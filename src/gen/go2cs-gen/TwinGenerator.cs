@@ -182,8 +182,20 @@ public sealed partial class TwinGenerator : ISourceGenerator
             m_ordered.Add(candidate);
         }
 
+        // M:N PROTOTYPE (A1): the never-twinned rule for native wrappers (the cgo design's M4). A method that is extern, that
+        // carries DllImport or LibraryImport, or whose body pins with `fixed`, is synchronous: a `fixed` scope cannot span a
+        // park. A twin that calls one calls the plain method, and blocks its carrier for the length of the call.
+        private static bool IsNative(MethodDeclarationSyntax method, IMethodSymbol symbol) =>
+            symbol.IsExtern || method.Modifiers.Any(SyntaxKind.ExternKeyword) ||
+            symbol.GetAttributes().Any(attribute => attribute.AttributeClass?.Name is "DllImportAttribute" or "LibraryImportAttribute") ||
+            method.DescendantNodes().OfType<FixedStatementSyntax>().Any();
+
         private string? PreRefusal(MethodDeclarationSyntax method, IMethodSymbol symbol)
         {
+            // First, so that relaxing a row below it can never admit a native wrapper.
+            if (IsNative(method, symbol))
+                return "native";
+
             if (HasTwinMember(symbol))
                 return "has-twin";
 
@@ -213,7 +225,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 symbol.Parameters.Any(parameter => parameter.Type.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer))
                 return "unsafe";
 
-            if (symbol.ReturnType.Name is "Task" or "ValueTask")
+            if (symbol.ReturnType.Name is "Task" or "ValueTask" or "GoTask")
                 return "async-shaped";
 
             if (method.DescendantNodes().OfType<YieldStatementSyntax>().Any())

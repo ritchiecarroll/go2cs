@@ -1342,6 +1342,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnBlockedIO() => CheckTarget("MnBlockedIO");
 
     [TestMethod]
+    public void CheckMnDeepUnwind() => CheckTarget("MnDeepUnwind");
+
+    [TestMethod]
     public void CheckMnMainExit() => CheckTarget("MnMainExit");
 
     [TestMethod]

@@ -989,7 +989,7 @@ internal sealed class ChanCore<T> : ChanCore
     // M:N SPIKE: Go's chansend for a hidden TWIN. The ready path is Send's own, with no allocation; a send
     // that must wait parks a waiter whose wake is a GoParkSlot, and the twin awaits the slot, which gives
     // its carrier back instead of blocking it.
-    internal ValueTask SendTwin(T value)
+    internal GoTask SendTwin(T value)
     {
         if (Send(value, block: false))
             return default;
@@ -997,7 +997,7 @@ internal sealed class ChanCore<T> : ChanCore
         return SendTwinSlow(value);
     }
 
-    private async ValueTask SendTwinSlow(T value)
+    private async GoTask SendTwinSlow(T value)
     {
         GoParkSlot slot = new();
         Waiter parked;
@@ -1027,15 +1027,15 @@ internal sealed class ChanCore<T> : ChanCore
     }
 
     // M:N SPIKE: Go's chanrecv for a hidden TWIN; see SendTwin.
-    internal ValueTask<(T value, bool ok)> RecvTwin()
+    internal GoTask<(T value, bool ok)> RecvTwin()
     {
         if (Recv(out T value, out bool ok, block: false))
-            return new ValueTask<(T value, bool ok)>((value, ok));
+            return new GoTask<(T value, bool ok)>((value, ok));
 
         return RecvTwinSlow();
     }
 
-    private async ValueTask<(T value, bool ok)> RecvTwinSlow()
+    private async GoTask<(T value, bool ok)> RecvTwinSlow()
     {
         GoParkSlot slot = new();
         Waiter parked;
@@ -1297,13 +1297,13 @@ internal static class SelectRuntime
     // M:N SPIKE: Run for a hidden TWIN. Everything up to the park is Run's own and synchronous, so the
     // channel locks are never held across an await; a select that must wait parks its waiters on one
     // GoParkSlot and the twin awaits it, which gives its carrier back instead of blocking it.
-    internal static ValueTask<int> RunTwin(SelectOp[] ops)
+    internal static GoTask<int> RunTwin(SelectOp[] ops)
     {
         int liveCount = CountLive(ops);
 
         // select{} or every case on a nil channel blocks forever: the thread path, which hands the P away.
         if (liveCount == 0)
-            return new ValueTask<int>(Run(ops));
+            return new GoTask<int>(Run(ops));
 
         bool allSynctest = AllCasesBubbled(ops);
 
@@ -1315,7 +1315,7 @@ internal static class SelectRuntime
         int committed = PollPassLocked(ops, pollOrder, lockOrder);
 
         if (committed >= 0)
-            return new ValueTask<int>(committed);
+            return new GoTask<int>(committed);
 
         GoParkSlot slot = new();
         SelectState sel = new(slot);
@@ -1347,7 +1347,7 @@ internal static class SelectRuntime
         return RunTwinParked(ops, lockOrder, sel, waiters, slot, scope);
     }
 
-    private static async ValueTask<int> RunTwinParked(SelectOp[] ops, ChanCore[] lockOrder, SelectState sel, Waiter?[] waiters, GoParkSlot slot, Goroutine.ParkScope scope)
+    private static async GoTask<int> RunTwinParked(SelectOp[] ops, ChanCore[] lockOrder, SelectState sel, Waiter?[] waiters, GoParkSlot slot, Goroutine.ParkScope scope)
     {
         await slot;
         scope.Dispose();
@@ -1949,7 +1949,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     // wait gives its carrier back instead of blocking it. A nil channel blocks forever, so it takes the
     // thread path.
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public ValueTask Sendꞏtwin(T value)
+    public GoTask Sendꞏtwin(T value)
     {
         if (m_core is null)
         {
@@ -1961,28 +1961,28 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     }
 
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public ValueTask<T> Receiveꞏtwin()
+    public GoTask<T> Receiveꞏtwin()
     {
         if (m_core is null)
-            return new ValueTask<T>(Receive());
+            return new GoTask<T>(Receive());
 
-        ValueTask<(T value, bool ok)> pending = m_core.RecvTwin();
+        GoTask<(T value, bool ok)> pending = m_core.RecvTwin();
 
-        return pending.IsCompletedSuccessfully ? new ValueTask<T>(pending.Result.value) : ReceiveTwinSlow(pending);
+        return pending.IsCompletedSuccessfully ? new GoTask<T>(pending.Result.value) : ReceiveTwinSlow(pending);
     }
 
-    private static async ValueTask<T> ReceiveTwinSlow(ValueTask<(T value, bool ok)> pending)
+    private static async GoTask<T> ReceiveTwinSlow(GoTask<(T value, bool ok)> pending)
     {
         return (await pending).value;
     }
 
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public ValueTask<(T value, bool ok)> Receiveꞏtwin(bool _)
+    public GoTask<(T value, bool ok)> Receiveꞏtwin(bool _)
     {
         if (m_core is null)
         {
             (T val, bool ok) = Receive(_);
-            return new ValueTask<(T value, bool ok)>((val, ok));
+            return new GoTask<(T value, bool ok)>((val, ok));
         }
 
         return m_core.RecvTwin();
@@ -1990,7 +1990,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
 
     // The hidden twin of the send operator method, which a generated twin awaits (B2).
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public ValueTask ᐸꟷꞏtwin(T value)
+    public GoTask ᐸꟷꞏtwin(T value)
     {
         return Sendꞏtwin(value);
     }

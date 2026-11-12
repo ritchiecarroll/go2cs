@@ -50,7 +50,7 @@ public sealed partial class Goroutine
     /// <c>Start(body, entry, …)</c>: one thread, the synchronous body. With it on, the goroutine runs
     /// <paramref name="twin"/>, multiplexed.
     /// </summary>
-    public static void StartTwin(Action body, Func<ValueTask> twin, Delegate entry, string callerFile = "", int callerLine = 0)
+    public static void StartTwin(Action body, Func<GoTask> twin, Delegate entry, string callerFile = "", int callerLine = 0)
     {
         if (!GoScheduler.Enabled)
         {
@@ -71,15 +71,17 @@ public sealed partial class Goroutine
         if (ExecutionTracer.Enabled)
             ExecutionTracer.OnCreate(goroutine);
 
-        // The twin runs under the creator's ExecutionContext, as a thread's start would have flowed it; the
-        // async machinery then carries it across every park.
-        ExecutionContext? context = ExecutionContext.Capture();
+        // The twin starts under the creator's ExecutionContext, as a thread's start would have flowed it. From
+        // there the context is the goroutine's own: each carrier takes it up at the mount and hands it back at
+        // the unmount (GoScheduler.RunStep), so nothing a twin awaits has to carry it.
+        goroutine.m_context = ExecutionContext.Capture();
         TwinStart start = new(goroutine, twin, bubble);
 
-        GoScheduler.Ready(goroutine, context is null
-            ? start.Run
-            : () => ExecutionContext.Run(context, static state => ((TwinStart)state!).Run(), start));
+        GoScheduler.Ready(goroutine, start.Run);
     }
+
+    // M:N PROTOTYPE (A1). The ExecutionContext of a multiplexed goroutine while no carrier has it mounted.
+    internal ExecutionContext? m_context;
 
     /// <summary>
     /// Runs a program's <c>main</c> as the main goroutine when it has a hidden async twin. With the scheduler off,
@@ -88,7 +90,7 @@ public sealed partial class Goroutine
     /// the startup thread takes goroutine 1 back when the twin ends, to end the program as <c>main</c>'s own
     /// thread does: a return, an unrecovered panic and a <c>runtime.Goexit</c> each leave from there.
     /// </summary>
-    public static void RunMainTwin(Action body, Func<ValueTask> twin)
+    public static void RunMainTwin(Action body, Func<GoTask> twin)
     {
         Goroutine? main = Volatile.Read(ref s_main);
 
@@ -107,12 +109,10 @@ public sealed partial class Goroutine
         t_current = null;
         Interlocked.CompareExchange(ref main.m_threadId, 0, Environment.CurrentManagedThreadId);
 
-        ExecutionContext? context = ExecutionContext.Capture();
+        main.m_context = ExecutionContext.Capture();
         MainTwin run = new(twin);
 
-        GoScheduler.Ready(main, context is null
-            ? run.Run
-            : () => ExecutionContext.Run(context, static state => ((MainTwin)state!).Run(), run));
+        GoScheduler.Ready(main, run.Run);
 
         run.Done.Wait();
 
@@ -125,6 +125,10 @@ public sealed partial class Goroutine
         main.m_multiplexed = false;
         main.Mount();
 
+        // Goroutine 1 comes back with the ExecutionContext its twin ended under.
+        if (GoScheduler.ContextFollowsGoroutine && main.m_context is { } context)
+            ExecutionContext.Restore(context);
+
         // What left main leaves it here, on goroutine 1, bound to this thread again.
         run.Outcome?.Throw();
     }
@@ -135,7 +139,7 @@ public sealed partial class Goroutine
     internal static string MainReading() =>
         s_mainTwinRan ? " main=multiplexed" : " main=thread";
 
-    private sealed class MainTwin(Func<ValueTask> twin)
+    private sealed class MainTwin(Func<GoTask> twin)
     {
         internal readonly ManualResetEventSlim Done = new(false);
         internal ExceptionDispatchInfo? Outcome;
@@ -145,7 +149,7 @@ public sealed partial class Goroutine
 
         // Nothing is handled here: main has no goroutine root, so whatever leaves it is carried to the startup
         // thread as it is.
-        private async ValueTask Drive()
+        private async GoTask Drive()
         {
             try
             {
@@ -160,7 +164,7 @@ public sealed partial class Goroutine
         }
     }
 
-    private sealed class TwinStart(Goroutine goroutine, Func<ValueTask> twin, SyncTestBubble? bubble)
+    private sealed class TwinStart(Goroutine goroutine, Func<GoTask> twin, SyncTestBubble? bubble)
     {
         internal void Run()
         {
@@ -176,7 +180,7 @@ public sealed partial class Goroutine
 
     // The twin's root: Run's try/catch ladder, with the awaits a twin needs. Every continuation of it runs
     // inside a carrier's step, with the goroutine mounted.
-    private static async ValueTask DriveTwin(Goroutine goroutine, Func<ValueTask> twin)
+    private static async GoTask DriveTwin(Goroutine goroutine, Func<GoTask> twin)
     {
         try
         {

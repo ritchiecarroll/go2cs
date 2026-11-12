@@ -571,7 +571,7 @@ partial class time_package
     // takes the thread path. The timer and the slot are allocated per sleep here; a real build hangs the
     // timer off the goroutine, as Go's gp.timer.
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static System.Threading.Tasks.ValueTask Sleepꞏtwin(Duration d)
+    public static global::go.golib.GoTask Sleepꞏtwin(Duration d)
     {
         if (d <= 0)
             return default;
@@ -590,7 +590,7 @@ partial class time_package
         return sleepTwin(deadline);
     }
 
-    private static async System.Threading.Tasks.ValueTask sleepTwin(int64 deadline)
+    private static async global::go.golib.GoTask sleepTwin(int64 deadline)
     {
         Goroutine.ParkScope scope = Goroutine.ParkTwin(WaitReason.Sleep);
 

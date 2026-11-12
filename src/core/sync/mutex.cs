@@ -247,7 +247,7 @@ private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Sem
 // completes an awaited wait on the ThreadPool, which is one hop per contended Lock). The profiling arms
 // of Lock are not twinned here.
 [GoRecv, System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-public static System.Threading.Tasks.ValueTask Lockꞏtwin(this ref Mutex m) {
+public static global::go.golib.GoTask Lockꞏtwin(this ref Mutex m) {
     SemaphoreSlim gate = gateOf(ref m);
     if (gate.Wait(0)) {
         return default;
@@ -255,7 +255,7 @@ public static System.Threading.Tasks.ValueTask Lockꞏtwin(this ref Mutex m) {
     return lockTwinSlow(gate);
 }
 
-private static async System.Threading.Tasks.ValueTask lockTwinSlow(SemaphoreSlim gate) {
+private static async global::go.golib.GoTask lockTwinSlow(SemaphoreSlim gate) {
     System.Threading.Tasks.Task acquired = gate.WaitAsync();
     if (acquired.IsCompleted) {
         return;

@@ -42,7 +42,7 @@ public sealed partial class TwinGenerator
     internal sealed partial class Run
     {
         private const string Hidden = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
-        private const string Task = "global::System.Threading.Tasks.ValueTask";
+        private const string Task = "global::go.golib.GoTask";
         private static readonly SymbolDisplayFormat s_full = SymbolDisplayFormat.FullyQualifiedFormat;
 
         private readonly Dictionary<ISymbol, IfaceMember> m_ifaceMembers = new(SymbolEqualityComparer.Default);

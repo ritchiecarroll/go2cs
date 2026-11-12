@@ -55,7 +55,7 @@ internal static void worker(this ж<storm> Ꮡs, nint id) {
 // M:N SPIKE (R5b, B1): the hidden async twin of worker, written by hand as the twin generator (B2) would
 // write it. Same statements in the same order; every call that can park is the callee's twin, awaited; the
 // receiver stays the box, and the ref local is derived again after each await.
-internal static async System.Threading.Tasks.ValueTask workerꞏtwin(this ж<storm> Ꮡs, nint id) {
+internal static async global::go.golib.GoTask workerꞏtwin(this ж<storm> Ꮡs, nint id) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -98,7 +98,7 @@ internal static async System.Threading.Tasks.ValueTask workerꞏtwin(this ж<sto
 }
 
 // M:N SPIKE: what goǃ becomes for a callee that has a twin. With GO2CS_MN unset this is goǃ exactly.
-internal static void goǃtwin(Action body, Func<System.Threading.Tasks.ValueTask> twin, Delegate entry, [System.Runtime.CompilerServices.CallerFilePath] string ᴛcallerFile = "", [System.Runtime.CompilerServices.CallerLineNumber] int ᴛcallerLine = 0) {
+internal static void goǃtwin(Action body, Func<global::go.golib.GoTask> twin, Delegate entry, [System.Runtime.CompilerServices.CallerFilePath] string ᴛcallerFile = "", [System.Runtime.CompilerServices.CallerLineNumber] int ᴛcallerLine = 0) {
     // MN_STORM_NOTWIN=1: a goroutine whose callee has no twin at all runs its synchronous body on a carrier.
     if (s_noTwin) {
         twin = () => { body(); return default; };
@@ -121,7 +121,7 @@ internal static void pinger(channel<nint> ping, channel<nint> pong, channel<nint
     done.ᐸꟷ(k);
 }
 
-internal static async System.Threading.Tasks.ValueTask pingerꞏtwin(channel<nint> ping, channel<nint> pong, channel<nint> done, nint k) {
+internal static async global::go.golib.GoTask pingerꞏtwin(channel<nint> ping, channel<nint> pong, channel<nint> done, nint k) {
     for (nint i = 0; i < k; i++) {
         await ping.Sendꞏtwin(i);
         await pong.Receiveꞏtwin();
@@ -136,7 +136,7 @@ internal static void ponger(channel<nint> ping, channel<nint> pong, nint k) {
     }
 }
 
-internal static async System.Threading.Tasks.ValueTask pongerꞏtwin(channel<nint> ping, channel<nint> pong, nint k) {
+internal static async global::go.golib.GoTask pongerꞏtwin(channel<nint> ping, channel<nint> pong, nint k) {
     for (nint i = 0; i < k; i++) {
         await pong.Sendꞏtwin(await ping.Receiveꞏtwin() + 1);
     }
@@ -159,7 +159,7 @@ internal static void leaf(channel<nint> done, nint k) {
     done.ᐸꟷ(1);
 }
 
-internal static async System.Threading.Tasks.ValueTask leafꞏtwin(channel<nint> done, nint k) {
+internal static async global::go.golib.GoTask leafꞏtwin(channel<nint> done, nint k) {
     var ch = new channel<nint>(1);
     long before = System.GC.GetAllocatedBytesForCurrentThread();
     var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -184,12 +184,28 @@ internal static bool microReadings() {
     if (mode == "ping") {
         var ping = new channel<nint>(0);
         var pong = new channel<nint>(0);
+        long before = System.GC.GetTotalAllocatedBytes(false);
         var watch = System.Diagnostics.Stopwatch.StartNew();
         goǃtwin(() => ponger(ping, pong, k), () => pongerꞏtwin(ping, pong, k), (Action<channel<nint>, channel<nint>, nint>)ponger);
         goǃtwin(() => pinger(ping, pong, done, k), () => pingerꞏtwin(ping, pong, done, k), (Action<channel<nint>, channel<nint>, channel<nint>, nint>)pinger);
         ᐸꟷ(done);
         watch.Stop();
-        System.Console.Error.WriteLine($"READING ping k={k} ns-per-round-trip={watch.Elapsed.TotalNanoseconds / k:F0}");
+        long allocated = System.GC.GetTotalAllocatedBytes(false) - before;
+        System.Console.Error.WriteLine($"READING ping k={k} ns-per-round-trip={watch.Elapsed.TotalNanoseconds / k:F0} bytes-per-round-trip={(double)allocated / k:F1}");
+        return true;
+    }
+
+    // M:N PROTOTYPE control (MN_MODE=foreign): a twin that awaits an awaiter golib does not own is resumed off its
+    // carrier. The scheduler's off-carrier counter has to read it, or a zero in that counter proves nothing.
+    if (mode == "foreign") {
+        var signal = new channel<nint>(1);
+        Action body = () => signal.ᐸꟷ(1);
+        goǃtwin(body, async () => {
+            await System.Threading.Tasks.Task.Yield();
+            await signal.Sendꞏtwin(1);
+        }, body);
+        ᐸꟷ(signal);
+        System.Console.Error.WriteLine($"READING foreign done k={k}");
         return true;
     }
 

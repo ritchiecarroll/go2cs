@@ -114,8 +114,8 @@ public sealed partial class TwinGenerator
             LinePosition start = tree.GetLineSpan(first.Span).StartLinePosition;
 
             string result = method.ReturnType is PredefinedTypeSyntax predefined && predefined.Keyword.IsKind(SyntaxKind.VoidKeyword)
-                ? "global::System.Threading.Tasks.ValueTask"
-                : "global::System.Threading.Tasks.ValueTask<" + method.ReturnType.WithoutTrivia().ToFullString() + ">";
+                ? "global::go.golib.GoTask"
+                : "global::go.golib.GoTask<" + method.ReturnType.WithoutTrivia().ToFullString() + ">";
 
             SyntaxTokenList modifiers = SyntaxFactory.TokenList(method.Modifiers.Where(modifier => !modifier.IsKind(SyntaxKind.PartialKeyword)))
                 .Add(SyntaxFactory.Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(SyntaxFactory.Space));

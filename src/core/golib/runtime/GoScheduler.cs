@@ -175,6 +175,54 @@ public static class GoScheduler
     /// <summary>Whether the calling thread is a carrier with a goroutine mounted.</summary>
     internal static bool OnCarrier => t_carrier is { Mounted: not null };
 
+    // M:N PROTOTYPE (A1). GO2CS_MN_CONTEXT=0 (a reading) turns the context rule off: a goroutine's
+    // ExecutionContext is then not carried from step to step, and a carrier starts under its starter's.
+    private static readonly bool s_contextSwap = Environment.GetEnvironmentVariable("GO2CS_MN_CONTEXT") != "0";
+
+    /// <summary>Whether a goroutine's ExecutionContext follows it from carrier to carrier.</summary>
+    internal static bool ContextFollowsGoroutine => s_contextSwap;
+
+    // Readings: a twin's step that began on a thread with no goroutine mounted, and a twin's caller resumed
+    // inside the frame that completed it (both zero unless something other than a twin or a park was awaited).
+    private static long s_offCarrierResumes;
+    private static long s_nestedResumes;
+
+    // A twin's step is starting from a delegate: a wake, or an awaiter that is not a twin's.
+    internal static void NoteStep()
+    {
+        if (t_carrier is not { Mounted: not null })
+            Interlocked.Increment(ref s_offCarrierResumes);
+    }
+
+    // A twin ended, and `continuation` awaits it: its caller's box, as a rule. The caller does not resume
+    // inside the frame that ended. The carrier runs it when that frame has returned (RunStep), so a return
+    // through any number of suspended callers stays on this carrier and uses no stack.
+    internal static void Continue(object continuation)
+    {
+        if (continuation is not GoTaskCore core)
+        {
+            ((Action)continuation)();
+            return;
+        }
+
+        if (t_carrier is { Mounted: not null } carrier)
+        {
+            if (carrier.Continuation is null)
+            {
+                carrier.Continuation = core;
+                return;
+            }
+
+            Interlocked.Increment(ref s_nestedResumes);
+        }
+        else
+        {
+            Interlocked.Increment(ref s_offCarrierResumes);
+        }
+
+        core.Resume();
+    }
+
     /// <summary>Queues one step of <paramref name="goroutine"/>.</summary>
     internal static void Ready(Goroutine goroutine, Action step)
     {
@@ -232,7 +280,10 @@ public static class GoScheduler
                $" steps-over-10ms={Interlocked.Read(ref s_longSteps)}" +
                $" max-step-ms={Interlocked.Read(ref s_maxStepTicks) * 1000 / Stopwatch.Frequency}" +
                $" carrier-start-failures={Interlocked.Read(ref s_carrierStartFailures)}" +
-               $" retakes={Interlocked.Read(ref s_retakes)}" + Goroutine.MainReading() + Goroutine.MountReading();
+               $" retakes={Interlocked.Read(ref s_retakes)}" +
+               $" off-carrier-resumes={Interlocked.Read(ref s_offCarrierResumes)}" +
+               $" nested-resumes={Interlocked.Read(ref s_nestedResumes)}" +
+               $" context={(s_contextSwap ? "goroutine" : "off")}" + Goroutine.MainReading() + Goroutine.MountReading();
     }
 
     private static void SampleThreads()
@@ -364,7 +415,14 @@ public static class GoScheduler
         try
         {
             Thread thread = new(carrier.Loop, CarrierStackSize) { IsBackground = true, Name = "go-carrier" };
-            thread.Start();
+
+            // A carrier is often started from inside a goroutine's step. It must not start under that
+            // goroutine's ExecutionContext, or every goroutine it mounts afterwards could read it.
+            if (s_contextSwap)
+                thread.UnsafeStart();
+            else
+                thread.Start();
+
             Interlocked.Increment(ref s_carriersStarted);
         }
         catch (OutOfMemoryException)
@@ -516,9 +574,16 @@ public static class GoScheduler
         internal bool InStep;
         internal int Chain;
 
+        // The caller of a twin that ended in this step, to resume when the ending frame has returned.
+        internal GoTaskCore? Continuation;
+
+        // The ExecutionContext this thread holds between steps: no goroutine's.
+        private ExecutionContext? m_baseContext;
+
         internal void Loop()
         {
             t_carrier = this;
+            m_baseContext = ExecutionContext.Capture();
 
             while (true)
             {
@@ -606,11 +671,35 @@ public static class GoScheduler
             Mounted = goroutine;
             Interlocked.Increment(ref s_steps);
 
+            // The goroutine's ExecutionContext comes with it: what it wrote to an AsyncLocal on its last
+            // carrier is what it reads on this one.
+            if (s_contextSwap && goroutine.m_context is { } context)
+                ExecutionContext.Restore(context);
+
             item.Step();
+
+            // Each twin that ended in the step left its awaiting caller here: run the callers one after
+            // another, each from this frame, until one parks or the goroutine's root ends.
+            while (Continuation is { } caller)
+            {
+                Continuation = null;
+                caller.Resume();
+            }
 
             // An unrecovered panic left the twin: raise it again HERE, with the goroutine still mounted, so
             // it is unhandled on this thread and golib's backstop reports it for the right goroutine.
             goroutine.RethrowTwinFatal();
+
+            // The goroutine keeps the context it ends the step with, and the carrier takes its own back
+            // before another goroutine mounts.
+            if (s_contextSwap)
+            {
+                if (ExecutionContext.Capture() is { } current)
+                    goroutine.m_context = current;
+
+                if (m_baseContext is { } baseContext)
+                    ExecutionContext.Restore(baseContext);
+            }
 
             Mounted = null;
             goroutine.Unmount();

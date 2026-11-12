@@ -167,7 +167,7 @@ internal static void end(@string mode, nint rep, nint n, nint got, uint64 alloc,
         (float64)took.Nanoseconds() / (float64)n, (float64)(m.TotalAlloc - alloc) / (float64)n);
 }
 
-internal static void Main() {
+internal static void main() {
     @string mode = os.Getenv("MN_COST_MODE");
     nint n = envInt("MN_COST_N", 1000);
     var c = new channel<nint>(0);
