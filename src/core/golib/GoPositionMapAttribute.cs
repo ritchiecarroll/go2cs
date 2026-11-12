@@ -114,7 +114,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public sealed class GoPositionMapAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoPositionMapAttribute : Attribute
 {
     /// <summary>
     /// Initializes a record without a per-call table. Kept as its own constructor rather than folded into

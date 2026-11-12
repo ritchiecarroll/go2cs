@@ -37,35 +37,35 @@ namespace go;
 // nothing, and no `go.Func` can be found from there. No package in the corpus reaches it today.
 
 /// <summary>Represents a Go func type with 17 parameters and a result: <c>func(T1, …, T17) TResult</c>.</summary>
-public delegate TResult Func<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Func<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, out TResult>(
     T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
     T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17);
 
 /// <summary>Represents a Go func type with 18 parameters and a result: <c>func(T1, …, T18) TResult</c>.</summary>
-public delegate TResult Func<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Func<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, out TResult>(
     T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
     T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18);
 
 /// <summary>Represents a Go func type with 19 parameters and a result: <c>func(T1, …, T19) TResult</c>.</summary>
-public delegate TResult Func<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Func<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19, out TResult>(
     T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
     T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19);
 
 /// <summary>Represents a Go func type with 20 parameters and a result: <c>func(T1, …, T20) TResult</c>.</summary>
-public delegate TResult Func<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Func<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19, in T20, out TResult>(
     T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
     T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20);
 
 /// <summary>Represents a Go func type with 21 parameters and a result: <c>func(T1, …, T21) TResult</c>.</summary>
-public delegate TResult Func<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Func<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19, in T20,
     in T21, out TResult>(
@@ -74,7 +74,7 @@ public delegate TResult Func<
     T21 arg21);
 
 /// <summary>Represents a Go func type with 22 parameters and a result: <c>func(T1, …, T22) TResult</c>.</summary>
-public delegate TResult Func<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Func<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19, in T20,
     in T21, in T22, out TResult>(
@@ -83,7 +83,7 @@ public delegate TResult Func<
     T21 arg21, T22 arg22);
 
 /// <summary>Represents a Go func type with 23 parameters and a result: <c>func(T1, …, T23) TResult</c>.</summary>
-public delegate TResult Func<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Func<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19, in T20,
     in T21, in T22, in T23, out TResult>(
@@ -92,7 +92,7 @@ public delegate TResult Func<
     T21 arg21, T22 arg22, T23 arg23);
 
 /// <summary>Represents a Go func type with 24 parameters and a result: <c>func(T1, …, T24) TResult</c>.</summary>
-public delegate TResult Func<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Func<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19, in T20,
     in T21, in T22, in T23, in T24, out TResult>(
@@ -101,35 +101,35 @@ public delegate TResult Func<
     T21 arg21, T22 arg22, T23 arg23, T24 arg24);
 
 /// <summary>Represents a Go func type with 17 parameters and no result: <c>func(T1, …, T17)</c>.</summary>
-public delegate void Action<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Action<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17>(
     T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
     T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17);
 
 /// <summary>Represents a Go func type with 18 parameters and no result: <c>func(T1, …, T18)</c>.</summary>
-public delegate void Action<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Action<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18>(
     T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
     T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18);
 
 /// <summary>Represents a Go func type with 19 parameters and no result: <c>func(T1, …, T19)</c>.</summary>
-public delegate void Action<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Action<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19>(
     T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
     T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19);
 
 /// <summary>Represents a Go func type with 20 parameters and no result: <c>func(T1, …, T20)</c>.</summary>
-public delegate void Action<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Action<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19, in T20>(
     T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
     T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20);
 
 /// <summary>Represents a Go func type with 21 parameters and no result: <c>func(T1, …, T21)</c>.</summary>
-public delegate void Action<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Action<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19, in T20,
     in T21>(
@@ -138,7 +138,7 @@ public delegate void Action<
     T21 arg21);
 
 /// <summary>Represents a Go func type with 22 parameters and no result: <c>func(T1, …, T22)</c>.</summary>
-public delegate void Action<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Action<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19, in T20,
     in T21, in T22>(
@@ -147,7 +147,7 @@ public delegate void Action<
     T21 arg21, T22 arg22);
 
 /// <summary>Represents a Go func type with 23 parameters and no result: <c>func(T1, …, T23)</c>.</summary>
-public delegate void Action<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Action<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19, in T20,
     in T21, in T22, in T23>(
@@ -156,7 +156,7 @@ public delegate void Action<
     T21 arg21, T22 arg22, T23 arg23);
 
 /// <summary>Represents a Go func type with 24 parameters and no result: <c>func(T1, …, T24)</c>.</summary>
-public delegate void Action<
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Action<
     in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10,
     in T11, in T12, in T13, in T14, in T15, in T16, in T17, in T18, in T19, in T20,
     in T21, in T22, in T23, in T24>(

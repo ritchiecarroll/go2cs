@@ -34,7 +34,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public sealed class GoBoundedGoroutineAttribute(string file, int line, int column, int ordinal) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoBoundedGoroutineAttribute(string file, int line, int column, int ordinal) : Attribute
 {
     /// <summary>
     /// Gets the converted source file's name.

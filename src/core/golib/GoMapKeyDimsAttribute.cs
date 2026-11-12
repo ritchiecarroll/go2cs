@@ -28,7 +28,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
-public sealed class GoMapKeyDimsAttribute(params int[] dims) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoMapKeyDimsAttribute(params int[] dims) : Attribute
 {
     /// <summary>The Go array dimensions of the map's key type, outermost first.</summary>
     public int[] Dims { get; } = dims;

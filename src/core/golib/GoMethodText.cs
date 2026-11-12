@@ -43,7 +43,7 @@ namespace go;
 /// methods, which are not bound here, so such a type keeps its structural text.
 /// </para>
 /// </remarks>
-public static class GoMethodText
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoMethodText
 {
     /// <summary>
     /// Gets the <c>Error()</c> or <c>String()</c> text of <paramref name="value"/>, when the value method

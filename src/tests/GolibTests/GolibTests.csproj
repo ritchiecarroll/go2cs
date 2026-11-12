@@ -23,6 +23,11 @@
     <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="4.2.751201" />
   </ItemGroup>
 
+  <!-- PublicSurfaceTests reads golib's public-surface baseline (docs/PublicSurface.md) from the output directory. -->
+  <ItemGroup>
+    <None Include="..\..\core\golib\PublicSurface.golib.txt" Link="PublicSurface.golib.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- The spawn-seam gate file drives linux-flavor-only syscall surface (Wait4, the unix
        ProcAttr); under any other $(GoTargetOS) it is excluded from compilation entirely,
        mirroring the L3 corpus's own per-GOOS item mechanism.

@@ -31,7 +31,7 @@ namespace go.golib;
 /// main as blocked for good (<c>Goroutine.MarkMainExited</c>). docs/DESIGN-goexit-main.md.
 /// </para>
 /// </remarks>
-public static class MainGoexit
+[EditorBrowsable(EditorBrowsableState.Never)] public static class MainGoexit
 {
     // The poll period of the park: the wait is for other threads to finish, so its latency is what the fatal report
     // adds after the last goroutine ends.

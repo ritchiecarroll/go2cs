@@ -16,7 +16,7 @@ namespace go;
 /// </summary>
 /// <typeparam name="TSelf">Implementing type (the named slice type itself).</typeparam>
 /// <typeparam name="T">Element type.</typeparam>
-public interface ISliceWrap<out TSelf, T>
+[EditorBrowsable(EditorBrowsableState.Never)] public interface ISliceWrap<out TSelf, T>
 {
     /// <summary>
     /// Wraps the given slice window in <typeparamref name="TSelf"/>, sharing its backing storage.

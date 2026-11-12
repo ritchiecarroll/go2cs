@@ -47,7 +47,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
-public sealed class GoDescriptorTypeAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoDescriptorTypeAttribute : Attribute
 {
     /// <summary>The carrier for the position's OWN Go type.</summary>
     public Type? Self { get; set; }

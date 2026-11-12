@@ -38,7 +38,7 @@ namespace go;
 /// what the caller's own frame already rooted.
 /// </para>
 /// </remarks>
-public sealed class NativeBox<T> : ж<T>, INativeRooted
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class NativeBox<T> : ж<T>, INativeRooted
 {
     // The native address this box aliases — never managed storage it owns.
     private readonly nuint m_nativeAddr;

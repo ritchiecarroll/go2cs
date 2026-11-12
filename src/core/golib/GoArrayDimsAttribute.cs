@@ -71,7 +71,7 @@ namespace go;
 /// <see cref="GoChanDirAttribute"/> is the twin for a defined channel type's direction.
 /// </para>
 [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
-public sealed class GoArrayDimsAttribute(params long[] dims) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoArrayDimsAttribute(params long[] dims) : Attribute
 {
     /// <summary>The Go array dimensions, outermost first.</summary>
     public long[] Dims { get; } = dims;

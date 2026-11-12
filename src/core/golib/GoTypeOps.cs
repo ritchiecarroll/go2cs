@@ -185,7 +185,7 @@ public interface IGoMethodSet
 }
 
 /// <summary>Finds the <see cref="IGoTypeOps"/> of a type known only at run time (trim stage 3c-2b).</summary>
-public static class GoTypeOps
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoTypeOps
 {
     private static readonly ConcurrentDictionary<Type, IGoTypeOps> s_ops = new();
 

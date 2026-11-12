@@ -13,7 +13,7 @@ namespace go.golib;
 /// <summary>
 /// Defines extension methods for actions.
 /// </summary>
-public static class ActionExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class ActionExtensions
 {
     /// <summary>
     /// Execute an action on the thread pool after a specified number of milliseconds.

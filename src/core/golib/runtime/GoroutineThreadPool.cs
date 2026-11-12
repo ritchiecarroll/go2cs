@@ -228,7 +228,7 @@ internal static class GoroutineThreadPool
 /// runs the registration first. The census of every <c>[ThreadStatic]</c>, <c>ThreadLocal</c> and
 /// <c>AsyncLocal</c> in the tree, and each one's disposition, is GolibTests' ThreadStateCensusTests.
 /// </remarks>
-public static class GoroutineThreadState
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoroutineThreadState
 {
     private static readonly List<Action> s_resets = [];
     private static Action[] s_snapshot = [];

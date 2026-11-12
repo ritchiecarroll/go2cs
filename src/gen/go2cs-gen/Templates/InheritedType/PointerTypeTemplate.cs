@@ -22,7 +22,7 @@ internal static class PointerTypeTemplate
         $$"""
 
 
-            [{{GeneratedCodeAttribute}}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            [{{GeneratedCodeAttribute}}, {{HiddenAttribute}}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             {{scope}} static ref {{targetTypeName}} DerefOrNull(this {{className}}? ʗp) =>
                 ref ʗp is null ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<{{targetTypeName}}>() : ref (({{PointerPrefix}}<{{targetTypeName}}>)ʗp).DerefOrNull();
         """;

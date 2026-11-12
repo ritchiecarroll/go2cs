@@ -20,55 +20,55 @@ namespace go;
 // mirror the BCL Action/Func family; the `ꓸꓸꓸ` suffix reads as Go's `...`.
 
 /// <summary>Represents a Go variadic func type with no result: <c>func(...T)</c>.</summary>
-public delegate void Actionꓸꓸꓸ<TArg>(params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<TArg>(params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with no result: <c>func(T1, ...T)</c>.</summary>
-public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with no result: <c>func(T1, T2, ...T)</c>.</summary>
-public delegate void Actionꓸꓸꓸ<T1, T2, TArg>(T1 arg1, T2 arg2, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, T2, TArg>(T1 arg1, T2 arg2, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with no result: <c>func(T1, T2, T3, ...T)</c>.</summary>
-public delegate void Actionꓸꓸꓸ<T1, T2, T3, TArg>(T1 arg1, T2 arg2, T3 arg3, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, T2, T3, TArg>(T1 arg1, T2 arg2, T3 arg3, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with no result: <c>func(T1, T2, T3, T4, ...T)</c>.</summary>
-public delegate void Actionꓸꓸꓸ<T1, T2, T3, T4, TArg>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, T2, T3, T4, TArg>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with no result: <c>func(T1, T2, T3, T4, T5, ...T)</c>.</summary>
-public delegate void Actionꓸꓸꓸ<T1, T2, T3, T4, T5, TArg>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, T2, T3, T4, T5, TArg>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with no result: <c>func(T1, T2, T3, T4, T5, T6, ...T)</c>.</summary>
-public delegate void Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with no result: <c>func(T1, T2, T3, T4, T5, T6, T7, ...T)</c>.</summary>
-public delegate void Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with no result: <c>func(T1, T2, T3, T4, T5, T6, T7, T8, ...T)</c>.</summary>
-public delegate void Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with a result: <c>func(...T) TResult</c>.</summary>
-public delegate TResult Funcꓸꓸꓸ<TArg, out TResult>(params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<TArg, out TResult>(params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with a result: <c>func(T1, ...T) TResult</c>.</summary>
-public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with a result: <c>func(T1, T2, ...T) TResult</c>.</summary>
-public delegate TResult Funcꓸꓸꓸ<T1, T2, TArg, out TResult>(T1 arg1, T2 arg2, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, T2, TArg, out TResult>(T1 arg1, T2 arg2, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with a result: <c>func(T1, T2, T3, ...T) TResult</c>.</summary>
-public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with a result: <c>func(T1, T2, T3, T4, ...T) TResult</c>.</summary>
-public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, T4, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, T4, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with a result: <c>func(T1, T2, T3, T4, T5, ...T) TResult</c>.</summary>
-public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, T4, T5, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, T4, T5, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with a result: <c>func(T1, T2, T3, T4, T5, T6, ...T) TResult</c>.</summary>
-public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with a result: <c>func(T1, T2, T3, T4, T5, T6, T7, ...T) TResult</c>.</summary>
-public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, params Span<TArg> args);
 
 /// <summary>Represents a Go variadic func type with a result: <c>func(T1, T2, T3, T4, T5, T6, T7, T8, ...T) TResult</c>.</summary>
-public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, params Span<TArg> args);

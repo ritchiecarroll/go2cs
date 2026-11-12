@@ -34,7 +34,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true)]
-public sealed class GoFieldAccessAttribute(params Type[] types) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoFieldAccessAttribute(params Type[] types) : Attribute
 {
     /// <summary>
     /// Gets the struct types.

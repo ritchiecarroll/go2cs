@@ -16,7 +16,7 @@ namespace go.golib;
 /// the converter captured for it with the pinned C toolchain (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §6.1, §11.5): an
 /// ELF SONAME (<c>libm.so.6</c>), a DLL as the import table names it, or a darwin install name as an absolute path.
 /// </summary>
-public sealed class GoCgoLibrary(string flag, string name)
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoCgoLibrary(string flag, string name)
 {
     /// <summary>The <c>-l</c> flag the package's <c>#cgo LDFLAGS</c> named.</summary>
     public string Flag { get; } = flag;
@@ -29,7 +29,7 @@ public sealed class GoCgoLibrary(string flag, string name)
 /// The resolver a converted cgo package registers for its own assembly (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §6.2).
 /// The converter emits only the data: the package's libraries, and a module initializer that registers them.
 /// </summary>
-public static class GoCgoLibraries
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoCgoLibraries
 {
     /// <summary>Registers the resolver for <paramref name="assembly"/>'s own <c>[LibraryImport]</c> bindings.</summary>
     public static void Register(Assembly assembly, params GoCgoLibrary[] libraries)

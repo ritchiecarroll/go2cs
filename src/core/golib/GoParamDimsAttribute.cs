@@ -32,7 +32,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true, Inherited = false)]
-public sealed class GoParamDimsAttribute(string method, Type?[] parameterTypes, int position, params long[] dims) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoParamDimsAttribute(string method, Type?[] parameterTypes, int position, params long[] dims) : Attribute
 {
     /// <summary>The C# method name.</summary>
     public string Method { get; } = method;

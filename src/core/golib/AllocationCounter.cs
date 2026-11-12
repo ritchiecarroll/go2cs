@@ -90,7 +90,7 @@ namespace go;
 /// is not touched at all.
 /// </para>
 /// </remarks>
-public static class AllocationCounter
+[EditorBrowsable(EditorBrowsableState.Never)] public static class AllocationCounter
 {
     // The process-wide gate. Deliberately a plain static rather than a `static readonly` the JIT
     // could fold to a constant: folding would require the value to be known before the first golib

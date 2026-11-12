@@ -56,7 +56,7 @@ internal interface IErrorTarget
     object? TargetObject { get; }
 }
 
-public class error<T> : error, IErrorTarget, IInterfaceAdapter
+[EditorBrowsable(EditorBrowsableState.Never)] public class error<T> : error, IErrorTarget, IInterfaceAdapter
 {
     private T m_target = default!;
     private readonly ж<T>? m_target_ptr;
@@ -227,7 +227,7 @@ public class error<T> : error, IErrorTarget, IInterfaceAdapter
     }
 }
 
-public static class errorExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class errorExtensions
 {
     public static T _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |

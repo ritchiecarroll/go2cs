@@ -78,12 +78,12 @@ internal sealed class ViewTable
 /// it, and boxes minted before that use the weak-table fallback.
 /// </summary>
 [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class, Inherited = false)]
-public sealed class GoBoxViewsAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoBoxViewsAttribute : Attribute
 {
 }
 
 /// <summary>Per-T shape decision: does a fresh standard box of T carry the view slot?</summary>
-public static class BoxShape<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public static class BoxShape<T>
 {
     // volatile: the lazy flip races benignly with minting; a box minted before the flip simply
     // has no slot and uses the weak table.
@@ -91,7 +91,7 @@ public static class BoxShape<T>
 }
 
 /// <summary>A standard box that carries the view slot (a consumer type's box).</summary>
-public sealed class SlottedStandardBox<T> : StandardBox<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class SlottedStandardBox<T> : StandardBox<T>
 {
     internal ViewEntry? m_views;
 
@@ -107,7 +107,7 @@ public sealed class SlottedStandardBox<T> : StandardBox<T>
 /// view on every call exactly as it did before the cache, so the identity assertions must go RED.
 /// Never set outside a test.
 /// </summary>
-public static class FieldViewCache
+[EditorBrowsable(EditorBrowsableState.Never)] public static class FieldViewCache
 {
     public static volatile bool Disabled;
 

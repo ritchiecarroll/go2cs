@@ -36,7 +36,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
-public sealed class GoInterfaceShellAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoInterfaceShellAttribute : Attribute
 {
     // What AdapterBinder reads of each shell by reflection, kept by both trimmers for every interface this attribute is
     // kept on: a typeof argument to an attribute parameter carrying [DynamicallyAccessedMembers] keeps those members. A

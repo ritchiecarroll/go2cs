@@ -34,7 +34,7 @@ namespace go;
 /// box is the one the conversion always made); the null path reads one static, decided once per <c>T</c>.
 /// </para>
 /// </remarks>
-public static class TypedNilOfExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class TypedNilOfExtensions
 {
     /// <summary>
     /// <paramref name="value"/>, or, when it is null, the canonical typed nil of <typeparamref name="T"/>: the pointer's
