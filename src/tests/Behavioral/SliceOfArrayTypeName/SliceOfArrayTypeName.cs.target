@@ -20,7 +20,7 @@ internal partial interface main_mixedExportedness /*dyn*/ {
     void Alpha(nint x);
 }
 
-internal static void Main() {
+internal static void main() {
     show("[6]uint8", new uint8[]{}.array(6));
     show("[][6]uint8", GoReflect.WithElemDims(new array<uint8>[]{new uint8[]{}.array(6)}.slice(), 6));
     show("[][3]int", GoReflect.WithElemDims(new array<nint>[]{new nint[]{}.array(3)}.slice(), 3));

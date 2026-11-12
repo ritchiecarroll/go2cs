@@ -31,7 +31,7 @@ internal static void report(@string prefix, Tally tʗp, nint n) {
     fmt.Println(prefix, t.total, t.log);
 }
 
-internal static void Main() {
+internal static void main() {
     ref var @base = ref heap<Tally>(new Tally(total: 2, log: "d"), out var Ꮡbase);
 
     var baseʗ1 = @base;

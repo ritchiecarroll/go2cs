@@ -22,7 +22,7 @@ partial interface Both :
     nint Get();
 }
 
-internal static void Main() {
+internal static void main() {
     Fn fn = default;
 
     fmt.Printf("%v\n"u8, (fn).OrTypedNilFunc());

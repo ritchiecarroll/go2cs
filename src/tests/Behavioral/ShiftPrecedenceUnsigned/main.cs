@@ -12,7 +12,7 @@ internal partial struct main_bitfield /*dyn*/ {
     internal uint64 cache;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(lowestSetBit(12));
     fmt.Println(lowestSetBit(40));
     uint64 z = 6;

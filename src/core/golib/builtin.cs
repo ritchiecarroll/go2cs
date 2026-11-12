@@ -77,8 +77,8 @@ public static partial class builtin
         // unless golib asks for it here. See builtin.WindowsLongPaths.cs.
         InitializeWindowsLongPaths();
 
-        // The thread that first touches golib is the one running `main`. Registering it makes the
-        // main goroutine visible to the live-goroutine registry, as Go's own accounting sees it —
+        // The first thread to touch golib is the startup thread; MainThread lends this identity to main's (C46).
+        // Registering it makes the main goroutine visible to the live-goroutine registry, as Go's accounting sees it —
         // without marking the thread as being "on a goroutine", which is a different question that
         // only runtime.Goexit asks (golib/runtime/Goroutine.cs).
         //
@@ -4196,6 +4196,17 @@ public static partial class builtin
 
         if (typeof(T) == typeof(complex64))
             return (complex64)(object)left! == (complex64)(object)right!;
+
+        // A Go pointer type argument: the nil literal's NilBox and a zero's null are ONE nil (PointerNilIdentity),
+        // as ж's own `==` has them. The object overload below must keep them apart, since there they are interface
+        // values: a typed nil in an interface is not the nil interface.
+        if (PointerNilIdentity<T>.IsPointerType)
+        {
+            bool leftNil = PointerNilIdentity<T>.IsNil(left), rightNil = PointerNilIdentity<T>.IsNil(right);
+
+            if (leftNil || rightNil)
+                return leftNil && rightNil;
+        }
 
         return default(T) is null ?
             AreEqual(left, (object?)right) :

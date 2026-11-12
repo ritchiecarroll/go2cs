@@ -22,7 +22,7 @@ internal static nint shadowedForInit() {
     return total;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(shadowedForInit());
 }
 

@@ -33,7 +33,7 @@ internal static void record(nint a, nint b) {
 internal static (nint, nint) tupleᴛ1ʗ = parts();
 internal static nint g = combine(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
 
-internal static void Main() {
+internal static void main() {
     var n = build();
     var (ᴛ3, ᴛ4) = parts();
     nint s = combine(ᴛ3, ᴛ4);

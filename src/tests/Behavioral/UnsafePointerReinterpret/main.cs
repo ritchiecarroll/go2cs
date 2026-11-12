@@ -34,7 +34,7 @@ internal static partial uintptr throughPointer(linkaddr v) {
     return (uintptr)((@unsafe.Pointer)(uintptr)v);
 }
 
-internal static void Main() {
+internal static void main() {
     ref var backing = ref heap(new uintptr(), out var Ꮡbacking);
     @unsafe.Pointer p = @unsafe.Pointer.FromBox(Ꮡbacking);
     writeBarrier(p, p);

@@ -67,7 +67,7 @@ internal static @string cleared() {
     return "DID NOT RUN";
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("registered finalizer:", registered());
     fmt.Println("cleared finalizer:", cleared());
 }

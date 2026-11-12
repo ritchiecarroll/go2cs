@@ -18,7 +18,7 @@ internal static @string many<E>(params Span<E> esʗp) {
 
 internal static @string keyed<K, V>(K k, V v) { return fmt.Sprintf("%T %T"u8, (k).OrTypedNilOf(), (v).OrTypedNilOf()); }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(show<nint>(3));
     fmt.Println(show(2.5D));
     fmt.Println(show((rune)'a'));

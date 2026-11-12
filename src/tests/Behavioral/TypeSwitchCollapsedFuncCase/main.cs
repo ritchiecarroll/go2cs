@@ -43,7 +43,7 @@ internal static @string kind(any raw) {
     return "other";
 }
 
-internal static void Main() {
+internal static void main() {
     var (from, to) = (reflect.ValueOf((nint)21), reflect.ValueOf(""));
     var hooks = slice<any>([
         new Func<reflectꓸType, reflectꓸType, any, (any, error)>((reflectꓸType f, reflectꓸType t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default)),

@@ -100,7 +100,7 @@ internal static partial void viaExpr(ж<outer> Ꮡo) {
     fmt.Println("method expr stack:", es(o));
 }
 
-internal static void Main() {
+internal static void main() {
     var o = Ꮡ(new outer());
     direct(o, new pouter(Ꮡ(new inner())));
     viaIface(o);

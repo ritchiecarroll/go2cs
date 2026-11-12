@@ -48,7 +48,7 @@ internal static @string readAll(Δio.Reader r) {
     return (@string)b;
 }
 
-internal static void Main() {
+internal static void main() {
     var t = Ꮡ(new Text(s: "abc"));
     fmt.Println("reader:", readAll(new strings_ReaderжReader(t.Reader())));
     fmt.Println("upper:", readAll(new strings_ReaderжReader(t.Upper())));

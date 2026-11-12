@@ -12,7 +12,7 @@ internal partial struct main_rows /*dyn*/ {
     internal uintptr a, b;
 }
 
-internal static void Main() {
+internal static void main() {
     uintptr zero = 0;
     uintptr one = 1;
     fmt.Println(MaxU > zero);

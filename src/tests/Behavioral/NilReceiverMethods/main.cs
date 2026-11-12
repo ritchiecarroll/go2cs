@@ -72,7 +72,7 @@ internal static void @try(@string label, Action fn) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     ж<File> nilFile = default;
 
     fmt.Println("== 1. nil receiver, DELEGATED guard: must not panic ==");

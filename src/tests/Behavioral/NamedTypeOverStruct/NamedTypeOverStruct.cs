@@ -59,7 +59,7 @@ partial struct mixed {
     internal nint sec;
 }
 
-internal static void Main() {
+internal static void main() {
     var mx = new mixed(Pub: 3);
     mx.sec = 4;
     fmt.Println(mx.Pub + mx.sec);

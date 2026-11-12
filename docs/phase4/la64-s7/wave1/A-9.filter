@@ -1,0 +1,1 @@
+internal/xcoff,internal/zstd,io,io/fs,io/ioutil,iter,log,log/slog,log/slog/internal/benchmarks,log/slog/internal/buffer,maps,math,math/big,math/big/internal/asmgen,math/bits,math/cmplx,math/rand,math/rand/v2,mime

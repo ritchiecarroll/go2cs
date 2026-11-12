@@ -26,7 +26,7 @@ public static void Log(this ж<Logger> Ꮡl, @string line) {
     finally { if (ᒐd1) Ꮡl.Ꮡmu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     ref var l = ref heap(new Logger(), out var Ꮡl);
     Ꮡl.Log("first");
     l.mu.Disable();

@@ -101,7 +101,7 @@ internal static void @try(@string label, Action fn) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     ж<node> nilNode = default;
 
     fmt.Println("== 1. nil argument, DELEGATED guard: must not panic ==");

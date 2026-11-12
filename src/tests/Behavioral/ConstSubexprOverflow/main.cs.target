@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var i32 = slice<int32>([0, 1, (int32)(1 << 20), (1 << 20) + 1, (int32)(2147483648L - 2), (int32)(2147483648L - 1)]);
 
     var i64 = slice<int64>([1152921504606846976L, 4611686018427387905L, 9223372036854775807L]);

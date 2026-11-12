@@ -31,7 +31,7 @@ internal static @unsafe.Pointer local(@unsafe.Pointer q) {
     return p;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var a = ref heap<nint>(out var Ꮡa);
     a = 1;
     ref var b = ref heap<nint>(out var Ꮡb);

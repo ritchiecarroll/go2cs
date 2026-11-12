@@ -74,13 +74,13 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
          goroutines;
        - osx-x64, macOS 15.7.9: kern.num_taskthreads 3072; the first failure at 3,051.
        Each is the cap less about 21 runtime and host threads, exact to the thread. The go statement itself throws,
-       synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1285
+       synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1308
        (`GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`). Found when internal/synctest's
        TestWaitGroupManyBubbles (about 10,100 live goroutines) died on both mac runners at the 1.26.10.3 re-bank. A
        developer Mac's cap may differ, so the figures above are stated as the hosted readings, not as macOS's limit. -->
   <!-- [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
        the limit would take (internal record, unlinked 2026-10-26, OQ-1). -->
-  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1285 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
+  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1308 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
        The figures are lane R's ParkStorm reading in docs/DESIGN-mn-scheduler-sizing.md §1 (Windows x64, 16 hardware
        threads, 31 GB RAM, Go 1.26.10, Release, today's 256 MiB stack reserve): 10,000 parked at 622 MB and 4.4 s against
        Go's 99 MB and 0.07 s; 100,000 at 5,904 MB and 302 s; 1,000,000 never parked within 600 s. -->
@@ -88,12 +88,21 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   appears only when every goroutine, `main` included, waits on a nil channel or an empty `select {}`. A
   deadlock on an ordinary channel or lock blocks forever. Break in with a debugger: each goroutine is a
   thread named `goroutine-N`.
-  <!-- src/core/golib/runtime/Goroutine.cs:1043 `internal static bool IsForeverWait(WaitReason reason) =>`
-       and :1102 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
-* **Stacks don't grow.** A goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it), and
-  `main` gets the first thread's stack, usually far less. Recursion past that ends the process with no
-  panic and no deferred calls, so run deep recursion in a goroutine. A goroutine the converter proves cannot
-  recurse at all reserves 16 MB instead ([how](ConversionStrategies.md#goroutines)).
+  <!-- src/core/golib/runtime/Goroutine.cs:1066 `internal static bool IsForeverWait(WaitReason reason) =>`
+       and :1125 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
+* **Stacks don't grow.** `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
+  a goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it). A goroutine the converter proves
+  cannot recurse at all reserves 16 MB instead ([how](ConversionStrategies.md#goroutines)). Recursion past a
+  thread's reserve ends the process with .NET's `Stack overflow.` and no panic and no deferred calls, where Go
+  prints `goroutine stack exceeds 1000000000-byte limit` and `fatal error: stack overflow` and exits 2. Two
+  pieces of code keep the startup thread's smaller stack (1 MiB on Windows, usually 8 MiB on linux and macOS):
+  your main package's `init` functions, which run before `main`, and `main` itself when an `init` called
+  `runtime.LockOSThread`, because Go then runs `main` on the startup thread and so does go2cs.
+  <!-- C46 (COORD ruling 2026-11-11, option A): src/core/golib/runtime/MainThread.cs `public const int StackReserve =
+       1024 * 1024 * 1024;` and its LockOSThread rule; go2cs-gen MainEntryGenerator writes the entry point. The init
+       residual: the main package's init is a module initializer of the entry assembly, which the CLR runs before
+       Main on the startup thread. The overflow message is its own seat (BOARD). Guards: Behavioral MainDeepRecursion
+       (2,000,000 levels in main; at the base it aborted after 174,430 frames on linux), GolibTests MainThreadTests. -->
 * **`recover()` catches Go panics, not every .NET exception.** Nil dereference, divide by zero and index
   out of range recover as in Go. Any other .NET exception, that `NotImplementedException` included, runs
   your deferred calls and keeps unwinding; `recover()` returns nil. As in Go, `recover()` stops a panic
@@ -267,10 +276,24 @@ The [validated modules](ValidatedModules.md) page is still short.
   own code, reshape the Go. In a dependency, point a `replace` at a patched copy, or fix the generated
   `.cs` and mark the file `[module: go.GoManualConversion]` so the next conversion leaves it alone. New
   ones still turn up: [tell me](#when-you-hit-a-seam).
-* **One bad dependency blocks everything above it.** A package that fails to convert is reported and
-  skipped, the run still exits 0, and every project that imports it fails to build. Read the summary
-  line, `Recursive conversion complete in ...: N/M packages converted (K failed: ...)`, not the exit
-  code. `-recurse=module`
+* **`unsafe` views of a string's or a slice's bytes are not supported yet.** Go code can read a string or a
+  `[]byte` through its header, `*(*struct{ p unsafe.Pointer; n uint })(unsafe.Pointer(&s))`, and then read bytes at
+  `unsafe.Pointer(uintptr(p) + i)` or through `(*[8]byte)(p)`. Converted, these stop with a named runtime panic,
+  because the string or slice lives in .NET-managed memory with no fixed address to offset. github.com/zeebo/xxh3
+  is the common case; the repository carries an `unsafe`-free copy of it that computes the same hashes, for a
+  `replace github.com/zeebo/xxh3 => <go2cs clone>/src/forks/github.com/zeebo/xxh3@v1.1.0`. The general fix is
+  planned.
+  <!-- C45 (COORD rulings 2026-11-11): option D for 1.26.10.4, the fork src/forks/github.com/zeebo/xxh3@v1.1.0 with
+       its FORK.md and identity/check.sh (16,632 results byte-identical to the original under real Go); option A, the
+       general fix, is a post-1.26.10.4 train, docs/phase4/DESIGN-unsafe-header-views.md on branch
+       claude/c1-c45-header-views. The panics: "cannot read native memory as <header type>: its CLR layout is not its
+       Go layout", "unsafe pointer arithmetic on a managed pointer with no address", and "cannot view native memory as
+       array<Byte>: the address has no managed element storage behind it" (Behavioral UnsafeHeaderViewFamily, parked
+       on that branch). -->
+* **One bad dependency blocks everything above it.** A package that fails to convert, or that the
+  converter refuses, is reported and skipped: the rest of the module still converts, and every project
+  that imports it fails to build. The run ends with exit 1, and its summary names each such package
+  and, for a refused one, each converted package that imports it. `-recurse=module`
   [converts only your packages](ConvertingAModule.md#optional-convert-the-module-only-and-deal-with-its-dependencies-later).
 
 ## What "validated" means, and what it doesn't
@@ -279,7 +302,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4139 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:4153 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :849
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.

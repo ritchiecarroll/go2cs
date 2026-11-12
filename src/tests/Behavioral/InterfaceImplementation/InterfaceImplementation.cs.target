@@ -24,7 +24,7 @@ partial struct Frog {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object gobˢ = (@string)"gob"u8;
 
-internal static void Main() {
+internal static void main() {
     var f = @new<Frog>();
     var d = @new<Dog>();
     ref var zoo = ref heap<array<Animal>>(new Animal[]{new FrogжAnimal(f), new DogжAnimal(d)}.array(), out var Ꮡzoo);

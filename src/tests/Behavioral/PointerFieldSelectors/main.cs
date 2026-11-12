@@ -87,7 +87,7 @@ internal static partial @string goFrames() {
     return strings.Join(names, " ");
 }
 
-internal static void Main() {
+internal static void main() {
     var p = Ꮡ(new point(1, 2));
     p.X = 10;
     p.Y += 5;

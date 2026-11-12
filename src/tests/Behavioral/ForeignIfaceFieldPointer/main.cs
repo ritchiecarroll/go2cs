@@ -11,7 +11,7 @@ internal partial struct main_type /*dyn*/ {
     internal addrlib.Addr got, want;
 }
 
-internal static void Main() {
+internal static void main() {
     var ta = Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock", Net: "unix"));
 
     array<main_type> connAddrs = new main_type[]{

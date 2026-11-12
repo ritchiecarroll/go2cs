@@ -28,7 +28,7 @@ internal static (nint, error) half(nint n) {
     return (n / 2, default);
 }
 
-internal static void Main() {
+internal static void main() {
     error probe(nint n, error errΔ1) {
         if (errΔ1 != nil) {
             return errΔ1;

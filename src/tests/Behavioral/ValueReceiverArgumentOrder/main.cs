@@ -25,7 +25,7 @@ internal static ж<V> shared = Ꮡ(new V(X: 1));
 
 internal static ж<V> current() { return shared; }
 
-internal static void Main() {
+internal static void main() {
     var p = Ꮡ(new V(X: 1));
     var pʗ1 = p;
     nint set(nint x) {

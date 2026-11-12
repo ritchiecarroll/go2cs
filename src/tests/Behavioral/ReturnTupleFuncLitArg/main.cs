@@ -34,7 +34,7 @@ internal static handler makePlain(nint n) {
     });
 }
 
-internal static void Main() {
+internal static void main() {
     var (h, label, err) = makeHandlers("go");
     fmt.Println(label, err);
     h.invoke("ping");

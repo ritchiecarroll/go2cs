@@ -32,7 +32,7 @@ internal static nint swap(ref channel<nint> ch, channel<nint> repl) {
     return 0;
 }
 
-internal static void Main() {
+internal static void main() {
     var selᴛ1 = fresh();
     switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out var v): {

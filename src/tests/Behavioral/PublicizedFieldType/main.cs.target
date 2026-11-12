@@ -41,7 +41,7 @@ public static nint Weigh(this CaseRange cr, weight w) {
     return (nint)w * 2;
 }
 
-internal static void Main() {
+internal static void main() {
     CaseRange cr = new();
     cr.Lo = 65;
     cr.Item = new inner(v: 9);

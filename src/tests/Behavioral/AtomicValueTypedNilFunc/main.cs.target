@@ -22,7 +22,7 @@ internal static void recovered(@string label, Action fn) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     ref var v1 = ref heap(new atomic.Value(), out var Ꮡv1);
     Ꮡv1.Store((nint fd) => {
         _ = fd;

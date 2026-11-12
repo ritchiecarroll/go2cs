@@ -11,7 +11,7 @@ partial struct ColorList {
     public ж<ж<ColorList>> NextNext;
 }
 
-internal static void Main() {
+internal static void main() {
     var red = new ColorList(2, "red", nil, nil);
     ref var blue = ref heap<ColorList>(new ColorList(2, "blue", nil, nil), out var Ꮡblue);
 

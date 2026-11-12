@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     float64 e5 = 1e5D;
     float64 e6 = 1e6D;
     float64 million = 1000000.0D;

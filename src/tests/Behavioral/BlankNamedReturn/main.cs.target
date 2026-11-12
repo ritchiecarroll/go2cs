@@ -21,7 +21,7 @@ internal static (nint, @string label) pair(@string tag) {
     return (default, label);
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(valid(true), valid(false));
     var (n, label) = pair("base");
     fmt.Println(n, label);

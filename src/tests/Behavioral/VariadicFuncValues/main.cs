@@ -62,7 +62,7 @@ internal static void swapEmitter(ж<logger> l, bool swap) {
     emit("spread %d %d"u8, rest.ꓸꓸꓸ);
 }
 
-internal static void Main() {
+internal static void main() {
     apply(gather);
 
     apply((@string prefix, params ꓸꓸꓸnint valsʗp) => {

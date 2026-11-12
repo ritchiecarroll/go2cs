@@ -67,6 +67,18 @@ type that is not public. In the standard library 268 forwarders in 12 packages b
      packed assemblies, the same on windows, linux and darwin (docs/phase4/DESIGN-promoted-forwarder-placement.md,
      amendment section H). -->
 
+**A method whose receiver type is written through an alias runs on a nil pointer, as in Go.** PENDING. Go accepts
+`type AttrNode = Node` with `func (n *AttrNode) Mode() int`, and the method is `Node`'s: it can be called on a nil
+pointer and test `n == nil` itself. The converter took such a method's receiver by reference, so the nil test read
+the struct through the nil pointer and the call panicked where Go returns; a method that used the receiver as a
+pointer in any other way did not compile. Such a method is now emitted as it is when the receiver is written with
+the type's own name. The standard library has no such method, so its converted code is unchanged. A receiver that
+is an alias of the pointer type itself (`type P = *T`) still does not compile after conversion.
+<!-- source: C48 of the TypeScript-Go readiness run (one type-check unit panicked in
+     ast.(*Node).GetResolutionModeOverride), P1; docs/phase4/DESIGN-alias-receiver-form.md. Behavioral
+     AliasReceiverForms; converter tests TestAliasReceiverTakesTheNamedForm and
+     TestAliasReceiverEmitsAsNamedReceiver. -->
+
 ## November 8, 2026 — Faster Native AOT, and a Release standard library from source
 
 <!-- Written ahead and HELD for release day (the .2 precedent, e665f4ea51): "November XX" becomes the publish date as the

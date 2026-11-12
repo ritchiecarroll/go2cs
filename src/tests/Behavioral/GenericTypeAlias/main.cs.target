@@ -25,7 +25,7 @@ internal static lib.Box<T> wrap<T>(T v) {
     return b;
 }
 
-internal static void Main() {
+internal static void main() {
     Pair<@string, nint> p = new Pair<@string, nint>(Key: "a", Val: 1);
     var sp = new Pair<@string, bool>(Key: "b", Val: true);
     Pair<@string, bool> sp2 = sp;

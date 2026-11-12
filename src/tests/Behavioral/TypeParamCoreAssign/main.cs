@@ -87,7 +87,7 @@ internal static slice<@string> keys<K, V>(map<K, V> m) {
     return @out;
 }
 
-internal static void Main() {
+internal static void main() {
     map<@string, nint> a = default;
     a = CopyMapInto<map<@string, nint>, map<@string, nint>, @string, nint>(a, new map<@string, nint>{["x"] = 1});
     var b = CopyMapInto<map<@string, nint>, map<@string, nint>, @string, nint>(a, new map<@string, nint>{["y"] = 2});

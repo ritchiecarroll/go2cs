@@ -96,6 +96,8 @@
     <Compile Remove="RuntimeBootstrapConstantsTests.cs" />
     <!-- GoBadOpenProbe/GoPipe2RoundTripProbe/GoMincoreErrorSignProbe (runtime/linux/stubs2_impl.cs). -->
     <Compile Remove="RuntimeFdSyscallTests.cs" />
+    <!-- GoSchedGetaffinityProbe/GoGetCPUCountProbe/GoOsyieldProbe/GoExitProbe (runtime/linux/stubs2_impl.cs). -->
+    <Compile Remove="RuntimeLinuxSchedExitTests.cs" />
     <!-- GoAllThreadsSyscallProbe (runtime/linux/os_linux_impl.cs). -->
     <Compile Remove="LinuxAllThreadsSyscallRefusalTests.cs" />
 
@@ -182,6 +184,8 @@
        assumed: `-getProperty:GoTargetOS` returns "" here. -->
   <ItemGroup Condition="'$(GoTargetOS)' != '' and '$(GoTargetOS)' != 'windows'">
     <Compile Remove="WindowsNetUserInfoTests.cs" />
+    <!-- C44: os.Args under the apphost and the dotnet muxer; syscall's windows GetCommandLine hand-own and os's split. -->
+    <Compile Remove="WindowsCommandLineTests.cs" />
     <!-- syscall's readNativeSockaddr lives in its windows/ folder. -->
     <Compile Remove="WindowsUnnamedUnixSockaddrTests.cs" />
 

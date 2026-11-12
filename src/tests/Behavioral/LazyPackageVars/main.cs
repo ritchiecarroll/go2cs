@@ -6,7 +6,7 @@ using LazyPackageVars;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var (first, second) = tables.Seen();
     fmt.Println("order:", tables.Order, first, second);
 

@@ -35,7 +35,7 @@ internal static void @catch(@string what, Action f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     ж<node> p = default;
     var pʗ1 = p;
     @catch("method-call", () => {

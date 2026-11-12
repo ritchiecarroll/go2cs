@@ -58,13 +58,18 @@ Several Go semantics cannot be written directly in C#, so the converter emits co
   finds no traceback renderer runs it to initialize `runtime`, so a program that imports nothing still prints
   Go's `goroutine 1 [running]:` traceback, and a program that never crashes never loads `runtime` for it
   under the JIT.
+* **`MainEntryGenerator`** — for a converted EXECUTABLE whose `main_package` declares Go's `main`, writes the C#
+  entry point `Main() => MainThread.Run(main)`, which runs `main` as the main goroutine on a thread reserving Go's
+  1 GB of stack. Nothing is written when the program already declares an entry point, as the converted-test host
+  does; see [`main` keeps its name, and the entry point is generated](package-conversion.md#main-keeps-its-name-and-the-entry-point-is-generated).
 
 `TypeGenerator`, `ImplementGenerator`, `EscapeRegistryGenerator` and `NativeArrayOpenerGenerator` also fill golib
 registries that code finds at run time, and none of them fills its registry at startup; see
 [Run-time registrations wait for the first lookup that misses](#run-time-registrations-wait-for-the-first-lookup-that-misses).
 The same assembly ships two analyzers, which report and generate nothing: `StringLiteralBindingAnalyzer`
 ([`GO2CS0004`](../DiagnosticCodes.md)) and `StackAppendBufferAnalyzer` ([`GO2CS0007`](../DiagnosticCodes.md)).
-<!-- The list is every class under src/gen/go2cs-gen declared `[Generator]`: sixteen at 3e3f18925a (fourteen
+<!-- The list is every class under src/gen/go2cs-gen declared `[Generator]`: nineteen at C46 (2026-11-11), whose MainEntryGenerator is one;
+     BoundedGoroutineInterceptorGenerator and ExtensionHostListGenerator are not yet listed above. Sixteen at 3e3f18925a (fourteen
      at b335356d6; grep for `^\[Generator`); the two analyzers are declared
      `[DiagnosticAnalyzer(LanguageNames.CSharp)]`. -->
 

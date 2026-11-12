@@ -6,7 +6,7 @@ partial class main_package {
 
 partial struct myLen /*num:uintptr*/;
 
-internal static void Main() {
+internal static void main() {
     uintptr n = 4;
     nint count = 0;
     foreach (var _ᴛ1 in range<uintptr>(n)) {

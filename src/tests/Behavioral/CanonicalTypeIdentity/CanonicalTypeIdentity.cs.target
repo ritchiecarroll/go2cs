@@ -5,7 +5,7 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var sixes = GoReflect.WithElemDims(new array<uint8>[]{new uint8[]{}.array(6)}.slice(), 6);
     var eights = GoReflect.WithElemDims(new array<uint8>[]{new uint8[]{}.array(8)}.slice(), 8);
     var t6 = reflect.TypeOf(sixes);

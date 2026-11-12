@@ -186,6 +186,29 @@ namespace go.golib;
     /// <summary>The managed id of the thread running this goroutine, or 0 while no thread is.</summary>
     internal int ThreadId => Volatile.Read(ref m_threadId);
 
+    // Go's m.lockedExt as golib can see it: runtime.LockOSThread minus runtime.UnlockOSThread on this goroutine. The
+    // count itself lives on the converted runtime's m, which golib cannot read; runtime's hand-owned pair mirrors each
+    // change here (NoteLockOSThread). Written only by this goroutine's own thread. MainThread reads the main
+    // goroutine's count before main starts: Go runs main on the startup thread when an init function locked it there.
+    private int m_lockedExternal;
+
+    /// <summary>Whether this goroutine has called runtime.LockOSThread more often than runtime.UnlockOSThread.</summary>
+    internal bool LockedToThread => Volatile.Read(ref m_lockedExternal) > 0;
+
+    /// <summary>runtime.LockOSThread on the calling goroutine (runtime's hand-owned body calls this beside Go's own).</summary>
+    internal static void NoteLockOSThread()
+    {
+        if (t_current is { } current)
+            Volatile.Write(ref current.m_lockedExternal, current.m_lockedExternal + 1);
+    }
+
+    /// <summary>runtime.UnlockOSThread on the calling goroutine; a call with no lock outstanding does nothing, as in Go.</summary>
+    internal static void NoteUnlockOSThread()
+    {
+        if (t_current is { m_lockedExternal: > 0 } current)
+            Volatile.Write(ref current.m_lockedExternal, current.m_lockedExternal - 1);
+    }
+
     // THE MAIN-RETURN MARKS (MainExit). A returning main asks a goroutine that is running a panic's deferred calls
     // the question runtime.main's yield loop asks (proc.go:310): can it run? Parked (m_waitReason, not readied)
     // answers most of it. The rest is a goroutine blocked OUTSIDE the park accounting, m_blockedDepth:
@@ -612,9 +635,9 @@ namespace go.golib;
     /// <remarks>
     /// <para>
     /// The main goroutine is minted exactly once per process, by <see cref="RegisterMainGoroutine"/>
-    /// on the thread that first touched golib. A host whose "main" runs on some OTHER thread -- the
-    /// converted-test host hands the whole run to a pool thread and parks its own main thread on the
-    /// package deadline -- would otherwise run Go's <c>TestMain</c> on a thread with no identity at
+    /// on the thread that first touched golib. A host whose "main" runs on some OTHER thread -- every converted
+    /// program (its generated entry point uses <see cref="MainThread"/>) and the converted-test host, which
+    /// waits on the package deadline -- would otherwise run Go's <c>TestMain</c> on a thread with no identity at
     /// all (a traceback headed <c>goroutine 0</c>, an id Go never mints) while the registered main
     /// goroutine sat in the registry as a goroutine that runs no Go code: a frameless block in every
     /// <c>runtime.Stack(all)</c> dump that no program's filter can drop, which is exactly how

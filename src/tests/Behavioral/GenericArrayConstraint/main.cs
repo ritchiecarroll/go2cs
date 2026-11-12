@@ -40,7 +40,7 @@ internal static fieldElement sum<T>(T a)
     return total;
 }
 
-internal static void Main() {
+internal static void main() {
     var r1 = new ringElement(new fieldElement[]{1, 2, 3, 4}.array());
     var r2 = new ringElement(new fieldElement[]{10, 20, 30, 40}.array());
     var rs = addPoly(r1, r2);

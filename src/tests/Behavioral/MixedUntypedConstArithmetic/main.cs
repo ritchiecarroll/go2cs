@@ -12,7 +12,7 @@ internal static UntypedInt seven => 7;
 internal static UntypedFloat two => 2.0;
 internal static UntypedFloat quadrillion => 1e15;
 
-internal static void Main() {
+internal static void main() {
     uint64 capacity = 14000000000UL;
     fmt.Println(capacity == (uint64)(/* procs * capacityPerProc */ 14000000000UL), capacity == (uint64)(/* capacityPerProc * procs */ 14000000000UL));
     fmt.Println((uint64)(/* procs * capacityPerProc */ 14000000000UL), (uint64)(/* capacityPerProc * procs */ 14000000000UL));

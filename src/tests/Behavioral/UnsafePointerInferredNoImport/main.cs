@@ -5,7 +5,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     ref var @base = ref heap(new int64(), out var Ꮡbase);
     @base = 100;
     @unsafe.Pointer p = (uintptr)ptrOf(Ꮡbase);

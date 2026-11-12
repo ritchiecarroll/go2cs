@@ -27,7 +27,7 @@ internal static @string inside() {
     return f(Ꮡ(new request(path: "/ctl")));
 }
 
-internal static void Main() {
+internal static void main() {
     var r = Ꮡ(new request(path: "/a", closed: true, depth: 1));
 
     fmt.Println(describe(r, "first"));

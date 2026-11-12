@@ -36,7 +36,7 @@ internal static float64 take(float64 f) { return f; }
 
 internal static float64 give() { return (float64)above1e23; }
 
-internal static void Main() {
+internal static void main() {
     float64 x = 1e40D;
     fmt.Println(x > (float64)Two129);
     fmt.Println(x < (float64)Two129);

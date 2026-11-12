@@ -100,7 +100,7 @@ internal static @string callString(any fn, params ꓸꓸꓸany argsʗp) {
     return "["u8 + fmt.Sprint(parts) + "]"u8;
 }
 
-internal static void Main() {
+internal static void main() {
     var namesᴷ = new stackAppend<@string>();
 
     fmt.Println("join3    :", callString(join, "go", (nint)1, (nint)2, (nint)3));

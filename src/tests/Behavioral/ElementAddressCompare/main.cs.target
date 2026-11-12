@@ -62,7 +62,7 @@ internal static void recovered(@string label, Func<bool> f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     var s = new slice<nint>(4, 8);
 
     fmt.Println("self       :", Ꮡelem(s, 0) == Ꮡelem(s, 0), Ꮡelem(s, 2) == Ꮡelem(s, 2));

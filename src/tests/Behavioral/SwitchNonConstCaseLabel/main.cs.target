@@ -31,7 +31,7 @@ internal static @string matchVar(uintptr p, uintptr a, uintptr b) {
 
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(classify(8));
     fmt.Println(classify(3));
     fmt.Println(matchVar(1, 1, 2));

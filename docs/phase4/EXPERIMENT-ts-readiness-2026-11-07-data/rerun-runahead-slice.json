@@ -1,0 +1,24 @@
+{
+ "pool": 7404,
+ "every": 37,
+ "units": 201,
+ "matched": 200,
+ "classes": {
+  "converted crashed": 1
+ },
+ "seconds": {
+  "go": 9.3,
+  "cs": 337.5
+ },
+ "mismatches": [
+  {
+   "index": "02478",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/declarationEmitTripleSlashReferenceAmbientModule.ts",
+   "unit": "/usage2.ts",
+   "first_diff_line": 0,
+   "go": "file 02478.txt (79 bytes)",
+   "cs": "CRASH rc=2"
+  }
+ ]
+}

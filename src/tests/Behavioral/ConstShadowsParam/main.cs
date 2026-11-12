@@ -13,7 +13,7 @@ internal static partial int64 f(int64 ns) {
     return total + ns;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(f(5));
     fmt.Println(f(-3));
 }

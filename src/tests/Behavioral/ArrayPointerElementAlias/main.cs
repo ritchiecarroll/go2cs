@@ -16,7 +16,7 @@ internal static void bumpAll(ж<byte> p) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     var dst = new slice<uint16>(8);
     nint n = readInto(Ꮡ(dst, 0), 4, [1, 2, 3, 4]);
     fmt.Println("copied:", n, "dst:", dst);

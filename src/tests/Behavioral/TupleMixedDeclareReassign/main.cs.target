@@ -83,7 +83,7 @@ internal static (slice<nint> hw, nint count) fill(nint n) {
     return (hw, count);
 }
 
-internal static void Main() {
+internal static void main() {
     var (a, b) = step(5);
     fmt.Println(a.Value, b);
     var (c, d) = shadow();

@@ -22,7 +22,7 @@ internal static (any v, error err) call(Func<(any, error)> fn) {
     return (v, err);
 }
 
-internal static void Main() {
+internal static void main() {
     var fn = (any, error) () => {
         throw panic("boom");
     };

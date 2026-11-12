@@ -81,7 +81,7 @@ internal partial struct main_ptrSlots /*dyn*/ {
     public MyBytesArrayPtr0 Z;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var xs = ref heap<slice<nint>>(slice<nint>([1, 2, 3, 4, 5, 6, 7, 8]), out var Ꮡxs);
     ref var xa = ref heap<array<nint>>(new nint[]{10, 20, 30, 40, 50, 60, 70, 80}.array(), out var Ꮡxa);
     ref var vs = ref heap<reflectꓸValue>(reflect.ValueOf(Ꮡxs).Elem(), out var Ꮡvs);

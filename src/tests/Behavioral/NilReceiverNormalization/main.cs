@@ -53,7 +53,7 @@ internal static @string firstUseReads(this ж<loc> Ꮡl) {
     return n + "/"u8 + l.name;
 }
 
-internal static void Main() {
+internal static void main() {
     ж<loc> nilLoc = default;
     var real = Ꮡ(new loc(name: "MST", offset: -7));
 

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("Hello, 世界");
 
     fmt.Printf("%s|%s|%s\n"u8, "日本語", "Ελληνικά", "Кириллица");

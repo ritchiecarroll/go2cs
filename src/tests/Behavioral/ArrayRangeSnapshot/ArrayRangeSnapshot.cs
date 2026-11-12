@@ -174,7 +174,7 @@ internal static void arrayOfNamedSlices() {
     fmt.Println("arrayOfNamedSlices after:", rows);
 }
 
-internal static void Main() {
+internal static void main() {
     arrayValue();
     namedArrayValue();
     arrayField();

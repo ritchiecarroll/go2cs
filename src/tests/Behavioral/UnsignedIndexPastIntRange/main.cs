@@ -22,7 +22,7 @@ internal static void @try(@string name, Func<byte> f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     @string s = "0123456789";
     var b = slice<byte>("abcdefghij"u8);
     ref var a = ref heap(new array<byte>(10), out var Ꮡa);

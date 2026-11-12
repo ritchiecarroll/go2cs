@@ -44,7 +44,7 @@ internal static ж<Pt> advance(ж<Pt> Ꮡp) {
     return Ꮡp;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var pt = ref heap<Pt>(new Pt(1, 2), out var Ꮡpt);
     ref var c = ref heap(new Count(), out var Ꮡc);
     c = 42;

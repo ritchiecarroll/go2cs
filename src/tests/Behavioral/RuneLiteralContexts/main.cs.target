@@ -17,7 +17,7 @@ internal static rune retRune() { return 'Z'; }
 
 internal static byte retByte() { return (byte)'z'; }
 
-internal static partial void Main() {
+internal static partial void main() {
     var bsᴷ = new stackAppend<byte>();
 
     fmt.Println((rune)'a');

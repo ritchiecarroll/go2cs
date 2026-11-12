@@ -61,7 +61,7 @@ internal static void visible(@string label, reflectꓸType t) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     describe("w", reflect.TypeOf(new w()));
     describe("Pub", reflect.TypeOf(new Pub()));
     describe("Named", reflect.TypeOf(new Named()));

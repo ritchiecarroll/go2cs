@@ -27,7 +27,7 @@ internal static Describer newDescriber(@string name) {
     return new widget(name: name);
 }
 
-internal static void Main() {
+internal static void main() {
     var d = newDescriber("alpha");
     fmt.Println(d.Describe());
 

@@ -17,7 +17,7 @@ partial struct Holder {
 
 internal static @string take(any v) { return fmt.Sprintf("%#v"u8, v); }
 
-internal static void Main() {
+internal static void main() {
     var h = new Holder();
     var hv = reflect.ValueOf(h);
 

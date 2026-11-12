@@ -123,7 +123,7 @@ internal static @string initValue;
     initValue = fromInit;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(greeting);
     fmt.Println(atoi(""), atoi("42"));
     fmt.Println(named());

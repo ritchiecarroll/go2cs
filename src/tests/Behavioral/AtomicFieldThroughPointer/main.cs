@@ -39,7 +39,7 @@ internal static int64 viaPointerLocal(ref owner o, int64 d) {
     return mp.Ꮡprof.Ꮡwait.get();
 }
 
-internal static void Main() {
+internal static void main() {
     var o = Ꮡ(new owner(h: Ꮡ(new holder()), deep: Ꮡ(new holder())));
     bump(o, 5);
     bump(o, 5);

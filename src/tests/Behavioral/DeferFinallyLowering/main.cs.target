@@ -207,7 +207,7 @@ internal static void rebound(this ж<box> Ꮡx, ж<box> other) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     var x = Ꮡ(new box(a: new tracer(id: "a"), b: new tracer(id: "b")));
 
     x.two();

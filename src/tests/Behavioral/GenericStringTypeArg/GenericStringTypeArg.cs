@@ -13,7 +13,7 @@ partial struct Pair<A, B> {
     internal B b;
 }
 
-internal static void Main() {
+internal static void main() {
     Pair<nint, @string> p = default;
     p.a = 5;
     p.b = "hi";

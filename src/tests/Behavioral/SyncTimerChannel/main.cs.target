@@ -16,7 +16,7 @@ internal static bool tryRecv(/*<-*/channel<time.Time> c) {
     }}
 }
 
-internal static void Main() {
+internal static void main() {
     var a = time.NewTimer(1 * time.Millisecond);
     time.Sleep(25 * time.Millisecond);
     var aPending = a.Stop();

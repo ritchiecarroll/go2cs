@@ -87,7 +87,7 @@ internal static void deferred(ж<nint> @out, params ꓸꓸꓸnint xsʗp) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     var a = slice<nint>([1, 2, 3]);
     forward(a.ꓸꓸꓸ);
     fmt.Println("forward wrote through:", a);

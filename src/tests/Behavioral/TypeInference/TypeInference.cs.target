@@ -20,7 +20,7 @@ internal static @string String(this main_MyBool b) {
 
 internal partial struct main_MyBoolᴛ1 /*bool*/;
 
-internal static void Main() {
+internal static void main() {
     const bool c = /* 3 < 4 */ true;
     nint x = default;
     nint y = default;

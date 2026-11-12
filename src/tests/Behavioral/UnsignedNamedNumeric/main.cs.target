@@ -8,7 +8,7 @@ partial struct Flags /*num:nuint*/;
 
 partial struct Mask /*num:uintptr*/;
 
-internal static void Main() {
+internal static void main() {
     Flags a = 6;
     Flags b = 2;
     fmt.Println(a + b);

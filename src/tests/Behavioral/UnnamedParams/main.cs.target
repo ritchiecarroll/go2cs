@@ -35,7 +35,7 @@ internal static nint total(params ꓸꓸꓸnint valsʗp) {
     return sum;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var n = ref heap(new note(), out var Ꮡn);
     setup(Ꮡn);
     discard(5);

@@ -22,7 +22,7 @@ internal static partial runtime.Frame other() {
     return capture();
 }
 
-internal static void Main() {
+internal static void main() {
     var (first, second) = twoSites();
     var third = other();
 

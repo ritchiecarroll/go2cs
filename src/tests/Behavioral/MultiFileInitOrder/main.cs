@@ -8,7 +8,7 @@ partial class main_package {
     order = append(order, (@string)"main#1");
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(len(order));
 
     foreach (var (_, name) in range(order)) {

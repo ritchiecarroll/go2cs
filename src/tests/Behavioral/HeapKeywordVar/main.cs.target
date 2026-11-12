@@ -21,7 +21,7 @@ internal static void Assign(this ref @decimal a, nint v) {
     a.d = v;
 }
 
-internal static void Main() {
+internal static void main() {
     nint @base = default;
     nint @as = default;
     nint @event = default;

@@ -64,7 +64,7 @@ internal static nint withFallthrough(bucketType typ) {
     return n;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(size(memProfile));
     fmt.Println(size(blockProfile));
     fmt.Println(size(mutexProfile));

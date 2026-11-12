@@ -6,7 +6,7 @@ using Δnet = net_package;
 
 partial class main_package {
 
-internal static partial void Main() {
+internal static partial void main() {
     GoFrame ᒐ = default;
     try {
         var (ln, err) = Δnet.Listen("tcp", "127.0.0.1:0");

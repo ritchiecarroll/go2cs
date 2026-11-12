@@ -36,7 +36,7 @@ internal partial struct main_i /*dyn*/ {
     public int64 Q;
 }
 
-internal static void Main() {
+internal static void main() {
     var intT = reflect.TypeOf((int64)0);
     var byteT = reflect.TypeOf((uint8)0);
     var strT = reflect.TypeOf("");

@@ -24,7 +24,7 @@ internal static void @try(@string label, Action set) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     ref var dstString = ref heap(new @string(), out var ᏑdstString);
     @try("S->string (must PANIC)", () => {
         reflect.ValueOf(ᏑdstString).Elem().Set(reflect.ValueOf((S)(@string)"x"));

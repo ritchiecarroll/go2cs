@@ -112,7 +112,7 @@ internal static void arm(@string @class, Func<@string> f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     arm("int", () => fmt.Sprint(quo(i, m1) == Δmath.MinInt, " ", rem(i, m1)));
     arm("int32", () => fmt.Sprint(quo(i32, (int32)m1), " ", rem(i32, (int32)m1)));
     arm("int64", () => fmt.Sprint(quo(i64, (int64)m1), " ", rem(i64, (int64)m1)));

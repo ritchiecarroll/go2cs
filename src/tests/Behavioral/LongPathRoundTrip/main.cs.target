@@ -16,7 +16,7 @@ internal partial struct main_probes /*dyn*/ {
     internal @string path;
 }
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         var namesᴷ = new stackAppend<@string>();

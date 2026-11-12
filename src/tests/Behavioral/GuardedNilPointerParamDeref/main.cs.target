@@ -15,7 +15,7 @@ internal static nint digits(nint @base, ref nint invalid) {
     return n;
 }
 
-internal static void Main() {
+internal static void main() {
     nint x = 0;
     nint c1 = digits(3, ref x);
     fmt.Println(c1, x);

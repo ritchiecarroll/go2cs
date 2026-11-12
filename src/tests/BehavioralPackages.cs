@@ -62,4 +62,55 @@ internal static class BehavioralPackages
             .OrderByDescending(dirName => dirName.Count(c => c == Path.DirectorySeparatorChar))
             .ThenBy(dirName => dirName, StringComparer.OrdinalIgnoreCase)
             .ToArray();
+
+    /// <summary>
+    /// go2cs.options: one behavioral project's EXTRA converter arguments, one per line. Every instrument that converts
+    /// a behavioral project reads it through <see cref="ConverterOptions"/> (check-no-regression.ps1 mirrors it), and the
+    /// repoguard TestBehavioralHarnessReadsConverterOptions fails by name if any converter call site stops doing so: a
+    /// call site that silently dropped the file would convert the project without -warn, which is false-green route #2's
+    /// shape (two instruments disagreeing on how a project converts).
+    /// </summary>
+    public const string ConverterOptionsFile = "go2cs.options";
+
+    /// <summary>
+    /// expected-output.txt: the stdout a project converted under -warn prints up to its refused site, where it must panic
+    /// (exit 2, stderr's first line a "panic: go2cs:" refusal). It replaces the Go oracle for that project, whose Go run
+    /// would go on past the refused call.
+    /// </summary>
+    public const string ExpectedOutputFile = "expected-output.txt";
+
+    private static readonly System.Text.RegularExpressions.Regex s_allowedConverterOption = new(@"^-warn=GO2CS\d{4}(,GO2CS\d{4})*$");
+
+    /// <summary>
+    /// The project's converter options as one argument prefix ("" when it has no go2cs.options), or the error naming a
+    /// line the file may not carry. The file may carry -warn=&lt;codes&gt; and nothing else, so a project cannot use it to turn
+    /// on any other converter behavior.
+    /// </summary>
+    public static (string Options, string? Error) ConverterOptions(string projectDir)
+    {
+        string path = Path.Combine(projectDir, ConverterOptionsFile);
+
+        if (!File.Exists(path))
+            return ("", null);
+
+        System.Text.StringBuilder options = new();
+
+        foreach (string raw in File.ReadAllLines(path))
+        {
+            string line = raw.Trim();
+
+            if (line.Length == 0)
+                continue;
+
+            if (!s_allowedConverterOption.IsMatch(line))
+                return ("", $"{ConverterOptionsFile}: \"{line}\" is not an allowed converter option (only -warn=<code>[,<code>...])");
+
+            options.Append(line).Append(' ');
+        }
+
+        return (options.ToString(), null);
+    }
+
+    /// <summary>Whether the project is an expected-output project (see <see cref="ExpectedOutputFile"/>).</summary>
+    public static bool HasExpectedOutput(string projectDir) => File.Exists(Path.Combine(projectDir, ExpectedOutputFile));
 }

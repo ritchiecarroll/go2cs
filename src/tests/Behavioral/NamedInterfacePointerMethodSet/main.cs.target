@@ -41,7 +41,7 @@ internal static void report(@string label, @string s, bool ok) {
     fmt.Println(label, ok, s);
 }
 
-internal static void Main() {
+internal static void main() {
     var (s, ok) = pmslib.TrySpeak(new PtrOnly(name: "a"));
     report("PtrOnly-value  ", s, ok);
 

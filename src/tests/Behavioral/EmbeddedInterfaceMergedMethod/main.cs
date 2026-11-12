@@ -144,7 +144,7 @@ internal partial interface main_local /*dyn*/ :
     new @string Ref(Path p);
 }
 
-internal static void Main() {
+internal static void main() {
     EmitHost h = new host();
     fmt.Println(((PrinterHost)(h)).Ref(aTsˢ), emit(new EmitHostᴠMayBeEmittedHost(h), bTsˢ), h.Dir());
 
