@@ -2141,3 +2141,19 @@ For the external wave the owner asked about: under R2, M:N landing later does no
 now. What such a consumer should be told now is tier 3's content: thread identity between calls is not a
 contract (T1), a goroutine is not a thread (T3), and .NET stack frames of converted code are not stable (E5).
 Scheduling is the owner's.
+
+### 8.10 Gates (Windows x64, dotnet SDK 10.0.400 / runtime 10.0.11, go1.26.10; M:N switches unset)
+
+This record's branch changes three files, all under `docs/`: this record, the BOARD (the three rows of
+`85989b9947`, placed again) and the public-surface plan (the dated block that folds 8.5 in). Its gates are the
+docs guards. Run on the tree as committed with 8.1 to 8.9 (`dddd89781d`), 00:35 to 00:53 CST on 2026-11-12.
+
+| gate | reading |
+|---|---|
+| `go test ./...` in `src/go2cs` (the converter suite and the repo guards) | 11 packages ok, 0 failed (1,024 s) |
+
+- GenTests, GolibTests and the solution-integrity gate were not run: the branch holds no file they read beyond
+  master's.
+- The repo guards ran once more after this subsection was placed. That reading is in the DONE post, since
+  writing it here would change the file they read.
+- The spike's own code was last gated in 6.11, and this section changes none of it.
