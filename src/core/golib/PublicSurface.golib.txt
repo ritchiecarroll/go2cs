@@ -124,6 +124,7 @@ go.GoImplementAttribute`2
 go.GoImplicitConvAttribute`2
 go.GoInlineConstraintLiftAttribute
 go.GoInterfaceShellAttribute
+go.GoInternalRootAttribute
 go.GoLazyAttribute
 go.GoLibcCall
 go.GoLibcErrnoRule
