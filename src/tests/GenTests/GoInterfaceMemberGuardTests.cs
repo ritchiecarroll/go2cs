@@ -24,10 +24,18 @@ namespace go2cs.Tests;
 /// </summary>
 /// <remarks>
 /// Every <c>[Generator]</c> in go2cs-gen runs, found by reflection, so a generator added later is covered without
-/// touching this test. The fixture's interfaces span the shapes the converter emits (a plain interface, an embedding
+/// touching this test. An implementer must supply every abstract member of the interface and of every interface it
+/// extends, so the comparison is over both: a base interface a generator adds, and a member a generator adds to an
+/// existing base, fail like a direct addition. The fixture's interfaces span the shapes the converter emits (a plain interface, an embedding
 /// one, a generic one, a one-method and an empty one, exported and unexported), with an implement record so the
 /// implement path runs too. Each Go interface's members are compared before and after generation; an added abstract
-/// member fails by name. The negative control runs the same check with a test-only generator that adds one.
+/// member fails by name. The negative controls run the same check with a test-only generator that adds one, and with
+/// one that makes a Go interface extend an interface carrying one.
+/// <para>
+/// Scope: this guards go2cs-gen, the GENERATORS. What the CONVERTER emits for an interface is not checked by a rule
+/// here or elsewhere: a converter change to an interface's emission shows up as golden diffs (CNR and the behavioral
+/// <c>.cs.target</c> files), which a reviewer reads, but nothing refuses an added abstract member by itself.
+/// </para>
 /// </remarks>
 [TestClass]
 public class GoInterfaceMemberGuardTests
@@ -113,6 +121,14 @@ public class GoInterfaceMemberGuardTests
 
     private static string Signature(ISymbol member) => member.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
 
+    // The abstract members of an interface and of all its base interfaces (AllInterfaces), by signature, sorted.
+    private static IEnumerable<string> AbstractMembersToImplement(INamedTypeSymbol type) =>
+        type.GetMembers().Concat(type.AllInterfaces.SelectMany(baseInterface => baseInterface.GetMembers()))
+            .Where(member => member.IsAbstract)
+            .Select(Signature)
+            .Distinct()
+            .OrderBy(signature => signature, StringComparer.Ordinal);
+
     // Abstract members each Go interface gained from generation: "Interface: member" per violation.
     private static List<string> AddedAbstractMembers(IEnumerable<ISourceGenerator> generators, out int generatorCount, out int generatedTrees)
     {
@@ -145,14 +161,15 @@ public class GoInterfaceMemberGuardTests
             INamedTypeSymbol after = output.GetTypeByMetadataName($"go.iguard_package+{name}")
                 ?? throw new AssertFailedException($"the interface {name} is missing from the output");
 
-            HashSet<string> declared = before.GetMembers().Select(Signature).ToHashSet();
+            // Every abstract member an implementer must supply: the interface's own, and those of every interface it
+            // extends. A generator that adds no member to the Go interface but makes it extend one that has an abstract
+            // member (the M:N hidden-twin shape) breaks every C# implementer just as a direct addition would.
+            HashSet<string> declared = AbstractMembersToImplement(before).ToHashSet();
 
-            foreach (ISymbol member in after.GetMembers())
+            foreach (string member in AbstractMembersToImplement(after))
             {
-                if (declared.Contains(Signature(member)) || !member.IsAbstract)
-                    continue;
-
-                violations.Add($"{name}: {Signature(member)}");
+                if (!declared.Contains(member))
+                    violations.Add($"{name}: {member}");
             }
         }
 
@@ -182,7 +199,31 @@ public class GoInterfaceMemberGuardTests
 
         List<string> violations = AddedAbstractMembers(generators, out _, out _);
 
-        CollectionAssert.AreEqual(new[] { "Reader: go.iguard_package.Reader.ᴛPlanted()" }, violations);
+        // ReadWriter extends Reader, so its implementers must supply the planted member too.
+        CollectionAssert.AreEqual(new[] { "Reader: go.iguard_package.Reader.ᴛPlanted()", "ReadWriter: go.iguard_package.Reader.ᴛPlanted()" },
+            violations, string.Join("; ", violations));
+    }
+
+    // The negative control for an inherited abstract member: the M:N hidden-twin shape OQ5 exists for. The generator adds
+    // no member to Reader itself, but makes it extend an interface that has one, which breaks every C# implementer the
+    // same way.
+    [TestMethod]
+    public void APlantedAbstractMemberOnANewBaseInterfaceIsCaught()
+    {
+        List<ISourceGenerator> generators = AllGenerators();
+        generators.Add(new HiddenTwinPlanter().AsSourceGenerator());
+
+        List<string> violations = AddedAbstractMembers(generators, out _, out _);
+
+        CollectionAssert.AreEqual(new[] { "Reader: go.iguard_package.IHiddenTwin.ᴛTwin()", "ReadWriter: go.iguard_package.IHiddenTwin.ᴛTwin()" },
+            violations, string.Join("; ", violations));
+    }
+
+    private sealed class HiddenTwinPlanter : IIncrementalGenerator
+    {
+        public void Initialize(IncrementalGeneratorInitializationContext context) =>
+            context.RegisterPostInitializationOutput(output => output.AddSource("twin.g.cs",
+                "namespace go; public static partial class iguard_package { public interface IHiddenTwin { void ᴛTwin(); } partial interface Reader : IHiddenTwin { } }"));
     }
 
     private sealed class AbstractMemberPlanter : IIncrementalGenerator
