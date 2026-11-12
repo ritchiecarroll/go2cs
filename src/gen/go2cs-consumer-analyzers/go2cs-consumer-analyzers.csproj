@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    go.lib's consumer analyzer: the consumer copy of go2cs-gen's InternalPackageAnalyzer (GO2CS0014), for plain C#
+    projects that reference converted go.* or nugetgo.* packages and so never load go2cs-gen. golib.csproj builds it
+    and packs the DLL under buildTransitive/, where go.lib.targets adds it as an Analyzer item. It acts only in a
+    compilation that declares no [GoPackage] class, and go2cs-gen's copy only in one that does, so a compilation that
+    loads both gets one check (docs/phase4/DESIGN-internal-package-marking.md, S1).
+
+    It compiles go2cs-gen's own files, linked, so the two copies cannot drift: the analyzer, under
+    GO2CS_CONSUMER_ANALYZER, and the one diagnostic registry (GeneratorDiagnostics.cs), with the shared Symbols.cs
+    that registry reads.
+  -->
+
+  <Import Project="..\..\version.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>go2cs-consumer-analyzers</AssemblyName>
+    <RootNamespace>go2cs</RootNamespace>
+    <Product>go2cs</Product>
+    <Description>go2cs analyzer for C# projects that consume converted Go packages: $(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
+    <AssemblyTitle>$(Description)</AssemblyTitle>
+    <Authors>$(Product) Authors</Authors>
+    <Company>The $(Authors)</Company>
+    <Copyright>Copyright © 2018-2026 $(Company)</Copyright>
+    <Nullable>enable</Nullable>
+    <LangVersion>14</LangVersion>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsPackable>false</IsPackable>
+    <DefineConstants>$(DefineConstants);GO2CS_CONSUMER_ANALYZER</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The same compiler floor as go2cs-gen: go.lib.targets' Go2csCompilerFloor already refuses an older compiler. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" NoWarn="NU1605" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\go2cs-gen\InternalPackageAnalyzer.cs" Link="InternalPackageAnalyzer.cs" />
+    <Compile Include="..\go2cs-gen\GeneratorDiagnostics.cs" Link="GeneratorDiagnostics.cs" />
+  </ItemGroup>
+
+  <Import Project="..\..\core\go2cs\go2cs.projitems" Label="Shared" />
+
+</Project>

@@ -44,6 +44,18 @@
     <CompilerVisibleProperty Include="MSBuildProjectDirectory" />
   </ItemGroup>
 
+  <!-- Every project of this tree is the standard library. go2cs-gen's InternalPackageAnalyzer (GO2CS0014) reads the
+       flag: Go lets only standard-library code import a standard internal or vendored package, and tests that by
+       directory (below GOROOT/src) rather than by import path, so the path alone cannot say it. A module named
+       `crypto/x` is not the standard library. -->
+  <PropertyGroup>
+    <GoStandardLibrary>true</GoStandardLibrary>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <CompilerVisibleProperty Include="GoStandardLibrary" />
+  </ItemGroup>
+
   <!-- Layout L3's universe check, the text renderPlatformUniverseCheck (src/go2cs/platformLayout.go) renders for the
        declared universe; a Go test holds the two equal (TestCorpusBuildFileCarriesTheUniverseCheck). Without it a
        pair the corpus was never laid out for compiles silently SHORT: a windows build at arm64 would take no amd64/

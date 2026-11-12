@@ -269,6 +269,7 @@
     <File Path="../NOTICE" />
   </Folder>
   <Folder Name="/gen/">
+    <Project Path="gen/go2cs-consumer-analyzers/go2cs-consumer-analyzers.csproj" />
     <Project Path="gen/go2cs-gen/go2cs-gen.csproj" />
   </Folder>
   <Folder Name="/go2cs/">

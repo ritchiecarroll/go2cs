@@ -195,11 +195,18 @@ public sealed class InternalPackageAnalyzer : DiagnosticAnalyzer
         return root.Length == 0 || path == root || path.StartsWith(root + "/", StringComparison.Ordinal);
     }
 
+    // The attribute's one string argument. A plain length test: the consumer copy targets netstandard2.0 without the
+    // System.Index polyfill a list pattern needs.
+    private static string? SingleString(AttributeData attribute)
+    {
+        return attribute.ConstructorArguments.Length == 1 ? attribute.ConstructorArguments[0].Value as string : null;
+    }
+
     private static MarkedAssembly? ReadRoot(IAssemblySymbol assembly)
     {
         foreach (AttributeData attribute in assembly.GetAttributes())
         {
-            if (attribute.AttributeClass?.ToDisplayString() != RootAttribute || attribute.ConstructorArguments is not [{ Value: string root }])
+            if (attribute.AttributeClass?.ToDisplayString() != RootAttribute || SingleString(attribute) is not { } root)
                 continue;
 
             bool standard = false;
@@ -249,7 +256,7 @@ public sealed class InternalPackageAnalyzer : DiagnosticAnalyzer
     {
         foreach (AttributeData attribute in assembly.GetAttributes())
         {
-            if (attribute.AttributeClass?.ToDisplayString() != ModInfoAttribute || attribute.ConstructorArguments is not [{ Value: string value }])
+            if (attribute.AttributeClass?.ToDisplayString() != ModInfoAttribute || SingleString(attribute) is not { } value)
                 continue;
 
             foreach (string line in value.Split('\n'))
@@ -287,7 +294,7 @@ public sealed class InternalPackageAnalyzer : DiagnosticAnalyzer
             {
                 foreach (AttributeData attribute in type.GetAttributes())
                 {
-                    if (attribute.AttributeClass?.ToDisplayString() != PackageAttribute || attribute.ConstructorArguments is not [{ Value: string name }])
+                    if (attribute.AttributeClass?.ToDisplayString() != PackageAttribute || SingleString(attribute) is not { } name)
                         continue;
 
                     string? importPath = null;

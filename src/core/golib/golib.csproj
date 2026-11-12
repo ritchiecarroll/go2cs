@@ -105,6 +105,28 @@
     <None Include="buildTransitive/go.lib.pack.targets" Pack="true" PackagePath="buildTransitive/" />
   </ItemGroup>
 
+  <!-- The consumer analyzer (GO2CS0014, src/gen/go2cs-consumer-analyzers), packed beside go.lib.targets, which adds it
+       as an Analyzer item for every C# consumer. Built here so the pack always carries the current one; no reference
+       to its assembly and no package dependency. A project reference to golib does not import buildTransitive, so
+       the corpus never loads it: converted projects get the same check from go2cs-gen. -->
+  <ItemGroup>
+    <ProjectReference Include="../../gen/go2cs-consumer-analyzers/go2cs-consumer-analyzers.csproj"
+                      ReferenceOutputAssembly="false" PrivateAssets="all" SkipGetTargetFrameworkProperties="true" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_GoPackConsumerAnalyzer</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <Target Name="_GoPackConsumerAnalyzer">
+    <MSBuild Projects="../../gen/go2cs-consumer-analyzers/go2cs-consumer-analyzers.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)" RemoveProperties="TargetFramework;RuntimeIdentifier">
+      <Output TaskParameter="TargetOutputs" ItemName="_GoConsumerAnalyzer" />
+    </MSBuild>
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="@(_GoConsumerAnalyzer)" PackagePath="buildTransitive/" />
+    </ItemGroup>
+  </Target>
+
   <ItemGroup>
     <Using Include="go.builtin" Static="True" />
     <Using Include="System" />

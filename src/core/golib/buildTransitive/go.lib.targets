@@ -406,6 +406,18 @@
            Text="The build stops here, before compiling: @(_GoBreakFloorBelow->Count()) go2cs-built package(s) named above are below go.* $(GoBreakFloor). Set GoAllowBelowBreakFloor=true to build anyway at your own risk." />
   </Target>
 
+  <!--
+    GO INTERNAL PACKAGES. Go lets only code at or below an internal or vendored package's root import it; .NET has no
+    such rule, so those packages stay public and their assemblies carry [assembly: GoInternalRoot(root)]. The consumer
+    analyzer packed beside this file warns (GO2CS0014) where C# names one of their types: they change without notice
+    between Go releases and no compatibility promise covers them. It acts only in a project that declares no Go
+    package, so a converted project, which gets the same check from go2cs-gen, is checked once. Set
+    GoInternalPackageWarning=false to turn it off, or NoWarn GO2CS0014.
+  -->
+  <ItemGroup Condition="'$(Language)' == 'C#' and '$(GoInternalPackageWarning)' != 'false'">
+    <Analyzer Include="$(MSBuildThisFileDirectory)go2cs-consumer-analyzers.dll" />
+  </ItemGroup>
+
   <!-- A converted package packed against the go.* packages (a `go2cs -recurse=nuget` conversion) writes its own
        usings into build/<PackageId>.props at pack time (see the file). Inert unless the project's Product is go2cs
        and it is being packed; the in-tree standard library imports the same file from src/Directory.Build.targets. -->
