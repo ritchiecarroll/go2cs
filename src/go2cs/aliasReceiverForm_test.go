@@ -31,7 +31,7 @@ import (
 
 // The alias declarations of the fixture, and what each alias denotes.
 var (
-	aliasReceiverDecls = regexp.MustCompile(`(?m)^(?:\t(?:AttrNode|Chain)\s+= .*|type ListAlias = List)\n`)
+	aliasReceiverDecls = regexp.MustCompile(`(?m)^(?:\t(?:AttrNode|Chain)\s+= .*|type ListAlias = List)\r?\n`)
 	aliasReceiverNames = strings.NewReplacer("AttrNode", "Node", "Chain", "Node", "ListAlias", "List")
 )
 
