@@ -31,7 +31,7 @@ public class PublicSurfaceTests
 
     private const string HiddenAttribute = "System.ComponentModel.EditorBrowsableAttribute";
 
-    // The file's sections: [tier1], [go-tier2] and [builtin], each a set of names.
+    // The file's sections: [tier1], [go-tier2], [builtin] and [tier1-members], each a set of lines.
     private static Dictionary<string, HashSet<string>> ReadBaseline()
     {
         string path = Path.Combine(AppContext.BaseDirectory, BaselineFile);
@@ -57,7 +57,7 @@ public class PublicSurfaceTests
             current.Add(line);
         }
 
-        foreach (string section in new[] { "tier1", "go-tier2", "builtin" })
+        foreach (string section in new[] { "tier1", "go-tier2", "builtin", "tier1-members" })
         {
             if (!sections.ContainsKey(section))
                 throw new InvalidDataException($"{BaselineFile} has no [{section}] section");
@@ -89,6 +89,139 @@ public class PublicSurfaceTests
             .Where(member => member is not Type && member is not MethodInfo { IsSpecialName: true })
             .Select(member => member.Name)
             .ToHashSet(StringComparer.Ordinal);
+
+    // ---- [tier1-members]: the signature of every public or protected member of a tier-1 type ----------------------
+    //
+    // One line per member, "<type> :: <kind> <signature>": the member's name, its generic arity, every parameter's type
+    // with ref, out, in and params, an optional parameter's default, the return type, and static or instance. Parameter
+    // NAMES and generic constraints are not in it. A member that carries [EditorBrowsable(Never)] is tier 2 and is left
+    // out. A removed or changed member reads as one line gone and one line new; an added member reads as one line new.
+
+    private static string TypeName(Type type)
+    {
+        if (type.IsGenericParameter)
+            return type.Name;
+        if (type.IsByRef)
+            return TypeName(type.GetElementType()!) + "&";
+        if (type.IsPointer)
+            return TypeName(type.GetElementType()!) + "*";
+        if (type.IsArray)
+            return TypeName(type.GetElementType()!) + "[" + new string(',', type.GetArrayRank() - 1) + "]";
+
+        Type[] arguments = type.IsGenericType ? type.GetGenericArguments() : Type.EmptyTypes;
+        return TypeName(type, arguments, arguments.Length);
+    }
+
+    // A generic nested type's arguments include its declaring type's: the first ones belong to the outermost type.
+    private static string TypeName(Type type, Type[] arguments, int count)
+    {
+        string simple = type.Name;
+        int tick = simple.IndexOf('`');
+        int own = 0;
+
+        if (tick >= 0)
+        {
+            own = int.Parse(simple[(tick + 1)..]);
+            simple = simple[..tick];
+        }
+
+        int outer = count - own;
+        string prefix = type.IsNested ? TypeName(type.DeclaringType!, arguments, outer) + "." :
+            string.IsNullOrEmpty(type.Namespace) ? "" : type.Namespace + ".";
+        string list = own > 0 ? "<" + string.Join(", ", arguments.Skip(outer).Take(own).Select(TypeName)) + ">" : "";
+
+        return prefix + simple + list;
+    }
+
+    private static string Parameter(ParameterInfo parameter)
+    {
+        string modifier = "";
+        Type type = parameter.ParameterType;
+
+        if (type.IsByRef)
+        {
+            modifier = parameter.IsOut ? "out " : parameter.IsIn ? "in " : "ref ";
+            type = type.GetElementType()!;
+        }
+        else if (parameter.GetCustomAttributesData().Any(attribute => attribute.AttributeType.Name is "ParamArrayAttribute" or "ParamCollectionAttribute"))
+        {
+            modifier = "params ";
+        }
+
+        string optional = !parameter.IsOptional ? "" :
+            " = " + (parameter.HasDefaultValue ? (parameter.DefaultValue is null ? "null" : Convert.ToString(parameter.DefaultValue, System.Globalization.CultureInfo.InvariantCulture)) : "default");
+
+        return modifier + TypeName(type) + optional;
+    }
+
+    private static string Parameters(ParameterInfo[] parameters) => "(" + string.Join(", ", parameters.Select(Parameter)) + ")";
+
+    private static bool IsVisible(MethodBase? method) => method is { IsPublic: true } or { IsFamily: true } or { IsFamilyOrAssembly: true };
+
+    private static bool IsVisible(FieldInfo field) => field.IsPublic || field.IsFamily || field.IsFamilyOrAssembly;
+
+    internal static SortedSet<string> MemberSignatures(IEnumerable<Type> types)
+    {
+        SortedSet<string> lines = new(StringComparer.Ordinal);
+        const BindingFlags all = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
+
+        foreach (Type type in types)
+        {
+            string owner = TypeName(type) + " :: ";
+            HashSet<MethodInfo> accessors = [];
+
+            foreach (PropertyInfo property in type.GetProperties(all))
+            {
+                MethodInfo?[] methods = [property.GetMethod, property.SetMethod];
+                accessors.UnionWith(methods.OfType<MethodInfo>());
+
+                if (!methods.Any(IsVisible) || IsHidden(property))
+                    continue;
+
+                MethodInfo any = methods.First(IsVisible)!;
+                string index = property.GetIndexParameters() is { Length: > 0 } parameters ? "[" + string.Join(", ", parameters.Select(Parameter)) + "]" : "";
+                string get = IsVisible(property.GetMethod) ? " get;" : "";
+                string set = IsVisible(property.SetMethod) ? " set;" : "";
+                lines.Add($"{owner}property {(any.IsStatic ? "static " : "")}{TypeName(property.PropertyType)} {property.Name}{index} {{{get}{set} }}");
+            }
+
+            foreach (EventInfo @event in type.GetEvents(all))
+            {
+                MethodInfo?[] methods = [@event.AddMethod, @event.RemoveMethod, @event.RaiseMethod];
+                accessors.UnionWith(methods.OfType<MethodInfo>());
+
+                if (methods.Any(IsVisible) && !IsHidden(@event))
+                    lines.Add($"{owner}event {TypeName(@event.EventHandlerType!)} {@event.Name}");
+            }
+
+            foreach (FieldInfo field in type.GetFields(all))
+            {
+                if (!IsVisible(field) || IsHidden(field))
+                    continue;
+
+                string kind = field.IsLiteral ? "const " : (field.IsStatic ? "static " : "") + (field.IsInitOnly ? "readonly " : "");
+                lines.Add($"{owner}field {kind}{TypeName(field.FieldType)} {field.Name}");
+            }
+
+            foreach (ConstructorInfo constructor in type.GetConstructors(all))
+            {
+                if (IsVisible(constructor) && !constructor.IsStatic && !IsHidden(constructor))
+                    lines.Add($"{owner}ctor {Parameters(constructor.GetParameters())}");
+            }
+
+            foreach (MethodInfo method in type.GetMethods(all))
+            {
+                if (!IsVisible(method) || accessors.Contains(method) || IsHidden(method))
+                    continue;
+
+                string generic = method.IsGenericMethodDefinition ? "<" + string.Join(", ", method.GetGenericArguments().Select(argument => argument.Name)) + ">" : "";
+                string returns = method.ReturnType.IsByRef ? "ref " + TypeName(method.ReturnType.GetElementType()!) : TypeName(method.ReturnType);
+                lines.Add($"{owner}method {(method.IsStatic ? "static " : "")}{returns} {method.Name}{generic}{Parameters(method.GetParameters())}");
+            }
+        }
+
+        return lines;
+    }
 
     private static List<string> Violations(Dictionary<string, HashSet<string>> baseline)
     {
@@ -127,6 +260,16 @@ public class PublicSurfaceTests
         foreach (string member in builtinNames.Where(member => !members.Contains(member)).OrderBy(member => member, StringComparer.Ordinal))
             violations.Add($"go.builtin.{member}: listed in [builtin] but builtin has no such public member");
 
+        // The tier-1 types' members, signature for signature.
+        HashSet<string> baselineMembers = baseline["tier1-members"];
+        SortedSet<string> signatures = MemberSignatures(exported.Where(type => tier1.Contains(type.FullName!)).OrderBy(type => type.FullName, StringComparer.Ordinal));
+
+        foreach (string line in baselineMembers.Where(line => !signatures.Contains(line)).OrderBy(line => line, StringComparer.Ordinal))
+            violations.Add($"[tier1-members] {line}: removed or changed; a tier-1 member changes only by the deprecation path (docs/PublicSurface.md)");
+
+        foreach (string line in signatures.Where(line => !baselineMembers.Contains(line)))
+            violations.Add($"[tier1-members] {line}: a new tier-1 member; add the line once it is meant to be a promise, or hide it");
+
         return violations;
     }
 
@@ -134,6 +277,18 @@ public class PublicSurfaceTests
     public void GolibsPublicSurfaceMatchesItsBaseline()
     {
         Dictionary<string, HashSet<string>> baseline = ReadBaseline();
+
+        foreach ((string section, HashSet<string> lines) in baseline)
+            Console.WriteLine($"{BaselineFile} [{section}]: {lines.Count}");
+
+        // The write mode: GO2CS_PUBLIC_SURFACE_MEMBERS=<path> writes golib's [tier1-members] lines there, from the same code.
+        if (Environment.GetEnvironmentVariable("GO2CS_PUBLIC_SURFACE_MEMBERS") is { Length: > 0 } membersPath)
+        {
+            HashSet<string> tier1Names = baseline["tier1"];
+            File.WriteAllLines(membersPath, MemberSignatures(typeof(builtin).Assembly.GetExportedTypes()
+                .Where(type => tier1Names.Contains(type.FullName!)).OrderBy(type => type.FullName, StringComparer.Ordinal)));
+        }
+
         List<string> violations = Violations(baseline);
 
         Assert.AreEqual(0, violations.Count,
@@ -155,9 +310,14 @@ public class PublicSurfaceTests
         Dictionary<string, HashSet<string>> baseline = ReadBaseline();
 
         Assert.IsTrue(baseline["tier1"].Remove("go.NilType"));
+        // A type leaves tier 1 with its member lines.
+        Assert.IsTrue(baseline["tier1-members"].RemoveWhere(line => line.StartsWith("go.NilType :: ", StringComparison.Ordinal)) > 0);
         Assert.IsTrue(baseline["go-tier2"].Remove("go.GoFrame"));
         Assert.IsTrue(baseline["builtin"].Remove("len"));
         baseline["tier1"].Add("go.ᴛNoSuchType");
+        string member = baseline["tier1-members"].Where(line => line.StartsWith("go.slice<T> :: ", StringComparison.Ordinal)).Min(StringComparer.Ordinal)!;
+        Assert.IsTrue(baseline["tier1-members"].Remove(member));
+        baseline["tier1-members"].Add("go.slice<T> :: method ᴛNoSuchMember()");
 
         CollectionAssert.AreEquivalent(new[]
         {
@@ -165,7 +325,9 @@ public class PublicSurfaceTests
             "go.NilType: a new non-Go name in namespace go; new golib names go in namespace go.golib",
             "go.GoFrame: a new non-Go name in namespace go; new golib names go in namespace go.golib",
             "go.ᴛNoSuchType: listed in PublicSurface.golib.txt but golib has no such public type",
-            "go.builtin.len: a new public member name of builtin; add it to [builtin] once it is meant to be in scope for every `using static go.builtin`"
+            "go.builtin.len: a new public member name of builtin; add it to [builtin] once it is meant to be in scope for every `using static go.builtin`",
+            "[tier1-members] go.slice<T> :: method ᴛNoSuchMember(): removed or changed; a tier-1 member changes only by the deprecation path (docs/PublicSurface.md)",
+            $"[tier1-members] {member}: a new tier-1 member; add the line once it is meant to be a promise, or hide it"
         }, Violations(baseline));
     }
 }
