@@ -24,9 +24,12 @@ public sealed partial class TwinGenerator
         private readonly SemanticModel m_model;
         private readonly HashSet<string> m_assigned = [];
         private List<List<string>> m_scopes = [];
-        private int m_awaits, m_passive;
+        private int m_awaits, m_passive, m_temps;
+        private StatementSyntax? m_current;
+        private List<StatementSyntax> m_spills = [];
+        private readonly HashSet<SyntaxNode> m_spilled = [];
 
-        public int Awaits, GoTwinned, Unrederivable, Literals, IfaceAwaits;
+        public int Awaits, GoTwinned, Unrederivable, Literals, IfaceAwaits, Spills, RefBlocked;
 
         public Rewriter(Run run, SemanticModel model, MethodDeclarationSyntax method)
         {
@@ -75,6 +78,17 @@ public sealed partial class TwinGenerator
             if (!m_run.ShouldAwait(site))
                 return base.VisitInvocationExpression(node);
 
+            // A ref struct value evaluated before the await (a u8 literal passed as a format, say) cannot live
+            // across it. Where everything evaluated earlier is inert, the awaited call moves ahead of its
+            // statement; anywhere else the call stays a blocking one, which hands its P off as a thread park does.
+            bool spill = RefLikeBefore(node, out bool movable);
+
+            if (spill && !movable)
+            {
+                RefBlocked++;
+                return base.VisitInvocationExpression(node);
+            }
+
             InvocationExpressionSyntax visited = (InvocationExpressionSyntax)base.VisitInvocationExpression(node)!;
 
             // An interface call reaches its twin through the hidden interface's call helper, or by name where the
@@ -88,6 +102,19 @@ public sealed partial class TwinGenerator
             if (site.Interface)
                 IfaceAwaits++;
 
+            if (spill)
+            {
+                string temp = "ᴛtwin" + ++m_temps;
+
+                m_spilled.Add(node);
+                m_spills.Add(ParseStatement("var " + temp + " = " + awaited.ToFullString() + ";"));
+                m_awaits++;
+                Awaits++;
+                Spills++;
+
+                return IdentifierName(temp).WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
+            }
+
             if (node.Parent is not (ExpressionStatementSyntax or ArrowExpressionClauseSyntax or LambdaExpressionSyntax))
                 awaited = ParenthesizedExpression(awaited);
 
@@ -95,6 +122,92 @@ public sealed partial class TwinGenerator
             Awaits++;
 
             return awaited.WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
+        }
+
+        // Whether a ref struct value is evaluated before this call inside its statement, and whether the call can
+        // move ahead of that statement: it can when the enclosing statement list is visiting the statement, the
+        // statement reaches the call unconditionally, and nothing is evaluated before the call but constants,
+        // static method names and calls that already moved.
+        private bool RefLikeBefore(InvocationExpressionSyntax node, out bool movable)
+        {
+            bool refLike = false;
+            bool inert = true;
+            SyntaxNode child = node;
+
+            void Earlier(ExpressionSyntax expression)
+            {
+                TypeInfo info = m_model.GetTypeInfo(expression);
+                refLike |= info.Type is { IsRefLikeType: true } || info.ConvertedType is { IsRefLikeType: true };
+
+                ExpressionSyntax bare = expression;
+
+                while (bare is ParenthesizedExpressionSyntax parenthesized)
+                    bare = parenthesized.Expression;
+
+                if (!m_spilled.Contains(bare) && !bare.IsKind(SyntaxKind.Utf8StringLiteralExpression) && !m_model.GetConstantValue(bare).HasValue)
+                    inert = false;
+            }
+
+            for (SyntaxNode? parent = node.Parent; parent is not null; child = parent, parent = parent.Parent)
+            {
+                if (parent is StatementSyntax statement)
+                {
+                    inert &= ReferenceEquals(statement, m_current) &&
+                             statement is ExpressionStatementSyntax or LocalDeclarationStatementSyntax or ReturnStatementSyntax;
+                    break;
+                }
+
+                if (parent is ArrowExpressionClauseSyntax or MemberDeclarationSyntax or AnonymousFunctionExpressionSyntax)
+                {
+                    inert = false;
+                    break;
+                }
+
+                switch (parent)
+                {
+                    case ArgumentSyntax or ParenthesizedExpressionSyntax or CastExpressionSyntax or EqualsValueClauseSyntax or VariableDeclaratorSyntax or MemberAccessExpressionSyntax:
+                        break;
+                    case BaseObjectCreationExpressionSyntax when child is ArgumentListSyntax:
+                        break;
+                    case VariableDeclarationSyntax declaration:
+                        inert &= declaration.Variables.Count == 1;
+                        break;
+                    case BaseArgumentListSyntax list:
+                        foreach (ArgumentSyntax argument in list.Arguments)
+                        {
+                            if (argument == child)
+                                break;
+
+                            Earlier(argument.Expression);
+                        }
+
+                        break;
+                    case InvocationExpressionSyntax invocation when child is ArgumentListSyntax:
+                        if (m_model.GetSymbolInfo(invocation).Symbol is not IMethodSymbol { IsStatic: true, MethodKind: MethodKind.Ordinary or MethodKind.LocalFunction })
+                            Earlier(invocation.Expression is MemberAccessExpressionSyntax access ? access.Expression : invocation.Expression);
+
+                        break;
+                    case AssignmentExpressionSyntax assignment when child == assignment.Right && assignment.IsKind(SyntaxKind.SimpleAssignmentExpression):
+                        inert &= m_model.GetSymbolInfo(assignment.Left).Symbol is ILocalSymbol { RefKind: RefKind.None } or IParameterSymbol { RefKind: RefKind.None };
+                        break;
+                    default:
+                        foreach (SyntaxNode sibling in parent.ChildNodes())
+                        {
+                            if (sibling == child)
+                                break;
+
+                            if (sibling is ExpressionSyntax expression)
+                                Earlier(expression);
+                        }
+
+                        inert = false;
+                        break;
+                }
+            }
+
+            movable = inert;
+
+            return refLike;
         }
 
         private static IdentifierNameSyntax Launcher(InvocationExpressionSyntax node) =>
@@ -271,7 +384,32 @@ public sealed partial class TwinGenerator
             foreach (StatementSyntax statement in statements)
             {
                 int before = m_awaits;
+                StatementSyntax? outer = m_current;
+                List<StatementSyntax> outerSpills = m_spills;
+
+                m_current = statement;
+                m_spills = [];
+
                 StatementSyntax visited = (StatementSyntax)Visit(statement)!;
+                List<StatementSyntax> spills = m_spills;
+
+                m_current = outer;
+                m_spills = outerSpills;
+
+                // Rule S: a call that moved ahead of its statement stands before it on the statement's own line,
+                // and the live ref locals are derived again between the two.
+                if (spills.Count > 0)
+                {
+                    spills[0] = spills[0].WithLeadingTrivia(visited.GetLeadingTrivia());
+
+                    for (int i = 1; i < spills.Count; i++)
+                        spills[i] = spills[i].WithLeadingTrivia(Space);
+
+                    result.AddRange(spills);
+                    result.AddRange(Live(TriviaList(Space)));
+                    visited = visited.WithLeadingTrivia(Space);
+                }
+
                 Register(statement);
 
                 List<StatementSyntax> live = m_awaits != before && !IsJump(statement) ? Live(TriviaList(Space)) : [];

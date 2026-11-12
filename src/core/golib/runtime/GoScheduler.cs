@@ -116,6 +116,14 @@ public static class GoScheduler
     private static long s_runNextSteps;
     private static long s_runNextSteals;
 
+    // GO2CS_MN_RETAKE=0 turns the native-call retake off (a measurement arm). With it on, the monitor does
+    // Go's sysmon retake: a goroutine it finds inside a native call (the native-call seam's depth is odd) on
+    // two ticks in a row, while work waits, has its P taken back, outside the injection budget. The seam
+    // itself is not changed: the carrier settles the account when the step ends or parks.
+    private static readonly bool s_retake = Environment.GetEnvironmentVariable("GO2CS_MN_RETAKE") != "0";
+    private static long s_retakes;
+    private static int s_pWaiters;
+
     private static int ReadMaxInject()
     {
         string? text = Environment.GetEnvironmentVariable("GO2CS_MN_MAXINJECT");
@@ -223,7 +231,8 @@ public static class GoScheduler
                $" run-next-steps={Interlocked.Read(ref s_runNextSteps)} run-next-steals={Interlocked.Read(ref s_runNextSteals)}" +
                $" steps-over-10ms={Interlocked.Read(ref s_longSteps)}" +
                $" max-step-ms={Interlocked.Read(ref s_maxStepTicks) * 1000 / Stopwatch.Frequency}" +
-               $" carrier-start-failures={Interlocked.Read(ref s_carrierStartFailures)}" + Goroutine.MountReading();
+               $" carrier-start-failures={Interlocked.Read(ref s_carrierStartFailures)}" +
+               $" retakes={Interlocked.Read(ref s_retakes)}" + Goroutine.MountReading();
     }
 
     private static void SampleThreads()
@@ -279,8 +288,12 @@ public static class GoScheduler
         if (Interlocked.Exchange(ref carrier.Next, null) is { } next)
             Enqueue(next, next.TakeReadyStep());
 
-        Interlocked.Increment(ref s_blocked);
-        ReleaseP();
+        // A step the monitor already retook the P from is counted blocked and holds no P.
+        if (Interlocked.Exchange(ref carrier.Retaken, 0) == 0)
+        {
+            Interlocked.Increment(ref s_blocked);
+            ReleaseP();
+        }
 
         if (!s_runq.IsEmpty)
             EnsureCarrier();
@@ -306,7 +319,9 @@ public static class GoScheduler
     /// <summary>The blocked goroutine's thread is running again: take a P back.</summary>
     internal static void ExitBlocked()
     {
+        Interlocked.Increment(ref s_pWaiters);
         s_p.Wait();
+        Interlocked.Decrement(ref s_pWaiters);
         Interlocked.Decrement(ref s_blocked);
 
         if (t_carrier is { } carrier)
@@ -406,7 +421,37 @@ public static class GoScheduler
                 }
             }
 
-            if (s_preemptTicks == 0 || s_runq.IsEmpty || Volatile.Read(ref s_idle) > 0)
+            bool queued = !s_runq.IsEmpty && Volatile.Read(ref s_idle) == 0;
+
+            // A carrier holding a dequeued step waits for a P with the queue empty: that is work waiting too.
+            if (s_retake && (queued || Volatile.Read(ref s_pWaiters) > 0))
+            {
+                int retake = 0;
+
+                lock (s_carriersLock)
+                {
+                    foreach (Carrier carrier in s_carriers)
+                    {
+                        bool native = Volatile.Read(ref carrier.RunningSince) != 0 &&
+                                      carrier.Mounted is { } mounted && (Volatile.Read(ref mounted.m_nativeDepth) & 1) != 0;
+
+                        if (!native)
+                            carrier.NativeTicks = 0;
+                        else if (++carrier.NativeTicks >= 2 && Interlocked.CompareExchange(ref carrier.Retaken, 1, 0) == 0)
+                            retake++;
+                    }
+                }
+
+                for (int i = 0; i < retake; i++)
+                {
+                    Interlocked.Increment(ref s_retakes);
+                    Interlocked.Increment(ref s_blocked);
+                    ReleaseP();
+                    EnsureCarrier();
+                }
+            }
+
+            if (s_preemptTicks == 0 || !queued)
                 continue;
 
             long pauses = GC.GetTotalPauseDuration().Ticks;
@@ -418,7 +463,7 @@ public static class GoScheduler
                 {
                     long since = Volatile.Read(ref carrier.RunningSince);
 
-                    if (since == 0 || carrier.Injected)
+                    if (since == 0 || carrier.Injected || Volatile.Read(ref carrier.Retaken) != 0)
                         continue;
 
                     long paused = (pauses - carrier.PauseAtStart) * Stopwatch.Frequency / TimeSpan.TicksPerSecond;
@@ -459,6 +504,11 @@ public static class GoScheduler
         internal long RunningSince;
         internal long PauseAtStart;
         internal volatile bool Injected;
+
+        // 1 while the monitor holds this step's P retaken (the mounted goroutine was inside a native call),
+        // and how many ticks in a row the monitor has found it there.
+        internal int Retaken;
+        internal int NativeTicks;
 
         // The run-next slot (the goroutine carries its step), whether this carrier is inside a step, and
         // how many slot runs in a row it has made.
@@ -506,7 +556,9 @@ public static class GoScheduler
                         continue;
                 }
 
+                Interlocked.Increment(ref s_pWaiters);
                 s_p.Wait();
+                Interlocked.Decrement(ref s_pWaiters);
                 InStep = true;
                 Injected = false;
                 PauseAtStart = GC.GetTotalPauseDuration().Ticks;
@@ -536,7 +588,12 @@ public static class GoScheduler
 
                     InStep = false;
                     Volatile.Write(ref RunningSince, 0);
-                    ReleaseP();
+
+                    // A step whose P the monitor retook has none to release: it stops counting as blocked.
+                    if (Interlocked.Exchange(ref Retaken, 0) == 1)
+                        Interlocked.Decrement(ref s_blocked);
+                    else
+                        ReleaseP();
                 }
             }
         }

@@ -1333,6 +1333,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMixedUntypedConstArithmetic() => CheckTarget("MixedUntypedConstArithmetic");
 
     [TestMethod]
+    public void CheckMnBlockedIO() => CheckTarget("MnBlockedIO");
+
+    [TestMethod]
     public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]

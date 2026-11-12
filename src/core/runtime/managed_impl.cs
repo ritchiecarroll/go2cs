@@ -1982,7 +1982,7 @@ partial class runtime_package
     // funcNameForPrint decorates: a generic function prints as fn[...], while pprof reads the raw symbol,
     // which in Go carries the GC-shape arguments and here, with no shapes to recover, is the undecorated name.
     private static string goFrameName(System.Reflection.MethodBase method, StackFrame? frame, out string symbol) =>
-        goFrameName(method, frame?.GetILOffset() ?? StackFrame.OFFSET_UNKNOWN, out symbol);
+        goTwinFrameName(method, frame?.GetILOffset() ?? StackFrame.OFFSET_UNKNOWN, out symbol);
 
     // The same, for a frame known only by its IL offset (a captured pc resolving lazily; see
     // CallerFrameRecord). OFFSET_UNKNOWN names a method with no instruction at all.
@@ -6748,4 +6748,27 @@ partial class runtime_package
     // GoEfaceHashProbe is the GolibTests seam for efaceHash (GolibTests is outside the
     // InternalsVisibleTo grant): the hash Go gives an interface value, as export_test.go's EfaceHash does.
     public static uintptr GoEfaceHashProbe(any i, uintptr seed) => efaceHash(i, seed);
+
+    // M:N spike: a hidden async twin runs as its state machine's MoveNext, on a compiler-generated nested
+    // type named `<childꞏtwin>d__N`. A frame there is named for the function the twin was generated from. The
+    // state machine's IL offsets say nothing about that function, so the offset is dropped.
+    private static string goTwinFrameName(System.Reflection.MethodBase method, int ilOffset, out string symbol)
+    {
+        if (method.Name == "MoveNext" && method.DeclaringType is { DeclaringType: { } outer, Name: { } machine } &&
+            machine.StartsWith('<') && machine.IndexOf("ꞏtwin>d__", StringComparison.Ordinal) is > 1 and int close)
+        {
+            const System.Reflection.BindingFlags declared = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+
+            string name = machine[1..close];
+
+            foreach (System.Reflection.MethodInfo candidate in outer.GetMethods(declared))
+            {
+                if (candidate.Name == name)
+                    return goFrameName(candidate, StackFrame.OFFSET_UNKNOWN, out symbol);
+            }
+        }
+
+        return goFrameName(method, ilOffset, out symbol);
+    }
 }

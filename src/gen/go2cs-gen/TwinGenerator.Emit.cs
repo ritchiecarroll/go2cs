@@ -21,7 +21,7 @@ public sealed partial class TwinGenerator
 {
     internal sealed partial class Run
     {
-        private int m_awaitSites, m_goTwinned, m_goLiterals, m_unrederivable;
+        private int m_awaitSites, m_goTwinned, m_goLiterals, m_unrederivable, m_spills, m_refBlocked;
 
         // One file of twins per source file: each twin sits in its function's own namespace and class, under a
         // #line directive that puts it on the function's own lines, so a trace or a breakpoint reads the source.
@@ -107,6 +107,8 @@ public sealed partial class TwinGenerator
             m_goTwinned += rewriter.GoTwinned;
             m_goLiterals += rewriter.Literals;
             m_unrederivable += rewriter.Unrederivable;
+            m_spills += rewriter.Spills;
+            m_refBlocked += rewriter.RefBlocked;
 
             SyntaxToken first = method.Modifiers.Count > 0 ? method.Modifiers[0] : method.ReturnType.GetFirstToken();
             LinePosition start = tree.GetLineSpan(first.Span).StartLinePosition;
@@ -169,7 +171,8 @@ public sealed partial class TwinGenerator
             report.Append("// candidates=").Append(m_ordered.Count).Append(" twinned=").Append(twinned.Count)
                 .Append(" go-only=").Append(twinned.Count(candidate => candidate.GoOnly)).Append("\r\n");
             report.Append("// await-sites=").Append(m_awaitSites).Append(" go-twinned=").Append(m_goTwinned).Append(" go-literals=").Append(m_goLiterals)
-                .Append(" ref-unrederivable=").Append(m_unrederivable).Append("\r\n");
+                .Append(" ref-unrederivable=").Append(m_unrederivable).Append(" ref-spills=").Append(m_spills)
+                .Append(" ref-blocked=").Append(m_refBlocked).Append("\r\n");
             report.Append("// in-twins: go-group-left=").Append(sites.Count(site => site.Go == GoKind.Group && !GoTwinnable(site)))
                 .Append(" go-other=").Append(sites.Count(site => site.Go == GoKind.Other))
                 .Append(" go-passive=").Append(sites.Count(site => site.Go != GoKind.None && !site.Active))
