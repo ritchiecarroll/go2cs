@@ -386,3 +386,29 @@ The posted predictions stay and are scored as worded. Added:
   layout of the same value, on linux/amd64.
 
 — H (2026-11-12)
+
+## 14. Amendment 2026-11-12: where the wrapper-is-synchronous invariant lives on the other side
+
+Section 13.5 left one item NOT READ: where the M:N generator keeps what it never twins. COORD had the M:N lane
+answer it the same day. This is the PROTOTYPE's site, not master's; the train that lands it will re-cite.
+
+- **The site:** `src/gen/go2cs-gen/TwinGenerator.cs` on `claude/g-mn-proto-a1` (commit `8d1124e491`). A method is
+  never twinned when it is native: it holds a `fixed` in its body, or it is `extern`, or it carries `DllImport` or
+  `LibraryImport`. That refusal is the first check, and a bodiless extern or `LibraryImport` partial never becomes a
+  candidate at all.
+- **The mark is structural,** so a bindings file needs no new attribute. A cgo wrapper that pins with `fixed`
+  (13.5) is refused by its own body.
+- **What that gives 13.5:** the generator refuses the WHOLE method when it holds a `fixed`, even where a suspension
+  would sit outside the `fixed` block. That is exactly the invariant: a wrapper is synchronous end to end.
+- **The M:N lane's stated limits,** carried here as that lane states them:
+  - a suspending call inside an `unsafe` block with no `fixed`, in a method that is not itself marked `unsafe`, is
+    still twinned and fails to compile. COORD has asked for that to become a refusal. A cgo wrapper is not that
+    shape: its class is `unsafe` and its pin is a `fixed`;
+  - `UnmanagedCallersOnly` is not in the rule. That is a C-to-Go entry point, which Phase 3 does not write (13.8)
+    and Phase 5 will have to settle.
+- **A wrapper with no pinned argument holds no `fixed`.** It is still never twinned, by the generator's other
+  marks: it calls a `LibraryImport` partial, and that partial is native. Whether a wrapper that only CALLS a native
+  method is itself held synchronous by the prototype is NOT READ here. Phase 3's first increment that touches
+  wrappers checks it against the prototype's red (`src/tools/mnspike2/MnNativeWrap`) before relying on it.
+
+— H (2026-11-12)
