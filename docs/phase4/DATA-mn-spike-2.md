@@ -485,3 +485,360 @@ threads, 7.0 s, 610 MB; switch off at 1,000: 1,011 threads; exit 0 and Go's hash
 This is the fourth guard that read the spike's own lines (findings 12 and 14): a hand-written twin in a
 hand-owned file is a receiver like any other. Whether the mark's generated pointer-receiver overload is the
 box-taking form that finding 7 asks for was not read; B2 reads it.
+
+## 4. B2: a twin generator in go2cs-gen (2026-11-11)
+
+B2 asks whether a generator can write the twins B1 wrote by hand, from the converted code as it stands, and
+what the owner's ruling on interfaces (OQ5: a default-bodied member or a separate hidden interface, never an
+abstract member on the Go-named interface) costs in each form. Branch `claude/g-mn-spike2-b2`, on
+`3e21aef0d8`. Windows x64, 12 logical processors, .NET SDK 10.0.400 (runtime 10.0.11, ILCompiler 10.0.11),
+go1.26.10. Spike code: it stays on the branch.
+
+### 4.1 What was built
+
+- `go2cs-gen/TwinGenerator*.cs` (five files, 1,517 lines), off unless the project's `GoTwins` property is true.
+  It runs every sibling generator of its own assembly in a nested driver, so it binds the members those
+  generators add (field access, receivers, interface implementations); the siblings therefore run twice in a
+  twinned project.
+- Candidates are the static methods with bodies. A candidate is refused before any analysis when it is an
+  instance method, takes its receiver or a parameter by reference, returns by reference, mentions a ref-like
+  type, is unsafe, is an iterator, is already async-shaped, already has a twin, or is named by the refuse file
+  (4.6). The rest go through a fixpoint: a function parks when it calls a twin (golib's, another assembly's by
+  name, or one of its own) or holds a `go` site whose target parks.
+- A twin is the original body's text between `#line` directives (errors, breakpoints and stack traces name the
+  visible file and line), `async ValueTask` or `ValueTask<T>`, named `<name>ꞏtwin`, in `<file>.twins.g.cs`.
+  Each parking call becomes `await <callee>ꞏtwin(…)`; a `go` site whose target has a twin becomes a twin start;
+  a `go` literal becomes a pair of lambdas over the same captures; a `ref` local derived from a box is derived
+  again after every awaiting statement.
+- The program entry: a generated `GoTwinEntry` class whose `Main` runs `Mainꞏtwin` on the scheduler when
+  `GO2CS_MN=1` and `Main` otherwise.
+- Interface twins in two shapes (4.4), with forwarders on the implementers the converter records.
+- A report file per project (`go2cs.twins.report.g.cs`): candidates, twins, await sites, refusals by reason,
+  and the candidates a refusal stopped from parking ("blocked").
+- golib: `builtin.Twins.cs` gains the name-uniform aliases the generator calls, the twin starters and the entry
+  runner (77 lines); `channel.cs` gains the send twin's operator form (7 lines); `GoScheduler.Monitor` is
+  corrected (4.5).
+- `Directory.Build.targets` gains the per-project switches of 4.2 (35 lines). The pointer-adapter template
+  gains one keyword, `partial`, emitted only when twins are on (4.7).
+- `src/tests/Behavioral/MnIfaceTwin`: a converted Go program whose interface `Parker` has six implementers:
+  `gate` (a pointer receiver emitted in box form; a mutex and a sleep), `napper` (a value receiver; a sleep),
+  `fixed` and `late` (no park; `late` reaches the interface through a dynamic assertion), `relay` (a pointer
+  receiver emitted as a `this ref` extension; a sleep), and `HandParker`, a C# class written by hand in
+  `hand.cs` the way the consumer document teaches. `hand.cs` also holds a class that has the method and does
+  not name the interface. The fixture is not registered in the solution or in the behavioral runner; its
+  `main.cs.target` is its `main.cs`, which a re-conversion of `main.go` reproduces byte for byte.
+
+No visible converted file changes in any build of B2: `git status` over the storm's and the fixture's
+non-generated files is empty with twins on.
+
+### 4.2 Build properties
+
+| property | meaning |
+|---|---|
+| `GoTwins` | the project gets twins (set in a project file) |
+| `GoTwinsFor=<names>` | the named projects get twins; the command-line form (a `GoTwins` on the command line is global and reaches every referenced project) |
+| `GoTwinsGo=false` | `go` sites are left as thread starts (an arm) |
+| `GoTwinsIface=hidden\|default`, `GoTwinsForIface` | the interface twin shape; the second is the command-line form |
+| `GoTwinsIfaceAll`, `GoTwinsForIfaceAll` | twin every member of every Go interface of the project, not only those with a parking implementer in it |
+| `GoTwinsRefuse=<file>` | rows `path\|line\|CSxxxx`; a candidate whose span holds the line is refused (4.6) |
+| `GoAotFor=<names>` | publish the named projects with Native AOT; a `PublishAot` on the command line reaches the netstandard2.0 generator project and fails it |
+
+### 4.3 The converted MnMixedStorm under generated twins
+
+The storm of 2.3, converted and untouched, built with `GoTwinsFor=MnMixedStorm`: the generator twins `worker`
+(5 await sites) and `Main` (4), turns both `go` sites into twin starts, and refuses nothing. Same sampler and
+hold as 3.3. Every row exits 0 and its output hash equals the Go build's for that n.
+
+| n | build | wall | peak OS threads | peak private |
+|---|---|---|---|---|
+| 1,000 | thread path (switch off) | 3.8 s | 1,011 | 89 MB |
+| 1,000 | hand twins (3.3) | 3.8 s | 24 | 29 MB |
+| 1,000 | generated twins | 3.8 s | 25 | 30 MB |
+| 10,000 | hand twins (3.3) | 4.0 s | 28 | 75 MB |
+| 10,000 | generated twins | 4.0 s | 28 | 76 MB |
+| 100,000 | hand twins (3.3) | 6.9 s | 43 | 614 MB |
+| 100,000 | generated twins | 6.9 s | 36 | 620 MB |
+
+The generated twins read as the hand twins did. A second read after the interface work and the correction of
+4.5 gave 25, 33 and 36 threads, 6.8 s and 617 MB at 100,000, with the same output hashes and an identical
+generated tree.
+
+The same project published as a Native AOT image under generated twins (`GoAotFor=MnMixedStorm`; publish
+1,290 s, 0 errors, 194,819,072 bytes), one run per arm, same sampler:
+
+| n | path | wall | peak OS threads | peak private | output hash |
+|---|---|---|---|---|---|
+| 1,000 | thread path (switch off) | 3.5 s | 1,009 | 120 MB | Go's |
+| 1,000 | generated twins | 3.6 s | 25 | 72 MB | Go's |
+| 10,000 | generated twins | 3.8 s | 26 | 130 MB | Go's |
+| 100,000 | generated twins | 7.9 s | 34 | 632 MB | Go's |
+
+The thread counts and the output carry to the image. Two things differ from the JIT build and neither was
+explained: the image holds more private memory at the small arms (72 MB against 30 at 1,000), and the one run
+at 100,000 took 7.9 s against 6.9 and 6.8. The image starts faster: a no-hold run of 1,000 exits in 0.4 s
+against 4.1 to 4.6 s.
+
+### 4.4 Interface twins: the two shapes OQ5 allows
+
+A call through a Go interface parks when the implementer behind it parks, so the interface needs a way to reach
+the implementer's twin. Both ruled shapes were built and measured on the same fixture.
+
+- **Hidden.** The Go-named interface gains a nested public interface `Parkerꞏtwin` (hidden from editors) that
+  carries `Parkꞏtwin`, and a static `Parkꞏcall(recv, args)` that tests `recv is Parkerꞏtwin` and otherwise wraps
+  the plain call. Implementers with a twin gain the base-list entry and a forwarder. The Go-named interface's
+  own member list does not change.
+- **Default.** The Go-named partial interface gains `Parkꞏtwin` with a default body that wraps the plain call.
+  Implementers with a twin gain an explicit implementation.
+
+The fixture prints, per implementer, the sum of 100 calls through the interface, one from each of 100
+goroutines, each holding 20 ms, then the reflected method count of `Parker`. With `MN_IFACE_HAND=1` it adds the
+hand-written implementer (which answers 5, so 500) and the C# side's own `typeof(Parker).GetMethods()` count.
+The "1,000 parked" rows run one implementer with 1,000 goroutines holding 3 s.
+
+| reading | twins off | hidden, JIT | hidden, AOT | default, JIT | default, AOT |
+|---|---|---|---|---|---|
+| build errors, hand.cs unchanged | 0 | 0 | 0 | 0 | 0 |
+| output against Go's, switch off and on | equal | equal | equal | one row differs | one row differs |
+| `reflect` method count of `Parker` (Go prints 1) | 1 | 1 | 1 | 2 | 2 |
+| C# `GetMethods()` count | 1 | 1 | 1 | 2 | 2 |
+| hand implementer through the interface | 500 | 500 | 500 | 500 | 500 |
+| 1,000 parked in `gate`, peak OS threads | | 30 | 24 | 28 | 23 |
+| 1,000 parked in `napper` | | 24 | 22 | 24 | 23 |
+| 1,000 parked in `relay` (by-ref receiver, no twin) | | 1,013 | 1,013 | 1,013 | 1,011 |
+| 1,000 parked in the hand implementer | | 1,013 | 1,011 | 1,013 | 1,011 |
+| Native AOT publish, wall | 1,312 s | | 1,298 s | | 1,289 s |
+| Native AOT image, bytes | 195,318,272 | | 195,352,576 | | 195,352,576 |
+| trim warning lines | 767 | | 767 | | 767 |
+
+The AOT `relay` and hand rows were read with `GO2CS_MN_RUNNEXT=0` on images that still carried the defect of
+4.5; the corrected image is read in 4.5.
+
+- **K2 does not fire in either shape.** A hand-written C# class that implements the Go interface compiles
+  unchanged and answers correctly under JIT and under Native AOT, with twins off, hidden or default.
+- **The hidden shape is invisible to both reflections.** Output equals Go's in every arm and the method count
+  stays 1 on the Go side and on the C# side. Its visible cost is one public nested interface per twinned Go
+  interface, and one base-list entry on each implementer that has a twin.
+- **The default shape works and shows.** It builds and runs under JIT and AOT, and the Go-named interface now
+  has two members: `reflect`'s `NumMethod` prints 2 where Go prints 1, and a C# caller's `GetMethods()` reads 2.
+  The Go side can be filtered in golib's method-set code; the C# side cannot.
+- **An implementer without a twin costs a thread per parked call, never a wrong answer.** The by-ref-receiver
+  implementer and the hand-written one both run the plain method on the carrier, which hands its P off: 1,000
+  parked calls hold about 1,000 threads, as today. For a hand-written implementer this is the documented rule a
+  C# author needs; for by-ref receivers it is the generator's largest refusal class (4.6).
+- **Twins cost 34,304 bytes of a 195 MB AOT image** on this fixture and no trim warning. The 22 minutes of ILC
+  are the rooted `go.*` closure under partial trimming, with or without twins.
+- The duck-typed C# class does not satisfy the assertion with twins off either, so the fixture has no reading
+  on late binding.
+
+### 4.5 A scheduler defect in B1, found by the AOT arm
+
+`GoScheduler.Monitor`'s run-next steal walk held the carriers lock and queued each stolen goroutine inside the
+`foreach`. Queuing can add a carrier, the lock is reentrant, and the add appends to the list under its own
+enumerator: `InvalidOperationException: Collection was modified`, exit 2. The pushed B1 tip (`3e21aef0d8`)
+carries it.
+
+- Red: the 1,000-parked `relay` and hand arms died 5 of 5 on both AOT images. The same `relay` arm ran 5 of 5
+  clean under JIT (run-next steals 0, 0, 1, 0, 0), so no B1 arm met it: it is timing, not AOT.
+- Correction: the walk collects the steals under the lock and queues them after it.
+- Green: a hidden-shape image published from the corrected golib (1,306 s, the same 195,352,576 bytes) ran
+  both arms 5 of 5 with run-next on: exit 0, no exception, 1,011 threads, 1,003 hand-offs, and 4 or 5 run-next
+  steals in every run, so the walk that threw is the walk that ran. Output equals Go's at the same size.
+- The throw needs a steal whose queuing starts a carrier while the walk has entries left. The JIT build stole
+  0 or 1 times a run in this arm and the AOT image 4 or 5; why the image steals more was not read.
+
+### 4.6 The standard library: scouting and the refuse loop
+
+The generator was run over the 55 converted standard-library packages the fixture's build reaches, reports
+summed. This is a scout of the generator's reach, not a run: no std twin is called by any measured arm.
+
+| reading | count |
+|---|---|
+| candidates (static methods with bodies) | 5,333 |
+| twins written | 372 |
+| await sites | 446 |
+| refused before analysis | 904 |
+| refused candidates that would otherwise park ("blocked") | 49 |
+
+- Twins by package: `syscall` 199 of 470 candidates, `runtime` 145 of 2,935, `io` 14 of 54,
+  `internal/godebug` 5, `internal/bisect` 3, `sync` 3 of 90, `internal/testlog` 2, `reflect` 1 of 414. The
+  other 47 packages get none.
+- Refusals by reason: by-ref receiver 499, by-ref parameter 155, unsafe 132, instance method 62, ref-like type
+  49, explicit implementation 4, iterator 2, already has a twin 1.
+- Blocked by reason: unsafe 39, by-ref receiver 6, by-ref parameter 3, ref-like 1; `syscall` 43 and `runtime` 6.
+  The by-ref refusals are the largest class and block 9 functions; the unsafe ones block 39, all but one in
+  `syscall`.
+- Parking spreads through two edges that mean little under Go: `syscall` parks through `LazyProc` (a mutex on
+  first use), and `runtime` through `gcStart` and `mallocgc`. A twin census that follows those edges overstates
+  what parks in practice; B5 measures the share on a real program and whether those edges want a cut.
+
+**The refuse loop.** A twin is a copy of the body with awaits in it, and C# rejects some copies that the
+pre-refusals cannot see from the syntax: a `ref` local or a returned reference held across an await. The loop
+builds the project, reads the compiler's errors in twin files (the `#line` directives make each error name the
+visible file and line), writes one `path|line|CSxxxx` row per error into the refuse file, and builds again; the
+generator refuses the candidate whose span holds the line. It ends when a build has no error.
+
+| package | candidates | twins, round 1 | rows | twins at the fixpoint | rounds | build wall |
+|---|---|---|---|---|---|---|
+| `io` | 54 | 14 | 0 | 14 | 1 | 111 s |
+| `sync` | 90 | 3 | 0 | 3 | 1 | 113 s |
+| `syscall` | 470 | 199 | 9 | 195 | 2 | 124 s, 117 s |
+| `runtime` | 2,935 | 145 | 0 | 145 | 1 | 195 s |
+
+- `syscall`'s nine errors are two shapes in four functions: CS9217 six times in `StartProcess` (a `ref` local
+  the generator could not derive again after an await; its report counts one such local), and CS8178 three
+  times, once in each standard-handle initialiser (an assignment through a property that returns a reference,
+  with an awaited right-hand side).
+  Refusing the four costs no other twin: 199 becomes 195.
+- No round ended on an error outside a twin file, and none failed without a compiler error.
+- The four packages hold 361 of the 372 scouted twins. The other 11 built in the scout without an error.
+- Red control: a refuse file seeded with one row inside a twinned `io` function dropped `io` from 14 twins to
+  12 (the function and its one caller) and the report named the candidate and the reason given in the row.
+- The loop is a build-time cost paid once per package and release, not per build: its output is a file of rows.
+  In a product it would run where the converter runs, and the rows would ship beside the converted code.
+
+### 4.7 Guards and red controls
+
+| guard | reading |
+|---|---|
+| generator tests, first run with the entry class | 495 of 496: the static-class census named the generated entry (`TwinGenerator.Emit`, a `static class`). The entry became a sealed class; 496 of 496 |
+| generator tests, adapter template with an unconditional `partial` | 484 of 496: twelve tests that find the adapter by its `sealed class` spelling |
+| generator tests, `partial` only under twins | 496 of 496, no test edited |
+| golib tests, corrected monitor and the new twin members | 0 failed, 2,530 passed, 49 skipped |
+| refuse loop, seeded row (4.6) | red as designed: 14 twins to 12, candidate named |
+| provenance guard | red on a real line move (last row); it named the file, the line and the quoted text |
+| scheduler defect (4.5) | red 5 of 5 on two arms and two images before the correction; green 5 of 5 on both arms after it |
+| twins-off output | the fixture's adapters read `sealed class` again; `runtime`, `sync`, `io` and `syscall` rebuilt with twins off after the loop hold no twin name and no twin directory |
+| twins-on output across the template change | the fixture's generated tree is identical by hash before and after |
+| converter suite and repository guards (`go test ./...`) | first run: the converter suite and every other package ok (1,076 s); the repository guard red on 1 of 934 provenance notes, because the five lines added to ImplementGenerator moved a line the generator reference cites. Re-cited at its new line; the guard re-run with this record in place is green |
+
+Not run: the solution-wide Debug build that a landing generator change owes, and a `-tests` row. Nothing here
+lands; the twins-off path is covered by the generator tests and the rows above.
+
+### 4.8 Predictions and verdicts
+
+Every line was written before its run; the dated blocks are in the lane's prediction file.
+
+| id | prediction | reading | verdict |
+|---|---|---|---|
+| B2-P1 | the converted storm under generated twins reads inside the hand twins' spread, Go's hashes | 25 / 28 / 36 threads, 3.8 / 4.0 / 6.9 s, hashes equal | HIT |
+| B2-P2 | no visible file changes; twins off leaves the generated tree as it was | both hold | HIT |
+| B2-P3 | the generator twins exactly `worker` (5 await sites) and `Main` (4), refuses nothing | as predicted | HIT |
+| B2-P4 | both `go` sites become twin starts; the literal becomes a lambda pair; `Wait` stays a hand-off | as predicted (3 hand-offs) | HIT |
+| B2-P5 | a default-bodied twin on a generated interface part runs under JIT and AOT, hand implementer unchanged | holds | HIT |
+| B2-P6 | storm build wall, twins on at most +20% | +0.6% on medians of three; the project is too small to show a cost | HIT, uninformative |
+| B2-W1 | the same pair on `runtime`: +50% to +110% | 189.5 s against 99.4 s, +91% | HIT |
+| B2-W2 | `runtime` assembly +3% to +8% | +248,320 bytes on 3,851,264, +6.4% | HIT |
+| B2-P7 | the refuse loop ends in at most 3 rounds | 1, 1, 2, 1 | HIT |
+| B2-I1 | hidden shape: 0 errors JIT and AOT, Go's output, hand implementer unchanged | holds | HIT |
+| B2-I2 | default shape: 0 errors JIT and AOT, hand implementer unchanged; K2 fires in neither | holds | HIT |
+| B2-I3 | method count 1 under hidden; under default 2 on the CLR side and (65%) 2 on the Go side | 1 and 1; 2 and 2 | HIT |
+| B2-I4 | box-form receiver through the adapter, value receiver through its part, by-ref receiver refused | as predicted | HIT |
+| B2-I5 | 1,000 parked: twinned implementers at most 60 threads, untwinned 900 or more, Go's output | 22 to 30; 1,011 to 1,013 | HIT |
+| B2-I6 | a `partial` adapter leaves the generator tests green (0 to 2 assertions to respell) | 12 failed; the keyword is now emitted only under twins, 496 of 496, no test edited | MISS |
+| B2-I7 | the storm's readings do not move after the interface work | same hashes, same generated tree | HIT |
+| B2-A1 | twins-off AOT publish of the fixture under 6 minutes | 1,312 s | MISS |
+| B2-A2 | each shape publishes within 1.25x of the twins-off wall | 1,298 s and 1,289 s | HIT |
+| B2-A3 | (first form) the default shape stalls in ILC | it does not; the first run was stopped before a control existed | MISS |
+| B2-R1 | `syscall` reaches a fixpoint in 2 rounds, round 1 records exactly the 9 scouted rows | holds | HIT |
+| B2-R2 | the rows refuse 3 to 5 candidates; 187 to 196 twins remain | 4; 195 | HIT |
+| B2-R3 | `runtime`, `io`, `sync` end in round 1 with 0 rows | holds | HIT |
+| B2-R4 | no round ends stuck or failed without a compiler error | none | HIT |
+| B2-R5 | a seeded row drops `io`'s twins by at least 1 and is named in the report | 14 to 12, named | HIT |
+| B2-G1 | with the corrected monitor the two arms that died run 5 of 5 clean with run-next on | 5 of 5 each, 1,011 threads, 4 or 5 steals a run, Go's output | HIT |
+| B2-S1 | the storm publishes as a Native AOT image under generated twins, 1,250 to 1,400 s | rc 0, 0 errors, 1,290 s | HIT |
+| B2-S2 | the image prints Go's output in every arm; threads about 1,010 off, at most 40 / 45 / 50 on | hashes equal; 1,009; 25 / 26 / 34 | HIT |
+| B2-S3 | at 100,000 the image runs in at most 6.9 s and 400 to 650 MB; no arm ends on an exception | 7.9 s (one run); 632 MB; none | MISS on the wall |
+
+Four misses, and what each one was. S3's wall was a line drawn at the JIT build's reading with one run behind
+it; the image was a second slower at 100,000 and B4 owes the repeated pair. I6 was a change I made to every build's output where the plan said twins
+only; the tests that keep the adapter's spelling caught it. A1 was a guess about ILC with no reading behind it.
+A3 was a verdict drawn from an arm with no control, corrected by running the control.
+
+The two cost lines from B1 that B2 can speak to: IL size is inside its bar on `runtime` (+6.4% against
+"+35% on net/http"); generator time is outside it (+91% against "+50% on net/http"). B4 prices both on
+`net/http`, and the first lever on time is to stop running the sibling generators twice.
+
+### 4.9 Findings
+
+The generator.
+
+1. **The twins can be generated from the converted code as it stands.** No visible file changed, the storm's
+   generated twins read as the hand twins did, and the fixture prints Go's output. The "class defer frame" of
+   the plan was not needed: the twin keeps the original's defer frame and runs it in the same `finally`.
+2. **`#line` carries.** A compiler error in a twin names the visible file and line, which is what makes the
+   refuse loop possible; a breakpoint in the visible file binds both copies. Twin files disable warnings, so a
+   twin's diagnostics never reach a build log unless they are errors.
+3. **A deferred call runs in its plain form.** A deferred unlock is right as it is. A deferred call that parks
+   blocks its carrier, which hands its P off: a thread for the length of the park, never a wrong answer.
+4. **golib still has plain-only blockers.** `WaitGroup.Wait`, `sync.Cond`, the runtime semaphore and `foreach`
+   over a channel have no twin. Each costs a hand-off where it blocks (the storm's one `Wait` reads as 3
+   hand-offs). They are golib work of the same kind as B1's.
+5. **A `go` site in a plain copy starts a thread.** Only twin copies route `go` to the scheduler. A goroutine
+   started from code that has no twin (a refused function, a hand-written C# caller) is a thread, as today.
+6. **Call sites that an interceptor rewrites are not rewritten in the twin copy.** No measured shape depends
+   on one. B3 has to census them before any claim about the std closure.
+7. **Twins bypass the converter's whitespace pass** (they are text copies), and one cosmetic case remains: a
+   re-derivation after a switch section that ends in `break` is unreachable code, silent under the disabled
+   warnings.
+8. **The by-ref classes are the largest refusal and a small loss.** By-ref receivers and parameters are 654 of
+   904 refusals and block 9 functions in this closure; unsafe bodies block 39, nearly all in `syscall`, where
+   the park the census sees is `LazyProc`'s first-use mutex (4.6). The ref-local
+   census reads 13,011 declarations in the corpus with 99.7% in the shapes the generator re-derives; that
+   census has no negative control yet.
+9. **Hand-written twins are seen by the sibling generators.** A twin written by hand in a converted file is
+   picked up by the method-set, receiver and embedding generators as an ordinary method. Generated twins are
+   not, because the siblings never see them. For `Mutex`'s `Lock` twin this answers 3.10's open read: the
+   receiver mark does generate the box-taking overload a twin can call, and the same pass writes the twin's
+   name into the type's generated method-set table, where Go-side reflection could find it (not run). B1's
+   hand twins stay where they are; no new ones should be added, and a landing design generates them all.
+10. **The sibling generators run twice in a twinned project**, once in the compiler and once in the twin
+    generator's nested driver. The storm project is too small to show the cost (4.8, B2-P6); the pair on
+    `runtime` is in 4.8.
+
+Interfaces.
+
+11. **Both OQ5 shapes work under JIT and Native AOT, and a hand-written implementer compiles unchanged under
+    both.** The hidden shape is the one that keeps both reflections and Go's output; the default shape needs a
+    golib filter for `reflect` and still shows a second member to C# reflection.
+12. **The "auto" policy is per assembly.** It twins an interface member when the same project holds a parking
+    implementer, and cannot see an implementer in another assembly. `GoTwinsIfaceAll` twins every member; its
+    cost on a real closure is B5's to measure.
+13. **The converter already records a dynamic assertion** (`x.(Parker)` on `late`) as an implementation, so the
+    forwarders cover it.
+14. **The pointer adapter has to be `partial` under twins, and only under twins.** The first version changed
+    the keyword in every build and twelve generator tests caught it; a change to non-twin output is a K4-class
+    slip and the guard that catches it exists.
+
+Consumer-visible, to fold into B6's list.
+
+15. A twin has its original's accessibility: a public Go function gains a public `<name>ꞏtwin` beside it,
+    hidden from editors, visible to reflection and to a determined caller.
+16. Hidden shape: one public nested interface per twinned Go interface, one base-list entry per twinned
+    implementer. Default shape: one more member on the Go-named interface.
+17. A C# class that implements a Go interface keeps working and costs a thread per parked call through it. A
+    C# author who wants the cheap path would implement the nested twin interface by hand; that is new, optional
+    surface, and no arm here wrote one.
+18. The program entry becomes a generated class when the main package is twinned; `Main` stays and still runs
+    the thread path when the switch is off.
+
+The scheduler and the tooling.
+
+19. **B1's monitor could throw under load** (4.5). Found by an arm B1 did not have; fixed on this branch.
+20. `GoTwins` and `PublishAot` given on the command line are global properties and reach every referenced
+    project; the per-project forms (`GoTwinsFor`, `GoAotFor`) exist for that reason.
+21. A Native AOT publish of a converted program is about 22 minutes of ILC on this box with or without twins,
+    and leaves self-contained host files in the build output that stop a later framework-dependent run of the
+    same project until the output directory is removed.
+
+### 4.10 What B2 did not measure
+
+- No std twin was run. The scout and the loop prove that the generated std twins compile, not that they behave;
+  B3 runs shapes whose parks are in std (`io.Pipe`, `sync` beyond the mutex, `time`).
+- Cross-assembly routing ran only against B1's hand twins in golib, `sync` and `time`: a twin calls
+  `<callee>ꞏtwin` in another assembly when that assembly holds one. No arm built two generator-twinned
+  assemblies and called across them at run time.
+- macOS and Linux. Every reading is Windows x64; the hosted legs are B3.
+- The native seam, cgo and `LockOSThread` under generated twins (B3, read-only against the seam).
+- Generator time and IL size on a large package beyond the one pair in 4.8; B4 prices them on `net/http`.
+- The TypeScript closure (B5).
+- Instance methods (62 refused, none blocked here) and generic functions were not given their own arm.
