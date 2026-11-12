@@ -51,7 +51,7 @@ using syscall = go.syscall_package;
 
 partial class windows_package
 {
-    public static unsafe error /*err*/ WSAGetOverlappedResult(syscallꓸHandle h, ж<syscall.Overlapped> Ꮡo, ж<uint32> Ꮡbytes, bool wait, ж<uint32> Ꮡflags) {
+    public static unsafe error /*err*/ WSAGetOverlappedResult(syscall.Handle h, ж<syscall.Overlapped> Ꮡo, ж<uint32> Ꮡbytes, bool wait, ж<uint32> Ꮡflags) {
         if (!GoAsyncIO.TryGetOperationAddress(Ꮡo, out nuint overlapped)) {
             // Not reachable from converted code: execIO harvests only an operation it submitted
             // through the seam, and the seam creates the record at submit. Loud by name rather than
@@ -101,7 +101,7 @@ partial class windows_package
     // an FD whose Init left it unpolled -- keeps the generated body, and the predicate is what stops
     // a POOLED key from answering with a record another descriptor's submit left behind. No decode
     // is owed on this path: a file read lands in the caller's own pinned buffer.
-    public static unsafe error /*err*/ GetOverlappedResult(syscallꓸHandle handle, ж<syscall.Overlapped> Ꮡoverlapped, ж<uint32> Ꮡdone, bool wait) {
+    public static unsafe error /*err*/ GetOverlappedResult(syscall.Handle handle, ж<syscall.Overlapped> Ꮡoverlapped, ж<uint32> Ꮡdone, bool wait) {
         uint32 _p0 = wait ? 1u : 0u;
 
         if (Ꮡoverlapped == nil || !GoAsyncIO.HasReadiness((nuint)(uintptr)handle) || !GoAsyncIO.TryGetOperationAddress(Ꮡoverlapped, out nuint overlapped)) {

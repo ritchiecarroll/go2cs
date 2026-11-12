@@ -58,11 +58,12 @@ using System.Threading;
 using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
 // The trailing parts of Go's one-block bucket, held beside the header instead of after it.
-private sealed class bucketParts {
+internal sealed class bucketParts {
     internal required slice<uintptr> stk;
     internal ж<memRecord>? mp;
     internal ж<blockRecord>? bp;
@@ -97,12 +98,14 @@ internal static ж<bucket> newBucket(bucketType typ, nint nstk) {
     return b;
 }
 
-private static bucketParts partsOf(ж<bucket> b) {
+internal static bucketParts partsOf(ж<bucket> b) {
     if (!s_bucketParts.TryGetValue(b, out bucketParts? parts)) {
         @throw("runtime: profile bucket not allocated by newBucket"u8);
     }
     return parts!;
 }
+
+} partial class runtimeᴛbucket {
 
 internal static slice<uintptr> stk(this ж<bucket> Ꮡb) {
     if (Ꮡb.Value.nstk > maxProfStackDepth) {
@@ -124,6 +127,8 @@ internal static ж<blockRecord> bp(this ж<bucket> Ꮡb) {
     }
     return partsOf(Ꮡb).bp!;
 }
+
+} partial class runtime_package {
 
 internal static ж<bucket> stkbucket(bucketType typ, uintptr size, slice<uintptr> stk, bool alloc) {
     var bh = Volatile.Read(ref s_buckhash);

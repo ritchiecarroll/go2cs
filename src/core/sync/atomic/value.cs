@@ -7,15 +7,19 @@ using System.Threading;
 
 namespace go.sync;
 
+using static atomic_package;
+
 partial class atomic_package {
 
 // A Value provides an atomic load and store of a consistently typed value.
 // The zero value for a Value returns nil from [Value.Load].
 //
 // A Value must not be copied after first use.
-[GoType] partial struct Value {
+[GoType] public partial struct Value {
     internal any v;
 }
+
+} partial class atomicᴛValue {
 
 // NATIVE reimplementation (hand-owned — this file carries [module: GoManualConversion], so a
 // -stdlib reconvert will not regenerate the Go version over it). Go's atomic.Value manipulates an
@@ -109,5 +113,7 @@ partial class atomic_package {
         }
     }
 }
+
+} partial class atomic_package {
 
 } // end atomic_package

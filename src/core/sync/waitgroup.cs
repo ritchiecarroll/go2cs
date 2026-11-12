@@ -29,11 +29,13 @@ using WaitReason = go.golib.WaitReason;
 
 namespace go;
 
+using static sync_package;
+
 partial class sync_package {
 
 // A WaitGroup waits for a collection of goroutines to finish.
 // A WaitGroup must not be copied after first use.
-[GoType] partial struct WaitGroup {
+[GoType] public partial struct WaitGroup {
     // Lazily-created shared state; a WaitGroup is always used through a pointer (ж<WaitGroup>).
     internal WaitGroupState? st;
 }
@@ -67,7 +69,7 @@ internal sealed class WaitGroupState {
     internal bool Bubbled;
 }
 
-private static WaitGroupState wgStateOf(ж<WaitGroup> Ꮡwg) {
+internal static WaitGroupState wgStateOf(ж<WaitGroup> Ꮡwg) {
     ref var wg = ref Ꮡwg.Value;
 
     WaitGroupState? s = Volatile.Read(ref wg.st);
@@ -84,8 +86,10 @@ private static WaitGroupState wgStateOf(ж<WaitGroup> Ꮡwg) {
 // this WaitGroup: none for a package-level WaitGroup, which Go leaves Unbubbled, so Add records no
 // association and sets no flag, and Wait is never durable -- exactly the path of a caller outside every
 // bubble (waitgroup.go: `case synctest.Unbubbled:` does nothing).
-private static SyncTestBubble? wgBubbleOf(ж<WaitGroup> Ꮡwg) =>
+internal static SyncTestBubble? wgBubbleOf(ж<WaitGroup> Ꮡwg) =>
     PackageLevelStorage.Holds(Ꮡwg) ? null : SyncTestBubble.Current;
+
+} partial class syncᴛWaitGroup {
 
 // Add adds delta, which may be negative, to the WaitGroup counter.
 // If the counter becomes zero, all goroutines blocked on Wait are released.
@@ -138,6 +142,8 @@ public static void Add(this ж<WaitGroup> Ꮡwg, nint delta) {
     }
 }
 
+} partial class sync_package {
+
 // wgAddBubble is the bubble half of Go 1.26's Add (waitgroup.go:86-108), over the association it
 // updates in place: caller is the calling goroutine's bubble, and busy is Go's `state != 0` with the
 // flag bit set aside (a non-zero counter or a parked waiter). It returns Go's fatal text, or null, and
@@ -172,6 +178,8 @@ internal static string? wgAddBubble(SyncTestBubble? caller, ref SyncTestBubble? 
 
     return null;
 }
+
+} partial class syncᴛWaitGroup {
 
 // Done decrements the WaitGroup counter by one.
 public static void Done(this ж<WaitGroup> Ꮡwg) => Ꮡwg.Add(-1);
@@ -255,5 +263,7 @@ public static void Go(this ж<WaitGroup> Ꮡwg, Action f) {
         Ꮡwg.Done();
     });
 }
+
+} partial class sync_package {
 
 } // end sync_package

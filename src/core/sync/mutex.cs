@@ -37,6 +37,8 @@ using WaitReason = go.golib.WaitReason;
 
 namespace go;
 
+using static sync_package;
+
 partial class sync_package {
 
 // Fatal-error hooks (Go provides these via runtime linkname): one-line forwards to golib's fatal
@@ -59,7 +61,7 @@ internal static partial void fatal(@string s) => FatalReport.Fatal(s, userFault:
 // The zero value for a Mutex is an unlocked mutex.
 //
 // A Mutex must not be copied after first use.
-[GoType] partial struct Mutex {
+[GoType] public partial struct Mutex {
     // Lazily-created binary semaphore backing this mutex. The gate is a FIELD of the mutex, so what
     // makes it shared is Go's own rule that a Mutex must not be copied after first use — every
     // reference to the same mutex reaches the same field. The box is NOT what holds it: this file's
@@ -81,7 +83,7 @@ internal static partial void fatal(@string s) => FatalReport.Fatal(s, userFault:
 // Takes the mutex BY REF rather than by box. Every use below was already `ref m` — the box existed
 // only to produce that ref — so this is the same code reached one indirection earlier, and it is
 // what lets the three methods that call it be `ref Mutex` primaries.
-private static SemaphoreSlim gateOf(ref Mutex m) {
+internal static SemaphoreSlim gateOf(ref Mutex m) {
     SemaphoreSlim? g = Volatile.Read(ref m.gate);
 
     if (g is not null) {
@@ -98,6 +100,8 @@ private static SemaphoreSlim gateOf(ref Mutex m) {
 
     return created;
 }
+
+} partial class syncᴛMutex {
 
 // Lock locks m.
 // If the lock is already in use, the calling goroutine blocks until the mutex is available.
@@ -169,12 +173,14 @@ private static SemaphoreSlim gateOf(ref Mutex m) {
     }
 }
 
+} partial class sync_package {
+
 // The acquire times of a gate's stamped waiters, Go's per-sudog acquiretime reduced to the two its
 // semrelease1 reads: the HEAD (the waiter a handoff dequeues) and the TAIL (the newest), plus the count
 // between them. Kept beside the gate rather than in Mutex, so Mutex's layout does not change, and
 // reached only while stamped waiters exist anywhere (s_outstanding), so an Unlock with profiling off
 // pays one volatile read.
-private sealed class WaitStamps {
+internal sealed class WaitStamps {
     internal static int s_outstanding;
 
     private int64 m_head;
@@ -236,7 +242,9 @@ private sealed class WaitStamps {
     }
 }
 
-private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<SemaphoreSlim, WaitStamps> s_waitStamps = new();
+internal static readonly System.Runtime.CompilerServices.ConditionalWeakTable<SemaphoreSlim, WaitStamps> s_waitStamps = new();
+
+} partial class syncᴛMutex {
 
 // TryLock tries to lock m and reports whether it succeeded.
 [GoRecv] public static bool TryLock(this ref Mutex m) => gateOf(ref m).Wait(0);
@@ -261,5 +269,7 @@ private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Sem
         fatal("sync: unlock of unlocked mutex"u8);
     }
 }
+
+} partial class sync_package {
 
 } // end sync_package

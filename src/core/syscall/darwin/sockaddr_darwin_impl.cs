@@ -103,12 +103,14 @@ using abi = go.@internal.abi_package;
 
 namespace go;
 
+using static syscall_package;
+
 partial class syscall_package
 {
     // sockaddr_storage is the largest address any of these calls can carry (128 bytes on darwin
     // too); every encode and decode below works in a buffer of this size, so one constant covers
     // the stack allocations and the `addrlen` the kernel is told it has.
-    private const int nativeSockaddrLen = 128;
+    internal const int nativeSockaddrLen = 128;
 
     // sockaddr_in exactly as darwin lays it out: 16 bytes, sa_len first, the address and the trailing
     // pad INLINE. `fixed` is what keeps them inline -- a C# array field would be another managed
@@ -181,9 +183,11 @@ partial class syscall_package
     // Go stores the port as the two bytes `p[0] = hi, p[1] = lo` -- network byte order IN MEMORY --
     // so a little-endian load of that field is the byte-SWAPPED port, which is exactly what
     // sin_port carries on the wire. The swap is its own inverse, so encode and decode share it.
-    private static uint16 swapBytes(uint16 value) {
+    internal static uint16 swapBytes(uint16 value) {
         return (uint16)((value >> 8) | (value << 8));
     }
+
+} partial class syscallᴛSockaddrInet4 {
 
     // (1) THE PORT ALIAS, IPv4. Identical to Go's darwin body except that the port is written to the
     // field instead of through a two-byte alias over it; `raw` is left in exactly the state Go
@@ -206,6 +210,8 @@ partial class syscall_package
         return (new @unsafe.Pointer(Ꮡsa.of(SockaddrInet4.Ꮡraw)), ((_Socklen)(uint32)sa.raw.Len), default!);
     }
 
+} partial class syscallᴛSockaddrInet6 {
+
     // (1) THE PORT ALIAS, IPv6. See the IPv4 method above.
     internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrInet6> Ꮡsa) {
         ref var sa = ref Ꮡsa.Value;
@@ -222,6 +228,8 @@ partial class syscall_package
 
         return (new @unsafe.Pointer(Ꮡsa.of(SockaddrInet6.Ꮡraw)), ((_Socklen)(uint32)sa.raw.Len), default!);
     }
+
+} partial class syscall_package {
 
     // Encodes a Sockaddr into the caller's stack buffer as the native sockaddr darwin expects,
     // returning the byte length to pass as `addrlen`. Go's own validation and raw-filling logic is
@@ -336,7 +344,7 @@ partial class syscall_package
     // anyToSockaddr all land here. The family is the SECOND byte on BSD and the length the FIRST;
     // Go's AF_UNIX arm bounds its scan by that sa_len, never by addrlen, so `len` is carried for
     // the record and the arms read the image exactly as Go reads the struct.
-    private static unsafe (Sockaddr, error) readNativeSockaddr(byte* buffer, _Socklen len, nint capacity) {
+    internal static unsafe (Sockaddr, error) readNativeSockaddr(byte* buffer, _Socklen len, nint capacity) {
         byte family = buffer[1];
 
         if (family == AF_LINK) {

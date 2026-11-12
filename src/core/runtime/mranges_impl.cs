@@ -60,6 +60,8 @@ using @unsafe = go.unsafe_package;
 
 namespace go;
 
+using static runtime_package;
+
 partial class runtime_package
 {
     // Hoisted @string literals (single allocation; Go keeps these in RODATA) — the one literal add's
@@ -69,10 +71,12 @@ partial class runtime_package
     // The three header stores as one slice: Go's (array, len, cap) over a block persistentalloc has
     // just returned. `array` is a native address by construction (persistentalloc hands out mmap'd
     // memory), so the door's provenance consult answers MISS and the mapping arm builds the window.
-    private static slice<addrRange> rebaseRanges(@unsafe.Pointer array, nint len, nint cap)
+    internal static slice<addrRange> rebaseRanges(@unsafe.Pointer array, nint len, nint cap)
     {
         return @unsafe.Slice((ж<addrRange>)(uintptr)array, (uintptr)cap)[..(int)len];
     }
+
+} partial class runtimeᴛaddrRanges {
 
     // init initializes a with 16 slots and an initial capacity of 16 (the emission's body with the
     // three header stores re-based: `ranges.len = 0; ranges.cap = 16; ranges.array = persistentalloc(…)`).
@@ -101,7 +105,7 @@ partial class runtime_package
         // An empty range has no effect on the set of addresses represented
         // by a, but passing a zero-sized range is almost always a bug.
         if (r.size() == 0) {
-            print((@string)"runtime: range = {"u8, ((Δhex)(uint64)r.@base.addr()), (@string)", "u8, ((Δhex)(uint64)r.limit.addr()), (@string)"}\n"u8);
+            print((@string)"runtime: range = {"u8, ((hex)(uint64)r.@base.addr()), (@string)", "u8, ((hex)(uint64)r.limit.addr()), (@string)"}\n"u8);
             @throw(attemptedToAddZeroSizedˢ);
         }
         // Because we assume r is not currently represented in a,
@@ -169,6 +173,8 @@ partial class runtime_package
         b.totalBytes = a.totalBytes;
         copy(b.ranges, a.ranges);
     }
+
+} partial class runtime_package {
 
     // ---- probes for the standing guard (GolibTests.RuntimeAddrRangesTests); the runtime row is not banked ----
 

@@ -106,7 +106,7 @@ partial class poll_package
     private const uint EPOLLHUP = 0x10;
     private const uint EPOLLRDHUP = 0x2000;
     private const uint EPOLLET = 0x80000000;
-    private const nuint EINTR = 4;
+    internal const nuint EINTR = 4;
 
     // The per-arch half of the kernel contract (S3 site 1; docs/phase4/DATA-la64-s3-census.md §2-§3,
     // checked against Go's own zsysnum and EpollEvent at each arch):

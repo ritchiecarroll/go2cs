@@ -59,7 +59,7 @@
 //     Sockaddr types to ΔSockaddr in the package lived in ITS body, so skipping its emission dropped
 //     the `[assembly: GoImplement<…>(Pointer = true)]` records from package_info.cs, and a reconvert
 //     of `net` against that shortened package_info showed net minting its own
-//     `syscall_SockaddrInet4жΔSockaddr` adapters instead of using syscall's -- the SECOND-IDENTITY
+//     `syscall_SockaddrInet4жSockaddr` adapters instead of using syscall's -- the SECOND-IDENTITY
 //     regression samePackageImplements.go exists to prevent (reflect and fmt see the wrapper where
 //     the value's own type belongs, and a direct-boxed value compares unequal to an adapter-wrapped
 //     one). Declaring the records in this file does not help either: a DEPENDENT package's converter
@@ -102,12 +102,14 @@ using errorspkg = go.errors_package;
 
 namespace go;
 
+using static syscall_package;
+
 partial class syscall_package
 {
     // sockaddr_storage is the largest address any of these calls can carry (128 bytes); every
     // encode and decode below works in a buffer of this size, so one constant covers the stack
     // allocations and the `addrlen` the kernel is told it has.
-    private const int nativeSockaddrLen = 128;
+    internal const int nativeSockaddrLen = 128;
 
     // sockaddr_in exactly as Windows lays it out: 16 bytes, the address and the trailing pad
     // INLINE. `fixed` is what keeps them inline -- a C# array field would be another managed
@@ -136,9 +138,11 @@ partial class syscall_package
     // MEMORY -- so a little-endian load of that field is the byte-SWAPPED port, which is exactly
     // what sockaddr_in.sin_port carries on the wire. The swap is its own inverse, so encode and
     // decode share it.
-    private static uint16 swapBytes(uint16 value) {
+    internal static uint16 swapBytes(uint16 value) {
         return (uint16)((value >> 8) | (value << 8));
     }
+
+} partial class syscallᴛSockaddrInet4 {
 
     // (1) THE PORT ALIAS, IPv4. Identical to Go's body except that the port is written to the
     // field instead of through a two-byte alias over it; `raw` is left in exactly the state Go
@@ -161,6 +165,8 @@ partial class syscall_package
         return (new @unsafe.Pointer(Ꮡsa.of(SockaddrInet4.Ꮡraw)), (int32)16, default!);
     }
 
+} partial class syscallᴛSockaddrInet6 {
+
     // (1) THE PORT ALIAS, IPv6. See the IPv4 method above.
     internal static (@unsafe.Pointer, int32, error) sockaddr(this ж<SockaddrInet6> Ꮡsa) {
         ref var sa = ref Ꮡsa.Value;
@@ -177,12 +183,14 @@ partial class syscall_package
         return (new @unsafe.Pointer(Ꮡsa.of(SockaddrInet6.Ꮡraw)), (int32)28, default!);
     }
 
+} partial class syscall_package {
+
     // Encodes a Sockaddr into the caller's stack buffer as the native sockaddr Windows expects,
     // returning the byte length to pass as `namelen`. Go's own validation and raw-filling logic is
     // reused by calling sockaddr() first -- so there is ONE definition of what a Sockaddr means and
     // this function does nothing but translate the layout, which is the only thing the conversion
     // gets wrong.
-    private static unsafe (int32 len, error err) writeNativeSockaddr(ΔSockaddr sa, byte* buffer) {
+    private static unsafe (int32 len, error err) writeNativeSockaddr(Sockaddr sa, byte* buffer) {
         // The interface value wraps the receiver box; IжAdapter.Box is how a converted interface
         // hands back the `*T` it holds (see the go2cs-gen ImplementGenerator adapters).
         switch ((sa as IжAdapter)?.Box) {
@@ -258,7 +266,7 @@ partial class syscall_package
     // Decodes the native sockaddr the kernel just wrote into the Sockaddr the Go caller expects.
     // The inverse of writeNativeSockaddr, and the one definition of that decode: Getsockname,
     // Getpeername and RawSockaddrAny.Sockaddr all land here.
-    private static unsafe (ΔSockaddr, error) readNativeSockaddr(byte* buffer, int32 len) {
+    internal static unsafe (Sockaddr, error) readNativeSockaddr(byte* buffer, int32 len) {
         uint16 family = *(uint16*)buffer;
 
         if (family == AF_INET) {
@@ -275,7 +283,7 @@ partial class syscall_package
 
             sa.Value.Addr = addr;
 
-            return (new SockaddrInet4жΔSockaddr(sa), default!);
+            return (new SockaddrInet4жSockaddr(sa), default!);
         }
 
         if (family == AF_INET6) {
@@ -293,7 +301,7 @@ partial class syscall_package
 
             sa.Value.Addr = addr;
 
-            return (new SockaddrInet6жΔSockaddr(sa), default!);
+            return (new SockaddrInet6жSockaddr(sa), default!);
         }
 
         if (family == AF_UNIX) {
@@ -326,7 +334,7 @@ partial class syscall_package
 
                 sa.Value.Name = ((@string)@unsafe.Slice(Ꮡ(abstractName, 0), m));
 
-                return (new SockaddrUnixжΔSockaddr(sa), default!);
+                return (new SockaddrUnixжSockaddr(sa), default!);
             }
 
             // An UNNAMED address (the kernel's addrlen == 2: the family alone) has no path, and the answer is the
@@ -336,7 +344,7 @@ partial class syscall_package
             if (n == 0) {
                 sa.Value.Name = "";
 
-                return (new SockaddrUnixжΔSockaddr(sa), default!);
+                return (new SockaddrUnixжSockaddr(sa), default!);
             }
 
             var name = new array<byte>(n);
@@ -347,7 +355,7 @@ partial class syscall_package
 
             sa.Value.Name = ((@string)@unsafe.Slice(Ꮡ(name, 0), n));
 
-            return (new SockaddrUnixжΔSockaddr(sa), default!);
+            return (new SockaddrUnixжSockaddr(sa), default!);
         }
 
         return (default!, EAFNOSUPPORT);
@@ -357,7 +365,7 @@ partial class syscall_package
     // buffer and hand its address to the package's own generated wrapper, which already does the
     // right thing with an address (see the file header) -- so the errno handling, the trap lookup
     // and the call shape all stay exactly where the converter put them.
-    public static unsafe error /*err*/ Bind(ΔHandle fd, ΔSockaddr sa) {
+    public static unsafe error /*err*/ Bind(Handle fd, Sockaddr sa) {
         byte* buffer = stackalloc byte[nativeSockaddrLen];
         var (n, err) = writeNativeSockaddr(sa, buffer);
 
@@ -368,7 +376,7 @@ partial class syscall_package
         return bind(fd, new @unsafe.Pointer((uintptr)(void*)buffer), n);
     }
 
-    public static unsafe error /*err*/ Connect(ΔHandle fd, ΔSockaddr sa) {
+    public static unsafe error /*err*/ Connect(Handle fd, Sockaddr sa) {
         byte* buffer = stackalloc byte[nativeSockaddrLen];
         var (n, err) = writeNativeSockaddr(sa, buffer);
 
@@ -396,7 +404,7 @@ partial class syscall_package
     // the duration of one call, never a field, for the reason stated in this file's header.
     //
     // SetsockoptIPv6Mreq is the same seam over `ipv6_mreq`; see its body below.
-    public static unsafe error /*err*/ SetsockoptIPMreq(ΔHandle fd, nint level, nint opt, ж<IPMreq> Ꮡmreq) {
+    public static unsafe error /*err*/ SetsockoptIPMreq(Handle fd, nint level, nint opt, ж<IPMreq> Ꮡmreq) {
         byte* buffer = stackalloc byte[nativeIPMreqLen];
 
         // A nil *IPMreq reaches the kernel as a zeroed option in Go's own wrapper too (it derefs
@@ -425,7 +433,7 @@ partial class syscall_package
     // the generated `Ꮡmreq.Reinterpret<IPv6Mreq, byte>()` has the defect SetsockoptIPMreq's comment
     // describes. Same remedy: the stack buffer is the native image, filled field by field. The
     // linux twin is structclass_linux_impl.cs's SetsockoptIPv6Mreq.
-    public static unsafe error /*err*/ SetsockoptIPv6Mreq(ΔHandle fd, nint level, nint opt, ж<IPv6Mreq> Ꮡmreq) {
+    public static unsafe error /*err*/ SetsockoptIPv6Mreq(Handle fd, nint level, nint opt, ж<IPv6Mreq> Ꮡmreq) {
         byte* buffer = stackalloc byte[nativeIPv6MreqLen];
 
         // A nil *IPv6Mreq reaches the kernel as a zeroed option, as for SetsockoptIPMreq.
@@ -472,7 +480,7 @@ partial class syscall_package
     // 0 crosses and the pins are skipped; net's socktest hook forwards whatever it is given, and the
     // wrapper is public API besides. The retention is what makes a non-nil caller sound rather than
     // lucky -- it is not a fix for anything the corpus exercises today, and is stated as such.
-    public static unsafe error ConnectEx(ΔHandle fd, ΔSockaddr sa, ж<byte> ᏑsendBuf, uint32 sendDataLen, ж<uint32> ᏑbytesSent, ж<Overlapped> Ꮡoverlapped) {
+    public static unsafe error ConnectEx(Handle fd, Sockaddr sa, ж<byte> ᏑsendBuf, uint32 sendDataLen, ж<uint32> ᏑbytesSent, ж<Overlapped> Ꮡoverlapped) {
         var err = LoadConnectEx();
 
         if (err != default!) {
@@ -502,6 +510,8 @@ partial class syscall_package
         return default!;
     }
 
+} partial class syscallᴛRawSockaddrAny {
+
     // THE DECODE, and the third consumer readNativeSockaddr was written for. Go reinterprets the
     // RawSockaddrAny as a RawSockaddrInet4/6/Unix and then reads the port through the SAME two-byte
     // alias the encoders write it through -- so the auto conversion panics identically
@@ -524,7 +534,7 @@ partial class syscall_package
     // GetAcceptExSockaddrs (zsyscall_windows_wsa_impl.cs) transcribes the kernel's native accept
     // buffer INTO managed RawSockaddrAny values field for field, precisely so this method has a
     // faithful managed image to read. The two are a pair; neither is meaningful alone.
-    public static unsafe (ΔSockaddr, error) Sockaddr(this ж<RawSockaddrAny> Ꮡrsa) {
+    public static unsafe (Sockaddr, error) Sockaddr(this ж<RawSockaddrAny> Ꮡrsa) {
         ref var rsa = ref Ꮡrsa.Value;
 
         // Go rewrites a leading NUL as '@' IN PLACE for an abstract Unix socket, with its own note
@@ -543,6 +553,8 @@ partial class syscall_package
         return readNativeSockaddr(buffer, (int32)(2 + UNIX_PATH_MAX));
     }
 
+} partial class syscall_package {
+
     // THE MANAGED RawSockaddrAny IS A TRANSCRIPTION, and this pair is the whole of what that means.
     //
     // Its fields are a field-for-field record of the 116-byte native sockaddr the kernel reads and
@@ -560,7 +572,7 @@ partial class syscall_package
     // second copy of a layout is exactly what this pair exists to prevent. (The first cut of the
     // WriteMsg arc did write a second copy, `unflattenRawSockaddr`; it was folded into
     // fillRawSockaddrAny when the RecvMsg direction needed the bounded form the harvest already had.)
-    private static unsafe void flattenRawSockaddr(ref RawSockaddrAny rsa, byte* buffer) {
+    internal static unsafe void flattenRawSockaddr(ref RawSockaddrAny rsa, byte* buffer) {
         *(uint16*)buffer = rsa.Addr.Family;
 
         for (nint i = 0; i < 14; i++) {
@@ -576,7 +588,7 @@ partial class syscall_package
     // generated wrappers, because those take a typed `ж<RawSockaddrAny>` -- the very managed struct
     // that cannot cross the boundary -- rather than an address. The error handling below mirrors
     // the generated wrappers exactly (`socket_error` result, errnoErr of the trap's errno).
-    public static unsafe (ΔSockaddr sa, error err) Getsockname(ΔHandle fd) {
+    public static unsafe (Sockaddr sa, error err) Getsockname(Handle fd) {
         byte* buffer = stackalloc byte[nativeSockaddrLen];
         int32 addrlen = nativeSockaddrLen;
 
@@ -589,7 +601,7 @@ partial class syscall_package
         return readNativeSockaddr(buffer, addrlen);
     }
 
-    public static unsafe (ΔSockaddr sa, error err) Getpeername(ΔHandle fd) {
+    public static unsafe (Sockaddr sa, error err) Getpeername(Handle fd) {
         byte* buffer = stackalloc byte[nativeSockaddrLen];
         int32 addrlen = nativeSockaddrLen;
 
@@ -617,10 +629,10 @@ partial class syscall_package
     public const int GoNativeSockaddrLen = nativeSockaddrLen;
 
     public static unsafe (int32 len, error err) GoWriteNativeSockaddrInet4(ж<SockaddrInet4> sa, byte* buffer) =>
-        writeNativeSockaddr(new SockaddrInet4жΔSockaddr(sa), buffer);
+        writeNativeSockaddr(new SockaddrInet4жSockaddr(sa), buffer);
 
     public static unsafe (int32 len, error err) GoWriteNativeSockaddrInet6(ж<SockaddrInet6> sa, byte* buffer) =>
-        writeNativeSockaddr(new SockaddrInet6жΔSockaddr(sa), buffer);
+        writeNativeSockaddr(new SockaddrInet6жSockaddr(sa), buffer);
 
     // ---- the RAW-SOCKADDR ENCODE: internal/poll's WriteMsg seam, and Sockaddr's exact inverse -----
     //
@@ -652,7 +664,7 @@ partial class syscall_package
         sa.Value.Port = port;
         sa.Value.Addr = addr.Clone();
 
-        return writeRawSockaddr(Ꮡrsa, new SockaddrInet4жΔSockaddr(sa));
+        return writeRawSockaddr(Ꮡrsa, new SockaddrInet4жSockaddr(sa));
     }
 
     public static unsafe int32 GoRawSockaddrFromInet6(ж<RawSockaddrAny> Ꮡrsa, nint port, uint32 zoneId, array<byte> addr) {
@@ -662,7 +674,7 @@ partial class syscall_package
         sa.Value.ZoneId = zoneId;
         sa.Value.Addr = addr.Clone();
 
-        return writeRawSockaddr(Ꮡrsa, new SockaddrInet6жΔSockaddr(sa));
+        return writeRawSockaddr(Ꮡrsa, new SockaddrInet6жSockaddr(sa));
     }
 
     // The flatten, exposed. internal/syscall/windows's WSASendMsg hand-own is handed a RawSockaddrAny
@@ -688,7 +700,7 @@ partial class syscall_package
     // them would let a 128-byte write land in a 116-byte record.
     public const int GoRawSockaddrAnyLen = rawSockaddrAnyLen;
 
-    private static unsafe int32 writeRawSockaddr(ж<RawSockaddrAny> Ꮡrsa, ΔSockaddr sa) {
+    private static unsafe int32 writeRawSockaddr(ж<RawSockaddrAny> Ꮡrsa, Sockaddr sa) {
         ref var rsa = ref Ꮡrsa.Value;
 
         // Go's own first line in both encoders -- `*rsa = syscall.RawSockaddrAny{}` -- and it is

@@ -56,6 +56,8 @@ using WaitReason = go.golib.WaitReason;
 
 namespace go.@internal;
 
+using static poll_package;
+
 partial class poll_package {
 
 // The inline gates backing fdMutex's two semaphore words. Lazily created, so a zero fdMutex is a
@@ -72,7 +74,7 @@ partial struct fdMutex {
 // A counting semaphore starting at zero — internal/poll's contract has no handoff or starvation
 // mode, so a release simply increments and a waiter re-competes, which is what the side-table
 // implementation it replaces did with a count plus a FIFO queue.
-private static SemaphoreSlim gateOf(ref fdMutex mu, bool read) {
+internal static SemaphoreSlim gateOf(ref fdMutex mu, bool read) {
     ref SemaphoreSlim? slot = ref read ? ref mu.rgate : ref mu.wgate;
 
     SemaphoreSlim? g = Volatile.Read(ref slot);
@@ -91,6 +93,8 @@ private static SemaphoreSlim gateOf(ref fdMutex mu, bool read) {
 
     return created;
 }
+
+} partial class pollᴛfdMutex {
 
 // increfAndClose sets the state of mu to closed.
 // It returns false if the file was already closed.
@@ -245,5 +249,7 @@ private static SemaphoreSlim gateOf(ref fdMutex mu, bool read) {
         }
     }
 }
+
+} partial class poll_package {
 
 }

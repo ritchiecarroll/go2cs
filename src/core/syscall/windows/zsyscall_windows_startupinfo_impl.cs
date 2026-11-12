@@ -104,8 +104,8 @@ partial class syscall_package
         managed.ShowWindow = native.ShowWindow;
         managed.__ = native.Reserved2Length;
         managed.___ = (ж<byte>)(uintptr)(nuint)native.Reserved2;
-        managed.StdInput = (ΔHandle)(uintptr)(nuint)native.StdInput;
-        managed.StdOutput = (ΔHandle)(uintptr)(nuint)native.StdOutput;
-        managed.StdErr = (ΔHandle)(uintptr)(nuint)native.StdErr;
+        managed.StdInput = (Handle)(uintptr)(nuint)native.StdInput;
+        managed.StdOutput = (Handle)(uintptr)(nuint)native.StdOutput;
+        managed.StdErr = (Handle)(uintptr)(nuint)native.StdErr;
     }
 }

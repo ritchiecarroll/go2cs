@@ -120,6 +120,8 @@ using System.Runtime.CompilerServices;
 
 namespace go;
 
+using static weak_package;
+
 partial class weak_package {
 
 // Pointer is a weak pointer to a value of type T.
@@ -195,6 +197,8 @@ public static Pointer<T> Make<T>(ж<T> Ꮡptr) {
     return new Pointer<T>(u);
 }
 
+} partial class weakᴛPointer {
+
 // Strong creates a strong pointer from the weak pointer.
 // Returns nil if the original value for the weak pointer was reclaimed by
 // the garbage collector.
@@ -208,6 +212,8 @@ public static ж<T> Value<T>(this Pointer<T> p) {
     // shape, as the lazily seeded zero HashTrieMap in hashtriemap.cs.
     return p.u is null ? default! : p.u.Strong();
 }
+
+} partial class weak_package {
 
 // The canonical indirection object. Go allocates one `atomic.Uintptr` per weakly-referenced address
 // and hangs it off the span as a `specialWeakHandle`; the identity of THAT object is what two weak

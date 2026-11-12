@@ -86,11 +86,12 @@ using godebugs = godebugs_package;
 using sync = global::go.sync_package;
 using atomic = global::go.sync.atomic_package;
 using go.sync;
+using static godebug_package;
 
 partial class godebug_package {
 
 // A Setting is a single setting in the $GODEBUG environment variable.
-[GoType] partial struct Setting {
+[GoType] public partial struct Setting {
     internal @string name;
     internal sync.Once once;
     internal ж<setting> setting; // Go embeds *setting (departure 1 in the header)
@@ -125,6 +126,8 @@ partial class godebug_package {
 public static ж<Setting> New(@string name) {
     return Ꮡ(new Setting(name: name));
 }
+
+} partial class godebugᴛSetting {
 
 // Name returns the name of the setting.
 [GoRecv] public static @string Name(this ref Setting s) {
@@ -166,6 +169,8 @@ internal static void register(this ж<Setting> Ꮡs) {
     registerMetric("/godebug/non-default-behavior/"u8 + s.Name() + ":events"u8, s.setting.of(setting.ᏑnonDefault).Load);
 }
 
+} partial class godebug_package {
+
 // cache is a cache of all the GODEBUG settings,
 // a locked map[string]*atomic.Pointer[string].
 //
@@ -184,6 +189,8 @@ internal static ref sync.Map cache => ref Ꮡcache.Value; // name string -> valu
 
 internal static ж<value> Ꮡempty = new StandardBox<value>(default(value));
 internal static ref value empty => ref Ꮡempty.Value;
+
+} partial class godebugᴛSetting {
 
 // Value returns the current value for the GODEBUG setting s.
 //
@@ -212,6 +219,8 @@ public static @string Value(this ж<Setting> Ꮡs) {
     }
     return v.text;
 }
+
+} partial class godebug_package {
 
 // lookup returns the unique *setting value for the given name.
 internal static ж<setting> lookup(@string name) {
@@ -362,16 +371,18 @@ private sealed class BisectStderrWriter : bisect.Writer {
     }
 }
 
-private static readonly bisect.Writer s_bisectStderr = new BisectStderrWriter();
+internal static readonly bisect.Writer s_bisectStderr = new BisectStderrWriter();
 
 // go2cs: retained from the converted output because the package's GoImplement registration
 // (package_info.cs) binds runtimeStderr to bisect.Writer; writes go to standard error directly
 // (Go routes through the runtime's fd-2 write since it cannot import os).
-[GoType] partial struct runtimeStderr {
+[GoType] internal partial struct runtimeStderr {
 }
 
 internal static ж<runtimeStderr> Ꮡstderr = new StandardBox<runtimeStderr>(default(runtimeStderr));
 internal static ref runtimeStderr stderr => ref Ꮡstderr.Value;
+
+} partial class godebugᴛruntimeStderr {
 
 [GoRecv] internal static (nint, error) Write(this ref runtimeStderr _, slice<byte> b) {
     if (len(b) > 0) {
@@ -379,5 +390,7 @@ internal static ref runtimeStderr stderr => ref Ꮡstderr.Value;
     }
     return (len(b), default!);
 }
+
+} partial class godebug_package {
 
 } // end godebug_package

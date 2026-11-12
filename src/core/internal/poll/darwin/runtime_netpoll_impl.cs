@@ -109,7 +109,7 @@ partial class poll_package
     private const ushort EV_CLEAR = 0x20;
     private const ushort EV_ERROR = 0x4000;
     private const ushort EV_EOF = 0x8000;
-    private const int EINTR = 4;
+    internal const int EINTR = 4;
 
     // struct kevent on 64-bit darwin: { uintptr_t ident; int16_t filter; uint16_t flags; uint32_t
     // fflags; intptr_t data; void *udata; } -- 32 bytes, every field naturally aligned.

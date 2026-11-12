@@ -30,9 +30,13 @@ using System.Threading;
 using atomic = @internal.runtime.atomic_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package
 {
+
+} partial class runtimeᴛschedStatsAggregate {
+
     // compute populates the schedStatsAggregate with values from the runtime.
     [GoRecv] internal static void compute(this ref schedStatsAggregate a) {
         // Lock the scheduler so the global run queue can't change and
@@ -47,15 +51,15 @@ partial class runtime_package
 
         // Collect running/runnable from per-P run queues.
         a.gCreated += Ꮡsched.of(schedt.ᏑgoroutinesCreated).Load();
-        foreach (var (_, Δp) in range(allp)) {
-            if (Δp == nil || (~Δp).status == _Pdead) {
+        foreach (var (_, p) in range(allp)) {
+            if (p == nil || (~p).status == _Pdead) {
                 break;
             }
-            a.gCreated += Δp.Value.goroutinesCreated;
-            var exprᴛ1 = (~Δp).status;
+            a.gCreated += p.Value.goroutinesCreated;
+            var exprᴛ1 = (~p).status;
             if (exprᴛ1 == _Prunning) {
                 {
-                    var (thread, ok) = setBlockOnExitSyscall(Δp); if (ok){
+                    var (thread, ok) = setBlockOnExitSyscall(p); if (ok){
                         thread.resume();
                         a.gNonGo++;
                     } else {
@@ -70,16 +74,16 @@ partial class runtime_package
                 // is running, but it will be accurate.
             }
 
-            ref var pp = ref Δp.Value;
+            ref var pp = ref p.Value;
 
             while (true) {
-                var h = atomic.Load(Δp.of(runtime_package.Δp.Ꮡrunqhead));
-                var t = atomic.Load(Δp.of(runtime_package.Δp.Ꮡrunqtail));
+                var h = atomic.Load(p.of(runtime_package.p.Ꮡrunqhead));
+                var t = atomic.Load(p.of(runtime_package.p.Ꮡrunqtail));
                 // Go: `next := atomic.Loaduintptr((*uintptr)(&p.runnext))`, read only for `next != 0`. The
                 // managed reference, read with the same acquire, answers that without a numeric view.
                 var runnextSet = Volatile.Read(ref pp.runnext.m_ref) is not null;
                 var runnable = (int32)(t - h);
-                if (atomic.Load(Δp.of(runtime_package.Δp.Ꮡrunqhead)) != h || runnable < 0) {
+                if (atomic.Load(p.of(runtime_package.p.Ꮡrunqhead)) != h || runnable < 0) {
                     continue;
                 }
                 if (runnextSet) {
@@ -112,4 +116,7 @@ partial class runtime_package
 
         unlock(Ꮡsched.of(schedt.Ꮡlock));
     }
+
+} partial class runtime_package {
+
 }

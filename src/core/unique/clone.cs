@@ -91,7 +91,7 @@ internal static cloneSeq makeCloneSeq(ж<abi.Type> Ꮡtyp) {
     if (Ꮡtyp == nil) {
         return new cloneSeq(nil);
     }
-    if (typ.Kind() == abi.ΔString) {
+    if (typ.Kind() == abi.String) {
         return singleStringClone;
     }
     ref var seq = ref heap(new cloneSeq(), out var Ꮡseq);
@@ -114,7 +114,7 @@ internal static void buildStructCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡse
     foreach (var i in range(len((~styp).Fields))) {
         var f = Ꮡ((~styp).Fields, i);
         var exprᴛ1 = (~f).Typ.Kind();
-        if (exprᴛ1 == abi.ΔString) {
+        if (exprᴛ1 == abi.String) {
             seq.stringOffsets = append(seq.stringOffsets, baseOffset + (~f).Offset);
         }
         else if (exprᴛ1 == abi.Struct) {
@@ -136,7 +136,7 @@ internal static void buildArrayCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡseq
     var offset = baseOffset;
     foreach (var _ᴛ1 in range<uintptr>((~atyp).Len)) {
         var exprᴛ1 = etyp.Kind();
-        if (exprᴛ1 == abi.ΔString) {
+        if (exprᴛ1 == abi.String) {
             seq.stringOffsets = append(seq.stringOffsets, offset);
         }
         else if (exprᴛ1 == abi.Struct) {

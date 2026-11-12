@@ -178,7 +178,7 @@ partial class windows_package
     // Data2/Data3 WORDs, Data4 eight inline bytes -- which is also Go's declaration, so the transcribe
     // is field-for-field with no reordering and no endianness question (every field is host order on
     // both sides).
-    private static unsafe error lookupExtensionFunction(syscallꓸHandle s, ж<syscall.GUID> Ꮡguid, out uintptr addr) {
+    private static unsafe error lookupExtensionFunction(syscall.Handle s, ж<syscall.GUID> Ꮡguid, out uintptr addr) {
         ref var guid = ref Ꮡguid.Value;
 
         byte* image = stackalloc byte[16];
@@ -211,7 +211,7 @@ partial class windows_package
         return default!;
     }
 
-    public static unsafe error WSASendMsg(syscallꓸHandle fd, ж<WSAMsg> Ꮡmsg, uint32 flags, ж<uint32> ᏑbytesSent, ж<syscall.Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+    public static unsafe error WSASendMsg(syscall.Handle fd, ж<WSAMsg> Ꮡmsg, uint32 flags, ж<uint32> ᏑbytesSent, ж<syscall.Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
         // The generated body's first act, kept: the extension function pointer is resolved through a
         // WSAIoctl on a scratch socket, once, and its failure is this call's failure.
         var err = loadWSASendRecvMsg();
@@ -339,7 +339,7 @@ partial class windows_package
     // the control path below is structural rather than measured -- written to be correct rather than
     // because something exercises it, and said plainly so a later reader does not mistake the guard's
     // silence for coverage.
-    public static unsafe error WSARecvMsg(syscallꓸHandle fd, ж<WSAMsg> Ꮡmsg, ж<uint32> ᏑbytesReceived, ж<syscall.Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+    public static unsafe error WSARecvMsg(syscall.Handle fd, ж<WSAMsg> Ꮡmsg, ж<uint32> ᏑbytesReceived, ж<syscall.Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
         var err = loadWSASendRecvMsg();
 
         if (err != default!) {

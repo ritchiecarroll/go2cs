@@ -55,7 +55,7 @@ partial class reflect_package {
 //
 // The Examples section of the documentation includes an illustration
 // of how to use MakeFunc to build a swap function for different types.
-public static ΔValue MakeFunc(ΔType typ, Func<slice<ΔValue>, slice<ΔValue>> fn) {
+public static Value MakeFunc(Type typ, Func<slice<Value>, slice<Value>> fn) {
     if (typ == default! || typ.Kind() != Func) {
         throw panic("reflect: call of MakeFunc with non-Func type");
     }
@@ -90,7 +90,7 @@ public static ΔValue MakeFunc(ΔType typ, Func<slice<ΔValue>, slice<ΔValue>> 
     nint[]?[]? paramDims = Ꮡt.Value.funcParamDims;
 
     object? invoke(object?[] rawArgs) {
-        var args = new slice<ΔValue>(ins.Length);
+        var args = new slice<Value>(ins.Length);
         for (int i = 0; i < ins.Length; i++) {
             // Each argument is typed by the func's STATIC parameter type (Go's contract: fn can
             // assume the types given by typ) — an interface-typed parameter is a Kind Interface
@@ -100,7 +100,7 @@ public static ΔValue MakeFunc(ΔType typ, Func<slice<ΔValue>, slice<ΔValue>> 
             nint[]? dims = paramDims is not null && i < paramDims.Length ? paramDims[i] : null;
             args[i] = makeTypedValue(rawArgs[i], ins[i], dims, default);
         }
-        slice<ΔValue> results = fn(args);
+        slice<Value> results = fn(args);
         if (len(results) != outs.Length) {
             throw panic("reflect: wrong return count from function created by MakeFunc");
         }
@@ -117,7 +117,7 @@ public static ΔValue MakeFunc(ΔType typ, Func<slice<ΔValue>, slice<ΔValue>> 
     Delegate del = GoReflect.MakeGoFuncDelegate(st, invoke);
     // The returned Value rides typ's OWN descriptor box (not a fresh synthType), so the dims cargo
     // survives and Type() interns back to the caller's wrapper — `MakeFunc(t, fn).Type() == t`.
-    var v = new ΔValue(Ꮡt, default!, ((flag)(uintptr)(nuint)Func));
+    var v = new Value(Ꮡt, default!, ((flag)(uintptr)(nuint)Func));
     v.boxed = del;
     return v;
 }
@@ -155,7 +155,7 @@ private static object? packResultTuple(System.Type tupleType, object?[] values, 
 // Interface() packs, a concrete one hands over the box it holds). The guards are Go's own, in Go's
 // order: the zero Value and a read-only Value (obtained from an unexported field) are refused
 // before assignability is asked at all.
-private static object? marshalMakeFuncResult(ΔValue result, System.Type want) {
+private static object? marshalMakeFuncResult(Value result, System.Type want) {
     if (result.flag == 0) {
         throw panic("reflect: function created by MakeFunc returned zero Value");
     }

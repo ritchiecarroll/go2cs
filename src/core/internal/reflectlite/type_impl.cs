@@ -7,6 +7,9 @@
 
 namespace go.@internal;
 
+using abi = go.@internal.abi_package;
+using static reflectlite_package;
+
 partial class reflectlite_package
 {
     // Implementation of resolveTypeOff
@@ -21,6 +24,8 @@ partial class reflectlite_package
         return default!;
     }
 
+} partial class reflectliteᴛrtype {
+
     // ==== Phase-3 write-back: the errors.As TYPE surface (rtype.Elem/Implements/AssignableTo) ====
     // The auto forms read descriptor sub-records (ptrType.Elem, interface method tables) that the
     // Phase-1 synthetic abi.Type never populates — Elem panicked "Elem of invalid type" and
@@ -29,7 +34,7 @@ partial class reflectlite_package
     // reflection and direct asserts can never disagree. See docs/phase4/DESIGN-reflection-bridge.md.
 
     // Elem returns the element type of a pointer/slice/array/map/chan type.
-    internal static ΔType Elem(this rtype t)
+    internal static Type Elem(this rtype t)
     {
         ж<abi_package.Type> self = t.Type;
         System.Type? st = self == nil ? null : self.Value.sysType;
@@ -41,7 +46,7 @@ partial class reflectlite_package
 
     // Implements reports whether the type implements the interface type u (Go method-set rules:
     // nominal or structural via golib StructurallyImplements).
-    internal static bool Implements(this rtype t, ΔType u)
+    internal static bool Implements(this rtype t, Type u)
     {
         if (u == default!)
             throw panic("reflect: nil type passed to Type.Implements");
@@ -51,6 +56,8 @@ partial class reflectlite_package
 
         return GoReflect.GoImplements(sysTypeOfLiteType(u), t.Type == nil ? null : t.Type.Value.sysType);
     }
+
+} partial class reflectlite_package {
 
     // AssignableTo is NO LONGER hand-owned here — the identity-on-the-managed-type restatement
     // was strictly narrower than Go's rule (it rejected `*int` ↔ `type IntPtr *int`, both
@@ -91,14 +98,14 @@ partial class reflectlite_package
         if (ᏑT == nil || ᏑV == nil)
             return false;
 
-        abiꓸKind kind = ᏑT.Value.Kind();
+        abi.Kind kind = ᏑT.Value.Kind();
 
         if (kind != ᏑV.Value.Kind())
             return false;
 
         // Non-composite types of equal kind have the same underlying type (the predefined
         // instance).
-        if (abi_package.Bool <= kind && kind <= abi_package.Complex128 || kind == abi_package.ΔString || kind == abi_package.UnsafePointer)
+        if (abi_package.Bool <= kind && kind <= abi_package.Complex128 || kind == abi_package.String || kind == abi_package.UnsafePointer)
             return true;
 
         // Composite types — Go's switch, in Go's order.
@@ -243,6 +250,8 @@ partial class reflectlite_package
         return abi_package.synthType(f.Type, dims, null, fieldDir);
     }
 
+} partial class reflectliteᴛrtype {
+
     // PkgPath answers a DEFINED type's import path over the same GoReflect machinery reflect's
     // side uses (GoPackagePath reads the managed nesting the converter emits). The literal form
     // read the uncommonType's PkgPath name offset out of the linker name blob and answered ""
@@ -279,9 +288,11 @@ partial class reflectlite_package
         return (@string)GoReflect.GoTypeName(t.Type.Value.sysType, t.Type.Value.arrayDims, t.Type.Value.chanDirChain, null);
     }
 
+} partial class reflectlite_package {
+
     // sysTypeOfLiteType recovers the managed System.Type a reflectlite Type wrapper describes
     // (the rtype's abi.Type carries it — synthType stamped it).
-    private static System.Type? sysTypeOfLiteType(ΔType u)
+    internal static System.Type? sysTypeOfLiteType(Type u)
     {
         var (rt, ok) = u._<rtype>(ᐧ);
         return ok && rt.Type != nil ? rt.Type.Value.sysType : null;

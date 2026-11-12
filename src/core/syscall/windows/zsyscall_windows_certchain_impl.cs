@@ -305,7 +305,7 @@ partial class syscall_package
     // `Size` is an INPUT this mirror owns, exactly as Process32First's dwSize is: the caller's value
     // is Go's `unsafe.Sizeof(*para)`, which is the native 80 by construction, but the mirror is the
     // only thing that can be sure of it and so states it from its own layout.
-    public static unsafe error /*err*/ CertGetCertificateChain(ΔHandle engine, ж<CertContext> Ꮡleaf, ж<Filetime> Ꮡtime, ΔHandle additionalStore, ж<CertChainPara> Ꮡpara, uint32 flags, uintptr reserved, ж<ж<CertChainContext>> ᏑchainCtx) {
+    public static unsafe error /*err*/ CertGetCertificateChain(Handle engine, ж<CertContext> Ꮡleaf, ж<Filetime> Ꮡtime, Handle additionalStore, ж<CertChainPara> Ꮡpara, uint32 flags, uintptr reserved, ж<ж<CertChainContext>> ᏑchainCtx) {
         nuint cell = 0;
         uintptr cellAddr = ᏑchainCtx == nil ? 0 : (uintptr)(void*)(&cell);
 
@@ -389,7 +389,7 @@ partial class syscall_package
     // crypto/x509 reads a FIELD through it (`storeCtx.Store`, this package's own additionalStore
     // argument one call later). ppStoreContext is documented OPTIONAL and root_windows.go passes nil
     // for every intermediate it adds, so the nil arm is a real caller.
-    public static unsafe error /*err*/ CertAddCertificateContextToStore(ΔHandle store, ж<CertContext> ᏑcertContext, uint32 addDisposition, ж<ж<CertContext>> ᏑstoreContext) {
+    public static unsafe error /*err*/ CertAddCertificateContextToStore(Handle store, ж<CertContext> ᏑcertContext, uint32 addDisposition, ж<ж<CertContext>> ᏑstoreContext) {
         nuint cell = 0;
         uintptr cellAddr = ᏑstoreContext == nil ? 0 : (uintptr)(void*)(&cell);
 
@@ -543,7 +543,7 @@ partial class syscall_package
         view.EncodingType = native->EncodingType;
         view.Length = native->Length;
         view.EncodedCert = copyNativeBytes(native->EncodedCert, native->Length);
-        view.Store = ((ΔHandle)(uintptr)native->CertStore);
+        view.Store = ((Handle)(uintptr)native->CertStore);
 
         rememberNativeIdentity(box, address);
 

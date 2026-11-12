@@ -26,8 +26,11 @@ using windows = @internal.syscall.windows_package;
 using os = os_package;
 using syscall = syscall_package;
 using @internal.syscall;
+using static pprof_package;
 
 partial class pprof_package {
+
+} partial class pprofᴛprofileBuilder {
 
 // readMapping adds memory mapping information to the profile.
 internal static void readMapping(this ж<profileBuilder> Ꮡb) {
@@ -73,6 +76,8 @@ internal static void readMapping(this ж<profileBuilder> Ꮡb) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class pprof_package {
 
 internal static (uint64 start, uint64 end, @string exe, @string buildID, error err) readMainModuleMapping() {
     uint64 start = default!;

@@ -73,17 +73,18 @@ using fs = go.io.fs_package;
 using syscall = syscall_package;
 using go.@internal;
 using go.sync;
+using static os_package;
 
 partial class os_package {
 
 // Byte offsets and sizes of darwin's `struct dirent`. See the layout table above.
-private const int direntInoOff = 0;
+internal const int direntInoOff = 0;
 private const int direntReclenOff = 16;
 private const int direntNamlenOff = 18;
-private const int direntTypeOff = 20;
+internal const int direntTypeOff = 20;
 private const int direntNameOff = 21;
 private const int direntNameMax = 1024;
-private const int direntSize = direntNameOff + direntNameMax;
+internal const int direntSize = direntNameOff + direntNameMax;
 
 // libc's readdir_r(3). The `entry` and `result` arguments are UNMANAGED addresses — that is the
 // whole point of this file (see the header): libc writes the entry record and publishes the
@@ -100,7 +101,7 @@ private delegate int readdir_r_fn(nint dir, nint entry, nint result);
 
 private static readdir_r_fn? s_readdir_r;
 
-private static int readdir_r_native(nint dir, nint entry, nint result) {
+internal static int readdir_r_native(nint dir, nint entry, nint result) {
     s_readdir_r ??= Marshal.GetDelegateForFunctionPointer<readdir_r_fn>(
         GoCgoDynamicImports.Resolve("readdir_r", "/usr/lib/libSystem.B.dylib"));
 
@@ -122,6 +123,8 @@ private static int readdirRCall(readdir_r_fn fn, nint dir, nint entry, nint resu
 
 // GoReaddirRCall is GolibTests' seam: it runs readdirRCall with fn as the native function.
 public static int GoReaddirRCall(nint fn) => readdirRCall(Marshal.GetDelegateForFunctionPointer<readdir_r_fn>(fn), 0, 0, 0);
+
+} partial class osᴛFile {
 
 // readdir is Go's dir_darwin.go (*File).readdir, protocol-for-protocol, over an unmanaged entry
 // buffer. The dirInfo/OpenDir handshake, the size/n convention, the EINTR retry, the zero-inode
@@ -243,16 +246,18 @@ public static int GoReaddirRCall(nint fn) => readdirRCall(Marshal.GetDelegateFor
     return (names, dirents, infos, default!);
 }
 
+} partial class os_package {
+
 // ReadUInt64 reads one little-endian 64-bit field out of the unmanaged entry record. Darwin on
 // both amd64 and arm64 is little-endian, matching the field order the layout table documents.
-private static uint64 ReadUInt64(nint at) {
+internal static uint64 ReadUInt64(nint at) {
     return (uint64)(uint32)Marshal.ReadInt32(at) | ((uint64)(uint32)Marshal.ReadInt32(at + 4) << 32);
 }
 
 // ReadEntryName decodes the entry's `d_name` — Go reads the inline array and truncates at the
 // first NUL, which is what d_namlen already reports; the NUL scan is kept as the authority
 // because Go's own loop trusts it over the length field, and both are bounded by d_name's size.
-private static @string ReadEntryName(nint entry) {
+internal static @string ReadEntryName(nint entry) {
     nint length = (nint)(uint16)Marshal.ReadInt16(entry + direntNamlenOff);
     if (length > direntNameMax) {
         length = direntNameMax;

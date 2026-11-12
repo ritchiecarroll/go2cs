@@ -104,7 +104,7 @@ partial class windows_package
     /// it — which is what lets <c>readMapping</c>'s <c>err != nil</c> arm fall back to its fake
     /// mapping entry without reading a half-filled record.
     /// </remarks>
-    public static unsafe error /*err*/ Module32First(syscallꓸHandle snapshot, ж<ModuleEntry32> ᏑmoduleEntry) {
+    public static unsafe error /*err*/ Module32First(syscall.Handle snapshot, ж<ModuleEntry32> ᏑmoduleEntry) {
         NativeModuleEntry32 native = default;
 
         // dwSize is an INPUT: Module32FirstW rejects the call unless it is the native record size.
@@ -136,7 +136,7 @@ partial class windows_package
     /// snapshot handle, not in the entry — Go reuses one entry only because it is the caller's
     /// buffer.
     /// </remarks>
-    public static unsafe error /*err*/ Module32Next(syscallꓸHandle snapshot, ж<ModuleEntry32> ᏑmoduleEntry) {
+    public static unsafe error /*err*/ Module32Next(syscall.Handle snapshot, ж<ModuleEntry32> ᏑmoduleEntry) {
         NativeModuleEntry32 native = default;
 
         native.Size = (uint32)sizeof(NativeModuleEntry32);

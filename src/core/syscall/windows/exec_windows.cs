@@ -242,11 +242,11 @@ internal static (slice<uint16>, error) createEnvBlock(slice<@string> envv) {
     return (b, default!);
 }
 
-public static void CloseOnExec(ΔHandle fd) {
+public static void CloseOnExec(Handle fd) {
     SetHandleInformation(fd, HANDLE_FLAG_INHERIT, 0);
 }
 
-public static error /*err*/ SetNonblock(ΔHandle fd, bool nonblocking) {
+public static error /*err*/ SetNonblock(Handle fd, bool nonblocking) {
     return default!;
 }
 
@@ -351,8 +351,8 @@ internal static (@string name, error err) joinExeDirAndFName(@string dir, @strin
     public ж<SecurityAttributes> ProcessAttributes; // if set, applies these security attributes as the descriptor for the new process
     public ж<SecurityAttributes> ThreadAttributes; // if set, applies these security attributes as the descriptor for the main thread of the new process
     public bool NoInheritHandles;                // if set, no handles are inherited by the new process, not even the standard handles, contained in ProcAttr.Files, nor the ones contained in AdditionalInheritedHandles
-    public slice<ΔHandle> AdditionalInheritedHandles;     // a list of additional handles, already marked as inheritable, that will be inherited by the new process
-    public ΔHandle ParentProcess;            // if non-zero, the new process regards the process given by this handle as its parent process, and AdditionalInheritedHandles, if set, should exist in this parent process
+    public slice<Handle> AdditionalInheritedHandles;     // a list of additional handles, already marked as inheritable, that will be inherited by the new process
+    public Handle ParentProcess;            // if non-zero, the new process regards the process given by this handle as its parent process, and AdditionalInheritedHandles, if set, should exist in this parent process
 }
 
 internal static ж<ProcAttr> ᏑzeroProcAttr = new StandardBox<ProcAttr>(default(ProcAttr));
@@ -571,7 +571,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
 
     // The handles duplicated below are owned by this call until CreateProcess consumes them;
     // Go closes the duplicates through a deferred DuplicateHandle(DUPLICATE_CLOSE_SOURCE).
-    var duplicated = new System.Collections.Generic.List<ΔHandle>();
+    var duplicated = new System.Collections.Generic.List<Handle>();
     var (currentProcess, _) = GetCurrentProcess();
     var parentProcess = (~sys).ParentProcess != 0 ? sys.Value.ParentProcess : currentProcess;
 
@@ -595,12 +595,12 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
 
         // Duplicate the caller's three std handles into inheritable handles in the parent process,
         // exactly as Go does, and collect the non-zero ones for the inherit list.
-        var fd = new ΔHandle[len(attr.Files)];
+        var fd = new Handle[len(attr.Files)];
 
         for (nint i = 0; i < len(attr.Files); i++) {
             if (attr.Files[i] > 0) {
-                ref var dup = ref heap(new ΔHandle(), out var Ꮡdup);
-                var dupErr = DuplicateHandle(currentProcess, ((ΔHandle)attr.Files[i]), parentProcess, Ꮡdup, 0, true, DUPLICATE_SAME_ACCESS);
+                ref var dup = ref heap(new Handle(), out var Ꮡdup);
+                var dupErr = DuplicateHandle(currentProcess, ((Handle)attr.Files[i]), parentProcess, Ꮡdup, 0, true, DUPLICATE_SAME_ACCESS);
                 if (dupErr != default!) {
                     return (0, 0, dupErr);
                 }
@@ -723,7 +723,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
 
         NativeProcessInformation pi = Marshal.PtrToStructure<NativeProcessInformation>(pip);
 
-        CloseHandle((ΔHandle)(uintptr)(nuint)(nint)pi.Thread);
+        CloseHandle((Handle)(uintptr)(nuint)(nint)pi.Thread);
 
         return (((nint)pi.ProcessId), ((uintptr)(nuint)(nint)pi.Process), default!);
     }
@@ -731,7 +731,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
         // Close this call's duplicates in the parent process — Go's deferred
         // DuplicateHandle(…, DUPLICATE_CLOSE_SOURCE). CreateProcess has already inherited them.
         foreach (var h in duplicated) {
-            DuplicateHandle(parentProcess, h, (ΔHandle)(0), (ж<ΔHandle>)(nil), 0, false, DUPLICATE_CLOSE_SOURCE);
+            DuplicateHandle(parentProcess, h, (Handle)(0), (ж<Handle>)(nil), 0, false, DUPLICATE_CLOSE_SOURCE);
         }
 
         if (attrListInitialized) {

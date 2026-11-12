@@ -576,32 +576,32 @@ public static byte[] GoAesKeySchedule() => aesSchedule.ToArray();
 
 // The four dispatchers, as asm_amd64.s's: aeshashbody when useAeshash is set, the fallback otherwise.
 
-internal static partial uintptr memhash(@unsafe.Pointer Δp, uintptr h, uintptr s) {
+internal static partial uintptr memhash(@unsafe.Pointer p, uintptr h, uintptr s) {
     if (useAeshash)
-        return (nuint)GoAeshash(referentBytes("memhash", Δp, s.Value), h.Value, aesSchedule);
+        return (nuint)GoAeshash(referentBytes("memhash", p, s.Value), h.Value, aesSchedule);
 
-    return (nuint)GoMemhashPointer(Δp, h.Value, s.Value);
+    return (nuint)GoMemhashPointer(p, h.Value, s.Value);
 }
 
-internal static partial uintptr memhash32(@unsafe.Pointer Δp, uintptr h) {
+internal static partial uintptr memhash32(@unsafe.Pointer p, uintptr h) {
     if (useAeshash)
-        return (nuint)GoAeshash32(MemoryMarshal.Read<uint>(referentBytes("memhash32", Δp, 4)), h.Value, aesSchedule);
+        return (nuint)GoAeshash32(MemoryMarshal.Read<uint>(referentBytes("memhash32", p, 4)), h.Value, aesSchedule);
 
-    return (nuint)GoMemhash32Pointer(Δp, h.Value);
+    return (nuint)GoMemhash32Pointer(p, h.Value);
 }
 
-internal static partial uintptr memhash64(@unsafe.Pointer Δp, uintptr h) {
+internal static partial uintptr memhash64(@unsafe.Pointer p, uintptr h) {
     if (useAeshash)
-        return (nuint)GoAeshash64(MemoryMarshal.Read<ulong>(referentBytes("memhash64", Δp, 8)), h.Value, aesSchedule);
+        return (nuint)GoAeshash64(MemoryMarshal.Read<ulong>(referentBytes("memhash64", p, 8)), h.Value, aesSchedule);
 
-    return (nuint)GoMemhash64Pointer(Δp, h.Value);
+    return (nuint)GoMemhash64Pointer(p, h.Value);
 }
 
-internal static partial uintptr strhash(@unsafe.Pointer Δp, uintptr h) {
+internal static partial uintptr strhash(@unsafe.Pointer p, uintptr h) {
     if (useAeshash)
-        return (nuint)GoAeshash(strhashContent(Δp), h.Value, aesSchedule);
+        return (nuint)GoAeshash(strhashContent(p), h.Value, aesSchedule);
 
-    return (nuint)GoStrhashPointer(Δp, h.Value);
+    return (nuint)GoStrhashPointer(p, h.Value);
 }
 
 } // end runtime_package

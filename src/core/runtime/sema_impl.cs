@@ -79,10 +79,12 @@ partial class runtime_package
             }
             catch (Exception ex)
             {
-                // Name the runtime frame it died in: a bare NullReferenceException does not say where.
+                // Name the runtime frame it died in: a bare NullReferenceException does not say where. A runtime
+                // frame is a function of the package class or a method of a receiver type's holder (runtimeᴛ<Type>).
                 string? frame = new System.Diagnostics.StackTrace(ex).GetFrames()
                     .Select(f => f.GetMethod())
-                    .FirstOrDefault(m => m?.DeclaringType == typeof(runtime_package))?.Name;
+                    .FirstOrDefault(m => m?.DeclaringType is { } type &&
+                        (type == typeof(runtime_package) || type.Name.StartsWith("runtimeᴛ", StringComparison.Ordinal)))?.Name;
 
                 acquirerFailure = $"{ex.GetType().Name} in runtime.{frame ?? "?"}: {ex.Message}";
             }

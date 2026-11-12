@@ -117,6 +117,7 @@ namespace go.@internal;
 using Δsyscall = go.syscall_package;
 using windows = go.@internal.syscall.windows_package;
 using atomic = go.sync.atomic_package;
+using static poll_package;
 
 partial class poll_package
 {
@@ -157,6 +158,8 @@ partial class poll_package
     internal static int32 sockaddrInet6ToRaw(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ref Δsyscall.SockaddrInet6 sa) {
         return Δsyscall.GoRawSockaddrFromInet6(Ꮡrsa, sa.Port, sa.ZoneId, sa.Addr);
     }
+
+} partial class pollᴛFD {
 
     // (*FD).DisassociateIOCP. Go's body asks the kernel to drop the handle's completion port, which
     // in Go always exists: netpollopen associates every pollable handle at open. The managed poller
@@ -210,4 +213,7 @@ partial class poll_package
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
         finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
     }
+
+} partial class poll_package {
+
 }

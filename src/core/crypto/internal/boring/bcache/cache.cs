@@ -42,6 +42,7 @@ namespace go.crypto.@internal.boring;
 using atomic = sync.atomic_package;
 using @unsafe = unsafe_package;
 using sync;
+using static bcache_package;
 
 partial class bcache_package {
 
@@ -58,7 +59,7 @@ partial class bcache_package {
 // This means that clients need to be able to cope with cache entries
 // disappearing, but it also means that clients don't need to worry about
 // cache entries keeping the keys from being collected.
-[GoType] partial struct Cache<K, V> {
+[GoType] public partial struct Cache<K, V> {
     // The runtime atomically stores nil to ptable at the start of each GC.
     internal atomic.Pointer<cacheTable<K, V>> ptable;
 }
@@ -72,6 +73,8 @@ partial struct cacheTable<K, V>;
     internal atomic.Pointer<V> v; // read and written atomically to allow updates
     internal ж<cacheEntry<K, V>> next; // immutable once linked into table
 }
+
+} partial class bcacheᴛCache {
 
 // provided by runtime
 //
@@ -91,10 +94,14 @@ public static void Register<K, V>(this ж<Cache<K, V>> Ꮡc) {
     golib.BoringCaches.Register(() => Ꮡc.Clear());
 }
 
+} partial class bcache_package {
+
 // cacheSize is the number of entries in the hash table.
 // The hash is the pointer value mod cacheSize, a prime.
 // Collisions are resolved by maintaining a linked list in each hash slot.
 internal static UntypedInt cacheSize => 1021;
+
+} partial class bcacheᴛCache {
 
 // table returns a pointer to the current cache hash table,
 // coping with the possibility of the GC clearing it out from under us.
@@ -189,5 +196,7 @@ public static void Put<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, ж<V> Ꮡv) 
         noK = start;
     }
 }
+
+} partial class bcache_package {
 
 } // end bcache_package

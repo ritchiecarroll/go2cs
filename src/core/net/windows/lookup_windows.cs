@@ -64,6 +64,7 @@ using syscall = syscall_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal.syscall;
+using static net_package;
 
 [GoFieldAccess(typeof(syscall.RawSockaddrInet4), typeof(syscall.RawSockaddrInet6), typeof(syscall.DNSSRVData), typeof(syscall.DNSMXData), typeof(syscall.DNSPTRData), typeof(syscall.DNSTXTData))]
 partial class net_package {
@@ -150,6 +151,8 @@ internal static (nint, error) lookupProtocol(context.Context ctx, @string name) 
     return default!;
 }
 
+} partial class netᴛResolver {
+
 internal static (slice<@string>, error) lookupHost(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var (ips, err) = Ꮡr.lookupIP(ctx, "ip"u8, name);
     if (err != default!) {
@@ -165,6 +168,8 @@ internal static (slice<@string>, error) lookupHost(this ж<Resolver> Ꮡr, conte
     return (addrs, default!);
 }
 
+} partial class net_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string getaddrinfowˢ = "getaddrinfow"u8;
 
@@ -172,6 +177,8 @@ internal static readonly @string getaddrinfowˢ = "getaddrinfow"u8;
     internal slice<IPAddr> addrs;
     internal error err;
 }
+
+} partial class netᴛResolver {
 
 internal static (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name) {
     {
@@ -361,8 +368,12 @@ Err: "unknown network"u8, Name: network + "/"u8 + service))));
     finally { ᒐ.Run(); }
 }
 
+} partial class net_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string dnsqueryˢ = "dnsquery"u8;
+
+} partial class netᴛResolver {
 
 internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     GoFrame ᒐ = default;
@@ -580,6 +591,8 @@ internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, conte
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
 }
+
+} partial class net_package {
 
 internal static UntypedInt dnsSectionMask => 0x0003;
 

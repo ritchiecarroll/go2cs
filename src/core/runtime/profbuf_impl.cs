@@ -27,8 +27,11 @@ namespace go;
 using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
+
+} partial class runtimeᴛprofBuf {
 
 // write writes an entry to the profiling buffer b.
 // The entry begins with a fixed hdr, which must have
@@ -125,5 +128,7 @@ internal static void write(this ж<profBuf> Ꮡb, ж<@unsafe.Pointer> ᏑtagPtr,
         break;
     }
 }
+
+} partial class runtime_package {
 
 } // end runtime_package

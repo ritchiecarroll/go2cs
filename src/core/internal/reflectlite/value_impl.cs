@@ -7,6 +7,9 @@
 
 namespace go.@internal;
 
+using abi = go.@internal.abi_package;
+using static reflectlite_package;
+
 partial class reflectlite_package
 {
     // Implementation of ifaceE2I
@@ -118,7 +121,7 @@ partial class reflectlite_package
         if (cur is not null)
             return cur;
 
-        abiꓸKind k = v.kind();
+        abi.Kind k = v.kind();
 
         // A nil FUNC packs as (type=func-type, value=nil) exactly as a nil pointer does —
         // GoReflect.CanonicalNilFunc, mirroring reflect's packInterfaceValue arm.
@@ -141,6 +144,8 @@ partial class reflectlite_package
     {
         return ValueOf(i);
     }
+
+} partial class reflectliteᴛValue {
 
     // Len returns v's length (v must be an Array, Chan, Map, Slice, or String).
     public static nint Len(this Value v)
@@ -165,7 +170,7 @@ partial class reflectlite_package
     // is v's value). A structurally nil pointer yields the invalid zero Value.
     public static Value Elem(this Value v)
     {
-        abiꓸKind k = v.kind();
+        abi.Kind k = v.kind();
 
         if (k == abi_package.Interface)
             return makeReflectValue(v.live);
@@ -252,9 +257,12 @@ partial class reflectlite_package
         GoReflect.WritePointerSlot(v.addrBox, marshalled);
     }
 
+} partial class reflectlite_package {
+
     // methodName returns a best-effort Go-shaped name of the calling reflectlite method for
     // panic messages — runtime.Caller has no managed form; walk the managed stack instead. The
-    // name is only ever observed in panic text.
+    // name is only ever observed in panic text. A Go method sits in its receiver type's holder,
+    // `reflectliteᴛValue`, which names the type as Go's symbol does.
     internal static @string methodName()
     {
         System.Diagnostics.StackTrace trace = new(2, false);
@@ -264,10 +272,15 @@ partial class reflectlite_package
             System.Reflection.MethodBase? method = trace.GetFrame(i)?.GetMethod();
             System.Type? decl = method?.DeclaringType;
 
-            if (method is null || decl is null)
+            if (method is null || decl is null || method.Name.StartsWith("mustBe"))
                 continue;
 
-            if (decl.Name.EndsWith("_package") && !method.Name.StartsWith("mustBe"))
+            int holderMark = decl.Name.IndexOf('ᴛ');
+
+            if (holderMark > 0)
+                return (@string)(decl.Name[..holderMark] + "." + decl.Name[(holderMark + 1)..] + "." + method.Name);
+
+            if (decl.Name.EndsWith("_package"))
                 return (@string)(decl.Name[..^"_package".Length] + "." + method.Name);
         }
 

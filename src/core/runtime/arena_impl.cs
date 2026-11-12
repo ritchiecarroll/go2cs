@@ -52,6 +52,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 // The plain namespace using brings internal/runtime/atomic's [GoRecv] extension methods (Bool.Load
 // and Store) into scope; an alias alone does not participate in extension lookup.
+using go.@internal;
 using go.@internal.runtime;
 using abi = go.@internal.abi_package;
 using @unsafe = go.unsafe_package;
@@ -59,6 +60,8 @@ using @unsafe = go.unsafe_package;
 [module: go.GoManualConversion]
 
 namespace go;
+
+using static runtime_package;
 
 partial class runtime_package
 {
@@ -87,9 +90,13 @@ partial class runtime_package
         return a;
     }
 
+} partial class runtimeᴛuserArena {
+
     // new allocates a new object of the provided type into the arena, and returns its pointer.
     [GoRecv] internal static @unsafe.Pointer @new(this ref userArena a, ж<_type> Ꮡtyp) =>
         new(userArenaNew(ref a, Ꮡtyp));
+
+} partial class runtime_package {
 
     // userArenaNew is new's managed form: the allocation itself, a pointer box whose static type is
     // *T, for a caller (UserArena.New) that stores it into an interface.
@@ -101,6 +108,8 @@ partial class runtime_package
         userArenaKeep(ref a, box, box, Ꮡtyp.Value.Size_);
         return (INilPointer)box;
     }
+
+} partial class runtimeᴛuserArena {
 
     // slice allocates a new slice backing store. slice must be a pointer to a slice (i.e. *[]T),
     // because userArenaSlice will update the slice directly.
@@ -114,18 +123,18 @@ partial class runtime_package
 
         ж<_type> typ = abi.TypeOf(sl);
 
-        if (typ == nil || abi.Kind(typ) != abi.Pointer) {
+        if (typ == nil || typ.Kind() != abi.Pointer) {
             throw panic("slice result of non-ptr type");
         }
 
-        typ = abi.Elem(typ);
+        typ = typ.Elem();
 
-        if (abi.Kind(typ) != abi.Slice) {
+        if (typ.Kind() != abi.Slice) {
             throw panic("slice of non-ptr-to-slice type");
         }
 
         // t is now the slice type; its element type sizes the allocation.
-        ж<_type> et = abi.Elem(typ);
+        ж<_type> et = typ.Elem();
         object slice = GoReflect.MakeContainer(userArenaManagedType(typ), cap, cap);
 
         // A zero-size element allocates nothing (Go hands back zerobase), and neither does cap 0.
@@ -156,14 +165,16 @@ partial class runtime_package
         Ꮡa.Value.allocations = null;
     }
 
+} partial class runtime_package {
+
     // arena_heapify takes a value that lives in an arena and makes a copy of it on the heap.
     // Values that don't live in an arena are returned unmodified.
     internal static any arena_heapify(any s)
     {
         ж<_type> t = abi.TypeOf(s);
-        abiꓸKind kind = t == nil ? abi.Invalid : abi.Kind(t);
+        abi.Kind kind = t == nil ? abi.Invalid : t.Kind();
 
-        if (kind == abi.ΔString) {
+        if (kind == abi.String) {
             if (s is not @string str || str.Length == 0 || !userArenaIsMember(((INilPointer)@unsafe.StringData(str)).ReferentObject)) {
                 return s;
             }
@@ -192,7 +203,7 @@ partial class runtime_package
             }
 
             ((IUntypedSlotAccess)pointer).TryLoadThrough(out object? value);
-            return GoReflect.NewPointerBox(userArenaManagedType(abi.Elem(t)), userArenaValueCopy(value));
+            return GoReflect.NewPointerBox(userArenaManagedType(t.Elem()), userArenaValueCopy(value));
         }
 
         throw panic("arena: Clone only supports pointers, slices, and strings");
@@ -200,7 +211,7 @@ partial class runtime_package
 
     // userArenaKeep records one allocation: kept alive by the arena's list, and a member for Clone.
     // Over userArenaChunkMaxAllocBytes Go allocates from the heap instead, so neither applies.
-    private static void userArenaKeep(ref userArena a, object allocation, object? referent, uintptr size)
+    internal static void userArenaKeep(ref userArena a, object allocation, object? referent, uintptr size)
     {
         if (size > userArenaChunkMaxAllocBytes) {
             return;
@@ -219,7 +230,7 @@ partial class runtime_package
 
     // The System.Type a synthesized descriptor stands for. Every descriptor the arena sees comes from
     // an interface value's dynamic type (abi.TypeOf), which is always synthesized.
-    private static System.Type userArenaManagedType(ж<_type> Ꮡtyp) =>
+    internal static System.Type userArenaManagedType(ж<_type> Ꮡtyp) =>
         Ꮡtyp.Value.sysType ?? throw panic("arena: type descriptor carries no managed type");
 
     // A Go value copy (typedmemmove) of one allocation's value: an array, or a struct carrying
@@ -229,7 +240,7 @@ partial class runtime_package
 
     // The backing storage of a slice value (or of a named slice type's underlying slice), or null for
     // one with no storage.
-    private static object? userArenaSliceReferent(object value)
+    internal static object? userArenaSliceReferent(object value)
     {
         if (GoReflect.TryUnwrapWrapperValue(value, out object? inner)) {
             value = inner;

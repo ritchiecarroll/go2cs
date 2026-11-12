@@ -82,6 +82,8 @@ using @unsafe = go.unsafe_package;
 
 namespace go.@internal;
 
+using static sync_package;
+
 partial class sync_package {
 
 // HashTrieMap is an implementation of a concurrent hash-trie. The implementation
@@ -91,7 +93,7 @@ partial class sync_package {
 //
 // The zero HashTrieMap is empty and ready to use.
 // It must not be copied after first use.
-[GoType] partial struct HashTrieMap<K, V>
+[GoType] public partial struct HashTrieMap<K, V>
 {
     // The whole of the map's state, held behind a REFERENCE exactly as Go holds it behind the
     // `root *indirect[K, V]` pointer: a by-value copy of a HashTrieMap shares one map. Null until
@@ -238,6 +240,8 @@ internal sealed class valueCell<V>
     }
 }
 #pragma warning restore CS8714
+
+} partial class syncᴛHashTrieMap {
 
 // init seeds the zero HashTrieMap on first touch. Go's split is a cheap flag read that falls through
 // to a locked publish; here the same split lives in storeOf — a Volatile.Read fast path over an
@@ -510,11 +514,13 @@ public static void Clear<K, V>(this ж<HashTrieMap<K, V>> Ꮡht)
     Volatile.Write(ref ht.store, new mapStore<K, V>(current.seed, current.hashHook));
 }
 
+} partial class sync_package {
+
 // storeOf returns the map's backing store, creating it once on first use (race-safe). This IS 1.24's
 // init/initSlow: the zero HashTrieMap is documented empty and ready to use, the flag read is the
 // Volatile.Read below and the locked publish is the CompareExchange, and a loser of that race adopts
 // the winner's store rather than its own. Same idiom, and same reasoning, as sync.Mutex's gateOf.
-private static mapStore<K, V> storeOf<K, V>(ref HashTrieMap<K, V> ht)
+internal static mapStore<K, V> storeOf<K, V>(ref HashTrieMap<K, V> ht)
 {
     mapStore<K, V>? store = Volatile.Read(ref ht.store);
 
@@ -530,7 +536,7 @@ private static mapStore<K, V> storeOf<K, V>(ref HashTrieMap<K, V> ht)
 // The zero V, spelled once. `@new<V>().ValueSlot` is the corpus idiom for Go's `*new(V)`, but it
 // cannot be written inside Swap or CompareAndSwap, whose Go-named `@new` parameter takes that
 // identifier; naming it here keeps ONE spelling of the zero in every method rather than two.
-private static V zeroValue<V>()
+internal static V zeroValue<V>()
 {
     return @new<V>().ValueSlot;
 }
@@ -580,7 +586,7 @@ private static void installKeyHash<K, V>(ref HashTrieMap<K, V> ht, Func<@unsafe.
 // comparable; everything else, `any` included, is) and it is the same definition abi.Type.Equal is
 // populated from, so this answers exactly what Go's nil check answers. Resolved once per
 // instantiation, not per call — this sits in front of every CompareAndSwap on the hot path.
-private static void mustBeStaticallyComparable<V>(string caller)
+internal static void mustBeStaticallyComparable<V>(string caller)
 {
     if (staticallyComparable<V>.applies) {
         return;
@@ -599,7 +605,7 @@ private static class staticallyComparable<V> {
 // above admits `any`, which moves the question to run time. Mirror the panic rather than letting
 // EqualityComparer<V>.Default answer a question Go refuses to answer. Inert for every other V: a
 // non-interface V that got past the static check was comparable at the Go type check too.
-private static void mustBeComparable<V>(V value) {
+internal static void mustBeComparable<V>(V value) {
     if (!dynamicallyComparable<V>.applies || value is null) {
         return;
     }

@@ -35,6 +35,8 @@ using atomic = go.sync.atomic_package;
 
 namespace go;
 
+using static sync_package;
+
 partial class sync_package {
 
 // poolDequeue is a lock-free fixed-size single-producer,
@@ -44,7 +46,7 @@ partial class sync_package {
 // It has the added feature that it nils out unused slots to avoid
 // unnecessary retention of objects. This is important for sync.Pool,
 // but not typically a property considered in the literature.
-[GoType] partial struct poolDequeue {
+[GoType] internal partial struct poolDequeue {
     // headTail packs together a 32-bit head index and a 32-bit
     // tail index. Both are indexes into vals modulo len(vals)-1.
     //
@@ -92,7 +94,9 @@ internal static readonly UntypedInt dequeueLimit = /* (1 << dequeueBits) / 4 */ 
 // declared because it is part of this package's shape (package_info.cs declares its accessibility).
 [GoType("ж<EmptyStruct>")] partial class dequeueNil;
 
-private static readonly any dequeueNilValue = new();
+internal static readonly any dequeueNilValue = new();
+
+} partial class syncᴛpoolDequeue {
 
 [GoRecv] internal static (uint32 head, uint32 tail) unpack(this ref poolDequeue d, uint64 ptrs) {
     uint32 head = default!;
@@ -215,6 +219,8 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
     return (val, true);
 }
 
+} partial class sync_package {
+
 // poolChain is a dynamically-sized version of poolDequeue.
 //
 // This is implemented as a doubly-linked list queue of poolDequeues
@@ -222,7 +228,7 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
 // dequeue fills up, this allocates a new one and only ever pushes to
 // the latest dequeue. Pops happen from the other end of the list and
 // once a dequeue is exhausted, it gets removed from the list.
-[GoType] partial struct poolChain {
+[GoType] internal partial struct poolChain {
     // head is the poolDequeue to push to. This is only accessed
     // by the producer, so doesn't need to be synchronized.
     internal ж<poolChainElt> head;
@@ -245,6 +251,8 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
     // non-nil to nil.
     internal atomic.Pointer<poolChainElt> next, prev;
 }
+
+} partial class syncᴛpoolChain {
 
 internal static void pushHead(this ж<poolChain> Ꮡc, any val) {
     ref var c = ref Ꮡc.Value;
@@ -328,5 +336,7 @@ internal static (any, bool) popTail(this ж<poolChain> Ꮡc) {
         d = d2;
     }
 }
+
+} partial class sync_package {
 
 } // end sync_package

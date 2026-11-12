@@ -50,7 +50,7 @@ partial class runtime_package
     private static extern int libc_madvise(nint addr, nuint length, int advice);
 
     // sysMmap calls the mmap system call. Go's err is 0 or the positive errno.
-    internal static partial (@unsafe.Pointer Δp, nint err) sysMmap(@unsafe.Pointer addr, uintptr n, int32 prot, int32 flags, int32 fd, uint32 off)
+    internal static partial (@unsafe.Pointer p, nint err) sysMmap(@unsafe.Pointer addr, uintptr n, int32 prot, int32 flags, int32 fd, uint32 off)
     {
         nint r = libc_mmap((nint)(nuint)(uintptr)addr, (nuint)n, (int)prot, (int)flags, (int)fd, (long)(ulong)(uint)off);
         if (r == -1) {

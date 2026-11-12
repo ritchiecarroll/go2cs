@@ -45,6 +45,8 @@
 
 namespace go;
 
+using static time_package;
+
 partial class time_package {
 
 // Note: The runtime knows the layout of struct Ticker, since newTimer allocates it.
@@ -54,7 +56,7 @@ partial class time_package {
 
 // A Ticker holds a channel that delivers “ticks” of a clock
 // at intervals.
-[GoType] partial struct Ticker {
+[GoType] public partial struct Ticker {
     public /*<-*/channel<Time> C; // The channel on which the ticks are delivered.
     internal bool initTicker;
 }
@@ -95,6 +97,8 @@ public static ж<Ticker> NewTicker(Duration d) {
     return t;
 }
 
+} partial class timeᴛTicker {
+
 // Stop turns off a ticker. After Stop, no more ticks will be sent.
 // Stop does not close the channel, to prevent a concurrent goroutine
 // reading from the channel from seeing an erroneous "tick".
@@ -126,6 +130,8 @@ public static void Reset(this ж<Ticker> Ꮡt, Duration d) {
     // Go: resetTimer((*Timer)(unsafe.Pointer(t)), when(d), int64(d))
     resetRuntimeTimer(Ꮡt, when(d), (int64)d);
 }
+
+} partial class time_package {
 
 // Tick is a convenience wrapper for [NewTicker] providing access to the ticking
 // channel only. Unlike NewTicker, Tick will return nil if d <= 0.

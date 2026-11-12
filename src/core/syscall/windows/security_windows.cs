@@ -84,6 +84,7 @@ using System.Runtime.InteropServices;
 namespace go;
 
 using @unsafe = unsafe_package;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -168,7 +169,7 @@ public static UntypedInt SidTypeLabel => 10;
 
 // The security identifier (SID) structure is a variable-length
 // structure used to uniquely identify users or groups.
-[GoType] partial struct SID {
+[GoType] public partial struct SID {
 }
 
 // StringToSid converts a string-format security identifier
@@ -185,7 +186,7 @@ public static (ж<SID>, error) StringToSid(@string s) {
         if (e != default!) {
             return (default!, e);
         }
-        defer(LocalFree, ((ΔHandle)(uintptr)sid), ref ᒐ);
+        defer(LocalFree, ((Handle)(uintptr)sid), ref ᒐ);
         return sid.Copy();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -234,6 +235,8 @@ public static (ж<SID> sid, @string domain, uint32 accType, error err) LookupSID
     }
 }
 
+} partial class syscallᴛSID {
+
 // String converts sid to a string format
 // suitable for display, storage, or transmission.
 public static (@string, error) String(this ж<SID> Ꮡsid) {
@@ -244,7 +247,7 @@ public static (@string, error) String(this ж<SID> Ꮡsid) {
         if (e != default!) {
             return ("", e);
         }
-        defer(LocalFree, ((ΔHandle)(uintptr)s), ref ᒐ);
+        defer(LocalFree, ((Handle)(uintptr)s), ref ᒐ);
         return (utf16PtrToString(s), default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -300,6 +303,8 @@ public static (@string account, @string domain, uint32 accType, error err) Looku
         }
     }
 }
+
+} partial class syscall_package {
 
 public static UntypedInt TOKEN_ASSIGN_PRIMARY => /* 1 << iota */ 1;
 public static UntypedInt TOKEN_DUPLICATE => 2;
@@ -370,7 +375,7 @@ public static UntypedInt MaxTokenInfoClass => 29;
     public ж<SID> PrimaryGroup;
 }
 
-[GoType("num:uintptr")] partial struct Token;
+[GoType("num:uintptr")] public partial struct Token;
 
 //sys	OpenProcessToken(h Handle, access uint32, token *Token) (err error) = advapi32.OpenProcessToken
 //sys	GetTokenInformation(t Token, infoClass uint32, info *byte, infoLen uint32, returnedLen *uint32) (err error) = advapi32.GetTokenInformation
@@ -391,10 +396,14 @@ public static (Token, error) OpenCurrentProcessToken() {
     return (t, default!);
 }
 
+} partial class syscallᴛToken {
+
 // Close releases access to access token.
 public static error Close(this Token t) {
-    return CloseHandle(((ΔHandle)(uintptr)t));
+    return CloseHandle(((Handle)(uintptr)t));
 }
+
+} partial class syscall_package {
 
 // ---- the token-information transcription (hand-owned; see the file header) -------------------
 
@@ -403,20 +412,20 @@ public static error Close(this Token t) {
 // follows it. Declaring the mirrors rather than reading at hand-computed offsets is what keeps the
 // transcription right on a 32-bit target, where PSID is four bytes and Attributes moves with it.
 [StructLayout(LayoutKind.Sequential)]
-private struct NativeSIDAndAttributes
+internal struct NativeSIDAndAttributes
 {
     public nuint Sid;
     public uint32 Attributes;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-private struct NativeTokenuser
+internal struct NativeTokenuser
 {
     public NativeSIDAndAttributes User;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-private struct NativeTokenprimarygroup
+internal struct NativeTokenprimarygroup
 {
     public nuint PrimaryGroup;
 }
@@ -434,7 +443,7 @@ private static readonly ConditionalWeakTable<object, object> s_tokenInfoAnchors 
 // A zero address answers the nil pointer, matching Go's `(*SID)(unsafe.Pointer(uintptr(0)))`, and
 // is returned WITHOUT an anchor on purpose: nil is golib's canonical shared NilBox, so anchoring
 // a buffer to it would key every nil SID in the process to one entry.
-private static ж<SID> nativeSid(nuint address, byte[] buffer) {
+internal static ж<SID> nativeSid(nuint address, byte[] buffer) {
     if (address == 0) {
         return default!;
     }
@@ -447,7 +456,7 @@ private static ж<SID> nativeSid(nuint address, byte[] buffer) {
 // verbatim but for WHERE THE BUFFER COMES FROM: the Pinned Object Heap, so the self-referential
 // pointer GetTokenInformation writes into it can never go stale. See the file header, remedy
 // half 2 -- this one line is the whole lifetime half of the fix.
-private static (byte[], error) getTokenInfoBuffer(Token t, uint32 @class, nint initSize) {
+internal static (byte[], error) getTokenInfoBuffer(Token t, uint32 @class, nint initSize) {
     ref var n = ref heap<uint32>(out var Ꮡn);
     n = (uint32)initSize;
     while (ᐧ) {
@@ -465,6 +474,8 @@ private static (byte[], error) getTokenInfoBuffer(Token t, uint32 @class, nint i
         }
     }
 }
+
+} partial class syscallᴛToken {
 
 // getInfo retrieves a specified type of information about an access token.
 //
@@ -539,5 +550,7 @@ public static (@string, error) GetUserProfileDirectory(this Token t) {
         }
     }
 }
+
+} partial class syscall_package {
 
 } // end syscall_package

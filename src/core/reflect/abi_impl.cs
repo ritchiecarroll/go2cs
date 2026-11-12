@@ -31,17 +31,20 @@ using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static reflect_package;
 
 partial class reflect_package {
+
+} partial class reflectᴛabiSeq {
 
 [GoRecv] internal static bool regAssign(this ref abiSeq a, ж<abi.Type> Ꮡt, uintptr offset) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var exprᴛ1 = ((ΔKind)(nuint)(uint8)t.Kind());
-    if (exprᴛ1 == ΔUnsafePointer || exprᴛ1 == ΔPointer || exprᴛ1 == Chan || exprᴛ1 == Map || exprᴛ1 == Func) {
+    var exprᴛ1 = ((Kind)(nuint)(uint8)t.Kind());
+    if (exprᴛ1 == UnsafePointer || exprᴛ1 == Pointer || exprᴛ1 == Chan || exprᴛ1 == Map || exprᴛ1 == Func) {
         return a.assignIntN(offset, t.Size(), 1, 0b1);
     }
-    if (exprᴛ1 == ΔBool || exprᴛ1 == ΔInt || exprᴛ1 == ΔUint || exprᴛ1 == Int8 || exprᴛ1 == Uint8 || exprᴛ1 == Int16 || exprᴛ1 == Uint16 || exprᴛ1 == Int32 || exprᴛ1 == Uint32 || exprᴛ1 == Uintptr) {
+    if (exprᴛ1 == Bool || exprᴛ1 == Int || exprᴛ1 == Uint || exprᴛ1 == Int8 || exprᴛ1 == Uint8 || exprᴛ1 == Int16 || exprᴛ1 == Uint16 || exprᴛ1 == Int32 || exprᴛ1 == Uint32 || exprᴛ1 == Uintptr) {
         return a.assignIntN(offset, t.Size(), 1, 0b0);
     }
     if (exprᴛ1 == Int64 || exprᴛ1 == Uint64) {
@@ -63,13 +66,13 @@ partial class reflect_package {
     else if (exprᴛ1 == Complex128) {
         return a.assignFloatN(offset, 8, 2);
     }
-    else if (exprᴛ1 == ΔString) {
+    else if (exprᴛ1 == String) {
         return a.assignIntN(offset, goarch.PtrSize, 2, 0b01);
     }
-    else if (exprᴛ1 == ΔInterface) {
+    else if (exprᴛ1 == Interface) {
         return a.assignIntN(offset, goarch.PtrSize, 2, 0b10);
     }
-    else if (exprᴛ1 == ΔSlice) {
+    else if (exprᴛ1 == Slice) {
         return a.assignIntN(offset, goarch.PtrSize, 3, 0b001);
     }
     else if (exprᴛ1 == Array) {
@@ -144,6 +147,8 @@ partial class reflect_package {
     throw panic("unhandled register assignment path");
 }
 
+} partial class reflect_package {
+
 // ==== addTypeBits — the same defect as regAssign, one call over ================================
 //
 // Both of funcLayout's pointer bitmaps come through here: newAbiDesc fills abid.stackPtrs with
@@ -163,15 +168,15 @@ internal static void addTypeBits(ж<bitVector> Ꮡbv, uintptr offset, ж<abi.Typ
     if (!t.Pointers()) {
         return;
     }
-    var exprᴛ1 = ((ΔKind)(nuint)((uint8)t.Kind()));
-    if (exprᴛ1 == Chan || exprᴛ1 == Func || exprᴛ1 == Map || exprᴛ1 == ΔPointer || exprᴛ1 == ΔSlice || exprᴛ1 == ΔString || exprᴛ1 == ΔUnsafePointer) {
+    var exprᴛ1 = ((Kind)(nuint)((uint8)t.Kind()));
+    if (exprᴛ1 == Chan || exprᴛ1 == Func || exprᴛ1 == Map || exprᴛ1 == Pointer || exprᴛ1 == Slice || exprᴛ1 == String || exprᴛ1 == UnsafePointer) {
         while (bv.n < (uint32)(offset / (uintptr)goarch.PtrSize)) {
             // 1 pointer at start of representation
             bv.append(0);
         }
         bv.append(1);
     }
-    else if (exprᴛ1 == ΔInterface) {
+    else if (exprᴛ1 == Interface) {
         while (bv.n < (uint32)(offset / (uintptr)goarch.PtrSize)) {
             // 2 pointers
             bv.append(0);

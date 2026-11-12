@@ -122,12 +122,12 @@ public static bool DeepEqual(any x, any y) {
 //
 // Retained although DeepEqual above no longer routes through it: it is the displaced form of a Go
 // function that still exists, and reflectlite's mirror and any future in-package caller reach it.
-internal static bool deepValueEqual(ΔValue v1, ΔValue v2, map<visit, bool> visited) {
+internal static bool deepValueEqual(Value v1, Value v2, map<visit, bool> visited) {
     visitSet inProgress = default;
     return deepValueEqualBoxed(v1, v2, ref inProgress);
 }
 
-private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, ref visitSet visited) {
+private static bool deepValueEqualBoxed(Value v1, Value v2, ref visitSet visited) {
     if (!v1.IsValid() || !v2.IsValid()) {
         return v1.IsValid() == v2.IsValid();
     }
@@ -146,8 +146,8 @@ private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, ref visitSet vis
     // managed model (a bridge Value never has Kind Interface — the boxed value is always concrete).
     // Go also keys the visit on the Type; managed identity roots are per-variable objects with a fixed
     // type, so the (root1, root2) pair alone cannot collide across types.
-    ΔKind kind = v1.Kind();
-    if (kind == ΔPointer || kind == Map || kind == ΔSlice) {
+    Kind kind = v1.Kind();
+    if (kind == Pointer || kind == Map || kind == Slice) {
         (object? root1, nint off1) = identityRoot(live1);
         (object? root2, nint off2) = identityRoot(live2);
         if (root1 is not null && root2 is not null && !visited.Add(new visitPair(root1, off1, root2, off2))) {
@@ -192,7 +192,7 @@ private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, ref visitSet vis
         }
         return true;
     }
-    if (kind == ΔSlice) {
+    if (kind == Slice) {
         (object? data1, nint low1) = sliceData(live1);
         (object? data2, nint low2) = sliceData(live2);
         if (data1 is null != data2 is null) {
@@ -250,13 +250,13 @@ private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, ref visitSet vis
         }
         return true;
     }
-    if (kind == ΔInterface) {
+    if (kind == Interface) {
         if (v1.IsNil() || v2.IsNil()) {
             return v1.IsNil() == v2.IsNil();
         }
         return deepValueEqualBoxed(v1.Elem(), v2.Elem(), ref visited);
     }
-    if (kind == ΔPointer) {
+    if (kind == Pointer) {
         if (live1 is not null && ReferenceEquals(live1, live2)) {
             // Same ж<T> box — Go's same-address short-circuit (one box per variable).
             return true;
@@ -339,16 +339,16 @@ private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, ref visitSet vis
         // one of its ten levels failed on that.
         return v1.IsNil() && v2.IsNil();
     }
-    if (kind == ΔInt || kind == Int8 || kind == Int16 || kind == Int32 || kind == Int64) {
+    if (kind == Int || kind == Int8 || kind == Int16 || kind == Int32 || kind == Int64) {
         return v1.Int() == v2.Int();
     }
-    if (kind == ΔUint || kind == Uint8 || kind == Uint16 || kind == Uint32 || kind == Uint64 || kind == Uintptr) {
+    if (kind == Uint || kind == Uint8 || kind == Uint16 || kind == Uint32 || kind == Uint64 || kind == Uintptr) {
         return v1.Uint() == v2.Uint();
     }
-    if (kind == ΔString) {
+    if (kind == String) {
         return v1.String() == v2.String();
     }
-    if (kind == ΔBool) {
+    if (kind == Bool) {
         return v1.Bool() == v2.Bool();
     }
     if (kind == Float32 || kind == Float64) {
@@ -367,7 +367,7 @@ private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, ref visitSet vis
 // elementTypeOf returns a map Value's DECLARED element type, or null when the bridge has no managed
 // type for it (a synthetic descriptor with no sysType) — in which case the walk falls back to the
 // dynamic typing it had before, which is right for every entry that physically holds a value.
-private static System.Type? elementTypeOf(ΔValue v) {
+private static System.Type? elementTypeOf(Value v) {
     return v.typ_ == nil ? null : GoReflect.ElementType(v.typ_.Value.sysType);
 }
 
@@ -536,7 +536,7 @@ private static bool arrayElementsEqualOf<E, C>(object a, object b) where C : ISp
 // mapElemValue builds the Value for one map entry, typed by the map's declared element type — the
 // slot rule MapIndex and MapIter.Value already follow, so a lookup, a range and a DeepEqual over one
 // map all describe its elements identically.
-private static ΔValue mapElemValue(object? boxed, System.Type? elemType, flag inheritRO) {
+private static Value mapElemValue(object? boxed, System.Type? elemType, flag inheritRO) {
     return elemType is null ? makeReflectValue(boxed) : makeTypedValue(boxed, elemType, null, inheritRO);
 }
 
@@ -712,7 +712,7 @@ private static IDictionary? mapBacking(object? boxed) {
     return value as IDictionary ?? (value is IMap ? mapBacking(value) : null);
 }
 
-private static bool isMapHolder(Type fieldType) {
+private static bool isMapHolder(System.Type fieldType) {
     return fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(StrongBox<>) &&
            typeof(IMap).IsAssignableFrom(fieldType.GetGenericArguments()[0]);
 }

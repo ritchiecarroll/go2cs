@@ -78,6 +78,7 @@ using atomic = @internal.runtime.atomic_package;
 using cpu = @internal.cpu_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -340,12 +341,14 @@ private static bool canHoldPointerSlot(Type type) =>
     GoReflect.KindOf(type) is GoReflect.Pointer or GoReflect.UnsafePointer or GoReflect.Interface or GoReflect.Struct or GoReflect.Array;
 
 // Cleanup is a handle to a cleanup call for a specific object.
-[GoType] partial struct Cleanup {
+[GoType] public partial struct Cleanup {
     // id is the unique identifier for the cleanup within the arena.
     internal uint64 id;
     // ptr contains the pointer to the object.
     internal uintptr ptr;
 }
+
+} partial class runtimeᴛCleanup {
 
 // Stop cancels the cleanup call. Stop will have no effect if the cleanup call
 // has already been queued for execution (because ptr became unreachable).
@@ -362,6 +365,8 @@ public static void Stop(this Cleanup c) {
     // same thing about its own race, in the same words, for the same reason.
     GoCleanupSentinel.Cancel(c.id);
 }
+
+} partial class runtime_package {
 
 // unique_runtime_blockUntilEmptyCleanupQueue blocks until the cleanup queue is empty or the
 // timeout is reached, and reports whether it emptied. Go 1.26 pushes it into unique's in-package
@@ -417,7 +422,7 @@ private static void ReattachCleanups(object target, global::System.Collections.G
     }
 }
 
-private sealed class GoCleanupSet
+internal sealed class GoCleanupSet
 {
     // ⚠ A LIFETIME ANCHOR, WRITTEN AND NEVER READ, AND THAT IS THE ENTIRE JOB. This list is the only
     // strong reference to a registered sentinel, and it lives under a dependent handle keyed on the
@@ -442,7 +447,7 @@ private sealed class GoCleanupSet
 // One registered cleanup. It holds the BODY and nothing else -- in particular it does NOT hold the
 // object, which is both what Go's API says (the cleanup never receives it) and what makes the
 // cleanup able to run at all.
-private sealed class GoCleanupSentinel
+internal sealed class GoCleanupSentinel
 {
     // NOT readonly, and dropped by Cancel rather than only flagged. The body closes over `arg`, so a
     // cancelled cleanup that merely set a flag would keep arg alive until the OBJECT died -- Go's
@@ -662,8 +667,10 @@ internal static ref cleanupQueue gcCleanups => ref ᏑgcCleanups.Value;
 
 // The managed path's two counts, read by readQueueStats. Incremented by the sentinel's finalizer when it
 // hands a cleanup to GoFinalizerQueue, and after the cleanup body returns.
-private static long s_cleanupsQueued;
-private static long s_cleanupsExecuted;
+internal static long s_cleanupsQueued;
+internal static long s_cleanupsExecuted;
+
+} partial class runtimeᴛcleanupQueue {
 
 internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
     @throw("runtime: gcCleanups.enqueue reached: the managed runtime makes no mspan cleanup specials (mcleanup.cs runs cleanups through GoFinalizerQueue)"u8);
@@ -689,5 +696,7 @@ internal static (uint64 queued, uint64 executed) readQueueStats(this ж<cleanupQ
 internal static bool blockUntilEmpty(this ж<cleanupQueue> Ꮡq, int64 timeout) {
     return blockUntilEmptyFinalizerQueue(timeout);
 }
+
+} partial class runtime_package {
 
 } // end runtime_package

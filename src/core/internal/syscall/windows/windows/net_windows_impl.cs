@@ -101,7 +101,7 @@ partial class windows_package
     // Go: wsaSendtoInet4 encodes `to` and calls WSASendTo (syscall_windows.go). Here the encode goes
     // through the mirror's seam into OPERATION-OWNED memory, and the SUBMIT goes through golib's
     // seam so this package and `syscall` share ONE operation record (netpoll design §4.7/§4.8).
-    public static unsafe error /*err*/ WSASendtoInet4(syscallꓸHandle s, ж<syscall.WSABuf> bufs, uint32 bufcnt, ж<uint32> sent, uint32 flags, ж<syscall.SockaddrInet4> to, ж<syscall.Overlapped> overlapped, ж<byte> croutine) {
+    public static unsafe error /*err*/ WSASendtoInet4(syscall.Handle s, ж<syscall.WSABuf> bufs, uint32 bufcnt, ж<uint32> sent, uint32 flags, ж<syscall.SockaddrInet4> to, ж<syscall.Overlapped> overlapped, ж<byte> croutine) {
         nuint native = prepareSendto(s, bufs, bufcnt, overlapped, out NativeWSABuf* staged, out byte* addr);
         var (addrlen, err) = syscall.GoWriteNativeSockaddrInet4(to, addr);
 
@@ -111,7 +111,7 @@ partial class windows_package
         return submitSendto(s, staged, bufcnt, sent, flags, addr, addrlen, native, croutine);
     }
 
-    public static unsafe error /*err*/ WSASendtoInet6(syscallꓸHandle s, ж<syscall.WSABuf> bufs, uint32 bufcnt, ж<uint32> sent, uint32 flags, ж<syscall.SockaddrInet6> to, ж<syscall.Overlapped> overlapped, ж<byte> croutine) {
+    public static unsafe error /*err*/ WSASendtoInet6(syscall.Handle s, ж<syscall.WSABuf> bufs, uint32 bufcnt, ж<uint32> sent, uint32 flags, ж<syscall.SockaddrInet6> to, ж<syscall.Overlapped> overlapped, ж<byte> croutine) {
         nuint native = prepareSendto(s, bufs, bufcnt, overlapped, out NativeWSABuf* staged, out byte* addr);
         var (addrlen, err) = syscall.GoWriteNativeSockaddrInet6(to, addr);
 
@@ -154,7 +154,7 @@ partial class windows_package
     // ALLOCATION and never the layout ("what the bytes MEAN is the caller's business"), so carving is
     // within the ratified contract and needs no further primitive.
     // Pointers cannot be tuple elements in C#, so the two carved regions come back through `out`.
-    private static unsafe nuint prepareSendto(syscallꓸHandle s, ж<syscall.WSABuf> bufs, uint32 bufcnt, ж<syscall.Overlapped> overlapped, out NativeWSABuf* staged, out byte* addr) {
+    private static unsafe nuint prepareSendto(syscall.Handle s, ж<syscall.WSABuf> bufs, uint32 bufcnt, ж<syscall.Overlapped> overlapped, out NativeWSABuf* staged, out byte* addr) {
         // The record is keyed by the WAITER -- the same `Ꮡoverlapped` execIO will later harvest by --
         // so a submit issued here and a harvest issued from `syscall` name one operation. Creating it
         // is `syscall`'s job (only it can bind the socket to the completion port); this call reaches
@@ -190,7 +190,7 @@ partial class windows_package
     }
 
     // The one submit path both families share, so the kernel contract lives in exactly one place.
-    private static unsafe error submitSendto(syscallꓸHandle s, NativeWSABuf* staged, uint32 bufcnt, ж<uint32> sent, uint32 flags, byte* addr, int32 addrlen, nuint native, ж<byte> croutine) {
+    private static unsafe error submitSendto(syscall.Handle s, NativeWSABuf* staged, uint32 bufcnt, ж<uint32> sent, uint32 flags, byte* addr, int32 addrlen, nuint native, ж<byte> croutine) {
         uint32 sentBytes = 0;
         var (r1, _, e1) = syscall.Syscall9(procWSASendTo.Addr(), 9, (uintptr)s, (uintptr)(void*)staged, (uintptr)bufcnt,
                                            (uintptr)(void*)(&sentBytes), (uintptr)flags, (uintptr)(void*)addr, (uintptr)addrlen,

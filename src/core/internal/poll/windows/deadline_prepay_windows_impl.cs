@@ -120,7 +120,7 @@ partial class poll_package
     private const uint32 sddlRevision1 = 1;
 
     // How long the pipe's write and read may take before the step gives up.
-    private static readonly time.Duration pipeIOTimeout = time.ΔSecond;
+    private static readonly time.Duration pipeIOTimeout = time.Second;
 
     private static void prepayFirstCompletion()
     {
@@ -137,7 +137,7 @@ partial class poll_package
             (uint32)(windows.PIPE_ACCESS_DUPLEX | windows.O_FILE_FLAG_OVERLAPPED) | fileFlagFirstPipeInstance,
             (uint32)(windows.PIPE_TYPE_BYTE | windows.PIPE_READMODE_BYTE) | pipeRejectRemoteClients, 1, 4096, 4096, 0, Ꮡsa);
         if (sa.SecurityDescriptor != 0)
-            Δsyscall.LocalFree((Δsyscall.ΔHandle)sa.SecurityDescriptor);
+            Δsyscall.LocalFree((Δsyscall.Handle)sa.SecurityDescriptor);
         if (errΔ1 != default!)
             return;
 
@@ -206,7 +206,7 @@ partial class poll_package
 
     // An FD over a private pipe handle, as FD.Init("pipe", true) leaves one, with its poll descriptor
     // taken from runtime_pollOpen directly (see the file header). Nil when the poller refuses it.
-    private static ж<FD> privatePipeFD(Δsyscall.ΔHandle handle)
+    private static ж<FD> privatePipeFD(Δsyscall.Handle handle)
     {
         var (ctx, errno) = runtime_pollOpen((uintptr)handle);
         if (errno != 0)

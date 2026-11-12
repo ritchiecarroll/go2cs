@@ -22,12 +22,14 @@ using WaitReason = go.golib.WaitReason;
 
 namespace go;
 
+using static sync_package;
+
 partial class sync_package {
 
 // A RWMutex is a reader/writer mutual exclusion lock.
 // The lock can be held by an arbitrary number of readers or a single writer.
 // The zero value for a RWMutex is an unlocked mutex. A RWMutex must not be copied after first use.
-[GoType] partial struct RWMutex {
+[GoType] public partial struct RWMutex {
     // Lazily-created shared state; a RWMutex is always used through a pointer (ж<RWMutex>).
     internal RWState? st;
 }
@@ -42,7 +44,7 @@ internal sealed class RWState {
     internal bool Writer;        // a writer holds the lock
 }
 
-private static RWState rwStateOf(ж<RWMutex> Ꮡrw) {
+internal static RWState rwStateOf(ж<RWMutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.Value;
 
     RWState? s = Volatile.Read(ref rw.st);
@@ -54,6 +56,8 @@ private static RWState rwStateOf(ж<RWMutex> Ꮡrw) {
     var created = new RWState();
     return Interlocked.CompareExchange(ref rw.st, created, null) ?? created;
 }
+
+} partial class syncᴛRWMutex {
 
 // RLock locks rw for reading. It should not be used for recursive read locking; a blocked Lock call
 // excludes new readers from acquiring the lock.
@@ -155,6 +159,8 @@ public static void Unlock(this ж<RWMutex> Ꮡrw) {
     }
 }
 
+} partial class sync_package {
+
 // syscall_hasWaitingReaders reports whether any goroutine is waiting to acquire a read lock on rw.
 // (syscall.ForkLock is an RWMutex and relies on this private linkname.)
 //
@@ -170,6 +176,8 @@ public static bool syscall_hasWaitingReaders(ж<RWMutex> Ꮡrw) {
         return s.ReadersWaiting > 0;
     }
 }
+
+} partial class syncᴛRWMutex {
 
 // RLocker returns a Locker interface that implements Lock and Unlock by calling rw.RLock and rw.RUnlock.
 //
@@ -189,7 +197,11 @@ public static Locker RLocker(this ж<RWMutex> Ꮡrw) {
     return new rlockerжLocker(Ꮡ((rlocker)(rw)));
 }
 
-[GoType("RWMutex")] partial struct rlocker;
+} partial class sync_package {
+
+[GoType("RWMutex")] internal partial struct rlocker;
+
+} partial class syncᴛrlocker {
 
 internal static void Lock(this ж<rlocker> Ꮡr) {
     ref var r = ref Ꮡr.Value;
@@ -202,5 +214,7 @@ internal static void Unlock(this ж<rlocker> Ꮡr) {
 
     (Ꮡ((RWMutex)(r))).RUnlock();
 }
+
+} partial class sync_package {
 
 } // end sync_package

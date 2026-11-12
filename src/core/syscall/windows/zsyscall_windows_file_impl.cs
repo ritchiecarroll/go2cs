@@ -77,15 +77,15 @@ namespace go;
 
 partial class syscall_package
 {
-    internal static error /*err*/ readFile(ΔHandle handle, slice<byte> buf, ж<uint32> Ꮡdone, ж<Overlapped> Ꮡoverlapped) =>
+    internal static error /*err*/ readFile(Handle handle, slice<byte> buf, ж<uint32> Ꮡdone, ж<Overlapped> Ꮡoverlapped) =>
         fileIO(procReadFile, wsaModeRead, handle, buf, Ꮡdone, Ꮡoverlapped);
 
-    internal static error /*err*/ writeFile(ΔHandle handle, slice<byte> buf, ж<uint32> Ꮡdone, ж<Overlapped> Ꮡoverlapped) =>
+    internal static error /*err*/ writeFile(Handle handle, slice<byte> buf, ж<uint32> Ꮡdone, ж<Overlapped> Ꮡoverlapped) =>
         fileIO(procWriteFile, wsaModeWrite, handle, buf, Ꮡdone, Ꮡoverlapped);
 
     // ReadFile and WriteFile share one signature, so one body serves both; the mode is the
     // poller's ('r' / 'w') and names which waiter the completion wakes.
-    private static unsafe error fileIO(ж<LazyProc> proc, nint mode, ΔHandle handle, slice<byte> buf, ж<uint32> Ꮡdone, ж<Overlapped> Ꮡoverlapped) {
+    private static unsafe error fileIO(ж<LazyProc> proc, nint mode, Handle handle, slice<byte> buf, ж<uint32> Ꮡdone, ж<Overlapped> Ꮡoverlapped) {
         if (Ꮡoverlapped == nil || !GoAsyncIO.HasReadiness((nuint)(uintptr)handle)) {
             // The generated body, unchanged (see the file header for who reaches it).
             ж<byte> _p0 = default!;

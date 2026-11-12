@@ -33,8 +33,13 @@ using @unsafe = go.unsafe_package;
 
 namespace go;
 
+using static runtime_package;
+
 partial class runtime_package
 {
+
+} partial class runtimeᴛtraceMap {
+
     internal static ж<traceMapNode> newTraceMapNode(this ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size, uintptr hash, uint64 id)
     {
         // Create data array.
@@ -48,4 +53,7 @@ partial class runtime_package
         meta.Value.hash = hash;
         return meta;
     }
+
+} partial class runtime_package {
+
 }

@@ -29,6 +29,7 @@ using System.Runtime.CompilerServices;
 using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
 using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
 using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -286,7 +287,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
     // write barriers.
     internal uintptr sp;
     internal uintptr pc;
-    internal Δguintptr g;
+    internal guintptr g;
     internal @unsafe.Pointer ctxt;
     internal uintptr lr;
     internal uintptr bp; // for framepointer-enabled architectures
@@ -303,66 +304,74 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
 //
 // Do not set fields manually. Use methods instead.
 // Extend this type with additional methods if needed.
-[GoType] partial struct maybeTraceablePtr {
+[GoType] internal partial struct maybeTraceablePtr {
     internal @unsafe.Pointer vp; // For liveness only.
     internal uintptr vu;        // Source of truth.
 }
+
+} partial class runtimeᴛmaybeTraceablePtr {
 
 // untrack unsets the pointer but preserves the address.
 // This is used to hide the pointer from the GC.
 //
 //go:nosplit
-[GoRecv] internal static void setUntraceable(this ref maybeTraceablePtr Δp) {
-    Δp.vp = default!;
+[GoRecv] internal static void setUntraceable(this ref maybeTraceablePtr p) {
+    p.vp = default!;
 }
 
 // setTraceable resets the pointer to the stored address.
 // This is used to make the pointer visible to the GC.
 //
 //go:nosplit
-[GoRecv] internal static void setTraceable(this ref maybeTraceablePtr Δp) {
-    Δp.vp = (@unsafe.Pointer)Δp.vu;
+[GoRecv] internal static void setTraceable(this ref maybeTraceablePtr p) {
+    p.vp = (@unsafe.Pointer)p.vu;
 }
 
 // set sets the pointer to the data element and updates the address.
 //
 //go:nosplit
-[GoRecv] internal static void set(this ref maybeTraceablePtr Δp, @unsafe.Pointer v) {
-    Δp.vp = v;
-    Δp.vu = (uintptr)v;
+[GoRecv] internal static void set(this ref maybeTraceablePtr p, @unsafe.Pointer v) {
+    p.vp = v;
+    p.vu = (uintptr)v;
 }
 
 // get retrieves the pointer to the data element.
 //
 //go:nosplit
-[GoRecv] internal static @unsafe.Pointer get(this ref maybeTraceablePtr Δp) {
-    return (@unsafe.Pointer)Δp.vu;
+[GoRecv] internal static @unsafe.Pointer get(this ref maybeTraceablePtr p) {
+    return (@unsafe.Pointer)p.vu;
 }
 
 // uintptr returns the uintptr address of the pointer.
 //
 //go:nosplit
-[GoRecv] internal static uintptr uintptr(this ref maybeTraceablePtr Δp) {
-    return Δp.vu;
+[GoRecv] internal static uintptr uintptr(this ref maybeTraceablePtr p) {
+    return p.vu;
 }
+
+} partial class runtime_package {
 
 // maybeTraceableChan extends conditionally trackable pointers (maybeTraceablePtr)
 // to track hchan pointers.
 //
 // Do not set fields manually. Use methods instead.
-[GoType] partial struct maybeTraceableChan {
+[GoType] internal partial struct maybeTraceableChan {
     /*embed*/ internal maybeTraceablePtr maybeTraceablePtr;
 }
 
+} partial class runtimeᴛmaybeTraceableChan {
+
 //go:nosplit
-[GoRecv] internal static void set(this ref maybeTraceableChan Δp, ж<Δhchan> Ꮡc) {
-    Δp.maybeTraceablePtr.set(@unsafe.Pointer.FromPinnedBox(Ꮡc));
+[GoRecv] internal static void set(this ref maybeTraceableChan p, ж<hchan> Ꮡc) {
+    p.maybeTraceablePtr.set(@unsafe.Pointer.FromPinnedBox(Ꮡc));
 }
 
 //go:nosplit
-[GoRecv] internal static ж<Δhchan> get(this ref maybeTraceableChan Δp) {
-    return (ж<Δhchan>)(uintptr)(Δp.maybeTraceablePtr.get());
+[GoRecv] internal static ж<hchan> get(this ref maybeTraceableChan p) {
+    return (ж<hchan>)(uintptr)(p.maybeTraceablePtr.get());
 }
+
+} partial class runtime_package {
 
 // sudog (pseudo-g) represents a g in a wait list, such as for sending/receiving
 // on a channel.
@@ -421,7 +430,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
 // Stack describes a Go execution stack.
 // The bounds of the stack are exactly [lo, hi),
 // with no implicit data structures on either side.
-[GoType] partial struct Δstack {
+[GoType] partial struct stack {
     internal uintptr lo;
     internal uintptr hi;
 }
@@ -432,7 +441,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
     internal lockRank rank;
 }
 
-[GoType] partial struct g {
+[GoType] internal partial struct g {
     // Stack parameters.
     // stack describes the actual stack memory: [stack.lo, stack.hi).
     // stackguard0 is the stack pointer compared in the Go stack growth prologue.
@@ -440,7 +449,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
     // stackguard1 is the stack pointer compared in the //go:systemstack stack growth prologue.
     // It is stack.lo+StackGuard on g0 and gsignal stacks.
     // It is ~0 on other goroutine stacks, to trigger a call to morestackc (and crash).
-    internal Δstack stack;   // offset known to runtime/cgo
+    internal stack stack;   // offset known to runtime/cgo
     internal uintptr stackguard0; // offset known to liblink
     internal uintptr stackguard1; // offset known to liblink
     internal ж<_panic> _panic; // innermost panic - offset known to liblink
@@ -468,7 +477,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
     internal atomic.Uint32 atomicstatus;
     internal uint32 stackLock; // sigprof/scang lock; TODO: fold in to atomicstatus
     internal uint64 goid;
-    internal Δguintptr schedlink;
+    internal guintptr schedlink;
     internal int64 waitsince;      // approx time when the g become blocked
     internal waitReason waitreason; // if status==Gwaiting
     internal bool preempt; // preemption signal, duplicates stackguard0 = stackpreempt
@@ -562,7 +571,7 @@ internal static UntypedInt freeMStack => 0; // M done, free stack and reference.
 internal static UntypedInt freeMRef => 1; // M done, free reference.
 internal static UntypedInt freeMWait => 2; // M still in use.
 
-[GoType] partial struct m {
+[GoType] internal partial struct m {
     internal ж<g> g0;  // goroutine with scheduling stack
     internal gobuf morebuf;  // gobuf arg to morestack
     internal uint32 divmod; // div/mod denominator for arm - known to liblink (cmd/internal/obj/arm/obj5.go)
@@ -574,7 +583,7 @@ internal static UntypedInt freeMWait => 2; // M still in use.
     internal array<uintptr> tls = new(tlsSlots); // thread-local storage (for x86 extern register)
     internal Action mstartfn;
     internal ж<g> curg;    // current running goroutine
-    internal Δguintptr caughtsig; // goroutine running during fatal signal
+    internal guintptr caughtsig; // goroutine running during fatal signal
     internal uint32 signalSecret;   // whether we have secret information in our signal stack
     // p is the currently attached P for executing Go code, nil if not executing user Go code.
     //
@@ -604,16 +613,16 @@ internal static UntypedInt freeMWait => 2; // M still in use.
     internal bool needextram;
     internal bool g0StackAccurate; // whether the g0 stack has accurate bounds
     internal uint8 traceback;
-    internal slice<ж<Δp>> allpSnapshot;  // Snapshot of allp for use after dropping P in findRunnable, nil otherwise.
+    internal slice<ж<p>> allpSnapshot;  // Snapshot of allp for use after dropping P in findRunnable, nil otherwise.
     internal uint64 ncgocall;        // number of cgo calls in total
     internal int32 ncgo;         // number of cgo calls currently in progress
     internal atomic.Uint32 cgoCallersUse; // if non-zero, cgoCallers in use temporarily
-    internal ж<ΔcgoCallers> cgoCallers; // cgo traceback if crashing in cgo call
+    internal ж<cgoCallers> cgoCallers; // cgo traceback if crashing in cgo call
     internal note park;
     internal ж<m> alllink; // on allm
     internal muintptr schedlink;
     internal listNodeManual idleNode;
-    internal Δguintptr lockedg;
+    internal guintptr lockedg;
     internal array<uintptr> createstack = new(32); // stack that created this thread, it's used for StackRecord.Stack0, so it must align with it.
     internal uint32 lockedExt;      // tracking for external LockOSThread
     internal uint32 lockedInt;      // tracking for internal lockOSThread
@@ -654,7 +663,7 @@ internal static UntypedInt freeMWait => 2; // M still in use.
     // These are here to avoid using the G stack so the stack can move during the call.
     internal uintptr libcallpc; // for cpu profiler
     internal uintptr libcallsp;
-    internal Δguintptr libcallg;
+    internal guintptr libcallg;
     internal winlibcall winsyscall; // stores syscall parameters on windows
     internal uintptr vdsoSP; // SP for traceback while in VDSO call (0 if not in call)
     internal uintptr vdsoPC; // PC for traceback while in VDSO call
@@ -699,7 +708,7 @@ internal static UntypedInt mRedZoneSize => /* (16 << 3) * asanenabledBit */ 0; /
 //
 // Note that get may race with M exit. A successful get will keep the m object
 // alive, but the M itself may be exited and thus not actually usable.
-[GoType] partial struct mWeakPointer {
+[GoType] internal partial struct mWeakPointer {
     internal ж<atomic.Pointer<m>> m;
 }
 
@@ -708,6 +717,8 @@ internal static mWeakPointer newMWeakPointer(ж<m> Ꮡmp) {
     w.m.Store(Ꮡmp);
     return w;
 }
+
+} partial class runtimeᴛmWeakPointer {
 
 internal static ж<m> get(this mWeakPointer w) {
     if (w.m == nil) {
@@ -722,6 +733,8 @@ internal static void clear(this mWeakPointer w) {
     w.m.Store(nil);
 }
 
+} partial class runtime_package {
+
 [GoType("dyn")] partial struct p_mspancache {
     // We need an explicit length here because this field is used
     // in allocation codepaths where write barriers are not allowed,
@@ -732,7 +745,7 @@ internal static void clear(this mWeakPointer w) {
     internal array<ж<mspan>> buf = new(128);
 }
 
-[GoType] partial struct Δp {
+[GoType] internal partial struct p {
     internal int32 id;
     internal uint32 status; // one of pidle/prunning/...
     internal puintptr link;
@@ -761,7 +774,7 @@ internal static void clear(this mWeakPointer w) {
     // Queue of runnable goroutines. Accessed without lock.
     internal uint32 runqhead;
     internal uint32 runqtail;
-    internal array<Δguintptr> runq = new(256);
+    internal array<guintptr> runq = new(256);
     // runnext, if non-nil, is a runnable G that was ready'd by
     // the current G and should be run next instead of what's in
     // runq if there's time remaining in the running G's time
@@ -774,7 +787,7 @@ internal static void clear(this mWeakPointer w) {
     //
     // Note that while other P's may atomically CAS this to zero,
     // only the owner P can CAS it to a valid G.
-    internal Δguintptr runnext;
+    internal guintptr runnext;
     // Available G's (status == Gdead)
     internal gList gFree;
     internal slice<ж<sudog>> sudogcache;
@@ -914,7 +927,7 @@ internal static void clear(this mWeakPointer w) {
     internal note sysmonnote;
     // safePointFn should be called on each P at the next GC
     // safepoint if p.runSafePointFn is set.
-    internal Action<ж<Δp>> safePointFn;
+    internal Action<ж<p>> safePointFn;
     internal int32 safePointWait;
     internal note safePointNote;
     internal int32 profilehz; // cpu profiling rate
@@ -975,7 +988,7 @@ internal static UntypedInt _SigIgn => 256; // _SIG_DFL action is to ignore the s
 // See https://golang.org/s/go12symtab.
 // Keep in sync with linker (../cmd/link/internal/ld/pcln.go:/pclntab)
 // and with package debug/gosym and with symtab.go in package runtime.
-[GoType] partial struct _func {
+[GoType] internal partial struct _func {
     /*embed*/ public @internal.runtime.sys_package.NotInHeap NotInHeap; // Only in static data
     internal uint32 entryOff; // start pc, as offset from moduledata.text
     internal int32 nameOff;  // function name, as index into moduledata.funcnametab.
@@ -1068,7 +1081,7 @@ internal static UntypedInt _SigIgn => 256; // _SIG_DFL action is to ignore the s
 // handling during stack growth: because they are pointer-typed and
 // _panic values only live on the stack, regular stack pointer
 // adjustment takes care of them.
-[GoType] partial struct _panic {
+[GoType] internal partial struct _panic {
     internal any arg;     // argument to panic
     internal ж<_panic> link; // link to earlier panic
     // startPC and startSP track where _panic.start was called.
@@ -1109,7 +1122,7 @@ internal static UntypedInt _SigIgn => 256; // _SIG_DFL action is to ignore the s
 
 // A waitReason explains why a goroutine has been stopped.
 // See gopark. Do not re-use waitReasons, add new ones.
-[GoType("num:uint8")] partial struct waitReason;
+[GoType("num:uint8")] internal partial struct waitReason;
 
 internal static waitReason waitReasonZero => /* iota */ 0;                 // ""
 internal static waitReason waitReasonGCAssistMarking => 1;      // "GC assist marking"
@@ -1209,6 +1222,8 @@ internal static array<@string> waitReasonStrings = new golib.SparseArray<@string
     [waitReasonCleanupWait] = "cleanup wait"u8
 }.array();
 
+} partial class runtimeᴛwaitReason {
+
 internal static @string String(this waitReason w) {
     if (w < 0 || w >= ((waitReason)(uint8)len(waitReasonStrings))) {
         return "unknown wait reason"u8;
@@ -1241,8 +1256,10 @@ internal static bool isChanWait(this waitReason w) {
 }
 
 internal static bool isWaitingForSuspendG(this waitReason w) {
-    return ΔisWaitingForSuspendG[w];
+    return runtime_package.isWaitingForSuspendG[w];
 }
+
+} partial class runtime_package {
 
 // isWaitingForSuspendG indicates that a goroutine is only entering _Gwaiting and
 // setting a waitReason because it needs to be able to let the suspendG
@@ -1250,7 +1267,7 @@ internal static bool isWaitingForSuspendG(this waitReason w) {
 // The G is always actually executing on the system stack in these cases.
 //
 // TODO(mknyszek): Consider replacing this with a new dedicated G status.
-internal static array<bool> ΔisWaitingForSuspendG = new golib.SparseArray<bool>{
+internal static array<bool> isWaitingForSuspendG = new golib.SparseArray<bool>{
     [waitReasonStoppingTheWorld] = true,
     [waitReasonGCMarkTermination] = true,
     [waitReasonGarbageCollection] = true,
@@ -1263,12 +1280,16 @@ internal static array<bool> ΔisWaitingForSuspendG = new golib.SparseArray<bool>
     [waitReasonFlushProcCaches] = true
 }.array(47);
 
+} partial class runtimeᴛwaitReason {
+
 internal static bool isIdleInSynctest(this waitReason w) {
-    return ΔisIdleInSynctest[w];
+    return runtime_package.isIdleInSynctest[w];
 }
 
+} partial class runtime_package {
+
 // isIdleInSynctest indicates that a goroutine is considered idle by synctest.Wait.
-internal static array<bool> ΔisIdleInSynctest = new golib.SparseArray<bool>{
+internal static array<bool> isIdleInSynctest = new golib.SparseArray<bool>{
     [waitReasonChanReceiveNilChan] = true,
     [waitReasonChanSendNilChan] = true,
     [waitReasonSelectNoCases] = true,
@@ -1310,8 +1331,8 @@ internal static ref mutex allpLock => ref ᏑallpLock.Value;
 
 // len(allp) == gomaxprocs; may change at safe points, otherwise
 // immutable.
-internal static ж<slice<ж<Δp>>> Ꮡallp = new StandardBox<slice<ж<Δp>>>(default(slice<ж<Δp>>));
-internal static ref slice<ж<Δp>> allp => ref Ꮡallp.ValueSlot;
+internal static ж<slice<ж<p>>> Ꮡallp = new StandardBox<slice<ж<p>>>(default(slice<ж<p>>));
+internal static ref slice<ж<p>> allp => ref Ꮡallp.ValueSlot;
 
 // Bitmask of Ps in _Pidle list, one bit per P. Reads and writes must
 // be atomic. Length may change at safe points.

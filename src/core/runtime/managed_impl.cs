@@ -130,6 +130,7 @@ using System.Threading;
 using go.golib;
 // The plain namespace using is what brings internal/runtime/atomic's [GoRecv] extension methods
 // (Int64.Load and friends) into scope — an alias alone does not participate in extension lookup.
+using go.@internal;
 using go.@internal.runtime;
 using abi = go.@internal.abi_package;
 using profilerecord = go.@internal.profilerecord_package;
@@ -139,6 +140,8 @@ using @unsafe = go.unsafe_package;
 [module: go.GoManualConversion]
 
 namespace go;
+
+using static runtime_package;
 
 partial class runtime_package
 {
@@ -1131,12 +1134,12 @@ partial class runtime_package
     // here, so a goroutine created after the snapshot is absent, which is the tolerance Go documents
     // for its concurrent collection: "New goroutines may not be in this list, but we didn't want to
     // know about them anyway."
-    internal static (nint n, bool ok) goroutineProfileWithLabels(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels)
+    internal static (nint n, bool ok) goroutineProfileWithLabels(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels)
     {
         // Go's guard: a labels slice whose length does not match p is dropped.
-        bool writeLabels = labels != nil && len(labels) == len(Δp);
+        bool writeLabels = labels != nil && len(labels) == len(p);
 
-        if (len(Δp) == 0)
+        if (len(p) == 0)
             return ((nint)gcount(false), false);
 
         semacquire(ᏑgoroutineProfile.of(goroutineProfileᴛ1.Ꮡsema));
@@ -1157,14 +1160,14 @@ partial class runtime_package
 
             nint n = snapshot.Length;
 
-            if (n > len(Δp))
+            if (n > len(p))
                 return (n, false);
 
             for (nint i = 0; i < n; i++)
             {
                 GoroutineProfileEntry entry = snapshot[(int)i];
 
-                Δp[i] = new profilerecord.StackRecord(
+                p[i] = new profilerecord.StackRecord(
                     Stack: entry.Function is null
                         ? default!
                         : new uintptr[] { (uintptr)GoSyntheticPC.Of(entry.Function) }.slice());
@@ -1305,7 +1308,7 @@ partial class runtime_package
     // L1 nil check away). Its callers already treat nil as "not a Go heap object": findObject returns
     // 0, the bulk write barriers fall back to the module bitmaps, and the arena checks answer "not in a
     // user arena chunk". Coordinator ruling 2026-09-28 22:01.
-    internal static ж<mspan> spanOf(uintptr Δp) => default!;
+    internal static ж<mspan> spanOf(uintptr p) => default!;
 
     // GoSpanOfProbe is the GolibTests seam for spanOf (GolibTests is outside the InternalsVisibleTo
     // grant): true when spanOf answers nil for p.
@@ -1382,6 +1385,8 @@ partial class runtime_package
         return total;
     }
 
+} partial class runtimeᴛconsistentHeapStats {
+
     // consistentHeapStats.read takes a globally consistent snapshot of the heap-stats deltas. Go's
     // body disables preemption (acquirem → getg) to hold `allp` stable, then merges every P's
     // delta buffer under a generation rotation. The managed model has no Ps and nothing ever
@@ -1393,6 +1398,8 @@ partial class runtime_package
     {
         Ꮡout.Value = new heapStatsDelta(nil);
     }
+
+} partial class runtime_package {
 
     // readMetricsManaged is the managed crossing for runtime/metrics.Read — the shim
     // runtime/metrics/sample.cs's hand-owned Read calls instead of the linkname-pushed
@@ -3821,7 +3828,7 @@ partial class runtime_package
     // offset and whether the frame is a return address -- and Resolve fills the rest on the first READ of
     // the token (callerFrameRecord), through this file's own PDB reader. A record whose Method is null
     // was built already resolved (a root frame, a synthetic pc).
-    private sealed class CallerFrameRecord
+    internal sealed class CallerFrameRecord
     {
         public string Function = string.Empty;
 
@@ -4326,16 +4333,17 @@ partial class runtime_package
     // Go's intrinsified atomics (cmd/compile's intrinsics.go): internal/runtime/atomic wholesale, and
     // sync/atomic's Load/Store/Swap/CompareAndSwap/Add/And/Or functions except the *Pointer forms, which Go
     // does not intrinsify (their frame stays, as it does here). Keyed by declaring type and name because
-    // runtime cannot reference sync/atomic; a refusal, never a model.
+    // runtime cannot reference sync/atomic; a refusal, never a model. A method of an atomic type sits in that
+    // type's holder (`go.sync.atomicᴛInt32`), which belongs to the package as its package class does.
     private static bool isIntrinsifiedAtomic(System.Reflection.MethodBase? method)
     {
         if (method?.DeclaringType?.FullName is not { } type)
             return false;
 
-        if (type == "go.@internal.runtime.atomic_package" || type == "go.internal.runtime.atomic_package")
+        if (isPackageClassOrHolder(type, "go.@internal.runtime.atomic") || isPackageClassOrHolder(type, "go.internal.runtime.atomic"))
             return true;
 
-        if (type != "go.sync.atomic_package" || method.Name.EndsWith("Pointer", StringComparison.Ordinal))
+        if (!isPackageClassOrHolder(type, "go.sync.atomic") || method.Name.EndsWith("Pointer", StringComparison.Ordinal))
             return false;
 
         return method.Name.StartsWith("Load", StringComparison.Ordinal) || method.Name.StartsWith("Store", StringComparison.Ordinal) ||
@@ -4343,6 +4351,12 @@ partial class runtime_package
                method.Name.StartsWith("Add", StringComparison.Ordinal) || method.Name.StartsWith("And", StringComparison.Ordinal) ||
                method.Name.StartsWith("Or", StringComparison.Ordinal);
     }
+
+    // Whether a type's full name is a package's class (`go.sync.atomic_package`) or one of its method holders
+    // (`go.sync.atomicᴛInt32`), given the package class's full name without its `_package` suffix.
+    private static bool isPackageClassOrHolder(string typeFullName, string package) =>
+        typeFullName.StartsWith(package, StringComparison.Ordinal) &&
+        (typeFullName.AsSpan(package.Length) is "_package" || typeFullName.AsSpan(package.Length).StartsWith("ᴛ", StringComparison.Ordinal));
 
     // Whether a go2cs-gen interface adapter frame lies between the throw and the site's first Go frame.
     private static bool adapterBeforeFirstGoFrame(StackFrame[] frames)
@@ -4372,6 +4386,8 @@ partial class runtime_package
 
         return null;
     }
+
+} partial class runtimeᴛFrames {
 
     // Frames.Next expands the next recorded PC into a Frame. The auto body resolves PCs through
     // findfunc's linker-built funcInfo tables, which have no managed form; the records minted by
@@ -4420,9 +4436,11 @@ partial class runtime_package
         return (default!, false);
     }
 
+} partial class runtime_package {
+
     // True when another Callers-minted PC remains — the precise "more" Go's two-frame prefetch
     // computes (a trailing foreign PC does not promise a Frame that will never come).
-    private static bool moreCallerFrames(slice<uintptr> callers)
+    internal static bool moreCallerFrames(slice<uintptr> callers)
     {
         for (nint i = 0; i < len(callers); i++)
         {
@@ -4434,8 +4452,9 @@ partial class runtime_package
     }
 
     // The Go-frame test (see Callers). The frame's TOP-LEVEL declaring scope must be a
-    // `<pkg>_package` class in namespace `go` — covering the package class itself, the struct
-    // types nested in it, and a function literal's display class — and the method must not be
+    // `<pkg>_package` class or a receiver type's method holder (`<pkg>ᴛ<Type>`, [GoMethodHost]) in
+    // namespace `go` — covering the package class itself, the struct types nested in it, a method's
+    // holder, and a function literal's display class — and the method must not be
     // go2cs machinery: a generated adapter (IGoAdapter, dispatch plumbing), a go2cs-gen
     // synthesized member (RecvGenerator's ж-forwarders carry [GeneratedCode("go2cs-gen", …)]), or a
     // [StackTraceHidden] linkname forwarder.
@@ -5515,7 +5534,7 @@ partial class runtime_package
 
     // The ENTRY of the span holding pc: a caller span's start, or a synthetic PC's function span
     // start. Any other pc is its own entry, as a function value's token is (FuncForPC(fn.Pointer())).
-    private static uintptr frameEntry(uintptr pc)
+    internal static uintptr frameEntry(uintptr pc)
     {
         lock (s_callerTableLock)
         {
@@ -5537,7 +5556,7 @@ partial class runtime_package
     public static @string GoFrameSymbolName(Frame f) =>
         f.PC != 0 && callerFrameRecord(f.PC) is CallerFrameRecord { SymbolName: string symbol } ? symbol : f.Function;
 
-    private static CallerFrameRecord? callerFrameRecord(uintptr token)
+    internal static CallerFrameRecord? callerFrameRecord(uintptr token)
     {
         nuint value = token;
 
@@ -5832,7 +5851,7 @@ partial class runtime_package
     // is declared per OS, as splicePanic names its file. Every line here, and every root frame line beside its
     // internRootFrame, is the release src/version.props pins (go1.26.10): repoguard's
     // TestRootFrameLinesMatchThePinnedGoRoot derives each from that GOROOT and fails when one moves.
-    private static nint rootFunctionStartLine(string function) => function switch
+    internal static nint rootFunctionStartLine(string function) => function switch
     {
         "runtime.goexit" => 1770,       // runtime/asm_amd64.s: TEXT runtime·goexit
         "runtime.gopanic" => 809,       // runtime/panic.go
@@ -5861,7 +5880,7 @@ partial class runtime_package
     // record keeps Go's nil. FuncForPC answers this same box (one *Func per function, as Go's). The box is a
     // HandleBox: Func is zero-size, and a plain box of it would be the zerobase, which every zero-size allocation
     // shares (golib's GoZeroBase), making every *Func equal to every other.
-    private static ж<Func> frameFunc(string function, uintptr entry)
+    internal static ж<Func> frameFunc(string function, uintptr entry)
     {
         if (function.Length == 0)
             return default!;
@@ -5934,13 +5953,13 @@ partial class runtime_package
     // were not the same pointer where Go's are, and two call sites of one function gave two FuncForPC boxes but
     // one Frame.Func. runtime's TestFunctionAlignmentTraceback compares the two (frame.Func != f) and reaches the
     // comparison on an arm64 process, which skips its code-byte read. firstmoduledata stays unchanged.
-    private sealed class FuncRecord
+    internal sealed class FuncRecord
     {
         public string Name = string.Empty;
         public uintptr Pc;
     }
 
-    private static readonly ConditionalWeakTable<object, FuncRecord> s_funcRecords = new();
+    internal static readonly ConditionalWeakTable<object, FuncRecord> s_funcRecords = new();
 
     // FuncForPC returns a *Func describing the function the token names, or nil when the token
     // names nothing this host can resolve — which is Go's own answer for a pc in no function.
@@ -5960,6 +5979,8 @@ partial class runtime_package
 
         return frameFunc(name!, frameEntry(pc));
     }
+
+} partial class runtimeᴛFunc {
 
     // Name returns the Go spelling recorded when the *Func was minted. A Func this host did not
     // mint carries no record and answers "", exactly as Go's Name() does for a nil *Func.
@@ -6011,6 +6032,8 @@ partial class runtime_package
         @file = record.File;
         return (@file, record.Line);
     }
+
+} partial class runtime_package {
 
     // The two token kinds a pc can be in this host, tried in the order that costs least.
     private static string? managedFuncName(uintptr pc)
@@ -6712,7 +6735,7 @@ partial class runtime_package
         if (v is IValueAdapter { Value: not null } valueAdapter)
             v = valueAdapter.Value;
 
-        abi.ΔKind kind = abi.Kind(Ꮡt);
+        abi.Kind kind = Ꮡt.Kind();
 
         if (kind >= abi.Bool && kind <= abi.Uintptr)
         {
@@ -6727,7 +6750,7 @@ partial class runtime_package
             return hashManagedBytes(bytes, h);
         }
 
-        if (kind == abi.ΔString && v is @string s)
+        if (kind == abi.String && v is @string s)
         {
             byte[] bytes = new byte[len(s)];
             s.ToSpan().CopyTo(bytes);
