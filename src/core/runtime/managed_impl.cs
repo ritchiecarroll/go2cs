@@ -2020,7 +2020,7 @@ partial class runtime_package
 
         // Go's `main` is emitted as C#'s entry point `Main` (a Go function that is itself named `Main`
         // is shadowed to `ΔMain`), so a receiver-less `Main` in a package class is Go's `main`.
-        string name = goFunctionName(method);
+        string name = goTwinLiteralName(method) ?? goFunctionName(method);
 
         // An sstring twin's canonical value delegate is a lambda carrying the Go name of the function
         // it stands for (GoTwinForwarderAttribute), so a func VALUE's *Func names that function
@@ -2071,6 +2071,11 @@ partial class runtime_package
 
                     recorded = siblingSuffix;
                 }
+
+                // M:N PROTOTYPE (A2). A literal written in a twin is the literal of the function the twin was
+                // generated from: Go has one function there.
+                if (outer.EndsWith(TwinSuffix, StringComparison.Ordinal))
+                    outer = outer[..^TwinSuffix.Length];
 
                 // The outer function's Go name: package initialization's (goInitFrameName) or, for the
                 // entry point, Go's `main` (goLiteralOuterName); any other outer keeps its own name.
@@ -3878,11 +3883,12 @@ partial class runtime_package
                     Line = line;
                 }
 
-                string function = goFrameName(Method, ILOffset, out string symbol);
+                // M:N PROTOTYPE (A2). A twin's frame is named, and started, as the function it was generated from.
+                string function = goTwinFrameName(Method, ILOffset, out string symbol);
                 Function = function;
                 SymbolName = symbol == function ? null : symbol;
                 Hidden = function.EndsWith("-fm", StringComparison.Ordinal);
-                StartLine = goFunctionStartLine(Method);
+                StartLine = goFunctionStartLine(goTwinOrigin(Method) ?? Method);
                 Volatile.Write(ref m_resolved, 1);
             }
         }
@@ -4077,6 +4083,27 @@ partial class runtime_package
         // carries a creator; a host method standing in for Go's own root (the test host's tRunner)
         // carries GoStackRoot. The main goroutine's runtime.main root is not modeled, and a thread a
         // host entered without a root gets none: nothing on it stands where a Go frame is.
+        // M:N PROTOTYPE (A2). THE CALLERS A PARK TOOK OFF THE STACK. A twin that parked is resumed alone:
+        // its awaiting callers are suspended state machines, reached through the parent link, and each is a
+        // frame at the call it awaits. Nothing is resumed on a goroutine that never parked, and on a thread
+        // that is not a carrier, so the walk above is the whole answer there.
+        for (GoTaskCore? caller = GoScheduler.ResumedTwin?.Parent; caller is not null; caller = caller.Parent)
+        {
+            if (parkedTwinFrame(caller) is not uintptr parked)
+                continue;
+
+            if (remainingSkip > 0)
+            {
+                remainingSkip--;
+                continue;
+            }
+
+            if (count >= len(pc))
+                return count;
+
+            pc[count++] = parked;
+        }
+
         if ((sawRoot || Goroutine.Current?.Creator is not null) && remainingSkip == 0 && count < len(pc))
             pc[count++] = internRootFrame("runtime.goexit", "runtime/asm_amd64.s", 1771);
 
@@ -4479,6 +4506,13 @@ partial class runtime_package
         // keeps the wrapper only when its callee is the panic machinery, which no live frame is
         // (splicePanic passes keepWrapper for the spliced site's first frame).
         if (!keepWrapper && method.IsDefined(typeof(GoWrapperAttribute), inherit: false))
+            return false;
+
+        // M:N PROTOTYPE (A2). A twin is two methods to the CLR: the stub that starts its state machine and
+        // the state machine's MoveNext, which holds the body. Go has one function there, so the stub is no
+        // frame; MoveNext is the frame (goTwinFrameName). The stub of a literal written in a twin
+        // (`<outerꞏtwin>b__X`) is the same case; a literal there that is not async is one method and stays.
+        if (method.Name.Contains(TwinSuffix, StringComparison.Ordinal) && method.IsDefined(typeof(AsyncStateMachineAttribute), inherit: false))
             return false;
 
         Type topLevel = declaring;
@@ -5797,7 +5831,7 @@ partial class runtime_package
 
             if (csFile is not null && csLine > 0 && goPositionMapRecord(method, goSourcePath(csFile)) is { } record)
             {
-                if (method.Name.Length > 0 && method.Name[0] == '<')
+                if (method.Name.Length > 0 && method.Name[0] == '<' || goTwinLiteralName(method) is not null)
                 {
                     int goLine = record.GoLineFor(csLine);
                     startLine = goLine <= 0 ? 0 : record.FuncLiteralStartFor(goLine);
@@ -6757,23 +6791,237 @@ partial class runtime_package
     // M:N spike: a hidden async twin runs as its state machine's MoveNext, on a compiler-generated nested
     // type named `<childꞏtwin>d__N`. A frame there is named for the function the twin was generated from. The
     // state machine's IL offsets say nothing about that function, so the offset is dropped.
-    private static string goTwinFrameName(System.Reflection.MethodBase method, int ilOffset, out string symbol)
+    private static string goTwinFrameName(System.Reflection.MethodBase method, int ilOffset, out string symbol) =>
+        goTwinOrigin(method) is { } origin ? goFrameName(origin, StackFrame.OFFSET_UNKNOWN, out symbol) : goFrameName(method, ilOffset, out symbol);
+
+    // The suffix the twin generator gives a hidden async twin's name.
+    private const string TwinSuffix = "ꞏtwin";
+
+    // The function a twin's state machine was generated from, for the MoveNext of one; null for any other
+    // method.
+    private static System.Reflection.MethodBase? goTwinOrigin(System.Reflection.MethodBase method)
     {
-        if (method.Name == "MoveNext" && method.DeclaringType is { DeclaringType: { } outer, Name: { } machine } &&
-            machine.StartsWith('<') && machine.IndexOf("ꞏtwin>d__", StringComparison.Ordinal) is > 1 and int close)
+        if (method.Name != "MoveNext" || method.DeclaringType is not { DeclaringType: { } outer, Name: { } machine } || !machine.StartsWith('<'))
+            return null;
+
+        int close = machine.IndexOf(TwinSuffix + ">d__", StringComparison.Ordinal);
+
+        if (close <= 1)
+            return null;
+
+        const System.Reflection.BindingFlags declared = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+
+        string name = machine[1..close];
+
+        foreach (System.Reflection.MethodInfo candidate in outer.GetMethods(declared))
         {
-            const System.Reflection.BindingFlags declared = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance |
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+            if (candidate.Name == name)
+                return candidate;
+        }
 
-            string name = machine[1..close];
+        return null;
+    }
 
-            foreach (System.Reflection.MethodInfo candidate in outer.GetMethods(declared))
+    // M:N PROTOTYPE (A2). A function literal written in a twin and started as a goroutine is an async lambda:
+    // a stub named `<outerꞏtwin>b__X` and a state machine `<<outerꞏtwin>b__X>d` whose MoveNext holds the
+    // literal's body. That MoveNext is the literal's frame, so it answers to the stub's name: the name a
+    // literal's frame is read from (goFrameName). Null for any other method. The positions stay MoveNext's
+    // own, since the stub has none.
+    private static string? goTwinLiteralName(System.Reflection.MethodBase method)
+    {
+        if (method.Name != "MoveNext" || method.DeclaringType is not { Name: { } machine })
+            return null;
+
+        if (!machine.StartsWith("<<", StringComparison.Ordinal) || !machine.EndsWith(">d", StringComparison.Ordinal))
+            return null;
+
+        return machine.IndexOf(TwinSuffix + ">", StringComparison.Ordinal) > 2 ? machine[1..^2] : null;
+    }
+
+    // M:N PROTOTYPE (A2). A SUSPENDED TWIN AS A FRAME: its MoveNext, at the call it awaits. The pc is
+    // interned as a live frame's is, suspended at the reported call, so a twin met on the stack at that call
+    // and the same twin met parked there are one pc and one line. Null for a twin that never suspended. A
+    // twin whose await cannot be read (no IL: Native AOT) is a frame with its name and its first line.
+    private static uintptr? parkedTwinFrame(GoTaskCore twin)
+    {
+        if (twin.MachineSnapshot is not { } machine)
+            return null;
+
+        TwinAwaitMap map = s_twinAwaitMaps.GetOrAdd(machine.GetType(), static type => new TwinAwaitMap(type));
+
+        // The rule the live walk applies to a frame: the runtime's own driver of a goroutine's twin is a
+        // suspended state machine too, and is no Go frame parked as it is none on the stack.
+        if (map.MoveNext is null || !isGoSourceFrame(map.MoveNext))
+            return null;
+
+        int callOffset = map.AwaitedCall(machine);
+        CallSiteKey key = new(map.MoveNext.MethodHandle, callOffset, false, true, callOffset >= 0, null);
+
+        lock (s_callerTableLock)
+        {
+            if (!s_callSiteTokens.TryGetValue(key, out nuint token))
             {
-                if (candidate.Name == name)
-                    return goFrameName(candidate, StackFrame.OFFSET_UNKNOWN, out symbol);
+                s_callerRecords.Add(new CallerFrameRecord { Method = map.MoveNext, ILOffset = callOffset, ReturnAddress = true, SuspendedAtReportedCall = callOffset >= 0 });
+                token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
+                s_callSiteTokens[key] = token;
+            }
+
+            return token;
+        }
+    }
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, TwinAwaitMap> s_twinAwaitMaps = new();
+
+    // M:N PROTOTYPE (A2). WHERE A SUSPENDED TWIN STANDS. The C# compiler numbers a method's awaits and, at
+    // each, stores that number to the state machine's state field before it suspends. So the state of a
+    // suspended machine names one await, and the call that await is of is read from MoveNext's IL: the call
+    // before the GetAwaiter call that precedes the store. The twin's #line directives map that call to its
+    // line. One pass per state machine type, on the first walk that meets it parked.
+    private sealed class TwinAwaitMap
+    {
+        public readonly System.Reflection.MethodBase? MoveNext;
+
+        // The awaits the pass met (GetAwaiter calls), the states it mapped, and the stores it could not map:
+        // a state stored twice, or stored with no await read before it. Awaits == Mapped and Unmapped == 0
+        // is the exact case (GoTwinAwaitCensusProbe).
+        public readonly int Awaits;
+        public readonly int Unmapped;
+        public int Mapped => m_awaitedCalls.Count;
+
+        private readonly System.Reflection.FieldInfo? m_state;
+        private readonly Dictionary<int, int> m_awaitedCalls = new();
+
+        public TwinAwaitMap(Type machine)
+        {
+            const System.Reflection.BindingFlags members = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public |
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+
+            MoveNext = machine.GetMethod("MoveNext", members);
+            m_state = machine.GetField(StateField, members);
+
+            if (MoveNext is null || m_state is null)
+                return;
+
+            byte[]? il;
+
+            try
+            {
+                il = MoveNext.GetMethodBody()?.GetILAsByteArray();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            if (il is null)
+                return;
+
+            Type[]? typeArguments = machine.IsGenericType ? machine.GetGenericArguments() : null;
+            int lastCall = -1;
+            int awaited = -1;
+            int constant = -1;
+            int constantAge = int.MaxValue;
+            int i = 0;
+
+            while (i < il.Length)
+            {
+                int start = i;
+                System.Reflection.Emit.OpCode op;
+
+                if (il[i] == 0xFE && i + 1 < il.Length)
+                {
+                    if (!ILOpCodeTable.TwoByte.TryGetValue(il[i + 1], out op))
+                        break;
+
+                    i += 2;
+                }
+                else if (!ILOpCodeTable.OneByte.TryGetValue(il[i], out op))
+                {
+                    break;
+                }
+                else
+                {
+                    i += 1;
+                }
+
+                if (constantAge < int.MaxValue)
+                    constantAge++;
+
+                switch (il[start])
+                {
+                    case 0x15: // ldc.i4.m1
+                        (constant, constantAge) = (-1, 0);
+                        break;
+                    case >= 0x16 and <= 0x1E: // ldc.i4.0 to ldc.i4.8
+                        (constant, constantAge) = (il[start] - 0x16, 0);
+                        break;
+                    case 0x1F when i < il.Length: // ldc.i4.s
+                        (constant, constantAge) = ((sbyte)il[i], 0);
+                        break;
+                    case 0x20 when i + 4 <= il.Length: // ldc.i4
+                        (constant, constantAge) = (BitConverter.ToInt32(il, i), 0);
+                        break;
+                    case 0x28 or 0x6F: // call, callvirt
+                        if (callTarget(MoveNext, start)?.Name == "GetAwaiter")
+                        {
+                            awaited = lastCall;
+                            Awaits++;
+                        }
+                        else
+                        {
+                            lastCall = start;
+                        }
+
+                        break;
+                    case 0x7D when i + 4 <= il.Length && constantAge <= 3 && constant >= 0: // stfld, of a state an await is numbered by
+                        string? stored;
+
+                        try
+                        {
+                            stored = machine.Module.ResolveField(BitConverter.ToInt32(il, i), typeArguments, null)?.Name;
+                        }
+                        catch (Exception)
+                        {
+                            stored = null;
+                        }
+
+                        if (stored == StateField)
+                        {
+                            if (awaited < 0 || !m_awaitedCalls.TryAdd(constant, awaited))
+                                Unmapped++;
+
+                            awaited = -1;
+                        }
+
+                        break;
+                }
+
+                i += op.OperandType switch
+                {
+                    System.Reflection.Emit.OperandType.InlineNone => 0,
+                    System.Reflection.Emit.OperandType.ShortInlineBrTarget or System.Reflection.Emit.OperandType.ShortInlineI or System.Reflection.Emit.OperandType.ShortInlineVar => 1,
+                    System.Reflection.Emit.OperandType.InlineVar => 2,
+                    System.Reflection.Emit.OperandType.InlineI8 or System.Reflection.Emit.OperandType.InlineR => 8,
+                    System.Reflection.Emit.OperandType.InlineSwitch when i + 4 <= il.Length => 4 + 4 * BitConverter.ToInt32(il, i),
+                    _ => 4
+                };
             }
         }
 
-        return goFrameName(method, ilOffset, out symbol);
+        // The IL offset of the call the suspended `machine` awaits, or -1 where it is not known.
+        public int AwaitedCall(object machine) =>
+            m_state?.GetValue(machine) is int state && m_awaitedCalls.TryGetValue(state, out int offset) ? offset : -1;
+
+        private const string StateField = "<>1__state";
+    }
+
+    // GoTwinAwaitCensusProbe is the measurement seam for TwinAwaitMap (prototype stage A2): for a twin's
+    // state machine type, the awaits its MoveNext holds, the states mapped to a call, and the stores that
+    // could not be mapped.
+    public static (int Awaits, int Mapped, int Unmapped) GoTwinAwaitCensusProbe(Type machine)
+    {
+        TwinAwaitMap map = new(machine);
+        return (map.Awaits, map.Mapped, map.Unmapped);
     }
 }

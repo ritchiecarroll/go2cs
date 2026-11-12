@@ -54,6 +54,22 @@ internal static nint count(slice<byte> buf) {
     return n;
 }
 
+// M:N PROTOTYPE (A2): an `unsafe` block with no `fixed` and no `unsafe` modifier on the method, holding a call that
+// can park. A twin of it awaits inside an unsafe context, which C# refuses (CS4004), so it is never twinned either.
+internal static nint peek(nint seed) {
+    nint echo;
+
+    unsafe {
+        nint local = seed;
+        nint* q = &local;
+
+        side.ᐸꟷ(seed + 1);
+        echo = *q;
+    }
+
+    return echo;
+}
+
 // A wrapper over a LibraryImport extern. The extern is Windows only; elsewhere the wrapper answers without it.
 internal static nint processId() {
     if (OperatingSystem.IsWindows()) {

@@ -188,11 +188,19 @@ public static class GoScheduler
     private static long s_nestedResumes;
 
     // A twin's step is starting from a delegate: a wake, or an awaiter that is not a twin's.
-    internal static void NoteStep()
+    internal static void NoteStep(GoTaskCore twin)
     {
-        if (t_carrier is not { Mounted: not null })
+        if (t_carrier is { Mounted: not null } carrier)
+            carrier.Resuming = twin;
+        else
             Interlocked.Increment(ref s_offCarrierResumes);
     }
+
+    // M:N PROTOTYPE (A2). The twin the calling carrier's step resumed, or null: no goroutine is mounted, or
+    // the step is a goroutine's first, whose calls are all frames on this thread. The resumed twin is the
+    // lowest frame of the goroutine that the thread holds; its callers are the suspended twins up its
+    // parent link (GoTaskCore.Parent), which a stack walk reads after the thread's own frames.
+    internal static GoTaskCore? ResumedTwin => t_carrier is { Mounted: not null } carrier ? carrier.Resuming : null;
 
     // A twin ended, and `continuation` awaits it: its caller's box, as a rule. The caller does not resume
     // inside the frame that ended. The carrier runs it when that frame has returned (RunStep), so a return
@@ -577,6 +585,9 @@ public static class GoScheduler
         // The caller of a twin that ended in this step, to resume when the ending frame has returned.
         internal GoTaskCore? Continuation;
 
+        // The twin this step resumed (see ResumedTwin). Null from the end of one step to a resume in another.
+        internal GoTaskCore? Resuming;
+
         // The ExecutionContext this thread holds between steps: no goroutine's.
         private ExecutionContext? m_baseContext;
 
@@ -683,8 +694,11 @@ public static class GoScheduler
             while (Continuation is { } caller)
             {
                 Continuation = null;
+                Resuming = caller;
                 caller.Resume();
             }
+
+            Resuming = null;
 
             // An unrecovered panic left the twin: raise it again HERE, with the goroutine still mounted, so
             // it is unhandled on this thread and golib's backstop reports it for the right goroutine.

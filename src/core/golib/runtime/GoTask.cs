@@ -298,9 +298,14 @@ internal class GoTaskCore
 
     private void ResumeAsStep()
     {
-        GoScheduler.NoteStep();
+        GoScheduler.NoteStep(this);
         Resume();
     }
+
+    // M:N PROTOTYPE (A2). A copy of the twin's state machine as it stands, for a stack walk to read which
+    // await a suspended caller sits at (runtime.Callers). Null for a twin that never suspended. A cold path:
+    // a struct state machine is boxed by the read.
+    internal virtual object? MachineSnapshot => null;
 
     internal void Await(object continuation) => m_continuation = continuation;
 
@@ -363,6 +368,8 @@ internal sealed class GoTaskBox<TStateMachine> : GoTaskCore where TStateMachine 
     internal TStateMachine Machine = default!;
 
     internal override void Resume() => Machine.MoveNext();
+
+    internal override object? MachineSnapshot => Machine;
 }
 
 // A suspended twin with a result: its state machine, on the heap.
@@ -371,4 +378,6 @@ internal sealed class GoTaskBox<T, TStateMachine> : GoTaskCore<T> where TStateMa
     internal TStateMachine Machine = default!;
 
     internal override void Resume() => Machine.MoveNext();
+
+    internal override object? MachineSnapshot => Machine;
 }

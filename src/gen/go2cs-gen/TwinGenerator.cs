@@ -185,10 +185,22 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // M:N PROTOTYPE (A1): the never-twinned rule for native wrappers (the cgo design's M4). A method that is extern, that
         // carries DllImport or LibraryImport, or whose body pins with `fixed`, is synchronous: a `fixed` scope cannot span a
         // park. A twin that calls one calls the plain method, and blocks its carrier for the length of the call.
+        //
+        // M:N PROTOTYPE (A2): the closed list. A method is refused as "native" when any one of these holds, and for no
+        // other reason:
+        //   1. it is extern;
+        //   2. it carries DllImport or LibraryImport;
+        //   3. its body holds a `fixed` statement, anywhere;
+        //   4. its body holds an `unsafe` block, anywhere (C# cannot await in an unsafe context, CS4004).
+        // Named limits of the list:
+        //   - rows 3 and 4 refuse the whole method, also when its parking call sits outside the fixed or unsafe scope;
+        //   - UnmanagedCallersOnly is not a row. Such a method is only ever entered from native code, so no twin calls it.
+        // A method with the `unsafe` modifier, or with a pointer in its signature, is refused further down as "unsafe".
         private static bool IsNative(MethodDeclarationSyntax method, IMethodSymbol symbol) =>
             symbol.IsExtern || method.Modifiers.Any(SyntaxKind.ExternKeyword) ||
             symbol.GetAttributes().Any(attribute => attribute.AttributeClass?.Name is "DllImportAttribute" or "LibraryImportAttribute") ||
-            method.DescendantNodes().OfType<FixedStatementSyntax>().Any();
+            method.DescendantNodes().OfType<FixedStatementSyntax>().Any() ||
+            method.DescendantNodes().OfType<UnsafeStatementSyntax>().Any();
 
         private string? PreRefusal(MethodDeclarationSyntax method, IMethodSymbol symbol)
         {
