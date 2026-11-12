@@ -157,6 +157,8 @@ public static class GoScheduler
     private static int s_peakThreads;
     private static long s_steps;
     private static long s_parks;
+    private static long s_migrations;
+    private static long s_migrated;
     private static long s_handoffs;
     private static long s_injections;
     private static long s_carrierStartFailures;
@@ -283,6 +285,7 @@ public static class GoScheduler
         return $"READING go-scheduler procs={s_procs} peak-carriers={Volatile.Read(ref s_peakCarriers)}" +
                $" carriers-started={Interlocked.Read(ref s_carriersStarted)} peak-os-threads={Volatile.Read(ref s_peakThreads)}" +
                $" steps={Interlocked.Read(ref s_steps)} parks={Interlocked.Read(ref s_parks)}" +
+               $" migrations={Interlocked.Read(ref s_migrations)} migrated-goroutines={Interlocked.Read(ref s_migrated)}" +
                $" handoffs={Interlocked.Read(ref s_handoffs)} injections={Interlocked.Read(ref s_injections)}" +
                $" run-next-steps={Interlocked.Read(ref s_runNextSteps)} run-next-steals={Interlocked.Read(ref s_runNextSteals)}" +
                $" steps-over-10ms={Interlocked.Read(ref s_longSteps)}" +
@@ -681,6 +684,21 @@ public static class GoScheduler
             goroutine.Mount();
             Mounted = goroutine;
             Interlocked.Increment(ref s_steps);
+
+            // M:N PROTOTYPE (A4). The reading's proof that goroutines moved: a step on a carrier other than the
+            // one that ran the goroutine's last step is a migration.
+            if (goroutine.m_lastCarrier is { } last && !ReferenceEquals(last, this))
+            {
+                Interlocked.Increment(ref s_migrations);
+
+                if (!goroutine.m_migrated)
+                {
+                    goroutine.m_migrated = true;
+                    Interlocked.Increment(ref s_migrated);
+                }
+            }
+
+            goroutine.m_lastCarrier = this;
 
             // The goroutine's ExecutionContext comes with it: what it wrote to an AsyncLocal on its last
             // carrier is what it reads on this one.

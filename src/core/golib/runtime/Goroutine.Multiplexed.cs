@@ -83,6 +83,11 @@ public sealed partial class Goroutine
     // M:N PROTOTYPE (A1). The ExecutionContext of a multiplexed goroutine while no carrier has it mounted.
     internal ExecutionContext? m_context;
 
+    // M:N PROTOTYPE (A4). The carrier that ran this goroutine's last step, and whether a step ever ran on another:
+    // read only by the scheduler's reading.
+    internal object? m_lastCarrier;
+    internal bool m_migrated;
+
     /// <summary>
     /// Runs a program's <c>main</c> as the main goroutine when it has a hidden async twin. With the scheduler off,
     /// or when an init function locked the main goroutine to the startup thread, it is exactly
