@@ -36483,4 +36483,63 @@ roster's linux expectation is 536 + 0: the counts are a host difference from tha
 host lacks is on `PATH`), not by moving the roster's linux-x64 536, which stays the reading of a host with no `zstd`.
 linux-arm64 banks 536 (linux-x64; linux-arm64: 535 + 1). The open item is the pin's own retirement plan, unchanged.
 
+## 2026-11-12 — G (COORD's ruling on a finding of the M:N prototype's first stage): a deadlock exit prints the fatal line ALONE, where Go also prints one block per goroutine (`goroutine 1 [select (no cases)]:` and its frames) — OPEN, a parity gap on master and independent of M:N; a .4 candidate, routed by COORD
+
+**What a user sees.** A converted program whose goroutines all wait forever ends as Go's does: exit code 2, and
+the fatal line on stderr. Go then prints an empty line and one block for every goroutine: a header with the
+goroutine's wait reason, then its frames. The converted program prints nothing after the fatal line, so its report
+does not say which goroutine waits, on what, or where.
+
+**Minimal repro** (one file of five lines, no imports): `package main`, an empty line, `func main() {`, an indented
+`select {}` (line 4), and `}`.
+
+**Go's own stderr (go1.26.10, windows/amd64, `go run .`), exit code 2, in order:**
+
+- `fatal error: all goroutines are asleep - deadlock!`
+- an empty line
+- `goroutine 1 [select (no cases)]:`
+- `main.main()`
+- a tab, then the source file's full path, then `:4 +0xf`
+
+`go run` adds its own `exit status 2` after them. The `+0xf` is a code offset, which no managed build reproduces.
+
+**Measured at master (`4efe149858`, windows x64, SDK 10.0.400, runtime 10.0.11).** The repro went in as a throwaway
+Behavioral fixture, converted and built by the behavioral runner (Release), run directly, and removed; the tree read
+clean after. Predicted from the prototype's plain build, where the gap was first seen:
+
+- stdout: empty.
+- stderr: the one line `fatal error: all goroutines are asleep - deadlock!` and nothing else.
+- exit code: 2.
+
+The first line and the exit code match Go. The four lines after it are missing.
+
+**Read at the tree (master, by name).**
+
+- The report is written by `builtin.fatal` (golib, `builtin.cs`): the message and a line ending, through
+  `builtin.WriteFatalReport` (stderr, then the crash output). It writes no goroutine block. That is the Release
+  path, the one measured; a Debug golib throws an `InvalidOperationException` there instead.
+- The pieces a block needs are in golib already. `WaitReason` carries Go's own text for each reason, `select (no
+  cases)` and `chan receive (nil chan)` included, and the detector that fires the report
+  (`Goroutine.AllGoroutinesForeverBlocked`) takes a snapshot of the goroutine registry to decide.
+- An unrecovered panic does print a block (`goroutine 1 [running]:` and frames; `DESIGN-crash-report.md`). Whether
+  that writer can print a PARKED goroutine's frames, as against the panicking thread's own, is not read.
+
+**What is on record already, and what is not.**
+
+- This BOARD's behavioral skip rows `ChannelReceiveFromNil` and `ChannelSendToNil` (DELIBERATE-SKIP) say the trace
+  cannot be expected byte for byte. That stands for the offsets. It does not cover the blocks being absent.
+- `docs/Limitations.md` and `docs/GoFeatureSupport.md` disclose that the message appears only for a forever-wait (a
+  nil channel, an empty `select {}`) and that any other deadlock hangs. Neither says the goroutine blocks are missing.
+
+**Scope.** Every program that reaches the report: main and each other goroutine in a forever-wait. Run on windows
+x64 only; the writer is shared golib code, so linux and darwin are expected to read the same, not measured. Main's
+`runtime.Goexit` report (`no goroutines (main called runtime.Goexit) - deadlock!`) has its own writer
+(`MainGoexit`), and whether Go prints blocks after it, and golib does not, is not read here.
+
+**Owed.** The fix is not taken here: COORD routes it to a lane as a .4 candidate. A fix prints, after the fatal
+line, an empty line and one block per registered goroutine (header with id and wait reason, then the frames golib
+can name), and the repro above becomes a fixture whose stderr is compared up to the code offset.
+
+— G (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
