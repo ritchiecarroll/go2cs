@@ -243,6 +243,7 @@ func TestWhiteboxProductionNumericConvNotRecorded(t *testing.T) {
 		t.Errorf("a numeric pair with a TEST-LOCAL operand must still record (it relocates there); got %v", numericConversions)
 	}
 }
+
 // TestPointerBoxConversionRecordShape pins the ONE definition of the pointer-boxing route both
 // conversionRecordHasLocalOperand and recordsRequireProductionMutation read. The `global::` trim is
 // load-bearing: a whitebox-production operand renders class-qualified while the box wraps that same

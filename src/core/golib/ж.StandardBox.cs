@@ -35,7 +35,7 @@ namespace go;
 /// <c>heap()</c> hands out a <c>ref</c> alias to it before any address is taken.
 /// </para>
 /// </remarks>
-public class StandardBox<T> : ж<T>
+public class StandardBox<T> : ж<T>, IPlainHeapRoot
 {
     // A managed T lives here (reference-containing layouts cannot be pinned, and no syscall can
     // meaningfully take their address, so no slot exists for them).
@@ -176,6 +176,10 @@ public class StandardBox<T> : ж<T>
     /// <inheritdoc/>
     // The zerobase's referent is the zerobase, which runtime treats as outside every heap span.
     public override object ReferentObject => NamesZeroBase ? GoZeroBase.Box : this;
+
+    // A field view's MANAGED-EXACT root (IPlainHeapRoot): non-nil, and not the zerobase, whose distinct boxes are one
+    // pointer while their ids differ. What remains compares by identity alone (Equals below), in every subclass.
+    bool IPlainHeapRoot.IsPlainHeapRoot => !m_isNull && !NamesZeroBase;
 
     /// <inheritdoc/>
     public override bool Equals(ж<T>? other)

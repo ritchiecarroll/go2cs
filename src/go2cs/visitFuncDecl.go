@@ -1751,7 +1751,7 @@ func csharpCodeWithoutComments(text string) string {
 }
 
 // csharpCodeWithoutCommentsOrLiterals is csharpCodeWithoutComments with every string and character literal's
-// contents removed too (`""`, `''` stand in for them): a literal's words are never code, and under plain literals
+// contents removed too (`""`, `”` stand in for them): a literal's words are never code, and under plain literals
 // (seat #51) a message spells words a hoisted field's name had hidden. An interpolated string ($"…", $@"…", @$"…")
 // keeps its contents, whose holes are code.
 func csharpCodeWithoutCommentsOrLiterals(text string) string {

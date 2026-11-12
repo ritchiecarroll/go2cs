@@ -870,9 +870,9 @@ func callsSeededThinAllocator(info *types.Info, body *ast.BlockStmt, seeded map[
 // heapProfileReaders are the functions through which Go code reads the memory profile, by the
 // package path and name go/types reports for the used object.
 var heapProfileReaders = map[string]bool{
-	"runtime.MemProfile":              true,
+	"runtime.MemProfile":             true,
 	"runtime/pprof.WriteHeapProfile": true,
-	"runtime/pprof.Lookup":            true,
+	"runtime/pprof.Lookup":           true,
 }
 
 // readsHeapProfile reports whether any file in the chosen set -- the production files, or with

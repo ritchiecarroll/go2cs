@@ -43,7 +43,7 @@ import "fmt"
 
 type oid struct{ der []byte }
 
-// A POINTER receiver: ` + "`o.fill()`" + ` takes o's address, so the plain ` + "`o`" + ` beside it can observe the write.
+// A POINTER receiver: `+"`o.fill()`"+` takes o's address, so the plain `+"`o`"+` beside it can observe the write.
 func (o *oid) fill(text string) error { o.der = []byte(text); return nil }
 
 type counter struct{ n int }

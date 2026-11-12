@@ -234,7 +234,7 @@ public class GoTimerTests
     // The host's own short wait on macOS: a one-shot kqueue EVFILT_TIMER with NOTE_CRITICAL (sys/event.h), made and
     // closed per wait. It is the test's own, not GoCriticalTimer's, so a change to golib's wait cannot move both
     // sides of a pair. False where there is no reading to take: not macOS, kqueue refused, or the wait cut short.
-    private static bool kernelWait(long nanoseconds)
+    internal static bool kernelWait(long nanoseconds)
     {
         if (!OperatingSystem.IsMacOS())
             return false;

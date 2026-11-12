@@ -83,7 +83,7 @@ type localImpl struct{}
 func (localImpl) G() string { return "g" }
 
 // The one shape whose EMISSION does move, and correctly: a C# delegate cannot be a partial
-// struct, so a named FUNC source is realized as the ` + "`ᴠ`" + ` value adapter class instead.
+// struct, so a named FUNC source is realized as the `+"`ᴠ`"+` value adapter class instead.
 type meter func() int
 
 func (m meter) Value() int { return m() }

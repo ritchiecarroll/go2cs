@@ -740,3 +740,146 @@ is `atWindowsLinuxAmd64`, 35 to 46 are `atWindows`, 47 to 49 are `atDarwin`. 49 
 One instrument note for the next reader: whole-file hand-owned files carry `[module: go.GoManualConversion]`, with
 the `go.` prefix. A search anchored on the attribute name without the prefix misses them, and missed `mfinal.cs`
 and `mcleanup.cs` here until their headers were read.
+
+## 12. Wave 1, read and banked (dated block, 2026-11-12, P2)
+
+> Wave 1 was dispatched at master `06610aaa65` (batch 286) and read by two readers independently: P2 and P5. The two
+> reads agree row for row. COORD's rulings R1 to R4 of 2026-11-12 decide the rows no existing form covered. This block
+> records the read, the bank, and the scores of §4.3's wave 1 predictions (W1 to W10, P2's posts of 2026-11-11).
+
+### 12.1 The dispatch
+
+Seven tip refs, `claude/p2-tip-06610aaa65-1` to `-7`, in G's order, one os-matrix dispatch each (goos linux, stage
+`sweep-shard`, arch both, the shard's `.filter` text byte for byte). The instrument's `check`, `plan` and `refs` modes
+ran as committed; its `dispatch` mode needs `gh`, which has no token on the dispatching box, so the seven went through
+the GitHub connector with the same inputs. Every run's headSha read `06610aaa65` before any row counted.
+
+| Shard | Run | Rows | arm job, min (ESTIMATE) | x64 job, min | Row walls arm / x64, s | Ratio | Held |
+|---|---|---|---|---|---|---|---|
+| A-13 | 43151871852 | 1 | 26.3 (123) | 34.5 | 1515 / 2008 | 0.75 | |
+| A-7 | 43151877722 | 19 | 42.0 (113) | 40.3 | 2461 / 2372 | 1.04 | internal/poll |
+| A-8 | 43151882036 | 19 | 16.3 (95) | 14.4 | 914 / 799 | 1.14 | |
+| A-9 | 43151886546 | 19 | 13.5 (92) | 13.2 | 751 / 732 | 1.03 | internal/zstd |
+| A-6 | 43151891055 | 19 | 17.5 (84) | 14.6 | 1001 / 827 | 1.21 | |
+| A-12 | 43151896336 | 19 | 16.0 (83) | 13.4 | 900 / 750 | 1.20 | |
+| A-2 | 43151902079 | 20 | 13.2 (78) | 17.0 | 746 / 949 | 0.79 | |
+
+### 12.2 The proofs, and G's bar runs
+
+- **14 of 14 jobs PASS.** On every leg the control saw 1 dump file and the 128 MiB write, prove left 0 files and stayed
+  under the 8 MiB bar, and recheck found 0 new files.
+- **The 8 MiB bar was made to fail before wave 1 used it** (G, branch `claude/g-la64-s7-e1` at `34d303270c`,
+  2026-11-11). Run 42985432830, the red-space arm: prove FAILED on both legs by free space alone ("/ lost 47,415,296
+  bytes" on x64, 66,531,328 on arm64, against the 8 MiB the proof allows). Run 42985646744, the red arm: prove FAILED
+  on both legs by the file census ("left 1 dump file(s)"). Run 42985806740, the same commit with suppression applied:
+  PASS on both legs. So each of the bar's two detectors fails on its own.
+
+### 12.3 The bank: 114 rows at linux-arm64
+
+`annotate_linux.py --rids` derived every segment from the evidence, and `check-roster-format.ps1` section 2i reads
+the same: 114 rows banked on both RIDs, 2 read and pending, 0 refused.
+
+| Form | Rows | Ruling |
+|---|---|---|
+| EQUAL | 110 | §2.4 |
+| ARCH-COUNT | internal/cpu: 9 -> 2, absent exactly §4.2's 7 names | §2.4 |
+| ARCH-NAMES | runtime: 11094 + 67 (linux-x64; linux-arm64: 11093 + 64) | R1 |
+| RULED ARCH-COUNT | internal/runtime/gc/scan: 3095 (linux-x64; linux-arm64: 3092) | R2 |
+| HOST-EQUAL | syscall: 42 + 17 (linux-x64; linux-arm64: 50 + 9) | R3 |
+
+COORD's direction counted "the 111 rows plus runtime = 112" and then named gc/scan and syscall to bank as well. The
+111 were the dry run's rows before R2 and R3, so the bank is 111 + runtime + gc/scan + syscall = 114.
+
+- **R1, runtime.** Each leg reports names the other does not. Go's x64 verdicts hold `TestHasAVX`,
+  `TestMemmoveOverflow`, `TestStartLineAsm` and `TestVDSOHash/__vdso_clock_gettime`, `__vdso_getrandom`,
+  `__vdso_gettimeofday`; Go's arm64 verdicts hold `TestVDSOHash/__kernel_clock_gettime` and `__kernel_getrandom`. These
+  8 are the only differences between Go's two name sets, and on each leg C# reports exactly Go's names (both readers
+  checked this from the Go side). The 3 disclosures that do not apply at arm64 are `TestMemmoveOverflow` and
+  `TestStartLineAsm` (absent) and `TestFunctionAlignmentTraceback` (it passes on arm64). The guard's new arch-names form
+  needs the collector's new `same_names` column to read yes on both legs.
+- **R2, gc/scan.** The hosted x64 runs the 3 AVX-512 tests the roster's host skipped (a BOARD finding of this date);
+  arm64 is the roster's 3,095 less exactly those 3.
+- **R3, syscall.** Both hosted legs read 50 + 9 with the same 9 disclosed names: the host-privilege class of the
+  2026-11-10 note on G's 40 + 19. The roster's linux-x64 42 + 17 is kept.
+
+### 12.4 Held, with their next steps
+
+- **internal/poll: an instrument artifact.** `TestSplicePipePool` waits 0.9 of the deadline for pipes the converted run
+  never collects (the disclosed leak); at the stage's 45m it waits 40.5 minutes and the host's 30-minute per-test
+  deadline cuts it before the disclosed signature prints (BOARD, this date). Next: a per-row timeout input for
+  `sweep-shard`, then W1-A7R, the row alone at 25m. The evidence file `W1-A7R.tsv` will supersede `W1-A7.tsv` for it.
+- **internal/zstd: a host difference.** `TestAlloc` runs where the host has `zstd`, and its allocation assert fails.
+  Next: the deferred pin extended to linux under the ten-read rule (BOARD, this date).
+
+### 12.5 Two findings in the tools
+
+- **The annotator's CSV field limit.** gc/scan's arm64 `absent` cell lists the hosted x64's 6,169 AVX-512 names (268
+  KB), past Python csv's 128 KiB default, and the dry run died on it. `annotate_linux.py` now raises the limit. The
+  guard reads the same file with `ConvertFrom-Csv`, which has no such limit: its run reads the row.
+- **The combined form could not hold runtime.** It needs the longer RID to name no absent verdict, and per-arch subtest
+  names break that. R1's arch-names form now covers it, in the guard and the annotator, each with fixtures.
+
+### 12.6 The scores
+
+| Prediction | Result | Score |
+|---|---|---|
+| PD: control 1 file and the write; prove 0 files under the bar; recheck 0 | 14 of 14 legs | **HIT** |
+| W1 runtime: x64's verdicts less 3 names, disclosed differing by 1 to 3, the COMBINED form | the 3 names absent and the difference 3, but the per-arch VDSO names fit no form | names **HIT**, form **REFUSED** (banked by R1) |
+| W2 internal/cpu 9 -> 2, gc/scan 3095 -> 3092 | 2 and 3092 at arm64 | **HIT** |
+| W3 the ten named rows equal | 9 equal; internal/poll FAIL on both legs | **MISS** (one row: the 45m budget) |
+| W4 syscall: equal verdicts, disclosures moving by 0 to 2 | arm64 equals x64 exactly (50 + 9) | **HIT** for arch; the roster difference is the host |
+| W5 the plain rows equal, 0 to 3 exceptions | 101 of 102; 1 exception, internal/zstd, a host property on both legs | **HIT** |
+| W6 hosted x64 equals the roster on all but 0 to 2 rows | 4 rows: gc/scan, syscall, internal/zstd, internal/poll | **MISS** |
+| W7 no row dies at one of the 15 stubs | none | **HIT** |
+| W8 every arm job inside its ESTIMATE; row-wall ratio 1.1 to 1.5 per shard | every job inside (longest 42 of 113 min); ratio in band on 3 of 7 shards (0.75 to 1.21) | **MISS** |
+| W9 a SetDefaultGOMAXPROCS assert reads red on both legs | `TestCgroupGOMAXPROCSSetDefault` passes on both sides; its asserting subtests skip on hosted runners (no cgroup limit) | **MISS** (not reached) |
+| W10 no "not implemented" naming a refused floor-set member | none in any of the 14 legs | **HIT** |
+
+### 12.7 G's second owed item: the fixed term reads loose
+
+§2.2's ESTIMATE carries 30 minutes per shard for setup, the converter build and the first row's corpus build. On every
+wave 1 leg the job wall less the summed row walls is 48 to 72 seconds. The first row's corpus build is inside its row
+wall, so that is not all of the 30 minutes, but no shard came near its ESTIMATE: the longest arm job is 42 of 113
+minutes, and the next longest 26 of 123. The ESTIMATE stays as a bound; wave 2's plan should not size its shards by it.
+
+### 12.8 The re-reads: A-7R and the ten zstd reads (dated, 2026-11-12, P2)
+
+Both ran at claude/p2-s7-sweep-timeout a31cb64783 from tip refs claude/p2-tip-a31cb64783-<k>, goos linux, sweep-shard, arch
+both. That ref's converted tree is master 06610aaa65's: the seat changes only the workflow (the `timeout=Nm` filter
+option) and the zstd pin (platforms darwin and linux). So `internal/poll`'s reading is master's, and `internal/zstd`'s
+is master's with the pin scoped to linux. Every dispatch's dump proofs passed on both legs (control, prove, recheck).
+
+**A-7R, `internal/poll;timeout=30m`, run 43161387949.** The plan log reads `sweep-shard: -TestTimeout 30m`. PASS 12 + 1
+on both legs, `TestSplicePipePool` diverging with its disclosed signature; walls 1,791 s (x64) and 1,839 s (arm64).
+PREDICTION (COORD R4): the disclosed signature at 12 + 1. **HIT.** 30m rather than 25m because the row's `$longTimeouts`
+floor is 30m and a smaller budget loses to it, so the asked and effective values are equal. The row banks EQUAL,
+12 + 1 (linux-x64; linux-arm64: 12 + 1); evidence W1-A7R.tsv supersedes W1-A7 for it. The defect claim is closed.
+
+**Z01-Z10, `internal/zstd`.** PREDICTION: `got 274495 allocs, want 0` on every read, both legs. **HIT**, 20 of 20:
+
+| Read | Run | linux-x64 | linux-arm64 |
+|---|---|---|---|
+| Z01 | 43161391741 | DISC 535 + 1, 295 s | DISC 535 + 1, 227 s |
+| Z02 | 43161395278 | DISC 535 + 1, 176 s | DISC 535 + 1, 242 s |
+| Z03 | 43161398705 | DISC 535 + 1, 281 s | DISC 535 + 1, 244 s |
+| Z04 | 43161402038 | DISC 535 + 1, 224 s | DISC 535 + 1, 232 s |
+| Z05 | 43161405088 | DISC 535 + 1, 222 s | DISC 535 + 1, 241 s |
+| Z06 | 43161416746 | DISC 535 + 1, 266 s | DISC 535 + 1, 253 s |
+| Z07 | 43161420090 | DISC 535 + 1, 229 s | DISC 535 + 1, 230 s |
+| Z08 | 43161423429 | DISC 535 + 1, 221 s | DISC 535 + 1, 239 s |
+| Z09 | 43161426535 | DISC 535 + 1, 310 s | DISC 535 + 1, 240 s |
+| Z10 | 43161429556 | DISC 535 + 1, 293 s | DISC 535 + 1, 260 s |
+
+Each leg also has new 0, `TestAlloc` the one disclosed verdict. The jobs are red only against the roster's linux
+expectation (536 + 0, read on a host without `zstd`). The ten reads are kept whole in
+docs/phase4/la64-s7/w1-reads/zstd-ten-reads.tsv. The evidence folder takes one of them, Z01, as W1-A9R.tsv (superseding
+W1-A9 for the row): the guard reads one line per RID for a row, and eleven stems that do not extend each other would be
+refused as "not one of each". The ten counts are identical, so Z01 stands for them. COORD ruled (06:04Z) that the row
+banks by a `$LinuxRidHostEqual` line, class host-tool, a new class beside host-privilege, and that the roster's
+linux-x64 536 stays the reading of a host with no `zstd`: 536 (linux-x64; linux-arm64: 535 + 1). TestAlloc prints
+274,495 allocations per run; 2,744,950 is the total over the 10 runs `AllocsPerRun` makes.
+
+**The scores, both kept.** internal/poll: wave 1's W6 MISS stands at W1 (12.6), and A-7R is a HIT. internal/zstd: the
+ten-read prediction is a HIT.
+
+**The count.** 114 + `internal/poll` + `internal/zstd` = 116 banked at linux-arm64; 120 pending.

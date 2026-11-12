@@ -1,0 +1,54 @@
+using System;
+using System.Diagnostics;
+using System.Linq;
+using go;
+using T = go.tsshape_package;
+
+static class Program
+{
+    const int N = 64;
+
+    static double Run(Func<int, long> body, long rounds)
+    {
+        var sw = Stopwatch.StartNew();
+        body((int)rounds);
+        sw.Stop();
+        return sw.Elapsed.TotalNanoseconds / (rounds * N);
+    }
+
+    static void Main(string[] args)
+    {
+        long target = args.Length > 0 ? long.Parse(args[0]) : 2_000_000; // compares per arm per rep
+        var deep = T.Deep(N);
+        var shallow = T.Shallow(N);
+        var plain = T.Plain(N);
+        var deep2 = T.Deep(N);
+        var ints = new slice<nint>(N);
+        for (int i = 0; i < N; i++) ints[i] = i;
+
+        var arms = new (string name, Func<int, long> body)[]
+        {
+            ("int baseline", r => T.CountEqInt(ints, ints, 1, r)),
+            ("plain unequal (StandardBox)", r => T.CountEq(plain, plain, 1, r)),
+            ("plain equal (same box)", r => T.CountEq(plain, plain, 0, r)),
+            ("shallow unequal (1 hop)", r => T.CountEq(shallow, shallow, 1, r)),
+            ("deep unequal (5 hops, TS shape)", r => T.CountEq(deep, deep, 1, r)),
+            ("deep equal (same box)", r => T.CountEq(deep, deep, 0, r)),
+            ("deep vs other deep (unequal)", r => T.CountEq(deep, deep2, 0, r)),
+            ("mixed deep vs plain", r => T.CountEq(deep, plain, 0, r)),
+            ("mixed plain vs deep", r => T.CountEq(plain, deep, 0, r)),
+        };
+
+        // Sanity: the equal arms count every pair, the unequal ones none.
+        Console.WriteLine($"check deep==deep shift0 {T.CountEq(deep, deep, 0, 1)} shift1 {T.CountEq(deep, deep, 1, 1)} deep2 {T.CountEq(deep, deep2, 0, 1)} mixed {T.CountEq(deep, plain, 0, 1)}");
+
+        foreach (var (name, body) in arms)
+        {
+            long rounds = Math.Max(1, target / N);
+            Run(body, Math.Max(1, rounds / 10)); // warm
+            Run(body, Math.Max(1, rounds / 10));
+            var reps = Enumerable.Range(0, 5).Select(_ => Run(body, rounds)).OrderBy(x => x).ToArray();
+            Console.WriteLine($"{name,-34} min {reps[0],9:F2}  med {reps[2],9:F2} ns/cmp");
+        }
+    }
+}

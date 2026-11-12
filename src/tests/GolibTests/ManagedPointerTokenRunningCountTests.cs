@@ -20,8 +20,14 @@ namespace GolibTests;
 // (os.ReadFile makes 7 such registrations: ~93 of its 131-136 us). With a running count the same
 // conversion measured 0.19-0.21 us.
 //
-// Two arms. PERF: a fresh-box conversion after 20k live registrations stays under 1 us -- a 5x margin
-// over the measured 0.2 us, against ~14 us before. INVARIANT: the count may OVER-count (an overwrite of a
+// Two arms. PERF: a fresh-box conversion after 20k live registrations stays under 5 us -- a 25x margin
+// over the measured 0.2 us, and still 2.8x under the ~14 us before. The bound was 1 us (5x) until the hosted
+// macOS slow mode read 1217 ns on osx-x64 (run 43064826815, a leg whose raw yields also ran 2.6-3.6 s): an
+// absolute wall-clock bar that runs on darwin needs at least 10x its typical, or a paired host reference
+// (COORD, 2026-11-11). The method keeps its name (fail sets and history are keyed by it), which predates the
+// widened bound. The arm prints a READING line on every run (the best batch and each round, ns per
+// conversion), so darwin's own typical is measured; if it proves well above 0.2 us, the bar becomes paired
+// (the same batch allocated but not converted, barring the excess). INVARIANT: the count may OVER-count (an overwrite of a
 // live address increments it) but must never read BELOW the table between sweeps, because Resolve's
 // `s_count == 0` fast path would then skip a live entry; and an overwritten entry still resolves to the
 // box that last registered it.
@@ -30,7 +36,7 @@ public class ManagedPointerTokenRunningCountTests
 {
     private const int Live = 20_000;
     private const int Batch = 2_000;
-    private const double BoundNs = 1_000;
+    private const double BoundNs = 5_000;
 
     private static uintptr s_sink;
 
@@ -50,6 +56,7 @@ public class ManagedPointerTokenRunningCountTests
 
         // Best of five batches: the bound is about the per-registration cost, not a scheduling hiccup.
         double best = double.MaxValue;
+        double[] rounds = new double[5];
 
         for (int round = 0; round < 5; round++)
         {
@@ -59,10 +66,14 @@ public class ManagedPointerTokenRunningCountTests
                 s_sink = Ꮡ((long)i);
 
             clock.Stop();
-            best = Math.Min(best, clock.Elapsed.TotalMilliseconds * 1_000_000 / Batch);
+            rounds[round] = clock.Elapsed.TotalMilliseconds * 1_000_000 / Batch;
+            best = Math.Min(best, rounds[round]);
         }
 
         GC.KeepAlive(held);
+
+        Console.WriteLine($"READING AFreshBoxConversion: best {best:F0} ns per conversion after {Live} live registrations " +
+            $"(rounds {string.Join(" ", Array.ConvertAll(rounds, r => r.ToString("F0")))} ns; bound {BoundNs} ns)");
 
         Assert.IsTrue(best < BoundNs,
             $"a fresh-box ж -> uintptr conversion costs {best:F0} ns after {Live} live registrations (bound {BoundNs} ns; " +
