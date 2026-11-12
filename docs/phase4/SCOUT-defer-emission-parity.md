@@ -288,3 +288,136 @@ Posted before the first probe (3b3c1bdab):
 3. **No interceptor-only route exists.** An interceptor replaces a call; zero-allocation frame semantics need a `try`
    with a `catch` and a `finally` in the method that runs, and the only way to keep that method off the page is to
    generate it (6e).
+
+## 10. Amendment, 2026-11-12: the review of `c9376671fb`
+
+A review of this scout agreed with 1a, 1b, 2, 3, 4, 5 and 6b, and with option 4 as the recommendation, and asked for
+five changes. Sections 1-9 stand as written above; this block corrects and extends them. The new numbers are lane
+C2's, from the same probe and host as section 4, with golib's real `GoFrame`.
+
+### 10.1 Option 6f, missed above: a static whole-body lambda that really runs, through a real ladder
+
+No interceptor and no copy. The visible method passes every input to a STATIC lambda, and a real generic ladder
+rung (`allows ref struct`, so a Span is a type argument) holds the frame and invokes the cached delegate:
+
+```csharp
+internal static void @try(@string name, Action register) => func(name, register, static (@string name, Action register, ref GoFrame ᒐ) => {
+    defer(() => {
+        var r = recover(); if (r != nil) {
+            fmt.Printf("%s: panic: %v\n"u8, name, r);
+        }
+    }, ref ᒐ);
+    register();
+    fmt.Printf("%s: registered\n"u8, name);
+});
+
+// golib, one rung of the ladder
+public static void func<T1, T2>(T1 a1, T2 a2, L2<T1, T2> body) where T1 : allows ref struct where T2 : allows ref struct
+{
+    GoFrame ᒐ = default;
+    try { body(a1, a2, ref ᒐ); }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+```
+
+| Shape | JIT ns | JIT B | AOT ns | AOT B |
+|---|---|---|---|---|
+| control: an empty call | 4.7 | 0 | 2.0 | 0 |
+| today (one value parameter) | 32.3 | 0 | 33.3 | 0 |
+| 6f, a value and a `ref` parameter | 24.6 | 0 | 33.8 | 0 |
+| 6f, a Span parameter | 36.1 | 0 | 37.2 | 0 |
+| 6f, a result | 23.9 | 0 | 35.2 | 0 |
+| today, a named result a defer increments | 50.8 | 88 | 47.5 | 72 |
+| 6f, the same named result | 61.2 | 160 | 67.7 | 128 |
+
+The `ref` result reads 1, the Span element 1, the result 42 and the named result 2, as Go's do; a panic in the body
+is recovered by the deferred call on both JIT and AOT. Stack frames above a callee: today 3, 6f 5 on the JIT (the
+ladder rung and the lambda); 4 and 5 under AOT. This JIT run's today row is high against its neighbours (the
+probe's own noise); the review, on win-x64 with a stand-in frame, read today at 6.7 ns and 6f at 8.8 ns for value
+and `ref`, an indirect call's ~2 ns, and this probe does not resolve a difference that small.
+
+**Verdict: VIABLE WITH COST.** Its costs against today:
+- a real ladder (section 10.5 measures it: 31 shapes);
+- two more stack frames, which runtime.Callers' pairing and the frame namer (`goFrameName`) must collapse;
+- a named result a defer writes is captured by the visible method: +72 B JIT, +56 B AOT per call;
+- the twin generator must lift the lambda's body into the twin (an async lambda with a `ref` frame is CS1988);
+- every input is repeated as a lambda parameter on the method line, and `ref ᒐ` stays on each defer.
+
+**It dominates 6e**: no interceptor, no body copy, no double IL, and the visible code is the code that runs.
+
+### 10.2 Option 6a, restated, and a cite fixed
+
+Section 3's "6a NOT VIABLE" is too broad, and section 4's own "6a `func(static lambda)`" row (0 / 0 B) says so. Restated:
+**a 6a body that captures is NOT VIABLE (24 / 72 B); a static 6a body costs 0 B, and that is 6f's mechanism.** Every
+Go function with parameters captures unless its inputs become lambda parameters, which is what 6f does.
+
+"6c's costs", cited in sections 3 and 6 and never defined, means the compile results of section 4: CS1628 (a `ref`
+parameter used inside the body lambda), CS9108 (a Span parameter), CS8175 (a captured Span local), CS0159 (`goto` out
+of the body) and CS8030 (a value returned through a void body).
+
+### 10.3 Option 6e, corrected
+
+- **A real delegate exists at run time.** The visible call site materialises the static lambda's delegate (cached in a
+  static field: 64 B once per function, and a null check per call), and the dead body's IL ships. Section 6's
+  "the lambda never runs" stands; "no lambda at run time" was not claimed and is not true.
+- **Costs section 6 did not list:** step-in passes through the expression-bodied visible method and the interceptor
+  stub unless both are hidden from the debugger; a diagnostic on a body line is reported twice (the lambda and the
+  copy compile the same text); Hot Reload works only if the generator re-runs.
+- **A refinement not probed:** the visible lambda never executes, so a named result could be declared INSIDE it and
+  hoisted only in the copy, which would remove 6e's +32 / +80 B.
+- **6e is superseded by 6f** (10.1), which reaches the same visible shape without the interceptor, the copy or the
+  double IL.
+
+### 10.4 Option 4: its caveats, and a shorter tail
+
+- **Caveats.** The body sits at Go's indentation, line for line. The boilerplate does not disappear: it becomes a
+  29-character signature suffix (` { GoFrame ᒐ = default; try {`) and a 123-character closing line, 152 in all.
+  `ref ᒐ` stays on every defer. An auto-formatter (`dotnet format`, an IDE's format-document) re-flows the layout
+  unless the emitted files are excluded from formatting.
+- **A merged filter is WRONG.** `catch (Exception ᒐe) when (Tail.Merged(ᒐe)) { }`, where the filter adopts and parks
+  the panic, costs 0 B and passes the plain semantics row. Then a nested case: a panic P1 whose catching frame is
+  OUTER, raised under a plain `try`/`finally` whose `finally` calls a function that panics P2 and recovers it.
+  Today's frame recovers P1. The merged filter recovers **nil**, with no exception escaping, on JIT and AOT: P1 is
+  lost silently. The filter runs in the first pass, before that `finally`; parking the panic there lets the inner
+  frame overwrite the parked panic and its claim. That is why `GoFrame.Capture` lives in the catch body.
+- **A frame-local tail is right.** `} catch (Exception ᒐe) when (ᒐ.Is(ᒐe)) { ᒐ.Capture(); } finally { ᒐ.Run(); } }`:
+  the filter stores the panic in the frame, the catch body parks it. Today's ordering is kept, the nested case
+  recovers P1, the cost is 0 B, and the closing line is 78 characters instead of 123 (107 instead of 152 with the
+  signature suffix). It needs two golib members on `GoFrame` (a panic field written by an `Is` instance method, and an
+  instance `Capture`), which the probe built as a wrapper struct, so it is a golib change with its own review.
+
+### 10.5 The ladder's real size, measured
+
+Every method-level frame's signature, classified per parameter as value, `ref`, `in`, `out` or Span, with the
+receiver marked, plus whether it returns a result (a parser over the emitted files at `06610aaa65`; 1 signature of
+2,496 not parsed). A shape is what one ladder rung must match.
+
+| Population | Method frames | Frames in func literals | Shapes | Folded (Span and a ж receiver as value) | All-value | With a `ref`/`in`/`out` position | Max arity |
+|---|---|---|---|---|---|---|---|
+| standard library, production | 938 | 51 | 40 | 28 | 20 | 8 | 10 |
+| standard library, tests | 1,261 | 561 | 21 | 13 | 12 | 1 | 10 |
+| behavioral goldens | 297 | 58 | 16 | 10 | 7 | 3 | 3 |
+| **union** | | | | **31** | **21** | **10** | 10 |
+
+- The all-value shapes are arities only: void or a result, at 0 to 10 parameters, 22 rungs at most.
+- The `ref`-bearing shapes found: `void:R` (5), `ret:R.V.V.V.V` (3), `ret:V.R.V` (2), `void:V.R` (2), and one each of
+  `ret:V.R`, `ret:R.V` (2 with behavioral), `ret:rR.V.V.V.V.V`, `void:V.R.V.V.V.V`, `ret:R`, `void:rR.V.V` (`rR` is a
+  `this ref T` receiver).
+- So the ladder is about 32 rungs for the whole corpus. Section 6's "exponential in arity" is wrong in practice:
+  that is the bound, and the corpus uses 10 of its `ref` positions. A generator could still emit them per package,
+  but a fixed golib ladder is affordable.
+- Frames inside func literals (a literal that defers) would nest: the literal's own body becomes a 6f call, and
+  whatever the literal captures becomes that call's arguments.
+
+### 10.6 The recommendation, amended
+
+The owner chooses between two shapes, both at 0 B for an ordinary function:
+
+1. **Option 4**, today's IL with the frame on the first and last lines. Optionally with the frame-local tail (10.4),
+   a separate golib change.
+2. **A 6f prototype**: the old whole-body look, with the visible code running. It needs a ~32-rung ladder, the two
+   extra frames collapsed in runtime.Callers and the frame namer, a twin-generator change, and +72 / +56 B on
+   named-result functions (148 production, 28 test and 10 behavioral, section 7).
+
+6e is withdrawn in favour of 6f. The interceptor-only routes (1a, 1b) remain NOT VIABLE.
