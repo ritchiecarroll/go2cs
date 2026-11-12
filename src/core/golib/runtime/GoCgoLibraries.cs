@@ -86,13 +86,15 @@ public static class GoCgoLibraries
 
     internal static nint Resolve(string name, Assembly assembly, IReadOnlyList<GoCgoLibrary> libraries, string target)
     {
+        // The target is held for EVERY import the assembly makes, a name the table does not own among them: a hand-owned
+        // import beside bindings converted for another target crosses with that target's layouts too.
+        if (TargetMismatch(target, GoHostOfRecord.HostGOOS(), RuntimeInformation.ProcessArchitecture) is { } mismatch)
+            throw new PlatformNotSupportedException(mismatch);
+
         foreach (GoCgoLibrary library in libraries)
         {
             if (library.Name != name)
                 continue;
-
-            if (TargetMismatch(target, GoHostOfRecord.HostGOOS(), RuntimeInformation.ProcessArchitecture) is { } mismatch)
-                throw new PlatformNotSupportedException(mismatch);
 
             if (OperatingSystem.IsMacOS() && !name.StartsWith('/'))
                 throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which is not an absolute install name: darwin loads a captured library only by its absolute path, since dyld's search for a bare name reaches the current directory; the current directory is never searched (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.12)");

@@ -88,7 +88,7 @@ func cgoRealToolchainLine(t *testing.T) (string, []string) {
 		t.Fatalf("%v --version: %v", fields, err)
 	}
 
-	return strings.TrimSpace(strings.SplitN(strings.ReplaceAll(string(version), "\r\n", "\n"), "\n", 2)[0]), fields
+	return cgoToolchainLine(string(version)), fields
 }
 
 // convertCgoReal converts the package files make, in a module of its own, under -cgo with the probe library linked
@@ -397,4 +397,32 @@ func TestTheCgoRouteConvertsTheFixtureOnARealHost(t *testing.T) {
 			t.Errorf("the refusal does not name both the target asked for (%s) and the host (%s)\n%s", other, target, stderr)
 		}
 	})
+}
+
+// The review of increment 5b, S6: on a leg that requires the probe (GO2CS_REQUIRE_CGO_PROBE=1), a missing C compiler
+// FAILS the real-route test. It used to skip, since the compiler check ran first and looked for gcc, cc or clang on
+// PATH, so a leg that lost its compiler read green. The test is run again here, in a process that requires the probe and
+// whose compiler (go env CC) does not exist, with PATH holding go alone.
+func TestTheRealRouteTestFailsWhenARequiredCompilerIsMissing(t *testing.T) {
+	goRoot, err := exec.Command("go", "env", "GOROOT").Output()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=^TestTheCgoRouteConvertsTheFixtureOnARealHost$", "-test.v")
+	cmd.Env = append(os.Environ(),
+		"GO2CS_REQUIRE_CGO_PROBE=1",
+		"GO2CS_CGO_PROBE_DIR="+t.TempDir(),
+		"CC=go2cs-no-such-compiler",
+		"PATH="+filepath.Join(strings.TrimSpace(string(goRoot)), "bin"))
+	output, err := cmd.CombinedOutput()
+
+	if err == nil || !strings.Contains(string(output), "--- FAIL: TestTheCgoRouteConvertsTheFixtureOnARealHost") {
+		t.Errorf("with the probe required and no C compiler, the real-route test did not fail (%v):\n%s", err, output)
+	}
+
+	if strings.Contains(string(output), "--- SKIP") {
+		t.Errorf("with the probe required and no C compiler, the real-route test skipped:\n%s", output)
+	}
 }

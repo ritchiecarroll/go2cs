@@ -413,7 +413,16 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// and on a real host its file is a build-cache name with no .go suffix, which the
 				// file-name check refuses, so the re-check would drop every one of them silently.
 				if pair.output == "" && !pair.bindings {
-					if match, err := CheckBuildConstraints(path, options.targetPlatform, options.buildTags, cfg.Dir); err != nil {
+					// A plain file of a cgo package was selected by a cgo-on load, so the re-check carries the
+					// cgo tag, as refuseCgoOnlyPackage's does: without it a file under //go:build cgo is dropped
+					// here with exit 0, and every reference to what it declares dangles.
+					tags := options.buildTags
+
+					if route != nil {
+						tags = append(append([]string{}, options.buildTags...), "cgo")
+					}
+
+					if match, err := CheckBuildConstraints(path, options.targetPlatform, tags, cfg.Dir); err != nil {
 						showWarning("Failed to evaluate build constraints for file \"%s\": %s", path, err)
 					} else if !match {
 						// Skipping file due to non-matching build constraints
@@ -715,6 +724,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					}
 				} else if err := visitor.writeOutputFile(outputFileName); err != nil {
 					log.Printf("%s\n", err)
+				} else if fileEntry.cgoBindings {
+					cgoBindingsWritten = true
 				}
 
 				packageLock.Lock()
@@ -734,11 +745,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		}
 
 		// A cgo package whose bindings file was not written cannot build, so its conversion fails here, loudly, rather
-		// than exit 0 with converted files that name C members nothing declares (cgoRoute.go).
-		if route != nil {
-			if _, err := os.Stat(route.bindingsPath(packageOutputPath, packageName)); err != nil {
-				log.Fatalf("Refusing to convert: cgo: package %s's bindings file was not written (%s); see the warnings above\n", pkg.PkgPath, err)
-			}
+		// than exit 0 with converted files that name C members nothing declares (cgoRoute.go). The verdict is THIS
+		// conversion's own write: a file on disk may be an earlier conversion's, which a failed write leaves standing.
+		if route != nil && !cgoBindingsWritten {
+			log.Fatalf("Refusing to convert: cgo: package %s's bindings file was not written by this conversion (%s); see the errors above\n", pkg.PkgPath, route.bindingsPath(packageOutputPath, packageName))
 		}
 
 		// Record the [assembly: GoImplement] pairs this package SATISFIES but never WITNESSES —

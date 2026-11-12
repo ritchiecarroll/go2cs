@@ -137,8 +137,9 @@ func cgoLinkerDirectives(file *ast.File) ([]string, error) {
 // cgoToolchain is the C compiler a capture links with: the command (which may carry arguments, as "zig cc" does) and the
 // environment it runs in.
 type cgoToolchain struct {
-	cc  []string
-	env []string
+	cc   []string
+	env  []string
+	arch []string // the target's architecture flags, as cmd/go hands them to CC (cgoArchFlags)
 }
 
 // cgoSymbolLibrary is one bound symbol and the load-time name of the library that defines it.
@@ -192,7 +193,7 @@ func linkCgoProbe(toolchain cgoToolchain, goos string, flags cgoLinkFlags, symbo
 		return "", "", err
 	}
 
-	args := append(append([]string{}, toolchain.cc[1:]...), "-shared", "-w", "-o", output, source)
+	args := append(append(append([]string{}, toolchain.cc[1:]...), toolchain.arch...), "-shared", "-w", "-o", output, source)
 
 	if goos != "windows" {
 		args = append(args, "-fPIC")
@@ -586,42 +587,50 @@ func splitCgoCommand(command string) ([]string, error) {
 	return fields, nil
 }
 
-// cgoQuotedSplit splits a command into fields separated by spaces, where a field may be quoted with ' or " to hold
-// spaces, so a pinned zig under a profile path with a space survives.
+// cgoQuotedSplit splits a command into fields as cmd/go splits CC (cmd/internal/quoted, Split, go1.26.10, ported): the
+// fields are separated by spaces, and a field that BEGINS with ' or " runs to the matching quote, with no unescaping
+// inside, so a pinned zig under a path with a space survives. A quote further inside a field is an ordinary character.
 func cgoQuotedSplit(command string) ([]string, error) {
+	isSpace := func(c byte) bool { return c == ' ' || c == '\t' || c == '\n' || c == '\r' }
+
 	var fields []string
-	var field strings.Builder
-	var quote rune
-	inField := false
 
-	for _, r := range command {
-		switch {
-		case quote != 0:
-			if r == quote {
-				quote = 0
-			} else {
-				field.WriteRune(r)
-			}
-		case r == '\'' || r == '"':
-			quote, inField = r, true
-		case r == ' ' || r == '\t' || r == '\n' || r == '\r':
-			if inField {
-				fields = append(fields, field.String())
-				field.Reset()
-				inField = false
-			}
-		default:
-			field.WriteRune(r)
-			inField = true
+	for len(command) > 0 {
+		for len(command) > 0 && isSpace(command[0]) {
+			command = command[1:]
 		}
-	}
 
-	if quote != 0 {
-		return nil, fmt.Errorf("unterminated %c string", quote)
-	}
+		if len(command) == 0 {
+			break
+		}
 
-	if inField {
-		fields = append(fields, field.String())
+		if command[0] == '"' || command[0] == '\'' {
+			quote := command[0]
+			command = command[1:]
+			i := 0
+
+			for i < len(command) && command[i] != quote {
+				i++
+			}
+
+			if i >= len(command) {
+				return nil, fmt.Errorf("unterminated %c string", quote)
+			}
+
+			fields = append(fields, command[:i])
+			command = command[i+1:]
+
+			continue
+		}
+
+		i := 0
+
+		for i < len(command) && !isSpace(command[i]) {
+			i++
+		}
+
+		fields = append(fields, command[:i])
+		command = command[i:]
 	}
 
 	return fields, nil

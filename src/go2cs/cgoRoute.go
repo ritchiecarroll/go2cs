@@ -75,6 +75,9 @@ var (
 
 	// cgoCheckClosures maps each recognised call of cmd/cgo's check closure to its unwrap.
 	cgoCheckClosures map[*ast.CallExpr]*cgoCheckClosure
+
+	// cgoBindingsWritten is set when this conversion wrote the package's bindings file.
+	cgoBindingsWritten bool
 )
 
 // cgoCheckClosure is one call through cmd/cgo's pointer-check closure, unwrapped: the call the closure makes, and what
@@ -109,7 +112,7 @@ type cgoUseRefusal struct {
 // cgoTreeRoles sorts a package's trees: cmd/cgo's rewrite of each import "C" source, cmd/cgo's types file and its
 // dynamic-import file, and plain Go source. A tree that opens with cmd/cgo's header and is none of these, and a second
 // tree for a source that already has one, are refused rather than guessed at (§11.20, S2).
-func cgoTreeRoles(pkg *packages.Package) (sources []syntaxSourceFile, typesFile *ast.File, refusals []cgoUseRefusal) {
+func cgoTreeRoles(pkg *packages.Package) (sources []syntaxSourceFile, typesFile *ast.File, imports map[string]bool, refusals []cgoUseRefusal) {
 	goFiles := map[string]bool{}
 
 	for _, path := range pkg.GoFiles {
@@ -146,7 +149,20 @@ func cgoTreeRoles(pkg *packages.Package) (sources []syntaxSourceFile, typesFile 
 
 			typesFile = file
 		case len(file.Decls) == 0 && cgoFileHasComment(file, func(text string) bool { return strings.HasPrefix(text, "//go:cgo_import_dynamic ") }):
-			// cmd/cgo's _cgo_import.go: the host C library's dynamic imports, which a converted package never reads.
+			// cmd/cgo's _cgo_import.go: the symbols its own binary imports, each by the name it imports it under
+			// (the local name of each //go:cgo_import_dynamic line; `_` names a library alone). Nothing of it is
+			// converted; the route reads it to bind only a name C really calls (cgoImportedByCmdCgo).
+			if imports == nil {
+				imports = map[string]bool{}
+			}
+
+			for _, group := range file.Comments {
+				for _, comment := range group.List {
+					if fields := strings.Fields(comment.Text); len(fields) >= 2 && fields[0] == "//go:cgo_import_dynamic" && fields[1] != "_" {
+						imports[fields[1]] = true
+					}
+				}
+			}
 		case fromCmdCgo && source != "":
 			if mapped[filepath.Clean(source)] {
 				refuse(fmt.Sprintf("two cmd/cgo trees map to %s", filepath.Base(source)))
@@ -162,7 +178,7 @@ func cgoTreeRoles(pkg *packages.Package) (sources []syntaxSourceFile, typesFile 
 		}
 	}
 
-	return sources, typesFile, refusals
+	return sources, typesFile, imports, refusals
 }
 
 // cgoDropDirectiveComments removes cmd/cgo's own comments from a tree it rewrote: its generated-file header, which
@@ -609,7 +625,7 @@ func cgoCalledFunction(node ast.Node, declarations map[types.Object]cgoDeclarati
 // nil when the package holds no cmd/cgo output (cmd/cgo did not run), so the caller's own refusal stands, and refuses,
 // exiting before anything is written, when any C use is outside Phase 2's set.
 func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRoute {
-	sources, typesFile, refusals := cgoTreeRoles(pkg)
+	sources, typesFile, imports, refusals := cgoTreeRoles(pkg)
 
 	if typesFile == nil && len(refusals) == 0 {
 		return nil
@@ -822,19 +838,19 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 	var captured []cgoSymbolLibrary
 	var toolchain string
 
+	symbolUses := map[string]token.Position{}
+
+	for _, declaration := range used {
+		if _, seen := symbolUses[declaration.cName]; !seen {
+			symbolUses[declaration.cName] = usedAt[declaration.object]
+		}
+	}
+
 	if cgoCaptureOverride != nil {
 		captured, toolchain, err = cgoCaptureOverride(symbols)
 	} else {
-		symbolUses := map[string]token.Position{}
-
-		for _, declaration := range used {
-			if _, seen := symbolUses[declaration.cName]; !seen {
-				symbolUses[declaration.cName] = usedAt[declaration.object]
-			}
-		}
-
 		var undefined []cgoUseRefusal
-		captured, toolchain, undefined, err = cgoCapture(load, goos, flags, symbols, symbolUses)
+		captured, toolchain, undefined, err = cgoCapture(load, goos, goarch, flags, symbols, symbolUses)
 
 		if len(undefined) > 0 {
 			refuseCgoRoute(pkg, undefined)
@@ -843,6 +859,16 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 
 	if err != nil {
 		refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: err.Error()}})
+	}
+
+	// The capture asks a library for each PLAIN name, with no header in sight, so a name a header renames is found
+	// under the wrong function. Each name is held to what cmd/cgo's own binary imports.
+	if len(symbols) > 0 && imports == nil {
+		refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: "cgo: cmd/cgo wrote no dynamic imports for this package (its C does not link as go builds it), so nothing shows which symbol each C call reaches, and Phase 2 binds only a name cmd/cgo itself imports"}})
+	}
+
+	if unverified := cgoImportedByCmdCgo(symbols, imports, symbolUses); len(unverified) > 0 {
+		refuseCgoRoute(pkg, unverified)
 	}
 
 	set := newCgoWrapperSet(target, sizes)
@@ -994,7 +1020,7 @@ func cgoBindingsHeader(pkg *packages.Package, sources []syntaxSourceFile, reduce
 	fmt.Fprintf(&header, "// %s.cgo.cs - the C bindings of Go package %s, made by go2cs from cmd/cgo's output for its import \"C\"\n", pkg.Name, pkg.PkgPath)
 	header.WriteString("// sources (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §4.1, §11.20). DO NOT EDIT: convert the package again with -cgo.\n")
 	fmt.Fprintf(&header, "// target: %s\n", targetPlatform)
-	fmt.Fprintf(&header, "// C toolchain: %s\n", toolchain)
+	fmt.Fprintf(&header, "// C toolchain: %s\n", cgoToolchainLine(toolchain))
 	fmt.Fprintf(&header, "// sha256: %s (the import \"C\" sources and the C declarations cmd/cgo gave them)\n\n", hex.EncodeToString(hash.Sum(nil)))
 
 	return header.String()
@@ -1128,7 +1154,7 @@ func cgoHostTarget(load cgoLoad, target string) error {
 // and the first line that compiler prints for --version, which the bindings' header records: never the CC value,
 // whose path would name the converting machine (§11.20, M4). A symbol no library defines, a function the preamble
 // itself defines among them, is refused by name at its use, as Phase 4's: the probe links each symbol alone to name them.
-func cgoCapture(load cgoLoad, goos string, flags cgoLinkFlags, symbols []string, usedAt map[string]token.Position) ([]cgoSymbolLibrary, string, []cgoUseRefusal, error) {
+func cgoCapture(load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols []string, usedAt map[string]token.Position) ([]cgoSymbolLibrary, string, []cgoUseRefusal, error) {
 	values, err := cgoGoEnv(load, "CC")
 
 	if err != nil {
@@ -1141,7 +1167,17 @@ func cgoCapture(load cgoLoad, goos string, flags cgoLinkFlags, symbols []string,
 		return nil, "", nil, err
 	}
 
-	toolchain := cgoToolchain{cc: command, env: load.env}
+	// The compiler is resolved once, so its --version (run here) and the probe's link (run in a temporary directory)
+	// are one program: a relative CC is the package directory's, as it is cmd/go's, and a bare name is PATH's.
+	if strings.ContainsAny(command[0], `/\`) {
+		if !filepath.IsAbs(command[0]) {
+			command[0] = filepath.Join(load.dir, command[0])
+		}
+	} else if resolved, lookErr := exec.LookPath(command[0]); lookErr == nil {
+		command[0] = resolved
+	}
+
+	toolchain := cgoToolchain{cc: command, env: load.env, arch: cgoArchFlags(goos, goarch)}
 	versionCommand := exec.Command(command[0], append(append([]string{}, command[1:]...), "--version")...)
 	versionCommand.Env = append(os.Environ(), load.env...)
 	version, err := versionCommand.Output()
@@ -1176,6 +1212,13 @@ func cgoCapture(load cgoLoad, goos string, flags cgoLinkFlags, symbols []string,
 			unbound[symbol] = true
 		}
 	} else {
+		// A probe that references nothing must link. When it does not, the failure is the package's link line or the
+		// compiler itself (a library that is not there, a directory for another architecture), and no symbol is to
+		// blame: the linker's own words are the refusal.
+		if _, _, baselineErr := linkCgoProbe(toolchain, goos, flags, nil, workDir, nil); baselineErr != nil {
+			return nil, "", nil, err
+		}
+
 		for _, symbol := range symbols {
 			if _, _, linkErr := linkCgoProbe(toolchain, goos, flags, []string{symbol}, workDir, nil); linkErr != nil {
 				unbound[symbol] = true
@@ -1198,12 +1241,88 @@ func cgoCapture(load cgoLoad, goos string, flags cgoLinkFlags, symbols []string,
 	return nil, "", nil, err
 }
 
-// cgoToolchainLine is the line of a C compiler's --version output the bindings' header records.
+// cgoToolchainLineLimit caps the toolchain line the bindings' header records.
+const cgoToolchainLineLimit = 120
+
+// cgoToolchainLine is the line of a C compiler's --version output the bindings' header records: its first line, in
+// printable ASCII only, capped. The line is written into a C# comment, and the text is whatever CC printed (a wrapper
+// script's too): a bare CR, U+0085, U+2028 and U+2029 each end a C# line, so anything outside 0x20-0x7E is dropped,
+// and nothing of it can become code.
 func cgoToolchainLine(version string) string {
-	return strings.TrimSpace(strings.SplitN(strings.ReplaceAll(version, "\r\n", "\n"), "\n", 2)[0])
+	var line strings.Builder
+
+	for _, r := range strings.SplitN(version, "\n", 2)[0] {
+		if r >= 0x20 && r <= 0x7e {
+			line.WriteRune(r)
+		}
+	}
+
+	text := strings.TrimSpace(line.String())
+
+	if len(text) > cgoToolchainLineLimit {
+		text = strings.TrimSpace(text[:cgoToolchainLineLimit])
+	}
+
+	return text
 }
 
-// cgoArchFlags are the flags that make a C compiler build for goos/goarch (increment 5b's review, S2).
+// cgoArchFlags are the flags that make a C compiler build for goos/goarch, as cmd/go hands them to CC for every cgo
+// compile and link (cmd/go/internal/work, gccArchArgs, go1.26.10), for the targets go2cs converts. The probe carries
+// them, so a compiler whose default architecture is not the conversion's (an amd64 go under Rosetta, or on Windows on
+// Arm) answers for the right one.
 func cgoArchFlags(goos, goarch string) []string {
+	switch goarch {
+	case "amd64":
+		if goos == "darwin" {
+			return []string{"-arch", "x86_64", "-m64"}
+		}
+
+		return []string{"-m64"}
+	case "arm64":
+		if goos == "darwin" {
+			return []string{"-arch", "arm64"}
+		}
+	}
+
 	return nil
+}
+
+// cgoImportedByCmdCgo refuses each symbol cmd/cgo's own binary does not import under its plain C name (imports, the
+// local names of _cgo_import.go). A header may rename a function behind its C name: darwin/amd64's <sys/stat.h> makes
+// fstat the symbol fstat$INODE64, a different function over a different struct stat, and glibc may make strtol
+// __isoc23_strtol. The plain name still exists in the library, so the capture finds it, and a binding to it would call a
+// function C never calls. A name the binary imports is the one C calls. One it does not import is renamed, or the C
+// compiler inlined the call (cmd/cgo compiles at -O2, and abs is a builtin), and nothing here tells the two apart, so
+// both are refused by name: a loud over-refusal rather than a silent wrong binding (COORD's ruling on the review's M3).
+func cgoImportedByCmdCgo(symbols []string, imports map[string]bool, usedAt map[string]token.Position) []cgoUseRefusal {
+	var refusals []cgoUseRefusal
+
+	for _, symbol := range symbols {
+		if imports[symbol] {
+			continue
+		}
+
+		var decorated []string
+
+		for name := range imports {
+			if strings.Contains(name, symbol) {
+				decorated = append(decorated, name)
+			}
+		}
+
+		sort.Strings(decorated)
+		instead := ""
+
+		if len(decorated) > 3 {
+			decorated = decorated[:3]
+		}
+
+		if len(decorated) > 0 {
+			instead = " (it imports " + strings.Join(decorated, ", ") + ")"
+		}
+
+		refusals = append(refusals, cgoUseRefusal{position: usedAt[symbol], text: fmt.Sprintf("C.%s: cmd/cgo's own binary does not import a symbol named %s%s, so nothing shows that name is the function C calls here: a header renames it, or the C compiler inlined the call as a builtin. Binding the plain name could call a different function, so it is refused; Phase 2 later", symbol, symbol, instead)})
+	}
+
+	return refusals
 }
