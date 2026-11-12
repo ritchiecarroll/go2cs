@@ -965,6 +965,29 @@ holds converted bindings to the target they record (`GoCgoLibraries.Register`'s 
 architecture where a leg's process differs: darwin's arm64 leg compiles `GoCgoWrappers.darwin-arm64.golden.cs`, which
 the generator writes for darwin/arm64 like the others.
 
+**A class 5b's legs found: an offline seam whose fixture names differ from a real host's (COORD named it).** The
+offline route loads checked-in cmd/cgo output as files named `.go`. A real host's `go list` hands back the same trees
+under build-cache names with no `.go` suffix, and the driver's build-constraint re-check refuses such a name
+(`isFileNameCompatible`). So every tree of the real route was dropped silently, with exit 0 and no bindings file,
+which no offline gate could see by construction. Fixed in 5b (3d4c3236b1): the route's trees are not re-checked, since
+go list selected their source, and a cgo package whose bindings file was not written fails the conversion by name.
+The general rule: where an offline seam stands in for a real route, any property of the real inputs the seam changes
+(here, a file's name) is a gap only the real route closes, so the real-route legs are part of the gate.
+
+**The first real-route readings (converter-cgo, increment 5b).**
+- The Phase 2 fixture's own refusal (its deferred and goroutine calls) passed on real cmd/cgo output first at
+  43147447241 (linux, zig).
+- With those two calls removed, the fixture converts on linux (zig), darwin (zig, both RIDs) and windows
+  (llvm-mingw), at 43151538896, 43151546974 and 43151555690. The captured tables are:
+  - linux: `libc.so.6`, `libm.so.6` (`-lm`) and `libgo2csprobe.so`;
+  - darwin: `/usr/lib/libSystem.B.dylib` and `/tmp/go2cs-cgo-probe/libgo2csprobe.dylib`;
+  - windows: `api-ms-win-crt-math-l1-1-0.dll`, `api-ms-win-crt-utility-l1-1-0.dll` and `go2csprobe.dll`.
+- llvm-mingw's C runtime resolves `mktime` statically, so windows refuses it by name at its use.
+- No build-machine path appears beyond the captured library names (a darwin install name is absolute by rule).
+- With the probe linked, `go list` hands back `_cgo_import.go` on all three. That answers §11.20's UNMEASURED cause:
+  `-dynimport` reads a binary linked from the preamble, which links now that the probe library defines the four
+  probes.
+
 Each divergence is a tested decision, not an accident (COORD's condition on the M1 ruling). In 5a, each of the four
 fixture functions converts, and the converted call is asserted. Their run-time behaviour is G1's, and goes on **G1's
 checklist** as these run-time arms, each asserting go2cs's actual behaviour beside `go run`'s:
