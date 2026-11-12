@@ -568,7 +568,7 @@ func TestInitScopeKeepsTheBlockForEachRefusal(t *testing.T) {
         }
     }
     r = 1;
-} catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); } finally { ᒐ.Run(); } return r; }`,
+} catch (Exception ᒐe) when (ᒐ.Is(ᒐe)) { ᒐ.Capture(); } finally { ᒐ.Run(); } return r; }`,
 		"refuseMethodValue": `internal static Func<nint> refuseMethodValue() {
     {
         var t = (new T()); if (t.M() > 0) {

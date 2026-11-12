@@ -23,7 +23,7 @@ import (
 //	internal static void main() { GoFrame ᒐ = default; try {
 //	    fmt.Println(openFileˢ);
 //	    deferǃ(fmt.Println, closeFileˢ, ref ᒐ);
-//	} catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); } finally { ᒐ.Run(); } }
+//	} catch (Exception ᒐe) when (ᒐ.Is(ᒐe)) { ᒐ.Capture(); } finally { ᒐ.Run(); } }
 //
 // The frame opens on the signature line and closes on the last line, and the body sits at Go's
 // indentation, one Go line to one C# line: a Go reader sees the function they wrote, with the frame
@@ -59,12 +59,7 @@ func (v *Visitor) goFrameName() string {
 
 // goFrameExceptionName is the emitted catch clause's exception variable.
 func (v *Visitor) goFrameExceptionName() string {
-	return GoFrameVar + "ex"
-}
-
-// goFramePanicName is the emitted catch filter's adopted-panic out variable.
-func (v *Visitor) goFramePanicName() string {
-	return GoFrameVar + "p"
+	return GoFrameVar + "e"
 }
 
 // goFrameExitLabel is the label a named-result function's early `return` jumps to (§4.4): the
@@ -174,9 +169,13 @@ func (v *Visitor) goFrameTail(indentLevel int, catchReturn string, endPos token.
 		catchReturn = " " + catchReturn
 	}
 
+	// The frame-local tail: the filter ADOPTS the panic into the frame (GoFrame.Is) and the catch
+	// body PARKS it (GoFrame.Capture), in that order. Parking in the filter would let a finally
+	// between the throw and this frame overwrite the parked panic (GoFrame.Is).
+	//
 	// Lowered defers run BEFORE Run(): Run() re-throws an unrecovered panic, which would leave
 	// anything after it in the finally unexecuted. They are already in Go's LIFO order.
-	return fmt.Sprintf(" catch (Exception %s) when (GoFrame.IsPanic(%s, out PanicException? %s)) { GoFrame.Capture(%s);%s } finally { %s%s%s.Run(); }",
-		v.goFrameExceptionName(), v.goFrameExceptionName(), v.goFramePanicName(), v.goFramePanicName(), catchReturn,
+	return fmt.Sprintf(" catch (Exception %s) when (%s.Is(%s)) { %s.Capture();%s } finally { %s%s%s.Run(); }",
+		v.goFrameExceptionName(), v.goFrameName(), v.goFrameExceptionName(), v.goFrameName(), catchReturn,
 		v.positionSentinelText(endPos), v.goFrameLoweredFinallyCalls(), v.goFrameName())
 }

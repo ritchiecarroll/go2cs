@@ -153,8 +153,9 @@ func main() {
 }
 `
 
-// goFrameTailText is the frame's catch and finally on the closing line, up to the finally's own body.
-const goFrameTailText = "catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp);"
+// goFrameTailText is the frame's catch on the closing line, up to the catch body's end: the frame-local tail,
+// where the filter stores the panic in the frame and the catch body parks it (GoFrame.Is, GoFrame.Capture).
+const goFrameTailText = "catch (Exception ᒐe) when (ᒐ.Is(ᒐe)) { ᒐ.Capture();"
 
 var goFrameLayoutName = regexp.MustCompile(`([@\w]+)\(`)
 

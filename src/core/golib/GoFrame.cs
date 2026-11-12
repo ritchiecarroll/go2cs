@@ -747,6 +747,35 @@ public ref struct GoFrame
         // returning main from exiting before this goroutine's report (MainExit).
         MainExit.PanicDefersStarted(GoThreadState.Current);
     }
+
+    /// <summary>
+    /// The emitted catch FILTER of the frame-local tail: <see cref="IsPanic"/>, with the adopted panic kept in
+    /// this frame for <see cref="Capture()"/>.
+    /// </summary>
+    /// <param name="ex">Exception reaching the frame's catch.</param>
+    /// <returns><c>true</c> when <paramref name="ex"/> is a Go panic this frame catches.</returns>
+    /// <remarks>
+    /// The converter emits <c>catch (Exception ᒐe) when (ᒐ.Is(ᒐe)) { ᒐ.Capture(); }</c>, which is the static pair
+    /// <c>when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }</c> with the out variable
+    /// moved into the frame. The ordering is the static pair's, and it is what matters: the filter only ADOPTS,
+    /// in the first pass of exception handling, and the catch body PARKS, after every intervening finally has run.
+    /// A filter that also parked would let a finally between the throw and this frame (one that runs a deferring
+    /// function which panics and recovers) overwrite the parked panic, and this frame would recover nil
+    /// (docs/phase4/SCOUT-defer-emission-parity.md, 10.4).
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool Is(Exception ex) => IsPanic(ex, out m_panic);
+
+    // The panic Is adopted, parked by Capture. A field of the frame rather than a local of the method, so the
+    // emitted tail names the frame alone; declared here, beside its two members.
+    private PanicException? m_panic;
+
+    /// <summary>
+    /// The emitted catch BODY of the frame-local tail: <see cref="Capture(PanicException)"/> for the panic
+    /// <see cref="Is"/> adopted.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
+    public void Capture() => Capture(m_panic!);
 }
 
 /// <summary>
