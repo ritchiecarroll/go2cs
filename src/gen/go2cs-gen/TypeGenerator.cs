@@ -554,7 +554,9 @@ public class TypeGenerator : ISourceGenerator
                         break;
 
                     case ClassDeclarationSyntax when typeDefinition.StartsWith($"{PointerPrefix}<"): // pointer
-                        typeName = typeDefinition[2..^1];
+                        // The pointee may be spelled through the file's alias of its package (log/slog's
+                        // `ж<time.Location>`), which this generated part has no using for.
+                        typeName = QualifySourceAliasReferences(typeDefinition[2..^1], syntaxTree, semanticModel);
                         
                         generatedSource = new InheritedTypeTemplate
                         {
