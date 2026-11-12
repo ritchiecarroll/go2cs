@@ -1345,6 +1345,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMnDeepUnwind() => CheckTarget("MnDeepUnwind");
 
     [TestMethod]
+    public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
+
+    [TestMethod]
     public void CheckMnMainExit() => CheckTarget("MnMainExit");
 
     [TestMethod]
