@@ -1411,9 +1411,21 @@ public class ImplementGenerator : ISourceGenerator
                     }
                 }
 
+                // A method the wrapped type's holder (or its promoted-method class) declares is called on that class.
+                Dictionary<string, string> valueMethodClasses = new(StringComparer.Ordinal);
+
+                foreach (MethodInfo valueMethod in methods)
+                {
+                    string valueSimpleName = GetSimpleName(valueMethod.Name);
+
+                    if (GoMethodHosts.HostOf(structType, valueMethod.ForwardMemberName(valueSimpleName)) is INamedTypeSymbol valueMethodHost)
+                        valueMethodClasses[valueSimpleName] = valueMethodHost.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                }
+
                 string valueAdapterSource = new ValueAdapterImplTemplate
                 {
                     PromotedFieldForwards = valuePromotedFieldForwards,
+                    MethodClasses = valueMethodClasses,
                     PackageNamespace = packageNamespace,
                     PackageName = packageName,
                     // FULLY-qualified: the bare name resolves to the LOCAL same-named type
@@ -1529,6 +1541,10 @@ public class ImplementGenerator : ISourceGenerator
                     : null,
                 ValueEmbedHopPromotedClass = valueEmbedPromotedHost?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 ValueEmbedHopPromotedMethods = valueEmbedPromotedHost is null ? null : new(valueEmbedPromotedHost.MemberNames, StringComparer.Ordinal),
+                ValueEmbedHopHolderClasses = embedHop is null && (structDecl?.GetEmbeddedValueHopNames(compilation!) is [var holderHop]) && holderHop.TypeName.Contains('.') &&
+                                             ResolveValueEmbedType(structType, holderHop.Name) is INamedTypeSymbol holderHopType
+                    ? ValueEmbedHolderClasses(holderHopType)
+                    : null,
                 UsingStatements = usingStatements
             }
             .Generate();
@@ -2233,6 +2249,31 @@ public class ImplementGenerator : ISourceGenerator
         ResolveValueEmbedType(structType, embedName)?.ContainingType is INamedTypeSymbol packageClass
             ? packageClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
             : null;
+
+    // The class of each method the embed's type declares in a method holder, by the method's name. A type declares
+    // a method once, so its holders (two where a test file adds methods) share no name.
+    private static Dictionary<string, string>? ValueEmbedHolderClasses(INamedTypeSymbol embedType)
+    {
+        IReadOnlyList<INamedTypeSymbol> holders = GoMethodHosts.MethodHolders(embedType);
+
+        if (holders.Count == 0)
+            return null;
+
+        Dictionary<string, string> classes = new(StringComparer.Ordinal);
+
+        foreach (INamedTypeSymbol holder in holders)
+        {
+            string holderName = holder.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+            foreach (string member in holder.MemberNames)
+            {
+                if (!classes.ContainsKey(member))
+                    classes[member] = holderName;
+            }
+        }
+
+        return classes;
+    }
 
     private static INamedTypeSymbol? ResolveValueEmbedType(ITypeSymbol structType, string embedName) =>
         structType.GetMembers(embedName)

@@ -26,6 +26,15 @@ internal abstract class TemplateBase
     // forwarder sits beside its method, so the two overload in one class and a private method stays reachable.
     public string? HostClassName = null;
 
+    // The classes of this assembly the method's own file reads through `using static`, fully qualified, when the
+    // host is a method holder: the holder is not nested in the package class, so a name the template repeats as
+    // written (a type another generator declares in the package class is unbound to this one, and printed bare)
+    // binds through the same directives as in the method's file. Null in the package class, where nesting reads it.
+    public string[]? HostStaticUsings = null;
+
+    private string HostStaticUsingDirectives => HostStaticUsings is not { Length: > 0 } ? "" :
+        string.Join("", HostStaticUsings.Select(target => $"using static {target};\r\n")) + "\r\n";
+
     // A converted Go type the converter no longer marks gets its [GoType] back on the generated part,
     // so reflection reads the type exactly as it did when the converter wrote the attribute.
     public bool EmitGoTypeAttribute;
@@ -135,7 +144,7 @@ internal abstract class TemplateBase
         
         namespace {{PackageNamespace}};
 
-        {{(HostClassName is null || HostClassName == $"{PackageName}_package" ? $"public static partial class {PackageName}_package" : $"partial class {HostClassName}")}}
+        {{HostStaticUsingDirectives}}{{(HostClassName is null || HostClassName == $"{PackageName}_package" ? $"public static partial class {PackageName}_package" : $"partial class {HostClassName}")}}
         {
         
         """;

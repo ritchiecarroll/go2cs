@@ -118,6 +118,7 @@ public class RecvGenerator : ISourceGenerator
                 PackageNamespace = packageNamespace,
                 PackageName = packageName,
                 HostClassName = HostClassOf(methodSyntax),
+                HostStaticUsings = HostStaticUsingsOf(methodSyntax, semanticModel),
                 Scope = scope,
                 Method = method,
                 ReceiverTypeIsPublic = receiverTypeIsPublic,
@@ -174,6 +175,7 @@ public class RecvGenerator : ISourceGenerator
                 PackageNamespace = packageNamespace,
                 PackageName = packageName,
                 HostClassName = HostClassOf(methodSyntax),
+                HostStaticUsings = HostStaticUsingsOf(methodSyntax, semanticModel),
                 Scope = scope,
                 Method = method,
                 ReceiverTypeIsPublic = EffectiveScopeIsPublic(receiverType, GetSimpleName(method.Parameters[0].type)),
@@ -197,6 +199,38 @@ public class RecvGenerator : ISourceGenerator
         methodSyntax.Parent is ClassDeclarationSyntax { Parent: not TypeDeclarationSyntax } host && host.Modifiers.Any(SyntaxKind.PartialKeyword)
             ? host.Identifier.Text
             : null;
+
+    // The classes of this assembly that the file of a method in a method holder reads through `using static`
+    // (TemplateBase.HostStaticUsings); null for a method of any other class.
+    internal static string[]? HostStaticUsingsOf(MethodDeclarationSyntax methodSyntax, SemanticModel semanticModel)
+    {
+        if (methodSyntax.Parent is not ClassDeclarationSyntax host ||
+            semanticModel.GetDeclaredSymbol(host) is not INamedTypeSymbol hostSymbol || !GoMethodHosts.IsMethodHost(hostSymbol))
+        {
+            return null;
+        }
+
+        List<string> targets = [];
+
+        foreach (SyntaxNode node in methodSyntax.SyntaxTree.GetRoot().DescendantNodes(node => node is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax))
+        {
+            if (node is not UsingDirectiveSyntax { Alias: null, Name: not null } directive || !directive.StaticKeyword.IsKind(SyntaxKind.StaticKeyword))
+                continue;
+
+            if (semanticModel.GetSymbolInfo(directive.Name).Symbol is not INamedTypeSymbol { IsStatic: true } target ||
+                !SymbolEqualityComparer.Default.Equals(target.ContainingAssembly, hostSymbol.ContainingAssembly))
+            {
+                continue;
+            }
+
+            string name = target.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+            if (!targets.Contains(name))
+                targets.Add(name);
+        }
+
+        return targets.Count == 0 ? null : [.. targets];
+    }
 
     // Whether the method's own class DECLARES its pointer twin: a same-named method whose receiver is
     // `ж<T>` over this method's `ref T` receiver and whose remaining parameters match. Only a twin

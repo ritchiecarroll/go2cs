@@ -72,6 +72,10 @@ internal class InterfaceImplTemplate : TemplateBase
     public string? ValueEmbedHopPromotedClass;
     public HashSet<string>? ValueEmbedHopPromotedMethods;
 
+    // The foreign value embed's method holders, by the name of each method they declare: the converter declares a
+    // type's methods in the type's holder, beside the package class, so the static call of one names its holder.
+    public Dictionary<string, string>? ValueEmbedHopHolderClasses;
+
     // Both sides' effective accessibility, resolved by the GENERATOR from the SYMBOLS (see
     // ImplementGenerator.AdapterSidePublic / Common.EffectiveScopeIsPublic). The template cannot ask
     // that question itself — it holds only names — and a name is the wrong oracle for a lifted
@@ -292,7 +296,9 @@ internal class InterfaceImplTemplate : TemplateBase
                         if (ValueEmbedHopStaticClass is not null)
                         {
                             string staticArgs = string.IsNullOrEmpty(method.CallParameters) ? $"this.{ValueEmbedHop}" : $"this.{ValueEmbedHop}, {method.CallParameters}";
-                            string staticClass = ValueEmbedHopPromotedMethods?.Contains(simpleMethodName.TrimStart('@')) is true ? ValueEmbedHopPromotedClass! : ValueEmbedHopStaticClass;
+                            string staticMember = simpleMethodName.TrimStart('@');
+                            string staticClass = ValueEmbedHopPromotedMethods?.Contains(staticMember) is true ? ValueEmbedHopPromotedClass! :
+                                ValueEmbedHopHolderClasses is not null && ValueEmbedHopHolderClasses.TryGetValue(staticMember, out string? holderClass) ? holderClass : ValueEmbedHopStaticClass;
                             result.Append($"[{NonUserCodeAttribute}] {method.ReturnType} {method.GetSignature()} => {staticClass}.{simpleMethodName}{method.GetGenericSignature()}({staticArgs});");
                             continue;
                         }

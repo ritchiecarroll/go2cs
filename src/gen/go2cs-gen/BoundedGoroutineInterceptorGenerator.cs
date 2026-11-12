@@ -399,6 +399,15 @@ public sealed class BoundedGoroutineInterceptorGenerator : IIncrementalGenerator
 
         methods.AddRange(semanticModel.LookupSymbols(position, name: identifier).OfType<IMethodSymbol>());
 
+        // The converter declares a type's methods in the type's holder, beside the package class, where the names in
+        // scope above do not reach from the package class or from another type's holder. Every holder of the package
+        // is read, as every method of the name was in scope while the package class held them all.
+        if (semanticModel.GetEnclosingSymbol(position, cancellationToken) is { } enclosing &&
+            (enclosing as INamedTypeSymbol ?? enclosing.ContainingType) is { ContainingNamespace: { } packageNamespace })
+        {
+            methods.AddRange(GoMethodHosts.NamespaceHolders(packageNamespace).SelectMany(holder => holder.GetMembers(identifier).OfType<IMethodSymbol>()));
+        }
+
         return methods;
     }
 

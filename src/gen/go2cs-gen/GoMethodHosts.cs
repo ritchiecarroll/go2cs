@@ -148,16 +148,36 @@ internal static class GoMethodHosts
     /// holder that holds it, else its package class. A type that declares a method promotes none of that name and
     /// declares it once, so one class holds every form of it.
     /// </summary>
-    public static string StaticClass(ITypeSymbol type, string name)
+    public static string StaticClass(ITypeSymbol type, string name) =>
+        (HostOf(type, name) ?? type.ContainingType)?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "";
+
+    /// <summary>
+    /// Gets the class beside <paramref name="type"/>'s package class that holds its method
+    /// <paramref name="name"/>: its promoted-method class when that class holds the name, else the method holder
+    /// that holds it, else null (the package class holds it, or nothing does).
+    /// </summary>
+    public static INamedTypeSymbol? HostOf(ITypeSymbol type, string name)
     {
         string member = name.TrimStart('@');
-        INamedTypeSymbol? host = PromotedHost(type);
 
-        if (host is null || host.GetMembers(member).IsEmpty)
-            host = MethodHolders(type).FirstOrDefault(holder => !holder.GetMembers(member).IsEmpty) ?? type.ContainingType;
+        if (PromotedHost(type) is INamedTypeSymbol host && !host.GetMembers(member).IsEmpty)
+            return host;
 
-        return host?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "";
+        return MethodHolders(type).FirstOrDefault(holder => !holder.GetMembers(member).IsEmpty);
     }
+
+    /// <summary>
+    /// Gets every method holder <paramref name="namespace"/> declares, in the ordinal order of their names.
+    /// </summary>
+    /// <remarks>
+    /// The namespace of a class this compilation declares is its own module's: the holders are those of the
+    /// package being compiled, with its test files' where both compile into one assembly.
+    /// </remarks>
+    public static IEnumerable<INamedTypeSymbol> NamespaceHolders(INamespaceSymbol @namespace) =>
+        s_hosts.GetValue(@namespace, ReadHosts).Declared.Values
+            .SelectMany(holders => holders)
+            .Distinct<INamedTypeSymbol>(SymbolEqualityComparer.Default)
+            .OrderBy(holder => holder.Name, System.StringComparer.Ordinal);
 
     private static Hosts? HostsOf(ITypeSymbol type)
     {
