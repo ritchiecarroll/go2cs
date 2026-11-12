@@ -240,3 +240,149 @@ waits for its verdict. Sections 1 to 11 stand as written; where a ruling changes
 - **Q-E, RULED: an on-demand linux stage on the existing workflow.**
 
 — H (2026-11-12)
+
+## 13. Amendment 2026-11-12: the design review, each finding answered
+
+COORD had the plan reviewed at `d4ef199184`: APPROVE-WITH-FIXES. Increments 3.0 and 3.1 may proceed after G1.
+Increments 3.2 and 3.3 wait for this block. **Every finding is ACCEPTED; none is rebutted.** Each was checked against
+the site it cites, at the base. Where this block and sections 1 to 10 disagree, this block governs, and the earlier
+text stays as it was written.
+
+### 13.1 What was wrong as written
+
+1. **Section 4, "a pointee that holds Go pointers is refused ... the one case the runtime cannot pin".** That treats
+   two different rules as one. Go's rule is about Go pointers. The CLR's is about managed references. A converted
+   `syscall.RawSockaddrInet4` holds no Go pointer, and holds two managed references: its `Addr` and `Zero` fields are
+   `array<byte>` (READ, `syscall/linux-amd64/ztypes_linux_amd64.cs`). `net` passes exactly that type to C.
+2. **Section 4's table, "the scoped pin has no finalizable holder".** False for every reinterpreted pointer. Such a box
+   already carries a pin taken where it was reinterpreted, a handle inside a finalizable `PinnedBuffer` (READ,
+   `runtime/PinnedBuffer.cs`). And "the wrapper pins the box's address" assumed the box's address is an address:
+   on the retained-source arm the box's own remarks say the wrapper "never uses the address" (READ, `ж.NativeBox.cs`),
+   and on the order-token arm the number names no memory at all.
+3. **Sections 1 and 4, "AVOIDS the syscall pin hole".** True for a typed pointer parameter only. Section 3 let a
+   `void *` number with no box behind it cross as it is, and a number minted through the non-retaining door is the
+   hole's own predicate.
+
+### 13.2 M1, ACCEPTED: three crossings, decided on the GO layout
+
+A pointer to Go memory is classed by the Go type of what it points at, read from the SOURCE (13.3), never from the C
+parameter's type:
+
+- **(a) PIN.** The Go type holds no Go pointer, its converted form holds no managed reference, and its CLR layout is
+  Go's (no layout mismatch, no size divergence). `[]byte`, `[N]int32`, a struct of scalars. C is handed the memory
+  itself.
+- **(b) IMAGE.** The Go type holds no Go pointer, but its converted form holds managed references or is laid out
+  differently (an inline array is `array<T>`). The wrapper builds a Go-LAYOUT image of the value: a buffer of the
+  SOURCE type's Go size, filled field by field at Go's offsets, handed to C, and copied back after the call. The size
+  is the source's (a `RawSockaddrInet6` is 28 bytes), not the parameter's (`struct sockaddr` is 16). This is Phase 2's
+  mirror, generalized from C structs to Go structs.
+- **(c) REFUSE.** The Go type holds a real Go pointer: cgo's own panic.
+
+Which component writes an image's field copies (the converter, from `go/types`, or go2cs-gen) is the first design step
+of 3.2, posted before code.
+
+**New stop line S-G: "net's own argument is unpinnable".** If class (b) cannot be built for `RawSockaddrInet4` and
+`RawSockaddrInet6` inside 3.2, the proof target cannot pass, and the plan returns to COORD before more code.
+
+### 13.3 M2, ACCEPTED: classify on the retained source, and recompute the address in scope
+
+- A wrapper never hands C the `NativeAddress` of a box minted from managed storage.
+- A reinterpreted box is classed by its RETAINED SOURCE: which storage it came from (an array and an index, or one
+  value) and that storage's Go type. `(*C.char)(unsafe.Pointer(&recs[0]))` over a `[]struct{ s string; n int }` is
+  class (c) by its source, and is refused. A check keyed on the parameter's `char` would have passed it.
+- The address is computed from the source INSIDE the wrapper's pin scope.
+- A box minted from managed storage whose source cannot be named (the order-token arm) is refused by name.
+- **Reds:** `&b[3]` (the whole array is held, the address is three elements in); a resliced `b[lo:]` (the index is
+  the backing array's); an empty slice (Go panics at `&b[0]` before any call, and so must go2cs); and
+  `&nativeSlice[0]`, which must class as C memory, since a native-backed slice refuses to be pinned.
+- **The table's cost row, corrected:** a reinterpreted box arrives already carrying the reinterpret seam's pin, in a
+  finalizable holder. Phase 3 does not add one, does not rely on it, and does not remove it. Removing it changes the
+  reinterpret seam for the whole corpus, which is an increment of its own.
+
+### 13.4 M3, ACCEPTED: a number is not evidence of C memory
+
+`C.f(unsafe.Pointer(uintptr(unsafe.Pointer(&b[0]))))` is legal Go. Two rules replace section 3's sentence:
+
+- **In one expression, the converter keeps the box.** Go's own guarantee for that form is by the operand's type, in
+  one expression. The cgo route emits it box-carrying, so the wrapper is handed the box and no number is minted.
+- **A number that arrives from a variable is looked up** in golib's pin and token registry (`ManagedPointerTokens`)
+  before it crosses. A hit on managed storage is classed as that box (13.2), or refused when the box cannot be named.
+  A tagged token, which names no user memory, is refused by name. Only a number the registry does not know crosses
+  as it is.
+
+**"AVOIDS", reworded to what is true:** Phase 3 never hands C an address of Go memory that it did not itself hold
+still for the call. For a typed pointer that holds by construction. For a number it holds by lookup. A number whose
+pin was already released before the call is not in the registry and crosses as C memory: that residue is the syscall
+hole itself, in code that is already invalid Go (a `uintptr` kept across statements), and Phase 3 does not close it.
+
+### 13.5 M4, ACCEPTED: classify every argument, then `fixed`
+
+Every wrapper runs in this order:
+
+1. Classify EVERY argument and build every image. A refusal throws here, with nothing pinned.
+2. Pin each class (a) argument with `fixed`, nested, the innermost block holding the transition bracket and the call.
+3. Copy each image back after the call.
+
+There is no pin handle, so nothing can leak when a later step throws, and nothing waits on a finalizer.
+
+**Invariant: a cgo wrapper is synchronous.** It is never async, never an iterator, and never rewritten into a
+resumable twin, because `fixed` cannot span a suspension. Any generator that makes such twins for the M:N scheduler
+must leave cgo wrappers out. How the bindings file marks them for that generator is settled with the M:N lane;
+where that generator keeps its exclusions is NOT READ.
+
+A reinterpreted source's element type is known only at run time, so its pin is a `fixed` over a reference to the
+source's first byte, not over a typed array. The mechanism is 3.2's design step. The rule is fixed here: no handle,
+no finalizer.
+
+### 13.6 M5, ACCEPTED: the slice door dispatches on the box, never on the address
+
+- The door's input is a box-carrying pointer. A bare number is looked up first, as in 13.4: a hit on managed storage
+  keeps today's copy and warning; a tagged token is refused; only an unknown number becomes a native-backed slice.
+  A number pointing into managed storage whose pin was released would otherwise have turned today's lost write into
+  corruption of the managed heap.
+- **"An element type with no Go pointers" in section 5 was the wrong predicate.** The native-backed slice's own test is
+  the CLR's: no managed reference, and no size divergence (READ, `slice.cs`). A Go struct with no pointers and one
+  inline array field fails it. For such an element type the door keeps today's copy and warning.
+- For a generic element type the answer is known only at run time. The door tests the predicate itself and falls
+  back to the copy; it never reaches the native-backed slice's panic.
+- The second consumer's named site is covered: its `rawmem` is an array of bytes.
+
+### 13.7 The SHOULD items, all ACCEPTED
+
+- **S1.** Section 6 undercounted `net`'s reads. Two more reds: slicing an inline array field of a struct in C memory
+  (`sa.Addr[:]`), and indexing a `(*[2]byte)` reinterpretation of a field's address (`&sa.Port`). With 13.2 these say
+  `net`'s socket addresses need a Go-layout image in BOTH directions. Stop line S-B is expected to fire, so 3.2 opens
+  with a design step.
+- **S2.** A red: `unsafe.Sizeof` of a C struct equals C's `sizeof` for a struct with inline arrays and padding
+  (`net` sizes a `malloc` by it). Inferred, not confirmed.
+- **S3.** Increment 3.3 changes pure-Go behaviour at run time: a copy becomes an alias, the capacity becomes Go's, and
+  the third index is honoured where today's emission ignores it (READ, `convSliceExpr.go`; its own comment names
+  `os.Readlink`'s reparse path and reflect's `gcSlice`). A byte comparison cannot see a run-time change. So 3.3 owes
+  the full behavioral suite, every banked row whose package holds a moved emission, and a census of the `-tests`
+  emission. P5's byte footprint is necessary, not sufficient.
+- **S4.** P6's control as posted can pass vacuously: with the reinterpret seam's pin still in place, "the pin removed"
+  still pins. The control removes every pin on the path. The array is small and newly allocated, so it is not in the
+  large or pinned heaps. The C function blocks while another thread forces a compacting collection, then writes. It
+  runs in a child process, since the failure may be a crash, and on each RID. P6 stays as posted and is scored
+  against this control.
+- **S5.** The helpers copy BYTES and never go through a text encoding. Fixture rows: invalid UTF-8; an interior NUL;
+  `GoStringN` and `GoBytes` with a zero and with a negative count, each as `go run` behaves on the leg; and `CBytes`,
+  whose result the caller frees.
+
+### 13.8 Notes, recorded
+
+- C keeping a pinned pointer past its return is undetectable, as it is in Go. Here it corrupts a heap that moves.
+  `Limitations.md` says so when 3.2 lands.
+- A view over freed C memory, or one that escapes to another goroutine, is Go's own hazard.
+- The errno form exists already and is reused.
+- C calling Go stays refused throughout Phase 3.
+
+### 13.9 Predictions, amended
+
+The posted predictions stay and are scored as worded. Added:
+
+- **P3-b.** S1's two reads both fail at the base.
+- **P9.** With 13.2 in place, `RawSockaddrInet4` and `RawSockaddrInet6` cross as images whose bytes equal Go's own
+  layout of the same value, on linux/amd64.
+
+— H (2026-11-12)
