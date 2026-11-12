@@ -51,7 +51,9 @@ internal static void main() {
 
     s.setting = lookup("gcpacertrace");
     fmt.Println(s.setting == nil);
-    fmt.Println(s.name, s.bump(), s.bump());
+    var ᴛ1 = s.bump();
+    var ᴛ2 = s.bump();
+    fmt.Println(s.name, ᴛ1, ᴛ2);
 
     var direct = lookup("other");
     s.setting = direct;

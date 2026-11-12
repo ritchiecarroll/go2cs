@@ -32,7 +32,8 @@ internal static void main() {
         pʗ1.X = x;
         return x;
     }
-    fmt.Println("argument writes through p:", p.Show(set(10)));
+    var ᴛ1 = set(10);
+    fmt.Println("argument writes through p:", p.Show(ᴛ1));
 
     nint bumped = p.Bump();
     fmt.Println("method writes its copy:", bumped, p.X);
@@ -43,7 +44,8 @@ internal static void main() {
         bʗ1.Item = "new";
         return "tag";
     }
-    fmt.Println("generic receiver:", b.Get(retag()));
+    var ᴛ2 = retag();
+    fmt.Println("generic receiver:", b.Get(ᴛ2));
 
     fmt.Println("call result as the pointer:", current().Show(func(nint () => {
         shared.X = 5;

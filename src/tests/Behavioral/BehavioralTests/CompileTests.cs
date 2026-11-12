@@ -2416,6 +2416,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckStatLayoutTruth() => CheckTarget("StatLayoutTruth");
 
     [TestMethod]
+    public void CheckStatementCallOrder() => CheckTarget("StatementCallOrder");
+
+    [TestMethod]
     public void CheckStatementTableFuncNames() => CheckTarget("StatementTableFuncNames");
 
     [TestMethod]

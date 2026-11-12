@@ -1147,6 +1147,7 @@
     <Project Path="tests/Behavioral/SortMethodSelfCapture/SortMethodSelfCapture.csproj" />
     <Project Path="tests/Behavioral/SpreadOperator/SpreadOperator.csproj" />
     <Project Path="tests/Behavioral/StackAppendBackingStore/StackAppendBackingStore.csproj" />
+    <Project Path="tests/Behavioral/StatementCallOrder/StatementCallOrder.csproj" />
     <Project Path="tests/Behavioral/StatementTableFuncNames/StatementTableFuncNames.csproj" />
     <Project Path="tests/Behavioral/StatLayoutTruth/StatLayoutTruth.csproj" />
     <Project Path="tests/Behavioral/StdLibInternalAbi/StdLibInternalAbi.csproj" />

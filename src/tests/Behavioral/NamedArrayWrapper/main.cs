@@ -111,21 +111,22 @@ internal static void main() {
     slots sl = default;
     sl.at(1).v = 77;
     sl.at(2).v = sl.at(1).v + 1;
-    fmt.Println(sl[1].v, sl[2].v, sl.at(1).v, sl.sum());
+    var ᴛ1 = sl.at(1);
+    fmt.Println(sl[1].v, sl[2].v, ᴛ1.v, sl.sum());
 
     scal sm = new();
-    var ᴛ1 = sm.s.Value;
-    fromBytes(ref ᴛ1, 7);
-    var ᴛ2 = (nonMont)((sm.s).Value);
-    @double(ref sm.s, ref ᴛ2);
+    var ᴛ2 = sm.s.Value;
+    fromBytes(ref ᴛ2, 7);
+    var ᴛ3 = (nonMont)((sm.s).Value);
+    @double(ref sm.s, ref ᴛ3);
     fmt.Println(sm.s[0], sm.s[3]);
     nonMont dm = default;
-    var ᴛ3 = dm.Value;
-    fromBytes(ref ᴛ3, 3);
+    var ᴛ4 = dm.Value;
+    fromBytes(ref ᴛ4, 3);
     fmt.Println(dm[1], dm[2]);
 
-    var ᴛ4 = sm.s.Value;
-    fromBytes(ref ᴛ4, 20);
+    var ᴛ5 = sm.s.Value;
+    fromBytes(ref ᴛ5, 20);
     fmt.Println(sm.s[0], sm.s[3]);
 
     var grid = new Grid(new unit[]{2, 3, 4}.array());

@@ -71,7 +71,8 @@ internal static void main() {
 
     var c = Ꮡb.Ꮡw;
     bump(ref (c.of(wrapper.Ꮡa)).DerefOrNull());
-    fmt.Println(b.w.a, readBack(Ꮡb));
+    var ᴛ1 = readBack(Ꮡb);
+    fmt.Println(b.w.a, ᴛ1);
 
     var s = new shadowed();
     s.fn = 5;

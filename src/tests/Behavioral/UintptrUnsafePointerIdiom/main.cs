@@ -43,7 +43,8 @@ internal static void main() {
     fmt.Println("deref operand:", (uintptr)(pp.ValueSlot) == g1);
 
     link.y = 7;
-    fmt.Println("written:", link.x, link.y, addrOf(link) == g1);
+    var ᴛ1 = addrOf(link);
+    fmt.Println("written:", link.x, link.y, ᴛ1 == g1);
 }
 
 } // end main_package

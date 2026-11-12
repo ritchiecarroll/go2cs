@@ -31,7 +31,10 @@ internal static void main() {
     var a = new arrval.Value(new nint[]{1, 2, 3}.array());
     a.Set(0, 5);
     a.Bump();
-    fmt.Println(a, a.First(), a.Sum(), a.Head());
+    var ᴛ1 = a.First();
+    var ᴛ2 = a.Sum();
+    var ᴛ3 = a.Head();
+    fmt.Println(a, ᴛ1, ᴛ2, ᴛ3);
 
     var m = new mapval.Value(new map<@string, nint>{["a"] = 1});
     m.Put("b", 2);

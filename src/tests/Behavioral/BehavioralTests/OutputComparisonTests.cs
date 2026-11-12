@@ -2345,6 +2345,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckStatLayoutTruth() => CheckTarget("StatLayoutTruth");
 
     [TestMethod]
+    public void CheckStatementCallOrder() => CheckTarget("StatementCallOrder");
+
+    [TestMethod]
     public void CheckStatementTableFuncNames() => CheckTarget("StatementTableFuncNames");
 
     [TestMethod]

@@ -48,7 +48,8 @@ internal static void main() {
 
     var st = Ꮡ(new store(id: 5, data: [11, 22, 33]));
     bump(ref (Ꮡ(st.stk(), 0)).DerefOrNull());
-    fmt.Println(st.data[0], st.stk()[0]);
+    var ᴛ1 = st.stk();
+    fmt.Println(st.data[0], ᴛ1[0]);
     bump(ref (Ꮡ(st.stk(), 2)).DerefOrNull());
     fmt.Println(st.data[2]);
 }

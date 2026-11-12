@@ -54,7 +54,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("EmbeddedPointerNilAssign.go", "EmbeddedPointerNilAssign.cs", "AAsUgoIABxCCrIKmgpaWsoKUoqaCgpaCgpaCgoKCgg==", "38-43:1;39-41:1.1", "", "", "", "39:25,40:17")]
+[assembly: GoPositionMap("EmbeddedPointerNilAssign.go", "EmbeddedPointerNilAssign.cs", "AAsUgoIABxCCrIKmgpaWsoKUoqaCgpaCgraCgoKCgg==", "38-43:1;39-41:1.1", "", "", "", "39:25,40:17")]
 // </GoSourcePositionMaps>
 
 namespace go;
