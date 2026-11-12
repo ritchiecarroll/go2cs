@@ -82,6 +82,16 @@ func cgoRealToolchainLine(t *testing.T) (string, []string) {
 		t.Fatal(err)
 	}
 
+	// The compiler is resolved as the route resolves it (cgoCapture): a bare name is PATH's, by its full path. The
+	// name a compiler prints for itself is the one it was run by, so gcc on windows prints "gcc.exe (...)" run by
+	// its path and "gcc (...)" run as "gcc". Run by the bare name here, this expected a line the route never writes
+	// (the runner's own MinGW gcc, run 43202800197; a pinned toolchain's CC is already a full path).
+	if !strings.ContainsAny(fields[0], `/\`) {
+		if resolved, lookErr := exec.LookPath(fields[0]); lookErr == nil {
+			fields[0] = resolved
+		}
+	}
+
 	version, err := exec.Command(fields[0], append(fields[1:], "--version")...).Output()
 
 	if err != nil {
@@ -293,7 +303,7 @@ func TestTheCgoRouteConvertsTheFixtureOnARealHost(t *testing.T) {
 			`"` + cgoRealProbeName(probeDir) + `")`,
 		} {
 			if !strings.Contains(bindings, want) {
-				t.Errorf("the bindings file does not carry %q", want)
+				t.Errorf("the bindings file does not carry %q; its header reads:\n%s", want, strings.Join(cgoHeaderLines(bindings), "\n"))
 			}
 		}
 
@@ -431,4 +441,17 @@ func TestTheRealRouteTestFailsWhenARequiredCompilerIsMissing(t *testing.T) {
 	if strings.Contains(string(output), "--- SKIP") {
 		t.Errorf("with the probe required and no C compiler, the real-route test skipped:\n%s", output)
 	}
+}
+
+// cgoHeaderLines are a bindings file's leading comment lines that record its target and its C toolchain.
+func cgoHeaderLines(bindings string) []string {
+	var lines []string
+
+	for _, line := range strings.Split(bindings, "\n") {
+		if strings.HasPrefix(line, "// target: ") || strings.HasPrefix(line, "// C toolchain: ") {
+			lines = append(lines, line)
+		}
+	}
+
+	return lines
 }
