@@ -36724,5 +36724,77 @@ from one program, see the run name it, restore. Until it lands, a run by `--filt
 (`pass 1`), never at the verdict.
 
 — G (2026-11-12)
+## 2026-11-12 — H (cgo Phase 2's exit gate, G1): the first time the route's output was compiled and run. One converter defect fixed, two findings OPEN, one toolchain fact
+
+G1's first hosted legs (`claude/h-cgo-g1` at `ea12a61e62`, stage `cgo-e2e`, runs 43207283066, 43207288962 and
+43207294212) were the first builds of what the cgo route writes for a real program. DESIGN-cgo-phase2-pinvoke §11.22
+has the leg-by-leg record.
+
+**FIXED in G1: a C name's first letter decided its type's accessibility.** `windows.h`'s `LPSYSTEMTIME` was `public`
+and the struct it points to `internal`, so the generated members for the pointer type did not compile (CS0050 to
+CS0057). The name is read in two places, the converter's accessibility record and go2cs-gen's scope for a bare
+declaration, and the fix covers both. Reds: `TestACNamesFirstLetterDoesNotMakeItsTypePublic`,
+`TestACTypeAnExportedFunctionNamesIsPublicWithItsPointee`, and the build test
+`TestACPointerTypedefBuildsWithTheStructItNames` (9 errors before, 0 after).
+
+**OPEN 1: a conversion between two C numeric types does not compile.** `C.ushort(n)` with `n` a `C.DWORD` converts to
+`(C.@ushort)(uint16)n` and records `GoImplicitConv<C.@ushort, C.DWORD>`. go2cs-gen's `ImplicitConvGenerator` hosts the
+operator in a partial of the source type declared inside the PACKAGE class (the first class of `package_info.cs`),
+where a C type is not: it declares a second, empty `main_package.@ushort`, and the build fails on CS1061 ("does not
+contain a definition for 'Value'"). The host has to be the class that holds the source type.
+
+- Measured on H by a build of a ten-line program, not on a leg. The gate program does not make such a conversion.
+- It is common in real cgo code (`C.size_t(C.int(n))`), so it is inside what Phase 2 says it converts.
+- The fix is in go2cs-gen, so it owes GenTests, the full behavioral suite and the corpus comparison. Proposed as its
+  own seat, red first, ahead of the .4 release.
+
+**OPEN 2: a cgo project built for another target fails far from the cause.** A cgo project's own default
+`GoTargetOS` is its bindings' target, and its bindings live in that target's folder. Built with another `GoTargetOS`
+(a property, or an environment variable of that name), the bindings file is left out and the first C type in an
+exported signature fails on CS0051. Two parts: the project should refuse another target by name, in MSBuild, before
+the compiler runs; and its default reaches only the project itself, so its references to the standard library still
+take their own default. Proposed for Phase 3's first increment.
+
+**A toolchain fact, not a go2cs defect:** on macOS, `go build` of a cgo program with the pinned zig as CC fails unless
+DWARF is off (`-ldflags=-w`). go's linker runs Apple's `strip` on the externally linked binary, and `strip` refuses
+zig's output ("the __LLVM segment too small"). `go list`, which the conversion uses, is unaffected.
+
+— H (2026-11-12)
+
+## 2026-11-12 — H (found by cgo Phase 2's exit gate, and NOT cgo): gc runs the calls in an operand list before it reads a plain variable there; go2cs evaluates left to right — OPEN, routed by COORD
+
+**The reading.** The exit gate's `ordered` arm passes a struct by value and, after it, an argument whose call changes
+that struct. go hands C the CHANGED struct and go2cs the struct as it was (`ordered 200004` against `ordered 2004`,
+on linux/amd64 and windows/amd64, runs 43212499497 and 43212507656).
+
+**It is not cgo.** Plain Go, no C, measured on H with go1.26.10:
+
+    type pair struct{ a, b int32 }
+    func mutate(p *pair) int32 { p.a = 100; return 2 }
+    func scaled(p pair, k int32) int32 { return (p.a*1000 + p.b) * k }
+
+    p := pair{1, 2}
+    println(scaled(p, mutate(&p)))      // go: 200004    go2cs: 2004
+
+    n := int32(1)
+    bump := func() int32 { n = 50; return 3 }
+    println(n + bump())                  // go: 53        go2cs: 4
+
+**The rule.** Go's spec orders the function calls, method calls and receives in an expression, left to right, and
+leaves a plain variable read unordered against them. gc evaluates the calls first, so a variable read in the same
+operand list sees what a later call wrote. go2cs emits the operands as C# evaluates them, strictly left to right.
+
+**The tree already matches gc here for one statement.** A `return` whose operand list holds such a call spills the
+call ahead of the reads (the `MultiValueReturnOrder` behavioral test; ConversionStrategies, "Multi-Assignment and
+Evaluation Order"). Call ARGUMENTS and BINARY operands are the unhandled siblings.
+
+**RULED (COORD, 2026-11-12):** not G1's to fix. It is converter-wide and moves corpus bytes. It is a parity
+candidate for the .4 release, scout first: a census of the corpus sites where a call in an operand list can modify a
+variable read in the same list. The exit gate keeps the arm as a named divergence that asserts both values.
+
+**Also updated by the same legs:** OPEN 1 of the row above (a conversion between two C numeric types) is FIXED in
+G1 by COORD's ruling (`f43755ef77` red, `2643cf6cea` green).
+
+— H (2026-11-12)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -308,6 +308,14 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	// Publicization therefore outranks the default, and the inline arm supplies that default.
 	if v.isPublicizedType(typeSpec.Name) {
 		v.pendingTypeAccess = "public "
+	} else if _, isCgo := cgoPseudoPackageNames[typeSpec.Name.Name]; isCgo && generatedTypeScope(getSanitizedIdentifier(name)) == "public" {
+		// A C name carries no Go export meaning: Go's own name for a C type is cmd/cgo's unexported _Ctype_ one, so
+		// the type is internal unless an exported declaration names it (the arm above; recordTypeAccessibility
+		// holds the record to that). go2cs-gen reads a BARE declaration's scope from its name, though, and a C name
+		// may begin with an upper-case letter (windows.h's LPSYSTEMTIME, DWORD). So for such a name the modifier is
+		// written inline, as a function-local type's is, and the generator follows it. A C name that already reads
+		// internal keeps its bare declaration.
+		v.pendingTypeAccess = "internal "
 	} else if localAccess := v.localTypeAccess(); localAccess != "" {
 		// A FUNCTION-LOCAL declaration takes the local-type rule, in EVERY conversion: its Go name
 		// carries no export meaning, and the hoisted `<Func>_<name>` identifier the name-based rules

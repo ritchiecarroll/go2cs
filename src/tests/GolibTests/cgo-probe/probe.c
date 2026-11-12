@@ -126,3 +126,9 @@ GO2CS_PROBE_EXPORT int go2cs_probe_pair_scaled(struct go2cs_probe_pair pair, int
 {
     return (pair.a * 1000 + pair.b) * k;
 }
+
+// A C string C owns: a Phase 2 program cannot make one (C.CString is Phase 3), so the exit gate's puts arm prints this.
+GO2CS_PROBE_EXPORT const char *go2cs_probe_text(void)
+{
+    return "go2cs probe text";
+}
