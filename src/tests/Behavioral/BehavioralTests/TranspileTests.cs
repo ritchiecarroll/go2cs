@@ -1342,6 +1342,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMnBlockedIO() => CheckTarget("MnBlockedIO");
 
     [TestMethod]
+    public void CheckMnMainExit() => CheckTarget("MnMainExit");
+
+    [TestMethod]
     public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]

@@ -775,6 +775,7 @@
     <Project Path="tests/Behavioral/MixedUntypedConstArithmetic/MixedUntypedConstArithmetic.csproj" />
     <Project Path="tests/Behavioral/MnBlockedIO/MnBlockedIO.csproj" />
     <Project Path="tests/Behavioral/MnIfaceTwin/MnIfaceTwin.csproj" />
+    <Project Path="tests/Behavioral/MnMainExit/MnMainExit.csproj" />
     <Project Path="tests/Behavioral/MnMixedStorm/MnMixedStorm.csproj" />
     <Project Path="tests/Behavioral/MultiFileInitOrder/MultiFileInitOrder.csproj" />
     <Project Path="tests/Behavioral/MultiPointerEmbedPromotion/MultiPointerEmbedPromotion.csproj" />

@@ -94,7 +94,7 @@ internal static nint envInt(@string name, nint fallback) {
     return v;
 }
 
-internal static void Main() {
+internal static void main() {
     nint n = envInt("MN_IFACE_N", 100);
     var hold = ((time.Duration)(int64)envInt("MN_IFACE_HOLD_MS", 20)) * time.Millisecond;
     @string kind = os.Getenv("MN_IFACE_KIND");

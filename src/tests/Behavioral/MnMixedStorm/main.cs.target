@@ -60,7 +60,7 @@ internal static nint envInt(@string name, nint fallback) {
     return fallback;
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     nint n = envInt("MN_STORM_N", 100000);
     nint hold = envInt("MN_STORM_HOLD_MS", 0);
 

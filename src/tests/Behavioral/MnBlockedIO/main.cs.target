@@ -110,7 +110,7 @@ internal static (nint sum, nint bad) collect(/*<-*/channel<nint> @out, nint k) {
     return (sum, bad);
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     @string kind = os.Getenv("MN_IO_KIND");
     nint k = envInt("MN_IO_K", 8);
     nint rounds = envInt("MN_IO_ROUNDS", 3);

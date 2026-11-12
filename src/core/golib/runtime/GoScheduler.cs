@@ -232,7 +232,7 @@ public static class GoScheduler
                $" steps-over-10ms={Interlocked.Read(ref s_longSteps)}" +
                $" max-step-ms={Interlocked.Read(ref s_maxStepTicks) * 1000 / Stopwatch.Frequency}" +
                $" carrier-start-failures={Interlocked.Read(ref s_carrierStartFailures)}" +
-               $" retakes={Interlocked.Read(ref s_retakes)}" + Goroutine.MountReading();
+               $" retakes={Interlocked.Read(ref s_retakes)}" + Goroutine.MainReading() + Goroutine.MountReading();
     }
 
     private static void SampleThreads()

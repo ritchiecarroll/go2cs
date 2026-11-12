@@ -1345,6 +1345,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMnBlockedIO() => CheckTarget("MnBlockedIO");
 
     [TestMethod]
+    public void CheckMnMainExit() => CheckTarget("MnMainExit");
+
+    [TestMethod]
     public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]

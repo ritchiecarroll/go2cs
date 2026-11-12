@@ -81,6 +81,85 @@ public sealed partial class Goroutine
             : () => ExecutionContext.Run(context, static state => ((TwinStart)state!).Run(), start));
     }
 
+    /// <summary>
+    /// Runs a program's <c>main</c> as the main goroutine when it has a hidden async twin. With the scheduler off,
+    /// or when an init function locked the main goroutine to the startup thread, it is exactly
+    /// <c>MainThread.Run(body)</c>. With it on, goroutine 1 itself runs <paramref name="twin"/>, multiplexed, and
+    /// the startup thread takes goroutine 1 back when the twin ends, to end the program as <c>main</c>'s own
+    /// thread does: a return, an unrecovered panic and a <c>runtime.Goexit</c> each leave from there.
+    /// </summary>
+    public static void RunMainTwin(Action body, Func<ValueTask> twin)
+    {
+        Goroutine? main = Volatile.Read(ref s_main);
+
+        // The startup thread holds goroutine 1 (golib's module initializer registered it there). Anything else is
+        // a host this launcher does not know.
+        if (!GoScheduler.Enabled || main is null || !ReferenceEquals(t_current, main) || main.LockedToThread)
+        {
+            MainThread.Run(body);
+            return;
+        }
+
+        // Goroutine 1 leaves the startup thread. Its logical state starts from the defaults on its first carrier,
+        // as it does on the thread MainThread.Run starts.
+        s_mainTwinRan = true;
+        main.m_multiplexed = true;
+        t_current = null;
+        Interlocked.CompareExchange(ref main.m_threadId, 0, Environment.CurrentManagedThreadId);
+
+        ExecutionContext? context = ExecutionContext.Capture();
+        MainTwin run = new(twin);
+
+        GoScheduler.Ready(main, context is null
+            ? run.Run
+            : () => ExecutionContext.Run(context, static state => ((MainTwin)state!).Run(), run));
+
+        run.Done.Wait();
+
+        // The twin's last step is still mounted until its carrier lets go.
+        SpinWait spin = default;
+
+        while (Volatile.Read(ref main.m_threadId) != 0)
+            spin.SpinOnce();
+
+        main.m_multiplexed = false;
+        main.Mount();
+
+        // What left main leaves it here, on goroutine 1, bound to this thread again.
+        run.Outcome?.Throw();
+    }
+
+    // Whether main was started as a twin on the scheduler (a reading).
+    private static bool s_mainTwinRan;
+
+    internal static string MainReading() =>
+        s_mainTwinRan ? " main=multiplexed" : " main=thread";
+
+    private sealed class MainTwin(Func<ValueTask> twin)
+    {
+        internal readonly ManualResetEventSlim Done = new(false);
+        internal ExceptionDispatchInfo? Outcome;
+
+        internal void Run() =>
+            _ = Drive();
+
+        // Nothing is handled here: main has no goroutine root, so whatever leaves it is carried to the startup
+        // thread as it is.
+        private async ValueTask Drive()
+        {
+            try
+            {
+                await twin();
+            }
+            catch (Exception ex)
+            {
+                Outcome = ExceptionDispatchInfo.Capture(ex);
+            }
+
+            Done.Set();
+        }
+    }
+
     private sealed class TwinStart(Goroutine goroutine, Func<ValueTask> twin, SyncTestBubble? bubble)
     {
         internal void Run()

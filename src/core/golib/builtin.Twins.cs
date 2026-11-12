@@ -67,26 +67,11 @@ public static partial class builtin
         Goroutine.StartTwin(() => action(arg1, arg2, arg3, arg4), () => twin(arg1, arg2, arg3, arg4), action, ᴛcallerFile, ᴛcallerLine);
     }
 
-    // The generated entry point of a program built with twins. With the scheduler off it is main's body, on
-    // the main thread, and no twin ever runs. With it on, main's twin runs multiplexed and the main thread
-    // waits for it. Not settled here: the twin is not goroutine 1, and a Goexit on main waits for ever.
+    // The generated entry point of a program built with twins. With the scheduler off it is MainThread.Run(main),
+    // and no twin ever runs. With it on, main's twin runs multiplexed as goroutine 1 (Goroutine.RunMainTwin).
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public static void RunMainꞏtwin(Action body, Func<ValueTask> twin)
     {
-        if (!GoScheduler.Enabled)
-        {
-            body();
-            return;
-        }
-
-        ManualResetEventSlim done = new(false);
-
-        Goroutine.StartTwin(body, async () =>
-        {
-            await twin();
-            done.Set();
-        }, body);
-
-        done.Wait();
+        Goroutine.RunMainTwin(body, twin);
     }
 }
