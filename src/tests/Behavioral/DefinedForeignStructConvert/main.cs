@@ -26,7 +26,7 @@ internal static void check(@string name, any x, reflectꓸType to) {
     fmt.Println(name, "CanConvert:", v.CanConvert(to), "ConvertibleTo:", v.Type().ConvertibleTo(to), "back:", to.ConvertibleTo(v.Type()));
 }
 
-internal static void Main() {
+internal static void main() {
     var when = time.Date(2020, 1, 2, 3, 4, 5, 0, time.ΔUTC);
     var timeType = reflect.TypeOf(new time.Time());
 

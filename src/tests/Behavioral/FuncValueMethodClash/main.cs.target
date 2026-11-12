@@ -22,7 +22,7 @@ internal static @string show(any v) {
 
 internal static any retAny() { return (Func<@string>)(Run); }
 
-internal static void Main() {
+internal static void main() {
     Func<@string> a = Run;
     Func<@string> b = Run;
     fmt.Println("same := ", a(), "| var = ", b());

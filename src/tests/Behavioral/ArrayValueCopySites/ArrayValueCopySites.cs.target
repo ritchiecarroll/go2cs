@@ -273,7 +273,7 @@ internal static void appendElement() {
     fmt.Println("appendElement:", s[0], a);
 }
 
-internal static void Main() {
+internal static void main() {
     rangeValues();
     rangeNamed();
     rangeHeapBoxed();

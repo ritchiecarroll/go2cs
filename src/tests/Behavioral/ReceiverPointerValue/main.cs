@@ -44,7 +44,7 @@ internal static array<ж<ring>> pair(this ж<ring> Ꮡr, ж<ring> other) {
     return new ж<ring>[]{Ꮡr, other}.array();
 }
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new ring(data: 1));
     a.initSelf();
 

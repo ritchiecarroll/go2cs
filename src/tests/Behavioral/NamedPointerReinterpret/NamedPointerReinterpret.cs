@@ -48,7 +48,7 @@ internal static @string classify(any v) {
     return "other";
 }
 
-internal static void Main() {
+internal static void main() {
     var pb = makeBase();
     var pv = pb.Reinterpret<@base, view>();
     var bb = (@base)(pv.Value);

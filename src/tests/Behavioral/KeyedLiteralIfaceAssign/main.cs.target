@@ -19,7 +19,7 @@ internal static @string Error(this failure f) {
     return f.Code.String() + ": "u8 + f.Msg;
 }
 
-internal static void Main() {
+internal static void main() {
     error err = default;
     err = new failure(Code: ((code)7), Msg: "boom");
     fmt.Println(err);

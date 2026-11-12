@@ -2101,33 +2101,24 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// satisfy — the box does not implement the interface, its generated pointer adapter
 			// does. Project the slice element-wise through the adapter (`widen<ж<Ident>, Node>(
 			// (~n).Names, elemᴛ0 => new IdentжNode(elemᴛ0))`), instantiating N as the interface
-			// itself. The projection copies the slice HEADER only (elements alias through the
-			// shared box, so method calls mutate the original objects); a callee that reassigns
-			// `list[i]` itself would not write back — acceptable for the read/widen shape this
-			// targets. convertToInterfaceType supplies the adapter reference AND the GoImplement
-			// recording, exactly as at scalar *T→iface call sites.
+			// itself. The projection is a NEW slice whose elements are adapters over the original
+			// boxes: method calls reach the original objects, but a write to the slice itself reaches
+			// only the copy. So a callee that may write the slice is refused before emission
+			// (GO2CS2006, sliceWideningWriteRefusals.go), and the trigger here is the one that gate
+			// examines. convertToInterfaceType supplies the adapter reference AND the
+			// GoImplement recording, exactly as at scalar *T→iface call sites.
 			if paramHasArg && (replacementArgs == nil || len(replacementArgs[i]) == 0) {
-				if declSlice, ok := paramType.Underlying().(*types.Slice); ok {
-					if tp, ok := types.Unalias(declSlice.Elem()).(*types.TypeParam); ok {
-						if iface, ok := tp.Constraint().Underlying().(*types.Interface); ok && iface.NumMethods() > 0 && iface.IsMethodSet() {
-							if instParam := v.instantiatedParamType(callExpr, i); instParam != nil {
-								if instSlice, ok := instParam.Underlying().(*types.Slice); ok {
-									if ptrElem, ok := instSlice.Elem().(*types.Pointer); ok && types.Implements(ptrElem, iface) {
-										elemVar := fmt.Sprintf("elem%s%d", TempVarMarker, i)
-										wrapped := v.convertToInterfaceType(tp.Constraint(), ptrElem, elemVar)
+				if tp, ptrElem := v.elementWiseSliceWidening(callExpr, i); tp != nil {
+					elemVar := fmt.Sprintf("elem%s%d", TempVarMarker, i)
+					wrapped := v.convertToInterfaceType(tp.Constraint(), ptrElem, elemVar)
 
-										if strings.HasPrefix(wrapped, "new ") {
-											if replacementArgs == nil {
-												replacementArgs = make([]string, params.Len())
-											}
-
-											replacementArgs[i] = fmt.Sprintf("widen<%s, %s>(%s, %s => %s)",
-												v.getCSharpTypeName(ptrElem), v.getCSharpTypeName(tp.Constraint()), DynamicCastArgMarker, elemVar, wrapped)
-										}
-									}
-								}
-							}
+					if strings.HasPrefix(wrapped, "new ") {
+						if replacementArgs == nil {
+							replacementArgs = make([]string, params.Len())
 						}
+
+						replacementArgs[i] = fmt.Sprintf("widen<%s, %s>(%s, %s => %s)",
+							v.getCSharpTypeName(ptrElem), v.getCSharpTypeName(tp.Constraint()), DynamicCastArgMarker, elemVar, wrapped)
 					}
 				}
 			}
@@ -2604,11 +2595,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						if argType := v.getType(callExpr.Args[i], false); argType != nil && !types.Identical(types.Unalias(argType), types.Unalias(delegateParamType)) {
 							if _, argIsSig := argType.Underlying().(*types.Signature); argIsSig {
 								if _, isLit := callExpr.Args[i].(*ast.FuncLit); !isLit && !typeContainsTypeParams(delegateParamType) {
-									if callExprContext.wrapArgWithNew == nil {
-										callExprContext.wrapArgWithNew = make(map[int]string)
-									}
-
-									callExprContext.wrapArgWithNew[i] = v.getCSharpTypeName(delegateParamType)
+									v.recordDelegateArgWrap(callExprContext, i, delegateParamType, callExpr.Args[i], argType)
 								}
 							}
 						}
@@ -2646,11 +2633,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						}
 
 						if argRendersNamedDelegate {
-							if callExprContext.wrapArgWithNew == nil {
-								callExprContext.wrapArgWithNew = make(map[int]string)
-							}
-
-							callExprContext.wrapArgWithNew[i] = v.getCSharpTypeName(paramType)
+							v.recordDelegateArgWrap(callExprContext, i, paramType, callExpr.Args[i], argType)
 						}
 					}
 				}

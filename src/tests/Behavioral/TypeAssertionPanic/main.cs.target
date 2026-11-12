@@ -53,7 +53,7 @@ internal static void @catch(@string what, Action f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     any boxed = (nint)7;
 
     var boxedʗ1 = boxed;

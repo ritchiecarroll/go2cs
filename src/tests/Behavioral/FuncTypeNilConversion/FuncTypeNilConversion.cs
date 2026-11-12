@@ -11,7 +11,7 @@ partial struct Point {
     public nint X, Y;
 }
 
-internal static void Main() {
+internal static void main() {
     var a = (Actionꓸꓸꓸ<nint>)(default);
     fmt.Println("A1 variadic-1-param Action nil:", a == nil);
 

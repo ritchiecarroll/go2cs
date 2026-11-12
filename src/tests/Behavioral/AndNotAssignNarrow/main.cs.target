@@ -10,7 +10,7 @@ partial struct hmap {
     internal uint8 flags;
 }
 
-internal static void Main() {
+internal static void main() {
     var h = Ꮡ(new hmap(flags: 7));
     h.flags &= unchecked((uint8)~(uint8)(writing));
     h.flags |= (uint8)(8);

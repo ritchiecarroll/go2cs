@@ -26,7 +26,7 @@ internal partial struct main_ptrCases /*dyn*/ {
     /*embed*/ internal error error;
 }
 
-internal static void Main() {
+internal static void main() {
     var cases = slice<main_cases>([
         new(new pointerErrжerror(Ꮡ(new pointerErr("pointer-receiver"))), "pointer-receiver"),
         new(new valueErr("value-receiver"), "value-receiver")

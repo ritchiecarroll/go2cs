@@ -18,7 +18,7 @@ internal static UntypedInt tagBits => 19;
 
 internal static word low(this word w) { return (word)(w & (uint64)((1 << (int)(tagBits)) - 1)); }
 
-internal static void Main() {
+internal static void main() {
     Tag t = 0x10;
     fmt.Println((uint8)t.Constructed());
     fmt.Println((uint8)t.Context());

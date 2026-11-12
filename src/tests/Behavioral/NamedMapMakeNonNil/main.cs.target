@@ -6,7 +6,7 @@ partial class main_package {
 
 partial struct StrIntMap /*map[@string, nint]*/;
 
-internal static void Main() {
+internal static void main() {
     var m = new StrIntMap(0);
     fmt.Println(m == nil);
     fmt.Println(len(m));

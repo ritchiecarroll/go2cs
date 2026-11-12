@@ -20,7 +20,7 @@ internal static @string build(nint x) {
     return s;
 }
 
-internal static void Main() {
+internal static void main() {
     @string s = default;
     s += "a"u8;
     s += "b"u8;

@@ -40,7 +40,7 @@ internal static void initᴛAddressed() {
     Addressed = must(ᴛ3, ᴛ4);
 }
 
-internal static void Main() {
+internal static void main() {
     var p = ᏑAddressed;
     fmt.Println("A:", A);
     fmt.Println("Addressed:", p.Value);

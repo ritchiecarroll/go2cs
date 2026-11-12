@@ -37,7 +37,7 @@ internal static partial nint idxBlocking(nint i) {
     return i;
 }
 
-internal static void Main() {
+internal static void main() {
     var ch = new channel<nint>(2);
 
     ch.ᐸꟷ(42);

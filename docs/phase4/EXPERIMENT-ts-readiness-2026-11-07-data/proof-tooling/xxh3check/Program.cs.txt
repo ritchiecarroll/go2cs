@@ -1,0 +1,27 @@
+// xxh3check (C#): the same lines as the Go twin, computed with System.IO.Hashing's XxHash128 / XxHash3 (seed 0).
+using System.IO.Hashing;
+using System.Text;
+
+static List<(string, string)> Inputs()
+{
+    var input = new List<(string, string)> { ("erased", "-"), ("canonical", "*"), ("base", "#"), ("inner", "<"), ("empty", "") };
+    foreach (int n in new[] { 1, 3, 4, 8, 9, 16, 17, 128, 129, 240, 241, 1024, 4097 })
+    {
+        var b = new StringBuilder();
+        for (int i = 0; i < n; i++) b.Append((char)('a' + (i * 7 + n) % 26));
+        input.Add(($"len{n}", b.ToString()));
+    }
+    input.Add(("utf8", "héllo wörld ж 世界"));
+    return input;
+}
+
+var output = new StringBuilder();
+foreach (var (name, s) in Inputs())
+{
+    byte[] bytes = Encoding.UTF8.GetBytes(s);
+    UInt128 h = XxHash128.HashToUInt128(bytes);
+    ulong hi = (ulong)(h >> 64), lo = (ulong)h;
+    ulong h64 = XxHash3.HashToUInt64(bytes);
+    output.Append($"{name} {bytes.Length} h128={hi:x16}:{lo:x16} h64={h64:x16} b128={hi:x16}:{lo:x16}\n");
+}
+Console.Out.Write(output.ToString());

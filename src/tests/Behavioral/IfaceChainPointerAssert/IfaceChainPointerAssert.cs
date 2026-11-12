@@ -27,7 +27,7 @@ partial struct valConn {
 internal static @string Read(this valConn v) { return "vread:"u8 + v.tag; }
 internal static @string Close(this valConn v) { return "vclosed:"u8 + v.tag; }
 
-internal static void Main() {
+internal static void main() {
     readCloser rc = new connжreadCloser(Ꮡ(new conn(data: "init")));
 
     reader r = new readCloserᴠreader(rc);

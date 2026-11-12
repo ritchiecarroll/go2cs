@@ -99,7 +99,7 @@ internal static partial slice<nint> ret() {
         line());
 }
 
-internal static void Main() {
+internal static void main() {
     show(false, "pkgSlice", pkgSlice);
     show(false, "pkgSum", pkgSum);
     show(false, "pkgStructs", pkgStructs);

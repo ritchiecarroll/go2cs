@@ -14,7 +14,7 @@ internal static nint total(nint ioΔ1, Δio.Writer w) {
     return sum;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(total(4, default));
 }
 

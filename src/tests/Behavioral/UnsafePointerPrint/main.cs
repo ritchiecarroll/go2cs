@@ -5,7 +5,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var e1 = @unsafe.StringData(""u8);
     @string empty = default;
     var e2 = @unsafe.StringData(empty);

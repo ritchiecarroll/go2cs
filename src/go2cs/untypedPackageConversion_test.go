@@ -144,7 +144,7 @@ func main() {
 
 	// The healthy function must be present and fully converted — proof the file was not dropped by
 	// the per-file recover, which is what the nil dereference used to cause.
-	for _, want := range []string{"internal static void healthy()", "total += i * i", "internal static void Main()"} {
+	for _, want := range []string{"internal static void healthy()", "total += i * i", "internal static void main()"} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("converted main.cs lost healthy code %q:\n%s", want, mainCs)
 		}

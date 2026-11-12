@@ -6,7 +6,7 @@ using CrossPkgLib = CrossPkgLib_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(CrossPkgFuncLib.Count(new Func<CrossPkgLibꓸStatus, bool>(CrossPkgFuncLib.Hot)));
 
     Func<CrossPkgLibꓸStatus, bool> pick = CrossPkgFuncLib.Hot;

@@ -27,7 +27,7 @@ partial struct wrapped<T> {
     internal nint count;
 }
 
-internal static void Main() {
+internal static void main() {
     var container = new Container(
         IntResult: new Result<nint>(
             Value: 42,

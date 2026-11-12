@@ -12,7 +12,7 @@ partial struct table<T> /*[3]Box<T>*/;
 
 partial struct vec<T> /*[2]T*/;
 
-internal static void Main() {
+internal static void main() {
     table<nint> t = default;
     t[0].v = 5;
     t[2].v = 9;

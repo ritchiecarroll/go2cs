@@ -58,7 +58,7 @@ internal static any process(any tok, ж<resolver> Ꮡr) {
     return tok;
 }
 
-internal static void Main() {
+internal static void main() {
     var r = Ꮡ(new resolver(ns: new map<@string, @string>{["a"] = "urn:a"}));
 
     var s = process(new start(n: new name(space: "a", local: "x"), attr: [new(space: "a", local: "y")]), r)._<start>();

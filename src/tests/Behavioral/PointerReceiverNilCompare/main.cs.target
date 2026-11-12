@@ -38,7 +38,7 @@ internal static @string describe(this ж<box> Ꮡb) {
     return fmt.Sprintf("box(%d)"u8, b.val);
 }
 
-internal static void Main() {
+internal static void main() {
     var b = Ꮡ(new box());
     fmt.Println(b.isNil(), b.notNil());
     fmt.Println(b.same(b), b.same(Ꮡ(new box())));

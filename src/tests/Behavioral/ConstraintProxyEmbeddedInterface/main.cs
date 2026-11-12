@@ -67,7 +67,7 @@ internal static void callback<T>(T v, Action<T, nint> f)
     f(v.Clone(), 8);
 }
 
-internal static void Main() {
+internal static void main() {
     use<ImplжConstrained>(Ꮡ(new Impl("alpha", 1)));
     use<ImplжConstrained>(Ꮡ(new Impl("beta", 10)));
 

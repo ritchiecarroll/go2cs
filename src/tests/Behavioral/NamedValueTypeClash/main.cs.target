@@ -18,7 +18,7 @@ public static void Add(this ref Value v, byte b) { v = append(v, b); }
 
 public static void Set(this ref Value v, nint i, byte b) { (v)[i] = b; }
 
-internal static void Main() {
+internal static void main() {
     var v = (Value)slice<byte>((@string)"abc"u8);
     v.Add((byte)'d');
     v.Set(0, (byte)'A');

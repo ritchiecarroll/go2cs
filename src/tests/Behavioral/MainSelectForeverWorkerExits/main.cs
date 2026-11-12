@@ -6,7 +6,7 @@ using time = time_package;
 
 partial class main_package {
 
-internal static partial void Main() {
+internal static partial void main() {
     goǃ(() => {
         time.Sleep(500 * time.Millisecond);
         fmt.Println("the worker served while main sat in select {}");

@@ -391,7 +391,7 @@ internal static void widths(uint32 x32, uint64 x64, nint xi) {
     fmt.Println("width-var", x32.Lsh(k32), x32.Rsh(k32), x64.Lsh(k64), x64.Rsh(k64));
 }
 
-internal static void Main() {
+internal static void main() {
     tableUint32(29, 5, 3, 7, 3);
     tableUint64(29, 5, 3, 7, 3);
     tableInt(29, 5, 3, 7, 3);

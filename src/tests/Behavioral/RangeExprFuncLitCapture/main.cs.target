@@ -9,7 +9,7 @@ partial struct probe {
     internal Func<nint> run;
 }
 
-internal static void Main() {
+internal static void main() {
     var vals = slice<nint>([3, 1, 4, 1, 5]);
     var counts = new map<@string, nint>{["a"] = 2, ["b"] = 7};
     nint total = 0;

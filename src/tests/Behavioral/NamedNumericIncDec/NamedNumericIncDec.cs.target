@@ -9,7 +9,7 @@ partial struct sidx /*num:nint*/;
 
 partial struct cx /*num:complex128*/;
 
-internal static void Main() {
+internal static void main() {
     nint n = 0;
     for (idx cΔ1 = (idx)0; cΔ1 < ((idx)5); cΔ1++) {
         n++;

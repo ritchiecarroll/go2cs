@@ -49,7 +49,7 @@ internal static void shapes() {
     e.Bare();
 }
 
-internal static void Main() {
+internal static void main() {
     nint runs = 1;
     if (os.Getenv("GO2CS_CALLER_LINE_WARM") == "1"u8) {
         runs = 400;

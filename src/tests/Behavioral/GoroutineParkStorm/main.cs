@@ -7,7 +7,7 @@ partial class main_package {
 
 internal static UntypedInt n => 1000;
 
-internal static partial void Main() {
+internal static partial void main() {
     ref var start = ref heap(new Δsync.WaitGroup(), out var Ꮡstart);
     Ꮡstart.Add(1);
 

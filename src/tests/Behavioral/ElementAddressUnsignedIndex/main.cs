@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var s = slice<nint>([10, 20, 30, 40]);
 
     uint32 i = 2;

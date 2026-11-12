@@ -10,7 +10,7 @@ partial struct Code /*num:nint*/;
 
 public static @string String(this Delim d) { return (@string)(rune)d; }
 
-internal static void Main() {
+internal static void main() {
     var d = (Delim)(rune)'{';
     fmt.Println(d.String());
 

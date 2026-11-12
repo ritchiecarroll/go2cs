@@ -128,7 +128,7 @@ internal static @string /*got*/ twoLinkChain() {
     return got;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("normal return:   ", normalReturnPanic());
     fmt.Println("after recovery:  ", panicAfterRecovery());
     fmt.Println("recover, panic:  ", recoverThenPanic());

@@ -9,7 +9,7 @@ partial struct pkgNamed3 /*[3]byte*/;
 
 internal partial struct main_named3 /*[3]byte*/;
 
-internal static void Main() {
+internal static void main() {
     var t0 = reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(0L));
     var t3 = reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(3L));
     fmt.Println("distinct types:", !AreEqual(t0, t3));

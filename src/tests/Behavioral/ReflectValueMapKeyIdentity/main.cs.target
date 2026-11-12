@@ -14,7 +14,7 @@ partial struct pair {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object fooˢ = (@string)"foo"u8;
 
-internal static void Main() {
+internal static void main() {
     var m = new map<@string, any>{["vstring"] = fooˢ, ["Vint"] = (nint)42, ["vbool"] = true};
     var dataVal = reflect.ValueOf(m);
     var keys = new map<reflectꓸValue, EmptyStruct>();

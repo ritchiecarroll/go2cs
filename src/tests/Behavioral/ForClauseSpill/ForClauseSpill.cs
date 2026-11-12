@@ -15,7 +15,7 @@ internal static bool keep(nint v, bool ok) { return ok; }
 
 internal static nint must(nint v, bool ok) { return v; }
 
-internal static void Main() {
+internal static void main() {
     var funcsᴷ = new stackAppend<Func<nint>>(moves: true);
 
     n = 0;

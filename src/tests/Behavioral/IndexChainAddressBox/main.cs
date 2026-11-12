@@ -91,7 +91,7 @@ internal static nint sliceFieldAddress() {
     return h.sl[1];
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("closureLocal:", closureLocal());
     fmt.Println("fieldArrayMethod:", fieldArrayMethod());
     fmt.Println("nestedFieldArrayMethod:", nestedFieldArrayMethod());

@@ -11,7 +11,7 @@ partial class main_package {
     (uint64)(4294967296L - 1), 18446744069414584320UL, 0x5555555555555555UL, 0xAAAAAAAAAAAAAAAAUL
 ]; }
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, x) in range(edges)) {
         foreach (var (_, y) in range(edges)) {
             var (s0, c0) = bits.Add64(x, y, 0);

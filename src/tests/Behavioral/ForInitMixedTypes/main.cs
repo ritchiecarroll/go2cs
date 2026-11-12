@@ -9,7 +9,7 @@ partial struct node {
     internal ж<node> next;
 }
 
-internal static void Main() {
+internal static void main() {
     var third = Ꮡ(new node(val: 3));
     var second = Ꮡ(new node(val: 2, next: third));
     var first = Ꮡ(new node(val: 1, next: second));

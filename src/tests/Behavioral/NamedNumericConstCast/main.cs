@@ -11,7 +11,7 @@ internal static Class allClass => /* ^Class(0) */ unchecked((Class)1844674407370
 internal static Big allBig => /* ^Big(0) */ unchecked((Big)18446744073709551615);
 internal static Class small => /* Class(5) */ 5;
 
-internal static void Main() {
+internal static void main() {
     fmt.Println((uint64)allClass);
     fmt.Println((uint64)allBig);
     fmt.Println((nuint)small);

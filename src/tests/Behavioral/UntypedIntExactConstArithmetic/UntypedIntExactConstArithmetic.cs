@@ -31,7 +31,7 @@ internal static nint trimmed() {
     return len(assert);
 }
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, q) in range(quotients.ΔRangeSnapshot())) {
         fmt.Println(q);
     }

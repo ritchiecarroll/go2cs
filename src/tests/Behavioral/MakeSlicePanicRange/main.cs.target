@@ -29,7 +29,7 @@ internal static partial any /*r*/ tryMake(nint length, nint capacity) {
     return r;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(tryMake(4, -1));
     fmt.Println(tryMake(0, -1));
     fmt.Println(tryMake(-1, -1));

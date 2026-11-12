@@ -14,7 +14,7 @@ internal static nint countAtInit;
     countAtInit = registry.Count();
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("count at init:", countAtInit);
 
     foreach (var (_, name) in range(slice<@string>(["jpeglike", "pnglike", "giflike"]))) {

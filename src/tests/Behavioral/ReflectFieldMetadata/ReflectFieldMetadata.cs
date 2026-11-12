@@ -64,7 +64,7 @@ internal partial struct main_i /*dyn*/ {
     internal nint u;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("CanSet via embedded  :", reflect.ValueOf(new embeds(new sElem(new sElemᴛ1[]{new()}.slice()))).Field(0).Index(0).Field(0).CanSet());
     fmt.Println("CanSet via unexported:", reflect.ValueOf(new holds(new sElem(new sElemᴛ1[]{new()}.slice()))).Field(0).Index(0).Field(0).CanSet());
     fmt.Println("CanSet via Slice     :", reflect.ValueOf(new embeds(new sElem(new sElemᴛ1[]{new()}.slice()))).Field(0).Slice(0, 1).Index(0).Field(0).CanSet());

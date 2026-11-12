@@ -13,7 +13,7 @@ internal static slice<@string> wellKnown = [
     "S-1-0-0"
 ];
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, s) in range(wellKnown)) {
         var (sid, err) = syscall.StringToSid(s);
         if (err != nil) {

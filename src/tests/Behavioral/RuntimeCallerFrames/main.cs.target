@@ -58,7 +58,7 @@ internal static partial nint depthPlus2() {
     return depthPlus1();
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     var (x, y) = sameSite();
     fmt.Println("same-line agreement:", x == y);
 

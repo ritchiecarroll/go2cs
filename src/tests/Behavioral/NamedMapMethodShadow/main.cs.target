@@ -63,7 +63,7 @@ internal partial struct main_named /*dyn*/ {
     internal map<@string, Env> m;
 }
 
-internal static void Main() {
+internal static void main() {
     var e = new Env(new map<@string, @string>{});
     e.Set("Key", "v");
     var (_, lower) = e["key", ꟷ];

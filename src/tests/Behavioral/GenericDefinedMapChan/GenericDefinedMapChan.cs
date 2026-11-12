@@ -136,7 +136,7 @@ internal static slice<@string> sortedStrings(slice<@string> values) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string twoˢ = "two"u8;
 
-internal static void Main() {
+internal static void main() {
     var ints = NewSet<nint>(3, 1, 2, 3);
     fmt.Println("Set[int]:", len(ints), ints.Has(2), ints.Has(9), ints.Add(4), ints.Add(4), sortedInts(ints.Keys()));
     ints.Reset();

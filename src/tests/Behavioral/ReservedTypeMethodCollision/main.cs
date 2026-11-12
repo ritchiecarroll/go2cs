@@ -18,7 +18,7 @@ internal static Δsliceᴛ Δslice(this ref builder b, nint n) {
     return new Δsliceᴛ(lo: b.@base, hi: b.@base + n);
 }
 
-internal static void Main() {
+internal static void main() {
     var b = Ꮡ(new builder(@base: 10));
     var s = b.Δslice(5);
     fmt.Println(s.lo, s.hi);

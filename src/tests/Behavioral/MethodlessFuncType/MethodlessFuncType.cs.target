@@ -31,7 +31,7 @@ internal static (nint, Action<error>, error) grab(@string tag, ж<slice<@string>
     return (len(tag), makeReleaser(tag, log), default);
 }
 
-internal static void Main() {
+internal static void main() {
     ref var log = ref heap<slice<@string>>(out var Ꮡlog);
 
     var (n, rel, err) = grab("a", Ꮡlog);

@@ -37,7 +37,7 @@ internal static @string kind(reply code) {
     return "many";
 }
 
-internal static void Main() {
+internal static void main() {
     for (nint i = 0; i <= 4; i++) {
         fmt.Println(describe((reply)i), kind((reply)i));
     }

@@ -79,7 +79,7 @@ internal static bool tryWhileHeld(this ж<counter> Ꮡc) {
     return got;
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     UntypedInt workers = 8;
     UntypedInt each = 2000;
 

@@ -144,7 +144,7 @@ internal static partial @string waitShape(nint s) {
     return "ok";
 }
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, n) in range(slice<nint>([0, 1, 2, 3]))) {
         fmt.Println(classify(n));
     }

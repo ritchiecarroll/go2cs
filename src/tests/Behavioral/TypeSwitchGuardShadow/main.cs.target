@@ -28,7 +28,7 @@ internal static @string describe(any c) {
     return fmt.Sprintf("other:%v"u8, c);
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(describe(new A(1)));
     fmt.Println(describe(new B(2)));
     fmt.Println(describe(new C(3)));

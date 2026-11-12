@@ -64,7 +64,7 @@ internal static void drain(@string name, Iter it) {
     fmt.Println();
 }
 
-internal static void Main() {
+internal static void main() {
     drain("ints", NewIter<nint>(1, 2, 3));
     drain("strings", NewIter((@string)"a", (@string)"b"));
     drain("empty", NewIter<float64>());

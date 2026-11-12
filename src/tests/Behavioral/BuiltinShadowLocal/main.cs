@@ -82,7 +82,7 @@ internal static void shadowedCalls() {
     fmt.Println("shadowed", print(4), println(3), len(Ꮡa), cap(Ꮡa));
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(sumWithLenLocal([10, 20, 30]));
     fmt.Println(sumWithLenLocal(default));
     fmt.Println(capPlusOne(new slice<nint>(2, 5)));

@@ -23,7 +23,7 @@ internal partial struct main_xs /*dyn*/ {
     /*embed*/ public EmptyInterface EmptyInterface;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Stringer s = new name("ok");
     fmt.Println(args(new main_xs()), s.String());
 }

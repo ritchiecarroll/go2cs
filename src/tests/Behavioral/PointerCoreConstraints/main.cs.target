@@ -106,7 +106,7 @@ internal static ж<T> cloneEmbedded<T>(ж<T> Ꮡp)
     return Ꮡc;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var t1 = ref heap<thing>(new thing(n: 1, s: "one"), out var Ꮡt1);
     var p1 = clone<thing>(Ꮡt1);
     t1.n = 42;

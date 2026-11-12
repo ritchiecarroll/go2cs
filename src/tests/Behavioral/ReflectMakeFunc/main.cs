@@ -17,7 +17,7 @@ partial struct traceHooks {
     public Func<nint, nint, (nint, @string)> Sum;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var intSwap = ref heap<Func<nint, nint, (nint, nint)>>(out var ᏑintSwap);
     makeSwap(ᏑintSwap);
     var (a, b) = intSwap(3, 7);

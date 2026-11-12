@@ -7,7 +7,7 @@ partial class main_package {
 
 partial struct namedAny /*map[any, nint]*/;
 
-internal static void Main() {
+internal static void main() {
     var anyKeys = new map<any, nint>{[default] = 1, [(@string)"b"] = 2, [(nint)7] = 3};
     nint iface = 0;
     nint nils = 0;

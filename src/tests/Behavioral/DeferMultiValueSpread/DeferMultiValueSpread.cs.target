@@ -173,7 +173,7 @@ internal static (nint, @string) pair() {
     return (counter, "captured");
 }
 
-internal static void Main() {
+internal static void main() {
     deferSpread();
     deferThree();
     deferCapture();

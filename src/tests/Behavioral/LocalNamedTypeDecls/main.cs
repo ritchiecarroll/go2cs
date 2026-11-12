@@ -26,7 +26,7 @@ internal partial struct main_recursiveSlice /*[]main_recursiveSlice*/;
 
 internal partial struct main_recursiveMap /*map[@string, main_recursiveMap]*/;
 
-internal static void Main() {
+internal static void main() {
     var pts = new main_Points(new main_Point[]{new(1, 2), new(3, 4), new(5, 6)}.slice());
 
     foreach (var (_, p) in range<main_Point>(pts)) {

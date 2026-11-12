@@ -9,6 +9,6 @@ partial class main_package {
 
 [MethodImpl(MethodImplOptions.NoInlining)] [GoInit] internal static void initΔ2() { fmt.Println("main.go init 2"); }
 
-internal static void Main() { fmt.Println("main"); }
+internal static void main() { fmt.Println("main"); }
 
 } // end main_package

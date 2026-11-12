@@ -132,7 +132,7 @@ internal static partial void step(@string name, Func<@string> body) {
     }}
 }
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         var (client, server) = pair();

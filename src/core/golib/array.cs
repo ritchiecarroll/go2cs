@@ -872,7 +872,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         // previous `m_array.GetHashCode()` hashed the backing REFERENCE, so every structural-
         // equal key missed.
         IStructuralEquatable equatable = WindowArray;
-        return equatable.GetHashCode(EqualityComparer<T>.Default);
+        return equatable.GetHashCode(PointerNilIdentity<T>.ElementComparer);
     }
 
     public override bool Equals(object? obj)
@@ -905,13 +905,13 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     public bool Equals(IArray<T>? other)
     {
         IStructuralEquatable equatable = WindowArray;
-        return equatable.Equals(otherWindow(other), EqualityComparer<T>.Default);
+        return equatable.Equals(otherWindow(other), PointerNilIdentity<T>.ElementComparer);
     }
 
     public bool Equals(array<T> other)
     {
         IStructuralEquatable equatable = WindowArray;
-        return equatable.Equals(other.WindowArray, EqualityComparer<T>.Default);
+        return equatable.Equals(other.WindowArray, PointerNilIdentity<T>.ElementComparer);
     }
 
     // The comparand's own elements: Source is the RAW backing, which for an Alias window is wider

@@ -8,7 +8,7 @@ partial struct triple /*[3]rune*/;
 
 partial struct nums /*[]nint*/;
 
-internal static void Main() {
+internal static void main() {
     var t = new triple(new rune[]{7, 32, 9}.array());
     fmt.Println(t[0], t[1], t[2]);
 

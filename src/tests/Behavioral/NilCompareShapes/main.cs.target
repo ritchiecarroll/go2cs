@@ -56,7 +56,7 @@ internal static @string describe(any v) {
 
 }
 
-internal static void Main() {
+internal static void main() {
     var err = typedNilErr();
     fmt.Println("typed nil pointer in error != nil:", err != nil);
     fmt.Println("nil == typed nil pointer in error:", nil == err);

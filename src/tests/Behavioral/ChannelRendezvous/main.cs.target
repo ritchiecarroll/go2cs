@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static partial void Main() {
+internal static partial void main() {
     var ch = new channel<nint>(0);
     fmt.Println("cap:", cap(ch), "len:", len(ch));
 

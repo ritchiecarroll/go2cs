@@ -377,14 +377,21 @@ internal static void walkList<N>(Visitor v, slice<N> list)
 walkList(v, widen<ж<Ident>, Node>(n.Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
 ```
 
-golib's `widen<T, TWide>(slice<T>, Func<T, TWide>)` copies the slice HEADER only — elements alias
-the original objects through the shared boxes, so method calls through the projected slice mutate
-the real objects. A callee that reassigned `list[i]` itself would not write back; the projection
-targets the read/widen shape (Go itself performs the same per-element interface widening inside
-the loop). `convertToInterfaceType` supplies the adapter reference and the `GoImplement` recording,
-exactly as at scalar `*T→iface` call sites. (Guarded by `GenericInterfaceConstraint` — pointer,
-interface, and embedded-interface instantiations of a method-set-constrained generic, calling a
-constraint method on the parameter and widening walkList-style, values vs Go.)
+golib's `widen<T, TWide>(slice<T>, Func<T, TWide>)` copies the slice element by element into a new
+backing array. Each element is an adapter over the original box, so method calls through the
+projected slice act on the real objects. The new slice does not share the caller's backing array, so
+the callee's writes to the slice itself — an element assignment, an `append` into its capacity, a sort
+— would land on the copy. go2cs therefore converts the call only when the callee is proven to read the
+slice and nothing more: ranging over it, `len`, `cap`, a `nil` comparison, reading an element, using it
+as `copy`'s source or `append`'s spread source, or handing it to a declared function that is itself
+proven to read it. Any other use refuses the package before a file is written, with
+[`GO2CS2006`](../DiagnosticCodes.md) naming the call and the callee's first unproven use
+(`sliceWideningWriteRefusals.go`). `convertToInterfaceType` supplies the adapter reference and the
+`GoImplement` recording, exactly as at scalar `*T→iface` call sites. (Guarded by
+`GenericInterfaceConstraint` — pointer, interface, and embedded-interface instantiations of a
+method-set-constrained generic, calling a constraint method on the parameter and widening
+walkList-style, values vs Go — and by `TestSliceWideningVerdictPerShape`, one call per proven read and
+per refused write.)
 
 An **anonymous inline** constraint carrying methods — `func Show[T interface{ Name() string }]`,
 `type Box[T interface{ Name() string }] struct` — is lifted to a named interface, exactly as an
@@ -639,7 +646,7 @@ forwarder throw the same refusal. The interface's own package still compiles: wi
 refusal is fatal to a conversion, so the converted standard library, which converts, reaches no refused
 shape, and no behavioral fixture does either.
 <!-- census of 2026-10-19 (Go 1.24 corpus): 6 self-referential interfaces in std, 12 in the behavioral tree, 0 sharing
-shapes. src/go2cs/conversionDriver.go:356 `log.Fatalf("Refusing to convert: %s\n", refusal)`. -->
+shapes. src/go2cs/conversionDriver.go:362 `return refusePackage(options, diagnosticProxyRefused, refusal)`, fatal outside -recurse: src/go2cs/recurseRefusal.go:41 `log.Fatalf("Refusing to convert: %s\n", err)`. -->
 
 Two exact designs remain open, and nothing in the corpus needs them: a per-element copy of the generic function
 in which `N` is the box itself (monomorphization), or static-abstract witness types in place of the proxy.

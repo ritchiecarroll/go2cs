@@ -12,7 +12,7 @@ internal static @string describe(this ref alias a) {
     return fmt.Sprintf("%s/%d"u8, a.Name, a.In.Len());
 }
 
-internal static void Main() {
+internal static void main() {
     var a = (alias)ptlike.New("first", 1, 2, 3);
 
     fmt.Println(a.Name, a.In.Len());

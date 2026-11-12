@@ -57,7 +57,7 @@ internal static bool less<T>(T x, T y)
 
 internal static bool eq<T>(T a, T b) { return AreEqual(a, b); }
 
-internal static void Main() {
+internal static void main() {
     var nan = Δmath.NaN();
 
     var ints = new Float64Slice(new float64[]{74D, 59D, 238D, -784D, 9845D, 959D, 905D, 0D, 42D}.slice());

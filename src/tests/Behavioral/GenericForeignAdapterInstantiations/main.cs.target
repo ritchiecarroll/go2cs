@@ -10,7 +10,7 @@ internal static void show(@string label, fieldlib.Field f) {
     fmt.Println(label, f.IsPresent(), f.Describe());
 }
 
-internal static void Main() {
+internal static void main() {
     ref var name = ref heap<fieldlib.Expected<@string>>(new fieldlib.Expected<@string>(Value: "pkg", Valid: true), out var Ꮡname);
     ref var deps = ref heap<fieldlib.Expected<map<@string, @string>>>(new fieldlib.Expected<map<@string, @string>>(Value: new map<@string, @string>{["a"] = "1"}, Valid: false), out var Ꮡdeps);
     ref var size = ref heap<fieldlib.Expected<nint>>(new fieldlib.Expected<nint>(Value: 42, Valid: true), out var Ꮡsize);

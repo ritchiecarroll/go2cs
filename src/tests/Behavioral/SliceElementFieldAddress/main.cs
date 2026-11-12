@@ -26,7 +26,7 @@ internal static partial void setU32(ref uint32 p, uint32 v) { p = v; }
 
 internal static partial void setInt(ref nint p, nint v) { p = v; }
 
-internal static void Main() {
+internal static void main() {
     var cells = new slice<cell>(3);
     var p = Ꮡ(cells, 1).Ꮡn;
     p.Value = 7;

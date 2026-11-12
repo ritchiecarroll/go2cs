@@ -61,7 +61,7 @@ internal static nint sumPoints(params ꓸꓸꓸsumPoints_points pointsʗp) {
     return total;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(greatestEnd(1, new span(4), new span(2)), greatestEnd(7));
 
     var nodes = slice<greatestEnd_nodes>([new span(5), new span(9), new span(3)]);
