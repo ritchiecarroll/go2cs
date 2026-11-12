@@ -32,10 +32,38 @@ namespace go.golib;
 [EditorBrowsable(EditorBrowsableState.Never)] public static class GoCgoLibraries
 {
     /// <summary>Registers the resolver for <paramref name="assembly"/>'s own <c>[LibraryImport]</c> bindings.</summary>
-    public static void Register(Assembly assembly, params GoCgoLibrary[] libraries)
+    public static void Register(Assembly assembly, params GoCgoLibrary[] libraries) => Register(assembly, "", libraries);
+
+    /// <summary>
+    /// Registers the resolver for <paramref name="assembly"/>'s own <c>[LibraryImport]</c> bindings, which were converted
+    /// for <paramref name="target"/> (<c>GOOS/GOARCH</c>, the target the bindings file's header records).
+    /// </summary>
+    public static void Register(Assembly assembly, string target, params GoCgoLibrary[] libraries)
     {
         List<GoCgoLibrary> owned = [.. libraries];
-        NativeLibrary.SetDllImportResolver(assembly, (name, importing, _) => Resolve(name, importing, owned));
+        NativeLibrary.SetDllImportResolver(assembly, (name, importing, _) => Resolve(name, importing, owned, target));
+    }
+
+    /// <summary>The running process's target, as Go names it: <c>GOOS/GOARCH</c>.</summary>
+    internal static string RunningTarget => $"{GoHostOfRecord.HostGOOS()}/{GoHostOfRecord.GoArchOf(RuntimeInformation.ProcessArchitecture)}";
+
+    /// <summary>
+    /// Why bindings converted for <paramref name="target"/> cannot run on <paramref name="hostGOOS"/> with
+    /// <paramref name="processArchitecture"/>, or <see langword="null"/> when they can (§5.3, as amended by §11.20). The
+    /// architecture is the PROCESS's, not the machine's: an x64 process under Rosetta or on Windows on Arm runs amd64
+    /// code, with amd64's C layouts. Bindings registered with no target (the original overload) are not checked.
+    /// </summary>
+    internal static string? TargetMismatch(string target, string hostGOOS, Architecture processArchitecture)
+    {
+        if (target.Length == 0)
+            return null;
+
+        string running = $"{hostGOOS}/{GoHostOfRecord.GoArchOf(processArchitecture)}";
+
+        if (string.Equals(target, running, StringComparison.Ordinal))
+            return null;
+
+        return $"cgo: these C bindings were converted for {target}, and this process runs as {running}: their C structs cross with {target}'s layouts and C library, which {running} does not share, so they are refused rather than called (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §5.3, §11.20)";
     }
 
     // Where a library the table owns may load from: where a Go binary's own loader would look for it, and never the
@@ -54,8 +82,15 @@ namespace go.golib;
     /// On darwin a name that is not absolute is refused before dyld sees it (§11.12, mandatory since increment 4d): dyld's
     /// search for a bare name reached the current directory on both hosted RIDs.
     /// </summary>
-    internal static nint Resolve(string name, Assembly assembly, IReadOnlyList<GoCgoLibrary> libraries)
+    internal static nint Resolve(string name, Assembly assembly, IReadOnlyList<GoCgoLibrary> libraries) => Resolve(name, assembly, libraries, "");
+
+    internal static nint Resolve(string name, Assembly assembly, IReadOnlyList<GoCgoLibrary> libraries, string target)
     {
+        // The target is held for EVERY import the assembly makes, a name the table does not own among them: a hand-owned
+        // import beside bindings converted for another target crosses with that target's layouts too.
+        if (TargetMismatch(target, GoHostOfRecord.HostGOOS(), RuntimeInformation.ProcessArchitecture) is { } mismatch)
+            throw new PlatformNotSupportedException(mismatch);
+
         foreach (GoCgoLibrary library in libraries)
         {
             if (library.Name != name)

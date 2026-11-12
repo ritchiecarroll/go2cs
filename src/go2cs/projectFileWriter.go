@@ -562,6 +562,12 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 		if packageCarriesArchLayout(outputFilePath) {
 			newContents = []byte(applyPlatformArchLayoutBlocks(string(newContents), projectFileName))
 		}
+
+		// A cgo package's bindings are for the one target it was converted for (cgoRoute.go), so that is the build's
+		// default, where the corpus's is windows/amd64.
+		if cgoRouteActive {
+			newContents = []byte(cgoTargetDefaults(string(newContents), options.targetPlatform))
+		}
 	}
 
 	// Layout L3's second half (platformProject.go): a package whose DIRECT IMPORT SET differs by

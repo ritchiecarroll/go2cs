@@ -64,6 +64,11 @@ func collectCgoPseudoPackageNames(pkg *types.Package) {
 
 		cgoPseudoPackageNames[declaration.object.Name()] = member
 	}
+
+	// On the cgo route the C functions the package calls are members too: _Cfunc_f is C.f, and _C2func_f is C.fꓸerrno.
+	for goName, member := range cgoRouteFunctions {
+		cgoPseudoPackageNames[goName] = member
+	}
 }
 
 // cgoPseudoPackageKind reports whether a declaration kind is emitted into the pseudo-package by this increment: the C

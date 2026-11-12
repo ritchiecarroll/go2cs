@@ -101,3 +101,11 @@ converts it as before when the callee only reads the slice. No standard-library 
 accept `GO2CS2006`, since a downgraded site would run on silently wrong. See [diagnostic codes](DiagnosticCodes.md).
 <!-- branch claude/c2-widening-write-refusal: src/go2cs/sliceWideningWriteRefusals.go; docs/DiagnosticCodes.md;
      the design record on claude/c2-widening-write-design (std census: 8 sites per target, 0 refused). -->
+
+### golib: `GoCgoLibraries.Register` gains a target (H)
+
+**A source-level note for anyone who calls `GoCgoLibraries.Register` by hand.** The method gains an overload that takes
+the target its bindings were converted for, `Register(assembly, "linux/amd64", ...)`, and the original
+`Register(assembly, ...)` stays, so compiled code is unaffected. One call no longer compiles: `Register(assembly, null)`
+is ambiguous between the two overloads (CS0121). Converted code never writes it; the converter emits every call.
+<!-- docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.20 (increment 5b; the review's N3). -->

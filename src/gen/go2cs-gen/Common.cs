@@ -496,6 +496,19 @@ public static class Common
     public const string DescriptorCarrierSuffix = "ᴅ";
 
     /// <summary>
+    /// The converter-reserved suffix of a cgo mirror, the C-layout struct a cgo package's bindings
+    /// cross a C struct with (the converter's cgoMirrors.go, cgoMirrorSuffix). A mirror is written
+    /// whole, with C's explicit layout, and is never a Go type.
+    /// </summary>
+    public const string CgoMirrorSuffix = "ᴍ";
+
+    /// <summary>
+    /// The converter-reserved prefix of a cgo mirror's inline-array helper (the converter's cgoMirrors.go,
+    /// cgoMirrorArrayPrefix), which is no Go type either.
+    /// </summary>
+    public const string CgoMirrorArrayPrefix = "ᴍarray";
+
+    /// <summary>
     /// Simple name of the assembly-level attribute a hand-owned package carries to opt out of the
     /// converted-Go-type rule (see <see cref="IsConvertedGoTypeDeclaration"/>).
     /// </summary>
@@ -515,8 +528,9 @@ public static class Common
     /// conversion (<c>[module: GoManualConversion]</c>), not a metadata file (package_info.cs,
     /// package_test_info.cs, go2cs_test_host.cs, whose type parts only pin accessibility) and not
     /// generated output; and (5) not a descriptor carrier, which the converter deliberately leaves
-    /// unmarked so no generator emits anything for it. Rule (4), the hand-owned PROJECT, is
-    /// assembly-wide and is read by <see cref="IsHandOwnedAssembly"/>. A hand-written file keeps the
+    /// unmarked so no generator emits anything for it, nor a cgo mirror or its inline-array helper, which
+    /// the converter writes whole beside the C types of a cgo package's pseudo-package. Rule (4), the
+    /// hand-owned PROJECT, is assembly-wide and is read by <see cref="IsHandOwnedAssembly"/>. A hand-written file keeps the
     /// attribute as its opt-in (<see cref="HasGoTypeAttribute"/>). A defined type's underlying-type
     /// definition, once the attribute's argument, is the trailing comment after the type's name
     /// (<see cref="GetDefinitionComment"/>), so (1) also admits a CLASS that carries one: a
@@ -533,8 +547,12 @@ public static class Common
         if (typeDeclaration.Parent is not ClassDeclarationSyntax packageClass || !packageClass.Identifier.Text.EndsWith(PackageSuffix, StringComparison.Ordinal))
             return false;
 
-        if (typeDeclaration.Identifier.Text.EndsWith(DescriptorCarrierSuffix, StringComparison.Ordinal))
+        if (typeDeclaration.Identifier.Text.EndsWith(DescriptorCarrierSuffix, StringComparison.Ordinal) ||
+            typeDeclaration.Identifier.Text.EndsWith(CgoMirrorSuffix, StringComparison.Ordinal) ||
+            typeDeclaration.Identifier.Text.StartsWith(CgoMirrorArrayPrefix, StringComparison.Ordinal))
+        {
             return false;
+        }
 
         return IsConvertedSourceFile(typeDeclaration.SyntaxTree);
     }

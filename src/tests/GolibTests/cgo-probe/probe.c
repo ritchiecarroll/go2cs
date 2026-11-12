@@ -85,3 +85,44 @@ GO2CS_PROBE_EXPORT long go2cs_probe_strtol(const char *s, int base)
 {
     return strtol(s, 0, base);
 }
+
+// The Phase 2 fixture's four probes (src/go2cs/testdata/cgo/phase2/fixture.go declares them, increment 5b): a struct
+// holding a pointer, which cmd/cgo's pointer-check closure guards, by pointer and inside a struct by value, and a by-value
+// pair beside an argument evaluated after it.
+struct go2cs_probe_node
+{
+    int value;
+    struct go2cs_probe_node *next;
+};
+
+struct go2cs_probe_link
+{
+    int value;
+    struct go2cs_probe_node *node;
+};
+
+// The values along a list, plus base.
+GO2CS_PROBE_EXPORT long go2cs_probe_node_sum(struct go2cs_probe_node *node, long base)
+{
+    for (; node; node = node->next)
+        base += node->value;
+
+    return base;
+}
+
+GO2CS_PROBE_EXPORT void go2cs_probe_node_touch(struct go2cs_probe_node *node)
+{
+    if (node)
+        node->value++;
+}
+
+GO2CS_PROBE_EXPORT int go2cs_probe_link_value(struct go2cs_probe_link link)
+{
+    return link.value + (link.node ? link.node->value : 0);
+}
+
+// Ordered, so the pair read is the one passed: (1, 2) scaled by 2 is 2002.
+GO2CS_PROBE_EXPORT int go2cs_probe_pair_scaled(struct go2cs_probe_pair pair, int k)
+{
+    return (pair.a * 1000 + pair.b) * k;
+}

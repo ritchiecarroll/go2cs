@@ -49,13 +49,14 @@ func TestCgoLibraryTableHasOneRowPerLibrary(t *testing.T) {
 	}
 }
 
-// The registration is a module initializer handing golib's resolver the package's own assembly and table.
+// The registration is a module initializer handing golib's resolver the package's own assembly, its bindings' one target
+// (§5.3, §11.20) and its table.
 func TestCgoLibrariesRegistrationIsAModuleInitializer(t *testing.T) {
-	text := cgoLibrariesRegistration("cgotest", []cgoLibraryEntry{{"-lm", "libm.so.6"}})
+	text := cgoLibrariesRegistration("cgotest", "linux/amd64", []cgoLibraryEntry{{"-lm", "libm.so.6"}})
 
 	for _, want := range []string{
 		"[global::System.Runtime.CompilerServices.ModuleInitializer]",
-		"internal static void registerᴍlibraries() => global::go.golib.GoCgoLibraries.Register(typeof(cgotestꓸC_package).Assembly,",
+		"internal static void registerᴍlibraries() => global::go.golib.GoCgoLibraries.Register(typeof(cgotestꓸC_package).Assembly, \"linux/amd64\",",
 		`new global::go.golib.GoCgoLibrary("-lm", "libm.so.6"));`,
 	} {
 		if !strings.Contains(text, want) {
