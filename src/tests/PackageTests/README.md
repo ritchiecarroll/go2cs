@@ -83,6 +83,32 @@ Run with `-TargetsFile src/core/golib/buildTransitive/go.lib.targets` and a `-Ve
 older), each now fails with `GO2CS3002` naming every go.* package of that release: pass a `-Version` at or above the
 floor.
 
+# `InternalPackageWarning`: GO2CS0014 on a Go internal package
+
+`InternalPackageWarning` is the consumer fixture for go.lib's consumer analyzer
+(`src/gen/go2cs-consumer-analyzers`), which `buildTransitive/go.lib.targets` adds as an Analyzer item. A Go
+`internal` or `vendor` package carries `[assembly: GoInternalRoot]`, and C# that names one of its types from outside
+the package's root gets warning `GO2CS0014` (`docs/phase4/DESIGN-internal-package-marking.md`). The fixture references
+go.unicode.utf8 (public) and go.internal.goversion (internal, root the standard library); `Internal.cs` names
+goversion's package class twice. `test-internal-package-warning.ps1` restores it from ONE feed into a fresh package
+cache, counts `GO2CS0014` in the compiler's SARIF log, and runs five arms:
+
+- (A) WARN: exactly one `GO2CS0014`, a warning, at the first name in `Internal.cs`; the build and run succeed;
+- (B) PUBLIC: without `Internal.cs` (`-p:NameInternal=false`) none;
+- (C) ERROR: with `-p:WarningsAsErrors=GO2CS0014` the build fails with `GO2CS0014`;
+- (D) WITH GEN: with go.gen also referenced (`-p:GoWithGen=true`) still exactly one, since go2cs-gen's copy acts only
+  in a project that declares a Go package;
+- (E) OPT-OUT: with `-p:GoInternalPackageWarning=false` none.
+
+```text
+pwsh src/tests/PackageTests/InternalPackageWarning/test-internal-package-warning.ps1 -Version <go.* version> [-GenVersion <go.gen version>] [-Source <feed>]
+```
+
+The gate was read on 2026-11-12 against a local feed packed from the branch at version 1.26.10.4 (the break floor;
+go.lib, go.gen, go.unicode.utf8 and go.internal.goversion): all five arms pass. Red first, two neuters, each restored
+byte-identical: go.internal.goversion packed from its unmarked `package_info.cs`, and go.lib packed without the
+Analyzer item. Each reads (A), (C) and (D) FAIL with no diagnostic, while (B) and (E) pass.
+
 # `PackageUsings`: each package's own usings gate
 
 `PackageUsings` is the consumer fixture for the `build/<PackageId>.props` each converted package carries,

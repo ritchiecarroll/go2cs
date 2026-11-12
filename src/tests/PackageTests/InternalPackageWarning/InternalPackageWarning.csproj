@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Consumer fixture for GO2CS0014, go.lib's consumer analyzer (src/gen/go2cs-consumer-analyzers, added as an Analyzer
+       item by src/core/golib/buildTransitive/go.lib.targets). Driven by test-internal-package-warning.ps1, which restores
+       it from a chosen feed into a fresh package cache; it is not a solution member and is never built by the corpus.
+       Program.cs names a public package (unicode/utf8); Internal.cs names a Go internal package (internal/goversion),
+       whose assembly carries [assembly: GoInternalRoot("", Standard = true)]. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <GoGenVersion Condition="'$(GoGenVersion)' == ''">$(GoPackageVersion)</GoGenVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="go.lib" Version="$(GoPackageVersion)" />
+    <PackageReference Include="go.unicode.utf8" Version="$(GoPackageVersion)" />
+    <PackageReference Include="go.internal.goversion" Version="$(GoPackageVersion)" />
+    <!-- Arm (D): go2cs-gen beside go.lib's analyzer. Its copy acts only in a project that declares a Go package, so
+         this plain project still gets exactly one GO2CS0014. -->
+    <PackageReference Include="go.gen" Version="$(GoGenVersion)" PrivateAssets="all" Condition="'$(GoWithGen)' == 'true'" />
+  </ItemGroup>
+
+  <!-- Arm (B): without Internal.cs the fixture names only the public package. -->
+  <ItemGroup Condition="'$(NameInternal)' == 'false'">
+    <Compile Remove="Internal.cs" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(NameInternal)' == 'false'">
+    <DefineConstants>$(DefineConstants);PUBLIC_ONLY</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Pre-pack only: point GoLibTargets at the working-tree targets file. A packed go.lib brings the same file, and the
+       analyzer beside it, through buildTransitive. -->
+  <Import Project="$(GoLibTargets)" Condition="'$(GoLibTargets)' != ''" />
+</Project>
