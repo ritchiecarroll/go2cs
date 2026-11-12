@@ -36475,6 +36475,39 @@ readers (ELF, Mach-O, COFF).
 
 — H (2026-11-12)
 
+## 2026-11-12 — H (cgo Phase 2 increment 5b, COORD's focused re-check at the seated tip): two residuals and three notes, each a fix in Phase 3's first increment — OPEN
+
+COORD re-checked 5b's three MUST-FIX items at `db5e34a189`, read them CLOSED and seated 5b in batch 288. The
+re-check left the items below. H read each cited site at the seated tip and each is as described. None is fixed in
+5b: a seated ref takes no commits. Each is a fix, red first, in Phase 3's first increment.
+
+**1. M1's residual: a plain `//go:build cgo` file in a package with no `import "C"` (OPEN).** The driver's
+build-constraint re-check adds the `cgo` tag only when the package has a cgo route (`processConversion`, the
+`if route != nil` beside the re-check). Under `-cgo`, a package with no `import "C"` still loads cgo-on, has no
+route, and its plain file under `//go:build cgo` is dropped with exit 0. The key should be the cgo-on load itself
+(`options.parseCgoTargets`). The same hole exists without `-cgo` when `CGO_ENABLED=1` is in the environment, which
+predates 5b. Both close together. NOT MEASURED by H: the drop is read from the code, and the red is owed.
+
+**2. M3's granularity: imports are per package, renames are per C file (OPEN, a known limit).**
+`cgoImportedByCmdCgo` reads one set of dynamic imports for the whole package binary. A header rename applies per
+translation unit. If one file's `fstat` reaches `fstat$INODE64` and another file declares a plain `fstat` itself,
+the binary imports both names, and the first file's call binds the plain name. Contrived, and recorded as a limit
+of the verified-names rule. The post-.4 preamble-compiled probe (the row above) reads each reference's own symbol
+and closes it.
+
+**3. The over-refusal is wider than `abs` and `labs`.** The re-check reports that glibc at `-O2` inlines `atoi`,
+`atol`, `toupper`, `tolower` and `fabs`, and renames `strtol` to an `__isoc23_` symbol, so each is refused by the
+same rule. H's legs measured only the fixture's `abs` and `labs`. `docs/Limitations.md` now names the class and
+no longer reads as two functions. A linux reading of these six is owed with the first increment.
+
+**4. The offline test seam's `-tags=cgo` may drop a user's `-tags`.** The seam appends its own `-tags=cgo` build
+flag, and go keeps the last `-tags` it is given. This is the test seam only (`cgoOfflineTrees`); a real `-cgo`
+load does not append it. NOT MEASURED: whether a user tag is dropped there is read from go's flag rule.
+
+**5. A link line that does not link reports the wrong error.** In `cgoCapture`, when the probe that references
+nothing fails to link, the code returns the first probe's error, which lists every symbol, and discards the
+baseline's own error. The baseline's error is the clean one (the linker's words about the link line), and is the
+one to return.
 ## 2026-11-12 — H (cgo Phase 2's exit gate, G1): the first time the route's output was compiled and run. One converter defect fixed, two findings OPEN, one toolchain fact
 
 G1's first hosted legs (`claude/h-cgo-g1` at `ea12a61e62`, stage `cgo-e2e`, runs 43207283066, 43207288962 and
