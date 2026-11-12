@@ -223,12 +223,17 @@ func convertCgoOfflineInto(t *testing.T, files map[string]string, output string)
 	return string(combined), output, err
 }
 
-// cgoRefusalLines are the lines of a conversion's output that refuse one C use under -cgo.
+// cgoRefusalLines are the lines of a conversion's output that refuse one C use of fixture.go under -cgo.
 func cgoRefusalLines(output string) []string {
+	return cgoRefusalLinesIn(output, "fixture.go")
+}
+
+// cgoRefusalLinesIn are the lines of a conversion's output that refuse one C use of the named source under -cgo.
+func cgoRefusalLinesIn(output, source string) []string {
 	var lines []string
 
 	for _, line := range strings.Split(strings.ReplaceAll(output, "\r\n", "\n"), "\n") {
-		if strings.Contains(line, "error "+diagnosticCgoRefused+": ") && strings.Contains(line, "fixture.go(") {
+		if strings.Contains(line, "error "+diagnosticCgoRefused+": ") && strings.Contains(line, source+"(") {
 			lines = append(lines, line)
 		}
 	}

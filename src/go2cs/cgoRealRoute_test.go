@@ -231,17 +231,23 @@ func TestTheCgoRouteConvertsTheFixtureOnARealHost(t *testing.T) {
 		// darwin/amd64's <sys/stat.h> renames fstat to fstat$INODE64, a different function with a different struct stat.
 		if target == "darwin/amd64" {
 			requireNothingWritten(t, output, err, stderr)
-			requireCgoUseRefused(t, cgoRefusalLines(stderr), "size.go(10,", "C.fstat", "fstat$INODE64")
+			requireCgoUseRefused(t, cgoRefusalLinesIn(stderr, "size.go"), "size.go(10,", "C.fstat", "fstat$INODE64")
+
+			for _, line := range cgoRefusalLinesIn(stderr, "size.go") {
+				t.Logf("READING %s: %s", target, line[strings.Index(line, "error "):])
+			}
+
 			return
 		}
 
 		if err != nil {
-			for _, line := range cgoRefusalLines(stderr) {
+			for _, line := range cgoRefusalLinesIn(stderr, "size.go") {
 				t.Logf("READING %s: C.fstat refused: %s", target, line[strings.Index(line, "error "):])
 			}
 
-			if len(cgoRefusalLines(stderr)) == 0 {
-				t.Logf("READING %s: the C.fstat package did not convert, with no cgo refusal line (%v)", target, err)
+			if len(cgoRefusalLinesIn(stderr, "size.go")) == 0 {
+				lines := strings.Split(strings.TrimSpace(strings.ReplaceAll(stderr, "\r\n", "\n")), "\n")
+				t.Logf("READING %s: the C.fstat package did not convert, with no cgo refusal line (%v); its last line: %s", target, err, lines[len(lines)-1])
 			}
 
 			return
