@@ -210,3 +210,36 @@ scout, with the source downloaded and censused, before anyone sizes it.
 **Not verified here:** every count above is from source text, not from cmd/cgo's output. For the chosen target, one
 hosted `converter-cgo` leg can replace the reading with cmd/cgo's own declarations, as Phase 1's recognition test
 does for its fixture.
+
+## 7. Amendment 2026-11-12: the rulings on this scout
+
+COORD ruled on the recommendation the day it was posted, and the owner ruled on the one item left to them. Section 6
+stands as written; this block records what was decided. The Phase 3 plan carries these as its inputs.
+
+1. **Phase 3 takes in all three shapes of section 3, each with a red:** the out-parameter that is a pointer to a C
+   pointer (`&db`, `&stmt`, `&res`, `char **errptr`); `defer C.free(unsafe.Pointer(cs))`, so cmd/cgo's deferred check
+   closure is accepted for that case in place of "Phase 2 later"; and `void*` parameters.
+2. **Phase 3's exit gate is amended:** "a real package's own cgo tests pass", beside the byte-identical round trip and
+   the no-copy case under GC pressure as written. A fixture round trip alone no longer closes the phase.
+3. **The proof target is `net`'s cgo resolver on linux**, with its seven `TestCgoLookup*` tests. The harness work
+   (`-cgo` with `-tests`, and a cgo-on conversion of one standard-library package) is its own increment of Phase 3
+   with its own red. The corpus ruling stays cgo-off: this is a separate validation lane, never the default build.
+4. **go-sqlite3 under `libsqlite3` is the flagship after Phase 3, and is not for the .4 release.** It is gated on
+   two things:
+   - the preamble-only Phase 4 slice: the 17 preamble helpers lose `static` and build into one side-built shared
+     library linked `-lsqlite3`;
+   - its nine `//export`s. **OWNER RULING:** Phase 5 proper for the same-thread callback case, where SQLite calls
+     back on the calling thread during a step. The foreign-thread case is left for later. The narrower rule, refusing
+     a callback only where it is passed to C, is not taken.
+5. **`coreos/pkg/dlopen` is not needed** as a separate proof: `net`'s resolver is the better one.
+6. **`modernc.org/sqlite` gets a separate scout later**, if the owner wants it.
+
+**A second consumer of the no-copy view, for the Phase 3 design.** A separate proof project converts
+`modernc.org/sqlite`, and found that a slice of a pointer-to-array cast over native memory copies, so a write through
+it is lost. The converter warns at 20 such sites: libc 12, `modernc.org/sqlite` 7, `modernc.org/memory` 1. The
+sharpest is the allocator's realloc (`memory.go:502`), a `copy` whose destination is such a slice. That memory is
+native, so a real view over the address is possible, and it is the same primitive as Phase 3's no-copy `&b[0]` case
+over pinned Go memory. The Phase 3 plan designs one view for both, or says why the two must differ. Reported by
+COORD; the sites are not read here.
+
+— H (2026-11-12)
