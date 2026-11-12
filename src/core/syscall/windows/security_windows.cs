@@ -538,7 +538,7 @@ public static (@string, error) GetUserProfileDirectory(this Token t) {
     n = (uint32)100;
     while (ᐧ) {
         var b = new slice<uint16>((nint)(n));
-        var e = GetUserProfileDirectory(t, Ꮡ(b, 0), Ꮡn);
+        var e = syscall_package.GetUserProfileDirectory(t, Ꮡ(b, 0), Ꮡn);
         if (e == default!) {
             return (UTF16ToString(b), default!);
         }

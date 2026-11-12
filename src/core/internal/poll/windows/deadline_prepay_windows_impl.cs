@@ -76,7 +76,7 @@ partial class poll_package
     static partial void prepayPlatformDeadlinePath()
     {
         prepare(
-            readinessSink(0), (Action<ж<FD>, ж<operation>>)cancelIO, (pollDescModeAction)waitCanceled,
+            readinessSink(0), (Action<ж<FD>, ж<operation>>)pollᴛFD.cancelIO, (pollDescModeAction)pollᴛpollDesc.waitCanceled,
             runtime_pollWaitCanceled, netpollReady, golib.GoAsyncIO.Signal, Δsyscall.CancelIoEx, Δsyscall.Syscall,
             windows.GetOverlappedResult, windows.WSAGetOverlappedResult);
 

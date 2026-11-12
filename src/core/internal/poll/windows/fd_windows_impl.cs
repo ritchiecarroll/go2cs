@@ -116,7 +116,6 @@ namespace go.@internal;
 // spells it the same way for the same reason.
 using Δsyscall = go.syscall_package;
 using windows = go.@internal.syscall.windows_package;
-using atomic = go.sync.atomic_package;
 using static poll_package;
 
 partial class poll_package
@@ -203,9 +202,9 @@ partial class poll_package
             }
 
             golib.GoAsyncIO.MarkUnassociated(descriptor);
-            // Through the alias: in namespace go.@internal the extension lookup reaches go.sync_package's
-            // generic Store first (CS7036), where the generated file's `using go.sync;` finds atomic's.
-            atomic.Store(Ꮡfd.of(FD.Ꮡdisassociated), true);
+            // Through atomic.Bool's method holder: from namespace go.@internal the extension lookup does not
+            // reach go.sync, where the holder is declared.
+            go.sync.atomicᴛBool.Store(Ꮡfd.of(FD.Ꮡdisassociated), true);
             // Don't call fd.pd.close(), it would be too racy.
             // There is no harm on leaving fd.pd open until Close is called.
             return default!;
