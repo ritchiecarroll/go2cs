@@ -147,9 +147,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	if options.parseCgoTargets {
 		cfg.Env = append(cfg.Env, "CGO_ENABLED=1")
 
-		// A test's checked-in cmd/cgo output loads as plain files, cgo-off (cgoRoute.go, cgoOfflineTrees).
+		// A test's checked-in cmd/cgo output loads as plain files, cgo-off (cgoRoute.go, cgoOfflineTrees). The cgo tag
+		// is set by hand, so the load still selects a plain file under //go:build cgo, as a cgo-on load does, while
+		// an import "C" source stays out.
 		if cgoOfflineTrees {
 			cfg.Env = append(cfg.Env, "CGO_ENABLED=0")
+			cfg.BuildFlags = append(cfg.BuildFlags, "-tags=cgo")
 			cfg.Overlay = map[string][]byte{
 				filepath.Join(options.goRoot, "src", "runtime", "cgo", "go2cs_incomplete.go"): []byte(cgoIncompleteOverlay),
 			}

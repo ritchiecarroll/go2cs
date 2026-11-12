@@ -571,9 +571,24 @@ func elfProbeLoadNames(toolchain cgoToolchain, flags cgoLinkFlags, symbols []str
 	return resolved, nil
 }
 
-// splitCgoCommand splits a CC command the way cmd/go does (cmd/internal/quoted): fields separated by spaces, a field may
-// be quoted with ' or " to hold spaces, so a pinned zig under a profile path with a space survives.
+// splitCgoCommand splits a CC command into its fields (cgoQuotedSplit), and refuses an empty one.
 func splitCgoCommand(command string) ([]string, error) {
+	fields, err := cgoQuotedSplit(command)
+
+	if err != nil {
+		return nil, fmt.Errorf("cgo: the C compiler command %q: %w", command, err)
+	}
+
+	if len(fields) == 0 {
+		return nil, errors.New("cgo: the C compiler command is empty")
+	}
+
+	return fields, nil
+}
+
+// cgoQuotedSplit splits a command into fields separated by spaces, where a field may be quoted with ' or " to hold
+// spaces, so a pinned zig under a profile path with a space survives.
+func cgoQuotedSplit(command string) ([]string, error) {
 	var fields []string
 	var field strings.Builder
 	var quote rune
@@ -602,15 +617,11 @@ func splitCgoCommand(command string) ([]string, error) {
 	}
 
 	if quote != 0 {
-		return nil, fmt.Errorf("cgo: the C compiler command %q has an unterminated quote", command)
+		return nil, fmt.Errorf("unterminated %c string", quote)
 	}
 
 	if inField {
 		fields = append(fields, field.String())
-	}
-
-	if len(fields) == 0 {
-		return nil, errors.New("cgo: the C compiler command is empty")
 	}
 
 	return fields, nil

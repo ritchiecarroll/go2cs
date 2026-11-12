@@ -13,7 +13,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -24,19 +26,41 @@ import (
 // legs build the probe, GO2CS_CGO_PROBE_DIR), and the Phase 2 fixture reaches the probe through CGO_LDFLAGS, so its
 // checked-in cmd/cgo output stays as it is.
 
-// cgoRealProbeDir is the probe library's directory, or a skip where no leg built it.
+// cgoRealProbeDir is the probe library's directory, or a skip where no leg built it. A leg that built one requires it
+// (GO2CS_REQUIRE_CGO_PROBE=1), and there a missing probe or a missing C compiler FAILS: the requirement is read first,
+// and the compiler is the one go itself would use (go env CC), so a leg that loses its compiler cannot skip green.
 func cgoRealProbeDir(t *testing.T) string {
 	t.Helper()
-	requireCCompiler(t)
 
+	required := os.Getenv("GO2CS_REQUIRE_CGO_PROBE") == "1"
 	dir := os.Getenv("GO2CS_CGO_PROBE_DIR")
 
 	if dir == "" {
-		if os.Getenv("GO2CS_REQUIRE_CGO_PROBE") == "1" {
+		if required {
 			t.Fatal("GO2CS_REQUIRE_CGO_PROBE=1 and no GO2CS_CGO_PROBE_DIR: the leg built no probe library")
 		}
 
 		t.Skip("no probe library here (GO2CS_CGO_PROBE_DIR): NOT MEASURED")
+	}
+
+	command := ""
+
+	if out, err := exec.Command("go", "env", "CC").Output(); err == nil {
+		command = strings.TrimSpace(string(out))
+	}
+
+	fields, err := splitCgoCommand(command)
+
+	if err == nil {
+		_, err = exec.LookPath(fields[0])
+	}
+
+	if err != nil {
+		if required {
+			t.Fatalf("GO2CS_REQUIRE_CGO_PROBE=1, and the C compiler go would use (%q) does not run here: %v", command, err)
+		}
+
+		t.Skipf("the C compiler go would use (%q) does not run here: NOT MEASURED", command)
 	}
 
 	return dir
@@ -144,7 +168,106 @@ func TestTheCgoRouteConvertsTheFixtureOnARealHost(t *testing.T) {
 		})
 	}
 
+	// cmd/cgo compiles its wrappers at -O2, so a compiler builtin may be inlined there and import nothing, and the route
+	// binds only a name cmd/cgo's own binary imports (§11.20, the review's M3). Which calls that refuses is each host's
+	// compiler's to say, so it is read here, and held to the two builtins the fixture calls.
+	t.Run("a call cmd/cgo's binary imports nothing for is refused by name", func(t *testing.T) {
+		stderr, _, output, err := convertCgoReal(t, probeDir, map[string]string{"fixture.go": withoutGoFuncs(t, fixture, refused...)})
+
+		if err == nil {
+			t.Logf("READING %s: no call was refused as not imported by cmd/cgo's binary", target)
+			return
+		}
+
+		requireNothingWritten(t, output, err, stderr)
+
+		functions := map[string]string{"abs": "Abs", "labs": "Labs"}
+		notImported := regexp.MustCompile(`C\.(\w+): cmd/cgo's own binary does not import`)
+		found := 0
+
+		for _, line := range cgoRefusalLines(stderr) {
+			match := notImported.FindStringSubmatch(line)
+
+			if match == nil {
+				t.Errorf("a refusal that is not the not-imported one: %s", line)
+				continue
+			}
+
+			found++
+			t.Logf("READING %s: %s", target, line[strings.Index(line, "C."):])
+
+			if function, builtin := functions[match[1]]; builtin {
+				refused = append(refused, function)
+			} else {
+				t.Errorf("C.%s is refused as not imported, and it is not one of the compiler builtins the fixture calls (abs, labs)", match[1])
+			}
+		}
+
+		if found == 0 {
+			t.Errorf("the conversion failed with no refusal line\n%s", stderr)
+		}
+	})
+
 	trimmed := withoutGoFuncs(t, fixture, refused...)
+
+	t.Run("a plain file under the cgo tag converts with the package", func(t *testing.T) {
+		stderr, _, output, err := convertCgoReal(t, probeDir, map[string]string{
+			"fixture.go": trimmed,
+			"cgotag.go":  "//go:build cgo\n\npackage cgophase2\n\n// Tagged is declared in a plain file the cgo tag selects.\nfunc Tagged() bool { return true }\n",
+		})
+
+		if err != nil {
+			t.Fatalf("the conversion failed: %v\n%s", err, stderr)
+		}
+
+		if !slices.Contains(emittedProjectFiles(t, output), "cgotag.cs") {
+			t.Errorf("the plain file under //go:build cgo was not converted: %v", emittedProjectFiles(t, output))
+		}
+	})
+
+	t.Run("a function a header renames is never bound by its plain name", func(t *testing.T) {
+		stderr, _, output, err := convertCgoReal(t, probeDir, map[string]string{"size.go": "package cgoreal\n\n/*\n#include <sys/stat.h>\n*/\nimport \"C\"\n\nfunc Size() int64 {\n\tvar st C.struct_stat\n\tC.fstat(0, &st)\n\treturn int64(st.st_size)\n}\n"})
+
+		// darwin/amd64's <sys/stat.h> renames fstat to fstat$INODE64, a different function with a different struct stat.
+		if target == "darwin/amd64" {
+			requireNothingWritten(t, output, err, stderr)
+			requireCgoUseRefused(t, cgoRefusalLines(stderr), "size.go(10,", "C.fstat", "fstat$INODE64")
+			return
+		}
+
+		if err != nil {
+			for _, line := range cgoRefusalLines(stderr) {
+				t.Logf("READING %s: C.fstat refused: %s", target, line[strings.Index(line, "error "):])
+			}
+
+			if len(cgoRefusalLines(stderr)) == 0 {
+				t.Logf("READING %s: the C.fstat package did not convert, with no cgo refusal line (%v)", target, err)
+			}
+
+			return
+		}
+
+		for _, file := range emittedProjectFiles(t, output) {
+			for _, line := range strings.Split(readConverted(t, output, file), "\n") {
+				if strings.Contains(line, "LibraryImport(") && strings.Contains(line, "fstat") {
+					t.Logf("READING %s: C.fstat bound as %s", target, strings.TrimSpace(line))
+				}
+			}
+		}
+	})
+
+	t.Run("a library that does not link is named, and no symbol is blamed for it", func(t *testing.T) {
+		stderr, _, output, err := convertCgoReal(t, probeDir, map[string]string{"cosine.go": "package cgoreal\n\n/*\n#cgo LDFLAGS: -lm -lgo2csnosuchlib\n#include <math.h>\n*/\nimport \"C\"\n\nfunc Cosine(x float64) float64 { return float64(C.cos(C.double(x))) }\n"})
+		requireNothingWritten(t, output, err, stderr)
+
+		if !strings.Contains(stderr, "go2csnosuchlib") {
+			t.Errorf("the refusal does not name the library that did not link\n%s", stderr)
+		}
+
+		if strings.Contains(stderr, "Phase 4") {
+			t.Errorf("a link failure is blamed on the package's C functions as Phase 4's\n%s", stderr)
+		}
+	})
 
 	t.Run("a copy without them converts, naming each library the C compiler found", func(t *testing.T) {
 		toolchain, cc := cgoRealToolchainLine(t)

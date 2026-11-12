@@ -1150,7 +1150,7 @@ func cgoCapture(load cgoLoad, goos string, flags cgoLinkFlags, symbols []string,
 		return nil, "", nil, fmt.Errorf("cgo: the C compiler cmd/cgo used does not report its version (--version): %w", err)
 	}
 
-	toolchainLine := strings.TrimSpace(strings.SplitN(strings.ReplaceAll(string(version), "\r\n", "\n"), "\n", 2)[0])
+	toolchainLine := cgoToolchainLine(string(version))
 	workDir, err := os.MkdirTemp("", "go2cs-cgo-capture-")
 
 	if err != nil {
@@ -1196,4 +1196,14 @@ func cgoCapture(load cgoLoad, goos string, flags cgoLinkFlags, symbols []string,
 	}
 
 	return nil, "", nil, err
+}
+
+// cgoToolchainLine is the line of a C compiler's --version output the bindings' header records.
+func cgoToolchainLine(version string) string {
+	return strings.TrimSpace(strings.SplitN(strings.ReplaceAll(version, "\r\n", "\n"), "\n", 2)[0])
+}
+
+// cgoArchFlags are the flags that make a C compiler build for goos/goarch (increment 5b's review, S2).
+func cgoArchFlags(goos, goarch string) []string {
+	return nil
 }

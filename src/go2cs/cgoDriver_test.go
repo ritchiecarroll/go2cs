@@ -14,10 +14,12 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -184,6 +186,13 @@ func replaceOnce(t *testing.T, text, old, new string) string {
 func convertCgoOffline(t *testing.T, files map[string]string) (string, string, error) {
 	t.Helper()
 
+	return convertCgoOfflineInto(t, files, t.TempDir())
+}
+
+// convertCgoOfflineInto is convertCgoOffline into an output directory the caller made, which may hold files already.
+func convertCgoOfflineInto(t *testing.T, files map[string]string, output string) (string, string, error) {
+	t.Helper()
+
 	treeSrc, err := filepath.Abs("..")
 
 	if err != nil {
@@ -197,7 +206,6 @@ func convertCgoOffline(t *testing.T, files map[string]string) (string, string, e
 		writeCgoFixture(t, dir, name, contents)
 	}
 
-	output := t.TempDir()
 	encoded, err := json.Marshal(cgoOfflineRun{
 		Args:      []string{"-cgo=true", "-comments", "-go2cspath", treeSrc, "-platforms", "linux/amd64", dir, output},
 		Libraries: cgoPhase2Libraries,
@@ -315,8 +323,36 @@ func cgoPhase2Admitted(t *testing.T) map[string]string {
 	files := cgoFixtureFiles(t, cgoPhase2FixtureDir)
 	files["fixture.cgo1.go"] = withoutGoFuncs(t, files["fixture.cgo1.go"], "Deferred", "Started")
 	files["fixture.go"] = withoutGoFuncs(t, files["fixture.go"], "Deferred", "Started")
+	files["cgo_import.go"] = cgoOfflineImportFile(cgoPhase2Libraries)
 
 	return files
+}
+
+// cgoOfflineImportFile writes cmd/cgo's _cgo_import.go as a real host's go list hands it back once the package links:
+// one dynamic import per C symbol its binary imports, by the name it imports it under, then any extra names. The
+// checked-in Phase 2 fixture has none (its probe functions were not linked when it was made, README.md).
+func cgoOfflineImportFile(libraries map[string]string, extra ...string) string {
+	names := make([]string, 0, len(libraries))
+
+	for name := range libraries {
+		names = append(names, name)
+	}
+
+	slices.Sort(names)
+
+	var text strings.Builder
+
+	text.WriteString("package cgophase2\n")
+
+	for _, name := range names {
+		fmt.Fprintf(&text, "//go:cgo_import_dynamic %s %s#GLIBC_2.2.5 %q\n", name, name, libraries[name])
+	}
+
+	for _, name := range extra {
+		fmt.Fprintf(&text, "//go:cgo_import_dynamic %s %s#GLIBC_2.2.5 \"libc.so.6\"\n", name, name)
+	}
+
+	return text.String()
 }
 
 // cgoBindingsPath is where the Phase 2 fixture's bindings file lands: homed at its one target's folder (§11.20, S3),
@@ -516,7 +552,7 @@ func TestCgoTreesCmdCgoDidNotWriteForThePackageAreRefused(t *testing.T) {
 // none, so Phase 1's is planted beside it.
 func TestCgoImportFileIsDropped(t *testing.T) {
 	files := cgoPhase2Admitted(t)
-	files["cgo_import.go"] = replaceOnce(t, cgoFixtureFiles(t, cgoFixtureDir)["cgo_import.go"], "package cgofixture", "package cgophase2")
+	files["cgo_import.go"] = cgoOfflineImportFile(cgoPhase2Libraries, "__libc_start_main")
 
 	stderr, output, err := convertCgoOffline(t, files)
 
@@ -532,5 +568,174 @@ func TestCgoImportFileIsDropped(t *testing.T) {
 		if strings.HasSuffix(file, ".cs") && strings.Contains(readConverted(t, output, file), "__libc_start_main") {
 			t.Errorf("%s carries a dynamic import from cmd/cgo's _cgo_import.go", file)
 		}
+	}
+}
+
+// The review of increment 5b, M1: a plain file under //go:build cgo is part of a cgo package. go list selects it for a
+// cgo-on load, and the driver's own build-constraint re-check, which carried no cgo tag, dropped it with exit 0, leaving
+// every reference to what it declares dangling.
+func TestCgoRoutePlainFileUnderTheCgoTagConverts(t *testing.T) {
+	files := cgoPhase2Admitted(t)
+	files["cgotag.go"] = "//go:build cgo\n\npackage cgophase2\n\n// Tagged is declared in a plain file the cgo tag selects.\nfunc Tagged() bool { return true }\n"
+
+	stderr, output, err := convertCgoOffline(t, files)
+
+	if err != nil {
+		t.Fatalf("the conversion failed: %v\n%s", err, stderr)
+	}
+
+	if !slices.Contains(emittedProjectFiles(t, output), "cgotag.cs") {
+		t.Errorf("the plain file under //go:build cgo was not converted: %v", emittedProjectFiles(t, output))
+	}
+}
+
+// The review of increment 5b, M2: a bindings file left by an earlier conversion must not stand in for one this
+// conversion failed to write. A stale file that cannot be written over is planted, and the conversion must fail by name.
+func TestCgoStaleBindingsFileDoesNotStandInForAWrite(t *testing.T) {
+	output := t.TempDir()
+	stale := filepath.Join(output, filepath.FromSlash(cgoBindingsPath))
+
+	if err := os.MkdirAll(filepath.Dir(stale), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(stale, []byte("// STALE: an earlier conversion's bindings\n"), 0o444); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() { _ = os.Chmod(stale, 0o644) })
+
+	if err := os.WriteFile(stale, []byte("probe"), 0o644); err == nil {
+		t.Skip("a read-only file can be written over here (a privileged user?), so the stale file cannot be made to survive: NOT MEASURED")
+	}
+
+	stderr, _, err := convertCgoOfflineInto(t, cgoPhase2Admitted(t), output)
+
+	if err == nil {
+		t.Errorf("the conversion exited 0 with a stale bindings file it could not write over\n%s", stderr)
+	}
+
+	if !strings.Contains(stderr, "bindings file was not written") {
+		t.Errorf("the failure does not say the bindings file was not written\n%s", stderr)
+	}
+}
+
+// The review of increment 5b, M3: the capture's probe declares each symbol with no header, so a name a header renames
+// (darwin/amd64's fstat is fstat$INODE64; glibc's strtol may be __isoc23_strtol) was found under its plain name and
+// bound to a different function than C calls. The route binds a name only when cmd/cgo's own binary imports it
+// (_cgo_import.go), and otherwise refuses it at its use, naming what the binary imports instead.
+func TestCgoSymbolCmdCgoDoesNotImportByItsCNameIsRefused(t *testing.T) {
+	t.Run("a renamed symbol", func(t *testing.T) {
+		imported := maps.Clone(cgoPhase2Libraries)
+		delete(imported, "mktime")
+
+		files := cgoPhase2Admitted(t)
+		files["cgo_import.go"] = cgoOfflineImportFile(imported, "mktime$INODE64")
+
+		stderr, output, err := convertCgoOffline(t, files)
+		requireNothingWritten(t, output, err, stderr)
+		requireCgoUseRefused(t, cgoRefusalLines(stderr), "fixture.go(74,", "C.mktime", "mktime$INODE64")
+	})
+
+	t.Run("no dynamic imports at all", func(t *testing.T) {
+		files := cgoPhase2Admitted(t)
+		delete(files, "cgo_import.go")
+
+		stderr, output, err := convertCgoOffline(t, files)
+		requireNothingWritten(t, output, err, stderr)
+
+		if !strings.Contains(stderr, "cmd/cgo wrote no dynamic imports") {
+			t.Errorf("the refusal does not say cmd/cgo wrote no dynamic imports\n%s", stderr)
+		}
+	})
+}
+
+// The review of increment 5b, S2: the probe builds for the conversion's target with the flags cmd/go itself hands the C
+// compiler (cmd/go/internal/work, gccArchArgs), so a compiler whose default architecture differs (an amd64 go under
+// Rosetta, or on Windows on Arm) cannot answer for another one.
+func TestCgoProbeArchFlagsAreCmdGos(t *testing.T) {
+	for _, row := range []struct {
+		goos, goarch string
+		want         []string
+	}{
+		{"linux", "amd64", []string{"-m64"}},
+		{"windows", "amd64", []string{"-m64"}},
+		{"darwin", "amd64", []string{"-arch", "x86_64", "-m64"}},
+		{"darwin", "arm64", []string{"-arch", "arm64"}},
+		{"linux", "arm64", nil},
+	} {
+		if got := cgoArchFlags(row.goos, row.goarch); !slices.Equal(got, row.want) {
+			t.Errorf("%s/%s: flags %q, want %q", row.goos, row.goarch, got, row.want)
+		}
+	}
+}
+
+// The review of increment 5b, S4: the toolchain line is written into a C# comment, and a wrapper compiler's version
+// text is not go2cs's to trust. A bare CR, U+0085, U+2028 and U+2029 each end a C# line, so the line keeps printable
+// ASCII only, and is capped.
+func TestCgoToolchainLineIsPrintableAsciiOnly(t *testing.T) {
+	if got, want := cgoToolchainLine("clang version 22.1.8 (https://example.org/llvm 1a2b)\nTarget: x86_64\n"), "clang version 22.1.8 (https://example.org/llvm 1a2b)"; got != want {
+		t.Errorf("a plain version line is %q, want %q", got, want)
+	}
+
+	hostile := cgoToolchainLine("clang int x;\rSystem.Exit();\u0085more end\ttab " + strings.Repeat("x", 500))
+
+	for _, r := range hostile {
+		if r < 0x20 || r > 0x7e {
+			t.Errorf("the toolchain line keeps %U: %q", r, hostile)
+		}
+	}
+
+	if len(hostile) > 120 {
+		t.Errorf("the toolchain line is %d characters, over its cap of 120", len(hostile))
+	}
+}
+
+// The review of increment 5b, N1: CC is split as cmd/go splits it, so this is cmd/internal/quoted's own table
+// (quoted_test.go, TestSplit, go1.26.10).
+func TestCgoQuotedSplitIsCmdGosQuotedSplit(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		value   string
+		want    []string
+		wantErr string
+	}{
+		{name: "empty", value: "", want: nil},
+		{name: "space", value: " ", want: nil},
+		{name: "one", value: "a", want: []string{"a"}},
+		{name: "leading_space", value: " a", want: []string{"a"}},
+		{name: "trailing_space", value: "a ", want: []string{"a"}},
+		{name: "two", value: "a b", want: []string{"a", "b"}},
+		{name: "two_multi_space", value: "a  b", want: []string{"a", "b"}},
+		{name: "two_tab", value: "a\tb", want: []string{"a", "b"}},
+		{name: "two_newline", value: "a\nb", want: []string{"a", "b"}},
+		{name: "quote_single", value: `'a b'`, want: []string{"a b"}},
+		{name: "quote_double", value: `"a b"`, want: []string{"a b"}},
+		{name: "quote_both", value: `'a '"b "`, want: []string{"a ", "b "}},
+		{name: "quote_contains", value: `'a "'"'b"`, want: []string{`a "`, `'b`}},
+		{name: "escape", value: `\'`, want: []string{`\'`}},
+		{name: "quote_unclosed", value: `'a`, wantErr: "unterminated ' string"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := cgoQuotedSplit(test.value)
+
+			if err != nil {
+				if test.wantErr == "" {
+					t.Fatalf("unexpected error: %v", err)
+				} else if !strings.Contains(err.Error(), test.wantErr) {
+					t.Fatalf("error %q does not contain %q", err, test.wantErr)
+				}
+
+				return
+			}
+
+			if test.wantErr != "" {
+				t.Fatalf("unexpected success; wanted error containing %q", test.wantErr)
+			}
+
+			if !slices.Equal(got, test.want) {
+				t.Errorf("got %q; want %q", got, test.want)
+			}
+		})
 	}
 }

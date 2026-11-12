@@ -119,6 +119,17 @@ public class CgoLibrariesTests
         StringAssert.Contains(thrown.Message, GoCgoLibraries.RunningTarget);
     }
 
+    // The review of increment 5b, S5: the target is held for every import the assembly makes, not only for a name the
+    // table owns. A hand-owned import beside bindings converted for another target crosses with the wrong layouts too.
+    [TestMethod]
+    public void ANameTheTableDoesNotOwnIsRefusedUnderAnotherTargetToo()
+    {
+        (string flag, string name) = SystemLibrary;
+
+        Assert.ThrowsException<PlatformNotSupportedException>(() => GoCgoLibraries.Resolve(name, s_assembly, Table((flag, "someotherlibrary")), "plan9/mips"),
+            "an import of an assembly whose bindings were converted for another target must not load here");
+    }
+
     [TestMethod]
     public void AnOwnedLibraryOfBindingsForTheRunningTargetLoads()
     {
