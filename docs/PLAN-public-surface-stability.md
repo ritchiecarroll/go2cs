@@ -259,3 +259,64 @@ deprecation set of this plan and a flag day for every published package. Nothing
 **Not measured, and able to move a row**: a package built against today's golib run against a landing golib
 (the spike changes the frame's layout and rebuilt everything); Visual Basic, F# and explicit-interface
 implementers; the manual check in a debugger.
+
+## M:N: corrections after the adversarial review (G, 2026-11-12)
+
+The block above was reviewed adversarially together with section 8 of the spike's record. The item-by-item
+answer is [DATA-mn-spike-2](phase4/DATA-mn-spike-2.md), section 9. This block corrects the block above; that
+text stays as written. Nothing here is ruled except where it says so.
+
+**An owner ruling changes the frame (2026-11-12).** There is no binary-compatibility promise from .4 to .5, and
+.5 resets the break floor: "if one more breaking change is needed to get to M:N, now is the time to do it"
+(the owner). So M:N is designed for its end state, and the tier-2 rule for twins is a .5 contract, not a .4 one.
+
+**Tier 2, corrected.** "Hidden additions, binary-stable within a Go minor" was not true of the spike's twin
+set: a twin existed only where the analysis found a park, so a Go patch could remove one that another assembly
+had bound to. The rule a landing form needs (the record's 9.4, M1):
+- the twin surface of a package is a function of its exported Go API, never of the park analysis: every
+  exported function, method and interface member whose signature admits a twin has one, always;
+- within a Go line a twin member never disappears and never changes shape, from the first release that carries
+  twins;
+- twins return a task type that golib owns, with its own builder (9.4, M2). Its member shape is the one binary
+  rule that cannot be frozen in text today: a bounded prototype comes first.
+
+**Tier 3, corrected.**
+- "Go-format tracebacks keep the Go names" holds for the "created by" line. After a goroutine resumes from a
+  park, its ancestor frames are missing from `runtime.Callers`, `runtime.Caller` and panic tracebacks until
+  the landing form links suspended twins (9.4, M4). That is a gap in what a Go program observes, not a tier-3
+  tooling difference, and it is owed before a landing.
+- A crash dump of an unrecovered panic shows the carrier's stack, not the panic site. That one is tier 3.
+
+**The contract page, items 4 and 5, corrected.** Ambient state is not one thing:
+- `AsyncLocal<T>` state follows the goroutine. The spike does flow an execution context; the sentence under
+  MQ2 above is wrong. What the spike gets wrong is narrower: a write made inside a twinned callee is undone on
+  return. The landing form's own builder removes that (9.5, S1).
+- Thread-affine state (thread name, priority, thread-statics, a monitor held across calls) belongs to the
+  carrier and is not a contract. Code that needs it calls `runtime.LockOSThread`, as in Go. The pin is not
+  built, and it has to exist before the scheduler is on by default.
+- Two more sentences for the page: names that carry the twin mark are reserved and never called or implemented
+  by hand; a `GoFrame` is never copied, stored or captured.
+
+All of these are sentences. They can be published with .4, before any M:N code exists.
+
+**The three questions, as they stand after the review.** Each has G's position; none is ruled.
+- **MQ1.** Unchanged, with an enforcement: tier 2, not for hand use, and an analyzer error on any consumer use
+  of a twin member or of the twin task type.
+- **MQ2.** Re-worded, since the row it rested on was wrong: "`AsyncLocal` state follows the goroutine, by
+  contract; thread-affine state is the carrier's and is outside the contract unless the goroutine is pinned
+  with `LockOSThread`."
+- **MQ3.** Changed. Not "opt-in for the first release that carries it" by a build property: twins are
+  unconditional in every published package from the first carrying release, and the switch is host-level
+  run-time configuration in one form. A per-project twin knob never ships. Whether the scheduler is on by
+  default stays the owner's call, and changing it later is then configuration, not a rebuild.
+
+**`GoFrame`.** The landing form makes it a plain struct, guarded by an analyzer rule that refuses every use but
+a local initialised to `default`, a `ref` argument and its own members (9.8). The ref struct never refused a
+copy; the rule does. Converted code already complies: 0 by-value uses in 681 files.
+
+**What .4 should carry for M:N: the sentences above, and nothing else.** Every package is converted and
+published again at each release, so no emission change gets cheaper by going into .4. The one optional code
+item is the `GoFrame` analyzer rule, which is independent of M:N (9.10).
+
+**"Not measured", corrected.** A package built against today's golib and run against a landing golib is no
+longer a case to measure: under the ruling above it is rebuilt for the first carrying release.
