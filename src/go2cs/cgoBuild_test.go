@@ -87,6 +87,42 @@ func cgoBuildArgs(t *testing.T, project, goos, goarch string) []string {
 	return args
 }
 
+// cgoBuiltAssembly is the assembly a build of project left under output. It is named by the project's AssemblyName,
+// which is not always its file's name, and its directory is the build configuration's, which a leg's environment may
+// set. So it is found, not assumed.
+func cgoBuiltAssembly(t *testing.T, output, project string) string {
+	t.Helper()
+
+	contents, err := os.ReadFile(project)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assemblyName := declaredAssemblyName(string(contents)) + ".dll"
+	var assemblies, left []string
+
+	_ = filepath.WalkDir(filepath.Join(output, "bin"), func(path string, entry os.DirEntry, err error) error {
+		if err == nil && !entry.IsDir() {
+			if entry.Name() == assemblyName {
+				assemblies = append(assemblies, path)
+			}
+
+			if relative, relErr := filepath.Rel(output, path); relErr == nil && len(left) < 40 {
+				left = append(left, relative)
+			}
+		}
+
+		return nil
+	})
+
+	if len(assemblies) != 1 {
+		t.Fatalf("the build left %d assemblies named %s, want 1; under bin: %v", len(assemblies), assemblyName, left)
+	}
+
+	return assemblies[0]
+}
+
 func TestTheCgoRoutesOutputBuildsAsAProject(t *testing.T) {
 	if os.Getenv(cgoBuildEnv) != "1" {
 		t.Skipf("NOT RUN: set %s=1 to build the converted fixture with the .NET SDK (Inconclusive, not a pass)", cgoBuildEnv)
@@ -201,5 +237,104 @@ func main() {
 
 	if err != nil {
 		t.Fatalf("a program naming a C pointer typedef does not build: %v\n%s", err, lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40))
+	}
+}
+
+// A program that converts between C numeric types, and between a C type and a Go one, builds and prints what go
+// prints. The types are cmd/cgo's, written as plain Go, so go runs the same sources with no C compiler. go2cs-gen
+// hosted each conversion operator in a part of the source type declared inside the package class, where a C type is
+// not, and the build failed on CS1061 (GenTests' AConversionBetweenCTypesCompiles holds the generator; this holds the
+// converter and the generator together, and the values).
+func TestAProgramConvertingBetweenCTypesBuildsAndRunsAsGoDoes(t *testing.T) {
+	if os.Getenv(cgoBuildEnv) != "1" {
+		t.Skipf("NOT RUN: set %s=1 to build the converted program with the .NET SDK (Inconclusive, not a pass)", cgoBuildEnv)
+	}
+
+	framework := regexp.MustCompile(`<TargetFramework Condition="[^"]*">([^<]+)</TargetFramework>`).FindStringSubmatch(renderCsprojTemplate("Exe", "", ""))
+
+	if framework == nil {
+		t.Fatal("the rendered template names no TargetFramework")
+	}
+
+	dotnet := requireDotnetSdk(t, framework[1])
+
+	dir := writeCgoGateModule(t, map[string]string{
+		"cgo_gotypes.go": `package main
+
+type _Ctype_int int32
+type _Ctype_long int64
+type _Ctype_short int16
+type _Ctype_ulong uint64
+type _Ctype_size_t = _Ctype_ulong
+type _Ctype_ushort uint16
+type _Ctype_DWORD uint32
+`,
+		"main.go": `package main
+
+type count uint32
+
+func main() {
+	n := _Ctype_int(7)
+	size := _Ctype_size_t(n)
+	wide := _Ctype_long(n)
+	big := _Ctype_long(70000)
+	narrow := _Ctype_short(big)
+	var d _Ctype_DWORD = 70000
+	low := _Ctype_ushort(d)
+	c := count(d)
+	back := _Ctype_DWORD(c + 1)
+	println(uint64(size), int64(wide), int16(narrow), uint16(low), uint32(c), uint32(back))
+}
+`})
+
+	goRun := exec.Command("go", "run", ".")
+	goRun.Dir = dir
+	goRun.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=0")
+	want, err := goRun.CombinedOutput()
+
+	if err != nil {
+		t.Fatalf("go did not run the program: %v\n%s", err, want)
+	}
+
+	stderr, output, err := convertCgoGateFixture(t, dir, nil)
+
+	if err != nil {
+		t.Fatalf("conversion failed: %v\n%s", err, stderr)
+	}
+
+	output = cgoBuildDir(t, output)
+	projects, err := filepath.Glob(filepath.Join(output, "*.csproj"))
+
+	if err != nil || len(projects) != 1 {
+		t.Fatalf("the conversion wrote %d project files in %s, want 1 (%v)", len(projects), output, err)
+	}
+
+	build := exec.Command(dotnet, cgoBuildArgs(t, projects[0], runtime.GOOS, "")...)
+	build.Env = append(os.Environ(), "DOTNET_CLI_TELEMETRY_OPTOUT=1", "DOTNET_NOLOGO=1", "MSBUILDDISABLENODEREUSE=1")
+	built, err := build.CombinedOutput()
+	errors := cgoCompilerErrors(string(built))
+
+	t.Logf("READING the C conversions program's build: %d distinct error(s)", len(errors))
+
+	for _, line := range errors {
+		t.Logf("READING build error %s", line)
+	}
+
+	if err != nil {
+		t.Fatalf("a program converting between C numeric types does not build: %v\n%s", err, lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40))
+	}
+
+	got, err := exec.Command(dotnet, cgoBuiltAssembly(t, output, projects[0])).CombinedOutput()
+
+	if err != nil {
+		t.Fatalf("the converted program did not run: %v\n%s", err, got)
+	}
+
+	wantLine, gotLine := strings.TrimSpace(strings.ReplaceAll(string(want), "\r\n", "\n")), strings.TrimSpace(strings.ReplaceAll(string(got), "\r\n", "\n"))
+
+	t.Logf("READING the C conversions program: go prints %q; go2cs prints %q", wantLine, gotLine)
+
+	if wantLine != gotLine || wantLine == "" {
+		t.Fatalf("the two runs differ, or printed nothing:\n   go: %q\ngo2cs: %q", wantLine, gotLine)
 	}
 }

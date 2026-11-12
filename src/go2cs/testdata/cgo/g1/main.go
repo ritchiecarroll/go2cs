@@ -98,6 +98,15 @@ func main() {
 		var e C.int
 		f := C.frexp(C.double(8), &e)
 		fmt.Println("frexp", float64(f), int(e))
+	case "conv":
+		// Conversions between C numeric types, with no C call: one C type to another by a typedef (size_t), a
+		// widening and a narrowing. Each needs a conversion operator the generator hosts in the C type.
+		n := C.int(7)
+		size := C.size_t(n)
+		wide := C.long(n)
+		big := C.long(70000)
+		narrow := C.short(big)
+		fmt.Println("conv", uint64(size), int64(wide), int16(narrow))
 	case "puts":
 		// A C string C owns, printed by C. The result is the arm; whether C's line reaches a captured stdout is read.
 		r := C.puts(C.go2cs_probe_text())

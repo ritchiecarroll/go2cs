@@ -62,6 +62,7 @@ func cgoG1Arms() []cgoG1Arm {
 		{name: "div"},
 		{name: "exp"},
 		{name: "frexp"},
+		{name: "conv"},
 		{name: "puts"},
 		{name: "nodesum"},
 		{name: "nested"},
@@ -285,36 +286,9 @@ func TestG1TheConvertedCgoProgramResolvesAndRunsAsGoDoes(t *testing.T) {
 		t.Fatalf("the converted gate program does not build: %v\n%s", err, lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40))
 	}
 
-	// The assembly is named by the project's AssemblyName, which is not always its file's name, and its directory is
-	// the build configuration's, which a leg's environment may set. So it is found, not assumed.
-	project, err := os.ReadFile(projects[0])
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assemblyName := declaredAssemblyName(string(project)) + ".dll"
-	var assemblies, left []string
-
-	_ = filepath.WalkDir(filepath.Join(output, "bin"), func(path string, entry os.DirEntry, err error) error {
-		if err == nil && !entry.IsDir() {
-			if entry.Name() == assemblyName {
-				assemblies = append(assemblies, path)
-			}
-
-			if relative, relErr := filepath.Rel(output, path); relErr == nil && len(left) < 40 {
-				left = append(left, relative)
-			}
-		}
-
-		return nil
-	})
-
-	if len(assemblies) != 1 {
-		t.Fatalf("the build left %d assemblies named %s for the gate program, want 1; under bin: %v", len(assemblies), assemblyName, left)
-	}
-
-	csProgram := []string{dotnet, assemblies[0]}
+	assembly := cgoBuiltAssembly(t, output, projects[0])
+	assemblies := []string{assembly}
+	csProgram := []string{dotnet, assembly}
 	libraryEnv := cgoG1LibraryEnv(probeDir)
 
 	if runtime.GOOS == "windows" {
