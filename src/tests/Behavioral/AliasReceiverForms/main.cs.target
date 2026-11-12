@@ -208,7 +208,7 @@ internal static void run(@string tag, ж<holder> h) {
     });
 }
 
-internal static void Main() {
+internal static void main() {
     run("nil", Ꮡ(new holder()));
     run("non-nil", Ꮡ(new holder(attrs: Ꮡ(new Node(kind: 3, name: "attrs")), list: Ꮡ(new List(new nint[]{1, 2}.slice())))));
     run("zero value", Ꮡ(new holder(attrs: Ꮡ(new Node()), list: Ꮡ(new List(new nint[]{}.slice())))));

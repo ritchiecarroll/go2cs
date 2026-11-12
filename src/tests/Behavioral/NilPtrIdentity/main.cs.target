@@ -72,7 +72,7 @@ internal static any nodeCode(ж<node> Ꮡn) {
     return n.Code;
 }
 
-internal static void Main() {
+internal static void main() {
     ж<lib.Message> local = default;
     holder field = default;
 

@@ -70,7 +70,7 @@ internal static void describe(this holder x, @string label) {
     fmt.Println(label, x.report == nil, x.h == nil, x.f == nil);
 }
 
-internal static void Main() {
+internal static void main() {
     var r = Ꮡ(new relater());
 
     check("ifelse-nil", IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(false, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default)));
