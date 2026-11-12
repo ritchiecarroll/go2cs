@@ -1115,3 +1115,340 @@ after the other, 20:24 to 20:48 CST.
 - The repo guards ran once more after this section was placed. That reading is in the phase's DONE post, since
   writing it here would change the file they read.
 - The behavioral suite as a whole was not run: the 20 programs of 5.2 ran one by one through the same runner.
+
+## 6. B4: what twins cost (2026-11-11)
+
+Branch `claude/g-mn-spike2-b4`, on B3's `cde9999305`. B4 is the cost table of the plan: what the twin path adds
+to a build, to an assembly, to a call that does not park, to start-up, and to the parts of the runtime it touches;
+and whether the build-wall cost B2 measured (+91% on `runtime`) can be removed. The coordinator asked for a lean
+phase and for the lever on the nested sibling run.
+
+The branch's first commit (`31cdbb875b`) registers `MnIfaceTwin` in `go2cs.slnx`, which closes the integrity red
+of 5.11.
+
+### 6.1 What was built
+
+- **Three ways for the twin generator to see its siblings' output** (`TwinGenerator.Siblings.cs`), chosen per
+  project by the build property `GoTwinsSiblings`:
+  - *nested* (unset; the form of sections 4 and 5): the 14 sibling generators run a second time, inside a
+    generator driver the twin generator starts.
+  - *memo*: every sibling's file passes through one helper (`AddGeneratedSource`); under this property the helper
+    also keeps the text, keyed by the compilation, and the twin generator parses what was kept. A sibling that has
+    not run yet is run nested.
+  - *last*: the same memo, with the twin work done under a second generator type, `ZTwinGenerator`, whose name
+    sorts after every sibling's. Nothing runs twice. The twin files then land in that type's directory.
+- **A report line for the control** (always written): `// siblings=<form> sibling-sources=N memo-sources=N
+  nested-generators=N`. Under `GoTwinsTiming=true` a second line gives the generator's own stopwatch:
+  `// timing sibling-ms=N analysis-ms=N emit-ms=N`. The times stay out of the report otherwise, since they differ
+  from build to build.
+- **MnCost** (`src/tools/mnspike2/MnCost`): one Go program, converted in place, with six modes picked by
+  `MN_COST_MODE`: a call from one function that can park into another that never does; a `sync.Mutex` pair; a
+  deferred closure; `io.CopyBuffer` in 512-byte chunks between two user types that do next to nothing; the same
+  copy into a SHA-256 hash; and a hold that sleeps, for the idle thread count. Each loop carries a channel
+  receive under a condition that is never true, so the generator gives it a twin and the loop pays what a twin
+  costs without parking once. `main` calls each loop itself, so the main twin awaits the loop's twin. Each mode
+  prints five readings of nanoseconds and allocated bytes per operation; the first is not read (the JIT is still
+  tiering).
+
+Both new properties are compiler-visible and are read from the environment as well as from the command line.
+
+### 6.2 The lever on the nested sibling run (`runtime`, Release, rebuild of the project alone, Windows x64, 12 P)
+
+Each run alternates the arms; the first off arm of a run reads 15 to 40 s above the later ones (a cold compiler
+server), so the pairs below are read from the second arm on, or as the difference inside one pair.
+
+| form | walls, twins on (s) | off arm beside it (s) | sibling run (s) | analysis (s) | emit (s) | sibling sources | assembly (bytes) |
+|---|---|---|---|---|---|---|---|
+| off | | 92.5, 98.3, 91.9, 85.8, 92.8, 88.7 | | | | | 3,851,264 |
+| nested | 204.2, 184.3 | 92.5, 98.3 | 95.3, 84.2 | 2.7, 2.5 | 0.09, 0.06 | 1,101 | 4,100,096 |
+| memo, as first written | 101.1, 96.0 | 92.5, 98.3 | 0.13, 0.13 | 2.1, 2.1 | 0.15, 0.04 | **684** | **4,099,584** |
+| memo with the late siblings nested | 209.3, 171.8 | 91.9, 85.8 | 93.5, 73.7 | 3.0, 2.4 | 0.09, 0.06 | 1,101 (684 kept, 1 generator nested) | 4,100,096 |
+| last | 119.6, 98.6 | 113.5, 92.8 | 0.49, 0.49 | 2.7, 2.3 | 0.10, 0.06 | 1,101 (all kept) | 4,100,096 |
+
+- **The nested run is the whole added wall.** 84 to 95 s of the 86 to 92 s that twins add are the siblings'
+  second run; the twin generator's own analysis is 2.5 to 2.7 s and its emission under 0.1 s.
+- **The memo as first written was wrong, and the control said so.** The compiler runs one assembly's generators in
+  the order of their full type names. `TypeGenerator` sorts after `TwinGenerator`, so its 417 files were not in
+  the memo yet: 684 sources against 1,101. The twin generator then bound against a compilation without them: 648
+  calls inside twin bodies and 2,858 outside did not bind, one twin lost an await (`runFinalizers` in
+  `mfinal.cs` called `mallocgc` without its twin; 176 await sites against 177), and the assembly came out 512
+  bytes smaller. Its wall is no reading.
+- **Running only the late sibling nested is correct and gains nothing**: the one late generator is the one that
+  costs (below).
+- **The last form is correct and removes the cost.** All 1,101 sources come from the memo, no generator runs
+  twice, the 18 twin files are byte-identical to the nested form's (the report compared without its `siblings`
+  and `timing` lines), and the assembly has the same size. Paired with the off arm just before each: **+6.1 s and
+  +5.8 s (+5.4% and +6.2%)**; against the last off arm of the run, +11%. B2's reading for the same project was
+  +91%.
+- **What a landing form would need**: the twin generator has to run after every generator whose output it reads.
+  The spike gets that from a type name; a product would state the order (one pipeline that ends with the twin
+  step, or an incremental generator fed by the others' outputs) and would not keep sources in a static table.
+  Nothing a consumer sees changes with the form: the twin files and the assembly are the same bytes.
+
+**One generator is most of this project's build, twins or not.** The compiler's own report for a twins-off rebuild
+of `runtime` (95 s wall): generators 85.8 s in all, of which `go2cs.TypeGenerator` **80.6 s (93%)**,
+`EscapeRegistryGenerator` 2.5 s, `ImplementGenerator` 1.2 s, `ImplicitConvGenerator` 0.7 s, `RecvGenerator` 0.3 s,
+every other under 0.1 s. It writes 417 files there, about 190 ms each. This is outside M:N: it is today's product,
+and it is why the nested run cost what it did. The spike did not look for the reason.
+
+### 6.3 `net/http` and `strconv`: build wall and assembly size (Release, rebuild of the project alone, Windows x64)
+
+`net/http` was built with hidden interface twins and the last form; its closure (191 projects) was built first
+with twins off. The validate-and-refuse loop of 4.3 reached its fixpoint in round 2: round 1 gave 8 compiler
+errors (1 CS8178, 7 CS9217, all a `ref` kept across an await), the 8 rows name 4 functions and the twin
+count goes from 262 to 255, round 2 built clean.
+
+| project | arm | wall (s) | generator stopwatch: siblings / analysis / emit (s) | assembly (bytes) | twins |
+|---|---|---|---|---|---|
+| `net/http` | off | 42.6, 42.9 | | 2,728,448 | |
+| `net/http` | last | 45.7 | 0.44 / 1.42 / 0.06 | 3,119,616 | 255 of 1,209 candidates, 504 await sites, 11 files |
+| `net/http` | nested | 75.0 | 29.4 / 1.55 / 0.06 | 3,119,616 | the same 11 files, byte for byte |
+| `strconv` | off | 2.53, 2.44 (the first, cold: 2.97) | | 349,184 | |
+| `strconv` | last | 2.57, 2.70 | 0.001 / 0.03 / 0 | 349,184 | 0 of 57 candidates; the report file only |
+
+- **`net/http` pays +3.0 s (+7%) in the last form and +32.2 s (+76%) nested.** The nested run's 29.4 s is again
+  the siblings' whole second run: the compiler's report for the off build gives the generators 30.0 s of the
+  42.6 s, `TypeGenerator` 13.6 s and `ImplementGenerator` 12.9 s of it.
+- **The assembly grows by 391,168 bytes (+14.3%)** for 255 twins, their state machines, and the hidden interface
+  twins (12 interface members twinned, 24 forwarders).
+- **What the generator refused in `net/http`**: 359 candidates for a by-ref receiver (32 of them reach a park), 27
+  for a by-ref parameter (4), 2 for a ref-like type, and the 4 functions the build rows named. The 39 that reach a
+  park and get no twin are the cases where a goroutine would hold its carrier; B5 counts them across the corpus.
+- **`strconv` is the control: nothing in it can park.** The generator finds no twin and writes its report and
+  nothing else; the assembly has the same size; the rebuild reads +0.04 and +0.25 s beside the off arm before it,
+  which is inside that arm's own spread. A package without a park pays the analysis (26 ms) and nothing more.
+
+### 6.4 What a twin costs on a path that never parks (MnCost, JIT, Release, Windows x64, 12 P)
+
+Each cell is the median of 8 readings (2 processes, repetitions 1 to 4; repetition 0 is not read), with the
+range where it is wider than 5%. "Plain" is the build without twins, which is today's product; the twins build
+with the scheduler off reads the same as plain in every mode (1.88, 230, 25.0, 19.5 ns), so one column stands
+for both. Go's own build of the same source is beside it for scale.
+
+| shape, per operation | Go | plain | twins, `GO2CS_MN=1` | twin adds |
+|---|---|---|---|---|
+| a call into a function that can park and does not | 1.7 ns, 0 B | 1.88 ns, 0 B | 7.88 ns, 0 B | **+6.0 ns** |
+| `sync.Mutex` `Lock` and `Unlock`, uncontended | 3.8 ns, 0 B | 230 ns, 64 B | 27.9 ns, 0 B | **−202 ns, −64 B** |
+| a call into a function that defers a closure | 4.6 ns, 0 B | 24.7 ns, 88 B | 43.8 ns (36.4 to 47.7), 88 B | **+19 ns**, no allocation added |
+| `io.CopyBuffer`, one 512-byte chunk, reader and writer that do next to nothing (io twinned) | 6.2 to 7.9 ns | 20.0 ns, 0 B | 58.7 to 59.9 ns, 0 B | **+39 ns, 3.0x** |
+| the same copy into SHA-256 (io twinned) | 254 ns | 4,429 ns | 4,471 ns | **+42 ns, 1.01x** |
+
+The control for every row is the JIT's own list of compiled methods (`DOTNET_JitDisasmSummary`): in the twins
+build the mode's twin is compiled under `GO2CS_MN=1` (4 to 5 methods with the state machine) and no twin of it
+is compiled with the scheduler off; the plain build compiles none.
+
+- **A twin call that completes without parking costs 6 ns** over the plain call: a `ValueTask` built, returned
+  and awaited, with no allocation. This is the price of every call from one twin into another.
+- **The mutex row is not a cost; it shows a slow path in today's `Lock`.** With profiling off the plain `Lock`
+  enters the park bracket before it tries the lock (`using (Goroutine.Park(...)) { gate.Wait(); }`), which is
+  where the 200 ns and the 64 bytes go. The hand twin of B1 tries the free lock first (`gate.Wait(0)`) and only
+  then waits. The same first step in the plain `Lock` would give today's product the 28 ns reading with no M:N
+  at all. Routed to the coordinator; not changed here.
+- **A defer inside a twin adds 13 ns beyond the call's 6**, and no allocation. The 88 bytes a deferred closure
+  costs today are the same on both paths (Go: 0).
+- **An interface call made inside a twin costs about 20 ns when the implementer has no twin.** The hidden twin
+  interface of 4.11 tests the receiver for the twin interface; a type that never parks does not implement it, so
+  the call falls to the plain method and its result is wrapped in a `ValueTask` and awaited. The copy loop makes
+  two such calls a chunk. The case where the implementer has a twin was not timed alone.
+- **K3 ("a real program over 2x slower on its non-parking path").** The floor kernel reads 3.0x: its chunk does
+  20 ns of work and the twin path adds 39. It is the worst a copy loop can be, and it is not a program: with a
+  hash behind the same loop the adder is the same 42 ns and the ratio is 1.01x. A loop goes over 2x only where
+  the work between two interface calls made in a twin is under about 20 ns. **I read K3 as not fired, and the
+  floor reading as the number to carry**: 6 ns a twin call, 20 ns an interface call from a twin. The ruling is
+  the coordinator's.
+- **The first run of this table timed nothing.** Its `main` passed each loop to a timing helper as a func value;
+  a func value holds the function's plain body (the generator twins no func literal), so every arm ran plain
+  code. The reading said so before the code did: the twins row equalled the plain row to 0.1 ns. The second form
+  calls the loops from `main` itself and carries the control above. The consequence for a consumer is in 6.9.
+
+### 6.5 Start-up and idle threads (MnCost, twins build, JIT, Windows x64)
+
+The program with no mode prints one line and ends; 20 processes with the scheduler off and 20 with it on,
+alternating. The hold mode sleeps 3 s in `main` and is sampled for its thread count.
+
+| reading | scheduler off | scheduler on | difference |
+|---|---|---|---|
+| process wall, median of 20 (ms) | 601.4 | 617.7 | +16 |
+| process wall, minimum of 20 (ms) | 585.9 | 597.0 | +11 |
+| paired difference, median of 20 pairs (ms) | | | +12 (range −51 to +178) |
+| peak threads while `main` sleeps | 15 | 28 | +13 |
+| peak private memory while `main` sleeps (MB) | 23 | 23 | 0 |
+
+- **Start-up costs about 11 to 16 ms, on a 600 ms process.** That is the scheduler's 12 carriers and its monitor
+  starting, and the main twin's first mount. The spread between pairs is wider than the difference, so the sign is
+  safe and the size is good to a few milliseconds. The 600 ms is today's start of a converted program under the
+  JIT and is not the spike's.
+- **The scheduler holds 13 more threads at rest**: one carrier per P (12 here) and the monitor. They are parked,
+  and they replace the thread a goroutine would otherwise hold, so the count stops growing where the thread path
+  keeps adding one per parked goroutine (29 to 33 threads for 100,000 goroutines in 5.4).
+
+### 6.6 The rows read from the tree (no run)
+
+Line counts are `git diff --shortstat` of B3's tip against the branch point on master (`742a3dbb24`); B4's own
+additions are the lever of 6.1 and the cost fixture.
+
+| part | what the spike changed | reading |
+|---|---|---|
+| converter (`src/go2cs`) | nothing | 0 files, 0 lines. No emitted `.cs` and no golden differs for twins; K4 does not fire |
+| golib | the scheduler, the goroutine's mounted state, the frame's mounted half, the parking twins of the channel and builtin operations | 10 files, +1,242 −9 |
+| go2cs-gen | the twin generator | 8 files, +1,675 −1 (before B4's lever) |
+| hand-owned standard library | `runtime` (the hand-off around a blocking stub, the main twin's wait), `sync` (the `Mutex.Lock` twin), `time` (the `Sleep` twin) | 4 files, +99 −2 |
+| fixtures and tools | `src/tools/mnspike2`, the Behavioral programs | 7 files +831; 27 files +2,231 |
+
+- **defer, recover and the frame model.** A twin keeps the converted body's `defer` and `recover` calls as they
+  are written; what changes is where the frame's state lives while the goroutine is not on a thread. The spike
+  moves it at mount and unmount (38.4 to 38.6 ns for the pair, 3.6); the cost inside a function that does not
+  park is the defer row of 6.4. No emitted call shape changes.
+- **The native-call seam.** `GoNativeCall.cs` is byte-identical to master's on this branch: the spike adds no
+  call into the seam and changes none. The scheduler reads the seam's depth counter in one place (the monitor of
+  5.5, which takes a carrier back from a goroutine that sits in a native call). Where a call is not bracketed
+  (linux and darwin `os.File.Read` today, 5.10) the scheduler cannot see it; that costs a carrier for the length
+  of the call, not correctness.
+- **cgo.** The corpus is emitted with `CGO_ENABLED=0` on every platform, so no converted package holds a cgo
+  call today and M:N adds nothing there. A cgo call, if the corpus ever carries one, is a native call and would
+  ride the same seam: bracketed, it gives its carrier back; unbracketed, it holds one.
+- **Thread-static state (B4-T1).** The census in GolibTests lists 34 fields, 22 of them in golib. The spike moves
+  8 golib fields with the goroutine at mount. 2 more golib fields are goroutine-scoped and are not moved (the
+  allocation tally and the `Gosched` backoff streak), so 10 of 22 is the count a landing form would carry
+  (predicted 8 to 14). **Outside golib, 7 of 12 fields are goroutine-scoped and the spike does not move them**:
+  `getg`'s cache and its owner, the held runtime locks and their count, the pending lock-profile flag,
+  `debug.SetPanicOnFault`, and the sleep timer. A goroutine that parks in a twin and resumes on another carrier
+  reads the other carrier's value for these. None of the 20 programs of section 5 reaches one across a park; a
+  landing form moves them or keys them by goroutine. `sync.Pool`'s shard id is per P in Go and stays with the
+  carrier.
+
+### 6.7 The storm under Native AOT and JIT, memory per goroutine, and the ping at one P (Windows x64, 12 P)
+
+MnMixedStorm with generated twins and `GO2CS_MN=1`, 100,000 goroutines, hold 3 s; the two arms alternate, 5 runs
+each. All ten runs print the output Go prints.
+
+| arm | walls (s) | median (s) | peak threads | peak private memory (MB) |
+|---|---|---|---|---|
+| Native AOT (B2's image, built before B3's rule S and retake) | 7.8, 7.5, 8.1, 7.5, 7.2 | 7.5 | 33 to 38 | 628 to 633 |
+| JIT (B3's final build) | 7.3, 7.2, 6.8, 7.0, 7.3 | 7.2 | 36 to 40 | 612 to 618 |
+| Go's own build | 3.8, 3.8 | 3.8 | 14 to 15 | 883, 889 |
+
+| memory per goroutine | peak private at 10,000 (MB) | at 100,000 (MB) | per goroutine |
+|---|---|---|---|
+| Go | 101, 101 | 883, 889 | 8.9 KB |
+| twins, JIT | 76, 83 | 612 to 618 | 6.1 KB |
+
+| ping, `GO2CS_MN=1`, 200,000 round trips (hand-twin fixture of B1) | ns a round trip | steps on the run-next slot |
+|---|---|---|
+| 12 P, before | 1,397, 1,445, 1,399 | 396,899 to 396,900 of 400,002 |
+| `GO2CS_MN_PROCS=1` | 1,710, 1,705, 2,115 | 396,899 to 396,900 of 400,002 |
+| 12 P, after | 1,508, 1,397, 1,427 | 396,900 of 400,002 |
+
+- **Native AOT reads 0.3 s behind the JIT on this program** and holds the same threads and memory. The image is
+  B2's, so the pair differs in vintage as well as in compiler; a twin program publishes and runs under Native AOT
+  at the size B2 recorded, and this section adds only that it is not slower in kind.
+- **A parked goroutine costs 6.1 KB under twins and 8.9 KB in Go.** Go's figure is its 8 KB starting stack on
+  Windows; the twin's is the state machines of the frames that are live at the park, the goroutine record, and
+  the channel waiter. This is the whole of finding 13 of section 3.
+- **The ping does not get faster on one P; it gets slower by about 300 ns.** The run-next counter says why: in
+  both arms 396,900 of the 400,002 steps took the run-next slot, so at 12 P the round trip already stays on one
+  carrier and there is no wake across carriers to remove. The 700 ns of a step is the step itself (park, ready,
+  resume). Go reads 425 to 432 ns for the round trip (3.6), and today's thread path 1,677 to 1,715. Where inside
+  the step the time goes was not measured.
+
+### 6.8 Predictions and verdicts
+
+Every line was written before its run; the dated blocks are in the lane's prediction file. P5 is the plan's cost
+bar.
+
+| id | prediction | reading | verdict |
+|---|---|---|---|
+| B4-G1 | of the wall twins add to `runtime`, the nested sibling run is 40 to 60% and the twin generator's own analysis 25 to 45% | the nested run is all of it (84 to 95 s of 86 to 92 s); analysis 2.5 to 2.7 s | MISS, both halves |
+| B4-G2 | the lever brings `runtime` from +91% to +35..55%; 50% inside P5's +50% | +5.4% and +6.2% (last form) | MISS on the good side; inside P5 |
+| hybrid (written 21:29) | the memo with the late siblings nested: the right twins, wall +15..40% | the right twins; +100% and +128% (the one late generator is the one that costs) | controls HIT, cost MISS |
+| last form (written 21:42) | the right twins at +3..11% | byte-identical twin files; +5.4% and +6.2% | HIT |
+| B4-G3 | `net/http`: generator time +40..80% before the lever, +20..45% after; assembly +5..15% | +76%; +7%; +14.3% | HIT; MISS on the good side; HIT |
+| B4-G3 | `strconv`: 0 twins, +0 bytes; wall +5..25% after the lever | 0 of 57; +0 bytes; +0.04 and +0.25 s, inside the off arm's spread | HIT; HIT; the wall line is not resolved |
+| B4-C1 | a twin call that completes synchronously: +5..25 ns | +6.0 ns, 0 B | HIT |
+| B4-C2 | `Mutex` pair in a twin, `sync` as built: +0..3 ns | −202 ns, −64 B (6.4: the plain `Lock`'s slow path) | MISS on the good side |
+| B4-C3 | defer in a twin: +20..80 ns; 55% no added allocation | +19 ns; none added | MISS by 1 ns on the good side; HIT |
+| B4-K3 | the copy kernel through twinned `io`: at most 1.3 times | 3.0 times on the floor kernel; 1.01 times with a hash behind it | MISS on the bad side (kernel); the hashed stream's own line (at most 1.05) HIT |
+| B4-S1 | start-up +2..10 ms; the scheduler adds 9 to 13 threads | +11 to +16 ms; +13 | MISS, high by 1 to 6 ms; HIT |
+| B4-A1 | AOT median 7.0 to 8.2 s, JIT 6.3 to 7.5 s; 70% that AOT is slower by 0.3 to 1.2 s | 7.5; 7.2; 0.3 | HIT (the difference at the low edge) |
+| B4-M1 | per goroutine: Go 8.0 to 9.0 KB, twins 5 to 7 KB | 8.9; 6.1 | HIT |
+| B4-P1 | the ping at one P reads 150 to 400 ns | 1,705 to 2,115 ns, above the 12 P reading | MISS, in the other direction |
+| B4-T1 | 8 to 14 of golib's thread-static fields belong to the goroutine | 10 of 22 | HIT |
+
+| P5 line | reading | verdict |
+|---|---|---|
+| a twin call completing synchronously +5..25 ns | +6.0 ns | HIT |
+| uncontended `Mutex.Lock` in a twin at most +30 ns | faster than the plain form | HIT |
+| defer in a twin +40..80 ns and 1 allocation | +19 ns, none | MISS on the good side |
+| start-up at most +5 ms and +3 threads | +11 to +16 ms; +13 threads | MISS, both (the thread line was called a miss beforehand) |
+| IL at most +35% on `net/http`, 0 on `strconv` | +14.3%; 0 | HIT |
+| generator time at most +50% on `net/http` | nested +76%; last +7% | nested MISS; last HIT |
+| 8 to 14 of golib's thread-static fields move to the goroutine | 10 of 22 | HIT |
+
+Stop lines: **K3 read, and in my reading not fired** (6.4: no program reads over 2 times; the floor kernel of a
+copy loop does, and the number it gives is carried). The ruling is the coordinator's. **K4 not fired** (the
+converter is untouched, 6.6). K1 and K2 were settled in sections 4 and 5.
+
+### 6.9 Findings
+
+1. **The build-wall cost of B2 is gone in the last form**: `runtime` +5.4% and +6.2% where B2 read +91%,
+   `net/http` +7% where the nested form reads +76%, a package without a park +0 within the spread. The twin files
+   and the assembly are the same bytes in every form. A landing form states the generator order instead of
+   getting it from a type name.
+2. **What a twin costs where nothing parks**: 6 ns a call from one twin into another, about 20 ns an interface
+   call made in a twin on an implementer that has no twin, 13 ns more for a defer, no allocation in any of them.
+   A loop pays over 2 times only where the work between two such interface calls is under about 20 ns.
+3. **A func value holds the plain body, so a park behind one holds its carrier.** The generator twins named
+   functions and methods; a func literal and any function passed as a value run the plain body
+   under either build. A park reached that way inside a twin is the untwinned-dependency case of 5.6: Go's
+   output, and a carrier held for the length of the park. `net/http`'s report counts 26 parks inside func
+   literals and 69 calls through a func value in its twins, and a handler registered as a func value is the
+   common shape of that package. This is the widest gap in the generator's reach, wider than the by-ref
+   refusals of 6.3; what closing it asks of a func value's representation belongs to the final answer.
+4. **The assembly grows by 14% on the heaviest parking package measured** and by nothing on a package without a
+   park.
+5. **Start-up costs 11 to 16 ms and 13 threads at rest** on 12 P (one carrier per P and the monitor).
+6. **A parked goroutine is 6.1 KB against Go's 8.9 KB**, and Native AOT runs the storm within 0.3 s of the JIT.
+7. **The park step is 700 ns and is not the wake between carriers** (6.7). Go's round trip is about a third of
+   the twin's. For a program that parks all the time this, and not the twin call, is the cost that matters; it
+   is the scheduler's, and the spike did not profile it.
+8. **Seven thread-static fields outside golib are goroutine-scoped and are not moved** (6.6). A landing form
+   moves them or keys them by goroutine.
+9. **Four readings are about today's product and not about M:N** (routed to the coordinator, nothing changed
+   here): `TypeGenerator` is 93% of the generator time on `runtime` and, with `ImplementGenerator`, 88% on
+   `net/http`; the plain `sync.Mutex.Lock` has no try-first step and reads 230 ns and 64 bytes where the twin
+   reads 28 ns and none (Go: 3.8 ns); a deferred closure costs 24.7 ns and 88 bytes (Go: 4.6 ns, none); the
+   converted SHA-256 reads 4,430 ns for 512 bytes where Go, with the CPU's instructions, reads 254.
+
+### 6.10 What B4 did not measure
+
+- **An interface call in a twin whose implementer has a twin**: not timed alone (6.4 times the fallback).
+- **The cost table on linux and darwin, and under Native AOT**: the micro rows are Windows x64 under the JIT;
+  Native AOT was read for the storm only, on B2's image.
+- **Where the 700 ns of a park step goes**, and any contended path (a contended `Mutex`, a select with several
+  ready cases).
+- **`net/http` with its dependencies twinned, and at run time**: its 191 dependencies were built with twins
+  off and the package was built, not run. The prediction named `sync` and `io` twinned beside it.
+- **The whole standard library's build wall under the last form**: three projects were timed.
+- **The generator inside an editor**, where it runs as the source changes; only command-line rebuilds were
+  timed.
+- **Start-up under Native AOT.**
+- **Why `TypeGenerator` costs about 190 ms a file.**
+
+### 6.11 Gates (Windows x64, dotnet SDK 10.0.400 / runtime 10.0.11, go1.26.10; M:N switches unset)
+
+Run on the tree as committed with this section's code (`e41abb2081`: the sibling forms and MnCost), one after the
+other, 22:31 to 23:02 CST.
+
+| gate | reading |
+|---|---|
+| GenTests | 0 failed, 496 passed of 496 (75 s) |
+| GolibTests | 0 failed, 2,534 passed, 45 skipped of 2,579 (688 s) |
+| `go test ./...` in `src/go2cs` (the converter suite and the repo guards) | 11 packages ok, 0 failed (1,073 s) |
+| solution integrity (`check-solution-integrity.ps1`) | OK: all 1,034 behavioral projects are registered in `go2cs.slnx` |
+
+- **The integrity gate is green**: the branch's first commit registers `MnIfaceTwin`, the one row 5.11 read red.
+- GenTests instantiate every generator type, `ZTwinGenerator` among them; it returns at once in a project
+  without `GoTwins`.
+- The repo guards ran once more after this section was placed. That reading is in the phase's DONE post, since
+  writing it here would change the file they read.
+- The behavioral suite as a whole was not run; no file under it changes in this phase.
