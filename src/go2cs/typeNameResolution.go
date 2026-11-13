@@ -655,6 +655,47 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 // methodless named func types, lifted anonymous types, array/slice/chan composites); the two must
 // flip together, since a shape one renders and the other does not is a name that exists in only
 // half the emission.
+// foreignAnonStructAliasTarget returns the lift another package published for its alias of an anonymous struct,
+// `<ns>.lib_package.Tindex_constraintᴛ1` below the `go` root for modernc.org/sqlite/lib's `Tindex_constraint`
+// (its GoTypeAlias record), when t is that alias. A `global using` RHS cannot name the importer's own
+// `libꓸTindex_constraint` alias, and unaliasing reaches a bare struct this package never lifted, which rendered as
+// Go text: `type cIndexConstraint = sqlite3.Tsqlite3_index_constraint` emitted
+// `go.main_package/struct{FiColumn int32; Fop uint8}` (sqlite-cs S2). The publisher's lift is the type.
+func foreignAnonStructAliasTarget(t types.Type, current *types.Package) (string, bool) {
+	alias, ok := t.(*types.Alias)
+
+	if !ok {
+		return "", false
+	}
+
+	obj := alias.Obj()
+
+	if obj == nil || obj.Pkg() == nil || obj.Pkg() == current {
+		return "", false
+	}
+
+	if st, isStruct := types.Unalias(alias).(*types.Struct); !isStruct || st.NumFields() == 0 {
+		return "", false
+	}
+
+	key := getSanitizedIdentifier(obj.Pkg().Name()) + "." + getCoreSanitizedIdentifier(obj.Name())
+
+	packageLock.Lock()
+	target, exists := importedTypeAliases[key]
+	ambiguous := ambiguousImportedTypeAliases.Contains(key)
+	packageLock.Unlock()
+
+	unrooted, rooted := strings.CutPrefix(target, RootNamespace+".")
+
+	if !exists || ambiguous || !rooted {
+		return "", false
+	}
+
+	// The RHS renderer roots every name it is given (renderCSFullTypeName's rootNested mode), so hand it the name
+	// below the root, as every other arm does.
+	return unrooted, true
+}
+
 func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) string {
 	if t == nil {
 		return ""
@@ -669,6 +710,10 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 	// replaced by what it RESOLVES to, at any depth. `type second = first` (with `type first =
 	// []Header`) otherwise renders the alias's own name and resolves to nothing.
 	if v.inUsingAliasTarget {
+		if target, ok := foreignAnonStructAliasTarget(t, v.pkg); ok {
+			return target
+		}
+
 		if unaliased := types.Unalias(t); unaliased != t {
 			return v.getFullyQualifiedTypeName(unaliased, isUnderlying)
 		}
@@ -825,7 +870,18 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 	// name or a deferred marker, never raw Go type text (see the getAliasQualifiedTypeName twin).
 	if !isUnderlying {
 		if name := v.deferredDynamicTypeName(t); name != "" {
-			return v.usingAliasTypeQualifier(t) + name
+			qualifier := v.usingAliasTypeQualifier(t)
+
+			// A deferred MARKER is replaced by the lift's name only after the file-visit barrier, so the
+			// `<pkg>_package/` qualifier's slash, which the rendering below turns into a dot for a name, is
+			// never rewritten in front of a marker: a `global using` declared in an EARLIER file than the
+			// anonymous struct it names emitted `go.main_package/TAggInfoᴛ1` (sqlite-cs S15). Give a marker
+			// the dotted qualifier the slash would have become.
+			if qualifier != "" && strings.HasPrefix(name, dynamicTypeMarkerPrefix) {
+				qualifier = strings.TrimSuffix(qualifier, "/") + "."
+			}
+
+			return qualifier + name
 		}
 	}
 

@@ -1,4 +1,4 @@
-global using AggInfo = go.main_package/TAggInfoᴛ1;
+global using AggInfo = go.main_package.TAggInfoᴛ1;
 
 namespace go;
 

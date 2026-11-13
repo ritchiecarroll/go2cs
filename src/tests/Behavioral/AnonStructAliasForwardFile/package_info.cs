@@ -28,7 +28,7 @@ using static go.main_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b466e436f6c756d6e20696e7433323b20466e46756e6320696e7433327d", "TAggInfoᴛ1")]
-[assembly: GoTypeAlias("AggInfo", "go.main_package/«DYNTYPE:7374727563747b466e436f6c756d6e20696e7433323b20466e46756e6320696e7433327d:DYNTYPE»")]
+[assembly: GoTypeAlias("AggInfo", "go.main_package.«DYNTYPE:7374727563747b466e436f6c756d6e20696e7433323b20466e46756e6320696e7433327d:DYNTYPE»")]
 [assembly: GoTypeAlias("TAggInfo", "go.main_package.TAggInfoᴛ1")]
 // </ExportedTypeAliases>
 

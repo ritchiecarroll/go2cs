@@ -1,4 +1,4 @@
-global using cIndexConstraint = go.main_package/struct{FiColumn int32; Fop uint8};
+global using cIndexConstraint = go.ForeignAnonStructAliasAlias.lib_package.Tindex_constraintᴛ1;
 
 namespace go;
 
