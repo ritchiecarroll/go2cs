@@ -283,6 +283,15 @@ public class ImplementGenerator : ISourceGenerator
             bool constraintProxy = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("ConstraintProxy")).value?.Trim() ?? "false");
             bool production = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Production")).value?.Trim() ?? "false");
 
+            // A CLOSED CARRIER record (the converter's closedCarrier.go): ONE instantiation of a generic type
+            // satisfies a NON-generic interface because a member the interface requires names the type's own
+            // type parameter (`box<point>` against `valuer { point val(); }`, where `val<T>` returns T). The
+            // open-definition forms below (`partial struct box<T> : valuer`, the generic `boxжvaluer<T>`)
+            // would forward a T where the interface wants `point` (CS0029), so the pair takes an adapter
+            // class written for the one instantiation, named from the type's bare name.
+            bool closed = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Closed")).value?.Trim() ?? "false") &&
+                structType is INamedTypeSymbol { IsGenericType: true };
+
             // A VALUE record for a CONSTRUCTED generic target (`wrap<@string>` implementing
             // `Lesser<wrap<@string>>`) extends the OPEN definition, since a partial declaration can only
             // extend that (see emittedGenericValueImpls), and left the interface CLOSED:
@@ -1124,6 +1133,7 @@ public class ImplementGenerator : ISourceGenerator
                 string adapterTypeParameters = "";
                 string adapterConstraintClause = "";
                 string? foreignClosedStructName = null;
+                string? localClosedStructName = null;
 
                 if (structType is INamedTypeSymbol { IsGenericType: true } genericStructType)
                 {
@@ -1164,6 +1174,18 @@ public class ImplementGenerator : ISourceGenerator
                         // resolved to nothing (CS0246). Qualified HERE rather than in the shared
                         // helper so every existing caller of GetFullTypeName stays byte-identical.
                         foreignClosedStructName = GlobalQualify(genericStructType.ToDisplayString());
+                    }
+                    else if (closed)
+                    {
+                        // A LOCAL generic's CLOSED CARRIER: a non-generic adapter over the one
+                        // instantiation, `boxжvaluer` wrapping `ж<box<point>>`. The identifier is the
+                        // symbol's bare name, as on the foreign closed route above, and the wrapped type is
+                        // spelled in full so the argument list resolves from anywhere in the assembly.
+                        if (!emittedGenericPointerAdapters.Add($"closed|{genericStructType.ToDisplayString()}|{interfaceName}"))
+                            continue;
+
+                        adapterBaseName = genericStructType.Name;
+                        localClosedStructName = genericStructType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                     }
                     else
                     {
@@ -1295,7 +1317,7 @@ public class ImplementGenerator : ISourceGenerator
                     // A LOCAL name is a bare SYMBOL name — UNescaped, unlike display strings — so a
                     // keyword-named struct must be "@"-escaped here or `ж<fixed>` breaks the parse
                     // (the CS0708 'main_package.' cascade). No-op for every other name.
-                    StructName = foreignStruct ? foreignClosedStructName ?? GlobalQualify(structType.GetFullTypeName(true)) : $"{EscapeCsKeyword(adapterBaseName)}{adapterTypeParameters}",
+                    StructName = foreignStruct ? foreignClosedStructName ?? GlobalQualify(structType.GetFullTypeName(true)) : localClosedStructName ?? $"{EscapeCsKeyword(adapterBaseName)}{adapterTypeParameters}",
                     InterfaceName = interfaceName,
                     // Adapter class name composes with the shared pointer glyph (CatжAnimal) - always
                     // via Symbols.PointerPrefix so a future symbol change follows automatically.
@@ -1368,10 +1390,18 @@ public class ImplementGenerator : ISourceGenerator
             // neither assembly can partial the other, exec_posix CS1503). A local NAMED FUNC
             // type (a DELEGATE - flag's funcValue) takes the same route: a delegate cannot
             // be a partial struct, and its Go methods are package extension methods that
-            // bind on the wrapped copy.
-            if (structType.TypeKind == TypeKind.Delegate ||
+            // bind on the wrapped copy. A CLOSED CARRIER pair (see `closed` above) takes it too:
+            // its partial could only extend the OPEN definition, which is the defect the carrier
+            // exists for, so it never reaches the open-definition fold below.
+            if (structType.TypeKind == TypeKind.Delegate || closed ||
                 (structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly)))
             {
+                // A GENERIC wrapped type is named and spelled from the SYMBOL, never from structName:
+                // GetFullTypeName's generic arm renders `Name<args>` with no containing class, which
+                // resolves nowhere outside the declaring package class and would land the argument
+                // list inside the adapter's identifier.
+                INamedTypeSymbol? genericValueTarget = structType is INamedTypeSymbol { IsGenericType: true } genericValueSymbol ? genericValueSymbol : null;
+
                 // Symbol-OR-name on BOTH sides (mirrors the pointer arm): a public adapter
                 // whose ctor takes an INTERNAL wrapped type is CS0051 (flag's internal
                 // funcValue delegate under the public Value interface).
@@ -1419,7 +1449,7 @@ public class ImplementGenerator : ISourceGenerator
                     // FULLY-qualified: the bare name resolves to the LOCAL same-named type
                     // inside this package class (os's ΔSignal interface shadowed syscall's
                     // ΔSignal struct - the adapter field/ctor typed the wrong side).
-                    StructName = GlobalQualify(structType.GetFullTypeName(true)),
+                    StructName = genericValueTarget?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? GlobalQualify(structType.GetFullTypeName(true)),
                     InterfaceName = interfaceName,
                     // Composes with Symbols.ValueAdapterInfix - the value sibling of the
                     // PointerPrefix-composed pointer adapters. A FOREIGN struct's name is
@@ -1427,7 +1457,7 @@ public class ImplementGenerator : ISourceGenerator
                     // same-simple-name collision guard; a LOCAL delegate stays bare. Both simple
                     // names compose UNESCAPED (an interior "@" marker lexes as two tokens); keep
                     // in sync with the converter's valueAdapterTypeRef composition.
-                    AdapterName = $"{(structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly) ? ForeignPackagePrefix(structType) : "")}{GetUnsanitizedIdentifier(GetSimpleName(structName))}{ValueAdapterInfix}{GetUnsanitizedIdentifier(GetSimpleName(interfaceName))}",
+                    AdapterName = $"{(structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly) ? ForeignPackagePrefix(structType) : "")}{GetUnsanitizedIdentifier(genericValueTarget?.Name ?? GetSimpleName(structName))}{ValueAdapterInfix}{GetUnsanitizedIdentifier(GetSimpleName(interfaceName))}",
                     AdapterScope = valueAdapterScope,
                     ImplementsFormattable = implementsFormattable,
                     Methods = methods,

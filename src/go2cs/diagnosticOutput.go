@@ -151,6 +151,10 @@ const (
 	// may write the slice, so its writes would reach the copy and not the caller (sliceWideningWriteRefusals.go).
 	diagnosticSliceWideningRefused = "GO2CS2006"
 
+	// diagnosticClosedCarrierRefused: a WARNING. An instantiation of a generic type satisfies a non-generic interface
+	// through a closed carrier, in a shape the carrier does not serve: a type-argument slot, a promoted method, or
+	// a second instantiation for one pair (closedCarrier.go). The conversion goes on and the C# build fails there.
+	diagnosticClosedCarrierRefused = "GO2CS2007"
 	// diagnosticFileDropped: a file the converter failed on (a recovered visitor panic), whose output was not
 	// written; the run fails at its end naming each one (droppedFiles.go). -warn may not downgrade it: the loss is
 	// not loud.
@@ -165,13 +169,6 @@ const (
 	// arrays and disagree on inline storage. A refusal: the two layouts differ (inlineArrayAdmission.go).
 	diagnosticInlineArrayMixedPair = "GO2CS2010"
 )
-
-// converterWarningCodes are the converter codes printed at "warning" by design (reportWarningDiagnostic), never at
-// "error". Every other converter code is an error; a code -warn downgrades stays one. TestGo2csDiagnosticCodeRegistry
-// reads this map for each code's severity.
-var converterWarningCodes = map[string]bool{
-	diagnosticInlineArrayCapped: true,
-}
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST
 // line/column pair the anchor allows, so a Windows drive letter ("C:\src\te.go:3:16") stays in it.

@@ -395,6 +395,9 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			return refusePackage(options, diagnosticInlineArrayMixedPair, err)
 		}
 
+		// A WARNING, never a refusal: a type argument that meets its constraint only as a closed pair (closedCarrier.go).
+		warnClosedCarrierTypeArguments(pkg)
+
 		var projectName, projectFileName, projectFileContents string
 		projectName, packageNamespace = getProjectName(packageInputPath, options)
 		packageNamespace = namespaceWithDirectorySegment(packageNamespace, pkg.PkgPath, pkg.Name)

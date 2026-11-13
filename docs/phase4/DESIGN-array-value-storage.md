@@ -811,6 +811,141 @@ The no-family control (`sbyte[]`) is 1,325,072 bytes under Native AOT.
 > - **7.7.5 question 2** is a BOARD line, "under Native AOT, ILC 10.0.14's `TrimMode=partial` does not compile a
 >   referenced non-trimmable library's unreferenced code", routed by COORD.
 
+#### 7.7.6 Can admission be auto-detected? (dated block, 2026-11-13, C1)
+
+> **The owner's ask, through COORD** (inbox C1 20261113T034712Z). Instead of the `-inline-arrays` opt-in, could I0
+> admit a struct type when its OWN declaring package, in its NON-TEST files, converts a value of it whole through
+> `unsafe.Pointer`, with the option kept as an override? This block is a read-only census of that rule, and a
+> recommendation.
+>
+> **Evidence:** `docs/phase4/data/inlinearray-scout/auto/`. `census-r4-auto.go` is the tool's `-auto` mode.
+> - `auto-sqlite-lib-libc.txt` covers modernc.org/sqlite v1.62.0 (`lib` and the `sqlite` package) and every package
+>   of modernc.org/libc v1.80.1.
+> - `auto-std.txt` covers std, Go 1.26.10, with test files.
+> - Both are linux/amd64 under the ruled caps (4 KiB per array and per struct).
+>
+> C2's I0-lib parts A to C do not depend on this; only part D does.
+
+**What the census counts.**
+- **Sites.** Each `(*X)(p)` with `p` an `unsafe.Pointer`, or `unsafe.Pointer(e)` with `e` a `*X`.
+- **What a site needs inline.** The types that must be inline for `X` to be layout-equal: every struct type
+  reachable from `X` BY VALUE (X itself, array elements, struct fields, at any depth) that holds an array.
+- **Where each type is converted.** Each such type is recorded against the package that converts it, split into test
+  and non-test files.
+- **Anonymous struct types** (ccgo writes many of its types as aliases of them) are keyed by their type string. They
+  count as in-package when a package that spells them converts them; go2cs lifts each one into the package that
+  writes it.
+
+**1. lib's 72, and the closure.**
+- **The 72 reconcile exactly.** lib's 72 whole-converted types are the conversion TARGETS that hold an array
+  directly. Every one is converted in lib's own non-test files.
+- **The rule must take the CLOSURE**, not only the targets:
+  - 25 more targets hold their arrays only in nested structs;
+  - 23 types are reached only by nesting.
+
+  Inline storage for a target is layout-equal only if those are inline too. Keyed by type, lib's auto set is
+  **118 types**, all converted in lib's own non-test files.
+- **Converted only in another package's non-test files: 0** in lib, sqlite and libc. **Only in test files: 0.**
+
+**2. Does auto admit anything the opt-in would not?** No. Over every package read, auto admits 0 types outside the
+opt-in's population. Auto is a SUBSET of the opt-in:
+
+| package | the opt-in admits | auto admits of them | the difference |
+|:--|--:|--:|:--|
+| modernc.org/sqlite/lib | 130 | 118 | 12 types never converted whole, nor nested in a type that is |
+| modernc.org/libc | 175 | 98 | 77 |
+| libc's subpackages (`libc/netdb`, `libc/signal`, `libc/sys/...`, 19 packages) | 113 | 1 | 112: they declare C types for transpiled programs, which convert them |
+| std, for I2 | 189 | 53 | 136 |
+
+- **The 130 is keyed by type.** 7.7's P1 counted lib's 148 by struct-expression POSITION, where identical anonymous
+  structs count once per spelling.
+- **libc reads 99 admitted** by the auto tally and 98 by this comparison. One anonymous type is attributed to
+  different packages by the two passes; NOT RESOLVED.
+- **Over the caps:** 5 libc types are converted whole in libc but exceed the caps, so they stay as today.
+  - Two are crypt_blowfish's `BF` key tables: `[4][256]TBF_word`, over 4 KiB.
+  - Two are musl logarithm data tables: `tab [128]`, plus their polynomial arrays.
+  - One is a netlink buffer, `[8192]Tuint8_t`.
+
+**3. libc and std, for I2.**
+- **libc:** 104 types need inline storage; all are converted in libc's own non-test files; 99 are admitted and 5
+  are over the caps.
+- **std**, over its 12 declaring packages: 110 need inline storage.
+  - 96 are converted in their own non-test files: 53 admitted, 40 managed, 3 over the caps.
+  - **6 are converted only in another package:** runtime converts `internal/abi.ITab`, `.InterfaceSwitchCache`,
+    `.TypeAssertCache`, `internal/chacha8rand.State` and `internal/cpu.CacheLinePad`, and sync converts
+    `sync/atomic.Pointer[poolChainElt]`.
+  - 8 are converted only in tests.
+  - So std's runtime-internal packages are where the own-package rule misses. std stays out of I0 under either
+    trigger.
+
+**4. Soundness: what the rule cannot see, and whether a miss is loud.**
+- **A type the rule misses keeps today's emission exactly** (`array<T>` fields). So a miss reproduces today's
+  behaviour, never a new layout. Native memory read as such a struct is refused by name, which is S22's refusal
+  (`src/core/golib/runtime/RuntimeErrorPanic.cs:192`). A managed pointer round trip has no layout question.
+- **Generic conversions** (a target holding a type parameter, so the instantiation chooses the type):
+  - lib, sqlite and libc have 1, `sqlite.go:1223`'s `cFuncPointer[T]`. It reads a function value as a `uintptr`,
+    which is S1's wall, and it holds no array at any instantiation.
+  - std has 84 in non-test files: `atomic.Pointer[T]`, `abi.Escape` and kin. They round-trip a pointer that was
+    always a `*T`, which needs no layout equality.
+  - A generic reinterpretation of an array-holding struct would be missed, and would meet today's behaviour, loudly
+    for native memory.
+- **Function values:** not a blind spot. A conversion is an expression in some function body, and the census reads
+  every body in the packages it loads. A func value moves where the CALL happens, not where the conversion is
+  spelled. So a conversion in a func literal is read in its own package, and one in another package's function is
+  counted as converted in that package.
+- **`reflect.NewAt`:** 0 calls in all three corpora.
+- **The one NEW hazard is a MIXED reinterpret chain**: `(*T)(unsafe.Pointer(&x))` where one side is admitted and
+  the other is not. Inline bytes read as a struct that still holds an `array<T>` reference is not a case today's
+  paths were built for.
+  - **lib, sqlite and libc:** 1,863 chains, 0 mixed.
+    - 1 has both sides admitted: S22's.
+    - In 914 only one side holds an array (a struct read from or written as bytes or scalars). The struct side is
+      admitted in 908 of those; the other 6 are libc's over-cap tables, which stay as today.
+  - **std:** 460 chains, **7 mixed**, all in the runtime's GC work buffers: `workbuf` against `stackWorkBuf` and
+    `stackObjectBuf`, where one side holds pointers.
+  - The hazard is NOT specific to auto. 7.7's declaration-local opt-in splits those pairs the same way. So I0 needs a
+    pair rule under either trigger.
+
+**Recommendation: AUTO, with `-inline-arrays` as an override, on four conditions.**
+1. **Admission is the CLOSURE.** It covers every struct reachable by value from a type the declaring package's
+   non-test files convert whole, and each type must pass 7.7's declaration-local rules and caps. Admitting only the
+   conversion targets would admit S22 and leave 48 of lib's 118 types behind it.
+2. **A pair rule.** A reinterpret chain whose two sides disagree on admission is a convert-time error naming the
+   chain and both types. It is never emitted, so a mixed pair cannot reach run time. lib reads 0 such chains, so the
+   rule costs lib nothing.
+3. **The decision is stamped in `package_info` (Q4).** A `-tests` conversion reads the stamp; it never re-derives the
+   decision from `_test.go` files. The census shows why: std has 8 types converted only in tests, which must not
+   change a shipping layout.
+4. **The override covers what auto cannot see.**
+   - `-inline-arrays=<patterns>` forces packages ON with the opt-in's full declaration-local population. That is
+     libc's subpackages (112 types that only their consumers convert), and any package whose reinterpretation is
+     generic.
+   - A `-` form turns auto off for a package.
+   - std stays out at I0 whatever the option says.
+
+**What this changes in 7.7, if ruled:**
+- **P1 becomes:** with auto on and no override, lib admits **118** types (type-keyed) with 0 refusals, S22 among
+  them. With `-inline-arrays=modernc.org/sqlite/lib`, it admits the 130 of the opt-in population.
+- **A new stop line, S7:** a mixed reinterpret chain is emitted instead of refused.
+- **Its P2 control:** the S22 shape with only one side admitted must be refused at convert time, by name.
+
+> **Amended 2026-11-13 (C1), recording two COORD rulings:**
+> - **7.7.6 is RULED as recommended** (inbox C1 20261113T040024Z). Admission is AUTO-DETECTED on its four
+>   conditions:
+>   - the closure;
+>   - the pair rule, as a convert-time error, `GO2CS2010`;
+>   - the `package_info` stamp;
+>   - `-inline-arrays` as an override, with a `-` form that turns auto off.
+>
+>   std stays out at I0. Part D's admission is reviewed against census-r4: lib 118 under auto, 130 with the
+>   override.
+> - **P6 is scored AS WORDED, and it is MISSED** (inbox C1 20261113T052540Z): C2 measured a rooted publish of
+>   17,793,904 bytes against the 2.4 MB bound. The prediction stays as written. What it meant: the 2.4 MB was my
+>   standalone probe's TOTAL, a 1,325,056-byte app plus a family INCREMENT of 976,432 bytes (7.7.2). The shipped
+>   family needs golib, about 16.9 MB of every go2cs Native AOT binary, which the bound never included. Read as the
+>   increment, C2's rooted reading adds 860,160 bytes, under the 976,432 measured in 7.7.2. That reading is recorded
+>   beside the score, not in place of it.
+
 > **Amended 2026-11-13 (C2), part D: admission and its record** (COORD's rulings of 04:00Z, 05:20Z and 06:19Z):
 > - **Admission is automatic; the option overrides it.** A struct is admitted when its own package's non-test files
 >   convert it whole through `unsafe.Pointer`, together with every struct it holds by value, plain ones included (C1's
