@@ -127,14 +127,14 @@ the table says what quiet means for each:
 | H2 | `migrate-gorelease.ps1 -Apply` moves the pin and resets the build counter to 0. `go generate .` from `src/go2cs`, under the target toolchain, regenerates `toolchainPins.go` (the release the dotnet tool downloads, read from the `go` line), and `internal/gentoolchainpins/testdata` is refreshed from the same live sources in the same commit: `TestToolchainPinsAreWhatTheGeneratorWrites` is red until both move. A census `problem` (an anchor matching 0) is re-anchored in its own commit before `-Apply`. *(Amended 2026-11-13, the 1.26.11 patch hop's H2.)* |
 | H3 | A package census identical in membership to the outgoing one. Any difference is a finding. |
 | H4, H4a | Nothing. A patch release changes no language, and the release-tag set is minor-keyed (§1.1); confirm both against the source rather than assume them. H4a is owed only if H3 or H4 finds work. |
-| H5 | The seeded reconvert, scored against the prediction above. |
+| H5 | The seeded reconvert, scored against the prediction above. `src/core/VERSION` is not written by the `-stdlib` emission: it is copied from the target GOROOT's `VERSION` (check first that the committed file equals the outgoing GOROOT's byte for byte), so a prediction names it under its real mechanism. *(Amended 2026-11-13, the 1.26.11 patch hop, where the prediction said the emission writes it.)* |
 | H6 | The hand-own re-audit for each hand-owned file whose upstream source the delta touches. The `.cs.auto` differential names them. |
 | H7 | Compile parity in full, every flavour. |
 | H7a | Merge the line's branch tip into the patch branch and re-read the gates at the merged tip. |
 | H8 | H5 already emits every target. The manifest diff against the outgoing one is expected empty, and any entry is a finding. |
 | H9 | `check-no-regression.ps1` green, with no golden changed. A changed golden is a finding. |
 | H10 | Re-derive the rows of the packages the delta touches. Every other row's reading stands; release day's §6 full sweep re-reads every row at the tree that ships. |
-| H11, H12, release day | As written. |
+| H11, H12, release day | As written. The binary-compatibility guard compares the first release after a patch hop with the previous patch line's last revision: a standard-library package's baseline is the highest published revision on its Go MINOR (`Invoke-GoApiCompatGuard -BaselineLine Minor`, push-nuget.ps1), and a guard that compares no go.* package while one has a published revision on that minor is red. *(Amended 2026-11-13, the 1.26.11 patch hop: under the first-three rule 1.26.11.1 had no baseline, and the guard read CLEAN having compared nothing. COORD 20261113T061237Z.)* |
 
 ### 1.4 A maintenance release
 
