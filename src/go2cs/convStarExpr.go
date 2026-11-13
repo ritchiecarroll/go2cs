@@ -22,6 +22,11 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		return emission
 	}
 
+	// A func read as a word, or a word read back as a func (funcWordOperations.go, m2 and r1).
+	if emission, ok := v.funcWordEmission(starExpr); ok {
+		return emission
+	}
+
 	ident := getIdentifier(starExpr.X)
 	pointerRecv, recvName := v.isPointerReceiver()
 

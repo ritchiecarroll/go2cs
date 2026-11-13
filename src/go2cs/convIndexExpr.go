@@ -17,6 +17,11 @@ import (
 )
 
 func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprContext) string {
+	// ccgo's __ccgo_fp, an interface's data word read as a func's number (funcWordOperations.go).
+	if emission, ok := v.funcWordEmission(indexExpr); ok {
+		return emission
+	}
+
 	var contexts []ExprContext
 	var ptrDeref string
 
