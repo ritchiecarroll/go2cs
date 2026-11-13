@@ -418,6 +418,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
 
     [TestMethod]
+    public void CheckDeclaredTypeNamedFloat() => CheckTarget("DeclaredTypeNamedFloat");
+
+    [TestMethod]
     public void CheckDeepEqual() => CheckTarget("DeepEqual");
 
     [TestMethod]
@@ -1559,6 +1562,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedSliceOfArrayDims() => CheckTarget("NamedSliceOfArrayDims");
+
+    [TestMethod]
+    public void CheckNamedSliceOverNamedSlice() => CheckTarget("NamedSliceOverNamedSlice");
 
     [TestMethod]
     public void CheckNamedSlicePointerElements() => CheckTarget("NamedSlicePointerElements");
