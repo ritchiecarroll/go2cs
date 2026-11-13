@@ -113,10 +113,11 @@ public class ArrayFamilyGeneratorTests
                 .Select(diagnostic => diagnostic.Id).Distinct().OrderBy(id => id));
         }
 
-        Assert.AreEqual("", Compile("s.Fa[3] = 1; s.Fa[(nint)4] += s.Fa[3]; int n = array201<sbyte>.Length; bool same = s.Fa == s.Fa;"), "the analysed faces compile");
+        Assert.AreEqual("", Compile("s.Fa[3] = 1; s.Fa[(nint)4] += s.Fa[3]; int n = array201<sbyte>.Length; bool same = s.Fa == s.Fa; uint u = 2; byte b = 1; ushort h = 0; long l = 6; s.Fa[u] = s.Fa[b]; s.Fa[h] = s.Fa[5ul]; s.Fa[(nint)l] = 0; go.uintptr p = 3u; s.Fa[p] = 1;"), "the analysed faces compile, by every index width the converter emits");
         Assert.AreEqual("CS0029", Compile("Span<sbyte> span = s.Fa;"), "no Span conversion");
         Assert.AreEqual("CS0029", Compile("ReadOnlySpan<sbyte> span = s.Fa;"), "no ReadOnlySpan conversion");
         Assert.AreNotEqual("", Compile("var part = s.Fa[1..3];"), "no slicing");
         Assert.AreEqual("CS1929", Compile("var span = s.Fa.AsSpan();"), "no AsSpan: the extension for arrays and spans does not apply");
+        Assert.AreEqual("CS1579", Compile("foreach (sbyte e in s.Fa) { }"), "no enumeration: a Go range lowered as foreach must not compile over a member");
     }
 }

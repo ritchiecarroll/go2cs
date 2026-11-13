@@ -60,9 +60,12 @@ public class InlineArrayFamilyTests
         a[0] = 7;
         a[(nint)3] = 9;
         a[0] += 1;
+        a[2u] = 5;
+        a[(ulong)1] = 4;
 
         Assert.AreEqual(8, a[0]);
-        Assert.AreEqual(0, a[1]);
+        Assert.AreEqual(4, a[1]);
+        Assert.AreEqual(5, a[2]);
         Assert.AreEqual(9, a[(nint)3]);
     }
 
@@ -89,6 +92,8 @@ public class InlineArrayFamilyTests
         StringAssert.Contains(Message(() => a[201] = 1), "index out of range [201] with length 201");
         StringAssert.Contains(Message(() => a[-1] = 1), "index out of range [-1]");
         StringAssert.Contains(Message(() => a[(nint)int.MaxValue + 1] = 1), "index out of range [2147483648] with length 201");
+        // An unsigned index is checked before any narrowing: Go reports the unsigned value, never a negative one.
+        StringAssert.Contains(Message(() => a[ulong.MaxValue] = 1), "index out of range [18446744073709551615] with length 201");
     }
 
     [TestMethod]

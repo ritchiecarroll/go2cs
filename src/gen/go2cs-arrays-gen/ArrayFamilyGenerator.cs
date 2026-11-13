@@ -17,7 +17,8 @@ namespace go2cs;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Each member wraps a private <c>[InlineArray(N)]</c> storage. It exposes only an element indexer and the constant
+/// Each member wraps a private <c>[InlineArray(N)]</c> storage. It exposes only an element indexer (by <c>int</c>,
+/// <c>nint</c> and <c>ulong</c>, golib's <c>array&lt;T&gt;</c> overloads, so an unsigned Go index binds) and the constant
 /// length: C# converts any <c>[InlineArray]</c> type to <c>Span&lt;T&gt;</c>, so the wrapper is what makes an
 /// unanalysed face (a slice, an address, a Span) a compile error rather than a silent copy (7.6.1). It implements Go
 /// equality itself: the default equality of an inline array throws, and that of a holder is order-dependent and wrong
@@ -124,6 +125,17 @@ public sealed class ArrayFamilyGenerator : IIncrementalGenerator
         source.Append("            if ((nuint)index >= ").Append(n).Append("u)\n");
         source.Append("                throw global::go.golib.RuntimeErrorPanic.IndexOutOfRange(index, ").Append(n).Append(");\n\n");
         source.Append("            return ref global::System.Runtime.CompilerServices.Unsafe.Add(ref global::System.Runtime.CompilerServices.Unsafe.As<Storage, T>(ref m_storage), index);\n");
+        source.Append("        }\n");
+        source.Append("    }\n\n");
+        source.Append("    /// <summary>The element at an unsigned <paramref name=\"index\"/>, checked before any narrowing.</summary>\n");
+        source.Append("    [global::System.Diagnostics.CodeAnalysis.UnscopedRef]\n");
+        source.Append("    public ref T this[ulong index]\n");
+        source.Append("    {\n");
+        source.Append("        get\n");
+        source.Append("        {\n");
+        source.Append("            if (index >= ").Append(n).Append("ul)\n");
+        source.Append("                throw global::go.golib.RuntimeErrorPanic.IndexOutOfRange(index, ").Append(n).Append(");\n\n");
+        source.Append("            return ref global::System.Runtime.CompilerServices.Unsafe.Add(ref global::System.Runtime.CompilerServices.Unsafe.As<Storage, T>(ref m_storage), (nint)index);\n");
         source.Append("        }\n");
         source.Append("    }\n\n");
         source.Append("    public bool Equals(").Append(name).Append("<T> other) => global::go.arrays.InlineArrays.Equal(ref global::System.Runtime.CompilerServices.Unsafe.As<Storage, T>(ref m_storage), ref global::System.Runtime.CompilerServices.Unsafe.As<Storage, T>(ref other.m_storage), ").Append(n).Append(");\n\n");
