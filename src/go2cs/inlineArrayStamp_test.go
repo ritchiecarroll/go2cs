@@ -332,3 +332,35 @@ func TestInlineArrayTestsRefuseAMissingRecordTheOptionNames(t *testing.T) {
 		t.Fatalf("a readable record decides: got %+v, %v", stamp, err)
 	}
 }
+
+// A record section's prose CHANGES between converter versions (M2 rewrote the <InlineArrays> prose), and a re-conversion
+// over the old package_info.cs must replace it, not leave the old prose above the new: the remover matched only the
+// CURRENT prose, so the four behavioral projects' regenerated package_info.cs carried both. The prose block is the run
+// of comment lines directly above the start marker, up to a blank line or another section's marker.
+func TestARecordSectionReplacesProseItNoLongerWrites(t *testing.T) {
+	old := []string{
+		"// <InterfaceImplementations>",
+		"// </InterfaceImplementations>",
+		"",
+		"// An older wording of the prose,",
+		"// two lines long.",
+		inlineArraysSectionStart,
+		`[assembly: go.golib.GoInlineArrayType("reparse")]`,
+		inlineArraysSectionEnd,
+		"",
+		"// <ImplicitConversions>",
+		"// </ImplicitConversions>",
+		"",
+		"namespace go;",
+	}
+
+	got := strings.Join(applyRecordSection(old, []string{`[assembly: go.golib.GoInlineArrayType("reparse")]`}, false, inlineArraysSection), "\n")
+
+	if strings.Contains(got, "An older wording") || strings.Contains(got, "two lines long") {
+		t.Errorf("the old prose survived:\n%s", got)
+	}
+
+	if strings.Count(got, inlineArraysProseLines()[0]) != 1 || !strings.Contains(got, "// </InterfaceImplementations>\n\n"+inlineArraysProseLines()[0]) {
+		t.Errorf("want the current prose once, after the blank line that ends the previous section:\n%s", got)
+	}
+}
