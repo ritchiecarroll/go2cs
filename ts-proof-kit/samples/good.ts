@@ -1,0 +1,20 @@
+// A small, valid TypeScript file.
+interface Point { x: number; y: number }
+
+function dist(a: Point, b: Point): number {
+    const dx = a.x - b.x, dy = a.y - b.y;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+export class Path<T extends Point> {
+    private pts: T[] = [];
+    add(p: T): this { this.pts.push(p); return this; }
+    get length(): number {
+        let n = 0;
+        for (let i = 1; i < this.pts.length; i++) n += dist(this.pts[i - 1], this.pts[i]);
+        return n;
+    }
+}
+
+const p = new Path().add({ x: 0, y: 0 }).add({ x: 3, y: 4 });
+console.log(`length=${p.length}`, p instanceof Path ? "ok" : "no");

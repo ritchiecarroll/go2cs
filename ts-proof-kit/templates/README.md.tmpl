@@ -1,0 +1,83 @@
+# typescript-go-cs
+
+> [!IMPORTANT]
+> **This is a proof of what the [go2cs](https://github.com/ritchiecarroll/go2cs) transpiler can do. It is NOT a
+> replacement for the TypeScript compiler.** Do not use it to compile TypeScript. Use
+> [TypeScript](https://github.com/microsoft/TypeScript) itself.
+
+> [!WARNING]
+> **Not affiliated with or endorsed by Microsoft.** TypeScript is a trademark of Microsoft Corporation. This is an
+> unofficial C# conversion of part of TypeScript's Go source, made with go2cs and published by the go2cs project.
+
+## What it shows
+
+go2cs converted TypeScript's own Go compiler packages (scanner, parser, binder, checker, printer, transformers and
+the program that ties them together), at
+[microsoft/TypeScript `{{TS_SHORT}}`](https://github.com/microsoft/TypeScript/tree/{{TS_COMMIT}}/tsc), to C#.
+{{HEADLINE}} These results were measured on {{PLATFORM}} on {{DATE}}:
+
+<!-- typescript-go-cs:results -->
+| What was compared | Inputs | Result |
+|:--|:--|:--|
+| Parse demo: diagnostics and every syntax node with its position | `samples/good.ts`, `samples/bad.ts` | {{PARSE_DEMO}} |
+| Parser corpus: the inputs of TypeScript's own parser fuzz test | {{CORPUS_UNITS}} files | {{CORPUS_RESULT}} |
+| Type-check demo: every diagnostic of a type-checked program | `samples/check.ts`, `samples/good.ts` | {{CHECK_DEMO}} |
+| Type-check, TypeScript's compiler tests: each file checked alone, every diagnostic | {{TC_UNITS}} files | {{TC_RESULT}} |
+| Emit, TypeScript's compiler tests: each file's JavaScript and `.d.ts` | {{EM_UNITS}} files | {{EM_RESULT}} |
+| Emit demo | `samples/good.ts`, `bad.ts`, `emit.ts` | {{EMIT_DEMO}} |
+| Multi-file projects: `tsconfig.json`, every diagnostic, every output file | `samples/projects/shop`, `legacy` | {{MF_RESULT}} |
+
+A result is "identical" only when the converted program's output equals the native Go build's output byte for byte.
+[PROOF.md](PROOF.md) has the method, both sides' outputs and every figure above.
+<!-- /typescript-go-cs:results -->
+
+Inputs use LF line endings, as git stores them; byte counts and hashes in this repository assume that.
+
+## What is not here
+
+The language service, the language server, `tsc`'s command line and watch mode are not converted here. Five of
+TypeScript's packages (`internal/ls`, `internal/ls/lsconv`, `internal/ls/autoimport`, `internal/project` and
+`internal/fourslash`) use a generic-constraint shape go2cs does not convert yet, and everything that imports them is
+left out with them.
+
+[![Go source](https://img.shields.io/badge/Go_source-microsoft%2FTypeScript_@{{TS_SHORT}}-00ADD8?logo=go)](https://github.com/microsoft/TypeScript/tree/{{TS_COMMIT}}/tsc) [![C# Source](https://img.shields.io/badge/C%23_Source-converted-512BD4?logo=dotnet)](src/github.com/microsoft/TypeScript/tsc)\
+[![Parser corpus](https://img.shields.io/badge/Parser_corpus-{{CORPUS_N}}_of_{{CORPUS_UNITS_B}}_match-{{C_COLOR}}?logo=go)](PROOF.md) [![Type-check](https://img.shields.io/badge/Type--check-{{TC_N}}_of_{{TC_UNITS_B}}_match-{{TC_COLOR}}?logo=go)](PROOF.md) [![Emit](https://img.shields.io/badge/Emit-{{EM_N}}_of_{{EM_UNITS_B}}_match-{{EM_COLOR}}?logo=go)](PROOF.md) [![go2cs](https://img.shields.io/badge/go2cs-@{{GOSTDLIB}}-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-{{GOSTDLIB}})
+
+## What is here
+
+| Path | What it is |
+|:--|:--|
+| `src/github.com/microsoft/TypeScript/tsc/internal/…` | The {{TS_PKGS}} TypeScript packages the four demos need, converted by go2cs. Do not edit them: change the Go and convert again. |
+| `src/github.com/microsoft/TypeScript/tsc/cmd/…` | The four demos, converted. Their Go sources are under `go/cmd/`. |
+| `pkg/…` | The {{PKG_PKGS}} third-party Go packages they import, converted, each module with its own license at its root. |
+| `go/` | The Go sources this project added: the four demos and the corpus extractor. They are not part of TypeScript. |
+| `samples/`, `proof/` | The demo inputs, the harness and its measured outputs. |
+| `LICENSE`, `NOTICE.txt` | TypeScript's Apache-2.0 license and its notices, verbatim. |
+| `MODIFICATIONS.md` | What was changed and what was added, as the license requires. |
+
+## Building and running
+
+Building needs the .NET 10 SDK. The restore takes the go2cs standard library (`go.*`) from nuget.org.
+
+```
+dotnet build src/github.com/microsoft/TypeScript/tsc/cmd/checkdemo/checkdemo.csproj -c Release -p:GoStdLibVersion={{GOSTDLIB}}
+dotnet run --project src/github.com/microsoft/TypeScript/tsc/cmd/checkdemo/checkdemo.csproj -c Release -p:GoStdLibVersion={{GOSTDLIB}} -- samples/check.ts
+```
+
+The same two commands build and run `parsedemo`, `emitdemo` (one or more `.ts` files) and `mfdemo` (one or more
+project directories). [PROOF.md](PROOF.md) shows how to run each comparison.
+
+## Provenance
+
+- **Converted:** with `go2cs -recurse=nuget` at go2cs commit `{{CONVERTER}}`.
+- **Built:** against go.* `{{GOSTDLIB}}` with the .NET SDK {{SDK}}.
+- **Compared:** against {{GOVERSION}} building the same Go sources, unmodified.
+
+## License
+
+The conversion is a derivative of TypeScript's source and carries its license:
+
+- [LICENSE](LICENSE) is Apache-2.0, verbatim.
+- [NOTICE.txt](NOTICE.txt) is verbatim.
+- [MODIFICATIONS.md](MODIFICATIONS.md) states the changes.
+- Each module under `pkg/` carries its own license.

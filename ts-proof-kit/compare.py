@@ -1,0 +1,184 @@
+# compare.py: the typescript-go-cs proof harness. Native Go parsedemo vs the converted C# parsedemo.
+#
+#   python -I compare.py --native <parsedemo-go.exe> --converted <parsedemo.dll> --samples <dir> --corpus <dir> --out <dir>
+#
+# 1. The demo: both run `parsedemo good.ts bad.ts` in <samples>; the two outputs must be byte-identical.
+# 2. The corpus: both run `parsedemo -corpus <corpus>` (parsecorpus-extract's units + manifest.tsv), one line per unit:
+#    "<index> <sha256 of the dump> <diagnostics> <nodes>", or "<index> PANIC <value>". A converted process that dies
+#    (a .NET stack overflow cannot be caught) is resumed at the next unit, and the unit it died on is classed CRASH.
+#    Every unit whose line differs is re-run with `-unit` on both sides and classed by its first differing dump line.
+# Writes <out>/results.json, both sides' raw outputs, and <out>/mismatch/<index>.{go,cs}.txt for each mismatch.
+# Every figure in results.json is counted from the two outputs; nothing is estimated.
+import argparse, hashlib, json, os, subprocess, sys, time
+
+sys.stdout.reconfigure(encoding="utf-8")
+ap = argparse.ArgumentParser()
+for a in ("native", "converted", "samples", "corpus", "out"):
+    ap.add_argument("--" + a, required=True)
+ap.add_argument("--dotnet", default="dotnet")
+ap.add_argument("--timeout", type=int, default=7200)
+A = ap.parse_args()
+os.makedirs(os.path.join(A.out, "mismatch"), exist_ok=True)
+
+
+def run(side, args, cwd=None):
+    conv = [A.dotnet, A.converted] if A.converted.lower().endswith(".dll") else [A.converted]
+    cmd = [A.native] + args if side == "go" else conv + args
+    t = time.time()
+    p = subprocess.run(cmd, cwd=cwd, capture_output=True, timeout=A.timeout)
+    return p.returncode, p.stdout, p.stderr, round(time.time() - t, 1)
+
+
+def sha(b):
+    return hashlib.sha256(b).hexdigest()
+
+
+res = {"demo": {}, "corpus": {}}
+
+# 1. the demo
+demo = {}
+for side in ("go", "cs"):
+    rc, out, err, secs = run(side, ["good.ts", "bad.ts"], cwd=A.samples)
+    open(os.path.join(A.out, f"demo.{side}.txt"), "wb").write(out)
+    demo[side] = {"rc": rc, "bytes": len(out), "lines": out.count(b"\n"), "sha256": sha(out), "seconds": secs,
+                  "stderr_tail": err.decode("utf-8", "replace")[-2000:]}
+demo["match"] = demo["go"]["rc"] == 0 and demo["cs"]["rc"] == 0 and demo["go"]["sha256"] == demo["cs"]["sha256"]
+res["demo"] = demo
+print("demo", "MATCH" if demo["match"] else "DIFFER", demo["go"]["sha256"][:12], demo["cs"]["sha256"][:12])
+
+# 2. the corpus
+rows = [r.split("\t") for r in open(os.path.join(A.corpus, "manifest.tsv"), encoding="utf-8").read().rstrip("\n").split("\n")]
+order = [r[0] for r in rows]
+meta = {r[0]: {"ext": r[1], "jsx": r[2], "force": r[3], "source": r[5], "unit": r[6] if len(r) > 6 else ""} for r in rows}
+
+
+CRASH_WINDOW = 2000  # the most units a crash's lost output window is searched for the unit that really died
+
+
+def complete_lines(out):
+    """Only the lines the process finished writing: a crash can cut the last one off mid-digest."""
+    text = out.decode("utf-8", "replace")
+    if not text.endswith("\n"):
+        text = text[:text.rfind("\n") + 1]
+    return [l.split(" ", 1) for l in text.splitlines() if l]
+
+
+# 2026-11-10: the demo writes the corpus through a bufio.Writer flushed only at exit, so a process that dies loses
+# every line still in the buffer. The first unit with no line is therefore NOT the unit that died: it is only the start
+# of the lost window (the old attribution named 20 crashed units where 2 crash, and a truncated line read as a digest
+# mismatch). Each unit of the window is now run alone with -unit on this side: the first whose own run dies with the
+# corpus run's exit code is the unit that died. The units before it ran and are judged by their -unit dumps against
+# native's -unit dumps (unit_checked; stricter than the digest), and the corpus run resumes after the unit that died.
+unit_checked = {"go": {}, "cs": {}}  # index -> sha256 of that side's -unit dump, for the units of a lost window
+
+
+def corpus(side):
+    lines, crashes, runs, start, secs = {}, [], [], None, 0.0
+    while True:
+        args = ["-corpus", A.corpus] + ([start] if start else [])
+        rc, out, err, s = run(side, args)
+        secs += s
+        got = complete_lines(out)
+        for idx, rest in got:
+            lines[idx] = rest
+        runs.append({"from": start or order[0], "rc": rc, "lines": len(got), "seconds": s,
+                     "stderr_tail": err.decode("utf-8", "replace")[-1500:]})
+        done = len(lines)
+        if rc == 0 and done == len(order):
+            break
+        if done >= len(order):
+            break
+        died, j = None, done                   # search the lost window for the unit whose own run dies the same way
+        while j < len(order) and j < done + CRASH_WINDOW:
+            urc, uout, uerr, us = run(side, ["-unit", A.corpus, order[j]])
+            secs += us
+            if urc == rc:
+                died, err = order[j], uerr
+                break
+            unit_checked[side][order[j]] = sha(uout)
+            lines[order[j]] = "UNIT-CHECKED"
+            j += 1
+        if died is None:                       # not found within the window: fall back to the first unit with no line
+            died, j = order[done], done
+        crashes.append({"index": died, "rc": rc, "window_from": order[done], "units_rechecked": j - done,
+                        "stderr_tail": err.decode("utf-8", "replace")[-1500:]})
+        lines[died] = f"CRASH rc={rc}"
+        if j + 1 >= len(order):
+            break
+        start = order[j + 1]
+    return lines, crashes, runs, secs
+
+
+go, go_crash, go_runs, go_secs = corpus("go")
+cs, cs_crash, cs_runs, cs_secs = corpus("cs")
+open(os.path.join(A.out, "corpus.go.txt"), "w", encoding="utf-8", newline="\n").write("".join(f"{i} {go.get(i, 'MISSING')}\n" for i in order))
+open(os.path.join(A.out, "corpus.cs.txt"), "w", encoding="utf-8", newline="\n").write("".join(f"{i} {cs.get(i, 'MISSING')}\n" for i in order))
+
+
+def classify(idx):
+    _, gout, _, _ = run("go", ["-unit", A.corpus, idx])
+    _, cout, cerr, _ = run("cs", ["-unit", A.corpus, idx])
+    open(os.path.join(A.out, "mismatch", f"{idx}.go.txt"), "wb").write(gout)
+    open(os.path.join(A.out, "mismatch", f"{idx}.cs.txt"), "wb").write(cout + (b"\n--- stderr\n" + cerr if cerr else b""))
+    gl, cl = gout.decode("utf-8", "replace").split("\n"), cout.decode("utf-8", "replace").split("\n")
+    for n, (a, b) in enumerate(zip(gl, cl)):
+        if a != b:
+            if a.startswith("diag") or b.startswith("diag"):
+                ga, cb = a.split("] ", 1), b.split("] ", 1)
+                kind = "diagnostic message" if a.startswith("diag") and b.startswith("diag") and ga[0] == cb[0] else "diagnostic code or span"
+            elif a.split(" [")[0] != b.split(" [")[0]:
+                kind = "node kind or shape"
+            else:
+                kind = "node position"
+            return kind, {"line": n + 1, "go": a[:300], "cs": b[:300]}
+    if len(gl) != len(cl):
+        return "dump length", {"go_lines": len(gl), "cs_lines": len(cl)}
+    return "digest only (dumps identical)", {}
+
+
+def unit_sha(side, idx):
+    if idx not in unit_checked[side]:
+        _, out, _, _ = run(side, ["-unit", A.corpus, idx])
+        unit_checked[side][idx] = sha(out)
+    return unit_checked[side][idx]
+
+
+mism, classes, rechecked = [], {}, []
+for idx in order:
+    a, b = go.get(idx), cs.get(idx)
+    if "UNIT-CHECKED" in (a, b) and not any(x and x.startswith(("PANIC", "CRASH")) for x in (a, b)):
+        rechecked.append(idx)                  # a lost-window unit: judged by the two sides' -unit dumps
+        if unit_sha("go", idx) == unit_sha("cs", idx):
+            continue
+        kind, detail = classify(idx)
+        classes[kind] = classes.get(kind, 0) + 1
+        mism.append({"index": idx, "class": kind, **meta[idx], **detail})
+        continue
+    if a == b and not a.startswith(("PANIC", "CRASH")):
+        continue
+    if b is None:
+        kind, detail = "not run", {}
+    elif b.startswith("CRASH"):
+        kind, detail = "converted process crashed", {"status": b}
+    elif b.startswith("PANIC") and not a.startswith("PANIC"):
+        kind, detail = "converted panicked", {"panic": b[6:][:300]}
+    elif a.startswith(("PANIC", "CRASH")):
+        kind, detail = "native panicked or crashed", {"go": a[:300], "cs": b[:300]}
+    else:
+        kind, detail = classify(idx)
+    classes[kind] = classes.get(kind, 0) + 1
+    mism.append({"index": idx, "class": kind, **meta[idx], **detail})
+
+matched = len(order) - len(mism)
+res["corpus"] = {"units": len(order), "matched": matched, "mismatched": len(mism), "classes": classes,
+                 "rechecked_by_unit": rechecked,
+                 "native": {"seconds": round(go_secs, 1), "runs": go_runs, "crashes": go_crash,
+                            "sha256": sha(open(os.path.join(A.out, "corpus.go.txt"), "rb").read())},
+                 "converted": {"seconds": round(cs_secs, 1), "runs": cs_runs, "crashes": cs_crash,
+                               "sha256": sha(open(os.path.join(A.out, "corpus.cs.txt"), "rb").read())},
+                 "nodes": sum(int(v.split()[2]) for v in go.values() if len(v.split()) == 3 and v.split()[2].isdigit()),
+                 "diagnostics": sum(int(v.split()[1]) for v in go.values() if len(v.split()) == 3 and v.split()[1].isdigit()),
+                 "mismatches": mism}
+json.dump(res, open(os.path.join(A.out, "results.json"), "w", encoding="utf-8"), indent=1)
+print(f"corpus {matched} of {len(order)} match; classes {classes}")
+sys.exit(0 if demo["match"] and matched == len(order) else 1)

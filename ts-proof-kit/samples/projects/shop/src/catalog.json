@@ -1,0 +1,4 @@
+[
+  { "sku": "A-1", "name": "Pen", "price": { "amount": 1.5, "currency": "USD" } },
+  { "sku": "B-2", "name": "Pad", "price": { "amount": 3.25, "currency": "USD" }, "tags": ["paper"] }
+]

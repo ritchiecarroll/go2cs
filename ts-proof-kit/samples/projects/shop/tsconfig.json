@@ -1,0 +1,19 @@
+{
+  // A small multi-file project: path alias, JSON import, ambient types, declarations.
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "out",
+    "rootDir": "src",
+    "resolveJsonModule": true,
+    "paths": { "@models/*": ["./src/models/*"] },
+    "typeRoots": ["./types"],
+    "types": ["env"]
+  },
+  "include": ["src/**/*"]
+}

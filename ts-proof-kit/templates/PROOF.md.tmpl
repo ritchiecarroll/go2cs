@@ -1,0 +1,186 @@
+# typescript-go-cs: proof
+
+TypeScript's Go compiler packages, converted to C# by [go2cs](https://github.com/ritchiecarroll/go2cs), compared with the
+native Go build of the same sources.
+
+*Measured {{DATE}}, {{PLATFORM}}.*
+
+| Side | Build |
+|:--|:--|
+| Native | {{GOVERSION}} |
+| Converted | go2cs `{{CONVERTER}}`, go.* `{{GOSTDLIB}}`, .NET SDK {{SDK}} |
+
+TypeScript is [microsoft/TypeScript](https://github.com/microsoft/TypeScript/tree/{{TS_COMMIT}}/tsc) at `{{TS_COMMIT}}`.
+
+Every figure on this page is counted from the two sides' outputs, which are in `proof/`. None is estimated.
+
+**Hand edits to the converted C#:** {{HANDPATCHES}}
+
+## 1. The parse demo
+
+`parsedemo samples/good.ts samples/bad.ts` prints, for each file:
+
+- each parse diagnostic: code, start, length and message;
+- every syntax node's kind and `[pos,end]`, in pre-order.
+
+`good.ts` is a small valid file. `bad.ts` has syntax errors.
+
+**Result: {{DEMO_VERDICT}}.**
+
+| Side | SHA-256 of the output |
+|:--|:--|
+| Native Go | `{{DEMO_SHA_GO}}` |
+| Converted C# | `{{DEMO_SHA_CS}}` |
+
+<details><summary>Native Go output ({{DEMO_LINES}} lines)</summary>
+
+```
+{{DEMO_GO}}
+```
+
+</details>
+
+<details><summary>Converted C# output</summary>
+
+```
+{{DEMO_CS}}
+```
+
+</details>
+
+## 2. The parser corpus
+
+The corpus is exactly the input set TypeScript's own parser fuzz test (`FuzzParser` in `internal/parser`) runs.
+`go test` reports the same 17,422 subtests for it:
+
+- 17,412 seed units, from two sources:
+  - every file under `testdata/fixtures`;
+  - every unit of every multi-file test case under `testdata/tests/cases/compiler` and `conformance`, split by
+    TypeScript's own test-file parser;
+- the 10 stored fuzz inputs in `internal/parser/testdata/fuzz/FuzzParser`, with their JSX and module-indicator flags.
+
+`go/cmd/parsecorpus-extract` writes them out in that order and with those flags. It runs natively only, so both
+sides read the same unit files.
+
+Each unit is parsed as the fuzz test parses it, as `/index<ext>`. Both sides print one line per unit: the SHA-256 of
+the unit's full dump (the same dump as the demo's), its diagnostic count and its node count. A unit matches when the
+two lines are equal.
+
+**Result: {{N}} of {{UNITS}} units match.** On the native side the corpus holds {{NODES}} syntax nodes and {{DIAGS}}
+parse diagnostics. Native run: {{SECS_GO}} s. Converted run: {{SECS_CS}} s.
+
+| Mismatch class | Units |
+|:--|--:|
+{{CLASS_ROWS}}
+
+### Every mismatch
+
+The first differing dump line is shown for each unit, native / converted. The full dumps are in `proof/mismatch/`.
+
+| Unit | Class | Source | First difference |
+|:--|:--|:--|:--|
+{{MISMATCH_ROWS}}
+
+## 3. The type-check demo
+
+`checkdemo samples/check.ts samples/good.ts` type-checks each file as `/main.ts` in its own program, with
+TypeScript's bundled library files, and prints every diagnostic (category, code, file, start, length, message) and
+the program's file count.
+
+**Result: {{CHECK_VERDICT}}.** Native SHA-256 `{{CHECK_SHA_GO}}`, converted `{{CHECK_SHA_CS}}`.
+
+<details><summary>Native Go output</summary>
+
+```
+{{CHECK_GO}}
+```
+
+</details>
+
+## 4. TypeScript's compiler tests: type-check and emit
+
+The pool is every single-file `.ts` unit from `tests/cases/compiler` in the parser corpus's manifest:
+{{TC_UNITS}} files. Each is run alone as `/main.ts` in its own program, in batches of 20 per process, on both sides:
+
+- through `checkdemo` (every diagnostic, as in section 3);
+- through `emitdemo` (declaration emit on, LF newlines: every output file's text, plus the emit diagnostics).
+
+Each side's output is split per file and compared file by file. A converted process that dies has its missing files
+re-run one at a time, so a crash is charged to the file that causes it; the native side gets the same treatment.
+
+**Type-check: {{TC_N}} of {{TC_UNITS}} files match.** Native {{TC_SECS_GO}} s, converted {{TC_SECS_CS}} s.
+
+| Mismatch class | Files |
+|:--|--:|
+{{TC_CLASS_ROWS}}
+
+{{TC_MISMATCH_ROWS}}
+
+**Emit: {{EM_N}} of {{EM_UNITS}} files match.** Native {{EM_SECS_GO}} s, converted {{EM_SECS_CS}} s.
+
+| Mismatch class | Files |
+|:--|--:|
+{{EM_CLASS_ROWS}}
+
+{{EM_MISMATCH_ROWS}}
+
+Times are for context only. They cover the last resumed run of each pass, not the whole pass, when a pass was
+resumed.
+
+## 5. The emit demo
+
+`emitdemo samples/good.ts samples/bad.ts samples/emit.ts` prints every output file of each program.
+`emit.ts` exercises enums, const enums, namespaces, parameter properties, private names, overloads, async functions,
+generators, mapped types and labelled tuples.
+
+**Result: {{EMIT_VERDICT}}.** Native SHA-256 `{{EMIT_SHA_GO}}`, converted `{{EMIT_SHA_CS}}`.
+
+## 6. Multi-file projects
+
+`mfdemo` is a small `tsc`-like driver over TypeScript's `compiler` package. For each project directory it parses
+`tsconfig.json`, builds the program, prints every diagnostic `tsc` would report (configuration, syntactic, global,
+semantic, declaration), then emits the program and prints every output file.
+
+- `samples/projects/shop`: `esnext` modules with `bundler` resolution, a `paths` alias, a JSON import, `typeRoots`,
+  declaration maps and source maps, two deliberate type errors.
+- `samples/projects/legacy`: CommonJS, `es2015` downlevel, a checked JavaScript file with JSDoc types, decorators, an
+  unknown compiler option, a missing module and an unused local.
+
+**Result: {{MF_VERDICT}}.** Native SHA-256 `{{MF_SHA_GO}}`, converted `{{MF_SHA_CS}}`.
+
+<details><summary>Native Go output</summary>
+
+```
+{{MF_GO}}
+```
+
+</details>
+
+## 7. How the harness was checked
+
+| Control | "Converted" side | Result |
+|:--|:--|:--|
+{{CONTROL_ROWS}}
+
+## Reproducing
+
+1. Check out TypeScript at `{{TS_COMMIT}}`, and copy `go/cmd/*` into its `tsc/cmd/`.
+2. In `tsc/`, build the native side from the unmodified module:
+
+   ```
+   for d in parsedemo checkdemo emitdemo mfdemo; do go build -o $d-go ./cmd/$d; done
+   go run ./cmd/parsecorpus-extract . corpus
+   ```
+
+3. For the conversion only, add the one `go.mod` change MODIFICATIONS.md states (the go2cs fork of
+   `github.com/zeebo/xxh3`), then convert with `go2cs -recurse=nuget` and build the demos as the README shows.
+4. Compare:
+
+   ```
+   python proof/compare.py --native parsedemo-go --converted <parsedemo> --samples samples --corpus corpus --out results/parse
+   python proof/demo_compare.py --name checkdemo --native checkdemo-go --converted <checkdemo> --cwd samples --out results -- check.ts good.ts
+   python proof/demo_compare.py --name emitdemo --native emitdemo-go --converted <emitdemo> --cwd samples --out results -- good.ts bad.ts emit.ts
+   python proof/demo_compare.py --name mfdemo --native mfdemo-go --converted <mfdemo> --cwd samples/projects --out results -- shop legacy
+   python proof/typecheck_slice.py --native checkdemo-go --converted <checkdemo> --corpus corpus --out results/check-full --every 1 --timeout 3600
+   python proof/typecheck_slice.py --native emitdemo-go --converted <emitdemo> --corpus corpus --out results/emit-full --every 1 --timeout 3600
+   ```

@@ -1,0 +1,4 @@
+Parse harness, positive	the native parse demo itself	demo identical; 17,422 of 17,422 units match
+Parse harness, negative	the native parse demo with one character of unit `00010`'s corpus line changed	17,421 of 17,422 match; the one mismatch named is `00010`
+Compiler-test harness, positive	the native type-check demo itself (every 37th file, 201)	201 of 201 match
+Compiler-test harness, negative	the native type-check demo with one byte of file `00216`'s output changed	200 of 201 match; the one mismatch named is `00216`

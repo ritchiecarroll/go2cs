@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "commonjs",
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "outDir": "dist",
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "notARealOption": 1
+  },
+  "files": ["main.ts", "lib/math.js", "lib/queue.ts"]
+}
