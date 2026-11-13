@@ -37600,7 +37600,7 @@ construction.
 
 — P5 (2026-11-13)
 
-## 2026-11-13 — P5 (seat A, COORD's ask): the cgo wrapper fixture declares `_Ctype_char` as `int8` for linux/arm64, where cmd/cgo declares `uint8` — OPEN, fixture only
+## 2026-11-13 — P5 (seat A, COORD's ask): the cgo wrapper fixture declares `_Ctype_char` as `int8` for linux/arm64, where cmd/cgo declares `uint8` — CLOSED 2026-11-13 in seat A (`198bc1d62b`); was OPEN, fixture only
 
 **What cgo picks.** cmd/cgo takes the Go type of C `char` from the DWARF encoding the C compiler wrote
 (`src/cmd/cgo/gcc.go`, go1.26.10): a `dwarf.CharType` (signed char encoding) becomes `int8`, and a
@@ -37620,6 +37620,30 @@ host was made, and the generator was not run on a `uint8` fixture.
 
 **Owed.** A linux/arm64 fixture with `_Ctype_char uint8`, the golden regenerated from it, and the arm64 leg
 re-read. Its own seat, not seat A.
+
+— P5 (2026-11-13)
+
+**CLOSED 2026-11-13, in seat A by COORD's ruling (22:59Z), commit `198bc1d62b`.** The fixture's target now names its
+char type: `uint8` for linux/arm64, `int8` for linux/amd64, both darwin targets and windows.
+`GoCgoWrappers.linux-arm64.golden.cs` was regenerated and moved 35 lines, every one char-typed: the `strtol` char
+mirror (368, 374, 393), `struct utsname`'s six members (688-693, 697-708, and the even lines of 830-840 and 846-856)
+and the inline array type (725, 727). No other golden moved. GolibTests' hand-declared `C.@char` wraps `uint8` under
+`GOCGO_CHAR_UNSIGNED` (linux with an arm64 process), and the two tests that cast a C char name the type by an alias.
+Made to fail first: with the arm64 type forced back to `int8`, `TestCgoScalarWrapperGoldensAreTheGeneratorsOutput`
+fails naming only the linux/arm64 golden.
+
+| leg at `198bc1d62b` | executed / passed / failed | run |
+|:--|:--|:--|
+| linux-arm64 | 2,661 / 2,661 / 0 | 43525931102 |
+| linux-x64 | 2,665 / 2,665 / 0 | 43525931102 |
+| win-x64 | 2,607 / 2,607 / 0 | 43525934547 |
+| osx-x64 | 2,563 / 2,563 / 0 | 43525938386 |
+| osx-arm64 | 2,562 / 2,562 / 0 | 43525938386 |
+
+The counts equal the earlier tips' on every leg; osx-arm64 reads 2,562 or 2,563 across this seat's runs, the
+disclosed Inconclusive of one sampler test there. **Still read, not measured:** no cgo run on a linux/arm64 host was
+made; the `uint8` is cmd/cgo's rule as its source states it. The fixtures in `cgoDeclarations_test.go` and
+`cgoMirrors_test.go` are not per target and keep `int8`.
 
 — P5 (2026-11-13)
 
