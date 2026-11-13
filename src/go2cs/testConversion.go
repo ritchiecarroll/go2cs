@@ -3235,10 +3235,11 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// refusing a record they do not reproduce. Its own -inline-arrays value and its _test.go files never decide. The
 	// EXTERNAL variant declares no production struct and admits nothing.
 	if len(prodEntries) > 0 {
-		stamp, ok := readInlineArrayStamp(platformPackageInfoPath(outputPath, options.targetPlatform))
+		recorded, ok := readInlineArrayStamp(platformPackageInfoPath(outputPath, options.targetPlatform))
+		stamp, err := inlineArrayTestsStamp(recorded, ok, pkg.PkgPath, options)
 
-		if !ok {
-			stamp = inlineArrayStamp{mode: inlineArraysModeAuto}
+		if err != nil {
+			return nil, nil, fmt.Errorf("%s: %w", pkg.PkgPath, err)
 		}
 
 		prodFiles := make([]*ast.File, 0, len(prodEntries))
