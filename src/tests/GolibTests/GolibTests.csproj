@@ -68,10 +68,10 @@
   </PropertyGroup>
   <!-- linux's golden is per architecture the same way: the hosted ubuntu-24.04-arm leg runs an arm64 process, and the
        linux/amd64 bindings refuse it by design ("converted for linux/amd64, and this process runs as linux/arm64"). -->
-  <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoCgoGoldenArch)' == 'Arm64'">
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux'">
     <Compile Remove="GoCgoWrappers.linux.golden.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoCgoGoldenArch)' != 'Arm64'">
+  <ItemGroup>
     <Compile Remove="GoCgoWrappers.linux-arm64.golden.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != 'darwin' or '$(GoCgoGoldenArch)' == 'Arm64'">
