@@ -176,6 +176,10 @@ func TestCgoUnsafePointerOfAMethodsOwnReceiverTypeIsRefusedByName(t *testing.T) 
 		{"the receiver, under parentheses", method("Wrapped", "", "unsafe.Pointer((h))"), 1},
 		{"a local copy of the receiver", method("Local", "\tp := h\n", "unsafe.Pointer(p)"), 1},
 		{"another pointer of the receiver's type", method("Other", "", "unsafe.Pointer(other)"), 1},
+		// The review of 3.1, finding 5: the walk read the receiver's type through its NAME, so a receiver with no name,
+		// or the blank one, was skipped, and the same conversion crossed.
+		{"a pointer of the type of a receiver with no name", "\nfunc (*holder) Unnamed(other *holder) bool {\n\treturn " + fmt.Sprintf(closure, "unsafe.Pointer(other)") + "\n}\n", 1},
+		{"a pointer of the type of a blank receiver", "\nfunc (_ *holder) Blank(other *holder) bool {\n\treturn " + fmt.Sprintf(closure, "unsafe.Pointer(other)") + "\n}\n", 1},
 		// The control: a function takes the pointer as a parameter, which carries its box.
 		{"in a function that takes the pointer as a parameter", "\nfunc same(p *holder) bool {\n\treturn " + fmt.Sprintf(closure, "unsafe.Pointer(p)") + "\n}\n", 0},
 	} {
