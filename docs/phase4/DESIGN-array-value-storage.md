@@ -838,3 +838,12 @@ The no-family control (`sbyte[]`) is 1,325,072 bytes under Native AOT.
 >   `inlineArrayStamp.go`.
 > - **OWED (deferred by COORD, 06:19Z):** laying out a struct of ANOTHER package that an admitted type holds by value,
 >   from that package's own record. Until then such a seed stays out with `GO2CS2009`; lib and libc hold 0.
+> - **Faces (COORD 06:50Z, ruling (a)).** The automatic rule also keeps a seed out when an array field in its closure is
+>   used, in the package's non-test files, in a way an inline array cannot express: sliced, its address or an element's
+>   address taken, or used as a whole value other than boxed into an interface. Index, `len`/`cap`, `range`,
+>   `unsafe.Offsetof`/`Sizeof`/`Alignof` and boxing stay admissible. A copy between two admitted fields is also kept out at I0
+>   (0 sites in lib and in the behavioral corpus), so the rule does not depend on which other types are admitted. Forced
+>   mode does not consult faces. Measured: lib 158/120 and forced 185/144, libc 123/99 with 4 `GO2CS2009`, sqlite 0, all
+>   unchanged; behavioral, FieldAccessReinterpret keeps `reparse` only (`record` slices `Path`, and `tail` was admitted only
+>   through `record`), GoImageCopyThroughView keeps `Dirent` and `Pair`, PointerFieldSelectors keeps `wire`. Converter:
+>   `inlineArrayFaces.go`.

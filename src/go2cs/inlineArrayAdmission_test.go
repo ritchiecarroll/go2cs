@@ -41,7 +41,7 @@ func admitFixture(t *testing.T, pkgDir string, options Options, sources ...[2]st
 		files = append(files, file)
 	}
 
-	info := &types.Info{Types: map[ast.Expr]types.TypeAndValue{}, Defs: map[*ast.Ident]types.Object{}, Uses: map[*ast.Ident]types.Object{}}
+	info := &types.Info{Types: map[ast.Expr]types.TypeAndValue{}, Defs: map[*ast.Ident]types.Object{}, Uses: map[*ast.Ident]types.Object{}, Selections: map[*ast.SelectorExpr]*types.Selection{}}
 	config := types.Config{Importer: importer.Default()}
 	pkg, err := config.Check("example.com/lib", fset, files, info)
 
@@ -402,7 +402,7 @@ func TestInlineArrayAdmissionLeavesAForeignAliasToItsPackage(t *testing.T) {
 	}
 
 	useFile := parse("use.go", "package use\n\nimport (\n\t\"unsafe\"\n\n\t\"example.com/lib\"\n)\n\nfunc read(p unsafe.Pointer) *lib.T { return (*lib.T)(p) }\n")
-	info := &types.Info{Types: map[ast.Expr]types.TypeAndValue{}, Defs: map[*ast.Ident]types.Object{}, Uses: map[*ast.Ident]types.Object{}}
+	info := &types.Info{Types: map[ast.Expr]types.TypeAndValue{}, Defs: map[*ast.Ident]types.Object{}, Uses: map[*ast.Ident]types.Object{}, Selections: map[*ast.SelectorExpr]*types.Selection{}}
 	imports := importerFunc(func(path string) (*types.Package, error) {
 		if path == "example.com/lib" {
 			return libPkg, nil

@@ -43,9 +43,7 @@ using static go.main_package;
 // the rule when it is not the default. A -tests conversion applies the same rule rather than deciding
 // again. The section exists only while there is a record to hold.
 // <InlineArrays>
-[assembly: go.golib.GoInlineArrayType("record")]
 [assembly: go.golib.GoInlineArrayType("reparse")]
-[assembly: go.golib.GoInlineArrayType("tail")]
 // </InlineArrays>
 
 // <ImplicitConversions>

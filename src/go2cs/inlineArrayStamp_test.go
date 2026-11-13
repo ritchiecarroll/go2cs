@@ -128,7 +128,7 @@ func TestInlineArrayAdmitFromStamp(t *testing.T) {
 		files = append(files, file)
 	}
 
-	info := &types.Info{Types: map[ast.Expr]types.TypeAndValue{}, Defs: map[*ast.Ident]types.Object{}, Uses: map[*ast.Ident]types.Object{}}
+	info := &types.Info{Types: map[ast.Expr]types.TypeAndValue{}, Defs: map[*ast.Ident]types.Object{}, Uses: map[*ast.Ident]types.Object{}, Selections: map[*ast.SelectorExpr]*types.Selection{}}
 	pkg, err := (&types.Config{Importer: importer.Default()}).Check("example.com/lib", fset, files, info)
 
 	if err != nil {
@@ -195,7 +195,7 @@ type L struct {
 
 func view(f *lib.F) *L { return (*L)(unsafe.Pointer(f)) }
 `)
-	info := &types.Info{Types: map[ast.Expr]types.TypeAndValue{}, Defs: map[*ast.Ident]types.Object{}, Uses: map[*ast.Ident]types.Object{}}
+	info := &types.Info{Types: map[ast.Expr]types.TypeAndValue{}, Defs: map[*ast.Ident]types.Object{}, Uses: map[*ast.Ident]types.Object{}, Selections: map[*ast.SelectorExpr]*types.Selection{}}
 	imports := importerFunc(func(path string) (*types.Package, error) {
 		if path == "example.com/lib" {
 			return libPkg, nil

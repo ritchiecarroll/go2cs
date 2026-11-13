@@ -37,7 +37,9 @@ import (
 //
 // A type the rule SELECTS (converted whole, or forced) that a cap keeps out stays exactly as today and is reported by a
 // WARNING naming the type, the field and the cap (GO2CS2009; COORD 2026-11-13 05:20Z). So is a type whose closure
-// reaches a struct declared in another package, which this package's emission cannot lay out.
+// reaches a struct declared in another package, which this package's emission cannot lay out, and, under the automatic
+// rule, one whose array fields the package uses through a face an inline array cannot spell (inlineArrayFaces.go;
+// COORD 2026-11-13 06:50Z).
 
 const (
 	inlineArrayMaxBytes    = 4096 // per array (7.7.1, ruling 3)
@@ -199,10 +201,15 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 	// Every anonymous struct type the package's own non-test files spell, by type string.
 	spelled := map[string]bool{}
 
+	// The first use of each struct's array fields that an inline array cannot spell (inlineArrayFaces.go).
+	faces := map[string]string{}
+
 	for _, file := range files {
 		if strings.HasSuffix(strings.ToLower(fset.Position(file.Pos()).Filename), "_test.go") {
 			continue
 		}
+
+		collectUnspelledFaces(file, fset, info, faces)
 
 		// A struct type expression that is a type spec's own body is the named type, counted once by its name.
 		specBodies := map[ast.Expr]bool{}
@@ -300,6 +307,11 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 
 			if why := inlineDeclarationRule(member, pkg, spelled, sizes); why != "" && reason == "" {
 				reason = why
+			}
+
+			// Under the automatic rule a face an inline array cannot spell keeps the seed out (forced: a compile error).
+			if face, found := faces[key]; found && reason == "" && !a.forced {
+				reason = face
 			}
 		}
 
@@ -666,7 +678,7 @@ func reportInlineArrayAdmission(a *inlineArrayAdmission) error {
 			trigger = "forced"
 		}
 
-		fmt.Printf("Inline arrays (%s): %s admits %d struct %s (%d holding arrays), %d kept out by a cap (GO2CS2009), %d mixed %s (GO2CS2010)\n",
+		fmt.Printf("Inline arrays (%s): %s admits %d struct %s (%d holding arrays), %d kept out (GO2CS2009), %d mixed %s (GO2CS2010)\n",
 			trigger, a.pkgPath, len(a.keyOrder), plural(len(a.keyOrder), "type", "types"), a.holding, len(a.warnings), len(a.refusals), plural(len(a.refusals), "pair", "pairs"))
 	}
 
