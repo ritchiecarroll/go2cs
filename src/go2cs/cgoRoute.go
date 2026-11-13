@@ -629,17 +629,28 @@ func cgoReceiverAddresses(file *ast.File, info *types.Info) []token.Pos {
 	for _, decl := range file.Decls {
 		funcDecl, ok := decl.(*ast.FuncDecl)
 
-		if !ok || funcDecl.Body == nil || funcDecl.Recv == nil || len(funcDecl.Recv.List) != 1 || len(funcDecl.Recv.List[0].Names) != 1 {
+		if !ok || funcDecl.Body == nil || funcDecl.Recv == nil {
 			continue
 		}
 
-		receiver := info.Defs[funcDecl.Recv.List[0].Names[0]]
+		// The receiver's type is read from the method's SIGNATURE, never through the receiver's name: a receiver with
+		// no name, or the blank one, defines no object, and the conversion inside such a method is minted the same way
+		// (the review of increment 3.1, finding 5).
+		method, _ := info.Defs[funcDecl.Name].(*types.Func)
 
-		if receiver == nil {
+		if method == nil {
 			continue
 		}
 
-		if _, isPointer := receiver.Type().Underlying().(*types.Pointer); !isPointer {
+		signature, _ := method.Type().(*types.Signature)
+
+		if signature == nil || signature.Recv() == nil {
+			continue
+		}
+
+		receiverType := signature.Recv().Type()
+
+		if _, isPointer := receiverType.Underlying().(*types.Pointer); !isPointer {
 			continue
 		}
 
@@ -660,7 +671,7 @@ func cgoReceiverAddresses(file *ast.File, info *types.Info) []token.Pos {
 				return true
 			}
 
-			if operand := info.TypeOf(call.Args[0]); operand != nil && types.Identical(operand, receiver.Type()) {
+			if operand := info.TypeOf(call.Args[0]); operand != nil && types.Identical(operand, receiverType) {
 				positions = append(positions, call.Pos())
 			}
 

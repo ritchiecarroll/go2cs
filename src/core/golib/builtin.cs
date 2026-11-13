@@ -2513,7 +2513,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(view.NativeElementAddress(index));
+                return new NativeBox<T>(view.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(view));
             }
         }
 
@@ -2542,7 +2542,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(view.NativeElementAddress(index));
+                return new NativeBox<T>(view.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(view));
             }
         }
 
@@ -2630,7 +2630,7 @@ public static partial class builtin
             {
                 // Unchecked here too: the length-checked NativeElementAddress refused SliceData over an
                 // empty native window.
-                return new NativeBox<T>(target.NativeElementAddressUnchecked(index));
+                return new NativeBox<T>(target.NativeElementAddressUnchecked(index), retainedSource: NativeSliceAnchors<T>.Of(target));
             }
         }
 
@@ -2660,7 +2660,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(target.NativeElementAddress(index));
+                return new NativeBox<T>(target.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(target));
             }
         }
 

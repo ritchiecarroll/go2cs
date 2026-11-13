@@ -1196,7 +1196,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // path did not already do. The knowledge was computed once, at the one place that had the
         // resolved box in hand; making the accessor re-derive it would put a token lookup on every
         // native read in the corpus.
-        return new NativeBox<T>((nuint)value.Value, aliasesAnOrderToken: aliasesAnOrderToken);
+        return new NativeBox<T>((nuint)value.Value, retainedSource: NativeDerivation.KeptResolved(resolved, aliasesAnOrderToken), aliasesAnOrderToken: aliasesAnOrderToken);
     }
 
     // The interior-alias step's one call shape, shared by both refusal arms: walk, record the path

@@ -273,11 +273,11 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     internal unsafe nuint NativeElementAddressUnchecked(nint index) => (nuint)NativeElementPointer(index);
 
     // Every native window is cut here: the door, Reslice, and append in place.
-    private slice(nuint nativeBase, nint low, nint high, nint max)
+    private slice(nuint nativeBase, nint low, nint high, nint max, T[]? anchor = null)
     {
         RefuseNativeWindowBeyondSpan(high - low);
 
-        m_array = [];
+        m_array = anchor ?? [];
         m_nativeBase = nativeBase;
         m_low = low;
         m_length = high - low;
@@ -306,7 +306,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     /// <c>addrRanges</c> grows its native array by doubling and the page allocator's summary levels
     /// are minted at their full extent).
     /// </summary>
-    internal static slice<T> OverNativeMemory(nuint baseAddress, nint length, nint capacity)
+    internal static slice<T> OverNativeMemory(nuint baseAddress, nint length, nint capacity, T[]? anchor = null)
     {
         if (System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             throw new PanicException($"native-backed slice: element type {typeof(T).Name} contains managed references and cannot alias native memory");
@@ -323,7 +323,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         if (capacity < length)
             throw new PanicException($"native-backed slice: capacity {capacity} is smaller than length {length}");
 
-        return new slice<T>(baseAddress, 0, length, capacity);
+        return new slice<T>(baseAddress, 0, length, capacity, anchor);
     }
 
     // A native window LONGER than any span is refused by name (CENSUS-golib-int32-narrowings S4/S4b):
@@ -436,7 +436,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // under a different element name, which is exactly what this alias means (and the element
         // types are one-byte-wide by the caller's own precondition).
         if (source.m_nativeBase != 0)
-            return new slice<T>(source.m_nativeBase, source.m_low, source.m_low + source.m_length, source.m_low + source.m_capacity);
+            return new slice<T>(source.m_nativeBase, source.m_low, source.m_low + source.m_length, source.m_low + source.m_capacity, NativeSliceAnchors<T>.For(NativeSliceAnchors<TSrc>.Of(source)));
 
         T[] aliased = Unsafe.As<T[]>(source.m_array);
 
@@ -840,7 +840,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // Native backing: same window arithmetic over the same base — reslicing never copies, so
         // the result aliases the identical memory and Ꮡ over it names the offset addresses.
         if (m_nativeBase != 0)
-            return new slice<T>(m_nativeBase, m_low + low, m_low + high, m_low + max);
+            return new slice<T>(m_nativeBase, m_low + low, m_low + high, m_low + max, m_array);
 
         if (m_array is null)
             return default;
@@ -1260,7 +1260,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // The native base joins the header comparison: two native windows are the same slice when
         // they name the same base and window, and a native-backed slice is never == a managed one
         // (nor == nil, whose base is 0 with an empty backing — the nil test stays exact).
-        return a.m_nativeBase == b.m_nativeBase && ReferenceEquals(a.m_array, b.m_array) &&
+        return a.m_nativeBase == b.m_nativeBase && (a.m_nativeBase != 0 || ReferenceEquals(a.m_array, b.m_array)) &&
                a.m_low == b.m_low && a.m_length == b.m_length && a.m_capacity == b.m_capacity;
     }
 
@@ -1625,7 +1625,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
                     elems.CopyTo(new Span<T>(slice.NativeElementPointer(slice.m_length), elems.Length));
                 }
 
-                return new slice<T>(slice.m_nativeBase, slice.m_low, slice.High + elems.Length, slice.m_low + slice.m_capacity);
+                return new slice<T>(slice.m_nativeBase, slice.m_low, slice.High + elems.Length, slice.m_low + slice.m_capacity, slice.m_array);
             }
 
             // Single-element append is the dominant Go idiom — store directly instead of span-copying.
@@ -1759,7 +1759,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
                     new Span<T>(slice.NativeElementPointer(slice.m_length), (int)count).Clear();
                 }
 
-                return new slice<T>(slice.m_nativeBase, slice.m_low, slice.High + count, slice.m_low + slice.m_capacity);
+                return new slice<T>(slice.m_nativeBase, slice.m_low, slice.High + count, slice.m_low + slice.m_capacity, slice.m_array);
             }
 
             Array.Clear(slice.m_array, (int)slice.High, (int)count);

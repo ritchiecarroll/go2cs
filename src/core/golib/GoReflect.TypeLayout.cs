@@ -818,7 +818,7 @@ public static partial class GoReflect
         if (backing is null)
             return s;
 
-        if (s.Length == 0 && ReferenceEquals(backing, System.Array.Empty<T>()))
+        if (s.Length == 0 && (s.IsNativeBacked || ReferenceEquals(backing, System.Array.Empty<T>())))
         {
             s = new slice<T>(new T[0]);
             backing = s.m_array;

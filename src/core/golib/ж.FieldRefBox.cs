@@ -316,7 +316,7 @@ internal interface IFirstFieldView
     // of a native chain is itself native and addresses Go's layout, never the CLR slot.
     internal ж<T>? NativeFieldBox() =>
         ((INativeRooted)this).NativeGoFieldAddress is var address and not 0
-            ? NativeArrayWindow() ?? new NativeBox<T>(address)
+            ? NativeArrayWindow() ?? new NativeBox<T>(address, retainedSource: NativeDerivation.Kept(m_source))
             : null;
 
     private ж<T>? NativeArrayWindow()

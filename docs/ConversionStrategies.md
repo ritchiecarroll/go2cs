@@ -11345,7 +11345,7 @@ an address does in Go.
 A token has no memory behind it, so it has no neighbours. Adding an offset to a token and converting the
 result back to a pointer raises a Go panic that says so. Like any Go panic, `recover` can catch it
 ([Defer / Panic / Recover](#defer--panic--recover)).
-<!-- the panics: src/core/golib/ж.cs:976-1199#e77df1 (token arithmetic refused; arm 2a panics at dereference of an order token read as another type, unless the number is a live box's own token and the direct reinterpret would alias that pair); src/core/golib/runtime/RuntimeErrorPanic.cs:61#c45947 (UnsafePointerArithmeticWithoutAddress, arithmetic refusal) and :95#d277a9 (UnsafePointerOrderTokenDereferenced, order-token dereference refusal); GolibTests TokenArithmeticRefusalTests, OrderTokenOffsetZeroRefusalTests -->
+<!-- the panics: src/core/golib/ж.cs:976-1199#b3fbd8 (token arithmetic refused; arm 2a panics at dereference of an order token read as another type, unless the number is a live box's own token and the direct reinterpret would alias that pair); src/core/golib/runtime/RuntimeErrorPanic.cs:61#c45947 (UnsafePointerArithmeticWithoutAddress, arithmetic refusal) and :95#d277a9 (UnsafePointerOrderTokenDereferenced, order-token dereference refusal); GolibTests TokenArithmeticRefusalTests, OrderTokenOffsetZeroRefusalTests -->
 
 **`unsafe.Pointer(p)` keeps what it points to alive.** A standalone conversion becomes a factory call
 such as `@unsafe.Pointer.FromPinnedBox(e0)`. The `@unsafe.Pointer` it builds stores the source box beside
