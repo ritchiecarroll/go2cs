@@ -42,6 +42,7 @@
     <None Include="$(MSBuildThisFileDirectory)arrayDimsNilCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsCompanion.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsCompanion_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)arrayLiteralBuiltin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)assemblyIdentity.go" />

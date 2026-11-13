@@ -77,10 +77,10 @@ func main() {
 	// Each element boxes at its Go type: a string literal through @string (its cached cast, seat #51, since a
 	// one-letter slug takes no pre-boxed field), an untyped constant through its default type, a pointer as its box.
 	for _, want := range []string{
-		`new any[]{(nint)1, (nint)2}.array()`,
-		`new any[]{(@string)"a", (@string)"b"}.array()`,
-		`new slice<any>[]{[1.5D, (rune)'x'], [(@string)("c"u8 + "d"u8), true]}.array()`,
-		`Ꮡ(new any[]{(nint)1, (@string)"p"}.array())`,
+		`array<any>([(nint)1, (nint)2])`,
+		`array<any>([(@string)"a", (@string)"b"])`,
+		`array<slice<any>>([[1.5D, (rune)'x'], [(@string)("c"u8 + "d"u8), true]])`,
+		`Ꮡ(array<any>([(nint)1, (@string)"p"]))`,
 		`slice<slice<any>>([[p.OrTypedNil()]])`,
 	} {
 		if !strings.Contains(mainCs, want) {

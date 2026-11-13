@@ -320,7 +320,29 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 				if compositeLitIsKeyed(compositeLit.Elts) {
 					return addrOf(fmt.Sprintf("new golib.SparseArray<%s>{%s}.array(%s)", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts)), arrayLengthArgs(strconv.FormatInt(u.Len(), 10), v.arrayElemFactory(u.Elem()))))
 				}
-				return addrOf(fmt.Sprintf("new %s[]{%s}.array(%s)", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts))), elidedArrayArgs))
+
+				// An elided unnamed array renders through the array builtin as the typed path does
+				// (arrayLiteralTakesBuiltin): `array<nint>([1, 2])`, or `array<nint>(4, [1, 2])` when it is short and
+				// its padding needs no element factory. An elided NAMED array keeps the projection, which binds the
+				// named slot through its implicit conversion.
+				short := int64(len(compositeLit.Elts)) < u.Len()
+				takesBuiltin := arrayLiteralTakesBuiltin(inferred) && len(compositeLit.Elts) > 0 &&
+					(!short || v.arrayElemFactory(u.Elem()) == "")
+				v.collectionExpressionElements = takesBuiltin
+
+				elements := v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts)))
+
+				if takesBuiltin {
+					lengthArg := ""
+
+					if short {
+						lengthArg = fmt.Sprintf("%d, ", u.Len())
+					}
+
+					return addrOf(fmt.Sprintf("array<%s>(%s[%s])", csElem, lengthArg, elements))
+				}
+
+				return addrOf(fmt.Sprintf("new %s[]{%s}.array(%s)", csElem, elements, elidedArrayArgs))
 			case *types.Pointer:
 				// An untyped composite whose inferred type is `*Struct` — the `[]*T{ {…} }` shorthand
 				// for `&T{…}` (e.g. runtime's `dbgvars = []*dbgVar{ {name, &debug.x}, … }`). Emit the
@@ -1066,8 +1088,18 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 	// literal and the declaration cannot drift apart; the factory is empty for every element whose
 	// `default(T)` is already the Go zero value, which is nearly all of them, so the bare-length
 	// render — and every existing golden — is unchanged.
+	//
+	// arrayPadLen keeps that declared length for a short literal whose padding needs no element factory, the one
+	// short shape the array builtin below takes (`array<byte>(8, [1, 2])`).
+	arrayPadLen := 0
+
 	if definedLen > 0 && compositeSuffix == ".array()" && len(compositeLit.Elts) < definedLen {
-		compositeSuffix = fmt.Sprintf(".array(%s)", arrayLengthArgs(strconv.Itoa(definedLen), v.arrayElemFactory(elementType)))
+		factory := v.arrayElemFactory(elementType)
+		compositeSuffix = fmt.Sprintf(".array(%s)", arrayLengthArgs(strconv.Itoa(definedLen), factory))
+
+		if factory == "" {
+			arrayPadLen = definedLen
+		}
 	}
 
 	var newSpace string
@@ -1213,7 +1245,25 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 	takesBuiltin := sliceLiteralTakesBuiltin(exprType) && compositeSuffix == ".slice()" && !namedArrayComposite &&
 		!namedMapComposite && namedStructWrapRender == "" && !arrayTypeContext.indexedInitializer && arrayTypeContext.maxLength == 0
 
-	if takesBuiltin && v.targetedSliceLiterals[compositeLit] {
+	// An unnamed `[N]T{…}`, or an alias to one, renders the same way through the array builtin, `array<nint>([1, 2])`,
+	// and a short one passes the declared length, `array<byte>(8, [1, 2])` (arrayLiteralTakesBuiltin). An empty
+	// literal, a keyed one and a short one whose element needs a factory keep their `new` form.
+	takesArrayBuiltin := arrayLiteralTakesBuiltin(exprType) && len(compositeLit.Elts) > 0 &&
+		(compositeSuffix == ".array()" || arrayPadLen > 0) && !namedArrayComposite && !namedMapComposite &&
+		namedStructWrapRender == "" && !arrayTypeContext.indexedInitializer && arrayTypeContext.maxLength == 0
+
+	if takesArrayBuiltin {
+		csElementType := convertToCSTypeName(v.getAliasQualifiedTypeName(elementType, false))
+		lengthArg := ""
+
+		if arrayPadLen > 0 {
+			lengthArg = fmt.Sprintf("%d, ", arrayPadLen)
+		}
+
+		takesBuiltin = true
+		lbrace, rbrace, compositeSuffix = "[", "]", ")"
+		result.WriteString(fmt.Sprintf("array<%s>(%s%s%s", csElementType, lengthArg, lbracePrefix, lbrace))
+	} else if takesBuiltin && v.targetedSliceLiterals[compositeLit] {
 		// Where C# knows the target is this slice<T>, the collection expression stands alone, `[1, 2]`, and
 		// slice<T>'s [CollectionBuilder] builds it (markTargetedSliceLiterals).
 		lbrace, rbrace, compositeSuffix = "[", "]", ""
@@ -1335,6 +1385,27 @@ func sliceLiteralTakesBuiltin(t types.Type) bool {
 	}
 
 	_, elemIsArray := slice.Elem().Underlying().(*types.Array)
+
+	return !elemIsArray
+}
+
+// arrayLiteralTakesBuiltin reports whether an unkeyed composite literal of type t renders as golib's array builtin
+// over a C# collection expression, the array form of sliceLiteralTakesBuiltin (Tour visual-parity item 4): Go's
+// `[3]int{1, 2, 3}` is `array<nint>([1, 2, 3])`, and a short `[8]byte{1, 2}` is `array<byte>(8, [1, 2])`. The
+// builtin wraps the fresh `T[]` C# builds for the collection expression (an array target, so a call inside an
+// element keeps its own Go line), which is the value the `new T[]{…}.array()` projection built.
+//
+// An UNNAMED array converts, and so does an alias to one, which denotes the identical type. A named array type keeps
+// its wrapper constructor, and an array of arrays keeps `new array<T>[]{…}.array()`; its elements, themselves array
+// literals, convert.
+func arrayLiteralTakesBuiltin(t types.Type) bool {
+	array, ok := types.Unalias(t).(*types.Array)
+
+	if !ok {
+		return false
+	}
+
+	_, elemIsArray := array.Elem().Underlying().(*types.Array)
 
 	return !elemIsArray
 }

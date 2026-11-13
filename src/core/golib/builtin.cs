@@ -3910,6 +3910,45 @@ public static partial class builtin
     }
 
     /// <summary>
+    /// Converts C# <paramref name="source"/> array to a Go <see cref="go.array{T}"/> over it.
+    /// </summary>
+    /// <typeparam name="T">Element type.</typeparam>
+    /// <param name="source">C# source array, which the result keeps as its backing.</param>
+    /// <returns>Go <see cref="go.array{T}"/> over <paramref name="source"/>.</returns>
+    /// <remarks>
+    /// This is the overload a Go array literal binds: the converter writes <c>[3]int{1, 2, 3}</c> as
+    /// <c>array&lt;nint&gt;([1, 2, 3])</c>, the array form of <c>slice&lt;nint&gt;([1, 2, 3])</c>. The collection
+    /// expression becomes the fresh <c>T[]</c> this wraps, so no two evaluations share elements, and the target is an
+    /// array rather than a span for the reason the <c>slice</c> overload gives: a call inside an element keeps its own
+    /// Go line. It builds the same value as the earlier <c>new T[]{…}.array()</c> form, which stays for the shapes
+    /// the converter does not write this way (a named array type's constructor, a keyed or sparse literal, an array
+    /// of arrays, an element whose zero value must be constructed).
+    /// </remarks>
+    public static array<T> array<T>(T[] source)
+    {
+        return new array<T>(source);
+    }
+
+    /// <summary>
+    /// Converts C# <paramref name="source"/> array to a Go <see cref="go.array{T}"/> of
+    /// <paramref name="length"/> elements, zero-filled past the elements <paramref name="source"/> holds.
+    /// </summary>
+    /// <typeparam name="T">Element type.</typeparam>
+    /// <param name="length">The Go array type's declared length.</param>
+    /// <param name="source">The elements the literal writes, fewer than <paramref name="length"/>.</param>
+    /// <returns>Go <see cref="go.array{T}"/> of <paramref name="length"/> elements.</returns>
+    /// <remarks>
+    /// This is the overload a SHORT Go array literal binds: <c>[8]byte{1, 2}</c> is
+    /// <c>array&lt;byte&gt;(8, [1, 2])</c>, 1, 2 and six zeros, as Go zero-fills the rest. It pads as the
+    /// <c>.array(length)</c> projection does, and only for an element whose <c>default(T)</c> is the Go zero value;
+    /// an element whose zero value must be constructed keeps the projection that takes an element factory.
+    /// </remarks>
+    public static array<T> array<T>(nint length, T[] source)
+    {
+        return source.array((int)length);
+    }
+
+    /// <summary>
     /// Projects a slice's elements into a widened target type via the supplied conversion.
     /// </summary>
     /// <typeparam name="T">Source element type.</typeparam>
