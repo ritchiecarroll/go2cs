@@ -37546,4 +37546,58 @@ in the runner's Compile row. Native AOT. Linux and macOS rows.
 
 — G (2026-11-13)
 
+## 2026-11-13 — P5 (seat B, closed with seat A by COORD's ruling): the linux-arm64 GolibTests leg ended its test host about 2,060 tests early; the cause was the linux/amd64 cgo golden, not the EventPipe sampler — FIXED in seat A
+
+**The blind spot.** On master 651c4ad147 the hosted linux-arm64 golib-tests leg (runs 43510049988 and 43497473577)
+ran 503 of the suite's tests, failed 23 with the cgo target refusal, and then the test host died while
+`EventPipeSamplerHostProbe.TheSamplersThreadKeysAndCpuReadingsAreMeasured` ran. About 2,060 tests never ran on
+that leg. vstest gave as the reason the last line on stderr, `invalid boolean value "bogus" for -test.v`, which a
+`ChattyFlagBridgeTests` test that passed had printed.
+
+**The cause.** `GolibTests.csproj` compiled `GoCgoWrappers.linux.golden.cs` on every linux leg. Its module
+initializer registers golib's cgo resolver for the whole GolibTests assembly with target `linux/amd64`, and
+`GoCgoLibraries.Resolve` refuses EVERY P/Invoke that assembly makes when the process target differs, a hand-owned
+import among them. Two tests make such a call on a thread that is not the test's own: the probe calls `gettid`
+inside each hog's `new Thread(...)`, and `GoTimerTests.serviceThread()` calls `gettid` inside a `GoTimer` callback
+on the timer service thread. The `PlatformNotSupportedException` was unhandled there, and the process ended.
+
+**The four isolating runs** (linux-arm64 golib-tests):
+
+| Run | Ref | Filter | Result |
+|---|---|---|---|
+| 43515648007 | master 651c4ad147 | the probe alone | host crashed in the probe |
+| 43515652676 | master 651c4ad147 | everything but the probe | 980 run, 25 refusals, host crashed in `GoTimerTests.TheServiceThreadIsIdleUnderAFarFutureTimer` |
+| 43516731364 | master 651c4ad147 | `EventPipeSamplerTests` alone | 7 of 7 pass: golib's sampler does not crash on arm64 |
+| 43517263836 | seat A 177ab806cf | the probe and `GoTimerTests` | 16 of 16 pass |
+
+The abort moved with the test set, which ruled out the probe and the sampler as its source.
+
+**The fix.** Seat A (177ab806cf) generates `GoCgoWrappers.linux-arm64.golden.cs` with the converter and selects
+it by process architecture. At 177ab806cf the whole linux-arm64 leg (run 43515128508) ran to completion: 2,661
+executed, 2,661 passed, 0 failed. The probe's readings are present there: hog ids 4010 and 4011, own CPU 932
+and 934 ms against sampler readings of 920 and 930 ms, 92 and 93 written, and the hog as leaf in 103 of 248.
+
+**Hardening** (seat A's second commit, c3486c0f68, COORD's ruling). Each of the two tests now catches on its own
+thread and fails on the test's thread, so a refused import fails one test and the suite still runs.
+It was made to fail once: with the linux/amd64 golden forced on the arm64 leg (a plant commit on top of
+c3486c0f68, never merged, run 43519587318), the leg ran to completion, 2,661 executed, 2,618 passed and 43
+failed, every one with the refusal text. The three tests on the two threads are among them:
+`TheSamplersThreadKeysAndCpuReadingsAreMeasured` ("hog 0 threw on its own thread"), and
+`TheServiceThreadIsIdleUnderAFarFutureTimer` and `DenseTimersCostTheServiceThreadLittleCpu` ("the timer
+callback threw on the service thread"). The host did not abort. So the suite's true refusal count under the
+wrong golden is 43, where the aborted master runs showed 23. Without the plant, c3486c0f68 reads 2,661 passed
+and 0 failed on linux-arm64 (run 43519596892).
+
+**Product-side reading, observed and NOT a defect.** A cgo target mismatch refuses every P/Invoke its assembly
+makes, on any thread. On a thread that is not a test's, an unhandled refusal ends the process. That is by design.
+
+**Prediction scored.** Seat A predicted that arm64 would read 0 refusals and abort at the same probe. The abort
+half MISSED as worded, because the abort was caused by the golden that seat A replaced.
+
+**Not run here.** `check-no-regression.ps1`: this box has no dotnet or pwsh. Seat A changes no converter source
+(one `_test.go` row, one generated golden, the csproj and two test files), so the corpus footprint is 0 by
+construction.
+
+— P5 (2026-11-13)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
