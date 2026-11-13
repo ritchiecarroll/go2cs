@@ -5,7 +5,7 @@ namespace go.UnexportedAnonAliasField;
 
 partial class lib_package {
 
-partial struct t__WIDL_name_00000003ᴛ1 /*dyn*/ {
+public partial struct t__WIDL_name_00000003ᴛ1 /*dyn*/ {
     public int32 FhInproc;
 }
 

@@ -66,8 +66,8 @@ public static partial class lib_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct t__WIDL_name_00000003ᴛ1 {}
     public partial struct TuserHPALETTEᴛ1 {}
+    public partial struct t__WIDL_name_00000003ᴛ1 {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
