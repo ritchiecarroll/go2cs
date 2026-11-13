@@ -28,7 +28,7 @@ private static readonly @string defaultGO_EXTLINK_ENABLEDᵇ = @""u8;
 internal static ref readonly @string defaultGO_LDSO => ref defaultGO_LDSOᵇ;
 private static readonly @string defaultGO_LDSOᵇ = @""u8;
 internal static ref readonly @string version => ref versionᵇ;
-private static readonly @string versionᵇ = @"go1.26.10"u8;
+private static readonly @string versionᵇ = @"go1.26.11"u8;
 internal static ref readonly @string defaultGOOS => ref defaultGOOSᵇ;
 private static readonly @string defaultGOOSᵇ = "windows";
 // go2cs generated this placeholder — const defaultGOARCH is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

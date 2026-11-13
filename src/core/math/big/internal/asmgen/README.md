@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net) [![Tests](https://img.shields.io/badge/Tests-11_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.26.10.3/math.big.internal.asmgen.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/math/big/internal/asmgen@go1.26.10)\
-[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/math/big/internal/asmgen) [![Source](https://img.shields.io/badge/Source-@1.26.10.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.26.10.3/src/core/math/big/internal/asmgen)
+[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net) [![Tests](https://img.shields.io/badge/Tests-11_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.26.10.3/math.big.internal.asmgen.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.11-00ADD8?logo=go)](https://pkg.go.dev/math/big/internal/asmgen@go1.26.11)\
+[![Source](https://img.shields.io/badge/Source-@1.26.11-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.11/src/math/big/internal/asmgen) [![Source](https://img.shields.io/badge/Source-@1.26.10.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.26.10.3/src/core/math/big/internal/asmgen)
 
 From C#, call this package through the static class go.math.big.@internal.asmgen_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
