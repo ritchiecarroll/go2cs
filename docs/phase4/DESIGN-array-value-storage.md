@@ -340,3 +340,303 @@ variant type-check the same declaration twice.
 2. The visible name, `array201<int8>`, against the alternatives: a name ending in a glyph, or keeping `array<int8>` in
    source with the length in an attribute. The latter is possible only once I2's backing exists.
 3. The I0 size caps (4 KiB per array, 64 KiB per struct).
+
+### 7.6 Review revision (dated block, 2026-11-13, C1)
+
+> **Status: REVISION of 7.1-7.5 after the Fable review** (COORD, inbox C1 20261113T003918Z). The review approved the
+> ladder with changes and rejected I0 as scoped. 7.1-7.5 stand above as written; where this block contradicts them,
+> this block governs. Code read at master `130cecb136`; every file cited below is unchanged since `6869ec2b54`. New
+> evidence is in `docs/phase4/data/inlinearray-scout/`:
+> - `probe-r2-Program.cs` and `probe-r2-output.txt`: the first probe plus the review's shapes, 0 checks failed. It
+>   builds with `probe.csproj`.
+> - `probe-await-Program.cs` and `probe-await-build.txt`: a project that MUST fail to build. Its error list is the
+>   measurement.
+> - `probe-eq-Program.cs` and `probe-eq-output.txt`: default equality, run twice in each call order.
+> - `go-layout-main.go` and `go-layout-output.txt`: Go's own sizes and offsets for the probed shapes.
+> - `census-r2-main.go`, with `census-r2-std.txt`, `census-r2-sqlite-lib.txt` and `census-r2-sqlite-and-lib.txt`.
+>   The r2 outputs carry the distinct-lengths lines (item 8).
+>
+> Runtime: .NET SDK 10.0.403, runtime 10.0.14, linux-x64, Release. NO CODE until the owner rules the questions in
+> 7.6.10.
+
+#### 7.6.1 Item 1 (BLOCKER): admission is declaration-local and opt-in; an unanalysed face fails to compile
+
+**The scout's predicate was wrong.** It was a whole-program usage fact, so a `_test.go` file, a later package or a
+consumer could change a struct's layout between a shipping conversion and a `-tests` conversion. It also missed faces.
+The r2 census counts the missed faces over std:
+
+| face | fields | positive control |
+|:--|--:|:--|
+| implicit address: a pointer-receiver method called on `x.f` or `x.f[i]` | 29 | `runtime.timeHistogram.counts`, 3 sites. Go's `h.counts[i].Add(1)` is master's `Ꮡ(h.counts, …).Add(1)` at `src/core/runtime/histogram.cs:133` |
+| an address or slice below the field (`x.f[i][:]`, `&x.f[i].g`) | 64 | none needed; counted by the same walk |
+| a whole-value use (copy, argument, conversion, `==`, store, `range` with a value) | 118 fields, 225 sites | none needed; counted by the same walk |
+
+- Of the scout's 306 admitted std fields, 6 have an implicit address and 2 more have a face below the field.
+  - The 6: `internal/abi.RegArgs.ReturnIsPtr`, `reflect.abiDesc.inRegPtrs` and `.outRegPtrs`,
+    `reflect.makeFuncCtxt.regPtrs`, `runtime.timeHistogram.counts` and `runtime.traceSchedResourceState.statusTraced`.
+  - The 2: `image/jpeg.decoder.huff` and `image/jpeg.encoder.quant`.
+  - So 306 was an over-count, and "298 remain" is no better: a census cannot list REFLECTION faces at all.
+- In modernc.org/sqlite/lib every new column reads 0. Loading the parent package modernc.org/sqlite with it changes
+  nothing but 2 more whole-struct conversion sites (10,819 against 10,817).
+
+**Reflection is a face the census cannot see.** Measured: `FieldInfo.GetValue` on an inline field returns a COPY, so an
+element write through it is lost. Through a reference-backed field, which is `array<T>`'s shape, the same write lands.
+Writing at the field's byte offset inside the owner lands.
+
+**The revised I0 rule.**
+1. **Admission is a property of the DECLARATION.** A struct type qualifies if:
+   - it is declared in a package that has OPTED IN;
+   - every field is unmanaged once its arrays are inline;
+   - it is within the caps (7.6.10, ruling 3) at every nesting level.
+
+   How fields are used never enters the rule, so a shipping conversion and a `-tests` conversion cannot disagree.
+2. **The opt-in is per package.** The first packages are ccgo-transpiled ones (modernc.org/sqlite/lib), and anonymous
+   struct type expressions converted through `unsafe.Pointer` in those packages. std stays out until I2.
+   - The opt-in is a conversion setting of the DECLARING package.
+   - A consumer package sees the inline type through the declaring assembly's metadata, so it needs no setting of its
+     own.
+   - The setting's mechanism (a converter flag, or a property in the converted project) is COORD's to rule.
+3. **An unanalysed face is a C# COMPILE ERROR, never a silent copy.** The I0 type exposes only an element indexer
+   (`ref T this[int]`) and the constant length. It has:
+   - no conversion to `array<T>`, `slice<T>` or `Span<T>`;
+   - no slicing member;
+   - no address member.
+
+   **Measured constraint: an `[InlineArray]` type cannot be that type.** C# converts any `[InlineArray]` type to
+   `Span<T>` implicitly, and a type cannot opt out of that. So the I0 type WRAPS the inline storage in a private field.
+   In `probe-await-build.txt`:
+   - `Span<int> s = p.a` over the `[InlineArray]` type compiles;
+   - the same over a wrapper that exposes only the indexer and the length fails with CS0029.
+4. **A whole-value read is an explicit copy the converter emits**, including before boxing to an interface. The copy
+   is the C# struct copy, which is Go's semantics. std's 225 sites show this face is common where I0 will eventually
+   reach; lib has none.
+5. **Reflection goes by reference for an inline field, or refuses loudly.**
+   - golib's reflect bridge reads and writes an inline field through (owner, Go field offset), the route measured to
+     land above.
+   - Where it cannot (a value reached only as a copy), it panics and names the field.
+   - A `FieldInfo.GetValue` copy is never handed out as an addressable array.
+
+#### 7.6.2 Item 2 (MAJOR): `[0]T` becomes an overlapped readonly alignment carrier
+
+**The scout's probe used the wrong shape.** It stood in `X int32` for S22's real tail. Re-probed with S22's real shape,
+`struct{ FforceAlignment [0]int16; Fa [201]int8; F__ccgo_pad2 [1]byte }`. In Go it is size 202 and alignment 2, and
+nested after a byte (`struct{ B byte; S S22 }`) it sits at offset 2 with outer size 204.
+
+| CLR form of S22 | S22 size | S nested after a byte | outer size |
+|:--|--:|--:|--:|
+| sequential, `[0]int16` dropped | 202 | 1 | 203 |
+| explicit at Go's offsets with `Size = 202`, no carrier | 202 | **1** | **203** |
+| explicit, `[0]int16` carried as `[FieldOffset(0)] readonly short` | 202 | 2 | 204 |
+
+- **Explicit layout alone does not fix it.** Go's offsets and Go's Size give Go's size and offsets for S22 itself, but
+  not Go's alignment, so a CLR container still places S22 at offset 1. Only the carrier restores the alignment.
+  - The carrier makes `[2]S22` 404 bytes, Go's size, and the struct stays unmanaged.
+- **"Explicit offsets transitively"** (the review's alternative) would fix only the containers go2cs emits. A `T[]`,
+  a `ж<T>` payload or a generic container that go2cs does not lay out would still use the CLR's alignment of 1.
+- **The carrier is a primitive of the element's ALIGNMENT, not the element itself.**
+  - `struct{ A byte; _ [0][2]int64 }` is 16 bytes in Go. Carrying the element (`[2]int64` at offset 8) makes it 24 in
+    the CLR; carrying a `long` makes it 16.
+  - The same rule gives Go's trailing padding: syscall's `InotifyEvent` (`Name [0]uint8` last) is 20 in Go and 16
+    without a carrier. A `byte` carrier at offset 16, rounded to alignment 4, is 20 (derived, not probed).
+  - A mid-struct carrier overlapping the next field (`struct{ A byte; Z [0]int32; B byte }`, B at 4, size 8) also
+    reads Go's layout.
+- **The carrier SHARES bytes with real fields.** After `Fa[0] = 5` and `Fa[1] = 6`, the readonly carrier reads 1541.
+  The fix fits the existing zero-size-field arc (`src/go2cs/zeroSizeFieldLayout.go`, the readonly rule and its
+  accessor), and Go never reads a `[0]T`. But equality, hashing, the image encoder and reflect's field walk must all
+  SKIP it. `ClrLayoutMismatch` already skips zero-size fields (`src/core/golib/GoReflect.TypeLayout.cs:514`).
+- **The population, from the r2 census:**
+  - **lib's 72 whole-converted struct types:** 35 carry an alignment-forcing `[0]T`. Without carriers, 12 lay out
+    differently from Go:
+    - 10 in alignment, so they are wrong whenever nested. S22 is one, and so are `TSrcList`, `TExprList`, `TIdList`,
+      `TWalIterator` and `TYYMINORTYPE`.
+    - 2 in size: `TyyParser` reads 1,032 against Go's 1,232, and `Tfts5yyParser` 2,032 against 2,432.
+  - **Over every lib struct type expression:** 93 of 148 carry one, 39 differ and 37 differ in alignment.
+  - **std's 264 declaration-local candidates:** 2 carry one, and 5 differ, all in size from trailing zero-size
+    fields.
+
+#### 7.6.3 Item 3 (MAJOR): the layout gate must be able to fail
+
+**Today's gate can pass without checking anything.** `GoReflect.ClrLayoutMismatch` answers null ("no mismatch") in
+three cases where the layout is unproven:
+- when `GoFieldOffsets` is null (`src/core/golib/GoReflect.TypeLayout.cs:495`);
+- when the struct holds a bool or a char at any depth, because `Marshal.OffsetOf` then reads the marshaled layout (:503);
+- when the CLR offset is unreadable (:530).
+
+The review cited :494, :503 and :527; those are the lines as they read at `130cecb136`.
+
+It also never compares size or alignment.
+
+**The S22 measurement shows why offsets and size are not enough.** S22 without a carrier has Go's size (202) and
+Go's offsets (0 and 201) and is still wrong. Only ALIGNMENT shows the defect.
+
+**Required, for the I0 cut:**
+- **The gate asserts four things for every admitted type at EVERY nesting level:**
+  - `GoFieldOffsets` is non-null;
+  - each CLR field offset equals Go's;
+  - `Unsafe.SizeOf` equals `GoSizeOf`;
+  - the CLR alignment equals `GoAlignOf`. The CLR alignment is measured as the offset of `T` in a generic
+    `struct{ byte; T }`; the composed-family probe shows generic sequential offsets are honored for unmanaged
+    elements.
+- **The gate reads MANAGED offsets.** For an inline field `Marshal.OffsetOf` happens to agree: 201, 2, 204 and 64 in
+  the probe. But a bool anywhere sends it to the marshaled layout. So the CLR offsets come from `Unsafe.ByteOffset`
+  over field references, in a per-type table go2cs-gen emits, which needs no reflection and works under AOT. The
+  population this matters for: lib's 72 hold no bool; std's 264 candidates include 44 that do.
+- **The deliberately broken control is S22 WITHOUT its carrier** (size and offsets right, alignment wrong). The gate
+  must name it before any admitted type's green counts. A second control is a type whose `GoFieldOffsets` is null,
+  which must fail, never pass.
+- **`GoFields` and `ArrayDims` learn the inline lengths first.** Today an array field's Go size comes from the
+  `[GoArrayDims]` stamp beside `array<T>`. An I0 field carries its length in its TYPE, so `TryGoSizeOf` must read it
+  from there, or the offsets stay null and the gate checks nothing again.
+
+#### 7.6.4 Item 4 (MAJOR): a length golib lacks is refused, unless the owner picks the composed family
+
+**The scout's fallback is withdrawn.** "A length golib does not ship stays `array<T>`" made a public field's TYPE
+depend on the golib version. Two options remain for the owner:
+
+**(a) Named family with refusal.**
+- golib ships `go.array<N><T>` for a fixed set of lengths, and converted code reads `array201<int8> Fa`.
+- A length outside the set is a convert-time REFUSAL naming the length and the field. Adding a length is a golib
+  tier-2 change, and never changes an existing field's type.
+- **Cost:** the owner principle "nothing is left out for being unreached" is not met for a module whose length golib
+  lacks. That module's structs refuse until a golib release adds the length.
+
+**(b) Composed family.**
+- golib ships only power-of-two blocks, and any N is their composition. 201 = 128 + 64 + 8 + 1 is
+  `Cat<Cat<Arr128<T>, Arr64<T>>, Cat<Arr8<T>, Arr1<T>>>`, built from golib types alone. So two assemblies' `[201]T`
+  are one C# type with no golib growth.
+- **Measured contiguous** for `sbyte`, `long`, a padded 16-byte struct and `string`: the blocks sit at
+  0/128/192/200 elements, and the total size is 201 elements in each case.
+- **Readability** is recovered by a generated `global using` alias per (N, element) that the assembly uses
+  (`array201_int8`). An alias cannot be generic, so generic code over `[N]T` shows the composed spelling.
+- **Two consequences:**
+  - `Cat<A, B>` is not itself an `[InlineArray]`, so it has no language Span conversion, which item 1 requires.
+  - Its indexer dispatches BY BLOCK (`i < A.Length ? First[i] : Second[i - A.Length]`) rather than by flat
+    arithmetic. The `string` case laid out in order here, but the CLR gives no layout guarantee for reference-bearing
+    structs, and dispatching by block holds under any layout.
+- **NOT MEASURED:** the indexer's cost through a composed type.
+
+**Recommendation: (b).** It is the only option that converts every length with no golib release in the loop, and the
+alias keeps the source readable.
+
+#### 7.6.5 Item 5 (MAJOR): equality is generated; the default is order-dependent and WRONG, not only throwing
+
+The default equality of an inline array, and of a struct holding one, measured:
+
+| call | result |
+|:--|:--|
+| `Equals` on the inline array | `NotSupportedException` ("Calling built-in Equals() or GetHashCode() on type marked as InlineArray is invalid.") |
+| `GetHashCode` on the inline array | the same exception |
+| `Equals` on a holder, as the FIRST equality use in the process | `NotSupportedException`, and again on a second call |
+| `Equals` on a holder after a `Dictionary` lookup has run first | **True**, for two holders whose inline arrays DIFFER (`A[2]` 0 against 7) |
+| `Dictionary<Holder, int>` lookup, in either order | **True/True**: an unequal key is found |
+| `GetHashCode` on a holder | returns, the same value for both unequal holders |
+
+The wrong answers reproduced in both runs of `probe-eq-output.txt`. The mechanism is NOT ROOTED: some runtime state the
+first path leaves behind changes what the second path does. For Go this is a silent wrong `==` and a silent wrong map
+key, so equality cannot be left to the default.
+
+**Required:**
+- **The family implements equality itself:** `IGoEquatable`, `IEquatable`, `Equals(object)` and `GetHashCode`. The
+  probe's `Arr4Eq<T>` does this with a span compare.
+- **Every holder gets generated equality**, used for Go `==` and for map keys. A holder that keeps the default but
+  holds an equality-implementing member answered correctly here (False for unequal holders). That runs through
+  reflection field by field, and given the row above, I0 does not rely on it.
+- **Equality skips the `[0]T` carriers** (7.6.2).
+
+#### 7.6.6 Item 6 (MINOR): the M:N collision is CS8178 on a compound assignment
+
+`probe-await-build.txt`, for an inline array in an async method:
+
+| form | result |
+|:--|:--|
+| `p.a[0] += await F()`, `p` a local | CS8178 (the element reference cannot be preserved across `await`) |
+| the same on a class field (a heap owner) | CS8178 |
+| `ref int e = ref p.a[0]; await F(); e = 1;` | CS9217 |
+| `Span<int> s = p.a; await F(); s[0] = 1;` | CS4007 |
+| `p.a[0] = await F()` | compiles, and runs correctly (`probe-r2-output.txt`) |
+| `p.a[await F()] += 1` | compiles |
+
+The scout's 7.5 named CS4007 for the general case; the review's CS8178 is the one an ordinary Go statement reaches.
+
+**The twin emitter's rule:**
+- A compound assignment whose right side contains an `await` is split. The index operands are spilled to temps in Go's
+  order, then `var t = await …; p.a[i] += t;`.
+- Measured: the split form compiles and gives `a[1] == 6` from 5 + 1.
+- Go's spec leaves the order between reading `p.a[i]` and calling `F()` unspecified. Reading after the call is the
+  order the split produces.
+
+#### 7.6.7 Item 7 (MINOR): I2's backing, shown across a real move
+
+The scout printed offset 0 and did not show that the owner MOVED. Re-probed:
+- the owner is a fresh gen-0 box allocated between two blocks of garbage, then put through three compacting
+  collections;
+- the owner went from generation 0 to 2, and its address moved by 37,324,912 bytes in the committed run (the distance differs run to run);
+- **negative control:** a PINNED box of the same type, through the same collections, moved by 0, so the address read
+  is real;
+- through the moved owner, (owner, offset) read 42 and wrote 43, and the write is seen through the box. Offset 0 is
+  correct: it is `Fa`'s offset inside the box's data, and `Fa` is the first field;
+- **negative control:** boxing a COPY of a by-value local at slicing time and writing through (that box, offset) leaves
+  the local at 42. The write is lost.
+
+**Rules for I2:**
+- The owner is never a box minted at slicing time. A sliced local is boxed at its declaration, on the
+  address-taken-local path, or it is not sliced.
+- For a struct held by a native box (`NativeBox`), the slice's backing is the existing native base
+  (`src/core/golib/slice.cs:253`) plus the field's Go offset, not an owner. NOT MEASURED; it composes with
+  DESIGN-native-backed-slice.
+- **I3 (managed elements) is (owner, offset) only, never layout-equal.** Agreed with the review: a reference-bearing
+  struct has no Go layout in the CLR to be equal to.
+
+#### 7.6.8 Item 8 (MINOR): the census record, re-derived
+
+- **Distinct lengths:** the r2 outputs carry the lines, so the scout's figures now reproduce from committed files.
+  - std: 306 admitted fields over 46 lengths, and 80 lengths over all array fields.
+  - lib: 103 admitted fields over 32 lengths.
+  - Under 7.6.1 these are the old predicate's figures, kept for the record. Admission is now per declaration.
+- **"Would admit all 72" is now derived, not assumed.** Each type is walked through every field at every depth.
+  - lib: all 72 whole-converted types hold an array, are all-unmanaged once inline, and are within the caps. None holds
+    a bool. 35 need a `[0]T` carrier, and 12 would be wrong without one (7.6.2).
+  - Over every lib struct type expression, 148 hold an array and all 148 qualify under 7.6.1's rule.
+  - std, for comparison: of its 66 whole-converted types, 40 are all-unmanaged once inline and 38 are within the caps.
+    The scout's table gave 66 without making that split.
+
+#### 7.6.9 Item 9 (MINOR): the cgo mirrors, and a by-value cap
+
+- **The cgo mirrors already emit inline arrays.** `src/go2cs/cgoMirrors.go:344` writes
+  `[InlineArray(N)] internal struct <name> { private <elem> m_element; }`, one non-generic internal helper per
+  (N, element) per assembly. The two families serve different purposes:
+  - a mirror never crosses an assembly boundary and holds C's layout;
+  - the I0 family is Go's type, shared by every assembly.
+
+  Under (b) the mirrors move onto the composed family in the I0 cut, so one family remains. Under (a) a mirror needs
+  any N, so the mirrors keep their helpers, and this page records the two families and why.
+- **A by-value cap.** Go grows a goroutine's stack; a CLR thread's stack is fixed (C46 reserved 1 GB for the main
+  goroutine only).
+  - A by-value local or parameter of an I0 type larger than a cap is heap-boxed by the converter, on the existing
+    address-taken-local path, so the frame holds a reference.
+  - The proposed cap is 1 KiB per local or parameter. It is an owner ruling with the others.
+  - NOT MEASURED: the stack size of a non-main goroutine's thread, and recursion depth under that cap.
+
+#### 7.6.10 The ladder as revised, and the owner rulings
+
+- **I0. Layout-equal structs in opted-in packages.**
+  - Admission is 7.6.1's declaration-local rule.
+  - Emission: the wrapper type with an indexer only, `[0]T` as an alignment carrier, and generated equality.
+  - It is gated by 7.6.3's four-way check with its broken control.
+  - Its first target is lib's 72 whole-converted types, S22 among them.
+  - The rest of 7.5's I0 predictions stand, except std, which is out until I2.
+- **I1.** Unchanged, except for the await rule: per 7.6.6, the twin emitter splits compound assignments, where 7.5
+  said it re-reads elements.
+- **I2.** As in 7.5, with 7.6.7's rules. The slice-width or pinning cost is still posted and ruled before any cut.
+  std's opt-in comes here.
+- **I3.** (owner, offset) only.
+
+**Owner rulings needed before I0 (COORD has put the first three to the owner):**
+1. **Home and family:**
+   - (a) a named golib family with convert-time refusal of an unshipped length; or
+   - (b) the composed family from golib blocks, with a per-assembly alias for each (N, element).
+   - Recommended: (b).
+2. **The visible name:** `array201<int8>` under (a), or the alias `array201_int8` under (b).
+3. **The caps:** 4 KiB per array and 64 KiB per struct (as 7.5), plus 1 KiB per by-value local or parameter (7.6.9).
+4. **For COORD: the opt-in mechanism** (a converter flag, or a property in the converted project) and the first
+   package list: modernc.org/sqlite/lib.

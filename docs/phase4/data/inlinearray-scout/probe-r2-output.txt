@@ -1,0 +1,69 @@
+PASS generic Arr201<sbyte> size 201 201
+PASS sequential: X at Go offset 204, size 208 X@204 size 208
+PASS sequential struct is unmanaged (blittable) 
+PASS explicit at Go offsets: size 208 208
+PASS Marshal.SizeOf agrees (blittable for interop) 208
+PASS native view reads Fa[200] and X in place Fa[199]=99 X=1020304
+PASS a write through the view lands in native memory 
+PASS a Span over the native field aliases it 
+PASS struct copy is a deep copy of the inline array 
+PASS managed element inline array works 
+PASS (owner, offset) reads through after a compacting GC offset 0
+PASS (owner, offset) writes are seen through the box 
+LIMIT byte[1]: loaded, size 1
+LIMIT byte[65535]: loaded, size 65535
+LIMIT byte[1048576]: loaded, size 1048576
+LIMIT byte[1048577]: loaded, size 1048577
+LIMIT byte[16777216]: loaded, size 16777216
+LIMIT long[131072] (1048576 bytes): loaded, size 1048576
+LIMIT long[131073] (1048584 bytes): loaded, size 1048584
+LIMIT length 0: TypeLoadException: InlineArrayAttribute requires that the length argument is greater than 0. Type: 'A0'. Assembly: 'ia0Byte, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null'.
+-- S22 real shape (Go: S22 size 202 align 2; Outer{B byte; S S22}: S@2 size 204; [2]S22 404)
+S22 sizes: seq 202, explicit-no-carrier 202, carrier 202
+PASS REPRODUCES the review: sequential, [0]int16 dropped, nests S at 1 and outer size 203 (Go 2, 204) S@1 size 203
+PASS REPRODUCES: explicit at Go offsets and Go Size, no carrier, ALSO nests S at 1, size 203 S@1 size 203
+PASS explicit, [0]int16 as an overlapped readonly short: nested S at 2 and size 204 S@2 size 204
+PASS carrier: [2]S22 is 404 404
+PASS carrier: unmanaged 
+carrier aliasing: after Fa[0]=5, Fa[1]=6 the readonly carrier reads 1541 (Go never reads a [0]int16; equality and the image encoder must skip it)
+-- carrier by alignment, not by element (Go: struct{A byte; _ [0][2]int64} size 16 align 8; struct{A byte; Z [0]int32; B byte} Z@4 B@4 size 8)
+PASS carrying the element [2]int64 overshoots Go's 16 24
+PASS carrying a long (the element's alignment) gives Go's 16 16
+PASS mid-struct carrier overlapping B: B@4, size 8 B@4 size 8
+-- equality
+holder as Dictionary key, then a lookup of an equal key: returned True
+Arr4<int>.Equals: NotSupportedException: Calling built-in Equals() or GetHashCode() on type marked as InlineArray is invalid.
+Arr4<int>.GetHashCode: NotSupportedException: Calling built-in Equals() or GetHashCode() on type marked as InlineArray is invalid.
+holder.Equals: NotSupportedException: Calling built-in Equals() or GetHashCode() on type marked as InlineArray is invalid.
+holder.GetHashCode: returned -1400652253
+holder as Dictionary key: returned 1
+PASS default Equals on an inline array throws NotSupportedException 
+PASS default Equals on a holder of one throws NotSupportedException 
+holder (default Equals) of a member that implements Equals, differing in A[3]: returned False
+PASS generated holder equality: unequal when A[3] differs, equal when not, usable as a key 
+-- await (the compile-error cases are in probe-await/, which must FAIL to build)
+PASS plain store and split compound across await, in an async method's local a[0]=1 a[1]=6
+-- (owner, offset) across a MOVE, with controls
+owner gen 0 -> 2; address moved by 37324912 bytes; pinned control moved by 0
+PASS the owner object MOVED during the compacting collections 
+PASS negative control: a pinned owner did NOT move (the address read is not noise) 
+PASS (owner, offset) reads through the moved owner offset 0
+PASS (owner, offset) writes are seen through the moved box 
+PASS negative control: a box minted at slicing time does NOT alias the local (the write is lost) local.Fa[10]=42
+-- reflection
+PASS FieldInfo.GetValue on an inline field is a COPY: an element write through it is lost 
+PASS control: the same through a reference-backed field (array<T>'s shape) lands 
+PASS by-ref route (owner, field offset): the write lands 
+-- composed family: 201 = 128 + 64 + 8 + 1 as Cat<Cat<Arr128,Arr64>,Cat<Arr8,Arr1>>
+PASS composed 201 of SByte is contiguous and 201 elements long blocks at 0/128/192/200 (want 0/128/192/200), size 201 (want 201)
+PASS composed 201 of Int64 is contiguous and 201 elements long blocks at 0/1024/1536/1600 (want 0/1024/1536/1600), size 1608 (want 1608)
+PASS composed 201 of Pad16 is contiguous and 201 elements long blocks at 0/2048/3072/3200 (want 0/2048/3072/3200), size 3216 (want 3216)
+PASS composed 201 of String is contiguous and 201 elements long blocks at 0/1024/1536/1600 (want 0/1024/1536/1600), size 1608 (want 1608)
+-- the gate's instrument: Marshal.OffsetOf (what ClrLayoutMismatch reads) over inline fields
+Marshal.OffsetOf(S22Carrier, F__ccgo_pad2): returned 201
+Marshal.OffsetOf(OuterCarrier, S): returned 2
+Marshal.OffsetOf(DigitPairsSeq, X): returned 204
+Marshal.SizeOf(OuterCarrier): returned 204
+Marshal.OffsetOf(Cat<Arr8<long>,Arr1<long>>, Second): returned 64
+PASS Unsafe.ByteOffset reads the CLR offset with no marshaling (the instrument a non-vacuous gate can use) 
+failed: 0
