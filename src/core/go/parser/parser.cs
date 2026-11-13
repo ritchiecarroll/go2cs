@@ -81,7 +81,7 @@ internal static void init(this ж<parser> Ꮡp, ж<tokenꓸFile> Ꮡfile, slice<
     var eh = (tokenꓸPosition pos, @string msg) => {
         Ꮡp.Value.errors.Add(pos, msg);
     };
-    p.scanner.Init(p.@file, src, new Action<tokenꓸPosition, @string>(eh), scanner.ScanComments);
+    p.scanner.Init(p.@file, src, eh, scanner.ScanComments);
 
     p.top = true;
     p.mode = mode;
