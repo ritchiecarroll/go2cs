@@ -255,6 +255,32 @@ The read and the write are compared by access path, as in the return spill, but 
 
 (Guarded by the `StatementCallOrder` behavioral test: 14 hazard arms, one per form, 5 controls, 4 copied-in-place arms (an expression and a closure-only local, in each of the two contexts) and their 2 controls, output-compared vs `go run`. Before the change 13 of the hazard lines print the pre-call value; with the spill but without the in-place rule, all 4 in-place lines print the post-call value. `evalOrderSpill.go` owns the analysis and `evalOrderInPlace.go` the in-place rule. `evalOrderSpill_test.go` pins the emission against seven neuters: no hazard ever, no callee read, the symmetric path comparison, no in-place copy, no address-taken scan, every conversion taking an address, and an operation nested in itself.)
 
+## A spread call evaluates a callee that calls BEFORE its arguments
+
+Go's spec evaluates a call's function value before its arguments, so `pick()(g())` runs `pick`, then `g`. A
+multi-value argument has no C# spelling, so the converter hoists its results into temporaries ahead of the
+statement (`var (ᴛ1, ᴛ2) = g();`) and passes them expanded. Left inline, the callee then ran after `g`, which gc
+never does (C1 measured it against gc, `docs/phase4/SCOUT-tour-visual-parity.md` 1.2).
+
+```go
+expectPresent(t, s, i)(m.Load(i))   // gc: expectPresent runs, THEN m.Load
+```
+
+A callee that is itself a **call** therefore goes into a temporary in the same pre-statement sink first, and the call
+reads it: `var ᴛ1 = expectPresent(t, s, i);`, then `var (ᴛ2, ᴛ3) = m.Load(i);`, then `ᴛ1(ᴛ2, ᴛ3);`. The temporaries
+share the file-monotonic `tupleTempIndex`.
+
+Only that shape is hoisted. A function name evaluates nothing, so `add(g())` keeps its form. A func variable
+(`h(g())`) and a method's receiver (`p.scaled(g())`) are plain reads, and gc reads them after the calls in the
+operand list, which is where the spread already leaves them (the statement rule above). Not covered: a
+package-level initializer, which has no statement sink, and a callee whose call sits inside another operand
+(`fs[idx()](g())`, `a.b().c(g())`). A type-checked census found neither in std with its tests or in the
+behavioral corpus.
+
+(Population when the rule was added: 172 sites, all in `internal/sync`'s `hashtriemap_test.go`, the curried
+`expectPresent(t, s, i)(m.Load(i))` family; no production file and no behavioral project. Guarded by
+`evalOrderCallee_test.go`: two hoisted sites and the three controls.)
+
 ## A SELECTOR left-hand side counts as a reassignment — a field swap must stay simultaneous
 
 The paren-deref fix above closed the *index* form of the target-classification gap; the **selector** form (`x.f, y.g = …`) had the same hole. The classifier deliberately drops a selector LHS's root identifier (`getIdentifier` would return the *base* — a package name, or a struct local — which, not itself being reassigned, would wrongly be counted as a new declaration and take a `var` prefix), and then counted it as **neither** reassigned nor declared. A parallel assignment whose targets are *all* selectors therefore satisfied no tuple-path gate — not `lhsLen == reassignedCount`, not `lhsLen == declaredCount`, and (with no single-call RHS) not `tupleResult` — and shattered into sequential stores, losing the swap's implicit temporary:
