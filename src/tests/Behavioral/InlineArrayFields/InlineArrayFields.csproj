@@ -188,6 +188,7 @@
     <ProjectReference Include="$(go2csPath)core/go.arrays/go.arrays.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
   </ItemGroup>
 

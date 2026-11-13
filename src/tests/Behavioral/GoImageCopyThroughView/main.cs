@@ -8,7 +8,7 @@ using go.golib;
 
 partial class main_package {
 
-[GoInlineLayout, StructLayout(LayoutKind.Explicit, Size = 1048)] partial struct Dirent {
+[GoInlineLayout(Size = 1048, Align = 8), StructLayout(LayoutKind.Explicit, Size = 1048)] partial struct Dirent {
     [FieldOffset(0)] public uint64 Ino;
     [FieldOffset(8)] public uint64 Seekoff;
     [FieldOffset(16)] public uint16 Reclen;
@@ -18,7 +18,7 @@ partial class main_package {
     [FieldOffset(1045)] public array3<byte> Pad_cgo;
 }
 
-[GoInlineLayout, StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Pair {
+[GoInlineLayout(Size = 16, Align = 8), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Pair {
     [FieldOffset(0)] public uint16 A;
     [FieldOffset(2)] public array2<uint8> B;
     [FieldOffset(8)] public uint64 C;
@@ -46,7 +46,7 @@ internal static void main() {
 
     var q = Ꮡp;
     n = copy(@unsafe.GoImage(q).slice(8, 10), slice<byte>([0xAA, 0xBB, 0xCC]));
-    fmt.Printf("%d %#x %v\n"u8, n, p.C, p.B);
+    fmt.Printf("%d %#x %v\n"u8, n, p.C, p.B.ΔCopy());
 }
 
 } // end main_package

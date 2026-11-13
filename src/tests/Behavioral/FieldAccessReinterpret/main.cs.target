@@ -23,7 +23,7 @@ partial struct record {
     /*embed*/ internal tail tail;
 }
 
-[GoInlineLayout, StructLayout(LayoutKind.Explicit, Size = 16)] partial struct reparse {
+[GoInlineLayout(Size = 16, Align = 4), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct reparse {
     [FieldOffset(0)] public uint32 Tag;
     [FieldOffset(4)] public uint16 Length;
     [FieldOffset(6)] public uint16 Reserved;

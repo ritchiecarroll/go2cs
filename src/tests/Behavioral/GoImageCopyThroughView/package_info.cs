@@ -39,10 +39,13 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // The struct types whose arrays this package holds inline (the go.arrays family), as the converter
-// admitted them: a `GoInlineArrayType` record per named type, and a `GoInlineArrays` record naming
-// the rule when it is not the default. A -tests conversion applies the same rule rather than deciding
-// again. The section exists only while there is a record to hold.
+// admitted them: a `GoInlineArrayType` record per named type, a `GoInlineArrayKeys` record with the
+// count and a digest of every admitted type (anonymous ones included), and a `GoInlineArrays` record
+// naming the rule when it is not the default. A -tests conversion applies the same rule rather than
+// deciding again, and refuses a production set that admits differently. The section exists only while
+// there is a record to hold.
 // <InlineArrays>
+[assembly: go.golib.GoInlineArrayKeys(2, "150031c28a3c7a0c")]
 [assembly: go.golib.GoInlineArrayType("Dirent")]
 [assembly: go.golib.GoInlineArrayType("Pair")]
 // </InlineArrays>

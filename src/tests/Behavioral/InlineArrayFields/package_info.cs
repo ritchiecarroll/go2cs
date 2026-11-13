@@ -39,10 +39,14 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // The struct types whose arrays this package holds inline (the go.arrays family), as the converter
-// admitted them: a `GoInlineArrayType` record per named type, and a `GoInlineArrays` record naming
-// the rule when it is not the default. A -tests conversion applies the same rule rather than deciding
-// again. The section exists only while there is a record to hold.
+// admitted them: a `GoInlineArrayType` record per named type, a `GoInlineArrayKeys` record with the
+// count and a digest of every admitted type (anonymous ones included), and a `GoInlineArrays` record
+// naming the rule when it is not the default. A -tests conversion applies the same rule rather than
+// deciding again, and refuses a production set that admits differently. The section exists only while
+// there is a record to hold.
 // <InlineArrays>
+[assembly: go.golib.GoInlineArrayKeys(5, "83ed99abf471563e")]
+[assembly: go.golib.GoInlineArrayType("Grid")]
 [assembly: go.golib.GoInlineArrayType("Holder")]
 [assembly: go.golib.GoInlineArrayType("Named")]
 [assembly: go.golib.GoInlineArrayType("Plain")]
@@ -65,7 +69,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AB8+lJSUgoKClIKCgpSClIKCgpSCgpSCgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "ACVOlJSUlJSCgoKUgoKClIKUgoKClIKClIKClIKCgoKkxKSCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -81,6 +85,7 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    public partial struct Grid {}
     public partial struct Holder {}
     public partial struct Named {}
     public partial struct Plain {}
@@ -95,5 +100,6 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     // </ImportInitializers>
 }

@@ -1,11 +1,14 @@
 // Guards Go arrays held INLINE in a struct the converter admits (I0, docs/phase4/DESIGN-array-value-storage.md 7.7):
 // each struct below is converted whole through unsafe.Pointer, so its arrays are go.arrays members laid out at Go's
 // offsets, and a [0]T is an alignment carrier. A view over raw bytes reads and writes Go's own bytes; len, cap, both
-// ranges, an array literal and fmt of a boxed array all read as Go's.
+// ranges, an array literal (keyed too) and fmt of a boxed array all read as Go's. An inline array boxed into an
+// interface crosses as a copy in the one representation every Go [N]T has there, nested arrays deep: a type switch,
+// interface ==, a map key and reflect see it, and a later write to the field does not reach the box.
 package main
 
 import (
 	"fmt"
+	"reflect"
 	"unsafe"
 )
 
@@ -28,11 +31,20 @@ type Named struct {
 	FrLimit float32
 }
 
+type Grid struct {
+	Cells [2][3]int16
+	Off   [4]uint8
+}
+
 func view(p unsafe.Pointer) *Holder { return (*Holder)(p) }
 
 func s22(p unsafe.Pointer) *S22 { return (*S22)(p) }
 
 func named(p unsafe.Pointer) *Named { return (*Named)(p) }
+
+func grid(p unsafe.Pointer) *Grid { return (*Grid)(p) }
+
+func box(v any) any { return v }
 
 func main() {
 	var raw [16]byte
@@ -59,4 +71,19 @@ func main() {
 	x := Named{FnName: 6, FzName: [7]int8{'s', 'e', 'c', 'o', 'n', 'd'}, FrLimit: 4.5}
 	fmt.Println(x.FnName, x.FzName[0], x.FzName[5], x.FzName[6], x.FrLimit, unsafe.Sizeof(x))
 	_ = named
+
+	g := Grid{Cells: [2][3]int16{{1, 2, 3}, {4, 5, 6}}, Off: [4]uint8{1: 7, 9}}
+	b := box(g.Off)
+	g.Off[1] = 0
+	fmt.Println(b, g.Off, box(g.Cells) == box([2][3]int16{{1, 2, 3}, {4, 5, 6}}))
+	switch v := box(g.Cells[1]).(type) {
+	case [3]int16:
+		fmt.Println("[3]int16", v[0], v[2])
+	default:
+		fmt.Println("other", v)
+	}
+	m := map[any]int{box(g.Cells[0]): 1}
+	fmt.Println(m[[3]int16{1, 2, 3}], reflect.ValueOf(g.Off).Cap(), reflect.ValueOf(g.Cells).Index(1).Len())
+	fmt.Printf("%T %v\n", g.Cells, g.Cells[1])
+	_ = grid
 }
