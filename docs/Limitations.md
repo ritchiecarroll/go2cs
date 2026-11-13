@@ -41,9 +41,12 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   - a C variable, a C function used as a value, and a deferred or `go` call that passes a pointer cmd/cgo
     checks (later in Phase 2);
   - a C function Go's own cgo build does not import by its C name. That is a function a header renames
-    (macOS on x64 makes `fstat` the symbol `fstat$INODE64`), and also one the C compiler inlines, which
-    includes `abs` and `labs`. go2cs cannot tell the two apart, so it refuses both rather than bind a
-    function C would not call:
+    (macOS on x64 makes `fstat` the symbol `fstat$INODE64`), and also any function the C compiler inlines
+    when cgo builds the package. Which functions those are depends on the compiler and the C library.
+    `abs` and `labs` are refused on Linux, macOS and Windows. With glibc, `atoi`, `atol`, `toupper`,
+    `tolower` and `fabs` are refused too (measured on Linux x64 with gcc 15 and with clang 22). go2cs
+    cannot tell a rename from an inlined call, so it refuses both rather than bind a function C would not
+    call:
     `error GO2CS2001: C.abs: cmd/cgo's own binary does not import a symbol named abs, ...` (later in
     Phase 2).
 

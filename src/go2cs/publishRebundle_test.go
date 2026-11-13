@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -244,5 +245,37 @@ func TestAMissingBuildOutputIsRefusedNotPassed(t *testing.T) {
 
 	if _, err := publishBuildOutput(filepath.Join(out, "bin", "tests", "Release", "net10.0", "win-x64", "x.tests.dll")+"\n", project); err == nil {
 		t.Error("the publish stated a build output that is not there, and the check passed: a guard that cannot see must say so")
+	}
+}
+
+// The published host carries the test project's DECLARED AssemblyName, which since OQ4 differs from the project file's
+// name for a standard-library test project (go.container.list.tests in container.list.tests.csproj). A host looked up by
+// the file's name was never found, and every standard-library -tests run read conversion-blocked. A project that declares
+// no AssemblyName, or whose file cannot be read, keeps its file's name.
+func TestThePublishedHostCarriesTheDeclaredAssemblyName(t *testing.T) {
+	suffix := ""
+	if runtime.GOOS == "windows" {
+		suffix = ".exe"
+	}
+
+	for _, row := range []struct{ contents, want string }{
+		{"<Project>\n  <PropertyGroup>\n    <AssemblyName>go.x.tests</AssemblyName>\n  </PropertyGroup>\n</Project>\n", "go.x.tests"},
+		{"<Project>\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n  </PropertyGroup>\n</Project>\n", "x.tests"},
+		{"", "x.tests"},
+	} {
+		out := t.TempDir()
+		project := filepath.Join(out, "x.tests.csproj")
+
+		if row.contents != "" {
+			if err := os.WriteFile(project, []byte(row.contents), 0o644); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		want := filepath.Join(out, "bin", "tests", "publish", row.want+suffix)
+
+		if got := publishedTestHostPath(out, project); got != want {
+			t.Errorf("project %q: host %s, want %s", row.contents, got, want)
+		}
 	}
 }

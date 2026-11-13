@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 // converterLoaderEnv is the environment every go/packages load the converter makes runs in: the host's own, then
@@ -35,6 +36,25 @@ func converterLoaderEnv(settings ...string) []string {
 	}
 
 	return append(env, "CGO_ENABLED=0")
+}
+
+// cgoOnLoad reports whether a load ran cgo-on, which is what puts the cgo build tag in force for the files it
+// selected: under -cgo (whose offline test seam sets the tag by hand at CGO_ENABLED=0), or under a CGO_ENABLED=1 the
+// load's own environment carries. The last setting of a key is the one a child process is given.
+func cgoOnLoad(options Options, env []string) bool {
+	if options.parseCgoTargets {
+		return true
+	}
+
+	enabled := ""
+
+	for _, entry := range env {
+		if value, found := strings.CutPrefix(entry, "CGO_ENABLED="); found {
+			enabled = value
+		}
+	}
+
+	return enabled == "1"
 }
 
 // checkCgoFlag refuses a -cgo the converter cannot honour. -cgo makes ONE load cgo-on, the single-package driver's

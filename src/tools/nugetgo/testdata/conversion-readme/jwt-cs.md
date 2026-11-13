@@ -1,5 +1,7 @@
 # jwt
 
+[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net)
+
 An unofficial C# conversion of the Go module [`github.com/golang-jwt/jwt/v5`](https://github.com/golang-jwt/jwt), produced by [go2cs](https://github.com/ritchiecarroll/go2cs) as a proof of its third-party conversion path.
 
 This repository is not affiliated with or endorsed by the golang-jwt maintainers, the authors of `github.com/golang-jwt/jwt`, or the Go project. Go users should use the upstream module.
@@ -14,13 +16,15 @@ This repository is not affiliated with or endorsed by the golang-jwt maintainers
 
 ## NuGet
 
-Published as [`nugetgo.github.com.golang-jwt.jwt.v5`](https://www.nuget.org/packages/nugetgo.github.com.golang-jwt.jwt.v5)
-5.3.1. A rebuild of the same Go version adds a fourth, revision part: `5.3.1.N`, where N counts up from 1. The package
-holds two assemblies: the module's root package and `request`.
+Published as
+[`nugetgo.github.com.golang-jwt.jwt.v5`](https://www.nuget.org/packages/nugetgo.github.com.golang-jwt.jwt.v5) 5.3.1,
+rebuilt as 5.3.1.3 from this repository's tag `nuget-5.3.1.3`. A rebuild of the same Go version adds a fourth,
+revision part: `5.3.1.N`, where N counts up from 1. The package holds two assemblies: the module's root package and
+`request`.
 
-unofficial go2cs C# conversion of github.com/golang-jwt/jwt/v5 v5.3.1, built on the Go 1.24.13 standard library; not
-affiliated with or endorsed by the golang-jwt maintainers or the Go project. Security: that standard library carries
-no Go security fixes issued after Go 1.24.13; review before any production use.
+unofficial go2cs C# conversion of github.com/golang-jwt/jwt/v5 v5.3.1, built on the Go 1.26.10 standard library; not
+affiliated with or endorsed by the golang-jwt maintainers or the Go project. Security: the Go standard library this
+package is built on includes no Go security fixes released after Go 1.26.10; review before any production use.
 
 ## What is here
 
@@ -31,6 +35,7 @@ no Go security fixes issued after Go 1.24.13; review before any production use.
 | `jwt/test/` | the module's `test` package: jwt's own test fixtures, converted but not packed |
 | `jwt/cmd/jwt/` | the module's `jwt` command, converted but not packed |
 | `jwt/Directory.Build.targets` | written by the nugetgo pack: the assemblies' copyright names the upstream holders |
+| `jwt/nuget/README.md` | the package's README on nuget.org: its About section is written by hand, and the nugetgo pack rewrites only its generated block |
 | `Directory.Build.props`, `Directory.Build.targets` | the build settings go2cs generated; `GoStdLibVersion` is set here |
 | `LICENSE` | the upstream license, verbatim (MIT) |
 | `VALIDATION.md`, `index.md`, `request.md` | the validation summary the NuGet package ships, and its proof page(s), byte for byte as packed |
@@ -42,19 +47,20 @@ nearest `Directory.Build.targets` above its own directory, which is the root one
 
 ```
 cd jwt
-dotnet build github.com.golang-jwt.jwt.v5.csproj -c Release -p:GoStdLibVersion=1.24.13.5
-dotnet build request/github.com.golang-jwt.jwt.v5.request.csproj -c Release -p:GoStdLibVersion=1.24.13.5
+dotnet build github.com.golang-jwt.jwt.v5.csproj -c Release -p:GoStdLibVersion=1.26.10.3
+dotnet build request/github.com.golang-jwt.jwt.v5.request.csproj -c Release -p:GoStdLibVersion=1.26.10.3
 ```
 
-The restore takes the `go.*` packages from nuget.org. `-p:GoStdLibVersion=1.24.13.5` pins the go2cs standard-library
-release the package was built against; without it the build takes the newest `1.24.13.*`.
+The restore takes the `go.*` packages from nuget.org. `-p:GoStdLibVersion=1.26.10.3` pins the go2cs standard-library
+release the package was built against; without it the build takes the newest `1.26.*`.
 
 ## Provenance
 
-Converted with `go2cs -recurse=nuget -platforms linux/amd64` at go2cs commit `7888e4e72f`, which is the go.*
-1.24.13.5 release with the nugetgo pack tools merged. The module's Go tests were converted and compared at the same
-commit: 189 matched, 0 disclosed, across the root package (186) and `request` (3). The package ships that report as
-`VALIDATION.md`.
+Converted with `go2cs -recurse=nuget -platforms linux/amd64` at go2cs commit `e1761e9a17`, the go.* 1.26.10.3
+release record, whose runtime, source generators and nugetgo tools it carries unchanged, and built and packed with
+the .NET SDK 10.0.403. The module's Go tests
+were converted and compared at the same commit: 189 matched, 0 disclosed, across the root package (186) and `request`
+(3). The package ships that report as `VALIDATION.md`.
 
 ## License
 
