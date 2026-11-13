@@ -37300,4 +37300,78 @@ Go (FALSE, on the two rows above); kind, type and `IsNil` equal Go in the three 
 
 — G (2026-11-12)
 
+## 2026-11-12 — G (Condition 3, COORD's ruling: option A with the identity token): reflect unwraps an interface shell where the Value is built; six predictions scored, no stop line tripped
+
+**Dated 2026-11-12 23:17 CST. Base `1d7e03bdbc`, fix `74fafaa67d`, Windows x64, SDK 10.0.400, go1.26.10.** A
+value that reaches reflect inside an interface shell (the generic adapter an assertion or a conversion to an
+interface builds) was read as the shell. A named slice or map behind the shell printed EMPTY with exit code 0.
+The row above this one holds the nil func part, which is its own seat.
+
+**The fix.** `makeReflectValue` of reflect, and its twin of reflectlite, unwrap the shell once, where the Value is
+built: the structural chain first, then one adapter. A shell around a NIL keeps the WHOLE shell, as golib's own
+unwrap rule does. Every accessor then reads the value, so no accessor carries a rule of its own.
+
+**The identity token.** reflect's Value keeps the shell it was built from in ONE companion field, `shell`. Its
+one writer is `makeReflectValue` (null unless it unwrapped). Its two readers are the Value's `Equals` and
+`GetHashCode`, through one private property. No accessor reads it. reflectlite's Value carries NO token: it has
+no equality that reads the datum.
+
+**Two more sites, beyond the two builders.** Both `Swapper` bodies (reflect's and reflectlite's) read their `any`
+argument directly, and panicked "call of Swapper on slice Value" for a slice behind a shell. Both now read it
+through `ValueOf`, as Go's body does. They are hand-owned files of the same two packages, so S3 holds.
+
+**The census: 1028 reads, 18 kinds, four arms, each scored against Go's output.** direct is the value in an
+`any`; va is a static conversion to a local interface; sh is the `any` asserted to that interface; er is a twin
+type converted to `error`.
+
+| Arm | Base: EQUAL / SILENT / PANIC / CRASH | Fix: EQUAL / SILENT / PANIC / CRASH |
+|---|---|---|
+| direct | 255 / 0 / 1 / 1 | 255 / 0 / 1 / 1 |
+| va | 214 / 12 / 7 / 24 | 257 / 0 / 0 / 0 |
+| sh | 202 / 22 / 9 / 24 | 247 / 8 / 2 / 0 |
+| er | 220 / 9 / 9 / 19 | 255 / 0 / 2 / 0 |
+
+Every read that still differs at the fix is a nil func read: 2 direct, 10 sh, 2 er, the rows of the entry above.
+
+**Predictions, posted before the fix, scored.**
+
+- P1, the 567 shell reads of the 13 non-nil kinds are EQUAL: TRUE.
+- P2, the direct arm keeps every class: TRUE (255, 1, 1 in both columns).
+- P3, `==` on two Values stays EQUAL in every arm: TRUE.
+- P4, the four other typed nils stay EQUAL and the nil func rows do not move: TRUE.
+- P5, seven `-tests` rows keep their sets: TRUE. Each row was read on Windows at base and at the fix, by one
+  converter binary (converter, generator and golib sources are byte-identical between the two refs), and
+  compared test by test and with the bank.
+
+| Package | Bank | Base | Fix | Tests that moved |
+|---|---|---|---|---|
+| reflect | 445 matched, 21 disclosed | 445 with 21 | 445 with 21 | 0 |
+| fmt | 62 matched, 1 disclosed | 62 with 1 | 62 with 1 | 0 |
+| errors | 80 matched, 0 disclosed | 80 | 80 | 0 |
+| sort | 63 matched, 0 disclosed | 63 | 63 | 0 |
+| encoding/json | 550 matched, 0 disclosed | 550 | 550 | 0 |
+| encoding/binary | 143 matched, 3 disclosed | 143 with 3 | 143 with 3 | 0 |
+| text/template | 53 matched, 0 disclosed | 53 | 53 | 0 |
+
+- P6, one tracked program is red at base and green at the fix: TRUE. `ReflectShellAccessors` passes its four
+  rows at the fix (Output: 1 compared, 0 failed). With the three source files put back to their parent state, its
+  Output row fails: "exit code mismatch: C# 2 vs Go 0", on the panic "call of reflect.Value.Cap on slice Value".
+  The files were restored byte-identical and the row read green again.
+
+The comparator of P5 was made to fail first: one verdict flipped in a copy of a results file reads "moved 1".
+
+**Stop lines.** S1 (a direct read changes class), S2 (a shell read leaves EQUAL), S3 (a file outside the
+hand-owned reflect and reflectlite files), S4 (a caller needs the shell kept), S5 (a row of P5 moves) and S6 (the
+token field trips a layout reader or a guard): none tripped. For S6 the repo guards and the reflect row are the
+readings.
+
+**A correction to the entry above.** The direct arm's crash now has a measured exit code: 2. The read is
+`MethodByName("Name").Call(nil)`.
+
+**Not built or measured.** The fixture adds two members to the converter-dev solution; that solution was not
+built end to end. Read instead: both member paths list and exist, and both projects compile in the runner's
+Compile row. Native AOT. Linux and macOS rows.
+
+— G (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
