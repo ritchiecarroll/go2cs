@@ -26,7 +26,7 @@ internal static void main() {
     fmt.Println(a[0], a[1]);
     fmt.Println();
 
-    var primes = new nint[]{2, 3, 5, 7, 11, 13}.array();
+    var primes = array<nint>([2, 3, 5, 7, 11, 13]);
     fmt.Println(primes);
 
     fmt.Println(a[0]);
@@ -36,14 +36,14 @@ internal static void main() {
     assignCopies();
 }
 
-internal static array<nint> garr = new nint[]{1, 2, 3}.array();
+internal static array<nint> garr = array<nint>([1, 2, 3]);
 
 partial struct arrHolder {
     internal array<nint> arr = new(3);
 }
 
 internal static void assignCopies() {
-    ref var src = ref heap<array<nint>>(new nint[]{1, 2, 3}.array(), out var Ꮡsrc);
+    ref var src = ref heap<array<nint>>(array<nint>([1, 2, 3]), out var Ꮡsrc);
     var cpy = src.Clone();
     cpy[0] = 99;
     fmt.Println(src[0], cpy[0]);
@@ -60,7 +60,7 @@ internal static void assignCopies() {
     e[2] = 66;
     fmt.Println(src[2], e[2]);
 
-    var h = new arrHolder(arr: new nint[]{4, 5, 6}.array());
+    var h = new arrHolder(arr: array<nint>([4, 5, 6]));
     var f = h.arr.Clone();
     f[0] = 55;
     fmt.Println(h.arr[0], f[0]);
@@ -69,7 +69,7 @@ internal static void assignCopies() {
     h.arr[1] = 44;
     fmt.Println(src[1], h.arr[1]);
 
-    var m = new array<nint>[]{new nint[]{7, 8, 9}.array(), new nint[]{10, 11, 12}.array()}.array();
+    var m = new array<nint>[]{array<nint>([7, 8, 9]), array<nint>([10, 11, 12])}.array();
     var row = m[1].Clone();
     row[0] = 33;
     fmt.Println(m[1][0], row[0]);
@@ -79,7 +79,7 @@ internal static void assignCopies() {
     g[0] = 22;
     fmt.Println(src[0], g[0]);
 
-    var (x, y) = (new nint[]{1, 2}.array(), new nint[]{3, 4}.array());
+    var (x, y) = (array<nint>([1, 2]), array<nint>([3, 4]));
     (x, y) = (y.Clone(), x.Clone());
     x[0] = 11;
     fmt.Println(x[0], x[1], y[0], y[1]);

@@ -6,9 +6,9 @@ partial class main_package {
 
 internal static void main() {
     ж<nint> p = default;
-    var a = GoReflect.WithElemDims(new array<any>[]{new any[]{(nint)1, (nint)2}.array(), new any[]{(@string)"a", (@string)"b"}.array()}.slice(), 2);
-    var b = new slice<any>[]{[1.5D, (rune)'x'], [(@string)("c"u8 + "d"u8), true]}.array();
-    var c = slice<ж<array<any>>>([Ꮡ(new any[]{(nint)1, (@string)"p"}.array())]);
+    var a = GoReflect.WithElemDims(new array<any>[]{array<any>([(nint)1, (nint)2]), array<any>([(@string)"a", (@string)"b"])}.slice(), 2);
+    var b = array<slice<any>>([[1.5D, (rune)'x'], [(@string)("c"u8 + "d"u8), true]]);
+    var c = slice<ж<array<any>>>([Ꮡ(array<any>([(nint)1, (@string)"p"]))]);
     var d = slice<slice<any>>([[p.OrTypedNil()]]);
     var (_, isInt) = a[0][0]._<nint>(ᐧ);
     var (_, isFloat) = b[0][0]._<float64>(ᐧ);

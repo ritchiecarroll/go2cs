@@ -31,7 +31,7 @@ internal static void main() {
     f.SetInt(5);
     fmt.Println("field write through:", (pp.Value).I, f.Addr().Type());
 
-    var ap = new arrPtr(Ꮡ(new nint[]{1, 2, 3}.array()));
+    var ap = new arrPtr(Ꮡ(array<nint>([1, 2, 3])));
     reflect.ValueOf(ap).Elem().Index(1).SetInt(9);
     fmt.Println("index write through:", (ap.Value)[1], ap.Value);
 

@@ -7,12 +7,12 @@ partial class main_package {
 internal static @string bomKind(@string s) {
     array<byte> bom = new(2);
     if (len(s) >= 2) {
-        bom = new byte[]{s[0], s[1]}.array();
+        bom = array<byte>([s[0], s[1]]);
         switch (bom) {
-        case var ᴛ when ᴛ == new byte[]{0xFF, 0xFE}.array(): {
+        case var ᴛ when ᴛ == array<byte>([0xFF, 0xFE]): {
             return "le";
         }
-        case var ᴛ when ᴛ == new byte[]{0xFE, 0xFF}.array(): {
+        case var ᴛ when ᴛ == array<byte>([0xFE, 0xFF]): {
             return "be";
         }}
 
@@ -24,10 +24,10 @@ internal static @string pair(/*[2]*/ array<byte> b) {
     b = b.Clone();
 
     switch (b) {
-    case var ᴛ when ᴛ == new byte[]{1, 2}.array() || ᴛ == new byte[]{3, 4}.array(): {
+    case var ᴛ when ᴛ == array<byte>([1, 2]) || ᴛ == array<byte>([3, 4]): {
         return "low";
     }
-    case var ᴛ when ᴛ == new byte[]{9, 9}.array(): {
+    case var ᴛ when ᴛ == array<byte>([9, 9]): {
         return "nines";
     }
     default: {
@@ -70,14 +70,14 @@ internal static slice<@string> through(/*[2]*/ array<byte> b) {
     slice<@string> @out = default;
     var exprᴛ1 = b;
     var matchᴛ1 = false;
-    if (exprᴛ1 == new byte[]{1, 1}.array()) { matchᴛ1 = true;
+    if (exprᴛ1 == array<byte>([1, 1])) { matchᴛ1 = true;
         @out = append(@out, (@string)"one");
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == new byte[]{2, 2}.array()) {
+    if (fallthrough || !matchᴛ1 && exprᴛ1 == array<byte>([2, 2])) {
         @out = append(@out, (@string)"two");
     }
-    else if (exprᴛ1 == new byte[]{3, 3}.array()) { matchᴛ1 = true;
+    else if (exprᴛ1 == array<byte>([3, 3])) { matchᴛ1 = true;
         @out = append(@out, (@string)"three");
     }
 
@@ -98,10 +98,10 @@ internal static @string order(/*[2]*/ array<byte> b) {
 
     trace = default;
     switch (b) {
-    case var ᴛ when ᴛ == at(1, new byte[]{7, 7}.array()) || ᴛ == at(2, new byte[]{8, 8}.array()): {
+    case var ᴛ when ᴛ == at(1, array<byte>([7, 7])) || ᴛ == at(2, array<byte>([8, 8])): {
         return fmt.Sprint("first ", trace);
     }
-    case var ᴛ when ᴛ == at(3, new byte[]{9, 9}.array()): {
+    case var ᴛ when ᴛ == at(3, array<byte>([9, 9])): {
         return fmt.Sprint("second ", trace);
     }}
 
@@ -122,11 +122,11 @@ internal static @string digit(nint n) {
 
 internal static void main() {
     fmt.Println(bomKind(((@string)(new byte[]{0xff, 0xfe, 0x61, 0x62}))), bomKind(((@string)(new byte[]{0xfe, 0xff, 0x61, 0x62}))), bomKind("ab"), bomKind("a"));
-    fmt.Println(pair(new byte[]{1, 2}.array()), pair(new byte[]{3, 4}.array()), pair(new byte[]{9, 9}.array()), pair(new byte[]{5, 5}.array()));
+    fmt.Println(pair(array<byte>([1, 2])), pair(array<byte>([3, 4])), pair(array<byte>([9, 9])), pair(array<byte>([5, 5])));
     fmt.Println(where(new point()), where(new point(0, 1)), where(new point(2, 2)));
     fmt.Println(sum(5, 2, 3), sum(6, 2, 3), sum(7, 2, 3));
-    fmt.Println(through(new byte[]{1, 1}.array()), through(new byte[]{2, 2}.array()), through(new byte[]{3, 3}.array()), len(through(new byte[]{}.array(2))));
-    fmt.Println(order(new byte[]{8, 8}.array()), order(new byte[]{9, 9}.array()), order(new byte[]{0, 0}.array()));
+    fmt.Println(through(array<byte>([1, 1])), through(array<byte>([2, 2])), through(array<byte>([3, 3])), len(through(new byte[]{}.array(2))));
+    fmt.Println(order(array<byte>([8, 8])), order(array<byte>([9, 9])), order(array<byte>([0, 0])));
     fmt.Println(digit(1), digit(3), digit(9));
 }
 

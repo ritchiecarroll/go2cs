@@ -68,7 +68,7 @@ internal static bool solve() {
     nint n = default;
     foreach (var (pos, field) in range(board)) {
         if (field == '●') {
-            foreach (var (_, dir) in range(new nint[]{-1, -N, +1, +N}.array())) {
+            foreach (var (_, dir) in range(array<nint>([-1, -N, +1, +N]))) {
                 if (move(pos, dir)) {
                     if (solve()) {
                         unmove(pos, dir);

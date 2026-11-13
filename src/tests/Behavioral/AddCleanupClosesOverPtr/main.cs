@@ -151,7 +151,7 @@ internal static void main() {
 
     @try("array capture holds ptr", () => {
         var v = Ꮡ(new T(f: 17));
-        ref var a = ref heap<array<ж<T>>>(new ж<T>[]{default, v}.array(), out var Ꮡa);
+        ref var a = ref heap<array<ж<T>>>(array<ж<T>>([default, v]), out var Ꮡa);
         var aʗ1 = a;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = aʗ1;

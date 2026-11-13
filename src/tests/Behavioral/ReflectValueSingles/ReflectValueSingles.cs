@@ -83,7 +83,7 @@ internal partial struct main_ptrSlots /*dyn*/ {
 
 internal static void main() {
     ref var xs = ref heap<slice<nint>>(slice<nint>([1, 2, 3, 4, 5, 6, 7, 8]), out var Ꮡxs);
-    ref var xa = ref heap<array<nint>>(new nint[]{10, 20, 30, 40, 50, 60, 70, 80}.array(), out var Ꮡxa);
+    ref var xa = ref heap<array<nint>>(array<nint>([10, 20, 30, 40, 50, 60, 70, 80]), out var Ꮡxa);
     ref var vs = ref heap<reflectꓸValue>(reflect.ValueOf(Ꮡxs).Elem(), out var Ꮡvs);
     var vsʗ1 = vs;
     expectPanic("SetLen(10)", "SetLen", () => {
@@ -207,9 +207,9 @@ internal static void main() {
 
     convRow("[]byte(nil) -> *[0]byte", slice<byte>(default), ж<array<byte>>.NilBoxOfDims(0L));
     convRow("[]byte{} -> *[0]byte", slice<byte>([]), Ꮡ(new array<byte>(0)));
-    convRow("[]byte{7} -> *[1]byte", slice<byte>([7]), Ꮡ(new byte[]{7}.array()));
-    convRow("MyBytes{9} -> *[1]byte", (MyBytes)slice<byte>([9]), Ꮡ(new byte[]{9}.array()));
-    convRow("[]byte{1,2,3,4} -> MyBytesArrayPtr", slice<byte>([1, 2, 3, 4]), new MyBytesArrayPtr(Ꮡ(new byte[]{1, 2, 3, 4}.array())));
+    convRow("[]byte{7} -> *[1]byte", slice<byte>([7]), Ꮡ(array<byte>([7])));
+    convRow("MyBytes{9} -> *[1]byte", (MyBytes)slice<byte>([9]), Ꮡ(array<byte>([9])));
+    convRow("[]byte{1,2,3,4} -> MyBytesArrayPtr", slice<byte>([1, 2, 3, 4]), new MyBytesArrayPtr(Ꮡ(array<byte>([1, 2, 3, 4]))));
     convRow("[]byte(nil) -> MyBytesArrayPtr0", slice<byte>(default), (MyBytesArrayPtr0)nil);
     convRow("[]byte{1,2,3,4} -> *MyBytesArray", slice<byte>([1, 2, 3, 4]), Ꮡ(new MyBytesArray(new byte[]{1, 2, 3, 4}.array())));
     convRow("[]byte(nil) -> *MyBytesArray0", slice<byte>(default), ж<MyBytesArray0>.NilBoxOfDims(0L));

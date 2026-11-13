@@ -31,7 +31,7 @@ internal static void main() {
     ptr p = @unsafe.Pointer.FromPinnedBox(Ꮡx);
     fmt.Println(~(ж<uint64>)(uintptr)(p));
 
-    ref var buf = ref heap<array<byte>>(new byte[]{1, 2, 3, 4, 5, 6, 7, 8}.array(), out var Ꮡbuf);
+    ref var buf = ref heap<array<byte>>(array<byte>([1, 2, 3, 4, 5, 6, 7, 8]), out var Ꮡbuf);
     ref var q = ref heap<ptr>(new ptr(Ꮡbuf.at<byte>(0)), out var Ꮡq);
     fmt.Println(readU8(q, 3), readU32(q, 4) == (uint32)((uint32)((uint32)((uint32)5 | (uint32)6 << 8) | (uint32)7 << 16) | (uint32)8 << 24));
 

@@ -25,7 +25,7 @@ internal static void main() {
     fmt.Println("zerofill:", unmarshal(@"[""x""]", Ꮡd), d);
 
     ref var e = ref heap(new array<nint>(2), out var Ꮡe);
-    e = new nint[]{9, 9}.array();
+    e = array<nint>([9, 9]);
     fmt.Println("empty:", unmarshal("[]", Ꮡe), e);
 
     ref var f = ref heap(new array<array<nint>>(2, () => new(2)), out var Ꮡf);

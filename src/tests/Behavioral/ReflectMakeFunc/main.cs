@@ -90,7 +90,7 @@ internal static void main() {
         }
         return slice<reflectꓸValue>([reflect.ValueOf(total)]);
     }));
-    fmt.Println("sum4:", sum4(new byte[]{1, 2, 3, 4}.array()));
+    fmt.Println("sum4:", sum4(array<byte>([1, 2, 3, 4])));
 }
 
 } // end main_package

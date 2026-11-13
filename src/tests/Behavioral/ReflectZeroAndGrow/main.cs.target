@@ -49,12 +49,12 @@ internal static void main() {
     z("NI non-zero", (NI)3);
     z("NI zero", (NI)0);
 
-    z("[2]uint8{1,2}", new uint8[]{1, 2}.array());
+    z("[2]uint8{1,2}", array<uint8>([1, 2]));
     z("[2]uint8{}", new uint8[]{}.array(2));
     z("NA{1,2}", new NA(new uint8[]{1, 2}.array()));
     z("NA{}", new NA(new uint8[2].array()));
     z("[3]string{'','',''}", new @string[]{}.array(3));
-    z("[2]NS{'a',''}", new NS[]{(NS)(@string)"a", (NS)(@string)""u8}.array());
+    z("[2]NS{'a',''}", array<NS>([(NS)(@string)"a", (NS)(@string)""u8]));
 
     z("NB(nil)", (NB)default);
     z("NB{}", new NB(new byte[]{}.slice()));

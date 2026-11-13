@@ -91,7 +91,7 @@ internal static void viaNested() {
 }
 
 internal static void viaArray() {
-    var a = new ViaArray(new map<nint, array<ViaArray>>{[1] = new ViaArray[]{new ViaArray(new map<nint, array<ViaArray>>{[2] = new ViaArray[]{}.array(2)}), default}.array()});
+    var a = new ViaArray(new map<nint, array<ViaArray>>{[1] = array<ViaArray>([new ViaArray(new map<nint, array<ViaArray>>{[2] = new ViaArray[]{}.array(2)}), default])});
     fmt.Println("viaArray:", len(a), len(a[1, () => new array<ViaArray>(2)][0]), a[1, () => new array<ViaArray>(2)][1] == nil);
 }
 

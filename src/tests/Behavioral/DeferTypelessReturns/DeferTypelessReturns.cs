@@ -75,7 +75,7 @@ internal static void main() {
         fmt.Println(p != nil, err == nil);
         (_, err) = find(xs, 9);
         fmt.Println(err);
-        fmt.Println(first(new byte[]{7, 8, 9, 10}.array()));
+        fmt.Println(first(array<byte>([7, 8, 9, 10])));
         fmt.Println(big.idx());
         fmt.Println(invalid == big, invalid == invalid);
     }

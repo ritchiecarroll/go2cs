@@ -42,7 +42,7 @@ internal static nint keyCount<K>(params Span<K> keysʗp) {
 }
 
 internal static array<T> one<T>(T v) {
-    return new T[]{v}.array();
+    return array<T>([v]);
 }
 
 internal static any asAny<T>(T v) {
@@ -109,7 +109,7 @@ internal static void main() {
 
     fmt.Println("phase 5:");
     fmt.Println(new holder(p: nil) == field, new holder(p: nil) == new holder(), new holder(p: n) == field);
-    fmt.Println(new ж<node>[]{default, field.p}.array() == new ж<node>[]{}.array(2), same(new holder(p: nil), field));
+    fmt.Println(array<ж<node>>([default, field.p]) == new ж<node>[]{}.array(2), same(new holder(p: nil), field));
 
     fmt.Println("phase 6:");
     nodePtr named = default;
@@ -119,7 +119,7 @@ internal static void main() {
 
     fmt.Println("phase 7:");
     fmt.Println(one<ж<node>>(nil) == new ж<node>[]{}.array(1), one(field.p) == one<ж<node>>(nil), one(n) == one<ж<node>>(nil));
-    var a = new ж<node>[]{n, n}.array();
+    var a = array<ж<node>>([n, n]);
     a[1] = default;
     a[0] = field.p;
     fmt.Println(a == new ж<node>[]{}.array(2), same(a, new ж<node>[]{}.array(2)));
@@ -127,7 +127,7 @@ internal static void main() {
     byArray[one<ж<node>>(nil)]++;
     byArray[new ж<node>[]{}.array(1)]++;
     byArray[one(field.p)]++;
-    fmt.Println(len(byArray), byArray[new ж<node>[]{default}.array()]);
+    fmt.Println(len(byArray), byArray[array<ж<node>>([default])]);
     var byStruct = new map<holder, nint>{};
     byStruct[new holder(p: nil)]++;
     byStruct[field]++;

@@ -125,7 +125,7 @@ internal static (syscallꓸHandle, error) newSender() {
     if (err != nil) {
         return (syscall.InvalidHandle, err);
     }
-    err = syscall.Bind(s, new syscall.SockaddrInet4жΔSockaddr(Ꮡ(new syscall.SockaddrInet4(Port: 0, Addr: new byte[]{127, 0, 0, 1}.array())))); if (err != nil) {
+    err = syscall.Bind(s, new syscall.SockaddrInet4жΔSockaddr(Ꮡ(new syscall.SockaddrInet4(Port: 0, Addr: array<byte>([127, 0, 0, 1]))))); if (err != nil) {
         syscall.Closesocket(s);
         return (syscall.InvalidHandle, err);
     }

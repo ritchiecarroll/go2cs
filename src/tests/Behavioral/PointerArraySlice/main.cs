@@ -25,7 +25,7 @@ internal static nint sumParam(ж<grid> Ꮡp) {
 }
 
 internal static void main() {
-    ref var arr = ref heap<array<nint>>(new nint[]{10, 20, 30, 40, 50}.array(), out var Ꮡarr);
+    ref var arr = ref heap<array<nint>>(array<nint>([10, 20, 30, 40, 50]), out var Ꮡarr);
     var p = Ꮡarr;
 
     var full = p.slice();
@@ -63,7 +63,7 @@ internal static void rangeIndexOnly() {
     }
     fmt.Println("nil *grid ranges", count);
 
-    var p = Ꮡ(new @string[]{"a", "b"}.array());
+    var p = Ꮡ(array<@string>(["a", "b"]));
     foreach (var i in range(p, 2)) {
         p.Value[i] += "!"u8;
     }

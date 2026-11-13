@@ -136,7 +136,7 @@ internal static void main() {
         fmt.Println(i1, v1);
     }
 
-    var farr = new float32[]{1.1F, 2.2F, 3.3F}.array();
+    var farr = array<float32>([1.1F, 2.2F, 3.3F]);
 
     foreach (var (iΔ6, vΔ6) in range(farr.ΔRangeSnapshot())) {
         fmt.Println(iΔ6, vΔ6);

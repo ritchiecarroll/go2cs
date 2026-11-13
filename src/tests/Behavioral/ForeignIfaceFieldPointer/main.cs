@@ -14,11 +14,11 @@ internal partial struct main_type /*dyn*/ {
 internal static void main() {
     var ta = Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock", Net: "unix"));
 
-    array<main_type> connAddrs = new main_type[]{
+    array<main_type> connAddrs = array<main_type>([
         new(new addrlib.UnixAddrжAddr(ta), new addrlib.UnixAddrжAddr(ta)),
         new(new addrlib.UnixAddrжAddr(Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock", Net: "unix"))), new addrlib.UnixAddrжAddr(Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock", Net: "unix")))),
         new(new addrlib.UnixAddrжAddr(ta), new addrlib.UnixAddrжAddr(Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock", Net: "unix"))))
-    }.array();
+    ]);
 
     foreach (var (i, ca) in range(connAddrs.ΔRangeSnapshot())) {
         fmt.Printf("%d got  T=%T v=%#v\n"u8, i, ca.got, ca.got);

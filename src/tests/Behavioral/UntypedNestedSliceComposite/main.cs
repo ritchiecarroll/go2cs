@@ -17,8 +17,8 @@ internal static slice<slice<rank>> order = new golib.SparseArray<slice<rank>>{
 }.slice();
 
 internal static slice<array<nint>> grid = GoReflect.WithElemDims(new array<nint>[]{
-    new nint[]{1, 2}.array(),
-    new nint[]{3, 4}.array()
+    array<nint>([1, 2]),
+    array<nint>([3, 4])
 }.slice(), 2);
 
 partial struct dbgVar {

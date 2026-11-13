@@ -154,7 +154,7 @@ internal static void main() {
     fmt.Println();
     fmt.Println("== array length is part of the reported type ==");
 
-    any aos = new slice<nint>[]{[1]}.array();
+    any aos = array<slice<nint>>([[1]]);
     var aosʗ1 = aos;
     check("array of slice", () => {
         _ = AreEqual(aosʗ1, aosʗ1);
@@ -288,9 +288,9 @@ internal static void main() {
     any p3 = new point(1, 3);
     fmt.Println("struct:   ", AreEqual(p1, p2), AreEqual(p1, p3));
 
-    any arr1 = new nint[]{1, 2}.array();
-    any arr2 = new nint[]{1, 2}.array();
-    any arr3 = new nint[]{1, 3}.array();
+    any arr1 = array<nint>([1, 2]);
+    any arr2 = array<nint>([1, 2]);
+    any arr3 = array<nint>([1, 3]);
     fmt.Println("array:    ", AreEqual(arr1, arr2), AreEqual(arr1, arr3));
 
     ref var x = ref heap<nint>(out var Ꮡx);
@@ -316,8 +316,8 @@ internal static void main() {
     any e1 = ((any)(nint)7);
     any e2 = ((any)(nint)7);
     fmt.Println("iface:    ", AreEqual(e1, e2));
-    any nc1 = new main_nestedComparable(new point(1, 2), new nint[]{3, 4}.array());
-    any nc2 = new main_nestedComparable(new point(1, 2), new nint[]{3, 4}.array());
+    any nc1 = new main_nestedComparable(new point(1, 2), array<nint>([3, 4]));
+    any nc2 = new main_nestedComparable(new point(1, 2), array<nint>([3, 4]));
     fmt.Println("nested:   ", AreEqual(nc1, nc2));
 
     fmt.Println();

@@ -43,7 +43,7 @@ internal static digest returnField(nest n) {
 }
 
 internal static digest newDigest() {
-    return new digest(h: new nint[]{1, 2, 3, 4}.array(), x: new byte[]{5, 6}.array(), nx: 7);
+    return new digest(h: array<nint>([1, 2, 3, 4]), x: array<byte>([5, 6]), nx: 7);
 }
 
 internal static void derefCopy() {
@@ -98,7 +98,7 @@ internal static void returnValue() {
 
 internal static void indexCopy() {
     var d = newDigest();
-    var arr = new digest[]{d.ΔClone(), d.ΔClone()}.array();
+    var arr = array<digest>([d.ΔClone(), d.ΔClone()]);
     var f = arr[0].ΔClone();
     f.bump();
     fmt.Println("index:      ", arr[0].show(), "|", f.show());
@@ -111,7 +111,7 @@ internal static void indexCopy() {
 
 internal static void rangeCopy() {
     var d = newDigest();
-    var arr = new digest[]{d.ΔClone(), d.ΔClone()}.array();
+    var arr = array<digest>([d.ΔClone(), d.ΔClone()]);
 
     foreach (var (_, vᴛ1) in range(arr.ΔRangeSnapshot())) {
         var g = vᴛ1.ΔClone();

@@ -36,7 +36,7 @@ internal static void main() {
     n = copy(@unsafe.GoImage(Ꮡdirent).slice(), data[..10]);
     fmt.Println(n, dirent.Ino, dirent.Seekoff, dirent.Reclen);
 
-    ref var p = ref heap<Pair>(new Pair(A: 0x0102, B: new uint8[]{5, 6}.array(), C: 0x1122334455667788UL), out var Ꮡp);
+    ref var p = ref heap<Pair>(new Pair(A: 0x0102, B: array<uint8>([5, 6]), C: 0x1122334455667788UL), out var Ꮡp);
     var @out = new slice<byte>(16);
     n = copy(@out, @unsafe.GoImage(Ꮡp).slice());
     fmt.Println(n, @out);

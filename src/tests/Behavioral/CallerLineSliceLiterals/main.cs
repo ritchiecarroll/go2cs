@@ -18,10 +18,10 @@ partial struct pair {
     internal nint a, b;
 }
 
-internal static array<nint> arrayFirst = new nint[]{line(),
+internal static array<nint> arrayFirst = array<nint>([line(),
     line(),
     line()
-}.array();
+]);
 
 internal static slice<nint> sliceAfterArray = slice<nint>([line(),
     line(),

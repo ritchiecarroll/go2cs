@@ -102,7 +102,7 @@ internal static void main() {
     @double(ref (p).DerefOrNull());
     fmt.Println("vec2:", v.x, v.y);
 
-    var arr = new uint64[]{10, 20, 30}.array();
+    var arr = array<uint64>([10, 20, 30]);
     addTo(ref arr[1], 1);
     fmt.Println("arr:", arr[0], arr[1], arr[2]);
 

@@ -75,7 +75,7 @@ public static Func<ж<Node>> Next(this ж<Node> Ꮡn) {
     return () => Ꮡn.Value.next;
 }
 
-public static array<ж<Node>> Triple(this ж<Node> Ꮡn) { return new ж<Node>[]{Ꮡn, Ꮡn, Ꮡn}.array(); }
+public static array<ж<Node>> Triple(this ж<Node> Ꮡn) { return array<ж<Node>>([Ꮡn, Ꮡn, Ꮡn]); }
 
 public static iter.Seq<ж<Node>> Path(this ж<Node> Ꮡn) {
     return (Func<ж<Node>, bool> yield) => {

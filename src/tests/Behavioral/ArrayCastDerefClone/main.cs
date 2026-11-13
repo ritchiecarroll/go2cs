@@ -43,7 +43,7 @@ internal static void main() {
 
     ref var pair = ref heap(new array<uintptr>(2), out var Ꮡpair);
 
-    pair = new uintptr[]{7, 8}.array();
+    pair = array<uintptr>([7, 8]);
     var gotPair = typedCastDerefDirect(Ꮡpair);
     gotPair[1] = 77;
     fmt.Println("direct copy:", gotPair, "original:", pair);

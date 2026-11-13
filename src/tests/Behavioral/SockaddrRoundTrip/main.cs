@@ -160,7 +160,7 @@ internal static void main() {
         }
         defer(() => syscall.WSACleanup(), ref ᒐ);
 
-        roundTrip("tcp4", syscall.AF_INET, new syscall.SockaddrInet4жΔSockaddr(Ꮡ(new syscall.SockaddrInet4(Addr: new byte[]{127, 0, 0, 1}.array()))));
+        roundTrip("tcp4", syscall.AF_INET, new syscall.SockaddrInet4жΔSockaddr(Ꮡ(new syscall.SockaddrInet4(Addr: array<byte>([127, 0, 0, 1])))));
         roundTrip("tcp6", syscall.AF_INET6, new syscall.SockaddrInet6жΔSockaddr(Ꮡ(new syscall.SockaddrInet6(Addr: new array<byte>(16){[15] = 1}))));
 
         decodeRawAny("raw4", syscall.AF_INET, (Action<nint, byte> put) => {

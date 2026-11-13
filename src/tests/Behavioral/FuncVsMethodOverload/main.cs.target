@@ -38,7 +38,7 @@ internal static uint32 second(this ж<holder> Ꮡh) {
 }
 
 internal static void main() {
-    ref var vals = ref heap<array<uint32>>(new uint32[]{10, 20, 30, 40}.array(), out var Ꮡvals);
+    ref var vals = ref heap<array<uint32>>(array<uint32>([10, 20, 30, 40]), out var Ꮡvals);
     fmt.Println(step(Ꮡvals.at<uint32>(0)));
 
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡvals.at<uint32>(1));

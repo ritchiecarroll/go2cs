@@ -21,7 +21,7 @@ internal static void main() {
     var me = new map<@string, array<nint>>{[""] = new nint[]{}.array(3)};
     fmt.Println("6 MapOf(string,ArrayOf(3,int)) == TypeOf(map[string][3]int):", AreEqual(reflect.MapOf(reflect.TypeOf(""), reflect.ArrayOf(3, reflect.TypeOf((nint)0))), reflect.TypeOf(me)));
 
-    var nested = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array()}.slice(), 2, 3);
+    var nested = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.array()}.slice(), 2, 3);
     fmt.Println("7 TypeOf([][2][3]int).Elem().Elem().Len() == 3:   ", reflect.TypeOf(nested).Elem().Elem().Len() == 3);
 
     var ptrs = slice<ж<array<byte>>>([Ꮡ(new byte[]{}.array(4))]);

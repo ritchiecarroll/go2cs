@@ -35,7 +35,7 @@ internal static void main() {
     var m = new map<@string, any>{["k"] = (@string)"mv"};
     var mk = new map<any, nint>{[(@string)"ky"] = 7};
     var s = slice<any>([(@string)"a", (@string)"b"]);
-    var arr = new any[]{(@string)"x", (@string)"y"}.array();
+    var arr = array<any>([(@string)"x", (@string)"y"]);
     var el = slice<node>([new(inner: (@string)"e1")]);
     var ep = slice<pair>([new("e2", (@string)"e3")]);
     var pp = slice<ж<node>>([Ꮡ(new node(inner: (@string)"p1"))]);

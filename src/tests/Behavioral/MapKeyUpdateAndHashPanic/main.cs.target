@@ -240,7 +240,7 @@ internal static void hashPanic() {
     });
     var emptyʗ5 = empty;
     @try("hashable key on empty map", () => {
-        _ = emptyʗ5[new nint[]{1, 2}.array()];
+        _ = emptyʗ5[array<nint>([1, 2])];
     });
     fmt.Println("full map len after:", len(full), "empty map len after:", len(empty));
 }

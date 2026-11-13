@@ -15,7 +15,7 @@ internal static void fatal(@string what, error err) {
 internal static void main() {
     GoFrame ᒐ = default;
     try {
-        ref var receiverAddr = ref heap<array<byte>>(new byte[]{127, 0, 0, 2}.array(), out var ᏑreceiverAddr);
+        ref var receiverAddr = ref heap<array<byte>>(array<byte>([127, 0, 0, 2]), out var ᏑreceiverAddr);
 
         var (receiver, err) = syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, 0);
         fatal("socket(receiver)", err);

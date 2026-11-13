@@ -43,7 +43,7 @@ internal static void p2() {
 
 internal static void p3() {
     ref var t = ref heap<tally>(new tally(1, "a"), out var Ꮡt);
-    ref var arr = ref heap<array<nint>>(new nint[]{1, 2, 3}.array(), out var Ꮡarr);
+    ref var arr = ref heap<array<nint>>(array<nint>([1, 2, 3]), out var Ꮡarr);
     void bump(nint k) {
         Ꮡt.Value.n += k;
         Ꮡt.Value.log += "!"u8;

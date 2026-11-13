@@ -27,7 +27,7 @@ private static readonly object gobˢ = (@string)"gob"u8;
 internal static void main() {
     var f = @new<Frog>();
     var d = @new<Dog>();
-    ref var zoo = ref heap<array<Animal>>(new Animal[]{new FrogжAnimal(f), new DogжAnimal(d)}.array(), out var Ꮡzoo);
+    ref var zoo = ref heap<array<Animal>>(array<Animal>([new FrogжAnimal(f), new DogжAnimal(d)]), out var Ꮡzoo);
     Test t = default;
 
     fmt.Printf("Iface cmp result = %v\n"u8, AreEqual(zoo[0], f));

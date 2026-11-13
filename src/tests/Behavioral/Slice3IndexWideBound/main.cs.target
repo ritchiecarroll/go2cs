@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static partial void run() {
-    var arr = new nint[]{10, 11, 12, 13, 14, 15, 16, 17}.array();
+    var arr = array<nint>([10, 11, 12, 13, 14, 15, 16, 17]);
     var sl = slice<nint>([20, 21, 22, 23, 24, 25]);
 
     uintptr n = 5;

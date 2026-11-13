@@ -43,10 +43,10 @@ internal static void main() {
     var b = empty();
     var c = positional();
     fmt.Println(a.V, a.W, b.V, c.V, c.W);
-    var w = new uint64[]{10, 20, 30, 40}.array();
+    var w = array<uint64>([10, 20, 30, 40]);
     fmt.Println(sum(w), len(w));
 
-    var d = new uint64[]{10, 20, 30, 40}.array();
+    var d = array<uint64>([10, 20, 30, 40]);
     fmt.Println(sum(d), rangeSum(d));
 
     words z = new(4);

@@ -11,7 +11,7 @@ partial class main_package {
     Data1: 0x25a207b9,
     Data2: 0xddf3,
     Data3: 0x4660,
-    Data4: new byte[]{0x8e, 0xe9, 0x76, 0xe5, 0x8c, 0x74, 0x06, 0x3e}.array()
+    Data4: array<byte>([0x8e, 0xe9, 0x76, 0xe5, 0x8c, 0x74, 0x06, 0x3e])
 )); }
 
 internal static void main() {
@@ -35,7 +35,7 @@ internal static void main() {
     copied.Data1 = 1;
     fmt.Println(id.Data1 == 0x25a207b9, copied.Data1);
 
-    var o = new guid.Outer(new guid.inner(A: 7, B: new byte[]{1, 2}.array()));
+    var o = new guid.Outer(new guid.inner(A: 7, B: array<byte>([1, 2])));
     fmt.Println(o.A, o.B[1], o.Sum());
 
     var (vals, refs) = guid.Pair();

@@ -196,11 +196,11 @@ internal static void showAll(params ꓸꓸꓸany partsʗp) {
     fmt.Println("  showAll:", parts);
 }
 
-internal static array<nint> regs = new nint[]{1, 2, 3}.array();
+internal static array<nint> regs = array<nint>([1, 2, 3]);
 
 internal static (nint, nint, nint) setRegs(nint a, nint b, nint c) {
     var old = regs.Clone();
-    regs = new nint[]{a, b, c}.array();
+    regs = array<nint>([a, b, c]);
     fmt.Println("  setRegs: now", regs, "was", old);
     return (old[0], old[1], old[2]);
 }

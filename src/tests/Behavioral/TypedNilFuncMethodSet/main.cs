@@ -27,7 +27,7 @@ internal static void main() {
 
     fmt.Printf("%v\n"u8, (fn).OrTypedNilFunc());
     fmt.Println((fn).OrTypedNilFunc());
-    fmt.Printf("%v\n"u8, new Fn[]{fn}.array());
+    fmt.Printf("%v\n"u8, array<Fn>([fn]));
     fmt.Printf("%s|%T\n"u8, (fn).OrTypedNilFunc(), (fn).OrTypedNilFunc());
 
     any x = (fn).OrTypedNilFunc();
