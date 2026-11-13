@@ -3230,6 +3230,33 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		prodEntries = append(prodEntries, prodEntry)
 	}
 
+	// Inline arrays (inlineArrayStamp.go): the INTERNAL variant recompiles the production files, so it holds their
+	// structs exactly as the production conversion recorded, applying the recorded rule to the production files and
+	// refusing a record they do not reproduce. Its own -inline-arrays value and its _test.go files never decide. The
+	// EXTERNAL variant declares no production struct and admits nothing.
+	if len(prodEntries) > 0 {
+		stamp, ok := readInlineArrayStamp(platformPackageInfoPath(outputPath, options.targetPlatform))
+
+		if !ok {
+			stamp = inlineArrayStamp{mode: inlineArraysModeAuto}
+		}
+
+		prodFiles := make([]*ast.File, 0, len(prodEntries))
+
+		for _, entry := range prodEntries {
+			prodFiles = append(prodFiles, entry.file)
+		}
+
+		admission, err := admitFromStamp(prodFiles, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, stamp, options)
+
+		if err != nil {
+			return nil, nil, fmt.Errorf("%s: %w", pkg.PkgPath, err)
+		}
+
+		packageInlineAdmission = admission
+		packageInlineArrayRecords = inlineArrayStampRecords(admission, inlineArrayMode(pkg.Types.Path(), pkg.Dir, stampedOptions(options, pkg.Types.Path(), stamp.mode)))
+	}
+
 	// ж-box A2 (three-driver rule, DESIGN-zh-box-reduction §3.5): the ref-lowering classification
 	// runs in the -tests driver too — over the PRODUCTION files only (prodEntries; the entry point
 	// additionally filters `_test.go` structurally), so the merged white-box package's test-side

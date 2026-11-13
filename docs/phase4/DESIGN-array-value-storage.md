@@ -810,3 +810,31 @@ The no-family control (`sbyte[]`) is 1,325,072 bytes under Native AOT.
 >   `go.arrays.dll`. The measurement is a module-load trace of a non-opted program, which must show no load.
 > - **7.7.5 question 2** is a BOARD line, "under Native AOT, ILC 10.0.14's `TrimMode=partial` does not compile a
 >   referenced non-trimmable library's unreferenced code", routed by COORD.
+
+> **Amended 2026-11-13 (C2), part D: admission and its record** (COORD's rulings of 04:00Z, 05:20Z and 06:19Z):
+> - **Admission is automatic; the option overrides it.** A struct is admitted when its own package's non-test files
+>   convert it whole through `unsafe.Pointer`, together with every struct it holds by value, plain ones included (C1's
+>   review, N4). `-inline-arrays=<patterns>` forces a package's whole declaration-local population of 7.7.4 on, and
+>   `-<pattern>` turns the automatic rule off. std is never admitted. Converter: `inlineArrayAdmission.go`.
+> - **7.7.1 and 7.7.4 amended: a cap is a WARNING, not a refusal.** A type the rule selects that a cap keeps out
+>   converts exactly as today with `GO2CS2009`, naming the type, the field and the cap. libc's over-cap types convert
+>   with one warning per selected seed (4). The convert-time ERROR is `GO2CS2010`: a reinterpret chain
+>   `(*T)(unsafe.Pointer(e))` whose two array-holding sides disagree. `-warn` cannot downgrade it.
+> - **P1 as measured** (66d9772a86, linux/amd64, modernc.org/sqlite v1.62.0, libc v1.80.1): lib admits 158 types
+>   (120 holding arrays) automatically and 185 (144) forced; libc 123 (99) with 4 `GO2CS2009`; the sqlite package
+>   0; `GO2CS2010` 0 everywhere; fmt `%v` and reflect uses reaching an admitted type 0. Against its prediction
+>   (mailbox 921b72106) 5 lines MET and 3 MISSED as worded: 118 and 130 were C1's combined lib+libc run, which files an
+>   anonymous struct both packages spell under libc (C1's tool over lib alone reads 120 and 144); libc's 5 counted
+>   types where the warning counts seeds (the two BF tables are one seed).
+> - **P4 restated:** with the option empty, a two-seeded three-target std reconvert reads 0 files, and the behavioral
+>   corpus moves ONLY in FieldAccessReinterpret, GoImageCopyThroughView and PointerFieldSelectors, the automatic rule's
+>   whole behavioral footprint; every other project reads 0.
+> - **The record.** `package_info.cs` carries an `<InlineArrays>` section, only when there is a record: one
+>   `[assembly: go.golib.GoInlineArrayType("<Go name>")]` per admitted named type, and
+>   `[assembly: go.golib.GoInlineArrays("forced" | "off")]` when the rule was not the default. A `-tests` conversion
+>   applies the recorded rule to the production files and refuses a record they do not reproduce. A reinterpret chain
+>   to another converted package's named struct is judged by that package's record; one reaching another package's
+>   anonymous struct, or a package whose record cannot be read, is counted, not judged. Converter:
+>   `inlineArrayStamp.go`.
+> - **OWED (deferred by COORD, 06:19Z):** laying out a struct of ANOTHER package that an admitted type holds by value,
+>   from that package's own record. Until then such a seed stays out with `GO2CS2009`; lib and libc hold 0.

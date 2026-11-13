@@ -110,6 +110,7 @@ func resetPackageState(pkg *packages.Package) {
 	productionDynamicTypeNames = nil
 	packageHoistedConstOrdinals = nil
 	packageInlineAdmission = nil
+	packageInlineArrayRecords = nil
 	productionHoistedConstOrdinals = nil
 	metadataAnchorClassPrefix = ""
 	metadataAnchorLocalTypes = false

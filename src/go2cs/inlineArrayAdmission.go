@@ -54,12 +54,15 @@ type inlineArrayAdmission struct {
 	holding  int               // admitted types that hold an array at any depth
 	holds    map[string]bool   // admitted key -> holds an array at any depth
 	blocked  map[string]string // a selected seed kept out -> why
-	foreign  int               // reinterpret pairs with a side another package lays out (its stamp decides; unchecked here)
+	foreign  int               // reinterpret pairs reaching a struct of another package whose record cannot be read: counted, not judged
 	pkg      *types.Package
 	spelled  map[string]bool
 	members  map[string][]string // a selected seed -> its closure's keys
 	warnings []inlineAdmissionDiagnostic
 	refusals []inlineAdmissionDiagnostic
+
+	options       Options                      // where an imported package's record is read from
+	foreignStamps map[string]*inlineArrayStamp // import path -> its record (nil: unreadable)
 }
 
 // inlineAdmissionDiagnostic is one GO2CS2009 warning or GO2CS2010 refusal, at its source position.
@@ -175,7 +178,7 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 		return nil
 	}
 
-	a := &inlineArrayAdmission{pkgPath: pkg.Path(), forced: options.inlineArrays.matches(options.inlineArrays.force, pkg.Path()), admitted: map[string]bool{}, holds: map[string]bool{}, blocked: map[string]string{}, members: map[string][]string{}}
+	a := &inlineArrayAdmission{pkgPath: pkg.Path(), forced: options.inlineArrays.matches(options.inlineArrays.force, pkg.Path()), admitted: map[string]bool{}, holds: map[string]bool{}, blocked: map[string]string{}, members: map[string][]string{}, options: options}
 	sizes := types.SizesFor("gc", "amd64")
 
 	if parts := strings.Split(options.targetPlatform, "/"); len(parts) == 2 {
@@ -334,8 +337,9 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 
 	sort.Strings(a.keyOrder)
 
-	// The pair rule (GO2CS2010): both sides hold arrays and disagree. A side another package lays out is that package's
-	// decision, read from its stamp (inlineArrayStamp.go); until then the pair is counted, not judged.
+	// The pair rule (GO2CS2010): both sides hold arrays and disagree. A struct another package lays out is that package's
+	// decision, read from its record (inlineArrayStamp.go); a pair reaching one whose record cannot be read, or an
+	// anonymous struct another package spells, is counted, not judged.
 	a.pkg, a.spelled = pkg, spelled
 
 	for _, pair := range pairs {
@@ -367,8 +371,8 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 	return a
 }
 
-// closureAdmitted reports whether t's by-value closure holds an array, and whether every array-holding struct in it is
-// admitted (the census's admittedSet).
+// closureAdmitted reports whether t's by-value closure holds an array, whether every array-holding struct in it is
+// admitted (the census's admittedSet), and whether it reaches a struct of another package whose admission is unknown.
 func (a *inlineArrayAdmission) closureAdmitted(t types.Type) (holds, admitted, foreign bool) {
 	admitted = true
 
@@ -377,7 +381,13 @@ func (a *inlineArrayAdmission) closureAdmitted(t types.Type) (holds, admitted, f
 			holds = true
 
 			if !inlineTypeIsLocal(member, a.pkg, a.spelled) {
-				foreign = true
+				if in, known := a.foreignAdmits(member); !known {
+					foreign = true
+				} else if !in {
+					admitted = false
+				}
+
+				return
 			}
 
 			if !a.admits(member) {
