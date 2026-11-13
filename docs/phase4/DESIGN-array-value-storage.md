@@ -640,3 +640,162 @@ The scout printed offset 0 and did not show that the owner MOVED. Re-probed:
 3. **The caps:** 4 KiB per array and 64 KiB per struct (as 7.5), plus 1 KiB per by-value local or parameter (7.6.9).
 4. **For COORD: the opt-in mechanism** (a converter flag, or a property in the converted project) and the first
    package list: modernc.org/sqlite/lib.
+
+### 7.7 I0 finalized under the owner's rulings, with the family's measured cost (dated block, 2026-11-13, C1)
+
+> **Status: DESIGN, I0 FINAL pending the two questions in 7.7.5.** The owner ruled on 7.6.10 (COORD, inbox C1
+> 20261113T010503Z), and COORD ordered a cost measurement before any code. This block records the rulings, the
+> measurement, I0 as it will be cut, its predictions and its stop lines. The evidence is in
+> `docs/phase4/data/inlinearray-scout/family/`: its README holds every reading and the sources. The census under the
+> ruled caps is `census-r3-*`. NO CODE: COORD routes the build to a lane with disk, and C1 reviews it.
+
+#### 7.7.1 The rulings
+
+1. **Family (a).** golib's build GENERATES `array1<T>` … `arrayN<T>` up to the per-array cap, generic over the
+   element. A length past the cap is refused at convert time, by name, with no fallback. Converted code reads
+   `internal array201<int8> Fa;`.
+2. **Namespace.** The family lives in its own namespace, marked `EditorBrowsable(Never)`, and converted projects
+   reach it through the global using the converter already writes. Proposed name: **`go.arrays`**.
+3. **Caps, FIXED for now:**
+   - 4 KiB per array and 4 KiB per struct, until the null-fault distance is measured on linux and darwin;
+   - over 1 KiB held by value goes to the heap.
+   - Making them configurable comes later, within proven bounds.
+4. **Opt-in** (COORD): `-inline-arrays=<import-path patterns>`, empty by default. The first list is
+   modernc.org/sqlite/lib alone, and std stays out until I2.
+
+#### 7.7.2 The measurement: "they only grow by usage"
+
+**The setup.** The family was generated at three sizes into a standalone library:
+- **one:** length 201;
+- **dense:** 1-256 plus the census lengths over 256, 264 lengths;
+- **full:** 1-4096, every length the 4 KiB cap admits for a 1-byte element.
+
+Each length is one public wrapper (indexer, `Length`, Go equality, no Span) over a private `[InlineArray(N)]`
+storage. The baseline is the published `golib.dll` of go.lib 1.26.10.2: 1,164,800 bytes. golib itself cannot be
+built on this box, so the family was measured as its own assembly. Its size and load cost are what it would add.
+
+| | one | dense (264) | full (4096) |
+|:--|--:|--:|--:|
+| library size, `where T : unmanaged` | 6,656 | 149,504 | 2,616,320 (2.2 x golib.dll) |
+| library build, no incremental | 1.2 s | 1.6 s | 8.5 s |
+| JIT: first use of `array201<sbyte>` (assembly, type, JIT), median of 30 | 1.29 ms | 1.42 ms | 2.74 ms |
+| JIT: RSS, median of 30 | 24.8 MB | 25.0 MB | 26.5 MB |
+| JIT: process wall, median of 30 | 29.7 ms | 29.0 ms | 29.8 ms |
+| Native AOT, go2cs's `TrimMode=partial` (and the SDK's full trim) | 1,325,056 | 1,325,056 | 1,325,056 |
+| Native AOT, the library ROOTED, unconstrained `T` | 1,572,400 | 7,986,736 | link failed |
+| Native AOT, the library ROOTED, `where T : unmanaged` | not run | 1,584,688 | 2,301,488 |
+
+The no-family control (`sbyte[]`) is 1,325,072 bytes under Native AOT.
+
+**What the owner's assumption gets right and wrong.**
+- **Native AOT, as go2cs publishes it: TRUE.** Unused lengths cost 0 bytes. The three binaries are the same size and
+  differ only in 40 bytes of build identifiers.
+  - A control proves the publish could have shown a cost. Under `TrimMode=partial`, ILC 10.0.14 does NOT root a
+    referenced non-trimmable library: an unreferenced non-generic method in it is not compiled (0 map entries).
+  - With `TrimmerRootAssembly` it is compiled: 5 entries, and 65,536 bytes over the rooted one-length library.
+- **The library: FALSE.** The DLL carries every definition. The full family is 2.6 MB, and a JIT process that touches
+  it pays about 1.45 ms more on first use and about 1.8 MB more RSS. The process wall medians did not separate at
+  this resolution.
+- **A configuration that ROOTS the library: FALSE, by a wide margin, unless `T` is constrained.**
+  - Rooted, every length compiles over `System.__Canon`, at about 140 bytes per ELEMENT (array1024 144,596 bytes,
+    array4096 574,302). That is 6.4 MB for the dense set.
+  - For the full set the object file was 1.2 GB and the link ran out of this box's disk. That is a box limit, not a
+    measured ceiling.
+  - `where T : unmanaged` removes every `__Canon` instantiation, and the rooted full family is then 2,301,488 bytes.
+  - golib's own guidance names a trimmer root as the alternative to `TrimMode=partial` (`src/core/golib/GoFieldMetadata.cs:83`), so
+    a rooted golib is a supported configuration, and the constraint is required.
+- **A side observation, NOT CHASED.** golib's comments say `TrimMode=partial` keeps golib "whole" (`src/core/golib/GoFieldMetadata.cs:34`).
+  For Native AOT, the control above shows that partial does not root a referenced non-trimmable assembly's
+  unreferenced code. Whether that matters to golib (its reflection reads METADATA, which `--scanreflection` may keep)
+  is not measured here. It is reported to COORD, not acted on.
+
+#### 7.7.3 The shape proposed
+
+- **The FULL family, 1-4096, `where T : unmanaged`.**
+  - The constraint matches I0, which admits only unmanaged elements, and it is what keeps a rooted publish small.
+  - I3's managed elements will need a separate decision when I3 comes. The constraint keeps that decision out of I0.
+  - A length is refused only past the cap, which the ruling refuses anyway. So the family itself refuses NOTHING
+    extra, which keeps the owner's "nothing is left out".
+- **In its own assembly, `go.arrays.dll`, shipped in the go.lib package and built by golib's build.**
+  - The CLR loads an assembly on first use. So a program that never opts in pays nothing: not the 2.6 MB of
+    metadata, the 1.45 ms or the 1.8 MB. (Standard CLR behaviour; NOT MEASURED here.)
+  - Inside `golib.dll` every go2cs program would carry it, because golib is always loaded. Whether the load cost is
+    the same inside a larger assembly is NOT MEASURED.
+  - Identity across assemblies is unaffected: there is still exactly one defining assembly.
+- **The cheaper alternative, if the owner wants golib's package smaller.**
+  - Dense 1-256 plus the census lengths: 149,504 bytes.
+  - Refusals: 0 over lib.
+  - For std, which stays out until I2, every length the old predicate admitted is either in the set or over the cap.
+    std's full list of field lengths was not checked against the set.
+  - A third-party module with a length in 257-4096 outside the set is refused by name until a golib release adds it.
+  - Adding a length turns a refusal into a conversion and never changes an existing field's type.
+
+#### 7.7.4 I0, as it will be cut
+
+1. **The converter.**
+   - **Option.** `-inline-arrays=<import-path patterns>`, empty by default. It is recorded with the conversion, so a
+     shipping conversion and a `-tests` conversion read the same list.
+   - **Admission.** In a matching package, a struct DECLARATION is admitted when:
+     - every field is unmanaged once its arrays are inline;
+     - every array is no larger than 4,096 bytes and no longer than 4,096 elements;
+     - every struct at every level is no larger than 4,096 bytes.
+
+     A struct that fails any rule stays exactly as today. That depends only on the declaration and the ruled caps,
+     never on golib's version.
+   - **Emission:**
+     - an admitted `[N]T` field becomes `go.arrays.array<N><T>`;
+     - a `[0]T` becomes a readonly alignment carrier at its Go offset (7.6.2), under the existing explicit layout;
+     - a whole-value read is an explicit copy;
+     - a compound assignment with an `await` on its right side is split (7.6.6).
+   - **The by-value cap.** A local or parameter of an admitted type over 1 KiB is boxed on the address-taken-local
+     path. In lib that is 3 of the 72 whole-converted types, and 4 of the 148 declarations.
+   - **Refusals** are convert-time errors naming the field and the cap.
+2. **golib (or `go.arrays.dll`, 7.7.5).**
+   - The generated family: `EditorBrowsable(Never)`, `where T : unmanaged`, no Span, slice or address face.
+   - Equality through `IGoEquatable`, which skips nothing (a family member holds no carrier).
+   - GoReflect learns that a `go.arrays` type is a Go array of N: `GoFields`, `ArrayDims` and `TryGoSizeOf`.
+   - Reflection reads and writes an inline field through (owner, Go offset), or panics naming the field.
+3. **go2cs-gen.**
+   - Generated equality for every holder of an admitted array, skipping carriers.
+   - A per-type managed field-offset table (`Unsafe.ByteOffset`) for the gate.
+4. **The gate.**
+   - It runs for every admitted type at every level, and checks four things: `GoFieldOffsets` non-null, offsets
+     equal, `Unsafe.SizeOf == GoSizeOf`, and alignment equal.
+   - **Broken control:** S22 without its carrier must be NAMED. A second control: a type with null offsets fails.
+   - **The default-equality trap** of 7.6.5 is a GolibTests case: a holder's `==` and map key must answer unequal
+     for unequal arrays in both call orders.
+
+**Predictions** (scored against the cut, as worded):
+- **P1. lib converts with no refusal.** With `-inline-arrays=modernc.org/sqlite/lib`:
+  - all 148 of lib's array-holding struct types (named, and anonymous struct type expressions) are admitted, and 0
+    are refused;
+  - the 103 nonzero array fields become `array<N><T>` over 32 lengths;
+  - the 126 zero-length fields become carriers.
+- **P2. The gate passes lib's 72 whole-converted types and fails the right controls.**
+  - All 72 pass all four checks.
+  - With carriers removed, 12 fail: 10 on alignment, and `TyyParser` and `Tfts5yyParser` on size.
+  - The S22 control is named.
+- **P3. S22 stops refusing.** S22's whole-struct read through the native box is admitted (`ClrLayoutMismatch` null
+  with non-null offsets), and sqlite-cs's next start-up wall is S1, the function pointers.
+- **P4. Nothing changes for anyone who does not opt in.** With the option empty, a two-seeded three-target `-stdlib`
+  reconvert reads ZERO changed files, and the behavioral goldens do not move.
+- **P5. AOT is unchanged.** A go2cs Native AOT hello-world's size with the family shipped equals its size without it,
+  apart from build identifiers.
+- **P6. The rooted cost holds.** A rooted Native AOT publish of the full constrained family stays within 2.4 MB
+  (measured 2,301,488).
+
+**Stop lines:**
+- **S1.** Any corpus or golden change with the option empty.
+- **S2.** The gate passes S22 without its carrier, or passes a type with null offsets.
+- **S3.** The family loses `where T : unmanaged`, or a rooted AOT publish of it exceeds P6.
+- **S4.** An unanalysed face compiles to a silent copy instead of a C# error.
+- **S5.** A holder reaches the default equality.
+- **S6.** A cap is raised before the null-fault distance is measured on linux and darwin (the owner's ruling).
+
+#### 7.7.5 Two questions before the cut
+
+1. **For the owner, through COORD: is `go.arrays.dll` beside `golib.dll` in the go.lib package acceptable?** The
+   ruling reads "golib's own build generates", and a second assembly from that build keeps the ruling's name and
+   namespace. If not, the family goes into `golib.dll`, and every program carries 2.6 MB more there.
+2. **For COORD: the side observation in 7.7.2** (`TrimMode=partial` does not root golib under Native AOT on ILC
+   10.0.14), as a BOARD line or a separate check.
