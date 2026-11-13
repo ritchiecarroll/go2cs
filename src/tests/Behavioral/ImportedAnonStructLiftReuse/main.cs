@@ -1,4 +1,4 @@
-global using TLARGE_INTEGER = go.main_package.TLARGE_INTEGERᴛ1;
+global using TLARGE_INTEGER = go.ImportedAnonStructLiftReuse.lib_package.largeIntegerᴛ1;
 
 namespace go;
 
@@ -7,10 +7,6 @@ using lib = ImportedAnonStructLiftReuse.lib_package;
 using ImportedAnonStructLiftReuse;
 
 partial class main_package {
-
-partial struct TLARGE_INTEGERᴛ1 /*dyn*/ {
-    public int64 QuadPart;
-}
 
 internal static void main() {
     TLARGE_INTEGER distance = default;

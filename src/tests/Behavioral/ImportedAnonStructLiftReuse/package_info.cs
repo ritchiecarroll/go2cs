@@ -27,8 +27,7 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoDynamicTypeLift("7374727563747b517561645061727420696e7436347d", "TLARGE_INTEGERᴛ1")]
-[assembly: GoTypeAlias("TLARGE_INTEGER", "go.main_package.TLARGE_INTEGERᴛ1")]
+[assembly: GoTypeAlias("TLARGE_INTEGER", "go.ImportedAnonStructLiftReuse.lib_package.largeIntegerᴛ1")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -51,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA4cgoKClpaCgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAocgoKClpaCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -67,7 +66,6 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
-    public partial struct TLARGE_INTEGERᴛ1 {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
