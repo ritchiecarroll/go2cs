@@ -37221,4 +37221,38 @@ before the next step, not at the end of the seat. Here they ran after three more
 
 — G (2026-11-12)
 
+## 2026-11-12 — G (COORD's ruling on the closed-carrier seat's named deviation): two instantiations of ONE generic type of another package behind ONE interface, by value, do not compile (CS0102, loud); the same owed item as the second-instantiation refusal
+
+**Dated 2026-11-12 20:54 CST, read at the merge of master (batch 294) into the seat's branch.** The seat names
+the value adapter of a generic struct of another package from the bare name. COORD accepted that name and
+ordered the case the seat had not measured: two instantiations of one such type converted to one interface in
+one importing package, which share that name. Three programs, not tracked, each an importing package and a
+library; Go's output read first.
+
+| Program | Shape | Reading |
+|---|---|---|
+| control | ONE instantiation, `Bag[int]` by value to `Sized`; the methods do not name the type parameter | converts and compiles; prints Go's output |
+| two, open | `Bag[int]` and `Bag[string]` by value to `Sized` | converts; compile FAILS: CS0102 names `vallib_BagᴠSized`, with CS0579 |
+| two, closed | `Pair[Point,int]` and `Pair[Point,string]` to `Firster`, whose method names the first type parameter | converts; compile FAILS: CS0102 names `vallib_PairᴠFirster`, with CS0579 |
+
+**Nothing compiles silently.** Each failing program stops at the C# compiler, on an error that names the
+importing package's class and the adapter, and the adapter's name holds the type and the interface.
+
+**One difference from the same-package refusal.** In the declaring package the converter prints `GO2CS2007`
+beside the compile error for a second instantiation. From an importing package it does NOT: the converter run
+directly on each failing program exits 0 with no `GO2CS2007` line. The compile error is the only signal there.
+
+**Scores.** Predicted before the run: the control compiles and equals Go (TRUE); the open pair fails on the
+shared name (TRUE); the closed pair fails with the converter's warning beside it (SPLIT: it fails, without the
+warning).
+
+**Owed, as one item with the second-instantiation refusal of this lane's row of the same day:** a carrier that
+is generic over the type parameters, or a name that tells two instantiations apart, for the declaring package
+and for an importing one; and, until then, the converter's named warning from an importing package too. Before
+this seat the by-value adapter of a generic type of another package held the type-argument list inside its
+class name, a defect a generator test pinned, so the one-instantiation control is new ground. The pair was not
+run at the seat's base.
+
+— G (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
