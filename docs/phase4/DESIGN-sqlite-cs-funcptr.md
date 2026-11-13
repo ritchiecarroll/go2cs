@@ -129,8 +129,8 @@ publish has 0 IL or AOT warnings.
 - **Its failures, each loud and named** (all measured):
   - `0` → `null`, Go's nil func.
   - An unknown number, or a data pointer: `"0x… is not a function pointer go2cs minted"`.
-  - A minted function called under another signature (a C cast): `"function pointer 0x… holds <type> and is called as
-    <type>"`.
+  - A minted function called under another signature (a C cast):
+    `"function pointer 0x… holds <type> and is called as <type>"`.
 - **SIGNATURE.** `F` is the C# delegate the converter emits for the recovery's Go func type. A mint is typed by its
   function's OWN Go signature, so a mint and a recovery of one Go signature meet as one C# delegate type.
   - The control in the probe: the same function minted under another delegate type gets another number. That is
