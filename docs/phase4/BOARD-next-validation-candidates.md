@@ -37291,4 +37291,156 @@ at most 976,432 + 10%. The prediction is corrected for the seats after this meas
 
 — C2 (2026-11-13)
 
+## 2026-11-13 — C1 (found by the Tour visual-parity scout, item 1): a multi-value spread `f(g())` whose callee expression itself calls runs `g()` FIRST, against Go's left-to-right call order — OPEN, routed to C2 (S4)
+
+**The reading.** Go's spec orders the function calls in an expression left to right, and the callee expression comes
+first. So in `pick()(g())`, `pick()` runs before `g()`. Measured under gc go1.26.10
+(`docs/phase4/data/tour-visual-parity/spread/go-order-main.go`): the log reads `pick`, then `g`.
+
+go2cs hoists the inner multi-value call into temps ahead of the whole statement (`src/go2cs/convExprList.go:276-337`:
+`var (ᴛ1, ᴛ2) = g(); pick()(ᴛ1, ᴛ2);`), so `g()` runs before `pick()`. The C# probe
+(`spread/probe-Program.cs`, the "order 1" row) reproduces that order. The converter was not run on this box.
+
+**Where it is met.**
+- **172 sites in std, all in one test file:** `internal/sync/hashtriemap_test.go`, the curried helpers
+  `expectPresent(t, s, i)(m.Load(i))`, `expectMissing`, `expectStored`, `expectLoaded` and kin.
+- **They are NOT observable there.** Each `expect*` call only runs `t.Helper()` and captures its arguments, and the
+  map operation touches neither, so no verdict moves.
+- **No non-test std code and no behavioral program has the shape.** The scout doc's "plus 1 behavioral" was a census
+  false positive: a `defer` whose callee is a func LITERAL, whose body's calls do not run when the callee is evaluated.
+- **The census:** `spread/spreadcensus-main.go`. Its callee-calls flag walks into func literals, which is the false
+  positive above.
+
+**What the fix must keep.**
+- **Hoist the callee value into a temp BEFORE the inner call**, only when the callee expression contains a call.
+- **Leave a callee that only reads a variable alone.** A receiver or func variable that the call changes must still be
+  read after it, because gc does so: `p.scaled(g2())` reads 9234 and `h(g3())` reads 12, measured. That is H's rule
+  for operand lists (BOARD, 2026-11-12), which C2's spill work follows.
+- **Defer and go:** their spread path (`visitDeferStmt.go:419`) evaluates the callee at the defer, so the same order
+  question applies there. NOT READ.
+
+**Owed.** C2 (S4): a behavioral program where both the callee's call and `g()` have visible effects, red first against
+Go's order, then the hoist.
+
+— C1 (2026-11-13)
+
+## 2026-11-12 — G (COORD's ruling on Condition 3, item 3): a NIL func of a named type misreads under reflect, with and without an interface shell; its own seat, after the unwrap seat
+
+**Dated 2026-11-12 21:53 CST, read at `1d7e03bdbc` (master `7c7dc687f8` plus the closed-carrier seat).** The
+census for Condition 3 (reflect accessors read through an interface shell) held five typed nils beside its 13
+kinds. The nil slice, map, chan and pointer read equal to Go in every arm. The nil func does not, and two of its
+rows fail in the DIRECT arm, where no shell is involved: so this is a defect of master on its own root, and COORD
+ruled it a seat of its own, after the unwrap seat. The program is not tracked; Go's output was read first.
+
+The value is `typelib.Step(nil)`, where `Step` is `func(int) int` of another package with a method `Name` by
+value. Arms: direct (the value in an `any`), sh (that `any` asserted to a local interface `namer`), er (a twin
+type that also implements `error`, converted to `error`). The static conversion to `namer` reads equal to Go in
+every row.
+
+| Arm | Read | Go | Converted |
+|---|---|---|---|
+| direct | `ValueOf(a).MethodByName("Name").Call(nil)` | `step` | the process dies: `System.InvalidCastException`, "Unable to cast object of type 'go.NilFuncValue' to type 'Step'" |
+| direct | `ValueOf(&slot).Elem().Set(ValueOf(a))`, `slot` a `namer` | `step` from `slot.Name()` | Go panic: "reflect.Set: value of type typelib.Step is not assignable to type main.namer" |
+| sh | `Kind()` | `func` | `ptr` |
+| sh | `Type()`, and `%T` of `Interface()`, and of an `any` slot after `Set` | `typelib.Step` | `main.namer[…/typelib.Step]`, the shell's own type |
+| sh | `NumMethod()` | `1` | `0` |
+| sh | `IsNil()`, `IsZero()` | `true`, `true` | `false`, `false` |
+| sh | `%v` | `<nil>` | `0xc000000500000000` |
+| sh | `Interface().(namer).Name()` | `step` | Go panic: "interface conversion: interface is nil, not main.namer" |
+| sh | `MethodByName("Name").Call(nil)` | `step` | Go panic: "reflect: call of reflect.Value.Call on zero Value" |
+| er | `Interface().(namer).Name()` | `step` | Go panic: "interface conversion: interface is nil, not main.namer" |
+| er | `Set` into a `namer` slot | `step` | Go panic: "reflect.Set: value of type typelib.StepE is not assignable to type main.namer" |
+
+**Counts.** Of the nil func's 13 reads per arm: direct 2 differ, the static conversion 0, sh 10 (8 silent with
+exit code 0, 2 panics), er 2. The sh arm's silent rows are the worst class: a wrong kind, type and nil-ness with
+nothing printed to say so.
+
+**What the readings say, not yet a root cause.** In the direct arm the nil func is held as a `go.NilFuncValue`
+object, and two reflect paths treat that object as the named delegate type. In the sh arm the assertion builds
+the generic shell around the nil func, and reflect reads the shell as the value. The unwrap seat keeps a shell
+whose wrapped value is nil, as golib's own unwrap rule does, so it is predicted NOT to move these rows.
+
+**Not measured.** The exit code of the direct arm's crash (an unhandled exception of the same run read exit code
+2 in another case); a nil func of an unnamed type; a nil func of a named type of the SAME package; Native AOT.
+
+**Predictions of the census for this part, written before the run:** the direct arm's 68 typed-nil reads equal
+Go (FALSE, on the two rows above); kind, type and `IsNil` equal Go in the three shell arms for all five kinds
+(FALSE for the nil func in sh; TRUE elsewhere).
+
+— G (2026-11-12)
+
+## 2026-11-12 — G (Condition 3, COORD's ruling: option A with the identity token): reflect unwraps an interface shell where the Value is built; six predictions scored, no stop line tripped
+
+**Dated 2026-11-12 23:17 CST. Base `1d7e03bdbc`, fix `74fafaa67d`, Windows x64, SDK 10.0.400, go1.26.10.** A
+value that reaches reflect inside an interface shell (the generic adapter an assertion or a conversion to an
+interface builds) was read as the shell. A named slice or map behind the shell printed EMPTY with exit code 0.
+The row above this one holds the nil func part, which is its own seat.
+
+**The fix.** `makeReflectValue` of reflect, and its twin of reflectlite, unwrap the shell once, where the Value is
+built: the structural chain first, then one adapter. A shell around a NIL keeps the WHOLE shell, as golib's own
+unwrap rule does. Every accessor then reads the value, so no accessor carries a rule of its own.
+
+**The identity token.** reflect's Value keeps the shell it was built from in ONE companion field, `shell`. Its
+one writer is `makeReflectValue` (null unless it unwrapped). Its two readers are the Value's `Equals` and
+`GetHashCode`, through one private property. No accessor reads it. reflectlite's Value carries NO token: it has
+no equality that reads the datum.
+
+**Two more sites, beyond the two builders.** Both `Swapper` bodies (reflect's and reflectlite's) read their `any`
+argument directly, and panicked "call of Swapper on slice Value" for a slice behind a shell. Both now read it
+through `ValueOf`, as Go's body does. They are hand-owned files of the same two packages, so S3 holds.
+
+**The census: 1028 reads, 18 kinds, four arms, each scored against Go's output.** direct is the value in an
+`any`; va is a static conversion to a local interface; sh is the `any` asserted to that interface; er is a twin
+type converted to `error`.
+
+| Arm | Base: EQUAL / SILENT / PANIC / CRASH | Fix: EQUAL / SILENT / PANIC / CRASH |
+|---|---|---|
+| direct | 255 / 0 / 1 / 1 | 255 / 0 / 1 / 1 |
+| va | 214 / 12 / 7 / 24 | 257 / 0 / 0 / 0 |
+| sh | 202 / 22 / 9 / 24 | 247 / 8 / 2 / 0 |
+| er | 220 / 9 / 9 / 19 | 255 / 0 / 2 / 0 |
+
+Every read that still differs at the fix is a nil func read: 2 direct, 10 sh, 2 er, the rows of the entry above.
+
+**Predictions, posted before the fix, scored.**
+
+- P1, the 567 shell reads of the 13 non-nil kinds are EQUAL: TRUE.
+- P2, the direct arm keeps every class: TRUE (255, 1, 1 in both columns).
+- P3, `==` on two Values stays EQUAL in every arm: TRUE.
+- P4, the four other typed nils stay EQUAL and the nil func rows do not move: TRUE.
+- P5, seven `-tests` rows keep their sets: TRUE. Each row was read on Windows at base and at the fix, by one
+  converter binary (converter, generator and golib sources are byte-identical between the two refs), and
+  compared test by test and with the bank.
+
+| Package | Bank | Base | Fix | Tests that moved |
+|---|---|---|---|---|
+| reflect | 445 matched, 21 disclosed | 445 with 21 | 445 with 21 | 0 |
+| fmt | 62 matched, 1 disclosed | 62 with 1 | 62 with 1 | 0 |
+| errors | 80 matched, 0 disclosed | 80 | 80 | 0 |
+| sort | 63 matched, 0 disclosed | 63 | 63 | 0 |
+| encoding/json | 550 matched, 0 disclosed | 550 | 550 | 0 |
+| encoding/binary | 143 matched, 3 disclosed | 143 with 3 | 143 with 3 | 0 |
+| text/template | 53 matched, 0 disclosed | 53 | 53 | 0 |
+
+- P6, one tracked program is red at base and green at the fix: TRUE. `ReflectShellAccessors` passes its four
+  rows at the fix (Output: 1 compared, 0 failed). With the three source files put back to their parent state, its
+  Output row fails: "exit code mismatch: C# 2 vs Go 0", on the panic "call of reflect.Value.Cap on slice Value".
+  The files were restored byte-identical and the row read green again.
+
+The comparator of P5 was made to fail first: one verdict flipped in a copy of a results file reads "moved 1".
+
+**Stop lines.** S1 (a direct read changes class), S2 (a shell read leaves EQUAL), S3 (a file outside the
+hand-owned reflect and reflectlite files), S4 (a caller needs the shell kept), S5 (a row of P5 moves) and S6 (the
+token field trips a layout reader or a guard): none tripped. For S6 the repo guards and the reflect row are the
+readings.
+
+**A correction to the entry above.** The direct arm's crash now has a measured exit code: 2. The read is
+`MethodByName("Name").Call(nil)`.
+
+**Not built or measured.** The fixture adds two members to the converter-dev solution; that solution was not
+built end to end. Read instead: both member paths list and exist, and both projects compile in the runner's
+Compile row. Native AOT. Linux and macOS rows.
+
+— G (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -40,6 +40,13 @@ partial struct ΔValue {
     [GoReflectCompanion] internal object? boxed;
     [GoReflectCompanion] internal object? addrBox;
 
+    // The interface SHELL the value arrived in, when makeReflectValue unwrapped one (null otherwise).
+    // An IDENTITY TOKEN only: Equals and GetHashCode below are its two readers, and no accessor
+    // reads it. A value adapter boxes its wrapped value afresh per read, so two ValueOf calls over
+    // ONE interface value carry two boxes; the shell is the one object both calls share, as the
+    // data word is in Go.
+    [GoReflectCompanion] internal object? shell;
+
     // The LIVE value this Value represents (read-through for an addressable Value). A Type.Method(i).Func is
     // carried unbound (GoReflect.LazyMethodFunc) and binds here, at its first use.
     internal object? live => addrBox is null ? (boxed is GoReflect.LazyMethodFunc lazy ? lazy.Func : boxed) : GoReflect.ReadPointerSlot(addrBox);
@@ -60,14 +67,18 @@ partial struct ΔValue {
     public bool Equals(ΔValue other) =>
         typ_ == other.typ_ && ptr == other.ptr && flag == other.flag &&
         ReferenceEquals(addrBox, other.addrBox) &&
-        (addrBox is not null || (PointerShapedDatum ? Equals(boxed, other.boxed) : ReferenceEquals(boxed, other.boxed)));
+        (addrBox is not null || ReferenceEquals(Identity, other.Identity) || (PointerShapedDatum && Equals(boxed, other.boxed)));
 
     public override int GetHashCode() => global::go.golib.HashCode.Combine(
         typ_,
         ptr,
         flag,
         System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(addrBox),
-        addrBox is not null ? 0 : PointerShapedDatum ? boxed?.GetHashCode() ?? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(boxed));
+        addrBox is not null ? 0 : PointerShapedDatum ? boxed?.GetHashCode() ?? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(Identity));
+
+    // The object whose identity stands for Go's data word: the shell the value arrived in, or else
+    // the box itself.
+    private object? Identity => shell ?? boxed;
 
     // A pointer-shaped kind held directly (not through a slot): its Go ptr IS the value, so two
     // Values of the same pointer, map, chan or func are equal -- compared by the value's own Go
@@ -82,14 +93,41 @@ partial struct ΔValue {
 // typ_ is the Phase-1 synthetic abi.Type (Kind_ classified from the managed System.Type); the flag
 // holds the Kind so Kind()/IsValid() resolve from value.cs unchanged. Used where Go derives the
 // type from the VALUE (ValueOf, interface Elem); slot-derived Values use makeTypedValue.
+//
+// The value may arrive inside an interface SHELL: a structural shell (`Δ<iface>ᴛObj`, or the
+// generic `Δ<iface><T>`), a value adapter (`<pkg>_<Type>ᴠ<iface>`) or a pointer adapter. Go's
+// dynamic value is the WRAPPED one, so the Value is built over it here, once, and every accessor
+// reads what it reads for the same value held directly. Kind() and Type() already resolved
+// through the shell; the accessors read the box, and a named slice or map behind a shell printed
+// EMPTY, Len answered 0 and Int died on a cast. The shell stays on the Value as its identity
+// token only (see ΔValue.shell).
 internal static ΔValue makeReflectValue(object? boxed) {
     if (boxed is null) {
         return new ΔValue(nil);
     }
-    var t = abi.TypeOf(boxed);
-    var v = new ΔValue(t, default!, ((flag)(uintptr)(uint8)GoReflect.KindOf(GoReflect.GoDynamicTypeOf(boxed))));
-    v.boxed = boxed;
+    object datum = unwrapShell(boxed);
+    var t = abi.TypeOf(datum);
+    var v = new ΔValue(t, default!, ((flag)(uintptr)(uint8)GoReflect.KindOf(GoReflect.GoDynamicTypeOf(datum))));
+    v.boxed = datum;
+    v.shell = ReferenceEquals(datum, boxed) ? null : boxed;
     return v;
+}
+
+// unwrapShell returns the Go dynamic value an interface shell stands in for, or boxed itself when
+// it is no shell. The order is IsNil's: the structural chain first, then one adapter. A shell
+// around a NIL keeps the WHOLE shell, as golib's own unwrap rule does: no value exists to stand
+// in for it, and the type lives on the shell alone.
+internal static object unwrapShell(object boxed) {
+    object cur = boxed;
+    while (cur is IInterfaceAdapter { Value: not null } interfaceAdapter) {
+        cur = interfaceAdapter.Value;
+    }
+    return cur switch {
+        IжAdapter { Box: not null } pointerAdapter => pointerAdapter.Box,
+        IValueAdapter { Value: not null } valueAdapter => valueAdapter.Value,
+        IGoAdapter => boxed,
+        _ => cur
+    };
 }
 
 // makeTypedValue builds a Value typed by a STATIC slot type (a struct field's declared type, a
@@ -3633,8 +3671,11 @@ private static bool isBothNamedMismatch(System.Type srcType, System.Type dstType
 // golib's non-generic ISlice indexer applies the slice window offset, so swaps land on the shared
 // backing store exactly as Go's do — reflectlite's copy has carried sort.Slice on this since the
 // first operational hit.
+//
+// The slice is read through ValueOf, as Go's body reads it, so a slice held behind an interface
+// shell is the slice (makeReflectValue's unwrap), not the shell.
 public static Action<nint, nint> Swapper(any Δslice) {
-    if (Δslice is not ISlice s) {
+    if (ValueOf(Δslice).live is not ISlice s) {
         throw panic(Ꮡ(new ValueError("Swapper", ValueOf(Δslice).Kind())));
     }
     // Fast path for slices of size 0 and 1. Nothing to swap.

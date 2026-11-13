@@ -4469,7 +4469,7 @@ constant calls `.slice`* below).
 A write through either slice shows through the other, as in Go. In this example `base` is a C#
 keyword, so the variable appears as `@base`
 ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
-<!-- The rule: src/go2cs/convSliceExpr.go:386 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool {` (a bound that is not a constant within int32 takes the method) and :419 `func (v *Visitor) sliceMethodCall(ident string, sliceExpr *ast.SliceExpr) (string, bool) {`; e.g. src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:48 `trim = trim.slice(0, len(trim) - 1);`. -->
+<!-- The rule: src/go2cs/convSliceExpr.go:436 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool {` (a bound that is not a constant within int32 takes the method) and :469 `func (v *Visitor) sliceMethodCall(ident string, sliceExpr *ast.SliceExpr) (string, bool) {`; e.g. src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:48 `trim = trim.slice(0, len(trim) - 1);`. -->
 
 <!-- source: src/tests/Behavioral/SliceAliasing/main.go:18-26 -->
 ```go
@@ -4614,7 +4614,7 @@ omitted low bound is written as the `0` it means, so `arr[:n:n]` starts at 0. `.
 (`nint`), so an `int` bound passes as is. Here `n` is a `uintptr`, so it is cast to `nint`:
 `arr.slice(0, (nint)(n), (nint)(n))`.
 <!-- source: src/tests/Behavioral/SliceAliasing/main.go:51 and src/tests/Behavioral/SliceAliasing/main.cs.target:40; src/tests/Behavioral/Slice3IndexWideBound/main.go:19 and src/tests/Behavioral/Slice3IndexWideBound/main.cs.target:13 -->
-<!-- A three-index bound is cast only when it is wide or unsigned (uint, uint32, uint64, uintptr, int64): src/go2cs/convSliceExpr.go:458 `func (v *Visitor) castWideIntegerToNint(expr ast.Expr) string {`. `arr[:n:n]` over a `uintptr` n: Slice3IndexWideBound/main.cs.target:12 `var a = arr.slice(0, (nint)(n), (nint)(n));`; a `nint` bound passes uncast, main.cs.target:20 `var e = arr.slice(0, k, k);`, and so does `len(anys)`, src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 `anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));`. The method: src/core/golib/slice.cs:1871 `public static slice<T> slice<T>(this in slice<T> slice, nint low, nint high, nint max)`. -->
+<!-- A three-index bound is cast only when it is wide or unsigned (uint, uint32, uint64, uintptr, int64): src/go2cs/convSliceExpr.go:508 `func (v *Visitor) castWideIntegerToNint(expr ast.Expr) string {`. `arr[:n:n]` over a `uintptr` n: Slice3IndexWideBound/main.cs.target:12 `var a = arr.slice(0, (nint)(n), (nint)(n));`; a `nint` bound passes uncast, main.cs.target:20 `var e = arr.slice(0, k, k);`, and so does `len(anys)`, src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 `anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));`. The method: src/core/golib/slice.cs:1871 `public static slice<T> slice<T>(this in slice<T> slice, nint low, nint high, nint max)`. -->
 
 **A nil slice is the default value.** `var zero []byte` becomes `slice<byte> zero = default;`, and
 `zero == nil` stays `zero == nil`, which binds `slice<T>`'s `operator ==(slice<T>, NilType)`. `default` is
@@ -5728,7 +5728,7 @@ and builds the zero value of a struct whose `default` is not Go's zero value. Th
 cannot hold a negative one, so Go's out-of-range panic could be lost. A bound that is not a constant within
 `int` goes to golib's `slice` method, which checks it as Go does. The result shares the backing array as Go's `s[:i]` does, and does
 not copy ([Slices and Arrays](#slices-and-arrays)).
-<!-- GoZero<T>() for a type parameter: src/go2cs/visitArrayType.go:347-364 `func (v *Visitor) typeParamZero(t types.Type) string`; golib: src/core/golib/builtin.cs:1625 `public static T GoZero<T>() =>`. Range vs slice method: src/go2cs/convSliceExpr.go:371-389 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool` -->
+<!-- GoZero<T>() for a type parameter: src/go2cs/visitArrayType.go:347-364 `func (v *Visitor) typeParamZero(t types.Type) string`; golib: src/core/golib/builtin.cs:1625 `public static T GoZero<T>() =>`. Range vs slice method: src/go2cs/convSliceExpr.go:421-439 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool` -->
 
 Using the type reads as in Go. Go's `int` is C# `nint`
 ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). `Stack[int]{}` calls the constructor that

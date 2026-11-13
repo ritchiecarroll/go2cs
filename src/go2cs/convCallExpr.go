@@ -5562,7 +5562,13 @@ func (v *Visitor) reinterpretManagedEmission(callExpr *ast.CallExpr, arg ast.Exp
 		return emission, true
 	}
 
-	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", v.convExpr(src, []ExprContext{identContext}), srcElem, targetElem), true
+	// A source that is itself a pointer CONVERSION, `(*U)(unsafe.Pointer((*T)(up)))`, renders as a cast,
+	// which binds looser than member access: parenthesized, `.Reinterpret` applies to the converted
+	// pointer instead of to `up` (CS1929).
+	// A source Go already parenthesized renders its own parentheses and is left as written.
+	rendered := v.parenthesizeConversionBase(src, v.convExpr(src, []ExprContext{identContext}))
+
+	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", rendered, srcElem, targetElem), true
 }
 
 // The internal/abi record types the managed model can synthesize from a descriptor's carried

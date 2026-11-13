@@ -965,6 +965,9 @@
     <Project Path="tests/Behavioral/PointerArrayRange/PointerArrayRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceReinterpret/PointerCastSliceReinterpret.csproj" />
+    <Project Path="tests/Behavioral/PointerArrayViewForms/PointerArrayViewForms.csproj" />
+    <Project Path="tests/Behavioral/ExplicitDerefConversionStore/ExplicitDerefConversionStore.csproj" />
+    <Project Path="tests/Behavioral/NestedPointerConversionReinterpret/NestedPointerConversionReinterpret.csproj" />
     <Project Path="tests/Behavioral/PointerConversionAliasing/PointerConversionAliasing.csproj" />
     <Project Path="tests/Behavioral/PointerConversionAnonymousTarget/PointerConversionAnonymousTarget.csproj" />
     <Project Path="tests/Behavioral/PointerReinterpretIdentity/PointerReinterpretIdentity.csproj" />
@@ -1054,6 +1057,8 @@
     <Project Path="tests/Behavioral/ReflectMapRangeNilKey/ReflectMapRangeNilKey.csproj" />
     <Project Path="tests/Behavioral/ReflectMethodTableWalk/ReflectMethodTableWalk.csproj" />
     <Project Path="tests/Behavioral/ReflectNilMapKey/ReflectNilMapKey.csproj" />
+    <Project Path="tests/Behavioral/ReflectShellAccessors/ReflectShellAccessors.csproj" />
+    <Project Path="tests/Behavioral/ReflectShellAccessors/typelib/ReflectShellAccessors.typelib.csproj" />
     <Project Path="tests/Behavioral/ReflectStringWindow/ReflectStringWindow.csproj" />
     <Project Path="tests/Behavioral/ReflectStructOf/ReflectStructOf.csproj" />
     <Project Path="tests/Behavioral/ReflectStructTagCopy/ReflectStructTagCopy.csproj" />
