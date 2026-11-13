@@ -137,7 +137,7 @@ public class InlineLayoutGeneratorTests
     }
 
     [TestMethod]
-    public void EqualityAndHashingSkipTheCarrier()
+    public void EqualityHashingAndToStringSkipTheCarrier()
     {
         (_, Dictionary<string, string> parts) = Generate();
 
@@ -147,6 +147,12 @@ public class InlineLayoutGeneratorTests
         Assert.IsFalse(equals.Contains("Carrier"), equals);
         StringAssert.Contains(equals, "this.A == other.A");
         Assert.IsFalse(hash.Contains("Carrier"), hash);
+
+        string text = parts["Z"][parts["Z"].IndexOf("public override string ToString()", StringComparison.Ordinal)..];
+        text = text[..text.IndexOf("}\");", StringComparison.Ordinal)];
+
+        Assert.IsFalse(text.Contains("Carrier"), text);
+        StringAssert.Contains(text, "A.ToString()");
     }
 
     // End to end: the generated table proves S22 to golib's gate, and Go's == holds where the carrier's bytes differ.

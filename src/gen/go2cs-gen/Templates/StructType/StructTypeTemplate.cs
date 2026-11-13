@@ -183,7 +183,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 public override string ToString() => global::go.GoMethodText.Of(this) ?? string.Concat("{", string.Join(" ",
                 [
-                    {{(StructMembers.Count > 0 ? string.Join(",\r\n            ", StructMembers.Select(GetToStringImplementation)) : "\"\"")}}
+                    {{(ComparedMembers.Count > 0 ? string.Join(",\r\n            ", ComparedMembers.Select(GetToStringImplementation)) : "\"\"")}}
                 ]), "}");
             }{{GoEquatablePart}}{{ManagedLayoutPart}}
         """;
@@ -2713,7 +2713,7 @@ internal class StructTypeTemplate : TemplateBase
         return item.isReferenceType ? $"{item.memberName}?.ToString() ?? \"<nil>\"" : $"{item.memberName}.ToString()";
     }
 
-    // The members equality and hashing read: every member but an alignment carrier.
+    // The members equality, hashing and ToString read: every member but an alignment carrier.
     private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)> ComparedMembers =>
         AlignmentCarrierMembers.Count == 0 ? StructMembers : StructMembers.Where(member => !AlignmentCarrierMembers.Contains(member.memberName)).ToList();
 
