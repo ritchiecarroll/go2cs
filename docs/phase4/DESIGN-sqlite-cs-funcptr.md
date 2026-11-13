@@ -577,3 +577,86 @@ IL/AOT warnings):
     - an XCR0-gated flag (AVX, AVX2, AVX-512) that is set where .NET's `.IsSupported` says the OS does not allow it.
 - **P2.2, reworded to match.** Under .NET's default configuration, x/sys/cpu's `X86.HasAVX2` equals
   `Avx2.IsSupported` on the same host.
+
+### 3.8 Amendment after the re-review (dated block, 2026-11-13, C1)
+
+> The re-review is COORD's inbox post C1 20261113T074423Z, items N1–N5. It rules S1 APPROVE WITH CHANGES and S21
+> APPROVE; G implements both, after its nil-func seats.
+>
+> Read again at master `b6f3bbb44f`. GoFuncCookie.cs, ж.PointerExtensions.cs, convCallExpr.go and reflect/value.cs
+> are unchanged since `3da19d0e2e` (`git diff` is empty), so every reading above still describes this tree.
+>
+> The new census is `rev/fpcensus4-main.go`. Its outputs are `rev/fpcensus4-<target>.txt` (sqlite) and
+> `rev/fpcensus4-std-<target>.txt` (std).
+
+**N1: the rules, narrowed, and their stdlib footprint.** This table replaces 3.3's "Go" column for which sites match.
+3.3's "converted" column stands.
+
+| rule | matches only | left on today's emission |
+|:--|:--|:--|
+| m1 | a function with one interface parameter and a `uintptr` result whose body returns `(*[2]uintptr)(unsafe.Pointer(&f))[1]` (ccgo's `__ccgo_fp`, in libc, lib and vec) | sync/pool.go:92 `poolRaceAddr`, which reads `[2]unsafe.Pointer` of a pool item and returns `unsafe.Pointer` |
+| m2 | `*(*uintptr)(unsafe.Pointer(&x))` READ, where x is a func or a one-func-field struct, and not the left side of an assignment (N3) | the `*(*unsafe.Pointer)` read, already `unsafe.Pointer.OfFunc` (convCallExpr.go:5501-5545); it answers the same word |
+| w2 | `*(*F)(unsafe.Pointer(e)) = fn` | — |
+| r1, r2 | the source is `&S{x}`, where S is a struct whose only field is a `uintptr` (embedded or named) | `&v` with v a `uintptr` (r3), which is golib's existing `Reinterpret` route and already resolves a cookie; a pointer-typed source (runtime/mcleanup.go:203, `&fn` with fn a `*funcval`); memory at an address (runtime/panic.go:969, a defer slot) |
+| w1 | `*(*uintptr)(unsafe.Pointer(&f)) = x` only | `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = p`: runtime/cgocall.go:465 and debugcall.go:266 (emitted at cgocall.cs:482 in all three flavours, and at debugcall.cs:269). These build a funcval by hand. They keep today's emission, a store into a temporary box: unchanged, named here, and outside this design. |
+
+**std census** (fpcensus4, `std` with `_test.go` files, CGO_ENABLED=0, windows/amd64, linux/amd64 and darwin/amd64;
+each site counted once across test variants). Each site it finds and what the narrowed rules do with it:
+
+| site | shape | under the narrowed rules |
+|:--|:--|:--|
+| sync/pool.go:92 | m1-like | not matched (above). pool.cs is hand-owned too. |
+| **reflect/value.go:1145** `funcName` | m2, `*(*uintptr)(unsafe.Pointer(&f))` | **MATCHED**: one hunk |
+| runtime/mcleanup.go:203 | a recovery from a `*funcval` | not matched. mcleanup.cs is hand-owned too. |
+| runtime/panic.go:969 | a recovery from memory | not matched |
+| runtime/cgocall.go:465, debugcall.go:266 | `*unsafe.Pointer` store | not matched (not w1) |
+| runtime/syscall_windows_test.go:174 (windows) | m2' (`*unsafe.Pointer` read) | already OfFunc; unchanged |
+| runtime/syscall_windows_test.go:164 (windows) | r3 | the existing Reinterpret route; unchanged. It passes a cookie, so 3.3's non-cookie panic does not fire. |
+| any w2 | — | 0 sites |
+
+**Prediction for the implementing seat's two-seeded `-stdlib` diff,** on each of the three flavours:
+- exactly one changed line, in reflect/value.cs (`funcName`, today `var pc = ~Ꮡf.Reinterpret<Func<slice<ΔValue>,
+  slice<ΔValue>>, uintptr>();`), becoming the cookie word;
+- 0 `GoPositionMap` lines, because no line is added or removed;
+- 0 changes to any hand-own's `.cs.auto` sibling.
+
+**The falsifiers:**
+- any other file;
+- any map line;
+- the `heap(fʗp, out var Ꮡf)` line moving. Go still takes `&f`, so the address-taken decision does not change.
+
+**The behaviour this changes:**
+- `runtime.FuncForPC` of a cookie is nil, so `funcName` answers "closure".
+- Go answers the same, for the same reason: Go's `*(*uintptr)(&f)` is the funcval's ADDRESS, not a code PC.
+- Today's answer is NOT MEASURED.
+- It is reached only from MakeFunc's panic messages.
+
+**N2: the mint's delegate form is a stop line.** v2's 24 ns mint depends on C# caching the delegate per site. C# does
+that for a conversion of a method group (`(Func<…>)F`, or F passed where a delegate is expected), which is what the
+corpus emits today. `new Func<…>(F)` is not cached: the reviewer measured a new instance at every evaluation and
+155–541 ns per mint.
+- **X1.6** An m1 call site, or an m2/w2 source, that creates its delegate with `new F(M)` instead of a
+  method-group conversion. The implementing seat adds a converter test that asserts the conversion form at an m1
+  call site.
+
+**N3: darwin counted the w1's left side as an m2.**
+- libc_unix.go:64 is the left side of the w1 store, not a read. darwin m2 is therefore **23**, and darwin mints are
+  **1,595**, on both darwin targets.
+- fpcensus4 matches w1 first. That moved exactly this one site on both darwin targets and nothing on the other three
+  (`diff` against fpcensus3).
+- The converter likewise matches w1 before m2.
+
+**N4: lift reuse is ruled YES in direction and routed to P1,** as part of the naming family.
+- **The spec P1 writes must say:**
+  - that the lift is publicly referenceable across assemblies, since libc's `largeInteger` is unexported;
+  - what happens when NEITHER package imports the other. My suggestion: nothing. Both lifts stay, and a func word
+    passed between them is refused by name by the rebind. The census finds no such case: the reviewer's deeper scan
+    finds `largeInteger`/`TLARGE_INTEGER` the only member of the class.
+- **P1.1 is amended:** sqlite-cs start-up passes the S1 wall on all five targets, except winSeekFile's
+  `TLARGE_INTEGER` recovery on windows/amd64 until P1's lift seat lands. This is the same exception as P1.2. If the
+  lift seat lands first, it is a windows/amd64 prerequisite instead.
+
+**N5: Resolve's pruning is kept.**
+- GoFuncCookie.Resolve (GoFuncCookie.cs:104-120) removes a dead weak entry when it resolves one. The implementation
+  keeps that for the closure path; the prototype in 3.4 lacked it.
+- Dead closures' entries that are never resolved stay in the index, as they do today. This is not changed.
