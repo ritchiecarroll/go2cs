@@ -11,6 +11,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -485,14 +486,15 @@ func TestBuildSolutionXMLPlacesRecoveredUnsafeCanonically(t *testing.T) {
 	}
 }
 
-// The opt-in CPU sampler companion (core/go2cs.CpuProfiler, section 11.3 of
-// docs/phase4/DESIGN-managed-profiling.md) is infrastructure like golib, not a Go package: the solution
-// lists it once at the ROOT, never under an import-path folder (it has no import path), and the
-// converted-project walk does not collect it as a package.
-func TestSolutionListsTheCpuProfilerCompanionAtTheRoot(t *testing.T) {
+// The companions (the opt-in CPU sampler, core/go2cs.CpuProfiler, section 11.3 of
+// docs/phase4/DESIGN-managed-profiling.md; the inline-array family, core/go.arrays, section 7.7 of
+// docs/phase4/DESIGN-array-value-storage.md) are infrastructure like golib, not Go packages: the
+// solution lists each once at the ROOT, never under an import-path folder (neither has an import
+// path), and the converted-project walk does not collect them as packages.
+func TestSolutionListsTheCompanionsAtTheRoot(t *testing.T) {
 	root := t.TempDir()
 
-	for _, rel := range []string{"core/fmt/fmt.csproj", cpuProfilerProjectReference} {
+	for _, rel := range append([]string{"core/fmt/fmt.csproj"}, rootCompanionProjects...) {
 		full := filepath.Join(root, filepath.FromSlash(rel))
 		if err := os.MkdirAll(filepath.Dir(full), 0755); err != nil {
 			t.Fatalf("mkdir: %v", err)
@@ -508,23 +510,25 @@ func TestSolutionListsTheCpuProfilerCompanionAtTheRoot(t *testing.T) {
 		t.Fatalf("collectConvertedProjects: %v", err)
 	}
 
-	for _, project := range coreProjects {
-		if project == cpuProfilerProjectReference {
-			t.Errorf("the walk collected the companion as a converted package: %v", coreProjects)
+	if !slices.Equal(coreProjects, []string{"core/fmt/fmt.csproj"}) {
+		t.Errorf("the walk collected a companion as a converted package: %v", coreProjects)
+	}
+
+	xml := buildSolutionXML(append(append(coreProjects, golibProjectReference), rootCompanionProjects...))
+
+	for _, companion := range []string{cpuProfilerProjectReference, goArraysProjectReference} {
+		if !strings.Contains(xml, "\r\n  <Project Path=\""+companion+"\" />\r\n") {
+			t.Errorf("%s is not a root-level project\n---\n%s", companion, xml)
+		}
+
+		if strings.Count(xml, companion) != 1 {
+			t.Errorf("%s must be listed exactly once\n---\n%s", companion, xml)
 		}
 	}
 
-	xml := buildSolutionXML(append(coreProjects, golibProjectReference, cpuProfilerProjectReference))
-
-	if !strings.Contains(xml, "\r\n  <Project Path=\""+cpuProfilerProjectReference+"\" />\r\n") {
-		t.Errorf("the companion is not a root-level project\n---\n%s", xml)
-	}
-
-	if strings.Count(xml, cpuProfilerProjectReference) != 1 {
-		t.Errorf("the companion must be listed exactly once\n---\n%s", xml)
-	}
-
-	if strings.Contains(xml, `Name="/go2cs.CpuProfiler/"`) {
-		t.Errorf("the companion was placed under an import-path folder\n---\n%s", xml)
+	for _, folder := range []string{`Name="/go2cs.CpuProfiler/"`, `Name="/go.arrays/"`} {
+		if strings.Contains(xml, folder) {
+			t.Errorf("a companion was placed under an import-path folder %s\n---\n%s", folder, xml)
+		}
 	}
 }

@@ -9,6 +9,7 @@
     <Project Path="core/go2cs/go2cs.shproj" />
     <Project Path="core/golib/golib.csproj" />
     <Project Path="core/go2cs.CpuProfiler/go2cs.CpuProfiler.csproj" />
+    <Project Path="core/go.arrays/go.arrays.csproj" />
   </Folder>
   <Folder Name="/core/bytes/">
     <Project Path="core/bytes/bytes.csproj" />
@@ -269,6 +270,7 @@
     <File Path="../NOTICE" />
   </Folder>
   <Folder Name="/gen/">
+    <Project Path="gen/go2cs-arrays-gen/go2cs-arrays-gen.csproj" />
     <Project Path="gen/go2cs-gen/go2cs-gen.csproj" />
   </Folder>
   <Folder Name="/go2cs/">
@@ -605,6 +607,9 @@
     <Project Path="tests/Behavioral/GenericMethodReflect/GenericMethodReflect.csproj" />
     <Project Path="tests/Behavioral/GenericNamedArrayType/GenericNamedArrayType.csproj" />
     <Project Path="tests/Behavioral/GenericNegation/GenericNegation.csproj" />
+    <Project Path="tests/Behavioral/GenericInstClosedIface/GenericInstClosedIface.csproj" />
+    <Project Path="tests/Behavioral/GenericInstClosedIfaceConsumer/GenericInstClosedIfaceConsumer.csproj" />
+    <Project Path="tests/Behavioral/GenericInstClosedIfaceConsumer/boxlib/GenericInstClosedIfaceConsumer.boxlib.csproj" />
     <Project Path="tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.csproj" />
     <Project Path="tests/Behavioral/GenericInterfaceCrossPackage/GenericInterfaceCrossPackage.csproj" />
     <Project Path="tests/Behavioral/GenericInterfaceCrossPackage/keylike/GenericInterfaceCrossPackage.keylike.csproj" />
@@ -967,6 +972,9 @@
     <Project Path="tests/Behavioral/PointerArrayRange/PointerArrayRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceReinterpret/PointerCastSliceReinterpret.csproj" />
+    <Project Path="tests/Behavioral/PointerArrayViewForms/PointerArrayViewForms.csproj" />
+    <Project Path="tests/Behavioral/ExplicitDerefConversionStore/ExplicitDerefConversionStore.csproj" />
+    <Project Path="tests/Behavioral/NestedPointerConversionReinterpret/NestedPointerConversionReinterpret.csproj" />
     <Project Path="tests/Behavioral/PointerConversionAliasing/PointerConversionAliasing.csproj" />
     <Project Path="tests/Behavioral/PointerConversionAnonymousTarget/PointerConversionAnonymousTarget.csproj" />
     <Project Path="tests/Behavioral/PointerReinterpretIdentity/PointerReinterpretIdentity.csproj" />
@@ -1056,6 +1064,8 @@
     <Project Path="tests/Behavioral/ReflectMapRangeNilKey/ReflectMapRangeNilKey.csproj" />
     <Project Path="tests/Behavioral/ReflectMethodTableWalk/ReflectMethodTableWalk.csproj" />
     <Project Path="tests/Behavioral/ReflectNilMapKey/ReflectNilMapKey.csproj" />
+    <Project Path="tests/Behavioral/ReflectShellAccessors/ReflectShellAccessors.csproj" />
+    <Project Path="tests/Behavioral/ReflectShellAccessors/typelib/ReflectShellAccessors.typelib.csproj" />
     <Project Path="tests/Behavioral/ReflectStringWindow/ReflectStringWindow.csproj" />
     <Project Path="tests/Behavioral/ReflectStructOf/ReflectStructOf.csproj" />
     <Project Path="tests/Behavioral/ReflectStructTagCopy/ReflectStructTagCopy.csproj" />
@@ -1267,6 +1277,7 @@
     <Project Path="tests/Behavioral/UnsafePointerParamAssign/UnsafePointerParamAssign.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerParamPin/UnsafePointerParamPin.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerPrint/UnsafePointerPrint.csproj" />
+    <Project Path="tests/Behavioral/UnsafePointerReceiverCopy/UnsafePointerReceiverCopy.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerReinterpret/UnsafePointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerTypeAlias/UnsafePointerTypeAlias.csproj" />
     <Project Path="tests/Behavioral/UnsafeStringEmpty/UnsafeStringEmpty.csproj" />

@@ -35,7 +35,27 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		}
 	}
 
-	ident := v.convExpr(sliceExpr.X, nil)
+	// A slice of a pointer-to-array CONVERSION, `(*[N]T)(p)[lo:hi]`, reads the memory p names (the span
+	// below copies it), and it is recognized by its AST and type, not by the emitted text. The forms that wrap the
+	// conversion — extra parentheses, `((*[N]T)(p))[lo:hi]`, and an explicit dereference,
+	// `(*(*[N]T)(p))[lo:hi]` (slicing the array a pointer names is slicing through the pointer) — are
+	// the same view, so they render the BARE conversion and take the span path below. Rendered whole,
+	// they emitted `((ж<array<T>>)…)` / `(~(ж<array<T>>)…)`, which the text match below missed, and the
+	// box slice read the whole array<T> as a value (sqlite-cs S20: a [1<<50-1]byte array overflowed).
+	viewConv := v.pointerArrayViewConversion(sliceExpr.X)
+	var ident string
+
+	if viewConv != nil && viewConv != sliceExpr.X && v.inFunction && sliceExpr.High != nil {
+		bare := v.convExpr(viewConv, nil)
+
+		if isMatch, _ := isPointerCast(bare); isMatch {
+			ident = bare
+		}
+	}
+
+	if ident == "" {
+		ident = v.convExpr(sliceExpr.X, nil)
+	}
 
 	// A sub-slice of a CONSTRAINED TYPE PARAMETER (`s[lo:hi]` / `s[lo:hi:max]` where s is
 	// `S ~[]E`) must yield S again, sharing backing — Go's named-slice sub-slice semantics
@@ -115,7 +135,13 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 
 	// When converting a pointer expression to a slice, we use special handling
 	if isMatch, ptrType := isPointerCast(ident); isMatch && v.inFunction && sliceExpr.High != nil {
-		if refusal, ok := v.managedSliceViewRefusal(sliceExpr); ok {
+		viewBase := sliceExpr.X
+
+		if viewConv != nil {
+			viewBase = viewConv
+		}
+
+		if refusal, ok := v.managedSliceViewRefusal(sliceExpr, viewBase); ok {
 			return refusal
 		}
 
@@ -138,6 +164,13 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 			isMatch = false
 		}
 
+		// A NAMED array (`type rawmem [1 << 20]byte`) emits its own name inside ж<…>, and the view's
+		// element is the array's ELEMENT type, read from go/types: `(*rawmem)(p)[:n]` is a []byte. Taken
+		// from the text, it was the array's name, a slice<rawmem> of whole arrays (sqlite-cs S5).
+		if elem, ok := v.namedArrayViewElem(viewBase); ok {
+			ptrType, csPtrType = elem, elem
+		}
+
 		identRunes := []rune(ident)
 
 		// A Go `(*[N]T)(ptr)[:n]` produces a `[]T` slice over the pointed-to memory. Emit the golib
@@ -157,17 +190,34 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		// buffer from offset 0 rather than the substitute name, and reflect's `gcSlice` read the GC bitmap
 		// from the wrong start. (A pointer cast binds tighter than `+`, so the offset applies to the typed
 		// pointer — no parentheses needed around the cast.)
+		//
+		// A MAX bound that differs from HIGH sets the capacity: Go's `[lo:hi:max]` has length hi-lo and
+		// capacity max-lo. The span then covers lo..max and the slice is cut to its length with
+		// `.slice(0, hi-lo)`, which keeps the capacity. Without this the capacity read as hi-lo.
 		base := string(identRunes[prefixLength:])
 		length := v.getRangeIndexer(sliceExpr.High)
+		capacity := ""
+
+		if sliceExpr.Max != nil && types.ExprString(sliceExpr.Max) != types.ExprString(sliceExpr.High) {
+			capacity = v.getRangeIndexer(sliceExpr.Max)
+		}
 
 		if sliceExpr.Low != nil {
 			low := v.getRangeIndexer(sliceExpr.Low)
 			base = fmt.Sprintf("%s + %s", base, low)
 			length = fmt.Sprintf("%s - %s", length, low)
+
+			if capacity != "" {
+				capacity = fmt.Sprintf("%s - %s", capacity, low)
+			}
 		}
 
 		// The span constructor COPIES: say so when this function writes through the result.
 		v.noteCopyingSliceViewWrite(sliceExpr)
+
+		if capacity != "" {
+			return fmt.Sprintf("new slice<%s>(new ReadOnlySpan<%s>((%s*)%s, %s)).slice(0, %s)", ptrType, ptrType, csPtrType, base, capacity, length)
+		}
 
 		return fmt.Sprintf("new slice<%s>(new ReadOnlySpan<%s>((%s*)%s, %s))", ptrType, ptrType, csPtrType, base, length)
 	}
@@ -541,8 +591,8 @@ func isIntegerLiteral(expr ast.Expr) bool {
 // `(*[1 << 16]unsafe.Pointer)(unsafe.Pointer(&m.Fun[0]))[:ni:ni]` views uintptr words as
 // unsafe.Pointer, which is a class here, and the function is unreachable in the managed model.
 // A refusal is diagnosable where a fabricated reference is not. An unmanaged element keeps the view.
-func (v *Visitor) managedSliceViewRefusal(sliceExpr *ast.SliceExpr) (string, bool) {
-	xType := v.info.TypeOf(sliceExpr.X)
+func (v *Visitor) managedSliceViewRefusal(sliceExpr *ast.SliceExpr, viewBase ast.Expr) (string, bool) {
+	xType := v.info.TypeOf(viewBase)
 
 	if xType == nil {
 		return "", false
@@ -805,4 +855,56 @@ func typeParamMapCore(tp *types.TypeParam) *types.Map {
 	}
 
 	return core
+}
+
+// pointerArrayViewConversion returns the type conversion whose slice reads memory: expr itself
+// when it is a conversion to a pointer to an array (named or not), or the conversion inside extra
+// parentheses or an explicit dereference of it. nil for any other expression.
+func (v *Visitor) pointerArrayViewConversion(expr ast.Expr) *ast.CallExpr {
+	inner := ast.Unparen(expr)
+
+	if star, ok := inner.(*ast.StarExpr); ok {
+		inner = ast.Unparen(star.X)
+	}
+
+	call, ok := inner.(*ast.CallExpr)
+
+	if !ok || len(call.Args) != 1 || !v.callExprIsTypeConversion(call) {
+		return nil
+	}
+
+	ptr, ok := types.Unalias(v.info.TypeOf(call)).Underlying().(*types.Pointer)
+
+	if !ok {
+		return nil
+	}
+
+	if _, ok := types.Unalias(ptr.Elem()).Underlying().(*types.Array); !ok {
+		return nil
+	}
+
+	return call
+}
+
+// namedArrayViewElem returns the C# element type of a view over a NAMED array type, `(*rawmem)(p)`, whose
+// emitted pointee is the array's own name; false for an unnamed array, whose emitted `array<T>` already
+// names its element.
+func (v *Visitor) namedArrayViewElem(viewBase ast.Expr) (string, bool) {
+	ptr, ok := types.Unalias(v.info.TypeOf(viewBase)).Underlying().(*types.Pointer)
+
+	if !ok {
+		return "", false
+	}
+
+	if _, isNamed := types.Unalias(ptr.Elem()).(*types.Named); !isNamed {
+		return "", false
+	}
+
+	arr, ok := ptr.Elem().Underlying().(*types.Array)
+
+	if !ok {
+		return "", false
+	}
+
+	return convertToCSTypeName(v.getAliasQualifiedTypeName(arr.Elem(), false)), true
 }

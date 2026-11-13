@@ -1639,6 +1639,10 @@ func valueRecordRealizesAsPartialStruct(targetType types.Type) bool {
 // Parsing cannot fail: a line that does not match the pattern is simply not a record and is
 // skipped, so an unrecognized or malformed package_info yields an empty result rather than an
 // error. There is no error to return, and none is.
+//
+// A CLOSED CARRIER record (`(Pointer = true, Closed = true)`, closedCarrier.go) is deliberately not
+// matched: the declaring assembly's adapter for it is a closed class the importer cannot name by the
+// open-generic rule, so the importer records and generates a carrier of its own.
 func parseExportedPointerImplementLines(lines []string) [][2]string {
 	var pairs [][2]string
 
@@ -1665,6 +1669,10 @@ func parseExportedPointerImplementLines(lines []string) [][2]string {
 // records that the defining assembly itself implements the interface on the value type.
 //
 // Like its pointer-form sibling this cannot fail — a non-matching line is just not a record.
+//
+// A CLOSED CARRIER record (`(Closed = true)`, closedCarrier.go) is deliberately not matched: the
+// declaring assembly does NOT implement the interface on the value type for it (an adapter class
+// does), so an importer that trusted the record would pass the value unwrapped (CS0029).
 func parseExportedValueImplementLines(lines []string) [][2]string {
 	var pairs [][2]string
 

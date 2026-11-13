@@ -608,6 +608,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckEscapedLoopVarSiblingIndex() => CheckTarget("EscapedLoopVarSiblingIndex");
 
     [TestMethod]
+    public void CheckExplicitDerefConversionStore() => CheckTarget("ExplicitDerefConversionStore");
+
+    [TestMethod]
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
 
     [TestMethod]
@@ -798,6 +801,12 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericFuncInstantiationArg() => CheckTarget("GenericFuncInstantiationArg");
+
+    [TestMethod]
+    public void CheckGenericInstClosedIface() => CheckTarget("GenericInstClosedIface");
+
+    [TestMethod]
+    public void CheckGenericInstClosedIfaceConsumer() => CheckTarget("GenericInstClosedIfaceConsumer");
 
     [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");
@@ -1604,6 +1613,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]
+    public void CheckNestedPointerConversionReinterpret() => CheckTarget("NestedPointerConversionReinterpret");
+
+    [TestMethod]
     public void CheckNestedPromotedEmbedInit() => CheckTarget("NestedPromotedEmbedInit");
 
     [TestMethod]
@@ -1809,6 +1821,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerArraySlice() => CheckTarget("PointerArraySlice");
+
+    [TestMethod]
+    public void CheckPointerArrayViewForms() => CheckTarget("PointerArrayViewForms");
 
     [TestMethod]
     public void CheckPointerCastSliceRange() => CheckTarget("PointerCastSliceRange");
@@ -2088,6 +2103,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckReflectNilMapKey() => CheckTarget("ReflectNilMapKey");
+
+    [TestMethod]
+    public void CheckReflectShellAccessors() => CheckTarget("ReflectShellAccessors");
 
     [TestMethod]
     public void CheckReflectStringWindow() => CheckTarget("ReflectStringWindow");
@@ -2658,6 +2676,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsafePointerPrint() => CheckTarget("UnsafePointerPrint");
+
+    [TestMethod]
+    public void CheckUnsafePointerReceiverCopy() => CheckTarget("UnsafePointerReceiverCopy");
 
     [TestMethod]
     public void CheckUnsafePointerTypeAlias() => CheckTarget("UnsafePointerTypeAlias");
