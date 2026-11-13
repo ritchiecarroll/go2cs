@@ -334,6 +334,13 @@ func (v *Visitor) dynamicStructTypeName(expr ast.Expr) string {
 		}
 	}
 
+	// Another package's alias of a defined type (`stdio.FILE`, `type FILE = X_iobuf`) is that defined type, spelled
+	// through the importer's alias table (`stdioꓸFILE`) as its declarations are. The normal path below returns its
+	// Go-shaped name, which names no member of the package class (CS0426, sqlite-cs S12).
+	if t != nil && v.isForeignAliasOfNamed(t) {
+		return convertToCSTypeName(v.getScopeCheckedTypeName(t))
+	}
+
 	// Concrete/named or otherwise resolvable type: use the normal path.
 	return v.getExpressionTypeName(expr, false)
 }

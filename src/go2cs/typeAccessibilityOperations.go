@@ -1157,6 +1157,19 @@ func receiverTypeIsPublicized(t types.Type) bool {
 // type references, peeling pointer/slice/array/map/channel wrappers to reach the element types.
 func collectUnexportedNamedTypes(t types.Type, pkg *types.Package) {
 	switch t := t.(type) {
+	case *types.Alias:
+		// An UNEXPORTED alias of an anonymous struct under an exported field — modernc.org/sqlite/lib's
+		// `TuserHPALETTE.Fu t__WIDL_name_00000003` (sqlite-cs S16). The struct lifts to a type named after the
+		// alias, `t__WIDL_name_00000003ᴛ1`, which both the converter and go2cs-gen scope internal by that name,
+		// so the public field and the accessor generated over it are CS0052/CS0050. The alias has no case of its
+		// own here, so the walk stopped at it. Publicize the lift, as collectPublicizedLiftedType does for one
+		// reached through a public signature; the lift then carries an explicit `public`, which go2cs-gen reads
+		// before the name.
+		if obj := t.Obj(); obj.Pkg() == pkg && !obj.Exported() {
+			if target, ok := types.Unalias(t).(*types.Struct); ok && target.NumFields() > 0 {
+				collectPublicizedLiftedType(target, pkg)
+			}
+		}
 	case *types.Named:
 		obj := t.Obj()
 
