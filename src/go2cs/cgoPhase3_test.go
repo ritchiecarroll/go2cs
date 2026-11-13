@@ -366,6 +366,16 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "govoidexpr", csFails: cgoP3GoMemory},
 		{name: "gobytes", csFails: cgoP3GoMemory},
 		{name: "gostring", csFails: cgoP3GoMemory},
+		// Pointers DERIVED from a view of Go memory (the review of increment 3.1, §16.11).
+		{name: "goviewfield", csFails: cgoP3GoMemory},
+		{name: "goviewfieldarray", csFails: cgoP3GoMemory},
+		{name: "goviewagain", csFails: cgoP3GoMemory},
+		{name: "goviewelem", csFails: cgoP3GoMemory},
+		{name: "goviewelemstring", csFails: cgoP3GoMemory},
+		{name: "goslice", csFails: cgoP3GoMemory},
+		{name: "goslicedata", csFails: cgoP3GoMemory},
+		{name: "goadd", csFails: cgoP3GoMemory},
+		{name: "goaddlocal", csFails: cgoP3GoMemory},
 	}
 }
 

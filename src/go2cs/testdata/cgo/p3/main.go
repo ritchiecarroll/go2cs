@@ -35,6 +35,13 @@ import (
 	"unsafe"
 )
 
+// goHeader is a Go struct the derived-pointer arms view Go memory through.
+type goHeader struct {
+	pad  int32
+	n    int32
+	name [8]byte
+}
+
 // roundTrip copies a Go string into C memory and reads it back up to its first NUL.
 func roundTrip(s string) string {
 	cs := C.CString(s)
@@ -193,6 +200,51 @@ func main() {
 		var x [4]C.char
 		x[0], x[1] = 'g', 'o'
 		fmt.Printf("gostring %q\n", C.GoString((*C.char)(unsafe.Pointer(&x))))
+	// The arms below hand C a pointer DERIVED from a view of Go memory, with no uintptr anywhere (the review of
+	// increment 3.1, DESIGN-cgo-phase3-marshaling §16.11). Go allows each. go2cs refuses each until 3.2.
+	case "goviewfield":
+		// A field of a struct viewed over a slice's bytes.
+		b := make([]byte, 16)
+		h := (*goHeader)(unsafe.Pointer(&b[0]))
+		fmt.Println("goviewfield", C.go2cs_probe_same(unsafe.Pointer(&h.n)) != nil, len(b))
+	case "goviewfieldarray":
+		// The same field, of a struct viewed over a Go array.
+		var a [16]byte
+		h := (*goHeader)(unsafe.Pointer(&a))
+		fmt.Println("goviewfieldarray", C.go2cs_probe_same(unsafe.Pointer(&h.n)) != nil, len(a))
+	case "goviewagain":
+		// A second reinterpret of the view, read by a helper.
+		b := make([]byte, 16)
+		h := (*goHeader)(unsafe.Pointer(&b[0]))
+		fmt.Printf("goviewagain %q %d\n", C.GoString((*C.char)(unsafe.Pointer(h))), len(b))
+	case "goviewelem":
+		// An element of an array field of the view.
+		b := make([]byte, 16)
+		h := (*goHeader)(unsafe.Pointer(&b[0]))
+		fmt.Println("goviewelem", C.go2cs_probe_same(unsafe.Pointer(&h.name[1])) != nil, len(b))
+	case "goviewelemstring":
+		// The same element, reinterpreted and read by a helper.
+		b := make([]byte, 16)
+		h := (*goHeader)(unsafe.Pointer(&b[0]))
+		fmt.Printf("goviewelemstring %q %d\n", C.GoString((*C.char)(unsafe.Pointer(&h.name[0]))), len(b))
+	case "goslice":
+		// An element of unsafe.Slice over a view.
+		b := make([]byte, 16)
+		sl := unsafe.Slice((*int32)(unsafe.Pointer(&b[0])), 4)
+		fmt.Println("goslice", C.go2cs_probe_same(unsafe.Pointer(&sl[1])) != nil, len(b))
+	case "goslicedata":
+		// unsafe.SliceData of the same slice.
+		b := make([]byte, 16)
+		sl := unsafe.Slice((*int32)(unsafe.Pointer(&b[0])), 4)
+		fmt.Println("goslicedata", C.go2cs_probe_same(unsafe.Pointer(unsafe.SliceData(sl))) != nil, len(b))
+	case "goadd":
+		// unsafe.Add over the address of a slice's element.
+		b := make([]byte, 16)
+		fmt.Println("goadd", C.go2cs_probe_same(unsafe.Add(unsafe.Pointer(&b[0]), 4)) != nil, len(b))
+	case "goaddlocal":
+		// unsafe.Add over the address of a local.
+		var x [2]int64
+		fmt.Println("goaddlocal", C.go2cs_probe_same(unsafe.Add(unsafe.Pointer(&x), 8)) != nil, len(x))
 	default:
 		fmt.Println("unknown arm", arm)
 		os.Exit(64)
