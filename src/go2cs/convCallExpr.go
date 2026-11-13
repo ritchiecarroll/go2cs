@@ -2674,6 +2674,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						callExprContext.interfaceTypes[j] = paramType
 					}
 
+					// An inline array crosses as its deep array<T> copy (C1's review, M1).
+					if j < len(callExpr.Args) && v.isInlineArrayExpr(callExpr.Args[j]) {
+						if callExprContext.inlineArrayBoxArgs == nil {
+							callExprContext.inlineArrayBoxArgs = make(map[int]bool)
+						}
+
+						callExprContext.inlineArrayBoxArgs[j] = true
+					}
+
 					// An untyped constant boxed into the interface must be cast to Go's DEFAULT TYPE for
 					// its kind so its C# box matches Go's boxed dynamic type and a later `.(int)`
 					// (`._<nint>()`) assertion, `case int:`, or `==` succeeds — see untypedConstBoxCast.

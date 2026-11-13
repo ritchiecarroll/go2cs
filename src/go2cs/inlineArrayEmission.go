@@ -26,7 +26,8 @@ import (
 //   - len and cap: the constant (convCallExpr.go), as golib's len cannot see the family;
 //   - an index-only range: range(N) (visitRangeStmt.go); a value range keeps range(x.ΔRangeSnapshot());
 //   - an element: the indexer, unchanged;
-//   - an array literal that initializes the field: new array<N><T>(e0, e1, ...) (convCompositeLit.go).
+//   - an array literal that initializes the field: new array<N><T>(e0, e1, ...) (convCompositeLit.go);
+//   - the whole array boxed into an interface parameter: its deep array<T> copy (inlineArrayBoxCopy).
 
 // isInlineArrayExpr reports whether expr denotes an array held inline: an array field of an admitted struct, or an array
 // element of one (an admitted closure holds every array inline, nested ones included).
@@ -168,6 +169,28 @@ func (v *Visitor) inlineArrayLiteral(lit *ast.CompositeLit) (string, bool) {
 	}
 
 	return fmt.Sprintf("new %s(%s)", v.inlineArrayTypeName(array), strings.Join(elements, ", ")), true
+}
+
+// inlineArrayBoxCopy renders an inline array crossing into an interface as its array<T> copy, deep for a nested array
+// (C1's review, M1): x.f.ΔCopy(), x.m.ΔSelect(static Δe1 => Δe1.ΔCopy()), and so on down. Interface space then holds
+// the one representation every other Go [N]T has there, so a type switch, interface ==, a map key, reflect and fmt see
+// no second form, and the copy aliases nothing the struct holds (Go boxes a copy).
+func inlineArrayBoxCopy(rendered string, array *types.Array) string {
+	if strings.HasPrefix(rendered, PointerDerefOp) {
+		rendered = "(" + rendered + ")"
+	}
+
+	return rendered + "." + inlineArrayDeepCopy(array, 1)
+}
+
+// inlineArrayDeepCopy is the member call that copies an inline array of type array out, one ΔSelect per nested level.
+func inlineArrayDeepCopy(array *types.Array, depth int) string {
+	if inner, isArray := array.Elem().Underlying().(*types.Array); isArray && inner.Len() > 0 {
+		element := fmt.Sprintf("Δe%d", depth)
+		return fmt.Sprintf("ΔSelect(static %s => %s.%s)", element, element, inlineArrayDeepCopy(inner, depth+1))
+	}
+
+	return "ΔCopy()"
 }
 
 // inlineArrayHeld reports whether t is a struct whose arrays are held inline: one this package admits, or a named struct

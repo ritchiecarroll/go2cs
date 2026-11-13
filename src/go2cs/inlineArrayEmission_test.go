@@ -115,3 +115,41 @@ func view(p unsafe.Pointer) *Outer { return (*Outer)(p) }
 		}
 	}
 }
+
+// C1's review, M1: an inline array boxed into an interface crosses as its array<T> COPY, deep for a nested array, so a
+// type switch, interface ==, a map key, reflect and fmt all see the one representation every other [N]T has.
+func TestInlineArrayBoxesAsItsDeepArrayCopy(t *testing.T) {
+	cs := convertInlineArrayFixture(t, "boxed", `package boxed
+
+import (
+	"fmt"
+	"unsafe"
+)
+
+type T struct {
+	B [2]uint8
+	M [3][2]int16
+	D [2][2][2]int8
+}
+
+func view(p unsafe.Pointer) *T { return (*T)(p) }
+
+func sink(v any) {}
+
+func use(v *T) {
+	fmt.Println(v.B, v.M, v.M[1])
+	sink(v.D)
+	sink(v.B[0])
+}
+`)
+
+	for _, want := range []string{
+		`fmt.Println(v.B.ΔCopy(), v.M.ΔSelect(static Δe1 => Δe1.ΔCopy()), v.M[1].ΔCopy());`,
+		`sink(v.D.ΔSelect(static Δe1 => Δe1.ΔSelect(static Δe2 => Δe2.ΔCopy())));`,
+		`sink(v.B[0]);`,
+	} {
+		if !strings.Contains(cs, want) {
+			t.Errorf("want %q:\n%s", want, cs)
+		}
+	}
+}

@@ -172,16 +172,17 @@ public class InlineArrayFamilyTests
         }
     }
 
-    // 7.6.1: the member exposes an element and its length, and nothing that reaches its storage as a whole. Part D3 adds two
-    // members that COPY rather than reach: the element-list constructor a Go array literal converts to (elements in) and
-    // ΔRangeSnapshot, the copy a Go range iterates (elements out). The reflection face (IGoInlineArray) is explicit.
+    // 7.6.1: the member exposes an element and its length, and nothing that reaches its storage as a whole. Part D3 adds
+    // members that COPY rather than reach: the element-list constructor a Go array literal converts to (elements in),
+    // ΔRangeSnapshot, the copy a Go range iterates, and ΔCopy and ΔSelect, the copy an interface holds (elements out; C1's
+    // review, M1). The reflection face (IGoInlineArray) is explicit.
     [TestMethod]
     public void AMemberExposesOnlyItsElementsAndLength()
     {
         string[] members = typeof(array201<>).GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
             .Select(member => member.Name).Distinct().OrderBy(name => name, StringComparer.Ordinal).ToArray();
 
-        CollectionAssert.AreEqual(new[] { ".ctor", "Equals", "GetHashCode", "Item", "Length", "get_Item", "op_Equality", "op_Inequality", "ΔRangeSnapshot" }, members, string.Join(", ", members));
+        CollectionAssert.AreEqual(new[] { ".ctor", "Equals", "GetHashCode", "Item", "Length", "get_Item", "op_Equality", "op_Inequality", "ΔCopy", "ΔRangeSnapshot", "ΔSelect" }, members, string.Join(", ", members));
     }
 
     // A Go array literal [5]int32{1, 2} is its elements from index 0 and Go's zero after them.
@@ -195,6 +196,16 @@ public class InlineArrayFamilyTests
         Assert.AreEqual(0, value[2]);
         Assert.AreEqual(0, value[4]);
         Assert.AreEqual(default, new array5<int>());
+    }
+
+    // C1's review, n1: Go refuses an array literal longer than the array at compile time, so a constructor handed more
+    // than N elements is a converter defect, and it is Go's index panic rather than a silent truncation.
+    [TestMethod]
+    public void ALiteralLongerThanTheArrayPanics()
+    {
+        PanicException panic = Assert.ThrowsException<PanicException>(() => new array3<int>(1, 2, 3, 4));
+        StringAssert.Contains(panic.Message, "index out of range [3] with length 3");
+        Assert.AreEqual(3, new array3<int>(1, 2, 3)[2]);
     }
 
     // Go ranges over a COPY of an array value: a write the loop body makes is not seen by the loop.
@@ -216,7 +227,28 @@ public class InlineArrayFamilyTests
         Assert.AreEqual(99, value[3]);
     }
 
-    // reflect (and fmt through it) walks a boxed member as a Go array value: its length and a copy of each element.
+    // C1's review, M1: an inline array boxed into an interface crosses as its array<T> copy, deep for a nested array, so
+    // interface space holds the one form every Go [N]T has there, and the copy aliases nothing the member holds.
+    [TestMethod]
+    public void TheInterfaceCopyIsADeepGolibArrayThatAliasesNothing()
+    {
+        array3<array2<short>> nested = new(new array2<short>(1, 2), new array2<short>(3, 4), new array2<short>(5, 6));
+        array<array<short>> copy = nested.ΔSelect(static e => e.ΔCopy());
+
+        nested[1][0] = 99;
+        Assert.AreEqual((short)3, copy[1][0]);
+        Assert.AreEqual((nint)3, copy.Length);
+        Assert.AreEqual((nint)2, copy[2].Length);
+
+        array<array<short>> plain = new(new[] { new array<short>(new short[] { 1, 2 }), new array<short>(new short[] { 3, 4 }), new array<short>(new short[] { 5, 6 }) });
+        Assert.IsTrue(((object)copy).Equals(plain), "interface == against a plain [3][2]int16");
+        Assert.AreEqual(plain.GetHashCode(), copy.GetHashCode(), "the same map key");
+        Assert.AreEqual("[[1 2] [3 4] [5 6]]", (string)go.fmt_package.Sprintf("%v", copy));
+    }
+
+    // reflect (and fmt through it) walks a member reached INSIDE a boxed struct (fmt.Println(*v), whose field reads hand
+    // reflect the member itself) as a Go array value: its length and a copy of each element. That is why IGoInlineArray
+    // and its two reflect arms stay after M1: an argument boxes as array<T>, but a whole struct boxes with its members.
     [TestMethod]
     public void ABoxedMemberIsReadByReflectionThroughItsInlineArrayFace()
     {

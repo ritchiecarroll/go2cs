@@ -349,6 +349,13 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// Routed through appendValueClone so a `~`-prefixed deref rendering is wrapped
 		// before the suffix binds (C# postfix beats unary); byte-neutral for every other shape.
 		clonedElement := func(rendered string) string {
+			// An inline array boxed into an interface crosses as its deep array<T> copy (inlineArrayBoxCopy).
+			if callContext != nil && callContext.inlineArrayBoxArgs[i] && !spreadArg {
+				if array, isArray := types.Unalias(v.getExprType(expr)).Underlying().(*types.Array); isArray {
+					return inlineArrayBoxCopy(rendered, array)
+				}
+			}
+
 			if !cloneArrayElement {
 				return rendered
 			}
