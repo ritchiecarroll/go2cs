@@ -83,3 +83,35 @@ var V = T{Off: [8]uint8{1: uint8(4), 5, 6}, N: [3]int32{2: 9}, E: [2]int16{}}
 		}
 	}
 }
+
+// Stop line S2 (DESIGN-array-value-storage.md, part D): golib's gate derived Go's layout from the very declaration it
+// checks, so an S22 whose [0]int16 carrier was missing passed. The converter now stamps Go's size and alignment from
+// go/types on the declaration, and the gate holds the managed layout to the stamp.
+func TestInlineArrayDeclarationCarriesGosSizeAndAlignment(t *testing.T) {
+	cs := convertInlineArrayFixture(t, "stamp", `package stamp
+
+import "unsafe"
+
+type S22 struct {
+	FforceAlignment [0]int16
+	Fa              [5]int8
+	Fpad            [1]byte
+}
+
+type Outer struct {
+	B byte
+	S S22
+}
+
+func view(p unsafe.Pointer) *Outer { return (*Outer)(p) }
+`)
+
+	for _, want := range []string{
+		`[GoInlineLayout(Size = 6, Align = 2), StructLayout(LayoutKind.Explicit, Size = 6)] partial struct S22`,
+		`[GoInlineLayout(Size = 8, Align = 2), StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Outer`,
+	} {
+		if !strings.Contains(cs, want) {
+			t.Errorf("want %q:\n%s", want, cs)
+		}
+	}
+}

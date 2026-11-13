@@ -719,11 +719,23 @@ public static partial class GoReflect
         if (sizeKnown && size > 0 && lastzero == size && ++size == 0)
             sizeKnown = false;
 
+        // A struct the converter laid out with inline arrays carries Go's size and alignment from go/types
+        // ([GoInlineLayout(Size, Align)]). They are Go's answer, not a derivation from this declaration: a [0]T carrier
+        // missing from the declaration takes Go's alignment with it, and only the stamp still says what it is
+        // (DESIGN-array-value-storage.md, part D, stop line S2). Every holder's offsets and size then derive from it.
+        GoInlineLayoutAttribute? stamp = t.GetCustomAttribute<GoInlineLayoutAttribute>(false);
+
+        if (stamp is { Align: > 0 })
+            maxAlign = stamp.Align;
+
         nuint totalAlign = (nuint)maxAlign;
         nuint total = sizeKnown ? (size + totalAlign - 1) / totalAlign * totalAlign : 0;
 
         if (sizeKnown && total < size)
             sizeKnown = false;
+
+        if (sizeKnown && stamp is { Size: > 0 })
+            total = (nuint)stamp.Size;
 
         StructLayout layout = sizeKnown
             ? new StructLayout(offsets, total, maxAlign, true)
