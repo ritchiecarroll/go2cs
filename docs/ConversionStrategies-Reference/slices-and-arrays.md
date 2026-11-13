@@ -2,7 +2,7 @@
 <!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#slices-and-arrays)
-Go slices and arrays are converted to the golib [`slice<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/slice.cs) and [`array<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/array.cs) structures. A `make`-style allocation uses a constructor; a slice literal is a C# collection expression, bare where C# knows its type and inside golib's `slice<T>` builtin elsewhere ([below](#a-slice-literal-is-a-collection-expression-where-c-knows-its-target)); an array literal builds a C# array and projects it with the `.array()` extension:
+Go slices and arrays are converted to the golib [`slice<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/slice.cs) and [`array<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/array.cs) structures. A `make`-style allocation uses a constructor; a slice literal is a C# collection expression, bare where C# knows its type and inside golib's `slice<T>` builtin elsewhere ([below](#a-slice-literal-is-a-collection-expression-where-c-knows-its-target)); an array literal is golib's `array<T>` builtin over a collection expression ([below](#an-array-literal-is-golibs-arrayt-builtin-over-a-collection-expression)):
 
 ```go
 package main
@@ -22,7 +22,7 @@ converts to:
 <!-- illustration: not converter output -->
 ```csharp
 internal static void main() {
-    var primes = new nint[]{2, 3, 5, 7, 11, 13}.array();
+    var primes = array<nint>([2, 3, 5, 7, 11, 13]);
     var nums = slice<nint>([10, 20, 30]);
     var buf = new slice<byte>(4);
     fmt.Println(primes[0], nums[2], len(buf));
@@ -90,9 +90,9 @@ element, such as a call's argument, keeps its bare spelling. (Guarded by the con
 An alias to an unnamed slice type is that type, so its literal converts too: with `type strs = []string`,
 `strs{"a", "b"}` → `slice<@string>(["a", "b"])`, and a generic alias `List[int]{4, 5}` → `slice<nint>([4, 5])`. So does an
 elided element of a named slice type, which takes no constructor and binds through the type's implicit conversion:
-`[2]IntSlice{{1, 2}, {3}}` → `new IntSlice[]{slice<nint>([1, 2]), slice<nint>([3])}.array()`.
+`[2]IntSlice{{1, 2}, {3}}` → `array<IntSlice>([slice<nint>([1, 2]), slice<nint>([3])])`.
 
-A keyed literal keeps its sparse form, a fixed array its `.array()` projection, a slice of arrays its
+A keyed literal keeps its sparse form, an unnamed fixed array takes golib's `array<T>` builtin (below), a slice of arrays its
 `GoReflect.WithElemDims(new array<T>[]{…}.slice(), n)` form (the element dims are recorded on it), and a named slice
 type's own literal its constructor (below). (Guarded by the converter test
 `TestSliceLiteralsAtTargetedPositionsAreCollectionExpressions`, by the behavioral test `CollectionExpressionSlices`, by golib's
@@ -245,6 +245,82 @@ initializer then mis-binds the element constructor (CS1503). With the structural
 `array<atomic.Pointer<profBuf>> = new(2)`. An array of a current-package or basic-typed element needs none of this (its
 string has no foreign path to strip). (Guarded by the `ArrayOfCrossPackageType` behavioral test — `[3]atomic.Int32` /
 `[2]atomic.Uint64` fields; runtime's `trace`/`traceMap` structs hold these.)
+
+### An array literal is golib's `array<T>` builtin over a collection expression
+
+An unkeyed, non-empty literal of an **unnamed** array type, or of an alias to one, renders as golib's `array<T>`
+builtin called on a C# collection expression. A full literal, and every `[...]T{…}` literal, passes its elements
+alone; a short literal passes its declared length first, and the builtin zero-fills the rest
+([below](#a-fixed-array-composite-literal-carries-its-declared-length-arrayn)):
+<!-- source: src/tests/Behavioral/ArrayLiteralBuiltin/main.go:30-56 -->
+```go
+	// Full length, short, and an ellipsis literal.
+	fmt.Println(primes, len(primes))
+	short := [8]byte{1, 2}
+	fmt.Println(short, len(short))
+	dots := [...]string{"a", "b", "c"}
+	fmt.Println(dots, len(dots))
+	fmt.Println(table[3])
+
+	// Each evaluation is a fresh array.
+	a, b := fresh(), fresh()
+	a[0] = 9
+	fmt.Println(a, b)
+
+	// An alias converts; a named array type keeps its constructor.
+	var t triple = triple{4, 5, 6}
+	d := digits{7, 8, 9}
+	fmt.Println(t, d)
+
+	// Keyed, empty and interface-element literals.
+	keyed := [5]int{1: 10, 3: 30}
+	empty := [4]int{}
+	mixed := [2]any{1, "one"}
+	fmt.Println(keyed, empty, mixed)
+
+	// An array of arrays keeps its outer form; its inner literals convert, a short one too.
+	grid := [2][3]int{{1, 2, 3}, {4}}
+	fmt.Println(grid, len(grid[1]))
+```
+<!-- source: src/tests/Behavioral/ArrayLiteralBuiltin/main.cs.target:33-54 -->
+```csharp
+    fmt.Println(primes, len(primes));
+    var @short = array<byte>(8, [1, 2]);
+    fmt.Println(@short, len(@short));
+    var dots = array<@string>(["a", "b", "c"]);
+    fmt.Println(dots, len(dots));
+    fmt.Println(table[3]);
+
+    var (a, b) = (fresh(), fresh());
+    a[0] = 9;
+    fmt.Println(a, b);
+
+    triple t = array<nint>([4, 5, 6]);
+    var d = new digits(new nint[]{7, 8, 9}.array());
+    fmt.Println(t, d);
+
+    var keyed = new array<nint>(5){[1] = 10, [3] = 30};
+    var empty = new nint[]{}.array(4);
+    var mixed = array<any>([(nint)1, oneˢ]);
+    fmt.Println(keyed, empty, mixed);
+
+    var grid = new array<nint>[]{array<nint>([1, 2, 3]), array<nint>(3, [4])}.array();
+    fmt.Println(grid, len(grid[1]));
+```
+
+The builtin has two overloads, `builtin.array<T>(T[])` and `builtin.array<T>(nint, T[])`. The collection expression
+binds the `T[]` parameter, so C# builds a fresh array with one store per element, and the overload keeps that array as
+the `array<T>`'s backing without copying it. The literal therefore allocates what the earlier `new T[]{…}.array()`
+form allocated: the one array for a full literal, and the element array plus its zero-filled copy for a short one.
+Each evaluation is a fresh array, and an element that holds a call keeps its own Go line.
+
+The other forms stay as they were. A named array type's literal keeps its constructor
+(`digits{7, 8, 9}` above), a keyed literal its indexed or sparse form, an empty literal `new T[]{}.array(N)`, and an
+array whose element is an array its outer `new array<T>[]{…}.array()`, whose inner literals convert. A short literal
+whose element must be constructed when zero keeps the factory form `.array(N, () => new())`
+([below](#a-fixed-size-array-constructs-its-elements-when-defaultt-is-not-usable-storage)). (Guarded by the
+behavioral test `ArrayLiteralBuiltin`, the converter test `TestArrayLiteralTakesTheArrayBuiltin`, and golib's
+`ArrayLiteralBuiltinAllocationTests`, which compares the builtin's allocations with the projection's.)
 
 ### A struct's array fields get their fixed length from a generated parameterless constructor
 
@@ -1221,12 +1297,12 @@ plus an explicit-argument control.)
 ## A fixed-array composite literal carries its DECLARED length (`.array(N)`)
 
 A `[N]T{…}` literal is **N** long however many elements it writes — Go zero-fills the rest, so
-`[8]byte{}` is eight zero bytes and `[8]byte{1, 2}` is `1, 2` followed by six zeros. The literal
-renders as a C# element array projected through golib's `.array()` extension, and that element
-array holds only the elements actually written, so a bare projection would produce an array as long as
+`[8]byte{}` is eight zero bytes and `[8]byte{1, 2}` is `1, 2` followed by six zeros. The literal's
+collection expression (or, in the forms that keep it, its C# element array) holds only the elements actually
+written, so wrapping it as it is would produce an array as long as
 the LITERAL rather than as long as the TYPE: `[8]byte{}` would be length **0**, compile cleanly and then
 panic on first use (`index out of range [7] with length 0` — math/rand/v2 `chacha8`'s `Seed`). The
-projection therefore takes the declared length:
+conversion therefore passes the declared length:
 
 ```go
 a := [8]byte{}          // eight zero bytes
@@ -1236,16 +1312,16 @@ c := [3]byte{1, 2, 3}   // already full
 
 <!-- illustration: not converter output -->
 ```csharp
-var a = new byte[]{}.array(8);
-var b = new byte[]{1, 2}.array(8);
-var c = new byte[]{1, 2, 3}.array();      // full literal keeps the plain projection
+var a = new byte[]{}.array(8);           // an empty literal keeps the projection
+var b = array<byte>(8, [1, 2]);
+var c = array<byte>([1, 2, 3]);          // a full literal passes no length
 ```
 
 Only a **short** literal takes the length argument. A full literal — and every `[...]T{…}`
-ellipsis literal, whose length *is* its element count — already yields the right length and keeps
-the plain `.array()` form. A **slice** literal is genuinely as long as its elements (`[]byte{}` IS
+ellipsis literal, whose length *is* its element count — already yields the right length and passes its
+elements alone, `array<T>([…])`. A **slice** literal is genuinely as long as its elements (`[]byte{}` IS
 empty) and never pads; its form, `slice<T>([…])`, takes no length. golib's `array<T>(T[] source, int length)` constructor
-does the zero-filled copy,
+does the zero-filled copy, behind both the builtin's length overload and the `.array(N)` projection,
 which is deliberately distinct from the `array(slice<T>, nint)` slice-to-array *conversion* ctor
 (there a short source is a Go panic; here it is the normal case).
 
@@ -1388,8 +1464,8 @@ structElem  := [][2]withArray{{}}         // withArray has a [2][3]int field
 <!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var nested      = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{}.array(2, () => new(3))}.slice(), 2, 3);
-var nestedShort = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array()}.array(2, () => new(3))}.slice(), 2, 3);
-var nestedKeyed = GoReflect.WithElemDims(new array<array<nint>>[]{new golib.SparseArray<array<nint>>{[1] = new nint[]{7, 8, 9}.array()}.array(2, () => new(3))}.slice(), 2, 3);
+var nestedShort = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{array<nint>([1, 2, 3])}.array(2, () => new(3))}.slice(), 2, 3);
+var nestedKeyed = GoReflect.WithElemDims(new array<array<nint>>[]{new golib.SparseArray<array<nint>>{[1] = array<nint>([7, 8, 9])}.array(2, () => new(3))}.slice(), 2, 3);
 var structElem  = GoReflect.WithElemDims(new array<withArray>[]{new withArray[]{}.array(2, () => new())}.slice(), 2);
 ```
 

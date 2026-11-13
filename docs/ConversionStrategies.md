@@ -4450,13 +4450,14 @@ of the C# types. `uintptr` is golib's own `uintptr` struct
 <!-- uintptr is a golib struct, not a project alias: src/core/golib/uintptr.cs:39#d446ed; project aliases such as `<Using Include="System.UInt32" Alias="uint32" />` (src/core/bufio/bufio.csproj:161#1a4b9a). -->
 
 **Literals and `make`.** A slice literal is golib's `slice<T>` builtin over a C# collection expression, an
-array literal a plain C# array turned into a Go value with `.array()`, and `make` calls a constructor. So
+array literal golib's `array<T>` builtin over one, and `make` calls a constructor. So
 `[]uint32{7, 8, 9}` becomes `slice<uint32>([7, 8, 9])`, `[6]int{0, 10, 20, 30, 40, 50}` becomes
-`new nint[]{0, 10, 20, 30, 40, 50}.array()`, and `make([]int, 3, 10)` becomes `new slice<nint>(3, 10)`.
+`array<nint>([0, 10, 20, 30, 40, 50])`, and `make([]int, 3, 10)` becomes `new slice<nint>(3, 10)`.
 Where C# already knows the slice type, such as a package var, an assignment, a return or a field, the literal is
 the bare collection expression: `var names = []string{"stdin", "stdout"}` becomes
 `internal static slice<@string> names = ["stdin", "stdout"];`
-([A slice literal is a collection expression where C# knows its target](ConversionStrategies-Reference/slices-and-arrays.md#a-slice-literal-is-a-collection-expression-where-c-knows-its-target)).
+([A slice literal is a collection expression where C# knows its target](ConversionStrategies-Reference/slices-and-arrays.md#a-slice-literal-is-a-collection-expression-where-c-knows-its-target);
+[An array literal is golib's `array<T>` builtin over a collection expression](ConversionStrategies-Reference/slices-and-arrays.md#an-array-literal-is-golibs-arrayt-builtin-over-a-collection-expression)).
 <!-- source: src/tests/Behavioral/SliceAliasing/main.go:20, :34 and :44; src/tests/Behavioral/SliceAliasing/main.cs.target:15, :26 and :34 -->
 <!-- The bare form: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22 `internal static slice<@string> names = ["stdin", "stdout"];`. -->
 
@@ -9283,7 +9284,7 @@ internal static @string show(this digest d) {
 }
 …
 internal static digest newDigest() {
-    return new digest(h: new nint[]{1, 2, 3, 4}.array(), x: new byte[]{5, 6}.array(), nx: 7);
+    return new digest(h: array<nint>([1, 2, 3, 4]), x: array<byte>([5, 6]), nx: 7);
 }
 …
 internal static void identCopy() {
@@ -10154,7 +10155,7 @@ internal static error release(errno e) {
 and each case compares through `AreEqual` in the same way, `case var ᴛ when AreEqual(ᴛ, errAgain):`
 ([Expression Switch Statements](#expression-switch-statements)).
 
-<!-- adapter unwrap: src/core/golib/builtin.cs:4221-4237#3733f1 (IInterfaceAdapter.Value, IжAdapter.Box); interface-vs-pointer example: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.go:29 `zoo[0] == f` -> InterfaceImplementation.cs.target:33 `AreEqual(zoo[0], f)` -->
+<!-- adapter unwrap: src/core/golib/builtin.cs:4260-4276#3733f1 (IInterfaceAdapter.Value, IжAdapter.Box); interface-vs-pointer example: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.go:29 `zoo[0] == f` -> InterfaceImplementation.cs.target:33 `AreEqual(zoo[0], f)` -->
 `AreEqual` unwraps adapters first, so an interface holding a pointer equals that pointer: Go's
 `zoo[0] == f`, where `zoo[0]` is an interface holding the pointer `f`, becomes `AreEqual(zoo[0], f)`.
 Comparing two values of a type Go cannot compare, such as a slice or map, panics as it does in Go.
@@ -11309,7 +11310,7 @@ reading through it reads the real storage, as in Go:
 <!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:77-81 -->
 ```csharp
 …
-    ref var arr = ref heap<array<nint>>(new nint[]{1, 2, 3, 4}.array(), out var Ꮡarr);
+    ref var arr = ref heap<array<nint>>(array<nint>([1, 2, 3, 4]), out var Ꮡarr);
     var arrptr = Ꮡarr.at<nint>(0);
 
     @unsafe.Pointer nextPtr = (@unsafe.Pointer)((uintptr)arrptr + /* unsafe.Sizeof(arr[0]) */ (uintptr)8);
@@ -11406,7 +11407,7 @@ public static uint64 Float64bits(float64 f) {
     return bitcast<float64, uint64>(f);
 }
 ```
-<!-- the reverse pun Float64frombits: UnsafeOperations.go:61-63#2dd660 -> cs.target:54-56 (`bitcast<uint64, float64>(b)`); integer pun UnsafeOperations.go:95#43707c -> cs.target:92 (`uint8 k = bitcast<int8, uint8>(i);`). bitcast: src/core/golib/builtin.cs:4107 (`where TSrc : unmanaged where TDst : unmanaged`). -->
+<!-- the reverse pun Float64frombits: UnsafeOperations.go:61-63#2dd660 -> cs.target:54-56 (`bitcast<uint64, float64>(b)`); integer pun UnsafeOperations.go:95#43707c -> cs.target:92 (`uint8 k = bitcast<int8, uint8>(i);`). bitcast: src/core/golib/builtin.cs:4146 (`where TSrc : unmanaged where TDst : unmanaged`). -->
 
 **Reading a struct as another struct with the same fields is a `Reinterpret`.** Go's
 `*(*T2)(unsafe.Pointer(&t1))` becomes `~Ꮡt1.Reinterpret<T1, T2>()`: a view of the same box, read as the

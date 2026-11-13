@@ -150,6 +150,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A non-escaping append can take Go's 32-byte stack buffer](slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer)
   - [A slice of a ZERO-SIZE element type carries no storage — `make([]struct{}, math.MaxInt)` allocates nothing](slices-and-arrays.md#a-slice-of-a-zero-size-element-type-carries-no-storage--makestruct-mathmaxint-allocates-nothing)
   - [A composite literal omitting a fixed-array field keeps the zeroed backing](slices-and-arrays.md#a-composite-literal-omitting-a-fixed-array-field-keeps-the-zeroed-backing)
+  - [An array literal is golib's `array<T>` builtin over a collection expression](slices-and-arrays.md#an-array-literal-is-golibs-arrayt-builtin-over-a-collection-expression)
   - [A fixed-array composite literal carries its DECLARED length (`.array(N)`)](slices-and-arrays.md#a-fixed-array-composite-literal-carries-its-declared-length-arrayn)
   - [An ELIDED element carries the same construction as the spelling it elides](slices-and-arrays.md#an-elided-element-carries-the-same-construction-as-the-spelling-it-elides)
   - [A NAMED array type's EMPTY literal is its zero value — and its element may need constructing](slices-and-arrays.md#a-named-array-types-empty-literal-is-its-zero-value--and-its-element-may-need-constructing)
