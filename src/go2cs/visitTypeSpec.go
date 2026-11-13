@@ -180,7 +180,15 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		// reader_test.go's TestFileReader, with `fileMaker` alongside it — 3 diagnostics, all 97 of
 		// the package's verdicts behind them). Take the same lift, and register it so every
 		// reference in the function resolves to the lifted name.
+		// The declaration takes the escaped name its uses are spelled with (convIdent's getSanitizedIdentifier): a
+		// Go alias named like a C# keyword (`type long = int32`, modernc.org/libc) or a golib reserved name
+		// (`slice`) is otherwise declared bare, a parse error or a name no use binds. A name already rewritten
+		// above (a collision's Δ, a cgo typedef's Cꓸ spelling) is the use spelling and stays as it is.
 		aliasName := name
+
+		if name == typeSpec.Name.Name {
+			aliasName = getCoreSanitizedIdentifier(name)
+		}
 
 		if v.inFunction {
 			aliasName = v.liftLocalTypeDeclName(name)
