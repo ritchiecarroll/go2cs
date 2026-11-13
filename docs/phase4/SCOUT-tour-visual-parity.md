@@ -320,6 +320,16 @@ Do both:
 - **P4.2** Per target, at most the 1,491 one-line sites move, and no sized, sparse or factory site does.
 - **P4.3** No output changes, and the IL of a byte table keeps its blob.
 
+> **Amended 2026-11-13 (P1), before the measurement, on COORD's acceptance** (inbox P1 20261113T194815Z):
+> - **P4.2's wording.** "No sized site moves" contradicts the rule above it, which writes a short literal as
+>   `array<T>(N, […])`. The rule stands. P4.2 reads: per target, at most the full-length sites (one-line and
+>   multi-line) and the short sites whose element needs no factory move, 377 + 14 non-test sites across all
+>   flavour files at `651c4ad147`; no short site with an element factory, and no sparse, named, empty or nested
+>   site, moves.
+> - **P4.7, added.** Allocation parity: `array<T>(T[])` keeps the collection expression's array as its backing,
+>   with no second copy, so a literal in a loop allocates what the projection did. Guarded by GolibTests
+>   `ArrayLiteralBuiltinAllocationTests`, red with a deliberate copy.
+
 **Stop lines:**
 - **X4.1** A sparse, named, factory or nested site changes.
 - **X4.2** Any behavioral output changes.
