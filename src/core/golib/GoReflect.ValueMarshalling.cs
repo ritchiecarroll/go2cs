@@ -654,6 +654,10 @@ public static partial class GoReflect
             case Map:
                 return DefaultValueOf(t);
             case Array:
+                // An inline array's zero is its default: the length is the type's, and the storage is inline.
+                if (InlineArrayLength(t) > 0)
+                    return DefaultValueOf(t);
+
                 return arrayDims is { Length: > 0 } && t.IsGenericType ? MakeSizedArray(t, arrayDims, 0) : DefaultValueOf(t);
             default:
                 return Activator.CreateInstance(t);
