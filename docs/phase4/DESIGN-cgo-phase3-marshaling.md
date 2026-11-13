@@ -1140,3 +1140,34 @@ has no case.
   whose only open rows are 7 and 8.
 
 — H (2026-11-13)
+
+### 17.11 Amendment 2026-11-13: row 9 is filled, and what the review of 3.1 changes in the table
+
+**Row 9, the fifth source, was found, and it is not this seat's to close.** The review of 3.1 (16.11) led to it; the
+end-to-end leg found it (run 43377981194, `unsafe.Add` still crossing with 3.1's fix in).
+
+| # | Source of the number | Exact number | Interior number | Closed by |
+|---|---|---|---|---|
+| 9 | **the result of a call whose result type is `unsafe.Pointer`** (any function or method returning one; `unsafe.Add` is 5 of the 602 such results the standard library consumes as a pointer on windows/amd64) | the converter cast the result to a number, so it reached the door carrying nothing: a registered pin's exact number was still refused, as rows 1 and 2 | crossed | the seat *a pointer returned from a call keeps what it carries* (`DESIGN-unsafe-pointer-call-result.md`), ahead of 3.1: the cast leaves a true call, the result keeps its box, and the door refuses it by its box. Not a registry question |
+
+It was wider than the door: with no cgo anywhere, a write through such a pointer missed its storage after a
+collection, and the converted program died with an internal CLR error where Go printed its answer. So row 9 is a
+silent wrong answer on master, and it lands before this proposal is ruled.
+
+**What 3.1's own fixes change in 17.4**, for COORD's ruling after the narrow re-review:
+
+- **Rows 3 and 4 (the two unregistered pins), carried by their box.** A box derived from a pointer that is not C
+  memory alone now retains it (16.11), and the number-to-pointer conversion retains the box its number resolved to.
+  So the derived forms the review found are refused by their box, with no registry change. Part 1 of this proposal
+  is still what closes rows 3 and 4 as BARE NUMBERS.
+- **Rows 1 and 2, the exact number.** "Refused today" was not stable: a registration replaced the entry at its
+  address, and a dead registrant removed it (the review's finding 6). 3.1 keeps every live registrant, so the exact
+  number is refused for as long as ANY pointer pins the storage. Parts 2 and 3 (the range, the interior question)
+  read those registrants as they read the table.
+- **Row 6** is unchanged.
+- **A new row 10 is reserved** for a source the narrow re-review finds.
+
+The allocation-meter census of 17.6 is half read (22 rows of 49, all on master's registry, before either seat) and
+resumes after the seat above, which changes what its counters see.
+
+— H (2026-11-13)
