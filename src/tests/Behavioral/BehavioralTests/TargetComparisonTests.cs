@@ -631,6 +631,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckEscapedLoopVarSiblingIndex() => CheckTarget("EscapedLoopVarSiblingIndex");
 
     [TestMethod]
+    public void CheckExplicitDerefConversionStore() => CheckTarget("ExplicitDerefConversionStore");
+
+    [TestMethod]
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
 
     [TestMethod]

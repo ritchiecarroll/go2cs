@@ -628,6 +628,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckEscapedLoopVarSiblingIndex() => CheckTarget("EscapedLoopVarSiblingIndex");
 
     [TestMethod]
+    public void CheckExplicitDerefConversionStore() => CheckTarget("ExplicitDerefConversionStore");
+
+    [TestMethod]
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
 
     [TestMethod]

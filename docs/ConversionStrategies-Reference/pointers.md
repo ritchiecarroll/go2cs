@@ -2779,6 +2779,29 @@ arms of `PointerCastSliceReinterpret` — the reparse `[n1:n2:n2]` shape and a b
 wider element sliced `[3:7]`, both matching Go. `StdLibInternalAbi`'s golden
 pins the corrected `OutSlice`; its own stdout does not depend on the offset.)
 
+## A store through an EXPLICIT dereference of a pointer conversion reaches the pointee
+`(*(*T)(p)).F = x` and `(*(*[N]T)(p))[i] = x` are the same stores as `(*T)(p).F = x` and
+`(*[N]T)(p)[i] = x`. The conversion's dereference used to render as a copy, `~cast`, so the
+store did not compile (CS0131, and CS1510 for a pointer-receiver method call on it). A selector
+or index whose base is such a dereference now renders the conversion and reads its `.Value`:
+
+<!-- source: src/tests/Behavioral/ExplicitDerefConversionStore/main.go:25-27 -->
+```go
+	(*(*frame)(ptr(bp))).Pgno = 7
+	(*(*frame)(ptr(bp))).Read += 3
+	(*(*frame)(ptr(bp))).bump()
+```
+<!-- source: src/tests/Behavioral/ExplicitDerefConversionStore/main.cs.target:21-23 -->
+```csharp
+    ((ж<frame>)(uintptr)(ptr(bp))).Value.Pgno = 7;
+    ((ж<frame>)(uintptr)(ptr(bp))).Value.Read += 3;
+    ((ж<frame>)(uintptr)(ptr(bp))).bump();
+```
+ccgo emits this shape for every store into a stack frame struct (`(*(*TWalSehFindFrame)(
+__ccgo_ptr(bp))).Fpgno = pgno`). (Guarded by the `ExplicitDerefConversionStore` behavioral output
+test: the struct field store, op-assign and method call, the array element store and op-assign,
+each beside the implicit form as its control.)
+
 ## `unsafe.Pointer(p)` on a pointer PARAMETER renders the box, never a deref
 A pointer parameter is emitted as the box `ж<T> Ꮡp` plus a deref'd VALUE alias
 (`ref var p = ref Ꮡp.DerefOrNull()`; the strict `ref Ꮡp.Value` when this rule was written). Taking its address through

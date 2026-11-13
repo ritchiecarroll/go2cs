@@ -430,6 +430,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [`unsafe.Slice` over MANAGED element storage ALIASES it](pointers.md#unsafeslice-over-managed-element-storage-aliases-it)
   - [A reinterpret of a MANAGED pointer aliases the box — it never round-trips through the address](pointers.md#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address)
   - [A pointer-cast slice with a LOW bound offsets the span](pointers.md#a-pointer-cast-slice-with-a-low-bound-offsets-the-span)
+  - [A store through an EXPLICIT dereference of a pointer conversion reaches the pointee](pointers.md#a-store-through-an-explicit-dereference-of-a-pointer-conversion-reaches-the-pointee)
   - [`unsafe.Pointer(p)` on a pointer PARAMETER renders the box, never a deref](pointers.md#unsafepointerp-on-a-pointer-parameter-renders-the-box-never-a-deref)
   - [A reference-type-pointee pointer parameter uses the nil-check-free `.ValueSlot` deref alias](pointers.md#a-reference-type-pointee-pointer-parameter-uses-the-nil-check-free-valueslot-deref-alias)
   - [A pointer-element composite literal takes the box for a deref-aliased ident](pointers.md#a-pointer-element-composite-literal-takes-the-box-for-a-deref-aliased-ident)
