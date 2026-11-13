@@ -1727,6 +1727,29 @@ func (v *Visitor) exprHasReceiverBoxInScope(expr ast.Expr) bool {
 	return v.exprIsDerefdPointerParam(expr) || v.exprIsCurrentDirectBoxReceiver(expr)
 }
 
+// exprIsReceiverOrDerefdPointerParam reports whether expr is the current method's receiver, matched
+// by OBJECT identity, or a pointer parameter (exprIsDerefdPointerParam): the two names a method body
+// renders as the pointed-to value (`ref var h = ref Ꮡh.DerefOrNull()`), whose `ref` is therefore the
+// pointee's storage. It differs from exprIsDerefAliasedPointer below in one way: it accepts a receiver
+// whose C# name was RENAMED (`Δp`, when the Go name is also a type and a method in the package, as
+// `p` is in runtime) — the alias is the same value alias under another name. A pointer LOCAL holds
+// the box itself and answers false.
+func (v *Visitor) exprIsReceiverOrDerefdPointerParam(expr ast.Expr) bool {
+	if v.exprIsDerefdPointerParam(expr) {
+		return true
+	}
+
+	ident, ok := expr.(*ast.Ident)
+
+	if !ok || v.currentFuncSignature == nil {
+		return false
+	}
+
+	recv := v.currentFuncSignature.Recv()
+
+	return recv != nil && v.info.ObjectOf(ident) == recv
+}
+
 // exprIsDerefAliasedPointer reports whether expr is a bare identifier that is a deref-aliased
 // pointer — a pointer PARAMETER or a pointer RECEIVER, both emitted as the pointed-to value
 // (`ref T x`), not the box itself. A pointer LOCAL, by contrast, holds the box directly. Callers

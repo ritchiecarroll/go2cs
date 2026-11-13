@@ -1,0 +1,1 @@
+archive/tar,archive/zip,bufio,bytes,cmp,compress/bzip2,compress/flate,compress/gzip,compress/lzw,compress/zlib,container/heap,container/list,container/ring,context,crypto,crypto/aes,crypto/cipher,crypto/des,crypto/dsa,crypto/ecdh

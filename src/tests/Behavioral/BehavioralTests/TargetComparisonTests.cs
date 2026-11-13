@@ -2731,6 +2731,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUnsafePointerPrint() => CheckTarget("UnsafePointerPrint");
 
     [TestMethod]
+    public void CheckUnsafePointerReceiverCopy() => CheckTarget("UnsafePointerReceiverCopy");
+
+    [TestMethod]
     public void CheckUnsafePointerReinterpret() => CheckTarget("UnsafePointerReinterpret");
 
     [TestMethod]
