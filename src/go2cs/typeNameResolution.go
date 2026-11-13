@@ -570,6 +570,17 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 			plainPkgPrefix = pkg.Name() + "."
 			foreignPathPrefix = pkg.Path() + "."
 		}
+	} else if alias, ok := t.(*types.Alias); ok {
+		// Another package's ALIAS reaching here (one whose target is not a foreign defined type: an anonymous
+		// struct, a basic type) carries its import PATH too, and the slash-strip below would leave the path's
+		// last segment as its qualifier. That is the package NAME only when the two agree: modernc.org/sqlite/lib
+		// declares `package sqlite3`, so `lib.Sqlite3_int64` named a package this file never imported (CS0246,
+		// sqlite-cs S19). Reduce the path to the name, as the defined-type arm above does; where they agree the
+		// result is what the strip produced.
+		if pkg := alias.Obj().Pkg(); pkg != nil && pkg != v.pkg {
+			plainPkgPrefix = pkg.Name() + "."
+			foreignPathPrefix = pkg.Path() + "."
+		}
 	}
 
 	// A NON-EMPTY anonymous struct/interface reaching this fallback was lifted by its
@@ -836,6 +847,15 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 	}
 
 	typeName = strings.ReplaceAll(typeName, packagePathPrefix, packagePathReplacement)
+
+	// Another package's alias carries its import PATH; reduce it to the package NAME before the strip below, which
+	// would keep the path's last segment (`lib.Tdb` for modernc.org/sqlite/lib's `package sqlite3`, sqlite-cs S19;
+	// see the getAliasQualifiedTypeName twin). Where the two agree the result is what the strip produced.
+	if alias, ok := t.(*types.Alias); ok {
+		if pkg := alias.Obj().Pkg(); pkg != nil && pkg != v.pkg && strings.HasPrefix(typeName, pkg.Path()+".") {
+			typeName = pkg.Name() + "." + typeName[len(pkg.Path())+1:]
+		}
+	}
 
 	// Skip the cross-package last-segment strip for composite/func type strings whose slashes are
 	// internal (e.g. `func(go2cs/x/sub.Record)`); they are converted structurally downstream.
@@ -1168,6 +1188,23 @@ func (v *Visitor) getCSharpTypeName(t types.Type) string {
 	}
 
 	return convertToCSTypeName(v.getAliasQualifiedTypeName(t, false))
+}
+
+// isForeignAliasOfNamed reports whether t is an alias declared in ANOTHER package whose target is a defined type
+// (modernc.org/libc's `stdio.FILE`, `type FILE = X_iobuf`, sqlite-cs S12). Such an alias is a name for a
+// defined type, spelled through the importer's alias table, so the paths that keep a defined type's spelling and
+// lift every other struct by expression must not treat it as anonymous: lifted, it was written by its raw Go name
+// (`.at<stdio.FILE>`, CS0426). A same-package alias resolves through its own `global using` and keeps its form.
+func (v *Visitor) isForeignAliasOfNamed(t types.Type) bool {
+	alias, ok := t.(*types.Alias)
+
+	if !ok || alias.Obj().Pkg() == nil || alias.Obj().Pkg() == v.pkg {
+		return false
+	}
+
+	_, isNamed := types.Unalias(alias).(*types.Named)
+
+	return isNamed
 }
 
 // foreignAliasedTypeName resolves a cross-package type that is RENAMED (or Go-aliased) inside

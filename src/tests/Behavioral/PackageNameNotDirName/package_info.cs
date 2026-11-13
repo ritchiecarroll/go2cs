@@ -10,8 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using libꓸSqlite3_int64 = long;
-global using libꓸTdb = go.PackageNameNotDirName.lib.sqlite3_package.Tdbᴛ1;
+global using sqlite3ꓸSqlite3_int64 = long;
+global using sqlite3ꓸTdb = go.PackageNameNotDirName.lib.sqlite3_package.Tdbᴛ1;
 // </ImportedTypeAliases>
 
 using go;
@@ -45,7 +45,7 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: GoFieldAccess(typeof(libꓸTdb))]
+[assembly: GoFieldAccess(typeof(sqlite3ꓸTdb))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

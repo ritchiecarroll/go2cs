@@ -13,7 +13,7 @@ public static ref array<stdioꓸFILE> X_iob => ref ((StaticBox<array<stdioꓸFIL
 internal static void main() {
     var m = new map<uintptr, int32>{};
     foreach (var i in range(len(X_iob))) {
-        m[(uintptr)ᏑX_iob.at<stdio.FILE>(i)] = (int32)i;
+        m[(uintptr)ᏑX_iob.at<stdioꓸFILE>(i)] = (int32)i;
     }
     X_iob[1].Fcnt = 4;
     fmt.Println(len(m), X_iob[1].Fcnt, /* unsafe.Sizeof(X_iob[0]) */ (uintptr)16);
