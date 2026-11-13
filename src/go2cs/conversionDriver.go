@@ -672,9 +672,15 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 							} else {
 								showWarning("visit file error: %v in \"%s\"", r, filepath.Base(fileEntry.filePath))
 							}
+
+							recordDroppedFile(fileEntry.filePath, r, fileEntry.manualConversion)
 						}
 					}
 				}()
+
+				if visitFileFaultHook != nil {
+					visitFileFaultHook(fileEntry.filePath)
+				}
 
 				visitor := newFileVisitor(fset, packageTypes, info, options, globalIdentNames, globalScope, needsNoInlining, fileEntry)
 
@@ -890,6 +896,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// Riding the existing error return is deliberate: main.go already turns it into a nonzero
 		// exit, so no new call site can forget to check the gate.
 		if err := unresolvedDynamicTypeError(); err != nil {
+			return err
+		}
+
+		// The same for a file the converter failed on (droppedFiles.go): its tests or production code is missing
+		// from what the build step would compile.
+		if err := droppedFileError(); err != nil {
 			return err
 		}
 	}

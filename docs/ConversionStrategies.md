@@ -13132,9 +13132,11 @@ The project as a whole does not build until those lines are fixed. Everything el
 converted correctly. The fix belongs in the Go source or its build setup, followed by a fresh
 conversion.
 
-**A converter fault stays inside one file.** If the converter itself fails while converting a file, it
-skips that file. It prints a warning such as `WARNING: visit file error: <fault> in "main.go"`. The
-package's other files still convert.
+**A converter fault stays inside one file, and fails the run.** If the converter itself fails while
+converting a file, it skips that file. It prints a warning such as
+`WARNING: visit file error: <fault> in "main.go"` and a `GO2CS2008` error naming the file. The package's
+other files still convert and are written. The run then ends with an error that names every skipped
+file, so a missing file is never mistaken for a finished conversion.
 
 **A failed package stays inside a `-recurse` run.** A package that cannot be loaded at all, or whose
 conversion fails, is recorded as failed. The next package then proceeds. At the end, the run names any
