@@ -152,7 +152,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// an import "C" source stays out.
 		if cgoOfflineTrees {
 			cfg.Env = append(cfg.Env, "CGO_ENABLED=0")
-			cfg.BuildFlags = append(cfg.BuildFlags, "-tags=cgo")
+			cfg.BuildFlags = cgoOfflineBuildFlags(options)
 			cfg.Overlay = map[string][]byte{
 				filepath.Join(options.goRoot, "src", "runtime", "cgo", "go2cs_incomplete.go"): []byte(cgoIncompleteOverlay),
 			}
@@ -413,12 +413,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// and on a real host its file is a build-cache name with no .go suffix, which the
 				// file-name check refuses, so the re-check would drop every one of them silently.
 				if pair.output == "" && !pair.bindings {
-					// A plain file of a cgo package was selected by a cgo-on load, so the re-check carries the
-					// cgo tag, as refuseCgoOnlyPackage's does: without it a file under //go:build cgo is dropped
-					// here with exit 0, and every reference to what it declares dangles.
+					// A plain file a cgo-on load selected was selected under the cgo tag, so the re-check carries it:
+					// without it a file under //go:build cgo is dropped here with exit 0, and what it declares dangles.
+					// The key is the LOAD (cgoOnLoad), not the route: a package with no import "C" has such files too.
 					tags := options.buildTags
 
-					if route != nil {
+					if cgoOnLoad(options, cfg.Env) {
 						tags = append(append([]string{}, options.buildTags...), "cgo")
 					}
 
