@@ -357,6 +357,7 @@
     <Project Path="tests/Behavioral/ByteTableStringConst/ByteTableStringConst.csproj" />
     <Project Path="tests/Behavioral/ByteTableStringVar/ByteTableStringVar.csproj" />
     <Project Path="tests/Behavioral/ArrayCastDerefClone/ArrayCastDerefClone.csproj" />
+    <Project Path="tests/Behavioral/ArrayLiteralBuiltin/ArrayLiteralBuiltin.csproj" />
     <Project Path="tests/Behavioral/ArrayLiteralDeclaredLength/ArrayLiteralDeclaredLength.csproj" />
     <Project Path="tests/Behavioral/ArrayOfCrossPackageType/ArrayOfCrossPackageType.csproj" />
     <Project Path="tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />
