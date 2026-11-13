@@ -1,0 +1,234 @@
+OPTIN crypto/des: the opt-in admits 2; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/internal/fips140/aes: the opt-in admits 6; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/internal/fips140/aes/gcm: the opt-in admits 6; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/internal/fips140/drbg: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/internal/fips140/ed25519: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/internal/fips140/edwards25519: the opt-in admits 4; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/internal/fips140/mlkem: the opt-in admits 2; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/internal/fips140/nistec: the opt-in admits 2; auto admits 1 of them; auto admits 0 the opt-in does not
+OPTIN crypto/internal/fips140/nistec/fiat: the opt-in admits 4; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/internal/fips140/sha256: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/internal/fips140/sha3: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/internal/fips140/sha512: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/md5: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/rc4: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/sha1: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN crypto/sha3: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN debug/elf: the opt-in admits 2; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN debug/macho: the opt-in admits 4; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN debug/pe: the opt-in admits 5; auto admits 2 of them; auto admits 0 the opt-in does not
+OPTIN encoding/base32: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN encoding/base64: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN image/jpeg: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN internal/abi: the opt-in admits 2; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN internal/chacha8rand: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN internal/coverage: the opt-in admits 4; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN internal/cpu: the opt-in admits 9; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN internal/runtime/gc/internal/gen: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN internal/runtime/syscall/linux: the opt-in admits 2; auto admits 2 of them; auto admits 0 the opt-in does not
+OPTIN internal/strconv: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN internal/syscall/unix: the opt-in admits 1; auto admits 1 of them; auto admits 0 the opt-in does not
+OPTIN internal/trace: the opt-in admits 2; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN internal/trace/internal/tracev1: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN internal/xcoff: the opt-in admits 7; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN internal/zstd: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN math/rand/v2: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN net/http: the opt-in admits 2; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN net/http/fcgi: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN os/signal: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN runtime: the opt-in admits 42; auto admits 25 of them; auto admits 0 the opt-in does not
+OPTIN syscall: the opt-in admits 32; auto admits 22 of them; auto admits 0 the opt-in does not
+OPTIN unicode: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN vendor/golang.org/x/crypto/chacha20: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN vendor/golang.org/x/crypto/chacha20poly1305: the opt-in admits 2; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN vendor/golang.org/x/crypto/internal/poly1305: the opt-in admits 4; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN vendor/golang.org/x/net/dns/dnsmessage: the opt-in admits 11; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN vendor/golang.org/x/sys/cpu: the opt-in admits 9; auto admits 0 of them; auto admits 0 the opt-in does not
+OPTIN vendor/golang.org/x/text/unicode/bidi: the opt-in admits 1; auto admits 0 of them; auto admits 0 the opt-in does not
+  MIXED pair (one side admitted, the other not): $GOROOT/src/runtime/mgcmark.go:1058:12 runtime.workbuf <- runtime.stackObjectBuf
+  MIXED pair (one side admitted, the other not): $GOROOT/src/runtime/mgcstack.go:213:9 runtime.stackWorkBuf <- runtime.workbuf
+  MIXED pair (one side admitted, the other not): $GOROOT/src/runtime/mgcstack.go:222:10 runtime.stackWorkBuf <- runtime.workbuf
+  MIXED pair (one side admitted, the other not): $GOROOT/src/runtime/mgcstack.go:247:14 runtime.workbuf <- runtime.stackWorkBuf
+  MIXED pair (one side admitted, the other not): $GOROOT/src/runtime/mgcstack.go:263:12 runtime.workbuf <- runtime.stackWorkBuf
+  MIXED pair (one side admitted, the other not): $GOROOT/src/runtime/mgcstack.go:274:7 runtime.stackObjectBuf <- runtime.workbuf
+  MIXED pair (one side admitted, the other not): $GOROOT/src/runtime/mgcstack.go:284:8 runtime.stackObjectBuf <- runtime.workbuf
+PAIRS (*T)(unsafe.Pointer(&x)) chains in non-test files: 460; both sides need inline storage and both admitted 10, both not admitted 1, MIXED 7; only one side holds an array 18 (that side admitted in 13)
+AUTO crypto/internal/fips140/nistec: needs-inline 1; converted whole in its own non-test files 1 (admitted 1, managed 0, over the caps 0); converted only in another package's non-test files 0; only in test files 0
+AUTO debug/pe: needs-inline 2; converted whole in its own non-test files 2 (admitted 2, managed 0, over the caps 0); converted only in another package's non-test files 0; only in test files 0
+AUTO internal/abi: needs-inline 3; converted whole in its own non-test files 0 (admitted 0, managed 0, over the caps 0); converted only in another package's non-test files 3; only in test files 0
+AUTO internal/chacha8rand: needs-inline 1; converted whole in its own non-test files 0 (admitted 0, managed 0, over the caps 0); converted only in another package's non-test files 1; only in test files 0
+AUTO internal/cpu: needs-inline 1; converted whole in its own non-test files 0 (admitted 0, managed 0, over the caps 0); converted only in another package's non-test files 1; only in test files 0
+AUTO internal/runtime/syscall/linux: needs-inline 2; converted whole in its own non-test files 2 (admitted 2, managed 0, over the caps 0); converted only in another package's non-test files 0; only in test files 0
+AUTO internal/syscall/unix: needs-inline 1; converted whole in its own non-test files 1 (admitted 1, managed 0, over the caps 0); converted only in another package's non-test files 0; only in test files 0
+AUTO reflect: needs-inline 3; converted whole in its own non-test files 3 (admitted 0, managed 3, over the caps 0); converted only in another package's non-test files 0; only in test files 0
+AUTO runtime: needs-inline 67; converted whole in its own non-test files 60 (admitted 25, managed 32, over the caps 3); converted only in another package's non-test files 0; only in test files 7
+AUTO sync: needs-inline 3; converted whole in its own non-test files 3 (admitted 0, managed 3, over the caps 0); converted only in another package's non-test files 0; only in test files 0
+AUTO sync/atomic: needs-inline 2; converted whole in its own non-test files 0 (admitted 0, managed 0, over the caps 0); converted only in another package's non-test files 1; only in test files 1
+AUTO syscall: needs-inline 24; converted whole in its own non-test files 24 (admitted 22, managed 2, over the caps 0); converted only in another package's non-test files 0; only in test files 0
+AUTO TOTAL over 12 declaring packages: needs-inline 110; own-package 96 (admitted 53, managed 40, over the caps 3); other-package only 6; test only 8
+AUTO blind spots: conversions whose target holds a type parameter 92 (84 in non-test files); reflect.NewAt calls 0
+  generic: $GOROOT/src/internal/abi/escape.go:64:10 T
+  generic: $GOROOT/src/internal/abi/escape.go:64:24 T
+  generic: $GOROOT/src/internal/runtime/atomic/types.go:526:9 T
+  generic: $GOROOT/src/internal/runtime/atomic/types.go:539:16 T
+  generic: $GOROOT/src/internal/runtime/atomic/types.go:546:12 T
+  generic: $GOROOT/src/internal/runtime/atomic/types.go:562:32 T
+  other-package only: internal/abi.ITab <- runtime
+  other-package only: internal/abi.InterfaceSwitchCache <- runtime
+  other-package only: internal/abi.TypeAssertCache <- runtime
+  other-package only: internal/chacha8rand.State <- runtime
+  other-package only: internal/cpu.CacheLinePad <- runtime
+  other-package only: sync/atomic.Pointer[sync.poolChainElt] <- sync
+  own-package but not admissible: caps     runtime.checkmarksMap
+  own-package but not admissible: caps     runtime.debugLogBuf
+  own-package but not admissible: caps     runtime.wbBuf
+  own-package but not admissible: managed  anon:struct{len int; buf [128]*runtime.mspan}
+  own-package but not admissible: managed  anon:struct{mcentral runtime.mcentral; pad [24]byte}
+  own-package but not admissible: managed  reflect.makeFuncCtxt
+  own-package but not admissible: managed  reflect.makeFuncImpl
+  own-package but not admissible: managed  reflect.methodValue
+  own-package but not admissible: managed  runtime.cleanupBlock
+  own-package but not admissible: managed  runtime.debugLogWriter
+  own-package but not admissible: managed  runtime.dloggerImpl
+  own-package but not admissible: managed  runtime.finBlock
+  own-package but not admissible: managed  runtime.g
+  own-package but not admissible: managed  runtime.gcBitsArena
+  own-package but not admissible: managed  runtime.gcWork
+  own-package but not admissible: managed  runtime.heapArena
+  own-package but not admissible: managed  runtime.immortalWeakHandle
+  own-package but not admissible: managed  runtime.itabTableType
+  own-package but not admissible: managed  runtime.m
+  own-package but not admissible: managed  runtime.mTraceState
+  own-package but not admissible: managed  runtime.mcache
+  own-package but not admissible: managed  runtime.mcentral
+  own-package but not admissible: managed  runtime.mcontext
+  own-package but not admissible: managed  runtime.mheap
+  own-package but not admissible: managed  runtime.p
+  own-package but not admissible: managed  runtime.pageAlloc
+  own-package but not admissible: managed  runtime.sigcontext
+  own-package but not admissible: managed  runtime.spanQueue
+  own-package but not admissible: managed  runtime.spanSetBlock
+  own-package but not admissible: managed  runtime.stackObjectBuf
+  own-package but not admissible: managed  runtime.stackWorkBuf
+  own-package but not admissible: managed  runtime.stackt
+  own-package but not admissible: managed  runtime.traceBuf
+  own-package but not admissible: managed  runtime.traceMapNode
+  own-package but not admissible: managed  runtime.traceRegionAllocBlock
+  own-package but not admissible: managed  runtime.typeCacheBucket
+  own-package but not admissible: managed  runtime.ucontext
+  own-package but not admissible: managed  runtime.xRegPerP
+  own-package but not admissible: managed  sync.poolChain
+  own-package but not admissible: managed  sync.poolLocal
+  own-package but not admissible: managed  sync.poolLocalInternal
+  own-package but not admissible: managed  syscall.Msghdr
+  own-package but not admissible: managed  syscall.SockFprog
+  row: anon:struct{SizeOfOpaqueState uint32; MmapProt uint32; MmapFlags uint32; reserved [13]uint32}	decl=runtime	anon=true	direct-array=true	top=true	size=64	converted-in=runtime
+  row: anon:struct{len int; buf [128]*runtime.mspan}	decl=runtime	anon=true	direct-array=true	top=false	size=1032	converted-in=runtime
+  row: anon:struct{mcentral runtime.mcentral; pad [24]byte}	decl=runtime	anon=true	direct-array=true	top=false	size=192	converted-in=runtime
+  row: crypto/internal/fips140/nistec.p256AffinePoint	decl=crypto/internal/fips140/nistec	anon=false	direct-array=true	top=false	size=64	converted-in=crypto/internal/fips140/nistec
+  row: debug/pe.COFFSymbol	decl=debug/pe	anon=false	direct-array=true	top=true	size=20	converted-in=debug/pe
+  row: debug/pe.COFFSymbolAuxFormat5	decl=debug/pe	anon=false	direct-array=true	top=true	size=20	converted-in=debug/pe
+  row: internal/abi.ITab	decl=internal/abi	anon=false	direct-array=true	top=true	size=32	converted-in=runtime
+  row: internal/abi.InterfaceSwitchCache	decl=internal/abi	anon=false	direct-array=true	top=true	size=32	converted-in=runtime
+  row: internal/abi.TypeAssertCache	decl=internal/abi	anon=false	direct-array=true	top=true	size=24	converted-in=runtime
+  row: internal/chacha8rand.State	decl=internal/chacha8rand	anon=false	direct-array=true	top=false	size=304	converted-in=runtime
+  row: internal/cpu.CacheLinePad	decl=internal/cpu	anon=false	direct-array=true	top=false	size=64	converted-in=runtime
+  row: internal/runtime/syscall/linux.EpollEvent	decl=internal/runtime/syscall/linux	anon=false	direct-array=true	top=true	size=12	converted-in=internal/runtime/syscall/linux
+  row: internal/runtime/syscall/linux.Utsname	decl=internal/runtime/syscall/linux	anon=false	direct-array=true	top=true	size=390	converted-in=internal/runtime/syscall/linux
+  row: internal/syscall/unix.SiginfoChild	decl=internal/syscall/unix	anon=false	direct-array=true	top=true	size=128	converted-in=internal/syscall/unix
+  row: reflect.makeFuncCtxt	decl=reflect	anon=false	direct-array=true	top=false	size=32	converted-in=reflect
+  row: reflect.makeFuncImpl	decl=reflect	anon=false	direct-array=false	top=true	size=48	converted-in=reflect
+  row: reflect.methodValue	decl=reflect	anon=false	direct-array=false	top=true	size=64	converted-in=reflect
+  row: runtime._func	decl=runtime	anon=false	direct-array=true	top=true	size=44	converted-in=runtime
+  row: runtime.checkmarksMap	decl=runtime	anon=false	direct-array=true	top=true	size=1048576	converted-in=runtime
+  row: runtime.cleanupBlock	decl=runtime	anon=false	direct-array=true	top=true	size=512	converted-in=runtime
+  row: runtime.consistentHeapStats	decl=runtime	anon=false	direct-array=true	top=false	size=3520	converted-in=
+  row: runtime.debugLogBuf	decl=runtime	anon=false	direct-array=true	top=false	size=16384	converted-in=runtime
+  row: runtime.debugLogWriter	decl=runtime	anon=false	direct-array=true	top=false	size=16464	converted-in=runtime
+  row: runtime.dloggerImpl	decl=runtime	anon=false	direct-array=false	top=true	size=16480	converted-in=runtime
+  row: runtime.elfEhdr	decl=runtime	anon=false	direct-array=true	top=true	size=64	converted-in=runtime
+  row: runtime.finBlock	decl=runtime	anon=false	direct-array=true	top=true	size=4064	converted-in=runtime
+  row: runtime.findfuncbucket	decl=runtime	anon=false	direct-array=true	top=true	size=20	converted-in=runtime
+  row: runtime.fpstate	decl=runtime	anon=false	direct-array=true	top=false	size=512	converted-in=runtime
+  row: runtime.fpstate1	decl=runtime	anon=false	direct-array=true	top=true	size=512	converted-in=runtime
+  row: runtime.fpxreg	decl=runtime	anon=false	direct-array=true	top=false	size=16	converted-in=runtime
+  row: runtime.fpxreg1	decl=runtime	anon=false	direct-array=true	top=false	size=16	converted-in=runtime
+  row: runtime.g	decl=runtime	anon=false	direct-array=false	top=true	size=456	converted-in=runtime
+  row: runtime.gTraceState	decl=runtime	anon=false	direct-array=false	top=false	size=32	converted-in=runtime
+  row: runtime.gcBitsArena	decl=runtime	anon=false	direct-array=true	top=true	size=65536	converted-in=runtime
+  row: runtime.gcControllerState	decl=runtime	anon=false	direct-array=true	top=true	size=392	converted-in=
+  row: runtime.gcWork	decl=runtime	anon=false	direct-array=true	top=false	size=4856	converted-in=runtime
+  row: runtime.heapArena	decl=runtime	anon=false	direct-array=true	top=true	size=69648	converted-in=runtime
+  row: runtime.heapStatsDelta	decl=runtime	anon=false	direct-array=true	top=false	size=1168	converted-in=
+  row: runtime.immortalWeakHandle	decl=runtime	anon=false	direct-array=true	top=true	size=24	converted-in=runtime
+  row: runtime.inlinedCall	decl=runtime	anon=false	direct-array=true	top=false	size=16	converted-in=runtime
+  row: runtime.itabTableType	decl=runtime	anon=false	direct-array=true	top=true	size=4112	converted-in=runtime
+  row: runtime.m	decl=runtime	anon=false	direct-array=true	top=true	size=1824	converted-in=runtime
+  row: runtime.mTraceState	decl=runtime	anon=false	direct-array=true	top=false	size=72	converted-in=runtime
+  row: runtime.mcache	decl=runtime	anon=false	direct-array=true	top=true	size=2296	converted-in=runtime
+  row: runtime.mcentral	decl=runtime	anon=false	direct-array=true	top=false	size=168	converted-in=runtime
+  row: runtime.mcontext	decl=runtime	anon=false	direct-array=true	top=true	size=256	converted-in=runtime
+  row: runtime.memRecord	decl=runtime	anon=false	direct-array=true	top=true	size=128	converted-in=runtime
+  row: runtime.mheap	decl=runtime	anon=false	direct-array=true	top=true	size=93464	converted-in=runtime
+  row: runtime.mstats	decl=runtime	anon=false	direct-array=true	top=true	size=10440	converted-in=
+  row: runtime.p	decl=runtime	anon=false	direct-array=true	top=true	size=15920	converted-in=runtime
+  row: runtime.pTraceState	decl=runtime	anon=false	direct-array=false	top=false	size=64	converted-in=runtime
+  row: runtime.pageAlloc	decl=runtime	anon=false	direct-array=true	top=false	size=65848	converted-in=runtime
+  row: runtime.pallocData	decl=runtime	anon=false	direct-array=true	top=false	size=128	converted-in=runtime
+  row: runtime.pcvalueCache	decl=runtime	anon=false	direct-array=true	top=false	size=392	converted-in=runtime
+  row: runtime.schedt	decl=runtime	anon=false	direct-array=false	top=true	size=6872	converted-in=
+  row: runtime.sigcontext	decl=runtime	anon=false	direct-array=true	top=true	size=256	converted-in=runtime
+  row: runtime.siginfo	decl=runtime	anon=false	direct-array=true	top=true	size=128	converted-in=runtime
+  row: runtime.spanInlineMarkBits	decl=runtime	anon=false	direct-array=true	top=true	size=128	converted-in=runtime
+  row: runtime.spanQueue	decl=runtime	anon=false	direct-array=true	top=false	size=2080	converted-in=runtime
+  row: runtime.spanSetBlock	decl=runtime	anon=false	direct-array=true	top=true	size=4608	converted-in=runtime
+  row: runtime.spanSetBlockHeader2	decl=runtime	anon=false	direct-array=true	top=false	size=512	converted-in=runtime
+  row: runtime.stackObjectBuf	decl=runtime	anon=false	direct-array=true	top=true	size=2048	converted-in=runtime
+  row: runtime.stackWorkBuf	decl=runtime	anon=false	direct-array=true	top=true	size=2048	converted-in=runtime
+  row: runtime.stackmap	decl=runtime	anon=false	direct-array=true	top=true	size=12	converted-in=runtime
+  row: runtime.stackt	decl=runtime	anon=false	direct-array=true	top=false	size=24	converted-in=runtime
+  row: runtime.timeHistogram	decl=runtime	anon=false	direct-array=true	top=false	size=1296	converted-in=
+  row: runtime.traceBuf	decl=runtime	anon=false	direct-array=true	top=true	size=65536	converted-in=runtime
+  row: runtime.traceMapNode	decl=runtime	anon=false	direct-array=true	top=true	size=72	converted-in=runtime
+  row: runtime.traceRegionAllocBlock	decl=runtime	anon=false	direct-array=true	top=true	size=65536	converted-in=runtime
+  row: runtime.traceSchedResourceState	decl=runtime	anon=false	direct-array=true	top=false	size=32	converted-in=runtime
+  row: runtime.typeCacheBucket	decl=runtime	anon=false	direct-array=true	top=false	size=32	converted-in=runtime
+  row: runtime.ucontext	decl=runtime	anon=false	direct-array=false	top=true	size=936	converted-in=runtime
+  row: runtime.usigset	decl=runtime	anon=false	direct-array=true	top=false	size=128	converted-in=runtime
+  row: runtime.wbBuf	decl=runtime	anon=false	direct-array=true	top=false	size=4112	converted-in=runtime
+  row: runtime.workType	decl=runtime	anon=false	direct-array=false	top=true	size=816	converted-in=
+  row: runtime.workbuf	decl=runtime	anon=false	direct-array=true	top=true	size=2048	converted-in=runtime
+  row: runtime.xRegPerP	decl=runtime	anon=false	direct-array=false	top=false	size=2120	converted-in=runtime
+  row: runtime.xRegState	decl=runtime	anon=false	direct-array=false	top=true	size=2112	converted-in=runtime
+  row: runtime.xRegs	decl=runtime	anon=false	direct-array=true	top=false	size=2112	converted-in=runtime
+  row: runtime.xmmreg	decl=runtime	anon=false	direct-array=true	top=false	size=16	converted-in=runtime
+  row: runtime.xmmreg1	decl=runtime	anon=false	direct-array=true	top=false	size=16	converted-in=runtime
+  row: sync.poolChain	decl=sync	anon=false	direct-array=false	top=false	size=16	converted-in=sync
+  row: sync.poolLocal	decl=sync	anon=false	direct-array=true	top=true	size=128	converted-in=sync
+  row: sync.poolLocalInternal	decl=sync	anon=false	direct-array=false	top=false	size=32	converted-in=sync
+  row: sync/atomic.Pointer[byte]	decl=sync/atomic	anon=false	direct-array=true	top=true	size=8	converted-in=
+  row: sync/atomic.Pointer[sync.poolChainElt]	decl=sync/atomic	anon=false	direct-array=true	top=false	size=8	converted-in=sync
+  row: syscall.FdSet	decl=syscall	anon=false	direct-array=true	top=true	size=128	converted-in=syscall
+  row: syscall.Flock_t	decl=syscall	anon=false	direct-array=true	top=true	size=32	converted-in=syscall
+  row: syscall.Fsid	decl=syscall	anon=false	direct-array=true	top=false	size=8	converted-in=syscall
+  row: syscall.ICMPv6Filter	decl=syscall	anon=false	direct-array=true	top=true	size=32	converted-in=syscall
+  row: syscall.IPMreq	decl=syscall	anon=false	direct-array=true	top=true	size=8	converted-in=syscall
+  row: syscall.IPMreqn	decl=syscall	anon=false	direct-array=true	top=true	size=12	converted-in=syscall
+  row: syscall.IPv6MTUInfo	decl=syscall	anon=false	direct-array=false	top=true	size=32	converted-in=syscall
+  row: syscall.IPv6Mreq	decl=syscall	anon=false	direct-array=true	top=true	size=20	converted-in=syscall
+  row: syscall.Msghdr	decl=syscall	anon=false	direct-array=true	top=true	size=56	converted-in=syscall
+  row: syscall.RawSockaddr	decl=syscall	anon=false	direct-array=true	top=false	size=16	converted-in=syscall
+  row: syscall.RawSockaddrAny	decl=syscall	anon=false	direct-array=true	top=true	size=112	converted-in=syscall
+  row: syscall.RawSockaddrInet4	decl=syscall	anon=false	direct-array=true	top=true	size=16	converted-in=syscall
+  row: syscall.RawSockaddrInet6	decl=syscall	anon=false	direct-array=true	top=true	size=28	converted-in=syscall
+  row: syscall.RawSockaddrLinklayer	decl=syscall	anon=false	direct-array=true	top=true	size=20	converted-in=syscall
+  row: syscall.RawSockaddrUnix	decl=syscall	anon=false	direct-array=true	top=true	size=110	converted-in=syscall
+  row: syscall.SockFprog	decl=syscall	anon=false	direct-array=true	top=true	size=16	converted-in=syscall
+  row: syscall.Stat_t	decl=syscall	anon=false	direct-array=true	top=true	size=144	converted-in=internal/syscall/unix,syscall
+  row: syscall.Statfs_t	decl=syscall	anon=false	direct-array=true	top=true	size=120	converted-in=syscall
+  row: syscall.Sysinfo_t	decl=syscall	anon=false	direct-array=true	top=true	size=112	converted-in=syscall
+  row: syscall.Timex	decl=syscall	anon=false	direct-array=true	top=true	size=208	converted-in=syscall
+  row: syscall.Ustat_t	decl=syscall	anon=false	direct-array=true	top=true	size=32	converted-in=syscall
+  row: syscall.Utsname	decl=syscall	anon=false	direct-array=true	top=true	size=390	converted-in=syscall
+  row: syscall.iflags	decl=syscall	anon=false	direct-array=true	top=true	size=18	converted-in=syscall
+  row: syscall.sigInfo	decl=syscall	anon=false	direct-array=true	top=true	size=128	converted-in=syscall
