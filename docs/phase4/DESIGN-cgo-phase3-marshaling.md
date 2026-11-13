@@ -957,3 +957,186 @@ live pinned range), on its own, with its predictions and its allocation-meter qu
 which opens with section 13.4's first rule.
 
 — H (2026-11-13)
+
+## 17. Proposal 2026-11-13: a golib seat that closes the number residue of 16.9 (design only, no code)
+
+**Status: PROPOSED.** COORD rules it together with the findings of the review of 3.1 (`80e8b3c7d8`). It is condition
+3 of ruling C. It is its own seat, after 3.1 lands. Nothing here is built.
+
+### 17.1 What is open
+
+3.1's door tells a bare number that is Go memory from C memory by an EXACT lookup in the pin and token registry.
+Two things get past it (16.9):
+
+- **A number whose pin was never registered.** Two pin moments register nothing: the pinned reinterpret
+  (`ElemRefBox.TryPinnedReinterpret`) and a native box built over a pinned buffer. Those are the four hand-overs the
+  arm holds open.
+- **An interior number.** A registered address plus an offset is not a key, for every kind of pin.
+
+### 17.2 What was read in golib before this was written
+
+- **Every number leaves a box through one exit:** the box-to-`uintptr` operator, and its `void *` twin. The bare
+  mint takes the same route (`Pointer(box)` asks `StableAddress`, which is that operator). The exit has four arms.
+  Three register what they hand out: the fixed array's data, the order token, the pinned value slot. The FIRST arm
+  answers a native box's own address and registers nothing. Both open crossings leave through that arm.
+- **The pinned reinterpret holds the WHOLE backing array still**, not the one element: it pins the array and mints a
+  native box over the element's address, holding the pin and its source.
+- **An entry is one weak reference, keyed by the exact address.** A read validates it: the box is alive, and its
+  current token is the number or it is still pinned there. A native box's token is its address, so an entry for a
+  pin-holding native box validates with no new arm. To be confirmed by the red, not assumed.
+- **A token plus an offset is refused today,** by the tag (`IsTaggedToken` reads the tag alone). Interior numbers are
+  open for pinned storage only.
+- **Costs the registry already measured** (its own remarks): about 163 bytes per distinct registration and about 0
+  for a repeat; 0.19 to 0.21 microseconds per fresh registration; the heaviest pin row on the roster (`crypto/tls`,
+  47.5 thousand pins) holds about 500 resident entries.
+- **`PinnedBuffer`** is constructed at 5 sites in golib and through `PinOnly` at 2, and is named by 3 hand-owned
+  files outside golib (two of windows' syscall files, and `unsafe`). No converted package can name it.
+
+### 17.3 The design, in three parts
+
+**Part 1: register the two unregistered numbers.** Two placements close the same four hand-overs.
+
+| | 1-EXIT (H's lean) | 1-PIN (condition 3 as worded) |
+|---|---|---|
+| Where | the exit's native arm: a native box that HOLDS A PIN (`PinsManagedStorage`) registers its address as it is handed out, and only where the exact read misses, so a live entry is never displaced | `TryPinnedReinterpret`, as it mints its box, and `PinnedBuffer`'s constructors |
+| Registers | only a pin-holding native box whose number is actually taken | every pinned reinterpret and every pinned buffer, numbered or not |
+| A `PinnedBuffer`'s address read directly by hand-owned code | not registered | registered, and a read then needs a new validation arm (a buffer is not a box) |
+
+They differ in cost (17.5) and in the last row. No cgo package's own code can read a `PinnedBuffer`'s address, so
+for the door of 3.1 the two close the same set.
+
+**Part 2: the pinned range.** Each registered pin answers the byte range it holds still: a value slot is its
+pointee's size; a fixed array's data is the array's bytes; a pinned reinterpret is the WHOLE backing array. Two ways
+to hold it:
+
+- **2-ENTRY (condition 3 as worded):** the entry carries the range's base and length. Every entry grows, for every
+  registration the registry makes today.
+- **2-BOX (H's lean):** the entry is unchanged, and the box answers its range when asked, from the pin it already
+  holds (one member beside `IsPinnedAt`, with no state).
+
+**Part 3: the interior question, asked at the door only.** `GoCgoArgs.IsKnownGoAddress` gains one step: on an exact
+miss, is the number inside the range of a LIVE entry? A hit is valid only if that entry's own key still resolves,
+so a dead box and a released pin answer MISS exactly as an exact read does. The number-to-pointer operator and
+`Resolve` are NOT changed: no conversion resolves an interior number to a box. Phase 2's struct-pointer door shares
+the predicate, so it gains the step too.
+
+How the door finds the entry:
+
+- **3-SCAN (H's lean):** walk the live entries. Nothing is added to a registration. A crossing that misses pays one
+  walk: a handful of entries in an ordinary process, about 500 on the heaviest row read so far.
+- **3-INDEX:** an index by page, kept at registration. A crossing is one lookup, and every registration pays for
+  each page its range covers (17 writes for a 64 KiB buffer). It puts cost on the path every row takes, so it is a
+  design of its own if the walk fails its bound (SA-5).
+
+### 17.4 What it closes
+
+One row per source of a number over Go memory. A source the review finds is one more row.
+
+| # | Source of the number | Exact number | Interior number | Closed by |
+|---|---|---|---|---|
+| 1 | a pinned value slot (a box, an element, a field), through the exit | refused today | **closes** | parts 2 and 3 |
+| 2 | a fixed array's pinned data, through the exit | refused today | **closes** | parts 2 and 3 |
+| 3 | a wider view pinned over an element (the pinned reinterpret) | **closes** | **closes**, over the whole backing array | parts 1, 2 and 3 |
+| 4 | a native box over a pinned managed buffer | **closes** | **closes** | parts 1, 2 and 3 |
+| 5 | a pointee that holds references (an order token) | refused today | refused today, by the tag | nothing needed; an arm holds it |
+| 6 | a pinned buffer's address read directly by hand-owned code | open under 1-EXIT, closes under 1-PIN | the same | part 1's placement; not reachable from a cgo package |
+| 7 | a number whose pin has been RELEASED (section 13.4's residue) | NOT closed | NOT closed | 3.2's first item (13.4's rule 1): the entry reads MISS by design |
+| 8 | a number minted from a reference with no pin (`FromRef`) | NOT closed | NOT closed | the converter (the BOARD row routed to P2). There is no pin, so there is no entry. A cgo package is refused it for the receiver's type (3.1) |
+| 9 | reserved: a fifth source from the review | | | |
+
+After this seat the disclosed gap narrows to rows 7 and 8, and `docs/Limitations.md` and the release notes are
+reworded in the same seat to say exactly that.
+
+### 17.5 The registry's cost per pinned reinterpret
+
+| | At the pin moment | When its number is taken | At the door |
+|---|---|---|---|
+| Today | 0 | 0 | one exact lookup |
+| 1-EXIT with 2-BOX and 3-SCAN | **0** | one test for a pin on every native conversion, and one exact read where there is one; for the FIRST number of a pin-holding native box, one entry (one allocation, about 163 bytes, about 0.2 microseconds); a repeat, 0 | on an exact miss, one walk of the live entries |
+| 1-PIN with 2-ENTRY | **one entry per pinned reinterpret, numbered or not** (one allocation, about 179 bytes, about 0.2 microseconds), and the same for every pinned buffer constructed, the pin-only holds every box takes included | 0 | the same walk, comparing two fields instead of asking the box |
+
+Every figure in this table is DERIVED from the registry's recorded costs. None is measured for this design.
+
+### 17.6 The allocation-meter question, named before any code
+
+The banked allocation asserts are denominated in BYTES. So the question is: **does any banked row's asserted body
+run a path this seat makes allocate, or allocate more?**
+
+- **2-ENTRY moves every existing registration** by the range's two words. A row whose asserted body registers a pin
+  today pays more bytes there, with no change to what it does.
+- **1-PIN adds a registration at every pin.** A row whose asserted body pins and never takes the number allocates
+  where it allocates nothing today.
+- **1-EXIT with 2-BOX** adds bytes only where an asserted body takes the number of a pin-holding native box for the
+  first time.
+
+**NOT MEASURED:** which banked rows, if any, do each of the three. It is measured first, before the seat is built,
+by a registration census (off by default, after the registry's existing census) that counts new entries per arm on:
+every banked row that holds an allocation assert, derived from the roster at that time; `crypto/tls`, the heaviest
+pin row; and `os`, the registry's own neutrality row. H's lean is the combination with the smallest exposure. If the
+census reads 0 on those rows for 1-PIN with 2-ENTRY as well, the wording of condition 3 costs nothing and H's lean
+has no case.
+
+### 17.7 Predictions, to be scored as worded
+
+- **PA-1 (red first).** The two arms that hold the gap open are rewritten to hold it shut, and are red at the base.
+  With the seat: all 36 hand-overs of 16.9's table are refused, 0 cross; a number built by arithmetic over a Go
+  pointer is refused for every kind of pin; and beside each, a number inside a block from C's `malloc`, exact and
+  interior, still crosses.
+- **PA-2.** GolibTests' total rises by the new arms only. No existing row changes, the pointer-token conversion
+  rows, the reinterpret-source retention rows and the registry's growth guard included.
+- **PA-3 (the weakest).** The number-to-pointer operator answers differently in exactly ONE case: the number of a
+  pin-holding native box, where no entry answered before, converted back to that box's own pointee type, is now that
+  same box, and keeps its pin. Today it is a fresh native box with no pin. A number an entry already answers for
+  keeps that entry. Every other case takes the arm it takes today. Not traced arm by arm: the
+  operator has many, and this is read on the red before it is trusted.
+- **PA-4.** 0 corpus bytes on four targets (golib only, no converter change), `check-no-regression` byte-identical,
+  no behavioral golden moves.
+- **PA-5.** Under H's lean no banked allocation assert moves, and the census of 17.6 reads 0 new entries inside an
+  asserted body. Under the wording of condition 3: NOT PREDICTED, because the rows are not yet read.
+- **PA-6.** The cost rows hold: `crypto/internal/nistec`'s wall time inside its recorded spread, and the `os` row
+  with no direction between base and seat, each read twice at each tree, alone on the box.
+- **PA-7.** The door's walk costs under 0.5 microseconds at 16 live entries and about 10 at 500. A derived figure
+  (a weak read and one call per entry), stated so that the measurement can miss it.
+- **PA-8.** Every arm of both end-to-end programs reads as it does at 3.1's tip, on linux, windows and darwin (both
+  architectures), a loop of `C.CString` and `C.free` included.
+- **Most likely red that is not the mechanism:** a reinterpret-source retention row, through PA-3's one case; or
+  the growth guard, which counts entries.
+
+### 17.8 Gates
+
+- golib is touched: the full, unfiltered GolibTests against the base's results. `go2cs.slnx` stays R's routed
+  finding, and is read at base and tip the same way.
+- The registry is the reflect bridge's: the five largest banked reflect consumers by verdict count, derived from the
+  roster at gate time, plus the cost canary, plus `crypto/tls` and `os`.
+- The full `go test ./...`, `check-no-regression`, the full behavioral suite once at the tip, and the two-seeded
+  corpus comparison on four targets (predicted 0: it is the proof that nothing but golib moved).
+- Hosted: `cgo-e2e` on linux, windows and darwin, because a door every cgo call takes is changed on every OS, and the
+  golib tests' C-memory controls where a C compiler exists.
+- An adversarial review at the tip before landing. This is collector-safety work.
+
+### 17.9 Stop lines
+
+- **SA-1.** An existing GolibTests row, a behavioral golden or a corpus byte moves: stop and attribute.
+- **SA-2.** A banked allocation assert moves: stop and post the row and the bytes. Nothing is re-baselined.
+- **SA-3.** The seat needs instance state on `ж<T>`, a new box kind, or a go2cs-gen change: stop and post the design.
+- **SA-4.** The number-to-pointer operator answers differently anywhere beyond PA-3's one case: stop.
+- **SA-5.** The door's walk misses its bound by more than five times, or the design needs a lock or a write on the
+  registration or resolution path: stop. The index is then its own design.
+- **SA-6.** Any C-memory control is refused: stop. A range that refuses real C memory is worse than the gap.
+- **SA-7.** The review's fifth source does not fit as a row of 17.4, and needs a mechanism of its own: stop and post
+  it. It is not folded in.
+- **S-F** stands: the seat yields to any .4 seat that needs H.
+
+### 17.10 Questions for COORD
+
+- **QA-1. Where part 1 registers.** Lean: the exit (1-EXIT). It deviates from the words of condition 3, which name
+  the pin moments. It closes the same four hand-overs and costs nothing at a pin.
+- **QA-2. Where the range lives.** Lean: the box answers it (2-BOX). It deviates from "an entry carries its length",
+  and it leaves every existing registration's bytes as they are.
+- **QA-3. The door's lookup.** Lean: the walk, with PA-7 as its bound and SA-5 behind it.
+- **QA-4. The census first.** Lean: yes, as its own small step, read-only against banked rows, before either
+  placement is chosen for good. It can make QA-1 and QA-2 moot.
+- **QA-5. Order.** Lean: this seat after 3.1 lands and before 3.2's design step, so that 3.2 is designed over a door
+  whose only open rows are 7 and 8.
+
+— H (2026-11-13)
