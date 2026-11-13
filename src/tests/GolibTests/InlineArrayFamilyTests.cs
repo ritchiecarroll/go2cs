@@ -172,14 +172,61 @@ public class InlineArrayFamilyTests
         }
     }
 
-    // 7.6.1: the member exposes an element and its length, and nothing that reaches its storage as a whole.
+    // 7.6.1: the member exposes an element and its length, and nothing that reaches its storage as a whole. Part D3 adds two
+    // members that COPY rather than reach: the element-list constructor a Go array literal converts to (elements in) and
+    // ΔRangeSnapshot, the copy a Go range iterates (elements out). The reflection face (IGoInlineArray) is explicit.
     [TestMethod]
     public void AMemberExposesOnlyItsElementsAndLength()
     {
         string[] members = typeof(array201<>).GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
             .Select(member => member.Name).Distinct().OrderBy(name => name, StringComparer.Ordinal).ToArray();
 
-        CollectionAssert.AreEqual(new[] { "Equals", "GetHashCode", "Item", "Length", "get_Item", "op_Equality", "op_Inequality" }, members, string.Join(", ", members));
+        CollectionAssert.AreEqual(new[] { ".ctor", "Equals", "GetHashCode", "Item", "Length", "get_Item", "op_Equality", "op_Inequality", "ΔRangeSnapshot" }, members, string.Join(", ", members));
+    }
+
+    // A Go array literal [5]int32{1, 2} is its elements from index 0 and Go's zero after them.
+    [TestMethod]
+    public void AnArrayLiteralFillsFromTheStartAndZeroesTheRest()
+    {
+        array5<int> value = new(1, 2);
+
+        Assert.AreEqual(1, value[0]);
+        Assert.AreEqual(2, value[1]);
+        Assert.AreEqual(0, value[2]);
+        Assert.AreEqual(0, value[4]);
+        Assert.AreEqual(default, new array5<int>());
+    }
+
+    // Go ranges over a COPY of an array value: a write the loop body makes is not seen by the loop.
+    [TestMethod]
+    public void ARangeIteratesACopy()
+    {
+        array4<int> value = new(1, 2, 3, 4);
+        List<int> seen = [];
+
+        foreach (var (i, element) in range(value.ΔRangeSnapshot()))
+        {
+            if (i == 0)
+                value[3] = 99;
+
+            seen.Add(element);
+        }
+
+        CollectionAssert.AreEqual(new[] { 1, 2, 3, 4 }, seen);
+        Assert.AreEqual(99, value[3]);
+    }
+
+    // reflect (and fmt through it) walks a boxed member as a Go array value: its length and a copy of each element.
+    [TestMethod]
+    public void ABoxedMemberIsReadByReflectionThroughItsInlineArrayFace()
+    {
+        object boxed = new array3<short>(5, 6, 7);
+
+        Assert.IsInstanceOfType(boxed, typeof(IGoInlineArray));
+        Assert.IsNotInstanceOfType(boxed, typeof(IArray));
+        IGoInlineArray inline = (IGoInlineArray)boxed;
+        Assert.AreEqual((nint)3, inline.Length);
+        Assert.AreEqual((short)6, inline[1]);
     }
 
     // P7 by construction: golib names no family type, so a program that does not opt in never loads go.arrays.dll.
