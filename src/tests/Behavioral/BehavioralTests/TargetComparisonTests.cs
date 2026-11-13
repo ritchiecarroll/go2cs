@@ -1051,6 +1051,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckImportSegmentTypeShadow() => CheckTarget("ImportSegmentTypeShadow");
 
     [TestMethod]
+    public void CheckImportedAnonStructLiftReuse() => CheckTarget("ImportedAnonStructLiftReuse");
+
+    [TestMethod]
     public void CheckIncDecPointerField() => CheckTarget("IncDecPointerField");
 
     [TestMethod]
