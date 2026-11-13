@@ -62,7 +62,7 @@ $script:UnnecessaryLine = 'Unnecessary suppressions found.'
 <#
     THE DECLARATION: the release that renamed every standard-library assembly to its package ID (OQ4,
     docs/phase4/DESIGN-assembly-identity.md section 4; COORD's OQ-D ruling, 2026-11-11). go.fmt shipped
-    lib/net10.0/fmt.dll through 1.26.10.3 and ships lib/net10.0/go.fmt.dll from 1.26.10.4 on; package IDs never change.
+    lib/net10.0/fmt.dll through 1.26.10.3 and ships lib/net10.0/go.fmt.dll from 1.26.11.1 on; package IDs never change.
     For a package of the converted standard library (a go.* id other than go.lib and go.gen, which keep golib.dll and
     go2cs-gen.dll), a baseline asset <dir>/<name>.dll missing from the current package is compared with <dir>/<id>.dll.
     The target is the package ID, as the rule states it: that is go.<name> for 359 of the 360 packages, and go.testing
@@ -75,13 +75,13 @@ $script:UnnecessaryLine = 'Unnecessary suppressions found.'
     unexamined. So the guard ALIGNS the identity instead (Set-GoApiCompatIdentity: the renamed copy's Assembly-table
     name, and nothing else, made the baseline's) and compares every member as usual, after checking that the identity
     changed exactly as declared: the current asset's assembly name must be the package ID. Nothing is suppressed.
-    Keyed to the release, the map applies only to the one comparison that crosses the rename (1.26.10.4, and its
+    Keyed to the release, the map applies only to the one comparison that crosses the rename (1.26.11.1, and its
     rehearsals, against 1.26.10.3). Every later release's baseline already ships <id>.dll, compares path to path, and
     the map is inert; an asset that goes missing then is red again, as it should be. Unkeyed, the map would admit any
     future disappearance of a std asset beside a same-named <id>.dll for ever, announced by no one. If the rename slips
     to another release, every renamed asset reads "missing" and names this line, which then moves with it.
 #>
-$script:AssemblyRenameRelease = '1.26.10.4'
+$script:AssemblyRenameRelease = '1.26.11.1'
 
 # Restores the pinned tool from the repository's local manifest and returns the version it answers. Throws when the
 # restore fails or the tool answers another version than the manifest pins.

@@ -22,7 +22,7 @@
     The directory of merged .nupkg files (its _flavors subdirectory is not read).
 
 .PARAMETER ReleaseVersion
-    The release the packages stand for, such as 1.26.10.4. A rehearsal packs at the last published build, so its own
+    The release the packages stand for, such as 1.26.11.1. A rehearsal packs at the last published build, so its own
     version would pick the wrong baseline (GoApiCompat.psm1, Invoke-GoApiCompatGuard).
 
 .PARAMETER Comment
