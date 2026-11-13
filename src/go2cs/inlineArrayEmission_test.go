@@ -19,6 +19,7 @@ import (
 // convertInlineArrayFixture converts a one-file package and returns its emitted C#, line endings normalized.
 func convertInlineArrayFixture(t *testing.T, pkg string, source string) string {
 	t.Helper()
+	isolateConverterPathGlobals(t)
 
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
@@ -158,6 +159,8 @@ func use(v *T) {
 // as the declaring package (len and cap the constant, range over the member, a literal through its constructor, boxing
 // as the deep copy), read from that package's record. C1 counted 0 such sites in lib and libc; the fixture is the guard.
 func TestInlineArrayForeignFieldSpellsTheFaces(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/two\n\ngo 1.23\n")
