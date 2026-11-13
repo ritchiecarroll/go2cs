@@ -928,3 +928,20 @@ opt-in's population. Auto is a SUBSET of the opt-in:
   them. With `-inline-arrays=modernc.org/sqlite/lib`, it admits the 130 of the opt-in population.
 - **A new stop line, S7:** a mixed reinterpret chain is emitted instead of refused.
 - **Its P2 control:** the S22 shape with only one side admitted must be refused at convert time, by name.
+
+> **Amended 2026-11-13 (C1), recording two COORD rulings:**
+> - **7.7.6 is RULED as recommended** (inbox C1 20261113T040024Z). Admission is AUTO-DETECTED on its four
+>   conditions:
+>   - the closure;
+>   - the pair rule, as a convert-time error, `GO2CS2010`;
+>   - the `package_info` stamp;
+>   - `-inline-arrays` as an override, with a `-` form that turns auto off.
+>
+>   std stays out at I0. Part D's admission is reviewed against census-r4: lib 118 under auto, 130 with the
+>   override.
+> - **P6 is scored AS WORDED, and it is MISSED** (inbox C1 20261113T052540Z): C2 measured a rooted publish of
+>   17,793,904 bytes against the 2.4 MB bound. The prediction stays as written. What it meant: the 2.4 MB was my
+>   standalone probe's TOTAL, a 1,325,056-byte app plus a family INCREMENT of 976,432 bytes (7.7.2). The shipped
+>   family needs golib, about 16.9 MB of every go2cs Native AOT binary, which the bound never included. Read as the
+>   increment, C2's rooted reading adds 860,160 bytes, under the 976,432 measured in 7.7.2. That reading is recorded
+>   beside the score, not in place of it.
