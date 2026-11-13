@@ -82,6 +82,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAnonInterfaceVarWitness() => CheckTarget("AnonInterfaceVarWitness");
 
     [TestMethod]
+    public void CheckAnonStructAliasForwardFile() => CheckTarget("AnonStructAliasForwardFile");
+
+    [TestMethod]
     public void CheckAnonStructAliasedConversion() => CheckTarget("AnonStructAliasedConversion");
 
     [TestMethod]
@@ -709,6 +712,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckForeignAliasElementAddress() => CheckTarget("ForeignAliasElementAddress");
+
+    [TestMethod]
+    public void CheckForeignAnonStructAliasAlias() => CheckTarget("ForeignAnonStructAliasAlias");
+
+    [TestMethod]
     public void CheckForeignConstraintProxy() => CheckTarget("ForeignConstraintProxy");
 
     [TestMethod]
@@ -1133,6 +1142,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckKeyedLiteralNamedForeignStruct() => CheckTarget("KeyedLiteralNamedForeignStruct");
+
+    [TestMethod]
+    public void CheckKeywordNamedTypeAlias() => CheckTarget("KeywordNamedTypeAlias");
 
     [TestMethod]
     public void CheckKeywordNamedTypes() => CheckTarget("KeywordNamedTypes");
@@ -1757,6 +1769,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPackageAliasRootedTypeArgs() => CheckTarget("PackageAliasRootedTypeArgs");
+
+    [TestMethod]
+    public void CheckPackageNameNotDirName() => CheckTarget("PackageNameNotDirName");
 
     [TestMethod]
     public void CheckPackageNameShadowing() => CheckTarget("PackageNameShadowing");
@@ -2678,6 +2693,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUncomparableEquality() => CheckTarget("UncomparableEquality");
+
+    [TestMethod]
+    public void CheckUnexportedAnonAliasField() => CheckTarget("UnexportedAnonAliasField");
 
     [TestMethod]
     public void CheckUnexportedEmbeddedMarker() => CheckTarget("UnexportedEmbeddedMarker");
