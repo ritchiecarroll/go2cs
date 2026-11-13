@@ -2087,6 +2087,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckReflectNilMapKey() => CheckTarget("ReflectNilMapKey");
 
     [TestMethod]
+    public void CheckReflectShellAccessors() => CheckTarget("ReflectShellAccessors");
+
+    [TestMethod]
     public void CheckReflectStringWindow() => CheckTarget("ReflectStringWindow");
 
     [TestMethod]

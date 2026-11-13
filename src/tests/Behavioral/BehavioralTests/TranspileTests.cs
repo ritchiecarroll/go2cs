@@ -2152,6 +2152,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckReflectNilMapKey() => CheckTarget("ReflectNilMapKey");
 
     [TestMethod]
+    public void CheckReflectShellAccessors() => CheckTarget("ReflectShellAccessors");
+
+    [TestMethod]
     public void CheckReflectStringWindow() => CheckTarget("ReflectStringWindow");
 
     [TestMethod]
