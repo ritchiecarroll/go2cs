@@ -297,6 +297,7 @@
     <Project Path="tests/Behavioral/AnonIfaceMethodSetWidening/AnonIfaceMethodSetWidening.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceParamCrossPackage/AnonIfaceParamCrossPackage.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceParamCrossPackage/anonifacelib/go.anonifacedbg.csproj" />
+    <Project Path="tests/Behavioral/AnonStructAliasForwardFile/AnonStructAliasForwardFile.csproj" />
     <Project Path="tests/Behavioral/AnonStructAssertLiftDedupe/AnonStructAssertLiftDedupe.csproj" />
     <Project Path="tests/Behavioral/AdapterNameInterfaceCollision/AdapterNameInterfaceCollision.csproj" />
     <Project Path="tests/Behavioral/AliasStructToInterface/AliasStructToInterface.csproj" />
@@ -330,6 +331,13 @@
     <Project Path="tests/Behavioral/AssignThroughTypeAssert/AssignThroughTypeAssert.csproj" />
     <Project Path="tests/Behavioral/AtomicValue/AtomicValue.csproj" />
     <Project Path="tests/Behavioral/BclTypeNameShadow/BclTypeNameShadow.csproj" />
+    <Project Path="tests/Behavioral/ForeignAliasElementAddress/ForeignAliasElementAddress.csproj" />
+    <Project Path="tests/Behavioral/ForeignAliasElementAddress/stdio/ForeignAliasElementAddress.stdio.csproj" />
+    <Project Path="tests/Behavioral/ForeignAnonStructAliasAlias/ForeignAnonStructAliasAlias.csproj" />
+    <Project Path="tests/Behavioral/ForeignAnonStructAliasAlias/lib/ForeignAnonStructAliasAlias.lib.csproj" />
+    <Project Path="tests/Behavioral/KeywordNamedTypeAlias/KeywordNamedTypeAlias.csproj" />
+    <Project Path="tests/Behavioral/PackageNameNotDirName/PackageNameNotDirName.csproj" />
+    <Project Path="tests/Behavioral/PackageNameNotDirName/lib/PackageNameNotDirName.lib.csproj" />
     <Project Path="tests/Behavioral/ReceiverShadowsImport/ReceiverShadowsImport.csproj" />
     <Project Path="tests/Behavioral/BigUntypedConstComparison/BigUntypedConstComparison.csproj" />
     <Project Path="tests/Behavioral/BitwiseUntypedConst/BitwiseUntypedConst.csproj" />
@@ -1238,6 +1246,8 @@
     <Project Path="tests/Behavioral/UintptrUnsafePointerIdiom/UintptrUnsafePointerIdiom.csproj" />
     <Project Path="tests/Behavioral/UnarySignStack/UnarySignStack.csproj" />
     <Project Path="tests/Behavioral/UncomparableEquality/UncomparableEquality.csproj" />
+    <Project Path="tests/Behavioral/UnexportedAnonAliasField/UnexportedAnonAliasField.csproj" />
+    <Project Path="tests/Behavioral/UnexportedAnonAliasField/lib/UnexportedAnonAliasField.lib.csproj" />
     <Project Path="tests/Behavioral/UnexportedEmbeddedMarker/UnexportedEmbeddedMarker.csproj" />
     <Project Path="tests/Behavioral/UnexportedIfaceDynamicAssert/UnexportedIfaceDynamicAssert.csproj" />
     <Project Path="tests/Behavioral/UnicodeConsoleOutput/UnicodeConsoleOutput.csproj" />
