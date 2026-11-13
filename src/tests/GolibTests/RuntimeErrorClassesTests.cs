@@ -150,7 +150,7 @@ public class RuntimeErrorClassesTests
         slice<nint> s = new(2);
 
         AssertRuntimeError(PanicValue(() => _ = new array<nint>(s, 4)), "boundsError", want, "[4]T(s)");
-        AssertRuntimeError(PanicValue(() => _ = array<nint>.Alias(s, 4)), "boundsError", want, "(*[4]T)(s)");
+        AssertRuntimeError(PanicValue(() => _ = go.array<nint>.Alias(s, 4)), "boundsError", want, "(*[4]T)(s)");
     }
 
     // ---- errorString: unsafe.Slice and unsafe.String refusals (runtime/unsafe.go:46,50,102,114) -------

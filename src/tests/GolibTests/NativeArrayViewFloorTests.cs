@@ -159,7 +159,7 @@ public class NativeArrayViewFloorTests
                 Marshal.WriteByte(block, i, 0);
 
             ж<byte> element = (ж<byte>)(uintptr)(nuint)block;
-            ж<array<byte>> view = array<byte>.AliasPointer(element, 4);
+            ж<array<byte>> view = go.array<byte>.AliasPointer(element, 4);
 
             view.ElementRef(2) = 0x5a;
 

@@ -237,7 +237,7 @@ public class ArrayRangeAllocationTests
     {
         // Non-zero m_low: Go's `(*[4]byte)(s[2:])` windows the slice's storage, and the enumerator
         // must report indices RELATIVE to that window (0-based), not to the backing store.
-        array<byte> a = array<byte>.Alias(new slice<byte>([1, 2, 3, 4, 5, 6, 7, 8])[2..], 4);
+        array<byte> a = go.array<byte>.Alias(new slice<byte>([1, 2, 3, 4, 5, 6, 7, 8])[2..], 4);
 
         long bytes = MeasurePatternBytes(a, out long sum);
 

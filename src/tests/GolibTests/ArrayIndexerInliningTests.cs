@@ -37,7 +37,7 @@ public class ArrayIndexerInliningTests
     public void TheInlinedIndexersKeepGosBoundsAndWindow()
     {
         array<ulong> backing = new(8);
-        array<ulong> window = array<ulong>.Alias(new slice<ulong>(backing.Source, 2, 6), 4);
+        array<ulong> window = go.array<ulong>.Alias(new slice<ulong>(backing.Source, 2, 6), 4);
 
         window[1] = 7UL;
         window[(nint)3] = 9UL;

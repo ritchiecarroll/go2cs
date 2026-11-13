@@ -114,7 +114,7 @@ public class ByteViewArrayFieldTests
         slice<byte> blob = new(16);
         ж<MountPoint> buf = Ꮡ(blob, 0).Reinterpret<byte, MountPoint>();
 
-        slice<ushort> path = array<ushort>.AliasPointer(buf.at<ushort>(MountPoint.ᏑPathBuffer, 0), 0xffff).slice(0, 3, 3);
+        slice<ushort> path = go.array<ushort>.AliasPointer(buf.at<ushort>(MountPoint.ᏑPathBuffer, 0), 0xffff).slice(0, 3, 3);
 
         Assert.AreEqual((nint)3, len(path));
         Assert.AreEqual((nint)3, cap(path));
@@ -131,7 +131,7 @@ public class ByteViewArrayFieldTests
     {
         slice<byte> blob = new(16);
         ж<MountPoint> buf = Ꮡ(blob, 0).Reinterpret<byte, MountPoint>();
-        ж<array<ushort>> p = array<ushort>.AliasPointer(buf.at<ushort>(MountPoint.ᏑPathBuffer, 0), 4);
+        ж<array<ushort>> p = go.array<ushort>.AliasPointer(buf.at<ushort>(MountPoint.ᏑPathBuffer, 0), 4);
 
         p.slice(1, 3)[1] = 0x0a0b;
         Assert.AreEqual((byte)0x0b, blob[12], "p[1:3][1] is element 2, Go offset 8 + 4");
@@ -149,7 +149,7 @@ public class ByteViewArrayFieldTests
     {
         slice<byte> blob = new(16);
         ж<MountPoint> buf = Ꮡ(blob, 0).Reinterpret<byte, MountPoint>();
-        ж<array<ushort>> p = array<ushort>.AliasPointer(buf.at<ushort>(MountPoint.ᏑPathBuffer, 0), 4);
+        ж<array<ushort>> p = go.array<ushort>.AliasPointer(buf.at<ushort>(MountPoint.ᏑPathBuffer, 0), 4);
 
         Assert.AreEqual("runtime error: slice bounds out of range [::5] with length 4", panicText(() => p.slice(0, 1, 5)));
         Assert.AreEqual("runtime error: slice bounds out of range [:5] with length 4", panicText(() => p.slice(0, 5)));
