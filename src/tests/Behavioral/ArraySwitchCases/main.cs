@@ -68,16 +68,15 @@ internal static slice<@string> through(/*[2]*/ array<byte> b) {
     b = b.Clone();
 
     slice<@string> @out = default;
-    var exprᴛ1 = b;
     var matchᴛ1 = false;
-    if (exprᴛ1 == new byte[]{1, 1}.array()) { matchᴛ1 = true;
+    if (b == new byte[]{1, 1}.array()) { matchᴛ1 = true;
         @out = append(@out, (@string)"one");
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == new byte[]{2, 2}.array()) {
+    if (fallthrough || !matchᴛ1 && b == new byte[]{2, 2}.array()) {
         @out = append(@out, (@string)"two");
     }
-    else if (exprᴛ1 == new byte[]{3, 3}.array()) { matchᴛ1 = true;
+    else if (b == new byte[]{3, 3}.array()) { matchᴛ1 = true;
         @out = append(@out, (@string)"three");
     }
 

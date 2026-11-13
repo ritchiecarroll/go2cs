@@ -113,12 +113,11 @@ internal static nint switchTag(slice<byte> b) {
 
 internal static nint switchLocal(slice<byte> b) {
     sstring s = (sstring)b;
-    var exprᴛ1 = s;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "on"u8: {
+    case {} when s == "on"u8: {
         return 1;
     }
-    case {} when exprᴛ1 == "off"u8: {
+    case {} when s == "off"u8: {
         return 2;
     }}
 

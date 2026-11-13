@@ -45,16 +45,15 @@ internal static nint mid(bucketType typ) {
 
 internal static nint withFallthrough(bucketType typ) {
     nint n = 0;
-    var exprᴛ1 = typ;
     var matchᴛ1 = false;
-    if (exprᴛ1 == memProfile) { matchᴛ1 = true;
+    if (typ == memProfile) { matchᴛ1 = true;
         n = 1;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == blockProfile) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && typ == blockProfile) { matchᴛ1 = true;
         n += 10;
     }
-    else if (exprᴛ1 == mutexProfile) {
+    else if (typ == mutexProfile) {
         n = 100;
     }
     else if (!matchᴛ1) { /* default: */

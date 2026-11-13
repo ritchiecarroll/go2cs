@@ -86,13 +86,13 @@ internal static partial void main() {
     var selAʗ1 = selA;
     var selBʗ1 = selB;
     goǃ(() => {
-        var selᴛ1 = selAʗ1;
-        var selᴛ2 = selBʗ1;
-        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out _): {
+        var selAᴛ1 = selAʗ1;
+        var selBᴛ1 = selBʗ1;
+        switch (select(ᐸꟷ(selAᴛ1, ꓸꓸꓸ), ᐸꟷ(selBᴛ1, ꓸꓸꓸ))) {
+        case 0 when selAᴛ1.ꟷᐳ(out _): {
             break;
         }
-        case 1 when selᴛ2.ꟷᐳ(out _): {
+        case 1 when selBᴛ1.ꟷᐳ(out _): {
             break;
         }}
         doneʗ3.ᐸꟷ("select");

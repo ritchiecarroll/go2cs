@@ -8,9 +8,9 @@ internal static void main() {
     var a = new channel<nint>(1);
     var b = new channel<nint>(1);
 
-    var selᴛ1 = a.ᐸꟷ(9, ꓸꓸꓸ);
-    var selᴛ2 = b.ᐸꟷ(9, ꓸꓸꓸ);
-    switch (select(selᴛ1, selᴛ2)) {
+    var aᴛ1 = a.ᐸꟷ(9, ꓸꓸꓸ);
+    var bᴛ1 = b.ᐸꟷ(9, ꓸꓸꓸ);
+    switch (select(aᴛ1, bᴛ1)) {
     case 0: {
         break;
     }
@@ -20,13 +20,13 @@ internal static void main() {
     fmt.Println("delivered:", len(a) + len(b));
 
     nint got = default;
-    var selᴛ3 = a;
-    var selᴛ4 = b;
-    switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-    case 0 when selᴛ3.ꟷᐳ(out got): {
+    var aᴛ2 = a;
+    var bᴛ2 = b;
+    switch (select(ᐸꟷ(aᴛ2, ꓸꓸꓸ), ᐸꟷ(bᴛ2, ꓸꓸꓸ))) {
+    case 0 when aᴛ2.ꟷᐳ(out got): {
         break;
     }
-    case 1 when selᴛ4.ꟷᐳ(out got): {
+    case 1 when bᴛ2.ꟷᐳ(out got): {
         break;
     }}
     fmt.Println("got:", got, "remaining:", len(a) + len(b));
@@ -34,9 +34,9 @@ internal static void main() {
     var c = new channel<nint>(100);
     var d = new channel<nint>(100);
     for (nint i = 0; i < 100; i++) {
-        var selᴛ5 = c.ᐸꟷ(i, ꓸꓸꓸ);
-        var selᴛ6 = d.ᐸꟷ(i, ꓸꓸꓸ);
-        switch (select(selᴛ5, selᴛ6)) {
+        var cᴛ1 = c.ᐸꟷ(i, ꓸꓸꓸ);
+        var dᴛ1 = d.ᐸꟷ(i, ꓸꓸꓸ);
+        switch (select(cᴛ1, dᴛ1)) {
         case 0: {
             break;
         }

@@ -26,10 +26,10 @@ internal static partial void main() {
     });
     time.Sleep(300 * time.Millisecond);
     r.Close();
-    var selᴛ1 = done;
+    var doneᴛ1 = done;
     var selᴛ2 = time.After((time.Duration)(5000000000L));
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out var msg): {
+    switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    case 0 when doneᴛ1.ꟷᐳ(out var msg): {
         fmt.Println("read unblocked:", msg);
         break;
     }

@@ -116,10 +116,10 @@ internal static partial void main() {
     goǃ(() => {
         doneʗ1.ᐸꟷ(walkRangeShape(reflect.ValueOf(new channel/*<-*/<nint>(0, GoChanDir.Send))));
     });
-    var selᴛ1 = done;
+    var doneᴛ1 = done;
     var selᴛ2 = time.After((time.Duration)(5000000000L));
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out var got): {
+    switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    case 0 when doneᴛ1.ꟷᐳ(out var got): {
         fmt.Println("range send-only:", got);
         break;
     }

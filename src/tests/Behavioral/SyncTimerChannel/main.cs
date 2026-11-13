@@ -6,9 +6,9 @@ using time = time_package;
 partial class main_package {
 
 internal static bool tryRecv(/*<-*/channel<time.Time> c) {
-    var selᴛ1 = c;
-    switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out _): {
+    var cᴛ1 = c;
+    switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+    case 0 when cᴛ1.ꟷᐳ(out _): {
         return true;
     }
     default: {

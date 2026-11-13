@@ -82,9 +82,8 @@ internal static @string concatenated() {
 internal static @string classify(@string x) {
     @string yes = "matched";
     @string no = "unmatched";
-    var exprᴛ1 = x;
     switch (ᐧ) {
-    case {} when exprᴛ1 == yes: {
+    case {} when x == yes: {
         return "case:" + yes;
     }}
 

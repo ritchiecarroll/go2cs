@@ -69,10 +69,10 @@ internal static partial void step(@string name, Func<@string> body) {
         doneʗ1.ᐸꟷ(body());
     });
 
-    var selᴛ1 = done;
+    var doneᴛ1 = done;
     var selᴛ2 = time.After((time.Duration)(10000000000L));
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out var got): {
+    switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    case 0 when doneᴛ1.ꟷᐳ(out var got): {
         fmt.Printf("%s: %s\n"u8, name, got);
         break;
     }

@@ -24,10 +24,10 @@ internal static @string registered() {
     })();
 
     for (nint i = 0; i < 400; i++) {
-        var selᴛ1 = done;
+        var doneᴛ1 = done;
         var selᴛ2 = time.After(5 * time.Millisecond);
-        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out _): {
+        switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+        case 0 when doneᴛ1.ꟷᐳ(out _): {
             return "RAN";
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
@@ -53,10 +53,10 @@ internal static @string cleared() {
     })();
 
     for (nint i = 0; i < 40; i++) {
-        var selᴛ3 = done;
+        var doneᴛ1 = done;
         var selᴛ4 = time.After(5 * time.Millisecond);
-        switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-        case 0 when selᴛ3.ꟷᐳ(out _): {
+        switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+        case 0 when doneᴛ1.ꟷᐳ(out _): {
             return "RAN";
         }
         case 1 when selᴛ4.ꟷᐳ(out _): {

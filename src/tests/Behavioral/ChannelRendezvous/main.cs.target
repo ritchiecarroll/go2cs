@@ -8,8 +8,8 @@ internal static partial void main() {
     var ch = new channel<nint>(0);
     fmt.Println("cap:", cap(ch), "len:", len(ch));
 
-    var selᴛ1 = ch.ᐸꟷ(1, ꓸꓸꓸ);
-    switch (trySelect(selᴛ1)) {
+    var chᴛ1 = ch.ᐸꟷ(1, ꓸꓸꓸ);
+    switch (trySelect(chᴛ1)) {
     case 0: {
         fmt.Println("send: ready (wrong for unbuffered)");
         break;
@@ -19,9 +19,9 @@ internal static partial void main() {
         break;
     }}
 
-    var selᴛ2 = ch;
-    switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-    case 0 when selᴛ2.ꟷᐳ(out var v): {
+    var chᴛ2 = ch;
+    switch (trySelect(ᐸꟷ(chᴛ2, ꓸꓸꓸ))) {
+    case 0 when chᴛ2.ꟷᐳ(out var v): {
         fmt.Println("recv: ready (wrong):", v);
         break;
     }

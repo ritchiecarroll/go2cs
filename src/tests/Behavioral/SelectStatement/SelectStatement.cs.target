@@ -26,14 +26,14 @@ internal static void fibonacci(channel<nint> f, channel<nint> quit) {
     nint x = 0;
     nint y = 1;
     for (;;) {
-        var selᴛ1 = f.ᐸꟷ(x, ꓸꓸꓸ);
-        var selᴛ2 = quit;
-        switch (select(selᴛ1, ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+        var fᴛ1 = f.ᐸꟷ(x, ꓸꓸꓸ);
+        var quitᴛ1 = quit;
+        switch (select(fᴛ1, ᐸꟷ(quitᴛ1, ꓸꓸꓸ))) {
         case 0: {
             (x, y) = (y, x + y);
             break;
         }
-        case 1 when selᴛ2.ꟷᐳ(out _): {
+        case 1 when quitᴛ1.ꟷᐳ(out _): {
             fmt.Println("quit");
             return;
         }}
@@ -110,24 +110,24 @@ internal static partial void main() {
     goǃ(g2, ch4);
 
     for (nint i = 0; i < 4; i++) {
-        var selᴛ3 = ch1;
-        var selᴛ4 = ch2;
-        var selᴛ5 = ch3;
-        var selᴛ6 = ch4;
-        switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ), ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
-        case 0 when selᴛ3.ꟷᐳ(out var v1): {
+        var ch1ᴛ1 = ch1;
+        var ch2ᴛ1 = ch2;
+        var ch3ᴛ1 = ch3;
+        var ch4ᴛ1 = ch4;
+        switch (select(ᐸꟷ(ch1ᴛ1, ꓸꓸꓸ), ᐸꟷ(ch2ᴛ1, ꓸꓸꓸ), ᐸꟷ(ch3ᴛ1, ꓸꓸꓸ), ᐸꟷ(ch4ᴛ1, ꓸꓸꓸ))) {
+        case 0 when ch1ᴛ1.ꟷᐳ(out var v1): {
             fmt.Println("Got: ", v1);
             break;
         }
-        case 1 when selᴛ4.ꟷᐳ(out var v1): {
+        case 1 when ch2ᴛ1.ꟷᐳ(out var v1): {
             fmt.Println("Got: ", v1);
             break;
         }
-        case 2 when selᴛ5.ꟷᐳ(out var v1, out var okΔ1): {
+        case 2 when ch3ᴛ1.ꟷᐳ(out var v1, out var okΔ1): {
             fmt.Println("OK: ", okΔ1, " -- got: ", v1);
             break;
         }
-        case 3 when selᴛ6.ꟷᐳ(out a[f()]): {
+        case 3 when ch4ᴛ1.ꟷᐳ(out a[f()]): {
             fmt.Println("Got: ", a[f()]);
             break;
         }}
@@ -136,29 +136,29 @@ internal static partial void main() {
     ch1 = default;
     close(ch2);
 
-    var selᴛ7 = ch1.ᐸꟷ(1, ꓸꓸꓸ);
-    var selᴛ8 = ch1;
-    var selᴛ9 = ch2;
-    var selᴛ10 = ch3;
-    var selᴛ11 = ch4;
-    switch (select(selᴛ7, ᐸꟷ(selᴛ8, ꓸꓸꓸ), ᐸꟷ(selᴛ9, ꓸꓸꓸ), ᐸꟷ(selᴛ10, ꓸꓸꓸ), ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
+    var ch1ᴛ2 = ch1.ᐸꟷ(1, ꓸꓸꓸ);
+    var ch1ᴛ3 = ch1;
+    var ch2ᴛ2 = ch2;
+    var ch3ᴛ2 = ch3;
+    var ch4ᴛ2 = ch4;
+    switch (select(ch1ᴛ2, ᐸꟷ(ch1ᴛ3, ꓸꓸꓸ), ᐸꟷ(ch2ᴛ2, ꓸꓸꓸ), ᐸꟷ(ch3ᴛ2, ꓸꓸꓸ), ᐸꟷ(ch4ᴛ2, ꓸꓸꓸ))) {
     case 0: {
         fmt.Println("unexpected send to nil channel");
         break;
     }
-    case 1 when selᴛ8.ꟷᐳ(out var v1): {
+    case 1 when ch1ᴛ3.ꟷᐳ(out var v1): {
         fmt.Println("unexpected received from nil channel: ", v1);
         break;
     }
-    case 2 when selᴛ9.ꟷᐳ(out var v1): {
+    case 2 when ch2ᴛ2.ꟷᐳ(out var v1): {
         fmt.Println("closed channel 2 selected immediately: ", v1);
         break;
     }
-    case 3 when selᴛ10.ꟷᐳ(out var v1, out var okΔ2): {
+    case 3 when ch3ᴛ2.ꟷᐳ(out var v1, out var okΔ2): {
         fmt.Println("unexpected: OK: ", okΔ2, " -- got: ", v1);
         break;
     }
-    case 4 when selᴛ11.ꟷᐳ(out a[f()]): {
+    case 4 when ch4ᴛ2.ꟷᐳ(out a[f()]): {
         fmt.Println("unexpected: ", a[f()]);
         break;
     }}
@@ -210,22 +210,22 @@ internal static partial void main() {
 }
 
 internal static @string firstMsg(channel<@string> a, channel<@string> b) {
-    var selᴛ12 = a;
-    var selᴛ13 = b;
-    switch (select(ᐸꟷ(selᴛ12, ꓸꓸꓸ), ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
-    case 0 when selᴛ12.ꟷᐳ(out var m): {
+    var aᴛ1 = a;
+    var bᴛ1 = b;
+    switch (select(ᐸꟷ(aᴛ1, ꓸꓸꓸ), ᐸꟷ(bᴛ1, ꓸꓸꓸ))) {
+    case 0 when aᴛ1.ꟷᐳ(out var m): {
         return "a:"u8 + m;
     }
-    case 1 when selᴛ13.ꟷᐳ(out var m): {
+    case 1 when bᴛ1.ꟷᐳ(out var m): {
         return "b:"u8 + m;
     }}
     return default;
 }
 
 internal static @string poll(channel<EmptyStruct> done) {
-    var selᴛ14 = done;
-    switch (trySelect(ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
-    case 0 when selᴛ14.ꟷᐳ(out _): {
+    var doneᴛ1 = done;
+    switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+    case 0 when doneᴛ1.ꟷᐳ(out _): {
         return "done";
     }
     default: {
@@ -246,13 +246,13 @@ internal static (raceResult, bool) raceSend() {
     var doneʗ1 = done;
     var resultsʗ1 = results;
     void racer(bool primaryΔ1) {
-        var selᴛ15 = resultsʗ1.ᐸꟷ(new raceResult(value: 7, primary: primaryΔ1), ꓸꓸꓸ);
-        var selᴛ16 = doneʗ1;
-        switch (select(selᴛ15, ᐸꟷ(selᴛ16, ꓸꓸꓸ))) {
+        var resultsᴛ1 = resultsʗ1.ᐸꟷ(new raceResult(value: 7, primary: primaryΔ1), ꓸꓸꓸ);
+        var doneᴛ1 = doneʗ1;
+        switch (select(resultsᴛ1, ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
         case 0: {
             break;
         }
-        case 1 when selᴛ16.ꟷᐳ(out _): {
+        case 1 when doneᴛ1.ꟷᐳ(out _): {
             break;
         }}
     }

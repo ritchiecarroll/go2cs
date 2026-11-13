@@ -2572,6 +2572,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckTcpLoopbackRoundTrip() => CheckTarget("TcpLoopbackRoundTrip");
 
     [TestMethod]
+    public void CheckTempNamedAfterIdentifier() => CheckTarget("TempNamedAfterIdentifier");
+
+    [TestMethod]
     public void CheckTestingStructZeroLiteral() => CheckTarget("TestingStructZeroLiteral");
 
     [TestMethod]

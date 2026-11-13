@@ -10,9 +10,9 @@ internal static void main() {
         cΔ1 = new channel<nint>(2);
         cΔ1.ᐸꟷ(40 + loop);
 
-        var selᴛ1 = cΔ1;
-        switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out var x): {
+        var cᴛ1 = cΔ1;
+        switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+        case 0 when cᴛ1.ꟷᐳ(out var x): {
             fmt.Println("recv", x);
             break;
         }
@@ -22,9 +22,9 @@ internal static void main() {
         }}
 
         cΔ1.ᐸꟷ(50 + loop);
-        var selᴛ2 = cΔ1;
-        switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-        case 0 when selᴛ2.ꟷᐳ(out var x, out var ok): {
+        var cᴛ2 = cΔ1;
+        switch (trySelect(ᐸꟷ(cᴛ2, ꓸꓸꓸ))) {
+        case 0 when cᴛ2.ꟷᐳ(out var x, out var ok): {
             fmt.Println("recv2", x, ok);
             break;
         }
@@ -33,9 +33,9 @@ internal static void main() {
             break;
         }}
 
-        var selᴛ3 = cΔ1;
-        switch (trySelect(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
-        case 0 when selᴛ3.ꟷᐳ(out var x): {
+        var cᴛ3 = cΔ1;
+        switch (trySelect(ᐸꟷ(cᴛ3, ꓸꓸꓸ))) {
+        case 0 when cᴛ3.ꟷᐳ(out var x): {
             fmt.Println("unexpected", x);
             break;
         }
@@ -45,14 +45,14 @@ internal static void main() {
         }}
 
         var d = new channel<nint>(1);
-        var selᴛ4 = d.ᐸꟷ(7, ꓸꓸꓸ);
-        var selᴛ5 = cΔ1;
-        switch (select(selᴛ4, ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
+        var dᴛ1 = d.ᐸꟷ(7, ꓸꓸꓸ);
+        var cᴛ4 = cΔ1;
+        switch (select(dᴛ1, ᐸꟷ(cᴛ4, ꓸꓸꓸ))) {
         case 0: {
             fmt.Println("sent");
             break;
         }
-        case 1 when selᴛ5.ꟷᐳ(out _): {
+        case 1 when cᴛ4.ꟷᐳ(out _): {
             fmt.Println("unexpected recv");
             break;
         }}
