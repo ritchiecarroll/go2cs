@@ -1,0 +1,11 @@
+PASS one word per static function, whatever the delegate type (Func<> or a named delegate) or site 
+PASS the word is in GoFuncCookie's band 
+PASS recovery as the minted type 
+PASS recovery as ANOTHER delegate type of the same signature REBINDS (TLARGE_INTEGER lifted twice) 
+PASS a signature that cannot bind is refused by name InvalidCastException
+PASS two closures get two words; one closure answers one word 
+PASS race: 300 rounds x 64 threads x 200 functions, no function split across two words splits 0
+PASS race: no two functions ever share a word rounds with a collision 0
+COST pass 0: mint 21 ns; recover and call 149 ns; recover with a REBIND and call 424 ns (0, 0)
+COST pass 1: mint 19 ns; recover and call 136 ns; recover with a REBIND and call 413 ns (0, 0)
+failed: 0

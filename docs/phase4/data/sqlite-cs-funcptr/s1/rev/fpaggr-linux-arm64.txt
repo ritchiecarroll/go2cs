@@ -1,0 +1,4 @@
+    56 sites    16 signatures  modernc.org/libc|R recovery target   e.g. 
+   454 sites    83 signatures  modernc.org/sqlite/lib|R recovery target   e.g. 
+    33 sites     1 signatures  modernc.org/sqlite/vec|R recovery target   e.g. 
+    13 sites     7 signatures  modernc.org/sqlite/vfs|R recovery target   e.g. 
