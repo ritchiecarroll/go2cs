@@ -1852,6 +1852,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerArraySlice() => CheckTarget("PointerArraySlice");
 
     [TestMethod]
+    public void CheckPointerArrayViewForms() => CheckTarget("PointerArrayViewForms");
+
+    [TestMethod]
     public void CheckPointerCastSliceRange() => CheckTarget("PointerCastSliceRange");
 
     [TestMethod]

@@ -959,6 +959,7 @@
     <Project Path="tests/Behavioral/PointerArrayRange/PointerArrayRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceReinterpret/PointerCastSliceReinterpret.csproj" />
+    <Project Path="tests/Behavioral/PointerArrayViewForms/PointerArrayViewForms.csproj" />
     <Project Path="tests/Behavioral/ExplicitDerefConversionStore/ExplicitDerefConversionStore.csproj" />
     <Project Path="tests/Behavioral/PointerConversionAliasing/PointerConversionAliasing.csproj" />
     <Project Path="tests/Behavioral/PointerConversionAnonymousTarget/PointerConversionAnonymousTarget.csproj" />

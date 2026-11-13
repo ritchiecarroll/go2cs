@@ -1855,6 +1855,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPointerArraySlice() => CheckTarget("PointerArraySlice");
 
     [TestMethod]
+    public void CheckPointerArrayViewForms() => CheckTarget("PointerArrayViewForms");
+
+    [TestMethod]
     public void CheckPointerCastSliceRange() => CheckTarget("PointerCastSliceRange");
 
     [TestMethod]
