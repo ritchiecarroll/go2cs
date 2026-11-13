@@ -68,6 +68,11 @@
   </PropertyGroup>
   <!-- linux's golden is per architecture the same way: the hosted ubuntu-24.04-arm leg runs an arm64 process, and the
        linux/amd64 bindings refuse it by design ("converted for linux/amd64, and this process runs as linux/arm64"). -->
+  <!-- cmd/cgo declares _Ctype_char from the C compiler's DWARF: plain char is unsigned in the linux/arm64 ABI (uint8)
+       and signed on every other target here (int8). GOCGO_CHAR_UNSIGNED gives the hand-declared C.@char the same type. -->
+  <PropertyGroup Condition="'$(GoTargetOS)' == 'linux' and '$(GoCgoGoldenArch)' == 'Arm64'">
+    <DefineConstants>$(DefineConstants);GOCGO_CHAR_UNSIGNED</DefineConstants>
+  </PropertyGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoCgoGoldenArch)' == 'Arm64'">
     <Compile Remove="GoCgoWrappers.linux.golden.cs" />
   </ItemGroup>

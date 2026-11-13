@@ -365,13 +365,13 @@ static unsafe partial class cgotestꓸC_package
 
     internal static (@long, error) go2cs_probe_strtolꓸerrno(ж<@char> p0, @int p1)
     {
-        sbyte m0 = default;
+        byte m0 = default;
         global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_strtol", out nuint n0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
         {
-            m0 = (int8)p0.Value;
+            m0 = (uint8)p0.Value;
             a0 = (nint)(&m0);
         }
 
@@ -390,7 +390,7 @@ static unsafe partial class cgotestꓸC_package
         }
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
-            p0.Value = (@char)(int8)m0;
+            p0.Value = (@char)(uint8)m0;
 
         error err = null;
 
@@ -685,27 +685,27 @@ static unsafe partial class cgotestꓸC_package
     [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 390)]
     internal struct _Ctype_struct_utsnameᴍ
     {
-        [global::System.Runtime.InteropServices.FieldOffset(0)] public ᴍarray65_sbyte sysname;
-        [global::System.Runtime.InteropServices.FieldOffset(65)] public ᴍarray65_sbyte nodename;
-        [global::System.Runtime.InteropServices.FieldOffset(130)] public ᴍarray65_sbyte release;
-        [global::System.Runtime.InteropServices.FieldOffset(195)] public ᴍarray65_sbyte version;
-        [global::System.Runtime.InteropServices.FieldOffset(260)] public ᴍarray65_sbyte machine;
-        [global::System.Runtime.InteropServices.FieldOffset(325)] public ᴍarray65_sbyte domainname;
+        [global::System.Runtime.InteropServices.FieldOffset(0)] public ᴍarray65_byte sysname;
+        [global::System.Runtime.InteropServices.FieldOffset(65)] public ᴍarray65_byte nodename;
+        [global::System.Runtime.InteropServices.FieldOffset(130)] public ᴍarray65_byte release;
+        [global::System.Runtime.InteropServices.FieldOffset(195)] public ᴍarray65_byte version;
+        [global::System.Runtime.InteropServices.FieldOffset(260)] public ᴍarray65_byte machine;
+        [global::System.Runtime.InteropServices.FieldOffset(325)] public ᴍarray65_byte domainname;
 
         internal static void CheckLayoutᴍ()
         {
-            Holdᴍ("sysname", "ᴍarray65_sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_sbyte>(), 65);
-            Holdᴍ("sysname element", "sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<sbyte>(), 1);
-            Holdᴍ("nodename", "ᴍarray65_sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_sbyte>(), 65);
-            Holdᴍ("nodename element", "sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<sbyte>(), 1);
-            Holdᴍ("release", "ᴍarray65_sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_sbyte>(), 65);
-            Holdᴍ("release element", "sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<sbyte>(), 1);
-            Holdᴍ("version", "ᴍarray65_sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_sbyte>(), 65);
-            Holdᴍ("version element", "sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<sbyte>(), 1);
-            Holdᴍ("machine", "ᴍarray65_sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_sbyte>(), 65);
-            Holdᴍ("machine element", "sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<sbyte>(), 1);
-            Holdᴍ("domainname", "ᴍarray65_sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_sbyte>(), 65);
-            Holdᴍ("domainname element", "sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<sbyte>(), 1);
+            Holdᴍ("sysname", "ᴍarray65_byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_byte>(), 65);
+            Holdᴍ("sysname element", "byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<byte>(), 1);
+            Holdᴍ("nodename", "ᴍarray65_byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_byte>(), 65);
+            Holdᴍ("nodename element", "byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<byte>(), 1);
+            Holdᴍ("release", "ᴍarray65_byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_byte>(), 65);
+            Holdᴍ("release element", "byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<byte>(), 1);
+            Holdᴍ("version", "ᴍarray65_byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_byte>(), 65);
+            Holdᴍ("version element", "byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<byte>(), 1);
+            Holdᴍ("machine", "ᴍarray65_byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_byte>(), 65);
+            Holdᴍ("machine element", "byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<byte>(), 1);
+            Holdᴍ("domainname", "ᴍarray65_byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray65_byte>(), 65);
+            Holdᴍ("domainname element", "byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<byte>(), 1);
         }
 
         private static void Holdᴍ(string member, string clrType, int clrSize, int cSize)
@@ -722,9 +722,9 @@ static unsafe partial class cgotestꓸC_package
     }
 
     [global::System.Runtime.CompilerServices.InlineArray(65)]
-    internal struct ᴍarray65_sbyte
+    internal struct ᴍarray65_byte
     {
-        private sbyte m_element;
+        private byte m_element;
     }
 
     // _Ctype_div_t's copy-in and copy-out, member by member (§5.2).
@@ -827,32 +827,32 @@ static unsafe partial class cgotestꓸC_package
     private static void ᴍin__Ctype_struct_utsnameᴍ(ref _Ctype_struct_utsnameᴍ m, in struct_utsname v)
     {
         for (int i0 = 0; i0 < 65; i0++)
-            m.sysname[i0] = (int8)v.sysname[i0];
+            m.sysname[i0] = (uint8)v.sysname[i0];
         for (int i0 = 0; i0 < 65; i0++)
-            m.nodename[i0] = (int8)v.nodename[i0];
+            m.nodename[i0] = (uint8)v.nodename[i0];
         for (int i0 = 0; i0 < 65; i0++)
-            m.release[i0] = (int8)v.release[i0];
+            m.release[i0] = (uint8)v.release[i0];
         for (int i0 = 0; i0 < 65; i0++)
-            m.version[i0] = (int8)v.version[i0];
+            m.version[i0] = (uint8)v.version[i0];
         for (int i0 = 0; i0 < 65; i0++)
-            m.machine[i0] = (int8)v.machine[i0];
+            m.machine[i0] = (uint8)v.machine[i0];
         for (int i0 = 0; i0 < 65; i0++)
-            m.domainname[i0] = (int8)v.domainname[i0];
+            m.domainname[i0] = (uint8)v.domainname[i0];
     }
 
     private static void ᴍout__Ctype_struct_utsnameᴍ(ref struct_utsname v, in _Ctype_struct_utsnameᴍ m)
     {
         for (int i0 = 0; i0 < 65; i0++)
-            v.sysname[i0] = (@char)(int8)m.sysname[i0];
+            v.sysname[i0] = (@char)(uint8)m.sysname[i0];
         for (int i0 = 0; i0 < 65; i0++)
-            v.nodename[i0] = (@char)(int8)m.nodename[i0];
+            v.nodename[i0] = (@char)(uint8)m.nodename[i0];
         for (int i0 = 0; i0 < 65; i0++)
-            v.release[i0] = (@char)(int8)m.release[i0];
+            v.release[i0] = (@char)(uint8)m.release[i0];
         for (int i0 = 0; i0 < 65; i0++)
-            v.version[i0] = (@char)(int8)m.version[i0];
+            v.version[i0] = (@char)(uint8)m.version[i0];
         for (int i0 = 0; i0 < 65; i0++)
-            v.machine[i0] = (@char)(int8)m.machine[i0];
+            v.machine[i0] = (@char)(uint8)m.machine[i0];
         for (int i0 = 0; i0 < 65; i0++)
-            v.domainname[i0] = (@char)(int8)m.domainname[i0];
+            v.domainname[i0] = (@char)(uint8)m.domainname[i0];
     }
 }

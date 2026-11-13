@@ -43,6 +43,17 @@ func (target cgoWrapperTarget) goldenName() string {
 	return "GoCgoWrappers." + target.goos + "-" + target.goarch + ".golden.cs"
 }
 
+// char is the Go type cmd/cgo declares _Ctype_char as for the target. cmd/cgo takes it from the C compiler's DWARF
+// (gcc.go: dwarf.CharType is int8, dwarf.UcharType is uint8), and plain char is unsigned in the linux/arm64 ABI and
+// signed on linux/amd64, on both darwin architectures and on windows.
+func (target cgoWrapperTarget) char() string {
+	if target.goos == "linux" && target.goarch == "arm64" {
+		return "uint8"
+	}
+
+	return "int8"
+}
+
 var cgoWrapperTargets = []cgoWrapperTarget{
 	// close(-1) sets EBADF on every POSIX libc.
 	{"linux", "libc.so.6", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoLinuxStructs, nil, []string{"c"}, "amd64"},
@@ -265,7 +276,7 @@ func cgoWrapperFixture(t *testing.T, target cgoWrapperTarget) *types.Package {
 
 	source := `package cgotest
 
-type _Ctype_char int8
+type _Ctype_char ` + target.char() + `
 type _Ctype_int int32
 type _Ctype_uint uint32
 type _Ctype_long ` + target.long + `
