@@ -386,6 +386,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			return refusePackage(options, diagnosticSliceWideningRefused, refusal)
 		}
 
+		// Which structs hold their arrays inline (inlineArrayAdmission.go): decided once, from the package's non-test
+		// files, before any file emits. A reinterpret chain whose sides disagree refuses the package (GO2CS2010).
+		packageInlineAdmission = computeInlineArrayAdmission(pkg.Syntax, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, options)
+
+		if err := reportInlineArrayAdmission(packageInlineAdmission); err != nil {
+			return refusePackage(options, diagnosticInlineArrayMixedPair, err)
+		}
+
 		var projectName, projectFileName, projectFileContents string
 		projectName, packageNamespace = getProjectName(packageInputPath, options)
 		packageNamespace = namespaceWithDirectorySegment(packageNamespace, pkg.PkgPath, pkg.Name)

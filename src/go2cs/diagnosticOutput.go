@@ -155,7 +155,23 @@ const (
 	// written; the run fails at its end naming each one (droppedFiles.go). -warn may not downgrade it: the loss is
 	// not loud.
 	diagnosticFileDropped = "GO2CS2008"
+
+	// diagnosticInlineArrayCapped: a struct type the inline-array rule SELECTS (converted whole through unsafe.Pointer by
+	// its own package, or forced by -inline-arrays) that a cap, or a closure reaching another package's struct, keeps
+	// out. A WARNING (COORD 2026-11-13): the type stays exactly as today (inlineArrayAdmission.go).
+	diagnosticInlineArrayCapped = "GO2CS2009"
+
+	// diagnosticInlineArrayMixedPair: a reinterpret chain (*T)(unsafe.Pointer(e)) whose two struct sides both hold
+	// arrays and disagree on inline storage. A refusal: the two layouts differ (inlineArrayAdmission.go).
+	diagnosticInlineArrayMixedPair = "GO2CS2010"
 )
+
+// converterWarningCodes are the converter codes printed at "warning" by design (reportWarningDiagnostic), never at
+// "error". Every other converter code is an error; a code -warn downgrades stays one. TestGo2csDiagnosticCodeRegistry
+// reads this map for each code's severity.
+var converterWarningCodes = map[string]bool{
+	diagnosticInlineArrayCapped: true,
+}
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST
 // line/column pair the anchor allows, so a Windows drive letter ("C:\src\te.go:3:16") stays in it.

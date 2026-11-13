@@ -224,8 +224,8 @@ func diagnosticCodeRegistryProblems(s diagnosticCodeSnapshot) []string {
 	return problems
 }
 
-// converterRegistry reads the const block's string values that are codes. Every code the converter prints is
-// printed at "error" (canonicalDiagnostic), so that is each one's severity.
+// converterRegistry reads the const block's string values that are codes. A code is printed at "error"
+// (canonicalDiagnostic) unless converterWarningCodes names its const, when it is printed at "warning".
 func converterRegistry(t *testing.T, root string) []registeredCode {
 	t.Helper()
 
@@ -239,6 +239,35 @@ func converterRegistry(t *testing.T, root string) []registeredCode {
 
 	var codes []registeredCode
 
+	// The consts converterWarningCodes names, by identifier.
+	warnings := map[string]bool{}
+
+	for _, decl := range file.Decls {
+		gen, ok := decl.(*ast.GenDecl)
+
+		if !ok || gen.Tok != token.VAR {
+			continue
+		}
+
+		for _, spec := range gen.Specs {
+			valueSpec := spec.(*ast.ValueSpec)
+
+			if len(valueSpec.Names) != 1 || valueSpec.Names[0].Name != "converterWarningCodes" || len(valueSpec.Values) != 1 {
+				continue
+			}
+
+			if literal, ok := valueSpec.Values[0].(*ast.CompositeLit); ok {
+				for _, element := range literal.Elts {
+					if pair, ok := element.(*ast.KeyValueExpr); ok {
+						if ident, ok := pair.Key.(*ast.Ident); ok {
+							warnings[ident.Name] = true
+						}
+					}
+				}
+			}
+		}
+	}
+
 	for _, decl := range file.Decls {
 		gen, ok := decl.(*ast.GenDecl)
 
@@ -247,7 +276,9 @@ func converterRegistry(t *testing.T, root string) []registeredCode {
 		}
 
 		for _, spec := range gen.Specs {
-			for _, value := range spec.(*ast.ValueSpec).Values {
+			valueSpec := spec.(*ast.ValueSpec)
+
+			for index, value := range valueSpec.Values {
 				lit, ok := value.(*ast.BasicLit)
 
 				if !ok || lit.Kind != token.STRING {
@@ -260,7 +291,13 @@ func converterRegistry(t *testing.T, root string) []registeredCode {
 					continue
 				}
 
-				codes = append(codes, registeredCode{text, converterSide, "Error", fmt.Sprintf("%s:%d", converterRegistryPath, fset.Position(lit.Pos()).Line)})
+				severity := "Error"
+
+				if index < len(valueSpec.Names) && warnings[valueSpec.Names[index].Name] {
+					severity = "Warning"
+				}
+
+				codes = append(codes, registeredCode{text, converterSide, severity, fmt.Sprintf("%s:%d", converterRegistryPath, fset.Position(lit.Pos()).Line)})
 			}
 		}
 	}
