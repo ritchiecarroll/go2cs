@@ -99,8 +99,8 @@ internal static void mapiterinit(ж<abiꓸMapType> t, ж<mapsꓸMap> m, ж<linkn
     it.it.Init(t, m);
     it.it.Next();
 
-    it.key = (uintptr)it.it.Key();
-    it.elem = (uintptr)it.it.Elem();
+    it.key = it.it.Key();
+    it.elem = it.it.Elem();
 }
 
 // reflect_mapiterinit is a compatibility wrapper for map iterator for users of
@@ -150,8 +150,8 @@ internal static void mapiternext(ж<linknameIter> Ꮡit) {
 
     it.it.Next();
 
-    it.key = (uintptr)it.it.Key();
-    it.elem = (uintptr)it.it.Elem();
+    it.key = it.it.Key();
+    it.elem = it.it.Elem();
 }
 
 // reflect_mapiternext is a compatibility wrapper for map iterator for users of
@@ -190,7 +190,7 @@ internal static void reflect_mapiternext(ж<linknameIter> it) {
 //
 //go:linkname reflect_mapiterkey reflect.mapiterkey
 internal static @unsafe.Pointer reflect_mapiterkey(ref linknameIter it) {
-    return (uintptr)it.it.Key();
+    return it.it.Key();
 }
 
 // reflect_mapiterelem is a compatibility wrapper for map iterator for users of
@@ -208,7 +208,7 @@ internal static @unsafe.Pointer reflect_mapiterkey(ref linknameIter it) {
 //
 //go:linkname reflect_mapiterelem reflect.mapiterelem
 internal static @unsafe.Pointer reflect_mapiterelem(ref linknameIter it) {
-    return (uintptr)it.it.Elem();
+    return it.it.Elem();
 }
 
 } // end runtime_package

@@ -107,7 +107,7 @@ retry:
             if (newCap == 0) {
                 newCap = spanSetInitSpineCap;
             }
-            @unsafe.Pointer newSpine = (uintptr)persistentalloc(newCap * (uintptr)goarch.PtrSize, cpu.CacheLineSize, Ꮡmemstats.ᏑgcMiscSys);
+            @unsafe.Pointer newSpine = persistentalloc(newCap * (uintptr)goarch.PtrSize, cpu.CacheLineSize, Ꮡmemstats.ᏑgcMiscSys);
             if (b.spineCap != 0) {
                 // Blocks are allocated off-heap, so
                 // no write barriers.
@@ -309,7 +309,7 @@ partial struct atomicSpanSetSpinePointer {
 //
 // It has the same semantics as atomic.UnsafePointer.
 internal static spanSetSpinePointer Load(this ж<atomicSpanSetSpinePointer> Ꮡs) {
-    return new spanSetSpinePointer((uintptr)Ꮡs.Ꮡa.Load());
+    return new spanSetSpinePointer(Ꮡs.Ꮡa.Load());
 }
 
 // Stores the spanSetSpinePointer.
