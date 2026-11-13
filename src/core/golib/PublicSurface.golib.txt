@@ -251,6 +251,7 @@ _
 append
 appendꓸꓸꓸ
 AreEqual
+array
 bitcast
 cap
 clear
@@ -732,6 +733,8 @@ go.builtin :: method static go.RangeOverInt<System.IntPtr> range<TArray>(go.ж<T
 go.builtin :: method static go.RangeOverInt<T> range<T>(T)
 go.builtin :: method static go.SelectOp ᐸꟷ<T>(go.channel<T>, go.NilType)
 go.builtin :: method static go.SequenceRange<T> range<T>(go.IArray<T>)
+go.builtin :: method static go.array<T> array<T>(System.IntPtr, T[])
+go.builtin :: method static go.array<T> array<T>(T[])
 go.builtin :: method static go.array<T>.RangeOver range<T>(go.array<T>)
 go.builtin :: method static go.array<T>.RangeOver range<T>(go.ж<go.array<T>>)
 go.builtin :: method static go.array<T>.RangeSnapshot range<T>(go.array<T>.RangeSnapshot)
