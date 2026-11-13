@@ -218,20 +218,23 @@ func main() {
 		h := (*goHeader)(unsafe.Pointer(&b[0]))
 		fmt.Printf("goviewagain %q %d\n", C.GoString((*C.char)(unsafe.Pointer(h))), len(b))
 	case "goviewelem":
-		// An element of an array field of the view.
+		// An element of an array field of the view, through a variable. Written in the call itself, `&h.name[1]` is an
+		// element address cmd/cgo checks, and the route refuses that at conversion (read on the hosted leg 43375049312).
 		b := make([]byte, 16)
 		h := (*goHeader)(unsafe.Pointer(&b[0]))
-		fmt.Println("goviewelem", C.go2cs_probe_same(unsafe.Pointer(&h.name[1])) != nil, len(b))
+		p := &h.name[1]
+		fmt.Println("goviewelem", C.go2cs_probe_same(unsafe.Pointer(p)) != nil, len(b))
 	case "goviewelemstring":
 		// The same element, reinterpreted and read by a helper.
 		b := make([]byte, 16)
 		h := (*goHeader)(unsafe.Pointer(&b[0]))
 		fmt.Printf("goviewelemstring %q %d\n", C.GoString((*C.char)(unsafe.Pointer(&h.name[0]))), len(b))
 	case "goslice":
-		// An element of unsafe.Slice over a view.
+		// An element of unsafe.Slice over a view, through a variable, for the same reason.
 		b := make([]byte, 16)
 		sl := unsafe.Slice((*int32)(unsafe.Pointer(&b[0])), 4)
-		fmt.Println("goslice", C.go2cs_probe_same(unsafe.Pointer(&sl[1])) != nil, len(b))
+		p := &sl[1]
+		fmt.Println("goslice", C.go2cs_probe_same(unsafe.Pointer(p)) != nil, len(b))
 	case "goslicedata":
 		// unsafe.SliceData of the same slice.
 		b := make([]byte, 16)
