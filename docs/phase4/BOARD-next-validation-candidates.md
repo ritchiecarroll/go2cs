@@ -37546,4 +37546,76 @@ in the runner's Compile row. Native AOT. Linux and macOS rows.
 
 — G (2026-11-13)
 
+## 2026-11-13 — G (sqlite-cs S1, C1's design as approved): a func value carried as a number takes one word per static function; predictions scored, no stop line tripped
+
+**Dated 2026-11-13 12:20 CST. Base master `651c4ad147` (batch 300), fix `60064685b2`, docs `bd76bba1c6` and
+`78c512b223`, corpus `f982350008`, Windows x64, SDK 10.0.400, go1.26.10.** The design is C1's
+`docs/phase4/DESIGN-sqlite-cs-funcptr.md`, sections 3.1, 3.3 and 3.8; COORD approved this seat's plan with its
+answers to section 3.5 and stop lines XG1-XG4 added to C1's X1.1-X1.6.
+
+**What was wrong.** ccgo keeps a C function pointer as a `uintptr`: it mints the number with `__ccgo_fp(f)` and
+calls through it by rebuilding a Go func value from `struct{ uintptr }`. At the base the tracked program
+`FuncWordShapes` (one site per class) fails on every class. r1 and r2 stop the transpile ("Unresolved dynamic
+struct type: struct{uintptr}", sqlite-cs's row S1). m1, m2 and w1 panic ("dereference of a managed pointer with no
+address"). w2 is silent: the store lands in the read view the reinterpret hands out, and the slot stays 0.
+
+**The fix.** golib's GoFuncCookie keys a delegate with no target (a converted top-level Go func) on its METHOD
+and holds that row for the process, so every delegate over the method, under any delegate type, answers one word,
+as Go's static funcval does. A closure or a bound method value keeps the per-instance word, held weakly. A
+delegate built over another (`new F(g)`) stands for g; the 64-thread race unit found that case on its first run.
+One recovery serves the new `GoFuncCookie.Func<F>(word)` and golib's Reinterpret route: the minted delegate, or one
+rebound over the same target and method, cached per delegate type for a static function only. A number that is no
+func word now panics by name on both routes. A 32-bit runtime is refused at the mint. The converter's new
+`funcWordOperations.go` recognises the six classes by their types in a package pre-pass and emits each through
+GoFuncCookie; a declared function is minted through the cached method-group conversion `(F)name`. ccgo's own m1
+spelling (a local `type iface [2]uintptr` before the return) was read from sqlite-cs's `repros/s1funcptrstruct`
+before the measurement, and both spellings are in the program and the unit test.
+
+**Not covered, by design:** a func stored into memory at a computed address (vfs/patches64.go's nine offset stores
+on every target), a recovery from a pointer or from memory (runtime's mcleanup and panic), and the
+`*unsafe.Pointer` forms, which already read through `unsafe.Pointer.OfFunc`.
+
+**Predictions, scored.**
+
+- Q1, the tracked program fails on every class at the base, loudly or silently: TRUE (four loud, w2 silent; read
+  class by class, because each loud failure hides the classes after it). At the fix its four rows pass and its 22
+  lines equal Go's.
+- Q2, the two-seeded `-stdlib` diff on four targets is the one reflect/value.cs `funcName` line, no map line, no
+  `.cs.auto` change, and the `-tests` arm of reflect and runtime does not differ: TRUE. Committed blob equalled the
+  base emission; the apply is `f982350008`. 0 of 226 hand-owned files clobbered in either arm.
+- Q3, the eight existing GoFuncCookieTests pass unchanged and each new unit fails once: TRUE. Seven new units; three
+  planted regressions of GoFuncCookie.cs (the static row off, the non-word panic and the 32-bit refusal off, the
+  wrapper rule off) fail 4, 2 and 1 of them, the eight existing none; restored byte-identical. The whole suite reads
+  2595 passed, 0 failed, 45 skipped. TestFuncWordShapes fails 9 asserts against a disabled pre-pass.
+- Q4, sqlite-cs on windows/amd64: TRUE for what can be read. Its demo stops at start-up on row S22, before S1, so the
+  run is NOT REACHED. Its closure (libc, sqlite/lib, sqlite) converted by each arm's converter: master refuses with 16
+  `struct{uintptr}` lines; the fix with none (4 other anonymous structs in sqlite's vtab.cs remain, other rows). The
+  fix emits 503 recoveries (libc 7, lib 496) and 12 mints (lib 1 m1 and 9 m2, sqlite 2 m2), each equal to C1's
+  per-package census, and its 1,303 `__ccgo_fp` call sites stay method-group arguments.
+- No-regression check (1065 behavioral packages transpiled, 8 platform-exclusive ones skipped on this host):
+  only FuncWordShapes' new files differ; no tracked golden moves.
+
+**Stop lines.** X1.1-X1.6 and XG1-XG4: none tripped. One public golib member is added, `Func<F>`, on a
+[go-tier2] type, and the row type is private. The reflect row validates 445 tests with 21 disclosed, equal to the
+bank, and 0 tests move against seat N1's reflect arm; the comparator was made to fail first.
+
+**Observed, not this seat's.** The runtime row dies at its 30-minute package deadline at master too
+(`TestSmhasherAvalanche` in flight; the Smhasher tests run about 1,600 s each on this box). Read at master and at
+the fix: 0 tests move between them. The bank (11,083 matched, 2026-11-09) was read on a run that finished.
+
+**Named requirements and routes.**
+- N3's park-set census (M:N stage (c)) includes sqlite-cs's three paths through a recovered func word: the mutex
+  calls, the VFS method calls and the busy handler's sleep, with sqlite-cs as the measured consumer. Until N3, a
+  park inside one of them holds a carrier (COORD's ruling on G2); on .4 master nothing changes.
+- N3 keys a twin on the METHOD and binds the delegate's target at the call (G1): nothing per instance, and a
+  rebound delegate finds the same twin.
+- winSeekFile's `TLARGE_INTEGER` recovery on windows/amd64 (C1's 3.3) is P1's M5, sqlite row S23.
+- S21's cpu name table is the next seat.
+
+**Not built or measured.** The converter-dev solution end to end (the fixture adds one member; its path is in the
+solution file and the project compiles in the runner's Compile row). Native AOT; linux and macOS; contention under
+many goroutines; per-site delegate caching at an m1 call site.
+
+— G (2026-11-13)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
