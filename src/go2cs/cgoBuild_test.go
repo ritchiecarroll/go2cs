@@ -489,3 +489,36 @@ func TestACgoProjectBuiltWithNoTargetTakesItsOwnTargetsStandardLibrary(t *testin
 		})
 	}
 }
+
+// A cgo project hands its project references a target, and the standard library builds only for the targets it is laid
+// out for (platformUniverse). A package's bindings are for the host's own target, which is not always one of them:
+// handing down darwin/arm64 refused every build of a cgo project on that host, by the library's own universe check
+// (DESIGN-cgo-phase3-marshaling §15, R5's second half; first read on the hosted leg 43335132134). The references take
+// the flavour the library has for the package's operating system. The project's own refusal still names the bindings'
+// own target.
+func TestACgoProjectHandsItsReferencesATargetTheStandardLibraryIsLaidOutFor(t *testing.T) {
+	for _, arm := range []struct{ target, reference string }{
+		{"windows/amd64", "windows/amd64"},
+		{"linux/amd64", "linux/amd64"},
+		{"linux/arm64", "linux/arm64"},
+		{"darwin/amd64", "darwin/amd64"},
+		// The library has one darwin flavour, which serves both of darwin's architectures.
+		{"darwin/arm64", "darwin/amd64"},
+	} {
+		goos, goarch, _ := strings.Cut(arm.target, "/")
+		referenceOS, referenceArch, _ := strings.Cut(arm.reference, "/")
+		blocks := cgoTargetBlocks(goos, goarch)
+
+		if !slices.Contains(platformUniverse, arm.reference) {
+			t.Errorf("%s: the arm expects %s, which the standard library is not laid out for", arm.target, arm.reference)
+		}
+
+		if want := "<AdditionalProperties>GoTargetOS=" + referenceOS + ";GoTargetArch=" + referenceArch + "</AdditionalProperties>"; !strings.Contains(blocks, want) {
+			t.Errorf("%s: the project does not hand its references %s:\n%s", arm.target, arm.reference, blocks)
+		}
+
+		if want := "!='" + arm.target + "'\""; !strings.Contains(blocks, want) {
+			t.Errorf("%s: the project's own refusal does not hold it to its bindings' target:\n%s", arm.target, blocks)
+		}
+	}
+}

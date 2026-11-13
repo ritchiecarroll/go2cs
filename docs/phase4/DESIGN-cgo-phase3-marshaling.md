@@ -560,3 +560,35 @@ The named risk outside the mechanism (R1 under `-cgo`) did not fire. No stop lin
 - **This record is a docs-only commit past the battery's tip.** It is gated alone: repoguard and the comment census.
 
 — H (2026-11-12)
+
+### 15.6 Amendment 2026-11-13: a defect of R5's second half on darwin/arm64, found after 3.0 landed
+
+3.0 landed in batch 292 (`4423d66052`). Increment 3.1's tip leg on darwin then read this (run 43335132134): on
+`osx-x64` every test passed; on `osx-arm64` the exit gate's program and 3.1's program both failed at the build, in
+10 s, with no compiler error:
+
+    Directory.Build.props(61,5): error : go2cs: darwin/arm64 is not a target the converted standard library is
+    laid out for (windows/amd64, linux/amd64, darwin/amd64, linux/arm64)
+
+**The cause is R5's second half.** A cgo project hands its own target to its project references. The standard library
+has no darwin/arm64 flavour: its darwin/amd64 flavour serves both of darwin's architectures, and before R5 the
+references took it by default. Handed `GoTargetArch=arm64`, the library's own universe check refuses the build. Every
+cgo project on a darwin/arm64 host was affected. linux, windows and darwin/amd64 were not.
+
+**Why no gate saw it.** 3.0 was gated with `cgo-e2e` on linux only (15.3 says so), and so was batch 292. R5 changed
+what every cgo project hands down on every operating system, and it owed a leg on each. P3.0-6 was scored MET on
+the two hosts it was read on. It was never read on darwin.
+
+**The fix** (`claude/h-cgo-target-handdown`, cut from master `130cecb136`): the references are handed the target the
+standard library is LAID OUT for (`cgoReferenceTarget`): the package's own pair when it is in the declared universe,
+and otherwise the flavour the library has for that operating system (darwin/arm64 takes darwin/amd64). The
+project's own refusal of a build for another target is unchanged, and still names the bindings' own pair.
+
+**Red first.** The hosted leg is the red. On H a text arm reads the handed-down pair for five targets
+(`TestACgoProjectHandsItsReferencesATargetTheStandardLibraryIsLaidOutFor`): red on master's route for darwin/arm64
+alone, green with the fix.
+
+**The lesson, COORD's and H's:** a seat that changes a build-time hand-down or default owes its end-to-end leg on
+EVERY operating system it touches, and the union gate re-runs that set.
+
+— H (2026-11-13)
