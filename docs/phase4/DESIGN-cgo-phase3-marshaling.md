@@ -879,3 +879,81 @@ COORD's other conditions:
 adds none. The door classifies and never dereferences (`AVoidPointerToFreedCMemoryStillCrossesAsGoLetsIt`).
 
 — H (2026-11-12)
+
+### 16.10 Record 2026-11-13: increment 3.1 as measured, and its predictions scored as worded
+
+**The trees.** The battery read `3271559fbf` (16.9's tip). Master then landed batch 294 (`7c7dc687f8`), which carries
+15.6's fix, and was merged in with no rebase at `c4b5d9613c`. The merge resolved two append-against-append conflicts
+with both sides kept (this record and the BOARD), and carries one test-only change (P3.1-9 below). The hosted legs
+below were read at `c4b5d9613c` unless a line names another tree.
+
+**The battery on H at `3271559fbf`**, one stage at a time:
+
+| Stage | Reading |
+|---|---|
+| `go test ./...` | rc 0, 11 packages ok, 0 cached, 1,474 s |
+| GolibTests, full and unfiltered | base `eabb7aad2c` 2,570 passed, 43 skipped of 2,613; tip 2,581 passed, 43 skipped of 2,624. The TRX difference is exactly the 11 new arms, and no existing row changed |
+| `go2cs.slnx` | NOT a reading of 3.1: 17,714 errors at the base and at the tip, the same set. An instrument finding, routed by COORD to R. H does not claim the solution builds |
+| `check-no-regression` | rc 0, byte-identical across all 1,035 behavioral packages |
+| the full behavioral suite | rc 0, PASS, 951 projects: Transpile, Compile and Target 951 of 951; Output 921 passed, 0 failed, 30 skipped, 0 timed out. No NOT MEASURED line. The tree was clean after it, so no golden moved |
+| two-seeded `-stdlib` comparison, A = `eabb7aad2c`, B = `3271559fbf` | windows/amd64, linux/amd64, darwin/amd64 and linux/arm64: 0 files, 0 diff lines on each. Every conversion exited 0, with 0 degraded packages |
+
+The comparison line was made to fail once after the run: on two seeded copies it read 0 files, and with one line
+appended to one file of one copy it read 1 file, and named it.
+
+**The hosted legs.** Counts are distinct test and subtest names, passed / failed / skipped.
+
+| Leg | Tree | Run | Reading |
+|---|---|---|---|
+| `converter-cgo` linux, the runner's gcc 15.2.0 | `c4b5d9613c` | 43365489712 | 145 / 0 / 9 |
+| `converter-cgo` linux, the pinned zig (clang 22.1.8) | `c4b5d9613c` | 43365503641 | 145 / 0 / 9 |
+| `converter-cgo` windows, gcc 15.2.0 | `c4b5d9613c` | 43365493831 | 143 / 0 / 12 |
+| `converter-cgo` darwin, Apple clang 17 | `c4b5d9613c` | 43365497275 | osx-x64 141 / 0 / 13; osx-arm64 141 / 0 / 13 |
+| `cgo-e2e` darwin | `c4b5d9613c` | 43365500071 | osx-x64 53 / 0 / 0; osx-arm64 53 / 0 / 0 |
+| `cgo-e2e` linux, the pinned zig | `3271559fbf` | 43335108528 | 53 / 0 / 0 |
+| `cgo-e2e` windows | `3271559fbf` | 43335120737 | 51 / 0 / 0 |
+
+At `3271559fbf` the four `converter-cgo` legs each failed one test (43335068049, 43335078194, 43335088003,
+43335098494), the stale expectation of P3.1-9, and `cgo-e2e` on osx-arm64 failed at the build for 15.6's defect
+(43335132134). Both are closed at `c4b5d9613c`. `cgo-e2e` on linux and windows was NOT re-read at `c4b5d9613c`:
+COORD ordered `converter-cgo` on the four hosts and `cgo-e2e` on darwin at the merged tip, and the union gate reads
+the other two again.
+
+**The scores.**
+
+| Prediction | Score |
+|---|---|
+| P3.1-1 | Base half: THREE OF FOUR as worded. `C.CString` and `C.GoString` were named as cmd/cgo's helpers, and the deferred call was named. `C.free` was named by the deferred refusal, not by its parameter. After half: MET, none of the four is refused. The fixture's other two refusals stand |
+| P3.1-2 | MET on every host read: cmd/cgo's binary imports `[free malloc]` under their plain names with linux gcc 15.2.0, linux clang 22.1.8 (zig), windows gcc 15.2.0, and Apple clang 17 on darwin/amd64 and darwin/arm64 |
+| P3.1-3 | MET on the three hosts: each of the program's 24 arms reads the same on the go arm and the go2cs arm on linux, windows and darwin. darwin/arm64, a fourth target, is MET at `c4b5d9613c` and was NOT MEASURED before it (15.6). How Go fails on a negative count was read on the go arm first (16.9) |
+| P3.1-4 | MET: the reassigned argument reaches C with its value at the `defer` (`321`), with no change to the converter's `defer` emission |
+| P3.1-5 | First sentence MET: every refusal arm of 16.3 is refused by name before the call, and each control crosses. Second sentence MISSED as worded: the one-expression `uintptr` form is refused when its number is exact, and CROSSES when arithmetic moves it inside the storage, as do the four hand-overs of 16.9's table. That is stop line S3.1-E, ruled by COORD and disclosed (16.9) |
+| P3.1-6 | MET on every clause: 0 corpus bytes on four targets, `check-no-regression` byte-identical, no behavioral golden moved, GolibTests up by the 11 new arms only |
+| P3.1-7 | MET on the one new golden, the Phase 3 fixture's bindings: 10 externs, 10 transition brackets, read on H and on every `converter-cgo` leg. The windows errno-slot clause is NOT MEASURED: no new golden is a windows one |
+| P3.1-8 | MET on both halves: under the runner's gcc cmd/cgo's binary imports `__isoc23_strtol` and not `strtol`; under the pinned zig it imports plain `strtol`. Also read: windows gcc and Apple clang import plain `strtol` |
+| P3.1-9 | MISSED, twice. The classifier test counted `_Cfunc__CMalloc` as plumbing (16.9). And the real-route test, which only a host with a C compiler runs, still expected the Phase 2 fixture's deferred call refused: red on all four `converter-cgo` legs at `3271559fbf`, fixed in the merge commit, green on all four at `c4b5d9613c`. Its first subtest now expects the goroutine call alone, and the rest of that test keeps the deferred call in the copy it converts, so each hosted host converts it from cmd/cgo's own output |
+| Most likely red (windows' `malloc` and `free` in two C runtimes) | Did NOT happen: the windows leg's round trips are green, 51 / 0 |
+
+**Stop lines.** S3.1-E FIRED and was ruled (16.9). S3.1-A, S3.1-B, S3.1-C, S3.1-D, S3.1-F and S3.1-G did not fire.
+No arm of Phase 2's exit gate moved for the registry clause of 16.9, so no Phase 2 correction is recorded.
+
+**Disclosures.**
+
+- **The memory-safety gap of 16.9 stands in 3.1:** a pointer rebuilt from a number that points into Go memory
+  crosses a `void *` unchecked. It is named in `docs/Limitations.md` and in the draft release notes.
+- **The receiver over-refusal is OWED** (16.9): it narrows in 3.2.
+- **The battery read `3271559fbf`, not the merged tip.** At `c4b5d9613c` H read repoguard and the comment census
+  (uncached, both ok) and the converter's cgo tests (76 passed, 0 failed, 24 skipped: the 24 need a C compiler or an
+  end-to-end build, and are the legs' to read). The union gate covers the rest at the batch.
+- **An overlap in run 1.** The gates of 15.6's fix (repoguard and the cgo tests, in another worktree) ran beside the
+  battery's `go test` and GolibTests stages. No timing row was in flight: the behavioral suite ran alone.
+- **A counting correction.** The counts H posted for 15.6's legs merged subtest names that differ only after
+  punctuation: `converter-cgo` darwin was posted as 126 passed and reads 129 by full name. Failures were 0 by either
+  count. The table above counts full names.
+- **This record is a docs-only commit past the legs' tip.** It is gated alone: repoguard and the comment census.
+
+**Owed after 3.1:** the golib seat proposal of 16.9 (register at the two pin moments, and refuse a number inside any
+live pinned range), on its own, with its predictions and its allocation-meter question first; and 3.2's design step,
+which opens with section 13.4's first rule.
+
+— H (2026-11-13)
