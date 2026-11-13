@@ -506,6 +506,7 @@
     <None Include="$(MSBuildThisFileDirectory)nilParamBoxTwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noinlineDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noInliningPartialUsing_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nonAsciiPtrCastSlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxy.go" />
     <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxyRefusals.go" />
     <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxyRefusals_test.go" />
