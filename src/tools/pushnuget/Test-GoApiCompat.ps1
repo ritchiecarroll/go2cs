@@ -284,6 +284,45 @@ try {
     Check 'a new package has no baseline' ($null -eq (Get-GoApiCompatBaselineVersion @() '1.26.10.3')) 'a baseline from nothing'
     Check 'a module revision takes its own module version''s previous revision' ((Get-GoApiCompatBaselineVersion @('1.0.300', '1.0.300.1', '1.0.300.2', '1.0.301') '1.0.300.3') -ceq '1.0.300.2') "$(Get-GoApiCompatBaselineVersion @('1.0.300', '1.0.300.1', '1.0.300.2', '1.0.301') '1.0.300.3')"
 
+    # THE PATCH HOP (COORD 20261113T061237Z, approving R's 01:10Z finding). 1.26.11.1 is the first release ever to cross a
+    # Go PATCH release, and under the first-three rule no 1.26.11.x is published, so every go.* package had no baseline:
+    # the guard compared nothing and read CLEAN, and the OQ4 rename and the promoted-forwarder move would have shipped
+    # unchecked against 1.26.10.3. A standard-library package's line is the Go MINOR (the break floor's line,
+    # Test-GoBreakFloor); a nugetgo module revision keeps the first three numbers, since a module version may break.
+    Write-Host 'a standard-library package''s baseline is the last published revision on its Go minor; a module''s keeps its version'
+    $minorTakes = (Get-Command Get-GoApiCompatBaselineVersion).Parameters.ContainsKey('Line')
+    function MinorBaseline([string[]]$Published, [string]$Current) {
+        if (-not $minorTakes) { return '<no -Line>' }
+        Get-GoApiCompatBaselineVersion -Published $Published -Current $Current -Line Minor
+    }
+    Check 'a patch hop''s first release compares with the previous patch line''s last revision' ((MinorBaseline $published '1.26.11.1') -ceq '1.26.10.3') "$(MinorBaseline $published '1.26.11.1')"
+    Check 'and so does its rehearsal' ((MinorBaseline $published '1.26.11.1-ci.7') -ceq '1.26.10.3') "$(MinorBaseline $published '1.26.11.1-ci.7')"
+    Check 'a later revision on the new patch line compares with the one before it' ((MinorBaseline ($published + '1.26.11.1') '1.26.11.2') -ceq '1.26.11.1') "$(MinorBaseline ($published + '1.26.11.1') '1.26.11.2')"
+    Check 'the first release of a new Go minor still has no baseline' ($null -eq (MinorBaseline $published '1.27.0.0')) "$(MinorBaseline $published '1.27.0.0')"
+    Check 'the default stays the first three numbers (a module revision): no baseline across a patch' ($null -eq (Get-GoApiCompatBaselineVersion $published '1.26.11.1')) "$(Get-GoApiCompatBaselineVersion $published '1.26.11.1')"
+    $guardTakesLine = (Get-Command Invoke-GoApiCompatGuard).Parameters.ContainsKey('BaselineLine')
+    Check 'the guard takes the line rule from its caller' $guardTakesLine 'Invoke-GoApiCompatGuard has no -BaselineLine'
+    Check 'the guard passes the line rule to the baseline picker' ($module -match 'Get-GoApiCompatBaselineVersion [^\r\n]*-Line \$BaselineLine') 'Invoke-GoApiCompatGuard does not pass -Line $BaselineLine'
+    $pushText = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/push-nuget.ps1'))
+    $packText = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/nugetgo/nugetgo-pack.ps1'))
+    $moveText = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1'))
+    Check 'push-nuget.ps1 (the standard library) takes the Go-minor line' ($pushText.Contains('-BaselineLine Minor')) 'push-nuget.ps1 does not pass -BaselineLine Minor'
+    Check 'New-GoApiCompatMoveSuppressions.ps1 (the standard library) takes the Go-minor line' ($moveText.Contains('-Line Minor')) 'it does not pass -Line Minor'
+    Check 'nugetgo-pack.ps1 (a module revision) keeps the default' (-not $packText.Contains('-BaselineLine Minor')) 'nugetgo-pack.ps1 passes -BaselineLine Minor'
+    # The arm that would have caught it: no go.* package compared, while some go.* package has a published revision on
+    # the release's Go minor below the release. That is a picker on the wrong line, never a first release.
+    $coverage = Get-Command Test-GoApiCompatBaselineCoverage -ErrorAction SilentlyContinue
+    function Coverage([int]$n, [string[]]$minor) {
+        if (-not $coverage) { return @('<no Test-GoApiCompatBaselineCoverage>') }
+        @(Test-GoApiCompatBaselineCoverage -PackagesCompared $n -MinorReleased $minor)
+    }
+    $f = @(Coverage 0 @('go.lib', 'go.fmt'))
+    Check 'no go.* package compared while the minor has a published release reads red, naming them' ($f.Count -eq 1 -and $f[0].Contains('go.lib') -and $f[0].Contains('go.fmt')) ($f -join '; ')
+    Check 'a guard that compared packages is not red here' ((Coverage 3 @('go.lib')).Count -eq 0) ((Coverage 3 @('go.lib')) -join '; ')
+    Check 'a first release of a minor (nothing published on it) is not red here' ((Coverage 0 @()).Count -eq 0) ((Coverage 0 @()) -join '; ')
+    Check 'a module (not go.*) is not read by this arm' ((Coverage 0 @('nugetgo.widget')).Count -eq 0) ((Coverage 0 @('nugetgo.widget')) -join '; ')
+    Check 'the guard runs the coverage arm' ($module.Contains('Test-GoApiCompatBaselineCoverage -PackagesCompared')) 'Invoke-GoApiCompatGuard does not call it'
+
     # Any release after 1.26.10.3 compares with 1.26.10.3, which already carries B3's break, so its entries match
     # nothing there and the guard refuses them (REVIEW-go-break-floor.md, item 4). They were deleted when 1.26.10.3 was
     # published (C2, 2026-11-10: every pre-publish pack on master refused on them, release-smoke 42720953059), with the

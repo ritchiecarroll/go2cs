@@ -89,7 +89,7 @@ try {
     foreach ($package in @(Get-ChildItem -LiteralPath $PackageDir -File -Filter '*.nupkg' | Sort-Object Name)) {
         $identity = Get-Identity $package.FullName
         $published = @(Get-GoApiCompatPublishedVersions $client $flat $identity.Id)
-        $baselineVersion = Get-GoApiCompatBaselineVersion -Published $published -Current $ReleaseVersion
+        $baselineVersion = Get-GoApiCompatBaselineVersion -Published $published -Current $ReleaseVersion -Line Minor
         if (-not $baselineVersion) { $noBaseline++; continue }
 
         $baseline = Save-GoApiCompatBaseline $client $flat $identity.Id $baselineVersion (Join-Path $work '_baselines')

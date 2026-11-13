@@ -443,15 +443,23 @@ function Test-GoApiCompatPackage {
     [pscustomobject]@{ Id = $Id; Compared = $compared; Assets = $assets; Failures = @($failures); Renamed = @($renamed) }
 }
 
-# The baseline for a package version: the highest published version on the same line (the same first three numbers),
-# below the current one and not a prerelease. $null when the line has no published version yet.
-function Get-GoApiCompatBaselineVersion([string[]]$Published, [Parameter(Mandatory)][string]$Current) {
+# The baseline for a package version: the highest published version on the same line, below the current one and not a
+# prerelease. $null when the line has no published version yet.
+#
+# The LINE is the caller's rule. Base (the default) is the same first three numbers: a nugetgo module revision, whose
+# first three numbers are its module version, and a module version may break. Minor is the same major.minor: the
+# standard library, whose line is the Go minor, as the break floor's is (Test-GoBreakFloor). Under Base, the first
+# release of a Go PATCH hop (1.26.11.1 after 1.26.10.3) has no baseline and the guard compares nothing; under Minor it
+# compares with 1.26.10.3 (COORD 20261113T061237Z). The first release of a new Go minor has none under either.
+function Get-GoApiCompatBaselineVersion([string[]]$Published, [Parameter(Mandatory)][string]$Current,
+    [ValidateSet('Base', 'Minor')][string]$Line = 'Base') {
     $mine = [version](($Current -split '[-+]', 2)[0])
     $candidates = foreach ($v in $Published) {
         if ($v -match '[-+]') { continue }
         $parsed = $null
         if (-not [version]::TryParse($v, [ref]$parsed)) { continue }
-        if ($parsed.Major -ne $mine.Major -or $parsed.Minor -ne $mine.Minor -or $parsed.Build -ne $mine.Build) { continue }
+        if ($parsed.Major -ne $mine.Major -or $parsed.Minor -ne $mine.Minor) { continue }
+        if ($Line -ceq 'Base' -and $parsed.Build -ne $mine.Build) { continue }
         if ($parsed -ge $mine) { continue }
         [pscustomobject]@{ Text = $v; Version = $parsed }
     }
@@ -489,6 +497,25 @@ function Save-GoApiCompatBaseline([System.Net.Http.HttpClient]$Client, [string]$
     $path
 }
 
+# The coverage arm. The guard is red when it compared no package while some go.* package it was asked about has a
+# published revision on the release's Go minor below the release. Such a package had a baseline to compare with, so
+# "no baseline" there is a picker on the wrong line, never a first release. This is the false CLEAN the first Go patch
+# hop would have shipped (1.26.11.1, every go.* package in NoBaseline under the first-three rule; COORD
+# 20261113T061237Z). -MinorReleased holds the ids found so. A module id (not go.*) is not read: a new module version
+# has no baseline by design. Returns failure strings.
+function Test-GoApiCompatBaselineCoverage {
+    param(
+        [int]$PackagesCompared,
+        [AllowEmptyCollection()][string[]]$MinorReleased = @()
+    )
+
+    $std = @($MinorReleased | Where-Object { $_ -like 'go.*' } | Sort-Object -Unique)
+    if ($PackagesCompared -gt 0 -or $std.Count -eq 0) { return @() }
+    $named = ($std | Select-Object -First 5) -join ', '
+    if ($std.Count -gt 5) { $named += " and $($std.Count - 5) more" }
+    @("the guard compared no package, but $named ha$(if ($std.Count -eq 1) { 's' } else { 've' }) a published revision on the release's Go minor below it: the baseline picker ran on the wrong line (a standard-library guard passes -BaselineLine Minor), so nothing was checked")
+}
+
 <#
     The guard over a set of packed packages. For each package it finds the baseline on the feed's flat container, and
     compares the two with the package's suppression file ($SuppressionFor maps an id to a path or $null). Returns:
@@ -518,7 +545,10 @@ function Invoke-GoApiCompatGuard {
         [Parameter(Mandatory)][string]$FlatContainer,
         [Parameter(Mandatory)][string]$RepoRoot,
         [Parameter(Mandatory)][string]$WorkDir,
-        [string]$ReleaseVersion
+        [string]$ReleaseVersion,
+        # The baseline line rule (Get-GoApiCompatBaselineVersion): Minor for the standard library (push-nuget.ps1),
+        # Base, the default, for a module revision (nugetgo-pack.ps1).
+        [ValidateSet('Base', 'Minor')][string]$BaselineLine = 'Base'
     )
 
     Add-Type -AssemblyName System.Net.Http
@@ -529,6 +559,7 @@ function Invoke-GoApiCompatGuard {
     $failures = New-Object System.Collections.Generic.List[string]
     $noBaseline = New-Object System.Collections.Generic.List[string]
     $noSurface = New-Object System.Collections.Generic.List[string]
+    $minorReleased = New-Object System.Collections.Generic.List[string]
     $baselines = @{}
     $packagesCompared = 0
     $compared = 0
@@ -538,8 +569,14 @@ function Invoke-GoApiCompatGuard {
         foreach ($package in $Packages) {
             $id = & $Identity $package.FullName
             $published = @(Get-GoApiCompatPublishedVersions $client $flat $id.Id)
-            $baselineVersion = Get-GoApiCompatBaselineVersion -Published $published -Current $(if ($ReleaseVersion) { $ReleaseVersion } else { $id.Version })
-            if (-not $baselineVersion) { $noBaseline.Add("$($id.Id) $($id.Version)"); continue }
+            $current = if ($ReleaseVersion) { $ReleaseVersion } else { $id.Version }
+            $baselineVersion = Get-GoApiCompatBaselineVersion -Published $published -Current $current -Line $BaselineLine
+            if (-not $baselineVersion) {
+                $noBaseline.Add("$($id.Id) $($id.Version)")
+                # Whether this package's Go minor has a published revision below the release: the coverage arm below.
+                if (Get-GoApiCompatBaselineVersion -Published $published -Current $current -Line Minor) { $minorReleased.Add($id.Id) }
+                continue
+            }
 
             $baseline = Save-GoApiCompatBaseline $client $flat $id.Id $baselineVersion (Join-Path $WorkDir '_baselines')
             $baselines[$id.Id] = [pscustomobject]@{ Version = $baselineVersion; Path = $baseline }
@@ -556,6 +593,7 @@ function Invoke-GoApiCompatGuard {
     finally { $client.Dispose() }
 
     if ($packagesCompared -gt 0 -and $compared -eq 0) { $failures.Add("the guard compared no asset of $packagesCompared package(s) with a baseline: it did not run") }
+    foreach ($line in @(Test-GoApiCompatBaselineCoverage -PackagesCompared $packagesCompared -MinorReleased @($minorReleased))) { $failures.Add($line) }
 
     [pscustomobject]@{
         Packages   = $packagesCompared
@@ -719,5 +757,5 @@ function Get-GoBreakFloor([AllowEmptyString()][string]$TargetsText) {
 
 Export-ModuleMember -Function Initialize-GoApiCompatTool, Get-GoApiCompatAssets, Get-GoApiCompatSuppressionMap,
     Read-GoApiCompatSuppressions, Test-GoApiCompatPackage, Get-GoApiCompatBaselineVersion, Get-GoApiCompatPublishedVersions,
-    Save-GoApiCompatBaseline, Invoke-GoApiCompatGuard,
+    Save-GoApiCompatBaseline, Invoke-GoApiCompatGuard, Test-GoApiCompatBaselineCoverage,
     Test-GoBreakFloor, Test-GoBreakFloorShape, Test-GoBreakFloorReachable, Get-GoBreakFloor, Get-GoBreakFloorFromPackage
