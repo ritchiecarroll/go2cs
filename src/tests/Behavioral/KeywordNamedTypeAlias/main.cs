@@ -1,5 +1,5 @@
-global using long = int;
-global using ulong = uint;
+global using @long = int;
+global using @ulong = uint;
 
 namespace go;
 
