@@ -799,3 +799,14 @@ The no-family control (`sbyte[]`) is 1,325,072 bytes under Native AOT.
    namespace. If not, the family goes into `golib.dll`, and every program carries 2.6 MB more there.
 2. **For COORD: the side observation in 7.7.2** (`TrimMode=partial` does not root golib under Native AOT on ILC
    10.0.14), as a BOARD line or a separate check.
+
+> **Amended 2026-11-13 (C1), on COORD's relay of the owner's rulings** (inbox C1 20261113T012200Z):
+> - **7.7.5 question 1 is RULED.** The family is `go.arrays.dll`, its own assembly in the go.lib package, built by
+>   golib's build. It holds 1-4096 lengths, `where T : unmanaged`, in namespace `go.arrays`.
+> - **7.7 is ACCEPTED as the I0 cut**, with its six predictions and six stop lines as written.
+> - **Implementation goes to C2; C1 reviews** for probe parity, the carriers, the gate's broken control and the
+>   generated equality.
+> - **Prediction P7, added before the cut and measured in it:** a program that does not opt in never loads
+>   `go.arrays.dll`. The measurement is a module-load trace of a non-opted program, which must show no load.
+> - **7.7.5 question 2** is a BOARD line, "under Native AOT, ILC 10.0.14's `TrimMode=partial` does not compile a
+>   referenced non-trimmable library's unreferenced code", routed by COORD.

@@ -36961,4 +36961,49 @@ with the fix.
 
 — G (2026-11-12)
 
+## 2026-11-13 — C1 (found by the go.arrays family measurement, design record REC-A 7.7): under Native AOT, ILC 10.0.14's `TrimMode=partial` does not compile a referenced non-trimmable library's unreferenced code, against golib's "keeps golib whole" — OPEN, routed by COORD
+
+**What was measured.** A probe library, `famlib`, built like golib: `EnableAotAnalyzer`, NOT marked trimmable. It
+held one non-generic class, `TrimControl`, that nothing references (a 3,000-case switch). An app referencing the
+library was published with `PublishAot=true` on linux-x64 (SDK 10.0.403, ILCompiler 10.0.14), with the ILC map file
+on.
+
+| publish | `--root:famlib` in the .rsp | binary | `TrimControl` entries in the map |
+|:--|:--|--:|--:|
+| `TrimMode=partial` | absent (`--defaultrooting` present) | 1,325,056 | 0 |
+| `TrimMode=full` | absent | 1,325,056 | not read |
+| `TrimMode=partial` plus `TrimmerRootAssembly famlib` | present | 1,637,936 | 5 |
+
+The same library without `TrimControl` is 1,325,056 bytes under partial, and 1,572,400 bytes rooted. So rooting
+compiled `TrimControl`, about 64 KiB, and partial alone compiled none of it.
+
+**What it contradicts.** `src/core/golib/GoFieldMetadata.cs:34` says the project template's `TrimMode=partial`
+"keeps golib and every converted assembly whole", and :83 offers it as one of two equal routes ("TrimMode=partial,
+or a trimmer root for each"). For Native AOT the probe shows the two are not equal: partial does not root a
+referenced library's unreferenced code. The SDK's ILC targets root an assembly only from `TrimmerRootAssembly`, or
+from a `ManagedAssemblyToLink` item whose TrimMode is `copy` (`Microsoft.NETCore.Native.targets:204-205`), and this
+publish set neither for the library.
+
+**Who meets it: NOT MEASURED.** golib's reflection reads METADATA (fields, offsets, attributes), which
+`--scanreflection` and the reflection-visible set may keep whether or not code is compiled. So the claim may be
+wrong in words and harmless in effect.
+
+NOT READ:
+- what metadata partial keeps for golib and a converted assembly;
+- whether any golib path needs CODE that only a reflection call reaches;
+- ILLink's `PublishTrimmed` without AOT, where `partial` is documented to copy non-trimmable assemblies.
+
+The probe library is a stand-in, not golib.
+
+**How it was met.** The control that let the family measurement show a cost at all (REC-A 7.7.2). The family's own
+answer does not depend on it: unused lengths cost 0 bytes under partial, and with `where T : unmanaged` a ROOTED
+full family is 2,301,488 bytes.
+
+**Evidence.** `docs/phase4/data/inlinearray-scout/family/README.md`, the rooting control section.
+
+**Owed (not taken here).** COORD routes the check: publish a converted program under partial with the map file on,
+and read whether golib's and the converted assembly's types and fields are present, against a rooted publish.
+
+— C1 (2026-11-13)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
