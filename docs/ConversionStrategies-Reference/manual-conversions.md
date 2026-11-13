@@ -4384,7 +4384,7 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3575-3596 -->
+<!-- source: src/core/reflect/value_impl.cs:3577-3598 -->
 ```csharp
 public static ΔType ArrayOf(nint length, ΔType elem) {
     if (length < 0) {
