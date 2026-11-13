@@ -77,9 +77,14 @@ func emitAutoConversionSiblings(markedFiles []FileEntry, fset *token.FileSet, pa
 				if !options.debugMode {
 					if r := recover(); r != nil {
 						showWarning("visit file error: %v in \"%s\" (auto-conversion sibling skipped)", r, filepath.Base(fileEntry.filePath))
+						recordDroppedFile(fileEntry.filePath, r, true)
 					}
 				}
 			}()
+
+			if visitFileFaultHook != nil {
+				visitFileFaultHook(fileEntry.filePath)
+			}
 
 			// The SAME constructor the normal per-file path uses. This was a hand-rolled copy of
 			// newFileVisitor's literal until 2026-08-19, and it had drifted by two fields — which
