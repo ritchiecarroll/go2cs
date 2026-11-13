@@ -982,3 +982,17 @@ opt-in's population. Auto is a SUBSET of the opt-in:
 >   unchanged; behavioral, FieldAccessReinterpret keeps `reparse` only (`record` slices `Path`, and `tail` was admitted only
 >   through `record`), GoImageCopyThroughView keeps `Dirent` and `Pair`, PointerFieldSelectors keeps `wire`. Converter:
 >   `inlineArrayFaces.go`.
+>   **The stated difference from ruling (a)** (accepted by COORD, 07:31Z): the ruling admits a whole-value copy between two
+>   admitted fields, since the type spells it; I0 keeps it out, so a seed's admission never depends on whether another
+>   type was admitted. Its population is 0 in lib and in the behavioral corpus.
+> - **D3, the emission.** An admitted struct is `[GoInlineLayout, StructLayout(LayoutKind.Explicit, Size = <Go size>)]`
+>   with each field at its Go offset. An array field is the `go.arrays` member `arrayN<T>`, nested arrays included, and a
+>   `[0]T` field is a primitive of `T`'s Go alignment marked `[GoAlignmentCarrier(typeof(array<T>))]`. An array literal
+>   that initializes such a field becomes `new arrayN<T>(elements)`, filling from the start and zeroing the rest. `len`
+>   and `cap` are the constant; a range over the index alone is `range(N)`, and a range over the values iterates a copy
+>   (`ΔRangeSnapshot()`), as Go's does. No `ΔClone` is generated for an inline field: the struct copy copies it. The
+>   project references `go.arrays`. A boxed member reads through the explicit `go.golib.IGoInlineArray` (length and
+>   element as `object`), which reflect's `Len` and `Index` take, so fmt prints it as Go does; reflection over the
+>   HOLDING struct panics with a named message (`reflect: field Named.FzName is a Go array held inline (go.arrays);
+>   reflection does not read or address it`), which [Limitations](../Limitations.md) records. `GoImage` lays an admitted
+>   struct out as one segment of its whole size. Converter: `inlineArrayEmission.go`, `zeroSizeFieldLayout.go`.
