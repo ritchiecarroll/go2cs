@@ -957,3 +957,129 @@ live pinned range), on its own, with its predictions and its allocation-meter qu
 which opens with section 13.4's first rule.
 
 — H (2026-11-13)
+
+### 16.11 Amendment 2026-11-13: the review found 3.1 UNSOUND as a boundary; the fix plan, posted before code
+
+**The verdict** (the adversarial review COORD launched at `80e8b3c7d8`): golib mints DERIVED boxes that drop their
+root's pin and source, and those cross every door as C memory, with their box, and with no `uintptr` in the Go
+source. So two sentences of 16.9 are FALSE as written: "the answer is NO for a box", and "it takes an explicit
+`uintptr` in the source". They were claims about the boxes golib mints FIRST, written as claims about every box.
+The arm enumerated first-generation boxes and never a box derived from one. H's miss. 3.1 does not land until the
+findings below are fixed in it. Ruling C covered numbers only, and none of this is a disclosure.
+
+**What held** (the review): every argument is classified before the transition, for all three parameter kinds;
+classification has no race for a refused box; and `StringData`, `SliceData` of a Go slice, `&x`, `&t.y`, a named
+receiver's fields, value receivers, by-value parameters, exact numbers and a single reinterpret are refused as
+intended. Not examined: variadic C functions, reflect's `UnsafePointer` and `UnsafeAddr`, sync/atomic, syscall
+buffers.
+
+**The findings.**
+
+| # | The Go | What golib did | Crosses |
+|---|---|---|---|
+| 1 | `h := (*hdr)(unsafe.Pointer(&b[0])); C.f(&h.n)` | a field of a native box is a fresh native box at the field's address, with no pin and no source | all three doors; over a Go array at any offset but 0 |
+| 2 | `(*C.char)(unsafe.Pointer(h))`, a second reinterpret | reinterpreting a native box mints a fresh native box at its address | `C.GoString(q)`, `unsafe.Pointer(q)` |
+| 3 | `unsafe.Slice((*int32)(unsafe.Pointer(&b[0])), 4)`, then `&sl[1]` or `unsafe.SliceData(sl)` | an element of a native-backed slice is a fresh native box | the struct pointer's door, which C WRITES through, and the void pointer's |
+| 4 | `C.f(unsafe.Add(unsafe.Pointer(&b[0]), 4))` | `unsafe.Add` returns a pointer with the new number and no source | the void pointer's door, for a slice element, a Go array and a local; offset 0 is refused |
+| 5 | `func (*T) U(q *T) { C.f(unsafe.Pointer(q)) }` | the receiver refusal of 16.9 skipped a method whose receiver has no name | the void pointer's door |
+| 6 | `p1 := &b[0]; n := uintptr(unsafe.Pointer(p1))`, then a second, temporary `&b[0]` is converted and dies | a registration REPLACES the entry at its address, and a dead registrant removes it | `n`, with `p1` alive and pinned |
+| 7 | a deferred call classifies at the call, not at the `defer` | cmd/cgo's own placement | ACCEPTED, once 6 is fixed |
+| 8 | the fifth-crossing arm lists first-generation boxes only | | the arm, not the door |
+
+The review MEASURED the harm of 1: `&h.n` returned from a helper, `h` dropped, a collection forced, and in 20 rounds
+of 20 the door handed C an address the slice no longer lived at.
+
+**The fix, as COORD ruled it.**
+
+- **One rule for every derivation (1, 2, and their kin).** A box derived from a native box that is NOT C memory
+  alone is minted retaining that box, in the slot a native box already has. The root, its pin and its source then
+  live as long as the derived box, and every door refuses it by the test it already makes. A native box's own
+  retained source has one production reader, the cgo doors, so nothing else observes the change. Sites: the field
+  box (`NativeFieldBox`), `Reinterpret`'s native arm, typed `unsafe.Add` over a native box, and the array-field
+  window, which shares the root's pin (every box kind has the pin field, and no box disposes its pin).
+- **The same defect at its source, a site the review did not list (ACCEPTED).** The number-to-pointer operator,
+  when its number RESOLVES to a live Go box of another pointee type, minted a native box with nothing, holding the
+  resolved box in its hand. It now mints it retaining that box. The "pointer rebuilt from a Go array's number" of
+  16.9 is then no longer flagless, `&h2.n` over it inherits, and the registry clause 3.1 added to the door becomes a
+  second lock instead of the only one.
+- **3, `unsafe.Slice` over a view (COORD: option (b), with a pre-check and a stop line).** A native-backed
+  `slice<T>` holds a base address and nothing to inherit FROM, and a new word on `slice<T>` would grow every slice
+  header in the corpus (not proposed). Its array field is unused when it is native-backed: it holds the shared
+  empty array. `unsafe.Slice` over a native box that is not C memory alone gives the slice its OWN zero-length
+  array, tied to the root by a weak table; a re-slice passes it along; an element or `SliceData` of such a slice is
+  minted retaining the root. No new field. **This also fixes a lifetime defect outside cgo:** a native-backed slice
+  over pinned managed memory holds nothing that keeps its root alive today, so the root can die and unpin under a
+  live slice. An arm with no cgo holds that shut.
+- **4, `unsafe.Add` on an `unsafe.Pointer` (COORD: option (b)).** "Add keeps the retained source" as first worded
+  breaks a reader: runtime's hash family, the pinner, the slice-header box and unsafe's store-through each take a
+  pointer's retained source as the referent AT its value, and would then act on offset 0. So `Add` over a pointer
+  that carries a box returns a pointer carrying a DERIVED native box, at the new value, retaining the source. The
+  readers see the truth at the value, and the door refuses it as reached through Go memory. Its cost is one more
+  object per such `Add`, gated by the census (below).
+- **5.** The receiver's type is read from the method's signature, never from a name.
+- **6, every live registrant kept (COORD: H's lean).** "Never replace a live entry" is not enough by construction:
+  A registers, B registers the same address and is not recorded, A dies, and B's number misses with B alive. Every
+  evaluation of `&b[0]` mints a fresh box, so two registrants at one address is the ordinary case. An entry stays
+  one weak reference while one registrant is live (today's bytes exactly), and becomes a small list at the second
+  DISTINCT live registrant. A read answers if ANY registrant is alive and still pinned there. Removal compares, in
+  `Resolve` and in `Sweep`. The list is pruned only after a collection has happened.
+- **8.** The derived forms join the arm, each through all three doors, with the reflect pair read as well.
+
+**The pre-check COORD ordered for 3: every reader of a slice's array field as IDENTITY, and what it does with a
+native-backed slice today.**
+
+| Reader | Today, for a native-backed slice | With its own zero-length array |
+|---|---|---|
+| `Overlaps` (copy and memmove overlap) | decided by ADDRESS, before the array is looked at | unchanged |
+| the hash | the base address | unchanged |
+| `==` on two slices | base, then the array's identity, then the window | would answer false for two `unsafe.Slice` calls over one view. **Keyed on the base for a native-backed pair in the same change,** so no answer moves |
+| the stack-append buffer's three identity tests | false: the array is never the buffer's store | false, the same |
+| element boxes and their canonical pair | each tests native-backed first, and uses the address | unchanged |
+| the array-dims stamp, on a ZERO-length slice only | reads the shared empty array as "no backing" and substitutes a managed empty slice | would keep the slice. Guarded on native-backed first, so today's answer stands |
+| `Array.Copy` between managed backings, the array alias, the string view | read the array's CONTENTS, which are empty either way | unchanged |
+
+No overlap or alias decision turns wrong. One reader (`==`) would have answered differently, and is keyed on the
+base, as COORD's stop line prescribes. If a gate shows another, SF-4 fires.
+
+**Predictions, to be scored as worded.**
+
+- **PF-1 (the reds).** Each shape of findings 1 to 6, built from the converter's own emission, crosses at
+  `80e8b3c7d8` through every door it can reach, and is refused with the fix. Beside each, the same form over C
+  memory still crosses.
+- **PF-2 (lifetime).** Three arms, each red at `80e8b3c7d8`: a field of a view outlives the view (the root is still
+  alive after a forced collection while the field's box is); an `unsafe.Slice` over a view outlives the view, with
+  no cgo; and the review's registry sequence (p1 live and pinned, a temporary second mint dies, a collection, `n`
+  still refused).
+- **PF-3.** GolibTests' total rises by the new arms. An existing row changes only if it asserts, by name, the state
+  this fix removes (a source dropped by `Add`, a flagless box from a resolved number). NOT READ which rows do:
+  they are named in the red commit, before the fix, and a row that moves without being named there is SF-2.
+- **PF-4.** 0 corpus bytes on four targets, `check-no-regression` byte-identical, no behavioral golden moves. The
+  only converter change is on the cgo route.
+- **PF-5.** The banked canaries read their banked counts: the five largest reflect consumers by verdict count
+  (derived at gate time), the cost canary, and `runtime`, `os`, `syscall`, `internal/runtime/maps` and `crypto/tls`,
+  because the operator, the field box and `Add` are on their paths. The weakest are the allocation asserts where
+  `Add` runs inside an asserted body.
+- **PF-6.** The registration census reads 0 inside every banked asserted body for `Add` over a carrying pointer
+  and for new registry entries at an address that already has a live registrant.
+- **PF-7.** Hosted: `converter-cgo` on four hosts and `cgo-e2e` on linux, windows and darwin (both architectures)
+  read as they did at `c4b5d9613c`, every C-memory arm included.
+
+**Stop lines.**
+
+- **SF-1.** A C-memory control is refused, or an end-to-end arm that passed at `80e8b3c7d8` fails.
+- **SF-2.** An existing GolibTests row moves that the red commit did not name.
+- **SF-3.** A banked canary row, or a banked allocation assert, moves. Nothing is re-baselined.
+- **SF-4.** A slice identity decision changes anywhere: stop. Identity is then keyed on the base address for every
+  native-backed slice.
+- **SF-5.** The fix needs a new field on `ж<T>`, on `slice<T>` or on `unsafe.Pointer`, a new box kind, or a
+  go2cs-gen change.
+- **SF-6.** A corpus byte moves, or a golden outside the cgo tests.
+- **SF-7.** The census reads nonzero in a banked asserted body for `Add` or for the registry's list: stop and post
+  the row. For `Add` the choice is then between the readers' own check and a scoped derivation.
+- **SF-8.** A derived form the arms can build still crosses after the fix. It is not disclosed.
+
+**Order.** Reds from the review's shapes; the fix; the full gates of 16.5 plus PF-5's canaries; the hosted legs; a
+narrow re-review of the delta, which COORD launches, on the three mechanisms by name (the anchor array, the derived
+box of `Add`, the registry's list); then 3.1 lands; then section 17, whose rows 1 to 4 and 6 these fixes change.
+
+— H (2026-11-13)
