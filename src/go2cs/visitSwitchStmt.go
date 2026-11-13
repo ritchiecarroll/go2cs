@@ -393,6 +393,21 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			}
 		}
 
+		// A tag that is ONE plain identifier is read the way Go wrote it (switchTagInPlace, switchTagTempPrefix):
+		// in place when nothing can change it between the first and the last label test, otherwise through a
+		// temp named after it (`var osᴛ1 = os;`). The "expr" name above stays taken, so later temps keep their
+		// numbers.
+		tagInPlace := false
+
+		if tag != nil && (!patternSwitch || stringTag) {
+			if v.switchTagInPlace(tag, caseClauses, hasFallthroughs) {
+				exprVarName = v.convExpr(tag, v.switchTagExprContexts(tag))
+				tagInPlace = true
+			} else if prefix := switchTagTempPrefix(tag, v.info); prefix != "" {
+				exprVarName = v.getTempVarName(prefix)
+			}
+		}
+
 		var matchVarName string
 
 		if hasFallthroughs {
@@ -555,7 +570,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 		}
 
 		if patternSwitch {
-			if stringTag {
+			if stringTag && !tagInPlace {
 				v.writeSwitchTagTemp(tag, exprVarName)
 			}
 
@@ -569,7 +584,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			return
 		}
 
-		if tag != nil {
+		if tag != nil && !tagInPlace {
 			v.writeSwitchTagTemp(tag, exprVarName)
 		}
 
@@ -997,6 +1012,151 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 }
 
 // writeSwitchTagTemp declares the temp a switch evaluates its tag into once (`var exprᴛ1 = tag;`).
+// switchTagTempPrefix returns the temp-name prefix for a switch tag that is one plain identifier: its C# name with
+// any `@` escape stripped (`os`, `string`, `ΔLock`), so the temp reads as the value it holds (`osᴛ1`). Any other
+// tag returns "" and keeps the `exprᴛN` temp: a selector, call or index named after one segment would hide what was
+// read.
+func switchTagTempPrefix(tag ast.Expr, info *types.Info) string {
+	ident, ok := ast.Unparen(tag).(*ast.Ident)
+
+	if !ok || ident.Name == "_" {
+		return ""
+	}
+
+	switch info.ObjectOf(ident).(type) {
+	case *types.Var, *types.Const:
+		return strings.TrimPrefix(getSanitizedIdentifier(ident.Name), "@")
+	}
+
+	return ""
+}
+
+// switchTagInPlace reports whether a switch tag can be read in every label test instead of through a temp. Go
+// evaluates the tag once; reading the variable again in each test is the same value when nothing can write it
+// between the first test and the last:
+//   - the tag is a local variable or parameter of the function being converted (not a package variable or a field);
+//   - its address is never taken, directly or by a pointer-method call, so no pointer reaches it;
+//   - no func literal reads or writes it, so no closure or goroutine reaches it;
+//   - no case label calls a function (a type conversion is not a call) or receives from a channel;
+//   - in a switch with fallthrough, no clause body assigns it.
+//
+// A pattern switch tests its labels before any body runs. A fallthrough switch is a chain of standalone ifs, so a
+// later label is tested after an earlier body has run, and a body that writes the tag would change a comparison Go
+// made against the original value; such a switch keeps the temp.
+func (v *Visitor) switchTagInPlace(tag ast.Expr, caseClauses []*ast.CaseClause, hasFallthroughs bool) bool {
+	ident, ok := ast.Unparen(tag).(*ast.Ident)
+
+	if !ok || v.currentFuncDecl == nil || v.currentFuncDecl.Body == nil {
+		return false
+	}
+
+	local, ok := v.info.ObjectOf(ident).(*types.Var)
+
+	if !ok || local.IsField() || local.Pkg() == nil || local.Parent() == nil || local.Parent() == local.Pkg().Scope() {
+		return false
+	}
+
+	if v.objectAddressTaken(local, v.currentFuncDecl, false) || v.funcLiteralReaches(local, v.currentFuncDecl.Body) {
+		return false
+	}
+
+	for _, clause := range caseClauses {
+		for _, label := range clause.List {
+			if v.exprCallsOrReceives(label) {
+				return false
+			}
+		}
+
+		if hasFallthroughs && v.stmtsAssign(local, clause.Body) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// stmtsAssign reports whether any statement in stmts, at any depth, assigns local: an assignment, an increment or
+// decrement, or a range clause that assigns its key or value.
+func (v *Visitor) stmtsAssign(local *types.Var, stmts []ast.Stmt) bool {
+	assigned := false
+
+	isLocal := func(expr ast.Expr) bool {
+		ident, ok := ast.Unparen(expr).(*ast.Ident)
+		return ok && v.info.ObjectOf(ident) == local
+	}
+
+	for _, stmt := range stmts {
+		ast.Inspect(stmt, func(node ast.Node) bool {
+			switch x := node.(type) {
+			case *ast.AssignStmt:
+				assigned = assigned || slices.ContainsFunc(x.Lhs, isLocal)
+			case *ast.IncDecStmt:
+				assigned = assigned || isLocal(x.X)
+			case *ast.RangeStmt:
+				assigned = assigned || x.Tok == token.ASSIGN && (isLocal(x.Key) || x.Value != nil && isLocal(x.Value))
+			}
+
+			return !assigned
+		})
+	}
+
+	return assigned
+}
+
+// funcLiteralReaches reports whether any func literal in body that does not itself declare local refers to it.
+func (v *Visitor) funcLiteralReaches(local *types.Var, body ast.Node) bool {
+	reached := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		if reached {
+			return false
+		}
+
+		funcLit, ok := node.(*ast.FuncLit)
+
+		if !ok || (funcLit.Pos() <= local.Pos() && local.Pos() < funcLit.End()) {
+			return true
+		}
+
+		ast.Inspect(funcLit.Body, func(inner ast.Node) bool {
+			if ident, ok := inner.(*ast.Ident); ok && v.info.ObjectOf(ident) == local {
+				reached = true
+			}
+
+			return !reached
+		})
+
+		return !reached
+	})
+
+	return reached
+}
+
+// exprCallsOrReceives reports whether expr contains a function call (a type conversion is not one), a receive, or a
+// func literal.
+func (v *Visitor) exprCallsOrReceives(expr ast.Expr) bool {
+	found := false
+
+	ast.Inspect(expr, func(node ast.Node) bool {
+		switch x := node.(type) {
+		case *ast.CallExpr:
+			if tv, ok := v.info.Types[x.Fun]; !ok || !tv.IsType() {
+				found = true
+			}
+		case *ast.UnaryExpr:
+			if x.Op == token.ARROW {
+				found = true
+			}
+		case *ast.FuncLit:
+			found = true
+		}
+
+		return !found
+	})
+
+	return found
+}
+
 func (v *Visitor) writeSwitchTagTemp(tag ast.Expr, name string) {
 	if v.options.preferVarDecl {
 		v.writeOutput("var ")

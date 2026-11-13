@@ -164,7 +164,15 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 			flushHoist(hoistBuf)
 		}
 
+		// A case whose channel is one plain identifier names its temp after that channel (`var quitᴛ1 = quit;`,
+		// `var cᴛ1 = c.ᐸꟷ(x, ꓸꓸꓸ);`), as a switch tag's temp does (switchTagTempPrefix). The "sel" name stays taken,
+		// so later temps keep their numbers.
 		tempName := getGlobalTempVarName("sel")
+
+		if prefix := switchTagTempPrefix(selectCaseChannel(comClause), v.info); prefix != "" {
+			tempName = v.getTempVarName(prefix)
+		}
+
 		caseTemps[i] = tempName
 
 		v.outputBuilder.WriteString(v.newline)
@@ -499,4 +507,25 @@ func (v *Visitor) selectCommBinding(lhs ast.Expr, isDefine bool) (boundName stri
 	}
 
 	return v.convExpr(lhs, nil), ""
+}
+
+// selectCaseChannel returns the channel expression of a select case: the send statement's channel, or the operand of
+// the receive in `<-ch`, `v := <-ch` or `v, ok = <-ch`; nil for the default case.
+func selectCaseChannel(comClause *ast.CommClause) ast.Expr {
+	switch comm := comClause.Comm.(type) {
+	case *ast.SendStmt:
+		return comm.Chan
+	case *ast.AssignStmt:
+		if len(comm.Rhs) == 1 {
+			if unaryExpr, ok := comm.Rhs[0].(*ast.UnaryExpr); ok && unaryExpr.Op == token.ARROW {
+				return unaryExpr.X
+			}
+		}
+	case *ast.ExprStmt:
+		if unaryExpr, ok := comm.X.(*ast.UnaryExpr); ok && unaryExpr.Op == token.ARROW {
+			return unaryExpr.X
+		}
+	}
+
+	return nil
 }
