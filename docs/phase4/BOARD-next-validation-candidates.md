@@ -37374,4 +37374,107 @@ Compile row. Native AOT. Linux and macOS rows.
 
 — G (2026-11-12)
 
+## 2026-11-13 — G (seat N1, COORD's cut of the nil-func design): a typed nil func in interface space is ONE value, stated by one golib helper; five predictions scored, no stop line tripped
+
+**Dated 2026-11-13 01:48 CST. Base `bb7419bef0`, fix `d3dc97e466` (the `-tests` rows read at `0f5abeac11`, its
+docs re-cite), Windows x64, SDK 10.0.400, go1.26.10.** The two rows above this one hold the earlier readings.
+This is seat N1 of two: the roots in golib and in the two hand-owned reflect files. Seat N2, the converter's
+func-type case of a type switch, stacks on it.
+
+**What was wrong.** A nil func of a named func type that reaches an interface is held in one of three shapes:
+the canonical carrier (boxed into `any`), a generated value adapter over a null delegate (converted to an
+interface), or the generic runtime shell over a null delegate (asserted to an interface). Each path that asks
+what an interface value IS answered for some shapes and not for others, so one Go value read differently by
+route. Eleven of the census's 34 probes hold no reflect call: this is a defect of the language surface first.
+
+**The design's measurement, read 2026-11-13 00:20 CST at the base.** 714 reads: 7 carriers (4 named nil funcs,
+in and out of the package; one unnamed; two controls, a live func and a typed nil pointer), 34 probes.
+
+- L1, a type switch never matches a typed nil func and falls to default in silence, in every arm, direct
+  included: 38 reads, and L2 masks 6 more. Seat N2's root.
+- L2, a re-assertion to its own interface misses (4 reads), an assertion through an assertion or an error misses
+  (6), and an assertion to `error` through a named interface misses (4).
+- L3, the panic text names "NilFuncValue" (7 reads) or "interface is nil".
+- reflect: `Call` crashes (11 reads), `Method` and `MethodByName` crash in the direct arm (8), `Set` and
+  `Convert` into an interface fail (16).
+
+**The fix: ONE RULE, one helper.** In interface space a typed nil func is its func type's canonical carrier, and
+a shell or adapter over a null func stands for it. `GoReflect.NilFuncOf` states it, and every reader goes
+through it:
+
+- the type assertion (its try form, its throwing form and the equality unwrap) resolves a shell or adapter over
+  a null func to the carrier, which the carrier arm that already existed answers by its type;
+- the dynamic type and the nil-word test answer the func type for the generic shell;
+- the method bind hands the receiver cast a null delegate, where it handed the carrier and the cast died;
+- assignability lets an interface slot take a typed nil func, as the language does;
+- the type name and the type-assertion panic name the func type, where they named the carrier class or a nil
+  interface;
+- reflect's and reflectlite's unwrap keep the carrier for a shell over a null func, and reflect's `Call` and
+  `CallSlice` test for a nil func before the delegate cast, with Go's text: "call of nil function".
+
+`NilFuncOf` is the ONE public golib member the seat adds. It sits on `GoReflect`, a tier-2 type, so it is a seam
+for the converted reflect packages and no user API. The own-type arm of the assertion that the new unwrap makes
+unreachable is removed. `builtin.type()` is NOT changed: no read needs it. No converter change, and the corpus
+does not move.
+
+**The census: 714 reads, 7 carriers, four arms, each scored against Go's output.** direct is the value in an
+`any`; va is a static conversion to an interface; sh is the `any` asserted to that interface; er is a twin type
+converted to `error`.
+
+| Arm | Base: EQUAL / SILENT / PANIC / CRASH | Fix: EQUAL / SILENT / PANIC / CRASH |
+|---|---|---|
+| direct | 188 / 22 / 15 / 13 | 222 / 16 / 0 / 0 |
+| va | 172 / 20 / 8 / 4 | 190 / 14 / 0 / 0 |
+| sh | 100 / 68 / 36 / 0 | 190 / 14 / 0 / 0 |
+| er | 44 / 8 / 14 / 2 | 62 / 6 / 0 / 0 |
+
+EQUAL moves from 504 to 664. The 50 reads that still differ are all SILENT: 44 type switch reads, the rows of
+seat N2, and 6 address prints of a live func, which no two runs share. Set check, both ways: 160 reads closed, 0
+reads newly differ. The typed nil pointer, the control, differs in no read at either ref.
+
+**Predictions, posted with the design, scored.**
+
+- P1, after N1 160 reads are EQUAL and exactly 44 type switch reads remain: TRUE.
+- P2, after N2 those 44 are EQUAL: seat N2's to score.
+- P3, no read EQUAL today leaves EQUAL, here and in the 1028 reads of the unwrap seat: TRUE in both.
+- P4, the unwrap seat's 14 open reads close in N1: TRUE. Its census reads 257 EQUAL in each of its four arms,
+  1028 of 1028.
+- P5, the seven `-tests` rows and GolibTests keep their sets: TRUE. Each row was read as `-tests` on Windows
+  at the fix, by a converter built at that ref, and compared with the bank and, test by test, with the unwrap
+  seat's fix arm (`74fafaa67d`, before its merge of master). The base itself was not read as `-tests` rows.
+- P6, the seat has a tracked program, red first: TRUE. `NilFuncInterfaceReads` (645 lines of Go output) at the
+  base prints 21 lines and dies with an InvalidCastException at "direct step method", exit code 2, with its
+  Transpile and Compile rows passing. At the fix its four rows pass and its output equals Go's on every line.
+
+| Package | Bank | Fix | Tests that moved |
+|---|---|---|---|
+| reflect | 445 matched, 21 disclosed | 445 with 21 | 0 |
+| fmt | 62 matched, 1 disclosed | 62 with 1 | 0 |
+| errors | 80 matched, 0 disclosed | 80 | 0 |
+| sort | 63 matched, 0 disclosed | 63 | 0 |
+| encoding/json | 550 matched, 0 disclosed | 550 | 0 |
+| encoding/binary | 143 matched, 3 disclosed | 143 with 3 | 0 |
+| text/template | 53 matched, 0 disclosed | 53 | 0 |
+
+The comparator was made to fail first: one verdict flipped in a copy of a results file reads "moved 1".
+
+GolibTests, the whole suite at the fix: Failed 0, Passed 2572, Skipped 45. The seat adds
+`NilFuncCarrierRuleTests`, four tests that hold the rule on the three shapes without a conversion. It was made to
+fail once: with the dynamic type's shell arm regressed, one of the four fails and names "the dynamic type is the
+func type". The file was restored byte-identical and the four pass again.
+
+**Stop lines.** S1 (a read leaves EQUAL), S2 (a file outside golib and the two reflect files, or more than one
+public golib member), S3 (a value that is no adapter pays a new type test in the assertion or the type switch
+operand) and S4 (a `-tests` row or GolibTests moves): none tripped. S3 holds by construction, not by a timing:
+every new test sits behind the adapter probe that was already there, or on the null-Value path. S5 and S6 are
+seat N2's.
+
+**Not examined.** A nil func of a named type stored into a slot of an UNNAMED func type with the same signature.
+
+**Not built or measured.** The fixture adds two members to the converter-dev solution; that solution was not
+built end to end. Read instead: both member paths are in the solution file and exist, and both projects compile
+in the runner's Compile row. Native AOT. Linux and macOS rows.
+
+— G (2026-11-13)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
