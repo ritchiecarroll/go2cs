@@ -11,7 +11,9 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/constant"
 	"go/types"
+	"strings"
 )
 
 // INLINE-ARRAY EMISSION (I0 part D3; docs/phase4/DESIGN-array-value-storage.md, 7.7.4)
@@ -99,7 +101,7 @@ func (v *Visitor) markInlineArrayLiterals(lit *ast.CompositeLit) {
 func (v *Visitor) inlineArrayLiteral(lit *ast.CompositeLit) (string, bool) {
 	array, ok := v.inlineArrayLiterals[lit]
 
-	if !ok || compositeLitIsKeyed(lit.Elts) {
+	if !ok {
 		return "", false
 	}
 
@@ -108,6 +110,10 @@ func (v *Visitor) inlineArrayLiteral(lit *ast.CompositeLit) (string, bool) {
 	// A nested array literal is itself an inline array (every array in an admitted closure is).
 	if inner, isArray := array.Elem().Underlying().(*types.Array); isArray && inner.Len() > 0 {
 		for _, elt := range lit.Elts {
+			if kv, isKeyed := elt.(*ast.KeyValueExpr); isKeyed {
+				elt = kv.Value
+			}
+
 			if elemLit, isLit := ast.Unparen(elt).(*ast.CompositeLit); isLit {
 				v.inlineArrayLiterals[elemLit] = inner
 			}
@@ -118,7 +124,50 @@ func (v *Visitor) inlineArrayLiteral(lit *ast.CompositeLit) (string, bool) {
 		return fmt.Sprintf("new %s()", v.inlineArrayTypeName(array)), true
 	}
 
-	return fmt.Sprintf("new %s(%s)", v.inlineArrayTypeName(array), v.convExprList(lit.Elts, lit.Lbrace, v.withValueCloneArgs(lit.Elts, v.elidedElemContext(array.Elem(), lit.Elts)))), true
+	if !compositeLitIsKeyed(lit.Elts) {
+		return fmt.Sprintf("new %s(%s)", v.inlineArrayTypeName(array), v.convExprList(lit.Elts, lit.Lbrace, v.withValueCloneArgs(lit.Elts, v.elidedElemContext(array.Elem(), lit.Elts)))), true
+	}
+
+	// A KEYED literal (C1's review, M3): Go's keys are constants, so each element lands at its position, a positional
+	// element after a key takes the next one, the gaps are the element's zero value, and the constructor zero-fills past
+	// the last element.
+	slots := []ast.Expr{}
+	index := int64(0)
+
+	for _, elt := range lit.Elts {
+		value := elt
+
+		if kv, isKeyed := elt.(*ast.KeyValueExpr); isKeyed {
+			key, exact := constant.Int64Val(constant.ToInt(v.info.Types[kv.Key].Value))
+
+			if !exact {
+				return "", false
+			}
+
+			index, value = key, kv.Value
+		}
+
+		for int64(len(slots)) <= index {
+			slots = append(slots, nil)
+		}
+
+		slots[index] = value
+		index++
+	}
+
+	elements := make([]string, len(slots))
+
+	for i, value := range slots {
+		if value == nil {
+			elements[i] = "default"
+			continue
+		}
+
+		single := []ast.Expr{value}
+		elements[i] = v.convExprList(single, lit.Lbrace, v.withValueCloneArgs(single, v.elidedElemContext(array.Elem(), single)))
+	}
+
+	return fmt.Sprintf("new %s(%s)", v.inlineArrayTypeName(array), strings.Join(elements, ", ")), true
 }
 
 // inlineArrayHeld reports whether t is a struct whose arrays are held inline: one this package admits, or a named struct

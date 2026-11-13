@@ -321,6 +321,7 @@
     <None Include="$(MSBuildThisFileDirectory)inlineArrayAdmission.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayAdmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayEmission.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp.go" />
