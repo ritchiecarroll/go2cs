@@ -37546,4 +37546,85 @@ in the runner's Compile row. Native AOT. Linux and macOS rows.
 
 — G (2026-11-13)
 
+## 2026-11-13 — G (sqlite-cs S21, C1's design as approved): x/sys/cpu's cpuid and xgetbv take golib bodies by name; predictions scored
+
+**Dated 2026-11-13 17:01 CST. Base master `651c4ad147` (batch 300), fix `bb79fb1f20`, docs `d74c7fc15d`,
+registry wording and re-cited notes `95d3b9dcd4`, the GOROOT gate `37de01a37d`, Windows x64, SDK 10.0.400,
+go1.26.10.** The design is C1's
+`docs/phase4/DESIGN-sqlite-cs-funcptr.md`, sections 2.3 and 3.7; COORD approved this seat's plan and both of its
+narrowings.
+
+**What was wrong.** golang.org/x/sys/cpu decodes its feature flags from `cpuid` and `xgetbv` in its init, and
+writes both in assembly. Their bodyless declarations converted to stubs that throw, so a converted program that
+imports x/sys/cpu died before `main` (modernc.org/libc imports it on windows and darwin: sqlite-cs row S21). A
+module importing x/sys/cpu v0.49.0, converted with `-recurse` at master, built and run here: exit 2, nothing
+printed, `NotImplementedException` "cpuid: no implementation reached this compilation" out of x/sys/cpu's init.
+The conversion named neither function.
+
+**The fix.** golib's `go.golib.GoCpu`, the one new public type (tier 2, EditorBrowsable Never): `Cpuid` reads the
+processor through `X86Base.CpuId`; `Xgetbv` SYNTHESISES XCR0 from `Sse`, `Avx` and `Avx512F.IsSupported`, since
+.NET has no XGETBV, and its doc comment says so. The converter's `asmForwardBodies.go` maps (golang.org/x/sys/cpu,
+function) to that body together with the Go signature it implements; a listed function takes the linkname
+forwarder writer. A listed function declared with another signature refuses its package before any file is
+written (`GO2CS2011`). A bodyless function of a module outside GOROOT that nothing forwards keeps its stub and is
+named (`GO2CS2012`, a warning). Both codes follow C2's two (inline arrays, batch 302).
+
+**Predictions, scored.**
+
+- R1, red at master: TRUE, as above.
+- R2, the same program at the fix prints Go's output on this host, line by line: TRUE. Exit 0; its 29 feature
+  flags equal Go's, so no flag differs from what Go's own cpuid and xgetbv read (stop line X2.2 not tripped).
+- R3, the converter tests (both forwards, the stub kept and named, a wrong signature refused): TRUE; planted
+  regressions fail them (forward off: 4 asserts; refusal off: 1; warning off: 1), restored byte-identical.
+- R4, the corpus does not move: FALSE at `95d3b9dcd4` (4 vendored files, below), TRUE at `37de01a37d`. The
+  two-seeded reconvert of the four-target universe from committed refs, with the `-tests` conversion of
+  internal/cpu: 0 files differ, no file in one arm only, 0 of 226 hand-owned files clobbered in either arm, and no
+  GO2CS2011 or GO2CS2012 in std. The no-regression check (1056 behavioral packages, 8 platform-exclusive ones
+  skipped on this host): byte-identical. Its one bodyless function, MapCloneLinkname's linkname pull, is
+  forwarded, so no fixture is named as a stub.
+- R5, sqlite-cs's windows closure: x/sys/cpu's two functions emit forwards, and no assembly function is left a
+  stub. The prediction also said 0 warnings, and that is FALSE as worded: `GO2CS2012` names 8 stubs, all linkname
+  pulls, which the warning covers by design: bigfft's 7 pulls of math/big's arithmetic (addVV, subVV, addVW,
+  subVW, shlVU, mulAddVWW, addMulVVW) and x/sys/cpu's `runtime_getAuxv`. Each is a real stub, now named; whether
+  a sqlite path reaches one is NOT MEASURED.
+- R6, golib: `GoCpuTests`' three units pass (the CPUID leaves against `X86Base.CpuId`, the synthesised XCR0 bit by
+  bit, `Xgetbv` against .NET's answers); planted regressions fail 1 and 2 of them. The whole suite reads 2591
+  passed, 0 failed, 45 skipped.
+
+**Stop lines.** X2.1 (a forwarder whose signature was not checked), X2.2, X2.3 (a stub reached and not named),
+any corpus move, and more than one new public golib type: none tripped.
+
+**Kept as stubs, on purpose (for a future freebsd or Windows-on-Arm reader).** x/sys/cpu's four arm64
+ID-register reads, `getisar0`, `getisar1`, `getpfr0` and `getzfr0`, have no managed body. x/sys/cpu reads them only
+on freebsd, which go2cs does not target, and no host here can run an arm64 body to check one. They convert to
+throwing stubs that `GO2CS2012` names. A target that reaches them needs bodies built from .NET's Arm intrinsics.
+
+**Not in the table, by ruling.** The standard library's vendored copy (`vendor/golang.org/x/sys/cpu`) keeps its
+stubs: it is std corpus. It converts under the module's own import path, so a table keyed on the path reached it
+too: the first footprint (seat `95d3b9dcd4`) moved 4 vendored files, tripping the corpus stop line, and
+`37de01a37d` gates the forward and the refusal on a package outside GOROOT, as the stub warning already was.
+
+**Why no converted program reaches the vendored stub (COORD's check).** Its init calls `cpuid` three times, and
+`cpu_gc_x86.cs` declares `cpuid` with no body, yet crypto/tls validates on windows and linux. Read at the tree,
+case (a) holds: the closure as converted does not import it. A bare `-stdlib` conversion applies the `purego` tag
+(`defaultStdLibBuildTags`), and under `purego` std's vendored chacha20poly1305 builds its `noasm` variant, which
+does not import x/sys/cpu (`go list -deps crypto/tls` for windows/amd64: present without the tag, absent with it).
+The converted chacha20poly1305 holds `chacha20poly1305_noasm.cs` and no amd64 file, and no converted std project
+references the vendored x/sys/cpu project. So its init never runs, and nothing reads zeros from it; std's
+generic crypto path is the `purego` decision itself, not a silent fallback.
+
+**Darwin needs no change.** x/sys/cpu's `syscall_syscall6` pull is already forwarded: the x/sys darwin twin
+table maps `syscall.syscall6` to `syscall.Syscall6` for every golang.org/x/sys package.
+
+**Found and fixed: a check that never ran.** C1's section 3.7 asks the implementing seat for an x/sys/cpu darwin
+case in `TestParseAsmTrampolineAddrs`. The test already had one, reading GOROOT's vendored x/sys/cpu, but it read
+`syscall_darwin_x86_gc.s`, which x/sys/cpu does not have (its file is `asm_darwin_x86_gc.s`), and it skipped
+silently when the read failed. It reads the real file now, both of its variables bind, and a missing file fails;
+pointed back at the old name it fails, restored byte-identical.
+
+**Not built or measured.** Darwin and linux conversions of x/sys/cpu (the twin forward is read at the code, not
+run); Native AOT.
+
+— G (2026-11-13)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
