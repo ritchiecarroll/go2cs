@@ -243,7 +243,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:57#5657c6 · src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:24,62#71330e +
   src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:42#deabd8 · src/tests/Behavioral/DeferSimple/DeferSimple.cs.target:8-15#6be1c6 +
   src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:17,34#32103d · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:74#4f87df ·
-  src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:10,31,73,76#5da42c · src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5#5f67f9 ·
+  src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:10,31,73,76#76c2f0 · src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5#5f67f9 ·
   src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:30#3e7716 · src/core/io/io.cs:84#df5e5e ·
   src/tests/Behavioral/ReflectValueSingles/ReflectValueSingles.cs.target:47#64aa80 + src/core/reflect/type.cs:1251#6bb2cb + src/core/golib/GoReflect.cs:19#9c197b ·
   src/tests/Behavioral/PointerToPointer/PointerToPointer.go:25#c3ddc3 + PointerToPointer.cs.target:24,32#78f549 + src/core/golib/ж.cs:877#3d6147 ·
@@ -314,8 +314,8 @@ code does not use, so they never clash with a Go name.
 Go types such as `slice<T>`, `@string` (Go's `string`) and `ж<T>` (Go's pointer) come from golib, the
 runtime library every converted project uses: see [The golib Runtime Library](#the-golib-runtime-library).
 
-<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:52#1114ce; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:36#201bcf and UnsafeOperations.cs.target:26#216378; NilPointerValueReceiverCall/main.cs.target:49#0e574a; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:326#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:106#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:14#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:19#4be793, ChannelRendezvous/main.cs.target:22#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; StringLiteralHoisting/main.cs.target:48#b6f816, src/core/internal/strconv/atoi.cs:261-262#a94661; SStringTwinPilot/main.cs.target:31#034d50; src/core/encoding/json/package_info.cs:14#3f709d;
-src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1118#a8d8ac), ChannelRendezvous/main.cs.target:23#b87223; AnyStringLitChanSend/main.cs.target:51#b6232f, GoCallVariations.cs.target:34#6193c1, ChannelRendezvous/main.cs.target:24#e54771; GoCallVariations.cs.target:9#e0e8ae; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:40#af46cf; src/core/io/fs/sub.cs:79#6201ad, ExprSwitch.cs.target:91#7667f8, src/core/strings/iter.cs:48#810daf; ExprSwitch.cs.target:245#743672; AppendOfMake/AppendOfMake.cs.target:66#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:33#2a5223;
+<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:52#1114ce; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:36#201bcf and UnsafeOperations.cs.target:26#216378; NilPointerValueReceiverCall/main.cs.target:49#0e574a; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:326#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:106#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:14#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:19#4be793, ChannelRendezvous/main.cs.target:22#073f72, InitOrderTupleSpecs/main.cs.target:9#8f2783; StringLiteralHoisting/main.cs.target:48#b6f816, src/core/internal/strconv/atoi.cs:261-262#a94661; SStringTwinPilot/main.cs.target:31#034d50; src/core/encoding/json/package_info.cs:14#3f709d;
+src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1118#a8d8ac), ChannelRendezvous/main.cs.target:23#69a688; AnyStringLitChanSend/main.cs.target:51#b6232f, GoCallVariations.cs.target:34#6193c1, ChannelRendezvous/main.cs.target:24#cd4d47; GoCallVariations.cs.target:9#e0e8ae; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:40#af46cf; src/core/io/fs/sub.cs:79#6201ad, ExprSwitch.cs.target:91#7667f8, src/core/strings/iter.cs:48#810daf; ExprSwitch.cs.target:245#743672; AppendOfMake/AppendOfMake.cs.target:66#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:33#2a5223;
 DefinedTypeOverInterface/package_info.cs:75#e1993c; GenericTypeNameCompanion/main.cs.target:17#6071b4; GenericTypeInstantiation/GenericTypeInstantiation.cs.target:45#f1c413 and AnonymousInterfaces/AnonymousInterfaces.cs.target:38#eed889; AdapterNameInterfaceCollision/main.cs.target:25#b09b5a; GoCallVariations.cs.target:43#1baedb; GoCallVariations.cs.target:44#f6bd07; UnsafeOperations.cs.target:4#8d3d6c and 23; src/core/strings/strings.cs:19#4df4b0; src/core/strings/export_test.cs:8#4db4a3 and strings_test.cs:26#ee31f6.
 Box kinds: src/core/golib/ж.ElemRefBox.cs:42#45fe5f, ж.FieldRefBox.cs:96#926016, ж.NativeBox.cs:41#764098, ж.NativeArrayBox.cs:46#294a9e, ж.SliceHeaderBox.cs:174#4ae53d, ж.HeaderSliceBox.cs:75#126a5e, ж.StringHeaderBox.cs:58#f81a05 all derive from ж<T>.
 appendꓸꓸꓸ: InterfaceCasting/InterfaceCasting.cs.target:284#b7f5f6 (Funcꓸꓸꓸ: BlankIdentifierCollision/main.cs.target:73#c69f13).
@@ -323,7 +323,7 @@ Buffer.Ꮡoff: PointerToPointer/PointerToPointer.cs.target:47 `PrintValPtr(Ꮡb.
 /*<-*/: SelectStatement/SelectStatement.cs.target:64#02eb99; _<T>(): TypeAssert/TypeAssert.cs.target:62#73a99c (comma-ok: src/core/io/fs/sub.cs:79#6201ad); ᴋ: src/core/internal/syscall/unix/linux/getrandom.cs:39#63d00a; break_/continue_: ForVariants/ForVariants.cs.target:61#c4196f (goto break_scan;) and :65#108b29 (continue_scan:;); main_point: LiftedLocalTypes/main.cs.target:17#023ae0.
 Glyph constants: src/go2cs/symbols.go, generated from src/core/go2cs/symbols.json (DescriptorCarrierSuffix in src/go2cs/visitTypeSpec.go, DescriptorCompanionSuffix in src/go2cs/descriptorCompanion.go). Values of ᐧ, ᐧᐧ, ꟷ and ꓸꓸꓸ: src/core/golib/builtin.cs:173-209#3c2428. The slice spread s.ꓸꓸꓸ: src/core/golib/slice.cs:655#e07a2f.
 Overload discriminators: the comma-ok overloads take a `bool _` whose value is unused: golib builtin.cs:749#0a8a17 (receive), map.cs:486#629bdd (map index), builtin.cs:3768-3773#ab6e8c (type assertion); the converter passes ꟷ (false) for receive/map and ᐧ (true) for type assertion. The select marker ꓸꓸꓸ is `public static readonly NilType ꓸꓸꓸ = nil;` (builtin.cs:199-210#4ddddc), whose doc comment says the channel operation then returns a SelectOp case descriptor that registers the pending operation with the select.
-ᐧᐧ: builtin.cs:175-187#9f29d1, `public static readonly bool ᐧᐧ = true;` for a leading constant-true case of a tagless switch; a foldable `when true` makes C# reject the later cases. The summary's Expression Switch section does not cover it, so the row links the reference: docs/ConversionStrategies-Reference/expression-switch.md:40#e2a6d2.
+ᐧᐧ: builtin.cs:175-187#9f29d1, `public static readonly bool ᐧᐧ = true;` for a leading constant-true case of a tagless switch; a foldable `when true` makes C# reject the later cases. The summary's Expression Switch section does not cover it, so the row links the reference: docs/ConversionStrategies-Reference/expression-switch.md:102#e2a6d2.
 Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; ᐧ U+1427 CANADIAN SYLLABICS FINAL MIDDLE DOT; ꟷ U+A7F7 LATIN EPIGRAPHIC LETTER SIDEWAYS I; ᴛ U+1D1B LATIN LETTER SMALL CAPITAL T. All are letter categories (Lm/Lo/Ll), so C# reads them as identifier characters.
 ᴷ is StackBufferMarker (src/core/go2cs/symbols.json); its declaration and site: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:8 `var xᴷ = new stackAppend<int64>();` and :12 `x = append(xᴷ, x, (int64)i);`, for Go main.go:16 `x = append(x, int64(i))`.
 ᶠ is FuncValueMarker (symbols.json:200-211#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:13#ee6601).
@@ -430,12 +430,12 @@ code, and the section that explains it in full.
 | `Δ1` suffix | A second declaration of the same name: a variable that shadows an outer one, or a repeated `init` function | `hourΔ1`, `initΔ1` | [Shadowing](#short-variable-redeclaration-shadowing); repeated `init`: [Functions and Methods](#functions-and-methods) |
 | `ʗ1` suffix | A copy of a variable, taken for the lambda that uses it | `var f1ʗ1 = f1;` | [Function Values and Closures](#function-values-and-closures) |
 | `ʗp` suffix | The raw incoming parameter, when the body copies it into a local of the Go name: a variadic pack becomes a slice, or a value whose address is taken moves into a heap box with `heap(…)` | `params ꓸꓸꓸerror errsʗp`; `readOnlyParam(Rect rʗp)` then `ref var r = ref heap(rʗp, out var Ꮡr);` | [Slices and Arrays](#slices-and-arrays) (variadic); [Pointers](#pointers) (address taken, the same `heap(…)` pattern as a local) |
-| `ᴛ` | A name the converter makes up: a temporary, a lambda parameter, an init helper or a lazy var's holder class | `ᴛ1`, `selᴛ2`, `initᴛsingle`, `lazyᴛ_Lu` | [Multi-Assignment](#multi-assignment-and-evaluation-order); init helpers: [Initialization Order](#package-level-variable-initialization-order) |
+| `ᴛ` | A name the converter makes up: a temporary, a lambda parameter, an init helper or a lazy var's holder class | `ᴛ1`, `chᴛ2`, `initᴛsingle`, `lazyᴛ_Lu` | [Multi-Assignment](#multi-assignment-and-evaluation-order); init helpers: [Initialization Order](#package-level-variable-initialization-order) |
 | `ˢ`, `ᶜ` suffix | A string literal (`ˢ`) or a local constant (`ᶜ`), stored once in a static field whose declaration sits in the same file | `namedStringConversionˢ`, `fnAtoiᶜ` | [Strings](#strings-string-and-sstring) |
 | `ꓸ` | A dot inside one name, such as a package-qualified alias | `reflectꓸValue` | [Type Aliasing](#type-aliasing) |
 | `ꓸꓸꓸ` in a type or name | Go's `...`: `ꓸꓸꓸT` aliases `Span<T>` for a variadic parameter; `s.ꓸꓸꓸ` and `appendꓸꓸꓸ` spread a slice; `Funcꓸꓸꓸ<…>` is a variadic func type | `using ꓸꓸꓸerror = Span<error>;`, `fmt.Sprintf(format, a.ꓸꓸꓸ)`, `appendꓸꓸꓸ(all, batch)` | [Slices and Arrays](#slices-and-arrays) |
-| `ꓸꓸꓸ` as an argument | A channel send or receive that registers with a `select` instead of running at once | `ᐸꟷ(selᴛ2, ꓸꓸꓸ)` | [Channels and `select`](#channels-and-select) |
-| `ᐸꟷ`, `ꟷᐳ` | Channel send, receive, and receive inside `select` | `ch.ᐸꟷ(textˢ)`, `ᐸꟷ(done)`, `selᴛ2.ꟷᐳ(out var v)` | [Channels and `select`](#channels-and-select) |
+| `ꓸꓸꓸ` as an argument | A channel send or receive that registers with a `select` instead of running at once | `ᐸꟷ(chᴛ2, ꓸꓸꓸ)` | [Channels and `select`](#channels-and-select) |
+| `ᐸꟷ`, `ꟷᐳ` | Channel send, receive, and receive inside `select` | `ch.ᐸꟷ(textˢ)`, `ᐸꟷ(done)`, `chᴛ2.ꟷᐳ(out var v)` | [Channels and `select`](#channels-and-select) |
 | `/*<-*/` | A channel's direction, kept as a comment: `/*<-*/channel<T>` is `<-chan T`, `channel/*<-*/<T>` is `chan<- T` | `/*<-*/channel<nint> src` | [Channels and `select`](#channels-and-select) |
 | `goǃ` | The `go` statement; the `ǃ` keeps the method's name apart from `go`, the namespace every converted file lives in | `goǃ(() => fmt.Println("First"))` | [Goroutines](#goroutines) |
 | `ꟷ` | golib's `const bool ꟷ = false`. As an extra argument it picks the overload that returns `(value, ok)`, for a comma-ok receive or map lookup; its value is not used | `var (v, ok) = ᐸꟷ(d, ꟷ);`, `var (_, before) = seen[memo, ꟷ];` | [Comma-Ok Forms](#multi-result-values-and-comma-ok-forms) |
@@ -5054,7 +5054,7 @@ func prefix(buf []byte) bool {
 	return string(buf[3:6]) == " /x"
 }
 ```
-<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:212-220 -->
+<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:211-219 -->
 ```csharp
 internal static bool prefix(slice<byte> buf) {
     if (len(buf) < 6) {
@@ -5080,7 +5080,7 @@ func returnedString() string {
 	return r
 }
 ```
-<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:178-182 -->
+<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:177-181 -->
 ```csharp
 internal static @string returnedString() {
     var b = slice<byte>("returned"u8);
@@ -7538,9 +7538,13 @@ either, including Go's `true` and `false`, and nor are constants of a named type
 The switch stays a C# `switch` over the tag. Each case binds the tag to `ᴛ` and compares in a `when`
 guard, `case var ᴛ when ᴛ == time.Monday:`, or keeps a constant pattern when every label in it is a C#
 constant (`case 0:`). A label list joins with `||`. C# tries the guards in order and `default` last,
-wherever it is written, which is the order Go evaluates them in. A string tag keeps a temporary under
-`switch (ᐧ)`, `case {} when exprᴛ1 == "get"u8:`, because C# would otherwise switch on a decoded .NET
-`string` ([reference](ConversionStrategies-Reference/expression-switch.md#a-string-tag-keeps-its-temp-under-the-expressionless-governor)):
+wherever it is written, which is the order Go evaluates them in. A string tag switches on `ᐧ` and compares
+in each guard, `switch (ᐧ)`, `case {} when cmd == "get"u8:`, because C# would otherwise switch on a decoded
+.NET `string` ([reference](ConversionStrategies-Reference/expression-switch.md#a-string-tag-compares-under-the-expressionless-governor)).
+A tag that is a local variable no clause can change is read in place, as `cmd` is here. Any other tag is
+first copied into a temporary, named after the tag when it is one plain name (`var sᴛ1 = s;`) and `exprᴛN`
+otherwise
+([reference](ConversionStrategies-Reference/expression-switch.md#a-tag-that-is-one-plain-name-is-read-in-place-or-named-after-it)):
 
 <!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.go:72-79 -->
 ```go
@@ -8880,8 +8884,10 @@ internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, ni
 
 **`select` becomes a C# `switch` over golib's `select(…)` call.** Four steps happen, in this order:
 
-1. Each case's operands are evaluated once, in source order, into a temporary named `selᴛN`. The `ᴛ`
-   marks a name the converter makes up, and `N` counts up through the file
+1. Each case's operands are evaluated once, in source order, into a temporary. The `ᴛ` marks a name
+   the converter makes up. When the channel is written as one plain name, the temporary takes that name:
+   `quitᴛ1` for `<-quit`, and `fᴛ1` for `f <- x`, with `N` counting up within the function. Any other
+   channel, such as a call or a field, gives `selᴛN`, with `N` counting up through the file
    ([Multi-Assignment](#multi-assignment-and-evaluation-order)). For a receive, the temporary holds the
    channel. For a send, it holds the registration itself (step 2), which has already captured the
    channel and the value.
@@ -8919,14 +8925,14 @@ internal static void fibonacci(channel<nint> f, channel<nint> quit) {
     nint x = 0;
     nint y = 1;
     for (;;) {
-        var selᴛ1 = f.ᐸꟷ(x, ꓸꓸꓸ);
-        var selᴛ2 = quit;
-        switch (select(selᴛ1, ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+        var fᴛ1 = f.ᐸꟷ(x, ꓸꓸꓸ);
+        var quitᴛ1 = quit;
+        switch (select(fᴛ1, ᐸꟷ(quitᴛ1, ꓸꓸꓸ))) {
         case 0: {
             (x, y) = (y, x + y);
             break;
         }
-        case 1 when selᴛ2.ꟷᐳ(out _): {
+        case 1 when quitᴛ1.ꟷᐳ(out _): {
             fmt.Println("quit");
             return;
         }}
@@ -8935,11 +8941,11 @@ internal static void fibonacci(channel<nint> f, channel<nint> quit) {
 ```
 
 **A receive case that names a variable declares it in the `when` guard.** `case m := <-a:` becomes
-`case 0 when selᴛ12.ꟷᐳ(out var m):`, as in the example that follows.
+`case 0 when aᴛ1.ꟷᐳ(out var m):`, as in the example that follows.
 
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.go:117 (case v1, ok := <-ch3:) -> SelectStatement.cs.target:127 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.go:117 (case v1, ok := <-ch3:) -> SelectStatement.cs.target:126 -->
 A comma-ok case adds a second `out` variable: `case v1, ok := <-ch3:` becomes
-`case 2 when selᴛ5.ꟷᐳ(out var v1, out var okΔ1):`. The `Δ1` suffix renames a variable whose name
+`case 2 when ch3ᴛ1.ꟷᐳ(out var v1, out var okΔ1):`. The `Δ1` suffix renames a variable whose name
 is used again in the same function ([Shadowing](#short-variable-redeclaration-shadowing)).
 
 When every case returns, Go needs no `return` after the `select`. C# cannot prove the `switch` always
@@ -8960,13 +8966,13 @@ func firstMsg(a, b chan string) string {
 <!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:212-223 -->
 ```csharp
 internal static @string firstMsg(channel<@string> a, channel<@string> b) {
-    var selᴛ12 = a;
-    var selᴛ13 = b;
-    switch (select(ᐸꟷ(selᴛ12, ꓸꓸꓸ), ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
-    case 0 when selᴛ12.ꟷᐳ(out var m): {
+    var aᴛ1 = a;
+    var bᴛ1 = b;
+    switch (select(ᐸꟷ(aᴛ1, ꓸꓸꓸ), ᐸꟷ(bᴛ1, ꓸꓸꓸ))) {
+    case 0 when aᴛ1.ꟷᐳ(out var m): {
         return "a:"u8 + m;
     }
-    case 1 when selᴛ13.ꟷᐳ(out var m): {
+    case 1 when bᴛ1.ꟷᐳ(out var m): {
         return "b:"u8 + m;
     }}
     return default;
@@ -8992,9 +8998,9 @@ func poll(done chan struct{}) string {
 <!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:225-235 -->
 ```csharp
 internal static @string poll(channel<EmptyStruct> done) {
-    var selᴛ14 = done;
-    switch (trySelect(ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
-    case 0 when selᴛ14.ꟷᐳ(out _): {
+    var doneᴛ1 = done;
+    switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+    case 0 when doneᴛ1.ꟷᐳ(out _): {
         return "done";
     }
     default: {

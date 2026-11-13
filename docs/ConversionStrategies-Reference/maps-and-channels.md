@@ -707,14 +707,14 @@ case took = <-ch:
 
 <!-- source: src/tests/Behavioral/SelectSendRecvMix/main.cs:33-42 -->
 ```csharp
-var selᴛ3 = ch.ᐸꟷ(8, ꓸꓸꓸ);
-var selᴛ4 = ch;
-switch (select(selᴛ3, ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+var chᴛ1 = ch.ᐸꟷ(8, ꓸꓸꓸ);
+var chᴛ2 = ch;
+switch (select(chᴛ1, ᐸꟷ(chᴛ2, ꓸꓸꓸ))) {
 case 0: {
     fmt.Println("send fired on full channel (wrong)");
     break;
 }
-case 1 when selᴛ4.ꟷᐳ(out took): {
+case 1 when chᴛ2.ꟷᐳ(out took): {
     break;
 }}
 ```
