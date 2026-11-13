@@ -31,6 +31,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -56,7 +57,21 @@ const (
 	// docs/phase4/DESIGN-managed-profiling.md): hand-owned infrastructure beside golib, not a Go
 	// package, so it is listed at the solution root like golib and never collected by the walk.
 	cpuProfilerProjectReference = "core/go2cs.CpuProfiler/go2cs.CpuProfiler.csproj"
+
+	// goArraysProjectReference is the inline-array family (section 7.7 of
+	// docs/phase4/DESIGN-array-value-storage.md): hand-owned infrastructure beside golib, packed in
+	// go.lib and loaded only by a program that opts in, so it is listed at the root like the sampler.
+	goArraysProjectReference = "core/go.arrays/go.arrays.csproj"
 )
+
+// rootCompanionProjects are the hand-owned infrastructure projects under core/ that are not Go
+// packages: each is listed at the solution root when the tree carries it, never under an
+// import-path folder, and never collected by the converted-project walk.
+var rootCompanionProjects = []string{cpuProfilerProjectReference, goArraysProjectReference}
+
+func isRootCompanionProject(project string) bool {
+	return slices.Contains(rootCompanionProjects, project)
+}
 
 // GenerateSolutionFile writes a Visual Studio .slnx solution at the output root that
 // references every converted stdlib project, the shared golib runtime, and the go2cs-gen
@@ -77,10 +92,13 @@ func (c *StdLibConverter) GenerateSolutionFile() error {
 	// the solution root (no folder), not among the import-path package folders.
 	coreProjects = append(coreProjects, golibProjectReference)
 
-	// The opt-in CPU sampler companion is hand-owned infrastructure too: listed at the root beside
-	// golib, and only when the tree carries it (a seeded output root does; a unit-test root may not).
-	if _, statErr := os.Stat(filepath.Join(c.go2csPath, filepath.FromSlash(cpuProfilerProjectReference))); statErr == nil {
-		coreProjects = append(coreProjects, cpuProfilerProjectReference)
+	// The companions (the opt-in CPU sampler, the inline-array family) are hand-owned infrastructure
+	// too: listed at the root beside golib, and only when the tree carries them (a seeded output root
+	// does; a unit-test root may not).
+	for _, companion := range rootCompanionProjects {
+		if _, statErr := os.Stat(filepath.Join(c.go2csPath, filepath.FromSlash(companion))); statErr == nil {
+			coreProjects = append(coreProjects, companion)
+		}
 	}
 
 	// Sort for deterministic, stable output regardless of filesystem walk order.
@@ -185,8 +203,8 @@ func (c *StdLibConverter) collectConvertedProjects() (coreProjects []string, err
 			return nil
 		}
 
-		// The CPU sampler companion likewise: infrastructure, added by GenerateSolutionFile.
-		if rel == cpuProfilerProjectReference {
+		// The companions likewise: infrastructure, added by GenerateSolutionFile.
+		if isRootCompanionProject(rel) {
 			return nil
 		}
 
@@ -306,8 +324,8 @@ func buildSolutionXML(coreProjects []string) string {
 	writeProject(1, golibProjectReference)
 
 	for _, project := range coreProjects {
-		if project == cpuProfilerProjectReference {
-			writeProject(1, cpuProfilerProjectReference)
+		if isRootCompanionProject(project) {
+			writeProject(1, project)
 		}
 	}
 
@@ -343,7 +361,7 @@ func buildSolutionXML(coreProjects []string) string {
 	folderSet := make(map[string]bool)
 
 	for _, project := range coreProjects {
-		if project == golibProjectReference || project == cpuProfilerProjectReference {
+		if project == golibProjectReference || isRootCompanionProject(project) {
 			continue // emitted at the root above, not under an import-path folder
 		}
 

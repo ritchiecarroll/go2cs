@@ -1,0 +1,77 @@
+     4  2|nontest|local const|values|blocked: untyped const (each name's C# type is decided by its uses)
+     4  2|nontest|local const|values|specs
+    33  2|nontest|local var|declarations saved
+     2  2|nontest|local var|no values|blocked: address-taken or captured name (heap box)
+     9  2|nontest|local var|no values|mergeable
+    11  2|nontest|local var|no values|specs
+    26  2|nontest|local var|specs merged
+     2  2|nontest|local var|tuple (one multi-value)|blocked: names of different types
+     2  2|nontest|local var|tuple (one multi-value)|blocked: tuple initializer (already one deconstruction)
+     2  2|nontest|local var|tuple (one multi-value)|specs
+     2  2|nontest|local var|values|blocked: address-taken or captured name (heap box)
+     2  2|nontest|local var|values|blocked: names of different types
+    17  2|nontest|local var|values|mergeable
+    21  2|nontest|local var|values|specs
+     1  2|nontest|package const|declarations saved
+     1  2|nontest|package const|no values|blocked: a blank name
+     1  2|nontest|package const|no values|mergeable
+     2  2|nontest|package const|no values|specs
+     1  2|nontest|package const|specs merged
+     1  2|nontest|package const|values|blocked: untyped const (each name's C# type is decided by its uses)
+     1  2|nontest|package const|values|specs
+     1  2|nontest|package var|declarations saved
+     1  2|nontest|package var|no values|mergeable
+     1  2|nontest|package var|no values|specs
+     1  2|nontest|package var|specs merged
+     4  2|nontest|package var|tuple (one multi-value)|blocked: a blank name
+     1  2|nontest|package var|tuple (one multi-value)|blocked: address-taken or captured name (heap box)
+     2  2|nontest|package var|tuple (one multi-value)|blocked: names of different types
+     8  2|nontest|package var|tuple (one multi-value)|blocked: tuple initializer (already one deconstruction)
+     8  2|nontest|package var|tuple (one multi-value)|specs
+     1  2|nontest|package var|values|blocked: names of different types
+     1  2|nontest|package var|values|specs
+     3  3|nontest|fallthrough|call
+     8  3|nontest|fallthrough|identifier: local or parameter
+    21  3|nontest|level 2 eligible (local, not addressed or captured, labels side-effect free)
+     8  3|nontest|non-constant label|identifier: local or parameter
+     4  3|nontest|string tag|call
+     5  3|nontest|string tag|identifier: local or parameter
+     5  3|nontest|string tag|other
+     1  4|nontest|alias|empty (zero value)|scalar or string element
+     2  4|nontest|alias|unkeyed, full length|scalar or string element
+     1  4|nontest|alias|unkeyed, shorter than its length|scalar or string element
+     1  4|nontest|named array type (elided, inside an outer literal)|empty (zero value)|array element
+     1  4|nontest|named array type (elided, inside an outer literal)|empty (zero value)|scalar or string element
+     2  4|nontest|named array type (elided, inside an outer literal)|unkeyed, full length|scalar or string element
+     5  4|nontest|named array type|empty (zero value)|array element
+    10  4|nontest|named array type|empty (zero value)|scalar or string element
+     2  4|nontest|named array type|empty (zero value)|struct element
+     1  4|nontest|named array type|keyed or sparse|array element
+     2  4|nontest|named array type|keyed or sparse|scalar or string element
+     1  4|nontest|named array type|unkeyed, full length|array element
+    29  4|nontest|named array type|unkeyed, full length|scalar or string element
+     1  4|nontest|named array type|unkeyed, shorter than its length|array element
+     3  4|nontest|named array type|unkeyed, shorter than its length|scalar or string element
+     3  4|nontest|unnamed (elided, inside an outer literal)|empty (zero value)|array element
+     1  4|nontest|unnamed (elided, inside an outer literal)|empty (zero value)|reference element
+    11  4|nontest|unnamed (elided, inside an outer literal)|empty (zero value)|scalar or string element
+     1  4|nontest|unnamed (elided, inside an outer literal)|empty (zero value)|struct element
+     1  4|nontest|unnamed (elided, inside an outer literal)|keyed or sparse|array element
+     2  4|nontest|unnamed (elided, inside an outer literal)|keyed or sparse|scalar or string element
+     6  4|nontest|unnamed (elided, inside an outer literal)|unkeyed, full length|array element
+     3  4|nontest|unnamed (elided, inside an outer literal)|unkeyed, full length|reference element
+    50  4|nontest|unnamed (elided, inside an outer literal)|unkeyed, full length|scalar or string element
+     1  4|nontest|unnamed (elided, inside an outer literal)|unkeyed, shorter than its length|array element
+     7  4|nontest|unnamed|empty (zero value)|array element
+     3  4|nontest|unnamed|empty (zero value)|reference element
+    16  4|nontest|unnamed|empty (zero value)|scalar or string element
+     3  4|nontest|unnamed|empty (zero value)|struct element
+     3  4|nontest|unnamed|keyed or sparse|array element
+     4  4|nontest|unnamed|keyed or sparse|reference element
+     8  4|nontest|unnamed|keyed or sparse|scalar or string element
+    11  4|nontest|unnamed|unkeyed, full length|array element
+    11  4|nontest|unnamed|unkeyed, full length|reference element
+    93  4|nontest|unnamed|unkeyed, full length|scalar or string element
+     7  4|nontest|unnamed|unkeyed, full length|struct element
+     2  4|nontest|unnamed|unkeyed, shorter than its length|array element
+     6  4|nontest|unnamed|unkeyed, shorter than its length|scalar or string element

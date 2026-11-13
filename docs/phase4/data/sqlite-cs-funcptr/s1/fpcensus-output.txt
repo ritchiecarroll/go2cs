@@ -1,0 +1,35 @@
+    989  ALL|distinct funcs minted
+    122  ALL|distinct mint signatures
+     85  ALL|distinct recovery signatures
+     43  ALL|mint signatures never recovered in Go (passed to C only)
+      6  ALL|recovery signatures no mint has (a cast in C)
+     53  modernc.org/libc|MINT arg: a package-level func
+      5  modernc.org/libc|MINT inside a composite literal (a callback table or struct)
+     53  modernc.org/libc|MINT sites
+     55  modernc.org/libc|RECOVER dereferenced at once
+     55  modernc.org/libc|RECOVER sites: &struct{ f uintptr }{x} (ccgo's form)
+     55  modernc.org/libc|RECOVER target: unnamed func type
+     15  modernc.org/sqlite/lib|COMPARE a number against a mint (== or !=)
+   1265  modernc.org/sqlite/lib|MINT arg: a package-level func
+     42  modernc.org/sqlite/lib|MINT arg: another package's func
+     16  modernc.org/sqlite/lib|MINT inside a composite literal (a callback table or struct)
+   1307  modernc.org/sqlite/lib|MINT sites
+    454  modernc.org/sqlite/lib|RECOVER dereferenced at once
+    454  modernc.org/sqlite/lib|RECOVER sites: &struct{ f uintptr }{x} (ccgo's form)
+    454  modernc.org/sqlite/lib|RECOVER target: unnamed func type
+      1  modernc.org/sqlite|COMPARE a number against a mint (== or !=)
+      1  modernc.org/sqlite|GO-SIDE: a struct{ f T } read as uintptr, T a type parameter
+      1  modernc.org/sqlite|GO-SIDE: a struct{ f func } read as uintptr
+     46  modernc.org/sqlite|MINT (Go side, cFuncPointer) sites
+  cast-only signature: func(*modernc.org/libc.TLS, uint32, uintptr, uintptr, uintptr) (int32)
+  cast-only signature: func(*modernc.org/libc.TLS, uintptr, int32, int32)
+  cast-only signature: func(*modernc.org/libc.TLS, uintptr, int32, uintptr, uintptr, int64)
+  cast-only signature: func(*modernc.org/libc.TLS, uintptr, int32, uintptr, uintptr, uintptr, uintptr) (int32)
+  cast-only signature: func(*modernc.org/libc.TLS, uintptr, uintptr, uint32, uint32, uint32) (uint32)
+  cast-only signature: func(*modernc.org/libc.TLS, uintptr, uintptr, uint64)
+  recovery signature x58: func(*libc.TLS, uintptr)
+  recovery signature x55: func(*libc.TLS, uintptr) (int32)
+  recovery signature x41: func(*libc.TLS, uintptr, uintptr) (int32)
+  recovery signature x33: func(*libc.TLS, uintptr, int32) (int32)
+  recovery signature x30: func(*libc.TLS, uintptr, int32, uintptr) (int32)
+  recovery signature x16: func(*libc.TLS, uintptr, uintptr, int32, int64) (int32)

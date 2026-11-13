@@ -478,6 +478,16 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 		packageName := strings.Join(importPathParts, ".")
 		projectReference := emittedProjectReference(targetDir, projectFileBaseName(packageName)+".csproj")
 
+		// The Go package NAME qualifies references in code and keys the package's imported aliases; the path's
+		// last segment is only a guess at it (build.FindOnly reads no source). modernc.org/sqlite/lib declares
+		// `package sqlite3`, so a `lib` key published `libꓸTdb` while the references asked for `sqlite3ꓸTdb`
+		// (CS0426, sqlite-cs S19). The loaded package's own name decides when the loader saw it.
+		rootPackageName := rootPackageNameFromPathParts(importPathParts)
+
+		if meta, ok := importPackageDirs[importPath]; ok && meta.Name != "" {
+			rootPackageName = meta.Name
+		}
+
 		targetDir = strings.ReplaceAll(targetDir, "$(go2csPath)", options.go2csPath+string(os.PathSeparator))
 
 		result[importPath] = PackageInfo{
@@ -490,7 +500,7 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 			// the package's own records from the local adapters it records for foreign structs.
 			ImportPath:       canonicalImportPath,
 			PackageName:      packageName,
-			RootPackageName:  rootPackageNameFromPathParts(importPathParts),
+			RootPackageName:  rootPackageName,
 			SourceDir:        sourceDir,
 			TargetDir:        targetDir,
 			ProjectReference: projectReference,

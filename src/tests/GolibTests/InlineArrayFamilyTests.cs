@@ -1,0 +1,194 @@
+// InlineArrayFamilyTests.cs - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// Use of this source code is governed by an MIT-style license
+// that can be found in the LICENSE file.
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using go;
+using go.arrays;
+using go.golib;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static go.builtin;
+
+namespace GolibTests;
+
+/// <summary>
+/// The inline-array family of go.arrays.dll (docs/phase4/DESIGN-array-value-storage.md, 7.7): a Go array value held
+/// inline, laid out as Go lays it out, with Go's index panic and Go's equality.
+/// </summary>
+[TestClass]
+public class InlineArrayFamilyTests
+{
+    // The CLR alignment of T, read as T's offset after a byte (7.6.3's measure).
+    private struct AfterByte<T> where T : unmanaged
+    {
+        public byte B;
+        public T Value;
+    }
+
+    private static int AlignmentOf<T>() where T : unmanaged
+    {
+        AfterByte<T> probe = default;
+        return (int)Unsafe.ByteOffset(ref Unsafe.As<AfterByte<T>, byte>(ref probe), ref Unsafe.As<T, byte>(ref probe.Value));
+    }
+
+    [TestMethod]
+    public void AMemberIsItsElementsLaidOutInline()
+    {
+        Assert.AreEqual(201, Unsafe.SizeOf<array201<sbyte>>());
+        Assert.AreEqual(32, Unsafe.SizeOf<array4<long>>());
+        Assert.AreEqual(6, Unsafe.SizeOf<array3<short>>());
+
+        Assert.AreEqual(1, AlignmentOf<array201<sbyte>>(), "the element's alignment");
+        Assert.AreEqual(2, AlignmentOf<array3<short>>());
+        Assert.AreEqual(8, AlignmentOf<array4<long>>());
+
+        Assert.AreEqual(201, array201<sbyte>.Length);
+    }
+
+    [TestMethod]
+    public void ElementsAreReadAndWrittenInPlace()
+    {
+        array4<int> a = default;
+
+        a[0] = 7;
+        a[(nint)3] = 9;
+        a[0] += 1;
+        a[2u] = 5;
+        a[(ulong)1] = 4;
+
+        Assert.AreEqual(8, a[0]);
+        Assert.AreEqual(4, a[1]);
+        Assert.AreEqual(5, a[2]);
+        Assert.AreEqual(9, a[(nint)3]);
+    }
+
+    [TestMethod]
+    public void AnIndexOutOfRangeIsGosPanic()
+    {
+        array201<sbyte> a = default;
+
+        string Message(Action access)
+        {
+            try
+            {
+                access();
+            }
+            catch (PanicException panic)
+            {
+                return panic.Message;
+            }
+
+            Assert.Fail("an out-of-range index panics");
+            return "";
+        }
+
+        StringAssert.Contains(Message(() => a[201] = 1), "index out of range [201] with length 201");
+        StringAssert.Contains(Message(() => a[-1] = 1), "index out of range [-1]");
+        StringAssert.Contains(Message(() => a[(nint)int.MaxValue + 1] = 1), "index out of range [2147483648] with length 201");
+        // An unsigned index is checked before any narrowing: Go reports the unsigned value, never a negative one.
+        StringAssert.Contains(Message(() => a[ulong.MaxValue] = 1), "index out of range [18446744073709551615] with length 201");
+    }
+
+    [TestMethod]
+    public void EqualityIsGosElementByElement()
+    {
+        array4<int> a = default, b = default;
+        a[2] = 7;
+        b[2] = 7;
+
+        Assert.IsTrue(a == b);
+        Assert.IsTrue(a.Equals(b));
+        Assert.IsTrue(a.Equals((object)b));
+        Assert.AreEqual(a.GetHashCode(), b.GetHashCode());
+
+        b[3] = 1;
+
+        Assert.IsTrue(a != b);
+        Assert.IsFalse(a.Equals(b));
+
+        // Go's ==: a NaN element makes the arrays unequal, and 0 equals -0.
+        array2<double> x = default, y = default;
+        x[0] = double.NaN;
+        y[0] = double.NaN;
+        Assert.IsFalse(x == y, "NaN is unequal to NaN in Go");
+
+        x[0] = 0.0;
+        y[0] = -0.0;
+        Assert.IsTrue(x == y, "0 equals -0 in Go");
+        Assert.AreEqual(x.GetHashCode(), y.GetHashCode());
+    }
+
+    // 7.6.5: the default equality of an inline array, and of a holder, was order-dependent and WRONG (an unequal map key
+    // was found). The family's own equality answers the same in both call orders.
+    [TestMethod]
+    public void AMapKeyIsFoundOnlyWhenEqualInEitherOrder()
+    {
+        array8<int> one = default, two = default;
+        two[2] = 7;
+
+        // Equality first, then the map.
+        Assert.IsFalse(one.Equals(two));
+        Dictionary<array8<int>, int> map = new() { [one] = 1 };
+        Assert.IsFalse(map.ContainsKey(two));
+        Assert.IsTrue(map.ContainsKey(one));
+
+        // The map first, then equality, on a length nothing above has used.
+        array16<int> three = default, four = default;
+        four[15] = 1;
+        Dictionary<array16<int>, int> other = new() { [three] = 1 };
+        Assert.IsFalse(other.ContainsKey(four));
+        Assert.IsFalse(three.Equals(four));
+        Assert.IsFalse(three == four);
+    }
+
+    [TestMethod]
+    public void GosEqualityReachesTheFamilyWithoutReflection()
+    {
+        array4<int> a = default, b = default;
+        b[1] = 1;
+
+        long before = EqualityFallbacks.ThreadCount;
+
+        Assert.IsTrue(AreEqual((object)a, (object)a));
+        Assert.IsFalse(AreEqual((object)a, (object)b));
+        Assert.IsTrue(((IGoEquatable)a).GoEquals(a));
+        Assert.AreEqual(before, EqualityFallbacks.ThreadCount, "reached the reflective fallback");
+    }
+
+    [TestMethod]
+    public void EveryMemberCarriesItsLengthForGolib()
+    {
+        foreach ((Type type, int length) in new[] { (typeof(array1<>), 1), (typeof(array201<>), 201), (typeof(array4096<>), 4096) })
+        {
+            Assert.AreEqual(length, type.GetCustomAttribute<GoInlineArrayAttribute>()?.Length, type.Name);
+            Assert.AreEqual(EditorBrowsableState.Never, type.GetCustomAttribute<EditorBrowsableAttribute>()?.State, type.Name);
+        }
+    }
+
+    // 7.6.1: the member exposes an element and its length, and nothing that reaches its storage as a whole.
+    [TestMethod]
+    public void AMemberExposesOnlyItsElementsAndLength()
+    {
+        string[] members = typeof(array201<>).GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+            .Select(member => member.Name).Distinct().OrderBy(name => name, StringComparer.Ordinal).ToArray();
+
+        CollectionAssert.AreEqual(new[] { "Equals", "GetHashCode", "Item", "Length", "get_Item", "op_Equality", "op_Inequality" }, members, string.Join(", ", members));
+    }
+
+    // P7 by construction: golib names no family type, so a program that does not opt in never loads go.arrays.dll.
+    [TestMethod]
+    public void GolibDoesNotReferenceTheFamily()
+    {
+        string[] referenced = typeof(IGoEquatable).Assembly.GetReferencedAssemblies().Select(name => name.Name!).ToArray();
+
+        CollectionAssert.DoesNotContain(referenced, typeof(array1<>).Assembly.GetName().Name, string.Join(", ", referenced));
+        Assert.AreEqual("go.arrays", typeof(array1<>).Assembly.GetName().Name);
+    }
+}

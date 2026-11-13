@@ -79,6 +79,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAnonInterfaceVarWitness() => CheckTarget("AnonInterfaceVarWitness");
 
     [TestMethod]
+    public void CheckAnonStructAliasForwardFile() => CheckTarget("AnonStructAliasForwardFile");
+
+    [TestMethod]
     public void CheckAnonStructAliasedConversion() => CheckTarget("AnonStructAliasedConversion");
 
     [TestMethod]
@@ -628,6 +631,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckEscapedLoopVarSiblingIndex() => CheckTarget("EscapedLoopVarSiblingIndex");
 
     [TestMethod]
+    public void CheckExplicitDerefConversionStore() => CheckTarget("ExplicitDerefConversionStore");
+
+    [TestMethod]
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
 
     [TestMethod]
@@ -704,6 +710,12 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckForVariants() => CheckTarget("ForVariants");
+
+    [TestMethod]
+    public void CheckForeignAliasElementAddress() => CheckTarget("ForeignAliasElementAddress");
+
+    [TestMethod]
+    public void CheckForeignAnonStructAliasAlias() => CheckTarget("ForeignAnonStructAliasAlias");
 
     [TestMethod]
     public void CheckForeignConstraintProxy() => CheckTarget("ForeignConstraintProxy");
@@ -1136,6 +1148,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckKeyedLiteralNamedForeignStruct() => CheckTarget("KeyedLiteralNamedForeignStruct");
+
+    [TestMethod]
+    public void CheckKeywordNamedTypeAlias() => CheckTarget("KeywordNamedTypeAlias");
 
     [TestMethod]
     public void CheckKeywordNamedTypes() => CheckTarget("KeywordNamedTypes");
@@ -1648,6 +1663,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]
+    public void CheckNestedPointerConversionReinterpret() => CheckTarget("NestedPointerConversionReinterpret");
+
+    [TestMethod]
     public void CheckNestedPromotedEmbedInit() => CheckTarget("NestedPromotedEmbedInit");
 
     [TestMethod]
@@ -1682,6 +1700,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNilFuncIfaceMethodValue() => CheckTarget("NilFuncIfaceMethodValue");
+
+    [TestMethod]
+    public void CheckNilFuncInterfaceReads() => CheckTarget("NilFuncInterfaceReads");
 
     [TestMethod]
     public void CheckNilFuncNamedDelegateArg() => CheckTarget("NilFuncNamedDelegateArg");
@@ -1760,6 +1781,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPackageAliasRootedTypeArgs() => CheckTarget("PackageAliasRootedTypeArgs");
+
+    [TestMethod]
+    public void CheckPackageNameNotDirName() => CheckTarget("PackageNameNotDirName");
 
     [TestMethod]
     public void CheckPackageNameShadowing() => CheckTarget("PackageNameShadowing");
@@ -1853,6 +1877,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerArraySlice() => CheckTarget("PointerArraySlice");
+
+    [TestMethod]
+    public void CheckPointerArrayViewForms() => CheckTarget("PointerArrayViewForms");
 
     [TestMethod]
     public void CheckPointerCastSliceRange() => CheckTarget("PointerCastSliceRange");
@@ -2144,6 +2171,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckReflectNilMapKey() => CheckTarget("ReflectNilMapKey");
+
+    [TestMethod]
+    public void CheckReflectShellAccessors() => CheckTarget("ReflectShellAccessors");
 
     [TestMethod]
     public void CheckReflectStringWindow() => CheckTarget("ReflectStringWindow");
@@ -2681,6 +2711,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUncomparableEquality() => CheckTarget("UncomparableEquality");
+
+    [TestMethod]
+    public void CheckUnexportedAnonAliasField() => CheckTarget("UnexportedAnonAliasField");
 
     [TestMethod]
     public void CheckUnexportedEmbeddedMarker() => CheckTarget("UnexportedEmbeddedMarker");

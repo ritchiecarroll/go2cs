@@ -26,7 +26,8 @@ import (
 //     value: a changed NuGet ID is a different package to every consumer.
 //   - The ASSEMBLY NAME IS THE PACKAGE ID.
 //
-// golib (package go.lib, assembly golib) and go2cs.CpuProfiler (not packed) are outside the rule (the design's OQ-A).
+// golib (package go.lib, assembly golib), go.arrays (assembly go.arrays, packed inside go.lib) and go2cs.CpuProfiler
+// (not packed) are outside the rule (the design's OQ-A).
 
 var (
 	stdLibAssemblyNameElement = regexp.MustCompile(`<AssemblyName>([^<]+)</AssemblyName>`)
@@ -70,7 +71,7 @@ func readStdLibProjectIdentities(t *testing.T) []stdLibProjectIdentity {
 
 	for _, rel := range gitTrackedFiles(t, root) {
 		if !strings.HasPrefix(rel, "src/core/") || !strings.HasSuffix(rel, ".csproj") || strings.HasSuffix(rel, ".tests.csproj") ||
-			strings.HasPrefix(rel, "src/core/golib/") || strings.HasPrefix(rel, "src/core/go2cs.CpuProfiler/") {
+			strings.HasPrefix(rel, "src/core/golib/") || strings.HasPrefix(rel, "src/core/go.arrays/") || strings.HasPrefix(rel, "src/core/go2cs.CpuProfiler/") {
 			continue
 		}
 
