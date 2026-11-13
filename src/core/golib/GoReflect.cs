@@ -148,8 +148,20 @@ namespace go;
         if (value is NilFuncValue nilFunc)
             return nilFunc.Type;
 
-        while (value is IInterfaceAdapter { Value: not null } interfaceAdapter)
-            value = interfaceAdapter.Value;
+        // A shell over a null func stands for that typed nil func (NilFuncOf), so it answers the
+        // func type, never its own class. Any other shell around a nil keeps the shell's type.
+        while (value is IInterfaceAdapter interfaceAdapter)
+        {
+            if (interfaceAdapter.Value is not { } inner)
+            {
+                if (NilFuncOf(value) is { } shellNilFunc)
+                    return shellNilFunc.Type;
+
+                break;
+            }
+
+            value = inner;
+        }
 
         if (value is IжAdapter { Box: not null } pointerAdapter)
             return CanonicalBoxType(pointerAdapter.Box.GetType());

@@ -137,6 +137,43 @@ public static partial class GoReflect
     private static readonly ConcurrentDictionary<Type, NilFuncValue> s_canonicalNilFuncs = new();
 
     /// <summary>
+    /// The canonical nil func <paramref name="value"/> stands for in INTERFACE space, or <c>null</c>
+    /// when it stands for none. Tier 2: a seam for the converted reflect packages, not a user API.
+    /// </summary>
+    /// <remarks>
+    /// ONE RULE, stated here and read by every path that asks what an interface value IS: in
+    /// interface space a typed nil func is its func type's canonical carrier
+    /// (<see cref="CanonicalNilFunc"/>), and a shell or adapter over a null func stands for it. Three
+    /// shapes hold such a nil: the carrier itself (a nil func boxed into <c>any</c>), a generated
+    /// value adapter whose wrapped delegate is null (a nil named func converted to an interface),
+    /// and go2cs-gen's generic runtime shell, closed over the delegate type (a nil func asserted to
+    /// an interface). The last two are decided once per shell type, from metadata: a null value has
+    /// no runtime type to ask. A shell or adapter over anything else, and every value that is no
+    /// adapter, answers <c>null</c>.
+    /// </remarks>
+    public static NilFuncValue? NilFuncOf(object? value)
+    {
+        switch (value)
+        {
+            case NilFuncValue carrier:
+                return carrier;
+            case IInterfaceAdapter { Value: null }:
+            case IValueAdapter { Value: null }:
+                return s_nilFuncShells.GetOrAdd(value.GetType(), static shellType =>
+                {
+                    Type? wrapped = typeof(IValueAdapter).IsAssignableFrom(shellType) ? ValueAdapterWrappedType(shellType) :
+                        shellType.IsGenericType && shellType.GetGenericArguments() is [var target] ? target : null;
+
+                    return wrapped is not null && typeof(Delegate).IsAssignableFrom(wrapped) ? (NilFuncValue)CanonicalNilFunc(wrapped) : null;
+                });
+            default:
+                return null;
+        }
+    }
+
+    private static readonly ConcurrentDictionary<Type, NilFuncValue?> s_nilFuncShells = new();
+
+    /// <summary>
     /// Go's <c>implements</c> relation over managed types: <paramref name="ifaceType"/> is an
     /// interface that <paramref name="valueType"/> satisfies nominally OR structurally by Go
     /// method-set rules — the SAME probe the emitted <c>_&lt;T&gt;</c> asserts use, so reflection
@@ -321,10 +358,24 @@ public static partial class GoReflect
         // The CANONICAL NIL FUNC resolves back to the nil delegate at every store: into its own
         // delegate type as null (the slot representation of a nil func), never into a different
         // func type — Go's identity rule, since two distinct func types are never assignable.
-        if (src is NilFuncValue nilFunc)
+        // A shell or adapter over a null func stands for the same nil (NilFuncOf). An INTERFACE
+        // slot takes it as the language does: the source itself when it already is that interface,
+        // or else what the type assertion builds from the carried type's method set.
+        if (NilFuncOf(src) is { } nilFunc)
         {
-            marshalled = null;
-            return dstType == nilFunc.Type;
+            if (dstType == nilFunc.Type)
+                return true;
+
+            if (!dstType.IsInterface)
+                return false;
+
+            if (dstType.IsInstanceOfType(src))
+            {
+                marshalled = src;
+                return true;
+            }
+
+            return builtin.TryTypeAssert(nilFunc, dstType, out marshalled);
         }
 
         // A DIRECTIONAL channel value is assignable only to a channel slot of the SAME direction -- Go's
