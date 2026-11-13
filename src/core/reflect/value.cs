@@ -1117,7 +1117,7 @@ private static readonly @string closureˢᵇ = "closure"u8;
 internal static @string funcName(Func<slice<ΔValue>, slice<ΔValue>> fʗp) {
     ref var f = ref heap(fʗp, out var Ꮡf);
 
-    var pc = ~Ꮡf.Reinterpret<Func<slice<ΔValue>, slice<ΔValue>>, uintptr>();
+    var pc = (uintptr)GoFuncCookie.Of(f);
     var rf = runtime.FuncForPC(pc);
     if (rf != nil) {
         return rf.Name();
