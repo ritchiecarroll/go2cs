@@ -678,6 +678,8 @@
     <Project Path="tests/Behavioral/ImmediatelyInvokedFunc/ImmediatelyInvokedFunc.csproj" />
     <Project Path="tests/Behavioral/ImplicitConvArgumentParameter/ImplicitConvArgumentParameter.csproj" />
     <Project Path="tests/Behavioral/ImportSegmentTypeShadow/ImportSegmentTypeShadow.csproj" />
+    <Project Path="tests/Behavioral/ImportedAnonStructLiftReuse/ImportedAnonStructLiftReuse.csproj" />
+    <Project Path="tests/Behavioral/ImportedAnonStructLiftReuse/lib/ImportedAnonStructLiftReuse.lib.csproj" />
     <Project Path="tests/Behavioral/IfaceFieldEmbedAdapter/IfaceFieldEmbedAdapter.csproj" />
     <Project Path="tests/Behavioral/IfaceFieldMethodValueBind/IfaceFieldMethodValueBind.csproj" />
     <Project Path="tests/Behavioral/IndexChainAddressBox/IndexChainAddressBox.csproj" />
