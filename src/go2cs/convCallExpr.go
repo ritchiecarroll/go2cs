@@ -3592,9 +3592,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 
 					// Check if the receiver type is pointer and call argument matches
-					if isRecvPointer && isArgPointer && types.Identical(recvType, argType) {
+					if isRecvPointer && isArgPointer && types.Identical(recvType, argType) && v.exprIsReceiverOrDerefdPointerParam(callExpr.Args[0]) {
 						// Since pointer-based receiver functions are converted to C# as ref-based
-						// extension functions, we need to convert the pointer from a reference type
+						// extension functions, we need to convert the pointer from a reference type.
+						// Only a name that RENDERS AS THE POINTEE takes this form: the receiver and a
+						// pointer parameter (`ref var h = ref Ꮡh.DerefOrNull()`). Keyed on the type
+						// alone, it also took a LOCAL copy (`p := h; poke(unsafe.Pointer(p), 8)`),
+						// which holds the box, so `FromRef(ref p)` was the address of the local's own
+						// slot and the write never reached `h` (Go `7 8`, converted `7 0`). A local, a
+						// field or any other operand falls through to the box-carrying mint below.
 						return fmt.Sprintf("(uintptr)@unsafe.Pointer.FromRef(ref %s)", v.convExpr(callExpr.Args[0], nil))
 					}
 				}

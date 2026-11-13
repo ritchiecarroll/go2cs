@@ -1257,6 +1257,7 @@
     <Project Path="tests/Behavioral/UnsafePointerParamAssign/UnsafePointerParamAssign.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerParamPin/UnsafePointerParamPin.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerPrint/UnsafePointerPrint.csproj" />
+    <Project Path="tests/Behavioral/UnsafePointerReceiverCopy/UnsafePointerReceiverCopy.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerReinterpret/UnsafePointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerTypeAlias/UnsafePointerTypeAlias.csproj" />
     <Project Path="tests/Behavioral/UnsafeStringEmpty/UnsafeStringEmpty.csproj" />
