@@ -1651,6 +1651,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]
+    public void CheckNestedPointerConversionReinterpret() => CheckTarget("NestedPointerConversionReinterpret");
+
+    [TestMethod]
     public void CheckNestedPromotedEmbedInit() => CheckTarget("NestedPromotedEmbedInit");
 
     [TestMethod]
