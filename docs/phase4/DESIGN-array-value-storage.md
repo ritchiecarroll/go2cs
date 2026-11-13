@@ -1002,3 +1002,31 @@ opt-in's population. Auto is a SUBSET of the opt-in:
 >   struct is counted, not judged. lib itself does not yet convert cleanly: 32 `struct{uintptr}` function-pointer casts
 >   stop at the unresolved-dynamic-type gate, before part D as after it; that is sqlite-cs S1 (G's). So the gate on lib's
 >   own compiled types (7.7.4's P2) and P3 run on the sqlite-cs lane's tree, after I0 lands.
+>
+> **Amended 2026-11-13 (C2), part D: C1's review (10:54Z) and stop line S2, as fixed** (COORD 11:35Z):
+> - **S2: the gate holds the layout to Go's, from go/types.** golib derived Go's layout from the declaration it checked,
+>   so an `S22` whose `[0]int16` carrier was deleted passed. The converter now stamps
+>   `[GoInlineLayout(Size = <Go size>, Align = <Go alignment>)]`, and golib's layout walk takes a stamped size and
+>   alignment as Go's: the gate names `S22 aligns to 1 in the CLR where Go aligns it to 2`, and a held `Outer{B byte;
+>   S S22}` still fails closed on a native read. Both are tracked GolibTests arms.
+> - **M1: an inline array boxes as its deep `array<T>` copy.** An interface argument is `x.f.ΔCopy()`, a nested array
+>   `x.m.ΔSelect(static Δe1 => Δe1.ΔCopy())`, one `ΔSelect` per level, so interface space holds the one representation
+>   every Go `[N]T` has there (type switch, interface `==`, map key, reflect `Cap`). An element that is itself an array
+>   takes a whole array's faces: boxed as an argument it is spelled, stored or compared it keeps the type out.
+>   **Kept:** `IGoInlineArray` and its two reflect arms (`Len`, `Index`). Under the automatic rule nothing reaches them,
+>   but forced mode does not consult the faces, and there a member boxed by assignment, composite element, return or
+>   send reaches interface space as itself.
+> - **M2: the record catches an anonymous disagreement.** It carries `[assembly: go.golib.GoInlineArrayKeys(<count>,
+>   "<digest>")]` over every admitted type's key, anonymous ones included, and a `-tests` run refuses a mismatch naming
+>   the count. A `-tests` run with no record while `-inline-arrays` names the package is refused too.
+> - **M3: a keyed array literal** takes each element at its constant key; gaps are `default`.
+> - **m2:** an instantiation of a generic struct is kept out (go2cs declares it once for every instantiation).
+> - **m3: a consumer spells a foreign inline field** (`len`/`cap`, `range`, literal, boxing) from the declaring
+>   package's record. Population 0 in lib and libc; a two-package converter test is the guard.
+> - **m5: an address below an element** (`&x.f[i].g`, `&x.m[i][j]`) keeps the type out. Before, it emitted
+>   `Ꮡv.at(T.ᏑE, 1).ᏑG`, which no golib `at` binds for a member: a compile error. Population 0.
+> - **Recorded, not fixed:** **m1** (`cap` of a by-value inline array local): 0 real locals, only ccgo's blank
+>   frame-slot placeholders. **m4** (`len`, `cap` or `range` over an operand that calls or receives, `len(f().A)`):
+>   it falls through to golib's `len`, which has no overload for a member, so it is a compile error, fail-closed.
+>   Population 0. **n2** (a value range over a local struct copy) is not taken.
+> - **n1:** the element-list constructor raises Go's index panic past `N` instead of truncating.
