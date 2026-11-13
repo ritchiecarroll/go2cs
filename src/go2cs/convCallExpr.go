@@ -4066,6 +4066,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext)
 		result = fmt.Sprintf("%s%s", constructType, funcName)
 	} else {
+		// A callee that is itself a call runs before the arguments in Go (pick()(g())); the spread below hoists the
+		// argument's results ahead of the statement, so the callee's value is hoisted ahead of them.
+		if hoisted := v.hoistCalleeBeforeSpread(callExpr, callExprContext, context, constructType, funcName); hoisted != "" {
+			funcName = hoisted
+		}
+
 		expr := v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext)
 
 		// runtime.AddCleanup's closes-over-ptr check reads the cleanup's by-value captures, which only
@@ -7870,4 +7876,54 @@ func unaliasableStructField(src, target *types.Struct) (string, types.Type, type
 	}
 
 	return "", nil, nil, false
+}
+
+// hoistCalleeBeforeSpread keeps Go's order for a multi-value spread whose callee is itself a call: Go evaluates the
+// function value before the arguments (pick()(g()) runs pick, then g), while convExprList hoists g()'s results into
+// temps ahead of the statement, which ran g first (S4, SCOUT-tour-visual-parity.md 1.2; 172 std test sites, all in
+// internal/sync's hashtriemap_test.go). So the callee's value goes into a temp in the same sink first, and the call
+// reads the temp. Only a callee that is a CALL is hoisted: a function name evaluates nothing, and a func variable or a
+// method's receiver is read after the calls, as gc reads a plain variable after the calls in an operand list. It
+// returns the temp's name, or "" when the shape does not apply.
+func (v *Visitor) hoistCalleeBeforeSpread(callExpr *ast.CallExpr, callExprContext *CallExprContext, context LambdaContext, constructType string, funcName string) string {
+	if constructType != "" || context.callArgs != nil || callExpr.Ellipsis.IsValid() || len(callExpr.Args) != 1 {
+		return ""
+	}
+
+	if _, calleeIsCall := ast.Unparen(callExpr.Fun).(*ast.CallExpr); !calleeIsCall {
+		return ""
+	}
+
+	argument, argumentIsCall := callExpr.Args[0].(*ast.CallExpr)
+
+	if !argumentIsCall {
+		return ""
+	}
+
+	if tuple, isTuple := v.getExprType(argument).(*types.Tuple); !isTuple || tuple.Len() < 2 {
+		return ""
+	}
+
+	// The same statement sink convExprList hoists the spread into; a package-level initializer has none.
+	var sink *strings.Builder
+
+	switch {
+	case callExprContext != nil && callExprContext.deferredDecls != nil:
+		sink = callExprContext.deferredDecls
+	case v.hoistedDecls != nil:
+		sink = v.hoistedDecls
+	default:
+		return ""
+	}
+
+	v.tupleTempIndex++
+	tempName := fmt.Sprintf("%s%d", TempVarMarker, v.tupleTempIndex)
+
+	sink.WriteString(v.newline)
+	sink.WriteString(v.indent(v.indentLevel))
+	// No trailing newline: the spread's own hoist, which always follows (the shape above is exactly the one
+	// convExprList expands), opens with one.
+	sink.WriteString(fmt.Sprintf("var %s = %s;", tempName, funcName))
+
+	return tempName
 }
