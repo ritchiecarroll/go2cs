@@ -1640,6 +1640,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNilFuncIfaceMethodValue() => CheckTarget("NilFuncIfaceMethodValue");
 
     [TestMethod]
+    public void CheckNilFuncInterfaceReads() => CheckTarget("NilFuncInterfaceReads");
+
+    [TestMethod]
     public void CheckNilFuncNamedDelegateArg() => CheckTarget("NilFuncNamedDelegateArg");
 
     [TestMethod]

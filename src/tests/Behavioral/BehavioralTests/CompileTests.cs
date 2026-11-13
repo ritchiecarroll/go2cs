@@ -1690,6 +1690,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNilFuncIfaceMethodValue() => CheckTarget("NilFuncIfaceMethodValue");
 
     [TestMethod]
+    public void CheckNilFuncInterfaceReads() => CheckTarget("NilFuncInterfaceReads");
+
+    [TestMethod]
     public void CheckNilFuncNamedDelegateArg() => CheckTarget("NilFuncNamedDelegateArg");
 
     [TestMethod]
