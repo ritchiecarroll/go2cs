@@ -152,7 +152,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// an import "C" source stays out.
 		if cgoOfflineTrees {
 			cfg.Env = append(cfg.Env, "CGO_ENABLED=0")
-			cfg.BuildFlags = append(cfg.BuildFlags, "-tags=cgo")
+			cfg.BuildFlags = cgoOfflineBuildFlags(options)
 			cfg.Overlay = map[string][]byte{
 				filepath.Join(options.goRoot, "src", "runtime", "cgo", "go2cs_incomplete.go"): []byte(cgoIncompleteOverlay),
 			}
@@ -386,6 +386,9 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			return refusePackage(options, diagnosticSliceWideningRefused, refusal)
 		}
 
+		// A WARNING, never a refusal: a type argument that meets its constraint only as a closed pair (closedCarrier.go).
+		warnClosedCarrierTypeArguments(pkg)
+
 		var projectName, projectFileName, projectFileContents string
 		projectName, packageNamespace = getProjectName(packageInputPath, options)
 		packageNamespace = namespaceWithDirectorySegment(packageNamespace, pkg.PkgPath, pkg.Name)
@@ -413,12 +416,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// and on a real host its file is a build-cache name with no .go suffix, which the
 				// file-name check refuses, so the re-check would drop every one of them silently.
 				if pair.output == "" && !pair.bindings {
-					// A plain file of a cgo package was selected by a cgo-on load, so the re-check carries the
-					// cgo tag, as refuseCgoOnlyPackage's does: without it a file under //go:build cgo is dropped
-					// here with exit 0, and every reference to what it declares dangles.
+					// A plain file a cgo-on load selected was selected under the cgo tag, so the re-check carries it:
+					// without it a file under //go:build cgo is dropped here with exit 0, and what it declares dangles.
+					// The key is the LOAD (cgoOnLoad), not the route: a package with no import "C" has such files too.
 					tags := options.buildTags
 
-					if route != nil {
+					if cgoOnLoad(options, cfg.Env) {
 						tags = append(append([]string{}, options.buildTags...), "cgo")
 					}
 
@@ -666,9 +669,15 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 							} else {
 								showWarning("visit file error: %v in \"%s\"", r, filepath.Base(fileEntry.filePath))
 							}
+
+							recordDroppedFile(fileEntry.filePath, r, fileEntry.manualConversion)
 						}
 					}
 				}()
+
+				if visitFileFaultHook != nil {
+					visitFileFaultHook(fileEntry.filePath)
+				}
 
 				visitor := newFileVisitor(fset, packageTypes, info, options, globalIdentNames, globalScope, needsNoInlining, fileEntry)
 				visitor.packageFuncDecls = packageFuncDecls
@@ -885,6 +894,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// Riding the existing error return is deliberate: main.go already turns it into a nonzero
 		// exit, so no new call site can forget to check the gate.
 		if err := unresolvedDynamicTypeError(); err != nil {
+			return err
+		}
+
+		// The same for a file the converter failed on (droppedFiles.go): its tests or production code is missing
+		// from what the build step would compile.
+		if err := droppedFileError(); err != nil {
 			return err
 		}
 	}

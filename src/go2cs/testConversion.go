@@ -7554,17 +7554,7 @@ const publishTargetPathProperty = "TargetPath"
 // A publish that states no path, or a path whose assembly does not exist, is an error, never a pass: after a successful
 // publish the build output exists, and a guard that cannot see must say so.
 func publishBuildOutput(output, testProject string) (string, error) {
-	// The host is named by the project's declared AssemblyName, which since OQ4 differs from the file name for a
-	// standard-library test project (go.fmt.tests in fmt.tests.csproj); a project that declares none takes its file's.
-	name := strings.TrimSuffix(filepath.Base(testProject), filepath.Ext(testProject))
-
-	if contents, err := os.ReadFile(testProject); err == nil {
-		if declared := declaredAssemblyName(string(contents)); declared != "" {
-			name = declared
-		}
-	}
-
-	assembly := name + ".dll"
+	assembly := testAssemblyFileName(testProject) + ".dll"
 	lines := strings.Split(output, "\n")
 
 	for i := len(lines) - 1; i >= 0; i-- {
@@ -8018,12 +8008,27 @@ func testHostLaunchDir(inputPath, outputPath string) string {
 	return outputPath
 }
 
-// publishedTestHostPath is the single-file executable publishTestHost produces: the test project's
-// own base name (which the template also uses as the AssemblyName), under the deterministic
-// publish directory, with the HOST platform's executable suffix — the run always happens on the
-// machine that published.
-func publishedTestHostPath(outputPath, testProject string) string {
+// testAssemblyFileName is the name the test project's build gives its assembly and its published host: the project's
+// declared AssemblyName, which since OQ4 differs from the file name for a standard-library test project (go.fmt.tests in
+// fmt.tests.csproj), else the file's base name, for a project that declares none or cannot be read. Both the build
+// output (publishBuildOutput) and the host (publishedTestHostPath) are found through it, so they cannot drift apart.
+func testAssemblyFileName(testProject string) string {
 	name := strings.TrimSuffix(filepath.Base(testProject), filepath.Ext(testProject))
+
+	if contents, err := os.ReadFile(testProject); err == nil {
+		if declared := declaredAssemblyName(string(contents)); declared != "" {
+			name = declared
+		}
+	}
+
+	return name
+}
+
+// publishedTestHostPath is the single-file executable publishTestHost produces: the test project's
+// assembly name (testAssemblyFileName), under the deterministic publish directory, with the HOST
+// platform's executable suffix — the run always happens on the machine that published.
+func publishedTestHostPath(outputPath, testProject string) string {
+	name := testAssemblyFileName(testProject)
 
 	if runtime.GOOS == "windows" {
 		name += ".exe"

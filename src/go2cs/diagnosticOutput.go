@@ -150,6 +150,15 @@ const (
 	// diagnosticSliceWideningRefused: a []*T passed as an element-wise copy to a generic []N parameter whose callee
 	// may write the slice, so its writes would reach the copy and not the caller (sliceWideningWriteRefusals.go).
 	diagnosticSliceWideningRefused = "GO2CS2006"
+
+	// diagnosticClosedCarrierRefused: a WARNING. An instantiation of a generic type satisfies a non-generic interface
+	// through a closed carrier, in a shape the carrier does not serve: a type-argument slot, a promoted method, or
+	// a second instantiation for one pair (closedCarrier.go). The conversion goes on and the C# build fails there.
+	diagnosticClosedCarrierRefused = "GO2CS2007"
+	// diagnosticFileDropped: a file the converter failed on (a recovered visitor panic), whose output was not
+	// written; the run fails at its end naming each one (droppedFiles.go). -warn may not downgrade it: the loss is
+	// not loud.
+	diagnosticFileDropped = "GO2CS2008"
 )
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST

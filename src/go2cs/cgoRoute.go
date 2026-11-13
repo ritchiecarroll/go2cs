@@ -45,6 +45,15 @@ import (
 // content alone. A host with no C compiler cannot make cmd/cgo's output, so this is how the route is tested there.
 var cgoOfflineTrees bool
 
+// cgoOfflineBuildFlags are the offline load's build flags: ONE -tags flag, the user's tags and cgo. go keeps only the
+// last -tags it is given, so a second flag for cgo would drop the user's, and every file under them.
+func cgoOfflineBuildFlags(options Options) []string {
+	offline := options
+	offline.buildTags = append(append([]string{}, options.buildTags...), "cgo")
+
+	return offline.loaderBuildFlags()
+}
+
 // cgoCaptureOverride is set only by tests: it answers the library capture, each symbol's load-time name and the C
 // toolchain's version line, in place of a C toolchain.
 var cgoCaptureOverride func(symbols []string) ([]cgoSymbolLibrary, string, error)
@@ -1093,7 +1102,8 @@ func (v *Visitor) convCgoClosureArgument(argument cgoClosureArgument, context Id
 }
 
 // cgoTargetDefaults makes a cgo package's project default to the one target its bindings were converted for: layout
-// L3's own defaults are the corpus's (windows, amd64), and a build of another target would compile no bindings.
+// L3's own defaults are the corpus's (windows, amd64), and a build of another target would compile no bindings. It
+// also makes the project hold to that target (cgoTargetBlocks).
 func cgoTargetDefaults(projectFileContents, targetPlatform string) string {
 	goos, goarch, _ := strings.Cut(targetPlatform, "/")
 
@@ -1102,7 +1112,82 @@ func cgoTargetDefaults(projectFileContents, targetPlatform string) string {
 			ReplaceAllLiteralString(projectFileContents, "<"+property+">"+value+"</"+property+"> <!-- the one target of this package's cgo bindings -->")
 	}
 
-	return projectFileContents
+	closeAt := strings.LastIndex(projectFileContents, "</Project>")
+
+	if closeAt < 0 || strings.Contains(projectFileContents, cgoTargetCheckName) {
+		return projectFileContents
+	}
+
+	return projectFileContents[:closeAt] + cgoTargetBlocks(goos, goarch) + projectFileContents[closeAt:]
+}
+
+// cgoTargetCheckName is the MSBuild target that refuses a cgo project's build for another target.
+const cgoTargetCheckName = "GoCheckCgoTarget"
+
+// cgoTargetBlocks are the two things that hold a cgo package's project to the one target of its bindings.
+//
+// A build for another target is refused by name, before any reference is built or the compiler runs: it would
+// compile no bindings file, and fail on the first C type in an exported signature (CS0051), far from the cause.
+//
+// And the project hands a target to the projects it references. Its default reaches only itself; the standard
+// library's own default is the corpus's, so a build that names no target would compile these bindings beside the
+// windows standard library, and say nothing. What it hands down is the target the standard library is LAID OUT for
+// (cgoReferenceTarget), which is not always the bindings' own.
+func cgoTargetBlocks(goos, goarch string) string {
+	target := goos + "/" + goarch
+	build := "$(" + platformTargetOSProperty + ")/$(" + platformTargetArchProperty + ")"
+	referenceOS, referenceArch := cgoReferenceTarget(goos, goarch)
+
+	return "  <!-- This package's cgo bindings were converted for " + target + ", and are for no other target. A build for\r\n" +
+		"       another would compile no bindings file and fail far from the cause, so it is refused here by name. -->\r\n" +
+		"  <Target Name=\"" + cgoTargetCheckName + "\" BeforeTargets=\"BeforeBuild;CoreCompile\">\r\n" +
+		"    <Error Condition=\"'" + build + "'!='" + target + "'\"\r\n" +
+		"           Text=\"go2cs: this package's cgo bindings were converted for " + target + ", and this build is for " + build +
+		". A cgo package builds only for the target it was converted for: build it for " + target +
+		", or convert it again with -cgo on a " + build + " host.\" />\r\n" +
+		"  </Target>\r\n\r\n" +
+		"  <!-- The projects this package references are built for this package's operating system, at the architecture\r\n" +
+		"       the standard library is laid out for there. The standard library's own default is windows/amd64, and a\r\n" +
+		"       build that names no target would put that one beside these bindings. -->\r\n" +
+		"  <ItemDefinitionGroup>\r\n" +
+		"    <ProjectReference>\r\n" +
+		"      <AdditionalProperties>" + platformTargetOSProperty + "=" + referenceOS + ";" + platformTargetArchProperty + "=" + referenceArch + "</AdditionalProperties>\r\n" +
+		"    </ProjectReference>\r\n" +
+		"  </ItemDefinitionGroup>\r\n\r\n"
+}
+
+// cgoReferenceTarget is the target a cgo package's project references are built for. The converted standard library is
+// laid out for a declared set of targets (platformUniverse), and its own build refuses any other by name. A cgo
+// package's bindings are for the host's own target, which need not be in that set: darwin/arm64 is not, and the
+// library's darwin/amd64 flavour serves both of darwin's architectures. So the references take the package's own
+// target where the library is laid out for it, and otherwise the flavour the library has for that operating system.
+// Handing down the bindings' own pair refused every build of a cgo project on darwin/arm64 (first read on the hosted
+// leg 43335132134).
+func cgoReferenceTarget(goos, goarch string) (string, string) {
+	flavourArch := ""
+
+	for _, target := range platformUniverse {
+		targetOS, targetArch, _ := strings.Cut(target, "/")
+
+		if targetOS != goos {
+			continue
+		}
+
+		if targetArch == goarch {
+			return goos, goarch
+		}
+
+		if flavourArch == "" {
+			flavourArch = targetArch
+		}
+	}
+
+	if flavourArch == "" {
+		// An operating system the library has no flavour of: its own check names the pair it is handed.
+		return goos, goarch
+	}
+
+	return goos, flavourArch
 }
 
 // cgoLoad is the environment and directory go list loaded the package in: the real route reads go env and runs the C
@@ -1216,7 +1301,9 @@ func cgoCapture(load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols [
 		// compiler itself (a library that is not there, a directory for another architecture), and no symbol is to
 		// blame: the linker's own words are the refusal.
 		if _, _, baselineErr := linkCgoProbe(toolchain, goos, flags, nil, workDir, nil); baselineErr != nil {
-			return nil, "", nil, err
+			// The baseline's own error, never the first probe's: that one referenced every symbol, and a linker
+			// that traces symbols names each of them beside the library that is not there.
+			return nil, "", nil, baselineErr
 		}
 
 		for _, symbol := range symbols {
