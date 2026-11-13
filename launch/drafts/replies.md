@@ -1,6 +1,8 @@
 # Draft: the reply bank
 
-> DRAFT for the owner's voice, refreshed 2026-10-20 for the Go 1.26 release. One short answer for each
+> DRAFT for the owner's voice, refreshed 2026-10-20 for the Go 1.26 release, and on 2026-11-13 for the 1.26.11.1 soft
+> release (the entries the new facts change: validation, Go version, goroutines, cgo, macOS, install; and two new
+> ones, TypeScript and sqlite-cs). One short answer for each
 > objection that can be predicted. Each grants what is true, says one thing, and links the page with the
 > detail. Edit before use; never paste the same text twice in one thread. **Acknowledge and link; never
 > argue.**
@@ -11,7 +13,7 @@
 > **Owner only** is never drafted as a ready reply: the agent flags the comment for the owner and quotes
 > the entry as background.
 >
-> Before the wide stage, check every link and every figure against the live site at the 1.26 release.
+> Before each stage, check every link and every figure against the live site at the release being announced.
 > Figures in [square brackets] are read on the day.
 
 ## Why not just use Go?
@@ -74,7 +76,7 @@ library, run, and compared with `go test -json` from the same Go release, test b
 only when every test either matches Go's verdict or is disclosed by name, with its exact failure and the
 reason (a goroutine is a thread, an allocation count Go's escape analysis beats, a test that reads Go's
 runtime internals). The counts are per platform, and one command reproduces any row on your own machine.
-At Go 1.26 that is [N of N] packages on Windows and Linux; macOS is in progress.
+At Go 1.26.11 that is [N of N] packages on Windows and Linux (x64 and arm64), and [234 of 236] on macOS.
 https://go2cs.net/ValidatedTestPackages.html
 What it does not prove is written down too:
 https://go2cs.net/Limitations.html#what-validated-means-and-what-it-doesnt
@@ -83,10 +85,10 @@ https://go2cs.net/Limitations.html#what-validated-means-and-what-it-doesnt
 
 *Matches:* Go 1.26, Go 1.27, out of date, behind, version, cadence, keep up.
 
-It tracks Go 1.26 [the patch release in Requirements], which Go supports until Go 1.28 ships. Go 1.27 is
-the next hop and starts now that 1.26 is out. The plan is to follow every Go release, one at a time,
-re-validating every package at each move, and to take Go's patch releases as they come, the security
-ones first. https://go2cs.net/Roadmap.html#go-releases
+It tracks Go 1.26 [the patch release in Requirements: 1.26.11], which Go supports until Go 1.28 ships. Go 1.27 is
+next, after M:N goroutine scheduling. The plan is to follow every Go release, one at a time, re-validating every
+package at each move, and to take Go's patch releases as they come, the security ones first.
+https://go2cs.net/Roadmap.html#go-releases
 
 ## Will it keep up? Isn't this a huge maintenance burden?
 
@@ -152,17 +154,13 @@ command: https://go2cs.net/ValidatedTestPackages.html
 
 *Matches:* goroutines, threads, scheduler, M:N, million goroutines, async, runtime async, .NET 11.
 
-For a server holding a million connections, yes, and I would not convert that. Each running goroutine owns
-an OS thread (threads are reused once a goroutine ends), so a program with tens of thousands of goroutines
-parked at once is where it stops being practical. For a library that uses a handful of goroutines it
-behaves the same. I chose matching Go's behavior over rewriting everything into `async`.
-https://go2cs.net/Limitations.html#what-converts-but-doesnt-behave-exactly-like-go
-
-*If they want to go further (what would real M:N take?):* there is a design note that measures the gap
-against Go and walks through what M:N would need on .NET, including a possible spike on .NET 11's opt-in
-runtime async. It's a thought exercise for discussion, not a plan or a schedule.
-[https://github.com/ritchiecarroll/go2cs/blob/master/docs/DESIGN-mn-scheduler-sizing.md: check the link is live
-on master at the 1.26 release]
+Today, for a server holding a million connections, yes. Each running goroutine owns an OS thread (threads are
+reused once a goroutine ends), so a program with tens of thousands of goroutines parked at once is where it stops
+being practical. For a library that uses a handful of goroutines it behaves the same. M:N scheduling, many
+goroutines over a few threads as Go does it, is the next release's work, and the converted code keeps Go's shape
+rather than turning into `async` everywhere.
+https://go2cs.net/Roadmap.html (goroutine scheduling, planned next)
+*(Say what has shipped on the day, nothing more. If M:N has a release by then, link its NEWS entry instead.)*
 
 ## "Is it production-ready?"
 
@@ -177,26 +175,59 @@ before you decide. https://go2cs.net/Limitations.html
 *Matches:* generics, reflection, reflect, unsafe, iterators, range over func, embedding, select.
 
 Generics, closures, embedding, iterators, `defer`/`panic`/`recover`, channels, `select` and `reflect`:
-yes. `unsafe` works over plain numbers and stops at anything the garbage collector tracks. cgo: no. The
-list of what does not make the trip is short and specific:
+yes. `unsafe` works over plain numbers and stops at anything the garbage collector tracks. cgo: partly, see the
+next answer. The list of what does not make the trip is short and specific:
 https://go2cs.net/Limitations.html#what-wont-make-the-trip
+
+## "Does it do cgo?"
+
+*Matches:* cgo, import "C", C library, C.CString, C.free, shared library, P/Invoke from Go.
+
+Partly, and on purpose step by step. With `-cgo`, Go code that calls a C library's functions converts: numbers,
+pointers and plain structs pass through, and `C.CString`, `C.GoString`, `C.GoBytes`, `void*` and `defer C.free` work.
+It converts for the machine's own platform. C code in the preamble, `//export` and callbacks into Go do not convert
+yet, and each is refused by name with the phase that will cover it.
+https://go2cs.net/Limitations.html#what-wont-make-the-trip
+*(If cgo 3.1 is not in the release, drop the second sentence's second half: Phase 2 alone is calling C functions
+with numbers, pointers and plain structs.)*
+
+## "Does TypeScript really convert?" / "Byte-identical? Prove it."
+
+*Matches:* TypeScript, typescript-go, tsgo, byte-identical, compiler, tsc.
+
+Yes, and the repository says exactly what was measured. TypeScript's own Go compiler (typescript-go) converts to
+C#: it parses [17,422 of 17,422] test files, and its type-check and emit output matches the native Go build byte for
+byte on [7,404 of 7,404]. The README says how that was measured. What it does not claim:
+that every TypeScript feature or option was exercised beyond those test files, or that it is as fast as the native
+build. https://github.com/ritchiecarroll/typescript-go-cs
+*(Before using this entry, confirm the README states the method; if it does not, drop that sentence. Quote only
+the figures the README states on the day. If asked about speed, grant that it is slower and link the
+README's numbers if it has them; quote no number it does not state.)*
+
+## "sqlite-cs doesn't work."
+
+*Matches:* sqlite, sqlite-cs, modernc, doesn't run, broken, fails.
+
+Not yet, and it is public so that is visible. It is modernc.org/sqlite converted as it stands: C translated to Go,
+then Go to C#, which pushes on the corners of Go (function pointers carried as numbers, structs read straight from
+memory) harder than anything else I have. Each wall it hits becomes a converter fix, and its README lists where it
+stops today. https://github.com/ritchiecarroll/sqlite-cs
 
 ## "Does it work on macOS?"
 
 *Matches:* macOS, Mac, Apple silicon, M1, M2, Darwin.
 
-Partly. The packages are there for Intel and Apple silicon, the converter has a macOS download, and HTTPS
-works, but validation is still in progress, package by package. Windows and Linux x64 are the finished
-platforms. https://go2cs.net/Roadmap.html#platforms
+Yes. The packages are there for Intel and Apple silicon, the dotnet tool runs there, and [234 of 236]
+standard-library packages validate on macOS; the roster shows each package's macOS count.
+https://go2cs.net/ValidatedTestPackages.html
 
 ## "How do I install it?"
 
 *Matches:* install, download, go install, dotnet tool, brew, winget.
 
-Download the converter for your platform from the releases page, or clone and `go install` it. You also
-need Go [the release in Requirements] and the .NET 10 SDK, because the converter uses Go's own toolchain
-to read your code. There is no `dotnet tool` or package-manager install yet.
-https://go2cs.net/#installing-the-converter
+`dotnet tool install -g go2cs`. You need the .NET 10 SDK; you do not need Go: on its first conversion the tool
+downloads the Go release go2cs converts with and checks it against hashes built into go2cs. Building from source
+with `go install` also works. https://go2cs.net/#installing-the-converter
 
 ## "I hit a bug."
 
