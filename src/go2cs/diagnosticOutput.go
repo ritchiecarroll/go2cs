@@ -161,8 +161,8 @@ const (
 	diagnosticFileDropped = "GO2CS2008"
 
 	// diagnosticAsmForwardSignatureRefused: a bodyless function asmForwardBodies lists (x/sys/cpu's cpuid, xgetbv)
-	// declares another signature than the golib body it forwards to answers (asmForwardBodies.go). (GO2CS2009 and
-	// GO2CS2010 are the inline-array seat's.)
+	// declares another signature than the golib body it forwards to answers (asmForwardBodies.go). The two numbers
+	// before it belong to the inline-array seat.
 	diagnosticAsmForwardSignatureRefused = "GO2CS2011"
 	// diagnosticAsmStubUnforwarded: a WARNING. A bodyless function of a module outside GOROOT that nothing forwards
 	// converts to a stub that throws when called; the conversion names each one (asmForwardBodies.go).
