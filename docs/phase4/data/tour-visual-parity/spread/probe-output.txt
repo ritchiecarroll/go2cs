@@ -1,0 +1,16 @@
+PASS A: fmtA.Println(split(17)) compiles (the tuple boxes into the one params slot) and spreads at run time: 7 10
+PASS A: two ordinary arguments unchanged: 1 x
+PASS A: HAZARD reproduced -- a deliberate single ValueTuple from C# is spread too: 1 2
+PASS B/C: fmt.Println(split(17)) binds the generic arity-2 overload: 7 10
+PASS B/C: arity 4 (the Tour's methods/images.go): 1 2 3 4
+PASS B/C: one ordinary argument still binds params: 5
+PASS B/C: no arguments still binds params: ""
+PASS B/C: method group conversion to the variadic delegate: 1 2
+PASS B/C: a deliberate C# tuple stays ONE value (no runtime guess): (1, 2)
+PASS D: lib.Must(parse()) binds a C# 14 static extension declared in the caller, through the using alias: ok 42
+PASS D: an interface method spread binds an instance extension: 1234
+PASS D: the ordinary call is untouched: ok 7
+PASS order 1, REPRODUCES today's defect: the temp form calls g() before pick() (Go: pick, then g): g,pick
+PASS order 1, callee-first form: pick,g
+PASS order 2, temp form matches gc (9234): 9234
+PASS order 2, REPRODUCES the inline hazard: the receiver copy is read before g2() (gc: 9234): 1234
