@@ -376,6 +376,11 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goslicedata", csFails: cgoP3GoMemory},
 		{name: "goadd", csFails: cgoP3GoMemory},
 		{name: "goaddlocal", csFails: cgoP3GoMemory},
+		// A pointer that reaches C as the result of a call, through a variable and through a user function.
+		{name: "goaddvar", csFails: cgoP3GoMemory},
+		{name: "goaddfunc", csFails: cgoP3GoMemory},
+		{name: "goviewfieldfunc", csFails: cgoP3GoMemory},
+		{name: "goviewfieldvar", csFails: cgoP3GoMemory},
 	}
 }
 

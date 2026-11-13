@@ -42,6 +42,11 @@ type goHeader struct {
 	name [8]byte
 }
 
+// same returns the pointer it was handed: a user function whose result is an unsafe.Pointer.
+//
+//go:noinline
+func same(p unsafe.Pointer) unsafe.Pointer { return p }
+
 // roundTrip copies a Go string into C memory and reads it back up to its first NUL.
 func roundTrip(s string) string {
 	cs := C.CString(s)
@@ -248,6 +253,25 @@ func main() {
 		// unsafe.Add over the address of a local.
 		var x [2]int64
 		fmt.Println("goaddlocal", C.go2cs_probe_same(unsafe.Add(unsafe.Pointer(&x), 8)) != nil, len(x))
+	// A pointer that reaches C as the RESULT OF A CALL (DESIGN-unsafe-pointer-call-result): through a variable, and
+	// through a user function, for unsafe.Add and for a pointer derived from a view. goadd and goaddlocal above hand
+	// the call's result to C as the argument itself.
+	case "goaddvar":
+		b := make([]byte, 16)
+		p := unsafe.Add(unsafe.Pointer(&b[0]), 4)
+		fmt.Println("goaddvar", C.go2cs_probe_same(p) != nil, len(b))
+	case "goaddfunc":
+		b := make([]byte, 16)
+		fmt.Println("goaddfunc", C.go2cs_probe_same(same(unsafe.Add(unsafe.Pointer(&b[0]), 4))) != nil, len(b))
+	case "goviewfieldfunc":
+		b := make([]byte, 16)
+		h := (*goHeader)(unsafe.Pointer(&b[0]))
+		fmt.Println("goviewfieldfunc", C.go2cs_probe_same(same(unsafe.Pointer(&h.n))) != nil, len(b))
+	case "goviewfieldvar":
+		b := make([]byte, 16)
+		h := (*goHeader)(unsafe.Pointer(&b[0]))
+		p := same(unsafe.Pointer(&h.n))
+		fmt.Println("goviewfieldvar", C.go2cs_probe_same(p) != nil, len(b))
 	default:
 		fmt.Println("unknown arm", arm)
 		os.Exit(64)

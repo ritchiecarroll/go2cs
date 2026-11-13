@@ -78,6 +78,10 @@ public unsafe partial class GoCgoArgsTests
 
     private const int TypedDoors = 5, UntypedDoors = 2;
 
+    // A user function that returns the pointer it was handed: `func id(p unsafe.Pointer) unsafe.Pointer { return p }`.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static @unsafe.Pointer Returned(@unsafe.Pointer pointer) => pointer;
+
     [TestMethod]
     public void ABoxDerivedFromAPointerOverGoMemoryIsRefusedAtEveryDoor()
     {
@@ -126,6 +130,18 @@ public unsafe partial class GoCgoArgsTests
         Untyped("unsafe.Add(unsafe.Pointer(&local), 4)", @unsafe.Add(@unsafe.Pointer.FromPinnedBox(local), 4));
         Untyped("unsafe.Add(unsafe.Pointer(h), 4) over a view", @unsafe.Add(@unsafe.Pointer.FromPinnedBox(view), 4));
 
+        // A CALL RESULT, as the converter emits one: the call itself, with no cast between it and its consumer
+        // (docs/phase4/DESIGN-unsafe-pointer-call-result.md). The four arms above hand unsafe.Add's result to the door
+        // as the argument. These take it through a variable and through a user function, for unsafe.Add and for a
+        // derived pointer.
+        @unsafe.Pointer added = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(first), 4);
+        Untyped("p := unsafe.Add(unsafe.Pointer(&b[0]), 4), through a variable", added);
+        Untyped("id(unsafe.Add(unsafe.Pointer(&b[0]), 4)), through a user function", Returned(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(first), 4)));
+        @unsafe.Pointer field = @unsafe.Pointer.FromPinnedBox(view.of(cgoHdr.ᏑN));
+        Untyped("p := unsafe.Pointer(&h.n), a derived pointer through a variable", field);
+        Untyped("id(unsafe.Pointer(&h.n)), a derived pointer through a user function", Returned(@unsafe.Pointer.FromPinnedBox(view.of(cgoHdr.ᏑN))));
+        Untyped("id(unsafe.Pointer(&sl[1])), an element of unsafe.Slice through a user function", Returned(@unsafe.Pointer.FromPinnedBox(Ꮡ(sliced, 1))));
+
         Assert.AreEqual(0, crossings.Count, "derived pointers over Go memory that crossed as C memory:\n" + string.Join("\n", crossings));
 
         GC.KeepAlive(first);
@@ -162,11 +178,34 @@ public unsafe partial class GoCgoArgsTests
             Typed("typed unsafe.Add", @unsafe.Add(native, 4));
             Untyped("unsafe.Add over the pinning mint", @unsafe.Add(@unsafe.Pointer.FromPinnedBox(native), 4));
             Untyped("unsafe.Add over a number", @unsafe.Add(new @unsafe.Pointer((uintptr)(nuint)memory), 4));
+            Untyped("unsafe.Add through a user function", Returned(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(native), 4)));
+            Untyped("a field through a user function", Returned(@unsafe.Pointer.FromPinnedBox(native.of(cgoHdr.ᏑN))));
         }
         finally
         {
             NativeMemory.Free(memory);
         }
+    }
+
+    // Why the emission matters to every arm above: a call result that is CAST to a number, as the converter emitted it
+    // until DESIGN-unsafe-pointer-call-result, carries nothing. It reaches the door as a bare number, and an interior
+    // number crosses (the disclosed number residue). The arms above hold only because the cast is gone.
+    [TestMethod]
+    public void ACallResultCastToANumberCarriesNothingAndCrossesAsANumber()
+    {
+        array<byte> bytes = new array<byte>(32);
+        ж<byte> first = new ElemRefBox<byte>(bytes, 0);
+        @unsafe.Pointer carrying = @unsafe.Pointer.FromPinnedBox(first);
+
+        @unsafe.Pointer kept = @unsafe.Add(carrying, 4);
+        @unsafe.Pointer cast = (uintptr)@unsafe.Add(carrying, 4);
+
+        Assert.IsNotNull(kept.RetainedSource, "the call's own result carries a box");
+        Assert.IsNull(cast.RetainedSource, "the same result cast to a number carries nothing");
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.VoidPointer(kept, "f")), GoMemoryOwner);
+        Assert.AreEqual(carrying.Value.Value + 4, GoCgoArgs.VoidPointer(cast, "f"), "DISCLOSED: the bare interior number crosses");
+
+        GC.KeepAlive(first);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
