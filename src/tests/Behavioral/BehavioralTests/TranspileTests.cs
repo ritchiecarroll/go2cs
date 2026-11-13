@@ -823,6 +823,12 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGenericFuncInstantiationArg() => CheckTarget("GenericFuncInstantiationArg");
 
     [TestMethod]
+    public void CheckGenericInstClosedIface() => CheckTarget("GenericInstClosedIface");
+
+    [TestMethod]
+    public void CheckGenericInstClosedIfaceConsumer() => CheckTarget("GenericInstClosedIfaceConsumer");
+
+    [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");
 
     [TestMethod]
@@ -2717,6 +2723,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsafePointerPrint() => CheckTarget("UnsafePointerPrint");
+
+    [TestMethod]
+    public void CheckUnsafePointerReceiverCopy() => CheckTarget("UnsafePointerReceiverCopy");
 
     [TestMethod]
     public void CheckUnsafePointerReinterpret() => CheckTarget("UnsafePointerReinterpret");

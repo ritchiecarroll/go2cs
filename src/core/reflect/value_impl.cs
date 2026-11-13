@@ -1237,6 +1237,17 @@ public static ΔValue Field(this ΔValue v, nint i) {
         return elem;
     }
     object? cur = v.live;
+    // A struct held in an interface through a structural shell (`Δ<iface>ᴛObj`, IInterfaceAdapter)
+    // or a VALUE adapter (`<Type>ᴠ<iface>`, IValueAdapter) is a SHELL around a copy of the struct:
+    // the kind and the field table above come from the wrapped type (GoDynamicTypeOf sees through
+    // both shells), so the read must reach the copy as well, or FieldInfo.GetValue is handed an
+    // object of the shell's class. The unwrap order is IsNil's.
+    while (cur is IInterfaceAdapter { Value: not null } interfaceAdapter) {
+        cur = interfaceAdapter.Value;
+    }
+    if (cur is IValueAdapter { Value: not null } valueAdapter) {
+        cur = valueAdapter.Value;
+    }
     if (cur is null) {
         throw panic(Ꮡ(new ValueError("reflect.Value.Field", v.kind())));
     }

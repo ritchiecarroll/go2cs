@@ -284,6 +284,15 @@ var interfaceInheritances map[string]hashset.HashSet[string]
 // referencing a class the generator never emits (net/http, CS0246 ×17). Guarded by packageLock.
 var adapterClassImplementations hashset.HashSet[string]
 
+// closedCarrierImplementations marks recorded "iface|impl" GoImplement pairs that take a CLOSED CARRIER: an
+// instantiation of a generic type of this package, converted to a non-generic interface whose method names the
+// type's own type parameter (closedCarrier.go). Their records are written with `Closed = true`. Guarded by packageLock.
+var closedCarrierImplementations hashset.HashSet[string]
+
+// closedCarrierWarnings holds the closed-carrier refusals already reported from a conversion site, as
+// "file|text", so one pair converted many times in a file is reported once. Guarded by packageLock.
+var closedCarrierWarnings hashset.HashSet[string]
+
 var implicitConversions map[string]hashset.HashSet[string]
 
 var invertedImplicitConversions map[string]hashset.HashSet[string]
