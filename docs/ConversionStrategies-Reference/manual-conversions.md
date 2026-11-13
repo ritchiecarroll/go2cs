@@ -840,7 +840,7 @@ field is an embed to `reflect`* below).
 <!-- history: Anonymous first waited on field ORDER, because go2cs-gen declared the promoted-embed backing box
      after the declared fields, so struct{X; y; Inner; inner; Ptr} walked as X, y, Ptr, Inner, inner; GoFields'
      reorder by the all-fields constructor and the Anonymous projection landed together. The converter has since
-     declared embeds in place (src/go2cs/visitStructType.go:976 `// declaration order, marked like every other embed:`). -->
+     declared embeds in place (src/go2cs/visitStructType.go:998 `// declaration order, marked like every other embed:`). -->
 
 Guard: `tests/Behavioral/ReflectUnexportedFieldFlags`, byte-identical to `go run` — the indexed
 walk's `IsExported`/`PkgPath`/`Tag`, `FieldByName` carrying the same flags (including the blank
@@ -2880,7 +2880,7 @@ MINI-BRIDGE* above; `GoStructLayoutTests.FieldOrder_IsGoDeclarationOrder_NotMeta
      encoding/json's dominance rules are decided by DEPTH and tag, never by declaration order, and its one
      order-sensitive test (TestMarshalEmbeds) declares its single plain field first. The section then named
      declaration-order cargo as the remedy; the constructor reorder landed instead, and the converter later declared
-     embeds in place (src/go2cs/visitStructType.go:976 `// declaration order, marked like every other embed:`). The
+     embeds in place (src/go2cs/visitStructType.go:998 `// declaration order, marked like every other embed:`). The
      legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:529 (`An embed is emitted by the converter as a partial PROPERTY`). -->
 
 ## An UNNAMED func type renders STRUCTURALLY, exactly as an unnamed struct does
@@ -4384,7 +4384,7 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3575-3596 -->
+<!-- source: src/core/reflect/value_impl.cs:3585-3606 -->
 ```csharp
 public static ΔType ArrayOf(nint length, ΔType elem) {
     if (length < 0) {

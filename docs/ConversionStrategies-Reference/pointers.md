@@ -2420,7 +2420,7 @@ type record struct {
 	n := copy(rec.Path[2:], []uint16{0x0c0d})
 	rec.B = 0x1112
 ```
-<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:9, 48-57 -->
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:12-61 -->
 ```csharp
 partial class main_package {
 …
