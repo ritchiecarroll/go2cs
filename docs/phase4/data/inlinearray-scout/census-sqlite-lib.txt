@@ -1,0 +1,5 @@
+packages 1; struct types 812; with an array field 147
+array fields 229 (96 first met in a struct type expression rather than a named declaration): zero-length 126; unmanaged element 229; managed element 0
+fields ever sliced 0; whole-address-taken 0; element-address-taken 0; through unsafe.Pointer 0; any of REC-A's refusals (sliced, &whole, unsafe) 0
+struct types (named, alias or anonymous) holding an array field, converted to/from unsafe.Pointer as a whole: 72 distinct, 10817 sites
+exit=0

@@ -1,0 +1,12 @@
+== dict-first
+dict: returned True/True
+equals: returned True/True
+equals again: returned True/True
+hash h1/h3: returned 100070600 returned 100070600
+reference-bearing holder Equals: returned True; again: returned True
+== equals-first
+equals: NotSupportedException
+equals again: NotSupportedException
+dict: returned True/True
+hash h1/h3: returned 1251308645 returned 1251308645
+reference-bearing holder Equals: returned True; again: returned True
