@@ -2781,6 +2781,65 @@ arms of `PointerCastSliceReinterpret` — the reparse `[n1:n2:n2]` shape and a b
 wider element sliced `[3:7]`, both matching Go. `StdLibInternalAbi`'s golden
 pins the corrected `OutSlice`; its own stdout does not depend on the offset.)
 
+## Every spelling of a pointer-cast slice takes the span, and a MAX bound sets its capacity
+The span lowering above is recognized from the Go expression, not from the text the conversion
+rendered. Extra parentheses around the conversion and an explicit dereference of it are the same
+expression to Go, and both take the span: ccgo writes `((*rawmem)(unsafe.Pointer(r)))[:size:size]`
+and `(*(*RawMem)(unsafe.Pointer(s)))[:n:n]`. A slice of a NAMED array type takes its element type
+from the array (`[]byte` for `rawmem`, a `[1<<50 - 1]byte`), never the array's own name. And a
+three-index slice whose max differs from its high bound covers `lo..max` and is cut to its length
+with `.slice(0, hi - lo)`, so its capacity is `max - lo` as in Go:
+
+<!-- source: src/tests/Behavioral/PointerArrayViewForms/main.go:22-27 -->
+```go
+	b := ((*[1<<50 - 1]byte)(unsafe.Pointer(p)))[:n:n]
+	c := (*(*[1<<50 - 1]byte)(unsafe.Pointer(p)))[:n:n]
+	d := (*rawmem)(unsafe.Pointer(p))[2:6]
+	e := ((*rawmem)(unsafe.Pointer(p)))[:4]
+	f := (*(*rawmem)(unsafe.Pointer(p)))[1:3:5]
+	g := (*[1<<50 - 1]byte)(unsafe.Pointer(p))[2:3:7]
+```
+<!-- source: src/tests/Behavioral/PointerArrayViewForms/main.cs.target:17-22 -->
+```csharp
+    var b = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p), (int)(n)));
+    var c = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p), (int)(n)));
+    var d = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p) + 2, 6 - 2));
+    var e = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p), 4));
+    var f = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p) + 1, 5 - 1)).slice(0, 3 - 1);
+    var g = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p) + 2, 7 - 2)).slice(0, 3 - 2);
+```
+Before, the parenthesized form fell through to `((ж<array<byte>>)…).slice(0, n, n)`, reading an
+`array<byte>` out of the pointee's own bytes (a nil dereference here, a fabricated reference in
+general); the dereferenced form copied the whole array first (`~`); a named array emitted
+`slice<rawmem>`; and `g` read capacity 1 where Go reads 5. A plain view keeps its bytes: the
+recognition only adds the forms the text match missed, and the capacity form is emitted only when
+max and high are written differently. The span still COPIES `lo..max` (the copying slice view);
+a write through it does not reach the memory. (Guarded by the `PointerArrayViewForms` behavioral
+output test, which prints what Go prints.)
+
+## A store through an EXPLICIT dereference of a pointer conversion reaches the pointee
+`(*(*T)(p)).F = x` and `(*(*[N]T)(p))[i] = x` are the same stores as `(*T)(p).F = x` and
+`(*[N]T)(p)[i] = x`. The conversion's dereference used to render as a copy, `~cast`, so the
+store did not compile (CS0131, and CS1510 for a pointer-receiver method call on it). A selector
+or index whose base is such a dereference now renders the conversion and reads its `.Value`:
+
+<!-- source: src/tests/Behavioral/ExplicitDerefConversionStore/main.go:25-27 -->
+```go
+	(*(*frame)(ptr(bp))).Pgno = 7
+	(*(*frame)(ptr(bp))).Read += 3
+	(*(*frame)(ptr(bp))).bump()
+```
+<!-- source: src/tests/Behavioral/ExplicitDerefConversionStore/main.cs.target:21-23 -->
+```csharp
+    ((ж<frame>)(uintptr)(ptr(bp))).Value.Pgno = 7;
+    ((ж<frame>)(uintptr)(ptr(bp))).Value.Read += 3;
+    ((ж<frame>)(uintptr)(ptr(bp))).bump();
+```
+ccgo emits this shape for every store into a stack frame struct (`(*(*TWalSehFindFrame)(
+__ccgo_ptr(bp))).Fpgno = pgno`). (Guarded by the `ExplicitDerefConversionStore` behavioral output
+test: the struct field store, op-assign and method call, the array element store and op-assign,
+each beside the implicit form as its control.)
+
 ## `unsafe.Pointer(p)` on a pointer PARAMETER renders the box, never a deref
 A pointer parameter is emitted as the box `ж<T> Ꮡp` plus a deref'd VALUE alias
 (`ref var p = ref Ꮡp.DerefOrNull()`; the strict `ref Ꮡp.Value` when this rule was written). Taking its address through
