@@ -11,8 +11,10 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/build"
 	"go/token"
 	"go/types"
+	"path/filepath"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
@@ -40,7 +42,8 @@ type asmForwardBody struct {
 }
 
 // asmForwardBodies is keyed by "<package path>.<function>". Only golang.org/x/sys/cpu as a module: the
-// standard library's vendored copy is converted std and reached by no banked row.
+// standard library's vendored copy is converted std and reached by no banked row. It converts under the same
+// import path, so the forward is gated on the package being outside GOROOT (funcAsmBodyForward), not on the key.
 var asmForwardBodies = map[string]asmForwardBody{
 	"golang.org/x/sys/cpu.cpuid": {
 		signature: "func(uint32, uint32) (uint32, uint32, uint32, uint32)",
@@ -104,6 +107,11 @@ func asmForwardRowOf(funcDecl *ast.FuncDecl, pkgPath string, info *types.Info) (
 // funcAsmBodyForward recognizes a bodyless function asmForwardBodies lists with its row's signature, and
 // answers the golib type and member the forwarder calls.
 func (v *Visitor) funcAsmBodyForward(funcDecl *ast.FuncDecl) (alias string, targetFunc string, ok bool) {
+	// The standard library's vendored x/sys/cpu converts under the module's import path; it keeps its stubs.
+	if !currentPackageOutsideGoroot {
+		return "", "", false
+	}
+
 	row, listed, matches := asmForwardRowOf(funcDecl, currentPackagePath, v.info)
 
 	if !listed || !matches {
@@ -140,7 +148,9 @@ func (refusal *asmForwardSignatureRefusal) report() {
 // refuseAsmForwardSignatures finds every bodyless function asmForwardBodies lists whose declared signature
 // differs from its row's. It returns nil when there is none.
 func refuseAsmForwardSignatures(pkg *packages.Package) *asmForwardSignatureRefusal {
-	if pkg.TypesInfo == nil {
+	// Only a package outside GOROOT forwards (funcAsmBodyForward), so only one can be refused: the standard
+	// library's vendored x/sys/cpu shares the module's import path and keeps its stubs.
+	if pkg.TypesInfo == nil || pkg.Dir == "" || isPathUnder(pkg.Dir, filepath.Join(build.Default.GOROOT, "src")) {
 		return nil
 	}
 
