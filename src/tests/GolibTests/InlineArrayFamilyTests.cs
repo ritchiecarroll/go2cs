@@ -227,6 +227,12 @@ public class InlineArrayFamilyTests
         IGoInlineArray inline = (IGoInlineArray)boxed;
         Assert.AreEqual((nint)3, inline.Length);
         Assert.AreEqual((short)6, inline[1]);
+
+        // The converted reflect reads it through that face (value_impl.cs, Len and Index), and fmt through reflect.
+        go.reflect_package.ΔValue value = go.reflect_package.ValueOf(boxed);
+        Assert.AreEqual((nint)3, value.Len());
+        Assert.AreEqual(6L, (long)value.Index(1).Int());
+        Assert.AreEqual("[5 6 7]", (string)go.fmt_package.Sprintf("%v", boxed));
     }
 
     // P7 by construction: golib names no family type, so a program that does not opt in never loads go.arrays.dll.
