@@ -246,9 +246,12 @@ public class InlineArrayFamilyTests
         Assert.AreEqual("[[1 2] [3 4] [5 6]]", (string)go.fmt_package.Sprintf("%v", copy));
     }
 
-    // reflect (and fmt through it) walks a member reached INSIDE a boxed struct (fmt.Println(*v), whose field reads hand
-    // reflect the member itself) as a Go array value: its length and a copy of each element. That is why IGoInlineArray
-    // and its two reflect arms stay after M1: an argument boxes as array<T>, but a whole struct boxes with its members.
+    // reflect (and fmt through it) walks a boxed MEMBER as a Go array value: its length and a copy of each element. After
+    // M1 the automatic rule boxes a member only as an interface argument, which crosses as array<T>; every other boxing
+    // (an assignment to an interface, a composite element, a return, a send) keeps the type out. Forced mode does not
+    // consult the faces, and there a member boxed those ways reaches interface space as itself: IGoInlineArray and its
+    // two reflect arms are kept for that path. (A whole holding struct is not one: reflection over its inline field
+    // panics by name, GoReflect.InlineArrays.)
     [TestMethod]
     public void ABoxedMemberIsReadByReflectionThroughItsInlineArrayFace()
     {

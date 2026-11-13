@@ -110,9 +110,9 @@ func arrayFieldOwner(sel *ast.SelectorExpr, info *types.Info) (types.Type, strin
 	return owner, selection.Obj().Name(), true
 }
 
-// unspelledFace names the face of the array field selected by sel (the top of stack) when an inline array cannot spell
-// it, or returns "".
-func unspelledFace(sel *ast.SelectorExpr, stack []ast.Node, info *types.Info) string {
+// unspelledFace names the face of the inline array subject (the top of stack: an array field selected, or an element of
+// one that is itself an array) when an inline array cannot spell it, or returns "".
+func unspelledFace(subject ast.Expr, stack []ast.Node, info *types.Info) string {
 	// The nearest enclosing node that is not a parenthesis, from index from down.
 	up := func(from int) (ast.Node, int) {
 		for i := from; i >= 0; i-- {
@@ -128,7 +128,7 @@ func unspelledFace(sel *ast.SelectorExpr, stack []ast.Node, info *types.Info) st
 
 	switch p := parent.(type) {
 	case *ast.IndexExpr:
-		if ast.Unparen(p.X) != sel {
+		if ast.Unparen(p.X) != subject {
 			return "" // the array is the index, which cannot type-check
 		}
 
@@ -181,6 +181,12 @@ func unspelledFace(sel *ast.SelectorExpr, stack []ast.Node, info *types.Info) st
 			}
 		}
 
+		// An element that is itself an array (x.m[i] of a nested array, every one of which is held inline) has a whole
+		// array's faces: boxed into an interface parameter it is spelled, stored or compared it is not.
+		if _, isArray := info.TypeOf(top).Underlying().(*types.Array); isArray {
+			return unspelledFace(top, stack[:at+1], info)
+		}
+
 		return ""
 	case *ast.CallExpr:
 		// len and cap read the constant length; unsafe.Sizeof, Offsetof and Alignof are compile-time constants.
@@ -193,7 +199,7 @@ func unspelledFace(sel *ast.SelectorExpr, stack []ast.Node, info *types.Info) st
 
 		if signature, ok := info.TypeOf(p.Fun).(*types.Signature); ok {
 			for i, arg := range p.Args {
-				if ast.Unparen(arg) != sel {
+				if ast.Unparen(arg) != subject {
 					continue
 				}
 
@@ -205,11 +211,11 @@ func unspelledFace(sel *ast.SelectorExpr, stack []ast.Node, info *types.Info) st
 
 		return "a whole value passed as an argument"
 	case *ast.RangeStmt:
-		if ast.Unparen(p.X) == sel {
+		if ast.Unparen(p.X) == subject {
 			return ""
 		}
 	case *ast.SliceExpr:
-		if ast.Unparen(p.X) == sel {
+		if ast.Unparen(p.X) == subject {
 			return "sliced (x.f[:])"
 		}
 	case *ast.UnaryExpr:
