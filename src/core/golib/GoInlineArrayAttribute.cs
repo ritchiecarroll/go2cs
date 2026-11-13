@@ -5,8 +5,9 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.ComponentModel;
 
-namespace go;
+namespace go.golib;
 
 /// <summary>
 /// Marks a type of the inline-array family (<c>go.arrays.array&lt;N&gt;&lt;T&gt;</c>, in <c>go.arrays.dll</c>): a Go array

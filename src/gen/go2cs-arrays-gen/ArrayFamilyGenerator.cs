@@ -25,7 +25,7 @@ namespace go2cs;
 /// </para>
 /// <para>
 /// <c>where T : unmanaged</c> keeps a rooted Native AOT publish of the family small (7.7.2) and matches I0, which admits
-/// only unmanaged elements. Every member carries <c>[go.GoInlineArray(N)]</c>, the attribute golib reads, so golib never
+/// only unmanaged elements. Every member carries <c>[go.golib.GoInlineArray(N)]</c>, the attribute golib reads, so golib never
 /// names a family type and a program that does not opt in never loads go.arrays.dll.
 /// </para>
 /// <para>
@@ -94,7 +94,7 @@ public sealed class ArrayFamilyGenerator : IIncrementalGenerator
 
         source.Append('\n');
         source.Append("/// <summary>A Go array value <c>[").Append(n).Append("]T</c>, held inline in its owner.</summary>\n");
-        source.Append("[global::go.GoInlineArray(").Append(n).Append(")]\n");
+        source.Append("[global::go.golib.GoInlineArray(").Append(n).Append(")]\n");
         source.Append("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]\n");
         source.Append("public struct ").Append(name).Append("<T> : global::go.IGoEquatable, global::System.IEquatable<")
             .Append(name).Append("<T>> where T : unmanaged\n");

@@ -122,7 +122,6 @@ go.GoImage`1
 go.GoImplementAttribute
 go.GoImplementAttribute`2
 go.GoImplicitConvAttribute`2
-go.GoInlineArrayAttribute
 go.GoInlineConstraintLiftAttribute
 go.GoInterfaceShellAttribute
 go.GoLazyAttribute
