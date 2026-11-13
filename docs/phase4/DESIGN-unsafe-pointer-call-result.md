@@ -216,3 +216,143 @@ read from the corpus and still shows the cast, with the new rule beside it; and 
 rows, the reflect canaries, and every row with an allocation assert).
 
 — H (2026-11-13)
+
+## 8. Record 2026-11-13: the corpus slot, as applied and measured (batch 301)
+
+**The trees.** On top of section 7's `f036dcf0ce`: master merged twice, at `79e6f116a1` (through batch 299,
+`6dc4bae09b`) and at `9b6562b21c` (batch 300, `651c4ad147`), no rebase, no conflicts; the application `41067a0fb7`;
+one docs sample `0ddca05b39`. The footprint was re-read at `9b6562b21c`. The build and `go test ./...` were read at
+`41067a0fb7`, every other gate and the sweep at `0ddca05b39`.
+
+**The footprint, re-read at the merged base.** Two seeded `-stdlib` conversions per target, A = master
+`651c4ad147`'s converter and B = the seat's. Eight conversions exited 0 with 0 degraded packages. The reading is
+section 7's, line for line: windows/amd64 77 files and 616 lines, linux/amd64 76 and 612, darwin/amd64 75 and 609,
+linux/arm64 76 and 612; 0 removed lines without the prefix, 0 position-map lines, 0 files in one root only.
+
+**The application (`41067a0fb7`), by the hunk rule, one target at a time.** Each file is
+`git merge-file` of the committed file with the two emissions, and is proved twice before it is written: the applied
+delta equals the emission's delta, and the file's residual drift against the emission is the same set before and
+after.
+
+| Target | Files in the footprint | Applied | Already holding the change | Conflicts | Proof failures |
+|---|---|---|---|---|---|
+| windows/amd64 | 77 | 77 | 0 | 0 | 0 |
+| linux/amd64 | 76 | 12 | 64 | 0 | 0 |
+| darwin/amd64 | 75 | 11 | 64 | 0 | 0 |
+| linux/arm64 | 76 | 8 | 68 | 0 | 0 |
+
+The union is 108 files, 758 lines removed and 758 added, and every one is the `(uintptr)` prefix leaving a call that
+returns an `unsafe.Pointer`. By package: `runtime` 80 files, `internal/runtime/maps` 8, `reflect` 4,
+`internal/runtime/gc/scan`, `sync` and `time` 2 each, and 1 each in `encoding/json`, `fmt`, `internal/reflectlite`,
+`internal/runtime/atomic`, `internal/sync`, `internal/syscall/execenv`, `net`, `sync/atomic`, `syscall`, `unique`
+and `weak`. That is 17 packages; 16 have a roster row (`internal/syscall/execenv` has none).
+
+**The hand-owned files.** Seven of the 108 are `.cs.auto` review siblings of hand-owned files, 24 sites between
+them. A sibling is the converter's own emission, so it takes the hunk. Its hand-owned file is not regenerated, so
+each site was read there:
+
+| Sibling | Sites | The same line in the hand-owned file |
+|---|---|---|
+| `runtime/mfinal.cs.auto` | 1 | 1: line 315, `frame = (uintptr)mallocgc(framesz, nil, true);`. Carried in the same commit as the sibling's hunk, re-derived from it: `frame` is an `unsafe.Pointer` and `mallocgc` returns one on all four targets |
+| `internal/sync/hashtriemap.cs.auto` | 11 | 0 |
+| `sync/atomic/value.cs.auto` | 7 | 0 |
+| `sync/pool.cs.auto` | 2 | 0 |
+| `sync/poolqueue.cs.auto` | 1 | 0 |
+| `time/tick.cs.auto` | 1 | 0 |
+| `weak/pointer.cs.auto` | 1 | 0 |
+
+The other 23 sites have no counterpart to carry: the hand-owned file does not hold the line.
+
+**OWED, as its own census after cgo Phase 3 increment 3.1's re-gate:** every hand-written cast of a call's result to
+`uintptr` where the call returns an `unsafe.Pointer`, in the hand-owned files and packages, TYPED and not textual.
+The starting population is the 29 text hits in `runtime`'s hand-written companion files. A text hit is not a
+finding: a call that returns a number is cast correctly.
+
+**The build at `41067a0fb7`.** The 17 packages on four targets, build output purged before each target: 68 of 68
+exit 0 with 0 errors. `runtime` builds on all four, which was the condition for the hand-own line.
+
+**The reference.** `pointers.md` gains the rule (*A call that returns an `unsafe.Pointer` is emitted as the call
+itself*), sampled from the behavioral program's golden, and its corpus sample of `runtime/alg.cs` loses the cast.
+One provenance note that cites `pointers.md` by line was re-cited, 41 lines down.
+
+**The owed question of section 7 (the Q49 drain): NOT redundant.** Its corpus case is `noescape`, which takes its
+pointer through a `uintptr` and back. That is how Go hides a pointer from escape analysis, and the pointer it
+returns carries nothing whatever the converter emits around the call. The drain stays, and `pointers.md` now says
+why.
+
+**The gates.** One stage at a time on H, build output purged after each, 0 tracked deletions, the tree clean.
+
+| Gate | Tree | Reading |
+|---|---|---|
+| `go test ./...` | `41067a0fb7` | **rc 1.** 10 packages ok, 0 cached; `repoguard` FAILED in `TestDocsSamplesHoldTheirLines`: a second `pointers.md` sample, of `internal/runtime/atomic/types.cs`, still showed the cast on a line the application rewrote |
+| `repoguard`, alone, `-count=1` | `0ddca05b39` | ok. The full `go test ./...` was not re-run on H at this tip: the difference is one docs line, and COORD's union battery reads it at the batch tip |
+| GolibTests, full | `0ddca05b39` | base (master `651c4ad147`) 2,590 passed, 43 skipped of 2,633; seat 2,595 passed, 43 skipped of 2,638. The TRX difference is exactly the five `UnsafeAddCarryTests` arms |
+| `check-no-regression` | `0ddca05b39` | rc 0, byte-identical across all 1,057 behavioral packages |
+| the full behavioral suite | `0ddca05b39` | rc 0, PASS, 966 projects: Transpile, Compile and Target 966 of 966; Output 936 passed, 0 failed, 30 skipped, 0 timed out. No NOT MEASURED line. 966 is section 7's 959 plus the 7 projects batches 299 and 300 registered |
+
+**The miss, and what it changed.** Eight docs samples in six pages are sourced from the 109 applied files. One
+quoted a rewritten line, and the plan had listed only the sample it meant to change. **Before a corpus change is
+applied, every docs sample sourced from the touched files is listed** (COORD, standing practice from this seat).
+
+**The sweep, windows/amd64 half, on H at `0ddca05b39`.** 57 rows, one at a time, whole rows, the default
+configuration: the 16 packages' rows, the five reflect canaries, and the rows with an allocation assert. The run
+list was posted before the first row ran.
+
+| Row | Verdicts | Row | Verdicts | Row | Verdicts |
+|---|---|---|---|---|---|
+| `bufio` | 80 | `bytes` | 84 | `context` | 62 |
+| `crypto/cipher` | 27,289 | `crypto/ed25519` | 9 | `crypto/md5` | 14 |
+| `crypto/rand` | 314 | `crypto/sha1` | 13 | `crypto/sha256` | 29 |
+| `crypto/sha3` | 54 | `crypto/sha512` | 44 | `encoding/binary` | 143 |
+| `encoding/json` | 550 | `fmt` | 62 | `hash/maphash` | 66 |
+| `internal/reflectlite` | 30 | `internal/runtime/atomic` | 16 | `internal/runtime/gc/scan` | 19 |
+| `internal/runtime/maps` | 19 | `internal/sync` | 106 | `internal/zstd` | 536 |
+| `io` | 60 | `log` | 24 | `log/slog` | 228 |
+| `log/slog/internal/buffer` | 1 | `mime` | 17 | `net/http/internal` | 14 |
+| `net/netip` | 211 | `net/rpc` | 15 | `net/textproto` | 27 |
+| `os` | 6,826 | `path` | 9 | `path/filepath` | 67 |
+| `slices` | 122 | `sort` | 63 | `strconv` | 39 |
+| `strings` | 68 | `sync` | 48 | `sync/atomic` | 108 |
+| `syscall` | 66 | `testing` | 82 | `time` | 178 |
+| `unicode/utf16` | 8 | `unicode/utf8` | 14 | `unique` | 27 |
+| `weak` | 9 | `math/big` | 249 | `encoding/gob` | 106 |
+| `crypto/rsa` | 590 | `crypto/internal/fips140test` | 2,270 | `database/sql` | 141 |
+| `reflect` | 445 | `net` | 505 | `go/types` | 597 |
+| `net/http` | 1,526 | `runtime` | 11,083 | `crypto/tls` | 1,393 |
+
+57 of 57 PASS, each at its banked count. Every row's comparison record reads `validated`, matched, with 0 errors.
+Two rows are named:
+
+- **`crypto/tls` reads 1,393 = 4,920 banked − 3,527.** `TestBogoSuite` is over the deadline on H: the standing,
+  disclosed host limit, unchanged by this seat. The hosted halves carry it.
+- **`runtime` reads 11,083, and its `TestFinalizer*` tests read their banked verdicts:** 18 verdicts (6 tests and
+  the 12 subtests of `TestFinalizerOrCleanupDeadlock`), pass in Go and pass converted. The row's disclosure file is
+  untouched.
+
+No row changed, for better or for worse. The linux (amd64 and arm64) and darwin halves run hosted on the same tip
+and the same 57 rows (runs 43475901068 and 43475907692); COORD scores them, and they are not scored here.
+
+**Found in the sweep's leftovers, not this seat's.** The `-tests` pass of `net/http` re-emitted one production
+line of `net/http/h2_bundle.cs` (`processHeaders`, the handler passed to `scheduleHandler`): the committed file
+wraps it as `new Action<…>(handler)`, and the converter emits `NilSafeDelegateConversion<…>(handler)`. Both arms of
+this seat's footprint emit the second form, so it is drift the committed corpus already carried at master
+`651c4ad147`, from the converter change that made a func-value wrap nil-safe. The hunk rule left it alone, as it
+must. It was restored with the rest of the sweep's leftovers and is posted to COORD.
+
+**The scores, as worded.**
+
+| Prediction | Score |
+|---|---|
+| The footprint at `9b6562b21c` reads as it did at `1a6a97997a` | MET, on all four targets |
+| `go test ./...` at the applied tip: rc 0, all ok, 0 cached | **MISSED**: `repoguard` failed on one docs sample |
+| GolibTests: the seat's total is the base's plus the five arms, skipped unchanged | MET |
+| `check-no-regression`: byte-identical | MET |
+| The full behavioral suite passes, no NOT MEASURED line, 959 plus what batches 299 and 300 registered | MET |
+| PB-8, windows/amd64 half: all 57 rows at their banked counts, `TestFinalizer*` at their banked verdicts | MET |
+| PB-8, linux and darwin halves | NOT SCORED HERE: COORD's readings |
+
+**Stop lines.** None fired on H. SB-1: no banked count moved. SB-3: no corpus line moved that is not the prefix's
+removal, and no position-map line. SB-4: every package compiles on every target, and the 57 rows' test emissions
+build. SB-7 stands as in section 7.
+
+— H (2026-11-13)
