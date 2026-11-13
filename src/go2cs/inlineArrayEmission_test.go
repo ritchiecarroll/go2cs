@@ -153,3 +153,73 @@ func use(v *T) {
 		}
 	}
 }
+
+// C1's review, m3: a consumer package reading an array field of a struct ANOTHER package admitted spells the same faces
+// as the declaring package (len and cap the constant, range over the member, a literal through its constructor, boxing
+// as the deep copy), read from that package's record. C1 counted 0 such sites in lib and libc; the fixture is the guard.
+func TestInlineArrayForeignFieldSpellsTheFaces(t *testing.T) {
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/two\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "lib", "lib.go"), `package lib
+
+import "unsafe"
+
+type F struct {
+	A [4]int32
+	N int64
+}
+
+func View(p unsafe.Pointer) *F { return (*F)(p) }
+`)
+	writeModuleFile(t, filepath.Join(appDir, "main.go"), `package main
+
+import (
+	"fmt"
+
+	"example.com/two/lib"
+)
+
+func main() {
+	f := lib.F{A: [4]int32{1, 2}, N: 3}
+	n := len(f.A) + cap(f.A)
+	for i := range f.A {
+		n += int(f.A[i])
+	}
+	for _, e := range f.A {
+		n += int(e)
+	}
+	fmt.Println(n, f.A)
+}
+`)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{goRoot: goRoot, goPath: build.Default.GOPATH, go2csPath: filepath.Join(root, "out"), recurse: true, targetPlatform: "linux/amd64",
+		indentSpaces: 4, preferVarDecl: true, useChannelOperators: true, hoistLiterals: true}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	cs := strings.ReplaceAll(readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "two", "main.cs")), "\r\n", "\n")
+
+	for _, want := range []string{
+		`A: new array4<int32>(1, 2)`,
+		`nint n = 4 + 4;`,
+		`foreach (var i in range(4))`,
+		`range(f.A.ΔRangeSnapshot())`,
+		`fmt.Println(n, f.A.ΔCopy());`,
+	} {
+		if !strings.Contains(cs, want) {
+			t.Errorf("want %q:\n%s", want, cs)
+		}
+	}
+}

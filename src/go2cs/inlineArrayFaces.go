@@ -132,22 +132,48 @@ func unspelledFace(sel *ast.SelectorExpr, stack []ast.Node, info *types.Info) st
 			return "" // the array is the index, which cannot type-check
 		}
 
+		// Climb from the element through the field selections and nested indexes below it (x.f[i].g, x.f[i][j]): an
+		// address taken anywhere on that path is an address into the inline storage (C1's review, m5).
+		var top ast.Expr = p
+
+		for {
+			next, nextAt := up(at - 1)
+
+			if below, ok := next.(*ast.SelectorExpr); ok && ast.Unparen(below.X) == top {
+				if field := info.Selections[below]; field != nil && field.Kind() == types.FieldVal {
+					top, at = below, nextAt
+					continue
+				}
+			}
+
+			if below, ok := next.(*ast.IndexExpr); ok && ast.Unparen(below.X) == top {
+				top, at = below, nextAt
+				continue
+			}
+
+			break
+		}
+
 		grand, _ := up(at - 1)
 
 		switch g := grand.(type) {
 		case *ast.UnaryExpr:
-			if g.Op == token.AND {
+			if g.Op == token.AND && top == p {
 				return "an element's address (&x.f[i])"
 			}
+
+			if g.Op == token.AND {
+				return "an address below an element (&x.f[i].g, &x.f[i][j])"
+			}
 		case *ast.SliceExpr:
-			if ast.Unparen(g.X) == p {
+			if ast.Unparen(g.X) == top {
 				return "an element sliced (x.f[i][:])"
 			}
 		case *ast.SelectorExpr:
-			if method := info.Selections[g]; method != nil && method.Kind() == types.MethodVal && ast.Unparen(g.X) == p {
+			if method := info.Selections[g]; method != nil && method.Kind() == types.MethodVal && ast.Unparen(g.X) == top {
 				if signature, ok := method.Obj().Type().(*types.Signature); ok && signature.Recv() != nil {
 					if _, pointerRecv := signature.Recv().Type().Underlying().(*types.Pointer); pointerRecv {
-						if _, elemIsPointer := info.TypeOf(p).Underlying().(*types.Pointer); !elemIsPointer {
+						if _, elemIsPointer := info.TypeOf(top).Underlying().(*types.Pointer); !elemIsPointer {
 							return "an element's address (a pointer-receiver method of x.f[i])"
 						}
 					}

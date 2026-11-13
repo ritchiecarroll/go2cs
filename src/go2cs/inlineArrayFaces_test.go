@@ -21,8 +21,9 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// facesFixture converts seven structs whole; one uses its array fields only through spelled faces, five each through
-// one unspelled face, and one through a face only its _test.go file uses.
+// facesFixture converts nine named structs whole (eleven types with the two anonymous element structs); one uses its
+// array fields only through spelled faces, seven each through one unspelled face, and one through a face only its
+// _test.go file uses.
 const facesFixture = `package lib
 
 import (
@@ -33,6 +34,7 @@ import (
 type Spelled struct {
 	A [4]int32
 	B [2]byte
+	C [2]struct{ G int32 }
 }
 
 type Sliced struct{ A [4]int32 }
@@ -40,6 +42,10 @@ type Sliced struct{ A [4]int32 }
 type Addressed struct{ A [4]int32 }
 
 type ElemAddr struct{ A [4]int32 }
+
+type BelowAddr struct{ A [2]struct{ G, K int32 } }
+
+type NestedAddr struct{ M [2][3]int32 }
 
 type Passed struct{ A [4]int32 }
 
@@ -53,6 +59,7 @@ func use(p unsafe.Pointer) {
 	s := (*Spelled)(p)
 	s.A[1] = 2
 	s.A[0] += 1
+	s.C[1].G = 4
 	_ = len(s.A) + cap(s.A)
 	for i, v := range s.A {
 		_, _ = i, v
@@ -68,6 +75,12 @@ func use(p unsafe.Pointer) {
 
 	ea := (*ElemAddr)(p)
 	_ = &ea.A[2]
+
+	ba := (*BelowAddr)(p)
+	_ = &ba.A[1].G
+
+	na := (*NestedAddr)(p)
+	_ = &na.M[1][2]
 
 	pa := (*Passed)(p)
 	_ = take(pa.A)
@@ -86,16 +99,18 @@ func TestInlineArrayAdmissionKeepsOutAnUnspelledFace(t *testing.T) {
 	testFile := [2]string{"lib_test.go", "package lib\n\nfunc probe(x *TestOnly) []int32 { return x.A[:] }\n"}
 	a, _ := admitFixture(t, "", Options{}, [2]string{"lib.go", facesFixture}, testFile)
 
-	if got := admittedKeys(a); got != "example.com/lib.Spelled example.com/lib.TestOnly" {
-		t.Fatalf("admitted %q, want Spelled and TestOnly", got)
+	if got := admittedKeys(a); got != "anon:struct{G int32} example.com/lib.Spelled example.com/lib.TestOnly" {
+		t.Fatalf("admitted %q, want Spelled (with its element struct) and TestOnly", got)
 	}
 
 	want := map[string]string{
-		"Sliced":    "field A is sliced (x.f[:]) at lib.go:",
-		"Addressed": "field A is its address (&x.f) at lib.go:",
-		"ElemAddr":  "field A is an element's address (&x.f[i]) at lib.go:",
-		"Passed":    "field A is a whole value passed as an argument at lib.go:",
-		"Stored":    "field A is a whole value (copied, stored, compared or returned) at lib.go:",
+		"Sliced":     "field A is sliced (x.f[:]) at lib.go:",
+		"Addressed":  "field A is its address (&x.f) at lib.go:",
+		"ElemAddr":   "field A is an element's address (&x.f[i]) at lib.go:",
+		"BelowAddr":  "field A is an address below an element (&x.f[i].g, &x.f[i][j]) at lib.go:",
+		"NestedAddr": "field M is an address below an element (&x.f[i].g, &x.f[i][j]) at lib.go:",
+		"Passed":     "field A is a whole value passed as an argument at lib.go:",
+		"Stored":     "field A is a whole value (copied, stored, compared or returned) at lib.go:",
 	}
 
 	if len(a.warnings) != len(want) {
@@ -112,7 +127,7 @@ func TestInlineArrayAdmissionKeepsOutAnUnspelledFace(t *testing.T) {
 
 	forced, _ := admitFixture(t, "", Options{inlineArrays: inlineArrayOverride{force: []string{"example.com/lib"}}}, [2]string{"lib.go", facesFixture}, testFile)
 
-	if len(forced.keyOrder) != 7 || len(forced.warnings) != 0 {
+	if len(forced.keyOrder) != 11 || len(forced.warnings) != 0 {
 		t.Fatalf("forced mode consulted faces: admitted %q, warnings %v", admittedKeys(forced), forced.warnings)
 	}
 }

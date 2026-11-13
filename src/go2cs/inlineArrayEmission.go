@@ -29,8 +29,9 @@ import (
 //   - an array literal that initializes the field: new array<N><T>(e0, e1, ...) (convCompositeLit.go);
 //   - the whole array boxed into an interface parameter: its deep array<T> copy (inlineArrayBoxCopy).
 
-// isInlineArrayExpr reports whether expr denotes an array held inline: an array field of an admitted struct, or an array
-// element of one (an admitted closure holds every array inline, nested ones included).
+// isInlineArrayExpr reports whether expr denotes an array held inline: an array field of an admitted struct (this
+// package's, or one another package records as admitted: C1's review, m3), or an array element of one (an admitted
+// closure holds every array inline, nested ones included).
 func (v *Visitor) isInlineArrayExpr(expr ast.Expr) bool {
 	if packageInlineAdmission == nil {
 		return false
@@ -39,7 +40,7 @@ func (v *Visitor) isInlineArrayExpr(expr ast.Expr) bool {
 	switch e := ast.Unparen(expr).(type) {
 	case *ast.SelectorExpr:
 		owner, _, ok := arrayFieldOwner(e, v.info)
-		return ok && packageInlineAdmission.admits(owner)
+		return ok && inlineArrayHeld(owner)
 	case *ast.IndexExpr:
 		if _, isArray := types.Unalias(v.info.TypeOf(e)).Underlying().(*types.Array); isArray {
 			return v.isInlineArrayExpr(e.X)
@@ -49,10 +50,10 @@ func (v *Visitor) isInlineArrayExpr(expr ast.Expr) bool {
 	return false
 }
 
-// markInlineArrayLiterals marks, in a struct literal of an admitted type, each array literal that initializes one of its
-// nonzero array fields (keyed by field name or by position).
+// markInlineArrayLiterals marks, in a struct literal of an admitted type (this package's or another's), each array
+// literal that initializes one of its nonzero array fields (keyed by field name or by position).
 func (v *Visitor) markInlineArrayLiterals(lit *ast.CompositeLit) {
-	if packageInlineAdmission == nil || !packageInlineAdmission.admits(v.info.TypeOf(lit)) {
+	if !inlineArrayHeld(v.info.TypeOf(lit)) {
 		return
 	}
 
