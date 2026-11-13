@@ -153,6 +153,32 @@ func read(p unsafe.Pointer) *Big { return (*Big)(p) }
 	}
 }
 
+// C1's review, m2: go2cs declares ONE C# struct for a generic Go struct, shared by every instantiation, and that
+// declaration stays non-inline (visitStructType keys the origin). Admitting the key G[int] would drop the copy's ΔClone
+// while its storage is still array<T>: silent aliasing. So an instantiated generic seed stays out, by name, as forced
+// mode already keeps generic declarations out.
+func TestInlineArrayAdmissionKeepsOutAnInstantiatedGeneric(t *testing.T) {
+	a, _ := admitFixture(t, "", Options{}, [2]string{"lib.go", `package lib
+
+import "unsafe"
+
+type G[T any] struct {
+	V   T
+	Tab [4]int32
+}
+
+func read(p unsafe.Pointer) *G[int] { return (*G[int])(p) }
+`})
+
+	if len(a.keyOrder) != 0 {
+		t.Fatalf("admitted %q, an instantiation of a generic struct", admittedKeys(a))
+	}
+
+	if len(a.warnings) != 1 || !strings.Contains(a.warnings[0].text, "G[int] is an instantiation of a generic struct") {
+		t.Fatalf("warnings %v, want one naming the instantiation", a.warnings)
+	}
+}
+
 func TestInlineArrayAdmissionWarnsOnAForeignClosure(t *testing.T) {
 	a, _ := admitFixture(t, "", Options{}, [2]string{"lib.go", `package lib
 

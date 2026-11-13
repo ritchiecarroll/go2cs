@@ -589,6 +589,12 @@ func inlineDeclarationRule(t types.Type, pkg *types.Package, spelled map[string]
 		return fmt.Sprintf("its by-value closure holds %s, declared in another package", types.TypeString(t, nil))
 	}
 
+	// go2cs declares ONE C# struct for a generic Go struct, shared by every instantiation and never inline, so an
+	// instantiation cannot be admitted alone (C1's review, m2): its copies would lose their ΔClone over array<T> storage.
+	if named, isNamed := t.(*types.Named); isNamed && named.TypeArgs().Len() > 0 {
+		return fmt.Sprintf("%s is an instantiation of a generic struct, which go2cs declares once for every instantiation", types.TypeString(t, packageQualifier(pkg)))
+	}
+
 	st, ok := t.Underlying().(*types.Struct)
 
 	if !ok {
