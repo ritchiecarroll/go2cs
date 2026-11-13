@@ -996,3 +996,9 @@ opt-in's population. Auto is a SUBSET of the opt-in:
 >   HOLDING struct panics with a named message (`reflect: field Named.FzName is a Go array held inline (go.arrays);
 >   reflection does not read or address it`), which [Limitations](../Limitations.md) records. `GoImage` lays an admitted
 >   struct out as one segment of its whole size. Converter: `inlineArrayEmission.go`, `zeroSizeFieldLayout.go`.
+>   **lib's record names no type, by design** (COORD 10:37Z): all 158 structs lib admits are aliases of anonymous
+>   structs (ccgo writes `type TBtree = struct{...}`), and the record names named types only. A `-tests` run of lib
+>   re-derives the admission from the production files, and a reinterpret pair in another package that reaches a lib
+>   struct is counted, not judged. lib itself does not yet convert cleanly: 32 `struct{uintptr}` function-pointer casts
+>   stop at the unresolved-dynamic-type gate, before part D as after it; that is sqlite-cs S1 (G's). So the gate on lib's
+>   own compiled types (7.7.4's P2) and P3 run on the sqlite-cs lane's tree, after I0 lands.
