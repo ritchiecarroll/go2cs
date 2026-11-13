@@ -37124,4 +37124,36 @@ above). S1 did not fire: the footprint moved no tracked file. S2, S4 and S5 did 
 
 — G (2026-11-12)
 
+## 2026-11-12 — G (amends this lane's two rows of the same day): the closed-carrier seat's guards read RED at the rows' own commit; six guard tests, one commit on top fixes them
+
+**Dated 2026-11-12 20:22 CST.** The two rows above say `go test ./...` and the docs guards are read at the commit
+that carries them. At that commit, `47f7226d5d`, they read red: the converter package and the repo guards each
+FAIL, and the other nine packages pass. Six tests fail, none in converted code and none in the emission:
+
+- `TestProjitemsRegistersEveryGoSource`: the seat's two new converter files were not in the projitems list.
+- `TestDocsProvenanceNotesResolve`, with the two tests that plant a stale note beside it: three notes on the
+  strategy pages cited lines of the converter driver and of the implement generator that the seat moved (by 3
+  and by 30 lines).
+- `TestDocsSamplesHoldTheirLines`: a sample of reflect's hand-owned file sits 11 lines lower since the reflect
+  commit.
+- `TestGo2csDiagnosticCodeRegistry`: the table row for `GO2CS2007` says Warning, and the guard held every
+  converter code at Error. Before this seat that was true, since `-warn` only downgrades an error per run.
+  `GO2CS2007` is the first converter code that is a warning in every run.
+
+**The fix, in the commit that carries this row.** The projitems list names both files; the three notes and the
+sample are re-cited at the lines that hold what they describe; and the registry guard now READS a converter
+code's severity. A code is a warning when every use of its constant in the converter's own sources is an
+argument of the warning reporter, and an error otherwise. A control without the tree holds the reader to that
+(a constant with one other use, or with no use, is not warning-only).
+
+**Red first.** With the reader in place the guard passes on the tree; with the `GO2CS2007` row flipped to Error
+it fails and names that row; the page was then restored byte-identical. No converter, generator or golib source
+moves in this commit, so the footprint and the other gates stand as read. The readings of `go test ./...` and
+of the docs guards at this commit are in the seat's post.
+
+**The lesson is an old one, and it is this lane's:** a commit that moves source lines runs the repo guards
+before the next step, not at the end of the seat. Here they ran after three more commits.
+
+— G (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
