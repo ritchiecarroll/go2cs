@@ -37600,4 +37600,27 @@ construction.
 
 — P5 (2026-11-13)
 
+## 2026-11-13 — P5 (seat A, COORD's ask): the cgo wrapper fixture declares `_Ctype_char` as `int8` for linux/arm64, where cmd/cgo declares `uint8` — OPEN, fixture only
+
+**What cgo picks.** cmd/cgo takes the Go type of C `char` from the DWARF encoding the C compiler wrote
+(`src/cmd/cgo/gcc.go`, go1.26.10): a `dwarf.CharType` (signed char encoding) becomes `int8`, and a
+`dwarf.UcharType` (unsigned char encoding) becomes `uint8`. Plain `char` is unsigned in the linux/arm64 C ABI,
+so there cgo declares `type _Ctype_char uint8`. On linux/amd64 and on both darwin targets it is `int8`.
+
+**Whether the generator agrees.** The generator reads the type the Go side declares, so on real cgo output it
+follows cgo. The converter test's fixture does not: `cgoLinuxStructs` in `src/go2cs/cgoWrappers_test.go`
+(and the declarations in `cgoDeclarations_test.go` and `cgoMirrors_test.go`) writes `type _Ctype_char int8`
+once for every target, and seat A's linux/arm64 row reuses it. `GoCgoWrappers.linux-arm64.golden.cs` therefore
+carries `sbyte` where bindings converted from real linux/arm64 cgo output would carry `byte`
+(`ᴍarray65_sbyte sysname`, golden line 688). The size and layout are the same, 1 byte, and the suite is green on
+the arm64 leg (2,661 passed, run 43519596892), so nothing fails today; the fixture is not what cgo emits there.
+
+**Read, not measured.** The cgo side is read from cmd/cgo's source and the C ABI. No cgo run on a linux/arm64
+host was made, and the generator was not run on a `uint8` fixture.
+
+**Owed.** A linux/arm64 fixture with `_Ctype_char uint8`, the golden regenerated from it, and the arm64 leg
+re-read. Its own seat, not seat A.
+
+— P5 (2026-11-13)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
