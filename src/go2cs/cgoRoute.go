@@ -1129,12 +1129,14 @@ const cgoTargetCheckName = "GoCheckCgoTarget"
 // A build for another target is refused by name, before any reference is built or the compiler runs: it would
 // compile no bindings file, and fail on the first C type in an exported signature (CS0051), far from the cause.
 //
-// And the project hands its target to the projects it references. Its default reaches only itself; the standard
+// And the project hands a target to the projects it references. Its default reaches only itself; the standard
 // library's own default is the corpus's, so a build that names no target would compile these bindings beside the
-// windows standard library, and say nothing.
+// windows standard library, and say nothing. What it hands down is the target the standard library is LAID OUT for
+// (cgoReferenceTarget), which is not always the bindings' own.
 func cgoTargetBlocks(goos, goarch string) string {
 	target := goos + "/" + goarch
 	build := "$(" + platformTargetOSProperty + ")/$(" + platformTargetArchProperty + ")"
+	referenceOS, referenceArch := cgoReferenceTarget(goos, goarch)
 
 	return "  <!-- This package's cgo bindings were converted for " + target + ", and are for no other target. A build for\r\n" +
 		"       another would compile no bindings file and fail far from the cause, so it is refused here by name. -->\r\n" +
@@ -1144,13 +1146,48 @@ func cgoTargetBlocks(goos, goarch string) string {
 		". A cgo package builds only for the target it was converted for: build it for " + target +
 		", or convert it again with -cgo on a " + build + " host.\" />\r\n" +
 		"  </Target>\r\n\r\n" +
-		"  <!-- The projects this package references are built for the same one target. The standard library's own\r\n" +
-		"       default is windows/amd64, and a build that names no target would put that one beside these bindings. -->\r\n" +
+		"  <!-- The projects this package references are built for this package's operating system, at the architecture\r\n" +
+		"       the standard library is laid out for there. The standard library's own default is windows/amd64, and a\r\n" +
+		"       build that names no target would put that one beside these bindings. -->\r\n" +
 		"  <ItemDefinitionGroup>\r\n" +
 		"    <ProjectReference>\r\n" +
-		"      <AdditionalProperties>" + platformTargetOSProperty + "=" + goos + ";" + platformTargetArchProperty + "=" + goarch + "</AdditionalProperties>\r\n" +
+		"      <AdditionalProperties>" + platformTargetOSProperty + "=" + referenceOS + ";" + platformTargetArchProperty + "=" + referenceArch + "</AdditionalProperties>\r\n" +
 		"    </ProjectReference>\r\n" +
 		"  </ItemDefinitionGroup>\r\n\r\n"
+}
+
+// cgoReferenceTarget is the target a cgo package's project references are built for. The converted standard library is
+// laid out for a declared set of targets (platformUniverse), and its own build refuses any other by name. A cgo
+// package's bindings are for the host's own target, which need not be in that set: darwin/arm64 is not, and the
+// library's darwin/amd64 flavour serves both of darwin's architectures. So the references take the package's own
+// target where the library is laid out for it, and otherwise the flavour the library has for that operating system.
+// Handing down the bindings' own pair refused every build of a cgo project on darwin/arm64 (first read on the hosted
+// leg 43335132134).
+func cgoReferenceTarget(goos, goarch string) (string, string) {
+	flavourArch := ""
+
+	for _, target := range platformUniverse {
+		targetOS, targetArch, _ := strings.Cut(target, "/")
+
+		if targetOS != goos {
+			continue
+		}
+
+		if targetArch == goarch {
+			return goos, goarch
+		}
+
+		if flavourArch == "" {
+			flavourArch = targetArch
+		}
+	}
+
+	if flavourArch == "" {
+		// An operating system the library has no flavour of: its own check names the pair it is handed.
+		return goos, goarch
+	}
+
+	return goos, flavourArch
 }
 
 // cgoLoad is the environment and directory go list loaded the package in: the real route reads go env and runs the C
