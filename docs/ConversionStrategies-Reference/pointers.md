@@ -2517,9 +2517,10 @@ collision-named field.
 **Limits.** A field whose own CLR form is a managed reference (an array, a string) still cannot be read WHOLE
 over native memory: `field` refuses it by name, `runtime error: cannot read native memory as main.record: its
 CLR layout is not its Go layout (field Path is a managed reference where Go stores the value inline)`, as the
-whole-value read did. A struct the converter admits for inline arrays
-([I0](../phase4/DESIGN-array-value-storage.md)) holds its arrays inside it and reads whole; `reparse` below is
-one, so its `Path[0]` is read through the inline array's indexer. Over managed memory every field reads as before. A local assigned anything else (a
+whole-value read did. A struct that the package converts whole through `unsafe.Pointer` holds its arrays
+inside it instead and reads whole; `reparse` below is one, so its `Path[0]` is read through the inline array's
+indexer. <!-- I0's admission and emission: docs/phase4/DESIGN-array-value-storage.md 7.7 and its part-D block. -->
+Over managed memory every field reads as before. A local assigned anything else (a
 `new(T)`, a parameter, a field), a range variable, a multi-value assignment other than the call below, or a
 local whose address is taken takes the general form instead: `p.f` for a direct field, and the box form for a
 collision-named field or an array field's element.
