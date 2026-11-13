@@ -306,6 +306,8 @@ public static partial class GoReflect
             value = pointerAdapter.Box;
         else if (value is IValueAdapter { Value: not null } valueAdapter)
             value = valueAdapter.Value;
+        else if (value is IGoAdapter && NilFuncOf(value) is not null)
+            return true; // a shell or adapter over a null func: GoDynamicTypeOf reports the func type, and its word is nil
 
         switch (KindOf(t))
         {

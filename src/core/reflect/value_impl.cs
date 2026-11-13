@@ -116,7 +116,9 @@ internal static ΔValue makeReflectValue(object? boxed) {
 // unwrapShell returns the Go dynamic value an interface shell stands in for, or boxed itself when
 // it is no shell. The order is IsNil's: the structural chain first, then one adapter. A shell
 // around a NIL keeps the WHOLE shell, as golib's own unwrap rule does: no value exists to stand
-// in for it, and the type lives on the shell alone.
+// in for it, and the type lives on the shell alone. A shell or adapter over a null FUNC is the one
+// nil that has a stand-in: the canonical nil func of its type (GoReflect.NilFuncOf), the datum a
+// nil func held directly already is.
 internal static object unwrapShell(object boxed) {
     object cur = boxed;
     while (cur is IInterfaceAdapter { Value: not null } interfaceAdapter) {
@@ -125,7 +127,7 @@ internal static object unwrapShell(object boxed) {
     return cur switch {
         IжAdapter { Box: not null } pointerAdapter => pointerAdapter.Box,
         IValueAdapter { Value: not null } valueAdapter => valueAdapter.Value,
-        IGoAdapter => boxed,
+        IGoAdapter => (object?)GoReflect.NilFuncOf(cur) ?? boxed,
         _ => cur
     };
 }
@@ -2118,7 +2120,7 @@ public static slice<ΔValue> Call(this ΔValue v, slice<ΔValue> @in) {
     v.flag.mustBe(Func);
     v.flag.mustBeExported();
     object? fn = v.live;
-    if (fn is null) {
+    if (fn is null or NilFuncValue) {
         throw panic("reflect.Value.Call: call of nil function");
     }
     var del = (Delegate)fn;
@@ -2269,7 +2271,7 @@ public static slice<ΔValue> CallSlice(this ΔValue v, slice<ΔValue> @in) {
     v.mustBeKind("reflect.Value.CallSlice"u8, Func);
     v.flag.mustBeExported();
     object? fn = v.live;
-    if (fn is null) {
+    if (fn is null or NilFuncValue) {
         throw panic("reflect.Value.CallSlice: call of nil function");
     }
     var del = (Delegate)fn;

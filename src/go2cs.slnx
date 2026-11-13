@@ -898,6 +898,8 @@
     <Project Path="tests/Behavioral/NilChannelSelectDefault/NilChannelSelectDefault.csproj" />
     <Project Path="tests/Behavioral/NilCompareShapes/NilCompareShapes.csproj" />
     <Project Path="tests/Behavioral/NilFuncIfaceMethodValue/NilFuncIfaceMethodValue.csproj" />
+    <Project Path="tests/Behavioral/NilFuncInterfaceReads/NilFuncInterfaceReads.csproj" />
+    <Project Path="tests/Behavioral/NilFuncInterfaceReads/typelib/NilFuncInterfaceReads.typelib.csproj" />
     <Project Path="tests/Behavioral/NilFuncNamedDelegateArg/NilFuncNamedDelegateArg.csproj" />
     <Project Path="tests/Behavioral/NilMapKey/NilMapKey.csproj" />
     <Project Path="tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />

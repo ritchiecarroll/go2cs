@@ -86,7 +86,7 @@ partial class reflectlite_package
     }
 
     // unwrapShell mirrors reflect's: the structural chain first, then one adapter, and a shell
-    // around a NIL keeps the WHOLE shell.
+    // around a NIL keeps the WHOLE shell, except over a null FUNC, which is the canonical nil func.
     internal static object unwrapShell(object boxed)
     {
         object cur = boxed;
@@ -98,7 +98,7 @@ partial class reflectlite_package
         {
             IжAdapter { Box: not null } pointerAdapter => pointerAdapter.Box,
             IValueAdapter { Value: not null } valueAdapter => valueAdapter.Value,
-            IGoAdapter => boxed,
+            IGoAdapter => (object?)GoReflect.NilFuncOf(cur) ?? boxed,
             _ => cur
         };
     }
