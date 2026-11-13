@@ -883,3 +883,83 @@ linux-x64 536 stays the reading of a host with no `zstd`: 536 (linux-x64; linux-
 ten-read prediction is a HIT.
 
 **The count.** 114 + `internal/poll` + `internal/zstd` = 116 banked at linux-arm64; 120 pending.
+
+## 13. Wave 2, read and banked (dated block, 2026-11-13, C1)
+
+> Wave 2 was dispatched by P2 at master `4efe149858` (batch 287, which carries wave 1's bank, both ruled tables and the
+> wave 2 instrument) and read by C1 with P2's kit; i9 co-reads independently. This block records the read, the bank,
+> and the scores of C1's wave 2 predictions W2-1 to W2-12 (posted to COORD 2026-11-12, before the dispatch), each scored
+> as worded.
+
+### 13.1 The dispatch and the proofs
+
+| Shard | Run | Rows | arm job, min | x64 job, min | Row walls arm / x64, s | Ratio |
+|---|---|---|---|---|---|---|
+| A-3 | 43187241199 | 20 | 35.1 | 30.6 | 2047 / 1788 | 1.14 |
+| A-10 | 43187245505 | 19 | 19.1 | 14.6 | 1089 / 820 | 1.33 |
+| A-5 | 43187250866 | 20 | 19.8 | 24.6 | 1119 / 1405 | 0.80 |
+| A-11 | 43187255453 | 19 | 24.6 | 25.3 | 1401 / 1448 | 0.97 |
+| A-14 | 43187259744 | 1 | 6.5 | 7.5 | 331 / 400 | 0.83 |
+| A-15 | 43187264663 | 1 | 8.3 | 9.5 | 445 / 514 | 0.87 |
+
+- Every run's headSha read `4efe149858` before any row counted.
+- **36 of 36 dump-proof lines PASS**: on all 12 legs, DUMPPROOF control (the detector sees a dump file and a 128 MiB
+  write), prove (two crashes of a 2,000-thread .NET probe, 0 new files, under 8 MiB) and recheck.
+- Each leg's artifact was unzipped into its own empty directory, and `collect.py` wrote `W2-<shard>.tsv` (no hyphen in
+  the stem) into the evidence directory beside wave 1's files. `$LinuxRidEvidenceWaves` is `@('')`, the directory
+  itself, and wave 2's rows share none with wave 1's, so no declaration changed.
+
+### 13.2 The two red jobs, attributed before banking
+
+A-3 and A-5 ended in job failure. Every red line in their logs is the sweep's `COUNT` word on the arm leg, a verdict
+count that differs from the roster's banked linux-x64 count:
+
+- `crypto/sha1  13, banked 14` (A-3): Go's arm64 test set lacks `TestOutOfBoundsRead`.
+- `debug/buildinfo  212, banked 211` (A-3): `TestReadFile`'s subtests are named by GOARCH (`linux_amd64/...` against
+  `linux_arm64/...`), and the arm64 set holds one more.
+- `go/internal/gcimporter  634, banked 636` (A-5): the two amd64-only std packages of `TestImportStdLib`.
+
+Each is an INSTRUMENT red: an arch-dependent test set read against an x64 count. On every one, matched equals verdicts,
+new is 0 and `same_names` reads yes on both legs. No line in any of the six runs says "not implemented".
+
+### 13.3 The bank: 80 rows at linux-arm64
+
+`annotate_linux.py --rids --write` derived every segment, a second dry run reads 0 rows to change, and
+`check-roster-format.ps1` reads 196 banked on both RIDs, 0 read and pending, 0 refused (2559 checks pass).
+
+| Form | Rows | Ruling |
+|---|---|---|
+| EQUAL | 77 | 2.4 |
+| ARCH-COUNT | crypto/sha1: 14 + 1 (linux-x64; linux-arm64: 13 + 1), absent `TestOutOfBoundsRead`; go/internal/gcimporter: 636 (linux-x64; linux-arm64: 634), absent `TestImportStdLib/internal/runtime/startlinetest` and `TestImportStdLib/runtime/race/internal/amd64v1` | 2.4 |
+| ARCH-NAMES | debug/buildinfo: 211 (linux-x64; linux-arm64: 212) | R1 |
+
+No hosted linux-x64 line differs from the roster, so no row is HELD and no `$LinuxRidHostEqual` line was needed.
+`crypto/tls` reads the full BoGo fan-out, 4921, on both hosted legs. **The count: 116 + 80 = 196 banked at linux-arm64;
+40 pending (wave 3).**
+
+### 13.4 The scores
+
+| Prediction (as worded) | Result | Score |
+|---|---|---|
+| W2-1: on all 12 legs control 1 file and the write, prove 0 files under the bar, recheck 0; every headSha its tip | 36 of 36 proof lines PASS; every head 4efe149858 | **HIT** |
+| W2-2: crypto/sha1 ARCH-COUNT 14 + 1 (linux-x64; linux-arm64: 13 + 1), absent exactly TestOutOfBoundsRead | exactly that | **HIT** |
+| W2-3: go/internal/gcimporter ARCH-COUNT 636 (linux-x64; linux-arm64: 634), absent exactly the two amd64-only std packages, contradicting 4.3's P10 | exactly that | **HIT** (P10 MISS) |
+| W2-4: crypto/subtle without the ruling 8 + 3 new and HELD, with it ARCH-STRICT 8 + 3; FALSIFIER: no DIT on the runner means EQUAL 11 | 11 on both legs: the runner does not report DIT | **FALSIFIER FIRED** (the main prediction MISSES; it fired first in runs 43170415741 / 43170419689) |
+| W2-5: debug/buildinfo EQUAL 211 on both legs, the equal form comparing counts | 211 / 212: the arm64 set holds one more GOARCH-named subtest; ARCH-NAMES | **MISS** |
+| W2-6: crypto/tls does not read 4921 on the hosted x64; HELD | 4921 on both legs | **MISS** |
+| W2-7: net, arm64 equals hosted x64, and hosted x64 equals 596 + 3 | 596 + 3 on both | **HIT** |
+| W2-8: the other 73 rows EQUAL between the legs, 0 to 3 exceptions | all EQUAL; the one exception is debug/buildinfo, counted under W2-5 | **HIT** |
+| W2-9: the hosted x64 differs from the roster on 2 to 6 of 80 rows, each HELD | 0 rows | **MISS** |
+| W2-10: no row dies at a stub; no "not implemented" naming a refused floor-set member | none in any of the 12 legs | **HIT** |
+| W2-11: every arm job inside 60 minutes, the longest A-3 or A-10; the row-wall ratio 0.7 to 1.3 on each of 6 shards | inside (longest A-3, 35.1 min); ratio in band on 5 of 6 (A-10 1.33) | **MISS** (one shard) |
+| W2-12: sync/atomic 108, os/signal 30 + 1, os/exec 88 + 1, reflect 445 + 21, go/parser 183, net/http 1526 EQUAL; runtime/pprof equal verdicts, disclosed moving 0 to 2 | all EQUAL; runtime/pprof 148 + 8 on both | **HIT** |
+
+Seven HITs, four MISSes and one fired falsifier. The misses share one cause: I expected the hosted runner to differ from
+the roster where it did not (W2-6, W2-9), and expected a count where Go's own arm64 test set differs (W2-5).
+
+### 13.5 Owed
+
+- **The crypto/subtle DIT entries are NOT YET OBSERVED on linux** (BOARD, 2026-11-13): the first DIT-reporting
+  linux/arm64 read confirms or retires them.
+- **i9's independent co-read** of the six runs is its own record. A disagreement re-opens the row it names.
+- **Wave 3** (A-1, A-4: the 40 pending rows) is dispatched only after this wave's rows are read, which they now are.
