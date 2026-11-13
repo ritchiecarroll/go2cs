@@ -491,7 +491,7 @@ internal static ж<sudog> acquireSudog() {
     var s = (~pp).sudogcache[n - 1];
     pp.Value.sudogcache[n - 1] = default;
     pp.Value.sudogcache = (~pp).sudogcache.slice(0, n - 1);
-    if ((uintptr)s.of(sudog.Ꮡelem).get() != nil) {
+    if (s.of(sudog.Ꮡelem).get() != nil) {
         @throw(acquireSudogFoundSElemˢ);
     }
     releasem(ref (mp).DerefOrNull());
@@ -518,7 +518,7 @@ private static readonly @string runtimeReleaseSudogWithˢᵇ = "runtime: release
 internal static void releaseSudog(ж<sudog> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if ((uintptr)s.elem.get() != nil) {
+    if (s.elem.get() != nil) {
         @throw(runtimeSudogWithNonNilˢ);
     }
     if (s.isSelect) {
@@ -1918,7 +1918,7 @@ internal static void mstart0() {
         if (size == 0) {
             size = 16384 * sys.StackGuardMultiplier;
         }
-        gp.Value.stack.hi = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡsize));
+        gp.Value.stack.hi = (uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡsize));
         gp.Value.stack.lo = (~gp).stack.hi - size + 1024;
     }
     // Initialize stack guard so that we can start calling regular
@@ -4567,7 +4567,7 @@ internal static void goyield_m(ж<g> Ꮡgp) {
 internal static void goexit1() {
     if (raceenabled) {
         var gp = getg(); if ((~gp).bubble != nil) {
-            racereleasemergeg(ref (gp).DerefOrNull(), (uintptr)(~gp).bubble.raceaddr());
+            racereleasemergeg(ref (gp).DerefOrNull(), (~gp).bubble.raceaddr());
         }
         racegoend();
     }
@@ -7884,9 +7884,9 @@ internal static void doInit1(ж<initTask> Ꮡt) {
             @throw(inittaskWithNoFunctionsˢ);
         }
 
-        ref var firstFunc = ref heap<@unsafe.Pointer>((uintptr)add(@unsafe.Pointer.FromPinnedBox(Ꮡt), 8), out var ᏑfirstFunc);
+        ref var firstFunc = ref heap<@unsafe.Pointer>(add(@unsafe.Pointer.FromPinnedBox(Ꮡt), 8), out var ᏑfirstFunc);
         for (var i = (uint32)0; i < t.nfns; i++) {
-            ref var Δp = ref heap<@unsafe.Pointer>((uintptr)add(firstFunc, (uintptr)i * (uintptr)goarch.PtrSize), out var Ꮡp);
+            ref var Δp = ref heap<@unsafe.Pointer>(add(firstFunc, (uintptr)i * (uintptr)goarch.PtrSize), out var Ꮡp);
             var f = (Ꮡp.Reinterpret<@unsafe.Pointer, Action>()).ValueSlot;
             f();
         }

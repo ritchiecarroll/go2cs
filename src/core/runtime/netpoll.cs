@@ -729,7 +729,7 @@ internal static ж<pollDesc> alloc(this ж<pollCache> Ꮡc) {
         }
         // Must be in non-GC memory because can be referenced
         // only from epoll/kqueue internals.
-        @unsafe.Pointer mem = (uintptr)persistentalloc(n * pdSize, tagAlign, Ꮡmemstats.Ꮡother_sys);
+        @unsafe.Pointer mem = persistentalloc(n * pdSize, tagAlign, Ꮡmemstats.Ꮡother_sys);
         for (var i = (uintptr)0; i < n; i++) {
             var pdΔ1 = (ж<pollDesc>)(uintptr)(add(mem, i * pdSize));
             lockInit(ref (pdΔ1.Ꮡlock).DerefOrNull(), lockRankPollDesc);

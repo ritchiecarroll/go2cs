@@ -79,7 +79,7 @@ public static Pointer<T> Make<T>(ж<T> Ꮡptr) {
 
     @unsafe.Pointer u = default;
     if (Ꮡptr != nil) {
-        u = (uintptr)runtime_registerWeakPointer(@unsafe.Pointer.FromPinnedBox(Ꮡptr));
+        u = runtime_registerWeakPointer(@unsafe.Pointer.FromPinnedBox(Ꮡptr));
     }
     runtime.KeepAlive(Ꮡptr.OrTypedNil());
     return new Pointer<T>(u: u);

@@ -204,8 +204,10 @@ func main() {
 		t.Errorf("the discarded call must still be emitted: %s", mainCs)
 	}
 
-	// A CONSUMED result keeps the conversion: the assignment RHS is the unambiguous witness.
-	if !strings.Contains(mainCs, "(uintptr)swapPtr(") {
-		t.Errorf("a consumed unsafe.Pointer result must keep its construct cast: %s", mainCs)
+	// A CONSUMED result is the call itself, with no cast either: a call that RETURNS an unsafe.Pointer hands back a
+	// pointer that carries its box, and the cast turned it into a number that carried nothing
+	// (docs/phase4/DESIGN-unsafe-pointer-call-result.md). Until that seat this guard asserted the opposite.
+	if strings.Contains(mainCs, "(uintptr)swapPtr(") {
+		t.Errorf("a consumed unsafe.Pointer result is cast to a number, which strips what the pointer carries: %s", mainCs)
 	}
 }

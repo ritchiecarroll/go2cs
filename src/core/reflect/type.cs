@@ -568,11 +568,11 @@ internal static ж<abi.Type> typeOff(this ж<rtype> Ꮡt, aTypeOff off) {
 internal static @unsafe.Pointer textOff(this ж<rtype> Ꮡt, aTextOff off) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    return (uintptr)resolveTextOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off);
+    return resolveTextOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off);
 }
 
 internal static @unsafe.Pointer textOffFor(ж<abi.Type> t, aTextOff off) {
-    return (uintptr)toRType(t).textOff(off);
+    return toRType(t).textOff(off);
 }
 
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1060,7 +1060,7 @@ internal static StructField /*f*/ Field(this ref structType t, nint i) {
         var staticuint64s = getStaticuint64s();
         @unsafe.Pointer pΔ1 = @unsafe.Pointer.FromPinnedBox(Ꮡ(staticuint64s.Value).at<uint64>(i));
         if (/* unsafe.Sizeof(int(0)) */ (uintptr)8 == 4 && goarch.BigEndian) {
-            pΔ1 = (uintptr)@unsafe.Add(pΔ1, 4);
+            pΔ1 = @unsafe.Add(pΔ1, 4);
         }
         f.Index = @unsafe.Slice((ж<nint>)(uintptr)(pΔ1), 1);
     } else {
@@ -1932,7 +1932,7 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
 
     // cache result for future callers
     var xʗ1 = x;
-    framePool = Ꮡ(new Δsync.Pool(New: () => @unsafe.Pointer.OrTypedNil((uintptr)unsafe_New(xʗ1))
+    framePool = Ꮡ(new Δsync.Pool(New: () => @unsafe.Pointer.OrTypedNil(unsafe_New(xʗ1))
     ));
     var (lti, _) = ᏑlayoutCache.LoadOrStore(k, new layoutType(
         t: x,
