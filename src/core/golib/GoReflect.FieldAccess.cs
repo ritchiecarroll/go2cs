@@ -283,8 +283,16 @@ public static partial class GoReflect
         public Type? DeclaringType => Path is { Length: > 0 } ? Path[^1].DeclaringType : null;
         internal readonly bool[] BoxHop;
 
-        internal GoFieldInfo(string name, Type type, nint[]? arrayDims, FieldInfo[] path, bool[] boxHop, string tag = "", bool embedded = false, GoChanDir chanDir = GoChanDir.Unstamped, nint[]? keyDims = null, Type? descriptorSelf = null, ChanCargo? chanCargo = null)
+        /// <summary>Whether the field is a Go array held inline (go.arrays), which reflection does not read or address.</summary>
+        internal readonly bool IsInlineArray;
+
+        /// <summary>Whether the field is the readonly alignment carrier of a Go [0]T field (<see cref="GoAlignmentCarrierAttribute"/>).</summary>
+        internal readonly bool IsAlignmentCarrier;
+
+        internal GoFieldInfo(string name, Type type, nint[]? arrayDims, FieldInfo[] path, bool[] boxHop, string tag = "", bool embedded = false, GoChanDir chanDir = GoChanDir.Unstamped, nint[]? keyDims = null, Type? descriptorSelf = null, ChanCargo? chanCargo = null, bool alignmentCarrier = false)
         {
+            IsInlineArray = InlineArrayLength(type) > 0;
+            IsAlignmentCarrier = alignmentCarrier;
             Name = name;
             Type = type;
             DescriptorSelf = descriptorSelf;
@@ -302,6 +310,13 @@ public static partial class GoReflect
         /// <summary>Reads this field's value from a live struct instance (path-following, boxed).</summary>
         public object? Read(object structValue)
         {
+            // A Go [0]T field holds nothing: its value is the zero-length array, whatever the carrier's shared bytes read.
+            if (IsAlignmentCarrier)
+                return ZeroValueOf(Type, ArrayDims);
+
+            if (IsInlineArray)
+                throw inlineFieldPanic(this);
+
             object? current = structValue;
 
             for (int i = 0; i < Path.Length && current is not null; i++)
@@ -395,6 +410,13 @@ public static partial class GoReflect
             // converter's `= new(N)` initializer put them; every OTHER field's come from the
             // converter's [GoArrayDims] stamp, which is null unless the field reaches an array
             // through a pointer or a map element — the two hops no zero instance can measure.
+            // A [GoAlignmentCarrier] field stands for a Go [0]T field: it is projected as that field, array<T> of length 0.
+            if (tryAlignmentCarrier(field, out Type carrierType, out nint[] carrierDims))
+            {
+                result.Add(new GoFieldInfo(projected, carrierType, carrierDims, [.. prefixPath, field], [.. prefixHops, false], goTagOf(field), alignmentCarrier: true));
+                continue;
+            }
+
             nint[]? dims = KindOf(field.FieldType) == Array ? FieldArrayDims(t, field) : FieldStampedDims(field);
             GoChanDir fieldDir = KindOf(field.FieldType) == Chan ? FieldChanDir(t, field) : GoChanDir.Unstamped;
             ChanCargo? fieldCargo = KindOf(field.FieldType) == Chan ? FieldChanCargo(t, field) : null;
@@ -563,6 +585,10 @@ public static partial class GoReflect
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReflectOnlyJustification)]
     public static object FieldAliasBox(object parentBox, GoFieldInfo field)
     {
+        // An inline array, and a readonly [0]T carrier, have no writable alias here (7.7.4, item 2).
+        if (field.IsInlineArray || field.IsAlignmentCarrier)
+            throw inlineFieldPanic(field);
+
         if (fieldBoxFromTable(parentBox, field) is { } tabled)
             return tabled;
 
