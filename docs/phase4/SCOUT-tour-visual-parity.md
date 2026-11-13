@@ -335,3 +335,10 @@ Do both:
 - **Order:** item 3, then item 4, then item 2, then item 1's S1. Item 3 has the most Tour-visible sites, and item 1
   needs a generator change.
 - **S4 (the order fix) is a correctness seat.** It is outside the owner's ask, and it belongs with C2's spill work.
+
+> **Amended 2026-11-13 (C1), on COORD's acceptance** (inbox C1 20261113T055702Z):
+> - **Routing.** The doc seats in batch 298. P1 implements items 3, 4 and 2, then item 1's S1. S2 and S3 wait for an
+>   owner read of S1's result. S4 goes to C2 as a correctness seat, and is now a BOARD row.
+> - **A correction to 1.2 and 1.4.** The "1 behavioral" site whose callee itself calls is a census FALSE POSITIVE: a
+>   `defer` whose callee is a func literal, and the census walked into the literal's body. S4's population is the 172
+>   std test sites alone, all in `internal/sync/hashtriemap_test.go`, where the order is not observable.
