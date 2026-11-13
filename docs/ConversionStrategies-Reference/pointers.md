@@ -2719,6 +2719,21 @@ mis-classifies as a non-conversion and reaches only the latter — deliberately 
 identity elision: the re-box routes above render their own conversions correctly, and diverting them
 breaks named ARRAY wrappers, whose lazily-materialized backing store a storage reinterpret bypasses.
 
+**A source that is itself a pointer conversion is parenthesized.** In
+`(*int8)(unsafe.Pointer((*int32)(up)))` the source `(*int32)(up)` renders as a C# cast, and a cast
+binds looser than member access: written bare, `(ж<int32>)(uintptr)(up).Reinterpret<int32, int8>()`
+applies `.Reinterpret` to `up`, an `unsafe.Pointer`, and does not compile (CS1929). The emission
+wraps such a source the way other member accesses on a conversion are wrapped
+(`parenthesizeConversionBase`), so the reinterpret applies to the converted pointer:
+
+<!-- source: src/tests/Behavioral/NestedPointerConversionReinterpret/main.cs:13 -->
+```csharp
+var q = ((ж<int32>)(uintptr)(up)).Reinterpret<int32, int8>();
+```
+
+(Guarded by the `NestedPointerConversionReinterpret` behavioral output test: it reads and writes
+through the `int8` view, checks the write in the `int32`, and reads a `uint16` view of the same bytes.)
+
 **A pointer-to-ARRAY target is excluded at the CONVERTER, not at the golib gate.** For
 `(*[N]T)(unsafe.Pointer(p))` the interception can only ever lose. golib never takes the managed arm
 for it — `array<U>` is an 8-byte struct holding a backing-store *reference*, so it fails the size
