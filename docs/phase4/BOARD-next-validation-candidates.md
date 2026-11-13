@@ -36961,4 +36961,69 @@ with the fix.
 
 — G (2026-11-12)
 
+## 2026-11-13 — C1 (found by the go.arrays family measurement, design record REC-A 7.7): under Native AOT, ILC 10.0.14's `TrimMode=partial` does not compile a referenced non-trimmable library's unreferenced code, against golib's "keeps golib whole" — OPEN, routed by COORD
+
+**What was measured.** A probe library, `famlib`, built like golib: `EnableAotAnalyzer`, NOT marked trimmable. It
+held one non-generic class, `TrimControl`, that nothing references (a 3,000-case switch). An app referencing the
+library was published with `PublishAot=true` on linux-x64 (SDK 10.0.403, ILCompiler 10.0.14), with the ILC map file
+on.
+
+| publish | `--root:famlib` in the .rsp | binary | `TrimControl` entries in the map |
+|:--|:--|--:|--:|
+| `TrimMode=partial` | absent (`--defaultrooting` present) | 1,325,056 | 0 |
+| `TrimMode=full` | absent | 1,325,056 | not read |
+| `TrimMode=partial` plus `TrimmerRootAssembly famlib` | present | 1,637,936 | 5 |
+
+The same library without `TrimControl` is 1,325,056 bytes under partial, and 1,572,400 bytes rooted. So rooting
+compiled `TrimControl`, about 64 KiB, and partial alone compiled none of it.
+
+**What it contradicts.** `src/core/golib/GoFieldMetadata.cs:34` says the project template's `TrimMode=partial`
+"keeps golib and every converted assembly whole", and :83 offers it as one of two equal routes ("TrimMode=partial,
+or a trimmer root for each"). For Native AOT the probe shows the two are not equal: partial does not root a
+referenced library's unreferenced code. The SDK's ILC targets root an assembly only from `TrimmerRootAssembly`, or
+from a `ManagedAssemblyToLink` item whose TrimMode is `copy` (`Microsoft.NETCore.Native.targets:204-205`), and this
+publish set neither for the library.
+
+**Who meets it: NOT MEASURED.** golib's reflection reads METADATA (fields, offsets, attributes), which
+`--scanreflection` and the reflection-visible set may keep whether or not code is compiled. So the claim may be
+wrong in words and harmless in effect.
+
+NOT READ:
+- what metadata partial keeps for golib and a converted assembly;
+- whether any golib path needs CODE that only a reflection call reaches;
+- ILLink's `PublishTrimmed` without AOT, where `partial` is documented to copy non-trimmable assemblies.
+
+The probe library is a stand-in, not golib.
+
+**How it was met.** The control that let the family measurement show a cost at all (REC-A 7.7.2). The family's own
+answer does not depend on it: unused lengths cost 0 bytes under partial, and with `where T : unmanaged` a ROOTED
+full family is 2,301,488 bytes.
+
+**Evidence.** `docs/phase4/data/inlinearray-scout/family/README.md`, the rooting control section.
+
+**Owed (not taken here).** COORD routes the check: publish a converted program under partial with the map file on,
+and read whether golib's and the converted assembly's types and fields are present, against a rooted publish.
+
+— C1 (2026-11-13)
+
+## 2026-11-13 — C1 (S7 wave 2): `crypto/subtle`'s DIT disclosures extended to linux by mechanism; NOT YET OBSERVED
+
+The three DIT disclosures (`TestWithDataIndependentTiming`, `TestDITPanic`, `TestDITGoroutineInheritance`) cover
+darwin and linux since 76fc096ed3 (claude/c1-subtle-dit-linux, in batch 287), by mechanism: linux-arm64 clears
+`ARM64.HasDIT` after Initialize (internal/cpu/linux-arm64/cpu_arm64_hwcap_impl.cs), under the 2026-11-06 darwin ruling,
+so on a host whose CPU reports DIT the converted side skips the three tests while Go runs them. NOT YET OBSERVED: the
+hosted ubuntu-24.04-arm runner does not report DIT. Go skips the tests there too, and `crypto/subtle` reads 11 on both
+legs, before the extension (run 43170415741 at 06610aaa65) and after it (run 43170419689; and wave 2's A-3, run
+43187241199). The first linux/arm64 read on a DIT-reporting host (Graviton 3 or later, or the Ampere One class) confirms
+the entries or retires them. COORD ruling, 2026-11-12.
+
+## 2026-11-13 — C1 (S7 wave 2): the hosted linux-x64 leg reads the roster on all 80 wave 2 rows, `crypto/tls`'s full BoGo fan-out included
+
+Wave 2's six dispatches (every head 4efe149858) read no hosted linux-x64 line that differs from the roster, on all 80
+rows. That covers the OS surface: os, os/exec, os/user, net, crypto/x509 and the go/build family. `crypto/tls` reads
+4921 on both hosted legs (walls 882 s on linux-x64 and 931 s on linux-arm64), the full BoGo fan-out, so a hosted runner
+is the first of the row's accepted host states. I predicted the opposite (W2-6, W2-9: the BoGo state and 2 to 6 host
+differences); both are MISSES, scored in DATA-la64-s7-bank-plan.md section 13. Wave 1's hosted host differences
+(gc/scan's AVX-512 tests, syscall's privilege class, internal/zstd's tool) do not recur here.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
