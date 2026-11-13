@@ -46,6 +46,9 @@ func (target cgoWrapperTarget) goldenName() string {
 var cgoWrapperTargets = []cgoWrapperTarget{
 	// close(-1) sets EBADF on every POSIX libc.
 	{"linux", "libc.so.6", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoLinuxStructs, nil, []string{"c"}, "amd64"},
+	// linux on arm64 (the hosted ubuntu-24.04-arm leg) runs an arm64 process too, so its GolibTests leg compiles bindings
+	// converted for linux/arm64, as darwin's does for darwin/arm64.
+	{"linux", "libc.so.6", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoLinuxStructs, nil, []string{"c"}, "arm64"},
 	{"darwin", "/usr/lib/libSystem.B.dylib", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoDarwinStructs, nil, []string{"System"}, "amd64"},
 	// Apple silicon runs an arm64 process, and golib's resolver holds bindings to the target they were converted for
 	// (§5.3, §11.20), so darwin's arm64 GolibTests leg compiles bindings converted for darwin/arm64.
