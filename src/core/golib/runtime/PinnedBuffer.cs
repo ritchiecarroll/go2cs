@@ -30,6 +30,9 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     {
         m_handle = GCHandle.Alloc(array, GCHandleType.Pinned);
         m_len = array.Length;
+
+        if (PinCensus.Enabled)
+            PinCensus.PinnedBuffer();
     }
 
     public PinnedBuffer(object? src, nint len) : this(src, (int)len) {}
@@ -38,6 +41,9 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     {
         m_handle = src is null ? default : GCHandle.Alloc(src, GCHandleType.Pinned);
         m_len = len;
+
+        if (PinCensus.Enabled && src is not null)
+            PinCensus.PinnedBuffer();
     }
 
     ~PinnedBuffer()

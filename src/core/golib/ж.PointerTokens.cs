@@ -473,6 +473,9 @@ namespace go;
         // Only a genuinely new entry counts; the idempotent early return must stay before it.
         int count = Interlocked.Increment(ref s_count);
 
+        if (PinCensus.Enabled)
+            PinCensus.NewEntry();
+
         if (Q44RegistryCensus.Enabled)
             Q44RegistryCensus.Mint();
 
@@ -528,6 +531,9 @@ namespace go;
 
         // Only a genuinely new entry counts; the idempotent early return must stay before it.
         int count = Interlocked.Increment(ref s_count);
+
+        if (PinCensus.Enabled)
+            PinCensus.NewEntry();
 
         if (count >= s_sweepAt)
             Sweep();

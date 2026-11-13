@@ -1100,10 +1100,14 @@ public static partial class testing_package
         if (TestExecution.ParallelTestsRunning)
             throw builtin.panic("testing: AllocsPerRun called during parallel test");
 
+        // The registration census (a measurement build): each counter over the warm-up and over the measured runs.
+        var censusStart = PinCensus.Enabled ? PinCensus.Read() : default;
+
         // Warmup run outside the measurement window (Go does the same): first-call lazy
         // initialization — and JIT compilation here — must not count against f.
         f();
 
+        var censusWarm = PinCensus.Enabled ? PinCensus.Read() : default;
         long startBytes = GC.GetAllocatedBytesForCurrentThread();
         long startCount = AllocationCounter.CurrentThreadCount;
 
@@ -1114,6 +1118,25 @@ public static partial class testing_package
         // keeps the two windows nested rather than overlapping.
         long counted = AllocationCounter.CurrentThreadCount - startCount;
         long allocated = GC.GetAllocatedBytesForCurrentThread() - startBytes;
+
+        if (PinCensus.Enabled)
+        {
+            var censusEnd = PinCensus.Read();
+            string caller = "?";
+
+            foreach (StackFrame frame in new StackTrace(1, false).GetFrames())
+            {
+                if (frame.GetMethod() is { } method && method.DeclaringType?.Namespace != "go" + "." + "testing_runtime" &&
+                    method.Name != nameof(AllocsPerRun))
+                {
+                    caller = (method.DeclaringType?.FullName ?? "?") + "." + method.Name;
+                    break;
+                }
+            }
+
+            PinCensus.Write($"apr caller={caller} test={TestExecution.Current?.Name ?? "?"} runs={runs} bytes={allocated} " +
+                            $"warm[{PinCensus.Delta(censusStart, censusWarm)}] measured[{PinCensus.Delta(censusWarm, censusEnd)}]");
+        }
 
         // Zero bytes is zero allocations, exactly, in both units. Returning here keeps every
         // assert-zero test — the dominant stdlib shape — byte-identical in output to the byte-only

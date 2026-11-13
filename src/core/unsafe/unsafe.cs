@@ -924,6 +924,9 @@ public static Pointer Add<TLen>(Pointer ptr, TLen len) where TLen : System.Numer
     if (ptr == nil)
         return new Pointer(nil);
 
+    if (PinCensus.Enabled && ptr.RetainedSource is not null)
+        PinCensus.AddCarrying();
+
     return new Pointer(ptr.Value + (uintptr)(nuint)nint.CreateTruncating(len));
 }
 

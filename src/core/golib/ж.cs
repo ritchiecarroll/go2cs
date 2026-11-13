@@ -1216,7 +1216,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // A native-backed pointer round-trips to the EXACT address it aliases — it is not
         // managed storage, so there is nothing to pin and no copy to take.
         if (value is not null && value.NativeAddress != 0)
+        {
+            if (PinCensus.Enabled && value is NativeBox<T> { PinsManagedStorage: true })
+                PinCensus.Exit(value, ManagedPointerTokens.Resolve(value.NativeAddress) is null);
+
             return (uintptr)value.NativeAddress;
+        }
 
         // A NIL pointer's address is 0, matching Go (`uintptr(unsafe.Pointer(nil)) == 0`) — and
         // the syscall wrappers legitimately pass nil pointers whose numeric address is simply 0.
@@ -1313,7 +1318,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     public static unsafe implicit operator void*(ж<T> value)
     {
         if (value is not null && value.NativeAddress != 0)
+        {
+            if (PinCensus.Enabled && value is NativeBox<T> { PinsManagedStorage: true })
+                PinCensus.Exit(value, ManagedPointerTokens.Resolve(value.NativeAddress) is null);
+
             return (void*)value.NativeAddress;
+        }
 
         // Structural, as in the uintptr operator above.
         if (value is null || value.IsNilPointer)

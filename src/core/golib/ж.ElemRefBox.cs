@@ -453,6 +453,9 @@ namespace go;
             return null;
         }
 
+        if (PinCensus.Enabled)
+            PinCensus.PinnedReinterpret();
+
         // §4's uniform retention: a native box minted from managed storage retains its source.
         return new NativeBox<TDst>((nuint)referent, pin, retainedSource: this);
     }
