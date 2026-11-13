@@ -307,3 +307,124 @@ than 0.2 s on P4's box.
 4. **F1.** Whether package initialization gets its own scout.
 
 — P5 (2026-11-13)
+
+---
+
+## Amendment 2026-11-13 (P5): COORD's review, APPROVE-WITH-FIXES (23:36Z)
+
+An independent review at `651c4ad147` approved the design with six must-fixes. Each block below amends the section it
+names; where the two disagree, the block wins. `Reg` is `TypeExtensions.ExtensionMethodRegistry.cs`, `MS` is
+`TypeExtensions.GoMethodSets.cs`. A line marked *per the review* is the reviewer's reading of the code, accepted here
+and confirmed red-first in the seat that builds on it.
+
+**Rulings.** A2 is cut FIRST, off master, as its own seat. A1 is built and measured on the method-holder branch now
+and lands only after OQ2 is on master. Metadata is the table under the JIT; the generated list is for Native AOT
+only. A3 is in only with must-fix 4 and a measured gain. **A4 is OUT of this release.** F1 is not started; the owner
+decides after P4's probe run.
+
+### M1 (amends §4.1, the AOT source): a listing can only widen a read
+
+Writer 1 cannot see the methods sibling generators add to a class it lists, golib keeps only the FIRST listing of a
+host (`Reg:776-779`), and `_package_asserts` is declared once per interface (*per the review*). A `Receivers` list
+written from one writer's view would drop the other writers' methods. Changed:
+- golib takes the UNION of every listing of a host: receivers and homes.
+- A host is `AnyReceiver` unless EVERY listing of it carries `Receivers`. It is decided per host. The assembly
+  marker `ReceiversListed` is dropped from the design.
+- A class that a template extends is listed by that template with the receivers the template writes; a writer that
+  cannot name its receivers lists the class without `Receivers`, which makes it `AnyReceiver`.
+- **Why AOT does not reuse OQ2's `[GoMethodHost(typeof(T))]`:** it marks only the holders of declared methods, not
+  promoted-method classes, cross-package forwarder classes or assert classes, and reading it means loading each host
+  class of the home and decoding one attribute per class, which is the per-item reflection cost L3 measured as the
+  expensive part under AOT. The assembly list is already read in one pass for `Homes`. The list guard compares
+  each holder's listed receiver with its `[GoMethodHost]`.
+
+### M2 (amends §4.2): a box question stays whole-scan
+
+§4.2 said the assignability consumer would key a box by its pointee. That contradicts §4.3 and F3:
+`GetExtensionMethods(Type)` on a box matches EVERY box receiver by generic definition and reads the whole scan
+(`Reg:907-915`), and that is a public answer. **Box questions to `GetExtensionMethods(Type)` stay whole-scan,
+unkeyed.** Only `error<T>`'s own lookup changes (A2). The whole-scan path reads every host and is not narrowed by
+any arm.
+
+### M3 (amends §4.1 and §4.2): one normalisation, complete against `IsAssignableFrom`
+
+The keys as written miss receivers the filters accept (`MS:803`, `Reg:919`):
+- `Nullable<E>` is assignable from `E`. It is found today only because the core library is always a home
+  (`Reg:522`).
+- A receiver typed as a public box subclass (`StandardBox<T>`, `NativeBox<T>`, `FieldRefBox<T>`, `ElemRefBox<T>`)
+  resolves to pointee `T` in the collector, which walks the base chain (`GoReflect.cs:105-118`), while the metadata
+  decoder recognises only `ж<T>` by name (`Reg:695-704`).
+
+Changed: **one shared function normalises a receiver to its index key, and the same function builds a question's
+keys.** It reads through a by-ref, through any type whose base chain reaches `ж<T>` to `T`, and takes the generic
+definition of every generic type, bases and interfaces included. A question's keys are the normalised forms of the
+element, each base, each interface, `object`, and `Nullable<>` for a value type. A receiver the decoder cannot
+normalise from metadata alone (a foreign generic base it would have to load) makes its host `AnyReceiver`. **Hosts
+whose receivers live in the core library or golib are read for every question, as today.** Fixtures: one each for
+`Nullable<E>`, each box subclass, a generic base and a generic interface.
+
+### M4 (amends §4.4, arm A3)
+
+A host with `AnyHome`, or with core-library or golib receivers, is read for EVERY question today (`Reg:171`, `522`).
+The attribute's condition becomes: every extension method of the compilation has a receiver that normalises to a
+type the compilation itself declares. `AnyHome`, a core-library receiver or a golib receiver each withhold it. Also:
+the whole scan (`Reg:288`) walks every deferred assembly before it answers, and `Visited` (`Reg:374-393`) gains a
+separate "seen, not walked" state so that walked still means complete. A3 is built only after A2 and A1 are scored,
+and only if its measured gain on `stringer` or on P4's box is outside noise. The cost of `Assembly.IsDefined` on an
+assembly carrying thousands of host attributes is measured first; if it is not small, A3 stops there.
+
+### M5 (amends §4.5, arm A4): out
+
+A4 is out of this release. Recorded for any return: `GetReferencedAssemblies` throws under Native AOT (golib's own
+note, `GoMemProfile.cs:104`), and AOT is where a missed registration has no reflection fallback (`MS:415`). A
+returned A4 is JIT-only, treats an unresolvable reference as "satisfies", and keeps `Run()`'s contract
+(`GoDeferredRegistrations.cs:79-98`). Guard 6 of §6 goes with it.
+
+### M6 (amends §2, §8 and §10): A1's pool was confounded with A2
+
+In `wide`, the probe's 152 hosts, 5,931 methods and 70 ms are the WHOLE scan, forced by `error<T>`'s static
+constructor (`error.cs:172`), not the home scope. 152 is every host in the closure. The home scope of the 11 asked
+types is 3,138 methods (§3). §8 counted the same 70 ms for both arms, and A1 alone would still read about 5,931.
+§1 item 2's "5,931 read to find 197" describes the forced whole scan. Re-predicted, in build order, every delta
+read from INTERLEAVED before/after pairs on one box and not from the 651 ms of §2 (the same box read 612 to 643 ms
+in a later session):
+
+| step | base | quantity | predicted |
+|:--|:--|:--|:--|
+| A2 | master | `wide`: methods read | 5,931 to **3,100 to 3,500** |
+| A2 | master | `wide`: `ExtensionMethodsOf` | 46 ms to **under 6 ms** |
+| A2 | master | `wide`: wall | **−25 to −45 ms** |
+| A2 | master | `hello`, `stringer`: wall | within noise (neither builds an `error<T>`) |
+| A1 on A2 | method-holder branch + A2 | `wide`: methods read | about 3,100 to **under 800** |
+| A1 on A2 | same | `wide`: wall | **−12 to −25 ms** |
+| A2 + A1 | | `wide`: wall | **−40 to −70 ms** |
+| A1 | P4's box, local packages before publish | TypeScript `hello` | **−0.15 to −0.30 s** (inferred: 303 ms of host reads under `GetExtensionMethodsHomedIn`, walk excluded) |
+
+Falsifiers replace §8's: A2 under 15 ms on `wide`; A2 leaves more than 4,000 methods read; A1 on top under 8 ms or
+more than 1,200 methods read; any guard difference; CNR drift. §10's "A1 to A3 under 70 ms" stop line becomes
+"A2 + A1 under 30 ms on `wide`". The 100 to 135 ms of §1 item 6 and the 515 to 550 ms of §8 are withdrawn.
+
+### The SHOULDs
+
+- **A2 is not claimed identical (amends §4.3 and §6).** When no `Error` has exactly the asked box as receiver,
+  `MinBy` returns the first unrelated box `Error` in scan order (`Reg:965`, `809-828`), so what a generic type's
+  pointer `Error` binds (`error.cs:187-195`) depends on load order TODAY (*per the review*). A2 asks for the type's
+  own method, which removes that dependence. The guard compares the BOUND DELEGATES (`s_ErrorByPtr`, `s_ErrorByVal`:
+  null or not, and the target method), old way and new way, over every receiver type of the corpus, and every
+  difference is listed and explained in the seat's post, not hidden under "identical".
+- **`GO2CS_METHODSET_VERIFY`** computes the whole-scan answer from a private read that fills none of the caches
+  the timed path reads, and is never set in a timed run.
+- **The TypeScript prediction** is scored on P4's box with a local-package A/B before publish. P4 runs the probe
+  now (asked by COORD), which gives the counts before any A1 code.
+- **Residual after OQ2 (missed in §1 item 4).** A hand-owned type keeps its methods in the package class, so a
+  package class can still hold many receivers and its package gains least. In `wide`'s eight homes on the
+  method-holder build, the unmarked hosts hold 229 of 3,138 methods, 164 of them in `reflect`'s nine unmarked classes. The
+  largest of those are cross-package forwarder classes, which have one receiver each and are scoped by the
+  signature decode. The A1 seat reports, per
+  package of the corpus, the methods in hosts with more than one receiver.
+- **Not verified by the review, settled in the A1 seat before its code, red first:** the receiver shapes of the
+  promoted-forwarder templates; `typeof` of an unexported or function-local receiver inside an assembly attribute
+  (`Homes` avoids the question by naming one type per assembly; a receiver that cannot be named makes the listing
+  carry no `Receivers`); `Delegate.Method` under Native AOT for the A2 guard; the cost of `Assembly.IsDefined` (M4).
+
+— P5 (2026-11-13)
