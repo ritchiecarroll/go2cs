@@ -31,15 +31,22 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   selects a file with `import "C"` stops the run with `error GO2CS2001`. With `-cgo`, on a machine with a
   C compiler, a package converts when every C use it makes is a call of a C function a shared library
   defines, passing integers, floating-point numbers and pointers, structs of integers and pointers by
-  value, or one struct or one scalar by pointer. Its C types and constants convert with it. It converts
-  for the machine's own operating system and architecture, and the converted package refuses to call C
-  anywhere else. Anything else is refused by name, with the phase that will cover it:
-  - `C.CString`, `C.GoString`, `C.GoBytes`, `C.malloc`, and a pointer into a slice or an array (Phase 3);
+  value, one struct or one scalar by pointer, or a `void *` that is nil or points at C memory.
+  `C.CString`, `C.CBytes`, `C.GoString`, `C.GoStringN`, `C.GoBytes`, `C.malloc` and `C.free` convert, and
+  so does `defer C.f(…)`. Its C types and constants convert with it. It converts for the machine's own
+  operating system and architecture, and the converted package refuses to call C anywhere else.
+  Anything else is refused by name, with the phase that will cover it:
+  - a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or
+    `C.GoStringN` (Phase 3, its next increment). A pointer into a slice or an array is refused when the
+    package is converted. `unsafe.Pointer(&x)` is refused when the call runs, with a message that names
+    the call. Inside a method with a pointer receiver, `unsafe.Pointer(p)` of a pointer of the receiver's
+    own type is refused when the package is converted: move the call into a function that takes the
+    pointer as a parameter;
   - a function the preamble itself defines, and a `#define` that is not a constant, both of which need
     compiled C (Phase 4);
   - `//export` (Phase 5);
-  - a C variable, a C function used as a value, and a deferred or `go` call that passes a pointer cmd/cgo
-    checks (later in Phase 2);
+  - a C variable, a C function used as a value, and `go C.f(…)` with a pointer cmd/cgo checks (later in
+    Phase 2);
   - a C function Go's own cgo build does not import by its C name. That is a function a header renames
     (macOS on x64 makes `fstat` the symbol `fstat$INODE64`), and also any function the C compiler inlines
     when cgo builds the package. Which functions those are depends on the compiler and the C library.
@@ -89,6 +96,17 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   <!-- docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.16 and §11.20 (COORD's M1 ruling, 2026-11-11); the census is
        TestCgoCheckClosureFormsAcrossGorootsCgoPackages, hosted run 42973745743: address 31, variable 50, index 22,
        slice 0, defer 9, go 0 over GOROOT's 29 cgo packages. -->
+* **cgo: a pointer rebuilt from a number can hand C Go memory unchecked. This is a known memory-safety
+  gap.** Do not pass C a pointer you rebuilt from a number when it points into Go memory:
+  `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)`, or a `uintptr` kept in a variable and converted
+  back. go2cs refuses every pointer into Go memory that it can still see as one. Once the address has
+  been through `uintptr` arithmetic, or came from a slice element viewed as another type
+  (`(*C.int)(unsafe.Pointer(&b[4]))`) and then through `uintptr`, go2cs cannot tell it from an address
+  in C memory, so the call goes ahead, and the memory may move while C is using it. Go allows the
+  one-expression form, because its memory does not move. Pass `unsafe.Pointer(p)` itself: go2cs refuses
+  that by name until it can hold Go memory still for C.
+  <!-- docs/phase4/DESIGN-cgo-phase3-marshaling.md §16.9 (stop line S3.1-E, COORD's ruling C, 2026-11-12); the arm is
+       GolibTests' APointerOverManagedStorageCrossesAVoidPointerOnlyAsTheFourDisclosedNumbers. -->
 * **Goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
   holds its thread for as long as it lives. When it ends, the thread waits to run the next `go` statement,
   so starting goroutines one after another is cheap; holding many alive at once is not. Measured on one

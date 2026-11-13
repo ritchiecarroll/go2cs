@@ -750,4 +750,100 @@ convert, so it is not an arm of the program. The run-time refusal arms are the a
 `void *`, the same as a number in a variable, the same through a `uintptr` in one expression, and `C.GoBytes` and
 `C.GoString` over Go memory.
 
+### 16.9 Amendment 2026-11-12: the green as built, a stop line that fired, and three crossings found on the way
+
+**The green** (`43ac9e33fa`), as 16.1 planned it, with these readings.
+
+- **The deferred call** is lowered in the tree, before anything else reads it: the statement's call becomes cmd/cgo's
+  own call of the C function, each argument the expression its closure variable was defined as. The emission is the
+  converter's ordinary `defer`: `defer(C.free, @unsafe.Pointer.FromPinnedBox(cs), ref ᒐ);`. P3.1-4 is MET on H and on
+  both early legs (the reassigned argument reaches C as 1; the log reads `321`).
+- **`C.malloc`** is cmd/cgo's wrapper `_Cfunc__CMalloc`, which the classifier filtered as plumbing and now reads as
+  `C.malloc`.
+- **How Go fails on a negative count** was read on the go arm before go2cs was shaped (run 43325908295):
+  `C.GoStringN(p, -1)` is `fatal error: out of memory`, exit 2; `C.GoBytes(p, -1)` is `panic: runtime error: gobytes:
+  length out of range`, exit 2; `C.GoBytes(p, 0)` is an empty slice that is not nil. go2cs does each the same.
+- **P3.1-9 MISSES as worded.** One test outside the predicted set moved: the classifier test counted
+  `_Cfunc__CMalloc` as plumbing.
+- **A widening beyond the plan's words, ACCEPTED by COORD.** A deferred or started GO function that calls C further
+  in (`defer func() { C.f(&x) }()`) was refused by the old, broad test. It is an ordinary `defer` or `go`, and
+  converts. Only cmd/cgo's own `go` form on the check closure stays refused. COORD required one arm: the inner call
+  over Go memory is still refused, at run time, by name (`goinnerdefer`, `goinnergo`, each beside its C-memory
+  control).
+- **S3.1-B did NOT fire** (COORD agrees). golib gains one default member on the internal `INativeRooted` interface
+  and its implementation on `NativeBox`: no field, no instance state, no new box kind, no go2cs-gen change. Both
+  box files keep their cited lines.
+
+**A defect of the first classifier, caught by reading the emission before any leg.** `unsafe.Pointer(cs)` over a C
+pointer is emitted as the pinning mint, which CARRIES the native box. The first cut refused every pointer that
+carried a box, so it would have refused `C.free(unsafe.Pointer(cs))`. Its arms passed because they minted the
+pointer another way. A native box now answers, without its pointee type, whether it is C memory alone, and every
+control uses the converter's own mints.
+
+**Stop line S3.1-E FIRED, and COORD ruled it (C, with conditions).** COORD asked of the classifier: can ANY box
+answer "C memory alone" when its storage is managed? The arm hands the door every pointer golib has over managed
+storage, four ways each: the pinning mint, the retaining mint, the bare mint, and its number in a variable.
+
+| Source | Carrying its box | As a bare number |
+|---|---|---|
+| a view aliasing a struct | refused | refused |
+| a view over a struct that holds references (a token) | refused | refused |
+| a native box with a retained source | refused | refused |
+| a native box that aliases an order token | refused | refused |
+| `unsafe.StringData`, `unsafe.SliceData` | refused | refused |
+| a pointer rebuilt from a Go array's number (below) | refused | refused |
+| **a wider view pinned over an element** (`(*int32)(unsafe.Pointer(&b[4]))`) | refused | **CROSSES** |
+| **a native box over a pinned managed buffer** | refused | **CROSSES** |
+
+So the answer is NO for a box and YES for a number: 4 of 36 hand-overs cross. The door's test for a bare number is
+the pin and token registry, and two pin moments register nothing. An interior address (a number plus an offset)
+misses the registry for every pin, since its entries are exact addresses.
+
+**The residue, disclosed by name** (COORD's condition 1), beside section 13.4's: *a pointer rebuilt from a number
+that points into Go memory crosses a `void *` unchecked.* It takes an explicit `uintptr` in the source. The
+one-expression form, `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)`, is legal Go. The harm is the syscall pin hole
+through a new door: C is handed Go memory whose only pin holder is a temporary, so the collector may release the pin
+during the call. It is a known memory-safety gap, and `docs/Limitations.md` and the release notes say so in those
+words. 3.1 opens no new way to MINT such a number.
+
+COORD's other conditions:
+
+- **The arm asserts exactly the four crossings and the 32 refusals**, so a fifth crossing is a red
+  (`APointerOverManagedStorageCrossesAVoidPointerOnlyAsTheFourDisclosedNumbers`).
+- **A golib seat proposal follows 3.1**: register at the two pin moments, and give a registry entry its length so a
+  number inside ANY live pinned range is refused. Its allocation-meter question on banked rows is named up front.
+- **Section 13.4's first rule** (in one expression the converter keeps the box) is the FIRST item of 3.2's design
+  step. 3.1 does not implement it: it leans on the registry, which holds for exact numbers.
+- **The review at the tip takes the residue as an explicit question**, with this list of where a number over Go
+  memory can come from. golib's pin moments: the box-to-`uintptr` and box-to-`void *` operators (four sites, each
+  registers); `ElemRefBox.TryPinnedReinterpret` (registers nothing); `PinnedBuffer`'s constructors (register
+  nothing). The converter's mints that involve no pin: `FromRef`, and a carrying pointer converted to `uintptr`,
+  which yields its number.
+
+**Two more crossings, found and CLOSED in 3.1, not disclosed.**
+
+1. **A pointer rebuilt from a Go array's number was taken for C memory** (read on the early end-to-end legs,
+   43330710728 and 43330721939, where every other arm matched Go: `C.GoString((*C.char)(unsafe.Pointer(&x)))` over a
+   Go array was read, not refused). That conversion goes through the array's number, and the number-to-pointer
+   operator mints a native box with no source, no token and no pin. The number is in the registry, so the predicate
+   gained one clause: a native box whose address the registry knows as a live Go box's is not C memory. Phase 2's
+   struct-pointer door shares the predicate, so this tightens Phase 2 too: a struct pointer rebuilt from a Go array's
+   number was handed to C as native, a latent Phase 2 hole. COORD ruled that an exit-gate arm that moves for it is a
+   Phase 2 correction, recorded in the exit gate's own record, not a 3.1 regression. The golib arm was regressed
+   (the clause
+   removed), went red, and was restored byte-identical.
+2. **A method's own receiver type, with no `uintptr` in the source.** Inside a method with a pointer receiver,
+   `unsafe.Pointer(p)` of a pointer of the receiver's own type is minted from a reference: `func (h *T) M() {
+   C.f(unsafe.Pointer(h)) }` emitted `C.f((uintptr)@unsafe.Pointer.FromRef(ref h))`, a bare number of storage
+   nothing pins, in no registry. The cgo route refuses it at conversion, by name, with the way round (a function
+   that takes the pointer as a parameter mints it with its box). It over-refuses a conversion that never reaches C,
+   in a cgo package only. COORD accepted it as sound, and ruled the over-refusal OWED: it narrows in 3.2, when the
+   pin scope exists, and is not permanent. Red first on H: five arms red at the green commit, green with the fix,
+   and the control
+   converts. For a LOCAL copy the same arm emits `FromRef(ref p)`, the address of the local itself: a converter
+   defect outside cgo, filed on the BOARD.
+
+**A freed C pointer still crosses**, as Go lets it: Go has no check for a C pointer used after `C.free`, and go2cs
+adds none. The door classifies and never dereferences (`AVoidPointerToFreedCMemoryStillCrossesAsGoLetsIt`).
+
 — H (2026-11-12)

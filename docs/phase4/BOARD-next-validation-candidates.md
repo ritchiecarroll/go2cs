@@ -36902,4 +36902,96 @@ on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64 against the exit gat
 
 — H (2026-11-12)
 
+## 2026-11-12 — H (cgo Phase 3 increment 3.1, stop line S3.1-E, COORD's ruling C): a pointer rebuilt from a number that points into Go memory crosses a `void *` unchecked — OPEN, a DISCLOSED memory-safety gap; two closures seated after 3.1
+
+Increment 3.1's `void *` door (`GoCgoArgs.VoidPointer`) refuses every pointer into Go memory that carries its box,
+and every bare number the pin and token registry knows. Measured over 36 hand-overs (9 sources of a pointer over
+managed storage, 4 ways each), exactly 4 cross as C memory, all as a bare number: a wider view pinned over a slice
+element, and a native box over a pinned managed buffer. Those two pin moments register nothing
+(`ElemRefBox.TryPinnedReinterpret`, `PinnedBuffer`'s constructors). An interior address (a number plus an offset)
+misses the registry for every pin.
+
+**What it takes.** An explicit `uintptr` in the source. `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)` in one
+expression is legal Go. **The harm:** C is handed Go memory whose only pin holder is a temporary, so the collector
+may release the pin during the call: the syscall pin hole through a new door. 3.1 opens no new way to mint the
+number.
+
+**RULED (COORD, 2026-11-12): C.** 3.1 lands with the class disclosed by name in `docs/Limitations.md`, the 3.1 record
+(`DESIGN-cgo-phase3-marshaling.md` §16.9) and the release notes. The GolibTests arm asserts exactly the four
+crossings and the 32 refusals. **OPEN, each its own seat:** (A) register at the two pin moments and give a registry
+entry its length, so a number inside any live pinned range is refused; its allocation-meter question on banked rows
+is named up front. (B) Section 13.4's first rule in the converter, the first item of 3.2's design step.
+
+— H (2026-11-12)
+
+## 2026-11-12 — H (found by cgo Phase 3 increment 3.1, and NOT cgo; COORD: priority, a .4 candidate): inside a method with a pointer receiver, `unsafe.Pointer(p)` of a LOCAL of the receiver's type is the address of the local itself, and a write through it is silently lost — OPEN, for COORD to route
+
+**The program, with no cgo.** Go prints `7 8 0 9`. The converted program prints `7 0 0 9`, exits 0 and says nothing.
+
+```go
+type T struct{ n int }
+
+func poke(p unsafe.Pointer, v int) { *(*int)(p) = v }
+
+func (h *T) viaReceiver()       { poke(unsafe.Pointer(h), 7) }
+func (h *T) viaLocal()          { p := h; poke(unsafe.Pointer(p), 8) }
+func (h *T) viaOther(other *T)  { poke(unsafe.Pointer(other), 9) }
+
+func main() {
+	var a, b, c, d T
+	a.viaReceiver()
+	b.viaLocal()
+	c.viaOther(&d)
+	fmt.Println(a.n, b.n, c.n, d.n)
+}
+```
+
+**The emission** (read on H at `43ac9e33fa`, windows/amd64):
+
+```csharp
+internal static void viaReceiver(this ж<T> Ꮡh) {
+    ref var h = ref Ꮡh.DerefOrNull();
+
+    poke((uintptr)@unsafe.Pointer.FromRef(ref h), 7);
+}
+
+internal static void viaLocal(this ж<T> Ꮡh) {
+    var p = Ꮡh;
+    poke((uintptr)@unsafe.Pointer.FromRef(ref p), 8);
+}
+```
+
+`p` is the box. `FromRef(ref p)` is the address of the LOCAL that holds the box, so `poke` writes 8 over the local's
+own slot, and `b.n` stays 0. The receiver and the parameter arms are right here, because each of those names is an
+alias of the value: `ref h` and `ref other` are the pointee.
+
+**The predicate of the arm** (`convCallExpr`, the `resultType.String() == "unsafe.Pointer"` block). All of:
+
+- the call is a conversion to `unsafe.Pointer` with one argument, in a position where the conversion's result is
+  consumed as a number (the block's `constructType` is set; a conversion folded into a reinterpret,
+  `(*int)(unsafe.Pointer(p))`, does not take the arm and is correct);
+- the enclosing function is a method whose receiver is a pointer;
+- the argument's type is a pointer whose element type is identical to the receiver's.
+
+It is keyed on the argument's TYPE. It never asks whether the argument is the receiver, or an alias of a value at
+all. It is right when the name is rendered as the value (the receiver, a pointer parameter) and wrong when the name
+holds a box. That is MEASURED for a local. A field, a call result or an element would take the same arm by the
+code, and is NOT MEASURED.
+
+**A coarse census.** 39 emitted `Pointer.FromRef(ref …)` sites in the converted standard library (`src/core`, the
+`.cs` files of every flavour, comment lines and the hand-owned `unsafe` package excluded): `runtime` 22 across its
+flavours, `reflect` 4, `internal/sync` 4, `internal/runtime/maps` 4, `internal/abi` 3, `syscall` 2. By the operand's
+spelling, 34 name what reads as a receiver (`t`, `h`, `r`, `m`, `g`, `c`, …), 4 name a shadow-renamed identifier
+(`Δp`, in `runtime`'s `malloc`), and 1 is an explicit box expression. **NOT MEASURED:** which of the 39 have an
+operand that holds a box. That needs each site's declaration read, and the four `Δp` sites are the first to read.
+
+**In a cgo package the conversion is refused** (increment 3.1, `cgoReceiverAddresses`), because that number would
+reach C as a bare number the `void *` door cannot tell from C memory. Outside cgo the emission stands as it was.
+Nothing is fixed here.
+
+**OPEN:** the per-site reading of the census, and the fix (a name that holds a box takes the box mint). It moves
+corpus bytes wherever such a site exists.
+
+— H (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

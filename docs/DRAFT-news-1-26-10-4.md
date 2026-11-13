@@ -123,3 +123,20 @@ the target its bindings were converted for, `Register(assembly, "linux/amd64", .
 `Register(assembly, ...)` stays, so compiled code is unaffected. One call no longer compiles: `Register(assembly, null)`
 is ambiguous between the two overloads (CS0121). Converted code never writes it; the converter emits every call.
 <!-- docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.20 (increment 5b; the review's N3). -->
+
+### cgo: C strings, `C.malloc` and `C.free`, `void *`, and `defer C.f(…)` (H)
+
+**cgo converts more of what real programs write.** Under `-cgo`, `C.CString`, `C.CBytes`, `C.GoString`,
+`C.GoStringN`, `C.GoBytes`, `C.malloc` and `C.free` now convert, a `void *` crosses when it is nil or points at C
+memory, and `defer C.f(…)` converts. The helpers copy bytes, with no text encoding in between, and what `C.CString`
+returns comes from the package's own `malloc`, so the package's own `C.free` frees it. go2cs still hands C no pointer
+into Go memory: a pointer into a slice or an array is refused when the package is converted, and `unsafe.Pointer(&x)`
+is refused when the call runs, each by name.
+
+**One known memory-safety gap.** Do not pass C a pointer you rebuilt from a number when it points into Go memory:
+`unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)`, or a `uintptr` kept in a variable and converted back. go2cs cannot
+yet tell that number from an address in C memory, so the call goes ahead, and the memory may move while C is using
+it. Pass `unsafe.Pointer(p)` itself, which go2cs refuses by name. See [Limitations](Limitations.md).
+<!-- docs/phase4/DESIGN-cgo-phase3-marshaling.md §16 (increment 3.1) and §16.9 (the residue, COORD's ruling C). cgo
+     Phase 3 is a STRETCH for this release by the owner's ruling: this section ships with the release that carries
+     increment 3.1, and moves to that release's notes if it is not this one. -->

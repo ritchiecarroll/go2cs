@@ -137,6 +137,39 @@ func main() {
 		defer C.go2cs_probe_release(unsafe.Pointer(log))
 		deferred(log)
 		fmt.Printf("deferred %q\n", C.GoString(log))
+	case "innerdefer":
+		// A deferred Go function that calls C further in is an ordinary defer. C memory crosses at the call inside it.
+		p := C.malloc(8)
+		defer C.free(p)
+
+		func() {
+			defer func() { fmt.Println("innerdefer", C.go2cs_probe_same(p) == p) }()
+		}()
+	case "innergo":
+		// A goroutine on a Go function that calls C further in is an ordinary goroutine.
+		p := C.malloc(8)
+		defer C.free(p)
+		done := make(chan bool)
+
+		go func() { done <- C.go2cs_probe_same(p) == p }()
+
+		fmt.Println("innergo", <-done)
+	case "goinnerdefer":
+		// The same deferred Go function over the address of a Go variable. Nothing about the defer lets it past the
+		// void pointer's rule: go2cs refuses it at the call inside, when the deferred function runs.
+		var x C.int = 7
+
+		func() {
+			defer func() { fmt.Println("goinnerdefer", C.go2cs_probe_same(unsafe.Pointer(&x)) != nil, int(x)) }()
+		}()
+	case "goinnergo":
+		// And the same goroutine over the address of a Go variable.
+		var x C.int = 7
+		done := make(chan bool)
+
+		go func() { done <- C.go2cs_probe_same(unsafe.Pointer(&x)) != nil }()
+
+		fmt.Println("goinnergo", <-done, int(x))
 	case "govoid":
 		// The address of a Go variable through a void pointer. Go allows it; go2cs refuses it until 3.2.
 		var x C.int = 7

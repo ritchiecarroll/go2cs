@@ -259,15 +259,9 @@ namespace go.golib;
         nuint number = pointer.Value.Value;
 
         // A pointer that carries its box, as the converter's mints of unsafe.Pointer(p) and unsafe.Pointer(&x) do: the
-        // box says what the memory is. C memory is a native box over C memory alone, whose number is its address.
-        if (pointer is IUnsafePointer { RetainedSource: { } carried })
+        // box says what the memory is. Only a native box over C memory alone goes on to the number's own test.
+        if (pointer is IUnsafePointer { RetainedSource: { } carried } && carried is not INativeRooted { IsGenuinelyNativeRoot: true })
         {
-            if (carried is INativeRooted { IsGenuinelyNativeRoot: true })
-            {
-                address = number;
-                return null;
-            }
-
             return carried is INativeRooted { IsNativeRooted: true }
                 ? "a pointer reached through a Go pointer into C memory (a field, or a view over managed storage)"
                 : "a pointer into Go memory";
@@ -285,11 +279,20 @@ namespace go.golib;
         return null;
     }
 
+    // Whether the registry knows a number as a live Go box's: a token, or the address a Go pointer was converted to.
+    private static bool IsKnownGoAddress(nuint address) =>
+        ManagedPointerTokens.IsTaggedToken(address) || ManagedPointerTokens.Resolve(address) is not null;
+
     private static PanicException HelperRefused(string helper, string what) =>
         RuntimeErrorPanic.ErrorString($"cgo: C.{helper} over Go memory: the pointer it was handed is {what}. Reading Go memory through cmd/cgo's helpers is cgo Phase 3's increment 3.2; until then go2cs refuses the call");
 
+    // A native box says what it was minted WITH, and a native box minted from a bare NUMBER was minted with nothing:
+    // (*T)(unsafe.Pointer(&array)) over a Go array of another element type goes through the number, and comes back as a
+    // native box with no source, no token and no pin, over pinned Go storage. The number is still in the registry, so
+    // the registry is asked too (Phase 3 increment 3.1; first read on the hosted end-to-end leg 43330710728, where
+    // C.GoString read a Go array through such a box).
     private static bool IsGenuinelyNative<T>(NativeBox<T> native) =>
-        native.RetainedSource is null && !native.AliasesAnOrderToken && !native.PinsManagedStorage;
+        native.RetainedSource is null && !native.AliasesAnOrderToken && !native.PinsManagedStorage && !IsKnownGoAddress(native.NativeAddress);
 
     private static PanicException Refused(string function, Type pointee, string what) =>
         RuntimeErrorPanic.ErrorString($"cgo: the {pointee.Name} pointer handed to C.{function} is {what}, so go2cs refuses the call");

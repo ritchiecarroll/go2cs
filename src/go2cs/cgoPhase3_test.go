@@ -10,6 +10,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -149,6 +150,65 @@ func TestCgoPhase3FixtureConvertsItsHelpersVoidPointersAndDeferredCalls(t *testi
 	}
 }
 
+// The one address of Go memory that reaches a void pointer as a bare number with no uintptr in the source: inside a
+// method with a pointer receiver, unsafe.Pointer of a pointer of the receiver's own type. The receiver converts by
+// reference, and the converter mints that conversion from a reference with no box to carry. Read while the pin
+// moments were listed for the review of the void pointer's door: the conversion handed C.f `(uintptr)FromRef(ref h)`,
+// and for a local copy of the receiver `FromRef(ref p)`, the address of the local itself. The route refuses each form
+// by name, before anything is written. The control beside them is the way round the refusal names: a function that
+// takes the pointer as a parameter converts, and mints it with its box.
+func TestCgoUnsafePointerOfAMethodsOwnReceiverTypeIsRefusedByName(t *testing.T) {
+	const closure = "func() _cgo_unsafe.Pointer { _cgo0 := %s; _cgoCheckPointer(_cgo0, nil); return _Cfunc_go2cs_probe_same(_cgo0) }() != nil"
+
+	method := func(name, prelude, argument string) string {
+		return "\nfunc (h *holder) " + name + "(other *holder) bool {\n" + prelude + "\treturn " + fmt.Sprintf(closure, argument) + "\n}\n"
+	}
+
+	holder := "\ntype holder struct{ n _Ctype_int }\n"
+
+	for _, arm := range []struct {
+		name    string
+		methods string
+		refused int
+	}{
+		{"the receiver, handed to C as it is", method("Same", "", "unsafe.Pointer(h)"), 1},
+		{"the receiver, as a number in a variable", method("Number", "\tn := uintptr(unsafe.Pointer(h))\n", "unsafe.Pointer(n)"), 1},
+		{"the receiver, under parentheses", method("Wrapped", "", "unsafe.Pointer((h))"), 1},
+		{"a local copy of the receiver", method("Local", "\tp := h\n", "unsafe.Pointer(p)"), 1},
+		{"another pointer of the receiver's type", method("Other", "", "unsafe.Pointer(other)"), 1},
+		// The control: a function takes the pointer as a parameter, which carries its box.
+		{"in a function that takes the pointer as a parameter", "\nfunc same(p *holder) bool {\n\treturn " + fmt.Sprintf(closure, "unsafe.Pointer(p)") + "\n}\n", 0},
+	} {
+		t.Run(arm.name, func(t *testing.T) {
+			files := cgoPhase3Offline(t)
+			files["fixture.cgo1.go"] += holder + arm.methods
+
+			stderr, output, err := convertCgoOffline(t, files)
+			lines := cgoRefusalLinesIn(stderr, "")
+
+			if arm.refused == 0 {
+				if err != nil {
+					t.Fatalf("the control did not convert: %v\n%s", err, lastLines(stderr, 12))
+				}
+
+				if converted := readConverted(t, output, "fixture.cs"); !regexp.MustCompile(`C\.go2cs_probe_same\((\(uintptr\))?@unsafe\.Pointer\.From(Pinned)?Box\(Ꮡ?p\)\)`).MatchString(converted) {
+					t.Errorf("the parameter is not minted with its box:\n%s", lastLines(converted, 14))
+				}
+
+				return
+			}
+
+			requireNothingWritten(t, output, err, stderr)
+
+			if len(lines) != arm.refused {
+				t.Errorf("%d refusal lines, want %d:\n%s", len(lines), arm.refused, strings.Join(lines, "\n"))
+			}
+
+			requireCgoUseRefused(t, lines, "unsafe.Pointer of a pointer of the method's own receiver type", "takes it as a parameter")
+		})
+	}
+}
+
 // The compile half of the test above: what the Phase 3 fixture converts to builds as a project.
 func TestCgoPhase3FixturesOutputBuildsAsAProject(t *testing.T) {
 	buildCgoOfflineFixture(t, "Phase 3", cgoPhase3Offline(t))
@@ -273,8 +333,9 @@ const cgoP3FixtureDir = "testdata/cgo/p3"
 const cgoP3GoMemory = "increment 3.2"
 
 // cgoP3Arms are the end-to-end program's arms. An arm with neither goFails nor csFails prints the same lines and exits
-// 0 both ways. The last five hand C or a helper a pointer into Go memory: Go runs each to its end, and go2cs refuses
-// each by name, naming the increment that admits it.
+// 0 both ways. The arms with csFails hand C or a helper a pointer into Go memory: Go runs each to its end, and go2cs
+// refuses each by name, naming the increment that admits it. innerdefer and innergo are the controls of goinnerdefer
+// and goinnergo: the same deferred or started Go function over C memory runs to its end both ways.
 func cgoP3Arms() []cgoG1Arm {
 	return []cgoG1Arm{
 		{name: "text"},
@@ -292,6 +353,10 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "fill"},
 		{name: "same"},
 		{name: "deferred"},
+		{name: "innerdefer"},
+		{name: "innergo"},
+		{name: "goinnerdefer", csFails: cgoP3GoMemory},
+		{name: "goinnergo", csFails: cgoP3GoMemory},
 		{name: "govoid", csFails: cgoP3GoMemory},
 		{name: "govoidnumber", csFails: cgoP3GoMemory},
 		{name: "govoidexpr", csFails: cgoP3GoMemory},

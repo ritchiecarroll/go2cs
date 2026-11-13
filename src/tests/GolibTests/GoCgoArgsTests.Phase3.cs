@@ -143,6 +143,144 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(view);
     }
 
+    // The review's question of the classifier (§16.9, COORD's ruling): can ANY box answer "C memory alone" when its
+    // storage is managed? Every way golib has a pointer over managed storage is handed to the door through each of the
+    // converter's own mints, through the bare mint, and as a number held in a variable.
+    //
+    // NO for a box: every hand-over that carries its box is refused. For a bare NUMBER there is a residue, ruled and
+    // disclosed (stop line S3.1-E, docs/Limitations.md): two pin moments register nothing, so a number minted from a
+    // pointer whose storage golib pinned for a reinterpret view, or from a native box over a pinned buffer, crosses.
+    // This arm asserts exactly those four crossings and no others, and that every other hand-over is refused: a fifth
+    // crossing is a red, and so is one of these four closing without this arm being told.
+    [TestMethod]
+    public void APointerOverManagedStorageCrossesAVoidPointerOnlyAsTheFourDisclosedNumbers()
+    {
+        array<int32> wide = new array<int32>(4);
+        ж<array<int32>> wideBox = new StandardBox<array<int32>>(wide);
+        array<byte> bytes = new array<byte>(16);
+        ж<byte> element = new ElemRefBox<byte>(bytes, 4);
+        ж<cgoPoint> standard = new StandardBox<cgoPoint>(default(cgoPoint));
+        ж<cgoHolder> holder = new StandardBox<cgoHolder>(default(cgoHolder));
+        byte[] pinnedBytes = new byte[32];
+        PinnedBuffer pinned = new PinnedBuffer(pinnedBytes);
+        @string text = new @string("go2cs"u8);
+        slice<byte> sliced = new slice<byte>(new byte[8]);
+
+        (string form, object box)[] boxes =
+        [
+            // A wider view of an element: not an alias, so the reinterpret pins the array and mints a native box.
+            ("a wider view pinned over an element", element.Reinterpret<byte, int32>()),
+            // A narrower view of a struct: an alias of the same managed storage.
+            ("a view aliasing a struct", standard.Reinterpret<cgoPoint, int32>()),
+            // A view of a struct that holds references: no storage to pin, so its number is a token.
+            ("a view over a struct that holds references", holder.Reinterpret<cgoHolder, int32>()),
+            // The two fallback arms as golib mints them: the number is the source's own, an address or a token.
+            ("a native box with a retained source", new NativeBox<int32>(((uintptr)standard).Value, retainedSource: standard)),
+            ("a native box that aliases an order token", new NativeBox<int32>(((uintptr)holder).Value, aliasesAnOrderToken: true)),
+            ("a native box over a pinned managed buffer", new NativeBox<byte>((nuint)pinned.Pointer, pin: pinned)),
+            ("unsafe.StringData", @unsafe.StringData(text)),
+            ("unsafe.SliceData", @unsafe.SliceData(sliced)),
+            // (*byte)(unsafe.Pointer(&array)) over a Go array of another element type: through the number, and back as
+            // a native box minted with no source, no token and no pin. Its number is the registry's.
+            ("a pointer rebuilt from a Go array's number", (ж<byte>)(uintptr)wideBox),
+        ];
+
+        var crossed = new System.Collections.Generic.List<string>();
+        int refusals = 0;
+
+        void Hand(string form, string mint, Func<@unsafe.Pointer> make)
+        {
+            try
+            {
+                nuint address = GoCgoArgs.VoidPointer(make(), "fill");
+                Assert.AreNotEqual((nuint)0, address, $"{form}, {mint}: nil");
+                crossed.Add($"{form}, {mint}");
+            }
+            catch (PanicException refused)
+            {
+                StringAssert.Contains(refused.Message, GoMemoryOwner, $"{form}, {mint}");
+                refusals++;
+            }
+        }
+
+        foreach ((string form, object box) in boxes)
+        {
+            switch (box)
+            {
+                case ж<int32> typed:
+                    Hand(form, "the pinning mint", () => @unsafe.Pointer.FromPinnedBox(typed));
+                    Hand(form, "the retaining mint", () => @unsafe.Pointer.FromBox(typed));
+                    Hand(form, "the bare mint", () => new @unsafe.Pointer(typed));
+                    Hand(form, "its number in a variable", () => { uintptr number = (uintptr)typed; return new @unsafe.Pointer(number); });
+                    break;
+
+                case ж<byte> typed:
+                    Hand(form, "the pinning mint", () => @unsafe.Pointer.FromPinnedBox(typed));
+                    Hand(form, "the retaining mint", () => @unsafe.Pointer.FromBox(typed));
+                    Hand(form, "the bare mint", () => new @unsafe.Pointer(typed));
+                    Hand(form, "its number in a variable", () => { uintptr number = (uintptr)typed; return new @unsafe.Pointer(number); });
+                    break;
+
+                default:
+                    Assert.Fail($"{form}: a {box.GetType().Name} is not a box this arm hands over");
+                    break;
+            }
+        }
+
+        GC.KeepAlive(bytes);
+        GC.KeepAlive(standard);
+        GC.KeepAlive(holder);
+        GC.KeepAlive(pinned);
+        GC.KeepAlive(pinnedBytes);
+        GC.KeepAlive(boxes);
+        GC.KeepAlive(wideBox);
+
+        string[] disclosed =
+        [
+            "a wider view pinned over an element, the bare mint",
+            "a wider view pinned over an element, its number in a variable",
+            "a native box over a pinned managed buffer, the bare mint",
+            "a native box over a pinned managed buffer, its number in a variable",
+        ];
+
+        CollectionAssert.AreEquivalent(disclosed, crossed, "the hand-overs that crossed as C memory:\n" + string.Join("\n", crossed));
+        Assert.AreEqual(boxes.Length * 4 - disclosed.Length, refusals, "every other hand-over is refused");
+    }
+
+    // The disclosed residue's other half: an INTERIOR address. The registry's entries are exact addresses, so a number
+    // built by arithmetic over a Go pointer's number misses it and crosses, for every kind of pin. The exact number
+    // beside it is the control, and is refused. This arm pins the gap, so the closure that ends it is told here.
+    [TestMethod]
+    public void ANumberBuiltByArithmeticOverAGoPointerCrossesAsDisclosed()
+    {
+        ж<cgoPoint> standard = new StandardBox<cgoPoint>(default(cgoPoint));
+        uintptr number = (uintptr)standard;
+
+        string exact = RefusalOf(() => GoCgoArgs.VoidPointer(new @unsafe.Pointer(number), "fill"));
+        StringAssert.Contains(exact, GoMemoryOwner);
+
+        nuint interior = number.Value + 4;
+        Assert.AreEqual(interior, GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)interior), "fill"), "DISCLOSED: an interior address crosses");
+
+        GC.KeepAlive(standard);
+    }
+
+    // What C.free leaves behind is still a pointer to C memory, as it is in Go: Go has no check for a C pointer used
+    // after it was freed, and go2cs adds none. The door classifies and never dereferences, so the freed pointer crosses.
+    [TestMethod]
+    public void AVoidPointerToFreedCMemoryStillCrossesAsGoLetsIt()
+    {
+        void* memory = NativeMemory.AllocZeroed(16);
+        nuint address = (nuint)memory;
+        ж<sbyte> native = new NativeBox<sbyte>(address);
+        @unsafe.Pointer carried = @unsafe.Pointer.FromPinnedBox(native);
+
+        NativeMemory.Free(memory);
+
+        Assert.AreEqual(address, GoCgoArgs.VoidPointer(carried, "free"));
+        Assert.AreEqual(address, GoCgoArgs.VoidPointer(@unsafe.Pointer.FromPinnedBox(native), "free"));
+    }
+
     [TestMethod]
     public void AHelpersPointerIsNilOrCMemoryAndGoMemoryIsRefusedNamingTheHelper()
     {
@@ -168,6 +306,16 @@ public unsafe partial class GoCgoArgsTests
         string typed = RefusalOf(() => GoCgoArgs.HelperPointer(managed, "GoString"));
         StringAssert.Contains(typed, "C.GoString over Go memory");
         StringAssert.Contains(typed, GoMemoryOwner);
+
+        // (*C.char)(unsafe.Pointer(&array)): the pointer comes back from the array's number as a native box, and is
+        // still Go memory (read first on the hosted end-to-end leg 43330710728, where this was read and not refused).
+        ж<array<sbyte>> text = new StandardBox<array<sbyte>>(new array<sbyte>(4));
+        ж<sbyte> rebuilt = (ж<sbyte>)(uintptr)text;
+        Assert.IsTrue(rebuilt is NativeBox<sbyte>, "the arm's premise: the pointer is a native box");
+
+        string overArray = RefusalOf(() => GoCgoArgs.HelperPointer(rebuilt, "GoString"));
+        StringAssert.Contains(overArray, "C.GoString over Go memory");
+        GC.KeepAlive(text);
 
         string untyped = RefusalOf(() => GoCgoArgs.HelperVoidPointer(new @unsafe.Pointer(managed), "GoBytes"));
         StringAssert.Contains(untyped, "C.GoBytes over Go memory");

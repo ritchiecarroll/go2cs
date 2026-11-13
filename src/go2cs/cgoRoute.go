@@ -614,6 +614,63 @@ func cgoRecognizeCheckClosureStatements(statements []ast.Stmt, info *types.Info,
 	return closure
 }
 
+// cgoReceiverAddresses answers each `unsafe.Pointer(p)` in a tree, inside a method with a pointer receiver, whose operand
+// has that receiver's own pointer type: the receiver itself, or any other pointer of its type. The converter renders a
+// pointer receiver as the value it points at, by reference, and inside such a method it mints that conversion from a
+// reference alone (convCallExpr's FromRef arm, which is keyed on the operand's TYPE): a bare number, of storage nothing
+// pins, that carries no box and that no registry knows. Everywhere else that is a recorded residual. In a cgo package
+// it is the one address of Go memory a void pointer's door could not tell from C memory, with no uintptr in the
+// source, so the route refuses it by name (Phase 3, increment 3.1; found while the pin moments were listed for the
+// review of that door). A function that takes the pointer as a parameter mints it with its box, which is the way
+// round the refusal names.
+func cgoReceiverAddresses(file *ast.File, info *types.Info) []token.Pos {
+	var positions []token.Pos
+
+	for _, decl := range file.Decls {
+		funcDecl, ok := decl.(*ast.FuncDecl)
+
+		if !ok || funcDecl.Body == nil || funcDecl.Recv == nil || len(funcDecl.Recv.List) != 1 || len(funcDecl.Recv.List[0].Names) != 1 {
+			continue
+		}
+
+		receiver := info.Defs[funcDecl.Recv.List[0].Names[0]]
+
+		if receiver == nil {
+			continue
+		}
+
+		if _, isPointer := receiver.Type().Underlying().(*types.Pointer); !isPointer {
+			continue
+		}
+
+		ast.Inspect(funcDecl.Body, func(n ast.Node) bool {
+			call, ok := n.(*ast.CallExpr)
+
+			if !ok || len(call.Args) != 1 {
+				return true
+			}
+
+			conversion, isType := info.Types[call.Fun]
+
+			if !isType || !conversion.IsType() {
+				return true
+			}
+
+			if basic, ok := conversion.Type.Underlying().(*types.Basic); !ok || basic.Kind() != types.UnsafePointer {
+				return true
+			}
+
+			if operand := info.TypeOf(call.Args[0]); operand != nil && types.Identical(operand, receiver.Type()) {
+				positions = append(positions, call.Pos())
+			}
+
+			return true
+		})
+	}
+
+	return positions
+}
+
 // cgoDirectlyChecks reports whether one of a body's own statements is a call of cmd/cgo's _cgoCheckPointer: the body is
 // a check closure's, not a function that holds one further in.
 func cgoDirectlyChecks(body *ast.BlockStmt, info *types.Info, plumbing map[types.Object]bool) bool {
@@ -814,6 +871,10 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 	}
 
 	for _, source := range sources {
+		for _, position := range cgoReceiverAddresses(source.file, info) {
+			refuse(position, "unsafe.Pointer of a pointer of the method's own receiver type, inside that method: go2cs mints that address from a reference, as a bare number it cannot tell from C memory. Hand the pointer to a function that takes it as a parameter and convert it there; Phase 3")
+		}
+
 		ast.Inspect(source.file, func(n ast.Node) bool {
 			switch n := n.(type) {
 			case *ast.DeferStmt:
