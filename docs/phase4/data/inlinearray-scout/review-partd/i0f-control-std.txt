@@ -1,0 +1,2 @@
+     1  internal/trace|K keyed array literal for an array field   e.g. $GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.10.linux-amd64/src/internal/trace/tracev1.go:437:12
+     1  runtime/debug|C len/cap of an array field whose operand calls   e.g. $GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.10.linux-amd64/src/runtime/debug/garbage.go:37:19
