@@ -51,12 +51,13 @@ const (
 type inlineArrayAdmission struct {
 	pkgPath  string
 	forced   bool
-	admitted map[string]bool   // inlineTypeKey -> admitted
-	keyOrder []string          // admitted keys, sorted
-	holding  int               // admitted types that hold an array at any depth
-	holds    map[string]bool   // admitted key -> holds an array at any depth
-	blocked  map[string]string // a selected seed kept out -> why
-	foreign  int               // reinterpret pairs reaching a struct of another package whose record cannot be read: counted, not judged
+	admitted map[string]bool       // inlineTypeKey -> admitted
+	keyOrder []string              // admitted keys, sorted
+	holding  int                   // admitted types that hold an array at any depth
+	holds    map[string]bool       // admitted key -> holds an array at any depth
+	types    map[string]types.Type // admitted key -> its type
+	blocked  map[string]string     // a selected seed kept out -> why
+	foreign  int                   // reinterpret pairs reaching a struct of another package whose record cannot be read: counted, not judged
 	pkg      *types.Package
 	spelled  map[string]bool
 	members  map[string][]string // a selected seed -> its closure's keys
@@ -84,6 +85,16 @@ func (a *inlineArrayAdmission) admits(t types.Type) bool {
 
 	key, ok := inlineTypeKey(t)
 	return ok && a.admitted[key]
+}
+
+// typeOf returns the struct type an admitted key names.
+func (a *inlineArrayAdmission) typeOf(key string) (*types.Struct, bool) {
+	if a == nil || !a.admitted[key] {
+		return nil, false
+	}
+
+	st, ok := a.types[key].Underlying().(*types.Struct)
+	return st, ok
 }
 
 // inlineTypeKey keys a struct type: a named type by its package path and name (and type arguments), an anonymous struct
@@ -348,6 +359,7 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 	}
 
 	sort.Strings(a.keyOrder)
+	a.types = candidates
 
 	// The pair rule (GO2CS2010): both sides hold arrays and disagree. A struct another package lays out is that package's
 	// decision, read from its record (inlineArrayStamp.go); a pair reaching one whose record cannot be read, or an

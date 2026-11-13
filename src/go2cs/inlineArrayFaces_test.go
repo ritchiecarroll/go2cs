@@ -348,6 +348,69 @@ func TestInlineArrayFaceCensus(t *testing.T) {
 			}
 		}
 
+		// The emission's own population: the admitted structs' array fields (nonzero, their lengths, and [0]T carriers),
+		// and the composite literals of an admitted struct that set an array field (keyed or positional).
+		arrayFields, carriers, literalSets := 0, 0, 0
+		lengths := map[int64]bool{}
+
+		for _, key := range a.keyOrder {
+			st, ok := a.typeOf(key)
+
+			if !ok {
+				continue
+			}
+
+			for i := 0; i < st.NumFields(); i++ {
+				if array, ok := st.Field(i).Type().Underlying().(*types.Array); ok {
+					if array.Len() == 0 {
+						carriers++
+					} else {
+						arrayFields++
+						lengths[array.Len()] = true
+					}
+				}
+			}
+		}
+
+		for _, file := range pkg.Syntax {
+			ast.Inspect(file, func(n ast.Node) bool {
+				lit, ok := n.(*ast.CompositeLit)
+
+				if !ok || !a.admits(pkg.TypesInfo.TypeOf(lit)) {
+					return true
+				}
+
+				st, _ := pkg.TypesInfo.TypeOf(lit).Underlying().(*types.Struct)
+
+				for i, elt := range lit.Elts {
+					field := -1
+
+					if kv, ok := elt.(*ast.KeyValueExpr); ok {
+						if id, ok := kv.Key.(*ast.Ident); ok {
+							for j := 0; st != nil && j < st.NumFields(); j++ {
+								if st.Field(j).Name() == id.Name {
+									field = j
+								}
+							}
+						}
+					} else {
+						field = i
+					}
+
+					if st != nil && field >= 0 && field < st.NumFields() {
+						if array, ok := st.Field(field).Type().Underlying().(*types.Array); ok && array.Len() > 0 {
+							literalSets++
+							note("composite literal sets an array field", elt.Pos())
+						}
+					}
+				}
+
+				return true
+			})
+		}
+
+		fmt.Printf("  admitted array fields %d over %d lengths, [0]T carriers %d, literal sets %d\n", arrayFields, len(lengths), carriers, literalSets)
+
 		var names []string
 
 		for face := range faces {

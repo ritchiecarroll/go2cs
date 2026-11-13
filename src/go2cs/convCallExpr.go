@@ -2891,6 +2891,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// "not evaluated" carries that carve-out), so those keep the evaluating form rather than
 		// having their side effect silently dropped.
 		if (ident.Name == "len" || ident.Name == "cap") && len(callExpr.Args) == 1 {
+			// An inline array (a go.arrays member, inlineArrayEmission.go) has its length in its type, and golib's len
+			// cannot see the family: the constant, unless the operand calls or receives.
+			if arr, isArray := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Array); isArray && v.isInlineArrayExpr(callExpr.Args[0]) && !v.exprHasCallOrReceive(callExpr.Args[0]) {
+				return fmt.Sprintf("%d", arr.Len())
+			}
+
 			// A NAMED pointer to an array (`type Features *flagSet`) folds the same way.
 			if ptr, ok := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Pointer); ok {
 				if arr, isArray := ptr.Elem().Underlying().(*types.Array); isArray {
