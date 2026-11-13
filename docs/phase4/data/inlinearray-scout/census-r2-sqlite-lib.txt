@@ -1,0 +1,60 @@
+packages 1; struct types 812; with an array field 147
+array fields 229 (96 first met in a struct type expression rather than a named declaration): zero-length 126; unmanaged element 229; managed element 0
+fields ever sliced 0; whole-address-taken 0; element-address-taken 0; through unsafe.Pointer 0; any of REC-A's refusals (sliced, &whole, unsafe) 0
+struct types (named, alias or anonymous) holding an array field, converted to/from unsafe.Pointer as a whole: 72 distinct, 10817 sites
+distinct lengths: 33 over all array fields; 32 over the 103 admitted fields: [1 2 3 4 5 6 7 8 9 10 11 12 14 15 16 19 21 23 32 40 42 48 50 64 80 88 97 100 128 201 496 512]
+faces the first predicate missed: implicit address (pointer-method receiver) 0 fields; address or slice below the field (x.f[i][:], &x.f[i].g) 0 fields; of the 103 admitted, 0 have an implicit address and 0 more a face below; 103 remain
+whole-value uses of a field (copy, argument, conversion, compare, store, range with a value): 0 fields, 0 sites
+  whole-converted: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: modernc.org/sqlite/lib.TFts5DlidxIter
+  whole-converted: sequential without zero-size fields reads size 16 align 4; Go 16 align 8: modernc.org/sqlite/lib.TYYMINORTYPE
+  whole-converted: sequential without zero-size fields reads size 16 align 4; Go 16 align 8: modernc.org/sqlite/lib.Tfts5YYMINORTYPE
+  whole-converted: sequential without zero-size fields reads size 202 align 1; Go 202 align 2: struct{FforceAlignment [0]int16; Fa [201]int8; F__ccgo_pad2 [1]byte}
+  whole-converted: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: modernc.org/sqlite/lib.Tp4union
+  whole-converted: sequential without zero-size fields reads size 2032 align 8; Go 2432 align 8: modernc.org/sqlite/lib.Tfts5yyParser
+  whole-converted: sequential without zero-size fields reads size 1032 align 8; Go 1232 align 8: modernc.org/sqlite/lib.TyyParser
+  whole-converted: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: modernc.org/sqlite/lib.TExprList
+  whole-converted: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: modernc.org/sqlite/lib.TFts5TombstoneArray
+  whole-converted: sequential without zero-size fields reads size 4 align 4; Go 8 align 8: modernc.org/sqlite/lib.TIdList
+  whole-converted: sequential without zero-size fields reads size 12 align 4; Go 16 align 8: modernc.org/sqlite/lib.TWalIterator
+  whole-converted: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: modernc.org/sqlite/lib.TSrcList
+whole-converted through unsafe.Pointer (review item 8): 72 struct types; holding an array at any depth 72; all-unmanaged once inline 72; within the caps (4 KiB per array, 64 KiB per struct, every level) 72; of those: carry an alignment-forcing [0]T 35, sequential layout without [0]T differs from Go in size or alignment 12 (in alignment, so wrong when nested 10), hold a bool at some depth 0
+  every: sequential without zero-size fields reads size 40 align 4; Go 40 align 8: struct{F__u struct{F__vi [0][10]int32; F__p [0][5]uintptr; F__i [10]int32}}
+  every: sequential without zero-size fields reads size 12 align 4; Go 16 align 8: struct{F__ccgo_align [0]uint64; FiPrior modernc.org/sqlite/lib.Tu32; FnSegment int32; FnPagemap modernc.org/sqlite/lib.Tu32}
+  every: sequential without zero-size fields reads size 128 align 4; Go 128 align 8: struct{FaSpacer [0][128]int8; Fm modernc.org/sqlite/lib.Tsqlite3_mutex; F__ccgo_pad2 [88]byte}
+  every: sequential without zero-size fields reads size 56 align 4; Go 56 align 8: struct{F__u struct{F__vi [0][14]int32; F__s [0][7]uint64; F__i [14]int32}}
+  every: sequential without zero-size fields reads size 2032 align 8; Go 2432 align 8: struct{Ffts5yytos uintptr; FpParse uintptr; Ffts5yystackEnd uintptr; Ffts5yystack uintptr; Ffts5yystk0 [100]modernc.org/sqlite/lib.Tfts5yyStackEntry}
+  every: sequential without zero-size fields reads size 4 align 2; Go 4 align 4: struct{FiConstExprReg [0]int32; Fx struct{FiOrderByCol modernc.org/sqlite/lib.Tu16; FiAlias modernc.org/sqlite/lib.Tu16}}
+  every: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: struct{FnotUsed1 [0]float64; FisInterrupted int32; F__ccgo_pad2 [4]byte}
+  every: sequential without zero-size fields reads size 6 align 2; Go 8 align 4: struct{F__ccgo_align [0]uint32; FsortFlags modernc.org/sqlite/lib.Tu8; F__ccgo_align1 [2]byte; F__ccgo4 uint16}
+  every: sequential without zero-size fields reads size 56 align 4; Go 56 align 8: struct{F__u struct{F__vi [0][14]int32; F__p [0][7]uintptr; F__i [14]int32}}
+  every: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: struct{FpOrInfo [0]uintptr; FpAndInfo [0]uintptr; Fx struct{FleftColumn int32; FiField int32}}
+  every: sequential without zero-size fields reads size 20 align 4; Go 24 align 8: struct{Fstateno uint16; Fmajor uint16; Fminor modernc.org/sqlite/lib.TYYMINORTYPE}
+  every: sequential without zero-size fields reads size 56 align 4; Go 56 align 8: struct{F__vi [0][14]int32; F__p [0][7]uintptr; F__i [14]int32}
+  every: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: struct{F__ccgo_align [0]uint64; FnRef int32; FnTombstone int32}
+  every: sequential without zero-size fields reads size 88 align 4; Go 88 align 8: struct{FsrcSpace [0][88]modernc.org/sqlite/lib.Tu8; FsSrc modernc.org/sqlite/lib.TSrcList; F__ccgo_pad2 [80]byte}
+  every: sequential without zero-size fields reads size 20 align 4; Go 24 align 8: struct{Fstateno uint8; Fmajor uint8; Fminor modernc.org/sqlite/lib.Tfts5YYMINORTYPE}
+  every: sequential without zero-size fields reads size 32 align 4; Go 32 align 8: struct{F__u struct{F__vi [0][8]int32; F__p [0][4]uintptr; F__i [8]int32}}
+  every: sequential without zero-size fields reads size 202 align 1; Go 202 align 2: struct{FforceAlignment [0]int16; Fa [201]int8; F__ccgo_pad2 [1]byte}
+  every: sequential without zero-size fields reads size 4 align 4; Go 8 align 8: struct{F__ccgo_align [0]uint64; FnId int32}
+  every: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: struct{F__ccgo_align [0]uint64; FnExpr int32; FnAlloc int32}
+  every: sequential without zero-size fields reads size 16 align 1; Go 16 align 8: struct{F__lldata [0]int64; F__align [0]float64; F__opaque [16]int8}
+  every: sequential without zero-size fields reads size 32 align 4; Go 32 align 8: struct{F__vi [0][8]int32; F__p [0][4]uintptr; F__i [8]int32}
+  every: sequential without zero-size fields reads size 40 align 4; Go 40 align 8: struct{F__vi [0][10]int32; F__p [0][5]uintptr; F__i [10]int32}
+  every: sequential without zero-size fields reads size 56 align 4; Go 56 align 8: struct{F__vi [0][14]int32; F__s [0][7]uint64; F__i [14]int32}
+  every: sequential without zero-size fields reads size 40 align 4; Go 40 align 8: struct{Fmutex modernc.org/sqlite/lib.Tpthread_mutex_t}
+  every: sequential without zero-size fields reads size 24 align 4; Go 24 align 8: struct{Fopcode modernc.org/sqlite/lib.Tu8; Fp4type int8; Fp5 modernc.org/sqlite/lib.Tu16; Fp1 int32; Fp2 int32; Fp3 int32; Fp4 modernc.org/sqlite/lib.Tp4union}
+  every: sequential without zero-size fields reads size 508 align 4; Go 512 align 8: struct{FiSize modernc.org/sqlite/lib.Tu32; FnSet modernc.org/sqlite/lib.Tu32; FiDivisor modernc.org/sqlite/lib.Tu32; Fu struct{FaHash [0][124]modernc.org/sqlite/lib.Tu32; FapSub [0][62]uintptr; FaBitmap [496]modernc.org/sqlite/lib.Tu8}}
+  every: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: struct{Fp [0]uintptr; Fz [0]uintptr; FpFunc [0]uintptr; FpCtx [0]uintptr; FpColl [0]uintptr; FpMem [0]uintptr; FpVtab [0]uintptr; FpKeyInfo [0]uintptr; Fai [0]uintptr; FpProgram [0]uintptr; FpTab [0]uintptr; FpSubrtnSig [0]uintptr; FpIdx [0]uintptr; Fi int32; F__ccgo_pad14 [4]byte}
+  every: sequential without zero-size fields reads size 88 align 4; Go 88 align 8: struct{FfromSpace [0][88]modernc.org/sqlite/lib.Tu8; FsSrc modernc.org/sqlite/lib.TSrcList; F__ccgo_pad2 [80]byte}
+  every: sequential without zero-size fields reads size 22 align 1; Go 22 align 2: struct{FforceAlignment [0]modernc.org/sqlite/lib.Tu16; Fa [21]int8; F__ccgo_pad2 [1]byte}
+  every: sequential without zero-size fields reads size 16 align 4; Go 16 align 8: struct{Ffts5yy0 [0]modernc.org/sqlite/lib.TFts5Token; Ffts5yy4 [0]int32; Ffts5yy11 [0]uintptr; Ffts5yy24 [0]uintptr; Ffts5yy46 [0]uintptr; Ffts5yy53 [0]uintptr; Ffts5yyinit int32; F__ccgo_pad7 [12]byte}
+  every: sequential without zero-size fields reads size 48 align 4; Go 48 align 8: struct{F__vi [0][12]int32; F__p [0][6]uintptr; F__i [12]int32}
+  every: sequential without zero-size fields reads size 16 align 4; Go 16 align 8: struct{Fyy0 [0]modernc.org/sqlite/lib.TToken; Fyy14 [0]uintptr; Fyy59 [0]uintptr; Fyy67 [0]uintptr; Fyy122 [0]uintptr; Fyy132 [0]uintptr; Fyy144 [0]int32; Fyy168 [0]uintptr; Fyy203 [0]uintptr; Fyy211 [0]uintptr; Fyy269 [0]modernc.org/sqlite/lib.TOnOrUsing; Fyy286 [0]modernc.org/sqlite/lib.TTrigEvent; Fyy383 [0]struct{Fvalue int32; Fmask int32}; Fyy391 [0]modernc.org/sqlite/lib.Tu32; Fyy427 [0]uintptr; Fyy454 [0]uintptr; Fyy462 [0]modernc.org/sqlite/lib.Tu8; Fyy509 [0]modernc.org/sqlite/lib.TFrameBound; Fyy555 [0]uintptr; Fyyinit int32; F__ccgo_pad20 [12]byte}
+  every: sequential without zero-size fields reads size 48 align 4; Go 48 align 8: struct{F__u struct{F__vi [0][12]int32; F__p [0][6]uintptr; F__i [12]int32}}
+  every: sequential without zero-size fields reads size 496 align 1; Go 496 align 8: struct{FaHash [0][124]modernc.org/sqlite/lib.Tu32; FapSub [0][62]uintptr; FaBitmap [496]modernc.org/sqlite/lib.Tu8}
+  every: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: struct{F__ccgo_align [0]uint64; FnSrc int32; FnAlloc modernc.org/sqlite/lib.Tu32}
+  every: sequential without zero-size fields reads size 88 align 4; Go 88 align 8: struct{FfromSpace [0][88]modernc.org/sqlite/lib.Tu8; FsSrc modernc.org/sqlite/lib.TSrcList; F__ccgo_pad2 [80]byte}
+  every: sequential without zero-size fields reads size 8 align 4; Go 8 align 8: struct{F__ccgo_align [0]uint64; FnLvl int32; FiSegid int32}
+  every: sequential without zero-size fields reads size 24 align 4; Go 24 align 8: struct{Fopcode modernc.org/sqlite/lib.Tu8; Fp4type int8; Fp5 modernc.org/sqlite/lib.Tu16; Fp1 int32; Fp2 int32; Fp3 int32; Fp4 modernc.org/sqlite/lib.Tp4union}
+  every: sequential without zero-size fields reads size 1032 align 8; Go 1232 align 8: struct{Fyytos uintptr; FpParse uintptr; FyystackEnd uintptr; Fyystack uintptr; Fyystk0 [50]modernc.org/sqlite/lib.TyyStackEntry}
+every struct type expression (declaration-local admission): 1241 struct types; holding an array at any depth 148; all-unmanaged once inline 148; within the caps (4 KiB per array, 64 KiB per struct, every level) 148; of those: carry an alignment-forcing [0]T 93, sequential layout without [0]T differs from Go in size or alignment 39 (in alignment, so wrong when nested 37), hold a bool at some depth 0

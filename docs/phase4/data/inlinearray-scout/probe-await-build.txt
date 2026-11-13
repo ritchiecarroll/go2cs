@@ -1,0 +1,5 @@
+Program.cs(22,46): error CS8178: A reference returned by a call to '<PrivateImplementationDetails>.InlineArrayFirstElementRef<Arr4<int>, int>(ref Arr4<int>)' cannot be preserved across 'await' or 'yield' boundary.
+Program.cs(24,39): error CS8178: A reference returned by a call to '<PrivateImplementationDetails>.InlineArrayFirstElementRef<Arr4<int>, int>(ref Arr4<int>)' cannot be preserved across 'await' or 'yield' boundary.
+Program.cs(26,101): error CS9217: A 'ref' local cannot be preserved across 'await' or 'yield' boundary.
+Program.cs(28,92): error CS4007: Instance of type 'System.Span<int>' cannot be preserved across 'await' or 'yield' boundary.
+Program.cs(37,85): error CS0029: Cannot implicitly convert type 'Wrapped4<int>' to 'System.Span<int>'

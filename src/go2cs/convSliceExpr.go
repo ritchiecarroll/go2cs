@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
@@ -119,7 +120,9 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		}
 
 		v.useUnsafeFunc = true
-		prefixLength := len(ptrType) + 5
+		// The prefix `(ж<` + ptrType + `>)` is cut from identRunes below, so it is counted in RUNES: a byte length
+		// cut a character per extra byte of a non-ASCII type name (`élément`, go2cs's own `Δ` import renames).
+		prefixLength := utf8.RuneCountInString(ptrType) + 5
 
 		// Remove array type prefix from the pointer type, if present
 		if strings.HasPrefix(ptrType, "array<") {

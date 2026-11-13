@@ -110,7 +110,12 @@ Check 'the Go module badge links pkg.go.dev at the module version' (
     $readme.Contains('[![Go module](https://img.shields.io/badge/Go_module-@v1.2.3-00ADD8?logo=go)](https://pkg.go.dev/example.com/mod@v1.2.3)')) 'no such badge'
 Check 'the go2cs badge links the release it was built on' (
     $readme.Contains('[![go2cs](https://img.shields.io/badge/go2cs-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5)')) 'no such badge'
-Check 'the synopsis is its own paragraph, escaped' ($lines -ccontains 'Package mod does \*one\* thing.') 'no synopsis line'
+$convertedBy = '[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net)'
+$badgeLines = @($lines | Where-Object { $_.Contains('[![') })
+Check 'the converted-by badge appears exactly once, first on the first badge line, before the Tests badge (owner 2026-11-12)' (
+    ([regex]::Matches($readme, [regex]::Escape($convertedBy))).Count -eq 1 -and $badgeLines.Count -eq 2 -and
+    $badgeLines[0].StartsWith("$convertedBy [![Tests]", [StringComparison]::Ordinal) -and -not $badgeLines[1].Contains($convertedBy)) "badge lines: $($badgeLines -join ' | ')"
+Check 'the synopsis is its own paragraph, escaped'($lines -ccontains 'Package mod does \*one\* thing.') 'no synopsis line'
 Check 'the license line links the module source and the C# conversion at its tag (owner 2026-10-15)' ($lines -ccontains "Converted from [example.com/mod]($modSource) source to C# in [example/mod-cs]($repo/tree/nuget-1.2.3); licensed under MIT $([char]0x2014) see [LICENSE]($repo/blob/nuget-1.2.3/LICENSE).") 'no license line'
 Check 'the release line names the go.* release the package is compiled against, after the license line (owner 2026-10-26)' (
     [Array]::IndexOf([string[]]$lines, 'This package is compiled against the go2cs standard-library packages at release 1.24.13.5: use it with that release of them. A later release that changes a package''s public shape needs this package''s rebuild for that release.') -gt

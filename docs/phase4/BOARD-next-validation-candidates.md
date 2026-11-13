@@ -36902,6 +36902,130 @@ on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64 against the exit gat
 
 — H (2026-11-12)
 
+## 2026-11-12 — G (COORD's order on a finding of the M:N prototype's stage A4): one instantiation of a local generic type assigned to a non-generic interface does not compile when the interface's method names the type argument — OPEN
+
+**The defect.** A generic struct has a method whose signature names its type parameter, `func (b box[T]) val() T`.
+A non-generic interface asks for that method at one type, `val() point`. Go accepts `box[point]` for the
+interface, and only that instantiation. The converted program does not compile.
+
+**Measured on master `6869ec2b54`** (Windows x64, go1.26.10, SDK 10.0.400, runtime 10.0.11) with four programs of
+about 25 lines, each run under Go and through the behavioral runner by filter, and a tracked program as the
+control. Each declares `type box[T any] struct`, one method and one interface in package `main`, assigns a
+`box[point]` (or its address) to the interface and calls the method through it.
+
+| Program | Method | The interface asks | Go prints | Transpile | Compile |
+|---|---|---|---|---|---|
+| `GenericFuncDecl` (tracked; the control) | — | — | — | pass | pass |
+| the result is the type parameter | `func (b box[T]) val() T` | `val() point` | `1 2` | pass | fail, CS0029 |
+| the same on a pointer receiver | `func (b *box[T]) val() T` | `val() point` | `3 4` | pass | fail, CS0029 |
+| a parameter is the type parameter | `func (b box[T]) take(v T) int` | `take(v point) int` | `5` | pass | fail, CS1929 |
+| the signature does not name it | `func (b box[T]) size() int` | `size() int` | `7` | pass | pass |
+
+The control's Target and Output rows read pass too. The four programs have no golden and no entry in the test
+lists, so their Target row reads fail by construction and Output reads skip. The last program's built executable
+was run by hand and prints `7`, as Go does.
+
+**The emission, read.** The converter's part is right: it records the CLOSED instantiation,
+`[assembly: GoImplement<box<point>, valuer>]`, and converts the assignment to `valuer v = new box<point>(…)`.
+The source generator that reads the record writes the implementation over the OPEN type. For a value it is
+`partial struct box<T> : valuer` holding `point valuer.val() => this.val();`, and for a pointer it is an adapter
+class generic over `T` holding `point valuer.val() => m_box.val();`. Both forwarded calls return a `T`, so the
+compiler reads "Cannot implicitly convert type 'T' to 'go.main_package.point'". With the type parameter in a
+parameter the forwarded call passes a `point` where a `T` is asked and reads CS1929. Where the signature does not
+name the type parameter the open implementation is true of every instantiation, as it is in Go, and it compiles.
+
+So the root reads in go2cs-gen's ImplementGenerator, in its branch for a generic type of the SAME package. Its
+own comments state the rule: when a non-generic interface mentions the type arguments, exactly one instantiation
+can satisfy it, and a per-instantiation adapter is what the semantics describe. By the same comments that
+adapter exists today for a generic type of ANOTHER package behind a pointer, and the same-package branch stays
+generic on the ground that the interface does not mention the arguments. This row is the case where it does.
+NOT DESIGNED here: the value form has no closed carrier today, because a partial declaration can only extend the
+open definition.
+
+**Who meets it.** Go code that hands one instantiation of its own generic type to a non-generic interface whose
+method returns or takes the element. The tracked corpus builds, so it cannot hold the failing shape. Of 2,235
+`GoImplement` records in tracked `package_info.cs` files, 22 name a generic instantiation first: 9 in the
+converted standard library and 13 in behavioral programs. NOT MEASURED: the module wave's packages, a generic
+interface, two instantiations of one generic type against one interface, an embedded generic field that promotes
+the method, and Native AOT.
+
+**How it was met.** The prototype's stage A4 builds generic instantiations of the task type under Native AOT. Its
+fixture read CS0029 in a generated implementation file with twins OFF, and that was reported as not measured on
+master. COORD ordered it measured there with a minimal program. It is on master, it is independent of M:N, and
+the prototype does not fix it.
+
+**Owed (not taken here).** A tracked behavioral program with the three failing shapes and the passing one, red
+first against Go's output, then the fix in the generator's same-package branch. The four programs of this
+measurement are not tracked: a tracked one needs its golden and its entries in the four test lists, which belong
+with the fix.
+
+— G (2026-11-12)
+
+## 2026-11-13 — C1 (found by the go.arrays family measurement, design record REC-A 7.7): under Native AOT, ILC 10.0.14's `TrimMode=partial` does not compile a referenced non-trimmable library's unreferenced code, against golib's "keeps golib whole" — OPEN, routed by COORD
+
+**What was measured.** A probe library, `famlib`, built like golib: `EnableAotAnalyzer`, NOT marked trimmable. It
+held one non-generic class, `TrimControl`, that nothing references (a 3,000-case switch). An app referencing the
+library was published with `PublishAot=true` on linux-x64 (SDK 10.0.403, ILCompiler 10.0.14), with the ILC map file
+on.
+
+| publish | `--root:famlib` in the .rsp | binary | `TrimControl` entries in the map |
+|:--|:--|--:|--:|
+| `TrimMode=partial` | absent (`--defaultrooting` present) | 1,325,056 | 0 |
+| `TrimMode=full` | absent | 1,325,056 | not read |
+| `TrimMode=partial` plus `TrimmerRootAssembly famlib` | present | 1,637,936 | 5 |
+
+The same library without `TrimControl` is 1,325,056 bytes under partial, and 1,572,400 bytes rooted. So rooting
+compiled `TrimControl`, about 64 KiB, and partial alone compiled none of it.
+
+**What it contradicts.** `src/core/golib/GoFieldMetadata.cs:34` says the project template's `TrimMode=partial`
+"keeps golib and every converted assembly whole", and :83 offers it as one of two equal routes ("TrimMode=partial,
+or a trimmer root for each"). For Native AOT the probe shows the two are not equal: partial does not root a
+referenced library's unreferenced code. The SDK's ILC targets root an assembly only from `TrimmerRootAssembly`, or
+from a `ManagedAssemblyToLink` item whose TrimMode is `copy` (`Microsoft.NETCore.Native.targets:204-205`), and this
+publish set neither for the library.
+
+**Who meets it: NOT MEASURED.** golib's reflection reads METADATA (fields, offsets, attributes), which
+`--scanreflection` and the reflection-visible set may keep whether or not code is compiled. So the claim may be
+wrong in words and harmless in effect.
+
+NOT READ:
+- what metadata partial keeps for golib and a converted assembly;
+- whether any golib path needs CODE that only a reflection call reaches;
+- ILLink's `PublishTrimmed` without AOT, where `partial` is documented to copy non-trimmable assemblies.
+
+The probe library is a stand-in, not golib.
+
+**How it was met.** The control that let the family measurement show a cost at all (REC-A 7.7.2). The family's own
+answer does not depend on it: unused lengths cost 0 bytes under partial, and with `where T : unmanaged` a ROOTED
+full family is 2,301,488 bytes.
+
+**Evidence.** `docs/phase4/data/inlinearray-scout/family/README.md`, the rooting control section.
+
+**Owed (not taken here).** COORD routes the check: publish a converted program under partial with the map file on,
+and read whether golib's and the converted assembly's types and fields are present, against a rooted publish.
+
+— C1 (2026-11-13)
+
+## 2026-11-13 — C1 (S7 wave 2): `crypto/subtle`'s DIT disclosures extended to linux by mechanism; NOT YET OBSERVED
+
+The three DIT disclosures (`TestWithDataIndependentTiming`, `TestDITPanic`, `TestDITGoroutineInheritance`) cover
+darwin and linux since 76fc096ed3 (claude/c1-subtle-dit-linux, in batch 287), by mechanism: linux-arm64 clears
+`ARM64.HasDIT` after Initialize (internal/cpu/linux-arm64/cpu_arm64_hwcap_impl.cs), under the 2026-11-06 darwin ruling,
+so on a host whose CPU reports DIT the converted side skips the three tests while Go runs them. NOT YET OBSERVED: the
+hosted ubuntu-24.04-arm runner does not report DIT. Go skips the tests there too, and `crypto/subtle` reads 11 on both
+legs, before the extension (run 43170415741 at 06610aaa65) and after it (run 43170419689; and wave 2's A-3, run
+43187241199). The first linux/arm64 read on a DIT-reporting host (Graviton 3 or later, or the Ampere One class) confirms
+the entries or retires them. COORD ruling, 2026-11-12.
+
+## 2026-11-13 — C1 (S7 wave 2): the hosted linux-x64 leg reads the roster on all 80 wave 2 rows, `crypto/tls`'s full BoGo fan-out included
+
+Wave 2's six dispatches (every head 4efe149858) read no hosted linux-x64 line that differs from the roster, on all 80
+rows. That covers the OS surface: os, os/exec, os/user, net, crypto/x509 and the go/build family. `crypto/tls` reads
+4921 on both hosted legs (walls 882 s on linux-x64 and 931 s on linux-arm64), the full BoGo fan-out, so a hosted runner
+is the first of the row's accepted host states. I predicted the opposite (W2-6, W2-9: the BoGo state and 2 to 6 host
+differences); both are MISSES, scored in DATA-la64-s7-bank-plan.md section 13. Wave 1's hosted host differences
+(gc/scan's AVX-512 tests, syscall's privilege class, internal/zstd's tool) do not recur here.
+
 ## 2026-11-12 — H (cgo Phase 3 increment 3.1, stop line S3.1-E, COORD's ruling C): a pointer rebuilt from a number that points into Go memory crosses a `void *` unchecked — OPEN, a DISCLOSED memory-safety gap; two closures seated after 3.1
 
 Increment 3.1's `void *` door (`GoCgoArgs.VoidPointer`) refuses every pointer into Go memory that carries its box,
