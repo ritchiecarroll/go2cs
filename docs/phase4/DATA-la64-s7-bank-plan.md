@@ -963,3 +963,69 @@ the roster where it did not (W2-6, W2-9), and expected a count where Go's own ar
   linux/arm64 read confirms or retires them.
 - **i9's independent co-read** of the six runs is its own record. A disagreement re-opens the row it names.
 - **Wave 3** (A-1, A-4: the 40 pending rows) is dispatched only after this wave's rows are read, which they now are.
+
+## 14. Wave 3, read and banked: linux-arm64 complete (dated block, 2026-11-13, C1)
+
+> C1 dispatched wave 3 at master `7c7dc687f8` (batch 294, which carries wave 2's bank) with a copy of P5's wave 2 kit
+> (`la64-s7/wave3/`), and read it alone. i9 had no live session (COORD, 2026-11-13), so the second dry run is the
+> check. This block records the read, the bank, and the scores of C1's wave 3 predictions W3-1 to W3-8. They were
+> posted to COORD before the dispatch (8092464b0e, then b712a3e5ae), and each is scored as worded.
+
+### 14.1 The dispatch and the proofs
+
+| Shard | Run | Rows | arm job, min | x64 job, min | Row walls arm / x64, s | Ratio |
+|---|---|---|---|---|---|---|
+| A-4 | 43353297697 | 20 | 14.2 | 12.0 | 768 / 651 | 1.18 |
+| A-1 | 43353301832 | 20 | 14.5 | 11.9 | 791 / 658 | 1.20 |
+
+- **The dispatch.** `wave3.sh check` read READY: both gates on master, 2 shards, 40 rows. `refs` pushed
+  `claude/c1-tip-7c7dc687f8-1` and `-2`, and `dispatch` started one os-matrix run on each (goos linux, stage
+  `sweep-shard`, arch both, the filter text byte for byte).
+- **The filters are exactly the roster's 40 pending rows**, and share none with waves 1 and 2.
+- **Heads.** Both runs' headSha read `7c7dc687f8` before any row counted.
+- **Proofs: 12 of 12 PASS.** On all 4 legs, DUMPPROOF control, prove and recheck read PASS.
+- **Evidence.** Each leg's artifact was unzipped into its own empty directory, and `collect.py` wrote `W3-A4.tsv` and
+  `W3-A1.tsv` beside waves 1 and 2. Every line reads `agree` yes, `same_names` yes and `absent` `-`.
+  `$LinuxRidEvidenceWaves` needs no change.
+- **Both runs ended green on both legs.**
+  - No row's status is anything but PASS (`validated`), and no line says "not implemented".
+  - The only red words in the logs (`FAIL`) are the workflow's own script text echoed into the job log, not result
+    lines.
+
+### 14.2 The bank: 40 rows, linux-arm64 complete
+
+- **The derivation.** `annotate_linux.py --rids --write` derived all 40 segments, every one EQUAL. Its second dry run
+  changes 0 rows.
+- **The header.** It now reads `linux-arm64: 236 of 236 banked, 0 pending`, with a dated provenance block.
+- **The guard.** `check-roster-format.ps1` passes 2559 checks: 236 rows banked on both RIDs, 0 read and pending, 0
+  refused. `test_annotate_evidence.py` reports 0 failures.
+- **The gate was made to fail.**
+  - With crypto/des's arm64 line in `W3-A1.tsv` changed to 54 + 1, the guard failed 1 of 2560 checks, naming
+    crypto/des ("is not the two-RID reading, linux: 54 + 1 (linux-arm64; linux-x64: 55) (arch-strict)").
+  - The file was then restored, with the same SHA-256 before and after.
+- **Held.** No hosted linux-x64 line differs from the roster, so nothing is held, and no `$LinuxRidHostEqual` line
+  was needed.
+- **The count: 116 + 80 + 40 = 236 of 236 banked at linux-arm64. The linux/arm64 bank (S7) is complete for .4.**
+
+### 14.3 The scores
+
+| Prediction (as worded) | Result | Score |
+|---|---|---|
+| W3-1: on all 4 legs control 1 file and the write, prove 0 files under the bar, recheck 0 (12 of 12); both heads 7c7dc687f8 | 12 of 12 PASS; both heads 7c7dc687f8 | **HIT** |
+| W3-2: all 40 EQUAL, no arch form; 0 to 2 exceptions, the likeliest crypto/aes, crypto/cipher, crypto/ecdh | 40 EQUAL, 0 exceptions; the three named rows read 58, 27289 and 47 on both legs | **HIT** (the named risks did not occur) |
+| W3-3: the hosted linux-x64 equals the roster on all 40; 0 HELD | all 40; 0 held | **HIT** |
+| W3-4: bytes 88 + 6 on both linux legs | 88 + 6 on both | **HIT** |
+| W3-5: no row dies at a stub; no "not implemented" | none in either run | **HIT** |
+| W3-6: both arm jobs inside 60 minutes, the longer A-1 (archive/zip's 4 GiB tests); the ratio 0.7 to 1.4 on both | 14.2 and 14.5 minutes, A-1 the longer; ratios 1.18 and 1.20 | **HIT** on all three claims. **The stated cause MISSES:** archive/zip's row took 45 / 50 s, and A-1's longest row is archive/tar, 196 / 214 s |
+| W3-7: both runs green on both legs | both green | **HIT** |
+| W3-8: 236 of 236 banked, 0 pending, the guard passing | exactly that | **HIT** |
+
+- **Eight HITs.** One stated reason was wrong: W3-6 named archive/zip as the cause of A-1's longer job.
+- **What changed from wave 2.** Wave 2's misses came from expecting host differences that did not occur. Wave 3's
+  predictions expected none, and took each row's darwin count, read before the dispatch, as the arm64 prediction.
+- **Not explained here:** archive/zip's 45-second row against the roster's "~775 s sweep time".
+
+### 14.4 Owed
+
+- **The crypto/subtle DIT entries remain NOT YET OBSERVED on linux** (BOARD, 2026-11-13). No wave-3 row touches them.
+- **Nothing in wave 3 is pending, held or refused.**
