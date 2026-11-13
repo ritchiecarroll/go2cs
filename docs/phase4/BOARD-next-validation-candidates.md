@@ -37255,4 +37255,49 @@ run at the seat's base.
 
 — G (2026-11-12)
 
+## 2026-11-12 — G (COORD's ruling on Condition 3, item 3): a NIL func of a named type misreads under reflect, with and without an interface shell; its own seat, after the unwrap seat
+
+**Dated 2026-11-12 21:53 CST, read at `1d7e03bdbc` (master `7c7dc687f8` plus the closed-carrier seat).** The
+census for Condition 3 (reflect accessors read through an interface shell) held five typed nils beside its 13
+kinds. The nil slice, map, chan and pointer read equal to Go in every arm. The nil func does not, and two of its
+rows fail in the DIRECT arm, where no shell is involved: so this is a defect of master on its own root, and COORD
+ruled it a seat of its own, after the unwrap seat. The program is not tracked; Go's output was read first.
+
+The value is `typelib.Step(nil)`, where `Step` is `func(int) int` of another package with a method `Name` by
+value. Arms: direct (the value in an `any`), sh (that `any` asserted to a local interface `namer`), er (a twin
+type that also implements `error`, converted to `error`). The static conversion to `namer` reads equal to Go in
+every row.
+
+| Arm | Read | Go | Converted |
+|---|---|---|---|
+| direct | `ValueOf(a).MethodByName("Name").Call(nil)` | `step` | the process dies: `System.InvalidCastException`, "Unable to cast object of type 'go.NilFuncValue' to type 'Step'" |
+| direct | `ValueOf(&slot).Elem().Set(ValueOf(a))`, `slot` a `namer` | `step` from `slot.Name()` | Go panic: "reflect.Set: value of type typelib.Step is not assignable to type main.namer" |
+| sh | `Kind()` | `func` | `ptr` |
+| sh | `Type()`, and `%T` of `Interface()`, and of an `any` slot after `Set` | `typelib.Step` | `main.namer[…/typelib.Step]`, the shell's own type |
+| sh | `NumMethod()` | `1` | `0` |
+| sh | `IsNil()`, `IsZero()` | `true`, `true` | `false`, `false` |
+| sh | `%v` | `<nil>` | `0xc000000500000000` |
+| sh | `Interface().(namer).Name()` | `step` | Go panic: "interface conversion: interface is nil, not main.namer" |
+| sh | `MethodByName("Name").Call(nil)` | `step` | Go panic: "reflect: call of reflect.Value.Call on zero Value" |
+| er | `Interface().(namer).Name()` | `step` | Go panic: "interface conversion: interface is nil, not main.namer" |
+| er | `Set` into a `namer` slot | `step` | Go panic: "reflect.Set: value of type typelib.StepE is not assignable to type main.namer" |
+
+**Counts.** Of the nil func's 13 reads per arm: direct 2 differ, the static conversion 0, sh 10 (8 silent with
+exit code 0, 2 panics), er 2. The sh arm's silent rows are the worst class: a wrong kind, type and nil-ness with
+nothing printed to say so.
+
+**What the readings say, not yet a root cause.** In the direct arm the nil func is held as a `go.NilFuncValue`
+object, and two reflect paths treat that object as the named delegate type. In the sh arm the assertion builds
+the generic shell around the nil func, and reflect reads the shell as the value. The unwrap seat keeps a shell
+whose wrapped value is nil, as golib's own unwrap rule does, so it is predicted NOT to move these rows.
+
+**Not measured.** The exit code of the direct arm's crash (an unhandled exception of the same run read exit code
+2 in another case); a nil func of an unnamed type; a nil func of a named type of the SAME package; Native AOT.
+
+**Predictions of the census for this part, written before the run:** the direct arm's 68 typed-nil reads equal
+Go (FALSE, on the two rows above); kind, type and `IsNil` equal Go in the three shell arms for all five kinds
+(FALSE for the nil func in sh; TRUE elsewhere).
+
+— G (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
