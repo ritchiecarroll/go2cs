@@ -1,0 +1,1 @@
+Native AOT publish of registry-probe-Program.cs (linux-x64, ILCompiler 10.0.14): exit 0, 0 IL/AOT warnings.
