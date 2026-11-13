@@ -10,7 +10,8 @@
 // signature line, the body sits at Go's indentation, and the catch, the finally, the named-result
 // exit and the method's own closing brace share one closing line. The shapes are the defer-parity
 // scout's five (docs/phase4/SCOUT-defer-emission-parity.md, section 11) plus the frame's other
-// parts: an unnamed result's catch return, a defer lowered into the finally, a named-result
+// parts: an unnamed result's catch return, a defer lowered into the finally (its flag line led by the Go
+// defer's own text, the owner's form), a named-result
 // literal nested in a frame, and a literal passed as an argument.
 
 package main
@@ -111,6 +112,13 @@ func (c *counter) inc() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.n++
+}
+
+// dec's lowered defer carries the user's trailing comment after the Go defer's own text.
+func (c *counter) dec() {
+	c.mu.Lock()
+	defer c.mu.Unlock() // released on every return
+	c.n--
 }
 
 // literals holds function-literal frames: a named-result literal nested in a deferring function.
@@ -265,8 +273,15 @@ func TestGoFrameLayoutOpensOnTheSignatureAndClosesOnOneLine(t *testing.T) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.Ꮡmu.Lock();
-    ᒐd1 = true;
+    /* defer c.mu.Unlock() */ ᒐd1 = true;
     c.n++;
+` + tail("", "if (ᒐd1) Ꮡc.Ꮡmu.Unlock(); ", ""),
+		"dec": `internal static void dec(this ж<counter> Ꮡc) { GoFrame ᒐ = default; bool ᒐd1 = false; try {
+    ref var c = ref Ꮡc.DerefOrNull();
+
+    Ꮡc.Ꮡmu.Lock();
+    /* defer c.mu.Unlock() */ ᒐd1 = true; // released on every return
+    c.n--;
 ` + tail("", "if (ᒐd1) Ꮡc.Ꮡmu.Unlock(); ", ""),
 		"literals": `internal static nint /*total*/ literals() { nint total = default; GoFrame ᒐ = default; try {
     defer(() => {
@@ -297,6 +312,21 @@ func TestGoFrameLayoutOpensOnTheSignatureAndClosesOnOneLine(t *testing.T) {
 	for name, body := range want {
 		if got[name] != body {
 			t.Errorf("%s emitted\n%s\nwant\n%s", name, got[name], body)
+		}
+	}
+}
+
+// The owner's amendment (COORD 2026-11-13 06:30Z): a LOWERED defer's flag line carries the Go defer statement as a
+// leading block comment, so it reads where Go wrote it. A text holding "*/" would end the block comment early, so it
+// takes a trailing line comment instead. Today's gates admit no argument, so no lowered defer can carry one; the
+// helper is guarded directly.
+func TestLoweredDeferFlagLineCarriesTheGoDefer(t *testing.T) {
+	for _, c := range []struct{ text, want string }{
+		{"defer c.mu.Unlock()", "/* defer c.mu.Unlock() */ ᒐd1 = true;"},
+		{"defer c.log(\"*/\")", "ᒐd1 = true; // defer c.log(\"*/\")"},
+	} {
+		if got := loweredDeferFlagLine("ᒐd1", c.text); got != c.want {
+			t.Errorf("loweredDeferFlagLine(%q) = %q, want %q", c.text, got, c.want)
 		}
 	}
 }

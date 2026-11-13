@@ -9,8 +9,10 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"go/ast"
+	"go/printer"
 	"go/token"
 	"go/types"
 	"strings"
@@ -30,7 +32,7 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 
 		v.outputBuilder.WriteString(v.newline)
 		v.outputBuilder.WriteString(v.indent(v.indentLevel))
-		v.outputBuilder.WriteString(fmt.Sprintf("%s = true;", v.loweredDefers[index].flagName))
+		v.outputBuilder.WriteString(loweredDeferFlagLine(v.loweredDefers[index].flagName, v.goSourceText(deferStmt)))
 
 		return
 	}
@@ -783,4 +785,37 @@ func isPlainIdentifier(s string) bool {
 	}
 
 	return true
+}
+
+// loweredDeferFlagLine is a lowered defer's statement-position line: its reached flag, led by the Go defer statement
+// as a block comment (the owner's form, COORD 2026-11-13 06:30Z), so the defer reads where Go wrote it while the call
+// itself runs from the finally. A text holding "*/" would close that comment early, so it trails the flag as a line
+// comment instead; today's lowering gates admit no argument, so no lowered defer reaches that form.
+func loweredDeferFlagLine(flagName string, deferText string) string {
+	switch {
+	case deferText == "":
+		return fmt.Sprintf("%s = true;", flagName)
+	case strings.Contains(deferText, "*/"):
+		return fmt.Sprintf("%s = true; // %s", flagName, deferText)
+	default:
+		return fmt.Sprintf("/* %s */ %s = true;", deferText, flagName)
+	}
+}
+
+// goSourceText is node's Go source as go/printer writes it, on one line (every whitespace run one space); "" when it
+// does not print.
+func (v *Visitor) goSourceText(node ast.Node) string {
+	fset := v.fset
+
+	if fset == nil {
+		fset = token.NewFileSet()
+	}
+
+	var text bytes.Buffer
+
+	if err := printer.Fprint(&text, fset, node); err != nil {
+		return ""
+	}
+
+	return strings.Join(strings.Fields(text.String()), " ")
 }
