@@ -37546,4 +37546,110 @@ in the runner's Compile row. Native AOT. Linux and macOS rows.
 
 — G (2026-11-13)
 
+## 2026-11-13 — G (seat N2, COORD's cut of the nil-func design): a func-type case of a type switch takes the guard form, so a typed nil func takes its own case; predictions scored, no stop line tripped
+
+**Dated 2026-11-13 06:53 CST. Base master `6dc4bae09b` (batch 299, which holds seat N1), fix `f2ac0a00a5`, merged with
+master at `b9764693e2`, Windows x64, SDK 10.0.400, go1.26.10.** The row above this one is seat N1. This is seat
+N2, the second and last of the cut: root G, the converter's func-type case of a type switch.
+
+**What was wrong.** Go keeps a typed nil func's type as the dynamic type of the interface that holds it, so a
+type switch takes the case that names that func type and binds the nil func. The emitted C# tested a func-type
+case with a type pattern (`case Func<nint, nint> v:`). A typed nil func reaches the switch as its func type's
+canonical carrier, which is no delegate, so the pattern missed and the switch fell to default, or to a later
+interface case, in silence, on every route into the interface. That is L1 of the design's measurement: 38 reads,
+with 6 more that L2 masked until seat N1.
+
+**The fix.** A case whose label is a func type (unnamed, a named func type without a method, a named func type
+with one) emits the guard form that the interface cases already use:
+
+- with a binding: `case {} Δv when Δv._<Func<nint, nint>>(out var v):`;
+- without one, or in a multi-type case: `case {} ᴛ0 when ᴛ0._<Func<nint, nint>>(out var _):`.
+
+golib's try form answers a live value by the same type test the pattern made, and a nil carrier by its type, so
+a live value's answer does not move. One converter file. No golib change and no generator change.
+
+**The collision rule (stop line S6).** Two func types can share one C# delegate (two named func types without a
+method and with one signature), and a guard never makes a later label unreachable. The guard form alone would
+lose the compile error that today stops a switch whose two such cases have DIFFERING bodies. So the label's C#
+type key is carried beside its text. A pre-pass finds the delegate types that two or more func labels name with
+differing bodies, and those labels keep the pattern form: CS8120 still stops the build. Duplicates with an
+identical body still merge under the unchanged marker comment. `TestTypeSwitchCollapsedFuncCase` asserts both;
+its new asserts fail 6 times against the base visitor.
+
+**Named before the run, then read.**
+
+- Goldens: FOUR fixtures, 12 labels, each changed in place: `FuncLitEmptyInterfaceTarget` 2,
+  `TypeSwitchCollapsedFuncCase` 7, `TypeSwitchGuardLaterRedeclare` 2, `LocalValueIfaceCallConversion` 1 (a named
+  func type with a method). The design post said three: it searched the unnamed delegate spellings only. The
+  no-regression check (1056 behavioral packages, 8 platform-exclusive ones skipped on this host) names those four
+  and no other tracked file.
+- Corpus hunks: 7 label lines in 4 `net/http` files, each changed in place, the same on every target. In the
+  `-stdlib` arm, `h2_bundle.cs` 2 lines. In the `-tests` arm, `clientserver_test.cs` 3, `requestwrite_test.cs`
+  1 and `httputil/dump_test.cs` 1. No position-map line. Read by a two-seeded reconvert of the declared universe
+  (four targets) from committed refs, base master and seat `eba0d52d3f`, each arm by a converter built at its
+  ref, with the `-tests` conversion of nine packages (`net/http`, `net/http/httputil` and the seven rows seat N1
+  read): 4 files differ, 7 lines, at the lines named; no file is in one arm only; 0 of 226 hand-owned files
+  clobbered in either arm. The corpus apply is `d4eb94fd60`. For the three test files the committed blob equals
+  the seat emission. `h2_bundle.cs` as committed differs from a fresh reconvert at master in one line this seat
+  does not own (one of the 13 files of the side finding already routed), so its two lines went in by the hunk
+  rule and that line stays as committed.
+
+**The census: 714 reads, 7 carriers, four arms, each scored against Go's output.**
+
+| Arm | Base: EQUAL / SILENT | Fix: EQUAL / SILENT |
+|---|---|---|
+| direct | 222 / 16 | 236 / 2 |
+| va | 190 / 14 | 202 / 2 |
+| sh | 190 / 14 | 202 / 2 |
+| er | 62 / 6 | 68 / 0 |
+
+EQUAL moves from 664 to 708. The 44 reads that closed are the type switch reads, by the census's probe names:
+15 `l-switch` (the switch on the value), 14 `l-reswitch` (the switch after an assertion to its interface) and 15
+`ifacesw` (the switch on what reflect's `Interface` returns). The 6 that still differ are address prints of a
+live func, which no two runs share. Set check, both ways: 44 reads closed, 0 reads newly differ. The base arm
+was read on the tip that holds N1 and master's merge, with the base visitor swapped in and the fix restored
+byte-identical afterwards: 664, with the same 50 differing reads seat N1 read.
+
+**Predictions, posted with the design, scored.**
+
+- P2, after N2 the 44 type switch reads are EQUAL: TRUE (708 of 714, plus the 6 address prints).
+- P3, no read EQUAL at the base leaves EQUAL, here and in the 1028 reads of the unwrap seat: TRUE in both; the
+  unwrap census reads 1028 of 1028 at the base arm and at the fix.
+- P5, the `-tests` rows and GolibTests keep their sets: TRUE for the two rows whose emission moves. `net/http`
+  validates 1526 tests and `net/http/httputil` 62, on windows, at base master and at the fix `d4eb94fd60`, each
+  arm by a converter built at its ref; each equals the bank and 0 tests moved, read test by test. The comparator
+  was made to fail first (one flipped test, which it named). NOT RE-RUN: seat N1's seven rows (the two-seeded
+  reconvert shows their packages' emission identical in both arms) and GolibTests (no golib, generator or
+  GolibTests file changes, and GolibTests references no `net` project).
+- P6, the seat has a tracked program, red first: TRUE. `NilFuncTypeSwitch` (234 lines of Go output; carriers
+  from another package and this one, with and without a method, unnamed, with live and nil-pointer controls;
+  bound, unbound, multi-type, mixed with interface cases, address-taken and merged switches) at the base
+  transpiles and compiles, exits 0 with nothing on stderr, and 90 of its 234 lines differ from Go. At the fix
+  its four rows pass and its output equals Go's on every line.
+
+**Stop lines.** S1 (a read leaves EQUAL), S4 (a `-tests` row or GolibTests moves), S5 (the corpus diff holds a
+hunk that is not a func-type case label, or a position-map line moves), S6 (the guard form collides with the
+collapsed func case rule) and "a golden outside the four named fixtures moves": none tripped. S3 holds by
+construction: a live value meets the same type test the pattern made.
+
+**Owed, found by this seat.** A var declaration that converts between a named func type WITH a method and the
+unnamed func type of one signature does not compile, in either direction: `var s typelib.Step = f` (f an unnamed
+func variable) is CS0029 from the unnamed delegate to the named type, and `var u func(int) int =
+typelib.Step(nil)` is CS0029 the other way. It is loud, and it is a converter root of its own (the declaration's
+conversion), not root G. So seat N1's NOT EXAMINED case (a nil func of a named type stored into a slot of an
+unnamed func type with the same signature) and its mirror could not ride this seat's program: neither compiles
+at the base. Both programs are kept beside the seat's scratch record. Go's answer for both is known from the Go
+run.
+
+**Not re-run at the merged tip.** The two censuses, the no-regression check and the behavioral rows were read
+with the fix installed on N1's tip merged with master, before batch 299 landed. The merge with master that
+followed brought docs only (no file under `src`), so those readings carry by the diff. The repo guards and
+`go test ./...` were run at the final tip.
+
+**Not built or measured.** The fixture adds two members to the converter-dev solution; that solution was not
+built end to end. Read instead: both member paths are in the solution file and exist, and both projects compile
+in the runner's Compile row. Native AOT. Linux and macOS rows.
+
+— G (2026-11-13)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
