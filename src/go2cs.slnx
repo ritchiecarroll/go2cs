@@ -698,6 +698,7 @@
     <Project Path="tests/Behavioral/InterfaceToInterfaceAdapter/InterfaceToInterfaceAdapter.csproj" />
     <Project Path="tests/Behavioral/InterfaceToInterfaceAssertion/InterfaceToInterfaceAssertion.csproj" />
     <Project Path="tests/Behavioral/InterfaceUntypedIntCompare/InterfaceUntypedIntCompare.csproj" />
+    <Project Path="tests/Behavioral/IntegerToNamedString/IntegerToNamedString.csproj" />
     <Project Path="tests/Behavioral/IntFormFloatConst/IntFormFloatConst.csproj" />
     <Project Path="tests/Behavioral/IntMinLiterals/IntMinLiterals.csproj" />
     <Project Path="tests/Behavioral/InvalidRuneString/InvalidRuneString.csproj" />
@@ -951,6 +952,7 @@
     <Project Path="tests/Behavioral/PanicTextGoTypeNames/PanicTextGoTypeNames.csproj" />
     <Project Path="tests/Behavioral/PanicValueRendering/PanicValueRendering.csproj" />
     <Project Path="tests/Behavioral/ParallelAssignmentHazard/ParallelAssignmentHazard.csproj" />
+    <Project Path="tests/Behavioral/ParallelDerefCastAssign/ParallelDerefCastAssign.csproj" />
     <Project Path="tests/Behavioral/ParenFuncLitGoDefer/ParenFuncLitGoDefer.csproj" />
     <Project Path="tests/Behavioral/ParenIifeNilFuncConv/ParenIifeNilFuncConv.csproj" />
     <Project Path="tests/Behavioral/ParenthesizedConcatContext/ParenthesizedConcatContext.csproj" />
@@ -1210,6 +1212,7 @@
     <Project Path="tests/Behavioral/SystemCollidingTypeName/SystemCollidingTypeName.csproj" />
     <Project Path="tests/Behavioral/TcpLoopbackRoundTrip/TcpLoopbackRoundTrip.csproj" />
     <Project Path="tests/Behavioral/TestingStructZeroLiteral/TestingStructZeroLiteral.csproj" />
+    <Project Path="tests/Behavioral/TerminatingSwitchDefaultFallthrough/TerminatingSwitchDefaultFallthrough.csproj" />
     <Project Path="tests/Behavioral/ThisRefReceiverTC0/ThisRefReceiverTC0.csproj" />
     <Project Path="tests/Behavioral/TraceUserAnnotations/TraceUserAnnotations.csproj" />
     <Project Path="tests/Behavioral/TransitiveAliasPreload/TransitiveAliasPreload.csproj" />

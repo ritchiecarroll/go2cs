@@ -1372,6 +1372,16 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				lhsElemContexts = append(lhsElemContexts, indexContext)
 			}
 
+			// A dereferenced pointer-cast element (`*(*uint64)(unsafe.Pointer(p))`) writes through the
+			// box's `.Value`, as the single-target path above does. The prefix `~` form is a value, not
+			// a variable, and a tuple element of it does not compile (CS0131; modernc.org/libc qsort.go's
+			// parallel swap `*(*uint64)(unsafe.Pointer(p)), *(*uint64)(unsafe.Pointer(q)) = …`).
+			if _, lhsIsStar := lhs.(*ast.StarExpr); lhsIsStar {
+				starExprContext := DefaultStarExprContext()
+				starExprContext.inLhsAssign = true
+				lhsElemContexts = append(lhsElemContexts, starExprContext)
+			}
+
 			lhsExpr := v.convExpr(lhs, lhsElemContexts)
 
 			if len(signedAssignTarget) > 0 {

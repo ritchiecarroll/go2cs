@@ -1698,7 +1698,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// Hop through the constant's DEFAULT Go type first (`((@string)(rune)runeError)`) —
 		// exactly Go's conversion semantics. A plain literal is already a C# constant and
 		// keeps its direct form (no churn).
-		if basicTarget != nil && basicTarget.Kind() == types.String {
+		//
+		// A NAMED string target (`type literalErr string`; github.com/ncruces/go-strftime's
+		// `literalErr(b)` over a byte) takes the same code-point steps, then the @string the unnamed
+		// form converts to: its [GoType] wrapper converts only from @string, never from an integer
+		// (CS0030). Scoped to an integer operand; a string operand already converts in one step.
+		namedStringTarget := false
+
+		if targetNamed, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
+			if u, ok := targetNamed.Underlying().(*types.Basic); ok && u.Kind() == types.String {
+				if argType := v.info.TypeOf(arg); argType != nil {
+					argBasic, ok := argType.Underlying().(*types.Basic)
+					namedStringTarget = ok && argBasic.Info()&types.IsInteger != 0
+				}
+			}
+		}
+
+		if basicTarget != nil && basicTarget.Kind() == types.String || namedStringTarget {
 			if tvArg, ok := v.info.Types[arg]; ok && tvArg.Value != nil {
 				if argBasic, ok := tvArg.Type.(*types.Basic); ok && argBasic.Info()&types.IsUntyped != 0 && !v.isCSharpConstantExpr(arg) {
 					expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(types.Default(argBasic).(*types.Basic)), expr)
@@ -1713,6 +1729,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(u), expr)
 					}
 				}
+			}
+
+			if namedStringTarget {
+				// A cast binds tighter than a binary operator: `literalErr(d+1)` converts the sum.
+				if v.needsParentheses(arg) {
+					expr = "(" + expr + ")"
+				}
+
+				expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(types.Typ[types.String]), expr)
 			}
 		}
 
