@@ -1063,6 +1063,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckInitStatementScope() => CheckTarget("InitStatementScope");
 
     [TestMethod]
+    public void CheckInlineArrayFields() => CheckTarget("InlineArrayFields");
+
+    [TestMethod]
     public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
 
     [TestMethod]

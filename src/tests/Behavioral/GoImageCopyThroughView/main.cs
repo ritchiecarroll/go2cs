@@ -2,23 +2,26 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
+using System.Runtime.InteropServices;
+using go.arrays;
+using go.golib;
 
 partial class main_package {
 
-partial struct Dirent {
-    public uint64 Ino;
-    public uint64 Seekoff;
-    public uint16 Reclen;
-    public uint16 Namlen;
-    public uint8 Type;
-    public array<int8> Name = new(1024);
-    public array<byte> Pad_cgo = new(3);
+[GoInlineLayout, StructLayout(LayoutKind.Explicit, Size = 1048)] partial struct Dirent {
+    [FieldOffset(0)] public uint64 Ino;
+    [FieldOffset(8)] public uint64 Seekoff;
+    [FieldOffset(16)] public uint16 Reclen;
+    [FieldOffset(18)] public uint16 Namlen;
+    [FieldOffset(20)] public uint8 Type;
+    [FieldOffset(21)] public array1024<int8> Name;
+    [FieldOffset(1045)] public array3<byte> Pad_cgo;
 }
 
-partial struct Pair {
-    public uint16 A;
-    public array<uint8> B = new(2);
-    public uint64 C;
+[GoInlineLayout, StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Pair {
+    [FieldOffset(0)] public uint16 A;
+    [FieldOffset(2)] public array2<uint8> B;
+    [FieldOffset(8)] public uint64 C;
 }
 
 internal static void main() {
@@ -36,7 +39,7 @@ internal static void main() {
     n = copy(@unsafe.GoImage(Ꮡdirent).slice(), data[..10]);
     fmt.Println(n, dirent.Ino, dirent.Seekoff, dirent.Reclen);
 
-    ref var p = ref heap<Pair>(new Pair(A: 0x0102, B: new uint8[]{5, 6}.array(), C: 0x1122334455667788UL), out var Ꮡp);
+    ref var p = ref heap<Pair>(new Pair(A: 0x0102, B: new array2<uint8>(5, 6), C: 0x1122334455667788UL), out var Ꮡp);
     var @out = new slice<byte>(16);
     n = copy(@out, @unsafe.GoImage(Ꮡp).slice());
     fmt.Println(n, @out);

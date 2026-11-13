@@ -4,6 +4,9 @@ using fmt = fmt_package;
 using runtime = runtime_package;
 using strings = strings_package;
 using @unsafe = unsafe_package;
+using System.Runtime.InteropServices;
+using go.arrays;
+using go.golib;
 
 partial class main_package {
 
@@ -52,11 +55,11 @@ partial struct outer {
     public nint W;
 }
 
-partial struct wire {
-    public uint16 Tag;
-    public uint16 Size;
-    public array<byte> Body = new(4);
-    public uint32 Flag;
+[GoInlineLayout, StructLayout(LayoutKind.Explicit, Size = 12)] partial struct wire {
+    [FieldOffset(0)] public uint16 Tag;
+    [FieldOffset(2)] public uint16 Size;
+    [FieldOffset(4)] public array4<byte> Body;
+    [FieldOffset(8)] public uint32 Flag;
 }
 
 partial struct holder {
