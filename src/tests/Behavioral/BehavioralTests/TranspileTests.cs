@@ -823,6 +823,12 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGenericFuncInstantiationArg() => CheckTarget("GenericFuncInstantiationArg");
 
     [TestMethod]
+    public void CheckGenericInstClosedIface() => CheckTarget("GenericInstClosedIface");
+
+    [TestMethod]
+    public void CheckGenericInstClosedIfaceConsumer() => CheckTarget("GenericInstClosedIfaceConsumer");
+
+    [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");
 
     [TestMethod]

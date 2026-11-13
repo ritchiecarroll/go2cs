@@ -597,6 +597,9 @@
     <Project Path="tests/Behavioral/GenericMethodReflect/GenericMethodReflect.csproj" />
     <Project Path="tests/Behavioral/GenericNamedArrayType/GenericNamedArrayType.csproj" />
     <Project Path="tests/Behavioral/GenericNegation/GenericNegation.csproj" />
+    <Project Path="tests/Behavioral/GenericInstClosedIface/GenericInstClosedIface.csproj" />
+    <Project Path="tests/Behavioral/GenericInstClosedIfaceConsumer/GenericInstClosedIfaceConsumer.csproj" />
+    <Project Path="tests/Behavioral/GenericInstClosedIfaceConsumer/boxlib/GenericInstClosedIfaceConsumer.boxlib.csproj" />
     <Project Path="tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.csproj" />
     <Project Path="tests/Behavioral/GenericInterfaceCrossPackage/GenericInterfaceCrossPackage.csproj" />
     <Project Path="tests/Behavioral/GenericInterfaceCrossPackage/keylike/GenericInterfaceCrossPackage.keylike.csproj" />
