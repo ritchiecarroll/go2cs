@@ -418,6 +418,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
 
     [TestMethod]
+    public void CheckDeadlockGoroutineBlocks() => CheckTarget("DeadlockGoroutineBlocks");
+
+    [TestMethod]
     public void CheckDeepEqual() => CheckTarget("DeepEqual");
 
     [TestMethod]
