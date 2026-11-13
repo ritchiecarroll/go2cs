@@ -36,7 +36,7 @@ namespace go;
 internal interface INativeRooted
 {
     bool IsNativeRooted { get; }
-
+    bool IsGenuinelyNativeRoot => false; // true for a NativeBox over C memory alone (NativeBox's own remarks)
     /// <summary>The native base address when this box IS a native root (a <see cref="NativeBox{T}"/>), else 0.</summary>
     nuint NativeRootAddress => 0;
 

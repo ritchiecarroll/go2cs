@@ -3559,7 +3559,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// (sync/atomic's nil-deref table) emitted `(uintptr)SwapPointer(nil, nil);` — CS0201.
 				// Node identity, not a flag, so a nested call in the same statement whose value IS
 				// consumed keeps the prefix (see visitExprStmt).
-				if callExpr != v.resultDiscardedExpr {
+				//
+				// …and unless the call is a TRUE call, a function or method that RETURNS an unsafe.Pointer.
+				// The prefix belongs to the conversion `unsafe.Pointer(x)`. On a true call it turned the
+				// returned pointer into a number, which converts back to a fresh pointer carrying nothing:
+				// not the box the pointer was minted from, and so not the pin that keeps its storage where
+				// the number says it is. A write through `p := f(q)` was lost once the collector had run
+				// (docs/phase4/DESIGN-unsafe-pointer-call-result.md; guarded by the behavioral program
+				// UnsafePointerCallResultLifetime). A consumer that needs the number builds its own cast: a
+				// pointer cast and uintptr(...) both do.
+				if calleeTV, isTyped := v.info.Types[callExpr.Fun]; callExpr != v.resultDiscardedExpr && isTyped && calleeTV.IsType() {
 					constructType = "(uintptr)"
 				}
 			} else if len(callExpr.Args) == 1 && v.currentFuncSignature != nil {

@@ -9,16 +9,16 @@ partial class main_package {
 
 internal static slice<slice<byte>> sink;
 
-internal static partial @unsafe.Pointer added(slice<byte> b) { return (uintptr)@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), 4); }
+internal static partial @unsafe.Pointer added(slice<byte> b) { return @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), 4); }
 
 internal static partial @unsafe.Pointer held(slice<byte> b) {
-    @unsafe.Pointer p = (uintptr)@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), 8);
+    @unsafe.Pointer p = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), 8);
     return p;
 }
 
 internal static partial @unsafe.Pointer same(@unsafe.Pointer p) { return p; }
 
-internal static partial @unsafe.Pointer own(slice<byte> b) { return (uintptr)same(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0))); }
+internal static partial @unsafe.Pointer own(slice<byte> b) { return same(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0))); }
 
 internal static void collect() {
     for (nint i = 0; i < 200000; i++) {
@@ -38,9 +38,9 @@ internal static void main() {
 
     for (nint round = 0; round < rounds; round++) {
         var b = new slice<byte>(64);
-        @unsafe.Pointer p = (uintptr)added(b);
-        @unsafe.Pointer q = (uintptr)held(b);
-        @unsafe.Pointer r = (uintptr)own(b);
+        @unsafe.Pointer p = added(b);
+        @unsafe.Pointer q = held(b);
+        @unsafe.Pointer r = own(b);
 
         collect();
 
