@@ -26,14 +26,14 @@ namespace go;
 /// reflection and the same answer under native AOT.
 /// </para>
 /// </remarks>
-public interface IGoArrayDims
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IGoArrayDims
 {
     /// <summary>The array dimensions, outermost first; empty when the type argument is not an array.</summary>
     static abstract nint[] Dims { get; }
 }
 
 /// <summary>The array-dims companion for a type argument that is not an array.</summary>
-public readonly struct ᴀnone : IGoArrayDims
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct ᴀnone : IGoArrayDims
 {
     /// <inheritdoc/>
     public static nint[] Dims => [];
@@ -42,7 +42,7 @@ public readonly struct ᴀnone : IGoArrayDims
 /// <summary>
 /// Go zero values of a type parameter whose array dimensions travel in an <see cref="IGoArrayDims"/> companion.
 /// </summary>
-public static class GoArrayZero
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoArrayZero
 {
     /// <summary>The zero value of <typeparamref name="T"/>: <c>var x T</c>.</summary>
     /// <typeparam name="T">The type parameter.</typeparam>

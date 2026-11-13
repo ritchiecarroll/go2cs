@@ -27,7 +27,7 @@ namespace go.golib;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, Inherited = false)]
-public sealed class GoStackRootAttribute(string function, string file, int line) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoStackRootAttribute(string function, string file, int line) : Attribute
 {
     /// <summary>The Go function the frame reports, in Go's spelling (<c>testing.tRunner</c>).</summary>
     public string Function { get; } = function;

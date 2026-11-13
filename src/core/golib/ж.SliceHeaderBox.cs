@@ -189,7 +189,7 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     // assembly golib cannot reference; its FromBoxObject is found by name. The dependency keeps that method in a
     // trimmed publish (trim stage 1, docs/PLAN-golib-full-trim.md). The trimmer reads its type name as a
     // documentation ID, so the nested type is unsafe_package.Pointer, not unsafe_package+Pointer.
-    [System.Diagnostics.CodeAnalysis.DynamicDependency("FromBoxObject", "go.unsafe_package.Pointer", "unsafe")]
+    [System.Diagnostics.CodeAnalysis.DynamicDependency("FromBoxObject", "go.unsafe_package.Pointer", "go.unsafe")]
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075",
         Justification = "pointerType is unsafe.Pointer, whose FromBoxObject the DynamicDependency on this constructor keeps.")]
     static SliceHeaderBox()

@@ -16,11 +16,13 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"go/ast"
 	"go/importer"
 	"go/parser"
 	"go/token"
 	"go/types"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -201,16 +203,6 @@ var cgoFixtureWant = map[cgoFixtureEntry]bool{
 	{"void", cgoType}:          true,
 	{"xptr", cgoType}:          true,
 }
-
-// cgoIncompleteOverlay declares runtime/cgo's Incomplete exactly as cgo.go does.
-const cgoIncompleteOverlay = `package cgo
-
-import "internal/runtime/sys"
-
-type Incomplete struct {
-	_ sys.NotInHeap
-}
-`
 
 // loadCgoFixture loads the fixture directory at CGO_ENABLED=0, where fixture.go drops out (it imports "C") and the
 // three generated files are the package. withIncomplete adds an Overlay giving runtime/cgo the one declaration it
@@ -421,7 +413,7 @@ func TestCgoSourceFilesMapsTheFixturesTreesToTheirSource(t *testing.T) {
 	}
 }
 
-// cgoFixtureSummaryCounts is what the driver's -cgo refusal reports for the fixture, by kind (cgoFixtureWant counted).
+// cgoFixtureSummaryCounts is what cgoRecognitionSummary reports for the fixture, by kind (cgoFixtureWant counted).
 const cgoFixtureSummaryCounts = "recognized 25 C declarations (6 func, 9 type, 1 struct, 1 enum, 3 int const, 1 float const, 1 string const, 1 errno func, 1 func value, 1 macro)"
 
 // cgoFixtureSummaryRoles is the rest of the fixture's summary: its trees by role, which no file name can change.
@@ -518,20 +510,38 @@ func TestCgoRecognitionSummarySaysWhenCmdCgoDidNotRun(t *testing.T) {
 // C library's symbol versions, so it is read and logged but not compared. Each regenerated file is logged whole, as
 // base64 on one line, so a fixture.go that changes is re-committed from this test's own output.
 func TestTheCgoFixtureIsCmdCgosOutputForFixtureGo(t *testing.T) {
+	requireCmdCgoOutput(t, cgoFixtureDir, "example.com/cgofixture", "fixture.cgo1.go", "cgo_gotypes.go", "cgo_import.go")
+}
+
+// cgoPhase2FixtureDir holds cgo Phase 2's extern-only fixture and the two files cmd/cgo generated from it
+// (testdata/cgo/phase2/README.md): the trees the converter's cgo route is tested on where no C compiler is.
+var cgoPhase2FixtureDir = filepath.Join("testdata", "cgo", "phase2")
+
+// Phase 2's fixture is made and held the same way as Phase 1's (increment 5a-0), without cgo_import.go: go list
+// hands back none for it (README.md).
+func TestTheCgoPhase2FixtureIsCmdCgosOutputForFixtureGo(t *testing.T) {
+	requireCmdCgoOutput(t, cgoPhase2FixtureDir, "example.com/cgophase2", "fixture.cgo1.go", "cgo_gotypes.go")
+}
+
+// requireCmdCgoOutput makes fixtureDir's generated files again from its fixture.go, in a module named modulePath, and
+// compares each of names with the committed one. A generated file not yet committed fails by name, and its REGEN line carries
+// the license header the renamed files take, so it can be committed from the decode as it stands.
+func requireCmdCgoOutput(t *testing.T, fixtureDir, modulePath string, names ...string) {
+	t.Helper()
 	requireCCompiler(t)
 
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
 		t.Skipf("the fixture's generated files are linux/amd64's (README.md); this host is %s/%s (Inconclusive, not a pass)", runtime.GOOS, runtime.GOARCH)
 	}
 
-	source, err := os.ReadFile(filepath.Join(cgoFixtureDir, "fixture.go"))
+	source, err := os.ReadFile(filepath.Join(fixtureDir, "fixture.go"))
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	dir := t.TempDir()
-	writeCgoFixture(t, dir, "go.mod", "module example.com/cgofixture\ngo 1.26\n")
+	writeCgoFixture(t, dir, "go.mod", "module "+modulePath+"\ngo 1.26\n")
 	writeCgoFixture(t, dir, "fixture.go", string(source))
 
 	list := exec.Command("go", "list", "-compiled", "-json", "-trimpath", ".")
@@ -586,6 +596,12 @@ func TestTheCgoFixtureIsCmdCgosOutputForFixtureGo(t *testing.T) {
 	}
 
 	for _, name := range []string{"fixture.cgo1.go", "cgo_gotypes.go", "cgo_import.go"} {
+		if _, found := generated[name]; !found && !slices.Contains(names, name) {
+			t.Logf("READING %s: not handed back, as expected", name)
+		}
+	}
+
+	for _, name := range names {
 		text, found := generated[name]
 
 		if !found {
@@ -593,7 +609,21 @@ func TestTheCgoFixtureIsCmdCgosOutputForFixtureGo(t *testing.T) {
 			continue
 		}
 
-		committed, err := os.ReadFile(filepath.Join(cgoFixtureDir, name))
+		committed, err := os.ReadFile(filepath.Join(fixtureDir, name))
+
+		if errors.Is(err, fs.ErrNotExist) {
+			header := ""
+
+			if name != "fixture.cgo1.go" {
+				// fixture.go's seven-line license header, naming this file, and a blank line.
+				lines := strings.SplitAfterN(strings.ReplaceAll(string(source), "\r\n", "\n"), "\n", 8)
+				header = strings.Replace(strings.Join(lines[:7], ""), "fixture.go", name, 1) + "\n"
+			}
+
+			t.Logf("REGEN %s %s", name, base64.StdEncoding.EncodeToString([]byte(header+text)))
+			t.Errorf("%s is not committed yet; commit it from this test's REGEN line", name)
+			continue
+		}
 
 		if err != nil {
 			t.Fatal(err)

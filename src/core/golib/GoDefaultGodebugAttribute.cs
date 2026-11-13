@@ -27,7 +27,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly)]
-public sealed class GoDefaultGodebugAttribute(string value) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoDefaultGodebugAttribute(string value) : Attribute
 {
     /// <summary>The comma-separated <c>name=value</c> settings, sorted by name, as cmd/go writes them.</summary>
     public string Value { get; } = value;

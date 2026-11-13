@@ -68,7 +68,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
-public sealed class GoCgoImportDynamicAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoCgoImportDynamicAttribute : Attribute
 {
     /// <summary>
     /// Creates a new <see cref="GoCgoImportDynamicAttribute"/>.

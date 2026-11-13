@@ -53,7 +53,7 @@ namespace go.golib;
 /// which is Go's own mechanism, not an emulation of one.
 /// </para>
 /// </remarks>
-public sealed class Coro
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class Coro
 {
     // The two halves of the handoff. Capacity one because a permit is a TURN, not a count: a second
     // release before the peer consumes the first would mean both sides were runnable, which is the

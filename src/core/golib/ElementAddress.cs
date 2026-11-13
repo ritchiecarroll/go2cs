@@ -39,7 +39,7 @@ namespace go;
 /// </para>
 /// </remarks>
 /// <typeparam name="T">Element type.</typeparam>
-public readonly struct ElementAddress<T> : IEquatable<ElementAddress<T>>
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct ElementAddress<T> : IEquatable<ElementAddress<T>>
 {
     // The backing T[] (or the foreign collection ElemRefBox canonicalizes onto), GoZeroBase.Box for every
     // zerobase element, or null for a NATIVE element, whose m_index is then its address.

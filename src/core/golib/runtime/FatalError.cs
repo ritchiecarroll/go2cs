@@ -9,7 +9,7 @@ namespace go.golib;
 /// <summary>
 /// Represents common fatal error messages reported in Go environment.
 /// </summary>
-public static class FatalError
+[EditorBrowsable(EditorBrowsableState.Never)] public static class FatalError
 {
     public static string DeadLock()
     {

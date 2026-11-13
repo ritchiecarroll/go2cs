@@ -1164,9 +1164,9 @@ and the `ꓸꓸꓸ` suffix reads as Go's `...`):
 
 <!-- source: src/core/golib/variadic.cs:26, 53 -->
 ```csharp
-public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params Span<TArg> args);
 …
-public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params Span<TArg> args);
 ```
 
 `iifeDelegateType` — the single structural lowering every `getCSharpTypeName(*types.Signature)` and
@@ -1288,7 +1288,7 @@ One small generic trampoline per family arity — eighteen, the closed set golib
 declares — is closed over the delegate's own parameter types by `MakeGenericMethod` and cached as
 an ordinary delegate, the `elementBoxViaAt` idiom GoReflect.FieldAccess.cs already uses:
 
-<!-- source: src/core/golib/GoReflect.TypeLayout.cs:1901-1902 -->
+<!-- source: src/core/golib/GoReflect.TypeLayout.cs:1915-1916 -->
 ```csharp
 private static object? callVariadicFunc1<T1, TArg, TResult>(Delegate d, object?[] a, Array t)
 { return ((Funcꓸꓸꓸ<T1, TArg, TResult>)d)((T1)a[0]!, new Span<TArg>((TArg[])t)); }

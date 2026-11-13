@@ -23,6 +23,11 @@
     <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="4.2.751201" />
   </ItemGroup>
 
+  <!-- PublicSurfaceTests reads golib's public-surface baseline (docs/PublicSurface.md) from the output directory. -->
+  <ItemGroup>
+    <None Include="..\..\core\golib\PublicSurface.golib.txt" Link="PublicSurface.golib.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- The spawn-seam gate file drives linux-flavor-only syscall surface (Wait4, the unix
        ProcAttr); under any other $(GoTargetOS) it is excluded from compilation entirely,
        mirroring the L3 corpus's own per-GOOS item mechanism.
@@ -58,8 +63,17 @@
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux'">
     <Compile Remove="GoCgoWrappers.linux.golden.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
+  <!-- darwin's golden is per architecture (increment 5b): golib's resolver holds bindings to the target they were
+       converted for (§5.3, §11.20), and Apple silicon runs an arm64 process. The legs build natively, so the build's
+       own process architecture names the golden. -->
+  <PropertyGroup>
+    <GoCgoGoldenArch>$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)</GoCgoGoldenArch>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin' or '$(GoCgoGoldenArch)' == 'Arm64'">
     <Compile Remove="GoCgoWrappers.darwin.golden.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin' or '$(GoCgoGoldenArch)' != 'Arm64'">
+    <Compile Remove="GoCgoWrappers.darwin-arm64.golden.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != '' and '$(GoTargetOS)' != 'windows'">
     <Compile Remove="GoCgoWrappers.windows.golden.cs" />
@@ -271,6 +285,8 @@
     <Using Include="System.Int32" Alias="rune" />
 
     <ProjectReference Include="..\..\core\golib\golib.csproj" />
+    <!-- InlineArrayFamilyTests: the inline-array family, go.arrays.dll. -->
+    <ProjectReference Include="..\..\core\go.arrays\go.arrays.csproj" />
     <!-- NamedSliceLenCapAllocationTests: sort.IntSlice is a generator-emitted named slice type (the
          `type S []E` wrapper struct), the shape whose len/cap boxed through the ISlice overloads. -->
     <ProjectReference Include="..\..\core\sort\sort.csproj" />

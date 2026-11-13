@@ -42,6 +42,13 @@ internal class StructTypeTemplate : TemplateBase
     // nothing (A17, COORD ruling 2026-09-28).
     public HashSet<string> ReadOnlyZeroSizeMembers = [];
     public string[] ValueCloneFields = [];
+    // The [GoAlignmentCarrier] fields (see GetAlignmentCarrierMembers): readonly stand-ins for Go [0]T fields that share
+    // bytes with the field Go places at the same offset, so equality and hashing skip them
+    // (docs/phase4/DESIGN-array-value-storage.md, 7.6.2).
+    public HashSet<string> AlignmentCarrierMembers = [];
+    // The instance fields of a [GoInlineLayout] struct, in declaration order; null for every other struct. Non-null
+    // emits the IGoManagedLayout part golib's inline-layout gate reads (7.6.3).
+    public List<(string spelling, string name)>? InlineLayoutFields;
 
     // The embeds this struct's converter declaration carries as FIELDS (`/*embed*/ public T T;`), in Go order: the
     // field is the embed's storage and its accessor, so the generator declares neither and stores through it.
@@ -116,6 +123,19 @@ internal class StructTypeTemplate : TemplateBase
     private string GoEquatablePart =>
         $"\r\n\r\n    partial struct {StructName} : global::go.IGoEquatable\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {StructName} value && this == value;\r\n    }}";
 
+    // golib's IGoManagedLayout for a [GoInlineLayout] struct: the struct measures its own fields' CLR offsets with
+    // Unsafe.ByteOffset over a default instance, its CLR size and its CLR alignment, so the inline-layout gate compares them
+    // with the Go layout without reflection (docs/phase4/DESIGN-array-value-storage.md, 7.6.3).
+    private string ManagedLayoutPart => InlineLayoutFields is not { } fields ? "" :
+        $"\r\n\r\n    partial struct {StructName} : global::go.golib.IGoManagedLayout\r\n    {{\r\n" +
+        $"        global::go.golib.GoManagedLayout global::go.golib.IGoManagedLayout.ManagedLayout\r\n        {{\r\n            get\r\n            {{\r\n" +
+        $"                {StructName} probe = default;\r\n\r\n" +
+        $"                return new(\r\n                    [{string.Join(", ", fields.Select(member => $"\"{member.name}\""))}],\r\n" +
+        $"                    [{string.Join(", ", fields.Select(member => $"global::go.golib.GoManagedLayout.OffsetOf(in probe, in probe.{member.spelling})"))}],\r\n" +
+        $"                    global::System.Runtime.CompilerServices.Unsafe.SizeOf<{StructName}>(),\r\n" +
+        $"                    global::go.golib.GoManagedLayout.AlignmentOf<{StructName}>());\r\n" +
+        $"            }}\r\n        }}\r\n    }}";
+
     private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)>? m_publicStructMembers;
     private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)> PublicStructMembers =>
         m_publicStructMembers ??= StructMembers.Where(item =>
@@ -163,9 +183,9 @@ internal class StructTypeTemplate : TemplateBase
 
                 public override string ToString() => global::go.GoMethodText.Of(this) ?? string.Concat("{", string.Join(" ",
                 [
-                    {{(StructMembers.Count > 0 ? string.Join(",\r\n            ", StructMembers.Select(GetToStringImplementation)) : "\"\"")}}
+                    {{(ComparedMembers.Count > 0 ? string.Join(",\r\n            ", ComparedMembers.Select(GetToStringImplementation)) : "\"\"")}}
                 ]), "}");
-            }{{GoEquatablePart}}
+            }{{GoEquatablePart}}{{ManagedLayoutPart}}
         """;
 
     // The memberwise `Equals(T)` and `GetHashCode`, omitted when a hand-owned partial declares the
@@ -2038,7 +2058,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 footer += $$"""
 
-                    [global::go.GoPromotedHost(typeof({{UnboundQualifiedStructName}})), {{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
+                    [global::go.GoPromotedHost(typeof({{UnboundQualifiedStructName}})), {{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}, {{HiddenAttribute}}]
                     {{Scope ?? "public"}} static class {{DeclareExtensionHost(PromotedHostClassName)}}
                     {{{promoted}}
                     }
@@ -2051,7 +2071,7 @@ internal class StructTypeTemplate : TemplateBase
 
             return footer + $$"""
 
-                [{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
+                [{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}, {{HiddenAttribute}}]
                 public static class {{DeclareExtensionHost(XpkgClassName($"{PackageName}_package", NonGenericStructName))}}
                 {{{m_xpkg}}
                 }
@@ -2278,7 +2298,7 @@ internal class StructTypeTemplate : TemplateBase
             // letter, so no owning type runs into a number.
             if (tokens.Count > 0)
             {
-                result.Append($"\r\n\r\n{TypeElemIndent}public static class {FieldAccessTokenHolder}\r\n{TypeElemIndent}{{");
+                result.Append($"\r\n\r\n{TypeElemIndent}[{HiddenAttribute}]\r\n{TypeElemIndent}public static class {FieldAccessTokenHolder}\r\n{TypeElemIndent}{{");
 
                 foreach (string token in tokens)
                     result.Append($"\r\n{TypeElemIndent}    {token}");
@@ -2693,7 +2713,11 @@ internal class StructTypeTemplate : TemplateBase
         return item.isReferenceType ? $"{item.memberName}?.ToString() ?? \"<nil>\"" : $"{item.memberName}.ToString()";
     }
 
-    private string CompareFields => StructMembers.Count == 0 ? "true /* empty */" :
+    // The members equality, hashing and ToString read: every member but an alignment carrier.
+    private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)> ComparedMembers =>
+        AlignmentCarrierMembers.Count == 0 ? StructMembers : StructMembers.Where(member => !AlignmentCarrierMembers.Contains(member.memberName)).ToList();
+
+    private string CompareFields => ComparedMembers.Count == 0 ? "true /* empty */" :
         HasEqualityOperators || EqualityFallbackMembers is not null ?
             string.Join(" &&\r\n            ", CompareList) :
             "false /* missing equality constraints */";
@@ -2707,16 +2731,16 @@ internal class StructTypeTemplate : TemplateBase
     // converter emits for Go == on any type-parameter operand: EqualityComparer speed on value
     // types but IEEE semantics on floats (EqualityComparer alone reports NaN equal to itself,
     // inverting Go) and typed-null/runtime-type semantics on reference and interface arguments.
-    private IEnumerable<string> CompareList => StructMembers.Select(member =>
+    private IEnumerable<string> CompareList => ComparedMembers.Select(member =>
         EqualityFallbackMembers?.Contains(member.memberName) == true ?
             $"global::go.builtin.AreEqual(this.{member.memberName}, other.{member.memberName})" :
             $"this.{member.memberName} == other.{member.memberName}");
 
-    public string HashCode => StructMembers.Count == 0 ? "base.GetHashCode()" :
+    public string HashCode => StructMembers.Count == 0 ? "base.GetHashCode()" : ComparedMembers.Count == 0 ? "0" :
         $"""
         global::go.golib.HashCode.Combine(
                     {ParamList})
         """;
 
-    private string ParamList => string.Join(",\r\n            ", StructMembers.Select(member => member.memberName));
+    private string ParamList => string.Join(",\r\n            ", ComparedMembers.Select(member => member.memberName));
 }

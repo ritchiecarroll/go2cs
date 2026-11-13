@@ -158,6 +158,7 @@ internal class StrTemplate : TemplateBase
         ? $$"""
             
                 // The canonical func value of {{Method.Name}}: a twinned function has no single method group (CS0123).
+                [{{HiddenAttribute}}]
                 {{Access}} static readonly {{DelegateType}} {{Method.Name}}{{FuncValueMarker}} = [global::go.GoTwinForwarder("{{Method.Name}}")] static ({{LambdaParameters}}) => {{Method.Name}}({{LambdaArguments}});
 
             """

@@ -9,7 +9,7 @@ namespace go;
 /// <summary>
 /// Defines an interface to support 'make' function parameters.
 /// </summary>
-public interface ISupportMake<out T> : IGoReflectMake where T : ISupportMake<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public interface ISupportMake<out T> : IGoReflectMake where T : ISupportMake<T>
 {
     /// <summary>
     /// Initializes type with make size and capacity parameters.

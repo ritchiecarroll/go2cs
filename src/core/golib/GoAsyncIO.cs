@@ -39,7 +39,7 @@ namespace go.golib;
 /// own first argument. Nothing else in either package's signature is common to both.
 /// </para>
 /// </remarks>
-public static class GoAsyncIO
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoAsyncIO
 {
     // Descriptor -> readiness sink. The sink takes the MODE the completion belongs to; the waiter's
     // own closure supplies everything else it needs.
@@ -649,7 +649,7 @@ public static class GoAsyncIO
 /// Implemented by a submitting package's per-operation state to expose the operation's native
 /// control block to the package that harvests its result.
 /// </summary>
-public interface IGoAsyncOperation
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IGoAsyncOperation
 {
     /// <summary>
     /// Address of the operation's native control block, or 0 when none is currently allocated.

@@ -16,7 +16,7 @@ namespace go;
 /// so a zero value can only be produced from a value that already has the shape. See
 /// <see cref="builtin.GoZero{T}"/>, which is where a built-in like <c>clear</c> asks for one.
 /// </remarks>
-public interface IGoZeroShaped
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IGoZeroShaped
 {
     /// <summary>
     /// Gets a NEW value of this type shaped exactly like this one, with every element the Go zero

@@ -31,7 +31,7 @@ namespace go;
 /// maps <see cref="GoChanDir.Unstamped"/> and <see cref="GoChanDir.Both"/> to it, which keeps the
 /// bidirectional channel's canonical spelling exactly what it was.
 /// </remarks>
-public sealed class ChanCargo
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class ChanCargo
 {
     /// <summary>The direction chain, outermost first; never empty on a live instance.</summary>
     public readonly GoChanDir[]? DirChain;

@@ -12,9 +12,9 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using go.golib;
 
-[assembly:InternalsVisibleTo("unsafe")]
+[assembly:InternalsVisibleTo("go.unsafe")]
 [assembly:InternalsVisibleTo("GolibTests")]
-[assembly:InternalsVisibleTo("runtime")] // runtime.Gosched delegates to golib's GoschedBackoff escalation
+[assembly:InternalsVisibleTo("go.runtime")] // runtime.Gosched delegates to golib's GoschedBackoff escalation
 
 namespace go;
 
@@ -60,7 +60,7 @@ namespace go;
 /// FALSE of a field or element reference whose root merely happens to be reference-bearing. The
 /// middle answer below is that class, and it is the one the merged Q44 arm turned into a token.
 /// </remarks>
-public enum PointerStorage
+[EditorBrowsable(EditorBrowsableState.Never)] public enum PointerStorage
 {
     /// <summary>
     /// No storage whose address means anything: the value is an order token, never an address.

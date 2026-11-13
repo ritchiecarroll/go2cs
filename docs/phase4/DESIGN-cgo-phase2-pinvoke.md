@@ -92,6 +92,9 @@ consumes the recognizer. Until then Phase 2 could not even refuse these by name.
 ### 4.1 Files
 
 > ⟶ **Amended 2026-11-10:** §11.8 (the bindings file is converter output, not git-ignored) and §11.9 (one per target, placed by the layout rule).
+> ⟶ **Amended 2026-11-11:** §11.20 (the header records the toolchain's first `--version` line, never `go env CC`, and
+> hashes the `import "C"` sources and converted C type declarations, never raw cmd/cgo output; Phase 2's single-target
+> bindings file is homed at `<goos>-<arch>/`).
 
 Per cgo package, the converter writes:
 
@@ -262,6 +265,8 @@ copy-back of the other overwrite it.
 ### 5.3 The size assertion, and what it can and cannot catch (R3)
 
 > ⟶ **Amended 2026-11-10:** §11.2 (the assertion above is tautological).
+> ⟶ **Amended 2026-11-11:** §11.20 (the run-time target check reads `ProcessArchitecture`, not `OSArchitecture`,
+> and lands in increment 5b).
 
 Each mirror carries a static check that runs once, before its first crossing:
 
@@ -723,6 +728,18 @@ Everything else is refused by name, whatever increment 1 finds about `go list -c
 - The cost of the seam bracket is on par with Go's `cgocall` bracket. §8 on blocking, affinity and signals stands as
   the review read it.
 
+> **AMENDED 2026-11-11 (COORD, RULED, on the review of increment 5's design, M1; §11.20):** five divergences of
+> cmd/cgo's pointer check, four of them with a function of their own in `src/go2cs/testdata/cgo/phase2/fixture.go`:
+>
+> - **Go panics, Phase 2 proceeds:** a pointer into package-level memory through the variable form
+>   (`PackageLevel`; `runtime/cgocall.go:772-777`), and a pointer to a field whose heap object holds another Go pointer
+>   (`Sibling`; `:751-768`). C is handed a stack mirror of the pointee alone, so the memory Go's scan guards is
+>   unreachable from C.
+> - **Go proceeds, Phase 2 refuses:** a member pointing at `runtime.Pinner`-pinned memory (`Pinned`; `:738`, the first
+>   line above); every check under `GODEBUG=cgocheck=0` (`:565`), which Phase 2 has no switch for (no fixture function:
+>   it is an environment setting); and a by-value struct whose pointer member points into pointer-free Go memory
+>   (`ByValue`; Go passes `top` through struct fields, `:714-726`, and Phase 2's copy-in refuses a managed pointer).
+
 ### 11.17 Q1 RULED: the visible `C.` form is the target (note 18)
 
 Converted call sites read `C.add(C.@int(a), C.@int(b))`, through a nested static class `C` that declares the C-named
@@ -787,3 +804,500 @@ test. COORD ruled each item; each was fixed red-first on the same branch:
   generated methods (CS0102). They are now `CheckLayoutᴍ` and `Holdᴍ`. As with the type suffix, a C-derived name is
   ASCII, so it can never be a marked name.
 - **RULED, §11.7: an all-padding eightbyte is refused by value** (the dated line under §11.7).
+
+### 11.20 Amendment 2026-11-11: increment 5, as reviewed
+
+H's design delta for increment 5 (§9 item 5, the narrowed refusal) was reviewed adversarially before any red. COORD
+ruled on the review: no BLOCKER, and four MUST-FIX items, all inside the seat. This section is the increment's design
+as ruled. Evidence cites are go1.26.10 file:line.
+
+**What 5 is.** Under `-cgo`, a package converts when every C use it makes is in Phase 2's set. Otherwise the refusal
+lists each use that is not, with the phase that owns it, writes nothing and exits non-zero. Increment 5 is two seats.
+5a is the converter route, gated offline over checked-in cmd/cgo output. 5b is the real route: the capture through
+`go env CC`, the link-flag check and §5.3's target check, gated on the hosted legs. Building and running the converted
+output against `go run` is G1's.
+
+**The check closure, and what unwrapping it claims (M1).** cmd/cgo rewrites a call whose pointer argument's pointee
+holds a pointer into a closure that calls `_cgoCheckPointer` before the call (cmd/cgo `gcc.go` `rewriteCall`). Phase 2
+unwraps the non-deferred closure to the direct call `C.f(…)`. The claim is NOT that the wrapper checks what Go
+checks. It is: **the mirror hands C only the pointee, so Go's wider scan guards memory C cannot reach.** The two
+forms differ:
+
+- the ADDRESS form, `_cgoBaseN := &x; …; _cgoCheckPointer(_cgoBaseN, 0 == 0)`, checks the pointee's members only
+  (`runtime/cgocall.go:580-590`). That is what `GoCgoArgs.PointerMember` checks (`GoCgoArgs.cs:80-88`).
+- the VARIABLE form, `_cgoN := p; _cgoCheckPointer(_cgoN, nil)`, scans the whole heap object (`cgocall.go:618`,
+  `:728-768`) and panics for any pointer into data or bss (`:772-777`).
+
+**RULED (COORD, 2026-11-11, on H's measured proposal): the variable form is admitted, and its two Go-panics cases are
+DISCLOSED divergences** (§11.16, `Limitations.md`). `TestCgoCheckClosureFormsAcrossGorootsCgoPackages`
+counted each form in the generated trees of GOROOT's 29 cgo packages (hosted linux, go1.26.10, run 42973745743):
+
+| Form | Count |
+|---|---|
+| address | 31 |
+| variable | 50 |
+| index | 22 |
+| slice | 0 |
+| defer | 9 |
+| go | 0 |
+
+The variable form is the majority among the closures that do not take element memory: 50 of 81. `plugin` reaches
+the address form only (2 sites). `net` reaches the variable form only (4 sites), because its resolver passes its
+pointers through as parameters (`cgo_unix_cgo.go:76`, `:84`), and that is ordinary cgo style. Most of `net`'s sites
+also pass a `void *` or a `T **`, which Phase 2 refuses anyway (N2), so the case for admitting the variable form rests
+on the census, not on `net`. The rest are `cmd/cgo/internal/test`.
+
+In both cases where Go's wider scan panics and Phase 2 proceeds, C is handed a stack mirror of the pointee alone,
+never the Go object. The memory Go's check guards (the rest of the heap object, or a data/bss variable C might retain)
+is unreachable from C. Only a program that already breaks cgo's pointer rules can observe the difference, and Go
+itself proceeds under `cgocheck=0`. Refusing the form would refuse correct programs to catch incorrect ones.
+
+**NAMED DEFERRAL, not a promise:** a run-time equivalent of the variable form's scan is Phase 2 later. Nothing
+schedules it, and it opens only if a program is found that depends on the panic.
+
+**A correction to the review, measured.** cmd/cgo DOES write a closure for a struct passed by value with a pointer
+member. The fixture's `ByValue` gets the variable form, `_cgo0 := link; _cgoCheckPointer(_cgo0, nil)`
+(`fixture.cgo1.go`, generated at go1.26.10), so the census's variable count includes by-value arguments. The divergence
+itself stands: Go accepts a pointer member into pointer-free Go memory, and Phase 2's copy-in refuses a managed
+pointer member.
+
+**Fail-closed is a census (M2, S4).** `_cgoN`, `_cgoBaseN` and `_cgoCheckPointer` are ordinary identifiers in a
+type-checked tree. A shape matcher that misses a closure would convert it to a C# lambda calling a dropped function,
+which is a build error AFTER files are written. So the refusal is a census over `types.Info.Uses`: every use of an
+object declared in cmd/cgo's types file must be consumed by a recognised shape. Those shapes are a call-site rename,
+a C type or constant reference, or a part of an unwrapped closure. Any other use refuses BEFORE any write, naming its
+site. Its negative controls (safety floor 13) mutate the checked-in output, and each must refuse naming its site:
+
+- an extra statement in a closure;
+- a check on the wrong `_cgoN`;
+- final-call arguments that are not exactly `_cgo0`…`_cgoN-1`, in order.
+
+The corpus stays byte-identical only because the `/*line*/` drop and the parenthesis drop are gated on cgo-tree
+identity, and the prediction says so.
+
+**Shapes (M3, N2).** RECOGNISED:
+
+- the non-deferred closure, in its address and variable forms;
+- `var _cgoN T = arg` for an unchecked argument (`gcc.go:988-995`), emitted as `T`'s conversion of `arg`, never the bare
+  initializer;
+- a closure nested in another's initializer at any depth (`gcc.go:1189-1203`), unwrapped recursively;
+- the two-result closures `func() (R, error)` and `func() (_Ctype_void, error)` (`gcc.go:939-969`);
+- a result-less closure as a statement;
+- an unparenthesised callee inside a closure, `/*line*/` anywhere, including between `return` and the callee, and
+  after `:=`;
+- `import _cgo_unsafe "unsafe"` (`gcc.go:1461-1468`);
+- cmd/cgo's parentheses around EVERY non-type reference (`gcc.go:1583-1586`). A parenthesis is dropped only when its
+  operand resolves to a cgo object.
+
+REFUSED by name:
+
+- the deferred closure, `defer func() func() {…}()()`: Phase 2 later;
+- the goroutine closure: `Deferred` is set only for `ctxDefer` (`ast.go:276`), so cmd/cgo writes `go func() {…}()`
+  and the arguments are evaluated INSIDE the new goroutine: Phase 2 later;
+- the index and slice forms (`_cgoIndexN`, `_cgoSliceN`): Phase 3.
+
+`_cgoBaseN` under conversions (`gcc.go:1287-1305`), such as `(*C.T)(unsafe.Pointer(&goStruct))`, unwraps and reaches
+`GoCgoArgs.StructPointer`'s refusal of a reinterpret-minted box (§11.1). That refusal has an arm.
+
+`void *` and `T **` always get a closure (`gcc.go:1129-1131`), and the wrapper already refuses both
+(`cgoStructWrappers.go:227`). So the closures inside Phase 2's set are exactly those whose argument is a pointer to a
+struct with a pointer member.
+
+`/*line*/` comments are line directives and shift ADJUSTED positions. Anything placed by position in a cgo tree uses
+`PositionFor(pos, false)` (N3). A refusal names the source site, which is the adjusted position.
+
+**File roles (S2).** On the real route a tree's role is read from content AND provenance:
+
+- the package has an `import "C"` GoFile;
+- the tree opens with cmd/cgo's header (`out.go:82`, `:707`);
+- the tree is in CompiledGoFiles and not in GoFiles;
+- two trees mapping to one source refuse.
+
+The tree whose `//line` names an `import "C"` source converts under that source's name. cmd/cgo's types file hosts the
+bindings file. `_cgo_import.go` is dropped before the dynamic-import collector sees it, and any other cmd/cgo tree
+refuses. Content-only recognition is allowed only for the offline tests, where checked-in output is loaded as plain
+files.
+
+**The header (M4; §4.1 amended).** The bindings file's header records:
+
+- the target;
+- the C toolchain's FIRST `--version` line, and NEVER `go env CC`'s value, because an absolute path would break the
+  nicknames-only rule;
+- a sha256 over the `import "C"` SOURCES and the C type declarations converted, normalised to LF.
+
+It hashes no path, no link flag and nothing from `_cgo_import.go`. Raw cmd/cgo output is machine-dependent: its
+`//line <srcfile>:1:1` is absolute (`out.go:713`), its `//go:cgo_ldflag` carries the environment's `CGO_LDFLAGS`,
+`-L` paths included (`out.go:50`), and `_cgo_import.go` names the host libc's symbol versions.
+
+**Targets (S1, S3 RULED; answers §11.18's SHOULD for Phase 2).** `-cgo` is single-target in Phase 2, and multi-target
+`-cgo` is Phase 2 later.
+
+- The bindings file is homed at `<goos>-<arch>/`, which is always truthful, never flat: flat means identical on all
+  four targets (§11.9). The project takes the layout rule's conditioned include for that folder (`platformLayout.go`).
+- "Host" is the load's `go env GOOS`/`GOARCH`, never go2cs's own `runtime.GOOS`. A `-cgo` target other than the host
+  refuses by name. linux/arm64 bindings need an arm64 host (char signedness, §11.9).
+- §5.3's run-time check reads `RuntimeInformation.ProcessArchitecture`, not `OSArchitecture`. Otherwise a Rosetta or
+  Windows-on-Arm x64 process falsely refuses (`26186c1739` already chose ProcessArchitecture for GOARCH). It lands in
+  5b: `GoCgoLibraries.Register` takes the target, and `Resolve` throws by name on a mismatch.
+
+**Arms.** `testdata/cgo/phase2/fixture.go` gives cmd/cgo every shape above, from the system C library and the probe
+library (§11.10). Its generated files are cmd/cgo's own output, made on a hosted linux/amd64 leg with the pinned zig
+toolchain and committed as Phase 1's were.
+
+- N1: `Ordered` passes a by-value struct and then an argument that changes it. Go copies the struct when the argument
+  is evaluated, and the converted call must too.
+- Four of §11.16's five divergences have a fixture function each. The fifth, `GODEBUG=cgocheck=0`, is an environment
+  setting.
+
+**Seam coverage, a standing property (COORD, for M:N; increment 5b).** Every native call a binding makes is inside
+runtime's `syscallEntersyscall`/`syscallExitsyscall` bracket (§11.4), so a scheduler that watches the bracket sees every C
+call. Each extern belongs to one wrapper with one bracket. The single exception is windows' `_errno` slot, which only
+the errno form calls, inside its own bracket. golib's resolver loads a library only when a bracketed call first binds
+its import, and the module initializer makes no native call. `TestCgoBindingsCrossTheSeamOnEveryNativeCall` holds this
+over the goldens: the externs equal the brackets plus the errno slot (linux 15/15, darwin 15/15, windows 17 = 16 + 1 at
+increment 5b), and no extern call sits outside a bracket. Its own negative control removes one bracket's opening and
+must name the call.
+
+**The host rule (increment 5b; S3).** `-cgo` converts for the host's own target, read before the load as `go env
+GOHOSTOS`/`GOHOSTARCH` in the load's environment, and any other target refuses naming both sides. golib's resolver
+holds converted bindings to the target they record (`GoCgoLibraries.Register`'s additive target overload;
+`TargetMismatch` compares the running GOOS and the PROCESS architecture). So the GolibTests goldens are per
+architecture where a leg's process differs: darwin's arm64 leg compiles `GoCgoWrappers.darwin-arm64.golden.cs`, which
+the generator writes for darwin/arm64 like the others.
+
+**A class 5b's legs found: an offline seam whose fixture names differ from a real host's (COORD named it).** The
+offline route loads checked-in cmd/cgo output as files named `.go`. A real host's `go list` hands back the same trees
+under build-cache names with no `.go` suffix, and the driver's build-constraint re-check refuses such a name
+(`isFileNameCompatible`). So every tree of the real route was dropped silently, with exit 0 and no bindings file,
+which no offline gate could see by construction. Fixed in 5b (3d4c3236b1): the route's trees are not re-checked, since
+go list selected their source, and a cgo package whose bindings file was not written fails the conversion by name.
+The general rule: where an offline seam stands in for a real route, any property of the real inputs the seam changes
+(here, a file's name) is a gap only the real route closes, so the real-route legs are part of the gate.
+
+A second member of the class, from the review below (M1): the offline seam loads cgo-off, so `go list` never selected a
+plain file under `//go:build cgo`, and no offline test could see the driver drop one. The seam's load now carries
+`-tags=cgo`, which selects such a file as a cgo-on load does and still leaves an `import "C"` source out.
+
+**The first real-route readings (converter-cgo, increment 5b).**
+- The Phase 2 fixture's own refusal (its deferred and goroutine calls) passed on real cmd/cgo output first at
+  43147447241 (linux, zig).
+- With those two calls removed, the fixture converts on linux (zig), darwin (zig, both RIDs) and windows
+  (llvm-mingw), at 43151538896, 43151546974 and 43151555690. The captured tables are:
+  - linux: `libc.so.6`, `libm.so.6` (`-lm`) and `libgo2csprobe.so`;
+  - darwin: `/usr/lib/libSystem.B.dylib` and `/tmp/go2cs-cgo-probe/libgo2csprobe.dylib`;
+  - windows: `api-ms-win-crt-math-l1-1-0.dll`, `api-ms-win-crt-utility-l1-1-0.dll` and `go2csprobe.dll`.
+- llvm-mingw's C runtime resolves `mktime` statically, so windows refuses it by name at its use.
+- No build-machine path appears beyond the captured library names (a darwin install name is absolute by rule).
+- With the probe linked, `go list` hands back `_cgo_import.go` on all three. That answers §11.20's UNMEASURED cause:
+  `-dynimport` reads a binary linked from the preamble, which links now that the probe library defines the four
+  probes.
+
+Each divergence is a tested decision, not an accident (COORD's condition on the M1 ruling). In 5a, each of the four
+fixture functions converts, and the converted call is asserted. Their run-time behaviour is G1's, and goes on **G1's
+checklist** as these run-time arms, each asserting go2cs's actual behaviour beside `go run`'s:
+
+- `PackageLevel` and `Sibling` PROCEED in go2cs (Go panics);
+- `Pinned` REFUSES in go2cs with the copy-in message (Go proceeds), and the same arm is run again under
+  `GODEBUG=cgocheck=0`, where Go proceeds and go2cs still refuses;
+- `ByValue` REFUSES in go2cs with the copy-in message (Go proceeds);
+- `Reinterpreted` REFUSES in go2cs at `GoCgoArgs.StructPointer` (§11.1);
+- `Ordered` passes the pair as it was before `mutate` ran;
+- `Nested`, `TwoResults` and `Statement` each match `go run`.
+
+**`_cgo_import.go` is missing from the fixture, cause UNMEASURED.** `go list -compiled` handed back none for
+`fixture.go` (run 42973745743), where it does for Phase 1's. The likely cause is that `-dynimport` reads a binary
+linked from the preamble, and nothing here defines the four probe functions. 5b PREDICTS that once `probe.c` defines
+them and the fixture links the probe library, `-dynimport` writes `_cgo_import.go` again. If it does not, that is a
+finding.
+
+### 11.21 Amendment 2026-11-12: the adversarial review of increment 5b
+
+COORD had 5b reviewed adversarially at `568fde8424` and held it from batch 287 until three MUST-FIX items closed, each
+red first (`c1ec22f56a`). This section records each item as fixed.
+
+**M1: a plain file under `//go:build cgo`.** The driver's build-constraint re-check skipped only cmd/cgo's trees, so a
+plain sibling the cgo tag selects was dropped with exit 0 and its declarations dangled. The re-check now carries the
+`cgo` tag for every plain file of a cgo package, as `refuseCgoOnlyPackage` already did.
+
+**M2: a stale bindings file.** The "bindings file was not written" gate was a bare `os.Stat`, which an earlier
+conversion's file satisfies when this conversion's write fails. The gate now reads a flag that only this conversion's
+own successful write sets.
+
+**M3: a name a header renames (RULED: the verified-names rule).** The capture's probe declares each symbol with no
+header, so it finds a renamed function under its plain name: darwin/amd64's `fstat` is `fstat$INODE64`, a different
+function over a different `struct stat`, and glibc may make `strtol` the symbol `__isoc23_strtol`. A binding to the
+plain name would call a function C never calls, silently.
+
+- **The rule:** a symbol binds only when cmd/cgo's own binary imports it under its plain C name. The names are the
+  local names of `_cgo_import.go`'s `//go:cgo_import_dynamic` lines (`cgoImportedByCmdCgo`). Any other symbol is
+  refused at its use, naming what the binary imports that contains its name.
+- A package with symbols to bind and no `_cgo_import.go` is refused too: its C does not link as go builds it, so
+  nothing verifies a name.
+- The capture stays the library oracle and runs first, so the static and Phase 4 refusals keep their text.
+- **The cost, accepted for .4:** cmd/cgo compiles its wrappers at `-O2`, so a call the C compiler inlines as a builtin
+  imports nothing and is refused like a rename. `abs` and `labs` are the fixture's. The refusal a user sees:
+  `C.abs: cmd/cgo's own binary does not import a symbol named abs, so nothing shows that name is the function C calls
+  here: a header renames it, or the C compiler inlined the call as a builtin. Binding the plain name could call a
+  different function, so it is refused; Phase 2 later`. A refusal by name is a disclosed limit; a silent wrong binding
+  is a defect. The real-route test reads which calls each host refuses this way and fails on any outside
+  `{abs, labs}`.
+- **NAMED DEFERRAL (post-.4, a BOARD row):** a probe compiled WITH the package's preamble, reading each reference's real
+  symbol from the object. It lifts the builtin refusals and binds a renamed name soundly. It needs the package's
+  `CgoCFLAGS` and three object readers (ELF, Mach-O, COFF).
+
+**SHOULD items, all fixed in 5b.**
+
+- **S1:** when the probe does not link, a probe that references nothing is linked first. If that fails too, the fault
+  is the link line or the compiler, and the linker's own error is the refusal. No symbol is blamed as Phase 4's.
+- **S2:** the probe carries the target's architecture flags as cmd/go hands them to CC (`gccArchArgs`, mirrored in
+  `cgoArchFlags` for amd64 and arm64), so a compiler whose default architecture differs cannot answer for another.
+- **S4:** the header's toolchain line keeps printable ASCII only and is capped at 120 characters
+  (`cgoToolchainLine`). A bare CR, U+0085, U+2028 and U+2029 each end a C# line, and the text is whatever CC printed.
+- **S5:** golib's resolver holds the target for every import the assembly makes, before the table is searched, so a
+  hand-owned import beside bindings for another target is refused too.
+- **S6:** the real-route test reads `GO2CS_REQUIRE_CGO_PROBE` first and checks the compiler go itself would use
+  (`go env CC`), so a leg that loses its compiler fails rather than skips
+  (`TestTheRealRouteTestFailsWhenARequiredCompilerIsMissing`, shown red against the old ordering).
+
+**Notes.**
+
+- **N1:** CC is split by a port of cmd/go's `quoted.Split` (`cgoQuotedSplit`), held by quoted's own test table. The
+  earlier splitter treated a quote inside a field as a quote, which cmd/go does not.
+- **N2:** CC is resolved once to one program before its `--version` and the probe's link: a relative path against the
+  package directory, a bare name on PATH.
+- **N3:** `GoCgoLibraries.Register`'s target overload is additive, so compiled callers are unaffected. At source,
+  `Register(assembly, null)` is now ambiguous (CS0121). No hand caller exists; the release notes name it.
+- **N5:** each bindings golden's header names its architecture.
+- **N6, INTENDED:** the host rule fires on every `-cgo` run, a package with no C in it included. `-cgo` is a cgo-on
+  load, and a cgo-on load for another target needs that target's C toolchain. The help text says so.
+
+### 11.22 Amendment 2026-11-12: G1, the exit gate, as planned and approved
+
+COORD approved this plan as posted, before any code. It is recorded here with its predictions as worded, so each can
+be scored against the legs.
+
+**What G1 is.** The PLAN's Phase 2 exit gate ("an extern-function-only cgo package's Go-callable surface compiles and
+resolves, with resolution pinned"), §11.10's arms, and §11.20's run-time checklist for the five divergences.
+
+**The gap it closes.** Before G1, the two halves of Phase 2 had never met:
+
+- §11.10's arms run in GolibTests on every hosted OS, but over the wrapper GENERATOR's goldens and HAND-DECLARED types;
+- increment 5b's legs show the ROUTE converts a real package on a real host, and nothing compiled that output.
+
+So "compiles and resolves" had not been measured on converter output: the converter's own C types, its bindings file,
+go2cs-gen and the SDK's LibraryImport generator in one build, and then a call.
+
+**The gate.**
+
+- **The program** is `src/go2cs/testdata/cgo/g1`, a `main` that is extern-only and inside Phase 2's set. Its one
+  argument names an arm and it runs that arm alone, so an arm that panics takes no other with it.
+- **The arms:** `cos`; `div` by value; `frexp` through a pointer to one scalar; the copy-back arm (`uname` on linux and
+  darwin, `GetSystemTime` on windows); the errno arms (`exp(1000)` everywhere, `close(-1)` on linux and darwin); `puts`;
+  `mktime` on linux and darwin; and §11.20's checklist (`nodesum`, `nested`, `tworesults`, `statement`, `ordered`,
+  `packagelevel`, `sibling`, `pinned`, `pinned` under `GODEBUG=cgocheck=0`, `byvalue`, `reinterpreted`).
+- **The comparison** (`TestG1TheConvertedCgoProgramResolvesAndRunsAsGoDoes`): go builds the program and go2cs converts
+  it, with the same C compiler and link line; the converted project is built with the .NET SDK; each arm is run both
+  ways. An arm is EQUAL (the same lines, exit 0 both ways) or one of §11.16's divergences, where each side's
+  behaviour is asserted.
+- **The PLAN's decoy arm, end to end:** a library with the probe's name that answers differently is planted in the
+  current directory, and the converted program's answer must not change. Its control runs first: go's own binary,
+  with the decoy as the library its loader finds, prints the decoy's answer, so the arm can fail.
+- **The compile half alone** (`TestTheCgoRoutesOutputBuildsAsAProject`) needs no C compiler: it converts the Phase 2
+  fixture's checked-in cmd/cgo output and builds the result. It runs on any lane with the SDK.
+- **Where it runs:** both tests are opt-in (`GO2CS_CGO_BUILD=1`), since each builds a closure of the converted
+  standard library. The hosted `cgo-e2e` stage sets it, on linux and darwin under the pinned zig and on windows under
+  llvm-mingw, with one windows run under zig as a labelled override reading.
+- **G2** (build and RUN against the C runtime on the four RIDs) is scored from the same legs, as its own line.
+
+**Two things the gate cannot do inside Phase 2.**
+
+- `puts` needs a C string, and a Phase 2 program cannot make one (`C.CString` is Phase 3). The arm passes a pointer C
+  returned (`go2cs_probe_text`, a string the probe library owns). The assertion is `puts`'s RESULT on both sides.
+  Whether C's line reaches a captured stdout is a READING: C's stdio is fully buffered on a pipe. If neither side
+  flushes it, that is a fact about stdio and not a go2cs defect, unless go's side flushes and go2cs's does not.
+- `strtol`'s `ERANGE` arm needs a C string too. It stays where it runs today (GolibTests, the probe) and moves into a
+  converted program with Phase 3's helpers.
+
+**The hand-declared GolibTests types stay** (`GoCgoWrapperTypes*.cs`) as the generator's unit instrument, by ruling.
+GolibTests has no go2cs-gen analyzer; the converted gate program is the gate for the converter's own types.
+
+**Predictions, as posted, to be scored as worded.**
+
+- **G1-P1.** The first hosted build of the converted program is RED, with at least one C# compile error no offline
+  test showed.
+- **G1-P2.** Once it builds, these arms are EQUAL to go's, byte for byte, on linux/amd64, darwin/amd64, darwin/arm64
+  and windows/amd64: cos, div, the copy-back arm, both errno arms, Ordered, Nested, TwoResults, Statement.
+- **G1-P3.** The divergences read as §11.20 rules them. PackageLevel and Sibling: go panics with cgo's pointer message
+  and exits 2, go2cs proceeds and prints the value. Pinned and ByValue: go proceeds, go2cs panics with the copy-in
+  message. Pinned under `cgocheck=0`: the same. Reinterpreted: go2cs refuses at `StructPointer`.
+- **G1-P4.** The decoy changes nothing on any RID.
+- **G1-P5.** `puts`'s result is equal on both sides on windows. Its line is missing from, or out of order in, the
+  captured stdout on at least one side.
+- **G1-P6.** Corpus 0. Every fix the build forces stays behind `-cgo`.
+- **G1-P7.** The windows zig override refuses `cos` by name and nothing else new.
+- **G1-P8.** Each leg finishes inside 30 minutes, the closure build included.
+
+**First reading, on H, before any leg (the compile half only).** The Phase 2 fixture's converted output builds as a
+project with 0 errors: `example.com.cgooffline.dll` is produced, and both go2cs-gen and the LibraryImport generator
+ran (248.8 s, of which nearly all is the closure of golib, runtime, syscall and unsafe). The run before it read 18
+errors, every one from the test not handing the build its `go2csPath`; that run is what shows the test fails when the
+build does. This is not G1-P1's measurement: G1-P1 is about the gate program on a hosted leg.
+
+**Stop lines.** A divergence arm that reads other than as ruled stops the gate, since it is a ruling's premise. A
+build fix that moves corpus bytes stops for attribution first. The date bends before the gate does.
+
+**The first hosted legs (2026-11-12, at `ea12a61e62`; runs 43207283066 linux, 43207288962 darwin, 43207294212
+windows).** All three read red. One red was the converter's; the rest were the gate's own harness.
+
+- **linux/amd64:** the gate program converts on the real route and builds as a project with 0 errors (78 s). The
+  test then looked for the assembly at a path it assumed, found none, and ran no arm. A harness fault.
+- **windows/amd64, a converter defect:** the gate program names `windows.h`'s `LPSYSTEMTIME`, a pointer typedef. Its
+  type was recorded `public` and the struct it points to `internal`, so go2cs-gen's members for the pointer type did
+  not compile (CS0050, CS0051, CS0053, CS0056, CS0057: 7 distinct errors).
+  - **Cause:** `recordTypeAccessibility` applied the name rule before the rule that keeps a C type internal, so a C
+    name beginning with an upper-case letter read as exported and passed as if it had been publicized.
+  - **Fix, in two places, because the name is read twice.** The record no longer reads a C name: a C type is
+    internal unless its emitter was handed the publicized `public`. And go2cs-gen reads a BARE declaration's scope
+    from its name too, so for a C name that reads public the converter writes `internal` inline, as it does for a
+    function-local type. The first half alone left CS0262 (conflicting modifiers on the two partials).
+  - **Red first:** `TestACNamesFirstLetterDoesNotMakeItsTypePublic` and its companion (`fa61cbe7a4`), and at the
+    compile level `TestACPointerTypedefBuildsWithTheStructItNames`, which read 9 errors before and 0 after.
+- **windows/amd64, harness:** the legs export `GoTargetOS` for their own OS, and MSBuild reads the environment as
+  properties. The Phase 2 fixture is converted for linux on every host, so on the windows leg the build left its
+  bindings file out and failed on CS0051. The tests now state the target they converted for.
+- **darwin, both RIDs, harness:** macOS's temporary directory is a symbolic link, and MSBuild's relative path to
+  `go2csPath`, counted from the link, ends one level short (MSB3202 on every referenced project). The tests resolve
+  the link.
+- **darwin, both RIDs, go and the C toolchain:** `go build` of the gate program failed before go2cs was involved. go's
+  linker runs Apple's `strip` on an externally linked binary, and `strip` refuses what the pinned zig links ("the
+  __LLVM segment too small"). The gate builds go's side with `-ldflags=-w` there. The gate program had already
+  CONVERTED on both RIDs.
+
+**G1-P1, scored as worded:** MET on windows/amd64 (a C# compile error no offline test showed). MISSED on linux/amd64
+(0 errors). NOT MEASURED on darwin at these runs: go's own build failed first.
+
+**Two findings the gate turned up and does not fix** (BOARD, 2026-11-12):
+
+- a conversion from one C numeric type to another does not compile: go2cs-gen hosts the conversion operator in the
+  package's class, where a C type is not;
+- a cgo project built for a `GoTargetOS` other than its bindings' target fails on CS0051, far from the cause.
+
+**The second hosted legs (2026-11-12, at `6e9ef45a29`; runs 43212499497 linux, 43212507656 windows): the arms ran for
+the first time.** Both legs failed on the same three arms. Everything else held on both hosts.
+
+- **Compiles, resolves, runs:** the gate program converts on the real route, builds with 0 errors (linux 139 s,
+  windows 361 s), and every arm runs.
+- **EQUAL to go, byte for byte:** `cos`, `div`, `exp` (1 with errno 0, then +Inf with ERANGE), `frexp`, `nodesum`,
+  `nested`, `tworesults`, `statement`, the copy-back arm (`uname` on linux, `GetSystemTime` on windows), and on linux
+  `close` (EBADF) and `mktime`.
+- **The divergences §11.16 rules, as ruled:** `packagelevel` and `sibling`, go exits 2 and go2cs prints the value;
+  `pinned`, `pinned` under `GODEBUG=cgocheck=0` and `byvalue`, go proceeds and go2cs exits 2.
+- **`puts`, a reading:** its result is equal on both hosts. On linux C's line is absent from go's captured stdout
+  and present in go2cs's; on windows it is present on both. Where present it follows Go's own line, though `puts` ran
+  first. go2cs's exit flushes C's stdio; go's does not on linux.
+
+**Two lines of §11.20's checklist were wrong, and are corrected here (COORD, RULED 2026-11-12). The originals stay
+above as written.**
+
+- **"`Ordered` passes the pair as it was before `mutate` ran" was wrong about go.** go passes the pair AFTER `mutate`
+  ran (`ordered 200004`), and go2cs before (`ordered 2004`). The line was reasoned from cmd/cgo's check closure,
+  which copies its arguments in order; cmd/cgo writes no closure for this call, since no argument needs a check, so
+  it is an ordinary call. Go's spec orders the calls in an expression and leaves a plain variable read unordered
+  against them. gc runs the calls first; go2cs evaluates left to right. That is the converter's, not cgo's: plain
+  Go with no C shows it (BOARD, 2026-11-12). **RULED:** the arm stays as a NAMED divergence asserting both values,
+  and the general class is not G1's to fix.
+- **"`Reinterpreted` REFUSES in go2cs at `GoCgoArgs.StructPointer`" was wrong about go2cs.** It proceeds, and prints
+  what go prints. §11.1's refusal is for a reinterpretation that cannot alias its source, which arrives as a native
+  box minted from managed storage. A Go struct reinterpreted as a C struct of the same layout is an ALIASING view of
+  the same Go memory, and `StructPointer` mirrors it as it mirrors any Go struct. **RULED:** the arm is EQUAL, and a
+  second arm, `reinterpretedwrite`, hands the same pointer to a C function that writes through it and prints the Go
+  field. **PREDICTION, recorded before it runs: both print 1.** If go2cs prints 0, C's write is lost, and that
+  defect stays in G1.
+
+**The third failing arm was the gate's own:** the decoy's control expected the wrong value. The `nested` arm calls
+the probe function twice, so the decoy answers 14001, not 7001. The control did load the decoy on both hosts.
+
+**COORD's ruling on the conversion finding, and its fix.** A conversion between two C numeric types is inside what
+Phase 2 says it converts, so it is fixed IN G1, red first (`f43755ef77`, `2643cf6cea`): go2cs-gen declares an
+operator's host in the class that holds the host type, and names a C type through its class from any other. The gate
+program has a `conv` arm, and a program of such conversions builds and prints what go prints on H
+(`7 7 4464 4464 70000 70001`). The target-mismatch finding goes to Phase 3's first increment.
+
+**Scores at these legs, as worded** (darwin pending): G1-P2 MISSED on `Ordered` and MET on the other arms it names;
+G1-P3 MET except `Reinterpreted`, MISSED; G1-P5 MET.
+
+**The third hosted legs (2026-11-12, at `f5351ca53f`; runs 43218540465 linux, 43218554704 darwin, 43218567730
+windows): GREEN on all four target rows.** On linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64 the gate
+program converts on the real route, builds with 0 errors, and every arm passes.
+
+- **The three arms not yet measured:**
+  - `conv` is EQUAL to go on all four (`conv 7 7 4464`);
+  - `reinterpretedwrite` prints 1 on both sides on all four, so C's write through the reinterpreted pointer reaches
+    the Go struct. **The prediction is MET**;
+  - the decoy arm passes on all four. Its control (go's own binary with the decoy as the library its loader finds)
+    prints the decoy's answer, 14001, and the converted program run from the decoy's directory prints the probe's,
+    1. On darwin a loader search path does override the probe's absolute install name, so the control works there.
+- `ordered` reads as ruled, a named divergence: go 200004, go2cs 2004.
+- **Wall times of the legs:** linux 7 min, darwin/arm64 12 min, windows 11 min, darwin/amd64 24 min (39 min at the
+  second legs). The gate program's own build: 95 s, 274 s, 277 s and 459 s.
+
+**The windows zig override, a labelled READING (run 43218579321), not a leg of the gate.** Under the pinned zig in
+place of llvm-mingw, the conversion refuses the gate program by name, at `C.cos` AND at `C.exp`: zig's mingw links
+both statically, so no shared library exports them (§11.5). Nothing is written. The Phase 2 fixture's offline build
+passes there. The owner's default for windows, llvm-mingw, is what makes these calls bind.
+
+**G1's predictions, scored as worded.**
+
+| | Prediction | Score |
+|---|---|---|
+| G1-P1 | The first hosted build of the converted program is RED, with a compile error no offline test showed | MET on windows/amd64 (the pointer typedef's accessibility). MISSED on linux/amd64 (0 errors). NOT MEASURED on darwin at the first legs (go's own build failed first); at the second it built with 0 errors |
+| G1-P2 | cos, div, the copy-back arm, both errno arms, Ordered, Nested, TwoResults and Statement are EQUAL on the four rows | MISSED on Ordered, on all four (a ruled divergence since). MET on the other eight |
+| G1-P3 | The divergences read as §11.20 rules them | MET for PackageLevel, Sibling, Pinned, Pinned under `cgocheck=0` and ByValue. MISSED for Reinterpreted: it proceeds (the checklist line is corrected above) |
+| G1-P4 | The decoy changes nothing on any RID | MET on all four |
+| G1-P5 | `puts`'s result is equal on windows; its line is missing from, or out of order in, a captured stdout on at least one side | MET: equal, and the line follows Go's own on both sides. On linux it is missing from go's side only |
+| G1-P6 | Corpus 0; every fix stays behind `-cgo` | The wording was loose: both fixes are keyed on the C pseudo-package, which no corpus package has. Scored by the corpus comparison in the battery |
+| G1-P7 | The windows zig override refuses `cos` by name and nothing else new | MISSED by one: it refuses `exp` too |
+| G1-P8 | Each leg finishes inside 30 minutes | MISSED on darwin/amd64 at the second legs (39 min). All four inside 30 at the third |
+
+**G2** (build and RUN against the C runtime on the four RIDs) is the same legs: MET on linux-x64, osx-x64, osx-arm64
+and win-x64.
+
+**What the gate found that no earlier test could.** Two compile defects in what the route writes (a C name's first
+letter deciding its type's accessibility; a conversion between C numeric types hosted in the wrong class), both
+fixed here red first. One general divergence that is not cgo's (the evaluation order of a variable read against a
+call). Two lines of this document's own checklist that were wrong, one about go and one about go2cs.
+
+**A note on §11.21's S4, from batch 288's gate.** The header's toolchain line names the compiler as the compiler names
+itself, and that is the name it was run by. The route runs CC by its full path, so a `gcc` found on PATH on windows
+is recorded as `gcc.exe (...)`. The line carries no directory, and one install always gives one line.
+
+**A third member of §11.20's offline-seam class.** The real-route test computed the header line it expected by
+running the bare name `gcc`, where the route runs the resolved file. Every pinned leg agreed, because a pinned
+toolchain's CC is already a full path; the runner's own gcc did not (run 43202800197, read by COORD at batch 288's
+union). The class, restated: an expectation computed by a different invocation than the route's own is a stand-in,
+and only the configuration that separates the two shows it. The test now resolves the name as the route does.
+
+**The battery (2026-11-12, at `f5351ca53f`, on H, one stage at a time, exit 0).** It covers the converter code and
+go2cs-gen, as ruled. The tree read clean after every stage.
+
+| Stage | Reading |
+|---|---|
+| `go test ./...` | 11 ok, 0 FAIL (`go2cs` 1,426 s; repoguard 371 s). No truncated record |
+| GolibTests, unfiltered | 2,556 passed, 0 failed, 43 skipped. Its TRX against the TRX at `db5e34a189`: 2,613 rows each, the same outcome on every row |
+| GenTests | 507 passed, 0 failed (506 before, plus `AConversionBetweenCTypesCompiles`) |
+| `check-no-regression.ps1` | byte-identical across all 1,035 behavioral packages (8 platform-exclusive skipped) |
+| The full behavioral suite | PASS, 951 projects: Transpile, Compile and Target 951 of 951; Output 921 pass, 0 fail, 30 skip, 0 timeout. No NOT MEASURED line |
+| Corpus comparison, two seeded `-stdlib` roots (A = `db5e34a189`, B = `f5351ca53f`) | 0 files differ on windows/amd64, on linux/amd64, on darwin/amd64 and on linux/arm64. Every conversion exited 0, none degraded |
+
+**G1-P6 is MET:** the corpus is unchanged on all four targets and the behavioral corpus is byte-identical.
+
+- **A disclosed overlap.** The repoguard gate for batch 288's one-file fix ran on this box while this battery was in
+  its `go test` stage, so that stage's wall times are slower than a solo run (repoguard 371 s here, about 205 s
+  alone). The stage passed; nothing in it reads as a timing failure.
+- **Past the battery's tip** this branch carries one Go test file (`cgoRealRoute_test.go`, the compiler resolved as
+  the route resolves it) and documents. They are gated by repoguard, the comment census and the cgo tests of the
+  converter suite, not by a second battery.
+
+**G1 is GREEN:** the hosted gate on four target rows, and the battery behind it.
+
+— H (2026-11-12)

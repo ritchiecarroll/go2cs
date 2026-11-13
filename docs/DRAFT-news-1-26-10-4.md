@@ -91,6 +91,20 @@ are reported as `GO2CS2005` instead of `GO2CS2002`. Their sites cannot fail loud
 accept `GO2CS2005`. A build script that matched `GO2CS2002` for those sites should match `GO2CS2005`.
 <!-- branch claude/r-warn-option: src/go2cs/diagnosticOutput.go diagnosticNonSelfProxyRefused; docs/DiagnosticCodes.md. -->
 
+### Standard-library assemblies are named after their packages (R)
+
+**Package go.fmt now ships go.fmt.dll.** Every converted standard-library assembly is named after its NuGet package
+ID: `go.fmt.dll`, `go.net.dll`, `go.crypto.tls.dll` (and `go.go.ast.dll` for package `go.go.ast`), where 1.26.10.3
+and earlier shipped `fmt.dll`, `net.dll` and `crypto.tls.dll`. Short names like `net.dll` and `log.dll` could clash
+with another library's in a consumer's bin folder. The package IDs themselves do not change, nor do golib
+(`golib.dll`, package go.lib), the go2cs-gen analyzer, or a converted module's own assemblies.
+
+**Upgrading.** A library converted and built against go.* 1.26.10.3 or earlier binds the standard library's
+assemblies by their OLD names, so it must be rebuilt against 1.26.10.4. The break floor already names any such
+package at build time (`GO2CS3002`) rather than letting it fail as a missing assembly at run time.
+<!-- OQ4 (docs/PLAN-public-surface-stability.md, ruled), branch claude/r-oq4-assembly-rename:
+     src/go2cs/assemblyIdentity.go; the design docs/phase4/DESIGN-assembly-identity.md and its census. -->
+
 ### A new refusal: `GO2CS2006` (C2)
 
 **A new refusal: `GO2CS2006`.** A generic call that passes a `[]*T` where the callee declares `[]N` (`N` constrained
@@ -101,3 +115,11 @@ converts it as before when the callee only reads the slice. No standard-library 
 accept `GO2CS2006`, since a downgraded site would run on silently wrong. See [diagnostic codes](DiagnosticCodes.md).
 <!-- branch claude/c2-widening-write-refusal: src/go2cs/sliceWideningWriteRefusals.go; docs/DiagnosticCodes.md;
      the design record on claude/c2-widening-write-design (std census: 8 sites per target, 0 refused). -->
+
+### golib: `GoCgoLibraries.Register` gains a target (H)
+
+**A source-level note for anyone who calls `GoCgoLibraries.Register` by hand.** The method gains an overload that takes
+the target its bindings were converted for, `Register(assembly, "linux/amd64", ...)`, and the original
+`Register(assembly, ...)` stays, so compiled code is unaffected. One call no longer compiles: `Register(assembly, null)`
+is ambiguous between the two overloads (CS0121). Converted code never writes it; the converter emits every call.
+<!-- docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.20 (increment 5b; the review's N3). -->

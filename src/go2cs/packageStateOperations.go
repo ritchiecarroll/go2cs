@@ -48,6 +48,10 @@ func resetPackageState(pkg *packages.Package) {
 	linknamePullDirectives = nil
 	cgoDynamicImports = nil
 	cgoDynamicImportPragmas = nil
+	cgoRouteActive = false
+	cgoBindingsWritten = false
+	cgoRouteFunctions = nil
+	cgoCheckClosures = nil
 	currentPackagePath = pkg.PkgPath
 	currentPackageGorootVendored = false
 	currentPackageOutsideGoroot = pkg.Dir != "" && !isPathUnder(pkg.Dir, filepath.Join(build.Default.GOROOT, "src"))
@@ -86,6 +90,8 @@ func resetPackageState(pkg *packages.Package) {
 	nominalProductionConstraints = hashset.HashSet[string]{}
 	interfaceInheritances = make(map[string]hashset.HashSet[string])
 	adapterClassImplementations = hashset.HashSet[string]{}
+	closedCarrierImplementations = hashset.HashSet[string]{}
+	closedCarrierWarnings = hashset.HashSet[string]{}
 	implicitConversions = make(map[string]hashset.HashSet[string])
 	invertedImplicitConversions = make(map[string]hashset.HashSet[string])
 	indirectImplicitConversions = make(map[string]hashset.HashSet[string])

@@ -51,7 +51,7 @@ namespace go;
 /// Design: <c>docs/Phase4/DESIGN-closure-emission.md</c> §4.
 /// </para>
 /// </remarks>
-public ref struct GoFrame
+[EditorBrowsable(EditorBrowsableState.Never)] public ref struct GoFrame
 {
     // Inline slots for the common defer arities; m_overflow is the correctness tail past them.
     // FOUR comes from a census of the Go standard library, not from a guess: of its 1,454 deferring

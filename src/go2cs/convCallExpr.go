@@ -296,6 +296,11 @@ func identIsUntypedConst(info *types.Info, ident *ast.Ident) bool {
 }
 
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
+	// A call through cmd/cgo's pointer-check closure converts as the call it makes (cgoRoute.go).
+	if closure, found := cgoCheckClosures[callExpr]; found {
+		return v.convCgoCheckClosure(closure, context)
+	}
+
 	// The call's `)` bounds the comments its argument list writes after its last argument (convExprList).
 	firstArg := token.NoPos
 
@@ -3587,9 +3592,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 
 					// Check if the receiver type is pointer and call argument matches
-					if isRecvPointer && isArgPointer && types.Identical(recvType, argType) {
+					if isRecvPointer && isArgPointer && types.Identical(recvType, argType) && v.exprIsReceiverOrDerefdPointerParam(callExpr.Args[0]) {
 						// Since pointer-based receiver functions are converted to C# as ref-based
-						// extension functions, we need to convert the pointer from a reference type
+						// extension functions, we need to convert the pointer from a reference type.
+						// Only a name that RENDERS AS THE POINTEE takes this form: the receiver and a
+						// pointer parameter (`ref var h = ref Ꮡh.DerefOrNull()`). Keyed on the type
+						// alone, it also took a LOCAL copy (`p := h; poke(unsafe.Pointer(p), 8)`),
+						// which holds the box, so `FromRef(ref p)` was the address of the local's own
+						// slot and the write never reached `h` (Go `7 8`, converted `7 0`). A local, a
+						// field or any other operand falls through to the box-carrying mint below.
 						return fmt.Sprintf("(uintptr)@unsafe.Pointer.FromRef(ref %s)", v.convExpr(callExpr.Args[0], nil))
 					}
 				}
@@ -5545,7 +5556,13 @@ func (v *Visitor) reinterpretManagedEmission(callExpr *ast.CallExpr, arg ast.Exp
 		return emission, true
 	}
 
-	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", v.convExpr(src, []ExprContext{identContext}), srcElem, targetElem), true
+	// A source that is itself a pointer CONVERSION, `(*U)(unsafe.Pointer((*T)(up)))`, renders as a cast,
+	// which binds looser than member access: parenthesized, `.Reinterpret` applies to the converted
+	// pointer instead of to `up` (CS1929).
+	// A source Go already parenthesized renders its own parentheses and is left as written.
+	rendered := v.parenthesizeConversionBase(src, v.convExpr(src, []ExprContext{identContext}))
+
+	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", rendered, srcElem, targetElem), true
 }
 
 // The internal/abi record types the managed model can synthesize from a descriptor's carried

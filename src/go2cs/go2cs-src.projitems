@@ -16,11 +16,16 @@
     <None Include="$(MSBuildThisFileDirectory)addCleanupCaptures.go" />
     <None Include="$(MSBuildThisFileDirectory)addressTakenPredicates_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasDocComments_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)aliasKeywordName_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasPublicization_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasReceiverForm_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasReferenceImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)allocInliningFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bridgeTypeAccess_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoBuild_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoG1_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoLoadTag_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoResiduals_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
     <None Include="$(MSBuildThisFileDirectory)genericAllocCallerFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonInterfaceParamPublic_test.go" />
@@ -39,6 +44,8 @@
     <None Include="$(MSBuildThisFileDirectory)arrayDimsCompanion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)assemblyIdentity.go" />
+    <None Include="$(MSBuildThisFileDirectory)assemblyIdentity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)assemblyScopedAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)astTypeSyntax.go" />
     <None Include="$(MSBuildThisFileDirectory)autoSiblingOperations.go" />
@@ -78,9 +85,11 @@
     <None Include="$(MSBuildThisFileDirectory)tailCalledFuncValue_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallFunnelSet_test.go" />
     <None Include="$(MSBuildThisFileDirectory)captureModeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoCheckClosureForms_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoConfigurationClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDeclarations.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDeclarations_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoDriver_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoGateRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoLibraryCapture.go" />
@@ -91,6 +100,8 @@
     <None Include="$(MSBuildThisFileDirectory)cgoMirrors_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPseudoPackage.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPseudoPackage_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoRealRoute_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoRoute.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoWrappers.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoWrappers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoSelectedRefusal_test.go" />
@@ -103,6 +114,8 @@
     <None Include="$(MSBuildThisFileDirectory)chanDirectionCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)childEnvGo2CSPath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cliPaths_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)closedCarrier.go" />
+    <None Include="$(MSBuildThisFileDirectory)closedCarrier_test.go" />
     <None Include="$(MSBuildThisFileDirectory)collapsedLambdaTrailingComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)collectionExpressionTargets.go" />
     <None Include="$(MSBuildThisFileDirectory)collectionExpressionTargets_test.go" />
@@ -121,6 +134,9 @@
     <None Include="$(MSBuildThisFileDirectory)constraintProxyForwarding_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)coreTypeParamAssign.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\g1_unix.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\g1_windows.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\main.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testSignals.go" />
@@ -208,6 +224,8 @@
     <None Include="$(MSBuildThisFileDirectory)dynamicStructOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicInterfaceBase.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeGate_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)droppedFiles.go" />
+    <None Include="$(MSBuildThisFileDirectory)droppedFiles_test.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)elementAddressCompare.go" />
     <None Include="$(MSBuildThisFileDirectory)embeddedAssets_test.go" />
@@ -239,6 +257,7 @@
     <None Include="$(MSBuildThisFileDirectory)fixtureWritesTracked_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foldedShiftOperand_test.go" />
     <None Include="$(MSBuildThisFileDirectory)forClauseReAlias_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)foreignAliasElementAddress_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignFieldConsumer_test.go" />
@@ -388,6 +407,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\layoutKeyLists_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\lineKeyedRecords_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\moduleDisclosureWording_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdLibAssemblyIdentity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdlibDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\suppressGCTransitionSeam_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\testInfoPositionMapCopies_test.go" />
@@ -495,6 +515,7 @@
     <None Include="$(MSBuildThisFileDirectory)nilParamBoxTwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noinlineDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noInliningPartialUsing_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nonAsciiPtrCastSlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxy.go" />
     <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxyRefusals.go" />
     <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxyRefusals_test.go" />
@@ -684,6 +705,9 @@
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\cgo_gotypes.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\fixture.cgo1.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\fixture.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_gotypes.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_import.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\fixture.cgo1.go" />

@@ -478,6 +478,16 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 		packageName := strings.Join(importPathParts, ".")
 		projectReference := emittedProjectReference(targetDir, projectFileBaseName(packageName)+".csproj")
 
+		// The Go package NAME qualifies references in code and keys the package's imported aliases; the path's
+		// last segment is only a guess at it (build.FindOnly reads no source). modernc.org/sqlite/lib declares
+		// `package sqlite3`, so a `lib` key published `libꓸTdb` while the references asked for `sqlite3ꓸTdb`
+		// (CS0426, sqlite-cs S19). The loaded package's own name decides when the loader saw it.
+		rootPackageName := rootPackageNameFromPathParts(importPathParts)
+
+		if meta, ok := importPackageDirs[importPath]; ok && meta.Name != "" {
+			rootPackageName = meta.Name
+		}
+
 		targetDir = strings.ReplaceAll(targetDir, "$(go2csPath)", options.go2csPath+string(os.PathSeparator))
 
 		result[importPath] = PackageInfo{
@@ -490,7 +500,7 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 			// the package's own records from the local adapters it records for foreign structs.
 			ImportPath:       canonicalImportPath,
 			PackageName:      packageName,
-			RootPackageName:  rootPackageNameFromPathParts(importPathParts),
+			RootPackageName:  rootPackageName,
 			SourceDir:        sourceDir,
 			TargetDir:        targetDir,
 			ProjectReference: projectReference,
@@ -1629,6 +1639,10 @@ func valueRecordRealizesAsPartialStruct(targetType types.Type) bool {
 // Parsing cannot fail: a line that does not match the pattern is simply not a record and is
 // skipped, so an unrecognized or malformed package_info yields an empty result rather than an
 // error. There is no error to return, and none is.
+//
+// A CLOSED CARRIER record (`(Pointer = true, Closed = true)`, closedCarrier.go) is deliberately not
+// matched: the declaring assembly's adapter for it is a closed class the importer cannot name by the
+// open-generic rule, so the importer records and generates a carrier of its own.
 func parseExportedPointerImplementLines(lines []string) [][2]string {
 	var pairs [][2]string
 
@@ -1655,6 +1669,10 @@ func parseExportedPointerImplementLines(lines []string) [][2]string {
 // records that the defining assembly itself implements the interface on the value type.
 //
 // Like its pointer-form sibling this cannot fail — a non-matching line is just not a record.
+//
+// A CLOSED CARRIER record (`(Closed = true)`, closedCarrier.go) is deliberately not matched: the
+// declaring assembly does NOT implement the interface on the value type for it (an adapter class
+// does), so an importer that trusted the record would pass the value unwrapped (CS0029).
 func parseExportedValueImplementLines(lines []string) [][2]string {
 	var pairs [][2]string
 

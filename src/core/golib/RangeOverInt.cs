@@ -24,7 +24,7 @@ namespace go;
 /// <see cref="IEnumerable{T}"/> for any other consumer, which boxes it.
 /// </remarks>
 /// <typeparam name="T">Integer type of the range operand and of the loop variable.</typeparam>
-public readonly struct RangeOverInt<T> : IEnumerable<T> where T : struct, IComparisonOperators<T, T, bool>, IIncrementOperators<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct RangeOverInt<T> : IEnumerable<T> where T : struct, IComparisonOperators<T, T, bool>, IIncrementOperators<T>
 {
     private readonly T m_n;
 

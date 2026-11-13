@@ -96,6 +96,69 @@ public class CgoLibrariesTests
             "a hand-owned import in the same assembly keeps the runtime's own resolution");
     }
 
+    // §5.3, as amended by §11.20 (increment 5b): bindings are converted for one target and register it, and a library they
+    // own is refused by name on any other, since a linux binding run on windows would cross with linux's layouts. The
+    // architecture is the PROCESS's (S1): an x64 process under Rosetta or on Windows on Arm runs amd64 code.
+    [TestMethod]
+    public void AnOwnedLibraryOfBindingsForAnotherTargetIsRefusedNamingBoth()
+    {
+        (string flag, string name) = SystemLibrary;
+        PlatformNotSupportedException? thrown = null;
+
+        try
+        {
+            GoCgoLibraries.Resolve(name, s_assembly, Table((flag, name)), "plan9/mips");
+        }
+        catch (PlatformNotSupportedException ex)
+        {
+            thrown = ex;
+        }
+
+        Assert.IsNotNull(thrown, "bindings converted for another target must not load here");
+        StringAssert.Contains(thrown.Message, "plan9/mips");
+        StringAssert.Contains(thrown.Message, GoCgoLibraries.RunningTarget);
+    }
+
+    // The review of increment 5b, S5: the target is held for every import the assembly makes, not only for a name the
+    // table owns. A hand-owned import beside bindings converted for another target crosses with the wrong layouts too.
+    [TestMethod]
+    public void ANameTheTableDoesNotOwnIsRefusedUnderAnotherTargetToo()
+    {
+        (string flag, string name) = SystemLibrary;
+
+        Assert.ThrowsException<PlatformNotSupportedException>(() => GoCgoLibraries.Resolve(name, s_assembly, Table((flag, "someotherlibrary")), "plan9/mips"),
+            "an import of an assembly whose bindings were converted for another target must not load here");
+    }
+
+    [TestMethod]
+    public void AnOwnedLibraryOfBindingsForTheRunningTargetLoads()
+    {
+        (string flag, string name) = SystemLibrary;
+        nint handle = GoCgoLibraries.Resolve(name, s_assembly, Table((flag, name)), GoCgoLibraries.RunningTarget);
+
+        Assert.AreNotEqual((nint)0, handle, $"{flag} binds {name} for {GoCgoLibraries.RunningTarget}, the running target");
+    }
+
+    [TestMethod]
+    [DataRow("linux/amd64", "linux", Architecture.X64, false)]
+    [DataRow("darwin/amd64", "darwin", Architecture.X64, false)]
+    [DataRow("windows/amd64", "windows", Architecture.X64, false)]
+    [DataRow("linux/amd64", "linux", Architecture.Arm64, true)]
+    [DataRow("darwin/arm64", "darwin", Architecture.X64, true)]
+    [DataRow("windows/amd64", "linux", Architecture.X64, true)]
+    public void BindingsRunOnlyOnTheTargetTheyWereConvertedFor(string target, string hostGOOS, Architecture architecture, bool refused)
+    {
+        string? message = GoCgoLibraries.TargetMismatch(target, hostGOOS, architecture);
+
+        Assert.AreEqual(refused, message is not null, $"bindings for {target} on {hostGOOS} with a {architecture} process: {message}");
+
+        if (refused)
+        {
+            StringAssert.Contains(message, target);
+            StringAssert.Contains(message, hostGOOS + "/" + (architecture == Architecture.X64 ? "amd64" : "arm64"));
+        }
+    }
+
     // §11.11's red: a deleted library throws, naming the -l, the captured name and the places tried. Returning 0 would
     // let the runtime probe on, current directory included on windows.
     [TestMethod]

@@ -20,6 +20,10 @@
 # is that artwork, so a package that carries it says so, as the go.* packages do).
 $script:Go2csRepository = 'https://github.com/ritchiecarroll/go2cs'
 $script:ArtworkLine = 'Artwork licensed under Creative Commons Attribution 3.0; see [artwork attribution](https://github.com/ritchiecarroll/go2cs/blob/master/docs/images/README).'
+# The converted-by badge (owner, 2026-11-12): go2cs's own mark, hosted on go2cs.net and linking there, the first badge
+# of a package README's first badge line. The go2cs badge on the second line names the release the package was built
+# on; this one says only that go2cs converted it.
+$script:ConvertedByBadge = '[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net)'
 $script:ShieldsHost = 'https://img.shields.io'
 $script:GoBlue = '00ADD8'
 $script:DotnetPurple = '512BD4'
@@ -101,7 +105,8 @@ function New-NugetgoBadge([string]$Alt, [string]$Label, [string]$Message, [strin
 }
 
 # The block the pack owns in a package README (COORD ruling 2026-10-10): the description as a blockquote (its module path
-# a link to the module's source), two lines of badges, the license line and, with the go2cs icon, its artwork line.
+# a link to the module's source), two lines of badges (the first opens with the converted-by badge), the license line
+# and, with the go2cs icon, its artwork line.
 # Every link is absolute, because nuget.org resolves no relative link. VALIDATION.md and the license file are linked in
 # the conversion repository, which carries both at its root (docs/NugetgoPublish.md, 4.5), at -RepositoryTag: the tag
 # nuget-<package version> COORD mints on the conversion commit before the package is signed (COORD ruling 2026-10-10),
@@ -146,7 +151,7 @@ function New-NugetgoGeneratedBlock {
 
     $blocks = New-Object System.Collections.Generic.List[string]
     $blocks.Add("> $callout")
-    $blocks.Add("$tests $(if ($sample) { "$sample " })$source\`n$module $release")
+    $blocks.Add("$($script:ConvertedByBadge) $tests $(if ($sample) { "$sample " })$source\`n$module $release")
     # The license line names both sides of the conversion (owner, 2026-10-15): the Go module's source, and the C# it
     # became, in the conversion repository at the tag this package names.
     $blocks.Add("Converted from $moduleLink source to C# in [$(Get-NugetgoRepositoryName $repo)]($repo/tree/$RepositoryTag); licensed under $LicenseSpdx $([char]0x2014) see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")

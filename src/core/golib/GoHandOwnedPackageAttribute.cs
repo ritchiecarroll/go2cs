@@ -31,4 +31,4 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly)]
-public sealed class GoHandOwnedPackageAttribute : Attribute;
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoHandOwnedPackageAttribute : Attribute;

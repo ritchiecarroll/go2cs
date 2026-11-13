@@ -47,7 +47,7 @@ namespace go.golib;
 /// uninstalled renderer costs the traceback and can never produce a wrong one.
 /// </para>
 /// </remarks>
-public static class FatalReport
+[EditorBrowsable(EditorBrowsableState.Never)] public static class FatalReport
 {
     /// <summary>
     /// Renders the failing goroutine's header and Go-spelled frames, and every other goroutine's

@@ -18,7 +18,7 @@ namespace go;
 /// parsed by exact match in the TypeGenerator and must not carry extra tokens (I2.R R-8).
 /// </summary>
 [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Interface)]
-public sealed class GoLocalNameAttribute(string name) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoLocalNameAttribute(string name) : Attribute
 {
     /// <summary>The original Go source-local type name.</summary>
     public string Name { get; } = name;

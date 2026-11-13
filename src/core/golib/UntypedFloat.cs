@@ -12,7 +12,7 @@ namespace go;
 /// <summary>
 /// Represents an untyped floating-point value.
 /// </summary>
-public readonly struct UntypedFloat(float64 value) : IEquatable<UntypedFloat>
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct UntypedFloat(float64 value) : IEquatable<UntypedFloat>
 {
     // Value of the struct 'UntypedFloat'
     private readonly float64 m_value = value;

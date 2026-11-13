@@ -63,7 +63,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class)]
-public class GoArchExclusiveAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoArchExclusiveAttribute : Attribute
 {
     /// <summary>
     /// Creates a new <see cref="GoArchExclusiveAttribute"/>.

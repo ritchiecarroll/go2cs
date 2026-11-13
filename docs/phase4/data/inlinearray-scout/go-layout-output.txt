@@ -1,0 +1,5 @@
+S22 size 202 align 2; Fa@0 pad@201
+Outer{B byte; S S22}: S@2 size 204
+[2]S22 size 404
+TrailElem{A byte; _ [0][2]int64}: size 16 align 8
+MidZero{A byte; Z [0]int32; B byte}: Z@4 B@4 size 8 align 4

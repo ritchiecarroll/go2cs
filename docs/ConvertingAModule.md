@@ -355,11 +355,19 @@ conversion.
 
 The pack still owns one block in it, between the lines `[//]: # (nugetgo:generated:begin)` and
 `[//]: # (nugetgo:generated:end)`. That block states the facts: where the C# came from and a link back to the Go
-source, the security caveat, the test badge, the versions, and the license. Every pack rewrites the block from what it
+source, the security caveat, the converted-by badge, the test badge, the versions, and the license. Every pack rewrites the block from what it
 measured, says so, and leaves everything outside it alone. Keep both marker lines, each on its own line with a blank
 line before and after, and put no link above the block. The pack refuses the file, by name, otherwise.
 
 `nuget/icon.png` beside it replaces the go2cs icon (PNG, at most 1 MB).
+
+To mark a repository or a README as converted by go2cs, use the badge ![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg). Put it under the title, linked to go2cs.net:
+
+```markdown
+[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net)
+```
+
+The badge is one file served from go2cs.net, so every page that uses it shows the current one.
 
 If the module's license asks that modified files say they were changed (Apache-2.0 does, in section 4(b)), convert
 with `-provenance`. Each converted file then carries a notice after its upstream copyright lines: the Go file and

@@ -46,7 +46,7 @@ namespace go.golib;
 /// its own measurement.
 /// </para>
 /// </remarks>
-public static class RuntimeSemaphore
+[EditorBrowsable(EditorBrowsableState.Never)] public static class RuntimeSemaphore
 {
     private sealed class SemaWaiter
     {

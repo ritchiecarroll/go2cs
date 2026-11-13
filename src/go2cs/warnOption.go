@@ -38,6 +38,7 @@ var warnRefusedCodes = map[string]string{
 	diagnosticGenericInstantiationRefused: "retired, so it is never reported",
 	diagnosticNonSelfProxyRefused:         "its downgraded sites are not loud: most would not compile, and a zero value boxed to an interface would be silently wrong",
 	diagnosticSliceWideningRefused:        "its downgraded sites are silent: the callee's writes go to an element-wise copy and the program runs on with a wrong result",
+	diagnosticFileDropped:                 "a dropped file is not loud: an init function, a method or an interface record can vanish with no compile error",
 }
 
 // parseWarnCodes reads -warn's comma-separated list. An unknown code, or a known code that is not allowed, is an

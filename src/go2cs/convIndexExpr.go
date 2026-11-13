@@ -342,7 +342,17 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		}
 	}
 
-	baseExpr := v.convExpr(indexExpr.X, xContexts)
+	// An EXPLICIT dereference of a pointer conversion, `(*(*[N]T)(p))[i]`, indexes the same array as
+	// the implicit `(*[N]T)(p)[i]`, so it renders the same way: the wrapped cast and its `.Value`.
+	// Through the star the base was `~cast`, a COPY of the array, and a store into it was CS0131 (the
+	// root of sqlite-cs S17).
+	var baseExpr string
+
+	if call := v.derefdPointerConversion(indexExpr.X); call != nil && ptrDeref == "" {
+		baseExpr, ptrDeref = "("+v.convExpr(call, xContexts)+")", ".Value"
+	} else {
+		baseExpr = v.convExpr(indexExpr.X, xContexts)
+	}
 
 	// A type-CONVERSION base renders as a C# cast, and postfix binds tighter than a cast — both
 	// the pointer auto-deref `.Value` and the index itself would re-bind onto the cast's INNER
@@ -504,4 +514,27 @@ func (v *Visitor) isGenericTypeArgument(indexExpr *ast.IndexExpr) bool {
 	}
 
 	return false
+}
+
+// derefdPointerConversion returns the conversion `(*T)(x)` when expr, parentheses aside, is an explicit
+// dereference of it, `*(*T)(x)`, and the conversion's type is a pointer; nil otherwise. Such a deref
+// names the same variable as the implicit forms `(*T)(x).F` and `(*T)(x)[i]`, and renders like them.
+func (v *Visitor) derefdPointerConversion(expr ast.Expr) *ast.CallExpr {
+	star, ok := ast.Unparen(expr).(*ast.StarExpr)
+
+	if !ok {
+		return nil
+	}
+
+	call, ok := ast.Unparen(star.X).(*ast.CallExpr)
+
+	if !ok || !v.callExprIsTypeConversion(call) {
+		return nil
+	}
+
+	if _, isPtr := types.Unalias(v.info.TypeOf(call)).Underlying().(*types.Pointer); !isPtr {
+		return nil
+	}
+
+	return call
 }

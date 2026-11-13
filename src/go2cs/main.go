@@ -301,7 +301,7 @@ func main() {
 	trimPathCmd := commandLine.Bool("trimpath", true, "Record a main-module source in the converted position maps the way `go build -trimpath` bakes it, <module path>/<path in module>, so the output names no directory of this machine; -trimpath=false records the absolute source path, as an untrimmed `go build` does")
 	warnCmd := commandLine.String("warn", "", "Downgrade the listed converter refusal codes to warnings (comma-separated), so a package holding a refused site still converts; each downgraded site fails loud, a panic carrying the refusal text, when reached, and the build reports it (GO2CS0011). Opt-in per code, never a default; only GO2CS2002 is allowed (an unknown or disallowed code is an error that names it)")
 	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
-	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Load a single package cgo-on (CGO_ENABLED=1; needs a C compiler) and report what cgo support recognizes in it. cgo has no C# conversion yet, so an import \"C\" source is still refused, now naming the C declarations it recognized and each generated file's source (docs/PLAN-cgo-interop.md, Phase 1). Not combinable with -stdlib, -tests or -recurse")
+	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Convert a single cgo package: load it cgo-on (CGO_ENABLED=1; needs a C compiler) and convert it when every C use it makes is one cgo support binds (calls of C functions a shared library defines; docs/Limitations.md). Any other use is refused by name, with the phase that owns it, before anything is written. Converts for the host's own target only: a cgo-on load for another target needs that target's C toolchain, so any other -platforms is refused, for a package with no C in it too. Not combinable with -stdlib, -tests or -recurse")
 	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
 	csprojFileCmd := commandLine.String("csproj", "", "Path to custom .csproj template file")
 	debugModeCmd := commandLine.Bool("debug", false, "Enable debug mode")
@@ -1022,6 +1022,12 @@ Examples:
 	// -platforms), covers them all. The files stay written; the run names every site and fails. The -tests path
 	// keeps its own earlier return of the same error (conversionDriver.go), which fails before its build step.
 	if err := unresolvedDynamicTypeError(); err != nil {
+		log.Fatalf("%v\n", err)
+	}
+
+	// Nor after dropping a file it failed on (droppedFiles.go): every other file is written, and the run names each
+	// dropped one and fails.
+	if err := droppedFileError(); err != nil {
 		log.Fatalf("%v\n", err)
 	}
 }

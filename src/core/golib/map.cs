@@ -16,7 +16,7 @@ using go.golib;
 
 namespace go;
 
-public interface IMap
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IMap
 {
     nint Length { get; }
 
@@ -61,7 +61,7 @@ public interface IMap
     void Clear();
 }
 
-public interface IMap<TKey, TValue> : IMap, IDictionary<TKey, TValue>, IGoReflectMap where TKey : notnull
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IMap<TKey, TValue> : IMap, IDictionary<TKey, TValue>, IGoReflectMap where TKey : notnull
 {
     (TValue, bool) this[TKey key, bool _] { get; }
 
