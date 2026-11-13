@@ -1,0 +1,411 @@
+variadic declarations (non-test): map[...T:43 ...any:61 prefix + ...T:57 prefix + ...any:132]; exported with ...any as the ONLY parameter: 38
+sites 396 (untyped, not counted: 0); max arity 5
+  func value       fixed(2)           non-test     0  test   189
+  package func     fixed(2)           non-test    16  test   165
+  package func     fixed(3)           non-test     1  test     9
+  package func     ...any             non-test     0  test     9
+  method           fixed(5)           non-test     3  test     0
+  method           fixed(3)           non-test     2  test     0
+  interface method fixed(4)           non-test     1  test     0
+  method           fixed(2)           non-test     1  test     0
+contexts: map[assignment:82 defer:4 expression:88 return:18 statement:204]
+arities: map[2:380 3:12 4:1 5:3]
+callee expression itself calls (today's temp form runs g() first; Go runs the callee's calls first): 172 (0 in non-test files)
+...any callees:
+    9 fmt.Println
+SITE $GOROOT/src/os/file_unix.go:432:11	package func	fixed(2)	fixCount	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/os/stat_linux.go:16:15	package func	fixed(2)	time.Unix	2	assignment	test=false	calleeCalls=false
+SITE $GOROOT/src/os/stat_linux.go:47:9	package func	fixed(2)	time.Unix	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/archive/tar/stat_actime1.go:15:9	package func	fixed(2)	time.Unix	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/archive/tar/stat_actime1.go:19:9	package func	fixed(2)	time.Unix	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/crypto/elliptic/params.go:121:9	method	fixed(3)	curve.affineFromJacobian	3	return	test=false	calleeCalls=false
+SITE $GOROOT/src/crypto/elliptic/params.go:217:9	method	fixed(3)	curve.affineFromJacobian	3	return	test=false	calleeCalls=false
+SITE $GOROOT/src/testing/testing.go:2320:2	package func	fixed(3)	registerCover	3	statement	test=false	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/fips.go:120:9	package func	fixed(2)	fipsError2	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/fips.go:249:9	package func	fixed(2)	fipsError2	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/fips.go:306:9	package func	fixed(2)	fipsError2	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/fips.go:353:9	package func	fixed(2)	fipsError2	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/database/sql/convert.go:305:11	interface method	fixed(4)	d.Compose	4	return	test=false	calleeCalls=false
+SITE $GOROOT/src/vendor/golang.org/x/text/unicode/norm/forminfo.go:227:10	package func	fixed(2)	compInfo	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/vendor/golang.org/x/text/unicode/norm/forminfo.go:229:9	package func	fixed(2)	compInfo	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/vendor/golang.org/x/text/unicode/norm/forminfo.go:235:10	package func	fixed(2)	compInfo	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/vendor/golang.org/x/text/unicode/norm/forminfo.go:237:9	package func	fixed(2)	compInfo	2	return	test=false	calleeCalls=false
+SITE $GOROOT/src/go/token/tree.go:148:9	method	fixed(2)	t.nextAfter	2	assignment	test=false	calleeCalls=false
+SITE $GOROOT/src/text/template/parse/parse.go:586:9	method	fixed(5)	t.newIf	5	return	test=false	calleeCalls=false
+SITE $GOROOT/src/text/template/parse/parse.go:596:7	method	fixed(5)	t.newRange	5	assignment	test=false	calleeCalls=false
+SITE $GOROOT/src/text/template/parse/parse.go:607:9	method	fixed(5)	t.newWith	5	return	test=false	calleeCalls=false
+SITE $GOROOT/src/internal/lazytemplate/lazytemplate.go:32:11	package func	fixed(2)	text/template.Must	2	assignment	test=false	calleeCalls=false
+SITE $GOROOT/src/internal/trace/traceviewer/http.go:62:17	package func	fixed(2)	html/template.Must	2	assignment	test=false	calleeCalls=false
+SITE $GOROOT/src/net/rpc/debug.go:40:13	package func	fixed(2)	html/template.Must	2	assignment	test=false	calleeCalls=false
+SITE $GOROOT/src/crypto/elliptic/elliptic_test.go:93:6	package func	fixed(2)	isInfinity	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/elliptic/elliptic_test.go:96:6	package func	fixed(2)	isInfinity	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/elliptic/elliptic_test.go:100:6	package func	fixed(2)	isInfinity	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/elliptic/elliptic_test.go:103:6	package func	fixed(2)	isInfinity	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/elliptic/elliptic_test.go:107:6	package func	fixed(2)	isInfinity	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/elliptic/elliptic_test.go:110:6	package func	fixed(2)	isInfinity	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/elliptic/elliptic_test.go:114:6	package func	fixed(2)	isInfinity	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:97:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:98:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:99:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:100:17	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:102:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:103:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:105:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:107:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:108:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:111:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:115:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:121:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:122:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:124:16	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:127:18	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:136:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:138:16	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:141:18	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:144:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:146:16	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:149:18	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:152:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:154:16	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:157:18	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:160:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:164:15	package func	fixed(3)	errRet3	3	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:169:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:170:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:171:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:173:28	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:178:18	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:179:18	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:183:28	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:189:28	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:190:28	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:191:28	package func	fixed(3)	errRet3	3	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:192:18	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:193:18	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:194:18	package func	fixed(3)	errRet3	3	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:197:17	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:200:19	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:204:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:210:17	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:211:17	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:213:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:216:17	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:219:17	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:223:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:224:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:225:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:226:27	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:246:17	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:247:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:248:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:250:17	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:254:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:255:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:257:17	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:265:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:266:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:267:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:275:15	package func	fixed(3)	errRet3	3	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:278:15	package func	fixed(3)	errRet3	3	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:293:19	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:296:19	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:297:19	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:307:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:308:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:309:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:310:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:313:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/internal/fips140only/fips140only_test.go:314:15	package func	fixed(2)	errRet2	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/rsa_test.go:427:2	func value	fixed(2)	checkErr2	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/rsa_test.go:428:2	func value	fixed(2)	checkErr2	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/rsa_test.go:429:2	func value	fixed(2)	checkErr2	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/rsa_test.go:430:2	func value	fixed(2)	checkErr2	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/rsa_test.go:433:2	func value	fixed(2)	checkErr2	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/rsa_test.go:434:2	func value	fixed(2)	checkErr2	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/rsa_test.go:435:2	func value	fixed(2)	checkErr2	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/rsa_test.go:436:2	func value	fixed(2)	checkErr2	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/rsa_test.go:437:2	func value	fixed(2)	checkErr2	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/rsa/rsa_test.go:438:2	func value	fixed(2)	checkErr2	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/crypto/tls/bogo_shim_test.go:716:10	package func	fixed(2)	html/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/debug/pe/file_test.go:363:8	package func	fixed(2)	text/template.Must	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/go/doc/doc_test.go:38:9	package func	fixed(2)	text/template.Must	2	return	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:18:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:23:11	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:44:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:47:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:48:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:49:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:61:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:62:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:63:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:75:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:76:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:77:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:80:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:81:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:84:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:136:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:158:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:166:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:167:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:168:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:186:14	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:191:13	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:192:12	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:206:11	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:207:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:207:15	package func	fixed(2)	Must	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:227:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:228:9	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:235:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:236:9	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:237:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:254:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:257:9	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:258:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:268:7	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/clone_test.go:270:7	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/content_test.go:385:11	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/content_test.go:423:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/content_test.go:444:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:787:11	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:834:11	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2006:11	package func	fixed(2)	text/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2108:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2127:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2144:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2181:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2183:2	package func	fixed(2)	Must	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2214:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2225:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2226:8	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2253:9	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2278:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2290:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2341:12	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/escape_test.go:2387:12	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/exec_test.go:174:29	package func	fixed(2)	Must	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/exec_test.go:1424:16	package func	fixed(2)	Must	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/exec_test.go:1494:12	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/exec_test.go:1511:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/exec_test.go:1534:11	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/exec_test.go:1590:11	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/exec_test.go:1833:18	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/exec_test.go:1833:23	package func	fixed(2)	Must	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/transition_test.go:54:11	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/example_test.go:137:7	package func	fixed(2)	html/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/example_test.go:163:22	package func	fixed(2)	html/template.Must	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/examplefiles_test.go:64:10	package func	fixed(2)	text/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/examplefiles_test.go:102:10	package func	fixed(2)	text/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/examplefiles_test.go:135:15	package func	fixed(2)	text/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/examplefiles_test.go:183:13	package func	fixed(2)	text/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/template_test.go:28:12	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/html/template/template_test.go:145:9	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/internal/platform/zosarch_test.go:54:10	package func	fixed(2)	text/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:46:4	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:53:4	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:54:4	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:55:4	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:56:4	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:59:4	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:60:4	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:75:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:76:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:77:5	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:78:5	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:82:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:90:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:91:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:117:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:127:6	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:128:6	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:129:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:130:6	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:133:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:137:6	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:140:6	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:148:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:149:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:150:5	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:151:5	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:158:6	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:160:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:168:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:169:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:170:5	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:171:5	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:180:6	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:182:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:194:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:212:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:213:7	func value	fixed(2)	expectStored(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:214:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:215:7	func value	fixed(2)	expectLoaded(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:219:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:221:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:225:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:236:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:237:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:249:7	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:252:7	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:264:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:265:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:266:5	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:267:5	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:271:6	func value	fixed(2)	expectPresent(t, s, i + j)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:275:6	func value	fixed(2)	expectPresent(t, s, i + j + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:279:5	func value	fixed(2)	expectPresent(t, s, i + 3)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:286:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:287:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:288:5	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:289:5	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:296:6	func value	fixed(2)	expectPresent(t, s, 16)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:298:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:306:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:307:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:308:5	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:309:5	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:318:6	func value	fixed(2)	expectPresent(t, s, i + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:320:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:340:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:341:7	func value	fixed(2)	expectStored(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:342:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:343:7	func value	fixed(2)	expectLoaded(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:347:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:349:7	func value	fixed(2)	expectPresent(t, key, id + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:353:7	func value	fixed(2)	expectPresent(t, key, id + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:374:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:375:7	func value	fixed(2)	expectStored(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:376:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:377:7	func value	fixed(2)	expectLoaded(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:381:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:383:7	func value	fixed(2)	expectPresent(t, key, id + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:387:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:391:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:402:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:403:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:415:7	func value	fixed(2)	expectPresent(t, s, i + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:418:7	func value	fixed(2)	expectPresent(t, s, i + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:430:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:431:5	func value	fixed(2)	expectNotLoadedFromSwap(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:432:5	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:433:5	func value	fixed(2)	expectLoadedFromSwap(t, s, i, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:437:6	func value	fixed(2)	expectPresent(t, s, i + j)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:438:6	func value	fixed(2)	expectLoadedFromSwap(t, s, i + j, i + j + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:439:6	func value	fixed(2)	expectPresent(t, s, i + j + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:443:5	func value	fixed(2)	expectLoadedFromSwap(t, s, i + 3, i + 3)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:450:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:451:5	func value	fixed(2)	expectNotLoadedFromSwap(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:452:5	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:453:5	func value	fixed(2)	expectLoadedFromSwap(t, s, i, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:455:4	func value	fixed(2)	expectLoadedFromSwap(t, testData[15], 15, 16)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:458:6	func value	fixed(2)	expectPresent(t, s, 16)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:460:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:468:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:469:5	func value	fixed(2)	expectNotLoadedFromSwap(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:470:5	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:471:5	func value	fixed(2)	expectLoadedFromSwap(t, s, i, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:474:5	func value	fixed(2)	expectLoadedFromSwap(t, testData[i], i, i + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:478:6	func value	fixed(2)	expectPresent(t, s, i + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:480:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:499:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:500:7	func value	fixed(2)	expectNotLoadedFromSwap(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:501:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:502:7	func value	fixed(2)	expectLoadedFromSwap(t, key, id, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:506:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:507:7	func value	fixed(2)	expectLoadedFromSwap(t, key, id, id + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:508:7	func value	fixed(2)	expectPresent(t, key, id + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:512:7	func value	fixed(2)	expectPresent(t, key, id + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:533:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:534:7	func value	fixed(2)	expectNotLoadedFromSwap(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:535:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:536:7	func value	fixed(2)	expectLoadedFromSwap(t, key, id, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:540:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:541:7	func value	fixed(2)	expectLoadedFromSwap(t, key, id, id + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:542:7	func value	fixed(2)	expectPresent(t, key, id + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:544:7	func value	fixed(2)	expectNotLoadedFromSwap(t, key, id + 2)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:545:7	func value	fixed(2)	expectPresent(t, key, id + 2)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:549:7	func value	fixed(2)	expectPresent(t, key, id + 2)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:560:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:561:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:572:7	func value	fixed(2)	expectPresent(t, s, i + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:575:7	func value	fixed(2)	expectPresent(t, s, i + 1)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:588:6	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:589:6	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:590:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:591:6	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:594:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:595:6	func value	fixed(2)	expectLoadedFromDelete(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:596:6	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:597:6	func value	fixed(2)	expectNotLoadedFromDelete(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:600:6	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:608:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:609:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:610:5	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:611:5	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:613:4	func value	fixed(2)	expectPresent(t, testData[15], 15)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:614:4	func value	fixed(2)	expectLoadedFromDelete(t, testData[15], 15)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:615:4	func value	fixed(2)	expectMissing(t, testData[15], 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:616:4	func value	fixed(2)	expectNotLoadedFromDelete(t, testData[15], 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:619:6	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:621:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:629:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:630:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:631:5	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:632:5	func value	fixed(2)	expectLoaded(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:635:5	func value	fixed(2)	expectPresent(t, testData[i], i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:636:5	func value	fixed(2)	expectLoadedFromDelete(t, testData[i], i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:637:5	func value	fixed(2)	expectMissing(t, testData[i], 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:638:5	func value	fixed(2)	expectNotLoadedFromDelete(t, testData[i], 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:642:6	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:644:6	func value	fixed(2)	expectPresent(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:652:5	func value	fixed(2)	expectLoadedFromDelete(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:656:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:674:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:675:7	func value	fixed(2)	expectStored(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:676:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:677:7	func value	fixed(2)	expectLoaded(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:681:7	func value	fixed(2)	expectPresent(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:682:7	func value	fixed(2)	expectLoadedFromDelete(t, key, id)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:683:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:687:7	func value	fixed(2)	expectMissing(t, key, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:698:5	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:699:5	func value	fixed(2)	expectStored(t, s, i)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:710:7	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:713:7	func value	fixed(2)	expectMissing(t, s, 0)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/internal/sync/hashtriemap_test.go:724:3	func value	fixed(2)	expectStored(t, k, v)	2	statement	test=true	calleeCalls=true
+SITE $GOROOT/src/net/netip/netip_test.go:2236:40	func value	fixed(2)	panicIP	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/net/netip/netip_test.go:2237:40	func value	fixed(2)	panicIP	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/net/netip/netip_test.go:2273:46	func value	fixed(2)	panicPfx	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/net/netip/netip_test.go:2274:46	func value	fixed(2)	panicPfx	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/net/netip/netip_test.go:2282:48	func value	fixed(2)	panicIPP	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/net/netip/netip_test.go:2287:46	func value	fixed(2)	panicPfx	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/net/netip/netip_test.go:2288:46	func value	fixed(2)	panicPfx	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/path/example_test.go:104:2	package func	...any	fmt.Println	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/path/example_test.go:105:2	package func	...any	fmt.Println	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/path/example_test.go:106:2	package func	...any	fmt.Println	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/path/filepath/example_unix_test.go:89:2	package func	...any	fmt.Println	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/path/filepath/example_unix_test.go:90:2	package func	...any	fmt.Println	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/path/filepath/example_unix_test.go:91:2	package func	...any	fmt.Println	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/path/filepath/example_unix_test.go:92:2	package func	...any	fmt.Println	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/reflect/abi_test.go:28:8	package func	fixed(3)	reflect.SetArgRegs	3	defer	test=true	calleeCalls=false
+SITE $GOROOT/src/reflect/abi_test.go:160:8	package func	fixed(3)	reflect.SetArgRegs	3	defer	test=true	calleeCalls=false
+SITE $GOROOT/src/reflect/abi_test.go:197:8	package func	fixed(3)	reflect.SetArgRegs	3	defer	test=true	calleeCalls=false
+SITE $GOROOT/src/reflect/all_test.go:7112:10	package func	fixed(3)	SetArgRegs	3	defer	test=true	calleeCalls=false
+SITE $GOROOT/src/reflect/example_test.go:64:2	package func	...any	fmt.Println	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/reflect/example_test.go:69:2	package func	...any	fmt.Println	2	statement	test=true	calleeCalls=false
+SITE $GOROOT/src/testing/benchmark_test.go:224:12	package func	fixed(2)	text/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/exec_test.go:184:29	package func	fixed(2)	Must	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/exec_test.go:1016:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/exec_test.go:1576:16	package func	fixed(2)	Must	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/exec_test.go:1646:12	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/exec_test.go:1663:10	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/exec_test.go:1686:11	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/exec_test.go:1742:11	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/exec_test.go:1948:9	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/multi_test.go:228:11	package func	fixed(2)	Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/example_test.go:42:7	package func	fixed(2)	text/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/example_test.go:92:22	package func	fixed(2)	text/template.Must	2	expression	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/examplefiles_test.go:62:10	package func	fixed(2)	text/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/examplefiles_test.go:93:15	package func	fixed(2)	text/template.Must	2	assignment	test=true	calleeCalls=false
+SITE $GOROOT/src/text/template/examplefiles_test.go:139:13	package func	fixed(2)	text/template.Must	2	assignment	test=true	calleeCalls=false
