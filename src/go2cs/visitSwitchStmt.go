@@ -1011,7 +1011,6 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 	}
 }
 
-// writeSwitchTagTemp declares the temp a switch evaluates its tag into once (`var exprᴛ1 = tag;`).
 // switchTagTempPrefix returns the temp-name prefix for a switch tag that is one plain identifier: its C# name with
 // any `@` escape stripped (`os`, `string`, `ΔLock`), so the temp reads as the value it holds (`osᴛ1`). Any other
 // tag returns "" and keeps the `exprᴛN` temp: a selector, call or index named after one segment would hide what was
@@ -1157,6 +1156,7 @@ func (v *Visitor) exprCallsOrReceives(expr ast.Expr) bool {
 	return found
 }
 
+// writeSwitchTagTemp declares the temp a switch evaluates its tag into once (`var exprᴛ1 = tag;`).
 func (v *Visitor) writeSwitchTagTemp(tag ast.Expr, name string) {
 	if v.options.preferVarDecl {
 		v.writeOutput("var ")
