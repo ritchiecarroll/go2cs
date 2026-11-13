@@ -49,7 +49,7 @@ internal static void atomicstorep(@unsafe.Pointer ptr, @unsafe.Pointer @new) {
     if (goexperiment.CgoCheck2) {
         cgoCheckPtrWrite((ж<@unsafe.Pointer>)(uintptr)(ptr), @new);
     }
-    atomic.StorepNoWB((uintptr)noescape(ptr), @new);
+    atomic.StorepNoWB(noescape(ptr), @new);
 }
 
 // atomic_storePointer is the implementation of internal/runtime/atomic.UnsafePointer.Store
