@@ -494,7 +494,15 @@ public static partial class GoReflect
 
     private static string? clrLayoutMismatch(Type t, int depth)
     {
-        if (depth > MaxLayoutDepth || KindOf(t) != Struct || !t.IsValueType || GoFieldOffsets(t) is not { } goOffsets)
+        if (depth > MaxLayoutDepth || KindOf(t) != Struct || !t.IsValueType)
+            return null;
+
+        // A struct held with inline arrays measures its own managed layout, so it is PROVEN either way: the gate of
+        // InlineLayoutMismatch, which also compares size and alignment and fails where Go's offsets are unknown.
+        if (typeof(IGoManagedLayout).IsAssignableFrom(t))
+            return InlineLayoutMismatch(t);
+
+        if (GoFieldOffsets(t) is not { } goOffsets)
             return null;
 
         GoFieldInfo[] fields = GoFields(t);
@@ -737,6 +745,10 @@ public static partial class GoReflect
     /// </summary>
     public static nint[]? ArrayDimsOfValue(object? value)
     {
+        // An inline array's dims are its TYPE's (go.arrays): it is never an IArray.
+        if (value is not null && InlineArrayLength(value.GetType()) > 0)
+            return DeclaredArrayDims(value.GetType());
+
         // An ISlice is an IArray but its Length is not a dimension: refuse it here so no caller can reach
         // the hole (defense in depth beside elemArrayDims).
         if (value is ISlice || value is not IArray arr)
@@ -1306,7 +1318,7 @@ public static partial class GoReflect
     internal static nint[]? DeclaredArrayDims(Type t)
     {
         return s_declaredArrayDims.GetOrAdd(t, static type =>
-            TypeStampedDims(type) ?? DefinedArrayDims(type));
+            InlineArrayLength(type) is > 0 and int inline ? inlineArrayDims(type, inline) : TypeStampedDims(type) ?? DefinedArrayDims(type));
     }
 
     private static readonly ConcurrentDictionary<Type, GoChanDir[]?> s_typeStampedChanDirChains = new();

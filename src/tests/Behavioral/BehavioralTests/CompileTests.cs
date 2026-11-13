@@ -628,6 +628,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckEscapedLoopVarSiblingIndex() => CheckTarget("EscapedLoopVarSiblingIndex");
 
     [TestMethod]
+    public void CheckExplicitDerefConversionStore() => CheckTarget("ExplicitDerefConversionStore");
+
+    [TestMethod]
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
 
     [TestMethod]
@@ -1648,6 +1651,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]
+    public void CheckNestedPointerConversionReinterpret() => CheckTarget("NestedPointerConversionReinterpret");
+
+    [TestMethod]
     public void CheckNestedPromotedEmbedInit() => CheckTarget("NestedPromotedEmbedInit");
 
     [TestMethod]
@@ -1856,6 +1862,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerArraySlice() => CheckTarget("PointerArraySlice");
+
+    [TestMethod]
+    public void CheckPointerArrayViewForms() => CheckTarget("PointerArrayViewForms");
 
     [TestMethod]
     public void CheckPointerCastSliceRange() => CheckTarget("PointerCastSliceRange");

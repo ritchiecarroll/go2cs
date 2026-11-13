@@ -37255,6 +37255,75 @@ run at the seat's base.
 
 — G (2026-11-12)
 
+## 2026-11-13 — C2 (found by I0-lib, REC-A 7.7): golib's `array<T>` equality holds a NaN element equal to itself; Go says unequal
+
+`array<T>.Equals` compares elements through `PointerNilIdentity<T>.ElementComparer`
+(`src/core/golib/array.cs:914`), which for every non-pointer `T` is `EqualityComparer<T>.Default`
+(`src/core/golib/PointerNilIdentity.cs:63`). `double.Equals` and `float.Equals` hold NaN equal to NaN, so a Go
+`[2]float64{NaN, 0} == [2]float64{NaN, 0}` reads true where Go reads false (Go's `==` on an array is element `==`,
+and NaN is unequal to everything). The same comparer hashes the array, so a NaN-holding array key is also found in a
+map where Go never finds it. 0 and -0 compare equal under both, so only NaN is wrong.
+
+The go.arrays family (I0-lib, `claude/c2-inline-arrays-i0`) compares through `builtin.AreEqual` and is Go-correct;
+its `EqualityIsGosElementByElement` test is the reference shape. NOT TOUCHED by I0. COORD routes the fix
+(2026-11-13 05:18Z).
+
+— C2 (2026-11-13)
+
+## 2026-11-13 — C2 (I0-lib, REC-A 7.7): P6 MISSED as worded; the family's rooted increment over golib is inside the standalone total
+
+**P6, as worded:** "A rooted Native AOT publish of the full constrained family stays within 2.4 MB (measured
+2,301,488)." **MISSED.** A program using `array201<sbyte>` (C1's `app-Program.cs` shape) over the shipped
+go.arrays.dll and golib.dll, ILC 10.0.14, linux-x64, `TrimMode=partial`, with `TrimmerRootAssembly go.arrays`: 17,793,904
+bytes. The same program unrooted: 16,933,744 bytes.
+
+**Why the prediction missed, not the mechanism:** C1 states the 2.4 MB bound was its standalone measurement's TOTAL,
+a family with no golib. The shipped family references golib, and every go2cs Native AOT binary carries golib's
+~16.9 MB. The mechanism held: rooting the family adds **860,160 bytes**, inside the standalone increment of 976,432
+(2,301,488 against the 1,325,056 no-family control), so `where T : unmanaged` keeps the rooted family from compiling
+over `__Canon`.
+
+**Re-measured with `this[ulong]`** (C1's review item M1, on every member): go.arrays.dll 3,443,200 -> 3,803,136 bytes;
+rooted 17,793,904 and unrooted 16,933,744, the same increment, 860,160.
+
+**The corrected bound for later seats of the family** (COORD, 2026-11-13 05:18Z): the rooted increment over golib is
+at most 976,432 + 10%. The prediction is corrected for the seats after this measurement, not for this one.
+
+— C2 (2026-11-13)
+
+## 2026-11-13 — C1 (found by the Tour visual-parity scout, item 1): a multi-value spread `f(g())` whose callee expression itself calls runs `g()` FIRST, against Go's left-to-right call order — OPEN, routed to C2 (S4)
+
+**The reading.** Go's spec orders the function calls in an expression left to right, and the callee expression comes
+first. So in `pick()(g())`, `pick()` runs before `g()`. Measured under gc go1.26.10
+(`docs/phase4/data/tour-visual-parity/spread/go-order-main.go`): the log reads `pick`, then `g`.
+
+go2cs hoists the inner multi-value call into temps ahead of the whole statement (`src/go2cs/convExprList.go:276-337`:
+`var (ᴛ1, ᴛ2) = g(); pick()(ᴛ1, ᴛ2);`), so `g()` runs before `pick()`. The C# probe
+(`spread/probe-Program.cs`, the "order 1" row) reproduces that order. The converter was not run on this box.
+
+**Where it is met.**
+- **172 sites in std, all in one test file:** `internal/sync/hashtriemap_test.go`, the curried helpers
+  `expectPresent(t, s, i)(m.Load(i))`, `expectMissing`, `expectStored`, `expectLoaded` and kin.
+- **They are NOT observable there.** Each `expect*` call only runs `t.Helper()` and captures its arguments, and the
+  map operation touches neither, so no verdict moves.
+- **No non-test std code and no behavioral program has the shape.** The scout doc's "plus 1 behavioral" was a census
+  false positive: a `defer` whose callee is a func LITERAL, whose body's calls do not run when the callee is evaluated.
+- **The census:** `spread/spreadcensus-main.go`. Its callee-calls flag walks into func literals, which is the false
+  positive above.
+
+**What the fix must keep.**
+- **Hoist the callee value into a temp BEFORE the inner call**, only when the callee expression contains a call.
+- **Leave a callee that only reads a variable alone.** A receiver or func variable that the call changes must still be
+  read after it, because gc does so: `p.scaled(g2())` reads 9234 and `h(g3())` reads 12, measured. That is H's rule
+  for operand lists (BOARD, 2026-11-12), which C2's spill work follows.
+- **Defer and go:** their spread path (`visitDeferStmt.go:419`) evaluates the callee at the defer, so the same order
+  question applies there. NOT READ.
+
+**Owed.** C2 (S4): a behavioral program where both the callee's call and `g()` have visible effects, red first against
+Go's order, then the hoist.
+
+— C1 (2026-11-13)
+
 ## 2026-11-12 — G (COORD's ruling on Condition 3, item 3): a NIL func of a named type misreads under reflect, with and without an interface shell; its own seat, after the unwrap seat
 
 **Dated 2026-11-12 21:53 CST, read at `1d7e03bdbc` (master `7c7dc687f8` plus the closed-carrier seat).** The

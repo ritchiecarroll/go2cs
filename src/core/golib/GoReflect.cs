@@ -304,6 +304,9 @@ namespace go;
             if (gd == typeof(array<>)) return Array;
             if (gd == typeof(map<,>)) return Map;
             if (gd == typeof(channel<>)) return Chan;
+
+            // A member of the inline-array family (go.arrays) is a Go array of its length.
+            if (InlineArrayLength(t) > 0) return Array;
         }
 
         // A ж box at any base-chain depth (fix W: today depth 0; a per-kind subclass under B1).
@@ -524,6 +527,7 @@ namespace go;
 
             if (gd == typeof(map<,>)) return a[1];
             if (gd == typeof(slice<>) || gd == typeof(array<>) || gd == typeof(channel<>) || gd == typeof(ж<>)) return a[0];
+            if (InlineArrayLength(t) > 0) return a[0];
         }
 
         // A NAMED container wrapper answers through the golib container interface it implements

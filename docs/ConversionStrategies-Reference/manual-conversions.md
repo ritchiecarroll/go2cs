@@ -2881,7 +2881,7 @@ MINI-BRIDGE* above; `GoStructLayoutTests.FieldOrder_IsGoDeclarationOrder_NotMeta
      order-sensitive test (TestMarshalEmbeds) declares its single plain field first. The section then named
      declaration-order cargo as the remedy; the constructor reorder landed instead, and the converter later declared
      embeds in place (src/go2cs/visitStructType.go:976 `// declaration order, marked like every other embed:`). The
-     legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:507 (`An embed is emitted by the converter as a partial PROPERTY`). -->
+     legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:529 (`An embed is emitted by the converter as a partial PROPERTY`). -->
 
 ## An UNNAMED func type renders STRUCTURALLY, exactly as an unnamed struct does
 

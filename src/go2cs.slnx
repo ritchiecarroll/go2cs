@@ -9,6 +9,7 @@
     <Project Path="core/go2cs/go2cs.shproj" />
     <Project Path="core/golib/golib.csproj" />
     <Project Path="core/go2cs.CpuProfiler/go2cs.CpuProfiler.csproj" />
+    <Project Path="core/go.arrays/go.arrays.csproj" />
   </Folder>
   <Folder Name="/core/bytes/">
     <Project Path="core/bytes/bytes.csproj" />
@@ -269,6 +270,7 @@
     <File Path="../NOTICE" />
   </Folder>
   <Folder Name="/gen/">
+    <Project Path="gen/go2cs-arrays-gen/go2cs-arrays-gen.csproj" />
     <Project Path="gen/go2cs-gen/go2cs-gen.csproj" />
   </Folder>
   <Folder Name="/go2cs/">
@@ -964,6 +966,9 @@
     <Project Path="tests/Behavioral/PointerArrayRange/PointerArrayRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceReinterpret/PointerCastSliceReinterpret.csproj" />
+    <Project Path="tests/Behavioral/PointerArrayViewForms/PointerArrayViewForms.csproj" />
+    <Project Path="tests/Behavioral/ExplicitDerefConversionStore/ExplicitDerefConversionStore.csproj" />
+    <Project Path="tests/Behavioral/NestedPointerConversionReinterpret/NestedPointerConversionReinterpret.csproj" />
     <Project Path="tests/Behavioral/PointerConversionAliasing/PointerConversionAliasing.csproj" />
     <Project Path="tests/Behavioral/PointerConversionAnonymousTarget/PointerConversionAnonymousTarget.csproj" />
     <Project Path="tests/Behavioral/PointerReinterpretIdentity/PointerReinterpretIdentity.csproj" />
