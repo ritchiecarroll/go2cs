@@ -13,7 +13,8 @@ SDK picks the build for your machine when it installs the tool. Building the con
 [.NET 10 SDK](https://dotnet.microsoft.com/download), and the first build restores the `go.*` packages from
 NuGet.
 A `-cgo` conversion is one package, and it builds against a go2cs clone (`dotnet build -p:go2csPath=<go2cs>/src/`);
-it does not use the `go.*` packages.
+it does not use the `go.*` packages yet. Building a cgo package against the `go.*` packages from the feed is
+planned for the next release.
 <!-- src/go2cs/main.go:305 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 Update it with `dotnet tool update -g go2cs`, and remove it with `dotnet tool uninstall -g go2cs`. To run it once
