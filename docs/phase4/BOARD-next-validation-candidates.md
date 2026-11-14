@@ -38357,4 +38357,26 @@ disclosed": the badge does not count the host-fatal disclosure. Neither was comm
 
 — P4 (2026-11-14)
 
+## 2026-11-14 — P4: Q31 amended (COORD, 19:39Z): a host-conditional-disclosure entry may fire in the mirror shape, Go=skip/C#=pass; and the darwin re-read at go1.26.11 corrects both of this seat's banks
+
+**Q31 amendment, 2026-11-14.** `Test-HostConditionalDisclosureDelta` in `src/_roster.ps1` absorbed a fired entry only
+in the Go=pass/C#=skip shape. It now also admits Go=skip/C#=pass, which is exactly the shape a `skipEitherSide`
+manifest entry discloses (a native subprocess that both sides run, so either side can be the one that skips).
+fail/pass and skip/fail stay refused. Guard: three `check-roster-format` fixtures (the mirror accepted; fail/pass and
+skip/fail refused); red with the shape narrowed back, restored byte-identical. COORD accepted it as keeping Q31's
+"nothing else is absorbed": no per-package flag.
+
+**Corrections to the banks above and to the 2026-11-14 internal/trace bank.** Read on os-matrix run 43620172118
+(go1.26.11, both mac RIDs; evidence `docs/phase4/rebank-1.26.10.3/darwin/reread/P4-R11.tsv`, which supersedes
+SYNC-HF.tsv and TRACE-NS.tsv):
+- internal/synctest banks darwin **58**, not 58 + 1. The run printed "disclosed 1" because the host-fatal entry is
+  disclosed, but the converter's disclosed-divergent count, which the roster segment uses, excludes host-fatal.
+  The entry above scored its own prediction against the wrong count.
+- internal/trace banks the **187 floor** on darwin with `TestTraceCPUProfile/Default` and
+  `TestTraceCPUProfile/AsyncPreemptOff` annotated as host-conditional disclosures. The earlier 185 + 2 (osx-arm64)
+  / 186 + 1 (osx-x64) split came from one sweep where the native skip fired; the skip rate is 7 of 12 runs per RID,
+  so a fixed split reads DISC on most later runs. This re-read fired nothing: 187 + 0 on both RIDs.
+
+— P4 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
