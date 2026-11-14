@@ -38055,4 +38055,59 @@ fix is the root's: the minted box keeps the source box (`NativeDerivation.Kept`)
 
 — P5 (2026-11-14)
 
+## 2026-11-14 — P5 (the interior-pointer cut, design 10.12; COORD ruling (a), 08:40Z: a row for after the release): the use walk that retires the 13 kept `FromRef` sites — OPEN, not started, after the release
+
+**What the cut does.** A converted method that takes a number from its receiver or a pointer parameter emitted
+`@unsafe.Pointer.FromRef(...)`, a pointer that keeps nothing of the box it came from. The cut emits the receiver's
+box instead, but only where the USE of the conversion is known at the conversion itself: the first argument of
+`unsafe.Add`, the `P` of an arithmetic form `unsafe.Pointer(uintptr(P) + n)`, or the operand of Go's own
+`uintptr(...)`. That is the node rule.
+
+**What it leaves.** A conversion whose value is a call argument, a return value or a store keeps `FromRef`, because
+the converter cannot read at that node what the callee, the caller or the later reader does with the pointer. 13
+sites at every target, each named with its use in `receiverFromRefSites`
+(`src/go2cs/internal/repoguard/interiorPointerMintCensus_test.go`, disposition "kept: use not provable at the
+node"): `internal/abi/type.cs` `Methods` and `ExportedMethods` (an argument of `addChecked`); `internal/sync/mutex.cs`
+`Lock`, `TryLock`, `lockSlow`, `Unlock` (arguments of `race.Acquire` and `race.Release`, under `race.Enabled`, a
+constant false); `reflect/type.cs` `nameOff`, `typeOff`, `textOff`; runtime's `mheap.cs` `init` (one file per layout
+key folder), `mgcmark_greenteagc.cs` `init`, `synctest.cs` `raceaddr` (a return) and `time.cs` `unlockAndRun`.
+
+**Why it is a row and not a defect today.** A kept site is the emission that shipped before the cut, unchanged. The
+design's prediction P2 (every `FromRef` leaves) is scored a MISS as worded, with this list beside it.
+
+**OPEN: the use walk.** For the argument, return and store cases, follow the value to where it is used: the callee's
+parameter (does it reach `unsafe.Add`, an arithmetic form or a dereference), the function's callers for a return, the
+readers of the stored location. Where every use is one the box serves, emit the box and drop the row from the kept
+list; where a use needs the number, say which and keep it. It moves corpus bytes at the sites it retires. Not started.
+Scheduled after 1.26.11.1.
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — P5 (COORD ruling, 2026-11-14 12:20Z; design 10.5 and 10.13): B2, the refusal by name of a native-box dereference whose pointee holds a reference, and the every-banked-row reading it waits on — MOVED to after 1.26.11.1, not started
+
+**What ships now.** The counter (`src/core/golib/NativeBoxDereferenceCensus.cs`, cut commit `65d9a4a990`), off unless
+`GO2CS_NATIVEBOX_CENSUS` is set. It counts each `NativeBox<T>` dereference that passes the layout refusal, in three
+classes: B2a (the pointee holds a reference and is not a Go struct value), B2b (a Go struct value that holds a
+reference and that the layout check does not refuse), UNPINNABLE (the box is derived from managed storage that
+cannot be pinned). It refuses nothing. The reader and its controls are `docs/phase4/probes/p5-nativebox-census/`.
+
+**What does not ship.** B2 itself: nothing refuses by name a dereference in those classes. And the reading B2 waits
+on: the counter over EVERY banked row on every flavour the roster banks (windows, linux/amd64, linux/arm64, darwin),
+one sweep per flavour with the variable set. The design lands B2 for a class only when every flavour reads 0 for it.
+
+**What is read before the release.** The canary rows on linux/amd64 only, in the cut's gates. An UNPINNABLE arrival
+there is a live instance of the interior-pointer hole and is posted on its own.
+
+**NOT SHOWN until that reading:** that the three classes are empty on windows, darwin and linux/arm64. The design's
+windows evidence that linux cannot stand in for it is `net/windows/interface_windows_impl.cs:262`, a cast of an OS
+buffer to a struct with pointer fields; it is unread.
+
+**Two corrections the cut made to the design's population** (design 10.13): the hand-owned `sync.Mutex` is refused
+by the layout check already and is not in B2b; an array value arrives as B2a, by kind.
+
+**OPEN, after 1.26.11.1:** a sweep option that sets the two variables and keeps the files; the four readings; then B2
+for each class that reads 0 everywhere, and a finding for each that does not.
+
+— P5 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
