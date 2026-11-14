@@ -735,7 +735,7 @@ internal static void gcStart(gcTrigger trigger) {
             }
             // Initialize ptrBuf if necessary.
             if (goexperiment.GreenTeaGC && (~Δp).gcw.ptrBuf == nil) {
-                Δp.Value.gcw.ptrBuf = (ж<array<uintptr>>)(uintptr)(persistentalloc(gc.PageSize, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
+                Δp.Value.gcw.ptrBuf = @unsafe.Pointer.To<array<uintptr>>(persistentalloc(gc.PageSize, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
             }
         }
 
@@ -1746,7 +1746,7 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
         // Go to sleep until woken by
         // gcController.findRunnableGCWorker.
         gopark((ж<g> g, @unsafe.Pointer nodep) => {
-            var nodeΔ1 = (ж<gcBgMarkWorkerNode>)(uintptr)(nodep);
+            var nodeΔ1 = @unsafe.Pointer.To<gcBgMarkWorkerNode>(nodep);
 
             var mp = nodeΔ1.m.ptr(); if (mp != nil) {
                 // The worker G is no longer running; release

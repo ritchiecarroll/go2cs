@@ -52,7 +52,7 @@ public class SystemGoroutineTests
         Assert.IsFalse(Goroutine.IsSystemCreator(null), "no creator is a user goroutine, as runtime.main is in Go");
     }
 
-    // From 1.26.10.4 a struct's same-package promoted methods are forwarders in a class of the struct's own
+    // From 1.26.11.1 a struct's same-package promoted methods are forwarders in a class of the struct's own
     // (`<pkg>ᴛ<Struct>ᴛpkg`), and Go names such a wrapper by the struct's package. The forwarder is the creator a
     // stack walk finds when the JIT inlines the promoted method that holds the `go` into it.
     [TestMethod]

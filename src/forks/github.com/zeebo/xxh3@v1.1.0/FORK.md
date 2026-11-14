@@ -2,7 +2,7 @@
 
 This directory is `github.com/zeebo/xxh3` at v1.1.0 with every use of `unsafe` removed. It exists so that a module
 that depends on xxh3 can be converted by go2cs today, which cannot yet convert xxh3's string- and slice-header views
-over managed memory (C45; the planned general fix is a post-1.26.10.4 train, design record
+over managed memory (C45; the planned general fix is a post-1.26.11.1 train, design record
 `docs/phase4/DESIGN-unsafe-header-views.md`). It computes the same hashes, bit for bit.
 
 Use it from a Go module with a `replace`:

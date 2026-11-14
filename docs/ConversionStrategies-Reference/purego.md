@@ -25,11 +25,12 @@ panic. Its only caller is ECDSA's `inverse` (`crypto/internal/fips140/ecdsa/ecds
 `ordInverse`, and on any error that function computes the inverse by Fermat's method instead,
 `kInv.Exp(k, c.nMinus2, c.N)`, as Go's own comment there allows for platforms without the fast form. So ECDSA is
 correct under purego and differs from the default build only in how it inverts.
-<!-- go1.26.10: GOROOT/src/crypto/internal/fips140/nistec/p256_ordinv_noasm.go:5 (`//go:build (!amd64 && !arm64) || purego`),
+<!-- go1.26.11 (re-cited 2026-11-13 at the 1.26.11 patch hop, which moved ecdsa.go two lines; read at go1.26.10 before
+     that): GOROOT/src/crypto/internal/fips140/nistec/p256_ordinv_noasm.go:5 (`//go:build (!amd64 && !arm64) || purego`),
      :12 (`return nil, errors.New("unimplemented")`); the only reference, GOROOT/src/crypto/internal/fips140/ecdsa/ecdsa.go:107
-     (`ordInverse: nistec.P256OrdInverse,`); the fallback, :383-399 (`func inverse[P Point[P]](c *Curve[P], kInv, k *bigmod.Nat) {`),
-     :384-386 (`kBytes, err := c.ordInverse(k.Bytes(c.N))`), :398 (`kInv.Exp(k, c.nMinus2, c.N)`). The converted form keeps
-     the fallback: src/core/crypto/internal/fips140/ecdsa/ecdsa.cs:448 (`var (kBytes, err) = c.ordInverse(k.Bytes(c.N));`).
+     (`ordInverse: nistec.P256OrdInverse,`); the fallback, :385-401 (`func inverse[P Point[P]](c *Curve[P], kInv, k *bigmod.Nat) {`),
+     :386-388 (`kBytes, err := c.ordInverse(k.Bytes(c.N))`), :400 (`kInv.Exp(k, c.nMinus2, c.N)`). The converted form keeps
+     the fallback: src/core/crypto/internal/fips140/ecdsa/ecdsa.cs:450 (`var (kBytes, err) = c.ordInverse(k.Bytes(c.N));`).
      Go 1.25 removed crypto/elliptic/nistec_p256.go (present at go1.24.13, absent at go1.25.0), and with it the
      panic below. -->
 <!-- Through Go 1.24 (this section as written for the Go 1.24.13 corpus, before the Go 1.26 hop): "Known accepted divergence: crypto/elliptic P256 Inverse panics under purego." One package regresses *behaviorally* under purego relative to the default build, and it is recorded as a **known divergence, not fixed**, because matching it is fidelity: **real Go panics there too under `-tags purego`.** Upstream `crypto/elliptic/nistec_p256.go` is gated `//go:build amd64 || arm64` **without** `&& !purego`, while its dependency `crypto/internal/fips140/nistec/p256_ordinv.go` is `(amd64 || arm64) && !purego`. So under purego the ordinv fallback `p256_ordinv_noasm.go` — which returns `errors.New("unimplemented")` — is selected, and `crypto/elliptic`'s `Inverse` (reached via the deprecated `invertible` interface) treats **any** error from the nistec scalar inverse as an invariant violation and **panics** `crypto/elliptic: nistec rejected normalized scalar`. (`crypto/ecdsa` handles the same error correctly with a Fermat-little-theorem fallback, so ECDSA is unaffected.) Verified against real Go: the default build returns a valid inverse, and `go run -tags purego` panics with that exact message. This is an upstream Go inconsistency in a largely-superseded package; go2cs reproduces Go-under-purego faithfully, so the panic is expected. It is a divergence from the **default** (`-tags=`) build only, which binds the asm ordinv. -->

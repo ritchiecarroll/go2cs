@@ -15,17 +15,17 @@ partial struct conf {
 
 internal static ж<bool> boolFieldAddr(ж<conf> c, @string name) {
     var v = reflect.Indirect(reflect.ValueOf(c.OrTypedNil()));
-    return (ж<bool>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
+    return @unsafe.Pointer.To<bool>(v.FieldByName(name).Addr().UnsafePointer());
 }
 
 internal static ж<@string> stringFieldAddr(ж<conf> c, @string name) {
     var v = reflect.Indirect(reflect.ValueOf(c.OrTypedNil()));
-    return (ж<@string>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
+    return @unsafe.Pointer.To<@string>(v.FieldByName(name).Addr().UnsafePointer());
 }
 
 internal static ж<nint> intFieldAddr(ж<conf> c, @string name) {
     var v = reflect.Indirect(reflect.ValueOf(c.OrTypedNil()));
-    return (ж<nint>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
+    return @unsafe.Pointer.To<nint>(v.FieldByName(name).Addr().UnsafePointer());
 }
 
 internal static void main() {

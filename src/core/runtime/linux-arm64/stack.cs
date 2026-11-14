@@ -638,7 +638,7 @@ partial struct adjustinfo {
 // adjustpointer checks whether *vpp is in the old stack described by adjinfo.
 // If so, it rewrites *vpp to point into the new stack.
 internal static void adjustpointer(ref adjustinfo adjinfo, @unsafe.Pointer vpp) {
-    var pp = (ж<uintptr>)(uintptr)(vpp);
+    var pp = @unsafe.Pointer.To<uintptr>(vpp);
     ref var Δp = ref heap<uintptr>(pp.Value, out var Ꮡp);
     if (stackDebug >= 4) {
         print((@string)"        ", pp.OrTypedNil(), (@string)":", (Δhex)(uint64)Δp, (@string)"\n");
@@ -699,14 +699,14 @@ internal static void adjustpointers(@unsafe.Pointer scanp, ж<bitvector> Ꮡbv, 
     for (var i = (uintptr)0; i < num; i += 8) {
         if (stackDebug >= 4) {
             for (var j = (uintptr)0; j < 8; j++) {
-                print((@string)"        ", @unsafe.Pointer.OrTypedNil(add(scanp, (i + j) * (uintptr)goarch.PtrSize)), (@string)":", ptrnames[bv.ptrbit(i + j)], (@string)":", (Δhex)(uint64)(~(ж<uintptr>)(uintptr)(add(scanp, (i + j) * (uintptr)goarch.PtrSize))), (@string)" # ", i, (@string)" ", addb(bv.bytedata, i / 8).Value, (@string)"\n");
+                print((@string)"        ", @unsafe.Pointer.OrTypedNil(add(scanp, (i + j) * (uintptr)goarch.PtrSize)), (@string)":", ptrnames[bv.ptrbit(i + j)], (@string)":", (Δhex)(uint64)(~@unsafe.Pointer.To<uintptr>(add(scanp, (i + j) * (uintptr)goarch.PtrSize))), (@string)" # ", i, (@string)" ", addb(bv.bytedata, i / 8).Value, (@string)"\n");
             }
         }
         var b = (addb(bv.bytedata, i / 8)).Value;
         while (b != 0) {
             var j = (uintptr)sys.TrailingZeros8(b);
             b &= (byte)(b - 1);
-            var pp = (ж<uintptr>)(uintptr)(add(scanp, (i + j) * (uintptr)goarch.PtrSize));
+            var pp = @unsafe.Pointer.To<uintptr>(add(scanp, (i + j) * (uintptr)goarch.PtrSize));
 retry:
             var Δp = pp.Value;
             if (f.valid() && 0 < Δp && Δp < minLegalPointer && debug.invalidptr != 0) {
@@ -749,7 +749,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
         if (debugCheckBP) {
             // Frame pointers should always point to the next higher frame on
             // the Go stack (or be nil, for the top frame on the stack).
-            var bp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)frame.varp);
+            var bp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)frame.varp);
             if (bp != 0 && (bp < adjinfo.old.lo || bp >= adjinfo.old.hi)) {
                 println((@string)"runtime: found invalid frame pointer");
                 print((@string)"bp=", (Δhex)(uint64)bp, (@string)" min=", (Δhex)(uint64)adjinfo.old.lo, (@string)" max=", (Δhex)(uint64)adjinfo.old.hi, (@string)"\n");
@@ -909,7 +909,7 @@ internal static void adjustsudogs(ref g gp, ref adjustinfo adjinfo) {
 
 internal static void fillstack(Δstack stk, byte b) {
     for (var Δp = stk.lo; Δp < stk.hi; Δp++) {
-        ((ж<byte>)(uintptr)((@unsafe.Pointer)Δp)).Value = b;
+        (@unsafe.Pointer.To<byte>((@unsafe.Pointer)Δp)).Value = b;
     }
 }
 
@@ -1421,7 +1421,7 @@ partial struct stackObjectRecord {
 internal static (uintptr, ж<byte>) gcdata(this ж<stackObjectRecord> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    var ptr = (uintptr)(uintptr)@unsafe.Pointer.FromRef(ref r);
+    var ptr = (uintptr)Ꮡr;
     ж<moduledata> mod = default;
     for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.next) {
         // The normal case: stackObjectRecord is in funcdata.
@@ -1439,7 +1439,7 @@ internal static (uintptr, ж<byte>) gcdata(this ж<stackObjectRecord> Ꮡr) {
     // you may have made a copy of a stackObjectRecord.
     // You must use the original pointer.
     var res = mod.rodata + (uintptr)r.gcdataoff;
-    return ((uintptr)r.ptrBytes, (ж<byte>)(uintptr)((@unsafe.Pointer)res));
+    return ((uintptr)r.ptrBytes, @unsafe.Pointer.To<byte>((@unsafe.Pointer)res));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

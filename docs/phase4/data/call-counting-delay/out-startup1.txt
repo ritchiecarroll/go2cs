@@ -1,0 +1,25 @@
+affinity mask 0x1
+PerfStartup-jit wall_ms: A/A 0.995 [0.813-1.036]
+    base   608.553 [584.094-945.302]  ratio 1.000 [1.000-1.000] inside  delta +0.000 (+0.0% of wall)
+    aa     614.641 [576.929-868.183]  ratio 0.995 [0.813-1.036] inside  delta +6.088 (+1.0% of wall)
+    d10    462.894 [450.400-659.064]  ratio 0.757 [0.624-1.088] inside  delta -145.659 (-23.9% of wall)
+    d20    460.995 [451.578-669.917]  ratio 0.757 [0.501-1.106] inside  delta -147.558 (-24.2% of wall)
+    d100   466.423 [450.145-601.839]  ratio 0.768 [0.476-0.977] inside  delta -142.130 (-23.4% of wall)
+PerfStartup-r2r wall_ms: A/A 1.013 [0.962-1.076]
+    base   426.153 [410.414-445.925]  ratio 1.000 [1.000-1.000] inside  delta +0.000 (+0.0% of wall)
+    aa     431.844 [405.429-467.547]  ratio 1.013 [0.962-1.076] inside  delta +5.692 (+1.3% of wall)
+    d10    325.888 [318.219-329.026]  ratio 0.765 [0.714-0.794] OUTSIDE  delta -100.265 (-23.5% of wall)
+    d20    324.778 [317.842-331.582]  ratio 0.763 [0.736-0.798] OUTSIDE  delta -101.374 (-23.8% of wall)
+    d100   323.390 [319.951-330.760]  ratio 0.762 [0.737-0.798] OUTSIDE  delta -102.762 (-24.1% of wall)
+PerfMidStart-jit wall_ms: A/A 1.008 [0.965-1.026]
+    base   1004.457 [992.049-1030.223]  ratio 1.000 [1.000-1.000] inside  delta +0.000 (+0.0% of wall)
+    aa     1008.455 [976.399-1023.095]  ratio 1.008 [0.965-1.026] inside  delta +3.997 (+0.4% of wall)
+    d10    776.399 [770.942-812.961]  ratio 0.774 [0.760-0.804] OUTSIDE  delta -228.059 (-22.7% of wall)
+    d20    774.131 [764.113-803.399]  ratio 0.771 [0.751-0.800] OUTSIDE  delta -230.326 (-22.9% of wall)
+    d100   775.285 [770.039-795.382]  ratio 0.772 [0.755-0.792] OUTSIDE  delta -229.173 (-22.8% of wall)
+PerfMidStart-r2r wall_ms: A/A 0.992 [0.967-1.052]
+    base   678.362 [655.854-691.134]  ratio 1.000 [1.000-1.000] inside  delta +0.000 (+0.0% of wall)
+    aa     672.602 [661.375-700.197]  ratio 0.992 [0.967-1.052] inside  delta -5.759 (-0.8% of wall)
+    d10    509.695 [504.501-544.266]  ratio 0.755 [0.730-0.795] OUTSIDE  delta -168.667 (-24.9% of wall)
+    d20    508.331 [506.583-518.332]  ratio 0.750 [0.741-0.777] OUTSIDE  delta -170.031 (-25.1% of wall)
+    d100   510.255 [505.753-515.142]  ratio 0.751 [0.732-0.783] OUTSIDE  delta -168.106 (-24.8% of wall)

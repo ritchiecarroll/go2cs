@@ -36,7 +36,7 @@ public static error /*err*/ Errorf(sstring format, params ꓸꓸꓸany aʗp) {
 }
 
 // errorf formats and returns an error value, or nil if no formatting is required.
-internal static error errorf(@string format, params ꓸꓸꓸany aʗp) {
+internal static error errorf(sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
     if (len(a) == 0 && stringslite.IndexByte(format, (byte)'%') == -1) {

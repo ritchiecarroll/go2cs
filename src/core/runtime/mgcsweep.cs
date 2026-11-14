@@ -1014,7 +1014,7 @@ retry:
 internal static void clobberfree(@unsafe.Pointer x, uintptr size) {
     // size (span.elemsize) is always a multiple of 4.
     for (var i = (uintptr)0; i < size; i += 4) {
-        ((ж<uint32>)(uintptr)(add(x, i))).Value = 0xdeadbeefU;
+        (@unsafe.Pointer.To<uint32>(add(x, i))).Value = 0xdeadbeefU;
     }
 }
 

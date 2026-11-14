@@ -14,7 +14,7 @@ partial struct sigctxt {
 
 //go:nosplit
 //go:nowritebarrierrec
-internal static ж<regs64> regs(this ref sigctxt c) { return ((ж<ucontext>)(uintptr)(c.ctxt)).Value.uc_mcontext.Ꮡss; }
+internal static ж<regs64> regs(this ref sigctxt c) { return (@unsafe.Pointer.To<ucontext>(c.ctxt)).Value.uc_mcontext.Ꮡss; }
 
 internal static uint64 rax(this ref sigctxt c) { return c.regs().rax; }
 internal static uint64 rbx(this ref sigctxt c) { return c.regs().rbx; }
@@ -64,7 +64,7 @@ internal static void fixsigcode(this ref sigctxt c, uint32 sig) {
         var pc = (uintptr)c.rip();
         // OS X will leave the pc just after the INT 3 instruction.
         // INT 3 is usually 1 byte, but there is a 2-byte form.
-        var code = (ж<array<byte>>)(uintptr)((@unsafe.Pointer)(pc - 2));
+        var code = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)(pc - 2));
         if (code.Value[1] != 0xCC && (code.Value[0] != 0xCD || code.Value[1] != 3)) {
             // SIGTRAP on something other than INT 3.
             c.set_sigcode(_SI_USER);

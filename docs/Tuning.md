@@ -9,6 +9,12 @@ see the [performance comparison](Performance.md), which is re-measured as the co
 Native AOT when tight loops dominate. Do not turn tiered compilation or dynamic PGO off for speed: on `win-x64`,
 the default runtime ran a pointer-heavy benchmark in roughly 40% less time than with either one off.
 
+**Start-up or steady state: the one setting to know.** A converted program optimizes its hot code from its first
+moment. That keeps a service fast, and it costs a short-lived tool part of its start: on one CPU, about a quarter of a
+small program's run. Short-lived tools, CLIs and containers with one or two CPUs: set `GoCallCountingDelayMs` to
+`runtime`. Long-running services, servers and benchmarks: keep the default. The measurements and how to set it:
+[start-up or steady state](#start-up-or-steady-state-the-call-counting-delay).
+
 ## Choosing a deployment
 
 A converted program can run three ways. All three run the same converted code; they differ in when it is compiled.
@@ -174,44 +180,93 @@ The settings, if you need them, each in three equivalent forms: a property in th
 | Dynamic PGO | `<TieredPGO>false</TieredPGO>` | `"System.Runtime.TieredPGO": false` | `DOTNET_TieredPGO=0` |
 | Quick JIT for loops | `<TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>` | `"System.Runtime.TieredCompilation.QuickJitForLoops": false` | `DOTNET_TC_QuickJitForLoops=0` |
 | Call-counting delay | `<GoCallCountingDelayMs>0</GoCallCountingDelayMs>` (a converted program's own property) | `"System.Runtime.TieredCompilation.CallCountingDelayMs": 0` | `DOTNET_TC_CallCountingDelayMs=0` |
+| Server garbage collection | `<ServerGarbageCollection>true</ServerGarbageCollection>` | `"System.GC.Server": true` | `DOTNET_gcServer=1` |
+| Dynamic adaptation (DATAS) | `<GarbageCollectionAdaptationMode>0</GarbageCollectionAdaptationMode>` | `"System.GC.DynamicAdaptationMode": 0` | `DOTNET_GCDynamicAdaptationMode=0` |
 
 Microsoft documents every runtime compilation setting in
-[Runtime configuration options for compilation](https://learn.microsoft.com/dotnet/core/runtime-config/compilation).
+[Runtime configuration options for compilation](https://learn.microsoft.com/dotnet/core/runtime-config/compilation). The garbage collector's settings are in
+[Runtime configuration options for garbage collection](https://learn.microsoft.com/dotnet/core/runtime-config/garbage-collector).
 
-**A converted program counts calls from the start.** .NET waits until about 100 ms pass with no new method compiled
-before it counts calls toward optimizing a method. Until then, a short busy phase runs the standard library's small
-functions unoptimized. A converted program sets that delay to 0. This applies wherever code is JIT-compiled: under
-`dotnet run` and `dotnet build`, and in a ReadyToRun publish, whose methods are still recompiled as they get hot. It
-does not apply to Native AOT. On `win-x64` (an AMD Ryzen 5 PRO 6650U):
+**Server garbage collection is an option for an allocation-heavy, long-running program.** Server GC keeps one heap
+and one collector thread per core, and collects in parallel. DATAS, which .NET turns on by default with server GC,
+shrinks the heap count to fit the live data; turning it off keeps a heap on every core. On `linux-x64`, on a 4-vCPU
+cloud VM, the converted TypeScript type checker takes about a third less time over a slice of its compiler tests with
+both settings above, and its peak memory is about 15% higher. The cost is memory. It grows with the core count,
+because each core has its own heap, so measure on the machine you deploy to. The settings take effect only in an
+executable: in a library, the host application's own settings decide. A converted project keeps .NET's default,
+workstation GC, because most programs are small or short-lived and do not repay the memory.
 
-- Under the JIT, a TLS handshake benchmark that loads over a hundred packages ran about a third faster (about 4.2 s
-  down to 2.8 s). A trivial program took about 24 ms, roughly 5%, longer to start.
-- Published with ReadyToRun, the same benchmark ran about 30% faster, and the trivial program took about 30 ms longer
-  to start.
+<!-- Source: P4 perf scout, branch claude/p4-ts-perf-scout 895e08794d, docs/phase4/SCOUT-ts-perf.md section 4 and
+     docs/phase4/data/ts-perf/experiments.tsv + runtime-knobs.tsv. linux-x64, 4 vCPU Xeon 2.1 GHz, 15 GB, .NET SDK
+     10.0.400, JIT Release; converted TypeScript at go2cs master 651c4ad147, checkdemo over the first 25 units of
+     units-101.txt, 1 warm-up + median of 3, same output hash on every run. Base (workstation concurrent GC) 35.83 s
+     wall, 1,252 MB peak RSS; DOTNET_gcServer=1 + DOTNET_GCDynamicAdaptationMode=0: 24.37 s (-32%), 1,447 MB (+15.6%);
+     server GC with DATAS on: 25.3 s (-29%). Owner ruling 2026-11-13: an option in this guide, on in the TypeScript
+     project as a tuned change, not the converted-project default. Spellings checked against the Microsoft page
+     linked above (Workstation vs. server; Dynamic adaptation to application sizes). -->
 
-**It trades start time for steady-state speed.** Hot methods reach optimized code sooner, and the program pays for it
-in a slightly longer start, most visibly under ReadyToRun. When start time matters more to your program, restore
-.NET's own delay in the converted project file:
+### Start-up or steady state: the call-counting delay
 
-```xml
-<GoCallCountingDelayMs>runtime</GoCallCountingDelayMs>
-```
+**Choose it by how long your program runs.** Measured on `win-x64` (an AMD Ryzen 5 PRO 6650U, 6 cores and 12
+threads): start times published as the converted project publishes by default, the TLS loop under the JIT build.
 
-or for one build or publish, `dotnet publish -c Release -p:GoCallCountingDelayMs=runtime`. Any other value is a delay
-in milliseconds. The setting applies to an executable project; the environment variable overrides it for one run. A
-C# application that references converted packages keeps .NET's default unless it sets the `runtimeconfig.json` value
+| Your program | Set `GoCallCountingDelayMs` to | What that buys |
+|:--|:--|:--|
+| A short-lived tool or CLI, or anything in a container with one or two CPUs | `runtime` (or `10`) | it starts 30 to 50 ms sooner on 12 CPUs, and 100 to 170 ms sooner on one CPU: a quarter of a small program's run |
+| A long-running service or server, and any benchmark | `0`, the default | its hot code stays fast: with a delay of 10 ms, a loop of TLS handshakes runs 41% slower on 12 CPUs and 1.9 times slower on one |
+
+**What the delay does.** .NET first compiles a method quickly, then recompiles the methods that keep running with full
+optimization. It starts counting a method's calls only after a quiet spell with no new method compiled: 100 ms by
+default. A converted program sets that spell to 0, so it counts from its first moment and its hot code is optimized
+as soon as it is hot. The price is paid in the program's start: the optimizing compiler runs while the program is
+still starting, and on a machine with one CPU it competes with the program for that CPU. The delay applies wherever
+code is JIT-compiled: under `dotnet run` and `dotnet build`, and in a ReadyToRun publish, whose methods are still
+recompiled as they get hot. Native AOT has no tiers, so it does not apply there.
+
+**The default is 0** because a converted program that does real work runs for longer than its start, and there the
+delay costs more than it saves. Changing it trades one for the other. Medians on the same machine, start-up as
+process wall time and the TLS loop as in-program time:
+
+| Reading | CPUs | delay 0 (default) | delay 10 | delay 100 (.NET's own) |
+|:--|:--:|--:|--:|--:|
+| A one-line program starts (published) | 12 | 346 ms | 316 ms | 313 ms |
+| A one-line program starts (published) | 1 | 426 ms | 326 ms | 323 ms |
+| A JSON, regexp, URL and template program starts (published) | 12 | 554 ms | 506 ms | 506 ms |
+| A JSON, regexp, URL and template program starts (published) | 1 | 678 ms | 510 ms | 510 ms |
+| 64 TLS handshakes (JIT build) | 12 | 1,217 ms | 1,713 ms | |
+| 64 TLS handshakes (JIT build) | 1 | 2,388 ms | 4,541 ms | |
+
+A delay of 10, 20 or 100 ms starts a program about equally fast, so the choice is between 0 and a delay, not between
+delays. The suite-wide cost of .NET's 100 ms follows below.
+
+**How to set it**, in any of three forms:
+
+- in the converted project file, `<GoCallCountingDelayMs>runtime</GoCallCountingDelayMs>`, or for one build or
+  publish, `dotnet publish -c Release -p:GoCallCountingDelayMs=runtime`. `runtime` keeps .NET's own default; a number
+  is a delay in milliseconds; empty means 0. The property applies to an executable project;
+- in the program's `runtimeconfig.json`, `"System.Runtime.TieredCompilation.CallCountingDelayMs": 100`;
+- for one run, the environment variable `DOTNET_TC_CallCountingDelayMs=100`, which overrides the other two.
+
+A C# application that references converted packages keeps .NET's default unless it sets the `runtimeconfig.json` value
 itself.
+
+**Check it on your machine.** Pin a published program to one CPU (`taskset -c 0` on Linux, `start /affinity 1 /wait`
+on Windows) and time a few runs with `DOTNET_TC_CallCountingDelayMs=0`, then with `100`.
 
 <!-- The property and its values: src/go2cs/csproj-template.xml, the GoCallCountingDelayMs PropertyGroup line (empty ->
      0) and the RuntimeHostConfigurationOption ItemGroup, conditioned on OutputType != Library and the value != runtime;
      the template's comment: "Another value is a delay in milliseconds; `runtime` keeps .NET's own default." -->
 
-
-<!-- Source: docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 9 (seat #53 P2, G-LAPTOP, .NET 10.0.11, 15
-     interleaved rounds, A/A band per program and metric). JIT build: PerfTlsHandshake wall 4,161 -> 2,804 ms
-     (-32.6%), PerfStartup +24.05 ms (+5.5%); the short hot phase Hash.String 36.97 -> 10.54 ns (0.286). ReadyToRun
-     publish (default against GoCallCountingDelayMs=runtime): PerfTlsHandshake 3,287 -> 2,309 ms, PerfStartup
-     312.6 -> 342.3 ms. Override order measured: the env var beats runtimeconfig.json in both directions. -->
+<!-- Source: docs/phase4/DATA-call-counting-delay.md (G-LAPTOP: AMD Ryzen 5 PRO 6650U, 6 cores / 12 threads,
+     win-x64, .NET 10.0.11; master a6cefba6ee; one perf window 2026-11-14 04:13-04:41 UTC; seat #53's interleaved
+     driver, 15 rounds after a discarded warm-up, an A/A twin of the base arm; the delay set per run with
+     DOTNET_TC_CallCountingDelayMs; one CPU by pinning the driver, whose programs inherit the mask). Tables 3.2 and
+     3.3: PerfStartup published 346.2 / 315.9 / 313.4 ms on 12 CPUs and 426.2 / 325.9 / 323.4 on one (delay 0 / 10 /
+     100); PerfMidStart published 554.1 / 505.6 / 506.0 and 678.4 / 509.7 / 510.3; PerfTlsHandshake JIT workload
+     1,216.8 -> 1,712.6 ms on 12 CPUs (+41%) and 2,388.3 -> 4,540.6 on one (x1.90). The guide's ranges: published
+     start-up gains 30 (PerfStartup) and 49 (PerfMidStart) ms on 12 CPUs, 100 and 169 on one; 100/426 = 23% and
+     169/678 = 25% ("a quarter"). Override order: seat #53 (docs/phase4/DESIGN-jit-inlining-tiering-publish.md
+     section 9) measured the env var beating runtimeconfig.json in both directions. -->
 
 **Before and after, across the performance suite.** On `win-x64` (an AMD Ryzen 5 PRO 6650U), the
 [performance suite's](Performance.md) programs ran with the template's delay of 0 and with .NET's own 100 ms. These

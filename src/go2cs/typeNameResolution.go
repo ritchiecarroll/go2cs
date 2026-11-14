@@ -1654,6 +1654,21 @@ func delegateRoot(rootNested bool, family string) string {
 // `Action`/`Func` delegates, which root to `System.` rather than to `go.` (the golib variadic
 // FAMILY `Actionꓸꓸꓸ`/`Funcꓸꓸꓸ` does live in `go`, and is rooted there).
 func renderCSFullTypeName(typeName string, rootNested bool) string {
+	return renderCSFullTypeNameAs(typeName, rootNested, false)
+}
+
+// convertToCSDeclaredTypeName renders the name of a type the Go source DECLARES (a package-level or
+// function-local TypeName, never a Universe one). Such a name can share a spelling with a basic type
+// the switch below maps (`int`, `string`), or with a C# type keyword it maps (`float`), and it must
+// still name the user's type: modernc.org/mathutil's `type float struct{…}` built as `float{n: n}`
+// emitted `new float64(…)` (CS1739). The caller decides from the go/types object, not the spelling.
+func convertToCSDeclaredTypeName(typeName string) string {
+	return strings.TrimPrefix(renderCSFullTypeNameAs(typeName, false, true), RootNamespace+".")
+}
+
+// renderCSFullTypeNameAs is renderCSFullTypeName; declared skips the basic-type spellings (see
+// convertToCSDeclaredTypeName).
+func renderCSFullTypeNameAs(typeName string, rootNested bool, declared bool) string {
 	typeName = strings.TrimPrefix(typeName, "~")
 
 	if strings.HasPrefix(typeName, "untyped ") {
@@ -1941,7 +1956,13 @@ func renderCSFullTypeName(typeName string, rootNested bool) string {
 		return typeName
 	}
 
-	switch typeName {
+	builtinSpelling := typeName
+
+	if declared {
+		builtinSpelling = ""
+	}
+
+	switch builtinSpelling {
 	case "int":
 		return "nint"
 	case "uint":

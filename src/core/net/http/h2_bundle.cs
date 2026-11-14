@@ -6494,7 +6494,7 @@ internal static error processHeaders(this ж<http2serverConn> Ꮡsc, ж<http2Met
         st.readDeadline = time.AfterFunc(sc.hs.ReadTimeout, st.onReadTimeout);
     }
 
-    return Ꮡsc.scheduleHandler(st, rw, req, new Action<ResponseWriter, ж<Request>>(handler));
+    return Ꮡsc.scheduleHandler(st, rw, req, NilSafeDelegateConversion<Action<ResponseWriter, ж<Request>>, HandlerFunc>(handler));
 }
 
 internal static partial void upgradeRequest(this ж<http2serverConn> Ꮡsc, ж<Request> Ꮡreq) {

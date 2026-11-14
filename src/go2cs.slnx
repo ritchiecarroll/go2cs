@@ -448,6 +448,7 @@
     <Project Path="tests/Behavioral/CrossPkgUser/CrossPkgUser.csproj" />
     <Project Path="tests/Behavioral/CtorFieldInitializerOmitted/CtorFieldInitializerOmitted.csproj" />
     <Project Path="tests/Behavioral/DeadPointerParamAlias/DeadPointerParamAlias.csproj" />
+    <Project Path="tests/Behavioral/DeclaredTypeNamedFloat/DeclaredTypeNamedFloat.csproj" />
     <Project Path="tests/Behavioral/DeepEqual/DeepEqual.csproj" />
     <Project Path="tests/Behavioral/DeepSelectRecursion/DeepSelectRecursion.csproj" />
     <Project Path="tests/Behavioral/DeferArgEnclosingCapture/DeferArgEnclosingCapture.csproj" />
@@ -703,6 +704,7 @@
     <Project Path="tests/Behavioral/InterfaceToInterfaceAdapter/InterfaceToInterfaceAdapter.csproj" />
     <Project Path="tests/Behavioral/InterfaceToInterfaceAssertion/InterfaceToInterfaceAssertion.csproj" />
     <Project Path="tests/Behavioral/InterfaceUntypedIntCompare/InterfaceUntypedIntCompare.csproj" />
+    <Project Path="tests/Behavioral/InteriorPointerShapes/InteriorPointerShapes.csproj" />
     <Project Path="tests/Behavioral/IntegerToNamedString/IntegerToNamedString.csproj" />
     <Project Path="tests/Behavioral/IntFormFloatConst/IntFormFloatConst.csproj" />
     <Project Path="tests/Behavioral/IntMinLiterals/IntMinLiterals.csproj" />
@@ -861,6 +863,7 @@
     <Project Path="tests/Behavioral/NamedSliceReflectDims/NamedSliceReflectDims.csproj" />
     <Project Path="tests/Behavioral/NamedStringConcat/NamedStringConcat.csproj" />
     <Project Path="tests/Behavioral/NamedStringConversion/NamedStringConversion.csproj" />
+    <Project Path="tests/Behavioral/NamedSliceOverNamedSlice/NamedSliceOverNamedSlice.csproj" />
     <Project Path="tests/Behavioral/NamedStringConsts/NamedStringConsts.csproj" />
     <Project Path="tests/Behavioral/NamedStringDefine/NamedStringDefine.csproj" />
     <Project Path="tests/Behavioral/NamedStringIndexCompare/NamedStringIndexCompare.csproj" />

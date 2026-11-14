@@ -2522,7 +2522,12 @@ function Get-DarwinSegmentRefusal {
 # 'native-oracle' (C1, 2026-11-07, arch-strict banking, COORD ruling (1)): readings taken after batch 208 moved the
 # osx-arm64 oracle to native arm64 (-test-oracle-goarch), so a row's two RIDs can legitimately differ. Its first file,
 # C1-NO1.tsv, is crypto/subtle from run 42261290086 (headSha 8fba1e6e7, over the AES seat's DIT disclosure).
-$DarwinEvidenceWaves = @('', 'dw2', 'e1', 'reread', 'native-oracle')
+# 'h10-go1.26.11' (R, 2026-11-14, the 1.26.11 patch hop's H10, COORD ruling (a) 20261114T110007Z): the three rows whose
+# counts moved with go1.26.11's own tests (crypto/internal/fips140test, net, net/http), re-read on both mac RIDs in one
+# dispatch after their segments were set (run 43591880062, net with ;dns=1.1.1.1,8.8.8.8). The TSV is collected from the
+# run's artifacts by docs/phase4/la64-s7/collect_darwin.py (collect.py's darwin twin), controlled first against run
+# 43588192951, whose log it reproduced on every row and RID.
+$DarwinEvidenceWaves = @('', 'dw2', 'e1', 'reread', 'native-oracle', 'h10-go1.26.11')
 
 # THE EVIDENCE DIRECTORY (COORD, 2026-10-27, PLAN-release-1-26-10-2.md, Rulings 1). The ONE place the darwin evidence
 # is named: relative to the repository root, with `{pin}` standing for the corpus pin (src/version.props'
@@ -3498,7 +3503,11 @@ Assert-Equal 'ledger: a ledgered row that banks is refused (banked with pending)
 # W<wave>-<shard>.tsv; a re-dispatch (W1-A7R) extends its original's stem and supersedes it, as for darwin.
 # The collector (docs/phase4/la64-s7/collect.py) adds same_names, which the arch-names form reads.
 $LinuxRidEvidenceDirectory = 'docs/phase4/rebank-1.26.10.4/linux-arm64/evidence'
-$LinuxRidEvidenceWaves = @('')
+# The 1.26.11 patch hop's H10 (2026-11-14) is its own wave: the three rows whose counts moved with go1.26.11's own tests
+# (crypto/internal/fips140test, net, net/http) were re-read in ONE arch-both dispatch (43588190175), collected by
+# collect.py into h10-go1.26.11/H10-L1.tsv. Their originals sit in three different W2 files, so a stem extension cannot
+# supersede them; a later declared wave is the row's reading of record, as for darwin's waves.
+$LinuxRidEvidenceWaves = @('', 'h10-go1.26.11')
 
 # RULED ARCH-COUNTS (Get-LinuxRuledArchCountReading): row -> '<verdict names, ;-separated> -- <citations>'. A row here
 # banks linux-arm64 at the roster's linux-x64 reading less exactly these verdicts, beside a hosted linux-x64 line that is

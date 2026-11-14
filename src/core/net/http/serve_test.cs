@@ -8939,6 +8939,48 @@ internal static void testMaxBytesHandler(ж<testing.T> t, testMode mode, int64 m
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string xTestˢ => ref xTestˢᵇ;
+private static readonly @string xTestˢᵇ = "X-Test"u8;
+
+public static void TestServerMaxBytesHeaderRace(ж<testing.T> t) {
+    runSynctest(t, (ж<testing.T> tΔ1, testMode mode) => {
+        GoFrame ᒐ = default;
+        try {
+            var cst = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, MaxBytesHandler(new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+                GoFrame ᒐ = default;
+                try {
+                    ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
+                    defer(Ꮡwg.Wait, ref ᒐ);
+                    // MaxBytesHandler will hit its set limit when reading the request
+                    // body. When this happens, it will make sure that the connection
+                    // is closed after this response. In doing so, it will set
+                    // "Connection: close" header. This must not race with any header
+                    // that is explicitly set by the handler.
+                    Ꮡwg.Go(() => {
+                        io.ReadAll(r.Body);
+                    });
+                    w.Header().Set(xTestˢ, "1");
+                    w.WriteHeader(413);
+                }
+                catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+                finally { ᒐ.Run(); }
+            })), 4), optFakeNet.OrTypedNil());
+            var (res, err) = cst.c.Post(cst.ts.URL, textPlainˢ, new http_test_package.strings_ReaderжReader(strings.NewReader(helloˢ)));
+            if (err != nil) {
+                tΔ1.Fatal(err);
+            }
+            var resʗ1 = res;
+            defer(ᴛ0 => ᴛ0.Close(), resʗ1.Body, ref ᒐ);
+            if (res.StatusCode != 413) {
+                tΔ1.Errorf("want status 413, got %v", res.Status);
+            }
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
+    });
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string http11103EarlyHintsLinkˢ => ref http11103EarlyHintsLinkˢᵇ;
 private static readonly @string http11103EarlyHintsLinkˢᵇ = "HTTP/1.1 103 Early Hints\r\nLink: </style.css>; rel=preload; as=style\r\nLink: </script.js>; rel=preload; as=script\r\n\r\nHTTP/1.1 103 Early Hints\r\nLink: </style.css>; rel=preload; as=style\r\nLink: </script.js>; rel=preload; as=script\r\nLink: </foo.js>; rel=preload; as=script\r\n\r\nHTTP/1.1 200 OK\r\nLink: </style.css>; rel=preload; as=style\r\nLink: </script.js>; rel=preload; as=script\r\nLink: </foo.js>; rel=preload; as=script\r\nDate: "u8;
 
@@ -9480,122 +9522,243 @@ internal static partial void testServerTLSNextProtos(ж<testing.T> t, testMode m
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string connectBackendExampleTldˢ => ref connectBackendExampleTldˢᵇ;
-private static readonly @string connectBackendExampleTldˢᵇ = "CONNECT backend.example.tld:80 HTTP/1.1\r\nHost: example.tld\r\n\r\n"u8;
-
-public static void TestServerCONNECTSuccess(ж<testing.T> t) {
-    synctest.Test(t, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
-        GoFrame ᒐ = default;
-        try {
-            const nint code = 200;
-            var body = slice<byte>("body"u8);
-                var bodyʗ1 = body;
-            var srv = Ꮡ(new Server(
-                Handler: new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
-                    w.WriteHeader(code);
-                    w.Write(bodyʗ1);
-                }))
-            ));
-            var l = fakeNetListen();
-            var lʗ1 = l;
-            defer(() => lʗ1.Close(), ref ᒐ);
-            var srvʗ1 = srv;
-            goǃ(ᴛ1 => srvʗ1.Serve(ᴛ1), new http_test_package.fakeNetListenerжListener(l));
-
-            var conn = l.connect();
-            var connʗ1 = conn;
-            defer(() => connʗ1.Close(), ref ᒐ);
-            io.WriteString(new http_test_package.fakeNetConnжWriter(conn), connectBackendExampleTldˢ);
-
-            var bufr = bufio.NewReader(new http_test_package.fakeNetConnжReader(conn));
-            synctest.Wait();
-            var (resp, err) = ReadResponse(bufr, nil);
-            if (err != nil) {
-                tΔ1.Fatal(err);
-            }
-            if (resp.StatusCode != code) {
-                tΔ1.Errorf("response status = %v, want %v", resp.StatusCode, (nint)(code));
-            }
-            if (resp.ContentLength != -1) {
-                tΔ1.Errorf("Content-Length: %v; want absent", resp.ContentLength);
-            }
-            if (len(resp.TransferEncoding) > 0) {
-                tΔ1.Errorf("Transfer-Encoding: %q; want absent", resp.TransferEncoding);
-            }
-            foreach (var (_, h) in range(slice<@string>(["Content-Length", "Transfer-Encoding"]))) {
-                var (gotΔ1, ok) = resp.Header[h, ꟷ]; if (ok) {
-                    tΔ1.Errorf("response header %q = %q; want absent", h, gotΔ1);
-                }
-            }
-            var got = new slice<byte>(len(body));
-            var (_, errΔ1) = io.ReadFull(new http_test_package.bufio_ReaderжReader(bufr), got); if (errΔ1 != nil || !bytes.Equal(got, body)) {
-                tΔ1.Fatalf("want bytes %q, got %q (err %v)", body, got, errΔ1);
-            }
-            if (!conn.IsClosedByPeer()) {
-                tΔ1.Errorf("connection not closed by peer");
-            }
-            {
-                var (gotΔ1, errΔ2) = bufr.Peek(32); if (len(gotΔ1) != 0 || !AreEqual(errΔ2, io.EOF)) {
-                    tΔ1.Errorf("read from conn: %q, %v; expect conn to be closed", gotΔ1, errΔ2);
-                }
-            }
-        }
-        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-        finally { ᒐ.Run(); }
-    });
+internal partial struct TestServerConnectionReuse_type /*dyn*/ {
+    internal @string name;
+    internal slice<@string> message;
+    internal Δhttp.HandlerFunc handler;
+    internal nint continueBodySize;
+    internal bool want100Continue;
+    internal nint wantResponse;
+    internal bool wantReused;
+    internal @string skip;
 }
 
-public static void TestServerCONNECTFailure(ж<testing.T> t) {
-    synctest.Test(t, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
-        GoFrame ᒐ = default;
-        try {
-            const nint code = 409;
-            var body = slice<byte>("body"u8);
-                var bodyʗ1 = body;
-            var srv = Ꮡ(new Server(
-                Handler: new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
-                    w.Header().Set(contentLengthˢ, strconv.Itoa(len(bodyʗ1)));
-                    w.WriteHeader(code);
-                    w.Write(bodyʗ1);
-                }))
-            ));
-            var l = fakeNetListen();
-            var lʗ1 = l;
-            defer(() => lʗ1.Close(), ref ᒐ);
-            var srvʗ1 = srv;
-            goǃ(ᴛ1 => srvʗ1.Serve(ᴛ1), new http_test_package.fakeNetListenerжListener(l));
+internal partial struct TestServerConnectionReuse_req /*dyn*/ {
+    /*embed*/ public io_package.ReadCloser ReadCloser;
+}
 
-            var conn = l.connect();
-            var connʗ1 = conn;
-            defer(() => connʗ1.Close(), ref ᒐ);
-            io.WriteString(new http_test_package.fakeNetConnжWriter(conn), connectBackendExampleTldˢ);
+public static void TestServerConnectionReuse(ж<testing.T> t) {
+    foreach (var (_, vᴛ1) in range(slice<TestServerConnectionReuse_type>([new(
+        name: "small body",
+        message: [
+            "POST / HTTP/1.1",
+            "Host: example.tld",
+            "Content-Length: 1",
+            "",
+            "x"
+        ],
+        wantResponse: 200,
+        wantReused: true
+    ), new(
+        name: "large body",
+        message: [
+            "POST / HTTP/1.1",
+            "Host: example.tld",
+            "Content-Length: 300000", // more than maxPostHandlerReadBytes
+            ""
+            // body is never sent
+        ],
+        wantResponse: 200,
+        wantReused: false
+    ), new(
+        name: "small body full duplex",
+        message: [
+            "POST / HTTP/1.1",
+            "Host: example.tld",
+            "Content-Length: 1",
+            "",
+            "x"
+        ],
+        handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
+            // Enable full duplex to avoid trying to read the request before
+            // writing the response.
+            NewResponseController(w).EnableFullDuplex();
+        },
+        wantResponse: 200,
+        wantReused: true
+    ), new(
+        name: "large body full duplex",
+        message: [
+            "POST / HTTP/1.1",
+            "Host: example.tld",
+            "Content-Length: 300000", // more than maxPostHandlerReadBytes
+            ""
+            // body is never sent
+        ],
+        handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
+            // Enable full duplex to avoid trying to read the request before
+            // writing the response.
+            NewResponseController(w).EnableFullDuplex();
+        },
+        wantResponse: 200,
+        wantReused: false
+    ), new(
+        // Send a request with a 1-byte body, which the server handler never reads.
+        // We should either send a 100-Continue and read the body
+        // or we should close the connection.
+        //
+        // Right now, the server hangs trying to read the request body
+        // the client isn't sending.
+        skip: "https://go.dev/issue/75933",
 
-            var bufr = bufio.NewReader(new http_test_package.fakeNetConnжReader(conn));
-            synctest.Wait();
-            var (resp, err) = ReadResponse(bufr, nil);
-            if (err != nil) {
-                tΔ1.Fatal(err);
+        name: "100-continue unconsumed small body",
+        message: [
+            "POST / HTTP/1.1",
+            "Host: example.tld",
+            "Expect: 100-continue",
+            "Content-Length: 1",
+            ""
+            // body is never sent
+        ],
+        want100Continue: false,
+        wantResponse: 200,
+        wantReused: true
+    ), new(
+        name: "100-continue unconsumed large body",
+        message: [
+            "POST / HTTP/1.1",
+            "Host: example.tld",
+            "Expect: 100-continue",
+            "Content-Length: 300000", // more than maxPostHandlerReadBytes
+            ""
+            // body is never sent
+        ],
+        want100Continue: false,
+        wantResponse: 200,
+        wantReused: false
+    ), new(
+        name: "100-continue consumed small body",
+        message: [
+            "POST / HTTP/1.1",
+            "Host: example.tld",
+            "Expect: 100-continue",
+            "Content-Length: 1",
+            ""
+        ],
+        handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
+            io.Copy(io.Discard, req.Body);
+        },
+        want100Continue: true,
+        continueBodySize: 1,
+        wantResponse: 200,
+        wantReused: true
+    ), new(
+        name: "small wrapped body",
+        message: [
+            "POST / HTTP/1.1",
+            "Host: example.tld",
+            "Content-Length: 1",
+            "",
+            "x"
+        ],
+        handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
+            // Enable full duplex to avoid trying to read the request before
+            // writing the response.
+            NewResponseController(w).EnableFullDuplex();
+
+            // Middleware wraps the Request.Body in some other type.
+            req.Body = new TestServerConnectionReuse_req(req.Body);
+        },
+        wantResponse: 200,
+        wantReused: true
+    ), new(
+        name: "large wrapped body",
+        message: [
+            "POST / HTTP/1.1",
+            "Host: example.tld",
+            "Content-Length: 300000", // more than maxPostHandlerReadBytes
+            ""
+        ],
+        handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
+            // Enable full duplex to avoid trying to read the request before
+            // writing the response.
+            NewResponseController(w).EnableFullDuplex();
+
+            // Middleware wraps the Request.Body in some other type.
+            req.Body = new TestServerConnectionReuse_req(req.Body);
+        },
+        wantResponse: 200,
+        wantReused: false
+    )
+    ]))) {
+        ref var test = ref heap(new TestServerConnectionReuse_type(), out var Ꮡtest);
+        test = vᴛ1;
+
+        var testʗ1 = test;
+        t.Run(test.name, (ж<testing.T> tΔ1) => {
+            if (testʗ1.skip != ""u8) {
+                tΔ1.Skip(testʗ1.skip);
             }
-            if (resp.StatusCode != code) {
-                tΔ1.Errorf("response status = %v, want %v", resp.StatusCode, (nint)(code));
+            var testʗ2 = testʗ1;
+            synctest.Test(tΔ1, (ж<testing.T> tΔ2) => {
+                var st = newHTTP1ServerTest(tΔ2, testʗ2.handler);
+                var conn = st.dial();
+                conn.writeMessage(testʗ2.message.ꓸꓸꓸ);
+                var resp = conn.readResponse();
+                {
+                    var (got, want) = (resp.StatusCode == 100, testʗ2.want100Continue); if (got != want) {
+                        tΔ2.Fatalf("100-Continue response: %v, want %v", got, want);
+                    }
+                }
+                if (resp.StatusCode == 100) {
+                    conn.conn.Write(bytes.Repeat(slice<byte>("x"u8), testʗ2.continueBodySize));
+                    resp = conn.readResponse();
+                }
+                {
+                    nint got = resp.StatusCode;
+                    nint want = testʗ2.wantResponse; if (got != want) {
+                        tΔ2.Fatalf("got response %v, want %v", got, want);
+                    }
+                }
+                if (testʗ2.wantReused) {
+                    conn.wantIdle();
+                } else {
+                    conn.wantClosed();
+                }
+            });
+        });
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string postHttp11ˢ => ref postHttp11ˢᵇ;
+private static readonly @string postHttp11ˢᵇ = "POST / HTTP/1.1"u8;
+internal static ref readonly @string hostExampleTldˢ => ref hostExampleTldˢᵇ;
+private static readonly @string hostExampleTldˢᵇ = "Host: example.tld"u8;
+internal static ref readonly @string contentLength4ˢ => ref contentLength4ˢᵇ;
+private static readonly @string contentLength4ˢᵇ = "Content-Length: 4"u8;
+
+// A handler may close the request body itself. When it has not read the body
+// to EOF, Close drains the remainder; reaching the end of the body is the
+// expected outcome and must not be reported to the caller as an error.
+public static void TestServerRequestBodyCloseAfterPartialRead(ж<testing.T> t) {
+    synctest.Test(t, (ж<testing.T> tΔ1) => {
+        var closeErr = new channel<error>(1);
+        var closeErrʗ1 = closeErr;
+        var st = newHTTP1ServerTest(tΔ1, (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
+            // Read part of the body, leaving the rest for Close to drain.
+            var (_, err) = io.ReadFull(req.Body, new slice<byte>(2)); if (err != nil) {
+                closeErrʗ1.ᐸꟷ(fmt.Errorf("reading request body: %v"u8, err));
+                return;
             }
-            if (!resp.Close) {
-                tΔ1.Errorf("Connection: close not set; want it to be");
-            }
-            var got = new slice<byte>(len(body));
-            var (_, errΔ1) = io.ReadFull(new http_test_package.bufio_ReaderжReader(bufr), got); if (errΔ1 != nil || !bytes.Equal(got, body)) {
-                tΔ1.Fatalf("want bytes %q, got %q (err %v)", body, got, errΔ1);
-            }
-            if (!conn.IsClosedByPeer()) {
-                tΔ1.Errorf("connection not closed by peer");
-            }
-            var (gotΔ1, errΔ2) = bufr.Peek(32); if (len(gotΔ1) != 0 || !AreEqual(errΔ2, io.EOF)) {
-                tΔ1.Errorf("read from conn: %q, %v; expect conn to be closed", gotΔ1, errΔ2);
+            closeErrʗ1.ᐸꟷ(req.Body.Close());
+        });
+        var conn = st.dial();
+        conn.writeMessage(
+            postHttp11ˢ,
+            hostExampleTldˢ,
+            contentLength4ˢ,
+            "",
+            testˢ2);
+        nint got = conn.readResponse().StatusCode;
+        nint want = 200; if (got != want) {
+            tΔ1.Fatalf("got response %v, want %v", got, want);
+        }
+        {
+            var err = ᐸꟷ(closeErr); if (err != nil) {
+                tΔ1.Errorf("Request.Body.Close() = %v, want nil", err);
             }
         }
-        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-        finally { ᒐ.Run(); }
     });
 }
 

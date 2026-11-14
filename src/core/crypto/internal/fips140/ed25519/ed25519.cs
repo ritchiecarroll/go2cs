@@ -66,6 +66,7 @@ public static (ж<PrivateKey>, error) GenerateKey() {
 internal static (ж<PrivateKey>, error) generateKey(ж<PrivateKey> Ꮡpriv) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
+    fipsSelfTest();
     fips140.RecordApproved();
     drbg.Read(priv.seed[..]);
     precomputePrivateKey(Ꮡpriv);
@@ -81,6 +82,7 @@ public static (ж<PrivateKey>, error) NewPrivateKeyFromSeed(slice<byte> seed) {
 internal static (ж<PrivateKey>, error) newPrivateKeyFromSeed(ж<PrivateKey> Ꮡpriv, slice<byte> seed) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
+    fipsSelfTest();
     fips140.RecordApproved();
     nint l = len(seed); if (l != seedSize) {
         return (default, errors.New("ed25519: bad seed length: "u8 + strconv.Itoa(l)));
@@ -115,6 +117,7 @@ public static (ж<PrivateKey>, error) NewPrivateKey(slice<byte> priv) {
 internal static (ж<PrivateKey>, error) newPrivateKey(ж<PrivateKey> Ꮡpriv, slice<byte> privBytes) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
+    fipsSelfTest();
     fips140.RecordApproved();
     nint l = len(privBytes); if (l != privateKeySize) {
         return (default, errors.New("ed25519: bad private key length: "u8 + strconv.Itoa(l)));

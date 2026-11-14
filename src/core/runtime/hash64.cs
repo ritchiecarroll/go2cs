@@ -23,9 +23,9 @@ internal static uintptr memhashFallback(@unsafe.Pointer Δp, uintptr seed, uintp
         return seed;
     }
     case {} when s < 4: {
-        a = (uintptr)(~(ж<byte>)(uintptr)(Δp));
-        a |= (uintptr)(((uintptr)(~(ж<byte>)(uintptr)(add(Δp, s >> 1))) << 8));
-        a |= (uintptr)(((uintptr)(~(ж<byte>)(uintptr)(add(Δp, s - 1))) << 16));
+        a = (uintptr)(~@unsafe.Pointer.To<byte>(Δp));
+        a |= (uintptr)(((uintptr)(~@unsafe.Pointer.To<byte>(add(Δp, s >> 1))) << 8));
+        a |= (uintptr)(((uintptr)(~@unsafe.Pointer.To<byte>(add(Δp, s - 1))) << 16));
         break;
     }
     case {} when s == 4: {

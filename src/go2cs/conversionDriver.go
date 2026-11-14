@@ -394,7 +394,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		}
 
 		// Which structs hold their arrays inline (inlineArrayAdmission.go): decided once, from the package's non-test
-		// files, before any file emits. A reinterpret chain whose sides disagree refuses the package (GO2CS2010).
+		// files, before any file emits. A reinterpret chain whose sides disagree keeps its admitted side out under the
+		// automatic rule (GO2CS2009) and refuses the package when forced (GO2CS2010).
 		packageInlineAdmission = computeInlineArrayAdmission(pkg.Syntax, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, options)
 		packageInlineArrayRecords = inlineArrayStampRecords(packageInlineAdmission, inlineArrayMode(pkg.Types.Path(), pkg.Dir, options))
 

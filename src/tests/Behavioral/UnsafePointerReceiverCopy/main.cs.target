@@ -20,7 +20,7 @@ partial struct Δq {
 
 internal static void q(this ref T h) { }
 
-internal static void poke(@unsafe.Pointer p, nint v) { ((ж<nint>)(uintptr)(p)).Value = v; }
+internal static void poke(@unsafe.Pointer p, nint v) { (@unsafe.Pointer.To<nint>(p)).Value = v; }
 
 internal static void viaReceiver(this ж<T> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();

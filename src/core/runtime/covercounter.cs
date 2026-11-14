@@ -20,7 +20,7 @@ internal static slice<rtcov.CovCounterBlob> coverage_getCovCounterList() {
             continue;
         }
         res = append(resᴷ, res, new rtcov.CovCounterBlob(
-            Counters: (ж<uint32>)(uintptr)((@unsafe.Pointer)datap.covctrs),
+            Counters: @unsafe.Pointer.To<uint32>((@unsafe.Pointer)datap.covctrs),
             Len: (uint64)((datap.ecovctrs - datap.covctrs) / u32sz)
         ));
     }

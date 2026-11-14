@@ -7,7 +7,8 @@
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // Guards the func-word shapes (funcWordOperations.go): a func value carried as a number in the six
-// structural classes ccgo writes, each emitted through golib's GoFuncCookie, and the near misses that
+// structural classes ccgo writes, each emitted through golib's GoFuncCookie, the store through a pointer
+// whose target the node does not name (w3, golib's unsafe.Pointer.StoreFunc), and the near misses that
 // keep today's pointer reinterpret. The m1 CALL SITE is asserted too: it must stay a method-group
 // conversion, which C# caches per site, never `new F(M)`, which mints a fresh delegate per evaluation
 // (sqlite-cs S1's stop line X1.6).
@@ -86,7 +87,17 @@ func main() {
 	var memory [1]uintptr
 	*(*func(int) int)(unsafe.Pointer(&memory)) = inc
 
-	fmt.Println(g(4), wordOf(g) == w, wordOfParam(inc) == w, typeWord(inc) != 0, notAFunc(5) != 0, memory[0] != 0)
+	var table [4]uintptr
+	*(*func(int) int)(unsafe.Pointer(uintptr(unsafe.Pointer(&table)) + 8)) = inc
+	*(*func(int) int)(unsafe.Add(unsafe.Pointer(&table), 16)) = g
+
+	p := unsafe.Pointer(&g)
+	*(*func(int) int)(p) = inc
+
+	var same func(int) int
+	*(*func(int) int)(unsafe.Pointer(&same)) = inc
+
+	fmt.Println(g(4), wordOf(g) == w, wordOfParam(inc) == w, typeWord(inc) != 0, notAFunc(5) != 0, memory[0] != 0, table[1] != 0, same(6))
 }
 `)
 	goRoot := build.Default.GOROOT
@@ -112,16 +123,20 @@ func main() {
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "fword", "main.cs"))
 
 	for _, want := range []string{
-		"return (uintptr)GoFuncCookie.Of((Delegate)f);",                      // m1
-		"(ccgoFP(inc), out var Ꮡw);",                                         // m1 call site: a method-group conversion
-		"return (uintptr)GoFuncCookie.Of(f);",                                // m2, a func variable
-		"return (uintptr)GoFuncCookie.Of((Delegate?)(object?)v);",            // m2, struct{ f T }
-		"((uintptr)GoFuncCookie.Of((Func<nint, nint>)inc), out var Ꮡlit);",   // m2, struct{ f func }{fn}
-		"fmt.Println(GoFuncCookie.Func<Func<nint, nint>>(w)(1));",            // r1, called at once
-		"var stored = GoFuncCookie.Func<Func<nint, nint>>(lit);",             // r1, stored
-		"fmt.Println(stored(2), GoFuncCookie.Func<Func<nint, nint>>(w)(3));", // r2
-		"slot = (uintptr)GoFuncCookie.Of((Func<nint, nint>)inc);",            // w2
-		"g = GoFuncCookie.Func<Func<nint, nint>>(slot);",                     // w1
+		"return (uintptr)GoFuncCookie.Of((Delegate)f);",                                                            // m1
+		"(ccgoFP(inc), out var Ꮡw);",                                                                               // m1 call site: a method-group conversion
+		"return (uintptr)GoFuncCookie.Of(f);",                                                                      // m2, a func variable
+		"return (uintptr)GoFuncCookie.Of((Delegate?)(object?)v);",                                                  // m2, struct{ f T }
+		"((uintptr)GoFuncCookie.Of((Func<nint, nint>)inc), out var Ꮡlit);",                                         // m2, struct{ f func }{fn}
+		"fmt.Println(GoFuncCookie.Func<Func<nint, nint>>(w)(1));",                                                  // r1, called at once
+		"var stored = GoFuncCookie.Func<Func<nint, nint>>(lit);",                                                   // r1, stored
+		"fmt.Println(stored(2), GoFuncCookie.Func<Func<nint, nint>>(w)(3));",                                       // r2
+		"slot = (uintptr)GoFuncCookie.Of((Func<nint, nint>)inc);",                                                  // w2
+		"g = GoFuncCookie.Func<Func<nint, nint>>(slot);",                                                           // w1
+		"@unsafe.Pointer.StoreFunc(@unsafe.Pointer.FromPinnedBox(Ꮡmemory), (Func<nint, nint>)inc);",                // w3, over a value of another type
+		"@unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡtable), 8), (Func<nint, nint>)inc);", // w3, the arithmetic form
+		"@unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡtable), 16), g);",                    // w3, a func value that is already a delegate
+		"@unsafe.Pointer.StoreFunc(p, (Func<nint, nint>)inc);",                                                     // w3, through a pointer held in a variable
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("func word shape must emit %q: %s", want, mainCs)
@@ -136,10 +151,23 @@ func main() {
 		t.Errorf("a func word is never minted from `new F(M)`, which defeats C#'s per-site delegate cache: %s", mainCs)
 	}
 
-	// The near misses keep today's emission: an interface's TYPE word, a word read from an int, and a
-	// func stored into memory that is no uintptr variable. Ten GoFuncCookie uses are the ten shapes
-	// above less the call site, plus the second m1 spelling.
+	// The near misses keep today's emission: an interface's TYPE word and a word read from an int. Ten
+	// GoFuncCookie uses are the first ten shapes above less the call site, plus the second m1 spelling.
 	if got := strings.Count(mainCs, "GoFuncCookie."); got != 10 {
 		t.Errorf("want 10 GoFuncCookie uses (the recognised shapes only), got %d: %s", got, mainCs)
+	}
+
+	// w3 is one golib call per store, and a store through `&same`, a variable of the stored func type itself,
+	// is no w3: it is a store into that variable's own box.
+	if got := strings.Count(mainCs, funcStoreDoor+"("); got != 4 {
+		t.Errorf("want 4 %s calls (the four w3 stores), got %d: %s", funcStoreDoor, got, mainCs)
+	}
+
+	if !strings.Contains(mainCs, "(Ꮡsame).ValueSlot = inc;") {
+		t.Errorf("a func stored through the address of a variable of its own type must stay a store into that variable: %s", mainCs)
+	}
+
+	if strings.Contains(mainCs, typedPointerDoor+"<Func<") {
+		t.Errorf("no func store may go through a typed pointer to a func, which is a native box over a delegate: %s", mainCs)
 	}
 }

@@ -62,7 +62,7 @@ public static ж<ΔFloat64Histogram> Float64Histogram(this Value v) {
     if (v.kind != KindFloat64Histogram) {
         throw panic("called Float64Histogram on non-Float64Histogram metric value");
     }
-    return (ж<ΔFloat64Histogram>)(uintptr)(v.pointer);
+    return @unsafe.Pointer.To<ΔFloat64Histogram>(v.pointer);
 }
 
 } // end metrics_package

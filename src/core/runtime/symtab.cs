@@ -232,12 +232,10 @@ internal static ΔfuncInfo funcInfo(this ж<Func> Ꮡf) {
 }
 
 internal static ΔfuncInfo funcInfo(this ж<_func> Ꮡf) {
-    ref var f = ref Ꮡf.DerefOrNull();
-
     // Find the module containing fn. fn is located in the pclntable.
     // The unsafe.Pointer to uintptr conversions and arithmetic
     // are safe because we are working with module addresses.
-    var ptr = (uintptr)(uintptr)@unsafe.Pointer.FromRef(ref f);
+    var ptr = (uintptr)Ꮡf;
     ж<moduledata> mod = default;
     for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.next) {
         if (len(datap.pclntable) == 0) {
@@ -385,7 +383,7 @@ internal static ref ж<slice<ж<moduledata>>> modulesSlice => ref ((StaticBox<ж
 //go:nosplit
 //go:nowritebarrier
 internal static slice<ж<moduledata>> activeModules() {
-    var Δp = (ж<slice<ж<moduledata>>>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑmodulesSlice)));
+    var Δp = @unsafe.Pointer.To<slice<ж<moduledata>>>(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑmodulesSlice)));
     if (Δp == nil) {
         return default;
     }
@@ -419,9 +417,9 @@ internal static void modulesinit() {
         modules.ValueSlot = append(modules.ValueSlot, md);
         if (md.gcdatamask == (new bitvector())) {
             var scanDataSize = md.edata - md.data;
-            md.gcdatamask = progToPointerMask((ж<byte>)(uintptr)((@unsafe.Pointer)md.gcdata), scanDataSize);
+            md.gcdatamask = progToPointerMask(@unsafe.Pointer.To<byte>((@unsafe.Pointer)md.gcdata), scanDataSize);
             var scanBSSSize = md.ebss - md.bss;
-            md.gcbssmask = progToPointerMask((ж<byte>)(uintptr)((@unsafe.Pointer)md.gcbss), scanBSSSize);
+            md.gcbssmask = progToPointerMask(@unsafe.Pointer.To<byte>((@unsafe.Pointer)md.gcbss), scanBSSSize);
             ᏑgcController.addGlobals((int64)(scanDataSize + scanBSSSize));
         }
     }
@@ -766,7 +764,7 @@ internal static ΔfuncInfo findfunc(uintptr pc) {
     var b = x / (uintptr)abi.FuncTabBucketSize;
     var i = x % (uintptr)abi.FuncTabBucketSize / (uintptr)((uintptr)abi.FuncTabBucketSize / nsub);
 
-    var ffb = (ж<findfuncbucket>)(uintptr)(add((@unsafe.Pointer)datap.findfunctab, b * /* unsafe.Sizeof(findfuncbucket{}) */ (uintptr)20));
+    var ffb = @unsafe.Pointer.To<findfuncbucket>(add((@unsafe.Pointer)datap.findfunctab, b * /* unsafe.Sizeof(findfuncbucket{}) */ (uintptr)20));
     var idx = ffb.idx + (uint32)ffb.of(findfuncbucket.Ꮡsubbuckets).ElementRef(i);
 
     // Find the ftab entry.
@@ -1073,7 +1071,7 @@ internal static int32 funcMaxSPDelta(ΔfuncInfo f) {
 }
 
 internal static uint32 pcdatastart(ΔfuncInfo f, uint32 table) {
-    return ~(ж<uint32>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡ(f).of(runtime_package.ΔfuncInfo.Ꮡnfuncdata)), /* unsafe.Sizeof(f.nfuncdata) */ (uintptr)1 + (uintptr)table * 4));
+    return ~@unsafe.Pointer.To<uint32>(add(@unsafe.Pointer.FromPinnedBox(Ꮡ(f).of(runtime_package.ΔfuncInfo.Ꮡnfuncdata)), /* unsafe.Sizeof(f.nfuncdata) */ (uintptr)1 + (uintptr)table * 4));
 }
 
 internal static int32 pcdatavalue(ΔfuncInfo f, uint32 table, uintptr targetpc) {
@@ -1108,7 +1106,7 @@ internal static @unsafe.Pointer funcdata(ΔfuncInfo f, uint8 i) {
     }
     var @base = f.datap.gofunc; // load gofunc address early so that we calculate during cache misses
     var Δp = (uintptr)Ꮡ(f).of(runtime_package.ΔfuncInfo.Ꮡnfuncdata) + /* unsafe.Sizeof(f.nfuncdata) */ (uintptr)1 + (uintptr)f.npcdata * 4 + (uintptr)i * 4;
-    var off = ~(ж<uint32>)(uintptr)((@unsafe.Pointer)Δp);
+    var off = ~@unsafe.Pointer.To<uint32>((@unsafe.Pointer)Δp);
     // Return off == ^uint32(0) ? 0 : f.datap.gofunc + uintptr(off), but without branches.
     // The compiler calculates mask on most architectures using conditional assignment.
     uintptr mask = default;

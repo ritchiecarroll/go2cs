@@ -661,8 +661,8 @@ Three deeper repairs make the single `.Clone()` correct everywhere:
 
 **The suffix must be WRAPPED on a `~`-prefixed rendering.** A deref whose operand is a pointer CAST
 (`*(*T)(p)`, `convStarExpr`'s casted-pointer-deref path) renders with the PREFIX `~` operator, and C#
-postfix binds tighter than unary — so a naked `.Clone()` re-binds onto the cast's inner operand
-instead of the dereferenced array. reflect's `InterfaceData` is the standard-library case (hand-owned
+postfix binds tighter than unary — so a naked `.Clone()` binds to the converted pointer, ahead of
+the dereference, instead of to the dereferenced array. reflect's `InterfaceData` is the standard-library case (hand-owned
 in `value_impl.cs`; the `ArrayCastDerefClone` golden holds the emission):
 
 ```go
@@ -670,8 +670,8 @@ return *(*[2]uintptr)(v.ptr)   // reflect/value.go
 ```
 <!-- illustration: not converter output -->
 ```csharp
-return ~(ж<array<uintptr>>)(uintptr)(v.ptr).Clone();    // WRONG — .Clone() reads v.ptr (CS1061)
-return (~(ж<array<uintptr>>)(uintptr)(v.ptr)).Clone();  // emitted — clone the dereferenced array
+return ~@unsafe.Pointer.To<array<uintptr>>(v.ptr).Clone();    // WRONG — .Clone() reads the pointer (CS1061)
+return (~@unsafe.Pointer.To<array<uintptr>>(v.ptr)).Clone();  // emitted — clone the dereferenced array
 ```
 
 Every clone-append site therefore routes its rendering through `appendValueClone`
@@ -1163,10 +1163,14 @@ overload delegates to `slice<T>`'s own `== NilType` — REPRESENTATION nilness (
 `value.m_value == nil`, so `IntSlice{} == nil` is false while the zero value stays nil. It cannot use
 `value.Equals(default(S))`: the slice wrapper's `Equals` (from `ISliceTypeTemplate`'s `Equals(ISlice<T>?)`)
 is structural *content* equality, which would classify an empty non-nil named slice (`S{}`, `make(S, 0)`,
-an `s[len(s):]` tail) as nil. The other nil-comparable kinds: **map** and **channel** wrappers use
-`Equals(default)` — they declare no structural `Equals`, so it falls back to reference identity through
-the backing field
-(`map<K,V>.Equals` is `ReferenceEquals(m_map, …)`; `channel<T>` compares its queue by reference).
+an `s[len(s):]` tail) as nil. The other nil-comparable kinds, **map** and **channel** wrappers,
+delegate the same way, to the backing `map<K,V>`'s or `channel<T>`'s own `== NilType` (`value.m_value == nil`;
+a map wrapper whose value sits behind a holder reads through the holder). They do not use
+`value.Equals(default(S))`: the wrapper declares no `Equals(S)`, so that call would box both values into
+`ValueType.Equals` and read the field by reflection on every comparison (guarded by
+`GenTests.EqualityWithoutBoxingTests`). <!-- history: map and channel wrappers emitted value.Equals(default(S))
+until the S3 fix of the TypeScript perf scout; the answer was the same, the cost
+was two boxes and a reflection read per comparison. -->
 Array/numeric/string/struct/`any` wrappers are not nil-comparable in Go (and the pointer wrapper
 already uses a reference-identity `Equals` override), so they keep the structural default; the same-type
 `operator ==(S, S)` is likewise left untouched (Go forbids comparing two slices, so no converted code
@@ -1679,6 +1683,21 @@ keeps the bare emission. Not covered: a public wrapper over a non-public element
 conversion operators the generator omits (see `OmitUnderlyingConversionOperators`), so neither the
 bare comparison nor the cast compiles there; no instance is known. Guarded by the
 `NamedArrayVsUnnamedCompare` behavioral test.
+
+## A defined type over another DEFINED slice type is a slice wrapper too
+
+Go gives `type fermat nat`, where `type nat []uint64`, every slice operation: `make`, indexing,
+slicing, `append`, `range`, `len` and `cap`, plus the conversions `fermat(n)` and `nat(f)`. Methods are
+not inherited. The converter writes the definition as the Go source does, `partial struct fermat /*nat*/;`,
+and go2cs-gen used to generate a plain wrapper over the `nat` struct, which has none of that surface
+(CS1503, CS0021, CS0315; github.com/remyoudompheng/bigfft, sqlite-cs row S4). The generator now follows
+the chain of definitions down to the `[]elem` at its bottom, as it already does for a named array
+(`type pallocBits pageBits`), and generates the slice wrapper over `slice<uint64>`, with an implicit
+conversion to and from `nat` through that slice. The walk stays inside one compilation: an element spelled
+in another package's terms would not bind, so such a chain keeps the plain wrapper. No defined type in
+the standard library's production sources is written over a defined slice type, so no corpus wrapper
+changes. Guarded by `NamedSliceOverNamedSlice`, which also runs a three-hop chain and the nil slice,
+output-compared vs Go.
 
 ## `make([]E, n)` constructs its ELEMENTS by the same rule
 

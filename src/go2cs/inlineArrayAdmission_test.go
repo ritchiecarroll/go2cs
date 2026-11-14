@@ -204,9 +204,11 @@ func read(p unsafe.Pointer) *Holds { return (*Holds)(p) }
 	}
 }
 
-// S7's control: S22's shape on one side of a reinterpret chain, admitted, and a capped struct on the other.
+// S7's control: S22's shape on one side of a reinterpret chain, admitted, and a capped struct on the other. FORCED, the
+// user named S22, so the mixed pair refuses the package (GO2CS2010); under the AUTOMATIC rule the pair agrees by keeping
+// S22 out with Big (COORD 2026-11-14 13:56Z, the x/sys sockaddr decode).
 func TestInlineArrayAdmissionRefusesAMixedPair(t *testing.T) {
-	a, _ := admitFixture(t, "", Options{}, [2]string{"lib.go", `package lib
+	const source = `package lib
 
 import "unsafe"
 
@@ -222,18 +224,29 @@ type Big struct {
 }
 
 func both(b *Big) *S22 { return (*S22)(unsafe.Pointer(b)) }
-`})
+`
+	a, _ := admitFixture(t, "", Options{inlineArrays: inlineArrayOverride{force: []string{"example.com/lib"}}}, [2]string{"lib.go", source})
 
 	if got := admittedKeys(a); got != "example.com/lib.S22" {
-		t.Fatalf("admitted %q, want S22 alone (Big is capped)", got)
+		t.Fatalf("forced: admitted %q, want S22 alone (Big is capped)", got)
 	}
 
 	if len(a.refusals) != 1 || !strings.Contains(a.refusals[0].text, "reinterprets S22, whose arrays are held inline, as Big, whose arrays are not") {
-		t.Fatalf("refusals %v, want one naming S22 and Big", a.refusals)
+		t.Fatalf("forced: refusals %v, want one naming S22 and Big", a.refusals)
 	}
 
 	if err := reportInlineArrayAdmission(a); err == nil || !strings.Contains(err.Error(), diagnosticInlineArrayMixedPair) {
-		t.Fatalf("report error %v, want the package refused with %s", err, diagnosticInlineArrayMixedPair)
+		t.Fatalf("forced: report error %v, want the package refused with %s", err, diagnosticInlineArrayMixedPair)
+	}
+
+	auto, _ := admitFixture(t, "", Options{}, [2]string{"lib.go", source})
+
+	if got := admittedKeys(auto); got != "" || len(auto.refusals) != 0 {
+		t.Fatalf("auto: admitted %q, refusals %v; want S22 kept out with Big and no refusal", got, auto.refusals)
+	}
+
+	if !hasWarning(auto, "S22 is converted whole through unsafe.Pointer but keeps array<T> storage: Big is reinterpreted as it") {
+		t.Fatalf("auto: warnings %v, want S22 kept out naming its partner Big", auto.warnings)
 	}
 
 	// Both sides admitted, or only one side holding arrays (a struct read as bytes), is not mixed.
@@ -253,6 +266,69 @@ func asBytes(a *A) *[16]byte { return (*[16]byte)(unsafe.Pointer(a)) }
 	if len(clean.refusals) != 0 || admittedKeys(clean) != "example.com/lib.A example.com/lib.B" {
 		t.Fatalf("clean pairs: refusals %v, admitted %q", clean.refusals, admittedKeys(clean))
 	}
+}
+
+// A type kept out with its reinterpret partner takes with it every admitted struct that holds it by value (a struct
+// cannot hold a managed one inline), and that holder's own pairs then agree the same way. Wrap holds Any; View
+// reinterprets Wrap; Leaf, held by Any, stays inline because its own closure is clean.
+func TestInlineArrayAdmissionKeepsAPairOutTransitively(t *testing.T) {
+	a, _ := admitFixture(t, "", Options{}, [2]string{"lib.go", `package lib
+
+import "unsafe"
+
+type Leaf struct{ Data [14]int8 }
+
+type Any struct {
+	Addr Leaf
+	Pad  [100]int8
+}
+
+type Inet struct {
+	Addr [4]byte
+}
+
+type Wrap struct {
+	A Any
+	N [2]int32
+}
+
+type View struct {
+	B [116]int8
+	N [2]int32
+}
+
+var copied [4]byte
+
+func decode(rsa *Any) { copied = (*Inet)(unsafe.Pointer(rsa)).Addr }
+
+func view(w *Wrap) *View { return (*View)(unsafe.Pointer(w)) }
+
+func wire(p unsafe.Pointer) *Wrap { return (*Wrap)(p) }
+`})
+
+	if got := admittedKeys(a); got != "example.com/lib.Leaf" || len(a.refusals) != 0 {
+		t.Fatalf("admitted %q, refusals %v; want Leaf alone and no refusal", got, a.refusals)
+	}
+
+	for _, want := range []string{
+		"Any is converted whole through unsafe.Pointer but keeps array<T> storage: it is reinterpreted as Inet",
+		"Wrap is converted whole through unsafe.Pointer but keeps array<T> storage: it holds Any by value",
+		"View is converted whole through unsafe.Pointer but keeps array<T> storage: Wrap is reinterpreted as it",
+	} {
+		if !hasWarning(a, want) {
+			t.Errorf("warnings %v, want %q", a.warnings, want)
+		}
+	}
+}
+
+func hasWarning(a *inlineArrayAdmission, text string) bool {
+	for _, warning := range a.warnings {
+		if strings.Contains(warning.text, text) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func TestParseInlineArrayOverride(t *testing.T) {

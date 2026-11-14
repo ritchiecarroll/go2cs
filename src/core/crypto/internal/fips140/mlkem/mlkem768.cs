@@ -196,6 +196,7 @@ public static (ж<DecapsulationKey768>, error) NewDecapsulationKey768(slice<byte
 }
 
 internal static (ж<DecapsulationKey768>, error) newKeyFromSeed(ж<DecapsulationKey768> dk, slice<byte> seed) {
+    fipsSelfTest();
     if (len(seed) != SeedSize) {
         return (default, errors.New(mlkemInvalidSeedLengthˢ));
     }
