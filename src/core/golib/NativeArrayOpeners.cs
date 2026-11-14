@@ -39,8 +39,9 @@ namespace go;
     // E -> NativePointerArrayBox<E>.Over, answering a ж<array<ж<E>>>.
     private static readonly ConcurrentDictionary<Type, Func<nuint, nint, object>> s_pointerArrays = new();
 
-    // X -> builtin.NativeArrayPointer<X>, answering a ж<array<X>>.
-    private static readonly ConcurrentDictionary<Type, Func<nuint, nint, object>> s_arrays = new();
+    // X -> builtin.NativeArrayPointer<X>, answering a ж<array<X>>. The third argument is the root the window keeps when
+    // its block is not C memory alone (an array field of a struct viewed over Go memory), else null.
+    private static readonly ConcurrentDictionary<Type, Func<nuint, nint, object?, object>> s_arrays = new();
 
     /// <summary>Registers the foreign pointer-array door for <c>*[N]*E</c>. Idempotent.</summary>
     public static void RegisterPointerArray<E>() =>
@@ -48,7 +49,7 @@ namespace go;
 
     /// <summary>Registers the native array door for <c>*[N]X</c>, the window over an <c>[N]X</c> field. Idempotent.</summary>
     public static void RegisterArray<X>() =>
-        s_arrays.TryAdd(typeof(X), static (address, length) => builtin.NativeArrayPointer<X>(address, length));
+        s_arrays.TryAdd(typeof(X), static (address, length, retainedSource) => builtin.NativeArrayPointer<X>(address, length, retainedSource));
 
     /// <summary>A <c>*[length]*E</c> over the foreign words at <paramref name="address"/>.</summary>
     internal static object OpenPointerArray(Type element, nuint address, nint length) =>
@@ -57,11 +58,14 @@ namespace go;
             ? open(address, length)
             : throw new PanicException($"go2cs: native pointer array: *[{length}]*{GoTypeName(element)} over memory the Go runtime did not allocate: this build never spells *[N]*{GoTypeName(element)}, so no reader for it was compiled");
 
-    /// <summary>A <c>*[length]X</c> over the native memory at <paramref name="address"/>.</summary>
-    internal static object OpenArray(Type element, nuint address, nint length) =>
-        s_arrays.TryGetValue(element, out Func<nuint, nint, object>? open) ||
+    /// <summary>
+    /// A <c>*[length]X</c> over the native memory at <paramref name="address"/>, keeping <paramref name="retainedSource"/>
+    /// (null for C memory alone).
+    /// </summary>
+    internal static object OpenArray(Type element, nuint address, nint length, object? retainedSource = null) =>
+        s_arrays.TryGetValue(element, out Func<nuint, nint, object?, object>? open) ||
         GoDeferredRegistrations.NativeArrayOpeners.Run() && s_arrays.TryGetValue(element, out open)
-            ? open(address, length)
+            ? open(address, length, retainedSource)
             : throw new PanicException($"go2cs: native array field: a [{length}]{GoTypeName(element)} field of a struct in native memory: this build declares no [N]{GoTypeName(element)} field, so no window for it was compiled");
 
     // The element as Go spells it (`main.E`, `*uint16`): reflect's own type string.

@@ -227,7 +227,7 @@ not correctness.)
 call-deref swap, output-compared vs `go run`; the pre-fix converter leaves all three visibly uncorrected.)
 
 ## A dereferenced pointer CONVERSION as a tuple target writes through `.Value`
-A single assignment to `*(*T)(p)` writes through the converted box, `((ж<T>)(uintptr)p).Value = v`. The tuple
+A single assignment to `*(*T)(p)` writes through the converted box, `(@unsafe.Pointer.To<T>(p)).Value = v`. The tuple
 target was rendered as a read instead, with the prefix `~` dereference, which is a value and not a variable,
 so a parallel assignment through two such targets did not compile (CS0131). modernc.org/libc's `qsort.go`
 swaps elements this way (sqlite-cs row S14):
@@ -237,8 +237,8 @@ swaps elements this way (sqlite-cs row S14):
 ```
 
 Each tuple target now takes the single assignment's `.Value` spelling, and the right-hand reads keep `~`, so the
-statement stays one simultaneous deconstruction, like the Go line: `(((ж<uint64>)(uintptr)((@unsafe.Pointer)p)).Value,
-((ж<uint64>)(uintptr)((@unsafe.Pointer)q)).Value) = (~(ж<uint64>)(uintptr)((@unsafe.Pointer)q), ~(ж<uint64>)(uintptr)((@unsafe.Pointer)p));`.
+statement stays one simultaneous deconstruction, like the Go line: `((@unsafe.Pointer.To<uint64>((@unsafe.Pointer)p)).Value,
+(@unsafe.Pointer.To<uint64>((@unsafe.Pointer)q)).Value) = (~@unsafe.Pointer.To<uint64>((@unsafe.Pointer)q), ~@unsafe.Pointer.To<uint64>((@unsafe.Pointer)p));`.
 Every such target was a compile error before, so no compiled corpus file changes. (Guarded by
 `ParallelDerefCastAssign`: a swap through `uintptr` addresses, a three-way rotate through `unsafe.Pointer`, and a
 swap of an address with itself, output-compared vs Go.)

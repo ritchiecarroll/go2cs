@@ -540,7 +540,7 @@ internal static nint netpollcheckerr(ж<pollDesc> pd, int32 mode) {
 }
 
 internal static bool netpollblockcommit(ж<g> gp, @unsafe.Pointer gpp) {
-    var r = atomic.Casuintptr((ж<uintptr>)(uintptr)(gpp), pdWait, (uintptr)gp);
+    var r = atomic.Casuintptr(@unsafe.Pointer.To<uintptr>(gpp), pdWait, (uintptr)gp);
     if (r) {
         // Bump the count of goroutines waiting for the poller.
         // The scheduler uses this to decide whether to block
@@ -633,7 +633,7 @@ internal static ж<g> netpollunblock(ж<pollDesc> pd, int32 mode, bool ioready, 
             } else if (old != pdNil) {
                 delta -= 1;
             }
-            return (ж<g>)(uintptr)((@unsafe.Pointer)old);
+            return @unsafe.Pointer.To<g>((@unsafe.Pointer)old);
         }
     }
 }
@@ -731,7 +731,7 @@ internal static ж<pollDesc> alloc(this ж<pollCache> Ꮡc) {
         // only from epoll/kqueue internals.
         @unsafe.Pointer mem = persistentalloc(n * pdSize, tagAlign, Ꮡmemstats.Ꮡother_sys);
         for (var i = (uintptr)0; i < n; i++) {
-            var pdΔ1 = (ж<pollDesc>)(uintptr)(add(mem, i * pdSize));
+            var pdΔ1 = @unsafe.Pointer.To<pollDesc>(add(mem, i * pdSize));
             lockInit(ref (pdΔ1.Ꮡlock).DerefOrNull(), lockRankPollDesc);
             pdΔ1.Ꮡrt.init(default, default);
             pdΔ1.Ꮡwt.init(default, default);

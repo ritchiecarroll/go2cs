@@ -346,7 +346,7 @@ internal static ж<g> sigFetchG(ж<sigctxt> Ꮡc) {
             var sp = sys.GetCallerSP();
             var s = spanOf(sp);
             if (s != nil && s.Ꮡstate.get() == mSpanManual && s.@base() < sp && sp < s.limit) {
-                var gp = ~(ж<ж<g>>)(uintptr)((@unsafe.Pointer)s.@base());
+                var gp = ~@unsafe.Pointer.To<ж<g>>((@unsafe.Pointer)s.@base());
                 return gp;
             }
             return default;
@@ -832,7 +832,7 @@ internal static ж<g> fatalsignal(uint32 sig, ж<sigctxt> Ꮡc, ж<g> Ꮡgp, ref
             n = physPageSize - pc % physPageSize;
         }
         print((@string)"instruction bytes:");
-        var b = (ж<array<byte>>)(uintptr)((@unsafe.Pointer)pc);
+        var b = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)pc);
         for (var i = (uintptr)0; i < n; i++) {
             print((@string)" ", (Δhex)(uint64)b.Value[i]);
         }
@@ -1107,7 +1107,7 @@ internal static void badsignal(uintptr sig, ж<sigctxt> c) {
         // Cannot call split-stack function as there is no G.
         writeErrStr(fatalBadGInSignalHandlerˢ);
         exit(2);
-        ((ж<uintptr>)(uintptr)((@unsafe.Pointer)(uintptr)123)).Value = 2;
+        (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(uintptr)123)).Value = 2;
     }
     needm(true);
     if (!sigsend((uint32)sig)) {

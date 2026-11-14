@@ -12,7 +12,7 @@ partial class atomic_package {
 //go:nosplit
 internal static uint8 goXchg8(ж<uint8> addr, uint8 v) {
     // Align down to 4 bytes and use 32-bit CAS.
-    var addr32 = (ж<uint32>)(uintptr)((@unsafe.Pointer)((uintptr)((uintptr)addr & ~(uintptr)3)));
+    var addr32 = @unsafe.Pointer.To<uint32>((@unsafe.Pointer)((uintptr)((uintptr)addr & ~(uintptr)3)));
     var shift = ((uintptr)((uintptr)addr & 3));
     if (goarch.BigEndian) {
         shift = (uintptr)(shift ^ 3);

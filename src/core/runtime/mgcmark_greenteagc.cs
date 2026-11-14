@@ -92,8 +92,6 @@ internal static spanScanOwnership load(this ж<spanScanOwnership> Ꮡo) {
 }
 
 internal static spanScanOwnership or(this ж<spanScanOwnership> Ꮡo, spanScanOwnership v) {
-    ref var o = ref Ꮡo.DerefOrNull();
-
     // N.B. We round down the address and use Or32 because Or8 doesn't
     // return a result, and it's strictly necessary for this protocol.
     //
@@ -103,8 +101,8 @@ internal static spanScanOwnership or(this ж<spanScanOwnership> Ꮡo, spanScanOw
     // would be implemented exactly as it is here, and since Or8 is
     // exclusively used in the runtime and a hot function, we want to keep
     // using its no-result version elsewhere for performance.
-    var o32 = (ж<uint32>)(uintptr)((@unsafe.Pointer)((uintptr)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref o) & ~(uintptr)0b11)));
-    var off = ((uintptr)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref o) & 0b11)) * 8;
+    var o32 = @unsafe.Pointer.To<uint32>((@unsafe.Pointer)((uintptr)((uintptr)Ꮡo & ~(uintptr)0b11)));
+    var off = ((uintptr)((uintptr)Ꮡo & 0b11)) * 8;
     if (goarch.BigEndian) {
         off = 32 - off - 8;
     }
@@ -187,7 +185,7 @@ internal static spanScanOwnership release(this ж<spanInlineMarkBits> Ꮡimb) {
 //
 // The span must be gcUsesSpanInlineMarkBits(span.elemsize).
 internal static ж<spanInlineMarkBits> spanInlineMarkBitsFromBase(uintptr @base) {
-    return (ж<spanInlineMarkBits>)(uintptr)((@unsafe.Pointer)(@base + (uintptr)gc.PageSize - /* unsafe.Sizeof(spanInlineMarkBits{}) */ (uintptr)128));
+    return @unsafe.Pointer.To<spanInlineMarkBits>((@unsafe.Pointer)(@base + (uintptr)gc.PageSize - /* unsafe.Sizeof(spanInlineMarkBits{}) */ (uintptr)128));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -216,7 +214,7 @@ internal static void moveInlineMarks(this ref mspan s, ж<gcBits> dst) {
     }
     var bytes = divRoundUp((uintptr)s.nelems, 8);
     var imb = s.inlineMarkBits();
-    var imbMarks = (ж<gc.ObjMask>)(uintptr)(@unsafe.Pointer.FromPinnedBox(imb.Ꮡmarks));
+    var imbMarks = @unsafe.Pointer.To<gc.ObjMask>(@unsafe.Pointer.FromPinnedBox(imb.Ꮡmarks));
     for (var i = (uintptr)0; i < bytes; i += goarch.PtrSize) {
         var marks = bswapIfBigEndian(imbMarks.Value[i / (uintptr)goarch.PtrSize]);
         if (i / (uintptr)goarch.PtrSize == (uintptr)((uintptr)((uintptr)(len(imb.marks) + 1) / (uintptr)goarch.PtrSize) - 1)) {
@@ -480,12 +478,12 @@ internal static bool empty(this ж<spanQueue> Ꮡq) {
 // Thread-safe.
 internal static bool chainEmpty(this ж<spanQueue> Ꮡq) {
     // Check the rest of the rings for work.
-    var r = (ж<spanSPMC>)(uintptr)(Ꮡq.Ꮡchain.of(spanQueue_chain.Ꮡtail).Load());
+    var r = @unsafe.Pointer.To<spanSPMC>(Ꮡq.Ꮡchain.of(spanQueue_chain.Ꮡtail).Load());
     while (r != nil) {
         if (!r.empty()) {
             return false;
         }
-        r = (ж<spanSPMC>)(uintptr)(r.Ꮡprev.Load());
+        r = @unsafe.Pointer.To<spanSPMC>(r.Ꮡprev.Load());
     }
     return true;
 }
@@ -587,7 +585,7 @@ internal static objptr tryGetFast(this ref spanQueue q) {
 //
 // q == q2 is OK.
 internal static objptr steal(this ref spanQueue q, ж<spanQueue> q2) {
-    var r = (ж<spanSPMC>)(uintptr)(q2.Ꮡchain.of(spanQueue_chain.Ꮡtail).Load());
+    var r = @unsafe.Pointer.To<spanSPMC>(q2.Ꮡchain.of(spanQueue_chain.Ꮡtail).Load());
     if (r == nil) {
         return 0;
     }
@@ -598,7 +596,7 @@ internal static objptr steal(this ref spanQueue q, ж<spanQueue> q2) {
         // the pop and the pop fails, then r is permanently
         // empty, which is the only condition under which it's
         // safe to drop r from the chain.
-        var r2 = (ж<spanSPMC>)(uintptr)(r.Ꮡprev.Load());
+        var r2 = @unsafe.Pointer.To<spanSPMC>(r.Ꮡprev.Load());
 
         // Try to refill from one of the rings
         var s = q.refill(r); if (s != 0) {
@@ -696,7 +694,7 @@ internal static void destroy(this ж<spanQueue> Ꮡq) {
     @lock(Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlock));
 
     // Remove, deinitialize, and free each ring.
-    for (var r = (ж<spanSPMC>)(uintptr)(Ꮡq.Ꮡchain.of(spanQueue_chain.Ꮡtail).Load()); r != nil; r = (ж<spanSPMC>)(uintptr)(r.Ꮡprev.Load())) {
+    for (var r = @unsafe.Pointer.To<spanSPMC>(Ꮡq.Ꮡchain.of(spanQueue_chain.Ꮡtail).Load()); r != nil; r = @unsafe.Pointer.To<spanSPMC>(r.Ꮡprev.Load())) {
         Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlist).remove(@unsafe.Pointer.FromPinnedBox(r));
         r.deinit();
         Ꮡmheap_.ᏑspanSPMCAlloc.free(@unsafe.Pointer.FromPinnedBox(r));
@@ -769,7 +767,7 @@ private static readonly @string gcSpanQueueˢᵇ = "GC span queue"u8;
 // waste memory.
 internal static ж<spanSPMC> newSpanSPMC(uint32 cap) {
     @lock(Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlock));
-    var r = (ж<spanSPMC>)(uintptr)(Ꮡmheap_.ᏑspanSPMCAlloc.alloc());
+    var r = @unsafe.Pointer.To<spanSPMC>(Ꮡmheap_.ᏑspanSPMCAlloc.alloc());
     Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlist).push(@unsafe.Pointer.FromPinnedBox(r));
     unlock(Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlock));
 
@@ -814,7 +812,7 @@ internal static void deinit(this ж<spanSPMC> Ꮡr) {
 // slot returns a pointer to slot i%r.cap.
 internal static ж<objptr> slot(this ref spanSPMC r, uint32 i) {
     var idx = (uintptr)(i & (r.cap - 1));
-    return (ж<objptr>)(uintptr)(@unsafe.Add(@unsafe.Pointer.FromBox(r.ring), idx * /* unsafe.Sizeof(objptr(0)) */ (uintptr)8));
+    return @unsafe.Pointer.To<objptr>(@unsafe.Add(@unsafe.Pointer.FromBox(r.ring), idx * /* unsafe.Sizeof(objptr(0)) */ (uintptr)8));
 }
 
 // freeDeadSpanSPMCs frees dead spanSPMCs back to the OS.
@@ -841,9 +839,9 @@ internal static void freeDeadSpanSPMCs() {
         unlock(Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlock));
         return;
     }
-    var r = (ж<spanSPMC>)(uintptr)(Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlist).head());
+    var r = @unsafe.Pointer.To<spanSPMC>(Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlist).head());
     while (r != nil) {
-        var next = (ж<spanSPMC>)(uintptr)((@unsafe.Pointer)r.allnode.next);
+        var next = @unsafe.Pointer.To<spanSPMC>((@unsafe.Pointer)r.allnode.next);
         if (r.Ꮡdead.Load()) {
             // It's dead. Remove, deinitialize and free it.
             Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlist).remove(@unsafe.Pointer.FromPinnedBox(r));
@@ -1020,8 +1018,8 @@ internal static nint spanSetScans(uintptr spanBase, uint16 nelems, ж<spanInline
     // Careful: these two structures alias since ObjMask is much bigger
     // than marks or scans. We do these unsafe shenanigans so that we can
     // access the marks and scans by uintptrs rather than by byte.
-    var imbMarks = (ж<gc.ObjMask>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡimb.Ꮡmarks));
-    var imbScans = (ж<gc.ObjMask>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡimb.Ꮡscans));
+    var imbMarks = @unsafe.Pointer.To<gc.ObjMask>(@unsafe.Pointer.FromPinnedBox(Ꮡimb.Ꮡmarks));
+    var imbScans = @unsafe.Pointer.To<gc.ObjMask>(@unsafe.Pointer.FromPinnedBox(Ꮡimb.Ꮡscans));
 
     // Iterate over one uintptr-sized chunks at a time, computing both
     // the union and intersection of marks and scans. Store the union
@@ -1056,7 +1054,7 @@ internal static void scanObjectSmall(uintptr spanBase, uintptr b, uintptr objSiz
     ref var gcw = ref Ꮡgcw.DerefOrNull();
 
     var (hbitsBase, _) = spanHeapBitsRange(spanBase, gc.PageSize, objSize);
-    var hbits = (ж<byte>)(uintptr)((@unsafe.Pointer)hbitsBase);
+    var hbits = @unsafe.Pointer.To<byte>((@unsafe.Pointer)hbitsBase);
     var ptrBits = extractHeapBitsSmall(hbits, spanBase, b, objSize);
     gcw.heapScanWork += (int64)(sys.Len64((uint64)ptrBits) * (nint)goarch.PtrSize);
     nint nptrs = 0;
@@ -1079,7 +1077,7 @@ internal static void scanObjectSmall(uintptr spanBase, uintptr b, uintptr objSiz
     foreach (var (_, vᴛ1) in range(gcw.ptrBuf.slice(0, nptrs))) {
         var Δp = vᴛ1;
 
-        Δp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)Δp);
+        Δp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)Δp);
         if (Δp == 0) {
             continue;
         }
@@ -1103,7 +1101,7 @@ internal static void scanObjectsSmall(uintptr @base, uintptr objSize, uint16 ele
         }
         nint n = sys.OnesCount64((uint64)bits);
         var (hbitsBase, _) = spanHeapBitsRange(@base, gc.PageSize, objSize);
-        var hbits = (ж<byte>)(uintptr)((@unsafe.Pointer)hbitsBase);
+        var hbits = @unsafe.Pointer.To<byte>((@unsafe.Pointer)hbitsBase);
         foreach (var _ᴛ1 in range(n)) {
             nint j = sys.TrailingZeros64((uint64)bits);
             bits &= unchecked((uintptr)~(uintptr)(((uintptr)1).Lsh((int64)(j))));
@@ -1133,7 +1131,7 @@ internal static void scanObjectsSmall(uintptr @base, uintptr objSize, uint16 ele
     foreach (var (_, vᴛ2) in range(gcw.ptrBuf.slice(0, nptrs))) {
         var Δp = vᴛ2;
 
-        Δp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)Δp);
+        Δp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)Δp);
         if (Δp == 0) {
             continue;
         }
@@ -1182,7 +1180,7 @@ internal static uintptr extractHeapBitsSmall(ж<byte> hbits, uintptr spanBase, u
 // - Contains pointers.
 internal static ж<gc.PtrMask> spanPtrMaskUnsafe(uintptr spanBase) {
     var @base = spanBase + (uintptr)gc.PageSize - /* unsafe.Sizeof(gc.PtrMask{}) */ (uintptr)128 - /* unsafe.Sizeof(spanInlineMarkBits{}) */ (uintptr)128;
-    return (ж<gc.PtrMask>)(uintptr)((@unsafe.Pointer)@base);
+    return @unsafe.Pointer.To<gc.PtrMask>((@unsafe.Pointer)@base);
 }
 
 partial struct sizeClassScanStats {
@@ -1344,7 +1342,7 @@ internal static void scanObject(uintptr b, ж<gcWork> Ꮡgcw) {
 
         // Work here is duplicated in scanblock and above.
         // If you make changes here, make changes there too.
-        var obj = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)addr);
+        var obj = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)addr);
 
         // At this point we have extracted the next potential pointer.
         // Quickly filter out nil and pointers back to the current object.

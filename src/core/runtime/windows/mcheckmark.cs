@@ -50,7 +50,7 @@ internal static void startCheckmarks() {
 
         if (bitmap == nil) {
             // Allocate bitmap on first use.
-            bitmap = (ж<checkmarksMap>)(uintptr)(persistentalloc(/* unsafe.Sizeof(*bitmap) */ (uintptr)65536, 0, Ꮡmemstats.ᏑgcMiscSys));
+            bitmap = @unsafe.Pointer.To<checkmarksMap>(persistentalloc(/* unsafe.Sizeof(*bitmap) */ (uintptr)65536, 0, Ꮡmemstats.ᏑgcMiscSys));
             if (bitmap == nil) {
                 @throw(outOfMemoryAllocatingˢ4);
             }

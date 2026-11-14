@@ -11,7 +11,7 @@ internal static @unsafe.Pointer rebind(@unsafe.Pointer p, @unsafe.Pointer q) {
 }
 
 internal static @unsafe.Pointer advance(@unsafe.Pointer p, uintptr n) {
-    p = (@unsafe.Pointer)((uintptr)p + n);
+    p = @unsafe.Add(p, n);
     return p;
 }
 
@@ -40,18 +40,18 @@ internal static void main() {
     @unsafe.Pointer pb = @unsafe.Pointer.FromPinnedBox(Ꮡb);
 
     @unsafe.Pointer r = rebind(pa, pb);
-    fmt.Println("rebind:", ~(ж<nint>)(uintptr)(r), "caller's pa still reads", ~(ж<nint>)(uintptr)(pa));
+    fmt.Println("rebind:", ~@unsafe.Pointer.To<nint>(r), "caller's pa still reads", ~@unsafe.Pointer.To<nint>(pa));
 
     ref var arr = ref heap<array<int32>>(new int32[]{10, 20, 30, 40}.array(), out var Ꮡarr);
     @unsafe.Pointer p0 = @unsafe.Pointer.FromPinnedBox(Ꮡarr.at<int32>(0));
     @unsafe.Pointer s = advance(p0, /* unsafe.Sizeof(arr[0]) */ (uintptr)4);
-    fmt.Println("advance:", ~(ж<int32>)(uintptr)(s), "caller's p0 still reads", ~(ж<int32>)(uintptr)(p0));
+    fmt.Println("advance:", ~@unsafe.Pointer.To<int32>(s), "caller's p0 still reads", ~@unsafe.Pointer.To<int32>(p0));
 
     @unsafe.Pointer t = step(p0, 2 * (nint)/* unsafe.Sizeof(arr[0]) */ (uintptr)4);
-    fmt.Println("step:", ~(ж<int32>)(uintptr)(t), "caller's p0 still reads", ~(ж<int32>)(uintptr)(p0));
+    fmt.Println("step:", ~@unsafe.Pointer.To<int32>(t), "caller's p0 still reads", ~@unsafe.Pointer.To<int32>(p0));
 
-    fmt.Println("clear:", clear(pa), "caller's pa still reads", ~(ж<nint>)(uintptr)(pa));
-    fmt.Println("local:", ~(ж<nint>)(uintptr)(local(pb)), a, b);
+    fmt.Println("clear:", clear(pa), "caller's pa still reads", ~@unsafe.Pointer.To<nint>(pa));
+    fmt.Println("local:", ~@unsafe.Pointer.To<nint>(local(pb)), a, b);
 }
 
 } // end main_package

@@ -296,7 +296,7 @@ internal static void mProf_Flush() {
 internal static void mProf_FlushLocked(uint32 index) {
     assertLockHeld(ᏑprofMemActiveLock);
     assertLockHeld(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
-    var head = (ж<bucket>)(uintptr)(Ꮡmbuckets.Load());
+    var head = @unsafe.Pointer.To<bucket>(Ꮡmbuckets.Load());
     for (var b = head; b != nil; b = b.allnext) {
         var mp = b.mp();
 
@@ -441,7 +441,7 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
     }
     while (n < len(pcBuf) && fp != nil) {
         // return addr sits one word above the frame pointer
-        var pc = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)((uintptr)fp + (uintptr)goarch.PtrSize));
+        var pc = ~@unsafe.Pointer.To<uintptr>(@unsafe.Add(fp, (uintptr)goarch.PtrSize));
 
         if (skip > 0) {
             var callPC = pc - 1;
@@ -464,7 +464,7 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
         }
 
         // follow the frame pointer to the next one
-        fp = (@unsafe.Pointer)(~(ж<uintptr>)(uintptr)(fp));
+        fp = (@unsafe.Pointer)(~@unsafe.Pointer.To<uintptr>(fp));
     }
     return n;
 }
@@ -822,7 +822,7 @@ internal static partial (nint n, bool ok) memProfileInternal(nint size, bool inu
     mProf_FlushLocked(index);
     unlock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     var clear = true;
-    var head = (ж<bucket>)(uintptr)(Ꮡmbuckets.Load());
+    var head = @unsafe.Pointer.To<bucket>(Ꮡmbuckets.Load());
     for (var b = head; b != nil; b = b.allnext) {
         var mp = b.mp();
         if (inuseZero || mp.active.alloc_bytes != mp.active.free_bytes) {
@@ -901,7 +901,7 @@ public static (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.Mem
 
 internal static void iterate_memprof(Action<ж<bucket>, uintptr, ж<uintptr>, uintptr, uintptr, uintptr> fn) {
     @lock(ᏑprofMemActiveLock);
-    var head = (ж<bucket>)(uintptr)(Ꮡmbuckets.Load());
+    var head = @unsafe.Pointer.To<bucket>(Ꮡmbuckets.Load());
     for (var b = head; b != nil; b = b.allnext) {
         var mp = b.mp();
         fn(b, b.nstk, Ꮡ(b.stk(), 0), b.size, mp.active.allocs, mp.active.frees);
@@ -968,7 +968,7 @@ internal static (nint n, bool ok) blockProfileInternal(nint size, Action<profile
     bool ok = default;
 
     @lock(ᏑprofBlockLock);
-    var head = (ж<bucket>)(uintptr)(Ꮡbbuckets.Load());
+    var head = @unsafe.Pointer.To<bucket>(Ꮡbbuckets.Load());
     for (var b = head; b != nil; b = b.allnext) {
         n++;
     }
@@ -1056,7 +1056,7 @@ internal static (nint n, bool ok) mutexProfileInternal(nint size, Action<profile
     bool ok = default;
 
     @lock(ᏑprofBlockLock);
-    var head = (ж<bucket>)(uintptr)(Ꮡxbuckets.Load());
+    var head = @unsafe.Pointer.To<bucket>(Ꮡxbuckets.Load());
     for (var b = head; b != nil; b = b.allnext) {
         n++;
     }
@@ -1105,7 +1105,7 @@ internal static (nint n, bool ok) threadCreateProfileInternal(nint size, Action<
     nint n = default;
     bool ok = default;
 
-    var first = (ж<m>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm)));
+    var first = @unsafe.Pointer.To<m>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm)));
     for (var mp = first; mp != nil; mp = mp.Value.alllink) {
         n++;
     }

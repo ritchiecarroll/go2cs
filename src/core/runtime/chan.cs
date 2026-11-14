@@ -103,7 +103,7 @@ internal static ж<Δhchan> makechan(ref chantype t, nint size) {
     switch (ᐧ) {
     case {} when mem == 0: {
         // Queue or element size is zero.
-        c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize, nil, true));
+        c = @unsafe.Pointer.To<Δhchan>(mallocgc(hchanSize, nil, true));
         // Race detector uses this location for synchronization.
         c.buf = c.raceaddr();
         break;
@@ -111,7 +111,7 @@ internal static ж<Δhchan> makechan(ref chantype t, nint size) {
     case {} when !elem.Pointers(): {
         // Elements do not contain pointers.
         // Allocate hchan and buf in one call.
-        c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize + mem, nil, true));
+        c = @unsafe.Pointer.To<Δhchan>(mallocgc(hchanSize + mem, nil, true));
         c.buf = add(@unsafe.Pointer.FromPinnedBox(c), hchanSize);
         break;
     }
@@ -834,7 +834,7 @@ internal static bool chanparkcommit(ж<g> Ꮡgp, @unsafe.Pointer chanLock) {
     // we risk gp getting readied by a channel operation and
     // so gp could continue running before everything before
     // the unlock is visible (even to gp itself).
-    unlock((ж<mutex>)(uintptr)(chanLock));
+    unlock(@unsafe.Pointer.To<mutex>(chanLock));
     return true;
 }
 

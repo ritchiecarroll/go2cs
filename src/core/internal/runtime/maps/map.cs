@@ -341,11 +341,11 @@ internal static uintptr directoryIndex(this ref ΔMap m, uintptr hash) {
 }
 
 internal static ж<table> directoryAt(this ref ΔMap m, uintptr i) {
-    return ~(ж<ж<table>>)(uintptr)((@unsafe.Pointer)((uintptr)m.dirPtr + (uintptr)goarch.PtrSize * i));
+    return ~@unsafe.Pointer.To<ж<table>>(@unsafe.Add(m.dirPtr, (uintptr)goarch.PtrSize * i));
 }
 
 internal static void directorySet(this ref ΔMap m, uintptr i, ж<table> nt) {
-    ((ж<ж<table>>)(uintptr)((@unsafe.Pointer)((uintptr)m.dirPtr + (uintptr)goarch.PtrSize * i))).ValueSlot = nt;
+    (@unsafe.Pointer.To<ж<table>>(@unsafe.Add(m.dirPtr, (uintptr)goarch.PtrSize * i))).ValueSlot = nt;
 }
 
 internal static void replaceTable(this ref ΔMap m, ж<table> Ꮡnt) {
@@ -469,13 +469,13 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
 
         @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
         if (typ.IndirectKey()) {
-            slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
+            slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
         }
 
         if (typ.Key.Equal(key, slotKey)) {
             @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
-                slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
+                slotElem = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value;
             }
             return (slotKey, slotElem, true);
         }
@@ -575,7 +575,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
 
         @unsafe.Pointer slotKeyΔ1 = g.key(Ꮡtyp, iΔ1);
         if (typ.IndirectKey()) {
-            slotKeyΔ1 = ((ж<@unsafe.Pointer>)(uintptr)(slotKeyΔ1)).Value;
+            slotKeyΔ1 = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKeyΔ1)).Value;
         }
         if (typ.Key.Equal(key, slotKeyΔ1)) {
             if (typ.NeedKeyUpdate()) {
@@ -584,7 +584,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
 
             @unsafe.Pointer slotElemΔ1 = g.elem(Ꮡtyp, iΔ1);
             if (typ.IndirectElem()) {
-                slotElemΔ1 = ((ж<@unsafe.Pointer>)(uintptr)(slotElemΔ1)).Value;
+                slotElemΔ1 = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElemΔ1)).Value;
             }
 
             return slotElemΔ1;
@@ -606,7 +606,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
     @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
     if (typ.IndirectKey()) {
         @unsafe.Pointer kmem = newobject(typ.Key);
-        ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = kmem;
+        (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = kmem;
         slotKey = kmem;
     }
     typedmemmove(typ.Key, slotKey, key);
@@ -614,7 +614,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
     @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
     if (typ.IndirectElem()) {
         @unsafe.Pointer emem = newobject(typ.Elem);
-        ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = emem;
+        (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value = emem;
         slotElem = emem;
     }
 
@@ -651,12 +651,12 @@ internal static void growToTable(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp) {
 
         @unsafe.Pointer key = g.key(Ꮡtyp, i);
         if (typ.IndirectKey()) {
-            key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+            key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
         }
 
         @unsafe.Pointer elem = g.elem(Ꮡtyp, i);
         if (typ.IndirectElem()) {
-            elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+            elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
         }
 
         var hash = typ.Hasher(key, m.seed);
@@ -732,14 +732,14 @@ internal static void deleteSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uin
         @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
         @unsafe.Pointer origSlotKey = slotKey;
         if (typ.IndirectKey()) {
-            slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
+            slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
         }
         if (typ.Key.Equal(key, slotKey)) {
             m.used--;
 
             if (typ.IndirectKey()) {
                 // Clearing the pointer is sufficient.
-                ((ж<@unsafe.Pointer>)(uintptr)(origSlotKey)).Value = default;
+                (@unsafe.Pointer.To<@unsafe.Pointer>(origSlotKey)).Value = default;
             } else if (typ.Key.Pointers()) {
                 // Only bother clearing if there are pointers.
                 typedmemclr(typ.Key, slotKey);
@@ -748,7 +748,7 @@ internal static void deleteSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uin
             @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
                 // Clearing the pointer is sufficient.
-                ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = default;
+                (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value = default;
             } else {
                 // Unlike keys, always clear the elem (even if
                 // it contains no pointers), as compound
@@ -849,7 +849,7 @@ public static ж<ΔMap> Clone(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> typ) {
         m.dirPtr = newGroup.data;
     } else {
         // Clone each (different) table.
-        var oldDir = @unsafe.Slice((ж<ж<table>>)(uintptr)(m.dirPtr), m.dirLen);
+        var oldDir = @unsafe.Slice(@unsafe.Pointer.To<ж<table>>(m.dirPtr), m.dirLen);
         var newDir = new slice<ж<table>>(m.dirLen);
         foreach (var (i, t) in range(oldDir)) {
             if (i > 0 && t == oldDir[i - 1]) {
@@ -888,14 +888,14 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
         ж<abi.Type> tΔ2 = default;
         ж<@unsafe.Pointer> pdata = default;
         if (len(i.Methods) == 0) {
-            var a = (ж<abi.EmptyInterface>)(uintptr)(p);
+            var a = @unsafe.Pointer.To<abi.EmptyInterface>(p);
             tΔ2 = a.Type;
             if (tΔ2 == nil) {
                 return default;
             }
             pdata = a.ᏑData;
         } else {
-            var a = (ж<abi.NonEmptyInterface>)(uintptr)(p);
+            var a = @unsafe.Pointer.To<abi.NonEmptyInterface>(p);
             if (a.ITab == nil) {
                 return default;
             }
@@ -917,7 +917,7 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
     case var ᴛ when ᴛ == abi.Array: {
         var a = Ꮡt.Reinterpret<abi.Type, abiꓸArrayType>();
         for (var i = (uintptr)0; i < a.of(abiꓸArrayType.ᏑLen).Value; i++) {
-            var err = mapKeyError2(a.of(abiꓸArrayType.ᏑElem).Value, (@unsafe.Pointer)((uintptr)p + i * a.of(abiꓸArrayType.ᏑElem).Value.Size_)); if (err != nil) {
+            var err = mapKeyError2(a.of(abiꓸArrayType.ᏑElem).Value, @unsafe.Add(p, i * a.of(abiꓸArrayType.ᏑElem).Value.Size_)); if (err != nil) {
                 return err;
             }
         }
@@ -929,7 +929,7 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
             if (f.Name.IsBlank()) {
                 continue;
             }
-            var err = mapKeyError2(f.Typ, (@unsafe.Pointer)((uintptr)p + f.Offset)); if (err != nil) {
+            var err = mapKeyError2(f.Typ, @unsafe.Add(p, f.Offset)); if (err != nil) {
                 return err;
             }
         }

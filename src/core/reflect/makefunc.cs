@@ -127,7 +127,7 @@ internal static void moveMakeFuncArgPtrs(ж<makeFuncCtxt> ctxt, ref abi.RegArgs 
         // (Normally the prove pass removes them, but for -N builds we
         // use too much stack.)
         // ptr := &args.Ptrs[i] (but cast from *unsafe.Pointer to *uintptr)
-        var ptr = (ж<uintptr>)(uintptr)(add(@unsafe.Pointer.FromBox(@unsafe.SliceData(args.Ptrs[..])), (uintptr)i * (uintptr)goarch.PtrSize, alwaysIn0IntArgRegsˢ));
+        var ptr = @unsafe.Pointer.To<uintptr>(add(@unsafe.Pointer.FromBox(@unsafe.SliceData(args.Ptrs[..])), (uintptr)i * (uintptr)goarch.PtrSize, alwaysIn0IntArgRegsˢ));
         if (ctxt.ᏑregPtrs.Get(i)) {
             ptr.Value = arg;
         } else {

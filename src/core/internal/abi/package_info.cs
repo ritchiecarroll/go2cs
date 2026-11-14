@@ -64,7 +64,7 @@ using static go.@internal.abi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/abi/abi.go", "abi.cs", "ACxegoKClIKCgpSCgoKUAAIYAAkCgpSCgpQABxCSAAISAAkEgg==")]
+[assembly: GoPositionMap("internal/abi/abi.go", "abi.cs", "ACxegoKClIKCgpSCgoKUAAIYAAkCgpSCgpQABxCSAAIS9II=")]
 [assembly: GoPositionMap("internal/abi/bounds.go", "bounds.cs", "ABluABgCgoKCgpSClJSClJSCgoKUlIKUlJTygoKCgoKCgoKCgpSClIKClIKUgpQ=")]
 [assembly: GoPositionMap("internal/abi/compiletype.go", "compiletype.cs", "AAce4JaAmJCWgJaA")]
 [assembly: GoPositionMap("internal/abi/escape.go", "escape.cs", "AAkmAAoCgt6SgpQAAiAADhwADgKC")]

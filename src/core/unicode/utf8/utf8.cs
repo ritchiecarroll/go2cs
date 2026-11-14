@@ -228,7 +228,7 @@ public static (rune r, nint size) DecodeRuneInString(sstring s) {
     return (r, size);
 }
 
-internal static (rune, nint) decodeRuneInStringSlow(@string s) {
+internal static (rune, nint) decodeRuneInStringSlow(sstring s) {
     nint n = len(s);
     if (n < 1) {
         return (RuneError, 0);

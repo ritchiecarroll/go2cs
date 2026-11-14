@@ -15,7 +15,7 @@ partial class fuzz_package {
 internal static slice<byte> coverage() {
     @unsafe.Pointer addr = @unsafe.Pointer.FromPinnedBox(Ꮡ_counters);
     var size = (uintptr)Ꮡ_ecounters - (uintptr)addr;
-    return @unsafe.Slice((ж<byte>)(uintptr)(addr), (nint)size);
+    return @unsafe.Slice(@unsafe.Pointer.To<byte>(addr), (nint)size);
 }
 
 } // end fuzz_package

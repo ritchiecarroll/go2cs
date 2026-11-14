@@ -54,7 +54,7 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     // Look at instruction to see if it is a divide.
     // Not necessary in Snow Leopard (si_code will be != 0).
     if (GOOS == "darwin"u8 && sig == _SIGFPE && gp.sigcode0 == 0) {
-        var pcΔ1 = (ж<array<byte>>)(uintptr)((@unsafe.Pointer)gp.sigpc);
+        var pcΔ1 = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)gp.sigpc);
         nint i = 0;
         if ((byte)(pcΔ1.Value[i] & 0xF0) == 0x40) { // 64-bit REX prefix
             i++;
@@ -72,7 +72,7 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     // In case we are panicking from external code, we need to initialize
     // Go special registers. We inject sigpanic0 (instead of sigpanic),
     // which takes care of that.
-    if (shouldPushSigpanic(ref (Ꮡgp).DerefOrNull(), pc, ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)sp))) {
+    if (shouldPushSigpanic(ref (Ꮡgp).DerefOrNull(), pc, ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)sp))) {
         c.pushCall(abi.FuncPCABI0(sigpanic0), pc);
     } else {
         // Not safe to push the call. Just clobber the frame.
@@ -84,7 +84,7 @@ internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resu
     // Make it look like we called target at resumePC.
     var sp = (uintptr)c.rsp();
     sp -= goarch.PtrSize;
-    ((ж<uintptr>)(uintptr)((@unsafe.Pointer)sp)).Value = resumePC;
+    (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)sp)).Value = resumePC;
     c.set_rsp((uint64)sp);
     c.set_rip((uint64)targetPC);
 }
