@@ -157,8 +157,6 @@ namespace go;
     // element: a [4096] array costs 64 chunk references and one 64-slot chunk on its first `&a[i]`.
     private const int ElementBoxChunk = 64;
 
-    private static readonly ConditionalWeakTable<T[], ElemRefBox<T>?[]?[]> s_arrayElementBoxes = new();
-
     /// <summary>
     /// Go's <c>&amp;a[i]</c> for an array element, index already checked: the persistent box of
     /// (backing, absolute index) when <typeparamref name="T"/> is <see cref="BoxShape{T}.Slotted"/>,
@@ -178,7 +176,12 @@ namespace go;
 
     private static ж<T> persistentArrayElement(array<T> array, T[] backing, int index)
     {
-        ElemRefBox<T>?[]?[] chunks = s_arrayElementBoxes.GetValue(backing, static b => new ElemRefBox<T>?[(b.Length + ElementBoxChunk - 1) / ElementBoxChunk][]);
+        // EXPERIMENT (lever E): one table for every element type. A backing array reached under a second
+        // element type (array covariance) would find the first type's chunks; it keeps a fresh box.
+        if (GoBoxTables.ArrayElementBoxes.GetValue(backing, static b => new ElemRefBox<T>?[(b.Length + ElementBoxChunk - 1) / ElementBoxChunk][]) is not ElemRefBox<T>?[]?[] chunks)
+            return new ElemRefBox<T>(array, index);
+
+
         int slot = (int)array.Low + index;
         int chunkIndex = slot / ElementBoxChunk;
 

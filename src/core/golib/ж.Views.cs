@@ -120,8 +120,6 @@ internal sealed class ViewTable
 
 public abstract partial class ж<T>
 {
-    private static readonly ConditionalWeakTable<ж<T>, ViewTable> s_views = new();
-
     // Where this box's view list lives: a slot on the two kinds that carry one, the weak table
     // for every other kind.
     private ref ViewEntry? viewsHead()
@@ -135,7 +133,7 @@ public abstract partial class ж<T>
         if (this is ElemRefBox<T> element)
             return ref element.m_views;
 
-        return ref s_views.GetOrCreateValue(this).Head;
+        return ref GoBoxTables.Views.GetOrCreateValue(this).Head;
     }
 
     /// <summary>

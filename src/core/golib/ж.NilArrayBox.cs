@@ -130,8 +130,6 @@ public abstract partial class ж<T>
 {
     // The intern table is a static of the closed generic, so it IS per-(T, dims) with no Type in
     // the key and no table shared between pointee types.
-    private static readonly ConcurrentDictionary<GoArrayDimsKey, ж<T>> s_nilArrayBoxes = new();
-
     /// <summary>
     /// The canonical typed nil instance for a pointer to a Go ARRAY, carrying the array's
     /// dimensions — what <c>(*[N]E)(nil)</c> is.
@@ -162,6 +160,6 @@ public abstract partial class ж<T>
         if (dims is not { Length: > 0 })
             return NilBox;
 
-        return s_nilArrayBoxes.GetOrAdd(new GoArrayDimsKey(dims), static key => new NilArrayBox<T>(key.Dims));
+        return (ж<T>)GoBoxTables.NilArrayBoxes.GetOrAdd((typeof(T), new GoArrayDimsKey(dims)), static key => new NilArrayBox<T>(key.Item2.Dims));
     }
 }

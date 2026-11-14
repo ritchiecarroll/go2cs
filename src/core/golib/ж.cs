@@ -248,11 +248,9 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
     private static class FieldRefWrappers<TElem>
     {
-        private static readonly ConditionalWeakTable<FieldRefFunc<T, TElem>, FieldRefFunc<TElem>> s_wrappers = new();
-
         public static FieldRefFunc<TElem> For(FieldRefFunc<T, TElem> fieldRefFunc)
         {
-            return s_wrappers.GetValue(fieldRefFunc, Wrap);
+            return (FieldRefFunc<TElem>)GoBoxTables.FieldRefWrappers.GetValue(fieldRefFunc, static accessor => Wrap((FieldRefFunc<T, TElem>)accessor));
         }
 
         private static FieldRefFunc<TElem> Wrap(FieldRefFunc<T, TElem> fieldRefFunc)
