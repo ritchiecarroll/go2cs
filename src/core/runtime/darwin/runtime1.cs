@@ -64,7 +64,7 @@ internal static ж<ж<byte>> argv;
 //
 //go:nosplit
 internal static ж<byte> argv_index(ж<ж<byte>> argv, int32 i) {
-    return ~(ж<ж<byte>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)i * (uintptr)goarch.PtrSize));
+    return ~@unsafe.Pointer.To<ж<byte>>(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)i * (uintptr)goarch.PtrSize));
 }
 
 internal static void args(int32 c, ж<ж<byte>> v) {
@@ -777,7 +777,7 @@ public static @unsafe.Pointer reflect_resolveNameOff(@unsafe.Pointer ptrInModule
 //
 //go:linkname reflect_resolveTypeOff reflect.resolveTypeOff
 public static @unsafe.Pointer reflect_resolveTypeOff(@unsafe.Pointer Δrtype, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff((typeOff)off));
+    return @unsafe.Pointer.FromPinnedBox(toRType(@unsafe.Pointer.To<_type>(Δrtype)).typeOff((typeOff)off));
 }
 
 // reflect_resolveTextOff resolves a function pointer offset from a base type.
@@ -792,7 +792,7 @@ public static @unsafe.Pointer reflect_resolveTypeOff(@unsafe.Pointer Δrtype, in
 //
 //go:linkname reflect_resolveTextOff reflect.resolveTextOff
 public static @unsafe.Pointer reflect_resolveTextOff(@unsafe.Pointer Δrtype, int32 off) {
-    return toRType((ж<_type>)(uintptr)(Δrtype)).textOff((textOff)off);
+    return toRType(@unsafe.Pointer.To<_type>(Δrtype)).textOff((textOff)off);
 }
 
 // reflectlite_resolveNameOff resolves a name offset from a base pointer.
@@ -806,7 +806,7 @@ internal static @unsafe.Pointer reflectlite_resolveNameOff(@unsafe.Pointer ptrIn
 //
 //go:linkname reflectlite_resolveTypeOff internal/reflectlite.resolveTypeOff
 internal static @unsafe.Pointer reflectlite_resolveTypeOff(@unsafe.Pointer Δrtype, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff((typeOff)off));
+    return @unsafe.Pointer.FromPinnedBox(toRType(@unsafe.Pointer.To<_type>(Δrtype)).typeOff((typeOff)off));
 }
 
 // reflect_addReflectOff adds a pointer to the reflection offset lookup map.

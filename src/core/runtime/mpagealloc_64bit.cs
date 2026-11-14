@@ -85,7 +85,7 @@ internal static void sysInit(this ref pageAlloc Δp, bool test) {
         }
 
         // Put this reservation into a slice.
-        ref var sl = ref heap<notInHeapSlice>(new notInHeapSlice((ж<notInHeap>)(uintptr)(r), 0, entries), out var Ꮡsl);
+        ref var sl = ref heap<notInHeapSlice>(new notInHeapSlice(@unsafe.Pointer.To<notInHeap>(r), 0, entries), out var Ꮡsl);
         Δp.summary[l] = ~Ꮡsl.Reinterpret<notInHeapSlice, slice<pallocSum>>();
     }
 }
@@ -265,7 +265,7 @@ internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemSt
     var n = (uintptr)((uintptr)1 << (int)(heapAddrBits)) / (uintptr)pallocChunkBytes;
     var nbytes = n * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
     @unsafe.Pointer r = sysReserve(nil, nbytes, scavengeIndexˢ);
-    ref var sl = ref heap<notInHeapSlice>(new notInHeapSlice((ж<notInHeap>)(uintptr)(r), (nint)n, (nint)n), out var Ꮡsl);
+    ref var sl = ref heap<notInHeapSlice>(new notInHeapSlice(@unsafe.Pointer.To<notInHeap>(r), (nint)n, (nint)n), out var Ꮡsl);
     s.chunks = ~Ꮡsl.Reinterpret<notInHeapSlice, slice<atomicScavChunkData>>();
     return 0; // All memory above is mapped Reserved.
 }

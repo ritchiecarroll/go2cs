@@ -180,7 +180,7 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     private static readonly Func<IArray, (object? backing, nint low, nint len, nint cap)>? s_describe;
     private static readonly Func<IArray, object>? s_elementZero;
     private static readonly Func<Array, nint, nint, nint, object?>? s_rebase;        // backing[low:high:max], or null for another element
-    private static readonly Func<nuint, nint, nint, object>? s_overNative;
+    private static readonly Func<nuint, nint, nint, object?, object>? s_overNative;
 
     /// <summary>Whether the pair (<typeparamref name="T"/>, <typeparamref name="TDst"/>) is a slice → header reinterpretation this box serves.</summary>
     internal static readonly bool Applies;
@@ -246,7 +246,7 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
 
         // The commit's two rebuilds, through a zero value of the slice type (OnHeaderStore).
         s_rebase = static (backing, low, high, max) => ((IGoReflectSlice)(object)default(T)!).ReflectRebase(backing, low, high, max);
-        s_overNative = static (address, len, cap) => ((IGoReflectSlice)(object)default(T)!).ReflectOverNativeMemory(address, len, cap);
+        s_overNative = static (address, len, cap, root) => ((IGoReflectSlice)(object)default(T)!).ReflectOverNativeMemory(address, len, cap, root);
         Applies = true;
     }
 
@@ -357,7 +357,7 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
 
             case HeaderData.Kind.Native:
                 if (shape)
-                    rebuilt = s_overNative!(address, len, cap);
+                    rebuilt = s_overNative!(address, len, cap, NativeDerivation.Kept(data is IUnsafePointer pointer ? pointer.RetainedSource : data));
                 break;
 
             default:

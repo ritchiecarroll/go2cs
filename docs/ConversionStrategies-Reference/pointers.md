@@ -844,7 +844,7 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:706-715 -->
+<!-- source: src/core/unsafe/unsafe.cs:891-900 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
@@ -952,11 +952,11 @@ The remedy is smaller than the blittable-mirror and byte-buffer answers above, b
 
 The mint depends on how the pointer argument **renders**. A genuine box — an address-of expression, a local pointer variable, a pointer field, a call result, and a pointer *parameter*, which renders as its box `Ꮡp` in pointer context — mints through a retaining door (`FromBox` / `FromPinnedBox`). A **deref-aliased** pointer *receiver* — a `this ref T` receiver, which has no box and renders as the pointed-to value alias — takes its ref directly: `FromRef(ref p)`. <!-- history: that arm was first written for pointer parameters under the earlier FromRef(ref (box).Value) mint, where .Value on a deref alias was CS1061 (runtime select.go unsafe.Pointer(pc0) and heapdump.go unsafe.Pointer(pstk), both *uintptr parameters, which take the element-aliasing AliasPointer route). --> Detection reuses `exprIsDerefAliasedPointer` (the same discriminator the pointer-reinterpret block uses). The `guintptr`/`muintptr` receiver family (`runtime2.go` `(*uintptr)(unsafe.Pointer(gp))` inside `guintptr.cas`) takes this form too — `ref (gp).Value` would bind the generated wrapper's `Value` *property* (CS0206); the CAS it feeds (`atomic.Casuintptr`) is a `partial` asm stub, so the copy-box semantics match the established reinterpret precedent (compile-milestone bar; the faithful managed-referent `ж<T>` model for those types remains a separate effort). (The bare `unsafe.Pointer(p)` pin stays exercised across the stdlib — runtime `select.go`/`heapdump.go`, and `runtime2.go`'s genuine `*guintptr`→`*uintptr` reinterpret here, whose differing element types keep it off the identity path. The `UnsafePointerParamPin` behavioral **output** test guards the same-type **identity collapse** of the `(*uintptr)(unsafe.Pointer(p))` shape it originally used — see *A SAME-TYPE reinterpret … collapses to the pointer itself* below — where the whole conversion elides to the box; a `(*byte)(unsafe.Pointer(&value))`-style DIFFERENT-type reinterpret still pins through `FromRef`.)
 
-**Inside a pointer-receiver method, only the receiver and a pointer parameter take `FromRef` when the conversion is consumed as a number.** `convCallExpr`'s receiver arm (an `unsafe.Pointer(x)` whose result is consumed as a number, in a method whose receiver is `*T`, with `x` a `*T`) emits `(uintptr)@unsafe.Pointer.FromRef(ref x)`. That is right only when `x` renders as the pointed-to value: the receiver (`ref var h = ref Ꮡh.DerefOrNull()`) and a pointer parameter. Keyed on the TYPE alone, it also took a local copy, `p := h; poke(unsafe.Pointer(p), 8)`: `p` holds the BOX, so `FromRef(ref p)` was the address of the local's own slot and the write never reached `h` (Go `7 8`, converted `7 0`, compiling and silent). The arm now asks `exprIsReceiverOrDerefdPointerParam` first: the receiver matched by OBJECT identity, so a receiver whose C# name was renamed (`Δp` in runtime's `notInHeap.add`, where `p` is also a type and a method) still takes it, or a pointer parameter. A local, a field or anything else falls through to the retaining door above: `poke(@unsafe.Pointer.FromPinnedBox(p), 8)`. Guarded by the `UnsafePointerReceiverCopy` behavioral output test (the receiver, a parameter, the folded `(*int)(unsafe.Pointer(p))`, a field, a renamed receiver, and two local copies).
+**Inside a pointer-receiver method, only the receiver and a pointer parameter take `FromRef` when the conversion is consumed as a number.** `convCallExpr`'s receiver arm (an `unsafe.Pointer(x)` whose result is consumed as a number, in a method whose receiver is `*T`, with `x` a `*T`) emits `(uintptr)@unsafe.Pointer.FromRef(ref x)`. That is right only when `x` renders as the pointed-to value: the receiver (`ref var h = ref Ꮡh.DerefOrNull()`) and a pointer parameter. Keyed on the TYPE alone, it also took a local copy, `p := h; poke(unsafe.Pointer(p), 8)`: `p` holds the BOX, so `FromRef(ref p)` was the address of the local's own slot and the write never reached `h` (Go `7 8`, converted `7 0`, compiling and silent). The arm now asks `exprIsReceiverOrDerefdPointerParam` first: the receiver matched by OBJECT identity, so a receiver whose C# name was renamed (`Δp` in runtime's `notInHeap.add`, where `p` is also a type and a method) still takes it, or a pointer parameter. A local, a field or anything else falls through to the retaining door above: `poke(@unsafe.Pointer.FromPinnedBox(p), 8)`. Guarded by the `UnsafePointerReceiverCopy` behavioral output test (the receiver, a parameter, the folded `(*int)(unsafe.Pointer(p))`, a field, a renamed receiver, and two local copies). At three uses the converter emits the receiver's box in place of `FromRef`: see [a pointer receiver inside its own method](#unsafepointeruintptrp--n-is-emitted-as-unsafeaddp-n--the-moved-pointer-keeps-what-p-carries).
 
 **Returning an `unsafe.Pointer` parameter whole is a plain value return.** The return path boxes a *pointer parameter* returned whole (`return p` → `return Ꮡp` — the value alias cannot bind the pointer result), and the pointer-result check counts the `UnsafePointer` basic as a pointer. But an `unsafe.Pointer` parameter renders as a plain **value** param (`@unsafe.Pointer zero`) with *no* box, so a `Ꮡ` prefix would reference a nonexistent `Ꮡzero`/`Ꮡv`/`Ꮡfd` (CS0103 — runtime `map.go` `mapaccess1_fat`/`mapaccess2_fat`'s `return zero`, `mem_windows.go`, and `panic.go` `readvarintUnsafe`'s tuple return). The box form applies only when the returned parameter's own type is a **genuine `*T`** (deref-aliased, so `Ꮡp` exists); an `unsafe.Pointer` param returns as-is. (Guarded by the `UnsafePointerParamPin` extension — the whole-return, tuple-return, and genuine-`*T`-control shapes, values vs Go.) <!-- cleared 4 runtime CS0103, 63 → 59 -->
 
-The **reverse** direction — reinterpreting a raw address *as* a pointer, `(*T)(p)` where `p` is an `unsafe.Pointer` (or `uintptr`) — is the reinterpret pattern referenced above. Its result is the pointer type `ж<T>`. A plain `(ж<T>)p` cast is `CS0030`: because `unsafe.Pointer` is `Pointer : ж<uintptr>`, reaching `ж<T>` needs the two chained user-defined conversions `Pointer → uintptr → ж<T>`, and C# performs at most one user-defined conversion in a cast. The converter routes explicitly through `uintptr` — `(ж<T>)(uintptr)(p)` — which yields a pointer at `p`'s address via golib's `explicit operator ж<T>(uintptr value)` (with `uintptr(Pointer) => Value`, the address the pointer holds) — a native-address box, or the very box a managed pointer's order token names (see [A reinterpreted raw address ALIASES native memory instead of boxing a copy](#a-reinterpreted-raw-address-aliases-native-memory-instead-of-boxing-a-copy)). <!-- history: the operator boxed a COPY of the T read there when this arm was written. --> The deref `*((*unsafe.Pointer)(k))` then adds `.Value`: `((ж<@unsafe.Pointer>)(uintptr)(k)).Value` — Go's read of the `unsafe.Pointer` stored at `k`. This is the identical routing the *dereference* path (`(*int)(p)` inside `*(...)`) uses via its `isPointerCast` flag, extended to the two shapes that do **not** set that flag: a bare call **argument** `atomicwb((*unsafe.Pointer)(ptr), new)` (runtime `atomic_pointer.go`) and an **extra-paren** deref `*((*unsafe.Pointer)(k))` (`internal/runtime/maps`' indirect key, `*((*unsafe.Pointer)(slotKey))` — `convStarExpr`'s dereference branch sees a `ParenExpr`, not the `CallExpr`, so it never marks the cast). Gated to a **pointer-result** conversion whose **argument** is a raw address (`unsafe.Pointer`/`uintptr` basic); the pointer-to-*named*-type value conversion `(*Base)(defPtr)` (below) has a `*T` argument, is handled earlier, and is not affected. Like every reinterpret through the `uintptr` round-trip, this is memory-layout-dependent code whose runtime values are **not the contract** — golib's own `map<K,V>` is what actually runs; the converted map implementation only needs to compile. (Guarded by the `UnsafePointerReinterpret` behavioral **Compile + Target** test — both the extra-paren deref and the bare-argument shapes.) <!-- cleared all 21 unsafe.Pointer → ж<unsafe.Pointer> CS0030 in runtime, 137 → 114 -->
+The **reverse** direction — reinterpreting a raw address *as* a pointer, `(*T)(p)` where `p` is an `unsafe.Pointer` (or `uintptr`) — is the reinterpret pattern referenced above. Its result is the pointer type `ж<T>`. A plain `(ж<T>)p` cast is `CS0030`: because `unsafe.Pointer` is `Pointer : ж<uintptr>`, reaching `ж<T>` needs the two chained user-defined conversions `Pointer → uintptr → ж<T>`, and C# performs at most one user-defined conversion in a cast. The converter emits golib's typed conversion, `@unsafe.Pointer.To<T>(p)` ([its own section](#tp-over-an-unsafepointer-is-emitted-as-unsafepointertotp--the-typed-pointer-keeps-what-p-carries)), which takes the pointer and what it carries. <!-- history: until 2026-11-14 the converter routed explicitly through `uintptr`, `(ж<T>)(uintptr)(p)`, and every form in this paragraph was spelled with that cast. --> A span view still routes through the number, `(T*)(uintptr)(p)`, and golib's `explicit operator ж<T>(uintptr value)` (with `uintptr(Pointer) => Value`, the address the pointer holds) is the conversion of a number: a native-address box, or the very box a managed pointer's order token names (see [A reinterpreted raw address ALIASES native memory instead of boxing a copy](#a-reinterpreted-raw-address-aliases-native-memory-instead-of-boxing-a-copy)). <!-- history: the operator boxed a COPY of the T read there when this arm was written. --> The deref `*((*unsafe.Pointer)(k))` then adds `.Value`: `(@unsafe.Pointer.To<@unsafe.Pointer>(k)).Value` — Go's read of the `unsafe.Pointer` stored at `k`. This is the identical routing the *dereference* path (`(*int)(p)` inside `*(...)`) uses via its `isPointerCast` flag, extended to the two shapes that do **not** set that flag: a bare call **argument** `atomicwb((*unsafe.Pointer)(ptr), new)` (runtime `atomic_pointer.go`) and an **extra-paren** deref `*((*unsafe.Pointer)(k))` (`internal/runtime/maps`' indirect key, `*((*unsafe.Pointer)(slotKey))` — `convStarExpr`'s dereference branch sees a `ParenExpr`, not the `CallExpr`, so it never marks the cast). Gated to a **pointer-result** conversion whose **argument** is a raw address (`unsafe.Pointer`/`uintptr` basic); the pointer-to-*named*-type value conversion `(*Base)(defPtr)` (below) has a `*T` argument, is handled earlier, and is not affected. Like every reinterpret through the `uintptr` round-trip, this is memory-layout-dependent code whose runtime values are **not the contract** — golib's own `map<K,V>` is what actually runs; the converted map implementation only needs to compile. (Guarded by the `UnsafePointerReinterpret` behavioral **Compile + Target** test — both the extra-paren deref and the bare-argument shapes.) <!-- cleared all 21 unsafe.Pointer → ж<unsafe.Pointer> CS0030 in runtime, 137 → 114 -->
 
 **A SAME-TYPE reinterpret `(*T)(unsafe.Pointer(p))` where `p` is already `*T` collapses to the pointer itself.** Converting a `*T` to `unsafe.Pointer` and back to the *same* `*T` is a no-op identity in Go — the language spec makes `(*Builder)(abi.NoEscape(unsafe.Pointer(b)))` exactly `b.addr = b` (strings.Builder's copy-by-value guard; the type's own TODO says to revert it to that once escape analysis improves). The `uintptr` round-trip above is **wrong** for this shape: a round-trip that copies would make `b.addr` a fresh box over a *copy* of the receiver, never reference-equal to it — and the guard's own `b.addr != b` self-check would FALSE-PANIC on the second call to any `strings.Builder` method (a `Grow` then a `WriteString`, or `strings.Join`'s repeated `WriteString`): `panic: strings: illegal use of non-zero Builder copied by value`. <!-- It surfaced in the converted fatih/color -recurse sample the moment color was enabled, when golib's ж<T>(uintptr) dereferenced-and-copied. --> `convCallExpr.pointerReinterpretIdentitySource` intercepts this exact shape at the top of the conversion path — a `(*T)(…)` whose source, after peeling an optional escape-analysis identity wrapper (`abi.NoEscape` or a package-local `noescape`, matched by name **and** `unsafe.Pointer→unsafe.Pointer` signature), is `unsafe.Pointer(p)` with `p` of the *identical* pointer type `*T` — and emits `p`'s **box** directly (in the `isPointer` context, so a deref-aliased receiver/param renders `Ꮡb`, not its value alias `b`):
 <!-- illustration: adapted, owed a real excerpt -->
@@ -1024,7 +1024,7 @@ System.GC.KeepAlive(ᴋ1);
 
 **The pin is what makes this safe to elide, and it is not the wrapper's.** Every managed address handed to native code is pinned for the POINTER's lifetime (*EVERY managed address handed to native code is pinned…*, above) — but `EnsureStableAddress` / `pinnedArrayData` set `m_pin` on the **operand** box, released when the operand is collected. The `Pointer` wrapper owns no pin, holds no reference to the operand, and tracks no lifetime; its `ж<uintptr>` slot holds a number. Eliding it therefore cannot shorten any pin, move any address, or change any value — a strictly-dead allocation, which is why this is a peephole and not a semantic change.
 
-The rule is keyed at the **wrapper's own emission site** (`unsafePointerBoxEmission`, marked per-CallExpr by `markDeadUnsafePointerBox` from the enclosing conversion), so it is self-limiting: the `unsafe.Pointer` arms that render a raw address by other means — `@unsafe.Pointer.FromRef(ref x)` for a deref-aliased pointer receiver, `((@unsafe.Pointer)(uintptr)v)` for a named uintptr/pointer operand, and `(@unsafe.Pointer)default!` for the literal `nil` — never consult the mark and are byte-identical. The enclosing conversion must be one that renders a `(uintptr)` cast around the operand, which is the basic `uintptr(…)` target and the named-over-uintptr target that hops through its underlying (`Handle(…)`, `syscall/security_windows.cs`'s `LocalFree` defers). An operand that binds looser than a cast is parenthesized (`unsafe.Pointer(uintptr(p) + off)`); an address-of operand is not, because `&x` renders as the primary box form `Ꮡx` / `Ꮡ(…)` / `Ꮡs.at<T>(i)`.
+The rule is keyed at the **wrapper's own emission site** (`unsafePointerBoxEmission`, marked per-CallExpr by `markDeadUnsafePointerBox` from the enclosing conversion), so it is self-limiting: the `unsafe.Pointer` arms that render a raw address by other means — `@unsafe.Pointer.FromRef(ref x)` for a deref-aliased pointer receiver, `((@unsafe.Pointer)(uintptr)v)` for a named uintptr/pointer operand, and `(@unsafe.Pointer)default!` for the literal `nil` — never consult the mark and are byte-identical. The enclosing conversion must be one that renders a `(uintptr)` cast around the operand, which is the basic `uintptr(…)` target and the named-over-uintptr target that hops through its underlying (`Handle(…)`, `syscall/security_windows.cs`'s `LocalFree` defers). An operand that binds looser than a cast is parenthesized (a dereference: `uintptr(unsafe.Pointer(*pp))` is `(uintptr)(pp.ValueSlot)`); <!-- history: until 2026-11-14 the example here was the sum `unsafe.Pointer(uintptr(p) + off)`, which is now emitted as unsafe.Add and is not a cast operand. --> an address-of operand is not, because `&x` renders as the primary box form `Ꮡx` / `Ꮡ(…)` / `Ꮡs.at<T>(i)`.
 
 The peephole takes three wrapper objects off every zsyscall wrapper call chain; a seeded A/B whole-stdlib reconvert changed exactly those sites and nothing else. <!-- Corpus footprint at landing: 494 sites across 45 files — 249 in syscall/zsyscall_windows.cs alone, 65 in internal/syscall/windows/zsyscall_windows.cs, 25 each in runtime/heapdump.cs and runtime/os_windows.cs — plus 10 across four behavioral goldens. Measured with a GC.GetAllocatedBytesForCurrentThread probe over 2,000 calls (platform not recorded): syscall.Write 1,072 → 544 B/op (−49.3 %), os.File.WriteString 9,208 → 8,680 B/op, i.e. 528 bytes. --> (The hand-owned `crypto/internal/fips140/subtle/xor_generic.cs` keeps its three sites, as it must: the converter regenerates it into the `xor_generic.cs.auto` review sibling instead of over it.) (Guarded by the `UintptrUnsafePointerIdiom` behavioral **output** test — address identity across two takes of one global, a pointer parameter, the nil pointer's 0, an array-element stride, an existing `unsafe.Pointer` value round-trip, a dereferenced pointer-to-pointer operand, and a write read back through the same pointer, all vs `go run` — plus the re-baselined `NilPointerUintptr`, `NilPointerParamUnsafePointer`, `FixedArrayBufferPointer` and `UnsafeOperations` goldens, which diverge the moment the peephole is neutered.)
 
@@ -1150,11 +1150,83 @@ internal static partial @unsafe.Pointer own(slice<byte> b) { return same(@unsafe
 
 **Why.** A `(uintptr)` cast on the call's result turns the pointer into a number, and the number converts back to a fresh pointer that carries nothing. Nothing then holds the pin, the collector may move the storage, and a write through the pointer no longer reaches it. <!-- The converter emitted that cast on every true call returning unsafe.Pointer until 2026-11-13. A program with no cgo lost a write through `p := f(q)` after a collection and died with an internal CLR error where Go printed its answer: docs/phase4/DESIGN-unsafe-pointer-call-result.md. -->
 
-**`unsafe.Add` is such a call.** Over a pointer that carries a box it returns a pointer that still does: a native box at the new address, which retains what the pointer carried. A bare number, a token and C memory keep the plain number.
+**`unsafe.Add` is such a call.** Over a pointer that carries a box it returns a pointer that still does: a native box at the new address, which retains what the pointer carried. A bare number and C memory keep the plain number; over an order token the moved pointer keeps the box the token names.
 
-**Limits.** The conversion `unsafe.Pointer(x)` has its own emission, above. A consumer that needs a number builds its own cast: a pointer cast `(*T)(f())` and `uintptr(f())` both do, and a number stored in a `uintptr` keeps nothing alive, as in Go. A callee that takes its pointer through a `uintptr` returns a pointer that carries nothing; the [`GC.KeepAlive` drain](#pointer-derived-funnel-arguments-and-bridged-unsafepointer-arguments-keep-their-box-alive-across-the-call--the-statement-scoped-gckeepalive-drain) covers the frame-minted box of such a call's argument. A statement that discards the result is the bare call.
+**Limits.** The conversion `unsafe.Pointer(x)` has its own emission, above. A consumer that needs a number builds its own cast, as `uintptr(f())` does, and a number stored in a `uintptr` keeps nothing alive, as in Go. A pointer conversion `(*T)(f())` takes the pointer itself, [through `unsafe.Pointer.To<T>`](#tp-over-an-unsafepointer-is-emitted-as-unsafepointertotp--the-typed-pointer-keeps-what-p-carries). A callee that takes its pointer through a `uintptr` returns a pointer that carries nothing; the [`GC.KeepAlive` drain](#pointer-derived-funnel-arguments-and-bridged-unsafepointer-arguments-keep-their-box-alive-across-the-call--the-statement-scoped-gckeepalive-drain) covers the frame-minted box of such a call's argument. A statement that discards the result is the bare call.
 
 Guarded by: the behavioral program `UnsafePointerCallResultLifetime`; `TestDiscardedUnsafePointerResultStatement`; `UnsafeAddCarryTests`.
+
+## `(*T)(p)` over an `unsafe.Pointer` is emitted as `unsafe.Pointer.To<T>(p)` — the typed pointer keeps what `p` carries
+
+Go's `(*T)(p)` turns an `unsafe.Pointer` into a typed pointer to the same memory, and the typed pointer keeps that memory alive. The converter emits golib's typed conversion, `@unsafe.Pointer.To<T>(p)`, which receives the pointer itself: its number and [the box it carries](#converting-a-go-pointer-to-unsafepointer).
+
+<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.go:20-22 -->
+```go
+func readU32(p ptr, o uintptr) uint32 {
+	return *(*uint32)(unsafe.Add(p, o))
+}
+```
+<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:19-21 -->
+```csharp
+internal static uint32 readU32(ptr p, uintptr o) {
+    return ~@unsafe.Pointer.To<uint32>(@unsafe.Add(p, o));
+}
+```
+
+`ptr` is the program's own alias for `unsafe.Pointer`, `@unsafe.Add` is Go's `unsafe.Add`, and `~` reads through the pointer, like Go's `*`.
+
+**What `To<T>` answers.** A pointer whose source is itself a pointer to `T` answers that pointer. A pointer that carries a box, such as an address inside a Go value plus an offset, answers a pointer at that address which retains the box: the memory stays alive, and stays where the address says it is. Anything else (a bare number, an order token, C memory) converts as its number does.
+
+**Why.** The form this replaces cast the pointer to a number first, `(ж<T>)(uintptr)(p)`, and a number carries nothing. A pointer derived from Go memory then came back as a pointer that kept nothing: the collector could move or free the storage, and a write through the pointer did not reach it. <!-- 2026-11-14, docs/phase4/DESIGN-interior-pointer-root.md 4.1 and 10.1. A probe program's write through a typed pointer, derived by unsafe.Add from a struct pointer, read 0 where Go reads 22 before this emission and 22 after it. -->
+
+**Every spelling of the conversion takes it:** the operand of a dereference (`*(*T)(p)`, read or written), a conversion used as a value or as a call argument, and a named type over a pointer, which applies its own conversion to the result (`(named)@unsafe.Pointer.To<int32>(p)`).
+
+**Limits.** Two conversions keep their own emission. A span view, `(*[N]T)(p)[lo:hi]`, [reads through a raw element pointer](#every-spelling-of-a-pointer-cast-slice-takes-the-span-and-a-max-bound-sets-its-capacity) over the number. A conversion whose operand is `unsafe.Pointer(q)` over a managed pointer `q` is [the managed reinterpret](#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address), which never leaves the box. A pointer made from a number carries nothing into the conversion. [Pointer arithmetic written in one expression](#unsafepointeruintptrp--n-is-emitted-as-unsafeaddp-n--the-moved-pointer-keeps-what-p-carries) is not made from a number.
+
+Guarded by: `TestTypedPointerDoorReplacesTheNumberCast`; `TestNativeFieldArrayViewEmitsTheDoorAndElementRef`; `InteriorPointerRootTests`; the behavioral programs `UnsafePointerTypeAlias`, `UnsafeOperations` and `ExplicitDerefConversionStore`.
+
+## `unsafe.Pointer(uintptr(p) + n)` is emitted as `unsafe.Add(p, n)` — the moved pointer keeps what `p` carries
+
+Go writes pointer arithmetic as one expression: convert the pointer to a number, add an offset, convert the sum back. Go treats that expression as one pointer operation, and its result keeps the memory alive (package `unsafe`, rule 3). The converter emits it as one operation too, `@unsafe.Add(p, n)`, so golib moves the pointer itself and the moved pointer carries [the box `p` carried](#converting-a-go-pointer-to-unsafepointer).
+
+<!-- source: src/tests/Behavioral/FuncVsMethodOverload/main.go:34-39 -->
+```go
+func (p *nih) add(bytes uintptr) *nih {
+	if bytes == 0 {
+		return p
+	}
+	return (*nih)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + bytes))
+}
+```
+<!-- source: src/tests/Behavioral/FuncVsMethodOverload/main.cs.target:16-21 -->
+```csharp
+internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
+    if (bytes == 0) {
+        return Ꮡp;
+    }
+    return @unsafe.Pointer.To<nih>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡp), bytes));
+}
+```
+
+`Ꮡp` is the receiver's box, `@unsafe.Pointer.FromPinnedBox(Ꮡp)` is `unsafe.Pointer(p)`, `@unsafe.Add` moves it by `bytes`, and `To<nih>` is [the typed conversion](#tp-over-an-unsafepointer-is-emitted-as-unsafepointertotp--the-typed-pointer-keeps-what-p-carries) of the result.
+
+**The form.** A conversion to `unsafe.Pointer` whose operand is a chain of `+` and `-` with `uintptr(p)` as its first term, where `p` is an `unsafe.Pointer`. Everything after the first term is the offset, emitted as it is written: `unsafe.Pointer(uintptr(p) + i<<2 + 1)` is `@unsafe.Add(p, (i << 2) + 1)`. A difference keeps Go's wrapping arithmetic: `unsafe.Pointer(uintptr(p) - n)` is `@unsafe.Add(p, (uintptr)0 - n)`. The pointer comes first in the sum, which is also what `go vet` asks of pointer arithmetic.
+
+**Why.** The form this replaces made the pointer from the sum, `(@unsafe.Pointer)((uintptr)p + n)`, and a number carries nothing. The pointer then kept nothing alive, and a typed pointer converted from it named storage the collector could move or free. <!-- 2026-11-14, docs/phase4/DESIGN-interior-pointer-root.md 4.2 and 10.7. The leftmost-term rule is go vet's unsafeptr check (isSafeArith); at the cut no corpus site had the pointer anywhere else in a sum. -->
+
+**A pointer receiver inside its own method.** `unsafe.Pointer(recv)` in a method normally renders from the receiver's value alias, [`FromRef(ref recv)`](#converting-a-go-pointer-to-unsafepointer), which is an address and keeps nothing. At three uses the converter emits the receiver's box instead, because the use is known at the conversion itself:
+
+- as the first argument of `unsafe.Add`: `@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡrecv), n)`;
+- as the `p` of the arithmetic form, as in the sample above;
+- as the operand of Go's own `uintptr(...)`: `uintptr(unsafe.Pointer(recv))` is `(uintptr)Ꮡrecv`.
+
+A pointer parameter that the method dereferences is emitted the same way. Every other use, such as a call argument, a return or an assignment, keeps `FromRef`. When the conversion was the method's only use of the value alias, the alias line (`ref var recv = ref Ꮡrecv.DerefOrNull();`) is not emitted. <!-- 2026-11-14, DESIGN-interior-pointer-root.md 4.3 as ruled (the node rule). The kept sites are named in the repoguard mint guard with the reason "use not provable at the node". -->
+
+**Equality.** A moved pointer equals any pointer to the same place, as in Go: `unsafe.Add(p, 0) == p`, and `unsafe.Add(unsafe.Pointer(&a[0]), 8) == unsafe.Pointer(&a[1])` for an array of 8-byte elements. Equal pointers hash alike, so a `map[unsafe.Pointer]T` finds a key by either. A pointer moved over a struct that holds references is token arithmetic, and it equals only a pointer moved the same distance. One pair is not mapped: a field's address taken through a typed view of memory of another type (`&h.f`, with `h := (*T)(p)`) against `unsafe.Add(p, off)` to the same place. That pair may compare unequal; it never compares equal with unlike hashes.
+
+**Limits.** Three forms stay numbers, and a pointer made from one keeps nothing: a sum whose first term is not the pointer (`unsafe.Pointer(n + uintptr(p))`), a masked or rounded number (`unsafe.Pointer(uintptr(p) &^ 7)`), and a sum over a number held in a variable (`u := uintptr(p)`, then `unsafe.Pointer(u + n)`), which Go also says keeps nothing. Over a nil pointer the result is the offset as a number, as in Go: `uintptr(unsafe.Add(nil, 24))` is 24.
+
+Guarded by: `TestPointerArithmeticFormEmitsUnsafeAdd`; `TestReceiverPointerEmitsItsBoxAtAProvenUse`; `TestInteriorPointerMintCensus` (every converted method that keeps `FromRef`, by name); `InteriorPointerRootTests` (`AMovedPointerEqualsAPointerAtTheSameAddress`, `EqualPointersHashAlikeAndFindEachOtherInAMap`, `AddOverANilPointerAnswersTheOffset`); the behavioral programs `InteriorPointerShapes` (reads and writes at a computed address inside a variable, a slice and an array field, and an interior pointer held across a collection as the only reference), `UnsafeOperations`, `UintptrUnsafePointerIdiom`, `FuncVsMethodOverload`, `UnsafePointerKeywordParam` and `ReflectNewAtField`.
 
 ## A numeric value pun READ is a bitcast — `*(*uint64)(unsafe.Pointer(&f))` boxes nothing
 
@@ -1283,6 +1355,7 @@ its types in a package pre-pass (`funcWordOperations.go`):
 | r1, r2 | `*(*F)(unsafe.Pointer(&S{x}))`, `S` one `uintptr` field, and `(*struct{ f F })(…).f` | `GoFuncCookie.Func<F>(x)` |
 | w1 | `*(*uintptr)(unsafe.Pointer(&f)) = x` | `f = GoFuncCookie.Func<F>(x);` |
 | w2 | `*(*F)(unsafe.Pointer(&v)) = fn`, `v` a `uintptr` | `v = (uintptr)GoFuncCookie.Of(fn);` |
+| w3 | `*(*F)(e) = fn`, `e` any other `unsafe.Pointer` | `@unsafe.Pointer.StoreFunc(e, fn);` |
 
 ```go
 func ccgoFP(f interface{}) uintptr {
@@ -1313,8 +1386,36 @@ A declared function is minted through the method-group conversion `(F)name`, whi
 how a func value converts to another delegate type) stands for `g` and answers its word. A number that is
 no func word, read as a func, panics by name, as does a word whose func is gone or cannot be bound.
 
+**A func stored through a pointer whose target the store does not name (w3)** is one golib call. ccgo fills a C
+method table this way: a func stored at a computed address inside a variable of words.
+
+```go
+	*(*func(int, int) int)(unsafe.Add(unsafe.Pointer(&gwords), 8)) = add
+```
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:98 -->
+```csharp
+    @unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡgwords), 8), (Func<nint, nint, nint>)add);
+```
+
+The store's type says the value is a func. It does not say what `e` names, and that is known only when the store
+runs, so `StoreFunc` decides there:
+
+- `e` names a word (C memory, or Go memory that holds no reference: a `uintptr` variable, a field of a struct of
+  numbers, an element of a word array): the func's word is stored;
+- `e` names a func (a func variable, or a func field or element inside a value that holds references): the func
+  itself is stored, as the slot's own delegate type;
+- `e` names a `uintptr` field or element inside a value that holds references: the word is stored;
+- anything else panics by name. No case writes a word over a reference.
+
+A word does not keep its func alive, as a `uintptr` does not in Go. A static function's word is good for the life
+of the process. A closure's word is good while something else holds the closure; after that a call through the
+word panics by name. A store through `&f`, with `f` a variable of the stored func type itself, is not w3: it is a
+store into `f`'s own box. <!-- 2026-11-14, DESIGN-interior-pointer-root.md 4.8 B1 and 10.4. Before it the store was
+`@unsafe.Pointer.To<F>(e).ValueSlot = fn`, a native box over a delegate: a managed reference written into raw memory.
+Census at go1.26.10: 0 such stores in the standard library, tests included, on windows/amd64, linux/amd64,
+darwin/amd64 and linux/arm64; 9 in modernc.org/sqlite v1.62.0 (vfs/patches64.go:18-26), all of top-level functions. -->
+
 **The shapes that keep today's pointer reinterpret, deliberately:**
-- a func stored into memory at a computed address (vfs/patches64.go's offset stores);
 - a recovery from a pointer or from memory (runtime's mcleanup and panic);
 - the `*unsafe.Pointer` forms, which already carry the same word through `unsafe.Pointer.OfFunc` (the
   section above).
@@ -1322,9 +1423,11 @@ no func word, read as a func, panics by name, as does a word whose func is gone 
 The design, its census per target and its predictions are `docs/phase4/DESIGN-sqlite-cs-funcptr.md`.
 
 **Guarded by:**
-- the `FuncWordShapes` behavioral test, one site per class with Go's answers;
+- the `FuncWordShapes` behavioral test, one site per class with Go's answers, and `InteriorPointerShapes` (its
+  shape 1 is the w3 store into a package variable, read back and called);
 - the converter's `TestFuncWordShapes`, which also asserts the near misses and the m1 call site's form;
-- GolibTests' `GoFuncCookieTests`.
+- GolibTests' `GoFuncCookieTests` and `FuncStoreThroughPointerTests` (each case of w3, the refusals, and a
+  closure's word after the closure is dropped).
 
 ## A pointer `reflect` handed out as an `unsafe.Pointer` must convert BACK — the order token is remembered, not redefined
 
@@ -2832,15 +2935,17 @@ identity elision: the re-box routes above render their own conversions correctly
 breaks named ARRAY wrappers, whose lazily-materialized backing store a storage reinterpret bypasses.
 
 **A source that is itself a pointer conversion is parenthesized.** In
-`(*int8)(unsafe.Pointer((*int32)(up)))` the source `(*int32)(up)` renders as a C# cast, and a cast
-binds looser than member access: written bare, `(ж<int32>)(uintptr)(up).Reinterpret<int32, int8>()`
-applies `.Reinterpret` to `up`, an `unsafe.Pointer`, and does not compile (CS1929). The emission
+`(*int8)(unsafe.Pointer((*int32)(up)))` the source `(*int32)(up)` is itself a conversion. The emission
 wraps such a source the way other member accesses on a conversion are wrapped
 (`parenthesizeConversionBase`), so the reinterpret applies to the converted pointer:
+<!-- history: when this rule was written the source rendered as a C# cast, and a cast binds looser than
+member access: written bare, `(ж<int32>)(uintptr)(up).Reinterpret<int32, int8>()` applied `.Reinterpret`
+to `up`, an `unsafe.Pointer`, and did not compile (CS1929). Since 2026-11-14 the source renders as a call,
+`@unsafe.Pointer.To<int32>(up)`, and the parentheses are kept. -->
 
 <!-- source: src/tests/Behavioral/NestedPointerConversionReinterpret/main.cs:13 -->
 ```csharp
-var q = ((ж<int32>)(uintptr)(up)).Reinterpret<int32, int8>();
+var q = (@unsafe.Pointer.To<int32>(up)).Reinterpret<int32, int8>();
 ```
 
 (Guarded by the `NestedPointerConversionReinterpret` behavioral output test: it reads and writes
@@ -2958,9 +3063,9 @@ or index whose base is such a dereference now renders the conversion and reads i
 ```
 <!-- source: src/tests/Behavioral/ExplicitDerefConversionStore/main.cs.target:21-23 -->
 ```csharp
-    ((ж<frame>)(uintptr)(ptr(bp))).Value.Pgno = 7;
-    ((ж<frame>)(uintptr)(ptr(bp))).Value.Read += 3;
-    ((ж<frame>)(uintptr)(ptr(bp))).bump();
+    (@unsafe.Pointer.To<frame>(ptr(bp))).Value.Pgno = 7;
+    (@unsafe.Pointer.To<frame>(ptr(bp))).Value.Read += 3;
+    (@unsafe.Pointer.To<frame>(ptr(bp))).bump();
 ```
 ccgo emits this shape for every store into a stack frame struct (`(*(*TWalSehFindFrame)(
 __ccgo_ptr(bp))).Fpgno = pgno`). (Guarded by the `ExplicitDerefConversionStore` behavioral output

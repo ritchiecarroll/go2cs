@@ -647,7 +647,7 @@ public static ж<RUNTIME_FUNCTION> /*ret*/ RtlLookupFunctionEntry(uintptr pc, ж
         var (r0, _, _) = syscall.SyscallN(procRtlLookupFunctionEntry.Addr(), (uintptr)pc, (uintptr)ᴋ55, (uintptr)ᴋ56);
     System.GC.KeepAlive(ᴋ55);
     System.GC.KeepAlive(ᴋ56);
-    ret = (ж<RUNTIME_FUNCTION>)(uintptr)((@unsafe.Pointer)r0);
+    ret = @unsafe.Pointer.To<RUNTIME_FUNCTION>((@unsafe.Pointer)r0);
     return ret;
 }
 

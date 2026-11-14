@@ -39,7 +39,7 @@ namespace go;
 /// canonicalization that halved the token/hash workloads in the design's §2.2 measurement.
 /// </para>
 /// </remarks>
-[EditorBrowsable(EditorBrowsableState.Never)] public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun, INativeRooted
 {
     // The FAST arm: canonical backing + ABSOLUTE index, deref-equivalent by the indexer
     // definitions of the three arms that populate it. Null when the foreign arm is in effect.
@@ -258,6 +258,16 @@ namespace go;
 
     /// <inheritdoc/>
     internal override nuint NativeIdentity => nativeElementIdentity();
+
+    // An element of a native-backed slice that keeps no root is an element of C memory alone, and the cgo doors hand C
+    // its address (cgo Phase 3 increment 3.1's second review, C2). The ANCHOR is what tells it from an element of a
+    // window over Go memory, which keeps its root and stays refused (G1). An element of foreign pointer words is not
+    // claimed here. IsNativeRooted stays false: FieldRefBox's native-rooted fact reads it, and an element is a field
+    // view's source.
+    bool INativeRooted.IsNativeRooted => false;
+
+    bool INativeRooted.IsGenuinelyNativeRoot =>
+        m_foreign is slice<T> native && native.IsNativeBacked && NativeSliceAnchors<T>.Of(native) is null;
 
     /// <inheritdoc/>
     // Canonical backing identity in the high bits with the element's Go BYTE offset below (absolute

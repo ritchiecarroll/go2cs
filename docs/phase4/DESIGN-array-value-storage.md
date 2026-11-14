@@ -1030,3 +1030,27 @@ opt-in's population. Auto is a SUBSET of the opt-in:
 >   it falls through to golib's `len`, which has no overload for a member, so it is a compile error, fail-closed.
 >   Population 0. **n2** (a value range over a local struct copy) is not taken.
 > - **n1:** the element-list constructor raises Go's index panic past `N` instead of truncating.
+
+> **Amended 2026-11-14 (C2): the pair rule under the automatic trigger keeps a mixed pair out** (COORD inbox C2
+> 20261114T135610Z, the sqlite-cs wall):
+> - **The finding.** golang.org/x/sys decodes a `RawSockaddrAny` by reinterpreting it as each family's sockaddr. Every
+>   family sockaddr is kept out by a face (a whole `Addr` copied, `&Path[0]`, a slice of a field), while the `Any`,
+>   whose package touches only `.Addr.Family`, is admitted. So 7.7.6's pair rule refused the module (`GO2CS2010`):
+>   x/sys/windows 3 chains, x/sys/unix 10 on linux/amd64 and linux/arm64, 4 on darwin/amd64. GOROOT's `syscall` holds
+>   the same shape (3, 8, 8, 8, never judged because std stays out), and libc and sqlite/lib hold 0 on all four targets.
+> - **The rule now.** Under the AUTOMATIC trigger, a local pair whose two array-holding sides disagree is made to agree
+>   by keeping the admitted side out: its root struct leaves the admitted set, and so does every admitted struct that
+>   holds it by value, until no pair disagrees. Each type kept out this way is a `GO2CS2009` warning naming its partner,
+>   the chain's site and the partner's own reason. FORCED, the user named those types, so a disagreement is still
+>   `GO2CS2010`; so is a pair whose admitted side another package lays out. Converter: `inlineArrayAdmission.go`.
+> - **Why keeping the `Any` out, not admitting the families.** Only admitting all of them gives Go's layout, and that
+>   needs faces I0 does not spell: a whole-array copy between an inline array and `array<T>`, a slice of an inline
+>   array, and an element's address (7.6.1 item 3). Keeping the pair as `array<T>` is the standard library's own state:
+>   golib's `Reinterpret<RawSockaddrAny, RawSockaddrInet4>` refuses the decode at run time, which is why std hand-owns
+>   it (syscall/windows/syscall_windows_impl.cs, "THE DECODE"), and no bytes are misread. Admitting the families
+>   whole is the I1 follow-up.
+> - **Measured** (the admission census arm, base c978595f0c against the fix, admitted / kept out / mixed): x/sys/windows
+>   23/12/3 to 22/13/0; x/sys/unix linux/amd64 43/15/10 to 39/19/0, linux/arm64 45/15/10 to 41/19/0, darwin/amd64
+>   19/7/4 to 17/9/0; libc and sqlite/lib identical on all four targets; `GO2CS2010` 0 in every population. The unix
+>   packages lose more than `RawSockaddrAny`: the family sockaddrs no face kept out (`RawSockaddrCAN`, `IUCV` and `VM`
+>   on linux, `RawSockaddrCtl` on darwin) agreed with the `Any` while it was admitted, and leave with it.

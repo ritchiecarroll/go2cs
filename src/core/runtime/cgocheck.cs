@@ -177,7 +177,7 @@ internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> gcbits, uintptr 
             off -= goarch.PtrSize;
         } else {
             if ((bits & 1) != 0) {
-                @unsafe.Pointer v = ~(ж<@unsafe.Pointer>)(uintptr)(add(src, i));
+                @unsafe.Pointer v = ~@unsafe.Pointer.To<@unsafe.Pointer>(add(src, i));
                 if (cgoIsGoPointer(v) && !isPinned(v)) {
                     @throw(cgoWriteBarrierFail);
                 }

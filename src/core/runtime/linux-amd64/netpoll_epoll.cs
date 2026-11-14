@@ -29,7 +29,7 @@ internal static void netpollPackData(ж<linux.EpollEvent> ev, ж<pollDesc> pd, u
 // pd is nil for the netpollBreak eventfd.
 internal static (ж<pollDesc> pd, uintptr fdseq) netpollUnpackData(ж<linux.EpollEvent> ev) {
     var tp = ~ev.ᏑData.Reinterpret<array<byte>, taggedPointer>();
-    return ((ж<pollDesc>)(uintptr)(tp.pointer()), tp.tag());
+    return (@unsafe.Pointer.To<pollDesc>(tp.pointer()), tp.tag());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

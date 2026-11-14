@@ -408,9 +408,9 @@ and spreading inside the thunk, at every variadic deferred call in the corpus.
 
 An empty variadic call is NOT such a wall: `f()` on `func f(parts ...int)` answers `parts == nil` as `true`, as in
 Go, because the variadic pack's `Span<T>.slice()` keeps a null span nil.
-<!-- src/core/golib/slice.cs:1939 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
+<!-- src/core/golib/slice.cs:1955 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
      empty slice where Go passes nil); golib's Span-to-slice copy has since kept nil-ness,
-     slice.cs:1909 `NIL-NESS CROSSES THIS BOUNDARY`. -->
+     slice.cs:1925 `NIL-NESS CROSSES THIS BOUNDARY`. -->
 
 ## A ZERO-ARG deferred/spawned call of a NAMED variadic callee keeps the lambda — the group carries `params`
 

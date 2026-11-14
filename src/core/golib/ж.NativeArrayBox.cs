@@ -43,7 +43,7 @@ namespace go;
 /// (the page allocator's <c>l2Size</c>). Nothing downstream can recover it from the address.
 /// </para>
 /// </remarks>
-internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox
+internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox, INativeRooted
 {
     // The base of the element block — never managed storage this box owns.
     private readonly nuint m_nativeAddr;
@@ -52,11 +52,19 @@ internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox
     // bounds every element take through this box (see the class remarks).
     private readonly nint m_length;
 
-    private NativeArrayBox(nuint nativeAddress, nint length)
+    // The anchor of the element view when the block is NOT C memory alone: an array field of a struct viewed over Go
+    // memory (FieldRefBox.NativeArrayWindow). It is NativeSliceAnchors' zero-length array, tied there to the root the
+    // window was derived from, so every view cut from this box keeps that root, its pin and its source alive, and a
+    // box derived from this one keeps it through NativeDerivation.Kept. Null over C memory, which keeps nothing, as
+    // before (cgo Phase 3 increment 3.1's second review, DESIGN-interior-pointer-root 4.4).
+    private readonly T[]? m_anchor;
+
+    private NativeArrayBox(nuint nativeAddress, nint length, T[]? anchor)
         : base(isNull: nativeAddress == 0)
     {
         m_nativeAddr = nativeAddress;
         m_length = length;
+        m_anchor = anchor;
 
         // The box only. The block it names is native — never charged, because the CLR heap never
         // received it — matching NativeBox's leaf-ctor counting.
@@ -69,13 +77,20 @@ internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox
     /// (<c>(*[N]T)(unsafe.Pointer(uintptr(0))) == nil</c>); a negative length is a caller defect and
     /// is refused by name rather than clamped.
     /// </summary>
-    internal static ж<array<T>> Over(nuint nativeAddress, nint length)
+    internal static ж<array<T>> Over(nuint nativeAddress, nint length, object? retainedSource = null)
     {
         if (length < 0)
             throw new PanicException($"native-backed array: negative length {length}");
 
-        return nativeAddress == 0 ? ж<array<T>>.NilBox : new NativeArrayBox<T>(nativeAddress, length);
+        return nativeAddress == 0 ? ж<array<T>>.NilBox : new NativeArrayBox<T>(nativeAddress, length, NativeSliceAnchors<T>.For(retainedSource));
     }
+
+    // A window over C memory alone is a genuinely native root; one that keeps a root is not, so the cgo doors refuse
+    // what is derived from it. IsNativeRooted stays false: FieldRefBox's native-rooted fact reads it, and this box is
+    // never a field view's source.
+    bool INativeRooted.IsNativeRooted => false;
+
+    bool INativeRooted.IsGenuinelyNativeRoot => m_anchor is null;
 
     /// <summary>
     /// The element view, and the only honest way through this box. A <c>slice&lt;T&gt;</c> over the
@@ -95,7 +110,7 @@ internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox
         if (IsNilPointer)
             return null;
 
-        return slice<T>.OverNativeMemory(m_nativeAddr, m_length);
+        return slice<T>.OverNativeMemory(m_nativeAddr, m_length, m_length, m_anchor);
     }
 
     /// <inheritdoc/>

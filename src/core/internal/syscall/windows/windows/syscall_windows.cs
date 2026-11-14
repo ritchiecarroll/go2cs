@@ -24,8 +24,8 @@ public static @string UTF16PtrToString(ж<uint16> p) {
     }
     @unsafe.Pointer end = @unsafe.Pointer.FromPinnedBox(p);
     nint n = 0;
-    while (~(ж<uint16>)(uintptr)(end) != 0) {
-        end = (@unsafe.Pointer)((uintptr)end + /* unsafe.Sizeof(*p) */ (uintptr)2);
+    while (~@unsafe.Pointer.To<uint16>(end) != 0) {
+        end = @unsafe.Add(end, /* unsafe.Sizeof(*p) */ (uintptr)2);
         n++;
     }
     return syscall.UTF16ToString(@unsafe.Slice(p, n));

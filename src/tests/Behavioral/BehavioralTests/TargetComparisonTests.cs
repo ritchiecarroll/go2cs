@@ -1144,6 +1144,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInterfaceUntypedIntCompare() => CheckTarget("InterfaceUntypedIntCompare");
 
     [TestMethod]
+    public void CheckInteriorPointerShapes() => CheckTarget("InteriorPointerShapes");
+
+    [TestMethod]
     public void CheckInvalidRuneString() => CheckTarget("InvalidRuneString");
 
     [TestMethod]

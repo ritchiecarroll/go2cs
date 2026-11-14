@@ -474,7 +474,7 @@ internal static nint /*assoc*/ getOrSetBubbleSpecial(@unsafe.Pointer Δp, uint64
         // p is not associated with a bubble,
         // and we've been asked to add an association.
         @lock(Ꮡmheap_.Ꮡspeciallock);
-        var s = (ж<specialBubble>)(uintptr)(Ꮡmheap_.ᏑspecialBubbleAlloc.alloc());
+        var s = @unsafe.Pointer.To<specialBubble>(Ꮡmheap_.ᏑspecialBubbleAlloc.alloc());
         unlock(Ꮡmheap_.Ꮡspeciallock);
         s.bubbleid = bubbleid;
         s.special.kind = _KindSpecialBubble;

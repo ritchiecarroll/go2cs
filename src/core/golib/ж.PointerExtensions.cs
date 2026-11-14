@@ -198,7 +198,7 @@ namespace go;
 
         // A native-backed box IS its address; reinterpreting it keeps aliasing that address.
         if (box.IsNative)
-            return new NativeBox<TDst>(box.NativeAddress);
+            return new NativeBox<TDst>(box.NativeAddress, retainedSource: NativeDerivation.Kept(box));
 
         // A FUNC read back out of a machine word -- `*(*func())(unsafe.Pointer(&lparam))`, the inbound
         // half of Go's closure-through-an-lParam idiom (runtime's `callback`). The word was minted by

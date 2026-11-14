@@ -19,7 +19,9 @@
 //
 //   - a re-pointed local keeps `.Value[i]` — after `q = other` the local may name a managed array;
 //   - a SAME-element view keeps array<T>.AliasPointer, the half that already windows real storage;
-//   - a TWO-hop selector keeps today's raw route — the door folds one field's offset, no more.
+//   - a TWO-hop selector keeps the raw route — the door folds one field's offset, no more. The raw route is
+//     spelled as the typed door, `@unsafe.Pointer.To<array<T>>(…)`, since the interior-pointer root
+//     (typedPointerDoor_test.go); it was the cast `(ж<array<T>>)(uintptr)(…)`.
 
 package main
 
@@ -225,8 +227,8 @@ func TestNativeFieldArrayViewEmitsTheDoorAndElementRef(t *testing.T) {
 		t.Errorf("sameElem: a same-element view must keep array<T>.AliasPointer, got:\n%s", body)
 	}
 
-	// CONTROL 3 — a two-hop selector keeps today's raw route.
-	if body := emittedFunctionBody(t, mainCs, "nested"); strings.Contains(body, "@unsafe.ArrayPointer<") || !strings.Contains(body, "(ж<array<byte>>)(uintptr)(") {
-		t.Errorf("nested: a two-hop selector must keep today's raw route, got:\n%s", body)
+	// CONTROL 3 — a two-hop selector keeps the raw route, spelled as the typed door.
+	if body := emittedFunctionBody(t, mainCs, "nested"); strings.Contains(body, "@unsafe.ArrayPointer<") || !strings.Contains(body, "@unsafe.Pointer.To<array<byte>>(") {
+		t.Errorf("nested: a two-hop selector must keep the raw route, got:\n%s", body)
 	}
 }

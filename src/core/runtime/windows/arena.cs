@@ -116,12 +116,12 @@ private static readonly @string arenaNewNonPointerTypeˢᵇ = "arena_New: non-po
 internal static any arena_arena_New(@unsafe.Pointer arena, any typʗp) {
     ref var typ = ref heap(typʗp, out var Ꮡtyp);
 
-    var t = (ж<_type>)(uintptr)((~efaceOf(Ꮡtyp)).data);
+    var t = @unsafe.Pointer.To<_type>((~efaceOf(Ꮡtyp)).data);
     if (t.Kind() != abi.Pointer) {
         @throw(arenaNewNonPointerTypeˢ);
     }
     var te = (t.Reinterpret<_type, ptrtype>()).Value.Elem;
-    @unsafe.Pointer x = (((ж<userArena>)(uintptr)(arena))).@new(te);
+    @unsafe.Pointer x = ((@unsafe.Pointer.To<userArena>(arena))).@new(te);
     ref var result = ref heap<any>(out var Ꮡresult);
     var e = efaceOf(Ꮡresult);
     e.Value._type = t;
@@ -133,14 +133,14 @@ internal static any arena_arena_New(@unsafe.Pointer arena, any typʗp) {
 //
 //go:linkname arena_arena_Slice arena.runtime_arena_arena_Slice
 internal static void arena_arena_Slice(@unsafe.Pointer arena, any Δsliceᴛ, nint cap) {
-    (((ж<userArena>)(uintptr)(arena))).Δslice(Δsliceᴛ, cap);
+    ((@unsafe.Pointer.To<userArena>(arena))).Δslice(Δsliceᴛ, cap);
 }
 
 // arena_arena_Free is a wrapper around (*userArena).free.
 //
 //go:linkname arena_arena_Free arena.runtime_arena_arena_Free
 internal static void arena_arena_Free(@unsafe.Pointer arena) {
-    (((ж<userArena>)(uintptr)(arena))).free();
+    ((@unsafe.Pointer.To<userArena>(arena))).free();
 }
 
 // go2cs generated this placeholder — func arena_heapify is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
