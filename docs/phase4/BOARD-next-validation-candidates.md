@@ -37829,4 +37829,105 @@ ten runs, each loading cleanly. The tool and its output are `docs/phase4/data/sq
 
 — G (2026-11-13)
 
+## 2026-11-13 — P5 (seat B, closed with seat A by COORD's ruling): the linux-arm64 GolibTests leg ended its test host about 2,060 tests early; the cause was the linux/amd64 cgo golden, not the EventPipe sampler — FIXED in seat A
+
+**The blind spot.** On master 651c4ad147 the hosted linux-arm64 golib-tests leg (runs 43510049988 and 43497473577)
+ran 503 of the suite's tests, failed 23 with the cgo target refusal, and then the test host died while
+`EventPipeSamplerHostProbe.TheSamplersThreadKeysAndCpuReadingsAreMeasured` ran. About 2,060 tests never ran on
+that leg. vstest gave as the reason the last line on stderr, `invalid boolean value "bogus" for -test.v`, which a
+`ChattyFlagBridgeTests` test that passed had printed.
+
+**The cause.** `GolibTests.csproj` compiled `GoCgoWrappers.linux.golden.cs` on every linux leg. Its module
+initializer registers golib's cgo resolver for the whole GolibTests assembly with target `linux/amd64`, and
+`GoCgoLibraries.Resolve` refuses EVERY P/Invoke that assembly makes when the process target differs, a hand-owned
+import among them. Two tests make such a call on a thread that is not the test's own: the probe calls `gettid`
+inside each hog's `new Thread(...)`, and `GoTimerTests.serviceThread()` calls `gettid` inside a `GoTimer` callback
+on the timer service thread. The `PlatformNotSupportedException` was unhandled there, and the process ended.
+
+**The four isolating runs** (linux-arm64 golib-tests):
+
+| Run | Ref | Filter | Result |
+|---|---|---|---|
+| 43515648007 | master 651c4ad147 | the probe alone | host crashed in the probe |
+| 43515652676 | master 651c4ad147 | everything but the probe | 980 run, 25 refusals, host crashed in `GoTimerTests.TheServiceThreadIsIdleUnderAFarFutureTimer` |
+| 43516731364 | master 651c4ad147 | `EventPipeSamplerTests` alone | 7 of 7 pass: golib's sampler does not crash on arm64 |
+| 43517263836 | seat A 177ab806cf | the probe and `GoTimerTests` | 16 of 16 pass |
+
+The abort moved with the test set, which ruled out the probe and the sampler as its source.
+
+**The fix.** Seat A (177ab806cf) generates `GoCgoWrappers.linux-arm64.golden.cs` with the converter and selects
+it by process architecture. At 177ab806cf the whole linux-arm64 leg (run 43515128508) ran to completion: 2,661
+executed, 2,661 passed, 0 failed. The probe's readings are present there: hog ids 4010 and 4011, own CPU 932
+and 934 ms against sampler readings of 920 and 930 ms, 92 and 93 written, and the hog as leaf in 103 of 248.
+
+**Hardening** (seat A's second commit, c3486c0f68, COORD's ruling). Each of the two tests now catches on its own
+thread and fails on the test's thread, so a refused import fails one test and the suite still runs.
+It was made to fail once: with the linux/amd64 golden forced on the arm64 leg (a plant commit on top of
+c3486c0f68, never merged, run 43519587318), the leg ran to completion, 2,661 executed, 2,618 passed and 43
+failed, every one with the refusal text. The three tests on the two threads are among them:
+`TheSamplersThreadKeysAndCpuReadingsAreMeasured` ("hog 0 threw on its own thread"), and
+`TheServiceThreadIsIdleUnderAFarFutureTimer` and `DenseTimersCostTheServiceThreadLittleCpu` ("the timer
+callback threw on the service thread"). The host did not abort. So the suite's true refusal count under the
+wrong golden is 43, where the aborted master runs showed 23. Without the plant, c3486c0f68 reads 2,661 passed
+and 0 failed on linux-arm64 (run 43519596892).
+
+**Product-side reading, observed and NOT a defect.** A cgo target mismatch refuses every P/Invoke its assembly
+makes, on any thread. On a thread that is not a test's, an unhandled refusal ends the process. That is by design.
+
+**Prediction scored.** Seat A predicted that arm64 would read 0 refusals and abort at the same probe. The abort
+half MISSED as worded, because the abort was caused by the golden that seat A replaced.
+
+**Not run here.** `check-no-regression.ps1`: this box has no dotnet or pwsh. Seat A changes no converter source
+(one `_test.go` row, one generated golden, the csproj and two test files), so the corpus footprint is 0 by
+construction.
+
+— P5 (2026-11-13)
+
+## 2026-11-13 — P5 (seat A, COORD's ask): the cgo wrapper fixture declares `_Ctype_char` as `int8` for linux/arm64, where cmd/cgo declares `uint8` — CLOSED 2026-11-13 in seat A (`198bc1d62b`); was OPEN, fixture only
+
+**What cgo picks.** cmd/cgo takes the Go type of C `char` from the DWARF encoding the C compiler wrote
+(`src/cmd/cgo/gcc.go`, go1.26.10): a `dwarf.CharType` (signed char encoding) becomes `int8`, and a
+`dwarf.UcharType` (unsigned char encoding) becomes `uint8`. Plain `char` is unsigned in the linux/arm64 C ABI,
+so there cgo declares `type _Ctype_char uint8`. On linux/amd64 and on both darwin targets it is `int8`.
+
+**Whether the generator agrees.** The generator reads the type the Go side declares, so on real cgo output it
+follows cgo. The converter test's fixture does not: `cgoLinuxStructs` in `src/go2cs/cgoWrappers_test.go`
+(and the declarations in `cgoDeclarations_test.go` and `cgoMirrors_test.go`) writes `type _Ctype_char int8`
+once for every target, and seat A's linux/arm64 row reuses it. `GoCgoWrappers.linux-arm64.golden.cs` therefore
+carries `sbyte` where bindings converted from real linux/arm64 cgo output would carry `byte`
+(`ᴍarray65_sbyte sysname`, golden line 688). The size and layout are the same, 1 byte, and the suite is green on
+the arm64 leg (2,661 passed, run 43519596892), so nothing fails today; the fixture is not what cgo emits there.
+
+**Read, not measured.** The cgo side is read from cmd/cgo's source and the C ABI. No cgo run on a linux/arm64
+host was made, and the generator was not run on a `uint8` fixture.
+
+**Owed.** A linux/arm64 fixture with `_Ctype_char uint8`, the golden regenerated from it, and the arm64 leg
+re-read. Its own seat, not seat A.
+
+— P5 (2026-11-13)
+
+**CLOSED 2026-11-13, in seat A by COORD's ruling (22:59Z), commit `198bc1d62b`.** The fixture's target now names its
+char type: `uint8` for linux/arm64, `int8` for linux/amd64, both darwin targets and windows.
+`GoCgoWrappers.linux-arm64.golden.cs` was regenerated and moved 35 lines, every one char-typed: the `strtol` char
+mirror (368, 374, 393), `struct utsname`'s six members (688-693, 697-708, and the even lines of 830-840 and 846-856)
+and the inline array type (725, 727). No other golden moved. GolibTests' hand-declared `C.@char` wraps `uint8` under
+`GOCGO_CHAR_UNSIGNED` (linux with an arm64 process), and the two tests that cast a C char name the type by an alias.
+Made to fail first: with the arm64 type forced back to `int8`, `TestCgoScalarWrapperGoldensAreTheGeneratorsOutput`
+fails naming only the linux/arm64 golden.
+
+| leg at `198bc1d62b` | executed / passed / failed | run |
+|:--|:--|:--|
+| linux-arm64 | 2,661 / 2,661 / 0 | 43525931102 |
+| linux-x64 | 2,665 / 2,665 / 0 | 43525931102 |
+| win-x64 | 2,607 / 2,607 / 0 | 43525934547 |
+| osx-x64 | 2,563 / 2,563 / 0 | 43525938386 |
+| osx-arm64 | 2,562 / 2,562 / 0 | 43525938386 |
+
+The counts equal the earlier tips' on every leg; osx-arm64 reads 2,562 or 2,563 across this seat's runs, the
+disclosed Inconclusive of one sampler test there. **Still read, not measured:** no cgo run on a linux/arm64 host was
+made; the `uint8` is cmd/cgo's rule as its source states it. The fixtures in `cgoDeclarations_test.go` and
+`cgoMirrors_test.go` are not per target and keep `int8`.
+
+— P5 (2026-11-13)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

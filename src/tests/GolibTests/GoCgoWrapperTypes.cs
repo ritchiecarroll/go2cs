@@ -26,12 +26,22 @@ internal static partial class cgotestꓸC_package
         public static implicit operator uint32(@uint value) => value.m_value;
     }
 
+    // C char: cmd/cgo declares it uint8 where the target's plain char is unsigned (linux/arm64) and int8 elsewhere.
+#if GOCGO_CHAR_UNSIGNED
+    internal readonly struct @char(uint8 value)
+    {
+        private readonly uint8 m_value = value;
+        public static implicit operator @char(uint8 value) => new(value);
+        public static implicit operator uint8(@char value) => value.m_value;
+    }
+#else
     internal readonly struct @char(int8 value)
     {
         private readonly int8 m_value = value;
         public static implicit operator @char(int8 value) => new(value);
         public static implicit operator int8(@char value) => value.m_value;
     }
+#endif
 
     internal readonly struct @double(float64 value)
     {
