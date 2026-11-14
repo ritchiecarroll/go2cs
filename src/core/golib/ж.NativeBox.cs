@@ -143,10 +143,15 @@ namespace go;
         // box comes through this method, the wrapper's indexer and its lazy fill included, since they take the ref
         // Value returns.
         //
-        // AFTER DereferenceableAddress, so a nil box answers the nil-dereference panic and an order token keeps its
-        // own refusal: neither needs an exemption here. It cures nothing: the shapes panic by name until a
-        // conversion exists that answers a wrapper box sharing the array.
-        if (s_isNamedArrayShaped)
+        // AFTER DereferenceableAddress, so an order token keeps its own refusal and needs no exemption here.
+        // NOT THE NUMBER 0, which does need one: a nil box passes DereferenceableAddress (that method refuses
+        // tokens, and 0 is not one) and must then answer what a nil pointer of every other pointee answers, the
+        // fault of the read itself. This line first stood here with no test of the address, on the belief that
+        // nil never reached it, and a nil named-array pointer answered the floor's text
+        // (NamedArrayViewFloorTests.ANilNamedArrayPointerReadsAsANilPointerAndItsTypeAnswersItsLength, red before
+        // the conjunct). It cures nothing: the shapes panic by name until a conversion exists that answers a
+        // wrapper box sharing the array.
+        if (s_isNamedArrayShaped && address != null)
             throw RuntimeErrorPanic.NamedArrayViewOfNativeMemory(typeof(T));
 
         // The dereference census (NativeBoxDereferenceCensus): a T that holds a reference and was not refused above, and
