@@ -1,18 +1,21 @@
 <#
 .SYNOPSIS
     Generates the binary-compatibility suppressions of one kind of announced break: a public method that left a
-    package class for a class go2cs-gen marks [GoPromotedHost(typeof(S))], unchanged in every other respect.
+    package class for a class marked [GoPromotedHost(typeof(S))] or [GoMethodHost(typeof(S))], unchanged in every
+    other respect.
 
 .DESCRIPTION
     1.26.11.1 moved every struct's same-package promoted-method forwarders out of the package class into a class of
-    the struct's own (docs/phase4/DESIGN-promoted-forwarder-placement.md). A compiled consumer binds a forwarder by
+    the struct's own (docs/phase4/DESIGN-promoted-forwarder-placement.md), which go2cs-gen marks GoPromotedHost, and
+    every method a package declares into its receiver type's method holder (OQ2, docs/phase4/SCOUT-method-holder.md),
+    which the converter marks GoMethodHost. A compiled consumer binds a forwarder by
     its declaring class, so each moved public forwarder is a CP0002 the release must announce, one entry per asset.
     They are too many to write by hand, and a hand-written list would also hide any member that left for another
     reason. This module writes the entries from the two assemblies themselves:
 
       a member is REMOVED when the baseline's public surface has its documentation id and the current one has not;
-      a removed method is a MOVE when the current assembly holds a class marked [go.GoPromotedHost(typeof(S))], S
-      being the struct the method's first parameter takes (S, or go.zh<S> for the pointer form), and that class
+      a removed method is a MOVE when the current assembly holds a class marked [go.GoPromotedHost(typeof(S))] or
+      [go.GoMethodHost(typeof(S))], S being the type the method's first parameter takes (S, or go.zh<S> for the pointer form), and that class
       declares a method of the same name, signature and attributes.
 
     Nullable annotations are compared DECODED. The compiler writes one NullableContext on a class, the value most
@@ -70,7 +73,9 @@ namespace Go2cs.ApiCompatMoves
 
     public static class Finder
     {
-        private const string HostAttribute = "go.GoPromotedHostAttribute";
+        // The two marks of a class a method may move into: a struct's promoted-method forwarders (go2cs-gen) and a
+        // receiver type's method holder (the converter). Both take the type as typeof, stored as its name.
+        private static readonly string[] HostAttributes = { "go.GoPromotedHostAttribute", "go.GoMethodHostAttribute" };
 
         private const string NullableAttribute = "System.Runtime.CompilerServices.NullableAttribute";
         private const string NullableContextAttribute = "System.Runtime.CompilerServices.NullableContextAttribute";
@@ -240,7 +245,7 @@ namespace Go2cs.ApiCompatMoves
             return outer.Length == 0 ? space.MetadataName : outer + "." + space.MetadataName;
         }
 
-        // The classes marked [go.GoPromotedHost(typeof(S))], by S. The attribute is read from the metadata tables and
+        // The classes marked [go.GoPromotedHost(typeof(S))] or [go.GoMethodHost(typeof(S))], by S. The attribute is read from the metadata tables and
         // not through the compilation: each assembly is loaded alone, as the guard compares it, so neither the
         // attribute's class (go.lib's) nor System.Type resolves, and the compiler decodes no argument of such an
         // attribute. The argument of typeof is stored as the type's name, which is all that is needed here.
@@ -260,7 +265,7 @@ namespace Go2cs.ApiCompatMoves
                 {
                     Srm.CustomAttribute attribute = reader.GetCustomAttribute(attributeHandle);
 
-                    if (AttributeClass(reader, attribute) != HostAttribute)
+                    if (Array.IndexOf(HostAttributes, AttributeClass(reader, attribute)) < 0)
                         continue;
 
                     Srm.BlobReader value = reader.GetBlobReader(attribute.Value);
@@ -356,7 +361,7 @@ namespace Go2cs.ApiCompatMoves
 
             if (!hosts.TryGetValue(key, out candidates))
             {
-                reason = "removed, and no class is marked GoPromotedHost(typeof(" + key + "))";
+                reason = "removed, and no class is marked GoPromotedHost(typeof(" + key + ")) or GoMethodHost(typeof(" + key + "))";
                 return false;
             }
 

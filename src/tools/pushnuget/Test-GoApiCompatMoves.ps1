@@ -1,14 +1,15 @@
 <#
 .SYNOPSIS
     Table-driven arms for GoApiCompatMoves.psm1, which writes the suppressions of one announced break: public methods
-    that left a package class for a class marked [GoPromotedHost(typeof(S))]. A moved method must get its entry, a
+    that left a package class for a class marked [GoPromotedHost(typeof(S))] or [GoMethodHost(typeof(S))]. A moved
+    method must get its entry, a
     method removed any other way must get none, and the guard itself must agree with both. Exit code = the number of
     failed cases.
 
 .DESCRIPTION
     The fixtures are two builds of one assembly (testdata/apicompat, moves-base.dll and moves-moved.dll, built by
-    build-apicompat-fixtures.ps1 from src/Moves.cs). Four forwarders moved as the release announced; six left the
-    package class another way, each a break nobody announced. The generated file is then handed to the guard
+    build-apicompat-fixtures.ps1 from src/Moves.cs). Seven forwarders and two methods of a method holder moved as the
+    release announced; seven left the package class another way, each a break nobody announced. The generated file is then handed to the guard
     (GoApiCompat.psm1) as push-nuget.ps1 hands it one: every entry must suppress exactly one diagnostic, none may be
     unnecessary, and the six other members must still read red.
 
@@ -95,14 +96,16 @@ try {
         $found = Get-GoApiCompatPackageMoves -Baseline $base -Current $moved -WorkDir $work
         $targets = @($found.Entries | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { $_.Target } | Sort-Object -CaseSensitive -Culture '')
         $want = @('M:go.ann_package.Named(go.ann_package.Tree)', 'M:go.ann_package.Plain(go.ann_package.Tree)', "M:go.ann_package.Plain(go.$zh{go.ann_package.Tree})",
+                  'M:go.hold_package.Read(go.hold_package.Clock)', "M:go.hold_package.Reset(go.$zh{go.hold_package.Clock})",
                   'M:go.internal.abi_package.Size(go.internal.abi_package.Named)', 'M:go.pkg_package.Get``1(go.pkg_package.Box{``0},``0)',
                   'M:go.pkg_package.Val(go.pkg_package.Outer)', "M:go.pkg_package.Val(go.$zh{go.pkg_package.Outer})")
-        Check 'the seven moves: value and pointer forms, a generic struct''s, one below a keyword namespace, three whose nullable attributes sit elsewhere' (
+        Check 'the nine moves: value and pointer forms, a generic struct''s, one below a keyword namespace, three whose nullable attributes sit elsewhere, and a method holder''s two' (
             ($targets -join ' | ') -ceq ($want -join ' | ')) ($targets -join ' | ')
-        Check 'each asset has the same seven' (@($found.Entries).Count -eq 14 -and @($found.Entries | Where-Object { $_.Asset -ceq $linux }).Count -eq 7) "$(@($found.Entries).Count) entries"
+        Check 'each asset has the same nine' (@($found.Entries).Count -eq 18 -and @($found.Entries | Where-Object { $_.Asset -ceq $linux }).Count -eq 9) "$(@($found.Entries).Count) entries"
         $hosts = @($found.Entries | ForEach-Object { $_.Host } | Sort-Object -Unique)
+        $holder = 'go.hold' + [string][char]0x1D1B + 'Clock'
         Check 'each move names the class that holds the method now' (
-            ($hosts -join ',') -ceq 'go.forwardersOfBox,go.forwardersOfOuter,go.forwardersOfTree,go.internal.forwardersOfNamed') ($hosts -join ',')
+            ($hosts -join ',') -ceq "go.forwardersOfBox,go.forwardersOfOuter,go.forwardersOfTree,$holder,go.internal.forwardersOfNamed") ($hosts -join ',')
 
         $refused = @($found.Refused | Where-Object { $_.Asset -ceq $lib })
         function Reason([string]$Member) {
@@ -118,7 +121,7 @@ try {
         Check 'a class without the attribute is not read' ((Reason 'Elsewhere').Contains('declares no Elsewhere')) (Reason 'Elsewhere')
         Check 'a class marked for another struct is not read' ((Reason 'Misfiled').Contains('go.forwardersOfOuter declares no Misfiled')) (Reason 'Misfiled')
         Check 'a removed method is not a move' ((Reason 'Gone').Contains('declares no Gone')) (Reason 'Gone')
-        Check 'a struct with no marked class has no move' ((Reason 'Only').Contains('no class is marked GoPromotedHost(typeof(go.pkg_package+Solo))')) (Reason 'Only')
+        Check 'a struct with no marked class has no move' ((Reason 'Only').Contains('no class is marked GoPromotedHost(typeof(go.pkg_package+Solo)) or GoMethodHost(typeof(go.pkg_package+Solo))')) (Reason 'Only')
 
         # The three nullable moves test nothing unless the compiler really wrote their attributes in other places in
         # the two fixtures; a rebuilt fixture could lose that without failing any check above.
@@ -165,7 +168,7 @@ try {
         Check 'the pinned tool restores from the manifest' ([bool]$pinned) "$why"
         if ($pinned) {
             $r = Test-GoApiCompatPackage -Id 'fixture.moves' -Baseline $base -Current $moved -SuppressionFile $null -RepoRoot $repoRoot -WorkDir $work
-            Check 'unsuppressed, the guard names all fourteen removed members on each asset' ($r.Failures.Count -eq 28 -and $r.Compared -eq 2) "$($r.Failures.Count) failures, compared $($r.Compared)"
+            Check 'unsuppressed, the guard names all sixteen removed members on each asset' ($r.Failures.Count -eq 32 -and $r.Compared -eq 2) "$($r.Failures.Count) failures, compared $($r.Compared)"
 
             $generated = Join-Path $work 'generated.xml'
             Write-GoApiCompatMoveSuppressions -Entries $found.Entries -Path $generated -Comment $comment

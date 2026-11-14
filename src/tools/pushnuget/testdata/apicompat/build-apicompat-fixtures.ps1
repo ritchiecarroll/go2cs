@@ -16,9 +16,11 @@
 
     Moves, from src/Moves.cs, compiled against src/MovesLib.cs (a stand-in for go.lib, built and not kept):
 
-      moves-base.dll       a package class that holds its structs' promoted-method forwarders: the baseline.
+      moves-base.dll       a package class that holds its structs' promoted-method forwarders and a type's own
+                           methods: the baseline.
       moves-moved.dll      the forwarders have left the package class: seven into a class marked [GoPromotedHost] for
-                           their struct, unchanged, and seven in ways the suppression generator must refuse.
+                           their struct, unchanged, and seven in ways the suppression generator must refuse; and the
+                           type's two methods into its method holder, a class marked [GoMethodHost].
 #>
 #Requires -Version 7.0
 $ErrorActionPreference = 'Stop'

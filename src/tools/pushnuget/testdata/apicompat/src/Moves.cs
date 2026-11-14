@@ -96,6 +96,33 @@ namespace go.@internal
 #endif
 }
 
+// A package's own methods. Without MOVED they are in the package class, as the converter wrote them through
+// 1.26.10.3; with MOVED they are in the receiver type's method holder, a class marked [GoMethodHost(typeof(T))],
+// named as the converter names it (package, U+1D1B, type). Both forms move: the value receiver and the pointer one.
+namespace go
+{
+    public static class hold_package
+    {
+        public struct Clock { public long Ticks; }
+
+#if !MOVED
+        public static long Read(this Clock target) => target.Ticks;
+
+        public static void Reset(this \u0436<Clock> target) { }
+#endif
+    }
+
+#if MOVED
+    [GoMethodHost(typeof(hold_package.Clock))]
+    public static class hold\u1D1BClock
+    {
+        public static long Read(this hold_package.Clock target) => target.Ticks;
+
+        public static void Reset(this \u0436<hold_package.Clock> target) { }
+    }
+#endif
+}
+
 // Nullable annotations. The compiler writes one NullableContext on a class, the value most of its members share, and
 // repeats it only on a member that differs. So a method that moves to a class of other members carries other
 // attributes than it did while it says the same: at base Named takes the package class's context and both forms of

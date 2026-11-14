@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Writes the CompatibilitySuppressions.xml of every packed go.* package whose public methods moved into a class
-    marked [GoPromotedHost] since its baseline, and reports every other member the package lost.
+    marked [GoPromotedHost] or [GoMethodHost] since its baseline, and reports every other member the package lost.
 
 .DESCRIPTION
     Run it over the merged packages of a pack-only run (push-nuget.ps1 -VersionSuffix local.1 -OutDir <dir>), in the
