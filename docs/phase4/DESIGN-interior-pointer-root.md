@@ -754,3 +754,61 @@ Dated lines. Nothing above is rewritten; where a line here disagrees with 10.5, 
 - **What this leaves not shown.** Until that reading, nothing shows that B2's population is empty on windows, on
   darwin or on linux/arm64, and nothing refuses a B2 dereference by name. 10.5's windows evidence
   (net/windows/interface_windows_impl.cs:262) stands unread.
+
+
+### 10.14 As cut: S11 as measured and the miss in its wording, the rooted member of 4.5, the canary reading (COORD, 2026-11-14 15:39Z)
+
+Dated lines. Nothing above is rewritten; where a line here disagrees with 10.7, 10.8 or 4.5, this line is the one in
+force.
+
+- **S11 as measured** (linux/amd64, one host, one axis: the base converter against the cut converter over the same
+  golib; Release). A loop of 20,000,000 calls, median of 5 interleaved runs, base to cut:
+
+  | receiver | `set` | `get` |
+  |---|---|---|
+  | `new(ctrlGroup)` | 2101 ms to 1992 (-5%) | 1848 to 1967 (+6%) |
+  | `(*ctrlGroup)(g.data)`, made once | 1903 to 2040 (+7%) | 1807 to 2015 (+12%) |
+  | `g.ctrls().set` and `.get`, made at each call (the package's own callers) | 2447 to 2871 (+17%) | 2445 to 2922 (+20%) |
+  | `&held.ctrls`, a field of a struct | 2115 to 3742 (+77%) | 1895 to 3685 (+95%) |
+
+  In the shape internal/runtime/maps calls them, `get` and `set` are inside the 25% line. On a field receiver, a shape
+  no corpus caller of `ctrlGroup` makes, they are over it: the number conversion of a field box costs about twice
+  that of a box that owns its storage. What the conversion does per call on a field box is read in the BOARD row
+  below; which part of that the difference is, is NOT MEASURED.
+- **The row arm of S11 could not fire, and that is a miss in the stop line, mine.** The banked
+  `internal/runtime/maps` row never reaches `ctrlGroup.get` or `set`: with both made to throw, the row's verdict set
+  is identical and the throw is never printed (the tests outside the 19 matched stop earlier, at `newarray`'s refusal
+  or at a dereference with no address, in both arms alike). And the sweep's wall time for the row cannot carry a 10%
+  line: three readings at one emission read 218 s, 243 s and 196 s, all but about 2 s of it the publish. The host's
+  own execution, 10 interleaved runs per arm, read 1.998 s and 2.005 s (+0.4%). The arm was written without checking
+  that the row runs the code it was meant to time. A stop line names a measurement that has been seen to move with
+  the thing it guards, or it says that it has not.
+- **RULED (a): 4.3 lands as cut for `ctrlGroup.get` and `set`.** The field-receiver cost is a BOARD row for after
+  1.26.11.1 (the cut branch), with what the conversion does per call on a field box and a candidate remedy. That
+  row also carries the read 4.3 still owes: which of the other changed receiver sites are called on a field box in
+  code that runs.
+- **4.5's rooted member is a second member, not a parameter.** 4.5 as cut (86247389c0) added `object? root = null`
+  to the published `IGoReflectSlice.ReflectOverNativeMemory`. The binary-compat guard read that as the published
+  member removed and an abstract member added (CP0002, CP0006; baseline go.lib 1.26.10.3). As fixed on the cut branch
+  (c79e1e106b): the three-argument member stays as published, and the member that takes the root is a second one
+  with a default body forwarding to it. `ISlice<T>` implements both. No suppression.
+- **The canary reading 10.13 asked for.** The counter over 14 rows on linux/amd64 (syscall, internal/runtime/maps,
+  unique, sync/atomic, reflect, errors, encoding/json, encoding/xml, go/types, go/internal/gcimporter, net, os,
+  crypto/tls, runtime): no UNPINNABLE, no B2a and no B2b arrival. Dereferences counted: sync/atomic 144,000,000,
+  runtime 3,465,564, reflect 3,987, net 3,075, os 412, syscall 52, the rest 0. In crypto/tls, 4 of 3,432 processes
+  were killed at the BoGo runner's deadline and are not measured past their start. The other three flavours stay
+  unread, as 10.13 says.
+- **The regen, after the go1.26.11 hop.** The two-seeded footprint was re-read on four targets on the merged base
+  (3ff376f868) and each target's score equals its score before the hop: converted .cs lines 641 (linux/amd64), 634
+  (windows), 628 (darwin), 642 (linux/arm64). Applied by the hunk rule to 160 files, 938 lines out and 910 in
+  (837a413fdc on the cut branch); the
+  13 kept FromRef sites of 10.12 stay at every target and no other old form is left. The .cs.auto review siblings
+  (12 files across the targets) are named and not applied.
+- **What the regen showed that 6 and 10 did not plan for: three instruments read the old SPELLING.** The
+  native-boundary census and the native-root field-view census matched the cast `(ж<T>)(uintptr)` alone, and 4.1
+  respells every converted site they count. The first went red on its declared rows; the second fell from 13 to 5
+  and stayed green. Both read both spellings now. The comment census rose by 9 on five lines whose blank lines did
+  not move, because it pairs a Go line with its C# line by identifier and 4.2 and 4.3 no longer spell `Pointer` or
+  `uintptr` there; its baseline is raised by those 9 (COORD ruled (a), 17:04Z) and the census's anchor is a seat for
+  its owner after the release. BOARD row: the cut branch. A cut that respells
+  an emitted form searches the instruments for the old form before its regen, and says what it found.
