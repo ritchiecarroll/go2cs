@@ -965,6 +965,16 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     private static readonly bool s_isArrayShaped =
         typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>);
 
+    // Per-INSTANTIATION constant: is T the wrapper struct go2cs-gen writes for a NAMED array type
+    // (`type RawMem [N]byte`)? It is a value type that is an IArray and holds a managed reference (its one field
+    // is a lazily filled holder of the array<E>). A slice is an IArray too (ISlice extends it) and is not this
+    // shape; array<E> itself is s_isArrayShaped above and keeps its own arm. `default(T) is I` is a type test on
+    // a value type: the JIT and ILC answer it from the type, with no box and no reflection. Declared directly
+    // after s_isArrayShaped in the same part of the class, because it reads it (static initializers run in
+    // textual order only within one part).
+    private static readonly bool s_isNamedArrayShaped =
+        !s_isArrayShaped && default(T) is IArray and not ISlice && RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+
     // ---- the address conversions (the uintptr/void* seam; kind tests are virtual reads) ----
 
     // EXPLICIT by design: reinterpreting a raw address as a pointer is the runtime-unsafe
@@ -1199,6 +1209,17 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // `array.cs`'s AliasPointer needs no change of its own: its documented raw-metal fallback is
         // `return (ж<array<T>>)(uintptr)element!`, which funnels through this operator.
         if (resolved is null && s_isArrayShaped)
+            throw RuntimeErrorPanic.NativeArrayViewWithoutElementStorage(typeof(T));
+
+        // THE SAME FLOOR FOR A NAMED ARRAY (2026-11-14; docs/phase4/DESIGN-native-array-view.md, the block of
+        // that date). `(*RawMem)(p)` over C memory would mint a native box of the WRAPPER, and the box reads its
+        // value with Unsafe.AsRef at the address: the wrapper's one field, a managed reference, comes OUT OF the
+        // C memory. Measured before this line: over memory holding data the data is dereferenced as a reference;
+        // over zeroed memory a huge array dies in its lazy allocation (OverflowException); over zeroed memory a
+        // SMALL array allocates a managed array, stores its reference INTO the C memory and reports success,
+        // where the collector cannot see it. The test is arm 5's, provenance and not T alone, with one
+        // difference: the number 0 is a nil pointer and is never refused here.
+        if (resolved is null && value.Value != 0 && s_isNamedArrayShaped)
             throw RuntimeErrorPanic.NativeArrayViewWithoutElementStorage(typeof(T));
 
         // The fall-through, carrying arm 2a's verdict IN THE BOX. `aliasesAnOrderToken` is false for
