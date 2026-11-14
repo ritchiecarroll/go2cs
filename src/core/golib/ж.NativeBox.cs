@@ -147,7 +147,7 @@ namespace go;
         // own refusal: neither needs an exemption here. It cures nothing: the shapes panic by name until a
         // conversion exists that answers a wrapper box sharing the array.
         if (s_isNamedArrayShaped)
-            throw RuntimeErrorPanic.NativeArrayViewWithoutElementStorage(typeof(T));
+            throw RuntimeErrorPanic.NamedArrayViewOfNativeMemory(typeof(T));
 
         // The dereference census (NativeBoxDereferenceCensus): a T that holds a reference and was not refused above, and
         // a box derived from storage that cannot be pinned. Counted after both refusals, so every count is a read or a

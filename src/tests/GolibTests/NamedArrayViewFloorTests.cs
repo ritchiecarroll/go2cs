@@ -80,7 +80,8 @@ public class NamedArrayViewFloorTests
         string message = panic.Message ?? "";
 
         StringAssert.Contains(message, typeName, "the refusal must name the type it refused");
-        StringAssert.Contains(message, "no managed element storage", "the refusal must name the cause");
+        StringAssert.Contains(message, "C memory, or Go storage of another type", "the refusal must name the cause, for both arrivals");
+        Assert.IsFalse(message.Contains("no managed element storage"), "pinned Go storage HAS managed element storage: the unnamed array's text is not this refusal's");
         StringAssert.Contains(message, "DESIGN-native-array-view.md", "the refusal must point at the document");
     }
 
