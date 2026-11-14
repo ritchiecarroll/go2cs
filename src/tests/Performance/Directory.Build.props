@@ -12,6 +12,14 @@
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
   </PropertyGroup>
 
+  <!-- Pins $(go2csPath) to the repository's src root, as src/core's and src/tests/Behavioral's
+       Directory.Build.props do: a converted benchmark's .csproj defaults it to $(USERPROFILE)/go2cs/ (the
+       deployed tree) under any configuration but Debug, so a Release build of go2cs.slnx bound these
+       members to whatever that tree held. An explicit -p:go2csPath or environment variable still wins. -->
+  <PropertyGroup Condition="'$(go2csPath)' == ''">
+    <go2csPath>$([MSBuild]::EnsureTrailingSlash($([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../..'))))</go2csPath>
+  </PropertyGroup>
+
   <!-- Native AOT publishes (PerfAot gate, see Directory.Build.targets) get their own intermediate
        tree: a RID-specific self-contained publish and a plain framework-dependent build sharing one
        obj\ cross-pollute (the next JIT build inherits self-contained restore assets and produces an
