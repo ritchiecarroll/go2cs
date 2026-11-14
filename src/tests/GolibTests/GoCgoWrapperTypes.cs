@@ -1,7 +1,8 @@
 // The C types GoCgoWrappers.<os>.golden.cs names, HAND-DECLARED. Increment 3d emits cmd/cgo's own type declarations into
 // the pseudo-package (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.17), but in the shape go2cs-gen expands, which
-// GolibTests (no go2cs-gen analyzer) cannot compile; these retire at increment 5 or G1, where a converted project compiles
-// the converter's own types and these wrappers together. Each is the shape a converted
+// GolibTests (no go2cs-gen analyzer) cannot compile. They STAY as the wrapper generator's unit instrument (COORD's
+// ruling on G1, 2026-11-12): the gate for the converter's own types and these wrappers together is the converted gate
+// program, built and run as a project (src/go2cs/cgoG1_test.go, §11.22). Each is the shape a converted
 // numeric type takes: a value wrapper over its Go type, converting implicitly both ways. C long's width differs by data
 // model, so it is declared per OS (GoCgoWrapperTypes.windows.cs and GoCgoWrapperTypes.posix.cs). Increment 3b2a's C
 // structs are the shape a converted Go struct takes: a C# struct with the C names as fields, each of a C type above, and
@@ -25,12 +26,22 @@ internal static partial class cgotestꓸC_package
         public static implicit operator uint32(@uint value) => value.m_value;
     }
 
+    // C char: cmd/cgo declares it uint8 where the target's plain char is unsigned (linux/arm64) and int8 elsewhere.
+#if GOCGO_CHAR_UNSIGNED
+    internal readonly struct @char(uint8 value)
+    {
+        private readonly uint8 m_value = value;
+        public static implicit operator @char(uint8 value) => new(value);
+        public static implicit operator uint8(@char value) => value.m_value;
+    }
+#else
     internal readonly struct @char(int8 value)
     {
         private readonly int8 m_value = value;
         public static implicit operator @char(int8 value) => new(value);
         public static implicit operator int8(@char value) => value.m_value;
     }
+#endif
 
     internal readonly struct @double(float64 value)
     {

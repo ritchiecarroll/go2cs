@@ -272,12 +272,12 @@ func TestRefusalCarriesTheEnumerationAndBothRemedies(t *testing.T) {
 	refusal := report.refusal()
 
 	for _, required := range []string{
-		"visitFuncDecl.go",         // the enumeration itself
-		"1 converter build input",  // the extent, grammatical at one
-		"emission-affecting",       // the split
-		"go build",                 // remedy one
-		"-allow-stale-converter",   // remedy two, named so a stale run says so in its command line
-		root,                       // where to run the rebuild
+		"visitFuncDecl.go",        // the enumeration itself
+		"1 converter build input", // the extent, grammatical at one
+		"emission-affecting",      // the split
+		"go build",                // remedy one
+		"-allow-stale-converter",  // remedy two, named so a stale run says so in its command line
+		root,                      // where to run the rebuild
 	} {
 		if !strings.Contains(refusal, required) {
 			t.Errorf("the refusal must carry %q:\n%s", required, refusal)

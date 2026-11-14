@@ -58,7 +58,7 @@ namespace go.golib;
 /// smaller than the one it replaces.
 /// </para>
 /// </remarks>
-public sealed partial class Goroutine
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed partial class Goroutine
 {
     /// <summary>
     /// Environment variable overriding <see cref="StackReserve"/>.
@@ -394,6 +394,28 @@ public sealed partial class Goroutine
     // `!isSystemGoroutine(gp, false)`. A system goroutine counts as user exactly while it is doing
     // user work, which in Go is the finalizer goroutine running a finalizer body and nothing else.
     internal bool CountsAsUser => !IsSystem || Volatile.Read(ref m_userWork) != 0;
+
+    // The frames this goroutine captured on its OWN thread as it entered a forever wait (channel.Wait),
+    // which are the frames a deadlock report prints for it. The CLR walks only the calling thread, so a
+    // parked goroutine's stack cannot be read from the reporter's; but every goroutine a deadlock report
+    // names is in a forever wait, so each captured its own before it counted as parked. A forever wait
+    // never ends, so the capture never goes stale. Null for a goroutine that never entered one.
+    internal System.Diagnostics.StackTrace? ForeverWaitStack { get; private set; }
+
+    // The wait reason of that forever wait, which the report's header prints. The goroutine that reports
+    // has left its park by then, and its live Reason no longer says what it waited on.
+    internal WaitReason ForeverWaitReason { get; private set; }
+
+    // Captures the calling goroutine's frames and wait reason for a deadlock report, from the frame above
+    // the caller. Only a forever wait calls it, so no ordinary wait pays for a stack walk.
+    internal static void CaptureForeverWaitStack(WaitReason reason)
+    {
+        if (t_current is { } current)
+        {
+            current.ForeverWaitStack = new System.Diagnostics.StackTrace(1, fNeedFileInfo: false);
+            current.ForeverWaitReason = reason;
+        }
+    }
 
     // Go's isSystemGoroutine (runtime/traceback.go): a goroutine whose start function lives in the
     // runtime package -- less runtime.main, which has no creator here and is never system. Decided
@@ -1098,18 +1120,32 @@ public sealed partial class Goroutine
         List<(WaitReason Reason, bool Readied, bool IsMain)> users = new(live.Length);
         bool mainExited = s_mainExited;
 
-        foreach (Goroutine goroutine in live)
-        {
-            bool isMain = ReferenceEquals(goroutine, s_main);
-
-            // A main ended by Goexit is not running, whatever its entry last recorded: it is left out here and counted
-            // as blocked for good below, as Go's checkdead finds no main among the goroutines it counts.
-            if (goroutine.CountsAsUser && !(isMain && mainExited))
-                users.Add((goroutine.Reason, goroutine.IsReadied, isMain));
-        }
+        foreach (Goroutine goroutine in UserGoroutines(live))
+            users.Add((goroutine.Reason, goroutine.IsReadied, ReferenceEquals(goroutine, s_main)));
 
         return IsProvableDeadlock(users, mainExited);
     }
+
+    // The user goroutines of a snapshot: the ones the deadlock decision counts, and the ones a deadlock
+    // report prints, in the snapshot's order. A main ended by Goexit is not running, whatever its entry
+    // last recorded: it is left out (counted as blocked for good by IsProvableDeadlock), as Go's checkdead
+    // finds no main among the goroutines it counts and Go's report prints no block for it.
+    private static IEnumerable<Goroutine> UserGoroutines(Goroutine[] live)
+    {
+        bool mainExited = s_mainExited;
+
+        foreach (Goroutine goroutine in live)
+        {
+            if (goroutine.CountsAsUser && !(ReferenceEquals(goroutine, s_main) && mainExited))
+                yield return goroutine;
+        }
+    }
+
+    /// <summary>
+    /// The goroutines a deadlock report prints, in goid order: every user goroutine, main among them
+    /// unless it ended by <c>runtime.Goexit</c>. Read by the hand-owned <c>runtime</c> package's renderer.
+    /// </summary>
+    internal static List<Goroutine> DeadlockReportGoroutines() => [.. UserGoroutines(Snapshot())];
 
     /// <summary>
     /// The deadlock decision itself, over each user goroutine's (wait reason, readied, is main): every one
@@ -1849,7 +1885,7 @@ internal enum GoroutineState
 /// rather than inventing a frame for. <see cref="Labels"/> is Go's <c>gp.labels</c> and is opaque
 /// here by design; the caller that set it is the caller that understands it.
 /// </remarks>
-public readonly struct GoroutineProfileEntry
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct GoroutineProfileEntry
 {
     internal GoroutineProfileEntry(System.Reflection.MethodBase? function, object? labels)
     {

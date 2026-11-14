@@ -29,7 +29,7 @@ namespace go;
 /// before the <c>error</c>. A Go function with more results is rare enough to deconstruct by hand.
 /// </para>
 /// </remarks>
-public static class MustExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class MustExtensions
 {
     /// <summary>
     /// Throws <see cref="GoErrorException"/> when <paramref name="err"/> is not nil.

@@ -35,7 +35,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
-public sealed class GoChanDirAttribute(params GoChanDir[] dirChain) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoChanDirAttribute(params GoChanDir[] dirChain) : Attribute
 {
     /// <summary>The direction chain, outermost first; never empty on an emitted stamp.</summary>
     public GoChanDir[] DirChain { get; } = dirChain;

@@ -51,7 +51,7 @@ namespace go;
 /// Design: <c>docs/Phase4/DESIGN-closure-emission.md</c> §4.
 /// </para>
 /// </remarks>
-public partial struct GoFrame // M:N SPIKE: not a ref struct, so a twin's frame can live across an await
+[EditorBrowsable(EditorBrowsableState.Never)] public partial struct GoFrame // M:N SPIKE: not a ref struct, so a twin's frame can live across an await
 {
     // Inline slots for the common defer arities; m_overflow is the correctness tail past them.
     // FOUR comes from a census of the Go standard library, not from a guess: of its 1,454 deferring

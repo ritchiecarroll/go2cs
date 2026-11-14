@@ -75,3 +75,9 @@ explained set of golden updates, and a passing converter test suite
 (`go test ./...` from `src/go2cs`). A change to `src/gen` or `src/core/golib` also
 owes a full behavioral compile. Corpus regenerations are separate from converter
 fixes so a fix is reviewable on its own.
+
+A change that alters what a C# consumer can bind to (emitted code, go2cs-gen output, golib's public API, package or
+assembly identity, diagnostic codes, MSBuild properties) states which tier of
+[docs/PublicSurface.md](docs/PublicSurface.md) it touches. A tier-1 or tier-2 break follows that page's single
+deprecation path: a break-floor move, a compatibility suppression, an "Upgrading" section in the release notes, and
+the `nugetgo.*` rebuild wave.

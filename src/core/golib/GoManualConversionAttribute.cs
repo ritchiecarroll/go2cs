@@ -32,6 +32,6 @@ namespace go;
 // attribute only confirms that at least one file in the module was manually converted, not
 // identifying individual files.
 [AttributeUsage(AttributeTargets.Module, AllowMultiple = true)]
-public class GoManualConversionAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoManualConversionAttribute : Attribute
 {
 }

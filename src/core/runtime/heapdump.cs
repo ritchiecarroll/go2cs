@@ -755,7 +755,7 @@ internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
             sysFree(@unsafe.Pointer.FromPinnedBox(Ꮡ(tmpbuf, 0)), (uintptr)len(tmpbuf), Ꮡmemstats.Ꮡother_sys);
         }
         var n = nptr / 8 + 1;
-        @unsafe.Pointer pΔ1 = (uintptr)sysAlloc(n, Ꮡmemstats.Ꮡother_sys, heapdumpˢ);
+        @unsafe.Pointer pΔ1 = sysAlloc(n, Ꮡmemstats.Ꮡother_sys, heapdumpˢ);
         if (pΔ1 == nil) {
             @throw(heapdumpOutOfMemoryˢ);
         }

@@ -31,7 +31,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public sealed class GoRefPrimaryAttribute(string typeName, string methodName) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoRefPrimaryAttribute(string typeName, string methodName) : Attribute
 {
     /// <summary>
     /// Gets the Go name of the receiver's struct type.

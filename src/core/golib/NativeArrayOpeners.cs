@@ -34,7 +34,7 @@ namespace go;
 /// than only in a published executable.
 /// </para>
 /// </remarks>
-public static class NativeArrayOpeners
+[EditorBrowsable(EditorBrowsableState.Never)] public static class NativeArrayOpeners
 {
     // E -> NativePointerArrayBox<E>.Over, answering a ж<array<ж<E>>>.
     private static readonly ConcurrentDictionary<Type, Func<nuint, nint, object>> s_pointerArrays = new();

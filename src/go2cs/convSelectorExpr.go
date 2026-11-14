@@ -1343,6 +1343,11 @@ func (v *Visitor) selectorBasePackageObj(selectorExpr *ast.SelectorExpr) *types.
 }
 
 func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context LambdaContext) string {
+	// A word read back as a func through a one-func-field struct (funcWordOperations.go, r2).
+	if emission, ok := v.funcWordEmission(selectorExpr); ok {
+		return emission
+	}
+
 	// A store TARGET on a readonly zero-size layout field (see markZeroSizeFieldStores): emit the plain
 	// selector, then route it through the generated accessor so the store lands on the shared slot.
 	if accessor, ok := v.zeroSizeFieldStores[selectorExpr]; ok {
@@ -2182,6 +2187,17 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 				break
 			}
 
+			// An EXPLICIT dereference of a pointer conversion, `(*(*T)(conv)).F`, selects the same
+			// variable as the implicit `(*T)(conv).F`, so it takes the conversion branch below with the
+			// conversion as its base. Rendered through the star instead, the base was `~cast`, a COPY:
+			// a field store was CS0131 (sqlite-cs S17, 929 sites in modernc.org/sqlite/lib), and a
+			// pointer-receiver method would have run on the copy.
+			renderedBase := selectorExpr.X
+
+			if call := v.derefdPointerConversion(baseExpr); call != nil {
+				baseExpr, renderedBase = call, call
+			}
+
 			if callExpr, ok := baseExpr.(*ast.CallExpr); ok {
 				// Check if the call expressions is a parenthesized expression
 				if _, ok := callExpr.Fun.(*ast.ParenExpr); ok {
@@ -2193,12 +2209,12 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 					if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal {
 						if sig, ok := sel.Obj().Type().(*types.Signature); ok && sig.Recv() != nil {
 							if _, isPtr := sig.Recv().Type().(*types.Pointer); isPtr {
-								return fmt.Sprintf("(%s).%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+								return fmt.Sprintf("(%s).%s", v.convExpr(renderedBase, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 							}
 						}
 					}
 
-					return fmt.Sprintf("(%s).Value.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+					return fmt.Sprintf("(%s).Value.%s", v.convExpr(renderedBase, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 				}
 			}
 

@@ -67,7 +67,7 @@ internal static void set_lr(this ref sigctxt c, uint64 x) { c.regs().regs[30] = 
 internal static void set_r28(this ref sigctxt c, uint64 x) { c.regs().regs[28] = x; }
 
 internal static void set_sigaddr(this ref sigctxt c, uint64 x) {
-    ((ж<uintptr>)(uintptr)((uintptr)add(@unsafe.Pointer.FromPinnedBox(c.info), 2 * goarch.PtrSize))).Value = (uintptr)x;
+    ((ж<uintptr>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(c.info), 2 * goarch.PtrSize))).Value = (uintptr)x;
 }
 
 internal static void dumpSigStack(@string s, uintptr sp, uintptr stackhi, uintptr ctx) {

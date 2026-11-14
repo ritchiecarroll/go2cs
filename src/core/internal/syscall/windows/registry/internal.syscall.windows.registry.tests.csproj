@@ -19,7 +19,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
     <RootNamespace>go.@internal.syscall.windows</RootNamespace>
-    <AssemblyName>internal.syscall.windows.registry.tests</AssemblyName>
+    <AssemblyName>go.internal.syscall.windows.registry.tests</AssemblyName>
     <Product>go2cs</Product>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>

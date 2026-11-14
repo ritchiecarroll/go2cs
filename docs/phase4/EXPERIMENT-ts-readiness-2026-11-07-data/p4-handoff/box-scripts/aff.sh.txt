@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# aff.sh <logfile> <exe> [args...]  -> runs pinned to CPUs 6-11; rc preserved. pwsh launched WITHOUT dotnet10 (it is a net8 tool); child gets dotnet10 back.
+log=$(cygpath -w "$1"); shift
+mkdir -p /h/go2cs-ts-exp/scripts/jobs; af=$(mktemp -p /h/go2cs-ts-exp/scripts/jobs args.XXXXXX); printf '%s\0' "$@" > "$af"
+p=":$PATH:"; p="${p//:\/c\/Users\/<user>\/dotnet10:/:}"; p="${p#:}"; p="${p%:}"
+env -u DOTNET_ROOT PATH="$p" AFF_DOTNET_ROOT='C:\Users\<user>\dotnet10' pwsh -NoProfile -NonInteractive -File 'H:\go2cs-ts-exp\scripts\aff.ps1' "$log" "$(cygpath -w "$af")"
+rc=$?; rm -f "$af"; exit $rc

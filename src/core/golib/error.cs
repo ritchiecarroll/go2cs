@@ -56,7 +56,7 @@ internal interface IErrorTarget
     object? TargetObject { get; }
 }
 
-public class error<T> : error, IErrorTarget, IInterfaceAdapter
+[EditorBrowsable(EditorBrowsableState.Never)] public class error<T> : error, IErrorTarget, IInterfaceAdapter
 {
     private T m_target = default!;
     private readonly ж<T>? m_target_ptr;
@@ -169,7 +169,7 @@ public class error<T> : error, IErrorTarget, IInterfaceAdapter
         Type targetType = typeof(T);
         Type targetTypeByPtr = typeof(ж<T>);
 
-        MethodInfo? extensionMethod = closed(targetTypeByPtr.GetExtensionMethod("Error"), pointer: true);
+        MethodInfo? extensionMethod = ErrorBinding.PointerMethod(targetType, targetTypeByPtr);
 
         if (extensionMethod is not null)
             s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
@@ -227,7 +227,7 @@ public class error<T> : error, IErrorTarget, IInterfaceAdapter
     }
 }
 
-public static class errorExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class errorExtensions
 {
     public static T _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
@@ -310,5 +310,40 @@ public static class errorExtensions
             result = type.IsValueType ? Activator.CreateInstance(type) : null;
             return false;
         }
+    }
+}
+
+/// <summary>
+/// Finds the method <see cref="error{T}"/> binds for a pointer-held target.
+/// </summary>
+internal static class ErrorBinding
+{
+    /// <summary>
+    /// The <c>Error</c> method that takes <paramref name="box"/>, the <c>ж&lt;T&gt;</c> of <paramref name="target"/>, as
+    /// its receiver, or <c>null</c> when <paramref name="target"/> has none.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The method is the type's OWN: one whose receiver is exactly <c>ж&lt;T&gt;</c>, read from the hosts of
+    /// <c>T</c>'s homes (<see cref="TypeExtensions.GetBoxExtensionMethod"/>). A generic type's is declared open
+    /// (<c>Error&lt;K&gt;(this ж&lt;Box&lt;K&gt;&gt;)</c>), which no receiver comparison finds and no delegate binds,
+    /// so it is taken closed over <c>T</c>'s type arguments from the method-set candidate source, the form every
+    /// shell binds.
+    /// </para>
+    /// <para>
+    /// This once asked <c>typeof(ж&lt;T&gt;).GetExtensionMethod("Error")</c>, which reads every extension method of
+    /// every loaded package to answer about one type (a box matches every box receiver by its generic definition),
+    /// and, when the type declared no such method, returned the first unrelated box's <c>Error</c> in scan order:
+    /// whether a generic type's pointer <c>Error</c> was then found depended on which package had loaded first.
+    /// </para>
+    /// </remarks>
+    internal static MethodInfo? PointerMethod(Type target, Type box)
+    {
+        if (!target.IsGenericType)
+            return go.golib.TypeExtensions.GetBoxExtensionMethod(target, box, "Error");
+
+        AdapterBinder.ResolveReceiverMethods(target, "Error", out MethodInfo? byPtr, out _);
+
+        return byPtr;
     }
 }

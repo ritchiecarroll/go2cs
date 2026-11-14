@@ -63,7 +63,7 @@ namespace go;
 /// <summary>
 /// Extension methods for <see cref="ж{T}"/> pointer references.
 /// </summary>
-public static class PointerExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class PointerExtensions
 {
     /// <summary>
     /// Yields this pointer in the form that carries its Go TYPE into interface space — itself when
@@ -203,14 +203,13 @@ public static class PointerExtensions
         // A FUNC read back out of a machine word -- `*(*func())(unsafe.Pointer(&lparam))`, the inbound
         // half of Go's closure-through-an-lParam idiom (runtime's `callback`). The word was minted by
         // GoFuncCookie when the func was read AS a word, so it resolves to that delegate; a zero word is
-        // Go's nil func. Any other word is not something this runtime minted for a func, and keeps the
-        // route below unchanged. The box is a READ view: a store through it does not re-encode the
-        // word into the slot (no Go caller of the idiom writes through it).
-        if (FuncCookieReinterpret<T, TDst>.Applies &&
-            Unsafe.As<T, nuint>(ref box.ValueSlot) is var word &&
-            (word == 0 || GoFuncCookie.IsCookie(word)))
+        // Go's nil func. Any other word is not something this runtime minted for a func, and panics by
+        // name: the route below would read a number as a reference. The box is a READ view: a store
+        // through it does not re-encode the word into the slot (the converter emits a func stored into
+        // a word slot as a store of the func's word, sqlite-cs S1's class w2).
+        if (FuncCookieReinterpret<T, TDst>.Applies)
         {
-            TDst fn = FuncCookieReinterpret<T, TDst>.Resolve(word);
+            TDst fn = FuncCookieReinterpret<T, TDst>.Resolve(Unsafe.As<T, nuint>(ref box.ValueSlot));
             return new StandardBox<TDst>(fn);
         }
 
@@ -396,27 +395,12 @@ public static class PointerExtensions
         /// read as a word; the reading side may name the same Go signature through another delegate
         /// type (a named func type, or <c>Action</c> against a <c>Func</c> twin), so a mismatch is
         /// rebound over the same target and method -- never a DynamicInvoke, which would silently
-        /// narrow the contract. A cookie whose func is no longer alive, or whose signature cannot be
-        /// bound, is refused by name: both are a use of a word nothing live stands behind.
+        /// narrow the contract. A word that is not a cookie, a cookie whose func is no longer alive,
+        /// or one whose signature cannot be bound is refused by name: each is a use of a word nothing
+        /// live stands behind. The resolve is GoFuncCookie's, the one the converter's
+        /// <see cref="GoFuncCookie.Func{F}"/> emission reads through.
         /// </remarks>
-        internal static TDst Resolve(nuint word)
-        {
-            if (word == 0)
-                return default!;
-
-            Delegate? fn = GoFuncCookie.Resolve(word);
-
-            if (fn is null)
-                throw new PanicException("go2cs: func cookie 0x" + word.ToString("x") + " names no live func -- the func value it was read from is no longer referenced");
-
-            if (fn is TDst typed)
-                return typed;
-
-            if (Delegate.CreateDelegate(typeof(TDst), fn.Target, fn.Method, throwOnBindFailure: false) is TDst rebound)
-                return rebound;
-
-            throw new PanicException("go2cs: func cookie 0x" + word.ToString("x") + " holds a " + fn.GetType().Name + ", which cannot be read as " + typeof(TDst).Name);
-        }
+        internal static TDst Resolve(nuint word) => (TDst)(object?)GoFuncCookie.ResolveAs(word, typeof(TDst))!;
     }
 
     internal static class RemembersReinterpretSource<T, TDst>
@@ -705,7 +689,7 @@ public static class PointerExtensions
 /// is Go-observable) and <c>null</c> for a source it does not describe, which leaves the reinterpret
 /// exactly as it was. Unregistered pairs cost one static read.
 /// </remarks>
-public static class PrefixProjection<T, TDst>
+[EditorBrowsable(EditorBrowsableState.Never)] public static class PrefixProjection<T, TDst>
 {
     public static Func<ж<T>, ж<TDst>?>? Project;
 }

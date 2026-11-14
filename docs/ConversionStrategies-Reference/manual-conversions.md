@@ -840,7 +840,7 @@ field is an embed to `reflect`* below).
 <!-- history: Anonymous first waited on field ORDER, because go2cs-gen declared the promoted-embed backing box
      after the declared fields, so struct{X; y; Inner; inner; Ptr} walked as X, y, Ptr, Inner, inner; GoFields'
      reorder by the all-fields constructor and the Anonymous projection landed together. The converter has since
-     declared embeds in place (src/go2cs/visitStructType.go:976 `// declaration order, marked like every other embed:`). -->
+     declared embeds in place (src/go2cs/visitStructType.go:1009 `// declaration order, marked like every other embed:`). -->
 
 Guard: `tests/Behavioral/ReflectUnexportedFieldFlags`, byte-identical to `go run` — the indexed
 walk's `IsExported`/`PkgPath`/`Tag`, `FieldByName` carrying the same flags (including the blank
@@ -1259,6 +1259,41 @@ reads; a same-package target whose parameters
 Phase A lowered to `ref` keeps its stub. It applies only OUTSIDE the converted standard library: the
 corpus's own trampolines (internal/runtime/atomic and the hand-owned sync/atomic) are governed by hand-owns
 and the stub census, and a forwarder there would collide with a hand-owned partial.
+
+## Assembly with real machine code takes a golib body by name — x/sys/cpu's `cpuid` and `xgetbv`
+
+A module function written in assembly that holds real machine code has nothing to forward to: no jump
+target, no linkname. Its bodyless declaration would convert to a stub that throws when called. For
+golang.org/x/sys/cpu that stub sat in the package's init: x/sys/cpu decodes its feature flags from `cpuid`
+and `xgetbv` as it loads, and modernc.org/libc imports it on windows and darwin, so every converted
+program on that path died before `main` (sqlite-cs row S21; `docs/phase4/DESIGN-sqlite-cs-funcptr.md`
+sections 2.3 and 3.7).
+
+**A small table, `asmForwardBodies` (`asmForwardBodies.go`), maps (package, function) to a managed body
+in golib, `go.golib.GoCpu`, together with the Go signature that body implements.** A listed function
+takes the linkname forwarder above, a body calling `global::go.golib.GoCpu.Cpuid(eaxArg, ecxArg)` or
+`global::go.golib.GoCpu.Xgetbv()`:
+- `Cpuid` reads the processor through `X86Base.CpuId`, the same leaves Go's assembly reads, so x/sys/cpu
+  keeps its own decoding of the bits;
+- `Xgetbv` is SYNTHESISED, since .NET has no XGETBV: XCR0 is built from `Sse`, `Avx` and
+  `Avx512F.IsSupported`, which .NET reports only when the OS enables the state. It is a register image from
+  .NET's view of the CPU, not a hardware read, and its doc comment says so.
+
+**The signature is checked.** A listed function declared with another signature refuses its package
+(`GO2CS2011`) before any file is written: the body would answer another question. The table keys on the
+module path alone, so the standard library's vendored copy (`vendor/golang.org/x/sys/cpu`) is untouched.
+
+**A stub that stays is named.** Any bodyless function of a module outside GOROOT that nothing forwards
+(assembly, or a `//go:linkname` pull go2cs does not forward) keeps its throwing stub, and the conversion
+reports it as `GO2CS2012`, a warning naming the function. A program that never calls it is unaffected.
+x/sys/cpu's four arm64 ID-register reads (`getisar0`, `getisar1`, `getpfr0`, `getzfr0`) stay such stubs on
+purpose: x/sys/cpu reads them only on freebsd, which go2cs does not target, so no body for them could be
+run on any target to check it.
+
+**Guarded by:**
+- the converter's `TestAsmForwardBodiesEmission` (both forwards, the stub kept, the warning naming only the
+  stub) and `TestAsmForwardSignatureIsRefusedBySite`;
+- GolibTests' `GoCpuTests` (the CPUID leaves against `X86Base.CpuId`, the synthesised XCR0 bit by bit).
 
 ## A cross-package `//go:linkname` PUSH resolves per recorded disposition — forwarder or announced panic
 
@@ -2880,8 +2915,8 @@ MINI-BRIDGE* above; `GoStructLayoutTests.FieldOrder_IsGoDeclarationOrder_NotMeta
      encoding/json's dominance rules are decided by DEPTH and tag, never by declaration order, and its one
      order-sensitive test (TestMarshalEmbeds) declares its single plain field first. The section then named
      declaration-order cargo as the remedy; the constructor reorder landed instead, and the converter later declared
-     embeds in place (src/go2cs/visitStructType.go:976 `// declaration order, marked like every other embed:`). The
-     legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:507 (`An embed is emitted by the converter as a partial PROPERTY`). -->
+     embeds in place (src/go2cs/visitStructType.go:1009 `// declaration order, marked like every other embed:`). The
+     legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:529 (`An embed is emitted by the converter as a partial PROPERTY`). -->
 
 ## An UNNAMED func type renders STRUCTURALLY, exactly as an unnamed struct does
 
@@ -3658,7 +3693,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5063 (`INLINED PANIC SITES`), :5071 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5118 (`INLINED PANIC SITES`), :5126 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
@@ -4384,7 +4419,7 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3526-3530, 3534-3537, 3546-3547 -->
+<!-- source: src/core/reflect/value_impl.cs:3587-3608 -->
 ```csharp
 public static ΔType ArrayOf(nint length, ΔType elem) {
     if (length < 0) {

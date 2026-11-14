@@ -1,0 +1,145 @@
+658874 samples, 12 threads, span 300.8 s
+  thread 40720: 150876 samples, median depth 4, go frames per sample 2.0
+  thread 42528: 150689 samples, median depth 3, go frames per sample 1.0
+  thread 45904: 150605 samples, median depth 6, go frames per sample 1.0
+  thread 47420: 150162 samples, median depth 43, go frames per sample 41.4
+  thread 21456: 26735 samples, median depth 4, go frames per sample 1.0
+  thread 45804: 5042 samples, median depth 4, go frames per sample 1.0
+  thread 42488: 5036 samples, median depth 4, go frames per sample 1.0
+  thread 22304: 5036 samples, median depth 4, go frames per sample 1.0
+  thread 22464: 5031 samples, median depth 4, go frames per sample 1.0
+  thread 24772: 4845 samples, median depth 4, go frames per sample 1.0
+  thread 49076: 4814 samples, median depth 6, go frames per sample 1.0
+  thread 36808: 3 samples, median depth 3, go frames per sample 0.0
+
+== window 0-30 s: 14125 samples on thread 47420
+  LEAF:
+     17.9%  System.Runtime.CompilerServices.CastHelpers.IsInstanceOfInterface(void*,class System.Object)
+     11.7%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package+<>c__DisplayClass1536_0.<hasBaseType>b__0(class go.?`1<value class ÎType>)
+      7.5%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeReference].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      6.2%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎObjectType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      5.5%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+StructuredType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      5.5%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeBase].Equals(class go.?`1<!0>)
+      5.4%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ConstrainedType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      5.1%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ConstrainedType].Equals(class go.?`1<!0>)
+      2.8%  System.Threading.Thread.<PollGC>g__PollGCWorker|70_0()
+      2.3%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeBase].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      1.4%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎObjectType].Equals(class go.?`1<!0>)
+      1.3%  go.ManagedPointerTokens.AllocationIdOf(class System.Object)
+      1.2%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeReference].go.INativeRooted.get_IsNativeRooted()
+      1.2%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+  INCLUSIVE (go.* frames):
+     99.9%  go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0()
+     99.9%  go.main_package.main()
+     85.2%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.collectCheckerDiagnostics(class go.?`1<value class ÎProgram>,class Context,class go.?`1<value class SourceFile>,class System.Func`4<class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>,value class go.slice`1<class go.?`1<value class Diagnostic>>>)
+     85.2%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.GetSemanticDiagnostics(class go.?`1<value class ÎProgram>,class Context,class go.?`1<value class SourceFile>)
+     85.2%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.getDiagnostics(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>,class go.?`1<value class DiagnosticsCollection>)
+     85.2%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.GetDiagnostics(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>)
+     85.2%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.getSemanticDiagnosticsWithChecker(class go.?`1<value class ÎProgram>,class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>)
+     85.2%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.getBindAndCheckDiagnosticsWithChecker(value class ÎProgram&,class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>)
+     85.2%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceFile(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>,bool)
+     85.2%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElement(class go.?`1<value class Checker>,class go.?`1<value class Node>)
+     85.2%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElements(class go.?`1<value class Checker>,value class go.slice`1<class go.?`1<value class Node>>)
+     85.2%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElementWorker(class go.?`1<value class Checker>,class go.?`1<value class Node>)
+     82.4%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.getBaseTypes(class go.?`1<value class Checker>,class go.?`1<value class ÎType>)
+     81.9%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package+<>c__DisplayClass1536_0.<hasBaseType>b__0(class go.?`1<value class ÎType>)
+  max stack depth 100, median 39
+
+== window 30-120 s: 45352 samples on thread 47420
+  LEAF:
+     21.3%  System.Runtime.CompilerServices.CastHelpers.IsInstanceOfInterface(void*,class System.Object)
+     14.9%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package+<>c__DisplayClass1536_0.<hasBaseType>b__0(class go.?`1<value class ÎType>)
+      9.9%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeReference].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      7.4%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeBase].Equals(class go.?`1<!0>)
+      7.3%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎObjectType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      6.9%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+StructuredType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      6.4%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ConstrainedType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      6.2%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ConstrainedType].Equals(class go.?`1<!0>)
+      3.0%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeBase].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      1.7%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeReference].go.INativeRooted.get_IsNativeRooted()
+      1.6%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎObjectType].Equals(class go.?`1<!0>)
+      1.5%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      1.4%  go.ManagedPointerTokens.AllocationIdOf(class System.Object)
+      1.0%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+StructuredType].get_OrderTokenIsExact()
+  INCLUSIVE (go.* frames):
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElementWorker(class go.?`1<value class Checker>,class go.?`1<value class Node>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElement(class go.?`1<value class Checker>,class go.?`1<value class Node>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElements(class go.?`1<value class Checker>,value class go.slice`1<class go.?`1<value class Node>>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceFile(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>,bool)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.getDiagnostics(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>,class go.?`1<value class DiagnosticsCollection>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.GetDiagnostics(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.getBindAndCheckDiagnosticsWithChecker(value class ÎProgram&,class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.getSemanticDiagnosticsWithChecker(class go.?`1<value class ÎProgram>,class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.collectCheckerDiagnostics(class go.?`1<value class ÎProgram>,class Context,class go.?`1<value class SourceFile>,class System.Func`4<class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>,value class go.slice`1<class go.?`1<value class Diagnostic>>>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.GetSemanticDiagnostics(class go.?`1<value class ÎProgram>,class Context,class go.?`1<value class SourceFile>)
+    100.0%  go.main_package.main()
+    100.0%  go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0()
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.getBaseTypes(class go.?`1<value class Checker>,class go.?`1<value class ÎType>)
+     99.9%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package+<>c__DisplayClass1536_0.<hasBaseType>b__0(class go.?`1<value class ÎType>)
+  max stack depth 100, median 42
+
+== window 120-300 s: 90306 samples on thread 47420
+  LEAF:
+     20.6%  System.Runtime.CompilerServices.CastHelpers.IsInstanceOfInterface(void*,class System.Object)
+     15.2%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package+<>c__DisplayClass1536_0.<hasBaseType>b__0(class go.?`1<value class ÎType>)
+     11.9%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeReference].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      7.6%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎObjectType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      7.4%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeBase].Equals(class go.?`1<!0>)
+      6.4%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ConstrainedType].Equals(class go.?`1<!0>)
+      5.8%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ConstrainedType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      5.6%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+StructuredType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      2.9%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeBase].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      1.6%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeReference].go.INativeRooted.get_IsNativeRooted()
+      1.6%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      1.6%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎObjectType].Equals(class go.?`1<!0>)
+      1.2%  go.ManagedPointerTokens.AllocationIdOf(class System.Object)
+      1.0%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeReference].get_OrderTokenIsExact()
+  INCLUSIVE (go.* frames):
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElementWorker(class go.?`1<value class Checker>,class go.?`1<value class Node>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElement(class go.?`1<value class Checker>,class go.?`1<value class Node>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElements(class go.?`1<value class Checker>,value class go.slice`1<class go.?`1<value class Node>>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceFile(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>,bool)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.getDiagnostics(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>,class go.?`1<value class DiagnosticsCollection>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.GetDiagnostics(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.getBindAndCheckDiagnosticsWithChecker(value class ÎProgram&,class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.getSemanticDiagnosticsWithChecker(class go.?`1<value class ÎProgram>,class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.collectCheckerDiagnostics(class go.?`1<value class ÎProgram>,class Context,class go.?`1<value class SourceFile>,class System.Func`4<class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>,value class go.slice`1<class go.?`1<value class Diagnostic>>>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.GetSemanticDiagnostics(class go.?`1<value class ÎProgram>,class Context,class go.?`1<value class SourceFile>)
+    100.0%  go.main_package.main()
+    100.0%  go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0()
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.getBaseTypes(class go.?`1<value class Checker>,class go.?`1<value class ÎType>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package+<>c__DisplayClass1536_0.<hasBaseType>b__0(class go.?`1<value class ÎType>)
+  max stack depth 100, median 44
+
+== window 300-end s: 379 samples on thread 47420
+  LEAF:
+     17.2%  System.Runtime.CompilerServices.CastHelpers.IsInstanceOfInterface(void*,class System.Object)
+     15.6%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package+<>c__DisplayClass1536_0.<hasBaseType>b__0(class go.?`1<value class ÎType>)
+     11.9%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeReference].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      9.5%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+StructuredType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      6.9%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeBase].Equals(class go.?`1<!0>)
+      6.9%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎObjectType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      6.3%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ConstrainedType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      5.5%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ConstrainedType].Equals(class go.?`1<!0>)
+      2.1%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeBase].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      1.8%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎType].GoFieldOffsetOf(class System.Object,class System.Delegate)
+      1.6%  go.?`1+FieldRefWrappers`1+<>c__DisplayClass2_0[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+StructuredType,go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ConstrainedType].<Wrap>g__getFieldRef|0(class System.Object)
+      1.6%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeReference].get_Value()
+      1.6%  go.?`1+FieldRefWrappers`1+<>c__DisplayClass2_0[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+TypeReference,go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎObjectType].<Wrap>g__getFieldRef|0(class System.Object)
+      1.6%  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.checker_package+ÎObjectType].Equals(class go.?`1<!0>)
+  INCLUSIVE (go.* frames):
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package+<>c__DisplayClass1536_0.<hasBaseType>b__0(class go.?`1<value class ÎType>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.resolveBaseTypesOfClass(class go.?`1<value class Checker>,class go.?`1<value class ÎType>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.getBaseTypes(class go.?`1<value class Checker>,class go.?`1<value class ÎType>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkClassLikeDeclaration(class go.?`1<value class Checker>,class go.?`1<value class Node>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkClassDeclaration(class go.?`1<value class Checker>,class go.?`1<value class Node>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElementWorker(class go.?`1<value class Checker>,class go.?`1<value class Node>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElement(class go.?`1<value class Checker>,class go.?`1<value class Node>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceElements(class go.?`1<value class Checker>,value class go.slice`1<class go.?`1<value class Node>>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.checkSourceFile(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>,bool)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.getDiagnostics(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>,class go.?`1<value class DiagnosticsCollection>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.checker_package.GetDiagnostics(class go.?`1<value class Checker>,class Context,class go.?`1<value class SourceFile>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.getBindAndCheckDiagnosticsWithChecker(value class ÎProgram&,class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.getSemanticDiagnosticsWithChecker(class go.?`1<value class ÎProgram>,class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>)
+    100.0%  go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.collectCheckerDiagnostics(class go.?`1<value class ÎProgram>,class Context,class go.?`1<value class SourceFile>,class System.Func`4<class Context,class go.?`1<value class Checker>,class go.?`1<value class SourceFile>,value class go.slice`1<class go.?`1<value class Diagnostic>>>)
+  max stack depth 50, median 39

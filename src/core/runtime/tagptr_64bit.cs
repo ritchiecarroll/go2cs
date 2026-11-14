@@ -63,8 +63,8 @@ private static readonly @string taggedPointerPackˢᵇ = "taggedPointerPack"u8;
 // Tag bits that don't fit in the result are discarded.
 internal static taggedPointer taggedPointerPack(@unsafe.Pointer ptr, uintptr tag) {
     var t = (taggedPointer)((uint64)(uintptr)ptr << (int)(tagBits - tagAlignBits) | (uint64)((uintptr)(tag & (uintptr)((1 << (int)(tagBits)) - 1))));
-    if ((uintptr)t.pointer() != ptr || t.tag() != tag) {
-        print((@string)"runtime: taggedPointerPack invalid packing: ptr=", @unsafe.Pointer.OrTypedNil(ptr), (@string)" tag=", (Δhex)(uint64)tag, (@string)" packed=", (Δhex)(uint64)t, (@string)" -> ptr=", @unsafe.Pointer.OrTypedNil((uintptr)t.pointer()), (@string)" tag=", (Δhex)(uint64)t.tag(), (@string)"\n");
+    if (t.pointer() != ptr || t.tag() != tag) {
+        print((@string)"runtime: taggedPointerPack invalid packing: ptr=", @unsafe.Pointer.OrTypedNil(ptr), (@string)" tag=", (Δhex)(uint64)tag, (@string)" packed=", (Δhex)(uint64)t, (@string)" -> ptr=", @unsafe.Pointer.OrTypedNil(t.pointer()), (@string)" tag=", (Δhex)(uint64)t.tag(), (@string)"\n");
         @throw(taggedPointerPackˢ);
     }
     return t;

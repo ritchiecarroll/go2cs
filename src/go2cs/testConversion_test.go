@@ -483,8 +483,6 @@ func TestPlatformSkipDisclosureOracle(t *testing.T) {
 	}
 }
 
-
-
 // The FLOOR's guards (ruling 2026-09-05). A floor lets one entry carry a structural part and a
 // deferrable excess at once, so its arms test the pairings that would let either half hide: a floor
 // on the label that claims nothing is reducible, a floor with no falsifiable sketch, a floor that

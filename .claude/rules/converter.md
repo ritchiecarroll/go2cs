@@ -49,6 +49,12 @@ Entry `src/go2cs/main.go`; stdlib driver `stdLibConverter.go` (dependency graph 
 `nameCollisionAnalysisOperations.go`, `constraintOperations.go` (generics), `importOperations.go`.
 Full taxonomy: [`docs/Architecture.md`](docs/Architecture.md).
 
+- **Run gofmt on the stored LF blob (`git show HEAD:<path> | gofmt`), never in place on a Windows checkout.** <!-- ⚠
+  2026-11-12, the gofmt sweep (claude/r-gofmt-sweep): an in-place gofmt -w on the CRLF working copy left 5 of 30 files
+  unclean, because gofmt's doc-comment reformatting (a blank // line between a list and the next paragraph) does not
+  fire on CRLF input. repoguard's TestConverterSourcesAreGofmtClean strips CR for the same reason. -->
+**A change to what a C# consumer can bind to states its tier** ([`docs/PublicSurface.md`](docs/PublicSurface.md)): emitted names and shapes, package or assembly identity, diagnostic codes, flags. A tier-1 or tier-2 break takes the page's single deprecation path.
+
 ## Flag reference
 
 `go2cs [options] <input_dir> [output_dir]`; `main.go` is authoritative.

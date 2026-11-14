@@ -284,6 +284,15 @@ var interfaceInheritances map[string]hashset.HashSet[string]
 // referencing a class the generator never emits (net/http, CS0246 ×17). Guarded by packageLock.
 var adapterClassImplementations hashset.HashSet[string]
 
+// closedCarrierImplementations marks recorded "iface|impl" GoImplement pairs that take a CLOSED CARRIER: an
+// instantiation of a generic type of this package, converted to a non-generic interface whose method names the
+// type's own type parameter (closedCarrier.go). Their records are written with `Closed = true`. Guarded by packageLock.
+var closedCarrierImplementations hashset.HashSet[string]
+
+// closedCarrierWarnings holds the closed-carrier refusals already reported from a conversion site, as
+// "file|text", so one pair converted many times in a file is reported once. Guarded by packageLock.
+var closedCarrierWarnings hashset.HashSet[string]
+
 var implicitConversions map[string]hashset.HashSet[string]
 
 var invertedImplicitConversions map[string]hashset.HashSet[string]
@@ -516,6 +525,17 @@ var packageDynamicTypeNames map[string]string
 // registries never hold it. Loaded beside the package's exported aliases (loadImportedTypeAliases);
 // guarded by packageLock; reset per package by resetPackageState.
 var importedDynamicTypeNames map[string]map[string]string
+
+// importedPublicLiftNames holds, per imported package's cleaned source directory, the names of the
+// lifted types its package_info.cs declares PUBLIC (`public partial struct Xᴛ1 {}`). An importer reuses
+// only a public lift (importedStructLift); an internal one is CS0122 from another assembly. Loaded beside
+// importedDynamicTypeNames; guarded by packageLock; reset per package by resetPackageState.
+var importedPublicLiftNames map[string]map[string]bool
+
+// importedStructLiftTargets maps the code-body name of each imported lift this package reused
+// (importedStructLift) to its package-qualified spelling below the root namespace, for a `global using`
+// RHS (importedStructLiftTarget). Guarded by packageLock; reset per package by resetPackageState.
+var importedStructLiftTargets map[string]string
 
 // packageConstraintLiftNames maps a generic type's inline-constraint DECLARATION (constraintLiftKey)
 // to its lift, for the methods whose receiver copy of the constraint no signature key may name.

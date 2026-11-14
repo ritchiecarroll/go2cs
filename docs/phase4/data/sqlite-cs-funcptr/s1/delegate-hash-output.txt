@@ -1,0 +1,1 @@
+hash A 58225482 hash B 58225482 equal-hash True; A equals A' True; A equals B False

@@ -369,7 +369,10 @@ public class RuntimePinnerTests
 
         // m_id (option 3, ruling 2026-09-30): a heap box's unique allocation id. Its cost, measured: 0 bytes
         // (72 -> 72 per ж of a 24-byte struct), since an int beside m_isNull fills the base block's padding.
-        CollectionAssert.AreEqual(new[] { "m_id", "m_isNull", "m_pin", "m_publishedArrayBacking" }, Fields(typeof(ж<>)),
+        // m_identityFacts (C51, 2026-11-11): a field view's cached identity facts, one byte read by FieldRefBox alone. Its
+        // cost, measured: 0 bytes (a converted *T over one embedded hop allocates 224 B and over five hops 792 B, before and
+        // after), since the byte joins m_id in the same padding.
+        CollectionAssert.AreEqual(new[] { "m_id", "m_identityFacts", "m_isNull", "m_pin", "m_publishedArrayBacking" }, Fields(typeof(ж<>)),
             "ж<T> gained instance state — the Pinner keeps its bit in a side table, not on the box");
         CollectionAssert.AreEqual(new[] { "m_slot", "m_val" }, Fields(typeof(StandardBox<>)),
             "StandardBox<T> gained instance state");

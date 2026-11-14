@@ -33,7 +33,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true, Inherited = false)]
-public sealed class GoSigChanDirAttribute(string method, Type?[] parameterTypes, GoChanDir[] parameterDirs, GoChanDir[] resultDirs) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoSigChanDirAttribute(string method, Type?[] parameterTypes, GoChanDir[] parameterDirs, GoChanDir[] resultDirs) : Attribute
 {
     /// <summary>The C# method name.</summary>
     public string Method { get; } = method;

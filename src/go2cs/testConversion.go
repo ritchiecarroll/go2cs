@@ -697,29 +697,29 @@ type testSource struct {
 }
 
 type testManifest struct {
-	SchemaVersion           int               `json:"schemaVersion"`
-	CapabilitiesVersion     int               `json:"capabilitiesVersion"`
-	PackageImportPath       string            `json:"packageImportPath"`
-	ModulePath              string            `json:"modulePath,omitempty"`
-	ProjectName             string            `json:"projectName"`
-	TestProject             string            `json:"testProject"`
-	GoVersion               string            `json:"goVersion"`
-	TargetGOOS              string            `json:"targetGOOS"`
-	TargetGOARCH            string            `json:"targetGOARCH"`
-	SourceRevision          string            `json:"sourceRevision,omitempty"`
-	ConverterRevision       string            `json:"converterRevision"`
-	InputDigest             string            `json:"inputDigest"`
-	TestProjectModel        string            `json:"testProjectModel,omitempty"`
-	ProductionFiles         []string          `json:"productionFiles"`
-	TestSources             []testSource      `json:"testSources"`
-	Fixtures                []string          `json:"fixtures"`
-	FixtureDirectories      []string          `json:"fixtureDirectories"`
+	SchemaVersion       int          `json:"schemaVersion"`
+	CapabilitiesVersion int          `json:"capabilitiesVersion"`
+	PackageImportPath   string       `json:"packageImportPath"`
+	ModulePath          string       `json:"modulePath,omitempty"`
+	ProjectName         string       `json:"projectName"`
+	TestProject         string       `json:"testProject"`
+	GoVersion           string       `json:"goVersion"`
+	TargetGOOS          string       `json:"targetGOOS"`
+	TargetGOARCH        string       `json:"targetGOARCH"`
+	SourceRevision      string       `json:"sourceRevision,omitempty"`
+	ConverterRevision   string       `json:"converterRevision"`
+	InputDigest         string       `json:"inputDigest"`
+	TestProjectModel    string       `json:"testProjectModel,omitempty"`
+	ProductionFiles     []string     `json:"productionFiles"`
+	TestSources         []testSource `json:"testSources"`
+	Fixtures            []string     `json:"fixtures"`
+	FixtureDirectories  []string     `json:"fixtureDirectories"`
 	// Fixture directories staged as a LINK into the real GOROOT directory rather than as file
 	// copies, so the Go toolchain accepts their `internal/…` imports (linkStagedFixtureDirs).
 	// Their files appear in NEITHER Fixtures nor the csproj: the host creates one link each at
 	// sandbox construction. `omitempty` keeps every package that has none byte-identical to what a
 	// converter without this capability wrote.
-	FixtureLinks            []string          `json:"fixtureLinks,omitempty"`
+	FixtureLinks []string `json:"fixtureLinks,omitempty"`
 	// The //go:embed payloads the convert hashed into InputDigest (testEmbedPayloads), so validation in a
 	// process that does not convert hashes the same paths. `omitempty`: a package with none writes the
 	// manifest a converter without this field wrote.
@@ -1359,7 +1359,7 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 		dynamicTypeNames:     packageDynamicTypeNames,
 		hoistedConstOrdinals: packageHoistedConstOrdinals,
 		globalTempVarCounts:  globalTempVarCount,
-		importForces:    packageImportForces,
+		importForces:         packageImportForces,
 		initFuncs:            initFuncCounter,
 	}
 
@@ -3230,6 +3230,34 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		prodEntries = append(prodEntries, prodEntry)
 	}
 
+	// Inline arrays (inlineArrayStamp.go): the INTERNAL variant recompiles the production files, so it holds their
+	// structs exactly as the production conversion recorded, applying the recorded rule to the production files and
+	// refusing a record they do not reproduce. Its own -inline-arrays value and its _test.go files never decide. The
+	// EXTERNAL variant declares no production struct and admits nothing.
+	if len(prodEntries) > 0 {
+		recorded, ok := readInlineArrayStamp(platformPackageInfoPath(outputPath, options.targetPlatform))
+		stamp, err := inlineArrayTestsStamp(recorded, ok, pkg.PkgPath, options)
+
+		if err != nil {
+			return nil, nil, fmt.Errorf("%s: %w", pkg.PkgPath, err)
+		}
+
+		prodFiles := make([]*ast.File, 0, len(prodEntries))
+
+		for _, entry := range prodEntries {
+			prodFiles = append(prodFiles, entry.file)
+		}
+
+		admission, err := admitFromStamp(prodFiles, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, stamp, options)
+
+		if err != nil {
+			return nil, nil, fmt.Errorf("%s: %w", pkg.PkgPath, err)
+		}
+
+		packageInlineAdmission = admission
+		packageInlineArrayRecords = inlineArrayStampRecords(admission, inlineArrayMode(pkg.Types.Path(), pkg.Dir, stampedOptions(options, pkg.Types.Path(), stamp.mode)))
+	}
+
 	// ж-box A2 (three-driver rule, DESIGN-zh-box-reduction §3.5): the ref-lowering classification
 	// runs in the -tests driver too — over the PRODUCTION files only (prodEntries; the entry point
 	// additionally filters `_test.go` structurally), so the merged white-box package's test-side
@@ -4990,7 +5018,7 @@ func writeTestProject(projectFile, projectName, namespace, importPath string, mo
 
 	contents := []byte(strings.NewReplacer(
 		TestRootNamespaceMarker, namespace,
-		TestAssemblyNameMarker, projectName+".tests",
+		TestAssemblyNameMarker, testAssemblyName(projectFile, projectName, options),
 		TestGo2CSRelativePathMarker, escapeXMLAttributeValue(relativeGo2CSPath),
 		TestCompileItemsMarker, compileItems.String(),
 		TestFixtureItemsMarker, fixtureItems.String(),
@@ -7493,7 +7521,7 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 // host is removed first, and it has to (see removePublishedTestHost).
 //
 // options.testConfig == "Release" takes the OTHER honest seam instead: the template's
-// Debug-conditional default is inside a `Condition="'$(go2csPath)'==''"` guard
+// Debug-conditional default is inside a `Condition="'$(go2csPath)'==”"` guard
 // (test-csproj-template.xml), so passing `-p:go2csPath` explicitly on the command line skips that
 // guard entirely regardless of configuration — the same escape CLAUDE.md documents for a
 // hand-invoked Release build elsewhere. Forward slashes and a trailing slash, matching that
@@ -7552,7 +7580,7 @@ const publishTargetPathProperty = "TargetPath"
 // A publish that states no path, or a path whose assembly does not exist, is an error, never a pass: after a successful
 // publish the build output exists, and a guard that cannot see must say so.
 func publishBuildOutput(output, testProject string) (string, error) {
-	assembly := strings.TrimSuffix(filepath.Base(testProject), filepath.Ext(testProject)) + ".dll"
+	assembly := testAssemblyFileName(testProject) + ".dll"
 	lines := strings.Split(output, "\n")
 
 	for i := len(lines) - 1; i >= 0; i-- {
@@ -8006,12 +8034,27 @@ func testHostLaunchDir(inputPath, outputPath string) string {
 	return outputPath
 }
 
-// publishedTestHostPath is the single-file executable publishTestHost produces: the test project's
-// own base name (which the template also uses as the AssemblyName), under the deterministic
-// publish directory, with the HOST platform's executable suffix — the run always happens on the
-// machine that published.
-func publishedTestHostPath(outputPath, testProject string) string {
+// testAssemblyFileName is the name the test project's build gives its assembly and its published host: the project's
+// declared AssemblyName, which since OQ4 differs from the file name for a standard-library test project (go.fmt.tests in
+// fmt.tests.csproj), else the file's base name, for a project that declares none or cannot be read. Both the build
+// output (publishBuildOutput) and the host (publishedTestHostPath) are found through it, so they cannot drift apart.
+func testAssemblyFileName(testProject string) string {
 	name := strings.TrimSuffix(filepath.Base(testProject), filepath.Ext(testProject))
+
+	if contents, err := os.ReadFile(testProject); err == nil {
+		if declared := declaredAssemblyName(string(contents)); declared != "" {
+			name = declared
+		}
+	}
+
+	return name
+}
+
+// publishedTestHostPath is the single-file executable publishTestHost produces: the test project's
+// assembly name (testAssemblyFileName), under the deterministic publish directory, with the HOST
+// platform's executable suffix — the run always happens on the machine that published.
+func publishedTestHostPath(outputPath, testProject string) string {
+	name := testAssemblyFileName(testProject)
 
 	if runtime.GOOS == "windows" {
 		name += ".exe"
@@ -8329,7 +8372,6 @@ const platformSkipClass = "platform-skip"
 // (coordinator ruling, mailbox 82ec6654c).
 const cgoConfigurationClass = "cgo-configuration"
 
-
 // deferredClass and structuralClass are the TWO labels every allocation-count disclosure resolves
 // into (coordinator ruling 2026-09-05, owner-ratified the same day, mailbox bd08f67c6 / 7c2d7ee44 /
 // 6087c58c7). They exist because `alloc-profile` had come to carry two different claims under one
@@ -8338,17 +8380,17 @@ const cgoConfigurationClass = "cgo-configuration"
 // behavioural property, so such an assertion is never disclosed as CLR-STRUCTURAL merely because it
 // fails today, but it MAY be deferred against a named plan to reach it.
 //
-//   deferred   -- the CLR CAN meet the assertion in principle; the entry names the retirement plan
-//                 that will. One plan may cover MANY entries by MECHANISM FAMILY (a box minted per
-//                 address-take, an element take, an out-parameter, an intermediate buffer in a
-//                 string conversion), so the requirement is met by family rather than by a bespoke
-//                 design per entry. It is a COMMITMENT, not an excuse: the owner's strengthening
-//                 makes the plan a hard requirement, and a plan whose design record is retired
-//                 without a replacement fails the row at its next sweep exactly as a regression
-//                 would.
-//   structural -- the entry carries a PROOF, stated in its reason, that no managed implementation
-//                 can meet the assertion, with the object Go keeps off the heap NAMED. Expected to
-//                 be rare, and each one is a claim the next reader may falsify.
+//	deferred   -- the CLR CAN meet the assertion in principle; the entry names the retirement plan
+//	              that will. One plan may cover MANY entries by MECHANISM FAMILY (a box minted per
+//	              address-take, an element take, an out-parameter, an intermediate buffer in a
+//	              string conversion), so the requirement is met by family rather than by a bespoke
+//	              design per entry. It is a COMMITMENT, not an excuse: the owner's strengthening
+//	              makes the plan a hard requirement, and a plan whose design record is retired
+//	              without a replacement fails the row at its next sweep exactly as a regression
+//	              would.
+//	structural -- the entry carries a PROOF, stated in its reason, that no managed implementation
+//	              can meet the assertion, with the object Go keeps off the heap NAMED. Expected to
+//	              be rare, and each one is a claim the next reader may falsify.
 //
 // The bare `alloc-profile` label is LEGACY and retires per row as rows re-sweep; it is still
 // accepted here so a row that has not re-swept keeps comparing, and its entries re-classify at
@@ -9144,7 +9186,6 @@ func signatureMismatchDetail(name, verb string, disclosure testDisclosure, csOut
 	return fmt.Sprintf("%s carries every half of the disclosed %s entry, but they cannot each be matched in a record of their own: %s",
 		verb, disclosure.classLabel(), disclosure.signatureLabel())
 }
-
 
 // leadingInteger reads the integer a disclosure's `want` leads with ("0 allocations" -> 0), which is
 // what a floor is compared against. Deliberately strict: it does not hunt for a number anywhere in

@@ -38,7 +38,7 @@ namespace go;
 /// what the caller's own frame already rooted.
 /// </para>
 /// </remarks>
-public sealed class NativeBox<T> : ж<T>, INativeRooted
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class NativeBox<T> : ж<T>, INativeRooted
 {
     // The native address this box aliases — never managed storage it owns.
     private readonly nuint m_nativeAddr;
@@ -267,4 +267,9 @@ public sealed class NativeBox<T> : ж<T>, INativeRooted
     {
         return Interlocked.CompareExchange(ref *(ulong*)DereferenceableAddress(), @new, old) == old;
     }
+
+    // C memory alone: an address no reinterpret fallback derived from managed storage, that is no order token, and
+    // that no pin holds over managed storage. It is the one pointer whose address a cgo wrapper hands C, asked here
+    // without the pointee type because an unsafe.Pointer carries its box as an object (GoCgoArgs.VoidPointer).
+    bool INativeRooted.IsGenuinelyNativeRoot => m_retainedSource is null && !m_aliasesAnOrderToken && m_pin is null;
 }

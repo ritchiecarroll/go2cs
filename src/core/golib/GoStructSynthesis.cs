@@ -93,7 +93,7 @@ namespace go;
 /// supplied by the caller because golib cannot reference <c>internal/abi</c>. It participates in the
 /// shape key and in nothing else.
 /// </remarks>
-public readonly struct GoSynthField
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct GoSynthField
 {
     /// <summary>The GO field name — <c>"_"</c> for a blank field, the embedded type's name for an embed.</summary>
     public readonly string Name;
@@ -133,7 +133,7 @@ public readonly struct GoSynthField
 /// back a <c>reflect.Type</c> the rest of the bridge describes exactly as it describes a converted
 /// struct.
 /// </summary>
-public static class GoStructSynthesis
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoStructSynthesis
 {
     // Everything below is guarded by this one lock: the shape intern, the module, the pkgpath
     // containers, the seed table and the mint. It is held across DefineType/CreateType, which is

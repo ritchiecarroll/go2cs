@@ -77,6 +77,10 @@ type CallExprContext struct {
 	// as nothing (typedNilInterfaceBoxing.go's third arm). Marked only for an EXACT unsafe.Pointer —
 	// a named type over it renders as its wrapper struct.
 	anyBoxedUnsafePointerArgs map[int]bool
+	// inlineArrayBoxArgs marks the arguments that box an INLINE array (a go.arrays member, inlineArrayEmission.go) into
+	// an interface parameter: each crosses as its deep array<T> copy (inlineArrayBoxCopy), the one representation every
+	// other Go [N]T has in interface space.
+	inlineArrayBoxArgs map[int]bool
 	// anyBoxedTypeParamArgs is the TYPE-PARAMETER sibling of the three maps above, at the same slots: inside a generic
 	// body a value of type E may be a nil pointer, func or unsafe.Pointer at run time, so it takes golib's
 	// OrTypedNilOf, which decides per type argument (typedNilInterfaceBoxing.go, applyTypedNilTypeParamBox).
@@ -466,8 +470,8 @@ func DefaultIdentContext() IdentContext {
 		isMethod:                false,
 		suppressGenericTypeArgs: false,
 		ident:                   nil,
-		fieldCollidesWithType: false,
-		fieldTypeIsRenamed:    false,
+		fieldCollidesWithType:   false,
+		fieldTypeIsRenamed:      false,
 	}
 }
 

@@ -44,7 +44,7 @@ namespace go;
 /// <see cref="@string"/>.
 /// </para>
 /// </remarks>
-public readonly ref struct sstring
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly ref struct sstring
 {
     // A read-only view over UTF-8 bytes. NOT owned/copied: sstring aliases whatever backing the
     // source span points at (a []byte, a u8 literal, an @string's bytes, a stackalloc, ...).

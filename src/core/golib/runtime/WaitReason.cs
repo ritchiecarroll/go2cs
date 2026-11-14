@@ -33,7 +33,7 @@ namespace go.golib;
 /// those adds its member with its Go string at that time.
 /// </para>
 /// </remarks>
-public enum WaitReason
+[EditorBrowsable(EditorBrowsableState.Never)] public enum WaitReason
 {
     /// <summary>
     /// Not parked — Go's <c>waitReasonZero</c>, whose string is empty.
@@ -132,7 +132,7 @@ public enum WaitReason
 /// <summary>
 /// The text a <see cref="WaitReason"/> prints in a goroutine traceback header.
 /// </summary>
-public static class WaitReasons
+[EditorBrowsable(EditorBrowsableState.Never)] public static class WaitReasons
 {
     /// <summary>
     /// Returns Go's own string for <paramref name="reason"/> — the word that appears between the

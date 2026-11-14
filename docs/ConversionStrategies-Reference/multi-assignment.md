@@ -226,6 +226,23 @@ not correctness.)
 `Event`/`Events`, exercised by disjoint swaps, a full reversal, and a selection sort driven entirely by the
 call-deref swap, output-compared vs `go run`; the pre-fix converter leaves all three visibly uncorrected.)
 
+## A dereferenced pointer CONVERSION as a tuple target writes through `.Value`
+A single assignment to `*(*T)(p)` writes through the converted box, `((ж<T>)(uintptr)p).Value = v`. The tuple
+target was rendered as a read instead, with the prefix `~` dereference, which is a value and not a variable,
+so a parallel assignment through two such targets did not compile (CS0131). modernc.org/libc's `qsort.go`
+swaps elements this way (sqlite-cs row S14):
+
+```go
+*(*uint64)(unsafe.Pointer(p)), *(*uint64)(unsafe.Pointer(q)) = *(*uint64)(unsafe.Pointer(q)), *(*uint64)(unsafe.Pointer(p))
+```
+
+Each tuple target now takes the single assignment's `.Value` spelling, and the right-hand reads keep `~`, so the
+statement stays one simultaneous deconstruction, like the Go line: `(((ж<uint64>)(uintptr)((@unsafe.Pointer)p)).Value,
+((ж<uint64>)(uintptr)((@unsafe.Pointer)q)).Value) = (~(ж<uint64>)(uintptr)((@unsafe.Pointer)q), ~(ж<uint64>)(uintptr)((@unsafe.Pointer)p));`.
+Every such target was a compile error before, so no compiled corpus file changes. (Guarded by
+`ParallelDerefCastAssign`: a swap through `uintptr` addresses, a three-way rotate through `unsafe.Pointer`, and a
+swap of an address with itself, output-compared vs Go.)
+
 ## An address-taken reference-typed local heap-boxes too — `Ꮡ(value)` copies are only for reads
 An INHERENTLY heap-allocated local (interface/pointer/slice/map/chan/func) is already a
 reference, so escape analysis blanket-marks it, and without a box `&local` would take the

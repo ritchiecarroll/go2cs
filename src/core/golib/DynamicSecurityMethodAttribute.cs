@@ -37,6 +37,6 @@ namespace System.Security;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, AllowMultiple = false, Inherited = false)]
-public sealed class DynamicSecurityMethodAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class DynamicSecurityMethodAttribute : Attribute
 {
 }

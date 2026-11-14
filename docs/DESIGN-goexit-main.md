@@ -41,8 +41,8 @@ frames run their deferred calls during the unwind, and the goroutine root swallo
 goroutine, `runtime.Goexit` throws `NotSupportedException` naming the Goexit design record, and the program exits 2
 with that message instead of Go's.
 
-<!-- src/core/runtime/managed_impl.cs:1517 (`if (!Goroutine.OnGoroutine)`), :1528 (`throw new GoexitException();`).
-The goroutine root: src/core/golib/runtime/Goroutine.cs:517 (`public static bool OnGoroutine => t_current is { IsMain: false };`). -->
+<!-- src/core/runtime/managed_impl.cs:1547 (`if (!Goroutine.OnGoroutine)`), :1558 (`throw new GoexitException();`).
+The goroutine root: src/core/golib/runtime/Goroutine.cs:539 (`public static bool OnGoroutine => t_current is { IsMain: false };`). -->
 
 ## Why the goroutine shape does not carry over
 
@@ -84,9 +84,9 @@ while the main thread is parked.
 
 <!-- The filter: src/core/golib/GoFrame.cs:685 (`public static bool IsPanic(Exception ex, [NotNullWhen(true)] out PanicException? panic)`),
 :705 (`if (ex is not GoexitException)`). A Goexit raised INSIDE a deferred call is already caught there:
-:373 (`catch (GoexitException goexit)`). The registry and the detector: src/core/golib/runtime/Goroutine.cs:1459
-(`private static void Unregister(Goroutine goroutine)`), :1073 (`internal static bool AllGoroutinesForeverBlocked()`),
-:1125 (`internal static bool IsProvableDeadlock(`). The backstop: src/core/golib/runtime/MainExit.cs:148
+:373 (`catch (GoexitException goexit)`). The registry and the detector: src/core/golib/runtime/Goroutine.cs:1495
+(`private static void Unregister(Goroutine goroutine)`), :1095 (`internal static bool AllGoroutinesForeverBlocked()`),
+:1161 (`internal static bool IsProvableDeadlock(`). The backstop: src/core/golib/runtime/MainExit.cs:148
 (`internal static void InstallBackstop(UnhandledExceptionEventHandler backstop) =>`). The deadlock text:
 src/core/golib/runtime/FatalError.cs:16 (`return "all goroutines are asleep - deadlock!";`). -->
 

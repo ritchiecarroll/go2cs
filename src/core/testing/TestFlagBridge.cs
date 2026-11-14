@@ -90,7 +90,7 @@ internal static class TestFlagBridge
 {
     // The converted flag package: type `go.flag_package` in assembly `flag` (flag.csproj's
     // AssemblyName). Resolved by name because the host must not reference it — see the remarks.
-    private const string FlagPackageTypeName = "go.flag_package, flag";
+    private const string FlagPackageTypeName = "go.flag_package, go.flag";
 
     /// <summary>
     /// Go's <c>testing.chattyFlag</c> — the TRI-STATE value behind <c>-test.v</c>.

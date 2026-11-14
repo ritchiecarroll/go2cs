@@ -25,6 +25,6 @@ namespace go;
 /// provides nothing.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
-public sealed class GoEmbeddedAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoEmbeddedAttribute : Attribute
 {
 }

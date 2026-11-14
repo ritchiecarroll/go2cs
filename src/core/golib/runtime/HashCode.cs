@@ -11,7 +11,7 @@ namespace go.golib;
 /// <summary>
 /// Provides a helper class for generating hash codes.
 /// </summary>
-public class HashCode
+[EditorBrowsable(EditorBrowsableState.Never)] public class HashCode
 {
     /// <summary>
     /// Combines all values into a single hash code.

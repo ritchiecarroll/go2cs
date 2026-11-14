@@ -479,7 +479,7 @@ internal static void cgocallbackg1(@unsafe.Pointer fn, @unsafe.Pointer frame, ui
         // will unpack the argument frame and call the Go function.
         ref var cb = ref heap<Action<@unsafe.Pointer>>(out var Ꮡcb);
         ref var cbFV = ref heap<funcval>(new funcval((uintptr)fn), out var ᏑcbFV);
-        (Ꮡ(@unsafe.Pointer.OfFunc(cb))).Value = (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(ᏑcbFV));
+        (Ꮡ(@unsafe.Pointer.OfFunc(cb))).Value = noescape(@unsafe.Pointer.FromPinnedBox(ᏑcbFV));
         cb(frame);
 
         if (raceenabled) {
@@ -623,7 +623,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         }
         for (var i = (uintptr)0; i < at.of(arraytype.ᏑLen).Value; i++) {
             cgoCheckArg(at.of(arraytype.ᏑElem).Value, Δp, true, top, msg);
-            Δp = (uintptr)add(Δp, at.of(arraytype.ᏑElem).Value.Size_);
+            Δp = add(Δp, at.of(arraytype.ᏑElem).Value.Size_);
         }
         break;
     }
@@ -655,7 +655,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         if (inheap((uintptr)it)) {
             throw panic(cgoFormatErr(msg, t.Kind()));
         }
-        Δp = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(Δp, goarch.PtrSize));
+        Δp = ~(ж<@unsafe.Pointer>)(uintptr)(add(Δp, goarch.PtrSize));
         if (!cgoIsGoPointer(Δp)) {
             return;
         }
@@ -680,7 +680,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         }
         for (nint i = 0; i < s.cap; i++) {
             cgoCheckArg(st.of(slicetype.ᏑElem).Value, Δp, true, false, msg);
-            Δp = (uintptr)add(Δp, st.of(slicetype.ᏑElem).Value.Size_);
+            Δp = add(Δp, st.of(slicetype.ᏑElem).Value.Size_);
         }
         break;
     }
@@ -707,7 +707,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
             if (!f.Typ.Pointers()) {
                 continue;
             }
-            cgoCheckArg(f.Typ, (uintptr)add(Δp, f.Offset), true, top, msg);
+            cgoCheckArg(f.Typ, add(Δp, f.Offset), true, top, msg);
         }
         break;
     }

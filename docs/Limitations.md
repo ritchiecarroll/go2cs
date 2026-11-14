@@ -13,7 +13,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 `unsafe`, assembly fast paths, or tests that pull in testify.
 
 * **Your code must build with the Go release go2cs tracks**, the one in
-  [Requirements](README.md#requirements), which the go2cs dotnet tool downloads for you, and **cgo is refused**.
+  [Requirements](README.md#requirements), which the go2cs dotnet tool downloads for you, and **cgo converts only
+  through `-cgo`, and only C functions a shared library defines** ([below](#what-wont-make-the-trip)).
 * **Assembly, `//go:linkname` and deep `unsafe` tricks compile clean, then fail at run time.** Many
   libraries ship a pure-Go fallback behind a build tag, and you have to pass that tag yourself.
 * **Each live goroutine holds an operating-system thread.** Thousands alive at once are fine. A hundred
@@ -26,9 +27,30 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 
 ## What won't make the trip
 
-* **cgo.** A package whose build selects a file with `import "C"` stops the whole run:
-  `error GO2CS2001: ... cgo has no C# conversion yet`. With no pure-Go path it is out of reach today
-  ([Roadmap](Roadmap.md#cgo)). <!-- [plan](PLAN-cgo-interop.md) (internal record, unlinked 2026-10-26, OQ-1) -->
+* **cgo, beyond the C functions a shared library defines.** Without `-cgo`, a package whose build
+  selects a file with `import "C"` stops the run with `error GO2CS2001`. With `-cgo`, on a machine with a
+  C compiler, a package converts when every C use it makes is a call of a C function a shared library
+  defines, passing integers, floating-point numbers and pointers, structs of integers and pointers by
+  value, or one struct or one scalar by pointer. Its C types and constants convert with it. It converts
+  for the machine's own operating system and architecture, and the converted package refuses to call C
+  anywhere else. Anything else is refused by name, with the phase that will cover it:
+  - `C.CString`, `C.GoString`, `C.GoBytes`, `C.malloc`, and a pointer into a slice or an array (Phase 3);
+  - a function the preamble itself defines, and a `#define` that is not a constant, both of which need
+    compiled C (Phase 4);
+  - `//export` (Phase 5);
+  - a C variable, a C function used as a value, and a deferred or `go` call that passes a pointer cmd/cgo
+    checks (later in Phase 2);
+  - a C function Go's own cgo build does not import by its C name. That is a function a header renames
+    (macOS on x64 makes `fstat` the symbol `fstat$INODE64`), and also any function the C compiler inlines
+    when cgo builds the package. Which functions those are depends on the compiler and the C library.
+    `abs` and `labs` are refused on Linux, macOS and Windows. With glibc, `atoi`, `atol`, `toupper`,
+    `tolower` and `fabs` are refused too (measured on Linux x64 with gcc 15 and with clang 22). go2cs
+    cannot tell a rename from an inlined call, so it refuses both rather than bind a function C would not
+    call:
+    `error GO2CS2001: C.abs: cmd/cgo's own binary does not import a symbol named abs, ...` (later in
+    Phase 2).
+
+  [Roadmap](Roadmap.md#cgo). <!-- [plan](PLAN-cgo-interop.md) (internal record, unlinked 2026-10-26, OQ-1); docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.20 -->
 * **A self-referential constraint over a pointer, when a method shares the element's storage.**
   `Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N` stops the run with `error GO2CS2002`,
   naming the site and the method. A pointer element reaches the generic code through a proxy object, and
@@ -54,6 +76,30 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 
 ## What converts, but doesn't behave exactly like Go
 
+* **cgo's pointer check differs from Go's in five places, all of them where a program breaks or bends
+  cgo's pointer rules.** go2cs never hands C a pointer into Go's memory: it hands C a copy of the one
+  struct a pointer points at, and copies it back after the call.
+  - Go checks a pointer held in a variable against the whole object it points into, and panics when
+    that object also holds a Go pointer, or lives in package-level memory. go2cs proceeds, since C only
+    ever sees the copy. This is the check most cgo code takes: across the Go toolchain's own cgo
+    packages, 50 of the 81 checked calls that pass no element of a slice or an array.
+  - Go accepts a struct member that points at memory pinned with `runtime.Pinner`, any pointer under
+    `GODEBUG=cgocheck=0`, and a struct passed by value whose pointer member points into Go memory that
+    holds no pointer. go2cs refuses all three when the call is made.
+  <!-- docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.16 and §11.20 (COORD's M1 ruling, 2026-11-11); the census is
+       TestCgoCheckClosureFormsAcrossGorootsCgoPackages, hosted run 42973745743: address 31, variable 50, index 22,
+       slice 0, defer 9, go 0 over GOROOT's 29 cgo packages. -->
+* **Reflection cannot read a struct whose arrays are held inline.** When a package reads native memory as a
+  struct, through `(*T)(unsafe.Pointer(p))`, go2cs lays that struct out as Go does and holds its array fields inside
+  it, rather than as separate objects. Indexing, `len`, `range` and printing one of those arrays work as in Go. Reflection
+  over the struct that holds them does not: `fmt.Printf("%v", s)`, `reflect.ValueOf(s).Field(i)` and anything else that
+  walks the struct's fields panics with `reflect: field T.F is a Go array held inline (go.arrays); reflection does not
+  read or address it`. Print the fields one at a time instead.
+  <!-- docs/phase4/DESIGN-array-value-storage.md 7.7 and its part-D block (I0, D3). Measured 2026-11-13 (C2) on the
+       InlineArrayFields behavioral fixture with two lines added: fmt.Printf("%v\n", x) over an admitted Named panicked
+       "reflect: field Named.FzName is a Go array held inline (go.arrays); reflection does not read or address it"
+       where Go printed {6 [115 101 99 111 110 100 0] 4.5}; fmt of the field alone (h.Buf) matched Go. The census at
+       part D's P1 counted 0 fmt %v and reflect uses reaching an admitted type in modernc.org/sqlite's lib and libc. -->
 * **Goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
   holds its thread for as long as it lives. When it ends, the thread waits to run the next `go` statement,
   so starting goroutines one after another is cheap; holding many alive at once is not. Measured on one
@@ -74,22 +120,23 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
          goroutines;
        - osx-x64, macOS 15.7.9: kern.num_taskthreads 3072; the first failure at 3,051.
        Each is the cap less about 21 runtime and host threads, exact to the thread. The go statement itself throws,
-       synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1308
+       synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1344
        (`GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`). Found when internal/synctest's
        TestWaitGroupManyBubbles (about 10,100 live goroutines) died on both mac runners at the 1.26.10.3 re-bank. A
        developer Mac's cap may differ, so the figures above are stated as the hosted readings, not as macOS's limit. -->
   <!-- [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
        the limit would take (internal record, unlinked 2026-10-26, OQ-1). -->
-  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1308 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
+  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1344 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
        The figures are lane R's ParkStorm reading in docs/DESIGN-mn-scheduler-sizing.md §1 (Windows x64, 16 hardware
        threads, 31 GB RAM, Go 1.26.10, Release, today's 256 MiB stack reserve): 10,000 parked at 622 MB and 4.4 s against
        Go's 99 MB and 0.07 s; 100,000 at 5,904 MB and 302 s; 1,000,000 never parked within 600 s. -->
 * **A deadlock usually hangs** where Go prints `all goroutines are asleep - deadlock!`. The message
   appears only when every goroutine, `main` included, waits on a nil channel or an empty `select {}`. A
   deadlock on an ordinary channel or lock blocks forever. Break in with a debugger: each goroutine is a
-  thread named `goroutine-N`.
-  <!-- src/core/golib/runtime/Goroutine.cs:1066 `internal static bool IsForeverWait(WaitReason reason) =>`
-       and :1125 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
+  thread named `goroutine-N`. When the message does appear, the goroutine blocks under it are Go's: each
+  goroutine's wait reason, its frames and the `go` statement that started it.
+  <!-- src/core/golib/runtime/Goroutine.cs:1088 `internal static bool IsForeverWait(WaitReason reason) =>`
+       and :1161 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
 * **Stacks don't grow.** `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
   a goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it). A goroutine the converter proves
   cannot recurse at all reserves 16 MB instead ([how](ConversionStrategies.md#goroutines)). Recursion past a
@@ -167,7 +214,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
   .NET's collector does not follow them.
-  <!-- src/core/runtime/managed_impl.cs:1282 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
+  <!-- src/core/runtime/managed_impl.cs:1312 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
        nothing in src/core/runtime or src/core/golib sets a GCSettings value or a GC heap limit from them. -->
 * **Runtime introspection is thinner than Go's.** A dump of all goroutines lists every goroutine and
   what it waits on, but has frames for the calling goroutine only. `pprof.StartCPUProfile` gives a
@@ -302,7 +349,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4153 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:4181 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :849
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.

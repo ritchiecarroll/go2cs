@@ -180,7 +180,15 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		// reader_test.go's TestFileReader, with `fileMaker` alongside it — 3 diagnostics, all 97 of
 		// the package's verdicts behind them). Take the same lift, and register it so every
 		// reference in the function resolves to the lifted name.
+		// The declaration takes the escaped name its uses are spelled with (convIdent's getSanitizedIdentifier): a
+		// Go alias named like a C# keyword (`type long = int32`, modernc.org/libc) or a golib reserved name
+		// (`slice`) is otherwise declared bare, a parse error or a name no use binds. A name already rewritten
+		// above (a collision's Δ, a cgo typedef's Cꓸ spelling) is the use spelling and stays as it is.
 		aliasName := name
+
+		if name == typeSpec.Name.Name {
+			aliasName = getCoreSanitizedIdentifier(name)
+		}
 
 		if v.inFunction {
 			aliasName = v.liftLocalTypeDeclName(name)
@@ -308,6 +316,14 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	// Publicization therefore outranks the default, and the inline arm supplies that default.
 	if v.isPublicizedType(typeSpec.Name) {
 		v.pendingTypeAccess = "public "
+	} else if _, isCgo := cgoPseudoPackageNames[typeSpec.Name.Name]; isCgo && generatedTypeScope(getSanitizedIdentifier(name)) == "public" {
+		// A C name carries no Go export meaning: Go's own name for a C type is cmd/cgo's unexported _Ctype_ one, so
+		// the type is internal unless an exported declaration names it (the arm above; recordTypeAccessibility
+		// holds the record to that). go2cs-gen reads a BARE declaration's scope from its name, though, and a C name
+		// may begin with an upper-case letter (windows.h's LPSYSTEMTIME, DWORD). So for such a name the modifier is
+		// written inline, as a function-local type's is, and the generator follows it. A C name that already reads
+		// internal keeps its bare declaration.
+		v.pendingTypeAccess = "internal "
 	} else if localAccess := v.localTypeAccess(); localAccess != "" {
 		// A FUNCTION-LOCAL declaration takes the local-type rule, in EVERY conversion: its Go name
 		// carries no export meaning, and the hoisted `<Func>_<name>` identifier the name-based rules
@@ -691,7 +707,6 @@ func samePackageTypeQualifier() string {
 
 	return nsSegments + "." + classQualifier + "/"
 }
-
 
 // DescriptorCarrierSuffix marks a converter-minted DESCRIPTOR CARRIER - the uninhabited interface
 // that holds the Go name of a defined-over-interface type the emission erased to a `using` alias.

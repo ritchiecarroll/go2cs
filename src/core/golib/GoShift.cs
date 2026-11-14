@@ -32,7 +32,7 @@ namespace go;
 /// its overloads raise Go's <c>runtime error: negative shift amount</c> panic for a count below zero, as
 /// Go's <c>panicshift</c> does.
 /// </remarks>
-public static class GoShift
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoShift
 {
     // ---- 64-bit: uint64 / int64 ----------------------------------------------------------------------
 

@@ -1140,7 +1140,7 @@ internal static bool isMaybeRunnable(this ж<g> Ꮡgp) {
         // If waiting on mutexes, wait groups, or condition variables,
         // check if the synchronization primitive attached to the sudog is marked.
         if (gp.waiting != nil) {
-            return isMarkedOrNotInHeap((uintptr)gp.waiting.of(sudog.Ꮡelem).get());
+            return isMarkedOrNotInHeap(gp.waiting.of(sudog.Ꮡelem).get());
         }
         break;
     }}
@@ -2256,7 +2256,7 @@ private static readonly @string otherˢᵇ = "other"u8;
 //
 //go:nosplit
 internal static @string gcTestPointerClass(@unsafe.Pointer Δp) {
-    var p2 = (uintptr)(uintptr)noescape(Δp);
+    var p2 = (uintptr)noescape(Δp);
     var gp = getg();
     if ((~gp).stack.lo <= p2 && p2 < (~gp).stack.hi) {
         return stackˢ;

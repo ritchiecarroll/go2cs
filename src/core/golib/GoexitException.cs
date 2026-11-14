@@ -32,7 +32,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [DebuggerNonUserCode]
-public class GoexitException : Exception
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoexitException : Exception
 {
     public GoexitException() : this(fromMain: false)
     {

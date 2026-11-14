@@ -313,6 +313,36 @@ partial class runtime_package
     internal static void ᴛRegisterFatalTraceback()
     {
         FatalReport.TracebackRenderer = fatalTraceback;
+        FatalReport.DeadlockRenderer = deadlockTraceback;
+    }
+
+    // The goroutine blocks of Go's deadlock report (checkdead, runtime/proc.go): every user goroutine in
+    // goid order, each a header with its wait reason, its frames, and the `go` statement that started it,
+    // one blank line between blocks. Go reports from the scheduler, so no goroutine is the current one:
+    // every block is a parked goroutine, and its frames are the ones it captured on its own thread as it
+    // entered its forever wait (Goroutine.ForeverWaitStack), because the CLR cannot walk another thread.
+    // A goroutine with no capture prints the placeholder renderStack prints for any foreign stack.
+    // System goroutines are left out, as a user-fault fatal leaves them out of Go's.
+    private static string deadlockTraceback()
+    {
+        StringBuilder trace = new();
+
+        foreach (Goroutine goroutine in Goroutine.DeadlockReportGoroutines())
+        {
+            if (trace.Length > 0)
+                trace.Append('\n');
+
+            appendGoroutineHeader(trace, goroutine, WaitReasons.Text(goroutine.ForeverWaitReason));
+
+            if (goroutine.ForeverWaitStack is StackTrace stack)
+                printGoFrames(trace, collectGoFrames(stack.GetFrames(), site: null, atCalls: true));
+            else
+                trace.Append(ForeignStackPlaceholder);
+
+            appendCreatedBy(trace, goroutine);
+        }
+
+        return trace.ToString();
     }
 
     private static readonly RuntimeMethodHandle s_fatalTracebackMethodHandle =
@@ -1725,14 +1755,16 @@ partial class runtime_package
     // A goroutine with no identity — Stack called on a host thread that never ran Go code — has no
     // goid to print, and Go has no such state at all. It reports id 0, which is not a goid Go's
     // monotonic allocator ever mints, rather than borrowing another goroutine's number.
-    private static void appendGoroutineHeader(StringBuilder trace, Goroutine? goroutine)
+    // status, when given, replaces the live state: the deadlock report prints the reason each goroutine
+    // recorded as it entered its forever wait.
+    private static void appendGoroutineHeader(StringBuilder trace, Goroutine? goroutine, string? status = null)
     {
         long id = goroutine is null ? 0 : goroutine.Id;
 
         // "running" covers Go's _Grunnable too, and cannot be split from it: Go distinguishes a
         // goroutine QUEUED on a P from one executing, and under the CLR a thread waiting for a core
         // is indistinguishable from one running on it. Stated rather than approximated.
-        string status = goroutine is { State: GoroutineState.Parked }
+        status ??= goroutine is { State: GoroutineState.Parked }
             ? WaitReasons.Text(goroutine.Reason)
             : "running";
 
@@ -1871,7 +1903,9 @@ partial class runtime_package
 
     // appendGoFrames' first half: one trace's Go frames as the lines it prints. The crash traceback joins several
     // (crashChainPrefix) and prints them once, so Go's elision counts the whole traceback, as Go's does.
-    private static List<(string name, string file, int line, bool inlined)> collectGoFrames(IEnumerable<StackFrame> frames, PanicException? site)
+    // atCalls says every frame is stopped at a call, as a capture taken above a wait is: no frame faulted. Such a
+    // frame's IL offset can fall short of its call (see goCallOffset), and is moved to it.
+    private static List<(string name, string file, int line, bool inlined)> collectGoFrames(IEnumerable<StackFrame> frames, PanicException? site, bool atCalls = false)
     {
         List<(string name, string file, int line, bool inlined)> printed = [];
         bool calledGo = false;
@@ -1930,7 +1964,9 @@ partial class runtime_package
             if (calledGoBelow && frameName.EndsWith("-fm", StringComparison.Ordinal))
                 continue;
 
-            (string file, int line) = goFramePosition(method, frame);
+            (string file, int line) = atCalls
+                ? goILPosition(method, goCallOffset(method, frame.GetILOffset()))
+                : goFramePosition(method, frame);
             printed.Add((frameName, file, line, false));
         }
 
@@ -2850,6 +2886,25 @@ partial class runtime_package
     // the offset); a frame with no IL offset has no position, as it had none there.
     private static (string file, int line) goFramePosition(System.Reflection.MethodBase method, StackFrame frame) =>
         goILPosition(method, frame.GetILOffset());
+
+    // The IL offset of the call a frame stopped at is the first call at or after the offset the CLR reports. The
+    // CLR can report an earlier offset, the last point before the call where the evaluation stack was empty: in
+    // `ᐸꟷ(c);` that is the `ldloc c` the C# compiler leaves in the PREVIOUS statement's sequence point, so the
+    // frame read the line above its call. Only for a frame known to be at a call: a faulting frame is not at one.
+    private static int goCallOffset(System.Reflection.MethodBase method, int ilOffset)
+    {
+        if (ilOffset < 0 || callSiteOffsets(method) is not { Length: > 0 } calls)
+            return ilOffset;
+
+        int index = Array.BinarySearch(calls, ilOffset);
+
+        if (index >= 0)
+            return ilOffset;
+
+        index = ~index;
+
+        return index < calls.Length ? calls[index] : ilOffset;
+    }
 
     private static (string file, int line) goILPosition(System.Reflection.MethodBase method, int ilOffset)
     {

@@ -22,7 +22,7 @@ namespace go;
 /// and <c>lib.Ord[*elem.Node]</c> can name the lift's generic constraint proxy.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public class GoInlineConstraintLiftAttribute(string owner, int index, string typeName) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoInlineConstraintLiftAttribute(string owner, int index, string typeName) : Attribute
 {
     /// <summary>
     /// Gets the Go name of the declaration owning the constrained type parameter.

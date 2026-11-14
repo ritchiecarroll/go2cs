@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 namespace go.golib;
 
 /// <summary>How a native call is expected to behave, for the scheduler's handoff (Go's entersyscall forms).</summary>
-public enum NativeCallHint
+[EditorBrowsable(EditorBrowsableState.Never)] public enum NativeCallHint
 {
     /// <summary>Go's <c>entersyscall</c>: the call may block; a long one has its P retaken.</summary>
     MayBlock,
@@ -50,7 +50,7 @@ public enum NativeCallHint
 /// <see cref="Enter"/> is carried for the M:N scheduler and read by nothing yet.
 /// </para>
 /// </remarks>
-public static class GoNativeCall
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoNativeCall
 {
     /// <summary>The calling goroutine enters a native call: Go's <c>entersyscall</c>.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

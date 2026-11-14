@@ -27,8 +27,16 @@
                             go.runtime.debug (runtimes/<rid>/, else lib/): it must not name the other OS's syscall
                             buffer type, and a runtimes/<rid>/ twin must name this OS's (the 1.24.13.6 release
                             blocker). Naming neither is platform-neutral and passes.
+      H  SOURCE COMPAT      the previous release's src/tests/CSharpConsumer, built UNCHANGED against the feed
+                            (docs/PublicSurface.md: code written against the last release compiles against this
+                            one). Its files come from -ConsumerRef, else from the newest nuget-<version> release
+                            tag below the version under test. The modules it calls are converted with -Converter
+                            at the versions that ref's run-csharp-consumer.ps1 pins, and the program must print
+                            that runner's own "checks: <N> ok, 0 failed". -ConsumerRef is the exception path for a
+                            deliberate break: it needs -ConsumerOverride citing the moved break floor and the release
+                            notes' Upgrading entry, and the verdict line reads OVERRIDE.
 
-    Exit 0 when A, B, C and G pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
+    Exit 0 when A, B, C, G and H pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
     under -WorkRoot.
 
 .PARAMETER Feed
@@ -45,13 +53,25 @@
 
 .PARAMETER GateWalkthrough
     Make arm D gate. The release-smoke stage passes it on every leg; without it D is a measurement.
+
+.PARAMETER ConsumerRef
+    The git ref (a tag or a branch on origin) whose src/tests/CSharpConsumer arm H builds. Default: the newest
+    nuget-<version> tag whose version is below -Version (for 1.26.10.4-ci.7, the newest tag below 1.26.10.4).
+    Given, it is an OVERRIDE and must come with -ConsumerOverride.
+
+.PARAMETER ConsumerOverride
+    With -ConsumerRef, the break the override is for: floor=<a.b.c.d>;news=<path>. The floor is this tree's
+    GoBreakFloor, moved above the previous release; the release notes hold its "Upgrading from <previous release>"
+    entry (docs/PublicSurface.md, How a promised name changes). Arm H's verdict line then reads OVERRIDE.
 #>
 param(
     [Parameter(Mandatory)] [string] $Feed,
     [Parameter(Mandatory)] [string] $Converter,
     [Parameter(Mandatory)] [string] $WorkRoot,
     [string] $Version,
-    [switch] $GateWalkthrough
+    [switch] $GateWalkthrough,
+    [string] $ConsumerRef,
+    [string] $ConsumerOverride
 )
 
 $ErrorActionPreference = 'Stop'
@@ -64,6 +84,7 @@ $Converter = (Resolve-Path $Converter).Path
 New-Item -ItemType Directory -Force $WorkRoot | Out-Null
 $WorkRoot = (Resolve-Path $WorkRoot).Path
 $repoSrc = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+$repoRoot = Split-Path $repoSrc -Parent
 
 if (-not $Version) {
     $lib = @(Get-ChildItem $Feed -Filter 'go.lib.*.nupkg' | Where-Object { $_.Name -match '^go\.lib\.(\d.*)\.nupkg$' })
@@ -349,7 +370,7 @@ if ($gVerdict -like 'PASS*') {
     $want, $refuse = if ($assetRid -like 'win-*') { 'WSABuf', 'Iovec' } else { 'Iovec', 'WSABuf' }
     $cache = Join-Path $WorkRoot 'G-coverage-debug/nuget-cache'
     $notes = @()
-    foreach ($pkg in @(@{ Id = 'go.internal.coverage.decodemeta'; Dll = 'internal.coverage.decodemeta.dll' }, @{ Id = 'go.runtime.debug'; Dll = 'runtime.debug.dll' })) {
+    foreach ($pkg in @(@{ Id = 'go.internal.coverage.decodemeta'; Dll = 'go.internal.coverage.decodemeta.dll' }, @{ Id = 'go.runtime.debug'; Dll = 'go.runtime.debug.dll' })) {
         $result = Get-GAssetVerdict -PackageRoot (Join-Path $cache "$($pkg.Id)/$($Version.ToLowerInvariant())") -AssetRid $assetRid -Dll $pkg.Dll -Want $want -Refuse $refuse
         if ($result.Fail) { $gVerdict = "FAIL (G-coverage-debug): $($pkg.Id) $Version $($result.Text)"; break }
         $notes += "$($pkg.Id) $($result.Text)"
@@ -357,6 +378,96 @@ if ($gVerdict -like 'PASS*') {
     if ($gVerdict -like 'PASS*') { $gVerdict += "; " + ($notes -join '; ') }
 }
 $verdicts += $gVerdict
+
+# ---- H: source compatibility: the previous release's consumer, unchanged -----------------------------
+# The ref logic (the tag choice, and a fetch that never changes the repository's depth) is shared with its self-test.
+. (Join-Path $PSScriptRoot 'SourceCompat/ConsumerRef.ps1')
+
+function Invoke-SourceCompatArm {
+    $name = 'H-source-compat'
+    $arm = Join-Path $WorkRoot $name
+    $cache = Join-Path $arm 'nuget-cache'
+    New-Item -ItemType Directory -Force $cache | Out-Null
+
+    # The previous release: the default consumer's tag, and what an override's citation is checked against.
+    $previous = Resolve-ConsumerRef $repoRoot $Version
+    if (-not $previous) { return "FAIL ($name): found no nuget-<version> release tag below $Version on origin" }
+
+    $ref = $previous
+    $how = "the newest nuget-* release tag below $Version"
+    $break = ''
+    if ($ConsumerOverride -and -not $ConsumerRef) { return "FAIL ($name): an override citation ($ConsumerOverride) without -ConsumerRef" }
+    if ($ConsumerRef) {
+        # The exception path: a deliberate break makes the previous release's consumer red by design. The override must
+        # name the break, and its verdict says OVERRIDE whatever the result (SourceCompat/ConsumerRef.ps1).
+        $name = 'H-source-compat OVERRIDE'
+        if (-not $ConsumerOverride) { return "FAIL ($name): -ConsumerRef $ConsumerRef needs -ConsumerOverride floor=<a.b.c.d>;news=<path>, the break it is for" }
+        $previousRelease = $previous -replace '^nuget-', ''
+        $cited = Test-ConsumerOverride $repoRoot $ConsumerOverride $previousRelease
+        if ($cited.Error) { return "FAIL ($name): $($cited.Error)" }
+        $ref = $ConsumerRef
+        $how = "the override for the break of floor $($cited.Floor) (previous release $previousRelease; $($cited.News), 'Upgrading from $previousRelease')"
+        $break = "; the break: floor $($cited.Floor) above $previousRelease, $($cited.News)"
+    }
+
+    # Exactly that ref. A tag already here is read with no fetch, and --depth is used only where the repository is
+    # already shallow, so a full clone is never truncated (SourceCompat/ConsumerRef.ps1, test-consumer-ref.ps1).
+    $commit = Get-ConsumerCommit $repoRoot $ref (Join-Path $arm 'fetch.log')
+    if (-not $commit) { return "FAIL ($name): git fetch origin $ref failed$(Get-FirstError (Join-Path $arm 'fetch.log'))" }
+    Write-Host "release smoke: H builds the CSharpConsumer of $ref ($commit), chosen as $how"
+
+    $tar = Join-Path $arm 'consumer.tar'
+    $code = Invoke-Logged (Join-Path $arm 'archive.log') {
+        & git -C $repoRoot archive --format=tar -o $tar $commit src/tests/CSharpConsumer
+        if ($LASTEXITCODE -eq 0) { & tar -xf $tar -C $arm }
+    }
+    if ($code -ne 0) { return "FAIL ($name): $ref has no src/tests/CSharpConsumer to extract (exit $code)" }
+    $consumer = Join-Path $arm 'src/tests/CSharpConsumer'
+
+    # The ref's own runner says which modules its program calls, at which versions, and how many checks it runs.
+    $runner = [System.IO.File]::ReadAllText((Join-Path $consumer 'run-csharp-consumer.ps1'))
+    if ($runner -notmatch '\[int\]\s*\$ExpectedChecks\s*=\s*(\d+)') { return "FAIL ($name): $ref's run-csharp-consumer.ps1 names no ExpectedChecks default" }
+    $expected = "checks: $($Matches[1]) ok, 0 failed"
+    $modules = @([regex]::Matches($runner, "(?m)^\s*(\w+)\s*=\s*'([^'@\s]+@v[^'\s]+)'") | ForEach-Object { @{ Name = $_.Groups[1].Value; Module = $_.Groups[2].Value } })
+    if ($modules.Count -eq 0) { return "FAIL ($name): $ref's run-csharp-consumer.ps1 pins no modules" }
+
+    $converted = Join-Path $arm 'converted'
+    foreach ($module in $modules) {
+        $ErrorActionPreference = 'Continue'
+        $download = (& go mod download -json $module.Module 2> (Join-Path $arm "download-$($module.Name).log")) -join "`n"
+        $code = $LASTEXITCODE
+        $ErrorActionPreference = 'Stop'
+        if ($code -ne 0) { return "FAIL ($name): go mod download $($module.Module) exited $code" }
+        $source = ($download | ConvertFrom-Json).Dir
+
+        $code = Invoke-Logged (Join-Path $arm "convert-$($module.Name).log") { & $Converter -recurse=nuget $source (Join-Path $converted $module.Name) }
+        if ($code -ne 0) { return "FAIL ($name): go2cs -recurse=nuget $($module.Module) exited $code$(Get-FirstError (Join-Path $arm "convert-$($module.Name).log"))" }
+    }
+
+    # One nuget.config above the consumer and the converted modules both.
+    Write-FeedConfig $arm
+    $project = Join-Path $consumer 'CSharpConsumer.csproj'
+    $env:NUGET_PACKAGES = $cache
+    try {
+        $code = Invoke-Logged (Join-Path $arm 'build.log') { & dotnet build $project -c Release "-p:ConsumerConvertedRoot=$converted" "-p:GoStdLibVersion=$Version" --nologo }
+        if ($code -ne 0) { return "FAIL ($name): $ref's CSharpConsumer does not build unchanged against go.* $Version$(Get-FirstError (Join-Path $arm 'build.log'))" }
+
+        $stdout = Join-Path $arm 'cs.stdout.txt'
+        $ErrorActionPreference = 'Continue'
+        & dotnet run --project $project -c Release --no-build "-p:ConsumerConvertedRoot=$converted" "-p:GoStdLibVersion=$Version" 1> $stdout 2> (Join-Path $arm 'cs.stderr.txt')
+        $runCode = $LASTEXITCODE
+        $ErrorActionPreference = 'Stop'
+    }
+    finally { $env:NUGET_PACKAGES = $null }
+
+    $lines = @(Get-Content -LiteralPath $stdout -ErrorAction SilentlyContinue)
+    $failedChecks = @($lines | Where-Object { $_ -match '\bFAIL\b' } | Select-Object -First 3)
+    if ($runCode -ne 0) { return "FAIL ($name): $ref's CSharpConsumer exited $runCode$(if ($failedChecks) { ' -- ' + ($failedChecks -join ' | ') })$(Get-StderrHead (Join-Path $arm 'cs.stderr.txt'))" }
+    if (@($lines | Where-Object { $_ -ceq $expected }).Count -ne 1) { return "FAIL ($name): $ref's CSharpConsumer did not print '$expected'$(if ($failedChecks) { ' -- ' + ($failedChecks -join ' | ') })" }
+
+    return "PASS ($name): the CSharpConsumer of $ref ($($commit.Substring(0, 10))) built unchanged against go.* $Version and printed '$expected'$break"
+}
+$verdicts += Invoke-SourceCompatArm
 
 # ---- D: the README walkthrough, measured, never gating -------------------------------------------
 $walk = Join-Path $WorkRoot 'D-walkthrough-src'

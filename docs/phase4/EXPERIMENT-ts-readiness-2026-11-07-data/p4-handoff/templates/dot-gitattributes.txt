@@ -1,0 +1,2 @@
+# The C#, the proof outputs and the verbatim license texts are stored byte for byte: no line-ending conversion.
+* -text

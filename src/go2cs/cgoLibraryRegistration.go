@@ -75,14 +75,16 @@ func cgoLibraryTable(flags cgoLinkFlags, captured []cgoSymbolLibrary) []cgoLibra
 const cgoLibrariesRegistrationMember = "register" + cgoMirrorSuffix + "libraries"
 
 // cgoLibrariesRegistration writes the pseudo-package member that registers the package's resolver table when its module
-// loads. A module initializer is rooted, so trimming keeps it, and it runs before any binding can be called (§6.2).
-func cgoLibrariesRegistration(packageName string, table []cgoLibraryEntry) string {
+// loads, with the one target its bindings were converted for (GOOS/GOARCH), which golib's resolver holds the running
+// process to (§5.3, as amended by §11.20). A module initializer is rooted, so trimming keeps it, and it runs before any
+// binding can be called (§6.2).
+func cgoLibrariesRegistration(packageName, target string, table []cgoLibraryEntry) string {
 	var text strings.Builder
 
 	text.WriteString("    // The package's C libraries, as the converter captured them (§6.1, §11.5), registered with golib's resolver for this\n")
 	text.WriteString("    // assembly's own [LibraryImport] bindings when the module loads (§6.2, §11.11).\n")
 	text.WriteString("    [global::System.Runtime.CompilerServices.ModuleInitializer]\n")
-	fmt.Fprintf(&text, "    internal static void %s() => global::go.golib.GoCgoLibraries.Register(typeof(%s).Assembly", cgoLibrariesRegistrationMember, cgoPseudoPackageClass(packageName))
+	fmt.Fprintf(&text, "    internal static void %s() => global::go.golib.GoCgoLibraries.Register(typeof(%s).Assembly, %q", cgoLibrariesRegistrationMember, cgoPseudoPackageClass(packageName), target)
 
 	for _, entry := range table {
 		fmt.Fprintf(&text, ",\n        new global::go.golib.GoCgoLibrary(%q, %q)", entry.flag, entry.name)

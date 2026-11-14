@@ -28,7 +28,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class GoTwinForwarderAttribute(string? goName = null) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoTwinForwarderAttribute(string? goName = null) : Attribute
 {
     /// <summary>The Go name of the function the delegate stands for, or <c>null</c> when the method's own name is it.</summary>
     public string? GoName { get; } = goName;

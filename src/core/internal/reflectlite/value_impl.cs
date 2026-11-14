@@ -65,10 +65,17 @@ partial class reflectlite_package
     // makeReflectValue builds a Value carrying a boxed managed value. typ_ is the Phase-1
     // synthetic abi.Type (Kind_ classified from the value's System.Type); the flag holds the
     // Kind so Kind()/IsValid() resolve from value.cs unchanged.
+    //
+    // A value that arrives inside an interface SHELL is unwrapped here, once, exactly as reflect's
+    // makeReflectValue does it (see reflect/value_impl.cs): sort.Slice over a named slice held in
+    // an interface read Len 0 and sorted nothing. No identity token rides along in this package:
+    // its Value has no equality that reads the datum.
     internal static Value makeReflectValue(object? boxed)
     {
         if (boxed is null)
             return new Value(nil);
+
+        boxed = unwrapShell(boxed);
 
         ж<abi_package.Type> t = abi_package.TypeOf(boxed);
         Value v = new Value(t, default!, (flag)(uintptr)(uint8)GoReflect.KindOf(GoReflect.GoDynamicTypeOf(boxed)));
@@ -76,6 +83,24 @@ partial class reflectlite_package
         v.boxed = boxed;
 
         return v;
+    }
+
+    // unwrapShell mirrors reflect's: the structural chain first, then one adapter, and a shell
+    // around a NIL keeps the WHOLE shell, except over a null FUNC, which is the canonical nil func.
+    internal static object unwrapShell(object boxed)
+    {
+        object cur = boxed;
+
+        while (cur is IInterfaceAdapter { Value: not null } interfaceAdapter)
+            cur = interfaceAdapter.Value;
+
+        return cur switch
+        {
+            IжAdapter { Box: not null } pointerAdapter => pointerAdapter.Box,
+            IValueAdapter { Value: not null } valueAdapter => valueAdapter.Value,
+            IGoAdapter => (object?)GoReflect.NilFuncOf(cur) ?? boxed,
+            _ => cur
+        };
     }
 
     // makeTypedValue builds a Value typed by a STATIC System.Type (a slot's declared type), so

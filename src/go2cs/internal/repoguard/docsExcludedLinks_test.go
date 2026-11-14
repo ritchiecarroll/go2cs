@@ -129,12 +129,12 @@ func TestExcludedLinkRuleReadsEachShape(t *testing.T) {
 	}
 
 	page := strings.Join([]string{
-		"[a plan](PLAN-x.md) and [a record](phase4/BOARD.md#row)",   // 2 findings
+		"[a plan](PLAN-x.md) and [a record](phase4/BOARD.md#row)",     // 2 findings
 		"[ok](Limitations.md) [ok](../src/core/x.cs) [ok](https://e)", // published, outside docs, absolute
-		"<!-- [kept as provenance](PLAN-y.md) -->",                   // a comment is not a link
-		"`[code](PLAN-z.md)`",                                       // nor is a code span
-		"[ref]: Runbook.md",                                         // a reference definition is
-		`<a href="phase4/x.md">raw</a>`,                             // and so is a raw href
+		"<!-- [kept as provenance](PLAN-y.md) -->",                    // a comment is not a link
+		"`[code](PLAN-z.md)`",           // nor is a code span
+		"[ref]: Runbook.md",             // a reference definition is
+		`<a href="phase4/x.md">raw</a>`, // and so is a raw href
 	}, "\n")
 
 	links, findings := excludedLinkFindings("docs/Page.md", page, patterns)

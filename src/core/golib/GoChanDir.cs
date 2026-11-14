@@ -27,7 +27,7 @@ namespace go;
 /// reported and remains the honest answer for a type it cannot otherwise distinguish.
 /// </para>
 /// </remarks>
-public enum GoChanDir : byte
+[EditorBrowsable(EditorBrowsableState.Never)] public enum GoChanDir : byte
 {
     /// <summary>
     /// No source stamped a direction; the bridge answers <see cref="Both"/> (abi's

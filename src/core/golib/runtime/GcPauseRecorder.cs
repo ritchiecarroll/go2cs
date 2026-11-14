@@ -102,7 +102,7 @@ namespace go.golib;
 /// <c>FullBlocking</c>/<c>Background</c> carries the higher <c>Index</c>.
 /// </para>
 /// </remarks>
-public static class GcPauseRecorder
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GcPauseRecorder
 {
     /// <summary>
     /// The ring's fixed length — <c>len(runtime.MemStats.PauseNs)</c>, which is Go's own 256 and is
@@ -500,7 +500,7 @@ public static class GcPauseRecorder
 /// and a snapshot CLASS allocated per call is one of the two regressions the named GolibTests guard
 /// exists to catch.
 /// </remarks>
-public readonly struct GcPauseSnapshot
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct GcPauseSnapshot
 {
     internal GcPauseSnapshot(ulong numGC, int ringCount, ulong lastGcEndUnixNs, ulong pauseTotalNs, ulong committedBytes, ulong heapSizeBytes, ulong heapReleased, uint numForcedGC)
     {

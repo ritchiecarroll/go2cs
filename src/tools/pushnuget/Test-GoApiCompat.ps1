@@ -168,6 +168,71 @@ try {
     Check 'a suppression for an analyzer-only package names an asset it does not carry, and reads red' (
         $null -eq $threw -and @($r.Failures | Where-Object { $_.Contains('does not carry') }).Count -eq 1) $(if ($threw) { $threw } else { "$($r.Failures -join '; ')" })
 
+    # OQ4 (docs/phase4/DESIGN-assembly-identity.md section 4; COORD's OQ-D ruling): 1.26.10.4 names every standard-library
+    # assembly after its package ID, so go.fmt's lib/net10.0/fmt.dll became lib/net10.0/go.fmt.dll. The guard compares
+    # each renamed assembly's API with its baseline under ONE declaration, for that release only, and reds everything
+    # else. Measured with the pinned tool: ApiCompat pairs assemblies by identity name, so Widget against go.Widget
+    # compares no member (CP0004 and a CP0001 per type, the same with a member removed); the declared rename must still
+    # read a removed member red. go.Widget is the fixture's package ID and the renamed assembly's identity.
+    Write-Host 'OQ4: an assembly renamed to its package ID is compared with its baseline, under the declaration only'
+    $takesRelease = (Get-Command Test-GoApiCompatPackage).Parameters.ContainsKey('ReleaseVersion')
+    function Compare-Release([string]$Id, [string]$Baseline, [string]$Current, [string]$Release, [string]$Suppressions) {
+        $p = @{ Id = $Id; Baseline = $Baseline; Current = $Current; SuppressionFile = $Suppressions; RepoRoot = $repoRoot; WorkDir = $work }
+        if ($takesRelease -and $Release) { $p.ReleaseVersion = $Release }
+        Test-GoApiCompatPackage @p
+    }
+    # How many renames a result reports; -1 when it reports none at all (no Renamed).
+    function RenamedCount($r) { if ($r.PSObject.Properties['Renamed']) { @($r.Renamed).Count } else { -1 } }
+    $goLib = 'lib/net10.0/go.Widget.dll'
+    $goLinux = 'runtimes/linux-x64/lib/net10.0/go.Widget.dll'
+    $renamed = New-Package 'renamed' @{ $goLib = 'gowidget-base.dll'; $goLinux = 'gowidget-base.dll' }
+    $renamedInternal = New-Package 'renamed-internal' @{ $goLib = 'gowidget-internal.dll'; $goLinux = 'gowidget-base.dll' }
+    $renamedNoLinux = New-Package 'renamed-nolinux' @{ $goLib = 'gowidget-base.dll' }
+    $renamedFileOnly = New-Package 'renamed-file-only' @{ $goLib = 'widget-base.dll'; $goLinux = 'gowidget-base.dll' }
+
+    $r = Compare-Release 'go.Widget' $base $renamed '1.26.10.4'
+    Check '(1) Widget.dll against go.Widget.dll, the same API, under the declaration: green, both assets compared' (
+        $r.Failures.Count -eq 0 -and $r.Compared -eq 2 -and (RenamedCount $r) -eq 2) "compared $($r.Compared); renamed $(RenamedCount $r); $($r.Failures -join '; ')"
+    $r = Compare-Release 'go.Widget' $base $renamed '1.26.10.4-ci.7'
+    Check '(1) a rehearsal of the declared release takes its numeric version' ($r.Failures.Count -eq 0 -and $r.Compared -eq 2) "compared $($r.Compared); $($r.Failures -join '; ')"
+    $r = Compare-Release 'go.Widget' $base $renamedInternal '1.26.10.4'
+    Check '(2) the renamed assembly missing a public member reads red and names it, its rule and its baseline asset' (
+        $r.Failures.Count -eq 1 -and $r.Failures[0].Contains('Fixture.Widget.Instance') -and $r.Failures[0].Contains('CP0002') -and
+        $r.Failures[0].Contains($lib) -and $r.Failures[0].Contains($goLib) -and $r.Compared -eq 2) "compared $($r.Compared); $($r.Failures -join '; ')"
+    # 1.26.10.4 also announces the promoted-forwarder move: its entries name the BASELINE asset on both sides
+    # (lib/net10.0/bufio.dll), and must still cover the break once the current asset is go.bufio.dll.
+    $r = Compare-Release 'go.Widget' $base $renamedInternal '1.26.10.4' $suppressed
+    Check '(2) a suppression naming the baseline asset covers the renamed asset''s announced break' ($r.Failures.Count -eq 0 -and $r.Compared -eq 2) "compared $($r.Compared); $($r.Failures -join '; ')"
+    $r = Compare-Release 'go.Widget' $base $renamed '1.26.10.5'
+    Check '(3) the rename for a release the guard does not declare reads red, each asset named with the declared release' (
+        $r.Failures.Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('missing') -and $_.Contains('1.26.10.4') }).Count -eq 2 -and (RenamedCount $r) -eq 0) "renamed $(RenamedCount $r); $($r.Failures -join '; ')"
+    $r = Compare-Release 'go.Widget' $base $renamed ''
+    Check '(3) and with no release named at all (nugetgo-pack.ps1''s call)' (
+        $r.Failures.Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('missing') -and $_.Contains('1.26.10.4') }).Count -eq 2 -and (RenamedCount $r) -eq 0) "$($r.Failures -join '; ')"
+    $r = Compare-Release 'go.Widget' $renamed $renamed '1.26.10.5'
+    Check '(3) a later release, whose baseline already ships go.Widget.dll, compares path to path: the map is inert' (
+        $r.Failures.Count -eq 0 -and $r.Compared -eq 2 -and (RenamedCount $r) -eq 0) "compared $($r.Compared); $($r.Failures -join '; ')"
+    $r = Compare-Release 'go.Widget' $base $renamedNoLinux '1.26.10.4'
+    Check '(4) a baseline asset with neither its own path nor the renamed one reads red, naming both; the other is compared' (
+        $r.Failures.Count -eq 1 -and $r.Failures[0].Contains($linux) -and $r.Failures[0].Contains($goLinux) -and $r.Failures[0].Contains('missing') -and $r.Compared -eq 1) "compared $($r.Compared); $($r.Failures -join '; ')"
+    $r = Compare-Release 'go.Widget' $base $renamedFileOnly '1.26.10.4'
+    Check '(4) a file at the renamed path whose assembly identity is not the package ID reads red, naming the identity' (
+        $r.Failures.Count -eq 1 -and $r.Failures[0].Contains($goLib) -and $r.Failures[0].Contains('identity') -and $r.Failures[0].Contains("'Widget'") -and $r.Compared -eq 1) "compared $($r.Compared); $($r.Failures -join '; ')"
+    # go.testing shipped testing_package.dll: its rename is to the package ID, not to go.<old name>.
+    $testingShape = New-Package 'renamed-testing-shape' @{ 'lib/net10.0/Widget_package.dll' = 'widget-base.dll' }
+    $r = Compare-Release 'go.Widget' $testingShape (New-Package 'renamed-lib-only' @{ $goLib = 'gowidget-base.dll' }) '1.26.10.4'
+    Check '(4) the target is the package ID (go.testing shipped testing_package.dll): green' ($r.Failures.Count -eq 0 -and $r.Compared -eq 1) "compared $($r.Compared); $($r.Failures -join '; ')"
+    foreach ($otherId in 'fixture.widget', 'nugetgo.widget', 'go.lib', 'go.gen') {
+        # The current package carries <dir>/<id>.dll, the shape the map looks for, so only the id can keep it out.
+        $other = New-Package "renamed-$otherId" @{ "lib/net10.0/$otherId.dll" = 'gowidget-base.dll'; "runtimes/linux-x64/lib/net10.0/$otherId.dll" = 'gowidget-base.dll' }
+        $r = Compare-Release $otherId $base $other '1.26.10.4'
+        Check "(5) the map does not apply to $otherId under the declaration: each asset missing, nothing renamed" (
+            $r.Failures.Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('missing') -and -not $_.Contains('identity') }).Count -eq 2 -and
+            (RenamedCount $r) -eq 0) "renamed $(RenamedCount $r); $($r.Failures -join '; ')"
+    }
+    $module = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'GoApiCompat.psm1'))
+    Check 'the guard passes the release it stands for to each package''s comparison' ($module -match 'Test-GoApiCompatPackage [^\r\n]*-ReleaseVersion') 'Invoke-GoApiCompatGuard does not pass -ReleaseVersion'
+
     Write-Host 'the suppression file format'
     $pkgMode = New-Suppressions 'pkgmode' @(Entry 'CP0002' 'F:Fixture.Widget.Instance' $lib '<IsBaselineSuppression>true</IsBaselineSuppression>')
     $threw = $false; try { Read-GoApiCompatSuppressions $pkgMode | Out-Null } catch { $threw = $_.Exception.Message.Contains('package-mode') }

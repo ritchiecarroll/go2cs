@@ -38,6 +38,17 @@ using static go.main_package;
 // <InterfaceImplementations>
 // </InterfaceImplementations>
 
+// The struct types whose arrays this package holds inline (the go.arrays family), as the converter
+// admitted them: a `GoInlineArrayType` record per named type, a `GoInlineArrayKeys` record with the
+// count and a digest of every admitted type (anonymous ones included), and a `GoInlineArrays` record
+// naming the rule when it is not the default. A -tests conversion applies the same rule rather than
+// deciding again, and refuses a production set that admits differently. The section exists only while
+// there is a record to hold.
+// <InlineArrays>
+[assembly: go.golib.GoInlineArrayKeys(1, "35df0863754b6b4d")]
+[assembly: go.golib.GoInlineArrayType("reparse")]
+// </InlineArrays>
+
 // <ImplicitConversions>
 // </ImplicitConversions>
 
@@ -55,7 +66,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AB9ogpSCpoKCgqaUgoKUgoKCgoKClIKUgpSCgoKUlIKmgpSCgpSigKSCgqI=", "103-109:1;104-104:1.1", "", "", "", "86:25,87:17")]
+[assembly: GoPositionMap("main.go", "main.cs", "ACNogpSCpoKCgqaUgoKUgoKCgoKClIKUgpSCgoKUlIKmgpSCgpSigKSCgqI=", "103-109:1;104-104:1.1", "", "", "", "90:25,91:17")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -72,7 +83,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     [GoValueClone("Path")] internal partial struct record {}
-    [GoValueClone("Path")] internal partial struct reparse {}
+    internal partial struct reparse {}
     internal partial struct tail {}
     // </TypeAccessibility>
 

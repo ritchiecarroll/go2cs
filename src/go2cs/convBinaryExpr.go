@@ -1415,6 +1415,7 @@ func (v *Visitor) bigIntegerConstMaterialization(expr ast.Expr, rendered string)
 //     what `1<<40 * 1.5` needs (see the untyped context handling below). The int-context counterpart
 //     — an inner shift left `untyped int` by an int64-typed parent (`1<<40 + 7`) — is not this
 //     function's business: it keeps IsInteger and overflowingConstLiteral folds it to `…L`.
+//
 // complexConstLiteral returns the EXACT folded C# text for a COMPLEX-kind constant operator
 // expression — `1230000 - 0i` as `1230000D + 0D.i()` — or "" for anything that is not one.
 //

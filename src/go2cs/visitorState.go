@@ -70,6 +70,10 @@ type FileEntry struct {
 	// `"abc"` in ExampleClone did exactly this once 3-char slugs became hoistable — CS0103 across
 	// reader_test/replace_test).
 	emissionExcluded bool
+	// outputBase names a cgo tree's converted file for the import "C" source it was rewritten from, and cgoBindings
+	// marks cmd/cgo's types file, which becomes the package's bindings file (cgoRoute.go).
+	outputBase  string
+	cgoBindings bool
 }
 
 // CapturedVarInfo tracks information about captured variables
@@ -132,6 +136,10 @@ type lambdaConversionState struct {
 }
 
 type Visitor struct {
+	// inlineArrayLiterals marks the array literals that initialize an inline array field (inlineArrayEmission.go),
+	// each with the array type the go.arrays member is named after.
+	inlineArrayLiterals map[*ast.CompositeLit]*types.Array
+
 	// The slices of copy's arguments that take the Go-image view, marked before the call's arguments convert
 	// (goImageCopyView.go).
 	goImageCopySlices map[*ast.SliceExpr]bool
@@ -187,7 +195,7 @@ type Visitor struct {
 	// lifts whose instantiation base parts are written (dynamicInterfaceBase.go).
 	capturedLiftNames map[string]string
 	liftBaseMarked    map[string]bool
-	subStructTypes  map[types.Type][]types.Type
+	subStructTypes    map[types.Type][]types.Type
 
 	// inUsingAliasTarget is set only while a type alias's `global using` RHS is being rendered.
 	// That RHS resolves at COMPILATION scope — outside `namespace go` and outside the emitted
@@ -315,6 +323,10 @@ type Visitor struct {
 	// (cgoUnsafeArgsLift.go): the block-prefix assembly renders its construction line and convCallExpr
 	// renders its `unsafe.Pointer(&first)` as the block's pinned box.
 	currentCgoLift *cgoUnsafeArgsLift
+
+	// cgoClosureArguments holds, while an unwrapped call through cmd/cgo's check closure converts, what each of the
+	// closure's variables stands for (cgoRoute.go).
+	cgoClosureArguments map[types.Object]cgoClosureArgument
 	// liftAtCallBoundary marks an anonymous-struct/interface lift reached from a function's OWN
 	// parameter/result declaration or from a call argument being passed to a known callee's
 	// matching parameter — positions whose type is externally significant ACROSS function scopes,

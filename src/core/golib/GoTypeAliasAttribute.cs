@@ -19,7 +19,7 @@ namespace go;
 /// into the local project as global usings with a package prefix.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public class GoTypeAliasAttribute(string alias, string typeName) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoTypeAliasAttribute(string alias, string typeName) : Attribute
 {
     /// <summary>
     /// Gets the alias name.

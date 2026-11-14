@@ -40,6 +40,7 @@ internal static void main() {
 
     stamper m = new typelib_Markᴠstamper(typelib.NewMark("x"));
     fmt.Printf("%T\n"u8, m);
+    fmt.Printf("%v\n"u8, m);
 
     fmt.Println(g.greet(), h.greet(), m.Stamp());
 }

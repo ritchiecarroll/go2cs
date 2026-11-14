@@ -36,7 +36,7 @@ namespace go;
 /// type, in a stack buffer (a pooled one above 4 KiB): nothing is allocated on the GC heap per call.
 /// </para>
 /// </remarks>
-public readonly struct GoImage<S>
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct GoImage<S>
 {
     private readonly ж<S> m_box;
     private readonly nint m_low;
@@ -211,6 +211,16 @@ public static unsafe partial class NativeStructMarshal
             }
 
             Size = (nint)size;
+
+            // A struct whose arrays are held inline ([GoInlineLayout], docs/phase4/DESIGN-array-value-storage.md 7.7) and whose
+            // CLR layout the gate proves IS its Go layout at every level is its own image: one copy of all its bytes, padding
+            // included, as Go's copy is. A struct that fails the gate keeps the per-field plan below, or its refusal.
+            if (type.IsDefined(typeof(global::go.golib.GoInlineLayoutAttribute), false) && InlineLayoutMismatch(type) is null)
+            {
+                m_segments = [new Segment(0, 0, Size, null, 0)];
+                return;
+            }
+
             System.Collections.Generic.List<Segment> segments = [];
             System.Collections.Generic.List<FieldInfo[]> paths = [];
 

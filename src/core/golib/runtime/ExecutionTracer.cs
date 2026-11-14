@@ -58,7 +58,7 @@ namespace go.golib;
 /// ring right after it advances, and relies on the reader having filed the generation it just ended.
 /// </para>
 /// </remarks>
-public static class ExecutionTracer
+[EditorBrowsable(EditorBrowsableState.Never)] public static class ExecutionTracer
 {
     // ---- the wire format (tracev2 event numbers, internal/trace/tracev2/events.go at the pin) ----
 

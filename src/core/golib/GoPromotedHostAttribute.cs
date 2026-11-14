@@ -26,7 +26,7 @@ namespace go;
 /// </remarks>
 /// <param name="struct">The struct whose promoted methods the class holds.</param>
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class GoPromotedHostAttribute(Type @struct) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoPromotedHostAttribute(Type @struct) : Attribute
 {
     /// <summary>
     /// Gets the struct whose promoted methods the class holds.

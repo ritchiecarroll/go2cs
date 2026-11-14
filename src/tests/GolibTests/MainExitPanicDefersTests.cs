@@ -236,8 +236,11 @@ public class MainExitPanicDefersTests
             using ManualResetEventSlim release = new(false);
             TimeSpan waited = TimeMainReturnWait(inDeferred => { inDeferred.Set(); release.Wait(); }, release.Set);
 
+            // The upper bound only has to tell the scaled 300 ms guard from MainExit's 10 s default. It was 3 s (10x the
+            // 300.0-306.5 ms the hosted darwin legs read), at the floor COORD's rule sets for an absolute wall-clock bar
+            // that runs on darwin (2026-11-11: at least 10x its typical); 5 s is 16.7x, and still 2x under the default.
             Assert.IsTrue(waited >= TimeSpan.FromMilliseconds(300), $"returned after {waited.TotalMilliseconds:F1} ms, before the guard");
-            Assert.IsTrue(waited < TimeSpan.FromSeconds(3), $"waited {waited.TotalMilliseconds:F1} ms, far past the guard");
+            Assert.IsTrue(waited < TimeSpan.FromSeconds(5), $"waited {waited.TotalMilliseconds:F1} ms, far past the guard");
         }
         finally
         {

@@ -1480,6 +1480,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		if !hasLinknameForward {
 			linknameAlias, linknameFunc, asmForwardPlan, hasLinknameForward = v.funcAsmTrampolineForward(funcDecl)
 		}
+
+		// Assembly with real machine code that golib answers with a managed body (asmForwardBodies.go).
+		if !hasLinknameForward {
+			linknameAlias, linknameFunc, hasLinknameForward = v.funcAsmBodyForward(funcDecl)
+		}
 	}
 
 	// A nil body means the Go function is implemented externally (assembly or cgo):
@@ -1662,8 +1667,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			v.writeLinknameForwarder(signature, linknameAlias, linknameFunc, asmForwardPlan)
 		} else {
 			// Bodyless (assembly/cgo) function: emit a `partial` declaration; the body is
-			// supplied by a hand-written companion or the PartialStubGenerator.
+			// supplied by a hand-written companion or the PartialStubGenerator. Outside GOROOT
+			// nothing supplies one, so the conversion names the stub (asmForwardBodies.go).
 			v.writeOutputLn(";")
+			v.reportAsmStub(funcDecl)
 		}
 	} else {
 		v.outputBuilder.WriteString(v.newline)
@@ -1751,7 +1758,7 @@ func csharpCodeWithoutComments(text string) string {
 }
 
 // csharpCodeWithoutCommentsOrLiterals is csharpCodeWithoutComments with every string and character literal's
-// contents removed too (`""`, `''` stand in for them): a literal's words are never code, and under plain literals
+// contents removed too (`""`, `”` stand in for them): a literal's words are never code, and under plain literals
 // (seat #51) a message spells words a hoisted field's name had hidden. An interpolated string ($"…", $@"…", @$"…")
 // keeps its contents, whose holes are code.
 func csharpCodeWithoutCommentsOrLiterals(text string) string {

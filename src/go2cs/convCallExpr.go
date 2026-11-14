@@ -296,6 +296,11 @@ func identIsUntypedConst(info *types.Info, ident *ast.Ident) bool {
 }
 
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
+	// A call through cmd/cgo's pointer-check closure converts as the call it makes (cgoRoute.go).
+	if closure, found := cgoCheckClosures[callExpr]; found {
+		return v.convCgoCheckClosure(closure, context)
+	}
+
 	// The call's `)` bounds the comments its argument list writes after its last argument (convExprList).
 	firstArg := token.NoPos
 
@@ -1693,7 +1698,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// Hop through the constant's DEFAULT Go type first (`((@string)(rune)runeError)`) —
 		// exactly Go's conversion semantics. A plain literal is already a C# constant and
 		// keeps its direct form (no churn).
-		if basicTarget != nil && basicTarget.Kind() == types.String {
+		//
+		// A NAMED string target (`type literalErr string`; github.com/ncruces/go-strftime's
+		// `literalErr(b)` over a byte) takes the same code-point steps, then the @string the unnamed
+		// form converts to: its [GoType] wrapper converts only from @string, never from an integer
+		// (CS0030). Scoped to an integer operand; a string operand already converts in one step.
+		namedStringTarget := false
+
+		if targetNamed, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
+			if u, ok := targetNamed.Underlying().(*types.Basic); ok && u.Kind() == types.String {
+				if argType := v.info.TypeOf(arg); argType != nil {
+					argBasic, ok := argType.Underlying().(*types.Basic)
+					namedStringTarget = ok && argBasic.Info()&types.IsInteger != 0
+				}
+			}
+		}
+
+		if basicTarget != nil && basicTarget.Kind() == types.String || namedStringTarget {
 			if tvArg, ok := v.info.Types[arg]; ok && tvArg.Value != nil {
 				if argBasic, ok := tvArg.Type.(*types.Basic); ok && argBasic.Info()&types.IsUntyped != 0 && !v.isCSharpConstantExpr(arg) {
 					expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(types.Default(argBasic).(*types.Basic)), expr)
@@ -1708,6 +1729,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(u), expr)
 					}
 				}
+			}
+
+			if namedStringTarget {
+				// A cast binds tighter than a binary operator: `literalErr(d+1)` converts the sum.
+				if v.needsParentheses(arg) {
+					expr = "(" + expr + ")"
+				}
+
+				expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(types.Typ[types.String]), expr)
 			}
 		}
 
@@ -2669,6 +2699,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						callExprContext.interfaceTypes[j] = paramType
 					}
 
+					// An inline array crosses as its deep array<T> copy (C1's review, M1).
+					if j < len(callExpr.Args) && v.isInlineArrayExpr(callExpr.Args[j]) {
+						if callExprContext.inlineArrayBoxArgs == nil {
+							callExprContext.inlineArrayBoxArgs = make(map[int]bool)
+						}
+
+						callExprContext.inlineArrayBoxArgs[j] = true
+					}
+
 					// An untyped constant boxed into the interface must be cast to Go's DEFAULT TYPE for
 					// its kind so its C# box matches Go's boxed dynamic type and a later `.(int)`
 					// (`._<nint>()`) assertion, `case int:`, or `==` succeeds — see untypedConstBoxCast.
@@ -2886,6 +2925,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// "not evaluated" carries that carve-out), so those keep the evaluating form rather than
 		// having their side effect silently dropped.
 		if (ident.Name == "len" || ident.Name == "cap") && len(callExpr.Args) == 1 {
+			// An inline array (a go.arrays member, inlineArrayEmission.go) has its length in its type, and golib's len
+			// cannot see the family: the constant, unless the operand calls or receives.
+			if arr, isArray := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Array); isArray && v.isInlineArrayExpr(callExpr.Args[0]) && !v.exprHasCallOrReceive(callExpr.Args[0]) {
+				return fmt.Sprintf("%d", arr.Len())
+			}
+
 			// A NAMED pointer to an array (`type Features *flagSet`) folds the same way.
 			if ptr, ok := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Pointer); ok {
 				if arr, isArray := ptr.Elem().Underlying().(*types.Array); isArray {
@@ -3554,7 +3599,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// (sync/atomic's nil-deref table) emitted `(uintptr)SwapPointer(nil, nil);` — CS0201.
 				// Node identity, not a flag, so a nested call in the same statement whose value IS
 				// consumed keeps the prefix (see visitExprStmt).
-				if callExpr != v.resultDiscardedExpr {
+				//
+				// …and unless the call is a TRUE call, a function or method that RETURNS an unsafe.Pointer.
+				// The prefix belongs to the conversion `unsafe.Pointer(x)`. On a true call it turned the
+				// returned pointer into a number, which converts back to a fresh pointer carrying nothing:
+				// not the box the pointer was minted from, and so not the pin that keeps its storage where
+				// the number says it is. A write through `p := f(q)` was lost once the collector had run
+				// (docs/phase4/DESIGN-unsafe-pointer-call-result.md; guarded by the behavioral program
+				// UnsafePointerCallResultLifetime). A consumer that needs the number builds its own cast: a
+				// pointer cast and uintptr(...) both do.
+				if calleeTV, isTyped := v.info.Types[callExpr.Fun]; callExpr != v.resultDiscardedExpr && isTyped && calleeTV.IsType() {
 					constructType = "(uintptr)"
 				}
 			} else if len(callExpr.Args) == 1 && v.currentFuncSignature != nil {
@@ -3587,9 +3641,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 
 					// Check if the receiver type is pointer and call argument matches
-					if isRecvPointer && isArgPointer && types.Identical(recvType, argType) {
+					if isRecvPointer && isArgPointer && types.Identical(recvType, argType) && v.exprIsReceiverOrDerefdPointerParam(callExpr.Args[0]) {
 						// Since pointer-based receiver functions are converted to C# as ref-based
-						// extension functions, we need to convert the pointer from a reference type
+						// extension functions, we need to convert the pointer from a reference type.
+						// Only a name that RENDERS AS THE POINTEE takes this form: the receiver and a
+						// pointer parameter (`ref var h = ref Ꮡh.DerefOrNull()`). Keyed on the type
+						// alone, it also took a LOCAL copy (`p := h; poke(unsafe.Pointer(p), 8)`),
+						// which holds the box, so `FromRef(ref p)` was the address of the local's own
+						// slot and the write never reached `h` (Go `7 8`, converted `7 0`). A local, a
+						// field or any other operand falls through to the box-carrying mint below.
 						return fmt.Sprintf("(uintptr)@unsafe.Pointer.FromRef(ref %s)", v.convExpr(callExpr.Args[0], nil))
 					}
 				}
@@ -5545,7 +5605,13 @@ func (v *Visitor) reinterpretManagedEmission(callExpr *ast.CallExpr, arg ast.Exp
 		return emission, true
 	}
 
-	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", v.convExpr(src, []ExprContext{identContext}), srcElem, targetElem), true
+	// A source that is itself a pointer CONVERSION, `(*U)(unsafe.Pointer((*T)(up)))`, renders as a cast,
+	// which binds looser than member access: parenthesized, `.Reinterpret` applies to the converted
+	// pointer instead of to `up` (CS1929).
+	// A source Go already parenthesized renders its own parentheses and is left as written.
+	rendered := v.parenthesizeConversionBase(src, v.convExpr(src, []ExprContext{identContext}))
+
+	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", rendered, srcElem, targetElem), true
 }
 
 // The internal/abi record types the managed model can synthesize from a descriptor's carried

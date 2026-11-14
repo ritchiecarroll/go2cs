@@ -234,7 +234,7 @@ public class GoTimerTests
     // The host's own short wait on macOS: a one-shot kqueue EVFILT_TIMER with NOTE_CRITICAL (sys/event.h), made and
     // closed per wait. It is the test's own, not GoCriticalTimer's, so a change to golib's wait cannot move both
     // sides of a pair. False where there is no reading to take: not macOS, kqueue refused, or the wait cut short.
-    private static bool kernelWait(long nanoseconds)
+    internal static bool kernelWait(long nanoseconds)
     {
         if (!OperatingSystem.IsMacOS())
             return false;
@@ -340,9 +340,30 @@ public class GoTimerTests
             Assert.Inconclusive("reads a thread's CPU time by its OS thread id, which this platform's ProcessThread does not carry");
 
         int id = 0;
+        Exception? thrown = null;
         using ManualResetEventSlim done = new();
-        new GoTimer(_ => { id = osThreadId(); done.Set(); }, null).Reset(now());
+
+        // The callback runs on the timer service thread, so what it throws is caught there and reported on the test's
+        // thread: an exception left unhandled on the service thread ends the test host and every test after this one (a
+        // refused P/Invoke did, on linux-arm64, while the GolibTests assembly carried bindings converted for linux/amd64).
+        new GoTimer(_ =>
+        {
+            try
+            {
+                id = osThreadId();
+            }
+            catch (Exception exception)
+            {
+                thrown = exception;
+            }
+
+            done.Set();
+        }, null).Reset(now());
+
         Assert.IsTrue(done.Wait(5_000));
+
+        if (thrown is not null)
+            Assert.Fail($"the timer callback threw on the service thread: {thrown}");
 
         using Process self = Process.GetCurrentProcess();
         return self.Threads.Cast<ProcessThread>().Single(thread => thread.Id == id);

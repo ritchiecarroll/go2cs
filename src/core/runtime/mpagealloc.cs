@@ -415,7 +415,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
         if (Δp.chunks[c.l1()] == nil) {
             // Create the necessary l2 entry.
             uintptr l2Size = /* unsafe.Sizeof(*p.chunks[0]) */ 1048576;
-            @unsafe.Pointer r = (uintptr)sysAlloc(l2Size, Δp.sysStat, vmaNamePageAllocIndex);
+            @unsafe.Pointer r = sysAlloc(l2Size, Δp.sysStat, vmaNamePageAllocIndex);
             if (r == nil) {
                 @throw(pageAllocOutOfMemoryˢ);
             }

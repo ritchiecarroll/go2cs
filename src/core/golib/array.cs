@@ -18,7 +18,7 @@ using go.golib;
 
 namespace go;
 
-public interface IArray : IEnumerable, ICloneable
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IArray : IEnumerable, ICloneable
 {
     Array? Source { get; }
 
@@ -39,7 +39,7 @@ public interface IArray : IEnumerable, ICloneable
 
 // The only generic sequence interface is IEnumerable<T>, so foreach and LINQ see the values. Go's range pairs come
 // from builtin.range (RangePairs.cs), as they do for slice<T> and array<T>.
-public interface IArray<T> : IArray, IEnumerable<T>, IGoReflectSequence
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IArray<T> : IArray, IEnumerable<T>, IGoReflectSequence
 {
     new T[] Source { get; }
 
@@ -648,7 +648,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     /// What <see cref="builtin.range{T}(array{T})"/> returns: the array's (index, value) pairs, Go's
     /// <c>range a</c>, for <c>foreach (var (i, v) in range(a))</c>.
     /// </summary>
-    public readonly struct RangeOver
+    [EditorBrowsable(EditorBrowsableState.Never)] public readonly struct RangeOver
     {
         private readonly array<T> m_array;
 
@@ -670,7 +670,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     /// interface-typed consumers still bind; those paths box the struct.
     /// </remarks>
     [Serializable]
-    public struct RangeEnumerator : IEnumerator<(nint, T)>
+    [EditorBrowsable(EditorBrowsableState.Never)] public struct RangeEnumerator : IEnumerator<(nint, T)>
     {
         private readonly T[] m_backing;
         private readonly nint m_low;
@@ -759,7 +759,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     /// The enumerable half of <see cref="ΔRangeSnapshot"/> — it holds only the SOURCE window, so
     /// producing it is free and the buffer is rented no earlier than the loop that consumes it.
     /// </summary>
-    public readonly struct RangeSnapshot
+    [EditorBrowsable(EditorBrowsableState.Never)] public readonly struct RangeSnapshot
     {
         private readonly T[] m_backing;
         private readonly int m_low;
@@ -789,7 +789,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     /// but <c>foreach</c> should drive it. Disposing twice is harmless (the field is cleared first);
     /// disposing two COPIES is not.
     /// </remarks>
-    public struct SnapshotEnumerator : IEnumerator<(nint, T)>
+    [EditorBrowsable(EditorBrowsableState.Never)] public struct SnapshotEnumerator : IEnumerator<(nint, T)>
     {
         private T[]? m_buffer;
         private readonly nint m_length;
@@ -1109,7 +1109,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     #endregion
 }
 
-public static class ArrayExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class ArrayExtensions
 {
     // array initializer from C# array
     public static array<T> array<T>(this T[] array)

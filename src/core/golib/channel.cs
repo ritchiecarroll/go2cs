@@ -19,7 +19,7 @@ using go.golib;
 
 namespace go;
 
-public interface IChannel : IEnumerable
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IChannel : IEnumerable
 {
     nint Capacity { get; }
 
@@ -119,7 +119,7 @@ internal interface IGoReflectChannel
     object ReflectWithCargo(ChanCargo? cargo);
 }
 
-public interface IChannel<T> : IChannel
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IChannel<T> : IChannel
 {
     void Send(in T value);
 
@@ -148,7 +148,7 @@ public interface IChannel<T> : IChannel
 /// setting on every call.
 /// </para>
 /// </remarks>
-public interface IChannelTimer
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IChannelTimer
 {
     /// <summary>
     /// Gets whether the channel must currently PRESENT as unbuffered: <c>cap()</c> and <c>len()</c>
@@ -1199,7 +1199,7 @@ internal static class SelectRuntime
             // select{} or every case on a nil channel: blocks forever — the standing
             // nil-channel deadlock-grace path (matches plain send/receive on nil).
             if (!channel.Wait(CancellationToken.None, reason: WaitReason.SelectNoCases))
-                fatal(FatalError.DeadLock(), 2);
+                FatalReport.Deadlock(FatalError.DeadLock());
 
             return -1; // unreachable
         }
@@ -1921,7 +1921,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
             if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanSendNilChan))
                 return;
 
-            fatal(FatalError.DeadLock(), 2);
+            FatalReport.Deadlock(FatalError.DeadLock());
             return;
         }
 
@@ -2107,7 +2107,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
             if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanReceiveNilChan))
                 return default!;
 
-            fatal(FatalError.DeadLock(), 2);
+            FatalReport.Deadlock(FatalError.DeadLock());
             return default!;
         }
 
@@ -2142,7 +2142,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
             if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanReceiveNilChan))
                 return (default!, false);
 
-            fatal(FatalError.DeadLock(), 2);
+            FatalReport.Deadlock(FatalError.DeadLock());
             return (default!, false);
         }
 
@@ -2398,7 +2398,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
             if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanReceiveNilChan))
                 yield break;
 
-            fatal(FatalError.DeadLock(), 2);
+            FatalReport.Deadlock(FatalError.DeadLock());
             yield break;
         }
 
@@ -2490,7 +2490,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     }
 }
 
-public static class channel
+[EditorBrowsable(EditorBrowsableState.Never)] public static class channel
 {
     public const int DeadLockDetectionTimeout = 200;
 
@@ -2523,6 +2523,11 @@ public static class channel
 
             return false;
         }
+
+        // A forever wait captures its goroutine's frames on its own thread BEFORE it counts as parked, so
+        // no poller can find every goroutine blocked while one of them has no frames to report.
+        if (!token.CanBeCanceled && Goroutine.IsForeverWait(reason))
+            Goroutine.CaptureForeverWaitStack(reason);
 
         using (Goroutine.Park(reason))
         {

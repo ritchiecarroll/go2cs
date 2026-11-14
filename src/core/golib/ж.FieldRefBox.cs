@@ -36,7 +36,7 @@ namespace go;
 internal interface INativeRooted
 {
     bool IsNativeRooted { get; }
-
+    bool IsGenuinelyNativeRoot => false; // true for a NativeBox over C memory alone (NativeBox's own remarks)
     /// <summary>The native base address when this box IS a native root (a <see cref="NativeBox{T}"/>), else 0.</summary>
     nuint NativeRootAddress => 0;
 
@@ -64,6 +64,22 @@ internal interface IInteriorPointer
 internal interface IExactOrderToken
 {
     bool OrderTokenIsExact { get; }
+
+    /// <summary>
+    /// Whether this field view's identity is MANAGED-EXACT: every hop down to its root is a field view whose Go offset is
+    /// resolved, and the root is a <see cref="IPlainHeapRoot"/>. Two such views are one Go pointer exactly when they share
+    /// the root and the Go offset, which their order tokens and roots answer without walking either chain.
+    /// </summary>
+    bool IsManagedExact { get; }
+}
+
+/// <summary>
+/// A root a field view's MANAGED-EXACT identity rests on: a non-nil heap box that does not name the zerobase, so its
+/// equality is reference identity alone (<see cref="StandardBox{T}"/> and its subclasses).
+/// </summary>
+internal interface IPlainHeapRoot
+{
+    bool IsPlainHeapRoot { get; }
 }
 
 /// <summary>
@@ -77,7 +93,7 @@ internal interface IFirstFieldView
     object? FirstFieldParent { get; }
 }
 
-public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView, IReinterpretView, IPackageLevelStorage
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView, IReinterpretView, IPackageLevelStorage
 {
     private readonly object m_source;
     private readonly FieldRefFunc<T> m_accessor;
@@ -164,7 +180,7 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     /// </para>
     /// </remarks>
     internal unsafe nuint NativeSlotAddress =>
-        !TargetsSharedZeroSizeSlot && m_source is INativeRooted { IsNativeRooted: true } ? (nuint)Unsafe.AsPointer(ref ValueSlot) : 0;
+        !TargetsSharedZeroSizeSlot && IsNativeRootedView ? (nuint)Unsafe.AsPointer(ref ValueSlot) : 0;
 
     /// <inheritdoc/>
     internal override nuint NativeIdentity => NativeSlotAddress;
@@ -194,6 +210,23 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
 
         if (ReferenceEquals(this, other))
             return true;
+
+        // Two MANAGED-EXACT views (IsManagedExact) are one Go pointer exactly when they share a root and a Go offset. Their
+        // order tokens are the root's id over the Go offset, cached per view, so unequal tokens answer at once; equal tokens
+        // are confirmed by the root itself, since the id space is finite. Every arm below answers the same for such a pair:
+        // neither is native (the native arm sees two zeros), a root's equality is its identity (so different roots are
+        // different sources all the way down), and one root at one Go offset is what the token, name, reinterpret and
+        // SameGoAddress arms each conclude. Against any other kind such a view is unequal, as the native arm and the kind
+        // test below answer. The arms below are the rule; this is their answer without the walk, which TypeScript's checker
+        // measured at hundreds of nanoseconds per compare (a *Type is a field promoted through five embedded structs, C51).
+        if (IsManagedExact)
+        {
+            if (other is not FieldRefBox<T> view)
+                return false;
+
+            if (view.IsManagedExact)
+                return PointerOrderToken == view.PointerOrderToken && ReferenceEquals(ReferentObject, view.ReferentObject);
+        }
 
         // A native-rooted field reference IS its address (see NativeSlotAddress): compare by it, against
         // every kind that can name the same machine address (a NativeBox, another native field reference,
@@ -247,7 +280,7 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
         NativeSlotAddress is var address and not 0 ? address.GetHashCode() : SourceIdentityHash(m_source);
 
     /// <inheritdoc/>
-    bool INativeRooted.IsNativeRooted => m_source is INativeRooted { IsNativeRooted: true };
+    bool INativeRooted.IsNativeRooted => IsNativeRootedView;
 
     // A field of a package-level variable is package-level storage too (Go: outside every heap span).
     bool IPackageLevelStorage.IsPackageLevel => m_source is IPackageLevelStorage { IsPackageLevel: true };
@@ -426,12 +459,54 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // source's token exact in turn (a root box's base is; an element view's index times the Go stride is).
     bool IExactOrderToken.OrderTokenIsExact => OrderTokenIsExact;
 
+    bool IExactOrderToken.IsManagedExact => IsManagedExact;
+
     // The source this view is the first field of: the field's Go offset in its source is 0. An offset the Go
     // layout cannot resolve (-1) is not 0, so an unknown layout never claims a parent.
     object? IFirstFieldView.FirstFieldParent => GoFieldOffsetOf(m_source, m_token) == 0 ? m_source : null;
 
-    private bool OrderTokenIsExact =>
-        GoFieldOffsetOf(m_source, m_token) >= 0 && (m_source is not IExactOrderToken source || source.OrderTokenIsExact);
+    private bool OrderTokenIsExact => (IdentityFacts & FactExact) != 0;
+
+    private bool IsNativeRootedView => (IdentityFacts & FactNativeRooted) != 0;
+
+    private bool IsManagedExact => (IdentityFacts & FactManagedExact) != 0;
+
+    // The identity facts, computed on first use and kept in m_identityFacts (ж.cs). Each is a pure function of this view's
+    // source and field, both immutable, and of its source's own facts, so a chain computes each hop once rather than
+    // re-walking every hop below it on every compare. A racing first read computes the same byte twice, harmlessly.
+    private const byte FactsKnown = 1, FactNativeRooted = 2, FactExact = 4, FactManagedExact = 8;
+
+    private byte IdentityFacts => m_identityFacts != 0 ? m_identityFacts : m_identityFacts = ComputeIdentityFacts();
+
+    private byte ComputeIdentityFacts()
+    {
+        byte facts = FactsKnown;
+
+        // Native memory, recursively through an of() chain (INativeRooted).
+        bool nativeRooted = m_source is INativeRooted { IsNativeRooted: true };
+
+        // Base plus Go offsets all the way down: this field's offset resolved, and its source's token exact in turn (a root
+        // box's base is; an element view's index times the Go stride is).
+        bool exact = GoFieldOffsetOf(m_source, m_token) >= 0 && (m_source is not IExactOrderToken source || source.OrderTokenIsExact);
+
+        if (nativeRooted)
+            facts |= FactNativeRooted;
+
+        if (exact)
+            facts |= FactExact;
+
+        if (!nativeRooted && exact && m_source switch
+            {
+                IExactOrderToken view => view.IsManagedExact,
+                IPlainHeapRoot root => root.IsPlainHeapRoot,
+                _ => false
+            })
+        {
+            facts |= FactManagedExact;
+        }
+
+        return facts;
+    }
 
     // ---- identity helpers (unchanged bodies, relocated with their sole consumer) ----
 

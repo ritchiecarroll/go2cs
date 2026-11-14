@@ -9,6 +9,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/importer"
 	"go/parser"
@@ -17,6 +18,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -29,15 +31,42 @@ type cgoWrapperTarget struct {
 	goos, library, crt, long, errnoDecl, structDecls string
 	libraries                                        map[string]string
 	ldflags                                          []string // the -l names its #cgo LDFLAGS would carry (increment 4c)
+	goarch                                           string   // the architecture its bindings are converted for (increment 5b)
+}
+
+// goldenName is the target's golden file: GoCgoWrappers.<goos>.golden.cs for amd64, and <goos>-<goarch> otherwise.
+func (target cgoWrapperTarget) goldenName() string {
+	if target.goarch == "amd64" {
+		return "GoCgoWrappers." + target.goos + ".golden.cs"
+	}
+
+	return "GoCgoWrappers." + target.goos + "-" + target.goarch + ".golden.cs"
+}
+
+// char is the Go type cmd/cgo declares _Ctype_char as for the target. cmd/cgo takes it from the C compiler's DWARF
+// (gcc.go: dwarf.CharType is int8, dwarf.UcharType is uint8), and plain char is unsigned in the linux/arm64 ABI and
+// signed on linux/amd64, on both darwin architectures and on windows.
+func (target cgoWrapperTarget) char() string {
+	if target.goos == "linux" && target.goarch == "arm64" {
+		return "uint8"
+	}
+
+	return "int8"
 }
 
 var cgoWrapperTargets = []cgoWrapperTarget{
 	// close(-1) sets EBADF on every POSIX libc.
-	{"linux", "libc.so.6", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoLinuxStructs, nil, []string{"c"}},
-	{"darwin", "/usr/lib/libSystem.B.dylib", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoDarwinStructs, nil, []string{"System"}},
+	{"linux", "libc.so.6", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoLinuxStructs, nil, []string{"c"}, "amd64"},
+	// linux on arm64 (the hosted ubuntu-24.04-arm leg) runs an arm64 process too, so its GolibTests leg compiles bindings
+	// converted for linux/arm64, as darwin's does for darwin/arm64.
+	{"linux", "libc.so.6", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoLinuxStructs, nil, []string{"c"}, "arm64"},
+	{"darwin", "/usr/lib/libSystem.B.dylib", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoDarwinStructs, nil, []string{"System"}, "amd64"},
+	// Apple silicon runs an arm64 process, and golib's resolver holds bindings to the target they were converted for
+	// (§5.3, §11.20), so darwin's arm64 GolibTests leg compiles bindings converted for darwin/arm64.
+	{"darwin", "/usr/lib/libSystem.B.dylib", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoDarwinStructs, nil, []string{"System"}, "arm64"},
 	// The UCRT's _close(-1) would raise the invalid-parameter handler, so windows' errno arm is exp's overflow (ERANGE).
 	{"windows", "ucrtbase.dll", "ucrtbase.dll", "int32", "func _C2func_exp(p0 _Ctype_double) (r1 _Ctype_double, r2 error) { return }", cgoWindowsStructs,
-		map[string]string{"PtInRect": "user32.dll", "UnionRect": "user32.dll", "GetSystemTime": "kernel32.dll"}, []string{"ucrtbase", "user32", "kernel32"}},
+		map[string]string{"PtInRect": "user32.dll", "UnionRect": "user32.dll", "GetSystemTime": "kernel32.dll"}, []string{"ucrtbase", "user32", "kernel32"}, "amd64"},
 }
 
 // The struct arms per OS. div by value everywhere; the by-value argument is inet_ntoa's struct in_addr on linux and
@@ -247,7 +276,7 @@ func cgoWrapperFixture(t *testing.T, target cgoWrapperTarget) *types.Package {
 
 	source := `package cgotest
 
-type _Ctype_char int8
+type _Ctype_char ` + target.char() + `
 type _Ctype_int int32
 type _Ctype_uint uint32
 type _Ctype_long ` + target.long + `
@@ -266,7 +295,7 @@ func _Cfunc_srand(p0 _Ctype_uint) (r1 _Ctype_void) { return }
 		t.Fatal(err)
 	}
 
-	pkg, err := (&types.Config{Importer: importer.Default(), Sizes: types.SizesFor("gc", "amd64")}).Check("cgotest", fset, []*ast.File{file}, nil)
+	pkg, err := (&types.Config{Importer: importer.Default(), Sizes: types.SizesFor("gc", target.goarch)}).Check("cgotest", fset, []*ast.File{file}, nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -280,7 +309,7 @@ func cgoWrapperGolden(t *testing.T, target cgoWrapperTarget) string {
 	t.Helper()
 
 	members := map[string]string{}
-	set := newCgoWrapperSet(cgoBindingTarget{goos: target.goos, library: target.library, crt: target.crt}, types.SizesFor("gc", "amd64"))
+	set := newCgoWrapperSet(cgoBindingTarget{goos: target.goos, library: target.library, crt: target.crt}, types.SizesFor("gc", target.goarch))
 	set.libraries = maps.Clone(target.libraries)
 
 	if set.libraries == nil {
@@ -320,9 +349,9 @@ func cgoWrapperGolden(t *testing.T, target cgoWrapperTarget) string {
 		loaded = append(loaded, cgoSymbolLibrary{name: name})
 	}
 
-	members[cgoMirrorSuffix+"0 libraries"] = cgoLibrariesRegistration("cgotest", cgoLibraryTable(cgoLinkFlags{libraries: append(slices.Clone(target.ldflags), "go2csprobe")}, loaded))
+	members[cgoMirrorSuffix+"0 libraries"] = cgoLibrariesRegistration("cgotest", target.goos+"/"+target.goarch, cgoLibraryTable(cgoLinkFlags{libraries: append(slices.Clone(target.ldflags), "go2csprobe")}, loaded))
 
-	return "// GoCgoWrappers." + target.goos + ".golden.cs - generated by go2cs's cgo wrapper generator for " + target.goos + ".\n" +
+	return "// " + target.goldenName() + " - generated by go2cs's cgo wrapper generator for " + target.goos + "/" + target.goarch + ".\n" +
 		"// DO NOT EDIT: src/go2cs's TestCgoScalarWrapperGoldensAreTheGeneratorsOutput holds this file equal to the\n" +
 		"// generator; run it with GO2CS_UPDATE_CGO_GOLDEN=1 to rewrite it. GolibTests compiles and runs it against libc.\n\n" +
 		"namespace go;\n\n" + cgoPseudoPackageText("cgotest", members)
@@ -348,7 +377,7 @@ func TestCgoPseudoPackageClassIsThePackageWithTheCMark(t *testing.T) {
 // against libc there is what the converter writes.
 func TestCgoScalarWrapperGoldensAreTheGeneratorsOutput(t *testing.T) {
 	for _, target := range cgoWrapperTargets {
-		path := filepath.Join("..", "tests", "GolibTests", "GoCgoWrappers."+target.goos+".golden.cs")
+		path := filepath.Join("..", "tests", "GolibTests", target.goldenName())
 		want := cgoWrapperGolden(t, target)
 
 		if os.Getenv("GO2CS_UPDATE_CGO_GOLDEN") == "1" {
@@ -498,6 +527,75 @@ func _C2func_find(p0 *_Ctype_struct_x) (r1 *_Ctype_int, r2 error) { return }
 
 		if seen != len(want) {
 			t.Errorf("%s: %d of the %d errno forms were recognized", goos, seen, len(want))
+		}
+	}
+}
+
+// cgoNativeCall matches a call of a binding's extern (absᴍnative(…), the errno form's …ᴍnativeerrno(…)) or of a windows
+// C runtime's errno slot (errnoᴍlocation()).
+var cgoNativeCall = regexp.MustCompile(`\w+` + cgoMirrorSuffix + `native(errno)?\(|` + cgoErrnoLocation + `\(\)`)
+
+// cgoSeamCoverage reads a bindings file: how many externs it declares, how many seam brackets it opens, and each native
+// call made outside one, with its line.
+func cgoSeamCoverage(text string) (imports, brackets int, outside []string) {
+	inside := false
+
+	for number, line := range strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n") {
+		trimmed := strings.TrimSpace(line)
+
+		switch {
+		case strings.HasPrefix(trimmed, "[global::System.Runtime.InteropServices.LibraryImport("):
+			imports++
+		case strings.HasSuffix(trimmed, ".syscallEntersyscall();"):
+			inside = true
+			brackets++
+		case strings.HasSuffix(trimmed, ".syscallExitsyscall();"):
+			inside = false
+		case strings.Contains(trimmed, "private static partial"):
+			// An extern's declaration, not a call.
+		case cgoNativeCall.MatchString(trimmed) && !inside:
+			outside = append(outside, fmt.Sprintf("%d: %s", number+1, trimmed))
+		}
+	}
+
+	return imports, brackets, outside
+}
+
+// Seam coverage, a standing property of the bindings (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.20, increment 5b):
+// every native call a binding makes is inside the native-call seam's bracket (runtime's syscallEntersyscall and
+// syscallExitsyscall, §11.4), so a scheduler that watches the bracket sees every C call (COORD, for M:N). Each extern is
+// one wrapper's, with one bracket, except windows' errno slot, which only the errno form calls, inside its own bracket.
+func TestCgoBindingsCrossTheSeamOnEveryNativeCall(t *testing.T) {
+	for _, target := range cgoWrapperTargets {
+		content, err := os.ReadFile(filepath.Join("..", "tests", "GolibTests", target.goldenName()))
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		text := string(content)
+		imports, brackets, outside := cgoSeamCoverage(text)
+		errnoSlot := 0
+
+		if strings.Contains(text, " "+cgoErrnoLocation+"();") {
+			errnoSlot = 1
+		}
+
+		t.Logf("READING %s: %d externs, %d brackets, %d errno slot", target.goos, imports, brackets, errnoSlot)
+
+		if imports != brackets+errnoSlot {
+			t.Errorf("%s: %d externs against %d brackets and %d errno slot: an extern no wrapper brackets", target.goos, imports, brackets, errnoSlot)
+		}
+
+		for _, call := range outside {
+			t.Errorf("%s: a native call outside the seam's bracket, line %s", target.goos, call)
+		}
+
+		// The check's own negative control: with one bracket's opening removed, it names the call that bracket covered.
+		planted := strings.Replace(text, "global::go.runtime_package.syscallEntersyscall();", "", 1)
+
+		if _, _, outside := cgoSeamCoverage(planted); len(outside) == 0 {
+			t.Errorf("%s: the check does not name a native call whose bracket was removed", target.goos)
 		}
 	}
 }

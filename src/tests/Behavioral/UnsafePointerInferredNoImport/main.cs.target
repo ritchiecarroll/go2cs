@@ -8,7 +8,7 @@ partial class main_package {
 internal static void main() {
     ref var @base = ref heap(new int64(), out var Ꮡbase);
     @base = 100;
-    @unsafe.Pointer p = (uintptr)ptrOf(Ꮡbase);
+    @unsafe.Pointer p = ptrOf(Ꮡbase);
 
     fmt.Println(p == nil);
     fmt.Println(p != nil);

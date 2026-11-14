@@ -12,7 +12,7 @@ namespace go;
 /// <summary>
 /// Represents an untyped integer value.
 /// </summary>
-public readonly struct UntypedInt : IEquatable<UntypedInt>
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct UntypedInt : IEquatable<UntypedInt>
 {
     // 64-bit value of the struct 'UntypedInt'
     private readonly int64 m_value;
