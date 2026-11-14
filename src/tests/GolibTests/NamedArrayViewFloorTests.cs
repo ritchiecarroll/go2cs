@@ -29,9 +29,10 @@ namespace GolibTests;
 /// Two layers. The number conversion refuses an address with NO provenance record, as it does for
 /// <c>array&lt;E&gt;</c>. That alone left the same store reachable from plain Go: an address WITH a record (pinned
 /// Go storage of another type) passed that test, and the Reinterpret conversion never reaches it. So the native
-/// box itself refuses to exist over any real address when its pointee is such a wrapper. No real address holds a
-/// wrapper struct: storage that holds a reference is never pinned. Not refused: nil, a pointer converted back to
-/// its own type, and an order token, which is not an address.
+/// box refuses the READ of its whole value when its pointee is such a wrapper. No real address holds a wrapper
+/// struct: storage that holds a reference is never pinned. The box itself may exist: until it is read it is an
+/// address (<see cref="NamedArrayCarrierTests"/>, which also holds one arm per read path). Not refused: a pointer
+/// converted back to its own type. A nil box and an order token answer their own panics at the dereference.
 /// </para>
 /// </remarks>
 [TestClass]

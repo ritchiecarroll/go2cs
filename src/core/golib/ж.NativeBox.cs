@@ -58,25 +58,6 @@ namespace go;
                        bool aliasesAnOrderToken = false)
         : base(isNull: nativeAddress == 0)
     {
-        // THE NAMED-ARRAY FLOOR, at the one place every native box is made (2026-11-14;
-        // docs/phase4/DESIGN-native-array-view.md, the block of that date). T is the wrapper struct of a named
-        // array type, whose one field is a managed reference, and Value below reads a T at the address with
-        // Unsafe.AsRef. No real address holds a wrapper: storage that holds a reference is never pinned, and C
-        // memory never held one. So the read took raw bytes for a reference, and where the bytes were zero the
-        // wrapper's lazy fill allocated a managed array and stored its reference INTO those bytes, C memory or
-        // a Go array's elements, with no error and where the collector cannot see it.
-        //
-        // The number conversion already refuses the address with no provenance record (ж<T>.FromNumber). This
-        // line is for the arrivals that test admits or never sees: an address WITH a record (pinned Go storage
-        // of another type) and the Reinterpret conversion. Measured before it, five Go shapes of seven stored
-        // an address into the Go array they viewed.
-        //
-        // Not refused: 0, the nil pointer, and a tagged order token, which is not an address (such a box
-        // answers its dereference as it did). It cures nothing: the Go memory shapes panic by name until a
-        // conversion exists that answers a wrapper box sharing the array.
-        if (s_isNamedArrayShaped && nativeAddress != 0 && !ManagedPointerTokens.IsTaggedToken(nativeAddress))
-            throw RuntimeErrorPanic.NativeArrayViewWithoutElementStorage(typeof(T));
-
         m_nativeAddr = nativeAddress;
         m_pin = pin;
         m_retainedSource = retainedSource;
@@ -146,6 +127,27 @@ namespace go;
             throw RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), reason);
 
         void* address = DereferenceableAddress();
+
+        // THE NAMED-ARRAY FLOOR, at the read of the whole value (2026-11-14; docs/phase4/DESIGN-native-array-view.md,
+        // the blocks of that date). T is the wrapper struct of a named array type, whose one field is a managed
+        // reference, and Value reads a T at the address with Unsafe.AsRef. No real address holds a wrapper: storage
+        // that holds a reference is never pinned, and C memory never held one. So the read took raw bytes for a
+        // reference, and where the bytes were zero the wrapper's lazy fill allocated a managed array and stored its
+        // reference INTO those bytes, C memory or a Go array's elements, with no error and where the collector cannot
+        // see it. Measured before the floor, five Go shapes of seven stored an address into the Go array they viewed.
+        //
+        // HERE AND NOT IN THE CONSTRUCTOR, where this line first stood. A box of the wrapper is a CARRIER until it
+        // is read: its number, its equality, a conversion onward to another pointee and a copy-back that hands it
+        // to a caller who never dereferences it read no memory, and all of them worked before the floor
+        // (NamedArrayCarrierTests). The same ruling as OrderTokenRefusal above. Every whole-value read of a native
+        // box comes through this method, the wrapper's indexer and its lazy fill included, since they take the ref
+        // Value returns.
+        //
+        // AFTER DereferenceableAddress, so a nil box answers the nil-dereference panic and an order token keeps its
+        // own refusal: neither needs an exemption here. It cures nothing: the shapes panic by name until a
+        // conversion exists that answers a wrapper box sharing the array.
+        if (s_isNamedArrayShaped)
+            throw RuntimeErrorPanic.NativeArrayViewWithoutElementStorage(typeof(T));
 
         // The dereference census (NativeBoxDereferenceCensus): a T that holds a reference and was not refused above, and
         // a box derived from storage that cannot be pinned. Counted after both refusals, so every count is a read or a
