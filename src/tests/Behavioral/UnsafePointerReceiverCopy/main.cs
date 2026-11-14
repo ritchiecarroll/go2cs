@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
+using static main_package;
 
 partial class main_package {
 
@@ -15,12 +16,18 @@ partial struct holder {
 
 internal static holder hold;
 
-partial struct Δq {
+partial struct q {
 }
+
+} partial class mainᴛT {
 
 internal static void q(this ref T h) { }
 
+} partial class main_package {
+
 internal static void poke(@unsafe.Pointer p, nint v) { (@unsafe.Pointer.To<nint>(p)).Value = v; }
+
+} partial class mainᴛT {
 
 internal static void viaReceiver(this ж<T> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
@@ -47,9 +54,9 @@ internal static void viaFolded(this ж<T> Ꮡh) {
 internal static void viaField(this ref T h) { poke(@unsafe.Pointer.FromPinnedBox(hold.p), 11); }
 
 internal static void viaRenamedReceiver(this ж<T> Ꮡq) {
-    ref var Δq = ref Ꮡq.DerefOrNull();
+    ref var q = ref Ꮡq.DerefOrNull();
 
-    poke((uintptr)@unsafe.Pointer.FromRef(ref Δq), 12);
+    poke((uintptr)@unsafe.Pointer.FromRef(ref q), 12);
 }
 
 internal static void viaLocalChain(this ж<T> Ꮡh) {
@@ -57,6 +64,8 @@ internal static void viaLocalChain(this ж<T> Ꮡh) {
     var r = p;
     poke(@unsafe.Pointer.FromPinnedBox(r), 13);
 }
+
+} partial class main_package {
 
 internal static void main() {
     ref var a = ref heap(new T(), out var Ꮡa);
@@ -79,7 +88,7 @@ internal static void main() {
 
     fmt.Println(a.n, b.n, c.n, d.n, e.n, f.n, g.n, k.n, m.n);
 
-    Δq _ᴛ1 = default;
+    q _ᴛ1 = default;
 }
 
 } // end main_package
