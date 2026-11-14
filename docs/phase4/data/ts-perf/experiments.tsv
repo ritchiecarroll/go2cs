@@ -1,0 +1,15 @@
+# Local experiments, checkdemo over the first 25 of units-101.txt, 1 warm-up + median of 3 (tools/envrun.py), same output hash 403f8606244a on every run.
+# Nothing here was committed: each arm is a runtime setting, a startup hook, or one rebuilt assembly copied over a copy of the master build.
+arm	wall_s	cpu_s	peak_rss_mb	change
+base	35.83	54.35	1252	master 651c4ad147 build, JIT, workstation concurrent GC (default)
+server-gc	24.37	50.36	1447	DOTNET_gcServer=1 DOTNET_GCDynamicAdaptationMode=0
+view-cache-off	30.8	-	-	golib FieldViewCache.Disabled=true via startup hook (views minted per call, not retained); runs 30.82 30.09 30.95 vs hook-enabled base 36.71 35.72 37.11
+utf8-sstring	34.05	-	-	unicode/utf8 decodeRuneInStringSlow(sstring) instead of (@string), rebuilt go.unicode.utf8.dll; runs 34.05 33.99 36.18
+utf8+view-cache-off	28.03	45.09	1083	the two above together
+utf8+view-cache-off+server-gc	22.71	40.82	3223	all three
+map-nil	33.46	51.49	1228	named-map == nil through map<K,V>'s own operator (generator NilComparisonExpression "Map"), rebuilt ast.dll; same-session base 34.09 52.52 1267
+r2r-jit	36.08	55.19	1133	dotnet publish -r linux-x64 --self-contained -p:PublishReadyToRun=true
+r2r+server-gc	24.05	49.38	1413	ReadyToRun plus server GC
+startup-jit	4.89	8.65	383	checkdemo good.ts, median of 5
+startup-r2r	4.57	8.41	402	checkdemo good.ts, ReadyToRun, median of 5
+aot	-	-	-	dotnet publish -p:PublishAot=true (app only, TrimMode partial): ILC "Insufficient memory" after 722 s on the 15 GB box
