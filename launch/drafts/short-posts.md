@@ -6,9 +6,9 @@
 > newsletter submissions (wide stage). Figures in [square brackets] are read on the day from the page that states
 > them. Edit each in your own words; never send the same text to two places.
 >
-> **Links.** go2cs.net, NEWS, the roster and Limitations are the site's own pages (the site was not reachable from the
-> session that wrote this: open each before posting). typescript-go-cs and sqlite-cs are **live once public** (gates
-> 12 and 13). nugetgo.net and the Tour README resolved on 2026-11-13.
+> **Links.** go2cs.net resolves (NEWS.html, read by COORD 2026-11-13); its roster and Limitations pages are the site's
+> own. sqlite-cs is public (created public 2026-11-12). typescript-go-cs is **live once public** (gate 12; still private
+> on 2026-11-13). nugetgo.net and the Tour README resolved on 2026-11-13. Open each again before posting.
 >
 > **If cgo 3.1 misses the release** (gate 14), every "cgo" line below says Phase 2 only: calling a shared library's C
 > functions with numbers, pointers and plain structs.
@@ -24,8 +24,8 @@ Windows, Linux (x64 and arm64) and macOS ([roster](https://go2cs.net/ValidatedTe
 - **TypeScript's own Go compiler, converted to C#**:
   [typescript-go-cs](https://github.com/ritchiecarroll/typescript-go-cs) (live once public). It parses [17,422 of
   17,422] test files, and type-checks and emits [7,404 of 7,404] byte-identical to the native build.
-- **SQLite, converted and not working yet**: [sqlite-cs](https://github.com/ritchiecarroll/sqlite-cs) (live once
-  public). It is in public so the walls are visible as I hit them.
+- **SQLite, converted and not working yet**: [sqlite-cs](https://github.com/ritchiecarroll/sqlite-cs). It
+  is in public so the walls are visible as I hit them.
 - **cgo**: calling a C library's functions from converted code, plus `C.CString`, `C.GoString`, `C.GoBytes`,
   `void*` and `defer C.free`. What it does not do is in [Limitations](https://go2cs.net/Limitations.html).
 - **This release breaks compiled code on purpose, while nobody depends on the old shape**: assemblies are named after
@@ -73,8 +73,8 @@ Read the channel's pinned rules first. One post, answers in its thread, no cross
 
 *Notes for the owner, not part of the post:* "byte-identical to native" is the TypeScript repository's measured
 claim (parse [17,422 of 17,422]; type-check and emit [7,404 of 7,404]); quote it only as that repository's README
-states it on the day. The two GitHub links are live once public; if one is not public yet, drop its line rather than
-posting a dead link.
+states it on the day. The typescript-go-cs link is live once public; if it is not public yet, drop its line rather
+than posting a dead link.
 
 ## 4. Newsletter submissions (wide stage, after M:N and one minor hop)
 

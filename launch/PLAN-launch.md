@@ -49,7 +49,10 @@
        cgo Phase 3, so 3.1 is not on master yet. The release notes are being written in docs/DRAFT-news-1-26-10-4.md
        (its title still says 1.26.10.4). Performance.md measures against published 1.26.10.2. go2cs.net did not
        answer from the session that wrote this, and the typescript-go-cs and sqlite-cs repositories are not
-       reachable from it, so their links are marked "check on the day". -->
+       reachable from it, so their links are marked "check on the day".
+     - 2026-11-14 amendment (C1, COORD's link facts read from the i7 on 2026-11-13, inbox C1 20261113T165959Z):
+       sqlite-cs is public (200; created public 2026-11-12), go2cs.net resolves (NEWS.html 200), and
+       typescript-go-cs is still private (404). Gate 13's status and the drafts' marks follow. -->
 
 
 Contents: [1. The recommendation](#1-the-recommendation) · [2. Where things stand](#2-where-things-stand) ·
@@ -144,7 +147,7 @@ master and the ledger on 2026-11-13; "unknown" means nothing this session could 
 | 10 | **A code of conduct** | R | `CODE_OF_CONDUCT.md` exists; the community profile stops flagging it | wide | open: none at master; profile 71% |
 | 11 | **A demo** | R | under a minute: install, convert, build, run, on the README | not a gate | unknown |
 | 12 | **typescript-go-cs public** | the owner | the repository is public, its README states the figures with how they were measured and links go2cs | soft (the posts link it) | unknown; public on push |
-| 13 | **sqlite-cs public, failing openly** | the owner | the repository is public, and its README says it is work in progress and where it stops | soft (the posts link it) | unknown here |
+| 13 | **sqlite-cs public, failing openly** | the owner | the repository is public, and its README says it is work in progress and where it stops | soft (the posts link it) | public (created 2026-11-12); README not read here |
 | 14 | **cgo 3.1 in the release, or out of the posts** | H; COORD decides | 3.1's helpers are in 1.26.11.1 with their residue disclosed in Limitations, or every draft says Phase 2 only | soft | not on master (Limitations lists `C.CString` as Phase 3) |
 | 15 | **The public-surface breaks shipped** | R, C2, P1 | OQ1, OQ2 and OQ4 are in 1.26.11.1, each under *Upgrading* in the NEWS entry, and [The public surface](../docs/PublicSurface.md) reads true | soft | OQ4 is in the draft notes; OQ1 and OQ2 unknown |
 
