@@ -1226,7 +1226,7 @@ A pointer parameter that the method dereferences is emitted the same way. Every 
 
 **Limits.** Three forms stay numbers, and a pointer made from one keeps nothing: a sum whose first term is not the pointer (`unsafe.Pointer(n + uintptr(p))`), a masked or rounded number (`unsafe.Pointer(uintptr(p) &^ 7)`), and a sum over a number held in a variable (`u := uintptr(p)`, then `unsafe.Pointer(u + n)`), which Go also says keeps nothing. Over a nil pointer the result is the offset as a number, as in Go: `uintptr(unsafe.Add(nil, 24))` is 24.
 
-Guarded by: `TestPointerArithmeticFormEmitsUnsafeAdd`; `TestReceiverPointerEmitsItsBoxAtAProvenUse`; `InteriorPointerRootTests` (`AMovedPointerEqualsAPointerAtTheSameAddress`, `EqualPointersHashAlikeAndFindEachOtherInAMap`, `AddOverANilPointerAnswersTheOffset`); the behavioral programs `UnsafeOperations`, `UintptrUnsafePointerIdiom`, `FuncVsMethodOverload`, `UnsafePointerKeywordParam` and `ReflectNewAtField`.
+Guarded by: `TestPointerArithmeticFormEmitsUnsafeAdd`; `TestReceiverPointerEmitsItsBoxAtAProvenUse`; `TestInteriorPointerMintCensus` (every converted method that keeps `FromRef`, by name); `InteriorPointerRootTests` (`AMovedPointerEqualsAPointerAtTheSameAddress`, `EqualPointersHashAlikeAndFindEachOtherInAMap`, `AddOverANilPointerAnswersTheOffset`); the behavioral programs `UnsafeOperations`, `UintptrUnsafePointerIdiom`, `FuncVsMethodOverload`, `UnsafePointerKeywordParam` and `ReflectNewAtField`.
 
 ## A numeric value pun READ is a bitcast — `*(*uint64)(unsafe.Pointer(&f))` boxes nothing
 

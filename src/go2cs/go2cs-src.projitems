@@ -427,6 +427,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\testInfoPositionMapCopies_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\generatorLoadGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\interceptorBuildGuard_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\interiorPointerMintCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeBoundaryBoxDeref_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeCallGateDarwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\sourcemeta\sourcemeta.go" />
