@@ -331,7 +331,7 @@
     code, and the build goes on.
   -->
   <PropertyGroup>
-    <GoBreakFloor>1.26.10.4</GoBreakFloor>
+    <GoBreakFloor>1.26.11.1</GoBreakFloor>
   </PropertyGroup>
 
   <Target Name="GoCheckBreakFloor" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'">

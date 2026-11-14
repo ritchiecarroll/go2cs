@@ -260,15 +260,18 @@ internal static (slice<byte>, error) encryptOAEP(hash.Hash hashΔ1, hash.Hash mg
         boring.UnreachableExceptTests();
 
         hashΔ1 = fips140hash.Unwrap(hashΔ1);
+        mgfHash = fips140hash.Unwrap(mgfHash);
 
         var errΔ3 = checkFIPS140OnlyPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ3 != nil) {
             return (default, errΔ3);
         }
-        if (fips140only.Enforced() && !fips140only.ApprovedHash(hashΔ1)) {
-            return (default, errors.New(cryptoRsaUseOfHashˢ));
-        }
-        if (fips140only.Enforced() && !fips140only.ApprovedRandomReader(random)) {
-            return (default, errors.New(cryptoRsaOnlyCryptoRandˢ));
+        if (fips140only.Enforced()) {
+            if (!fips140only.ApprovedHash(hashΔ1) || !fips140only.ApprovedHash(mgfHash)) {
+                return (default, errors.New(cryptoRsaUseOfHashˢ));
+            }
+            if (!fips140only.ApprovedRandomReader(random)) {
+                return (default, errors.New(cryptoRsaOnlyCryptoRandˢ));
+            }
         }
 
         var (k, err) = fipsPublicKey(ref (Ꮡpub).DerefOrNull());

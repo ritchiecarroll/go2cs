@@ -1,7 +1,7 @@
 # ConsumerRef.ps1 - the ref logic of release-smoke.ps1's arm H (source compatibility), dot-sourced by it and by
 # test-consumer-ref.ps1, which exercises it against a local origin.
 
-# The newest nuget-<a.b.c.d> release tag on origin below the version under test. A prerelease (1.26.10.4-ci.7) is below
+# The newest nuget-<a.b.c.d> release tag on origin below the version under test. A prerelease (1.26.11.1-ci.7) is below
 # its own release, so it compares by its numeric part; a published version's own tag is not below it and is skipped.
 # $null when origin cannot be listed or holds no such tag.
 function Resolve-ConsumerRef([string]$RepoRoot, [string]$UnderTest) {

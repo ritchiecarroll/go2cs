@@ -95,6 +95,12 @@ const (
 	// on-disk signal that this package's suite has been through the pipeline.
 	testProjectFileSuffix = ".tests.csproj"
 
+	// go2csBadge marks the README as converted by go2cs, linked to go2cs.net: the same badge a converted
+	// module's README carries (docs/ConvertingAModule.md). It needs no input, so every README has it.
+	// Its link is go2cs.net's root, so push-nuget.ps1's retarget patterns, anchored on
+	// 'go2cs.net/validation/', never match it.
+	go2csBadge = "[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net)"
+
 	// shieldsBadgeHost renders both badges; the path form is `/badge/<label>-<message>-<color>`.
 	shieldsBadgeHost = "https://img.shields.io"
 
@@ -161,27 +167,28 @@ const (
 	badgeLineBreak = "\\\n"
 )
 
-// readmeBadgeLine composes a converted stdlib package's whole badge paragraph — Tests and Docs on
-// the first line, Source·Go and Source·C# on the second, one badgeLineBreak apart and single spaces
-// within each line.
+// readmeBadgeLine composes a converted stdlib package's whole badge paragraph — converted-by-go2cs,
+// Tests and Docs on the first line, Source·Go and Source·C# on the second, one badgeLineBreak apart
+// and single spaces within each line.
 //
-// Each badge is emitted only when it can be composed honestly, so the paragraph may hold any subset,
-// or — when none has the inputs it needs — nothing at all, in which case the README carries no badge
-// paragraph, exactly as it did before badges existed. The break is a JOIN between the two lines
-// rather than a terminator on the first, so a missing badge can never leave a dangling break or an
-// empty line: an unseeded reconvert (Docs and Source·Go only) emits one badge per line with the
-// break between them, a package that can compose only one line emits that line alone with no break
-// at all, and no badges at all is still the empty string.
+// The go2cs badge leads the first line and is always there, since it needs no input. Every other
+// badge is emitted only when it can be composed honestly, so the rest of the paragraph may hold any
+// subset. The break is a JOIN between the two lines rather than a terminator on the first, so a
+// missing badge can never leave a dangling break or an empty line: an unseeded reconvert (go2cs, Docs
+// and Source·Go) emits two lines with the break between them, and a package with no second line emits
+// its first line alone with no break at all.
 //
 // The badges answer independent questions from independent inputs, so none suppresses another: Tests
 // and Source·C# read the repository (version.props, the proof pages), while Docs and Source·Go read
 // the Go toolchain and GOROOT. That split is what an unseeded reconvert makes visible — it emits the
-// two toolchain badges and neither repository one, one on each line, which is exactly why the break
-// has to be composed from what is present rather than written into a fixed template.
+// two toolchain badges and neither repository one, which is exactly why the break has to be composed
+// from what is present rather than written into a fixed template.
 func readmeBadgeLine(projectPath string, projectName string, sourceDir string, options Options) string {
 	importPath := stdLibImportPath(sourceDir, options.goRoot)
-	state := make([]string, 0, 2)
+	state := make([]string, 0, 3)
 	source := make([]string, 0, 2)
+
+	state = append(state, go2csBadge)
 
 	if badge := readmeValidationBadgeLine(projectPath, projectName, sourceDir); badge != "" {
 		state = append(state, badge)
@@ -200,10 +207,7 @@ func readmeBadgeLine(projectPath string, projectName string, sourceDir string, o
 	}
 
 	lines := make([]string, 0, 2)
-
-	if len(state) > 0 {
-		lines = append(lines, strings.Join(state, badgeSeparator))
-	}
+	lines = append(lines, strings.Join(state, badgeSeparator))
 
 	if len(source) > 0 {
 		lines = append(lines, strings.Join(source, badgeSeparator))

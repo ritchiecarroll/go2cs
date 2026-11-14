@@ -270,10 +270,11 @@ func refreshPackageReadmeAfterProof(outputPath string, options Options) error {
 // CRLF line endings to match the converter's other generated text output (and avoid autocrlf churn).
 //
 // Between the attribution blockquote and the package's own documentation sits the badge paragraph —
-// two lines, Tests + Docs then the Source pair, per readmeBadgeLine, each badge omitted when this
-// conversion cannot compose an honest one. sourceDir is the package's Go source directory, which the
-// badges read: the validation badge to see the `_test.go` files the conversion itself never compiles,
-// the docs and Go source badges to recover the package's Go import path.
+// two lines, go2cs + Tests + Docs then the Source pair, per readmeBadgeLine. The go2cs badge is always
+// there; each other badge is omitted when this conversion cannot compose an honest one. sourceDir is
+// the package's Go source directory, which the badges read: the validation badge to see the `_test.go`
+// files the conversion itself never compiles, the docs and Go source badges to recover the package's
+// Go import path.
 //
 // The CRLF pass at the bottom is what carries the badge paragraph's internal hard break to disk, so
 // readmeBadgeLine composes that break with a bare \n and lets this one conversion cover it.
@@ -286,10 +287,8 @@ func writeReadmeFile(projectPath string, projectName string, packageDoc string, 
 	builder.WriteString(fmt.Sprintf("# go.%s\n\n", projectName))
 	builder.WriteString("> C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).\n\n")
 
-	if badges := readmeBadgeLine(projectPath, projectName, sourceDir, options); badges != "" {
-		builder.WriteString(badges)
-		builder.WriteString("\n\n")
-	}
+	builder.WriteString(readmeBadgeLine(projectPath, projectName, sourceDir, options))
+	builder.WriteString("\n\n")
 
 	// The "From C#" line (first-impression audit, COORD 2026-10-10): the class a C# caller uses and the guide that
 	// shows how. Plain text, no inline code: nuget.org's dark theme draws an inline-code span as a red block.
