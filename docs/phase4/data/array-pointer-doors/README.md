@@ -50,3 +50,21 @@ modernc.org/sqlite v1.62.0 and modernc.org/libc v1.80.1 in its `go.mod`; the too
 `census/tables.txt` is the output of a short script over the `.tsv` files: counts per tag and form, then for the two
 sqlite tags the split by package and array name, `RawMem` by form, context and operand, the unnamed arrays by form
 and by operand, and for two standard library tags the forms and the slice sites one per line.
+
+## Re-run at the landed master (2026-11-14 19:35Z)
+
+Batch 305 landed as master `c2919b8b16`; the design branch merged it at `8a378c0ff1`. The merge base is the cut tip
+`837a413fdc`. At the merged tree, same box, same commands:
+
+- The converter built from the merged tree emits `main.cs` and `package_info.cs` byte-identical to the cut's.
+- The 24 arms give the output and exit codes of `converted-cut.out`. One line differs on every run, at any tree:
+  the eight bytes arm M0 prints are the managed reference stored into the C memory, an address.
+- The 11 prototype arms give `prototype.out` byte for byte.
+- Generator output for the program: the two array wrappers (`RawMem`, `smallMem`) are byte-identical; the struct
+  `hdr` gains `System.IEquatable<hdr>` (P4's S4, in the same batch), which no arm depends on.
+- Corpus counts: 13 span emissions in the same 6 files, 4 in the `.cs.auto` sibling, `To<array<` on 84 lines in 28
+  files, as at the cut. `src/core` differs from the cut in `fmt/errors.cs`, `unicode/utf8/utf8.cs` and
+  `golib/runtime/HashCode.cs`.
+
+The runner was first checked on the cut's own build: it reproduces `converted-cut.out` except the M0 line. No new
+output file is committed, because none would differ from the ones here.

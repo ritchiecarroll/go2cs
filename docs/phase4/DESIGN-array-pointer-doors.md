@@ -1,7 +1,15 @@
 # DESIGN: a slice or an element taken through `(*[N]T)(p)` aliases the memory p names
 
-> - **Status:** DRAFT FOR REVIEW (G reviews; COORD's brief to P5 of 2026-11-14 18:06Z). No code is cut. Written
->   while batch 305 gates, on the cut it carries; to be re-read against the landed master before it is final.
+> - **Status:** FOR REVIEW, no longer a draft (G reviews; COORD's brief to P5 of 2026-11-14 18:06Z). No code is cut.
+>   Written while batch 305 gated, on the cut it carries, and re-read against the landed master (next line).
+> - **Re-read at the landed master, 2026-11-14 19:35Z:** master `c2919b8b16` (batch 305), merged into this branch at
+>   `8a378c0ff1`. The merge base is the cut tip, so master adds only P4's S2-S4 and C2's inline pairs to the tree
+>   this was measured on. Re-measured at the merged tree: the converter's emission of the program is byte-identical
+>   to the cut's; the 24 arms and the 11 prototype arms give the same output and exit codes (arm M0's eight bytes
+>   are an address and differ on every run); the corpus counts of section 3 are unchanged (`src/core` differs from
+>   the cut in three files, none cited in this design). The census tables read Go source at the module pins and do
+>   not depend on the tree. Nothing in the design changed. Everything section 9 lists as not shown is still not
+>   shown.
 > - **Read and measured at:** `claude/p5-interior-pointer-cut` `837a413fdc` (the interior-pointer cut, the seat in
 >   batch 305). Go 1.26.11, one cloud linux/amd64 VM (4 vCPU, 15 GB, .NET SDK 10.0), Release, `GoTargetOS=linux`.
 > - **Modules:** modernc.org/sqlite v1.62.0 and modernc.org/libc v1.80.1, sqlite-cs's pins, read from the module
