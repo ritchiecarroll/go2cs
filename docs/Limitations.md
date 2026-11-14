@@ -35,6 +35,9 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   `C.CString`, `C.CBytes`, `C.GoString`, `C.GoStringN`, `C.GoBytes`, `C.malloc` and `C.free` convert, and
   so does `defer C.f(…)`. Its C types and constants convert with it. It converts for the machine's own
   operating system and architecture, and the converted package refuses to call C anywhere else.
+  A `-cgo` conversion is one package, and it builds against a go2cs clone
+  (`dotnet build -p:go2csPath=<go2cs>/src/`); it does not use the `go.*` packages.
+  <!-- src/go2cs/main.go:305 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
   Anything else is refused by name, with the phase that will cover it:
   - a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or
     `C.GoStringN` (Phase 3, its next increment). A pointer into a slice or an array is refused when the

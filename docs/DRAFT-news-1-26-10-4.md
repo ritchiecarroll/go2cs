@@ -142,7 +142,9 @@ returns comes from the package's own `malloc`, so the package's own `C.free` fre
 into Go memory: a pointer into a slice or an array is refused when the package is converted, and `unsafe.Pointer(&x)`
 is refused when the call runs, each by name. Each of these was run against the Go build of the same program on
 linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64. Every arm printed what Go printed, or, where it hands C Go
-memory, was refused by name.
+memory, was refused by name. A `-cgo` conversion is one package, and it builds against a go2cs clone
+(`dotnet build -p:go2csPath=<go2cs>/src/`); it does not use the `go.*` packages.
+<!-- src/go2cs/main.go:305 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **One known memory-safety gap.** Do not pass C a pointer you made from a number held in a variable, when it points
 inside Go memory: `u := uintptr(unsafe.Pointer(p))` followed by `C.f(unsafe.Pointer(u + n))`. The same holds when the
@@ -689,7 +691,7 @@ goroutine waits on a nil channel or an empty `select {}`; any other deadlock han
 goroutine, nor for the deadlock report: those went to stderr alone. They now reach the crash file too.
 <!-- Deadlock: merge 01986cdd81 (4078bdc81b): red first at master 3da19d0e2e (the line alone; the three-goroutine case
      twice); behavioral DeadlockGoroutineBlocks; golib + hand-owned runtime only, 0 corpus lines; no platform named.
-     Limitations.md:156-160#02e695 and GoFeatureSupport.md:110#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
+     Limitations.md:159-163#02e695 and GoFeatureSupport.md:110#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
      builtin.WriteFatalReport; GolibTests BackstopCrashOutputTests red with the crash file empty, green, linux. -->
 
 ### Runtime fixes (G, C1, i9)
