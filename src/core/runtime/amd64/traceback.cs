@@ -690,7 +690,7 @@ internal static void printArgs(ΔfuncInfo f, @unsafe.Pointer argp, uintptr pc) {
         return;
     }
 
-    @unsafe.Pointer liveInfo = (uintptr)funcdata(f, abi.FUNCDATA_ArgLiveInfo);
+    @unsafe.Pointer liveInfo = funcdata(f, abi.FUNCDATA_ArgLiveInfo);
     var liveIdx = pcdatavalue(f, abi.PCDATA_ArgLiveIndex, pc);
     var startOffset = (uint8)0xff; // smallest offset that needs liveness info (slots with a lower offset is always live)
     if (liveInfo != nil) {
@@ -710,7 +710,7 @@ internal static void printArgs(ΔfuncInfo f, @unsafe.Pointer argp, uintptr pc) {
 
     var isLiveʗ1 = isLive;
     void print1(uint8 off, uint8 sz, uint8 slotIdxΔ2) {
-        var x = readUnaligned64((uintptr)add(argp, (uintptr)off));
+        var x = readUnaligned64(add(argp, (uintptr)off));
         // mask out irrelevant bits
         if (sz < 8) {
             var shift = (uint8)(64 - sz * 8);
@@ -1668,7 +1668,7 @@ public static void SetCgoTraceback(nint version, @unsafe.Pointer traceback, @uns
             context: context,
             symbolizer: symbolizer
         ), out var Ꮡarg);
-        cgocall(_cgo_set_traceback_functions, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
+        cgocall(_cgo_set_traceback_functions, noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
         System.GC.KeepAlive(Ꮡarg);
     }
 }
@@ -1791,7 +1791,7 @@ internal static void callCgoSymbolizer(ж<cgoSymbolizerArg> arg) {
     if (asanenabled) {
         asanwrite(@unsafe.Pointer.FromPinnedBox(arg), /* unsafe.Sizeof(cgoSymbolizerArg{}) */ (uintptr)56);
     }
-    call(_cgo_call_symbolizer_function, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(arg)));
+    call(_cgo_call_symbolizer_function, noescape(@unsafe.Pointer.FromPinnedBox(arg)));
 }
 
 // cgoContextPCs gets the PC values from a cgo traceback.
@@ -1815,7 +1815,7 @@ internal static void cgoContextPCs(uintptr ctxt, slice<uintptr> buf) {
     if (asanenabled) {
         asanwrite(@unsafe.Pointer.FromPinnedBox(Ꮡarg), /* unsafe.Sizeof(arg) */ (uintptr)32);
     }
-    call(_cgo_call_traceback_function, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
+    call(_cgo_call_traceback_function, noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
     System.GC.KeepAlive(Ꮡarg);
 }
 

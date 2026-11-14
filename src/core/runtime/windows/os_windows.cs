@@ -989,7 +989,7 @@ internal static uintptr stdcall_no_g(stdFunction fn, params ꓸꓸꓸuintptr arg
         N: (uintptr)len(args)
     ), out var Ꮡcall);
     if (len(args) > 0) {
-        call.Args = (uintptr)(uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
+        call.Args = (uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
     }
     windows.StdCall(Ꮡcall);
     return call.R1;
@@ -1010,7 +1010,7 @@ internal static uintptr stdcall(stdFunction fn, params ꓸꓸꓸuintptr argsʗp)
     mp.Value.stdCallInfo.Fn = (uintptr)(@unsafe.Pointer)fn;
     mp.Value.stdCallInfo.N = (uintptr)len(args);
     if (len(args) > 0) {
-        mp.Value.stdCallInfo.Args = (uintptr)(uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
+        mp.Value.stdCallInfo.Args = (uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
     }
     var resetLibcall = false;
     if ((~mp).profilehz != 0 && (~mp).libcallsp == 0) {

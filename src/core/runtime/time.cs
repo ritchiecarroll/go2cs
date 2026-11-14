@@ -1394,7 +1394,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
         if (raceenabled) {
             // Establish a happens-before between this timer event and
             // the next synctest.Wait call.
-            racereleasemergeg(ref (gp).DerefOrNull(), (uintptr)Ꮡbubble.raceaddr());
+            racereleasemergeg(ref (gp).DerefOrNull(), Ꮡbubble.raceaddr());
         }
         gp.Value.bubble = default;
     }

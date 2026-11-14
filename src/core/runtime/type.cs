@@ -120,7 +120,7 @@ internal static ж<byte> getGCMaskOnDemand(ж<_type> Ꮡt) {
     @unsafe.Pointer addr = @unsafe.Pointer.FromPinnedBox(t.GCData);
 
     if (GOOS == "aix"u8) {
-        addr = (uintptr)add(addr, firstmoduledata.data - aixStaticDataBase);
+        addr = add(addr, firstmoduledata.data - aixStaticDataBase);
     }
 
     for (;;) {

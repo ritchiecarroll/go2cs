@@ -121,7 +121,7 @@ internal static any arena_arena_New(@unsafe.Pointer arena, any typʗp) {
         @throw(arenaNewNonPointerTypeˢ);
     }
     var te = (t.Reinterpret<_type, ptrtype>()).Value.Elem;
-    @unsafe.Pointer x = (uintptr)(((ж<userArena>)(uintptr)(arena))).@new(te);
+    @unsafe.Pointer x = (((ж<userArena>)(uintptr)(arena))).@new(te);
     ref var result = ref heap<any>(out var Ꮡresult);
     var e = efaceOf(Ꮡresult);
     e.Value._type = t;
@@ -227,7 +227,7 @@ internal static @unsafe.Pointer alloc(this ref userArena a, ж<_type> typ, nint 
     var s = a.active;
     @unsafe.Pointer x = default;
     for (;;) {
-        x = (uintptr)s.userArenaNextFree(typ, cap);
+        x = s.userArenaNextFree(typ, cap);
         if (x != nil) {
             break;
         }
@@ -339,9 +339,9 @@ internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type>
         // Redirect allocations that don't fit into a chunk well directly
         // from the heap.
         if (cap >= 0) {
-            return (uintptr)newarray(Ꮡtyp, cap);
+            return newarray(Ꮡtyp, cap);
         }
-        return (uintptr)newobject(Ꮡtyp);
+        return newobject(Ꮡtyp);
     }
 
     // Prevent preemption as we set up the space for a new object.
@@ -425,7 +425,7 @@ internal static void userArenaHeapBitsSetSliceType(ж<_type> Ꮡtyp, nint n, @un
         throw panic(((plainError)(@string)runtimeAllocationSizeOutˢ));
     }
     for (nint i = 0; i < n; i++) {
-        userArenaHeapBitsSetType(Ꮡtyp, (uintptr)add(ptr, (uintptr)i * typ.Size_), s);
+        userArenaHeapBitsSetType(Ꮡtyp, add(ptr, (uintptr)i * typ.Size_), s);
     }
 }
 
