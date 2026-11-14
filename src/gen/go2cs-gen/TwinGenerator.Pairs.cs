@@ -30,6 +30,22 @@ public sealed partial class TwinGenerator
         internal bool Pairs { get; init; } = true;
 
         private readonly Dictionary<string, string> m_pairClassOf = new(System.StringComparer.Ordinal);
+        private readonly Dictionary<string, string> m_staticPairOf = new(System.StringComparer.Ordinal);
+
+        // A static function's pair is made ONCE per (class, function, delegate type): the name of the cache field in the
+        // function's own class, and whether this request is the first (whose twin then declares the field).
+        internal (string Name, bool IsNew) StaticPairCache(INamedTypeSymbol owner, IMethodSymbol function, INamedTypeSymbol delegateType)
+        {
+            string key = owner.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) + "|" + function.ToDisplayString() + "|" +
+                         delegateType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+            if (m_staticPairOf.TryGetValue(key, out string? name))
+                return (name, false);
+
+            name = "ꞏpair" + m_staticPairOf.Count;
+            m_staticPairOf[key] = name;
+            return (name, true);
+        }
         private readonly StringBuilder m_pairClasses = new();
         internal int PairsMade, PairTests;
 

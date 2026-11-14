@@ -34,6 +34,9 @@ public sealed partial class TwinGenerator
         // N3's D3 core: the method's own func-value parameters whose pair test is HOISTED to the twin's entry (never
         // reassigned), the awaits that pair tests added (they never make a literal can-park), and the method itself.
         public readonly List<string> HoistedPairs = [];
+
+        // The static-pair cache fields this twin is the first to need, declared in its class after it.
+        public readonly List<string> CacheFields = [];
         private readonly ISymbol? m_method;
         private readonly bool m_blockBody;
         private int m_pairAwaits;
@@ -524,13 +527,27 @@ public sealed partial class TwinGenerator
                 return null;
             }
 
-            m_run.PairsMade++;
-
             string plainType = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             string group = argument.WithoutTrivia().ToFullString();
+            string pair = "new " + plainType + "(new " + m_run.PairClass(type, twinType) + "(" + group + ", " + Rename(argument.WithoutTrivia()).ToFullString() + ").Invoke)";
 
-            return ParseExpression("new " + plainType + "(new " + m_run.PairClass(type, twinType) + "(" + group + ", " + Rename(argument.WithoutTrivia()).ToFullString() + ").Invoke)")
-                .WithTriviaFrom(node);
+            // Made ONCE per function and delegate type: a field of this twin's own class, filled on first use (a race only
+            // makes a second, equal pair). Where the class cannot hold a field, the pair is made per conversion.
+            if (m_method?.ContainingType is { TypeKind: TypeKind.Class or TypeKind.Struct } owner)
+            {
+                (string cache, bool isNew) = m_run.StaticPairCache(owner, method, type);
+
+                if (isNew)
+                {
+                    m_run.PairsMade++;
+                    CacheFields.Add("private static " + plainType + "? " + cache + ";");
+                }
+
+                return ParseExpression("(" + cache + " ??= " + pair + ")").WithTriviaFrom(node);
+            }
+
+            m_run.PairsMade++;
+            return ParseExpression(pair).WithTriviaFrom(node);
         }
 
         public override SyntaxNode? VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)

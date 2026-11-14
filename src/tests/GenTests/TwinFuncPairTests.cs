@@ -163,6 +163,20 @@ public class TwinFuncPairTests
             "a literal paired inside new D(...) binds the outer creation to the pair, never a delegate over a delegate");
     }
 
+    // A static function's pair is made ONCE per function and delegate type (the D3s arm's 0 B per conversion): a field
+    // in the function's own class, filled on first use; every later conversion reads it.
+    [TestMethod]
+    public void AStaticFunctionsPairIsCachedOncePerFunction()
+    {
+        (string twins, Diagnostic[] errors) = Run();
+        string main = Body(twins, "main");
+
+        Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
+        StringAssert.Contains(main, "(ꞏpair0 ??= new global::System.Action(new global::go2cs.TwinPairs.ꞏFuncPair0(park2, park2ꞏtwin).Invoke))",
+            "the conversion reads the cached pair, making it on first use");
+        StringAssert.Contains(twins, "private static global::System.Action? ꞏpair0;", "the cache is a field of the function's own class");
+    }
+
     [TestMethod]
     public void AGoStatementOnAPairBoundValueLaunchesTheTwin()
     {
