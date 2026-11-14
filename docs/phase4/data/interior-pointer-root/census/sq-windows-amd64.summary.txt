@@ -1,0 +1,1 @@
+sq-windows-amd64: packages 23, load errors 0, helpers 0, sites 5630

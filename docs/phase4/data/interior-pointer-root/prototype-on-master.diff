@@ -1,0 +1,34 @@
+diff --git "a/src/core/golib/\320\266.NativeDerivation.cs" "b/src/core/golib/\320\266.NativeDerivation.cs"
+index 9d46c4231e..e8304ba8ed 100644
+--- "a/src/core/golib/\320\266.NativeDerivation.cs"
++++ "b/src/core/golib/\320\266.NativeDerivation.cs"
+@@ -24,6 +24,14 @@ internal static class NativeDerivation
+         _ => root
+     };
+ 
++    // PROTOTYPE (interior-pointer design, never lands as written): the typed conversion of an unsafe.Pointer that
++    // carries a box. Today's answer for the number, and where that is a native box with nothing, the same box
++    // retaining what the pointer carried.
++    internal static ж<T> Rooted<T>(ж<T> box, object? carried) =>
++        box is NativeBox<T> { RetainedSource: null } native && ((INativeRooted)native).IsGenuinelyNativeRoot && Kept(carried) is { } kept
++            ? new NativeBox<T>(native.NativeIdentity, retainedSource: kept)
++            : box;
++
+     // unsafe.Add over an unsafe.Pointer that carries its box: the box the moved pointer carries, a native box AT the
+     // new value that retains what the pointer carried. Null where there is nothing to keep (the pointer carried
+     // nothing, or C memory alone), and for a token, whose arithmetic keeps its own route.
+diff --git a/src/core/unsafe/unsafe.cs b/src/core/unsafe/unsafe.cs
+index 776c363e69..3352989a6e 100644
+--- a/src/core/unsafe/unsafe.cs
++++ b/src/core/unsafe/unsafe.cs
+@@ -484,6 +484,10 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
+         return value is null || value.IsNull ? null : (void*)value.Value;
+     }
+ 
++    // PROTOTYPE (interior-pointer design): `(*T)(p)` for an unsafe.Pointer p, keeping what p carries.
++    public static ж<T> To<T>(Pointer? p) =>
++        NativeDerivation.Rooted((ж<T>)(uintptr)p!, p?.RetainedSource);
++
+     public static Pointer FromRef<T>(ref T type)
+     {
+         fixed (T* ptr = &type)
