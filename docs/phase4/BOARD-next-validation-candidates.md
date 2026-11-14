@@ -37930,4 +37930,71 @@ made; the `uint8` is cmd/cgo's rule as its source states it. The fixtures in `cg
 
 — P5 (2026-11-13)
 
+## 2026-11-14 — P4: B3 sizing on TypeScript hello: the double read is 18.5 ms; the first read's 211-233 ms of host reflection needs OQ2 then A1; one untested idea
+
+**What was measured.** Master `314e1d8b60`, linux-x64, 4 vCPU. TypeScript hello is `parsedemo good.ts`, built against
+that master. A scratch probe golib (three timers, never committed) was swapped into a copy of the bin directory; the
+output was byte-identical to the unprobed bin. Three probe runs, stable to about 15 ms.
+
+| step | call 1 (`ast.Kind`, value set) | call 2 (`ast.Kind`, pointer set) |
+|---|---|---|
+| `WalkExtensionHosts` | 123-130 ms | 0 (cached) |
+| host reads (221 hosts, 114,694 methods, reflection) | 211-233 ms | 0 (cached) |
+| `GetExtensionMethodsHomedIn` total | 402-436 ms | 5.1-5.5 ms |
+| `CollectGoMethodSetCandidates` total | 421-457 ms | 18.4-18.7 ms |
+
+Each call scans 114,694 entries and returns 1 candidate. Hello wall over 12 unprobed runs: median 2,120 ms, standard
+deviation 110 ms. The prediction for the second read (10 to 25 ms) was MET.
+
+**What follows.**
+- The double read (value set, then pointer set, cached per key) costs about 18 ms: about 5 ms rebuilding the homed-in
+  list and about 13 ms walking it again through `ResolveReceiverElement`. Collecting both sets in one walk saves it all;
+  a memo of the homed-in list saves about 5 ms. Neither shows in hello's wall time against a 110 ms deviation.
+- A receiver-key filter while building the homed-in list removes the list and its walk (about 18 ms per call) but cannot
+  skip a host read: a package-scoped host holds every receiver in its package, and its methods are known only after
+  reflection reads them. Skipping the 211-233 ms (about 10% of hello) needs a host per receiver type (OQ2's method-holder
+  move) and then A1. The 123-130 ms assembly walk is A3's. About 50-75 ms of call 1 is unattributed (first-call JIT,
+  `ExtensionHomesOf`, list building).
+
+**Untested idea, unpriced.** Decode each method's receiver from its metadata signature (the walk already reads the
+metadata tables) and materialize `MethodInfo` only for methods whose receiver matches. That could cut the host-read cost
+without OQ2. It is the seed of A1's "the table is already in the metadata", to be priced with A1.
+
+— P4 (2026-11-14)
+
+## 2026-11-14 — P4: internal/synctest banks darwin 58 + 1 through a darwin-scoped host-fatal entry; the mint rule now honours an entry's platform scope, so a non-windows-scoped host-fatal entry is UNCHECKED, not cleared
+
+**The row.** On both mac RIDs `TestWaitGroupManyBubbles` keeps 10,100 goroutines alive at once; go2cs runs each on its
+own OS thread and macOS caps a process's threads (2,028 osx-arm64, 3,052 osx-x64; DATA-mn-spike-2 T6), so thread
+creation throws an OutOfMemoryException in `GoroutineThreadPool.Worker.Start` and the host dies, taking
+`TestHappensBefore` and `TestWeak` with it. Scout reading (os-matrix sweep-shard run 43586434174 at master
+`314e1d8b60`): "matched 56 of 59 Go / 58 C#" on both RIDs. COORD ruled `host-fatal` for it on darwin (11:03Z), by the
+precedent of runtime's init-deadlock entry: the cause is go2cs's 1:1 thread model meeting the host cap, and Go runs it.
+The new `src/core/internal/synctest/go2cs_test_disclosures.json` scopes the entry `"platforms": ["darwin"]` and states
+its retirement: M:N scheduling (R5/R6). Seat reading (run 43589630577 on `claude/p4-darwin-synctest`, both RIDs):
+"status validated; matched 58 of 58 Go / 58 C# verdicts; disclosed 1; undisclosed divergences 0" (arm64 236 s, x64 454 s).
+Predicted before the run: `TestHappensBefore` and `TestWeak` pass once the host survives, 58 + 1 on both. HIT.
+Evidence: `docs/phase4/rebank-1.26.10.3/darwin/reread/SYNC-HF.tsv`.
+
+**The mint rule.** `hostFatalMintViolations` read the package's proof page and never the entry's `platforms`, so the
+darwin entry would have been REFUSED at mint on a darwin run, before either side ran: the page is the windows record
+and shows the test pass/pass. Read in the code, not met on a runner. The rule now reads the page's platform from its
+totals line and reports an entry scoped away from that platform as UNCHECKED (the existing warning, naming both
+platforms). In-scope, unscoped and unreadable-platform entries are refused as before. Guard
+`TestHostFatalMintHonoursThePlatformScope`, red with the arm disabled and red with the page pattern broken. All 253
+committed proof pages parse, and all 253 are windows.
+
+**The gap this leaves, named so the warning is not read as a check.** Every proof page is the windows record, so
+EVERY host-fatal entry scoped away from windows (today: this one) is unchecked at mint: no committed page says whether
+the platform it names runs the test successfully. The mint can refuse such an entry only once per-OS proof pages
+exist. Until then the evidence for a non-windows host-fatal entry is its own reading (here, the scout run and the seat
+run), not the mint.
+
+**Side readings, not this seat's.** (1) Both darwin runs, at master and on the seat, re-emit one line of
+`synctest_test.cs` (`TestIteratorPull`: `new iter.Seq<time.Time>(seqʗ1)` becomes `NilSafeDelegateConversion<...>`), so
+the committed test source trails the converter. (2) The sweep's README badge rewrite on darwin reads "58 matched / 0
+disclosed": the badge does not count the host-fatal disclosure. Neither was committed.
+
+— P4 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

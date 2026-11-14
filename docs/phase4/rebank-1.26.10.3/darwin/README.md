@@ -263,4 +263,13 @@ the seam's head, above, which batch 280 landed. The other three rows have no ear
 undisclosed count. `win_differs` compares the reading with the windows columns, since these rows carried no darwin
 segment.
 
+## The internal/synctest host-fatal read on claude/p4-darwin-synctest (`reread/SYNC-HF.tsv`, COORD 2026-11-14)
+
+One row on both RIDs, os-matrix sweep-shard run 43589630577 on `claude/p4-darwin-synctest` @ c3818674b6 (master
+314e1d8b60 plus the seat). The seat adds a darwin-scoped `host-fatal` entry for `TestWaitGroupManyBubbles`, the class (c)
+thread-cap death above, and lets the mint rule honour an entry's platform scope. Both RIDs read "status validated;
+matched 58 of 58 Go / 58 C# verdicts; disclosed 1; undisclosed divergences 0" (osx-arm64 236 s, osx-x64 454 s), so the
+row banks `darwin: 58 + 1`. Before the seat, at master (run 43586434174), both RIDs read "matched 56 of 59 Go / 58 C#",
+as at 1.26.10.3. The withdrawal retires when M:N scheduling lands; the row is then re-read on both RIDs.
+
 <!-- {% endraw %} -->
