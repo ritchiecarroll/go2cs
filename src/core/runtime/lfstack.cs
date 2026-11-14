@@ -84,7 +84,7 @@ internal static uint64 lfstackPack(ж<lfnode> node, uintptr cnt) {
 }
 
 internal static ж<lfnode> lfstackUnpack(uint64 val) {
-    return (ж<lfnode>)(uintptr)(((taggedPointer)val).pointer());
+    return @unsafe.Pointer.To<lfnode>(((taggedPointer)val).pointer());
 }
 
 } // end runtime_package

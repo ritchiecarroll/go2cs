@@ -77,7 +77,7 @@ public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintpt
     if (goarch.BigEndian) {
         offset = (uintptr)goarch.PtrSize - argSize;
     }
-    return (@unsafe.Pointer)((uintptr)@unsafe.Pointer.FromBox(Ꮡ(r.Ints, reg)) + offset);
+    return @unsafe.Add(@unsafe.Pointer.FromBox(Ꮡ(r.Ints, reg)), offset);
 }
 
 // IntArgRegBitmap is a bitmap large enough to hold one bit per
@@ -97,10 +97,8 @@ public static void Set(this ref IntArgRegBitmap b, nint i) {
 //
 //go:nosplit
 public static bool Get(this ж<IntArgRegBitmap> Ꮡb, nint i) {
-    ref var b = ref Ꮡb.DerefOrNull();
-
     // Compute p=&b[i/8], but without a bounds check. We don't have the stack for it.
-    var p = (ж<byte>)(uintptr)((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref b) + (uintptr)(i / 8)));
+    var p = @unsafe.Pointer.To<byte>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡb), (uintptr)(i / 8)));
     return (byte)(p.Value & (((uint8)1).Lsh((int64)(i % 8)))) != 0;
 }
 

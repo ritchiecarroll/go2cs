@@ -74,6 +74,12 @@ line by line.
   half `unsafe.Add` has already dropped it.
 - **The corpus** is regenerated for the change's own lines, on all four targets, in the slot COORD ruled.
 
+> **Amended 2026-11-14 (interior-pointer root, DESIGN-interior-pointer-root.md 4.1 and 10.1).** "A token keeps the
+> plain number" no longer holds for what the pointer carries. The moved pointer's number is still the token plus the
+> offset and no address is formed, but the pointer now carries the box the token names, because the token resolves
+> only while that box is alive. `UnsafeAddCarryTests.AddOverATokenKeepsTheTokensOwnRoute` asserts the new form. C
+> memory alone still keeps the plain number.
+
 ## 4. Predictions, to be scored as worded
 
 - **PB-1 (red first).** The lifetime program, tracked as a behavioral program with three shapes (a function

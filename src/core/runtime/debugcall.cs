@@ -211,7 +211,7 @@ partial struct debugCallWrapArgs {
 // goroutine.
 internal static void debugCallWrap1() {
     var gp = getg();
-    var args = (ж<debugCallWrapArgs>)(uintptr)((~gp).param);
+    var args = @unsafe.Pointer.To<debugCallWrapArgs>((~gp).param);
     var (dispatch, callingG) = (args.dispatch, args.callingG);
     gp.Value.param = default;
 

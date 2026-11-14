@@ -436,8 +436,8 @@ internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> typ,
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0; // Always zero
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0; // Always zero
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
     // See if we need to replace the existing tiny block with the new one
     // based on amount of remaining free space.
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
@@ -622,13 +622,13 @@ internal static uintptr writeHeapBitsSmallStub(ж<mspan> Ꮡspan, uintptr x, uin
         // Two writes.
         var bits0 = (uintptr)ptrBits - j;
         var bits1 = bits - bits0;
-        var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-        var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+        var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+        var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
         dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
         dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
     } else {
         // One write.
-        var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+        var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
         dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 1)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j)))); // We're taking the min so this compiles on 32 bit platforms. But if bits > ptrbits we always take the other branch
     }
 

@@ -32,21 +32,29 @@ import (
 //                                                                   -> GoFuncCookie.Func<F>(x)
 //   w1  `*(*uintptr)(unsafe.Pointer(&f)) = x`, f a func variable   -> f = GoFuncCookie.Func<F>(x);
 //   w2  `*(*F)(unsafe.Pointer(&v)) = fn`, v a uintptr lvalue        -> v = (uintptr)GoFuncCookie.Of(fn);
+//   w3  `*(*F)(e) = fn`, e any other unsafe.Pointer                 -> @unsafe.Pointer.StoreFunc(e, fn);
 //
-// Each shape is recognised by its TYPES, never by a name. Anything else keeps today's pointer
-// reinterpret: a func stored into memory at a computed address (vfs/patches64.go's offset stores), a
-// recovery from a pointer or from memory (runtime's mcleanup and panic), and the `*unsafe.Pointer`
-// forms, which already read through unsafe.Pointer.OfFunc.
+// Each shape is recognised by its TYPES, never by a name. w3 is the store whose target the node does not
+// name: a func stored at a computed address (vfs/patches64.go's offset stores into ccgo's method table),
+// through a pointer held in a variable, or over a value of another type. What e names is known only at run
+// time, so golib decides there whether the slot takes the func or its word
+// (docs/phase4/DESIGN-interior-pointer-root.md 4.8 B1 and 10.4). The one store that keeps the pointer
+// reinterpret is `*(*F)(unsafe.Pointer(&f)) = fn` over a variable f of type F itself, which is a plain
+// store into f's own box. Anything else keeps it too: a recovery from a pointer or from memory (runtime's
+// mcleanup and panic), and the `*unsafe.Pointer` forms, which already read through unsafe.Pointer.OfFunc.
 
 type funcWordShape struct {
-	class    string     // m1, m2, r1, r2, w1 or w2
-	value    ast.Expr   // m1, m2, w2: the func value read or stored
+	class    string     // m1, m2, r1, r2, w1, w2 or w3
+	value    ast.Expr   // m1, m2, w2, w3: the func value read or stored
 	word     ast.Expr   // r1, r2, w1: the word read as a func
-	target   ast.Expr   // w1: the func variable; w2: the uintptr lvalue
+	target   ast.Expr   // w1: the func variable; w2: the uintptr lvalue; w3: the unsafe.Pointer stored through
 	funcType types.Type // r1, r2, w1: the func type the word is read as
 	viaParam bool       // value is a type parameter's value (m2 over a struct{ f T })
 	field    string     // m2 over a one-func-field struct VALUE (not a literal): the field holding the func
 }
+
+// funcStoreDoor is golib's door for w3, a func stored through an unsafe.Pointer whose target the node does not name.
+const funcStoreDoor = "@unsafe.Pointer.StoreFunc"
 
 // packageFuncWords maps each recognised shape's node (the deref, selector, index or assignment) to its
 // operands. Rebuilt by collectFuncWords per package beside the value pun reads, for the same reason.
@@ -329,7 +337,7 @@ func recognizeFuncWordField(selector *ast.SelectorExpr, info *types.Info) *funcW
 	return nil
 }
 
-// recognizeFuncWordStore matches w1 and w2: a plain one-to-one store through a converted pointer.
+// recognizeFuncWordStore matches w1, w2 and w3: a plain one-to-one store through a converted pointer.
 func recognizeFuncWordStore(assign *ast.AssignStmt, info *types.Info) *funcWordShape {
 	if assign.Tok != token.ASSIGN || len(assign.Lhs) != 1 || len(assign.Rhs) != 1 {
 		return nil
@@ -347,24 +355,29 @@ func recognizeFuncWordStore(assign *ast.AssignStmt, info *types.Info) *funcWordS
 		return nil
 	}
 
-	operand, ok := unsafePointerOfAddress(arg, info)
+	if operand, ok := unsafePointerOfAddress(arg, info); ok {
+		operandType := info.TypeOf(operand)
 
-	if !ok {
-		return nil
+		if operandType == nil {
+			return nil
+		}
+
+		if isFuncWordType(elem) && isFuncType(operandType) {
+			return &funcWordShape{class: "w1", target: operand, word: assign.Rhs[0], funcType: operandType}
+		}
+
+		if isFuncType(elem) && isFuncWordType(operandType) {
+			return &funcWordShape{class: "w2", target: operand, value: assign.Rhs[0]}
+		}
+
+		// `&f` over a variable of the stored func type itself is a store into f's own box, and stays one.
+		if types.Identical(elem, operandType) {
+			return nil
+		}
 	}
 
-	operandType := info.TypeOf(operand)
-
-	if operandType == nil {
-		return nil
-	}
-
-	if isFuncWordType(elem) && isFuncType(operandType) {
-		return &funcWordShape{class: "w1", target: operand, word: assign.Rhs[0], funcType: operandType}
-	}
-
-	if isFuncType(elem) && isFuncWordType(operandType) {
-		return &funcWordShape{class: "w2", target: operand, value: assign.Rhs[0]}
+	if isFuncType(elem) && isUnsafePointerBasic(info.TypeOf(arg)) {
+		return &funcWordShape{class: "w3", target: arg, value: assign.Rhs[0]}
 	}
 
 	return nil
@@ -509,7 +522,7 @@ func (v *Visitor) funcWordEmission(node ast.Node) (string, bool) {
 	return "", false
 }
 
-// funcWordStoreEmission renders a recognised store (w1, w2) as a statement, reporting false otherwise.
+// funcWordStoreEmission renders a recognised store (w1, w2, w3) as a statement, reporting false otherwise.
 func (v *Visitor) funcWordStoreEmission(assign *ast.AssignStmt) (string, bool) {
 	shape := packageFuncWords[assign]
 
@@ -522,6 +535,8 @@ func (v *Visitor) funcWordStoreEmission(assign *ast.AssignStmt) (string, bool) {
 		return fmt.Sprintf("%s = GoFuncCookie.Func<%s>(%s);", v.convExpr(shape.target, nil), v.getCSharpTypeName(shape.funcType), v.convExpr(shape.word, nil)), true
 	case "w2":
 		return fmt.Sprintf("%s = (uintptr)GoFuncCookie.Of(%s);", v.convExpr(shape.target, nil), v.funcWordValueEmission(shape)), true
+	case "w3":
+		return fmt.Sprintf("%s(%s, %s);", funcStoreDoor, v.convExpr(shape.target, nil), v.funcWordValueEmission(shape)), true
 	}
 
 	return "", false

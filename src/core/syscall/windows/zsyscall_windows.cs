@@ -481,7 +481,7 @@ public static (ж<CertContext> context, error err) CertCreateCertificateContext(
     var ᴋ56 = certEncoded;
         var (r0, _, e1) = SyscallN(procCertCreateCertificateContext.Addr(), (uintptr)certEncodingType, (uintptr)ᴋ56, (uintptr)encodedLen);
     System.GC.KeepAlive(ᴋ56);
-    context = (ж<CertContext>)(uintptr)((@unsafe.Pointer)r0);
+    context = @unsafe.Pointer.To<CertContext>((@unsafe.Pointer)r0);
     if (context == nil) {
         err = errnoErr(e1);
     }
@@ -495,7 +495,7 @@ public static (ж<CertContext> context, error err) CertEnumCertificatesInStore(�
     var ᴋ57 = prevContext;
         var (r0, _, e1) = SyscallN(procCertEnumCertificatesInStore.Addr(), (uintptr)store, (uintptr)ᴋ57);
     System.GC.KeepAlive(ᴋ57);
-    context = (ж<CertContext>)(uintptr)((@unsafe.Pointer)r0);
+    context = @unsafe.Pointer.To<CertContext>((@unsafe.Pointer)r0);
     if (context == nil) {
         err = errnoErr(e1);
     }
@@ -956,7 +956,7 @@ public static (ж<uint16> envs, error err) GetEnvironmentStrings() {
     error err = default;
 
     var (r0, _, e1) = SyscallN(procGetEnvironmentStringsW.Addr());
-    envs = (ж<uint16>)(uintptr)((@unsafe.Pointer)r0);
+    envs = @unsafe.Pointer.To<uint16>((@unsafe.Pointer)r0);
     if (envs == nil) {
         err = errnoErr(e1);
     }
@@ -1657,7 +1657,7 @@ public static (ж<array<ж<array<uint16>>>> argv, error err) CommandLineToArgv(�
         var (r0, _, e1) = SyscallN(procCommandLineToArgvW.Addr(), (uintptr)ᴋ159, (uintptr)ᴋ160);
     System.GC.KeepAlive(ᴋ159);
     System.GC.KeepAlive(ᴋ160);
-    argv = (ж<array<ж<array<uint16>>>>)(uintptr)((@unsafe.Pointer)r0);
+    argv = @unsafe.Pointer.To<array<ж<array<uint16>>>>((@unsafe.Pointer)r0);
     if (argv == nil) {
         err = errnoErr(e1);
     }

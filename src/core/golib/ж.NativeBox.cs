@@ -126,10 +126,20 @@ namespace go;
         if (s_layoutMismatch is { } reason)
             throw RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), reason);
 
-        return DereferenceableAddress();
+        void* address = DereferenceableAddress();
+
+        // The dereference census (NativeBoxDereferenceCensus): a T that holds a reference and was not refused above, and
+        // a box derived from storage that cannot be pinned. Counted after both refusals, so every count is a read or a
+        // write that happened. Null unless the census is on: one test of a static readonly field.
+        if (s_census is { } census)
+            NativeBoxDereferenceCensus.Dereference(census, m_retainedSource, m_pin is not null);
+
+        return address;
     }
 
     private static readonly string? s_layoutMismatch = GoReflect.ClrLayoutMismatch(typeof(T));
+
+    private static readonly NativeBoxDereferenceCensus.Pointee? s_census = NativeBoxDereferenceCensus.Pointee.Of<T>();
 
     /// <inheritdoc/>
     public override unsafe ref T Value => ref Unsafe.AsRef<T>(ValueAddress());
@@ -272,4 +282,8 @@ namespace go;
     // that no pin holds over managed storage. It is the one pointer whose address a cgo wrapper hands C, asked here
     // without the pointee type because an unsafe.Pointer carries its box as an object (GoCgoArgs.VoidPointer).
     bool INativeRooted.IsGenuinelyNativeRoot => m_retainedSource is null && !m_aliasesAnOrderToken && m_pin is null;
+
+    // What this box was derived from, for the identity of an unsafe.Pointer that carries it (NativeDerivation.Token).
+    // A box over an order token has no address to measure a distance from.
+    object? INativeRooted.NativeDerivedFrom => m_aliasesAnOrderToken ? null : m_retainedSource;
 }

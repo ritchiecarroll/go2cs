@@ -382,13 +382,40 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         if (other is not Pointer pointer)
             return base.Equals(other);
         if (Referent is { } mine && pointer.Referent is { } theirs)
-            return ReferenceEquals(mine, theirs) || ReferentToken(mine) == ReferentToken(theirs);
+            return IdentityOf(mine) == pointer.IdentityOf(theirs);
         return PointerOrderToken == pointer.PointerOrderToken;
+    }
+
+    // ONE IDENTITY FOR A POINTER AND WHAT IS DERIVED FROM IT (2026-11-14). A pointer whose referent resolved is
+    // identified by ONE number, which Equals compares and GetHashCode hashes, so two equal pointers cannot hash
+    // apart (a Go map keyed on unsafe.Pointer would miss a key it holds). Two rules give that number.
+    //
+    //   A DERIVED POINTER. A pointer moved by unsafe.Add, or converted to a typed pointer and back, carries a native
+    //   box AT the new address (it keeps what the pointer carried), while a pointer made over a Go variable carries
+    //   the variable's own box. Identified by what they carry, the two were always different:
+    //   `unsafe.Add(p, 0) == p` answered false, and so did
+    //   `unsafe.Add(unsafe.Pointer(&a[0]), 8) == unsafe.Pointer(&a[1])`, where Go answers true. A native box derived
+    //   from a managed one now answers its place in that box's token space (NativeDerivation.Token: the source's
+    //   token plus the distance moved), which is the token a managed pointer to the same place answers. No address
+    //   is asked of a pointer that was never moved, so equality and hashing pin nothing they did not pin before.
+    //
+    //   TOKEN ARITHMETIC. A struct that holds a reference has no address; its pointer's number is its order token,
+    //   and unsafe.Add over it answers the token plus the offset, carrying the root. Such a pointer's identity is its
+    //   own NUMBER. It was the root's before, so `unsafe.Add(p, 8) == p` answered true over such a struct. Every
+    //   other mint of a token-numbered pointer stores the token of what it carries, so its number and its
+    //   referent's token are one value.
+    //
+    // The asymmetric pair of the hash contract above (exactly one side resolves a referent) is as it was.
+    private nuint IdentityOf(object referent)
+    {
+        nuint number = Value.Value;
+
+        return ManagedPointerTokens.IsTaggedToken(number) ? number : ReferentToken(referent);
     }
 
     public override int GetHashCode()
     {
-        return Referent is { } referent ? ReferentToken(referent).GetHashCode() : PointerOrderToken.GetHashCode();
+        return Referent is { } referent ? IdentityOf(referent).GetHashCode() : PointerOrderToken.GetHashCode();
     }
 
     // A referent's identity is its ORDER TOKEN, never the box OBJECT: a field or element reference is
@@ -407,6 +434,7 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     {
         return referent switch
         {
+            INativeRooted { NativeRootAddress: not 0 } derived => NativeDerivation.Token(derived),
             INilPointer box => box.PointerOrderToken,
             IChannel channel => channel.PointerOrderToken,
             _ => ManagedPointerTokens.IdentityToken(referent)
@@ -565,6 +593,96 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         return new Pointer((uintptr)box, box);
     }
 
+    // Go's `(*T)(p)` for an unsafe.Pointer VALUE p (docs/phase4/DESIGN-interior-pointer-root.md 4.1 and 10.1). The
+    // converter's earlier spelling was `(ж<T>)(uintptr)(p)`: the cast to a number dropped what p carried before
+    // golib saw it, so an interior address of Go memory came back as a native box that kept nothing and pinned
+    // nothing, and the storage moved or was collected under a pointer still in use.
+    //
+    // The answer is the number conversion's own (ж<T>.FromNumber: one body, one box minted), with two differences.
+    //
+    //   THE BASE. A pointer straight from a mint names its source at offset 0, and its stored number may be an
+    //   address read before anything held the storage still (FromBox reads it under `fixed` for one statement). So
+    //   the number converted is the source's OWN, asked now (BaseOf), never the stored one.
+    //
+    //   THE ROOT. Where the conversion would mint a native box that keeps nothing, it keeps what p carried.
+    //
+    // A pointer whose source is itself a pointer to T is that pointer: it names its source at offset 0, which is
+    // what the registry answered for a pinned source and what nothing answered for one that was never pinned.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ж<T> To<T>(Pointer? p)
+    {
+        if (p is null || p.IsNull)
+            return ж<T>.FromNumber(default, carried: null);
+
+        if (p.m_retainedSource is ж<T> itself && NamesAManagedSourceByAddress(p, out _))
+            return itself;
+
+        return ж<T>.FromNumber(BaseOf(p), p.m_retainedSource);
+    }
+
+    // The same conversion for an operand that is already a number: the number conversion, unchanged.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ж<T> To<T>(uintptr number)
+    {
+        return ж<T>.FromNumber(number, carried: null);
+    }
+
+    // Whether p came straight from a mint over a MANAGED box and holds an address for it: FromBox, FromBoxObject or
+    // FromPinnedBox over storage that has one. Such a pointer names its source at offset 0 by construction, because
+    // every derivation replaces the source (Add carries the native box NativeDerivation.Moved made). A zerobase
+    // pointer, a native alias and a token (tagged; its arithmetic keeps the source, see Add) are not this case.
+    private static bool NamesAManagedSourceByAddress(Pointer p, [NotNullWhen(true)] out IGoReflectBox? source)
+    {
+        source = p.m_retainedSource as IGoReflectBox;
+
+        return source is { NativeAddress: 0, IsNilPointer: false, NamesZeroBase: false } && !ManagedPointerTokens.IsTaggedToken((nuint)p.Value.Value);
+    }
+
+    // The number a derivation from p starts at (design 10.1): for a pointer that names a managed box by address, the
+    // box's OWN number, asked now. The box's number conversion is the pin moment: it holds pinnable storage still
+    // for the box's lifetime, records it, and answers the address that now holds (or the order token, for a pointee
+    // that holds a reference and so has no address). The stored number is used as it is when the box is already
+    // pinned there, which is every FromPinnedBox mint, and for every other pointer.
+    private static uintptr BaseOf(Pointer p)
+    {
+        if (!NamesAManagedSourceByAddress(p, out IGoReflectBox? source))
+            return p.Value;
+
+        if (source is INilPointer pinned && pinned.IsPinnedAt((nuint)p.Value.Value))
+            return p.Value;
+
+        return (uintptr)source.NativeArgumentAddress();
+    }
+
+    // unsafe.Add's body. Three rules beyond the sum:
+    //
+    //   over NIL it answers the offset as a number, as Go does (`unsafe.Add(nil, n)` is the address n; it answered
+    //   nil here until 2026-11-14). Offset 0 over nil is still nil: the zero address is the nil pointer;
+    //
+    //   the BASE is BaseOf(ptr), so a pointer minted by FromBox is derived from where its storage is held, not from
+    //   a number read before anything held it;
+    //
+    //   the SOURCE is kept. For an address, the moved pointer carries a native box at the new value that retains
+    //   what ptr carried (NativeDerivation.Moved). For a TOKEN (a source that holds a reference has no address) the
+    //   sum is token arithmetic, which the conversion answers by the alias walk over the token's own box; that box
+    //   is found through a weak record, so the moved pointer keeps it, or the struct could be collected while the
+    //   pointer that Go says keeps it alive is still in use.
+    internal static Pointer Moved(Pointer? ptr, nuint offset)
+    {
+        if (ptr is null || ptr.IsNull)
+            return new Pointer((uintptr)offset);
+
+        nuint value = (nuint)BaseOf(ptr).Value + offset;
+
+        if (NativeDerivation.Moved(ptr.m_retainedSource, value) is { } moved)
+            return FromBox(moved);
+
+        if (ManagedPointerTokens.IsTaggedToken(value) && NativeDerivation.Kept(ptr.m_retainedSource) is { } kept)
+            return new Pointer((uintptr)value, kept);
+
+        return new Pointer((uintptr)value);
+    }
+
     // The word a Go FUNC value answers when it is read AS a word -- `*(*unsafe.Pointer)(unsafe.Pointer(&f))`,
     // emitted for a func-typed f. Go's func value is one pointer (to a funcval); a managed one is a
     // delegate with no address, so the word is its GoFuncCookie: carried by native code as an lParam and
@@ -574,6 +692,73 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     public static Pointer OfFunc(Delegate? fn)
     {
         return fn is null ? Nil : new Pointer(GoFuncCookie.Of(fn));
+    }
+
+    // Go's `*(*F)(e) = fn` for a func type F and an unsafe.Pointer VALUE e (docs/phase4/DESIGN-interior-pointer-root.md
+    // 4.8 B1 and 10.4). The store's own type says the VALUE is a func. It does not say what e names, and a managed
+    // func is a reference while Go's is one word, so what is stored is decided here, at run time, by what e names:
+    //
+    //   a WORD: C memory, or Go memory that holds no reference (a `uintptr` variable, a field of a struct of
+    //   numbers, an element of a word array). The func's word is stored (GoFuncCookie), through the same conversion
+    //   `*(*uintptr)(e) = word` takes. This is ccgo's function-pointer table (modernc.org/sqlite, vfs/patches64.go);
+    //
+    //   a FUNC: a func variable, or a func field or element inside a value that holds references. The func itself is
+    //   stored, as the slot's own delegate type (a named func type's variable takes a func stored as the unnamed
+    //   type, as it does in Go);
+    //
+    //   a `uintptr` field or element inside a value that holds references: the word, through its alias.
+    //
+    // Anything else is refused by name, and no arm writes 8 bytes over a reference. The emission this replaces,
+    // `To<F>(e).Value = fn`, was a native box over a delegate: a managed reference written into raw memory.
+    //
+    // LIFETIME. A word does not keep its func alive, as a uintptr does not in Go. A static function's word is good
+    // for the life of the process. A closure's word is good while something else holds the closure; after that it
+    // names no live func and a call through it is refused by name (GoFuncCookie.ResolveAs).
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static void StoreFunc(Pointer? e, Delegate? fn)
+    {
+        if (e is null || e.IsNull)
+            throw go.golib.RuntimeErrorPanic.NilPointerDereference();
+
+        nuint number = (nuint)BaseOf(e).Value;
+
+        // An address: memory with no reference in it. The word store.
+        if (!ManagedPointerTokens.IsTaggedToken(number))
+        {
+            To<uintptr>(e).Value = (uintptr)GoFuncCookie.Of(fn);
+            return;
+        }
+
+        // A token: a value that holds a reference has no address, and the number names its box (and, moved, an
+        // offset into it). The slot is the one Go's layout puts there.
+        nuint offset = 0;
+        object? root = ManagedPointerTokens.Resolve(number);
+
+        if (root is null && ManagedPointerTokens.IsTokenArithmetic(number))
+            root = ManagedPointerTokens.ResolveArithmeticBase(number, out offset);
+
+        if (root is null)
+            throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer func store: the pointer names no live Go value");
+
+        object? slot = GoReflect.ResolveInteriorFuncSlot(root, offset, out Type? slotType, out string shape);
+
+        if (slot is ж<uintptr> word)
+        {
+            word.Value = (uintptr)GoFuncCookie.Of(fn);
+            return;
+        }
+
+        if (slot is IUntypedSlotAccess func && slotType is not null)
+        {
+            // The slot's own delegate type: a func of another type with the same signature is rebound to it, and one
+            // that cannot be is refused by name there.
+            Delegate? value = fn is null || fn.GetType() == slotType ? fn : GoFuncCookie.ResolveAs(GoFuncCookie.Of(fn), slotType);
+
+            if (func.TryStoreThrough(value))
+                return;
+        }
+
+        throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer func store: the pointer names neither a func nor a word (" + root.GetType().Name + " +" + offset + ":" + shape + ")");
     }
 
     // ---- the bare-unsafe.Pointer primitives' recovery and through-ops (I5) ----
@@ -921,10 +1106,7 @@ public static Pointer Add(Pointer ptr, uintptr len) {
 }
 
 public static Pointer Add<TLen>(Pointer ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
-    if (ptr == nil)
-        return new Pointer(nil);
-
-    return NativeDerivation.Moved(ptr.RetainedSource, (nuint)(ptr.Value + (uintptr)(nuint)nint.CreateTruncating(len)).Value) is { } moved ? Pointer.FromBox(moved) : new Pointer(ptr.Value + (uintptr)(nuint)nint.CreateTruncating(len));
+    return Pointer.Moved(ptr, (nuint)nint.CreateTruncating(len));
 }
 
 // A typed element box addresses its target through an Int32 element index, so an offset outside
@@ -1054,9 +1236,13 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
         // 2026-10-19: crypto/x509's windows chain reads, unsafe.Slice(chainCtx.Chains, n)) and keep the runtime's
         // own words in a shadow. The slice reads the n words (see builtin.NativeArrayPointer).
         if (NativePointerElement<T>.Is)
-            return builtin.NativeArrayPointer<T>(ptr.NativeAddress, n).slice(0, n, n);
+        {
+            slice<T> words = builtin.NativeArrayPointer<T>(ptr.NativeAddress, n).slice(0, n, n);
+            NativeSliceAnchors<T>.Keep(words, NativeDerivation.Kept(ptr));
+            return words;
+        }
 
-        return slice<T>.OverNativeMemory(ptr.NativeAddress, n);
+        return slice<T>.OverNativeMemory(ptr.NativeAddress, n, n, NativeSliceAnchors<T>.For(NativeDerivation.Kept(ptr)));
     }
 
     // A pointer INTO managed array/slice storage (`unsafe.Slice(&s[i], n)`) yields a window that

@@ -31,7 +31,7 @@ partial struct CFRef /*num:uintptr*/;
 public static slice<byte> CFDataToSlice(CFRef data) {
     nint length = CFDataGetLength(data);
     var ptr = CFDataGetBytePtr(data);
-    var src = @unsafe.Slice((ж<byte>)(uintptr)((@unsafe.Pointer)ptr), length);
+    var src = @unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)ptr), length);
     return bytes.Clone(src);
 }
 

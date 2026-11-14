@@ -76,7 +76,7 @@ public static @string GaiStrerror(nint ecode) {
     var (r1, _, _) = syscall_syscall(abi.FuncPCABI0(libc_gai_strerror_trampoline),
         (uintptr)ecode,
         0, 0);
-    return GoString((ж<byte>)(uintptr)((@unsafe.Pointer)r1));
+    return GoString(@unsafe.Pointer.To<byte>((@unsafe.Pointer)r1));
 }
 
 // Implemented in the runtime package.

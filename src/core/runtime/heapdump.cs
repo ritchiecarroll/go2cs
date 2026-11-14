@@ -259,7 +259,7 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
         // at the function prologue, assume so and hope for the best.
         pcdata = 0;
     }
-    var stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
+    var stkmap = @unsafe.Pointer.To<stackmap>(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
 
     ref var bv = ref heap(new bitvector(), out var Ꮡbv);
     if (stkmap != nil && stkmap.n > 0) {
@@ -318,9 +318,9 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
     // Record arg info for parent.
     child.argoff = s.argp - s.fp;
     child.arglen = s.argBytes();
-    child.sp = (ж<uint8>)(uintptr)((@unsafe.Pointer)s.sp);
+    child.sp = @unsafe.Pointer.To<uint8>((@unsafe.Pointer)s.sp);
     child.depth++;
-    stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
+    stkmap = @unsafe.Pointer.To<stackmap>(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
     if (stkmap != nil) {
         child.args = stackmapdata(stkmap, pcdata);
     } else {

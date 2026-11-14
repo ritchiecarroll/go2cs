@@ -326,7 +326,7 @@ partial struct spanSetSpinePointer {
 
 // lookup returns &s[idx].
 internal static ж<atomic.Pointer<spanSetBlock>> lookup(this spanSetSpinePointer s, uintptr idx) {
-    return (ж<atomic.Pointer<spanSetBlock>>)(uintptr)(add(s.p, (uintptr)goarch.PtrSize * idx));
+    return @unsafe.Pointer.To<atomic.Pointer<spanSetBlock>>(add(s.p, (uintptr)goarch.PtrSize * idx));
 }
 
 // spanSetBlockPool is a global pool of spanSetBlocks.
@@ -341,10 +341,10 @@ partial struct spanSetBlockAlloc {
 // alloc tries to grab a spanSetBlock out of the pool, and if it fails
 // persistentallocs a new one and returns it.
 internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) {
-    var s = (ж<spanSetBlock>)(uintptr)(Ꮡp.Ꮡstack.pop()); if (s != nil) {
+    var s = @unsafe.Pointer.To<spanSetBlock>(Ꮡp.Ꮡstack.pop()); if (s != nil) {
         return s;
     }
-    return (ж<spanSetBlock>)(uintptr)(persistentalloc(/* unsafe.Sizeof(spanSetBlock{}) */ (uintptr)4608, builtin.max(cpu.CacheLineSize, (uintptr)(tagAlign)), Ꮡmemstats.ᏑgcMiscSys));
+    return @unsafe.Pointer.To<spanSetBlock>(persistentalloc(/* unsafe.Sizeof(spanSetBlock{}) */ (uintptr)4608, builtin.max(cpu.CacheLineSize, (uintptr)(tagAlign)), Ꮡmemstats.ᏑgcMiscSys));
 }
 
 // free returns a spanSetBlock back to the pool.
@@ -430,7 +430,7 @@ partial struct atomicMSpanPointer {
 
 // Load returns the *mspan.
 internal static ж<mspan> Load(this ж<atomicMSpanPointer> Ꮡp) {
-    return (ж<mspan>)(uintptr)(Ꮡp.Ꮡp.Load());
+    return @unsafe.Pointer.To<mspan>(Ꮡp.Ꮡp.Load());
 }
 
 // StoreNoWB stores an *mspan.

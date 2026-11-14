@@ -592,3 +592,494 @@ alone, green with the fix.
 EVERY operating system it touches, and the union gate re-runs that set.
 
 — H (2026-11-13)
+
+## 16. Amendment 2026-11-12: increment 3.1, its plan, predictions and stop lines (posted before code)
+
+Increment 3.0 is accepted and seats in batch 292 (`eabb7aad2c`, master merged in). COORD ordered the 3.1 plan next,
+built on M1 to M4 of section 13. No code is written. Each statement about the tree is marked READ (read at
+`eabb7aad2c`) or NOT READ (the red measures it).
+
+3.1 is the helpers, `void *`, and the deferred call for any bound function (sections 3 and 12). It hands C no Go
+memory: there is no pin and no image in it. Every pointer into Go memory that reaches a 3.1 door is refused by name
+before the call, and increment 3.2 turns that one arm into pin, image or refuse.
+
+### 16.1 What 3.1 admits
+
+**A. The helpers.** `C.CString`, `C.CBytes`, `C.GoString`, `C.GoStringN` and `C.GoBytes` are refused today by name
+(`cgoBuiltinNames`, READ). Each becomes a member of the package's C class in its bindings file.
+
+- The copies are golib functions over an address, and they copy BYTES (S5). No text encoding is on the path.
+- The allocation is the package's own `malloc`, bound in the bindings file from the captured library like any other
+  symbol (Q-D, ruled). cmd/cgo reaches `malloc` through its own C stub (`_cgo_cmalloc`, READ), so the package's
+  binary imports it whenever a helper allocates. `C.free` is the user's own call and needs `void *` (B).
+- `C.CString` and `C.CBytes` return a native box, as a C function's pointer result does today (READ).
+- `C.GoString(nil)` is the empty string. A nil result from `malloc` ends the program as cmd/cgo's stub does. That
+  arm is NOT MEASURED: no test can make `malloc` fail.
+- The pointer a `Go*` helper is handed is classified as in B. C memory is read. Go memory is refused by name in 3.1
+  (question Q2).
+
+**B. `void *`.** A parameter of Go type `unsafe.Pointer` is refused today (`cgoScalarOf`, READ). It becomes one
+golib question, asked for every such argument before anything else happens (M4, step 1):
+
+| What the pointer carries | 3.1 |
+|---|---|
+| nil | C receives 0 |
+| A genuinely native box (the predicate Phase 2 already uses: no retained source, no order token, no pin on managed storage) | its address |
+| A box of Go memory, of any kind | refused by name, before the call (3.2's arm) |
+| A native box minted from managed storage (M2) | refused by name. Its address is never handed to C |
+| A number with no box, known to golib's pin and token registry (M3) | classed as the box it names, so refused in 3.1 |
+| A tagged token (M3) | refused by name |
+| A number the registry does not know | crosses as it is |
+
+A `void *` result is C memory: a native pointer, or nil for 0. With M4 there is nothing to unwind in 3.1: a refusal
+in any argument throws before the transition bracket and before any other argument has an effect.
+
+**C. The deferred call (Q-B, ruled for any bound function).** The route refuses `defer` on a check closure today
+(READ). It recognizes cmd/cgo's deferred shape, `defer func() func() { _cgo0 := x; return func() {
+_cgoCheckPointer(_cgo0, nil); _Cfunc_f(_cgo0) }}()()`, for any function the route binds and for the argument forms
+the immediate closure already admits. It lowers it to a deferred call of the bound wrapper whose arguments are
+evaluated at the `defer`. The `go` form stays refused.
+
+**D. `strtol`'s reading, owed from 3.0.** `strtol`'s second parameter is a `char **`, the out-parameter, which the
+increments table gives to 3.2. So 3.1 takes the reading where the rule reads it: a test builds the one-call
+package on the real route, reads the names cmd/cgo's own binary imports, and prints which of `strtol` and
+`__isoc23_strtol` is there. It asserts only that the rule's verdict follows that set (question Q1).
+
+### 16.2 What 3.1 does not do
+
+No Go memory is handed to C, pinned or imaged (3.2). No C memory is read through Go pointer syntax beyond what Phase
+2 reads (section 6, 3.2). No slice view (3.3). No out-parameter (3.2). C calling Go stays refused.
+
+### 16.3 The fixture, the probe and the reds
+
+- **The first red needs no new file.** The Phase 1 fixture's committed cmd/cgo trees already hold `C.CString`,
+  `C.GoString` and `defer C.free(unsafe.Pointer(cs))` (READ). Converted through the offline seam on H, they are
+  the red P3.1-1 predicts (NOT READ: no test converts those trees through the route today).
+- **A Phase 3 fixture** (`testdata/cgo/phase3`), made as Phase 2's was: `fixture.go` by hand, cmd/cgo's two files
+  from a hosted linux leg's `REGEN` lines, committed from that run. H has no C compiler, so the order is: commit the
+  source and the regeneration test, read the leg, commit the trees with the red tests, then the fixes.
+- **Probe functions**, added to the probe library's one C file: return a static C string; return a `malloc`ed copy
+  the caller frees; fill a caller's C buffer; sum `n` bytes behind a `void *`; return a `void *` it was handed; a
+  call log the deferred arms read back. Additive: no existing function changes.
+- **An end-to-end program**, built by go and converted by go2cs as the exit gate's is, its two outputs compared byte
+  for byte on linux, windows and darwin. Its rows:
+  - a round trip of each helper, both directions, over plain text, invalid UTF-8 and a string with an interior NUL;
+  - `GoStringN` and `GoBytes` with a count of zero, and with a negative count. The negative rows run in a child
+    process, since Go may end the program there; the comparison is the exit status and the kind of failure;
+  - `CBytes`, read back and freed by the caller;
+  - `void *`: nil, C memory, and C memory through a `uintptr` variable;
+  - the deferred call: two deferred C calls and a deferred Go call, read back in order from the call log; and an
+    argument reassigned after the `defer`, which must reach C with the value it had at the `defer`.
+- **Refusal arms, go2cs only** (Go allows them, and 3.2 admits them): a `[]byte` element, a struct box, and
+  `unsafe.Pointer(uintptr(unsafe.Pointer(&b[0])))` in one expression and through a variable, each handed to a
+  `void *`. Each must be refused by name before the call. None may cross as a number.
+- **golib arms** (GolibTests): each copy function; and each row of B's table, with a control: a number the registry
+  does not know crosses, so the refusal arms can fail.
+
+### 16.4 Predictions, to be scored as worded
+
+- **P3.1-1.** At the base the Phase 1 trees are refused, with nothing written, and the refusals name `C.CString`
+  and `C.GoString` as cmd/cgo's own helpers, `C.free`'s parameter as not a scalar, and the deferred call through
+  the check closure. After 3.1 none of those four is among the refusals. The fixture's other refusals (a C function
+  used as a value, a `#define` that is not a constant) stand.
+- **P3.1-2 (P1 of section 9, on the legs run).** cmd/cgo's binary imports `malloc` and `free` under their plain
+  names on hosted linux/amd64, windows/amd64 and darwin, so neither is refused by the verified-names rule.
+- **P3.1-3.** Every row of the end-to-end program is byte-identical between the go arm and the go2cs arm on the
+  three hosts. The weakest rows are the negative counts: how Go fails there is NOT READ, and the row is read on the
+  go arm before go2cs is shaped to it.
+- **P3.1-4.** go2cs already evaluates a deferred call's arguments at the `defer` for this emission: the reassigned
+  argument reaches C with its value at the `defer`, with no change to the converter's `defer` emission.
+- **P3.1-5.** Every refusal arm of 16.3 is refused by name before the call, and the control crosses. In particular
+  the one-expression `uintptr` form arrives carrying its box or is found in the registry; it never crosses as C
+  memory.
+- **P3.1-6.** 0 corpus bytes on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64. `check-no-regression`
+  stays byte-identical. No behavioral golden moves. GolibTests' total rises by the new arms only and no existing
+  row changes (P4).
+- **P3.1-7 (P7).** On each new golden, externs equal transition brackets, plus windows' one errno slot.
+- **P3.1-8.** Under the runner's gcc, cmd/cgo's binary for the `strtol` package imports `__isoc23_strtol` and not
+  `strtol`. Under the pinned zig it imports plain `strtol`. The zig half is the weaker one: it depends on the glibc
+  version zig targets by default.
+- **P3.1-9.** The only existing tests whose expectations move are cgo tests that assert one of P3.1-1's four
+  refusals. They are named in the red commit.
+- **Most likely red that is not the mechanism:** the windows leg's `malloc` and `free`. A helper's allocation and
+  the user's `C.free` must reach the SAME C runtime. If the capture binds them in two different libraries there,
+  the round trip corrupts a heap and no row says why. The windows leg prints both libraries before any row runs.
+
+### 16.5 Gates
+
+- golib is touched, so the full, unfiltered GolibTests is owed, read against the base's results, and `go2cs.slnx`
+  is built once. go2cs-gen is not planned to be touched; if it is, its full suite is owed and S3.1-B fires first.
+- The full `go test ./...` (repoguard and the comment census inside it), `check-no-regression`, the full behavioral
+  suite once at the tip, and the two-seeded corpus comparison on four targets.
+- Hosted. At the red: `converter-cgo` on linux, once. At the tip: `converter-cgo` on linux both ways, windows and
+  darwin; `cgo-e2e` on linux, windows and darwin.
+- The classifier is the safety boundary of 3.1, so the adversarial review COORD ordered for Phase 3 is asked for at
+  the tip, before landing.
+
+### 16.6 Stop lines
+
+- **S3.1-A.** A corpus byte moves, or a golden outside the cgo tests: stop and attribute (S-E).
+- **S3.1-B.** The helpers or the classifier need a new box kind, instance state on `ж<T>`, or a go2cs-gen change:
+  stop and post the design (S-B, S-C).
+- **S3.1-C.** `malloc` or `free` is not imported under its plain name on a host, or the two bind in different C
+  runtimes: stop. The allocator ruling returns to COORD. No .NET allocator is substituted.
+- **S3.1-D.** P3.1-4 fails: go2cs does not evaluate this deferred call's arguments at the `defer`. That is a
+  converter reading outside cgo. It is posted, and the lowering is not shaped around it.
+- **S3.1-E.** Any arm the tests can build lets an address of Go memory, or a number minted from one, cross a
+  `void *` as C memory, beyond the released-pin residue section 13.4 names: stop. `void *` stays refused.
+- **S3.1-F.** A row needs Go memory handed to C to pass: it is 3.2's row. Nothing of 3.2 is pulled forward.
+- **S3.1-G.** A go arm and a go2cs arm differ on a row other than the negative counts: stop and post the reading.
+  A negative-count difference go2cs cannot match is disclosed by name, never dropped from the program.
+- **S-F** stands: 3.1 yields to any .4 seat that needs H.
+
+### 16.7 Questions for COORD
+
+- **Q1. `strtol`'s reading.** Lean: at the rule's own input, as in 16.1 D, with the conversion-level reading in 3.2
+  when the out-parameter lands. The other way is to admit a pointer-to-pointer parameter in 3.1, nil and C memory
+  only.
+- **Q2. Go memory handed to a `Go*` helper.** `C.GoBytes(unsafe.Pointer(&b[0]), n)` is legal Go: a Go function
+  reads it, and C is not involved. Lean: refused by name in 3.1 and admitted in 3.2, because reading it needs the
+  source classification that 3.2's design step defines (M2).
+- **Q3. The branch.** Lean: `claude/h-cgo-phase3-helpers`, cut from `eabb7aad2c`, with master merged in after 292
+  lands.
+
+### 16.8 Amendment 2026-11-12: COORD's rulings, and the reds as read on H
+
+COORD approved the plan as posted and ruled the three questions as leaned.
+
+- **Q1, RULED:** `strtol` is read at the rule's own input in 3.1. A pointer-to-pointer parameter waits for 3.2's
+  out-parameter. P3.1-8 is scored as worded, the weaker zig half included.
+- **Q2, RULED:** Go memory handed to a `Go*` helper is refused by name in 3.1 and admitted in 3.2 under M2's source
+  classification. The refusal names the shape (`C.GoBytes` over Go memory) and says it is increment 3.2's, so a user
+  who meets it reads a known, dated gap and not a defect. That program joins the refusal arms, with its control.
+- **Q3, RULED:** the branch is `claude/h-cgo-phase3-helpers`. Master is merged in, never rebased, after batch 292
+  lands.
+- **The windows two-runtimes risk** stays a stop line as written (S3.1-C): if `malloc` and `free` bind in different
+  C runtimes it is posted and COORD rules the allocator.
+- **The adversarial review** at the tip, before landing, is ordered, on the classifier as the safety boundary.
+
+**One sentence of 16.3 was wrong, and is corrected here.** It said no test converts the Phase 1 trees through the
+route. One does (`TestCgoPhase1FixtureIsRefusedNamingEachUseAndItsOwner`), and it already asserted three of P3.1-1's
+refusals. The Phase 2 fixture also holds a deferred call through the check closure (`Deferred`), refused the same
+way. So the first reds are those tests with their expectations turned over, and they are read on H.
+
+**The reds at the red commit, on H (offline).**
+
+| Test | Reading |
+|---|---|
+| `TestCgoPhase1FixtureIsRefusedNamingEachUseAndItsOwner` | `C.CString` and `C.GoString` are refused as cmd/cgo's own helpers. `C.free` is refused as a deferred call through the check closure |
+| `TestCgoPhase2FixtureIsRefusedNamingOnlyItsGoroutineCall` | 2 refusal lines, want 1: the deferred call is refused beside the goroutine call |
+| `TestCgoDeferredCallThroughTheCheckClosureConvertsAsADeferredCall` | the conversion is refused |
+| `TestCgoPhase2FixtureConvertsAsTheSourceReads` | red with them: the fixture it converts now keeps its `Deferred` function |
+
+**P3.1-1's base half, scored as worded: three of four.** `C.CString`, `C.GoString` and the deferred call read as
+predicted. `C.free`'s parameter is NOT named as "not a scalar": the deferred refusal stops the census at the `defer`,
+so the `void *` parameter behind it is never reached. That text is read where a `void *` call is not deferred.
+
+**The end-to-end program's arms (16.3), as built.** The plan's element arm (`&b[0]` handed to a `void *`) is refused
+at CONVERSION today, by the check closure's own element form, and stays so until 3.2. A program that holds it cannot
+convert, so it is not an arm of the program. The run-time refusal arms are the address of a Go variable through a
+`void *`, the same as a number in a variable, the same through a `uintptr` in one expression, and `C.GoBytes` and
+`C.GoString` over Go memory.
+
+### 16.9 Amendment 2026-11-12: the green as built, a stop line that fired, and three crossings found on the way
+
+**The green** (`43ac9e33fa`), as 16.1 planned it, with these readings.
+
+- **The deferred call** is lowered in the tree, before anything else reads it: the statement's call becomes cmd/cgo's
+  own call of the C function, each argument the expression its closure variable was defined as. The emission is the
+  converter's ordinary `defer`: `defer(C.free, @unsafe.Pointer.FromPinnedBox(cs), ref ᒐ);`. P3.1-4 is MET on H and on
+  both early legs (the reassigned argument reaches C as 1; the log reads `321`).
+- **`C.malloc`** is cmd/cgo's wrapper `_Cfunc__CMalloc`, which the classifier filtered as plumbing and now reads as
+  `C.malloc`.
+- **How Go fails on a negative count** was read on the go arm before go2cs was shaped (run 43325908295):
+  `C.GoStringN(p, -1)` is `fatal error: out of memory`, exit 2; `C.GoBytes(p, -1)` is `panic: runtime error: gobytes:
+  length out of range`, exit 2; `C.GoBytes(p, 0)` is an empty slice that is not nil. go2cs does each the same.
+- **P3.1-9 MISSES as worded.** One test outside the predicted set moved: the classifier test counted
+  `_Cfunc__CMalloc` as plumbing.
+- **A widening beyond the plan's words, ACCEPTED by COORD.** A deferred or started GO function that calls C further
+  in (`defer func() { C.f(&x) }()`) was refused by the old, broad test. It is an ordinary `defer` or `go`, and
+  converts. Only cmd/cgo's own `go` form on the check closure stays refused. COORD required one arm: the inner call
+  over Go memory is still refused, at run time, by name (`goinnerdefer`, `goinnergo`, each beside its C-memory
+  control).
+- **S3.1-B did NOT fire** (COORD agrees). golib gains one default member on the internal `INativeRooted` interface
+  and its implementation on `NativeBox`: no field, no instance state, no new box kind, no go2cs-gen change. Both
+  box files keep their cited lines.
+
+**A defect of the first classifier, caught by reading the emission before any leg.** `unsafe.Pointer(cs)` over a C
+pointer is emitted as the pinning mint, which CARRIES the native box. The first cut refused every pointer that
+carried a box, so it would have refused `C.free(unsafe.Pointer(cs))`. Its arms passed because they minted the
+pointer another way. A native box now answers, without its pointee type, whether it is C memory alone, and every
+control uses the converter's own mints.
+
+**Stop line S3.1-E FIRED, and COORD ruled it (C, with conditions).** COORD asked of the classifier: can ANY box
+answer "C memory alone" when its storage is managed? The arm hands the door every pointer golib has over managed
+storage, four ways each: the pinning mint, the retaining mint, the bare mint, and its number in a variable.
+
+| Source | Carrying its box | As a bare number |
+|---|---|---|
+| a view aliasing a struct | refused | refused |
+| a view over a struct that holds references (a token) | refused | refused |
+| a native box with a retained source | refused | refused |
+| a native box that aliases an order token | refused | refused |
+| `unsafe.StringData`, `unsafe.SliceData` | refused | refused |
+| a pointer rebuilt from a Go array's number (below) | refused | refused |
+| **a wider view pinned over an element** (`(*int32)(unsafe.Pointer(&b[4]))`) | refused | **CROSSES** |
+| **a native box over a pinned managed buffer** | refused | **CROSSES** |
+
+So the answer is NO for a box and YES for a number: 4 of 36 hand-overs cross. The door's test for a bare number is
+the pin and token registry, and two pin moments register nothing. An interior address (a number plus an offset)
+misses the registry for every pin, since its entries are exact addresses.
+
+**The residue, disclosed by name** (COORD's condition 1), beside section 13.4's: *a pointer rebuilt from a number
+that points into Go memory crosses a `void *` unchecked.* It takes an explicit `uintptr` in the source. The
+one-expression form, `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)`, is legal Go. The harm is the syscall pin hole
+through a new door: C is handed Go memory whose only pin holder is a temporary, so the collector may release the pin
+during the call. It is a known memory-safety gap, and `docs/Limitations.md` and the release notes say so in those
+words. 3.1 opens no new way to MINT such a number.
+
+COORD's other conditions:
+
+- **The arm asserts exactly the four crossings and the 32 refusals**, so a fifth crossing is a red
+  (`APointerOverManagedStorageCrossesAVoidPointerOnlyAsTheFourDisclosedNumbers`).
+- **A golib seat proposal follows 3.1**: register at the two pin moments, and give a registry entry its length so a
+  number inside ANY live pinned range is refused. Its allocation-meter question on banked rows is named up front.
+- **Section 13.4's first rule** (in one expression the converter keeps the box) is the FIRST item of 3.2's design
+  step. 3.1 does not implement it: it leans on the registry, which holds for exact numbers.
+- **The review at the tip takes the residue as an explicit question**, with this list of where a number over Go
+  memory can come from. golib's pin moments: the box-to-`uintptr` and box-to-`void *` operators (four sites, each
+  registers); `ElemRefBox.TryPinnedReinterpret` (registers nothing); `PinnedBuffer`'s constructors (register
+  nothing). The converter's mints that involve no pin: `FromRef`, and a carrying pointer converted to `uintptr`,
+  which yields its number.
+
+**Two more crossings, found and CLOSED in 3.1, not disclosed.**
+
+1. **A pointer rebuilt from a Go array's number was taken for C memory** (read on the early end-to-end legs,
+   43330710728 and 43330721939, where every other arm matched Go: `C.GoString((*C.char)(unsafe.Pointer(&x)))` over a
+   Go array was read, not refused). That conversion goes through the array's number, and the number-to-pointer
+   operator mints a native box with no source, no token and no pin. The number is in the registry, so the predicate
+   gained one clause: a native box whose address the registry knows as a live Go box's is not C memory. Phase 2's
+   struct-pointer door shares the predicate, so this tightens Phase 2 too: a struct pointer rebuilt from a Go array's
+   number was handed to C as native, a latent Phase 2 hole. COORD ruled that an exit-gate arm that moves for it is a
+   Phase 2 correction, recorded in the exit gate's own record, not a 3.1 regression. The golib arm was regressed
+   (the clause
+   removed), went red, and was restored byte-identical.
+2. **A method's own receiver type, with no `uintptr` in the source.** Inside a method with a pointer receiver,
+   `unsafe.Pointer(p)` of a pointer of the receiver's own type is minted from a reference: `func (h *T) M() {
+   C.f(unsafe.Pointer(h)) }` emitted `C.f((uintptr)@unsafe.Pointer.FromRef(ref h))`, a bare number of storage
+   nothing pins, in no registry. The cgo route refuses it at conversion, by name, with the way round (a function
+   that takes the pointer as a parameter mints it with its box). It over-refuses a conversion that never reaches C,
+   in a cgo package only. COORD accepted it as sound, and ruled the over-refusal OWED: it narrows in 3.2, when the
+   pin scope exists, and is not permanent. Red first on H: five arms red at the green commit, green with the fix,
+   and the control
+   converts. For a LOCAL copy the same arm emits `FromRef(ref p)`, the address of the local itself: a converter
+   defect outside cgo, filed on the BOARD.
+
+**A freed C pointer still crosses**, as Go lets it: Go has no check for a C pointer used after `C.free`, and go2cs
+adds none. The door classifies and never dereferences (`AVoidPointerToFreedCMemoryStillCrossesAsGoLetsIt`).
+
+— H (2026-11-12)
+
+### 16.10 Record 2026-11-13: increment 3.1 as measured, and its predictions scored as worded
+
+**The trees.** The battery read `3271559fbf` (16.9's tip). Master then landed batch 294 (`7c7dc687f8`), which carries
+15.6's fix, and was merged in with no rebase at `c4b5d9613c`. The merge resolved two append-against-append conflicts
+with both sides kept (this record and the BOARD), and carries one test-only change (P3.1-9 below). The hosted legs
+below were read at `c4b5d9613c` unless a line names another tree.
+
+**The battery on H at `3271559fbf`**, one stage at a time:
+
+| Stage | Reading |
+|---|---|
+| `go test ./...` | rc 0, 11 packages ok, 0 cached, 1,474 s |
+| GolibTests, full and unfiltered | base `eabb7aad2c` 2,570 passed, 43 skipped of 2,613; tip 2,581 passed, 43 skipped of 2,624. The TRX difference is exactly the 11 new arms, and no existing row changed |
+| `go2cs.slnx` | NOT a reading of 3.1: 17,714 errors at the base and at the tip, the same set. An instrument finding, routed by COORD to R. H does not claim the solution builds |
+| `check-no-regression` | rc 0, byte-identical across all 1,035 behavioral packages |
+| the full behavioral suite | rc 0, PASS, 951 projects: Transpile, Compile and Target 951 of 951; Output 921 passed, 0 failed, 30 skipped, 0 timed out. No NOT MEASURED line. The tree was clean after it, so no golden moved |
+| two-seeded `-stdlib` comparison, A = `eabb7aad2c`, B = `3271559fbf` | windows/amd64, linux/amd64, darwin/amd64 and linux/arm64: 0 files, 0 diff lines on each. Every conversion exited 0, with 0 degraded packages |
+
+The comparison line was made to fail once after the run: on two seeded copies it read 0 files, and with one line
+appended to one file of one copy it read 1 file, and named it.
+
+**The hosted legs.** Counts are distinct test and subtest names, passed / failed / skipped.
+
+| Leg | Tree | Run | Reading |
+|---|---|---|---|
+| `converter-cgo` linux, the runner's gcc 15.2.0 | `c4b5d9613c` | 43365489712 | 145 / 0 / 9 |
+| `converter-cgo` linux, the pinned zig (clang 22.1.8) | `c4b5d9613c` | 43365503641 | 145 / 0 / 9 |
+| `converter-cgo` windows, gcc 15.2.0 | `c4b5d9613c` | 43365493831 | 143 / 0 / 12 |
+| `converter-cgo` darwin, Apple clang 17 | `c4b5d9613c` | 43365497275 | osx-x64 141 / 0 / 13; osx-arm64 141 / 0 / 13 |
+| `cgo-e2e` darwin | `c4b5d9613c` | 43365500071 | osx-x64 53 / 0 / 0; osx-arm64 53 / 0 / 0 |
+| `cgo-e2e` linux, the pinned zig | `3271559fbf` | 43335108528 | 53 / 0 / 0 |
+| `cgo-e2e` windows | `3271559fbf` | 43335120737 | 51 / 0 / 0 |
+
+At `3271559fbf` the four `converter-cgo` legs each failed one test (43335068049, 43335078194, 43335088003,
+43335098494), the stale expectation of P3.1-9, and `cgo-e2e` on osx-arm64 failed at the build for 15.6's defect
+(43335132134). Both are closed at `c4b5d9613c`. `cgo-e2e` on linux and windows was NOT re-read at `c4b5d9613c`:
+COORD ordered `converter-cgo` on the four hosts and `cgo-e2e` on darwin at the merged tip, and the union gate reads
+the other two again.
+
+**The scores.**
+
+| Prediction | Score |
+|---|---|
+| P3.1-1 | Base half: THREE OF FOUR as worded. `C.CString` and `C.GoString` were named as cmd/cgo's helpers, and the deferred call was named. `C.free` was named by the deferred refusal, not by its parameter. After half: MET, none of the four is refused. The fixture's other two refusals stand |
+| P3.1-2 | MET on every host read: cmd/cgo's binary imports `[free malloc]` under their plain names with linux gcc 15.2.0, linux clang 22.1.8 (zig), windows gcc 15.2.0, and Apple clang 17 on darwin/amd64 and darwin/arm64 |
+| P3.1-3 | MET on the three hosts: each of the program's 24 arms reads the same on the go arm and the go2cs arm on linux, windows and darwin. darwin/arm64, a fourth target, is MET at `c4b5d9613c` and was NOT MEASURED before it (15.6). How Go fails on a negative count was read on the go arm first (16.9) |
+| P3.1-4 | MET: the reassigned argument reaches C with its value at the `defer` (`321`), with no change to the converter's `defer` emission |
+| P3.1-5 | First sentence MET: every refusal arm of 16.3 is refused by name before the call, and each control crosses. Second sentence MISSED as worded: the one-expression `uintptr` form is refused when its number is exact, and CROSSES when arithmetic moves it inside the storage, as do the four hand-overs of 16.9's table. That is stop line S3.1-E, ruled by COORD and disclosed (16.9) |
+| P3.1-6 | MET on every clause: 0 corpus bytes on four targets, `check-no-regression` byte-identical, no behavioral golden moved, GolibTests up by the 11 new arms only |
+| P3.1-7 | MET on the one new golden, the Phase 3 fixture's bindings: 10 externs, 10 transition brackets, read on H and on every `converter-cgo` leg. The windows errno-slot clause is NOT MEASURED: no new golden is a windows one |
+| P3.1-8 | MET on both halves: under the runner's gcc cmd/cgo's binary imports `__isoc23_strtol` and not `strtol`; under the pinned zig it imports plain `strtol`. Also read: windows gcc and Apple clang import plain `strtol` |
+| P3.1-9 | MISSED, twice. The classifier test counted `_Cfunc__CMalloc` as plumbing (16.9). And the real-route test, which only a host with a C compiler runs, still expected the Phase 2 fixture's deferred call refused: red on all four `converter-cgo` legs at `3271559fbf`, fixed in the merge commit, green on all four at `c4b5d9613c`. Its first subtest now expects the goroutine call alone, and the rest of that test keeps the deferred call in the copy it converts, so each hosted host converts it from cmd/cgo's own output |
+| Most likely red (windows' `malloc` and `free` in two C runtimes) | Did NOT happen: the windows leg's round trips are green, 51 / 0 |
+
+**Stop lines.** S3.1-E FIRED and was ruled (16.9). S3.1-A, S3.1-B, S3.1-C, S3.1-D, S3.1-F and S3.1-G did not fire.
+No arm of Phase 2's exit gate moved for the registry clause of 16.9, so no Phase 2 correction is recorded.
+
+**Disclosures.**
+
+- **The memory-safety gap of 16.9 stands in 3.1:** a pointer rebuilt from a number that points into Go memory
+  crosses a `void *` unchecked. It is named in `docs/Limitations.md` and in the draft release notes.
+- **The receiver over-refusal is OWED** (16.9): it narrows in 3.2.
+- **The battery read `3271559fbf`, not the merged tip.** At `c4b5d9613c` H read repoguard and the comment census
+  (uncached, both ok) and the converter's cgo tests (76 passed, 0 failed, 24 skipped: the 24 need a C compiler or an
+  end-to-end build, and are the legs' to read). The union gate covers the rest at the batch.
+- **An overlap in run 1.** The gates of 15.6's fix (repoguard and the cgo tests, in another worktree) ran beside the
+  battery's `go test` and GolibTests stages. No timing row was in flight: the behavioral suite ran alone.
+- **A counting correction.** The counts H posted for 15.6's legs merged subtest names that differ only after
+  punctuation: `converter-cgo` darwin was posted as 126 passed and reads 129 by full name. Failures were 0 by either
+  count. The table above counts full names.
+- **This record is a docs-only commit past the legs' tip.** It is gated alone: repoguard and the comment census.
+
+**Owed after 3.1:** the golib seat proposal of 16.9 (register at the two pin moments, and refuse a number inside any
+live pinned range), on its own, with its predictions and its allocation-meter question first; and 3.2's design step,
+which opens with section 13.4's first rule.
+
+— H (2026-11-13)
+
+### 16.11 Amendment 2026-11-13: the review found 3.1 UNSOUND as a boundary; the fix plan, posted before code
+
+**The verdict** (the adversarial review COORD launched at `80e8b3c7d8`): golib mints DERIVED boxes that drop their
+root's pin and source, and those cross every door as C memory, with their box, and with no `uintptr` in the Go
+source. So two sentences of 16.9 are FALSE as written: "the answer is NO for a box", and "it takes an explicit
+`uintptr` in the source". They were claims about the boxes golib mints FIRST, written as claims about every box.
+The arm enumerated first-generation boxes and never a box derived from one. H's miss. 3.1 does not land until the
+findings below are fixed in it. Ruling C covered numbers only, and none of this is a disclosure.
+
+**What held** (the review): every argument is classified before the transition, for all three parameter kinds;
+classification has no race for a refused box; and `StringData`, `SliceData` of a Go slice, `&x`, `&t.y`, a named
+receiver's fields, value receivers, by-value parameters, exact numbers and a single reinterpret are refused as
+intended. Not examined: variadic C functions, reflect's `UnsafePointer` and `UnsafeAddr`, sync/atomic, syscall
+buffers.
+
+**The findings.**
+
+| # | The Go | What golib did | Crosses |
+|---|---|---|---|
+| 1 | `h := (*hdr)(unsafe.Pointer(&b[0])); C.f(&h.n)` | a field of a native box is a fresh native box at the field's address, with no pin and no source | all three doors; over a Go array at any offset but 0 |
+| 2 | `(*C.char)(unsafe.Pointer(h))`, a second reinterpret | reinterpreting a native box mints a fresh native box at its address | `C.GoString(q)`, `unsafe.Pointer(q)` |
+| 3 | `unsafe.Slice((*int32)(unsafe.Pointer(&b[0])), 4)`, then `&sl[1]` or `unsafe.SliceData(sl)` | an element of a native-backed slice is a fresh native box | the struct pointer's door, which C WRITES through, and the void pointer's |
+| 4 | `C.f(unsafe.Add(unsafe.Pointer(&b[0]), 4))` | `unsafe.Add` returns a pointer with the new number and no source | the void pointer's door, for a slice element, a Go array and a local; offset 0 is refused |
+| 5 | `func (*T) U(q *T) { C.f(unsafe.Pointer(q)) }` | the receiver refusal of 16.9 skipped a method whose receiver has no name | the void pointer's door |
+| 6 | `p1 := &b[0]; n := uintptr(unsafe.Pointer(p1))`, then a second, temporary `&b[0]` is converted and dies | a registration REPLACES the entry at its address, and a dead registrant removes it | `n`, with `p1` alive and pinned |
+| 7 | a deferred call classifies at the call, not at the `defer` | cmd/cgo's own placement | ACCEPTED, once 6 is fixed |
+| 8 | the fifth-crossing arm lists first-generation boxes only | | the arm, not the door |
+
+The review MEASURED the harm of 1: `&h.n` returned from a helper, `h` dropped, a collection forced, and in 20 rounds
+of 20 the door handed C an address the slice no longer lived at.
+
+**The fix, as COORD ruled it.**
+
+- **One rule for every derivation (1, 2, and their kin).** A box derived from a native box that is NOT C memory
+  alone is minted retaining that box, in the slot a native box already has. The root, its pin and its source then
+  live as long as the derived box, and every door refuses it by the test it already makes. A native box's own
+  retained source has one production reader, the cgo doors, so nothing else observes the change. Sites: the field
+  box (`NativeFieldBox`), `Reinterpret`'s native arm, typed `unsafe.Add` over a native box, and the array-field
+  window, which shares the root's pin (every box kind has the pin field, and no box disposes its pin).
+- **The same defect at its source, a site the review did not list (ACCEPTED).** The number-to-pointer operator,
+  when its number RESOLVES to a live Go box of another pointee type, minted a native box with nothing, holding the
+  resolved box in its hand. It now mints it retaining that box. The "pointer rebuilt from a Go array's number" of
+  16.9 is then no longer flagless, `&h2.n` over it inherits, and the registry clause 3.1 added to the door becomes a
+  second lock instead of the only one.
+- **3, `unsafe.Slice` over a view (COORD: option (b), with a pre-check and a stop line).** A native-backed
+  `slice<T>` holds a base address and nothing to inherit FROM, and a new word on `slice<T>` would grow every slice
+  header in the corpus (not proposed). Its array field is unused when it is native-backed: it holds the shared
+  empty array. `unsafe.Slice` over a native box that is not C memory alone gives the slice its OWN zero-length
+  array, tied to the root by a weak table; a re-slice passes it along; an element or `SliceData` of such a slice is
+  minted retaining the root. No new field. **This also fixes a lifetime defect outside cgo:** a native-backed slice
+  over pinned managed memory holds nothing that keeps its root alive today, so the root can die and unpin under a
+  live slice. An arm with no cgo holds that shut.
+- **4, `unsafe.Add` on an `unsafe.Pointer` (COORD: option (b)).** "Add keeps the retained source" as first worded
+  breaks a reader: runtime's hash family, the pinner, the slice-header box and unsafe's store-through each take a
+  pointer's retained source as the referent AT its value, and would then act on offset 0. So `Add` over a pointer
+  that carries a box returns a pointer carrying a DERIVED native box, at the new value, retaining the source. The
+  readers see the truth at the value, and the door refuses it as reached through Go memory. Its cost is one more
+  object per such `Add`, gated by the census (below).
+- **5.** The receiver's type is read from the method's signature, never from a name.
+- **6, every live registrant kept (COORD: H's lean).** "Never replace a live entry" is not enough by construction:
+  A registers, B registers the same address and is not recorded, A dies, and B's number misses with B alive. Every
+  evaluation of `&b[0]` mints a fresh box, so two registrants at one address is the ordinary case. An entry stays
+  one weak reference while one registrant is live (today's bytes exactly), and becomes a small list at the second
+  DISTINCT live registrant. A read answers if ANY registrant is alive and still pinned there. Removal compares, in
+  `Resolve` and in `Sweep`. The list is pruned only after a collection has happened.
+- **8.** The derived forms join the arm, each through all three doors, with the reflect pair read as well.
+
+**The pre-check COORD ordered for 3: every reader of a slice's array field as IDENTITY, and what it does with a
+native-backed slice today.**
+
+| Reader | Today, for a native-backed slice | With its own zero-length array |
+|---|---|---|
+| `Overlaps` (copy and memmove overlap) | decided by ADDRESS, before the array is looked at | unchanged |
+| the hash | the base address | unchanged |
+| `==` on two slices | base, then the array's identity, then the window | would answer false for two `unsafe.Slice` calls over one view. **Keyed on the base for a native-backed pair in the same change,** so no answer moves |
+| the stack-append buffer's three identity tests | false: the array is never the buffer's store | false, the same |
+| element boxes and their canonical pair | each tests native-backed first, and uses the address | unchanged |
+| the array-dims stamp, on a ZERO-length slice only | reads the shared empty array as "no backing" and substitutes a managed empty slice | would keep the slice. Guarded on native-backed first, so today's answer stands |
+| `Array.Copy` between managed backings, the array alias, the string view | read the array's CONTENTS, which are empty either way | unchanged |
+
+No overlap or alias decision turns wrong. One reader (`==`) would have answered differently, and is keyed on the
+base, as COORD's stop line prescribes. If a gate shows another, SF-4 fires.
+
+**Predictions, to be scored as worded.**
+
+- **PF-1 (the reds).** Each shape of findings 1 to 6, built from the converter's own emission, crosses at
+  `80e8b3c7d8` through every door it can reach, and is refused with the fix. Beside each, the same form over C
+  memory still crosses.
+- **PF-2 (lifetime).** Three arms, each red at `80e8b3c7d8`: a field of a view outlives the view (the root is still
+  alive after a forced collection while the field's box is); an `unsafe.Slice` over a view outlives the view, with
+  no cgo; and the review's registry sequence (p1 live and pinned, a temporary second mint dies, a collection, `n`
+  still refused).
+- **PF-3.** GolibTests' total rises by the new arms. An existing row changes only if it asserts, by name, the state
+  this fix removes (a source dropped by `Add`, a flagless box from a resolved number). NOT READ which rows do:
+  they are named in the red commit, before the fix, and a row that moves without being named there is SF-2.
+- **PF-4.** 0 corpus bytes on four targets, `check-no-regression` byte-identical, no behavioral golden moves. The
+  only converter change is on the cgo route.
+- **PF-5.** The banked canaries read their banked counts: the five largest reflect consumers by verdict count
+  (derived at gate time), the cost canary, and `runtime`, `os`, `syscall`, `internal/runtime/maps` and `crypto/tls`,
+  because the operator, the field box and `Add` are on their paths. The weakest are the allocation asserts where
+  `Add` runs inside an asserted body.
+- **PF-6.** The registration census reads 0 inside every banked asserted body for `Add` over a carrying pointer
+  and for new registry entries at an address that already has a live registrant.
+- **PF-7.** Hosted: `converter-cgo` on four hosts and `cgo-e2e` on linux, windows and darwin (both architectures)
+  read as they did at `c4b5d9613c`, every C-memory arm included.
+
+**Stop lines.**
+
+- **SF-1.** A C-memory control is refused, or an end-to-end arm that passed at `80e8b3c7d8` fails.
+- **SF-2.** An existing GolibTests row moves that the red commit did not name.
+- **SF-3.** A banked canary row, or a banked allocation assert, moves. Nothing is re-baselined.
+- **SF-4.** A slice identity decision changes anywhere: stop. Identity is then keyed on the base address for every
+  native-backed slice.
+- **SF-5.** The fix needs a new field on `ж<T>`, on `slice<T>` or on `unsafe.Pointer`, a new box kind, or a
+  go2cs-gen change.
+- **SF-6.** A corpus byte moves, or a golden outside the cgo tests.
+- **SF-7.** The census reads nonzero in a banked asserted body for `Add` or for the registry's list: stop and post
+  the row. For `Add` the choice is then between the readers' own check and a scoped derivation.
+- **SF-8.** A derived form the arms can build still crosses after the fix. It is not disclosed.
+
+**Order.** Reds from the review's shapes; the fix; the full gates of 16.5 plus PF-5's canaries; the hosted legs; a
+narrow re-review of the delta, which COORD launches, on the three mechanisms by name (the anchor array, the derived
+box of `Add`, the registry's list); then 3.1 lands; then section 17, whose rows 1 to 4 and 6 these fixes change.
+
+— H (2026-11-13)

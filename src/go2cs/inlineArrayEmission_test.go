@@ -117,6 +117,84 @@ func view(p unsafe.Pointer) *Outer { return (*Outer)(p) }
 	}
 }
 
+// COORD 2026-11-14 13:56Z, the sqlite-cs wall: golang.org/x/sys decodes a RawSockaddrAny by reinterpreting it as each
+// family's sockaddr, and every family sockaddr is kept out by a face (a whole Addr copied, &Path[0]) while the Any
+// itself is admitted, so the module was refused (GO2CS2010) on every target. Under the automatic rule the pair now
+// agrees by keeping the Any out with its partners; the rest of the closure (RawSockaddr) stays inline.
+func TestInlineArrayPairKeepsTheSockaddrDecodeOut(t *testing.T) {
+	cs := convertInlineArrayFixture(t, "sockaddr", `package sockaddr
+
+import "unsafe"
+
+const (
+	AF_UNIX = 1
+	AF_INET = 2
+)
+
+type RawSockaddr struct {
+	Family uint16
+	Data   [14]int8
+}
+
+type RawSockaddrAny struct {
+	Addr RawSockaddr
+	Pad  [100]int8
+}
+
+type RawSockaddrInet4 struct {
+	Family uint16
+	Port   uint16
+	Addr   [4]byte
+	Zero   [8]uint8
+}
+
+type RawSockaddrUnix struct {
+	Family uint16
+	Path   [108]int8
+}
+
+type SockaddrInet4 struct {
+	Port int
+	Addr [4]byte
+	raw  RawSockaddrInet4
+}
+
+func (sa *SockaddrInet4) sockaddr() (unsafe.Pointer, int32) {
+	sa.raw.Family = AF_INET
+	sa.raw.Addr = sa.Addr
+	return unsafe.Pointer(&sa.raw), int32(unsafe.Sizeof(sa.raw))
+}
+
+func (rsa *RawSockaddrAny) Decode() (string, [4]byte) {
+	switch rsa.Addr.Family {
+	case AF_UNIX:
+		pp := (*RawSockaddrUnix)(unsafe.Pointer(rsa))
+		n := 0
+		for n < len(pp.Path) && pp.Path[n] != 0 {
+			n++
+		}
+		return string(unsafe.Slice((*byte)(unsafe.Pointer(&pp.Path[0])), n)), [4]byte{}
+	case AF_INET:
+		pp := (*RawSockaddrInet4)(unsafe.Pointer(rsa))
+		return "", pp.Addr
+	}
+	return "", [4]byte{}
+}
+
+func Wire(p unsafe.Pointer) *RawSockaddrAny { return (*RawSockaddrAny)(p) }
+`)
+
+	if !strings.Contains(cs, `[GoInlineLayout(Size = 16, Align = 2), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct RawSockaddr {`) {
+		t.Errorf("want RawSockaddr held inline:\n%s", cs)
+	}
+
+	for _, kept := range []string{"RawSockaddrAny", "RawSockaddrInet4", "RawSockaddrUnix"} {
+		if !strings.Contains(cs, "\npartial struct "+kept+" {") {
+			t.Errorf("want %s kept as array<T> storage:\n%s", kept, cs)
+		}
+	}
+}
+
 // C1's review, M1: an inline array boxed into an interface crosses as its array<T> COPY, deep for a nested array, so a
 // type switch, interface ==, a map key, reflect and fmt all see the one representation every other [N]T has.
 func TestInlineArrayBoxesAsItsDeepArrayCopy(t *testing.T) {

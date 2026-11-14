@@ -40,11 +40,11 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast32(ж<abiꓸMapType> Ꮡt
         @unsafe.Pointer slotKey = g.key(Ꮡtyp, 0);
         var slotSize = typ.SlotSize;
         while (full != 0) {
-            if (key == ~(ж<uint32>)(uintptr)(slotKey) && full.lowestSet()) {
-                @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKey + typ.ElemOff);
+            if (key == ~@unsafe.Pointer.To<uint32>(slotKey) && full.lowestSet()) {
+                @unsafe.Pointer slotElem = @unsafe.Add(slotKey, typ.ElemOff);
                 return slotElem;
             }
-            slotKey = (@unsafe.Pointer)((uintptr)slotKey + slotSize);
+            slotKey = @unsafe.Add(slotKey, slotSize);
             full = full.shiftOutLowest();
         }
         return @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
@@ -70,8 +70,8 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast32(ж<abiꓸMapType> Ꮡt
             var i = match.first();
 
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
-            if (key == ~(ж<uint32>)(uintptr)(slotKey)) {
-                @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKey + typ.ElemOff);
+            if (key == ~@unsafe.Pointer.To<uint32>(slotKey)) {
+                @unsafe.Pointer slotElem = @unsafe.Add(slotKey, typ.ElemOff);
                 return slotElem;
             }
             match = match.removeFirst();
@@ -114,11 +114,11 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abiꓸMapTy
         @unsafe.Pointer slotKey = g.key(Ꮡtyp, 0);
         var slotSize = typ.SlotSize;
         while (full != 0) {
-            if (key == ~(ж<uint32>)(uintptr)(slotKey) && full.lowestSet()) {
-                @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKey + typ.ElemOff);
+            if (key == ~@unsafe.Pointer.To<uint32>(slotKey) && full.lowestSet()) {
+                @unsafe.Pointer slotElem = @unsafe.Add(slotKey, typ.ElemOff);
                 return (slotElem, true);
             }
-            slotKey = (@unsafe.Pointer)((uintptr)slotKey + slotSize);
+            slotKey = @unsafe.Add(slotKey, slotSize);
             full = full.shiftOutLowest();
         }
         return (@unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0)), false);
@@ -144,8 +144,8 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abiꓸMapTy
             var i = match.first();
 
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
-            if (key == ~(ж<uint32>)(uintptr)(slotKey)) {
-                @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKey + typ.ElemOff);
+            if (key == ~@unsafe.Pointer.To<uint32>(slotKey)) {
+                @unsafe.Pointer slotElem = @unsafe.Add(slotKey, typ.ElemOff);
                 return (slotElem, true);
             }
             match = match.removeFirst();
@@ -172,7 +172,7 @@ internal static @unsafe.Pointer putSlotSmallFast32(this ref ΔMap m, ж<abiꓸMa
         var iΔ1 = match.first();
 
         @unsafe.Pointer slotKeyΔ1 = g.key(typ, iΔ1);
-        if (key == ~(ж<uint32>)(uintptr)(slotKeyΔ1)) {
+        if (key == ~@unsafe.Pointer.To<uint32>(slotKeyΔ1)) {
             @unsafe.Pointer slotElemΔ1 = g.elem(typ, iΔ1);
             return slotElemΔ1;
         }
@@ -190,7 +190,7 @@ internal static @unsafe.Pointer putSlotSmallFast32(this ref ΔMap m, ж<abiꓸMa
     var i = match.first();
 
     @unsafe.Pointer slotKey = g.key(typ, i);
-    ((ж<uint32>)(uintptr)(slotKey)).Value = key;
+    (@unsafe.Pointer.To<uint32>(slotKey)).Value = key;
 
     @unsafe.Pointer slotElem = g.elem(typ, i);
 
@@ -270,7 +270,7 @@ outer:
                 var iΔ1 = match.first();
 
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, iΔ1);
-                if (key == ~(ж<uint32>)(uintptr)(slotKey)) {
+                if (key == ~@unsafe.Pointer.To<uint32>(slotKey)) {
                     slotElem = g.elem(Ꮡtyp, iΔ1);
 
                     t.checkInvariants(Ꮡtyp, Ꮡm);
@@ -314,7 +314,7 @@ outer:
             // If there is room left to grow, just insert the new entry.
             if (t.growthLeft > 0) {
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
-                ((ж<uint32>)(uintptr)(slotKey)).Value = key;
+                (@unsafe.Pointer.To<uint32>(slotKey)).Value = key;
 
                 slotElem = g.elem(Ꮡtyp, i);
 
@@ -415,7 +415,7 @@ outer:
                 var iΔ1 = match.first();
 
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, iΔ1);
-                if (key == ~(ж<@unsafe.Pointer>)(uintptr)(slotKey)) {
+                if (key == ~@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)) {
                     slotElem = g.elem(Ꮡtyp, iΔ1);
 
                     t.checkInvariants(Ꮡtyp, Ꮡm);
@@ -454,7 +454,7 @@ outer:
             // If there is room left to grow, just insert the new entry.
             if (t.growthLeft > 0) {
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
-                ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = key;
+                (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = key;
 
                 slotElem = g.elem(Ꮡtyp, i);
 

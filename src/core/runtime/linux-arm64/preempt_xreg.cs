@@ -88,7 +88,7 @@ internal static void xRegSave(ref g gp) {
     } else {
         // Allocate a new save block.
         @lock(ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡlock));
-        dest = (ж<xRegState>)(uintptr)(ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡalloc).alloc());
+        dest = @unsafe.Pointer.To<xRegState>(ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡalloc).alloc());
         unlock(ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡlock));
     }
 
