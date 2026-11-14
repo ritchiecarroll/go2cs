@@ -26,8 +26,12 @@ namespace GolibTests;
 /// bytes it never wrote.
 /// </para>
 /// <para>
-/// The discriminator is the address's PROVENANCE, as it is for <c>array&lt;E&gt;</c>: the same wrapper over an
-/// address the registry knows converts as before. The admitted arms below are as load-bearing as the refused ones.
+/// Two layers. The number conversion refuses an address with NO provenance record, as it does for
+/// <c>array&lt;E&gt;</c>. That alone left the same store reachable from plain Go: an address WITH a record (pinned
+/// Go storage of another type) passed that test, and the Reinterpret conversion never reaches it. So the native
+/// box itself refuses to exist over any real address when its pointee is such a wrapper. No real address holds a
+/// wrapper struct: storage that holds a reference is never pinned. Not refused: nil, a pointer converted back to
+/// its own type, and an order token, which is not an address.
 /// </para>
 /// </remarks>
 [TestClass]
@@ -57,6 +61,19 @@ public class NamedArrayViewFloorTests
 
     // `(*A)(p)` for an unsafe.Pointer made from a number, as the converter emits it.
     private static ж<T> Converted<T>(nint address) => @unsafe.Pointer.To<T>((@unsafe.Pointer)(uintptr)(nuint)address);
+
+    private static PanicException? Attempt(Action store)
+    {
+        try
+        {
+            store();
+            return null;
+        }
+        catch (PanicException panic)
+        {
+            return panic;
+        }
+    }
 
     private static void AssertNamesTheRefusal(PanicException panic, string typeName)
     {
@@ -224,21 +241,90 @@ public class NamedArrayViewFloorTests
     }
 
     /// <summary>
-    /// THE BOUND, as <see cref="NativeArrayViewFloorTests.APinnedManagedAddressAtAnArrayPointeeIsAdmittedBecauseItResolves"/>
-    /// states it for <c>array&lt;E&gt;</c>: an address that resolves to a live box of ANOTHER pointee type is
-    /// admitted. The floor refuses the no-provenance class, not every wrong view.
+    /// GO memory, arm gh: <c>(*smallMem)(unsafe.Pointer(&amp;w))</c> over a <c>[8]uint64</c>. The address has a
+    /// provenance record, so the number conversion's own test admits it. Before the second layer the store was
+    /// lost and <c>w[0]</c> read the address of a managed object.
     /// </summary>
+    /// <remarks>
+    /// This arm replaces one that asserted the opposite, "an address that resolves to a live box of another type
+    /// is admitted", the bound <see cref="NativeArrayViewFloorTests"/> states for <c>array&lt;E&gt;</c>. For the
+    /// wrapper that bound was the hole.
+    /// </remarks>
     [TestMethod]
-    public void APinnedManagedAddressAtANamedArrayPointeeIsAdmittedBecauseItResolves()
+    public void ANamedArrayOverAGoArrayOfAnotherElementTypeIsRefusedAndStoresNothing()
     {
-        ж<array<uint64>> pinned = new StandardBox<array<uint64>>(new array<uint64>(8));
-        uintptr address = (uintptr)pinned;
+        array<uint64> words = new(8);
+        ж<array<uint64>> pinned = new StandardBox<array<uint64>>(words);
 
-        ж<FloorSmallMem> view = (ж<FloorSmallMem>)address;
+        PanicException? panic = Attempt(
+            () => @unsafe.Pointer.To<FloorSmallMem>(@unsafe.Pointer.FromPinnedBox(pinned)).Value[0] = 1);
 
-        Assert.IsNotNull(view, "an address with a provenance record is not this floor's class");
+        Assert.AreEqual(0UL, words[0], $"the Go array was written: its first word reads 0x{words[0]:x}");
+        Assert.IsNotNull(panic, "a named array over Go storage of another type must be refused, not answered");
+        AssertNamesTheRefusal(panic, nameof(FloorSmallMem));
 
         GC.KeepAlive(pinned);
+    }
+
+    /// <summary>
+    /// GO memory, arm gg: <c>(*smallMem)(unsafe.Pointer(&amp;s[0]))</c> over a <c>[]byte</c>.
+    /// </summary>
+    [TestMethod]
+    public void ANamedArrayOverASliceElementIsRefusedAndStoresNothing()
+    {
+        slice<byte> bytes = make<slice<byte>>(64);
+
+        PanicException? panic = Attempt(
+            () => @unsafe.Pointer.To<FloorSmallMem>(@unsafe.Pointer.FromPinnedBox(Ꮡ(bytes, 0))).Value[7] = 9);
+
+        CollectionAssert.AreEqual(new byte[8], bytes[..8].ToArray(),
+            $"the slice was written: its first eight bytes read {BitConverter.ToString(bytes[..8].ToArray())}");
+        Assert.IsNotNull(panic, "a named array over a slice's storage must be refused, not answered");
+        AssertNamesTheRefusal(panic, nameof(FloorSmallMem));
+    }
+
+    /// <summary>
+    /// GO memory, arms ga and gd: <c>(*smallMem)(unsafe.Pointer(&amp;arr))</c> over a <c>[64]byte</c>, which the
+    /// converter emits as <c>Reinterpret&lt;array&lt;byte&gt;, smallMem&gt;()</c>. This conversion never passes the
+    /// number conversion's test.
+    /// </summary>
+    [TestMethod]
+    public void ANamedArrayReinterpretedOverItsUnnamedArrayIsRefusedAndStoresNothing()
+    {
+        array<byte> bytes = new(64);
+        ж<array<byte>> boxed = new StandardBox<array<byte>>(bytes);
+
+        PanicException? panic = Attempt(() => boxed.Reinterpret<array<byte>, FloorSmallMem>().Value[1] = 3);
+
+        CollectionAssert.AreEqual(new byte[8], bytes[..8].ToArray(),
+            $"the array was written: its first eight bytes read {BitConverter.ToString(bytes[..8].ToArray())}");
+        Assert.IsNotNull(panic, "a named array over the unnamed array it is defined on must be refused, not answered");
+        AssertNamesTheRefusal(panic, nameof(FloorSmallMem));
+
+        GC.KeepAlive(boxed);
+    }
+
+    /// <summary>
+    /// NOT this floor: the number of a pointer whose pointee holds a reference is an ORDER TOKEN, not an address.
+    /// A box over it converts as before and keeps its own refusal at the dereference.
+    /// </summary>
+    [TestMethod]
+    public void AnOrderTokenAtANamedArrayPointeeKeepsItsOwnRefusal()
+    {
+        ж<@string> text = new StandardBox<@string>((@string)"text");
+        uintptr token = (uintptr)text;
+
+        ж<FloorSmallMem> carrier = (ж<FloorSmallMem>)token;
+
+        Assert.IsNotNull(carrier, "an order token at a named array pointee still converts");
+
+        PanicException panic = Assert.ThrowsException<PanicException>(() => carrier.Value[0] = 1,
+            "and its dereference is still refused");
+
+        Assert.IsFalse((panic.Message ?? "").Contains("cannot view native memory"),
+            "by the order-token refusal, not by this floor");
+
+        GC.KeepAlive(text);
     }
 
     /// <summary>
