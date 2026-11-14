@@ -1,0 +1,9 @@
+CREATION CENSUS prefix=net/http: 31 can-park func-value call sites
+  covered            18
+  partial            3
+  uncovered          10
+  no-creation-found  0
+  caller plain           map[covered:4 partial:2 uncovered:1]
+  caller plain(closure)  map[covered:1 uncovered:1]
+  caller twin            map[covered:7 partial:1 uncovered:7]
+  caller twin(closure)   map[covered:6 uncovered:1]

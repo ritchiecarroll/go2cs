@@ -1,0 +1,16 @@
+runtime aot=True N=2000000
+A0     create+call closure               11.72 ns     72.0 B
+D3c    create pair+call                  30.76 ns    200.0 B
+B0p    create+call bound ptr method       9.25 ns     48.0 B
+D3bp   create pair+call, ptr method      28.26 ns    176.0 B
+B0v    create+call bound value method     11.71 ns     72.0 B
+D3bv   create pair+call, value method     30.84 ns    200.0 B
+A0call call a closure                     1.61 ns      0.0 B
+D3call call via the pair                  1.83 ns      0.0 B
+D3s    call a static's pair               2.06 ns      0.0 B
+D3t    twin-side Target test              8.78 ns      0.0 B
+D1hit  CWT lookup, known                 11.74 ns      0.0 B
+M      Delegate.Method, fresh           448.33 ns    296.0 B
+D1reg  create+miss+Method+register      991.09 ns    319.3 B
+names: A0 method <MakeA0>b__0; D3 handed-out method Invoke, target FuncPair`2
+done
