@@ -1424,6 +1424,41 @@ public static void TestDialContext(ж<testing.T> t) {
     });
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string dialTCPˢ => ref dialTCPˢᵇ;
+private static readonly @string dialTCPˢᵇ = "DialTCP()"u8;
+internal static ref readonly @string dialUDPˢ => ref dialUDPˢᵇ;
+private static readonly @string dialUDPˢᵇ = "DialUDP()"u8;
+internal static ref readonly @string ip6Ipv6Icmpˢ => ref ip6Ipv6Icmpˢᵇ;
+private static readonly @string ip6Ipv6Icmpˢᵇ = "ip6:ipv6-icmp"u8;
+internal static ref readonly @string dialIPˢ => ref dialIPˢᵇ;
+private static readonly @string dialIPˢᵇ = "DialIP()"u8;
+
+public static partial void TestDialNetipInvalidRaddr(ж<testing.T> t) {
+    void assertErrMissingAddress(ж<testing.T> tΔ1, @string name, error errΔ1) {
+        tΔ1.Helper();
+        if (errΔ1 == nil) {
+            tΔ1.Errorf("%s err = nil", name);
+            return;
+        }
+        var (e, ok) = errΔ1._<ж<global::go.net_package.OpError>>(ᐧ);
+        if (!ok) {
+            tΔ1.Errorf("%s err = %#v, want *OpError", name, errΔ1);
+            return;
+        }
+        if (!AreEqual(e.Err, errMissingAddress)) {
+            tΔ1.Errorf("%s err = %#v, want *OpError errMissingAddress", name, errΔ1);
+        }
+    }
+    ref var d = ref heap(new global::go.net_package.Dialer(), out var Ꮡd);
+    var (_, err) = Ꮡd.DialTCP(t.Context(), tcpˢ, new netip.AddrPort(), new netip.AddrPort());
+    assertErrMissingAddress(t, dialTCPˢ, err);
+    (_, err) = Ꮡd.DialUDP(t.Context(), udpˢ, new netip.AddrPort(), new netip.AddrPort());
+    assertErrMissingAddress(t, dialUDPˢ, err);
+    (_, err) = Ꮡd.DialIP(t.Context(), ip6Ipv6Icmpˢ, new netipꓸAddr(), new netipꓸAddr());
+    assertErrMissingAddress(t, dialIPˢ, err);
+}
+
 // mustHaveExternalNetwork is like testenv.MustHaveExternalNetwork
 // except on non-Linux, non-mobile builders it permits the test to
 // run in -short mode.
