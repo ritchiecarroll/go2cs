@@ -924,7 +924,7 @@ public static Pointer Add<TLen>(Pointer ptr, TLen len) where TLen : System.Numer
     if (ptr == nil)
         return new Pointer(nil);
 
-    return new Pointer(ptr.Value + (uintptr)(nuint)nint.CreateTruncating(len));
+    return NativeDerivation.Moved(ptr.RetainedSource, (nuint)(ptr.Value + (uintptr)(nuint)nint.CreateTruncating(len)).Value) is { } moved ? Pointer.FromBox(moved) : new Pointer(ptr.Value + (uintptr)(nuint)nint.CreateTruncating(len));
 }
 
 // A typed element box addresses its target through an Int32 element index, so an offset outside
@@ -950,7 +950,7 @@ public static ж<T> Add<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numeri
     // byte arithmetic (its argument is an unsafe.Pointer), which is what a native alias reproduces;
     // the managed array-element path below is an element step against a managed backing store.
     if (ptr.IsNative)
-        return new NativeBox<T>((nuint)((nint)ptr.NativeAddress + n));
+        return new NativeBox<T>((nuint)((nint)ptr.NativeAddress + n), retainedSource: NativeDerivation.Kept(ptr));
 
     (IArray array, int index)? arrayRef  = ptr.ArrayRef;
 

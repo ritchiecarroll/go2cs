@@ -37,7 +37,7 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast64(ж<abiꓸMapType> Ꮡt
             data: m.dirPtr
         );
         var full = g.ctrls().matchFull();
-        @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, 0);
+        @unsafe.Pointer slotKey = g.key(Ꮡtyp, 0);
         var slotSize = typ.SlotSize;
         while (full != 0) {
             if (key == ~(ж<uint64>)(uintptr)(slotKey) && full.lowestSet()) {
@@ -51,7 +51,7 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast64(ж<abiꓸMapType> Ꮡt
     }
 
     ref var k = ref heap<uint64>(key, out var Ꮡk);
-    var hash = typ.Hasher((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡk)), m.seed);
+    var hash = typ.Hasher(abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡk)), m.seed);
     System.GC.KeepAlive(Ꮡk);
 
     // Select table.
@@ -69,7 +69,7 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast64(ж<abiꓸMapType> Ꮡt
         while (match != 0) {
             var i = match.first();
 
-            @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+            @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             if (key == ~(ж<uint64>)(uintptr)(slotKey)) {
                 @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKey + 8);
                 return slotElem;
@@ -111,7 +111,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abiꓸMapTy
             data: m.dirPtr
         );
         var full = g.ctrls().matchFull();
-        @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, 0);
+        @unsafe.Pointer slotKey = g.key(Ꮡtyp, 0);
         var slotSize = typ.SlotSize;
         while (full != 0) {
             if (key == ~(ж<uint64>)(uintptr)(slotKey) && full.lowestSet()) {
@@ -125,7 +125,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abiꓸMapTy
     }
 
     ref var k = ref heap<uint64>(key, out var Ꮡk);
-    var hash = typ.Hasher((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡk)), m.seed);
+    var hash = typ.Hasher(abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡk)), m.seed);
     System.GC.KeepAlive(Ꮡk);
 
     // Select table.
@@ -144,7 +144,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abiꓸMapTy
         while (match != 0) {
             var i = match.first();
 
-            @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+            @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             if (key == ~(ж<uint64>)(uintptr)(slotKey)) {
                 @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKey + 8);
                 return (slotElem, true);
@@ -172,9 +172,9 @@ internal static @unsafe.Pointer putSlotSmallFast64(this ref ΔMap m, ж<abiꓸMa
     while (match != 0) {
         var iΔ1 = match.first();
 
-        @unsafe.Pointer slotKeyΔ1 = (uintptr)g.key(typ, iΔ1);
+        @unsafe.Pointer slotKeyΔ1 = g.key(typ, iΔ1);
         if (key == ~(ж<uint64>)(uintptr)(slotKeyΔ1)) {
-            @unsafe.Pointer slotElemΔ1 = (uintptr)g.elem(typ, iΔ1);
+            @unsafe.Pointer slotElemΔ1 = g.elem(typ, iΔ1);
             return slotElemΔ1;
         }
         match = match.removeFirst();
@@ -190,10 +190,10 @@ internal static @unsafe.Pointer putSlotSmallFast64(this ref ΔMap m, ж<abiꓸMa
 
     var i = match.first();
 
-    @unsafe.Pointer slotKey = (uintptr)g.key(typ, i);
+    @unsafe.Pointer slotKey = g.key(typ, i);
     ((ж<uint64>)(uintptr)(slotKey)).Value = key;
 
-    @unsafe.Pointer slotElem = (uintptr)g.elem(typ, i);
+    @unsafe.Pointer slotElem = g.elem(typ, i);
 
     g.ctrls().set(i, (ctrl)(uint8)h2(hash));
     m.used++;
@@ -219,7 +219,7 @@ internal static @unsafe.Pointer runtime_mapassign_fast64(ж<abiꓸMapType> Ꮡty
     }
 
     ref var k = ref heap<uint64>(key, out var Ꮡk);
-    var hash = typ.Hasher((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡk)), m.seed);
+    var hash = typ.Hasher(abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡk)), m.seed);
     System.GC.KeepAlive(Ꮡk);
 
     // Set writing after calling Hasher, since Hasher may panic, in which
@@ -232,7 +232,7 @@ internal static @unsafe.Pointer runtime_mapassign_fast64(ж<abiꓸMapType> Ꮡty
 
     if (m.dirLen == 0) {
         if (m.used < abi.MapGroupSlots) {
-            @unsafe.Pointer elem = (uintptr)m.putSlotSmallFast64(Ꮡtyp, hash, key);
+            @unsafe.Pointer elem = m.putSlotSmallFast64(Ꮡtyp, hash, key);
 
             if (m.writing == 0) {
                 fatal(concurrentMapWritesˢ);
@@ -270,9 +270,9 @@ outer:
             while (match != 0) {
                 var iΔ1 = match.first();
 
-                @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, iΔ1);
+                @unsafe.Pointer slotKey = g.key(Ꮡtyp, iΔ1);
                 if (key == ~(ж<uint64>)(uintptr)(slotKey)) {
-                    slotElem = (uintptr)g.elem(Ꮡtyp, iΔ1);
+                    slotElem = g.elem(Ꮡtyp, iΔ1);
 
                     t.checkInvariants(Ꮡtyp, Ꮡm);
                     goto break_outer;
@@ -314,10 +314,10 @@ outer:
 
             // If there is room left to grow, just insert the new entry.
             if (t.growthLeft > 0) {
-                @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+                @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
                 ((ж<uint64>)(uintptr)(slotKey)).Value = key;
 
-                slotElem = (uintptr)g.elem(Ꮡtyp, i);
+                slotElem = g.elem(Ꮡtyp, i);
 
                 g.ctrls().set(i, (ctrl)(uint8)h2Hash);
                 t.growthLeft--;
@@ -354,9 +354,9 @@ internal static @unsafe.Pointer putSlotSmallFastPtr(this ref ΔMap m, ж<abiꓸM
     while (match != 0) {
         var iΔ1 = match.first();
 
-        @unsafe.Pointer slotKeyΔ1 = (uintptr)g.key(typ, iΔ1);
+        @unsafe.Pointer slotKeyΔ1 = g.key(typ, iΔ1);
         if (key == ~(ж<@unsafe.Pointer>)(uintptr)(slotKeyΔ1)) {
-            @unsafe.Pointer slotElemΔ1 = (uintptr)g.elem(typ, iΔ1);
+            @unsafe.Pointer slotElemΔ1 = g.elem(typ, iΔ1);
             return slotElemΔ1;
         }
         match = match.removeFirst();
@@ -372,10 +372,10 @@ internal static @unsafe.Pointer putSlotSmallFastPtr(this ref ΔMap m, ж<abiꓸM
 
     var i = match.first();
 
-    @unsafe.Pointer slotKey = (uintptr)g.key(typ, i);
+    @unsafe.Pointer slotKey = g.key(typ, i);
     ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = key;
 
-    @unsafe.Pointer slotElem = (uintptr)g.elem(typ, i);
+    @unsafe.Pointer slotElem = g.elem(typ, i);
 
     g.ctrls().set(i, (ctrl)(uint8)h2(hash));
     m.used++;
@@ -403,7 +403,7 @@ internal static @unsafe.Pointer runtime_mapassign_fast64ptr(ж<abiꓸMapType> �
     }
 
     ref var k = ref heap<@unsafe.Pointer>(key, out var Ꮡk);
-    var hash = typ.Hasher((uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡk)), m.seed);
+    var hash = typ.Hasher(abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡk)), m.seed);
     System.GC.KeepAlive(Ꮡk);
 
     // Set writing after calling Hasher, since Hasher may panic, in which
@@ -416,7 +416,7 @@ internal static @unsafe.Pointer runtime_mapassign_fast64ptr(ж<abiꓸMapType> �
 
     if (m.dirLen == 0) {
         if (m.used < abi.MapGroupSlots) {
-            @unsafe.Pointer elem = (uintptr)m.putSlotSmallFastPtr(Ꮡtyp, hash, key);
+            @unsafe.Pointer elem = m.putSlotSmallFastPtr(Ꮡtyp, hash, key);
 
             if (m.writing == 0) {
                 fatal(concurrentMapWritesˢ);
@@ -454,9 +454,9 @@ outer:
             while (match != 0) {
                 var iΔ1 = match.first();
 
-                @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, iΔ1);
+                @unsafe.Pointer slotKey = g.key(Ꮡtyp, iΔ1);
                 if (key == ~(ж<@unsafe.Pointer>)(uintptr)(slotKey)) {
-                    slotElem = (uintptr)g.elem(Ꮡtyp, iΔ1);
+                    slotElem = g.elem(Ꮡtyp, iΔ1);
 
                     t.checkInvariants(Ꮡtyp, Ꮡm);
                     goto break_outer;
@@ -493,10 +493,10 @@ outer:
 
             // If there is room left to grow, just insert the new entry.
             if (t.growthLeft > 0) {
-                @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+                @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
                 ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = key;
 
-                slotElem = (uintptr)g.elem(Ꮡtyp, i);
+                slotElem = g.elem(Ꮡtyp, i);
 
                 g.ctrls().set(i, (ctrl)(uint8)h2Hash);
                 t.growthLeft--;
@@ -537,7 +537,7 @@ internal static void runtime_mapdelete_fast64(ж<abiꓸMapType> typ, ж<ΔMap> �
         return;
     }
 
-    Ꮡm.Delete(typ, (uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)));
+    Ꮡm.Delete(typ, abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)));
     System.GC.KeepAlive(Ꮡkey);
 }
 

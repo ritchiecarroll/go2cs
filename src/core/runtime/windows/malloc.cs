@@ -702,7 +702,7 @@ internal static void mallocinit() {
         // heap reservation.
 
         uintptr arenaMetaSize = /* (1 << arenaBits) * unsafe.Sizeof(heapArena{}) */ unchecked((uintptr)293131517952);
-        var meta = (uintptr)(uintptr)sysReserve(nil, arenaMetaSize, heapReservationˢ);
+        var meta = (uintptr)sysReserve(nil, arenaMetaSize, heapReservationˢ);
         if (meta != 0) {
             Ꮡmheap_.ᏑheapArenaAlloc.init(meta, arenaMetaSize, true);
         }
@@ -823,7 +823,7 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
         //
         // Only do this if we're using the regular heap arena hints.
         // This behavior is only for the heap.
-        v = (uintptr)h.arena.alloc(n, heapArenaBytes, ᏑgcController.ᏑheapReleased, heapˢ);
+        v = h.arena.alloc(n, heapArenaBytes, ᏑgcController.ᏑheapReleased, heapˢ);
         if (v != nil) {
             size = n;
             goto mapped;
@@ -844,7 +844,7 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
             // Outside addressable heap. Can't use.
             v = default;
         } else {
-            v = (uintptr)sysReserve((@unsafe.Pointer)Δp, n, heapReservationˢ);
+            v = sysReserve((@unsafe.Pointer)Δp, n, heapReservationˢ);
         }
         if (Δp == (uintptr)v) {
             // Success. Update the hint.
@@ -1176,12 +1176,12 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
 
     if (sizeSpecializedMallocEnabled && heapBitsInSpan(size)) {
         if (Ꮡtyp == nil || !typ.Pointers()) {
-            return (uintptr)mallocNoScanTable[size](size, Ꮡtyp, needzero);
+            return mallocNoScanTable[size](size, Ꮡtyp, needzero);
         } else {
             if (!needzero) {
                 @throw(objectsWithPointersMustˢ);
             }
-            return (uintptr)mallocScanTable[size](size, Ꮡtyp, needzero);
+            return mallocScanTable[size](size, Ꮡtyp, needzero);
         }
     }
 
@@ -1192,7 +1192,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
 
     // Pre-malloc debug hooks.
     if (debug.malloc) {
-        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+        @unsafe.Pointer xΔ1 = preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
             return xΔ1;
         }
     }
@@ -1276,7 +1276,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
         if (Ꮡtyp != nil && typ.Pointers() && !heapBitsInSpan(elemsize) && size <= (uintptr)(maxSmallSize - gc.MallocHeaderSize)) {
             frag -= gc.MallocHeaderSize;
         }
-        asanpoison((uintptr)@unsafe.Add(x, size - asanRZ), asanRZ);
+        asanpoison(@unsafe.Add(x, size - asanRZ), asanRZ);
         asanunpoison(x, size - asanRZ);
     }
     if (valgrindenabled) {
@@ -1454,7 +1454,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcTiny(uintptr size, ж<_type> 
         // TODO: enable this padding for all allocations, not just
         // tinyalloc ones. It's tricky because of pointer maps.
         // Maybe just all noscan objects?
-        x = (uintptr)add(x, span.elemsize - size);
+        x = add(x, span.elemsize - size);
     }
     return (x, span.elemsize);
 }
@@ -1496,7 +1496,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallNoscan(uintptr size, ж<
     // First, check for a reusable object.
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         // We have a reusable object, use it.
-        @unsafe.Pointer xΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, size, needzero);
+        @unsafe.Pointer xΔ1 = mallocgcSmallNoscanReuse(c, span, spc, size, needzero);
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         return (xΔ1, size);
@@ -1758,7 +1758,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanHeader(uintptr size,
         memclrNoHeapPointers(x, size);
     }
     var header = (ж<ж<_type>>)(uintptr)(x);
-    x = (uintptr)add(x, gc.MallocHeaderSize);
+    x = add(x, gc.MallocHeaderSize);
     c.scanAlloc += heapSetTypeSmallHeader((uintptr)x, size - (uintptr)gc.MallocHeaderSize, Ꮡtyp, header, span);
 
     // Ensure that the stores above that initialize x to
@@ -1936,7 +1936,7 @@ internal static @unsafe.Pointer preMallocgcDebug(uintptr size, ж<_type> typ) {
                 align = 1;
             }
         }
-        return (uintptr)persistentalloc(size, align, Ꮡmemstats.Ꮡother_sys);
+        return persistentalloc(size, align, Ꮡmemstats.Ꮡother_sys);
     }
     if (inittrace.active && inittrace.id == (~getg()).goid) {
         // Init functions are executed sequentially in a single goroutine.
@@ -2315,12 +2315,12 @@ internal static void memclrNoHeapPointersChunked(uintptr size, @unsafe.Pointer x
 internal static @unsafe.Pointer newobject(ж<_type> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
-    return (uintptr)mallocgc(typ.Size_, Ꮡtyp, true);
+    return mallocgc(typ.Size_, Ꮡtyp, true);
 }
 
 //go:linkname maps_newobject internal/runtime/maps.newobject
 internal static @unsafe.Pointer maps_newobject(ж<_type> typ) {
-    return (uintptr)newobject(typ);
+    return newobject(typ);
 }
 
 // reflect_unsafe_New is meant for package reflect,
@@ -2338,14 +2338,14 @@ internal static @unsafe.Pointer maps_newobject(ж<_type> typ) {
 internal static @unsafe.Pointer reflect_unsafe_New(ж<_type> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
-    return (uintptr)mallocgc(typ.Size_, Ꮡtyp, true);
+    return mallocgc(typ.Size_, Ꮡtyp, true);
 }
 
 //go:linkname reflectlite_unsafe_New internal/reflectlite.unsafe_New
 internal static @unsafe.Pointer reflectlite_unsafe_New(ж<_type> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
-    return (uintptr)mallocgc(typ.Size_, Ꮡtyp, true);
+    return mallocgc(typ.Size_, Ꮡtyp, true);
 }
 
 // newarray allocates an array of n elements of type typ.
@@ -2365,13 +2365,13 @@ internal static @unsafe.Pointer newarray(ж<_type> Ꮡtyp, nint n) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (n == 1) {
-        return (uintptr)mallocgc(typ.Size_, Ꮡtyp, true);
+        return mallocgc(typ.Size_, Ꮡtyp, true);
     }
     var (mem, overflow) = Δmath.MulUintptr(typ.Size_, (uintptr)n);
     if (overflow || mem > maxAlloc || n < 0) {
         throw panic(((plainError)(@string)runtimeAllocationSizeOutˢ));
     }
-    return (uintptr)mallocgc(mem, Ꮡtyp, true);
+    return mallocgc(mem, Ꮡtyp, true);
 }
 
 // reflect_unsafe_NewArray is meant for package reflect,
@@ -2390,12 +2390,12 @@ internal static @unsafe.Pointer newarray(ж<_type> Ꮡtyp, nint n) {
 //
 //go:linkname reflect_unsafe_NewArray reflect.unsafe_NewArray
 internal static @unsafe.Pointer reflect_unsafe_NewArray(ж<_type> typ, nint n) {
-    return (uintptr)newarray(typ, n);
+    return newarray(typ, n);
 }
 
 //go:linkname maps_newarray internal/runtime/maps.newarray
 internal static @unsafe.Pointer maps_newarray(ж<_type> typ, nint n) {
-    return (uintptr)newarray(typ, n);
+    return newarray(typ, n);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

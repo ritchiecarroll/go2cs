@@ -161,7 +161,7 @@ internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
     if (len(pcs) == 0) {
         return 0; // ID 0 is reserved for zero-length stacks.
     }
-    var (id, _) = Ꮡt.Ꮡtab.put((uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(pcs, 0))), (uintptr)len(pcs) * /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8);
+    var (id, _) = Ꮡt.Ꮡtab.put(noescape(@unsafe.Pointer.FromBox(Ꮡ(pcs, 0))), (uintptr)len(pcs) * /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8);
     return id;
 }
 
@@ -216,7 +216,7 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
 
     // Recursively walk all child nodes.
     foreach (var i in range(len(node.children))) {
-        @unsafe.Pointer child = (uintptr)Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
+        @unsafe.Pointer child = Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
         if (child == nil) {
             continue;
         }
@@ -365,7 +365,7 @@ internal static uintptr startPCForTrace(uintptr pc) {
     if (!f.valid()) {
         return pc; // may happen for locked g in extra M since its pc is 0.
     }
-    @unsafe.Pointer w = (uintptr)funcdata(f, abi.FUNCDATA_WrapInfo);
+    @unsafe.Pointer w = funcdata(f, abi.FUNCDATA_WrapInfo);
     if (w == nil) {
         return pc; // not a wrapper
     }

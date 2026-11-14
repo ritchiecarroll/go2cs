@@ -111,7 +111,7 @@ public static void Put(this ж<Pool> Ꮡp, any x) {
             // Randomly drop x on floor.
             return;
         }
-        race.ReleaseMerge((uintptr)poolRaceAddr(x));
+        race.ReleaseMerge(poolRaceAddr(x));
         race.Disable();
     }
     var (l, _) = Ꮡp.pin();
@@ -156,7 +156,7 @@ public static any Get(this ж<Pool> Ꮡp) {
     if (race.Enabled) {
         race.Enable();
         if (x != nil) {
-            race.Acquire((uintptr)poolRaceAddr(x));
+            race.Acquire(poolRaceAddr(x));
         }
     }
     if (x == nil && p.New != nil) {

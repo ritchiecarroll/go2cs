@@ -38,7 +38,7 @@ internal static void main() {
     ref var backing = ref heap(new uintptr(), out var Ꮡbacking);
     @unsafe.Pointer p = @unsafe.Pointer.FromBox(Ꮡbacking);
     writeBarrier(p, p);
-    _ = (uintptr)indirectKey(p);
+    _ = indirectKey(p);
     ref var fslot = ref heap<Action>(out var Ꮡfslot);
     var (_, ok) = funcAt(@unsafe.Pointer.FromPinnedBox(Ꮡfslot));
     _ = ok;
