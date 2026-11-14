@@ -10,6 +10,13 @@
 >
 > COORD ruled the outline on 2026-11-14 (section 10). The M:N section is co-owned with lane G, whose answer to QG-1
 > is folded into section 6. Amended by dated blocks, never rewritten.
+>
+> **Provenance notes (2026-11-14): checked by hand, not by the guard.** `docs/phase4/` is outside
+> `TestDocsProvenanceNotesResolve` by design, because it holds point-in-time records. So a green `TestDocs` says
+> nothing about the notes in this file. All 15 were checked at `c2919b8b16` by a scratch script that applies the
+> guard's own rule: the cited line, whitespace collapsed, must contain the quote. 15 of 15 resolve. A negative
+> control (one quote deliberately altered) was named by the script, and was not caught by `TestDocs`, which is how
+> the gap was found.
 
 ## 1. What is open
 
