@@ -1091,6 +1091,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckInterfaceUntypedIntCompare() => CheckTarget("InterfaceUntypedIntCompare");
 
     [TestMethod]
+    public void CheckInteriorPointerShapes() => CheckTarget("InteriorPointerShapes");
+
+    [TestMethod]
     public void CheckInvalidRuneString() => CheckTarget("InvalidRuneString");
 
     [TestMethod]

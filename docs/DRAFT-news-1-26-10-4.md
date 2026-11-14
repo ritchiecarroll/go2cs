@@ -141,6 +141,21 @@ it. Pass `unsafe.Pointer(p)` itself, which go2cs refuses by name. See [Limitatio
      Phase 3 is a STRETCH for this release by the owner's ruling: this section ships with the release that carries
      increment 3.1, and moves to that release's notes if it is not this one. -->
 
+### A func stored through an `unsafe.Pointer` (P5)
+
+**`*(*F)(e) = fn`, a func stored through an `unsafe.Pointer`, now stores what the target can hold.** Code translated
+from C by ccgo fills a table of C function pointers this way, at a computed address
+(`*(*func(…) int32)(unsafe.Pointer(uintptr(unsafe.Pointer(&table)) + 8)) = fn`). The store wrote a managed
+reference into the table's memory before, and the number read back from the table named no func. It now stores the
+func's word where the target is a word, and the func itself where the target is a func variable or a func field.
+A target that is neither panics by name. The standard library has no such store. See
+[Pointers](ConversionStrategies-Reference/pointers.md#a-func-value-carried-as-a-number--one-word-per-static-function-through-gofunccookie).
+<!-- docs/phase4/DESIGN-interior-pointer-root.md 4.8 B1 and 10.4; golib's unsafe.Pointer.StoreFunc. Arms: the
+     behavioral programs FuncWordShapes (the w3 rows) and InteriorPointerShapes (shape 1), GolibTests
+     FuncStoreThroughPointerTests, the converter's TestFuncWordShapes. CENSUS, read 2026-11-14 at go1.26.10, tests
+     included: 0 such stores in the standard library on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64;
+     9 in modernc.org/sqlite v1.62.0 (vfs/patches64.go:18-26), all of top-level functions. -->
+
 ### `unsafe.Add` over a nil pointer answers the offset (P5)
 
 **`unsafe.Add` over a nil pointer now answers the offset, as Go does.** `unsafe.Add(nil, n)` is the address `n`; it

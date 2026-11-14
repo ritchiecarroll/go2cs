@@ -38022,4 +38022,37 @@ corpus bytes wherever such a site exists.
 
 — H (2026-11-12)
 
+## 2026-11-14 — P5 (found by the interior-pointer mint census, design 4.7; COORD: a row now, the callers read after the gates): `ManagedPointerTokens.MintOpaque` keeps nothing of a reference-free managed box — OPEN, callers not read
+
+**The mint** (`src/core/golib/ж.PointerTokens.cs`, `MintOpaque<T>`). The converter emits it for `T(unsafe.Pointer(p))`
+where `T`'s underlying type is `*struct{}` (Go's `syscall.Pointer`). It has three answers:
+
+- a nil box: address 0;
+- a box whose pointee holds a reference: the box's registered order token, and the minted box holds the referent
+  for its own lifetime (`s_mintedReferents`);
+- a native box, or a MANAGED box whose pointee holds no reference: `new NativeBox<EmptyStruct>((nuint)(uintptr)box)`.
+
+In the third answer, for a managed box, the number is the address the box's own number conversion pinned. The pin is
+held by a handle that is a field of the source box. The minted box does not hold the source box. So when the source
+box is no longer referenced, its finalizer releases the pin, and the minted pointer names storage that can move or be
+collected. Go's rule is that the converted pointer keeps its pointee alive.
+
+**This is the family of the interior-pointer root** (docs/phase4/DESIGN-interior-pointer-root.md 4.1 and 10.1): a
+native box minted at an address of Go memory that carries nothing of what owns that memory. The 4.7 census
+(`TestInteriorPointerMintCensus`) lists the mint with this disposition; it is not changed in that cut.
+
+**Callers, by a text read at `30a0cc3c2c`.** One emitted site in the committed corpus:
+`src/core/crypto/x509/windows/root_windows.cs:142` (`ExtraPolicyPara`, whose pointee holds a pointer and so takes
+the token answer, not the third). Hand-owned consumers that name the mint in comments:
+`src/core/syscall/windows/zsyscall_windows_certchain_impl.cs` and
+`src/core/internal/syscall/windows/windows/syscall_windows_impl.cs`. Converted test suites and third-party code that
+write the same Go shape take the same emission.
+
+**NOT READ:** whether any caller reaches the third answer over a managed box and lets that box go while the minted
+pointer is in use. **OPEN:** that read (each caller: which answer it takes, and whether it holds its box across the
+use). If every caller holds it, the row closes as "holds by construction" with the sites named. If one does not, the
+fix is the root's: the minted box keeps the source box (`NativeDerivation.Kept`).
+
+— P5 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

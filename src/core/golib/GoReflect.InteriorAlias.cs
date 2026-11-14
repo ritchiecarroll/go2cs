@@ -117,7 +117,34 @@ public static partial class GoReflect
     /// <param name="shape">The PATH SHAPE taken (<c>.f[i].g</c>) or, on a refusal, its NAME — the census record.</param>
     internal static object? ResolveInteriorAlias(object baseBox, nuint offset, Type target, out string shape)
     {
+        return resolveInteriorNode(baseBox, offset, target, out _, out shape);
+    }
+
+    /// <summary>
+    /// Resolves <c>base + offset</c> to the FUNC or WORD slot Go's layout puts exactly there: an alias box whose
+    /// pointee is a delegate type or <c>uintptr</c>, and that type in <paramref name="slotType"/>. It is the walk of
+    /// <see cref="ResolveInteriorAlias"/> with the pointee type read from the layout instead of asked for, which is
+    /// what a func stored through an <c>unsafe.Pointer</c> needs (<c>unsafe.Pointer.StoreFunc</c>;
+    /// docs/phase4/DESIGN-interior-pointer-root.md 10.4): the store's own func type says nothing about whether the
+    /// slot holds a func or its word. Returns <c>null</c>, with the refusal named in <paramref name="shape"/>, when
+    /// the offset lands on anything else.
+    /// </summary>
+    internal static object? ResolveInteriorFuncSlot(object baseBox, nuint offset, out Type? slotType, out string shape)
+    {
+        return resolveInteriorNode(baseBox, offset, null, out slotType, out shape);
+    }
+
+    // Whether a node of the layout is one a func store can land on: a func, or the word a func is carried as.
+    private static bool isFuncOrWord(Type nodeType)
+    {
+        return nodeType == typeof(uintptr) || typeof(Delegate).IsAssignableFrom(nodeType);
+    }
+
+    // The walk both resolutions share. `target` is the pointee type asked for, or null for the func-or-word slot.
+    private static object? resolveInteriorNode(object baseBox, nuint offset, Type? target, out Type? found, out string shape)
+    {
         shape = "";
+        found = null;
 
         if (boxPointeeType(baseBox) is not { } nodeType)
         {
@@ -130,8 +157,11 @@ public static partial class GoReflect
 
         for (int depth = 0; depth <= MaxLayoutDepth; depth++)
         {
-            if (offset == 0 && nodeType == target)
+            if (offset == 0 && (target is null ? isFuncOrWord(nodeType) : nodeType == target))
+            {
+                found = nodeType;
                 return node;
+            }
 
             switch (KindOf(nodeType))
             {
@@ -223,7 +253,7 @@ public static partial class GoReflect
 
                 default:
                     shape += offset == 0
-                        ? $" refused: type mismatch ({nodeType.Name} is not {target.Name})"
+                        ? $" refused: type mismatch ({nodeType.Name} is not {target?.Name ?? "a func or a uintptr"})"
                         : " refused: offset inside a scalar";
                     return null;
             }

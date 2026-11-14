@@ -694,6 +694,73 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         return fn is null ? Nil : new Pointer(GoFuncCookie.Of(fn));
     }
 
+    // Go's `*(*F)(e) = fn` for a func type F and an unsafe.Pointer VALUE e (docs/phase4/DESIGN-interior-pointer-root.md
+    // 4.8 B1 and 10.4). The store's own type says the VALUE is a func. It does not say what e names, and a managed
+    // func is a reference while Go's is one word, so what is stored is decided here, at run time, by what e names:
+    //
+    //   a WORD: C memory, or Go memory that holds no reference (a `uintptr` variable, a field of a struct of
+    //   numbers, an element of a word array). The func's word is stored (GoFuncCookie), through the same conversion
+    //   `*(*uintptr)(e) = word` takes. This is ccgo's function-pointer table (modernc.org/sqlite, vfs/patches64.go);
+    //
+    //   a FUNC: a func variable, or a func field or element inside a value that holds references. The func itself is
+    //   stored, as the slot's own delegate type (a named func type's variable takes a func stored as the unnamed
+    //   type, as it does in Go);
+    //
+    //   a `uintptr` field or element inside a value that holds references: the word, through its alias.
+    //
+    // Anything else is refused by name, and no arm writes 8 bytes over a reference. The emission this replaces,
+    // `To<F>(e).Value = fn`, was a native box over a delegate: a managed reference written into raw memory.
+    //
+    // LIFETIME. A word does not keep its func alive, as a uintptr does not in Go. A static function's word is good
+    // for the life of the process. A closure's word is good while something else holds the closure; after that it
+    // names no live func and a call through it is refused by name (GoFuncCookie.ResolveAs).
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static void StoreFunc(Pointer? e, Delegate? fn)
+    {
+        if (e is null || e.IsNull)
+            throw go.golib.RuntimeErrorPanic.NilPointerDereference();
+
+        nuint number = (nuint)BaseOf(e).Value;
+
+        // An address: memory with no reference in it. The word store.
+        if (!ManagedPointerTokens.IsTaggedToken(number))
+        {
+            To<uintptr>(e).Value = (uintptr)GoFuncCookie.Of(fn);
+            return;
+        }
+
+        // A token: a value that holds a reference has no address, and the number names its box (and, moved, an
+        // offset into it). The slot is the one Go's layout puts there.
+        nuint offset = 0;
+        object? root = ManagedPointerTokens.Resolve(number);
+
+        if (root is null && ManagedPointerTokens.IsTokenArithmetic(number))
+            root = ManagedPointerTokens.ResolveArithmeticBase(number, out offset);
+
+        if (root is null)
+            throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer func store: the pointer names no live Go value");
+
+        object? slot = GoReflect.ResolveInteriorFuncSlot(root, offset, out Type? slotType, out string shape);
+
+        if (slot is ж<uintptr> word)
+        {
+            word.Value = (uintptr)GoFuncCookie.Of(fn);
+            return;
+        }
+
+        if (slot is IUntypedSlotAccess func && slotType is not null)
+        {
+            // The slot's own delegate type: a func of another type with the same signature is rebound to it, and one
+            // that cannot be is refused by name there.
+            Delegate? value = fn is null || fn.GetType() == slotType ? fn : GoFuncCookie.ResolveAs(GoFuncCookie.Of(fn), slotType);
+
+            if (func.TryStoreThrough(value))
+                return;
+        }
+
+        throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer func store: the pointer names neither a func nor a word (" + root.GetType().Name + " +" + offset + ":" + shape + ")");
+    }
+
     // ---- the bare-unsafe.Pointer primitives' recovery and through-ops (I5) ----
 
     // The referent this pointer can store/load through: the retained box first; else whatever the

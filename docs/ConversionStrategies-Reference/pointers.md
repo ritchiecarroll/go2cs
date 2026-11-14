@@ -844,7 +844,7 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:824-833 -->
+<!-- source: src/core/unsafe/unsafe.cs:891-900 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
@@ -1222,11 +1222,11 @@ internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
 
 A pointer parameter that the method dereferences is emitted the same way. Every other use, such as a call argument, a return or an assignment, keeps `FromRef`. When the conversion was the method's only use of the value alias, the alias line (`ref var recv = ref Ꮡrecv.DerefOrNull();`) is not emitted. <!-- 2026-11-14, DESIGN-interior-pointer-root.md 4.3 as ruled (the node rule). The kept sites are named in the repoguard mint guard with the reason "use not provable at the node". -->
 
-**Equality.** A moved pointer equals any pointer to the same place, as in Go: `unsafe.Add(p, 0) == p`, and `unsafe.Add(unsafe.Pointer(&a[0]), 8) == unsafe.Pointer(&a[1])` for an array of 8-byte elements. Equal pointers hash alike, so a `map[unsafe.Pointer]T` finds a key by either. A pointer moved over a struct that holds references is token arithmetic, and it equals only a pointer moved the same distance.
+**Equality.** A moved pointer equals any pointer to the same place, as in Go: `unsafe.Add(p, 0) == p`, and `unsafe.Add(unsafe.Pointer(&a[0]), 8) == unsafe.Pointer(&a[1])` for an array of 8-byte elements. Equal pointers hash alike, so a `map[unsafe.Pointer]T` finds a key by either. A pointer moved over a struct that holds references is token arithmetic, and it equals only a pointer moved the same distance. One pair is not mapped: a field's address taken through a typed view of memory of another type (`&h.f`, with `h := (*T)(p)`) against `unsafe.Add(p, off)` to the same place. That pair may compare unequal; it never compares equal with unlike hashes.
 
 **Limits.** Three forms stay numbers, and a pointer made from one keeps nothing: a sum whose first term is not the pointer (`unsafe.Pointer(n + uintptr(p))`), a masked or rounded number (`unsafe.Pointer(uintptr(p) &^ 7)`), and a sum over a number held in a variable (`u := uintptr(p)`, then `unsafe.Pointer(u + n)`), which Go also says keeps nothing. Over a nil pointer the result is the offset as a number, as in Go: `uintptr(unsafe.Add(nil, 24))` is 24.
 
-Guarded by: `TestPointerArithmeticFormEmitsUnsafeAdd`; `TestReceiverPointerEmitsItsBoxAtAProvenUse`; `TestInteriorPointerMintCensus` (every converted method that keeps `FromRef`, by name); `InteriorPointerRootTests` (`AMovedPointerEqualsAPointerAtTheSameAddress`, `EqualPointersHashAlikeAndFindEachOtherInAMap`, `AddOverANilPointerAnswersTheOffset`); the behavioral programs `UnsafeOperations`, `UintptrUnsafePointerIdiom`, `FuncVsMethodOverload`, `UnsafePointerKeywordParam` and `ReflectNewAtField`.
+Guarded by: `TestPointerArithmeticFormEmitsUnsafeAdd`; `TestReceiverPointerEmitsItsBoxAtAProvenUse`; `TestInteriorPointerMintCensus` (every converted method that keeps `FromRef`, by name); `InteriorPointerRootTests` (`AMovedPointerEqualsAPointerAtTheSameAddress`, `EqualPointersHashAlikeAndFindEachOtherInAMap`, `AddOverANilPointerAnswersTheOffset`); the behavioral programs `InteriorPointerShapes` (reads and writes at a computed address inside a variable, a slice and an array field, and an interior pointer held across a collection as the only reference), `UnsafeOperations`, `UintptrUnsafePointerIdiom`, `FuncVsMethodOverload`, `UnsafePointerKeywordParam` and `ReflectNewAtField`.
 
 ## A numeric value pun READ is a bitcast — `*(*uint64)(unsafe.Pointer(&f))` boxes nothing
 
@@ -1355,6 +1355,7 @@ its types in a package pre-pass (`funcWordOperations.go`):
 | r1, r2 | `*(*F)(unsafe.Pointer(&S{x}))`, `S` one `uintptr` field, and `(*struct{ f F })(…).f` | `GoFuncCookie.Func<F>(x)` |
 | w1 | `*(*uintptr)(unsafe.Pointer(&f)) = x` | `f = GoFuncCookie.Func<F>(x);` |
 | w2 | `*(*F)(unsafe.Pointer(&v)) = fn`, `v` a `uintptr` | `v = (uintptr)GoFuncCookie.Of(fn);` |
+| w3 | `*(*F)(e) = fn`, `e` any other `unsafe.Pointer` | `@unsafe.Pointer.StoreFunc(e, fn);` |
 
 ```go
 func ccgoFP(f interface{}) uintptr {
@@ -1385,8 +1386,36 @@ A declared function is minted through the method-group conversion `(F)name`, whi
 how a func value converts to another delegate type) stands for `g` and answers its word. A number that is
 no func word, read as a func, panics by name, as does a word whose func is gone or cannot be bound.
 
+**A func stored through a pointer whose target the store does not name (w3)** is one golib call. ccgo fills a C
+method table this way: a func stored at a computed address inside a variable of words.
+
+```go
+	*(*func(int, int) int)(unsafe.Add(unsafe.Pointer(&gwords), 8)) = add
+```
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:98 -->
+```csharp
+    @unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡgwords), 8), (Func<nint, nint, nint>)add);
+```
+
+The store's type says the value is a func. It does not say what `e` names, and that is known only when the store
+runs, so `StoreFunc` decides there:
+
+- `e` names a word (C memory, or Go memory that holds no reference: a `uintptr` variable, a field of a struct of
+  numbers, an element of a word array): the func's word is stored;
+- `e` names a func (a func variable, or a func field or element inside a value that holds references): the func
+  itself is stored, as the slot's own delegate type;
+- `e` names a `uintptr` field or element inside a value that holds references: the word is stored;
+- anything else panics by name. No case writes a word over a reference.
+
+A word does not keep its func alive, as a `uintptr` does not in Go. A static function's word is good for the life
+of the process. A closure's word is good while something else holds the closure; after that a call through the
+word panics by name. A store through `&f`, with `f` a variable of the stored func type itself, is not w3: it is a
+store into `f`'s own box. <!-- 2026-11-14, DESIGN-interior-pointer-root.md 4.8 B1 and 10.4. Before it the store was
+`@unsafe.Pointer.To<F>(e).ValueSlot = fn`, a native box over a delegate: a managed reference written into raw memory.
+Census at go1.26.10: 0 such stores in the standard library, tests included, on windows/amd64, linux/amd64,
+darwin/amd64 and linux/arm64; 9 in modernc.org/sqlite v1.62.0 (vfs/patches64.go:18-26), all of top-level functions. -->
+
 **The shapes that keep today's pointer reinterpret, deliberately:**
-- a func stored into memory at a computed address (vfs/patches64.go's offset stores);
 - a recovery from a pointer or from memory (runtime's mcleanup and panic);
 - the `*unsafe.Pointer` forms, which already carry the same word through `unsafe.Pointer.OfFunc` (the
   section above).
@@ -1394,9 +1423,11 @@ no func word, read as a func, panics by name, as does a word whose func is gone 
 The design, its census per target and its predictions are `docs/phase4/DESIGN-sqlite-cs-funcptr.md`.
 
 **Guarded by:**
-- the `FuncWordShapes` behavioral test, one site per class with Go's answers;
+- the `FuncWordShapes` behavioral test, one site per class with Go's answers, and `InteriorPointerShapes` (its
+  shape 1 is the w3 store into a package variable, read back and called);
 - the converter's `TestFuncWordShapes`, which also asserts the near misses and the m1 call site's form;
-- GolibTests' `GoFuncCookieTests`.
+- GolibTests' `GoFuncCookieTests` and `FuncStoreThroughPointerTests` (each case of w3, the refusals, and a
+  closure's word after the closure is dropped).
 
 ## A pointer `reflect` handed out as an `unsafe.Pointer` must convert BACK — the order token is remembered, not redefined
 
