@@ -386,7 +386,7 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goviewfieldfunc", csFails: cgoP3GoMemory},
 		{name: "goviewfieldvar", csFails: cgoP3GoMemory},
 		// The second review (§16.12): a typed pointer from an interior unsafe.Pointer value, and an array field of a view.
-		{name: "goaddtyped", csFails: cgoP3GoMemory},
+		{name: "goaddtyped"}, // RED ARM (never lands): expect run-as-Go, so release-smoke-cgo must fail naming goaddtyped
 		{name: "goaddfill", csFails: cgoP3WriteThrough},
 		{name: "gofieldtyped", csFails: cgoP3WriteThrough},
 		{name: "goviewnamestring", csFails: cgoP3GoMemory},
