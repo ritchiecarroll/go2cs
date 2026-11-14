@@ -71,9 +71,10 @@ public unsafe class InteriorPointerRootTests
         public nint cap;
     }
 
-    // `(*T)(p)` for an unsafe.Pointer value p, as the converter emits it. This is the one line that changes with
-    // design 4.1: the cast through uintptr drops whatever the pointer carried.
-    private static ж<T> Converted<T>(@unsafe.Pointer p) => (ж<T>)(uintptr)(p);
+    // `(*T)(p)` for an unsafe.Pointer value p, as the converter emits it (design 4.1). Until the typed door this line
+    // read `(ж<T>)(uintptr)(p)`, and the cast through uintptr dropped whatever the pointer carried: every red row of
+    // this file was red through that one spelling.
+    private static ж<T> Converted<T>(@unsafe.Pointer p) => @unsafe.Pointer.To<T>(p);
 
     // GoCgoArgsTests.Review2's recipe: the generations collected and finalized three times, then a blocking, compacting
     // gen2 collection with the large object heap compacted too, then the freed space reused.
@@ -217,6 +218,41 @@ public unsafe class InteriorPointerRootTests
         typed.Value = new Pair { i1 = 5, i2 = 6 };
         Assert.AreEqual(5L, box.Value.i1);
         Assert.AreEqual(6L, box.Value.i2);
+
+        GC.KeepAlive(box);
+        GC.KeepAlive(control);
+    }
+
+    // The twin over an address TAKEN (FromPinnedBox): the mint pins, so the storage must not move at all while the box
+    // is held, and the typed pointer names it. Passed before the typed door too; it is here so the base rule cannot
+    // un-pin or re-home what was already right.
+    [TestMethod]
+    public void AFromPinnedBoxDerivedPointerNamesItsStorageAcrossACompactingCollection()
+    {
+        (ж<Pair> box, ж<Pair> control) = SubjectAndControlBehindGarbage();
+        nuint controlBefore = SlotAddress(control);
+
+        @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(box);
+        nuint pinnedAt = SlotAddress(box);
+
+        CollectAndCompact();
+
+        @unsafe.Pointer q = @unsafe.Add(p, 8);
+
+        CollectAndCompact();
+
+        ж<long> typed = Converted<long>(q);
+
+        if (SlotAddress(control) == controlBefore)
+            Assert.Inconclusive("the control box beside the subject did not move, so this run cannot tell a pinned box from a heap that stood still");
+
+        Assert.AreEqual(pinnedAt, SlotAddress(box), "storage whose address was taken moved while its box was held");
+        AssertNamesItsStorageNow(typed, pinnedAt + 8, "(*int64)(unsafe.Add(unsafe.Pointer(&v), 8))");
+        Assert.AreNotEqual((nuint)0, typed.NativeAddress, "a field of pinned storage at a different type is an address, as before");
+
+        typed.Value = 77;
+        Assert.AreEqual(77L, box.Value.i2);
+        Assert.AreSame(box, Converted<Pair>(p), "offset 0 at the box's own type is the box, as the registry answered before");
 
         GC.KeepAlive(box);
         GC.KeepAlive(control);

@@ -565,6 +565,96 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         return new Pointer((uintptr)box, box);
     }
 
+    // Go's `(*T)(p)` for an unsafe.Pointer VALUE p (docs/phase4/DESIGN-interior-pointer-root.md 4.1 and 10.1). The
+    // converter's earlier spelling was `(ж<T>)(uintptr)(p)`: the cast to a number dropped what p carried before
+    // golib saw it, so an interior address of Go memory came back as a native box that kept nothing and pinned
+    // nothing, and the storage moved or was collected under a pointer still in use.
+    //
+    // The answer is the number conversion's own (ж<T>.FromNumber: one body, one box minted), with two differences.
+    //
+    //   THE BASE. A pointer straight from a mint names its source at offset 0, and its stored number may be an
+    //   address read before anything held the storage still (FromBox reads it under `fixed` for one statement). So
+    //   the number converted is the source's OWN, asked now (BaseOf), never the stored one.
+    //
+    //   THE ROOT. Where the conversion would mint a native box that keeps nothing, it keeps what p carried.
+    //
+    // A pointer whose source is itself a pointer to T is that pointer: it names its source at offset 0, which is
+    // what the registry answered for a pinned source and what nothing answered for one that was never pinned.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ж<T> To<T>(Pointer? p)
+    {
+        if (p is null || p.IsNull)
+            return ж<T>.FromNumber(default, carried: null);
+
+        if (p.m_retainedSource is ж<T> itself && NamesAManagedSourceByAddress(p, out _))
+            return itself;
+
+        return ж<T>.FromNumber(BaseOf(p), p.m_retainedSource);
+    }
+
+    // The same conversion for an operand that is already a number: the number conversion, unchanged.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ж<T> To<T>(uintptr number)
+    {
+        return ж<T>.FromNumber(number, carried: null);
+    }
+
+    // Whether p came straight from a mint over a MANAGED box and holds an address for it: FromBox, FromBoxObject or
+    // FromPinnedBox over storage that has one. Such a pointer names its source at offset 0 by construction, because
+    // every derivation replaces the source (Add carries the native box NativeDerivation.Moved made). A zerobase
+    // pointer, a native alias and a token (tagged; its arithmetic keeps the source, see Add) are not this case.
+    private static bool NamesAManagedSourceByAddress(Pointer p, [NotNullWhen(true)] out IGoReflectBox? source)
+    {
+        source = p.m_retainedSource as IGoReflectBox;
+
+        return source is { NativeAddress: 0, IsNilPointer: false, NamesZeroBase: false } && !ManagedPointerTokens.IsTaggedToken((nuint)p.Value.Value);
+    }
+
+    // The number a derivation from p starts at (design 10.1): for a pointer that names a managed box by address, the
+    // box's OWN number, asked now. The box's number conversion is the pin moment: it holds pinnable storage still
+    // for the box's lifetime, records it, and answers the address that now holds (or the order token, for a pointee
+    // that holds a reference and so has no address). The stored number is used as it is when the box is already
+    // pinned there, which is every FromPinnedBox mint, and for every other pointer.
+    private static uintptr BaseOf(Pointer p)
+    {
+        if (!NamesAManagedSourceByAddress(p, out IGoReflectBox? source))
+            return p.Value;
+
+        if (source is INilPointer pinned && pinned.IsPinnedAt((nuint)p.Value.Value))
+            return p.Value;
+
+        return (uintptr)source.NativeArgumentAddress();
+    }
+
+    // unsafe.Add's body. Three rules beyond the sum:
+    //
+    //   over NIL it answers the offset as a number, as Go does (`unsafe.Add(nil, n)` is the address n; it answered
+    //   nil here until 2026-11-14). Offset 0 over nil is still nil: the zero address is the nil pointer;
+    //
+    //   the BASE is BaseOf(ptr), so a pointer minted by FromBox is derived from where its storage is held, not from
+    //   a number read before anything held it;
+    //
+    //   the SOURCE is kept. For an address, the moved pointer carries a native box at the new value that retains
+    //   what ptr carried (NativeDerivation.Moved). For a TOKEN (a source that holds a reference has no address) the
+    //   sum is token arithmetic, which the conversion answers by the alias walk over the token's own box; that box
+    //   is found through a weak record, so the moved pointer keeps it, or the struct could be collected while the
+    //   pointer that Go says keeps it alive is still in use.
+    internal static Pointer Moved(Pointer? ptr, nuint offset)
+    {
+        if (ptr is null || ptr.IsNull)
+            return new Pointer((uintptr)offset);
+
+        nuint value = (nuint)BaseOf(ptr).Value + offset;
+
+        if (NativeDerivation.Moved(ptr.m_retainedSource, value) is { } moved)
+            return FromBox(moved);
+
+        if (ManagedPointerTokens.IsTaggedToken(value) && NativeDerivation.Kept(ptr.m_retainedSource) is { } kept)
+            return new Pointer((uintptr)value, kept);
+
+        return new Pointer((uintptr)value);
+    }
+
     // The word a Go FUNC value answers when it is read AS a word -- `*(*unsafe.Pointer)(unsafe.Pointer(&f))`,
     // emitted for a func-typed f. Go's func value is one pointer (to a funcval); a managed one is a
     // delegate with no address, so the word is its GoFuncCookie: carried by native code as an lParam and
@@ -921,10 +1011,7 @@ public static Pointer Add(Pointer ptr, uintptr len) {
 }
 
 public static Pointer Add<TLen>(Pointer ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
-    if (ptr == nil)
-        return new Pointer(nil);
-
-    return NativeDerivation.Moved(ptr.RetainedSource, (nuint)(ptr.Value + (uintptr)(nuint)nint.CreateTruncating(len)).Value) is { } moved ? Pointer.FromBox(moved) : new Pointer(ptr.Value + (uintptr)(nuint)nint.CreateTruncating(len));
+    return Pointer.Moved(ptr, (nuint)nint.CreateTruncating(len));
 }
 
 // A typed element box addresses its target through an Int32 element index, so an offset outside

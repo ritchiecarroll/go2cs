@@ -18,6 +18,8 @@ namespace GolibTests;
 //   MUST-FIX 1. (*T)(p), where p is an unsafe.Pointer VALUE holding an INTERIOR Go address, is emitted
 //   `(ж<T>)(uintptr)(p)`. The number misses the registry (only a box's own address is registered), so the conversion
 //   mints a native box with no source and no pin.
+//   Since the typed door (docs/phase4/DESIGN-interior-pointer-root.md 4.1) the emission is `@unsafe.Pointer.To<T>(p)`,
+//   and the arms below spell that: the cast was the defect, so no arm could turn green while spelling it.
 //
 //   MUST-FIX 2. An ARRAY field of a struct viewed over Go memory is a native window that keeps nothing of the view:
 //   `h.Ꮡname.Reinterpret<array<byte>, byte>()`, `@unsafe.Add(@unsafe.Pointer.FromPinnedBox(h.Ꮡname), 1)`,
@@ -75,19 +77,19 @@ public unsafe partial class GoCgoArgsTests
 
         // p := unsafe.Add(unsafe.Pointer(&b[0]), 4); (*byte)(p)
         @unsafe.Pointer added = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), 4);
-        crossings.AddRange(CrossingsOf("(*byte)(p), p := unsafe.Add(unsafe.Pointer(&b[0]), 4)", (ж<byte>)(uintptr)(added)));
+        crossings.AddRange(CrossingsOf("(*byte)(p), p := unsafe.Add(unsafe.Pointer(&b[0]), 4)", @unsafe.Pointer.To<byte>(added)));
 
         // p := unsafe.Pointer(&h.n) over a view; (*int32)(p)
         @unsafe.Pointer field = @unsafe.Pointer.FromPinnedBox(view.of(cgoHdr.ᏑN));
-        crossings.AddRange(CrossingsOf("(*int32)(p), p := unsafe.Pointer(&h.n) over a view", (ж<int32>)(uintptr)(field)));
+        crossings.AddRange(CrossingsOf("(*int32)(p), p := unsafe.Pointer(&h.n) over a view", @unsafe.Pointer.To<int32>(field)));
 
         // var x [4]int32; p := unsafe.Pointer(&x[1]); (*int32)(p)
         @unsafe.Pointer element = @unsafe.Pointer.FromPinnedBox(local.at<int32>(1));
-        crossings.AddRange(CrossingsOf("(*int32)(p), p := unsafe.Pointer(&x[1]) over a local", (ж<int32>)(uintptr)(element)));
+        crossings.AddRange(CrossingsOf("(*int32)(p), p := unsafe.Pointer(&x[1]) over a local", @unsafe.Pointer.To<int32>(element)));
 
         // (*byte)(id(unsafe.Add(unsafe.Pointer(&b[0]), 4))), through a user function
         crossings.AddRange(CrossingsOf("(*byte)(id(unsafe.Add(unsafe.Pointer(&b[0]), 4)))",
-            (ж<byte>)(uintptr)(Returned(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), 4)))));
+            @unsafe.Pointer.To<byte>(Returned(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), 4)))));
 
         Assert.AreEqual(0, crossings.Count, "typed pointers over interior Go memory that crossed as C memory:\n" + string.Join("\n", crossings));
 
@@ -102,7 +104,7 @@ public unsafe partial class GoCgoArgsTests
         ж<byte> first = new ElemRefBox<byte>(bytes, 0);
         @unsafe.Pointer p = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(first), 4);
 
-        return ((ж<byte>)(uintptr)(p), new WeakReference(first));
+        return (@unsafe.Pointer.To<byte>(p), new WeakReference(first));
     }
 
     // A collection that compacts: the generations collected and finalized three times, then a blocking, compacting gen2
@@ -154,7 +156,7 @@ public unsafe partial class GoCgoArgsTests
         slice<byte> b = new slice<byte>(16);
         @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0));
 
-        List<string> crossings = CrossingsOf("(*byte)(p), p := unsafe.Pointer(&b[0])", (ж<byte>)(uintptr)(p));
+        List<string> crossings = CrossingsOf("(*byte)(p), p := unsafe.Pointer(&b[0])", @unsafe.Pointer.To<byte>(p));
 
         Assert.AreEqual(0, crossings.Count, string.Join("\n", crossings));
         GC.KeepAlive(b);
@@ -394,9 +396,9 @@ public unsafe partial class GoCgoArgsTests
             ж<cgoNamed> named = new NativeBox<cgoNamed>((nuint)memory);
 
             // MUST-FIX 1's shapes.
-            Typed("(*byte)(unsafe.Add(p, 4))", (ж<byte>)(uintptr)(@unsafe.Add(c, 4)));
-            Typed("(*int32)(unsafe.Pointer(&h.n))", (ж<int32>)(uintptr)(@unsafe.Pointer.FromPinnedBox(hdr.of(cgoHdr.ᏑN))));
-            Typed("(*byte)(id(unsafe.Add(p, 4)))", (ж<byte>)(uintptr)(Returned(@unsafe.Add(c, 4))));
+            Typed("(*byte)(unsafe.Add(p, 4))", @unsafe.Pointer.To<byte>(@unsafe.Add(c, 4)));
+            Typed("(*int32)(unsafe.Pointer(&h.n))", @unsafe.Pointer.To<int32>(@unsafe.Pointer.FromPinnedBox(hdr.of(cgoHdr.ᏑN))));
+            Typed("(*byte)(id(unsafe.Add(p, 4)))", @unsafe.Pointer.To<byte>(Returned(@unsafe.Add(c, 4))));
 
             // MUST-FIX 2's shapes, but &h.name[1], which C2 reads on its own.
             Typed("(*byte)(unsafe.Pointer(&h.name))", named.of(cgoNamed.ᏑName).Reinterpret<array<byte>, byte>());
