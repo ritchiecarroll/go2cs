@@ -26,7 +26,9 @@ These do not change. A change to any of them is a break, and takes the [deprecat
 - **golib's consumer API.** The types a C# program uses directly: `@string`, `slice<T>`, `map<K, V>`, `channel<T>`,
   `array<T>`, `ж<T>`, `error`, the numeric types such as `complex128` and `uintptr`, `builtin` and its functions
   (`len`, `make`, `append`, `nil`, `goǃ` and the rest), and the exceptions below. The full list is
-  `src/core/golib/PublicSurface.golib.txt`; a type that is not on it is tier 2.
+  `src/core/golib/PublicSurface.golib.txt`; a type that is not on it is tier 2. With `using static go.builtin`
+  outside namespace `go`, write `go.array<T>` and `go.slice<T>` to reach those types' static members
+  (`go.array<T>.Alias`): the builtin functions `array<T>(…)` and `slice<T>(…)` are found first (CS0119).
 - **The exceptions a consumer catches.** `PanicException` and `GoErrorException`, their names and their properties.
 - **Package IDs and the version scheme.** A standard-library package is `go.<import path>` (`go.encoding.hex`), a
   converted module's package is `nugetgo.<package path>` (`nugetgo.github.com.google.uuid`), and a version is the Go

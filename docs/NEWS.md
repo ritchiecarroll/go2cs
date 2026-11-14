@@ -54,6 +54,19 @@ promoted method through `using static` alone; it is first under *Upgrading from 
   [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
   <!-- source: the same seat; GenTests PromotedHostClassTests.UsingStaticAloneBringsDeclaredMethodsAndNoPromotedOne
        (CS1929 without the namespace) and TheNamespaceBringsThePromotedMethods. -->
+- **The static members of `array<T>` need `go.` beside `using static go.builtin`.** PENDING. golib's `builtin`
+  gains `array<T>(…)`, the function converted code now calls for an array literal (`[3]int{2, 3, 5}` is
+  `array<nint>([2, 3, 5])`). In C# outside namespace `go` that has both `using go;` and `using static go.builtin;`,
+  as every project has under the default `GoConsumerUsings`, the name `array<T>` before a `.` now finds that
+  function first: `array<byte>.Alias(s, 4)` fails with CS0119. Write `go.array<byte>.Alias(s, 4)`. `slice<T>` has
+  always worked this way because of its own `slice<T>(…)` function (`go.slice<nint>.Make(3)`). Declarations,
+  `new array<T>(n)`, casts, `typeof`, `is` and `default` are unaffected, and so is converted code, which is in
+  namespace `go`.
+  <!-- source: Tour visual-parity item 4 (claude/p1-vp-array-literal). A probe project referencing golib compiled
+       each shape in three arms: converted shape (namespace go, global using static), consumer shape (another
+       namespace with using go; and using static go.builtin;), and qualified. Only the unqualified static member
+       access fails, for array<T> and for slice<T> alike. golib's own tests needed 13 call sites qualified
+       (GolibTests, b08b6087ad and e9ee58b76d). -->
 
 **A package whose types promote very many methods now loads.** PENDING. The .NET runtime loads no type with more
 than 65,521 methods. A converted package class held every promoted-method forwarder of every struct in the package,

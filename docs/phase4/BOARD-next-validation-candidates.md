@@ -37546,4 +37546,42 @@ in the runner's Compile row. Native AOT. Linux and macOS rows.
 
 — G (2026-11-13)
 
+## 2026-11-14 — P1 (Tour visual-parity item 4): array literals read `array<T>([…])`; one consumer-visible break, disclosed; committed converted tests keep the old form until the next `-tests` reconvert
+
+Seat `claude/p1-vp-array-literal`. An unkeyed, non-empty literal of an unnamed or alias array type now calls golib's
+new `builtin.array<T>(T[])` or `builtin.array<T>(nint, T[])` over a C# collection expression:
+`[6]int{2, 3, 5, 7, 11, 13}` is `array<nint>([2, 3, 5, 7, 11, 13])`, and a short literal passes its length first.
+Named, keyed, sparse, empty, array-of-arrays and factory-element literals keep their forms. The corpus regen is
+not in the seat yet; it waits for COORD's corpus slot.
+
+**The consumer-visible break.** In C# outside namespace `go` with both `using go;` and `using static go.builtin;`
+(the default `GoConsumerUsings` of every consuming project), `array<T>.Alias(…)` and `array<T>.AliasPointer(…)`
+now fail with CS0119: the builtin function is found before the type. `go.array<T>.Alias(…)` works. A probe against
+golib measured every shape: only the unqualified static member access fails; declarations, `new`, casts,
+`typeof`, `is`, `default` and a method-group conversion compile, and converted code (namespace `go`) is unaffected.
+`slice<T>` already fails the same way (`slice<nint>.Make(3)`, CS0119), so the rule is not new, only wider.
+Disclosed in docs/NEWS.md (the pending release's *Upgrading* list) and docs/PublicSurface.md.
+
+Census of hand-written C# that could reach it, at the seat's tip:
+- This repository outside `src/core`: 13 sites, all in GolibTests, all qualified in the seat. 2 more in GenTests
+  are generator input compiled inside namespace `go`, so they are unaffected. No other file outside namespace `go`
+  in src/tests, src/tools, src/utilities, src/gen or the archived examples has a hit.
+- docs/: 21 mentions of `array<T>.X(…)`. Every one describes converted code or names an instance member
+  (`Clone`, `GetEnumerator`). None is consumer code.
+- The converter emits `Alias` and `AliasPointer` only into converted code. No nugetgo template or sample in this
+  repository writes C# that uses them.
+- sqlite-cs at 726aeb8: no C# file is committed; 0 hits.
+- typescript-go-cs: not read; P1 stays off TypeScript-Go under the owner's standing rule. Owed to the lane that
+  holds that repository.
+
+Fix priced and not taken: move the two overloads to a static class that only converted projects import. That
+adds a `<Using>` line to every converted project file (the whole corpus and all 1054 behavioral projects) and a
+second golib type, and it would leave `slice<T>` as it is.
+
+**Committed converted `_test.cs` files** keep `new T[]{…}.array()` at about 936 sites (857 full, 65 multi-line,
+14 short), counted with the seat's census predicate, which undercounts literals passed to constructors. They take
+the new form on the next `-tests` reconvert; never hand-edit them.
+
+— P1 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
