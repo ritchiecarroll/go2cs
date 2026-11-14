@@ -174,9 +174,30 @@ The settings, if you need them, each in three equivalent forms: a property in th
 | Dynamic PGO | `<TieredPGO>false</TieredPGO>` | `"System.Runtime.TieredPGO": false` | `DOTNET_TieredPGO=0` |
 | Quick JIT for loops | `<TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>` | `"System.Runtime.TieredCompilation.QuickJitForLoops": false` | `DOTNET_TC_QuickJitForLoops=0` |
 | Call-counting delay | `<GoCallCountingDelayMs>0</GoCallCountingDelayMs>` (a converted program's own property) | `"System.Runtime.TieredCompilation.CallCountingDelayMs": 0` | `DOTNET_TC_CallCountingDelayMs=0` |
+| Server garbage collection | `<ServerGarbageCollection>true</ServerGarbageCollection>` | `"System.GC.Server": true` | `DOTNET_gcServer=1` |
+| Dynamic adaptation (DATAS) | `<GarbageCollectionAdaptationMode>0</GarbageCollectionAdaptationMode>` | `"System.GC.DynamicAdaptationMode": 0` | `DOTNET_GCDynamicAdaptationMode=0` |
 
 Microsoft documents every runtime compilation setting in
-[Runtime configuration options for compilation](https://learn.microsoft.com/dotnet/core/runtime-config/compilation).
+[Runtime configuration options for compilation](https://learn.microsoft.com/dotnet/core/runtime-config/compilation). The garbage collector's settings are in
+[Runtime configuration options for garbage collection](https://learn.microsoft.com/dotnet/core/runtime-config/garbage-collector).
+
+**Server garbage collection is an option for an allocation-heavy, long-running program.** Server GC keeps one heap
+and one collector thread per core, and collects in parallel. DATAS, which .NET turns on by default with server GC,
+shrinks the heap count to fit the live data; turning it off keeps a heap on every core. On `linux-x64`, on a 4-vCPU
+cloud VM, the converted TypeScript type checker takes about a third less time over a slice of its compiler tests with
+both settings above, and its peak memory is about 15% higher. The cost is memory. It grows with the core count,
+because each core has its own heap, so measure on the machine you deploy to. The settings take effect only in an
+executable: in a library, the host application's own settings decide. A converted project keeps .NET's default,
+workstation GC, because most programs are small or short-lived and do not repay the memory.
+
+<!-- Source: P4 perf scout, branch claude/p4-ts-perf-scout 895e08794d, docs/phase4/SCOUT-ts-perf.md section 4 and
+     docs/phase4/data/ts-perf/experiments.tsv + runtime-knobs.tsv. linux-x64, 4 vCPU Xeon 2.1 GHz, 15 GB, .NET SDK
+     10.0.400, JIT Release; converted TypeScript at go2cs master 651c4ad147, checkdemo over the first 25 units of
+     units-101.txt, 1 warm-up + median of 3, same output hash on every run. Base (workstation concurrent GC) 35.83 s
+     wall, 1,252 MB peak RSS; DOTNET_gcServer=1 + DOTNET_GCDynamicAdaptationMode=0: 24.37 s (-32%), 1,447 MB (+15.6%);
+     server GC with DATAS on: 25.3 s (-29%). Owner ruling 2026-11-13: an option in this guide, on in the TypeScript
+     project as a tuned change, not the converted-project default. Spellings checked against the Microsoft page
+     linked above (Workstation vs. server; Dynamic adaptation to application sizes). -->
 
 **A converted program counts calls from the start.** .NET waits until about 100 ms pass with no new method compiled
 before it counts calls toward optimizing a method. Until then, a short busy phase runs the standard library's small
