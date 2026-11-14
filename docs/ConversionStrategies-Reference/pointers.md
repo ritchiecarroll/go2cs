@@ -1166,7 +1166,7 @@ func readU32(p ptr, o uintptr) uint32 {
 	return *(*uint32)(unsafe.Add(p, o))
 }
 ```
-<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:19-21 -->
+<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:20-22 -->
 ```csharp
 internal static uint32 readU32(ptr p, uintptr o) {
     return ~@unsafe.Pointer.To<uint32>(@unsafe.Add(p, o));
@@ -1198,7 +1198,7 @@ func (p *nih) add(bytes uintptr) *nih {
 	return (*nih)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + bytes))
 }
 ```
-<!-- source: src/tests/Behavioral/FuncVsMethodOverload/main.cs.target:16-21 -->
+<!-- source: src/tests/Behavioral/FuncVsMethodOverload/main.cs.target:19-24 -->
 ```csharp
 internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
     if (bytes == 0) {
@@ -1366,7 +1366,7 @@ func callR1(x uintptr, a, b int) int {
 	return (*(*func(int, int) int)(unsafe.Pointer(&struct{ uintptr }{x})))(a, b)
 }
 ```
-<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:18-22 -->
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:19-23 -->
 ```csharp
 internal static uintptr ccgoFP(any fʗp) {
     ref var f = ref heap(fʗp, out var Ꮡf);
@@ -1374,7 +1374,7 @@ internal static uintptr ccgoFP(any fʗp) {
     return (uintptr)GoFuncCookie.Of((Delegate)f);
 }
 ```
-<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:44-46 -->
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:45-47 -->
 ```csharp
 internal static nint callR1(uintptr x, nint a, nint b) {
     return GoFuncCookie.Func<Func<nint, nint, nint>>(x)(a, b);
@@ -1392,7 +1392,7 @@ method table this way: a func stored at a computed address inside a variable of 
 ```go
 	*(*func(int, int) int)(unsafe.Add(unsafe.Pointer(&gwords), 8)) = add
 ```
-<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:98 -->
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:99 -->
 ```csharp
     @unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡgwords), 8), (Func<nint, nint, nint>)add);
 ```
@@ -3060,7 +3060,7 @@ or index whose base is such a dereference now renders the conversion and reads i
 	(*(*frame)(ptr(bp))).Read += 3
 	(*(*frame)(ptr(bp))).bump()
 ```
-<!-- source: src/tests/Behavioral/ExplicitDerefConversionStore/main.cs.target:21-23 -->
+<!-- source: src/tests/Behavioral/ExplicitDerefConversionStore/main.cs.target:26-28 -->
 ```csharp
     (@unsafe.Pointer.To<frame>(ptr(bp))).Value.Pgno = 7;
     (@unsafe.Pointer.To<frame>(ptr(bp))).Value.Read += 3;

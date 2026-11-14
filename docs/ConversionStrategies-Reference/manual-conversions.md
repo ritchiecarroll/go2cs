@@ -3699,7 +3699,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5084 (`INLINED PANIC SITES`), :5092 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5112 (`INLINED PANIC SITES`), :5120 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
@@ -4425,7 +4425,7 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3587-3608 -->
+<!-- source: src/core/reflect/value_impl.cs:3673-3694 -->
 ```csharp
 public static Type ArrayOf(nint length, Type elem) {
     if (length < 0) {
