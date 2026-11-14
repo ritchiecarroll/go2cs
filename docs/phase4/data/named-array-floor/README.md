@@ -44,3 +44,24 @@ dotnet build <outdir> -c Release -p:GoTargetOS=linux -p:go2csPath=<tree>/src/   
 
 The guards that hold the behaviour are in GolibTests: `NamedArrayViewFloorTests` and
 `NativeArrayViewFloorTests.ANilPointerAtAnArrayPointeeIsANilPointer`.
+
+## Amendment 2026-11-14, after COORD's review of `e2853567af`
+
+Everything above describes the branch at `e2853567af`, where the refusal fired when the native box was made. The
+review moved it to the read of the whole value and gave it its own text (the design document's second block of this
+date). Added here, beside the outputs they are compared with:
+
+| Path | What it is |
+|:--|:--|
+| `shapes/converted-read.out`, `shapes/prototype-read.out` | the 24-arm program and its 11 prototype arms, the same emission, built against the tip after the rework (`3410407821`) |
+| `gomem/converted-read.out` | the seven Go-memory arms against that tip |
+| `typed/converted-read.out` | the three typed-pointer arms against that tip |
+
+Reading them: the refusal's text is now `cannot view native memory as <type>: a named Go array is a window on a real
+managed array, and the memory at this address is not one (it is C memory, or Go storage of another type)`, and the
+panic's frame is the line of the first READ through the pointer, not the conversion. The arms that end in the refusal
+are the same arms as in the `-floor` outputs; every other arm is identical to its `-floor` output.
+
+`predictions.txt` sections 5 to 9 hold the hosted runs at `e2853567af`, the review's items, the predictions R1 to R7
+as posted before the rework, and each scoring. The guards are now three GolibTests classes: `NamedArrayCarrierTests`,
+`NamedArrayViewFloorTests`, and the two nil arms of `NativeArrayViewFloorTests`.

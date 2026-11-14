@@ -104,3 +104,144 @@ verdict lists differ by that one arm, added and passing.
 
 ------------------------------------------------------------------------------------------------------------
 5. HOSTED RUNS (P5 and cut B's falsifier). Appended when they report.
+   Appended 2026-11-14, with the review rework below. Seven runs of os-matrix.yml at e2853567af, dispatched
+   20:54Z. These test the refusal where the box is MADE, the version the review then moved; they stay evidence
+   of that version only (COORD, 21:08Z).
+   golib-tests:     linux 43639928021, windows 43639930786, darwin 43639933694: each concluded success.
+                    Three flavours were dispatched (linux, windows, darwin), where P5 says four.
+   sweep-shard:     linux 43639941366, windows 43639943913: each concluded success. Filter: unique, reflect,
+                    internal/runtime/maps, hash/maphash, weak, sync/atomic, internal/abi.
+   behavioral-full: linux 43639936013 concluded success (20:54Z to 22:00Z).
+                    windows 43639938645 was still running at 22:11Z, when this was written. Its reading is
+                    posted on the mailbox and is not in this file.
+   So for the version at e2853567af: six runs of seven concluded success, none failed, one open. No run
+   failed, so no row failed with the floor's text. P5 is MET on six and OPEN on one.
+
+============================================================================================================
+THE REVIEW REWORK. Everything below is on top of e2853567af; nothing above is rewritten.
+
+Commits, in order:
+  00f9767708  tests, red: a named array pointer over real memory is a carrier until it is read
+  8d48cd13f3  the refusal moves from the native box constructor to the read of the whole value
+  7eb7c082a4  tests, red: a named array pointer over C memory is an address until it is read
+  a3940c1a93  the refusal at the number conversion (cut A) is removed; one mechanism
+  a169f07ce6  the read refusal takes its own text, naming both arrivals
+  2d5e2fc2a5  tests, red: a nil pointer to a named array; a nil array pointer from a number
+  3410407821  the read refusal is for a real address; a nil pointer answers as a nil pointer
+
+------------------------------------------------------------------------------------------------------------
+6. COORD'S REVIEW of the golib diff at e2853567af (21:00Z): SHIP-WITH-FIXES, seven items.
+   1 refuse at the READ, not where the box is made; carrier arms red first; a red arm per read path.
+   2 measure whether cut A is still needed; prefer one mechanism.
+   3 the panic text is untrue for pinned Go storage; word it for both.
+   4 the pin leaked on the refused path; moot if making the box no longer throws.
+   5 an arm for len() and reflect on a nil *[N]T reached through the number 0.
+   6 seven `Reinterpret<pallocBits, pageBits>` sites the BOARD entry does not name.
+   7 hosted behavioral-full, the shards, golib-tests and the binary-compat check before seating.
+
+PREDICTIONS, as posted 21:08Z before any edit, and accepted by COORD as the score sheet (21:08Z).
+R1 commit 1 at e2853567af: every new arm is RED, each with the floor's text thrown where the box is made.
+   Carriers: (a) `&s.mem` of a struct in native memory, cast to *byte, one byte written and read back;
+   (b) `(*Named)(unsafe.Pointer(&b[0]))` as a uintptr equal to &b[0], and cast straight back with b[0] read;
+   (c) a deep copy-back whose struct holds a non-nil *Named the callee wrote and nobody reads.
+   Reads, one arm per path (index read, index store, whole copy, DerefOrNil, the array doors, the reflect
+   slot): making the box does not throw, the read is refused by name, the storage bytes are unchanged after.
+R2 after commit 2: all of commit 1 green. Outside the floor files every GolibTests verdict equals the tip's
+   run (2787 / 2738 / 49 / 0 there). The four arms that assert a throw at the constructor are rewritten in
+   commit 1 as read arms.
+R3 commit 3 at commit 2: its arms RED with the floor's text at the number conversion. After commit 4 green,
+   and the M0 / C D F arms of the C-memory file are refused at the read. 0 failed, 49 skipped.
+R4 the probes at the new tip: C D F M C0 D0 F0 M0 and ga gb gd gg gh still end in the named refusal, exit 2,
+   now at the first read. A line printed between the conversion and the first read may appear where the old
+   output had none (M0 "prints nothing" may not hold); each such line is reported. The other 16 arms, ge, gf
+   and the 11 prototype arms are identical. typed: `byte` and `go` refused, `struct` unchanged.
+R5 made to fail: with the read line removed, the read arms go red and the carrier arms stay green.
+R6 item 5: the named form is expected fixable in golib (the type carries its length) and the unnamed
+   array<E> form NOT (the type argument carries no length at the number conversion). If so the unnamed half
+   becomes a BOARD row and its arm asserts the measured answer and names the row. (Accepted by COORD.)
+R7 corpus, banked emission, public surface: as the first plan. No converter, generator or corpus file.
+Falsifiers: any carrier arm red after commit 2 or 4; any read path that completes; any address found in the
+storage after a refused store; any verdict moving outside the floor files.
+
+SCORING, as worded.
+R1 MISSED by one arm, as worded. 13 new arms, 12 red at e2853567af, each with the floor's text thrown in
+   the constructor. The 13th is green by design: two named arrays of one shape alias the same managed array
+   (item 6's control), and no native box is made. "Every new arm" was wrong; the arm should have been
+   predicted green.
+R2 MET on the verdicts, MISSED on one sentence. At 8d48cd13f3: 30 of 30 in the floor files; whole suite
+   2800 total, 2751 passed, 49 skipped, 0 failed; the verdict lists of the e2853567af run and this run differ
+   by the 13 new arms and nothing else. The sentence "the four arms that assert a throw at the constructor
+   are rewritten in commit 1" did not hold: no arm needed rewriting there, because the three Go-memory arms
+   assert the conversion and the read together.
+R3 MET. At 7eb7c082a4: 4 red of 33, each with the floor's text thrown in the number conversion (three new
+   C-memory arms and the rewritten number-conversion arm). At a3940c1a93: 33 of 33.
+R4 MET. Outputs: shapes/converted-read.out, shapes/prototype-read.out, gomem/converted-read.out,
+   typed/converted-read.out, each beside the -floor output of e2853567af it is compared with.
+   - C D F M C0 D0 F0 M0: each still ends in the named refusal, exit 2. Two differences per arm: the new
+     text, and the frame. The panic is no longer under unsafe.To at the conversion; it is at the line of
+     the first read (main.go:71, 75, 87, 117, 123, 126, 131, 137).
+   - ga gb gd gg gh: the same. ga and gd now panic one line later than before (main.go:21 and :31, the
+     read, where :20 and :30 are the conversion).
+   - No arm prints a line it did not print before. M0 still prints nothing ahead of its panic, so the
+     caution written into R4 was not needed.
+   - The other 16 arms of the 24 are identical; ge and gf are identical; the 11 prototype arms are
+     identical (diff empty). typed: `go` and `byte` refused with the new text, `struct` unchanged.
+R5 MISSED as worded, and the gate is sound. With the read line removed at a3940c1a93: 16 red of 33, not
+   "the read arms" alone. The 16 are the 8 read arms of the carrier file AND the 8 refusal arms of the floor
+   file, which after the rework are read arms too; I counted one file. Every carrier arm stayed green. Each
+   red arm shows an address in the storage it viewed. File restored (sha256 equal), rebuilt, 33 of 33.
+R6 the unnamed half MET; the named half MISSED in its premise, and the arm found a defect of this rework.
+   Measured at a169f07ce6 before any arm was written:
+   - a nil *Named from the number 0 or from unsafe.Pointer(nil): reflect answers kind array, length 64,
+     size 64, IsNil true. Nothing to fix: the type declares its length. The prediction expected a fix.
+   - the same pointer READ: "cannot view native memory as FloorSmallMem". WRONG, and mine. The refusal moved
+     to the read (8d48cd13f3) without the constructor's test of the address, on my statement that a nil box
+     is answered before the line. It is not: the check before the line refuses order tokens, and 0 passes
+     it. A nil pointer of any other pointee answers the fault of the read (NullReferenceException here).
+     Red first (2d5e2fc2a5, 1 red of 35), then one conjunct (3410407821), 35 of 35.
+   - a nil *[4]byte from the number 0 or from unsafe.Pointer(nil): reflect answers length 0, the type prints
+     `*[]uint8`, Size() panics "the size of [?]uint8 is not known". Go answers 4. The language's own nil,
+     NilBoxOfDims(4), answers 4. Not curable in golib, as predicted: a BOARD row, and the arm
+     NativeArrayViewFloorTests.ANilArrayPointerFromANumberCarriesNoLengthWhereTheLanguagesNilDoes asserts
+     the measured 0 and names the row.
+   - len(): the converter writes the constant for len of an array pointer whose operand neither calls nor
+     receives (convCallExpr.go), so converted code answers N. golib's own len over an array pointer
+     dereferences; it is not what such code calls.
+R7 MET. `git diff --stat c2919b8b16 3410407821 -- src` names six files: src/core/golib (ж.cs,
+   ж.NativeBox.cs, runtime/RuntimeErrorPanic.cs; 69 lines added, 1 removed) and src/tests/GolibTests (three
+   test files). Nothing under src/go2cs, src/gen, or a converted package. Public surface: no public member
+   added or changed. The flag is `private static` in the native box, so P6's first wording ("one private
+   static field") now holds and the `private protected` of e2853567af is gone; the new factory is internal.
+   The binary-compat guard needs PowerShell; COORD runs it on the i7 at the announced tip.
+Falsifiers: none fired. No carrier arm was red after commit 2 or 4; no read path completed; no address was
+found in the storage after a refused read or store.
+
+------------------------------------------------------------------------------------------------------------
+7. A DEVIATION from the posted plan, item 3 (the panic text). The plan said the shared text would be
+   reworded. It was not. Read at the tree: that text also serves the unnamed array's refusal at the number
+   conversion, where "no managed element storage behind it" is true; NativeArrayViewFloorTests asserts it;
+   docs/Limitations.md quotes it for a parked behavioral row of another lane. So the named read refusal has
+   its own text and an INTERNAL factory, and arm 5's text is untouched. The prefix `cannot view native memory
+   as <shape>:` is shared, so the hosted falsifier's search key is unchanged. Red first: 7 red of 33 on the
+   new wording, then 33 of 33 (a169f07ce6).
+
+------------------------------------------------------------------------------------------------------------
+8. ITEMS 4 AND 6.
+   4 moot by construction: no constructor throws, so no pin is created ahead of a throw.
+   6 read and tested. The seven sites convert *pallocBits to *pageBits, two named arrays of one field
+     sequence, over managed storage. Reinterpret takes its alias arm (a field view on the same box) before
+     any native route. The arm ANamedArrayReinterpretedAsAnotherOfItsShapeAliasesTheSameArray holds the pair
+     shape. The BOARD append names the seven and corrects the census from 8 sites per target to 15: my
+     census had searched for conversions through unsafe.Pointer only.
+
+------------------------------------------------------------------------------------------------------------
+9. GATES at 3410407821 (linux/amd64, Go 1.26.11, Release).
+   - The three floor files: 35 of 35 (NamedArrayCarrierTests 16, NamedArrayViewFloorTests 13,
+     NativeArrayViewFloorTests 6).
+   - GolibTests, whole suite: 2805 total, 2756 passed, 49 skipped, 0 failed. Against the 8d48cd13f3 run
+     (2800 / 2751 / 49 / 0) the verdict lists differ by five arms, each added and passing: the three C-memory
+     carrier arms and the two nil arms. No other verdict moved.
+   - The probes: R4 above.
+   - Read at the committed tip and therefore reported on the mailbox with the announce, not here: repoguard,
+     the identifier census of each message and diff, the hosted runs re-dispatched at the new tip, and the
+     binary-compat reading.
