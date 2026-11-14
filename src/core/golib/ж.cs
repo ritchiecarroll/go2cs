@@ -1208,7 +1208,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         //
         // `array.cs`'s AliasPointer needs no change of its own: its documented raw-metal fallback is
         // `return (ж<array<T>>)(uintptr)element!`, which funnels through this operator.
-        if (resolved is null && s_isArrayShaped)
+        //
+        // NOT THE NUMBER 0 (2026-11-14). `(*[N]T)(unsafe.Pointer(nil))` is a nil pointer in Go and touches no
+        // memory, but 0 has no provenance record either, so this line refused it through both doors until the
+        // conjunct below (NativeArrayViewFloorTests.ANilPointerAtAnArrayPointeeIsANilPointer, red before it).
+        // The fall-through answers a null native box, as it does for every other pointee.
+        if (resolved is null && value.Value != 0 && s_isArrayShaped)
             throw RuntimeErrorPanic.NativeArrayViewWithoutElementStorage(typeof(T));
 
         // THE SAME FLOOR FOR A NAMED ARRAY (2026-11-14; docs/phase4/DESIGN-native-array-view.md, the block of
