@@ -135,7 +135,9 @@ is ambiguous between the two overloads (CS0121). Converted code never writes it;
 memory, and `defer C.f(…)` converts. The helpers copy bytes, with no text encoding in between, and what `C.CString`
 returns comes from the package's own `malloc`, so the package's own `C.free` frees it. go2cs still hands C no pointer
 into Go memory: a pointer into a slice or an array is refused when the package is converted, and `unsafe.Pointer(&x)`
-is refused when the call runs, each by name.
+is refused when the call runs, each by name. A `-cgo` conversion is one package, and it builds against a go2cs
+clone (`dotnet build -p:go2csPath=<go2cs>/src/`); it does not use the `go.*` packages.
+<!-- src/go2cs/main.go:305 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **One known memory-safety gap.** Do not pass C a pointer you rebuilt from a number when it points into Go memory:
 `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)`, or a `uintptr` kept in a variable and converted back. go2cs cannot
