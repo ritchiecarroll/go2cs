@@ -723,3 +723,34 @@ Dated lines, so the design and the cut agree. Nothing above is rewritten.
 - **4.7's kept list and the regen** (ruled 09:36Z). The guard arm reads the committed corpus, which holds the old
   lines until the regen. The list names the 13 kept sites with the ruled reason and names the sites the converter no
   longer emits as "leaves at the regen", so the arm is green before the regen and after it.
+
+### 10.13 As cut: B0 as it shipped, 10.5 corrected, B2 moved after the release (COORD, 2026-11-14 12:20Z)
+
+Dated lines. Nothing above is rewritten; where a line here disagrees with 10.5, this line is the one in force.
+
+- **B0 as cut** (cut branch 65d9a4a990). The counter is `NativeBoxDereferenceCensus`
+  (src/core/golib/NativeBoxDereferenceCensus.cs), called from `NativeBox<T>.ValueAddress` after the layout refusal
+  and after `DereferenceableAddress`, so a refused dereference is not counted. It is off unless
+  `GO2CS_NATIVEBOX_CENSUS` is set, and then writes one file per process (`GO2CS_NATIVEBOX_CENSUS_FILE`, `{pid}` in
+  the name). Off, it costs one static null test per dereference; it refuses nothing and adds no public surface. The
+  reader and its controls are docs/phase4/probes/p5-nativebox-census/.
+- **10.5's known member is wrong.** `sync.Mutex`, the hand-owned C# struct, holds one managed reference at a known Go
+  offset, so `ClrLayoutMismatch` already refuses it by name and it is NOT in B2b. Measured in the cut: GolibTests arm
+  `TheHandOwnedMutexIsRefusedByLayoutAndIsNotInThePopulation`. libc's Mutex over it is therefore not a B2b arrival
+  on a whole-value read; which read shape libc takes is P2's question (COORD, same post).
+- **B2b is narrower than 10.5 says.** A struct with a string field, or with any reference field whose Go offset is
+  known, is refused by the layout check. B2b is left with a Go struct value that holds a reference only in a field
+  the layout check reads as zero Go bytes or cannot place: an unstamped `array<T>` field is the measured case.
+- **An array value arrives as B2a.** `array<T>` holds its elements by reference in its CLR form and is not a Go
+  struct value, so the counter classes it B2a, not "itself a reference" in 10.5's sense. Each row carries `kind=`
+  for that reason. Read over GolibTests: 2 of B2a over `array<array<uint32>>`, source retained.
+- **A third class beside B2.** UNPINNABLE: the box is derived, through any number of hops, from a managed box whose
+  storage cannot be pinned (10.1's class). It is counted whatever the pointee is.
+- **RULED: B2 and the every-banked-row reading move to after 1.26.11.1.** B2 (the refusal by name) does not land in
+  this seat. B0's reading over every banked row on four flavours, which 10.5 makes B2's precondition, is not run
+  before the release, and no hosted workflow option is added for it now. The counter ships in this seat, inert, as
+  the instrument that later reading needs. In this seat's gates the counter is read over the canary rows on
+  linux/amd64 only; an UNPINNABLE arrival in a canary is posted on its own. BOARD row: the cut branch.
+- **What this leaves not shown.** Until that reading, nothing shows that B2's population is empty on windows, on
+  darwin or on linux/arm64, and nothing refuses a B2 dereference by name. 10.5's windows evidence
+  (net/windows/interface_windows_impl.cs:262) stands unread.
