@@ -257,7 +257,7 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
     case var ᴛ when ᴛ == abi.Array: {
         var a = Ꮡt.Reinterpret<_type, arraytype>();
         for (var i = (uintptr)0; i < a.of(arraytype.ᏑLen).Value; i++) {
-            h = typehash(a.of(arraytype.ᏑElem).Value, (uintptr)add(Δp, i * a.of(arraytype.ᏑElem).Value.Size_), h);
+            h = typehash(a.of(arraytype.ᏑElem).Value, add(Δp, i * a.of(arraytype.ᏑElem).Value.Size_), h);
         }
         return h;
     }
@@ -267,7 +267,7 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
             if (f.Name.IsBlank()) {
                 continue;
             }
-            h = typehash(f.Typ, (uintptr)add(Δp, f.Offset), h);
+            h = typehash(f.Typ, add(Δp, f.Offset), h);
         }
         return h;
     }
@@ -377,7 +377,7 @@ internal static bool ifaceeq(ж<itab> Ꮡtab, @unsafe.Pointer x, @unsafe.Pointer
 internal static uintptr stringHash(@string sʗp, uintptr seed) {
     ref var s = ref heap(sʗp, out var Ꮡs);
 
-    var ᴛ1 = strhash((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡs)), seed);
+    var ᴛ1 = strhash(noescape(@unsafe.Pointer.FromPinnedBox(Ꮡs)), seed);
     System.GC.KeepAlive(Ꮡs);
     return ᴛ1;
 }
@@ -392,7 +392,7 @@ internal static uintptr bytesHash(slice<byte> bʗp, uintptr seed) {
 internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
 
-    var ᴛ2 = memhash32((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    var ᴛ2 = memhash32(noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
     System.GC.KeepAlive(Ꮡi);
     return ᴛ2;
 }
@@ -400,7 +400,7 @@ internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
 internal static uintptr int64Hash(uint64 iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
 
-    var ᴛ3 = memhash64((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    var ᴛ3 = memhash64(noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
     System.GC.KeepAlive(Ꮡi);
     return ᴛ3;
 }

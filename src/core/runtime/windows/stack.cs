@@ -382,7 +382,7 @@ internal static Δstack @stackalloc(uint32 n) {
 
     if (debug.efence != 0 || stackFromSystem != 0) {
         n = (uint32)alignUp((uintptr)n, physPageSize);
-        @unsafe.Pointer vΔ1 = (uintptr)sysAlloc((uintptr)n, Ꮡmemstats.Ꮡstacks_sys, goroutineStackSystemˢ);
+        @unsafe.Pointer vΔ1 = sysAlloc((uintptr)n, Ꮡmemstats.Ꮡstacks_sys, goroutineStackSystemˢ);
         if (vΔ1 == nil) {
             @throw(outOfMemoryStackallocˢ);
         }
@@ -699,14 +699,14 @@ internal static void adjustpointers(@unsafe.Pointer scanp, ж<bitvector> Ꮡbv, 
     for (var i = (uintptr)0; i < num; i += 8) {
         if (stackDebug >= 4) {
             for (var j = (uintptr)0; j < 8; j++) {
-                print((@string)"        ", @unsafe.Pointer.OrTypedNil((uintptr)add(scanp, (i + j) * (uintptr)goarch.PtrSize)), (@string)":", ptrnames[bv.ptrbit(i + j)], (@string)":", (Δhex)(uint64)(~(ж<uintptr>)(uintptr)((uintptr)add(scanp, (i + j) * (uintptr)goarch.PtrSize))), (@string)" # ", i, (@string)" ", addb(bv.bytedata, i / 8).Value, (@string)"\n");
+                print((@string)"        ", @unsafe.Pointer.OrTypedNil(add(scanp, (i + j) * (uintptr)goarch.PtrSize)), (@string)":", ptrnames[bv.ptrbit(i + j)], (@string)":", (Δhex)(uint64)(~(ж<uintptr>)(uintptr)(add(scanp, (i + j) * (uintptr)goarch.PtrSize))), (@string)" # ", i, (@string)" ", addb(bv.bytedata, i / 8).Value, (@string)"\n");
             }
         }
         var b = (addb(bv.bytedata, i / 8)).Value;
         while (b != 0) {
             var j = (uintptr)sys.TrailingZeros8(b);
             b &= (byte)(b - 1);
-            var pp = (ж<uintptr>)(uintptr)((uintptr)add(scanp, (i + j) * (uintptr)goarch.PtrSize));
+            var pp = (ж<uintptr>)(uintptr)(add(scanp, (i + j) * (uintptr)goarch.PtrSize));
 retry:
             var Δp = pp.Value;
             if (f.valid() && 0 < Δp && Δp < minLegalPointer && debug.invalidptr != 0) {

@@ -214,7 +214,7 @@ private static readonly @string osThreadStackˢᵇ = "OS thread stack"u8;
 //
 //go:nosplit
 internal static void newosproc0(uintptr stacksize, @unsafe.Pointer fn) {
-    @unsafe.Pointer Δstack = (uintptr)sysAlloc(stacksize, Ꮡmemstats.Ꮡstacks_sys, osThreadStackˢ);
+    @unsafe.Pointer Δstack = sysAlloc(stacksize, Ꮡmemstats.Ꮡstacks_sys, osThreadStackˢ);
     if (Δstack == nil) {
         writeErrStr(failallocatestack);
         exit(1);
@@ -291,7 +291,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> argv) {
         return;
     }
 
-    n = read(fd, (uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡauxvreadbuf.at<uintptr>(0))), (int32)/* unsafe.Sizeof(auxvreadbuf) */ (uintptr)1024);
+    n = read(fd, noescape(@unsafe.Pointer.FromBox(Ꮡauxvreadbuf.at<uintptr>(0))), (int32)/* unsafe.Sizeof(auxvreadbuf) */ (uintptr)1024);
     closefd(fd);
     if (n < 0) {
         return;
@@ -347,7 +347,7 @@ internal static uintptr getHugePageSize() {
     if (fd < 0) {
         return 0;
     }
-    @unsafe.Pointer ptr = (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡnumbuf.at<byte>(0)));
+    @unsafe.Pointer ptr = noescape(@unsafe.Pointer.FromPinnedBox(Ꮡnumbuf.at<byte>(0)));
     var n = read(fd, ptr, (int32)len(numbuf));
     closefd(fd);
     if (n <= 0) {

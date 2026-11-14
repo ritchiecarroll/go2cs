@@ -120,7 +120,7 @@ internal static any packEface(Value v) {
         // Value is indirect, and so is the interface we're making.
         @unsafe.Pointer ptr = v.ptr;
         if ((flag)(v.flag & flagAddr) != 0) {
-            @unsafe.Pointer c = (uintptr)unsafe_New(t);
+            @unsafe.Pointer c = unsafe_New(t);
             typedmemmove(t, c, ptr);
             ptr = c;
         }
@@ -282,7 +282,7 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
     }
     case {} when implements(Ꮡdst, v.typ()): {
         if (target == nil) {
-            target = (uintptr)unsafe_New(Ꮡdst);
+            target = unsafe_New(Ꮡdst);
         }
         if (v.Kind() == abi.Interface && v.IsNil()) {
             // A nil ReadWriter passed to nil Reader is OK,
@@ -315,7 +315,7 @@ private static readonly @string iLenˢᵇ = "i < len"u8;
 // whySafe must explain why i < len. (Passing "i < len" is fine;
 // the benefit is to surface this assumption at the call site.)
 internal static @unsafe.Pointer arrayAt(@unsafe.Pointer p, nint i, uintptr eltSize, @string whySafe) {
-    return (uintptr)add(p, (uintptr)i * eltSize, iLenˢ);
+    return add(p, (uintptr)i * eltSize, iLenˢ);
 }
 
 internal static partial void ifaceE2I(ж<abi.Type> t, any src, @unsafe.Pointer dst);

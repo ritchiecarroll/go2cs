@@ -85,7 +85,7 @@ public static slice<@string> Environ() {
             // find NUL terminator
             @unsafe.Pointer end = @unsafe.Pointer.FromPinnedBox(envp);
             while (~(ж<uint16>)(uintptr)(end) != 0) {
-                end = (uintptr)@unsafe.Add(end, size);
+                end = @unsafe.Add(end, size);
             }
 
             var entry = @unsafe.Slice(envp, ((uintptr)end - (uintptr)envp) / size);

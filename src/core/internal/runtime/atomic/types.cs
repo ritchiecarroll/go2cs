@@ -465,7 +465,7 @@ partial struct UnsafePointer {
 //
 //go:nosplit
 public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
-    return (uintptr)Loadp(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue));
+    return Loadp(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue));
 }
 
 // StoreNoWB updates the value atomically.
