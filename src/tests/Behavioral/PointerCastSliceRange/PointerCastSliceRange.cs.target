@@ -40,7 +40,7 @@ internal static void main() {
     }
     _ = pick(true);
 
-    var op = (opaque)(ж<array<nint>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ip));
+    var op = (opaque)@unsafe.Pointer.To<array<nint>>(@unsafe.Pointer.FromPinnedBox(ip));
     _ = op;
 }
 

@@ -661,8 +661,8 @@ Three deeper repairs make the single `.Clone()` correct everywhere:
 
 **The suffix must be WRAPPED on a `~`-prefixed rendering.** A deref whose operand is a pointer CAST
 (`*(*T)(p)`, `convStarExpr`'s casted-pointer-deref path) renders with the PREFIX `~` operator, and C#
-postfix binds tighter than unary — so a naked `.Clone()` re-binds onto the cast's inner operand
-instead of the dereferenced array. reflect's `InterfaceData` is the standard-library case (hand-owned
+postfix binds tighter than unary — so a naked `.Clone()` binds to the converted pointer, ahead of
+the dereference, instead of to the dereferenced array. reflect's `InterfaceData` is the standard-library case (hand-owned
 in `value_impl.cs`; the `ArrayCastDerefClone` golden holds the emission):
 
 ```go
@@ -670,8 +670,8 @@ return *(*[2]uintptr)(v.ptr)   // reflect/value.go
 ```
 <!-- illustration: not converter output -->
 ```csharp
-return ~(ж<array<uintptr>>)(uintptr)(v.ptr).Clone();    // WRONG — .Clone() reads v.ptr (CS1061)
-return (~(ж<array<uintptr>>)(uintptr)(v.ptr)).Clone();  // emitted — clone the dereferenced array
+return ~@unsafe.Pointer.To<array<uintptr>>(v.ptr).Clone();    // WRONG — .Clone() reads the pointer (CS1061)
+return (~@unsafe.Pointer.To<array<uintptr>>(v.ptr)).Clone();  // emitted — clone the dereferenced array
 ```
 
 Every clone-append site therefore routes its rendering through `appendValueClone`

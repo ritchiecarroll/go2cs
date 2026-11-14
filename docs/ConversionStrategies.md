@@ -4469,7 +4469,7 @@ constant calls `.slice`* below).
 A write through either slice shows through the other, as in Go. In this example `base` is a C#
 keyword, so the variable appears as `@base`
 ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
-<!-- The rule: src/go2cs/convSliceExpr.go:436 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool {` (a bound that is not a constant within int32 takes the method) and :469 `func (v *Visitor) sliceMethodCall(ident string, sliceExpr *ast.SliceExpr) (string, bool) {`; e.g. src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:48 `trim = trim.slice(0, len(trim) - 1);`. -->
+<!-- The rule: src/go2cs/convSliceExpr.go:446 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool {` (a bound that is not a constant within int32 takes the method) and :479 `func (v *Visitor) sliceMethodCall(ident string, sliceExpr *ast.SliceExpr) (string, bool) {`; e.g. src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:48 `trim = trim.slice(0, len(trim) - 1);`. -->
 
 <!-- source: src/tests/Behavioral/SliceAliasing/main.go:18-26 -->
 ```go
@@ -4614,7 +4614,7 @@ omitted low bound is written as the `0` it means, so `arr[:n:n]` starts at 0. `.
 (`nint`), so an `int` bound passes as is. Here `n` is a `uintptr`, so it is cast to `nint`:
 `arr.slice(0, (nint)(n), (nint)(n))`.
 <!-- source: src/tests/Behavioral/SliceAliasing/main.go:51 and src/tests/Behavioral/SliceAliasing/main.cs.target:40; src/tests/Behavioral/Slice3IndexWideBound/main.go:19 and src/tests/Behavioral/Slice3IndexWideBound/main.cs.target:13 -->
-<!-- A three-index bound is cast only when it is wide or unsigned (uint, uint32, uint64, uintptr, int64): src/go2cs/convSliceExpr.go:508 `func (v *Visitor) castWideIntegerToNint(expr ast.Expr) string {`. `arr[:n:n]` over a `uintptr` n: Slice3IndexWideBound/main.cs.target:12 `var a = arr.slice(0, (nint)(n), (nint)(n));`; a `nint` bound passes uncast, main.cs.target:20 `var e = arr.slice(0, k, k);`, and so does `len(anys)`, src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 `anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));`. The method: src/core/golib/slice.cs:1874 `public static slice<T> slice<T>(this in slice<T> slice, nint low, nint high, nint max)`. -->
+<!-- A three-index bound is cast only when it is wide or unsigned (uint, uint32, uint64, uintptr, int64): src/go2cs/convSliceExpr.go:518 `func (v *Visitor) castWideIntegerToNint(expr ast.Expr) string {`. `arr[:n:n]` over a `uintptr` n: Slice3IndexWideBound/main.cs.target:12 `var a = arr.slice(0, (nint)(n), (nint)(n));`; a `nint` bound passes uncast, main.cs.target:20 `var e = arr.slice(0, k, k);`, and so does `len(anys)`, src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 `anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));`. The method: src/core/golib/slice.cs:1874 `public static slice<T> slice<T>(this in slice<T> slice, nint low, nint high, nint max)`. -->
 
 **A nil slice is the default value.** `var zero []byte` becomes `slice<byte> zero = default;`, and
 `zero == nil` stays `zero == nil`, which binds `slice<T>`'s `operator ==(slice<T>, NilType)`. `default` is
@@ -5728,7 +5728,7 @@ and builds the zero value of a struct whose `default` is not Go's zero value. Th
 cannot hold a negative one, so Go's out-of-range panic could be lost. A bound that is not a constant within
 `int` goes to golib's `slice` method, which checks it as Go does. The result shares the backing array as Go's `s[:i]` does, and does
 not copy ([Slices and Arrays](#slices-and-arrays)).
-<!-- GoZero<T>() for a type parameter: src/go2cs/visitArrayType.go:347-364 `func (v *Visitor) typeParamZero(t types.Type) string`; golib: src/core/golib/builtin.cs:1625 `public static T GoZero<T>() =>`. Range vs slice method: src/go2cs/convSliceExpr.go:421-439 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool` -->
+<!-- GoZero<T>() for a type parameter: src/go2cs/visitArrayType.go:347-364 `func (v *Visitor) typeParamZero(t types.Type) string`; golib: src/core/golib/builtin.cs:1625 `public static T GoZero<T>() =>`. Range vs slice method: src/go2cs/convSliceExpr.go:431-449 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool` -->
 
 Using the type reads as in Go. Go's `int` is C# `nint`
 ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). `Stack[int]{}` calls the constructor that
@@ -11255,7 +11255,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 ([Struct Types](#struct-types)), and `default!` is its zero value
 ([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
 Go's for the target architecture, here amd64.
-<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3996-4017#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:4006-4027#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.
@@ -11316,7 +11316,7 @@ reading through it reads the real storage, as in Go:
     var arrptr = Ꮡarr.at<nint>(0);
 
     @unsafe.Pointer nextPtr = (@unsafe.Pointer)((uintptr)arrptr + /* unsafe.Sizeof(arr[0]) */ (uintptr)8);
-    fmt.Println("Value of the next element:", ~(ж<nint>)(uintptr)(nextPtr));
+    fmt.Println("Value of the next element:", ~@unsafe.Pointer.To<nint>(nextPtr));
 ```
 
 This prints `2`, the second element, under both Go and C#. In the C#:
@@ -11326,8 +11326,10 @@ This prints `2`, the second element, under both Go and C#. In the C#:
 - `heap<T>(value, out var Ꮡarr)` puts `arr` in a box, `Ꮡarr`, because its address is taken, starting from
   its initial value ([Pointers](#pointers)).
 - `Ꮡarr.at<nint>(0)` is `&arr[0]`, a pointer to one array element.
-- `(ж<nint>)(uintptr)(nextPtr)` is Go's `(*int)(nextPtr)`. The converter goes through the number:
-  `(uintptr)` takes the address out of the `@unsafe.Pointer`, and `(ж<nint>)` makes a pointer from it.
+- `@unsafe.Pointer.To<nint>(nextPtr)` is Go's `(*int)(nextPtr)`. golib makes the typed pointer, a
+  `ж<nint>`, from the `@unsafe.Pointer` itself.
+  <!-- history: until 2026-11-14 the converter went through the number, `(ж<nint>)(uintptr)(nextPtr)`:
+  `(uintptr)` took the address out of the `@unsafe.Pointer`, and `(ж<nint>)` made a pointer from it. -->
 - `~` reads through a pointer, like Go's `*p`
   ([Implicit Pointer Dereferencing](#implicit-pointer-dereferencing)).
 - `"Value of the next element:"` stays a plain C# literal. `fmt.Println` takes `any` values, so
@@ -11511,7 +11513,7 @@ internal/unsafeheader's own tests, which build a slice and a string this way, pa
      (docs/phase4/DATA-rebank-prep-c1-2026-10-22.md, section 2). The page said "on linux and windows"; no
      windows reading at go1.26.10 is recorded (the re-bank owes it,
      docs/PLAN-rebank-go126.md:450 (`E3 retires, and the row rejoins`)), so windows is left off until one is. -->
-<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:287-293#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:53-59#0b034b (remarks), :349 (`{receiver}.OnHeaderStore();`, the setter, receiver being ʗp or the box a named pointer wrapper holds), :656-672#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:62-80#63bcd1 (remarks), :328#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-58#c14bfc. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2615-2624#cc40fb. Platform: see the note above. -->
+<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:287-293#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:53-59#0b034b (remarks), :349 (`{receiver}.OnHeaderStore();`, the setter, receiver being ʗp or the box a named pointer wrapper holds), :656-672#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:62-80#63bcd1 (remarks), :328#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-58#c14bfc. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2644-2653#cc40fb. Platform: see the note above. -->
 
 **A pointer passed to a system call stays alive until the call returns, as in Go.** Go guarantees this
 for `uintptr(unsafe.Pointer(p))` written directly in a `syscall.Syscall` argument list. The converter

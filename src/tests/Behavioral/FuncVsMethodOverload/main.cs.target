@@ -19,11 +19,11 @@ internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
     if (bytes == 0) {
         return Ꮡp;
     }
-    return (ж<nih>)(uintptr)((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref p) + bytes));
+    return @unsafe.Pointer.To<nih>((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref p) + bytes));
 }
 
 internal static partial uint32 step(ж<uint32> v) {
-    var q = (ж<uint32>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(v), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
+    var q = @unsafe.Pointer.To<uint32>(add(@unsafe.Pointer.FromPinnedBox(v), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
     return q.Value;
 }
 
@@ -34,7 +34,7 @@ partial struct holder {
 internal static uint32 second(this ж<holder> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
-    return ~(ж<uint32>)(uintptr)(add((uintptr)@unsafe.Pointer.FromRef(ref h), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
+    return ~@unsafe.Pointer.To<uint32>(add((uintptr)@unsafe.Pointer.FromRef(ref h), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
 }
 
 internal static void main() {
@@ -42,7 +42,7 @@ internal static void main() {
     fmt.Println(step(Ꮡvals.at<uint32>(0)));
 
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡvals.at<uint32>(1));
-    fmt.Println(~(ж<uint32>)(uintptr)(add(p, 8)));
+    fmt.Println(~@unsafe.Pointer.To<uint32>(add(p, 8)));
 
     ref var n = ref heap<nih>(new nih(a: 7, b: 9), out var Ꮡn);
     var m = Ꮡn.add(0);

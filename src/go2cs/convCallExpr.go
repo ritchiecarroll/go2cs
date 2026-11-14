@@ -961,6 +961,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				return emission
 			}
 
+			if door, ok := v.typedPointerDoorEmission(callExpr, arg, targetTypeName, expr); ok {
+				return door
+			}
+
 			return fmt.Sprintf("(%s)(uintptr)(%s)", targetTypeName, expr)
 		}
 
@@ -982,6 +986,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						}
 
 						elemCS := convertToCSTypeName(v.getAliasQualifiedTypeName(ptrUnder.Elem(), false))
+
+						// The same typed door as the `(*T)(p)` form above, then the named type's own operator.
+						if basic.Kind() == types.UnsafePointer {
+							return fmt.Sprintf("((%s)%s<%s>(%s))", targetTypeName, typedPointerDoor, elemCS, expr)
+						}
+
 						return fmt.Sprintf("((%s)(%s<%s>)(uintptr)(%s))", targetTypeName, PointerPrefix, elemCS, expr)
 					}
 				}
@@ -4140,7 +4150,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				expr = v.stackAppendBufferName(buffer) + ", " + expr
 			}
 
-			result = fmt.Sprintf("%s%s(%s)", constructType, funcName, expr)
+			if door, ok := v.typedPointerDoorCallEmission(callExpr, constructType, funcName, expr); ok {
+				result = door
+			} else {
+				result = fmt.Sprintf("%s%s(%s)", constructType, funcName, expr)
+			}
 		}
 	}
 
@@ -5362,6 +5376,71 @@ func (v *Visitor) isRawAddressPointerConversion(callExpr *ast.CallExpr, arg ast.
 	}
 
 	return false
+}
+
+// typedPointerDoor is golib's door for Go's `(*T)(p)` over an unsafe.Pointer VALUE: `@unsafe.Pointer.To<T>(p)`.
+const typedPointerDoor = "@unsafe.Pointer.To"
+
+// typedPointerDoorEmission renders `(*T)(p)`, p an unsafe.Pointer, as `@unsafe.Pointer.To<T>(p)`.
+//
+// The conversion was emitted `(ж<T>)(uintptr)(p)`. The cast to a number came first, so golib's number operator
+// saw a number and nothing of what p carried: an interior address of Go memory (a base plus an offset, which no
+// registry holds) came back as a native box that kept nothing and pinned nothing, under a pointer still in use.
+// The door takes the pointer itself, mints the one box the cast minted, and where that box would keep nothing it
+// keeps what p carried (docs/phase4/DESIGN-interior-pointer-root.md 4.1).
+//
+// Three sources keep the cast. A TYPED pointer source that reached this route (see the note at the call site) is
+// a box, not an unsafe.Pointer, and has no door. A conversion convSliceExpr reads as a span view
+// (`(*[N]T)(p)[lo:hi]`) is never rendered as a conversion at all: that lowering cuts the `(ж<…>)` prefix off the
+// text and reads the memory through a raw C# pointer, so its text stays what the cut expects. And a target that
+// is not spelled `ж<…>` has no pointee to name.
+func (v *Visitor) typedPointerDoorEmission(callExpr *ast.CallExpr, arg ast.Expr, targetTypeName, expr string) (string, bool) {
+	if v.spanViewConversions[callExpr] {
+		return "", false
+	}
+
+	argType := v.info.TypeOf(arg)
+
+	if argType == nil {
+		return "", false
+	}
+
+	if basic, ok := argType.Underlying().(*types.Basic); !ok || basic.Kind() != types.UnsafePointer {
+		return "", false
+	}
+
+	prefix := PointerPrefix + "<"
+
+	if !strings.HasPrefix(targetTypeName, prefix) || !strings.HasSuffix(targetTypeName, ">") {
+		return "", false
+	}
+
+	pointee := targetTypeName[len(prefix) : len(targetTypeName)-1]
+
+	return fmt.Sprintf("%s<%s>(%s)", typedPointerDoor, pointee, expr), true
+}
+
+// typedPointerDoorCallEmission is typedPointerDoorEmission for the CALL path. `(*T)(p)` with a parenthesized star
+// type is not classified as a conversion and is assembled as a call whose callee convParenExpr rendered as the
+// cast pair `(ж<T>)(uintptr)`; this is most of the corpus's `(*T)(p)` sites. The callee text is read back only
+// to recover the pointee it already spells; what decides is the call itself: one argument, a TYPE callee, an
+// unsafe.Pointer operand.
+func (v *Visitor) typedPointerDoorCallEmission(callExpr *ast.CallExpr, constructType, funcName, expr string) (string, bool) {
+	if constructType != "" || len(callExpr.Args) != 1 {
+		return "", false
+	}
+
+	if calleeTV, isTyped := v.info.Types[callExpr.Fun]; !isTyped || !calleeTV.IsType() {
+		return "", false
+	}
+
+	const castSuffix = ")(uintptr)"
+
+	if !strings.HasPrefix(funcName, "(") || !strings.HasSuffix(funcName, castSuffix) {
+		return "", false
+	}
+
+	return v.typedPointerDoorEmission(callExpr, callExpr.Args[0], funcName[1:len(funcName)-len(castSuffix)], expr)
 }
 
 // pointerReinterpretIdentitySource reports the underlying pointer expression when a `(*T)(…)`

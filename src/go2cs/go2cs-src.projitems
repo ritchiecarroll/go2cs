@@ -761,6 +761,7 @@
     <None Include="$(MSBuildThisFileDirectory)typeAssertSourceOverload_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilInterfaceBoxing.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilUnsafePointer_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)typedPointerDoor_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeNameResolution.go" />
     <None Include="$(MSBuildThisFileDirectory)typeNameResolution_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typePredicates.go" />

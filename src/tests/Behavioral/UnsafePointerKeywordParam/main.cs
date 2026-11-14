@@ -15,7 +15,7 @@ internal static bool notNil(@unsafe.Pointer @new) { return @new != nil; }
 
 internal static uintptr asUintptr(@unsafe.Pointer @new) { return (uintptr)@new; }
 
-internal static int32 deref(@unsafe.Pointer @new) { return ~(ж<int32>)(uintptr)(@new); }
+internal static int32 deref(@unsafe.Pointer @new) { return ~@unsafe.Pointer.To<int32>(@new); }
 
 internal static void store(ref holder h, @unsafe.Pointer @new) { h.p = @new; }
 

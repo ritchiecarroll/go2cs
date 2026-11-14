@@ -28,7 +28,7 @@ internal static void main() {
         var rebuilt = Ꮡ(b, 4);
         fmt.Println("unsafe.Pointer round trip             :", rebuilt == p.at<byte>(4), r == rebuilt);
 
-        var viaUintptr = (ж<byte>)(uintptr)((@unsafe.Pointer)((uintptr)Ꮡ(b, 0) + 4));
+        var viaUintptr = @unsafe.Pointer.To<byte>((@unsafe.Pointer)((uintptr)Ꮡ(b, 0) + 4));
         fmt.Println("uintptr arithmetic                    :", viaUintptr == r, q == viaUintptr);
 
         var seen = new map<ж<byte>, @string>{[q] = "slice element"};
