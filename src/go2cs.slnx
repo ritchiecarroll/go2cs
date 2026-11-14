@@ -304,6 +304,7 @@
     <Project Path="tests/Behavioral/AdapterNameInterfaceCollision/AdapterNameInterfaceCollision.csproj" />
     <Project Path="tests/Behavioral/AliasStructToInterface/AliasStructToInterface.csproj" />
     <Project Path="tests/Behavioral/AliasStructToInterfaceLib/AliasStructToInterfaceLib.csproj" />
+    <Project Path="tests/Behavioral/AliasedImportRenamedMember/AliasedImportRenamedMember.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceThroughPointerAdapter/AnonIfaceThroughPointerAdapter.csproj" />
     <Project Path="tests/Behavioral/AnonInterfaceCrossFile/AnonInterfaceCrossFile.csproj" />
     <Project Path="tests/Behavioral/AnonInterfaceSignatureAssert/AnonInterfaceSignatureAssert.csproj" />

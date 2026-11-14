@@ -50,6 +50,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAliasStructToInterface() => CheckTarget("AliasStructToInterface");
 
     [TestMethod]
+    public void CheckAliasedImportRenamedMember() => CheckTarget("AliasedImportRenamedMember");
+
+    [TestMethod]
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]

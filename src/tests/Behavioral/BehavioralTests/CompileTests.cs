@@ -52,6 +52,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAliasStructToInterfaceLib() => CheckTarget("AliasStructToInterfaceLib");
 
     [TestMethod]
+    public void CheckAliasedImportRenamedMember() => CheckTarget("AliasedImportRenamedMember");
+
+    [TestMethod]
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
