@@ -83,6 +83,16 @@ internal static class NativeSliceAnchors<T>
         return anchor;
     }
 
+    // A slice over foreign pointer WORDS is read into a fresh managed array (NativePointerWords.Window), which keeps
+    // nothing of the memory it was read from. Over a pointer that is not C memory alone, that array is tied to the
+    // root here, so the slice keeps the view it was read over (unsafe.Slice with a pointer element; DESIGN-interior-
+    // pointer-root 4.5). A slice with no elements keeps nothing.
+    internal static void Keep(in slice<T> words, object? root)
+    {
+        if (root is not null && words.m_array is { Length: > 0 } array)
+            s_roots.AddOrUpdate(array, root);
+    }
+
     // The root a native-backed slice keeps, or null: one reference compare for every slice that keeps none.
     internal static object? Of(in slice<T> view) =>
         view.IsNativeBacked && !ReferenceEquals(view.m_array, Array.Empty<T>()) && s_roots.TryGetValue(view.m_array, out object? root)

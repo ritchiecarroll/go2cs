@@ -1054,7 +1054,11 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
         // 2026-10-19: crypto/x509's windows chain reads, unsafe.Slice(chainCtx.Chains, n)) and keep the runtime's
         // own words in a shadow. The slice reads the n words (see builtin.NativeArrayPointer).
         if (NativePointerElement<T>.Is)
-            return builtin.NativeArrayPointer<T>(ptr.NativeAddress, n).slice(0, n, n);
+        {
+            slice<T> words = builtin.NativeArrayPointer<T>(ptr.NativeAddress, n).slice(0, n, n);
+            NativeSliceAnchors<T>.Keep(words, NativeDerivation.Kept(ptr));
+            return words;
+        }
 
         return slice<T>.OverNativeMemory(ptr.NativeAddress, n, n, NativeSliceAnchors<T>.For(NativeDerivation.Kept(ptr)));
     }

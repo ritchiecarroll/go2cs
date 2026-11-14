@@ -329,7 +329,7 @@ internal interface IFirstFieldView
         // The window is X's registered door (NativeArrayOpeners), compiled only for an [N]X field some compilation
         // declares, never a generic method closed by reflection (Native AOT has no code for one over a value type).
         // T is array<X>, so the window IS a ж<T>.
-        return length >= 0 ? (ж<T>)NativeArrayOpeners.OpenArray(element, address, length) : null;
+        return length >= 0 ? (ж<T>)NativeArrayOpeners.OpenArray(element, address, length, NativeDerivation.Kept(m_source)) : null;
     }
 
     // X for an array field type T = array<X>, else null: a pure type query, decided once per T.

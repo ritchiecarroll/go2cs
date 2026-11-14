@@ -156,7 +156,8 @@ internal interface ISliceBacking
 
     // The header-slice box's rebuild (HeaderSliceBox.Rebase; trim stage 3c-2a): a slice of this slice type's element over
     // native memory, through golib's single creation door. Reached through a zero value of the slice type.
-    object IGoReflectSlice.ReflectOverNativeMemory(nuint address, nint len, nint cap) => slice<T>.OverNativeMemory(address, len, cap);
+    object IGoReflectSlice.ReflectOverNativeMemory(nuint address, nint len, nint cap, object? root) =>
+        slice<T>.OverNativeMemory(address, len, cap, NativeSliceAnchors<T>.For(root));
 
     // The slice-header box's commit (SliceHeaderBox.OnHeaderStore): a slice of this slice type's element over
     // backing[low:high:max], SHARING the backing, or null when the backing is not exactly this element's array. Exactly,
@@ -192,7 +193,9 @@ public interface IGoReflectSlice
     object ReflectElementZero();
 
     /// <summary>A slice of this slice type's element over <paramref name="len"/>/<paramref name="cap"/> elements of native memory.</summary>
-    object ReflectOverNativeMemory(nuint address, nint len, nint cap);
+    // `root` is the box whose storage the address names, as NativeDerivation.Kept answers it: the slice keeps it alive
+    // (cgo Phase 3 increment 3.1's second review, DESIGN-interior-pointer-root 4.5). Null is C memory alone.
+    object ReflectOverNativeMemory(nuint address, nint len, nint cap, object? root = null);
 
     /// <summary>A slice of this slice type's element over <paramref name="backing"/>[low:high:max], sharing it; null when the backing is not this element's array.</summary>
     object? ReflectRebase(Array backing, nint low, nint high, nint max);
