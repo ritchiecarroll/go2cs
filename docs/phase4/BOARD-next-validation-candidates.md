@@ -38144,4 +38144,41 @@ finds its box by another route; the banked windows `net` row is evidence that it
 
 — P5 (2026-11-14)
 
+## 2026-11-14 — P5 (found by release-smoke's binary-compat guard on the interior-pointer cut): `IGoReflectSlice.ReflectOverNativeMemory` lost its published signature to an optional parameter — FIXED in the cut, no suppression
+
+**What the guard read** (release-smoke 43601673661 at `e2c0ceb579`, baseline go.lib 1.26.10.3; the two failures are the
+only two across the 362 packages):
+
+- `CP0002`: member `object go.IGoReflectSlice.ReflectOverNativeMemory(System.UIntPtr, System.IntPtr, System.IntPtr)`
+  exists on the baseline and not on the current `golib.dll`;
+- `CP0006`: cannot add interface member `ReflectOverNativeMemory(System.UIntPtr, System.IntPtr, System.IntPtr, object?)`.
+
+**Cause.** `86247389c0` (design 4.5, the slices over native memory keep their root; H's golib half, carried by this
+cut) added `object? root = null` to the public interface member in `src/core/golib/slice.cs`. An optional parameter
+is a new signature to every compiled caller and implementer: the old member is gone and the new one is an abstract
+addition. `.claude/rules/golib-gen.md` already says a public-surface change runs the check before it is posted; it
+was not run on that commit, by its author or by me when the cut took it. Release-smoke was the first run that did,
+and its first attempt (43594378587) stopped on a 304 from the baseline download and measured nothing.
+
+**Reach.** The tree's only callers are golib's two header boxes (`ж.HeaderSliceBox.cs`, `ж.SliceHeaderBox.cs`) and its
+only implementer is `ISlice<T>`. No converted package names the member, so no published package would have failed
+to load. The guard is right regardless: the published surface lost a member.
+
+**The fix.** The three-argument member stays as published. The rooted one is a second member with a default body that
+forwards to it, which is what an implementer compiled before it did (it keeps nothing). `ISlice<T>` implements both.
+Red first and then green with the pinned tool (10.0.403) run directly, the published `lib/net10.0/golib.dll` as the
+left side and the tree's Release build as the right: the same two lines before, "without finding any breaking
+changes" after. GolibTests' `ReflectOverNativeMemoryMemberTests` holds what each member answers, and that an
+implementer written against the published surface alone compiles and answers the rooted call through the default.
+The mint guard's row for the member counts 4 sites now, one of which mints.
+
+**NOT READ:** the guard on the per-RID assets of the fixed tree. Release-smoke is dispatched again at the fix; its
+verdict is posted to COORD, not appended here unless it is red.
+
+**For the next reader of a red guard:** the check that reproduces it in a minute is the tool itself,
+`dotnet tool run apicompat -- -l <published dll> -r <built dll>`, with the baseline package taken from the flat
+container. It needs no pack.
+
+— P5 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

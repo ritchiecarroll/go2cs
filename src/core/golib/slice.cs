@@ -159,6 +159,11 @@ internal interface ISliceBacking
     object IGoReflectSlice.ReflectOverNativeMemory(nuint address, nint len, nint cap, object? root) =>
         slice<T>.OverNativeMemory(address, len, cap, NativeSliceAnchors<T>.For(root));
 
+    // The member as go.lib 1.26.10.3 published it. It stays so the published surface loses nothing (the binary-compat
+    // guard's CP0002). It answers as it always did, with no root; golib's own callers pass the root to the member above.
+    object IGoReflectSlice.ReflectOverNativeMemory(nuint address, nint len, nint cap) =>
+        ((IGoReflectSlice)this).ReflectOverNativeMemory(address, len, cap, root: null);
+
     // The slice-header box's commit (SliceHeaderBox.OnHeaderStore): a slice of this slice type's element over
     // backing[low:high:max], SHARING the backing, or null when the backing is not exactly this element's array. Exactly,
     // because array covariance would admit a string[] as an object[]. Reached through a zero value of the slice type.
@@ -193,9 +198,17 @@ public interface IGoReflectSlice
     object ReflectElementZero();
 
     /// <summary>A slice of this slice type's element over <paramref name="len"/>/<paramref name="cap"/> elements of native memory.</summary>
+    object ReflectOverNativeMemory(nuint address, nint len, nint cap);
+
+    /// <summary>The same slice, keeping <paramref name="root"/> alive for as long as the slice is.</summary>
     // `root` is the box whose storage the address names, as NativeDerivation.Kept answers it: the slice keeps it alive
     // (cgo Phase 3 increment 3.1's second review, DESIGN-interior-pointer-root 4.5). Null is C memory alone.
-    object ReflectOverNativeMemory(nuint address, nint len, nint cap, object? root = null);
+    //
+    // A second member with a default body, not a fourth parameter on the first: go.lib 1.26.10.3 published the
+    // three-argument member, and a parameter added to it, optional or not, is a different signature to every compiled
+    // caller and implementer (the guard read CP0002 and CP0006 on exactly that). The default is what an implementer
+    // compiled before this member existed did: it keeps nothing. ISlice<T> implements both.
+    object ReflectOverNativeMemory(nuint address, nint len, nint cap, object? root) => ReflectOverNativeMemory(address, len, cap);
 
     /// <summary>A slice of this slice type's element over <paramref name="backing"/>[low:high:max], sharing it; null when the backing is not this element's array.</summary>
     object? ReflectRebase(Array backing, nint low, nint high, nint max);
