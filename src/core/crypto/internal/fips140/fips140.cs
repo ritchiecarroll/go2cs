@@ -47,7 +47,8 @@ private static readonly @string fips1403ModeIsˢ3ᵇ = "FIPS 140-3 mode is incom
 
 // Supported returns an error if FIPS 140-3 mode can't be enabled.
 public static error Supported() {
-    // Keep this in sync with fipsSupported in cmd/dist/test.go.
+    // Keep this in sync with internal/platform.FIPS140Supported and
+    // cmd/dist.tester.fips140Supported.
 
     // The purego tag changes too much of the implementation to claim the
     // validation still applies.

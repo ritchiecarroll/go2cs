@@ -448,7 +448,7 @@ public class PromotedHostClassTests
     }
 
     // The consumer's view (docs/ConsumingGoFromCSharp.md): `using static` of the package class alone brings the types
-    // and the methods they declare, and no method a struct promotes. Before 1.26.10.4 it brought those too.
+    // and the methods they declare, and no method a struct promotes. Before 1.26.11.1 it brought those too.
     [TestMethod]
     public void UsingStaticAloneBringsDeclaredMethodsAndNoPromotedOne()
     {

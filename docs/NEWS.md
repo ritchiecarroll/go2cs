@@ -12,36 +12,37 @@ their full text.
 
 <!-- Written ahead and HELD for release day (the .2 and .3 precedent): "November XX" becomes the publish date as the
      last change before the release tag (GoCorpusMigration.md, the release ritual, item 1). Section opened by the
-     promoted-forwarder seat (P1, COORD ruling 2026-11-10 08:28Z); later 1.26.10.4 seats append to it. Every item is
-     PENDING until 1.26.10.4 publishes. -->
+     promoted-forwarder seat (P1, COORD ruling 2026-11-10 08:28Z); later seats for the release append to it. Every item is
+     PENDING until 1.26.11.1 publishes. The release was prepared as 1.26.10.4; the owner ruled it ships as
+     1.26.11.1, built from Go 1.26.11 (2026-11-12, the 1.26.11 patch hop). -->
 
-**NuGet 1.26.10.4.** PENDING. The third fix release on the Go 1.26 line. The converted standard library is still built
-from Go 1.26.10. One change below breaks assemblies already compiled against 1.26.10.3, and C# source that reaches a
-promoted method through `using static` alone; it is first under *Upgrading from 1.26.10.3*.
+**NuGet 1.26.11.1.** PENDING. The fourth release on the Go 1.26 line, and the first built from Go 1.26.11, a Go patch
+release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a promoted
+method through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
 
 **Upgrading from 1.26.10.3.**
 
 - **Rebuild what you built against 1.26.10.3.** PENDING. A Go struct that embeds another struct of its own package
   gets a forwarder for each method the embedding promotes. Through 1.26.10.3 those forwarders were members of the
-  package class (`bufio_package` for `bufio`); from 1.26.10.4 each struct's forwarders are in a class of the
+  package class (`bufio_package` for `bufio`); from 1.26.11.1 each struct's forwarders are in a class of the
   struct's own, beside the package class in the same namespace. In the standard library 900 public forwarders moved,
   counted once for each assembly a package ships, in 20 packages; a program can import 13 of the 20, and the other
   7 are internal or vendored. An assembly or nugetgo package compiled against go.* 1.26.10.3 that calls such a
-  promoted method fails at that call under 1.26.10.4 with `MissingMethodException`. The build refuses the
+  promoted method fails at that call under 1.26.11.1 with `MissingMethodException`. The build refuses the
   combination first: a package built below the new break floor is error `GO2CS3002`, which names the package
-  ([Diagnostic codes](DiagnosticCodes.md)). Rebuild against 1.26.10.4, and move each `nugetgo.*` reference to its
-  1.26.10.4 revision.
+  ([Diagnostic codes](DiagnosticCodes.md)). Rebuild against 1.26.11.1, and move each `nugetgo.*` reference to its
+  1.26.11.1 revision.
   <!-- source: the promoted-forwarder seat (docs/phase4/DESIGN-promoted-forwarder-placement.md; owner ruling
        2026-11-10: "better breaking changes now than before we're deep with users"). The moved members are announced
        to the binary-compatibility guard as generated CP0002 entries, 900 entries in 20 suppression files
-       (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1), and <GoBreakFloor> is 1.26.10.4. The nugetgo
+       (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1), and <GoBreakFloor> is 1.26.11.1. The nugetgo
        rebuild wave ships with this release (the owner's hands). -->
 - **Standard-library assemblies are named after their packages.** PENDING. Package `go.fmt` now ships `go.fmt.dll`,
   not `fmt.dll`, and likewise every converted standard-library assembly (`go.net.dll`, `go.crypto.tls.dll`,
   `go.go.ast.dll` for package `go.go.ast`, `go.testing.dll`). The package IDs do not change, nor do `golib.dll`
   (package go.lib), the go2cs-gen analyzer, or a converted module's own assemblies. A library converted and built
   against go.* 1.26.10.3 or earlier binds the standard library's assemblies by their OLD names, so it must be rebuilt
-  against 1.26.10.4; the same break floor names it at build time (`GO2CS3002`) rather than letting it fail as a
+  against 1.26.11.1; the same break floor names it at build time (`GO2CS3002`) rather than letting it fail as a
   missing assembly at run time. A C# project that referenced a converted assembly by file name (`fmt.dll`) or by an
   assembly-qualified type name (`go.fmt_package, fmt`) uses the new name.
   <!-- source: OQ4, docs/PLAN-public-surface-stability.md (ruled), the design docs/phase4/DESIGN-assembly-identity.md;

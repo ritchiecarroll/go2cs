@@ -123,6 +123,7 @@
     <Compile Include="go2cs_test_host.cs" />
     <Compile Include="h2_error_test.cs" />
     <Compile Include="header_test.cs" />
+    <Compile Include="http1_server_test.cs" />
     <Compile Include="http_test.cs" />
     <Compile Include="main_test.cs" />
     <Compile Include="mapping_test.cs" />
@@ -179,6 +180,7 @@
     <None Include="header.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="header_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="http.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="http1_server_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="http_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="jar.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="main_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -236,7 +238,6 @@
     <ProjectReference Include="$(go2csPath)core/compress/zlib/compress.zlib.csproj" />
     <ProjectReference Include="$(go2csPath)core/container/list/container.list.csproj" />
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha1/crypto.sha1.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/tls/crypto.tls.csproj" />
@@ -251,10 +252,6 @@
     <ProjectReference Include="$(go2csPath)core/hash/hash.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/nettrace/internal.nettrace.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/race/internal.race.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/maps/internal.runtime.maps.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/synctest/internal.synctest.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />

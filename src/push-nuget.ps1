@@ -102,9 +102,10 @@
 .PARAMETER ApiCompatFlatContainer
     Where the binary-compatibility guard reads each package's BASELINE: the flat container of the feed
     the last release was published to. Defaults to nuget.org's. After the merge, every package is compared,
-    asset by asset, with the highest published version on its line (the same first three numbers) below
-    the version being packed; an unannounced break refuses the pack (docs\phase4\
-    DESIGN-binary-compat-guard.md, src\tools\pushnuget\GoApiCompat.psm1).
+    asset by asset, with the highest published version on its Go minor (the same first two numbers) below
+    the version being packed, so a patch hop's first release compares with the previous patch line's last
+    revision; an unannounced break refuses the pack (docs\phase4\DESIGN-binary-compat-guard.md,
+    src\tools\pushnuget\GoApiCompat.psm1).
 
 .PARAMETER VersionSuffix
     A LOCAL REHEARSAL's prerelease label (e.g. local.1): every package is packed as
@@ -2197,7 +2198,7 @@ $apiCompatWork = Join-Path ([System.IO.Path]::GetTempPath()) ('go2cs-apicompat-'
 $guardReleaseVersion = if ($dryRun) { $wouldBeVersion } else { $fullVersion }
 try {
     $apiCompat = Invoke-GoApiCompatGuard -Packages $pkgs -RepoRoot $repoRoot -WorkDir $apiCompatWork `
-        -FlatContainer $ApiCompatFlatContainer -ReleaseVersion $guardReleaseVersion `
+        -FlatContainer $ApiCompatFlatContainer -ReleaseVersion $guardReleaseVersion -BaselineLine Minor `
         -Identity { param($path) Get-GoNuGetPackageIdentity $path } `
         -SuppressionFor { param($id) $suppressionMap[$id] }
     # The baseline go.lib's floor, read now: the work directory and the baselines in it go in the finally below.

@@ -188,8 +188,8 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
   fails the run at startup (`TypeLoadException`), and the assembly check names the cause. It gates.
 - **H** source compatibility ([What go2cs promises](PublicSurface.md)): the previous release's
   `src/tests/CSharpConsumer`, read from git and built **unchanged** against the feed. The ref is the newest
-  `nuget-<version>` release tag below the version under test (for `1.26.10.4-ci.N`, the newest tag below
-  `1.26.10.4`), or `consumer_ref` when set. The modules it calls are converted with this tree's converter against
+  `nuget-<version>` release tag below the version under test (for `1.26.11.1-ci.N`, the newest tag below
+  `1.26.11.1`), or `consumer_ref` when set. The modules it calls are converted with this tree's converter against
   the feed, at the versions that ref's `run-csharp-consumer.ps1` pins, and the program must print that runner's own
   `checks: <N> ok, 0 failed`. A name that program uses, removed or renamed without the deprecation path, fails the
   build here, by the compiler's error line. The leg prints the ref it used. It gates. The ref is fetched without
