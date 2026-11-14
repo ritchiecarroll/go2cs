@@ -21,9 +21,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
-using static runtime_package;
+using System.Runtime.CompilerServices;
 
 partial class runtime_package {
 
@@ -31,7 +29,7 @@ internal static UntypedInt maxAlign => 8;
 internal static uintptr hchanSize => /* unsafe.Sizeof(hchan{}) + uintptr(-int(unsafe.Sizeof(hchan{}))&(maxAlign-1)) */ 112;
 internal const bool debugChan = false;
 
-partial struct hchan {
+partial struct Δhchan {
     internal nuint qcount;        // total data in the queue
     internal nuint dataqsiz;      // size of the circular queue
     internal @unsafe.Pointer buf; // points to an array of dataqsiz elements
@@ -59,7 +57,7 @@ partial struct waitq {
 }
 
 //go:linkname reflect_makechan reflect.makechan
-internal static ж<hchan> reflect_makechan(ref chantype t, nint size) {
+internal static ж<Δhchan> reflect_makechan(ref chantype t, nint size) {
     return makechan(ref t, size);
 }
 
@@ -67,7 +65,7 @@ internal static ж<hchan> reflect_makechan(ref chantype t, nint size) {
 internal static ref readonly @string makechanSizeOutOfRangeˢ => ref makechanSizeOutOfRangeˢᵇ;
 private static readonly @string makechanSizeOutOfRangeˢᵇ = "makechan: size out of range"u8;
 
-internal static ж<hchan> makechan64(ref chantype t, int64 size) {
+internal static ж<Δhchan> makechan64(ref chantype t, int64 size) {
     if ((int64)(nint)size != size) {
         throw panic(((plainError)(@string)makechanSizeOutOfRangeˢ));
     }
@@ -81,7 +79,7 @@ private static readonly @string makechanInvalidChannelˢᵇ = "makechan: invalid
 internal static ref readonly @string makechanBadAlignmentˢ => ref makechanBadAlignmentˢᵇ;
 private static readonly @string makechanBadAlignmentˢᵇ = "makechan: bad alignment"u8;
 
-internal static ж<hchan> makechan(ref chantype t, nint size) {
+internal static ж<Δhchan> makechan(ref chantype t, nint size) {
     var elem = t.Elem;
 
     // compiler checks this but be safe.
@@ -101,26 +99,26 @@ internal static ж<hchan> makechan(ref chantype t, nint size) {
     // buf points into the same allocation, elemtype is persistent.
     // SudoG's are referenced from their owning thread so they can't be collected.
     // TODO(dvyukov,rlh): Rethink when collector can move allocated objects.
-    ж<hchan> c = default;
+    ж<Δhchan> c = default;
     switch (ᐧ) {
     case {} when mem == 0: {
         // Queue or element size is zero.
-        c = (ж<hchan>)(uintptr)(mallocgc(hchanSize, nil, true));
+        c = @unsafe.Pointer.To<Δhchan>(mallocgc(hchanSize, nil, true));
         // Race detector uses this location for synchronization.
-        c.buf = (uintptr)c.raceaddr();
+        c.buf = c.raceaddr();
         break;
     }
     case {} when !elem.Pointers(): {
         // Elements do not contain pointers.
         // Allocate hchan and buf in one call.
-        c = (ж<hchan>)(uintptr)(mallocgc(hchanSize + mem, nil, true));
-        c.buf = (uintptr)add(@unsafe.Pointer.FromPinnedBox(c), hchanSize);
+        c = @unsafe.Pointer.To<Δhchan>(mallocgc(hchanSize + mem, nil, true));
+        c.buf = add(@unsafe.Pointer.FromPinnedBox(c), hchanSize);
         break;
     }
     default: {
         // Elements contain pointers.
-        c = @new<hchan>();
-        c.buf = (uintptr)mallocgc(mem, elem, true);
+        c = @new<Δhchan>();
+        c.buf = mallocgc(mem, elem, true);
         break;
     }}
 
@@ -149,17 +147,17 @@ internal static ж<hchan> makechan(ref chantype t, nint size) {
 // See go.dev/issue/67401.
 //
 //go:linkname chanbuf
-internal static @unsafe.Pointer chanbuf(ж<hchan> Ꮡc, nuint i) {
+internal static @unsafe.Pointer chanbuf(ж<Δhchan> Ꮡc, nuint i) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    return (uintptr)add(c.buf, (uintptr)i * (uintptr)c.elemsize);
+    return add(c.buf, (uintptr)i * (uintptr)c.elemsize);
 }
 
 // full reports whether a send on c would block (that is, the channel is full).
 // It uses a single word-sized read of mutable state, so although
 // the answer is instantaneously true, the correct answer may have changed
 // by the time the calling function receives the return value.
-internal static bool full(ref hchan c) {
+internal static bool full(ref Δhchan c) {
     // c.dataqsiz is immutable (never written after the channel is created)
     // so it is safe to read at any time during channel operation.
     if (c.dataqsiz == 0) {
@@ -173,7 +171,7 @@ internal static bool full(ref hchan c) {
 // entry point for c <- x from compiled code.
 //
 //go:nosplit
-internal static void chansend1(ж<hchan> c, @unsafe.Pointer elem) {
+internal static void chansend1(ж<Δhchan> c, @unsafe.Pointer elem) {
     chansend(c, elem, true, sys.GetCallerPC());
 }
 
@@ -201,7 +199,7 @@ private static readonly @string chansendSpuriousWakeupˢᵇ = "chansend: spuriou
  * been closed.  it is easiest to loop and re-run
  * the operation; we'll see that it's now closed.
  */
-internal static bool chansend(ж<hchan> Ꮡc, @unsafe.Pointer ep, bool block, uintptr callerpc) {
+internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, uintptr callerpc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc == nil) {
@@ -217,7 +215,7 @@ internal static bool chansend(ж<hchan> Ꮡc, @unsafe.Pointer ep, bool block, ui
     }
 
     if (raceenabled) {
-        racereadpc((uintptr)Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(chansend));
+        racereadpc(Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(chansend));
     }
 
     if (c.bubble != nil && (~getg()).bubble != c.bubble) {
@@ -269,7 +267,7 @@ internal static bool chansend(ж<hchan> Ꮡc, @unsafe.Pointer ep, bool block, ui
 
     if (c.qcount < c.dataqsiz) {
         // Space is available in the channel buffer. Enqueue the element to send.
-        @unsafe.Pointer qp = (uintptr)chanbuf(Ꮡc, c.sendx);
+        @unsafe.Pointer qp = chanbuf(Ꮡc, c.sendx);
         if (raceenabled) {
             racenotify(Ꮡc, c.sendx, nil);
         }
@@ -349,7 +347,7 @@ internal static bool chansend(ж<hchan> Ꮡc, @unsafe.Pointer ep, bool block, ui
 // Channel c must be empty and locked.  send unlocks c with unlockf.
 // sg must already be dequeued from c.
 // ep must be non-nil and point to the heap or the caller's stack.
-internal static void send(ж<hchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep, Action unlockf, nint skip) {
+internal static void send(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep, Action unlockf, nint skip) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var sg = ref Ꮡsg.DerefOrNull();
 
@@ -373,7 +371,7 @@ internal static void send(ж<hchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep, A
             c.sendx = c.recvx; // c.sendx = (c.sendx+1) % c.dataqsiz
         }
     }
-    if ((uintptr)sg.elem.get() != nil) {
+    if (sg.elem.get() != nil) {
         sendDirect(c.elemtype, Ꮡsg, ep);
         sg.elem.set(nil);
     }
@@ -392,7 +390,7 @@ internal static void send(ж<hchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep, A
 // Because it is only intended for timers, it does not
 // handle waiting senders at all (all timer channels
 // use non-blocking sends to fill the buffer).
-internal static bool timerchandrain(ж<hchan> Ꮡc) {
+internal static bool timerchandrain(ж<Δhchan> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Note: Cannot use empty(c) because we are called
@@ -407,7 +405,7 @@ internal static bool timerchandrain(ж<hchan> Ꮡc) {
     var any = false;
     while (c.qcount > 0) {
         any = true;
-        typedmemclr(c.elemtype, (uintptr)chanbuf(Ꮡc, c.recvx));
+        typedmemclr(c.elemtype, chanbuf(Ꮡc, c.recvx));
         c.recvx++;
         if (c.recvx == c.dataqsiz) {
             c.recvx = 0;
@@ -436,7 +434,7 @@ internal static void sendDirect(ж<_type> Ꮡt, ж<sudog> Ꮡsg, @unsafe.Pointer
     // Once we read sg.elem out of sg, it will no longer
     // be updated if the destination's stack gets copied (shrunk).
     // So make sure that no preemption points can happen between read & use.
-    @unsafe.Pointer dst = (uintptr)sg.elem.get();
+    @unsafe.Pointer dst = sg.elem.get();
     typeBitsBulkBarrier(Ꮡt, (uintptr)dst, (uintptr)src, t.Size_);
     // No need for cgo write barrier checks because dst is always
     // Go memory.
@@ -450,7 +448,7 @@ internal static void recvDirect(ж<_type> Ꮡt, ж<sudog> Ꮡsg, @unsafe.Pointer
     // dst is on our stack or the heap, src is on another stack.
     // The channel is locked, so src will not move during this
     // operation.
-    @unsafe.Pointer src = (uintptr)sg.elem.get();
+    @unsafe.Pointer src = sg.elem.get();
     typeBitsBulkBarrier(Ꮡt, (uintptr)dst, (uintptr)src, t.Size_);
     memmove(dst, src, t.Size_);
 }
@@ -463,7 +461,7 @@ private static readonly @string closeOfSynctestChannelˢᵇ = "close of synctest
 internal static ref readonly @string closeOfClosedChannelˢ => ref closeOfClosedChannelˢᵇ;
 private static readonly @string closeOfClosedChannelˢᵇ = "close of closed channel"u8;
 
-internal static void closechan(ж<hchan> Ꮡc) {
+internal static void closechan(ж<Δhchan> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc == nil) {
@@ -481,8 +479,8 @@ internal static void closechan(ж<hchan> Ꮡc) {
 
     if (raceenabled) {
         var callerpc = sys.GetCallerPC();
-        racewritepc((uintptr)Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(closechan));
-        racerelease((uintptr)Ꮡc.raceaddr());
+        racewritepc(Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(closechan));
+        racerelease(Ꮡc.raceaddr());
     }
 
     c.closed = 1;
@@ -495,8 +493,8 @@ internal static void closechan(ж<hchan> Ꮡc) {
         if (sg == nil) {
             break;
         }
-        if ((uintptr)sg.of(sudog.Ꮡelem).get() != nil) {
-            typedmemclr(c.elemtype, (uintptr)sg.of(sudog.Ꮡelem).get());
+        if (sg.of(sudog.Ꮡelem).get() != nil) {
+            typedmemclr(c.elemtype, sg.of(sudog.Ꮡelem).get());
             sg.of(sudog.Ꮡelem).set(nil);
         }
         if ((~sg).releasetime != 0) {
@@ -506,7 +504,7 @@ internal static void closechan(ж<hchan> Ꮡc) {
         gp.Value.param = @unsafe.Pointer.FromPinnedBox(sg);
         sg.Value.success = false;
         if (raceenabled) {
-            raceacquireg(ref (gp).DerefOrNull(), (uintptr)Ꮡc.raceaddr());
+            raceacquireg(ref (gp).DerefOrNull(), Ꮡc.raceaddr());
         }
         glist.push(gp);
     }
@@ -525,7 +523,7 @@ internal static void closechan(ж<hchan> Ꮡc) {
         gp.Value.param = @unsafe.Pointer.FromPinnedBox(sg);
         sg.Value.success = false;
         if (raceenabled) {
-            raceacquireg(ref (gp).DerefOrNull(), (uintptr)Ꮡc.raceaddr());
+            raceacquireg(ref (gp).DerefOrNull(), Ꮡc.raceaddr());
         }
         glist.push(gp);
     }
@@ -543,12 +541,12 @@ internal static void closechan(ж<hchan> Ꮡc) {
 // empty).  It is atomically correct and sequentially consistent at the moment
 // it returns, but since the channel is unlocked, the channel may become
 // non-empty immediately afterward.
-internal static bool empty(ж<hchan> Ꮡc) {
+internal static bool empty(ж<Δhchan> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // c.dataqsiz is immutable.
     if (c.dataqsiz == 0) {
-        return (uintptr)atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡc.Ꮡsendq.Ꮡfirst)) == nil;
+        return atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡc.Ꮡsendq.Ꮡfirst)) == nil;
     }
     // c.timer is also immutable (it is set after make(chan) but before any channel operations).
     // All timer channels have dataqsiz > 0.
@@ -561,12 +559,12 @@ internal static bool empty(ж<hchan> Ꮡc) {
 // entry points for <- c from compiled code.
 //
 //go:nosplit
-internal static void chanrecv1(ж<hchan> c, @unsafe.Pointer elem) {
+internal static void chanrecv1(ж<Δhchan> c, @unsafe.Pointer elem) {
     chanrecv(c, elem, true);
 }
 
 //go:nosplit
-internal static bool /*received*/ chanrecv2(ж<hchan> c, @unsafe.Pointer elem) {
+internal static bool /*received*/ chanrecv2(ж<Δhchan> c, @unsafe.Pointer elem) {
     bool received = default;
 
     (_, received) = chanrecv(c, elem, true);
@@ -583,7 +581,7 @@ private static readonly @string receiveOnSynctestChannelˢᵇ = "receive on sync
 // Otherwise, if c is closed, zeros *ep and returns (true, false).
 // Otherwise, fills in *ep with an element and returns (true, true).
 // A non-nil ep must point to the heap or the caller's stack.
-internal static (bool selected, bool received) chanrecv(ж<hchan> Ꮡc, @unsafe.Pointer ep, bool block) {
+internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block) {
     bool selected = default;
     bool received = default;
     ref var c = ref Ꮡc.DerefOrNull();
@@ -635,7 +633,7 @@ internal static (bool selected, bool received) chanrecv(ж<hchan> Ꮡc, @unsafe.
         if (empty(Ꮡc)) {
             // The channel is irreversibly closed and empty.
             if (raceenabled) {
-                raceacquire((uintptr)Ꮡc.raceaddr());
+                raceacquire(Ꮡc.raceaddr());
             }
             if (ep != nil) {
                 typedmemclr(c.elemtype, ep);
@@ -654,7 +652,7 @@ internal static (bool selected, bool received) chanrecv(ж<hchan> Ꮡc, @unsafe.
     if (c.closed != 0) {
         if (c.qcount == 0) {
             if (raceenabled) {
-                raceacquire((uintptr)Ꮡc.raceaddr());
+                raceacquire(Ꮡc.raceaddr());
             }
             unlock(Ꮡc.Ꮡlock);
             if (ep != nil) {
@@ -681,7 +679,7 @@ internal static (bool selected, bool received) chanrecv(ж<hchan> Ꮡc, @unsafe.
 
     if (c.qcount > 0) {
         // Receive directly from queue
-        @unsafe.Pointer qp = (uintptr)chanbuf(Ꮡc, c.recvx);
+        @unsafe.Pointer qp = chanbuf(Ꮡc, c.recvx);
         if (raceenabled) {
             racenotify(Ꮡc, c.recvx, nil);
         }
@@ -769,7 +767,7 @@ internal static (bool selected, bool received) chanrecv(ж<hchan> Ꮡc, @unsafe.
 // Channel c must be full and locked. recv unlocks c with unlockf.
 // sg must already be dequeued from c.
 // A non-nil ep must point to the heap or the caller's stack.
-internal static void recv(ж<hchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep, Action unlockf, nint skip) {
+internal static void recv(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep, Action unlockf, nint skip) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var sg = ref Ꮡsg.DerefOrNull();
 
@@ -790,7 +788,7 @@ internal static void recv(ж<hchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep, A
         // head of the queue. Make the sender enqueue
         // its item at the tail of the queue. Since the
         // queue is full, those are both the same slot.
-        @unsafe.Pointer qp = (uintptr)chanbuf(Ꮡc, c.recvx);
+        @unsafe.Pointer qp = chanbuf(Ꮡc, c.recvx);
         if (raceenabled) {
             racenotify(Ꮡc, c.recvx, nil);
             racenotify(Ꮡc, c.recvx, Ꮡsg);
@@ -800,7 +798,7 @@ internal static void recv(ж<hchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep, A
             typedmemmove(c.elemtype, ep, qp);
         }
         // copy data from sender to queue
-        typedmemmove(c.elemtype, qp, (uintptr)sg.elem.get());
+        typedmemmove(c.elemtype, qp, sg.elem.get());
         c.recvx++;
         if (c.recvx == c.dataqsiz) {
             c.recvx = 0;
@@ -836,7 +834,7 @@ internal static bool chanparkcommit(ж<g> Ꮡgp, @unsafe.Pointer chanLock) {
     // we risk gp getting readied by a channel operation and
     // so gp could continue running before everything before
     // the unlock is visible (even to gp itself).
-    unlock((ж<mutex>)(uintptr)(chanLock));
+    unlock(@unsafe.Pointer.To<mutex>(chanLock));
     return true;
 }
 
@@ -856,7 +854,7 @@ internal static bool chanparkcommit(ж<g> Ꮡgp, @unsafe.Pointer chanLock) {
 //	} else {
 //		... bar
 //	}
-internal static bool /*selected*/ selectnbsend(ж<hchan> c, @unsafe.Pointer elem) {
+internal static bool /*selected*/ selectnbsend(ж<Δhchan> c, @unsafe.Pointer elem) {
     return chansend(c, elem, false, sys.GetCallerPC());
 }
 
@@ -876,21 +874,21 @@ internal static bool /*selected*/ selectnbsend(ж<hchan> c, @unsafe.Pointer elem
 //	} else {
 //		... bar
 //	}
-internal static (bool selected, bool received) selectnbrecv(@unsafe.Pointer elem, ж<hchan> c) {
+internal static (bool selected, bool received) selectnbrecv(@unsafe.Pointer elem, ж<Δhchan> c) {
     return chanrecv(c, elem, false);
 }
 
 //go:linkname reflect_chansend reflect.chansend0
-internal static bool /*selected*/ reflect_chansend(ж<hchan> c, @unsafe.Pointer elem, bool nb) {
+internal static bool /*selected*/ reflect_chansend(ж<Δhchan> c, @unsafe.Pointer elem, bool nb) {
     return chansend(c, elem, !nb, sys.GetCallerPC());
 }
 
 //go:linkname reflect_chanrecv reflect.chanrecv
-internal static (bool selected, bool received) reflect_chanrecv(ж<hchan> c, bool nb, @unsafe.Pointer elem) {
+internal static (bool selected, bool received) reflect_chanrecv(ж<Δhchan> c, bool nb, @unsafe.Pointer elem) {
     return chanrecv(c, elem, !nb);
 }
 
-internal static nint chanlen(ж<hchan> Ꮡc) {
+internal static nint chanlen(ж<Δhchan> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc == nil) {
@@ -909,7 +907,7 @@ internal static nint chanlen(ж<hchan> Ꮡc) {
     return (nint)c.qcount;
 }
 
-internal static nint chancap(ж<hchan> Ꮡc) {
+internal static nint chancap(ж<Δhchan> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc == nil) {
@@ -929,26 +927,24 @@ internal static nint chancap(ж<hchan> Ꮡc) {
 }
 
 //go:linkname reflect_chanlen reflect.chanlen
-internal static nint reflect_chanlen(ж<hchan> c) {
+internal static nint reflect_chanlen(ж<Δhchan> c) {
     return chanlen(c);
 }
 
 //go:linkname reflectlite_chanlen internal/reflectlite.chanlen
-internal static nint reflectlite_chanlen(ж<hchan> c) {
+internal static nint reflectlite_chanlen(ж<Δhchan> c) {
     return chanlen(c);
 }
 
 //go:linkname reflect_chancap reflect.chancap
-internal static nint reflect_chancap(ж<hchan> c) {
+internal static nint reflect_chancap(ж<Δhchan> c) {
     return chancap(c);
 }
 
 //go:linkname reflect_chanclose reflect.chanclose
-internal static void reflect_chanclose(ж<hchan> c) {
+internal static void reflect_chanclose(ж<Δhchan> c) {
     closechan(c);
 }
-
-} partial class runtimeᴛwaitq {
 
 internal static void enqueue(this ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
@@ -1001,9 +997,7 @@ internal static ж<sudog> dequeue(this ref waitq q) {
     }
 }
 
-} partial class runtimeᴛhchan {
-
-internal static @unsafe.Pointer raceaddr(this ж<hchan> Ꮡc) {
+internal static @unsafe.Pointer raceaddr(this ж<Δhchan> Ꮡc) {
     // Treat read-like and write-like operations on the channel to
     // happen at this address. Avoid using the address of qcount
     // or dataqsiz, because the len() and cap() builtins read
@@ -1012,19 +1006,17 @@ internal static @unsafe.Pointer raceaddr(this ж<hchan> Ꮡc) {
     return @unsafe.Pointer.FromBox(Ꮡc.Ꮡbuf);
 }
 
-} partial class runtime_package {
-
-internal static void racesync(ж<hchan> c, ref sudog sg) {
-    racerelease((uintptr)chanbuf(c, 0));
-    raceacquireg(ref (sg.g).DerefOrNull(), (uintptr)chanbuf(c, 0));
-    racereleaseg(ref (sg.g).DerefOrNull(), (uintptr)chanbuf(c, 0));
-    raceacquire((uintptr)chanbuf(c, 0));
+internal static void racesync(ж<Δhchan> c, ref sudog sg) {
+    racerelease(chanbuf(c, 0));
+    raceacquireg(ref (sg.g).DerefOrNull(), chanbuf(c, 0));
+    racereleaseg(ref (sg.g).DerefOrNull(), chanbuf(c, 0));
+    raceacquire(chanbuf(c, 0));
 }
 
 // Notify the race detector of a send or receive involving buffer entry idx
 // and a channel c or its communicating partner sg.
 // This function handles the special case of c.elemsize==0.
-internal static void racenotify(ж<hchan> Ꮡc, nuint idx, ж<sudog> Ꮡsg) {
+internal static void racenotify(ж<Δhchan> Ꮡc, nuint idx, ж<sudog> Ꮡsg) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var sg = ref Ꮡsg.DerefOrNull();
 
@@ -1035,7 +1027,7 @@ internal static void racenotify(ж<hchan> Ꮡc, nuint idx, ж<sudog> Ꮡsg) {
     // this way, Go will continue to not allocating buffer entries for channels
     // of elemsize==0, yet the race detector can be made to handle multiple
     // sync objects underneath the hood (one sync object per idx)
-    @unsafe.Pointer qp = (uintptr)chanbuf(Ꮡc, idx);
+    @unsafe.Pointer qp = chanbuf(Ꮡc, idx);
     // When elemsize==0, we don't allocate a full buffer for the channel.
     // Instead of individual buffer entries, the race detector uses the
     // c.buf as the only buffer entry.  This simplification prevents us from

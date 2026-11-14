@@ -44,12 +44,12 @@ internal static void atomicwb(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Pointer @new) 
 //go:nosplit
 internal static void atomicstorep(@unsafe.Pointer ptr, @unsafe.Pointer @new) {
     if (writeBarrier.enabled) {
-        atomicwb((ж<@unsafe.Pointer>)(uintptr)(ptr), @new);
+        atomicwb(@unsafe.Pointer.To<@unsafe.Pointer>(ptr), @new);
     }
     if (goexperiment.CgoCheck2) {
-        cgoCheckPtrWrite((ж<@unsafe.Pointer>)(uintptr)(ptr), @new);
+        cgoCheckPtrWrite(@unsafe.Pointer.To<@unsafe.Pointer>(ptr), @new);
     }
-    atomic.StorepNoWB((uintptr)noescape(ptr), @new);
+    atomic.StorepNoWB(noescape(ptr), @new);
 }
 
 // atomic_storePointer is the implementation of internal/runtime/atomic.UnsafePointer.Store

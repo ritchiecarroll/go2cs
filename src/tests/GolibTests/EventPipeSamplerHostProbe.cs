@@ -68,19 +68,30 @@ public class EventPipeSamplerHostProbe
         var ids = new ulong[threads];
         var ownCpu = new TimeSpan[threads];
         var hogs = new Thread[threads];
+        var thrown = new Exception?[threads];
 
         for (int i = 0; i < threads; i++)
         {
             int index = i;
 
+            // The hog is a thread of its own, so what it throws is caught here and reported on the test's thread below:
+            // an exception left unhandled on it ends the test host and every test after this one (a refused P/Invoke
+            // did, on linux-arm64, while the GolibTests assembly carried bindings converted for linux/amd64).
             hogs[i] = new Thread(() =>
             {
-                ids[index] = NativeThreadId();
-                long token = ThreadCpuTime.CurrentThreadToken();
-                using ThreadCpuReader? reader = token != 0 ? ThreadCpuTime.Open(token) : null;
-                TimeSpan start = reader is not null && reader.TryRead(out TimeSpan before) ? before : TimeSpan.Zero;
-                cpusamplerprobe_package.cpuHogger(hogMilliseconds);
-                ownCpu[index] = reader is not null && reader.TryRead(out TimeSpan after) ? after - start : TimeSpan.MinValue;
+                try
+                {
+                    ids[index] = NativeThreadId();
+                    long token = ThreadCpuTime.CurrentThreadToken();
+                    using ThreadCpuReader? reader = token != 0 ? ThreadCpuTime.Open(token) : null;
+                    TimeSpan start = reader is not null && reader.TryRead(out TimeSpan before) ? before : TimeSpan.Zero;
+                    cpusamplerprobe_package.cpuHogger(hogMilliseconds);
+                    ownCpu[index] = reader is not null && reader.TryRead(out TimeSpan after) ? after - start : TimeSpan.MinValue;
+                }
+                catch (Exception exception)
+                {
+                    thrown[index] = exception;
+                }
             });
 
             hogs[i].Start();
@@ -88,6 +99,12 @@ public class EventPipeSamplerHostProbe
 
         foreach (Thread hog in hogs)
             hog.Join();
+
+        if (Array.FindIndex(thrown, exception => exception is not null) is int failed and >= 0)
+        {
+            sampler.Stop((_, _, _) => { });
+            Assert.Fail($"hog {failed} threw on its own thread: {thrown[failed]}");
+        }
 
         sampler.Stop(Collect);
         wall.Stop();

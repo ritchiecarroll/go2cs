@@ -198,7 +198,7 @@ internal static int32 closefd(int32 fd) {
     @throw(unimplementedˢ);
     return -1;
 }
-internal static int32 read(int32 fd, @unsafe.Pointer p, int32 n) {
+internal static int32 read(int32 fd, @unsafe.Pointer Δp, int32 n) {
     @throw(unimplementedˢ);
     return -1;
 }
@@ -306,7 +306,7 @@ internal static void monitorSuspendResume() {
     ref var fn = ref heap<any>(out var Ꮡfn);
 
     fn = uintptr (uintptr context, uint32 changeType, uintptr setting) => {
-        for (var mp = (ж<m>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm))); mp != nil; mp = mp.Value.alllink) {
+        for (var mp = @unsafe.Pointer.To<m>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm))); mp != nil; mp = mp.Value.alllink) {
             if ((~mp).resumesema != 0) {
                 stdcall(_SetEvent, (~mp).resumesema);
             }
@@ -458,7 +458,7 @@ internal static void initLongPathSupport() {
     // Set the IsLongPathAwareProcess flag of the PEB's bit field.
     // This flag is not documented, but it's known to be used
     // by Windows to enable long path support.
-    var bitField = (ж<byte>)(uintptr)((@unsafe.Pointer)(stdcall(_RtlGetCurrentPeb) + PebBitFieldOffset));
+    var bitField = @unsafe.Pointer.To<byte>((@unsafe.Pointer)(stdcall(_RtlGetCurrentPeb) + PebBitFieldOffset));
     bitField.Value |= (byte)(IsLongPathAwareProcess);
 
     canUseLongPaths = true;
@@ -504,11 +504,11 @@ internal static void goenvs() {
     //     "envA=valA\x00envB=valB\x00\x00" (in UTF-16)
     // Two consecutive zero bytes end the list.
     @unsafe.Pointer strings = (@unsafe.Pointer)stdcall(_GetEnvironmentStringsW);
-    var p = ((ж<array<uint16>>)(uintptr)(strings)).slice();
+    var Δp = @unsafe.Pointer.To<array<uint16>>(strings).slice();
 
     nint n = 0;
     for ((nint from, nint i) = (0, 0); true; i++) {
-        if (p[i] == 0) {
+        if (Δp[i] == 0) {
             // empty string marks the end
             if (i == from) {
                 break;
@@ -520,11 +520,11 @@ internal static void goenvs() {
     envs = new slice<@string>(n);
 
     foreach (var i in range(len(envs))) {
-        envs[i] = gostringw(Ꮡ(p, 0));
-        while (p[0] != 0) {
-            p = p[1..];
+        envs[i] = gostringw(Ꮡ(Δp, 0));
+        while (Δp[0] != 0) {
+            Δp = Δp[1..];
         }
-        p = p[1..]; // skip nil byte
+        Δp = Δp[1..]; // skip nil byte
     }
 
     stdcall(_FreeEnvironmentStringsW, (uintptr)strings);
@@ -840,7 +840,7 @@ internal static void mpreinit(ref m mp) {
 }
 
 //go:nosplit
-internal static void sigsave(ж<sigset> p) {
+internal static void sigsave(ж<sigset> Δp) {
 }
 
 //go:nosplit
@@ -921,7 +921,7 @@ internal static void minit() {
     // Sanity check the stack bounds.
     var g0 = getg();
     if (@base > (~g0).stack.hi || (~g0).stack.hi - @base > (uintptr)64 << 20) {
-        print((@string)"runtime: g0 stack [", (hex)(uint64)@base, (@string)",", (hex)(uint64)(~g0).stack.hi, (@string)")\n");
+        print((@string)"runtime: g0 stack [", (Δhex)(uint64)@base, (@string)",", (Δhex)(uint64)(~g0).stack.hi, (@string)")\n");
         @throw(badG0Stackˢ);
     }
     g0.Value.stack.lo = @base;
@@ -989,7 +989,7 @@ internal static uintptr stdcall_no_g(stdFunction fn, params ꓸꓸꓸuintptr arg
         N: (uintptr)len(args)
     ), out var Ꮡcall);
     if (len(args) > 0) {
-        call.Args = (uintptr)(uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
+        call.Args = (uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
     }
     windows.StdCall(Ꮡcall);
     return call.R1;
@@ -1010,7 +1010,7 @@ internal static uintptr stdcall(stdFunction fn, params ꓸꓸꓸuintptr argsʗp)
     mp.Value.stdCallInfo.Fn = (uintptr)(@unsafe.Pointer)fn;
     mp.Value.stdCallInfo.N = (uintptr)len(args);
     if (len(args) > 0) {
-        mp.Value.stdCallInfo.Args = (uintptr)(uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
+        mp.Value.stdCallInfo.Args = (uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
     }
     var resetLibcall = false;
     if ((~mp).profilehz != 0 && (~mp).libcallsp == 0) {
@@ -1090,7 +1090,7 @@ internal static void profilem(ж<m> mp, uintptr thread) {
     // Align Context to 16 bytes.
     ж<windows.Context> c = default;
     ref var cbuf = ref heap(new array<byte>(1247), out var Ꮡcbuf);
-    c = (ж<windows.Context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
+    c = @unsafe.Pointer.To<windows.Context>((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
 
     c.ContextFlags = windows.CONTEXT_CONTROL;
     stdcall(_GetThreadContext, thread, (uintptr)c);
@@ -1128,7 +1128,7 @@ internal static void profileLoop() {
 
     for (;;) {
         stdcall(_WaitForSingleObject, profiletimer, windows.INFINITE);
-        var first = (ж<m>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm)));
+        var first = @unsafe.Pointer.To<m>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm)));
         for (var mp = first; mp != nil; mp = mp.Value.alllink) {
             if (mp == (~getg()).m) {
                 // Don't profile ourselves.
@@ -1239,7 +1239,7 @@ internal static void preemptM(ж<m> Ꮡmp) {
     // Prepare thread context buffer. This must be aligned to 16 bytes.
     ж<windows.Context> c = default;
     ref var cbuf = ref heap(new array<byte>(1247), out var Ꮡcbuf);
-    c = (ж<windows.Context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
+    c = @unsafe.Pointer.To<windows.Context>((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
     c.ContextFlags = windows.CONTEXT_CONTROL;
 
     // Serialize thread suspension. SuspendThread is asynchronous,

@@ -1,0 +1,5 @@
+the method-group conversion at one site yields the same instance each time: True
+two sites, same function, same number: True
+round 0: the worst-placed of 300 same-type functions, mint at a site 533 ns (0)
+round 1: the worst-placed of 300 same-type functions, mint at a site 51 ns (0)
+round 2: the worst-placed of 300 same-type functions, mint at a site 48 ns (0)

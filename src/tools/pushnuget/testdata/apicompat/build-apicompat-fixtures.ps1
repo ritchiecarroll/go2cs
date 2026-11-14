@@ -11,7 +11,7 @@
                            deliberate regression the guard's sizing used (GoTypeOps<T>.Instance made internal).
       widget-added.dll     Widget.Instance is public and Widget.Weight is new: an addition, which is compatible.
       gowidget-base.dll    widget-base.dll under the assembly identity go.Widget: OQ4's rename (fmt.dll became
-                           go.fmt.dll in 1.26.10.4), the same surface under its package ID's name.
+                           go.fmt.dll in 1.26.11.1), the same surface under its package ID's name.
       gowidget-internal.dll  widget-internal.dll under go.Widget: the rename AND a member removed.
 
     Moves, from src/Moves.cs, compiled against src/MovesLib.cs (a stand-in for go.lib, built and not kept):

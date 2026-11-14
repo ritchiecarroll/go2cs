@@ -1,0 +1,18 @@
+     3  2|nontest|local var|declarations saved
+     1  2|nontest|local var|no values|mergeable
+     1  2|nontest|local var|no values|specs
+     3  2|nontest|local var|specs merged
+     1  2|nontest|local var|values|blocked: names of different types
+     2  2|nontest|local var|values|mergeable
+     3  2|nontest|local var|values|specs
+     3  2|nontest|package var|declarations saved
+     1  2|nontest|package var|no values|mergeable
+     1  2|nontest|package var|no values|specs
+     2  2|nontest|package var|specs merged
+     1  2|nontest|package var|values|mergeable
+     1  2|nontest|package var|values|specs
+     1  3|nontest|level 2 eligible (local, not addressed or captured, labels side-effect free)
+     1  3|nontest|non-constant label|selector
+     1  3|nontest|string tag|identifier: local or parameter
+     4  4|nontest|named array type (elided, inside an outer literal)|unkeyed, full length|scalar or string element
+     3  4|nontest|unnamed|unkeyed, full length|scalar or string element

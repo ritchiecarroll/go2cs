@@ -8,7 +8,6 @@ using gc = @internal.runtime.gc_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -74,16 +73,12 @@ partial struct gclink {
 // to the garbage collector.
 partial struct gclinkptr /*num:uintptr*/;
 
-} partial class runtimeᴛgclinkptr {
-
 // ptr returns the *gclink form of p.
 // The result should be used for accessing fields, not stored
 // in other data structures.
-internal static ж<gclink> ptr(this gclinkptr p) {
-    return (ж<gclink>)(uintptr)((@unsafe.Pointer)(uintptr)p);
+internal static ж<gclink> ptr(this gclinkptr Δp) {
+    return @unsafe.Pointer.To<gclink>((@unsafe.Pointer)(uintptr)Δp);
 }
-
-} partial class runtime_package {
 
 partial struct stackfreelist {
     internal gclinkptr list; // linked list of free stacks
@@ -98,7 +93,7 @@ internal static ж<mcache> allocmcache() {
     ref var c = ref heap<ж<mcache>>(out var Ꮡc);
     systemstack(() => {
         @lock(Ꮡmheap_.Ꮡlock);
-        Ꮡc.ValueSlot = (ж<mcache>)(uintptr)(Ꮡmheap_.Ꮡcachealloc.alloc());
+        Ꮡc.ValueSlot = @unsafe.Pointer.To<mcache>(Ꮡmheap_.Ꮡcachealloc.alloc());
         Ꮡc.ValueSlot.ᏑflushGen.Store(mheap_.sweepgen);
         unlock(Ꮡmheap_.Ꮡlock);
     });
@@ -152,8 +147,6 @@ internal static ж<mcache> getMCache(ref m mp) {
     return c;
 }
 
-} partial class runtimeᴛmcache {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string refillOfSpanWithFreeˢ => ref refillOfSpanWithFreeˢᵇ;
 private static readonly @string refillOfSpanWithFreeˢᵇ = "refill of span with free space remaining"u8;
@@ -161,8 +154,6 @@ internal static ref readonly @string refillOfSpanWithReusableˢ => ref refillOfS
 private static readonly @string refillOfSpanWithReusableˢᵇ = "refill of span with reusable pointers remaining on pointer free list"u8;
 internal static ref readonly @string badSweepgenInRefillˢ => ref badSweepgenInRefillˢᵇ;
 private static readonly @string badSweepgenInRefillˢᵇ = "bad sweepgen in refill"u8;
-internal static ref readonly @string outOfMemoryˢ => ref outOfMemoryˢᵇ;
-private static readonly @string outOfMemoryˢᵇ = "out of memory"u8;
 internal static ref readonly @string spanHasNoFreeSpaceˢ => ref spanHasNoFreeSpaceˢᵇ;
 private static readonly @string spanHasNoFreeSpaceˢᵇ = "span has no free space"u8;
 
@@ -352,7 +343,7 @@ internal static void releaseAll(this ref mcache c) {
     // so we can simply clear the linked list head pointers.
     // TODO(thepudds): consider having debug logging of a non-empty reusable lists getting cleared,
     // maybe based on the existing debugReusableLog.
-    clear(c.reusableNoscan[..]);
+    builtin.clear(c.reusableNoscan[..]);
 
     // Update heapLive and heapScan.
     ᏑgcController.update(dHeapLive, scanAlloc);
@@ -410,4 +401,4 @@ internal static bool hasReusableNoscan(this ref mcache c, spanClass spc) {
     return c.reusableNoscan[spc] != 0;
 }
 
-} // end runtimeᴛmcache
+} // end runtime_package

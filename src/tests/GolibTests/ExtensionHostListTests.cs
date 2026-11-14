@@ -18,7 +18,7 @@ namespace GolibTests;
 public class ExtensionHostListTests
 {
     // Assemblies that reference golib but are hand-written .NET projects built without go2cs-gen, so carry no list.
-    private static readonly HashSet<string> s_notConverted = ["GolibTests", "go2cs.CpuProfiler"];
+    private static readonly HashSet<string> s_notConverted = ["GolibTests", "go2cs.CpuProfiler", "go.arrays"];
 
     // Every assembly in the test's output directory that references golib, loaded. The output directory holds the
     // whole reference closure, so this is every converted assembly the project can reach.

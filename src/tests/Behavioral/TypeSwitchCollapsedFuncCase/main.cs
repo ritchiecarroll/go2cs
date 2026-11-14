@@ -10,18 +10,18 @@ partial class main_package {
 // type HookKind is a methodless func type — rendered inline as its base delegate
 // type HookValue is a methodless func type — rendered inline as its base delegate
 
-internal static (any, error) exec(any raw, reflect.Value from, reflect.Value to) {
+internal static (any, error) exec(any raw, reflectꓸValue from, reflectꓸValue to) {
     switch (raw.type()) {
-    case Func<reflect.Type, reflect.Type, any, (any, error)> f: {
+    case {} Δf when Δf._<Func<reflectꓸType, reflectꓸType, any, (any, error)>>(out var f): {
         return f(from.Type(), to.Type(), from.Interface());
     }
-    case Func<reflect.Kind, reflect.Kind, any, (any, error)> f: {
+    case {} Δf when Δf._<Func<reflectꓸKind, reflectꓸKind, any, (any, error)>>(out var f): {
         return f(from.Kind(), to.Kind(), from.Interface());
     }
-    case Func<reflect.Value, reflect.Value, (any, error)> f: {
+    case {} Δf when Δf._<Func<reflectꓸValue, reflectꓸValue, (any, error)>>(out var f): {
         return f(from, to);
     }
-    case Func<nint, nint> f: {
+    case {} Δf when Δf._<Func<nint, nint>>(out var f): {
         return (f(from.Interface()._<nint>()), default);
     }
     default: {
@@ -32,11 +32,11 @@ internal static (any, error) exec(any raw, reflect.Value from, reflect.Value to)
 
 internal static @string kind(any raw) {
     switch (raw.type()) {
-    case Func<reflect.Type, reflect.Type, any, (any, error)>: {
+    case {} ᴛ0 when ᴛ0._<Func<reflectꓸType, reflectꓸType, any, (any, error)>>(out var _): {
         return "type";
     }
-    case Func<reflect.Kind, reflect.Kind, any, (any, error)> _:
-    case Func<reflect.Value, reflect.Value, (any, error)> _: {
+    case {} ᴛ0 when ᴛ0._<Func<reflectꓸKind, reflectꓸKind, any, (any, error)>>(out var _):
+    case {} ᴛ1 when ᴛ1._<Func<reflectꓸValue, reflectꓸValue, (any, error)>>(out var _): {
         return "kind or value";
     }}
 
@@ -46,9 +46,9 @@ internal static @string kind(any raw) {
 internal static void main() {
     var (from, to) = (reflect.ValueOf((nint)21), reflect.ValueOf(""));
     var hooks = slice<any>([
-        new Func<reflect.Type, reflect.Type, any, (any, error)>((reflect.Type f, reflect.Type t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default)),
-        new Func<reflect.Kind, reflect.Kind, any, (any, error)>((reflect.Kind f, reflect.Kind t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default)),
-        new Func<reflect.Value, reflect.Value, (any, error)>((reflect.Value f, reflect.Value t) => (f.Int() * 2, default)),
+        new Func<reflectꓸType, reflectꓸType, any, (any, error)>((reflectꓸType f, reflectꓸType t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default)),
+        new Func<reflectꓸKind, reflectꓸKind, any, (any, error)>((reflectꓸKind f, reflectꓸKind t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default)),
+        new Func<reflectꓸValue, reflectꓸValue, (any, error)>((reflectꓸValue f, reflectꓸValue t) => (f.Int() * 2, default)),
         nint (nint x) => x + 1,
         (nint)42
     ]);
@@ -58,7 +58,7 @@ internal static void main() {
     }
 
     {
-        var (f, ok) = hooks[2]._<Func<reflect.Value, reflect.Value, (any, error)>>(ᐧ); if (ok) {
+        var (f, ok) = hooks[2]._<Func<reflectꓸValue, reflectꓸValue, (any, error)>>(ᐧ); if (ok) {
             var (@out, _) = f(reflect.ValueOf((nint)5), to);
             fmt.Println("asserted", @out);
         }

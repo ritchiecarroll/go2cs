@@ -1,0 +1,3 @@
+     2  (a) ... over 4 KiB (beyond the struct cap)   e.g. $GOMODCACHE/modernc.org/libc@v1.80.1/ccgo_linux_amd64.go:8185:6
+     1  (a) lib local/param, array-holding struct, 1 KiB < size <= 4 KiB   e.g. $GOMODCACHE/modernc.org/libc@v1.80.1/all_musl_test.go:437:6
+    31  lib _test.go file   e.g. $GOMODCACHE/modernc.org/libc@v1.80.1/all_musl_test.go

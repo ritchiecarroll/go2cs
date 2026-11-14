@@ -1,0 +1,1 @@
+     1  (a) lib local/param, array-holding struct, 1 KiB < size <= 4 KiB   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/lib/sqlite_windows.go:89909:6

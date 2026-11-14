@@ -1,0 +1,2 @@
+    19  address BELOW an element: &x.f[i].g...   e.g. $GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.10.linux-amd64/src/runtime/mcentral.go:51:12
+    10  pointer-receiver method BELOW an element: x.f[i].g.M()   e.g. $GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.10.linux-amd64/src/runtime/arena.go:1120:2

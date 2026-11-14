@@ -1,0 +1,11 @@
+PASS one number per function across mint sites (busy.go's h == cFuncPointer(busyHandler)) 0xfffff00000000000 0xfffff00000000010
+PASS a number is 16-aligned in the kernel half, never 0 and never ^0 (SQLITE_TRANSIENT) 
+PASS CONTROL: the same function minted under ANOTHER delegate type gets another number (so the converter types every mint by the function's own Go signature) 
+PASS recovery calls the function 
+PASS recovery returns the minted instance (identity for N3's twin lookup) 
+PASS zero is Go's nil func 
+PASS a recovery under another signature (a C cast) fails loudly, naming both types InvalidCastException: function pointer 0xfffff00000000000 holds System.Func`4[TLS,System.UIntPtr,System.UIntPtr,System.Int32] and is called as System.Func`3[TLS,System.UIntPtr,System.Int32]
+PASS an unknown number fails loudly InvalidOperationException: 0xfffff00000001000 is not a function pointer go2cs minted
+PASS a data pointer used as a function pointer fails loudly InvalidOperationException: 0x7f0012345670 is not a function pointer go2cs minted
+COST mint (a lookup of an existing delegate) 39.2 ns; recover and call 11.9 ns (True, 1000000)
+failed: 0

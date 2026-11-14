@@ -15,7 +15,7 @@ partial class runtime_package {
 internal static void gostartcall(ref gobuf buf, @unsafe.Pointer fn, @unsafe.Pointer ctxt) {
     var sp = buf.sp;
     sp -= goarch.PtrSize;
-    ((ж<uintptr>)(uintptr)((@unsafe.Pointer)sp)).Value = buf.pc;
+    (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)sp)).Value = buf.pc;
     buf.sp = sp;
     buf.pc = (uintptr)fn;
     buf.ctxt = ctxt;

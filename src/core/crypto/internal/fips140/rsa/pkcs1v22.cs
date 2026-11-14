@@ -406,6 +406,7 @@ public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, hash.Hash mgfH
     fipsSelfTest();
     fips140.RecordApproved();
     checkApprovedHash(hashΔ1);
+    checkApprovedHash(mgfHash);
     {
         var (fipsApproved, err) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (err != nil) {
             return (default, err);
@@ -449,6 +450,7 @@ public static (slice<byte>, error) DecryptOAEP(hash.Hash hashΔ1, hash.Hash mgfH
     fipsSelfTest();
     fips140.RecordApproved();
     checkApprovedHash(hashΔ1);
+    checkApprovedHash(mgfHash);
 
     nint k = priv.pub.Size();
     if (len(ciphertext) > k || k < hashΔ1.Size() * 2 + 2) {

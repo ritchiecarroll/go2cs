@@ -4,7 +4,6 @@
 namespace go;
 
 using @unsafe = unsafe_package;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -26,16 +25,12 @@ partial struct listHeadManual {
     internal uintptr nodeOffset;
 }
 
-} partial class runtimeᴛlistHeadManual {
-
 // init initializes the list head. off is the offset (via unsafe.Offsetof) of
 // the listNodeManual field in the objects in the list.
 internal static void init(this ref listHeadManual head, uintptr off) {
     head.initialized = true;
     head.nodeOffset = off;
 }
-
-} partial class runtime_package {
 
 // listNodeManual is the linked list node for objects in a listHeadManual list.
 //
@@ -57,21 +52,15 @@ partial struct listNodeManual {
     internal uintptr next;
 }
 
-} partial class runtimeᴛlistHeadManual {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeUninitializedˢ => ref runtimeUninitializedˢᵇ;
-private static readonly @string runtimeUninitializedˢᵇ = "runtime: uninitialized listHead"u8;
-
-internal static ж<listNodeManual> getNode(this ref listHeadManual head, @unsafe.Pointer p) {
+internal static ж<listNodeManual> getNode(this ref listHeadManual head, @unsafe.Pointer Δp) {
     if (!head.initialized) {
         @throw(runtimeUninitializedˢ);
     }
 
-    if (p == nil) {
+    if (Δp == nil) {
         return default;
     }
-    return (ж<listNodeManual>)(uintptr)(@unsafe.Add(p, head.nodeOffset));
+    return @unsafe.Pointer.To<listNodeManual>(@unsafe.Add(Δp, head.nodeOffset));
 }
 
 // Returns true if the list is empty.
@@ -85,20 +74,20 @@ internal static @unsafe.Pointer head(this ref listHeadManual head) {
 }
 
 // Push p onto the front of the list.
-internal static void push(this ref listHeadManual head, @unsafe.Pointer p) {
+internal static void push(this ref listHeadManual head, @unsafe.Pointer Δp) {
     // p becomes the head of the list.
 
     // ... so p's next is the current head.
-    var pNode = head.getNode(p);
+    var pNode = head.getNode(Δp);
     pNode.next = head.obj;
 
     // ... and the current head's prev is p.
     if (head.obj != 0) {
         var headNode = head.getNode((@unsafe.Pointer)head.obj);
-        headNode.prev = (uintptr)p;
+        headNode.prev = (uintptr)Δp;
     }
 
-    head.obj = (uintptr)p;
+    head.obj = (uintptr)Δp;
 }
 
 // Pop removes the head of the list.
@@ -108,10 +97,10 @@ internal static @unsafe.Pointer pop(this ref listHeadManual head) {
     }
 
     // Return the head of the list.
-    @unsafe.Pointer p = (@unsafe.Pointer)head.obj;
+    @unsafe.Pointer Δp = (@unsafe.Pointer)head.obj;
 
     // ... so the new head is p's next.
-    var pNode = head.getNode(p);
+    var pNode = head.getNode(Δp);
     head.obj = pNode.next;
     // p is no longer on the list. Clear next to remove unused references.
     // N.B. as the head, prev must already be nil.
@@ -123,18 +112,18 @@ internal static @unsafe.Pointer pop(this ref listHeadManual head) {
         headNode.prev = 0;
     }
 
-    return p;
+    return Δp;
 }
 
 // Remove p from the middle of the list.
-internal static void remove(this ref listHeadManual head, @unsafe.Pointer p) {
-    if ((@unsafe.Pointer)head.obj == p) {
+internal static void remove(this ref listHeadManual head, @unsafe.Pointer Δp) {
+    if ((@unsafe.Pointer)head.obj == Δp) {
         // Use pop to ensure head is updated when removing the head.
         head.pop();
         return;
     }
 
-    var pNode = head.getNode(p);
+    var pNode = head.getNode(Δp);
     var prevNode = head.getNode((@unsafe.Pointer)pNode.prev);
     var nextNode = head.getNode((@unsafe.Pointer)pNode.next);
 
@@ -151,4 +140,4 @@ internal static void remove(this ref listHeadManual head, @unsafe.Pointer p) {
     pNode.next = 0;
 }
 
-} // end runtimeᴛlistHeadManual
+} // end runtime_package

@@ -198,6 +198,12 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 			}
 		}
 
+		// A type the Go source declares is named as declared, even where its spelling is one the basic
+		// types use (`type float struct{…}`), decided by its go/types object.
+		if typeName, ok := v.info.ObjectOf(ident).(*types.TypeName); ok && typeName.Parent() != types.Universe {
+			return convertToCSDeclaredTypeName(v.getIdentName(ident))
+		}
+
 		return convertToCSTypeName(v.getIdentName(ident))
 	}
 

@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-21_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.26.10.3/io.fs.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/io/fs@go1.26.10)\
-[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/io/fs) [![Source](https://img.shields.io/badge/Source-@1.26.10.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.26.10.3/src/core/io/fs)
+[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net) [![Tests](https://img.shields.io/badge/Tests-21_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.26.10.3/io.fs.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.11-00ADD8?logo=go)](https://pkg.go.dev/io/fs@go1.26.11)\
+[![Source](https://img.shields.io/badge/Source-@1.26.11-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.11/src/io/fs) [![Source](https://img.shields.io/badge/Source-@1.26.10.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.26.10.3/src/core/io/fs)
 
 From C#, call this package through the static class go.io.fs_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -17,7 +17,7 @@ Path names are UTF-8-encoded, unrooted, slash-separated sequences of path elemen
 
 ### Testing
 
-See the [testing/fstest](https://pkg.go.dev/testing/fstest@go1.26.10) package for support with testing implementations of file systems.
+See the [testing/fstest](https://pkg.go.dev/testing/fstest@go1.26.11) package for support with testing implementations of file systems.
 
 ---
 

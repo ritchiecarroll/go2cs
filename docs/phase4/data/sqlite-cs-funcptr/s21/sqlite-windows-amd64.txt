@@ -1,0 +1,14 @@
+tags "": bodyless functions 12 in 2 modules; by kind map[assembly:2 linkname:10]
+  assembly functions in    2  golang.org/x/sys/cpu
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	addMulVVW	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	addVV	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	addVW	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	mulAddVWW	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	shlVU	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	subVV	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	subVW	arith_decl.go
+ROW	golang.org/x/sys	golang.org/x/sys/cpu	assembly	cpuid	cpu_gc_x86.go
+ROW	golang.org/x/sys	golang.org/x/sys/cpu	assembly	xgetbv	cpu_gc_x86.go
+ROW	golang.org/x/sys	golang.org/x/sys/cpu	linkname	runtime_getAuxv	runtime_auxv_go121.go
+ROW	golang.org/x/sys	golang.org/x/sys/windows	linkname	syscall_getprocaddress	dll_windows.go
+ROW	golang.org/x/sys	golang.org/x/sys/windows	linkname	syscall_loadlibrary	dll_windows.go

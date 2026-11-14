@@ -110,6 +110,7 @@ func TestCgoDeclarationsClassifiesEachKindAndFiltersThePlumbing(t *testing.T) {
 		"free":       cgoFunc,
 		"halve":      cgoErrnoFunc,
 		"int":        cgoType,
+		"malloc":     cgoFunc, // cmd/cgo's _Cfunc__CMalloc, which is what a source's C.malloc names (cgoMallocWrapper)
 		"struct_x":   cgoStruct,
 		"twice":      cgoFuncValue,
 		"union_u":    cgoUnion,

@@ -44,7 +44,7 @@ public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintpt
     if (BigEndian) {
         offset = (uintptr)PtrSize - argSize;
     }
-    return (@unsafe.Pointer)((uintptr)@unsafe.Pointer.FromBox(Ꮡ(r.Ints, reg)) + offset);
+    return @unsafe.Add(@unsafe.Pointer.FromBox(Ꮡ(r.Ints, reg)), offset);
 }
 
 } partial class main_package {

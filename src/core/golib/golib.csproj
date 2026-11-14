@@ -153,4 +153,27 @@
     <None Include="NOTICE" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/NOTICE')" />
     <None Include="AUTHORS" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/AUTHORS')" />
   </ItemGroup>
+
+  <!-- THE INLINE-ARRAY FAMILY rides in go.lib beside golib.dll (docs/phase4/DESIGN-array-value-storage.md, 7.7):
+       go.arrays.dll is a second build output of this package, so a program that opts in references it through the
+       go.lib it already depends on, and one that does not never loads it (golib names no family type). go.arrays
+       references golib, so golib cannot reference it back: the pack takes the assembly the SOLUTION build produced
+       (go2cs-stdlib.slnx lists core/go.arrays, and push-nuget.ps1 builds the solution and then packs it with
+       no-build). A pack that finds no go.arrays.dll fails rather than shipping a go.lib without the family. The .pdb
+       rides under GoPackSymbols like every other assembly's (Directory.Build.props filters the extensions). -->
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);_GoPackInlineArrayFamily</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <Target Name="_GoPackInlineArrayFamily">
+    <PropertyGroup>
+      <_GoArraysOutDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', 'go.arrays', 'bin', '$(Configuration)', '$(TargetFramework)'))</_GoArraysOutDir>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(_GoArraysOutDir)go.arrays.dll')"
+           Text="go.lib packs go.arrays.dll beside golib.dll, and $(_GoArraysOutDir)go.arrays.dll does not exist: build core/go.arrays/go.arrays.csproj (go2cs-stdlib.slnx builds it) in $(Configuration) before packing." />
+    <ItemGroup>
+      <BuildOutputInPackage Include="$(_GoArraysOutDir)go.arrays.dll" />
+      <BuildOutputInPackage Include="$(_GoArraysOutDir)go.arrays.pdb" Condition="Exists('$(_GoArraysOutDir)go.arrays.pdb')" />
+    </ItemGroup>
+  </Target>
 </Project>

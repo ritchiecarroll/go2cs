@@ -819,10 +819,17 @@ public static partial class GoReflect
     // (calling a nil func panics with "invalid memory address or nil pointer dereference").
     // Rhymes with the registererr chip's Defect A (GoDynamicTypeOf): the same null-Value shell
     // leaking into a path that needs the value it stands for, not the wrapper itself.
+    //
+    // A typed nil func in any of its interface-space shapes (NilFuncOf: the carrier, or a shell over
+    // a null func) is the same null delegate, for the same reason: the carrier handed on as it was
+    // died in that cast too ("Unable to cast object of type 'go.NilFuncValue' to type ...").
     private static object? GoDynamicValueOf(object? value)
     {
         while (value is IInterfaceAdapter { Value: not null } interfaceAdapter)
             value = interfaceAdapter.Value;
+
+        if (value is NilFuncValue or IInterfaceAdapter && NilFuncOf(value) is not null)
+            return null;
 
         if (value is IжAdapter { Box: not null } pointerAdapter)
             return pointerAdapter.Box;

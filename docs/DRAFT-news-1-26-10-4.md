@@ -1,4 +1,8 @@
-# DRAFT — the go.* 1.26.10.4 release notes
+# DRAFT — the go.* 1.26.11.1 release notes
+
+<!-- 2026-11-13 (R, the 1.26.11 patch hop): the release this draft was started for as 1.26.10.4 ships as 1.26.11.1, built
+     from Go 1.26.11 (the owner's ruling, relayed by COORD 2026-11-12). The file keeps its name because records cite it by
+     path; the release it names below is 1.26.11.1. -->
 
 <!-- DRAFT for owner and COORD review, started 2026-11-11 by seat C43 (P2) from master 50dd9a065c, on the .3 precedent
      (docs/DRAFT-news-1-26-10-3.md, b3ca4ef593). Nothing here is published. At release the entries below move to the top
@@ -86,7 +90,7 @@ nothing. See [`-recurse`](CommandLine.md).
 ### A refusal is renumbered: `GO2CS2005` (R)
 
 **A refusal is renumbered: `GO2CS2005`.** The refusals for a pointer type argument to a generic with a
-non-self-referential method-set constraint (new in 1.26.10.4, alongside the conversions that now work for that shape)
+non-self-referential method-set constraint (new in 1.26.11.1, alongside the conversions that now work for that shape)
 are reported as `GO2CS2005` instead of `GO2CS2002`. Their sites cannot fail loud if downgraded, so `-warn` does not
 accept `GO2CS2005`. A build script that matched `GO2CS2002` for those sites should match `GO2CS2005`.
 <!-- branch claude/r-warn-option: src/go2cs/diagnosticOutput.go diagnosticNonSelfProxyRefused; docs/DiagnosticCodes.md. -->
@@ -100,7 +104,7 @@ with another library's in a consumer's bin folder. The package IDs themselves do
 (`golib.dll`, package go.lib), the go2cs-gen analyzer, or a converted module's own assemblies.
 
 **Upgrading.** A library converted and built against go.* 1.26.10.3 or earlier binds the standard library's
-assemblies by their OLD names, so it must be rebuilt against 1.26.10.4. The break floor already names any such
+assemblies by their OLD names, so it must be rebuilt against 1.26.11.1. The break floor already names any such
 package at build time (`GO2CS3002`) rather than letting it fail as a missing assembly at run time.
 <!-- OQ4 (docs/PLAN-public-surface-stability.md, ruled), branch claude/r-oq4-assembly-rename:
      src/go2cs/assemblyIdentity.go; the design docs/phase4/DESIGN-assembly-identity.md and its census. -->
@@ -123,3 +127,52 @@ the target its bindings were converted for, `Register(assembly, "linux/amd64", .
 `Register(assembly, ...)` stays, so compiled code is unaffected. One call no longer compiles: `Register(assembly, null)`
 is ambiguous between the two overloads (CS0121). Converted code never writes it; the converter emits every call.
 <!-- docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.20 (increment 5b; the review's N3). -->
+
+### cgo: C strings, `C.malloc` and `C.free`, `void *`, and `defer C.f(…)` (H)
+
+**cgo converts more of what real programs write.** Under `-cgo`, `C.CString`, `C.CBytes`, `C.GoString`,
+`C.GoStringN`, `C.GoBytes`, `C.malloc` and `C.free` now convert, a `void *` crosses when it is nil or points at C
+memory, and `defer C.f(…)` converts. The helpers copy bytes, with no text encoding in between, and what `C.CString`
+returns comes from the package's own `malloc`, so the package's own `C.free` frees it. go2cs still hands C no pointer
+into Go memory: a pointer into a slice or an array is refused when the package is converted, and `unsafe.Pointer(&x)`
+is refused when the call runs, each by name.
+
+**One known memory-safety gap.** Do not pass C a pointer you rebuilt from a number when it points into Go memory:
+`unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)`, or a `uintptr` kept in a variable and converted back. go2cs cannot
+yet tell that number from an address in C memory, so the call goes ahead, and the memory may move while C is using
+it. Pass `unsafe.Pointer(p)` itself, which go2cs refuses by name. See [Limitations](Limitations.md).
+<!-- docs/phase4/DESIGN-cgo-phase3-marshaling.md §16 (increment 3.1) and §16.9 (the residue, COORD's ruling C). cgo
+     Phase 3 is a STRETCH for this release by the owner's ruling: this section ships with the release that carries
+     increment 3.1, and moves to that release's notes if it is not this one. -->
+
+### A func stored through an `unsafe.Pointer` (P5)
+
+**`*(*F)(e) = fn`, a func stored through an `unsafe.Pointer`, now stores what the target can hold.** Code translated
+from C by ccgo fills a table of C function pointers this way, at a computed address
+(`*(*func(…) int32)(unsafe.Pointer(uintptr(unsafe.Pointer(&table)) + 8)) = fn`). The store wrote a managed
+reference into the table's memory before, and the number read back from the table named no func. It now stores the
+func's word where the target is a word, and the func itself where the target is a func variable or a func field.
+A target that is neither panics by name. The standard library has no such store. See
+[Pointers](ConversionStrategies-Reference/pointers.md#a-func-value-carried-as-a-number--one-word-per-static-function-through-gofunccookie).
+<!-- docs/phase4/DESIGN-interior-pointer-root.md 4.8 B1 and 10.4; golib's unsafe.Pointer.StoreFunc. Arms: the
+     behavioral programs FuncWordShapes (the w3 rows) and InteriorPointerShapes (shape 1), GolibTests
+     FuncStoreThroughPointerTests, the converter's TestFuncWordShapes. CENSUS, read 2026-11-14 at go1.26.10, tests
+     included: 0 such stores in the standard library on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64;
+     9 in modernc.org/sqlite v1.62.0 (vfs/patches64.go:18-26), all of top-level functions. -->
+
+### `unsafe.Add` over a nil pointer answers the offset (P5)
+
+**`unsafe.Add` over a nil pointer now answers the offset, as Go does.** `unsafe.Add(nil, n)` is the address `n`; it
+answered nil before. Pointer arithmetic written in one expression, `unsafe.Pointer(uintptr(p) + n)`, converts to the
+same call, so it gives the same answer over a nil `p`. A program that compared such a result with nil sees a non-nil
+pointer now. No call site in the standard library does. See
+[Pointers](ConversionStrategies-Reference/pointers.md#unsafepointeruintptrp--n-is-emitted-as-unsafeaddp-n--the-moved-pointer-keeps-what-p-carries).
+<!-- docs/phase4/DESIGN-interior-pointer-root.md 10.7 (COORD's ruling of 2026-11-14 07:52Z); the arm is GolibTests
+     InteriorPointerRootTests.AddOverANilPointerAnswersTheOffset, and the behavioral program UintptrUnsafePointerIdiom
+     prints the same under Go. CENSUS, read 2026-11-14 at go1.26.10 (non-test sources outside cmd): 17 call sites of
+     unsafe.Add. syscall/env_windows.go:88, 93; runtime/mgcmark_greenteagc.go:753, list.go:58, list_manual.go:65,
+     malloc.go:1181; reflect/type.go:1205; internal/syscall/execenv/execenv_windows.go:37, 39, 44;
+     internal/runtime/maps/group.go:131, 133, 139, 142; internal/runtime/gc/scan/scan_reference.go:32, scan_go.go:37,
+     81. None passes a base that its own code allows to be nil together with an offset that is not 0: runtime/list.go
+     and list_manual.go test `p == nil` before the call, and the others add to the address of a variable, a receiver
+     or an allocation. -->

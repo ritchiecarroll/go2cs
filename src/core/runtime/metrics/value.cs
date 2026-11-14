@@ -5,7 +5,6 @@ namespace go.runtime;
 
 using math = math_package;
 using @unsafe = unsafe_package;
-using static metrics_package;
 
 partial class metrics_package {
 
@@ -30,8 +29,6 @@ partial struct Value {
     internal uint64 scalar;           // contains scalar values for scalar Kinds.
     internal @unsafe.Pointer pointer; // contains non-scalar values.
 }
-
-} partial class metricsᴛValue {
 
 // Kind returns the tag representing the kind of value this is.
 public static ValueKind Kind(this Value v) {
@@ -61,11 +58,11 @@ public static float64 Float64(this Value v) {
 // Float64Histogram returns the internal *Float64Histogram value for the metric.
 //
 // If v.Kind() != KindFloat64Histogram, this method panics.
-public static ж<Float64Histogram> Float64Histogram(this Value v) {
+public static ж<ΔFloat64Histogram> Float64Histogram(this Value v) {
     if (v.kind != KindFloat64Histogram) {
         throw panic("called Float64Histogram on non-Float64Histogram metric value");
     }
-    return (ж<Float64Histogram>)(uintptr)(v.pointer);
+    return @unsafe.Pointer.To<ΔFloat64Histogram>(v.pointer);
 }
 
-} // end metricsᴛValue
+} // end metrics_package

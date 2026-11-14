@@ -1,0 +1,8 @@
+     7 sites     4 signatures  modernc.org/libc|R recovery target   e.g. 
+     1 sites     0 signatures  modernc.org/sqlite/lib|M ... an UNNAMED one   e.g. modernc.org/libc.XSetFilePointerEx  libc.largeInteger
+     1 sites     0 signatures  modernc.org/sqlite/lib|M minted function passing a struct or array by value   e.g. modernc.org/libc.XSetFilePointerEx  libc.largeInteger
+     1 sites     1 signatures  modernc.org/sqlite/lib|R ... an UNNAMED one (anonymous, or an alias of one)   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/lib/sqlite_g_00000000000c0000.go:117332:7  sqlite3.TLARGE_INTEGER
+     1 sites     1 signatures  modernc.org/sqlite/lib|R ... passing a struct or array by value   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/lib/sqlite_g_00000000000c0000.go:117332:7  sqlite3.TLARGE_INTEGER
+   496 sites   102 signatures  modernc.org/sqlite/lib|R recovery target   e.g. 
+    33 sites     1 signatures  modernc.org/sqlite/vec|R recovery target   e.g. 
+    13 sites     7 signatures  modernc.org/sqlite/vfs|R recovery target   e.g. 

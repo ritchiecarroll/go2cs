@@ -333,6 +333,19 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 
 	recordable := recordableBase && v.isLocalImplType(targetType)
 
+	// One instantiation of a generic type of this package, converted to a non-generic interface whose method names
+	// the type's own type parameter, is carried by a CLOSED adapter class (closedCarrier.go). Every other pair
+	// answers closedCarrierNone here and keeps the route below unchanged.
+	closedCarrier := closedCarrierNone
+
+	if recordable {
+		closedCarrier = closedCarrierRouteOf(targetType, interfaceType, v.pkg)
+
+		if closedCarrier == closedCarrierRefused {
+			v.warnClosedCarrierPromoted(targetType, interfaceType)
+		}
+	}
+
 	// A VALUE conversion of a FOREIGN type to a LOCAL interface (os.Signal is DOWNSTREAM
 	// of syscall.Signal - neither assembly can partial the other) records too: the
 	// generator emits a local VALUE ADAPTER class wrapping a COPY (Go value semantics)
@@ -612,6 +625,16 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 			adapterClassImplementations.Add(interfaceTypeName + "|" + recordName)
 		}
 
+		// A closed-carrier pair is written with `Closed = true`; its value form is an adapter class the cast site
+		// names as well, so it takes the same prune exemption (the pointer form has it by its ж< prefix).
+		if closedCarrier == closedCarrierClosed {
+			closedCarrierImplementations.Add(closedCarrierPairKey(interfaceTypeName, recordName))
+
+			if !pointerTarget {
+				adapterClassImplementations.Add(interfaceTypeName + "|" + recordName)
+			}
+		}
+
 		packageLock.Unlock()
 	}
 
@@ -749,7 +772,9 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 			// generator's foreign check is by CONTAINING ASSEMBLY, so it prefixes the class name
 			// there too, and the two sides must agree (see ForeignPackagePrefix).
 			if pkg := named.Obj().Pkg(); pkg != nil && (pkg != v.pkg || whiteboxProductionTarget) {
-				simpleTarget := targetTypeName
+				// The adapter is named from the type's BARE name: a generic's type arguments carry qualifiers of
+				// their own (`Box<boxlib_package.Point>`), which the last-dot cut below would read as the type's.
+				simpleTarget := closedCarrierBareName(targetTypeName)
 
 				if idx := strings.LastIndex(simpleTarget, "."); idx >= 0 {
 					simpleTarget = simpleTarget[idx+1:]
@@ -760,6 +785,18 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 		}
 
 		return fmt.Sprintf("new %s(%s)", v.testOwnedAdapterRef(valueAdapterTypeRef(qualifiedTarget, interfaceTypeName), targetTypeName, interfaceTypeName), exprResult)
+	}
+
+	// A CLOSED CARRIER pair (closedCarrier.go) wraps at the conversion site in its closed adapter, named from the
+	// generic type's bare name: `new boxᴠvaluer(b)` for the value form, `new boxжvaluer(p)` for the pointer form.
+	if closedCarrier == closedCarrierClosed && exprResult != "" {
+		bareTarget := closedCarrierBareName(targetTypeName)
+
+		if pointerTarget {
+			return fmt.Sprintf("new %s(%s)", adapterTypeRef(v.whiteboxVariantAdapterStructName(bareTarget), interfaceTypeName), exprResult)
+		}
+
+		return fmt.Sprintf("new %s(%s)", v.testOwnedAdapterRef(valueAdapterTypeRef(bareTarget, interfaceTypeName), targetTypeName, interfaceTypeName), exprResult)
 	}
 
 	// A LOCAL NAMED FUNC type with methods (flag's funcValue implementing Value): a C#

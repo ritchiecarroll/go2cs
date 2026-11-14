@@ -418,7 +418,7 @@ internal static abiDesc newAbiDesc(ж<funcType> t, ж<abi.Type> rcvr) {
 internal static void intFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSize, @unsafe.Pointer to) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    memmove(to, (uintptr)r.IntRegArgAddr(reg, argSize), argSize);
+    memmove(to, r.IntRegArgAddr(reg, argSize), argSize);
 }
 
 // intToReg loads an argSize sized integer and stores it into reg.
@@ -427,7 +427,7 @@ internal static void intFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSize,
 internal static void intToReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSize, @unsafe.Pointer from) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    memmove((uintptr)r.IntRegArgAddr(reg, argSize), from, argSize);
+    memmove(r.IntRegArgAddr(reg, argSize), from, argSize);
 }
 
 // floatFromReg loads a float value from its register representation in r.
@@ -438,11 +438,11 @@ internal static void floatFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSiz
 
     switch (argSize) {
     case var ᴛ when ᴛ == 4: {
-        ((ж<float32>)(uintptr)(to)).Value = archFloat32FromReg(r.Floats[reg]);
+        (@unsafe.Pointer.To<float32>(to)).Value = archFloat32FromReg(r.Floats[reg]);
         break;
     }
     case var ᴛ when ᴛ == 8: {
-        ((ж<float64>)(uintptr)(to)).Value = (Ꮡr.at(abi.RegArgs.ᏑFloats, reg).Reinterpret<uint64, float64>()).Value;
+        (@unsafe.Pointer.To<float64>(to)).Value = (Ꮡr.at(abi.RegArgs.ᏑFloats, reg).Reinterpret<uint64, float64>()).Value;
         break;
     }
     default: {
@@ -457,11 +457,11 @@ internal static void floatFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSiz
 internal static void floatToReg(ref abi.RegArgs r, nint reg, uintptr argSize, @unsafe.Pointer from) {
     switch (argSize) {
     case var ᴛ when ᴛ == 4: {
-        r.Floats[reg] = archFloat32ToReg(~(ж<float32>)(uintptr)(from));
+        r.Floats[reg] = archFloat32ToReg(~@unsafe.Pointer.To<float32>(from));
         break;
     }
     case var ᴛ when ᴛ == 8: {
-        r.Floats[reg] = ~(ж<uint64>)(uintptr)(from);
+        r.Floats[reg] = ~@unsafe.Pointer.To<uint64>(from);
         break;
     }
     default: {

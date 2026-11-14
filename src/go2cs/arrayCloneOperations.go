@@ -62,6 +62,11 @@ func typeNeedsValueCloneSeen(t types.Type, seen map[types.Type]bool) bool {
 		return false
 	}
 
+	// A struct whose arrays are held inline (inlineArrayEmission.go) is copied whole by a plain C# struct copy.
+	if inlineArrayHeld(t) {
+		return false
+	}
+
 	if typeIsArrayValue(t) {
 		return true
 	}
@@ -114,7 +119,7 @@ func structValueCloneFields(t types.Type, structTypeName string) []string {
 
 	structType, isStruct := t.Underlying().(*types.Struct)
 
-	if !isStruct {
+	if !isStruct || inlineArrayHeld(t) {
 		return nil
 	}
 

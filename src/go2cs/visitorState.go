@@ -139,6 +139,10 @@ type lambdaConversionState struct {
 }
 
 type Visitor struct {
+	// inlineArrayLiterals marks the array literals that initialize an inline array field (inlineArrayEmission.go),
+	// each with the array type the go.arrays member is named after.
+	inlineArrayLiterals map[*ast.CompositeLit]*types.Array
+
 	// The slices of copy's arguments that take the Go-image view, marked before the call's arguments convert
 	// (goImageCopyView.go).
 	goImageCopySlices map[*ast.SliceExpr]bool
@@ -639,6 +643,9 @@ type Visitor struct {
 	sstringHoistsByStmt     map[ast.Stmt][]sstringHoist   // Per-func: hoisted sstring temp decls to inject before a top-level body statement (its anchor)
 	suppressSStringHoist    bool                          // Transient: while rendering a hoisted temp's OWN initializer, ignore sstringHoistedConvExprs so the real `((sstring)x)` view is emitted
 	deadUnsafePointerBoxes  map[*ast.CallExpr]bool        // `unsafe.Pointer(x)` conversions whose wrapper object an enclosing `uintptr(…)` reads straight back — emitted without it (see markDeadUnsafePointerBox)
+	spanViewConversions     map[*ast.CallExpr]bool        // `(*[N]T)(p)` conversions convSliceExpr lowers to a span over the raw pointer: they keep the cast text that lowering cuts (see typedPointerDoorEmission)
+	carriedPointerCasts     map[*ast.CallExpr]bool        // `unsafe.Pointer(x)` conversions handed to golib as a POINTER: unsafe.Add's first argument and the P of an arithmetic form (see pointerArithmetic.go)
+	pointerArithmeticBase   *ast.CallExpr                 // the `uintptr(P)` leaf of the arithmetic form being rendered; it renders as pointerArithmeticSentinel
 	identNames              map[*ast.Ident]string         // Local identifiers to adjusted names map
 	isReassigned            map[*ast.Ident]bool           // Local identifiers to reassignment status map
 	initScopeShapes         map[ast.Stmt]initScopeShape   // Per-func: how a head if/switch/type switch emits its init (analyzeInitScopes)

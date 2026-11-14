@@ -75,7 +75,7 @@ A subtler case: a newly-declared tuple element can be flagged *escaping* by anal
 
 **A tuple deconstruction into INTERFACE variables hoists the call when a component needs converting.** Reassigning a multi-value call into pre-declared interface locals (`c, err = sd.dialTCP(…)` with `var c Conn`) can require a per-component interface conversion C#'s tuple assignment cannot perform implicitly — a `ж<TCPConn>` component satisfies `Conn` only through its generated pointer adapter, an *explicit* conversion (CS0266 ×11 in net's dial.go). Mirroring the return-statement tuple arm, the call is hoisted into temp markers and each component converts in a tuple literal:
 
-<!-- source: src/core/net/darwin/dial.cs:939-940 -->
+<!-- source: src/core/net/darwin/dial.cs:930-931 -->
 ```csharp
 var (ᴛ1, ᴛ2) = Ꮡsd.dialTCP(ctx, laΔ1, raΔ1);
 (c, err) = (new TCPConnжConn(ᴛ1), ᴛ2);
@@ -225,6 +225,23 @@ not correctness.)
 (Guarded by the `PointerReceiverSliceSwap` extension — a `cell`/`cells` pair mirroring oldtrace's
 `Event`/`Events`, exercised by disjoint swaps, a full reversal, and a selection sort driven entirely by the
 call-deref swap, output-compared vs `go run`; the pre-fix converter leaves all three visibly uncorrected.)
+
+## A dereferenced pointer CONVERSION as a tuple target writes through `.Value`
+A single assignment to `*(*T)(p)` writes through the converted box, `(@unsafe.Pointer.To<T>(p)).Value = v`. The tuple
+target was rendered as a read instead, with the prefix `~` dereference, which is a value and not a variable,
+so a parallel assignment through two such targets did not compile (CS0131). modernc.org/libc's `qsort.go`
+swaps elements this way (sqlite-cs row S14):
+
+```go
+*(*uint64)(unsafe.Pointer(p)), *(*uint64)(unsafe.Pointer(q)) = *(*uint64)(unsafe.Pointer(q)), *(*uint64)(unsafe.Pointer(p))
+```
+
+Each tuple target now takes the single assignment's `.Value` spelling, and the right-hand reads keep `~`, so the
+statement stays one simultaneous deconstruction, like the Go line: `((@unsafe.Pointer.To<uint64>((@unsafe.Pointer)p)).Value,
+(@unsafe.Pointer.To<uint64>((@unsafe.Pointer)q)).Value) = (~@unsafe.Pointer.To<uint64>((@unsafe.Pointer)q), ~@unsafe.Pointer.To<uint64>((@unsafe.Pointer)p));`.
+Every such target was a compile error before, so no compiled corpus file changes. (Guarded by
+`ParallelDerefCastAssign`: a swap through `uintptr` addresses, a three-way rotate through `unsafe.Pointer`, and a
+swap of an address with itself, output-compared vs Go.)
 
 ## An address-taken reference-typed local heap-boxes too — `Ꮡ(value)` copies are only for reads
 An INHERENTLY heap-allocated local (interface/pointer/slice/map/chan/func) is already a

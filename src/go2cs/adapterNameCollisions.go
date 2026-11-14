@@ -76,6 +76,10 @@ const (
 const (
 	pointerRecordSuffix           = ">(Pointer = true)]"
 	pointerProductionRecordSuffix = ">(Pointer = true, Production = true)]"
+
+	// pointerClosedRecordSuffix ends a pointer record of a CLOSED CARRIER pair (closedCarrier.go). Its adapter takes
+	// the same `<struct>ж<iface>` name an ordinary pointer adapter does, so it joins the same collision groups.
+	pointerClosedRecordSuffix = ">(Pointer = true, " + closedCarrierRecordArgument + ")]"
 )
 
 // emittedPointerAdapterPairs holds the (structRef, interfaceRef) pairs of the pointer-form
@@ -171,6 +175,8 @@ func recordEmittedPointerAdapterPairs(lines []string) {
 			inner = strings.TrimSuffix(inner, pointerProductionRecordSuffix)
 		case strings.HasSuffix(inner, pointerRecordSuffix):
 			inner = strings.TrimSuffix(inner, pointerRecordSuffix)
+		case strings.HasSuffix(inner, pointerClosedRecordSuffix):
+			inner = strings.TrimSuffix(inner, pointerClosedRecordSuffix)
 		default:
 			continue
 		}

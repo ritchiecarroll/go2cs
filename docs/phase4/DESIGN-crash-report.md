@@ -295,3 +295,37 @@ have no conversion relationship to any Go source and honestly report their own. 
 `main.main()` and `_testmain.go` there. The three strings `TestSetCrashOutput` requires —
 `panic: oops`, `goroutine 1`, `debug_test.TestMain` — are present in both the crash file and stderr,
 `hello` is in stderr and not in the crash file, and the child exits 2.
+
+## 11. Amendment 2026-11-13 (P2): the deadlock report's goroutine blocks
+
+Go's `checkdead` follows `fatal error: all goroutines are asleep - deadlock!` with a blank line and a
+block per goroutine: a header with the reason it waits (`goroutine 1 [select (no cases)]:`), its frames,
+and for a goroutine a `go` statement started, the `created by` line. golib printed the line alone, from
+whichever goroutine first saw the deadlock, and more than one could print it.
+
+**As built.** A deadlock report has no failing goroutine: every goroutine is parked, and the CLR walks
+only the calling thread. So each goroutine captures its own frames and wait reason on its own thread as
+it enters a forever wait, before it counts as parked (`Goroutine.CaptureForeverWaitStack`, called from
+`channel.Wait`); a forever wait never ends, so the capture never goes stale, and no ordinary wait pays
+for a stack walk. `FatalReport.Deadlock` replaces the five `fatal(FatalError.DeadLock(), 2)` sites: the
+first goroutine to see the deadlock claims the report (`MainExit.AwaitReportOwner`, Go's `paniclk`) and
+the others wait behind it, so one report prints. The blocks come from the hand-owned runtime's
+`deadlockTraceback` (registered beside `fatalTraceback`), over the user goroutines in goid order, main
+left out when it ended by `runtime.Goexit`, as Go's report leaves it out. Each header prints the recorded
+reason, not the live state: the reporter has left its park by then.
+
+**One position fix rode along.** A captured frame stops at a call, but the CLR can report the IL offset of
+the last empty-stack point before it, which the C# compiler leaves inside the PREVIOUS statement's
+sequence point (`ldloc c` ahead of the receive call), so the frame read the line above. For a frame known
+to be at a call, `goCallOffset` moves the offset to the first call at or after it. Faulting frames keep
+their reported offset.
+
+Guarded by the behavioral test `DeadlockGoroutineBlocks`, which re-runs itself as a child for `select {}`,
+three goroutines on nil channels, and a Goexit main, and prints each child's exit code and stderr with
+host paths, code offsets and goroutine numbering normalized. Red at master 3da19d0e2e: each case printed the
+line alone, and the three-goroutine case printed it twice; green prints Go's output
+line for line.
+
+**M:N note (recorded, not built).** Under the M:N prototype a parked goroutine is a continuation on no
+thread of its own, so "capture on your own thread before parking" becomes "capture the logical stack at
+the park". That is the M4 parent-link and line-table item.

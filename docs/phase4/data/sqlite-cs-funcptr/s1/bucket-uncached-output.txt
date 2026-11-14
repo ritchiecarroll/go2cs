@@ -1,0 +1,3 @@
+round 0: 300 same-type functions; mint (new delegate + lookup) of the last 626 ns, of the first 18399 ns, per-site cached 150 ns (0)
+round 1: 300 same-type functions; mint (new delegate + lookup) of the last 85 ns, of the first 13325 ns, per-site cached 86 ns (0)
+round 2: 300 same-type functions; mint (new delegate + lookup) of the last 75 ns, of the first 13467 ns, per-site cached 53 ns (0)

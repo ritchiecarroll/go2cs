@@ -966,6 +966,32 @@ public static partial class TypeExtensions
     }
 
     /// <summary>
+    /// The extension method called <paramref name="methodName"/> whose receiver is exactly <paramref name="box"/>, the
+    /// <c>ж&lt;X&gt;</c> of <paramref name="pointee"/>, or <c>null</c> when none is declared: the first in scan order.
+    /// </summary>
+    /// <param name="pointee">The box's pointee <c>X</c>, which names the homes to read.</param>
+    /// <param name="box">The receiver asked for, <c>typeof(ж&lt;X&gt;)</c>.</param>
+    /// <param name="methodName">Name of extension method to find.</param>
+    /// <param name="source">The methods to search; <c>null</c> reads the hosts of the pointee's homes.</param>
+    /// <remarks>
+    /// <see cref="GetExtensionMethod"/> on a box reads the WHOLE scan, because <see cref="GetExtensionMethods(Type)"/>
+    /// matches a box by its generic definition and so answers every box receiver of every loaded package. A caller
+    /// that wants one type's own method asks here: a method on <c>ж&lt;X&gt;</c> is homed where <c>X</c> is
+    /// (<see cref="ExtensionHome"/>), so the hosts of <c>X</c>'s homes hold every method this can return, and no other
+    /// package's host class is read (docs/phase4/DESIGN-startup-method-sets.md, arm A2).
+    /// </remarks>
+    internal static MethodInfo? GetBoxExtensionMethod(Type pointee, Type box, string methodName, IReadOnlyList<(MethodInfo, Type)>? source = null)
+    {
+        foreach ((MethodInfo method, Type receiver) in source ?? GetExtensionMethodsHomedIn(ExtensionHomesOf(pointee)))
+        {
+            if (receiver == box && method.Name == methodName)
+                return method;
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// Creates a delegate for the given static method metadata.
     /// </summary>
     /// <param name="methodInfo">Method metadata of extension method.</param>

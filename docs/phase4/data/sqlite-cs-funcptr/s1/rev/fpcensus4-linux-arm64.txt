@@ -1,0 +1,15 @@
+    53  modernc.org/libc|m1 call site   e.g. $GOMODCACHE/modernc.org/libc@v1.80.1/ccgo_linux_arm64.go:30151:59
+     1  modernc.org/libc|m1 declaration (an interface's data word read)   e.g. $GOMODCACHE/modernc.org/libc@v1.80.1/ccgo_linux_arm64.go:150232:1
+    55  modernc.org/libc|r1 func from &struct{ uintptr }{x} (EMBEDDED), called at once   e.g. $GOMODCACHE/modernc.org/libc@v1.80.1/ccgo_linux_arm64.go:23794:32
+     1  modernc.org/libc|r2 struct{ f func } from &struct{ uintptr }{x} (EMBEDDED), STORED   e.g. $GOMODCACHE/modernc.org/libc@v1.80.1/qsort.go:24:6
+  1308  modernc.org/sqlite/lib|m1 call site   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/lib/hooks_linux_arm64.go:27:36
+     1  modernc.org/sqlite/lib|m1 declaration (an interface's data word read)   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/lib/sqlite.go:13742:1
+   454  modernc.org/sqlite/lib|r1 func from &struct{ uintptr }{x} (EMBEDDED), called at once   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/lib/seh.go:108:11
+   107  modernc.org/sqlite/vec|m1 call site   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/vec/patches.go:47:39
+     1  modernc.org/sqlite/vec|m1 declaration (an interface's data word read)   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/vec/vec.go:1155:1
+    33  modernc.org/sqlite/vec|r1 func from &struct{ uintptr }{x} (EMBEDDED), called at once   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/vec/vec.go:1247:5
+    11  modernc.org/sqlite/vfs|m2 a struct{ f func } read as a word   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/vfs/vfs_linux_arm64.go:1522:11
+     4  modernc.org/sqlite/vfs|w2 a func written INTO a word slot (a mint) at &v, v a uintptr variable or field   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/vfs/patches.go:122:3
+     9  modernc.org/sqlite/vfs|w2 a func written INTO a word slot (a mint) at MEMORY at an address (unsafe.Pointer(p))   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/vfs/patches64.go:18:3
+     1  modernc.org/sqlite|m2 a struct{ f T } read as a word, T a type parameter   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/sqlite.go:1223:10
+     1  modernc.org/sqlite|m2 a struct{ f func } read as a word   e.g. $GOMODCACHE/modernc.org/sqlite@v1.62.0/conn.go:482:4

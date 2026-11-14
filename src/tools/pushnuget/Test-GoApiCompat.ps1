@@ -168,7 +168,7 @@ try {
     Check 'a suppression for an analyzer-only package names an asset it does not carry, and reads red' (
         $null -eq $threw -and @($r.Failures | Where-Object { $_.Contains('does not carry') }).Count -eq 1) $(if ($threw) { $threw } else { "$($r.Failures -join '; ')" })
 
-    # OQ4 (docs/phase4/DESIGN-assembly-identity.md section 4; COORD's OQ-D ruling): 1.26.10.4 names every standard-library
+    # OQ4 (docs/phase4/DESIGN-assembly-identity.md section 4; COORD's OQ-D ruling): 1.26.11.1 (planned as 1.26.10.4) names every standard-library
     # assembly after its package ID, so go.fmt's lib/net10.0/fmt.dll became lib/net10.0/go.fmt.dll. The guard compares
     # each renamed assembly's API with its baseline under ONE declaration, for that release only, and reds everything
     # else. Measured with the pinned tool: ApiCompat pairs assemblies by identity name, so Widget against go.Widget
@@ -190,42 +190,45 @@ try {
     $renamedNoLinux = New-Package 'renamed-nolinux' @{ $goLib = 'gowidget-base.dll' }
     $renamedFileOnly = New-Package 'renamed-file-only' @{ $goLib = 'widget-base.dll'; $goLinux = 'gowidget-base.dll' }
 
-    $r = Compare-Release 'go.Widget' $base $renamed '1.26.10.4'
+    $r = Compare-Release 'go.Widget' $base $renamed '1.26.11.1'
     Check '(1) Widget.dll against go.Widget.dll, the same API, under the declaration: green, both assets compared' (
         $r.Failures.Count -eq 0 -and $r.Compared -eq 2 -and (RenamedCount $r) -eq 2) "compared $($r.Compared); renamed $(RenamedCount $r); $($r.Failures -join '; ')"
-    $r = Compare-Release 'go.Widget' $base $renamed '1.26.10.4-ci.7'
+    $r = Compare-Release 'go.Widget' $base $renamed '1.26.11.1-ci.7'
     Check '(1) a rehearsal of the declared release takes its numeric version' ($r.Failures.Count -eq 0 -and $r.Compared -eq 2) "compared $($r.Compared); $($r.Failures -join '; ')"
-    $r = Compare-Release 'go.Widget' $base $renamedInternal '1.26.10.4'
+    $r = Compare-Release 'go.Widget' $base $renamedInternal '1.26.11.1'
     Check '(2) the renamed assembly missing a public member reads red and names it, its rule and its baseline asset' (
         $r.Failures.Count -eq 1 -and $r.Failures[0].Contains('Fixture.Widget.Instance') -and $r.Failures[0].Contains('CP0002') -and
         $r.Failures[0].Contains($lib) -and $r.Failures[0].Contains($goLib) -and $r.Compared -eq 2) "compared $($r.Compared); $($r.Failures -join '; ')"
-    # 1.26.10.4 also announces the promoted-forwarder move: its entries name the BASELINE asset on both sides
+    # 1.26.11.1 also announces the promoted-forwarder move: its entries name the BASELINE asset on both sides
     # (lib/net10.0/bufio.dll), and must still cover the break once the current asset is go.bufio.dll.
-    $r = Compare-Release 'go.Widget' $base $renamedInternal '1.26.10.4' $suppressed
+    $r = Compare-Release 'go.Widget' $base $renamedInternal '1.26.11.1' $suppressed
     Check '(2) a suppression naming the baseline asset covers the renamed asset''s announced break' ($r.Failures.Count -eq 0 -and $r.Compared -eq 2) "compared $($r.Compared); $($r.Failures -join '; ')"
-    $r = Compare-Release 'go.Widget' $base $renamed '1.26.10.5'
+    $r = Compare-Release 'go.Widget' $base $renamed '1.26.11.2'
     Check '(3) the rename for a release the guard does not declare reads red, each asset named with the declared release' (
-        $r.Failures.Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('missing') -and $_.Contains('1.26.10.4') }).Count -eq 2 -and (RenamedCount $r) -eq 0) "renamed $(RenamedCount $r); $($r.Failures -join '; ')"
+        $r.Failures.Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('missing') -and $_.Contains('1.26.11.1') }).Count -eq 2 -and (RenamedCount $r) -eq 0) "renamed $(RenamedCount $r); $($r.Failures -join '; ')"
+    $r = Compare-Release 'go.Widget' $base $renamed '1.26.10.4'
+    Check '(3) 1.26.10.4, the release the rename was planned for, never ships (the owner: ".4 ships as 1.26.11.1"), so it is not declared: red' (
+        $r.Failures.Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('missing') -and $_.Contains('1.26.11.1') }).Count -eq 2 -and (RenamedCount $r) -eq 0) "renamed $(RenamedCount $r); $($r.Failures -join '; ')"
     $r = Compare-Release 'go.Widget' $base $renamed ''
     Check '(3) and with no release named at all (nugetgo-pack.ps1''s call)' (
-        $r.Failures.Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('missing') -and $_.Contains('1.26.10.4') }).Count -eq 2 -and (RenamedCount $r) -eq 0) "$($r.Failures -join '; ')"
-    $r = Compare-Release 'go.Widget' $renamed $renamed '1.26.10.5'
+        $r.Failures.Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('missing') -and $_.Contains('1.26.11.1') }).Count -eq 2 -and (RenamedCount $r) -eq 0) "$($r.Failures -join '; ')"
+    $r = Compare-Release 'go.Widget' $renamed $renamed '1.26.11.2'
     Check '(3) a later release, whose baseline already ships go.Widget.dll, compares path to path: the map is inert' (
         $r.Failures.Count -eq 0 -and $r.Compared -eq 2 -and (RenamedCount $r) -eq 0) "compared $($r.Compared); $($r.Failures -join '; ')"
-    $r = Compare-Release 'go.Widget' $base $renamedNoLinux '1.26.10.4'
+    $r = Compare-Release 'go.Widget' $base $renamedNoLinux '1.26.11.1'
     Check '(4) a baseline asset with neither its own path nor the renamed one reads red, naming both; the other is compared' (
         $r.Failures.Count -eq 1 -and $r.Failures[0].Contains($linux) -and $r.Failures[0].Contains($goLinux) -and $r.Failures[0].Contains('missing') -and $r.Compared -eq 1) "compared $($r.Compared); $($r.Failures -join '; ')"
-    $r = Compare-Release 'go.Widget' $base $renamedFileOnly '1.26.10.4'
+    $r = Compare-Release 'go.Widget' $base $renamedFileOnly '1.26.11.1'
     Check '(4) a file at the renamed path whose assembly identity is not the package ID reads red, naming the identity' (
         $r.Failures.Count -eq 1 -and $r.Failures[0].Contains($goLib) -and $r.Failures[0].Contains('identity') -and $r.Failures[0].Contains("'Widget'") -and $r.Compared -eq 1) "compared $($r.Compared); $($r.Failures -join '; ')"
     # go.testing shipped testing_package.dll: its rename is to the package ID, not to go.<old name>.
     $testingShape = New-Package 'renamed-testing-shape' @{ 'lib/net10.0/Widget_package.dll' = 'widget-base.dll' }
-    $r = Compare-Release 'go.Widget' $testingShape (New-Package 'renamed-lib-only' @{ $goLib = 'gowidget-base.dll' }) '1.26.10.4'
+    $r = Compare-Release 'go.Widget' $testingShape (New-Package 'renamed-lib-only' @{ $goLib = 'gowidget-base.dll' }) '1.26.11.1'
     Check '(4) the target is the package ID (go.testing shipped testing_package.dll): green' ($r.Failures.Count -eq 0 -and $r.Compared -eq 1) "compared $($r.Compared); $($r.Failures -join '; ')"
     foreach ($otherId in 'fixture.widget', 'nugetgo.widget', 'go.lib', 'go.gen') {
         # The current package carries <dir>/<id>.dll, the shape the map looks for, so only the id can keep it out.
         $other = New-Package "renamed-$otherId" @{ "lib/net10.0/$otherId.dll" = 'gowidget-base.dll'; "runtimes/linux-x64/lib/net10.0/$otherId.dll" = 'gowidget-base.dll' }
-        $r = Compare-Release $otherId $base $other '1.26.10.4'
+        $r = Compare-Release $otherId $base $other '1.26.11.1'
         Check "(5) the map does not apply to $otherId under the declaration: each asset missing, nothing renamed" (
             $r.Failures.Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('missing') -and -not $_.Contains('identity') }).Count -eq 2 -and
             (RenamedCount $r) -eq 0) "renamed $(RenamedCount $r); $($r.Failures -join '; ')"
@@ -281,6 +284,45 @@ try {
     Check 'a new package has no baseline' ($null -eq (Get-GoApiCompatBaselineVersion @() '1.26.10.3')) 'a baseline from nothing'
     Check 'a module revision takes its own module version''s previous revision' ((Get-GoApiCompatBaselineVersion @('1.0.300', '1.0.300.1', '1.0.300.2', '1.0.301') '1.0.300.3') -ceq '1.0.300.2') "$(Get-GoApiCompatBaselineVersion @('1.0.300', '1.0.300.1', '1.0.300.2', '1.0.301') '1.0.300.3')"
 
+    # THE PATCH HOP (COORD 20261113T061237Z, approving R's 01:10Z finding). 1.26.11.1 is the first release ever to cross a
+    # Go PATCH release, and under the first-three rule no 1.26.11.x is published, so every go.* package had no baseline:
+    # the guard compared nothing and read CLEAN, and the OQ4 rename and the promoted-forwarder move would have shipped
+    # unchecked against 1.26.10.3. A standard-library package's line is the Go MINOR (the break floor's line,
+    # Test-GoBreakFloor); a nugetgo module revision keeps the first three numbers, since a module version may break.
+    Write-Host 'a standard-library package''s baseline is the last published revision on its Go minor; a module''s keeps its version'
+    $minorTakes = (Get-Command Get-GoApiCompatBaselineVersion).Parameters.ContainsKey('Line')
+    function MinorBaseline([string[]]$Published, [string]$Current) {
+        if (-not $minorTakes) { return '<no -Line>' }
+        Get-GoApiCompatBaselineVersion -Published $Published -Current $Current -Line Minor
+    }
+    Check 'a patch hop''s first release compares with the previous patch line''s last revision' ((MinorBaseline $published '1.26.11.1') -ceq '1.26.10.3') "$(MinorBaseline $published '1.26.11.1')"
+    Check 'and so does its rehearsal' ((MinorBaseline $published '1.26.11.1-ci.7') -ceq '1.26.10.3') "$(MinorBaseline $published '1.26.11.1-ci.7')"
+    Check 'a later revision on the new patch line compares with the one before it' ((MinorBaseline ($published + '1.26.11.1') '1.26.11.2') -ceq '1.26.11.1') "$(MinorBaseline ($published + '1.26.11.1') '1.26.11.2')"
+    Check 'the first release of a new Go minor still has no baseline' ($null -eq (MinorBaseline $published '1.27.0.0')) "$(MinorBaseline $published '1.27.0.0')"
+    Check 'the default stays the first three numbers (a module revision): no baseline across a patch' ($null -eq (Get-GoApiCompatBaselineVersion $published '1.26.11.1')) "$(Get-GoApiCompatBaselineVersion $published '1.26.11.1')"
+    $guardTakesLine = (Get-Command Invoke-GoApiCompatGuard).Parameters.ContainsKey('BaselineLine')
+    Check 'the guard takes the line rule from its caller' $guardTakesLine 'Invoke-GoApiCompatGuard has no -BaselineLine'
+    Check 'the guard passes the line rule to the baseline picker' ($module -match 'Get-GoApiCompatBaselineVersion [^\r\n]*-Line \$BaselineLine') 'Invoke-GoApiCompatGuard does not pass -Line $BaselineLine'
+    $pushText = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/push-nuget.ps1'))
+    $packText = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/nugetgo/nugetgo-pack.ps1'))
+    $moveText = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1'))
+    Check 'push-nuget.ps1 (the standard library) takes the Go-minor line' ($pushText.Contains('-BaselineLine Minor')) 'push-nuget.ps1 does not pass -BaselineLine Minor'
+    Check 'New-GoApiCompatMoveSuppressions.ps1 (the standard library) takes the Go-minor line' ($moveText.Contains('-Line Minor')) 'it does not pass -Line Minor'
+    Check 'nugetgo-pack.ps1 (a module revision) keeps the default' (-not $packText.Contains('-BaselineLine Minor')) 'nugetgo-pack.ps1 passes -BaselineLine Minor'
+    # The arm that would have caught it: no go.* package compared, while some go.* package has a published revision on
+    # the release's Go minor below the release. That is a picker on the wrong line, never a first release.
+    $coverage = Get-Command Test-GoApiCompatBaselineCoverage -ErrorAction SilentlyContinue
+    function Coverage([int]$n, [string[]]$minor) {
+        if (-not $coverage) { return @('<no Test-GoApiCompatBaselineCoverage>') }
+        @(Test-GoApiCompatBaselineCoverage -PackagesCompared $n -MinorReleased $minor)
+    }
+    $f = @(Coverage 0 @('go.lib', 'go.fmt'))
+    Check 'no go.* package compared while the minor has a published release reads red, naming them' ($f.Count -eq 1 -and $f[0].Contains('go.lib') -and $f[0].Contains('go.fmt')) ($f -join '; ')
+    Check 'a guard that compared packages is not red here' ((Coverage 3 @('go.lib')).Count -eq 0) ((Coverage 3 @('go.lib')) -join '; ')
+    Check 'a first release of a minor (nothing published on it) is not red here' ((Coverage 0 @()).Count -eq 0) ((Coverage 0 @()) -join '; ')
+    Check 'a module (not go.*) is not read by this arm' ((Coverage 0 @('nugetgo.widget')).Count -eq 0) ((Coverage 0 @('nugetgo.widget')) -join '; ')
+    Check 'the guard runs the coverage arm' ($module.Contains('Test-GoApiCompatBaselineCoverage -PackagesCompared')) 'Invoke-GoApiCompatGuard does not call it'
+
     # Any release after 1.26.10.3 compares with 1.26.10.3, which already carries B3's break, so its entries match
     # nothing there and the guard refuses them (REVIEW-go-break-floor.md, item 4). They were deleted when 1.26.10.3 was
     # published (C2, 2026-11-10: every pre-publish pack on master refused on them, release-smoke 42720953059), with the
@@ -320,12 +362,12 @@ try {
     Check 'vendored cryptobyte carries at most batch 235''s 5 entries, and cites the batch while it carries any' (
         $cb.Count -le 5 -and ($cb.Count -eq 0 -or [System.IO.File]::ReadAllText($real['go.vendor.golang.org.x.crypto.cryptobyte']).Contains('batch 235'))) "$($cb.Count) entries"
 
-    # 1.26.10.4 announces one break: every struct's promoted-method forwarders left the package class for a class of
+    # 1.26.11.1 announces one break: every struct's promoted-method forwarders left the package class for a class of
     # the struct's own (docs/phase4/DESIGN-promoted-forwarder-placement.md; the owner's ruling, 2026-11-10). Its entries
     # are GENERATED from the packed assemblies and their 1.26.10.3 baselines (New-GoApiCompatMoveSuppressions.ps1 over
     # the pack rehearsal of 2026-11-10: master ae69e4ce74 and the seat), one CP0002 per moved public forwarder per
     # asset: 900 in these 20 files. The bound is those counts and no other file. Each header says when its file goes:
-    # once 1.26.10.4 is published, the release after it compares with 1.26.10.4 and the entries match nothing.
+    # once 1.26.11.1 is published, the release after it compares with 1.26.11.1 and the entries match nothing.
     Write-Host 'the tree carries at most the promoted-forwarder move''s generated entries'
     $moveCaps = [ordered]@{
         'go.archive.zip' = 14; 'go.bufio' = 4; 'go.crypto.internal.fips140.aes' = 2; 'go.debug.dwarf' = 20;

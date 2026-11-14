@@ -1,0 +1,6 @@
+     2  (b) net (_test.go): array field of a DECL struct used, len/cap   e.g. $GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.10.linux-amd64/src/net/unixsock_linux_test.go:55:33
+    13  (b) net: array field of a DECL struct used, slicing   e.g. $GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.10.linux-amd64/src/net/iprawsock_posix.go:17:22
+     4  (b) net: array field of a DECL struct used, whole value as an argument   e.g. $GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.10.linux-amd64/src/net/udpsock_posix.go:80:25
+     2  (b) net: array field of a DECL struct used, whole-value assign   e.g. $GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.10.linux-amd64/src/net/udpsock_posix.go:54:10
+     1  (b) os: array field of a DECL struct used, slicing   e.g. $GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.10.linux-amd64/src/os/sys_linux.go:19:20
+     2  (b) os: array field of a DECL struct used, whole value as an argument   e.g. $GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.10.linux-amd64/src/os/dir_unix.go:119:41

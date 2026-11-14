@@ -1,0 +1,1 @@
+    18  lib _test.go file   e.g. $GOMODCACHE/modernc.org/libc@v1.80.1/all_non_musl_test.go

@@ -5,6 +5,9 @@ using fmt = fmt_package;
 using runtime = runtime_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
+using System.Runtime.InteropServices;
+using go.arrays;
+using go.golib;
 
 partial class main_package {
 
@@ -20,11 +23,12 @@ partial struct record {
     /*embed*/ internal tail tail;
 }
 
-partial struct reparse {
-    public uint32 Tag;
-    public uint16 Length, Reserved;
-    public uint32 Flags;
-    public array<uint16> Path = new(1);
+[GoInlineLayout(Size = 16, Align = 4), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct reparse {
+    [FieldOffset(0)] public uint32 Tag;
+    [FieldOffset(4)] public uint16 Length;
+    [FieldOffset(6)] public uint16 Reserved;
+    [FieldOffset(8)] public uint32 Flags;
+    [FieldOffset(12)] public array1<uint16> Path;
 }
 
 internal static slice<byte> sink;
@@ -74,7 +78,7 @@ internal static void main() {
     }
 
     runtime.GC();
-    fmt.Println("returned:", got.Flags, got.of(reparse.ᏑPath).ElementRef(0), err);
+    fmt.Println("returned:", got.Flags, got.Path[0], err);
 
     var view = viewReparse(blob);
     view.Flags = 0x0d0c0b0a;

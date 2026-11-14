@@ -9,7 +9,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -19,7 +18,7 @@ internal const bool debugSelect = false;
 // Known to compiler.
 // Changes here must also be made in src/cmd/compile/internal/walk/select.go's scasetype.
 partial struct scase {
-    internal ж<hchan> c;           // chan
+    internal ж<Δhchan> c;          // chan
     internal @unsafe.Pointer elem; // data element
 }
 
@@ -33,7 +32,7 @@ internal static void selectsetpc(ref uintptr pc) {
 }
 
 internal static void sellock(slice<scase> scases, slice<uint16> lockorder) {
-    ж<hchan> c = default;
+    ж<Δhchan> c = default;
     foreach (var (_, o) in range(lockorder)) {
         var c0 = scases[o].c;
         if (c0 != c) {
@@ -84,7 +83,7 @@ internal static bool selparkcommit(ж<g> Ꮡgp, @unsafe.Pointer _) {
     // particular, it must not access the *hselect. That's okay,
     // because by the time this is called, gp.waiting has all
     // channels in lock order.
-    ж<hchan> lastc = default;
+    ж<Δhchan> lastc = default;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
         if (sg.of(sudog.Ꮡc).get() != lastc && lastc != nil) {
             // As soon as we unlock the channel, fields in
@@ -266,7 +265,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
     sellock(scases, lockorder);
 
     ж<sudog> sg = default;
-    ж<hchan> c = default;
+    ж<Δhchan> c = default;
     ж<scase> k = default;
     ж<sudog> sglist = default;
     ж<sudog> sgnext = default;
@@ -297,7 +296,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
             }
         } else {
             if (raceenabled) {
-                racereadpc((uintptr)c.raceaddr(), casePC(casi), chansendpc);
+                racereadpc(c.raceaddr(), casePC(casi), chansendpc);
             }
             if (c.closed != 0) {
                 goto sclose;
@@ -366,7 +365,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
     sellock(scases, lockorder);
 
     gp.of(g.ᏑselectDone).Store(0);
-    sg = (ж<sudog>)(uintptr)((~gp).param);
+    sg = @unsafe.Pointer.To<sudog>((~gp).param);
     gp.Value.param = default;
 
     // pass 3 - dequeue from unsuccessful chans
@@ -470,7 +469,7 @@ bufrecv:
         asanwrite(cas.elem, c.elemtype.Size_);
     }
     recvOK = true;
-    qp = (uintptr)chanbuf(c, c.recvx);
+    qp = chanbuf(c, c.recvx);
     if (cas.elem != nil) {
         typedmemmove(c.elemtype, cas.elem, qp);
     }
@@ -495,7 +494,7 @@ bufsend:
     if (asanenabled) {
         asanread(cas.elem, c.elemtype.Size_);
     }
-    typedmemmove(c.elemtype, (uintptr)chanbuf(c, c.sendx), cas.elem);
+    typedmemmove(c.elemtype, chanbuf(c, c.sendx), cas.elem);
     c.sendx++;
     if (c.sendx == c.dataqsiz) {
         c.sendx = 0;
@@ -525,7 +524,7 @@ rclose:
         typedmemclr(c.elemtype, cas.elem);
     }
     if (raceenabled) {
-        raceacquire((uintptr)c.raceaddr());
+        raceacquire(c.raceaddr());
     }
     goto retc;
 
@@ -562,22 +561,16 @@ sclose:
     throw panic(((plainError)(@string)sendOnClosedChannelˢ));
 }
 
-} partial class runtimeᴛhchan {
-
-internal static uintptr sortkey(this ж<hchan> Ꮡc) {
-    ref var c = ref Ꮡc.DerefOrNull();
-
-    return (uintptr)(uintptr)@unsafe.Pointer.FromRef(ref c);
+internal static uintptr sortkey(this ж<Δhchan> Ꮡc) {
+    return (uintptr)Ꮡc;
 }
-
-} partial class runtime_package {
 
 // A runtimeSelect is a single case passed to rselect.
 // This must match ../reflect/value.go:/runtimeSelect
 partial struct runtimeSelect {
     internal selectDir dir;
     internal @unsafe.Pointer typ; // channel type (not used here)
-    internal ж<hchan> ch;         // channel
+    internal ж<Δhchan> ch;        // channel
     internal @unsafe.Pointer val; // ptr to data (SendDir) or ptr to receive buffer (RecvDir)
 }
 
@@ -654,8 +647,6 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     return (chosen, recvOK);
 }
 
-} partial class runtimeᴛwaitq {
-
 internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
@@ -692,4 +683,4 @@ internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
     }
 }
 
-} // end runtimeᴛwaitq
+} // end runtime_package

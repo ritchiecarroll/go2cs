@@ -63,7 +63,7 @@ internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> dst, @unsafe.Pointer s
     }
 
     systemstack(() => {
-        println((@string)"write of unpinned Go pointer", (hex)(uint64)(uintptr)src, (@string)"to non-Go memory", (hex)(uint64)(uintptr)dst);
+        println((@string)"write of unpinned Go pointer", (Δhex)(uint64)(uintptr)src, (@string)"to non-Go memory", (Δhex)(uint64)(uintptr)dst);
         @throw(cgoWriteBarrierFail);
     });
 }
@@ -125,10 +125,10 @@ internal static void cgoCheckSliceCopy(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @u
     if (cgoIsGoPointer(dst)) {
         return;
     }
-    @unsafe.Pointer p = src;
+    @unsafe.Pointer Δp = src;
     for (nint i = 0; i < n; i++) {
-        cgoCheckTypedBlock(Ꮡtyp, p, 0, typ.Size_);
-        p = (uintptr)add(p, typ.Size_);
+        cgoCheckTypedBlock(Ꮡtyp, Δp, 0, typ.Size_);
+        Δp = add(Δp, typ.Size_);
     }
 }
 
@@ -162,7 +162,7 @@ internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> gcbits, uintptr 
     var skipMask = off / (uintptr)goarch.PtrSize / 8;
     var skipBytes = skipMask * (uintptr)goarch.PtrSize * 8;
     var ptrmask = addb(gcbits, skipMask);
-    src = (uintptr)add(src, skipBytes);
+    src = add(src, skipBytes);
     off -= skipBytes;
     size += off;
     uint32 bits = default;
@@ -177,7 +177,7 @@ internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> gcbits, uintptr 
             off -= goarch.PtrSize;
         } else {
             if ((bits & 1) != 0) {
-                @unsafe.Pointer v = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(src, i));
+                @unsafe.Pointer v = ~@unsafe.Pointer.To<@unsafe.Pointer>(add(src, i));
                 if (cgoIsGoPointer(v) && !isPinned(v)) {
                     @throw(cgoWriteBarrierFail);
                 }

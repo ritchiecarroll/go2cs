@@ -68,11 +68,12 @@ namespace go;
 /// </para>
 /// <para>
 /// <b>Fail-soft.</b> <see cref="TryCreate"/> answers <c>false</c> for anything it cannot build. A MISS
-/// is normal control flow at every emitted assertion and type-switch site, and the structural probe
-/// that gates this call is deliberately NAME-ONLY for an open-generic receiver method — a Go
-/// <c>box[int]</c> whose <c>Get() T</c> returns an <c>int</c> matches <c>interface{ Get() string }</c>
-/// under that weaker rule. Go answers <c>ok=false</c> there, so a construction failure must reproduce
-/// today's harmless miss, never escape as an exception.
+/// is normal control flow at every emitted assertion and type-switch site. The structural probe that
+/// gates this call compares a generic type's method by full signature, closed over the value's type
+/// arguments (<see cref="go.golib.TypeExtensions.StructurallyImplements"/>), so a Go <c>box[int]</c>
+/// whose <c>Get() T</c> returns an <c>int</c> does not match <c>interface{ Get() string }</c>, as Go
+/// answers <c>ok=false</c> there. A construction failure past that gate must still read as a miss,
+/// never escape as an exception.
 /// </para>
 /// <para>
 /// <b>Method-set discipline.</b> Binding resolves through

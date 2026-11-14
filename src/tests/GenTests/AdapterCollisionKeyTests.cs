@@ -53,9 +53,9 @@ namespace go2cs.Tests;
 /// <para>
 /// ⚠ The VALUE (non-pointer) adapter path is NOT in scope and does NOT share the key defect: it never
 /// calls <c>AdapterStructKey</c> and never consults <c>collidingAdapterNames</c> — both call sites are
-/// gated on <c>Pointer = true</c>. It does carry the seat's IDENTIFIER defect, measured by
-/// <see cref="AForeignGenericValueRecordIsUnmovedByTheKeyFix"/>, and fixing that needs the converter's
-/// <c>valueAdapterTypeRef</c> half in the same commit — a separate seat, not this one.
+/// gated on <c>Pointer = true</c>. It carried the seat's IDENTIFIER defect, pinned by
+/// <see cref="AForeignGenericValueRecordIsUnmovedByTheKeyFix"/> until the closed-carrier seat moved
+/// the generator and the converter's <c>valueAdapterTypeRef</c> half together.
 /// </para>
 /// </remarks>
 [TestClass]
@@ -449,15 +449,17 @@ public class AdapterCollisionKeyTests
     /// the <c>Pointer = true</c> arms — so this commit cannot move it, and the arm pins that.
     /// </summary>
     /// <remarks>
-    /// ⚠ What it DOES carry is the seat's own IDENTIFIER defect, one path over: the value name composes
+    /// What it DID carry was the seat's own IDENTIFIER defect, one path over: the value name composed
     /// from <c>GetFullTypeName</c>, which spells a generic <c>Name&lt;typeArgs&gt;</c>, so the argument
-    /// list lands inside the class identifier exactly as it did on the pointer path before the seat.
-    /// The identifier asserted below is that defect, pinned deliberately rather than fixed: the
-    /// CONVERTER composes the matching name at the cast site through <c>valueAdapterTypeRef</c>, and a
-    /// generator-only change would leave the two halves naming different classes. It is unreachable
-    /// for every committed record — the only generic struct sides on the value side of the corpus are
-    /// LOCAL and DECLARED, which route to the partial-stub path instead of here, and there is no
-    /// foreign-and-generic value record at all.
+    /// list landed inside the class identifier (<c>pkg_G&lt;Object, Object&gt;ᴠmapLike</c>) exactly as
+    /// it did on the pointer path before the seat. This arm pinned that identifier until BOTH halves
+    /// could move together, because the CONVERTER composes the matching name at the cast site through
+    /// <c>valueAdapterTypeRef</c>. The closed-carrier seat moved both: a generic wrapped type is named
+    /// from its BARE symbol name here and at the cast site, and the type arguments live only in the
+    /// wrapped type. The behavioral program <c>GenericInstClosedIfaceConsumer</c> is the first
+    /// foreign-and-generic value record that is compiled and run, and the name asserted below is the
+    /// one its cast site reads. The key question above is unchanged: no <c>Pointer = true</c> arm is
+    /// reached.
     /// </remarks>
     [TestMethod]
     public void AForeignGenericValueRecordIsUnmovedByTheKeyFix()
@@ -466,8 +468,8 @@ public class AdapterCollisionKeyTests
 
         string adapter = Adapter(adapters, "G_Object, Object_", "mapLike");
 
-        Assert.AreEqual("pkg_G<Object, Object>ᴠmapLike", DeclaredAdapterName(adapter),
-            "the value path's identifier is the seat's residue — it must not move under a key fix, and it is not fixable from this half alone");
+        Assert.AreEqual("pkg_GᴠmapLike", DeclaredAdapterName(adapter),
+            "a generic wrapped type names its value adapter from the bare symbol name, as the converter's cast site does");
     }
 
     #endregion

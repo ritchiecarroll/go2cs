@@ -12,7 +12,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 using @internal.runtime.syscall;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -92,7 +91,7 @@ internal static void futexwakeup(ж<uint32> addr, uint32 cnt) {
         print((@string)"futexwakeup addr=", addr.OrTypedNil(), (@string)" returned ", ret, (@string)"\n");
     });
 
-    ((ж<int32>)(uintptr)((@unsafe.Pointer)(uintptr)0x1006)).Value = 0x1006;
+    (@unsafe.Pointer.To<int32>((@unsafe.Pointer)(uintptr)0x1006)).Value = 0x1006;
 }
 
 internal static int32 getCPUCount() {
@@ -215,12 +214,12 @@ private static readonly @string osThreadStackˢᵇ = "OS thread stack"u8;
 //
 //go:nosplit
 internal static void newosproc0(uintptr stacksize, @unsafe.Pointer fn) {
-    @unsafe.Pointer stack = (uintptr)sysAlloc(stacksize, Ꮡmemstats.Ꮡstacks_sys, osThreadStackˢ);
-    if (stack == nil) {
+    @unsafe.Pointer Δstack = sysAlloc(stacksize, Ꮡmemstats.Ꮡstacks_sys, osThreadStackˢ);
+    if (Δstack == nil) {
         writeErrStr(failallocatestack);
         exit(1);
     }
-    var ret = clone(cloneFlags, (@unsafe.Pointer)((uintptr)stack + stacksize), nil, nil, fn);
+    var ret = clone(cloneFlags, @unsafe.Add(Δstack, stacksize), nil, nil, fn);
     if (ret < 0) {
         writeErrStr(failthreadcreate);
         exit(1);
@@ -258,7 +257,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> argv) {
     n++;
 
     // now argv+n is auxv
-    var auxvp = (ж<array<uintptr>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)n * (uintptr)goarch.PtrSize));
+    var auxvp = @unsafe.Pointer.To<array<uintptr>>(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)n * (uintptr)goarch.PtrSize));
 
     nint pairsΔ1 = sysauxv(auxvp.slice()); if (pairsΔ1 != 0) {
         auxv = auxvp.slice(0, pairsΔ1 * 2, pairsΔ1 * 2);
@@ -273,13 +272,13 @@ internal static void sysargs(int32 argc, ж<ж<byte>> argv) {
         // try using mincore to detect the physical page size.
         // mincore should return EINVAL when address is not a multiple of system page size.
         uintptr size = /* 256 << 10 */ 262144; // size of memory region to allocate
-        var (p, err) = mmap(nil, size, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
+        var (Δp, err) = mmap(nil, size, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
         if (err != 0) {
             return;
         }
         uintptr nΔ1 = default;
         for (nΔ1 = (uintptr)4 << 10; nΔ1 < size; nΔ1 <<= 1) {
-            var errΔ1 = mincore((@unsafe.Pointer)((uintptr)p + nΔ1), 1, Ꮡaddrspace_vec.at<byte>(0));
+            var errΔ1 = mincore(@unsafe.Add(Δp, nΔ1), 1, Ꮡaddrspace_vec.at<byte>(0));
             if (errΔ1 == 0) {
                 physPageSize = nΔ1;
                 break;
@@ -288,11 +287,11 @@ internal static void sysargs(int32 argc, ж<ж<byte>> argv) {
         if (physPageSize == 0) {
             physPageSize = size;
         }
-        munmap(p, size);
+        munmap(Δp, size);
         return;
     }
 
-    n = read(fd, (uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡauxvreadbuf.at<uintptr>(0))), (int32)/* unsafe.Sizeof(auxvreadbuf) */ (uintptr)1024);
+    n = read(fd, noescape(@unsafe.Pointer.FromBox(Ꮡauxvreadbuf.at<uintptr>(0))), (int32)/* unsafe.Sizeof(auxvreadbuf) */ (uintptr)1024);
     closefd(fd);
     if (n < 0) {
         return;
@@ -321,7 +320,7 @@ internal static nint /*pairs*/ sysauxv(slice<uintptr> auxv) {
             // and musl use the value as-is for stack and pointer protector
             // cookies from libc_start_main and/or dl_start. Also, cgo programs
             // may use the value after we do.
-            startupRand = ((ж<array<byte>>)(uintptr)((@unsafe.Pointer)val)).slice();
+            startupRand = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)val).slice();
             break;
         }
         case var ᴛ when ᴛ == _AT_PAGESZ: {
@@ -348,14 +347,14 @@ internal static uintptr getHugePageSize() {
     if (fd < 0) {
         return 0;
     }
-    @unsafe.Pointer ptr = (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡnumbuf.at<byte>(0)));
+    @unsafe.Pointer ptr = noescape(@unsafe.Pointer.FromPinnedBox(Ꮡnumbuf.at<byte>(0)));
     var n = read(fd, ptr, (int32)len(numbuf));
     closefd(fd);
     if (n <= 0) {
         return 0;
     }
     n--; // remove trailing newline
-    var (v, err) = strconv.Atoi(slicebytetostringtmp((ж<byte>)(uintptr)(ptr), (nint)n));
+    var (v, err) = strconv.Atoi(slicebytetostringtmp(@unsafe.Pointer.To<byte>(ptr), (nint)n));
     if (err != nil || v < 0) {
         v = 0;
     }
@@ -541,13 +540,9 @@ internal static void setSignalstackSP(ж<stackt> s, uintptr sp) {
     (s.Ꮡss_sp.Reinterpret<ж<byte>, uintptr>()).Value = sp;
 }
 
-} partial class runtimeᴛsigctxt {
-
 //go:nosplit
 internal static void fixsigcode(this ref sigctxt c, uint32 sig) {
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sigactionFailedˢ => ref sigactionFailedˢᵇ;
@@ -722,8 +717,6 @@ internal static UntypedInt _SI_USER => 0;
 internal static UntypedInt _SI_TKILL => -6;
 internal static UntypedInt _SYS_SECCOMP => 1;
 
-} partial class runtimeᴛsigctxt {
-
 // sigFromUser reports whether the signal was sent because of a call
 // to kill or tgkill.
 //
@@ -740,8 +733,6 @@ internal static bool sigFromSeccomp(this ref sigctxt c) {
     var code = (int32)c.sigcode();
     return code == _SYS_SECCOMP;
 }
-
-} partial class runtime_package {
 
 //go:nosplit
 internal static (int32 ret, int32 errno) mprotect(@unsafe.Pointer addr, uintptr n, int32 prot) {
@@ -827,12 +818,10 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
     return (major, minor, patch, true);
 }
 
-} partial class runtimeᴛkernelVersion {
-
 // GE checks if the running kernel version
 // is greater than or equal to the provided version.
 internal static bool GE(this kernelVersion kv, nint x, nint y) {
     return kv.major > x || (kv.major == x && kv.minor >= y);
 }
 
-} // end runtimeᴛkernelVersion
+} // end runtime_package

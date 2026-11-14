@@ -1,0 +1,15 @@
+Program.cs(17,25): warning CS8981: The type name 'builtin' only contains lower-cased ascii characters. Such names may become reserved for the language.
+Program.cs(10,28): warning CS8981: The type name 'slice' only contains lower-cased ascii characters. Such names may become reserved for the language.
+Program.cs(11,28): warning CS8981: The type name 'array' only contains lower-cased ascii characters. Such names may become reserved for the language.
+Program.cs(27,30): warning CS0649: Field 'main_package.c' is never assigned to, and will always have its default value false
+Program.cs(27,41): warning CS0649: Field 'main_package.java' is never assigned to, and will always have its default value false
+Program.cs(27,33): warning CS0649: Field 'main_package.python' is never assigned to, and will always have its default value false
+PASS item 4: array<nint>([...]) binds the builtin method, not the type: len 6
+PASS item 4: the sized form array<nint>(6, [2, 3]): 2,3,0,0,0,0
+PASS item 4: slice<nint>([...]) unchanged beside it: len 6
+PASS item 4: a fresh array per evaluation (no shared elements): two evaluations
+PASS item 4: nint literal IL, new vs today: same length: 44 vs 44 bytes
+PASS item 4: byte literal IL (static-data blob), new vs today: same length: 24 vs 24 bytes
+PASS item 4: the IL differs only in the call token (4 bytes): 1 bytes differ
+PASS item 2: one declaration, several names (fields, readonly, const, locals): 
+PASS item 3: osᴛ1, stringᴛ1 (from @string) and ΔLockᴛ1 are valid C# names: 

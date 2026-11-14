@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    go.arrays.dll: the inline-array family for a Go array value held inline in its owner, array1<T> ... array4096<T>
+    (docs/phase4/DESIGN-array-value-storage.md, 7.7). Its own assembly, built by golib's build and packed in go.lib
+    beside golib.dll, so a program that never opts in to inline arrays never loads it. The family is GENERATED at this
+    build by go2cs-arrays-gen; only the shared helpers are written by hand. Hand-owned; no Go source converts here.
+  -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
+    <RootNamespace>go.arrays</RootNamespace>
+    <AssemblyName>go.arrays</AssemblyName>
+    <Product>go2cs</Product>
+    <Description>Go array values held inline, for use with go2cs: $(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
+    <AssemblyTitle>$(Description)</AssemblyTitle>
+    <Authors>$(Product) Authors</Authors>
+    <Company>The $(Authors)</Company>
+    <Copyright>Copyright © 2018-2026 $(Company)</Copyright>
+    <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Nullable>enable</Nullable>
+    <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
+    <!-- Packed inside go.lib (golib.csproj), never as a package of its own. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OutDir)'=='' AND '$(BaseOutputPath)'==''">
+    <OutDir>bin/$(Configuration)/$(TargetFramework)/</OutDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../golib/golib.csproj" />
+    <ProjectReference Include="../../gen/go2cs-arrays-gen/go2cs-arrays-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

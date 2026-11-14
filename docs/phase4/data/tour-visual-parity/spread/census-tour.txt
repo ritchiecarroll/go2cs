@@ -1,0 +1,13 @@
+sites 6 (untyped, not counted: 0); max arity 4
+  package func     ...any             non-test     6  test     0
+contexts: map[statement:6]
+arities: map[2:5 4:1]
+callee expression itself calls (today's temp form runs g() first; Go runs the callee's calls first): 0 (0 in non-test files)
+...any callees:
+    6 fmt.Println
+SITE $TOUR/_content/tour/basics/named-results.go:14:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $TOUR/_content/tour/methods/exercise-errors.go:14:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $TOUR/_content/tour/methods/exercise-errors.go:15:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $TOUR/_content/tour/methods/images.go:13:2	package func	...any	fmt.Println	4	statement	test=false	calleeCalls=false
+SITE $TOUR/_content/tour/solutions/errors.go:38:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $TOUR/_content/tour/solutions/errors.go:39:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false

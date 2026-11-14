@@ -11,8 +11,8 @@
 // even though the numbers themselves differ. The operand kinds the peephole covers are all here —
 // address-of, a pointer parameter, the nil pointer, an array element, an existing unsafe.Pointer
 // value, and a dereferenced pointer-to-pointer, which is the one shape the emission has to
-// parenthesize for itself — alongside a uintptr-arithmetic operand that renders as a cast instead of
-// a constructed wrapper, and so pins the neighbouring form the peephole must leave alone.
+// parenthesize for itself — alongside pointer arithmetic written in one expression, which is emitted
+// as unsafe.Add over the pointer, and the same arithmetic over the nil pointer, which is the offset.
 package main
 
 import (
@@ -57,9 +57,9 @@ func main() {
 	up := unsafe.Pointer(e0)
 	fmt.Println("round trip:", uintptr(up) == a0)
 
-	// 5. An operand that binds LOOSER than a cast: dropping the wrapper must not let the enclosing
-	//    conversion capture only part of it. (A uintptr-valued operand renders as a cast rather than
-	//    a constructed wrapper, so this one is not the peephole's shape — it pins the neighbour.)
+	// 5. Pointer arithmetic in one expression: the sum is emitted as unsafe.Add over the pointer, and
+	//    the enclosing conversion reads the moved pointer's number. The stride from element 0 lands
+	//    on element 2 only if the moved pointer names the same storage as the pointer it came from.
 	shifted := uintptr(unsafe.Pointer(uintptr(unsafe.Pointer(e0)) + 2*unsafe.Sizeof(buf[0])))
 	fmt.Println("arithmetic:", shifted == a2)
 
@@ -71,4 +71,10 @@ func main() {
 	// 7. The address names LIVE storage: written and read back through the same pointer.
 	link.y = 7
 	fmt.Println("written:", link.x, link.y, addrOf(link) == g1)
+
+	// 8. Arithmetic over the nil pointer is the offset, as a number: Go defines `uintptr(nil)` as 0, and
+	//    the sum of 0 and an offset is that offset whichever way the pointer is moved.
+	var none unsafe.Pointer
+	offset := 3 * unsafe.Sizeof(buf[0])
+	fmt.Println("nil arithmetic:", uintptr(unsafe.Pointer(uintptr(none)+offset)) == offset, uintptr(unsafe.Add(none, 24)) == 24)
 }

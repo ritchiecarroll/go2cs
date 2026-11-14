@@ -62,7 +62,7 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
     }
 
     // Try to bump-pointer allocate into the current block.
-    ref var block = ref heap<ж<traceRegionAllocBlock>>((ж<traceRegionAllocBlock>)(uintptr)(Ꮡa.Ꮡcurrent.Load()), out var Ꮡblock);
+    ref var block = ref heap<ж<traceRegionAllocBlock>>(@unsafe.Pointer.To<traceRegionAllocBlock>(Ꮡa.Ꮡcurrent.Load()), out var Ꮡblock);
     if (block != nil) {
         var r = block.of(traceRegionAllocBlock.Ꮡoff).Add(n);
         if (r <= (uintptr)len(block.data)) {
@@ -79,7 +79,7 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
 
         // Check block again under the lock. Someone may
         // have gotten here first.
-        Ꮡblock.ValueSlot = (ж<traceRegionAllocBlock>)(uintptr)(Ꮡa.Ꮡcurrent.Load());
+        Ꮡblock.ValueSlot = @unsafe.Pointer.To<traceRegionAllocBlock>(Ꮡa.Ꮡcurrent.Load());
         if (Ꮡblock.ValueSlot != nil) {
             var r = Ꮡblock.ValueSlot.of(traceRegionAllocBlock.Ꮡoff).Add(n);
             if (r <= (uintptr)len(Ꮡblock.ValueSlot.data)) {
@@ -94,7 +94,7 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
         }
 
         // Allocate a new block.
-        Ꮡblock.ValueSlot = (ж<traceRegionAllocBlock>)(uintptr)(sysAlloc(/* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceArenaAllocˢ));
+        Ꮡblock.ValueSlot = @unsafe.Pointer.To<traceRegionAllocBlock>(sysAlloc(/* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceArenaAllocˢ));
         if (Ꮡblock.ValueSlot == nil) {
             @throw(traceRegionOutOfMemoryˢ);
         }
@@ -124,7 +124,7 @@ internal static void drop(this ж<traceRegionAlloc> Ꮡa) {
         a.full = block.next;
         sysFree(@unsafe.Pointer.FromPinnedBox(block), /* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys);
     }
-    @unsafe.Pointer current = (uintptr)Ꮡa.Ꮡcurrent.Load(); if (current != nil) {
+    @unsafe.Pointer current = Ꮡa.Ꮡcurrent.Load(); if (current != nil) {
         sysFree(current, /* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys);
         Ꮡa.Ꮡcurrent.Store(nil);
     }

@@ -1,0 +1,7 @@
+tags "purego,noasm": bodyless functions 5 in 1 modules; by kind map[assembly:4 linkname:1]
+  assembly functions in    4  golang.org/x/sys/cpu
+ROW	golang.org/x/sys	golang.org/x/sys/cpu	assembly	getisar0	cpu_gc_arm64.go
+ROW	golang.org/x/sys	golang.org/x/sys/cpu	assembly	getisar1	cpu_gc_arm64.go
+ROW	golang.org/x/sys	golang.org/x/sys/cpu	assembly	getpfr0	cpu_gc_arm64.go
+ROW	golang.org/x/sys	golang.org/x/sys/cpu	assembly	getzfr0	cpu_gc_arm64.go
+ROW	golang.org/x/sys	golang.org/x/sys/cpu	linkname	runtime_getAuxv	runtime_auxv_go121.go

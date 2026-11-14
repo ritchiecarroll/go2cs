@@ -229,7 +229,7 @@ public static partial void TestDumpRequest(ж<testing.T> t) {
                 req.Body = io.NopCloser(new httputil_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
                 break;
             }
-            case Func<io.ReadCloser> b: {
+            case {} Δb when Δb._<Func<io.ReadCloser>>(out var b): {
                 req.Body = b();
                 break;
             }

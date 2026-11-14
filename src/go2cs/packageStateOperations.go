@@ -90,6 +90,8 @@ func resetPackageState(pkg *packages.Package) {
 	nominalProductionConstraints = hashset.HashSet[string]{}
 	interfaceInheritances = make(map[string]hashset.HashSet[string])
 	adapterClassImplementations = hashset.HashSet[string]{}
+	closedCarrierImplementations = hashset.HashSet[string]{}
+	closedCarrierWarnings = hashset.HashSet[string]{}
 	implicitConversions = make(map[string]hashset.HashSet[string])
 	invertedImplicitConversions = make(map[string]hashset.HashSet[string])
 	indirectImplicitConversions = make(map[string]hashset.HashSet[string])
@@ -102,6 +104,8 @@ func resetPackageState(pkg *packages.Package) {
 	globalTempVarCount = make(map[string]int)
 	packageDynamicTypeNames = make(map[string]string)
 	importedDynamicTypeNames = make(map[string]map[string]string)
+	importedPublicLiftNames = make(map[string]map[string]bool)
+	importedStructLiftTargets = make(map[string]string)
 	packageConstraintLiftNames = make(map[string]string)
 	resetInlineConstraintState()
 	packageLiftedTypeNames = hashset.HashSet[string]{}
@@ -109,6 +113,8 @@ func resetPackageState(pkg *packages.Package) {
 	productionAliasLiftedTypes = nil
 	productionDynamicTypeNames = nil
 	packageHoistedConstOrdinals = nil
+	packageInlineAdmission = nil
+	packageInlineArrayRecords = nil
 	productionHoistedConstOrdinals = nil
 	metadataAnchorClassPrefix = ""
 	metadataAnchorLocalTypes = false

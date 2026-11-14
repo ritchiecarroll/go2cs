@@ -14,6 +14,7 @@ import (
 	"go/ast"
 	"go/types"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -303,6 +304,140 @@ func (v *Visitor) importedDynamicInterfaceName(iface *types.Interface) string {
 	return convertToCSTypeName(getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name)
 }
 
+// importedStructLift returns the qualified C# name of an anonymous struct that a package this one
+// imports directly has already lifted, when that struct is IDENTICAL to st (types.Identical) and its
+// lift is public; otherwise "". Go calls the two one type, so C# must too: sqlite's TLARGE_INTEGER and
+// libc's largeInteger alias one anonymous struct, and two lifts made libc's function unbindable through
+// sqlite's delegate type (DESIGN-sqlite-cs-funcptr.md section 3.3). An internal lift is never reused:
+// it is CS0122 from this assembly. When two imports qualify, the lexically smallest import path wins.
+func (v *Visitor) importedStructLift(st *types.Struct) string {
+	if st == nil || isEmptyStructType(st) || v.pkg == nil {
+		return ""
+	}
+
+	imports := slices.Clone(v.pkg.Imports())
+	slices.SortFunc(imports, func(a, b *types.Package) int { return strings.Compare(a.Path(), b.Path()) })
+	signature := st.String()
+
+	for _, pkg := range imports {
+		meta, ok := importPackageDirs[pkg.Path()]
+
+		if !ok {
+			continue
+		}
+
+		key := filepath.Clean(meta.Dir)
+
+		packageLock.Lock()
+		name := importedDynamicTypeNames[key][signature]
+		public := name != "" && importedPublicLiftNames[key][name]
+		packageLock.Unlock()
+
+		if !public || !packageDeclaresIdenticalStruct(pkg, st) {
+			continue
+		}
+
+		qualified := getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name
+		codeName := convertToCSTypeName(qualified)
+
+		packageLock.Lock()
+		importedStructLiftTargets[codeName] = qualified
+		packageLock.Unlock()
+
+		return codeName
+	}
+
+	return ""
+}
+
+// importedStructLiftTarget returns the `global using` spelling of a lift importedStructLift reused, given its
+// code-body name, below the root namespace (the RHS renderer roots it). A reused lift is another package's
+// type, so usingAliasTypeQualifier, which qualifies THIS package's lifts, must not prefix it.
+func importedStructLiftTarget(codeName string) (string, bool) {
+	packageLock.Lock()
+	target, ok := importedStructLiftTargets[codeName]
+	packageLock.Unlock()
+
+	return target, ok
+}
+
+// packageDeclaresIdenticalStruct reports whether an anonymous struct identical to st appears in pkg's
+// package-level declarations: an alias target, a variable, a function signature, or a field of a
+// defined struct, through pointers, slices, arrays, maps and channels. Two structs with the same text
+// and an unexported field are different Go types, so text alone is not identity.
+func packageDeclaresIdenticalStruct(pkg *types.Package, st *types.Struct) bool {
+	seen := map[types.Type]bool{}
+	var found func(t types.Type, depth int) bool
+
+	found = func(t types.Type, depth int) bool {
+		if t == nil || depth > 8 || seen[t] {
+			return false
+		}
+
+		seen[t] = true
+
+		switch x := t.(type) {
+		case *types.Alias:
+			return found(types.Unalias(x), depth)
+		case *types.Struct:
+			if types.Identical(x, st) {
+				return true
+			}
+
+			for i := range x.NumFields() {
+				if found(x.Field(i).Type(), depth+1) {
+					return true
+				}
+			}
+		case *types.Pointer:
+			return found(x.Elem(), depth+1)
+		case *types.Slice:
+			return found(x.Elem(), depth+1)
+		case *types.Array:
+			return found(x.Elem(), depth+1)
+		case *types.Map:
+			return found(x.Key(), depth+1) || found(x.Elem(), depth+1)
+		case *types.Chan:
+			return found(x.Elem(), depth+1)
+		case *types.Signature:
+			for i := range x.Params().Len() {
+				if found(x.Params().At(i).Type(), depth+1) {
+					return true
+				}
+			}
+
+			for i := range x.Results().Len() {
+				if found(x.Results().At(i).Type(), depth+1) {
+					return true
+				}
+			}
+		}
+
+		return false
+	}
+
+	scope := pkg.Scope()
+
+	for _, name := range scope.Names() {
+		switch obj := scope.Lookup(name).(type) {
+		case *types.TypeName:
+			if named, ok := obj.Type().(*types.Named); ok {
+				if found(named.Underlying(), 0) {
+					return true
+				}
+			} else if found(obj.Type(), 0) {
+				return true
+			}
+		case *types.Var, *types.Func:
+			if found(obj.Type(), 0) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 // dynamicStructTypeName resolves the C# type name of an expression whose type is
 // a (possibly anonymous) struct, for use where a concrete type name is required —
 // e.g. the `ж.of(StructType.ᏑField)` address-of-field form. It prefers this
@@ -332,6 +467,13 @@ func (v *Visitor) dynamicStructTypeName(expr ast.Expr) string {
 		if structType, ok := t.(*types.Struct); ok && !isEmptyStructType(structType) {
 			return dynamicTypeMarker(signature)
 		}
+	}
+
+	// Another package's alias of a defined type (`stdio.FILE`, `type FILE = X_iobuf`) is that defined type, spelled
+	// through the importer's alias table (`stdioꓸFILE`) as its declarations are. The normal path below returns its
+	// Go-shaped name, which names no member of the package class (CS0426, sqlite-cs S12).
+	if t != nil && v.isForeignAliasOfNamed(t) {
+		return convertToCSTypeName(v.getScopeCheckedTypeName(t))
 	}
 
 	// Concrete/named or otherwise resolvable type: use the normal path.

@@ -25,7 +25,6 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -70,8 +69,6 @@ internal static UntypedInt wbBufEntries => 512;
 // Maximum number of entries that we need to ask from the
 // buffer in a single call.
 internal static UntypedInt wbMaxEntriesPerCall => 8;
-
-} partial class runtimeᴛwbBuf {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badWriteBarrierBufferˢ => ref badWriteBarrierBufferˢᵇ;
@@ -135,9 +132,9 @@ internal static ж<array<uintptr>> get1(this ref wbBuf b) {
     if (b.next + (uintptr)goarch.PtrSize > b.end) {
         wbBufFlush();
     }
-    var p = (ж<array<uintptr>>)(uintptr)((@unsafe.Pointer)b.next);
+    var Δp = @unsafe.Pointer.To<array<uintptr>>((@unsafe.Pointer)b.next);
     b.next += goarch.PtrSize;
-    return p;
+    return Δp;
 }
 
 //go:nowritebarrierrec
@@ -146,12 +143,10 @@ internal static ж<array<uintptr>> get2(this ref wbBuf b) {
     if (b.next + (uintptr)(2 * goarch.PtrSize) > b.end) {
         wbBufFlush();
     }
-    var p = (ж<array<uintptr>>)(uintptr)((@unsafe.Pointer)b.next);
+    var Δp = @unsafe.Pointer.To<array<uintptr>>((@unsafe.Pointer)b.next);
     b.next += 2 * goarch.PtrSize;
-    return p;
+    return Δp;
 }
-
-} partial class runtime_package {
 
 // wbBufFlush flushes the current P's write barrier buffer to the GC
 // workbufs.
@@ -176,7 +171,7 @@ internal static void wbBufFlush() {
         // We're going down. Not much point in write barriers
         // and this way we can allow write barriers in the
         // panic path.
-        (~(~getg()).m).p.ptr().of(p.ᏑwbBuf).discard();
+        (~(~getg()).m).p.ptr().of(runtime_package.Δp.ᏑwbBuf).discard();
         return;
     }
 
@@ -197,11 +192,11 @@ internal static void wbBufFlush() {
 //
 //go:nowritebarrierrec
 //go:systemstack
-internal static void wbBufFlush1(ж<p> Ꮡpp) {
+internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     // Get the buffered pointers.
-    var start = (uintptr)@unsafe.Pointer.FromBox(Ꮡpp.of(p.ᏑwbBuf).at(wbBuf.Ꮡbuf, 0));
+    var start = (uintptr)@unsafe.Pointer.FromBox(Ꮡpp.of(runtime_package.Δp.ᏑwbBuf).at(wbBuf.Ꮡbuf, 0));
     var n = (pp.wbBuf.next - start) / /* unsafe.Sizeof(pp.wbBuf.buf[0]) */ (uintptr)8;
     var ptrs = pp.wbBuf.buf.slice(0, (nint)(n));
 
@@ -232,7 +227,7 @@ internal static void wbBufFlush1(ж<p> Ꮡpp) {
     // could track whether any un-shaded goroutine has used the
     // buffer, or just track globally whether there are any
     // un-shaded stacks and flush after each stack scan.
-    var gcw = Ꮡpp.of(p.Ꮡgcw);
+    var gcw = Ꮡpp.of(runtime_package.Δp.Ꮡgcw);
     nint pos = 0;
     foreach (var (_, ptr) in range(ptrs)) {
         if (ptr < minLegalPointer) {

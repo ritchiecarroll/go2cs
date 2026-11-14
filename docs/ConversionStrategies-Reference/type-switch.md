@@ -45,13 +45,15 @@ internal static void @do(any i) {
 <!-- illustration: not converter output -->
 ```csharp
 switch (raw.type()) {
-case Func<bool, bool>: {
+case {} ᴛ0 when ᴛ0._<Func<bool, bool>>(out var _): {
     return "either";
 }
 /* case Func<bool, bool>: merged with an earlier case mapping to the same C# type (identical body) */}
 ```
 
 If the bodies **differ**, both labels are kept and the CS8120 stands: a compile error is preferable to silently routing one Go case's values into another case's body. Duplicate detection keys on the resolved C# type (`rune`→`int32`, `byte`→`uint8`) per switch statement. Guarded by `TestTypeSwitchCollapsedFuncCase` (an identical-body pair that merges, a differing-body pair that keeps both labels, and two different delegates that never merge); the `TypeSwitch` behavioral test keeps `uint` + `uintptr` with different bodies, each value hitting its own case.
+
+**A func-type case label takes the `when`-guard form, so a typed nil func takes its own case.**<!-- 2026-11-13 --> Go keeps a typed nil func's type as the dynamic type of the interface that holds it: `var a any = Step(nil)` takes `case Step:` and binds the nil func. A nil delegate boxes to nothing in C#, so golib holds a typed nil func in an interface as its func type's nil carrier, which is no delegate: a C# type pattern (`case Func<nint, nint> v:`) misses it and the switch would fall to `default` in silence. A case whose label is a func type — unnamed (`case func(int) int:`), a named func type without a method, or a named func type with one — therefore emits the form the interface labels use (see the next sections): `case {} Δv when Δv._<Func<nint, nint>>(out var v):` with a binding, `case {} ᴛ0 when ᴛ0._<Func<nint, nint>>(out var _):` without one or in a multi-type clause. golib's try form answers a live value by the same type test the pattern made and a nil carrier by its func type, and the binding of a carrier is the nil func, so `v == nil` holds in the body as in Go. One exception keeps the compile error above: a guard never makes a later label unreachable, so when two func labels of one switch name the same C# delegate with **differing** bodies, both stay in pattern form and CS8120 still stops the build; an identical-body pair merges as shown, its kept label in guard form. Guarded by the `NilFuncTypeSwitch` behavioral test (typed nil funcs of this package and another, with and without a method, unnamed, live and nil-pointer controls; bound, unbound, multi-type, mixed with interface cases, address-taken and merged switches, output-compared vs Go) and by `TestTypeSwitchCollapsedFuncCase`.
 
 **Multi-type cases stack labels and bind at the tag's interface type.** Go binds a type-switch case
 variable at the listed CONCRETE type only when the clause lists exactly **one** type; a multi-type clause

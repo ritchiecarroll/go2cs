@@ -84,7 +84,7 @@ If you convert and publish a module of your own, its nuget.org page is covered i
 
 ### The break floor
 
-The check arrives with `go.*` 1.26.10.4; a project whose `go.lib` is 1.26.10.3 or older is not checked. From that
+The check arrives with `go.*` 1.26.11.1; a project whose `go.lib` is 1.26.10.3 or older is not checked. From that
 release, the build checks each converted package it uses against the **break floor**: the newest `go.*` release that
 changed members that compiled code binds. The floor is `go.*` 1.26.10.3, which changed the member a `foreach` over a
 slice binds. A package built below it, such as a `nugetgo.*` revision built against `go.*` 1.26.10.2, still restores
@@ -170,10 +170,10 @@ projects, or in a project that sets `GoConsumerUsings` to `false`, turn the warn
 ```
 
 **Two other forms work too.** `using static` on a package class gives bare names for the package's functions,
-types, constants and variables. It does not bring methods. Since 2026-11-11 the methods a type declares are
+types, constants and variables. It does not bring methods. From 1.26.11.1 the methods a type declares are
 extension methods of one class per receiver type beside the package class (`timeᴛDuration`), as a method a struct
-promotes from an embedded field has been since 1.26.10.4, and the namespace brings them (`using go;`, or the
-package's own namespace, both of which the packages add for you). Several
+promotes from an embedded field is, and the namespace brings them (`using go;`, or the package's own namespace,
+both of which the packages add for you). Several
 `using static` lines can collide, though: `Contains` is in `strings`, `bytes` and `slices`, and
 `Reader` is a type in both `strings` and `bytes`. It suits a file that leans on one package. The package class
 itself, through `using go;`, always works and reads a little noisier:
@@ -303,8 +303,8 @@ shortest exact text.
 `fmt.Sprintf("%v", x)` gives the Go text of any value as an `@string`. Converted Go code's `print` and `println`
 print a named value's underlying value and a pointer's address, as in Go, never its `String()`. That holds for a
 type-parameter value in generic code too.
-<!-- A pointer: src/core/golib/builtin.cs:3276 (`IPrintPointer pointer => pointer.PrintPointer(),`).
-     Every other value: src/core/golib/builtin.cs:3277 (`_ => GoPrintText.Text(arg) ?? arg.ToString()`).
+<!-- A pointer: src/core/golib/builtin.cs:3282 (`IPrintPointer pointer => pointer.PrintPointer(),`).
+     Every other value: src/core/golib/builtin.cs:3283 (`_ => GoPrintText.Text(arg) ?? arg.ToString()`).
      The run-time unwrap of a named basic type:
      src/core/golib/GoPrintText.cs:31 (`GoReflect.TryUnwrapWrapperValue(value, out object? underlying)`).
      Guard:

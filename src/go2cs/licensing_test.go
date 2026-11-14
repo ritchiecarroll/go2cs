@@ -492,7 +492,7 @@ func TestLicensingPackageBoundaries(t *testing.T) {
 			t.Errorf("LICENSE-EXCEPTION lacks %q", want)
 		}
 	}
-	for _, dir := range []string{"../core/golib", "../core/go2cs", "../gen/go2cs-gen"} {
+	for _, dir := range []string{"../core/golib", "../core/go.arrays", "../core/go2cs", "../gen/go2cs-gen", "../gen/go2cs-arrays-gen"} {
 		data, err := os.ReadFile(filepath.Join(dir, "LICENSE"))
 		if err != nil || !strings.Contains(string(data), "MIT License") {
 			t.Errorf("permissive component %s: missing MIT license (%v)", dir, err)
@@ -504,7 +504,8 @@ func TestLicensingPackageBoundaries(t *testing.T) {
 		}
 		if entry.IsDir() {
 			switch entry.Name() {
-			case "bin", "obj", "Generated", ".vs", "golib", "go2cs":
+			// go.arrays is golib's companion assembly, packed inside go.lib, and MIT like golib.
+			case "bin", "obj", "Generated", ".vs", "golib", "go.arrays", "go2cs":
 				return filepath.SkipDir
 			}
 			return nil

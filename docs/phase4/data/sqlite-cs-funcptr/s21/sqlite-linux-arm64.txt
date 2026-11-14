@@ -1,0 +1,18 @@
+tags "": bodyless functions 16 in 2 modules; by kind map[assembly:6 linkname:10]
+  assembly functions in    6  golang.org/x/sys/unix
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	addMulVVW	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	addVV	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	addVW	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	mulAddVWW	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	shlVU	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	subVV	arith_decl.go
+ROW	github.com/remyoudompheng/bigfft	github.com/remyoudompheng/bigfft	linkname	subVW	arith_decl.go
+ROW	golang.org/x/sys	golang.org/x/sys/unix	assembly	RawSyscall	syscall_unix_gc.go
+ROW	golang.org/x/sys	golang.org/x/sys/unix	assembly	RawSyscall6	syscall_unix_gc.go
+ROW	golang.org/x/sys	golang.org/x/sys/unix	assembly	RawSyscallNoError	syscall_linux_gc.go
+ROW	golang.org/x/sys	golang.org/x/sys/unix	assembly	Syscall	syscall_unix_gc.go
+ROW	golang.org/x/sys	golang.org/x/sys/unix	assembly	Syscall6	syscall_unix_gc.go
+ROW	golang.org/x/sys	golang.org/x/sys/unix	assembly	SyscallNoError	syscall_linux_gc.go
+ROW	golang.org/x/sys	golang.org/x/sys/unix	linkname	runtime_getAuxv	auxv.go
+ROW	golang.org/x/sys	golang.org/x/sys/unix	linkname	syscall_prlimit	syscall_linux.go
+ROW	golang.org/x/sys	golang.org/x/sys/unix	linkname	vgetrandom	vgetrandom_linux.go

@@ -127,6 +127,20 @@ namespace go;
     /// its open definition and closes it over the proxy itself.
     /// </summary>
     public bool ConstraintProxy { get; set; }
+
+    /// <summary>
+    /// Gets or sets flag indicating this records a CLOSED CARRIER: <c>TStruct</c> is ONE instantiation
+    /// of a generic type, and it satisfies the non-generic <c>TInterface</c> only because a member the
+    /// interface requires names the type's own type parameter (Go's <c>box[point]</c> against
+    /// <c>interface{ val() point }</c>, where <c>box[T]</c> declares <c>val() T</c>). No other
+    /// instantiation satisfies the interface that way, so the generic definition cannot implement it:
+    /// the generator emits an adapter class for the one instantiation instead (<c>boxᴠvaluer</c> holding
+    /// a copy for a value, <c>boxжvaluer</c> holding the box when <see cref="Pointer"/> is also set),
+    /// and the converter wraps each conversion in it. <c>TStruct</c> does NOT implement
+    /// <c>TInterface</c> in C#, so a consumer must not read this record as "the type implements the
+    /// interface". Keep in sync with the converter's <c>closedCarrier.go</c>.
+    /// </summary>
+    public bool Closed { get; set; }
 }
 
 /// <summary>

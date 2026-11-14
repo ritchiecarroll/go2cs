@@ -104,7 +104,7 @@ func isTerminatingStmtList(list []ast.Stmt, info *types.Info) bool {
 // exits only the innermost construct), so the label must be DECLARED after the switch
 // (regexp/syntax parse.go's BigSwitch, CS0159 x11). Switches take no continue label.
 func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, target LabeledStmtContext) {
-	v.visitSwitchStmtCore(switchStmt)
+	v.visitSwitchStmtCore(switchStmt, target.label)
 
 	if len(target.label) > 0 {
 		v.outputBuilder.WriteString(v.newline)
@@ -112,7 +112,8 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, target LabeledStmt
 	}
 }
 
-func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
+// label names the switch's own label, if any, for the terminating-statement test.
+func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt, label string) {
 	v.noteClauseSpans(switchStmt.Body)
 	defer v.trimTrailingLineBreak()
 
@@ -685,11 +686,10 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 
 					v.outputBuilder.WriteString(fmt.Sprintf("if (fallthrough || !%s) { /* default: */", guardVarName))
 
-					// A trailing default emitted in the guarded form leaves C# unable to prove the switch
-					// is exhaustive (see guardedTerminalDefault above).
-					if !nonTrailing {
-						guardedTerminalDefault = true
-					}
+					// A default emitted in the guarded form leaves C# unable to prove the switch is
+					// exhaustive (see guardedTerminalDefault above). A non-trailing one is followed by case
+					// `if`s with no final `else`, so C# cannot prove it either.
+					guardedTerminalDefault = true
 				} else if nonTrailing {
 					// A leading/middle default runs only when NO case matches (anyMatch is precomputed
 					// above). This covers the clause that falls OUT into the next case (ascii85) and
@@ -699,6 +699,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 					// `else` (a plain block followed by `else if` is CS8641, which is why the reorder
 					// above exists at all).
 					v.outputBuilder.WriteString(fmt.Sprintf("if (!%s) { /* default: */", anyMatchVarName))
+					guardedTerminalDefault = true
 				} else if hasFallthroughs {
 					// A TRAILING default in a switch WITH fallthroughs must be guarded on !match. The
 					// else-if chain is broken by the fallthrough-TARGET if-blocks (a case rendered
@@ -838,7 +839,11 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 		// reachable Go code (the switch always returns/exits), so nothing else can run after it. Skip in
 		// namedReturnDefer mode: there the body sits inside a `void` `func((defer, recover) => …)` wrapper,
 		// so a value `return default;` is CS8030 — and the void wrapper needs no trailing return anyway.
-		if guardedTerminalDefault && allCasesTerminal && !v.namedReturnDeferMode && v.currentReturnSignature != nil && v.currentReturnSignature.Results().Len() > 0 {
+		//
+		// allCasesTerminal is conservative (a case ending in a `for` with no condition reads as falling out), so
+		// the Go specification's own rule is asked too (isGoSpecTerminating, with the switch's label so a
+		// `break Label` counts): a terminating switch can be followed by no reachable Go code either.
+		if guardedTerminalDefault && (allCasesTerminal || isGoSpecTerminating(switchStmt, label)) && !v.namedReturnDeferMode && v.currentReturnSignature != nil && v.currentReturnSignature.Results().Len() > 0 {
 			v.writeOutputLn("return default;")
 		}
 	} else if allConst && tag != nil {

@@ -929,6 +929,12 @@ func (v *Visitor) fieldAccessBoxAccessor(pointee types.Type, sel *ast.Ident, str
 // `ref p.Value.arr[i]` in managed memory) and the slice form `p.of(T.Ꮡarr).slice(…)`; ok is false for any other
 // selection.
 func (v *Visitor) fieldAccessArrayField(selectorExpr *ast.SelectorExpr) (string, bool) {
+	// An inline array (a go.arrays member, inlineArrayEmission.go) lives in the struct itself, so the field property
+	// reaches it and its indexer reads the element in place: it takes no field view.
+	if v.isInlineArrayExpr(selectorExpr) {
+		return "", false
+	}
+
 	pointee := v.fieldAccessLocal(selectorExpr.X)
 
 	if pointee == nil {

@@ -20,6 +20,8 @@
     <!-- Referenced as a plain library, NOT as an analyzer: these tests exercise the
          generator's identifier helpers directly. -->
     <ProjectReference Include="..\..\gen\go2cs-gen\go2cs-gen.csproj" />
+    <!-- ArrayFamilyGeneratorTests: the inline-array family generator, run directly. -->
+    <ProjectReference Include="..\..\gen\go2cs-arrays-gen\go2cs-arrays-gen.csproj" />
     <!-- The real golib: GoTypeDefinitionCommentTests compiles converted declarations plus the
          generator's output against it, so "a deleted definition comment fails the build" is read
          from the compiler's own verdict, not inferred from the generated text. Aliased: golib and

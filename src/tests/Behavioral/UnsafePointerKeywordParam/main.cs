@@ -15,12 +15,12 @@ internal static bool notNil(@unsafe.Pointer @new) { return @new != nil; }
 
 internal static uintptr asUintptr(@unsafe.Pointer @new) { return (uintptr)@new; }
 
-internal static int32 deref(@unsafe.Pointer @new) { return ~(ж<int32>)(uintptr)(@new); }
+internal static int32 deref(@unsafe.Pointer @new) { return ~@unsafe.Pointer.To<int32>(@new); }
 
 internal static void store(ref holder h, @unsafe.Pointer @new) { h.p = @new; }
 
 internal static @unsafe.Pointer offset(@unsafe.Pointer @new, uintptr d) {
-    return (@unsafe.Pointer)((uintptr)@new + d);
+    return @unsafe.Add(@new, d);
 }
 
 internal static uintptr pass(@unsafe.Pointer @new) { return asUintptr(@new); }
@@ -47,7 +47,7 @@ internal static void main() {
     holder h = default;
     store(ref h, px);
     fmt.Println(h.p == px);
-    fmt.Println((uintptr)offset(px, 0) == px);
+    fmt.Println(offset(px, 0) == px);
     fmt.Println(pass(px) == asUintptr(px));
 }
 

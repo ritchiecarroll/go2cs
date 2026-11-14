@@ -43,9 +43,9 @@ internal static void checkInvariants(this ref table t, ж<abi.MapType> Ꮡtyp, �
             default: {
                 used++;
 
-                @unsafe.Pointer key = (uintptr)g.key(Ꮡtyp, j);
+                @unsafe.Pointer key = g.key(Ꮡtyp, j);
                 if (typ.IndirectKey()) {
-                    key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                    key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
                 }
 
                 // Can't lookup keys that don't compare equal
@@ -140,10 +140,10 @@ table{
             }}
 
             print((@string)"\t\t\t\tkey  ");
-            dump((uintptr)g.key(Ꮡtyp, j), typ.Key.Size_);
+            dump(g.key(Ꮡtyp, j), typ.Key.Size_);
             println((@string)""u8);
             print((@string)"\t\t\t\telem ");
-            dump((uintptr)g.elem(Ꮡtyp, j), typ.Elem.Size_);
+            dump(g.elem(Ꮡtyp, j), typ.Elem.Size_);
             println((@string)""u8);
         }
     }
@@ -155,8 +155,8 @@ table{
 // outside the runtime.
 internal static void dump(@unsafe.Pointer ptr, uintptr size) {
     while (size > 0) {
-        print(~(ж<byte>)(uintptr)(ptr), (@string)" ");
-        ptr = (@unsafe.Pointer)((uintptr)ptr + 1);
+        print(~@unsafe.Pointer.To<byte>(ptr), (@string)" ");
+        ptr = @unsafe.Add(ptr, 1);
         size--;
     }
 }

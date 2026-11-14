@@ -224,8 +224,103 @@ func diagnosticCodeRegistryProblems(s diagnosticCodeSnapshot) []string {
 	return problems
 }
 
-// converterRegistry reads the const block's string values that are codes. Every code the converter prints is
-// printed at "error" (canonicalDiagnostic), so that is each one's severity.
+// converterWarningReporter is the converter function that prints a diagnostic at "warning".
+const converterWarningReporter = "reportWarningDiagnostic"
+
+// warningOnlyConstants names the constants the converter reports only as warnings: each is used somewhere, and
+// every use is a direct argument of converterWarningReporter. Any other use (reportDiagnostic, a refusal's code
+// field, a comparison) leaves the constant out. A constant's own declaration is not a use.
+func warningOnlyConstants(files []*ast.File, names map[string]bool) map[string]bool {
+	warned, other := map[string]int{}, map[string]int{}
+
+	for _, file := range files {
+		skip := map[*ast.Ident]bool{}
+		warningArgument := map[*ast.Ident]bool{}
+
+		ast.Inspect(file, func(node ast.Node) bool {
+			switch n := node.(type) {
+			case *ast.ValueSpec:
+				for _, name := range n.Names {
+					skip[name] = true
+				}
+			case *ast.CallExpr:
+				if fun, ok := n.Fun.(*ast.Ident); ok && fun.Name == converterWarningReporter {
+					for _, arg := range n.Args {
+						if id, ok := arg.(*ast.Ident); ok {
+							warningArgument[id] = true
+						}
+					}
+				}
+			}
+
+			return true
+		})
+
+		ast.Inspect(file, func(node ast.Node) bool {
+			id, ok := node.(*ast.Ident)
+
+			if !ok || !names[id.Name] || skip[id] {
+				return true
+			}
+
+			if warningArgument[id] {
+				warned[id.Name]++
+			} else {
+				other[id.Name]++
+			}
+
+			return true
+		})
+	}
+
+	only := map[string]bool{}
+
+	for name, n := range warned {
+		if n > 0 && other[name] == 0 {
+			only[name] = true
+		}
+	}
+
+	return only
+}
+
+// converterSources parses the converter's own Go sources: the non-test .go files of the registry's directory.
+func converterSources(t *testing.T, root string) []*ast.File {
+	t.Helper()
+
+	dir := filepath.Join(root, filepath.FromSlash(filepath.Dir(converterRegistryPath)))
+	entries, err := os.ReadDir(dir)
+
+	if err != nil {
+		t.Fatalf("read %s: %v", dir, err)
+	}
+
+	fset := token.NewFileSet()
+
+	var files []*ast.File
+
+	for _, entry := range entries {
+		name := entry.Name()
+
+		if entry.IsDir() || !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+
+		file, err := parser.ParseFile(fset, filepath.Join(dir, name), nil, parser.SkipObjectResolution)
+
+		if err != nil {
+			t.Fatalf("parse %s: %v", name, err)
+		}
+
+		files = append(files, file)
+	}
+
+	return files
+}
+
+// converterRegistry reads the const block's string values that are codes. The converter prints a code at "error"
+// (canonicalDiagnostic), which -warn may downgrade per run, unless the code's constant is reported only through
+// converterWarningReporter (warningOnlyConstants): that code is a warning in every run.
 func converterRegistry(t *testing.T, root string) []registeredCode {
 	t.Helper()
 
@@ -239,6 +334,9 @@ func converterRegistry(t *testing.T, root string) []registeredCode {
 
 	var codes []registeredCode
 
+	constants := map[string]bool{}
+	constantOf := map[int]string{}
+
 	for _, decl := range file.Decls {
 		gen, ok := decl.(*ast.GenDecl)
 
@@ -247,7 +345,9 @@ func converterRegistry(t *testing.T, root string) []registeredCode {
 		}
 
 		for _, spec := range gen.Specs {
-			for _, value := range spec.(*ast.ValueSpec).Values {
+			valueSpec := spec.(*ast.ValueSpec)
+
+			for i, value := range valueSpec.Values {
 				lit, ok := value.(*ast.BasicLit)
 
 				if !ok || lit.Kind != token.STRING {
@@ -260,8 +360,21 @@ func converterRegistry(t *testing.T, root string) []registeredCode {
 					continue
 				}
 
+				if i < len(valueSpec.Names) {
+					constants[valueSpec.Names[i].Name] = true
+					constantOf[len(codes)] = valueSpec.Names[i].Name
+				}
+
 				codes = append(codes, registeredCode{text, converterSide, "Error", fmt.Sprintf("%s:%d", converterRegistryPath, fset.Position(lit.Pos()).Line)})
 			}
+		}
+	}
+
+	warningOnly := warningOnlyConstants(converterSources(t, root), constants)
+
+	for i := range codes {
+		if warningOnly[constantOf[i]] {
+			codes[i].severity = "Warning"
 		}
 	}
 
@@ -460,6 +573,42 @@ func TestGo2csDiagnosticCodeRegistry(t *testing.T) {
 
 	for _, problem := range diagnosticCodeRegistryProblems(snapshot) {
 		t.Error(problem)
+	}
+}
+
+// TestConverterWarningOnlyConstants controls the severity reader without the tree: a constant every use of which
+// is an argument of the warning reporter is warning-only, and one other use, or no use, keeps a constant out.
+func TestConverterWarningOnlyConstants(t *testing.T) {
+	const source = `package p
+
+const (
+	onlyWarned = "a"
+	alsoError  = "b"
+	inAField   = "c"
+	neverUsed  = "d"
+)
+
+func f() {
+	reportWarningDiagnostic("", onlyWarned, "x")
+	reportWarningDiagnostic("p", onlyWarned, "y")
+	reportWarningDiagnostic("", alsoError, "x")
+	reportDiagnostic("", alsoError, "x")
+	reportWarningDiagnostic("", inAField, "x")
+	_ = refusal{code: inAField}
+}
+`
+
+	file, err := parser.ParseFile(token.NewFileSet(), "p.go", source, parser.SkipObjectResolution)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	names := map[string]bool{"onlyWarned": true, "alsoError": true, "inAField": true, "neverUsed": true}
+	got := warningOnlyConstants([]*ast.File{file}, names)
+
+	if len(got) != 1 || !got["onlyWarned"] {
+		t.Errorf("warning-only constants = %v; want onlyWarned alone", got)
 	}
 }
 

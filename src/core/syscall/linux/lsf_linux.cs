@@ -27,7 +27,7 @@ public static (nint, error) LsfSocket(nint ifindex, nint proto) {
     if (e != nil) {
         return (0, e);
     }
-    var p = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡlsall.ᏑProtocol));
+    var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡlsall.ᏑProtocol));
     p.Value[0] = (byte)(proto >> 8);
     p.Value[1] = (byte)proto;
     lsall.Ifindex = ifindex;

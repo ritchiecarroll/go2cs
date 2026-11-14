@@ -2513,7 +2513,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(view.NativeElementAddress(index));
+                return new NativeBox<T>(view.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(view));
             }
         }
 
@@ -2542,7 +2542,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(view.NativeElementAddress(index));
+                return new NativeBox<T>(view.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(view));
             }
         }
 
@@ -2630,7 +2630,7 @@ public static partial class builtin
             {
                 // Unchecked here too: the length-checked NativeElementAddress refused SliceData over an
                 // empty native window.
-                return new NativeBox<T>(target.NativeElementAddressUnchecked(index));
+                return new NativeBox<T>(target.NativeElementAddressUnchecked(index), retainedSource: NativeSliceAnchors<T>.Of(target));
             }
         }
 
@@ -2660,7 +2660,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(target.NativeElementAddress(index));
+                return new NativeBox<T>(target.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(target));
             }
         }
 
@@ -2850,7 +2850,12 @@ public static partial class builtin
     /// only in one assembly is a trap for whichever package meets the shape next.
     /// </para>
     /// </remarks>
-    public static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length)
+    public static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length) => NativeArrayPointer<T>(address, length, null);
+
+    // The same door for a window that keeps a root: an array field of a struct viewed over Go memory
+    // (FieldRefBox.NativeArrayWindow). Only the bare-element kind keeps it; the shadow and pointer-word kinds are
+    // unchanged, and keep nothing as before.
+    internal static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length, object? retainedSource)
     {
         if (ShadowArrayBox<T>.Needed)
         {
@@ -2866,7 +2871,7 @@ public static partial class builtin
             return ShadowArrayBox<T>.Over(address, length);
         }
 
-        return NativeArrayBox<T>.Over(address, length);
+        return NativeArrayBox<T>.Over(address, length, retainedSource);
     }
 
     // E for a pointer element T = ж<E>, else null: a pure type query, decided once per T.
@@ -2923,7 +2928,8 @@ public static partial class builtin
             _ => 0
         };
 
-        return address == 0 ? null : NativeArrayPointer<T>(address, length);
+        // A field of a view over Go memory keeps that view, as the field door's own window does (NativeArrayWindow).
+        return address == 0 ? null : NativeArrayPointer<T>(address, length, NativeDerivation.Kept(field));
     }
 
     /// <summary>
@@ -3339,8 +3345,9 @@ public static partial class builtin
         if (TryTypeAssert(target, out T value))
             return value;
 
+        // A shell over a null func keeps its carrier: the panic names the func type, not a nil interface.
         while (target is IInterfaceAdapter interfaceAdapter)
-            target = interfaceAdapter.Value!;
+            target = (interfaceAdapter.Value ?? GoReflect.NilFuncOf(interfaceAdapter))!;
 
         throw RuntimeErrorPanic.TypeAssertion(typeof(object), target, typeof(T));
     }
@@ -3413,9 +3420,12 @@ public static partial class builtin
         // adapter yields need not be one itself.
         bool isAdapter = target is IGoAdapter;
 
+        // A shell over a null func is no nil interface: it stands for the typed nil func it was built
+        // from (GoReflect.NilFuncOf), which the carrier arm below answers by its type. Only a null
+        // Value asks, so an unwrap that finds a value costs nothing more.
         while (isAdapter && target is IInterfaceAdapter interfaceAdapter)
         {
-            target = interfaceAdapter.Value;
+            target = interfaceAdapter.Value ?? GoReflect.NilFuncOf(interfaceAdapter);
             isAdapter = target is IGoAdapter;
         }
 
@@ -3436,6 +3446,16 @@ public static partial class builtin
             case T typedTarget:
                 value = typedTarget;
                 return true;
+        }
+
+        // A value adapter over a null func that is not itself a T stands for its typed nil func too
+        // (GoReflect.NilFuncOf): asserted to its own func type or to ANOTHER interface, the carried
+        // type answers, exactly as it does for the carrier. Behind the adapter probe, so a value
+        // that is no adapter pays nothing.
+        if (isAdapter && target is IValueAdapter { Value: null } && GoReflect.NilFuncOf(target) is { } behind)
+        {
+            target = behind;
+            isAdapter = false;
         }
 
         // The CANONICAL NIL FUNC (GoReflect.CanonicalNilFunc — a nil func packed into interface
@@ -3485,18 +3505,9 @@ public static partial class builtin
             return true;
         }
 
-        // The wrapped value is a NULL delegate (a named func type crossing an interface boundary
-        // as a nil value) — Go's assert still succeeds, with a nil result (`f, ok :=
-        // handler.(HandlerFunc)` is ok=true, f=nil for a typed-nil-in-interface). The pattern
-        // above can never see this: a C# type pattern excludes null by design, so `Value: T
-        // wrapped` fails for exactly the case it most needs to match. Recover the wrapped field's
-        // DECLARED type from the adapter's own class metadata, the only channel a null value still
-        // answers through (GoReflect.GoDynamicTypeOf's identical fallback).
-        if (isAdapter && target is IValueAdapter { Value: null } && GoReflect.ValueAdapterWrappedType(target.GetType()) == typeOfT)
-        {
-            value = default!;
-            return true;
-        }
+        // A wrapped NULL delegate never reaches here: the pattern above cannot see it (a C# type
+        // pattern excludes null by design), so it resolved above, as the typed nil func it stands
+        // for (`f, ok := handler.(HandlerFunc)` is ok=true, f=nil for a typed-nil-in-interface).
 
         if (AssertFacts<T>.IsInterface)
         {
@@ -4387,13 +4398,10 @@ public static partial class builtin
     // over the delegate type: what asserting a typed nil func to an interface literal builds) holds a null delegate, and
     // unwrapping it to null would turn Go's typed nil func into the nil interface; it answers the canonical NilFuncValue
     // for its delegate type instead, the encoding a nil func has everywhere else in interface space.
+    // The rule itself is GoReflect.NilFuncOf's, shared with the type assertion and reflect.
     private static object? interfaceAdapterValue(IInterfaceAdapter adapter)
     {
-        if (adapter.Value is { } value)
-            return value;
-
-        return adapter.GetType() is { IsGenericType: true } shellType && shellType.GetGenericArguments() is [var target] &&
-            typeof(Delegate).IsAssignableFrom(target) ? GoReflect.CanonicalNilFunc(target) : null;
+        return adapter.Value ?? GoReflect.NilFuncOf(adapter);
     }
 
     // Go names the offending type in the message exactly as `%T` spells it, and for an ARRAY that
@@ -4487,6 +4495,9 @@ public static partial class builtin
     {
         return value switch
         {
+            // A typed nil func in interface space (the carrier, or a shell or adapter over a null
+            // func) names the func type it carries, never the carrier class or "nil".
+            _ when GoReflect.NilFuncOf(value) is { } nilFunc => GetGoTypeName(nilFunc.Type),
             // A generated pointer-sourced interface adapter stands in for the *T it wraps —
             // Go's dynamic type is the pointer, never the adapter class.
             IжAdapter adapter => GetGoTypeName(adapter.Box),

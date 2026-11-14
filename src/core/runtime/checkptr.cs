@@ -49,7 +49,7 @@ internal static bool checkptrStraddles(@unsafe.Pointer ptr, uintptr size) {
     if ((uintptr)ptr >= ((uintptr)0 - (size - 1))) {
         return true;
     }
-    @unsafe.Pointer end = (uintptr)add(ptr, size - 1);
+    @unsafe.Pointer end = add(ptr, size - 1);
 
     // TODO(mdempsky): Detect when [ptr, end] contains Go allocations,
     // but neither ptr nor end point into one themselves.

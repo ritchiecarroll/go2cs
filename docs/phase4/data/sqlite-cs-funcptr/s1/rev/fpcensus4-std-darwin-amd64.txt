@@ -1,0 +1,6 @@
+     1  reflect|m2 a func read as a word (*(*uintptr)(unsafe.Pointer(&f)))   e.g. $GOROOT/src/reflect/value.go:1145:9
+     3  runtime|r1 func from &<other>, STORED   e.g. $GOROOT/src/runtime/mcleanup.go:203:14
+     1  runtime|r4 func from MEMORY at an address (unsafe.Pointer(p)), STORED   e.g. $GOROOT/src/runtime/panic.go:969:12
+     2  runtime|w1' write THROUGH a func variable, *unsafe.Pointer target (NOT w1: runtime's hand-built funcval)   e.g. $GOROOT/src/runtime/cgocall.go:465:2
+     2  sync|m1 call site   e.g. $GOROOT/src/sync/pool.go:108:21
+     1  sync|m1 declaration (an interface's data word read)   e.g. $GOROOT/src/sync/pool.go:92:1

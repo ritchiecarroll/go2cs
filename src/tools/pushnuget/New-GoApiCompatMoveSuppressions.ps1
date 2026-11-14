@@ -22,7 +22,7 @@
     The directory of merged .nupkg files (its _flavors subdirectory is not read).
 
 .PARAMETER ReleaseVersion
-    The release the packages stand for, such as 1.26.10.4. A rehearsal packs at the last published build, so its own
+    The release the packages stand for, such as 1.26.11.1. A rehearsal packs at the last published build, so its own
     version would pick the wrong baseline (GoApiCompat.psm1, Invoke-GoApiCompatGuard).
 
 .PARAMETER Comment
@@ -89,7 +89,7 @@ try {
     foreach ($package in @(Get-ChildItem -LiteralPath $PackageDir -File -Filter '*.nupkg' | Sort-Object Name)) {
         $identity = Get-Identity $package.FullName
         $published = @(Get-GoApiCompatPublishedVersions $client $flat $identity.Id)
-        $baselineVersion = Get-GoApiCompatBaselineVersion -Published $published -Current $ReleaseVersion
+        $baselineVersion = Get-GoApiCompatBaselineVersion -Published $published -Current $ReleaseVersion -Line Minor
         if (-not $baselineVersion) { $noBaseline++; continue }
 
         $baseline = Save-GoApiCompatBaseline $client $flat $identity.Id $baselineVersion (Join-Path $work '_baselines')

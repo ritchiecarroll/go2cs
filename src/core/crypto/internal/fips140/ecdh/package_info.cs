@@ -27,6 +27,7 @@ using static go.crypto.@internal.fips140.ecdh_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoTypeAlias("PublicKey", "ΔPublicKey")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -64,7 +65,7 @@ using static go.crypto.@internal.fips140.ecdh_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/ecdh/cast.go", "cast.cs", "ABAelILcAAoW3IKCgoKUgpQ=")]
-[assembly: GoPositionMap("crypto/internal/fips140/ecdh/ecdh.go", "ecdh.cs", "ACE8gqaCAAsQggAiOILu7oLu7oLuAAgSgu4AEBjSuIKCgILauIKmgoIACxiSgoKUgpSm+PiCpoKmpoK4poLm1ILugqamooKCAAgGooKUgu6CyoKCuILKqJKCgpSqooLcgpSCgqiSgoK4", "174-183:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdh/ecdh.go", "ecdh.cs", "AB48gqaCAAcQggAgOILu7oLu7oLuAAgSgu4AEBjSgriCgoCC2riCpoKCAAsYkoKClIKUpvjCyoKmgqamgrimgubUgu6CpqaigoIACAaigpSC7oLKgoK4gsqokoKClKqigtyClIKCqJKCgrg=", "175-184:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -83,7 +84,7 @@ public static partial class ecdh_package
     public partial interface Point<P> {}
     public partial struct Curve<P> {}
     public partial struct PrivateKey {}
-    public partial struct PublicKey {}
+    public partial struct ΔPublicKey {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -104,14 +105,3 @@ public static partial class ecdh_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
-
-// A Go method is an extension method on its receiver type. The methods of one type are
-// in a class of their own beside the package class, so that a method and a package-level
-// type, constant or variable can share a name as they do in Go. Each class is declared
-// below with the type it holds the methods of; its blocks are in the converted sources,
-// in Go's declaration order.
-
-// <MethodHolders>
-[GoMethodHost(typeof(ecdh_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛPrivateKey;
-[GoMethodHost(typeof(ecdh_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛPublicKey;
-// </MethodHolders>

@@ -569,6 +569,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			// before the declaring file registered its lift) resolves against the
 			// now-complete registry; an unresolvable one is dropped — mirroring the
 			// implicit-conversion writer's resolveImplicitConvTypeName skip below.
+			recordedInterfaceName := interfaceName
 			interfaceName, okIface := resolveImplicitConvTypeName(interfaceName)
 
 			if !okIface {
@@ -576,6 +577,18 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			}
 
 			for implementation := range implementations {
+				// A closed-carrier pair (closedCarrier.go) is written with `Closed = true`, after `Pointer = true`
+				// for the pointer form. go2cs-gen reads the argument and writes a closed adapter class for the pair.
+				if closedCarrierImplementations.Contains(closedCarrierPairKey(recordedInterfaceName, implementation)) {
+					if inner, ok := strings.CutPrefix(implementation, PointerPrefix+"<"); ok {
+						lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Pointer = true, %s)]", qualifyLocalTypeRef(strings.TrimSuffix(inner, ">")), qualifyLocalTypeRef(interfaceName), closedCarrierRecordArgument))
+					} else {
+						lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(%s)]", qualifyLocalTypeRef(implementation), qualifyLocalTypeRef(interfaceName), closedCarrierRecordArgument))
+					}
+
+					continue
+				}
+
 				// Compare on the spelling that will actually be EMITTED, not on the raw registry
 				// key. The covered set is built from exportedTypeAliases, whose values visitTypeSpec
 				// already canonicalized (it reverts a file-local import rename before recording the
@@ -634,6 +647,9 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 				lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", qualifyLocalTypeRef(implementation), qualifyLocalTypeRef(interfaceName)))
 			}
 		}
+
+		// Two closed instantiations of one generic type for one interface would share a carrier name: named here.
+		warnClosedCarrierCollisions(closedCarrierImplementations.Keys())
 
 		// Add new promoted interface implementations to package info file (hashset ensures uniqueness)
 		for interfaceName, implementations := range promotedInterfaceImplementations {
@@ -728,6 +744,9 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 
 	// The sstring twins' records (sstringTwinOperations.go), under the same omitted-when-empty rule.
 	packageInfoLines = applyRecordSection(packageInfoLines, packageSStringTwinRecords, mergeExisting, sstringTwinSection)
+
+	// The inline-array admission's records (inlineArrayStamp.go), under the same omitted-when-empty rule.
+	packageInfoLines = applyRecordSection(packageInfoLines, packageInlineArrayRecords, mergeExisting, inlineArraysSection)
 
 	// Handle implicit conversions
 	startLineIndex = -1

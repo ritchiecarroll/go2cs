@@ -66,16 +66,16 @@ public static bool IsAdult(this Person p) {
 ## Real standard-library conversions, side by side
 
 The goal — *reads like Go* — is easiest to judge on real code. Below are converted standard-library files
-next to their original **Go 1.26.10** source, in order of increasing richness:
+next to their original **Go 1.26.11** source, in order of increasing richness:
 
-| Package | Go 1.26.10 source | Converted C# | What it shows |
+| Package | Go 1.26.11 source | Converted C# | What it shows |
 |:--|:--|:--|:--|
-| `errors` | [errors.go](https://github.com/golang/go/blob/go1.26.10/src/errors/errors.go) | [errors.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/errors/errors.cs) | Error values and an unexported type satisfying the `error` interface. |
-| `cmp` | [cmp.go](https://github.com/golang/go/blob/go1.26.10/src/cmp/cmp.go) | [cmp.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/cmp/cmp.cs) | Generics with an ordered-type constraint. |
-| `unicode/utf8` | [utf8.go](https://github.com/golang/go/blob/go1.26.10/src/unicode/utf8/utf8.go) | [utf8.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/unicode/utf8/utf8.cs) | Constants keeping Go's hex/binary literal formatting; arrays and structs. |
-| `sort` | [search.go](https://github.com/golang/go/blob/go1.26.10/src/sort/search.go) | [search.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/sort/search.cs) | Binary search driven by a `func(int) bool` closure. |
-| `strings` | [reader.go](https://github.com/golang/go/blob/go1.26.10/src/strings/reader.go) | [reader.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/strings/reader.cs) | A struct with receiver methods, tuple returns, and interface implementation. |
-| `container/list` | [list.go](https://github.com/golang/go/blob/go1.26.10/src/container/list/list.go) | [list.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/container/list/list.cs) | A doubly-linked list — pointers and receiver methods. |
+| `errors` | [errors.go](https://github.com/golang/go/blob/go1.26.11/src/errors/errors.go) | [errors.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/errors/errors.cs) | Error values and an unexported type satisfying the `error` interface. |
+| `cmp` | [cmp.go](https://github.com/golang/go/blob/go1.26.11/src/cmp/cmp.go) | [cmp.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/cmp/cmp.cs) | Generics with an ordered-type constraint. |
+| `unicode/utf8` | [utf8.go](https://github.com/golang/go/blob/go1.26.11/src/unicode/utf8/utf8.go) | [utf8.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/unicode/utf8/utf8.cs) | Constants keeping Go's hex/binary literal formatting; arrays and structs. |
+| `sort` | [search.go](https://github.com/golang/go/blob/go1.26.11/src/sort/search.go) | [search.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/sort/search.cs) | Binary search driven by a `func(int) bool` closure. |
+| `strings` | [reader.go](https://github.com/golang/go/blob/go1.26.11/src/strings/reader.go) | [reader.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/strings/reader.cs) | A struct with receiver methods, tuple returns, and interface implementation. |
+| `container/list` | [list.go](https://github.com/golang/go/blob/go1.26.11/src/container/list/list.go) | [list.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/container/list/list.cs) | A doubly-linked list — pointers and receiver methods. |
 
 Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core).
 
@@ -101,9 +101,9 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 - **[.NET 10.0 SDK](https://dotnet.microsoft.com/download)**, to build and run the converted C#.
 - **No Go installation, with the go2cs dotnet tool.** The converter uses the Go toolchain to load and
   type-check the source it converts, so that source must already build with `go build`. The
-  [dotnet tool](DotnetTool.md) downloads the Go release it converts with, Go 1.26.10, on first use.
+  [dotnet tool](DotnetTool.md) downloads the Go release it converts with, Go 1.26.11, on first use.
   To build the converter from source instead, you need [Go 1.26](https://go.dev/dl/). The standard
-  library packages are converted from, and validated on, Go 1.26.10, and the
+  library packages are converted from, and validated on, Go 1.26.11, and the
   [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
 - **Windows or Linux on x64**, where the converted standard library is validated against Go's own
   tests. macOS, on Intel and Apple silicon, has packages; a package validated there shows a macOS

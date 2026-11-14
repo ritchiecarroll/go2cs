@@ -124,17 +124,17 @@ the table says what quiet means for each:
 |:--|:--|
 | Readiness, H0 | As written, at the line's branch tip. |
 | H1 | The new patch toolchain, verified by H1 step 1. |
-| H2 | `migrate-gorelease.ps1 -Apply` moves the pin and resets the build counter to 0. |
+| H2 | `migrate-gorelease.ps1 -Apply` moves the pin and resets the build counter to 0. `go generate .` from `src/go2cs`, under the target toolchain, regenerates `toolchainPins.go` (the release the dotnet tool downloads, read from the `go` line), and `internal/gentoolchainpins/testdata` is refreshed from the same live sources in the same commit: `TestToolchainPinsAreWhatTheGeneratorWrites` is red until both move. A census `problem` (an anchor matching 0) is re-anchored in its own commit before `-Apply`. *(Amended 2026-11-13, the 1.26.11 patch hop's H2.)* |
 | H3 | A package census identical in membership to the outgoing one. Any difference is a finding. |
 | H4, H4a | Nothing. A patch release changes no language, and the release-tag set is minor-keyed (§1.1); confirm both against the source rather than assume them. H4a is owed only if H3 or H4 finds work. |
-| H5 | The seeded reconvert, scored against the prediction above. |
+| H5 | The seeded reconvert, scored against the prediction above. `src/core/VERSION` is not written by the `-stdlib` emission: it is copied from the target GOROOT's `VERSION` (check first that the committed file equals the outgoing GOROOT's byte for byte), so a prediction names it under its real mechanism. *(Amended 2026-11-13, the 1.26.11 patch hop, where the prediction said the emission writes it.)* |
 | H6 | The hand-own re-audit for each hand-owned file whose upstream source the delta touches. The `.cs.auto` differential names them. |
 | H7 | Compile parity in full, every flavour. |
 | H7a | Merge the line's branch tip into the patch branch and re-read the gates at the merged tip. |
 | H8 | H5 already emits every target. The manifest diff against the outgoing one is expected empty, and any entry is a finding. |
 | H9 | `check-no-regression.ps1` green, with no golden changed. A changed golden is a finding. |
 | H10 | Re-derive the rows of the packages the delta touches. Every other row's reading stands; release day's §6 full sweep re-reads every row at the tree that ships. |
-| H11, H12, release day | As written. |
+| H11, H12, release day | As written. The binary-compatibility guard compares the first release after a patch hop with the previous patch line's last revision: a standard-library package's baseline is the highest published revision on its Go MINOR (`Invoke-GoApiCompatGuard -BaselineLine Minor`, push-nuget.ps1), and a guard that compares no go.* package while one has a published revision on that minor is red. *(Amended 2026-11-13, the 1.26.11 patch hop: under the first-three rule 1.26.11.1 had no baseline, and the guard read CLEAN having compared nothing. COORD 20261113T061237Z.)* |
 
 ### 1.4 A maintenance release
 
@@ -1134,6 +1134,7 @@ for R in h4a h5; do
   ( cd '<tree>/src' && tar -cf - --exclude=bin --exclude=obj --exclude=Generated core gen ) | ( cd "<stage>/$R/src" && tar -xf - ) || exit 5
   cp '<tree>/src/Directory.Build.props' "<stage>/$R/src/" || exit 5
   ( cd '<tree>/docs' && tar -cf - validation ) | ( cd "<stage>/$R/docs" && tar -xf - ) || exit 5
+  cp '<tree>/docs/ValidatedTestPackages.md' "<stage>/$R/docs/" || exit 5
 done
 git -C '<tree>' show '<landing>:src/version.props' > '<stage>/h4a/src/version.props' || exit 5
 want=$(git -C '<tree>' -c core.quotePath=false ls-tree -r --name-only HEAD -- src/core | grep -c '[.]cs$')
@@ -1158,7 +1159,7 @@ inert.
 | `src/core` minus `bin`/`obj`/`Generated` | floor 2: the marker detector and layout L3's per-GOOS routing need it |
 | `src/version.props` | the corpus pin guard reads it beside `core`; H5's root takes `<H2>`'s file — the pin AND the reset build number the emitted badges read — never a sed of the pin line; H4a's takes `<landing>`'s |
 | `docs/validation` | the README Tests and Source·C# badges read it with `version.props`; without either, both badges vanish corpus-wide |
-| `docs/ValidatedTestPackages.md` | the Tests badge reads the roster's exclusion ledger, so an excluded row never goes green; without it the Tests badge vanishes corpus-wide (TRAIN T3 fixup, 2026-10-10) |
+| `docs/ValidatedTestPackages.md` | the Tests badge reads the roster's exclusion ledger, so an excluded row never goes green; without it the Tests badge vanishes corpus-wide (TRAIN T3 fixup, 2026-10-10). *(Edited in place 2026-11-13, the 1.26.11 patch hop: the seed block above now copies it. This row listed it, but the block never did.)* |
 | `src/Directory.Build.props`, `src/gen` minus build dirs | to BUILD the root: `core/Directory.Build.props` imports the file above it (the TFM) and resolves the analyzer at `$(go2csPath)gen/go2cs-gen`, which the generated solution also lists |
 
 <!-- Lane R's seeding, 2026-09-07/08 and 2026-09-13: r-h5b-setup.sh:36-51, setup-convert.sh:38-51 (archived, sha256 in the rehearsal's

@@ -128,7 +128,7 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, ж<traceStackT
                     if (usesLR) {
                         pcBuf[2] = gp.sched.lr;
                     } else {
-                        pcBuf[2] = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)gp.sched.sp);
+                        pcBuf[2] = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)gp.sched.sp);
                     }
                     nstk += 2 + fpTracebackPCs((@unsafe.Pointer)gp.sched.bp, pcBuf[3..]);
                 } else {
@@ -164,7 +164,7 @@ internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
     if (len(pcs) == 0) {
         return 0; // ID 0 is reserved for zero-length stacks.
     }
-    var (id, _) = Ꮡt.Ꮡtab.put((uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(pcs, 0))), (uintptr)len(pcs) * /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8);
+    var (id, _) = Ꮡt.Ꮡtab.put(noescape(@unsafe.Pointer.FromBox(Ꮡ(pcs, 0))), (uintptr)len(pcs) * /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8);
     return id;
 }
 
@@ -174,7 +174,7 @@ internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
 internal static void dump(this ж<traceStackTable> Ꮡt, uintptr gen) {
     var stackBuf = new slice<uintptr>(tracev2.MaxFramesPerStack);
     var w = unsafeTraceWriter(gen, nil);
-    var root = (ж<traceMapNode>)(uintptr)(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
+    var root = @unsafe.Pointer.To<traceMapNode>(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
         w = dumpStacksRec(root, w, stackBuf);
     }
     w.flush().end();
@@ -221,11 +221,11 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
 
     // Recursively walk all child nodes.
     foreach (var i in range(len(node.children))) {
-        @unsafe.Pointer child = (uintptr)Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
+        @unsafe.Pointer child = Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
         if (child == nil) {
             continue;
         }
-        w = dumpStacksRec((ж<traceMapNode>)(uintptr)(child), w, stackBuf);
+        w = dumpStacksRec(@unsafe.Pointer.To<traceMapNode>(child), w, stackBuf);
     }
     return w;
 }
@@ -286,9 +286,9 @@ internal static nint /*i*/ fpTracebackPCs(@unsafe.Pointer fp, slice<uintptr> pcB
 
     for (i = 0; i < len(pcBuf) && fp != nil; i++) {
         // return addr sits one word above the frame pointer
-        pcBuf[i] = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)((uintptr)fp + (uintptr)goarch.PtrSize));
+        pcBuf[i] = ~@unsafe.Pointer.To<uintptr>(@unsafe.Add(fp, (uintptr)goarch.PtrSize));
         // follow the frame pointer to the next one
-        fp = (@unsafe.Pointer)(~(ж<uintptr>)(uintptr)(fp));
+        fp = (@unsafe.Pointer)(~@unsafe.Pointer.To<uintptr>(fp));
     }
     return i;
 }
@@ -370,11 +370,11 @@ internal static uintptr startPCForTrace(uintptr pc) {
     if (!f.valid()) {
         return pc; // may happen for locked g in extra M since its pc is 0.
     }
-    @unsafe.Pointer w = (uintptr)funcdata(f, abi.FUNCDATA_WrapInfo);
+    @unsafe.Pointer w = funcdata(f, abi.FUNCDATA_WrapInfo);
     if (w == nil) {
         return pc; // not a wrapper
     }
-    return f.datap.textAddr(~(ж<uint32>)(uintptr)(w));
+    return f.datap.textAddr(~@unsafe.Pointer.To<uint32>(w));
 }
 
 } // end runtime_package

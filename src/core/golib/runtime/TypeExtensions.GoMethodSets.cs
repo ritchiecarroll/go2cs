@@ -233,7 +233,7 @@ public static partial class TypeExtensions
     // the EMBEDDING package, so a cross-package embed satisfying a foreign marker interface
     // answers false — the conservative direction, with no measured consumer.
     //
-    // A SAME-package promoted method's wrapper is in the struct's promoted-method class from 1.26.10.4
+    // A SAME-package promoted method's wrapper is in the struct's promoted-method class from 1.26.11.1
     // (`<pkg>ᴛ<Struct>ᴛpkg`, marked [GoPromotedHost(typeof(Struct))]) and no longer in the package class.
     // Its package is the STRUCT's: Go puts a promoted method in the embedding type's method set, and
     // net's `w.(buffersWriter)` over a `*TCPConn` that promotes `writeBuffers` from its embedded `conn`

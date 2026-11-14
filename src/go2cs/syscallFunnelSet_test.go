@@ -327,12 +327,16 @@ func TestPointerMintFromABoxTakesTheRetainingDoor(t *testing.T) {
 // ---- Q49: the bridged-wrapper argument and darwin's funnel names (2026-09-05) ---------------------
 //
 // The pin-lifetime class's MANAGED-callee member: `f(g(unsafe.Pointer(&x)))` where g returns
-// unsafe.Pointer. The converter bridges g's Pointer result to a number (`(uintptr)g(…)`), so the
-// retained box is stripped before f's `@unsafe.Pointer` parameter re-wraps it; with nothing else
+// unsafe.Pointer. The converter BRIDGED g's Pointer result to a number (`(uintptr)g(…)`), so the
+// retained box was stripped before f's `@unsafe.Pointer` parameter re-wrapped it; with nothing else
 // referencing Ꮡx past the mint, a collection under the call retires the provenance entry and the
 // callee's resolve refuses by name (runtime's int32Hash inside TestSmhasherWindowed). The remedy
 // names the frame-minted box for a KeepAlive after the statement — the funnel's contract one
 // callee kind over — and these guards pin its three statement shapes and its two scope controls.
+//
+// The bridge itself is gone (docs/phase4/DESIGN-unsafe-pointer-call-result.md): a call's unsafe.Pointer result is no
+// longer cast to a number, so the pointer g returns still carries its box. The KeepAlive stays, and these guards read
+// the call without the cast.
 const bridgedWrapperFixture = `package main
 
 import "unsafe"
@@ -506,7 +510,7 @@ func TestBridgedWrapperArgumentKeepsItsFrameMintedBoxAlive(t *testing.T) {
 
 	for i, line := range body {
 		switch {
-		case strings.Contains(line, "consume((uintptr)noescapeLike(@unsafe.Pointer.FromPinnedBox(Ꮡi))"):
+		case strings.Contains(line, "consume(noescapeLike(@unsafe.Pointer.FromPinnedBox(Ꮡi))"):
 			callIndex = i
 		case strings.Contains(line, "System.GC.KeepAlive(Ꮡi);"):
 			keepIndex = i
@@ -588,7 +592,7 @@ func TestBridgedWrapperArgumentPlacement(t *testing.T) {
 
 	for i, line := range body {
 		switch {
-		case strings.Contains(line, "consume((uintptr)noescapeLike(@unsafe.Pointer.FromPinnedBox(Ꮡi))"):
+		case strings.Contains(line, "consume(noescapeLike(@unsafe.Pointer.FromPinnedBox(Ꮡi))"):
 			callIndex = i
 		case strings.Contains(line, "System.GC.KeepAlive(Ꮡi);"):
 			keepIndex = i
@@ -639,7 +643,7 @@ func TestBridgedWrapperArgumentPlacement(t *testing.T) {
 
 	for i, line := range body {
 		switch {
-		case strings.Contains(line, "consume((uintptr)noescapeLike(@unsafe.Pointer.FromPinnedBox(Ꮡj))"):
+		case strings.Contains(line, "consume(noescapeLike(@unsafe.Pointer.FromPinnedBox(Ꮡj))"):
 			callIndex = i
 		case strings.Contains(line, "System.GC.KeepAlive(Ꮡj);"):
 			keepIndex = i

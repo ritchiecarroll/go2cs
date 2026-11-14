@@ -21,7 +21,7 @@ internal static void main() {
     n.Value = 42;
     @unsafe.Pointer q = @unsafe.Pointer.FromPinnedBox(n);
     fmt.Println("A2 paren, existing pointer, non-nil:", q != nil);
-    fmt.Println("A3 round-trips to the same value:", ~(ж<nint>)(uintptr)(q));
+    fmt.Println("A3 round-trips to the same value:", ~@unsafe.Pointer.To<nint>(q));
 
     var table = slice<main_table>([
         new(@unsafe.Pointer.FromPinnedBox(@new<nint>()), false),
@@ -35,7 +35,7 @@ internal static void main() {
     fmt.Println("B1 bare, fresh allocation, non-nil:", r != nil);
 
     @unsafe.Pointer s = @unsafe.Pointer.FromPinnedBox(n);
-    fmt.Println("B2 bare, existing pointer, round-trips:", ~(ж<nint>)(uintptr)(s));
+    fmt.Println("B2 bare, existing pointer, round-trips:", ~@unsafe.Pointer.To<nint>(s));
 
     var c1 = (Celsius)36.6D;
     var c2 = (Celsius)36.6D;

@@ -149,23 +149,19 @@ partial struct ctrlGroup /*num:uint64*/;
 
 // get returns the i-th control byte.
 internal static ctrl get(this ж<ctrlGroup> Ꮡg, uintptr i) {
-    ref var g = ref Ꮡg.DerefOrNull();
-
     if (goarch.BigEndian) {
-        return ~(ж<ctrl>)(uintptr)(@unsafe.Add((uintptr)@unsafe.Pointer.FromRef(ref g), 7 - i));
+        return ~@unsafe.Pointer.To<ctrl>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡg), 7 - i));
     }
-    return ~(ж<ctrl>)(uintptr)(@unsafe.Add((uintptr)@unsafe.Pointer.FromRef(ref g), i));
+    return ~@unsafe.Pointer.To<ctrl>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡg), i));
 }
 
 // set sets the i-th control byte.
 internal static void set(this ж<ctrlGroup> Ꮡg, uintptr i, ctrl c) {
-    ref var g = ref Ꮡg.DerefOrNull();
-
     if (goarch.BigEndian) {
-        ((ж<ctrl>)(uintptr)(@unsafe.Add((uintptr)@unsafe.Pointer.FromRef(ref g), 7 - i))).Value = c;
+        (@unsafe.Pointer.To<ctrl>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡg), 7 - i))).Value = c;
         return;
     }
-    ((ж<ctrl>)(uintptr)(@unsafe.Add((uintptr)@unsafe.Pointer.FromRef(ref g), i))).Value = c;
+    (@unsafe.Pointer.To<ctrl>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡg), i))).Value = c;
 }
 
 // setEmpty sets all the control bytes to empty.
@@ -322,7 +318,7 @@ internal static (uint64, bool) alignUpPow2(uint64 n) {
 
 // ctrls returns the group control word.
 internal static ж<ctrlGroup> ctrls(this ref groupReference g) {
-    return (ж<ctrlGroup>)(uintptr)(g.data);
+    return @unsafe.Pointer.To<ctrlGroup>(g.data);
 }
 
 // key returns a pointer to the key at index i.
@@ -331,7 +327,7 @@ internal static @unsafe.Pointer key(this ref groupReference g, ж<abi.MapType> �
 
     var offset = groupSlotsOffset + i * typ.SlotSize;
 
-    return (@unsafe.Pointer)((uintptr)g.data + offset);
+    return @unsafe.Add(g.data, offset);
 }
 
 // elem returns a pointer to the element at index i.
@@ -340,7 +336,7 @@ internal static @unsafe.Pointer elem(this ref groupReference g, ж<abi.MapType> 
 
     var offset = groupSlotsOffset + i * typ.SlotSize + typ.ElemOff;
 
-    return (@unsafe.Pointer)((uintptr)g.data + offset);
+    return @unsafe.Add(g.data, offset);
 }
 
 } partial class maps_package {
@@ -363,7 +359,7 @@ partial struct groupsReference {
 internal static groupsReference newGroups(ref abi.MapType typ, uint64 length) {
     return new groupsReference(
         // TODO: make the length type the same throughout.
-        data: (uintptr)newarray(typ.Group, (nint)length),
+        data: newarray(typ.Group, (nint)length),
         lengthMask: length - 1
     );
 }
@@ -379,7 +375,7 @@ internal static groupReference group(this ref groupsReference g, ж<abi.MapType>
     var offset = (uintptr)i * typ.GroupSize;
 
     return new groupReference(
-        data: (@unsafe.Pointer)((uintptr)g.data + offset)
+        data: @unsafe.Add(g.data, offset)
     );
 }
 
@@ -392,25 +388,25 @@ internal static void cloneGroup(ж<abi.MapType> Ꮡtyp, groupReference newGroup,
     if (typ.IndirectKey()) {
         // Deep copy keys if indirect.
         for (var i = (uintptr)0; i < abi.MapGroupSlots; i++) {
-            @unsafe.Pointer oldKey = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)oldGroup.key(Ꮡtyp, i));
+            @unsafe.Pointer oldKey = ~@unsafe.Pointer.To<@unsafe.Pointer>(oldGroup.key(Ꮡtyp, i));
             if (oldKey == nil) {
                 continue;
             }
-            @unsafe.Pointer newKey = (uintptr)newobject(typ.Key);
+            @unsafe.Pointer newKey = newobject(typ.Key);
             typedmemmove(typ.Key, newKey, oldKey);
-            ((ж<@unsafe.Pointer>)(uintptr)((uintptr)newGroup.key(Ꮡtyp, i))).Value = newKey;
+            (@unsafe.Pointer.To<@unsafe.Pointer>(newGroup.key(Ꮡtyp, i))).Value = newKey;
         }
     }
     if (typ.IndirectElem()) {
         // Deep copy elems if indirect.
         for (var i = (uintptr)0; i < abi.MapGroupSlots; i++) {
-            @unsafe.Pointer oldElem = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)oldGroup.elem(Ꮡtyp, i));
+            @unsafe.Pointer oldElem = ~@unsafe.Pointer.To<@unsafe.Pointer>(oldGroup.elem(Ꮡtyp, i));
             if (oldElem == nil) {
                 continue;
             }
-            @unsafe.Pointer newElem = (uintptr)newobject(typ.Elem);
+            @unsafe.Pointer newElem = newobject(typ.Elem);
             typedmemmove(typ.Elem, newElem, oldElem);
-            ((ж<@unsafe.Pointer>)(uintptr)((uintptr)newGroup.elem(Ꮡtyp, i))).Value = newElem;
+            (@unsafe.Pointer.To<@unsafe.Pointer>(newGroup.elem(Ꮡtyp, i))).Value = newElem;
         }
     }
 }

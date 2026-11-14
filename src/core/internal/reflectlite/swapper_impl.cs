@@ -22,8 +22,11 @@ partial class reflectlite_package {
 // slice.
 //
 // Swapper panics if the provided interface is not a slice.
+//
+// The slice is read through ValueOf, as Go's body reads it, so a slice held behind an interface
+// shell is the slice (makeReflectValue's unwrap), not the shell.
 public static Action<nint, nint> Swapper(any Δslice) {
-    if (Δslice is not ISlice s) {
+    if (ValueOf(Δslice).live is not ISlice s) {
         throw panic(Ꮡ(new ValueError(Method: "Swapper"u8, Kind: ValueOf(Δslice).Kind())));
     }
     // Fast path for slices of size 0 and 1. Nothing to swap.

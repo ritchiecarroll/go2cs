@@ -1,0 +1,4 @@
+B3PROBE marks:
+B3PROBE   main-enter at 306 ms after process start; assemblies loaded 68; methods jitted 2942; jit time 1770 ms
+B3PROBE   exit at 337 ms after process start; assemblies loaded 68; methods jitted 3332; jit time 1802 ms
+B3PROBE site	calls	inclusive ms	items

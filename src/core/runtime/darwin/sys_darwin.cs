@@ -58,7 +58,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_rawsyscalln(uintpt
         n: (uintptr)len(args)
     ));
     if (c.n != 0) {
-        c.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
+        c.args = (uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
     }
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscallN_trampoline), @unsafe.Pointer.FromPinnedBox(c));
     var gp = getg(); if (gp != nil && (~gp).m != nil && (~(~gp).m).errnoAddr != nil) {

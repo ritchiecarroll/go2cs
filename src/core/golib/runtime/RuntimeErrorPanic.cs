@@ -689,20 +689,22 @@ namespace go.golib;
     /// </remarks>
     public static PanicException TypeAssertion(Type source, object? target, Type asserted)
     {
-        // The dynamic type is what the adapters stand in for, as builtin.GetGoTypeName reads it.
+        // The dynamic type is what the adapters stand in for, as builtin.GetGoTypeName reads it. A typed nil func
+        // (the carrier, or a shell or adapter over a null func) has a dynamic type and no value to read it from:
+        // its carrier names it, where a null would report a nil interface.
         while (true)
         {
             if (target is IжAdapter pointerAdapter)
                 target = pointerAdapter.Box;
             else if (target is IValueAdapter valueAdapter)
-                target = valueAdapter.Value;
+                target = valueAdapter.Value ?? GoReflect.NilFuncOf(valueAdapter);
             else if (target is IInterfaceAdapter interfaceAdapter)
-                target = interfaceAdapter.Value;
+                target = interfaceAdapter.Value ?? GoReflect.NilFuncOf(interfaceAdapter);
             else
                 break;
         }
 
-        Type? concrete = target?.GetType();
+        Type? concrete = target is NilFuncValue nilFunc ? nilFunc.Type : target?.GetType();
         string assertedName = GoReflect.GoTypeName(asserted);
 
         if (asserted.IsInterface || asserted == typeof(object))

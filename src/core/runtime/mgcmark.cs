@@ -12,7 +12,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -52,8 +51,6 @@ internal static UntypedInt drainCheckThreshold => 100000;
 // must also evenly divide pagesPerArena.
 internal static UntypedInt pagesPerSpanRoot => /* min(512, pagesPerArena) */ 512;
 
-} partial class runtimeᴛg {
-
 // internalBlocked returns true if the goroutine is blocked due to an
 // internal (non-leaking) waitReason, e.g. waiting for the netpoller or garbage collector.
 // Such goroutines are never leak detection candidates according to the GC.
@@ -63,8 +60,6 @@ internal static bool internalBlocked(this ref g gp) {
     var reason = gp.waitreason;
     return reason < waitReasonChanReceiveNilChan || waitReasonSyncWaitGroupWait < reason;
 }
-
-} partial class runtime_package {
 
 // allGsSnapshotSortedForGC takes a snapshot of allgs and returns a sorted
 // array of Gs. The array is sorted by the G's status, with running Gs
@@ -266,7 +261,7 @@ internal static int64 markroot(ж<gcWork> gcw, uint32 i, bool flushBgCredit) {
         break;
     }
     case {} when i == fixedRootCleanups: {
-        for (var cb = (ж<cleanupBlock>)(uintptr)(ᏑgcCleanups.of(cleanupQueue.Ꮡall).Load()); cb != nil; cb = cb.Value.alllink) {
+        for (var cb = @unsafe.Pointer.To<cleanupBlock>(ᏑgcCleanups.of(cleanupQueue.Ꮡall).Load()); cb != nil; cb = cb.Value.alllink) {
             // N.B. This only needs to synchronize with cleanup execution, which only resets these blocks.
             // All cleanup queueing happens during sweep.
             var n = (uintptr)atomic.Load(cb.of(cleanupBlock.Ꮡn));
@@ -368,7 +363,7 @@ internal static int64 markrootBlock(uintptr b0, uintptr n0, ж<uint8> ptrmask0, 
         return 0;
     }
     var b = b0 + off;
-    var ptrmask = (ж<uint8>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(ptrmask0), (uintptr)shard * (uintptr)(rootBlockBytes / (8 * goarch.PtrSize))));
+    var ptrmask = @unsafe.Pointer.To<uint8>(add(@unsafe.Pointer.FromPinnedBox(ptrmask0), (uintptr)shard * (uintptr)(rootBlockBytes / (8 * goarch.PtrSize))));
     var n = (uintptr)rootBlockBytes;
     if (off + n > n0) {
         n = n0 - off;
@@ -514,13 +509,13 @@ internal static void gcScanFinalizer(ж<specialfinalizer> Ꮡspf, ж<mspan> Ꮡs
     // Don't mark finalized object, but scan it so we retain everything it points to.
 
     // A finalizer can be set for an inner byte of an object, find object beginning.
-    var p = s.@base() + spf.special.offset / s.elemsize * s.elemsize;
+    var Δp = s.@base() + spf.special.offset / s.elemsize * s.elemsize;
 
     // Mark everything that can be reached from
     // the object (but *not* the object itself or
     // we'll never collect it).
     if (!s.spanclass.noscan()) {
-        scanObject(p, gcw);
+        scanObject(Δp, gcw);
     }
 
     // The special itself is also a root.
@@ -584,9 +579,9 @@ retry:
             // If the CPU limiter is enabled, intentionally don't
             // assist to reduce the amount of CPU time spent in the GC.
             if (enteredMarkAssistForTracing) {
-                var trace = traceAcquire();
-                if (trace.ok()) {
-                    trace.GCMarkAssistDone();
+                var Δtrace = traceAcquire();
+                if (Δtrace.ok()) {
+                    Δtrace.GCMarkAssistDone();
                     // Set this *after* we trace the end to make sure
                     // that we emit an in-progress event if this is
                     // the first event for the goroutine in the trace
@@ -595,7 +590,7 @@ retry:
                     // goroutine's trace state, and it must be atomic
                     // with respect to the tracer.
                     gp.inMarkAssist = false;
-                    traceRelease(trace);
+                    traceRelease(Δtrace);
                 } else {
                     // This state is tracked even if tracing isn't enabled.
                     // It's only used by the new tracer.
@@ -642,9 +637,9 @@ retry:
                 // We were able to steal all of the credit we
                 // needed.
                 if (enteredMarkAssistForTracing) {
-                    var trace = traceAcquire();
-                    if (trace.ok()) {
-                        trace.GCMarkAssistDone();
+                    var Δtrace = traceAcquire();
+                    if (Δtrace.ok()) {
+                        Δtrace.GCMarkAssistDone();
                         // Set this *after* we trace the end to make sure
                         // that we emit an in-progress event if this is
                         // the first event for the goroutine in the trace
@@ -653,7 +648,7 @@ retry:
                         // goroutine's trace state, and it must be atomic
                         // with respect to the tracer.
                         gp.inMarkAssist = false;
-                        traceRelease(trace);
+                        traceRelease(Δtrace);
                     } else {
                         // This state is tracked even if tracing isn't enabled.
                         // It's only used by the new tracer.
@@ -665,13 +660,13 @@ retry:
             }
         }
         if (!enteredMarkAssistForTracing) {
-            var trace = traceAcquire();
-            if (trace.ok()) {
-                trace.GCMarkAssistStart();
+            var Δtrace = traceAcquire();
+            if (Δtrace.ok()) {
+                Δtrace.GCMarkAssistStart();
                 // Set this *after* we trace the start, otherwise we may
                 // emit an in-progress event for an assist we're about to start.
                 gp.inMarkAssist = true;
-                traceRelease(trace);
+                traceRelease(Δtrace);
             } else {
                 gp.inMarkAssist = true;
             }
@@ -726,9 +721,9 @@ retry:
             // this G's assist debt, or the GC cycle is over.
         }
         if (enteredMarkAssistForTracing) {
-            var trace = traceAcquire();
-            if (trace.ok()) {
-                trace.GCMarkAssistDone();
+            var Δtrace = traceAcquire();
+            if (Δtrace.ok()) {
+                Δtrace.GCMarkAssistDone();
                 // Set this *after* we trace the end to make sure
                 // that we emit an in-progress event if this is
                 // the first event for the goroutine in the trace
@@ -737,7 +732,7 @@ retry:
                 // goroutine's trace state, and it must be atomic
                 // with respect to the tracer.
                 gp.inMarkAssist = false;
-                traceRelease(trace);
+                traceRelease(Δtrace);
             } else {
                 // This state is tracked even if tracing isn't enabled.
                 // It's only used by the new tracer.
@@ -786,7 +781,7 @@ internal static void gcAssistAlloc1(ж<g> Ꮡgp, int64 scanWork) {
     // Limiter event tracking might be disabled if we end up here
     // while on a mark worker.
     var startTime = nanotime();
-    var trackLimiterEvent = (~gp.m).p.ptr().of(p.ᏑlimiterEvent).start(limiterEventMarkAssist, startTime);
+    var trackLimiterEvent = (~gp.m).p.ptr().of(runtime_package.Δp.ᏑlimiterEvent).start(limiterEventMarkAssist, startTime);
 
     gcBeginWork();
 
@@ -795,7 +790,7 @@ internal static void gcAssistAlloc1(ж<g> Ꮡgp, int64 scanWork) {
 
     // drain own cached work first in the hopes that it
     // will be more cache friendly.
-    var gcw = (~(~getg()).m).p.ptr().of(p.Ꮡgcw);
+    var gcw = (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡgcw);
     var workDone = gcDrainN(gcw, scanWork);
 
     casgstatus(Ꮡgp, _Gwaiting, _Grunning);
@@ -823,7 +818,7 @@ internal static void gcAssistAlloc1(ж<g> Ꮡgp, int64 scanWork) {
     var pp = (~gp.m).p.ptr();
     pp.Value.gcAssistTime += duration;
     if (trackLimiterEvent) {
-        pp.of(p.ᏑlimiterEvent).stop(limiterEventMarkAssist, now);
+        pp.of(runtime_package.Δp.ᏑlimiterEvent).stop(limiterEventMarkAssist, now);
     }
     if ((~pp).gcAssistTime > gcAssistTimeSlack) {
         ᏑgcController.ᏑassistTime.Add((~pp).gcAssistTime);
@@ -971,7 +966,7 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> gcw) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     if ((readgstatus(Ꮡgp) & (uint32)_Gscan) == 0) {
-        print((@string)"runtime:scanstack: gp=", Ꮡgp.OrTypedNil(), (@string)", goid=", gp.goid, (@string)", gp->atomicstatus=", (hex)(uint64)readgstatus(Ꮡgp), (@string)"\n");
+        print((@string)"runtime:scanstack: gp=", Ꮡgp.OrTypedNil(), (@string)", goid=", gp.goid, (@string)", gp->atomicstatus=", (Δhex)(uint64)readgstatus(Ꮡgp), (@string)"\n");
         @throw(scanstackBadStatusˢ);
     }
 
@@ -1011,9 +1006,9 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> gcw) {
 
     // Keep statistics for initial stack size calculation.
     // Note that this accumulates the scanned size, not the allocated size.
-    var p = (~(~getg()).m).p.ptr();
-    p.Value.scannedStackSize += (uint64)scannedSize;
-    p.Value.scannedStacks++;
+    var Δp = (~(~getg()).m).p.ptr();
+    Δp.Value.scannedStackSize += (uint64)scannedSize;
+    Δp.Value.scannedStacks++;
 
     if (isShrinkStackSafe(Ꮡgp)) {
         // Shrink the stack if not much of it is being used.
@@ -1031,7 +1026,7 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> gcw) {
     }
 
     if (debugScanConservative && gp.asyncSafePoint) {
-        print((@string)"scanning async preempted goroutine ", gp.goid, (@string)" stack [", (hex)(uint64)gp.stack.lo, (@string)",", (hex)(uint64)gp.stack.hi, (@string)")\n");
+        print((@string)"scanning async preempted goroutine ", gp.goid, (@string)" stack [", (Δhex)(uint64)gp.stack.lo, (@string)",", (Δhex)(uint64)gp.stack.hi, (@string)")\n");
     }
 
     // Scan the saved context register. This is effectively a live
@@ -1100,7 +1095,7 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> gcw) {
         obj.setRecord(nil); // Don't scan it again.
         if (stackTraceDebug) {
             printlock();
-            print((@string)"  live stkobj at", (hex)(uint64)(state.stack.lo + (uintptr)obj.off), (@string)"of size", obj.size);
+            print((@string)"  live stkobj at", (Δhex)(uint64)(state.stack.lo + (uintptr)obj.off), (@string)"of size", obj.size);
             if (conservative) {
                 print((@string)" (conservative)");
             }
@@ -1127,7 +1122,7 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> gcw) {
                 if (obj.r == nil) { // reachable
                     continue;
                 }
-                println((@string)"  dead stkobj at", (hex)(uint64)(gp.stack.lo + (uintptr)obj.off), (@string)"of size", obj.r.size);
+                println((@string)"  dead stkobj at", (Δhex)(uint64)(gp.stack.lo + (uintptr)obj.off), (@string)"of size", obj.r.size);
                 // Note: not necessarily really dead - only reachable-from-ptr dead.
             }
         }
@@ -1155,7 +1150,7 @@ internal static void scanframeworker(ж<stkframe> Ꮡframe, ж<stackScanState> �
     var isDebugCall = frame.fn.valid() && frame.fn.funcID == abi.FuncID_debugCallV2;
     if (state.conservative || isAsyncPreempt || isDebugCall) {
         if (debugScanConservative) {
-            println((@string)"conservatively scanning function", funcname(frame.fn), (@string)"at PC", (hex)(uint64)frame.continpc);
+            println((@string)"conservatively scanning function", funcname(frame.fn), (@string)"at PC", (Δhex)(uint64)frame.continpc);
         }
 
         // Conservatively scan the frame. Unlike the precise
@@ -1235,7 +1230,7 @@ internal static void scanframeworker(ж<stkframe> Ꮡframe, ж<stackScanState> �
                 continue;
             }
             if (stackTraceDebug) {
-                println((@string)"stkobj at", (hex)(uint64)ptr, (@string)"of size", obj.size);
+                println((@string)"stkobj at", (Δhex)(uint64)ptr, (@string)"of size", obj.size);
             }
             state.addObject(ptr, obj);
         }
@@ -1594,13 +1589,13 @@ internal static void scanblock(uintptr b0, uintptr n0, ж<uint8> ptrmask, ж<gcW
         for (nint j = 0; j < 8 && i < n; j++) {
             if ((bits & 1) != 0) {
                 // Same work as in scanObject; see comments there.
-                var p = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(b + i));
-                if (p != 0) {
-                    if (Ꮡstk != nil && p >= stk.stack.lo && p < stk.stack.hi) {
-                        Ꮡstk.putPtr(p, false);
+                var Δp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(b + i));
+                if (Δp != 0) {
+                    if (Ꮡstk != nil && Δp >= stk.stack.lo && Δp < stk.stack.hi) {
+                        Ꮡstk.putPtr(Δp, false);
                     } else {
-                        if (!tryDeferToSpanScan(p, gcw)) {
-                            var (obj, span, objIndex) = findObject(p, b, i); if (obj != 0) {
+                        if (!tryDeferToSpanScan(Δp, gcw)) {
+                            var (obj, span, objIndex) = findObject(Δp, b, i); if (obj != 0) {
                                 greyobject(obj, b, i, span, gcw, objIndex);
                             }
                         }
@@ -1630,17 +1625,17 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> ptrmask, �
 
     if (debugScanConservative) {
         printlock();
-        print((@string)"conservatively scanning [", (hex)(uint64)b, (@string)",", (hex)(uint64)(b + n), (@string)")\n");
-        hexdumpWords(b, n, (uintptr p, hexdumpMarker m) => {
+        print((@string)"conservatively scanning [", (Δhex)(uint64)b, (@string)",", (Δhex)(uint64)(b + n), (@string)")\n");
+        hexdumpWords(b, n, (uintptr Δp, hexdumpMarker m) => {
             if (ptrmask != nil) {
-                var word = (p - b) / (uintptr)goarch.PtrSize;
+                var word = (Δp - b) / (uintptr)goarch.PtrSize;
                 var bits = addb(ptrmask, word / 8).Value;
                 if ((byte)((bits >> (int)(word % 8)) & 1) == 0) {
                     return;
                 }
             }
 
-            var val = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)p);
+            var val = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)Δp);
             if (Ꮡstate != nil && Ꮡstate.Value.stack.lo <= val && val < Ꮡstate.Value.stack.hi) {
                 m.start();
                 println((@string)"ptr to stack");
@@ -1683,7 +1678,7 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> ptrmask, �
             }
         }
 
-        var val = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(b + i));
+        var val = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(b + i));
 
         // Check if val points into the stack.
         if (Ꮡstate != nil && state.stack.lo <= val && val < state.stack.hi) {
@@ -1728,7 +1723,7 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> ptrmask, �
 //
 //go:nowritebarrier
 internal static void shade(uintptr b) {
-    var gcw = (~(~getg()).m).p.ptr().of(p.Ꮡgcw);
+    var gcw = (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡgcw);
     if (!tryDeferToSpanScan(b, gcw)) {
         var (obj, span, objIndex) = findObject(b, 0, 0); if (obj != 0) {
             greyobject(obj, 0, 0, span, gcw, objIndex);
@@ -1765,11 +1760,11 @@ internal static void greyobject(uintptr obj, uintptr @base, uintptr off, ж<mspa
             return;
         }
         if (debug.checkfinalizers > 1) {
-            print((@string)"  mark ", (hex)(uint64)obj, (@string)" found at *(", (hex)(uint64)@base, (@string)"+", (hex)(uint64)off, (@string)")\n");
+            print((@string)"  mark ", (Δhex)(uint64)obj, (@string)" found at *(", (Δhex)(uint64)@base, (@string)"+", (Δhex)(uint64)off, (@string)")\n");
         }
     } else {
         if (debug.gccheckmark > 0 && span.isFree(objIndex)) {
-            print((@string)"runtime: marking free object ", (hex)(uint64)obj, (@string)" found at *(", (hex)(uint64)@base, (@string)"+", (hex)(uint64)off, (@string)")\n");
+            print((@string)"runtime: marking free object ", (Δhex)(uint64)obj, (@string)" found at *(", (Δhex)(uint64)@base, (@string)"+", (Δhex)(uint64)off, (@string)")\n");
             gcDumpObject(baseˢ, @base, off);
             gcDumpObject(objˢ, obj, ~(uintptr)0);
             getg().Value.m.Value.traceback = 2;
@@ -1811,12 +1806,12 @@ internal static void greyobject(uintptr obj, uintptr @base, uintptr off, ж<mspa
 // field at byte offset off in obj.
 internal static void gcDumpObject(@string label, uintptr obj, uintptr off) {
     var s = spanOf(obj);
-    print(label, (@string)"=", (hex)(uint64)obj);
+    print(label, (@string)"=", (Δhex)(uint64)obj);
     if (s == nil) {
         print((@string)" s=nil\n");
         return;
     }
-    print((@string)" s.base()=", (hex)(uint64)s.@base(), (@string)" s.limit=", (hex)(uint64)s.limit, (@string)" s.spanclass=", s.spanclass, (@string)" s.elemsize=", s.elemsize, (@string)" s.state=");
+    print((@string)" s.base()=", (Δhex)(uint64)s.@base(), (@string)" s.limit=", (Δhex)(uint64)s.limit, (@string)" s.spanclass=", s.spanclass, (@string)" s.elemsize=", s.elemsize, (@string)" s.state=");
     var state = s.Ꮡstate.get(); if (0 <= state && (nint)state < len(mSpanStateNames)) {
         print(mSpanStateNames[state], (@string)"\n");
     } else {
@@ -1843,7 +1838,7 @@ internal static void gcDumpObject(@string label, uintptr obj, uintptr off) {
             print((@string)" ...\n");
             skipped = false;
         }
-        print((@string)" *(", label, (@string)"+", i, (@string)") = ", (hex)(uint64)(~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(obj + i))));
+        print((@string)" *(", label, (@string)"+", i, (@string)") = ", (Δhex)(uint64)(~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(obj + i))));
         if (i == off) {
             print((@string)" <==");
         }
@@ -1890,7 +1885,7 @@ internal static void gcmarknewobject(ж<mspan> Ꮡspan, uintptr obj) {
         atomic.Or8(arena.at(heapArena.ᏑpageMarks, (ulong)(pageIdx)), pageMask);
     }
 
-    var gcw = (~(~getg()).m).p.ptr().of(p.Ꮡgcw);
+    var gcw = (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡgcw);
     gcw.bytesMarked += (uint64)span.elemsize;
 }
 
@@ -1900,12 +1895,12 @@ internal static void gcmarknewobject(ж<mspan> Ꮡspan, uintptr obj) {
 internal static void gcMarkTinyAllocs() {
     assertWorldStopped();
 
-    foreach (var (_, p) in range(allp)) {
-        var c = p.Value.mcache;
+    foreach (var (_, Δp) in range(allp)) {
+        var c = Δp.Value.mcache;
         if (c == nil || c.tiny == 0) {
             continue;
         }
-        var gcw = p.of(runtime_package.p.Ꮡgcw);
+        var gcw = Δp.of(runtime_package.Δp.Ꮡgcw);
         if (!tryDeferToSpanScan(c.tiny, gcw)) {
             var (_, span, objIndex) = findObject(c.tiny, 0, 0);
             greyobject(c.tiny, 0, 0, span, gcw, objIndex);
