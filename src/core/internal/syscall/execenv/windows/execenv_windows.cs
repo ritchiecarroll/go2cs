@@ -39,9 +39,9 @@ public static (slice<@string> env, error err) Default(ж<syscall.SysProcAttr> �
         uintptr size = /* unsafe.Sizeof(*blockp) */ 2;
         while (blockp.Value != 0) { // environment block ends with empty string
             // find NUL terminator
-            @unsafe.Pointer end = (uintptr)@unsafe.Add(@unsafe.Pointer.FromPinnedBox(blockp), size);
+            @unsafe.Pointer end = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(blockp), size);
             while (~(ж<uint16>)(uintptr)(end) != 0) {
-                end = (uintptr)@unsafe.Add(end, size);
+                end = @unsafe.Add(end, size);
             }
 
             var entry = @unsafe.Slice(blockp, ((uintptr)end - (uintptr)blockp) / 2);

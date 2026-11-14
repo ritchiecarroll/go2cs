@@ -409,7 +409,7 @@ internal static abiDesc newAbiDesc(ж<funcType> t, ж<abi.Type> rcvr) {
 internal static void intFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSize, @unsafe.Pointer to) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    memmove(to, (uintptr)r.IntRegArgAddr(reg, argSize), argSize);
+    memmove(to, r.IntRegArgAddr(reg, argSize), argSize);
 }
 
 // intToReg loads an argSize sized integer and stores it into reg.
@@ -418,7 +418,7 @@ internal static void intFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSize,
 internal static void intToReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSize, @unsafe.Pointer from) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    memmove((uintptr)r.IntRegArgAddr(reg, argSize), from, argSize);
+    memmove(r.IntRegArgAddr(reg, argSize), from, argSize);
 }
 
 // floatFromReg loads a float value from its register representation in r.

@@ -685,13 +685,13 @@ internal static uintptr /*scanSize*/ writeHeapBitsSmall(this ref mspan span, uin
         // Two writes.
         var bits0 = (uintptr)ptrBits - j;
         var bits1 = bits - bits0;
-        var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-        var dst1 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+        var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+        var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
         dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
         dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
     } else {
         // One write.
-        var dstΔ1 = (ж<uintptr>)(uintptr)((uintptr)add(dst, i * (uintptr)goarch.PtrSize));
+        var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
         dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((((uintptr)1).Lsh((uint64)(bits))) - 1).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
     }
 
