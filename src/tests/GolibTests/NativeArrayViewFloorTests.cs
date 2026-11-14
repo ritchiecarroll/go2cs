@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using @unsafe = go.unsafe_package;
 
 namespace GolibTests;
 
@@ -134,6 +135,24 @@ public class NativeArrayViewFloorTests
             "6-of-609 regression the type-tested floor was withdrawn for");
 
         GC.KeepAlive(pinned);
+    }
+
+    /// <summary>
+    /// A NIL pointer is not a native address: <c>(*[N]T)(unsafe.Pointer(nil))</c> is a nil pointer in Go.
+    /// </summary>
+    /// <remarks>
+    /// Until 2026-11-14 the floor refused it: the number 0 has no provenance record, which is all the floor
+    /// asked. Both doors panicked "cannot view native memory as array&lt;Byte&gt;" for a conversion that touches
+    /// no memory. Found while giving the named-array floor (<see cref="NamedArrayViewFloorTests"/>) its nil arm.
+    /// </remarks>
+    [TestMethod]
+    public void ANilPointerAtAnArrayPointeeIsANilPointer()
+    {
+        ж<array<byte>> fromZero = (ж<array<byte>>)(uintptr)0;
+        ж<array<byte>> fromNil = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)default(NilType));
+
+        Assert.IsTrue(fromZero == nil, "the number 0 at an array pointee is a nil pointer");
+        Assert.IsTrue(fromNil == nil, "the typed door over a nil unsafe.Pointer is a nil pointer");
     }
 
     /// <summary>
