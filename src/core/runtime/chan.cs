@@ -105,20 +105,20 @@ internal static ж<Δhchan> makechan(ref chantype t, nint size) {
         // Queue or element size is zero.
         c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize, nil, true));
         // Race detector uses this location for synchronization.
-        c.buf = (uintptr)c.raceaddr();
+        c.buf = c.raceaddr();
         break;
     }
     case {} when !elem.Pointers(): {
         // Elements do not contain pointers.
         // Allocate hchan and buf in one call.
         c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize + mem, nil, true));
-        c.buf = (uintptr)add(@unsafe.Pointer.FromPinnedBox(c), hchanSize);
+        c.buf = add(@unsafe.Pointer.FromPinnedBox(c), hchanSize);
         break;
     }
     default: {
         // Elements contain pointers.
         c = @new<Δhchan>();
-        c.buf = (uintptr)mallocgc(mem, elem, true);
+        c.buf = mallocgc(mem, elem, true);
         break;
     }}
 
@@ -150,7 +150,7 @@ internal static ж<Δhchan> makechan(ref chantype t, nint size) {
 internal static @unsafe.Pointer chanbuf(ж<Δhchan> Ꮡc, nuint i) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    return (uintptr)add(c.buf, (uintptr)i * (uintptr)c.elemsize);
+    return add(c.buf, (uintptr)i * (uintptr)c.elemsize);
 }
 
 // full reports whether a send on c would block (that is, the channel is full).
@@ -215,7 +215,7 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
     }
 
     if (raceenabled) {
-        racereadpc((uintptr)Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(chansend));
+        racereadpc(Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(chansend));
     }
 
     if (c.bubble != nil && (~getg()).bubble != c.bubble) {
@@ -267,7 +267,7 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
 
     if (c.qcount < c.dataqsiz) {
         // Space is available in the channel buffer. Enqueue the element to send.
-        @unsafe.Pointer qp = (uintptr)chanbuf(Ꮡc, c.sendx);
+        @unsafe.Pointer qp = chanbuf(Ꮡc, c.sendx);
         if (raceenabled) {
             racenotify(Ꮡc, c.sendx, nil);
         }
@@ -371,7 +371,7 @@ internal static void send(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
             c.sendx = c.recvx; // c.sendx = (c.sendx+1) % c.dataqsiz
         }
     }
-    if ((uintptr)sg.elem.get() != nil) {
+    if (sg.elem.get() != nil) {
         sendDirect(c.elemtype, Ꮡsg, ep);
         sg.elem.set(nil);
     }
@@ -405,7 +405,7 @@ internal static bool timerchandrain(ж<Δhchan> Ꮡc) {
     var any = false;
     while (c.qcount > 0) {
         any = true;
-        typedmemclr(c.elemtype, (uintptr)chanbuf(Ꮡc, c.recvx));
+        typedmemclr(c.elemtype, chanbuf(Ꮡc, c.recvx));
         c.recvx++;
         if (c.recvx == c.dataqsiz) {
             c.recvx = 0;
@@ -434,7 +434,7 @@ internal static void sendDirect(ж<_type> Ꮡt, ж<sudog> Ꮡsg, @unsafe.Pointer
     // Once we read sg.elem out of sg, it will no longer
     // be updated if the destination's stack gets copied (shrunk).
     // So make sure that no preemption points can happen between read & use.
-    @unsafe.Pointer dst = (uintptr)sg.elem.get();
+    @unsafe.Pointer dst = sg.elem.get();
     typeBitsBulkBarrier(Ꮡt, (uintptr)dst, (uintptr)src, t.Size_);
     // No need for cgo write barrier checks because dst is always
     // Go memory.
@@ -448,7 +448,7 @@ internal static void recvDirect(ж<_type> Ꮡt, ж<sudog> Ꮡsg, @unsafe.Pointer
     // dst is on our stack or the heap, src is on another stack.
     // The channel is locked, so src will not move during this
     // operation.
-    @unsafe.Pointer src = (uintptr)sg.elem.get();
+    @unsafe.Pointer src = sg.elem.get();
     typeBitsBulkBarrier(Ꮡt, (uintptr)dst, (uintptr)src, t.Size_);
     memmove(dst, src, t.Size_);
 }
@@ -479,8 +479,8 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
 
     if (raceenabled) {
         var callerpc = sys.GetCallerPC();
-        racewritepc((uintptr)Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(closechan));
-        racerelease((uintptr)Ꮡc.raceaddr());
+        racewritepc(Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(closechan));
+        racerelease(Ꮡc.raceaddr());
     }
 
     c.closed = 1;
@@ -493,8 +493,8 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
         if (sg == nil) {
             break;
         }
-        if ((uintptr)sg.of(sudog.Ꮡelem).get() != nil) {
-            typedmemclr(c.elemtype, (uintptr)sg.of(sudog.Ꮡelem).get());
+        if (sg.of(sudog.Ꮡelem).get() != nil) {
+            typedmemclr(c.elemtype, sg.of(sudog.Ꮡelem).get());
             sg.of(sudog.Ꮡelem).set(nil);
         }
         if ((~sg).releasetime != 0) {
@@ -504,7 +504,7 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
         gp.Value.param = @unsafe.Pointer.FromPinnedBox(sg);
         sg.Value.success = false;
         if (raceenabled) {
-            raceacquireg(ref (gp).DerefOrNull(), (uintptr)Ꮡc.raceaddr());
+            raceacquireg(ref (gp).DerefOrNull(), Ꮡc.raceaddr());
         }
         glist.push(gp);
     }
@@ -523,7 +523,7 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
         gp.Value.param = @unsafe.Pointer.FromPinnedBox(sg);
         sg.Value.success = false;
         if (raceenabled) {
-            raceacquireg(ref (gp).DerefOrNull(), (uintptr)Ꮡc.raceaddr());
+            raceacquireg(ref (gp).DerefOrNull(), Ꮡc.raceaddr());
         }
         glist.push(gp);
     }
@@ -546,7 +546,7 @@ internal static bool empty(ж<Δhchan> Ꮡc) {
 
     // c.dataqsiz is immutable.
     if (c.dataqsiz == 0) {
-        return (uintptr)atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡc.Ꮡsendq.Ꮡfirst)) == nil;
+        return atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡc.Ꮡsendq.Ꮡfirst)) == nil;
     }
     // c.timer is also immutable (it is set after make(chan) but before any channel operations).
     // All timer channels have dataqsiz > 0.
@@ -633,7 +633,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
         if (empty(Ꮡc)) {
             // The channel is irreversibly closed and empty.
             if (raceenabled) {
-                raceacquire((uintptr)Ꮡc.raceaddr());
+                raceacquire(Ꮡc.raceaddr());
             }
             if (ep != nil) {
                 typedmemclr(c.elemtype, ep);
@@ -652,7 +652,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
     if (c.closed != 0) {
         if (c.qcount == 0) {
             if (raceenabled) {
-                raceacquire((uintptr)Ꮡc.raceaddr());
+                raceacquire(Ꮡc.raceaddr());
             }
             unlock(Ꮡc.Ꮡlock);
             if (ep != nil) {
@@ -679,7 +679,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
 
     if (c.qcount > 0) {
         // Receive directly from queue
-        @unsafe.Pointer qp = (uintptr)chanbuf(Ꮡc, c.recvx);
+        @unsafe.Pointer qp = chanbuf(Ꮡc, c.recvx);
         if (raceenabled) {
             racenotify(Ꮡc, c.recvx, nil);
         }
@@ -788,7 +788,7 @@ internal static void recv(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
         // head of the queue. Make the sender enqueue
         // its item at the tail of the queue. Since the
         // queue is full, those are both the same slot.
-        @unsafe.Pointer qp = (uintptr)chanbuf(Ꮡc, c.recvx);
+        @unsafe.Pointer qp = chanbuf(Ꮡc, c.recvx);
         if (raceenabled) {
             racenotify(Ꮡc, c.recvx, nil);
             racenotify(Ꮡc, c.recvx, Ꮡsg);
@@ -798,7 +798,7 @@ internal static void recv(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
             typedmemmove(c.elemtype, ep, qp);
         }
         // copy data from sender to queue
-        typedmemmove(c.elemtype, qp, (uintptr)sg.elem.get());
+        typedmemmove(c.elemtype, qp, sg.elem.get());
         c.recvx++;
         if (c.recvx == c.dataqsiz) {
             c.recvx = 0;
@@ -1007,10 +1007,10 @@ internal static @unsafe.Pointer raceaddr(this ж<Δhchan> Ꮡc) {
 }
 
 internal static void racesync(ж<Δhchan> c, ref sudog sg) {
-    racerelease((uintptr)chanbuf(c, 0));
-    raceacquireg(ref (sg.g).DerefOrNull(), (uintptr)chanbuf(c, 0));
-    racereleaseg(ref (sg.g).DerefOrNull(), (uintptr)chanbuf(c, 0));
-    raceacquire((uintptr)chanbuf(c, 0));
+    racerelease(chanbuf(c, 0));
+    raceacquireg(ref (sg.g).DerefOrNull(), chanbuf(c, 0));
+    racereleaseg(ref (sg.g).DerefOrNull(), chanbuf(c, 0));
+    raceacquire(chanbuf(c, 0));
 }
 
 // Notify the race detector of a send or receive involving buffer entry idx
@@ -1027,7 +1027,7 @@ internal static void racenotify(ж<Δhchan> Ꮡc, nuint idx, ж<sudog> Ꮡsg) {
     // this way, Go will continue to not allocating buffer entries for channels
     // of elemsize==0, yet the race detector can be made to handle multiple
     // sync objects underneath the hood (one sync object per idx)
-    @unsafe.Pointer qp = (uintptr)chanbuf(Ꮡc, idx);
+    @unsafe.Pointer qp = chanbuf(Ꮡc, idx);
     // When elemsize==0, we don't allocate a full buffer for the channel.
     // Instead of individual buffer entries, the race detector uses the
     // c.buf as the only buffer entry.  This simplification prevents us from

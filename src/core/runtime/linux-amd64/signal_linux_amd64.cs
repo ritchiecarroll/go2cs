@@ -52,7 +52,7 @@ internal static void set_rip(this ref sigctxt c, uint64 x) { c.regs().rip = x; }
 internal static void set_rsp(this ref sigctxt c, uint64 x) { c.regs().rsp = x; }
 internal static void set_sigcode(this ref sigctxt c, uint64 x) { c.info.si_code = (int32)x; }
 internal static void set_sigaddr(this ref sigctxt c, uint64 x) {
-    ((ж<uintptr>)(uintptr)((uintptr)add(@unsafe.Pointer.FromPinnedBox(c.info), 2 * goarch.PtrSize))).Value = (uintptr)x;
+    ((ж<uintptr>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(c.info), 2 * goarch.PtrSize))).Value = (uintptr)x;
 }
 
 // dumpSigStack prints a signal stack with the context, fpstate pointer field within that context and

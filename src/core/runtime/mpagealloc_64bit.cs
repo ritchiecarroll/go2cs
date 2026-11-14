@@ -79,7 +79,7 @@ internal static void sysInit(this ref pageAlloc Δp, bool test) {
 
         // Reserve b bytes of memory anywhere in the address space.
         var b = alignUp((uintptr)entries * pallocSumBytes, physPageSize);
-        @unsafe.Pointer r = (uintptr)sysReserve(nil, b, pageSummaryˢ);
+        @unsafe.Pointer r = sysReserve(nil, b, pageSummaryˢ);
         if (r == nil) {
             @throw(failedToReservePageˢ);
         }
@@ -130,8 +130,8 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
         var limitOffset = alignUp((uintptr)sumIdxLimit * pallocSumBytes, physPageSize);
         @unsafe.Pointer baseΔ1 = @unsafe.Pointer.FromPinnedBox(Ꮡ(Ꮡp.Value.summary[level], 0));
         return new addrRange(
-            new offAddr((uintptr)(uintptr)add(baseΔ1, baseOffset)),
-            new offAddr((uintptr)(uintptr)add(baseΔ1, limitOffset))
+            new offAddr((uintptr)add(baseΔ1, baseOffset)),
+            new offAddr((uintptr)add(baseΔ1, limitOffset))
         );
     }
 
@@ -264,7 +264,7 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
 internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemStat> sysStat) {
     var n = (uintptr)((uintptr)1 << (int)(heapAddrBits)) / (uintptr)pallocChunkBytes;
     var nbytes = n * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
-    @unsafe.Pointer r = (uintptr)sysReserve(nil, nbytes, scavengeIndexˢ);
+    @unsafe.Pointer r = sysReserve(nil, nbytes, scavengeIndexˢ);
     ref var sl = ref heap<notInHeapSlice>(new notInHeapSlice((ж<notInHeap>)(uintptr)(r), (nint)n, (nint)n), out var Ꮡsl);
     s.chunks = ~Ꮡsl.Reinterpret<notInHeapSlice, slice<atomicScavChunkData>>();
     return 0; // All memory above is mapped Reserved.

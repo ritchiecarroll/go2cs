@@ -34,12 +34,12 @@ public static any /*val*/ Load(this ж<Value> Ꮡv) {
     ref var val = ref heap<any>(out var Ꮡval);
 
     var vp = Ꮡv.Reinterpret<Value, efaceWords>();
-    @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
+    @unsafe.Pointer typ = LoadPointer(vp.of(efaceWords.Ꮡtyp));
     if (typ == nil || typ == @unsafe.Pointer.FromPinnedBox(ᏑfirstStoreInProgress)) {
         // First store not yet completed.
         return default;
     }
-    @unsafe.Pointer data = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡdata));
+    @unsafe.Pointer data = LoadPointer(vp.of(efaceWords.Ꮡdata));
     var vlp = Ꮡval.Reinterpret<any, efaceWords>();
     vlp.of(efaceWords.Ꮡtyp).Value = typ;
     vlp.of(efaceWords.Ꮡdata).Value = data;
@@ -61,7 +61,7 @@ public static void Store(this ж<Value> Ꮡv, any valʗp) {
     var vp = Ꮡv.Reinterpret<Value, efaceWords>();
     var vlp = Ꮡval.Reinterpret<any, efaceWords>();
     for (;;) {
-        @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
+        @unsafe.Pointer typ = LoadPointer(vp.of(efaceWords.Ꮡtyp));
         if (typ == nil) {
             // Attempt to start first store.
             // Disable preemption so that other goroutines can use
@@ -107,7 +107,7 @@ public static any /*old*/ Swap(this ж<Value> Ꮡv, any @newʗp) {
     var vp = Ꮡv.Reinterpret<Value, efaceWords>();
     var np = Ꮡnew.Reinterpret<any, efaceWords>();
     for (;;) {
-        @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
+        @unsafe.Pointer typ = LoadPointer(vp.of(efaceWords.Ꮡtyp));
         if (typ == nil) {
             // Attempt to start first store.
             // Disable preemption so that other goroutines can use
@@ -134,7 +134,7 @@ public static any /*old*/ Swap(this ж<Value> Ꮡv, any @newʗp) {
             throw panic("sync/atomic: swap of inconsistently typed value into Value");
         }
         var op = Ꮡold.Reinterpret<any, efaceWords>();
-        (op.of(efaceWords.Ꮡtyp).Value, op.of(efaceWords.Ꮡdata).Value) = (np.of(efaceWords.Ꮡtyp).Value, (uintptr)SwapPointer(vp.of(efaceWords.Ꮡdata), np.of(efaceWords.Ꮡdata).Value));
+        (op.of(efaceWords.Ꮡtyp).Value, op.of(efaceWords.Ꮡdata).Value) = (np.of(efaceWords.Ꮡtyp).Value, SwapPointer(vp.of(efaceWords.Ꮡdata), np.of(efaceWords.Ꮡdata).Value));
         return old;
     }
 }
@@ -158,7 +158,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, a
         throw panic("sync/atomic: compare and swap of inconsistently typed values");
     }
     for (;;) {
-        @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
+        @unsafe.Pointer typ = LoadPointer(vp.of(efaceWords.Ꮡtyp));
         if (typ == nil) {
             if (old != nil) {
                 return false;
@@ -192,7 +192,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, a
         // not offered by the package functions.
         // CompareAndSwapPointer below only ensures vp.data
         // has not changed since LoadPointer.
-        @unsafe.Pointer data = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡdata));
+        @unsafe.Pointer data = LoadPointer(vp.of(efaceWords.Ꮡdata));
         ref var i = ref heap<any>(out var Ꮡi);
         (Ꮡi.Reinterpret<any, efaceWords>()).Value.typ = typ;
         (Ꮡi.Reinterpret<any, efaceWords>()).Value.data = data;
