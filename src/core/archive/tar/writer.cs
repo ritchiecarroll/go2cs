@@ -230,7 +230,7 @@ internal static error writePAXHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, m
     var fmtStr = (slice<byte> b, @string s) => {
         Ꮡf.Value.formatString(b, toASCII(s));
     };
-    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, new Action<slice<byte>, @string>(fmtStr), new Action<slice<byte>, int64>(Ꮡf.formatOctal));
+    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, fmtStr, new Action<slice<byte>, int64>(Ꮡf.formatOctal));
     blk.setFormat(FormatPAX);
     {
         var err = tw.writeRawHeader(blk, hdr.Size, hdr.Typeflag); if (err != nil) {

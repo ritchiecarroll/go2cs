@@ -188,7 +188,6 @@
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/subtle/crypto.internal.fips140.subtle.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/tls12/crypto.internal.fips140.tls12.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/tls13/crypto.internal.fips140.tls13.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/impl/crypto.internal.impl.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha256/crypto.sha256.csproj" />

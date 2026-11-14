@@ -84,7 +84,7 @@ If you convert and publish a module of your own, its nuget.org page is covered i
 
 ### The break floor
 
-The check arrives with `go.*` 1.26.10.4; a project whose `go.lib` is 1.26.10.3 or older is not checked. From that
+The check arrives with `go.*` 1.26.11.1; a project whose `go.lib` is 1.26.10.3 or older is not checked. From that
 release, the build checks each converted package it uses against the **break floor**: the newest `go.*` release that
 changed members that compiled code binds. The floor is `go.*` 1.26.10.3, which changed the member a `foreach` over a
 slice binds. A package built below it, such as a `nugetgo.*` revision built against `go.*` 1.26.10.2, still restores
@@ -171,7 +171,7 @@ projects, or in a project that sets `GoConsumerUsings` to `false`, turn the warn
 
 **Two other forms work too.** `using static` on a package class gives bare names, and brings the methods the
 package's types declare as well. It does not bring a method a struct promotes from an embedded field: since
-1.26.10.4 those are extension methods of a class of the struct's own beside the package class, which the
+1.26.11.1 those are extension methods of a class of the struct's own beside the package class, which the
 namespace brings (`using go;`, or the package's own namespace, both of which the packages add for you). Several
 `using static` lines can collide, though: `Contains` is in `strings`, `bytes` and `slices`, and
 `Reader` is a type in both `strings` and `bytes`. It suits a file that leans on one package. The package class
