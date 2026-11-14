@@ -76,7 +76,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         bool ifaceAll = options.TryGetValue("build_property.GoTwinsIfaceAll", out string? all) && string.Equals(all, "true", StringComparison.OrdinalIgnoreCase);
 
-        new Run(context, goSites, ifaceShape, ifaceAll) { Self = self }.Execute();
+        // GoTwinsPairs=false: N3's D3 core off (no pairs, no pair test), the A/B control.
+        bool pairs = !(options.TryGetValue("build_property.GoTwinsPairs", out string? pairing) && string.Equals(pairing, "false", StringComparison.OrdinalIgnoreCase));
+
+        new Run(context, goSites, ifaceShape, ifaceAll) { Self = self, Pairs = pairs }.Execute();
     }
 
     internal sealed partial class Run(GeneratorExecutionContext context, bool goSites, IfaceShape ifaceShape, bool ifaceAll)
@@ -308,7 +311,8 @@ public sealed partial class TwinGenerator : ISourceGenerator
         {
             foreach (Site site in candidate.Sites)
             {
-                if (site.Direct && (ShouldAwait(site) || goSites && GoTwinnable(site)))
+                // A call through a func value twins its function only by N3's caller rule (TwinGenerator.Pairs.cs).
+                if (site.Direct && (ShouldAwait(site) || goSites && GoTwinnable(site) || site.Delegate && CallerRuleTwins(site)))
                     return true;
             }
 
@@ -401,18 +405,24 @@ public sealed partial class TwinGenerator : ISourceGenerator
             base.VisitInvocationExpression(node);
         }
 
+        // N3's D3 core: a block-bodied literal in the function's own body may become a pair, so its calls are ACTIVE (its
+        // twin lambda awaits them) but never DIRECT, as a go literal's: they never make the enclosing function park.
         public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
         {
-            m_passive++;
+            bool pairable = run.Pairs && m_passive == 0 && node.Body is BlockSyntax && !node.Modifiers.Any(SyntaxKind.AsyncKeyword);
+
+            if (pairable) m_literal++; else m_passive++;
             base.VisitParenthesizedLambdaExpression(node);
-            m_passive--;
+            if (pairable) m_literal--; else m_passive--;
         }
 
         public override void VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
         {
-            m_passive++;
+            bool pairable = run.Pairs && m_passive == 0 && node.Body is BlockSyntax && !node.Modifiers.Any(SyntaxKind.AsyncKeyword);
+
+            if (pairable) m_literal++; else m_passive++;
             base.VisitSimpleLambdaExpression(node);
-            m_passive--;
+            if (pairable) m_literal--; else m_passive--;
         }
 
         public override void VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)

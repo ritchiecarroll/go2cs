@@ -31,10 +31,19 @@ public sealed partial class TwinGenerator
 
         public int Awaits, GoTwinned, Unrederivable, Literals, IfaceAwaits, Spills, RefBlocked;
 
+        // N3's D3 core: the method's own func-value parameters whose pair test is HOISTED to the twin's entry (never
+        // reassigned), the awaits that pair tests added (they never make a literal can-park), and the method itself.
+        public readonly List<string> HoistedPairs = [];
+        private readonly ISymbol? m_method;
+        private readonly bool m_blockBody;
+        private int m_pairAwaits;
+
         public Rewriter(Run run, SemanticModel model, MethodDeclarationSyntax method)
         {
             m_run = run;
             m_model = model;
+            m_method = model.GetDeclaredSymbol(method);
+            m_blockBody = method.Body is not null;
 
             // A box or path that is assigned anywhere in the function may name another variable after an await.
             foreach (SyntaxNode node in method.DescendantNodes())
@@ -74,6 +83,29 @@ public sealed partial class TwinGenerator
 
             if (site.Go == GoKind.Group && m_run.CanPark(site.GoTarget))
                 return GoGroup(node);
+
+            // A call through a func value in this (existing) twin: test its target for a pair and await the twin. A
+            // void call is rewritten at its statement (VisitExpressionStatement); a value call here.
+            // A value call inside a larger statement moves ahead of it into a temp, as an awaited call spills, so nothing
+            // evaluated before it (a ref returned by a slice's indexer, say) lives across the await; where the call
+            // cannot move, it stays plain.
+            if (site is { Active: true, Delegate: true, Go: GoKind.None } && node.Parent is not ExpressionStatementSyntax &&
+                m_current is not null && PairShape(node) is { Void: false } shape)
+            {
+                RefLikeBefore(node, out bool pairMovable);
+
+                if (pairMovable)
+                {
+                    (string test, string twin, string plain) = BuildPairCall(node, shape);
+                    string temp = "ᴛtwin" + ++m_temps;
+
+                    m_spilled.Add(node);
+                    m_spills.Add(ParseStatement("var " + temp + " = " + test + " ? await " + twin + " : " + plain + ";"));
+                    Spills++;
+
+                    return IdentifierName(temp).WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
+                }
+            }
 
             if (!m_run.ShouldAwait(site))
                 return base.VisitInvocationExpression(node);
@@ -279,6 +311,9 @@ public sealed partial class TwinGenerator
 
         public override SyntaxNode? VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
         {
+            if (PairLiteral(node) is { } pair)
+                return pair;
+
             m_passive++;
             SyntaxNode? visited = base.VisitParenthesizedLambdaExpression(node);
             m_passive--;
@@ -287,10 +322,140 @@ public sealed partial class TwinGenerator
 
         public override SyntaxNode? VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
         {
+            if (PairLiteral(node) is { } pair)
+                return pair;
+
             m_passive++;
             SyntaxNode? visited = base.VisitSimpleLambdaExpression(node);
             m_passive--;
             return visited;
+        }
+
+        public override SyntaxNode? VisitExpressionStatement(ExpressionStatementSyntax node)
+        {
+            if (m_passive == 0 && node.Expression is InvocationExpressionSyntax call && m_run.Sites.TryGetValue(call, out Site? site) &&
+                site is { Active: true, Delegate: true, Go: GoKind.None } && PairShape(call) is { } shape)
+            {
+                (string test, string twin, string plain) = BuildPairCall(call, shape);
+                return ParseStatement("if (" + test + ") await " + twin + "; else " + plain + ";").WithTriviaFrom(node);
+            }
+
+            return base.VisitExpressionStatement(node);
+        }
+
+        // Whether a call through a func value takes the pair test, and its twin delegate type; no side effects.
+        private (string TwinType, bool Void)? PairShape(InvocationExpressionSyntax node)
+        {
+            if (!m_run.Pairs || node.Expression is not IdentifierNameSyntax ||
+                m_model.GetTypeInfo(node.Expression).Type is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } type ||
+                Run.TwinDelegateType(type) is not { } twinType || RefLikeBefore(node, out _))
+            {
+                return null;
+            }
+
+            return (twinType, type.DelegateInvokeMethod!.ReturnsVoid);
+        }
+
+        // N3's D3 core, the CALL: a call through a func value held by a local or parameter (named once, so reading its
+        // target and calling it see one value). Its target is tested for a pair -- once at the twin's entry for a
+        // parameter never reassigned (HOISTED), else at the call -- and the twin, typed by the Go signature's canonical
+        // twin delegate, is awaited; anything else is called as before. Null where the shape is not covered: the call
+        // stays plain, as today.
+        private (string Test, string Twin, string Plain) BuildPairCall(InvocationExpressionSyntax node, (string TwinType, bool Void) shape)
+        {
+            IdentifierNameSyntax callee = (IdentifierNameSyntax)node.Expression;
+            string twinType = shape.TwinType;
+            string name = callee.Identifier.Text;
+            string arguments = ((ArgumentListSyntax)Visit(node.ArgumentList)!).WithoutTrivia().ToFullString();
+            bool hoisted = m_blockBody && m_model.GetSymbolInfo(callee).Symbol is IParameterSymbol parameter &&
+                           SymbolEqualityComparer.Default.Equals(parameter.ContainingSymbol, m_method) && !m_assigned.Contains(name);
+
+            string pairName;
+            string test;
+
+            if (hoisted)
+            {
+                pairName = name + "ꞏpair";
+                test = pairName + " is not null";
+
+                if (!HoistedPairs.Contains(name))
+                    HoistedPairs.Add(name);
+            }
+            else
+            {
+                pairName = "ᴘpair" + ++m_temps;
+                test = name + "?.Target is global::go.golib.GoFuncPair " + pairName;
+            }
+
+            m_awaits++;
+            m_pairAwaits++;
+            Awaits++;
+            m_run.PairTests++;
+
+            return (test, "((" + twinType + ")" + pairName + ".Twin)" + arguments, name + arguments);
+        }
+
+        // N3's D3 core, the PAIR: a literal in this twin body whose body can park -- awaits from pair tests do not count,
+        // since a literal is never paired for calling a func value (the caller rule's question) -- becomes its plain and
+        // twin lambdas in one expression (so C# gives them one closure), handed out as its own delegate type bound to the
+        // pair's Invoke. A goǃ literal is the go statement's (GoLiteral); an expression body and a signature that cannot
+        // carry a twin stay plain.
+        private ExpressionSyntax? PairLiteral(LambdaExpressionSyntax node)
+        {
+            if (!m_run.Pairs || m_passive > 0 || node.Body is not BlockSyntax || node.Modifiers.Any(SyntaxKind.AsyncKeyword) ||
+                node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "goǃ" } } } } ||
+                m_model.GetTypeInfo(node).ConvertedType is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } type ||
+                Run.TwinDelegateType(type) is not { } twinType)
+            {
+                return null;
+            }
+
+            List<List<string>> scopes = m_scopes;
+            int awaits = m_awaits, pairAwaits = m_pairAwaits, totalAwaits = Awaits, temps = m_temps, tests = m_run.PairTests;
+            List<string> hoisted = [.. HoistedPairs];
+            m_scopes = [];
+            m_awaits = 0;
+            m_pairAwaits = 0;
+
+            CSharpSyntaxNode body = (CSharpSyntaxNode)Visit(node.Body)!;
+            bool parks = m_awaits - m_pairAwaits > 0;
+
+            m_scopes = scopes;
+            m_awaits = awaits;
+            m_pairAwaits = pairAwaits;
+
+            if (!parks)
+            {
+                // Not can-park: undo what the twin visit counted, and leave the literal plain.
+                Awaits = totalAwaits;
+                m_temps = temps;
+                m_run.PairTests = tests;
+                HoistedPairs.Clear();
+                HoistedPairs.AddRange(hoisted);
+                return null;
+            }
+
+            m_passive++;
+            ExpressionSyntax plain = (ExpressionSyntax)(node is ParenthesizedLambdaExpressionSyntax parenthesized
+                ? base.VisitParenthesizedLambdaExpression(parenthesized)!
+                : base.VisitSimpleLambdaExpression((SimpleLambdaExpressionSyntax)node)!);
+            m_passive--;
+
+            LinePosition start = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition;
+            string directive = "\r\n#line " + (start.Line + 1) + " \"" + node.SyntaxTree.FilePath + "\"\r\n" + new string(' ', start.Character);
+
+            ExpressionSyntax twin = node.WithBody(body).WithoutTrivia()
+                .WithModifiers(node.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space)))
+                .WithLeadingTrivia(ParseLeadingTrivia(directive));
+
+            string plainType = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            string pairClass = m_run.PairClass(type, twinType);
+
+            m_run.PairsMade++;
+            Literals++;
+
+            return ParseExpression("new " + plainType + "(new " + pairClass + "(" + plain.WithoutTrivia().ToFullString() + ", " + twin.ToFullString() + ").Invoke)")
+                .WithTriviaFrom(node);
         }
 
         public override SyntaxNode? VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)

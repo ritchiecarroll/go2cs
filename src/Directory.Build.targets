@@ -40,7 +40,8 @@
     generator project and fails it. GoTwinsSiblings (B4) picks how the twin generator sees its siblings' output:
     unset runs them a second time in a nested driver, memo reads what they wrote and nests the late ones, last
     does the twin work under ZTwinGenerator, after every sibling, and runs nothing twice. GoTwinsTiming=true
-    adds the generator's stopwatch to its report. Both are read from the environment as well.
+    adds the generator's stopwatch to its report. Both are read from the environment as well. GoTwinsPairs=false
+    (M:N PROTOTYPE, N3) switches off the func-value pairs and the pair test, the A/B control for the D3 core.
   -->
   <PropertyGroup Condition="'$(GoAotFor)' != '' and $([System.String]::Copy(';$(GoAotFor);').Contains(';$(MSBuildProjectName);'))">
     <PublishAot>true</PublishAot>
@@ -55,6 +56,7 @@
   <ItemGroup>
     <CompilerVisibleProperty Include="GoTwins" />
     <CompilerVisibleProperty Include="GoTwinsGo" />
+    <CompilerVisibleProperty Include="GoTwinsPairs" />
     <CompilerVisibleProperty Include="GoTwinsIface" />
     <CompilerVisibleProperty Include="GoTwinsIfaceAll" />
     <CompilerVisibleProperty Include="GoTwinsSiblings" />

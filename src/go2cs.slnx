@@ -795,6 +795,7 @@
     <Project Path="tests/Behavioral/MnBlockedIO/MnBlockedIO.csproj" />
     <Project Path="tests/Behavioral/MnIfaceTwin/MnIfaceTwin.csproj" />
     <Project Path="tests/Behavioral/MnDeepUnwind/MnDeepUnwind.csproj" />
+    <Project Path="tests/Behavioral/MnFuncPair/MnFuncPair.csproj" />
     <Project Path="tests/Behavioral/MnParkedCallers/MnParkedCallers.csproj" />
     <Project Path="tests/Behavioral/MnAotGeneric/MnAotGeneric.csproj" />
     <Project Path="tests/Behavioral/MnMainExit/MnMainExit.csproj" />

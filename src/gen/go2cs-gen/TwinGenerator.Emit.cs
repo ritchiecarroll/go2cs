@@ -88,6 +88,7 @@ public sealed partial class TwinGenerator
                 Context.AddLineExactSource(GetValidFileName(unique), source.ToString());
             }
 
+            EmitPairs();
             EmitIface();
             EmitEntry();
             EmitReport();
@@ -100,6 +101,18 @@ public sealed partial class TwinGenerator
             Rewriter rewriter = new(this, Model(tree), method);
             BlockSyntax? body = (BlockSyntax?)rewriter.Visit(method.Body);
             ArrowExpressionClauseSyntax? arrow = (ArrowExpressionClauseSyntax?)rewriter.Visit(method.ExpressionBody);
+
+            // N3's D3 core: a func-value parameter never reassigned is tested for a pair ONCE, at the twin's entry. The
+            // declarations sit on the opening brace's own line, so every line of the body keeps its #line mapping.
+            if (body is not null && rewriter.HoistedPairs.Count > 0)
+            {
+                SyntaxTriviaList braceTrailing = body.OpenBraceToken.TrailingTrivia;
+                List<StatementSyntax> declarations = [.. rewriter.HoistedPairs.Select(name =>
+                    SyntaxFactory.ParseStatement(" global::go.golib.GoFuncPair? " + name + "ꞏpair = " + name + "?.Target as global::go.golib.GoFuncPair;"))];
+
+                declarations[^1] = declarations[^1].WithTrailingTrivia(braceTrailing);
+                body = body.WithOpenBraceToken(body.OpenBraceToken.WithTrailingTrivia()).WithStatements(body.Statements.InsertRange(0, declarations));
+            }
 
             candidate.Awaits = rewriter.Awaits;
             m_awaitSites += rewriter.Awaits;

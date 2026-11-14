@@ -1387,6 +1387,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
 
     [TestMethod]
+    public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
+
+    [TestMethod]
     public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
 
     [TestMethod]
