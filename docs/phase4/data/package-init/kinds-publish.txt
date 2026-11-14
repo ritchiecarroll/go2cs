@@ -1,0 +1,10 @@
+threads: [('32630', 1120, 126.2), ('32638', 815, 493.9), ('32640', 20, 3.4), ('32639', 13, 2.8)]
+module initializer                         1 methods      0.1 ms   0.1%  il      11
+package functions and nested types         9 methods      2.4 ms   1.9%  il     648
+golib generic over a package type        648 methods     58.2 ms  47.1%  il   26157
+golib generic over golib or framework types    68 methods      7.1 ms   5.8%  il    2803
+golib non-generic                         99 methods     15.7 ms  12.7%  il    3746
+framework generic instantiation          230 methods     33.3 ms  27.0%  il   18148
+framework other                           55 methods      6.8 ms   5.5%  il    2372
+golib generic types: [('go.ж', 319, 32.6), ('go.StandardBox', 143, 10.3), ('go.slice', 28, 4.6), ('go.StaticBox', 86, 3.9), ('go.array', 39, 3.5), ('go.golib.SparseArray', 18, 2.4), ('go.map', 12, 2.3), ('go.FieldRefBox', 24, 2.3), ('go.BoxShape', 25, 1.5), ('go.GoGrowthFacts', 3, 0.7)]
+framework types: [('System.Collections.Concurrent.ConcurrentDictionary', 100, 20.1), ('System.Collections.Generic.Dictionary', 48, 6.7), ('System.Linq.Enumerable', 5, 2.7), ('System.Collections.Generic.List', 25, 2.1), ('System.SpanHelpers', 3, 1.4), ('System.Threading.ThreadLocal', 13, 1.4), ('<PrivateImplementationDetails>', 20, 1.4), ('System.ReadOnlySpan', 12, 0.8), ('System.Span', 11, 0.7), ('System.Text.StringBuilder+AppendInterpolatedStringHandler', 3, 0.7), ('System.Runtime.InteropServices.MemoryMarshal', 13, 0.6), ('System.MemoryExtensions', 3, 0.3), ('System.Collections.Concurrent.ConcurrentQueueSegment', 1, 0.3), ('System.Array', 4, 0.3), ('System.Buffer', 5, 0.3), ('System.SpanHelpers+DontNegate', 2, 0.3)]
