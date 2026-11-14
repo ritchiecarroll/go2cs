@@ -108,16 +108,21 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
        where Go printed {6 [115 101 99 111 110 100 0] 4.5}; fmt of the field alone (h.Buf) matched Go. The census at
        part D's P1 counted 0 fmt %v and reflect uses reaching an admitted type in modernc.org/sqlite's lib and libc. -->
 * **cgo: a pointer rebuilt from a number can hand C Go memory unchecked. This is a known memory-safety
-  gap.** Do not pass C a pointer you rebuilt from a number when it points into Go memory:
-  `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)`, or a `uintptr` kept in a variable and converted
-  back. go2cs refuses every pointer into Go memory that it can still see as one. Once the address has
-  been through `uintptr` arithmetic, or came from a slice element viewed as another type
-  (`(*C.int)(unsafe.Pointer(&b[4]))`) and then through `uintptr`, go2cs cannot tell it from an address
-  in C memory, so the call goes ahead, and the memory may move while C is using it. Go allows the
-  one-expression form, because its memory does not move. Pass `unsafe.Pointer(p)` itself: go2cs refuses
-  that by name until it can hold Go memory still for C.
+  gap.** Do not pass C a pointer you made from a number held in a variable when it points inside Go
+  memory: `u := uintptr(unsafe.Pointer(p))`, then `unsafe.Pointer(u + n)`. Nor one whose sum puts the
+  pointer second, `unsafe.Pointer(n + uintptr(unsafe.Pointer(p)))`. go2cs refuses every pointer into Go
+  memory that it can still see as one. Once such an address has been through a `uintptr`, go2cs cannot
+  tell it from an address in C memory, so the call goes ahead, and the memory may move while C is using
+  it. The same holds for a slice element viewed as another type (`(*C.int)(unsafe.Pointer(&b[4]))`) and
+  then held as a `uintptr`. Go's own form, `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)` written in
+  one expression, converts to `unsafe.Add`, which go2cs sees as Go memory and refuses by name. So does
+  `unsafe.Pointer(p)` itself, until go2cs can hold Go memory still for C.
   <!-- docs/phase4/DESIGN-cgo-phase3-marshaling.md §16.9 (stop line S3.1-E, COORD's ruling C, 2026-11-12); the arm is
-       GolibTests' APointerOverManagedStorageCrossesAVoidPointerOnlyAsTheFourDisclosedNumbers. -->
+       GolibTests' APointerOverManagedStorageCrossesAVoidPointerOnlyAsTheFourDisclosedNumbers. 2026-11-14 (H, the
+       release-notes audit): the one-expression form is emitted as unsafe.Add on master (src/go2cs/pointerArithmetic.go;
+       TestPointerArithmeticFormEmitsUnsafeAdd, whose controls "held" and "reversed" stay numbers), and unsafe.Add's
+       result keeps its box, so the door refuses it (the goadd arms, hosted cgo-e2e on linux-x64, win-x64, osx-arm64
+       and osx-x64). The interior arm is GolibTests' ANumberBuiltByArithmeticOverAGoPointerCrossesAsDisclosed. -->
 * **Goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
   holds its thread for as long as it lives. When it ends, the thread waits to run the next `go` statement,
   so starting goroutines one after another is cheap; holding many alive at once is not. Measured on one

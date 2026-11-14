@@ -120,13 +120,14 @@ accept `GO2CS2006`, since a downgraded site would run on silently wrong. See [di
 <!-- branch claude/c2-widening-write-refusal: src/go2cs/sliceWideningWriteRefusals.go; docs/DiagnosticCodes.md;
      the design record on claude/c2-widening-write-design (std census: 8 sites per target, 0 refused). -->
 
-### golib: `GoCgoLibraries.Register` gains a target (H)
-
-**A source-level note for anyone who calls `GoCgoLibraries.Register` by hand.** The method gains an overload that takes
-the target its bindings were converted for, `Register(assembly, "linux/amd64", ...)`, and the original
-`Register(assembly, ...)` stays, so compiled code is unaffected. One call no longer compiles: `Register(assembly, null)`
-is ambiguous between the two overloads (CS0121). Converted code never writes it; the converter emits every call.
-<!-- docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.20 (increment 5b; the review's N3). -->
+<!-- 2026-11-14 (H): the section "golib: `GoCgoLibraries.Register` gains a target (H)" is DROPPED, as R's note below
+     suggests. GoCgoLibraries is new in this release (816009e491, batch 284; golib at nuget-1.26.10.3 has no such
+     class), so an overload added to it changes nothing anyone compiled against, and the converter emits every call
+     to it. The class is EditorBrowsable(Never). Its text was: "The method gains an overload that takes the target
+     its bindings were converted for, Register(assembly, "linux/amd64", ...), and the original Register(assembly,
+     ...) stays, so compiled code is unaffected. One call no longer compiles: Register(assembly, null) is ambiguous
+     between the two overloads (CS0121). Converted code never writes it; the converter emits every call."
+     Its provenance: docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.20 (increment 5b; the review's N3). -->
 <!-- 2026-11-14 (R, the release-notes audit), for H: GoCgoLibraries is new in this release. It was added on the
      branch merged as 816009e491 (batch 284), and golib at nuget-1.26.10.3 has no such class, so no compiled code
      can be "unaffected" by an overload of it. Suggest folding the CS0121 note into "cgo: `go2cs -cgo` converts a
@@ -139,15 +140,28 @@ is ambiguous between the two overloads (CS0121). Converted code never writes it;
 memory, and `defer C.f(…)` converts. The helpers copy bytes, with no text encoding in between, and what `C.CString`
 returns comes from the package's own `malloc`, so the package's own `C.free` frees it. go2cs still hands C no pointer
 into Go memory: a pointer into a slice or an array is refused when the package is converted, and `unsafe.Pointer(&x)`
-is refused when the call runs, each by name.
+is refused when the call runs, each by name. Each of these was run against the Go build of the same program on
+linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64. Every arm printed what Go printed, or, where it hands C Go
+memory, was refused by name.
 
-**One known memory-safety gap.** Do not pass C a pointer you rebuilt from a number when it points into Go memory:
-`unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)`, or a `uintptr` kept in a variable and converted back. go2cs cannot
-yet tell that number from an address in C memory, so the call goes ahead, and the memory may move while C is using
-it. Pass `unsafe.Pointer(p)` itself, which go2cs refuses by name. See [Limitations](Limitations.md).
+**One known memory-safety gap.** Do not pass C a pointer you made from a number held in a variable, when it points
+inside Go memory: `u := uintptr(unsafe.Pointer(p))` followed by `C.f(unsafe.Pointer(u + n))`. The same holds when the
+pointer is the second term of the sum, `unsafe.Pointer(n + uintptr(unsafe.Pointer(p)))`. go2cs cannot yet tell such a
+number from an address in C memory, so the call goes ahead, and the memory may move while C is using it. Go's own
+form, `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)` in one expression, converts to `unsafe.Add`. go2cs sees that
+as Go memory and refuses it by name, as it refuses `unsafe.Pointer(p)` itself. See [Limitations](Limitations.md).
 <!-- docs/phase4/DESIGN-cgo-phase3-marshaling.md §16 (increment 3.1) and §16.9 (the residue, COORD's ruling C). cgo
      Phase 3 is a STRETCH for this release by the owner's ruling: this section ships with the release that carries
-     increment 3.1, and moves to that release's notes if it is not this one. -->
+     increment 3.1, and moves to that release's notes if it is not this one.
+     2026-11-14 (H), answering R's note below: CONFIRMED, the stretch condition is met. Increment 3.1 is on master
+     (43ac9e33fa, batch 305), and its re-gate merge 932ed46c19 is seated in batch 306, so this section ships with this
+     release. The four targets are the hosted cgo-e2e legs 43638330006 (linux-x64), 43638338397 (win-x64) and
+     43638346986 (osx-arm64 and osx-x64), 50 of 50 arms each, at 54b84f9ff7.
+     The gap example is RE-READ, as R asked. The one-expression form is emitted as unsafe.Add on master
+     (src/go2cs/pointerArithmetic.go; TestPointerArithmeticFormEmitsUnsafeAdd's "sum" arm). unsafe.Add's result keeps
+     the box it was given, so the door refuses it, as the goadd and goaddlocal arms read on all four legs. That
+     test's controls "held" (u + n) and "reversed" (n + uintptr(p)) stay numbers, which is the gap as now worded.
+     The residue's design is docs/phase4/DESIGN-cgo-pin-extents.md (claude/h-cgo-pin-registry). -->
 <!-- 2026-11-14 (R, the release-notes audit), for H and COORD: increment 3.1 is on master. 43ac9e33fa ("cgo Phase 3
      increment 3.1: the helpers, void * and the deferred call (GREEN)") came in with batch 305's f4b803dfd8, and
      docs/Limitations.md already describes the helpers. The stretch condition reads as met: confirm, and drop the
