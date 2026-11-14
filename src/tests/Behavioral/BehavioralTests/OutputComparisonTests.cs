@@ -1055,6 +1055,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
 
     [TestMethod]
+    public void CheckIntegerToNamedString() => CheckTarget("IntegerToNamedString");
+
+    [TestMethod]
     public void CheckInterfaceAssertionMapKey() => CheckTarget("InterfaceAssertionMapKey");
 
     [TestMethod]
@@ -1790,6 +1793,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckParallelAssignmentHazard() => CheckTarget("ParallelAssignmentHazard");
 
     [TestMethod]
+    public void CheckParallelDerefCastAssign() => CheckTarget("ParallelDerefCastAssign");
+
+    [TestMethod]
     public void CheckParenFuncLitGoDefer() => CheckTarget("ParenFuncLitGoDefer");
 
     [TestMethod]
@@ -2511,6 +2517,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTcpLoopbackRoundTrip() => CheckTarget("TcpLoopbackRoundTrip");
+
+    [TestMethod]
+    public void CheckTerminatingSwitchDefaultFallthrough() => CheckTarget("TerminatingSwitchDefaultFallthrough");
 
     [TestMethod]
     public void CheckTestingStructZeroLiteral() => CheckTarget("TestingStructZeroLiteral");

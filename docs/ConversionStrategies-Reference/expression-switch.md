@@ -191,6 +191,36 @@ nested `[2][2]int` and a struct array — including the over-length (truncate) a
 (zero-fill) cases — and, in the other direction, asserts that the `default` arm still produces Go's
 exact error for the targets it genuinely owns, so the guard cannot be an over-broad one.
 
+## A switch that is terminating by the Go spec ends with `return default;`
+A guarded default, in any position, leaves C# unable to prove that the if-chain always leaves the
+function, so a value-returning function that ends in such a switch needs the unreachable trailing
+`return default;` the sections above describe. The converter's own per-clause test is conservative:
+a clause that ends in a `for` with no condition reads as falling out of the switch, and a default
+that is not the last clause did not set the flag at all. So the trailing return also asks the Go
+specification's rule for a terminating statement (`isGoSpecTerminating`, given the switch's label so a
+`break Label` counts). The switch has a default, no clause breaks out of it, and every clause ends in a
+terminating statement or a `fallthrough`. modernc.org/libc's `(*mutex).lock` is the witness (sqlite-cs
+row S13):
+
+```go
+switch typ {
+default:
+	fallthrough
+case 0:
+	return 10
+case 1:
+	for n := 0; ; n++ {
+		if n == 3 {
+			return int32(20 + n)
+		}
+	}
+}
+```
+
+Before this, the function did not compile (CS0161). A switch with a clause that falls out is not
+terminating and keeps its own final return. Guarded by `TerminatingSwitchDefaultFallthrough`, which has a
+leading default, a middle default and a non-terminating control, output-compared vs Go.
+
 ## A clause's `else` may only be dropped when EVERY preceding clause terminates
 Since seat #28 this governs only a switch with `fallthrough`: the shape below has none, so it now
 emits as a pattern switch, as the excerpt from `src/core` below shows. In the if-chain lowering the converter omits the `else` before a clause when the preceding clause
