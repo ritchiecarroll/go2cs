@@ -13,7 +13,7 @@ partial struct cursor {
 }
 
 internal static uint8 readU8(ptr p, uintptr o) {
-    return ~@unsafe.Pointer.To<uint8>((ptr)((uintptr)p + o));
+    return ~@unsafe.Pointer.To<uint8>(@unsafe.Add(p, o));
 }
 
 internal static uint32 readU32(ptr p, uintptr o) {
