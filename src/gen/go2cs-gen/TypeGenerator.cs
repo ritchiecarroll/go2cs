@@ -316,6 +316,38 @@ public class TypeGenerator : ISourceGenerator
 
                         break;
 
+                    // A defined type over another DEFINED slice type (`type fermat nat`, `type nat []big.Word`;
+                    // github.com/remyoudompheng/bigfft) is a slice in Go: it is made, indexed, sliced and
+                    // len()'d like its base. Its definition names the base, as the Go source does, and the
+                    // base's own wrapper declares no slice surface for it, so follow the chain to the `[]elem`
+                    // at its bottom and generate the slice wrapper, plus the conversions to and from the base
+                    // that Go's `fermat(n)` and `nat(f)` need.
+                    case StructDeclarationSyntax when !string.IsNullOrWhiteSpace(typeDefinition) &&
+                                                      ResolveSliceElementType(context, typeDefinition, []) is { } sliceElement:
+                        typeName = QualifySourceAliasReferences(sliceElement, syntaxTree, semanticModel);
+
+                        generatedSource = new InheritedTypeTemplate
+                        {
+                            PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
+                            PackageName = packageName,
+                            ObjectName = identifier,
+                            Scope = scope,
+                            TypeName = $"slice<{typeName}>",
+                            TargetTypeName = typeName,
+                            TypeClass = "Slice",
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
+                            NamedBaseTypeName = typeDefinition,
+                            NamedBaseIsPublic = context.GetStructDeclaration(typeDefinition) is (StructDeclarationSyntax baseDeclaration, Compilation baseCompilation) &&
+                                baseCompilation.GetSemanticModel(baseDeclaration.SyntaxTree).GetDeclaredSymbol(baseDeclaration) is ITypeSymbol baseSymbol &&
+                                StructDeclarationSyntaxExtensions.IsMemberTypePublic(baseSymbol),
+                            ReadOnlyValue = false
+                        }
+                        .Generate();
+
+                        break;
+
                     case StructDeclarationSyntax when !string.IsNullOrWhiteSpace(typeDefinition):
                         typeName = typeDefinition;
 
@@ -1076,6 +1108,29 @@ public class TypeGenerator : ISourceGenerator
             definition = $"{containingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{definition}";
 
         return ResolveArrayElementType(context, definition, seen);
+    }
+
+    // The SLICE twin of ResolveArrayElementType: walks a defined-type-over-defined-type chain to its
+    // `[]elem` bottom and returns elem, or null once the chain reaches anything else. Same compilation
+    // only, as the struct walk in the named-definition case is: every hop's definition is a bare name
+    // relative to its own package, and an element spelled in another package's terms would not bind in
+    // this one, so a chain that leaves the compilation keeps the plain named-base wrapper.
+    private static string? ResolveSliceElementType(GeneratorExecutionContext context, string typeName, HashSet<string> seen)
+    {
+        if (!seen.Add(typeName))
+            return null;
+
+        (StructDeclarationSyntax? structDecl, Compilation? structCompilation) = context.GetStructDeclaration(typeName);
+
+        if (structDecl is null || structCompilation != context.Compilation || GetGoTypeDefinition(structDecl) is not { } definition)
+            return null;
+
+        if (definition.StartsWith("[]"))
+            return definition[2..].Trim();
+
+        // Another named hop (`type A B`, `type B C`, `type C []T`); anything else ends the walk.
+        return definition.StartsWith("[") || definition.StartsWith("map[") || definition.StartsWith("chan ") || definition.Contains('(') ?
+            null : ResolveSliceElementType(context, definition, seen);
     }
 
     // Reads a struct declaration's own [GoType("…")] definition string (first constructor argument,

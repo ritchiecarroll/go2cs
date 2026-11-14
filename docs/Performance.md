@@ -224,7 +224,10 @@ window, and the Native AOT ratio to the same Go binaries timed again in the Nati
   references. ReadyToRun precompiles golib and the packages and starts in about three quarters of
   the JIT's time; **Native AOT removes the JIT-on-the-fly cost and starts about three times faster
   than the JIT**, but still runs the same package initializers, so a gap to Go remains. For CLI-shaped
-  programs AOT is the deployment story on time.
+  programs AOT is the deployment story on time. Under the JIT and ReadyToRun, one setting moves the Startup row:
+  the table runs with the converter's call-counting delay of 0, which suits long-running work; a short-lived tool
+  starts sooner with a delay, by a quarter of its run on one CPU. See
+  [start-up or steady state](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#start-up-or-steady-state-the-call-counting-delay).
 - **ReadyToRun against the JIT:** past start-up, the ReadyToRun column runs within about a tenth of
   the JIT on most rows, because the program's own code is compiled by the JIT in both. String is the
   exception, at about twice the JIT's time.
