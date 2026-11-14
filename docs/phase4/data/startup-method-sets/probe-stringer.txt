@@ -1,0 +1,42 @@
+B3PROBE marks:
+B3PROBE   main-enter at 293 ms after process start; assemblies loaded 68; methods jitted 2918; jit time 1502 ms
+B3PROBE   exit at 425 ms after process start; assemblies loaded 71; methods jitted 4319; jit time 1689 ms
+B3PROBE site	calls	inclusive ms	items
+B3PROBE StructurallyImplements	16	40.0	1
+B3PROBE CollectGoMethodSetCandidates	7	37.8	4
+B3PROBE GetExtensionMethodsHomedIn	7	34.9	18
+B3PROBE LoadAssemblyExtensionHosts	71	25.2	122
+B3PROBE GoDeferredRegistrations.Run(Adapters)	1	11.0	15
+B3PROBE ExtensionHost.Methods(read)	3	5.9	12
+B3PROBE AdapterBinder.BuildFactory	1	3.1	1
+B3PROBE keys StructurallyImplements: 16 distinct
+B3PROBE   go.b3.main_package+named -> go.error = False x1
+B3PROBE   go.b3.main_package+named -> go.fmt_package+Formatter = False x1
+B3PROBE   go.b3.main_package+named -> go.fmt_package+Stringer = True x1
+B3PROBE   go.b3.main_package+point -> go.error = False x1
+B3PROBE   go.b3.main_package+point -> go.fmt_package+Formatter = False x1
+B3PROBE   go.b3.main_package+point -> go.fmt_package+Stringer = False x1
+B3PROBE   go.slice`1[System.IntPtr] -> go.error = False x1
+B3PROBE   go.slice`1[System.IntPtr] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.slice`1[System.IntPtr] -> go.fmt_package+Stringer = False x1
+B3PROBE   go.StandardBox`1[go.b3.main_package+point] -> go.error = False x1
+B3PROBE   go.StandardBox`1[go.b3.main_package+point] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.StandardBox`1[go.b3.main_package+point] -> go.fmt_package+Stringer = False x1
+B3PROBE   go.StandardBox`1[go.errors_package+errorString] -> go.fmt_package+Formatter = False x1
+B3PROBE   System.IntPtr -> go.error = False x1
+B3PROBE   System.IntPtr -> go.fmt_package+Formatter = False x1
+B3PROBE   System.IntPtr -> go.fmt_package+Stringer = False x1
+B3PROBE keys CollectGoMethodSetCandidates: 7 distinct
+B3PROBE   *go.b3.main_package+named x1
+B3PROBE   *go.b3.main_package+point x1
+B3PROBE   *go.errors_package+errorString x1
+B3PROBE   go.b3.main_package+named x1
+B3PROBE   go.b3.main_package+point x1
+B3PROBE   go.slice`1[System.IntPtr] x1
+B3PROBE   System.IntPtr x1
+B3PROBE keys ExtensionHost.Methods(read): 3 distinct
+B3PROBE   go.b3.main_package x1
+B3PROBE   go.errors_package x1
+B3PROBE   go.errors_package_asserts x1
+B3PROBE keys AdapterBinder.BuildFactory: 1 distinct
+B3PROBE   go.b3.main_package+named -> go.fmt_package+Stringer x1
