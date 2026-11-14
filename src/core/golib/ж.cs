@@ -971,8 +971,8 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // shape; array<E> itself is s_isArrayShaped above and keeps its own arm. `default(T) is I` is a type test on
     // a value type: the JIT and ILC answer it from the type, with no box and no reflection. Declared directly
     // after s_isArrayShaped in the same part of the class, because it reads it (static initializers run in
-    // textual order only within one part).
-    private static readonly bool s_isNamedArrayShaped =
+    // textual order only within one part). Read by the number conversion below and by NativeBox's constructor.
+    private protected static readonly bool s_isNamedArrayShaped =
         !s_isArrayShaped && default(T) is IArray and not ISlice && RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
     // ---- the address conversions (the uintptr/void* seam; kind tests are virtual reads) ----

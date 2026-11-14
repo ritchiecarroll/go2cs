@@ -58,6 +58,25 @@ namespace go;
                        bool aliasesAnOrderToken = false)
         : base(isNull: nativeAddress == 0)
     {
+        // THE NAMED-ARRAY FLOOR, at the one place every native box is made (2026-11-14;
+        // docs/phase4/DESIGN-native-array-view.md, the block of that date). T is the wrapper struct of a named
+        // array type, whose one field is a managed reference, and Value below reads a T at the address with
+        // Unsafe.AsRef. No real address holds a wrapper: storage that holds a reference is never pinned, and C
+        // memory never held one. So the read took raw bytes for a reference, and where the bytes were zero the
+        // wrapper's lazy fill allocated a managed array and stored its reference INTO those bytes, C memory or
+        // a Go array's elements, with no error and where the collector cannot see it.
+        //
+        // The number conversion already refuses the address with no provenance record (ж<T>.FromNumber). This
+        // line is for the arrivals that test admits or never sees: an address WITH a record (pinned Go storage
+        // of another type) and the Reinterpret conversion. Measured before it, five Go shapes of seven stored
+        // an address into the Go array they viewed.
+        //
+        // Not refused: 0, the nil pointer, and a tagged order token, which is not an address (such a box
+        // answers its dereference as it did). It cures nothing: the Go memory shapes panic by name until a
+        // conversion exists that answers a wrapper box sharing the array.
+        if (s_isNamedArrayShaped && nativeAddress != 0 && !ManagedPointerTokens.IsTaggedToken(nativeAddress))
+            throw RuntimeErrorPanic.NativeArrayViewWithoutElementStorage(typeof(T));
+
         m_nativeAddr = nativeAddress;
         m_pin = pin;
         m_retainedSource = retainedSource;
