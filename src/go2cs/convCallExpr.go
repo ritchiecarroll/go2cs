@@ -324,6 +324,18 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		return cgoUnsafeArgsBlockPointer(lift)
 	}
 
+	// Pointer arithmetic in Go's one valid form, `unsafe.Pointer(uintptr(P) + n)`, is emitted as unsafe.Add; and
+	// unsafe.Add's own first argument is marked as a pointer golib receives (pointerArithmetic.go).
+	if callExpr == v.pointerArithmeticBase {
+		return pointerArithmeticSentinel
+	}
+
+	if emission, ok := v.pointerArithmeticEmission(callExpr); ok {
+		return emission
+	}
+
+	v.markCarriedPointerArgument(callExpr)
+
 	// An EXPORTED generic of this package called with an array type argument at a parameter whose
 	// zero value it builds: it cannot carry an array-dims companion, so the call is refused loudly
 	// rather than run with a length-0 array (arrayDimsCompanion.go).
@@ -1061,6 +1073,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// mint that cannot retain (FromRef sees only the ref); a recorded residual, loud at
 				// the primitives if ever reached.
 				if v.exprIsDerefAliasedPointer(arg) {
+					if emission, ok := v.receiverPointerAtProvenUse(callExpr); ok {
+						return emission
+					}
+
 					return fmt.Sprintf("@unsafe.Pointer.FromRef(ref %s)", expr)
 				}
 
@@ -3660,6 +3676,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						// which holds the box, so `FromRef(ref p)` was the address of the local's own
 						// slot and the write never reached `h` (Go `7 8`, converted `7 0`). A local, a
 						// field or any other operand falls through to the box-carrying mint below.
+						//
+						// At a use known at this node, and with the receiver's box in scope, the box is
+						// emitted instead (receiverPointerAtProvenUse); every other use keeps FromRef.
+						if emission, ok := v.receiverPointerAtProvenUse(callExpr); ok {
+							return emission
+						}
+
 						return fmt.Sprintf("(uintptr)@unsafe.Pointer.FromRef(ref %s)", v.convExpr(callExpr.Args[0], nil))
 					}
 				}

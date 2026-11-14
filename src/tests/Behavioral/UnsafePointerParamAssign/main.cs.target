@@ -11,7 +11,7 @@ internal static @unsafe.Pointer rebind(@unsafe.Pointer p, @unsafe.Pointer q) {
 }
 
 internal static @unsafe.Pointer advance(@unsafe.Pointer p, uintptr n) {
-    p = (@unsafe.Pointer)((uintptr)p + n);
+    p = @unsafe.Add(p, n);
     return p;
 }
 

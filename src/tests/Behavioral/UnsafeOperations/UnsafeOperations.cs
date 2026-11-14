@@ -77,7 +77,7 @@ internal static void main() {
     ref var arr = ref heap<array<nint>>(new nint[]{1, 2, 3, 4}.array(), out var Ꮡarr);
     var arrptr = Ꮡarr.at<nint>(0);
 
-    @unsafe.Pointer nextPtr = (@unsafe.Pointer)((uintptr)arrptr + /* unsafe.Sizeof(arr[0]) */ (uintptr)8);
+    @unsafe.Pointer nextPtr = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(arrptr), /* unsafe.Sizeof(arr[0]) */ (uintptr)8);
     fmt.Println("Value of the next element:", ~@unsafe.Pointer.To<nint>(nextPtr));
 
     ref var t1 = ref heap(new T1(), out var Ꮡt1);

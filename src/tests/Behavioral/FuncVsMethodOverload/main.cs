@@ -6,7 +6,7 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static partial @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
-    return (@unsafe.Pointer)((uintptr)p + x);
+    return @unsafe.Add(p, x);
 }
 
 partial struct nih {
@@ -14,12 +14,10 @@ partial struct nih {
 }
 
 internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
     if (bytes == 0) {
         return Ꮡp;
     }
-    return @unsafe.Pointer.To<nih>((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref p) + bytes));
+    return @unsafe.Pointer.To<nih>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡp), bytes));
 }
 
 internal static partial uint32 step(ж<uint32> v) {

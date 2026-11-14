@@ -392,6 +392,52 @@ public unsafe class InteriorPointerRootTests
         Assert.IsTrue(@unsafe.Add(nilPointer, 0) == nil, "unsafe.Add(nil, 0) == nil");
     }
 
+    // ---- Equality: two pointers at one address are one Go pointer, however each of them was derived.
+    //
+    // A pointer moved by unsafe.Add carries a native box at the new address (it keeps what the pointer carried), and a
+    // pointer made by unsafe.Pointer(&x) carries x's own box. Compared by what they carry, the two were different
+    // pointers: `unsafe.Add(p, 0) == p` and `unsafe.Pointer(uintptr(p) + 0) == p` answered false where Go answers
+    // true (the behavioral program UnsafePointerKeywordParam, once the arithmetic form is emitted as unsafe.Add).
+
+    [TestMethod]
+    public void AMovedPointerEqualsAPointerAtTheSameAddress()
+    {
+        ж<Pair> box = new StandardBox<Pair>(new Pair { i1 = 1, i2 = 2 });
+        @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(box);
+
+        Assert.IsTrue(@unsafe.Add(p, 0) == p, "unsafe.Add(p, 0) == p");
+        Assert.IsTrue(p == @unsafe.Add(p, 0), "p == unsafe.Add(p, 0)");
+        Assert.IsTrue(@unsafe.Add(@unsafe.Add(p, 8), -8) == p, "there and back is the same pointer");
+        Assert.IsFalse(@unsafe.Add(p, 8) == p, "a pointer 8 bytes on is another pointer");
+
+        // A FromBox pointer holds a number read before anything held the storage still.
+        ж<Pair> second = new StandardBox<Pair>(new Pair { i1 = 3, i2 = 4 });
+        @unsafe.Pointer loose = @unsafe.Pointer.FromBox(second);
+
+        Assert.IsTrue(@unsafe.Add(loose, 0) == loose, "unsafe.Add(p, 0) == p for a pointer whose box was not pinned when it was made");
+        Assert.IsFalse(@unsafe.Add(loose, 0) == p, "two variables are two pointers");
+
+        // &a[1] reached two ways: by index, and by arithmetic from &a[0].
+        ж<array<long>> elements = new StandardBox<array<long>>(new array<long>(4));
+        @unsafe.Pointer first = @unsafe.Pointer.FromPinnedBox(elements.at<long>(0));
+        @unsafe.Pointer next = @unsafe.Pointer.FromPinnedBox(elements.at<long>(1));
+
+        Assert.IsTrue(@unsafe.Add(first, 8) == next, "unsafe.Add(unsafe.Pointer(&a[0]), 8) == unsafe.Pointer(&a[1])");
+        Assert.IsTrue(next == @unsafe.Add(first, 8), "and the other way round");
+        Assert.IsFalse(@unsafe.Add(first, 16) == next, "&a[2] is not &a[1]");
+
+        // A root that holds a reference has no address: its arithmetic is token arithmetic, and offset 0 is the root.
+        ж<TwoArrays> bearing = new StandardBox<TwoArrays>(new TwoArrays());
+        @unsafe.Pointer t = @unsafe.Pointer.FromPinnedBox(bearing);
+
+        Assert.IsTrue(@unsafe.Add(t, 0) == t, "unsafe.Add(p, 0) == p over a struct that holds references");
+
+        GC.KeepAlive(box);
+        GC.KeepAlive(second);
+        GC.KeepAlive(elements);
+        GC.KeepAlive(bearing);
+    }
+
     // ---- C memory: the same derivations over memory Go does not own. These pass before and after the fix.
 
     [TestMethod]

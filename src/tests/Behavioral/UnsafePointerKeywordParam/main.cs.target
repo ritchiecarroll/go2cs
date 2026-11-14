@@ -20,7 +20,7 @@ internal static int32 deref(@unsafe.Pointer @new) { return ~@unsafe.Pointer.To<i
 internal static void store(ref holder h, @unsafe.Pointer @new) { h.p = @new; }
 
 internal static @unsafe.Pointer offset(@unsafe.Pointer @new, uintptr d) {
-    return (@unsafe.Pointer)((uintptr)@new + d);
+    return @unsafe.Add(@new, d);
 }
 
 internal static uintptr pass(@unsafe.Pointer @new) { return asUintptr(@new); }

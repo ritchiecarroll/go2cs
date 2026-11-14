@@ -382,9 +382,31 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         if (other is not Pointer pointer)
             return base.Equals(other);
         if (Referent is { } mine && pointer.Referent is { } theirs)
-            return ReferenceEquals(mine, theirs) || ReferentToken(mine) == ReferentToken(theirs);
+        {
+            if (ReferenceEquals(mine, theirs))
+                return true;
+
+            if (NamesAnAddress(mine) != NamesAnAddress(theirs))
+                return BaseOf(this).Value == BaseOf(pointer).Value;
+
+            return ReferentToken(mine) == ReferentToken(theirs);
+        }
         return PointerOrderToken == pointer.PointerOrderToken;
     }
+
+    // ONE SIDE NAMES AN ADDRESS, THE OTHER A BOX (2026-11-14). A pointer moved by unsafe.Add carries a native box AT
+    // the new address (NativeDerivation.Moved: it keeps what the pointer carried), so its referent's token is that
+    // address, while a pointer minted over a Go variable carries the variable's own box, whose token is its
+    // allocation's. Compared by token the two were always different: `unsafe.Add(p, 0) == p` answered false, and so
+    // did `unsafe.Add(unsafe.Pointer(&a[0]), 8) == unsafe.Pointer(&a[1])`, where Go answers true (two pointers are
+    // equal exactly when their addresses are). Such a pair is compared by ADDRESS: the native side's is its number,
+    // and the box side's is asked of the box now (BaseOf, the same answer a derivation from it starts at, which holds
+    // pinnable storage still). A box that holds a reference has no address; its number is a tagged token, which no
+    // address equals.
+    //
+    // The hash is unchanged, so such a pair is equal with hashes from two sources: the asymmetric pair of the hash
+    // contract above, which this arm widens to a moved pointer against the box at the address it moved to.
+    private static bool NamesAnAddress(object referent) => referent is INativeIdentity { NativeIdentityOrZero: not 0 };
 
     public override int GetHashCode()
     {

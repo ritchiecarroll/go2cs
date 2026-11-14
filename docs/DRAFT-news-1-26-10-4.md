@@ -140,3 +140,20 @@ it. Pass `unsafe.Pointer(p)` itself, which go2cs refuses by name. See [Limitatio
 <!-- docs/phase4/DESIGN-cgo-phase3-marshaling.md §16 (increment 3.1) and §16.9 (the residue, COORD's ruling C). cgo
      Phase 3 is a STRETCH for this release by the owner's ruling: this section ships with the release that carries
      increment 3.1, and moves to that release's notes if it is not this one. -->
+
+### `unsafe.Add` over a nil pointer answers the offset (P5)
+
+**`unsafe.Add` over a nil pointer now answers the offset, as Go does.** `unsafe.Add(nil, n)` is the address `n`; it
+answered nil before. Pointer arithmetic written in one expression, `unsafe.Pointer(uintptr(p) + n)`, converts to the
+same call, so it gives the same answer over a nil `p`. A program that compared such a result with nil sees a non-nil
+pointer now. No call site in the standard library does. See
+[Pointers](ConversionStrategies-Reference/pointers.md#unsafepointeruintptrp--n-is-emitted-as-unsafeaddp-n--the-moved-pointer-keeps-what-p-carries).
+<!-- docs/phase4/DESIGN-interior-pointer-root.md 10.7 (COORD's ruling of 2026-11-14 07:52Z); the arm is GolibTests
+     InteriorPointerRootTests.AddOverANilPointerAnswersTheOffset, and the behavioral program UintptrUnsafePointerIdiom
+     prints the same under Go. CENSUS, read 2026-11-14 at go1.26.10 (non-test sources outside cmd): 17 call sites of
+     unsafe.Add. syscall/env_windows.go:88, 93; runtime/mgcmark_greenteagc.go:753, list.go:58, list_manual.go:65,
+     malloc.go:1181; reflect/type.go:1205; internal/syscall/execenv/execenv_windows.go:37, 39, 44;
+     internal/runtime/maps/group.go:131, 133, 139, 142; internal/runtime/gc/scan/scan_reference.go:32, scan_go.go:37,
+     81. None passes a base that its own code allows to be nil together with an offset that is not 0: runtime/list.go
+     and list_manual.go test `p == nil` before the call, and the others add to the address of a variable, a receiver
+     or an allocation. -->

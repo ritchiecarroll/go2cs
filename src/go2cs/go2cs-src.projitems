@@ -598,6 +598,8 @@
     <None Include="$(MSBuildThisFileDirectory)platformProject_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProjectConverted_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformScopedDisclosures_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)pointerArithmetic.go" />
+    <None Include="$(MSBuildThisFileDirectory)pointerArithmetic_test.go" />
     <None Include="$(MSBuildThisFileDirectory)pointerNamedArraySlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)pointerParamNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)pointerReceiverMark_test.go" />
