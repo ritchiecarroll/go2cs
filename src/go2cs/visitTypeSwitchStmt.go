@@ -131,6 +131,11 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 		return typeToken
 	}
 
+	// Func-typed labels take the guard form, except those sharing one C# delegate type over
+	// differing bodies (see collidingFuncCaseTypes). Found here, before any label is emitted:
+	// the FIRST label of such a pair must keep its type pattern too.
+	collidingFuncCases := v.collidingFuncCaseTypes(caseClauses)
+
 	for i, caseClause := range caseClauses {
 		if i > 0 {
 			v.outputBuilder.WriteString(v.newline)
@@ -174,7 +179,10 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 			v.indentLevel--
 			v.writeOutput("}")
 		} else {
-			var caseExprs []string
+			// caseMergeKeys and caseMergeTexts run parallel to caseExprs: the C# type the
+			// duplicate-mapped-case merge keys that label on (empty for a label that is never a
+			// duplicate) and the label's type pattern text, which the merge marker spells.
+			var caseExprs, caseMergeKeys, caseMergeTexts []string
 
 			// A MULTI-TYPE case clause (`case *Alias, *Named:`) binds its case variable at the
 			// TAG's static (interface) type — Go binds the listed concrete type only when the
@@ -233,6 +241,8 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 				// used in such a case.
 				if ident, ok := expr.(*ast.Ident); ok && ident.Name == "nil" {
 					caseExprs = append(caseExprs, "null")
+					caseMergeKeys = append(caseMergeKeys, "")
+					caseMergeTexts = append(caseMergeTexts, "")
 					continue
 				}
 
@@ -258,34 +268,50 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 				// *T implements the interface in Go. The `when` guard routes through golib's
 				// type-assert machinery (`_<Iface>`), which matches nominal implementers directly
 				// and re-wraps a raw box in its registered pointer adapter (see AdapterRegistry).
-				if v.isInterfaceCaseLabel(expr) {
+				//
+				// A FUNC-typed case label takes the same guard form. A typed nil func in an interface is not
+				// a null: it is its func type's carrier (golib's NilFuncValue), which no C# type pattern
+				// matches, so `case Func<nint, nint> f:` sent it to the default arm where Go takes the case
+				// and binds the nil func. The type-assert machinery answers a live value by the same `is`
+				// test the pattern made, and the carrier by its func type. The exception is a pair of func
+				// labels on ONE C# delegate type whose bodies differ (collidingFuncCases): those stay type
+				// patterns, so the build still stops at CS8120.
+				patternExpr := fmt.Sprintf("%s %s", caseExpr, bindIdent)
+				funcKey, isFuncCase := v.funcCaseLabelKey(expr)
+				mergeKey := ""
+
+				if isFuncCase {
+					mergeKey = funcKey
+				}
+
+				if v.isInterfaceCaseLabel(expr) || (isFuncCase && !collidingFuncCases[funcKey]) {
 					if len(bindIdent) > 0 && bindIdent != "_" {
-						// case {} Δx when Δx._<liftedIfaceType>(out var x):
+						// case {} Δx when Δx._<caseType>(out var x):
 						tempTarget := fmt.Sprintf("%s%s", ShadowVarMarker, bindIdent)
 						caseExpr = fmt.Sprintf("{} %s when %s._<%s>(out var %s)", tempTarget, tempTarget, caseExpr, bindIdent)
 					} else {
-						// case {} t1 when t1._<liftedIfaceType>(out _):
+						// case {} t1 when t1._<caseType>(out _):
 						tempTarget := fmt.Sprintf("%s%d", TempVarMarker, i)
 						caseExpr = fmt.Sprintf("{} %s when %s._<%s>(out var _)", tempTarget, tempTarget, caseExpr)
 					}
 				} else {
-					caseExpr = fmt.Sprintf("%s %s", caseExpr, bindIdent)
+					caseExpr = patternExpr
+
+					if !isFuncCase {
+						mergeKey = resolveCaseType(caseExpr)
+					}
 				}
 
 				// One label per Go type: `case int:` is `nint` alone. Go matches the dynamic type
 				// exactly, so an int32 (or rune) must NOT take the int arm; a Go int reaches an
 				// interface boxed as nint, untyped constants included (`(nint)1`).
 				caseExprs = append(caseExprs, caseExpr)
+				caseMergeKeys = append(caseMergeKeys, mergeKey)
+				caseMergeTexts = append(caseMergeTexts, strings.TrimRight(patternExpr, " "))
 			}
 
-			// The clause's printed Go body — the identity key for the duplicate-mapped-case merge.
-			printedBody := &strings.Builder{}
-
-			for _, stmt := range caseClause.Body {
-				printedBody.WriteString(v.getPrintedNode(stmt))
-			}
-
-			bodyKey := printedBody.String()
+			// The clause's printed Go body - the identity key for the duplicate-mapped-case merge.
+			bodyKey := v.printedCaseBody(caseClause)
 			outputs := 0
 
 			if multiTypeCase {
@@ -293,12 +319,10 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 				// its marker), then emit every surviving label over ONE shared body.
 				var labels []string
 
-				for _, caseExpr := range caseExprs {
+				for ci, caseExpr := range caseExprs {
 					// Duplicate-mapped concrete case: skip only on an identical Go body (see the
-					// merge note above). Dynamic (`{} … when`) and `null` labels are never duplicates.
-					if !strings.HasPrefix(caseExpr, "{}") && caseExpr != "null" {
-						resolved := resolveCaseType(caseExpr)
-
+					// merge note above). A label that is never a duplicate (interface, `null`) carries no key.
+					if resolved := caseMergeKeys[ci]; resolved != "" {
 						if priorBody, seen := emittedCaseTypes[resolved]; seen && priorBody == bodyKey {
 							if outputs > 0 {
 								v.outputBuilder.WriteString(v.newline)
@@ -306,7 +330,7 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 
 							outputs++
 
-							v.writeOutput("/* case %s: merged with an earlier case mapping to the same C# type (identical body) */", strings.TrimRight(caseExpr, " "))
+							v.writeOutput("/* case %s: merged with an earlier case mapping to the same C# type (identical body) */", caseMergeTexts[ci])
 							continue
 						}
 
@@ -372,12 +396,10 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 					v.writeOutput("}")
 				}
 			} else {
-				for _, caseExpr := range caseExprs {
+				for ci, caseExpr := range caseExprs {
 					// Duplicate-mapped concrete case: skip only on an identical Go body (see the
-					// merge note above). Dynamic (`{} … when`) and `null` labels are never duplicates.
-					if !strings.HasPrefix(caseExpr, "{}") && caseExpr != "null" {
-						resolved := resolveCaseType(caseExpr)
-
+					// merge note above). A label that is never a duplicate (interface, `null`) carries no key.
+					if resolved := caseMergeKeys[ci]; resolved != "" {
 						if priorBody, seen := emittedCaseTypes[resolved]; seen && priorBody == bodyKey {
 							if outputs > 0 {
 								v.outputBuilder.WriteString(v.newline)
@@ -385,7 +407,7 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 
 							outputs++
 
-							v.writeOutput("/* case %s: merged with an earlier case mapping to the same C# type (identical body) */", strings.TrimRight(caseExpr, " "))
+							v.writeOutput("/* case %s: merged with an earlier case mapping to the same C# type (identical body) */", caseMergeTexts[ci])
 							continue
 						}
 
@@ -480,6 +502,74 @@ func (v *Visitor) isInterfaceCaseLabel(expr ast.Expr) bool {
 	_, isIface := labelType.Underlying().(*types.Interface)
 
 	return isIface
+}
+
+// funcCaseLabelKey reports whether a type-switch case label denotes a FUNC type - unnamed, or named
+// with or without methods - and names the C# delegate type such a label resolves to. A func label
+// takes the interface labels' guard form: a typed nil func held in an interface is its func type's
+// carrier, not a null and not a delegate, so no plain C# type pattern matches it.
+func (v *Visitor) funcCaseLabelKey(expr ast.Expr) (string, bool) {
+	labelType := v.getType(expr, false)
+
+	if labelType == nil {
+		return "", false
+	}
+
+	labelType = types.Unalias(labelType)
+
+	if _, isFunc := labelType.Underlying().(*types.Signature); !isFunc {
+		return "", false
+	}
+
+	return v.getCSharpTypeName(labelType), true
+}
+
+// collidingFuncCaseTypes returns the C# delegate types that two or more func-typed case labels of one
+// type switch resolve to with DIFFERING Go bodies, compared as the duplicate-mapped-case merge compares
+// them: each later label against the FIRST label of its type. Those labels keep the plain type pattern,
+// so C# rejects the later one (CS8120); as guard labels both would compile, and the later Go case would
+// run the earlier body.
+func (v *Visitor) collidingFuncCaseTypes(caseClauses []*ast.CaseClause) map[string]bool {
+	firstBodies := map[string]string{}
+	colliding := map[string]bool{}
+
+	for _, caseClause := range caseClauses {
+		bodyKey := ""
+		printed := false
+
+		for _, expr := range caseClause.List {
+			funcKey, isFuncCase := v.funcCaseLabelKey(ast.Unparen(expr))
+
+			if !isFuncCase {
+				continue
+			}
+
+			if !printed {
+				bodyKey = v.printedCaseBody(caseClause)
+				printed = true
+			}
+
+			if firstBody, seen := firstBodies[funcKey]; !seen {
+				firstBodies[funcKey] = bodyKey
+			} else if firstBody != bodyKey {
+				colliding[funcKey] = true
+			}
+		}
+	}
+
+	return colliding
+}
+
+// printedCaseBody returns a case clause's printed Go body - the identity key for the
+// duplicate-mapped-case merge.
+func (v *Visitor) printedCaseBody(caseClause *ast.CaseClause) string {
+	printedBody := &strings.Builder{}
+
+	for _, stmt := range caseClause.Body {
+		printedBody.WriteString(v.getPrintedNode(stmt))
+	}
+
+	return printedBody.String()
 }
 
 // tagHasSideEffects reports whether a type-switch tag expression contains a call or a channel

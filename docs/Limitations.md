@@ -96,6 +96,17 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   <!-- docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.16 and §11.20 (COORD's M1 ruling, 2026-11-11); the census is
        TestCgoCheckClosureFormsAcrossGorootsCgoPackages, hosted run 42973745743: address 31, variable 50, index 22,
        slice 0, defer 9, go 0 over GOROOT's 29 cgo packages. -->
+* **Reflection cannot read a struct whose arrays are held inline.** When a package reads native memory as a
+  struct, through `(*T)(unsafe.Pointer(p))`, go2cs lays that struct out as Go does and holds its array fields inside
+  it, rather than as separate objects. Indexing, `len`, `range` and printing one of those arrays work as in Go. Reflection
+  over the struct that holds them does not: `fmt.Printf("%v", s)`, `reflect.ValueOf(s).Field(i)` and anything else that
+  walks the struct's fields panics with `reflect: field T.F is a Go array held inline (go.arrays); reflection does not
+  read or address it`. Print the fields one at a time instead.
+  <!-- docs/phase4/DESIGN-array-value-storage.md 7.7 and its part-D block (I0, D3). Measured 2026-11-13 (C2) on the
+       InlineArrayFields behavioral fixture with two lines added: fmt.Printf("%v\n", x) over an admitted Named panicked
+       "reflect: field Named.FzName is a Go array held inline (go.arrays); reflection does not read or address it"
+       where Go printed {6 [115 101 99 111 110 100 0] 4.5}; fmt of the field alone (h.Buf) matched Go. The census at
+       part D's P1 counted 0 fmt %v and reflect uses reaching an admitted type in modernc.org/sqlite's lib and libc. -->
 * **cgo: a pointer rebuilt from a number can hand C Go memory unchecked. This is a known memory-safety
   gap.** Do not pass C a pointer you rebuilt from a number when it points into Go memory:
   `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)`, or a `uintptr` kept in a variable and converted
@@ -127,22 +138,23 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
          goroutines;
        - osx-x64, macOS 15.7.9: kern.num_taskthreads 3072; the first failure at 3,051.
        Each is the cap less about 21 runtime and host threads, exact to the thread. The go statement itself throws,
-       synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1308
+       synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1344
        (`GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`). Found when internal/synctest's
        TestWaitGroupManyBubbles (about 10,100 live goroutines) died on both mac runners at the 1.26.10.3 re-bank. A
        developer Mac's cap may differ, so the figures above are stated as the hosted readings, not as macOS's limit. -->
   <!-- [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
        the limit would take (internal record, unlinked 2026-10-26, OQ-1). -->
-  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1308 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
+  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1344 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
        The figures are lane R's ParkStorm reading in docs/DESIGN-mn-scheduler-sizing.md §1 (Windows x64, 16 hardware
        threads, 31 GB RAM, Go 1.26.10, Release, today's 256 MiB stack reserve): 10,000 parked at 622 MB and 4.4 s against
        Go's 99 MB and 0.07 s; 100,000 at 5,904 MB and 302 s; 1,000,000 never parked within 600 s. -->
 * **A deadlock usually hangs** where Go prints `all goroutines are asleep - deadlock!`. The message
   appears only when every goroutine, `main` included, waits on a nil channel or an empty `select {}`. A
   deadlock on an ordinary channel or lock blocks forever. Break in with a debugger: each goroutine is a
-  thread named `goroutine-N`.
-  <!-- src/core/golib/runtime/Goroutine.cs:1066 `internal static bool IsForeverWait(WaitReason reason) =>`
-       and :1125 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
+  thread named `goroutine-N`. When the message does appear, the goroutine blocks under it are Go's: each
+  goroutine's wait reason, its frames and the `go` statement that started it.
+  <!-- src/core/golib/runtime/Goroutine.cs:1088 `internal static bool IsForeverWait(WaitReason reason) =>`
+       and :1161 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
 * **Stacks don't grow.** `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
   a goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it). A goroutine the converter proves
   cannot recurse at all reserves 16 MB instead ([how](ConversionStrategies.md#goroutines)). Recursion past a
@@ -220,7 +232,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
   .NET's collector does not follow them.
-  <!-- src/core/runtime/managed_impl.cs:1282 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
+  <!-- src/core/runtime/managed_impl.cs:1312 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
        nothing in src/core/runtime or src/core/golib sets a GCSettings value or a GC heap limit from them. -->
 * **Runtime introspection is thinner than Go's.** A dump of all goroutines lists every goroutine and
   what it waits on, but has frames for the calling goroutine only. `pprof.StartCPUProfile` gives a
@@ -355,7 +367,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4153 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:4181 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :849
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.
