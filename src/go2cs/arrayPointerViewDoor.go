@@ -33,7 +33,9 @@ import (
 // What a view is (a window on a Go array, a window on native memory, or a copy of another Go value) is decided at
 // run time by what the pointer names; see the doors in src/core/unsafe/unsafe.cs.
 //
-// Three forms keep what they had. An element that holds references is refused by name (managedSliceViewRefusal).
+// Four forms keep what they had. An element that holds references is refused by name (managedSliceViewRefusal).
+// The same-element alias conversion of an UNNAMED array, `(*[N]T)(unsafe.Pointer(p))` with p a `*T`, keeps
+// `array<T>.AliasPointer`, which already windows p's own storage (arrayPointerAliasEmission).
 // The open form of an UNNAMED array (`(*[4]byte)(unsafe.Pointer(&x))[:]`) keeps the box route: it runs on banked
 // rows, and its own defect is a separate row (the design's decision D4). And an operand that holds a `FromRef`
 // mint keeps the span: that number is an address read under `fixed` for one statement, and a window that
@@ -54,6 +56,12 @@ func (v *Visitor) arrayPointerViewOf(sliceExpr *ast.SliceExpr) (arrayPointerView
 	conversion := v.pointerArrayViewConversion(sliceExpr.X)
 
 	if conversion == nil {
+		return arrayPointerView{}, false
+	}
+
+	// The same-element alias conversion, `(*[N]T)(unsafe.Pointer(p))` with p a `*T`, is already a window on p's own
+	// storage (arrayPointerAliasEmission), and banked rows run on it. Sliced, it keeps that route.
+	if _, _, alias := v.arrayPointerAliasSource(conversion, conversion.Args[0]); alias {
 		return arrayPointerView{}, false
 	}
 

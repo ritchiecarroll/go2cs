@@ -12,8 +12,10 @@
 // slice from a span, which copies, so a write through the slice never reached the memory.
 //
 // Each form has an arm. The CONTROLS carry the scope: the open form of an UNNAMED array keeps the box route; an
-// element that holds references takes no door; an operand that holds a FromRef mint keeps the span; and a
-// BOUNDED view under copy stays builtin copy over the view door, because only the open form needs the copy doors.
+// element that holds references takes no door; an operand that holds a FromRef mint keeps the span; a BOUNDED view
+// under copy stays builtin copy over the view door, because only the open form needs the copy doors; and the
+// same-element alias conversion, `(*[N]T)(unsafe.Pointer(p))` with p a `*T`, keeps array<T>.AliasPointer, which
+// already windows p's own storage and which banked rows run on.
 
 package main
 
@@ -104,6 +106,11 @@ func bounded(p unsafe.Pointer, src []byte) int {
 	return copy((*RawMem)(p)[:len(src)], src)
 }
 
+// CONTROL 5: the same-element alias conversion keeps the alias route when it is sliced.
+func sameElem(buf *uint16, n int) []uint16 {
+	return (*[10000]uint16)(unsafe.Pointer(buf))[:n:n]
+}
+
 func main() {
 	var buf [64]byte
 	p := unsafe.Pointer(&buf)
@@ -112,6 +119,7 @@ func main() {
 	h := &hdr{}
 	fmt.Println(len(openUnnamed(&x)), len(h.bytes()), len(wide(uintptr(p), 2)))
 	_ = managed
+	_ = sameElem
 }
 `)
 
@@ -184,6 +192,7 @@ func TestArrayPointerViewDoorReplacesTheCopyingSpan(t *testing.T) {
 		{"openUnnamed", "@unsafe.Pointer.To<array<byte>>(", "the open form of an unnamed array keeps the box route"},
 		{"managed", "", "an element that holds references takes no door"},
 		{"bytes", "new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromRef(ref h)), 4)", "an operand that holds a FromRef mint keeps the span"},
+		{"sameElem", "return array<uint16>.AliasPointer(buf, 10000).slice(0, n, n);", "the same-element alias conversion keeps the alias route"},
 	} {
 		body := emittedFunctionBody(t, mainCs, arm.function)
 
