@@ -50,6 +50,38 @@ internal static class NativeDerivation
 
         return new NativeBox<byte>(value, retainedSource: kept);
     }
+
+    // THE ORDER TOKEN OF A DERIVED BOX (2026-11-14), read by unsafe.Pointer's equality and hash and by nothing else.
+    //
+    // A managed box is identified by its order token (allocation base + Go offset), which is stable and needs no
+    // pin. A native box is identified by its address. A native box DERIVED from a managed box is the same Go pointer
+    // as a managed pointer to that place (`unsafe.Add(p, 0)` is p; `unsafe.Add(unsafe.Pointer(&a[0]), 8)` is
+    // `unsafe.Pointer(&a[1])`), so the two must answer ONE identity, or they compare unequal and hash apart. This
+    // answers the derived box's place in the token space of what it was derived from: the source's token plus the
+    // distance from the source's address to the box's own. The source of a derived box is held still for the box's
+    // life (the derivation asked its number, which is the pin moment), so its address is the one the distance was
+    // measured from. A chain of derivations is walked to its first managed source.
+    //
+    // A box over C memory alone, over an order token, or derived from a source with no address answers its own
+    // number, as before.
+    internal static nuint Token(INativeRooted box)
+    {
+        nuint address = box.NativeRootAddress;
+
+        switch (box.NativeDerivedFrom)
+        {
+            case INativeRooted { NativeRootAddress: var from and not 0 } inner:
+                return unchecked(Token(inner) + (address - from));
+
+            case IGoReflectBox { NativeAddress: 0, IsNilPointer: false, NamesZeroBase: false } source when source is INilPointer tokened:
+                nuint held = source.NativeArgumentAddress();
+
+                return held == 0 || ManagedPointerTokens.IsTaggedToken(held) ? address : unchecked(tokened.PointerOrderToken + (address - held));
+
+            default:
+                return address;
+        }
+    }
 }
 
 // Whether a box names native memory, asked without its pointee type.

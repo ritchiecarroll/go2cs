@@ -272,4 +272,8 @@ namespace go;
     // that no pin holds over managed storage. It is the one pointer whose address a cgo wrapper hands C, asked here
     // without the pointee type because an unsafe.Pointer carries its box as an object (GoCgoArgs.VoidPointer).
     bool INativeRooted.IsGenuinelyNativeRoot => m_retainedSource is null && !m_aliasesAnOrderToken && m_pin is null;
+
+    // What this box was derived from, for the identity of an unsafe.Pointer that carries it (NativeDerivation.Token).
+    // A box over an order token has no address to measure a distance from.
+    object? INativeRooted.NativeDerivedFrom => m_aliasesAnOrderToken ? null : m_retainedSource;
 }

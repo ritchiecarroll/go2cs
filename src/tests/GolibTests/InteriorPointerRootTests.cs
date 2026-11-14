@@ -438,6 +438,69 @@ public unsafe class InteriorPointerRootTests
         GC.KeepAlive(bearing);
     }
 
+    // Pointers that are equal hash alike, or a Go map keyed on unsafe.Pointer misses a key it holds (COORD's condition
+    // on the equality fix, 2026-11-14). Every pair below is one Go pointer reached two ways. Each is asked for its
+    // hash both ways, and looked up in a map[unsafe.Pointer]bool by the pointer that did not store it.
+
+    [TestMethod]
+    public void EqualPointersHashAlikeAndFindEachOtherInAMap()
+    {
+        ж<Pair> box = new StandardBox<Pair>(new Pair { i1 = 1, i2 = 2 });
+        @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(box);
+
+        ж<Pair> second = new StandardBox<Pair>(new Pair { i1 = 3, i2 = 4 });
+        @unsafe.Pointer loose = @unsafe.Pointer.FromBox(second);
+
+        ж<array<long>> elements = new StandardBox<array<long>>(new array<long>(4));
+        @unsafe.Pointer first = @unsafe.Pointer.FromPinnedBox(elements.at<long>(0));
+        @unsafe.Pointer next = @unsafe.Pointer.FromPinnedBox(elements.at<long>(1));
+
+        ж<TwoArrays> bearing = new StandardBox<TwoArrays>(new TwoArrays());
+        @unsafe.Pointer t = @unsafe.Pointer.FromPinnedBox(bearing);
+
+        (string name, @unsafe.Pointer moved, @unsafe.Pointer direct)[] pairs =
+        [
+            ("unsafe.Add(p, 0) and p", @unsafe.Add(p, 0), p),
+            ("there and back, and p", @unsafe.Add(@unsafe.Add(p, 8), -8), p),
+            ("unsafe.Add(p, 0) and p, the box not pinned when p was made", @unsafe.Add(loose, 0), loose),
+            ("unsafe.Add(&a[0], 8) and &a[1]", @unsafe.Add(first, 8), next),
+            ("unsafe.Add(&a[0], 16) and unsafe.Add(&a[1], 8)", @unsafe.Add(first, 16), @unsafe.Add(next, 8)),
+            ("(*int64)(p) converted back, and p", @unsafe.Pointer.FromBox(@unsafe.Pointer.To<long>(p)), p),
+            ("(*int64)(unsafe.Add(p, 8)) converted back, and unsafe.Add(p, 8)", @unsafe.Pointer.FromBox(@unsafe.Pointer.To<long>(@unsafe.Add(p, 8))), @unsafe.Add(p, 8)),
+            ("unsafe.Add(t, 0) and t, over a struct that holds references", @unsafe.Add(t, 0), t),
+            ("unsafe.Add(t, 8) twice, over a struct that holds references", @unsafe.Add(t, 8), @unsafe.Add(@unsafe.Add(t, 16), -8)),
+        ];
+
+        foreach ((string name, @unsafe.Pointer moved, @unsafe.Pointer direct) in pairs)
+        {
+            Assert.IsTrue(moved == direct, $"{name}: equal");
+            Assert.IsTrue(direct == moved, $"{name}: equal, the other way round");
+            Assert.AreEqual(direct.GetHashCode(), moved.GetHashCode(), $"{name}: equal pointers hash alike");
+
+            map<@unsafe.Pointer, bool> seen = new map<@unsafe.Pointer, bool>();
+            seen[direct] = true;
+            (_, bool found) = seen[moved, true];
+            Assert.IsTrue(found, $"{name}: a key stored by the second is found by the first");
+
+            seen = new map<@unsafe.Pointer, bool>();
+            seen[moved] = true;
+            (_, found) = seen[direct, true];
+            Assert.IsTrue(found, $"{name}: a key stored by the first is found by the second");
+            Assert.AreEqual(1, seen.Count, $"{name}: one key");
+        }
+
+        // And pointers that differ stay different keys. Over a struct that holds references the arithmetic is token
+        // arithmetic, and a pointer 8 bytes on is another pointer there too.
+        Assert.IsFalse(@unsafe.Add(p, 8) == p, "a pointer 8 bytes on is another pointer");
+        Assert.IsFalse(@unsafe.Add(t, 8) == t, "a pointer 8 bytes on is another pointer, over a struct that holds references");
+        Assert.IsFalse(@unsafe.Add(first, 16) == next, "&a[2] is not &a[1]");
+
+        GC.KeepAlive(box);
+        GC.KeepAlive(second);
+        GC.KeepAlive(elements);
+        GC.KeepAlive(bearing);
+    }
+
     // ---- C memory: the same derivations over memory Go does not own. These pass before and after the fix.
 
     [TestMethod]

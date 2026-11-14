@@ -41,6 +41,12 @@ internal interface INativeRooted
     nuint NativeRootAddress => 0;
 
     /// <summary>
+    /// What a native root was DERIVED from (the source it retains), when its own address is an address and not an
+    /// order token; else null. Read by <see cref="NativeDerivation.Token"/> only.
+    /// </summary>
+    object? NativeDerivedFrom => null;
+
+    /// <summary>
     /// A field reference's address at its GO offset when it sits ONE field hop off a native root, else 0
     /// -- the address the native field-view door views (<see cref="builtin.NativeFieldArrayPointer{T}"/>).
     /// </summary>

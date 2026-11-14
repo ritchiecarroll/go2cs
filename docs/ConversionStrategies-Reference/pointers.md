@@ -844,7 +844,7 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:818-827 -->
+<!-- source: src/core/unsafe/unsafe.cs:824-833 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
@@ -1222,11 +1222,11 @@ internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
 
 A pointer parameter that the method dereferences is emitted the same way. Every other use, such as a call argument, a return or an assignment, keeps `FromRef`. When the conversion was the method's only use of the value alias, the alias line (`ref var recv = ref Ꮡrecv.DerefOrNull();`) is not emitted. <!-- 2026-11-14, DESIGN-interior-pointer-root.md 4.3 as ruled (the node rule). The kept sites are named in the repoguard mint guard with the reason "use not provable at the node". -->
 
-**Equality.** A moved pointer equals any pointer at the same address, as in Go: `unsafe.Add(p, 0) == p`, and `unsafe.Add(unsafe.Pointer(&a[0]), 8) == unsafe.Pointer(&a[1])` for an array of 8-byte elements.
+**Equality.** A moved pointer equals any pointer to the same place, as in Go: `unsafe.Add(p, 0) == p`, and `unsafe.Add(unsafe.Pointer(&a[0]), 8) == unsafe.Pointer(&a[1])` for an array of 8-byte elements. Equal pointers hash alike, so a `map[unsafe.Pointer]T` finds a key by either. A pointer moved over a struct that holds references is token arithmetic, and it equals only a pointer moved the same distance.
 
 **Limits.** Three forms stay numbers, and a pointer made from one keeps nothing: a sum whose first term is not the pointer (`unsafe.Pointer(n + uintptr(p))`), a masked or rounded number (`unsafe.Pointer(uintptr(p) &^ 7)`), and a sum over a number held in a variable (`u := uintptr(p)`, then `unsafe.Pointer(u + n)`), which Go also says keeps nothing. Over a nil pointer the result is the offset as a number, as in Go: `uintptr(unsafe.Add(nil, 24))` is 24.
 
-Guarded by: `TestPointerArithmeticFormEmitsUnsafeAdd`; `TestReceiverPointerEmitsItsBoxAtAProvenUse`; `InteriorPointerRootTests` (`AMovedPointerEqualsAPointerAtTheSameAddress`, `AddOverANilPointerAnswersTheOffset`); the behavioral programs `UnsafeOperations`, `UintptrUnsafePointerIdiom`, `FuncVsMethodOverload`, `UnsafePointerKeywordParam` and `ReflectNewAtField`.
+Guarded by: `TestPointerArithmeticFormEmitsUnsafeAdd`; `TestReceiverPointerEmitsItsBoxAtAProvenUse`; `InteriorPointerRootTests` (`AMovedPointerEqualsAPointerAtTheSameAddress`, `EqualPointersHashAlikeAndFindEachOtherInAMap`, `AddOverANilPointerAnswersTheOffset`); the behavioral programs `UnsafeOperations`, `UintptrUnsafePointerIdiom`, `FuncVsMethodOverload`, `UnsafePointerKeywordParam` and `ReflectNewAtField`.
 
 ## A numeric value pun READ is a bitcast — `*(*uint64)(unsafe.Pointer(&f))` boxes nothing
 
