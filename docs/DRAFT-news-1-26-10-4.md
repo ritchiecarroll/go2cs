@@ -1,4 +1,8 @@
-# DRAFT — the go.* 1.26.10.4 release notes
+# DRAFT — the go.* 1.26.11.1 release notes
+
+<!-- 2026-11-13 (R, the 1.26.11 patch hop): the release this draft was started for as 1.26.10.4 ships as 1.26.11.1, built
+     from Go 1.26.11 (the owner's ruling, relayed by COORD 2026-11-12). The file keeps its name because records cite it by
+     path; the release it names below is 1.26.11.1. -->
 
 <!-- DRAFT for owner and COORD review, started 2026-11-11 by seat C43 (P2) from master 50dd9a065c, on the .3 precedent
      (docs/DRAFT-news-1-26-10-3.md, b3ca4ef593). Nothing here is published. At release the entries below move to the top
@@ -86,7 +90,7 @@ nothing. See [`-recurse`](CommandLine.md).
 ### A refusal is renumbered: `GO2CS2005` (R)
 
 **A refusal is renumbered: `GO2CS2005`.** The refusals for a pointer type argument to a generic with a
-non-self-referential method-set constraint (new in 1.26.10.4, alongside the conversions that now work for that shape)
+non-self-referential method-set constraint (new in 1.26.11.1, alongside the conversions that now work for that shape)
 are reported as `GO2CS2005` instead of `GO2CS2002`. Their sites cannot fail loud if downgraded, so `-warn` does not
 accept `GO2CS2005`. A build script that matched `GO2CS2002` for those sites should match `GO2CS2005`.
 <!-- branch claude/r-warn-option: src/go2cs/diagnosticOutput.go diagnosticNonSelfProxyRefused; docs/DiagnosticCodes.md. -->
@@ -100,7 +104,7 @@ with another library's in a consumer's bin folder. The package IDs themselves do
 (`golib.dll`, package go.lib), the go2cs-gen analyzer, or a converted module's own assemblies.
 
 **Upgrading.** A library converted and built against go.* 1.26.10.3 or earlier binds the standard library's
-assemblies by their OLD names, so it must be rebuilt against 1.26.10.4. The break floor already names any such
+assemblies by their OLD names, so it must be rebuilt against 1.26.11.1. The break floor already names any such
 package at build time (`GO2CS3002`) rather than letting it fail as a missing assembly at run time.
 <!-- OQ4 (docs/PLAN-public-surface-stability.md, ruled), branch claude/r-oq4-assembly-rename:
      src/go2cs/assemblyIdentity.go; the design docs/phase4/DESIGN-assembly-identity.md and its census. -->

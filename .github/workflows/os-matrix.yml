@@ -2168,7 +2168,7 @@ jobs:
           # A sweep regenerates committed test artifacts in place, so the tree is dirty afterwards
           # and it is (almost always) nothing -- CRLF phantoms and the -tests-closure class. The
           # sweep itself classifies them; this records the raw state alongside for the reader.
-          & git -C $PWD status --porcelain -- src/core |
+          & git -C $PWD status --porcelain -- src/core docs/validation |
               Set-Content -LiteralPath (Join-Path $art "sweep-$goos-$rid-git-status.txt") -Encoding utf8
 
           # The CONTENT of those rewrites, not just their names: a non-windows leg's -tests emission
@@ -2176,8 +2176,12 @@ jobs:
           # ends. The diff lets a lane read per-GOOS emission drift without a runner of that OS
           # (COORD ruling 2026-10-02, after the first darwin row drifted 15+1 lines unread).
           # WriteAllLines always creates the file, so a clean tree uploads an empty diff rather than none.
+          # docs/validation is in it too: the -tests compare renders the row's proof page there
+          # (docs/validation/current/<pkg>.md), and a hosted reading banks that page from this artifact. The
+          # runner's tree is gone when the job ends, so a diff scoped to src/core left a hosted row
+          # unbankable (COORD route, 2026-11-14, the 1.26.11 hop's H10 net row).
           $trackedDiff = Join-Path $art "sweep-$goos-$rid-tracked.diff"
-          $diffLines = [string[]]@(& git -C $PWD -c core.quotePath=false diff --no-ext-diff --no-color -- src/core)
+          $diffLines = [string[]]@(& git -C $PWD -c core.quotePath=false diff --no-ext-diff --no-color -- src/core docs/validation)
           [System.IO.File]::WriteAllLines($trackedDiff, $diffLines)
           Write-Host "==> tracked-rewrite diff: $((Get-Item -LiteralPath $trackedDiff).Length) bytes -> $(Split-Path -Leaf $trackedDiff)"
 

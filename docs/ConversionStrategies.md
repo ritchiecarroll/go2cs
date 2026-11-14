@@ -12589,7 +12589,7 @@ public static (slice<byte>, error) P256OrdInverse(slice<byte> k) {
 `P256OrdInverse` on P-256. It takes the stub's error as "not implemented here" and computes the inverse by
 Fermat's method:
 
-<!-- source: GOROOT/src/crypto/internal/fips140/ecdsa/ecdsa.go:383-399 -->
+<!-- source: GOROOT/src/crypto/internal/fips140/ecdsa/ecdsa.go:385-401 -->
 ```go
 func inverse[P Point[P]](c *Curve[P], kInv, k *bigmod.Nat) {
 	if c.ordInverse != nil {
