@@ -160,6 +160,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckArrayPointerElementAlias() => CheckTarget("ArrayPointerElementAlias");
 
     [TestMethod]
+    public void CheckArrayPointerViewDoors() => CheckTarget("ArrayPointerViewDoors");
+
+    [TestMethod]
     public void CheckArrayRangeSnapshot() => CheckTarget("ArrayRangeSnapshot");
 
     [TestMethod]
