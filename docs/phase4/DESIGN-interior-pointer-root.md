@@ -687,3 +687,19 @@ test that collects without compacting can read green over stale bytes.
 - The callees of 10.2's handed-on sites and sqlite's nine stores are named as NOT READ.
 - The box-kind half of 10.2 (a field or element reference that answers a token) is not counted.
 - `review-counts.py` reads text. A `FromRef` or a cast built across two lines is not counted.
+
+### 10.11 4.5's first item, reworded for a pointer element (COORD, 2026-11-14 07:51Z)
+
+4.5 says an interior address of Go memory "takes the anchored route". That is right for an element that holds no
+reference and impossible for a POINTER element: `slice<T>.OverNativeMemory` refuses an element that holds a
+reference (slice.cs:309-311), and `unsafe.Slice` already sends a pointer element down its own branch
+(unsafe.cs:1053-1057, G's words route, which reads the n words into a managed array). So, in H's cut of 4.5:
+
+- an element that holds no reference: as 4.5 says, `Kept(ptr)` is asked first and the slice is anchored on it;
+- a pointer element: the branch keeps G's words route, and the fresh managed array it makes is tied to `Kept(ptr)`
+  through the table `NativeSliceAnchors` already has (ж.NativeDerivation.cs:72). No field is added.
+
+H adds two arms on its ref for this before cutting: a red arm for the rebased slice header, and a guard arm that an
+element of a native slice anchored to a Go view stays refused at the void door. With the first, the header-rebase
+arm of 10.6 is no longer P5's alone: P5's `InteriorPointerRootTests` keeps its own plain-Go row for it and does not
+duplicate H's door row.
