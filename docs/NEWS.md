@@ -17,8 +17,8 @@ their full text.
      1.26.11.1, built from Go 1.26.11 (2026-11-12, the 1.26.11 patch hop). -->
 
 **NuGet 1.26.11.1.** PENDING. The fourth release on the Go 1.26 line, and the first built from Go 1.26.11, a Go patch
-release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a promoted
-method through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
+release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a method
+through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
 
 **Upgrading from 1.26.10.3.**
 
@@ -48,22 +48,22 @@ method through `using static` alone; they are first under *Upgrading from 1.26.1
   <!-- source: OQ4, docs/PLAN-public-surface-stability.md (ruled), the design docs/phase4/DESIGN-assembly-identity.md;
        src/go2cs/assemblyIdentity.go. The binary-compatibility guard compares each renamed assembly with its 1.26.10.3
        baseline through a rename map keyed to this release (src/tools/pushnuget/GoApiCompat.psm1). -->
-- **`using static` alone no longer brings promoted methods.** PENDING. C# that calls into a converted package with
-  only `using static go.bufio_package;` still sees the package's types, functions and the methods its types declare.
-  A method a struct promotes from an embedded struct of the same package now needs the namespace as well:
-  add `using go;` (or `using go.<path>;` for a package below the root). Converted code already has it.
-  [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
+- **`using static` alone no longer brings methods.** PENDING. C# that calls into a converted package with only
+  `using static go.bufio_package;` still sees the package's types, functions, constants and variables, but no method:
+  neither the methods its types declare nor a method a struct promotes from an embedded struct of the same package.
+  Add the namespace as well: `using go;` (or `using go.<path>;` for a package below the root). Converted code already
+  has it. [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
   <!-- source: the same seat; GenTests PromotedHostClassTests.UsingStaticAloneBringsDeclaredMethodsAndNoPromotedOne
        (CS1929 without the namespace) and TheNamespaceBringsThePromotedMethods. -->
 - **Every Go method is in its receiver type's method holder.** PENDING. Through 1.26.10.3 the methods a package
-  declares were members of the package class (`time_package`); from 1.26.10.4 the methods of each type are in a class
+  declares were members of the package class (`time_package`); from 1.26.11.1 the methods of each type are in a class
   of their own beside the package class, in the same namespace (`timeᴛTime` holds `time.Time`'s methods). A method is
   still an extension method on its receiver, so `t.Add(d)` reads as before once the namespace is imported (`using go;`,
   or `using go.<path>;` for a package below the root); `using static go.time_package;` alone no longer brings any
   method. A call written in static form through the package class, `time_package.Add(t, d)`, is now
-  `t.Add(d)`. An assembly compiled against 1.26.10.3 that calls a Go method fails under 1.26.10.4 with
+  `t.Add(d)`. An assembly compiled against 1.26.10.3 that calls a Go method fails under 1.26.11.1 with
   `MissingMethodException`, and the break floor refuses that combination first (`GO2CS3002`): rebuild against
-  1.26.10.4.
+  1.26.11.1.
   <!-- source: the method-holder seat (OQ2, P1; docs/phase4/SCOUT-method-holder.md on
        claude/p1-oq2-method-holder-scout). The moved members are announced to the binary-compatibility guard by the
        release's pack rehearsal and New-GoApiCompatMoveSuppressions.ps1, as the promoted move was; the counts are read
