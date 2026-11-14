@@ -3,7 +3,6 @@ global using triple = go.array<nint>;
 namespace go;
 
 using fmt = fmt_package;
-using runtime = runtime_package;
 
 partial class main_package {
 
@@ -17,9 +16,11 @@ internal static array<nint> primes = array<nint>([2, 3, 5, 7, 11, 13]);
 
 internal static array<byte> table = array<byte>([0x10, 0x20, 0x30, 0x40]);
 
-internal static partial nint line() {
-    var (_, _, n, _) = runtime.Caller(1);
-    return n;
+internal static nint calls;
+
+internal static nint next() {
+    calls++;
+    return calls;
 }
 
 internal static array<nint> fresh() {
@@ -61,8 +62,8 @@ internal static void main() {
     fmt.Println(cells[0].marks, cells[2].marks, len(cells[2].marks));
 
     var lines = array<nint>([
-        line(),
-        line()
+        next(),
+        next()
     ]);
     fmt.Println(lines[1] - lines[0]);
 }

@@ -252,7 +252,7 @@ An unkeyed, non-empty literal of an **unnamed** array type, or of an alias to on
 builtin called on a C# collection expression. A full literal, and every `[...]T{…}` literal, passes its elements
 alone; a short literal passes its declared length first, and the builtin zero-fills the rest
 ([below](#a-fixed-array-composite-literal-carries-its-declared-length-arrayn)):
-<!-- source: src/tests/Behavioral/ArrayLiteralBuiltin/main.go:30-56 -->
+<!-- source: src/tests/Behavioral/ArrayLiteralBuiltin/main.go:29-55 -->
 ```go
 	// Full length, short, and an ellipsis literal.
 	fmt.Println(primes, len(primes))
@@ -282,7 +282,7 @@ alone; a short literal passes its declared length first, and the builtin zero-fi
 	grid := [2][3]int{{1, 2, 3}, {4}}
 	fmt.Println(grid, len(grid[1]))
 ```
-<!-- source: src/tests/Behavioral/ArrayLiteralBuiltin/main.cs.target:33-54 -->
+<!-- source: src/tests/Behavioral/ArrayLiteralBuiltin/main.cs.target:34-55 -->
 ```csharp
     fmt.Println(primes, len(primes));
     var @short = array<byte>(8, [1, 2]);

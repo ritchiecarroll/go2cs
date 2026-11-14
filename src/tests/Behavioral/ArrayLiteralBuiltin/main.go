@@ -1,9 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"runtime"
-)
+import "fmt"
 
 type digits [3]int
 
@@ -17,9 +14,11 @@ var primes = [6]int{2, 3, 5, 7, 11, 13}
 
 var table = [4]byte{0x10, 0x20, 0x30, 0x40}
 
-func line() int {
-	_, _, n, _ := runtime.Caller(1)
-	return n
+var calls int
+
+func next() int {
+	calls++
+	return calls
 }
 
 func fresh() [3]int {
@@ -64,10 +63,10 @@ func main() {
 	cells := [3]cell{{marks: [2]bool{true, false}}}
 	fmt.Println(cells[0].marks, cells[2].marks, len(cells[2].marks))
 
-	// A call inside an element keeps its own line.
+	// A multi-line literal evaluates its elements in order.
 	lines := [2]int{
-		line(),
-		line(),
+		next(),
+		next(),
 	}
-	fmt.Println(lines[1]-lines[0])
+	fmt.Println(lines[1] - lines[0])
 }
