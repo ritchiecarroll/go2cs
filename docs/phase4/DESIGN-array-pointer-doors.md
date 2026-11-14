@@ -327,6 +327,24 @@ refused by the same named panic. This is the route every non-converter caller ta
 file, a module converted before door C). It cures nothing and makes M0 loud. It is separable and small, like arm
 5 was, and it is proposed to land first (decision D2).
 
+> **CORRECTED 2026-11-14 21:00Z (P5), from the floor seat's finding.** Two sentences above are wrong or
+> incomplete, and are left as written so the review can see what changed.
+>
+> 1. *"Over Go memory both answer what `To<...>` answers today"* is wrong for the NAMED form. Measured at master
+>    `c2919b8b16`: `To<A>` over Go memory of another type (a `[64]byte` field or variable, a `[8]uint64`, a
+>    slice's first element, a struct's first field) makes a native box of the wrapper, loses the program's write
+>    and stores a managed address into the Go storage, in 5 shapes of 7. Only the round trip at the pointer's
+>    own type is right. Evidence: `data/named-array-floor/gomem/` on `claude/p5-named-array-floor`. So door C's
+>    named form cannot delegate to `To` over Go memory either: `ToArray<A, E>` has to answer its own box of the
+>    wrapper, sharing the Go array where `p` names a managed array of `E`, and the sibling box kind otherwise.
+>    The reverse (a named array viewed as the unnamed one) answers length 0 today, as arm Q does.
+> 2. *The floor* landed wider than this paragraph, by COORD's 19:58Z ruling: the provenance test at
+>    `FromNumber` as written here, and a second line in the `NativeBox` constructor that refuses the wrapper
+>    over ANY real address (not 0, not an order token), because an address with a record and the `Reinterpret`
+>    conversion both reach the same store. Consequence for the doors: no door may make a `NativeBox` of a
+>    wrapper. Door B never does (`Element`, `LoadArray` and `StoreArray` work in `E`). Door C's named form
+>    must mint its own box kind for C memory and for Go memory alike.
+
 ### 4.6 A `FromRef` operand keeps the snapshot
 
 `@unsafe.Pointer.FromRef(ref x)` is a number read under `fixed` for one statement. An aliasing window over that
