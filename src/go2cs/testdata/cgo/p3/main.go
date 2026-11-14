@@ -272,6 +272,83 @@ func main() {
 		h := (*goHeader)(unsafe.Pointer(&b[0]))
 		p := same(unsafe.Pointer(&h.n))
 		fmt.Println("goviewfieldvar", C.go2cs_probe_same(p) != nil, len(b))
+	// The second review of increment 3.1 (DESIGN-cgo-phase3-marshaling §16.12), with no uintptr anywhere. MUST-FIX 1:
+	// a typed pointer converted from an unsafe.Pointer VALUE that holds an interior Go address. MUST-FIX 2: an array
+	// field of a struct viewed over Go memory. Go allows each, and go2cs is to refuse each until 3.2. The c* arms are
+	// their twins over C memory, which run to their end both ways.
+	case "goaddtyped":
+		b := make([]byte, 16)
+		copy(b[4:], "go")
+		p := unsafe.Add(unsafe.Pointer(&b[0]), 4)
+		fmt.Printf("goaddtyped %q %d\n", C.GoString((*C.char)(p)), len(b))
+	case "goaddfill":
+		// C writes through the typed pointer.
+		b := make([]byte, 16)
+		p := unsafe.Add(unsafe.Pointer(&b[0]), 4)
+		n := C.go2cs_probe_text_fill((*C.char)(p), 8)
+		fmt.Printf("goaddfill %d %q\n", int(n), string(b[4:4+int(n)]))
+	case "gofieldtyped":
+		b := make([]byte, 16)
+		h := (*goHeader)(unsafe.Pointer(&b[0]))
+		p := unsafe.Pointer(&h.n)
+		n := C.go2cs_probe_text_fill((*C.char)(p), 4)
+		fmt.Printf("gofieldtyped %d %q\n", int(n), string(b[4:4+int(n)]))
+	case "goviewnamestring":
+		b := make([]byte, 16)
+		h := (*goHeader)(unsafe.Pointer(&b[0]))
+		copy(h.name[:], "go")
+		fmt.Printf("goviewnamestring %q %d\n", C.GoString((*C.char)(unsafe.Pointer(&h.name))), len(b))
+	case "goviewnameadd":
+		b := make([]byte, 16)
+		h := (*goHeader)(unsafe.Pointer(&b[0]))
+		fmt.Println("goviewnameadd", C.go2cs_probe_same(unsafe.Add(unsafe.Pointer(&h.name), 1)) != nil, len(b))
+	case "goviewnameslice":
+		b := make([]byte, 16)
+		h := (*goHeader)(unsafe.Pointer(&b[0]))
+		s := h.name[:]
+		p := &s[1]
+		fmt.Println("goviewnameslice", C.go2cs_probe_same(unsafe.Pointer(p)) != nil, len(b))
+	case "goviewnamedata":
+		// C writes through unsafe.SliceData of the field's slice.
+		b := make([]byte, 16)
+		h := (*goHeader)(unsafe.Pointer(&b[0]))
+		s := h.name[:]
+		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(unsafe.SliceData(s))), 8)
+		fmt.Printf("goviewnamedata %d %q\n", int(n), string(s[:n]))
+	case "caddtyped":
+		p := C.malloc(16)
+		defer C.free(p)
+		q := unsafe.Add(p, 4)
+		n := C.go2cs_probe_text_fill((*C.char)(q), 8)
+		fmt.Printf("caddtyped %d %q\n", int(n), C.GoString((*C.char)(q)))
+	case "cfieldtyped":
+		h := (*goHeader)(C.malloc(16))
+		defer C.free(unsafe.Pointer(h))
+		q := unsafe.Pointer(&h.n)
+		n := C.go2cs_probe_text_fill((*C.char)(q), 4)
+		fmt.Printf("cfieldtyped %d %q\n", int(n), C.GoString((*C.char)(q)))
+	case "cviewnamestring":
+		h := (*goHeader)(C.malloc(16))
+		defer C.free(unsafe.Pointer(h))
+		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(&h.name)), 8)
+		fmt.Printf("cviewnamestring %d %q\n", int(n), C.GoString((*C.char)(unsafe.Pointer(&h.name))))
+	case "cviewnameadd":
+		h := (*goHeader)(C.malloc(16))
+		defer C.free(unsafe.Pointer(h))
+		q := unsafe.Add(unsafe.Pointer(&h.name), 1)
+		fmt.Println("cviewnameadd", C.go2cs_probe_same(q) == q)
+	case "cviewnameslice":
+		h := (*goHeader)(C.malloc(16))
+		defer C.free(unsafe.Pointer(h))
+		s := h.name[:]
+		p := &s[1]
+		fmt.Println("cviewnameslice", C.go2cs_probe_same(unsafe.Pointer(p)) == unsafe.Pointer(p))
+	case "cviewnamedata":
+		h := (*goHeader)(C.malloc(16))
+		defer C.free(unsafe.Pointer(h))
+		s := h.name[:]
+		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(unsafe.SliceData(s))), 8)
+		fmt.Printf("cviewnamedata %d %q\n", int(n), string(s[:n]))
 	default:
 		fmt.Println("unknown arm", arm)
 		os.Exit(64)

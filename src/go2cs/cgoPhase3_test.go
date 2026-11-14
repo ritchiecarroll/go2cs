@@ -381,6 +381,21 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goaddfunc", csFails: cgoP3GoMemory},
 		{name: "goviewfieldfunc", csFails: cgoP3GoMemory},
 		{name: "goviewfieldvar", csFails: cgoP3GoMemory},
+		// The second review (§16.12): a typed pointer from an interior unsafe.Pointer value, and an array field of a view.
+		{name: "goaddtyped", csFails: cgoP3GoMemory},
+		{name: "goaddfill", csFails: cgoP3GoMemory},
+		{name: "gofieldtyped", csFails: cgoP3GoMemory},
+		{name: "goviewnamestring", csFails: cgoP3GoMemory},
+		{name: "goviewnameadd", csFails: cgoP3GoMemory},
+		{name: "goviewnameslice", csFails: cgoP3GoMemory},
+		{name: "goviewnamedata", csFails: cgoP3GoMemory},
+		// Their twins over C memory, which run to their end both ways.
+		{name: "caddtyped"},
+		{name: "cfieldtyped"},
+		{name: "cviewnamestring"},
+		{name: "cviewnameadd"},
+		{name: "cviewnameslice"},
+		{name: "cviewnamedata"},
 	}
 }
 
