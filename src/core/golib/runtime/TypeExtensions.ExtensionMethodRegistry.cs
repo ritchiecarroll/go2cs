@@ -133,13 +133,14 @@ public static partial class TypeExtensions
         private (MethodInfo method, Type receiver, Assembly? home)[]? m_methods;
 
         // A class found in the metadata tables, loaded as a type only when its methods are read.
-        public ExtensionHost(Assembly assembly, Module module, int token, Assembly[] homes, bool anyHome)
+        public ExtensionHost(Assembly assembly, Module module, int token, Assembly[] homes, bool anyHome, ReceiverKey[]? receivers = null)
         {
             Assembly = assembly;
             m_module = module;
             m_token = token;
             Homes = homes;
             AnyHome = anyHome;
+            Receivers = receivers;
         }
 
         // A class the scan already holds as a type, with the homes its methods extend; or, given its methods, a class
@@ -163,6 +164,11 @@ public static partial class TypeExtensions
         /// <summary>Whether a receiver belongs to no assembly (a type parameter, an array): read for every question.</summary>
         public bool AnyHome { get; }
 
+        /// <summary>The key of every receiver type the class's methods extend (<see cref="ReceiverKey"/>), or
+        /// <c>null</c> when they are not known or not all expressible as keys: read for every question its homes
+        /// admit.</summary>
+        public ReceiverKey[]? Receivers { get; }
+
         public Type Type => m_type ??= m_module!.ResolveType(m_token);
 
         // Whether a question that can match only receivers homed in `homes` must read this class.
@@ -174,6 +180,22 @@ public static partial class TypeExtensions
             foreach (Assembly home in Homes)
             {
                 if (homes.Contains(home))
+                    return true;
+            }
+
+            return false;
+        }
+
+        // Whether a question whose element can match only receivers keyed in `keys` (ReceiverKeysOf) must read this
+        // class. Asked after Extends: a class with no key list answers for every question.
+        public bool ExtendsReceivers(HashSet<ReceiverKey> keys)
+        {
+            if (Receivers is not { } receivers)
+                return true;
+
+            foreach (ReceiverKey receiver in receivers)
+            {
+                if (keys.Contains(receiver))
                     return true;
             }
 
@@ -311,7 +333,18 @@ public static partial class TypeExtensions
     /// a question about a type whose homes are <paramref name="homes"/> can match (<see cref="ExtensionHomesOf"/>),
     /// read without reading any other host class.
     /// </summary>
-    internal static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsHomedIn(IReadOnlySet<Assembly> homes)
+    internal static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsHomedIn(IReadOnlySet<Assembly> homes) =>
+        GetExtensionMethodsHomedIn(homes, null);
+
+    /// <summary>
+    /// The extension methods a method-set question about <paramref name="element"/> can match: those of
+    /// <see cref="GetExtensionMethodsHomedIn(IReadOnlySet{Assembly})"/> for its homes, read only from the host classes
+    /// that extend one of its receiver keys (<see cref="ReceiverKeysOf"/>) or carry no key list.
+    /// </summary>
+    internal static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsFor(Type element) =>
+        GetExtensionMethodsHomedIn(ExtensionHomesOf(element), ReceiverKeysOf(element));
+
+    private static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsHomedIn(IReadOnlySet<Assembly> homes, HashSet<ReceiverKey>? keys)
     {
         List<(MethodInfo method, Type receiver)> found = [];
         ExtensionScan scan = WalkExtensionHosts();
@@ -320,7 +353,7 @@ public static partial class TypeExtensions
         {
             foreach (ExtensionHost host in scan.Hosts)
             {
-                if (!host.Extends(homes))
+                if (!host.Extends(homes) || keys is not null && !host.ExtendsReceivers(keys))
                     continue;
 
                 foreach ((MethodInfo method, Type receiver, Assembly? home) in host.Methods)
@@ -512,6 +545,62 @@ public static partial class TypeExtensions
     }
 
     /// <summary>
+    /// A receiver type as the scan indexes it: the module and metadata token of its type definition. A generic
+    /// instantiation is keyed by its definition, and a by-ref or a pointer box (<c>ж&lt;X&gt;</c>) by what it holds.
+    /// </summary>
+    internal readonly record struct ReceiverKey(Module Module, int Token);
+
+    /// <summary>
+    /// The key of a loaded receiver, read through its by-ref and every pointer box as <see cref="ExtensionHome"/>
+    /// reads them (a box subclass included), or <c>null</c> when it has none and its host class must be read for every
+    /// question: a type parameter, an array, a pointer, a function pointer, and any type of the core library or of
+    /// golib.
+    /// </summary>
+    internal static ReceiverKey? ReceiverKeyOf(Type receiver)
+    {
+        Type element = receiver.IsByRef ? receiver.GetElementType()! : receiver;
+
+        for (bool isPointer = true; isPointer;)
+            ResolveReceiverElement(element, out element, out isPointer);
+
+        if (element.IsGenericParameter || element.HasElementType || element.IsFunctionPointer)
+            return null;
+
+        Assembly assembly = element.Assembly;
+
+        if (assembly == typeof(object).Assembly || assembly == typeof(TypeExtensions).Assembly)
+            return null;
+
+        return new ReceiverKey(element.Module, element.MetadataToken);
+    }
+
+    /// <summary>
+    /// The keys a method-set question about <paramref name="element"/> can match: those of the element, of each type
+    /// it derives from and of each interface it implements. A receiver element matches the element only if it is the
+    /// element, shares its generic definition, or is assignable from it (ReceiverElementMatches); every such receiver
+    /// outside the core library and golib is one of these types or an instantiation of one's definition, and a
+    /// receiver inside them (<c>object</c>, <c>Nullable&lt;E&gt;</c>) has no key, so its class is read regardless.
+    /// </summary>
+    internal static HashSet<ReceiverKey> ReceiverKeysOf(Type element)
+    {
+        HashSet<ReceiverKey> keys = [];
+
+        for (Type? current = element; current is not null; current = current.BaseType)
+            add(current);
+
+        foreach (Type interfaceType in element.GetInterfaces())
+            add(interfaceType);
+
+        return keys;
+
+        void add(Type candidate)
+        {
+            if (ReceiverKeyOf(candidate) is { } key)
+                keys.Add(key);
+        }
+    }
+
+    /// <summary>
     /// The homes a question about <paramref name="type"/> can match: those of the type, of each type it derives from
     /// and of each interface it implements, and the core library's (<c>object</c>, which every type converts to). An
     /// extension method's receiver matches the type only if it is the type, shares its generic definition, or is
@@ -562,6 +651,10 @@ public static partial class TypeExtensions
         SignatureDecoder<ReceiverShape, object?> decoder = new(ReceiverShapeProvider.Instance, reader, null);
         List<ExtensionHost> hosts = [];
         List<Assembly> homes = [];
+        List<ReceiverKey> receivers = [];
+
+        // The core library's and golib's own receivers carry no key (ReceiverKeyOf).
+        bool keyed = assembly != typeof(object).Assembly && assembly != typeof(TypeExtensions).Assembly;
 
         foreach (TypeDefinitionHandle handle in reader.TypeDefinitions)
         {
@@ -574,7 +667,9 @@ public static partial class TypeExtensions
                 continue;
 
             bool anyHome = false;
+            bool anyReceiver = !keyed;
             homes.Clear();
+            receivers.Clear();
 
             foreach (MethodDefinitionHandle methodHandle in definition.GetMethods())
             {
@@ -598,9 +693,19 @@ public static partial class TypeExtensions
 
                 decoder.DecodeType(ref signature); // the return type
 
-                if (decoder.DecodeType(ref signature) == ReceiverShape.Defined)
+                ReceiverShape shape = decoder.DecodeType(ref signature);
+
+                if (shape.Kind == ReceiverKind.Defined)
                 {
                     addHome(assembly);
+
+                    // A class the assembly derives from another type could be a pointer box of its own, which the
+                    // method-set rule reads through to its pointee: no key says that.
+                    if (isPlain(shape.Token))
+                        addReceiver(new ReceiverKey(module, shape.Token));
+                    else
+                        anyReceiver = true;
+
                     continue;
                 }
 
@@ -610,9 +715,17 @@ public static partial class TypeExtensions
                     addHome(home);
                 else
                     anyHome = true;
+
+                if (anyReceiver)
+                    continue;
+
+                if (ReceiverKeyOf(receiver) is { } key)
+                    addReceiver(key);
+                else
+                    anyReceiver = true;
             }
 
-            hosts.Add(new ExtensionHost(assembly, module, MetadataTokens.GetToken(handle), [.. homes], anyHome));
+            hosts.Add(new ExtensionHost(assembly, module, MetadataTokens.GetToken(handle), [.. homes], anyHome, anyReceiver ? null : [.. receivers]));
         }
 
         return hosts;
@@ -621,6 +734,31 @@ public static partial class TypeExtensions
         {
             if (!homes.Contains(home))
                 homes.Add(home);
+        }
+
+        void addReceiver(ReceiverKey key)
+        {
+            if (!receivers.Contains(key))
+                receivers.Add(key);
+        }
+
+        // Whether a type the assembly defines is an interface, a struct, an enum or a class deriving from object.
+        bool isPlain(int token)
+        {
+            EntityHandle baseType = reader.GetTypeDefinition((TypeDefinitionHandle)MetadataTokens.Handle(token)).BaseType;
+
+            if (baseType.IsNil)
+                return true;
+
+            if (baseType.Kind != HandleKind.TypeReference)
+                return false;
+
+            TypeReference reference = reader.GetTypeReference((TypeReferenceHandle)baseType);
+
+            return reader.StringComparer.Equals(reference.Namespace, "System") &&
+                   (reader.StringComparer.Equals(reference.Name, "ValueType") ||
+                    reader.StringComparer.Equals(reference.Name, "Object") ||
+                    reader.StringComparer.Equals(reference.Name, "Enum"));
         }
     }
 
@@ -677,11 +815,18 @@ public static partial class TypeExtensions
     }
 
     // What the metadata walk needs to know of a receiver's signature type: whether the assembly itself defines it.
-    private enum ReceiverShape : byte
+    private enum ReceiverKind : byte
     {
         Other,
         Defined,
         Box // golib's ж<T>, before its instantiation is read through
+    }
+
+    // A receiver's signature type as the walk reads it; a Defined one carries its type-definition token.
+    private readonly record struct ReceiverShape(ReceiverKind Kind, int Token = 0)
+    {
+        public static readonly ReceiverShape Other = new(ReceiverKind.Other);
+        public static readonly ReceiverShape Box = new(ReceiverKind.Box);
     }
 
     // Reads a signature type as a ReceiverShape, loading no type: by-refs, modifiers and golib's ж<X> are read
@@ -690,7 +835,8 @@ public static partial class TypeExtensions
     {
         public static readonly ReceiverShapeProvider Instance = new();
 
-        public ReceiverShape GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, byte rawTypeKind) => ReceiverShape.Defined;
+        public ReceiverShape GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, byte rawTypeKind) =>
+            new(ReceiverKind.Defined, MetadataTokens.GetToken(handle));
 
         public ReceiverShape GetTypeFromReference(MetadataReader reader, TypeReferenceHandle handle, byte rawTypeKind)
         {
@@ -705,8 +851,8 @@ public static partial class TypeExtensions
         }
 
         public ReceiverShape GetGenericInstantiation(ReceiverShape genericType, ImmutableArray<ReceiverShape> typeArguments) =>
-            genericType == ReceiverShape.Box && typeArguments.Length == 1 ? typeArguments[0] :
-            genericType == ReceiverShape.Defined ? ReceiverShape.Defined : ReceiverShape.Other;
+            genericType.Kind == ReceiverKind.Box && typeArguments.Length == 1 ? typeArguments[0] :
+            genericType.Kind == ReceiverKind.Defined ? genericType : ReceiverShape.Other;
 
         public ReceiverShape GetByReferenceType(ReceiverShape elementType) => elementType;
 
@@ -910,9 +1056,13 @@ public static partial class TypeExtensions
             targetType = targetType.GetGenericTypeDefinition();
 
         // A box's definition matches every box receiver, whatever its pointee's home: that question reads the
-        // whole scan.
+        // whole scan. Any other target reads the host classes that extend one of its receiver keys; a receiver's key
+        // is read through its box, which this filter is not, so a target that is itself a box of another kind (one
+        // exempt from the normalisation above) keeps the scope of its homes.
         IEnumerable<(MethodInfo method, Type type)> extensionMethods =
-            source ?? (targetType == typeof(ж<>) ? GetExtensionMethods() : GetExtensionMethodsHomedIn(ExtensionHomesOf(targetType)));
+            source ?? (targetType == typeof(ж<>) ? GetExtensionMethods() :
+                       GoReflect.TryBoxPointee(targetType, out _) ? GetExtensionMethodsHomedIn(ExtensionHomesOf(targetType)) :
+                       GetExtensionMethodsFor(targetType));
 
         IEnumerable<MethodInfo> methods = isGenericType ?
             extensionMethods.Where(value => isGenericMatch(value.type)).Select(value => value.method) :

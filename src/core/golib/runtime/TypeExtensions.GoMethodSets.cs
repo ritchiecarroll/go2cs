@@ -521,7 +521,7 @@ public static partial class TypeExtensions
     /// </summary>
     internal static List<MethodInfo> CollectGoMethodSetCandidates(Type valueElement, bool valueIsPointer, IReadOnlyList<(MethodInfo, Type)>? source)
     {
-        IReadOnlyList<(MethodInfo method, Type receiver)> allExtensionMethods = source ?? GetExtensionMethodsHomedIn(ExtensionHomesOf(valueElement));
+        IReadOnlyList<(MethodInfo method, Type receiver)> allExtensionMethods = source ?? GetExtensionMethodsFor(valueElement);
         List<MethodInfo> candidates = [];
 
         foreach ((MethodInfo method, Type receiver) in allExtensionMethods)
