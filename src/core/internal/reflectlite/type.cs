@@ -135,7 +135,7 @@ partial struct Δname {
 }
 
 internal static ж<byte> data(this Δname n, nint off, @string whySafe) {
-    return (ж<byte>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(n.bytes), (uintptr)off, whySafe));
+    return @unsafe.Pointer.To<byte>(add(@unsafe.Pointer.FromPinnedBox(n.bytes), (uintptr)off, whySafe));
 }
 
 internal static bool isExported(this Δname n) {
@@ -207,8 +207,8 @@ internal static @string pkgPath(abiꓸName n) {
     ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
-    copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff))).slice(), array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
-    var pkgPathName = new Δname((ж<byte>)(uintptr)(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
+    copy(@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)).slice(), array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
+    var pkgPathName = new Δname(@unsafe.Pointer.To<byte>(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
     return pkgPathName.name();
 }
 
@@ -232,11 +232,11 @@ internal static partial @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModu
 internal static partial @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off);
 
 internal static abiꓸName nameOff(this rtype t, nameOff off) {
-    return new abiꓸName(Bytes: (ж<byte>)(uintptr)(resolveNameOff(@unsafe.Pointer.FromPinnedBox(t.Type), (int32)off)));
+    return new abiꓸName(Bytes: @unsafe.Pointer.To<byte>(resolveNameOff(@unsafe.Pointer.FromPinnedBox(t.Type), (int32)off)));
 }
 
 internal static ж<abi.Type> typeOff(this rtype t, typeOff off) {
-    return (ж<abi.Type>)(uintptr)(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(t.Type), (int32)off));
+    return @unsafe.Pointer.To<abi.Type>(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(t.Type), (int32)off));
 }
 
 internal static ж<uncommonType> uncommon(this rtype t) {
@@ -365,7 +365,7 @@ internal static ΔType Out(this rtype t, nint i) {
 // does not cause x to advance to the very end of p's allocation
 // and therefore point incorrectly at the next block in memory.
 internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x, @string whySafe) {
-    return (@unsafe.Pointer)((uintptr)p + x);
+    return @unsafe.Add(p, x);
 }
 
 // TypeOf returns the reflection Type that represents the dynamic type of i.

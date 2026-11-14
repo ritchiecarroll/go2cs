@@ -38181,4 +38181,90 @@ container. It needs no pack.
 
 — P5 (2026-11-14)
 
+## 2026-11-14 — P5 (the interior-pointer cut, stop line S11; COORD ruling (a), 15:39Z: a row for after the release): the number conversion of a FIELD box costs about twice that of a box that owns its storage — OPEN, not started, after 1.26.11.1
+
+**What was measured** (design 10.14 holds the table; linux/amd64, one host, Release, 20,000,000 calls, median of 5
+interleaved runs, the base converter against the cut converter over one golib). The cut's node rule (design 4.3)
+emits the receiver's BOX where the base emitted `FromRef(ref g)`, so `unsafe.Pointer(g)` on a receiver goes through
+the box's number conversion (`ж<T>`'s `uintptr` operator) at each call:
+
+- a receiver that owns its storage (`new(ctrlGroup)`): `set` -5%, `get` +6%;
+- the shape internal/runtime/maps uses, `(*ctrlGroup)(g.data)`: +7% and +12% with the receiver kept, +17% and +20%
+  made at each call;
+- a receiver that is a FIELD of a struct (`&held.ctrls`): `set` +77%, `get` +95% (about 95 to 105 ns per call
+  before, 185 after).
+
+S11's line is 25%. Ruled: 4.3 lands as cut, because the package's own shape is inside the line and the banked
+`internal/runtime/maps` row never reaches `ctrlGroup.get` or `set` (control: both made to throw, verdicts identical).
+
+**What the code says the field box pays per call** (read, not profiled): `ж.cs`'s operator asks `StorageKind`, which
+on `FieldRefBox` is three tests, one of them `CrossesAsItsRoot` behind an accessor test, then `PinnableStorage`;
+then `EnsureStableAddress` (a null test once pinned), `ValueSlot` through the accessor delegate, and
+`ManagedPointerTokens.RegisterPinned`, which is a table lookup that returns when the same box is already there. So
+the registry is not rewritten per call; my post of 15:17Z named "skip the registry write for a box already
+registered" as the candidate remedy, and that already holds. NOT MEASURED: which of these the 80 ns is.
+
+**Candidate remedy, for the seat that takes this row:** a box that is pinned answers its number from the pin, without
+asking its storage kind again (the kind of a box does not change once it has a pin). Measure first; the loop
+programs are in the seat's kit.
+
+**The read 4.3 still owes, carried here:** which of the other receiver sites the regen changed are called on a field
+box in code that runs. The 21 sites: internal/abi `Get`; internal/runtime/maps `get` and `set`; runtime `add`,
+`sortkey`, `gcdata`, `or`, `funcInfo`; syscall `data` (unix).
+
+**A lesson for the next stop line:** S11's second arm named the maps row's wall time, and the row does not run the
+code the arm was meant to time. An arm is written against a measurement that has been seen to move with the thing
+it guards.
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — P5 (the interior-pointer cut's corpus regen, batch 305): three instruments read the SPELLING the regen changed; one went red, one fell without failing, one rose on lines whose blank lines did not move — the two guards FIXED in the seat; the comment census baseline RAISED by 9 (COORD ruled (a))
+
+**None of the three was in the regen's prediction.** The prediction was the emission's line kinds per target, and it
+was met on four targets. What the regen's commit owes besides the corpus was listed from memory (the mint census's
+leaving rows, the metadata, the docs citations) and not from a search for who reads the old spelling. The search is
+one command and it is the lesson: before a regen that respells a form, grep the instruments for the old form.
+
+**1. `nativeBoundaryBoxDeref_test.go` went red, correctly.** Its pattern was the cast `(ж<T>)(uintptr)`; the
+converter now writes Go's `(*T)(p)` as `@unsafe.Pointer.To<T>(p)`, so all 11 code sites in its scope left the
+pattern and it read `code sites 0`, with both declared `CertContext` rows DECLARED BUT NOT MEASURED. The sites are
+not cured: over an address the kernel produced the door builds the same native box. The pattern reads both
+spellings now and the control plants the door spelling (a hazard and a known negative). Reading after: 11 code
+sites = 2 in class + 9 blittable, as before the regen.
+
+**2. `nativeRootFieldViewCensus_test.go` fell from 13 to 5 and stayed green.** It counts and does not refuse (COORD,
+2026-10-02), and its one positive control is a `Reinterpret` site, so nothing told it that the cast route had left
+its pattern. Same fix. Its second positive control is now `runtime/alg.cs`, whose mints are all door-spelled; made
+to fail once by breaking the pattern, then restored. Reading after: 13 in 5 files, the same rows as before.
+
+**3. `TestCommentParityCensus` rose by 9 on three files: `body:extra:after-param-prelude` 194 to 195,
+`body:extra:unexplained` 2503 to 2507, `body:go-blank-unmapped` 2127 to 2131.** No blank line moved at any of the
+five sites. The census pairs a Go line with its C# line by requiring every Go identifier on the C# line, and the
+cut's emission no longer spells two of them:
+
+- `internal/runtime/maps/group.cs`, `key` and `elem`: Go `return unsafe.Pointer(uintptr(g.data) + offset)` is
+  `return @unsafe.Add(g.data, offset);` (no `Pointer`, no `uintptr`). One unmapped Go blank and one unexplained C#
+  blank each.
+- `internal/runtime/maps/runtime.cs`, two `slotElem = unsafe.Pointer(uintptr(slotKeyOrig) + typ.ElemOff)` lines:
+  the same.
+- `runtime/stack.cs`, `gcdata`: Go `ptr := uintptr(unsafe.Pointer(r))` is `var ptr = (uintptr)Ꮡr;` (no `Pointer`),
+  so the prelude's separator is not recognised as one.
+
+The baseline is raised by those 9 in the regen's commit, since the battery has to be green at the tip and the
+alternative is an instrument change that is not this seat's. **RULED (a) by COORD, 2026-11-14 17:04Z: the raise
+stands; the anchor is a seat for the census's owner after 1.26.11.1.** The nine by file and line are in the regen
+commit's message.
+
+**A candidate for the census, measured and not applied (the `runtime/sema.cs` blank it moves must be read, not
+assumed):** on a Go line that holds `unsafe.Pointer(`, do not require
+`Pointer`, nor `uintptr` when the line also holds `uintptr(`. On the regenerated tree it clears 8 of the 9 (the
+separator in `gcdata` anchors through another function) and it also lowers six files that are unmapped today for
+the same reason (`runtime/runtime1.cs` and `runtime/string.cs` by 4 and 3 in two classes each,
+`runtime/mcheckmark.cs`, `runtime/plugin.cs`, `internal/syscall/execenv/execenv_windows.cs`), and it moves one
+blank in `runtime/sema.cs` from unmapped to `go-blank-cs-none`, which is either a real missing blank it uncovers
+or a wrong anchor. Dropping the two names for every line is too wide: it moves 63 rows, most of them in go/types,
+where `Pointer` is the package's own type.
+
+— P5 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

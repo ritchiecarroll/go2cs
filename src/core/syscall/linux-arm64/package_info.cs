@@ -89,7 +89,7 @@ using static go.syscall_package;
 [assembly: GoPositionMap("syscall/rlimit.go", "rlimit.cs", "AA88AA4CgoKCAAcQlIK4gqaU")]
 [assembly: GoPositionMap("syscall/rlimit_stub.go", "rlimit_stub.cs", "AAgU")]
 [assembly: GoPositionMap("syscall/sockcmsg_linux.go", "sockcmsg_linux.cs", "AAoc0oKCgoKCgqzSgpSClIKUgg==")]
-[assembly: GoPositionMap("syscall/sockcmsg_unix.go", "sockcmsg_unix.cs", "AAwioqqipqIACBaigoKCgoKUgoKUpoKCgpSqwoKCgoKCgoKUqsKClIKUgoKClA==")]
+[assembly: GoPositionMap("syscall/sockcmsg_unix.go", "sockcmsg_unix.cs", "AAwioqqipoIACBaigoKCgoKUgoKUpoKCgpSqwoKCgoKCgoKUqsKClIKUgoKClA==")]
 [assembly: GoPositionMap("syscall/sockcmsg_unix_other.go", "sockcmsg_unix_other.cs", "AAockri26oLYgqaCyA==")]
 [assembly: GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACEMCasoKClAAHEJKokqiSqJKqkpaSmA==")]
 [assembly: GoPositionMap("syscall/syscall_linux.go", "syscall_linux.cs", "ABc8AAkGAAIsABQCrgAIAoKCgqzyAAwagoKs8oKCgqaCnLKmgqaCpoKmgoKUpoKCgqamgoKClNSsooIACRSCggAJFIKmgoKmgoKokoKCuKamgpSUlJSmgoKUgoKUpoKUuIKmrMaCgqaCgoKmlKqSpoKmgqaCqpKmgqqSgpSCgoKClKqSpoKmgqqSpoKqkqaCgpSqkoKUpoKClKamzrKCgoKmgsqCpqaygoKUgriCpoKCgpSCgpQAFm6UlJSUlIKClKaCgpSmgoKUpoKClKrSgoKClKaCAAY4ooKCgri4gpSCgriCpoKUpgAMGqKClIKCgoKCgoIAChaigoKCggAEigGCAAY8soKCAAgwgoKCggAEFIKCgoIABlaygoKCgoKClIKCgoKCgqaCgqaClIKCgpSClKiSrAAKDu6CgoKClIK4poKClIKCpqaCpoKm6oKCgoKClIKCgoKUuIKCgoKUgriCgoKClIKCgoKUpqaCpoLOgoKCgqaCgoKCpoKmsoKCgqaCpoKmlJSYkqaCpoKmgqaCgoKUqtaClIKClAACPAAbAoIAAkIAHyYAFAKClIKu8oKUgqwACAyigoKUgpTKooKClIKUyqKCgpSClMqigoKUgpTKooKClIKUyqKCgpSClMqigoKUgpTKooKClIKUABMq3IKmggACFPSqogACFAAJAoKClA==")]

@@ -114,12 +114,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 1)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -271,12 +271,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 3)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -428,12 +428,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 7)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -585,12 +585,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 15)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -742,12 +742,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 63)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -899,12 +899,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 255)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -1056,12 +1056,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 1023)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -1213,12 +1213,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 4095)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -1370,12 +1370,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 16383)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -1527,12 +1527,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 65535)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -1684,12 +1684,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 262143)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -1841,12 +1841,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 1048575)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -1998,12 +1998,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 4194303)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -2155,12 +2155,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 16777215)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -2312,12 +2312,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 67108863)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -2469,12 +2469,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 268435455)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -2626,12 +2626,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 1073741823)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -2783,12 +2783,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 4294967295)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -2940,12 +2940,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 68719476735)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -3097,12 +3097,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 1099511627775)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -3254,12 +3254,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 17592186044415)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -3411,12 +3411,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 281474976710655)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -3568,12 +3568,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 4503599627370495)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -3725,12 +3725,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 72057594037927935)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -3882,12 +3882,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 1152921504606846975)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -4039,12 +4039,12 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
         if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
-            var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-            var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+            var dst0 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+            var dst1 = @unsafe.Pointer.To<uintptr>(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
             dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
             dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
         } else {
-            var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
+            var dstΔ1 = @unsafe.Pointer.To<uintptr>(add(dst, i * (uintptr)goarch.PtrSize));
             dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 18446744073709551615)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j))));
         }
 
@@ -4196,8 +4196,8 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -4341,8 +4341,8 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -4486,8 +4486,8 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -4631,8 +4631,8 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -4776,8 +4776,8 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -4921,8 +4921,8 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5066,8 +5066,8 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5211,8 +5211,8 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5356,8 +5356,8 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5501,8 +5501,8 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5646,8 +5646,8 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5791,8 +5791,8 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5936,8 +5936,8 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -6081,8 +6081,8 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -6226,8 +6226,8 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;

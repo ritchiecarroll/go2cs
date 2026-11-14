@@ -136,11 +136,11 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this 
             return (new bitvector(), false); // No locals, so also no stack objects
         }
         hasReflectStackObj = true;
-        var mv = ~(ж<ж<reflectMethodValue>>)(uintptr)((@unsafe.Pointer)arg0);
+        var mv = ~@unsafe.Pointer.To<ж<reflectMethodValue>>((@unsafe.Pointer)arg0);
         // Figure out whether the return values are valid.
         // Reflect will update this value after it copies
         // in the return values.
-        var retValid = ~(ж<bool>)(uintptr)((@unsafe.Pointer)(arg0 + (uintptr)(4 * goarch.PtrSize)));
+        var retValid = ~@unsafe.Pointer.To<bool>((@unsafe.Pointer)(arg0 + (uintptr)(4 * goarch.PtrSize)));
         if (mv.fn != f.entry()) {
             print((@string)"runtime: confused by ", funcname(f), (@string)"\n");
             @throw(reflectMismatchˢ);
@@ -209,7 +209,7 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
     }}
     if (size > minsize) {
         var stackid = pcdata;
-        var stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
+        var stkmap = @unsafe.Pointer.To<stackmap>(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
         if (stkmap == nil || stkmap.n <= 0) {
             print((@string)"runtime: frame ", funcname(f), (@string)" untyped locals ", (Δhex)(uint64)(frame.varp - size), (@string)"+", (Δhex)(uint64)size, (@string)"\n");
             @throw(missingStackmapˢ);
@@ -236,7 +236,7 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
     if (args.n > 0 && args.bytedata == nil) {
         // Non-empty argument frame, but not a special map.
         // Fetch the argument map at pcdata.
-        var stackmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
+        var stackmap = @unsafe.Pointer.To<stackmap>(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
         if (stackmap == nil || stackmap.n <= 0) {
             print((@string)"runtime: frame ", funcname(f), (@string)" untyped args ", (Δhex)(uint64)frame.argp, (@string)"+", (Δhex)(uint64)(args.n * (int32)goarch.PtrSize), (@string)"\n");
             @throw(missingStackmapˢ);
@@ -263,9 +263,9 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
     } else {
         @unsafe.Pointer Δp = funcdata(f, abi.FUNCDATA_StackObjects);
         if (Δp != nil) {
-            var n = ~(ж<uintptr>)(uintptr)(Δp);
+            var n = ~@unsafe.Pointer.To<uintptr>(Δp);
             Δp = add(Δp, goarch.PtrSize);
-            var r0 = (ж<stackObjectRecord>)(uintptr)(noescape(Δp));
+            var r0 = @unsafe.Pointer.To<stackObjectRecord>(noescape(Δp));
             objs = @unsafe.Slice(r0, (nint)n);
             // Note: the noescape above is needed to keep
             // getStackMap from "leaking param content:

@@ -343,7 +343,7 @@ internal static any mapclone(any mʗp) {
 
     var e = efaceOf(Ꮡm);
     var typ = (~e)._type.Reinterpret<_type, abiꓸMapType>();
-    var map_ = (ж<mapsꓸMap>)(uintptr)((~e).data);
+    var map_ = @unsafe.Pointer.To<mapsꓸMap>((~e).data);
     map_ = map_.Clone(typ);
     e.Value.data = @unsafe.Pointer.FromPinnedBox(map_);
     return m;

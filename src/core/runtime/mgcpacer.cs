@@ -774,7 +774,7 @@ internal static (bool, int64) assignWaitingGCWorker(this ж<gcControllerState> �
     }
 
     // Grab a worker before we commit to running below.
-    var node = (ж<gcBgMarkWorkerNode>)(uintptr)(ᏑgcBgMarkWorkerPool.pop());
+    var node = @unsafe.Pointer.To<gcBgMarkWorkerNode>(ᏑgcBgMarkWorkerPool.pop());
     if (node == nil) {
         // There is at least one worker per P, so normally there are
         // enough workers to run on all Ps, if necessary. However, once

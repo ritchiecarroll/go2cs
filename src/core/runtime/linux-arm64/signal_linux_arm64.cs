@@ -16,7 +16,7 @@ partial struct sigctxt {
 
 //go:nosplit
 //go:nowritebarrierrec
-internal static ж<sigcontext> regs(this ref sigctxt c) { return Ꮡ(((ж<ucontext>)(uintptr)(c.ctxt)).Value.uc_mcontext); }
+internal static ж<sigcontext> regs(this ref sigctxt c) { return Ꮡ((@unsafe.Pointer.To<ucontext>(c.ctxt)).Value.uc_mcontext); }
 
 internal static uint64 r0(this ref sigctxt c) { return c.regs().regs[0]; }
 internal static uint64 r1(this ref sigctxt c) { return c.regs().regs[1]; }
@@ -67,14 +67,14 @@ internal static void set_lr(this ref sigctxt c, uint64 x) { c.regs().regs[30] = 
 internal static void set_r28(this ref sigctxt c, uint64 x) { c.regs().regs[28] = x; }
 
 internal static void set_sigaddr(this ref sigctxt c, uint64 x) {
-    ((ж<uintptr>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(c.info), 2 * goarch.PtrSize))).Value = (uintptr)x;
+    (@unsafe.Pointer.To<uintptr>(add(@unsafe.Pointer.FromPinnedBox(c.info), 2 * goarch.PtrSize))).Value = (uintptr)x;
 }
 
 internal static void dumpSigStack(@string s, uintptr sp, uintptr stackhi, uintptr ctx) {
     println(s);
     println((@string)"SP:\t", (Δhex)(uint64)sp);
     println((@string)"ctx:\t", (Δhex)(uint64)ctx);
-    var entriesStart = (uintptr)Ꮡ(((ж<ucontext>)(uintptr)((@unsafe.Pointer)ctx)).Value.uc_mcontext).Ꮡ__reserved;
+    var entriesStart = (uintptr)Ꮡ((@unsafe.Pointer.To<ucontext>((@unsafe.Pointer)ctx)).Value.uc_mcontext).Ꮡ__reserved;
     hexdumpWords(sp, stackhi, (uintptr Δp, hexdumpMarker hm) => {
         switch (Δp) {
         case var ᴛ when ᴛ == ctx: {

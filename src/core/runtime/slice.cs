@@ -454,7 +454,7 @@ internal static nint slicecopy(@unsafe.Pointer toPtr, nint toLen, @unsafe.Pointe
 
     if (size == 1) { // common case worth about 2x to do here
         // TODO: is this still worth it with new memmove impl?
-        ((ж<byte>)(uintptr)(toPtr)).Value = ((ж<byte>)(uintptr)(fromPtr)).Value; // known to be a byte pointer
+        (@unsafe.Pointer.To<byte>(toPtr)).Value = (@unsafe.Pointer.To<byte>(fromPtr)).Value; // known to be a byte pointer
     } else {
         memmove(toPtr, fromPtr, size);
     }
@@ -467,7 +467,7 @@ internal static slice<byte> bytealg_MakeNoZero(nint len) {
         panicmakeslicelen();
     }
     var cap = roundupsize((uintptr)len, true);
-    return @unsafe.Slice((ж<byte>)(uintptr)(mallocgc(cap, nil, false)), cap).slice(0, len);
+    return @unsafe.Slice(@unsafe.Pointer.To<byte>(mallocgc(cap, nil, false)), cap).slice(0, len);
 }
 
 // moveSlice copies the input slice to the heap and returns it.

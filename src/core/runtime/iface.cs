@@ -71,7 +71,7 @@ internal static ж<itab> getitab(ж<interfacetype> Ꮡinter, ж<_type> Ꮡtyp, b
     // This is by far the most common case, so do it without locks.
     // Use atomic to ensure we see any previous writes done by the thread
     // that updates the itabTable field (with atomic.Storep in itabAdd).
-    var t = (ж<itabTableType>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑitabTable)));
+    var t = @unsafe.Pointer.To<itabTableType>(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑitabTable)));
     m = t.find(Ꮡinter, Ꮡtyp); if (m != nil) {
         goto finish;
     }
@@ -84,7 +84,7 @@ internal static ж<itab> getitab(ж<interfacetype> Ꮡinter, ж<_type> Ꮡtyp, b
     }
 
     // Entry doesn't exist yet. Make a new entry & add it.
-    m = (ж<itab>)(uintptr)(persistentalloc(/* unsafe.Sizeof(itab{}) */ (uintptr)32 + (uintptr)(len(inter.Methods) - 1) * (uintptr)goarch.PtrSize, 0, Ꮡmemstats.Ꮡother_sys));
+    m = @unsafe.Pointer.To<itab>(persistentalloc(/* unsafe.Sizeof(itab{}) */ (uintptr)32 + (uintptr)(len(inter.Methods) - 1) * (uintptr)goarch.PtrSize, 0, Ꮡmemstats.Ꮡother_sys));
     m.Inter = Ꮡinter;
     m.Type = Ꮡtyp;
     // The hash is used in type switches. However, compiler statically generates itab's
@@ -123,11 +123,11 @@ internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> int
     var mask = t.size - 1;
     var h = (uintptr)(itabHashFunc(ref (inter).DerefOrNull(), ref (typ).DerefOrNull()) & mask);
     for (var i = (uintptr)1; ; i++) {
-        var Δp = (ж<ж<itab>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
+        var Δp = @unsafe.Pointer.To<ж<itab>>(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
         // Use atomic read here so if we see m != nil, we also see
         // the initializations of the fields of m.
         // m := *p
-        var m = (ж<itab>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Δp)));
+        var m = @unsafe.Pointer.To<itab>(atomic.Loadp(@unsafe.Pointer.FromBox(Δp)));
         if (m == nil) {
             return default;
         }
@@ -162,7 +162,7 @@ internal static void itabAdd(ж<itab> Ꮡm) {
         // t2 = new(itabTableType) + some additional entries
         // We lie and tell malloc we want pointer-free memory because
         // all the pointed-to values are not in the heap.
-        var t2 = (ж<itabTableType>)(uintptr)(mallocgc((2 + 2 * t.size) * (uintptr)goarch.PtrSize, nil, true));
+        var t2 = @unsafe.Pointer.To<itabTableType>(mallocgc((2 + 2 * t.size) * (uintptr)goarch.PtrSize, nil, true));
         t2.size = t.size * 2;
 
         // Copy over entries.
@@ -193,7 +193,7 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
     var mask = t.size - 1;
     var h = (uintptr)(itabHashFunc(ref (m.Inter).DerefOrNull(), ref (m.Type).DerefOrNull()) & mask);
     for (var i = (uintptr)1; ; i++) {
-        var Δp = (ж<ж<itab>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
+        var Δp = @unsafe.Pointer.To<ж<itab>>(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
         var m2 = Δp.ValueSlot;
         if (m2 == Ꮡm) {
             // A given itab may be used in more than one module
@@ -416,7 +416,7 @@ internal static @unsafe.Pointer /*x*/ convT16(uint16 val) {
         }
     } else {
         x = mallocgc(2, uint16Type, false);
-        ((ж<uint16>)(uintptr)(x)).Value = val;
+        (@unsafe.Pointer.To<uint16>(x)).Value = val;
     }
     return x;
 }
@@ -431,7 +431,7 @@ internal static @unsafe.Pointer /*x*/ convT32(uint32 val) {
         }
     } else {
         x = mallocgc(4, uint32Type, false);
-        ((ж<uint32>)(uintptr)(x)).Value = val;
+        (@unsafe.Pointer.To<uint32>(x)).Value = val;
     }
     return x;
 }
@@ -452,7 +452,7 @@ internal static @unsafe.Pointer /*x*/ convT64(uint64 val) {
         x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((ulong)(val)));
     } else {
         x = mallocgc(8, uint64Type, false);
-        ((ж<uint64>)(uintptr)(x)).Value = val;
+        (@unsafe.Pointer.To<uint64>(x)).Value = val;
     }
     return x;
 }
@@ -473,7 +473,7 @@ internal static @unsafe.Pointer /*x*/ convTstring(@string val) {
         x = @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
     } else {
         x = mallocgc(/* unsafe.Sizeof(val) */ (uintptr)16, stringType, true);
-        ((ж<@string>)(uintptr)(x)).Value = val;
+        (@unsafe.Pointer.To<@string>(x)).Value = val;
     }
     return x;
 }
@@ -496,7 +496,7 @@ internal static @unsafe.Pointer /*x*/ convTslice(slice<byte> valʗp) {
         x = @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
     } else {
         x = mallocgc(/* unsafe.Sizeof(val) */ (uintptr)24, sliceType, true);
-        ((ж<slice<byte>>)(uintptr)(x)).ValueSlot = val;
+        (@unsafe.Pointer.To<slice<byte>>(x)).ValueSlot = val;
     }
     return x;
 }
@@ -542,7 +542,7 @@ internal static ж<itab> typeAssert(ж<abi.TypeAssert> Ꮡs, ж<_type> t) {
         return tab;
     }
     // Load the current cache.
-    var oldC = (ж<abi.TypeAssertCache>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑCache)));
+    var oldC = @unsafe.Pointer.To<abi.TypeAssertCache>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑCache)));
 
     if ((cheaprand() & (uint32)oldC.Mask) != 0) {
         // As cache gets larger, choose to update it less often
@@ -582,7 +582,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
 
     // Allocate the new table.
     var newSize = /* unsafe.Sizeof(abi.TypeAssertCache{}) */ (uintptr)24 + (uintptr)(newN - 1) * /* unsafe.Sizeof(abi.TypeAssertCacheEntry{}) */ (uintptr)16;
-    var newC = (ж<abi.TypeAssertCache>)(uintptr)(mallocgc(newSize, nil, true));
+    var newC = @unsafe.Pointer.To<abi.TypeAssertCache>(mallocgc(newSize, nil, true));
     newC.Mask = (uintptr)(newN - 1);
     var newEntries = @unsafe.Slice(newC.at(abi.TypeAssertCache.ᏑEntries, 0), newN);
 
@@ -601,7 +601,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
     }
     foreach (var (_, e) in range(oldEntries)) {
         if (e.Typ != 0) {
-            addEntry((ж<_type>)(uintptr)((@unsafe.Pointer)e.Typ), (ж<itab>)(uintptr)((@unsafe.Pointer)e.Itab));
+            addEntry(@unsafe.Pointer.To<_type>((@unsafe.Pointer)e.Typ), @unsafe.Pointer.To<itab>((@unsafe.Pointer)e.Itab));
         }
     }
     addEntry(typ, tab);
@@ -649,7 +649,7 @@ internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, �
         return (case_, tab);
     }
     // Load the current cache.
-    var oldC = (ж<abi.InterfaceSwitchCache>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑCache)));
+    var oldC = @unsafe.Pointer.To<abi.InterfaceSwitchCache>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑCache)));
 
     if ((cheaprand() & (uint32)oldC.Mask) != 0) {
         // As cache gets larger, choose to update it less often
@@ -693,7 +693,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
 
     // Allocate the new table.
     var newSize = /* unsafe.Sizeof(abi.InterfaceSwitchCache{}) */ (uintptr)32 + (uintptr)(newN - 1) * /* unsafe.Sizeof(abi.InterfaceSwitchCacheEntry{}) */ (uintptr)24;
-    var newC = (ж<abi.InterfaceSwitchCache>)(uintptr)(mallocgc(newSize, nil, true));
+    var newC = @unsafe.Pointer.To<abi.InterfaceSwitchCache>(mallocgc(newSize, nil, true));
     newC.Mask = (uintptr)(newN - 1);
     var newEntries = @unsafe.Slice(newC.at(abi.InterfaceSwitchCache.ᏑEntries, 0), newN);
 
@@ -713,7 +713,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
     }
     foreach (var (_, e) in range(oldEntries)) {
         if (e.Typ != 0) {
-            addEntry((ж<_type>)(uintptr)((@unsafe.Pointer)e.Typ), e.Case, (ж<itab>)(uintptr)((@unsafe.Pointer)e.Itab));
+            addEntry(@unsafe.Pointer.To<_type>((@unsafe.Pointer)e.Typ), e.Case, @unsafe.Pointer.To<itab>((@unsafe.Pointer)e.Itab));
         }
     }
     addEntry(typ, case_, tab);
@@ -749,7 +749,7 @@ internal static void iterate_itabs(Action<ж<itab>> fn) {
     // so no other locks/atomics needed.
     var t = itabTable;
     for (var i = (uintptr)0; i < t.size; i++) {
-        var m = ~(ж<ж<itab>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(t.Ꮡentries), i * (uintptr)goarch.PtrSize));
+        var m = ~@unsafe.Pointer.To<ж<itab>>(add(@unsafe.Pointer.FromPinnedBox(t.Ꮡentries), i * (uintptr)goarch.PtrSize));
         if (m != nil) {
             fn(m);
         }

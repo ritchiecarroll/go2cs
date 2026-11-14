@@ -304,7 +304,9 @@ const (
 	// known at the conversion itself. A call argument, a return and a store are not.
 	fromRefKept = "kept: use not provable at the node"
 	// The converter emits the box here (unsafe.Add's first argument, the P of an arithmetic form, or the operand
-	// of Go's own uintptr conversion); the committed corpus holds the old line until its regen.
+	// of Go's own uintptr conversion); the committed corpus holds the old line until its regen. A row with this
+	// disposition is for a converter cut that lands before its regen. The table holds none now: the regen of
+	// 2026-11-14 removed the 21 sites of the 18 rows that carried it, and a site that comes back is a new site.
 	fromRefLeaves = "leaves at the regen"
 )
 
@@ -333,24 +335,6 @@ var receiverFromRefSites = map[string]fromRefRow{
 	"runtime/mgcmark_greenteagc.cs|init":   {1, fromRefKept, "an argument of memclrNoHeapPointers"},
 	"runtime/synctest.cs|raceaddr":         {1, fromRefKept, "a return"},
 	"runtime/time.cs|unlockAndRun":         {1, fromRefKept, "an argument of raceacquirectx"},
-	"internal/abi/abi.cs|Get":              {1, fromRefLeaves, "unsafe.Add's first argument"},
-	"internal/runtime/maps/group.cs|get":   {2, fromRefLeaves, "unsafe.Add's first argument"},
-	"internal/runtime/maps/group.cs|set":   {2, fromRefLeaves, "unsafe.Add's first argument"},
-	"runtime/darwin/malloc.cs|add":         {1, fromRefLeaves, "the P of an arithmetic form"},
-	"runtime/linux-amd64/malloc.cs|add":    {1, fromRefLeaves, "the P of an arithmetic form"},
-	"runtime/linux-arm64/malloc.cs|add":    {1, fromRefLeaves, "the P of an arithmetic form"},
-	"runtime/windows/malloc.cs|add":        {1, fromRefLeaves, "the P of an arithmetic form"},
-	"runtime/darwin/select.cs|sortkey":     {1, fromRefLeaves, "the operand of Go's uintptr conversion"},
-	"runtime/linux/select.cs|sortkey":      {1, fromRefLeaves, "the operand of Go's uintptr conversion"},
-	"runtime/windows/select.cs|sortkey":    {1, fromRefLeaves, "the operand of Go's uintptr conversion"},
-	"runtime/darwin/stack.cs|gcdata":       {1, fromRefLeaves, "the operand of Go's uintptr conversion"},
-	"runtime/linux-amd64/stack.cs|gcdata":  {1, fromRefLeaves, "the operand of Go's uintptr conversion"},
-	"runtime/linux-arm64/stack.cs|gcdata":  {1, fromRefLeaves, "the operand of Go's uintptr conversion"},
-	"runtime/windows/stack.cs|gcdata":      {1, fromRefLeaves, "the operand of Go's uintptr conversion"},
-	"runtime/mgcmark_greenteagc.cs|or":     {2, fromRefLeaves, "unsafe.Add's first argument"},
-	"runtime/symtab.cs|funcInfo":           {1, fromRefLeaves, "the operand of Go's uintptr conversion"},
-	"syscall/darwin/sockcmsg_unix.cs|data": {1, fromRefLeaves, "the P of an arithmetic form"},
-	"syscall/linux/sockcmsg_unix.cs|data":  {1, fromRefLeaves, "the P of an arithmetic form"},
 }
 
 // ---- findings
@@ -527,7 +511,7 @@ func TestInteriorPointerMintCensus(t *testing.T) {
 	}
 
 	t.Logf("READING: %d golib and unsafe files, %d native mint sites in %d members; %d two-word pointer mints; %d hand-owned files with the number cast; "+
-		"%d converted files, %d FromRef sites in %d methods (%d kept, %d leaving at the regen)",
+		"%d converted files, %d FromRef sites in %d methods (%d kept, %d in rows that leave at a regen)",
 		runtimeFiles, count(native), len(native), count(pointers), len(handOwned), converted, count(fromRef), len(fromRef), kept, count(fromRef)-kept)
 
 	findings := mintTableFindings("NATIVE MINT", classifyNativeMint, native, mintRowCounts(nativeMints), nil)
@@ -655,6 +639,16 @@ internal static void publish(this ж<Bubble> Ꮡbubble) {
 	scan = map[string][]string{}
 	mintMemberSites(scan, "runtime/synctest.cs", convertedPlant, receiverFromRefPattern, nil)
 
+	// The table holds no leaving row since the regen, so the control plants one for the length of this test.
+	const plantedLeaving = "runtime/symtab.cs|funcInfo"
+
+	if _, declared := receiverFromRefSites[plantedLeaving]; declared {
+		t.Fatalf("the control's planted leaving row %s is in the table; plant another key", plantedLeaving)
+	}
+
+	receiverFromRefSites[plantedLeaving] = fromRefRow{1, fromRefLeaves, "the operand of Go's uintptr conversion"}
+	defer delete(receiverFromRefSites, plantedLeaving)
+
 	findings = mintTableFindings("RECEIVER FromRef", classifyFromRef, scan, fromRefRowCounts(), func(key string) bool {
 		return receiverFromRefSites[key].disposition == fromRefLeaves
 	})
@@ -666,7 +660,7 @@ internal static void publish(this ж<Bubble> Ꮡbubble) {
 			t.Errorf("the listed kept site was reported: %s", finding)
 		}
 
-		if strings.Contains(finding, "runtime/symtab.cs|funcInfo") {
+		if strings.Contains(finding, plantedLeaving) {
 			t.Errorf("a row that leaves at the regen was reported as unanswered: %s", finding)
 		}
 	}
