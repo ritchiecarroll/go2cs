@@ -15,6 +15,7 @@ namespace go.crypto.@internal.fips140test;
 
 using bytes = bytes_package;
 using boring = go.crypto.@internal.boring_package;
+using cryptotest = go.crypto.@internal.cryptotest_package;
 using fips140 = go.crypto.@internal.fips140_package;
 using aes = go.crypto.@internal.fips140.aes_package;
 using gcm = go.crypto.@internal.fips140.aes.gcm_package;
@@ -130,6 +131,10 @@ internal static ref readonly @string ctrDRBGˢ => ref ctrDRBGˢᵇ;
 private static readonly @string ctrDRBGˢᵇ = "ctrDRBG"u8;
 internal static ref readonly @string hmacˢ => ref hmacˢᵇ;
 private static readonly @string hmacˢᵇ = "HMAC"u8;
+internal static ref readonly @string hmacWKeccak256Notˢ => ref hmacWKeccak256Notˢᵇ;
+private static readonly @string hmacWKeccak256Notˢᵇ = "HMAC w/ Keccak-256 [NOT APPROVED]"u8;
+internal static ref readonly @string v1280ˢ => ref v1280ˢᵇ;
+private static readonly @string v1280ˢᵇ = "v1.28.0"u8;
 internal static ref readonly @string mlKemKeyGenEncapDecapˢ => ref mlKemKeyGenEncapDecapˢᵇ;
 private static readonly @string mlKemKeyGenEncapDecapˢᵇ = "ML-KEM KeyGen, Encap, Decap"u8;
 internal static ref readonly @string rsaKeyGenˢ => ref rsaKeyGenˢᵇ;
@@ -141,6 +146,8 @@ internal static ref readonly @string sha256ˢ => ref sha256ˢᵇ;
 private static readonly @string sha256ˢᵇ = "SHA-256"u8;
 internal static ref readonly @string rsaSigGenSigVerPssˢ => ref rsaSigGenSigVerPssˢᵇ;
 private static readonly @string rsaSigGenSigVerPssˢᵇ = "RSA SigGen, SigVer PSS"u8;
+internal static ref readonly @string rsaSigGenPssWKeccak256ˢ => ref rsaSigGenPssWKeccak256ˢᵇ;
+private static readonly @string rsaSigGenPssWKeccak256ˢᵇ = "RSA SigGen PSS w/ Keccak-256 [NOT APPROVED]"u8;
 internal static ref readonly @string rsaKeyGenWSmallKeyNotˢ => ref rsaKeyGenWSmallKeyNotˢᵇ;
 private static readonly @string rsaKeyGenWSmallKeyNotˢᵇ = "RSA KeyGen w/ small key [NOT APPROVED]"u8;
 internal static ref readonly @string ktsIfcOaepˢ => ref ktsIfcOaepˢᵇ;
@@ -169,6 +176,8 @@ internal static ref readonly @string cSHAKE128ˢ => ref cSHAKE128ˢᵇ;
 private static readonly @string cSHAKE128ˢᵇ = "cSHAKE-128"u8;
 internal static ref readonly @string cSHAKE256ˢ => ref cSHAKE256ˢᵇ;
 private static readonly @string cSHAKE256ˢᵇ = "cSHAKE-256"u8;
+internal static ref readonly @string keccak256NotApprovedˢ => ref keccak256NotApprovedˢᵇ;
+private static readonly @string keccak256NotApprovedˢᵇ = "Keccak-256 [NOT APPROVED]"u8;
 internal static ref readonly @string kdaHkdfˢ => ref kdaHkdfˢᵇ;
 private static readonly @string kdaHkdfˢᵇ = "KDA HKDF"u8;
 internal static ref readonly @string infoˢ => ref infoˢᵇ;
@@ -183,6 +192,8 @@ internal static ref readonly @string passwordˢ => ref passwordˢᵇ;
 private static readonly @string passwordˢᵇ = "password"u8;
 internal static ref readonly @string kdfTlsV12Cvlˢ => ref kdfTlsV12Cvlˢᵇ;
 private static readonly @string kdfTlsV12Cvlˢᵇ = "KDF TLS v1.2 CVL"u8;
+internal static ref readonly @string kdfTlsV12CvlSha384ˢ => ref kdfTlsV12CvlSha384ˢᵇ;
+private static readonly @string kdfTlsV12CvlSha384ˢᵇ = "KDF TLS v1.2 CVL SHA-384"u8;
 internal static ref readonly @string kdfTlsV13Cvlˢ => ref kdfTlsV13Cvlˢᵇ;
 private static readonly @string kdfTlsV13Cvlˢᵇ = "KDF TLS v1.3 CVL"u8;
 
@@ -196,6 +207,7 @@ public static void TestFIPS140(ж<testing.T> t) {
     var aesIV = new slice<byte>(aes.ΔBlockSize);
     var plaintext = slice<byte>("Go Cryptographic Module TestFIPS140 plaintext..."u8);
     var plaintextSHA256 = decodeHex(t, "06b2614e2ef315832b23f5d0ff70294d8ddd3889527dfbe75707fe41da929325");
+    var plaintextSHA384 = decodeHex(t, "ad20990965f6caec69e016072881f80f049c0687554809901ec4c0988c3fec678c0926fe5661742185be968de6c4d9b2");
     var (aesBlock, err) = aes.New(aesKey);
     fatalIfErr(t, err);
 
@@ -333,250 +345,287 @@ public static void TestFIPS140(ж<testing.T> t) {
         tΔ9.Logf("HMAC output: %x", @out);
     });
 
-    t.Run(mlKemKeyGenEncapDecapˢ, (ж<testing.T> tΔ10) => {
-        ensureServiceIndicator(tΔ10);
+    var plaintextʗ7 = plaintext;
+    t.Run(hmacWKeccak256Notˢ, (ж<testing.T> tΔ10) => {
+        cryptotest.MustMinimumFIPS140ModuleVersion(new fipstest_internal_test_package.testing_TжTB(tΔ10), v1280ˢ);
+        ensureServiceIndicatorFalse(tΔ10);
+        var h = hmac.New<hash.Hash>(widen<ж<sha3.Digest>, hash.Hash>(sha3.NewLegacyKeccak256, elemᴛ0 => new fipstest_internal_test_package.sha3_DigestжHash(elemᴛ0)), plaintextʗ7);
+        h.Write(plaintextʗ7);
+        var @out = h.Sum(default);
+        tΔ10.Logf("HMAC w/ Keccak-256 output: %x", @out);
+    });
+
+    t.Run(mlKemKeyGenEncapDecapˢ, (ж<testing.T> tΔ11) => {
+        ensureServiceIndicator(tΔ11);
         var (k, errΔ5) = mlkem.GenerateKey768();
-        fatalIfErr(tΔ10, errΔ5);
+        fatalIfErr(tΔ11, errΔ5);
 
         var (ss, c) = k.EncapsulationKey().Encapsulate();
-        tΔ10.Logf("ML-KEM encapsulation: %x", c);
+        tΔ11.Logf("ML-KEM encapsulation: %x", c);
 
         (var ss2, errΔ5) = k.Decapsulate(c);
-        fatalIfErr(tΔ10, errΔ5);
-        tΔ10.Logf("ML-KEM shared secret: %x", ss);
+        fatalIfErr(tΔ11, errΔ5);
+        tΔ11.Logf("ML-KEM shared secret: %x", ss);
         if (!bytes.Equal(ss, ss2)) {
-            tΔ10.Errorf("ML-KEM round trip failed");
+            tΔ11.Errorf("ML-KEM round trip failed");
         }
     });
 
     ref var rsaKey = ref heap<ж<rsa.PrivateKey>>(out var ᏑrsaKey);
-    t.Run(rsaKeyGenˢ, (ж<testing.T> tΔ11) => {
-        ensureServiceIndicator(tΔ11);
+    t.Run(rsaKeyGenˢ, (ж<testing.T> tΔ12) => {
+        ensureServiceIndicator(tΔ12);
         error errΔ6 = default;
         (ᏑrsaKey.ValueSlot, errΔ6) = rsa.GenerateKey(rand.Reader, 2048);
-        fatalIfErr(tΔ11, errΔ6);
-        tΔ11.Log(rsaKeyGeneratedˢ);
+        fatalIfErr(tΔ12, errΔ6);
+        tΔ12.Log(rsaKeyGeneratedˢ);
     });
 
     var plaintextSHA256ʗ2 = plaintextSHA256;
-    t.Run(rsaSigGenSigVerPkcs15ˢ, (ж<testing.T> tΔ12) => {
-        ensureServiceIndicator(tΔ12);
+    t.Run(rsaSigGenSigVerPkcs15ˢ, (ж<testing.T> tΔ13) => {
+        ensureServiceIndicator(tΔ13);
         var (sig, errΔ7) = rsa.SignPKCS1v15(ᏑrsaKey.ValueSlot, sha256ˢ, plaintextSHA256ʗ2);
-        fatalIfErr(tΔ12, errΔ7);
-        tΔ12.Logf("RSA PKCS1v15 signature: %x", sig);
+        fatalIfErr(tΔ13, errΔ7);
+        tΔ13.Logf("RSA PKCS1v15 signature: %x", sig);
 
         errΔ7 = rsa.VerifyPKCS1v15(ᏑrsaKey.ValueSlot.PublicKey(), sha256ˢ, plaintextSHA256ʗ2, sig);
-        fatalIfErr(tΔ12, errΔ7);
+        fatalIfErr(tΔ13, errΔ7);
     });
 
     var plaintextSHA256ʗ3 = plaintextSHA256;
-    t.Run(rsaSigGenSigVerPssˢ, (ж<testing.T> tΔ13) => {
-        ensureServiceIndicator(tΔ13);
+    t.Run(rsaSigGenSigVerPssˢ, (ж<testing.T> tΔ14) => {
+        ensureServiceIndicator(tΔ14);
         var (sig, errΔ8) = rsa.SignPSS(rand.Reader, ᏑrsaKey.ValueSlot, new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), plaintextSHA256ʗ3, 16);
-        fatalIfErr(tΔ13, errΔ8);
-        tΔ13.Logf("RSA PSS signature: %x", sig);
+        fatalIfErr(tΔ14, errΔ8);
+        tΔ14.Logf("RSA PSS signature: %x", sig);
 
         errΔ8 = rsa.VerifyPSS(ᏑrsaKey.ValueSlot.PublicKey(), new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), plaintextSHA256ʗ3, sig);
-        fatalIfErr(tΔ13, errΔ8);
-    });
-
-    t.Run(rsaKeyGenWSmallKeyNotˢ, (ж<testing.T> tΔ14) => {
-        ensureServiceIndicatorFalse(tΔ14);
-        var (_, errΔ9) = rsa.GenerateKey(rand.Reader, 512);
-        fatalIfErr(tΔ14, errΔ9);
-        tΔ14.Log(rsaKeyGeneratedˢ);
+        fatalIfErr(tΔ14, errΔ8);
     });
 
     var plaintextSHA256ʗ4 = plaintextSHA256;
-    t.Run(ktsIfcOaepˢ, (ж<testing.T> tΔ15) => {
-        ensureServiceIndicator(tΔ15);
-        var (c, errΔ10) = rsa.EncryptOAEP(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), rand.Reader, ᏑrsaKey.ValueSlot.PublicKey(), plaintextSHA256ʗ4, default);
-        fatalIfErr(tΔ15, errΔ10);
-        tΔ15.Logf("RSA OAEP ciphertext: %x", c);
-
-        (var @out, errΔ10) = rsa.DecryptOAEP(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), ᏑrsaKey.ValueSlot, c, default);
-        fatalIfErr(tΔ15, errΔ10);
-        tΔ15.Logf("RSA OAEP decrypted plaintext: %x", @out);
-        if (!bytes.Equal(plaintextSHA256ʗ4, @out)) {
-            tΔ15.Errorf("RSA OAEP round trip failed");
-        }
+    t.Run(rsaSigGenPssWKeccak256ˢ, (ж<testing.T> tΔ15) => {
+        cryptotest.MustMinimumFIPS140ModuleVersion(new fipstest_internal_test_package.testing_TжTB(tΔ15), v1280ˢ);
+        ensureServiceIndicatorFalse(tΔ15);
+        var (sig, errΔ9) = rsa.SignPSS(rand.Reader, ᏑrsaKey.ValueSlot, new fipstest_internal_test_package.sha3_DigestжHash(sha3.NewLegacyKeccak256()), plaintextSHA256ʗ4, 16);
+        fatalIfErr(tΔ15, errΔ9);
+        tΔ15.Logf("RSA PSS w/ Keccak-256 signature: %x", sig);
     });
 
-    var plaintextʗ7 = plaintext;
-    t.Run(sha2224ˢ, (ж<testing.T> tΔ16) => {
-        ensureServiceIndicator(tΔ16);
-        var h = sha256.New224();
-        h.Write(plaintextʗ7);
-        var @out = h.Sum(default);
-        tΔ16.Logf("SHA2-224 output: %x", @out);
-    });
-
-    var plaintextʗ8 = plaintext;
-    t.Run(sha2256ˢ, (ж<testing.T> tΔ17) => {
-        ensureServiceIndicator(tΔ17);
-        var h = sha256.New();
-        h.Write(plaintextʗ8);
-        var @out = h.Sum(default);
-        tΔ17.Logf("SHA2-256 output: %x", @out);
-    });
-
-    var plaintextʗ9 = plaintext;
-    t.Run(sha2384ˢ, (ж<testing.T> tΔ18) => {
-        ensureServiceIndicator(tΔ18);
-        var h = sha512.New384();
-        h.Write(plaintextʗ9);
-        var @out = h.Sum(default);
-        tΔ18.Logf("SHA2-384 output: %x", @out);
-    });
-
-    var plaintextʗ10 = plaintext;
-    t.Run(sha2512ˢ, (ж<testing.T> tΔ19) => {
-        ensureServiceIndicator(tΔ19);
-        var h = sha512.New();
-        h.Write(plaintextʗ10);
-        var @out = h.Sum(default);
-        tΔ19.Logf("SHA2-512 output: %x", @out);
-    });
-
-    var plaintextʗ11 = plaintext;
-    t.Run(sha2512224ˢ, (ж<testing.T> tΔ20) => {
-        ensureServiceIndicator(tΔ20);
-        var h = sha512.New512_224();
-        h.Write(plaintextʗ11);
-        var @out = h.Sum(default);
-        tΔ20.Logf("SHA2-512/224 output: %x", @out);
-    });
-
-    var plaintextʗ12 = plaintext;
-    t.Run(sha2512256ˢ, (ж<testing.T> tΔ21) => {
-        ensureServiceIndicator(tΔ21);
-        var h = sha512.New512_256();
-        h.Write(plaintextʗ12);
-        var @out = h.Sum(default);
-        tΔ21.Logf("SHA2-512/256 output: %x", @out);
-    });
-
-    var plaintextʗ13 = plaintext;
-    t.Run(sha3224ˢ, (ж<testing.T> tΔ22) => {
-        ensureServiceIndicator(tΔ22);
-        var h = sha3.New224();
-        h.Write(plaintextʗ13);
-        var @out = h.Sum(default);
-        tΔ22.Logf("SHA3-224 output: %x", @out);
-    });
-
-    var plaintextʗ14 = plaintext;
-    t.Run(sha3256ˢ, (ж<testing.T> tΔ23) => {
-        ensureServiceIndicator(tΔ23);
-        var h = sha3.New256();
-        h.Write(plaintextʗ14);
-        var @out = h.Sum(default);
-        tΔ23.Logf("SHA3-256 output: %x", @out);
-    });
-
-    var plaintextʗ15 = plaintext;
-    t.Run(sha3384ˢ, (ж<testing.T> tΔ24) => {
-        ensureServiceIndicator(tΔ24);
-        var h = sha3.New384();
-        h.Write(plaintextʗ15);
-        var @out = h.Sum(default);
-        tΔ24.Logf("SHA3-384 output: %x", @out);
-    });
-
-    var plaintextʗ16 = plaintext;
-    t.Run(sha3512ˢ, (ж<testing.T> tΔ25) => {
-        ensureServiceIndicator(tΔ25);
-        var h = sha3.New512();
-        h.Write(plaintextʗ16);
-        var @out = h.Sum(default);
-        tΔ25.Logf("SHA3-512 output: %x", @out);
-    });
-
-    var plaintextʗ17 = plaintext;
-    t.Run(shake128ˢ, (ж<testing.T> tΔ26) => {
-        ensureServiceIndicator(tΔ26);
-        var h = sha3.NewShake128();
-        h.Write(plaintextʗ17);
-        var @out = new slice<byte>(16);
-        h.Read(@out);
-        tΔ26.Logf("SHAKE-128 output: %x", @out);
-    });
-
-    var plaintextʗ18 = plaintext;
-    t.Run(shake256ˢ, (ж<testing.T> tΔ27) => {
-        ensureServiceIndicator(tΔ27);
-        var h = sha3.NewShake256();
-        h.Write(plaintextʗ18);
-        var @out = new slice<byte>(16);
-        h.Read(@out);
-        tΔ27.Logf("SHAKE-256 output: %x", @out);
-    });
-
-    var plaintextʗ19 = plaintext;
-    t.Run(cSHAKE128ˢ, (ж<testing.T> tΔ28) => {
-        ensureServiceIndicator(tΔ28);
-        var h = sha3.NewCShake128(default, slice<byte>("test"u8));
-        h.Write(plaintextʗ19);
-        var @out = new slice<byte>(16);
-        h.Read(@out);
-        tΔ28.Logf("cSHAKE-128 output: %x", @out);
-    });
-
-    var plaintextʗ20 = plaintext;
-    t.Run(cSHAKE256ˢ, (ж<testing.T> tΔ29) => {
-        ensureServiceIndicator(tΔ29);
-        var h = sha3.NewCShake256(default, slice<byte>("test"u8));
-        h.Write(plaintextʗ20);
-        var @out = new slice<byte>(16);
-        h.Read(@out);
-        tΔ29.Logf("cSHAKE-256 output: %x", @out);
+    t.Run(rsaKeyGenWSmallKeyNotˢ, (ж<testing.T> tΔ16) => {
+        ensureServiceIndicatorFalse(tΔ16);
+        var (_, errΔ10) = rsa.GenerateKey(rand.Reader, 512);
+        fatalIfErr(tΔ16, errΔ10);
+        tΔ16.Log(rsaKeyGeneratedˢ);
     });
 
     var plaintextSHA256ʗ5 = plaintextSHA256;
-    t.Run(kdaHkdfˢ, (ж<testing.T> tΔ30) => {
+    t.Run(ktsIfcOaepˢ, (ж<testing.T> tΔ17) => {
+        ensureServiceIndicator(tΔ17);
+        var (c, errΔ11) = rsa.EncryptOAEP(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), rand.Reader, ᏑrsaKey.ValueSlot.PublicKey(), plaintextSHA256ʗ5, default);
+        fatalIfErr(tΔ17, errΔ11);
+        tΔ17.Logf("RSA OAEP ciphertext: %x", c);
+
+        (var @out, errΔ11) = rsa.DecryptOAEP(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), ᏑrsaKey.ValueSlot, c, default);
+        fatalIfErr(tΔ17, errΔ11);
+        tΔ17.Logf("RSA OAEP decrypted plaintext: %x", @out);
+        if (!bytes.Equal(plaintextSHA256ʗ5, @out)) {
+            tΔ17.Errorf("RSA OAEP round trip failed");
+        }
+    });
+
+    var plaintextʗ8 = plaintext;
+    t.Run(sha2224ˢ, (ж<testing.T> tΔ18) => {
+        ensureServiceIndicator(tΔ18);
+        var h = sha256.New224();
+        h.Write(plaintextʗ8);
+        var @out = h.Sum(default);
+        tΔ18.Logf("SHA2-224 output: %x", @out);
+    });
+
+    var plaintextʗ9 = plaintext;
+    t.Run(sha2256ˢ, (ж<testing.T> tΔ19) => {
+        ensureServiceIndicator(tΔ19);
+        var h = sha256.New();
+        h.Write(plaintextʗ9);
+        var @out = h.Sum(default);
+        tΔ19.Logf("SHA2-256 output: %x", @out);
+    });
+
+    var plaintextʗ10 = plaintext;
+    t.Run(sha2384ˢ, (ж<testing.T> tΔ20) => {
+        ensureServiceIndicator(tΔ20);
+        var h = sha512.New384();
+        h.Write(plaintextʗ10);
+        var @out = h.Sum(default);
+        tΔ20.Logf("SHA2-384 output: %x", @out);
+    });
+
+    var plaintextʗ11 = plaintext;
+    t.Run(sha2512ˢ, (ж<testing.T> tΔ21) => {
+        ensureServiceIndicator(tΔ21);
+        var h = sha512.New();
+        h.Write(plaintextʗ11);
+        var @out = h.Sum(default);
+        tΔ21.Logf("SHA2-512 output: %x", @out);
+    });
+
+    var plaintextʗ12 = plaintext;
+    t.Run(sha2512224ˢ, (ж<testing.T> tΔ22) => {
+        ensureServiceIndicator(tΔ22);
+        var h = sha512.New512_224();
+        h.Write(plaintextʗ12);
+        var @out = h.Sum(default);
+        tΔ22.Logf("SHA2-512/224 output: %x", @out);
+    });
+
+    var plaintextʗ13 = plaintext;
+    t.Run(sha2512256ˢ, (ж<testing.T> tΔ23) => {
+        ensureServiceIndicator(tΔ23);
+        var h = sha512.New512_256();
+        h.Write(plaintextʗ13);
+        var @out = h.Sum(default);
+        tΔ23.Logf("SHA2-512/256 output: %x", @out);
+    });
+
+    var plaintextʗ14 = plaintext;
+    t.Run(sha3224ˢ, (ж<testing.T> tΔ24) => {
+        ensureServiceIndicator(tΔ24);
+        var h = sha3.New224();
+        h.Write(plaintextʗ14);
+        var @out = h.Sum(default);
+        tΔ24.Logf("SHA3-224 output: %x", @out);
+    });
+
+    var plaintextʗ15 = plaintext;
+    t.Run(sha3256ˢ, (ж<testing.T> tΔ25) => {
+        ensureServiceIndicator(tΔ25);
+        var h = sha3.New256();
+        h.Write(plaintextʗ15);
+        var @out = h.Sum(default);
+        tΔ25.Logf("SHA3-256 output: %x", @out);
+    });
+
+    var plaintextʗ16 = plaintext;
+    t.Run(sha3384ˢ, (ж<testing.T> tΔ26) => {
+        ensureServiceIndicator(tΔ26);
+        var h = sha3.New384();
+        h.Write(plaintextʗ16);
+        var @out = h.Sum(default);
+        tΔ26.Logf("SHA3-384 output: %x", @out);
+    });
+
+    var plaintextʗ17 = plaintext;
+    t.Run(sha3512ˢ, (ж<testing.T> tΔ27) => {
+        ensureServiceIndicator(tΔ27);
+        var h = sha3.New512();
+        h.Write(plaintextʗ17);
+        var @out = h.Sum(default);
+        tΔ27.Logf("SHA3-512 output: %x", @out);
+    });
+
+    var plaintextʗ18 = plaintext;
+    t.Run(shake128ˢ, (ж<testing.T> tΔ28) => {
+        ensureServiceIndicator(tΔ28);
+        var h = sha3.NewShake128();
+        h.Write(plaintextʗ18);
+        var @out = new slice<byte>(16);
+        h.Read(@out);
+        tΔ28.Logf("SHAKE-128 output: %x", @out);
+    });
+
+    var plaintextʗ19 = plaintext;
+    t.Run(shake256ˢ, (ж<testing.T> tΔ29) => {
+        ensureServiceIndicator(tΔ29);
+        var h = sha3.NewShake256();
+        h.Write(plaintextʗ19);
+        var @out = new slice<byte>(16);
+        h.Read(@out);
+        tΔ29.Logf("SHAKE-256 output: %x", @out);
+    });
+
+    var plaintextʗ20 = plaintext;
+    t.Run(cSHAKE128ˢ, (ж<testing.T> tΔ30) => {
         ensureServiceIndicator(tΔ30);
-        var key = hkdf.Key<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), plaintextSHA256ʗ5, slice<byte>("salt"u8), infoˢ, 16);
-        tΔ30.Logf("HKDF key: %x", key);
+        var h = sha3.NewCShake128(default, slice<byte>("test"u8));
+        h.Write(plaintextʗ20);
+        var @out = new slice<byte>(16);
+        h.Read(@out);
+        tΔ30.Logf("cSHAKE-128 output: %x", @out);
+    });
+
+    var plaintextʗ21 = plaintext;
+    t.Run(cSHAKE256ˢ, (ж<testing.T> tΔ31) => {
+        ensureServiceIndicator(tΔ31);
+        var h = sha3.NewCShake256(default, slice<byte>("test"u8));
+        h.Write(plaintextʗ21);
+        var @out = new slice<byte>(16);
+        h.Read(@out);
+        tΔ31.Logf("cSHAKE-256 output: %x", @out);
+    });
+
+    var plaintextʗ22 = plaintext;
+    t.Run(keccak256NotApprovedˢ, (ж<testing.T> tΔ32) => {
+        cryptotest.MustMinimumFIPS140ModuleVersion(new fipstest_internal_test_package.testing_TжTB(tΔ32), v1280ˢ);
+        ensureServiceIndicatorFalse(tΔ32);
+        var h = sha3.NewLegacyKeccak256();
+        h.Write(plaintextʗ22);
+        var @out = h.Sum(default);
+        tΔ32.Logf("Keccak-256 output: %x", @out);
     });
 
     var plaintextSHA256ʗ6 = plaintextSHA256;
-    t.Run(kdaOneStepNoCounterˢ, (ж<testing.T> tΔ31) => {
-        ensureServiceIndicator(tΔ31);
-        var key = hkdf.Extract<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), plaintextSHA256ʗ6, slice<byte>("salt"u8));
-        tΔ31.Logf("KDA OneStepNoCounter key: %x", key);
+    t.Run(kdaHkdfˢ, (ж<testing.T> tΔ33) => {
+        ensureServiceIndicator(tΔ33);
+        var key = hkdf.Key<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), plaintextSHA256ʗ6, slice<byte>("salt"u8), infoˢ, 16);
+        tΔ33.Logf("HKDF key: %x", key);
     });
 
     var plaintextSHA256ʗ7 = plaintextSHA256;
-    t.Run(feedbackKdfˢ, (ж<testing.T> tΔ32) => {
-        ensureServiceIndicator(tΔ32);
-        var key = hkdf.Expand<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), plaintextSHA256ʗ7, infoˢ, 16);
-        tΔ32.Logf("Feedback KDF key: %x", key);
+    t.Run(kdaOneStepNoCounterˢ, (ж<testing.T> tΔ34) => {
+        ensureServiceIndicator(tΔ34);
+        var key = hkdf.Extract<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), plaintextSHA256ʗ7, slice<byte>("salt"u8));
+        tΔ34.Logf("KDA OneStepNoCounter key: %x", key);
     });
 
     var plaintextSHA256ʗ8 = plaintextSHA256;
-    t.Run(pbkdfˢ, (ж<testing.T> tΔ33) => {
-        ensureServiceIndicator(tΔ33);
-        var (key, errΔ11) = pbkdf2.Key<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), passwordˢ, plaintextSHA256ʗ8, 2, 16);
-        fatalIfErr(tΔ33, errΔ11);
-        tΔ33.Logf("PBKDF key: %x", key);
+    t.Run(feedbackKdfˢ, (ж<testing.T> tΔ35) => {
+        ensureServiceIndicator(tΔ35);
+        var key = hkdf.Expand<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), plaintextSHA256ʗ8, infoˢ, 16);
+        tΔ35.Logf("Feedback KDF key: %x", key);
     });
 
     var plaintextSHA256ʗ9 = plaintextSHA256;
-    t.Run(kdfTlsV12Cvlˢ, (ж<testing.T> tΔ34) => {
-        ensureServiceIndicator(tΔ34);
-        var key = tls12.MasterSecret<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), plaintextSHA256ʗ9, slice<byte>("test"u8));
-        tΔ34.Logf("TLS v1.2 CVL Master Secret: %x", key);
+    t.Run(pbkdfˢ, (ж<testing.T> tΔ36) => {
+        ensureServiceIndicator(tΔ36);
+        var (key, errΔ12) = pbkdf2.Key<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), passwordˢ, plaintextSHA256ʗ9, 2, 16);
+        fatalIfErr(tΔ36, errΔ12);
+        tΔ36.Logf("PBKDF key: %x", key);
     });
 
     var plaintextSHA256ʗ10 = plaintextSHA256;
-    t.Run(kdfTlsV13Cvlˢ, (ж<testing.T> tΔ35) => {
-        ensureServiceIndicator(tΔ35);
-        var es = tls13.NewEarlySecret<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), plaintextSHA256ʗ10);
-        var hs = es.HandshakeSecret(plaintextSHA256ʗ10);
+    t.Run(kdfTlsV12Cvlˢ, (ж<testing.T> tΔ37) => {
+        ensureServiceIndicator(tΔ37);
+        var key = tls12.MasterSecret<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), plaintextSHA256ʗ10, slice<byte>("test"u8));
+        tΔ37.Logf("TLS v1.2 CVL Master Secret: %x", key);
+    });
+
+    var plaintextSHA384ʗ1 = plaintextSHA384;
+    t.Run(kdfTlsV12CvlSha384ˢ, (ж<testing.T> tΔ38) => {
+        cryptotest.MustMinimumFIPS140ModuleVersion(new fipstest_internal_test_package.testing_TжTB(tΔ38), v1280ˢ);
+        ensureServiceIndicator(tΔ38);
+        var key = tls12.MasterSecret<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New384, elemᴛ0 => new fipstest_internal_test_package.sha512_DigestжHash(elemᴛ0)), plaintextSHA384ʗ1, slice<byte>("test"u8));
+        tΔ38.Logf("TLS v1.2 CVL SHA-384 Master Secret: %x", key);
+    });
+
+    var plaintextSHA256ʗ11 = plaintextSHA256;
+    t.Run(kdfTlsV13Cvlˢ, (ж<testing.T> tΔ39) => {
+        ensureServiceIndicator(tΔ39);
+        var es = tls13.NewEarlySecret<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ0)), plaintextSHA256ʗ11);
+        var hs = es.HandshakeSecret(plaintextSHA256ʗ11);
         var ms = hs.MasterSecret();
         var client = ms.ClientApplicationTrafficSecret(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()));
         var server = ms.ServerApplicationTrafficSecret(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()));
-        tΔ35.Logf("TLS v1.3 CVL Application Traffic Secrets: client %x, server %x", client, server);
+        tΔ39.Logf("TLS v1.3 CVL Application Traffic Secrets: client %x, server %x", client, server);
     });
 }
 

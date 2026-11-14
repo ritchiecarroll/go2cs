@@ -36,6 +36,7 @@ internal static class Go2CsTestHost
             "header.go",
             "header_test.go",
             "http.go",
+            "http1_server_test.go",
             "http_test.go",
             "jar.go",
             "main_test.go",
@@ -200,18 +201,18 @@ internal static class Go2CsTestHost
         registry.Add("TestDifferencePath", http_internal_test_package.TestDifferencePath, "pattern_test.go", 469);
         registry.Add("TestDirJoin", http_test_package.TestDirJoin, "fs_test.go", 451);
         registry.Add("TestDirectoryIfNotModified", http_test_package.TestDirectoryIfNotModified, "fs_test.go", 845);
-        registry.Add("TestDisableContentLength", http_test_package.TestDisableContentLength, "serve_test.go", 7411);
+        registry.Add("TestDisableContentLength", http_test_package.TestDisableContentLength, "serve_test.go", 7438);
         registry.Add("TestDisableKeepAliveUpgrade", http_test_package.TestDisableKeepAliveUpgrade, "serve_test.go", 6933);
         registry.Add("TestDontCacheBrokenHTTP2Conn", http_test_package.TestDontCacheBrokenHTTP2Conn, "transport_test.go", 6883);
         registry.Add("TestDoubleHijack", http_test_package.TestDoubleHijack, "serve_test.go", 4158);
-        registry.Add("TestEarlyHints", http_test_package.TestEarlyHints, "serve_test.go", 7256);
+        registry.Add("TestEarlyHints", http_test_package.TestEarlyHints, "serve_test.go", 7283);
         registry.Add("TestEarlyHintsRequest", http_test_package.TestEarlyHintsRequest, "clientserver_test.go", 1774);
         registry.Add("TestEmptyDirOpenCWD", http_test_package.TestEmptyDirOpenCWD, "fs_test.go", 487);
         registry.Add("TestEmptyPasswordAuth", http_test_package.TestEmptyPasswordAuth, "client_test.go", 1051);
         registry.Add("TestEmptyServeMux", http_internal_test_package.TestEmptyServeMux, "server_test.go", 122);
         registry.Add("TestErrNotSupported", http_test_package.TestErrNotSupported, "request_test.go", 1513);
-        registry.Add("TestError", http_test_package.TestError, "serve_test.go", 7466);
-        registry.Add("TestErrorContentLength", http_test_package.TestErrorContentLength, "serve_test.go", 7445);
+        registry.Add("TestError", http_test_package.TestError, "serve_test.go", 7493);
+        registry.Add("TestErrorContentLength", http_test_package.TestErrorContentLength, "serve_test.go", 7472);
         registry.Add("TestErrorWriteLoopRace", http_test_package.TestErrorWriteLoopRace, "transport_test.go", 7149);
         registry.Add("TestEscapedPathsAndPatterns", http_internal_test_package.TestEscapedPathsAndPatterns, "server_test.go", 192);
         registry.Add("TestExactMatch", http_internal_test_package.TestExactMatch, "server_test.go", 165);
@@ -238,7 +239,7 @@ internal static class Go2CsTestHost
         registry.Add("TestFormFileOrder", http_test_package.TestFormFileOrder, "request_test.go", 469);
         registry.Add("TestFormValueCallsParseMultipartForm", http_test_package.TestFormValueCallsParseMultipartForm, "request_test.go", 418);
         registry.Add("TestGetBasicAuth", http_test_package.TestGetBasicAuth, "request_test.go", 690);
-        registry.Add("TestGetBody", http_test_package.TestGetBody, "serve_test.go", 7358);
+        registry.Add("TestGetBody", http_test_package.TestGetBody, "serve_test.go", 7385);
         registry.Add("TestGetRequestFormat", http_test_package.TestGetRequestFormat, "client_test.go", 102);
         registry.Add("TestH12_200NoBody", http_test_package.TestH12_200NoBody, "clientserver_test.go", 508);
         registry.Add("TestH12_AutoGzip", http_test_package.TestH12_AutoGzip, "clientserver_test.go", 635);
@@ -281,7 +282,7 @@ internal static class Go2CsTestHost
         registry.Add("TestHandlersCanSetConnectionClose10", http_test_package.TestHandlersCanSetConnectionClose10, "serve_test.go", 1459);
         registry.Add("TestHandlersCanSetConnectionClose11", http_test_package.TestHandlersCanSetConnectionClose11, "serve_test.go", 1453);
         registry.Add("TestHasToken", http_internal_test_package.TestHasToken, "header_test.go", 186);
-        registry.Add("TestHeadBody", http_test_package.TestHeadBody, "serve_test.go", 7349);
+        registry.Add("TestHeadBody", http_test_package.TestHeadBody, "serve_test.go", 7376);
         registry.Add("TestHeadReaderFrom", http_test_package.TestHeadReaderFrom, "serve_test.go", 1675);
         registry.Add("TestHeadResponses", http_test_package.TestHeadResponses, "serve_test.go", 1637);
         registry.Add("TestHeaderToWire", http_test_package.TestHeaderToWire, "serve_test.go", 3918);
@@ -297,7 +298,7 @@ internal static class Go2CsTestHost
         registry.Add("TestIdleConnH2Crash", http_test_package.TestIdleConnH2Crash, "transport_test.go", 5622);
         registry.Add("TestIndex", http_internal_test_package.TestIndex, "routing_index_test.go", 14);
         registry.Add("TestInterruptWithPanic", http_test_package.TestInterruptWithPanic, "clientserver_test.go", 1335);
-        registry.Add("TestInvalidChunkedBodies", http_test_package.TestInvalidChunkedBodies, "serve_test.go", 7572);
+        registry.Add("TestInvalidChunkedBodies", http_test_package.TestInvalidChunkedBodies, "serve_test.go", 7599);
         registry.Add("TestInvalidHeaderResponse", http_test_package.TestInvalidHeaderResponse, "transport_test.go", 6737);
         registry.Add("TestInvalidTrailerClosesConnection", http_test_package.TestInvalidTrailerClosesConnection, "serve_test.go", 2482);
         registry.Add("TestIs408", http_test_package.TestIs408, "transport_test.go", 6661);
@@ -355,7 +356,7 @@ internal static class Go2CsTestHost
         registry.Add("TestParseBasicAuth", http_test_package.TestParseBasicAuth, "request_test.go", 732);
         registry.Add("TestParseContentLength", http_internal_test_package.TestParseContentLength, "transfer_test.go", 336);
         registry.Add("TestParseCookie", http_internal_test_package.TestParseCookie, "cookie_test.go", 733);
-        registry.Add("TestParseFormCleanup", http_test_package.TestParseFormCleanup, "serve_test.go", 7288);
+        registry.Add("TestParseFormCleanup", http_test_package.TestParseFormCleanup, "serve_test.go", 7315);
         registry.Add("TestParseFormInitializeOnError", http_test_package.TestParseFormInitializeOnError, "request_test.go", 143);
         registry.Add("TestParseFormQuery", http_test_package.TestParseFormQuery, "request_test.go", 56);
         registry.Add("TestParseFormQueryMethods", http_test_package.TestParseFormQueryMethods, "request_test.go", 94);
@@ -380,7 +381,7 @@ internal static class Go2CsTestHost
         registry.Add("TestPostRedirects", http_test_package.TestPostRedirects, "client_test.go", 320);
         registry.Add("TestPostRequestFormat", http_test_package.TestPostRequestFormat, "client_test.go", 120);
         registry.Add("TestProbeZeroLengthBody", http_test_package.TestProbeZeroLengthBody, "client_test.go", 2272);
-        registry.Add("TestProcessing", http_test_package.TestProcessing, "serve_test.go", 7275);
+        registry.Add("TestProcessing", http_test_package.TestProcessing, "serve_test.go", 7302);
         registry.Add("TestProtocols", http_internal_test_package.TestProtocols, "http_test.go", 192);
         registry.Add("TestProxyAuthHeader", http_test_package.TestProxyAuthHeader, "transport_test.go", 7303);
         registry.Add("TestProxyAuthKeys", http_internal_test_package.TestProxyAuthKeys, "proxy_test.go", 71);
@@ -476,14 +477,13 @@ internal static class Go2CsTestHost
         registry.Add("TestServeWithSlashRedirectKeepsQueryString", http_test_package.TestServeWithSlashRedirectKeepsQueryString, "serve_test.go", 537);
         registry.Add("TestServerAllowsBlockingRemoteAddr", http_test_package.TestServerAllowsBlockingRemoteAddr, "serve_test.go", 1567);
         registry.Add("TestServerBufferedChunking", http_test_package.TestServerBufferedChunking, "serve_test.go", 3471);
-        registry.Add("TestServerCONNECTFailure", http_test_package.TestServerCONNECTFailure, "serve_test.go", 7740);
-        registry.Add("TestServerCONNECTSuccess", http_test_package.TestServerCONNECTSuccess, "serve_test.go", 7689);
         registry.Add("TestServerCancelsReadHeaderTimeoutWhenIdle", http_test_package.TestServerCancelsReadHeaderTimeoutWhenIdle, "serve_test.go", 6202);
         registry.Add("TestServerCancelsReadTimeoutWhenIdle", http_test_package.TestServerCancelsReadTimeoutWhenIdle, "serve_test.go", 6150);
         registry.Add("TestServerCloseDeadlock", http_test_package.TestServerCloseDeadlock, "serve_test.go", 6092);
         registry.Add("TestServerCloseListenerOnce", http_test_package.TestServerCloseListenerOnce, "serve_test.go", 6533);
         registry.Add("TestServerConnState", http_test_package.TestServerConnState, "serve_test.go", 4497);
         registry.Add("TestServerConnStateNew", http_test_package.TestServerConnStateNew, "serve_test.go", 4716);
+        registry.Add("TestServerConnectionReuse", http_test_package.TestServerConnectionReuse, "serve_test.go", 7716);
         registry.Add("TestServerContentType", http_test_package.TestServerContentType, "serve_test.go", 3238);
         registry.Add("TestServerContentTypeSniff", http_test_package.TestServerContentTypeSniff, "sniff_test.go", 91);
         registry.Add("TestServerContext_LocalAddrContextKey", http_test_package.TestServerContext_LocalAddrContextKey, "serve_test.go", 5278);
@@ -505,15 +505,17 @@ internal static class Go2CsTestHost
         registry.Add("TestServerKeepAlivesEnabled", http_test_package.TestServerKeepAlivesEnabled, "serve_test.go", 6100);
         registry.Add("TestServerKeepAlivesEnabledResultClose", http_test_package.TestServerKeepAlivesEnabledResultClose, "serve_test.go", 4660);
         registry.Add("TestServerListenNotComparableListener", http_test_package.TestServerListenNotComparableListener, "serve_test.go", 6513);
+        registry.Add("TestServerMaxBytesHeaderRace", http_test_package.TestServerMaxBytesHeaderRace, "serve_test.go", 7256);
         registry.Add("TestServerNoDate", http_test_package.TestServerNoDate, "serve_test.go", 3232);
         registry.Add("TestServerNoReadTimeout", http_test_package.TestServerNoReadTimeout, "serve_test.go", 945);
         registry.Add("TestServerNoWriteTimeout", http_test_package.TestServerNoWriteTimeout, "serve_test.go", 1054);
-        registry.Add("TestServerReadAfterHandlerAbort100Continue", http_test_package.TestServerReadAfterHandlerAbort100Continue, "serve_test.go", 7545);
-        registry.Add("TestServerReadAfterHandlerDone100Continue", http_test_package.TestServerReadAfterHandlerDone100Continue, "serve_test.go", 7518);
-        registry.Add("TestServerReadAfterWriteHeader100Continue", http_test_package.TestServerReadAfterWriteHeader100Continue, "serve_test.go", 7487);
+        registry.Add("TestServerReadAfterHandlerAbort100Continue", http_test_package.TestServerReadAfterHandlerAbort100Continue, "serve_test.go", 7572);
+        registry.Add("TestServerReadAfterHandlerDone100Continue", http_test_package.TestServerReadAfterHandlerDone100Continue, "serve_test.go", 7545);
+        registry.Add("TestServerReadAfterWriteHeader100Continue", http_test_package.TestServerReadAfterWriteHeader100Continue, "serve_test.go", 7514);
         registry.Add("TestServerReadHeaderTimeoutIsCleared", http_test_package.TestServerReadHeaderTimeoutIsCleared, "serve_test.go", 875);
         registry.Add("TestServerReadTimeout", http_test_package.TestServerReadTimeout, "serve_test.go", 904);
         registry.Add("TestServerReaderFromOrder", http_test_package.TestServerReaderFromOrder, "serve_test.go", 4242);
+        registry.Add("TestServerRequestBodyCloseAfterPartialRead", http_test_package.TestServerRequestBodyCloseAfterPartialRead, "serve_test.go", 7900);
         registry.Add("TestServerRequestContextCancel_ConnClose", http_test_package.TestServerRequestContextCancel_ConnClose, "serve_test.go", 5238);
         registry.Add("TestServerRequestContextCancel_ServeHTTPDone", http_test_package.TestServerRequestContextCancel_ServeHTTPDone, "serve_test.go", 5207);
         registry.Add("TestServerSetKeepAlivesEnabledClosesConns", http_test_package.TestServerSetKeepAlivesEnabledClosesConns, "serve_test.go", 5928);
@@ -521,7 +523,7 @@ internal static class Go2CsTestHost
         registry.Add("TestServerShutdownStateNew", http_test_package.TestServerShutdownStateNew, "serve_test.go", 6035);
         registry.Add("TestServerShutdownThenServe", http_test_package.TestServerShutdownThenServe, "serve_test.go", 6560);
         registry.Add("TestServerTLSHandshakeTimeout", http_internal_test_package.TestServerTLSHandshakeTimeout, "server_test.go", 17);
-        registry.Add("TestServerTLSNextProtos", http_test_package.TestServerTLSNextProtos, "serve_test.go", 7622);
+        registry.Add("TestServerTLSNextProtos", http_test_package.TestServerTLSNextProtos, "serve_test.go", 7649);
         registry.Add("TestServerTimeouts", http_test_package.TestServerTimeouts, "serve_test.go", 731);
         registry.Add("TestServerUndeclaredTrailers", http_test_package.TestServerUndeclaredTrailers, "clientserver_test.go", 1513);
         registry.Add("TestServerUnencryptedHTTP2HeaderTimeout", http_test_package.TestServerUnencryptedHTTP2HeaderTimeout, "serve_test.go", 818);

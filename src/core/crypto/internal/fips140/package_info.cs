@@ -56,7 +56,7 @@ using static go.crypto.@internal.fips140_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/cast.go", "cast.cs", "AA0iAAkKAAUeAA0CgpSCpoKClIKClIIAByAADAKClIKmgoKUgoKUgg==")]
-[assembly: GoPositionMap("crypto/internal/fips140/fips140.go", "fips140.cs", "ABEigoKktILmAAwK2oIABxCC3KqmgqbmgurG")]
+[assembly: GoPositionMap("crypto/internal/fips140/fips140.go", "fips140.cs", "ABEigoKktILmAAwK7IIABxCC3KqmgqbmgurG")]
 [assembly: GoPositionMap("crypto/internal/fips140/indicator.go", "indicator.cs", "AAkoAA4GAAgSkgACENIAAhTygryi")]
 // </GoSourcePositionMaps>
 

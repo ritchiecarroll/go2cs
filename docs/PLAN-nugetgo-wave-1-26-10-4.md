@@ -1,4 +1,8 @@
-# PLAN — the nugetgo rebuild wave against go.* 1.26.10.4
+# PLAN — the nugetgo rebuild wave against go.* 1.26.11.1
+
+<!-- 2026-11-13 (R, the 1.26.11 patch hop): this plan was written for go.* 1.26.10.4, which ships as 1.26.11.1 (the owner's
+     ruling); every release it names below is re-keyed to 1.26.11.1. The file keeps its name, and the pin sheets under
+     docs/phase4/nugetgo-1-26-10-4/ are records that take a dated block when the wave runs. -->
 
 > **STATUS: DRAFT (P2, 2026-11-10); section 7's questions RULED by COORD the same day.** Asked for by COORD on
 > 2026-11-10, after the owner ruled the promoted-forwarder holder move a deliberate .4 break (record:
@@ -10,15 +14,15 @@
 
 ## 1. Why the wave exists
 
-go.* 1.26.10.4 moves every promoted-method forwarder out of a package's `<pkg>_package` class into a holder class per
+go.* 1.26.11.1 moves every promoted-method forwarder out of a package's `<pkg>_package` class into a holder class per
 struct (P1's seat, findings 2-6 of the forwarder review binding). A forwarder is the static method a converted module
 calls when it uses a method promoted through an embedded field. CoreCLR refuses to load a type with more than 65,524
 methods, and the TypeScript-Go `ast` package's `ast_package` exceeds it at 1.26.10.3. After the move, IL compiled
-against 1.26.10.3 that binds `go.X_package::M(...)` throws `MissingMethodException` on 1.26.10.4.
+against 1.26.10.3 that binds `go.X_package::M(...)` throws `MissingMethodException` on 1.26.11.1.
 
 **The break floor turns that run-time failure into a build error.** The seat moves `GoBreakFloor` in go.lib's
-`buildTransitive/go.lib.targets` to `1.26.10.4`, and push-nuget's reachable-suppression rule refuses the release
-otherwise (`docs/phase4/DESIGN-go-break-floor.md` section 4). A consumer on go.lib 1.26.10.4 then gets `GO2CS3002`
+`buildTransitive/go.lib.targets` to `1.26.11.1`, and push-nuget's reachable-suppression rule refuses the release
+otherwise (`docs/phase4/DESIGN-go-break-floor.md` section 4). A consumer on go.lib 1.26.11.1 then gets `GO2CS3002`
 for every nugetgo package built on go.* 1.26.10.3 or earlier, one error per package, whether or not that package's IL
 reaches a moved forwarder. The floor reads the package's release, not its IL.
 
@@ -30,21 +34,21 @@ and that belongs in the release notes' *Upgrading* paragraph.
 The policy in `PLAN-rebank-1-26-10-3.md` section 8 applies as written to a release that lists a break:
 
 1. the release notes' *Upgrading* section announces it (P1's seat adds the paragraph to `docs/NEWS.md`);
-2. the nugetgo rebuild wave ships with the release, built on it (this plan). For 1.26.10.4 that means the same release
+2. the nugetgo rebuild wave ships with the release, built on it (this plan). For 1.26.11.1 that means the same release
    cycle, not the same push (COORD, 2026-11-10): go.* publishes first, the wave is built at the record commit, and the
    release is announced once the wave is green. go.* does not wait for the wave;
 3. the owner deprecates the earlier revisions of every published module on nuget.org, with the new revision as the
-   alternate (block 6 of each sheet). `GO2CS3002`'s text sends the consumer to "a revision built on go.* 1.26.10.4 or
+   alternate (block 6 of each sheet). `GO2CS3002`'s text sends the consumer to "a revision built on go.* 1.26.11.1 or
    later", and the deprecation is what names that revision on the package page.
 
 ## 2. The values this wave fixes
 
 | Name | Value |
 |:--|:--|
-| `R` | `1.26.10.4` |
-| `T` | `R`'s record commit (`release: go2cs converted stdlib 1.26.10.4`), cut with `New-NugetgoToolsTree.ps1` (runbook 0.3). It does not exist until release day, so no kit can be built before it. |
+| `R` | `1.26.11.1` |
+| `T` | `R`'s record commit (`release: go2cs converted stdlib 1.26.11.1`), cut with `New-NugetgoToolsTree.ps1` (runbook 0.3). It does not exist until release day, so no kit can be built before it. |
 | `P` | `linux/amd64`, as in the 1.26.10.3 wave |
-| go.* range in every package | `[1.26.10.4, 1.27.0)` (B4) |
+| go.* range in every package | `[1.26.11.1, 1.27.0)` (B4) |
 | Kit refs | `claude/c2-nugetgo-1261004-<name>`, one per module, holding `conversion/`, `nupkg/` and `KIT.md`, as the 1.26.10.3 wave's `claude/c2-nugetgo-1261003-<name>` refs do |
 | Sheets | `phase4/nugetgo-1-26-10-4/S1-PIN-SHEET.md` to `S4-PIN-SHEET.md`, and `Test-PostPublishRestore.ps1` beside them. Not cut yet (section 5). |
 
@@ -105,7 +109,7 @@ already reads, so nothing changes for them.
 ## 3. The order, and the exact-pin rule
 
 **Rule.** No package in this wave may reference a package built against 1.26.10.3 or earlier, and no package is
-packed before everything it references exists at its 1.26.10.4 revision.
+packed before everything it references exists at its 1.26.11.1 revision.
 
 - **S1, the six leaves, one PIN session.** None references another nugetgo package, so their order inside S1 is free.
   The sheet pushes them in table order.
@@ -122,12 +126,12 @@ packed before everything it references exists at its 1.26.10.4 revision.
 **The checks that prove the rule.**
 
 - **Restore, for each package** (runbook section 3, the hosted rows): `dotnet list <consumer> package
-  --include-transitive` passes only when every go.* package resolves to `1.26.10.4` and every nugetgo.* package
+  --include-transitive` passes only when every go.* package resolves to `1.26.11.1` and every nugetgo.* package
   resolves to this wave's revision from the table above. Any other version is a refusal, posted with the list.
 - **Build, new in this wave.** A restore never reaches the floor, because `GoCheckBreakFloor` runs before
   `CoreCompile`. So the post-publish smoke also BUILDS each consumer:
-  - each of the nine at this wave's revision beside go.fmt 1.26.10.4 builds with no `GO2CS3002`;
-  - the red control: uuid 1.6.0.3 beside go.fmt 1.26.10.4 fails with exactly one `GO2CS3002` naming
+  - each of the nine at this wave's revision beside go.fmt 1.26.11.1 builds with no `GO2CS3002`;
+  - the red control: uuid 1.6.0.3 beside go.fmt 1.26.11.1 fails with exactly one `GO2CS3002` naming
     the package `nugetgo.github.com.google.uuid` at uuid 1.6.0.3 and `go.* 1.26.10.3`;
   - the same control with `-p:GoAllowBelowBreakFloor=true` builds, with that diagnostic as a warning.
 
@@ -136,15 +140,15 @@ packed before everything it references exists at its 1.26.10.4 revision.
 Each step is the runbook's, in the order `PLAN-rebank-1-26-10-3.md` section 8 set for 1.26.10.3.
 
 1. **Preconditions (runbook 0).**
-   - P1's forwarder seat has landed, with `GoBreakFloor` at `1.26.10.4`, and push-nuget's `-VerifyOnly` has read the
+   - P1's forwarder seat has landed, with `GoBreakFloor` at `1.26.11.1`, and push-nuget's `-VerifyOnly` has read the
      floor as `.4` and the guard as 0 unsuppressed (P2 is its second reader).
-   - The go.* push (release-nuget Phase 3) is done, and nuget.org's flat container lists `1.26.10.4` for go.lib,
+   - The go.* push (release-nuget Phase 3) is done, and nuget.org's flat container lists `1.26.11.1` for go.lib,
      go.gen and every go.* package the nine closures reference.
    - The record commit exists (Phase 4), and `New-NugetgoToolsTree.ps1` cuts `T` from it.
-   - `1.26.10.4` is listed in the registry repository's `cmd/sitegen/go2cs-releases.txt` (runbook 5, step 1), so the
+   - `1.26.11.1` is listed in the registry repository's `cmd/sitegen/go2cs-releases.txt` (runbook 5, step 1), so the
      CI resolution check can read packages built on it.
 2. **S1's six kits and S3's kit (runbook 1-3).** For each module, one run:
-   `Invoke-NugetgoRepack.ps1 -Module <M@V> -Revision <N> -T <T> -Release 1.26.10.4 -Work <new dir>`. mousetrap, with
+   `Invoke-NugetgoRepack.ps1 -Module <M@V> -Revision <N> -T <T> -Release 1.26.11.1 -Work <new dir>`. mousetrap, with
    no Go tests, runs twice: `-Packs int1`, then, after its hosted rows are written against that rehearsal package,
    `-Packs release -BehaviorProofDir <rows>`.
    - Each run exits 0, with every count equal to the module's `Expect`.
@@ -152,7 +156,7 @@ Each step is the runbook's, in the order `PLAN-rebank-1-26-10-3.md` section 8 se
      UNMEASURED (section 2).
    - Each kit is committed to its `claude/c2-nugetgo-1261004-<name>` ref.
 3. **cobra's kit, from the local feed.** The same driver, with `-Feed` set to a folder holding S1's pflag and
-   mousetrap release candidates beside go.* 1.26.10.4, and the 1.26.10.3 wave's `-ThirdPartyPackage` argument with
+   mousetrap release candidates beside go.* 1.26.11.1, and the 1.26.10.3 wave's `-ThirdPartyPackage` argument with
    its two versions moved to pflag 1.0.9.4 and mousetrap 1.1.0.3.
    Run it without root's file capabilities and with a writable private module cache (runbook Traps, 12).
 4. **gojq's kit, from the local feed.** The whole module validated (`-test-timeout` of about 50 minutes), then the
@@ -182,7 +186,7 @@ Each step is the runbook's, in the order `PLAN-rebank-1-26-10-3.md` section 8 se
 ## 6. The deprecation lists
 
 Each sheet's block 6 deprecates every 1.26.10.x revision of its module, with this wave's revision as the alternate.
-Under the 1.26.10.4 floor, all of them fail the consumer's build. The revisions built against go.* 1.24.13
+Under the 1.26.11.1 floor, all of them fail the consumer's build. The revisions built against go.* 1.24.13
 (hashset 1.0.0 and hashset 1.0.0.2, uuid 1.6.0, jwt/v5 5.3.1, x/sync 0.19.0, pflag 1.0.9) cap their range at `1.25.0`
 and are left out, as in the earlier waves.
 
@@ -199,17 +203,17 @@ and are left out, as in the earlier waves.
 | gojq | | | gojq 0.12.19 | gojq 0.12.19.1 |
 
 The 1.26.10.3 wave deprecated the 1.26.10.1 and 1.26.10.2 revisions with the 1.26.10.3 ones as alternates. Deprecating
-them again here moves their alternate to the 1.26.10.4 revision, so no package page points at a revision the floor
+them again here moves their alternate to the 1.26.11.1 revision, so no package page points at a revision the floor
 refuses.
 
 ## 7. Open questions for COORD, and the rulings (COORD, 2026-11-10)
 
-1. Does the 1.26.10.4 release wait for the wave, as section 8's policy item 2 says ("ships with it")? COORD's note of
+1. Does the 1.26.11.1 release wait for the wave, as section 8's policy item 2 says ("ships with it")? COORD's note of
    2026-11-10 says the wave "follows .4's publish". This plan assumes the 1.26.10.3 order: go.* push, record commit,
    wave, and the release announced when the wave is ready.
    **RULED:** the 1.26.10.3 order. go.* does not wait for the wave; "ships with it" means the same release cycle,
    before the announcement. Section 1 says so.
 2. Who cuts the four sheets: C2 by precedent, or P2 now as templates?
    **RULED:** C2, from this plan. The build arm of section 3 is adopted, and C2 folds it into the sheets.
-3. gojq's `cli`: still deferred for 1.26.10.4 (this plan's default), since `golang.org/x/sys` cannot be packed?
+3. gojq's `cli`: still deferred for 1.26.11.1 (this plan's default), since `golang.org/x/sys` cannot be packed?
    **RULED:** deferred.
