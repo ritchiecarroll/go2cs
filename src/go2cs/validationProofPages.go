@@ -221,6 +221,12 @@ func proofDisclosedNames(comparison testComparison, names []string, disclosures 
 	return disclosed
 }
 
+// isProofGoSideSkip reports whether a disclosed row is a Go-side host skip: an entry with a
+// GoSkipSignature, Go skipping and the converted side passing.
+func isProofGoSideSkip(comparison testComparison, name string, disclosure testDisclosure) bool {
+	return disclosure.GoSkipSignature != "" && comparison.Go[name] == "skip" && comparison.CSharp[name] == "pass"
+}
+
 // proofVerdict renders one side's terminal status, or an em dash when that side never reported the
 // test at all (only reachable on a comparison that did not validate).
 func proofVerdict(results map[string]string, name string) string {
@@ -364,7 +370,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 		// clause is selected by what this package's manifest actually contains — so pages without a
 		// platform-skip row keep their exact wording, and the page that has one cannot state
 		// something false about itself.
-		hasPlatformSkip, hasDeferred := false, false
+		hasPlatformSkip, hasDeferred, hasGoSkip := false, false, false
 
 		for _, name := range disclosed {
 			if disclosure, pinned := disclosures[name]; pinned {
@@ -378,6 +384,10 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				// row that actually skipped makes the clause false, so every existing runtime-capability
 				// failure row keeps its page's wording byte for byte.
 				hasPlatformSkip = hasPlatformSkip || (disclosure.hasClass(runtimeCapabilityClass) && comparison.CSharp[name] == "skip")
+
+				// A Go-side host skip (testDisclosure.GoSkipSignature) has the GO side skipping and the
+				// converted side passing, so both "provably cannot" and "not a skipped test" are false of it.
+				hasGoSkip = hasGoSkip || isProofGoSideSkip(comparison, name, disclosure)
 			}
 		}
 
@@ -391,9 +401,15 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 			claim = "this conversion does not satisfy"
 		}
 
+		// A page with a Go-side skip states the claim every class shares; pages without one keep
+		// their wording byte for byte.
+		if hasGoSkip {
+			claim = "on which the two runtimes' verdicts differ for a stated reason"
+		}
+
 		page.WriteString("\n## Disclosed divergences\n\n")
 
-		if hasPlatformSkip {
+		if hasPlatformSkip || hasGoSkip {
 			fmt.Fprintf(&page, "A disclosed divergence is a specific Go assertion %s — never\n", claim)
 			page.WriteString("a tolerance, and never a test skipped to make a row pass. Each one is pinned by exact signature in the package's\n")
 		} else {
@@ -491,6 +507,21 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				"suite reports **skip**, at a check for a runtime capability the managed host does not have. It is\n"+
 				"pinned to that skip message, so the row moves to a hard mismatch if the converted side ever skips\n"+
 				"for a different reason, or stops skipping.\n", escapeProofCell(name))
+		}
+
+		// A Go-side host skip's own note, for the same anti-laundering reason, from the other side: here
+		// it is Go that did not run the test, and a reader must see that in words.
+		for _, name := range disclosed {
+			disclosure, pinned := disclosures[name]
+
+			if !pinned || !isProofGoSideSkip(comparison, name, disclosure) {
+				continue
+			}
+
+			fmt.Fprintf(&page, "\n`%s` is a **Go-side host skip**: `go test` reports **skip** and the converted\n"+
+				"suite reports **pass**, because Go's own test skips on a property of the host it ran on that the\n"+
+				"converted side does not share. It is pinned to Go's own skip message, so the row moves to a hard\n"+
+				"mismatch if Go ever skips for a different reason or fails, or if the converted side stops passing.\n", escapeProofCell(name))
 		}
 
 		// A host-conditional row's own note, modeled on the roster's internal/zstd row: name the

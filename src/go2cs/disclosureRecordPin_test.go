@@ -41,7 +41,7 @@ func matchStack(disclosures map[string]testDisclosure, records []string, present
 	csResults := map[string]string{"TestStack": "fail"}
 	csOutputs := map[string]string{"TestStack": strings.Join(records, "\r\n")}
 	csRecords := map[string]testRecords{"TestStack": {Present: present, Records: records}}
-	mismatches, _, disclosed, _ = matchTerminalStatusesWithRecords([]string{"TestStack"}, goResults, csResults, disclosures, csOutputs, csRecords)
+	mismatches, _, disclosed, _ = matchTerminalStatusesWithRecords([]string{"TestStack"}, goResults, csResults, disclosures, csOutputs, csRecords, nil)
 	return mismatches, disclosed
 }
 
@@ -103,7 +103,7 @@ func TestRecordPinRefusesDroppedRecords(t *testing.T) {
 	csResults := map[string]string{"TestStack": "fail"}
 	csOutputs := map[string]string{"TestStack": strings.Join(stackRecords, "\r\n")}
 	csRecords := map[string]testRecords{"TestStack": {Present: true, Records: stackRecords, Dropped: 3}}
-	mismatches, _, _, _ := matchTerminalStatusesWithRecords([]string{"TestStack"}, goResults, csResults, stackDisclosure(2), csOutputs, csRecords)
+	mismatches, _, _, _ := matchTerminalStatusesWithRecords([]string{"TestStack"}, goResults, csResults, stackDisclosure(2), csOutputs, csRecords, nil)
 	if len(mismatches) != 1 || !strings.Contains(mismatches[0], "dropped 3 more") {
 		t.Fatalf("dropped records must fail the pin and say so; got %q", mismatches)
 	}
@@ -117,7 +117,7 @@ func TestPinFailingRootDoesNotWithdrawItsFanOut(t *testing.T) {
 	records := planted()
 	csOutputs := map[string]string{"TestStack": strings.Join(records, "\r\n")}
 	csRecords := map[string]testRecords{"TestStack": {Present: true, Records: records}}
-	mismatches, _, _, withdrawn := matchTerminalStatusesWithRecords([]string{"TestStack", "TestStack/case"}, goResults, csResults, stackDisclosure(2), csOutputs, csRecords)
+	mismatches, _, _, withdrawn := matchTerminalStatusesWithRecords([]string{"TestStack", "TestStack/case"}, goResults, csResults, stackDisclosure(2), csOutputs, csRecords, nil)
 	if len(withdrawn) != 0 || len(mismatches) != 2 {
 		t.Fatalf("a root failing its pin must withdraw nothing, and both rows compare strictly; mismatches %q withdrawn %q", mismatches, withdrawn)
 	}
@@ -125,7 +125,7 @@ func TestPinFailingRootDoesNotWithdrawItsFanOut(t *testing.T) {
 	// Positive control: the same shape with the pin holding withdraws the child.
 	csRecords["TestStack"] = testRecords{Present: true, Records: stackRecords}
 	csOutputs["TestStack"] = strings.Join(stackRecords, "\r\n")
-	mismatches, _, _, withdrawn = matchTerminalStatusesWithRecords([]string{"TestStack", "TestStack/case"}, goResults, csResults, stackDisclosure(2), csOutputs, csRecords)
+	mismatches, _, _, withdrawn = matchTerminalStatusesWithRecords([]string{"TestStack", "TestStack/case"}, goResults, csResults, stackDisclosure(2), csOutputs, csRecords, nil)
 	if len(mismatches) != 0 || len(withdrawn) != 1 {
 		t.Fatalf("a root holding its pin withdraws its Go-only fan-out; mismatches %q withdrawn %q", mismatches, withdrawn)
 	}
