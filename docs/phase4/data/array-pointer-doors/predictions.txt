@@ -80,3 +80,26 @@ FOURTH SET, the UNNAMED array indexed through a conversion over C memory: the do
 
 Scored 2026-11-14, fourth set: MET as worded. R, S and T panic with "cannot view native memory as array<Int32>"
 (array<Byte> for T): "the address has no managed element storage behind it".
+
+FIFTH SET, 2026-11-14 22:40Z, memcpy into a Go variable through a number (amend-1114/prng/, design section 10.4).
+NO PREDICTION WAS WRITTEN BEFORE THIS BUILD. It was run to answer COORD's ruling 4 (does a real site need V2),
+and its results are recorded as measured, not scored. For the record of what was expected and not written down:
+the struct arms (pa pb pc) and pe lost under both builds; pd and pf (byte arrays named by the array's own number)
+were expected to reach the prototype's element window, and did not.
+  measured: all six arms print zeros under the conversion and under the prototype (go.out has Go's answers).
+
+SIXTH SET, written 2026-11-14 22:40Z before any door exists. To be scored at door A's and door B's cuts.
+  P9   With door A (V1, V3, V4, no V2): arm W's three lines print `5 "name\x00\x00"`, `4 "name"`,
+       `4 "\x00\x00wxyz"`; arms pd and pf print Go's answers; arms pa, pb, pc, pe still print zeros.
+       Falsifier: any of W, pd, pf differing from go.out; any of pa pb pc pe printing a non-zero.
+  P10  With V2 added: pa, pb, pc, pe and N print Go's answers, and the stress arm of section 5 is right in
+       10,000 of 10,000 rounds. Falsifier: one wrong round, or any of the five differing.
+  P11  Ruling 6: a 20-byte source into arm W's array through `[:]`, and a 32-byte destination from it, are refused
+       by name with the count of remaining elements (16) in the message, and the array reads unchanged after the
+       refused write. Falsifier: a CLR IndexOutOfRange or ArgumentException; any byte of the array changed.
+  P12  Door B's allocation arm: 0 bytes per element over C memory (V3) for 100,000 stores and reads after one
+       warm-up pass; the V1 control reads more than 0. Falsifier: any byte for V3 (stop line 7), or a control
+       that reads 0 (the instrument cannot see a box).
+  P13  D8, if ruled (b): a snapshot destination directly under `copy` refuses by name, arms pa pb pc pe refuse
+       where P9 has them printing zeros, and no std line reaches the refusal (no production line is a copy
+       destination through a view; the three os test lines are unclassified and read first). Falsifier: a two-seeded emission showing a std `CopyInto`; a banked row refusing.

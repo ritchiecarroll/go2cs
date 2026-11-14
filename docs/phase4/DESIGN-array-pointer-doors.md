@@ -460,3 +460,198 @@ Decisions asked (my recommendation first):
 - No cost was measured: the element door's box per access, the anchor's allocation per V2 view.
 - sqlite-cs's tree, its walls S3 and S5 as G lists them, and G's 16-view census were not read. The census here is
   the tool's, at sqlite-cs's module pins.
+
+## 10. Amendment 2026-11-14 22:40Z (P5): the rulings on doors A and B, the census by arm, the floor as reworked
+
+COORD's rulings of 21:20Z (items 3 to 6, with G's agreement to the design at `27ac1088e8`), the follow-up review
+of the floor of 22:22Z, and the forward of 22:17Z. Nothing above is rewritten; where this section and an earlier
+one differ, this one is later. Evidence: `data/array-pointer-doors/amend-1114/`.
+
+<!-- Provenance. Rulings: claude/mailbox docs/phase4/inbox/P5/20261114T212040Z-COORD.md (doors),
+     20261114T222234Z-COORD.md (review of 4c8ee1cbd2, three nits), 20261114T221736Z-COORD.md (two pointer casts).
+     The floor: branch claude/p5-named-array-floor, tip 4c8ee1cbd2, DESIGN-native-array-view.md second block.
+     The probe: built 2026-11-14 22:27Z to 22:31Z on linux/amd64 against golib at 4c8ee1cbd2, converter of
+     c2919b8b16. The caller counts: grep over the 96 files `go list` selects for windows/amd64, sqlite v1.62.0. -->
+
+### 10.1 The floor is at the read (corrects the 21:00Z block of 4.5)
+
+The 21:00Z correction says the floor has "a second line in the `NativeBox` constructor". After the review that is
+no longer so. The named-array floor is ONE line, in `NativeBox<T>.ValueAddress`, which `Value` and `ValueSlot`
+both go through. The constructor refuses nothing, and the number conversion has no named-array line.
+
+- `(*RawMem)(cptr)` over C memory is therefore refused at the first READ of the array, not at the conversion.
+  Until it is read the pointer is an address: its number, its equality and a cast back to another pointer type
+  all work, as they did at master.
+- A nil pointer to a named array is not refused by the floor (its test is `address != null`). Its read reaches
+  address 0 and the CLR's fault becomes Go's nil dereference, as for every nil native box. Not new.
+- The rule for the doors is unchanged: no door makes a native box of a wrapper and reads it. Door C's named
+  kind is a sibling box whose `Value` refuses by name.
+- The `array<>` test is spelled in three places (`ж.NativeBox.cs:174`, `ж.cs:329` and `ж.cs:966`). Door A's cut
+  touches both files and ties them with a comment at each naming the others.
+
+### 10.2 Ruling 3: arm W, the twin of w5b2
+
+w5b2 is Go memory: a `RawMem` view over a local `[16]byte`. Three statements join the acceptance kit as arm W
+(`amend-1114/w/`, Go's answers in `go.out`):
+
+    var buf [16]byte
+    copy((*RawMem)(unsafe.Pointer(&buf[0]))[:], "name\x00")       5 "name\x00\x00"       CopyInto over V1
+    copy(out[:], (*RawMem)(unsafe.Pointer(&buf[0]))[:])            4 "name"               CopyFrom over V1
+    copy((*RawMem)(unsafe.Pointer(&buf[0]))[12:], "wxyz")          4 "\x00\x00wxyz"       CopyInto, lo = 12
+
+W sits beside C0 in P1's list. It is expected red at the floor's tip with the floor's refusal, as arms gb and gg
+of the floor's kit are (a named array over the address of an element of Go memory). W itself has not been
+converted yet.
+
+### 10.3 Ruling 6: CopyInto and CopyFrom over V1 stop at the Go array
+
+Over V1 the count is `min(N - lo, len(other), the array's remaining elements from the pointer's element)`.
+When the first two allow more than the third, the door refuses BY NAME before it copies anything:
+
+    go2cs: copy through (*[N]E)(p)[lo:] would pass the end of the Go array p points into (K elements remain)
+
+Go has no answer for that program (it writes or reads past its own allocation), so the arm that holds it is a
+GolibTests arm and not a kit arm: a 20-byte source into arm W's 16-byte array, and a 32-byte destination from
+it. The message is asserted, and the array is asserted unchanged after the refused write. The view form's
+capacity rule in 4.2 is the same bound and is unchanged.
+
+### 10.4 Ruling 4: the census by arm, and V2 has a real site
+
+The split is `amend-1114/by-arm.txt`. A site's arm is decided at run time by what its operand names, so the
+split is a reading of each site's source.
+
+| population | V3 | V1 | a `uintptr` parameter: the caller's arm | lines |
+|:--|--:|--:|--:|--:|
+| sqlite + libc, windows/amd64 | 16 | 1 | 17 | 34 |
+| sqlite + libc, linux/amd64 | 12 | 0 | 4 | 16 |
+
+G's reading of the sites holds: sqlite's own 12 views take C memory, and libc's one view of Go memory at the
+site (`Xstrerror`) is V1. The 17 parameter lines are where it does not close. They sit in 15 functions of the C
+ABI (`Xmemcpy`, `Xmemmove`, `Xread`, `Xfread`, `Xsnprintf` and others), and what they view is whatever number
+the caller passes.
+
+**Not confirmed: one production site needs V2.** sqlite's generated code on windows/amd64 calls `Xmemcpy` 412
+times and `Xmemmove` 42 times. Three calls pass the address of a Go package variable as the DESTINATION:
+
+- `sqlite_windows.go:5802`, in `Xsqlite3_randomness`: `memcpy(&sqlite3Prng, &chacha20_init, 16)`, the first
+  seeding of sqlite's random number generator, which sqlite reads for temporary file names, journal and WAL
+  salts and random rowids.
+- `_sqlite3PrngSaveState` and `_sqlite3PrngRestoreState` (test control): the whole 132-byte state, both ways.
+
+The variable is `struct { Fs [16]uint32; Fout [64]uint8; Fn uint8 }`. The converter emits a struct of this shape
+with an inline layout (the probe's twin: 132 bytes, fields at 0, 64 and 128, no reference), so it is V2's case: Go storage of another type that holds no
+references and can be pinned. Thirteen more calls pass a Go variable as the SOURCE; a snapshot is exact for
+those. The counts are a lower bound (an address that arrives through a variable or arithmetic is not counted).
+
+Measured on the same shape (`amend-1114/prng/`, libc's `Xmemcpy` body with six callers):
+
+| arm | destination, source | Go | converted | prototype |
+|:--|:--|:--|:--|:--|
+| pa | the 132-byte struct, from a `[4]uint32` | `0x61707865 0x3320646e ...` | zeros | zeros |
+| pb | the struct, from the struct | `7 9 3` | `0 0 0` | `0 0 0` |
+| pc | a struct of scalars, from a `[4]uint32` | `0x61707865 ...` | zeros | zeros |
+| pd | a `[8]byte`, from a `[8]uint8`, each named by the array's own number | `[217 213 5 ...]` | zeros | zeros |
+| pe | a `[4]uint32`, from a `[8]uint8` | `0xf905d5d9 0xd763a120` | zeros | zeros |
+| pf | a `[16]byte`, from a `[4]uint32` | `[101 120 112 ...]` | zeros | zeros |
+
+The prototype is `unsafe.Slice` as it stands, which for a number the registry knows takes its snapshot. That is
+what door A answers for Go storage of another type when V2 is absent. So with door A cut as V1, V3 and V4 only,
+arms pa, pb, pc and pe stay lost, silently, and so does the seeding at `:5802` on the windows flavour.
+
+Two more things the probe shows:
+
+- **V1 must take the array's own number.** pd and pf name a byte array by `uintptr(unsafe.Pointer(&buf))`, the
+  array and not its element 0, and the prototype misses the element window. Door A's V1 is defined on what the
+  number resolves to: a box of `array<E>` at offset 0 is that array's element 0, and a number inside the array
+  is the element at that offset. pd joins P1 as a V1 arm; pf is V1 for its destination.
+- **std needs no V2.** None of P5's 11 lines writes through a view of Go storage of another type
+  (`by-arm.txt` section 4). P8 calls the two `os_windows` lines "read and written"; read at the source they are
+  read only.
+
+**What follows for the cut.** By the ruling's own terms ("deferred to .5 unless a real site appears") V2 is not
+deferred by this section; the decision is COORD's. The order proposed keeps both outcomes open:
+
+1. Door A is cut as V1, V3, V4 first: its commits, its arms (A B E G H I K L O P, C C0, W, pd, pf), its
+   footprint.
+2. V2 is the LAST commits of the same seat: the anchored window, arm N, arms pa pb pc pe, the stress arm of
+   section 5 and its made-to-fail twin. Stop line 1 is unchanged: one wrong round in 10,000 withdraws it.
+3. If V2 is deferred or withdrawn, the seat ends at step 1 and N, pa, pb, pc and pe stay red and NAMED, with a
+   BOARD row that names `sqlite_windows.go:5802`.
+
+**D8, asked: what a lost write says when V2 is absent.** `Xmemcpy`'s views are bounded forms, which 4.1 emits
+as `View` and then `copy`. The door hands out a snapshot and cannot know it will be written, so without V2 the
+write at `:5802` stays as silent as it is today (the converter's warning names the line at conversion time, and
+nothing at run time). Two answers:
+
+- (a) Leave it: the BOARD row of step 3 names the site, and V2 is the cure.
+- (b) Emit a bounded view that is `copy`'s direct destination through `CopyInto` with its bounds (15 of the
+  windows flavour's 34 lines have that context), so the door sees the write and refuses a snapshot destination
+  by name. One more emission shape and one more refusal.
+
+Recommended: (a) if V2 stays in the seat, because the snapshot destinations that remain are roots that hold
+references, which the converter already warns about; (b) only if V2 is deferred, so that `:5802` fails by name
+on the windows flavour and not silently. No std production line is a copy destination through a view (P5's 11
+lines are bound views and copy sources), so neither answer moves a banked row's production side. Three std TEST
+lines are (`os_windows_test.go:243`, `:340`, `:730`: `uint16` views of `&buf.PathBuffer[0]`, a one-element array
+at the end of a struct, and of a typed pointer). Their arm is NOT classified here; they are named so that the
+cut's `-tests` census reads them before (b) could reach a banked windows row of `os`.
+
+### 10.5 Ruling 5: door B's first cut, the V3 fast path
+
+The element door of 4.5 costs one box per access, and the index form is in hot code (G's count on windows/amd64:
+`_chacha_block` 97 sites, `_balance_nonroot` 31, `_datetimeFunc` 28). The first cut of door B therefore has two
+spellings:
+
+    (*A)(p)[i]   read, store, compound, ++     ->   @unsafe.Pointer.ElementRef<E>(p, i, N)        a `ref E`
+    &(*A)(p)[i]                                 ->   @unsafe.Pointer.Element<E>(p, i, N)           the box, as in 4.5
+
+`ElementRef` checks `0 <= i < N` with Go's index panic, then:
+
+- **V3** (the number resolves to nothing): `ref Unsafe.AsRef<E>((void*)(p + i*size))`. No allocation, and no
+  lifetime question, because C memory has none.
+- **V1, V2, V4 and a pointer that carries a root**: the box of 4.5, and `ref box.Value`. The box is what keeps
+  the root, so it is not removed here.
+
+An `E` that holds references is refused as in 4.5; nothing about the pointee rule changes.
+
+**Acceptance, added.** An allocation-count arm on an insert-shaped loop: 100,000 stores and reads through
+`(*[1<<20]uint32)(unsafe.Pointer(c))[i]` over C memory, measured with `GC.GetAllocatedBytesForCurrentThread`
+around the loop, after one warm-up pass. **Stop line 7 (it replaces stop line 6, which left the cost to a
+follow-up): more than 0 bytes per element for V3 stops door B.**
+The control is the same loop over a Go `[]uint32` through `&s[0]` (V1), which is expected to allocate and
+shows the instrument can read a non-zero.
+
+**For whoever cuts N3** (G's caveat): a `ref` return cannot live across an `await` (CS8178). `ElementRef`'s
+result is used inside one expression, and the spill the N3 twin introduces must never split that expression.
+If a site cannot be kept in one expression, it takes `Element(...).Value`.
+
+### 10.6 The two pointer casts COORD forwarded (22:17Z): both keep their root
+
+Read at `4c8ee1cbd2`; nothing was run.
+
+- `runtime/mprof_impl.cs:194`, `(ж<bucket>)(uintptr)(allnext.Load())`. The number is the one
+  `FromPinnedBox(nb)` registered when the previous bucket was stored. `bucket` holds references, so the number is
+  an order token; the number conversion resolves it and, the pointee types being equal, answers the bucket's
+  own box (its first arm). The result IS the root. The box is reachable throughout: the atomic holds the
+  pointer that carries it until the store four lines below, and the hash chain holds it for good.
+- `unsafe/unsafe.cs:1452`, `(ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field)`. The cast to a number drops what
+  the pointer carried, but the conversion's last line keeps what the number RESOLVES to
+  (`NativeDerivation.KeptResolved`), and the registry resolves a pinned address to its box. So the native box
+  keeps the field's box, which keeps the pin. If the field's box were collected between the two casts (only
+  the caller's reference holds it there), the number would not resolve and arm 5 would refuse by name, since
+  the target is always `array<T>`: a refusal, never a box that keeps nothing. The 11 corpus callers pass a
+  field's box of a struct box that is live across the call (`pp.ᏑPort` 8, `sa.ᏑPort` 2, `mp.of(m.Ꮡcheaprand)` 1).
+
+Neither is a BOARD row. Door A's cut respells `:1452` as `Pointer.To<array<T>>(Pointer.FromPinnedBox(field))`,
+which keeps the root by what the pointer carries and closes the window by construction (one line, hand-owned,
+GolibTests arm beside it).
+
+### 10.7 What this section does not show
+
+- The doors still do not exist: every "door A answers" above is the design, and the prototype is `unsafe.Slice`.
+- That V2 as designed makes pa, pb, pc and pe print Go's answers is predicted, not run.
+- The caller counts are for package `modernc.org/sqlite/lib` on windows/amd64 only, and are a lower bound.
+- What the linux flavour does with `memcpy(&sqlite3Prng, ...)` (its libc memcpy is not a view form) was not
+  measured.
+- 10.6 is a reading. The window at `unsafe.cs:1452` was not produced.
+- sqlite-cs's own tree was not built; `:5802` is read from the module, not observed failing in the demo.

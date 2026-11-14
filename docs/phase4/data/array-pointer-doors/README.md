@@ -68,3 +68,24 @@ Batch 305 landed as master `c2919b8b16`; the design branch merged it at `8a378c0
 
 The runner was first checked on the cut's own build: it reproduces `converted-cut.out` except the M0 line. No new
 output file is committed, because none would differ from the ones here.
+
+## Amendment 2026-11-14 22:40Z: the census by arm and two probes (`amend-1114/`)
+
+For section 10 of the design (COORD's rulings 3 to 6).
+
+| Path | What it is |
+|:--|:--|
+| `amend-1114/by-arm.txt` | door A's slice sites split by arm, the callers of libc's parameter functions in sqlite's generated code (windows/amd64), the probe's table, and the 11 std lines read at the source |
+| `amend-1114/prng/main.go`, `go.mod`, `go.out` | libc's windows `Xmemcpy` body with six callers that pass the number of a Go variable; Go's answers |
+| `amend-1114/prng/converted.out`, `prototype.out` | the conversion at master's emission and with the one-line hand edit, built against golib at `4c8ee1cbd2` on linux/amd64 |
+| `amend-1114/prng/prototype-edit.txt` | the two spellings of the edited line, and the struct's emitted layout |
+| `amend-1114/w/main.go`, `go.mod`, `go.out` | arm W, the twin of w5b2 that runs as Go: three statements over a local `[16]byte` |
+
+The `prng` probe was built with no prediction written first; `predictions.txt` says so in its fifth set. Its
+sixth set holds the predictions for the doors, written before any door exists.
+
+```
+cd amend-1114/prng && go build -o prng . && for a in pa pb pc pd pe pf; do ./prng $a; done
+go2cs -go2cspath <tree>/src <kit>/prng <kit>/prng
+dotnet build prngprobe.csproj -c Release -p:GoTargetOS=linux -p:go2csPath=<tree>/src/
+```
