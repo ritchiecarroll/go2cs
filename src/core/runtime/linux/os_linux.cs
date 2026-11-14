@@ -91,7 +91,7 @@ internal static void futexwakeup(ж<uint32> addr, uint32 cnt) {
         print((@string)"futexwakeup addr=", addr.OrTypedNil(), (@string)" returned ", ret, (@string)"\n");
     });
 
-    ((ж<int32>)(uintptr)((@unsafe.Pointer)(uintptr)0x1006)).Value = 0x1006;
+    (@unsafe.Pointer.To<int32>((@unsafe.Pointer)(uintptr)0x1006)).Value = 0x1006;
 }
 
 internal static int32 getCPUCount() {
@@ -219,7 +219,7 @@ internal static void newosproc0(uintptr stacksize, @unsafe.Pointer fn) {
         writeErrStr(failallocatestack);
         exit(1);
     }
-    var ret = clone(cloneFlags, (@unsafe.Pointer)((uintptr)Δstack + stacksize), nil, nil, fn);
+    var ret = clone(cloneFlags, @unsafe.Add(Δstack, stacksize), nil, nil, fn);
     if (ret < 0) {
         writeErrStr(failthreadcreate);
         exit(1);
@@ -257,7 +257,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> argv) {
     n++;
 
     // now argv+n is auxv
-    var auxvp = (ж<array<uintptr>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)n * (uintptr)goarch.PtrSize));
+    var auxvp = @unsafe.Pointer.To<array<uintptr>>(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)n * (uintptr)goarch.PtrSize));
 
     nint pairsΔ1 = sysauxv(auxvp.slice()); if (pairsΔ1 != 0) {
         auxv = auxvp.slice(0, pairsΔ1 * 2, pairsΔ1 * 2);
@@ -278,7 +278,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> argv) {
         }
         uintptr nΔ1 = default;
         for (nΔ1 = (uintptr)4 << 10; nΔ1 < size; nΔ1 <<= 1) {
-            var errΔ1 = mincore((@unsafe.Pointer)((uintptr)Δp + nΔ1), 1, Ꮡaddrspace_vec.at<byte>(0));
+            var errΔ1 = mincore(@unsafe.Add(Δp, nΔ1), 1, Ꮡaddrspace_vec.at<byte>(0));
             if (errΔ1 == 0) {
                 physPageSize = nΔ1;
                 break;
@@ -320,7 +320,7 @@ internal static nint /*pairs*/ sysauxv(slice<uintptr> auxv) {
             // and musl use the value as-is for stack and pointer protector
             // cookies from libc_start_main and/or dl_start. Also, cgo programs
             // may use the value after we do.
-            startupRand = ((ж<array<byte>>)(uintptr)((@unsafe.Pointer)val)).slice();
+            startupRand = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)val).slice();
             break;
         }
         case var ᴛ when ᴛ == _AT_PAGESZ: {
@@ -354,7 +354,7 @@ internal static uintptr getHugePageSize() {
         return 0;
     }
     n--; // remove trailing newline
-    var (v, err) = strconv.Atoi(slicebytetostringtmp((ж<byte>)(uintptr)(ptr), (nint)n));
+    var (v, err) = strconv.Atoi(slicebytetostringtmp(@unsafe.Pointer.To<byte>(ptr), (nint)n));
     if (err != nil || v < 0) {
         v = 0;
     }

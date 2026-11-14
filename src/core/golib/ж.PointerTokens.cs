@@ -518,10 +518,15 @@ namespace go;
         // The same no-allocation steady state Register keeps: a repeated pin of the same storage
         // reports the same address, and 70% of real pins are repeats (gate #1's census).
         if (s_table.TryGetValue(address, out WeakReference<object>? existing) &&
-            existing.TryGetTarget(out object? remembered) &&
-            ReferenceEquals(remembered, box))
+            existing.TryGetTarget(out object? remembered))
         {
-            return;
+            if (ReferenceEquals(remembered, box))
+                return;
+
+            // The entry is about to name the LATEST registrant. One that is alive and still pinned here is kept beside
+            // it (KeepDisplaced), or its number would stop resolving the moment this later registrant died.
+            if (remembered is INilPointer pinned && pinned.IsPinnedAt(address))
+                KeepDisplaced(address, existing);
         }
 
         s_table[address] = new WeakReference<object>(box);
@@ -658,7 +663,13 @@ namespace go;
 
         if (!weak.TryGetTarget(out object? box))
         {
-            if (s_table.TryRemove(token, out _))
+            // The latest registrant is dead. An earlier one that is alive and still pinned here answers, and takes the
+            // entry back; only when there is none does the entry go, and it goes by COMPARE, so a registration that
+            // landed meanwhile is not removed with it.
+            if (Volatile.Read(ref s_displacedCount) != 0 && Promote(token, weak) is { } kept)
+                return kept;
+
+            if (s_table.TryRemove(new System.Collections.Generic.KeyValuePair<nuint, WeakReference<object>>(token, weak)))
                 Interlocked.Decrement(ref s_count);
 
             return null;
@@ -672,7 +683,131 @@ namespace go;
         if (CurrentToken(box) == token)
             return box;
 
-        return box is INilPointer pointer && pointer.IsPinnedAt(token) ? box : null;
+        if (box is INilPointer pointer && pointer.IsPinnedAt(token))
+            return box;
+
+        // The latest registrant is alive and no longer pinned here: an earlier one may still be.
+        return Volatile.Read(ref s_displacedCount) != 0 ? Promote(token, weak) : null;
+    }
+
+    // EVERY LIVE REGISTRANT OF A PINNED ADDRESS (cgo Phase 3 increment 3.1, the review's finding 6;
+    // docs/phase4/DESIGN-cgo-phase3-marshaling.md 16.11). The table above names ONE registrant per address, the
+    // latest: every evaluation of `&b[0]` mints a fresh box, and each registers the same address. So with p1 alive
+    // and pinned, a temporary second pointer to the same element took the entry, died, and p1's number stopped
+    // resolving. "Never replace a live entry" is not enough either: the unrecorded later registrant then outlives the
+    // recorded one. So a registrant displaced while alive and still pinned is KEPT here, beside the table, and a read
+    // whose latest registrant no longer answers asks these before it answers MISS.
+    //
+    // The table's own entry is untouched, one weak reference per registration exactly as before: a displaced
+    // registrant's own weak reference is what is kept, so nothing is allocated for it but the list's growth. A list is
+    // pruned only when a collection has happened since its last pruning (no weak target can die without one), so a
+    // loop that pins one address again and again pays an append and never a scan.
+    private static readonly ConcurrentDictionary<nuint, Registrants> s_displaced = new();
+
+    // Addresses with a displaced list. The read path's one test: zero in a process that never pins one address twice.
+    private static int s_displacedCount;
+
+    private sealed class Registrants
+    {
+        internal WeakReference<object>[] Items = new WeakReference<object>[2];
+        internal int Count;
+        internal int PrunedAtCollection = -1;
+
+        // Drops the registrants whose box is dead. Under the list's lock.
+        internal void Prune()
+        {
+            int kept = 0;
+
+            for (int i = 0; i < Count; i++)
+            {
+                if (Items[i].TryGetTarget(out _))
+                    Items[kept++] = Items[i];
+            }
+
+            Array.Clear(Items, kept, Count - kept);
+            Count = kept;
+        }
+    }
+
+    private static void KeepDisplaced(nuint address, WeakReference<object> registrant)
+    {
+        while (true)
+        {
+            if (!s_displaced.TryGetValue(address, out Registrants? list))
+            {
+                Registrants fresh = new();
+                list = s_displaced.GetOrAdd(address, fresh);
+
+                if (ReferenceEquals(list, fresh))
+                    Interlocked.Increment(ref s_displacedCount);
+            }
+
+            if (KeepIn(list, address, registrant))
+                return;
+        }
+    }
+
+    // False when the list was emptied and removed before its lock was taken: the caller takes the address's list again.
+    private static bool KeepIn(Registrants list, nuint address, WeakReference<object> registrant)
+    {
+        lock (list)
+        {
+            if (!s_displaced.TryGetValue(address, out Registrants? current) || !ReferenceEquals(current, list))
+                return false;
+
+            int collections = GC.CollectionCount(0);
+
+            if (list.PrunedAtCollection != collections)
+            {
+                list.Prune();
+                list.PrunedAtCollection = collections;
+            }
+
+            if (list.Count > 0 && ReferenceEquals(list.Items[list.Count - 1], registrant))
+                return true;
+
+            if (list.Count == list.Items.Length)
+                Array.Resize(ref list.Items, list.Count * 2);
+
+            list.Items[list.Count++] = registrant;
+            return true;
+        }
+    }
+
+    // The latest registrant of `address` no longer answers for it. Finds a displaced one that is alive and still
+    // pinned there, gives it the table's entry back (by compare against the entry that failed) and answers its box.
+    private static object? Promote(nuint address, WeakReference<object> failed)
+    {
+        if (!s_displaced.TryGetValue(address, out Registrants? list))
+            return null;
+
+        lock (list)
+        {
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                WeakReference<object> candidate = list.Items[i];
+
+                if (!candidate.TryGetTarget(out object? box) || box is not INilPointer pinned || !pinned.IsPinnedAt(address))
+                    continue;
+
+                // Out of the list and back into the table. A registration that landed meanwhile keeps the entry, and
+                // this registrant stays kept beside it.
+                if (s_table.TryUpdate(address, candidate, failed))
+                {
+                    list.Items[i] = list.Items[--list.Count];
+                    list.Items[list.Count] = null!;
+                }
+
+                return box;
+            }
+
+            list.Prune();
+
+            if (list.Count == 0 && s_displaced.TryRemove(new System.Collections.Generic.KeyValuePair<nuint, Registrants>(address, list)))
+                Interlocked.Decrement(ref s_displacedCount);
+        }
+
+        return null;
     }
 
     // The token the box would report today — the same projection reflect used to mint the entry.
@@ -721,8 +856,21 @@ namespace go;
 
             foreach ((nuint token, WeakReference<object> weak) in s_table)
             {
-                if (!weak.TryGetTarget(out _))
-                    s_table.TryRemove(token, out _);
+                // By compare, and never while an earlier registrant of the address is alive and pinned there.
+                if (!weak.TryGetTarget(out _) && (Volatile.Read(ref s_displacedCount) == 0 || Promote(token, weak) is null))
+                    s_table.TryRemove(new System.Collections.Generic.KeyValuePair<nuint, WeakReference<object>>(token, weak));
+            }
+
+            // And the kept registrants: the dead go, and a list left empty goes with them.
+            foreach ((nuint address, Registrants list) in s_displaced)
+            {
+                lock (list)
+                {
+                    list.Prune();
+
+                    if (list.Count == 0 && s_displaced.TryRemove(new System.Collections.Generic.KeyValuePair<nuint, Registrants>(address, list)))
+                        Interlocked.Decrement(ref s_displacedCount);
+                }
             }
 
             // Re-sync the running count to the table, EXACTLY when nothing else moved it meanwhile: the

@@ -306,7 +306,7 @@ internal static void monitorSuspendResume() {
     ref var fn = ref heap<any>(out var Ꮡfn);
 
     fn = uintptr (uintptr context, uint32 changeType, uintptr setting) => {
-        for (var mp = (ж<m>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm))); mp != nil; mp = mp.Value.alllink) {
+        for (var mp = @unsafe.Pointer.To<m>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm))); mp != nil; mp = mp.Value.alllink) {
             if ((~mp).resumesema != 0) {
                 stdcall(_SetEvent, (~mp).resumesema);
             }
@@ -458,7 +458,7 @@ internal static void initLongPathSupport() {
     // Set the IsLongPathAwareProcess flag of the PEB's bit field.
     // This flag is not documented, but it's known to be used
     // by Windows to enable long path support.
-    var bitField = (ж<byte>)(uintptr)((@unsafe.Pointer)(stdcall(_RtlGetCurrentPeb) + PebBitFieldOffset));
+    var bitField = @unsafe.Pointer.To<byte>((@unsafe.Pointer)(stdcall(_RtlGetCurrentPeb) + PebBitFieldOffset));
     bitField.Value |= (byte)(IsLongPathAwareProcess);
 
     canUseLongPaths = true;
@@ -504,7 +504,7 @@ internal static void goenvs() {
     //     "envA=valA\x00envB=valB\x00\x00" (in UTF-16)
     // Two consecutive zero bytes end the list.
     @unsafe.Pointer strings = (@unsafe.Pointer)stdcall(_GetEnvironmentStringsW);
-    var Δp = ((ж<array<uint16>>)(uintptr)(strings)).slice();
+    var Δp = @unsafe.Pointer.To<array<uint16>>(strings).slice();
 
     nint n = 0;
     for ((nint from, nint i) = (0, 0); true; i++) {
@@ -1090,7 +1090,7 @@ internal static void profilem(ж<m> mp, uintptr thread) {
     // Align Context to 16 bytes.
     ж<windows.Context> c = default;
     ref var cbuf = ref heap(new array<byte>(1247), out var Ꮡcbuf);
-    c = (ж<windows.Context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
+    c = @unsafe.Pointer.To<windows.Context>((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
 
     c.ContextFlags = windows.CONTEXT_CONTROL;
     stdcall(_GetThreadContext, thread, (uintptr)c);
@@ -1128,7 +1128,7 @@ internal static void profileLoop() {
 
     for (;;) {
         stdcall(_WaitForSingleObject, profiletimer, windows.INFINITE);
-        var first = (ж<m>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm)));
+        var first = @unsafe.Pointer.To<m>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm)));
         for (var mp = first; mp != nil; mp = mp.Value.alllink) {
             if (mp == (~getg()).m) {
                 // Don't profile ourselves.
@@ -1239,7 +1239,7 @@ internal static void preemptM(ж<m> Ꮡmp) {
     // Prepare thread context buffer. This must be aligned to 16 bytes.
     ж<windows.Context> c = default;
     ref var cbuf = ref heap(new array<byte>(1247), out var Ꮡcbuf);
-    c = (ж<windows.Context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
+    c = @unsafe.Pointer.To<windows.Context>((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
     c.ContextFlags = windows.CONTEXT_CONTROL;
 
     // Serialize thread suspension. SuspendThread is asynchronous,

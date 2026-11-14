@@ -97,7 +97,7 @@ using static go.syscall_package;
 [assembly: GoPositionMap("syscall/rlimit_darwin.go", "rlimit_darwin.cs", "AAwUtoKClII=")]
 [assembly: GoPositionMap("syscall/route_bsd.go", "route_bsd.cs", "AAwgmJKCpoKmgsqCpoKUqJKClIKClIKCgoIAFQoAAhqOgoKUgoKClKiSlIKUgqSClIKkAAYWABUogoK4lIKCpIKClJSkgoKkgoKUlAADEtKUgoCCpIKUgoCCpAAaNoKCgoKCgpSClIKClIK0goKUgoK0goKUgrYACxiCgoKUgoKUggALGIKCgoKCgpSClIKClIK0goKUgoK0goKUgrau8pKCgoKCgpSClJSmgpS+woKClA==")]
 [assembly: GoPositionMap("syscall/route_darwin.go", "route_darwin.cs", "AAkSopSCpIKkgqSClAALGIKCgoKClIKUgoKUgrSCgpSCtIKClIK2")]
-[assembly: GoPositionMap("syscall/sockcmsg_unix.go", "sockcmsg_unix.cs", "AAwioqqipqIACBaigoKCgoKUgoKUpoKCgpSqwoKCgoKCgoKUqsKClIKUgoKClA==")]
+[assembly: GoPositionMap("syscall/sockcmsg_unix.go", "sockcmsg_unix.cs", "AAwioqqipoIACBaigoKCgoKUgoKUpoKCgpSqwoKCgoKCgoKUqsKClIKUgoKClA==")]
 [assembly: GoPositionMap("syscall/sockcmsg_unix_other.go", "sockcmsg_unix_other.cs", "AAockri26oLYgqaCyA==")]
 [assembly: GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACEMCasoKClAAHEJKokqiSqJKqkpaSmA==")]
 [assembly: GoPositionMap("syscall/syscall_bsd.go", "syscall_bsd.cs", "ABIsgoKCgpSCgpQAAhQACAKCgpSCuIKmgoKClIKClKaCgqaCgpSmisIAECiUgoKUppSCgoKUppSUlIKClKaY0oKCgpQAD1CigoKClIKCgpSmooKUgoKCgoKCgoIACMoBsoKCgqaygoKmgoKCgqaCgoKCpoKCgoKmgoKCggAHTMKCgoKCgoKUgpSCgpSClIKCgpSClKqSkoKUgpSmtIKCuIKClIK4goK4gpSmtIKCuIKCgpSClKqSgpSmgoKUgoK4uKqSgpQABxDcgqaC", "", "", "370=TimespecToNsec/1/2/1,NsecToTimeval/1/2/1,TimespecToNsec/2/2/2,NsecToTimeval/2/2/2")]

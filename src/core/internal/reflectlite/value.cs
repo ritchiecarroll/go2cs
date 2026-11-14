@@ -101,7 +101,7 @@ internal static @unsafe.Pointer pointer(this Value v) {
         throw panic("can't call pointer on a non-pointer Value");
     }
     if ((flag)(v.flag & flagIndir) != 0) {
-        return ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
+        return ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
     }
     return v.ptr;
 }
@@ -130,7 +130,7 @@ internal static any packEface(Value v) {
     case {} when (flag)(v.flag & flagIndir) != 0: {
         // Value is indirect, but interface is direct. We need
         // to load the data at v.ptr into the interface data word.
-        e.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
+        e.Data = ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
         break;
     }
     default: {
@@ -292,7 +292,7 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
         }
         var x = valueInterface(v);
         if (Ꮡdst.NumMethod() == 0) {
-            ((ж<any>)(uintptr)(target)).ValueSlot = x;
+            (@unsafe.Pointer.To<any>(target)).ValueSlot = x;
         } else {
             ifaceE2I(Ꮡdst, x, target);
         }

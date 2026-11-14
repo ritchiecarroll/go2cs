@@ -1441,7 +1441,7 @@ jobs:
           $filter = $env:CGO_TEST_FILTER
           $testTimeout = '10m'
           if ($env:STAGE -eq 'cgo-e2e') {
-              if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^TestG1|^TestTheCgoRoutesOutputBuildsAsAProject$|^TestACgoProjectBuilt' }
+              if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^TestG1|^TestTheCgoRoutesOutputBuildsAsAProject$|^TestACgoProjectBuilt|^TestCgoPhase3Program' }
               $testTimeout = '40m'
           }
           if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^Test.*Cgo|^TestRealLoad' }

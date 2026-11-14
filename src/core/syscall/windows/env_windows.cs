@@ -84,13 +84,13 @@ public static slice<@string> Environ() {
         while (envp.Value != 0) { // environment block ends with empty string
             // find NUL terminator
             @unsafe.Pointer end = @unsafe.Pointer.FromPinnedBox(envp);
-            while (~(ж<uint16>)(uintptr)(end) != 0) {
+            while (~@unsafe.Pointer.To<uint16>(end) != 0) {
                 end = @unsafe.Add(end, size);
             }
 
             var entry = @unsafe.Slice(envp, ((uintptr)end - (uintptr)envp) / size);
             r = append(r, UTF16ToString(entry));
-            envp = (ж<uint16>)(uintptr)(@unsafe.Add(end, size));
+            envp = @unsafe.Pointer.To<uint16>(@unsafe.Add(end, size));
         }
         return r;
     }

@@ -50,7 +50,7 @@ internal static int32 netpollopen(uintptr fd, ж<pollDesc> pd) {
         ev[0].udata = pd.Reinterpret<pollDesc, byte>();
     } else {
         var tp = taggedPointerPack(@unsafe.Pointer.FromPinnedBox(pd), pd.Ꮡfdseq.Load());
-        ev[0].udata = (ж<byte>)(uintptr)((@unsafe.Pointer)(uintptr)tp);
+        ev[0].udata = @unsafe.Pointer.To<byte>((@unsafe.Pointer)(uintptr)tp);
     }
     ev[1] = ev[0];
     ev[1].filter = _EVFILT_WRITE;
@@ -174,7 +174,7 @@ retry:
                 tag = 0;
             } else {
                 var tpΔ1 = (taggedPointer)(uint64)(uintptr)ev.udata;
-                pd = (ж<pollDesc>)(uintptr)(tpΔ1.pointer());
+                pd = @unsafe.Pointer.To<pollDesc>(tpΔ1.pointer());
                 tag = tpΔ1.tag();
                 if (pd.Ꮡfdseq.Load() != tag) {
                     continue;

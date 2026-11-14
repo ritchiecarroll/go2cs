@@ -389,7 +389,7 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
         if (resStateSize > 0) {
             @unsafe.Pointer mem = _C_malloc(resStateSize);
             defer(_C_free, mem, ref ᒐ);
-            var memSlice = @unsafe.Slice((ж<byte>)(uintptr)(mem), resStateSize);
+            var memSlice = @unsafe.Slice(@unsafe.Pointer.To<byte>(mem), resStateSize);
             clear(memSlice);
             state = Ꮡ(memSlice, 0).Reinterpret<byte, _C_struct___res_state>();
         }
@@ -407,7 +407,7 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
         // For now, we are willing to take res_search's word that there's nothing
         // useful in the response, even though there *is* a response.
         nint bufSize = maxDNSPacketSize;
-        ref var buf = ref heap<ж<_C_uchar>>((ж<_C_uchar>)(uintptr)(_C_malloc((uintptr)bufSize)), out var Ꮡbuf);
+        ref var buf = ref heap<ж<_C_uchar>>(@unsafe.Pointer.To<_C_uchar>(_C_malloc((uintptr)bufSize)), out var Ꮡbuf);
         defer(() => {
             // Free in a closure which captures buf to pick up a reallocated buffer from below.
             _C_free(@unsafe.Pointer.FromPinnedBox(Ꮡbuf.ValueSlot));
@@ -431,7 +431,7 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
             // Allocate a bigger buffer to fit the entire msg.
             _C_free(@unsafe.Pointer.FromPinnedBox(buf));
             bufSize = size;
-            buf = (ж<_C_uchar>)(uintptr)(_C_malloc((uintptr)bufSize));
+            buf = @unsafe.Pointer.To<_C_uchar>(_C_malloc((uintptr)bufSize));
         }
 
         dnsmessage.Parser p = default;

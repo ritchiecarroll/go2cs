@@ -365,7 +365,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
     sellock(scases, lockorder);
 
     gp.of(g.ᏑselectDone).Store(0);
-    sg = (ж<sudog>)(uintptr)((~gp).param);
+    sg = @unsafe.Pointer.To<sudog>((~gp).param);
     gp.Value.param = default;
 
     // pass 3 - dequeue from unsuccessful chans
@@ -562,9 +562,7 @@ sclose:
 }
 
 internal static uintptr sortkey(this ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.DerefOrNull();
-
-    return (uintptr)(uintptr)@unsafe.Pointer.FromRef(ref c);
+    return (uintptr)Ꮡc;
 }
 
 // A runtimeSelect is a single case passed to rselect.

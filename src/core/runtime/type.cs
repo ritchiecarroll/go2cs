@@ -124,7 +124,7 @@ internal static ж<byte> getGCMaskOnDemand(ж<_type> Ꮡt) {
     }
 
     for (;;) {
-        ref var Δp = ref heap<ж<byte>>((ж<byte>)(uintptr)(atomic.Loadp(addr)), out var Ꮡp);
+        ref var Δp = ref heap<ж<byte>>(@unsafe.Pointer.To<byte>(atomic.Loadp(addr)), out var Ꮡp);
         switch (Δp) {
         default: { // Already built.
             return Δp;
@@ -139,13 +139,13 @@ internal static ж<byte> getGCMaskOnDemand(ж<_type> Ꮡt) {
         }
         case var ᴛ when ᴛ == default: { // Not built yet.
             // Attempt to get exclusive access to build it.
-            if (!atomic.Casp1((ж<@unsafe.Pointer>)(uintptr)(addr), nil, @unsafe.Pointer.FromPinnedBox(ᏑinProgress))) {
+            if (!atomic.Casp1(@unsafe.Pointer.To<@unsafe.Pointer>(addr), nil, @unsafe.Pointer.FromPinnedBox(ᏑinProgress))) {
                 continue;
             }
 
             // Build gcmask for this type.
             var bytes = (uintptr)goarch.PtrSize * divRoundUp(t.PtrBytes / (uintptr)goarch.PtrSize, 8 * goarch.PtrSize);
-            Δp = (ж<byte>)(uintptr)(persistentalloc(bytes, goarch.PtrSize, Ꮡmemstats.Ꮡother_sys));
+            Δp = @unsafe.Pointer.To<byte>(persistentalloc(bytes, goarch.PtrSize, Ꮡmemstats.Ꮡother_sys));
             systemstack(() => {
                 buildGCMask(Ꮡt, new bitCursor(ptr: Ꮡp.ValueSlot, n: 0));
             });
@@ -340,7 +340,7 @@ internal static abiꓸName resolveNameOff(@unsafe.Pointer ptrInModule, nameOff o
                 println((@string)"runtime: nameOff", (Δhex)(uint64)off, (@string)"out of range", (Δhex)(uint64)md.types, (@string)"-", (Δhex)(uint64)md.etypes);
                 @throw(runtimeNameOffsetOutOfˢ);
             }
-            return new abiꓸName(Bytes: (ж<byte>)(uintptr)((@unsafe.Pointer)resΔ1));
+            return new abiꓸName(Bytes: @unsafe.Pointer.To<byte>((@unsafe.Pointer)resΔ1));
         }
     }
 
@@ -355,7 +355,7 @@ internal static abiꓸName resolveNameOff(@unsafe.Pointer ptrInModule, nameOff o
         }
         @throw(runtimeNameOffsetBaseˢ);
     }
-    return new abiꓸName(Bytes: (ж<byte>)(uintptr)(res));
+    return new abiꓸName(Bytes: @unsafe.Pointer.To<byte>(res));
 }
 
 internal static abiꓸName nameOff(this Δrtype t, nameOff off) {
@@ -393,7 +393,7 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
             }
             @throw(runtimeTypeOffsetBaseˢ);
         }
-        return (ж<_type>)(uintptr)(resΔ1);
+        return @unsafe.Pointer.To<_type>(resΔ1);
     }
     var t = md.typemap[off]; if (t != nil) {
         return t;
@@ -403,7 +403,7 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
         println((@string)"runtime: typeOff", (Δhex)(uint64)off, (@string)"out of range", (Δhex)(uint64)md.types, (@string)"-", (Δhex)(uint64)md.etypes);
         @throw(runtimeTypeOffsetOutOfˢ);
     }
-    return (ж<_type>)(uintptr)((@unsafe.Pointer)res);
+    return @unsafe.Pointer.To<_type>((@unsafe.Pointer)res);
 }
 
 internal static ж<_type> typeOff(this Δrtype t, typeOff off) {
@@ -456,7 +456,7 @@ internal static @string pkgPath(abiꓸName n) {
         off += i2 + l2;
     }
     ref var nameOff = ref heap(new nameOff(), out var ᏑnameOff);
-    copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff))).slice(), array<byte>.AliasPointer(n.Data(off), 4).slice());
+    copy(@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)).slice(), array<byte>.AliasPointer(n.Data(off), 4).slice());
     var pkgPathName = resolveNameOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff);
     return pkgPathName.Name();
 }
@@ -477,7 +477,7 @@ collect:
         foreach (var (_, tl) in range(prev.typelinks)) {
             ж<_type> t = default;
             if (prev.typemap == nil) {
-                t = (ж<_type>)(uintptr)((@unsafe.Pointer)(prev.types + (uintptr)tl));
+                t = @unsafe.Pointer.To<_type>((@unsafe.Pointer)(prev.types + (uintptr)tl));
             } else {
                 t = prev.typemap[((typeOff)tl)];
             }
@@ -501,7 +501,7 @@ break_collect:;
             pinnedTypemaps = append(pinnedTypemaps, tm);
             md.typemap = tm;
             foreach (var (_, tl) in range(md.typelinks)) {
-                var t = (ж<_type>)(uintptr)((@unsafe.Pointer)(md.types + (uintptr)tl));
+                var t = @unsafe.Pointer.To<_type>((@unsafe.Pointer)(md.types + (uintptr)tl));
                 foreach (var (_, candidate) in range(typehash[t.Hash])) {
                     var seen = new map<_typePair, EmptyStruct>{};
                     if (typesEqual(t, candidate, seen)) {

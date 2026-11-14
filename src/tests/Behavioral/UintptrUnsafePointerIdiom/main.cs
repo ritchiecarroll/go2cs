@@ -36,7 +36,7 @@ internal static void main() {
     @unsafe.Pointer up = @unsafe.Pointer.FromPinnedBox(e0);
     fmt.Println("round trip:", (uintptr)up == a0);
 
-    var shifted = (uintptr)(@unsafe.Pointer)((uintptr)e0 + 2 * /* unsafe.Sizeof(buf[0]) */ (uintptr)4);
+    var shifted = (uintptr)@unsafe.Add(@unsafe.Pointer.FromPinnedBox(e0), 2 * /* unsafe.Sizeof(buf[0]) */ (uintptr)4);
     fmt.Println("arithmetic:", shifted == a2);
 
     var pp = Ꮡlink;
@@ -44,6 +44,10 @@ internal static void main() {
 
     link.y = 7;
     fmt.Println("written:", link.x, link.y, addrOf(link) == g1);
+
+    @unsafe.Pointer none = default;
+    var offset = 3 * /* unsafe.Sizeof(buf[0]) */ (uintptr)4;
+    fmt.Println("nil arithmetic:", (uintptr)@unsafe.Add(none, offset) == offset, (uintptr)@unsafe.Add(none, 24) == 24);
 }
 
 } // end main_package

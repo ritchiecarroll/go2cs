@@ -49,7 +49,7 @@ internal static uintptr memhash128(@unsafe.Pointer Δp, uintptr h) {
 //go:nosplit
 internal static uintptr memhash_varlen(@unsafe.Pointer Δp, uintptr h) {
     var ptr = sys.GetClosurePtr();
-    var size = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(ptr + /* unsafe.Sizeof(h) */ (uintptr)8));
+    var size = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(ptr + /* unsafe.Sizeof(h) */ (uintptr)8));
     return memhash(Δp, h, size);
 }
 
@@ -100,7 +100,7 @@ internal static partial uintptr memhash64(@unsafe.Pointer Δp, uintptr h);
 internal static partial uintptr strhash(@unsafe.Pointer Δp, uintptr h);
 
 internal static uintptr strhashFallback(@unsafe.Pointer a, uintptr h) {
-    var x = (ж<stringStruct>)(uintptr)(a);
+    var x = @unsafe.Pointer.To<stringStruct>(a);
     return memhashFallback(x.str, h, (uintptr)x.len);
 }
 
@@ -109,7 +109,7 @@ internal static uintptr strhashFallback(@unsafe.Pointer a, uintptr h) {
 // To avoid long hash chains, we assign a random number
 // as the hash value for a NaN.
 internal static uintptr f32hash(@unsafe.Pointer Δp, uintptr h) {
-    var f = ~(ж<float32>)(uintptr)(Δp);
+    var f = ~@unsafe.Pointer.To<float32>(Δp);
     switch (ᐧ) {
     case {} when f is 0F: {
         return trimHash(c1 * ((uintptr)(c0 ^ h))); // +0, -0
@@ -123,7 +123,7 @@ internal static uintptr f32hash(@unsafe.Pointer Δp, uintptr h) {
 }
 
 internal static uintptr f64hash(@unsafe.Pointer Δp, uintptr h) {
-    var f = ~(ж<float64>)(uintptr)(Δp);
+    var f = ~@unsafe.Pointer.To<float64>(Δp);
     switch (ᐧ) {
     case {} when f is 0D: {
         return trimHash(c1 * ((uintptr)(c0 ^ h))); // +0, -0
@@ -137,17 +137,17 @@ internal static uintptr f64hash(@unsafe.Pointer Δp, uintptr h) {
 }
 
 internal static uintptr c64hash(@unsafe.Pointer Δp, uintptr h) {
-    var x = (ж<array<float32>>)(uintptr)(Δp);
+    var x = @unsafe.Pointer.To<array<float32>>(Δp);
     return f32hash(@unsafe.Pointer.FromPinnedBox(x.at<float32>(1)), f32hash(@unsafe.Pointer.FromPinnedBox(x.at<float32>(0)), h));
 }
 
 internal static uintptr c128hash(@unsafe.Pointer Δp, uintptr h) {
-    var x = (ж<array<float64>>)(uintptr)(Δp);
+    var x = @unsafe.Pointer.To<array<float64>>(Δp);
     return f64hash(@unsafe.Pointer.FromPinnedBox(x.at<float64>(1)), f64hash(@unsafe.Pointer.FromPinnedBox(x.at<float64>(0)), h));
 }
 
 internal static uintptr interhash(@unsafe.Pointer Δp, uintptr h) {
-    var a = (ж<iface>)(uintptr)(Δp);
+    var a = @unsafe.Pointer.To<iface>(Δp);
     var tab = a.of(iface.Ꮡtab).Value;
     if (tab == nil) {
         return h;
@@ -178,7 +178,7 @@ internal static uintptr interhash(@unsafe.Pointer Δp, uintptr h) {
 //
 //go:linkname nilinterhash
 internal static uintptr nilinterhash(@unsafe.Pointer Δp, uintptr h) {
-    var a = (ж<eface>)(uintptr)(Δp);
+    var a = @unsafe.Pointer.To<eface>(Δp);
     var t = a.of(eface.Ꮡ_type).Value;
     if (t == nil) {
         return h;
@@ -288,43 +288,43 @@ internal static bool memequal0(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return true;
 }
 internal static bool memequal8(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    return ~(ж<int8>)(uintptr)(Δp) == ~(ж<int8>)(uintptr)(q);
+    return ~@unsafe.Pointer.To<int8>(Δp) == ~@unsafe.Pointer.To<int8>(q);
 }
 internal static bool memequal16(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    return ~(ж<int16>)(uintptr)(Δp) == ~(ж<int16>)(uintptr)(q);
+    return ~@unsafe.Pointer.To<int16>(Δp) == ~@unsafe.Pointer.To<int16>(q);
 }
 internal static bool memequal32(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    return ~(ж<int32>)(uintptr)(Δp) == ~(ж<int32>)(uintptr)(q);
+    return ~@unsafe.Pointer.To<int32>(Δp) == ~@unsafe.Pointer.To<int32>(q);
 }
 internal static bool memequal64(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    return ~(ж<int64>)(uintptr)(Δp) == ~(ж<int64>)(uintptr)(q);
+    return ~@unsafe.Pointer.To<int64>(Δp) == ~@unsafe.Pointer.To<int64>(q);
 }
 internal static bool memequal128(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    return ~(ж<array<int64>>)(uintptr)(Δp) == ~(ж<array<int64>>)(uintptr)(q);
+    return ~@unsafe.Pointer.To<array<int64>>(Δp) == ~@unsafe.Pointer.To<array<int64>>(q);
 }
 internal static bool f32equal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    return ~(ж<float32>)(uintptr)(Δp) == ~(ж<float32>)(uintptr)(q);
+    return ~@unsafe.Pointer.To<float32>(Δp) == ~@unsafe.Pointer.To<float32>(q);
 }
 internal static bool f64equal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    return ~(ж<float64>)(uintptr)(Δp) == ~(ж<float64>)(uintptr)(q);
+    return ~@unsafe.Pointer.To<float64>(Δp) == ~@unsafe.Pointer.To<float64>(q);
 }
 internal static bool c64equal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    return ~(ж<complex64>)(uintptr)(Δp) == ~(ж<complex64>)(uintptr)(q);
+    return ~@unsafe.Pointer.To<complex64>(Δp) == ~@unsafe.Pointer.To<complex64>(q);
 }
 internal static bool c128equal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    return ~(ж<complex128>)(uintptr)(Δp) == ~(ж<complex128>)(uintptr)(q);
+    return ~@unsafe.Pointer.To<complex128>(Δp) == ~@unsafe.Pointer.To<complex128>(q);
 }
 internal static bool strequal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    return ~(ж<@string>)(uintptr)(Δp) == ~(ж<@string>)(uintptr)(q);
+    return ~@unsafe.Pointer.To<@string>(Δp) == ~@unsafe.Pointer.To<@string>(q);
 }
 internal static bool interequal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    var x = ~(ж<iface>)(uintptr)(Δp);
-    var y = ~(ж<iface>)(uintptr)(q);
+    var x = ~@unsafe.Pointer.To<iface>(Δp);
+    var y = ~@unsafe.Pointer.To<iface>(q);
     return x.tab == y.tab && ifaceeq(x.tab, x.data, y.data);
 }
 internal static bool nilinterequal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    var x = ~(ж<eface>)(uintptr)(Δp);
-    var y = ~(ж<eface>)(uintptr)(q);
+    var x = ~@unsafe.Pointer.To<eface>(Δp);
+    var y = ~@unsafe.Pointer.To<eface>(q);
     return x._type == y._type && efaceeq(x._type, x.data, y.data);
 }
 internal static bool efaceeq(ж<_type> Ꮡt, @unsafe.Pointer x, @unsafe.Pointer y) {
@@ -442,7 +442,7 @@ internal static void alginit() {
 internal static void initAlgAES() {
     useAeshash = true;
     // Initialize with random data so hash collisions will be hard to engineer.
-    var key = (ж<array<uint64>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡaeskeysched));
+    var key = @unsafe.Pointer.To<array<uint64>>(@unsafe.Pointer.FromPinnedBox(Ꮡaeskeysched));
     foreach (var i in range(key, 16)) {
         key.Value[i] = bootstrapRand();
     }
@@ -450,7 +450,7 @@ internal static void initAlgAES() {
 
 // Note: These routines perform the read with a native endianness.
 internal static uint32 readUnaligned32(@unsafe.Pointer Δp) {
-    var q = (ж<array<byte>>)(uintptr)(Δp);
+    var q = @unsafe.Pointer.To<array<byte>>(Δp);
     if (goarch.BigEndian) {
         return byteorder.BEUint32(q.slice());
     }
@@ -458,7 +458,7 @@ internal static uint32 readUnaligned32(@unsafe.Pointer Δp) {
 }
 
 internal static uint64 readUnaligned64(@unsafe.Pointer Δp) {
-    var q = (ж<array<byte>>)(uintptr)(Δp);
+    var q = @unsafe.Pointer.To<array<byte>>(Δp);
     if (goarch.BigEndian) {
         return byteorder.BEUint64(q.slice());
     }

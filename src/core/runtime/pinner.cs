@@ -236,7 +236,7 @@ internal static ж<pinnerBits> newPinnerBits(this ref mspan s) {
 //
 //go:nosplit
 internal static ж<pinnerBits> getPinnerBits(this ж<mspan> Ꮡs) {
-    return (ж<pinnerBits>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑpinnerBits)));
+    return @unsafe.Pointer.To<pinnerBits>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑpinnerBits)));
 }
 
 internal static void setPinnerBits(this ж<mspan> Ꮡs, ж<pinnerBits> Δp) {
@@ -284,7 +284,7 @@ internal static void incPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
     var (@ref, exists) = Ꮡspan.specialFindSplicePoint(offset, _KindSpecialPinCounter);
     if (!exists) {
         @lock(Ꮡmheap_.Ꮡspeciallock);
-        rec = (ж<specialPinCounter>)(uintptr)(Ꮡmheap_.ᏑspecialPinCounterAlloc.alloc());
+        rec = @unsafe.Pointer.To<specialPinCounter>(Ꮡmheap_.ᏑspecialPinCounterAlloc.alloc());
         unlock(Ꮡmheap_.Ꮡspeciallock);
         // splice in record, fill in offset.
         rec.special.offset = offset;

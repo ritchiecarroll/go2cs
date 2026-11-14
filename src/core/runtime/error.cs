@@ -309,72 +309,72 @@ internal static void printanycustomtype(any iʗp) {
     switch ((~eface)._type.Kind()) {
     case var ᴛ when ᴛ == abi.ΔString: {
         print(typestring, (@string)@"(""");
-        printindented(~(ж<@string>)(uintptr)((~eface).data));
+        printindented(~@unsafe.Pointer.To<@string>((~eface).data));
         print((@string)@""")");
         break;
     }
     case var ᴛ when ᴛ == abi.Bool: {
-        print(typestring, (@string)"(", ~(ж<bool>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<bool>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Int: {
-        print(typestring, (@string)"(", ~(ж<nint>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<nint>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Int8: {
-        print(typestring, (@string)"(", ~(ж<int8>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<int8>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Int16: {
-        print(typestring, (@string)"(", ~(ж<int16>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<int16>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Int32: {
-        print(typestring, (@string)"(", ~(ж<int32>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<int32>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Int64: {
-        print(typestring, (@string)"(", ~(ж<int64>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<int64>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Uint: {
-        print(typestring, (@string)"(", ~(ж<nuint>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<nuint>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Uint8: {
-        print(typestring, (@string)"(", ~(ж<uint8>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<uint8>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Uint16: {
-        print(typestring, (@string)"(", ~(ж<uint16>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<uint16>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Uint32: {
-        print(typestring, (@string)"(", ~(ж<uint32>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<uint32>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Uint64: {
-        print(typestring, (@string)"(", ~(ж<uint64>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<uint64>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Uintptr: {
-        print(typestring, (@string)"(", ~(ж<uintptr>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<uintptr>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Float32: {
-        print(typestring, (@string)"(", ~(ж<float32>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<float32>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Float64: {
-        print(typestring, (@string)"(", ~(ж<float64>)(uintptr)((~eface).data), (@string)")");
+        print(typestring, (@string)"(", ~@unsafe.Pointer.To<float64>((~eface).data), (@string)")");
         break;
     }
     case var ᴛ when ᴛ == abi.Complex64: {
-        print(typestring, ~(ж<complex64>)(uintptr)((~eface).data));
+        print(typestring, ~@unsafe.Pointer.To<complex64>((~eface).data));
         break;
     }
     case var ᴛ when ᴛ == abi.Complex128: {
-        print(typestring, ~(ж<complex128>)(uintptr)((~eface).data));
+        print(typestring, ~@unsafe.Pointer.To<complex128>((~eface).data));
         break;
     }
     default: {

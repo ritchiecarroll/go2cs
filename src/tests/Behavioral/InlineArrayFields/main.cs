@@ -35,13 +35,13 @@ partial class main_package {
     [FieldOffset(12)] public array4<uint8> Off;
 }
 
-internal static ж<Holder> view(@unsafe.Pointer p) { return (ж<Holder>)(uintptr)(p); }
+internal static ж<Holder> view(@unsafe.Pointer p) { return @unsafe.Pointer.To<Holder>(p); }
 
-internal static ж<S22> s22(@unsafe.Pointer p) { return (ж<S22>)(uintptr)(p); }
+internal static ж<S22> s22(@unsafe.Pointer p) { return @unsafe.Pointer.To<S22>(p); }
 
-internal static ж<Named> named(@unsafe.Pointer p) { return (ж<Named>)(uintptr)(p); }
+internal static ж<Named> named(@unsafe.Pointer p) { return @unsafe.Pointer.To<Named>(p); }
 
-internal static ж<Grid> grid(@unsafe.Pointer p) { return (ж<Grid>)(uintptr)(p); }
+internal static ж<Grid> grid(@unsafe.Pointer p) { return @unsafe.Pointer.To<Grid>(p); }
 
 internal static any box(any v) { return v; }
 

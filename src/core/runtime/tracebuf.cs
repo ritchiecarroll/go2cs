@@ -174,7 +174,7 @@ internal static traceWriter refill(this traceWriter w) {
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
         } else {
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-            w.traceBuf = (ж<traceBuf>)(uintptr)(sysAlloc(/* unsafe.Sizeof(traceBuf{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceBufferˢ));
+            w.traceBuf = @unsafe.Pointer.To<traceBuf>(sysAlloc(/* unsafe.Sizeof(traceBuf{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceBufferˢ));
             if (w.traceBuf == nil) {
                 @throw(traceOutOfMemoryˢ);
             }

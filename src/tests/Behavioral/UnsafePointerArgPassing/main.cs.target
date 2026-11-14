@@ -12,7 +12,7 @@ partial struct counter {
 internal static void add(this ref counter c, uintptr d) { c.n += (nint)d; }
 
 internal static partial @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
-    return (@unsafe.Pointer)((uintptr)p + x);
+    return @unsafe.Add(p, x);
 }
 
 internal static void main() {
