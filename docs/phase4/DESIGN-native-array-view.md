@@ -407,6 +407,74 @@ arm 4, the classification already in hand — and never by LOCATION, which is un
      the one path that resolves nowhere, and is corrected here rather than by rewriting the block
      above, which is append-only. Ruled additive by COORD at 791bd267d. -->
 
+#### Amendment 2026-11-14 (P5) — the same floor for a NAMED array type, in two layers, and the nil pointer
+
+**The floor above is keyed on `array<E>`. A named array type is a different C# type and was not covered.**
+Go `type smallMem [64]byte` is emitted as a struct that go2cs-gen completes: one field, a managed reference
+to a holder of the `array<byte>`, filled on first use. It is an `IArray`, it is not `array<>`, and it holds
+a reference. A native box of that struct reads the struct at the address, so the bytes at the address are
+taken for the reference.
+
+Measured at master `c2919b8b16` (linux/amd64, Go 1.26.11, Release), before this amendment's code:
+
+| Arrival | Go | Converted at master |
+|:--|:--|:--|
+| `(*smallMem)(p)`, `p` zeroed C memory, then an index store | stores the byte | no error; the first eight bytes of the C memory become the address of a managed array |
+| `(*RawMem)(p)` over zeroed C memory, `RawMem` longer than a .NET array can be | a pointer | `OverflowException` in the lazy fill |
+| the same over C memory holding data | a pointer | `NullReferenceException`: the data is read as a reference |
+| `(*smallMem)(unsafe.Pointer(&x))`, `x` a Go array of another type, a slice element or a struct field | a view of `x` | no error in 5 shapes of 7; the program's write is lost and a managed address is stored into `x` |
+| `(*[N]T)(unsafe.Pointer(nil))` | a nil pointer | refused by this floor |
+
+The first row is the one that matters: a managed reference stored where the collector cannot see it, with
+no error. The fourth is the same store into Go storage, through two routes the number conversion does not
+decide: an address WITH a provenance record (pinned Go storage of another type, which the cross-type arm
+admits), and the `Reinterpret` conversion, which makes its native box without passing the number conversion.
+
+**What landed (branch `claude/p5-named-array-floor`, three cuts, each red first).**
+
+1. **At the number conversion, beside arm 5** (`ж<T>.FromNumber`): a second per-instantiation flag,
+   `s_isNamedArrayShaped` (a value type that is an `IArray`, not an `ISlice`, not `array<>`, holding a
+   reference), refused under arm 5's own test, `resolved is null`, with arm 5's panic. Never for the number 0.
+2. **In the `NativeBox<T>` constructor**: when `T` is that struct and the address is a real one (not 0, not a
+   tagged order token), the same panic. This is the layer that covers the fourth row.
+3. **The nil pointer**: arm 5 gains `value.Value != 0`. The number 0 at an `array<E>` pointee is a nil
+   pointer again, through both doors.
+
+**Why layer 2 does not contradict the 2026-09-20 amendment.** That amendment is a measurement about
+`array<E>`: its cross-type boxes are made at startup (`initAlgAES`) and never read as arrays, so a refusal at
+the place they are made panics every program. Layer 2 fires for the named-array struct only. For that struct
+no value can exist at a real address at all (storage holding a reference is never pinned, and C memory never
+held one), so there is no arrival for which the box is right. And nothing makes one on a path a banked row
+runs: std has 8 conversions to a named array per target, 3 in `mprof.go` inside the hand-owned `stkbucket`,
+4 in `mgcmark_greenteagc.go` in the collector's own scan, 1 in `internal/runtime/maps` `TestMapIndirect`,
+which is disclosed and refuses earlier. The falsifier is stated with the cut: any hosted behavioral project
+or sweep row failing with this floor's text is a live arrival and is read before anything else.
+
+**What it does not change.** A pointer to a named array in Go memory, converted to a number and back at its
+own type, is the same box (arm 1). An order token at a named-array pointee keeps arm 2a's refusal at the
+dereference. A slice header is outside the floor. An unnamed array viewed over Go memory of another array
+type (length 0) is not touched; it is a BOARD row.
+
+**It is a floor and cures nothing.** The Go-memory shapes that stored an address now panic by name where Go
+answers. The conversion that answers them, a box of the named array sharing the Go array it views, is the
+array-pointer doors design (`DESIGN-array-pointer-doors.md`, in review on `claude/p5-native-view-design`).
+
+Guards: `NamedArrayViewFloorTests` (12 arms) and `NativeArrayViewFloorTests.ANilPointerAtAnArrayPointeeIsANilPointer`
+in GolibTests. Programs, Go's answers, the converted answers before and after, and the predictions with their
+scoring: [`data/named-array-floor/`](data/named-array-floor/README.md).
+
+<!-- P5, 2026-11-14. Rulings: COORD 19:35Z (the floor is its own seat, .4, red first, refuse by name keyed on
+     the wrapper as arm 5 is keyed on array<>) and 19:58Z (A then B in one seat, B is what lands; the nil
+     refusal fixed in the seat as its own red-first commit; made-to-fail for each). Readings, GolibTests,
+     whole suite: red commit 61511a266d 2783 total / 2729 passed / 49 skipped / 5 failed (the five arms);
+     cut A 9ec25dc665 2783 / 2734 / 49 / 0; red for the Go-memory arrivals 9f96ea25a3, 3 arms red at A; cut B
+     6019d6275d 2786 / 2737 / 49 / 0, verdict lists differing from A's by the new file's arms only; red for
+     nil d222504127, 1 arm. Made to fail, A: with `resolved is null` dropped from layer 1 exactly one arm goes
+     red (the pinned-bound arm then in the file), not two as the plan predicted: arm 1 returns the round
+     trip before the line. Design section 4.5 of the doors draft said a named array over Go memory "answers
+     what To answers today"; the fourth row above is what To answered, so that sentence is wrong and the
+     draft is corrected on its own branch. -->
+
 ---
 
 ## 5. Rejected alternatives, on the record

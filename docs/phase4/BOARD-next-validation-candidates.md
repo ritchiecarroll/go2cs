@@ -38267,4 +38267,45 @@ where `Pointer` is the package's own type.
 
 — P5 (2026-11-14)
 
+## 2026-11-14 — P5 (the named-array floor seat; COORD rulings D4 at 19:35Z and item 3 at 19:58Z): three rows the seat leaves open: an array viewed over another array type answers length 0; a plain pointer conversion to a named array does not compile; a named array over Go memory of another type is refused where Go answers — OPEN, all three, owner P5
+
+Read at master `c2919b8b16` on linux/amd64, Go 1.26.11, Release. Programs, Go's answers and the converted answers:
+`docs/phase4/data/named-array-floor/` and, for Q, `docs/phase4/data/array-pointer-doors/` (design branch
+`claude/p5-native-view-design`). The floor seat (`claude/p5-named-array-floor`) refuses the named-array half of this
+class by name; these three are what it does not change.
+
+**1. A whole view of an array over Go memory of another array type answers length 0 (wrong answer or a panic, owner
+P5, deferred by ruling D4).** Two shapes, one emission (`Reinterpret` over the pinned box, then the array read
+through a box whose pointee is the destination array):
+
+- **Q, unnamed over unnamed.** `w := (*[16]byte)(unsafe.Pointer(&arr))[:]` over `var arr [4]uint32`, then
+  `w[4] = 1`. Go prints `[0 1 0 0]`. Converted: `index out of range [4] with length 0`.
+- **ge, a named array viewed as the unnamed one.** `e := (*[64]byte)(unsafe.Pointer(&sm))` over `var sm smallMem`
+  (`type smallMem [64]byte`), then `e[5] = 7`. Go prints `7 7 [0 0 0 0 0 7 0 0]`. Converted:
+  `index out of range [5] with length 0`.
+
+Neither stores anything it should not: the view is empty, so the store panics. The floor seat leaves both as they
+are (its refusal is keyed on the generated wrapper as the POINTEE, and here the pointee is `array<E>`). The cure is
+door C of the array-pointer design, ruled to .5.
+
+**2. A plain conversion between a pointer to an unnamed array and a pointer to a named array of the same
+underlying type does not compile (CS0030, owner P5, not in the floor seat by COORD's 19:58Z ruling).** Go:
+`g := (*smallMem)(&h.buf)` with `buf [64]byte` and no `unsafe`. Emitted: `(ж<smallMem>)(h.Ꮡbuf)`, and C# has no
+conversion from the box of `array<byte>` to the box of `smallMem`. Go allows it because the two pointer types have
+identical underlying base types. Found while writing the Go-memory probe; the arm was taken out of the probe and
+its source and emission are kept beside it (`gomem/plain-conversion.go.txt`, `.cs.txt`). No std or behavioral site
+is known: none was looked for, so this is a shape, not a census.
+
+**3. A named array viewed over Go memory of ANOTHER type is refused by name from this seat on, where Go answers
+(owner P5, cure in doors B and C).** Five shapes of seven in the probe: over a `[64]byte` field (`ga`), over a
+`[64]byte` variable (`gb`), over a `[8]uint64` (`gd`), over a slice's first element (`gg`), over a struct's first
+field (`gh`). At master each stored a managed address into the Go storage and lost the program's write (Go prints
+3, 4, 6, 9, 1; converted, in the committed run, 162, 207, 161, 0, 139934896735784: the values are addresses and
+differ per run), which is why the seat refuses them. The same-type
+round trip (`gf`) is right before and after. std has 8 conversions to a named array per target and none of them
+runs on a banked row (3 in `mprof.go` inside the hand-owned `stkbucket`, 4 in `mgcmark_greenteagc.go` in the
+collector's own scan, 1 in `internal/runtime/maps` `TestMapIndirect`, which is disclosed and refuses earlier).
+
+— P5 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

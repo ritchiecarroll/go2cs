@@ -1,0 +1,106 @@
+Named-array floor: predictions as posted, and each scoring, in order. Lane P5, 2026-11-14.
+Times are UTC. "Posted" means on the fleet mailbox before the thing it predicts was built or run.
+linux/amd64, Go 1.26.11, Release, GolibTests unless a line says otherwise.
+
+Commits on claude/p5-named-array-floor, off master c2919b8b16:
+  61511a266d  tests, red: a named array over C memory
+  9ec25dc665  cut A: refused at the number conversion when the address has no provenance record
+  9f96ea25a3  tests, red: a named array over Go memory of another type
+  6019d6275d  cut B: refused in the native box constructor over any real address
+  d222504127  tests, red: a nil pointer at an array pointee
+  9d45cce0c3  the nil fix: arm 5 gains `value.Value != 0`
+
+------------------------------------------------------------------------------------------------------------
+1. RED AT MASTER (61511a266d, tests only). 9 arms, 5 red.
+   - 64-byte named array over zeroed C memory, conversion and index store: no exception.
+   - the same, the memory read back: its first eight bytes are the address of a managed object.
+   - a named array longer than a .NET array can be, over zeroed C memory: OverflowException.
+   - the same over C memory holding data: NullReferenceException.
+   - the number conversion (uintptr to pointer): no exception.
+   Whole suite, the baseline: 2783 total, 2729 passed, 49 skipped, 5 failed (those five).
+
+------------------------------------------------------------------------------------------------------------
+2. PREDICTIONS FOR CUT A (posted 19:58Z, before the cut existed).
+
+P1 corpus: 0 lines. The cut touches no file under src/go2cs or src/gen, so -stdlib on any target emits what
+   master emits. Proof offered: the path list of the diff, not four emissions. (Accepted as proof by COORD.)
+P2 banked rows' emission: none moves.
+P3 GolibTests: the 5 red arms go green, the 4 green stay green, every other test keeps its verdict:
+   2783 total, 2734 passed, 49 skipped, 0 failed.
+P4 the 24-arm program at master's emission: C D F M C0 D0 F0 M0 each end in the named refusal, exit 2, M0
+   prints nothing; the other 16 arms are byte-identical; the 11 prototype arms are byte-identical.
+P5 banked rows' verdicts: none moves. Hosted golib-tests on four flavours, behavioral-full, and sweep-shard
+   for unique, reflect, internal/runtime/maps, hash/maphash, weak, sync/atomic, internal/abi after the push.
+P6 public surface: no new member; one private static field.
+
+Stop lines: (1) any GolibTests verdict outside the new file that differs from the baseline; (2) any hosted
+row or behavioral project failing with this refusal's text; (3) nil not admitted; (4) made to fail: with the
+new condition removed the 5 arms are red (the red commit), and with `resolved is null` dropped "the two
+admitted arms must go red"; (5) no converter, generator or corpus file changes.
+
+SCORING.
+P1 MET. `git diff --stat c2919b8b16` names src/core/golib (2 files), src/tests/GolibTests (2 files) and
+   docs/phase4. Nothing under src/go2cs, src/gen, or a converted package.
+P2 MET, same path list.
+P3 MET at cut A: 2783 total, 2734 passed, 49 skipped, 0 failed. The verdict lists of the baseline run and
+   the cut A run differ by the five arms and nothing else.
+P4 MET, read at the tip 9d45cce0c3 (A, B and the nil fix together; it was not read at A alone).
+   shapes/converted-master.out against shapes/converted-floor.out: the 8 arms end in
+   `cannot view native memory as RawMem` (C D F C0 D0 F0) or `as smallMem` (M M0), exit 2; M0 prints nothing;
+   the other 16 arms identical. shapes/prototype-master.out and prototype-floor.out are identical (11 arms).
+P5 OPEN until the hosted runs report. They are dispatched after the push and their result is appended below.
+P6 MET on the surface, MISSED on one word: after cut B the field is `private protected`, not private, so the
+   derived native box can read it. It is not visible outside the assembly. The binary-compat check was not
+   run on this box (it needs PowerShell).
+Stop line 4, second half: MISSED as worded. With `resolved is null` dropped from cut A's line exactly ONE
+   arm went red (the pinned-bound arm then in the file: a named array over a pinned array of another type),
+   not two. The other admitted arm, the round trip at the pointer's own type, is answered by arm 1 before the
+   line is reached, so the line cannot see it. File restored, `git status` clean.
+
+------------------------------------------------------------------------------------------------------------
+3. THE FINDING (posted 19:58Z on its own): the same store happens over GO memory, through routes cut A does
+   not decide. gomem/converted-master.out against gomem/go.out: five shapes of seven lose the write and store
+   a managed address into the Go storage (ga gb gd gg gh); ge panics with length 0; gf is right.
+
+PREDICTIONS FOR CUT B (posted with the finding, before any run).
+- the 7-arm program: ga gb gd gg gh end in the named refusal; ge and gf unchanged.
+- GolibTests: the arm "an address resolving to a live box of another type is admitted" flips by construction
+  and is rewritten as a refusal. Every other test of the 2783 keeps its verdict.
+- P1, P2, P4, P5 and P6 hold unchanged under B.
+- Falsifier (COORD, 19:58Z): any behavioral-full project or shard row failing with the floor's text is a live
+  arrival, read and named before anything else. B is believed only on hosted behavioral-full and the shards
+  at 0.
+
+RED AT A (9f96ea25a3): 3 arms red, each showing an address stored in the Go storage: over a [8]uint64, over
+a slice's first element, through Reinterpret over the unnamed array. A fourth new arm, an order token at a
+named-array pointee keeping its own refusal, was green at A and stays green.
+
+SCORING.
+- 7-arm program MET: gomem/converted-floor.out. ga gb gd gg gh end in `cannot view native memory as
+  smallMem`, exit 2. ge and gf are the same lines as at master.
+- GolibTests MET: 2786 total, 2737 passed, 49 skipped, 0 failed. Against cut A's run the verdict lists differ
+  by the new file's arms only: 4 added, 1 removed (the admitted arm, replaced in the red commit).
+- Not predicted, read: typed/converted-floor.out. The arm `byte` (a typed *byte over C memory, then the
+  named array) printed `7 8` at master and stored a reference into the C memory; it is refused at the floor.
+  The arm `go` (the same two functions over a Go struct) printed two wrong numbers at master and is refused
+  at the floor, where Go prints `3 4` and `7 8`. The arm `struct` was already refused by the struct-layout
+  floor and is unchanged.
+
+MADE TO FAIL, cut B's admit conditions (prediction written here before the run): with both `nativeAddress
+!= 0` and the order-token test dropped from the constructor's line, the order-token arm goes red, and the
+named-array nil arm goes red if a nil conversion makes a box at all; the other arms of the two floor files
+stay green.
+   READ: MET. 17 arms, 15 passed, 2 failed: the order-token arm and the named-array nil arm, both with the
+   floor's own text. File restored (sha256 equal, `git status` clean of it), rebuilt, 17 of 17 green.
+
+------------------------------------------------------------------------------------------------------------
+4. THE NIL POINTER (found with the finding; COORD, 19:58Z: fixed in this seat, red first).
+   Arm 5 refused the number 0 at an array<E> pointee through both doors. Go answers a nil pointer.
+
+RED (d222504127): 1 arm, NativeArrayViewFloorTests.ANilPointerAtAnArrayPointeeIsANilPointer, `cannot view
+native memory as array<Byte>` at the number conversion. The other 16 arms of the two floor files green.
+FIX (9d45cce0c3): 17 of 17. Whole suite 2787 total, 2738 passed, 49 skipped, 0 failed; against cut B's run the
+verdict lists differ by that one arm, added and passing.
+
+------------------------------------------------------------------------------------------------------------
+5. HOSTED RUNS (P5 and cut B's falsifier). Appended when they report.
