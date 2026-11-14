@@ -579,6 +579,20 @@ Assert-Equal 'host-conditional-disclosure: the named entry firing in any other s
         csharp = New-VerdictMap @{ TestOther = 'pass'; TestExtraFiles = 'fail' }
         disclosed = @('TestCredentialNoSetGroups (host-limit): the seam names the field', 'TestExtraFiles (platform-skip): source-defined platform skip')
     })).Accepted
+# The mirror shape (2026-11-14, internal/trace on darwin): Go=skip / C#=pass, one verdict changing
+# column, is absorbed like Go=pass / C#=skip; a Go failure beside a converted pass, or a converted
+# failure beside a Go skip, is not.
+$hcdMirror = { param($go, $cs) [PSCustomObject]@{
+        go = New-VerdictMap @{ TestOther = 'pass'; 'TestTraceCPUProfile/Default' = $go }
+        csharp = New-VerdictMap @{ TestOther = 'pass'; 'TestTraceCPUProfile/Default' = $cs }
+        disclosed = @('TestTraceCPUProfile/Default (host-identity): both sides run one native Go program')
+    } }
+Assert-Equal 'host-conditional-disclosure: the mirror shape (Go=skip / C#=pass) is accepted' $true `
+    (Test-HostConditionalDisclosureDelta -Expected 187 -Disclosed 0 -Names @('TestTraceCPUProfile/Default') -Got 186 -GotDisclosed 1 -Comparison (& $hcdMirror 'skip' 'pass')).Accepted
+Assert-Equal 'host-conditional-disclosure: Go=fail / C#=pass is refused' $false `
+    (Test-HostConditionalDisclosureDelta -Expected 187 -Disclosed 0 -Names @('TestTraceCPUProfile/Default') -Got 186 -GotDisclosed 1 -Comparison (& $hcdMirror 'fail' 'pass')).Accepted
+Assert-Equal 'host-conditional-disclosure: Go=skip / C#=fail is refused' $false `
+    (Test-HostConditionalDisclosureDelta -Expected 187 -Disclosed 0 -Names @('TestTraceCPUProfile/Default') -Got 186 -GotDisclosed 1 -Comparison (& $hcdMirror 'skip' 'fail')).Accepted
 Assert-Equal 'host-conditional-disclosure: a row naming nothing absorbs nothing' $false `
     (Test-HostConditionalDisclosureDelta -Expected 87 -Disclosed 1 -Names @() -Got 86 -GotDisclosed 2 -Comparison $hcdFired).Accepted
 Assert-Equal 'host-conditional-disclosure: a record without verdict maps is refused' $false `
