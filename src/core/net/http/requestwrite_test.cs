@@ -505,7 +505,7 @@ public static void TestRequestWrite(ж<testing.T> t) {
                 ttʗ1.Req.Body = io.NopCloser(new http_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
                 break;
             }
-            case Func<io.ReadCloser> b: {
+            case {} Δb when Δb._<Func<io.ReadCloser>>(out var b): {
                 ttʗ1.Req.Body = b();
                 break;
             }}

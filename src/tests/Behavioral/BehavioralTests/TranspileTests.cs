@@ -418,6 +418,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
 
     [TestMethod]
+    public void CheckDeadlockGoroutineBlocks() => CheckTarget("DeadlockGoroutineBlocks");
+
+    [TestMethod]
     public void CheckDeclaredTypeNamedFloat() => CheckTarget("DeclaredTypeNamedFloat");
 
     [TestMethod]
@@ -805,6 +808,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFuncVsMethodOverload() => CheckTarget("FuncVsMethodOverload");
 
     [TestMethod]
+    public void CheckFuncWordShapes() => CheckTarget("FuncWordShapes");
+
+    [TestMethod]
     public void CheckGenericArrayConstraint() => CheckTarget("GenericArrayConstraint");
 
     [TestMethod]
@@ -1051,6 +1057,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckImportSegmentTypeShadow() => CheckTarget("ImportSegmentTypeShadow");
 
     [TestMethod]
+    public void CheckImportedAnonStructLiftReuse() => CheckTarget("ImportedAnonStructLiftReuse");
+
+    [TestMethod]
     public void CheckIncDecPointerField() => CheckTarget("IncDecPointerField");
 
     [TestMethod]
@@ -1078,6 +1087,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckInitStatementScope() => CheckTarget("InitStatementScope");
 
     [TestMethod]
+    public void CheckInlineArrayFields() => CheckTarget("InlineArrayFields");
+
+    [TestMethod]
     public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
 
     [TestMethod]
@@ -1085,6 +1097,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
+
+    [TestMethod]
+    public void CheckIntegerToNamedString() => CheckTarget("IntegerToNamedString");
 
     [TestMethod]
     public void CheckInterfaceAssertionMapKey() => CheckTarget("InterfaceAssertionMapKey");
@@ -1714,6 +1729,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNilFuncNamedDelegateArg() => CheckTarget("NilFuncNamedDelegateArg");
 
     [TestMethod]
+    public void CheckNilFuncTypeSwitch() => CheckTarget("NilFuncTypeSwitch");
+
+    [TestMethod]
     public void CheckNilMapKey() => CheckTarget("NilMapKey");
 
     [TestMethod]
@@ -1832,6 +1850,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckParallelAssignmentHazard() => CheckTarget("ParallelAssignmentHazard");
+
+    [TestMethod]
+    public void CheckParallelDerefCastAssign() => CheckTarget("ParallelDerefCastAssign");
 
     [TestMethod]
     public void CheckParenFuncLitGoDefer() => CheckTarget("ParenFuncLitGoDefer");
@@ -2576,6 +2597,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTcpLoopbackRoundTrip() => CheckTarget("TcpLoopbackRoundTrip");
+
+    [TestMethod]
+    public void CheckTerminatingSwitchDefaultFallthrough() => CheckTarget("TerminatingSwitchDefaultFallthrough");
 
     [TestMethod]
     public void CheckTestingStructZeroLiteral() => CheckTarget("TestingStructZeroLiteral");

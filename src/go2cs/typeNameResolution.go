@@ -747,6 +747,12 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 	}
 
 	if name, ok := v.liftedNameFor(t); ok {
+		if v.inUsingAliasTarget {
+			if target, imported := importedStructLiftTarget(name); imported {
+				return target
+			}
+		}
+
 		return v.usingAliasTypeQualifier(t) + name
 	}
 

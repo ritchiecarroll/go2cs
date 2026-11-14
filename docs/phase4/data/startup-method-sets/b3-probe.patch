@@ -1,0 +1,224 @@
+diff --git a/src/core/golib/AdapterBinder.cs b/src/core/golib/AdapterBinder.cs
+index 69ff3f82bb..567068a758 100644
+--- a/src/core/golib/AdapterBinder.cs
++++ b/src/core/golib/AdapterBinder.cs
+@@ -131,7 +131,9 @@ namespace go;
+ 
+         if (!AdapterRegistry.TryGetShellFactory(valueType, interfaceType, out Func<object, object>? factory))
+         {
++            long b3 = go.golib.B3Probe.Enter();
+             factory = BuildFactory(valueType, interfaceType);
++            go.golib.B3Probe.Leave("AdapterBinder.BuildFactory", b3, factory is null ? 0 : 1, $"{valueType} -> {interfaceType}");
+ 
+             // Memoized unconditionally, including the negative. Go fixes a type's method set at
+             // COMPILE time, so a pair that cannot bind now can never bind later; and the extension
+diff --git a/src/core/golib/B3Probe.cs b/src/core/golib/B3Probe.cs
+new file mode 100644
+index 0000000000..38d17b56c8
+--- /dev/null
++++ b/src/core/golib/B3Probe.cs
+@@ -0,0 +1,75 @@
++// MEASUREMENT ONLY (B3 design, never committed): counters and inclusive times of the start-up reflection path,
++// printed to stderr at process exit when GO2CS_B3_PROBE is set.
++using System;
++using System.Collections.Concurrent;
++using System.Diagnostics;
++using System.Linq;
++using System.Threading;
++
++namespace go.golib;
++
++public static class B3Probe
++{
++    public static readonly bool On = Environment.GetEnvironmentVariable("GO2CS_B3_PROBE") is { Length: > 0 };
++    public static readonly bool Detail = Environment.GetEnvironmentVariable("GO2CS_B3_PROBE") == "2";
++    private static readonly ConcurrentDictionary<string, (long count, long ticks, long items)> s_sites = new();
++    private static readonly ConcurrentDictionary<string, int> s_keys = new();
++    private static readonly ConcurrentQueue<string> s_marks = new();
++    private static int s_hooked;
++
++    public static long Enter() => On ? Stopwatch.GetTimestamp() : 0;
++
++    public static void Leave(string site, long t0, long items = 0, string? key = null)
++    {
++        if (!On)
++            return;
++
++        long ticks = Stopwatch.GetTimestamp() - t0;
++        s_sites.AddOrUpdate(site, (1, ticks, items), (_, old) => (old.count + 1, old.ticks + ticks, old.items + items));
++
++        if (key is not null)
++            s_keys.AddOrUpdate(site + "\t" + key, 1, static (_, n) => n + 1);
++
++        Hook();
++    }
++
++    public static void Mark(string name)
++    {
++        if (!On)
++            return;
++
++        s_marks.Enqueue($"{name} at {(DateTime.Now - Process.GetCurrentProcess().StartTime).TotalMilliseconds:F0} ms after process start; assemblies loaded {AppDomain.CurrentDomain.GetAssemblies().Length}; methods jitted {System.Runtime.JitInfo.GetCompiledMethodCount()}; jit time {System.Runtime.JitInfo.GetCompilationTime().TotalMilliseconds:F0} ms");
++        Hook();
++    }
++
++    private static void Hook()
++    {
++        if (Interlocked.CompareExchange(ref s_hooked, 1, 0) == 0)
++            AppDomain.CurrentDomain.ProcessExit += static (_, _) => Dump();
++    }
++
++    public static void Dump()
++    {
++        Mark("exit");
++        Console.Error.WriteLine("B3PROBE marks:");
++
++        foreach (string mark in s_marks)
++            Console.Error.WriteLine("B3PROBE   " + mark);
++
++        Console.Error.WriteLine("B3PROBE site\tcalls\tinclusive ms\titems");
++
++        foreach (var pair in s_sites.OrderByDescending(static p => p.Value.ticks))
++            Console.Error.WriteLine($"B3PROBE {pair.Key}\t{pair.Value.count}\t{pair.Value.ticks * 1000.0 / Stopwatch.Frequency:F1}\t{pair.Value.items}");
++
++        foreach (IGrouping<string, System.Collections.Generic.KeyValuePair<string, int>> site in s_keys.GroupBy(static p => p.Key.Split('\t')[0]))
++        {
++            Console.Error.WriteLine($"B3PROBE keys {site.Key}: {site.Count()} distinct");
++
++            if (Detail)
++            {
++                foreach (var key in site.OrderBy(static p => p.Key))
++                    Console.Error.WriteLine($"B3PROBE   {key.Key.Split('\t')[1]} x{key.Value}");
++            }
++        }
++    }
++}
+diff --git a/src/core/golib/GoDeferredRegistrations.cs b/src/core/golib/GoDeferredRegistrations.cs
+index f891c40e61..ce02ae6cc6 100644
+--- a/src/core/golib/GoDeferredRegistrations.cs
++++ b/src/core/golib/GoDeferredRegistrations.cs
+@@ -87,9 +87,15 @@ public sealed class GoDeferredRegistrations
+ 
+         lock (m_lock)
+         {
++            long b3 = go.golib.B3Probe.Enter();
++            int b3n = m_pending.Count - m_next;
++            string b3name = ReferenceEquals(this, Adapters) ? "Adapters" : ReferenceEquals(this, ZeroFactories) ? "ZeroFactories" : ReferenceEquals(this, EscapeRegistry) ? "EscapeRegistry" : "NativeArrayOpeners";
++
+             while (m_next < m_pending.Count)
+                 m_pending[m_next++]();
+ 
++            go.golib.B3Probe.Leave("GoDeferredRegistrations.Run(" + b3name + ")", b3, b3n);
++
+             m_pending.Clear();
+             m_next = 0;
+             m_hasPending = false;
+diff --git a/src/core/golib/runtime/MainThread.cs b/src/core/golib/runtime/MainThread.cs
+index 4c250e73df..b50b11c30a 100644
+--- a/src/core/golib/runtime/MainThread.cs
++++ b/src/core/golib/runtime/MainThread.cs
+@@ -53,6 +53,7 @@ namespace go.golib;
+     public static void Run(Action main)
+     {
+         ArgumentNullException.ThrowIfNull(main);
++        B3Probe.Mark("main-enter");
+ 
+         // An init function locked the main goroutine to this, the startup thread: Go invokes main here.
+         if (Goroutine.Current is { IsMain: true, LockedToThread: true })
+diff --git a/src/core/golib/runtime/TypeExtensions.ExtensionMethodRegistry.cs b/src/core/golib/runtime/TypeExtensions.ExtensionMethodRegistry.cs
+index d15efd318d..97469eeecf 100644
+--- a/src/core/golib/runtime/TypeExtensions.ExtensionMethodRegistry.cs
++++ b/src/core/golib/runtime/TypeExtensions.ExtensionMethodRegistry.cs
+@@ -190,7 +190,9 @@ public static partial class TypeExtensions
+ 
+                 Type type = Type;
+                 HostReadProbeForTest?.Invoke(type);
++                long b3 = B3Probe.Enter();
+                 methods = ReadExtensionMethods(type);
++                B3Probe.Leave("ExtensionHost.Methods(read)", b3, methods.Length, type.FullName);
+ 
+                 // Two threads may read one class; both read the same methods, and the first published is kept.
+                 return Interlocked.CompareExchange(ref m_methods, methods, null) ?? methods;
+@@ -312,6 +314,14 @@ public static partial class TypeExtensions
+     /// read without reading any other host class.
+     /// </summary>
+     internal static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsHomedIn(IReadOnlySet<Assembly> homes)
++    {
++        long b3 = B3Probe.Enter();
++        IReadOnlyList<(MethodInfo method, Type receiver)> b3r = GetExtensionMethodsHomedInB3(homes);
++        B3Probe.Leave("GetExtensionMethodsHomedIn", b3, b3r.Count);
++        return b3r;
++    }
++
++    private static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsHomedInB3(IReadOnlySet<Assembly> homes)
+     {
+         List<(MethodInfo method, Type receiver)> found = [];
+         ExtensionScan scan = WalkExtensionHosts();
+@@ -381,7 +391,10 @@ public static partial class TypeExtensions
+                     continue;
+ 
+                 ScanProbeForTest?.Invoke(assembly);
++                long b3 = B3Probe.Enter();
++                int b3n = found.Count;
+                 LoadAssemblyExtensionHosts(assembly, found);
++                B3Probe.Leave("LoadAssemblyExtensionHosts", b3, found.Count - b3n);
+                 (nowVisited ??= visited.ToBuilder()).Add(assembly);
+             }
+ 
+@@ -892,6 +905,14 @@ public static partial class TypeExtensions
+     /// </summary>
+     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReferenceTypeJustification)]
+     internal static MethodInfo[] ExtensionMethodsOf(Type targetType, IReadOnlyList<(MethodInfo, Type)>? source)
++    {
++        long b3 = B3Probe.Enter();
++        MethodInfo[] b3r = ExtensionMethodsOfB3(targetType, source);
++        B3Probe.Leave("ExtensionMethodsOf", b3, b3r.Length, targetType.ToString());
++        return b3r;
++    }
++
++    private static MethodInfo[] ExtensionMethodsOfB3(Type targetType, IReadOnlyList<(MethodInfo, Type)>? source)
+     {
+         // Fix W (B1 §3.1): normalize a ж box at any base-chain depth to its ж<X> base BEFORE
+         // the generic-match split, so a per-kind subclass instance matches the extension
+diff --git a/src/core/golib/runtime/TypeExtensions.GoMethodSets.cs b/src/core/golib/runtime/TypeExtensions.GoMethodSets.cs
+index f8294d4af3..a67cc3cfef 100644
+--- a/src/core/golib/runtime/TypeExtensions.GoMethodSets.cs
++++ b/src/core/golib/runtime/TypeExtensions.GoMethodSets.cs
+@@ -171,6 +171,14 @@ public static partial class TypeExtensions
+     /// is compared the same way, closed over the value's type arguments by the candidate source.
+     /// </remarks>
+     public static bool StructurallyImplements(this Type valueType, Type interfaceType)
++    {
++        long b3 = B3Probe.Enter();
++        bool b3r = StructurallyImplementsB3(valueType, interfaceType);
++        B3Probe.Leave("StructurallyImplements", b3, b3r ? 1 : 0, $"{valueType} -> {interfaceType} = {b3r}");
++        return b3r;
++    }
++
++    private static bool StructurallyImplementsB3(Type valueType, Type interfaceType)
+     {
+         MethodInfo[] interfaceMethods = [.. interfaceType.GetInterfaceMethods()];
+ 
+@@ -514,6 +522,14 @@ public static partial class TypeExtensions
+     /// (ReceiverElementMatches), and <see cref="ExtensionHomesOf"/> holds the home of every such receiver.
+     /// </summary>
+     internal static List<MethodInfo> CollectGoMethodSetCandidates(Type valueElement, bool valueIsPointer, IReadOnlyList<(MethodInfo, Type)>? source)
++    {
++        long b3 = B3Probe.Enter();
++        List<MethodInfo> b3r = CollectGoMethodSetCandidatesB3(valueElement, valueIsPointer, source);
++        B3Probe.Leave("CollectGoMethodSetCandidates", b3, b3r.Count, $"{(valueIsPointer ? "*" : "")}{valueElement}");
++        return b3r;
++    }
++
++    private static List<MethodInfo> CollectGoMethodSetCandidatesB3(Type valueElement, bool valueIsPointer, IReadOnlyList<(MethodInfo, Type)>? source)
+     {
+         IReadOnlyList<(MethodInfo method, Type receiver)> allExtensionMethods = source ?? GetExtensionMethodsHomedIn(ExtensionHomesOf(valueElement));
+         List<MethodInfo> candidates = [];
+@@ -635,6 +651,7 @@ public static partial class TypeExtensions
+     {
+         return s_goMethodSetEntries.GetOrAdd((valueElement, valueIsPointer), static key =>
+         {
++            B3Probe.Leave("GetGoMethodSetEntries(fill)", B3Probe.Enter(), 0, $"{(key.isPointer ? "*" : "")}{key.element}");
+             Dictionary<string, MethodInfo> byGoName = [];
+ 
+             foreach (MethodInfo candidate in GetGoMethodSetCandidates(key.element, key.isPointer))

@@ -15,6 +15,11 @@
 // colliding switch becomes: merged when the bodies are identical, both labels kept (a loud CS8120)
 // when they differ. That merge keys on the label's C# type, which it cut at the FIRST space, so a
 // generic type's own `, ` truncated `Func<nint, nint>` and `Func<nint, @string>` to one key.
+//
+// A func-type case takes the interface cases' guard form, `case {} Δf when Δf._<T>(out var f):`. A
+// typed nil func held in an interface is its func type's carrier, which no C# type pattern matches,
+// so the pattern form sent it to the default arm. The labels of a colliding pair whose bodies DIFFER
+// keep the type pattern: as guard labels both would compile and the second would never run.
 
 package main
 
@@ -26,9 +31,10 @@ import (
 	"testing"
 )
 
-// TestTypeSwitchCollapsedFuncCase pins the delegate spelling of a collapsed case (with and without
-// a binding), both labels of a colliding pair whose bodies differ, the merge of a colliding pair
-// whose bodies match, and two distinct delegates sharing a first type argument kept apart.
+// TestTypeSwitchCollapsedFuncCase pins the delegate spelling of a collapsed case in its guard form
+// (with and without a binding), both PATTERN labels of a colliding pair whose bodies differ, the
+// merge of a colliding pair whose bodies match, and two distinct delegates sharing a first type
+// argument kept apart.
 func TestTypeSwitchCollapsedFuncCase(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	if testing.Short() {
@@ -134,13 +140,20 @@ func main() {
 
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "tscf", "main.cs"))
 
+	// A func-type case is a guard label: `case {} <temp> when <temp>._<delegate>(out var <binding>):`.
+	guard := func(temp string, delegate string, binding string) string {
+		return "    case {} " + temp + " when " + temp + "._<" + delegate + ">(out var " + binding + "):"
+	}
+
+	unbound := TempVarMarker + "0"
+
 	// LIVE labels are matched with their indentation: the merge marker comment spells the same
 	// `case <type>:` text, so an unanchored match reads a merged label as present.
 	for _, want := range []string{
-		"    case Func<nint, (any, error)> f:", // a binding (mapstructure's shape)
-		"    case Func<@string, nint>:",        // no binding
-		"    case Func<nint, nint>:",           // distinct delegates sharing a first type argument
-		"    case Func<nint, @string>:",
+		guard(ShadowVarMarker+"f", "Func<nint, (any, error)>", "f"), // a binding (mapstructure's shape)
+		guard(unbound, "Func<@string, nint>", "_"),                  // no binding
+		guard(unbound, "Func<nint, nint>", "_"),                     // distinct delegates sharing a first type argument
+		guard(unbound, "Func<nint, @string>", "_"),
 		"/* case Func<bool, bool>: merged with an earlier case mapping to the same C# type (identical body) */",
 	} {
 		if !strings.Contains(mainCs, want) {
@@ -153,14 +166,18 @@ func main() {
 	}
 
 	for _, name := range []string{"Hook", "Name", "Left", "Right"} {
-		if strings.Contains(mainCs, "case "+name) {
+		if strings.Contains(mainCs, "case "+name) || strings.Contains(mainCs, "<"+name+">") {
 			t.Errorf("a collapsed func type is never declared, so no case may name %s: %s", name, mainCs)
 		}
 	}
 
-	// differ keeps BOTH labels (the loud CS8120), same merges its second: three live Func<bool, bool>
-	// labels in all.
-	if got := strings.Count(mainCs, "    case Func<bool, bool>:"); got != 3 {
-		t.Errorf("want 3 live Func<bool, bool> labels (2 in differ, 1 in same), got %d: %s", got, mainCs)
+	// differ keeps BOTH labels as type patterns (the loud CS8120); same merges its second label into one
+	// guard label. Two pattern labels and one guard label on Func<bool, bool> in all.
+	if got := strings.Count(mainCs, "    case Func<bool, bool>:"); got != 2 {
+		t.Errorf("want 2 pattern Func<bool, bool> labels (both in differ), got %d: %s", got, mainCs)
+	}
+
+	if got := strings.Count(mainCs, guard(unbound, "Func<bool, bool>", "_")); got != 1 {
+		t.Errorf("want 1 guard Func<bool, bool> label (in same), got %d: %s", got, mainCs)
 	}
 }
