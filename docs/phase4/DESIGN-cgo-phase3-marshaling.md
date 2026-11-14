@@ -1083,3 +1083,303 @@ narrow re-review of the delta, which COORD launches, on the three mechanisms by 
 box of `Add`, the registry's list); then 3.1 lands; then section 17, whose rows 1 to 4 and 6 these fixes change.
 
 — H (2026-11-13)
+
+### 16.12 Record 2026-11-14: the review fix as measured, a second review, and the windows cut
+
+This record covers six steps:
+
+- 16.11's fix as built, with the two stop lines it fired;
+- its first full reading, on a base that holds batch 301 (`f8a94fa1bc`);
+- the merge of batch 302 (`83fbf28560`);
+- a second review, which found 3.1 still UNSOUND;
+- the red arms for that review;
+- H's half of the fix ruled for it (the windows cut).
+
+**3.1 is not ready.** It lands only with the interior-pointer root closed. The owner ruled the split: P5 owns the
+design (`docs/phase4/DESIGN-interior-pointer-root.md`, on `claude/p5-interior-pointer-root`) and cuts its sections
+4.1 to 4.3 and 4.7. H cuts 4.4 and 4.5 and the red arms. The fix enters 1.26.11.1 as its own corpus seat after R's
+hop.
+
+**The trees.**
+
+| Tip | What it is |
+|---|---|
+| `d87e1dd863` | 16.11's fix |
+| `c05eea56f3` | the end-to-end arms corrected to take an element's address through a variable |
+| `aab557f747` | the allocation guard's list and the arms rebuilt from the emission |
+| `f8a94fa1bc` | the merge of master `a6cefba6ee` (batch 301) |
+| `83fbf28560` | the merge of master `314e1d8b60` (batch 302) |
+| `8a8a52ff1e`, `b642ac3682`, `f7973c969d`, `48796dfdde` | the second review's red arms, on `claude/h-cgo-31-review2-red` |
+| `86247389c0`, `7014c1b2bd` | the windows cut and its provenance re-cite, on `claude/h-cgo-31-windows` |
+
+This record and the merge of `48796dfdde` sit on top of `7014c1b2bd`.
+
+#### 16.12.1 The fix as built, and the two stop lines it fired
+
+**SF-8 FIRED: a fifth source.** The first end-to-end leg at the fix (cgo-e2e linux, run 43377981194, on side ref
+`claude/h-cgo-31-e2e-green`) read five of seven reds green, refused by the carried box. `goadd` and `goaddlocal`
+still crossed.
+
+- **The cause.** The converter prefixed EVERY call whose result type is `unsafe.Pointer` with `(uintptr)`. A pointer
+  returned from a call therefore came back as a bare number: whatever box it carried was laundered away.
+- **The GolibTests arm missed it.** It handed `unsafe.Add`'s result to the door directly: green for a shape the
+  converter never emits.
+- **The defect is not cgo's.** On master, plain Go with no cgo, the converted program lost its writes through such a
+  pointer after a collection: 20 rounds wrong of 20, where Go reads 0. As a tracked behavioral program it corrupted
+  the managed heap ("Internal CLR error", 3 of 3).
+- **Where it went.** COORD ruled it a seat of its own, ahead of 3.1:
+  - the branch: `claude/h-unsafe-pointer-call-keeps-box`;
+  - its record: `docs/phase4/DESIGN-unsafe-pointer-call-result.md`;
+  - it landed in batch 301.
+- **Two shapes found holding at the base.** The first red leg did not convert (run 43375049312). Two arms wrote an
+  element's address inside the C call itself, and the route refuses that at conversion, by name. The arms now take
+  the address through a variable.
+
+**SF-2 FIRED.** The full GolibTests run at `d87e1dd863` read 2,585 passed, 43 skipped, 1 failed.
+
+- **The failure.** `NoUncountedBackingAllocations` named two raw arrays the fix allocates outside the allocation
+  counter: the slice anchor's zero-length array, and the registry's list of kept registrants. Neither was named in
+  the red commit.
+- **COORD's ruling.** List both BY NAME as infrastructure, each with its reason. Neither is an allocation a Go program
+  asked for.
+- **The neuter.** With one unlisted raw array added, the guard fails naming that array alone. With it removed, the
+  file is byte-identical and the guard passes (`aab557f747`).
+
+**Two shapes this record corrects.**
+
+- An element of an array field of a view (`goviewelem`, `goviewelemstring`) was ALREADY refused at the red tree. H had
+  posted it as open. The refusal comes from the element box's kind, not from any inheritance (16.12.3).
+- The blank receiver of finding 5 was already refused at the base, so its arm is a control. The receiver with no name
+  crossed, as the review said.
+
+#### 16.12.2 The first full reading of the fix, at `f8a94fa1bc`
+
+The merge of batch 301 had two conflicts:
+
+- golib's native-derivation file, add/add. 3.1's file was kept whole; every non-comment line of master's is in it.
+- The BOARD, appended on both sides; each heading appears once.
+
+Nine files changed on both sides, and each composes both ways. The base readings are master `a6cefba6ee`'s: GolibTests
+2,595 passed, 43 skipped of 2,638; behavioral 966; check-no-regression 1,057. Master's tree is `03a506bce5`'s, hash
+for hash.
+
+**The battery on H, and the hosted legs.**
+
+| Prediction | Reading | Score |
+|---|---|---|
+| R-0 repoguard | rc 0, 260 s | MET |
+| R-1 `go test ./...` | rc 0, 11 ok, 0 cached | MET |
+| R-2 GolibTests 2,612 / 43 of 2,655 | 2,612 passed, 43 skipped of 2,655. The TRX difference is exactly 17 new arms, and no existing row changed | MET |
+| R-3 check-no-regression | byte-identical across 1,057 | MET |
+| R-4 behavioral | PASS, 966 projects; Output 936 passed, 0 failed, 30 skipped; no NOT MEASURED | MET |
+| R-5 four-target footprint | A = master `a6cefba6ee`, B = the tip; 0 files on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64 | MET |
+| R-6 canaries at bank | on H: nistec 44 (228 s), os 6,826, syscall 66, internal/runtime/maps 19, go/types 597, crypto/cipher 27,289, runtime 11,083. Hosted windows (43541842369): net/http 1,526, crypto/tls 1,393 | MISSED as worded, premise COORD's |
+| R-7 hosted, 0 failed | converter-cgo: linux gcc 147/0/9 (43541766127), linux zig 147/0/9 (43541776956), windows 145/0/12 (43541787680), darwin 143/0/13 per arch (43541797945). cgo-e2e: linux 66/0/0 (43541808343), windows 64/0/0 (43541819534), darwin 66/0/0 per arch (43541830790) | MET |
+
+- **R-6.** The amendment said to score crypto/tls at its full bank of 4,920 on the hosted runner. The hosted runner
+  does not carry BoGo past the deadline either: it reads 1,393 under the same committed host-limit disclosure, and
+  the sweep scores the row PASS. R-5 reading 0 files is why no linux or darwin shard was owed.
+- **nistec's wall.** 228 s is H's first reading of that row. The recorded 354 s and 384 s are another box's, so
+  nothing is claimed from the comparison.
+- **R-7, the weakest line.** `goadd`, `goaddlocal`, `goaddvar`, `goaddfunc`, `goviewfieldfunc` and `goviewfieldvar`
+  each end refused before the call on all four e2e jobs. With batch 301 under the fix, a pointer returned from a call
+  keeps its box.
+
+**16.11's predictions, scored as worded.**
+
+| Prediction | Score |
+|---|---|
+| PF-1 | MISSED at `d87e1dd863`: SF-8, `goadd` and `goaddlocal` crossed end to end. MET at `f8a94fa1bc`: every shape of findings 1 to 6 is refused at every door it reaches, and every form over C memory still crosses (R-2, R-7) |
+| PF-2 | MET: the three lifetime arms were red at the base and are green with the fix |
+| PF-3 | MISSED at `d87e1dd863`: SF-2, a row the red commit did not name. MET at `f8a94fa1bc` after the ruling: exactly the 17 new arms, no existing row changed |
+| PF-4 | MET: R-3, R-4 and R-5. The only converter change is on the cgo route |
+| PF-5 | MET under the disclosure: R-6 |
+| PF-6 | NOT MEASURED. The registration census stopped at 22 rows of 49, all on master's registry and before either seat. It resumes from row 23 after 3.1 |
+| PF-7 | MET: R-7. Each count is the `c4b5d9613c` reading plus the new arms (converter-cgo +2, cgo-e2e +13) |
+
+**Stop lines.**
+
+- SF-2 and SF-8 FIRED and were ruled (16.12.1).
+- SF-1, SF-3, SF-4, SF-5, SF-6 and SF-7 did not fire.
+- SF-4: no gate showed a slice identity decision moving.
+
+#### 16.12.3 The merge of batch 302, at `83fbf28560`
+
+| Prediction | Reading | Score |
+|---|---|---|
+| M-1 no hand edit outside the BOARD and the allocation guard's list | two conflicts, the BOARD and `docs/Limitations.md` (adjacent inserts). No code file conflicted | MISSED as worded |
+| M-2 GolibTests = master + 17 | base `314e1d8b60` 2,616 / 43 of 2,659; merge 2,633 / 43 of 2,676. Exactly the 17 GoCgoArgsTests rows; no existing row changed | MET |
+| M-3 check-no-regression | byte-identical across 1,067. Read on the merge only: it was not run at `314e1d8b60` itself | MET |
+| M-4 repoguard | ok | MET |
+
+Six files changed on both sides, and each composes both ways. The BOARD holds 560 headings, each once.
+
+COORD ordered the cgo legs re-read on the merge, because 302 changes how a struct holding arrays is laid out. They
+read exactly as at `f8a94fa1bc`:
+
+- cgo-e2e: linux 66/0/0 (43568096178), windows 64/0/0 (43568099701), darwin 66/0/0 per arch (43568102643);
+- converter-cgo: linux gcc 147/0/9 (43568105239), windows 145/0/12 (43568108816);
+- no struct arm moved, and the six Go-memory arms of R-7 stay refused.
+
+#### 16.12.4 The second review: UNSOUND, two families
+
+COORD's narrow review of the fix delta, read at `f8a94fa1bc`.
+
+**What holds:**
+
+- all six findings of 16.11 are fixed, red first;
+- the allocation guard's list is closed at its two entries;
+- the batch-301 composition is a clean superset;
+- the six refused Go-memory arms are stricter than Go, and disclosed.
+
+**What fails:** two derivation families still reach C as "C memory alone", with no `uintptr` in the Go source. By
+SF-8 that is a stop, not a disclosure.
+
+- **Family 1, the interior conversion.** `(*T)(p)`, where `p` is an `unsafe.Pointer` VALUE holding an interior Go
+  address (`p := unsafe.Add(unsafe.Pointer(&b[0]), 4)`, or `unsafe.Pointer(&h.n)` of a view).
+  - The converter emits `(ж<T>)(uintptr)(p)`.
+  - The interior number misses the registry, and the operator mints a native box with no source and no pin.
+  - It crosses the helper door and the struct-pointer door (which C writes through) and the void door.
+  - It is 301's laundering class, on a CONVERSION instead of a call.
+- **Family 2, the array-field window.** 16.11 wrote that the window "shares the root's pin". It did not: the window
+  and its element view kept nothing. Over a view of Go memory, four forms cross:
+  - a reinterpret of `&h.name`;
+  - `unsafe.Add` over it;
+  - `&s[1]` of `s := h.name[:]`;
+  - `unsafe.SliceData(s)`.
+  With no cgo, `&h.name[1]` with `h` dropped leaves an element over storage nothing holds.
+- **The SHOULDs.**
+  - `unsafe.Slice` over a view with a POINTER element (that branch had no anchor);
+  - finding 8's reflect pair, which had no arm;
+  - this scoring section;
+  - a control for the void door's over-refusal of an element of a C struct's array field.
+
+**Family 1 is a GC-safety hole in plain Go.** The red arm U2 reads the shape exactly as the converter emits it:
+
+1. `ж<byte> first = &b[0]`;
+2. `p := unsafe.Add(unsafe.Pointer(first), 4)`;
+3. `(ж<byte>)(uintptr)(p)`;
+4. everything else dropped.
+
+The collection is real: three rounds of collect and finalize, then a forced, blocking, compacting gen2 collection
+with the large-object heap set to compact, twice, then the freed space refilled.
+
+A diagnostic, run three times and not committed, showed the same each time:
+
+- the typed pointer is a native box with no source;
+- its root box is collected;
+- the `byte[]` storage is alive but MOVED, about 8 MB from the address the pointer still names.
+
+The pointer still read 9, but that is the stale bytes left at the vacated address, not evidence the value survived.
+Nothing pinned the storage. COORD ruled it 301's class, and a release matter; U2 is the fix seat's headline
+acceptance arm, and its compaction recipe is fixed as written.
+
+#### 16.12.5 The red arms, and their scores
+
+The red arms are on `claude/h-cgo-31-review2-red`, cut from `83fbf28560`. The unit arms are in
+`GoCgoArgsTests.Review2.cs`; the end-to-end arms are in the Phase 3 program.
+
+**Unit arms, at `b642ac3682`:** 34 tests, 28 passed, 6 failed. The 17 earlier rows are among the 28, unchanged.
+
+| Arm | Predicted | Read | Score |
+|---|---|---|---|
+| U1, family 1 at every door | red, 20 crossings | red, 15 | MISSED as worded: `&x[1]` over a local does not cross. Its element box's own address is registered, so the number hits the registry. Family 1 is an address INTERIOR to a box's own storage, and an element box is not interior to itself |
+| U2, family 1 keeps its storage | red | red | MET (16.12.4) |
+| U3, family 2 at every door | red | red, 34 crossings | MET. Per view, over a slice and over a Go array: reinterpret 5, `unsafe.Add` 2 at the void doors, `&s[1]` 5, `SliceData` 5. `&h.name[1]` crosses none |
+| U4, a dropped view's array field | red | red | MET, both forms |
+| U5, `unsafe.Slice` of pointers over a view | not predicted | red: its doors hold, but the view is collected while the slice is alive | — |
+| U6, the reflect pair | not predicted | green: already refused at both void doors | — |
+| C1, the same shapes over C memory | green | green | MET |
+| C2, an element of a C struct's array field at the void door | red (low confidence) | red: refused as "a pointer into Go memory" | MET: the over-refusal was real |
+| K0, offset 0 | green | green | MET |
+
+**Two more arms at `f7973c969d`,** both ruled before the cut.
+
+- U7: a slice re-based through its header over a view keeps the view. It drives the `unsafe.Pointer`-first header
+  site. It reads red. The `ж`-first site is P5's.
+- G1: an element of an array field of a view over Go memory is still refused at the void door. It reads green. It
+  guards the door the cut narrows for C2.
+
+**End to end, at `b642ac3682`** (cgo-e2e linux 43572655934, windows 43572657857, darwin 43572659780): MET as worded
+on all four jobs.
+
+- Seven arms crossed with Go's own output: `goaddtyped`, `goaddfill`, `gofieldtyped`, `goviewnamestring`,
+  `goviewnameadd`, `goviewnameslice` and `goviewnamedata`. `goaddfill` printed C's fill on go2cs's side, so C wrote
+  through the typed pointer into Go memory.
+- The six C-memory twins pass, and the 37 earlier arms are unchanged.
+  H's posts said 40 (16 run as Go does, 22 refused, the negstring/negbytes pair). That was a miscount: every
+  linux log from f8a94fa1bc on names the same 37, which is 15 + 20 + 2. It was never measured as 40.
+
+**An arm defect of H's, fixed at `48796dfdde`.** Three arms reach the struct-pointer door: `goaddfill`,
+`gofieldtyped` and `goviewnamedata`. That door is Phase 2's, for every typed pointer parameter, and its refusal
+("which C must not write through") names no increment. The arms were keyed on "increment 3.2", so a CORRECT refusal
+would have failed them, and P5 would have met arms that could not turn green. They are now keyed on the door's own
+text.
+
+#### 16.12.6 The windows cut (4.4 and 4.5), golib only
+
+| Item | Change |
+|---|---|
+| (a) | `NativeArrayBox<T>` gains its one field, the anchor of its element view. The anchor is `NativeSliceAnchors`' zero-length array, tied to the root the window was derived from, and null over C memory. `Over`, `NativeArrayOpeners.OpenArray` and an internal `builtin.NativeArrayPointer` overload carry the root. The public door the emission calls is unchanged |
+| (b) | `FieldRefBox.NativeArrayWindow` passes `NativeDerivation.Kept(m_source)`. So does `builtin.NativeFieldArrayPointer`, the other window door, which is the same window class and beyond the plan |
+| (c) | The window's element view is cut over that anchor, so `&s[1]`, `SliceData` and an element take each hold the root. The anchor is minted once per window, not on every element take |
+| (d) | `NativeArrayBox` implements `INativeRooted`. It is a genuine native root only when it has no anchor. `IsNativeRooted` stays false, because field layout reads it corpus-wide. So the window's reinterpret and `unsafe.Add` keep it through `Kept` |
+| (e) | C2. `ElemRefBox` implements `INativeRooted`: it is a genuine native root only as an element of a native-backed slice with NO anchor. The void door's registry test no longer refuses a hit that is a genuine native root |
+| (f) | `unsafe.Slice` with a POINTER element keeps G's words route, and ties its fresh array to `Kept(ptr)` (`NativeSliceAnchors<T>.Keep`, no field) |
+| (g) | `IGoReflectSlice.ReflectOverNativeMemory(nuint address, nint len, nint cap, object? root = null)`, implemented over `NativeSliceAnchors<T>.For(root)`. Null means C memory alone, as before. `SliceHeaderBox`'s native arm passes `Kept` of the data word's box. The `ж`-first site is P5's, on this signature |
+
+**S5 held:** no field beyond the native array box's one, and no change to `ж<T>`, `slice<T>`, `unsafe.Pointer`, the
+converter or the generator.
+
+**G1, made to fail once.** With (e)'s no-anchor clause dropped, G1 failed by name and C2 still passed. The file was
+then restored byte-identical (same sha256), and the edit was never committed.
+
+**The scores.**
+
+| Prediction | Reading | Score |
+|---|---|---|
+| H-1 GoCgoArgsTests: U3, U4, U5 and C2 turn green; U1 and U2 stay red | 36 tests, 34 passed, 2 failed: exactly U1 and U2. U3, U4, U5, U7 and C2 green; U6, C1, K0, G1 and the 17 stay green | MET |
+| H-2 full GolibTests | 2,687 = 2,642 passed, 2 failed (U1 and U2), 43 skipped. The TRX difference against the merge's is exactly the 11 new rows; no existing row changed; the allocation guard passes | MET, as corrected BEFORE the measurement (from 2,685, since U7 and G1 came after it) |
+| H-3 repoguard, `go test ./...`, check-no-regression | at `86247389c0` repoguard STOPPED (below). At `7014c1b2bd`: repoguard rc 0; `go test` rc 0, 11 ok, 0 cached; byte-identical across 1,067 | MET at `7014c1b2bd` |
+| H-4 full behavioral | Relaunched at 67 GB free: PASS, 974 projects; Output 944/0 with the standing 30 skips; 0 NOT MEASURED | MET |
+| H-5 canaries and allocation asserts at bank | On H, under go1.26.10, at `7014c1b2bd`: 55 rows, one at a time, each PASS at its roster count. These are 54 rows of the 301 sweep's set, which includes every allocation-assert row, plus `text/template`. Each count equals the 301 sweep's reading. `runtime` 11,083, `os` 6,826, `crypto/cipher` 27,289. Hosted windows 43575527735, at `86247389c0`, whose only difference from the tip is a docs commit: `net` 505, `net/http` 1,526, and `crypto/tls` 1,393 under its standing BoGo host-limit disclosure | MET |
+| H-6 end to end: the four `goviewname*` arms turn refused; the three family-1 arms still cross; the twins and the 37 unchanged | cgo-e2e linux 43575515927, windows 43575518122, darwin 43575520708: on every job the four turn refused; `goaddtyped`, `goaddfill` and `gofieldtyped` still cross; the twins and the 37 hold. `goviewnamedata` still failed, on its arm's keying alone (fixed at `48796dfdde`) | MET |
+
+**Hosted beyond H-6.**
+
+- golib-tests linux (43575523139): 2,738 tests, 2,703 passed, 33 skipped, 2 failed.
+- golib-tests darwin (43575525581): arm64 2,649 / 2,600 / 47 skipped / 2 failed; x64 2,649 / 2,601 / 46 / 2.
+- Every failed set is exactly U1 and U2: the cut composes on every OS, with only P5's half red.
+- sweep-shard windows (43575527735): net 505, net/http 1,526, crypto/tls 1,393 under its disclosure, all at bank.
+
+**Stop lines.** None of the cut's fired. Two stops in the battery were H's, and neither is a code finding.
+
+- **Repoguard, at `86247389c0`.** 30 of 935 provenance notes, in five docs pages, cited lines the cut moved.
+  - 28 were re-cited at the line the cut's own diff maps each to.
+  - 2 cite the class declarations of `ElemRefBox` and `NativeArrayBox`. Each gained an interface on the same line
+    and still says what its note says, so its fingerprint was re-read.
+  - The fix is `7014c1b2bd`.
+  - Lesson: before cutting a golib file, list every provenance note that cites it. That is the docs-sample rule,
+    carried to golib.
+- **Behavioral, at `7014c1b2bd`: VOID.** The box ran out of disk.
+  - 37 Go oracle builds failed, which a golib-only cut cannot reach.
+  - A test that writes into TEMP failed.
+  - The log was cut, and the runner exited 127.
+  - Free disk was 40 GB at launch; behavioral's peak on H is above 43 GB. The floor for a full behavioral run on H is
+    now 60 GB, not the sweep's 25 GB.
+  - After the go build cache was reclaimed (67 GB free), the stage was re-run from behavioral at the same tip.
+
+**Owed:**
+
+- This cut reaches master inside P5's seat, which merged `7014c1b2bd` and carries 4.1 to 4.3 and 4.7. Those turn U1
+  and U2 green and respell five lines of U1 and U2 to the typed door. The seat lands with batch 305, so this branch
+  does not take the go1.26.11 hop itself. It carries the arm fix `48796dfdde`, merged after the battery, and this
+  record.
+- After batch 305 lands: one merge of master into 3.1's branch under go1.26.11, then 3.1's re-gate (GolibTests,
+  CNR, and the hosted cgo-e2e and converter-cgo legs, where the seven `go*` arms of 16.12.5 must be refused). Then
+  3.1's release-path seat.
+- The narrow re-review of the combined fix.
+- PF-6, the registration census from row 23.
+- Then the pin-registry proposal (17.11), re-gated on the same base.
+
+— H (2026-11-14)
