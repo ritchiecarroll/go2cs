@@ -38307,4 +38307,32 @@ object-plus-offset backing? If it does, L shrinks.
 
 — C2 (2026-11-14)
 
+**Amended 2026-11-14 (C2): the open question, read at batch 305's landed master `c2919b8b16`. YES, by another route.
+The slice face drops from L to M and the element-address face from M to S/M. Still PARKED.** P5's interior-pointer
+seat adds no new `slice<T>` backing kind. It gives a ROOTED native-backed slice over pinned managed storage, which
+serves the same purpose:
+
+- `ж.NativeBox.cs`: a native box over an address INTO managed storage carries what holds that storage still
+  (`NativeBox(nativeAddress, PinnedBuffer? pin, object? retainedSource, ...)`, line 57).
+- `ж.NativeDerivation.cs`: a box derived from such a box (a field, a reinterpret, an offset, an element of an
+  `unsafe.Slice` over it) RETAINS that root.
+- `slice.cs`: `OverNativeMemory(baseAddress, length, capacity, anchor)` (line 325) keeps the root with no word added
+  to `slice<T>`. The native-backed slice's otherwise unused array field becomes a zero-length anchor array tied to
+  the root (`NativeSliceAnchors<T>.For(root)`, lines 160 and 455), and a re-slice passes it along.
+
+So for I1:
+
+- **Sliced (`x.f[:]`): M, not L.** Emit an `unsafe.Slice` over a native box minted (pinned) over the owning box's
+  inline storage, rooted in that box. The slice hot path does not change. The cost moves to one pin per sliced
+  inline array, held while any slice of it lives, which fragments the heap if the slice lives long. The gate that
+  replaces the Performance A/B is a pin-count census.
+- **Element's address (`&x.f[i]`): S/M, not M.** The same derivation at the element's offset: a native box that
+  retains the root, with no alias-box type of its own.
+- **Whole value:** unchanged, S.
+
+Group cost after this: the windows sockaddrs need S + S/M; linux and darwin sockaddrs and the windows setupapi types
+need S + S/M + M. Still no consumer before .4, so the row stays PARKED. Re-size it when a consumer appears.
+
+— C2 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
