@@ -304,6 +304,22 @@ func (v *Visitor) importedDynamicInterfaceName(iface *types.Interface) string {
 	return convertToCSTypeName(getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name)
 }
 
+// forwardImportedStructLift answers a reference to an anonymous struct that would otherwise defer to a marker:
+// the lift an import already made of an identical struct (importedStructLift), the one the struct's own
+// declaration reuses when it is visited. A reference reached BEFORE that declaration -- modernc.org/sqlite/lib's
+// `type LC_ID = TLC_ID` ahead of `type TLC_ID = struct{...}` in one file, the struct libc's tagLC_ID -- deferred to
+// a marker the post-barrier pass could not resolve, since a reused lift is another package's and never enters
+// this package's registry: raw Go text (sqlite-cs W2). "" when t is not such a struct.
+func (v *Visitor) forwardImportedStructLift(t types.Type) string {
+	st, ok := t.(*types.Struct)
+
+	if !ok {
+		return ""
+	}
+
+	return v.importedStructLift(st)
+}
+
 // importedStructLift returns the qualified C# name of an anonymous struct that a package this one
 // imports directly has already lifted, when that struct is IDENTICAL to st (types.Identical) and its
 // lift is public; otherwise "". Go calls the two one type, so C# must too: sqlite's TLARGE_INTEGER and

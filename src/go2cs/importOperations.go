@@ -1401,6 +1401,9 @@ func preloadImportedTypeAliases(files []FileEntry, options Options) {
 	}
 }
 
+// maxPackageInfoLine is the longest package_info.cs line readPackageInfoLines accepts: 256 MB, far beyond any record.
+const maxPackageInfoLine = 256 * 1024 * 1024
+
 // readPackageInfoLines reads a package info file into its lines. Splitting the file read out
 // of the three parsers below lets them run over an in-memory line set too — the embedded
 // standard-library metadata record (stdlibMetadata.go), which carries the very same lines for
@@ -1417,6 +1420,11 @@ func readPackageInfoLines(packageInfoFile string) ([]string, error) {
 	var lines []string
 
 	scanner := bufio.NewScanner(file)
+
+	// A record's line has no length bound: a GoPositionMap for a large file is one base64 line, 123,448 bytes for
+	// modernc.org/sqlite/lib's sqlite_windows.go. At the scanner's 64 KB default the read failed and none of the
+	// package's alias records loaded for any importer (sqlite-cs W2). The limit is only a ceiling on one line.
+	scanner.Buffer(make([]byte, 0, 64*1024), maxPackageInfoLine)
 
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
