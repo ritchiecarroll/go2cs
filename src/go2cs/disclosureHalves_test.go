@@ -460,3 +460,136 @@ func TestAGoSideHostSkipIsStatedOnTheProofPage(t *testing.T) {
 		t.Fatalf("the page names the row as a Go-side host skip in words:\n%s", page)
 	}
 }
+
+// ---- the native-subprocess skip: skipEitherSide (COORD ruling 2026-11-14) ----------------------------
+//
+// internal/trace's TestTraceCPUProfile subtests build and run one native Go program on BOTH sides, and
+// that program decides pass or skip, so the pinned skip can land on either side. The entry admits the
+// mirror shape, Go=pass / C#=skip, pinned on the converted side's skip output carrying Go's own text.
+
+const nativeSkipPin = "CPU profile did not include any samples while tracing was active"
+
+func nativeSkipEntry(eitherSide bool) string {
+	flag := ""
+	if eitherSide {
+		flag = `,"skipEitherSide":true`
+	}
+
+	return `{"name":"TestProfile/Default","class":"host-identity","platforms":["darwin"],"goSkipSignature":"` + nativeSkipPin + `"` + flag + `,"signature":"","reason":"both sides run one native Go program"}`
+}
+
+func matchNativeSkip(disclosures map[string]testDisclosure, goStatus, csStatus, goOutput, csOutput string) (mismatches, disclosed []string) {
+	const name = "TestProfile/Default"
+
+	mismatches, _, disclosed, _ = matchTerminalStatusesWithRecords([]string{name},
+		map[string]string{name: goStatus}, map[string]string{name: csStatus}, disclosures,
+		map[string]string{name: csOutput}, nil, map[string]string{name: goOutput})
+	return mismatches, disclosed
+}
+
+func TestANativeSubprocessSkipIsDisclosedOnEitherSide(t *testing.T) {
+	disclosures := loadRaw(t, "darwin", nativeSkipEntry(true))
+	pinned := "    trace_test.go:121: " + nativeSkipPin + "\n"
+	other := "    trace_test.go:99: skipping: some other reason\n"
+
+	cases := []struct {
+		row                string
+		goStatus, csStatus string
+		goOutput, csOutput string
+		disclosed          bool
+		mismatchContains   string
+	}{
+		{"Go skips with the pin, C# passes", "skip", "pass", pinned, "", true, ""},
+		{"C# skips with the pin, Go passes", "pass", "skip", "", pinned, true, ""},
+		{"C# skips for another reason", "pass", "skip", "", other, false, `C#'s skip output does not carry`},
+		{"Go skips for another reason", "skip", "pass", other, "", false, `Go's skip output does not carry`},
+		{"C# skips with the pin in Go's output only", "pass", "skip", pinned, other, false, `C#'s skip output does not carry`},
+		{"C# fails where Go passed", "pass", "fail", "", pinned, false, `C#="fail"`},
+		{"Go fails where C# skipped with the pin", "fail", "skip", pinned, pinned, false, `Go="fail"`},
+		{"Go fails where C# passed", "fail", "pass", pinned, "", false, `Go="fail"`},
+		{"both sides skip", "skip", "skip", pinned, pinned, false, ""},
+		{"both sides pass", "pass", "pass", "", "", false, ""},
+	}
+
+	for _, c := range cases {
+		mismatches, disclosed := matchNativeSkip(disclosures, c.goStatus, c.csStatus, c.goOutput, c.csOutput)
+
+		if c.disclosed {
+			if len(mismatches) != 0 || len(disclosed) != 1 {
+				t.Errorf("%s: must be DISCLOSED; mismatches %q disclosed %q", c.row, mismatches, disclosed)
+			}
+			continue
+		}
+
+		if len(disclosed) != 0 {
+			t.Errorf("%s: must never be disclosed; disclosed %q", c.row, disclosed)
+		}
+		if c.mismatchContains == "" {
+			if len(mismatches) != 0 {
+				t.Errorf("%s: the sides agree, so the entry is inert; mismatches %q", c.row, mismatches)
+			}
+			continue
+		}
+		if len(mismatches) != 1 || !strings.Contains(mismatches[0], c.mismatchContains) {
+			t.Errorf("%s: must be one strict mismatch naming %q; got %q", c.row, c.mismatchContains, mismatches)
+		}
+	}
+}
+
+func TestTheMirrorSkipNeedsSkipEitherSide(t *testing.T) {
+	// The control: the same entry without the flag keeps G's one-direction arm, so a C# skip carrying
+	// the pin where Go passed is still a strict mismatch.
+	mismatches, disclosed := matchNativeSkip(loadRaw(t, "darwin", nativeSkipEntry(false)), "pass", "skip", "", "    trace_test.go:121: "+nativeSkipPin+"\n")
+
+	if len(disclosed) != 0 || len(mismatches) != 1 || !strings.Contains(mismatches[0], `C#="skip"`) {
+		t.Fatalf("without skipEitherSide a C# skip is a mismatch; mismatches %q disclosed %q", mismatches, disclosed)
+	}
+}
+
+func TestSkipEitherSideIsRefusedWithoutAGoSkipSignature(t *testing.T) {
+	entry := `{"name":"TestX","class":"host-identity","signature":"some converted text","skipEitherSide":true,"reason":"r"}`
+
+	_, _, err := readTestDisclosureManifest(rawManifest(t, entry))
+	if err == nil || !strings.Contains(err.Error(), "TestX") || !strings.Contains(err.Error(), "goSkipSignature") {
+		t.Fatalf("skipEitherSide alone must be refused, naming the entry and goSkipSignature; got %v", err)
+	}
+}
+
+func TestANativeSubprocessSkipIsStatedOnTheProofPage(t *testing.T) {
+	comparison := testComparison{
+		Package: "internal/trace", Status: "validated",
+		Go:     map[string]string{"TestProfile/Default": "pass", "TestOther": "pass"},
+		CSharp: map[string]string{"TestProfile/Default": "skip", "TestOther": "pass"},
+	}
+
+	page := renderValidationProofPage(proofPageProvenance{importPath: "internal/trace", goVersion: "1.26.10", platform: "darwin/arm64", date: "2026-11-14"},
+		comparison, loadRaw(t, "darwin", nativeSkipEntry(true)), nil)
+
+	if strings.Contains(page, "provably cannot") || !strings.Contains(page, "**native-subprocess skip**") || strings.Contains(page, "**Go-side host skip**") {
+		t.Fatalf("the page names the row as a native-subprocess skip in words, and only that:\n%s", page)
+	}
+}
+
+func TestTheGoSkipPinIsReadFromGoTestOutputEvents(t *testing.T) {
+	// go test -json's own shape for a skipped subtest, as go1.26.10 writes it: the t.Skip text is an
+	// "output" event and the terminal "skip" event carries no Output. Reading only terminal events
+	// left the Go side's skip text empty, so the Go=skip shape could never be admitted outside a
+	// unit test that supplied the text by hand.
+	stream := strings.Join([]string{
+		`{"Time":"2026-11-14T12:38:20.86Z","Action":"run","Package":"internal/trace","Test":"TestProfile/Default"}`,
+		`{"Time":"2026-11-14T12:38:20.86Z","Action":"output","Package":"internal/trace","Test":"TestProfile/Default","Output":"=== RUN   TestProfile/Default\n"}`,
+		`{"Time":"2026-11-14T12:38:20.86Z","Action":"output","Package":"internal/trace","Test":"TestProfile/Default","Output":"    trace_test.go:121: ` + nativeSkipPin + `\n"}`,
+		`{"Time":"2026-11-14T12:38:20.86Z","Action":"output","Package":"internal/trace","Test":"TestProfile/Default","Output":"--- SKIP: TestProfile/Default (0.00s)\n"}`,
+		`{"Time":"2026-11-14T12:38:20.86Z","Action":"skip","Package":"internal/trace","Test":"TestProfile/Default","Elapsed":0}`,
+	}, "\n")
+
+	goOutputs := goSideTestOutputs(stream)
+	if !strings.Contains(goOutputs["TestProfile/Default"], nativeSkipPin) {
+		t.Fatalf("Go's skip text must be read from its output events; got %q", goOutputs["TestProfile/Default"])
+	}
+
+	mismatches, disclosed := matchNativeSkip(loadRaw(t, "darwin", nativeSkipEntry(true)), "skip", "pass", goOutputs["TestProfile/Default"], "")
+	if len(mismatches) != 0 || len(disclosed) != 1 {
+		t.Fatalf("a real go test skip with the pin is disclosed; mismatches %q disclosed %q", mismatches, disclosed)
+	}
+}

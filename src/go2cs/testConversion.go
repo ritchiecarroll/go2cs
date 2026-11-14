@@ -8885,10 +8885,12 @@ type testDisclosure struct {
 	// GoSkipSignature unlocks the one shape pinned on the GO side: Go=skip / C#=pass, admitted only
 	// when Go's OWN skip output for the test contains it (ruling R1 of
 	// docs/phase4/DESIGN-comparator-arms.md, inside PLAN-rebank-1-26-10-3 §4: a Go skip on a
-	// host-DATA predicate the converted side legitimately does not share). internal/trace's
-	// TestTraceCPUProfile/Default is the first member: on the hosted osx-x64 VM Go's signal-driven
-	// profiler delivers no sample while tracing, so Go's own test skips, and the converted side's
-	// timer-thread sampler passes.
+	// host-DATA predicate the converted side legitimately does not share).
+	//
+	// 2026-11-14: the member this field was first written for, internal/trace's TestTraceCPUProfile,
+	// was read as Go's profiler starving while the converted side's sampler did not. That premise is
+	// false: both sides build and run the same native Go program (testTraceProg), so either side can
+	// skip, and that test carries SkipEitherSide below.
 	//
 	// The loader's guards are the safety argument (see goSkipSignatureRefusal): host-identity only,
 	// never beside HostConditional (the two tolerate opposite halves and together would admit
@@ -8897,6 +8899,15 @@ type testDisclosure struct {
 	// and only there: in this shape the converted side passes and prints nothing to pin, so its pin is
 	// the pass itself, and any C# fail or skip is a mismatch. Empty for every other disclosure.
 	GoSkipSignature string `json:"goSkipSignature,omitempty"`
+
+	// SkipEitherSide extends a GoSkipSignature entry to the mirror shape, Go=pass / C#=skip, pinned on
+	// the CONVERTED side's skip output carrying the same Go text. It is for a test whose verdict is
+	// decided by a native Go subprocess that BOTH sides build and run, so the skip is the host's on
+	// either side and the converted code is not in the path: internal/trace's TestTraceCPUProfile
+	// subtests, where the native cpu-profile testprog sometimes records no sample while tracing on
+	// macOS. The pin is Go's own t.Skip text, which the converted test prints unchanged. Any other skip
+	// text, a fail, or a skip on both sides stays what it was. Refused without a GoSkipSignature.
+	SkipEitherSide bool `json:"skipEitherSide,omitempty"`
 
 	// Want, Reading and Plan carry the DEFERRED class's contract (see deferredClass below). They
 	// are what makes a deferred entry a commitment rather than an excuse, and the loader refuses a
@@ -9396,6 +9407,10 @@ func readTestDisclosureManifest(outputPath string) (map[string]testDisclosure, [
 // the first guard.
 func goSkipSignatureRefusal(disclosure testDisclosure) error {
 	if disclosure.GoSkipSignature == "" {
+		if disclosure.SkipEitherSide {
+			return fmt.Errorf("disclosure %s sets skipEitherSide without a goSkipSignature; the mirror shape is pinned on the same Go skip text", disclosure.Name)
+		}
+
 		return nil
 	}
 
@@ -10170,18 +10185,31 @@ func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[s
 			// Go's OWN skip output, the one shape that reads the Go side's text. Only skip/pass reaches
 			// it: Go=fail / C#=pass is never admitted, and a C# side that fails or skips has moved. It
 			// roots no withdrawal, so a C#-only row under the skipped test still compares strictly.
-			if disclosure, ok := disclosures[name]; ok && disclosure.GoSkipSignature != "" &&
-				goOK && csOK && goStatus == "skip" && csStatus == "pass" {
-				if strings.Contains(goOutputs[name], disclosure.GoSkipSignature) {
-					disclosed = append(disclosed, name)
-					disclosedNames.Add(name)
-					continue
+			//
+			// With SkipEitherSide the mirror shape, Go=pass / C#=skip, is admitted the same way, pinned on
+			// the converted side's skip output: both sides run one native subprocess, so the skip may
+			// land on either. Go=pass / C#=fail is never admitted.
+			if disclosure, ok := disclosures[name]; ok && disclosure.GoSkipSignature != "" && goOK && csOK {
+				skipSide, skipOutput := "", ""
+
+				if goStatus == "skip" && csStatus == "pass" {
+					skipSide, skipOutput = "Go", goOutputs[name]
+				} else if disclosure.SkipEitherSide && goStatus == "pass" && csStatus == "skip" {
+					skipSide, skipOutput = "C#", csOutputs[name]
 				}
 
-				mismatches = append(mismatches, fmt.Sprintf("%s: Go=%q C#=%q (Go's skip output does not carry the disclosed goSkipSignature %q)",
-					name, goStatus, csStatus, disclosure.GoSkipSignature))
-				mismatchNames.Add(name)
-				continue
+				if skipSide != "" {
+					if strings.Contains(skipOutput, disclosure.GoSkipSignature) {
+						disclosed = append(disclosed, name)
+						disclosedNames.Add(name)
+						continue
+					}
+
+					mismatches = append(mismatches, fmt.Sprintf("%s: Go=%q C#=%q (%s's skip output does not carry the disclosed goSkipSignature %q)",
+						name, goStatus, csStatus, skipSide, disclosure.GoSkipSignature))
+					mismatchNames.Add(name)
+					continue
+				}
 			}
 
 			// The THIRD accepted shape: a SOURCE-DEFINED PLATFORM SKIP. Go's own test source
@@ -10720,7 +10748,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	csRecords := terminalTestRecords(csOutput)
 	// Go's own per-test output is read for ONE purpose: the GoSkipSignature pin, which a Go-side skip
 	// is admitted on (testDisclosure.GoSkipSignature). No other shape reads it.
-	goOutputs := terminalTestOutputs(goOutput)
+	goOutputs := goSideTestOutputs(goOutput)
 	var manifest testManifest
 	var censusGaps []string
 	var runtimeDeclared []string
@@ -11085,6 +11113,25 @@ func terminalTestOutputs(output string) map[string]string {
 		switch event.Action {
 		case "pass", "fail", "skip", "timeout", "infrastructure-error":
 			result[event.Test] = event.Output
+		}
+	}
+	return result
+}
+
+// goSideTestOutputs gathers go test -json's per-test text. Unlike the converted host, go test puts
+// nothing on a terminal event: a test's log lines, its t.Skip text included, arrive as separate
+// "output" events before it, so terminalTestOutputs reads an empty string for every Go test. This
+// joins each test's output events, which is where a GoSkipSignature's pin is found.
+func goSideTestOutputs(output string) map[string]string {
+	result := make(map[string]string)
+	for _, line := range testStreamLines(output) {
+		var event normalizedTestEvent
+		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
+			continue
+		}
+		switch event.Action {
+		case "output", "pass", "fail", "skip", "timeout", "infrastructure-error":
+			result[event.Test] += event.Output
 		}
 	}
 	return result

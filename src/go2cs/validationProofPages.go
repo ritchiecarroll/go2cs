@@ -227,6 +227,12 @@ func isProofGoSideSkip(comparison testComparison, name string, disclosure testDi
 	return disclosure.GoSkipSignature != "" && comparison.Go[name] == "skip" && comparison.CSharp[name] == "pass"
 }
 
+// isProofNativeSubprocessSkip reports whether a disclosed row is the mirror shape a SkipEitherSide
+// entry admits: Go passing and the converted side skipping on the same native subprocess's skip.
+func isProofNativeSubprocessSkip(comparison testComparison, name string, disclosure testDisclosure) bool {
+	return disclosure.GoSkipSignature != "" && disclosure.SkipEitherSide && comparison.Go[name] == "pass" && comparison.CSharp[name] == "skip"
+}
+
 // proofVerdict renders one side's terminal status, or an em dash when that side never reported the
 // test at all (only reachable on a comparison that did not validate).
 func proofVerdict(results map[string]string, name string) string {
@@ -387,7 +393,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 
 				// A Go-side host skip (testDisclosure.GoSkipSignature) has the GO side skipping and the
 				// converted side passing, so both "provably cannot" and "not a skipped test" are false of it.
-				hasGoSkip = hasGoSkip || isProofGoSideSkip(comparison, name, disclosure)
+				hasGoSkip = hasGoSkip || isProofGoSideSkip(comparison, name, disclosure) || isProofNativeSubprocessSkip(comparison, name, disclosure)
 			}
 		}
 
@@ -522,6 +528,21 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				"suite reports **pass**, because Go's own test skips on a property of the host it ran on that the\n"+
 				"converted side does not share. It is pinned to Go's own skip message, so the row moves to a hard\n"+
 				"mismatch if Go ever skips for a different reason or fails, or if the converted side stops passing.\n", escapeProofCell(name))
+		}
+
+		// The mirror shape's note: both sides run one native Go subprocess, and this time it was the
+		// converted side's run of it that skipped.
+		for _, name := range disclosed {
+			disclosure, pinned := disclosures[name]
+
+			if !pinned || !isProofNativeSubprocessSkip(comparison, name, disclosure) {
+				continue
+			}
+
+			fmt.Fprintf(&page, "\n`%s` is a **native-subprocess skip**: `go test` reports **pass** and the converted\n"+
+				"suite reports **skip**. Both sides build and run the same native Go program, which decides the\n"+
+				"verdict, and on this run the converted side's run of it hit Go's own skip. It is pinned to Go's own\n"+
+				"skip message, so the row moves to a hard mismatch if the skip text changes or either side fails.\n", escapeProofCell(name))
 		}
 
 		// A host-conditional row's own note, modeled on the roster's internal/zstd row: name the
