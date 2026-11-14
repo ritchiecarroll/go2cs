@@ -299,7 +299,7 @@ internal static error setValue(this Key k, @string name, uint32 valtype, slice<b
 public static error SetDWordValue(this Key k, @string name, uint32 valueʗp) {
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
-    return k.setValue(name, DWORD, ((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡvalue))).slice());
+    return k.setValue(name, DWORD, @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡvalue)).slice());
 }
 
 // SetQWordValue sets the data and type of a name value
@@ -307,7 +307,7 @@ public static error SetDWordValue(this Key k, @string name, uint32 valueʗp) {
 public static error SetQWordValue(this Key k, @string name, uint64 valueʗp) {
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
-    return k.setValue(name, QWORD, ((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡvalue))).slice());
+    return k.setValue(name, QWORD, @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡvalue)).slice());
 }
 
 internal static unsafe error setStringValue(this Key k, @string name, uint32 valtype, @string value) {

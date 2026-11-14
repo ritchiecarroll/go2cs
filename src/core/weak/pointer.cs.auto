@@ -97,7 +97,7 @@ public static ж<T> Value<T>(this Pointer<T> p) {
     if (p.u == nil) {
         return default;
     }
-    return (ж<T>)(uintptr)(runtime_makeStrongFromWeak(p.u));
+    return @unsafe.Pointer.To<T>(runtime_makeStrongFromWeak(p.u));
 }
 
 } partial class weak_package {

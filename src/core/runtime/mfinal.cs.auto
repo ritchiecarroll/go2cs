@@ -123,7 +123,7 @@ internal static void queuefinalizer(@unsafe.Pointer p, ж<funcval> Ꮡfn, uintpt
 
     if (finq == nil || (~finq).cnt == (uint32)len((~finq).fin)) {
         if (finc == nil) {
-            finc = (ж<finBlock>)(uintptr)(persistentalloc(finBlockSize, 0, Ꮡmemstats.ᏑgcMiscSys));
+            finc = @unsafe.Pointer.To<finBlock>(persistentalloc(finBlockSize, 0, Ꮡmemstats.ᏑgcMiscSys));
             finc.Value.alllink = allfin;
             allfin = finc;
             if (finptrmask[0] == 0) {
@@ -179,7 +179,7 @@ internal static partial void createfing() {
 }
 
 internal static bool finalizercommit(ж<g> gp, @unsafe.Pointer @lock) {
-    unlock((ж<mutex>)(uintptr)(@lock));
+    unlock(@unsafe.Pointer.To<mutex>(@lock));
     // fingStatus should be modified after fing is put into a waiting state
     // to avoid waking fing in running state, even if it is about to be parked.
     ᏑfingStatus.Or(fingWait);
@@ -255,23 +255,23 @@ internal static void runFinalizers() {
                     // memory. That means we have to clear
                     // it before writing to it to avoid
                     // confusing the write barrier.
-                    ((ж<array<uintptr>>)(uintptr)(frame)).Value = new uintptr[]{}.array(2);
+                    (@unsafe.Pointer.To<array<uintptr>>(frame)).Value = new uintptr[]{}.array(2);
                 }
                 switch ((~f).fint.Kind()) {
                 case var ᴛ when ᴛ == abi.Pointer: {
                     // direct use of pointer
-                    ((ж<@unsafe.Pointer>)(uintptr)(r)).Value = f.Value.arg;
+                    (@unsafe.Pointer.To<@unsafe.Pointer>(r)).Value = f.Value.arg;
                     break;
                 }
                 case var ᴛ when ᴛ == abi.Interface: {
                     var ityp = (~f).fint.Reinterpret<_type, interfacetype>();
                     // set up with empty interface
-                    ((ж<eface>)(uintptr)(r)).Value._type = (~f).ot.ᏑType;
-                    ((ж<eface>)(uintptr)(r)).Value.data = f.Value.arg;
+                    (@unsafe.Pointer.To<eface>(r)).Value._type = (~f).ot.ᏑType;
+                    (@unsafe.Pointer.To<eface>(r)).Value.data = f.Value.arg;
                     if (len(ityp.Methods) != 0) {
                         // convert to interface with methods
                         // this conversion is guaranteed to succeed - we checked in SetFinalizer
-                        ((ж<iface>)(uintptr)(r)).Value.tab = assertE2I(ityp, ((ж<eface>)(uintptr)(r)).Value._type);
+                        (@unsafe.Pointer.To<iface>(r)).Value.tab = assertE2I(ityp, (@unsafe.Pointer.To<eface>(r)).Value._type);
                     }
                     break;
                 }
@@ -556,11 +556,11 @@ okarg:
     var fintʗ1 = fint;
     var otʗ1 = ot;
     systemstack(() => {
-        if (!addfinalizer((~eʗ2).data, (ж<funcval>)(uintptr)((~fʗ1).data), nret, fintʗ1, otʗ1)) {
+        if (!addfinalizer((~eʗ2).data, @unsafe.Pointer.To<funcval>((~fʗ1).data), nret, fintʗ1, otʗ1)) {
             @throw("runtime.SetFinalizer: finalizer already set"u8);
         }
         if (debug.checkfinalizers != 0) {
-            setFinalizerContext((~eʗ2).data, otʗ1.of(ptrtype.ᏑElem).Value, callerpc, ((ж<funcval>)(uintptr)((~fʗ1).data)).Value.fn);
+            setFinalizerContext((~eʗ2).data, otʗ1.of(ptrtype.ᏑElem).Value, callerpc, (@unsafe.Pointer.To<funcval>((~fʗ1).data)).Value.fn);
         }
     });
 }

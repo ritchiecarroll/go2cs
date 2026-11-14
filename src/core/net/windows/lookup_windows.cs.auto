@@ -177,13 +177,13 @@ internal static partial (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, 
                 @unsafe.Pointer addr = (@unsafe.Pointer)(uintptr)(result.Addr);
                 switch (result.Family) {
                 case var ᴛ when ᴛ == syscall.AF_INET: {
-                    var a = ((ж<syscall.RawSockaddrInet4>)(uintptr)(addr)).Value.Addr.Clone();
+                    var a = (@unsafe.Pointer.To<syscall.RawSockaddrInet4>(addr)).Value.Addr.Clone();
                     addrs = append(addrs, new IPAddr(IP: copyIP(a[..])));
                     break;
                 }
                 case var ᴛ when ᴛ == syscall.AF_INET6: {
-                    var a = ((ж<syscall.RawSockaddrInet6>)(uintptr)(addr)).Value.Addr.Clone();
-                    @string zone = zoneCache.name((nint)((ж<syscall.RawSockaddrInet6>)(uintptr)(addr)).Value.Scope_id);
+                    var a = (@unsafe.Pointer.To<syscall.RawSockaddrInet6>(addr)).Value.Addr.Clone();
+                    @string zone = zoneCache.name((nint)(@unsafe.Pointer.To<syscall.RawSockaddrInet6>(addr)).Value.Scope_id);
                     addrs = append(addrs, new IPAddr(IP: copyIP(a[..]), Zone: zone));
                     break;
                 }
@@ -300,11 +300,11 @@ internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context
         @unsafe.Pointer addr = (@unsafe.Pointer)(uintptr)(result.Addr);
         switch (result.Family) {
         case var ᴛ when ᴛ == syscall.AF_INET: {
-            var a = (ж<syscall.RawSockaddrInet4>)(uintptr)(addr);
+            var a = @unsafe.Pointer.To<syscall.RawSockaddrInet4>(addr);
             return ((nint)syscall.Ntohs(a.Port), default);
         }
         case var ᴛ when ᴛ == syscall.AF_INET6: {
-            var a = (ж<syscall.RawSockaddrInet6>)(uintptr)(addr);
+            var a = @unsafe.Pointer.To<syscall.RawSockaddrInet6>(addr);
             return ((nint)syscall.Ntohs(a.Port), default);
         }}
         return (0, new DNSErrorжerror(newDNSError(syscall.EINVAL, network + "/"u8 + service, ""u8)));

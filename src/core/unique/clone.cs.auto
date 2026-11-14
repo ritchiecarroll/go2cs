@@ -29,7 +29,7 @@ internal static T clone<T>(T valueʗp, ж<cloneSeq> Ꮡseq) {
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
     foreach (var (_, offset) in range(seq.stringOffsets)) {
-        var ps = (ж<@string>)(uintptr)((@unsafe.Pointer)((uintptr)Ꮡvalue + offset));
+        var ps = @unsafe.Pointer.To<@string>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡvalue), offset));
         ps.Value = stringslite.Clone(ps.Value);
     }
     return abi.EscapeToResultNonString(value);

@@ -362,7 +362,7 @@ public static (ж<Tokenuser>, error) GetTokenUser(this Token t) {
     if (e != nil) {
         return (default, e);
     }
-    return ((ж<Tokenuser>)(uintptr)(i), default);
+    return (@unsafe.Pointer.To<Tokenuser>(i), default);
 }
 
 // GetTokenPrimaryGroup retrieves access token t primary group information.
@@ -373,7 +373,7 @@ public static (ж<Tokenprimarygroup>, error) GetTokenPrimaryGroup(this Token t) 
     if (e != nil) {
         return (default, e);
     }
-    return ((ж<Tokenprimarygroup>)(uintptr)(i), default);
+    return (@unsafe.Pointer.To<Tokenprimarygroup>(i), default);
 }
 
 // GetUserProfileDirectory retrieves path to the
