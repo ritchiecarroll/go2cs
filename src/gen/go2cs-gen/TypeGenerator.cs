@@ -161,6 +161,8 @@ public class TypeGenerator : ISourceGenerator
                             StructMembers = structDeclaration.GetStructMembers(context.Compilation, true),
                             ChanDirInitializerMembers = structDeclaration.GetChanDirInitializerMembers(),
                             ReadOnlyZeroSizeMembers = structDeclaration.GetReadOnlyExplicitLayoutMembers(),
+                            AlignmentCarrierMembers = structDeclaration.GetAlignmentCarrierMembers(),
+                            InlineLayoutFields = structDeclaration.HasGoInlineLayout() ? structDeclaration.GetInstanceFields() : null,
                             HasEqualityOperators = hasEqualityOperators,
                             HandWrittenEquality = DeclaresOwnEquality(semanticModel.GetDeclaredSymbol(structDeclaration) as INamedTypeSymbol),
                             // A generic struct that failed the whole-struct constraint gate still

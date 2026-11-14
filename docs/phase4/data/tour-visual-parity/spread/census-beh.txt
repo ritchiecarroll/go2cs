@@ -1,0 +1,72 @@
+sites 60 (untyped, not counted: 0); max arity 3
+  package func     fixed(2)           non-test    30  test     0
+  package func     ...any             non-test    25  test     0
+  package func     fixed(3)           non-test     3  test     0
+  method           fixed(2)           non-test     1  test     0
+  func literal     fixed(2)           non-test     1  test     0
+contexts: map[assignment:11 defer:10 expression:11 go:2 return:1 statement:25]
+arities: map[2:56 3:4]
+callee expression itself calls (today's temp form runs g() first; Go runs the callee's calls first): 1 (1 in non-test files)
+...any callees:
+   24 fmt.Println
+    1 showAll
+SITE $REPO/src/tests/Behavioral/DeferFrameScopes/main.go:129:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferFrameScopes/main.go:130:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferFrameScopes/main.go:131:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferFrameScopes/main.go:132:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferFrameScopes/main.go:133:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:70:8	package func	fixed(2)	show	2	defer	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:77:8	package func	fixed(3)	show3	3	defer	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:85:8	package func	fixed(2)	report	2	defer	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:95:8	package func	fixed(2)	show	2	defer	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:96:8	package func	fixed(3)	show3	3	defer	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:105:8	method	fixed(2)	s.take	2	defer	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:115:9	package func	fixed(2)	report	2	defer	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:140:5	package func	fixed(2)	goShow	2	go	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:149:5	package func	fixed(2)	goShow	2	go	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:196:8	package func	fixed(3)	setRegs	3	defer	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:205:8	func literal	fixed(2)	(func(n int, s string) literal)	2	defer	test=false	calleeCalls=true
+SITE $REPO/src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.go:215:8	package func	...any	showAll	2	defer	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.go:180:9	package func	fixed(2)	joinPair	2	return	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/ForClauseSpill/ForClauseSpill.go:25:6	package func	fixed(2)	keep	2	expression	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/ForClauseSpill/ForClauseSpill.go:36:14	package func	fixed(2)	keep	2	expression	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/ForClauseSpill/ForClauseSpill.go:49:11	package func	fixed(2)	must	2	assignment	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/ForClauseSpill/ForClauseSpill.go:49:36	package func	fixed(2)	must	2	assignment	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/ForClauseSpill/ForClauseSpill.go:59:11	package func	fixed(2)	must	2	assignment	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/ForClauseSpill/ForClauseSpill.go:59:36	package func	fixed(2)	must	2	assignment	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/ForClauseSpill/ForClauseSpill.go:75:11	package func	fixed(2)	must	2	assignment	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/ForClauseSpill/ForClauseSpill.go:75:36	package func	fixed(2)	must	2	assignment	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.go:58:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.go:59:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.go:60:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/NilReceiverNormalization/main.go:63:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/NilReceiverNormalization/main.go:64:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/PackageVarTupleInitOrder/main.go:31:9	package func	fixed(2)	must	2	assignment	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/PackageVarTupleInitOrder/main.go:34:17	package func	fixed(2)	must	2	assignment	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/PlainSendOperandOrder/PlainSendOperandOrder.go:34:32	package func	fixed(2)	must	2	expression	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/PlainSendOperandOrder/PlainSendOperandOrder.go:42:17	package func	fixed(2)	must	2	expression	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/PlainSendOperandOrder/PlainSendOperandOrder.go:48:18	package func	fixed(2)	must	2	expression	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/PlainSendOperandOrder/PlainSendOperandOrder.go:55:18	package func	fixed(2)	must	2	expression	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/PlainSendOperandOrder/PlainSendOperandOrder.go:68:8	package func	fixed(2)	must	2	expression	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/SelectSendTupleSpread/SelectSendTupleSpread.go:33:13	package func	fixed(2)	must	2	expression	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/SelectSendTupleSpread/SelectSendTupleSpread.go:42:13	package func	fixed(2)	must	2	expression	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/SelectSendTupleSpread/SelectSendTupleSpread.go:49:22	package func	fixed(2)	must	2	expression	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/SelectSendTupleSpread/SelectSendTupleSpread.go:54:8	package func	fixed(2)	must	2	expression	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/SwitchPointerSentinelCase/main.go:135:2	package func	...any	fmt.Println	3	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/TupleSpreadIntoCall/TupleSpreadIntoCall.go:30:7	package func	fixed(2)	makeNode	2	assignment	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/TupleSpreadIntoCall/TupleSpreadIntoCall.go:47:9	package func	fixed(2)	combine	2	assignment	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/TupleSpreadIntoCall/TupleSpreadIntoCall.go:52:7	package func	fixed(2)	combine	2	assignment	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/TupleSpreadIntoCall/TupleSpreadIntoCall.go:55:2	package func	fixed(2)	record	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:105:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:106:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:107:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:108:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:111:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:112:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:129:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:133:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:139:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:140:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:144:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:149:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false
+SITE $REPO/src/tests/Behavioral/VariadicSlotInterfaces/main.go:155:2	package func	...any	fmt.Println	2	statement	test=false	calleeCalls=false

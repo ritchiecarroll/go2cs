@@ -90,6 +90,8 @@ func resetPackageState(pkg *packages.Package) {
 	nominalProductionConstraints = hashset.HashSet[string]{}
 	interfaceInheritances = make(map[string]hashset.HashSet[string])
 	adapterClassImplementations = hashset.HashSet[string]{}
+	closedCarrierImplementations = hashset.HashSet[string]{}
+	closedCarrierWarnings = hashset.HashSet[string]{}
 	implicitConversions = make(map[string]hashset.HashSet[string])
 	invertedImplicitConversions = make(map[string]hashset.HashSet[string])
 	indirectImplicitConversions = make(map[string]hashset.HashSet[string])

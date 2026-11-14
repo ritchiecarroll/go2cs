@@ -37026,6 +37026,526 @@ is the first of the row's accepted host states. I predicted the opposite (W2-6, 
 differences); both are MISSES, scored in DATA-la64-s7-bank-plan.md section 13. Wave 1's hosted host differences
 (gc/scan's AVX-512 tests, syscall's privilege class, internal/zstd's tool) do not recur here.
 
+## 2026-11-12 — G (COORD's ruling on a stop line of the closed-carrier seat): `fmt` `%v` of an interface holding a value adapter panics in `reflect.Value.Field` on master — FIXED at that one site; the same shells reach `Int` (a crash) and slices and maps (an empty print, exit 0) — OPEN, a design COORD routes
+
+**The defect.** An interface does not always hold its value directly. Two SHELL objects can stand between: the
+value adapter (`<Type>ᴠ<iface>`, the form a struct of another package takes when it is assigned to an interface
+declared here) and the structural object shell (`Δ<iface>ᴛObj`, the form an `any`-to-interface assert builds).
+reflect's dynamic-type read sees through both shells, so a `Value` made over such an interface carries the
+WRAPPED type's kind and tables. Its accessors then read the object the `Value` holds, which is still the shell.
+
+`Value.Field` handed the shell to the field read and the runtime refused it. `fmt` reaches `Field` for every `%v`
+of a struct, so printing such an interface ended the program.
+
+**The control, on master's runtime.** It is not a defect of the seat that met it. The tracked behavioral program
+`FormatTypeAdapters` holds a struct of its `typelib` package in a local interface and printed it only with `%T`
+and through its method. One line was added, `fmt.Printf("%v\n", m)`, and the program was run before any fix, on a
+tree whose runtime equals master `6869ec2b54` in every file on the path. Predicted at 85% to crash: TRUE.
+
+| Lane | Reading |
+|---|---|
+| Go | exit 0, the struct printed |
+| Converted | exit 2: `System.ArgumentException`, "Field 'Tag' defined on type '…typelib_package+Mark' is not a field on the target object…", thrown under `reflect.Value.Field` |
+
+**The fix, at that site only.** The read in `Value.Field` (the hand-owned `value_impl.cs`) now unwraps the
+interface shells and then the value adapter, in the order `IsNil` already uses, and reads the field from the
+struct. With it the program's four runner rows read pass 1 each (Transpile, Compile, Target, Output), and the
+added line is the tracked red-first proof: the program's source, C# and golden move by that line.
+
+**The family, measured after the fix (17:29 CST).** COORD ordered the other accessors probed before this row was
+written. The probe is not tracked: a `typelib` package with a named int, a named slice, a named map and a struct,
+each held in a local interface through each shell, one case per process, printed with `%T`, `%v`, `%d` and `%+v`.
+Predicted before the run (17:27 CST): at least one of the six non-struct cases differs from Go, 65%, TRUE; both
+struct cases equal Go, 90%, TRUE.
+
+| Held value | Shell | Go | Converted |
+|---|---|---|---|
+| named int `Count(7)` | value adapter | `7` three times, exit 0 | exit 2 at the first `%v`: `System.InvalidCastException`, the shell cast to `System.IConvertible` in reflect's `Int`, reached from fmt's `printValue` |
+| named int `Count(7)` | object shell | the same | the same exception, on the object shell |
+| named slice `List{1, 2, 3}` | value adapter | `[1 2 3]` three times | `[]` three times, exit 0 |
+| named slice `List{1, 2, 3}` | object shell | the same | `[]` three times, exit 0 |
+| named map `Dict{"a": 1}` | value adapter | `map[a:1]`, `map[%!d(string=a):1]`, `map[a:1]` | `map[]` three times, exit 0 |
+| named map `Dict{"a": 1}` | object shell | the same | `map[]` three times, exit 0 |
+| struct | value adapter | the struct | equal to Go (the fixed site) |
+| struct | object shell | the struct | equal to Go (the fixed site) |
+
+`%T` and the method call are right in all eight cases. So `Field` is one site of a family: `Int` crashes, and the
+slice and map accessors answer as if the value were empty. The slice and map arm is the worse one, because it is
+SILENT: wrong output with exit code 0.
+
+**Who meets it.** A program that prints, with a verb that goes through reflect, an interface holding a named
+non-struct type of another package, or any value that reached the interface through an `any` assert. NOT
+MEASURED: the remaining accessors (`Uint`, `Float`, `String`, `Bool`, `Index`, `MapRange`, `Len` read on their
+own), `encoding/json` and the other reflect clients, a pointer adapter, and Native AOT.
+
+**Owed, a design, not taken here.** An unwrap where reflect BUILDS the value would cover every accessor at once.
+It changes what `Interface()` hands back for a shell-held value, so it is a design with its own measurement and
+not a widening of this fix. By COORD's ruling this seat changes `Field` and nothing else, and the design is a
+post-seat item COORD routes.
+
+**The gate this fix owes.** `value_impl.cs` is a hand-owned file under `src/core`, so the seat owes the full
+`go test ./...` and reflect's own validated row at its tip. At the tip `e222cbbce5` the row reads
+445 tests validated against `go test` with 21 disclosed, against the banked 445 with 21: equal. The row's first
+run, one merge earlier, ran nothing on the converted side: the pipeline looked for the published host under the
+project file's name, a master defect that batch 293 fixed the same hour. `go test ./...` is read at the commit
+that carries this row, and the seat's post states it.
+
+— G (2026-11-12)
+
+## 2026-11-12 — G (COORD's order, the fix for this lane's row of the same day): one instantiation of a generic type behind a non-generic interface now compiles and runs, through a CLOSED CARRIER; three uses are refused by warning `GO2CS2007`, two of them OWED designs
+
+**The defect, in one line.** `box[T]` declares `val() T`, the interface `valuer` asks for `val() point`, and Go
+accepts `box[point]` as a `valuer`. The generator implemented the interface over the type's OPEN definition, where
+`val()` returns `T`: CS0029. This lane's row of 2026-11-12 on the defect (ref `d2afbe6551`) carries the readings.
+
+**What landed (option A, as COORD ruled it).**
+
+- THE PREDICATE is the converter's (`closedCarrier.go`). A pair takes the closed route only when ALL hold: the
+  type is an instantiation of a generic type the converting package declares; the interface is named and NOT
+  generic; and a method the interface requires names a type parameter of the definition. Every other pair keeps
+  the route it had, byte for byte.
+- THE MARKER. The pair's record in `package_info.cs` carries `Closed = true`. The generator reads it, and so does
+  a consuming package's converter, which then wraps instead of trusting the type as a partial struct.
+- THE CARRIER is an adapter class for the one instantiation: `boxᴠvaluer` holds a copy for a value, and a
+  NON-generic `cellжgetter` holds the box for a pointer. Both are named from the type's BARE name, on the
+  generator's side and at the conversion site, and the type arguments live only in the wrapped type.
+- VISIBLE CODE. A conversion site of a value pair reads `new boxᴠvaluer(x)` where Go reads `x`. A pointer site
+  reads `new cellжgetter(p)`, one type-argument list shorter than before. Declarations and methods do not move.
+
+**Considered and rejected: the open partial behind a per-interface guard (B').** It leaves a false C# subtype
+behind (`box<int>` IS a `valuer` to the runtime) and guards five golib sites of the assert path against it. One
+missed guard is a silent wrong answer to `x.(valuer)`, so the false subtype is not created at all.
+
+**CORRECTION, dated 2026-11-12, to this lane's row of the same day.** That row says exactly one instantiation can
+satisfy such an interface. That is false with two type parameters: Go accepts `pair[point, int]` AND
+`pair[point, string]` for an interface whose method names only the first, and prints both (measured, one program).
+The carrier's name has room for one instantiation of a pair in a package, so the second is refused by the warning.
+
+**Refused by warning `GO2CS2007`, each loud: the warning names the site, and the C# build then fails there.**
+
+| Use | Why the carrier does not serve it | Build reading beside the warning | Status |
+|---|---|---|---|
+| the instantiation as a TYPE ARGUMENT constrained by the interface (`use[V valuer]` called with `box[point]`) | C# checks the constraint by name, and `box<point>` does not implement `valuer`; wrapping would change `V` | CS0315 | OWED design: a value constraint proxy |
+| a required method PROMOTED from an embedded field (`outer[T]{box[T]}`) | the carrier forwards to members the type declares itself | CS0029 | OWED design: promotion naming `T` |
+| a SECOND instantiation of one pair in one package | two carriers of one name | CS0102 with CS0579 | owed with the generic carrier (A2), when a user appears |
+
+**The proof.** Two tracked behavioral programs, each compared with Go's output. `GenericInstClosedIface` (24
+lines) converts through every site kind: assignment, a var with a value, argument, return, slice element, struct
+field, map value, send; then `==` against the value and between interfaces, the assert back, a type switch, `%v`
+and `%T`, an `any` asserted to the interface, the interface as a map key, `box[int]` answering false, and the
+pointer form with its assert back. `GenericInstClosedIfaceConsumer` (5 lines) has a library that exports the
+generic and the interface and converts the pair, and a `main` that converts it again: the marker alone carries
+it. Red first: both programs fail to compile on master with CS0029. A GenTests file runs the generator on a
+marked and an unmarked copy of the same records; the unmarked copy reads the open forms and the defect's error.
+
+**Gates, each read from its log** (Windows x64, SDK 10.0.400, runtime 10.0.11, go1.26.10). The tip is `e222cbbce5`:
+the two seat commits under two merges of master, batches 292 and 293.
+
+- The full `go2cs.slnx` Debug build reads 0 errors, and GolibTests reads 2568 passed, 0 failed, 45 skipped. Both
+  were read at the carrier commit `2bf6106f05`; the two merges bring no generator source and no golib file.
+- GenTests at the tip: 517 of 517.
+- Behavioral, default lane, at the tip: `FormatTypeAdapters` and both new programs pass Transpile, Compile, Target
+  and Output.
+- `go test ./...` and the docs guards are read at the commit that carries this row; the seat's post states them.
+- FOOTPRINT: 0 files. It ran over the FOUR targets the converter declares (windows, linux and darwin on amd64,
+  linux on arm64). The converter refuses a subset of them, so the order's three-target footprint is read as four.
+  Each arm is a `-stdlib` emission from a root seeded from `src/core`, by a converter built at the arm's ref: the
+  base is the reflect commit `8831cf370d`, the seat is the carrier commit `2bf6106f05`. Both arms exit 0 with
+  "Failed: 0" on all four targets and clobber 0 of 226 hand-owned files, and each then converts the tests of 11
+  packages. 0 files differ and 0 exist in one arm only (the run manifests excluded), so this is a plain seat.
+- `GO2CS2007` is registered in `docs/DiagnosticCodes.md`, as COORD allocated it.
+
+**Predictions (16:23 and 16:32 CST), scored.**
+
+| # | Prediction | Score |
+|---|---|---|
+| PD-1, 85% | the red shapes turn green; the passing shape keeps its bytes | TRUE: both programs pass all four rows, and the footprint (PD-2) holds every other emission |
+| PD-2, 85% | corpus footprint 0 files | TRUE: 0 files differ over four targets and the tests of 11 packages |
+| PD-3, 65% | assert back, `==`, `%v`, `%T` and a type switch need no golib change | SPLIT: four TRUE; `%v` FALSE, it needed the `Value.Field` fix (reflect, not golib) |
+| PD-4', 70% | an `any` holding a raw `box[point]` asserts to the interface through the object shell | TRUE |
+| PD-5, 80% | `box[int]` answers false | TRUE |
+| PD-6, 55% | the shell and a wrapped adapter are equal under `==`, as a map key and under `%v` | SPLIT: `==` and the map key TRUE; `%v` FALSE, the same fix |
+| PD-7, 75% | the promoted shape and the type-argument shape are red on master | TRUE |
+
+Stop lines: S3 fired on `%v` and COORD ruled the `Value.Field` fix into the seat as its own first commit (the row
+above). S1 did not fire: the footprint moved no tracked file. S2, S4 and S5 did not fire.
+
+**Limits and decisions, each read and none hidden.**
+
+1. An anonymous interface literal keeps the route it had: the predicate asks for a named interface.
+2. A promoted method among the required ones refuses the pair even when that method names no type parameter.
+3. NOT MEASURED: a `-tests` recompile of a package that holds a closed pair.
+4. The type-argument warning is raised in the production driver only, not in the test-variant conversion.
+5. The promoted warning carries the file and no line.
+6. The generator's value-adapter arm now names a generic type by its bare name. That also renames the adapter of
+   a generic struct of ANOTHER package, if one exists. The old identifier held the type-argument
+   list (`pkg_G<Object, Object>ᴠmapLike`), and a GenTests arm pinned it as a known defect until both sides could
+   move together; that arm now asserts the bare name. The footprint moved no cast site, so the corpus converts no
+   such pair today. Read, not compiled: that the old identifier failed to compile. NOT MEASURED: two
+   instantiations of one foreign generic for one interface in one consumer, which would now share a name. This
+   is a NAMED DEVIATION from "every other pair keeps its route", put to COORD for a ruling.
+7. A generic named func type with a closed pair takes the bare name too.
+8. NOT MEASURED: Native AOT, and the cost of the reflective call on the `any`-to-interface path.
+
+— G (2026-11-12)
+
+## 2026-11-12 — G (amends this lane's two rows of the same day): the closed-carrier seat's guards read RED at the rows' own commit; six guard tests, one commit on top fixes them
+
+**Dated 2026-11-12 20:22 CST.** The two rows above say `go test ./...` and the docs guards are read at the commit
+that carries them. At that commit, `47f7226d5d`, they read red: the converter package and the repo guards each
+FAIL, and the other nine packages pass. Six tests fail, none in converted code and none in the emission:
+
+- `TestProjitemsRegistersEveryGoSource`: the seat's two new converter files were not in the projitems list.
+- `TestDocsProvenanceNotesResolve`, with the two tests that plant a stale note beside it: three notes on the
+  strategy pages cited lines of the converter driver and of the implement generator that the seat moved (by 3
+  and by 30 lines).
+- `TestDocsSamplesHoldTheirLines`: a sample of reflect's hand-owned file sits 11 lines lower since the reflect
+  commit.
+- `TestGo2csDiagnosticCodeRegistry`: the table row for `GO2CS2007` says Warning, and the guard held every
+  converter code at Error. Before this seat that was true, since `-warn` only downgrades an error per run.
+  `GO2CS2007` is the first converter code that is a warning in every run.
+
+**The fix, in the commit that carries this row.** The projitems list names both files; the three notes and the
+sample are re-cited at the lines that hold what they describe; and the registry guard now READS a converter
+code's severity. A code is a warning when every use of its constant in the converter's own sources is an
+argument of the warning reporter, and an error otherwise. A control without the tree holds the reader to that
+(a constant with one other use, or with no use, is not warning-only).
+
+**Red first.** With the reader in place the guard passes on the tree; with the `GO2CS2007` row flipped to Error
+it fails and names that row; the page was then restored byte-identical. No converter, generator or golib source
+moves in this commit, so the footprint and the other gates stand as read. The readings of `go test ./...` and
+of the docs guards at this commit are in the seat's post.
+
+**The lesson is an old one, and it is this lane's:** a commit that moves source lines runs the repo guards
+before the next step, not at the end of the seat. Here they ran after three more commits.
+
+— G (2026-11-12)
+
+## 2026-11-12 — G (COORD's ruling on the closed-carrier seat's named deviation): two instantiations of ONE generic type of another package behind ONE interface, by value, do not compile (CS0102, loud); the same owed item as the second-instantiation refusal
+
+**Dated 2026-11-12 20:54 CST, read at the merge of master (batch 294) into the seat's branch.** The seat names
+the value adapter of a generic struct of another package from the bare name. COORD accepted that name and
+ordered the case the seat had not measured: two instantiations of one such type converted to one interface in
+one importing package, which share that name. Three programs, not tracked, each an importing package and a
+library; Go's output read first.
+
+| Program | Shape | Reading |
+|---|---|---|
+| control | ONE instantiation, `Bag[int]` by value to `Sized`; the methods do not name the type parameter | converts and compiles; prints Go's output |
+| two, open | `Bag[int]` and `Bag[string]` by value to `Sized` | converts; compile FAILS: CS0102 names `vallib_BagᴠSized`, with CS0579 |
+| two, closed | `Pair[Point,int]` and `Pair[Point,string]` to `Firster`, whose method names the first type parameter | converts; compile FAILS: CS0102 names `vallib_PairᴠFirster`, with CS0579 |
+
+**Nothing compiles silently.** Each failing program stops at the C# compiler, on an error that names the
+importing package's class and the adapter, and the adapter's name holds the type and the interface.
+
+**One difference from the same-package refusal.** In the declaring package the converter prints `GO2CS2007`
+beside the compile error for a second instantiation. From an importing package it does NOT: the converter run
+directly on each failing program exits 0 with no `GO2CS2007` line. The compile error is the only signal there.
+
+**Scores.** Predicted before the run: the control compiles and equals Go (TRUE); the open pair fails on the
+shared name (TRUE); the closed pair fails with the converter's warning beside it (SPLIT: it fails, without the
+warning).
+
+**Owed, as one item with the second-instantiation refusal of this lane's row of the same day:** a carrier that
+is generic over the type parameters, or a name that tells two instantiations apart, for the declaring package
+and for an importing one; and, until then, the converter's named warning from an importing package too. Before
+this seat the by-value adapter of a generic type of another package held the type-argument list inside its
+class name, a defect a generator test pinned, so the one-instantiation control is new ground. The pair was not
+run at the seat's base.
+
+— G (2026-11-12)
+
+## 2026-11-13 — C2 (found by I0-lib, REC-A 7.7): golib's `array<T>` equality holds a NaN element equal to itself; Go says unequal
+
+`array<T>.Equals` compares elements through `PointerNilIdentity<T>.ElementComparer`
+(`src/core/golib/array.cs:914`), which for every non-pointer `T` is `EqualityComparer<T>.Default`
+(`src/core/golib/PointerNilIdentity.cs:63`). `double.Equals` and `float.Equals` hold NaN equal to NaN, so a Go
+`[2]float64{NaN, 0} == [2]float64{NaN, 0}` reads true where Go reads false (Go's `==` on an array is element `==`,
+and NaN is unequal to everything). The same comparer hashes the array, so a NaN-holding array key is also found in a
+map where Go never finds it. 0 and -0 compare equal under both, so only NaN is wrong.
+
+The go.arrays family (I0-lib, `claude/c2-inline-arrays-i0`) compares through `builtin.AreEqual` and is Go-correct;
+its `EqualityIsGosElementByElement` test is the reference shape. NOT TOUCHED by I0. COORD routes the fix
+(2026-11-13 05:18Z).
+
+— C2 (2026-11-13)
+
+## 2026-11-13 — C2 (I0-lib, REC-A 7.7): P6 MISSED as worded; the family's rooted increment over golib is inside the standalone total
+
+**P6, as worded:** "A rooted Native AOT publish of the full constrained family stays within 2.4 MB (measured
+2,301,488)." **MISSED.** A program using `array201<sbyte>` (C1's `app-Program.cs` shape) over the shipped
+go.arrays.dll and golib.dll, ILC 10.0.14, linux-x64, `TrimMode=partial`, with `TrimmerRootAssembly go.arrays`: 17,793,904
+bytes. The same program unrooted: 16,933,744 bytes.
+
+**Why the prediction missed, not the mechanism:** C1 states the 2.4 MB bound was its standalone measurement's TOTAL,
+a family with no golib. The shipped family references golib, and every go2cs Native AOT binary carries golib's
+~16.9 MB. The mechanism held: rooting the family adds **860,160 bytes**, inside the standalone increment of 976,432
+(2,301,488 against the 1,325,056 no-family control), so `where T : unmanaged` keeps the rooted family from compiling
+over `__Canon`.
+
+**Re-measured with `this[ulong]`** (C1's review item M1, on every member): go.arrays.dll 3,443,200 -> 3,803,136 bytes;
+rooted 17,793,904 and unrooted 16,933,744, the same increment, 860,160.
+
+**The corrected bound for later seats of the family** (COORD, 2026-11-13 05:18Z): the rooted increment over golib is
+at most 976,432 + 10%. The prediction is corrected for the seats after this measurement, not for this one.
+
+— C2 (2026-11-13)
+
+## 2026-11-13 — C1 (found by the Tour visual-parity scout, item 1): a multi-value spread `f(g())` whose callee expression itself calls runs `g()` FIRST, against Go's left-to-right call order — OPEN, routed to C2 (S4)
+
+**The reading.** Go's spec orders the function calls in an expression left to right, and the callee expression comes
+first. So in `pick()(g())`, `pick()` runs before `g()`. Measured under gc go1.26.10
+(`docs/phase4/data/tour-visual-parity/spread/go-order-main.go`): the log reads `pick`, then `g`.
+
+go2cs hoists the inner multi-value call into temps ahead of the whole statement (`src/go2cs/convExprList.go:276-337`:
+`var (ᴛ1, ᴛ2) = g(); pick()(ᴛ1, ᴛ2);`), so `g()` runs before `pick()`. The C# probe
+(`spread/probe-Program.cs`, the "order 1" row) reproduces that order. The converter was not run on this box.
+
+**Where it is met.**
+- **172 sites in std, all in one test file:** `internal/sync/hashtriemap_test.go`, the curried helpers
+  `expectPresent(t, s, i)(m.Load(i))`, `expectMissing`, `expectStored`, `expectLoaded` and kin.
+- **They are NOT observable there.** Each `expect*` call only runs `t.Helper()` and captures its arguments, and the
+  map operation touches neither, so no verdict moves.
+- **No non-test std code and no behavioral program has the shape.** The scout doc's "plus 1 behavioral" was a census
+  false positive: a `defer` whose callee is a func LITERAL, whose body's calls do not run when the callee is evaluated.
+- **The census:** `spread/spreadcensus-main.go`. Its callee-calls flag walks into func literals, which is the false
+  positive above.
+
+**What the fix must keep.**
+- **Hoist the callee value into a temp BEFORE the inner call**, only when the callee expression contains a call.
+- **Leave a callee that only reads a variable alone.** A receiver or func variable that the call changes must still be
+  read after it, because gc does so: `p.scaled(g2())` reads 9234 and `h(g3())` reads 12, measured. That is H's rule
+  for operand lists (BOARD, 2026-11-12), which C2's spill work follows.
+- **Defer and go:** their spread path (`visitDeferStmt.go:419`) evaluates the callee at the defer, so the same order
+  question applies there. NOT READ.
+
+**Owed.** C2 (S4): a behavioral program where both the callee's call and `g()` have visible effects, red first against
+Go's order, then the hoist.
+
+— C1 (2026-11-13)
+
+## 2026-11-12 — G (COORD's ruling on Condition 3, item 3): a NIL func of a named type misreads under reflect, with and without an interface shell; its own seat, after the unwrap seat
+
+**Dated 2026-11-12 21:53 CST, read at `1d7e03bdbc` (master `7c7dc687f8` plus the closed-carrier seat).** The
+census for Condition 3 (reflect accessors read through an interface shell) held five typed nils beside its 13
+kinds. The nil slice, map, chan and pointer read equal to Go in every arm. The nil func does not, and two of its
+rows fail in the DIRECT arm, where no shell is involved: so this is a defect of master on its own root, and COORD
+ruled it a seat of its own, after the unwrap seat. The program is not tracked; Go's output was read first.
+
+The value is `typelib.Step(nil)`, where `Step` is `func(int) int` of another package with a method `Name` by
+value. Arms: direct (the value in an `any`), sh (that `any` asserted to a local interface `namer`), er (a twin
+type that also implements `error`, converted to `error`). The static conversion to `namer` reads equal to Go in
+every row.
+
+| Arm | Read | Go | Converted |
+|---|---|---|---|
+| direct | `ValueOf(a).MethodByName("Name").Call(nil)` | `step` | the process dies: `System.InvalidCastException`, "Unable to cast object of type 'go.NilFuncValue' to type 'Step'" |
+| direct | `ValueOf(&slot).Elem().Set(ValueOf(a))`, `slot` a `namer` | `step` from `slot.Name()` | Go panic: "reflect.Set: value of type typelib.Step is not assignable to type main.namer" |
+| sh | `Kind()` | `func` | `ptr` |
+| sh | `Type()`, and `%T` of `Interface()`, and of an `any` slot after `Set` | `typelib.Step` | `main.namer[…/typelib.Step]`, the shell's own type |
+| sh | `NumMethod()` | `1` | `0` |
+| sh | `IsNil()`, `IsZero()` | `true`, `true` | `false`, `false` |
+| sh | `%v` | `<nil>` | `0xc000000500000000` |
+| sh | `Interface().(namer).Name()` | `step` | Go panic: "interface conversion: interface is nil, not main.namer" |
+| sh | `MethodByName("Name").Call(nil)` | `step` | Go panic: "reflect: call of reflect.Value.Call on zero Value" |
+| er | `Interface().(namer).Name()` | `step` | Go panic: "interface conversion: interface is nil, not main.namer" |
+| er | `Set` into a `namer` slot | `step` | Go panic: "reflect.Set: value of type typelib.StepE is not assignable to type main.namer" |
+
+**Counts.** Of the nil func's 13 reads per arm: direct 2 differ, the static conversion 0, sh 10 (8 silent with
+exit code 0, 2 panics), er 2. The sh arm's silent rows are the worst class: a wrong kind, type and nil-ness with
+nothing printed to say so.
+
+**What the readings say, not yet a root cause.** In the direct arm the nil func is held as a `go.NilFuncValue`
+object, and two reflect paths treat that object as the named delegate type. In the sh arm the assertion builds
+the generic shell around the nil func, and reflect reads the shell as the value. The unwrap seat keeps a shell
+whose wrapped value is nil, as golib's own unwrap rule does, so it is predicted NOT to move these rows.
+
+**Not measured.** The exit code of the direct arm's crash (an unhandled exception of the same run read exit code
+2 in another case); a nil func of an unnamed type; a nil func of a named type of the SAME package; Native AOT.
+
+**Predictions of the census for this part, written before the run:** the direct arm's 68 typed-nil reads equal
+Go (FALSE, on the two rows above); kind, type and `IsNil` equal Go in the three shell arms for all five kinds
+(FALSE for the nil func in sh; TRUE elsewhere).
+
+— G (2026-11-12)
+
+## 2026-11-12 — G (Condition 3, COORD's ruling: option A with the identity token): reflect unwraps an interface shell where the Value is built; six predictions scored, no stop line tripped
+
+**Dated 2026-11-12 23:17 CST. Base `1d7e03bdbc`, fix `74fafaa67d`, Windows x64, SDK 10.0.400, go1.26.10.** A
+value that reaches reflect inside an interface shell (the generic adapter an assertion or a conversion to an
+interface builds) was read as the shell. A named slice or map behind the shell printed EMPTY with exit code 0.
+The row above this one holds the nil func part, which is its own seat.
+
+**The fix.** `makeReflectValue` of reflect, and its twin of reflectlite, unwrap the shell once, where the Value is
+built: the structural chain first, then one adapter. A shell around a NIL keeps the WHOLE shell, as golib's own
+unwrap rule does. Every accessor then reads the value, so no accessor carries a rule of its own.
+
+**The identity token.** reflect's Value keeps the shell it was built from in ONE companion field, `shell`. Its
+one writer is `makeReflectValue` (null unless it unwrapped). Its two readers are the Value's `Equals` and
+`GetHashCode`, through one private property. No accessor reads it. reflectlite's Value carries NO token: it has
+no equality that reads the datum.
+
+**Two more sites, beyond the two builders.** Both `Swapper` bodies (reflect's and reflectlite's) read their `any`
+argument directly, and panicked "call of Swapper on slice Value" for a slice behind a shell. Both now read it
+through `ValueOf`, as Go's body does. They are hand-owned files of the same two packages, so S3 holds.
+
+**The census: 1028 reads, 18 kinds, four arms, each scored against Go's output.** direct is the value in an
+`any`; va is a static conversion to a local interface; sh is the `any` asserted to that interface; er is a twin
+type converted to `error`.
+
+| Arm | Base: EQUAL / SILENT / PANIC / CRASH | Fix: EQUAL / SILENT / PANIC / CRASH |
+|---|---|---|
+| direct | 255 / 0 / 1 / 1 | 255 / 0 / 1 / 1 |
+| va | 214 / 12 / 7 / 24 | 257 / 0 / 0 / 0 |
+| sh | 202 / 22 / 9 / 24 | 247 / 8 / 2 / 0 |
+| er | 220 / 9 / 9 / 19 | 255 / 0 / 2 / 0 |
+
+Every read that still differs at the fix is a nil func read: 2 direct, 10 sh, 2 er, the rows of the entry above.
+
+**Predictions, posted before the fix, scored.**
+
+- P1, the 567 shell reads of the 13 non-nil kinds are EQUAL: TRUE.
+- P2, the direct arm keeps every class: TRUE (255, 1, 1 in both columns).
+- P3, `==` on two Values stays EQUAL in every arm: TRUE.
+- P4, the four other typed nils stay EQUAL and the nil func rows do not move: TRUE.
+- P5, seven `-tests` rows keep their sets: TRUE. Each row was read on Windows at base and at the fix, by one
+  converter binary (converter, generator and golib sources are byte-identical between the two refs), and
+  compared test by test and with the bank.
+
+| Package | Bank | Base | Fix | Tests that moved |
+|---|---|---|---|---|
+| reflect | 445 matched, 21 disclosed | 445 with 21 | 445 with 21 | 0 |
+| fmt | 62 matched, 1 disclosed | 62 with 1 | 62 with 1 | 0 |
+| errors | 80 matched, 0 disclosed | 80 | 80 | 0 |
+| sort | 63 matched, 0 disclosed | 63 | 63 | 0 |
+| encoding/json | 550 matched, 0 disclosed | 550 | 550 | 0 |
+| encoding/binary | 143 matched, 3 disclosed | 143 with 3 | 143 with 3 | 0 |
+| text/template | 53 matched, 0 disclosed | 53 | 53 | 0 |
+
+- P6, one tracked program is red at base and green at the fix: TRUE. `ReflectShellAccessors` passes its four
+  rows at the fix (Output: 1 compared, 0 failed). With the three source files put back to their parent state, its
+  Output row fails: "exit code mismatch: C# 2 vs Go 0", on the panic "call of reflect.Value.Cap on slice Value".
+  The files were restored byte-identical and the row read green again.
+
+The comparator of P5 was made to fail first: one verdict flipped in a copy of a results file reads "moved 1".
+
+**Stop lines.** S1 (a direct read changes class), S2 (a shell read leaves EQUAL), S3 (a file outside the
+hand-owned reflect and reflectlite files), S4 (a caller needs the shell kept), S5 (a row of P5 moves) and S6 (the
+token field trips a layout reader or a guard): none tripped. For S6 the repo guards and the reflect row are the
+readings.
+
+**A correction to the entry above.** The direct arm's crash now has a measured exit code: 2. The read is
+`MethodByName("Name").Call(nil)`.
+
+**Not built or measured.** The fixture adds two members to the converter-dev solution; that solution was not
+built end to end. Read instead: both member paths list and exist, and both projects compile in the runner's
+Compile row. Native AOT. Linux and macOS rows.
+
+— G (2026-11-12)
+
+## 2026-11-13 — G (seat N1, COORD's cut of the nil-func design): a typed nil func in interface space is ONE value, stated by one golib helper; five predictions scored, no stop line tripped
+
+**Dated 2026-11-13 01:48 CST. Base `bb7419bef0`, fix `d3dc97e466` (the `-tests` rows read at `0f5abeac11`, its
+docs re-cite), Windows x64, SDK 10.0.400, go1.26.10.** The two rows above this one hold the earlier readings.
+This is seat N1 of two: the roots in golib and in the two hand-owned reflect files. Seat N2, the converter's
+func-type case of a type switch, stacks on it.
+
+**What was wrong.** A nil func of a named func type that reaches an interface is held in one of three shapes:
+the canonical carrier (boxed into `any`), a generated value adapter over a null delegate (converted to an
+interface), or the generic runtime shell over a null delegate (asserted to an interface). Each path that asks
+what an interface value IS answered for some shapes and not for others, so one Go value read differently by
+route. Eleven of the census's 34 probes hold no reflect call: this is a defect of the language surface first.
+
+**The design's measurement, read 2026-11-13 00:20 CST at the base.** 714 reads: 7 carriers (4 named nil funcs,
+in and out of the package; one unnamed; two controls, a live func and a typed nil pointer), 34 probes.
+
+- L1, a type switch never matches a typed nil func and falls to default in silence, in every arm, direct
+  included: 38 reads, and L2 masks 6 more. Seat N2's root.
+- L2, a re-assertion to its own interface misses (4 reads), an assertion through an assertion or an error misses
+  (6), and an assertion to `error` through a named interface misses (4).
+- L3, the panic text names "NilFuncValue" (7 reads) or "interface is nil".
+- reflect: `Call` crashes (11 reads), `Method` and `MethodByName` crash in the direct arm (8), `Set` and
+  `Convert` into an interface fail (16).
+
+**The fix: ONE RULE, one helper.** In interface space a typed nil func is its func type's canonical carrier, and
+a shell or adapter over a null func stands for it. `GoReflect.NilFuncOf` states it, and every reader goes
+through it:
+
+- the type assertion (its try form, its throwing form and the equality unwrap) resolves a shell or adapter over
+  a null func to the carrier, which the carrier arm that already existed answers by its type;
+- the dynamic type and the nil-word test answer the func type for the generic shell;
+- the method bind hands the receiver cast a null delegate, where it handed the carrier and the cast died;
+- assignability lets an interface slot take a typed nil func, as the language does;
+- the type name and the type-assertion panic name the func type, where they named the carrier class or a nil
+  interface;
+- reflect's and reflectlite's unwrap keep the carrier for a shell over a null func, and reflect's `Call` and
+  `CallSlice` test for a nil func before the delegate cast, with Go's text: "call of nil function".
+
+`NilFuncOf` is the ONE public golib member the seat adds. It sits on `GoReflect`, a tier-2 type, so it is a seam
+for the converted reflect packages and no user API. The own-type arm of the assertion that the new unwrap makes
+unreachable is removed. `builtin.type()` is NOT changed: no read needs it. No converter change, and the corpus
+does not move.
+
+**The census: 714 reads, 7 carriers, four arms, each scored against Go's output.** direct is the value in an
+`any`; va is a static conversion to an interface; sh is the `any` asserted to that interface; er is a twin type
+converted to `error`.
+
+| Arm | Base: EQUAL / SILENT / PANIC / CRASH | Fix: EQUAL / SILENT / PANIC / CRASH |
+|---|---|---|
+| direct | 188 / 22 / 15 / 13 | 222 / 16 / 0 / 0 |
+| va | 172 / 20 / 8 / 4 | 190 / 14 / 0 / 0 |
+| sh | 100 / 68 / 36 / 0 | 190 / 14 / 0 / 0 |
+| er | 44 / 8 / 14 / 2 | 62 / 6 / 0 / 0 |
+
+EQUAL moves from 504 to 664. The 50 reads that still differ are all SILENT: 44 type switch reads, the rows of
+seat N2, and 6 address prints of a live func, which no two runs share. Set check, both ways: 160 reads closed, 0
+reads newly differ. The typed nil pointer, the control, differs in no read at either ref.
+
+**Predictions, posted with the design, scored.**
+
+- P1, after N1 160 reads are EQUAL and exactly 44 type switch reads remain: TRUE.
+- P2, after N2 those 44 are EQUAL: seat N2's to score.
+- P3, no read EQUAL today leaves EQUAL, here and in the 1028 reads of the unwrap seat: TRUE in both.
+- P4, the unwrap seat's 14 open reads close in N1: TRUE. Its census reads 257 EQUAL in each of its four arms,
+  1028 of 1028.
+- P5, the seven `-tests` rows and GolibTests keep their sets: TRUE. Each row was read as `-tests` on Windows
+  at the fix, by a converter built at that ref, and compared with the bank and, test by test, with the unwrap
+  seat's fix arm (`74fafaa67d`, before its merge of master). The base itself was not read as `-tests` rows.
+- P6, the seat has a tracked program, red first: TRUE. `NilFuncInterfaceReads` (645 lines of Go output) at the
+  base prints 21 lines and dies with an InvalidCastException at "direct step method", exit code 2, with its
+  Transpile and Compile rows passing. At the fix its four rows pass and its output equals Go's on every line.
+
+| Package | Bank | Fix | Tests that moved |
+|---|---|---|---|
+| reflect | 445 matched, 21 disclosed | 445 with 21 | 0 |
+| fmt | 62 matched, 1 disclosed | 62 with 1 | 0 |
+| errors | 80 matched, 0 disclosed | 80 | 0 |
+| sort | 63 matched, 0 disclosed | 63 | 0 |
+| encoding/json | 550 matched, 0 disclosed | 550 | 0 |
+| encoding/binary | 143 matched, 3 disclosed | 143 with 3 | 0 |
+| text/template | 53 matched, 0 disclosed | 53 | 0 |
+
+The comparator was made to fail first: one verdict flipped in a copy of a results file reads "moved 1".
+
+GolibTests, the whole suite at the fix: Failed 0, Passed 2572, Skipped 45. The seat adds
+`NilFuncCarrierRuleTests`, four tests that hold the rule on the three shapes without a conversion. It was made to
+fail once: with the dynamic type's shell arm regressed, one of the four fails and names "the dynamic type is the
+func type". The file was restored byte-identical and the four pass again.
+
+**Stop lines.** S1 (a read leaves EQUAL), S2 (a file outside golib and the two reflect files, or more than one
+public golib member), S3 (a value that is no adapter pays a new type test in the assertion or the type switch
+operand) and S4 (a `-tests` row or GolibTests moves): none tripped. S3 holds by construction, not by a timing:
+every new test sits behind the adapter probe that was already there, or on the null-Value path. S5 and S6 are
+seat N2's.
+
+**Not examined.** A nil func of a named type stored into a slot of an UNNAMED func type with the same signature.
+
+**Not built or measured.** The fixture adds two members to the converter-dev solution; that solution was not
+built end to end. Read instead: both member paths are in the solution file and exist, and both projects compile
+in the runner's Compile row. Native AOT. Linux and macOS rows.
+
+— G (2026-11-13)
+
 ## 2026-11-12 — H (cgo Phase 3 increment 3.1, stop line S3.1-E, COORD's ruling C): a pointer rebuilt from a number that points into Go memory crosses a `void *` unchecked — OPEN, a DISCLOSED memory-safety gap; two closures seated after 3.1
 
 Increment 3.1's `void *` door (`GoCgoArgs.VoidPointer`) refuses every pointer into Go memory that carries its box,

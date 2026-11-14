@@ -687,7 +687,7 @@ internal static void fmtPointer(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
     uintptr u = default;
     switch (value.Kind()) {
     case var ᴛ when ᴛ == reflect.Chan || ᴛ == reflect.Func || ᴛ == reflect.Map || ᴛ == reflect.ΔPointer || ᴛ == reflect.ΔSlice || ᴛ == reflect.ΔUnsafePointer: {
-        u = (uintptr)(uintptr)value.UnsafePointer();
+        u = (uintptr)value.UnsafePointer();
         break;
     }
     default: {
@@ -1167,7 +1167,7 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
     else if (exprᴛ1 == reflect.ΔPointer) { matchᴛ1 = true;
         // pointer to array or slice or struct? ok at top level
         // but not embedded (avoid loops)
-        if (depth == 0 && (uintptr)f.UnsafePointer() != nil) {
+        if (depth == 0 && f.UnsafePointer() != nil) {
             var a = f.Elem();
             switch (a.Kind()) {
             case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice || ᴛ == reflect.Struct || ᴛ == reflect.Map: {

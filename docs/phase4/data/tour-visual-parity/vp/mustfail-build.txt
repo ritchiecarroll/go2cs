@@ -1,0 +1,1 @@
+error CS0819: Implicitly-typed variables cannot have multiple declarators (MustFail.cs line 5)

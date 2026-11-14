@@ -20,8 +20,8 @@ internal static void main() {
     @base = 100;
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡbase);
 
-    @unsafe.Pointer q = (uintptr)add(p, 16);
-    @unsafe.Pointer r = (uintptr)add(p, 0);
+    @unsafe.Pointer q = add(p, 16);
+    @unsafe.Pointer r = add(p, 0);
 
     fmt.Println((uintptr)q - (uintptr)p == 16);
     fmt.Println((uintptr)r == (uintptr)p);

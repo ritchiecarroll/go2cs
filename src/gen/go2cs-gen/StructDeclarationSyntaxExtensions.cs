@@ -374,6 +374,31 @@ public static class StructDeclarationSyntaxExtensions
     /// under <c>[StructLayout(LayoutKind.Explicit)]</c>, and the arc is bounded to unmanaged structs, so the
     /// constructor-initialized readonly embed boxes (managed) can never appear here.
     /// </summary>
+    // Whether the struct carries [GoInlineLayout]: the converter admitted it to inline arrays
+    // (docs/phase4/DESIGN-array-value-storage.md, 7.7.4), so the generator implements golib's IGoManagedLayout for it.
+    public static bool HasGoInlineLayout(this StructDeclarationSyntax structDeclaration) =>
+        structDeclaration.AttributeLists
+            .SelectMany(list => list.Attributes)
+            .Any(attribute => attribute.Name.ToString().Split('.').Last() is "GoInlineLayout" or "GoInlineLayoutAttribute");
+
+    // The struct's instance fields in declaration order, each as its C# spelling (a keyword keeps its '@') and its
+    // metadata name: what a managed-layout table measures and what reflection's FieldInfo.Name reads.
+    public static List<(string spelling, string name)> GetInstanceFields(this StructDeclarationSyntax structDeclaration) =>
+        structDeclaration.Members
+            .OfType<FieldDeclarationSyntax>()
+            .Where(field => !field.Modifiers.Any(SyntaxKind.StaticKeyword) && !field.Modifiers.Any(SyntaxKind.ConstKeyword))
+            .SelectMany(field => field.Declaration.Variables.Select(variable => (variable.Identifier.Text, variable.Identifier.ValueText)))
+            .ToList();
+
+    // The [GoAlignmentCarrier] fields: each stands for a Go [0]T field and SHARES bytes with the field Go places at the
+    // same offset, so equality and hashing skip it (docs/phase4/DESIGN-array-value-storage.md, 7.6.2).
+    public static HashSet<string> GetAlignmentCarrierMembers(this StructDeclarationSyntax structDeclaration) =>
+        new(structDeclaration.Members
+            .OfType<FieldDeclarationSyntax>()
+            .Where(field => field.AttributeLists.SelectMany(list => list.Attributes)
+                .Any(attribute => attribute.Name.ToString().Split('.').Last() is "GoAlignmentCarrier" or "GoAlignmentCarrierAttribute"))
+            .SelectMany(field => field.Declaration.Variables.Select(variable => variable.Identifier.Text)), StringComparer.Ordinal);
+
     public static HashSet<string> GetReadOnlyExplicitLayoutMembers(
         this StructDeclarationSyntax structDeclaration)
     {

@@ -312,7 +312,7 @@ internal static void runFinalizers() {
                     // all not yet finalized objects are stored in finq.
                     // If we do not mark it as FlagNoScan,
                     // the last finalized object is not collected.
-                    frame = (uintptr)mallocgc(framesz, nil, true);
+                    frame = mallocgc(framesz, nil, true);
                     framecap = framesz;
                 }
                 if ((~f).fint == nil) {

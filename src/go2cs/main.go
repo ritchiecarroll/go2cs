@@ -1024,4 +1024,10 @@ Examples:
 	if err := unresolvedDynamicTypeError(); err != nil {
 		log.Fatalf("%v\n", err)
 	}
+
+	// Nor after dropping a file it failed on (droppedFiles.go): every other file is written, and the run names each
+	// dropped one and fails.
+	if err := droppedFileError(); err != nil {
+		log.Fatalf("%v\n", err)
+	}
 }

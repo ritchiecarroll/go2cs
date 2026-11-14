@@ -3559,7 +3559,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// (sync/atomic's nil-deref table) emitted `(uintptr)SwapPointer(nil, nil);` — CS0201.
 				// Node identity, not a flag, so a nested call in the same statement whose value IS
 				// consumed keeps the prefix (see visitExprStmt).
-				if callExpr != v.resultDiscardedExpr {
+				//
+				// …and unless the call is a TRUE call, a function or method that RETURNS an unsafe.Pointer.
+				// The prefix belongs to the conversion `unsafe.Pointer(x)`. On a true call it turned the
+				// returned pointer into a number, which converts back to a fresh pointer carrying nothing:
+				// not the box the pointer was minted from, and so not the pin that keeps its storage where
+				// the number says it is. A write through `p := f(q)` was lost once the collector had run
+				// (docs/phase4/DESIGN-unsafe-pointer-call-result.md; guarded by the behavioral program
+				// UnsafePointerCallResultLifetime). A consumer that needs the number builds its own cast: a
+				// pointer cast and uintptr(...) both do.
+				if calleeTV, isTyped := v.info.Types[callExpr.Fun]; callExpr != v.resultDiscardedExpr && isTyped && calleeTV.IsType() {
 					constructType = "(uintptr)"
 				}
 			} else if len(callExpr.Args) == 1 && v.currentFuncSignature != nil {
@@ -3592,9 +3601,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 
 					// Check if the receiver type is pointer and call argument matches
-					if isRecvPointer && isArgPointer && types.Identical(recvType, argType) {
+					if isRecvPointer && isArgPointer && types.Identical(recvType, argType) && v.exprIsReceiverOrDerefdPointerParam(callExpr.Args[0]) {
 						// Since pointer-based receiver functions are converted to C# as ref-based
-						// extension functions, we need to convert the pointer from a reference type
+						// extension functions, we need to convert the pointer from a reference type.
+						// Only a name that RENDERS AS THE POINTEE takes this form: the receiver and a
+						// pointer parameter (`ref var h = ref Ꮡh.DerefOrNull()`). Keyed on the type
+						// alone, it also took a LOCAL copy (`p := h; poke(unsafe.Pointer(p), 8)`),
+						// which holds the box, so `FromRef(ref p)` was the address of the local's own
+						// slot and the write never reached `h` (Go `7 8`, converted `7 0`). A local, a
+						// field or any other operand falls through to the box-carrying mint below.
 						return fmt.Sprintf("(uintptr)@unsafe.Pointer.FromRef(ref %s)", v.convExpr(callExpr.Args[0], nil))
 					}
 				}
@@ -5550,7 +5565,13 @@ func (v *Visitor) reinterpretManagedEmission(callExpr *ast.CallExpr, arg ast.Exp
 		return emission, true
 	}
 
-	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", v.convExpr(src, []ExprContext{identContext}), srcElem, targetElem), true
+	// A source that is itself a pointer CONVERSION, `(*U)(unsafe.Pointer((*T)(up)))`, renders as a cast,
+	// which binds looser than member access: parenthesized, `.Reinterpret` applies to the converted
+	// pointer instead of to `up` (CS1929).
+	// A source Go already parenthesized renders its own parentheses and is left as written.
+	rendered := v.parenthesizeConversionBase(src, v.convExpr(src, []ExprContext{identContext}))
+
+	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", rendered, srcElem, targetElem), true
 }
 
 // The internal/abi record types the managed model can synthesize from a descriptor's carried

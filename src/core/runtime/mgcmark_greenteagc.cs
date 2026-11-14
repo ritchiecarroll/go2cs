@@ -783,7 +783,7 @@ internal static ж<spanSPMC> newSpanSPMC(uint32 cap) {
     }
 
     r.cap = cap;
-    @unsafe.Pointer ring = (uintptr)sysAlloc((uintptr)cap * /* unsafe.Sizeof(objptr(0)) */ (uintptr)8, Ꮡmemstats.ᏑgcMiscSys, gcSpanQueueˢ);
+    @unsafe.Pointer ring = sysAlloc((uintptr)cap * /* unsafe.Sizeof(objptr(0)) */ (uintptr)8, Ꮡmemstats.ᏑgcMiscSys, gcSpanQueueˢ);
     atomic.StorepNoWB(@unsafe.Pointer.FromBox(r.Ꮡring), ring);
     return r;
 }
@@ -814,7 +814,7 @@ internal static void deinit(this ж<spanSPMC> Ꮡr) {
 // slot returns a pointer to slot i%r.cap.
 internal static ж<objptr> slot(this ref spanSPMC r, uint32 i) {
     var idx = (uintptr)(i & (r.cap - 1));
-    return (ж<objptr>)(uintptr)((uintptr)@unsafe.Add(@unsafe.Pointer.FromBox(r.ring), idx * /* unsafe.Sizeof(objptr(0)) */ (uintptr)8));
+    return (ж<objptr>)(uintptr)(@unsafe.Add(@unsafe.Pointer.FromBox(r.ring), idx * /* unsafe.Sizeof(objptr(0)) */ (uintptr)8));
 }
 
 // freeDeadSpanSPMCs frees dead spanSPMCs back to the OS.

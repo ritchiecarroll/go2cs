@@ -543,6 +543,9 @@ func TestLazyPackageVarRefusesByName(t *testing.T) {
 			"it copies the var base, whose storage a slice aliases"},
 	}
 
+	takeDroppedFiles()
+	t.Cleanup(func() { takeDroppedFiles() })
+
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			withLazyPackageVars(t, "table")
@@ -568,6 +571,12 @@ func TestLazyPackageVarRefusesByName(t *testing.T) {
 
 			if _, emitted := files["table.cs"]; emitted {
 				t.Errorf("a refused file must not be emitted:\n%s", files["table.cs"])
+			}
+
+			// A refused file fails the run (droppedFiles.go): the run's closing check names it. Reading the record
+			// clears it, so it cannot reach a later conversion in this process.
+			if err := droppedFileError(); err == nil || !strings.Contains(err.Error(), "table.go (.cs): @visitValueSpec - lazyPackageVars entry table cannot be built") {
+				t.Errorf("the refused file fails the run, named; droppedFileError returned:\n%v", err)
 			}
 		})
 	}
