@@ -126,10 +126,20 @@ namespace go;
         if (s_layoutMismatch is { } reason)
             throw RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), reason);
 
-        return DereferenceableAddress();
+        void* address = DereferenceableAddress();
+
+        // The dereference census (NativeBoxDereferenceCensus): a T that holds a reference and was not refused above, and
+        // a box derived from storage that cannot be pinned. Counted after both refusals, so every count is a read or a
+        // write that happened. Null unless the census is on: one test of a static readonly field.
+        if (s_census is { } census)
+            NativeBoxDereferenceCensus.Dereference(census, m_retainedSource, m_pin is not null);
+
+        return address;
     }
 
     private static readonly string? s_layoutMismatch = GoReflect.ClrLayoutMismatch(typeof(T));
+
+    private static readonly NativeBoxDereferenceCensus.Pointee? s_census = NativeBoxDereferenceCensus.Pointee.Of<T>();
 
     /// <inheritdoc/>
     public override unsafe ref T Value => ref Unsafe.AsRef<T>(ValueAddress());
