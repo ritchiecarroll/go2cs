@@ -2522,7 +2522,12 @@ function Get-DarwinSegmentRefusal {
 # 'native-oracle' (C1, 2026-11-07, arch-strict banking, COORD ruling (1)): readings taken after batch 208 moved the
 # osx-arm64 oracle to native arm64 (-test-oracle-goarch), so a row's two RIDs can legitimately differ. Its first file,
 # C1-NO1.tsv, is crypto/subtle from run 42261290086 (headSha 8fba1e6e7, over the AES seat's DIT disclosure).
-$DarwinEvidenceWaves = @('', 'dw2', 'e1', 'reread', 'native-oracle')
+# 'h10-go1.26.11' (R, 2026-11-14, the 1.26.11 patch hop's H10, COORD ruling (a) 20261114T110007Z): the three rows whose
+# counts moved with go1.26.11's own tests (crypto/internal/fips140test, net, net/http), re-read on both mac RIDs in one
+# dispatch after their segments were set (run 43591880062, net with ;dns=1.1.1.1,8.8.8.8). The TSV is collected from the
+# run's artifacts by docs/phase4/la64-s7/collect_darwin.py (collect.py's darwin twin), controlled first against run
+# 43588192951, whose log it reproduced on every row and RID.
+$DarwinEvidenceWaves = @('', 'dw2', 'e1', 'reread', 'native-oracle', 'h10-go1.26.11')
 
 # THE EVIDENCE DIRECTORY (COORD, 2026-10-27, PLAN-release-1-26-10-2.md, Rulings 1). The ONE place the darwin evidence
 # is named: relative to the repository root, with `{pin}` standing for the corpus pin (src/version.props'
