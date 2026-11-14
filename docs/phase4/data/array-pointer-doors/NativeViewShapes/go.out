@@ -1,0 +1,24 @@
+A: 5 "helloXXX"
+B: 6 "abcdefXX"
+C: 4 "/tmpXXXX"
+D: "XXXX\x00XXX"
+E: 4 true "u\x00\x00\x00\x00XXX"
+F: 25699 "aZcd"
+G: 8 "errno 7\x00"
+H: 4 "rrrrXXXX"
+I: 6 "abcdef"
+J: 1125899906842623
+K: "WXY!" "WXY!"
+L: 16 "0123456789012345"
+M: 5 "small\x00XX"
+C0: 4 "/tmp\x00\x00\x00\x00"
+D0: "\x00\x00\x00\x00\a\x00\x00\x00"
+F0: 0 "\x00Z\x00\x00"
+M0: 5 "small\x00\x00\x00"
+N: true
+O: "field\x00"
+P: "\x00\x00\x00\x00interior\x00\x00"
+Q: [0 1 0 0]
+R: 7
+S: 9
+T: "C\x00XXXXXX"

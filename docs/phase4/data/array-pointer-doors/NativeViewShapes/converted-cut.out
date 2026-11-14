@@ -1,0 +1,102 @@
+A: 5 "XXXXXXXX"
+   [exit 0]
+B: 6 "XXXXXXXX"
+   [exit 0]
+C: panic: runtime error: invalid memory address or nil pointer dereference
+
+goroutine 1 [running]:
+main.get_Value()
+	<kit>/NativeViewShapes/Generated/go2cs-gen/go2cs.TypeGenerator/go.main_package.RawMem.g.cs:108
+main.get_Item()
+   [exit 2]
+D: panic: runtime error: invalid memory address or nil pointer dereference
+
+goroutine 1 [running]:
+main.get_Value()
+	<kit>/NativeViewShapes/Generated/go2cs-gen/go2cs.TypeGenerator/go.main_package.RawMem.g.cs:108
+main.get_Item()
+   [exit 2]
+E: 4 false "XXXXXXXX"
+   [exit 0]
+F: panic: runtime error: invalid memory address or nil pointer dereference
+
+goroutine 1 [running]:
+main.get_Value()
+	<kit>/NativeViewShapes/Generated/go2cs-gen/go2cs.TypeGenerator/go.main_package.RawMem.g.cs:108
+main.go.IArray.get_Source()
+   [exit 2]
+G: 8 "\x00\x00\x00\x00\x00\x00\x00\x00"
+   [exit 0]
+H: 4 "XXXXXXXX"
+   [exit 0]
+I: 6 "abcdef"
+   [exit 0]
+J: 1125899906842623
+   [exit 0]
+K: "abc!" "WXYZ"
+   [exit 0]
+L: 16 "XXXXXXXXXXXXXXXX"
+   [exit 0]
+M: panic: runtime error: invalid memory address or nil pointer dereference
+
+goroutine 1 [running]:
+main.get_Value()
+	<kit>/NativeViewShapes/Generated/go2cs-gen/go2cs.TypeGenerator/go.main_package.smallMem.g.cs:106
+main.get_Item()
+   [exit 2]
+C0: System.OverflowException: Arithmetic operation resulted in an overflow.
+   at go.array`1..ctor(UInt64 length) in <tree>/src/core/golib/array.cs:line 184
+   at go.main_package.RawMem.materializeValue() in <kit>/NativeViewShapes/Generated/go2cs-gen/go2cs.TypeGenerator/go.main_package.RawMem.g.cs:line 114
+   at go.main_package.RawMem.get_Item(Range range) in <kit>/NativeViewShapes/Generated/go2cs-gen/go2cs.TypeGenerator/go.main_package.RawMem.g.cs:line 55
+   at go.main_package.main() in <kit>/NativeViewShapes/main.cs:line 148
+   at go.golib.MainThread.<>c__DisplayClass1_0.<Run>b__0() in <tree>/src/core/golib/runtime/MainThread.cs:line 67
+   [exit 2]
+D0: System.OverflowException: Arithmetic operation resulted in an overflow.
+   at go.array`1..ctor(UInt64 length) in <tree>/src/core/golib/array.cs:line 184
+   at go.main_package.RawMem.materializeValue() in <kit>/NativeViewShapes/Generated/go2cs-gen/go2cs.TypeGenerator/go.main_package.RawMem.g.cs:line 114
+   at go.main_package.main() in <kit>/NativeViewShapes/main.cs:line 153
+   at go.golib.MainThread.<>c__DisplayClass1_0.<Run>b__0() in <tree>/src/core/golib/runtime/MainThread.cs:line 67
+   at System.Threading.Thread.StartCallback()
+   [exit 2]
+F0: System.OverflowException: Arithmetic operation resulted in an overflow.
+   at go.array`1..ctor(UInt64 length) in <tree>/src/core/golib/array.cs:line 184
+   at go.main_package.RawMem.materializeValue() in <kit>/NativeViewShapes/Generated/go2cs-gen/go2cs.TypeGenerator/go.main_package.RawMem.g.cs:line 114
+   at go.main_package.RawMem.go.IArray.get_Source() in <kit>/NativeViewShapes/Generated/go2cs-gen/go2cs.TypeGenerator/go.main_package.RawMem.g.cs:line 30
+   at go.ж`1.publishArrayBacking[TCheck](TCheck check) in <tree>/src/core/golib/ж.cs:line 434
+   at go.ж`1.arrayView[TCheck](TCheck check) in <tree>/src/core/golib/ж.cs:line 414
+   [exit 2]
+M0: 5 "\xe80\xd0Ÿ\x7f\x00\x00"
+   [exit 0]
+N: false
+   [exit 0]
+O: "\x00\x00\x00\x00\x00\x00"
+   [exit 0]
+P: "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+   [exit 0]
+Q: panic: runtime error: index out of range [4] with length 0
+
+goroutine 1 [running]:
+main.main()
+	<kit>/NativeViewShapes/main.go:158
+   [exit 2]
+R: panic: runtime error: cannot view native memory as array<Int32>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+S: panic: runtime error: cannot view native memory as array<Int32>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+T: panic: runtime error: cannot view native memory as array<Byte>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]

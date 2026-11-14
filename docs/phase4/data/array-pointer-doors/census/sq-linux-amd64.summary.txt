@@ -1,0 +1,17 @@
+sq-linux-amd64: 26 packages, 0 load errors, 898 sites
+  deref/bound                  25
+  deref/return (test)          1
+  deref/store                  69
+  index/arg                    165
+  index/bound                  115
+  index/read                   330
+  index/return                 3
+  index/store                  266
+  pointer/bound                2
+  pointer/read                 1
+  slice-open/copy-dst          2
+  slice2/bound                 1
+  slice2/copy-dst              1
+  slice3/bound                 4
+  slice3/copy-dst              3
+  slice3/copy-src              5

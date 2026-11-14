@@ -1,0 +1,82 @@
+Predictions for the red arms, written 2026-11-14 before the converted program was built or run.
+Tree: the interior-pointer cut, 837a413fdc. Program: repro/NativeViewShapes (Go's answers in go.out).
+Derived from reading convSliceExpr.go (the span path), unsafe.Pointer.To<T>, ж<T>.FromNumber and NativeBox<T>.Value.
+
+Bounded views (a high bound, inside a function) take the span path: new slice<T>(new ReadOnlySpan<T>(...)), a COPY.
+  A  write lost            5 "XXXXXXXX"                          RED
+  B  write lost            6 "XXXXXXXX"                          RED
+  E  write lost, cap = n   4 false "XXXXXXXX"                    RED (both the memory and the capacity)
+  G  write lost (Go mem)   8 and eight zero bytes                RED
+  H  write lost            4 "XXXXXXXX"                          RED
+  I  read only             6 "abcdef"                            GREEN
+  K  stale snapshot        "abc!" "WXYZ"                         RED
+  L  write lost            16 and sixteen X                      RED (lower confidence: the uintptr bound may not compile)
+No high bound, or no slice: the box path, To<RawMem>(p).Value... over a NativeBox<RawMem>. The wrapper struct's
+first field is a managed reference, read here from C memory that holds "XXXXXXXX".
+  C  the process dies on a fabricated reference (a fatal fault or a NullReference), NOT G's OverflowException,
+     which needs the first word of the memory to be zero                                                    RED
+  D  the same fault                                                                                          RED
+  F  the same fault (lower confidence: the element door may answer differently)                              RED
+  M  the same fault, for an array that fits (64 bytes): the size is not the cause                            RED
+  J  a constant                1125899906842623                  GREEN (medium confidence)
+Falsifier for the reading as a whole: any of A, B, H printing Go's answer means the span path is not what runs.
+
+Scored 2026-11-14, first run (repro/NativeViewShapes/cs.out against go.out): every line MET as worded.
+A B E G H K L red with exactly the predicted text; I and J green; C D F M die in the wrapper's get_Value
+(reported as Go's nil-dereference panic, exit 2).
+
+Second set, written before the control arms existed: the same box-path shapes over memory that is still ZERO.
+  C0  G's w5b2: OverflowException out of materializeValue (array of 1<<50-1)                               RED
+  D0  the same OverflowException                                                                             RED
+  F0  the same OverflowException (lower confidence, as F)                                                    RED
+  M0  no exception. copy answers 5, and the eight bytes at p are NOT "small\0": they hold a managed
+      reference (the wrapper's holder, written into C memory by materializeValue), so peek shows a
+      non-zero pointer-shaped value, and the bytes "small" are in a managed array the memory never sees   RED
+
+Scored 2026-11-14, second run: every line MET as worded. C0 D0 F0 throw OverflowException from
+array<T>..ctor(UInt64) under RawMem.materializeValue (C0 through get_Item(Range): G's w5b2 stack).
+M0 prints 5 and the memory reads e8 30 d0 45 c7 7f 00 00: a managed reference stored in C memory.
+
+PROTOTYPE ARM (written before it was built): the converted main.cs with ONE hand edit, no golib change.
+Every span emission `new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(X), LEN))` becomes
+`@unsafe.Slice(@unsafe.Pointer.To<byte>(X), LEN)`: the door golib already has, over the same operands.
+  A B H I K L  print Go's answers (the native arm of unsafe.Slice aliases)
+  G            prints Go's answer (the pinned Go-memory arm aliases the array's own storage)
+  E            the memory is Go's ("u\0\0\0\0XXX") but the capacity line still reads false:
+               unsafe.Slice answers cap = len, and Go's cap here is 1<<50-2
+  C D F M and the zero controls are not touched by this edit and stay red.
+Falsifier: any of A B G H K L not printing Go's answer means the existing arms are not enough and the
+design needs more than a door.
+
+Scored 2026-11-14 (repro/NativeViewShapesProto/proto.out): every line MET as worded. A B G H I K L print
+Go's answers with the one hand edit and no golib change; E's memory is Go's and its capacity line reads false.
+
+THIRD SET, Go memory (question 4), written before the arms existed. Cut = the converted program as emitted;
+proto = the same one hand edit (span emission to unsafe.Slice).
+  N  a local uint64 viewed as 8 bytes and written: Go prints true.
+       cut: false (span copy).   proto: false too. unsafe.Slice resolves the address to the pinned uint64 box,
+       leaves the native arm, finds no element window, and takes its own snapshot fallback. This is the arm
+       that says the existing door is NOT enough over Go memory of another element type.
+  O  a byte-array field of a heap struct, viewed, a collection forced, then written: Go prints "field\0".
+       cut: six zero bytes.      proto: Go's answer (the element-window arm aliases the field's array).
+  P  an interior address of a Go slice through unsafe.Add, viewed, a collection forced, then written.
+       cut: zeros where Go has "interior".   proto: Go's answer (the native arm, the root kept by the cut).
+  Q  an unnamed [4]uint32 viewed whole as (*[16]byte)(p)[:] and written: Go prints [0 1 0 0].
+       cut: uncertain, no prediction on the output; predicted only that it is NOT the span path (no high bound).
+
+Scored 2026-11-14, third set: every predicted line MET as worded.
+  cut:   N false; O six zero bytes; P zeros. Q (no prediction on its output) panics
+         "index out of range [4] with length 0": the whole view of an unnamed array over Go memory of another
+         element type answers a slice of length 0. It is the box path, as predicted, and it is a FINDING.
+  proto: N false (the existing door snapshots here); O "field\0" and P "....interior.." after a forced collection.
+
+FOURTH SET, the UNNAMED array indexed through a conversion over C memory: the dominant shape in sqlite and libc
+(census: 425 of 459 windows sites, 879 of 898 linux sites are index or dereference forms). Written before the arms.
+  R  (*[4]int32)(unsafe.Pointer(p))[1] = 7, then read back      Go: 7
+  S  &(*[4]int32)(unsafe.Pointer(p))[2], written through        Go: 9
+  T  *(*[2]byte)(unsafe.Pointer(p)) = [2]byte{'C', 0}           Go: "C\0XXXXXX"
+  cut, all three: refused by name, the arm-5 panic of the number conversion (an array view over native memory
+  without element storage). Loud, not corruption. Falsifier: any of them printing anything else.
+
+Scored 2026-11-14, fourth set: MET as worded. R, S and T panic with "cannot view native memory as array<Int32>"
+(array<Byte> for T): "the address has no managed element storage behind it".

@@ -1,0 +1,198 @@
+Tables taken from the .tsv files in this folder (2026-11-14); README.md says what each block counts.
+Columns: tag, sites, then per form: three-index slice, two-index slice with a high bound, open slice,
+index, dereference, the pointer itself.
+
+tag                   sites  slice3  slice2 slice-open  index  deref  pointer
+sq-linux-amd64          898      12       2          2    784     95        3
+sq-windows-amd64        433      26       7          1    384     12        3
+std-darwin-amd64        115       6       5          8     37      6       53
+std-darwin-arm64        113       6       5          8     37      6       51
+std-linux-amd64         117       6       5          7     37      6       56
+std-linux-arm64         118       6       5          7     37      6       57
+std-windows-amd64       125      18       7         11     37      6       46
+
+sq-windows-amd64, by package and array type (named arrays by name, '-' = unnamed):
+  package                      array     slice3  slice2 slice-open  index  deref  pointer
+  modernc.org/libc             -              0       0          0      2      3        0
+  modernc.org/libc             RawMem        14       6          1      4      0        2
+  modernc.org/sqlite           -              0       0          0      0      0        1
+  modernc.org/sqlite           RawMem        12       0          0      0      0        0
+  modernc.org/sqlite/lib       -              0       0          0    369      4        0
+  modernc.org/sqlite/lib       iface          0       0          0      1      0        0
+  modernc.org/sqlite/vec       -              0       0          0      7      0        0
+  modernc.org/sqlite/vec       iface          0       0          0      1      0        0
+  modernc.org/sqlite/vfs       -              0       0          0      0      5        0
+  modernc.org/sqlite/vfs       RawMem         0       1          0      0      0        0
+
+sq-windows-amd64, RawMem by form/context and operand:
+   14  slice3/copy-dst        number
+    7  slice3/copy-src        number
+    6  slice2/bound           number
+    4  slice3/bound           number
+    3  index/store            number
+    2  pointer/bound          number
+    1  index/bound            number
+    1  slice-open/copy-dst    number
+    1  slice2/arg             number
+    1  slice3/copy-dst        addr-of-element
+
+sq-windows-amd64, unnamed arrays by form/context:
+  170  index/store
+   92  index/bound
+   73  index/read
+   43  index/arg
+    6  deref/store
+    5  deref/bound
+    1  deref/return
+    1  pointer/bound
+
+sq-windows-amd64, unnamed arrays by operand:
+  380  call:__ccgo_ptr
+    5  number-arith
+    4  number
+    2  addr-of-var
+
+sq-windows-amd64, element holds pointers: {'false': 433}; arrays past the span limit: {('RawMem', 'past-span'): 40}
+
+sq-linux-amd64, by package and array type (named arrays by name, '-' = unnamed):
+  package                      array     slice3  slice2 slice-open  index  deref  pointer
+  modernc.org/libc             -              0       0          0    405     87        1
+  modernc.org/libc             RawMem         0       1          2      0      0        0
+  modernc.org/libc             UUID           0       0          0      0      0        1
+  modernc.org/libc             iface          0       0          0      1      0        0
+  modernc.org/sqlite           -              0       0          0      0      0        1
+  modernc.org/sqlite           RawMem        12       0          0      0      0        0
+  modernc.org/sqlite/lib       -              0       0          0    369      3        0
+  modernc.org/sqlite/lib       iface          0       0          0      1      0        0
+  modernc.org/sqlite/vec       -              0       0          0      7      0        0
+  modernc.org/sqlite/vec       iface          0       0          0      1      0        0
+  modernc.org/sqlite/vfs       -              0       0          0      0      5        0
+  modernc.org/sqlite/vfs       RawMem         0       1          0      0      0        0
+
+sq-linux-amd64, RawMem by form/context and operand:
+    5  slice3/copy-src        number
+    4  slice3/bound           number
+    3  slice3/copy-dst        number
+    2  slice-open/copy-dst    number
+    1  slice2/bound           number
+    1  slice2/copy-dst        number
+
+sq-linux-amd64, unnamed arrays by form/context:
+  271  index/read
+  266  index/store
+  129  index/arg
+  115  index/bound
+   69  deref/store
+   25  deref/bound
+    2  pointer/bound
+    1  deref/return
+
+sq-linux-amd64, unnamed arrays by operand:
+  744  call:__ccgo_ptr
+   63  addr-of-var
+   60  number
+   10  number-arith
+    1  addr-of-element
+
+sq-linux-amd64, element holds pointers: {'false': 898}; arrays past the span limit: {('RawMem', 'past-span'): 16}
+
+std-linux-amd64, by form/context (test files marked):
+   51  pointer/bound
+   34  index/store
+    4  slice3/return
+    3  deref/read
+    3  pointer/arg
+    3  slice-open/copy-dst
+    3  slice-open/copy-src
+    3  slice2/bound
+    2  index/addr
+    2  slice2/copy-src
+    2  slice3/bound
+    1  deref/bound (test)
+    1  deref/return
+    1  deref/store
+    1  index/arg
+    1  pointer/range
+    1  pointer/return
+    1  slice-open/bound
+std-linux-amd64, slice forms, one per line:
+  internal/abi                       type.go:241                N=65536       Method                 ptr-elem=false slice3/return  call:addChecked
+  internal/abi                       type.go:248                N=65536       Method                 ptr-elem=false slice3/return  call:addChecked
+  internal/abi                       type.go:525                N=65536       *Type                  ptr-elem=true  slice3/return  call:addChecked
+  internal/abi                       type.go:536                N=131072      *Type                  ptr-elem=true  slice3/return  call:addChecked
+  internal/reflectlite               type.go:209                N=4           byte                   ptr-elem=false slice-open/copy-dst  addr-of-var
+  internal/reflectlite               type.go:209                N=4           byte                   ptr-elem=false slice-open/copy-src  typed-pointer
+  reflect                            type.go:455                N=4           byte                   ptr-elem=false slice-open/copy-dst  addr-of-var
+  reflect                            type.go:455                N=4           byte                   ptr-elem=false slice-open/copy-src  typed-pointer
+  runtime                            debuglog.go:822            N=1048576     readState              ptr-elem=true  slice2/bound  pointer-var
+  runtime                            heapdump.go:743            N=1073741824  byte                   ptr-elem=false slice2/bound  pointer-var
+  runtime                            heapdump.go:84             N=4096        byte                   ptr-elem=false slice2/copy-src  pointer-var
+  runtime                            heapdump.go:94             N=4096        byte                   ptr-elem=false slice2/copy-src  pointer-var
+  runtime                            iface.go:220               N=65536       internal/abi.Method    ptr-elem=false slice3/bound  call:add
+  runtime                            iface.go:225               N=65536       uintptr                ptr-elem=false slice3/bound  addr-of-element
+  runtime                            mbitmap.go:1536            N=1073741824  byte                   ptr-elem=false slice2/bound  call:persistentalloc
+  runtime                            os_linux.go:312            N=16          byte                   ptr-elem=false slice-open/bound  number
+  runtime                            type.go:430                N=4           byte                   ptr-elem=false slice-open/copy-dst  addr-of-var
+  runtime                            type.go:430                N=4           byte                   ptr-elem=false slice-open/copy-src  typed-pointer
+std-linux-amd64, named arrays: {'big': 1, 'PtrMask': 1, 'ObjMask': 3, 'buckhashArray': 3}
+
+std-windows-amd64, by form/context (test files marked):
+   44  pointer/bound
+   34  index/store
+    7  slice3/bound
+    5  slice2/bound
+    5  slice3/return
+    4  slice-open/arg
+    3  deref/read
+    3  slice-open/copy-dst
+    3  slice-open/copy-src
+    3  slice3/copy-dst (test)
+    2  index/addr
+    2  slice2/copy-src
+    2  slice3/arg
+    1  deref/bound (test)
+    1  deref/return
+    1  deref/store
+    1  index/arg
+    1  pointer/range
+    1  pointer/return
+    1  slice-open/bound
+    1  slice3/range
+std-windows-amd64, slice forms, one per line:
+  internal/abi                       type.go:241                N=65536       Method                 ptr-elem=false slice3/return  call:addChecked
+  internal/abi                       type.go:248                N=65536       Method                 ptr-elem=false slice3/return  call:addChecked
+  internal/abi                       type.go:525                N=65536       *Type                  ptr-elem=true  slice3/return  call:addChecked
+  internal/abi                       type.go:536                N=131072      *Type                  ptr-elem=true  slice3/return  call:addChecked
+  internal/reflectlite               type.go:209                N=4           byte                   ptr-elem=false slice-open/copy-dst  addr-of-var
+  internal/reflectlite               type.go:209                N=4           byte                   ptr-elem=false slice-open/copy-src  typed-pointer
+  internal/syscall/windows           reparse_windows.go:69      N=65535       uint16                 ptr-elem=false slice3/arg  addr-of-element
+  internal/syscall/windows           reparse_windows.go:93      N=65535       uint16                 ptr-elem=false slice3/arg  addr-of-element
+  internal/syscall/windows           security_windows.go:204    N=268435455   SID_AND_ATTRIBUTES     ptr-elem=true  slice3/return  addr-of-element
+  internal/syscall/windows/registry  value.go:110               N=536870912   uint16                 ptr-elem=false slice3/bound  addr-of-element
+  internal/syscall/windows/registry  value.go:206               N=536870912   uint16                 ptr-elem=false slice3/bound  addr-of-element
+  internal/syscall/windows/registry  value.go:280               N=4           byte                   ptr-elem=false slice-open/arg  addr-of-var
+  internal/syscall/windows/registry  value.go:286               N=8           byte                   ptr-elem=false slice-open/arg  addr-of-var
+  internal/syscall/windows/registry  value.go:294               N=536870912   byte                   ptr-elem=false slice3/bound  addr-of-element
+  internal/syscall/windows/registry  value.go:324               N=536870912   byte                   ptr-elem=false slice3/bound  addr-of-element
+  net                                lookup_windows.go:312      N=256         uint16                 ptr-elem=false slice-open/arg  typed-pointer
+  net                                lookup_windows.go:362      N=256         uint16                 ptr-elem=false slice-open/arg  typed-pointer
+  net                                lookup_windows.go:387      N=1024        *uint16                ptr-elem=true  slice3/range  addr-of-element
+  os/user                            lookup_windows.go:213      N=1024        internal/syscall/windows.LocalGroupUserInfo0 ptr-elem=true  slice3/bound  typed-pointer
+  os_test                            os_windows_test.go:243     N=2048        uint16                 ptr-elem=false slice3/copy-dst  addr-of-element (test)
+  os_test                            os_windows_test.go:340     N=2048        uint16                 ptr-elem=false slice3/copy-dst  addr-of-element (test)
+  os_test                            os_windows_test.go:730     N=10000       uint16                 ptr-elem=false slice3/copy-dst  typed-pointer (test)
+  reflect                            type.go:455                N=4           byte                   ptr-elem=false slice-open/copy-dst  addr-of-var
+  reflect                            type.go:455                N=4           byte                   ptr-elem=false slice-open/copy-src  typed-pointer
+  runtime                            debuglog.go:822            N=1048576     readState              ptr-elem=true  slice2/bound  pointer-var
+  runtime                            heapdump.go:743            N=1073741824  byte                   ptr-elem=false slice2/bound  pointer-var
+  runtime                            heapdump.go:84             N=4096        byte                   ptr-elem=false slice2/copy-src  pointer-var
+  runtime                            heapdump.go:94             N=4096        byte                   ptr-elem=false slice2/copy-src  pointer-var
+  runtime                            iface.go:220               N=65536       internal/abi.Method    ptr-elem=false slice3/bound  call:add
+  runtime                            iface.go:225               N=65536       uintptr                ptr-elem=false slice3/bound  addr-of-element
+  runtime                            mbitmap.go:1536            N=1073741824  byte                   ptr-elem=false slice2/bound  call:persistentalloc
+  runtime                            os_windows.go:501          N=16777216    uint16                 ptr-elem=false slice-open/bound  pointer-var
+  runtime                            os_windows.go:570          N=1073741824  byte                   ptr-elem=false slice2/bound  pointer-var
+  runtime                            os_windows.go:605          N=1073741824  byte                   ptr-elem=false slice2/bound  pointer-var
+  runtime                            type.go:430                N=4           byte                   ptr-elem=false slice-open/copy-dst  addr-of-var
+  runtime                            type.go:430                N=4           byte                   ptr-elem=false slice-open/copy-src  typed-pointer
+std-windows-amd64, named arrays: {'big': 1, 'PtrMask': 1, 'ObjMask': 3, 'buckhashArray': 3}
