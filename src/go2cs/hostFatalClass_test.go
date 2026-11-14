@@ -311,3 +311,66 @@ func TestHostFatalMayOmitItsSignatureAndOtherClassesMayNot(t *testing.T) {
 		t.Fatalf("re-check after the negative case: %v", err)
 	}
 }
+
+// THE PLATFORM SCOPE AT MINT. A proof page is ONE platform's record (its totals line names it), and
+// an entry scoped away from that platform (testDisclosure.Platforms) withdraws nothing there. So the
+// page neither refuses nor clears it: the entry is reported unchecked, naming both platforms. The
+// first member is internal/synctest's TestWaitGroupManyBubbles, host-fatal on darwin only (the 1:1
+// goroutine-to-thread model meets macOS's thread cap) and recorded pass/pass on the windows page.
+// The windows-scoped and unscoped arms keep the refusal, and a page whose platform cannot be read
+// keeps it too (fail safe).
+func TestHostFatalMintHonoursThePlatformScope(t *testing.T) {
+	root := t.TempDir()
+	pkg := filepath.Join(root, "src", "core", "internal", "synctest")
+	if err := os.MkdirAll(pkg, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, "src", "core", "golib"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "src", "core", "golib", "golib.csproj"), []byte("<Project/>"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	pages := filepath.Join(root, "docs", validationDocsDirName, validationCurrentDirName)
+	if err := os.MkdirAll(pages, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	table := "| Test | `go test` | go2cs |\n|---|---|---|\n| `TestWaitGroupManyBubbles` | pass | pass |\n"
+	writePage := func(header string) {
+		t.Helper()
+		if err := os.WriteFile(filepath.Join(pages, "internal.synctest.md"), []byte(header+table), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	scoped := func(platforms ...string) map[string]testDisclosure {
+		m := hostFatal("TestWaitGroupManyBubbles")
+		d := m["TestWaitGroupManyBubbles"]
+		d.Platforms = goosScope(platforms)
+		m["TestWaitGroupManyBubbles"] = d
+		return m
+	}
+
+	writePage("**59 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package\n\n")
+
+	// ALLOWED, UNCHECKED: scoped to darwin, and the page is the windows record.
+	v, u := hostFatalMintViolations(pkg, scoped("darwin"))
+	if len(v) != 0 {
+		t.Fatalf("a darwin-scoped entry must not be refused by the windows page; got %#v", v)
+	}
+	if len(u) != 1 || !strings.Contains(u[0], "scoped to darwin") || !strings.Contains(u[0], "windows record") {
+		t.Fatalf("a darwin-scoped entry must be reported unchecked, naming both platforms; got %#v", u)
+	}
+
+	// REFUSED: a scope that includes the page's platform, and no scope at all (every platform).
+	for _, m := range []map[string]testDisclosure{scoped("darwin", "windows"), hostFatal("TestWaitGroupManyBubbles")} {
+		if v, _ := hostFatalMintViolations(pkg, m); len(v) != 1 || !strings.Contains(v[0], "TestWaitGroupManyBubbles") {
+			t.Fatalf("an entry that applies to the page's platform must still be refused; got %#v", v)
+		}
+	}
+
+	// REFUSED: the page's platform cannot be read, so the scope cannot excuse the entry.
+	writePage("")
+	if v, _ := hostFatalMintViolations(pkg, scoped("darwin")); len(v) != 1 {
+		t.Fatalf("with no readable page platform the refusal must stand; got %#v", v)
+	}
+}
