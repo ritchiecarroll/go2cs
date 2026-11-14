@@ -418,6 +418,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
 
     [TestMethod]
+    public void CheckDeadlockGoroutineBlocks() => CheckTarget("DeadlockGoroutineBlocks");
+
+    [TestMethod]
     public void CheckDeepEqual() => CheckTarget("DeepEqual");
 
     [TestMethod]

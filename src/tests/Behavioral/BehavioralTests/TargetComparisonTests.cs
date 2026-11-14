@@ -421,6 +421,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
 
     [TestMethod]
+    public void CheckDeadlockGoroutineBlocks() => CheckTarget("DeadlockGoroutineBlocks");
+
+    [TestMethod]
     public void CheckDeepEqual() => CheckTarget("DeepEqual");
 
     [TestMethod]
