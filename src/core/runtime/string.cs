@@ -168,7 +168,7 @@ internal static @string slicebytetostring(ж<tmpBuf> buf, ж<byte> Ꮡptr, nint 
     if (n == 1) {
         @unsafe.Pointer pΔ1 = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((nint)(ptr)));
         if (goarch.BigEndian) {
-            pΔ1 = (uintptr)add(pΔ1, 7);
+            pΔ1 = add(pΔ1, 7);
         }
         return @unsafe.String((ж<byte>)(uintptr)(pΔ1), 1);
     }
@@ -177,7 +177,7 @@ internal static @string slicebytetostring(ж<tmpBuf> buf, ж<byte> Ꮡptr, nint 
     if (buf != nil && n <= 32) {
         Δp = @unsafe.Pointer.FromPinnedBox(buf);
     } else {
-        Δp = (uintptr)mallocgc((uintptr)n, nil, false);
+        Δp = mallocgc((uintptr)n, nil, false);
     }
     memmove(Δp, @unsafe.Pointer.FromPinnedBox(Ꮡptr), (uintptr)n);
     return @unsafe.String((ж<byte>)(uintptr)(Δp), n);
@@ -345,9 +345,9 @@ internal static slice<byte> /*b*/ rawbyteslice(nint size) {
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
 
     var cap = roundupsize((uintptr)size, true);
-    @unsafe.Pointer Δp = (uintptr)mallocgc(cap, nil, false);
+    @unsafe.Pointer Δp = mallocgc(cap, nil, false);
     if (cap != (uintptr)size) {
-        memclrNoHeapPointers((uintptr)add(Δp, (uintptr)size), cap - (uintptr)size);
+        memclrNoHeapPointers(add(Δp, (uintptr)size), cap - (uintptr)size);
     }
 
     (Ꮡb.Reinterpret<slice<byte>, Δsliceᴛ>()).Value = new Δsliceᴛ(Δp.Value, size, (nint)cap);
@@ -362,9 +362,9 @@ internal static slice<rune> /*b*/ rawruneslice(nint size) {
         @throw(outOfMemoryˢ);
     }
     var mem = roundupsize((uintptr)size * 4, true);
-    @unsafe.Pointer Δp = (uintptr)mallocgc(mem, nil, false);
+    @unsafe.Pointer Δp = mallocgc(mem, nil, false);
     if (mem != (uintptr)size * 4) {
-        memclrNoHeapPointers((uintptr)add(Δp, (uintptr)size * 4), mem - (uintptr)size * 4);
+        memclrNoHeapPointers(add(Δp, (uintptr)size * 4), mem - (uintptr)size * 4);
     }
 
     (Ꮡb.Reinterpret<slice<rune>, Δsliceᴛ>()).Value = new Δsliceᴛ(Δp.Value, size, (nint)(mem / 4));
@@ -387,7 +387,7 @@ internal static slice<byte> /*b*/ gobytes(ж<byte> Δp, nint n) {
         throw panic(((errorString)(@string)gobytesLengthOutOfRangeˢ));
     }
 
-    @unsafe.Pointer bp = (uintptr)mallocgc((uintptr)n, nil, false);
+    @unsafe.Pointer bp = mallocgc((uintptr)n, nil, false);
     memmove(bp, @unsafe.Pointer.FromPinnedBox(Δp), (uintptr)n);
 
     (Ꮡb.Reinterpret<slice<byte>, Δsliceᴛ>()).Value = new Δsliceᴛ(bp.Value, n, n);

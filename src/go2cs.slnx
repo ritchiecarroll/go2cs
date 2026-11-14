@@ -1275,6 +1275,7 @@
     <Project Path="tests/Behavioral/UnsafeOperations/UnsafeOperations.csproj" />
     <Project Path="tests/Behavioral/UnsafeBuiltinIntegerLen/UnsafeBuiltinIntegerLen.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerArgPassing/UnsafePointerArgPassing.csproj" />
+    <Project Path="tests/Behavioral/UnsafePointerCallResultLifetime/UnsafePointerCallResultLifetime.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerInferredNoImport/UnsafePointerInferredNoImport.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerKeywordParam/UnsafePointerKeywordParam.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerParamAssign/UnsafePointerParamAssign.csproj" />

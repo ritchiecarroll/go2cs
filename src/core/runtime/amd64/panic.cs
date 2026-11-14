@@ -823,7 +823,7 @@ internal static (uint32, @unsafe.Pointer) readvarintUnsafe(@unsafe.Pointer fd) {
     nint shift = default;
     for (;;) {
         var b = ~(ж<uint8>)(uintptr)(fd);
-        fd = (uintptr)add(fd, /* unsafe.Sizeof(b) */ (uintptr)1);
+        fd = add(fd, /* unsafe.Sizeof(b) */ (uintptr)1);
         if (b < 128) {
             return (r + ((uint32)b).Lsh((int64)(shift)), fd);
         }
@@ -979,7 +979,7 @@ internal static void start(this ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp)
 
             Δp.retpc = s.Value.retpc;
             Δp.deferBitsPtr = (ж<byte>)(uintptr)(add(sp, (~s).deferBitsOffset));
-            Δp.slotsPtr = (uintptr)add(sp, (~s).slotsOffset);
+            Δp.slotsPtr = add(sp, (~s).slotsOffset);
         }
 
         return;
@@ -1132,7 +1132,7 @@ internal static ref readonly @string missingDeferreturnˢ => ref missingDeferret
 private static readonly @string missingDeferreturnˢᵇ = "missing deferreturn"u8;
 
 internal static bool initOpenCodedDefers(this ref _panic Δp, ΔfuncInfo fn, @unsafe.Pointer varp) {
-    @unsafe.Pointer fd = (uintptr)funcdata(fn, abi.FUNCDATA_OpenCodedDeferInfo);
+    @unsafe.Pointer fd = funcdata(fn, abi.FUNCDATA_OpenCodedDeferInfo);
     if (fd == nil) {
         return false;
     }
@@ -1151,7 +1151,7 @@ internal static bool initOpenCodedDefers(this ref _panic Δp, ΔfuncInfo fn, @un
 
     Δp.retpc = fn.entry() + (uintptr)fn.deferreturn;
     Δp.deferBitsPtr = deferBitsPtr;
-    Δp.slotsPtr = (uintptr)add(varp, ((uintptr)0 - (uintptr)slotsOffset));
+    Δp.slotsPtr = add(varp, ((uintptr)0 - (uintptr)slotsOffset));
 
     return true;
 }

@@ -81,7 +81,7 @@ public static (V value, bool ok) Load<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K 
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 
     Ꮡht.init();
-    var hash = ht.keyHash((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
+    var hash = ht.keyHash(abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
     System.GC.KeepAlive(Ꮡkey);
 
     var i = Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Load();
@@ -113,7 +113,7 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
         ref var key = ref heap(keyʗp, out var Ꮡkey);
 
         Ꮡht.init();
-        var hash = ht.keyHash((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
+        var hash = ht.keyHash(abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
         System.GC.KeepAlive(Ꮡkey);
         ж<Δindirect<K, V>> i = default;
         nuint hashShift = default;
@@ -243,7 +243,7 @@ public static (V previous, bool loaded) Swap<K, V>(this ж<HashTrieMap<K, V>> �
         ref var key = ref heap(keyʗp, out var Ꮡkey);
 
         Ꮡht.init();
-        var hash = ht.keyHash((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
+        var hash = ht.keyHash(abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
         System.GC.KeepAlive(Ꮡkey);
         ж<Δindirect<K, V>> i = default;
         nuint hashShift = default;
@@ -333,7 +333,7 @@ public static bool /*swapped*/ CompareAndSwap<K, V>(this ж<HashTrieMap<K, V>> �
         if (ht.valEqual == nil) {
             throw panic("called CompareAndSwap when value is not of comparable type");
         }
-        var hash = ht.keyHash((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
+        var hash = ht.keyHash(abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
         System.GC.KeepAlive(Ꮡkey);
 
         // Find a node with the key and compare with it. n != nil if we found the node.
@@ -369,7 +369,7 @@ public static (V value, bool loaded) LoadAndDelete<K, V>(this ж<HashTrieMap<K, 
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 
     Ꮡht.init();
-    var hash = ht.keyHash((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
+    var hash = ht.keyHash(abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
     System.GC.KeepAlive(Ꮡkey);
 
     // Find a node with the key and compare with it. n != nil if we found the node.
@@ -436,7 +436,7 @@ public static bool /*deleted*/ CompareAndDelete<K, V>(this ж<HashTrieMap<K, V>>
     if (ht.valEqual == nil) {
         throw panic("called CompareAndDelete when value is not of comparable type");
     }
-    var hash = ht.keyHash((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
+    var hash = ht.keyHash(abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
     System.GC.KeepAlive(Ꮡkey);
 
     // Find a node with the key. n != nil if we found the node.
@@ -667,7 +667,7 @@ internal static (V, bool) lookupWithValue<K, V>(this ж<Δentry<K, V>> Ꮡe, K k
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
     while (Ꮡe != nil) {
-        if (AreEqual(e.key, key) && (valEqual == nil || valEqual(@unsafe.Pointer.FromPinnedBox(Ꮡe.of(sync_package.Δentry<K, V>.Ꮡvalue)), (uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡvalue))))) {
+        if (AreEqual(e.key, key) && (valEqual == nil || valEqual(@unsafe.Pointer.FromPinnedBox(Ꮡe.of(sync_package.Δentry<K, V>.Ꮡvalue)), abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡvalue))))) {
             System.GC.KeepAlive(Ꮡvalue);
             return (e.value, true);
         }
@@ -715,7 +715,7 @@ internal static (ж<Δentry<K, V>>, bool) compareAndSwap<K, V>(this ж<Δentry<K
     ref var head = ref Ꮡhead.DerefOrNull();
     ref var old = ref heap(oldʗp, out var Ꮡold);
 
-    if (AreEqual(head.key, key) && valEqual(@unsafe.Pointer.FromPinnedBox(Ꮡhead.of(sync_package.Δentry<K, V>.Ꮡvalue)), (uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡold)))) {
+    if (AreEqual(head.key, key) && valEqual(@unsafe.Pointer.FromPinnedBox(Ꮡhead.of(sync_package.Δentry<K, V>.Ꮡvalue)), abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡold)))) {
         // Return the new head of the list.
         var eΔ1 = newEntryNode(key, @new);
         System.GC.KeepAlive(Ꮡold);
@@ -727,7 +727,7 @@ internal static (ж<Δentry<K, V>>, bool) compareAndSwap<K, V>(this ж<Δentry<K
     var i = Ꮡhead.of(sync_package.Δentry<K, V>.Ꮡoverflow);
     var e = i.Load();
     while (e != nil) {
-        if (AreEqual((~e).key, key) && valEqual(@unsafe.Pointer.FromPinnedBox(e.of(sync_package.Δentry<K, V>.Ꮡvalue)), (uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡold)))) {
+        if (AreEqual((~e).key, key) && valEqual(@unsafe.Pointer.FromPinnedBox(e.of(sync_package.Δentry<K, V>.Ꮡvalue)), abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡold)))) {
             var eNew = newEntryNode(key, @new);
             System.GC.KeepAlive(Ꮡold);
             eNew.of(sync_package.Δentry<K, V>.Ꮡoverflow).Store(e.of(sync_package.Δentry<K, V>.Ꮡoverflow).Load());
@@ -772,7 +772,7 @@ internal static (ж<Δentry<K, V>>, bool) compareAndDelete<K, V>(this ж<Δentry
     ref var head = ref Ꮡhead.DerefOrNull();
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
-    if (AreEqual(head.key, key) && valEqual(@unsafe.Pointer.FromPinnedBox(Ꮡhead.of(sync_package.Δentry<K, V>.Ꮡvalue)), (uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡvalue)))) {
+    if (AreEqual(head.key, key) && valEqual(@unsafe.Pointer.FromPinnedBox(Ꮡhead.of(sync_package.Δentry<K, V>.Ꮡvalue)), abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡvalue)))) {
         // Drop the head of the list.
         var ᴛ1 = Ꮡhead.of(sync_package.Δentry<K, V>.Ꮡoverflow).Load();
         System.GC.KeepAlive(Ꮡvalue);
@@ -781,7 +781,7 @@ internal static (ж<Δentry<K, V>>, bool) compareAndDelete<K, V>(this ж<Δentry
     var i = Ꮡhead.of(sync_package.Δentry<K, V>.Ꮡoverflow);
     var e = i.Load();
     while (e != nil) {
-        if (AreEqual((~e).key, key) && valEqual(@unsafe.Pointer.FromPinnedBox(e.of(sync_package.Δentry<K, V>.Ꮡvalue)), (uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡvalue)))) {
+        if (AreEqual((~e).key, key) && valEqual(@unsafe.Pointer.FromPinnedBox(e.of(sync_package.Δentry<K, V>.Ꮡvalue)), abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡvalue)))) {
             i.Store(e.of(sync_package.Δentry<K, V>.Ꮡoverflow).Load());
             System.GC.KeepAlive(Ꮡvalue);
             return (Ꮡhead, true);
