@@ -104,6 +104,13 @@ internal class InheritedTypeTemplate : TemplateBase
     // IStrongBox step), so the Go value seen through reflect is the map itself.
     public bool HoldsMapInHolder = false;
 
+    // A defined type over a struct that contributes fields (`type CacheHashKey key`). Without its own
+    // equality the wrapper falls back to ValueType.Equals and ValueType.GetHashCode, which box it and
+    // read m_value by reflection (the inner struct overrides Equals, so the runtime cannot compare bits)
+    // and then call m_value's own Equals(object) and GetHashCode. EqualityOverrides states that same
+    // answer directly, and GoEquatablePart adds IEquatable<T> so a Dictionary key takes it unboxed.
+    public bool StructEquality = false;
+
     // The Go methods declared on this type, and its own name (TypeGenerator.GoMethodNames). A Go method
     // is an extension method, which loses to any applicable instance member, and a member may not share
     // its type's name, so a map or channel wrapper YIELDS each of these names: a member implementing an interface becomes its explicit implementation, and Set is
@@ -255,14 +262,17 @@ internal class InheritedTypeTemplate : TemplateBase
     // ISliceTypeTemplate Equals(ISlice<T>?) compares the backing arrays element-wise), so a non-nil
     // EMPTY named slice (`S{}`, `make(S, 0)`, an `s[len(s):]` tail) was misclassified as nil. Delegate
     // to slice<T>'s own == NilType — REPRESENTATION nilness (null backing array, R13) — so `IntSlice{}
-    // == nil` is false while the zero value stays nil. Map/channel keep the structural default and are
-    // already correct: they declare no structural Equals, so `Equals(default)` falls back to reference
-    // identity on the backing field (map<K,V>.Equals is ReferenceEquals(m_map); channel<T> compares its
-    // queue). Pointer uses its reference-identity Equals override, and array/numeric/string/struct/any
-    // are not nil-comparable in Go — all keep the default.
+    // == nil` is false while the zero value stays nil. Map/channel delegate the same way, to map<K,V>'s
+    // and channel<T>'s own == NilType (no backing store): the wrapper declares no Equals(S), so the old
+    // `value.Equals(default(S))` boxed both values into ValueType.Equals, which reads the fields by
+    // reflection, and answered the same question (map<K,V>.Equals is ReferenceEquals(m_map); channel<T>
+    // compares its core) at that cost on every `m == nil`. Pointer uses its reference-identity Equals
+    // override, and array/numeric/string/struct/any are not nil-comparable in Go — all keep the default.
     private string NilComparisonExpression => TypeClass switch
     {
         "Slice" => "value.m_value == nil",
+        "Map" => $"value.{Value} == nil",
+        "Channel" => "value.m_value == nil",
         // STRUCTURAL nil for pointers (null-safe): a null reference and the canonical typed nil
         // instance are the same Go nil pointer; the old `value.Equals(default)` NRE'd on a null
         // reference and reported the canonical instance non-nil.
@@ -679,6 +689,15 @@ internal class InheritedTypeTemplate : TemplateBase
 
                 public override int GetHashCode() => {Value}.GetHashCode();
 
+        """ : StructEquality ?
+        $"""
+
+                public bool Equals({ObjectName} other) => m_value.Equals(other.m_value);
+
+                public override bool Equals(object? obj) => obj is {ObjectName} other && Equals(other);
+
+                public override int GetHashCode() => m_value.GetHashCode();
+
         """ : "";
 
     private string ReadOnly => ReadOnlyValue ? "readonly " : "";
@@ -847,7 +866,7 @@ internal class InheritedTypeTemplate : TemplateBase
     // EXPLICITLY, through this type's own == (EqualityExpression; IEEE for a float underlying, where its Equals is
     // NaN-equal), so the comparison runs in compiled code and no member is added.
     private string GoEquatablePart =>
-        $"\r\n\r\n    partial {ObjectKind} {ObjectName} : global::go.IGoEquatable\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {ObjectName} value && this == value;\r\n    }}";
+        $"\r\n\r\n    partial {ObjectKind} {ObjectName} : global::go.IGoEquatable{(StructEquality ? $", global::System.IEquatable<{ObjectName}>" : "")}\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {ObjectName} value && this == value;\r\n    }}";
 
     // A named pointer's deref alias, an extension method of the package class (PointerTypeTemplate.DerefAlias).
     private string PointerDerefAlias => TypeClass == "Pointer" ? PointerTypeTemplate.DerefAlias(MemberScope, ObjectName, TargetTypeName) : "";

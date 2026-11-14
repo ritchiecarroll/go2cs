@@ -486,6 +486,7 @@ public class TypeGenerator : ISourceGenerator
                             TargetTypeName = typeName,
                             TypeClass = NamedUnderlyingTypeClass(typeDefinition),
                             ForwardedStructMembers = forwardedMembers,
+                            StructEquality = forwardedMembers is { Count: > 0 },
                             UnderlyingArrayElementType = underlyingArrayElem,
                             ValueClone = valueCloneFields.Length > 0,
                             WrappedTypeIsPublic = wrappedTypeIsPublic,

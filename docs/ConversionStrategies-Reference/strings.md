@@ -465,16 +465,18 @@ Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
 
 A converting package reads the record, or the embedded standard-library metadata under `-recurse=nuget`, and renders its func values of `fmt.Sprintf` as `fmt.Sprintfᶠ`. The section is omitted when a package has no twins.
 
-**The list.** Twins are an explicit registry, `sstringTwins` in `sstringTwinOperations.go`, keyed `"<pkgPath>.<Func>"` or `"<pkgPath>.<Recv>.<method>"` and listing the twinned parameter indices. It holds fmt's format parameters and the helpers they pass them to, plus `unicode/utf8`'s `DecodeRuneInString` and `RuneCountInString`: 32 parameters in 29 functions. The converter refuses an entry (`validateSStringTwin`) that:
+**The list.** Twins are an explicit registry, `sstringTwins` in `sstringTwinOperations.go`, keyed `"<pkgPath>.<Func>"` or `"<pkgPath>.<Recv>.<method>"` and listing the twinned parameter indices. It holds fmt's format parameters and the helpers they pass them to, plus `unicode/utf8`'s `DecodeRuneInString`, the `decodeRuneInStringSlow` it passes its input to, and `RuneCountInString`: 34 parameters in 31 functions. The converter refuses an entry (`validateSStringTwin`) that:
 - is hand-owned, has no body, or is generic;
 - registers an index that is out of range or is the variadic tail;
 - has a registered parameter that is not `string`;
 - has a blank parameter (`_` or unnamed), which the `@string` forwarder could not pass on;
 - captures a registered parameter in a closure, or uses it in a `defer` or `go` statement;
-- binds a registered parameter to a local, because the implicit `sstring` → `@string` conversion would copy silently.
+- binds a registered parameter to a local, because the implicit `sstring` → `@string` conversion would copy silently;
+- passes a registered parameter to a function in the same package, or to a func value, that is not a twin at that index, because the callee takes an `@string` and every call would copy. A call into another package is admitted: that callee's `@string` parameter is its own package's contract.
 
 **Guards.**
 - `TestSStringTwinEmission` covers the emission, the value sites (bare and cross-package), the defer and go forms, and the records.
+- The `TestSStringTwinCallRule*` tests refuse a same-package copy and a func value, and admit a twin callee and a callee in another package.
 - `TestNoSStringTwinMethodGroupInCorpus` fails on any method-group use of a twin in `src/core` or the behavioral goldens.
 - The behavioral test `SStringTwinPilot` compares every call form, value site, identity and name against Go.
 
