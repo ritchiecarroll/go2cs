@@ -38,4 +38,19 @@ internal static class GoBoxTables
 
     /// <summary>The canonical typed nil for a pointer to a Go array, per (pointee type, dims) (was <c>ж&lt;T&gt;.s_nilArrayBoxes</c>).</summary>
     internal static readonly ConcurrentDictionary<(Type, GoArrayDimsKey), object> NilArrayBoxes = new();
+
+    /// <summary>A field accessor's Go offset (was <c>FieldRefBox&lt;T&gt;.s_goOffsetsByAccessor</c>).</summary>
+    internal static readonly ConditionalWeakTable<Delegate, FieldGoOffset> GoOffsetsByAccessor = new();
+
+    /// <summary>A field accessor's displacement (was <c>FieldRefBox&lt;T&gt;.s_displacementsByAccessor</c>).</summary>
+    internal static readonly ConditionalWeakTable<Delegate, FieldDisplacement> DisplacementsByAccessor = new();
 }
+
+/// <summary>
+/// EXPERIMENT (lever E, v2): was the record <c>FieldRefBox&lt;T&gt;.GoOffset</c>. Nested in the generic box it was
+/// a new record type, with every compiler-generated record member, per field type; nothing in it depends on T.
+/// </summary>
+internal sealed record FieldGoOffset(Type SourceType, nint Value);
+
+/// <summary>EXPERIMENT (lever E, v2): was the record <c>FieldRefBox&lt;T&gt;.Displacement</c>, for the same reason.</summary>
+internal sealed record FieldDisplacement(Type SourceType, nuint Value);

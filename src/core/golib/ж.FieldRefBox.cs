@@ -368,7 +368,7 @@ internal interface IFirstFieldView
     {
         Type sourceType = source.GetType();
 
-        if (s_goOffsetsByAccessor.TryGetValue(fieldId, out GoOffset? cached) && ReferenceEquals(cached.SourceType, sourceType))
+        if (GoBoxTables.GoOffsetsByAccessor.TryGetValue(fieldId, out FieldGoOffset? cached) && ReferenceEquals(cached.SourceType, sourceType))
             return cached.Value;
 
         nint offset = IsReinterpretAccessor(fieldId) ? 0 :
@@ -376,14 +376,10 @@ internal interface IFirstFieldView
                 ? s_goFieldDisplacements.GetOrAdd((structType, fieldName), static key => ResolveGoFieldOffset(key.Item1, key.Item2))
                 : -1;
 
-        s_goOffsetsByAccessor.AddOrUpdate(fieldId, new GoOffset(sourceType, offset));
+        GoBoxTables.GoOffsetsByAccessor.AddOrUpdate(fieldId, new FieldGoOffset(sourceType, offset));
 
         return offset;
     }
-
-    private sealed record GoOffset(Type SourceType, nint Value);
-
-    private static readonly ConditionalWeakTable<Delegate, GoOffset> s_goOffsetsByAccessor = new();
 
     /// <inheritdoc/>
     // A field reference's storage is its container's, recursively: `Ꮡo.of(Ꮡin).of(Ꮡv)` hangs off
@@ -532,18 +528,14 @@ internal interface IFirstFieldView
     {
         Type sourceType = source.GetType();
 
-        if (s_displacementsByAccessor.TryGetValue(fieldId, out Displacement? cached) && ReferenceEquals(cached.SourceType, sourceType))
+        if (GoBoxTables.DisplacementsByAccessor.TryGetValue(fieldId, out FieldDisplacement? cached) && ReferenceEquals(cached.SourceType, sourceType))
             return cached.Value;
 
         nuint displacement = ResolveGoFieldDisplacement(source, fieldId);
-        s_displacementsByAccessor.AddOrUpdate(fieldId, new Displacement(sourceType, displacement));
+        GoBoxTables.DisplacementsByAccessor.AddOrUpdate(fieldId, new FieldDisplacement(sourceType, displacement));
 
         return displacement;
     }
-
-    private sealed record Displacement(Type SourceType, nuint Value);
-
-    private static readonly ConditionalWeakTable<Delegate, Displacement> s_displacementsByAccessor = new();
 
     private static nuint ResolveGoFieldDisplacement(object source, Delegate fieldId)
     {
