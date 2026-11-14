@@ -8522,6 +8522,10 @@ func corpusImportPathOf(root, packageDir string) string {
 	return filepath.ToSlash(relative)
 }
 
+// proofPagePlatformPattern reads a proof page's platform from the totals line the page writer
+// emits (validationProofPages.go, proofTotalsFormat + " — Go %s, `%s`, converted package").
+var proofPagePlatformPattern = regexp.MustCompile("(?m)^\\*\\*\\d+ matched · \\d+ disclosed\\*\\* — Go [^,]+, `([a-z0-9]+)/[a-z0-9]+`, converted package")
+
 // hostFatalMintViolations enforces the class's mint rule (coordinator ruling, 2026-09-02): a
 // host-fatal entry must NOT name a test that any committed proof page records as a MATCHING
 // verdict. The rule exists because this class is the only one that changes what RUNS, and the
@@ -8580,6 +8584,10 @@ func corpusImportPathOf(root, packageDir string) string {
 // row'") has EXPIRED: runtime/debug is banked on both axes now, so the answer is no longer always
 // that. The qualifier is a schema change and belongs in its own cut; making the vacuity visible is
 // what surfaces whether it is needed and how often, which is why it comes first.
+// That qualifier now exists as testDisclosure.Platforms, and since 2026-11-14 the rule honours it: a
+// page is evidence only about an entry that applies to the page's own platform, read from the page's
+// totals line. An entry scoped away from it is reported unchecked, never refused or cleared by it.
+// First member: internal/synctest's darwin-only TestWaitGroupManyBubbles (the macOS thread cap).
 // The second return names what the rule could NOT decide, and it exists because until 2026-09-06
 // all three of the early returns below produced a bare nil: "I checked and found no agreement" and
 // "I could not check" were the same value, and only one of the three carried a comment saying which
@@ -8648,6 +8656,17 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 		return nil, unchecked
 	}
 
+	// The page's own platform, from the totals line the page writer emits (validationProofPages.go):
+	// "**N matched · M disclosed** — Go <version>, `<goos>/<goarch>`, converted package". A page is
+	// one platform's record, so it is evidence only about an entry that applies to that platform. An
+	// entry scoped away from the page's platform (testDisclosure.Platforms) withdraws nothing there,
+	// so the page cannot refuse it, and it cannot clear it either: the entry is reported unchecked,
+	// naming both platforms. A page whose platform cannot be read keeps the refusal (fail safe).
+	pageGOOS := ""
+	if m := proofPagePlatformPattern.FindSubmatch(data); m != nil {
+		pageGOOS = string(m[1])
+	}
+
 	row := regexp.MustCompile("^\\|\\s*`([^`]+)`\\s*\\|([^|]*)\\|([^|]*)\\|")
 	seen := map[string]bool{}
 	for _, line := range strings.Split(string(data), "\n") {
@@ -8658,6 +8677,12 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 		// The name reached the evidence base: whatever the verdict pair says, the rule has
 		// something to decide on and this entry is no longer unexamined.
 		seen[m[1]] = true
+		if scope := disclosures[m[1]].Platforms; pageGOOS != "" && len(scope) > 0 && !scope.includes(pageGOOS) {
+			unchecked = append(unchecked, fmt.Sprintf(
+				"%s: scoped to %s, and %s is the %s record, so it neither refuses nor clears the entry",
+				m[1], strings.Join(scope, ", "), filepath.Base(page), pageGOOS))
+			continue
+		}
 		if strings.TrimSpace(m[2]) == strings.TrimSpace(m[3]) {
 			violations = append(violations, fmt.Sprintf(
 				"%s is disclosed %s, but %s records it as a MATCHING verdict (%s/%s): excluding it "+
