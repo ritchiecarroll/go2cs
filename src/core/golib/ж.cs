@@ -326,7 +326,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (typeof(ISlice).IsAssignableFrom(typeof(T)))
             return false;
 
-        return !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>));
+        return !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>)); // ONE TEST, THREE SPELLINGS: s_isArrayShaped below and NativeBox<T>.s_isNamedArrayShaped spell this one; change the three together
 
         // What remains is exactly the shape that IS lazy: a go2cs-gen named fixed-size array
         // wrapper (`Value => m_value ??= new array<E>(N)`, TypeClass "Array") and the array-VIEW
@@ -963,7 +963,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // docs/phase4/DESIGN-native-array-view.md §4 as amended). Computed once per instantiation
     // because the operator is on a hot path and the answer cannot change.
     private static readonly bool s_isArrayShaped =
-        typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>);
+        typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>); // ONE TEST, THREE SPELLINGS: the line above the lazy-shape comment (search "s_isArrayShaped below") and NativeBox<T>.s_isNamedArrayShaped spell this one; change the three together
 
     // ---- the address conversions (the uintptr/void* seam; kind tests are virtual reads) ----
 

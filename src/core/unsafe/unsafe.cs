@@ -1630,14 +1630,20 @@ public static ж<byte> StringData(@string str) {
 // It carries both routes. A field one hop off a NATIVE root takes golib's native field-view door, which
 // views the field at its GO offset (builtin.NativeFieldArrayPointer); every other root -- managed,
 // pinned-managed, nil, or a struct whose Go layout cannot be known -- takes the raw-address route the
-// converter emitted before, unchanged. The route lives here rather than in golib because golib sits
+// converter emitted before. The route lives here rather than in golib because golib sits
 // below this package and cannot name Pointer.FromPinnedBox, the retaining pin the raw route needs.
+//
+// The raw route hands the POINTER to the typed door (Pointer.To), so the array pointer keeps the field's box by
+// what the pointer carries. It was spelled `(ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field)`: the cast to a number
+// dropped the box, and the result kept it only because the registry still resolved the pinned address, which
+// held as long as something else kept the box alive between the two casts
+// (docs/phase4/DESIGN-array-pointer-doors.md 10.6).
 //
 // T rides on the CLASS and TField on the method so the call site names only T: C# infers TField from
 // the field argument, and an extension member cannot take T alone (CS1061 under C# 14).
 public static class ArrayPointer<T> {
     public static ж<array<T>> Of<TField>(ж<TField> field, nint length) =>
-        builtin.NativeFieldArrayPointer<T>(field, length) ?? (ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field);
+        builtin.NativeFieldArrayPointer<T>(field, length) ?? Pointer.To<array<T>>(Pointer.FromPinnedBox(field));
 }
 
 // Go's `(*[unsafe.Sizeof(s)]byte)(unsafe.Pointer(&s))[lo:hi]` as a direct argument of copy, where s's struct is
