@@ -30,7 +30,7 @@ These do not change. A change to any of them is a break, and takes the [deprecat
 - **The exceptions a consumer catches.** `PanicException` and `GoErrorException`, their names and their properties.
 - **Package IDs and the version scheme.** A standard-library package is `go.<import path>` (`go.encoding.hex`), a
   converted module's package is `nugetgo.<package path>` (`nugetgo.github.com.google.uuid`), and a version is the Go
-  release followed by a fourth number that counts go2cs's builds of it (`1.26.10.4`).
+  release followed by a fourth number that counts go2cs's builds of it (`1.26.11.1`).
 - **`go2cs/source-metadata.txt`**, the file in every package that names the Go release and the go2cs build it came
   from. Its format is frozen; tools read it.
 

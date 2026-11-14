@@ -45,7 +45,7 @@ internal static class Go2CsTestHost
         registry.Add("TestEntropySamples", fipstest_internal_test_package.TestEntropySamples, "entropy_test.go", 33);
         registry.Add("TestEntropyUnchanged", fipstest_internal_test_package.TestEntropyUnchanged, "entropy_test.go", 221);
         registry.Add("TestEquivalents", fipstest_internal_test_package.TestEquivalents, "nistec_test.go", 108);
-        registry.Add("TestFIPS140", fipstest_internal_test_package.TestFIPS140, "fips_test.go", 91);
+        registry.Add("TestFIPS140", fipstest_internal_test_package.TestFIPS140, "fips_test.go", 92);
         registry.Add("TestGetConfig", fipstest_internal_test_package.TestGetConfig, "acvp_test.go", 2221);
         registry.Add("TestIndicator", fipstest_internal_test_package.TestIndicator, "indicator_test.go", 12);
         registry.Add("TestIntegrityCheck", fipstest_internal_test_package.TestIntegrityCheck, "check_test.go", 24);
@@ -60,7 +60,7 @@ internal static class Go2CsTestHost
         registry.Add("TestSha2256", fipstest_internal_test_package.TestSha2256, "acvp_test.go", 2238);
         registry.Add("TestTooFewArgs", fipstest_internal_test_package.TestTooFewArgs, "acvp_test.go", 2176);
         registry.Add("TestTooManyArgs", fipstest_internal_test_package.TestTooManyArgs, "acvp_test.go", 2198);
-        registry.Add("TestVersion", fipstest_internal_test_package.TestVersion, "fips_test.go", 67);
+        registry.Add("TestVersion", fipstest_internal_test_package.TestVersion, "fips_test.go", 68);
         registry.Add("TestXAES", fipstest_internal_test_package.TestXAES, "xaes_test.go", 39);
         registry.Add("TestXAESAccumulated", fipstest_internal_test_package.TestXAESAccumulated, "xaes_test.go", 117);
         registry.Add("TestXAESAllocations", fipstest_internal_test_package.TestXAESAllocations, "xaes_test.go", 19);

@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `net/http` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-25 · converter `b5fc1294d`*
+*Validated 2026-11-14 · converter `5bdf0a90b`*
 
-**1526 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
+**1538 matched · 0 disclosed** — Go 1.26.11, `windows/amd64`, converted package
 [`src/core/net/http`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/http).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.11 windows/amd64`.
 
-Both runtimes skip 21 of the matched tests identically.
+Both runtimes skip 22 of the matched tests identically.
 
 ## Verdicts
 
@@ -912,8 +912,6 @@ Both runtimes skip 21 of the matched tests identically.
 | `TestServerAllowsBlockingRemoteAddr` | pass | pass |
 | `TestServerAllowsBlockingRemoteAddr/h1` | pass | pass |
 | `TestServerBufferedChunking` | pass | pass |
-| `TestServerCONNECTFailure` | pass | pass |
-| `TestServerCONNECTSuccess` | pass | pass |
 | `TestServerCancelsReadHeaderTimeoutWhenIdle` | pass | pass |
 | `TestServerCancelsReadHeaderTimeoutWhenIdle/h1` | pass | pass |
 | `TestServerCancelsReadTimeoutWhenIdle` | pass | pass |
@@ -924,6 +922,16 @@ Both runtimes skip 21 of the matched tests identically.
 | `TestServerConnState` | pass | pass |
 | `TestServerConnState/h1` | pass | pass |
 | `TestServerConnStateNew` | pass | pass |
+| `TestServerConnectionReuse` | pass | pass |
+| `TestServerConnectionReuse/100-continue_consumed_small_body` | pass | pass |
+| `TestServerConnectionReuse/100-continue_unconsumed_large_body` | pass | pass |
+| `TestServerConnectionReuse/100-continue_unconsumed_small_body` | skip | skip |
+| `TestServerConnectionReuse/large_body` | pass | pass |
+| `TestServerConnectionReuse/large_body_full_duplex` | pass | pass |
+| `TestServerConnectionReuse/large_wrapped_body` | pass | pass |
+| `TestServerConnectionReuse/small_body` | pass | pass |
+| `TestServerConnectionReuse/small_body_full_duplex` | pass | pass |
+| `TestServerConnectionReuse/small_wrapped_body` | pass | pass |
 | `TestServerContentType` | pass | pass |
 | `TestServerContentType/h1` | pass | pass |
 | `TestServerContentType/h2` | pass | pass |
@@ -972,6 +980,9 @@ Both runtimes skip 21 of the matched tests identically.
 | `TestServerKeepAlivesEnabledResultClose` | pass | pass |
 | `TestServerKeepAlivesEnabledResultClose/h1` | pass | pass |
 | `TestServerListenNotComparableListener` | pass | pass |
+| `TestServerMaxBytesHeaderRace` | pass | pass |
+| `TestServerMaxBytesHeaderRace/h1` | pass | pass |
+| `TestServerMaxBytesHeaderRace/h2` | pass | pass |
 | `TestServerNoDate` | pass | pass |
 | `TestServerNoDate/h1` | pass | pass |
 | `TestServerNoDate/h2` | pass | pass |
@@ -1000,6 +1011,7 @@ Both runtimes skip 21 of the matched tests identically.
 | `TestServerReaderFromOrder` | pass | pass |
 | `TestServerReaderFromOrder/h1` | pass | pass |
 | `TestServerReaderFromOrder/h2` | pass | pass |
+| `TestServerRequestBodyCloseAfterPartialRead` | pass | pass |
 | `TestServerRequestContextCancel_ConnClose` | pass | pass |
 | `TestServerRequestContextCancel_ConnClose/h1` | pass | pass |
 | `TestServerRequestContextCancel_ServeHTTPDone` | pass | pass |

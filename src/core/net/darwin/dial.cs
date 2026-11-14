@@ -644,7 +644,15 @@ public static (ж<TCPConn>, error) DialTCP(this ж<Dialer> Ꮡd, context.Context
         (ctx, var cancel) = d.dialCtx(ctx);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
-        return dialTCP(ctx, Ꮡd, network, TCPAddrFromAddrPort(laddr), TCPAddrFromAddrPort(raddr));
+        ж<TCPAddr> laddrTCP = default;
+        ж<TCPAddr> raddrTCP = default;
+        if (laddr.IsValid()) {
+            laddrTCP = TCPAddrFromAddrPort(laddr);
+        }
+        if (raddr.IsValid()) {
+            raddrTCP = TCPAddrFromAddrPort(raddr);
+        }
+        return dialTCP(ctx, Ꮡd, network, laddrTCP, raddrTCP);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
@@ -666,7 +674,15 @@ public static (ж<UDPConn>, error) DialUDP(this ж<Dialer> Ꮡd, context.Context
         (ctx, var cancel) = d.dialCtx(ctx);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
-        return dialUDP(ctx, Ꮡd, network, UDPAddrFromAddrPort(laddr), UDPAddrFromAddrPort(raddr));
+        ж<UDPAddr> laddrUDP = default;
+        ж<UDPAddr> raddrUDP = default;
+        if (laddr.IsValid()) {
+            laddrUDP = UDPAddrFromAddrPort(laddr);
+        }
+        if (raddr.IsValid()) {
+            raddrUDP = UDPAddrFromAddrPort(raddr);
+        }
+        return dialUDP(ctx, Ꮡd, network, laddrUDP, raddrUDP);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
@@ -688,7 +704,15 @@ public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context c
         (ctx, var cancel) = d.dialCtx(ctx);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
-        return dialIP(ctx, Ꮡd, network, ipAddrFromAddr(laddr), ipAddrFromAddr(raddr));
+        ж<IPAddr> laddrIP = default;
+        ж<IPAddr> raddrIP = default;
+        if (laddr.IsValid()) {
+            laddrIP = ipAddrFromAddr(laddr);
+        }
+        if (raddr.IsValid()) {
+            raddrIP = ipAddrFromAddr(raddr);
+        }
+        return dialIP(ctx, Ꮡd, network, laddrIP, raddrIP);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }

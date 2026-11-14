@@ -394,6 +394,21 @@ internal class InheritedTypeTemplate : TemplateBase
     // in the one test assembly under the whitebox-reference model.
     private bool OmitUnderlyingConversionOperators => Scope!.StartsWith("public") && !WrappedTypeIsPublic;
 
+    // For a defined type over another defined SLICE type (`type fermat nat`): the base the Go source names,
+    // and whether it is public. The wrapper holds the bottom slice, so it converts to and from the base
+    // through that slice; a public wrapper over a non-public base omits the pair, as above.
+    public string? NamedBaseTypeName = null;
+    public bool NamedBaseIsPublic = true;
+
+    private string NamedBaseConversionOperators => NamedBaseTypeName is null || Scope!.StartsWith("public") && !NamedBaseIsPublic ? "" :
+        $$"""
+
+                // Handle conversions between '{{NamedBaseTypeName}}' and {{ObjectKind}} '{{ObjectName}}', the type it is defined over
+                public static implicit operator {{ObjectName}}({{NamedBaseTypeName}} value) => new {{ObjectName}}(({{TypeName}})value);
+
+                public static implicit operator {{NamedBaseTypeName}}({{ObjectName}} value) => ({{NamedBaseTypeName}})value.{{Value}};
+        """;
+
     private string UnderlyingConversionOperators => TypeName is "any" or "object" || OmitUnderlyingConversionOperators ? "" :
         $$"""
                 // Handle implicit conversions between '{{TypeName}}' and {{ObjectKind}} '{{ObjectName}}'
@@ -891,7 +906,7 @@ internal class InheritedTypeTemplate : TemplateBase
         
                 public static bool operator !=({{ObjectName}} left, {{ObjectName}} right) => !(left == right);
         
-        {{UnderlyingConversionOperators}}
+        {{UnderlyingConversionOperators}}{{NamedBaseConversionOperators}}
                     {{UintptrBridgeOperators}}{{UntypedIntBridgeOperator}}{{UntypedFloatBridgeOperator}}{{BasicNumericConversionOperators}}{{ComplexBridgeOperators}}{{StringSurfaceMembers}}
                 // Handle comparisons between 'nil' and {{ObjectKind}} '{{ObjectName}}'
                 public static bool operator ==({{ObjectName}} value, NilType nil) => {{NilComparisonExpression}};

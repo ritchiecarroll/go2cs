@@ -1,0 +1,79 @@
+sampled allocation 26,894 MB; GCs 239 (gen2 126); suspended 42,012 ms
+-- by type
+   39.8%    10,707 MB  System.Byte[]
+   13.0%     3,500 MB  go.ViewEntry
+    4.1%     1,100 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase]
+    4.1%     1,095 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node]
+    4.0%     1,083 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault]
+    2.8%       753 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node][]
+    1.7%       451 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase]
+    1.6%       434 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionBase]
+    1.6%       431 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase]
+    1.6%       425 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase]
+    1.6%       422 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase]
+    1.6%       421 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase]
+    1.3%       350 MB  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier]
+    1.3%       340 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase]
+    1.2%       324 MB  Identifier[]
+    1.2%       324 MB  ΔSymbol[]
+    1.1%       285 MB  Entry[go.string,go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ΔSymbol]][]
+    0.9%       247 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+DeclarationBase]
+    0.9%       234 MB  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ΔSymbol]
+    0.6%       160 MB  go.map`2[go.string,go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ΔSymbol]]
+    0.6%       154 MB  SymbolTable
+    0.5%       123 MB  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeList]
+    0.5%       122 MB  ParameterDeclaration[]
+    0.4%       119 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeWithTypeArgumentsBase]
+    0.4%       118 MB  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeReferenceNode]
+-- by allocating frame (first frame outside System/Microsoft)
+   38.8%    10,446 MB  go.sstring.op_Implicit(value class go.sstring)
+    6.1%     1,647 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    6.1%     1,636 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    5.9%     1,589 MB  go.slices_package.Grow(!!0,int)
+    2.5%       663 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    2.4%       650 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    2.4%       647 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    2.4%       639 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    2.4%       636 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    2.3%       630 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    2.2%       582 MB  go.github.com.microsoft.TypeScript.tsc.internal.core_package.New(value class Arena`1<!!0>&)
+    2.1%       570 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    1.8%       491 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    1.7%       466 MB  go.github.com.microsoft.TypeScript.tsc.internal.parser_package.createIdentifierWithDiagnostic(value class Parser&,bool,class go.ж`1<value cl
+    1.6%       422 MB  go.github.com.microsoft.TypeScript.tsc.internal.ast_package.GetSymbolTable(class go.ж`1<value class SymbolTable>)
+    1.5%       412 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    1.1%       293 MB  go.github.com.microsoft.TypeScript.tsc.internal.binder_package.declareSymbolEx(value class Binder&,value class SymbolTable,class go.ж`1<valu
+    0.9%       231 MB  go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseDelimitedList(class go.ж`1<value class Parser>,value class ParsingContex
+    0.8%       206 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PropertySignatureDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    0.8%       203 MB  go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseModifiersEx(class go.ж`1<value class Parser>,bool,bool,bool)
+    0.7%       197 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeWithTypeArgumentsBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    0.7%       184 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeReferenceNode].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    0.6%       163 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+KeywordTypeNode].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    0.6%       162 MB  go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseParameterEx(class go.ж`1<value class Parser>,bool,bool)
+    0.6%       162 MB  go.string..ctor(value class System.ReadOnlySpan`1<unsigned int8>&)
+-- by type @ golib frame <- allocating frame
+   38.8%    10,446 MB  System.Byte[]  @  go.sstring.op_Implicit(value class go.sstring)  <-  go.sstring.op_Implicit(value class go.sstring)
+    4.1%     1,095 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node]  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].viewOfSlow  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].viewOfSlow
+    4.0%     1,083 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault]  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(cl  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(cl
+    2.1%       553 MB  go.ViewEntry  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(cl  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(cl
+    2.1%       552 MB  go.ViewEntry  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].viewOfSlow  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].viewOfSlow
+    1.6%       440 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase]  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase].vi  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase].vi
+    1.6%       436 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase]  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase].viewOfS  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase].viewOfS
+    1.6%       434 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionBase]  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase].v  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase].v
+    1.6%       431 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase]  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase].v  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase].v
+    1.6%       422 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase]  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionB  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionB
+    1.6%       418 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase]  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase].  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase].
+    1.4%       386 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase]  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier].viewOfSlow(  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier].viewOfSlow(
+    1.3%       350 MB  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier]  @  go.github.com.microsoft.TypeScript.tsc.internal.parser_package.createIdentifierWithDiagnos
+    1.2%       332 MB  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase]  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase].viewOfSlo  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase].viewOfSlo
+    1.2%       320 MB  Identifier[]  @  go.slices_package.Grow(!!0,int)  <-  go.slices_package.Grow(!!0,int)
+    1.2%       315 MB  ΔSymbol[]  @  go.slices_package.Grow(!!0,int)  <-  go.slices_package.Grow(!!0,int)
+    0.8%       226 MB  go.ViewEntry  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase].viewOfS  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase].viewOfS
+    0.8%       214 MB  go.ViewEntry  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionB  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionB
+    0.8%       212 MB  go.ViewEntry  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase].v  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase].v
+    0.8%       212 MB  go.ViewEntry  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase].  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase].
+    0.8%       211 MB  go.ViewEntry  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase].vi  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase].vi
+    0.8%       210 MB  Entry[go.string,go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ΔSymbol]][]  @  go.github.com.microsoft.TypeScript.tsc.internal.binder_package.declareSymbolEx(value class
+    0.8%       208 MB  go.ViewEntry  @  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase].v  <-  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase].v
+    0.8%       202 MB  go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node][]  @  go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseModifiersEx(class go.ж
+    0.7%       198 MB  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ΔSymbol]  @  go.github.com.microsoft.TypeScript.tsc.internal.core_package.New(value class Arena`1<!!0>&

@@ -165,7 +165,7 @@ This page states which releases come next.
 
 ## Go releases
 
-**In short.** The converted standard library is on Go 1.26.10, a release Go still supports. The next
+**In short.** The converted standard library is on Go 1.26.11, a release Go still supports. The next
 move is Go 1.27, before the 1.26 series leaves support. 1.24.13.7 is the last 1.24 release.
 
 Go 1.24 left upstream support in February 2026, and the 1.25 series left it in August 2026, so

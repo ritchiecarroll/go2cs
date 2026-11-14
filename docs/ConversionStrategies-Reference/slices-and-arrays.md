@@ -1684,6 +1684,21 @@ conversion operators the generator omits (see `OmitUnderlyingConversionOperators
 bare comparison nor the cast compiles there; no instance is known. Guarded by the
 `NamedArrayVsUnnamedCompare` behavioral test.
 
+## A defined type over another DEFINED slice type is a slice wrapper too
+
+Go gives `type fermat nat`, where `type nat []uint64`, every slice operation: `make`, indexing,
+slicing, `append`, `range`, `len` and `cap`, plus the conversions `fermat(n)` and `nat(f)`. Methods are
+not inherited. The converter writes the definition as the Go source does, `partial struct fermat /*nat*/;`,
+and go2cs-gen used to generate a plain wrapper over the `nat` struct, which has none of that surface
+(CS1503, CS0021, CS0315; github.com/remyoudompheng/bigfft, sqlite-cs row S4). The generator now follows
+the chain of definitions down to the `[]elem` at its bottom, as it already does for a named array
+(`type pallocBits pageBits`), and generates the slice wrapper over `slice<uint64>`, with an implicit
+conversion to and from `nat` through that slice. The walk stays inside one compilation: an element spelled
+in another package's terms would not bind, so such a chain keeps the plain wrapper. No defined type in
+the standard library's production sources is written over a defined slice type, so no corpus wrapper
+changes. Guarded by `NamedSliceOverNamedSlice`, which also runs a three-hop chain and the nil slice,
+output-compared vs Go.
+
 ## `make([]E, n)` constructs its ELEMENTS by the same rule
 
 `slice<T>`'s length constructor fills its backing with `default(T)` exactly as `array<T>`'s does, so

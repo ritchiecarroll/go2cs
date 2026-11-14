@@ -1,0 +1,79 @@
+sampled allocation 87 MB; GCs 2 (gen2 2); suspended 63 ms
+-- by type
+   10.5%         9 MB  System.Reflection.RuntimeParameterInfo
+   10.2%         9 MB  System.Reflection.RuntimeMethodInfo
+    9.7%         8 MB  System.Signature
+    9.5%         8 MB  System.ValueTuple`2[System.Reflection.MethodInfo,System.Type][]
+    7.9%         7 MB  System.Reflection.ParameterInfo[]
+    6.8%         6 MB  System.String
+    6.7%         6 MB  System.Reflection.RuntimeMethodInfo[]
+    6.4%         6 MB  ReceiverShape[]
+    6.0%         5 MB  Builder[go.golib.TypeExtensions+ReceiverShape]
+    6.0%         5 MB  System.ValueTuple`3[System.Reflection.MethodInfo,System.Type,System.Reflection.Assembly][]
+    5.8%         5 MB  System.Type[]
+    5.0%         4 MB  System.RuntimeType[]
+    3.5%         3 MB  System.Byte[]
+    1.4%         1 MB  System.Reflection.MethodInfo[]
+    1.0%         1 MB  Slot[]
+    0.5%         0 MB  System.Reflection.Metadata.MetadataReader
+    0.3%         0 MB  go.slice`1[System.Byte]
+    0.3%         0 MB  System.Int32[]
+    0.2%         0 MB  System.Reflection.RuntimeModule
+    0.2%         0 MB  RuntimeTypeCache
+    0.1%         0 MB  System.Object[]
+    0.1%         0 MB  System.Reflection.Metadata.TypeName
+    0.1%         0 MB  GoFieldInfo[]
+    0.1%         0 MB  FromTo[]
+    0.1%         0 MB  buffer
+-- by allocating frame (first frame outside System/Microsoft)
+   31.3%        27 MB  go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadOnlySet`1<class System.Reflection.Assembly>)
+   17.1%        15 MB  go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Reflection.MethodInfo)
+   16.7%        15 MB  go.golib.TypeExtensions.GetExtensionTargetType(class System.Reflection.MethodInfo)
+   13.0%        11 MB  go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)
+    6.4%         6 MB  go.golib.TypeExtensions+ReceiverShapeProvider.GetTypeFromReference(class System.Reflection.Metadata.MetadataReader,value class System.Reflec
+    3.8%         3 MB  go.golib.TypeExtensions.CollectGoMethodSetCandidates(class System.Type,bool,class System.Collections.Generic.IReadOnlyList`1<value class Sys
+    2.5%         2 MB  go.embed_package.ΔEmbedRaw(class System.Reflection.Assembly,value class go.string,value class go.string)
+    1.8%         2 MB  go.golib.TypeExtensions.DeclaredExtensionMethods(class System.Type)
+    1.2%         1 MB  go.golib.TypeExtensions.ExtensionHome(class System.Type)
+    0.9%         1 MB  go.StringLiteralCache.Insert(class System.String,unsigned int8[])
+    0.8%         1 MB  go.golib.TypeExtensions+ExtensionHost.ReadExtensionMethods(class System.Type)
+    0.7%         1 MB  ?
+    0.5%         0 MB  go.StringLiteralCache.Miss(class System.String)
+    0.3%         0 MB  go.GoReflect.collectGoFields(class System.Type,class System.Reflection.FieldInfo[],bool[],class System.Collections.Generic.List`1<value clas
+    0.2%         0 MB  go.builtin.initPackage(class System.Type)
+    0.2%         0 MB  go.fmt_package+buffer.go.ISlice<System.Byte>.Slice(int,int)
+    0.2%         0 MB  go.AllocationCounter.CopyOf(value class System.ReadOnlySpan`1<!!0>)
+    0.2%         0 MB  go.builtin.Ꮡ(!!0)
+    0.1%         0 MB  go.GoReflect.KindOf(class System.Type)
+    0.1%         0 MB  <Module>..cctor()
+    0.1%         0 MB  go.StringLiteralCache.NewSlots(int32)
+    0.1%         0 MB  go.GoReflect.TryBoxPointee(class System.Type,class System.Type&)
+    0.1%         0 MB  go.builtin.appendꓸꓸꓸ(!!0,class go.ISlice`1<!!1>)
+    0.1%         0 MB  go.fmt_package+buffer.get_Capacity()
+    0.1%         0 MB  go.builtin.GoZero()
+-- by type @ golib frame <- allocating frame
+    9.5%         8 MB  System.ValueTuple`2[System.Reflection.MethodInfo,System.Type][]  @  go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadO  <-  go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadO
+    9.2%         8 MB  System.Reflection.RuntimeMethodInfo  @  go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadO  <-  go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadO
+    6.4%         6 MB  ReceiverShape[]  @  go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)  <-  go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)
+    6.4%         6 MB  System.String  @  go.golib.TypeExtensions+ReceiverShapeProvider.GetTypeFromReference(class System.Reflection  <-  go.golib.TypeExtensions+ReceiverShapeProvider.GetTypeFromReference(class System.Reflection
+    6.0%         5 MB  Builder[go.golib.TypeExtensions+ReceiverShape]  @  go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)  <-  go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)
+    6.0%         5 MB  System.Reflection.RuntimeMethodInfo[]  @  go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadO  <-  go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadO
+    5.6%         5 MB  System.Reflection.RuntimeParameterInfo  @  go.golib.TypeExtensions.GetExtensionTargetType(class System.Reflection.MethodInfo)  <-  go.golib.TypeExtensions.GetExtensionTargetType(class System.Reflection.MethodInfo)
+    5.4%         5 MB  System.Signature  @  go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Refle  <-  go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Refle
+    5.3%         5 MB  System.ValueTuple`3[System.Reflection.MethodInfo,System.Type,System.Reflection.Assembly][]  @  go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadO  <-  go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadO
+    4.8%         4 MB  System.Reflection.RuntimeParameterInfo  @  go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Refle  <-  go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Refle
+    4.3%         4 MB  System.Signature  @  go.golib.TypeExtensions.GetExtensionTargetType(class System.Reflection.MethodInfo)  <-  go.golib.TypeExtensions.GetExtensionTargetType(class System.Reflection.MethodInfo)
+    4.1%         4 MB  System.Reflection.ParameterInfo[]  @  go.golib.TypeExtensions.GetExtensionTargetType(class System.Reflection.MethodInfo)  <-  go.golib.TypeExtensions.GetExtensionTargetType(class System.Reflection.MethodInfo)
+    3.8%         3 MB  System.Type[]  @  go.golib.TypeExtensions.CollectGoMethodSetCandidates(class System.Type,bool,class System.C  <-  go.golib.TypeExtensions.CollectGoMethodSetCandidates(class System.Type,bool,class System.C
+    3.7%         3 MB  System.Reflection.ParameterInfo[]  @  go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Refle  <-  go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Refle
+    2.6%         2 MB  System.RuntimeType[]  @  go.golib.TypeExtensions.GetExtensionTargetType(class System.Reflection.MethodInfo)  <-  go.golib.TypeExtensions.GetExtensionTargetType(class System.Reflection.MethodInfo)
+    2.5%         2 MB  System.Byte[]  @  go.embed_package.ΔEmbedRaw(class System.Reflection.Assembly,value class go.string,value cl  <-  go.embed_package.ΔEmbedRaw(class System.Reflection.Assembly,value class go.string,value cl
+    2.4%         2 MB  System.RuntimeType[]  @  go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Refle  <-  go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Refle
+    1.2%         1 MB  System.Reflection.MethodInfo[]  @  go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadO  <-  go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadO
+    1.0%         1 MB  System.Type[]  @  go.golib.TypeExtensions.ExtensionHome(class System.Type)  <-  go.golib.TypeExtensions.ExtensionHome(class System.Type)
+    1.0%         1 MB  System.Reflection.RuntimeMethodInfo  @  go.golib.TypeExtensions.DeclaredExtensionMethods(class System.Type)  <-  go.golib.TypeExtensions.DeclaredExtensionMethods(class System.Type)
+    0.9%         1 MB  Slot[]  @  go.StringLiteralCache.Insert(class System.String,unsigned int8[])  <-  go.StringLiteralCache.Insert(class System.String,unsigned int8[])
+    0.8%         1 MB  System.Type[]  @  go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Refle  <-  go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Refle
+    0.7%         1 MB  System.ValueTuple`3[System.Reflection.MethodInfo,System.Type,System.Reflection.Assembly][]  @  go.golib.TypeExtensions+ExtensionHost.ReadExtensionMethods(class System.Type)  <-  go.golib.TypeExtensions+ExtensionHost.ReadExtensionMethods(class System.Type)
+    0.6%         1 MB  System.Reflection.RuntimeMethodInfo[]  @  go.golib.TypeExtensions.DeclaredExtensionMethods(class System.Type)  <-  go.golib.TypeExtensions.DeclaredExtensionMethods(class System.Type)
+    0.5%         0 MB  System.Reflection.Metadata.MetadataReader  @  go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)  <-  go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)

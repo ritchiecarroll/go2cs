@@ -4,7 +4,7 @@
     package class for a class go2cs-gen marks [GoPromotedHost(typeof(S))], unchanged in every other respect.
 
 .DESCRIPTION
-    1.26.10.4 moved every struct's same-package promoted-method forwarders out of the package class into a class of
+    1.26.11.1 moved every struct's same-package promoted-method forwarders out of the package class into a class of
     the struct's own (docs/phase4/DESIGN-promoted-forwarder-placement.md). A compiled consumer binds a forwarder by
     its declaring class, so each moved public forwarder is a CP0002 the release must announce, one entry per asset.
     They are too many to write by hand, and a hand-written list would also hide any member that left for another

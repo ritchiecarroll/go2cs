@@ -424,6 +424,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDeadlockGoroutineBlocks() => CheckTarget("DeadlockGoroutineBlocks");
 
     [TestMethod]
+    public void CheckDeclaredTypeNamedFloat() => CheckTarget("DeclaredTypeNamedFloat");
+
+    [TestMethod]
     public void CheckDeepEqual() => CheckTarget("DeepEqual");
 
     [TestMethod]
@@ -1577,6 +1580,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedSliceOfArrayDims() => CheckTarget("NamedSliceOfArrayDims");
+
+    [TestMethod]
+    public void CheckNamedSliceOverNamedSlice() => CheckTarget("NamedSliceOverNamedSlice");
 
     [TestMethod]
     public void CheckNamedSlicePointerElements() => CheckTarget("NamedSlicePointerElements");

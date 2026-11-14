@@ -426,12 +426,13 @@ internal static void close(this ref chunkWriter cw) {
 // A response represents the server side of an HTTP response.
 partial struct response {
     internal ж<conn> conn;
-    internal ж<Request> req; // request for this response
-    internal io.ReadCloser reqBody;
+    internal ж<Request> req;        // request for this response
+    internal ж<body> reqBody;       // nil when NoBody
     internal Action cancelCtx;      // when ServeHTTP exits
     internal bool wroteHeader;      // a non-1xx header has been (logically) written
     internal bool wants10KeepAlive; // HTTP/1.0 w/ Connection "keep-alive"
     internal bool wantsClose;       // HTTP request has Connection "close"
+    internal ж<expectContinueReader> ecReader;
     // canWriteContinue is an atomic boolean that says whether or
     // not a 100 Continue header can be written to the
     // connection.
@@ -467,7 +468,7 @@ partial struct response {
     // request. Instead, when this is set, we stop reading
     // subsequent requests on this connection and stop reading
     // input from it.
-    internal bool requestBodyLimitHit;
+    internal atomic.Bool requestBodyLimitHit;
     // trailers are the headers to be sent after the handler
     // finishes writing the body. This field is initialized from
     // the Trailer response header when the response header is
@@ -552,12 +553,8 @@ internal static void declareTrailer(this ref response w, @string k) {
 
 // requestTooLarge is called by maxBytesReader when too much input has
 // been read from the client.
-internal static void requestTooLarge(this ref response w) {
-    w.closeAfterReply = true;
-    w.requestBodyLimitHit = true;
-    if (!w.wroteHeader) {
-        w.Header().Set(connectionˢ, closeˢ);
-    }
+internal static void requestTooLarge(this ж<response> Ꮡw) {
+    Ꮡw.ᏑrequestBodyLimitHit.Store(true);
 }
 
 // disableWriteContinue stops Request.Body.Read from sending an automatic 100-Continue.
@@ -979,7 +976,6 @@ partial struct expectContinueReader {
     internal ж<response> resp;
     internal io.ReadCloser readCloser;
     internal atomic.Bool closed;
-    internal atomic.Bool sawEOF;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -987,8 +983,6 @@ internal static ref readonly @string http11100Continueˢ => ref http11100Continu
 private static readonly @string http11100Continueˢᵇ = "HTTP/1.1 100 Continue\r\n\r\n"u8;
 
 internal static (nint n, error err) Read(this ж<expectContinueReader> Ꮡecr, slice<byte> p) {
-    nint n = default;
-    error err = default;
     ref var ecr = ref Ꮡecr.DerefOrNull();
 
     if (Ꮡecr.Ꮡclosed.Load()) {
@@ -1004,11 +998,7 @@ internal static (nint n, error err) Read(this ж<expectContinueReader> Ꮡecr, s
         }
         w.ᏑwriteContinueMu.Unlock();
     }
-    (n, err) = ecr.readCloser.Read(p);
-    if (AreEqual(err, io.EOF)) {
-        Ꮡecr.ᏑsawEOF.Store(true);
-    }
-    return (n, err);
+    return ecr.readCloser.Read(p);
 }
 
 internal static error Close(this ж<expectContinueReader> Ꮡecr) {
@@ -1111,9 +1101,21 @@ internal static (ж<response> w, error err) readRequest(this ж<conn> Ꮡc, cont
         req.ctx = ctx;
         req.RemoteAddr = c.remoteAddr;
         req.TLS = c.tlsState;
-        var (body, ok) = req.Body._<ж<body>>(ᐧ); if (ok) {
-            body.doEarlyClose = true;
+        ж<body> reqBody = default;
+        switch (req.Body.type()) {
+        case noBody b: {
+            break;
         }
+        case ж<body> b: {
+            reqBody = b;
+            reqBody.doEarlyClose = true;
+            break;
+        }
+        default: {
+            var b = req.Body;
+            throw panic(fmt.Errorf("http: unexpected request body type %T"u8, req.Body));
+            break;
+        }}
 
         c.rwc.SetReadDeadline(wholeReqDeadline);
 
@@ -1121,7 +1123,7 @@ internal static (ж<response> w, error err) readRequest(this ж<conn> Ꮡc, cont
             conn: Ꮡc,
             cancelCtx: cancelCtx,
             req: req,
-            reqBody: req.Body,
+            reqBody: reqBody,
             handlerHeader: new ΔHeader(0),
             contentLength: -1,
 
@@ -1456,14 +1458,16 @@ internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
     // than to read the body. For now, assume that if we're sending
     // headers, the handler is done reading the body and we should
     // drop the connection if we haven't seen EOF.
-    {
-        var (ecr, ok) = w.req.Body._<ж<expectContinueReader>>(ᐧ); if (ok && !ecr.ᏑsawEOF.Load()) {
-            w.closeAfterReply = true;
-        }
+    if (w.ecReader != nil && w.reqBody.bodyRemains()) {
+        w.closeAfterReply = true;
     }
 
     if (isCONNECT) {
         // Don't reuse a connection after a CONNECT, even if we reject it.
+        w.closeAfterReply = true;
+    }
+
+    if (w.ᏑrequestBodyLimitHit.Load()) {
         w.closeAfterReply = true;
     }
 
@@ -1481,72 +1485,34 @@ internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
     // before reading a response may deadlock in this case.
     // This behavior has been present since CL 5268043 (2011), however,
     // so it doesn't seem to be causing problems.
-    if (w.req.ContentLength != 0 && !w.closeAfterReply && !w.fullDuplex) {
+    if (w.req.ContentLength != 0 && w.reqBody != nil && !w.closeAfterReply && !w.fullDuplex) {
         bool discard = default;
         bool tooBig = default;
-
-        switch (w.req.Body.type()) {
-        case ж<expectContinueReader> bdy: {
-            // We only get here if we have already fully consumed the request body
-            // (see above).
+        w.reqBody.Ꮡmu.Lock();
+        switch (ᐧ) {
+        case {} when w.reqBody.closed: {
+            if (!w.reqBody.sawEOF) {
+                // Body was closed in handler with non-EOF error.
+                w.closeAfterReply = true;
+            }
             break;
         }
-        case ж<body> bdy: {
-            bdy.Ꮡmu.Lock();
-            switch (ᐧ) {
-            case {} when bdy.closed: {
-                if (!bdy.sawEOF) {
-                    // Body was closed in handler with non-EOF error.
-                    w.closeAfterReply = true;
-                }
-                break;
-            }
-            case {} when bdy.unreadDataSizeLocked() >= maxPostHandlerReadBytes: {
-                tooBig = true;
-                break;
-            }
-            default: {
-                discard = true;
-                break;
-            }}
-            bdy.Ꮡmu.Unlock();
+        case {} when w.reqBody.unreadDataSizeLocked() >= maxPostHandlerReadBytes: {
+            tooBig = true;
             break;
         }
         default: {
-            var bdy = w.req.Body;
             discard = true;
             break;
         }}
+        w.reqBody.Ꮡmu.Unlock();
 
         if (discard) {
-            var (_, err) = io.CopyN(io.Discard, w.reqBody, maxPostHandlerReadBytes + 1);
-            switch (err) {
-            case var ᴛ when AreEqual(ᴛ, default): {
-                // There must be even more data left over.
-                tooBig = true;
-                break;
-            }
-            case var ᴛ when AreEqual(ᴛ, ErrBodyReadAfterClose): {
-                // Body was already consumed and closed.
-                break;
-            }
-            case var ᴛ when AreEqual(ᴛ, io.EOF): {
-                // The remaining body was just consumed, close it.
-                err = w.reqBody.Close();
-                if (err != nil) {
-                    w.closeAfterReply = true;
-                }
-                break;
-            }
-            default: {
-                // Some other kind of error occurred, like a read timeout, or
-                // corrupt chunked encoding. In any case, whatever remains
-                // on the wire must not be parsed as another HTTP request.
+            w.reqBody.Close();
+            if (w.reqBody.didEarlyClose()) {
                 w.closeAfterReply = true;
-                break;
-            }}
+            }
         }
-
         if (tooBig) {
             w.requestTooLarge();
             delHeader(connectionˢ);
@@ -1631,6 +1597,10 @@ internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
     }
     if (!w.req.ProtoAtLeast(1, 0)) {
         return;
+    }
+
+    if (w.ᏑrequestBodyLimitHit.Load()) {
+        w.closeAfterReply = true;
     }
 
     // Only override the Connection header if it is not a successful
@@ -1805,9 +1775,12 @@ internal static void finishRequest(this ж<response> Ꮡw) {
     w.conn.bufw.Flush();
 
     w.conn.r.abortPendingRead();
+    w.reqBody.registerOnHitEOF(default); // prevent new background read from starting
 
     // Close the body (regardless of w.closeAfterReply) so we can
     // re-use its bufio.Reader later safely.
+    //
+    // In full-duplex mode, this may also drain the remaining request body.
     w.reqBody.Close();
 
     if (w.req.MultipartForm != nil) {
@@ -1817,8 +1790,10 @@ internal static void finishRequest(this ж<response> Ꮡw) {
 
 // shouldReuseConnection reports whether the underlying TCP connection can be reused.
 // It must only be called after the handler is done executing.
-internal static bool shouldReuseConnection(this ref response w) {
-    if (w.closeAfterReply) {
+internal static bool shouldReuseConnection(this ж<response> Ꮡw) {
+    ref var w = ref Ꮡw.DerefOrNull();
+
+    if (w.closeAfterReply || Ꮡw.ᏑrequestBodyLimitHit.Load()) {
         // The request or something set while executing the
         // handler indicated we shouldn't reuse this
         // connection.
@@ -1844,8 +1819,7 @@ internal static bool shouldReuseConnection(this ref response w) {
 }
 
 internal static bool closedRequestBodyEarly(this ref response w) {
-    var (body, ok) = w.req.Body._<ж<body>>(ᐧ);
-    return ok && body.didEarlyClose();
+    return w.reqBody != nil && w.reqBody.didEarlyClose();
 }
 
 internal static void Flush(this ж<response> Ꮡw) {
@@ -2216,8 +2190,9 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
             if (req.expectsContinue()) {
                 if (req.ProtoAtLeast(1, 1) && req.ContentLength != 0) {
                     // Wrap the Body reader with one that replies on the connection
-                    req.Body = new expectContinueReaderжReadCloser(Ꮡ(new expectContinueReader(readCloser: req.Body, resp: w)));
+                    w.ecReader = Ꮡ(new expectContinueReader(readCloser: req.Body, resp: w));
                     w.ᏑcanWriteContinue.Store(true);
+                    req.Body = new expectContinueReaderжReadCloser(w.ecReader);
                 }
             } else if (req.Header.get(expectˢ2) != ""u8) {
                 w.sendExpectationFailed();
@@ -2226,8 +2201,11 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
 
             Ꮡc.ᏑcurReq.Store(w);
 
-            if (requestBodyRemains(req.Body)) {
-                registerOnHitEOF(req.Body, w.conn.r.startBackgroundRead);
+            // Start background read, which detects when a client has closed its connection
+            // while a request handler is still running. When the request has a body, we
+            // start the background read only after the entire body has been consumed.
+            if (w.reqBody.bodyRemains()) {
+                w.reqBody.registerOnHitEOF(w.conn.r.startBackgroundRead);
             } else {
                 w.conn.r.startBackgroundRead();
             }
@@ -2250,7 +2228,7 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
             w.finishRequest();
             c.rwc.SetWriteDeadline(new time.Time());
             if (!w.shouldReuseConnection()) {
-                if (w.requestBodyLimitHit || w.closedRequestBodyEarly()) {
+                if (w.ᏑrequestBodyLimitHit.Load() || w.closedRequestBodyEarly()) {
                     c.closeWriteAndWait();
                 }
                 return;
@@ -2463,43 +2441,6 @@ internal static void closeNotify(this ж<response> Ꮡw) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡw.DerefOrNull().lazyCloseNotifyMu.Unlock(); ᒐ.Run(); }
-}
-
-internal static void registerOnHitEOF(io.ReadCloser rc, Action fn) {
-    switch (rc.type()) {
-    case ж<expectContinueReader> v: {
-        registerOnHitEOF(v.readCloser, fn);
-        break;
-    }
-    case ж<body> v: {
-        v.registerOnHitEOF(fn);
-        break;
-    }
-    default: {
-        var v = rc;
-        throw panic("unexpected type " + fmt.Sprintf("%T"u8, rc));
-        break;
-    }}
-}
-
-// requestBodyRemains reports whether future calls to Read
-// on rc might yield more data.
-internal static bool requestBodyRemains(io.ReadCloser rc) {
-    if (AreEqual(rc, NoBody)) {
-        return false;
-    }
-    switch (rc.type()) {
-    case ж<expectContinueReader> v: {
-        return requestBodyRemains(v.readCloser);
-    }
-    case ж<body> v: {
-        return v.bodyRemains();
-    }
-    default: {
-        var v = rc;
-        throw panic("unexpected type " + fmt.Sprintf("%T"u8, rc));
-        break;
-    }}
 }
 
 // The HandlerFunc type is an adapter to allow the use of

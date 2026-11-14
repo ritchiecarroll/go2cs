@@ -153,7 +153,11 @@ internal static (nint n, error err) readGeneric(this ж<Digest> Ꮡd, slice<byte
 // Sum appends the current hash to b and returns the resulting slice.
 // It does not change the underlying hash state.
 public static slice<byte> Sum(this ref Digest d, slice<byte> b) {
-    fips140.RecordApproved();
+    if (d.dsbyte == dsbyteKeccak) {
+        fips140.RecordNonApproved();
+    } else {
+        fips140.RecordApproved();
+    }
     return d.sum(b);
 }
 
