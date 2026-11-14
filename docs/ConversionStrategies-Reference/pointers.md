@@ -1258,6 +1258,74 @@ through the derived pointer
 stores into a detached box rather than corrupting punned memory; real write-through semantics for it are
 not implemented.
 
+## A func value carried as a number — one word per static function, through `GoFuncCookie`
+
+C translated to Go by ccgo (modernc.org/libc, modernc.org/sqlite) keeps a C function pointer as a `uintptr`.
+It mints the number with `__ccgo_fp(f)`, which reads an interface's data word, and it calls through the
+number by turning it back into a Go func value through an anonymous `struct{ uintptr }`. Go's func value is
+one pointer word to a funcval, and a top-level function has ONE static funcval: every site answers the same
+number, and C code compares those numbers. A managed func value is a delegate, a reference with no address,
+so golib's `GoFuncCookie` mints the number instead:
+- a delegate with no target (a converted top-level Go func) answers one word per METHOD, held for the
+  process, under every delegate type that spells its signature;
+- a closure or a bound method value answers one word per delegate instance, held weakly, as Go's heap
+  funcval is collectable;
+- a word read back as a func is the minted delegate, or one rebound over the same target and method when
+  the reading side names the signature through another delegate type.
+
+The rule, in four directions, is that **a func value's storage is its word.** Each shape is recognised by
+its types in a package pre-pass (`funcWordOperations.go`):
+
+| class | Go | converted |
+|:--|:--|:--|
+| m1 | `(*[2]uintptr)(unsafe.Pointer(&f))[1]`, returned by a function of one interface parameter (ccgo's `__ccgo_fp`, also after a local `type iface [2]uintptr`) | `(uintptr)GoFuncCookie.Of((Delegate)f)` |
+| m2 | `*(*uintptr)(unsafe.Pointer(&x))` read, `x` a func, `S{fn}` or an `S` value, `S` one func or type-parameter field | `(uintptr)GoFuncCookie.Of(fn)` |
+| r1, r2 | `*(*F)(unsafe.Pointer(&S{x}))`, `S` one `uintptr` field, and `(*struct{ f F })(…).f` | `GoFuncCookie.Func<F>(x)` |
+| w1 | `*(*uintptr)(unsafe.Pointer(&f)) = x` | `f = GoFuncCookie.Func<F>(x);` |
+| w2 | `*(*F)(unsafe.Pointer(&v)) = fn`, `v` a `uintptr` | `v = (uintptr)GoFuncCookie.Of(fn);` |
+
+```go
+func ccgoFP(f interface{}) uintptr {
+	return (*[2]uintptr)(unsafe.Pointer(&f))[1]
+}
+
+func callR1(x uintptr, a, b int) int {
+	return (*(*func(int, int) int)(unsafe.Pointer(&struct{ uintptr }{x})))(a, b)
+}
+```
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:18-22 -->
+```csharp
+internal static uintptr ccgoFP(any fʗp) {
+    ref var f = ref heap(fʗp, out var Ꮡf);
+
+    return (uintptr)GoFuncCookie.Of((Delegate)f);
+}
+```
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:44-46 -->
+```csharp
+internal static nint callR1(uintptr x, nint a, nint b) {
+    return GoFuncCookie.Func<Func<nint, nint, nint>>(x)(a, b);
+}
+```
+
+A declared function is minted through the method-group conversion `(F)name`, which C# caches per site, never
+`new F(name)`, which allocates a delegate at every evaluation. A delegate built over another (`new F(g)`,
+how a func value converts to another delegate type) stands for `g` and answers its word. A number that is
+no func word, read as a func, panics by name, as does a word whose func is gone or cannot be bound.
+
+**The shapes that keep today's pointer reinterpret, deliberately:**
+- a func stored into memory at a computed address (vfs/patches64.go's offset stores);
+- a recovery from a pointer or from memory (runtime's mcleanup and panic);
+- the `*unsafe.Pointer` forms, which already carry the same word through `unsafe.Pointer.OfFunc` (the
+  section above).
+
+The design, its census per target and its predictions are `docs/phase4/DESIGN-sqlite-cs-funcptr.md`.
+
+**Guarded by:**
+- the `FuncWordShapes` behavioral test, one site per class with Go's answers;
+- the converter's `TestFuncWordShapes`, which also asserts the near misses and the m1 call site's form;
+- GolibTests' `GoFuncCookieTests`.
+
 ## A pointer `reflect` handed out as an `unsafe.Pointer` must convert BACK — the order token is remembered, not redefined
 
 A Go pointer to managed storage has no machine address to report, so every projection of one to a scalar answers with a stable **order token** instead: `INilPointer.PointerOrderToken`, whose own remarks say plainly that tokens "are order keys, never an identity substitute". `reflect.Value.Pointer` and `reflect.Value.UnsafePointer` both project through it (`reflect/value_impl.cs`'s `reflectPointerToken`), and that contract is exactly right for the consumers it was written for — `fmt`'s `%p`, and `internal/fmtsort`'s ordering of pointer-keyed map entries, which compares two tokens arithmetically.

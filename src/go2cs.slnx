@@ -591,6 +591,7 @@
     <Project Path="tests/Behavioral/FuncTypeParam/FuncTypeParam.csproj" />
     <Project Path="tests/Behavioral/FuncValueMethodClash/FuncValueMethodClash.csproj" />
     <Project Path="tests/Behavioral/FuncVsMethodOverload/FuncVsMethodOverload.csproj" />
+    <Project Path="tests/Behavioral/FuncWordShapes/FuncWordShapes.csproj" />
     <Project Path="tests/Behavioral/GenericArrayConstraint/GenericArrayConstraint.csproj" />
     <Project Path="tests/Behavioral/GenericAtomicPointerField/GenericAtomicPointerField.csproj" />
     <Project Path="tests/Behavioral/GenericCompositeLiterals/GenericCompositeLiterals.csproj" />
