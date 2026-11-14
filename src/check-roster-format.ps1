@@ -3498,7 +3498,11 @@ Assert-Equal 'ledger: a ledgered row that banks is refused (banked with pending)
 # W<wave>-<shard>.tsv; a re-dispatch (W1-A7R) extends its original's stem and supersedes it, as for darwin.
 # The collector (docs/phase4/la64-s7/collect.py) adds same_names, which the arch-names form reads.
 $LinuxRidEvidenceDirectory = 'docs/phase4/rebank-1.26.10.4/linux-arm64/evidence'
-$LinuxRidEvidenceWaves = @('')
+# The 1.26.11 patch hop's H10 (2026-11-14) is its own wave: the three rows whose counts moved with go1.26.11's own tests
+# (crypto/internal/fips140test, net, net/http) were re-read in ONE arch-both dispatch (43588190175), collected by
+# collect.py into h10-go1.26.11/H10-L1.tsv. Their originals sit in three different W2 files, so a stem extension cannot
+# supersede them; a later declared wave is the row's reading of record, as for darwin's waves.
+$LinuxRidEvidenceWaves = @('', 'h10-go1.26.11')
 
 # RULED ARCH-COUNTS (Get-LinuxRuledArchCountReading): row -> '<verdict names, ;-separated> -- <citations>'. A row here
 # banks linux-arm64 at the roster's linux-x64 reading less exactly these verdicts, beside a hosted linux-x64 line that is
