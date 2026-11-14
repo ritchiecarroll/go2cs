@@ -73,7 +73,7 @@ internal static void main() {
     fmt.Println("func-source:", mv.Value(), "numeric-source:", gv.Value());
 
     switch (gv.type()) {
-    case meter t: {
+    case {} Δt when Δt._<meter>(out var t): {
         fmt.Println("switch:", "meter", t());
         break;
     }

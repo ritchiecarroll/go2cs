@@ -53,6 +53,9 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 	// the read renders as a bitcast of x's value, so that address-of boxes nothing. See valuePunOperations.go.
 	collectValuePunReads(files, info)
 
+	// And the func words: a func value carried as a number, read or stored (funcWordOperations.go).
+	collectFuncWords(files, info)
+
 	var concurrentTasks sync.WaitGroup
 
 	// A panic raised on THIS side of the `go` statement below cannot be recovered by the caller:

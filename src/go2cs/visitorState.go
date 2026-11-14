@@ -136,6 +136,10 @@ type lambdaConversionState struct {
 }
 
 type Visitor struct {
+	// inlineArrayLiterals marks the array literals that initialize an inline array field (inlineArrayEmission.go),
+	// each with the array type the go.arrays member is named after.
+	inlineArrayLiterals map[*ast.CompositeLit]*types.Array
+
 	// The slices of copy's arguments that take the Go-image view, marked before the call's arguments convert
 	// (goImageCopyView.go).
 	goImageCopySlices map[*ast.SliceExpr]bool
