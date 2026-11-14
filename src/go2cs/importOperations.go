@@ -1339,8 +1339,29 @@ func loadImportedDynamicTypeLiftLines(lines []string, sourceDir string) {
 		names[entry[0]] = entry[1]
 	}
 
+	if importedPublicLiftNames == nil {
+		importedPublicLiftNames = make(map[string]map[string]bool)
+	}
+
+	public, ok := importedPublicLiftNames[key]
+
+	if !ok {
+		public = make(map[string]bool)
+		importedPublicLiftNames[key] = public
+	}
+
+	for _, line := range lines {
+		if match := publicLiftRecordPattern.FindStringSubmatch(line); match != nil {
+			public[match[1]] = true
+		}
+	}
+
 	packageLock.Unlock()
 }
+
+// publicLiftRecordPattern matches a package_info.cs accessibility record that declares a lifted struct
+// public: `    public partial struct largeIntegerᴛ1 {}`.
+var publicLiftRecordPattern = regexp.MustCompile(`^\s*public partial struct (\S+) \{\}\s*$`)
 
 // preloadImportedTypeAliases loads the exported type aliases of EVERY package imported by ANY file in
 // the current package, BEFORE file conversion begins. importedTypeAliases is package-global but was

@@ -358,6 +358,8 @@ Token next = done + "-next"u8;
 
 A typed constant keeps its named type, whatever its value expression (a literal, a conversion such as `mapOp("Load")`, or a folded concatenation). It renders through the `u8` bridge, or through `(@string)` for a raw backtick value. A `:=` local keeps its declared type, and heap-boxes like any other local when its address escapes. An untyped string constant stays `@string`. The behavioral tests `NamedStringConsts`, `NamedStringDefine` and `NamedStringConcat` cover these.
 
+An integer converted to a named string type yields the UTF-8 encoding of that code point, as `string(i)` does. The wrapper converts only from `@string`, so the conversion takes the unnamed form's steps (an untyped constant's default type, a named integer's underlying type), then `@string`, then the named cast: github.com/ncruces/go-strftime's `literalErr(b)` for a byte `b` is `(literalErr)(@string)b` (sqlite-cs row S6). The behavioral test `IntegerToNamedString` covers byte, rune, int, uint16, a named byte, a sum and constants.
+
 ## `sstring`: a string view that allocates nothing
 
 `sstring` is a `readonly ref struct` over a `ReadOnlySpan<byte>`. Because it is a `ref struct`, C# rejects every way a string could escape: storing it in a field, array or map, boxing it, capturing it in a lambda, or using it as a type argument. A misuse is therefore a compile error, never an aliasing bug.

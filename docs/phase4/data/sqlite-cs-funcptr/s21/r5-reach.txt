@@ -1,0 +1,131 @@
+windows/amd64 tags=[]: 144 roots, 9410 reachable functions
+  github.com/remyoudompheng/bigfft.Mul                    declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addMulVVW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVW                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.mulAddVWW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.shlVU                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVW                  declared, NOT reachable
+  golang.org/x/sys/cpu.cpuid                              REACHABLE addrTaken=false callers=6 [golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit] path: 
+  golang.org/x/sys/cpu.getAuxv                            declared, NOT reachable
+  golang.org/x/sys/cpu.runtime_getAuxv                    REACHABLE addrTaken=true callers=1 [(reflect.Value).Call] path: 
+rc=0
+windows/amd64 tags=[safe,purego,noasm]: 143 roots, 9404 reachable functions
+  github.com/remyoudompheng/bigfft.Mul                    declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addMulVVW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVW                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.mulAddVWW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.shlVU                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVW                  declared, NOT reachable
+  golang.org/x/sys/cpu.cpuid                              REACHABLE addrTaken=false callers=6 [golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit] path: 
+  golang.org/x/sys/cpu.getAuxv                            declared, NOT reachable
+  golang.org/x/sys/cpu.runtime_getAuxv                    REACHABLE addrTaken=true callers=1 [(reflect.Value).Call] path: 
+rc=0
+linux/amd64 tags=[]: 137 roots, 9761 reachable functions
+  github.com/remyoudompheng/bigfft.Mul                    declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addMulVVW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVW                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.mulAddVWW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.shlVU                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVW                  declared, NOT reachable
+  golang.org/x/sys/cpu.cpuid                              not in this build
+  golang.org/x/sys/cpu.getAuxv                            not in this build
+  golang.org/x/sys/cpu.runtime_getAuxv                    not in this build
+rc=0
+linux/amd64 tags=[safe,purego,noasm]: 136 roots, 9751 reachable functions
+  github.com/remyoudompheng/bigfft.Mul                    declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addMulVVW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVW                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.mulAddVWW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.shlVU                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVW                  declared, NOT reachable
+  golang.org/x/sys/cpu.cpuid                              not in this build
+  golang.org/x/sys/cpu.getAuxv                            not in this build
+  golang.org/x/sys/cpu.runtime_getAuxv                    not in this build
+rc=0
+linux/arm64 tags=[]: 137 roots, 9796 reachable functions
+  github.com/remyoudompheng/bigfft.Mul                    declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addMulVVW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVW                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.mulAddVWW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.shlVU                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVW                  declared, NOT reachable
+  golang.org/x/sys/cpu.cpuid                              not in this build
+  golang.org/x/sys/cpu.getAuxv                            not in this build
+  golang.org/x/sys/cpu.runtime_getAuxv                    not in this build
+rc=0
+linux/arm64 tags=[safe,purego,noasm]: 136 roots, 9782 reachable functions
+  github.com/remyoudompheng/bigfft.Mul                    declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addMulVVW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVW                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.mulAddVWW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.shlVU                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVW                  declared, NOT reachable
+  golang.org/x/sys/cpu.cpuid                              not in this build
+  golang.org/x/sys/cpu.getAuxv                            not in this build
+  golang.org/x/sys/cpu.runtime_getAuxv                    not in this build
+rc=0
+darwin/amd64 tags=[]: 164 roots, 9972 reachable functions
+  github.com/remyoudompheng/bigfft.Mul                    declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addMulVVW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVW                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.mulAddVWW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.shlVU                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVW                  declared, NOT reachable
+  golang.org/x/sys/cpu.cpuid                              REACHABLE addrTaken=false callers=6 [golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit] path: 
+  golang.org/x/sys/cpu.getAuxv                            declared, NOT reachable
+  golang.org/x/sys/cpu.runtime_getAuxv                    REACHABLE addrTaken=true callers=1 [(reflect.Value).Call] path: 
+rc=0
+darwin/amd64 tags=[safe,purego,noasm]: 163 roots, 9962 reachable functions
+  github.com/remyoudompheng/bigfft.Mul                    declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addMulVVW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVW                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.mulAddVWW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.shlVU                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVW                  declared, NOT reachable
+  golang.org/x/sys/cpu.cpuid                              REACHABLE addrTaken=false callers=6 [golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit golang.org/x/sys/cpu.archInit] path: 
+  golang.org/x/sys/cpu.getAuxv                            declared, NOT reachable
+  golang.org/x/sys/cpu.runtime_getAuxv                    REACHABLE addrTaken=true callers=1 [(reflect.Value).Call] path: 
+rc=0
+darwin/arm64 tags=[]: 164 roots, 10006 reachable functions
+  github.com/remyoudompheng/bigfft.Mul                    declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addMulVVW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVW                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.mulAddVWW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.shlVU                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVW                  declared, NOT reachable
+  golang.org/x/sys/cpu.cpuid                              not in this build
+  golang.org/x/sys/cpu.getAuxv                            declared, NOT reachable
+  golang.org/x/sys/cpu.runtime_getAuxv                    REACHABLE addrTaken=true callers=1 [(reflect.Value).Call] path: 
+rc=0
+darwin/arm64 tags=[safe,purego,noasm]: 163 roots, 9992 reachable functions
+  github.com/remyoudompheng/bigfft.Mul                    declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addMulVVW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.addVW                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.mulAddVWW              declared, NOT reachable
+  github.com/remyoudompheng/bigfft.shlVU                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVV                  declared, NOT reachable
+  github.com/remyoudompheng/bigfft.subVW                  declared, NOT reachable
+  golang.org/x/sys/cpu.cpuid                              not in this build
+  golang.org/x/sys/cpu.getAuxv                            declared, NOT reachable
+  golang.org/x/sys/cpu.runtime_getAuxv                    REACHABLE addrTaken=true callers=1 [(reflect.Value).Call] path: 
+rc=0
+done 17:32:21

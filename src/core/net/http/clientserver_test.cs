@@ -275,15 +275,15 @@ internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode 
 
     foreach (var (_, opt) in range(opts)) {
         switch (opt.type()) {
-        case Action<ж<Δhttp.Transport>> optΔ1: {
+        case {} ΔoptΔ1 when ΔoptΔ1._<Action<ж<Δhttp.Transport>>>(out var optΔ1): {
             transportFuncs = append(transportFuncs, optΔ1);
             break;
         }
-        case Action<ж<httptest.Server>> optΔ1: {
+        case {} ΔoptΔ1 when ΔoptΔ1._<Action<ж<httptest.Server>>>(out var optΔ1): {
             optΔ1(cst.ts);
             break;
         }
-        case Action<ж<Δhttp.Server>> optΔ1: {
+        case {} ΔoptΔ1 when ΔoptΔ1._<Action<ж<Δhttp.Server>>>(out var optΔ1): {
             optΔ1(cst.ts.Config);
             break;
         }

@@ -125,6 +125,9 @@ type Options struct {
 	// warnCodes is -warn's refusal codes, downgraded to warnings, each on the allow-list (warnOption.go).
 	warnCodes map[string]bool
 
+	// inlineArrays is -inline-arrays' per-package override of inline-array admission (inlineArrayAdmission.go).
+	inlineArrays inlineArrayOverride
+
 	// skipRefusedPackages makes a pre-emission refusal a returned *packageRefusal rather than fatal, so -recurse skips
 	// the package and goes on (recurseRefusal.go). Set per package by ModuleConverter.convertAll only.
 	skipRefusedPackages bool

@@ -87,8 +87,13 @@ func (v *Visitor) goLayoutSizer() types.Sizes {
 // struct needs none (no zero-size field) or cannot take one (a managed field anywhere).
 type structZeroSizeLayout struct {
 	size     int64
+	align    int64 // Go's alignment (go/types), stamped on an inline struct so golib's gate has an independent source
 	offsets  []int64
 	zeroSize []bool
+
+	// inline marks a struct admitted to inline arrays (inlineArrayAdmission.go): it takes this layout whether or not
+	// it has a zero-size field, its nonzero arrays are go.arrays members, and each [0]T is an alignment carrier.
+	inline bool
 }
 
 func (v *Visitor) structZeroSizeLayout(structType *types.Struct, named types.Type) (layout structZeroSizeLayout, ok bool) {
@@ -111,6 +116,7 @@ func (v *Visitor) structZeroSizeLayout(structType *types.Struct, named types.Typ
 	fields := make([]*types.Var, structType.NumFields())
 	zeroSize := make([]bool, structType.NumFields())
 	anyZero := false
+	inline := packageInlineAdmission.admits(named)
 
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
@@ -123,7 +129,7 @@ func (v *Visitor) structZeroSizeLayout(structType *types.Struct, named types.Typ
 		// named field: a pointer embed is managed and drops the struct out, a value embed of an unmanaged
 		// struct stays in. runtime's lfstack-list node `struct{ _ sys.NotInHeap; listedValManual }` is the
 		// shape this admits: Go lays both at offset 0, and sequential layout gave the blank a CLR byte.
-		if csManagedField(field.Type(), 0) {
+		if inline && csManagedFieldInline(field.Type(), 0) || !inline && csManagedField(field.Type(), 0) {
 			return structZeroSizeLayout{}, false
 		}
 
@@ -146,7 +152,7 @@ func (v *Visitor) structZeroSizeLayout(structType *types.Struct, named types.Typ
 		}
 	}
 
-	if !anyZero {
+	if !anyZero && !inline {
 		return structZeroSizeLayout{}, false
 	}
 
@@ -159,7 +165,60 @@ func (v *Visitor) structZeroSizeLayout(structType *types.Struct, named types.Typ
 		return structZeroSizeLayout{}, false
 	}
 
-	return structZeroSizeLayout{size: size, offsets: sizes.Offsetsof(fields), zeroSize: zeroSize}, true
+	return structZeroSizeLayout{size: size, align: sizes.Alignof(named), offsets: sizes.Offsetsof(fields), zeroSize: zeroSize, inline: inline}, true
+}
+
+// inlineArrayTypeName names the go.arrays member a nonzero array field of an admitted struct takes: array<N><T>, with
+// an array element itself inline (array<N><array<M><U>>), since every array in an admitted closure is.
+func (v *Visitor) inlineArrayTypeName(array *types.Array) string {
+	elem := array.Elem()
+
+	if inner, ok := elem.Underlying().(*types.Array); ok && inner.Len() > 0 {
+		return fmt.Sprintf("array%d<%s>", array.Len(), v.inlineArrayTypeName(inner))
+	}
+
+	return fmt.Sprintf("array%d<%s>", array.Len(), convertToCSTypeName(v.getScopeCheckedTypeName(elem)))
+}
+
+// alignmentCarrierType is the primitive that carries a [0]T field's alignment: T's Go alignment in bytes.
+func (v *Visitor) alignmentCarrierType(elem types.Type) string {
+	switch v.goLayoutSizer().Alignof(elem) {
+	case 8:
+		return "long"
+	case 4:
+		return "int"
+	case 2:
+		return "short"
+	default:
+		return "byte"
+	}
+}
+
+// csManagedFieldInline is csManagedField for a field of a struct admitted to inline arrays, whose arrays are go.arrays
+// members (a nonzero array is managed only if its element is) or alignment carriers (a [0]T is a primitive).
+func csManagedFieldInline(t types.Type, depth int) bool {
+	if depth > 12 {
+		return true
+	}
+
+	switch u := t.Underlying().(type) {
+	case *types.Array:
+		if u.Len() == 0 {
+			return false
+		}
+
+		return csManagedFieldInline(u.Elem(), depth+1)
+	case *types.Struct:
+		for i := range u.NumFields() {
+			if csManagedFieldInline(u.Field(i).Type(), depth+1) {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	return csManagedField(t, depth)
 }
 
 // csManagedField reports whether a Go type becomes a MANAGED C# type — one the CLR tracks as a
@@ -196,6 +255,12 @@ func csManagedField(t types.Type, depth int) bool {
 
 // structLayoutAttribute renders the struct-level stamp.
 func (l structZeroSizeLayout) structLayoutAttribute() string {
+	if l.inline {
+		// Go's size and alignment from go/types: the gate's source independent of this declaration, so a [0]T carrier
+		// missing from it fails by name (DESIGN-array-value-storage.md, part D, stop line S2).
+		return fmt.Sprintf("[GoInlineLayout(Size = %d, Align = %d), StructLayout(LayoutKind.Explicit, Size = %d)] ", l.size, l.align, l.size)
+	}
+
 	return fmt.Sprintf("[StructLayout(LayoutKind.Explicit, Size = %d)] ", l.size)
 }
 
