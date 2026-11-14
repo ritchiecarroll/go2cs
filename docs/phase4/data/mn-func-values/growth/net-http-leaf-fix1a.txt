@@ -1,0 +1,15 @@
+FACTORIES (fix 1, synchronous twins, leaf; over the arm's set=true) 102
+SEEDS (-seed-func-calls=true leaf-only=true) 536, declared 252
+TWINNED 1820 of 8647 declared (closure); net/http 537 of 1144; twinned SSA instructions 94949
+CREATION CENSUS prefix=net/http: 31 can-park func-value call sites
+  covered            28
+  partial            0
+  uncovered          3
+  no-creation-found  0
+  caller entered: twin 31, twin-holed 0, plain 0
+  AWAITED (every creator a twin AND the caller entered as a twin): 28 of 31
+  caller entered, TRANSITIVE: twin 16, twin-holed 15, plain 0; AWAITED (transitive) 14 of 31
+  AWAITED STRICT (also every creator entered as a twin, transitive): 11 of 31
+  TRANSITIVE, initializers NOT counted as roots (the rule's own holes): twin 16, twin-holed 15; AWAITED 14 of 31
+  caller twin            map[covered:19 uncovered:3]
+  caller twin(closure)   map[covered:9]

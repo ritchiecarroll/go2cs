@@ -1,0 +1,11 @@
+base rc=0
+fix1 rc=0
+leaf rc=0
+leaf-fix1 rc=0
+prop rc=0
+prop-fix1 rc=0
+arms done
+fix1a rc=0
+leaf-fix1a rc=0
+prop-fix1a rc=0
+arms done (with fix1a)

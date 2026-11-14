@@ -1,0 +1,6 @@
+report-base rc=0
+report-prop rc=0
+base rc=0
+leaf-fix1a rc=0
+prop-fix1a rc=0
+ts arms done

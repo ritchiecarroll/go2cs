@@ -1,0 +1,15 @@
+FACTORIES (fix 1, synchronous twins, leaf; over the arm's set=true) 261
+SEEDS (-seed-func-calls=true leaf-only=true) 1305, declared 578
+TWINNED 1511 of 16881 declared (closure); github.com/microsoft/TypeScript/tsc 0 of 0; twinned SSA instructions 85234
+CREATION CENSUS prefix=github.com/microsoft/TypeScript/tsc: 18 can-park func-value call sites
+  covered            16
+  partial            0
+  uncovered          0
+  no-creation-found  2
+  caller entered: twin 13, twin-holed 5, plain 0
+  AWAITED (every creator a twin AND the caller entered as a twin): 11 of 18
+  caller entered, TRANSITIVE: twin 10, twin-holed 8, plain 0; AWAITED (transitive) 8 of 18
+  AWAITED STRICT (also every creator entered as a twin, transitive): 4 of 18
+  TRANSITIVE, initializers NOT counted as roots (the rule's own holes): twin 10, twin-holed 8; AWAITED 8 of 18
+  caller twin            map[covered:9]
+  caller twin(closure)   map[covered:7 no-creation-found:2]

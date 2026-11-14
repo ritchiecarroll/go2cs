@@ -224,3 +224,142 @@ Read from it:
   relying on it was found; the search was not exhaustive.
 - **Not verified yet:** open generic delegates in twin bodies and trimming of the emitted pair classes; each is read
   in the code stage. The bench itself is now in the data folder (source, runner, both runs), so it can be re-read.
+
+## 10. The narrow re-review of section 9 (dated block, 2026-11-14 00:17 CST, G)
+
+> COORD's narrow Fable re-review of section 9 (at `587b1d9ede`) and of G's caller-local replacement for fix 1':
+> NOT-YET for 1' (both forms) and for fix 4; fixes 2, 3, 5 and 6 CODE-READY. Six must-fixes and five shoulds,
+> answered below; sections 1-9 stand unless a line here supersedes them. Measured on G-LAPTOP, data in
+> [`data/mn-func-values/growth/`](data/mn-func-values/growth/) and
+> [`data/mn-func-values/sortbench/`](data/mn-func-values/sortbench/); every prediction was written before its run.
+
+### 10.1 Fix 1' is superseded, and the rule replacing it is NOT ruled yet
+
+9.3's fix 1' (a caller's assembly reads its references' records of paired delegate types) is SUPERSEDED. Twins are
+made per assembly, and a referenced assembly's twins are seen only through its emitted `ꞏtwin` members
+(`TwinGenerator.cs`, `HasTwinMember`). `net/http` is its own assembly and compiles before the program that creates
+its handlers, so its generator can never read the program's record: 1' as written does not twin
+`HandlerFunc.ServeHTTP`, the site it was for. The replacement decides at the CALLER, locally: a function whose body
+calls through a func value (a direct call; not `go`, not `defer`) gets a twin, which tests the delegate's target
+for a pair. It is the delegate analogue of `GoTwinsIfaceAll`. Its PROPAGATION rule decides everything (must-fix 1),
+and both readings were measured.
+
+### 10.2 Must-fix 1: the propagation rule, measured both ways
+
+The census tool (B5's `canpark` and the N3 creation pass) gained a seed for the rule, a leaf-only form, fix 1's
+factories, and a TRANSITIVE entry test: a site is awaited only if every creator of its value is a twin AND no plain
+body reaches its caller by a non-go call (VTA edges, so holes are an UPPER bound). "Own holes" and "awaited" count
+the rule's own plain roots, not package initializers (which run plain by section 8). `net/http` and its closure,
+the generator's reach (`-no-func-values -long-only -exclude-runtime`), windows:
+
+| arm | twinned (closure, of 8,647) | net/http (of 1,144) | covered/partial/uncovered | awaited | own holes |
+|---|--:|--:|--:|--:|--:|
+| today | 1,496 (17.3%) | 482 | 18 / 2 / 11 | 8 | - |
+| fix 1 alone | 1,526 | 496 | 28 / 0 / 3 | 11 | - |
+| LEAF rule + fix 1 | 1,820 (21.0%) | 537 | 28 / 0 / 3 | 14 | 15 |
+| PROPAGATING rule + fix 1 | 3,371 (39.0%) | 647 | 28 / 0 / 3 | 28 | 0 |
+
+- **The rule must PROPAGATE ("calls a func value" sets Parks).** A leaf twin's callers run its plain body: the leaf
+  rule leaves 15 of 31 sites holed, silently (fix 7 warns at creation sites only). Propagating leaves none of its
+  own; every hole left in that arm is reached from a package initializer, through VTA's over-approximated Reader
+  edges (`drbg.ReadWithReader` -> `io.ReadFull` -> `(*crypto/tls.Conn).Read`).
+- **Its cost is not +5..15%** (the posted prediction, of TWINS, is FALSE). Of twins in the closure: +125%
+  (1,496 -> 3,371); as a share of declared functions, 17.3% -> 39.0%; in `net/http` +34% (482 -> 647); twinned SSA
+  instructions +74% (81,907 -> 142,247), the proxy for size. Section 9's "+5..15%" is withdrawn.
+- **Packages that cannot park get twins.** sort 0 -> 28, slices 0 -> 30, strings 1 -> 22, bytes 3 -> 22, sync 2 ->
+  14 (of 71, 81, 116, 116, 58 functions). This SUPERSEDES DATA-mn-spike-2.md E7 ("nothing for a package that cannot
+  park", line 2103) for any rule that twins func-value callers.
+- **Fix 1 must key on the rule's own set, to a fixpoint.** A closure that calls a func value is can-park under the
+  rule, so its creator is a factory too: `sync.OnceFunc`'s and `sync.OnceValue`'s closures were the plain roots of
+  every rule-own hole until fix 1 counted them (the tool's `-factories-arm`).
+- **Size, estimated, not built.** The census over-counts the generator (482 can-park in `net/http` against the
+  generator's 255 twins of 1,209 candidates). Scaled by the census's +34%, `net/http` gains about 87 twins, about
+  130 KB at the reviewer's 1.5 KB per twin. Build time is not measured: it needs the generator (the code stage).
+
+### 10.3 Must-fix 2: hot callbacks cost, and the stop line trips
+
+A sort called from main's twin, under the rule: every recursion is a twin-to-twin `GoTask` call and every less/cmp
+call first tests the delegate for a pair. 100,000 ints, five processes per runtime, golib's real `GoTask` builder,
+the JIT with tiering off (the tiered runs swung 62-309 ns between processes and are not used). Stop line, stated
+first: the rule is not acceptable as the default above x1.25 on either runtime.
+
+| shape | JIT, per-call test | AOT, per-call test | JIT, test hoisted | AOT, test hoisted |
+|---|--:|--:|--:|--:|
+| sort.Slice (index less) | x2.04-x2.11 | x2.87-x2.89 | x1.22-x1.23 | x1.22-x1.25 |
+| slices.SortFunc (generic cmp) | x2.07-x2.09 | x3.14-x3.18 | x1.17-x1.18 | x1.19-x1.23 |
+
+- **The stop line TRIPS with a per-call test** (x2 JIT, x3 AOT). The non-generic pair test is not cheap: 4.2 ns
+  JIT, 8.2 ns AOT per call (P3's "under 3 ns" is FALSE), about 17 times per element sorted.
+- **Hoisted, the rule sits AT the line, not under it.** Testing once per func-value variable that is never
+  reassigned (a parameter like `less`), at the twin's entry, leaves the GoTask state machines: x1.17-x1.25. That
+  x1.2 is the M:N cost of any twinned callee, not this rule's own.
+- So 10.1's rule cannot be the default as written: the propagating rule is the only sound one (10.2), and it costs
+  x2-x3 on hot callbacks with a per-call test, and 55% of all functions twinned in TypeScript (10.5). Two shapes
+  remain for the ruling: (a) the propagating rule WITH the hoisted test and an opt-out for callback-only callers (a
+  func-value parameter that is only ever called, never stored, returned or sent: sort, slices, strings.Map), whose
+  sites take the fallback, warned; (b) no caller rule, fix 1 alone, with `HandlerFunc.ServeHTTP` and its kind named
+  by the generator. Neither is measured as a whole yet; (a)'s twin count needs a census arm that models the opt-out.
+
+### 10.4 Must-fixes 3 to 6
+
+3. **Refused functions warn.** A refused function (byref, reflike, unsafe, iterator) whose body calls through a func
+   value warns ONCE, at the function, naming the refusal: iterators are the yield callers, so a silent fallback
+   there would be the largest silent hole. Fix 7 now reads: creation sites warn, and each refused function with a
+   func-value call warns once. Fix 7 SUPERSEDES section 6's P5 ("the generator names the site").
+4. **Twin retrieval keys on the Go signature.** `mux.HandleFunc(lit)` pairs the literal as the structural
+   `Action<ResponseWriter, ж<Request>>`; `HandlerFunc(handler)` then goes through `NilSafeDelegateConversion`
+   (`convCallExpr.go:1220`, `builtin.DelegateConversions.cs:34`), which rebinds over the same target, so the
+   `HandlerFunc` delegate's target is that pair. The pair therefore stores its twin typed by the GO signature's
+   canonical twin delegate (the underlying signature after named-type erasure, `Func<ResponseWriter, ж<Request>,
+   GoTask>` here), and every call site derives its cast from its own delegate type's underlying Go signature, never
+   from the C# delegate type. 9.4's "canonical per signature" is widened to every named func type. The code stage's
+   P4 program covers exactly this chain (a literal paired as the structural type, converted to `HandlerFunc`, called
+   from a twin and awaited).
+5. **Fix 4 binds by method, not by mint.** ccgo mints its words from package-level tables, plain code, so no
+   pair-bound mint would ever happen. Instead the generator registers each pairable static function's pair BY
+   METHOD in a module initializer (S1's design, line 499): the row holds the pair from the moment its assembly
+   loads, before any word for that method can be minted, so `Resolve` and `Func<F>` return the pair-bound
+   delegate. If an upgrade path is ever needed (a row created first), it replaces the row's delegate and CLEARS
+   `Rebinds` under `s_gate`, or `Func<F>` would return plain for cached types. Word equality survives (`Of` unwraps).
+   Written against S1's code, which reaches this line with the S1 merge.
+6. **Deferred literals stay plain.** 9.4's "Cost sites" bullet is corrected: `defer func(){ <-done }()` does NOT
+   pay a pair; a deferred operand stays plain and warned (fixes 6 and 7), which agrees with spike rule 3
+   (DATA-mn-spike-2.md, line 772). The cost sites are `wg.Go`, `once.Do`, parking range-over-func yields and
+   can-park literals created in loops.
+
+### 10.5 The shoulds
+
+- **Fix 1's naming and dispatch.** A factory's twin is named and dispatched as every twin is (`Xꞏtwin`, returning
+  `GoTask`, completing synchronously); a factory that is an interface member goes through the interface's twin
+  forwarder (`IfaceShape`), and a factory that later becomes can-park is simply a twin that parks. Coverage after fix
+  1, measured: 28 of 31 covered. Of the 3 left, 2 are created in `net/http.init` (initializers stay plain, section
+  8) and 1, `Transport.dial`, gets a bound method value from `defaultTransportDialContext`, which the census's factory
+  test misses (a bound-method wrapper is not mapped back to its method) and fixes 1 and 2 cover: the reviewer's 29.
+- **Fix 5's site list** gains `delegateArgWrap.go:110` -> `convExprList.go:488/490` (`new D(methodGroup | literal)`):
+  not a delegate over a delegate, but a creation site the pair rewrite must cover. S1's `Of` comment ("new F(g) is
+  how a func value converts") is stale and is corrected in the S1 merge.
+- **Fix 6** expects no flood: about 6 `defer cancel()`-style defers and 15 deferred literals in `net/http`.
+- **TypeScript** (the reviewer: net/http is enough for fix 1, not for the replacement). B5's setup is reproduced
+  here (ba29a562991c, the kit's `checkdemo`, the xxh3 fork, B5's two cuts): 16,881 functions against B5's 16,923, and
+  45 direct parkers as recorded. The creation census counts sites in the TS MODULE, 18; the record's 124 of 2,197 is
+  the whole closure's.
+
+  | arm | twinned (of 16,881) | awaited, transitive (of 18) | rule's own holes |
+  |---|--:|--:|--:|
+  | today | 806 (4.8%) | 2 | - |
+  | LEAF rule + fix 1 | 1,511 (9.0%) | 8 | 8 |
+  | PROPAGATING rule + fix 1 | 9,307 (55.1%) | 16 | 0 |
+
+  The callback-heavy program is where the propagating rule's cost explodes: it twins more than half of all functions
+  (x11.5; SSA instructions x8.6, 41,773 -> 360,360). The leaf rule's 8 holes have real plain roots
+  (`(*sync.Once).Do`, checker and tsoptions functions).
+- **The census tool's holes are an upper bound, read with two rules found in this work**: a METHOD named `init` is
+  not a package initializer (`(*internal/poll.pollDesc).init` was misread by name), and a `-cut` function is neither
+  a plain root nor walked through (the cut asserts its reach is spurious; TypeScript's propagating arm read 7 holes,
+  all through cuts 1 and 2, before this rule, and 0 after).
+
+### 10.6 Where this leaves stage (b)
+
+Code-ready now, after the S1 merge into this line (batch 302 landed S1 on master at `314e1d8b60`): fixes 2, 3, 5,
+6. Waiting on the ruling: the caller rule (10.3's (a) or (b)) and
+fix 4 as 10.4 restates it.

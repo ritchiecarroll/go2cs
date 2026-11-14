@@ -213,6 +213,11 @@ func main() {
 	creation := flag.String("creation", "", "N3's creation census for call sites in packages with this path prefix (e.g. net/http): where the func values reaching each can-park func-value call site were created, and whether there is a twin body")
 	creationOut := flag.String("creation-out", "", "write one line per can-park func-value call site to this file")
 	flag.BoolVar(&staticOnly, "static-only", false, "propagate through static calls only: the lower bound (the default, through VTA's dynamic edges too, is the upper)")
+	flag.BoolVar(&factoriesArm, "factories-arm", false, "with -seed-factories: a value counts as can-park when it is in the arm's set (seeded closures too), to a fixpoint")
+	flag.BoolVar(&seedFactories, "seed-factories", false, "fix 1: a function creating a really-parking value as a func value gets a (synchronous) twin; it does not propagate")
+	flag.BoolVar(&seedLeafOnly, "seed-leaf-only", false, "with -seed-func-calls: seeds are twinned but do not propagate to their callers")
+	seedFuncCalls := &seedFuncValueCalls
+	flag.BoolVar(seedFuncCalls, "seed-func-calls", false, "N3's caller-local 1' rule: a function with a direct call through a func value (not go, not defer) is seeded as parking, then propagates like a parker")
 	flag.Parse()
 
 	for _, name := range strings.Split(*cut, ",") {
@@ -254,6 +259,7 @@ func main() {
 	// Direct parkers, then the reverse closure over non-`go` edges.
 	parks := map[*ssa.Function]bool{}
 	byLeaf := map[string]int{}
+	seeds, seedsDeclared, twinInstrs := 0, 0, 0
 	var queue []*ssa.Function
 
 	// The runtime family neither parks nor propagates (park inventory rows 11-12): its scheduler, GC and finalizer
@@ -282,41 +288,59 @@ func main() {
 		}
 	}
 
-	for len(queue) > 0 {
-		fn := queue[0]
-		queue = queue[1:]
+	propagate(graph, parks, queue)
 
-		node := graph.Nodes[fn]
-		if node == nil {
-			continue
+	// baseParks is the set before any seed: a function whose own body or callees really park. A func-value call
+	// site matters (can park) when a callee is in it; the seeds only decide where twins exist.
+	baseParks := make(map[*ssa.Function]bool, len(parks))
+	for fn := range parks {
+		baseParks[fn] = true
+	}
+
+	if *seedFuncCalls {
+		queue = nil
+		for fn := range all {
+			if inRuntimeFamily(fn) || parks[fn] || !callsFuncValue(fn) {
+				continue
+			}
+
+			parks[fn] = true
+			queue = append(queue, fn)
+			seeds++
+			if counted(fn) {
+				seedsDeclared++
+			}
 		}
 
-		for _, edge := range node.In {
-			if _, isGo := edge.Site.(*ssa.Go); isGo {
-				continue
-			}
+		if !seedLeafOnly {
+			propagate(graph, parks, queue)
+		}
+	}
 
-			// -static-only: the LOWER bound. Only calls whose callee is fixed at the call site propagate; VTA's
-			// context-insensitive interface and func-value edges (every io.Writer passed anywhere reaches every
-			// Fprintf) make the default the UPPER bound.
-			if skipEdge(edge.Site) {
-				continue
-			}
+	factories := 0
+	if seedFactories {
+		// -factories-arm: a value is can-park when it is in the ARM's set (a seeded closure that calls a func value
+		// counts), iterated to a fixpoint; otherwise only values that really park (the base set), one pass.
+		valueParks := baseParks
+		if factoriesArm {
+			valueParks = parks
+		}
 
-			caller := edge.Caller.Func
-			if inRuntimeFamily(caller) {
-				continue
-			}
+		for changed := true; changed; changed = factoriesArm && changed {
+			changed = false
+			for fn := range all {
+				outer := outermost(fn)
+				if inRuntimeFamily(outer) || parks[outer] || !createsParkingValue(fn, valueParks) {
+					continue
+				}
 
-			if cutSet[caller.String()] {
-				continue
-			}
-
-			if !parks[caller] {
-				parks[caller] = true
-				queue = append(queue, caller)
+				parks[outer] = true
+				factories++
+				changed = true
 			}
 		}
+
+		fmt.Printf("FACTORIES (fix 1, synchronous twins, leaf; over the arm's set=%v) %d\n", factoriesArm, factories)
 	}
 
 	if *why != "" {
@@ -324,7 +348,34 @@ func main() {
 	}
 
 	if *creation != "" {
-		creationCensus(prog, all, graph, parks, *creation, *creationOut)
+		fmt.Printf("SEEDS (-seed-func-calls=%v leaf-only=%v) %d, declared %d\n", *seedFuncCalls, seedLeafOnly, seeds, seedsDeclared)
+
+		declared, twinned, prefixDeclared, prefixTwinned, instrs := 0, 0, 0, 0, 0
+		for fn := range all {
+			if !counted(fn) || *excludeRuntime && inRuntimeFamily(fn) {
+				continue
+			}
+
+			declared++
+			inPrefix := fn.Pkg.Pkg.Path() == *creation
+			if inPrefix {
+				prefixDeclared++
+			}
+
+			if parks[fn] {
+				twinned++
+				if inPrefix {
+					prefixTwinned++
+				}
+
+				for _, block := range fn.Blocks {
+					instrs += len(block.Instrs)
+				}
+			}
+		}
+
+		fmt.Printf("TWINNED %d of %d declared (closure); %s %d of %d; twinned SSA instructions %d\n", twinned, declared, *creation, prefixTwinned, prefixDeclared, instrs)
+		creationCensus(prog, all, graph, baseParks, parks, *creation, *creationOut)
 		return
 	}
 
@@ -355,6 +406,10 @@ func main() {
 			rep.Functions++
 
 			if parks[fn] {
+				for _, block := range fn.Blocks {
+					twinInstrs += len(block.Instrs)
+				}
+
 				share.CanPark++
 				rep.CanPark++
 				rep.CanParkNames = append(rep.CanParkNames, fn.String())
@@ -428,6 +483,7 @@ func main() {
 	fmt.Printf("canpark %s goos=%s exclude-runtime=%v long-only=%v static-only=%v no-func-values=%v\n", strings.Join(patterns, " "), *goos, *excludeRuntime, longOnly, staticOnly, noFuncValues)
 	fmt.Printf("FUNCTIONS %d can-park %d share %.1f%% (direct parkers %d)\n", rep.Functions, rep.CanPark, 100*rep.Share, rep.DirectParkers)
 	fmt.Printf("DIRECT BY LEAF %v\n", byLeaf)
+	fmt.Printf("SEEDS (-seed-func-calls=%v leaf-only=%v) %d, declared %d; CAN-PARK SSA INSTRUCTIONS %d\n", *seedFuncCalls, seedLeafOnly, seeds, seedsDeclared, twinInstrs)
 	fmt.Printf("CLOSURES %d can-park %d\n", rep.Closures, rep.ClosuresCanPark)
 	fmt.Printf("GO STATEMENTS %d can-park %d unresolved %d\n", rep.GoStatements.Total, rep.GoStatements.CanPark, rep.GoStatements.Unresolved)
 	fmt.Printf("INTERFACE CALLS %d can-park %d unresolved %d\n", rep.InterfaceCalls.Total, rep.InterfaceCalls.CanPark, rep.InterfaceCalls.Unresolved)
@@ -449,6 +505,66 @@ func main() {
 			os.Exit(1)
 		}
 	}
+}
+
+// seedFuncValueCalls is the -seed-func-calls flag; seedLeafOnly is -seed-leaf-only (seeds get a twin, their callers
+// do not: the leaf-twin reading of N3's caller-local rule).
+var seedFuncValueCalls, seedLeafOnly, seedFactories, factoriesArm bool
+
+// propagate marks the reverse closure of queue over the call edges that propagate under the flags.
+func propagate(graph *callgraph.Graph, parks map[*ssa.Function]bool, queue []*ssa.Function) {
+	for len(queue) > 0 {
+		fn := queue[0]
+		queue = queue[1:]
+
+		node := graph.Nodes[fn]
+		if node == nil {
+			continue
+		}
+
+		for _, edge := range node.In {
+			if _, isGo := edge.Site.(*ssa.Go); isGo {
+				continue
+			}
+
+			// -static-only: the LOWER bound. Only calls whose callee is fixed at the call site propagate; VTA's
+			// context-insensitive interface and func-value edges (every io.Writer passed anywhere reaches every
+			// Fprintf) make the default the UPPER bound.
+			if skipEdge(edge.Site) {
+				continue
+			}
+
+			caller := edge.Caller.Func
+			if inRuntimeFamily(caller) || cutSet[caller.String()] {
+				continue
+			}
+
+			if !parks[caller] {
+				parks[caller] = true
+				queue = append(queue, caller)
+			}
+		}
+	}
+}
+
+// callsFuncValue reports whether fn's body calls through a func value directly: a call (not go, not defer) with no
+// static callee that is not an interface invoke or a builtin. N3's caller-local 1' rule twins such a function.
+func callsFuncValue(fn *ssa.Function) bool {
+	for _, block := range fn.Blocks {
+		for _, instr := range block.Instrs {
+			call, ok := instr.(*ssa.Call)
+			if !ok {
+				continue
+			}
+
+			common := call.Common()
+			if common.StaticCallee() == nil && !common.IsInvoke() && !isBuiltin(common) {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func isGo(site ssa.CallInstruction) bool {
@@ -489,7 +605,7 @@ func explain(names []string, all map[*ssa.Function]bool, graph *callgraph.Graph,
 			cur := queue[0]
 			queue = queue[1:]
 
-			if len(directLeaves(cur)) > 0 {
+			if len(directLeaves(cur)) > 0 || seedFuncValueCalls && callsFuncValue(cur) {
 				hit = cur
 				break
 			}
@@ -527,6 +643,16 @@ func explain(names []string, all map[*ssa.Function]bool, graph *callgraph.Graph,
 			path = append([]string{step}, path...)
 		}
 
-		fmt.Printf("WHY %s: CAN PARK via %v; path: %s\n", name, directLeaves(hit), strings.Join(path, " "))
+		if hit == nil {
+			fmt.Printf("WHY %s: CAN PARK but no path found\n", name)
+			continue
+		}
+
+		via := fmt.Sprint(directLeaves(hit))
+		if via == "[]" {
+			via = "[func-value seed]"
+		}
+
+		fmt.Printf("WHY %s: CAN PARK via %s; path: %s\n", name, via, strings.Join(path, " "))
 	}
 }

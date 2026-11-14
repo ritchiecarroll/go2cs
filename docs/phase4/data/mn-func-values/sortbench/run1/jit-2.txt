@@ -1,0 +1,7 @@
+runtime aot=True N=100000
+P   sort.Slice shape, plain           63.91 ns/elem
+T   sort.Slice shape, twins          161.04 ns/elem  x2.52
+PG  slices.SortFunc shape, plain     182.13 ns/elem
+TG  slices.SortFunc shape, twins      88.26 ns/elem  x0.48
+Tt  pair test (non-generic)            3.96 ns/call
+done
