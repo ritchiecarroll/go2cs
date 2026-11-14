@@ -37799,6 +37799,34 @@ pointed back at the old name it fails, restored byte-identical.
 **Not built or measured.** Darwin and linux conversions of x/sys/cpu (the twin forward is read at the code, not
 run); Native AOT.
 
+## 2026-11-13 — G (sqlite-cs S21's R5, read on COORD's order): the sqlite-cs demo reaches none of the 8 stubs GO2CS2012 names
+
+**Dated 2026-11-13 17:32 CST. Read at master `651c4ad147`, Windows x64, go1.26.10.** Seat S21 (its own row,
+seated in batch 302) names every bodyless function of a module that nothing forwards as `GO2CS2012`. In
+sqlite-cs's windows closure it named 8, all linkname pulls: bigfft's 7 of math/big's arithmetic (`addVV`,
+`subVV`, `addVW`, `subVW`, `shlVU`, `mulAddVWW`, `addMulVVW`) and x/sys/cpu's `runtime_getAuxv`. COORD asked
+whether sqlite-cs reaches any of them.
+
+**The read.** Rapid type analysis (`golang.org/x/tools/go/callgraph/rta`, x/tools v0.52.0, the converter's own) of
+the sqlite-cs demo from `main` and every package `init`, for windows/amd64, linux/amd64, linux/arm64,
+darwin/amd64 and darwin/arm64, each with no build tags and with `safe,purego,noasm` (the tags `-recurse` applies):
+ten runs, each loading cleanly. The tool and its output are `docs/phase4/data/sqlite-cs-funcptr/s21/`
+`r5-cgtool-main.go` and `r5-reach.txt`.
+
+- **bigfft's 7: not reachable on any target, under either tag set.** Neither is `bigfft.Mul`, bigfft's own entry:
+  nothing in the demo's closure multiplies through it.
+- **`runtime_getAuxv`: address-taken, never called.** x/sys/cpu's `init` (runtime_auxv_go121.go) stores it in
+  `getAuxvFn`. The one call of `getAuxvFn` is in `getAuxv`, which only `hwcap_linux.go` calls. On linux the demo's
+  closure does not import x/sys/cpu at all (libc imports it on windows and darwin only), and on windows and darwin
+  `getAuxv` is not reachable. RTA lists `runtime_getAuxv` as reachable on those six builds (two tag sets each)
+  only through its conservative edge from `(reflect.Value).Call` to every address-taken function.
+- **Control:** x/sys/cpu's `cpuid` reads reachable on both amd64 targets with six direct calls from `archInit`, so
+  the analysis sees direct calls where they exist.
+
+**So no seat follows.** The 8 stubs stay stubs, named by `GO2CS2012`, and the sqlite-cs demo calls none of them.
+**Not read:** sqlite's own test suite as converted (only the demo's entry points), and whether a call through
+`reflect` could reach `runtime_getAuxv` at run time.
+
 — G (2026-11-13)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
