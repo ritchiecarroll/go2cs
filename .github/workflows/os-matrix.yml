@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
         type: choice
         required: true
         default: census
@@ -60,6 +60,7 @@ on:
           - aot-smoke
           - nugetgo-behavior
           - golib-tests
+          - gen-tests
           - stack-probe
           - converter-cgo
           - cgo-e2e
@@ -518,6 +519,9 @@ jobs:
               'golib-tests'      = 90    # one Release build of GolibTests and its core closure for this GOOS from
                                          # cold, then `dotnet test` (whole suite, or a --filter). PROVISIONAL until
                                          # the first run; added for the AES seat's osx-arm64 guard (C1, 2026-11-06).
+              'gen-tests'        = 30    # one Release build of GenTests (go2cs-gen and golib) from cold, then
+                                         # `dotnet test` (whole suite, or a --filter): 526 tests in about 2 min on a
+                                         # laptop. PROVISIONAL until the first run (R, 2026-11-14).
               'sweep-shard'      = 210   # one -tests convert/build/run/compare cycle per matched
                                          # row; the sweep's own per-package floors reach 120m.
               'release-smoke'    = 90    # the LEG only (the pack job has its own budget): converter
@@ -1243,6 +1247,68 @@ jobs:
 
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
           & ./.github/annotate-summary.ps1 -Title "golib-tests $goos/$rid" -Lines $summary
+
+          exit $runExit
+
+      # -------------------------------------------------------------------------------------
+      # gen-tests -- GenTests (the go2cs-gen analyzer's suite) on this leg's own host. Until this stage nothing hosted
+      # ran GenTests off windows: batch 290 landed a GenTests red that only linux shows (AConversionBetweenCTypesCompiles,
+      # a path spelled for windows), and no gate saw it until a lane ran the suite by hand (COORD, 2026-11-13). The
+      # suite's subject is the generator, which every converted project runs as an analyzer on every OS, so it runs on
+      # every leg of the dispatch's GOOS (and on linux's arm64 leg too: it runs no converted program).
+      # -------------------------------------------------------------------------------------
+      - name: GenTests — build and run for this GOOS
+        if: needs.plan.outputs.stage == 'gen-tests'
+        shell: pwsh
+        env:
+          GEN_FILTER: ${{ needs.plan.outputs.filter }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $log = Join-Path $art "gen-tests-$goos-$rid.log"
+          $trx = Join-Path $art "gen-tests-$goos-$rid.trx"
+
+          Push-Location 'src/tests/GenTests'
+          try {
+              $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
+              & dotnet build -c Release "-p:GoTargetOS=$goos" @archArgs -nologo -v q *>&1 | Tee-Object -FilePath $log
+              $runExit = $LASTEXITCODE
+
+              if ($runExit -eq 0) {
+                  $testArgs = @('test', '-c', 'Release', '--no-build', "-p:GoTargetOS=$goos") + $archArgs + @('--blame-hang-timeout', '10m',
+                      '--logger', "trx;LogFileName=$trx", '--logger', 'console;verbosity=normal')
+                  if (-not [string]::IsNullOrWhiteSpace($env:GEN_FILTER)) { $testArgs += @('--filter', $env:GEN_FILTER) }
+                  & dotnet @testArgs *>&1 | Tee-Object -FilePath $log -Append
+                  $runExit = $LASTEXITCODE
+              }
+          }
+          finally { Pop-Location }
+
+          # Every test's outcome by name, from the trx: a test that went Inconclusive here is visible, not counted as a pass,
+          # and a failing test is named in the summary rather than left in the log.
+          $outcomes = @()
+          if (Test-Path -LiteralPath $trx) {
+              [xml]$doc = Get-Content -LiteralPath $trx -Raw
+              $failed = @($doc.TestRun.Results.UnitTestResult | Where-Object { $_.outcome -ne 'Passed' } | Sort-Object testName |
+                  ForEach-Object { "  $($_.outcome) $($_.testName)" })
+              $outcomes = if ($failed.Count) { @('Not passed:') + $failed } else { @('Every test passed.') }
+          }
+          else { $outcomes = @('No trx was written: the build or the test run failed before any result (see the log).') }
+
+          $summary = @(
+              "## GenTests -- GOOS=$goos ($rid)"
+              ''
+              "Filter ``$($env:GEN_FILTER)`` -- exit ``$runExit``"
+              ''
+              '```'
+          ) + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "gen-tests $goos/$rid" -Lines $summary
 
           exit $runExit
 
