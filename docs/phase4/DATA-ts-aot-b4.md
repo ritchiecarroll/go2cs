@@ -449,3 +449,69 @@ delta can hide a new event. From this run on the record reads the events stamped
 tree that differs from the conversion's own commit only by lever E v2's golib. It needed all three levers of
 §10. The names sit at 72% of the limit, so the route is real but not comfortable: the returned generic cycle
 (§13) is measured at a quarter of the names, and it is the next lever to be read.
+
+## 15. Amendment, 2026-11-15 00:00Z: the returned generic cycle is pinned and cut (lever G)
+
+Ordered by COORD (mailbox `20261114T223231Z-COORD.md`) ahead of the two remaining demos. Predictions G1 to G4
+were posted first (`20261114T223427Z-i9.md`).
+
+**It reproduces on a tiny program.** A golib-only consumer (an `array<nint>` written and read by index), Native
+AOT, `TrimMode=partial`, one `IL3054` line per site:
+
+| golib tree | `IL3054` lines | Image | Publish |
+|:--|--:|--:|--:|
+| `2b6fe9a34d`, the first fix's own commit | 0 | 7,292,928 B | 11 s |
+| master `c2919b8b16` | 654 | 19,697,664 B | 33 s |
+| master + lever G | 0 | 11,214,848 B | 19 s |
+
+**The commit that closed it again.** `git bisect` over `src/core/golib` and `src/core/go2cs`, nine steps, none
+skipped, each reading 0 or between 573 and 589 lines: the first bad commit is `4ad8e8df66` (2026-10-21),
+"field-view cache matches accessors without Delegate.Equals; element boxes get the view slot". The lane had
+named `8a714cf6dd`, a day later; that was wrong.
+
+**The edge.** That commit added `this is ElemRefBox<T>` to `ж<T>`'s view lookup, in `viewsHead` and in the
+inlined hit path of `viewOf` (`ж.Views.cs:135` and `:175` at master). One mention is enough. Every `ж<T>` then
+constructs `ElemRefBox<T>`, which names `array<T>`, whose `AliasPointer` names `ж<array<T>>`, and the loop
+repeats one nesting level deeper until ILC's cut-off. `AliasPointer` is the growth edge `2b6fe9a34d` left in
+place on purpose, because the converter emits calls to it.
+
+**Lever G.** The two tests ask a non-generic interface, `IElementViewSlot`, which the element box implements.
+The interface is `internal`; nothing public moves. Branch `claude/i9-b4-cycle`, `5d00eb8b91`: master plus this
+one commit. COORD has ruled it a landing candidate for the release in progress, to be re-cut as a seat with a
+guard; that seat is not this record.
+
+**Measured, each arm against a tree that differs by lever G alone:**
+
+| | PerfStartup: S7 to S8 | `parsedemo`: P1 to P3 |
+|:--|:--|:--|
+| base tree | master `ffaafa144f` + lever E v2 | `651c4ad147` + lever E v2 |
+| `IL3054` lines | 882 to 0 | 884 to 0 |
+| symbol string table | 206.7 to 115.7 MB (-44.0%) | 655.1 to 429.6 MB (-34.4%) |
+| symbols | 2,311,421 to 1,617,603 | 5,864,759 to 4,281,792 |
+| image | 120.5 to 87.6 MB (-27.3%) | 297.4 to 219.5 MB (-26.2%) |
+| ILC wall | 7 m 14 s to 6 m 29 s (-10.4%) | 36 m 49 s to 31 m 58 s (-13.2%) |
+| ILC peak private | 6.54 to 3.84 GB (-41.3%) | 17.60 to 11.66 GB (-33.8%) |
+| single-core plateau | not read | 26 to 27.5 min |
+
+Both images print what native Go prints: PerfStartup its checksum line, `parsedemo` the demo and 17,422 of
+17,422 corpus units. `GolibTests` whole (Release, windows) on the S8 tree: 2,624 passed, 0 failed, every test's
+verdict equal to the unpatched tree's.
+
+Against unpatched master, levers E v2 and G together take PerfStartup's names from 366.8 to 115.7 MB (-68.4%),
+its image from 152.3 to 87.6 MB and ILC's peak from 11.83 to 3.84 GB.
+
+**Scored.** G1 (reproduces at master, 0 at the first fix): MET. G2 (the bisect lands on `8a714cf6dd`): MISSED.
+G3: consumer to 0 lines, MET; PerfStartup names fall 20 to 35%, MISSED on the good side (44.0%), wall falls 10
+to 30%, MET (10.4%); `parsedemo` names fall 15 to 30%, MISSED on the good side (34.4%); **`parsedemo`'s
+single-core plateau falls by more than half, MISSED: it did not move.** G4 (`GolibTests` verdicts equal): MET.
+
+**The lead that is now refuted.** Sections 13 and 14 carried, as a lead, that ILC's long single-core phase at
+flat memory is the generic cycle's cost. It is not. With the cycle gone the plateau is unchanged; what shrank
+is the phase before it and the memory. The plateau was 86% of this `parsedemo` build's ILC time and 124 minutes
+of `checkdemo`'s. What ILC does there is not identified, and it is the lever on build time that nobody holds.
+
+**The stop line was controlled before it guarded anything.** With the line at 3 GB under a known 6.5 GB peak,
+the sampler logged 3.07 GB, killed ILC by process id, and the run exited non-zero with no ILC process left.
+
+**No guard counts cut-off lines.** That is how the cycle returned unseen a week after it was fixed. The
+consumer above is such a guard in under a minute; a cheaper one that needs no publish is owed by the seat.
