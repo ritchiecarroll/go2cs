@@ -272,7 +272,9 @@ namespace go.golib;
         if (ManagedPointerTokens.IsTaggedToken(number))
             return "a token for a Go value that has no address (it holds Go references)";
 
-        if (ManagedPointerTokens.Resolve(number) is not null)
+        // A registered element of C memory alone is not Go memory: an element box registers its address when it is
+        // converted to a number, whatever memory it names (C2). Only a box that keeps no root qualifies (G1).
+        if (ManagedPointerTokens.Resolve(number) is { } registered && registered is not INativeRooted { IsGenuinelyNativeRoot: true })
             return "the address of Go memory (a Go variable, field or element)";
 
         address = number;
