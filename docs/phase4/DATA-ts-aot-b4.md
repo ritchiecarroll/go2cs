@@ -198,9 +198,9 @@ so one table keyed on the base type holds every type's entries. v1 (`21995337d9`
   `ElemRefBox` line the patch edits. v2 updates that allow-list entry, and every test then has the same verdict
   as the unpatched tree.
 - **JIT start-up.** A published hello (the template's default publish, ReadyToRun), unpatched against v2, 40
-  interleaved pairs, twice: 198.7 to 197.2 ms and 199.5 to 196.5 ms, with A/A spreads of 0.2 and 1.8 ms. About
-  2 ms, 1%. Lever E is an AOT and size lever, not a start-up one: under the JIT a generic type's statics exist
-  only for the types a run touches. These are internal timings from this box.
+  interleaved pairs, twice: no effect beyond the edge of the instrument's resolution. Lever E is an AOT and
+  size lever, not a start-up one: under the JIT a generic type's statics exist only for the types a run
+  touches. The readings are internal to the fleet and are in the mailbox post, not here.
 - **Known gap in the experiment.** With one table for every element type, a backing array reached under a
   second element type would find the first type's chunks; the patch gives it a fresh box instead of a
   persistent one. A landing version needs a real answer there.
@@ -252,7 +252,7 @@ unmeasured here, and routed to G by COORD.
 | E2 | ILC wall falls 15 to 35% | v1 +1.9%; v2 14.0% | MISSED both, v2 by a point |
 | E2 | ILC peak private falls 10 to 30% | v1 24.4%; v2 38.0% | v1 MET; v2 MISSED, on the good side |
 | E3 | weak-table instantiations under 50 | v1 4,510; v2 46 | v1 MISSED; v2 MET |
-| E4 | JIT start-up 5 to 25 ms faster | about 2 ms | MISSED |
+| E4 | JIT start-up 5 to 25 ms faster | no effect beyond the instrument's resolution | MISSED |
 | E5 | `GolibTests`: the same verdict for every test | v1 one text guard differs; v2 identical | v1 MISSED; v2 MET |
 | S6 | fold all: another 8 to 15% off the table | 2.1% | MISSED |
 | S7 | no debug symbols: table unchanged within 1% | identical | MET |
@@ -390,3 +390,6 @@ first fix found its edges. No standing gate counts cut-off lines, so the return 
 
 Breaking it again is a golib lever of the same order as lever E, and unlike E it also removes work ILC does
 only to throw it away.
+
+> **This record has moved.** Its current copy, with the `checkdemo` result, is `docs/phase4/DATA-ts-aot-b4.md` on
+> the branch `claude/i9-ts-aot-b4`. This copy stays as the experiment branch's own history and is not amended further.
