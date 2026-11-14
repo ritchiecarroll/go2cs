@@ -832,6 +832,10 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		switch {
 		case isArrayPointee && rangedThroughPointer && derefdValue:
 			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
+		case isArrayPointee && v.isInlineArrayExpr(rangeStmt.X) && !v.exprHasCallOrReceive(rangeStmt.X):
+			// An inline array (a go.arrays member, inlineArrayEmission.go) ranges its constant length: golib's len
+			// cannot see the family, and Go does not evaluate this operand.
+			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
 		case isArrayPointee && rangedThroughPointer && ptrDeref != "":
 			v.writeOutput("foreach (%s%s in range(%s, %d))", decl, iterExpr, rangeExpr, arrayType.Len())
 		default:

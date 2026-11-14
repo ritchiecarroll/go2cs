@@ -328,7 +328,7 @@ Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; 
 ᴷ is StackBufferMarker (src/core/go2cs/symbols.json); its declaration and site: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:8 `var xᴷ = new stackAppend<int64>();` and :12 `x = append(xᴷ, x, (int64)i);`, for Go main.go:16 `x = append(x, int64(i))`.
 ᶠ is FuncValueMarker (symbols.json:200-211#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:13#ee6601).
 _ΔpN: src/go2cs/visitFuncDecl.go:1401-1415#03b3c7 and :2969-2977#701c82; :60-68#c625cd and :2053#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); in a function declaration, UnnamedParams/main.cs.target:17 `internal static void discard(nint _) {` (Go UnnamedParams/main.go:14 `func discard(int)`) and UnnamedParams/main.cs.target:22 `internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) {`; a body-less signature (a function type, or an interface method) takes its discard test from the function being converted or last converted, src/go2cs/visitFuncDecl.go:2054 `dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(v.currentFuncDecl)`, set at src/go2cs/visitFuncDecl.go:515 `v.currentFuncDecl = funcDecl` and never cleared; a lone `_`: CaptureHoistThroughConversion/main.cs.target:7 `public delegate void Handler(nint _);` (Go CaptureHoistThroughConversion/main.go:23 `type Handler func(int)`, converted before any function); a lone `_Δp0`: BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);` (converted after BlankIdentifierCollision/main.go:40 `_, _, _, _ = a, b, c, d`) and AnonymousInterfaces.cs.target:38 `(nint, error) Read(slice<byte> _Δp0);` (lifted from AnonymousInterfaces.go:28 `func takesReader(r interface{ Read([]byte) (int, error) }) {`, whose body has AnonymousInterfaces.go:30 `n, _ := r.Read(buf)`); several: GenericTypeInstantiation.cs.target:45#f1c413.
-Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:614#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
+Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:623#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
 `main` -> `Main` until C46 (2026-11-11); since then `main` keeps its name and go2cs-gen's MainEntryGenerator writes `Main`. A Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:373-381#95eaaa).
 A member golib adds itself: src/core/golib/array.cs:563 `public array<T> ΔClone()`.
 The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:86-90#b0ed6c and :144#941a6a.
@@ -1804,7 +1804,7 @@ also gets `go.lib`, the [golib runtime](#the-golib-runtime-library), and `go.gen
 [source generators](#source-generators). The program's own packages stay project references. A program
 that imports `fmt` gets these lines in its `.csproj`:
 
-<!-- expected app .csproj lines; emitted by src/go2cs/projectFileWriter.go:423,426,534#a5a0d6 -->
+<!-- expected app .csproj lines; emitted by src/go2cs/projectFileWriter.go:423,426,549#a5a0d6 -->
 <!-- source (not checked): the three lines src/go2cs/moduleConverter_integration_test.go:231-233 (`<PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />`) asserts, which it holds as Go string literals -->
 ```xml
 <PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />
@@ -3114,7 +3114,7 @@ value embed by its own `new T(nil)`, and a pointer embed as a nil `ж<T>` box ra
 promoted access through it panics as Go does. `new(nil)` calls it. Here `Padded` is a struct of plain fields, so
 it stays `default!`, and `Embedded` embeds it:
 <!-- src/go2cs/visitValueSpec.go:446-451 `structHasPromotedEmbeds … a value embed by its own … new(nil);`; the
-     embed is declared as a field: src/go2cs/visitStructType.go:983#87d05a (commit 814ff707c7). -->
+     embed is declared as a field: src/go2cs/visitStructType.go:985#87d05a (commit 814ff707c7). -->
 
 <!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.go:33-40,44-48,140-141 -->
 ```go
@@ -4630,7 +4630,7 @@ so it is not nil, as in Go, and allocates nothing. See [Nil and Zero Values](#ni
 elements. The converter adds `.Clone()` wherever Go copies an array: assignment, parameters, results and
 the other places Go copies a value. So `d := garr` becomes `var d = garr.Clone();`.
 <!-- source: src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.go:53 and src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.cs.target:52 -->
-<!-- The array-copy claim is scoped to "Go's array copy sites": a fixed array reached only through an embedded (promoted) struct field is not seen by the value-clone stamping, so a by-value copy of such a struct leaves the array backing shared (src/go2cs/arrayCloneOperations.go:44-52#9c92a3, :80-83#a7773d). -->
+<!-- The array-copy claim is scoped to "Go's array copy sites": a fixed array reached only through an embedded (promoted) struct field is not seen by the value-clone stamping, so a by-value copy of such a struct leaves the array backing shared (src/go2cs/arrayCloneOperations.go:44-52#9c92a3, :85-88#a7773d). -->
 
 An array parameter is cloned on entry, so the callee's writes stay local, as in Go:
 
@@ -7101,7 +7101,7 @@ VariadicPackPassThrough/VariadicPackPassThrough.go:11 `for i := range xs {`
 The string control: src/go2cs/rangeIndexOnly_test.go:281 `expect("overString", "foreach (var (i, _) in str)")`;
 the nil pointer: :261 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`. -->
 <!-- The count range: src/go2cs/visitRangeStmt.go:832-833 `case isArrayPointee && rangedThroughPointer && derefdValue:`
-then `foreach (%s%s in range(%d))`, and :836 `foreach (%s%s in range(%s, %d))` for a pointer held in a variable.
+then `foreach (%s%s in range(%d))`, and :840 `foreach (%s%s in range(%s, %d))` for a pointer held in a variable.
 src/go2cs/rangeIndexOnly_test.go:267 `expect("overPointerParam", "foreach (var i in range(2))")` and :269
 `expect("setAll", "foreach (var i in range(4))")`; src/go2cs/rangeNilPointerArray_test.go:24
 `func TestRangeOverPointerArrayValueIsCountRange(t *testing.T) {`; the behavioral PointerArrayRange ranges a nil
@@ -9218,8 +9218,8 @@ of its own package, is built with `new(nil)`. That generated constructor builds 
 embedded type that itself needs construction (one with an array field) is usable, and an embedded pointer
 holds a nil `ж<T>` box rather than a C# `null`.
 <!-- embedded: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.go:44-48,141 `var e Embedded` -> UnsafeOperations.cs.target:38-42,120 `Embedded e = new(nil);` -->
-<!-- the predicate: src/go2cs/visitStructType.go:1112 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`,
-     which skips :1158 `// A same-package interface embed renders as a plain interface field — no box.` and a
+<!-- the predicate: src/go2cs/visitStructType.go:1134 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`,
+     which skips :1180 `// A same-package interface embed renders as a plain interface field — no box.` and a
      builtin or unnamed embed; a cross-package embed always counts. The zero-value emission:
      src/go2cs/visitValueSpec.go:446 `} else if v.structHasPromotedEmbeds(def.Type()) {`. -->
 
@@ -9389,7 +9389,7 @@ assigned, have its address taken, or receive a method call. Because every field 
 struct whose fields are all plain values is laid out exactly as Go lays it, and a pointer that views raw
 memory as the struct (`(*T)(unsafe.Pointer(p))`) reads Go's bytes.
 <!-- Owner ruling (A), 2026-10-16, uniform over value and pointer embeds: the emission is
-src/go2cs/visitStructType.go:983#87d05a; the generator reads such a field as the embed
+src/go2cs/visitStructType.go:985#87d05a; the generator reads such a field as the embed
 (src/gen/go2cs-gen/StructDeclarationSyntaxExtensions.cs:27#95fa84, IsPromotingEmbedType) and declares no storage or
 accessor for it (src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:396#0e4b57, :434#0e4b57). Before (A) the
 converter emitted `partial ref T T { get; }` and the generator stored the value in a private `ʗT` field in a
@@ -11072,9 +11072,10 @@ call that returns one over a byte array or byte slice, also reaches an array fie
 ([`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr)).
 <!-- the rule: src/go2cs/fieldAccess.go:24 `// FIELD ACCESS THROUGH A REINTERPRETED POINTER`,
      the step across a return :45 `// ONE STEP ACROSS A RETURN`.
-     In-function: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:49 `Reinterpret<byte, record>();`;
+     In-function: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:53 `Reinterpret<byte, record>();`;
      across a return: FieldAccessReinterpret/main.go:90 `got, err := readReparse(0x0201, false)` ->
-     main.cs.target:77 `fmt.Println("returned:", got.Flags, got.of(reparse.ᏑPath).ElementRef(0), err);`.
+     main.cs.target:81 `fmt.Println("returned:", got.Flags, got.Path[0], err);`: since I0 D3 reparse holds Path inline, so the
+     element is read through the inline array's indexer, not a field view; the field-view step across a return is the guard's.
      Guard: TestFieldAccessCrossesOneReturn (src/go2cs/fieldAccessReturn_test.go). -->
 
 A value-receiver method called through a pointer local is written `p.M()`, as in Go, and still works on its
@@ -11254,7 +11255,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 ([Struct Types](#struct-types)), and `default!` is its zero value
 ([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
 Go's for the target architecture, here amd64.
-<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3956-3977#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3971-3992#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.
@@ -11472,7 +11473,7 @@ src/tests/Behavioral/FieldAccessReinterpret/main.go:90 (`got, err := readReparse
 	rec.Off = 7
 	rec.Off += 1
 ```
-<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:48-54 -->
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:52-58 -->
 ```csharp
     var blob = new slice<byte>(24);
     var rec = Ꮡ(blob, 0).Reinterpret<byte, record>();
@@ -12498,20 +12499,20 @@ names its portable fallback `math_big_pure_go` rather than `purego`, so both tag
 A `go2cs -recurse` conversion of your own module applies `safe,purego,noasm`, for the reasons given at the end
 of this section, unless you pass `-tags` or `-module-safe-tag=false`. Other conversions apply exactly the tags you
 pass and nothing else.
-<!-- src/go2cs/commandLineOptions.go:309 (`var defaultModuleBuildTags = []string{"safe", "purego", "noasm"}`),
+<!-- src/go2cs/commandLineOptions.go:312 (`var defaultModuleBuildTags = []string{"safe", "purego", "noasm"}`),
      :325-335 (`if tagsExplicit {` … `if recurse && moduleSafeTag {`). -->
 
 <!-- The math_big_pure_go member: arith_decl.go (`!math_big_pure_go`) declares eight bodyless
      functions whose bodies are arith_$GOARCH.s; arith_decl_pure.go (`math_big_pure_go`) forwards each
      to the `_g` pure-Go implementation in arith.go. With purego alone, every big.Int/Float/Rat
      arithmetic path compiled and threw on first use (surfaced as time.TestTruncateRound -> big.Int.Mul
-     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:288#3fe3c3 (defaultStdLibBuildTags);
-     resolveBuildTags (commandLineOptions.go:324#0885a6) keys the default on the -stdlib and -tests flags, not on
+     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:291#3fe3c3 (defaultStdLibBuildTags);
+     resolveBuildTags (commandLineOptions.go:327#0885a6) keys the default on the -stdlib and -tests flags, not on
      the package being standard library, so a -tests run on any package gets it. `-tags=` clears the
      default. A -stdlib run prints the tags it applies, e.g.
      `Applying build tags: purego,math_big_pure_go (default; pass -tags to override)`
      (../src/go2cs/stdLibConverter.go:56 (`fmt.Println(c.options.buildTagsAnnouncement("purego"))`), the line built at
-     ../src/go2cs/commandLineOptions.go:520 (`return "Applying build tags: " + strings.Join(o.buildTags, ",") + suffix`));
+     ../src/go2cs/commandLineOptions.go:523 (`return "Applying build tags: " + strings.Join(o.buildTags, ",") + suffix`));
      a -recurse run prints its own the same way (../src/go2cs/moduleConverter.go:87
      (`fmt.Println(m.options.buildTagsAnnouncement("module"))`)); -tests shares the stdlib default and prints it only
      with -recurse. -->

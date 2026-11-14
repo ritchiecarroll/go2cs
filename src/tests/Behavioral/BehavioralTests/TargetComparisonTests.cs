@@ -1081,6 +1081,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInitStatementScope() => CheckTarget("InitStatementScope");
 
     [TestMethod]
+    public void CheckInlineArrayFields() => CheckTarget("InlineArrayFields");
+
+    [TestMethod]
     public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
 
     [TestMethod]

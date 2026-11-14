@@ -38,6 +38,18 @@ using static go.main_package;
 // <InterfaceImplementations>
 // </InterfaceImplementations>
 
+// The struct types whose arrays this package holds inline (the go.arrays family), as the converter
+// admitted them: a `GoInlineArrayType` record per named type, a `GoInlineArrayKeys` record with the
+// count and a digest of every admitted type (anonymous ones included), and a `GoInlineArrays` record
+// naming the rule when it is not the default. A -tests conversion applies the same rule rather than
+// deciding again, and refuses a production set that admits differently. The section exists only while
+// there is a record to hold.
+// <InlineArrays>
+[assembly: go.golib.GoInlineArrayKeys(2, "150031c28a3c7a0c")]
+[assembly: go.golib.GoInlineArrayType("Dirent")]
+[assembly: go.golib.GoInlineArrayType("Pair")]
+// </InlineArrays>
+
 // <ImplicitConversions>
 // </ImplicitConversions>
 
@@ -49,7 +61,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABdEhIKCgoKUgoKWgoKWgoKCloKC")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABpEhIKCgoKUgoKWgoKWgoKCloKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -65,8 +77,8 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
-    [GoValueClone("Name", "Pad_cgo")] public partial struct Dirent {}
-    [GoValueClone("B")] public partial struct Pair {}
+    public partial struct Dirent {}
+    public partial struct Pair {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

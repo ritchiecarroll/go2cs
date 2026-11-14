@@ -17,6 +17,20 @@ namespace go.golib;
 /// <remarks>
 /// go2cs-gen implements <see cref="IGoManagedLayout"/> for every struct carrying it, so golib's inline-layout gate
 /// (<c>GoReflect.InlineLayoutMismatch</c>) can compare the struct's managed layout with its Go layout at every level.
+/// The converter stamps Go's <see cref="Size"/> and <see cref="Align"/> from go/types, so the gate holds the managed
+/// layout to a source independent of the declaration it checks: a carrier missing from the declaration takes Go's
+/// alignment with it, and only the stamp still says what Go's alignment is.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
-[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoInlineLayoutAttribute : Attribute;
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoInlineLayoutAttribute : Attribute
+{
+    /// <summary>
+    /// Gets or sets Go's size of the struct, in bytes, as go/types computes it; 0 when not stamped.
+    /// </summary>
+    public int Size { get; set; }
+
+    /// <summary>
+    /// Gets or sets Go's alignment of the struct, in bytes, as go/types computes it; 0 when not stamped.
+    /// </summary>
+    public int Align { get; set; }
+}

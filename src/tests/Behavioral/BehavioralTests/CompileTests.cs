@@ -1078,6 +1078,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckInitStatementScope() => CheckTarget("InitStatementScope");
 
     [TestMethod]
+    public void CheckInlineArrayFields() => CheckTarget("InlineArrayFields");
+
+    [TestMethod]
     public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
 
     [TestMethod]

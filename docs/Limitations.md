@@ -89,6 +89,17 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   <!-- docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.16 and §11.20 (COORD's M1 ruling, 2026-11-11); the census is
        TestCgoCheckClosureFormsAcrossGorootsCgoPackages, hosted run 42973745743: address 31, variable 50, index 22,
        slice 0, defer 9, go 0 over GOROOT's 29 cgo packages. -->
+* **Reflection cannot read a struct whose arrays are held inline.** When a package reads native memory as a
+  struct, through `(*T)(unsafe.Pointer(p))`, go2cs lays that struct out as Go does and holds its array fields inside
+  it, rather than as separate objects. Indexing, `len`, `range` and printing one of those arrays work as in Go. Reflection
+  over the struct that holds them does not: `fmt.Printf("%v", s)`, `reflect.ValueOf(s).Field(i)` and anything else that
+  walks the struct's fields panics with `reflect: field T.F is a Go array held inline (go.arrays); reflection does not
+  read or address it`. Print the fields one at a time instead.
+  <!-- docs/phase4/DESIGN-array-value-storage.md 7.7 and its part-D block (I0, D3). Measured 2026-11-13 (C2) on the
+       InlineArrayFields behavioral fixture with two lines added: fmt.Printf("%v\n", x) over an admitted Named panicked
+       "reflect: field Named.FzName is a Go array held inline (go.arrays); reflection does not read or address it"
+       where Go printed {6 [115 101 99 111 110 100 0] 4.5}; fmt of the field alone (h.Buf) matched Go. The census at
+       part D's P1 counted 0 fmt %v and reflect uses reaching an admitted type in modernc.org/sqlite's lib and libc. -->
 * **Goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
   holds its thread for as long as it lives. When it ends, the thread waits to run the next `go` statement,
   so starting goroutines one after another is cheap; holding many alive at once is not. Measured on one
@@ -337,7 +348,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4153 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:4181 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :849
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.

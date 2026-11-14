@@ -393,6 +393,15 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			return refusePackage(options, diagnosticAsmForwardSignatureRefused, refusal)
 		}
 
+		// Which structs hold their arrays inline (inlineArrayAdmission.go): decided once, from the package's non-test
+		// files, before any file emits. A reinterpret chain whose sides disagree refuses the package (GO2CS2010).
+		packageInlineAdmission = computeInlineArrayAdmission(pkg.Syntax, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, options)
+		packageInlineArrayRecords = inlineArrayStampRecords(packageInlineAdmission, inlineArrayMode(pkg.Types.Path(), pkg.Dir, options))
+
+		if err := reportInlineArrayAdmission(packageInlineAdmission); err != nil {
+			return refusePackage(options, diagnosticInlineArrayMixedPair, err)
+		}
+
 		// A WARNING, never a refusal: a type argument that meets its constraint only as a closed pair (closedCarrier.go).
 		warnClosedCarrierTypeArguments(pkg)
 
