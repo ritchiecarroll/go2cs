@@ -593,3 +593,17 @@ func TestTheGoSkipPinIsReadFromGoTestOutputEvents(t *testing.T) {
 		t.Fatalf("a real go test skip with the pin is disclosed; mismatches %q disclosed %q", mismatches, disclosed)
 	}
 }
+
+func TestAnIdleNativeSubprocessSkipIsNotOrphaned(t *testing.T) {
+	// pass/pass is a skipEitherSide entry's healthy reading, so the orphan report stays quiet on it; the
+	// same entry without the flag is still reported, as is G's one-direction entry.
+	name := "TestProfile/Default"
+	pass := map[string]string{name: "pass"}
+
+	if orphans := orphanedDisclosures(loadRaw(t, "darwin", nativeSkipEntry(true)), pass, pass, "darwin"); len(orphans) != 0 {
+		t.Fatalf("an idle skipEitherSide entry is not reported orphaned; got %+v", orphans)
+	}
+	if orphans := orphanedDisclosures(loadRaw(t, "darwin", nativeSkipEntry(false)), pass, pass, "darwin"); len(orphans) != 1 {
+		t.Fatalf("without skipEitherSide an idle entry is reported; got %+v", orphans)
+	}
+}

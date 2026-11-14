@@ -8766,6 +8766,13 @@ func orphanedDisclosures(disclosures map[string]testDisclosure, goResults, csRes
 			continue
 		}
 
+		// A SkipEitherSide entry pins a host that sometimes skips on either side, so pass/pass is its
+		// healthy reading, not a sign it is stale; reported on most runs, the line would teach readers to
+		// ignore the report. Its retirement is read at a rebank instead (the entry's history says when).
+		if disclosure.SkipEitherSide && goResults[name] == "pass" {
+			continue
+		}
+
 		out = append(out, orphanedDisclosure{
 			Name:   name,
 			Class:  disclosure.classLabel(),
@@ -8907,6 +8914,7 @@ type testDisclosure struct {
 	// subtests, where the native cpu-profile testprog sometimes records no sample while tracing on
 	// macOS. The pin is Go's own t.Skip text, which the converted test prints unchanged. Any other skip
 	// text, a fail, or a skip on both sides stays what it was. Refused without a GoSkipSignature.
+	// pass/pass is such an entry's healthy reading, so orphanedDisclosures does not report it.
 	SkipEitherSide bool `json:"skipEitherSide,omitempty"`
 
 	// Want, Reading and Plan carry the DEFERRED class's contract (see deferredClass below). They
