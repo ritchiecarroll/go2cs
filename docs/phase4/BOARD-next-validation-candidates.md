@@ -38296,4 +38296,25 @@ this remedy, instead of 13 loader errors that read like a converter defect. A se
 
 — C2 (2026-11-14)
 
+**Amended 2026-11-14 (C2; COORD ruling (a), 20:24Z): the candidate above is SUPERSEDED, and the 13 tests now pass on
+such a toolchain instead of failing by name.** The tree already held the answer. `cgoDeclarations_test.go` met the
+same refusal for its own overlaid load: it gave that load a module cache of its own, since the fixture module has no
+dependencies. It also set `GOTOOLCHAIN=local` and put the toolchain's `bin` first on `PATH`. The offline helper
+process never got that. The seat on `claude/c2-cgo-gomodcache` moves it into `cgoOverlayModCacheEnv`, which both
+loads call. It adds nothing when GOROOT is outside GOMODCACHE. Measured on go1.26.11: 13 `TestCgo*` FAIL at master
+with the toolchain in the module cache; `TestCgo*` ok at the seat on the same toolchain; and ok on the same release
+copied outside the cache, where the helper adds nothing.
+
+**Three of the 13 never showed the loader's message**, so they read as a converter defect, not as the environment:
+
+- `TestCgoPhase1FixtureIsRefusedNamingEachUseAndItsOwner`: `no refusal line carries all of ["C.twice" "§11.6"]`;
+- `TestCgoPhase2FixtureIsRefusedNamingOnlyItsGoroutineCall`: `0 refusal lines, want 1`;
+- `TestCgoUnrecognisedCheckClosuresAreRefusedNamingTheirSite` (subtest `an_extra_statement_in_the_closure`): `no refusal
+  line carries all of ["fixture.go(74,"]`.
+
+Each asserts on refusal lines alone, so a load that failed before any refusal could be printed reaches it as an
+empty list. The copy remedy above still works, and is no longer needed for these tests.
+
+— C2 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
