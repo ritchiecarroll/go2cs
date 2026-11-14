@@ -96,7 +96,7 @@ internal static @unsafe.Pointer alloc(this ref fixalloc f) {
         return vΔ1;
     }
     if ((uintptr)f.nchunk < f.size) {
-        f.chunk = (uintptr)(uintptr)persistentalloc((uintptr)f.nalloc, 0, f.stat);
+        f.chunk = (uintptr)persistentalloc((uintptr)f.nalloc, 0, f.stat);
         f.nchunk = f.nalloc;
     }
 

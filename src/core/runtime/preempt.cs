@@ -480,7 +480,7 @@ internal static (bool, uintptr) isAsyncSafePoint(ж<g> Ꮡgp, uintptr pc, uintpt
         // functions (except at calls).
         return (false, 0);
     }
-    @unsafe.Pointer fd = (uintptr)funcdata(f, abi.FUNCDATA_LocalsPointerMaps); if (fd == nil || (abi.FuncFlag)(f.flag & abi.FuncFlagAsm) != 0) {
+    @unsafe.Pointer fd = funcdata(f, abi.FUNCDATA_LocalsPointerMaps); if (fd == nil || (abi.FuncFlag)(f.flag & abi.FuncFlagAsm) != 0) {
         // This is assembly code. Don't assume it's well-formed.
         // TODO: Empirically we still need the fd == nil check. Why?
         //

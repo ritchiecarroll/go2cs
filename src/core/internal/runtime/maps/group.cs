@@ -322,7 +322,7 @@ partial struct groupsReference {
 internal static groupsReference newGroups(ref abiꓸMapType typ, uint64 length) {
     return new groupsReference(
         // TODO: make the length type the same throughout.
-        data: (uintptr)newarray(typ.Group, (nint)length),
+        data: newarray(typ.Group, (nint)length),
         lengthMask: length - 1
     );
 }
@@ -347,25 +347,25 @@ internal static void cloneGroup(ж<abiꓸMapType> Ꮡtyp, groupReference newGrou
     if (typ.IndirectKey()) {
         // Deep copy keys if indirect.
         for (var i = (uintptr)0; i < abi.MapGroupSlots; i++) {
-            @unsafe.Pointer oldKey = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)oldGroup.key(Ꮡtyp, i));
+            @unsafe.Pointer oldKey = ~(ж<@unsafe.Pointer>)(uintptr)(oldGroup.key(Ꮡtyp, i));
             if (oldKey == nil) {
                 continue;
             }
-            @unsafe.Pointer newKey = (uintptr)newobject(typ.Key);
+            @unsafe.Pointer newKey = newobject(typ.Key);
             typedmemmove(typ.Key, newKey, oldKey);
-            ((ж<@unsafe.Pointer>)(uintptr)((uintptr)newGroup.key(Ꮡtyp, i))).Value = newKey;
+            ((ж<@unsafe.Pointer>)(uintptr)(newGroup.key(Ꮡtyp, i))).Value = newKey;
         }
     }
     if (typ.IndirectElem()) {
         // Deep copy elems if indirect.
         for (var i = (uintptr)0; i < abi.MapGroupSlots; i++) {
-            @unsafe.Pointer oldElem = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)oldGroup.elem(Ꮡtyp, i));
+            @unsafe.Pointer oldElem = ~(ж<@unsafe.Pointer>)(uintptr)(oldGroup.elem(Ꮡtyp, i));
             if (oldElem == nil) {
                 continue;
             }
-            @unsafe.Pointer newElem = (uintptr)newobject(typ.Elem);
+            @unsafe.Pointer newElem = newobject(typ.Elem);
             typedmemmove(typ.Elem, newElem, oldElem);
-            ((ж<@unsafe.Pointer>)(uintptr)((uintptr)newGroup.elem(Ꮡtyp, i))).Value = newElem;
+            ((ж<@unsafe.Pointer>)(uintptr)(newGroup.elem(Ꮡtyp, i))).Value = newElem;
         }
     }
 }

@@ -387,7 +387,7 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
         var resStateSize = /* unsafe.Sizeof(_C_struct___res_state{}) */ (uintptr)552;
         ж<_C_struct___res_state> state = default;
         if (resStateSize > 0) {
-            @unsafe.Pointer mem = (uintptr)_C_malloc(resStateSize);
+            @unsafe.Pointer mem = _C_malloc(resStateSize);
             defer(_C_free, mem, ref ᒐ);
             var memSlice = @unsafe.Slice((ж<byte>)(uintptr)(mem), resStateSize);
             clear(memSlice);

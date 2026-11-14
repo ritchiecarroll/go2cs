@@ -32,7 +32,7 @@ internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
         return 0;
     }
     // Insert the pointer to the type itself.
-    var (id, _) = Ꮡt.Ꮡtab.put((uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(typ))), goarch.PtrSize);
+    var (id, _) = Ꮡt.Ꮡtab.put(noescape(@unsafe.Pointer.FromBox(Ꮡ(typ))), goarch.PtrSize);
     System.GC.KeepAlive(Ꮡtyp);
     return id;
 }
@@ -80,7 +80,7 @@ internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w
 
     // Recursively walk all child nodes.
     foreach (var i in range(len(node.children))) {
-        @unsafe.Pointer child = (uintptr)Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
+        @unsafe.Pointer child = Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
         if (child == nil) {
             continue;
         }

@@ -2672,6 +2672,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUnsafePointerArgPassing() => CheckTarget("UnsafePointerArgPassing");
 
     [TestMethod]
+    public void CheckUnsafePointerCallResultLifetime() => CheckTarget("UnsafePointerCallResultLifetime");
+
+    [TestMethod]
     public void CheckUnsafePointerInferredNoImport() => CheckTarget("UnsafePointerInferredNoImport");
 
     [TestMethod]

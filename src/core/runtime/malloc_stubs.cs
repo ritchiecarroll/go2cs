@@ -65,7 +65,7 @@ internal static @unsafe.Pointer mallocStub(uintptr size, ж<_type> typ, bool nee
         // See go.dev/issue/76356
         var gp = getg();
         if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-            return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
+            return mallocgcSmallNoScanSC2(size, typ, needzero);
         }
     }
     if (doubleCheckMalloc) {
@@ -81,7 +81,7 @@ internal static @unsafe.Pointer mallocStub(uintptr size, ж<_type> typ, bool nee
 
     // Pre-malloc debug hooks.
     if (debug.malloc) {
-        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+        @unsafe.Pointer xΔ1 = preMallocgcDebug(size, typ); if (xΔ1 != nil) {
             return xΔ1;
         }
     }
@@ -275,7 +275,7 @@ internal static (@unsafe.Pointer, uintptr) smallNoScanStub(uintptr size, ж<_typ
     // First, check for a reusable object.
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         // We have a reusable object, use it.
-        @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
+        @unsafe.Pointer vΔ1 = mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
 
@@ -507,7 +507,7 @@ internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> typ,
         // TODO: enable this padding for all allocations, not just
         // tinyalloc ones. It's tricky because of pointer maps.
         // Maybe just all noscan objects?
-        x = (uintptr)add(x, elemsize - constsize);
+        x = add(x, elemsize - constsize);
     }
     return (x, elemsize);
 }
@@ -622,13 +622,13 @@ internal static uintptr writeHeapBitsSmallStub(ж<mspan> Ꮡspan, uintptr x, uin
         // Two writes.
         var bits0 = (uintptr)ptrBits - j;
         var bits1 = bits - bits0;
-        var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
-        var dst1 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 1) * (uintptr)goarch.PtrSize));
+        var dst0 = (ж<uintptr>)(uintptr)(add(dst, (i + 0) * (uintptr)goarch.PtrSize));
+        var dst1 = (ж<uintptr>)(uintptr)(add(dst, (i + 1) * (uintptr)goarch.PtrSize));
         dst0.Value = (uintptr)((uintptr)((dst0.Value) & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
         dst1.Value = (uintptr)((uintptr)((dst1.Value) & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
     } else {
         // One write.
-        var dstΔ1 = (ж<uintptr>)(uintptr)((uintptr)add(dst, i * (uintptr)goarch.PtrSize));
+        var dstΔ1 = (ж<uintptr>)(uintptr)(add(dst, i * (uintptr)goarch.PtrSize));
         dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 1)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j)))); // We're taking the min so this compiles on 32 bit platforms. But if bits > ptrbits we always take the other branch
     }
 

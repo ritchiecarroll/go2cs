@@ -2752,6 +2752,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUnsafePointerArgPassing() => CheckTarget("UnsafePointerArgPassing");
 
     [TestMethod]
+    public void CheckUnsafePointerCallResultLifetime() => CheckTarget("UnsafePointerCallResultLifetime");
+
+    [TestMethod]
     public void CheckUnsafePointerInferredNoImport() => CheckTarget("UnsafePointerInferredNoImport");
 
     [TestMethod]

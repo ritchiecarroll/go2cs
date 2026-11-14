@@ -467,13 +467,13 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
     while (match != 0) {
         var i = match.first();
 
-        @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+        @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
         if (typ.IndirectKey()) {
             slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
         }
 
         if (typ.Key.Equal(key, slotKey)) {
-            @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
+            @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
                 slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
             }
@@ -491,7 +491,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
 public static void Put(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp, @unsafe.Pointer key, @unsafe.Pointer elem) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
-    @unsafe.Pointer slotElem = (uintptr)Ꮡm.PutSlot(Ꮡtyp, key);
+    @unsafe.Pointer slotElem = Ꮡm.PutSlot(Ꮡtyp, key);
     typedmemmove(typ.Elem, slotElem, elem);
 }
 
@@ -523,7 +523,7 @@ public static @unsafe.Pointer PutSlot(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡ
 
     if (m.dirLen == 0) {
         if (m.used < abi.MapGroupSlots) {
-            @unsafe.Pointer elem = (uintptr)m.putSlotSmall(Ꮡtyp, hash, key);
+            @unsafe.Pointer elem = m.putSlotSmall(Ꮡtyp, hash, key);
 
             if (m.writing == 0) {
                 fatal(concurrentMapWritesˢ);
@@ -573,7 +573,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
     while (match != 0) {
         var iΔ1 = match.first();
 
-        @unsafe.Pointer slotKeyΔ1 = (uintptr)g.key(Ꮡtyp, iΔ1);
+        @unsafe.Pointer slotKeyΔ1 = g.key(Ꮡtyp, iΔ1);
         if (typ.IndirectKey()) {
             slotKeyΔ1 = ((ж<@unsafe.Pointer>)(uintptr)(slotKeyΔ1)).Value;
         }
@@ -582,7 +582,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
                 typedmemmove(typ.Key, slotKeyΔ1, key);
             }
 
-            @unsafe.Pointer slotElemΔ1 = (uintptr)g.elem(Ꮡtyp, iΔ1);
+            @unsafe.Pointer slotElemΔ1 = g.elem(Ꮡtyp, iΔ1);
             if (typ.IndirectElem()) {
                 slotElemΔ1 = ((ж<@unsafe.Pointer>)(uintptr)(slotElemΔ1)).Value;
             }
@@ -603,17 +603,17 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
 
     var i = match.first();
 
-    @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+    @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
     if (typ.IndirectKey()) {
-        @unsafe.Pointer kmem = (uintptr)newobject(typ.Key);
+        @unsafe.Pointer kmem = newobject(typ.Key);
         ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = kmem;
         slotKey = kmem;
     }
     typedmemmove(typ.Key, slotKey, key);
 
-    @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
+    @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
     if (typ.IndirectElem()) {
-        @unsafe.Pointer emem = (uintptr)newobject(typ.Elem);
+        @unsafe.Pointer emem = newobject(typ.Elem);
         ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = emem;
         slotElem = emem;
     }
@@ -649,12 +649,12 @@ internal static void growToTable(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp) {
             continue;
         }
 
-        @unsafe.Pointer key = (uintptr)g.key(Ꮡtyp, i);
+        @unsafe.Pointer key = g.key(Ꮡtyp, i);
         if (typ.IndirectKey()) {
             key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
         }
 
-        @unsafe.Pointer elem = (uintptr)g.elem(Ꮡtyp, i);
+        @unsafe.Pointer elem = g.elem(Ꮡtyp, i);
         if (typ.IndirectElem()) {
             elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
         }
@@ -729,7 +729,7 @@ internal static void deleteSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uin
 
     while (match != 0) {
         var i = match.first();
-        @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+        @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
         @unsafe.Pointer origSlotKey = slotKey;
         if (typ.IndirectKey()) {
             slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
@@ -745,7 +745,7 @@ internal static void deleteSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uin
                 typedmemclr(typ.Key, slotKey);
             }
 
-            @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
+            @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
                 // Clearing the pointer is sufficient.
                 ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = default;

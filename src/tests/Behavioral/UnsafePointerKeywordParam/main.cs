@@ -47,7 +47,7 @@ internal static void main() {
     holder h = default;
     store(ref h, px);
     fmt.Println(h.p == px);
-    fmt.Println((uintptr)offset(px, 0) == px);
+    fmt.Println(offset(px, 0) == px);
     fmt.Println(pass(px) == asUintptr(px));
 }
 

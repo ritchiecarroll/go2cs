@@ -389,12 +389,12 @@ internal static void callbackWrap(ref callbackArgs a) {
     foreach (var (_, part) in range(c.abiMap.parts)) {
         switch (part.kind) {
         case var ᴛ when ᴛ == abiPartStack: {
-            memmove((uintptr)add(goArgs, part.dstStackOffset), (uintptr)add(a.args, part.srcStackOffset), part.len);
+            memmove(add(goArgs, part.dstStackOffset), add(a.args, part.srcStackOffset), part.len);
             break;
         }
         case var ᴛ when ᴛ == abiPartReg: {
             @unsafe.Pointer goReg = @unsafe.Pointer.FromBox(Ꮡregs.at(abi.RegArgs.ᏑInts, part.dstRegister));
-            memmove(goReg, (uintptr)add(a.args, part.srcStackOffset), part.len);
+            memmove(goReg, add(a.args, part.srcStackOffset), part.len);
             break;
         }
         default: {
@@ -410,7 +410,7 @@ internal static void callbackWrap(ref callbackArgs a) {
 
     // Even though this is copying back results, we can pass a nil
     // type because those results must not require write barriers.
-    reflectcall(nil, @unsafe.Pointer.FromPinnedBox(c.fn), (uintptr)noescape(goArgs), (uint32)c.abiMap.dstStackSize, (uint32)c.abiMap.retOffset, (uint32)frameSize, Ꮡregs);
+    reflectcall(nil, @unsafe.Pointer.FromPinnedBox(c.fn), noescape(goArgs), (uint32)c.abiMap.dstStackSize, (uint32)c.abiMap.retOffset, (uint32)frameSize, Ꮡregs);
 
     // Extract the result.
     //
@@ -453,7 +453,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscalln(uintptr f
     c.Value.Fn = fn;
     c.Value.N = n;
     if ((~c).N != 0) {
-        c.Value.Args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
+        c.Value.Args = (uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
     }
     cgocall(asmstdcallAddr, @unsafe.Pointer.FromPinnedBox(c));
     // cgocall may reschedule us on to a different M,
