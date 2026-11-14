@@ -1,4 +1,7 @@
+using System;
+using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go.golib;
 
@@ -21,12 +24,47 @@ public class GoCpuTests
             return;
         }
 
+        // The two reads may run on different logical processors (on Windows with more than one, they are pinned to
+        // two on purpose, so the comparison crosses cores every time rather than by chance).
+        bool crossCores = OperatingSystem.IsWindows() && Environment.ProcessorCount > 1;
+
         foreach ((uint leaf, uint subleaf) in new[] { (0u, 0u), (1u, 0u), (7u, 0u), (0x80000000u, 0u) })
         {
-            (int eax, int ebx, int ecx, int edx) = X86Base.CpuId((int)leaf, (int)subleaf);
-            Assert.AreEqual(((uint)eax, (uint)ebx, (uint)ecx, (uint)edx), GoCpu.Cpuid(leaf, subleaf), $"leaf {leaf:x}, subleaf {subleaf}");
+            (int eax, int ebx, int ecx, int edx) = crossCores ? OnProcessor(0, () => X86Base.CpuId((int)leaf, (int)subleaf)) : X86Base.CpuId((int)leaf, (int)subleaf);
+            (uint, uint, uint, uint) actual = crossCores ? OnProcessor(1, () => GoCpu.Cpuid(leaf, subleaf)) : GoCpu.Cpuid(leaf, subleaf);
+            Assert.AreEqual(PerCoreMasked(leaf, ((uint)eax, (uint)ebx, (uint)ecx, (uint)edx)), PerCoreMasked(leaf, actual), $"leaf {leaf:x}, subleaf {subleaf}");
         }
     }
+
+    // Leaf 1 EBX bits 31:24 are the INITIAL APIC ID of the logical processor that executed CPUID, so two reads on
+    // two cores differ there and nowhere else; x/sys/cpu never reads them. No other leaf the test reads carries a
+    // per-core field (leaves 4, 0xB and 0x1F, which do, are not read).
+    private static (uint, uint, uint, uint) PerCoreMasked(uint leaf, (uint eax, uint ebx, uint ecx, uint edx) r) =>
+        leaf == 1 ? (r.eax, r.ebx & 0x00FF_FFFFu, r.ecx, r.edx) : r;
+
+    // Runs read with the calling thread pinned to one logical processor, then restores the thread's mask.
+    private static T OnProcessor<T>(int processor, Func<T> read)
+    {
+        nint thread = GetCurrentThread();
+        nuint previous = SetThreadAffinityMask(thread, (nuint)1 << processor);
+        Assert.AreNotEqual((nuint)0, previous, $"SetThreadAffinityMask to processor {processor}");
+
+        try
+        {
+            Thread.Yield();
+            return read();
+        }
+        finally
+        {
+            SetThreadAffinityMask(thread, previous);
+        }
+    }
+
+    [DllImport("kernel32.dll")]
+    private static extern nint GetCurrentThread();
+
+    [DllImport("kernel32.dll")]
+    private static extern nuint SetThreadAffinityMask(nint thread, nuint mask);
 
     [TestMethod]
     public void TheSynthesisedXcr0SetsEachStateFromItsAnswer()
