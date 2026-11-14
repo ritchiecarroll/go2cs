@@ -197,6 +197,17 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					(v.inFunction || !liftNameNeedsPublicType(name))
 			}
 
+			// An IMPORTED package's public lift of an identical struct (importedStructLift): Go calls the
+			// two one type, so this package declares none of its own. The name is public in its own
+			// assembly, so no accessibility test of this package's applies.
+			if !admissible {
+				if st, ok := structSignatureType.(*types.Struct); ok {
+					if imported := v.importedStructLift(st); imported != "" {
+						existing, admissible = imported, true
+					}
+				}
+			}
+
 			if admissible {
 				if identType != nil {
 					v.liftedTypeMap[identType] = existing

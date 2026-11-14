@@ -1010,6 +1010,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckImportSegmentTypeShadow() => CheckTarget("ImportSegmentTypeShadow");
 
     [TestMethod]
+    public void CheckImportedAnonStructLiftReuse() => CheckTarget("ImportedAnonStructLiftReuse");
+
+    [TestMethod]
     public void CheckIncDecPointerField() => CheckTarget("IncDecPointerField");
 
     [TestMethod]
