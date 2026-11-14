@@ -565,7 +565,9 @@ func (v *Visitor) markCaptureModeBoxedParams(params *ast.FieldList, body *ast.Bl
 //
 // The trigger is ADDRESS-TAKEN specifically — the one condition that hands other code a pointer
 // into the result's own storage, requiring the box `Ꮡerr`, the pointee write, and `return err` to
-// share one slot (mirrors identHasHeapBox's box gate for an inherently-heap ident). A result that
+// share one slot (mirrors identHasHeapBox's box gate for an inherently-heap ident). Go's two
+// IMPLICIT address-of forms count too: a call of a capture-mode pointer method on the result and a
+// pointer-method value of it (see the parameter arm, markCaptureModeBoxedParams). A result that
 // is merely referenced or WRITTEN inside a closure does NOT qualify: a C# closure already captures
 // the outer local by reference, so the full escape analysis (which blanket-marks any inherently-
 // heap ident referenced in a closure) would needlessly flip such a result to box-ref emission. The
@@ -599,8 +601,21 @@ func (v *Visitor) analyzeNamedResults(results *ast.FieldList, body *ast.BlockStm
 				continue
 			}
 
-			if v.objectAddressTaken(obj, body, false) || v.pointerMethodValueAddressTaken(obj, body) {
+			// Go also takes `&r` implicitly for a call of a capture-mode (direct-ж) pointer method on
+			// the result or on a value chain rooted at it (`r.SetBigInt(bi)`, modernc.org/mathutil's
+			// NewInt128FromFloat32, sqlite-cs S8c), and for a pointer-method VALUE of it. The method's
+			// only emitted receiver is the box, so an unboxed result failed with CS1929. Same two
+			// reasons, same record, as the parameter and receiver arms.
+			captureMode := v.bodyCallsCaptureModeMethodOnObject(obj, body) || v.pointerMethodValueAddressTaken(obj, body)
+
+			if captureMode || v.objectAddressTaken(obj, body, false) {
 				v.identEscapesHeap[obj] = true
+
+				// An inherently-heap result (named slice/map/chan) boxes only for a recorded
+				// capture-mode reason, as in the parameter arm (see identHasHeapBox).
+				if captureMode && packageCaptureModeBoxIdents != nil && isInherentlyHeapAllocatedType(obj.Type()) {
+					packageCaptureModeBoxIdents[obj] = true
+				}
 			}
 		}
 	}

@@ -1534,6 +1534,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");
 
     [TestMethod]
+    public void CheckNamedResultCaptureModeReceiver() => CheckTarget("NamedResultCaptureModeReceiver");
+
+    [TestMethod]
     public void CheckNamedResultDeferCapture() => CheckTarget("NamedResultDeferCapture");
 
     [TestMethod]

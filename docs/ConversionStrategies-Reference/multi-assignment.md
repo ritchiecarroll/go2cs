@@ -307,6 +307,33 @@ take the same treatment. (Guarded by `NamedResultAddressEscape` — an error res
 `PointerToInterfaceParamDeref` re-baselined to the box form, its output unchanged since its handler
 only *reads* `*err`.)
 
+Go also takes `&r` **implicitly** for a named result, in the same two forms the value parameter and
+value receiver arms below already handle: a call of a capture-mode (direct-ж) pointer method on the
+result or on a value-field chain rooted at it, and a pointer-method value of it. A direct-ж method's
+only emitted receiver is the box `ж<T>`, so before the named-result arm took the call form an unboxed
+result failed to compile (CS1929), and the chain form `Ꮡ(h).Ꮡinner.Add(…)` compiled through a **copy**
+box and dropped the method's writes. The shape is modernc.org/mathutil's `NewInt128FromFloat32`
+calling `r.SetBigInt(bi)` on its named result, where `SetBigInt` uses its receiver pointer as a value
+(`fmt.Errorf("%T…", x)`):
+```go
+func fromInt(v int64) (r Int128) {
+	r.SetBig(v)
+	return r
+}
+```
+```csharp
+internal static Int128 /*r*/ fromInt(int64 v) {
+    ref var r = ref heap(new Int128(), out var Ꮡr);
+
+    Ꮡr.SetBig(v);
+    return r;
+}
+```
+A named slice, map or chan result is a reference already and boxes only for this recorded reason, as
+the parameter arm does. (Guarded by `NamedResultCaptureModeReceiver` — struct results with a body write
+before the call and a bare return, the value-field chain form, and a named slice result whose method
+appends through its receiver, output-compared vs Go.)
+
 ## An address-taken VALUE PARAMETER heap-boxes too
 A value parameter, like a named result, is declared in the **signature** — not by any body statement —
 so the escape analysis' define-walk never reached it either. Parameters were additionally kept out of

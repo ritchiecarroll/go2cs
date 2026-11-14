@@ -1484,6 +1484,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");
 
     [TestMethod]
+    public void CheckNamedResultCaptureModeReceiver() => CheckTarget("NamedResultCaptureModeReceiver");
+
+    [TestMethod]
     public void CheckNamedResultDeferCapture() => CheckTarget("NamedResultDeferCapture");
 
     [TestMethod]
