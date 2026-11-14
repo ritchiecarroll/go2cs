@@ -321,6 +321,7 @@ func fromInt(v int64) (r Int128) {
 	return r
 }
 ```
+<!-- source: src/tests/Behavioral/NamedResultCaptureModeReceiver/main.cs:22-27 -->
 ```csharp
 internal static Int128 /*r*/ fromInt(int64 v) {
     ref var r = ref heap(new Int128(), out var Ꮡr);
