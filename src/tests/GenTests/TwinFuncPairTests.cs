@@ -75,7 +75,14 @@ public class TwinFuncPairTests
                 nint r = 3;
                 var rʗ1 = r;
                 caller(() => rʗ1.wait());
+
+                // Fix 5: the converter's creation sites `new D(methodGroup | literal)` (delegateArgWrap, convExprList).
+                caller(new Action(park2));
+                caller(new Action(() => { ᐸꟷ(ch); }));
             }
+
+            // A static function that parks, converted to a func value through `new D(F)`.
+            public static void park2() { ᐸꟷ(ch); }
         }
         """;
 
@@ -138,6 +145,18 @@ public class TwinFuncPairTests
 
         StringAssert.Contains(main, "async () => await rʗ1.waitꞏtwin()", "the twin half awaits the method's twin over the same snapshot");
         StringAssert.Contains(main, "(() => rʗ1.wait(), ", "the plain half is the literal as written, over the same snapshot");
+    }
+
+    [TestMethod]
+    public void TheConvertersNewDelegateSitesMakeOnePairAndNoDelegateOverADelegate()
+    {
+        string main = Body(Run().twins, "main");
+
+        StringAssert.Contains(main, "new global::System.Action(new global::go2cs.TwinPairs.ꞏFuncPair0(park2, park2ꞏtwin).Invoke)",
+            "new D(F) over a function that parks is a pair of F and its twin");
+        Assert.IsFalse(main.Contains("new Action(new global::System.Action(", StringComparison.Ordinal) ||
+                       main.Contains("new global::System.Action(new global::System.Action(", StringComparison.Ordinal),
+            "a literal paired inside new D(...) binds the outer creation to the pair, never a delegate over a delegate");
     }
 
     [TestMethod]

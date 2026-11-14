@@ -455,7 +455,48 @@ public sealed partial class TwinGenerator
             m_run.PairsMade++;
             Literals++;
 
-            return ParseExpression("new " + plainType + "(new " + pairClass + "(" + plain.WithoutTrivia().ToFullString() + ", " + twin.ToFullString() + ").Invoke)")
+            string pairInvoke = "new " + pairClass + "(" + plain.WithoutTrivia().ToFullString() + ", " + twin.ToFullString() + ").Invoke";
+
+            // Fix 5: the sole argument of the converter's `new D(literal)` binds that creation to the pair itself, never a
+            // delegate over a delegate (whose target would hide the pair from the call test).
+            if (node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Arguments.Count: 1, Parent: ObjectCreationExpressionSyntax creation } } &&
+                SymbolEqualityComparer.Default.Equals(m_model.GetTypeInfo(creation).Type, type))
+            {
+                return ParseExpression(pairInvoke).WithTriviaFrom(node);
+            }
+
+            return ParseExpression("new " + plainType + "(" + pairInvoke + ")").WithTriviaFrom(node);
+        }
+
+        public override SyntaxNode? VisitObjectCreationExpression(ObjectCreationExpressionSyntax node) =>
+            PairGroup(node) ?? base.VisitObjectCreationExpression(node);
+
+        // Fix 5: the converter's `new D(F)` over a STATIC function that can park becomes a pair of F and its twin, in this
+        // twin body. A bound or generic method group, or a signature that cannot carry a twin, stays as it is.
+        private ExpressionSyntax? PairGroup(ObjectCreationExpressionSyntax node)
+        {
+            if (!m_run.Pairs || m_passive > 0 || node.Initializer is not null || node.ArgumentList is not { Arguments.Count: 1 } list ||
+                m_model.GetTypeInfo(node).Type is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } type ||
+                Run.TwinDelegateType(type) is not { } twinType)
+            {
+                return null;
+            }
+
+            ExpressionSyntax argument = list.Arguments[0].Expression;
+
+            if (argument is not (IdentifierNameSyntax or MemberAccessExpressionSyntax) ||
+                m_model.GetSymbolInfo(argument).Symbol is not IMethodSymbol { IsStatic: true, MethodKind: MethodKind.Ordinary, ReducedFrom: null, IsGenericMethod: false } method ||
+                !m_run.CanPark(Run.Normalize(method)))
+            {
+                return null;
+            }
+
+            m_run.PairsMade++;
+
+            string plainType = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            string group = argument.WithoutTrivia().ToFullString();
+
+            return ParseExpression("new " + plainType + "(new " + m_run.PairClass(type, twinType) + "(" + group + ", " + Rename(argument.WithoutTrivia()).ToFullString() + ").Invoke)")
                 .WithTriviaFrom(node);
         }
 
