@@ -267,7 +267,7 @@ imethods:
                     pkgPathΔ1 = rtyp.nameOff(x.PkgPath).Name();
                 }
                 if (tname.IsExported() || pkgPathΔ1 == ipkg) {
-                    @unsafe.Pointer ifn = (uintptr)rtyp.textOff(t.Ifn);
+                    @unsafe.Pointer ifn = rtyp.textOff(t.Ifn);
                     if (k == 0) {
                         fun0 = ifn; // we'll set m.Fun[0] at the end
                     } else if (firstTime) {
@@ -383,7 +383,7 @@ internal static @unsafe.Pointer convT(ж<_type> Ꮡt, @unsafe.Pointer v) {
     if (asanenabled) {
         asanread(v, t.Size_);
     }
-    @unsafe.Pointer x = (uintptr)mallocgc(t.Size_, Ꮡt, true);
+    @unsafe.Pointer x = mallocgc(t.Size_, Ꮡt, true);
     typedmemmove(Ꮡt, x, v);
     return x;
 }
@@ -401,7 +401,7 @@ internal static @unsafe.Pointer convTnoptr(ж<_type> Ꮡt, @unsafe.Pointer v) {
         asanread(v, t.Size_);
     }
 
-    @unsafe.Pointer x = (uintptr)mallocgc(t.Size_, Ꮡt, false);
+    @unsafe.Pointer x = mallocgc(t.Size_, Ꮡt, false);
     memmove(x, v, t.Size_);
     return x;
 }
@@ -412,10 +412,10 @@ internal static @unsafe.Pointer /*x*/ convT16(uint16 val) {
     if (val < (uint16)len(staticuint64s)) {
         x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((nint)(val)));
         if (goarch.BigEndian) {
-            x = (uintptr)add(x, 6);
+            x = add(x, 6);
         }
     } else {
-        x = (uintptr)mallocgc(2, uint16Type, false);
+        x = mallocgc(2, uint16Type, false);
         ((ж<uint16>)(uintptr)(x)).Value = val;
     }
     return x;
@@ -427,10 +427,10 @@ internal static @unsafe.Pointer /*x*/ convT32(uint32 val) {
     if (val < (uint32)len(staticuint64s)) {
         x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((ulong)(val)));
         if (goarch.BigEndian) {
-            x = (uintptr)add(x, 4);
+            x = add(x, 4);
         }
     } else {
-        x = (uintptr)mallocgc(4, uint32Type, false);
+        x = mallocgc(4, uint32Type, false);
         ((ж<uint32>)(uintptr)(x)).Value = val;
     }
     return x;
@@ -451,7 +451,7 @@ internal static @unsafe.Pointer /*x*/ convT64(uint64 val) {
     if (val < (uint64)len(staticuint64s)) {
         x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((ulong)(val)));
     } else {
-        x = (uintptr)mallocgc(8, uint64Type, false);
+        x = mallocgc(8, uint64Type, false);
         ((ж<uint64>)(uintptr)(x)).Value = val;
     }
     return x;
@@ -472,7 +472,7 @@ internal static @unsafe.Pointer /*x*/ convTstring(@string val) {
     if (val == ""u8) {
         x = @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
     } else {
-        x = (uintptr)mallocgc(/* unsafe.Sizeof(val) */ (uintptr)16, stringType, true);
+        x = mallocgc(/* unsafe.Sizeof(val) */ (uintptr)16, stringType, true);
         ((ж<@string>)(uintptr)(x)).Value = val;
     }
     return x;
@@ -495,7 +495,7 @@ internal static @unsafe.Pointer /*x*/ convTslice(slice<byte> valʗp) {
     if ((Ꮡval.Reinterpret<slice<byte>, Δsliceᴛ>()).Value.Δarray == nil) {
         x = @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
     } else {
-        x = (uintptr)mallocgc(/* unsafe.Sizeof(val) */ (uintptr)24, sliceType, true);
+        x = mallocgc(/* unsafe.Sizeof(val) */ (uintptr)24, sliceType, true);
         ((ж<slice<byte>>)(uintptr)(x)).ValueSlot = val;
     }
     return x;

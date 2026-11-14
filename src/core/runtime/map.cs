@@ -90,7 +90,7 @@ internal static partial @unsafe.Pointer mapaccess1(ж<abiꓸMapType> t, ж<maps�
 internal static partial (@unsafe.Pointer, bool) mapaccess2(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @unsafe.Pointer key);
 
 internal static @unsafe.Pointer mapaccess1_fat(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @unsafe.Pointer key, @unsafe.Pointer zero) {
-    @unsafe.Pointer e = (uintptr)mapaccess1(t, m, key);
+    @unsafe.Pointer e = mapaccess1(t, m, key);
     if (e == @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0))) {
         return zero;
     }
@@ -98,7 +98,7 @@ internal static @unsafe.Pointer mapaccess1_fat(ж<abiꓸMapType> t, ж<mapsꓸMa
 }
 
 internal static (@unsafe.Pointer, bool) mapaccess2_fat(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @unsafe.Pointer key, @unsafe.Pointer zero) {
-    @unsafe.Pointer e = (uintptr)mapaccess1(t, m, key);
+    @unsafe.Pointer e = mapaccess1(t, m, key);
     if (e == @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0))) {
         return (zero, false);
     }
@@ -264,7 +264,7 @@ internal static @unsafe.Pointer reflect_mapaccess_faststr(ж<abiꓸMapType> t, �
 internal static void reflect_mapassign(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> m, @unsafe.Pointer key, @unsafe.Pointer elem) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @unsafe.Pointer Δp = (uintptr)mapassign(Ꮡt, m, key);
+    @unsafe.Pointer Δp = mapassign(Ꮡt, m, key);
     typedmemmove(t.Elem, Δp, elem);
 }
 
@@ -272,7 +272,7 @@ internal static void reflect_mapassign(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> m,
 internal static void reflect_mapassign_faststr(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> m, @string key, @unsafe.Pointer elem) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @unsafe.Pointer Δp = (uintptr)mapassign_faststr(Ꮡt, m, key);
+    @unsafe.Pointer Δp = mapassign_faststr(Ꮡt, m, key);
     typedmemmove(t.Elem, Δp, elem);
 }
 

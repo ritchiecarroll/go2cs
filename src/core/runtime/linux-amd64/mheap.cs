@@ -526,7 +526,7 @@ internal static void recordspan(@unsafe.Pointer vh, @unsafe.Pointer Δp) {
         }
         ref var @new = ref heap<slice<ж<mspan>>>(out var Ꮡnew);
         var sp = Ꮡnew.Reinterpret<slice<ж<mspan>>, Δsliceᴛ>();
-        sp.Δarray = (uintptr)sysAlloc((uintptr)n * (uintptr)goarch.PtrSize, Ꮡmemstats.Ꮡother_sys, allspansArrayˢ);
+        sp.Δarray = sysAlloc((uintptr)n * (uintptr)goarch.PtrSize, Ꮡmemstats.Ꮡother_sys, allspansArrayˢ);
         if (sp.Δarray == nil) {
             @throw(runtimeCannotAllocateˢ);
         }
@@ -2713,7 +2713,7 @@ internal static ж<atomic.Uintptr> getOrAdd(this ж<immortalWeakHandleMap> Ꮡta
 
     ж<immortalWeakHandle> newNode = default;
     var m = Ꮡtab.Ꮡroot;
-    var hash = memhash((uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡp)), 0, goarch.PtrSize);
+    var hash = memhash(abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡp)), 0, goarch.PtrSize);
     System.GC.KeepAlive(Ꮡp);
     var hashIter = hash;
     for (;;) {

@@ -40,7 +40,7 @@ public static int32 /*count*/ ScanSpanPackedGo(@unsafe.Pointer mem, ж<uintptr> 
             // over that.
 
             for (var wordI = objStartInSpan; wordI < objEndInSpan; wordI++) {
-                var val = ~(ж<uintptr>)(uintptr)((uintptr)@unsafe.Add(mem, wordI * (uintptr)goarch.PtrSize));
+                var val = ~(ж<uintptr>)(uintptr)(@unsafe.Add(mem, wordI * (uintptr)goarch.PtrSize));
                 // Check if we should enqueue this word.
                 //
                 // We load the word before the check because, even though this

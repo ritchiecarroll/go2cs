@@ -261,10 +261,10 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         // This offset matches the assembly code on amd64 and arm64.
         objs = methodValueCallFrameObjs[..];
     } else {
-        @unsafe.Pointer Δp = (uintptr)funcdata(f, abi.FUNCDATA_StackObjects);
+        @unsafe.Pointer Δp = funcdata(f, abi.FUNCDATA_StackObjects);
         if (Δp != nil) {
             var n = ~(ж<uintptr>)(uintptr)(Δp);
-            Δp = (uintptr)add(Δp, goarch.PtrSize);
+            Δp = add(Δp, goarch.PtrSize);
             var r0 = (ж<stackObjectRecord>)(uintptr)(noescape(Δp));
             objs = @unsafe.Slice(r0, (nint)n);
             // Note: the noescape above is needed to keep

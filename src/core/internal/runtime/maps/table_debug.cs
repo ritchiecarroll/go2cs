@@ -40,7 +40,7 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
             default: {
                 used++;
 
-                @unsafe.Pointer key = (uintptr)g.key(Ꮡtyp, j);
+                @unsafe.Pointer key = g.key(Ꮡtyp, j);
                 if (typ.IndirectKey()) {
                     key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
                 }
@@ -137,10 +137,10 @@ table{
             }}
 
             print((@string)"\t\t\t\tkey  ");
-            dump((uintptr)g.key(Ꮡtyp, j), typ.Key.Size_);
+            dump(g.key(Ꮡtyp, j), typ.Key.Size_);
             println((@string)""u8);
             print((@string)"\t\t\t\telem ");
-            dump((uintptr)g.elem(Ꮡtyp, j), typ.Elem.Size_);
+            dump(g.elem(Ꮡtyp, j), typ.Elem.Size_);
             println((@string)""u8);
         }
     }
