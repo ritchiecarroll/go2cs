@@ -703,3 +703,23 @@ H adds two arms on its ref for this before cutting: a red arm for the rebased sl
 element of a native slice anchored to a Go view stays refused at the void door. With the first, the header-rebase
 arm of 10.6 is no longer P5's alone: P5's `InteriorPointerRootTests` keeps its own plain-Go row for it and does not
 duplicate H's door row.
+
+### 10.12 As cut: three rulings taken during the converter cut (COORD, 2026-11-14)
+
+Dated lines, so the design and the cut agree. Nothing above is rewritten.
+
+- **4.2 takes the LEFTMOST pointer leaf only** (ruled 09:36Z). 10.7 allows the leaf anywhere in the sum but on the
+  right of a `-`. The cut recognises a chain of `+` and `-` whose FIRST term is `uintptr(P)`, which is `go vet`'s
+  rule (unsafeptr's `isSafeArith`), and renders everything after that term as the offset. Read at the cut: no corpus
+  site has the pointer anywhere else in a sum. Every `(@unsafe.Pointer)(sum)` the cut does not take, 72 lines, is a
+  sum over a number held in a variable or a field. A rounded pointer (`uintptr(P) &^ m`), which vet also admits,
+  stays a number, as 10.7 says of the mask.
+- **4.3 is the node rule** (ruled (a), 08:40Z). 4.3 and 10.2 say `FromRef` leaves the emission. As cut, the
+  receiver's box is emitted only at the three uses the converter can read at the conversion itself: the first
+  argument of `unsafe.Add`, the `P` of a 4.2 form, and the operand of Go's own `uintptr(...)`. Every other use (a
+  call argument, a return, a store) keeps `FromRef`. 13 sites per target are kept, each named in 4.7's guard with the
+  reason "use not provable at the node". P2 is scored a MISS as worded, with that list beside it. The use walk that
+  would retire the kept sites is a BOARD row for after the release.
+- **4.7's kept list and the regen** (ruled 09:36Z). The guard arm reads the committed corpus, which holds the old
+  lines until the regen. The list names the 13 kept sites with the ruled reason and names the sites the converter no
+  longer emits as "leaves at the regen", so the arm is green before the regen and after it.
