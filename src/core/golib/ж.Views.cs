@@ -132,8 +132,10 @@ public abstract partial class ж<T>
         if (this is FieldRefBox<T> view)
             return ref view.m_views;
 
-        if (this is ElemRefBox<T> element)
-            return ref element.m_views;
+        // EXPERIMENT (i9, B4 lever G): asked through a non-generic face. Naming ElemRefBox<T> here made every
+        // ж<T> construct it, and with it array<T>, whose AliasPointer names ж<array<T>>: ILC's generic cycle.
+        if (this is IElementViewSlot element)
+            return ref element.ViewsRef;
 
         return ref s_views.GetOrCreateValue(this).Head;
     }
@@ -172,7 +174,7 @@ public abstract partial class ж<T>
         if (!FieldViewCache.Disabled)
         {
             ViewEntry? e = this is SlottedStandardBox<T> slotted ? slotted.m_views :
-                this is ElemRefBox<T> element ? element.m_views :
+                this is IElementViewSlot element ? element.Views :
                 this is FieldRefBox<T> view ? view.m_views : null;
 
             for (; e is not null; e = e.Next)
