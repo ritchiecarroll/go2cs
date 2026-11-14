@@ -125,3 +125,22 @@ One JIT process read 17.2 ns for the non-parking call in stage A2 and has not be
 - One hand-twin program was not read: it does not build with generated twins and its assembly bears another
   program's name.
 - What a later stage adds to the sheet (function values, the pin, a closure built as a twin) is not in it.
+
+## Rulings at the freeze (dated block, 2026-11-13 18:32 CST)
+
+Settled. COORD accepted A5 with four rulings on this sheet (2026-11-12), and the owner ruled the fallback's severity
+(2026-11-13). Later stages cite them; this block does not rewrite the sections above.
+
+- **The four awaiter members leave the public surface.** OnCompleted and UnsafeOnCompleted on each awaiter become
+  explicit interface implementations, as swap B1 ran them. The frozen surface is the 23 members of the sheet, the
+  two compile-time rows marked as they are, plus the twin-only 7 named under "The seams the sheet does not show".
+  This settles the third OPEN under "Landing requirements".
+- **The three non-public golib/runtime seams ship together and are not frozen**: the scheduler's resumed twin and
+  the core's parent and machine snapshot. golib and the runtime package are released as one.
+- **The park kit is marked [go-tier2]**: GoParkSlot, GoParkAwaiter and Goroutine.ParkTwin are public for the
+  converted standard library's hand-written twins and are not frozen for users.
+- **The fallback is a WARNING by default, and an opt-in makes it an ERROR** (the owner, 2026-11-13). A function or
+  a go statement the generator cannot make async keeps its plain path and gets a diagnostic naming the site and the
+  reason. This settles the second OPEN under "Landing requirements". The opt-in proposed here is the build's own:
+  the diagnostic has a go2cs-gen code of its own, so `WarningsAsErrors` (or an .editorconfig severity) turns it into
+  an error, with no new property to learn. Its code is minted with the fallback's implementation.
