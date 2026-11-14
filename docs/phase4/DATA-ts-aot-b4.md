@@ -334,3 +334,59 @@ object-file readings, census tables and the scripts that produced them (`i9b-aot
 `i9b_strtab_kinds.py`, `i9b_strtab_mtheads.py`, `i9b-il-census.ps1`, `i9b_startup_pair.py`,
 `i9b-golibtests.ps1`) are in the lane's work folder on i9 and are named in the mailbox posts of 2026-11-14
 (`20261114T143608Z`, `144002Z`, `150655Z`, `152350Z`, `163146Z`, `165002Z`, all `-i9.md`).
+
+## 13. Amendment, 2026-11-14 18:20Z: `parsedemo` builds and matches native Go
+
+Run P1, approved by COORD (mailbox `20261114T165219Z-COORD.md`), predictions posted first
+(`20261114T170500Z-i9.md`), result posted at `20261114T174652Z-i9.md`.
+
+- **Subject:** the converted `parsedemo`, on the conversion's own commit `651c4ad147` with the golib half of
+  lever E v2 applied (local branch `claude/i9-b4-lever-e-651c`, `b1769f6df1`). No converter change, no
+  regenerated code.
+- **Publish:** win-x64, Release, `PublishAot` for the executable, `TrimMode=full`, `NativeDebugSymbols=false`.
+  Four logical CPUs.
+
+| | Measured | Predicted |
+|:--|--:|:--|
+| result | exit code 0 | a pass, called at about 60% |
+| symbol string table | 655.1 MB, 30.5% of the stream's limit | 0.8 to 2.6 GB: MISSED, low |
+| symbol-table offset | 514.8 MB | 1.2 to 1.9 GB: MISSED, low |
+| `.obj` | 1,314 MB, 5,864,759 symbols | |
+| ILC wall | 36 m 49 s | 45 to 150 min: MISSED, low |
+| ILC peak private / `PeakWorkingSet64` | 17.60 / 17.06 GB | 15 to 35 GB: MET |
+| image | 297.4 MB | 0.5 to 1.1 GB: MISSED, low |
+| WHEA | 319 before and after | |
+
+Correctness, by the proof kit's `compare.py` against the native Go build of the unmodified module:
+
+- the demo (`good.ts bad.ts`) is byte-identical, 8,104 bytes;
+- the parse corpus matches on 17,422 of 17,422 units, with no crash on either side;
+- as a control, a different input gives a different hash, the same on both sides.
+
+The image is kept with its SHA-256,
+`8421c3a363ac3e321c4cd00d42a1a36fb3531c4fa41a5995a0642791b4123863` (297,359,360 bytes).
+
+**What this changes above.** §6's ratio model overestimated by about three times; PerfStartup is a poor
+calibration for a closure whose types are mostly closure classes. `parsedemo` is the calibration of the same
+shape: `checkdemo`'s closure is 1.17 to 1.33 times `parsedemo`'s on the four counts, which puts `checkdemo`
+with the same three levers at 0.75 to 1.0 GB of names and 0.6 to 0.8 GB of offset, under both ceilings. That
+build is asked of COORD and not yet run. §1's "not measured" stands for `checkdemo` until it is.
+
+### A fourth multiplier: golib's `array<T>` generic cycle is back
+
+ILC reports `IL3054` ("generic expansion ... aborted due to generic recursion") in every run of this record:
+1,292 lines in S1, 886 in S2 and S3 (unpatched master), 882 with lever E, 884 in P1. The expansions are
+`array<array<array<array<array<T>>>>>` chains through `slice<T>`, the pointer box and its box kinds.
+
+Names holding array-in-array nesting are 25.4% of P1's string table and 32.5% of S7's, spread evenly over
+depths 2, 3 and 4. That is the shape of an expansion run to ILC's cut-off, not of types a Go program declares.
+
+`2b6fe9a34d` (2026-10-14) broke this cycle once and recorded its three edges; the growth edge,
+`array<T>.AliasPointer` returning a pointer to `array<T>`, was left in place because the converter emits calls
+to it. That commit measured 0 cut-off lines afterwards. The cycle is closed again at master. A candidate for
+the new edge, by reading and by date only, is `8a714cf6dd` (2026-10-22), which added
+`ElemRefBox<T>.OfArrayElement(array<T>, int)`; it has not been pinned with ILC's scan graph, which is how the
+first fix found its edges. No standing gate counts cut-off lines, so the return went unseen.
+
+Breaking it again is a golib lever of the same order as lever E, and unlike E it also removes work ILC does
+only to throw it away.
