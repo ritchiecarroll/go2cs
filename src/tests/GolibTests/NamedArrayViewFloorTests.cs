@@ -189,7 +189,8 @@ public class NamedArrayViewFloorTests
     }
 
     /// <summary>
-    /// The number conversion is the same door as the typed one: <c>(ж&lt;A&gt;)(uintptr)addr</c> is refused too.
+    /// The number conversion is the same door as the typed one: <c>(ж&lt;A&gt;)(uintptr)addr</c> makes a pointer,
+    /// and the read through it is refused too.
     /// </summary>
     [TestMethod]
     public void TheNumberConversionIsTheSameDoor()
@@ -198,8 +199,9 @@ public class NamedArrayViewFloorTests
 
         try
         {
-            PanicException panic = Assert.ThrowsException<PanicException>(
-                () => _ = (ж<FloorSmallMem>)(uintptr)(nuint)block);
+            ж<FloorSmallMem> numbered = (ж<FloorSmallMem>)(uintptr)(nuint)block;
+
+            PanicException panic = Assert.ThrowsException<PanicException>(() => _ = numbered.Value[0]);
 
             AssertNamesTheRefusal(panic, nameof(FloorSmallMem));
         }

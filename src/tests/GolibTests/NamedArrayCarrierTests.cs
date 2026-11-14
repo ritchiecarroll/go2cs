@@ -258,6 +258,94 @@ public unsafe class NamedArrayCarrierTests
         Assert.AreEqual((byte)6, box.Value[5], "a store through the twin is seen through the original");
     }
 
+    // ---- the same over C memory: an address with no provenance record ----
+
+    /// <summary>
+    /// <c>p := (*smallMem)(unsafe.Pointer(c))</c> over C memory, used as an address only: through the typed door
+    /// and through the number conversion it is not nil, its number is <c>c</c>, and the two are one pointer.
+    /// </summary>
+    [TestMethod]
+    public void ANamedArrayPointerOverNativeMemoryIsAnAddress()
+    {
+        nint block = Zeroed();
+
+        try
+        {
+            ж<FloorSmallMem> typed = @unsafe.Pointer.To<FloorSmallMem>((@unsafe.Pointer)(uintptr)(nuint)block);
+            ж<FloorSmallMem> numbered = (ж<FloorSmallMem>)(uintptr)(nuint)block;
+
+            Assert.IsTrue(typed != nil, "a pointer over real memory is not nil");
+            Assert.AreEqual((nuint)block, ((uintptr)typed).Value, "its number is the address it was made from");
+            Assert.IsTrue(typed == numbered, "the typed door and the number conversion answer one pointer");
+
+            byte[] after = new byte[NativeBytes];
+            Marshal.Copy(block, after, 0, NativeBytes);
+
+            CollectionAssert.AreEqual(new byte[NativeBytes], after, "nothing is stored by converting");
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(block);
+        }
+    }
+
+    /// <summary>
+    /// <c>(*byte)(unsafe.Pointer((*smallMem)(unsafe.Pointer(c))))</c>: cast straight back, the bytes are C's own.
+    /// </summary>
+    [TestMethod]
+    public void ANamedArrayPointerOverNativeMemoryCastsStraightBack()
+    {
+        nint block = Zeroed();
+
+        try
+        {
+            Marshal.WriteByte(block, 0, 3);
+
+            ж<FloorSmallMem> named = @unsafe.Pointer.To<FloorSmallMem>((@unsafe.Pointer)(uintptr)(nuint)block);
+            ж<byte> back = @unsafe.Pointer.To<byte>(@unsafe.Pointer.FromBox(named));
+
+            Assert.AreEqual((byte)3, back.Value, "the round trip reads the first byte");
+
+            back.Value = 8;
+
+            Assert.AreEqual((byte)8, Marshal.ReadByte(block, 0), "and a store through it reaches the C memory");
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(block);
+        }
+    }
+
+    /// <summary>
+    /// And the read through it is refused where it happens: the box is made, the index store is the named refusal,
+    /// and the C memory holds what it held.
+    /// </summary>
+    [TestMethod]
+    public void AReadThroughANamedArrayPointerOverNativeMemoryIsRefusedAtTheRead()
+    {
+        nint block = Zeroed();
+
+        try
+        {
+            ж<FloorSmallMem> named = (ж<FloorSmallMem>)(uintptr)(nuint)block;
+
+            PanicException? panic = Attempt(() => named.Value[5] = 7);
+
+            byte[] after = new byte[NativeBytes];
+            Marshal.Copy(block, after, 0, NativeBytes);
+
+            CollectionAssert.AreEqual(new byte[NativeBytes], after,
+                $"the native memory was written: its first eight bytes read {BitConverter.ToString(after, 0, 8)}");
+            Assert.IsNotNull(panic, "the store through a named array over C memory must be refused");
+            StringAssert.Contains(panic.Message ?? "", "cannot view native memory as");
+            StringAssert.Contains(panic.Message ?? "", nameof(FloorSmallMem));
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(block);
+        }
+    }
+
     // ---- reads: one arm per way the whole value is reached ----
 
     /// <summary><c>x := p[0]</c>: the box's <c>Value</c>, then the wrapper's indexer.</summary>
