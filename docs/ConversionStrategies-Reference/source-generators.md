@@ -491,7 +491,7 @@ queued after a run is run by the next miss.
      src/core/golib/builtin.cs:1633 (`GoDeferredRegistrations.ZeroFactories.Run()`),
      src/core/golib/GoTypeOps.cs:233 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
      src/core/golib/GoReflect.VariadicRegistry.cs:51 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
-     src/core/golib/NativeArrayOpeners.cs:56 (`GoDeferredRegistrations.NativeArrayOpeners.Run()`), :63
+     src/core/golib/NativeArrayOpeners.cs:57 (`GoDeferredRegistrations.NativeArrayOpeners.Run()`), :67
      (`GoDeferredRegistrations.NativeArrayOpeners.Run()`). Guard: src/tests/GolibTests/DeferredRegistrationTests.cs:212
      (`public void ARegistrationQueuedAfterARunIsRunByTheNextMiss()`). The startup measurement is in the comment of
      GoDeferredRegistrations.cs (PerfStartup, 2026-10-22, win-x64 JIT, median of 9 interleaved runs: 4,402 -> 3,188

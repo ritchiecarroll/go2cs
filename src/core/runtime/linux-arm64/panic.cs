@@ -534,7 +534,7 @@ internal static any deferrangefunc() {
 
 // badDefer returns a fixed bad defer pointer for poisoning an atomic defer list head.
 internal static ж<_defer> badDefer() {
-    return (ж<_defer>)(uintptr)((@unsafe.Pointer)(uintptr)1);
+    return @unsafe.Pointer.To<_defer>((@unsafe.Pointer)(uintptr)1);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -822,7 +822,7 @@ internal static (uint32, @unsafe.Pointer) readvarintUnsafe(@unsafe.Pointer fd) {
     uint32 r = default;
     nint shift = default;
     for (;;) {
-        var b = ~(ж<uint8>)(uintptr)(fd);
+        var b = ~@unsafe.Pointer.To<uint8>(fd);
         fd = add(fd, /* unsafe.Sizeof(b) */ (uintptr)1);
         if (b < 128) {
             return (r + ((uint32)b).Lsh((int64)(shift)), fd);
@@ -971,14 +971,14 @@ internal static void start(this ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp)
     if (Δp.deferreturn) {
         Δp.sp = sp;
 
-        var s = (ж<savedOpenDeferState>)(uintptr)((~gp).param); if (s != nil) {
+        var s = @unsafe.Pointer.To<savedOpenDeferState>((~gp).param); if (s != nil) {
             // recovery saved some state for us, so that we can resume
             // calling open-coded defers without unwinding the stack.
 
             gp.Value.param = default;
 
             Δp.retpc = s.Value.retpc;
-            Δp.deferBitsPtr = (ж<byte>)(uintptr)(add(sp, (~s).deferBitsOffset));
+            Δp.deferBitsPtr = @unsafe.Pointer.To<byte>(add(sp, (~s).deferBitsOffset));
             Δp.slotsPtr = add(sp, (~s).slotsOffset);
         }
 
@@ -1049,7 +1049,7 @@ internal static (Action, bool) nextDefer(this ж<_panic> Ꮡp) {
             bits &= unchecked((uint8)~(uint8)(((uint8)1).Lsh((uint64)(i))));
             Δp.deferBitsPtr.Value = bits;
 
-            return (((ж<Action>)(uintptr)(add(Δp.slotsPtr, i * (uintptr)goarch.PtrSize))).ValueSlot, true);
+            return ((@unsafe.Pointer.To<Action>(add(Δp.slotsPtr, i * (uintptr)goarch.PtrSize))).ValueSlot, true);
         }
 
 Recheck:
@@ -1142,7 +1142,7 @@ internal static bool initOpenCodedDefers(this ref _panic Δp, ΔfuncInfo fn, @un
     }
 
     (var deferBitsOffset, fd) = readvarintUnsafe(fd);
-    var deferBitsPtr = (ж<uint8>)(uintptr)(add(varp, ((uintptr)0 - (uintptr)deferBitsOffset)));
+    var deferBitsPtr = @unsafe.Pointer.To<uint8>(add(varp, ((uintptr)0 - (uintptr)deferBitsOffset)));
     if (deferBitsPtr.Value == 0) {
         return false; // has open-coded defers, but none pending
     }

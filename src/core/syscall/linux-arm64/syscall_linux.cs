@@ -636,7 +636,7 @@ internal static (nint n, error err) sendmsgN(nint fd, slice<byte> p, slice<byte>
     error err = default;
 
     ref var msg = ref heap(new Msghdr(), out var Ꮡmsg);
-    msg.Name = (ж<byte>)(uintptr)(ptr);
+    msg.Name = @unsafe.Pointer.To<byte>(ptr);
     msg.Namelen = (uint32)salen;
     ref var iov = ref heap(new Iovec(), out var Ꮡiov);
     if (len(p) > 0) {

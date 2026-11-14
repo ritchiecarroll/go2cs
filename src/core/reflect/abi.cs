@@ -429,11 +429,11 @@ internal static void floatFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSiz
 
     switch (argSize) {
     case var ᴛ when ᴛ == 4: {
-        ((ж<float32>)(uintptr)(to)).Value = archFloat32FromReg(r.Floats[reg]);
+        (@unsafe.Pointer.To<float32>(to)).Value = archFloat32FromReg(r.Floats[reg]);
         break;
     }
     case var ᴛ when ᴛ == 8: {
-        ((ж<float64>)(uintptr)(to)).Value = (Ꮡr.at(abi.RegArgs.ᏑFloats, reg).Reinterpret<uint64, float64>()).Value;
+        (@unsafe.Pointer.To<float64>(to)).Value = (Ꮡr.at(abi.RegArgs.ᏑFloats, reg).Reinterpret<uint64, float64>()).Value;
         break;
     }
     default: {
@@ -448,11 +448,11 @@ internal static void floatFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSiz
 internal static void floatToReg(ref abi.RegArgs r, nint reg, uintptr argSize, @unsafe.Pointer from) {
     switch (argSize) {
     case var ᴛ when ᴛ == 4: {
-        r.Floats[reg] = archFloat32ToReg(~(ж<float32>)(uintptr)(from));
+        r.Floats[reg] = archFloat32ToReg(~@unsafe.Pointer.To<float32>(from));
         break;
     }
     case var ᴛ when ᴛ == 8: {
-        r.Floats[reg] = ~(ж<uint64>)(uintptr)(from);
+        r.Floats[reg] = ~@unsafe.Pointer.To<uint64>(from);
         break;
     }
     default: {

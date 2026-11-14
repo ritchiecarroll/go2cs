@@ -112,7 +112,7 @@ internal static @unsafe.Pointer alloc(this ref fixalloc f) {
 
 internal static void free(this ref fixalloc f, @unsafe.Pointer Δp) {
     f.inuse -= f.size;
-    var v = (ж<mlink>)(uintptr)(Δp);
+    var v = @unsafe.Pointer.To<mlink>(Δp);
     v.next = f.list;
     f.list = v;
 }

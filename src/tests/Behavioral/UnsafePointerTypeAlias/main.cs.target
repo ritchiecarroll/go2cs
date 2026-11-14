@@ -13,11 +13,11 @@ partial struct cursor {
 }
 
 internal static uint8 readU8(ptr p, uintptr o) {
-    return ~(ж<uint8>)(uintptr)((ptr)((uintptr)p + o));
+    return ~@unsafe.Pointer.To<uint8>(@unsafe.Add(p, o));
 }
 
 internal static uint32 readU32(ptr p, uintptr o) {
-    return ~(ж<uint32>)(uintptr)(@unsafe.Add(p, o));
+    return ~@unsafe.Pointer.To<uint32>(@unsafe.Add(p, o));
 }
 
 internal static uint8 next(this ref cursor c) {
@@ -29,7 +29,7 @@ internal static uint8 next(this ref cursor c) {
 internal static void main() {
     ref var x = ref heap<uint64>((uint64)42, out var Ꮡx);
     ptr p = @unsafe.Pointer.FromPinnedBox(Ꮡx);
-    fmt.Println(~(ж<uint64>)(uintptr)(p));
+    fmt.Println(~@unsafe.Pointer.To<uint64>(p));
 
     ref var buf = ref heap<array<byte>>(new byte[]{1, 2, 3, 4, 5, 6, 7, 8}.array(), out var Ꮡbuf);
     ref var q = ref heap<ptr>(new ptr(Ꮡbuf.at<byte>(0)), out var Ꮡq);

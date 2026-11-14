@@ -78,7 +78,7 @@ public static void SetFP(this ref Context c, uintptr x) { c.Rbp = (uint64)x; }
 
 public static void PushCall(this ref Context c, uintptr targetPC, uintptr resumePC) {
     var sp = c.SP() - (uintptr)goarch.StackAlign;
-    ((ж<uintptr>)(uintptr)((@unsafe.Pointer)sp)).Value = resumePC;
+    (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)sp)).Value = resumePC;
     c.SetSP(sp);
     c.SetPC(targetPC);
 }

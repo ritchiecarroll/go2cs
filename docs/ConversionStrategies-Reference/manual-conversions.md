@@ -210,9 +210,9 @@ is a golib slice-model capability rather than a per-GOOS hand-own (`src/core/gol
      Mprotect(b[:pagesize],
      PROT_NONE) and Munmap(b) answered `invalid argument` (the kernel was handed a managed element address); writes
      landed
-     in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:1029
+     in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:1211
      (`A pointer that ALIASES a GENUINELY NATIVE address yields a NATIVE-BACKED slice over that`); the door:
-     src/core/golib/slice.cs:288 (`The single creation door for a native-backed slice`). -->
+     src/core/golib/slice.cs:304 (`The single creation door for a native-backed slice`). -->
 
 ## The CryptoAPI chain seam — when a native record must be READ as a struct and HANDED BACK as a pointer
 

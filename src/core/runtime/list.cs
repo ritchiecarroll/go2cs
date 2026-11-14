@@ -57,7 +57,7 @@ internal static ж<listNode> getNode(this ref listHead head, @unsafe.Pointer Δp
     if (Δp == nil) {
         return default;
     }
-    return (ж<listNode>)(uintptr)(@unsafe.Add(Δp, head.nodeOffset));
+    return @unsafe.Pointer.To<listNode>(@unsafe.Add(Δp, head.nodeOffset));
 }
 
 // Returns true if the list is empty.

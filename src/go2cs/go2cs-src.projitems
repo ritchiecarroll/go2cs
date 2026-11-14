@@ -25,6 +25,7 @@
     <None Include="$(MSBuildThisFileDirectory)cgoBuild_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoG1_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoLoadTag_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoPhase3_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoResiduals_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
     <None Include="$(MSBuildThisFileDirectory)genericAllocCallerFrames_test.go" />
@@ -139,6 +140,7 @@
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\g1_unix.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\g1_windows.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\p3\main.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testSignals.go" />
@@ -425,6 +427,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\testInfoPositionMapCopies_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\generatorLoadGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\interceptorBuildGuard_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\interiorPointerMintCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeBoundaryBoxDeref_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeCallGateDarwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\sourcemeta\sourcemeta.go" />
@@ -596,6 +599,8 @@
     <None Include="$(MSBuildThisFileDirectory)platformProject_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProjectConverted_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformScopedDisclosures_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)pointerArithmetic.go" />
+    <None Include="$(MSBuildThisFileDirectory)pointerArithmetic_test.go" />
     <None Include="$(MSBuildThisFileDirectory)pointerNamedArraySlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)pointerParamNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)pointerReceiverMark_test.go" />
@@ -720,6 +725,10 @@
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\cgo_gotypes.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\fixture.cgo1.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\fixture.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase3\cgo_gotypes.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase3\fixture.cgo1.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase3\fixture.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase3\README.md" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_gotypes.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_import.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\fixture.cgo1.go" />
@@ -755,6 +764,7 @@
     <None Include="$(MSBuildThisFileDirectory)typeAssertSourceOverload_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilInterfaceBoxing.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilUnsafePointer_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)typedPointerDoor_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeNameResolution.go" />
     <None Include="$(MSBuildThisFileDirectory)typeNameResolution_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typePredicates.go" />

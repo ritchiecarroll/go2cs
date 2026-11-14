@@ -752,13 +752,13 @@ internal static slice<ж<g>> allGsSnapshot() {
 // atomicAllG returns &allgs[0] and len(allgs) for use with atomicAllGIndex.
 internal static (ж<ж<g>>, uintptr) atomicAllG() {
     var length = atomic.Loaduintptr(Ꮡallglen);
-    var ptr = (ж<ж<g>>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallgptr)));
+    var ptr = @unsafe.Pointer.To<ж<g>>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallgptr)));
     return (ptr, length);
 }
 
 // atomicAllGIndex returns ptr[i] with the allgptr returned from atomicAllG.
 internal static ж<g> atomicAllGIndex(ж<ж<g>> ptr, uintptr i) {
-    return ~(ж<ж<g>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(ptr), i * (uintptr)goarch.PtrSize));
+    return ~@unsafe.Pointer.To<ж<g>>(add(@unsafe.Pointer.FromPinnedBox(ptr), i * (uintptr)goarch.PtrSize));
 }
 
 // forEachG calls fn on every G from allgs.
@@ -2548,7 +2548,7 @@ internal static void needm(bool signal) {
 internal static void needAndBindM() {
     needm(false);
 
-    if (_cgo_pthread_key_created != nil && ~(ж<uintptr>)(uintptr)(_cgo_pthread_key_created) != 0) {
+    if (_cgo_pthread_key_created != nil && ~@unsafe.Pointer.To<uintptr>(_cgo_pthread_key_created) != 0) {
         cgoBindM();
     }
 }
@@ -2837,7 +2837,7 @@ internal static ж<m> lockextra(bool nilokay) {
             continue;
         }
         if (ᏑextraM.CompareAndSwap(old, locked)) {
-            return (ж<m>)(uintptr)((@unsafe.Pointer)old);
+            return @unsafe.Pointer.To<m>((@unsafe.Pointer)old);
         }
         osyield_no_g();
         continue;
@@ -3690,7 +3690,7 @@ top:
     // If we're in the GC mark phase, can safely scan and blacken objects,
     // and have work to do, run idle-time marking rather than give up the P.
     if (gcBlackenEnabled != 0 && gcShouldScheduleWorker(pp) && ᏑgcController.addIdleMarkWorker()) {
-        var node = (ж<gcBgMarkWorkerNode>)(uintptr)(ᏑgcBgMarkWorkerPool.pop());
+        var node = @unsafe.Pointer.To<gcBgMarkWorkerNode>(ᏑgcBgMarkWorkerPool.pop());
         if (node != nil) {
             pp.Value.gcMarkWorkerMode = gcMarkWorkerIdleMode;
             var gpΔ9 = node.gp.ptr();
@@ -4137,7 +4137,7 @@ internal static (ж<Δp>, ж<g>) checkIdleGCNoP() {
         return (default, default);
     }
 
-    var node = (ж<gcBgMarkWorkerNode>)(uintptr)(ᏑgcBgMarkWorkerPool.pop());
+    var node = @unsafe.Pointer.To<gcBgMarkWorkerNode>(ᏑgcBgMarkWorkerPool.pop());
     if (node == nil) {
         pidleput(pp, now);
         unlock(Ꮡsched.of(schedt.Ꮡlock));
@@ -4317,7 +4317,7 @@ internal static void dropg() {
 }
 
 internal static bool parkunlock_c(ж<g> gp, @unsafe.Pointer @lock) {
-    unlock((ж<mutex>)(uintptr)(@lock));
+    unlock(@unsafe.Pointer.To<mutex>(@lock));
     return true;
 }
 
@@ -5017,7 +5017,7 @@ internal static ж<g> malg(int32 stacksize) {
         newg.Value.stackguard1 = ~(uintptr)0;
         // Clear the bottom word of the stack. We record g
         // there on gsignal stack during VDSO on ARM and ARM64.
-        ((ж<uintptr>)(uintptr)((@unsafe.Pointer)(~newg).stack.lo)).Value = 0;
+        (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(~newg).stack.lo)).Value = 0;
     }
     return newg;
 }
@@ -5081,12 +5081,12 @@ internal static ж<g> newproc1(ж<funcval> Ꮡfn, ж<g> Ꮡcallergp, uintptr cal
     var sp = (~newg).stack.hi - totalSize;
     if (usesLR) {
         // caller's LR
-        ((ж<uintptr>)(uintptr)((@unsafe.Pointer)sp)).Value = 0;
+        (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)sp)).Value = 0;
         prepGoExitFrame(sp);
     }
     if (GOARCH == "arm64"u8) {
         // caller's FP
-        ((ж<uintptr>)(uintptr)((@unsafe.Pointer)(sp - (uintptr)goarch.PtrSize))).Value = 0;
+        (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(sp - (uintptr)goarch.PtrSize))).Value = 0;
     }
 
     memclrNoHeapPointers(@unsafe.Pointer.FromPinnedBox(newg.of(g.Ꮡsched)), /* unsafe.Sizeof(newg.sched) */ (uintptr)48);
@@ -6960,7 +6960,7 @@ internal static void mput(ж<m> mp) {
 internal static ж<m> mget() {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
 
-    var mp = (ж<m>)(uintptr)(Ꮡsched.of(schedt.Ꮡmidle).pop());
+    var mp = @unsafe.Pointer.To<m>(Ꮡsched.of(schedt.Ꮡmidle).pop());
     if (mp != nil) {
         sched.nmidle--;
     }

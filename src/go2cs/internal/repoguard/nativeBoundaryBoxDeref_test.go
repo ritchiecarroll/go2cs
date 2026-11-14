@@ -110,8 +110,25 @@ import (
 // carrying either spelling of the hand-own marker. A plant proves the predicate CAN fire; (d) is what
 // proves it is the RULE.
 
-// boxDerefPattern matches the cast that builds a golib heap box over a raw machine word.
-var boxDerefPattern = regexp.MustCompile(`\(ж<([^>]+)>\)\s*\(uintptr\)`)
+// boxDerefPattern matches the two spellings that build a golib heap box over a raw machine word: the cast
+// `(ж<T>)(uintptr)`, which hand-owned files still write, and the typed door `@unsafe.Pointer.To<T>(`, which the
+// converter emits for Go's `(*T)(p)` since the interior-pointer cut. The door changes what the box keeps of a Go
+// address; over an address the KERNEL produced it builds the same native box, so both spellings are the class.
+// ⚠ 2026-11-14, P5: the corpus regen of that cut respelled all 11 code sites in scope and this census read
+// "code sites 0" on the cast alone. The declared set is what said so (DECLARED BUT NOT MEASURED), exactly as
+// narrowing (3) records for the first run. boxDerefPointee reads whichever spelling matched.
+var boxDerefPattern = regexp.MustCompile(`\(ж<([^>]+)>\)\s*\(uintptr\)|@unsafe\.Pointer\.To<([^>]+)>\(`)
+
+// boxDerefPointee returns the pointee type named by the first box-over-a-word spelling on the line.
+func boxDerefPointee(line string) (string, bool) {
+	match := boxDerefPattern.FindStringSubmatch(line)
+
+	if match == nil {
+		return "", false
+	}
+
+	return strings.TrimSpace(match[1] + match[2]), true
+}
 
 // handOwnMarkerPattern matches both committed spellings of the whole-file hand-own marker, AS DECLARED:
 // anchored to the start of a line, so the placeholder comment a generated file leaves behind -- which
@@ -518,7 +535,7 @@ func scanBoxDerefs(t *testing.T, root string, tracked []string, trees []string) 
 				member = header[1]
 			}
 
-			match := boxDerefPattern.FindStringSubmatch(line)
+			pointee, matched := boxDerefPointee(line)
 			commentHere := inBlockComment || strings.HasPrefix(trimmed, "//") || strings.HasPrefix(trimmed, "*")
 
 			if strings.HasPrefix(trimmed, "/*") && !strings.Contains(trimmed, "*/") {
@@ -527,7 +544,7 @@ func scanBoxDerefs(t *testing.T, root string, tracked []string, trees []string) 
 				inBlockComment = false
 			}
 
-			if match == nil {
+			if !matched {
 				continue
 			}
 
@@ -549,7 +566,7 @@ func scanBoxDerefs(t *testing.T, root string, tracked []string, trees []string) 
 				file:    strings.TrimPrefix(rel, "src/core/"),
 				line:    n + 1,
 				member:  member,
-				pointee: strings.TrimSpace(match[1]),
+				pointee: pointee,
 			}
 			site.row = fmt.Sprintf("%s :: %s -> %s", site.file, site.member, site.pointee)
 
@@ -843,6 +860,18 @@ public static (ж<Blittable> b, error err) _GetBlittable() {
     return (b, err);
 }
 
+public static (ж<Hostent> h, error err) _GetHostByNameDoor(@string name) {
+    var (r0, _, e1) = Syscall(procgethostbyname.Addr(), 1, (uintptr)ᴋ1, 0, 0);
+    h = @unsafe.Pointer.To<Hostent>((@unsafe.Pointer)r0);
+    return (h, err);
+}
+
+public static (ж<Blittable> b, error err) _GetBlittableDoor() {
+    var (r0, _, e1) = Syscall(procblittable.Addr(), 0, 0, 0, 0);
+    b = @unsafe.Pointer.To<Blittable>((@unsafe.Pointer)r0);
+    return (b, err);
+}
+
 // h = (ж<Hostent>)(uintptr)((@unsafe.Pointer)r0);   the line comment form, as a companion header quotes it
 /*
    h = (ж<Hostent>)(uintptr)((@unsafe.Pointer)r0);   the block comment form
@@ -885,6 +914,7 @@ public static (ж<Hostent> h, error err) _GetHostByNameUnqualified() {
 
 	wantHazards := []string{
 		"syscall/windows/zsyscall_windows.cs :: _GetHostByName -> Hostent",
+		"syscall/windows/zsyscall_windows.cs :: _GetHostByNameDoor -> Hostent",
 		"syscall/windows/zsyscall_windows.cs :: _GetNested -> Outer",
 	}
 
@@ -903,8 +933,8 @@ public static (ж<Hostent> h, error err) _GetHostByNameUnqualified() {
 
 	// The known negative and its neighbours: two blittable code sites, both syntactically identical to
 	// the hazards. A predicate that cannot tell them apart matches everything and means nothing.
-	if scan.blittable != 3 {
-		t.Fatalf("control reported %d blittable code sites, want 3 (the uint16 line the corpus carries four times, a resolvable all-scalar struct, and an opaque empty-bodied struct)", scan.blittable)
+	if scan.blittable != 4 {
+		t.Fatalf("control reported %d blittable code sites, want 4 (the uint16 line the corpus carries four times, a resolvable all-scalar struct in both spellings, and an opaque empty-bodied struct)", scan.blittable)
 	}
 
 	if scan.inComment != 2 {

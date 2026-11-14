@@ -150,29 +150,31 @@ func TestTheCgoRouteConvertsTheFixtureOnARealHost(t *testing.T) {
 
 	fixture := strings.ReplaceAll(string(source), "\r\n", "\n")
 
-	t.Run("the fixture refuses its deferred and goroutine calls", func(t *testing.T) {
+	// Phase 3's increment 3.1 converts the deferred call through the check closure (DESIGN-cgo-phase3-marshaling §16.1
+	// C), so the goroutine call is the fixture's one use outside the set, here as it is offline
+	// (TestCgoPhase2FixtureIsRefusedNamingOnlyItsGoroutineCall).
+	t.Run("the fixture refuses its goroutine call, and only that", func(t *testing.T) {
 		stderr, _, output, err := convertCgoReal(t, probeDir, map[string]string{"fixture.go": fixture})
 		requireNothingWritten(t, output, err, stderr)
 
 		lines := cgoRefusalLines(stderr)
-		requireCgoUseRefused(t, lines, "fixture.go(106,", "C.go2cs_probe_node_touch", "deferred", "Phase 2 later")
 		requireCgoUseRefused(t, lines, "fixture.go(113,", "C.go2cs_probe_node_touch", "goroutine", "Phase 2 later")
 
-		if len(lines) != 2 {
-			t.Errorf("%d refusal lines, want 2:\n%s", len(lines), stderr)
+		if len(lines) != 1 {
+			t.Errorf("%d refusal lines, want 1:\n%s", len(lines), stderr)
 		}
 	})
 
 	// llvm-mingw's C runtime resolves mktime statically (converter-cgo 43148958897, windows), and Phase 2 binds only a
 	// shared library's export, so on windows the copy that converts leaves Mktime out, and the next subtest holds the
 	// refusal.
-	refused := []string{"Deferred", "Started"}
+	refused := []string{"Started"}
 
 	if runtime.GOOS == "windows" {
 		refused = append(refused, "Mktime")
 
 		t.Run("a C function the C runtime resolves statically is refused at its use", func(t *testing.T) {
-			stderr, _, output, err := convertCgoReal(t, probeDir, map[string]string{"fixture.go": withoutGoFuncs(t, fixture, "Deferred", "Started")})
+			stderr, _, output, err := convertCgoReal(t, probeDir, map[string]string{"fixture.go": withoutGoFuncs(t, fixture, "Started")})
 			requireNothingWritten(t, output, err, stderr)
 			requireCgoUseRefused(t, cgoRefusalLines(stderr), "fixture.go(74,", "C.mktime", "statically")
 		})

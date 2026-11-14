@@ -62,7 +62,7 @@ internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint f
         }
 
         // Use unsafe to turn addr into a []byte.
-        var b = @unsafe.Slice((ж<byte>)(uintptr)((@unsafe.Pointer)addr), length);
+        var b = @unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)addr), length);
 
         // Register mapping in m and return it.
         var p = Ꮡ(b, cap(b) - 1);

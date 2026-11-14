@@ -370,7 +370,7 @@ internal static error build(this ж<profileBuilder> Ꮡb) {
         if (e.tag != nil) {
             var eʗ1 = e;
             labels = () => {
-                foreach (var (_, lbl) in range(((ж<labelMap>)(uintptr)(eʗ1.tag)).Value.Set.List)) {
+                foreach (var (_, lbl) in range((@unsafe.Pointer.To<labelMap>(eʗ1.tag)).Value.Set.List)) {
                     Ꮡb.Value.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
             };

@@ -212,7 +212,7 @@ public static uint32 GetSidSubAuthority(ж<syscall.SID> sid, uint32 subAuthority
     GoFrame ᒐ = default;
     try {
         defer(runtime.KeepAlive, sid.OrTypedNil(), ref ᒐ);
-        return ~(ж<uint32>)(uintptr)((@unsafe.Pointer)getSidSubAuthority(sid, subAuthorityIdx));
+        return ~@unsafe.Pointer.To<uint32>((@unsafe.Pointer)getSidSubAuthority(sid, subAuthorityIdx));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
@@ -223,7 +223,7 @@ public static uint8 GetSidSubAuthorityCount(ж<syscall.SID> sid) {
     GoFrame ᒐ = default;
     try {
         defer(runtime.KeepAlive, sid.OrTypedNil(), ref ᒐ);
-        return ~(ж<uint8>)(uintptr)((@unsafe.Pointer)getSidSubAuthorityCount(sid));
+        return ~@unsafe.Pointer.To<uint8>((@unsafe.Pointer)getSidSubAuthorityCount(sid));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }

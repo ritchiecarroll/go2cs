@@ -10,13 +10,13 @@ internal static void main() {
     x = 0x01020304;
     @unsafe.Pointer up = @unsafe.Pointer.FromPinnedBox(Ꮡx);
 
-    var q = ((ж<int32>)(uintptr)(up)).Reinterpret<int32, int8>();
+    var q = (@unsafe.Pointer.To<int32>(up)).Reinterpret<int32, int8>();
     fmt.Println(q.Value);
 
     q.Value = 9;
     fmt.Println(x == 0x01020309);
 
-    var w = ((ж<int32>)(uintptr)(up)).Reinterpret<int32, uint16>();
+    var w = (@unsafe.Pointer.To<int32>(up)).Reinterpret<int32, uint16>();
     fmt.Println(w.Value);
 }
 

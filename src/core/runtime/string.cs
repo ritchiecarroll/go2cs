@@ -170,7 +170,7 @@ internal static @string slicebytetostring(ж<tmpBuf> buf, ж<byte> Ꮡptr, nint 
         if (goarch.BigEndian) {
             pΔ1 = add(pΔ1, 7);
         }
-        return @unsafe.String((ж<byte>)(uintptr)(pΔ1), 1);
+        return @unsafe.String(@unsafe.Pointer.To<byte>(pΔ1), 1);
     }
 
     @unsafe.Pointer Δp = default;
@@ -180,7 +180,7 @@ internal static @string slicebytetostring(ж<tmpBuf> buf, ж<byte> Ꮡptr, nint 
         Δp = mallocgc((uintptr)n, nil, false);
     }
     memmove(Δp, @unsafe.Pointer.FromPinnedBox(Ꮡptr), (uintptr)n);
-    return @unsafe.String((ж<byte>)(uintptr)(Δp), n);
+    return @unsafe.String(@unsafe.Pointer.To<byte>(Δp), n);
 }
 
 // stringDataOnStack reports whether the string's data is
@@ -553,7 +553,7 @@ internal static nint findnull(ж<byte> s) {
             return offset + i;
         }
         // Move to next page
-        ptr = (@unsafe.Pointer)((uintptr)ptr + (uintptr)safeLen);
+        ptr = @unsafe.Add(ptr, (uintptr)safeLen);
         offset += safeLen;
         safeLen = pageSize;
     }

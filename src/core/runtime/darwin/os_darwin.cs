@@ -23,7 +23,7 @@ partial struct mOS {
 
 internal static void unimplemented(@string name) {
     println(name, (@string)"not implemented");
-    ((ж<nint>)(uintptr)((@unsafe.Pointer)(uintptr)1231)).Value = 1231;
+    (@unsafe.Pointer.To<nint>((@unsafe.Pointer)(uintptr)1231)).Value = 1231;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
