@@ -26,13 +26,12 @@ namespace GolibTests;
 /// bytes it never wrote.
 /// </para>
 /// <para>
-/// Two layers. The number conversion refuses an address with NO provenance record, as it does for
-/// <c>array&lt;E&gt;</c>. That alone left the same store reachable from plain Go: an address WITH a record (pinned
-/// Go storage of another type) passed that test, and the Reinterpret conversion never reaches it. So the native
-/// box refuses the READ of its whole value when its pointee is such a wrapper. No real address holds a wrapper
-/// struct: storage that holds a reference is never pinned. The box itself may exist: until it is read it is an
-/// address (<see cref="NamedArrayCarrierTests"/>, which also holds one arm per read path). Not refused: a pointer
-/// converted back to its own type. A nil box and an order token answer their own panics at the dereference.
+/// One mechanism. The native box refuses the READ of its whole value when its pointee is such a wrapper, whatever
+/// made the box: the number conversion over C memory, an address with a provenance record (pinned Go storage of
+/// another type), or the Reinterpret conversion. No real address holds a wrapper struct: storage that holds a
+/// reference is never pinned. The box itself may exist: until it is read it is an address
+/// (<see cref="NamedArrayCarrierTests"/>, which also holds one arm per read path). Not refused: a pointer converted
+/// back to its own type. A nil box and an order token answer their own panics at the dereference.
 /// </para>
 /// </remarks>
 [TestClass]
@@ -98,7 +97,7 @@ public class NamedArrayViewFloorTests
         {
             PanicException panic = Assert.ThrowsException<PanicException>(
                 () => Converted<FloorSmallMem>(block).Value[5] = 7,
-                "a named array over an address with no provenance record must not become a box of its wrapper");
+                "a store through a named array over an address with no provenance record must be refused");
 
             AssertNamesTheRefusal(panic, nameof(FloorSmallMem));
         }
@@ -245,8 +244,7 @@ public class NamedArrayViewFloorTests
 
     /// <summary>
     /// GO memory, arm gh: <c>(*smallMem)(unsafe.Pointer(&amp;w))</c> over a <c>[8]uint64</c>. The address has a
-    /// provenance record, so the number conversion's own test admits it. Before the second layer the store was
-    /// lost and <c>w[0]</c> read the address of a managed object.
+    /// provenance record. Before the floor the store was lost and <c>w[0]</c> read the address of a managed object.
     /// </summary>
     /// <remarks>
     /// This arm replaces one that asserted the opposite, "an address that resolves to a live box of another type

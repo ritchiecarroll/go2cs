@@ -160,6 +160,15 @@ namespace go;
 
     private static readonly string? s_layoutMismatch = GoReflect.ClrLayoutMismatch(typeof(T));
 
+    // Is T the wrapper struct go2cs-gen writes for a NAMED array type (`type RawMem [N]byte`)? It is a value type that
+    // is an IArray and holds a managed reference (its one field is a lazily filled holder of the array<E>). A slice is
+    // an IArray too (ISlice extends it) and is not this shape, and array<E> itself is not: its floor is arm 5 of the
+    // number conversion (ж<T>.FromNumber). `default(T) is I` is a type test on a value type: the JIT and ILC answer
+    // it from the type, with no box and no reflection. Decided once per T, read by ValueAddress above.
+    private static readonly bool s_isNamedArrayShaped =
+        !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>)) &&
+        default(T) is IArray and not ISlice && RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+
     private static readonly NativeBoxDereferenceCensus.Pointee? s_census = NativeBoxDereferenceCensus.Pointee.Of<T>();
 
     /// <inheritdoc/>
