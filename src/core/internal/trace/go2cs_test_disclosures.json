@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "disclosures": [
+    {
+      "name": "TestTraceCPUProfile/Default",
+      "class": "host-identity",
+      "platforms": [
+        "darwin"
+      ],
+      "goSkipSignature": "CPU profile did not include any samples while tracing was active",
+      "skipEitherSide": true,
+      "signature": "",
+      "reason": "TestTraceCPUProfile/Default builds testdata/testprog/cpu-profile.go with the real go tool and runs that native Go program on both sides; the converted test, like Go's, only parses the program's trace and the CPU-profile summary it prints to stderr. The program profiles a 100 ms CPU hog labelled tracing=on, and when its profile holds no such sample the test skips with \"CPU profile did not include any samples while tracing was active\" (trace_test.go:120). On the hosted macOS runners the native profiler sometimes records no sample in that window, on whichever side happened to run it, so one side skips while the other passes; go2cs's own sampler is never loaded. Measured on 2026-11-14 over four stack-probe and two sweep-shard reads at master (12 runs of each of these two subtests per runner): the two sides disagreed in 7 of 12 on each runner, in both directions on both runners; at least 6 Go and 3 C# skips on osx-arm64 and 2 Go and 5 C# on osx-x64 (the stack-probe reads report only disagreements, so a skip on both sides is counted only in the sweep reads). The Stress subtest runs the same program and never skipped in those reads. The divergence is admitted in both directions only when the skipping side printed exactly that Go text; any other skip text, a failure on either side, or a C# failure is a hard mismatch. Scoped to darwin: linux and windows run the program and match (on linux, 40 native runs all recorded 5 to 13 samples). RETIRES if the native profiler stops missing the window on macOS, which this entry would then show as both sides passing.",
+      "history": "2026-11-14, P4's darwin read and COORD's order: the earlier reading of this test (2026-10-25 D-W1 and G's 2026-11-09 BOARD row) took one side's skip as the converted sampler starving or as a Go-only host skip. Both sides run one native subprocess, so neither premise holds. COORD ordered a symmetric native-subprocess skip, pinned to Go's message, for this test only, built on G's comparator arm (a) (claude/g-comparator-goskip) extended with skipEitherSide."
+    },
+    {
+      "name": "TestTraceCPUProfile/AsyncPreemptOff",
+      "class": "host-identity",
+      "platforms": [
+        "darwin"
+      ],
+      "goSkipSignature": "CPU profile did not include any samples while tracing was active",
+      "skipEitherSide": true,
+      "signature": "",
+      "reason": "TestTraceCPUProfile/AsyncPreemptOff builds testdata/testprog/cpu-profile.go with the real go tool and runs that native Go program on both sides; the converted test, like Go's, only parses the program's trace and the CPU-profile summary it prints to stderr. The program profiles a 100 ms CPU hog labelled tracing=on, and when its profile holds no such sample the test skips with \"CPU profile did not include any samples while tracing was active\" (trace_test.go:120). On the hosted macOS runners the native profiler sometimes records no sample in that window, on whichever side happened to run it, so one side skips while the other passes; go2cs's own sampler is never loaded. Measured on 2026-11-14 over four stack-probe and two sweep-shard reads at master (12 runs of each of these two subtests per runner): the two sides disagreed in 7 of 12 on each runner, in both directions on both runners; at least 6 Go and 3 C# skips on osx-arm64 and 2 Go and 5 C# on osx-x64 (the stack-probe reads report only disagreements, so a skip on both sides is counted only in the sweep reads). The Stress subtest runs the same program and never skipped in those reads. The divergence is admitted in both directions only when the skipping side printed exactly that Go text; any other skip text, a failure on either side, or a C# failure is a hard mismatch. Scoped to darwin: linux and windows run the program and match (on linux, 40 native runs all recorded 5 to 13 samples). RETIRES if the native profiler stops missing the window on macOS, which this entry would then show as both sides passing.",
+      "history": "2026-11-14, P4's darwin read and COORD's order: the earlier reading of this test (2026-10-25 D-W1 and G's 2026-11-09 BOARD row) took one side's skip as the converted sampler starving or as a Go-only host skip. Both sides run one native subprocess, so neither premise holds. COORD ordered a symmetric native-subprocess skip, pinned to Go's message, for this test only, built on G's comparator arm (a) (claude/g-comparator-goskip) extended with skipEitherSide."
+    }
+  ]
+}

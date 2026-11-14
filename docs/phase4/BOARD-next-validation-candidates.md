@@ -34923,6 +34923,29 @@ while Go's signal-driven profiler delivered one.
 - Unmeasured: how often the converted sampler misses the window per host, and whether the sampler's period or its
   start-up latency is the cause.
 
+> **CORRECTION 2026-11-14 (P4, read on COORD's order of 11:42Z; the row above is kept as written).** The premise is
+> false: the converted sampler is not in the path. `testTraceProg` (trace_test.go; converted `trace_test.cs`) builds
+> `testdata/testprog/cpu-profile.go` with the real `go` tool (`testenv.GoToolPath`) and runs that NATIVE program on BOTH
+> sides. The program profiles, parses its own profile and prints the `tracing=on` sample summary; each side's test only
+> parses that stderr and skips at `pprofSamples == 0`. `go2cs.CpuProfiler` is never loaded. So every skip on either side
+> is the native Go profiler missing the 100 ms window on the hosted mac, and the osx-x64 `Default` C#=skip above is the
+> native program's run under the converted test, not a converted-sampler miss. D-W1's Go-side-only reading (2026-10-25)
+> falls with it. Linux control (4 vCPU, go1.26.10, the same testprog): 40 runs, 0 with zero samples, 5 to 13 each.
+>
+> **Rate** (4 stack-probe + 2 sweep-shard reads at master 314e1d8b60 / c978595f0c, 12 runs each of `Default` and
+> `AsyncPreemptOff` per RID): the sides disagreed in 7 of 12 on each RID, in both directions on both; skips at least
+> 6 Go / 3 C# on osx-arm64 and 2 Go / 5 C# on osx-x64 (a stack-probe read shows only disagreements, so skip/skip is
+> counted only in the two sweep reads). `Stress` runs the same program and never skipped (0 of 6 per side per RID).
+> Runs: 43591393256, 43591400051, 43593684487, 43595545217 (probe); 43586434174, 43593728853 (sweep).
+>
+> **What follows instead.** No converted fix exists. COORD ruled a symmetric native-subprocess admission for this test
+> only: G's arm (a) extended with `skipEitherSide` (Go=pass / C#=skip admitted on the converted side's skip text, which
+> is Go's own `t.Skip` text), and the two subtests entered as darwin-scoped `host-identity` disclosures pinned on
+> "CPU profile did not include any samples while tracing was active" (`claude/p4-trace-skip-both`). The same seat
+> found arm (a) inert on real input: `go test -json` carries a test's `t.Skip` text in `output` events and nothing on
+> the terminal `skip` event, so the Go side's skip text read empty and the Go=skip shape could never be admitted; the
+> Go side's text is now joined from its output events.
+
 ## 2026-11-09 — G: runtime's `TestDecorateMappings` passes VACUOUSLY on the converted side, because `setVMANameSupported()` is never probed
 
 **The mechanism.** The converted `setVMANameSupported()` (`src/core/runtime/linux/set_vma_name_linux.cs`) returns
