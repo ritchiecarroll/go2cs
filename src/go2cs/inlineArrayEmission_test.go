@@ -10,7 +10,10 @@ package main
 
 import (
 	"go/build"
+	"os"
+	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -114,6 +117,111 @@ func view(p unsafe.Pointer) *Outer { return (*Outer)(p) }
 		if !strings.Contains(cs, want) {
 			t.Errorf("want %q:\n%s", want, cs)
 		}
+	}
+}
+
+// [GoInlineLayout] lives in go.golib, which a converted project's global usings do not import. The converter adds
+// `using go.golib;` only where an admitted struct holds an array field itself, so a file whose admitted structs hold
+// none (a plain struct admitted because an admitted struct holds it by value) failed to build: CS0246 in
+// x/sys/windows' setupapi_windows.cs, release-smoke win-x64 run 43622476546 (COORD 2026-11-14 19:23Z). The stamp is
+// spelled fully qualified, as the converter's other go.golib names are.
+var inlineLayoutStampModule = map[string]string{
+	"pair.go": `package stamponly
+
+type Pair struct {
+	X int32
+	Y int32
+}
+`,
+	"holder.go": `package stamponly
+
+import "unsafe"
+
+type Holder struct {
+	P Pair
+	B [4]byte
+}
+
+func View(p unsafe.Pointer) *Holder { return (*Holder)(p) }
+`,
+}
+
+// convertInlineLayoutStampModule converts the two-file module and returns its output root.
+func convertInlineLayoutStampModule(t *testing.T) string {
+	t.Helper()
+	isolateConverterPathGlobals(t)
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/stamponly\n\ngo 1.23\n")
+
+	for name, source := range inlineLayoutStampModule {
+		writeModuleFile(t, filepath.Join(appDir, name), source)
+	}
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{goRoot: goRoot, goPath: build.Default.GOPATH, go2csPath: filepath.Join(root, "out"), recurse: true, targetPlatform: runtime.GOOS + "/" + runtime.GOARCH,
+		indentSpaces: 4, preferVarDecl: true, useChannelOperators: true, hoistLiterals: true}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	return filepath.Join(options.go2csPath, "src", "example.com", "stamponly")
+}
+
+func TestInlineArrayLayoutStampIsFullyQualified(t *testing.T) {
+	out := convertInlineLayoutStampModule(t)
+	pair := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "pair.cs")), "\r\n", "\n")
+
+	if strings.Contains(pair, "using go.golib;") {
+		t.Fatalf("pair.cs must not import go.golib, or the fixture cannot show the stamp resolving alone:\n%s", pair)
+	}
+
+	if want := `[global::go.golib.GoInlineLayout(Size = 8, Align = 4), StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Pair`; !strings.Contains(pair, want) {
+		t.Errorf("want %q:\n%s", want, pair)
+	}
+}
+
+// The same module BUILT with the .NET SDK. GO2CS_INLINE_BUILD=1 runs it (it builds golib too, so it is opt-in like the
+// cgo build arms).
+func TestInlineArrayLayoutStampModuleBuilds(t *testing.T) {
+	if os.Getenv("GO2CS_INLINE_BUILD") != "1" {
+		t.Skip("NOT RUN: set GO2CS_INLINE_BUILD=1 to build the converted module with the .NET SDK (Inconclusive, not a pass)")
+	}
+
+	framework := regexp.MustCompile(`<TargetFramework Condition="[^"]*">([^<]+)</TargetFramework>`).FindStringSubmatch(renderCsprojTemplate("Library", "", ""))
+
+	if framework == nil {
+		t.Fatal("the rendered template names no TargetFramework")
+	}
+
+	dotnet := requireDotnetSdk(t, framework[1])
+	out := convertInlineLayoutStampModule(t)
+	projects, err := filepath.Glob(filepath.Join(out, "*.csproj"))
+
+	if err != nil || len(projects) != 1 {
+		t.Fatalf("the conversion wrote %d project files, want 1 (%v)", len(projects), err)
+	}
+
+	buildCmd := exec.Command(dotnet, cgoBuildArgs(t, projects[0], runtime.GOOS, "")...)
+	buildCmd.Env = append(os.Environ(), "DOTNET_CLI_TELEMETRY_OPTOUT=1", "DOTNET_NOLOGO=1", "MSBUILDDISABLENODEREUSE=1")
+	built, err := buildCmd.CombinedOutput()
+
+	for _, line := range cgoCompilerErrors(string(built)) {
+		t.Logf("READING build error %s", line)
+	}
+
+	if err != nil {
+		t.Fatalf("a module file whose only golib name is the layout stamp does not build: %v\n%s", err, lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40))
 	}
 }
 
