@@ -1658,6 +1658,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNilFuncNamedDelegateArg() => CheckTarget("NilFuncNamedDelegateArg");
 
     [TestMethod]
+    public void CheckNilFuncTypeSwitch() => CheckTarget("NilFuncTypeSwitch");
+
+    [TestMethod]
     public void CheckNilMapKey() => CheckTarget("NilMapKey");
 
     [TestMethod]

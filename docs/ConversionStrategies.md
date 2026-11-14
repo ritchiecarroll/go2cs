@@ -8006,7 +8006,9 @@ default: {
 value and captures it as `Δv`. `Δv` is a made-up name: the `Δ` prefix keeps it from clashing with the `v`
 that the same label binds ([Names and Glyphs](#reading-converted-code-names-and-glyphs)). The `when`
 guard calls `_<T>`, golib's type assertion, in a form that returns `false` instead of panicking. On
-success, `v` holds the value as an `error`.
+success, `v` holds the value as an `error`. A case that names a func type takes the same form
+(`case {} Δv when Δv._<Func<nint, nint>>(out var v):`): an interface holds a typed nil func as a carrier
+that is no delegate, and the guard lets it take its own case, as in Go.
 
 <!-- src/core/golib/builtin.cs:3545 `if (AdapterRegistry.TryGetAdapterFactory(subjectType, typeOfT,`
 and :3561 `AdapterBinder.TryCreate(subject, typeOfT, out object? shell)`;

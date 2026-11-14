@@ -12,16 +12,16 @@ partial class main_package {
 
 internal static (any, error) exec(any raw, reflectꓸValue from, reflectꓸValue to) {
     switch (raw.type()) {
-    case Func<reflectꓸType, reflectꓸType, any, (any, error)> f: {
+    case {} Δf when Δf._<Func<reflectꓸType, reflectꓸType, any, (any, error)>>(out var f): {
         return f(from.Type(), to.Type(), from.Interface());
     }
-    case Func<reflectꓸKind, reflectꓸKind, any, (any, error)> f: {
+    case {} Δf when Δf._<Func<reflectꓸKind, reflectꓸKind, any, (any, error)>>(out var f): {
         return f(from.Kind(), to.Kind(), from.Interface());
     }
-    case Func<reflectꓸValue, reflectꓸValue, (any, error)> f: {
+    case {} Δf when Δf._<Func<reflectꓸValue, reflectꓸValue, (any, error)>>(out var f): {
         return f(from, to);
     }
-    case Func<nint, nint> f: {
+    case {} Δf when Δf._<Func<nint, nint>>(out var f): {
         return (f(from.Interface()._<nint>()), default);
     }
     default: {
@@ -32,11 +32,11 @@ internal static (any, error) exec(any raw, reflectꓸValue from, reflectꓸValue
 
 internal static @string kind(any raw) {
     switch (raw.type()) {
-    case Func<reflectꓸType, reflectꓸType, any, (any, error)>: {
+    case {} ᴛ0 when ᴛ0._<Func<reflectꓸType, reflectꓸType, any, (any, error)>>(out var _): {
         return "type";
     }
-    case Func<reflectꓸKind, reflectꓸKind, any, (any, error)> _:
-    case Func<reflectꓸValue, reflectꓸValue, (any, error)> _: {
+    case {} ᴛ0 when ᴛ0._<Func<reflectꓸKind, reflectꓸKind, any, (any, error)>>(out var _):
+    case {} ᴛ1 when ᴛ1._<Func<reflectꓸValue, reflectꓸValue, (any, error)>>(out var _): {
         return "kind or value";
     }}
 
