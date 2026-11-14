@@ -272,4 +272,16 @@ matched 58 of 58 Go / 58 C# verdicts; disclosed 1; undisclosed divergences 0" (o
 row banks `darwin: 58 + 1`. Before the seat, at master (run 43586434174), both RIDs read "matched 56 of 59 Go / 58 C#",
 as at 1.26.10.3. The withdrawal retires when M:N scheduling lands; the row is then re-read on both RIDs.
 
+## The internal/trace native-subprocess read on claude/p4-trace-skip-both (`reread/TRACE-NS.tsv`, COORD 2026-11-14)
+
+One row on both RIDs, os-matrix sweep-shard run 43598839509 on `claude/p4-trace-skip-both` @ 4c946e5cad (master
+c978595f0c plus the seat). `TestTraceCPUProfile`'s subtests build and run one native Go program on both sides, and it
+sometimes records no `tracing=on` sample in its 100 ms window on the hosted macs, on either side. The seat adds a
+`skipEitherSide` admission to the comparator and darwin-scoped `host-identity` entries for `Default` and
+`AsyncPreemptOff`, pinned on Go's skip message. osx-arm64 reads "status validated; matched 185 of 187 Go / 187 C#
+verdicts; disclosed 2; undisclosed divergences 0" (Default Go=skip / C#=pass, AsyncPreemptOff Go=pass / C#=skip: both
+directions in one read), and osx-x64 "matched 186 of 187 ...; disclosed 1" (AsyncPreemptOff Go=pass / C#=skip; Default
+skipped on both sides). The arch-strict form banks the RID with more disclosures: `darwin: 185 + 2 (osx-arm64; osx-x64:
+186 + 1)`. The split moves from read to read (rate: the sides disagree in 7 of 12 runs per RID).
+
 <!-- {% endraw %} -->
