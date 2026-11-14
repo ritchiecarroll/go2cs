@@ -428,3 +428,42 @@ more than 1,200 methods read; any guard difference; CNR drift. §10's "A1 to A3 
   carry no `Receivers`); `Delegate.Method` under Native AOT for the A2 guard; the cost of `Assembly.IsDefined` (M4).
 
 — P5 (2026-11-13)
+
+## Amendment 2026-11-14 (P5): A2 cut; A1 and A3 DEFERRED by the owner
+
+**Ruling (owner, 2026-11-14, relayed by COORD):** B3 in release 1.26.11.1 is arm A2 only. A1 and A3 are deferred to
+a later release: at about 15 to 25 ms they are not worth slipping the date. A4 stays out. This document and the
+amendment above stay as the record for the release that takes them up.
+
+**A2 as cut** (`claude/p5-b3-a2-error-lookup`, record `docs/phase4/DATA-startup-method-sets-a2.md`): `wide` reads
+41 host classes and 3,138 extension methods at start-up where it read 152 and 5,931, and starts about 45 to 65 ms
+sooner in interleaved pairs. One disclosed behaviour difference: a generic type's pointer `Error` was bound or
+missed by scan order, and is now always bound.
+
+**What was learned about A1 before the ruling arrived**, so the next reader does not start from the prediction. A
+prototype was built on the method-holder branch (`82fb35fc28`) with A2 applied, JIT path only, never pushed:
+receiver keys (module and type-definition token) taken in the metadata walk, a host class read only when a
+question's keys (the element, its bases and its interfaces) meet one of the host's, with the core library's and
+golib's receivers unkeyed and so always read (M3). The existing whole-scan equivalence guard
+(`ExtensionReceiverScopeTests`, every reachable type, both method sets and the extension list) was green over it
+and was shown red by dropping the interface keys.
+
+| `wide` on the method-holder branch, Release, JIT | host classes read | methods read | wall, paired median over 100 pairs |
+|:--|--:|--:|:--|
+| branch as is | 602 | 5,931 | |
+| + A2 | 333 | 3,138 | -58.1 ms against the branch (quartiles -87.1 to -15.2) |
+| + A2 + A1 prototype | 211 | 1,948 | -57.6 and -62.9 ms against the branch; -6.9 and -23.0 ms against + A2 |
+
+Scored against the amendment's A1 prediction: wall "-12 to -25 ms" read -23.0 ms on one 100-pair run and -6.9 ms
+on another, with A/A controls of about ±10 ms, so A1's own gain is not resolved from zero on this VM; methods read
+"under 800" read 1,948, and the falsifier "over 1,200 read" FIRED. 208 of the 211 classes still read carry exactly
+one receiver key, most of them `runtime`'s per-type holders. Scoping the by-value extension lookup
+(`ExtensionMethodsOf`) by keys as well did not change the count, so that lookup is not the reader; which question
+reads them was not found before the work stopped. Whoever takes A1 up starts there: name the question that reads
+`runtime`'s holders (a host-read probe keyed by the asking type answers it), then re-predict. The measured A2 + A1
+total sits inside the amendment's stop line only because of A2.
+
+Not done for A1, and owed if it is taken up: the Native AOT half (M1), the fixtures M3 names, the per-package
+residual, and every item under "Not verified by the review" above.
+
+— P5 (2026-11-14)
