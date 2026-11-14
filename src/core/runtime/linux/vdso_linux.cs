@@ -105,7 +105,7 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
     bool foundVaddr = default;
     ж<array<elfDyn>> dyn = default;
     for (var i = (uint16)0; i < hdr.e_phnum; i++) {
-        var ptΔ1 = (ж<elfPhdr>)(uintptr)(add(pt, (uintptr)i * /* unsafe.Sizeof(elfPhdr{}) */ (uintptr)56));
+        var ptΔ1 = @unsafe.Pointer.To<elfPhdr>(add(pt, (uintptr)i * /* unsafe.Sizeof(elfPhdr{}) */ (uintptr)56));
         switch (ptΔ1.p_type) {
         case var ᴛ when ᴛ == _PT_LOAD: {
             if (!foundVaddr) {
@@ -117,7 +117,7 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
             break;
         }
         case var ᴛ when ᴛ == _PT_DYNAMIC: {
-            dyn = (ж<array<elfDyn>>)(uintptr)((@unsafe.Pointer)(info.loadAddr + (uintptr)ptΔ1.p_offset));
+            dyn = @unsafe.Pointer.To<array<elfDyn>>((@unsafe.Pointer)(info.loadAddr + (uintptr)ptΔ1.p_offset));
             break;
         }}
     }
@@ -139,27 +139,27 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
         var Δp = info.loadOffset + (uintptr)dt.d_val;
         switch (dt.d_tag) {
         case var ᴛ when ᴛ == _DT_STRTAB: {
-            info.symstrings = (ж<array<byte>>)(uintptr)((@unsafe.Pointer)Δp);
+            info.symstrings = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)Δp);
             break;
         }
         case var ᴛ when ᴛ == _DT_SYMTAB: {
-            info.symtab = (ж<array<elfSym>>)(uintptr)((@unsafe.Pointer)Δp);
+            info.symtab = @unsafe.Pointer.To<array<elfSym>>((@unsafe.Pointer)Δp);
             break;
         }
         case var ᴛ when ᴛ == _DT_HASH: {
-            hash = (ж<array<uint32>>)(uintptr)((@unsafe.Pointer)Δp);
+            hash = @unsafe.Pointer.To<array<uint32>>((@unsafe.Pointer)Δp);
             break;
         }
         case var ᴛ when ᴛ == _DT_GNU_HASH: {
-            gnuhash = (ж<array<uint32>>)(uintptr)((@unsafe.Pointer)Δp);
+            gnuhash = @unsafe.Pointer.To<array<uint32>>((@unsafe.Pointer)Δp);
             break;
         }
         case var ᴛ when ᴛ == _DT_VERSYM: {
-            info.versym = (ж<array<uint16>>)(uintptr)((@unsafe.Pointer)Δp);
+            info.versym = @unsafe.Pointer.To<array<uint16>>((@unsafe.Pointer)Δp);
             break;
         }
         case var ᴛ when ᴛ == _DT_VERDEF: {
-            info.verdef = (ж<elfVerdef>)(uintptr)((@unsafe.Pointer)Δp);
+            info.verdef = @unsafe.Pointer.To<elfVerdef>((@unsafe.Pointer)Δp);
             break;
         }}
     }
@@ -202,7 +202,7 @@ internal static int32 vdsoFindVersion(ж<vdsoInfo> Ꮡinfo, ref vdsoVersionKey v
     var def = info.verdef;
     for (;;) {
         if ((uint16)(def.vd_flags & (uint16)_VER_FLG_BASE) == 0) {
-            var aux = (ж<elfVerdaux>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(def), (uintptr)def.vd_aux));
+            var aux = @unsafe.Pointer.To<elfVerdaux>(add(@unsafe.Pointer.FromPinnedBox(def), (uintptr)def.vd_aux));
             if (def.vd_hash == ver.verHash && ver.version == gostringnocopy(info.symstrings.at<byte>((ulong)(aux.vda_name)))) {
                 return (int32)((uint16)(def.vd_ndx & 0x7fff));
             }
@@ -211,7 +211,7 @@ internal static int32 vdsoFindVersion(ж<vdsoInfo> Ꮡinfo, ref vdsoVersionKey v
         if (def.vd_next == 0) {
             break;
         }
-        def = (ж<elfVerdef>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(def), (uintptr)def.vd_next));
+        def = @unsafe.Pointer.To<elfVerdef>(add(@unsafe.Pointer.FromPinnedBox(def), (uintptr)def.vd_next));
     }
 
     return -1; // cannot match any version
@@ -291,7 +291,7 @@ internal static void vdsoauxv(uintptr tag, uintptr val) {
         // TODO(rsc): I don't understand why the compiler thinks info escapes
         // when passed to the three functions below.
         var info1 = Ꮡinfo;
-        vdsoInitFromSysinfoEhdr(ref (info1).DerefOrNull(), (ж<elfEhdr>)(uintptr)((@unsafe.Pointer)val));
+        vdsoInitFromSysinfoEhdr(ref (info1).DerefOrNull(), @unsafe.Pointer.To<elfEhdr>((@unsafe.Pointer)val));
         vdsoParseSymbols(info1, vdsoFindVersion(info1, ref vdsoLinuxVersion));
         break;
     }}

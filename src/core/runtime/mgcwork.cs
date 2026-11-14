@@ -424,7 +424,7 @@ internal static void checkempty(this ref workbuf b) {
 internal static ж<workbuf> getempty() {
     ж<workbuf> b = default;
     if (work.empty != 0) {
-        b = (ж<workbuf>)(uintptr)(Ꮡwork.Ꮡempty.pop());
+        b = @unsafe.Pointer.To<workbuf>(Ꮡwork.Ꮡempty.pop());
         if (b != nil) {
             b.checkempty();
         }
@@ -460,7 +460,7 @@ internal static ж<workbuf> getempty() {
         // Slice up the span into new workbufs. Return one and
         // put the rest on the empty list.
         for (var i = (uintptr)0; i + (uintptr)_WorkbufSize <= workbufAlloc; i += _WorkbufSize) {
-            var newb = (ж<workbuf>)(uintptr)((@unsafe.Pointer)(s.@base() + i));
+            var newb = @unsafe.Pointer.To<workbuf>((@unsafe.Pointer)(s.@base() + i));
             newb.workbufhdr.nobj = 0;
             lfnodeValidate(newb.of(workbuf.Ꮡnode));
             if (i == 0) {
@@ -501,7 +501,7 @@ internal static void putfull(ж<workbuf> Ꮡb) {
 //
 //go:nowritebarrier
 internal static ж<workbuf> trygetfull() {
-    var b = (ж<workbuf>)(uintptr)(Ꮡwork.Ꮡfull.pop());
+    var b = @unsafe.Pointer.To<workbuf>(Ꮡwork.Ꮡfull.pop());
     if (b != nil) {
         b.checknonempty();
         return b;

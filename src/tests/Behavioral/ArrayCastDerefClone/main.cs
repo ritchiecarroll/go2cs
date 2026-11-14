@@ -28,11 +28,11 @@ internal static void typedCastDerefAssign(ж<Row> p) {
 }
 
 internal static Row castDerefReturn(@unsafe.Pointer p) {
-    return (~(ж<Row>)(uintptr)(p)).Clone();
+    return (~@unsafe.Pointer.To<Row>(p)).Clone();
 }
 
 internal static array<uintptr> castDerefReturnDirect(@unsafe.Pointer p) {
-    return (~(ж<array<uintptr>>)(uintptr)(p)).Clone();
+    return (~@unsafe.Pointer.To<array<uintptr>>(p)).Clone();
 }
 
 internal static void main() {

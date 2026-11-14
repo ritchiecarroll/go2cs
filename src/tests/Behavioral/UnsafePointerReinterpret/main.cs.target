@@ -5,7 +5,7 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static partial @unsafe.Pointer indirectKey(@unsafe.Pointer k) {
-    return ((ж<@unsafe.Pointer>)(uintptr)(k)).Value;
+    return (@unsafe.Pointer.To<@unsafe.Pointer>(k)).Value;
 }
 
 internal static partial void store(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointer val) {
@@ -15,17 +15,17 @@ internal static partial void store(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointer v
 }
 
 internal static partial void writeBarrier(@unsafe.Pointer ptr, @unsafe.Pointer val) {
-    store((ж<@unsafe.Pointer>)(uintptr)(ptr), val);
+    store(@unsafe.Pointer.To<@unsafe.Pointer>(ptr), val);
 }
 
 internal static partial (Action, bool) funcAt(@unsafe.Pointer p) {
-    return (((ж<Action>)(uintptr)(p)).ValueSlot, true);
+    return ((@unsafe.Pointer.To<Action>(p)).ValueSlot, true);
 }
 
 internal static partial uint64 zeroPair(@unsafe.Pointer x) {
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
-    return ((ж<array<uint64>>)(uintptr)(x)).Value[0];
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    return (@unsafe.Pointer.To<array<uint64>>(x)).Value[0];
 }
 
 partial struct linkaddr /*num:uintptr*/;

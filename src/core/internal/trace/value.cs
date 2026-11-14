@@ -50,7 +50,7 @@ private static readonly @string valueBadˢᵇ = "Value{Bad}"u8;
 // a string representation of the value for other kinds of values.
 public static @string String(this Value v) {
     if (v.kind == ValueString) {
-        return @unsafe.String((ж<byte>)(uintptr)(v.pointer), (nint)v.scalar);
+        return @unsafe.String(@unsafe.Pointer.To<byte>(v.pointer), (nint)v.scalar);
     }
     switch (v.kind) {
     case var ᴛ when ᴛ == ValueUint64: {

@@ -89,6 +89,9 @@ public unsafe class UnsafeAddCarryTests
     public void AddOverATokenKeepsTheTokensOwnRoute()
     {
         // A pointee that holds references has no address: its number is a token, and token arithmetic has its own route.
+        // The moved pointer's number is still a token, and no address is formed. Since the interior-pointer root
+        // (docs/phase4/DESIGN-interior-pointer-root.md 4.1) it also carries the box the token names, as Go's pointer
+        // keeps its referent: the token resolves only while that box is alive. Before, it carried nothing.
         ж<holder> box = new StandardBox<holder>(default(holder));
         @unsafe.Pointer carrying = @unsafe.Pointer.FromPinnedBox(box);
         Assert.IsTrue(ManagedPointerTokens.IsTaggedToken(carrying.Value.Value), "the control: this pointer's number is a token");
@@ -96,7 +99,8 @@ public unsafe class UnsafeAddCarryTests
         @unsafe.Pointer moved = @unsafe.Add(carrying, 8);
 
         Assert.AreEqual(carrying.Value.Value + 8, moved.Value.Value);
-        Assert.IsNull(moved.RetainedSource, "a token plus an offset stays the number it was");
+        Assert.IsTrue(ManagedPointerTokens.IsTaggedToken(moved.Value.Value), "a token plus an offset is still a token: no address is formed");
+        Assert.AreSame(box, moved.RetainedSource, "and the moved pointer carries the box the token names");
         GC.KeepAlive(box);
     }
 

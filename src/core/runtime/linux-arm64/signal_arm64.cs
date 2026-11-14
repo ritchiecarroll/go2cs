@@ -72,13 +72,13 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     // anyway.
     var sp = c.sp() - (uint64)sys.StackAlign; // needs only sizeof uint64, but must align the stack
     c.set_sp(sp);
-    ((ж<uint64>)(uintptr)((@unsafe.Pointer)(uintptr)sp)).Value = c.lr();
+    (@unsafe.Pointer.To<uint64>((@unsafe.Pointer)(uintptr)sp)).Value = c.lr();
     // Make sure a valid frame pointer is saved on the stack so that the
     // frame pointer checks in adjustframe are happy, if they're enabled.
     // Frame pointer unwinding won't visit the sigpanic frame, since
     // sigpanic will save the same frame pointer before calling into a panic
     // function.
-    ((ж<uint64>)(uintptr)((@unsafe.Pointer)(uintptr)(sp - (uint64)goarch.PtrSize))).Value = c.r29();
+    (@unsafe.Pointer.To<uint64>((@unsafe.Pointer)(uintptr)(sp - (uint64)goarch.PtrSize))).Value = c.r29();
 
     var pc = gp.sigpc;
 
@@ -99,11 +99,11 @@ internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resu
     // This extra space is known to gentraceback.
     var sp = c.sp() - 16; // SP needs 16-byte alignment
     c.set_sp(sp);
-    ((ж<uint64>)(uintptr)((@unsafe.Pointer)(uintptr)sp)).Value = c.lr();
+    (@unsafe.Pointer.To<uint64>((@unsafe.Pointer)(uintptr)sp)).Value = c.lr();
     // Make sure a valid frame pointer is saved on the stack so that the
     // frame pointer checks in adjustframe are happy, if they're enabled.
     // This is not actually used for unwinding.
-    ((ж<uint64>)(uintptr)((@unsafe.Pointer)(uintptr)(sp - (uint64)goarch.PtrSize))).Value = c.r29();
+    (@unsafe.Pointer.To<uint64>((@unsafe.Pointer)(uintptr)(sp - (uint64)goarch.PtrSize))).Value = c.r29();
     // Set up PC and LR to pretend the function being signaled
     // calls targetPC at resumePC.
     c.set_lr((uint64)resumePC);

@@ -514,8 +514,8 @@ private static readonly @string runtimeCannotAllocateˢᵇ = "runtime: cannot al
 //
 //go:nowritebarrierrec
 internal static void recordspan(@unsafe.Pointer vh, @unsafe.Pointer Δp) {
-    var h = (ж<mheap>)(uintptr)(vh);
-    var s = (ж<mspan>)(uintptr)(Δp);
+    var h = @unsafe.Pointer.To<mheap>(vh);
+    var s = @unsafe.Pointer.To<mspan>(Δp);
 
     assertLockHeld(h.Ꮡlock);
 
@@ -1116,13 +1116,13 @@ internal static ж<mspan> allocMSpanLocked(this ж<mheap> Ꮡh) {
     var pp = (~(~getg()).m).p.ptr();
     if (pp == nil) {
         // We don't have a p so just do the normal thing.
-        return (ж<mspan>)(uintptr)(h.spanalloc.alloc());
+        return @unsafe.Pointer.To<mspan>(h.spanalloc.alloc());
     }
     // Refill the cache if necessary.
     if ((~pp).mspancache.len == 0) {
         const nint refillCount = /* len(pp.mspancache.buf) / 2 */ 64;
         for (nint i = 0; i < refillCount; i++) {
-            pp.Value.mspancache.buf[i] = (ж<mspan>)(uintptr)(h.spanalloc.alloc());
+            pp.Value.mspancache.buf[i] = @unsafe.Pointer.To<mspan>(h.spanalloc.alloc());
         }
         pp.Value.mspancache.len = refillCount;
     }
@@ -2147,7 +2147,7 @@ internal static bool addfinalizer(@unsafe.Pointer Δp, ж<funcval> f, uintptr nr
     ref var ot = ref Ꮡot.DerefOrNull();
 
     @lock(Ꮡmheap_.Ꮡspeciallock);
-    var s = (ж<specialfinalizer>)(uintptr)(Ꮡmheap_.Ꮡspecialfinalizeralloc.alloc());
+    var s = @unsafe.Pointer.To<specialfinalizer>(Ꮡmheap_.Ꮡspecialfinalizeralloc.alloc());
     unlock(Ꮡmheap_.Ꮡspeciallock);
     s.special.kind = _KindSpecialFinalizer;
     s.fn = f;
@@ -2213,7 +2213,7 @@ internal static uint64 addCleanup(@unsafe.Pointer Δp, cleanupFn c) {
     // is a considerable part of the cost of AddCleanup. This
     // would also require reserving some cleanup IDs on the P.
     @lock(Ꮡmheap_.Ꮡspeciallock);
-    var s = (ж<specialCleanup>)(uintptr)(Ꮡmheap_.ᏑspecialCleanupAlloc.alloc());
+    var s = @unsafe.Pointer.To<specialCleanup>(Ꮡmheap_.ᏑspecialCleanupAlloc.alloc());
     mheap_.cleanupID++; // Increment first. ID 0 is reserved.
     var id = mheap_.cleanupID;
     unlock(Ꮡmheap_.Ꮡspeciallock);
@@ -2264,7 +2264,7 @@ internal static void setCleanupContext(@unsafe.Pointer ptr, ж<_type> ᏑptrType
     ref var ptrType = ref ᏑptrType.DerefOrNull();
 
     @lock(Ꮡmheap_.Ꮡspeciallock);
-    var s = (ж<specialCheckFinalizer>)(uintptr)(Ꮡmheap_.ᏑspecialCheckFinalizerAlloc.alloc());
+    var s = @unsafe.Pointer.To<specialCheckFinalizer>(Ꮡmheap_.ᏑspecialCheckFinalizerAlloc.alloc());
     unlock(Ꮡmheap_.Ꮡspeciallock);
     s.special.kind = _KindSpecialCheckFinalizer;
     s.cleanupID = cleanupID;
@@ -2387,7 +2387,7 @@ partial struct specialTinyBlock {
 // value, since we're using this for debugging.
 internal static void setTinyBlockContext(@unsafe.Pointer ptr) {
     @lock(Ꮡmheap_.Ꮡspeciallock);
-    var s = (ж<specialTinyBlock>)(uintptr)(Ꮡmheap_.ᏑspecialTinyBlockAlloc.alloc());
+    var s = @unsafe.Pointer.To<specialTinyBlock>(Ꮡmheap_.ᏑspecialTinyBlockAlloc.alloc());
     unlock(Ꮡmheap_.Ꮡspeciallock);
     s.special.kind = _KindSpecialTinyBlock;
 
@@ -2451,7 +2451,7 @@ internal static @unsafe.Pointer internal_weak_runtime_registerWeakPointer(@unsaf
 
 //go:linkname internal_weak_runtime_makeStrongFromWeak weak.runtime_makeStrongFromWeak
 internal static @unsafe.Pointer internal_weak_runtime_makeStrongFromWeak(@unsafe.Pointer u) {
-    var handle = (ж<atomic.Uintptr>)(uintptr)(u);
+    var handle = @unsafe.Pointer.To<atomic.Uintptr>(u);
 
     // Prevent preemption. We want to make sure that another GC cycle can't start
     // and that work.strongFromWeak.block can't change out from under us.
@@ -2584,7 +2584,7 @@ internal static ж<atomic.Uintptr> getOrAddWeakHandle(@unsafe.Pointer Δp) {
     }
 
     @lock(Ꮡmheap_.Ꮡspeciallock);
-    var s = (ж<specialWeakHandle>)(uintptr)(Ꮡmheap_.ᏑspecialWeakHandleAlloc.alloc());
+    var s = @unsafe.Pointer.To<specialWeakHandle>(Ꮡmheap_.ᏑspecialWeakHandleAlloc.alloc());
     unlock(Ꮡmheap_.Ꮡspeciallock);
     var handle = Ꮡ((@new<getOrAddWeakHandle_weakHandleBox>().h));
     s.special.kind = _KindSpecialWeakHandle;
@@ -2717,7 +2717,7 @@ internal static ж<atomic.Uintptr> getOrAdd(this ж<immortalWeakHandleMap> Ꮡta
     System.GC.KeepAlive(Ꮡp);
     var hashIter = hash;
     for (;;) {
-        var n = (ж<immortalWeakHandle>)(uintptr)(m.Load());
+        var n = @unsafe.Pointer.To<immortalWeakHandle>(m.Load());
         if (n == nil) {
             // Try to insert a new map node. We may end up discarding
             // this node if we fail to insert because it turns out the
@@ -2735,7 +2735,7 @@ internal static ж<atomic.Uintptr> getOrAdd(this ж<immortalWeakHandleMap> Ꮡta
             // much activity, or the map gets big and races to insert on
             // the same node are much less likely.
             if (newNode == nil) {
-                newNode = (ж<immortalWeakHandle>)(uintptr)(persistentalloc(/* unsafe.Sizeof(immortalWeakHandle{}) */ (uintptr)24, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
+                newNode = @unsafe.Pointer.To<immortalWeakHandle>(persistentalloc(/* unsafe.Sizeof(immortalWeakHandle{}) */ (uintptr)24, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
                 newNode.ptr = Δp;
             }
             if (m.CompareAndSwapNoWB(nil, @unsafe.Pointer.FromPinnedBox(newNode))) {
@@ -2744,7 +2744,7 @@ internal static ж<atomic.Uintptr> getOrAdd(this ж<immortalWeakHandleMap> Ꮡta
             // Reload n. Because pointers are only stored once,
             // we must have lost the race, and therefore n is not nil
             // anymore.
-            n = (ж<immortalWeakHandle>)(uintptr)(m.Load());
+            n = @unsafe.Pointer.To<immortalWeakHandle>(m.Load());
         }
         if (n.ptr == Δp) {
             return n.handle();
@@ -2770,7 +2770,7 @@ internal static void setprofilebucket(@unsafe.Pointer Δp, ж<bucket> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     @lock(Ꮡmheap_.Ꮡspeciallock);
-    var s = (ж<specialprofile>)(uintptr)(Ꮡmheap_.Ꮡspecialprofilealloc.alloc());
+    var s = @unsafe.Pointer.To<specialprofile>(Ꮡmheap_.Ꮡspecialprofilealloc.alloc());
     unlock(Ꮡmheap_.Ꮡspeciallock);
     s.special.kind = _KindSpecialProfile;
     s.b = Ꮡb;
@@ -3013,7 +3013,7 @@ internal static ж<gcBits> newMarkBits(uintptr nelems) {
     var bytesNeeded = blocksNeeded * 8;
 
     // Try directly allocating from the current head arena.
-    var head = (ж<gcBitsArena>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑgcBitsArenas.of(gcBitsArenasᴛ1.Ꮡnext))));
+    var head = @unsafe.Pointer.To<gcBitsArena>(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑgcBitsArenas.of(gcBitsArenasᴛ1.Ꮡnext))));
     var pΔ1 = head.tryAlloc(bytesNeeded); if (pΔ1 != nil) {
         return pΔ1;
     }
@@ -3112,7 +3112,7 @@ internal static ж<gcBitsArena> newArenaMayUnlock() {
     ж<gcBitsArena> result = default;
     if (gcBitsArenas.free == nil) {
         unlock(ᏑgcBitsArenas.of(gcBitsArenasᴛ1.Ꮡlock));
-        result = (ж<gcBitsArena>)(uintptr)(sysAlloc(gcBitsChunkBytes, Ꮡmemstats.ᏑgcMiscSys, gcBitsˢ));
+        result = @unsafe.Pointer.To<gcBitsArena>(sysAlloc(gcBitsChunkBytes, Ꮡmemstats.ᏑgcMiscSys, gcBitsˢ));
         if (result == nil) {
             @throw(runtimeCannotAllocateˢ);
         }

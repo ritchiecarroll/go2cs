@@ -38,6 +38,7 @@ import (
 	"go/token"
 	"go/types"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
@@ -61,6 +62,7 @@ var sstringTwins = map[string][]int{
 	"fmt.indexRune":      {0},
 	"fmt.parseArgNumber": {0},
 	"fmt.parsenum":       {0},
+	"fmt.errorf":         {0}, // reached from Errorf: the call rule in validateSStringTwin
 
 	"fmt.buffer.writeString": {0},
 	"fmt.fmt.fmtBx":          {1},
@@ -79,8 +81,9 @@ var sstringTwins = map[string][]int{
 	"fmt.ss.peek":            {0},
 	"fmt.ss.scanNumber":      {0},
 
-	"unicode/utf8.DecodeRuneInString": {0},
-	"unicode/utf8.RuneCountInString":  {0},
+	"unicode/utf8.DecodeRuneInString":     {0},
+	"unicode/utf8.decodeRuneInStringSlow": {0}, // reached from DecodeRuneInString: the call rule
+	"unicode/utf8.RuneCountInString":      {0},
 }
 
 // sstringTwinKey composes a function's registry key.
@@ -204,6 +207,8 @@ func (v *Visitor) callSStringTwinCallee(call *ast.CallExpr) *types.Func {
 //     or inside a defer/go statement (the lowering captures it into a generic type argument, CS0306);
 //   - a local bound to a registered parameter (`t := s`, `t := s[i:]`): the converter types the local
 //     @string, and the implicit sstring → @string conversion would COPY on every call, silently.
+//   - a registered parameter passed as a call argument to a same-package function, or a func value, that
+//     is not a twin at that index: the callee receives an @string, the same silent copy.
 func (v *Visitor) validateSStringTwin(funcDecl *ast.FuncDecl, fn *types.Func, indices []int) {
 	key := sstringTwinKey(fn)
 
@@ -317,6 +322,54 @@ func (v *Visitor) validateSStringTwin(funcDecl *ast.FuncDecl, fn *types.Func, in
 			if ident, ok := lhs[k].(*ast.Ident); ok && ident.Name != "_" && !twinned[v.info.ObjectOf(ident)] {
 				refuse(fmt.Sprintf("local %s is bound to a twinned parameter", ident.Name))
 			}
+		}
+
+		return true
+	})
+
+	// A twinned parameter passed as a call argument binds an sstring parameter only when the callee
+	// is itself a twin at that index. A same-package callee, or a func value, that is not receives an
+	// @string, and the implicit sstring → @string conversion COPIES on every call: twin the callee. A
+	// call into another package is admitted: there the @string is the callee's contract (errors.New
+	// keeps it), and a helper there is twinned in its own package or not at all.
+	ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
+		call, ok := node.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		if tv, found := v.info.Types[call.Fun]; found && (tv.IsType() || tv.IsBuiltin()) {
+			return true
+		}
+
+		var callee *types.Func
+
+		switch fun := ast.Unparen(call.Fun).(type) {
+		case *ast.Ident:
+			callee, _ = v.info.Uses[fun].(*types.Func)
+		case *ast.SelectorExpr:
+			callee, _ = v.info.Uses[fun.Sel].(*types.Func)
+		}
+
+		for index, arg := range call.Args {
+			param := rootOf(arg)
+
+			if !twinned[param] {
+				continue
+			}
+
+			if callee != nil && (callee.Pkg() != v.pkg || slices.Contains(sstringTwinIndices(callee), index)) {
+				continue
+			}
+
+			target := "a function value"
+
+			if callee != nil {
+				target = callee.FullName()
+			}
+
+			refuse(fmt.Sprintf("parameter %s is passed to %s as argument #%d, which is not a twinned parameter, so the call copies it into an @string", param.Name(), target, index))
 		}
 
 		return true

@@ -973,7 +973,18 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // pointer arithmetic then walks the GC heap, and handing the pointer back to a native API
     // frees GC memory — STATUS_HEAP_CORRUPTION). Aliasing keeps `uintptr(unsafe.Pointer(p))`
     // an exact round-trip, as Go requires.
-    public static unsafe explicit operator ж<T>(uintptr value)
+    public static explicit operator ж<T>(uintptr value)
+    {
+        return FromNumber(value, carried: null);
+    }
+
+    // The number conversion's body, shared with unsafe.Pointer.To<T> (Go's `(*T)(p)` for an unsafe.Pointer VALUE;
+    // docs/phase4/DESIGN-interior-pointer-root.md 4.1). `carried` is what the unsafe.Pointer carried, or null for a
+    // bare number. It is read at ONE place, the fall-through at the end: where the conversion would mint a native
+    // box that keeps nothing, the box keeps what the pointer carried (NativeDerivation.Kept: nothing for C memory
+    // alone). Every arm above the fall-through answers exactly as it does for a bare number, so the operator is
+    // this method with nothing carried, and one conversion still mints one box.
+    internal static unsafe ж<T> FromNumber(uintptr value, object? carried)
     {
         // A pointer to MANAGED storage has no address to have been converted from: what a
         // reflect projection handed out was an order token (see ManagedPointerTokens). Recover
@@ -1196,7 +1207,11 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // path did not already do. The knowledge was computed once, at the one place that had the
         // resolved box in hand; making the accessor re-derive it would put a token lookup on every
         // native read in the corpus.
-        return new NativeBox<T>((nuint)value.Value, aliasesAnOrderToken: aliasesAnOrderToken);
+        //
+        // What the pointer CARRIED is kept here and only here, and only where the resolve kept nothing: a number that
+        // missed the registry (an interior address of Go memory: only a box's own address is registered) used to
+        // mint a box with no source and no pin under a pointer still in use.
+        return new NativeBox<T>((nuint)value.Value, retainedSource: NativeDerivation.KeptResolved(resolved, aliasesAnOrderToken) ?? NativeDerivation.Kept(carried), aliasesAnOrderToken: aliasesAnOrderToken);
     }
 
     // The interior-alias step's one call shape, shared by both refusal arms: walk, record the path

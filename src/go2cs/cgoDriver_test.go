@@ -91,6 +91,16 @@ var cgoPhase2Libraries = map[string]string{
 	"go2cs_probe_node_touch":  "libgo2csprobe.so",
 	"go2cs_probe_link_value":  "libgo2csprobe.so",
 	"go2cs_probe_pair_scaled": "libgo2csprobe.so",
+	"free":                    "libc.so.6",
+	"malloc":                  "libc.so.6",
+	"go2cs_probe_text":        "libgo2csprobe.so",
+	"go2cs_probe_text_copy":   "libgo2csprobe.so",
+	"go2cs_probe_text_fill":   "libgo2csprobe.so",
+	"go2cs_probe_sum":         "libgo2csprobe.so",
+	"go2cs_probe_same":        "libgo2csprobe.so",
+	"go2cs_probe_log_new":     "libgo2csprobe.so",
+	"go2cs_probe_log_put":     "libgo2csprobe.so",
+	"go2cs_probe_release":     "libgo2csprobe.so",
 }
 
 const cgoPhase2Toolchain = "clang version 22.1.8"
@@ -294,41 +304,79 @@ func TestCgoPhase1FixtureIsRefusedNamingEachUseAndItsOwner(t *testing.T) {
 	}
 }
 
-// requireCgoPhase1UsesRefused asserts the five uses of C Phase 1's fixture makes outside Phase 2's set, each refused with
-// the phase that owns it, as the census refuses them before any capture: offline and on a real host alike.
+// requireCgoPhase1UsesRefused asserts the two uses of C Phase 1's fixture makes outside the admitted set, each refused
+// with the phase that owns it, as the census refuses them before any capture: offline and on a real host alike. Its
+// other three (C.CString, C.GoString and the deferred C.free) were refused until Phase 3's increment 3.1
+// (DESIGN-cgo-phase3-marshaling §16), and no refusal names them now.
 func requireCgoPhase1UsesRefused(t *testing.T, stderr string) {
 	t.Helper()
 
 	lines := cgoRefusalLines(stderr)
-	requireCgoUseRefused(t, lines, "C.CString", "Phase 3")
-	requireCgoUseRefused(t, lines, "C.GoString", "Phase 3")
 	requireCgoUseRefused(t, lines, "C.twice", "§11.6")
 	requireCgoUseRefused(t, lines, "C.NEXT", "Phase 4")
-	requireCgoUseRefused(t, lines, "fixture.go(58,", "C.free", "deferred", "Phase 2 later")
+
+	for _, name := range []string{"C.CString", "C.GoString", "C.free"} {
+		for _, line := range lines {
+			if strings.Contains(line, name+":") || strings.Contains(line, name+" ") || strings.Contains(line, name+"'s") {
+				t.Errorf("%s is refused, and increment 3.1 admits it:\n%s", name, line)
+			}
+		}
+	}
 }
 
-// §11.20, P4': the Phase 2 fixture's only uses outside the set are its deferred call and its goroutine call through the
-// check closure, refused as Phase 2 later.
-func TestCgoPhase2FixtureIsRefusedNamingOnlyItsDeferredAndGoroutineCalls(t *testing.T) {
+// §11.20, P4', as increment 3.1 leaves it (DESIGN-cgo-phase3-marshaling §16.1 C): the Phase 2 fixture's only use outside
+// the set is its goroutine call through the check closure. Its deferred call converts.
+func TestCgoPhase2FixtureIsRefusedNamingOnlyItsGoroutineCall(t *testing.T) {
 	stderr, output, err := convertCgoOffline(t, cgoFixtureFiles(t, cgoPhase2FixtureDir))
 	requireNothingWritten(t, output, err, stderr)
 
 	lines := cgoRefusalLines(stderr)
-	requireCgoUseRefused(t, lines, "fixture.go(106,", "C.go2cs_probe_node_touch", "deferred", "Phase 2 later")
-	requireCgoUseRefused(t, lines, "fixture.go(113,", "C.go2cs_probe_node_touch", "goroutine", "Phase 2 later")
+	requireCgoUseRefused(t, lines, "fixture.go(113,", "C.go2cs_probe_node_touch", "goroutine")
 
-	if len(lines) != 2 {
-		t.Errorf("%d refusal lines, want 2:\n%s", len(lines), strings.Join(lines, "\n"))
+	if len(lines) != 1 {
+		t.Errorf("%d refusal lines, want 1:\n%s", len(lines), strings.Join(lines, "\n"))
 	}
 }
 
-// cgoPhase2Admitted is the Phase 2 fixture without the two calls Phase 2 refuses, as checked-in files.
+// The deferred call through cmd/cgo's check closure (§16.1 C): `defer C.f(&x)` is, in cmd/cgo's tree, a closure that
+// evaluates the arguments at the defer and returns the closure that checks them and calls. It converts as a deferred
+// call of the bound function with those arguments, and none of cmd/cgo's own variables reaches the C#.
+func TestCgoDeferredCallThroughTheCheckClosureConvertsAsADeferredCall(t *testing.T) {
+	stderr, output, err := convertCgoOffline(t, cgoPhase2Admitted(t))
+
+	if err != nil {
+		t.Fatalf("the conversion failed: %v\n%s", err, stderr)
+	}
+
+	converted := readConverted(t, output, "fixture.cs")
+	start := strings.Index(converted, " Deferred(")
+
+	if start < 0 {
+		t.Fatalf("fixture.cs holds no Deferred function:\n%s", lastLines(converted, 40))
+	}
+
+	body := converted[start:]
+
+	if end := strings.Index(body, "\n}"); end >= 0 {
+		body = body[:end]
+	}
+
+	if !regexp.MustCompile(`defer\(C\.go2cs_probe_node_touch, [^;]*ref ᒐ\);`).MatchString(body) {
+		t.Errorf("Deferred does not defer the bound function with its argument:\n%s", body)
+	}
+
+	if strings.Contains(body, "_cgo") {
+		t.Errorf("one of cmd/cgo's own variables reached the C#:\n%s", body)
+	}
+}
+
+// cgoPhase2Admitted is the Phase 2 fixture without the one call the route refuses, as checked-in files.
 func cgoPhase2Admitted(t *testing.T) map[string]string {
 	t.Helper()
 
 	files := cgoFixtureFiles(t, cgoPhase2FixtureDir)
-	files["fixture.cgo1.go"] = withoutGoFuncs(t, files["fixture.cgo1.go"], "Deferred", "Started")
-	files["fixture.go"] = withoutGoFuncs(t, files["fixture.go"], "Deferred", "Started")
+	files["fixture.cgo1.go"] = withoutGoFuncs(t, files["fixture.cgo1.go"], "Started")
+	files["fixture.go"] = withoutGoFuncs(t, files["fixture.go"], "Started")
 	files["cgo_import.go"] = cgoOfflineImportFile(cgoPhase2Libraries)
 
 	return files

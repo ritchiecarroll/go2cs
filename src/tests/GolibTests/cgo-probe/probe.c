@@ -132,3 +132,93 @@ GO2CS_PROBE_EXPORT const char *go2cs_probe_text(void)
 {
     return "go2cs probe text";
 }
+
+// Phase 3 increment 3.1's probes (docs/phase4/DESIGN-cgo-phase3-marshaling.md §16): C strings and plain memory, taken,
+// returned and filled. Whatever this library allocates is released by go2cs_probe_release, never by the caller's own
+// free: on windows the two may be different C runtimes, each with its own heap.
+
+// A copy of text in memory this library allocates, or NULL for NULL.
+GO2CS_PROBE_EXPORT char *go2cs_probe_text_copy(const char *text)
+{
+    if (!text)
+        return 0;
+
+    size_t length = 0;
+
+    while (text[length])
+        length++;
+
+    char *copy = malloc(length + 1);
+
+    if (!copy)
+        return 0;
+
+    for (size_t i = 0; i <= length; i++)
+        copy[i] = text[i];
+
+    return copy;
+}
+
+// Writes as much of the probe text as size holds, with its NUL, into the caller's buffer, and returns its length.
+GO2CS_PROBE_EXPORT int go2cs_probe_text_fill(char *buffer, int size)
+{
+    const char *text = go2cs_probe_text();
+    int length = 0;
+
+    if (!buffer || size <= 0)
+        return 0;
+
+    while (length < size - 1 && text[length])
+    {
+        buffer[length] = text[length];
+        length++;
+    }
+
+    buffer[length] = 0;
+    return length;
+}
+
+// The sum of count bytes, each as an unsigned value: what C read behind a void pointer.
+GO2CS_PROBE_EXPORT long go2cs_probe_sum(const void *bytes, int count)
+{
+    const unsigned char *p = bytes;
+    long sum = 0;
+
+    for (int i = 0; p && i < count; i++)
+        sum += p[i];
+
+    return sum;
+}
+
+// The pointer it was handed, so the caller sees what crossed.
+GO2CS_PROBE_EXPORT void *go2cs_probe_same(void *pointer)
+{
+    return pointer;
+}
+
+// An empty call log of 32 bytes, zeroed.
+GO2CS_PROBE_EXPORT char *go2cs_probe_log_new(void)
+{
+    return calloc(32, 1);
+}
+
+// Appends one digit to a call log: the order the calls ran in, and the value each was handed.
+GO2CS_PROBE_EXPORT void go2cs_probe_log_put(char *log, int value)
+{
+    int length = 0;
+
+    if (!log)
+        return;
+
+    while (log[length])
+        length++;
+
+    if (length < 31)
+        log[length] = (char)('0' + value % 10);
+}
+
+// Releases memory this library allocated.
+GO2CS_PROBE_EXPORT void go2cs_probe_release(void *pointer)
+{
+    free(pointer);
+}

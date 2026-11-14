@@ -525,7 +525,7 @@ partial struct Pointer<T> {
 //
 //go:nosplit
 public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡp) {
-    return (ж<T>)(uintptr)(Ꮡp.Ꮡu.Load());
+    return @unsafe.Pointer.To<T>(Ꮡp.Ꮡu.Load());
 }
 
 // StoreNoWB updates the value atomically.

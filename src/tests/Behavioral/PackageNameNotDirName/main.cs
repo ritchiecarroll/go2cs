@@ -8,7 +8,7 @@ using PackageNameNotDirName.lib;
 partial class main_package {
 
 internal static void busy(@unsafe.Pointer p, int32 t, int64 rows) {
-    var db = (ж<sqlite3ꓸTdb>)(uintptr)(p);
+    var db = @unsafe.Pointer.To<sqlite3ꓸTdb>(p);
     db.FbusyTimeout = t;
     db.Frows = (sqlite3ꓸSqlite3_int64)rows;
 }

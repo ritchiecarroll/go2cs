@@ -52,7 +52,13 @@ import (
 const nativeFieldViewDoor = "@unsafe.ArrayPointer<"
 
 var reinterpretMintPattern = regexp.MustCompile(`^\s*(?:var\s+)?([A-Za-z_\p{L}][A-Za-z0-9_\p{L}]*)\s*=\s*.*\.Reinterpret<(.+)>\(\)\s*;`)
-var uintptrMintPattern = regexp.MustCompile(`^\s*(?:var\s+)?([A-Za-z_\p{L}][A-Za-z0-9_\p{L}]*)\s*=\s*\(ж<([^>]+)>\)\s*\(uintptr\)`)
+
+// uintptrMintPattern reads both spellings of a box built over a machine word: the cast `(ж<S>)(uintptr)(…)` and the
+// typed door `@unsafe.Pointer.To<S>(…)` the converter emits for Go's `(*S)(p)` since the interior-pointer cut. Over an
+// address with no provenance record the door yields the same native box, so it is the same candidate.
+// ⚠ 2026-11-14, P5: on the cast alone this census read 5 where the tree before that cut's regen read 13, with the
+// code unchanged in meaning, and nothing failed. The pointee is whichever group matched.
+var uintptrMintPattern = regexp.MustCompile(`^\s*(?:var\s+)?([A-Za-z_\p{L}][A-Za-z0-9_\p{L}]*)\s*=\s*(?:\(ж<([^>]+)>\)\s*\(uintptr\)|@unsafe\.Pointer\.To<([^>]+)>\()`)
 var inlineReinterpretViewPattern = regexp.MustCompile(`\.Reinterpret<([^()]+)>\(\)\.of\(`)
 var fieldViewPattern = regexp.MustCompile(`(^|[^A-Za-z0-9_\p{L}.])([A-Za-z_\p{L}][A-Za-z0-9_\p{L}]*)\.of\(`)
 
@@ -191,7 +197,7 @@ func scanNativeRootFieldViews(t *testing.T, root string, tracked []string) field
 					minted[mint[1]] = pointee
 				}
 			} else if mint := uintptrMintPattern.FindStringSubmatch(line); mint != nil {
-				minted[mint[1]] = mint[2]
+				minted[mint[1]] = mint[2] + mint[3]
 			}
 		}
 	}
@@ -214,6 +220,15 @@ func TestNativeRootFieldViewCensus(t *testing.T) {
 	if got := census.sites[control] + census.behindDoor[control]; got < 2 {
 		t.Fatalf("POSITIVE CONTROL: %s's port alias (RawSockaddrInet4 and RawSockaddrInet6) reads %d sites, want 2; "+
 			"the census cannot see the site it was cut beside, so its count means nothing", control, got)
+	}
+
+	// The second control is the typed-door spelling: every mint in runtime/alg.cs is `@unsafe.Pointer.To<S>(…)`
+	// since the interior-pointer regen, so a pattern that reads the cast alone reads no site there.
+	const doorControl = "src/core/runtime/alg.cs"
+
+	if census.sites[doorControl] < 1 {
+		t.Fatalf("POSITIVE CONTROL (the typed door): %s reads no site; its mints are spelled @unsafe.Pointer.To<S>(…) and "+
+			"the census has stopped reading that spelling, so its count has fallen without the code changing", doorControl)
 	}
 
 	total, door := 0, 0

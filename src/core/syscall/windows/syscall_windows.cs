@@ -95,8 +95,8 @@ internal static @string utf16PtrToString(ж<uint16> p) {
     }
     @unsafe.Pointer end = @unsafe.Pointer.FromPinnedBox(p);
     nint n = 0;
-    while (~(ж<uint16>)(uintptr)(end) != 0) {
-        end = (@unsafe.Pointer)((uintptr)end + /* unsafe.Sizeof(*p) */ (uintptr)2);
+    while (~@unsafe.Pointer.To<uint16>(end) != 0) {
+        end = @unsafe.Add(end, /* unsafe.Sizeof(*p) */ (uintptr)2);
         n++;
     }
     return UTF16ToString(@unsafe.Slice(p, n));
@@ -1466,7 +1466,7 @@ internal static (ж<procThreadAttributeListContainer>, error) newProcThreadAttri
         return (default, err);
     }
     // size is guaranteed to be ≥1 by InitializeProcThreadAttributeList.
-    var al = Ꮡ(new procThreadAttributeListContainer(data: (ж<_PROC_THREAD_ATTRIBUTE_LIST>)(uintptr)((@unsafe.Pointer)alloc)));
+    var al = Ꮡ(new procThreadAttributeListContainer(data: @unsafe.Pointer.To<_PROC_THREAD_ATTRIBUTE_LIST>((@unsafe.Pointer)alloc)));
     err = initializeProcThreadAttributeList(al.data, maxAttrCount, 0, Ꮡsize);
     if (err != nil) {
         return (default, err);

@@ -58,7 +58,7 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> f, n
             (mem, err) = (default, err); goto ᒐdone;
         }
 
-        var region = @unsafe.Slice((ж<byte>)(uintptr)((@unsafe.Pointer)addr), size);
+        var region = @unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)addr), size);
         (mem, err) = (Ꮡ(new sharedMem(
             f: f,
             region: region,

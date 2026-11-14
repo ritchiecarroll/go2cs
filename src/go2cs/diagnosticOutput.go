@@ -166,7 +166,8 @@ const (
 	diagnosticInlineArrayCapped = "GO2CS2009"
 
 	// diagnosticInlineArrayMixedPair: a reinterpret chain (*T)(unsafe.Pointer(e)) whose two struct sides both hold
-	// arrays and disagree on inline storage. A refusal: the two layouts differ (inlineArrayAdmission.go).
+	// arrays and disagree on inline storage. A refusal: the two layouts differ (inlineArrayAdmission.go). Under the
+	// automatic rule a local pair agrees by keeping its admitted side out (GO2CS2009) instead.
 	diagnosticInlineArrayMixedPair = "GO2CS2010"
 
 	// diagnosticAsmForwardSignatureRefused: a bodyless function asmForwardBodies lists (x/sys/cpu's cpuid, xgetbv)

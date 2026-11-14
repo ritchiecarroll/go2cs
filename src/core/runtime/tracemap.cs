@@ -80,7 +80,7 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
     var m = Ꮡtab.Ꮡroot;
     var hashIter = hash;
     for (;;) {
-        var n = (ж<traceMapNode>)(uintptr)(m.Load());
+        var n = @unsafe.Pointer.To<traceMapNode>(m.Load());
         if (n == nil) {
             // Try to insert a new map node. We may end up discarding
             // this node if we fail to insert because it turns out the
@@ -106,7 +106,7 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
             // Reload n. Because pointers are only stored once,
             // we must have lost the race, and therefore n is not nil
             // anymore.
-            n = (ж<traceMapNode>)(uintptr)(m.Load());
+            n = @unsafe.Pointer.To<traceMapNode>(m.Load());
         }
         if (n.hash == hash && (uintptr)len(n.data) == size) {
             if (memequal(@unsafe.Pointer.FromPinnedBox(Ꮡ(n.data, 0)), data, size)) {

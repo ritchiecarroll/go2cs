@@ -679,7 +679,7 @@ internal static void mallocinit() {
             if ((!raceenabled && i > 0x3f) || (raceenabled && i > 0x5f)) {
                 hintList = Ꮡmheap_.ᏑuserArena.of(mheap_userArena.ᏑarenaHints);
             }
-            var hint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.ᏑarenaHintAlloc.alloc());
+            var hint = @unsafe.Pointer.To<arenaHint>(Ꮡmheap_.ᏑarenaHintAlloc.alloc());
             hint.addr = Δp;
             (hint.next, hintList.ValueSlot) = (hintList.ValueSlot, hint);
         }
@@ -746,7 +746,7 @@ internal static void mallocinit() {
                 break;
             }
         }
-        var hint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.ᏑarenaHintAlloc.alloc());
+        var hint = @unsafe.Pointer.To<arenaHint>(Ꮡmheap_.ᏑarenaHintAlloc.alloc());
         hint.addr = Δp;
         (hint.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
 
@@ -754,7 +754,7 @@ internal static void mallocinit() {
         //
         // While this potentially competes with the hint above, in practice we probably
         // aren't going to be getting this far anyway on 32-bit platforms.
-        var userArenaHint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.ᏑarenaHintAlloc.alloc());
+        var userArenaHint = @unsafe.Pointer.To<arenaHint>(Ꮡmheap_.ᏑarenaHintAlloc.alloc());
         userArenaHint.addr = Δp;
         (userArenaHint.next, mheap_.userArena.arenaHints) = (mheap_.userArena.arenaHints, userArenaHint);
     }
@@ -886,10 +886,10 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
         }
 
         // Create new hints for extending this region.
-        var hint = (ж<arenaHint>)(uintptr)(h.arenaHintAlloc.alloc());
+        var hint = @unsafe.Pointer.To<arenaHint>(h.arenaHintAlloc.alloc());
         (hint.addr, hint.down) = ((uintptr)v, true);
         (hint.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
-        hint = (ж<arenaHint>)(uintptr)(h.arenaHintAlloc.alloc());
+        hint = @unsafe.Pointer.To<arenaHint>(h.arenaHintAlloc.alloc());
         hint.addr = (uintptr)v + size;
         (hint.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
     }
@@ -935,7 +935,7 @@ mapped:
             // is paged in is too expensive. Trying to account for the whole region means
             // that it will appear like an enormous memory overhead in statistics, even though
             // it is not.
-            l2 = (ж<array<ж<heapArena>>>)(uintptr)(sysAllocOS(/* unsafe.Sizeof(*l2) */ (uintptr)8388608, heapIndexˢ));
+            l2 = @unsafe.Pointer.To<array<ж<heapArena>>>(sysAllocOS(/* unsafe.Sizeof(*l2) */ (uintptr)8388608, heapIndexˢ));
             if (l2 == nil) {
                 @throw(outOfMemoryAllocatingˢ);
             }
@@ -951,9 +951,9 @@ mapped:
             @throw(arenaAlreadyInitializedˢ);
         }
         ж<heapArena> r = default;
-        r = (ж<heapArena>)(uintptr)(h.heapArenaAlloc.alloc(/* unsafe.Sizeof(*r) */ (uintptr)4368, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys, heapMetadataˢ));
+        r = @unsafe.Pointer.To<heapArena>(h.heapArenaAlloc.alloc(/* unsafe.Sizeof(*r) */ (uintptr)4368, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys, heapMetadataˢ));
         if (r == nil) {
-            r = (ж<heapArena>)(uintptr)(persistentalloc(/* unsafe.Sizeof(*r) */ (uintptr)4368, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
+            r = @unsafe.Pointer.To<heapArena>(persistentalloc(/* unsafe.Sizeof(*r) */ (uintptr)4368, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
             if (r == nil) {
                 @throw(outOfMemoryAllocatingˢ2);
             }
@@ -965,7 +965,7 @@ mapped:
             if (sizeΔ1 == 0) {
                 sizeΔ1 = physPageSize;
             }
-            var newArray = (ж<notInHeap>)(uintptr)(persistentalloc(sizeΔ1, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
+            var newArray = @unsafe.Pointer.To<notInHeap>(persistentalloc(sizeΔ1, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
             if (newArray == nil) {
                 @throw(outOfMemoryAllocatingˢ3);
             }
@@ -1029,7 +1029,7 @@ internal static void enableMetadataHugePages(this ж<mheap> Ꮡh) {
     // N.B. The arenas L1 map is quite small on all platforms, so it's fine to
     // just iterate over the whole thing.
     foreach (var i in range(len(h.arenas))) {
-        var l2 = (ж<array<ж<heapArena>>>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡ(h.arenas, i))));
+        var l2 = @unsafe.Pointer.To<array<ж<heapArena>>>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡ(h.arenas, i))));
         if (l2 == nil) {
             continue;
         }
@@ -1383,8 +1383,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcTiny(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0; // Always zero
-    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0; // Always zero
+    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
     // See if we need to replace the existing tiny block with the new one
     // based on amount of remaining free space.
     if (!raceenabled && (size < c.tinyoffset || c.tiny == 0)) {
@@ -1757,7 +1757,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanHeader(uintptr size,
     if (span.needzero != 0) {
         memclrNoHeapPointers(x, size);
     }
-    var header = (ж<ж<_type>>)(uintptr)(x);
+    var header = @unsafe.Pointer.To<ж<_type>>(x);
     x = add(x, gc.MallocHeaderSize);
     c.scanAlloc += heapSetTypeSmallHeader((uintptr)x, size - (uintptr)gc.MallocHeaderSize, Ꮡtyp, header, span);
 
@@ -2570,9 +2570,7 @@ partial struct notInHeap {
 }
 
 internal static ж<notInHeap> add(this ж<notInHeap> Ꮡp, uintptr bytes) {
-    ref var Δp = ref Ꮡp.DerefOrNull();
-
-    return (ж<notInHeap>)(uintptr)((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref Δp) + bytes));
+    return @unsafe.Pointer.To<notInHeap>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡp), bytes));
 }
 
 // redZoneSize computes the size of the redzone for a given allocation.

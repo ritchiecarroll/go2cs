@@ -34,7 +34,7 @@ public static int32 /*count*/ ScanSpanPackedReference(@unsafe.Pointer mem, ж<ui
         if ((uintptr)(ptrMask[word / (nint)goarch.PtrBits] & (((uintptr)1).Lsh((int64)(word % (nint)goarch.PtrBits)))) == 0) {
             continue;
         }
-        var ptr = ~(ж<uintptr>)(uintptr)(@unsafe.Add(mem, word * (nint)goarch.PtrSize));
+        var ptr = ~@unsafe.Pointer.To<uintptr>(@unsafe.Add(mem, word * (nint)goarch.PtrSize));
         if (ptr == 0) {
             continue;
         }

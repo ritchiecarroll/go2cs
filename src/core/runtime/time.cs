@@ -283,7 +283,7 @@ internal static ж<Δhchan> hchan(this ж<timer> Ꮡt) {
     // Note: t.arg is a chan time.Time,
     // and runtime cannot refer to that type,
     // so we cannot use a type assertion.
-    return (ж<Δhchan>)(uintptr)((~efaceOf(Ꮡt.Ꮡarg)).data);
+    return @unsafe.Pointer.To<Δhchan>((~efaceOf(Ꮡt.Ꮡarg)).data);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
