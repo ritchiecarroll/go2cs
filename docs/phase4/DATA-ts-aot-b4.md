@@ -286,14 +286,21 @@ and is the program the hello and parse-corpus comparisons run.
 
 Filing is the owner's decision. Draft text:
 
-> **Title:** NativeAOT object writer: symbol string table limited to 2 GiB (`MemoryStream`), and COFF file
-> offsets overflow `uint` without a check
+> **Title:** NativeAOT object writer: COFF file offsets overflow `uint` without a check, and the symbol string
+> table is limited to 2 GiB (`MemoryStream`)
 >
 > **Version:** ILCompiler 10.0.14 (dotnet/dotnet `0427b9abbead`), win-x64. Both limits are still present on
 > `main` as of 2026-11-14.
 >
-> **What happens.** Publishing a large application with `PublishAot` fails at the end of compilation, after
-> about three hours here:
+> **The silent one first.** `CoffObjectWriter.EmitObjectFile` accumulates section and relocation sizes into a
+> `uint dataOffset` and stores it as `PointerToRawData`, `PointerToRelocations` and `PointerToSymbolTable`
+> (`CoffObjectWriter.cs:481-505`) with no overflow check. An object whose section data and relocations exceed
+> 4 GiB would be written with wrapped offsets and no error. We have not produced such an object: the failure
+> below stops the write first. The string-table size field and the per-symbol name offsets are `uint32` too
+> (`:966-967`, `:1043-1054`).
+>
+> **The one that reports.** Publishing a large application with `PublishAot` fails at the end of compilation,
+> after about three hours here:
 >
 > ```
 > System.IO.IOException: Stream was too long.
@@ -304,19 +311,13 @@ Filing is the owner's decision. Draft text:
 >    at ILCompiler.ObjectWriter.CoffObjectWriter.EmitObjectFile(String)
 > ```
 >
-> **Cause 1, the reported failure.** `StringTableBuilder` holds the table in a `MemoryStream`
-> (`StringTableBuilder.cs:16`), which cannot exceed `int.MaxValue` bytes. Every symbol's full mangled name is
-> reserved (`CoffObjectWriter.cs:552-559`), and `NativeAotNameMangler` expands generic instantiations
-> recursively with no length cap (`NativeAotNameMangler.cs:288-304`), so an application with many generic
-> instantiations over types with long namespace-qualified names reaches 2 GiB of names well before any other
-> limit. The ELF writer uses the same class.
->
-> **Cause 2, not reported by any error.** `CoffObjectWriter.EmitObjectFile` accumulates section and relocation
-> sizes into a `uint dataOffset` and stores it as `PointerToRawData`, `PointerToRelocations` and
-> `PointerToSymbolTable` (`CoffObjectWriter.cs:481-505`) with no overflow check. An object whose section data
-> and relocations exceed 4 GiB would be written with wrapped offsets. The string-table size field and the
-> per-symbol name offsets are `uint32` too (`:966-967`, `:1043-1054`), so replacing the stream alone moves the
-> first limit to 4 GiB, not away.
+> **Its cause.** `StringTableBuilder` holds the table in a `MemoryStream` (`StringTableBuilder.cs:16`), which
+> cannot exceed `int.MaxValue` bytes. Every symbol's full mangled name is reserved
+> (`CoffObjectWriter.cs:552-559`), and `NativeAotNameMangler` expands generic instantiations recursively with
+> no length cap (`NativeAotNameMangler.cs:288-304`), so an application with many generic instantiations over
+> types with long namespace-qualified names reaches 2 GiB of names well before any other limit. The ELF
+> writer uses the same class. Replacing the stream alone moves this limit to the 4 GiB of the `uint32` fields
+> above, not away.
 >
 > **Scale, for reference.** A two-line program in the same code base produces a 1.45 GB object with 3.87 million
 > symbols and a 453 MB string table, 97.5% of it names containing a generic instantiation, mean length 170 bytes.
