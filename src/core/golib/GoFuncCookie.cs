@@ -112,9 +112,9 @@ namespace go;
 
         RequireWordSize(IntPtr.Size);
 
-        // A delegate built over another delegate (`new F(g)`, which is how a func value converts to
-        // another delegate type) invokes g and stands for it: Go's conversion keeps the funcval.
-        if (fn.Target is Delegate wrapped && fn.Method.Name == "Invoke" && fn.Method.DeclaringType == wrapped.GetType())
+        // A delegate built over another delegate (`new F(g)` in hand-written C#, or a rebind) invokes g and stands for
+        // it, as Go's conversion keeps the funcval; an M:N pair stands for its plain delegate. golib's one unwrap rule.
+        if (golib.GoFuncPair.Underlying(fn) is var wrapped && !ReferenceEquals(wrapped, fn))
         {
             nuint innerWord = Of(wrapped);
 

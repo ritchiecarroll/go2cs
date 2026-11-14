@@ -58,14 +58,14 @@ public sealed partial class Goroutine
             return;
         }
 
-        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, entry.Method);
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, GoFuncPair.Underlying(entry).Method);
 
         // As StartWithCreator: the goroutine exists, in its bubble and in the registry, before the go statement ends.
         long parentId = t_current?.Id ?? 0;
         SyncTestBubble? bubble = t_current?.m_bubble;
         bubble?.Spawned();
 
-        Goroutine goroutine = Register(isMain: false, creator, parentId, entry.Method, s_profileLabels.Value, ilOffset);
+        Goroutine goroutine = Register(isMain: false, creator, parentId, GoFuncPair.Underlying(entry).Method, s_profileLabels.Value, ilOffset);
         goroutine.m_multiplexed = true;
 
         if (ExecutionTracer.Enabled)

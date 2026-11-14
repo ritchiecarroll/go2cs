@@ -1229,8 +1229,8 @@ namespace go.golib;
         // Captured HERE, on the thread executing the `go` statement -- the new thread's first frame
         // is Run, which knows nothing about who asked for it. `body` IS the goroutine's start
         // function on this overload: nothing wrapped it, so its Method names the Go function.
-        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, body.Method);
-        StartWithCreator(body, creator, ilOffset, body.Method, stack: stack);
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, GoFuncPair.Underlying(body).Method);
+        StartWithCreator(body, creator, ilOffset, GoFuncPair.Underlying(body).Method, stack: stack);
     }
 
     /// <summary>
@@ -1259,8 +1259,8 @@ namespace go.golib;
     /// </summary>
     public static void Start(Action body, Delegate entry, GoStack stack, string callerFile, int callerLine)
     {
-        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, entry.Method);
-        StartWithCreator(body, creator, ilOffset, entry.Method, stack: stack);
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, GoFuncPair.Underlying(entry).Method);
+        StartWithCreator(body, creator, ilOffset, GoFuncPair.Underlying(entry).Method, stack: stack);
     }
 
     // The creator of a `go` statement, ONCE per site. CreatorFrame resolves a frame for every frame on the stack, so
@@ -1307,7 +1307,7 @@ namespace go.golib;
     /// a runtime function -- so classifying by it would make every guard a user goroutine.
     /// </remarks>
     internal static void StartForGuard(Action body, System.Reflection.MethodBase? creator) =>
-        StartWithCreator(body, creator, System.Diagnostics.StackFrame.OFFSET_UNKNOWN, body.Method, systemBasis: creator);
+        StartWithCreator(body, creator, System.Diagnostics.StackFrame.OFFSET_UNKNOWN, GoFuncPair.Underlying(body).Method, systemBasis: creator);
 
     private static void StartWithCreator(Action body, System.Reflection.MethodBase? creator, int creatorILOffset, System.Reflection.MethodBase? entry,
         System.Reflection.MethodBase? systemBasis = null, GoStack stack = GoStack.Default)
@@ -1579,10 +1579,10 @@ namespace go.golib;
     // The goroutine ROOT itself, on the CALLING thread. Start queues it; GolibTests calls it directly,
     // because the root's policy can only be observed from a thread whose exception the caller can
     // still catch — the real path ends in an unhandled exception and a dead process by design.
-    internal static void Run(Action body) => Run(body, creator: null, parentId: 0, entry: body.Method);
+    internal static void Run(Action body) => Run(body, creator: null, parentId: 0, entry: GoFuncPair.Underlying(body).Method);
 
     // A goroutine whose creator was in a synctest bubble (and already counted it there) joins it here.
-    internal static void Run(Action body, SyncTestBubble? bubble) => Run(body, creator: null, parentId: 0, entry: body.Method, bubble);
+    internal static void Run(Action body, SyncTestBubble? bubble) => Run(body, creator: null, parentId: 0, entry: GoFuncPair.Underlying(body).Method, bubble);
 
     internal static void Run(Action body, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry) =>
         Run(body, creator, parentId, entry, bubble: null);

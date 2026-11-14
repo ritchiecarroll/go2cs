@@ -499,7 +499,7 @@ namespace go;
         if (deferred.Target is RecoveringCall recovering)
             deferred = recovering.Call;
 
-        return catcher is not null && catcher != RunMethod && deferred.Method == catcher;
+        return catcher is not null && catcher != RunMethod && golib.GoFuncPair.Underlying(deferred).Method == catcher;
     }
 
     // GO'S DIRECT-CALL RULE FOR recover (COORD ruling 2026-10-22, Option B). recover returns nil unless it is called

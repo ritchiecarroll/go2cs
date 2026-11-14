@@ -1972,7 +1972,7 @@ public static partial class GoReflect
     /// </remarks>
     public static nint[]?[]? FuncParamDims(object? funcValue)
     {
-        if (funcValue is not Delegate d || d.Method is not { } method)
+        if (funcValue is not Delegate d || GoFuncPair.Underlying(d).Method is not { } method)
             return null;
 
         ParameterInfo[] declared = method.GetParameters();
@@ -2047,13 +2047,7 @@ public static partial class GoReflect
         if (funcValue is not Delegate outer || outer.GetType().GetMethod("Invoke") is not { } invoke)
             return (null, null);
 
-        Delegate current = outer;
-
-        for (int hops = 0; hops < 8 && current.Target is Delegate inner && current.Method.Name == "Invoke" &&
-                           current.Method.DeclaringType == inner.GetType(); hops++)
-        {
-            current = inner;
-        }
+        Delegate current = GoFuncPair.Underlying(outer);
 
         MethodInfo method = current.Method;
 

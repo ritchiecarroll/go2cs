@@ -149,8 +149,8 @@ namespace go;
 
     /// <summary>True when <paramref name="d"/> is a Go method value: a method with its receiver bound.</summary>
     public static bool IsMethodValue(Delegate d) =>
-        d.Target is not null &&
-        d.Method is { DeclaringType: not null } method &&
+        golib.GoFuncPair.Underlying(d) is { Target: not null } underlying &&
+        underlying.Method is { DeclaringType: not null } method &&
         method.Name.Length > 0 && method.Name[0] != '<';
 
     /// <summary>The identity a method value of <paramref name="method"/> tokens by: one object per method.</summary>
@@ -462,9 +462,9 @@ namespace go;
         // Remember a delegate's METHOD strongly beside the weak box, so the token still answers its
         // name after every delegate sharing it has been collected. Written before the weak store is
         // observable to a reader, so a token that resolves at all resolves completely.
-        if (box is Delegate del && del.Method is not null)
+        if (box is Delegate del && golib.GoFuncPair.Underlying(del).Method is { } delMethod)
         {
-            s_delegateMethods[token] = del.Method;
+            s_delegateMethods[token] = delMethod;
 
             if (IsMethodValue(del))
                 s_methodValueTokens.TryAdd(token, 0);
