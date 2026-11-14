@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using @unsafe = go.unsafe_package;
+using reflect = go.reflect_package;
 
 namespace GolibTests;
 
@@ -153,6 +154,48 @@ public class NativeArrayViewFloorTests
 
         Assert.IsTrue(fromZero == nil, "the number 0 at an array pointee is a nil pointer");
         Assert.IsTrue(fromNil == nil, "the typed door over a nil unsafe.Pointer is a nil pointer");
+    }
+
+    /// <summary>
+    /// OPEN, and this arm asserts the MEASURED answer, not Go's: a nil <c>*[N]T</c> reached through a number or
+    /// through <c>unsafe.Pointer(nil)</c> carries no length, so reflect reads 0 where Go reads N.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Go: <c>reflect.TypeOf((*[4]byte)(unsafe.Pointer(nil))).Elem().Len()</c> is 4. Here the pointee type is
+    /// <c>array&lt;byte&gt;</c>, which carries its length in the VALUE, and a nil pointer has no value. The
+    /// language's own nil, <c>(*[4]byte)(nil)</c>, is emitted as <c>NilBoxOfDims(4)</c> and answers 4 (the control).
+    /// The conversion from a number has no N to carry: its type argument is <c>array&lt;byte&gt;</c> and nothing else.
+    /// golib cannot cure that from its side. The cure is a conversion that is handed N, which is what the
+    /// array-pointer creation door is (docs/phase4/DESIGN-array-pointer-doors.md, door A).
+    /// </para>
+    /// <para>
+    /// The BOARD row is "a nil array pointer made from a number carries no length" (P5, 2026-11-14). Whoever
+    /// cures it turns the two MEASURED assertions below into Go's answer, 4. <c>len(p)</c> is not in this arm:
+    /// the converter writes the constant N for len of an array pointer whose operand neither calls nor receives,
+    /// so converted code already answers N for this pointer.
+    /// </para>
+    /// </remarks>
+    [TestMethod]
+    public void ANilArrayPointerFromANumberCarriesNoLengthWhereTheLanguagesNilDoes()
+    {
+        ж<array<byte>> languageNil = go.ж<array<byte>>.NilBoxOfDims(4);
+        ж<array<byte>> fromZero = (ж<array<byte>>)(uintptr)0;
+        ж<array<byte>> fromNil = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)default(NilType));
+
+        Assert.AreEqual((nint)4, reflect.TypeOf(languageNil).Elem().Len(), "the control: the language's nil carries its length");
+        CollectionAssert.AreEqual(new nint[] { 4 }, GoReflect.PointeeArrayDims(languageNil), "the control, at the bridge");
+
+        foreach (ж<array<byte>> pointer in new[] { fromZero, fromNil })
+        {
+            Assert.IsTrue(pointer == languageNil, "two nil pointers of one Go type are equal");
+            Assert.IsTrue(reflect.ValueOf(pointer).IsNil(), "reflect.ValueOf(p).IsNil()");
+            Assert.AreEqual(reflect.Array, reflect.TypeOf(pointer).Elem().Kind(), "reflect.TypeOf(p).Elem().Kind()");
+
+            // MEASURED. Go answers 4 and [4].
+            Assert.AreEqual((nint)0, reflect.TypeOf(pointer).Elem().Len(), "MEASURED: no length rides a nil made from a number (the BOARD row)");
+            Assert.IsNull(GoReflect.PointeeArrayDims(pointer), "MEASURED: the bridge has no dims to read");
+        }
     }
 
     /// <summary>

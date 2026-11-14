@@ -7,6 +7,7 @@ using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using @unsafe = go.unsafe_package;
+using reflect = go.reflect_package;
 
 namespace GolibTests;
 
@@ -222,6 +223,61 @@ public class NamedArrayViewFloorTests
 
         Assert.IsTrue(fromNil == nil, "the typed door over a nil unsafe.Pointer is a nil pointer");
         Assert.IsTrue(fromZero == nil, "the number 0 is a nil pointer");
+    }
+
+    /// <summary>
+    /// A nil pointer to a named array reads as a nil pointer, and its type still answers its length.
+    /// </summary>
+    /// <remarks>
+    /// Go: <c>p := (*A)(unsafe.Pointer(uintptr(0)))</c> is nil, <c>reflect.TypeOf(p).Elem().Len()</c> is the
+    /// declared length with no pointee to measure, and <c>*p</c> is a nil pointer dereference. The floor is about
+    /// REAL addresses. Measured 2026-11-14, with the refusal at the read and no test of the address: the read of
+    /// this nil box answered "cannot view native memory as FloorSmallMem", where a nil box of every other
+    /// pointee answers the nil dereference. The control below is that other pointee.
+    /// </remarks>
+    [TestMethod]
+    public void ANilNamedArrayPointerReadsAsANilPointerAndItsTypeAnswersItsLength()
+    {
+        ж<FloorSmallMem> fromZero = (ж<FloorSmallMem>)(uintptr)0;
+        ж<FloorSmallMem> fromNil = @unsafe.Pointer.To<FloorSmallMem>((@unsafe.Pointer)default(NilType));
+        ж<nint> control = (ж<nint>)(uintptr)0;
+
+        // Assigned and kept, because a discarded ref return is never loaded and so never faults.
+        Exception? expected = Caught(() => { nint read = control.Value; GC.KeepAlive(read); });
+
+        Assert.IsNotNull(expected, "the control, a nil pointer to an int read through its box, must throw");
+
+        foreach (ж<FloorSmallMem> pointer in new[] { fromZero, fromNil })
+        {
+            reflect.ΔType type = reflect.TypeOf(pointer);
+
+            Assert.AreEqual(reflect.ΔPointer, type.Kind(), "reflect.TypeOf(p).Kind()");
+            Assert.AreEqual(reflect.Array, type.Elem().Kind(), "reflect.TypeOf(p).Elem().Kind()");
+            Assert.AreEqual((nint)64, type.Elem().Len(), "the length is the type's: there is no pointee to measure");
+            Assert.IsTrue(reflect.ValueOf(pointer).IsNil(), "reflect.ValueOf(p).IsNil()");
+
+            foreach (Action read in new Action[] { () => _ = pointer.Value.Length, () => pointer.Value[1] = 3 })
+            {
+                Exception? caught = Caught(read);
+
+                Assert.IsNotNull(caught, "a read through a nil pointer must throw");
+                Assert.AreEqual(expected.GetType(), caught.GetType(), $"a nil named-array pointer must answer what every nil pointer answers; it answered: {caught.Message}");
+                Assert.IsFalse(caught.Message.Contains("cannot view native memory"), "the number 0 is not an address, so the floor's text is not its answer");
+            }
+        }
+    }
+
+    private static Exception? Caught(Action read)
+    {
+        try
+        {
+            read();
+            return null;
+        }
+        catch (Exception caught)
+        {
+            return caught;
+        }
     }
 
     /// <summary>
