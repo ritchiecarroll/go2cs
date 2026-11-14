@@ -398,11 +398,12 @@ public sealed partial class TwinGenerator
         // N3's D3 core, the PAIR: a literal in this twin body whose body can park -- awaits from pair tests do not count,
         // since a literal is never paired for calling a func value (the caller rule's question) -- becomes its plain and
         // twin lambdas in one expression (so C# gives them one closure), handed out as its own delegate type bound to the
-        // pair's Invoke. A goǃ literal is the go statement's (GoLiteral); an expression body and a signature that cannot
-        // carry a twin stay plain.
+        // pair's Invoke. An expression body pairs too: it is how the converter spells a bound method value (fix 2 of 9.3),
+        // the receiver snapshotted once into a local both halves capture. A goǃ literal is the go statement's (GoLiteral);
+        // a signature that cannot carry a twin stays plain.
         private ExpressionSyntax? PairLiteral(LambdaExpressionSyntax node)
         {
-            if (!m_run.Pairs || m_passive > 0 || node.Body is not BlockSyntax || node.Modifiers.Any(SyntaxKind.AsyncKeyword) ||
+            if (!m_run.Pairs || m_passive > 0 || node.Modifiers.Any(SyntaxKind.AsyncKeyword) ||
                 node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "goǃ" } } } } ||
                 m_model.GetTypeInfo(node).ConvertedType is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } type ||
                 Run.TwinDelegateType(type) is not { } twinType)

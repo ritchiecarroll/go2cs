@@ -60,11 +60,21 @@ public class TwinFuncPairTests
                 f();
             }
 
+            // A value-receiver method whose body parks; `r.wait` is a bound method value. (A pointer receiver is
+            // `this ref`, which the generator refuses to twin, byref-param: no twin, so no pair.)
+            public static void wait(this nint r) { ᐸꟷ(ch); }
+
             // A twin (it reaches caller); its literal parks, so the twin body makes it a pair.
             public static void main()
             {
                 caller(() => { ᐸꟷ(ch); });
                 onlyCalls(() => { });
+
+                // Fix 2: a bound method value, as the converter emits it -- the receiver snapshotted ONCE into a local,
+                // then an expression-bodied literal over it. Both halves of the pair capture that one local.
+                nint r = 3;
+                var rʗ1 = r;
+                caller(() => rʗ1.wait());
             }
         }
         """;
@@ -119,6 +129,15 @@ public class TwinFuncPairTests
 
         StringAssert.Contains(caller, "global::go.golib.GoFuncPair", "the call through f tests its target for a pair");
         StringAssert.Contains(caller, ".Twin", "and awaits the pair's twin");
+    }
+
+    [TestMethod]
+    public void ABoundMethodValueIsAPairOverItsOneReceiverSnapshot()
+    {
+        string main = Body(Run().twins, "main");
+
+        StringAssert.Contains(main, "async () => await rʗ1.waitꞏtwin()", "the twin half awaits the method's twin over the same snapshot");
+        StringAssert.Contains(main, "(() => rʗ1.wait(), ", "the plain half is the literal as written, over the same snapshot");
     }
 
     [TestMethod]

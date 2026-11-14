@@ -405,11 +405,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
             base.VisitInvocationExpression(node);
         }
 
-        // N3's D3 core: a block-bodied literal in the function's own body may become a pair, so its calls are ACTIVE (its
+        // N3's D3 core: a literal in the function's own body may become a pair, so its calls are ACTIVE (its
         // twin lambda awaits them) but never DIRECT, as a go literal's: they never make the enclosing function park.
         public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
         {
-            bool pairable = run.Pairs && m_passive == 0 && node.Body is BlockSyntax && !node.Modifiers.Any(SyntaxKind.AsyncKeyword);
+            bool pairable = run.Pairs && m_passive == 0 && !node.Modifiers.Any(SyntaxKind.AsyncKeyword);
 
             if (pairable) m_literal++; else m_passive++;
             base.VisitParenthesizedLambdaExpression(node);
@@ -418,7 +418,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         public override void VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
         {
-            bool pairable = run.Pairs && m_passive == 0 && node.Body is BlockSyntax && !node.Modifiers.Any(SyntaxKind.AsyncKeyword);
+            bool pairable = run.Pairs && m_passive == 0 && !node.Modifiers.Any(SyntaxKind.AsyncKeyword);
 
             if (pairable) m_literal++; else m_passive++;
             base.VisitSimpleLambdaExpression(node);
