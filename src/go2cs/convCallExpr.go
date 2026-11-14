@@ -315,6 +315,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// (goImageCopyView.go); marked before the arguments are converted.
 	v.markGoImageCopyArgs(callExpr)
 
+	// A copy into or out of the open view of a named array, `copy((*A)(p)[lo:], src)`, is one of golib's copy
+	// doors (arrayPointerViewDoor.go).
+	if door, ok := v.arrayPointerCopyDoor(callExpr); ok {
+		return door
+	}
+
 	// The //go:cgo_unsafe_args block lift (cgoUnsafeArgsLift.go): the ONE `unsafe.Pointer(&first)` the
 	// current declaration's lift consumes renders as the synthesized block's pinned box. Intercepted
 	// ahead of every arm because the conversion reaches two of them -- the type-conversion arm for a
