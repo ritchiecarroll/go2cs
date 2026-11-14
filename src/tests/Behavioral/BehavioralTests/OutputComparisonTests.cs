@@ -695,6 +695,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForeignAnonStructAliasAlias() => CheckTarget("ForeignAnonStructAliasAlias");
 
     [TestMethod]
+    public void CheckForeignAnonStructAliasElemAddress() => CheckTarget("ForeignAnonStructAliasElemAddress");
+
+    [TestMethod]
     public void CheckForeignConstraintProxy() => CheckTarget("ForeignConstraintProxy");
 
     [TestMethod]

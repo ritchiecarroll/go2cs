@@ -1269,6 +1269,16 @@ func (v *Visitor) isForeignAliasOfNamed(t types.Type) bool {
 	return isNamed
 }
 
+// isPublishedForeignAnonStructAlias reports whether t is another package's alias of a non-empty ANONYMOUS struct
+// whose lift that package published (foreignAnonStructAliasTarget): libc's real `stdio.FILE` is `type FILE =
+// X_iobuf` with `type X_iobuf = struct{...}` (ccgo), so isForeignAliasOfNamed's defined-type test misses it
+// (sqlite-cs W5a). Its declarations already spell it `stdioꓸFILE`; an unpublished one keeps its path.
+func (v *Visitor) isPublishedForeignAnonStructAlias(t types.Type) bool {
+	_, ok := foreignAnonStructAliasTarget(t, v.pkg)
+
+	return ok
+}
+
 // foreignAliasedTypeName resolves a cross-package type that is RENAMED (or Go-aliased) inside
 // its own package — syscall declares `ΔHandle` for its type-vs-method-colliding `Handle` — to
 // the recorded imported-type alias (`syscallꓸHandle` = `go.syscall_package.ΔHandle`): the raw
