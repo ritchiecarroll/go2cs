@@ -38110,4 +38110,38 @@ for each class that reads 0 everywhere, and a finding for each that does not.
 
 — P5 (2026-11-14)
 
+## 2026-11-14 — P5 (closes the 2026-11-14 `MintOpaque` row above; COORD, 13:04Z): `ManagedPointerTokens.MintOpaque`'s callers each hold their box — CLOSED, holds by construction
+
+**The read** (text, at `fb79ad6afb`; nothing run, nothing changed). The converter emits the mint only for
+`T(unsafe.Pointer(p))` where `T`'s underlying type is `*struct{}` (`convCallExpr.go`, `opaquePointerMintEmission`).
+Go 1.26.10's standard library outside `cmd` declares two such types, `syscall.Pointer` (`types_windows.go:343`) and
+sync's `dequeueNil` (`poolqueue.go:63`). `dequeueNil` is converted only from `nil`, so it never takes the mint. One
+Go site converts to `syscall.Pointer`: `crypto/x509/root_windows.go:125`. No `_test.go` in the standard library has
+the shape.
+
+**The callers, all of them:**
+
+- `src/core/crypto/x509/windows/root_windows.cs:142` (`checkChainSSLServerPolicy`), over `sslPara`;
+- `src/tests/Behavioral/SystemCertVerify/main.cs:152`, the same shape, over `sslPara`.
+
+Both pass a box of `syscall.SSLExtraCertChainPolicyPara`, whose `ServerName` is a pointer
+(`src/core/syscall/windows/types_windows.cs`). A pointee that holds a reference takes the mint's second answer: the
+box's order token, with the minted box holding the source box (`s_mintedReferents`). The minted box is stored in
+`para.ExtraPolicyPara`; `para` is the argument of `CertVerifyCertificateChainPolicy`, whose hand-owned wrapper
+resolves the token back to the box before the native call (`zsyscall_windows_certchain_impl.cs`). Each caller holds
+its box across the use. GolibTests' `ManagedPointerTokenMintTests` calls the mint directly; it is the mint's own
+test, not a consumer.
+
+**What stays as the row above describes.** The third answer over a managed box (a pointee with no reference) keeps
+nothing of its source, and no caller in `src/core`, in a committed converted test or in the behavioral corpus
+reaches it. A caller that would: user code, or a later Go release, that converts a pointer to a reference-free
+struct to `syscall.Pointer`. The fix named in the row above stands for that day; it is not made here.
+
+**One stale comment, not changed:** `src/core/internal/syscall/windows/windows/syscall_windows_impl.cs` says
+internal/poll mints `msg.Name` with `MintOpaque`. At this corpus internal/poll emits `msg.Name = Ꮡrsa.Ꮡname`
+(`src/core/internal/poll/windows/fd_windows.cs:178`), no mint. NOT READ: whether that consumer's `Resolve` still
+finds its box by another route; the banked windows `net` row is evidence that it does, not a reading.
+
+— P5 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
