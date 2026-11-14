@@ -792,7 +792,7 @@ public static @unsafe.Pointer reflect_resolveTypeOff(@unsafe.Pointer Δrtype, in
 //
 //go:linkname reflect_resolveTextOff reflect.resolveTextOff
 public static @unsafe.Pointer reflect_resolveTextOff(@unsafe.Pointer Δrtype, int32 off) {
-    return (uintptr)toRType((ж<_type>)(uintptr)(Δrtype)).textOff((textOff)off);
+    return toRType((ж<_type>)(uintptr)(Δrtype)).textOff((textOff)off);
 }
 
 // reflectlite_resolveNameOff resolves a name offset from a base pointer.

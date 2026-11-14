@@ -121,7 +121,7 @@ internal static void drop(this ж<traceRegionAlloc> Ꮡa) {
         a.full = block.next;
         sysFree(@unsafe.Pointer.FromPinnedBox(block), /* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys);
     }
-    @unsafe.Pointer current = (uintptr)Ꮡa.Ꮡcurrent.Load(); if (current != nil) {
+    @unsafe.Pointer current = Ꮡa.Ꮡcurrent.Load(); if (current != nil) {
         sysFree(current, /* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys);
         Ꮡa.Ꮡcurrent.Store(nil);
     }

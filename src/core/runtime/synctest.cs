@@ -103,7 +103,7 @@ internal static void changegstatus(this ж<synctestBubble> Ꮡbubble, ж<g> Ꮡg
             if (raceenabled && newval != _Gdead && newval != _Gdeadextra) {
                 // Record that this goroutine parking happens before
                 // any subsequent Wait.
-                racereleasemergeg(ref (Ꮡgp).DerefOrNull(), (uintptr)Ꮡbubble.raceaddr());
+                racereleasemergeg(ref (Ꮡgp).DerefOrNull(), Ꮡbubble.raceaddr());
             }
         }
     }
@@ -285,7 +285,7 @@ internal static void synctestRun(Action fʗp) {
         if (raceenabled) {
             // Establish a happens-before relationship between bubbled goroutines exiting
             // and Run returning.
-            raceacquireg(ref (gp).DerefOrNull(), (uintptr)(~gp).bubble.raceaddr());
+            raceacquireg(ref (gp).DerefOrNull(), (~gp).bubble.raceaddr());
         }
         if (total != 1) {
             @string reason = default;
@@ -360,7 +360,7 @@ internal static void synctestWait() {
     // Establish a happens-before relationship on the activity of the now-blocked
     // goroutines in the bubble.
     if (raceenabled) {
-        raceacquireg(ref (gp).DerefOrNull(), (uintptr)(~gp).bubble.raceaddr());
+        raceacquireg(ref (gp).DerefOrNull(), (~gp).bubble.raceaddr());
     }
 }
 

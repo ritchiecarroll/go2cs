@@ -2746,6 +2746,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUnsafePointerArgPassing() => CheckTarget("UnsafePointerArgPassing");
 
     [TestMethod]
+    public void CheckUnsafePointerCallResultLifetime() => CheckTarget("UnsafePointerCallResultLifetime");
+
+    [TestMethod]
     public void CheckUnsafePointerInferredNoImport() => CheckTarget("UnsafePointerInferredNoImport");
 
     [TestMethod]

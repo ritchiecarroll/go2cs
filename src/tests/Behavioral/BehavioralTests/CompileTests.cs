@@ -2746,6 +2746,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUnsafePointerArgPassing() => CheckTarget("UnsafePointerArgPassing");
 
     [TestMethod]
+    public void CheckUnsafePointerCallResultLifetime() => CheckTarget("UnsafePointerCallResultLifetime");
+
+    [TestMethod]
     public void CheckUnsafePointerInferredNoImport() => CheckTarget("UnsafePointerInferredNoImport");
 
     [TestMethod]

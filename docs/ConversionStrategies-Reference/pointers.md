@@ -881,7 +881,7 @@ func (u *UnsafePointer) Load() unsafe.Pointer { return Loadp(unsafe.Pointer(&u.v
 <!-- source: src/core/internal/runtime/atomic/types.cs:467-469 -->
 ```csharp
 public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
-    return (uintptr)Loadp(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue));
+    return Loadp(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue));
 }
 ```
 > `FromBox` carries the transient numeric address (**not GC-stable** — the caveat of every `unsafe.Pointer`-as-`uintptr` use) **and the source box itself** (`Pointer.RetainedSource`, the `NativeBox` §4 retention pattern). The retained referent is what makes the bare-`unsafe.Pointer` atomic primitives real: `*(*unsafe.Pointer)(ptr) = val` must write the memory the pointer names, not the argument box's own `uintptr` slot, so `StorepNoWB`/`Loadp` recover the referent (`StoreThrough`/`LoadThrough`, dispatching through golib's internal `IUntypedSlotAccess` seam on `ж<T>`) and reach the very slot the pointer names. <!-- Without the retained source they were silently non-functional: internal/runtime/atomic's TestStorepNoWB, the 14/15. --> A pointer with no recoverable referent panics **by name** instead of losing the write. A nil box mints the 0 address, never a nil-deref panic — Go's `unsafe.Pointer(nil)`, matching the pointer-parameter emission. The `*unsafe.Pointer` siblings (`Casp1`/`storePointer`/`casPointer`) were always correct by signature — they carry an aliasing `ж<unsafe.Pointer>`. A pointer **receiver** keeps `FromRef` (a `this ref T` receiver has no box to retain) — the one non-retaining mint, a recorded residual, loud at the primitives if ever reached. (The reinterpret pattern `*(*U)(unsafe.Pointer(&x))` is handled separately and is not affected. Guarded by `GolibTests`' `UnsafePointerRetentionTests`, failing-first against the `FromRef` emission, plus `internal/runtime/atomic`'s own test suite.)
@@ -1094,7 +1094,7 @@ internal static (nint n, error err) recvfrom(nint fd, slice<byte> p, nint flags,
 }
 ```
 
-The MANAGED-callee member of the same class (runtime's `TestSmhasherWindowed` is the corpus case <!-- measured 2026-09-05 -->): the converter bridges every value-consumed call whose RESULT is `unsafe.Pointer` with `(uintptr)` (`convCallExpr`), so `memhash32(noescape(unsafe.Pointer(&i)), seed)` hands the callee a number with the Pointer's retained source stripped, and the frame-minted box `Ꮡi` has no reference left after `FromPinnedBox` returns. A bridged `unsafe.Pointer`-returning CALL argument (not a conversion, not a builtin) over `unsafe.Pointer(&x)` of a frame-minted local — a parameter re-minted as a box included — names `Ꮡx` for a `System.GC.KeepAlive(Ꮡx)` after the statement (`bridgedWrapperKeepAliveBoxes`); a `return f(…)` hoists the call into a `ᴛN` temp so the KeepAlive sits between the call and the return:
+The MANAGED-callee member of the same class (runtime's `TestSmhasherWindowed` is the corpus case <!-- measured 2026-09-05 -->): a callee that returns an `unsafe.Pointer` may hand back one that carries nothing. `noescape` is the corpus's own: it takes its pointer through a `uintptr` and back, which is how Go hides a pointer from escape analysis, so in `memhash32(noescape(unsafe.Pointer(&i)), seed)` the pointer `memhash32` receives is a number, and the frame-minted box `Ꮡi` has no reference left after `FromPinnedBox` returns. <!-- Until 2026-11-13 the converter itself stripped the box here, by casting every value-consumed call result of type unsafe.Pointer to (uintptr); that cast is gone (the next section), and this drain stays for a callee that drops the box on its own. --> An `unsafe.Pointer`-returning CALL argument (not a conversion, not a builtin) over `unsafe.Pointer(&x)` of a frame-minted local — a parameter re-minted as a box included — names `Ꮡx` for a `System.GC.KeepAlive(Ꮡx)` after the statement (`bridgedWrapperKeepAliveBoxes`); a `return f(…)` hoists the call into a `ᴛN` temp so the KeepAlive sits between the call and the return:
 
 ```go
 func int32Hash(i uint32, seed uintptr) uintptr {
@@ -1107,13 +1107,54 @@ func int32Hash(i uint32, seed uintptr) uintptr {
 internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
 
-    var ᴛ2 = memhash32((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    var ᴛ2 = memhash32(noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
     System.GC.KeepAlive(Ꮡi);
     return ᴛ2;
 }
 ```
 
 Boundaries, each guarded in `syscallFunnelSet_test.go`: a BARE `f(unsafe.Pointer(&x))` argument is not bridged (the Pointer retains its box through the call) and records nothing; a package-level variable's box is a static field and records nothing; an outer CONVERSION (`n := uintptr(noescape(unsafe.Pointer(&i)))`, runtime's `stdcallN` / `mstart0` shape) records nothing, because a stored number is outside the class — a KeepAlive after the store would hold the box exactly as far as the store. The drain is per STATEMENT: a box named inside an `if` condition is kept alive by the first statement after the call (inside the body or after the `if` — a use on any path after the call keeps the local live at it); a `for` INIT/POST clause, emitted inside the C# header where no statement can follow, is refused by name (`rejectForClauseKeepAlive`), as a deferred or spawned call is (the contract is statement-scoped and a `defer` runs at unwind); a function literal converts its body against an EMPTY pending list and restores the enclosing statement's afterwards, so a box the enclosing call named before its literal argument was converted is never drained inside the lambda. `src/syscall-keepalive-census.ps1` walks the converted emission: every captured temp has exactly one KeepAlive (arm 1), hand-own pointer arguments are held across their call (arm 2), and no raw pointer-derived funnel argument remains (arm 3) <!-- arm 3 was red on the pre-cut darwin emission, which had never been through the funnel path: RED 104 -->.
+
+## A call that returns an `unsafe.Pointer` is emitted as the call itself — the pointer keeps what it carries
+
+Go's `unsafe.Pointer` keeps its referent alive, wherever it came from: a conversion, or the result of a call. A converted `unsafe.Pointer` [carries the box it was minted from](#converting-a-go-pointer-to-unsafepointer), and the box holds the pin that keeps its storage where the pointer's number says it is. So a call whose result type is `unsafe.Pointer` is emitted as the call, with nothing between it and whatever consumes it: a `return`, a variable, an argument, a comparison.
+
+```go
+func added(b []byte) unsafe.Pointer { return unsafe.Add(unsafe.Pointer(&b[0]), 4) }
+
+func held(b []byte) unsafe.Pointer {
+	p := unsafe.Add(unsafe.Pointer(&b[0]), 8)
+	return p
+}
+
+func same(p unsafe.Pointer) unsafe.Pointer { return p }
+
+func own(b []byte) unsafe.Pointer { return same(unsafe.Pointer(&b[0])) }
+```
+
+<!-- source: src/tests/Behavioral/UnsafePointerCallResultLifetime/main.cs.target:12-21 -->
+```csharp
+internal static partial @unsafe.Pointer added(slice<byte> b) { return @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), 4); }
+
+internal static partial @unsafe.Pointer held(slice<byte> b) {
+    @unsafe.Pointer p = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), 8);
+    return p;
+}
+
+internal static partial @unsafe.Pointer same(@unsafe.Pointer p) { return p; }
+
+internal static partial @unsafe.Pointer own(slice<byte> b) { return same(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0))); }
+```
+
+`Ꮡ(b, 0)` is the element pointer `&b[0]`, and `FromPinnedBox` is the mint of `unsafe.Pointer(p)` that pins and carries its box.
+
+**Why.** A `(uintptr)` cast on the call's result turns the pointer into a number, and the number converts back to a fresh pointer that carries nothing. Nothing then holds the pin, the collector may move the storage, and a write through the pointer no longer reaches it. <!-- The converter emitted that cast on every true call returning unsafe.Pointer until 2026-11-13. A program with no cgo lost a write through `p := f(q)` after a collection and died with an internal CLR error where Go printed its answer: docs/phase4/DESIGN-unsafe-pointer-call-result.md. -->
+
+**`unsafe.Add` is such a call.** Over a pointer that carries a box it returns a pointer that still does: a native box at the new address, which retains what the pointer carried. A bare number, a token and C memory keep the plain number.
+
+**Limits.** The conversion `unsafe.Pointer(x)` has its own emission, above. A consumer that needs a number builds its own cast: a pointer cast `(*T)(f())` and `uintptr(f())` both do, and a number stored in a `uintptr` keeps nothing alive, as in Go. A callee that takes its pointer through a `uintptr` returns a pointer that carries nothing; the [`GC.KeepAlive` drain](#pointer-derived-funnel-arguments-and-bridged-unsafepointer-arguments-keep-their-box-alive-across-the-call--the-statement-scoped-gckeepalive-drain) covers the frame-minted box of such a call's argument. A statement that discards the result is the bare call.
+
+Guarded by: the behavioral program `UnsafePointerCallResultLifetime`; `TestDiscardedUnsafePointerResultStatement`; `UnsafeAddCarryTests`.
 
 ## A numeric value pun READ is a bitcast — `*(*uint64)(unsafe.Pointer(&f))` boxes nothing
 
