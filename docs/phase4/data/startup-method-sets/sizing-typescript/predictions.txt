@@ -1,0 +1,26 @@
+B3 SIZING FOR TYPESCRIPT: PREDICTIONS, written 2026-11-14 before any arm is measured.
+Instrument: the synthetic BigAst (219 node structs embedding a base with 260 pointer methods, one Kind with String,
+printed once by fmt), Release, JIT, this box (linux/amd64, 4 vCPU). Base reading already taken (one run, probe on):
+221 hosts, 114,922 methods read, GetExtensionMethodsHomedIn 2 calls 229,844 items 344 ms, host method reads 154 ms,
+CollectGoMethodSetCandidates 370 ms. P4's TypeScript hello: 221 hosts, 114,694 methods, 404 / 198 / 435 ms.
+
+P1 (question 1, the double read). The host classes keep their methods after the first read, so the second call
+re-walks nothing and re-reads nothing: it filters 114,922 cached rows into a new list.
+  PREDICTED: the second GetExtensionMethodsHomedIn call costs under 20 ms of the 344. A memo of the last answer
+  (same homes, same scan generation) saves 5 to 20 ms on the synthetic, and by the same ratio 6 to 25 ms on the
+  TypeScript hello. Wall, interleaved pairs: not resolved from the A/A control.
+  FALSIFIER: the second call costs more than 40 ms, or the memo arm's wall gain is resolved and over 40 ms.
+
+P2 (question 2, receiver keys at the host class, on master, no method-holder move). 220 of the 221 hosts are
+go2cs-gen's per-type classes of promoted methods; each extends one type. Kind's question keys are Kind and its
+interfaces.
+  PREDICTED: hosts read fall from 221 to at most 3; methods read fall from 114,922 to under 1,500;
+  CollectGoMethodSetCandidates (both calls) falls from about 370 ms to under 110 ms, of which the scan walk (about
+  77 ms, paid by whichever question is first) is the floor. Wall: -200 to -280 ms per run, resolved.
+  The walk itself costs no more than 10 ms extra for decoding the keys.
+  FALSIFIER: more than 10 hosts or more than 5,000 methods still read; wall gain under 150 ms; output differs.
+
+P3 (transfer to TypeScript). If P4's 221 hosts are 1 package class and 220 per-type classes as in the synthetic,
+the hello saving is the host reads outside the walk: 250 to 320 ms of the 435. NOT MEASURABLE HERE: this box has no
+converted TypeScript. The discriminator is P4's kept probe output: how many of the 221 host names are per-type
+classes, and how many methods the package class itself holds.

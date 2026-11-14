@@ -1,0 +1,40 @@
+The second pass of the read under three settings, three runs each (GO2CS_B3_PROBE=2): its time, and the collections counted around it.
+== [default]
+B3PROBE HomedIn.pass call#1	1	251.2	114922
+B3PROBE HomedIn.pass call#2	1	86.6	114922
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 56658 KB, heap 64551 KB x1
+B3PROBE   call 2: gen0 1, gen1 1, gen2 1, allocated 4086 KB, heap 47096 KB x1
+B3PROBE HomedIn.pass call#1	1	235.0	114922
+B3PROBE HomedIn.pass call#2	1	81.2	114922
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 56655 KB, heap 64547 KB x1
+B3PROBE   call 2: gen0 1, gen1 1, gen2 1, allocated 4083 KB, heap 47096 KB x1
+B3PROBE HomedIn.pass call#1	1	227.1	114922
+B3PROBE HomedIn.pass call#2	1	77.4	114922
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 56655 KB, heap 64554 KB x1
+B3PROBE   call 2: gen0 1, gen1 1, gen2 1, allocated 4084 KB, heap 47097 KB x1
+== [DOTNET_TC_QuickJitForLoops=0]
+B3PROBE HomedIn.pass call#1	1	204.0	114922
+B3PROBE HomedIn.pass call#2	1	4.0	114922
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 56653 KB, heap 64593 KB x1
+B3PROBE   call 2: gen0 0, gen1 0, gen2 0, allocated 4096 KB, heap 50006 KB x1
+B3PROBE HomedIn.pass call#1	1	248.3	114922
+B3PROBE HomedIn.pass call#2	1	4.4	114922
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 56656 KB, heap 64605 KB x1
+B3PROBE   call 2: gen0 0, gen1 0, gen2 0, allocated 4096 KB, heap 49974 KB x1
+B3PROBE HomedIn.pass call#1	1	184.4	114922
+B3PROBE HomedIn.pass call#2	1	82.1	114922
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 56653 KB, heap 64603 KB x1
+B3PROBE   call 2: gen0 1, gen1 1, gen2 1, allocated 4077 KB, heap 47096 KB x1
+== [DOTNET_TieredCompilation=0]
+B3PROBE HomedIn.pass call#1	1	186.4	114922
+B3PROBE HomedIn.pass call#2	1	4.7	114922
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 56678 KB, heap 64612 KB x1
+B3PROBE   call 2: gen0 0, gen1 0, gen2 0, allocated 4096 KB, heap 50939 KB x1
+B3PROBE HomedIn.pass call#1	1	173.8	114922
+B3PROBE HomedIn.pass call#2	1	80.9	114922
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 56670 KB, heap 64716 KB x1
+B3PROBE   call 2: gen0 1, gen1 1, gen2 1, allocated 4082 KB, heap 47145 KB x1
+B3PROBE HomedIn.pass call#1	1	161.7	114922
+B3PROBE HomedIn.pass call#2	1	87.6	114922
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 56678 KB, heap 64707 KB x1
+B3PROBE   call 2: gen0 1, gen1 1, gen2 1, allocated 4091 KB, heap 47145 KB x1

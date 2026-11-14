@@ -467,3 +467,79 @@ Not done for A1, and owed if it is taken up: the Native AOT half (M1), the fixtu
 residual, and every item under "Not verified by the review" above.
 
 — P5 (2026-11-14)
+
+## Amendment 2026-11-14 (P5): a sizing for TypeScript, asked by COORD after P4's probe
+
+**What was asked.** P4's probe of the converted TypeScript (`hello`: one `fmt` check of `ast.Kind` reads 221 host
+classes and 114,694 methods, about 435 ms of 1,800) showed B3 is not zero for a program with a large package. COORD
+asked for a sizing, not a seat: (1) can the double read go without OQ2, (2) does a filter by receiver work without
+OQ2's per-type holders, (3) what remains for A1 proper. Nothing here is built for landing. The arms are switches in
+a measurement-only golib (`data/startup-method-sets/sizing-typescript/`).
+
+**Instrument.** This box has no converted TypeScript, so the case is rebuilt: `BigAst` (`gen.py 219 260`), one
+package with 219 node structs that embed a base holding 260 pointer-receiver methods, and one `Kind` with `String`,
+printed once by `fmt`. At master `314e1d8b60` (A2 in), Release, JIT, linux/amd64, 4 vCPU. It reads 221 host
+classes and 114,922 methods in 2 calls of `GetExtensionMethodsHomedIn` (229,844 rows): P4's counts to within 0.2%.
+220 of the 221 are go2cs-gen's per-type classes of promoted methods (`go.mainᴛT000ᴛpkg`), 520 methods each, and
+one is the package class. Predictions were written before any arm ran (`predictions.txt`). Wall is 30 interleaved
+rounds with the probe off; the per-site figures are medians of 12 probe runs. Output is identical in every arm.
+
+| synthetic, median | master | memo of the last answer | receiver keys |
+|:--|--:|--:|--:|
+| host classes read / methods read | 221 / 114,922 | 221 / 114,922 | **1 / 522** |
+| `CollectGoMethodSetCandidates`, both calls | 422.9 ms | 354.6 ms | **113.0 ms** |
+| first call of the read | 316.6 ms | 322.6 ms | 107.2 ms |
+| second call of the read | 78.2 ms | 0.3 ms | 0.3 ms |
+| the scan walk (inside the first call) | 99.7 ms | 100.1 ms | 98.2 ms |
+| host method reads | 176.1 ms | 180.5 ms | 7.7 ms |
+| wall, paired against master (quartiles) | A/A +2.9 (-86.4 to +83.6) | -105.7 (-155.4 to -11.8) | **-298.9 (-400.6 to -267.5)** |
+
+**(1) The double read: do not build a memo for it.** The second call re-reads nothing: the host classes keep their
+methods. Its work is 4 ms. The 78 ms it reads is ONE generation 2 collection: the first call allocates 56.6 MB of
+reflection objects for the 114,922 methods (heap 64.5 MB), and the second call's 4 MB list triggers the collection.
+In nine runs with `GC.CollectionCount` read around the pass (`second-pass-gc.txt`), the pass reads 77 to 88 ms in
+the six where one generation 2 collection is counted inside it and 4.0 to 4.7 ms in the three where none is; all
+three runs at the default settings are of the first kind, and so by their times (72.9 to 93.6 ms) are the table's
+twelve. A memo saves the 4 ms for certain. It avoids the collection in this program, which ends soon after; a
+program that goes on allocating, as the TypeScript `hello` does, pays that collection at its next trigger while the
+56 MB stay live. Predicted for the TypeScript `hello`: 4 to 6 ms, and the rest not predictable.
+*Scored:* P1 said "the second call costs under 20 ms" and its falsifier (over 40 ms) FIRED as worded; the work it
+described is 4 ms and the difference is the collection, which the prediction did not foresee.
+
+**(2) A filter by receiver works on master, without OQ2, and it is A1's own mechanism.** The A1 prototype
+(record ref `claude/p5-b3-a1-proto` `9977f35ca6`: receiver keys taken in the metadata walk, JIT path, golib only)
+applies to master unchanged. §7 said "on master as it is, A1 changes no timing (a package class has every
+receiver)". That holds for DECLARED methods and is wrong for PROMOTED ones: go2cs-gen already writes one class per
+embedding type, and a class of promoted methods extends one type. TypeScript's cost is there by its counts: 221
+classes averaging 519 methods, where its node types embed a common base (`SCOUT-ts-perf.md` §5 names the chain).
+With keys the `Kind` question reads the package class alone. *Scored:* P2 hosts "at most 3" read 1,
+methods "under 1,500" read 522, walk "no more than 10 ms extra" read -1.5 ms: MET. "Under 110 ms" read 113.0 and
+the wall "-200 to -280 ms" read -298.9: both MISSED as worded, the first by 3 ms (the walk reads about 99 ms in
+these runs, not the 77 ms of the single base run the prediction used), the second because the collection of (1)
+goes too. A2's own-homes read (`GetBoxExtensionMethod`) is scoped by home and not by type, so on its own it reads
+every class of the package as well; the same keys would scope it. NOT MEASURED.
+The whole-scan guards at master with the keys on (`guard.txt`): `ExtensionReceiverScopeTests` and the three scan
+test classes, 13 of 13 green with the switch off and on, and 2 red (315 reachable answers differ) with the
+interface keys dropped, then green again.
+
+**(3) What remains for A1 proper.** After receiver keys on master, a question still reads the package class with
+every DECLARED method of the package (522 methods and 7.7 ms here). Splitting that class is what OQ2 adds. On the
+TypeScript `hello` it is bounded by the package class's share of the 114,694 methods, which P4's kept probe output
+can state (how many of the 221 host names are per-type classes, and the package class's method count); NOT
+MEASURED here. Also still A1's and not sized here: the Native AOT half (M1; without it AOT reads as today), the
+fixtures M3 names, and the open question of the block above (which question reads `runtime`'s holders in `wide`).
+The scan walk, about 99 ms here and 117 ms in P4's run, is A3's and no arm here touches it.
+
+**Predicted for the TypeScript `hello`, for P4's box, if receiver keys were taken:** `CollectGoMethodSetCandidates`
+from 435 ms to 120 to 160 ms, wall -250 to -320 ms of 1,800, IF 220 of its 221 classes are per-type classes as its
+counts suggest. The falsifier is the package class holding more than 20,000 of the methods. P4 can score it in
+one run: apply `sizing-typescript/sizing-arms.patch` to golib at master (it applies at `314e1d8b60` and at the
+batch 305 seat), swap the built `golib.dll` into the demo's folder as before, and run with `GO2CS_B3_KEYS=1` and
+without.
+
+**Cost of taking it, if the owner wants it in a release:** the prototype is about 160 lines in two golib files, no
+generator change, no corpus line, no public name. It owes what the amendment above lists for A1 less OQ2: the
+whole-scan guard with a red arm at master, M3's fixtures, GolibTests in both configurations, the full behavioral
+suite (a golib change that emits no C#), the three-target compile, and P4's run.
+
+— P5 (2026-11-14)

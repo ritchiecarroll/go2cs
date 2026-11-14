@@ -1,0 +1,8 @@
+ExtensionReceiverScopeTests, ExtensionScanMetadataTests, ExtensionScanScopeTests, ExtensionHostListTests at master 314e1d8b60 plus sizing-arms.patch, Release, linux/amd64.
+keys off: Passed!  - Failed:     0, Passed:    13, Skipped:     0, Total:    13, Duration: 24 s - GolibTests.dll (net10.0)
+GO2CS_B3_KEYS=1: Passed!  - Failed:     0, Passed:    13, Skipped:     0, Total:    13, Duration: 24 s - GolibTests.dll (net10.0)
+GO2CS_B3_KEYS=1 GO2CS_B3_KEYS_BREAK=1 (interface keys dropped): Failed!  - Failed:     2, Passed:    11, Skipped:     0, Total:    13, Duration: 23 s - GolibTests.dll (net10.0)
+  Failed EveryFixtureAnswerIsTheFullScans [15 ms]
+   Assert.AreEqual failed. Expected:<0>. Actual:<3>. go.fx.circle (X method set): the whole scan answers [fx_internal_test_package.Area(shape)], the home-scoped scan []
+  Failed EveryReachableAnswerIsTheFullScans [20 s]
+   Assert.AreEqual failed. Expected:<0>. Actual:<315>. 315 answers differ, first 20:

@@ -1,0 +1,580 @@
+diff --git a/src/core/golib/AdapterBinder.cs b/src/core/golib/AdapterBinder.cs
+index 69ff3f82bb..567068a758 100644
+--- a/src/core/golib/AdapterBinder.cs
++++ b/src/core/golib/AdapterBinder.cs
+@@ -131,7 +131,9 @@ namespace go;
+ 
+         if (!AdapterRegistry.TryGetShellFactory(valueType, interfaceType, out Func<object, object>? factory))
+         {
++            long b3 = go.golib.B3Probe.Enter();
+             factory = BuildFactory(valueType, interfaceType);
++            go.golib.B3Probe.Leave("AdapterBinder.BuildFactory", b3, factory is null ? 0 : 1, $"{valueType} -> {interfaceType}");
+ 
+             // Memoized unconditionally, including the negative. Go fixes a type's method set at
+             // COMPILE time, so a pair that cannot bind now can never bind later; and the extension
+diff --git a/src/core/golib/GoDeferredRegistrations.cs b/src/core/golib/GoDeferredRegistrations.cs
+index f891c40e61..ce02ae6cc6 100644
+--- a/src/core/golib/GoDeferredRegistrations.cs
++++ b/src/core/golib/GoDeferredRegistrations.cs
+@@ -87,9 +87,15 @@ public sealed class GoDeferredRegistrations
+ 
+         lock (m_lock)
+         {
++            long b3 = go.golib.B3Probe.Enter();
++            int b3n = m_pending.Count - m_next;
++            string b3name = ReferenceEquals(this, Adapters) ? "Adapters" : ReferenceEquals(this, ZeroFactories) ? "ZeroFactories" : ReferenceEquals(this, EscapeRegistry) ? "EscapeRegistry" : "NativeArrayOpeners";
++
+             while (m_next < m_pending.Count)
+                 m_pending[m_next++]();
+ 
++            go.golib.B3Probe.Leave("GoDeferredRegistrations.Run(" + b3name + ")", b3, b3n);
++
+             m_pending.Clear();
+             m_next = 0;
+             m_hasPending = false;
+diff --git a/src/core/golib/runtime/MainThread.cs b/src/core/golib/runtime/MainThread.cs
+index 4c250e73df..b50b11c30a 100644
+--- a/src/core/golib/runtime/MainThread.cs
++++ b/src/core/golib/runtime/MainThread.cs
+@@ -53,6 +53,7 @@ namespace go.golib;
+     public static void Run(Action main)
+     {
+         ArgumentNullException.ThrowIfNull(main);
++        B3Probe.Mark("main-enter");
+ 
+         // An init function locked the main goroutine to this, the startup thread: Go invokes main here.
+         if (Goroutine.Current is { IsMain: true, LockedToThread: true })
+diff --git a/src/core/golib/runtime/TypeExtensions.ExtensionMethodRegistry.cs b/src/core/golib/runtime/TypeExtensions.ExtensionMethodRegistry.cs
+index 6811710d67..de363aefb8 100644
+--- a/src/core/golib/runtime/TypeExtensions.ExtensionMethodRegistry.cs
++++ b/src/core/golib/runtime/TypeExtensions.ExtensionMethodRegistry.cs
+@@ -133,13 +133,14 @@ public static partial class TypeExtensions
+         private (MethodInfo method, Type receiver, Assembly? home)[]? m_methods;
+ 
+         // A class found in the metadata tables, loaded as a type only when its methods are read.
+-        public ExtensionHost(Assembly assembly, Module module, int token, Assembly[] homes, bool anyHome)
++        public ExtensionHost(Assembly assembly, Module module, int token, Assembly[] homes, bool anyHome, ReceiverKey[]? receivers = null)
+         {
+             Assembly = assembly;
+             m_module = module;
+             m_token = token;
+             Homes = homes;
+             AnyHome = anyHome;
++            Receivers = receivers;
+         }
+ 
+         // A class the scan already holds as a type, with the homes its methods extend; or, given its methods, a class
+@@ -163,6 +164,11 @@ public static partial class TypeExtensions
+         /// <summary>Whether a receiver belongs to no assembly (a type parameter, an array): read for every question.</summary>
+         public bool AnyHome { get; }
+ 
++        /// <summary>The key of every receiver type the class's methods extend (<see cref="ReceiverKey"/>), or
++        /// <c>null</c> when they are not known or not all expressible as keys: read for every question its homes
++        /// admit.</summary>
++        public ReceiverKey[]? Receivers { get; }
++
+         public Type Type => m_type ??= m_module!.ResolveType(m_token);
+ 
+         // Whether a question that can match only receivers homed in `homes` must read this class.
+@@ -180,6 +186,22 @@ public static partial class TypeExtensions
+             return false;
+         }
+ 
++        // Whether a question whose element can match only receivers keyed in `keys` (ReceiverKeysOf) must read this
++        // class. Asked after Extends: a class with no key list answers for every question.
++        public bool ExtendsReceivers(HashSet<ReceiverKey> keys)
++        {
++            if (Receivers is not { } receivers)
++                return true;
++
++            foreach (ReceiverKey receiver in receivers)
++            {
++                if (keys.Contains(receiver))
++                    return true;
++            }
++
++            return false;
++        }
++
+         // The class's extension methods, each with its receiver and the receiver's home, in GetMethods order.
+         public (MethodInfo method, Type receiver, Assembly? home)[] Methods
+         {
+@@ -188,9 +210,13 @@ public static partial class TypeExtensions
+                 if (Volatile.Read(ref m_methods) is { } methods)
+                     return methods;
+ 
++                long b3t = B3Probe.Enter();
+                 Type type = Type;
++                B3Probe.Leave("ExtensionHost.Type(resolve)", b3t);
+                 HostReadProbeForTest?.Invoke(type);
++                long b3 = B3Probe.Enter();
+                 methods = ReadExtensionMethods(type);
++                B3Probe.Leave("ExtensionHost.Methods(read)", b3, methods.Length, type.FullName);
+ 
+                 // Two threads may read one class; both read the same methods, and the first published is kept.
+                 return Interlocked.CompareExchange(ref m_methods, methods, null) ?? methods;
+@@ -311,18 +337,75 @@ public static partial class TypeExtensions
+     /// a question about a type whose homes are <paramref name="homes"/> can match (<see cref="ExtensionHomesOf"/>),
+     /// read without reading any other host class.
+     /// </summary>
+-    internal static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsHomedIn(IReadOnlySet<Assembly> homes)
++    internal static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsHomedIn(IReadOnlySet<Assembly> homes) =>
++        GetExtensionMethodsHomedIn(homes, null);
++
++    /// <summary>
++    /// The extension methods a method-set question about <paramref name="element"/> can match: those of
++    /// <see cref="GetExtensionMethodsHomedIn(IReadOnlySet{Assembly})"/> for its homes, read only from the host classes
++    /// that extend one of its receiver keys (<see cref="ReceiverKeysOf"/>) or carry no key list.
++    /// </summary>
++    internal static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsFor(Type element) =>
++        GetExtensionMethodsHomedIn(ExtensionHomesOf(element), ReceiverKeysOf(element));
++
++    // MEASUREMENT ONLY (B3 sizing, never committed): two arms behind switches, so one binary runs every arm.
++    internal static readonly bool B3Keys = Environment.GetEnvironmentVariable("GO2CS_B3_KEYS") == "1";
++    private static readonly bool s_b3Break = Environment.GetEnvironmentVariable("GO2CS_B3_KEYS_BREAK") == "1"; // the guard's red arm
++    private static readonly bool s_b3Memo = Environment.GetEnvironmentVariable("GO2CS_B3_MEMO") == "1";
++    private sealed record B3Last(int Generation, IReadOnlySet<Assembly> Homes, IReadOnlyList<(MethodInfo method, Type receiver)> Result);
++    private static B3Last? s_b3Last;
++    private static int s_b3Call;
++
++    private static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsHomedIn(IReadOnlySet<Assembly> homes, HashSet<ReceiverKey>? keys)
++    {
++        if (!B3Keys)
++            keys = null;
++
++        int call = Interlocked.Increment(ref s_b3Call);
++        long b3 = B3Probe.Enter();
++        IReadOnlyList<(MethodInfo method, Type receiver)> b3r;
++        string how = "read";
++
++        if (s_b3Memo && keys is null && Volatile.Read(ref s_b3Last) is { } last &&
++            last.Generation == Volatile.Read(ref s_extensionMethodsGeneration) && last.Homes.SetEquals(homes))
++        {
++            b3r = last.Result;
++            how = "memo";
++        }
++        else
++        {
++            b3r = GetExtensionMethodsHomedInB3(homes, keys, call);
++
++            if (s_b3Memo && keys is null)
++                Volatile.Write(ref s_b3Last, new B3Last(Volatile.Read(ref s_extensionMethodsGeneration), homes, b3r));
++        }
++
++        B3Probe.Leave("GetExtensionMethodsHomedIn", b3, b3r.Count);
++        B3Probe.Leave(call <= 6 ? $"HomedIn.call#{call} ({how})" : "HomedIn.call#7+", b3, b3r.Count);
++        return b3r;
++    }
++
++    private static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsHomedInB3(IReadOnlySet<Assembly> homes, HashSet<ReceiverKey>? keys, int call)
+     {
+         List<(MethodInfo method, Type receiver)> found = [];
++        long b3w = B3Probe.Enter();
+         ExtensionScan scan = WalkExtensionHosts();
++        B3Probe.Leave("HomedIn.walk", b3w, scan.Hosts.Length);
+ 
+         for (int attempt = 1; ; attempt++)
+         {
++            long b3p = B3Probe.Enter();
++            int b3h = 0;
++            int b3g0 = GC.CollectionCount(0), b3g1 = GC.CollectionCount(1), b3g2 = GC.CollectionCount(2);
++            long b3a = GC.GetTotalAllocatedBytes(false);
++
+             foreach (ExtensionHost host in scan.Hosts)
+             {
+-                if (!host.Extends(homes))
++                if (!host.Extends(homes) || keys is not null && !host.ExtendsReceivers(keys))
+                     continue;
+ 
++                b3h++;
++
+                 foreach ((MethodInfo method, Type receiver, Assembly? home) in host.Methods)
+                 {
+                     if (home is null || homes.Contains(home))
+@@ -330,11 +413,17 @@ public static partial class TypeExtensions
+                 }
+             }
+ 
++            B3Probe.Leave("HomedIn.pass", b3p, found.Count, $"attempt {attempt}, hosts {b3h}");
++            B3Probe.Leave(call <= 6 ? $"HomedIn.pass call#{call}" : "HomedIn.pass call#7+", b3p, found.Count);
++            B3Probe.Leave("HomedIn.gc", b3p, 0, $"call {call}: gen0 {GC.CollectionCount(0) - b3g0}, gen1 {GC.CollectionCount(1) - b3g1}, gen2 {GC.CollectionCount(2) - b3g2}, allocated {(GC.GetTotalAllocatedBytes(false) - b3a) / 1024} KB, heap {GC.GetTotalMemory(false) / 1024} KB");
++
+             // Reading a host's methods can load an assembly, as above.
+             if (attempt == MaxScanAttempts || Volatile.Read(ref s_extensionMethodsGeneration) == scan.Generation)
+                 return found;
+ 
++            b3w = B3Probe.Enter();
+             scan = WalkExtensionHosts();
++            B3Probe.Leave("HomedIn.walk", b3w, scan.Hosts.Length);
+             found.Clear();
+         }
+     }
+@@ -381,7 +470,10 @@ public static partial class TypeExtensions
+                     continue;
+ 
+                 ScanProbeForTest?.Invoke(assembly);
++                long b3 = B3Probe.Enter();
++                int b3n = found.Count;
+                 LoadAssemblyExtensionHosts(assembly, found);
++                B3Probe.Leave("LoadAssemblyExtensionHosts", b3, found.Count - b3n);
+                 (nowVisited ??= visited.ToBuilder()).Add(assembly);
+             }
+ 
+@@ -511,6 +603,65 @@ public static partial class TypeExtensions
+         return receiver.Assembly;
+     }
+ 
++    /// <summary>
++    /// A receiver type as the scan indexes it: the module and metadata token of its type definition. A generic
++    /// instantiation is keyed by its definition, and a by-ref or a pointer box (<c>ж&lt;X&gt;</c>) by what it holds.
++    /// </summary>
++    internal readonly record struct ReceiverKey(Module Module, int Token);
++
++    /// <summary>
++    /// The key of a loaded receiver, read through its by-ref and every pointer box as <see cref="ExtensionHome"/>
++    /// reads them (a box subclass included), or <c>null</c> when it has none and its host class must be read for every
++    /// question: a type parameter, an array, a pointer, a function pointer, and any type of the core library or of
++    /// golib.
++    /// </summary>
++    internal static ReceiverKey? ReceiverKeyOf(Type receiver)
++    {
++        Type element = receiver.IsByRef ? receiver.GetElementType()! : receiver;
++
++        for (bool isPointer = true; isPointer;)
++            ResolveReceiverElement(element, out element, out isPointer);
++
++        if (element.IsGenericParameter || element.HasElementType || element.IsFunctionPointer)
++            return null;
++
++        Assembly assembly = element.Assembly;
++
++        if (assembly == typeof(object).Assembly || assembly == typeof(TypeExtensions).Assembly)
++            return null;
++
++        return new ReceiverKey(element.Module, element.MetadataToken);
++    }
++
++    /// <summary>
++    /// The keys a method-set question about <paramref name="element"/> can match: those of the element, of each type
++    /// it derives from and of each interface it implements. A receiver element matches the element only if it is the
++    /// element, shares its generic definition, or is assignable from it (ReceiverElementMatches); every such receiver
++    /// outside the core library and golib is one of these types or an instantiation of one's definition, and a
++    /// receiver inside them (<c>object</c>, <c>Nullable&lt;E&gt;</c>) has no key, so its class is read regardless.
++    /// </summary>
++    internal static HashSet<ReceiverKey> ReceiverKeysOf(Type element)
++    {
++        HashSet<ReceiverKey> keys = [];
++
++        for (Type? current = element; current is not null; current = current.BaseType)
++            add(current);
++
++        if (!s_b3Break)
++        {
++            foreach (Type interfaceType in element.GetInterfaces())
++                add(interfaceType);
++        }
++
++        return keys;
++
++        void add(Type candidate)
++        {
++            if (ReceiverKeyOf(candidate) is { } key)
++                keys.Add(key);
++        }
++    }
++
+     /// <summary>
+     /// The homes a question about <paramref name="type"/> can match: those of the type, of each type it derives from
+     /// and of each interface it implements, and the core library's (<c>object</c>, which every type converts to). An
+@@ -562,6 +713,10 @@ public static partial class TypeExtensions
+         SignatureDecoder<ReceiverShape, object?> decoder = new(ReceiverShapeProvider.Instance, reader, null);
+         List<ExtensionHost> hosts = [];
+         List<Assembly> homes = [];
++        List<ReceiverKey> receivers = [];
++
++        // The core library's and golib's own receivers carry no key (ReceiverKeyOf).
++        bool keyed = B3Keys && assembly != typeof(object).Assembly && assembly != typeof(TypeExtensions).Assembly;
+ 
+         foreach (TypeDefinitionHandle handle in reader.TypeDefinitions)
+         {
+@@ -574,7 +729,9 @@ public static partial class TypeExtensions
+                 continue;
+ 
+             bool anyHome = false;
++            bool anyReceiver = !keyed;
+             homes.Clear();
++            receivers.Clear();
+ 
+             foreach (MethodDefinitionHandle methodHandle in definition.GetMethods())
+             {
+@@ -598,9 +755,19 @@ public static partial class TypeExtensions
+ 
+                 decoder.DecodeType(ref signature); // the return type
+ 
+-                if (decoder.DecodeType(ref signature) == ReceiverShape.Defined)
++                ReceiverShape shape = decoder.DecodeType(ref signature);
++
++                if (shape.Kind == ReceiverKind.Defined)
+                 {
+                     addHome(assembly);
++
++                    // A class the assembly derives from another type could be a pointer box of its own, which the
++                    // method-set rule reads through to its pointee: no key says that.
++                    if (isPlain(shape.Token))
++                        addReceiver(new ReceiverKey(module, shape.Token));
++                    else
++                        anyReceiver = true;
++
+                     continue;
+                 }
+ 
+@@ -610,9 +777,17 @@ public static partial class TypeExtensions
+                     addHome(home);
+                 else
+                     anyHome = true;
++
++                if (anyReceiver)
++                    continue;
++
++                if (ReceiverKeyOf(receiver) is { } key)
++                    addReceiver(key);
++                else
++                    anyReceiver = true;
+             }
+ 
+-            hosts.Add(new ExtensionHost(assembly, module, MetadataTokens.GetToken(handle), [.. homes], anyHome));
++            hosts.Add(new ExtensionHost(assembly, module, MetadataTokens.GetToken(handle), [.. homes], anyHome, anyReceiver ? null : [.. receivers]));
+         }
+ 
+         return hosts;
+@@ -622,6 +797,31 @@ public static partial class TypeExtensions
+             if (!homes.Contains(home))
+                 homes.Add(home);
+         }
++
++        void addReceiver(ReceiverKey key)
++        {
++            if (!receivers.Contains(key))
++                receivers.Add(key);
++        }
++
++        // Whether a type the assembly defines is an interface, a struct, an enum or a class deriving from object.
++        bool isPlain(int token)
++        {
++            EntityHandle baseType = reader.GetTypeDefinition((TypeDefinitionHandle)MetadataTokens.Handle(token)).BaseType;
++
++            if (baseType.IsNil)
++                return true;
++
++            if (baseType.Kind != HandleKind.TypeReference)
++                return false;
++
++            TypeReference reference = reader.GetTypeReference((TypeReferenceHandle)baseType);
++
++            return reader.StringComparer.Equals(reference.Namespace, "System") &&
++                   (reader.StringComparer.Equals(reference.Name, "ValueType") ||
++                    reader.StringComparer.Equals(reference.Name, "Object") ||
++                    reader.StringComparer.Equals(reference.Name, "Enum"));
++        }
+     }
+ 
+     /// <summary>
+@@ -677,20 +877,28 @@ public static partial class TypeExtensions
+     }
+ 
+     // What the metadata walk needs to know of a receiver's signature type: whether the assembly itself defines it.
+-    private enum ReceiverShape : byte
++    private enum ReceiverKind : byte
+     {
+         Other,
+         Defined,
+         Box // golib's ж<T>, before its instantiation is read through
+     }
+ 
++    // A receiver's signature type as the walk reads it; a Defined one carries its type-definition token.
++    private readonly record struct ReceiverShape(ReceiverKind Kind, int Token = 0)
++    {
++        public static readonly ReceiverShape Other = new(ReceiverKind.Other);
++        public static readonly ReceiverShape Box = new(ReceiverKind.Box);
++    }
++
+     // Reads a signature type as a ReceiverShape, loading no type: by-refs, modifiers and golib's ж<X> are read
+     // through, and a generic instantiation is its definition.
+     private sealed class ReceiverShapeProvider : ISignatureTypeProvider<ReceiverShape, object?>
+     {
+         public static readonly ReceiverShapeProvider Instance = new();
+ 
+-        public ReceiverShape GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, byte rawTypeKind) => ReceiverShape.Defined;
++        public ReceiverShape GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, byte rawTypeKind) =>
++            new(ReceiverKind.Defined, MetadataTokens.GetToken(handle));
+ 
+         public ReceiverShape GetTypeFromReference(MetadataReader reader, TypeReferenceHandle handle, byte rawTypeKind)
+         {
+@@ -705,8 +913,8 @@ public static partial class TypeExtensions
+         }
+ 
+         public ReceiverShape GetGenericInstantiation(ReceiverShape genericType, ImmutableArray<ReceiverShape> typeArguments) =>
+-            genericType == ReceiverShape.Box && typeArguments.Length == 1 ? typeArguments[0] :
+-            genericType == ReceiverShape.Defined ? ReceiverShape.Defined : ReceiverShape.Other;
++            genericType.Kind == ReceiverKind.Box && typeArguments.Length == 1 ? typeArguments[0] :
++            genericType.Kind == ReceiverKind.Defined ? genericType : ReceiverShape.Other;
+ 
+         public ReceiverShape GetByReferenceType(ReceiverShape elementType) => elementType;
+ 
+@@ -892,6 +1100,14 @@ public static partial class TypeExtensions
+     /// </summary>
+     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReferenceTypeJustification)]
+     internal static MethodInfo[] ExtensionMethodsOf(Type targetType, IReadOnlyList<(MethodInfo, Type)>? source)
++    {
++        long b3 = B3Probe.Enter();
++        MethodInfo[] b3r = ExtensionMethodsOfB3(targetType, source);
++        B3Probe.Leave("ExtensionMethodsOf", b3, b3r.Length, targetType.ToString());
++        return b3r;
++    }
++
++    private static MethodInfo[] ExtensionMethodsOfB3(Type targetType, IReadOnlyList<(MethodInfo, Type)>? source)
+     {
+         // Fix W (B1 §3.1): normalize a ж box at any base-chain depth to its ж<X> base BEFORE
+         // the generic-match split, so a per-kind subclass instance matches the extension
+@@ -910,9 +1126,13 @@ public static partial class TypeExtensions
+             targetType = targetType.GetGenericTypeDefinition();
+ 
+         // A box's definition matches every box receiver, whatever its pointee's home: that question reads the
+-        // whole scan.
++        // whole scan. Any other target reads the host classes that extend one of its receiver keys; a receiver's key
++        // is read through its box, which this filter is not, so a target that is itself a box of another kind (one
++        // exempt from the normalisation above) keeps the scope of its homes.
+         IEnumerable<(MethodInfo method, Type type)> extensionMethods =
+-            source ?? (targetType == typeof(ж<>) ? GetExtensionMethods() : GetExtensionMethodsHomedIn(ExtensionHomesOf(targetType)));
++            source ?? (targetType == typeof(ж<>) ? GetExtensionMethods() :
++                       GoReflect.TryBoxPointee(targetType, out _) ? GetExtensionMethodsHomedIn(ExtensionHomesOf(targetType)) :
++                       GetExtensionMethodsFor(targetType));
+ 
+         IEnumerable<MethodInfo> methods = isGenericType ?
+             extensionMethods.Where(value => isGenericMatch(value.type)).Select(value => value.method) :
+diff --git a/src/core/golib/runtime/TypeExtensions.GoMethodSets.cs b/src/core/golib/runtime/TypeExtensions.GoMethodSets.cs
+index f8294d4af3..993b14f42b 100644
+--- a/src/core/golib/runtime/TypeExtensions.GoMethodSets.cs
++++ b/src/core/golib/runtime/TypeExtensions.GoMethodSets.cs
+@@ -171,6 +171,14 @@ public static partial class TypeExtensions
+     /// is compared the same way, closed over the value's type arguments by the candidate source.
+     /// </remarks>
+     public static bool StructurallyImplements(this Type valueType, Type interfaceType)
++    {
++        long b3 = B3Probe.Enter();
++        bool b3r = StructurallyImplementsB3(valueType, interfaceType);
++        B3Probe.Leave("StructurallyImplements", b3, b3r ? 1 : 0, $"{valueType} -> {interfaceType} = {b3r}");
++        return b3r;
++    }
++
++    private static bool StructurallyImplementsB3(Type valueType, Type interfaceType)
+     {
+         MethodInfo[] interfaceMethods = [.. interfaceType.GetInterfaceMethods()];
+ 
+@@ -515,7 +523,16 @@ public static partial class TypeExtensions
+     /// </summary>
+     internal static List<MethodInfo> CollectGoMethodSetCandidates(Type valueElement, bool valueIsPointer, IReadOnlyList<(MethodInfo, Type)>? source)
+     {
+-        IReadOnlyList<(MethodInfo method, Type receiver)> allExtensionMethods = source ?? GetExtensionMethodsHomedIn(ExtensionHomesOf(valueElement));
++        long b3 = B3Probe.Enter();
++        List<MethodInfo> b3r = CollectGoMethodSetCandidatesB3(valueElement, valueIsPointer, source);
++        B3Probe.Leave("CollectGoMethodSetCandidates", b3, b3r.Count, $"{(valueIsPointer ? "*" : "")}{valueElement}");
++        B3Probe.Leave($"Collect {(valueIsPointer ? "*" : "")}{valueElement.Name}", b3, b3r.Count);
++        return b3r;
++    }
++
++    private static List<MethodInfo> CollectGoMethodSetCandidatesB3(Type valueElement, bool valueIsPointer, IReadOnlyList<(MethodInfo, Type)>? source)
++    {
++        IReadOnlyList<(MethodInfo method, Type receiver)> allExtensionMethods = source ?? GetExtensionMethodsFor(valueElement);
+         List<MethodInfo> candidates = [];
+ 
+         foreach ((MethodInfo method, Type receiver) in allExtensionMethods)
+@@ -635,6 +652,7 @@ public static partial class TypeExtensions
+     {
+         return s_goMethodSetEntries.GetOrAdd((valueElement, valueIsPointer), static key =>
+         {
++            B3Probe.Leave("GetGoMethodSetEntries(fill)", B3Probe.Enter(), 0, $"{(key.isPointer ? "*" : "")}{key.element}");
+             Dictionary<string, MethodInfo> byGoName = [];
+ 
+             foreach (MethodInfo candidate in GetGoMethodSetCandidates(key.element, key.isPointer))
+diff --git a/src/core/golib/B3Probe.cs b/src/core/golib/B3Probe.cs
+new file mode 100644
+index 0000000000..38d17b56c8
+--- /dev/null
++++ b/src/core/golib/B3Probe.cs
+@@ -0,0 +1,75 @@
++// MEASUREMENT ONLY (B3 design, never committed): counters and inclusive times of the start-up reflection path,
++// printed to stderr at process exit when GO2CS_B3_PROBE is set.
++using System;
++using System.Collections.Concurrent;
++using System.Diagnostics;
++using System.Linq;
++using System.Threading;
++
++namespace go.golib;
++
++public static class B3Probe
++{
++    public static readonly bool On = Environment.GetEnvironmentVariable("GO2CS_B3_PROBE") is { Length: > 0 };
++    public static readonly bool Detail = Environment.GetEnvironmentVariable("GO2CS_B3_PROBE") == "2";
++    private static readonly ConcurrentDictionary<string, (long count, long ticks, long items)> s_sites = new();
++    private static readonly ConcurrentDictionary<string, int> s_keys = new();
++    private static readonly ConcurrentQueue<string> s_marks = new();
++    private static int s_hooked;
++
++    public static long Enter() => On ? Stopwatch.GetTimestamp() : 0;
++
++    public static void Leave(string site, long t0, long items = 0, string? key = null)
++    {
++        if (!On)
++            return;
++
++        long ticks = Stopwatch.GetTimestamp() - t0;
++        s_sites.AddOrUpdate(site, (1, ticks, items), (_, old) => (old.count + 1, old.ticks + ticks, old.items + items));
++
++        if (key is not null)
++            s_keys.AddOrUpdate(site + "\t" + key, 1, static (_, n) => n + 1);
++
++        Hook();
++    }
++
++    public static void Mark(string name)
++    {
++        if (!On)
++            return;
++
++        s_marks.Enqueue($"{name} at {(DateTime.Now - Process.GetCurrentProcess().StartTime).TotalMilliseconds:F0} ms after process start; assemblies loaded {AppDomain.CurrentDomain.GetAssemblies().Length}; methods jitted {System.Runtime.JitInfo.GetCompiledMethodCount()}; jit time {System.Runtime.JitInfo.GetCompilationTime().TotalMilliseconds:F0} ms");
++        Hook();
++    }
++
++    private static void Hook()
++    {
++        if (Interlocked.CompareExchange(ref s_hooked, 1, 0) == 0)
++            AppDomain.CurrentDomain.ProcessExit += static (_, _) => Dump();
++    }
++
++    public static void Dump()
++    {
++        Mark("exit");
++        Console.Error.WriteLine("B3PROBE marks:");
++
++        foreach (string mark in s_marks)
++            Console.Error.WriteLine("B3PROBE   " + mark);
++
++        Console.Error.WriteLine("B3PROBE site\tcalls\tinclusive ms\titems");
++
++        foreach (var pair in s_sites.OrderByDescending(static p => p.Value.ticks))
++            Console.Error.WriteLine($"B3PROBE {pair.Key}\t{pair.Value.count}\t{pair.Value.ticks * 1000.0 / Stopwatch.Frequency:F1}\t{pair.Value.items}");
++
++        foreach (IGrouping<string, System.Collections.Generic.KeyValuePair<string, int>> site in s_keys.GroupBy(static p => p.Key.Split('\t')[0]))
++        {
++            Console.Error.WriteLine($"B3PROBE keys {site.Key}: {site.Count()} distinct");
++
++            if (Detail)
++            {
++                foreach (var key in site.OrderBy(static p => p.Key))
++                    Console.Error.WriteLine($"B3PROBE   {key.Key.Split('\t')[1]} x{key.Value}");
++            }
++        }
++    }
++}
