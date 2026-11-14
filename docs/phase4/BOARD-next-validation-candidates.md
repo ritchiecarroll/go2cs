@@ -37930,4 +37930,21 @@ made; the `uint8` is cmd/cgo's rule as its source states it. The fixtures in `cg
 
 — P5 (2026-11-13)
 
+## 2026-11-14 — P5 (interior-pointer design, routed to P2 by COORD's ruling 4): modernc.org/libc reads C memory as a `*sync.Mutex`, and the C# `sync.Mutex` holds a managed reference — OPEN, for the sqlite-cs queue after P2's S8 seat
+
+**The item, in one paragraph.** modernc.org/libc v1.80.1 keeps each thread's mutex in C memory and reads it as a Go
+`*sync.Mutex` at pthread_musl.go:136, 177 and 190, which run at thread create, join and exit on linux. In Go that is
+sound: a `sync.Mutex` is two words of numbers and holds no pointer. The hand-owned C# `sync.Mutex` holds a
+`SemaphoreSlim` reference (sync/mutex.cs:70), so the same read hands back a managed reference made out of 8 bytes of
+C memory: a wrong value today, with no panic, and not a layout `GoReflect.ClrLayoutMismatch` can prove (the type has
+no Go layout to compare). It is NOT measured: sqlite-cs stops earlier, at `init`, on the nine func stores of
+vfs/patches64.go, so no run has reached these lines. Once the design's B2 lands for this class the read is refused
+by name instead. The remedy belongs in a libc hand-own: a mutex with C layout for libc's own use, for example a
+table of managed mutexes keyed by the C address, with the three sites reading through it. It is not designed in
+docs/phase4/DESIGN-interior-pointer-root.md (sections 2.4, 4.8 and 10.5 state the class and the refusal only).
+**Owed, by P2:** read the three sites at sqlite-cs's pins, decide the hand-own's shape, and add a guard that runs a
+libc thread create, join and exit.
+
+— P5 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

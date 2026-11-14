@@ -3,6 +3,8 @@
 > - **Status:** FOR REVIEW. No code is cut. Lane P5, 2026-11-14, by the owner's ruling of that date (COORD's
 >   post to P5, 06:54Z): P5 owns the design for the interior `unsafe.Pointer` root, which covers cgo Phase 3
 >   increment 3.1's two must-fix families and sqlite-cs's func store at a computed address. H implements 3.1 on it.
+> - **Amended 2026-11-14 (section 10):** the review's six must-fixes are answered, the four decisions are
+>   recorded as ruled, and H's arms are named. Where section 10 and sections 3 to 8 differ, section 10 holds.
 > - **Read and measured at:** master `314e1d8b60` (batch 302) for every measurement; H's
 >   `claude/h-cgo-phase3-helpers` at `83fbf28560` for what that branch already closes. Go 1.26.10, one cloud
 >   linux/amd64 VM (4 vCPU, 15 GB, .NET SDK 10.0.400), Release, `GoTargetOS=linux`.
@@ -411,3 +413,277 @@ cover.
   and 8, not that the cut is sound.
 - H's red arms were not run here.
 - `runtime` and `internal/runtime/maps` (289 sites) were not classified by reach.
+
+## 10. Amendment, 2026-11-14: the review, the rulings and H's arms
+
+**Source.** COORD's review of 83d2baafea (inbox P5, 2026-11-14 07:34Z; verdict APPROVE-WITH-FIXES, six must-fixes),
+COORD's post of H's arm names (07:36Z) and of H's first red arm (07:45Z). Every claim of the review was read at H's
+tip 83fbf28560 and at master 314e1d8b60 before it was answered. Counts are from
+`data/interior-pointer-root/review-counts.py`, run at master; its output is `review-counts.txt` beside it. Where
+this section and sections 3 to 8 differ, this section holds.
+
+### 10.1 Must-fix 1: a pointer from `FromBox` keeps its root and the root can move
+
+**Read.** `FromBox` (unsafe.cs:500) ends `fixed (T* ptr = &box.ValueSlot) return new Pointer((uintptr)ptr, box);`.
+The number is an address read for one statement and the box is retained; nothing is pinned.
+`NativeDerivation.Kept` and `Moved` retain and do not pin. The review is right, and section 3's verdict on reflect
+makefunc.go:172 ("a local the frame holds") is withdrawn: it answered lifetime and not movement.
+
+**Measured by H (COORD, 07:45Z).** `ATypedPointerConvertedFromAnInteriorUnsafePointerKeepsItsStorageAlive` at H's
+red tip b642ac3682: red 3 of 3 runs. After a compacting collection the typed pointer is a native box with no source,
+the array is alive and has moved (about 8 MB), and the pointer still reads the old bytes at the old address.
+
+**The rule.** Pinning in step 3 alone is not enough: the number was read before the pin, so a collection between the
+mint and the derivation leaves a stale number, and a later pin holds the root still at a different address. So:
+**a pointer whose carried source is a managed box takes its base from the box, never from its stored number.** A
+pointer straight from `FromBox`, `FromBoxObject` or `FromPinnedBox` names its source at offset 0 by construction.
+`NativeDerivation.Moved` (under `unsafe.Add`) and `To<T>` step 3, given such a pointer, read the source's own number
+through the box's number operator (ж.cs:1214), which pins pinnable storage, registers it and answers the address
+that now holds. That number is the base. A pointer that was already moved carries the native box `Moved` made: its
+address came from a pinned base, and its retained root holds the pin (the handle is a field of the root box). It is
+used as it is. `FromBox` itself does not change, so a pointer that is never derived from costs what it costs today.
+
+| The root's storage | The base | `To<T>` at an offset |
+|:--|:--|:--|
+| pinnable: a reference-free pointee, or the data of a reference-free array | the pinned address | offset 0 is step 2 (the registry answers the root); otherwise a native box at base plus offset that retains the root |
+| holds a reference (`StorageKind` None) | the box's order token | token arithmetic, which the number operator answers today: the field or element alias when Go's layout has a `T` exactly there, a refusal by name otherwise (`resolveInterior`, ж.cs:1204). No address is formed |
+| unpinnable (`EnsureStableAddress` pins only when `PinnableStorage` is not null) | not stable | the alias walk first. With no alias, today's box, COUNTED by B0's counter as its own class. A refusal follows that census, as B2's does |
+
+**Counts at master.** 295 `FromBox` calls in 74 files outside golib and unsafe (converted tests and review siblings
+included). 2 lines derive from one in the same expression (reflect/makefunc.cs:130,
+runtime/mgcmark_greenteagc.cs:817). A pointer that passes through a variable first is not visible to a text count,
+which is why the rule is in golib and not in the emission.
+
+**The guard (4.7) gains a column.** Every `new Pointer(number, source)` mint is listed with "the number is the
+source's own address: yes or no". A mint that answers no over a movable source is stop line S10.
+
+**The arm.** `InteriorPointerRootTests.AFromBoxDerivedPointerSurvivesACompactingCollection`, with H's compaction
+recipe taken exactly (collect and finalize three times, large-object compaction once, a forced blocking compacting
+generation-2 collection twice, the freed space refilled with 0xEE). The collection is placed in three positions:
+between `FromBox` and `Add`, between `Add` and the conversion, between the conversion and the write. Each position
+asserts the ADDRESS (the typed pointer's address equals the storage's current address plus the offset, H's
+diagnostic) and then the value. A run in which the storage did not move is INCONCLUSIVE, never passed. Twins: the
+same over `FromPinnedBox`, and over C memory.
+
+### 10.2 Must-fix 2: 4.3 changes the number, not only the root
+
+**Read.** `FromPinnedBox` is `new Pointer((uintptr)box, box)` (unsafe.cs:560), and the number operator answers the
+box's order token when the storage holds a reference (ж.cs:1269-1280). The review is right.
+
+**The population.** 42 code lines call `FromRef` outside golib and unsafe: 37 converted, 1 in a converted test
+(reflect/all_test.cs:8425), 1 hand-owned (runtime/mfinal.cs:376), 3 in a review sibling (sync/waitgroup.cs.auto).
+Section 2.2's 41 counted non-test files and included 3 comment lines. All 37 converted lines carry the `(uintptr)`
+cast of convCallExpr.go:3653; the bare emission at convCallExpr.go:1054 has 0 converted lines. All 37 have their
+box as a parameter of the enclosing member (read by script), so 4.3's "NOT READ" is now read and S3 does not fire
+at master.
+
+**The 37 lines are 25 Go sites, classified by the C# pointee.** Go's own "holds no pointer" is not the test:
+`_func` and `spanInlineMarkBits` hold `array<byte>` fields, which are references in C#.
+
+| C# pointee | Sites | Number under `FromPinnedBox` |
+|:--|:--|:--|
+| reference-free: 15 sites, 22 lines | internal/abi type.cs:230, 243 (`UncommonType`); internal/runtime/maps group.cs:132, 134, 142, 145 (`ctrlGroup`); internal/sync mutex.cs:67, 94, 189, 201 (`Mutex`); runtime malloc.cs:2575 (`notInHeap`, 4 flavours); stack.cs:1424 (`stackObjectRecord`, 4 flavours); mgcmark_greenteagc.cs:106, 107 (`spanScanOwnership`); syscall sockcmsg_unix.cs:28 (`Cmsghdr`, 2 flavours) | the pinned address, when the box is a standard box |
+| an array: 1 site | internal/abi abi.cs:103 (`IntArgRegBitmap`, an `IArray<uint8>`) | the pinned address of the element data. `FromRef` answers the address of the wrapper struct, whose first word is a reference, so today's `+ i/8` reads the reference's bytes |
+| holds a reference: 9 sites, 14 lines | reflect type.cs:559, 565, 571 (`rtype`); runtime mheap.cs:730 (`mheap`, 4 flavours); select.cs:567 (`hchan`, 3 flavours); symtab.cs:240 (`_func`); mgcmark_greenteagc.cs:146 (`spanInlineMarkBits`); synctest.cs:191 (`synctestBubble`); time.cs:1280 (`timer`) | the box's order token |
+
+The table is the static half. The box kind decides too: a field or element reference whose pointee is reference-free
+inside a container that holds references can answer its token (ж.FieldRefBox.cs:417-434). No count of that is made.
+
+**What the number is used for, under a token.**
+
+- Identity, order or an opaque word: select.cs:567 (the lock order), synctest.cs:191, time.cs:1280 (a race context),
+  mheap.cs:730 (handed to `recordspan`, which converts it back: the token resolves to the box, where `FromRef`'s
+  number resolves to nothing). A token is right here, and it is stable where `FromRef`'s number is not.
+- Compared with a module's address range: symtab.cs:240, and stack.cs:1424 in the reference-free class. The number
+  is in no module either way.
+- Handed on as an `unsafe.Pointer`: reflect type.cs:559-571 (`resolveNameOff`, `resolveTypeOff`, `resolveTextOff`)
+  and mgcmark_greenteagc.cs:146 (`memclrNoHeapPointers`). NOT READ: what each callee does with the number.
+- Cast to a raw C# pointer: internal/abi type.cs:230, 243, the converter's span form
+  `new ReadOnlySpan<E>((E*)(uintptr)(p), n)`. That form has 19 code lines outside golib and unsafe: 9 converted (the
+  two above; runtime heapdump.cs:61, 71, 762; iface.cs:243; mbitmap.cs:1638; windows/os_windows.cs:582, 616), 6
+  hand-owned, 4 in a review sibling. `UncommonType` is reference-free, so over a standard box the number stays an
+  address; the read past the struct is wrong today and stays wrong (no method table follows an `UncommonType` in
+  managed memory). Over a box that answers a token it would be the wild read the review describes.
+  runtime/iface.cs:243 feeds the same form from `FromPinnedBox` at master.
+
+**4.3 as amended.** An emitted `FromRef` site changes to `FromPinnedBox` only when every use of its number is one of:
+the typed door or `unsafe.Add` (carried, 10.1), or identity, order or an opaque word. A site whose number reaches a
+raw C# pointer, a span constructor or a callee the seat has not read KEEPS `FromRef` and is listed by name in the
+repoguard arm, which therefore holds a list and not a count of 0. At master the list starts as internal/abi
+type.cs:230 and 243, and reflect type.cs:559-571 and mgcmark_greenteagc.cs:146 until their callees are read.
+
+**New stop line S10** is in 10.8.
+
+### 10.3 Must-fix 3: the cast goes with the callee
+
+**Read.** convCallExpr.go:3653 is `fmt.Sprintf("(uintptr)@unsafe.Pointer.FromRef(ref %s)", …)`. With only the callee
+swapped, `@unsafe.Add((uintptr)FromPinnedBox(Ꮡg), i)` hands `Add` a number and the source is gone before the
+derivation. The seat emits `@unsafe.Pointer.FromPinnedBox(Ꮡg)` with no cast. Where Go's own text converts to
+`uintptr` (`uintptr(unsafe.Pointer(c))`), the outer cast is that conversion's and stays. P2's matcher counts the cast
+as part of the `FromRef` spelling.
+
+### 10.4 Must-fix 4: B1 when the slot is a managed func variable; lifetime
+
+**Read.** `GoFuncCookie.s_delegateOf` is a `Dictionary<nuint, WeakReference<Delegate>>` (GoFuncCookie.cs:74, 149); a
+static function's row is held strongly (:50, :132). The review is right on both points.
+
+**B1 as amended.** The converter does not emit `To<uintptr>(e).Value = cookie`. It emits one golib call,
+`@unsafe.Pointer.StoreFunc(e, fn)` (`[EditorBrowsable(Never)]`, one surface line), which decides at run time what `e`
+names:
+
+1. a managed func variable (the carried source is a box whose pointee is a delegate type, at offset 0): the func
+   itself is stored, through the slot access `StoreThrough` already uses (unsafe.cs:600). This is class w1's result.
+   A delegate type the slot cannot hold is refused by name;
+2. a word: C memory, or reference-free managed storage (10.1's first row): the word store,
+   `To<uintptr>(e).Value = (uintptr)GoFuncCookie.Of(fn)`;
+3. the inside of a value that holds references (10.1's second row): the alias walk. A func field takes the func, a
+   `uintptr` field takes the word, anything else is refused by name.
+
+No arm writes 8 bytes over a reference.
+
+**Lifetime, stated.** A static function's word is valid for the life of the process. A closure's word is valid while
+something else holds the closure: stored only in raw memory, it can be collected, and its word then resolves to
+nothing and is refused by name at the call. Go has the same rule for a func stored in memory its collector does not
+scan. Read-back and equality are those of class w2 and of S1.
+
+**Arms.** `FuncWordShapes` gains three rows: the store through a pointer that names a func variable at run time
+(the variable is then called), the store into a word slot (read back, compared, called), and a closure's word after
+its closure is dropped and a collection is forced (the named refusal). NOT READ: whether sqlite's nine stores are
+all of static functions; the seat reads vfs/patches64.go:18-26 for it.
+
+### 10.5 Must-fix 5: B0's reach, and B2 against the refusal that already exists
+
+**Read.** `NativeBox<T>.ValueAddress` (ж.NativeBox.cs:124) already refuses by name
+(`RuntimeErrorPanic.NativeStructLayoutMismatch`) a STRUCT `T` whose layout `GoReflect.ClrLayoutMismatch` proves is
+not Go's, and a field that is a managed reference is such a proof (GoReflect.TypeLayout.cs:488). Section 4.8 did not
+mention it. `ClrLayoutMismatch` answers null, and so refuses nothing, for a `T` that is not a struct and for a struct
+whose Go layout it cannot read.
+
+**B2, redefined.** B2 adds nothing where `ClrLayoutMismatch` already refuses. Its population is exactly
+`IsReferenceOrContainsReferences<T>` AND `ClrLayoutMismatch(T) is null`, in two classes:
+
+- B2a, `T` is itself a reference: a delegate, a pointer box, a string, a slice, an interface, an `unsafe.Pointer`;
+- B2b, a struct that holds a reference and whose Go layout is unknown. libc's Mutex over the hand-owned C#
+  `sync.Mutex` is the known member.
+
+**B0, widened.** The counter sits in `ValueAddress` after the layout check, so it counts exactly B2's population, by
+`T`, by class, and by whether the box retains a source; and 10.1's unpinnable class beside it. It is read over EVERY
+banked row, on every flavour the roster banks (windows, linux/amd64, linux/arm64, and darwin where rows are
+banked), by one sweep per flavour with the counter's variable set. P5 lands the counter and reads linux/amd64.
+The other flavours are read by the lanes that hold those hosts, dispatched by COORD. B2 lands for a class only when
+every flavour's reading is in and is 0 for it. The windows evidence that the linux/amd64 canaries cannot stand in:
+net/windows/interface_windows_impl.cs:262 casts an OS buffer to `ж<windows.IpAdapterAddresses>`, a struct with
+pointer fields.
+
+### 10.6 Must-fix 6: H's ref, and S8 replaced by named arms
+
+**The precondition is met.** `claude/h-cgo-31-review2-red` is on origin at b642ac3682 (read by `git ls-remote`,
+2026-11-14): 8a8a52ff1e (unit) and b642ac3682 (end to end), on H's 83fbf28560. COORD's reading of it (07:47Z):
+GoCgoArgsTests 34 tests, 28 passed, 6 failed, the 17 earlier rows all passing. P5 did not run it.
+
+**The acceptance list, from H's ref.** Red, to turn green: U1, U2, U3, U4, U5 and C2. To stay green: U6, C1, K0 and
+the 17 earlier rows. End to end: the seven `go*` arms read red and turn green, the six `c*` twins and the 40
+existing arms do not move.
+
+**What H's readings change in this design.**
+
+- **Family 1 is "an interior address of a box's own storage".** U1 read 15 crossings, not 20: `&x[1]` over a local
+  does not cross, because the element box's own address is registered and the conversion finds it in the registry
+  (K0's answer at offset 0). An element box is not interior to itself. Sections 2.5 and 4.1 are to be read with
+  that definition: step 2 of the door already answers an element's or a field's own address, and step 3 is for an
+  address inside a box's storage that no box of its own names.
+- U3 read 34 crossings, per view (a slice and a Go array): the reinterpret of `&h.name` 5, `unsafe.Add` 2 (untyped),
+  `&s[1]` 5, `SliceData` 5. `&h.name[1]` crosses no door and loses its view, which is U4.
+- U5 is a lifetime fault, not a crossing: the doors hold, and the view is collected while the slice of pointers is
+  alive.
+- U6 is green at H's tip: the reflect pair is refused at both void doors today. 4.5 predicted no code for it.
+- **C2 is red: an over-refusal.** `&h.name[1]` over C memory is refused at the void door as a pointer into Go
+  memory. S1 names a refused C-memory twin, so 4.4 (H's half) must turn C2 green, and P5's half must not refuse it
+  by another route.
+
+**S8 is replaced** by one named cgo-door arm per family, H's, each handing every derived form to every door it
+reaches and asserting 0 crossings:
+
+| Family | Arm (GoCgoArgsTests) | Forms | Doors or end-to-end rows |
+|:--|:--|:--|:--|
+| 1, the interior conversion | `ATypedPointerConvertedFromAnInteriorUnsafePointerIsRefusedAtEveryDoor` (U1) | `unsafe.Add` over `&b[0]`; `&h.n` of a view; `&x[1]` of a local; through a user function | `StructPointer`, `HelperPointer`, `VoidPointer` of both mints, `HelperVoidPointer`; end to end `goaddtyped`, `goaddfill`, `gofieldtyped` |
+| 2, the array-field window | `AnArrayFieldOfAViewOverGoMemoryIsRefusedAtEveryDoor` (U3) | a reinterpret of `&h.name`; `unsafe.Add` over it; `h.name[:]` with `&s[1]` and `SliceData`; `&h.name[1]`; each over a slice and over a Go array | end to end `goviewnamestring`, `goviewnameadd`, `goviewnameslice`, `goviewnamedata` |
+
+**The rest of H's arms, for section 5's table:**
+U2 `ATypedPointerConvertedFromAnInteriorUnsafePointerKeepsItsStorageAlive` (plain Go, a compacting collection);
+U4 `AnArrayFieldOfADroppedViewKeepsTheViewAndItsPinAlive`;
+U5 `AnUnsafeSliceOfPointersOverAViewKeepsTheViewAndIsRefusedAtEveryDoor` (4.5);
+U6 `TheReflectPairOverADerivedPointerIsRefusedAtTheVoidDoors`.
+The controls for S1: `TheReviewsShapesOverCMemoryStillCross`,
+`AnElementOfAnArrayFieldOfACStructCrossesTheVoidDoorAsItsAddress`,
+`ATypedPointerConvertedFromAnUnsafePointerAtOffsetZeroIsRefused`, and the end-to-end twins `caddtyped`,
+`cfieldtyped`, `cviewnamestring`, `cviewnameadd`, `cviewnameslice`, `cviewnamedata`.
+
+**P5's own arms** are in `InteriorPointerRootTests`: the rebased slice header (`ReflectOverNativeMemory`), which is
+not on H's ref, and 10.1's `FromBox` arm. Every arm there uses H's compaction recipe and the address assertion; a
+test that collects without compacting can read green over stale bytes.
+
+### 10.7 The SHOULD items
+
+- **4.2, nested sums.** The recognised operand is a tree of `+` and `-` over `uintptr` in which exactly one leaf is
+  a conversion from an `unsafe.Pointer` `P` and that leaf is never on the right of a `-`. It emits
+  `@unsafe.Add(P', rest)`, where `rest` is the same tree with the leaf removed. `Cmsghdr.data` has two addends and
+  becomes one `Add`. A mask is not a sum: mgcmark_greenteagc.cs:106 (`&^ 0b11`) stays a number and is named in the
+  record as a residue.
+- **`unsafe.Add(nil, n)`.** golib answers nil (unsafe.cs:924); Go answers the number `n`. With 4.2,
+  `unsafe.Pointer(uintptr(p) + n)` over a nil `p` would change from `n` to nil. The seat changes `Add`'s nil arm to
+  answer the number with no source, as Go does: one line, one arm red first (`AddOverANilPointerAnswersTheOffset`).
+  It also changes every existing `Add` over a nil pointer with a non-zero offset from nil to that number; a canary
+  that moves for it is S4. COORD may rule the other way (keep nil and disclose it).
+- **Hand-owned files keep the old cast.** 34 hand-owned files hold it: 61 casts in the parenthesised spelling and 25
+  in the unparenthesised one (`(ж<T>)(uintptr)x`, as sync/atomic/type.cs:137 and 159). The per-file list is the last
+  block of `review-counts.txt`. The seat does not edit them. 4.7's guard covers golib's mints only, so the list is a
+  second repoguard arm: a hand-owned file that GAINS a cast fails it by name. Each listed file is read once in the
+  seat for a cast over a derived pointer; one found is posted, not fixed in passing.
+- **`GoTypeOps.NewNativeBox` (GoTypeOps.cs:101).** Its caller NativeStructMarshal.Deep.cs:517 reaches it for a
+  pointer word that native code left and that names nothing inside any Go copy the marshaller made (the copies are
+  tested first, :505-514). That is C memory by construction: disposition `C memory: a pointer word native code
+  returned`, listed in 4.7's guard with that reason.
+- **A `uintptr` held across statements** is disclosed on the user page: docs/Limitations.md, "A few quiet ones", in
+  this commit, with the identity difference of I5 beside it (ruling 2).
+- **Performance.** `To<T>` mints one box (4.1 says so; the prototype's two mints are the prototype's). 4.3 puts the
+  number operator on receivers that took a bare `fixed` before: one pin handle per box and one registry write per
+  call. The seat TIMES it, beside allocations: `ctrlGroup.get` and `set` in a loop, and the banked
+  `internal/runtime/maps` row's wall time, before and after, three runs each on one host. internal/sync's four
+  sites sit under `race.Enabled`, a constant false (internal/race/norace.cs:13), so they never run and are not
+  timed. The threshold is stop line S11.
+
+### 10.8 Predictions and stop lines, added or changed
+
+- **P9.** `AFromBoxDerivedPointerSurvivesACompactingCollection` is red at H's tip in all three positions on the
+  address assertion, and green with 10.1. Its `FromPinnedBox` twin is red at H's tip only through the cast (no
+  source), and green with 4.1.
+- **P10.** B1's `StoreFunc` changes 0 stdlib lines (P3 stands) and the vfs package's 9 stores take it (P4's count
+  stands; the spelling is `StoreFunc`, not the word store).
+- **P2, restated.** The `FromRef` spelling includes its `(uintptr)` cast (10.3), and the count of changed `FromRef`
+  lines is the 37 less the lines 10.2 keeps by name.
+- **S8** is withdrawn and replaced by the two named arms of 10.6: either arm reading a crossing after the fix is a
+  stop, and is not disclosed.
+- **S10, new.** A mint whose number is not its source's own address over a movable source (10.1); or a 4.3 site
+  whose number can be a token and reaches a raw C# pointer, a span constructor or a native memory primitive (10.2).
+  The site is not changed. It is posted.
+- **S11, new.** `ctrlGroup.get` or `set` slows by more than 25%, or the `internal/runtime/maps` row's wall time rises
+  by more than 10%, on the same host. 4.3 does not land for the receivers measured; the numbers are posted.
+- **S3** stands for any site the seat's own emission adds on another target or in a converted test.
+
+### 10.9 The four decisions, as ruled (COORD, 2026-11-14 07:34Z; the owner may overrule)
+
+1. **The door enters this release (1.26.11.1), as its own seat, after must-fixes 1 to 3.** It moves the corpus, so
+   it queues in the corpus order right after R's hop and ahead of the visual seats. Fallback if S1, S2 or S4 trips:
+   4.2, 4.3, 4.4 and the arms ship, and family 1 is disclosed on the user page.
+2. **I5 (identity) is disclosed now** (docs/Limitations.md, this commit) and lands after its census.
+3. **The split.** H cuts 4.4, 4.5 and its arms. P5 cuts 4.1 to 4.3, 4.7, B1, B0 and the program, on H's tip. B2 and
+   I5 follow their censuses.
+4. **The libc Mutex item goes to P2**, after its S8 seat. It is a separate BOARD row of this date.
+
+### 10.10 What this amendment does not show
+
+- No code is cut and nothing in this section was run by P5. H's readings are quoted from COORD's posts.
+- The callees of 10.2's handed-on sites and sqlite's nine stores are named as NOT READ.
+- The box-kind half of 10.2 (a field or element reference that answers a token) is not counted.
+- `review-counts.py` reads text. A `FromRef` or a cast built across two lines is not counted.

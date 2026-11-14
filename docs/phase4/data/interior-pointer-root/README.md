@@ -88,3 +88,11 @@ that requires `modernc.org/sqlite v1.62.0` and `modernc.org/libc v1.80.1`, with 
 output is `corpus-counts.txt`. It matches the cast's type argument by bracket depth and reads the file list with
 `core.quotepath=false`. A `grep -o` with a greedy pattern over the default `git ls-files` output undercounts (900
 against 919): it reads two casts on one line as one and skips the 17 golib files whose name is not ASCII.
+
+## The review amendment's counts (2026-11-14)
+
+`review-counts.py`, run from the repo root at master 314e1d8b60, wrote `review-counts.txt`: every `FromRef` call line
+with its file's kind and whether it carries the `(uintptr)` cast; the counts of `FromBox` and `FromPinnedBox` calls;
+every cast of a number to a raw C# pointer; and, per hand-owned file, the old cast in both spellings. It reads the
+tracked `.cs` and `.cs.auto` files under `src/core`, golib and unsafe excluded, and skips comment text after `//`.
+The design's section 10 quotes it.

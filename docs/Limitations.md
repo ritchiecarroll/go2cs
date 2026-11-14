@@ -237,6 +237,15 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   * Copying a struct by value shares any fixed-size array inside an embedded struct.
   * A slice of one number type laid over another's storage
     (`unsafe.Slice((*uint64)(unsafe.Pointer(&b[0])), n)`) is a copy: writes through it never reach `b`.
+  * A pointer's number kept in a `uintptr` and turned back into a pointer in a later statement
+    (`n := uintptr(unsafe.Pointer(p))`, then `(*T)(unsafe.Pointer(n))`) can name memory that has since moved, and
+    the number does not keep the value alive. Go calls this invalid too, but Go's heap does not move values, so
+    it often works there. Do the arithmetic and the conversion in one expression, or use `unsafe.Add`.
+  * A pointer to a field made by arithmetic does not compare equal to the field's own address:
+    `(*int64)(unsafe.Add(unsafe.Pointer(&p), 8)) == &p.y` is false where Go says true.
+  <!-- docs/phase4/DESIGN-interior-pointer-root.md (P5, 2026-11-14): the first item is its section 4.2 and the
+       review's SHOULD of that date; the second is shape 9 of its section 1.1, measured false at master 314e1d8b60
+       and at H's 83fbf28560, disclosed by COORD's ruling 2 (section 10.9) until increment I5 lands. -->
   * A type switch's `case int:` also catches an `int32` or `rune` when the switch has no `int32` case of
     its own (`case uint:` likewise for `uint32`).
   * A left shift of an untyped constant that takes a named integer type from its context, such as
