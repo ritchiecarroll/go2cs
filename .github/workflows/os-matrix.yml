@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
         type: choice
         required: true
         default: census
@@ -61,11 +61,12 @@ on:
           - nugetgo-behavior
           - golib-tests
           - gen-tests
+          - solution-build
           - stack-probe
           - converter-cgo
           - cgo-e2e
       filter:
-        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
+        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
         type: string
         required: false
         default: ''
@@ -522,6 +523,9 @@ jobs:
               'gen-tests'        = 30    # one Release build of GenTests (go2cs-gen and golib) from cold, then
                                          # `dotnet test` (whole suite, or a --filter): 526 tests in about 2 min on a
                                          # laptop. PROVISIONAL until the first run (R, 2026-11-14).
+              'solution-build'   = 60    # one cold build of go2cs.slnx: golib, go2cs-gen, the test projects, every
+                                         # behavioral and performance member and their core closure: 622 s cold on a
+                                         # laptop (R, 2026-11-14). PROVISIONAL until the first hosted run.
               'sweep-shard'      = 210   # one -tests convert/build/run/compare cycle per matched
                                          # row; the sweep's own per-package floors reach 120m.
               'release-smoke'    = 90    # the LEG only (the pack job has its own budget): converter
@@ -1311,6 +1315,77 @@ jobs:
           & ./.github/annotate-summary.ps1 -Title "gen-tests $goos/$rid" -Lines $summary
 
           exit $runExit
+
+      # -------------------------------------------------------------------------------------
+      # solution-build -- `dotnet build src/go2cs.slnx`, the converter-dev workspace, whole: golib, go2cs-gen, the
+      # hand-written test projects, every behavioral and performance member and the core packages they reference.
+      # Nothing else builds the solution whole (the behavioral runner builds its members one by one with its own
+      # -p:go2csPath), and CLAUDE.md asks for this build after any golib or runtime API change. Measured before the stage
+      # (H, 2026-11-13): a Release build failed with 17,714 errors, all in behavioral members, CS0246 and CS0234 on
+      # golib's own names. A converted .csproj defaults $(go2csPath) to $(USERPROFILE)/go2cs/ (the tree deploy-core.ps1
+      # stages) under any configuration but Debug, so every behavioral member bound to that tree, stale or absent. The
+      # test trees' Directory.Build.props now pin go2csPath to the repository, as src/core's does. A hosted runner has no
+      # $(USERPROFILE)/go2cs, so a member that falls back to that default fails here by name.
+      # -------------------------------------------------------------------------------------
+      - name: Solution build — go2cs.slnx for this GOOS
+        if: needs.plan.outputs.stage == 'solution-build'
+        shell: pwsh
+        env:
+          SLN_FILTER: ${{ needs.plan.outputs.filter }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $config = if ([string]::IsNullOrWhiteSpace($env:SLN_FILTER)) { 'Release' } else { $env:SLN_FILTER.Trim() }
+          if ($config -cnotin 'Release', 'Debug') {
+              Write-Host "::error::solution-build's filter is the configuration, Release (blank) or Debug: '$config' is neither"
+              exit 1
+          }
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $log = Join-Path $art "solution-build-$config-$goos-$rid.log"
+
+          # The deployed tree a converted .csproj falls back to must not exist here, or a member falling back to it would
+          # build against whatever it holds and pass.
+          $home_ = if ($env:USERPROFILE) { $env:USERPROFILE } else { $env:HOME }
+          $deployed = Join-Path $home_ 'go2cs'
+          if (Test-Path -LiteralPath $deployed) {
+              Write-Host "::error::$deployed exists on this runner: a member falling back to it would build against it and pass"
+              exit 1
+          }
+
+          $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
+          $sw = [System.Diagnostics.Stopwatch]::StartNew()
+          & dotnet build src/go2cs.slnx -c $config "-p:GoTargetOS=$goos" @archArgs -nologo -clp:ErrorsOnly *>&1 | Tee-Object -FilePath $log
+          $runExit = $LASTEXITCODE
+          $sw.Stop()
+
+          # Distinct error lines (the closing list repeats each one), by code and by project.
+          $errors = @(Get-Content -LiteralPath $log | Where-Object { $_ -match ': error [A-Z]+[0-9]+' } | Sort-Object -Unique)
+          $projectOf = { param($line) if ($line -match '\[([^\]]+\.(cs|sh)proj)') { Split-Path -Leaf $Matches[1] } }
+          $byCode = @($errors | ForEach-Object { if ($_ -match ': error ([A-Z]+[0-9]+)') { $Matches[1] } } | Group-Object |
+              Sort-Object Count -Descending | ForEach-Object { "  $($_.Name) $($_.Count)" })
+          $byProject = @($errors | ForEach-Object { & $projectOf $_ } | Group-Object | Sort-Object Count -Descending)
+
+          $summary = @(
+              "## go2cs.slnx -- $config, GOOS=$goos ($rid)"
+              ''
+              "exit ``$runExit``, $([int]$sw.Elapsed.TotalMinutes) min, $($errors.Count) distinct error line(s) in $($byProject.Count) project(s)"
+              ''
+              '```'
+          ) + $(if ($errors.Count) {
+              @('By code:') + $byCode + @('By project (first 25):') + @($byProject | Select-Object -First 25 | ForEach-Object { "  $($_.Name) $($_.Count)" })
+          } else { @('No errors.') }) + @('```')
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "solution-build $config $goos/$rid" -Lines $summary
+
+          # An exit of 0 with error lines is not a pass, and an exit that is not 0 with none is named, not read as one.
+          if ($runExit -eq 0 -and $errors.Count -gt 0) { Write-Host "::error::the build exited 0 and printed $($errors.Count) error line(s)"; exit 1 }
+          if ($runExit -ne 0 -and $errors.Count -eq 0) { Write-Host "::error::the build exited $runExit and printed no error line: read the log" }
+          exit $runExit
+
 
       # -------------------------------------------------------------------------------------
       # converter-cgo -- OPT-IN: the converter's own cgo tests on this leg's host, where a C compiler lets go list run
