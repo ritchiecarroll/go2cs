@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/rsa` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-25 · converter `3e3f18925`*
+*Validated 2026-11-14 · converter `5bdf0a90b`*
 
-**590 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
+**590 matched · 1 disclosed** — Go 1.26.11, `windows/amd64`, converted package
 [`src/core/crypto/rsa`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/rsa).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.11 windows/amd64`.
 
 ## Verdicts
 
