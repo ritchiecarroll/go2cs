@@ -336,6 +336,10 @@ const cgoP3FixtureDir = "testdata/cgo/p3"
 // cgoP3GoMemory is in every refusal increment 3.1 makes of a pointer into Go memory: the increment that admits it.
 const cgoP3GoMemory = "increment 3.2"
 
+// cgoP3WriteThrough is in the refusal of a typed pointer C would write through (GoCgoArgs.StructPointer, Phase 2's door
+// for every typed pointer parameter): a native box minted over managed storage. Its text names no increment.
+const cgoP3WriteThrough = "which C must not write through"
+
 // cgoP3Arms are the end-to-end program's arms. An arm with neither goFails nor csFails prints the same lines and exits
 // 0 both ways. The arms with csFails hand C or a helper a pointer into Go memory: Go runs each to its end, and go2cs
 // refuses each by name, naming the increment that admits it. innerdefer and innergo are the controls of goinnerdefer
@@ -383,12 +387,12 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goviewfieldvar", csFails: cgoP3GoMemory},
 		// The second review (§16.12): a typed pointer from an interior unsafe.Pointer value, and an array field of a view.
 		{name: "goaddtyped", csFails: cgoP3GoMemory},
-		{name: "goaddfill", csFails: cgoP3GoMemory},
-		{name: "gofieldtyped", csFails: cgoP3GoMemory},
+		{name: "goaddfill", csFails: cgoP3WriteThrough},
+		{name: "gofieldtyped", csFails: cgoP3WriteThrough},
 		{name: "goviewnamestring", csFails: cgoP3GoMemory},
 		{name: "goviewnameadd", csFails: cgoP3GoMemory},
 		{name: "goviewnameslice", csFails: cgoP3GoMemory},
-		{name: "goviewnamedata", csFails: cgoP3GoMemory},
+		{name: "goviewnamedata", csFails: cgoP3WriteThrough},
 		// Their twins over C memory, which run to their end both ways.
 		{name: "caddtyped"},
 		{name: "cfieldtyped"},
