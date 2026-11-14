@@ -311,6 +311,69 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(sliced);
     }
 
+    // ---- COORD's arms for 4.5's header rebase and 4.4's void-door exception.
+
+    // unsafeheader.Slice and runtime.slice: Data unsafe.Pointer; Len, Cap int.
+    private struct cgoSliceHeader
+    {
+        public @unsafe.Pointer Data;
+        public nint Len;
+        public nint Cap;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static (slice<int32> rebased, WeakReference root) HeaderRebasedOverAFieldOfADroppedView(array<byte> bytes)
+    {
+        ж<cgoHdr> view = new ElemRefBox<byte>(bytes, 0).Reinterpret<byte, cgoHdr>();
+
+        // (*unsafeheader.Slice)(unsafe.Pointer(&s)).Data = unsafe.Pointer(&h.n); then Cap and Len.
+        ref slice<int32> alias = ref heap(default(slice<int32>), out ж<slice<int32>> Ꮡalias);
+        ж<cgoSliceHeader> hdr = Ꮡalias.Reinterpret<slice<int32>, cgoSliceHeader>();
+
+        hdr.Value.Data = @unsafe.Pointer.FromPinnedBox(view.of(cgoHdr.ᏑN));
+        hdr.OnHeaderStore();
+        hdr.Value.Cap = 2;
+        hdr.OnHeaderStore();
+        hdr.Value.Len = 2;
+        hdr.OnHeaderStore();
+
+        return (alias, new WeakReference(view));
+    }
+
+    // U7: a slice re-based through its header over a pointer derived from a view of Go memory, the view dropped, U2's
+    // compacting collection. The rebased slice must keep the view, as unsafe.Slice over the same pointer does.
+    [TestMethod]
+    public void ASliceRebasedThroughItsHeaderOverAViewKeepsTheViewAlive()
+    {
+        array<byte> bytes = new array<byte>(32);
+        bytes[4] = 7;
+        (slice<int32> rebased, WeakReference root) = HeaderRebasedOverAFieldOfADroppedView(bytes);
+        bytes = default;
+
+        CollectAndCompact();
+
+        Assert.IsTrue(root.IsAlive, "the view a slice header was re-based over is collected while the slice is alive, and its pin with it");
+        Assert.AreEqual(7, (int)rebased[0], "the slice still reads the storage it was re-based over");
+        GC.KeepAlive(rebased);
+    }
+
+    // G1, the guard on 4.4's void-door exception: an element of a native slice that is ANCHORED to a view of Go memory
+    // is still refused at the void door, in both mints. The exception admits an element of C memory alone, and the
+    // anchor is what tells the two apart.
+    [TestMethod]
+    public void AnElementOfAnArrayFieldOfAViewOverGoMemoryIsStillRefusedAtTheVoidDoor()
+    {
+        array<byte> backing = new array<byte>(32);
+        ж<cgoNamed> view = new ElemRefBox<byte>(backing, 0).Reinterpret<byte, cgoNamed>();
+        ж<byte> element = view.at<byte>(cgoNamed.ᏑName, 1);
+
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.VoidPointer(@unsafe.Pointer.FromPinnedBox(element), "f")), GoMemoryOwner, "the pinning mint");
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.VoidPointer(@unsafe.Pointer.FromBox(element), "f")), GoMemoryOwner, "the retaining mint");
+
+        GC.KeepAlive(backing);
+        GC.KeepAlive(view);
+    }
+
     // ---- The controls: the same shapes over C memory.
 
     [TestMethod]
