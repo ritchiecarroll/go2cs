@@ -79,6 +79,10 @@ public class TwinFuncPairTests
                 // Fix 5: the converter's creation sites `new D(methodGroup | literal)` (delegateArgWrap, convExprList).
                 caller(new Action(park2));
                 caller(new Action(() => { ᐸꟷ(ch); }));
+
+                // Fix 6: `go g()` on a func value in a twin launches the pair's twin when g is pair-bound.
+                Action g = () => { ᐸꟷ(ch); };
+                goǃ(g);
             }
 
             // A static function that parks, converted to a func value through `new D(F)`.
@@ -157,6 +161,15 @@ public class TwinFuncPairTests
         Assert.IsFalse(main.Contains("new Action(new global::System.Action(", StringComparison.Ordinal) ||
                        main.Contains("new global::System.Action(new global::System.Action(", StringComparison.Ordinal),
             "a literal paired inside new D(...) binds the outer creation to the pair, never a delegate over a delegate");
+    }
+
+    [TestMethod]
+    public void AGoStatementOnAPairBoundValueLaunchesTheTwin()
+    {
+        string main = Body(Run().twins, "main");
+
+        StringAssert.Contains(main, "goǃtwin(g.Invoke, ((global::System.Func<global::go.golib.GoTask>)", "a pair-bound g launches its twin");
+        StringAssert.Contains(main, "else goǃ(g);", "anything else launches as before");
     }
 
     [TestMethod]

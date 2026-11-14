@@ -333,6 +333,12 @@ public sealed partial class TwinGenerator
 
         public override SyntaxNode? VisitExpressionStatement(ExpressionStatementSyntax node)
         {
+            if (m_passive == 0 && node.Expression is InvocationExpressionSyntax launch && m_run.Sites.TryGetValue(launch, out Site? goSite) &&
+                goSite is { Active: true, Go: GoKind.Other } && GoPairLaunch(launch) is { } launched)
+            {
+                return ParseStatement(launched).WithTriviaFrom(node);
+            }
+
             if (m_passive == 0 && node.Expression is InvocationExpressionSyntax call && m_run.Sites.TryGetValue(call, out Site? site) &&
                 site is { Active: true, Delegate: true, Go: GoKind.None } && PairShape(call) is { } shape)
             {
@@ -341,6 +347,33 @@ public sealed partial class TwinGenerator
             }
 
             return base.VisitExpressionStatement(node);
+        }
+
+        // Fix 6 of 9.3: `go f(args)` on a func value held by a local or parameter, in a twin: when f is pair-bound the
+        // goroutine launches the pair's twin through goǃtwin (golib's unwrap names it by f's plain body), anything else
+        // launches as before. A value-returning f and a ref argument keep today's launch. `defer f()` is untouched: a
+        // deferred call runs in the frame's synchronous unwind.
+        private string? GoPairLaunch(InvocationExpressionSyntax node)
+        {
+            SeparatedSyntaxList<ArgumentSyntax> arguments = node.ArgumentList.Arguments;
+
+            if (!m_run.Pairs || node.Expression is not IdentifierNameSyntax { Identifier.Text: "goǃ" } ||
+                arguments.Count is < 1 or > 5 || arguments.Any(argument => !argument.RefKindKeyword.IsKind(SyntaxKind.None) || argument.NameColon is not null) ||
+                arguments[0].Expression is not IdentifierNameSyntax callee ||
+                m_model.GetTypeInfo(callee).Type is not INamedTypeSymbol { TypeKind: TypeKind.Delegate, DelegateInvokeMethod: { ReturnsVoid: true } invoke } type ||
+                invoke.Parameters.Length != arguments.Count - 1 || Run.TwinDelegateType(type) is not { } twinType)
+            {
+                return null;
+            }
+
+            string name = callee.Identifier.Text;
+            string rest = string.Concat(arguments.Skip(1).Select(argument => ", " + ((ExpressionSyntax)Visit(argument.Expression)!).WithoutTrivia().ToFullString()));
+            string pairName = "ᴘpair" + ++m_temps;
+
+            GoTwinned++;
+
+            return "if (" + name + "?.Target is global::go.golib.GoFuncPair " + pairName + ") goǃtwin(" + name + ".Invoke, ((" + twinType + ")" +
+                   pairName + ".Twin)" + rest + "); else goǃ(" + name + rest + ");";
         }
 
         // Whether a call through a func value takes the pair test, and its twin delegate type; no side effects.
