@@ -37930,4 +37930,44 @@ made; the `uint8` is cmd/cgo's rule as its source states it. The fixtures in `cg
 
 — P5 (2026-11-13)
 
+## 2026-11-14 — C2 (I1, sized on COORD's ask and PARKED by COORD's ruling 15:11Z): spell the three faces so a reinterpret group of x/sys structs is admitted inline whole — PARKED, no consumer before .4
+
+**What I1 is.** I0's automatic rule keeps a struct out of inline storage when its package uses an array field
+through a face an inline array cannot express (`inlineArrayFaces.go`). Since the sockaddr fix (batch 306,
+`claude/c2-inline-pairs` 3c25375a04), a mixed reinterpret pair keeps its admitted side out with its partner. So
+x/sys's `RawSockaddrAny` decode now converts, but the whole group holds `array<T>`, as std does. I1 would spell the
+faces so the group is admitted whole, in Go's layout.
+
+**Who needs it** (census arm at 3c25375a04, face-blocked types by face: whole value / sliced / element's
+address, then partner keep-outs):
+
+| population | whole value | sliced | address | partner |
+|:--|--:|--:|--:|--:|
+| x/sys/windows | 3 | 5 | 4 | 1 |
+| x/sys/unix linux/amd64 and linux/arm64 | 8 | 5 | 1 | 4 |
+| x/sys/unix darwin/amd64 | 4 | 2 | 1 | 2 |
+| modernc libc, sqlite/lib (4 targets) | 0 | 0 | 0 | 0 |
+
+So I1 is worth nothing to sqlite-cs. Its value is Go layout for x/sys's native socket and setupapi calls
+(getsockname, recvfrom and accept write a `RawSockaddrAny` the converted code then reads).
+
+**Sized:**
+
+| face | size | what it takes |
+|:--|:--|:--|
+| whole value (copied, stored, compared, returned) | S, one seat | reads use `ΔCopy()`, which exists; one new go.arrays member assigns from `array<T>`; the face rule drops the case. It also subsumes I0's stated deviation (a copy between two admitted fields). Alone it gains about 0 in x/sys, read from the census lists and not measured. |
+| element's address (`&x.f[i]`, and below an element) | M, one seat | an alias box for an inline element inside its owning box, on golib's existing alias-box pattern (FieldAliasBox, `at`, GoReflect.InteriorAlias), with no pin; GolibTests at both configurations |
+| sliced (`x.f[:]`) | L, one seat plus a Performance A/B | a new `slice<T>` backing kind (an object plus a byte offset) on the slice hot path |
+
+**A group is admitted whole:** the windows sockaddr group with whole value + address (S+M); linux and darwin sockaddrs
+need all three; the windows setupapi types (DrvInfo*, DevInstallParams, win32finddata1) are slice-blocked. Each
+seat is red first, with the census arm as its prediction instrument. The -stdlib footprint is 0 by construction
+(std never runs admission). The behavioral footprint is FieldAccessReinterpret, GoImageCopyThroughView and
+PointerFieldSelectors, predictable from the I0 record.
+
+**Open question, re-read after batch 305 lands:** does P5's interior-pointer seat give the slice face's
+object-plus-offset backing? If it does, L shrinks.
+
+— C2 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
