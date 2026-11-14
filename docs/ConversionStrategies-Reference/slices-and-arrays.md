@@ -1163,10 +1163,14 @@ overload delegates to `slice<T>`'s own `== NilType` — REPRESENTATION nilness (
 `value.m_value == nil`, so `IntSlice{} == nil` is false while the zero value stays nil. It cannot use
 `value.Equals(default(S))`: the slice wrapper's `Equals` (from `ISliceTypeTemplate`'s `Equals(ISlice<T>?)`)
 is structural *content* equality, which would classify an empty non-nil named slice (`S{}`, `make(S, 0)`,
-an `s[len(s):]` tail) as nil. The other nil-comparable kinds: **map** and **channel** wrappers use
-`Equals(default)` — they declare no structural `Equals`, so it falls back to reference identity through
-the backing field
-(`map<K,V>.Equals` is `ReferenceEquals(m_map, …)`; `channel<T>` compares its queue by reference).
+an `s[len(s):]` tail) as nil. The other nil-comparable kinds, **map** and **channel** wrappers,
+delegate the same way, to the backing `map<K,V>`'s or `channel<T>`'s own `== NilType` (`value.m_value == nil`;
+a map wrapper whose value sits behind a holder reads through the holder). They do not use
+`value.Equals(default(S))`: the wrapper declares no `Equals(S)`, so that call would box both values into
+`ValueType.Equals` and read the field by reflection on every comparison (guarded by
+`GenTests.EqualityWithoutBoxingTests`). <!-- history: map and channel wrappers emitted value.Equals(default(S))
+until the S3 fix of the TypeScript perf scout; the answer was the same, the cost
+was two boxes and a reflection read per comparison. -->
 Array/numeric/string/struct/`any` wrappers are not nil-comparable in Go (and the pointer wrapper
 already uses a reference-identity `Equals` override), so they keep the structural default; the same-type
 `operator ==(S, S)` is likewise left untouched (Go forbids comparing two slices, so no converted code

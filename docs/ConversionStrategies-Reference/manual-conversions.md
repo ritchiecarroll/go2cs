@@ -1758,9 +1758,15 @@ shape the converted corpus actually interns these agree:
   type always presents one key, and a second `TypeFor` call finds the first call's entry.
 * **A converted struct** — `net/netip`'s `addrDetail{isV6 bool; zoneV6 string}`, the shape `unique`
   actually interns — carries a generated field-wise `Equals` over `==` plus a `HashCode.Combine` of the
-  same fields, which is Go's struct `==` exactly. It does **not** implement `IEquatable<T>`, so
-  `EqualityComparer<T>.Default` routes through the `object` override; that lands on the same comparison, at
-  the cost of one box per lookup.
+  same fields, which is Go's struct `==` exactly. It implements `IEquatable<T>`, so
+  `EqualityComparer<T>.Default` calls the typed `Equals(T)` and a lookup boxes nothing; the hash is the typed
+  `go.golib.HashCode.Combine` overload, which gives the value the boxed form gives and allocates nothing. A
+  defined type over a struct (`type K S`) declares its own `Equals(K)`, `Equals(object)`, `GetHashCode` and
+  `IEquatable<K>`, each forwarding to the struct's. Guarded by `GenTests.EqualityWithoutBoxingTests` and
+  `GolibTests.HashCodeCombineAllocationTests`. <!-- history: until the S4 fix of the TypeScript perf scout,
+  a struct declared Equals(T) without IEquatable<T>, so each probe boxed, its
+  GetHashCode bound Combine(params object[]), and a defined type over a struct declared no equality at all and
+  fell back to ValueType.Equals and ValueType.GetHashCode. -->
 * **`@string`** compares and hashes by CONTENT, as Go's string `==` does — verified with two keys built
   from distinct backing storage.
 
