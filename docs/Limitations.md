@@ -263,7 +263,9 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
     `(*int64)(unsafe.Add(unsafe.Pointer(&p), 8)) == &p.y` is false where Go says true.
   <!-- docs/phase4/DESIGN-interior-pointer-root.md (P5, 2026-11-14): the first item is its section 4.2 and the
        review's SHOULD of that date; the second is shape 9 of its section 1.1, measured false at master 314e1d8b60
-       and at H's 83fbf28560, disclosed by COORD's ruling 2 (section 10.9) until increment I5 lands. -->
+       and at H's 83fbf28560, disclosed by COORD's ruling 2 (section 10.9) until increment I5 lands. Read again
+       on 2026-11-14 at master c2919b8b16 with the named-array floor, before this landed: for a local and for a
+       heap value Go prints `true`, the conversion `false`, and both read the field's value. -->
   * A type switch's `case int:` also catches an `int32` or `rune` when the switch has no `int32` case of
     its own (`case uint:` likewise for `uint32`).
   * A left shift of an untyped constant that takes a named integer type from its context, such as
