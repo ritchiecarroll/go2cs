@@ -29,8 +29,10 @@ import (
 //     VALUE (fields and array elements, at any depth), plain nested structs included: the layout gate needs a managed
 //     layout table at every level (C1's review, N4). Every type in the closure must pass 7.7's declaration-local rules:
 //     unmanaged once its arrays are inline, no array over 4096 bytes or 4096 elements, no struct over 4096 bytes.
-//  2. PAIR RULE. A reinterpret chain (*T)(unsafe.Pointer(e)), e a *X, whose two sides both hold arrays and disagree on
-//     admission is a convert-time ERROR naming both types (GO2CS2010), under either trigger.
+//  2. PAIR RULE. A reinterpret chain (*T)(unsafe.Pointer(e)), e a *X, whose two sides both hold arrays must agree on
+//     admission. FORCED, a disagreement is a convert-time ERROR naming both types (GO2CS2010). Under the AUTOMATIC rule
+//     the admitted side is kept out with its partner instead, warning GO2CS2009 (COORD 2026-11-14 13:56Z: x/sys's
+//     sockaddr decode); only a pair whose admitted side another package lays out is still refused.
 //  3. STAMP. The decision is recorded in package_info.cs, and a -tests conversion reads it (inlineArrayStamp.go).
 //  4. OVERRIDE. -inline-arrays=<patterns> forces a package ON with the declaration-local population (every struct the
 //     package declares or spells that holds an array), and "-<pattern>" turns auto OFF. std stays out either way.
@@ -349,7 +351,25 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 
 	// A type admitted through one seed but blocked as another's root stays admitted only if its own closure is clean,
 	// which inlineDeclarationRule already proved for every member above; nothing more to reconcile.
-	for key := range a.admitted {
+	a.types = candidates
+	a.pkg, a.spelled = pkg, spelled
+
+	// The pair rule, AUTOMATIC trigger (COORD 2026-11-14 13:56Z): a reinterpret chain whose two sides hold arrays and
+	// disagree is made to agree by keeping the admitted side out with its partner, never by refusing the package. Its
+	// root struct leaves the admitted set, and so does every admitted struct that holds it by value (a struct cannot hold
+	// a managed one inline), until no pair disagrees; each type kept out this way is a GO2CS2009 warning naming why.
+	// golang.org/x/sys's sockaddr decode is the population: RawSockaddrAny reinterpreted as each family's sockaddr,
+	// every one of which a face keeps out. Both sides then hold array<T>, which is the standard library's own state.
+	if !a.forced {
+		for a.keepMixedPairsOut(pairs, fset) {
+		}
+	}
+
+	for key, in := range a.admitted {
+		if !in {
+			continue
+		}
+
 		a.keyOrder = append(a.keyOrder, key)
 
 		if st, ok := candidates[key].Underlying().(*types.Struct); ok && structHoldsArray(st, 0) {
@@ -359,13 +379,11 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 	}
 
 	sort.Strings(a.keyOrder)
-	a.types = candidates
 
 	// The pair rule (GO2CS2010): both sides hold arrays and disagree. A struct another package lays out is that package's
 	// decision, read from its record (inlineArrayStamp.go); a pair reaching one whose record cannot be read, or an
-	// anonymous struct another package spells, is counted, not judged.
-	a.pkg, a.spelled = pkg, spelled
-
+	// anonymous struct another package spells, is counted, not judged. Under the automatic trigger only a pair whose
+	// admitted side another package lays out can still disagree here.
 	for _, pair := range pairs {
 		dstHolds, dstIn, dstForeign := a.closureAdmitted(pair.dst)
 		srcHolds, srcIn, srcForeign := a.closureAdmitted(pair.src)
@@ -393,6 +411,82 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 	}
 
 	return a
+}
+
+// keepMixedPairsOut takes one pass over the reinterpret pairs and keeps out the admitted side of each local pair that
+// disagrees (with every admitted struct that holds it by value). It reports whether anything was kept out, so the
+// caller repeats it until the pairs agree; the admitted set only shrinks, so the repetition ends.
+func (a *inlineArrayAdmission) keepMixedPairsOut(pairs []inlineReinterpretPair, fset *token.FileSet) bool {
+	changed := false
+
+	for _, pair := range pairs {
+		dstHolds, dstIn, dstForeign := a.closureAdmitted(pair.dst)
+		srcHolds, srcIn, srcForeign := a.closureAdmitted(pair.src)
+
+		if dstForeign || srcForeign || !dstHolds || !srcHolds || dstIn == srcIn {
+			continue
+		}
+
+		side, partner := pair.dst, pair.src
+		why := fmt.Sprintf("%s is reinterpreted as it", types.TypeString(partner, packageQualifier(a.pkg)))
+
+		if srcIn {
+			side, partner = pair.src, pair.dst
+			why = fmt.Sprintf("it is reinterpreted as %s", types.TypeString(partner, packageQualifier(a.pkg)))
+		}
+
+		// The admitted side another package lays out is that package's decision: the refusal pass reports it.
+		if !inlineTypeIsLocal(side, a.pkg, a.spelled) {
+			continue
+		}
+
+		position := fset.Position(pair.pos)
+		why = fmt.Sprintf("%s at %s:%d:%d, whose arrays are not held inline", why, filepath.Base(position.Filename), position.Line, position.Column)
+
+		if partnerKey, ok := inlineTypeKey(partner); ok {
+			if reason, blocked := a.blocked[partnerKey]; blocked {
+				why = fmt.Sprintf("%s (%s)", why, reason)
+			}
+		}
+
+		if key, ok := inlineTypeKey(side); ok && a.admitted[key] {
+			a.keepOut(key, why, position)
+			changed = true
+		}
+	}
+
+	return changed
+}
+
+// keepOut removes an admitted struct from the admitted set with its GO2CS2009 warning, and with it every admitted
+// struct that holds it by value.
+func (a *inlineArrayAdmission) keepOut(key string, why string, position token.Position) {
+	if !a.admitted[key] {
+		return
+	}
+
+	a.admitted[key] = false
+	a.blocked[key] = why
+	a.warnings = append(a.warnings, inlineAdmissionDiagnostic{position,
+		fmt.Sprintf("%s is converted whole through unsafe.Pointer but keeps array<T> storage: %s", types.TypeString(a.types[key], packageQualifier(a.pkg)), why)})
+
+	for holder, in := range a.admitted {
+		if !in || holder == key {
+			continue
+		}
+
+		holds := false
+
+		byValueStructs(a.types[holder], 0, map[string]bool{}, func(member types.Type) {
+			if memberKey, ok := inlineTypeKey(member); ok && memberKey == key {
+				holds = true
+			}
+		})
+
+		if holds {
+			a.keepOut(holder, fmt.Sprintf("it holds %s by value, whose arrays are not held inline", types.TypeString(a.types[key], packageQualifier(a.pkg))), position)
+		}
+	}
 }
 
 // closureAdmitted reports whether t's by-value closure holds an array, whether every array-holding struct in it is

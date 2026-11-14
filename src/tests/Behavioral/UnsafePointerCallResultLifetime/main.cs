@@ -44,9 +44,9 @@ internal static void main() {
 
         collect();
 
-        ((ж<byte>)(uintptr)(p)).Value = 1;
-        ((ж<byte>)(uintptr)(q)).Value = 2;
-        ((ж<byte>)(uintptr)(r)).Value = 3;
+        (@unsafe.Pointer.To<byte>(p)).Value = 1;
+        (@unsafe.Pointer.To<byte>(q)).Value = 2;
+        (@unsafe.Pointer.To<byte>(r)).Value = 3;
 
         if (b[4] != 1) {
             viaReturn++;

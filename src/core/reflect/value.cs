@@ -110,7 +110,7 @@ internal static @unsafe.Pointer pointer(this ΔValue v) {
         throw panic("can't call pointer on a non-pointer Value");
     }
     if ((flag)(v.flag & flagIndir) != 0) {
-        return ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
+        return ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
     }
     return v.ptr;
 }
@@ -144,7 +144,7 @@ internal static @unsafe.Pointer packEfaceData(ΔValue v) {
     case {} when (flag)(v.flag & flagIndir) != 0: {
         // Value is indirect, but interface is direct. We need
         // to load the data at v.ptr into the interface data word.
-        return ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
+        return ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
     }
     default: {
         // Value is direct, and so is the interface.
@@ -206,7 +206,7 @@ internal static slice<byte> bytesSlow(this ΔValue v) {
             throw panic("reflect.Value.Bytes of non-byte slice");
         }
         // Slice is always bigger than a word; assume flagIndir.
-        return ~(ж<slice<byte>>)(uintptr)(v.ptr);
+        return ~@unsafe.Pointer.To<slice<byte>>(v.ptr);
     }
     case var ᴛ when ᴛ == Array: {
         if (v.typ().Elem().Kind() != abi.Uint8) {
@@ -215,7 +215,7 @@ internal static slice<byte> bytesSlow(this ΔValue v) {
         if (!v.CanAddr()) {
             throw panic("reflect.Value.Bytes of unaddressable byte array");
         }
-        var p = (ж<byte>)(uintptr)(v.ptr);
+        var p = @unsafe.Pointer.To<byte>(v.ptr);
         nint n = (nint)(v.typ().Reinterpret<abi.Type, arrayType>()).Value.Len;
         return @unsafe.Slice(p, n);
     }}
@@ -271,7 +271,7 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
         rcvr = v;
         (rcvrtype, t, fn) = methodReceiver(op, v, (nint)v.flag >> (int)(flagMethodShift));
     } else if ((flag)(v.flag & flagIndir) != 0) {
-        fn = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
+        fn = ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
     } else {
         fn = v.ptr;
     }
@@ -411,7 +411,7 @@ stepsLoop:
                 if ((flag)(vΔ1.flag & flagIndir) != 0) {
                     typedmemmove(targ.Ꮡt, addr, vΔ1.ptr);
                 } else {
-                    ((ж<@unsafe.Pointer>)(uintptr)(addr)).Value = vΔ1.ptr;
+                    (@unsafe.Pointer.To<@unsafe.Pointer>(addr)).Value = vΔ1.ptr;
                 }
                 // There's only one step for a stack-allocated value.
                 goto break_stepsLoop;
@@ -425,7 +425,7 @@ stepsLoop:
                         // Duplicate this pointer in the pointer area of the
                         // register space. Otherwise, there's the potential for
                         // this to be the last reference to v.ptr.
-                        regArgs.Ptrs[st.ireg] = ~(ж<@unsafe.Pointer>)(uintptr)(offset);
+                        regArgs.Ptrs[st.ireg] = ~@unsafe.Pointer.To<@unsafe.Pointer>(offset);
                     }
                     intToReg(ᏑregArgs, st.ireg, st.size, offset);
                 } else {
@@ -550,7 +550,7 @@ break_stepsLoop:;
                 }
                 case var ᴛ when ᴛ == abiStepPointer: {
                     @unsafe.Pointer sΔ2 = add(s, st.offset, precomputedValueOffsetˢ);
-                    ((ж<@unsafe.Pointer>)(uintptr)(sΔ2)).Value = regArgs.Ptrs[st.ireg];
+                    (@unsafe.Pointer.To<@unsafe.Pointer>(sΔ2)).Value = regArgs.Ptrs[st.ireg];
                     break;
                 }
                 case var ᴛ when ᴛ == abiStepFloatReg: {
@@ -641,7 +641,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
                 }
                 v.flag |= (flag)(flagIndir);
             } else {
-                v.ptr = ~(ж<@unsafe.Pointer>)(uintptr)(add(ptr, st.stkOff, ptrˢ));
+                v.ptr = ~@unsafe.Pointer.To<@unsafe.Pointer>(add(ptr, st.stkOff, ptrˢ));
             }
         } else {
             if (!typ.IsDirectIface()) {
@@ -658,7 +658,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
                     }
                     case var ᴛ when ᴛ == abiStepPointer: {
                         @unsafe.Pointer s = add(v.ptr, stΔ1.offset, precomputedValueOffsetˢ);
-                        ((ж<@unsafe.Pointer>)(uintptr)(s)).Value = regs.Ptrs[stΔ1.ireg];
+                        (@unsafe.Pointer.To<@unsafe.Pointer>(s)).Value = regs.Ptrs[stΔ1.ireg];
                         break;
                     }
                     case var ᴛ when ᴛ == abiStepFloatReg: {
@@ -738,7 +738,7 @@ stepsLoop:
                         memmove(addr, v.ptr, st.size);
                     } else {
                         // This case must be a pointer type.
-                        ((ж<uintptr>)(uintptr)(addr)).Value = (uintptr)v.ptr;
+                        (@unsafe.Pointer.To<uintptr>(addr)).Value = (uintptr)v.ptr;
                     }
                     // There's only one step for a stack-allocated value.
                     goto break_stepsLoop;
@@ -816,7 +816,7 @@ internal static (ж<abi.Type> rcvrtype, ж<funcType> t, @unsafe.Pointer fn) meth
         if (!tt.nameOff(m.Name).IsExported()) {
             throw panic("reflect: " + op + " of unexported method");
         }
-        var iface = (ж<nonEmptyInterface>)(uintptr)(v.ptr);
+        var iface = @unsafe.Pointer.To<nonEmptyInterface>(v.ptr);
         if (iface.itab == nil) {
             throw panic("reflect: " + op + " of method on nil interface value");
         }
@@ -848,12 +848,12 @@ internal static void storeRcvr(ΔValue v, @unsafe.Pointer p) {
     var t = v.typ();
     if (t.Kind() == abi.Interface) {
         // the interface data word becomes the receiver word
-        var iface = (ж<nonEmptyInterface>)(uintptr)(v.ptr);
-        ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = iface.word;
+        var iface = @unsafe.Pointer.To<nonEmptyInterface>(v.ptr);
+        (@unsafe.Pointer.To<@unsafe.Pointer>(p)).Value = iface.word;
     } else if ((flag)(v.flag & flagIndir) != 0 && t.IsDirectIface()) {
-        ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = ((ж<@unsafe.Pointer>)(uintptr)(v.ptr)).Value;
+        (@unsafe.Pointer.To<@unsafe.Pointer>(p)).Value = (@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr)).Value;
     } else {
-        ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = v.ptr;
+        (@unsafe.Pointer.To<@unsafe.Pointer>(p)).Value = v.ptr;
     }
 }
 
@@ -983,7 +983,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
                     var matchᴛ2 = false;
                     if (exprᴛ2 == abiStepPointer) { matchᴛ2 = true;
                         // Do the pointer copy directly so we get a write barrier.
-                        methodRegs.Ptrs[mStepΔ1.ireg] = ~(ж<@unsafe.Pointer>)(uintptr)(from); // We need to make sure this ends up in Ints, too.
+                        methodRegs.Ptrs[mStepΔ1.ireg] = ~@unsafe.Pointer.To<@unsafe.Pointer>(from); // We need to make sure this ends up in Ints, too.
                         fallthrough = true;
                     }
                     if (fallthrough || !matchᴛ2 && exprᴛ2 == abiStepIntReg) { matchᴛ2 = true;
@@ -1007,7 +1007,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
                     switch (vStep.kind) {
                     case var ᴛ when ᴛ == abiStepPointer: {
                         // Do the pointer copy directly so we get a write barrier.
-                        ((ж<@unsafe.Pointer>)(uintptr)(to)).Value = valueRegs.Ptrs[vStep.ireg];
+                        (@unsafe.Pointer.To<@unsafe.Pointer>(to)).Value = valueRegs.Ptrs[vStep.ireg];
                         break;
                     }
                     case var ᴛ when ᴛ == abiStepIntReg: {
@@ -1287,9 +1287,9 @@ internal static any packIfaceValueIntoEmptyIface(ΔValue v) {
     // Empty interface has one layout, all interfaces with
     // methods have a second layout.
     if (v.NumMethod() == 0) {
-        return ~(ж<any>)(uintptr)(v.ptr);
+        return ~@unsafe.Pointer.To<any>(v.ptr);
     }
-    return ((ж<packIfaceValueIntoEmptyIface_type>)(uintptr)(v.ptr)).ValueSlot;
+    return (@unsafe.Pointer.To<packIfaceValueIntoEmptyIface_type>(v.ptr)).ValueSlot;
 }
 
 // go2cs generated this placeholder — func InterfaceData is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1374,7 +1374,7 @@ internal static nint lenNonSlice(this ΔValue v) {
     }
     case var ᴛ when ᴛ == ΔString: {
         // String is bigger than a word; assume flagIndir.
-        return ((ж<unsafeheader.String>)(uintptr)(v.ptr)).Value.Len;
+        return (@unsafe.Pointer.To<unsafeheader.String>(v.ptr)).Value.Len;
     }
     case var ᴛ when ᴛ == Ptr: {
         if (v.typ().Elem().Kind() == abi.Array) {
@@ -1398,7 +1398,7 @@ internal static ΔValue copyVal(ж<abi.Type> Ꮡtyp, flag fl, @unsafe.Pointer pt
         typedmemmove(Ꮡtyp, c, ptr);
         return new ΔValue(Ꮡtyp, c.Value, (flag)(fl | flagIndir));
     }
-    return new ΔValue(Ꮡtyp, ~(ж<@unsafe.Pointer>)(uintptr)(ptr), fl);
+    return new ΔValue(Ꮡtyp, ~@unsafe.Pointer.To<@unsafe.Pointer>(ptr), fl);
 }
 
 // go2cs generated this placeholder — func Method is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1560,7 +1560,7 @@ public static void Send(this ΔValue v, ΔValue x) {
 public static void SetPointer(this ΔValue v, @unsafe.Pointer x) {
     v.mustBeAssignable();
     v.mustBe(ΔUnsafePointer);
-    ((ж<@unsafe.Pointer>)(uintptr)(v.ptr)).Value = x;
+    (@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr)).Value = x;
 }
 
 // go2cs generated this placeholder — func SetString is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1768,7 +1768,7 @@ internal static @unsafe.Pointer arrayAt(@unsafe.Pointer p, nint i, uintptr eltSi
 
 // grow is identical to Grow but does not check for assignability.
 internal static void grow(this ΔValue v, nint n) {
-    var p = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);
+    var p = @unsafe.Pointer.To<unsafeheader.Slice>(v.ptr);
     switch (ᐧ) {
     case {} when n is < 0: {
         throw panic("reflect.Value.Grow: negative len");
@@ -1925,7 +1925,7 @@ internal static ΔValue assignTo(this ΔValue v, @string context, ж<abi.Type> �
             target = unsafe_New(Ꮡdst);
         }
         if (Ꮡdst.NumMethod() == 0) {
-            ((ж<any>)(uintptr)(target)).ValueSlot = x;
+            (@unsafe.Pointer.To<any>(target)).ValueSlot = x;
         } else {
             ifaceE2I(Ꮡdst, x, target);
         }
@@ -2209,19 +2209,19 @@ internal static ΔValue makeInt(flag f, uint64 bits, ΔType t) {
     @unsafe.Pointer ptr = unsafe_New(typ);
     switch (typ.Size()) {
     case var ᴛ when ᴛ == 1: {
-        ((ж<uint8>)(uintptr)(ptr)).Value = (uint8)bits;
+        (@unsafe.Pointer.To<uint8>(ptr)).Value = (uint8)bits;
         break;
     }
     case var ᴛ when ᴛ == 2: {
-        ((ж<uint16>)(uintptr)(ptr)).Value = (uint16)bits;
+        (@unsafe.Pointer.To<uint16>(ptr)).Value = (uint16)bits;
         break;
     }
     case var ᴛ when ᴛ == 4: {
-        ((ж<uint32>)(uintptr)(ptr)).Value = (uint32)bits;
+        (@unsafe.Pointer.To<uint32>(ptr)).Value = (uint32)bits;
         break;
     }
     case var ᴛ when ᴛ == 8: {
-        ((ж<uint64>)(uintptr)(ptr)).Value = bits;
+        (@unsafe.Pointer.To<uint64>(ptr)).Value = bits;
         break;
     }}
     return new ΔValue(typ, ptr.Value, (flag)((flag)(f | flagIndir) | ((flag)(uintptr)typ.Kind())));
@@ -2234,11 +2234,11 @@ internal static ΔValue makeFloat(flag f, float64 v, ΔType t) {
     @unsafe.Pointer ptr = unsafe_New(typ);
     switch (typ.Size()) {
     case var ᴛ when ᴛ == 4: {
-        ((ж<float32>)(uintptr)(ptr)).Value = (float32)v;
+        (@unsafe.Pointer.To<float32>(ptr)).Value = (float32)v;
         break;
     }
     case var ᴛ when ᴛ == 8: {
-        ((ж<float64>)(uintptr)(ptr)).Value = v;
+        (@unsafe.Pointer.To<float64>(ptr)).Value = v;
         break;
     }}
     return new ΔValue(typ, ptr.Value, (flag)((flag)(f | flagIndir) | ((flag)(uintptr)typ.Kind())));
@@ -2248,7 +2248,7 @@ internal static ΔValue makeFloat(flag f, float64 v, ΔType t) {
 internal static ΔValue makeFloat32(flag f, float32 v, ΔType t) {
     var typ = t.common();
     @unsafe.Pointer ptr = unsafe_New(typ);
-    ((ж<float32>)(uintptr)(ptr)).Value = v;
+    (@unsafe.Pointer.To<float32>(ptr)).Value = v;
     return new ΔValue(typ, ptr.Value, (flag)((flag)(f | flagIndir) | ((flag)(uintptr)typ.Kind())));
 }
 
@@ -2259,11 +2259,11 @@ internal static ΔValue makeComplex(flag f, complex128 v, ΔType t) {
     @unsafe.Pointer ptr = unsafe_New(typ);
     switch (typ.Size()) {
     case var ᴛ when ᴛ == 8: {
-        ((ж<complex64>)(uintptr)(ptr)).Value = (complex64)v;
+        (@unsafe.Pointer.To<complex64>(ptr)).Value = (complex64)v;
         break;
     }
     case var ᴛ when ᴛ == 16: {
-        ((ж<complex128>)(uintptr)(ptr)).Value = v;
+        (@unsafe.Pointer.To<complex128>(ptr)).Value = v;
         break;
     }}
     return new ΔValue(typ, ptr.Value, (flag)((flag)(f | flagIndir) | ((flag)(uintptr)typ.Kind())));
@@ -2331,7 +2331,7 @@ internal static ΔValue cvtFloat(ΔValue v, ΔType t) {
         // Don't do any conversion if both types have underlying type float32.
         // This avoids converting to float64 and back, which will
         // convert a signaling NaN to a quiet NaN. See issue 36400.
-        return makeFloat32(v.flag.ro(), ~(ж<float32>)(uintptr)(v.ptr), t);
+        return makeFloat32(v.flag.ro(), ~@unsafe.Pointer.To<float32>(v.ptr), t);
     }
     return makeFloat(v.flag.ro(), v.Float(), t);
 }
@@ -2385,7 +2385,7 @@ internal static ΔValue cvtSliceArrayPtr(ΔValue v, ΔType t) {
     if (n > v.Len()) {
         throw panic("reflect: cannot convert slice with length " + strconv.Itoa(v.Len()) + " to pointer to array with length " + strconv.Itoa(n));
     }
-    var h = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);
+    var h = @unsafe.Pointer.To<unsafeheader.Slice>(v.ptr);
     return new ΔValue(t.common(), h.Data, (flag)((flag)(v.flag & ~((flag)((flag)(flagIndir | flagAddr) | flagKindMask))) | ((flag)(uintptr)ΔPointer)));
 }
 
@@ -2395,7 +2395,7 @@ internal static ΔValue cvtSliceArray(ΔValue v, ΔType t) {
     if (n > v.Len()) {
         throw panic("reflect: cannot convert slice with length " + strconv.Itoa(v.Len()) + " to array with length " + strconv.Itoa(n));
     }
-    var h = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);
+    var h = @unsafe.Pointer.To<unsafeheader.Slice>(v.ptr);
     var typ = t.common();
     @unsafe.Pointer ptr = h.Data;
     @unsafe.Pointer c = unsafe_New(typ);
@@ -2425,7 +2425,7 @@ internal static ΔValue cvtT2I(ΔValue v, ΔType typ) {
     @unsafe.Pointer target = unsafe_New(typ.common());
     var x = valueInterface(v, false);
     if (typ.NumMethod() == 0) {
-        ((ж<any>)(uintptr)(target)).ValueSlot = x;
+        (@unsafe.Pointer.To<any>(target)).ValueSlot = x;
     } else {
         ifaceE2I(typ.common(), x, target);
     }
@@ -2616,7 +2616,7 @@ internal static dummyᴛ1 dummy;
 // the compiler cannot follow.
 internal static void contentEscapes(@unsafe.Pointer x) {
     if (dummy.b) {
-        escapes(~(ж<any>)(uintptr)(x)); // the dereference may not always be safe, but never executed
+        escapes(~@unsafe.Pointer.To<any>(x)); // the dereference may not always be safe, but never executed
     }
 }
 

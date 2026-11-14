@@ -63,7 +63,7 @@ internal static void addSecret(@unsafe.Pointer Δp, uintptr size) {
     // code is allocating. The cost should be relatively low,
     // but we have run into a wall with other special allocations before.
     @lock(Ꮡmheap_.Ꮡspeciallock);
-    var s = (ж<specialSecret>)(uintptr)(Ꮡmheap_.ᏑspecialSecretAlloc.alloc());
+    var s = @unsafe.Pointer.To<specialSecret>(Ꮡmheap_.ᏑspecialSecretAlloc.alloc());
     s.special.kind = _KindSpecialSecret;
     s.size = size;
     unlock(Ꮡmheap_.Ꮡspeciallock);

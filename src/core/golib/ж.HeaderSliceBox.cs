@@ -78,7 +78,7 @@ internal sealed class HeaderSliceBox<T, TDst> : ж<TDst>
 
     private static readonly FieldInfo[]? s_fields;                                   // [0] array box, [1] len, [2] cap — declaration order
     private static readonly Func<object, (bool nil, bool native, nuint address)>? s_words;  // the array box's identity words
-    private static readonly Func<nuint, nint, nint, object>? s_rebase;               // slice<X>.OverNativeMemory(address, len, cap), boxed
+    private static readonly Func<nuint, nint, nint, object?, object>? s_rebase;      // slice<X>.OverNativeMemory(address, len, cap, anchors of root), boxed
 
     /// <summary>Whether the pair (<typeparamref name="T"/>, <typeparamref name="TDst"/>) is a header → slice reinterpretation this box serves.</summary>
     internal static readonly bool Applies;
@@ -120,7 +120,7 @@ internal sealed class HeaderSliceBox<T, TDst> : ж<TDst>
         // The single creation door, through the target slice type's own face (ISlice<T>'s default member, trim stage
         // 3c-2a): TDst IS that slice type, so a zero value of it carries the member, compiled for it.
         IGoReflectSlice target0 = (IGoReflectSlice)(object)default(TDst)!;
-        s_rebase = (address, len, cap) => target0.ReflectOverNativeMemory(address, len, cap);
+        s_rebase = (address, len, cap, root) => target0.ReflectOverNativeMemory(address, len, cap, root);
         Applies = true;
     }
 
@@ -205,7 +205,9 @@ internal sealed class HeaderSliceBox<T, TDst> : ж<TDst>
         }
         else if (native)
         {
-            m_value = (TDst)s_rebase!(address, len, cap);
+            // The header's array box is what the address was read from: where it names Go storage (a view, a converted
+            // pointer that carries its box) the re-based slice keeps it; over C memory alone it keeps nothing, as before.
+            m_value = (TDst)s_rebase!(address, len, cap, NativeDerivation.Kept(pointer));
         }
         else
         {

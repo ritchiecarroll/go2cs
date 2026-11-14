@@ -167,7 +167,9 @@ func TestInlineArrayAdmitFromStamp(t *testing.T) {
 }
 
 // The pair rule across two packages reads the other package's record: a chain from a type the other package admitted
-// to one this package did not (or the reverse) is refused, and a package whose record cannot be read is counted.
+// to one this package did not (or the reverse) disagrees, and a package whose record cannot be read is counted. Under
+// the automatic rule this package's side is kept out with the other's (COORD 2026-11-14 13:56Z); forced, the package
+// is refused.
 func TestInlineArrayAdmissionJudgesAForeignPairByItsStamp(t *testing.T) {
 	fset := token.NewFileSet()
 	parse := func(name, source string) *ast.File {
@@ -219,7 +221,7 @@ func view(f *lib.F) *L { return (*L)(unsafe.Pointer(f)) }
 	saved := lookupInlineArrayStamp
 	defer func() { lookupInlineArrayStamp = saved }()
 
-	run := func(stamp *inlineArrayStamp) *inlineArrayAdmission {
+	run := func(stamp *inlineArrayStamp, options ...Options) *inlineArrayAdmission {
 		lookupInlineArrayStamp = func(importPath string, _ Options) (inlineArrayStamp, bool) {
 			if importPath != "example.com/lib" || stamp == nil {
 				return inlineArrayStamp{}, false
@@ -228,7 +230,13 @@ func view(f *lib.F) *L { return (*L)(unsafe.Pointer(f)) }
 			return *stamp, true
 		}
 
-		return computeInlineArrayAdmission([]*ast.File{useFile}, fset, usePkg, info, "", Options{})
+		chosen := Options{}
+
+		if len(options) > 0 {
+			chosen = options[0]
+		}
+
+		return computeInlineArrayAdmission([]*ast.File{useFile}, fset, usePkg, info, "", chosen)
 	}
 
 	// use.L is converted whole, so it is admitted; lib.F is lib's.
@@ -236,10 +244,16 @@ func view(f *lib.F) *L { return (*L)(unsafe.Pointer(f)) }
 		t.Fatalf("both sides admitted, yet refused %v (foreign %d)", a.refusals, a.foreign)
 	}
 
-	a := run(&inlineArrayStamp{mode: inlineArraysModeAuto})
+	a := run(&inlineArrayStamp{mode: inlineArraysModeAuto}, Options{inlineArrays: inlineArrayOverride{force: []string{"example.com/use"}}})
 
 	if len(a.refusals) != 1 || !strings.Contains(a.refusals[0].text, "reinterprets L, whose arrays are held inline, as lib.F, whose arrays are not") {
-		t.Fatalf("a foreign side left as array<T> was not refused by name: %v", a.refusals)
+		t.Fatalf("forced: a foreign side left as array<T> was not refused by name: %v", a.refusals)
+	}
+
+	auto := run(&inlineArrayStamp{mode: inlineArraysModeAuto})
+
+	if len(auto.refusals) != 0 || len(auto.keyOrder) != 0 || !hasWarning(auto, "L is converted whole through unsafe.Pointer but keeps array<T> storage: lib.F is reinterpreted as it") {
+		t.Fatalf("auto: L was not kept out with lib.F: admitted %v, refusals %v, warnings %v", auto.keyOrder, auto.refusals, auto.warnings)
 	}
 
 	if a := run(nil); len(a.refusals) != 0 || a.foreign != 1 {

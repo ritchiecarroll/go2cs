@@ -40,7 +40,7 @@ public static int32 /*count*/ ScanSpanPackedGo(@unsafe.Pointer mem, ж<uintptr> 
             // over that.
 
             for (var wordI = objStartInSpan; wordI < objEndInSpan; wordI++) {
-                var val = ~(ж<uintptr>)(uintptr)(@unsafe.Add(mem, wordI * (uintptr)goarch.PtrSize));
+                var val = ~@unsafe.Pointer.To<uintptr>(@unsafe.Add(mem, wordI * (uintptr)goarch.PtrSize));
                 // Check if we should enqueue this word.
                 //
                 // We load the word before the check because, even though this
@@ -84,7 +84,7 @@ internal static unsafeBuf<T> newUnsafeBuf<T>(ж<T> @base) {
 // must be certain that such a write will still be in-bounds with respect
 // to the buffer's true capacity.
 internal static void addIf<T>(this ref unsafeBuf<T> b, T val, bool pred) {
-    ((ж<T>)(uintptr)(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(b.@base), b.n * (nint)@unsafe.Sizeof(val)))).ValueSlot = val;
+    (@unsafe.Pointer.To<T>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(b.@base), b.n * (nint)@unsafe.Sizeof(val)))).ValueSlot = val;
     b.n += bool2int(pred);
 }
 

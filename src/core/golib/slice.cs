@@ -156,7 +156,13 @@ internal interface ISliceBacking
 
     // The header-slice box's rebuild (HeaderSliceBox.Rebase; trim stage 3c-2a): a slice of this slice type's element over
     // native memory, through golib's single creation door. Reached through a zero value of the slice type.
-    object IGoReflectSlice.ReflectOverNativeMemory(nuint address, nint len, nint cap) => slice<T>.OverNativeMemory(address, len, cap);
+    object IGoReflectSlice.ReflectOverNativeMemory(nuint address, nint len, nint cap, object? root) =>
+        slice<T>.OverNativeMemory(address, len, cap, NativeSliceAnchors<T>.For(root));
+
+    // The member as go.lib 1.26.10.3 published it. It stays so the published surface loses nothing (the binary-compat
+    // guard's CP0002). It answers as it always did, with no root; golib's own callers pass the root to the member above.
+    object IGoReflectSlice.ReflectOverNativeMemory(nuint address, nint len, nint cap) =>
+        ((IGoReflectSlice)this).ReflectOverNativeMemory(address, len, cap, root: null);
 
     // The slice-header box's commit (SliceHeaderBox.OnHeaderStore): a slice of this slice type's element over
     // backing[low:high:max], SHARING the backing, or null when the backing is not exactly this element's array. Exactly,
@@ -193,6 +199,16 @@ public interface IGoReflectSlice
 
     /// <summary>A slice of this slice type's element over <paramref name="len"/>/<paramref name="cap"/> elements of native memory.</summary>
     object ReflectOverNativeMemory(nuint address, nint len, nint cap);
+
+    /// <summary>The same slice, keeping <paramref name="root"/> alive for as long as the slice is.</summary>
+    // `root` is the box whose storage the address names, as NativeDerivation.Kept answers it: the slice keeps it alive
+    // (cgo Phase 3 increment 3.1's second review, DESIGN-interior-pointer-root 4.5). Null is C memory alone.
+    //
+    // A second member with a default body, not a fourth parameter on the first: go.lib 1.26.10.3 published the
+    // three-argument member, and a parameter added to it, optional or not, is a different signature to every compiled
+    // caller and implementer (the guard read CP0002 and CP0006 on exactly that). The default is what an implementer
+    // compiled before this member existed did: it keeps nothing. ISlice<T> implements both.
+    object ReflectOverNativeMemory(nuint address, nint len, nint cap, object? root) => ReflectOverNativeMemory(address, len, cap);
 
     /// <summary>A slice of this slice type's element over <paramref name="backing"/>[low:high:max], sharing it; null when the backing is not this element's array.</summary>
     object? ReflectRebase(Array backing, nint low, nint high, nint max);
@@ -273,11 +289,11 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     internal unsafe nuint NativeElementAddressUnchecked(nint index) => (nuint)NativeElementPointer(index);
 
     // Every native window is cut here: the door, Reslice, and append in place.
-    private slice(nuint nativeBase, nint low, nint high, nint max)
+    private slice(nuint nativeBase, nint low, nint high, nint max, T[]? anchor = null)
     {
         RefuseNativeWindowBeyondSpan(high - low);
 
-        m_array = [];
+        m_array = anchor ?? [];
         m_nativeBase = nativeBase;
         m_low = low;
         m_length = high - low;
@@ -306,7 +322,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     /// <c>addrRanges</c> grows its native array by doubling and the page allocator's summary levels
     /// are minted at their full extent).
     /// </summary>
-    internal static slice<T> OverNativeMemory(nuint baseAddress, nint length, nint capacity)
+    internal static slice<T> OverNativeMemory(nuint baseAddress, nint length, nint capacity, T[]? anchor = null)
     {
         if (System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             throw new PanicException($"native-backed slice: element type {typeof(T).Name} contains managed references and cannot alias native memory");
@@ -323,7 +339,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         if (capacity < length)
             throw new PanicException($"native-backed slice: capacity {capacity} is smaller than length {length}");
 
-        return new slice<T>(baseAddress, 0, length, capacity);
+        return new slice<T>(baseAddress, 0, length, capacity, anchor);
     }
 
     // A native window LONGER than any span is refused by name (CENSUS-golib-int32-narrowings S4/S4b):
@@ -436,7 +452,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // under a different element name, which is exactly what this alias means (and the element
         // types are one-byte-wide by the caller's own precondition).
         if (source.m_nativeBase != 0)
-            return new slice<T>(source.m_nativeBase, source.m_low, source.m_low + source.m_length, source.m_low + source.m_capacity);
+            return new slice<T>(source.m_nativeBase, source.m_low, source.m_low + source.m_length, source.m_low + source.m_capacity, NativeSliceAnchors<T>.For(NativeSliceAnchors<TSrc>.Of(source)));
 
         T[] aliased = Unsafe.As<T[]>(source.m_array);
 
@@ -840,7 +856,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // Native backing: same window arithmetic over the same base — reslicing never copies, so
         // the result aliases the identical memory and Ꮡ over it names the offset addresses.
         if (m_nativeBase != 0)
-            return new slice<T>(m_nativeBase, m_low + low, m_low + high, m_low + max);
+            return new slice<T>(m_nativeBase, m_low + low, m_low + high, m_low + max, m_array);
 
         if (m_array is null)
             return default;
@@ -1260,7 +1276,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // The native base joins the header comparison: two native windows are the same slice when
         // they name the same base and window, and a native-backed slice is never == a managed one
         // (nor == nil, whose base is 0 with an empty backing — the nil test stays exact).
-        return a.m_nativeBase == b.m_nativeBase && ReferenceEquals(a.m_array, b.m_array) &&
+        return a.m_nativeBase == b.m_nativeBase && (a.m_nativeBase != 0 || ReferenceEquals(a.m_array, b.m_array)) &&
                a.m_low == b.m_low && a.m_length == b.m_length && a.m_capacity == b.m_capacity;
     }
 
@@ -1625,7 +1641,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
                     elems.CopyTo(new Span<T>(slice.NativeElementPointer(slice.m_length), elems.Length));
                 }
 
-                return new slice<T>(slice.m_nativeBase, slice.m_low, slice.High + elems.Length, slice.m_low + slice.m_capacity);
+                return new slice<T>(slice.m_nativeBase, slice.m_low, slice.High + elems.Length, slice.m_low + slice.m_capacity, slice.m_array);
             }
 
             // Single-element append is the dominant Go idiom — store directly instead of span-copying.
@@ -1759,7 +1775,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
                     new Span<T>(slice.NativeElementPointer(slice.m_length), (int)count).Clear();
                 }
 
-                return new slice<T>(slice.m_nativeBase, slice.m_low, slice.High + count, slice.m_low + slice.m_capacity);
+                return new slice<T>(slice.m_nativeBase, slice.m_low, slice.High + count, slice.m_low + slice.m_capacity, slice.m_array);
             }
 
             Array.Clear(slice.m_array, (int)slice.High, (int)count);

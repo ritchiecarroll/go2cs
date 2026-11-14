@@ -77,7 +77,7 @@ partial struct gclinkptr /*num:uintptr*/;
 // The result should be used for accessing fields, not stored
 // in other data structures.
 internal static ж<gclink> ptr(this gclinkptr Δp) {
-    return (ж<gclink>)(uintptr)((@unsafe.Pointer)(uintptr)Δp);
+    return @unsafe.Pointer.To<gclink>((@unsafe.Pointer)(uintptr)Δp);
 }
 
 partial struct stackfreelist {
@@ -93,7 +93,7 @@ internal static ж<mcache> allocmcache() {
     ref var c = ref heap<ж<mcache>>(out var Ꮡc);
     systemstack(() => {
         @lock(Ꮡmheap_.Ꮡlock);
-        Ꮡc.ValueSlot = (ж<mcache>)(uintptr)(Ꮡmheap_.Ꮡcachealloc.alloc());
+        Ꮡc.ValueSlot = @unsafe.Pointer.To<mcache>(Ꮡmheap_.Ꮡcachealloc.alloc());
         Ꮡc.ValueSlot.ᏑflushGen.Store(mheap_.sweepgen);
         unlock(Ꮡmheap_.Ꮡlock);
     });
