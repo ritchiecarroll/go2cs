@@ -386,6 +386,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			return refusePackage(options, diagnosticSliceWideningRefused, refusal)
 		}
 
+		// ...and an assembly function go2cs forwards to a managed body, declared with another signature than
+		// that body answers (asmForwardBodies.go).
+		if refusal := refuseAsmForwardSignatures(pkg); refusal != nil {
+			refusal.report()
+			return refusePackage(options, diagnosticAsmForwardSignatureRefused, refusal)
+		}
+
 		// A WARNING, never a refusal: a type argument that meets its constraint only as a closed pair (closedCarrier.go).
 		warnClosedCarrierTypeArguments(pkg)
 

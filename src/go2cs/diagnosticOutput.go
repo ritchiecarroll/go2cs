@@ -159,6 +159,14 @@ const (
 	// written; the run fails at its end naming each one (droppedFiles.go). -warn may not downgrade it: the loss is
 	// not loud.
 	diagnosticFileDropped = "GO2CS2008"
+
+	// diagnosticAsmForwardSignatureRefused: a bodyless function asmForwardBodies lists (x/sys/cpu's cpuid, xgetbv)
+	// declares another signature than the golib body it forwards to answers (asmForwardBodies.go). The two numbers
+	// before it belong to the inline-array seat.
+	diagnosticAsmForwardSignatureRefused = "GO2CS2011"
+	// diagnosticAsmStubUnforwarded: a WARNING. A bodyless function of a module outside GOROOT that nothing forwards
+	// converts to a stub that throws when called; the conversion names each one (asmForwardBodies.go).
+	diagnosticAsmStubUnforwarded = "GO2CS2012"
 )
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST

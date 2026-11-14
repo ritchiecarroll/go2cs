@@ -1260,6 +1260,41 @@ Phase A lowered to `ref` keeps its stub. It applies only OUTSIDE the converted s
 corpus's own trampolines (internal/runtime/atomic and the hand-owned sync/atomic) are governed by hand-owns
 and the stub census, and a forwarder there would collide with a hand-owned partial.
 
+## Assembly with real machine code takes a golib body by name — x/sys/cpu's `cpuid` and `xgetbv`
+
+A module function written in assembly that holds real machine code has nothing to forward to: no jump
+target, no linkname. Its bodyless declaration would convert to a stub that throws when called. For
+golang.org/x/sys/cpu that stub sat in the package's init: x/sys/cpu decodes its feature flags from `cpuid`
+and `xgetbv` as it loads, and modernc.org/libc imports it on windows and darwin, so every converted
+program on that path died before `main` (sqlite-cs row S21; `docs/phase4/DESIGN-sqlite-cs-funcptr.md`
+sections 2.3 and 3.7).
+
+**A small table, `asmForwardBodies` (`asmForwardBodies.go`), maps (package, function) to a managed body
+in golib, `go.golib.GoCpu`, together with the Go signature that body implements.** A listed function
+takes the linkname forwarder above, a body calling `global::go.golib.GoCpu.Cpuid(eaxArg, ecxArg)` or
+`global::go.golib.GoCpu.Xgetbv()`:
+- `Cpuid` reads the processor through `X86Base.CpuId`, the same leaves Go's assembly reads, so x/sys/cpu
+  keeps its own decoding of the bits;
+- `Xgetbv` is SYNTHESISED, since .NET has no XGETBV: XCR0 is built from `Sse`, `Avx` and
+  `Avx512F.IsSupported`, which .NET reports only when the OS enables the state. It is a register image from
+  .NET's view of the CPU, not a hardware read, and its doc comment says so.
+
+**The signature is checked.** A listed function declared with another signature refuses its package
+(`GO2CS2011`) before any file is written: the body would answer another question. The table keys on the
+module path alone, so the standard library's vendored copy (`vendor/golang.org/x/sys/cpu`) is untouched.
+
+**A stub that stays is named.** Any bodyless function of a module outside GOROOT that nothing forwards
+(assembly, or a `//go:linkname` pull go2cs does not forward) keeps its throwing stub, and the conversion
+reports it as `GO2CS2012`, a warning naming the function. A program that never calls it is unaffected.
+x/sys/cpu's four arm64 ID-register reads (`getisar0`, `getisar1`, `getpfr0`, `getzfr0`) stay such stubs on
+purpose: x/sys/cpu reads them only on freebsd, which go2cs does not target, so no body for them could be
+run on any target to check it.
+
+**Guarded by:**
+- the converter's `TestAsmForwardBodiesEmission` (both forwards, the stub kept, the warning naming only the
+  stub) and `TestAsmForwardSignatureIsRefusedBySite`;
+- GolibTests' `GoCpuTests` (the CPUID leaves against `X86Base.CpuId`, the synthesised XCR0 bit by bit).
+
 ## A cross-package `//go:linkname` PUSH resolves per recorded disposition — forwarder or announced panic
 
 The PULL above is one of two directions, and the converter long handled only that one. A **PUSH** runs the

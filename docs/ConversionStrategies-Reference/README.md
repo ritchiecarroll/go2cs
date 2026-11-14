@@ -478,6 +478,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Hand-owns have a platform, and it is not the same question as a folder](manual-conversions.md#hand-owns-have-a-platform-and-it-is-not-the-same-question-as-a-folder)
   - [Realizing an asm-backed arch layer with managed hardware intrinsics](manual-conversions.md#realizing-an-asm-backed-arch-layer-with-managed-hardware-intrinsics)
   - [A cross-package `//go:linkname` PULL emits a forwarder, not a throwing stub](manual-conversions.md#a-cross-package-golinkname-pull-emits-a-forwarder-not-a-throwing-stub)
+  - [Assembly with real machine code takes a golib body by name — x/sys/cpu's `cpuid` and `xgetbv`](manual-conversions.md#assembly-with-real-machine-code-takes-a-golib-body-by-name--xsyscpus-cpuid-and-xgetbv)
   - [A cross-package `//go:linkname` PUSH resolves per recorded disposition — forwarder or announced panic](manual-conversions.md#a-cross-package-golinkname-push-resolves-per-recorded-disposition--forwarder-or-announced-panic)
   - [A `//go:cgo_import_dynamic` trampoline gets a RECORD, so its address can be resolved rather than invented](manual-conversions.md#a-gocgo_import_dynamic-trampoline-gets-a-record-so-its-address-can-be-resolved-rather-than-invented)
   - [`internal/sync.HashTrieMap` — a managed map where Go seeds itself from `MapType().Hasher`](manual-conversions.md#internalsynchashtriemap--a-managed-map-where-go-seeds-itself-from-maptypehasher)
