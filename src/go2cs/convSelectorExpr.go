@@ -1343,6 +1343,11 @@ func (v *Visitor) selectorBasePackageObj(selectorExpr *ast.SelectorExpr) *types.
 }
 
 func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context LambdaContext) string {
+	// A word read back as a func through a one-func-field struct (funcWordOperations.go, r2).
+	if emission, ok := v.funcWordEmission(selectorExpr); ok {
+		return emission
+	}
+
 	// A store TARGET on a readonly zero-size layout field (see markZeroSizeFieldStores): emit the plain
 	// selector, then route it through the generated accessor so the store lands on the shared slot.
 	if accessor, ok := v.zeroSizeFieldStores[selectorExpr]; ok {

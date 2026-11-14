@@ -945,3 +945,88 @@ opt-in's population. Auto is a SUBSET of the opt-in:
 >   family needs golib, about 16.9 MB of every go2cs Native AOT binary, which the bound never included. Read as the
 >   increment, C2's rooted reading adds 860,160 bytes, under the 976,432 measured in 7.7.2. That reading is recorded
 >   beside the score, not in place of it.
+
+> **Amended 2026-11-13 (C2), part D: admission and its record** (COORD's rulings of 04:00Z, 05:20Z and 06:19Z):
+> - **Admission is automatic; the option overrides it.** A struct is admitted when its own package's non-test files
+>   convert it whole through `unsafe.Pointer`, together with every struct it holds by value, plain ones included (C1's
+>   review, N4). `-inline-arrays=<patterns>` forces a package's whole declaration-local population of 7.7.4 on, and
+>   `-<pattern>` turns the automatic rule off. std is never admitted. Converter: `inlineArrayAdmission.go`.
+> - **7.7.1 and 7.7.4 amended: a cap is a WARNING, not a refusal.** A type the rule selects that a cap keeps out
+>   converts exactly as today with `GO2CS2009`, naming the type, the field and the cap. libc's over-cap types convert
+>   with one warning per selected seed (4). The convert-time ERROR is `GO2CS2010`: a reinterpret chain
+>   `(*T)(unsafe.Pointer(e))` whose two array-holding sides disagree. `-warn` cannot downgrade it.
+> - **P1 as measured** (66d9772a86, linux/amd64, modernc.org/sqlite v1.62.0, libc v1.80.1): lib admits 158 types
+>   (120 holding arrays) automatically and 185 (144) forced; libc 123 (99) with 4 `GO2CS2009`; the sqlite package
+>   0; `GO2CS2010` 0 everywhere; fmt `%v` and reflect uses reaching an admitted type 0. Against its prediction
+>   (mailbox 921b72106) 5 lines MET and 3 MISSED as worded: 118 and 130 were C1's combined lib+libc run, which files an
+>   anonymous struct both packages spell under libc (C1's tool over lib alone reads 120 and 144); libc's 5 counted
+>   types where the warning counts seeds (the two BF tables are one seed).
+> - **P4 restated:** with the option empty, a two-seeded three-target std reconvert reads 0 files, and the behavioral
+>   corpus moves ONLY in FieldAccessReinterpret, GoImageCopyThroughView and PointerFieldSelectors, the automatic rule's
+>   whole behavioral footprint; every other project reads 0.
+> - **The record.** `package_info.cs` carries an `<InlineArrays>` section, only when there is a record: one
+>   `[assembly: go.golib.GoInlineArrayType("<Go name>")]` per admitted named type, and
+>   `[assembly: go.golib.GoInlineArrays("forced" | "off")]` when the rule was not the default. A `-tests` conversion
+>   applies the recorded rule to the production files and refuses a record they do not reproduce. A reinterpret chain
+>   to another converted package's named struct is judged by that package's record; one reaching another package's
+>   anonymous struct, or a package whose record cannot be read, is counted, not judged. Converter:
+>   `inlineArrayStamp.go`.
+> - **OWED (deferred by COORD, 06:19Z):** laying out a struct of ANOTHER package that an admitted type holds by value,
+>   from that package's own record. Until then such a seed stays out with `GO2CS2009`; lib and libc hold 0.
+> - **Faces (COORD 06:50Z, ruling (a)).** The automatic rule also keeps a seed out when an array field in its closure is
+>   used, in the package's non-test files, in a way an inline array cannot express: sliced, its address or an element's
+>   address taken, or used as a whole value other than boxed into an interface. Index, `len`/`cap`, `range`,
+>   `unsafe.Offsetof`/`Sizeof`/`Alignof` and boxing stay admissible. A copy between two admitted fields is also kept out at I0
+>   (0 sites in lib and in the behavioral corpus), so the rule does not depend on which other types are admitted. Forced
+>   mode does not consult faces. Measured: lib 158/120 and forced 185/144, libc 123/99 with 4 `GO2CS2009`, sqlite 0, all
+>   unchanged; behavioral, FieldAccessReinterpret keeps `reparse` only (`record` slices `Path`, and `tail` was admitted only
+>   through `record`), GoImageCopyThroughView keeps `Dirent` and `Pair`, PointerFieldSelectors keeps `wire`. Converter:
+>   `inlineArrayFaces.go`.
+>   **The stated difference from ruling (a)** (accepted by COORD, 07:31Z): the ruling admits a whole-value copy between two
+>   admitted fields, since the type spells it; I0 keeps it out, so a seed's admission never depends on whether another
+>   type was admitted. Its population is 0 in lib and in the behavioral corpus.
+> - **D3, the emission.** An admitted struct is `[GoInlineLayout, StructLayout(LayoutKind.Explicit, Size = <Go size>)]`
+>   with each field at its Go offset. An array field is the `go.arrays` member `arrayN<T>`, nested arrays included, and a
+>   `[0]T` field is a primitive of `T`'s Go alignment marked `[GoAlignmentCarrier(typeof(array<T>))]`. An array literal
+>   that initializes such a field becomes `new arrayN<T>(elements)`, filling from the start and zeroing the rest. `len`
+>   and `cap` are the constant; a range over the index alone is `range(N)`, and a range over the values iterates a copy
+>   (`ΔRangeSnapshot()`), as Go's does. No `ΔClone` is generated for an inline field: the struct copy copies it. The
+>   project references `go.arrays`. A boxed member reads through the explicit `go.golib.IGoInlineArray` (length and
+>   element as `object`), which reflect's `Len` and `Index` take, so fmt prints it as Go does; reflection over the
+>   HOLDING struct panics with a named message (`reflect: field Named.FzName is a Go array held inline (go.arrays);
+>   reflection does not read or address it`), which [Limitations](../Limitations.md) records. `GoImage` lays an admitted
+>   struct out as one segment of its whole size. Converter: `inlineArrayEmission.go`, `zeroSizeFieldLayout.go`.
+>   **lib's record names no type, by design** (COORD 10:37Z): all 158 structs lib admits are aliases of anonymous
+>   structs (ccgo writes `type TBtree = struct{...}`), and the record names named types only. A `-tests` run of lib
+>   re-derives the admission from the production files, and a reinterpret pair in another package that reaches a lib
+>   struct is counted, not judged. lib itself does not yet convert cleanly: 32 `struct{uintptr}` function-pointer casts
+>   stop at the unresolved-dynamic-type gate, before part D as after it; that is sqlite-cs S1 (G's). So the gate on lib's
+>   own compiled types (7.7.4's P2) and P3 run on the sqlite-cs lane's tree, after I0 lands.
+>
+> **Amended 2026-11-13 (C2), part D: C1's review (10:54Z) and stop line S2, as fixed** (COORD 11:35Z):
+> - **S2: the gate holds the layout to Go's, from go/types.** golib derived Go's layout from the declaration it checked,
+>   so an `S22` whose `[0]int16` carrier was deleted passed. The converter now stamps
+>   `[GoInlineLayout(Size = <Go size>, Align = <Go alignment>)]`, and golib's layout walk takes a stamped size and
+>   alignment as Go's: the gate names `S22 aligns to 1 in the CLR where Go aligns it to 2`, and a held `Outer{B byte;
+>   S S22}` still fails closed on a native read. Both are tracked GolibTests arms.
+> - **M1: an inline array boxes as its deep `array<T>` copy.** An interface argument is `x.f.ΔCopy()`, a nested array
+>   `x.m.ΔSelect(static Δe1 => Δe1.ΔCopy())`, one `ΔSelect` per level, so interface space holds the one representation
+>   every Go `[N]T` has there (type switch, interface `==`, map key, reflect `Cap`). An element that is itself an array
+>   takes a whole array's faces: boxed as an argument it is spelled, stored or compared it keeps the type out.
+>   **Kept:** `IGoInlineArray` and its two reflect arms (`Len`, `Index`). Under the automatic rule nothing reaches them,
+>   but forced mode does not consult the faces, and there a member boxed by assignment, composite element, return or
+>   send reaches interface space as itself.
+> - **M2: the record catches an anonymous disagreement.** It carries `[assembly: go.golib.GoInlineArrayKeys(<count>,
+>   "<digest>")]` over every admitted type's key, anonymous ones included, and a `-tests` run refuses a mismatch naming
+>   the count. A `-tests` run with no record while `-inline-arrays` names the package is refused too.
+> - **M3: a keyed array literal** takes each element at its constant key; gaps are `default`.
+> - **m2:** an instantiation of a generic struct is kept out (go2cs declares it once for every instantiation).
+> - **m3: a consumer spells a foreign inline field** (`len`/`cap`, `range`, literal, boxing) from the declaring
+>   package's record. Population 0 in lib and libc; a two-package converter test is the guard.
+> - **m5: an address below an element** (`&x.f[i].g`, `&x.m[i][j]`) keeps the type out. Before, it emitted
+>   `Ꮡv.at(T.ᏑE, 1).ᏑG`, which no golib `at` binds for a member: a compile error. Population 0.
+> - **Recorded, not fixed:** **m1** (`cap` of a by-value inline array local): 0 real locals, only ccgo's blank
+>   frame-slot placeholders. **m4** (`len`, `cap` or `range` over an operand that calls or receives, `len(f().A)`):
+>   it falls through to golib's `len`, which has no overload for a member, so it is a compile error, fail-closed.
+>   Population 0. **n2** (a value range over a local struct copy) is not taken.
+> - **n1:** the element-list constructor raises Go's index panic past `N` instead of truncating.

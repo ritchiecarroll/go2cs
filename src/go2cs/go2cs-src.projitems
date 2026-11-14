@@ -40,6 +40,8 @@
     <None Include="$(MSBuildThisFileDirectory)arrayCloneOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayCloneShadow_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsNilCargo.go" />
+    <None Include="$(MSBuildThisFileDirectory)asmForwardBodies.go" />
+    <None Include="$(MSBuildThisFileDirectory)asmForwardBodies_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsCompanion.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsCompanion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines.go" />
@@ -269,6 +271,8 @@
     <None Include="$(MSBuildThisFileDirectory)foreignWrittenRHS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcLitNamedNumericLiteralArm_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcResultProjection_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)funcWordOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)funcWordOperations_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericDefinedMapChan_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericFuncInstantiationArg_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericInstantiationRefusal_test.go" />
@@ -307,6 +311,7 @@
     <None Include="$(MSBuildThisFileDirectory)importAliasOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)importInit_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importedAliasUseGate_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)importedAnonStructLiftReuse_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)implicitConvArgumentLoop_test.go" />
     <None Include="$(MSBuildThisFileDirectory)implicitConvValueType_test.go" />
@@ -320,6 +325,14 @@
     <None Include="$(MSBuildThisFileDirectory)initOrderTupleSpec_test.go" />
     <None Include="$(MSBuildThisFileDirectory)initScopeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)initScope_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayAdmission.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayAdmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayEmission.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayEmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintClosedRecord_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintNamed.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintPublished_test.go" />

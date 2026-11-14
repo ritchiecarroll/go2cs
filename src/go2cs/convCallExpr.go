@@ -1698,7 +1698,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// Hop through the constant's DEFAULT Go type first (`((@string)(rune)runeError)`) —
 		// exactly Go's conversion semantics. A plain literal is already a C# constant and
 		// keeps its direct form (no churn).
-		if basicTarget != nil && basicTarget.Kind() == types.String {
+		//
+		// A NAMED string target (`type literalErr string`; github.com/ncruces/go-strftime's
+		// `literalErr(b)` over a byte) takes the same code-point steps, then the @string the unnamed
+		// form converts to: its [GoType] wrapper converts only from @string, never from an integer
+		// (CS0030). Scoped to an integer operand; a string operand already converts in one step.
+		namedStringTarget := false
+
+		if targetNamed, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
+			if u, ok := targetNamed.Underlying().(*types.Basic); ok && u.Kind() == types.String {
+				if argType := v.info.TypeOf(arg); argType != nil {
+					argBasic, ok := argType.Underlying().(*types.Basic)
+					namedStringTarget = ok && argBasic.Info()&types.IsInteger != 0
+				}
+			}
+		}
+
+		if basicTarget != nil && basicTarget.Kind() == types.String || namedStringTarget {
 			if tvArg, ok := v.info.Types[arg]; ok && tvArg.Value != nil {
 				if argBasic, ok := tvArg.Type.(*types.Basic); ok && argBasic.Info()&types.IsUntyped != 0 && !v.isCSharpConstantExpr(arg) {
 					expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(types.Default(argBasic).(*types.Basic)), expr)
@@ -1713,6 +1729,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(u), expr)
 					}
 				}
+			}
+
+			if namedStringTarget {
+				// A cast binds tighter than a binary operator: `literalErr(d+1)` converts the sum.
+				if v.needsParentheses(arg) {
+					expr = "(" + expr + ")"
+				}
+
+				expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(types.Typ[types.String]), expr)
 			}
 		}
 
@@ -2674,6 +2699,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						callExprContext.interfaceTypes[j] = paramType
 					}
 
+					// An inline array crosses as its deep array<T> copy (C1's review, M1).
+					if j < len(callExpr.Args) && v.isInlineArrayExpr(callExpr.Args[j]) {
+						if callExprContext.inlineArrayBoxArgs == nil {
+							callExprContext.inlineArrayBoxArgs = make(map[int]bool)
+						}
+
+						callExprContext.inlineArrayBoxArgs[j] = true
+					}
+
 					// An untyped constant boxed into the interface must be cast to Go's DEFAULT TYPE for
 					// its kind so its C# box matches Go's boxed dynamic type and a later `.(int)`
 					// (`._<nint>()`) assertion, `case int:`, or `==` succeeds — see untypedConstBoxCast.
@@ -2891,6 +2925,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// "not evaluated" carries that carve-out), so those keep the evaluating form rather than
 		// having their side effect silently dropped.
 		if (ident.Name == "len" || ident.Name == "cap") && len(callExpr.Args) == 1 {
+			// An inline array (a go.arrays member, inlineArrayEmission.go) has its length in its type, and golib's len
+			// cannot see the family: the constant, unless the operand calls or receives.
+			if arr, isArray := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Array); isArray && v.isInlineArrayExpr(callExpr.Args[0]) && !v.exprHasCallOrReceive(callExpr.Args[0]) {
+				return fmt.Sprintf("%d", arr.Len())
+			}
+
 			// A NAMED pointer to an array (`type Features *flagSet`) folds the same way.
 			if ptr, ok := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Pointer); ok {
 				if arr, isArray := ptr.Elem().Underlying().(*types.Array); isArray {

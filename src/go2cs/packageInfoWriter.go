@@ -745,6 +745,9 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	// The sstring twins' records (sstringTwinOperations.go), under the same omitted-when-empty rule.
 	packageInfoLines = applyRecordSection(packageInfoLines, packageSStringTwinRecords, mergeExisting, sstringTwinSection)
 
+	// The inline-array admission's records (inlineArrayStamp.go), under the same omitted-when-empty rule.
+	packageInfoLines = applyRecordSection(packageInfoLines, packageInlineArrayRecords, mergeExisting, inlineArraysSection)
+
 	// Handle implicit conversions
 	startLineIndex = -1
 	endLineIndex = -1

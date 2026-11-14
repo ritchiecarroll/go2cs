@@ -197,6 +197,17 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					(v.inFunction || !liftNameNeedsPublicType(name))
 			}
 
+			// An IMPORTED package's public lift of an identical struct (importedStructLift): Go calls the
+			// two one type, so this package declares none of its own. The name is public in its own
+			// assembly, so no accessibility test of this package's applies.
+			if !admissible {
+				if st, ok := structSignatureType.(*types.Struct); ok {
+					if imported := v.importedStructLift(st); imported != "" {
+						existing, admissible = imported, true
+					}
+				}
+			}
+
 			if admissible {
 				if identType != nil {
 					v.liftedTypeMap[identType] = existing
@@ -660,6 +671,28 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			fieldInitializer = " = " + chanInitializer
 		}
 
+		// An array field of a struct admitted to inline arrays (the layout arc's inline mode, zeroSizeFieldLayout.go):
+		// a nonzero [N]T is the go.arrays member array<N><T>, held in the struct, so it takes no initializer; a [0]T is a
+		// readonly primitive of T's alignment, an alignment carrier that names the array<T> it stands for.
+		var carrierAttr string
+
+		if hasZeroSizeLayout && zeroSizeLayout.inline {
+			if array, ok := fieldType.Underlying().(*types.Array); ok {
+				fieldInitializer = ""
+				v.addRequiredUsing("go.golib")
+
+				if array.Len() == 0 {
+					carrierAttr = fmt.Sprintf("[GoAlignmentCarrier(typeof(%s))] ", csDisplayTypeName)
+					csDisplayTypeName = v.alignmentCarrierType(array.Elem())
+				} else {
+					csDisplayTypeName = v.inlineArrayTypeName(array)
+					v.addRequiredUsing("go.arrays")
+				}
+
+				displayLenDeviation = token.Pos(len(csDisplayTypeName) - len(goDisplayTypeName))
+			}
+		}
+
 		if field.Names == nil {
 			// An embed is a field the converter declares (owner ruling (A)), so under the zero-size layout arc's
 			// explicit layout it carries its Go offset like any other field, and a ZERO-SIZE embed is readonly for
@@ -1064,7 +1097,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 					layoutFieldIndex++
 
-					v.writeString(target, "%s%s %s%s%s %s%s;%s", offsetAttr, getAccess(ident.Name), readOnly, fieldDimsComment, csDisplayTypeName, fieldName, fieldInitializer, tagComment)
+					v.writeString(target, "%s%s%s %s%s%s %s%s;%s", offsetAttr, carrierAttr, getAccess(ident.Name), readOnly, fieldDimsComment, csDisplayTypeName, fieldName, fieldInitializer, tagComment)
 					v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+displayLenDeviation))
 					target.WriteString(v.newline)
 				}

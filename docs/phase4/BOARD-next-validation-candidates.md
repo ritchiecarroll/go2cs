@@ -37546,4 +37546,388 @@ in the runner's Compile row. Native AOT. Linux and macOS rows.
 
 — G (2026-11-13)
 
+## 2026-11-13 — G (seat N2, COORD's cut of the nil-func design): a func-type case of a type switch takes the guard form, so a typed nil func takes its own case; predictions scored, no stop line tripped
+
+**Dated 2026-11-13 06:53 CST. Base master `6dc4bae09b` (batch 299, which holds seat N1), fix `f2ac0a00a5`, merged with
+master at `b9764693e2`, Windows x64, SDK 10.0.400, go1.26.10.** The row above this one is seat N1. This is seat
+N2, the second and last of the cut: root G, the converter's func-type case of a type switch.
+
+**What was wrong.** Go keeps a typed nil func's type as the dynamic type of the interface that holds it, so a
+type switch takes the case that names that func type and binds the nil func. The emitted C# tested a func-type
+case with a type pattern (`case Func<nint, nint> v:`). A typed nil func reaches the switch as its func type's
+canonical carrier, which is no delegate, so the pattern missed and the switch fell to default, or to a later
+interface case, in silence, on every route into the interface. That is L1 of the design's measurement: 38 reads,
+with 6 more that L2 masked until seat N1.
+
+**The fix.** A case whose label is a func type (unnamed, a named func type without a method, a named func type
+with one) emits the guard form that the interface cases already use:
+
+- with a binding: `case {} Δv when Δv._<Func<nint, nint>>(out var v):`;
+- without one, or in a multi-type case: `case {} ᴛ0 when ᴛ0._<Func<nint, nint>>(out var _):`.
+
+golib's try form answers a live value by the same type test the pattern made, and a nil carrier by its type, so
+a live value's answer does not move. One converter file. No golib change and no generator change.
+
+**The collision rule (stop line S6).** Two func types can share one C# delegate (two named func types without a
+method and with one signature), and a guard never makes a later label unreachable. The guard form alone would
+lose the compile error that today stops a switch whose two such cases have DIFFERING bodies. So the label's C#
+type key is carried beside its text. A pre-pass finds the delegate types that two or more func labels name with
+differing bodies, and those labels keep the pattern form: CS8120 still stops the build. Duplicates with an
+identical body still merge under the unchanged marker comment. `TestTypeSwitchCollapsedFuncCase` asserts both;
+its new asserts fail 6 times against the base visitor.
+
+**Named before the run, then read.**
+
+- Goldens: FOUR fixtures, 12 labels, each changed in place: `FuncLitEmptyInterfaceTarget` 2,
+  `TypeSwitchCollapsedFuncCase` 7, `TypeSwitchGuardLaterRedeclare` 2, `LocalValueIfaceCallConversion` 1 (a named
+  func type with a method). The design post said three: it searched the unnamed delegate spellings only. The
+  no-regression check (1056 behavioral packages, 8 platform-exclusive ones skipped on this host) names those four
+  and no other tracked file.
+- Corpus hunks: 7 label lines in 4 `net/http` files, each changed in place, the same on every target. In the
+  `-stdlib` arm, `h2_bundle.cs` 2 lines. In the `-tests` arm, `clientserver_test.cs` 3, `requestwrite_test.cs`
+  1 and `httputil/dump_test.cs` 1. No position-map line. Read by a two-seeded reconvert of the declared universe
+  (four targets) from committed refs, base master and seat `eba0d52d3f`, each arm by a converter built at its
+  ref, with the `-tests` conversion of nine packages (`net/http`, `net/http/httputil` and the seven rows seat N1
+  read): 4 files differ, 7 lines, at the lines named; no file is in one arm only; 0 of 226 hand-owned files
+  clobbered in either arm. The corpus apply is `d4eb94fd60`. For the three test files the committed blob equals
+  the seat emission. `h2_bundle.cs` as committed differs from a fresh reconvert at master in one line this seat
+  does not own (one of the 13 files of the side finding already routed), so its two lines went in by the hunk
+  rule and that line stays as committed.
+
+**The census: 714 reads, 7 carriers, four arms, each scored against Go's output.**
+
+| Arm | Base: EQUAL / SILENT | Fix: EQUAL / SILENT |
+|---|---|---|
+| direct | 222 / 16 | 236 / 2 |
+| va | 190 / 14 | 202 / 2 |
+| sh | 190 / 14 | 202 / 2 |
+| er | 62 / 6 | 68 / 0 |
+
+EQUAL moves from 664 to 708. The 44 reads that closed are the type switch reads, by the census's probe names:
+15 `l-switch` (the switch on the value), 14 `l-reswitch` (the switch after an assertion to its interface) and 15
+`ifacesw` (the switch on what reflect's `Interface` returns). The 6 that still differ are address prints of a
+live func, which no two runs share. Set check, both ways: 44 reads closed, 0 reads newly differ. The base arm
+was read on the tip that holds N1 and master's merge, with the base visitor swapped in and the fix restored
+byte-identical afterwards: 664, with the same 50 differing reads seat N1 read.
+
+**Predictions, posted with the design, scored.**
+
+- P2, after N2 the 44 type switch reads are EQUAL: TRUE (708 of 714, plus the 6 address prints).
+- P3, no read EQUAL at the base leaves EQUAL, here and in the 1028 reads of the unwrap seat: TRUE in both; the
+  unwrap census reads 1028 of 1028 at the base arm and at the fix.
+- P5, the `-tests` rows and GolibTests keep their sets: TRUE for the two rows whose emission moves. `net/http`
+  validates 1526 tests and `net/http/httputil` 62, on windows, at base master and at the fix `d4eb94fd60`, each
+  arm by a converter built at its ref; each equals the bank and 0 tests moved, read test by test. The comparator
+  was made to fail first (one flipped test, which it named). NOT RE-RUN: seat N1's seven rows (the two-seeded
+  reconvert shows their packages' emission identical in both arms) and GolibTests (no golib, generator or
+  GolibTests file changes, and GolibTests references no `net` project).
+- P6, the seat has a tracked program, red first: TRUE. `NilFuncTypeSwitch` (234 lines of Go output; carriers
+  from another package and this one, with and without a method, unnamed, with live and nil-pointer controls;
+  bound, unbound, multi-type, mixed with interface cases, address-taken and merged switches) at the base
+  transpiles and compiles, exits 0 with nothing on stderr, and 90 of its 234 lines differ from Go. At the fix
+  its four rows pass and its output equals Go's on every line.
+
+**Stop lines.** S1 (a read leaves EQUAL), S4 (a `-tests` row or GolibTests moves), S5 (the corpus diff holds a
+hunk that is not a func-type case label, or a position-map line moves), S6 (the guard form collides with the
+collapsed func case rule) and "a golden outside the four named fixtures moves": none tripped. S3 holds by
+construction: a live value meets the same type test the pattern made.
+
+**Owed, found by this seat.** A var declaration that converts between a named func type WITH a method and the
+unnamed func type of one signature does not compile, in either direction: `var s typelib.Step = f` (f an unnamed
+func variable) is CS0029 from the unnamed delegate to the named type, and `var u func(int) int =
+typelib.Step(nil)` is CS0029 the other way. It is loud, and it is a converter root of its own (the declaration's
+conversion), not root G. So seat N1's NOT EXAMINED case (a nil func of a named type stored into a slot of an
+unnamed func type with the same signature) and its mirror could not ride this seat's program: neither compiles
+at the base. Both programs are kept beside the seat's scratch record. Go's answer for both is known from the Go
+run.
+
+**Not re-run at the merged tip.** The two censuses, the no-regression check and the behavioral rows were read
+with the fix installed on N1's tip merged with master, before batch 299 landed. The merge with master that
+followed brought docs only (no file under `src`), so those readings carry by the diff. The repo guards and
+`go test ./...` were run at the final tip.
+
+**Not built or measured.** The fixture adds two members to the converter-dev solution; that solution was not
+built end to end. Read instead: both member paths are in the solution file and exist, and both projects compile
+in the runner's Compile row. Native AOT. Linux and macOS rows.
+
+## 2026-11-13 — G (sqlite-cs S1, C1's design as approved): a func value carried as a number takes one word per static function; predictions scored, no stop line tripped
+
+**Dated 2026-11-13 12:20 CST. Base master `651c4ad147` (batch 300), fix `60064685b2`, docs `bd76bba1c6` and
+`78c512b223`, corpus `f982350008`, Windows x64, SDK 10.0.400, go1.26.10.** The design is C1's
+`docs/phase4/DESIGN-sqlite-cs-funcptr.md`, sections 3.1, 3.3 and 3.8; COORD approved this seat's plan with its
+answers to section 3.5 and stop lines XG1-XG4 added to C1's X1.1-X1.6.
+
+**What was wrong.** ccgo keeps a C function pointer as a `uintptr`: it mints the number with `__ccgo_fp(f)` and
+calls through it by rebuilding a Go func value from `struct{ uintptr }`. At the base the tracked program
+`FuncWordShapes` (one site per class) fails on every class. r1 and r2 stop the transpile ("Unresolved dynamic
+struct type: struct{uintptr}", sqlite-cs's row S1). m1, m2 and w1 panic ("dereference of a managed pointer with no
+address"). w2 is silent: the store lands in the read view the reinterpret hands out, and the slot stays 0.
+
+**The fix.** golib's GoFuncCookie keys a delegate with no target (a converted top-level Go func) on its METHOD
+and holds that row for the process, so every delegate over the method, under any delegate type, answers one word,
+as Go's static funcval does. A closure or a bound method value keeps the per-instance word, held weakly. A
+delegate built over another (`new F(g)`) stands for g; the 64-thread race unit found that case on its first run.
+One recovery serves the new `GoFuncCookie.Func<F>(word)` and golib's Reinterpret route: the minted delegate, or one
+rebound over the same target and method, cached per delegate type for a static function only. A number that is no
+func word now panics by name on both routes. A 32-bit runtime is refused at the mint. The converter's new
+`funcWordOperations.go` recognises the six classes by their types in a package pre-pass and emits each through
+GoFuncCookie; a declared function is minted through the cached method-group conversion `(F)name`. ccgo's own m1
+spelling (a local `type iface [2]uintptr` before the return) was read from sqlite-cs's `repros/s1funcptrstruct`
+before the measurement, and both spellings are in the program and the unit test.
+
+**Not covered, by design:** a func stored into memory at a computed address (vfs/patches64.go's nine offset stores
+on every target), a recovery from a pointer or from memory (runtime's mcleanup and panic), and the
+`*unsafe.Pointer` forms, which already read through `unsafe.Pointer.OfFunc`.
+
+**Predictions, scored.**
+
+- Q1, the tracked program fails on every class at the base, loudly or silently: TRUE (four loud, w2 silent; read
+  class by class, because each loud failure hides the classes after it). At the fix its four rows pass and its 22
+  lines equal Go's.
+- Q2, the two-seeded `-stdlib` diff on four targets is the one reflect/value.cs `funcName` line, no map line, no
+  `.cs.auto` change, and the `-tests` arm of reflect and runtime does not differ: TRUE. Committed blob equalled the
+  base emission; the apply is `f982350008`. 0 of 226 hand-owned files clobbered in either arm.
+- Q3, the eight existing GoFuncCookieTests pass unchanged and each new unit fails once: TRUE. Seven new units; three
+  planted regressions of GoFuncCookie.cs (the static row off, the non-word panic and the 32-bit refusal off, the
+  wrapper rule off) fail 4, 2 and 1 of them, the eight existing none; restored byte-identical. The whole suite reads
+  2595 passed, 0 failed, 45 skipped. TestFuncWordShapes fails 9 asserts against a disabled pre-pass.
+- Q4, sqlite-cs on windows/amd64: TRUE for what can be read. Its demo stops at start-up on row S22, before S1, so the
+  run is NOT REACHED. Its closure (libc, sqlite/lib, sqlite) converted by each arm's converter: master refuses with 16
+  `struct{uintptr}` lines; the fix with none (4 other anonymous structs in sqlite's vtab.cs remain, other rows). The
+  fix emits 503 recoveries (libc 7, lib 496) and 12 mints (lib 1 m1 and 9 m2, sqlite 2 m2), each equal to C1's
+  per-package census, and its 1,303 `__ccgo_fp` call sites stay method-group arguments.
+- No-regression check (1065 behavioral packages transpiled, 8 platform-exclusive ones skipped on this host):
+  only FuncWordShapes' new files differ; no tracked golden moves.
+
+**Stop lines.** X1.1-X1.6 and XG1-XG4: none tripped. One public golib member is added, `Func<F>`, on a
+[go-tier2] type, and the row type is private. The reflect row validates 445 tests with 21 disclosed, equal to the
+bank, and 0 tests move against seat N1's reflect arm; the comparator was made to fail first.
+
+**Observed, not this seat's.** The runtime row dies at its 30-minute package deadline at master too
+(`TestSmhasherAvalanche` in flight; the Smhasher tests run about 1,600 s each on this box). Read at master and at
+the fix: 0 tests move between them. The bank (11,083 matched, 2026-11-09) was read on a run that finished.
+
+**Named requirements and routes.**
+- N3's park-set census (M:N stage (c)) includes sqlite-cs's three paths through a recovered func word: the mutex
+  calls, the VFS method calls and the busy handler's sleep, with sqlite-cs as the measured consumer. Until N3, a
+  park inside one of them holds a carrier (COORD's ruling on G2); on .4 master nothing changes.
+- N3 keys a twin on the METHOD and binds the delegate's target at the call (G1): nothing per instance, and a
+  rebound delegate finds the same twin.
+- winSeekFile's `TLARGE_INTEGER` recovery on windows/amd64 (C1's 3.3) is P1's M5, sqlite row S23.
+- S21's cpu name table is the next seat.
+
+**Not built or measured.** The converter-dev solution end to end (the fixture adds one member; its path is in the
+solution file and the project compiles in the runner's Compile row). Native AOT; linux and macOS; contention under
+many goroutines; per-site delegate caching at an m1 call site.
+
+## 2026-11-13 — G (sqlite-cs S21, C1's design as approved): x/sys/cpu's cpuid and xgetbv take golib bodies by name; predictions scored
+
+**Dated 2026-11-13 17:01 CST. Base master `651c4ad147` (batch 300), fix `bb79fb1f20`, docs `d74c7fc15d`,
+registry wording and re-cited notes `95d3b9dcd4`, the GOROOT gate `37de01a37d`, Windows x64, SDK 10.0.400,
+go1.26.10.** The design is C1's
+`docs/phase4/DESIGN-sqlite-cs-funcptr.md`, sections 2.3 and 3.7; COORD approved this seat's plan and both of its
+narrowings.
+
+**What was wrong.** golang.org/x/sys/cpu decodes its feature flags from `cpuid` and `xgetbv` in its init, and
+writes both in assembly. Their bodyless declarations converted to stubs that throw, so a converted program that
+imports x/sys/cpu died before `main` (modernc.org/libc imports it on windows and darwin: sqlite-cs row S21). A
+module importing x/sys/cpu v0.49.0, converted with `-recurse` at master, built and run here: exit 2, nothing
+printed, `NotImplementedException` "cpuid: no implementation reached this compilation" out of x/sys/cpu's init.
+The conversion named neither function.
+
+**The fix.** golib's `go.golib.GoCpu`, the one new public type (tier 2, EditorBrowsable Never): `Cpuid` reads the
+processor through `X86Base.CpuId`; `Xgetbv` SYNTHESISES XCR0 from `Sse`, `Avx` and `Avx512F.IsSupported`, since
+.NET has no XGETBV, and its doc comment says so. The converter's `asmForwardBodies.go` maps (golang.org/x/sys/cpu,
+function) to that body together with the Go signature it implements; a listed function takes the linkname
+forwarder writer. A listed function declared with another signature refuses its package before any file is
+written (`GO2CS2011`). A bodyless function of a module outside GOROOT that nothing forwards keeps its stub and is
+named (`GO2CS2012`, a warning). Both codes follow C2's two (inline arrays, batch 302).
+
+**Predictions, scored.**
+
+- R1, red at master: TRUE, as above.
+- R2, the same program at the fix prints Go's output on this host, line by line: TRUE. Exit 0; its 29 feature
+  flags equal Go's, so no flag differs from what Go's own cpuid and xgetbv read (stop line X2.2 not tripped).
+- R3, the converter tests (both forwards, the stub kept and named, a wrong signature refused): TRUE; planted
+  regressions fail them (forward off: 4 asserts; refusal off: 1; warning off: 1), restored byte-identical.
+- R4, the corpus does not move: FALSE at `95d3b9dcd4` (4 vendored files, below), TRUE at `37de01a37d`. The
+  two-seeded reconvert of the four-target universe from committed refs, with the `-tests` conversion of
+  internal/cpu: 0 files differ, no file in one arm only, 0 of 226 hand-owned files clobbered in either arm, and no
+  GO2CS2011 or GO2CS2012 in std. The no-regression check (1056 behavioral packages, 8 platform-exclusive ones
+  skipped on this host): byte-identical. Its one bodyless function, MapCloneLinkname's linkname pull, is
+  forwarded, so no fixture is named as a stub.
+- R5, sqlite-cs's windows closure: x/sys/cpu's two functions emit forwards, and no assembly function is left a
+  stub. The prediction also said 0 warnings, and that is FALSE as worded: `GO2CS2012` names 8 stubs, all linkname
+  pulls, which the warning covers by design: bigfft's 7 pulls of math/big's arithmetic (addVV, subVV, addVW,
+  subVW, shlVU, mulAddVWW, addMulVVW) and x/sys/cpu's `runtime_getAuxv`. Each is a real stub, now named; whether
+  a sqlite path reaches one is NOT MEASURED.
+- R6, golib: `GoCpuTests`' three units pass (the CPUID leaves against `X86Base.CpuId`, the synthesised XCR0 bit by
+  bit, `Xgetbv` against .NET's answers); planted regressions fail 1 and 2 of them. The whole suite reads 2591
+  passed, 0 failed, 45 skipped.
+
+**Stop lines.** X2.1 (a forwarder whose signature was not checked), X2.2, X2.3 (a stub reached and not named),
+any corpus move, and more than one new public golib type: none tripped.
+
+**Kept as stubs, on purpose (for a future freebsd or Windows-on-Arm reader).** x/sys/cpu's four arm64
+ID-register reads, `getisar0`, `getisar1`, `getpfr0` and `getzfr0`, have no managed body. x/sys/cpu reads them only
+on freebsd, which go2cs does not target, and no host here can run an arm64 body to check one. They convert to
+throwing stubs that `GO2CS2012` names. A target that reaches them needs bodies built from .NET's Arm intrinsics.
+
+**Not in the table, by ruling.** The standard library's vendored copy (`vendor/golang.org/x/sys/cpu`) keeps its
+stubs: it is std corpus. It converts under the module's own import path, so a table keyed on the path reached it
+too: the first footprint (seat `95d3b9dcd4`) moved 4 vendored files, tripping the corpus stop line, and
+`37de01a37d` gates the forward and the refusal on a package outside GOROOT, as the stub warning already was.
+
+**Why no converted program reaches the vendored stub (COORD's check).** Its init calls `cpuid` three times, and
+`cpu_gc_x86.cs` declares `cpuid` with no body, yet crypto/tls validates on windows and linux. Read at the tree,
+case (a) holds: the closure as converted does not import it. A bare `-stdlib` conversion applies the `purego` tag
+(`defaultStdLibBuildTags`), and under `purego` std's vendored chacha20poly1305 builds its `noasm` variant, which
+does not import x/sys/cpu (`go list -deps crypto/tls` for windows/amd64: present without the tag, absent with it).
+The converted chacha20poly1305 holds `chacha20poly1305_noasm.cs` and no amd64 file, and no converted std project
+references the vendored x/sys/cpu project. So its init never runs, and nothing reads zeros from it; std's
+generic crypto path is the `purego` decision itself, not a silent fallback.
+
+**Darwin needs no change.** x/sys/cpu's `syscall_syscall6` pull is already forwarded: the x/sys darwin twin
+table maps `syscall.syscall6` to `syscall.Syscall6` for every golang.org/x/sys package.
+
+**Found and fixed: a check that never ran.** C1's section 3.7 asks the implementing seat for an x/sys/cpu darwin
+case in `TestParseAsmTrampolineAddrs`. The test already had one, reading GOROOT's vendored x/sys/cpu, but it read
+`syscall_darwin_x86_gc.s`, which x/sys/cpu does not have (its file is `asm_darwin_x86_gc.s`), and it skipped
+silently when the read failed. It reads the real file now, both of its variables bind, and a missing file fails;
+pointed back at the old name it fails, restored byte-identical.
+
+**Not built or measured.** Darwin and linux conversions of x/sys/cpu (the twin forward is read at the code, not
+run); Native AOT.
+
+## 2026-11-13 — G (sqlite-cs S21's R5, read on COORD's order): the sqlite-cs demo reaches none of the 8 stubs GO2CS2012 names
+
+**Dated 2026-11-13 17:32 CST. Read at master `651c4ad147`, Windows x64, go1.26.10.** Seat S21 (its own row,
+seated in batch 302) names every bodyless function of a module that nothing forwards as `GO2CS2012`. In
+sqlite-cs's windows closure it named 8, all linkname pulls: bigfft's 7 of math/big's arithmetic (`addVV`,
+`subVV`, `addVW`, `subVW`, `shlVU`, `mulAddVWW`, `addMulVVW`) and x/sys/cpu's `runtime_getAuxv`. COORD asked
+whether sqlite-cs reaches any of them.
+
+**The read.** Rapid type analysis (`golang.org/x/tools/go/callgraph/rta`, x/tools v0.52.0, the converter's own) of
+the sqlite-cs demo from `main` and every package `init`, for windows/amd64, linux/amd64, linux/arm64,
+darwin/amd64 and darwin/arm64, each with no build tags and with `safe,purego,noasm` (the tags `-recurse` applies):
+ten runs, each loading cleanly. The tool and its output are `docs/phase4/data/sqlite-cs-funcptr/s21/`
+`r5-cgtool-main.go` and `r5-reach.txt`.
+
+- **bigfft's 7: not reachable on any target, under either tag set.** Neither is `bigfft.Mul`, bigfft's own entry:
+  nothing in the demo's closure multiplies through it.
+- **`runtime_getAuxv`: address-taken, never called.** x/sys/cpu's `init` (runtime_auxv_go121.go) stores it in
+  `getAuxvFn`. The one call of `getAuxvFn` is in `getAuxv`, which only `hwcap_linux.go` calls. On linux the demo's
+  closure does not import x/sys/cpu at all (libc imports it on windows and darwin only), and on windows and darwin
+  `getAuxv` is not reachable. RTA lists `runtime_getAuxv` as reachable on those six builds (two tag sets each)
+  only through its conservative edge from `(reflect.Value).Call` to every address-taken function.
+- **Control:** x/sys/cpu's `cpuid` reads reachable on both amd64 targets with six direct calls from `archInit`, so
+  the analysis sees direct calls where they exist.
+
+**So no seat follows.** The 8 stubs stay stubs, named by `GO2CS2012`, and the sqlite-cs demo calls none of them.
+**Not read:** sqlite's own test suite as converted (only the demo's entry points), and whether a call through
+`reflect` could reach `runtime_getAuxv` at run time.
+
+— G (2026-11-13)
+
+## 2026-11-13 — P5 (seat B, closed with seat A by COORD's ruling): the linux-arm64 GolibTests leg ended its test host about 2,060 tests early; the cause was the linux/amd64 cgo golden, not the EventPipe sampler — FIXED in seat A
+
+**The blind spot.** On master 651c4ad147 the hosted linux-arm64 golib-tests leg (runs 43510049988 and 43497473577)
+ran 503 of the suite's tests, failed 23 with the cgo target refusal, and then the test host died while
+`EventPipeSamplerHostProbe.TheSamplersThreadKeysAndCpuReadingsAreMeasured` ran. About 2,060 tests never ran on
+that leg. vstest gave as the reason the last line on stderr, `invalid boolean value "bogus" for -test.v`, which a
+`ChattyFlagBridgeTests` test that passed had printed.
+
+**The cause.** `GolibTests.csproj` compiled `GoCgoWrappers.linux.golden.cs` on every linux leg. Its module
+initializer registers golib's cgo resolver for the whole GolibTests assembly with target `linux/amd64`, and
+`GoCgoLibraries.Resolve` refuses EVERY P/Invoke that assembly makes when the process target differs, a hand-owned
+import among them. Two tests make such a call on a thread that is not the test's own: the probe calls `gettid`
+inside each hog's `new Thread(...)`, and `GoTimerTests.serviceThread()` calls `gettid` inside a `GoTimer` callback
+on the timer service thread. The `PlatformNotSupportedException` was unhandled there, and the process ended.
+
+**The four isolating runs** (linux-arm64 golib-tests):
+
+| Run | Ref | Filter | Result |
+|---|---|---|---|
+| 43515648007 | master 651c4ad147 | the probe alone | host crashed in the probe |
+| 43515652676 | master 651c4ad147 | everything but the probe | 980 run, 25 refusals, host crashed in `GoTimerTests.TheServiceThreadIsIdleUnderAFarFutureTimer` |
+| 43516731364 | master 651c4ad147 | `EventPipeSamplerTests` alone | 7 of 7 pass: golib's sampler does not crash on arm64 |
+| 43517263836 | seat A 177ab806cf | the probe and `GoTimerTests` | 16 of 16 pass |
+
+The abort moved with the test set, which ruled out the probe and the sampler as its source.
+
+**The fix.** Seat A (177ab806cf) generates `GoCgoWrappers.linux-arm64.golden.cs` with the converter and selects
+it by process architecture. At 177ab806cf the whole linux-arm64 leg (run 43515128508) ran to completion: 2,661
+executed, 2,661 passed, 0 failed. The probe's readings are present there: hog ids 4010 and 4011, own CPU 932
+and 934 ms against sampler readings of 920 and 930 ms, 92 and 93 written, and the hog as leaf in 103 of 248.
+
+**Hardening** (seat A's second commit, c3486c0f68, COORD's ruling). Each of the two tests now catches on its own
+thread and fails on the test's thread, so a refused import fails one test and the suite still runs.
+It was made to fail once: with the linux/amd64 golden forced on the arm64 leg (a plant commit on top of
+c3486c0f68, never merged, run 43519587318), the leg ran to completion, 2,661 executed, 2,618 passed and 43
+failed, every one with the refusal text. The three tests on the two threads are among them:
+`TheSamplersThreadKeysAndCpuReadingsAreMeasured` ("hog 0 threw on its own thread"), and
+`TheServiceThreadIsIdleUnderAFarFutureTimer` and `DenseTimersCostTheServiceThreadLittleCpu` ("the timer
+callback threw on the service thread"). The host did not abort. So the suite's true refusal count under the
+wrong golden is 43, where the aborted master runs showed 23. Without the plant, c3486c0f68 reads 2,661 passed
+and 0 failed on linux-arm64 (run 43519596892).
+
+**Product-side reading, observed and NOT a defect.** A cgo target mismatch refuses every P/Invoke its assembly
+makes, on any thread. On a thread that is not a test's, an unhandled refusal ends the process. That is by design.
+
+**Prediction scored.** Seat A predicted that arm64 would read 0 refusals and abort at the same probe. The abort
+half MISSED as worded, because the abort was caused by the golden that seat A replaced.
+
+**Not run here.** `check-no-regression.ps1`: this box has no dotnet or pwsh. Seat A changes no converter source
+(one `_test.go` row, one generated golden, the csproj and two test files), so the corpus footprint is 0 by
+construction.
+
+— P5 (2026-11-13)
+
+## 2026-11-13 — P5 (seat A, COORD's ask): the cgo wrapper fixture declares `_Ctype_char` as `int8` for linux/arm64, where cmd/cgo declares `uint8` — CLOSED 2026-11-13 in seat A (`198bc1d62b`); was OPEN, fixture only
+
+**What cgo picks.** cmd/cgo takes the Go type of C `char` from the DWARF encoding the C compiler wrote
+(`src/cmd/cgo/gcc.go`, go1.26.10): a `dwarf.CharType` (signed char encoding) becomes `int8`, and a
+`dwarf.UcharType` (unsigned char encoding) becomes `uint8`. Plain `char` is unsigned in the linux/arm64 C ABI,
+so there cgo declares `type _Ctype_char uint8`. On linux/amd64 and on both darwin targets it is `int8`.
+
+**Whether the generator agrees.** The generator reads the type the Go side declares, so on real cgo output it
+follows cgo. The converter test's fixture does not: `cgoLinuxStructs` in `src/go2cs/cgoWrappers_test.go`
+(and the declarations in `cgoDeclarations_test.go` and `cgoMirrors_test.go`) writes `type _Ctype_char int8`
+once for every target, and seat A's linux/arm64 row reuses it. `GoCgoWrappers.linux-arm64.golden.cs` therefore
+carries `sbyte` where bindings converted from real linux/arm64 cgo output would carry `byte`
+(`ᴍarray65_sbyte sysname`, golden line 688). The size and layout are the same, 1 byte, and the suite is green on
+the arm64 leg (2,661 passed, run 43519596892), so nothing fails today; the fixture is not what cgo emits there.
+
+**Read, not measured.** The cgo side is read from cmd/cgo's source and the C ABI. No cgo run on a linux/arm64
+host was made, and the generator was not run on a `uint8` fixture.
+
+**Owed.** A linux/arm64 fixture with `_Ctype_char uint8`, the golden regenerated from it, and the arm64 leg
+re-read. Its own seat, not seat A.
+
+— P5 (2026-11-13)
+
+**CLOSED 2026-11-13, in seat A by COORD's ruling (22:59Z), commit `198bc1d62b`.** The fixture's target now names its
+char type: `uint8` for linux/arm64, `int8` for linux/amd64, both darwin targets and windows.
+`GoCgoWrappers.linux-arm64.golden.cs` was regenerated and moved 35 lines, every one char-typed: the `strtol` char
+mirror (368, 374, 393), `struct utsname`'s six members (688-693, 697-708, and the even lines of 830-840 and 846-856)
+and the inline array type (725, 727). No other golden moved. GolibTests' hand-declared `C.@char` wraps `uint8` under
+`GOCGO_CHAR_UNSIGNED` (linux with an arm64 process), and the two tests that cast a C char name the type by an alias.
+Made to fail first: with the arm64 type forced back to `int8`, `TestCgoScalarWrapperGoldensAreTheGeneratorsOutput`
+fails naming only the linux/arm64 golden.
+
+| leg at `198bc1d62b` | executed / passed / failed | run |
+|:--|:--|:--|
+| linux-arm64 | 2,661 / 2,661 / 0 | 43525931102 |
+| linux-x64 | 2,665 / 2,665 / 0 | 43525931102 |
+| win-x64 | 2,607 / 2,607 / 0 | 43525934547 |
+| osx-x64 | 2,563 / 2,563 / 0 | 43525938386 |
+| osx-arm64 | 2,562 / 2,562 / 0 | 43525938386 |
+
+The counts equal the earlier tips' on every leg; osx-arm64 reads 2,562 or 2,563 across this seat's runs, the
+disclosed Inconclusive of one sampler test there. **Still read, not measured:** no cgo run on a linux/arm64 host was
+made; the `uint8` is cmd/cgo's rule as its source states it. The fixtures in `cgoDeclarations_test.go` and
+`cgoMirrors_test.go` are not per target and keep `int8`.
+
+— P5 (2026-11-13)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
