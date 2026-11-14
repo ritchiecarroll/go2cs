@@ -111,8 +111,8 @@ func view(p unsafe.Pointer) *Outer { return (*Outer)(p) }
 `)
 
 	for _, want := range []string{
-		`[GoInlineLayout(Size = 6, Align = 2), StructLayout(LayoutKind.Explicit, Size = 6)] partial struct S22`,
-		`[GoInlineLayout(Size = 8, Align = 2), StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Outer`,
+		`[global::go.golib.GoInlineLayout(Size = 6, Align = 2), StructLayout(LayoutKind.Explicit, Size = 6)] partial struct S22`,
+		`[global::go.golib.GoInlineLayout(Size = 8, Align = 2), StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Outer`,
 	} {
 		if !strings.Contains(cs, want) {
 			t.Errorf("want %q:\n%s", want, cs)
@@ -292,7 +292,7 @@ func (rsa *RawSockaddrAny) Decode() (string, [4]byte) {
 func Wire(p unsafe.Pointer) *RawSockaddrAny { return (*RawSockaddrAny)(p) }
 `)
 
-	if !strings.Contains(cs, `[GoInlineLayout(Size = 16, Align = 2), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct RawSockaddr {`) {
+	if !strings.Contains(cs, `[global::go.golib.GoInlineLayout(Size = 16, Align = 2), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct RawSockaddr {`) {
 		t.Errorf("want RawSockaddr held inline:\n%s", cs)
 	}
 

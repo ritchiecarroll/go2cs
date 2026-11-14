@@ -257,8 +257,10 @@ func csManagedField(t types.Type, depth int) bool {
 func (l structZeroSizeLayout) structLayoutAttribute() string {
 	if l.inline {
 		// Go's size and alignment from go/types: the gate's source independent of this declaration, so a [0]T carrier
-		// missing from it fails by name (DESIGN-array-value-storage.md, part D, stop line S2).
-		return fmt.Sprintf("[GoInlineLayout(Size = %d, Align = %d), StructLayout(LayoutKind.Explicit, Size = %d)] ", l.size, l.align, l.size)
+		// missing from it fails by name (DESIGN-array-value-storage.md, part D, stop line S2). Fully qualified: the
+		// stamp lives in go.golib, which a converted project does not import, and a file whose admitted structs hold no
+		// array field of their own takes no `using go.golib;` (CS0246 in x/sys/windows, COORD 2026-11-14 19:23Z).
+		return fmt.Sprintf("[global::go.golib.GoInlineLayout(Size = %d, Align = %d), StructLayout(LayoutKind.Explicit, Size = %d)] ", l.size, l.align, l.size)
 	}
 
 	return fmt.Sprintf("[StructLayout(LayoutKind.Explicit, Size = %d)] ", l.size)

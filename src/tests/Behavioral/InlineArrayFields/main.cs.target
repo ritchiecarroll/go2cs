@@ -9,28 +9,28 @@ using go.golib;
 
 partial class main_package {
 
-[GoInlineLayout(Size = 4, Align = 4), StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Plain {
+[global::go.golib.GoInlineLayout(Size = 4, Align = 4), StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Plain {
     [FieldOffset(0)] public int32 N;
 }
 
-[GoInlineLayout(Size = 12, Align = 4), StructLayout(LayoutKind.Explicit, Size = 12)] partial struct Holder {
+[global::go.golib.GoInlineLayout(Size = 12, Align = 4), StructLayout(LayoutKind.Explicit, Size = 12)] partial struct Holder {
     [FieldOffset(0)] public Plain P;
     [FieldOffset(4)] public array8<byte> Buf;
 }
 
-[GoInlineLayout(Size = 6, Align = 2), StructLayout(LayoutKind.Explicit, Size = 6)] partial struct S22 {
+[global::go.golib.GoInlineLayout(Size = 6, Align = 2), StructLayout(LayoutKind.Explicit, Size = 6)] partial struct S22 {
     [FieldOffset(0)] [GoAlignmentCarrier(typeof(array<int16>))] public readonly short FforceAlignment;
     [FieldOffset(0)] public array5<int8> Fa;
     [FieldOffset(5)] public array1<byte> Fpad;
 }
 
-[GoInlineLayout(Size = 12, Align = 4), StructLayout(LayoutKind.Explicit, Size = 12)] partial struct Named {
+[global::go.golib.GoInlineLayout(Size = 12, Align = 4), StructLayout(LayoutKind.Explicit, Size = 12)] partial struct Named {
     [FieldOffset(0)] public uint8 FnName;
     [FieldOffset(1)] public array7<int8> FzName;
     [FieldOffset(8)] public float32 FrLimit;
 }
 
-[GoInlineLayout(Size = 16, Align = 2), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Grid {
+[global::go.golib.GoInlineLayout(Size = 16, Align = 2), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Grid {
     [FieldOffset(0)] public array2<array3<int16>> Cells;
     [FieldOffset(12)] public array4<uint8> Off;
 }

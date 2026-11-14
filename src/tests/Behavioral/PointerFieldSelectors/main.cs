@@ -55,7 +55,7 @@ partial struct outer {
     public nint W;
 }
 
-[GoInlineLayout(Size = 12, Align = 4), StructLayout(LayoutKind.Explicit, Size = 12)] partial struct wire {
+[global::go.golib.GoInlineLayout(Size = 12, Align = 4), StructLayout(LayoutKind.Explicit, Size = 12)] partial struct wire {
     [FieldOffset(0)] public uint16 Tag;
     [FieldOffset(2)] public uint16 Size;
     [FieldOffset(4)] public array4<byte> Body;

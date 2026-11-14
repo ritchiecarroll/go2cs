@@ -8,7 +8,7 @@ using go.golib;
 
 partial class main_package {
 
-[GoInlineLayout(Size = 1048, Align = 8), StructLayout(LayoutKind.Explicit, Size = 1048)] partial struct Dirent {
+[global::go.golib.GoInlineLayout(Size = 1048, Align = 8), StructLayout(LayoutKind.Explicit, Size = 1048)] partial struct Dirent {
     [FieldOffset(0)] public uint64 Ino;
     [FieldOffset(8)] public uint64 Seekoff;
     [FieldOffset(16)] public uint16 Reclen;
@@ -18,7 +18,7 @@ partial class main_package {
     [FieldOffset(1045)] public array3<byte> Pad_cgo;
 }
 
-[GoInlineLayout(Size = 16, Align = 8), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Pair {
+[global::go.golib.GoInlineLayout(Size = 16, Align = 8), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Pair {
     [FieldOffset(0)] public uint16 A;
     [FieldOffset(2)] public array2<uint8> B;
     [FieldOffset(8)] public uint64 C;
