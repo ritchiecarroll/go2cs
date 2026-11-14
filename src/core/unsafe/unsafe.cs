@@ -627,6 +627,194 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         return ж<T>.FromNumber(number, carried: null);
     }
 
+    // ---- Go's `(*A)(p)[lo:hi]`, A an array type and p an unsafe.Pointer: the VIEW doors (door A) ----
+    //
+    // docs/phase4/DESIGN-array-pointer-doors.md, 4.1 to 4.4 and section 10. The converter emitted these forms as a
+    // span over the pointer cast to a number, which COPIES: a write through the slice never reached the memory, and
+    // a named array (`type RawMem [1<<50 - 1]byte`, modernc.org/libc) was read as a managed wrapper out of C
+    // memory. A door takes the pointer itself and the array's length N as a constant. Nothing of length N is
+    // allocated or spanned: N is a bound.
+    //
+    //     (*A)(p)[lo:hi]              View<E>(p, lo, hi, N)
+    //     (*A)(p)[lo:hi:max]          View<E>(p, lo, hi, max, N)
+    //     (*A)(p)[lo:]                View<E>(p, lo, N)
+    //     copy((*A)(p)[lo:], src)     CopyInto<E>(p, lo, N, src)
+    //     copy(dst, (*A)(p)[lo:])     CopyFrom<E>(dst, p, lo, N)
+    //
+    // Go's order: the nil check, then the bounds against N with Go's slice panics for an array, then the view.
+    // WHAT THE VIEW IS depends on what p points to (Window):
+    //
+    //   V1  an element of a Go array or slice of E, or a Go array of E named by its own address: a managed window
+    //       on that array. Writes reach it and nothing needs to be held still. Its capacity, and what a copy door
+    //       may copy, end where the Go array ends; a view that would pass that end is refused by name, because the
+    //       managed array is all the storage there is.
+    //   V3  an address the pointer registry does not know (C memory, or an interior address of Go memory): a native
+    //       window over the address, with Go's capacity. It keeps what the pointer carried, which is nothing for C
+    //       memory alone.
+    //   V4  any other Go value: a COPY of the elements read at the pointer, as before the doors. A read is exact
+    //       and a write does not reach the value, so a copy door refuses such a destination by name.
+    //
+    // The length is taken at full width and refused by name past what a span can hold, as unsafe.Slice refuses it:
+    // the cast to int it replaces wrapped (2^32 + 5 would have read five elements).
+    private enum ViewUse
+    {
+        Slice,
+        CopyDestination,
+        CopySource
+    }
+
+    // `(*A)(p)[lo:hi]`: length hi-lo, capacity N-lo.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static slice<E> View<E>(Pointer? p, long lo, long hi, long length)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)hi > (ulong)length || (ulong)lo > (ulong)hi)
+            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(lo, hi, length);
+
+        return Window<E>(p!, lo, hi - lo, length - lo, length, ViewUse.Slice);
+    }
+
+    // `(*A)(p)[lo:hi:max]`: length hi-lo, capacity max-lo.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static slice<E> View<E>(Pointer? p, long lo, long hi, long max, long length)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)max > (ulong)length || (ulong)hi > (ulong)max || (ulong)lo > (ulong)hi)
+            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(lo, hi, max, length);
+
+        return Window<E>(p!, lo, hi - lo, max - lo, length, ViewUse.Slice);
+    }
+
+    // `(*A)(p)[lo:]` anywhere but directly under copy: the whole array from lo. For an array longer than a span
+    // can hold (RawMem) this is refused by name: a slice of that length has no representation here, and a
+    // shortened one would answer a wrong len.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static slice<E> View<E>(Pointer? p, long lo, long length)
+    {
+        return View<E>(p, lo, length, length);
+    }
+
+    // `copy((*A)(p)[lo:], src)`. Go copies min(N-lo, len(src)) elements, so the view cut is exactly that long,
+    // whatever N is. p is evaluated before src, as Go evaluates copy's arguments.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static nint CopyInto<E>(Pointer? p, long lo, long length, in slice<E> src)
+    {
+        long count = OpenFormCount(p, lo, length, src.Length);
+
+        return count == 0 ? 0 : copy(Window<E>(p!, lo, count, count, length, ViewUse.CopyDestination), src);
+    }
+
+    // The same with a string source, which Go allows into a byte destination.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static nint CopyInto(Pointer? p, long lo, long length, in @string src)
+    {
+        long count = OpenFormCount(p, lo, length, src.Length);
+
+        return count == 0 ? 0 : copy(Window<byte>(p!, lo, count, count, length, ViewUse.CopyDestination), src);
+    }
+
+    // `copy(dst, (*A)(p)[lo:])`: min(len(dst), N-lo) elements.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static nint CopyFrom<E>(in slice<E> dst, Pointer? p, long lo, long length)
+    {
+        long count = OpenFormCount(p, lo, length, dst.Length);
+
+        return count == 0 ? 0 : copy(dst, Window<E>(p!, lo, count, count, length, ViewUse.CopySource));
+    }
+
+    // Slicing through a nil array pointer is Go's nil dereference, before any bound is read.
+    private static void RequireArrayPointer(Pointer? p)
+    {
+        if (p is null || p.IsNull)
+            throw RuntimeErrorPanic.NilPointerDereference();
+    }
+
+    // The open form's checks and the count copy uses of it.
+    private static long OpenFormCount(Pointer? p, long lo, long length, nint other)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)lo > (ulong)length)
+            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(lo, length, length);
+
+        return Math.Min(length - lo, other);
+    }
+
+    // The Go form a refusal names: N and E are the array's, the bounds the site's.
+    private static string ViewForm<E>(long lo, long count, long length, ViewUse use) =>
+        use is ViewUse.Slice
+            ? $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:{lo + count}]"
+            : $"copy through (*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:]";
+
+    // The view of `count` elements starting `lo` elements after p, with room for `capacity`. The bounds are checked
+    // by the caller. p is resolved where it points and the view starts lo elements on, so a number the registry
+    // knows keeps its answer for every lo.
+    private static slice<E> Window<E>(Pointer p, long lo, long count, long capacity, long length, ViewUse use)
+    {
+        // The converter refuses such an element at the site; the doors are public, so they refuse it too.
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<E>())
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)}: an element that holds references cannot be viewed at an address");
+
+        // A zero-size element has no storage to view, so a length past any span is still a valid Go slice
+        // (unsafe.Slice's exemption). Its capacity is its length.
+        if (GoSliceLimit.IsZeroSize<E>() && GoSliceLimit.LongerThanAnySpan(count))
+            return new slice<E>((nint)count);
+
+        if (GoSliceLimit.LongerThanAnySpan(count))
+            throw RuntimeErrorPanic.RuntimeRaised($"go2cs: {ViewForm<E>(lo, count, length, use)}: length {count} exceeds the maximum slice length of this runtime");
+
+        ж<E> ptr = To<E>(p);
+
+        // V1, an element of managed E storage: the pointer's own box, or the box a number resolved to.
+        if (ptr.TryGetElementStorage(out E[]? elements, out nint first))
+            return ManagedWindow(elements, first, elements.Length - first, lo, count, capacity, length, use);
+
+        // An order token is a number that is no address: it is never viewed as memory (the copy below reads through
+        // the box, which refuses a token by name).
+        if (ptr.IsNative && !ManagedPointerTokens.IsTaggedToken(ptr.NativeAddress))
+        {
+            object? resolved = ManagedPointerTokens.Resolve(ptr.NativeAddress);
+
+            // V3. Kept answers null for C memory alone, so no anchor is allocated for it.
+            if (resolved is null)
+            {
+                nuint address = ptr.NativeAddress + (nuint)lo * (nuint)Unsafe.SizeOf<E>();
+
+                return slice<E>.OverNativeMemory(address, (nint)count, (nint)capacity, NativeSliceAnchors<E>.For(NativeDerivation.Kept(ptr)));
+            }
+
+            // V1, a Go array of E named by its own address (`unsafe.Pointer(&a)`, or that number): the address is
+            // the array's element 0, so the view is a window on the array.
+            if (resolved is ж<array<E>> { IsNilPointer: false } arrayBox && arrayBox.ValueSlot is { Source: { } source } whole)
+                return ManagedWindow(source, whole.Low, whole.Length, lo, count, capacity, length, use);
+        }
+
+        // V4. A write would land in the copy, so copy's destination is refused instead of written and lost.
+        if (use is ViewUse.CopyDestination)
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)} cannot write the Go value p points to: it is not an array of {GoReflect.GoTypeName(typeof(E))}, and a view of it is a copy");
+
+        if (count == 0)
+            return new slice<E>(Array.Empty<E>());
+
+        fixed (E* source = &ptr.Value)
+            return new slice<E>(new ReadOnlySpan<E>(source + lo, (int)count));
+    }
+
+    // A window on a Go array of E: `available` elements exist from the pointer's element to the array's end.
+    private static slice<E> ManagedWindow<E>(E[] elements, nint first, nint available, long lo, long count, long capacity, long length, ViewUse use)
+    {
+        long remain = available - lo;
+
+        if (count > remain)
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)} would pass the end of the Go array p points into ({Math.Max(remain, 0)} elements remain)");
+
+        nint low = first + (nint)lo;
+
+        return new slice<E>(elements, low, low + (nint)count, low + (nint)Math.Min(capacity, remain));
+    }
+
     // Whether p came straight from a mint over a MANAGED box and holds an address for it: FromBox, FromBoxObject or
     // FromPinnedBox over storage that has one. Such a pointer names its source at offset 0 by construction, because
     // every derivation replaces the source (Add carries the native box NativeDerivation.Moved made). A zerobase

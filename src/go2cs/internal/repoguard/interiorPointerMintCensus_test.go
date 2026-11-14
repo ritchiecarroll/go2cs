@@ -146,6 +146,7 @@ var nativeMints = map[string]interiorMintRow{
 	mintGolib + "ж.cs|FromNumber":          {1, "carries: the box an exact address resolved to, else NativeDerivation.Kept of what the pointer carried (design 4.1)"},
 	mintUnsafe + "unsafe.cs|Add":           {1, "carries: NativeDerivation.Kept of the typed pointer it moves"},
 	mintUnsafe + "unsafe.cs|Slice":         {1, "carries: the anchor for NativeDerivation.Kept of the pointer"},
+	mintUnsafe + "unsafe.cs|Window":        {1, "carries: the anchor for NativeDerivation.Kept of the typed pointer the view door resolved (array-pointer doors, 4.3)"},
 }
 
 // ---- arm 2: two-word pointers
