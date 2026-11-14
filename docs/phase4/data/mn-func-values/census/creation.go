@@ -327,6 +327,11 @@ func creationCensus(prog *ssa.Program, all map[*ssa.Function]bool, graph *callgr
 				verdict = "partial"
 			}
 
+			// Shape (a): a call through a callback-only parameter is a FALLBACK by rule (plain, warned), never awaited.
+			if call, isCall := site.(*ssa.Call); isCall && optOutCallbacks && isCallbackOnlyCall(call, optOnly) {
+				verdict = "fallback(opt-out)"
+			}
+
 			callerKind := creationKind(fn, parks)
 			entered := entry(fn, graph, parks)
 			entries[entered]++
@@ -376,7 +381,7 @@ func creationCensus(prog *ssa.Program, all map[*ssa.Function]bool, graph *callgr
 	total := len(rows)
 	fmt.Printf("CREATION CENSUS prefix=%s: %d can-park func-value call sites\n", prefix, total)
 
-	for _, v := range []string{"covered", "partial", "uncovered", "no-creation-found"} {
+	for _, v := range []string{"covered", "partial", "uncovered", "no-creation-found", "fallback(opt-out)"} {
 		fmt.Printf("  %-18s %d\n", v, verdicts[v])
 	}
 

@@ -215,6 +215,7 @@ func main() {
 	flag.BoolVar(&staticOnly, "static-only", false, "propagate through static calls only: the lower bound (the default, through VTA's dynamic edges too, is the upper)")
 	flag.BoolVar(&factoriesArm, "factories-arm", false, "with -seed-factories: a value counts as can-park when it is in the arm's set (seeded closures too), to a fixpoint")
 	flag.BoolVar(&seedFactories, "seed-factories", false, "fix 1: a function creating a really-parking value as a func value gets a (synchronous) twin; it does not propagate")
+	flag.BoolVar(&optOutCallbacks, "opt-out-callbacks", false, "N3 shape (a): a function whose every func-value call is through its own callback-only parameters takes no caller-rule twin; those sites fall back")
 	flag.BoolVar(&seedLeafOnly, "seed-leaf-only", false, "with -seed-func-calls: seeds are twinned but do not propagate to their callers")
 	seedFuncCalls := &seedFuncValueCalls
 	flag.BoolVar(seedFuncCalls, "seed-func-calls", false, "N3's caller-local 1' rule: a function with a direct call through a func value (not go, not defer) is seeded as parking, then propagates like a parker")
@@ -297,10 +298,14 @@ func main() {
 		baseParks[fn] = true
 	}
 
+	if optOutCallbacks {
+		optOnly = callbackOnlyParams(all)
+	}
+
 	if *seedFuncCalls {
 		queue = nil
 		for fn := range all {
-			if inRuntimeFamily(fn) || parks[fn] || !callsFuncValue(fn) {
+			if inRuntimeFamily(fn) || parks[fn] || !callsFuncValue(fn) || optOutCallbacks && !seedsUnderOptOut(fn, optOnly) {
 				continue
 			}
 
@@ -375,6 +380,10 @@ func main() {
 		}
 
 		fmt.Printf("TWINNED %d of %d declared (closure); %s %d of %d; twinned SSA instructions %d\n", twinned, declared, *creation, prefixTwinned, prefixDeclared, instrs)
+		if optOutCallbacks {
+			reportOptOut(prog, all, graph, optOnly, baseParks, *creation)
+		}
+
 		creationCensus(prog, all, graph, baseParks, parks, *creation, *creationOut)
 		return
 	}
@@ -483,7 +492,10 @@ func main() {
 	fmt.Printf("canpark %s goos=%s exclude-runtime=%v long-only=%v static-only=%v no-func-values=%v\n", strings.Join(patterns, " "), *goos, *excludeRuntime, longOnly, staticOnly, noFuncValues)
 	fmt.Printf("FUNCTIONS %d can-park %d share %.1f%% (direct parkers %d)\n", rep.Functions, rep.CanPark, 100*rep.Share, rep.DirectParkers)
 	fmt.Printf("DIRECT BY LEAF %v\n", byLeaf)
-	fmt.Printf("SEEDS (-seed-func-calls=%v leaf-only=%v) %d, declared %d; CAN-PARK SSA INSTRUCTIONS %d\n", *seedFuncCalls, seedLeafOnly, seeds, seedsDeclared, twinInstrs)
+	fmt.Printf("SEEDS (-seed-func-calls=%v leaf-only=%v opt-out=%v) %d, declared %d; CAN-PARK SSA INSTRUCTIONS %d\n", *seedFuncCalls, seedLeafOnly, optOutCallbacks, seeds, seedsDeclared, twinInstrs)
+	if optOutCallbacks {
+		reportOptOut(prog, all, graph, optOnly, baseParks, "")
+	}
 	fmt.Printf("CLOSURES %d can-park %d\n", rep.Closures, rep.ClosuresCanPark)
 	fmt.Printf("GO STATEMENTS %d can-park %d unresolved %d\n", rep.GoStatements.Total, rep.GoStatements.CanPark, rep.GoStatements.Unresolved)
 	fmt.Printf("INTERFACE CALLS %d can-park %d unresolved %d\n", rep.InterfaceCalls.Total, rep.InterfaceCalls.CanPark, rep.InterfaceCalls.Unresolved)

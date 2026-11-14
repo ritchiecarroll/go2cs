@@ -363,3 +363,44 @@ first: the rule is not acceptable as the default above x1.25 on either runtime.
 Code-ready now, after the S1 merge into this line (batch 302 landed S1 on master at `314e1d8b60`): fixes 2, 3, 5,
 6. Waiting on the ruling: the caller rule (10.3's (a) or (b)) and
 fix 4 as 10.4 restates it.
+
+## 11. Shape (a) measured (dated block, 2026-11-14 02:15 CST, G)
+
+> COORD's ruling on section 10: measure shape (a) before ruling between it and (b). (a) is the propagating caller
+> rule, with the hoisted pair test and an OPT-OUT for callback-only callers: a func-value parameter that is only
+> called, or passed on to a callback-only parameter of a static callee (to a fixpoint), never stored, returned,
+> sent, captured or handed to a goroutine. A function whose every func-value call goes through such parameters takes
+> no caller-rule twin; those sites fall back, warned once per function. Same instrument, reach and cuts as section
+> 10, with fix 1 keyed on the rule's own set. Predictions first; data in
+> [`data/mn-func-values/growth/a/`](data/mn-func-values/growth/a/).
+
+| | propagating + fix 1 (10.2) | shape (a) |
+|---|--:|--:|
+| net/http closure: twinned (of 8,647) | 3,371 (39.0%) | 2,919 (33.8%) |
+| net/http: awaited, transitive (of 31) | 28 | 11 |
+| net/http: holes of the rule's own | 0 | 12 |
+| TypeScript: twinned (of 16,881) | 9,307 (55.1%) | 8,315 (49.3%) |
+| TypeScript: awaited, transitive (of 18) | 16 | 5 |
+| TypeScript: holes of the rule's own | 0 | 7 |
+
+- **The opt-out saves 11-13% of the twins and gives up most of the coverage.** The twin share stays near the
+  propagating number (33.8% against 39.0%; 49.3% against 55.1%), which is the condition COORD named for falling
+  back to (b).
+- **It opts out the motivating site.** `(net/http.HandlerFunc).ServeHTTP`'s receiver `f` is a parameter that is
+  only called, so the site N3 exists for falls back under (a).
+- **What it gives up, named.** In net/http's closure 235 functions are opted out wholly and 14 in part, turning 379
+  call sites into fallbacks; 128 of them are reached by a value that really parks. The carriers: `cryptobyte`'s
+  `callContinuation` 64 (VTA-imprecise), `(*log.Logger).output` 12, `(*sync.Once).doSlow` 11,
+  `fips140.WithoutEnforcement` 6, `http2serverConn.runHandler` 5, and `HandlerFunc.ServeHTTP` 2. In TypeScript, 649
+  functions wholly and 18 in part turn 1,010 sites into fallbacks, 94 of them parking-reached: `(*sync.Once).doSlow`
+  10, `compiler.GetDiagnosticsOfAnyProgram$1` 8, `tsoptions.ParsedCommandLine.GetOutputFileNames$1` 8, the
+  `strings` sequence iterators' closures (`splitSeq$1` 6, `FieldsSeq$1` 4, `FieldsFuncSeq$1` 4), and more. A
+  fallback runs the callback's PLAIN body, so a twinned callback reached through an opted-out caller is holed: that
+  is where (a)'s 12 and 7 holes come from.
+- **The sort bench under (a), without a new run.** `slices.SortFunc` is opted out (`slices.pdqsortCmpFunc[...]`
+  only calls and passes on `cmp`), so it runs plain, x1.00. `sort.Slice` is NOT: it stores `less` in a `lessSwap`
+  struct, and `pdqsort_func` calls `data.Less` through a field, so it stays twinned and keeps the hoisted
+  x1.17-x1.25 of 10.3, at the line.
+- **Predictions, scored:** twins in net/http's closure TRUE (2,919 in 2,400..3,100); awaited FALSE (11, not
+  24..28); holes FALSE (12, not 0); TypeScript FALSE (8,315 above 4,000..8,000; awaited 5, not 12..16); the
+  opt-out's real cost TRUE (128, far over the 5 predicted); the sort bench under (a) TRUE.
