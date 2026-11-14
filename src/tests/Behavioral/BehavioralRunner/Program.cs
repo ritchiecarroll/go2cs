@@ -57,6 +57,11 @@ namespace BehavioralRunner
         // HasBestEffort` at each site: the next status of this kind must reach every such caller by
         // being added here, not by being remembered at four call sites.
         public bool HasUnmeasured => HasTimeout || HasBestEffort;
+
+        // A main program whose Output phase was skipped because its package_info.cs carries no
+        // [GoTestMatchingConsoleOutput]: it transpiled and compiled, and its output was never compared
+        // with Go's. Not a Status: the phase is a skip like any other, and this says which skip it was.
+        public bool NotCompared { get; set; }
     }
 
     internal static class Runner
@@ -1033,7 +1038,7 @@ namespace BehavioralRunner
         private static void RunOutputComparison(IReadOnlyList<string> projects, Dictionary<string, ProjectResult> results)
         {
             Console.Write($"[Output]   running C# vs Go, comparing exit code + stdout... ");
-            int failed = 0, compared = 0, timeouts = 0;
+            int failed = 0, compared = 0, timeouts = 0, notCompared = 0;
 
             foreach (string p in projects)
             {
@@ -1104,6 +1109,17 @@ namespace BehavioralRunner
                 if (!MatchConsoleOutput(p))
                 {
                     results[p].Phases[Phase.Output] = Status.Skip;
+
+                    // A library has no program to run, so its skip says nothing. A main program's does: its
+                    // output was never compared with Go's, and Report names it rather than letting the skip
+                    // count under a PASS (BOARD 2026-11-12, G: a --filter run of such a program read PASS).
+                    if (IsMainProgram(p))
+                    {
+                        results[p].NotCompared = true;
+                        results[p].Messages.Add("NOT COMPARED: a main program without [GoTestMatchingConsoleOutput] in its package_info.cs, so its output was not compared with Go's");
+                        notCompared++;
+                    }
+
                     continue;
                 }
 
@@ -1262,7 +1278,7 @@ namespace BehavioralRunner
                 }
             }
 
-            Console.WriteLine($"{compared} compared, {failed} failed{(timeouts > 0 ? $", {timeouts} NOT MEASURED (timed out)" : "")}");
+            Console.WriteLine($"{compared} compared, {failed} failed{(timeouts > 0 ? $", {timeouts} NOT MEASURED (timed out)" : "")}{(notCompared > 0 ? $", {notCompared} NOT COMPARED" : "")}");
         }
 
         // Copies each project's freshly transpiled .cs over its .cs.target golden. Only projects whose
@@ -1491,6 +1507,16 @@ namespace BehavioralRunner
                    File.ReadLines(packageInfo).Any(l => l.Trim() == "[GoTestMatchingConsoleOutput]");
         }
 
+        // A main program: the converter stamps its package class [GoPackage("main")]; a library's stamp names
+        // the library (and carries ImportPath).
+        private static bool IsMainProgram(string project)
+        {
+            string packageInfo = Path.Combine(s_behavioralDir, project, "package_info.cs");
+
+            return File.Exists(packageInfo) &&
+                   File.ReadLines(packageInfo).Any(l => l.Trim() == "[GoPackage(\"main\")]");
+        }
+
         private static bool FilesEqual(string a, string b)
         {
             // Compare with line endings normalized (CRLF -> LF). Since 2026-10-14 the converter writes every
@@ -1621,7 +1647,32 @@ namespace BehavioralRunner
                     Console.WriteLine($"  {m}");
             }
 
+            // Main programs whose output was never compared (ProjectResult.NotCompared). A project that broke
+            // or went unmeasured elsewhere is already in a roster above, where that is the actionable fact.
+            List<ProjectResult> notCompared = all.Where(r => r.NotCompared && !r.HasFail && !r.HasUnmeasured).ToList();
+
+            if (notCompared.Count > 0)
+            {
+                Console.WriteLine();
+                Console.WriteLine($"---- {notCompared.Count} main program(s) NOT COMPARED ----");
+                Console.WriteLine("  Each transpiled and compiled, and its output was not compared with Go's: its package_info.cs");
+                Console.WriteLine("  has no [GoTestMatchingConsoleOutput]. This run proves nothing about its behavior.");
+
+                foreach (ProjectResult r in notCompared.OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase).Take(20))
+                    Console.WriteLine($"  {r.Name}");
+
+                if (notCompared.Count > 20)
+                    Console.WriteLine($"  ... and {notCompared.Count - 20} more.");
+            }
+
             bool ok = failures.Count == 0 && notMeasured.Count == 0 && s_goBuildFailures.Count == 0;
+
+            // A run whose Output phase compared nothing -- every program it reached was NOT COMPARED -- is not a
+            // green: it is a vacuous one, and reads FAIL for the reason "NOT MEASURED" does. A run that compared
+            // some programs and left others uncompared stays a PASS, with the count in its headline and the names
+            // in the roster above.
+            bool anyOutputMeasured = all.Any(r => r.Phases.TryGetValue(Phase.Output, out Status s) && s != Status.Skip);
+            bool vacuous = ok && notCompared.Count > 0 && !anyOutputMeasured;
 
             // The headline distinguishes the two, because they call for opposite responses: a real
             // failure is investigated, an unmeasured run is re-run with a bigger budget. The arms key
@@ -1629,14 +1680,16 @@ namespace BehavioralRunner
             // s_goBuildFailures to be empty for the "purely unmeasured" arm, which meant a run whose
             // only problem was expired `go build` budgets fell through to the mixed arm and announced
             // the self-contradictory "FAIL (0 failing, N not measured)".
-            string verdict = ok ? "PASS"
+            string verdict = vacuous ? $"FAIL (NOT COMPARED: {notCompared.Count}, no program's output was compared)"
+                : ok && notCompared.Count > 0 ? $"PASS ({notCompared.Count} NOT COMPARED)"
+                : ok ? "PASS"
                 : failures.Count == 0 && notMeasured.Count > 0 ? $"FAIL (NOT MEASURED: {notMeasured.Count})"
                 : notMeasured.Count > 0 ? $"FAIL ({failures.Count} failing, {notMeasured.Count} not measured)"
                 : "FAIL";
 
             Console.WriteLine();
             Console.WriteLine($"{verdict}  ({all.Count} projects, {elapsed.TotalSeconds:N1}s)");
-            return ok ? 0 : 1;
+            return ok && !vacuous ? 0 : 1;
         }
 
         // Returns null on any unrecognized token or an empty result, which the caller turns into a
@@ -1715,7 +1768,12 @@ namespace BehavioralRunner
                   a budget is reported as NOT MEASURED, never as a compile or behavioral failure, but it
                   still fails the run -- an unmeasured project must not read as a pass.
 
-                Exit code 0 = all matched projects pass; 1 = at least one failure or unmeasured project;
+                A main program without [GoTestMatchingConsoleOutput] is named NOT COMPARED: its output is not
+                compared with Go's. A run that compared some output and left such programs uncompared reads
+                "PASS (N NOT COMPARED)"; a run in which no output was compared at all reads FAIL.
+
+                Exit code 0 = all matched projects pass; 1 = at least one failure or unmeasured project, or a run
+                whose Output phase compared nothing because every program reached was NOT COMPARED;
                 2 = usage error.
                 """);
         }

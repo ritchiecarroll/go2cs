@@ -59,6 +59,7 @@ using static go.main_package;
 namespace go;
 
 [GoPackage("main")]
+// Cannot test matching console output, go routine output order is non-deterministic
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the
