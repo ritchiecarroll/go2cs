@@ -1,3 +1,0 @@
-shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs	run	wall_s	cells
-TRACE-NS	internal/trace	osx-arm64	187	185	2	2	0	validated	yes	187	0	-	yes	43598839509	534	read
-TRACE-NS	internal/trace	osx-x64	187	186	1	1	0	validated	yes	187	0	-	yes	43598839509	1305	read

@@ -2038,7 +2038,11 @@ function Test-CapabilityAbsentDelta {
 # What it accepts, and only that: the matched count SHORT of the floor by k >= 1, the disclosed
 # count OVER its expectation by exactly the same k, exactly k of the annotation's names present
 # among the live record's disclosures, and each of those reading Go=pass / C#=skip in the verdict
-# maps -- the platform-skip shape this member was measured in. A lost verdict beside a fired one
+# maps -- the platform-skip shape this member was measured in -- or Go=skip / C#=pass, its mirror
+# (2026-11-14: internal/trace's TestTraceCPUProfile subtests run one native Go program on both sides,
+# and on the hosted macs either side's run can skip; the comparator discloses that mirror only for an
+# entry pinned on Go's skip text with skipEitherSide, so a row cannot reach it by naming alone). A
+# lost verdict beside a fired one
 # (85 + 2), a second disclosure the annotation does not name (86 + 3, or 86 + 2 with another name),
 # and a fired name in any other shape (Go=pass / C#=fail) are all refused by name. Evidence is the
 # live comparison record ALONE: the surplus rule's committed-proof-page cross-check rejects
@@ -2094,8 +2098,13 @@ function Test-HostConditionalDisclosureDelta {
         if (-not $goMap.ContainsKey($name) -or -not $csMap.ContainsKey($name)) {
             return New-HostConditionalDisclosureResult $false @() "$name is disclosed but absent from the verdict maps"
         }
-        if ($goMap[$name] -ne 'pass' -or $csMap[$name] -ne 'skip') {
-            return New-HostConditionalDisclosureResult $false @() "$name fired in the shape Go=$($goMap[$name]) / C#=$($csMap[$name]); the host-conditional disclosure shape is Go=pass / C#=skip and nothing else is absorbed"
+        # Go=pass / C#=skip is the platform-skip shape; Go=skip / C#=pass is its mirror, which the
+        # comparator discloses only for an entry pinned on Go's own skip text with skipEitherSide
+        # (internal/trace's TestTraceCPUProfile subtests on darwin). Either way one verdict changed
+        # column and both sides agree it was a skip; any fail is refused.
+        $firedShape = "$($goMap[$name])/$($csMap[$name])"
+        if ($firedShape -ne 'pass/skip' -and $firedShape -ne 'skip/pass') {
+            return New-HostConditionalDisclosureResult $false @() "$name fired in the shape Go=$($goMap[$name]) / C#=$($csMap[$name]); the host-conditional disclosure shapes are Go=pass / C#=skip and Go=skip / C#=pass, and nothing else is absorbed"
         }
     }
 

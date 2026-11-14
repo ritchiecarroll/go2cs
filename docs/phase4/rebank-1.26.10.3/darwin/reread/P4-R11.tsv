@@ -1,0 +1,5 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs	run	wall_s	cells
+P4-R11	internal/synctest	osx-arm64	58	58	1	0	0	validated	yes	59	0	58/1/False	yes	43620172118	228	read
+P4-R11	internal/synctest	osx-x64	58	58	1	0	0	validated	yes	59	0	58/1/False	yes	43620172118	539	read
+P4-R11	internal/trace	osx-arm64	187	187	0	0	0	validated	yes	187	0	185/2/False	no	43620172118	390	read
+P4-R11	internal/trace	osx-x64	187	187	0	0	0	validated	yes	187	0	186/1/False	no	43620172118	274	read

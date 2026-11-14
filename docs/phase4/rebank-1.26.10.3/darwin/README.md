@@ -263,25 +263,24 @@ the seam's head, above, which batch 280 landed. The other three rows have no ear
 undisclosed count. `win_differs` compares the reading with the windows columns, since these rows carried no darwin
 segment.
 
-## The internal/synctest host-fatal read on claude/p4-darwin-synctest (`reread/SYNC-HF.tsv`, COORD 2026-11-14)
+## internal/synctest and internal/trace on claude/p4-trace-skip-both (`reread/P4-R11.tsv`, COORD 2026-11-14)
 
-One row on both RIDs, os-matrix sweep-shard run 43589630577 on `claude/p4-darwin-synctest` @ c3818674b6 (master
-314e1d8b60 plus the seat). The seat adds a darwin-scoped `host-fatal` entry for `TestWaitGroupManyBubbles`, the class (c)
-thread-cap death above, and lets the mint rule honour an entry's platform scope. Both RIDs read "status validated;
-matched 58 of 58 Go / 58 C# verdicts; disclosed 1; undisclosed divergences 0" (osx-arm64 236 s, osx-x64 454 s), so the
-row banks `darwin: 58 + 1`. Before the seat, at master (run 43586434174), both RIDs read "matched 56 of 59 Go / 58 C#",
-as at 1.26.10.3. The withdrawal retires when M:N scheduling lands; the row is then re-read on both RIDs.
+The reading of record is os-matrix sweep-shard run 43620172118 on `claude/p4-trace-skip-both` @ b2b6f309fd (the two
+seats merged with master ffaafa144f, go1.26.11), both RIDs.
 
-## The internal/trace native-subprocess read on claude/p4-trace-skip-both (`reread/TRACE-NS.tsv`, COORD 2026-11-14)
-
-One row on both RIDs, os-matrix sweep-shard run 43598839509 on `claude/p4-trace-skip-both` @ 4c946e5cad (master
-c978595f0c plus the seat). `TestTraceCPUProfile`'s subtests build and run one native Go program on both sides, and it
-sometimes records no `tracing=on` sample in its 100 ms window on the hosted macs, on either side. The seat adds a
-`skipEitherSide` admission to the comparator and darwin-scoped `host-identity` entries for `Default` and
-`AsyncPreemptOff`, pinned on Go's skip message. osx-arm64 reads "status validated; matched 185 of 187 Go / 187 C#
-verdicts; disclosed 2; undisclosed divergences 0" (Default Go=skip / C#=pass, AsyncPreemptOff Go=pass / C#=skip: both
-directions in one read), and osx-x64 "matched 186 of 187 ...; disclosed 1" (AsyncPreemptOff Go=pass / C#=skip; Default
-skipped on both sides). The arch-strict form banks the RID with more disclosures: `darwin: 185 + 2 (osx-arm64; osx-x64:
-186 + 1)`. The split moves from read to read (rate: the sides disagree in 7 of 12 runs per RID).
+- **internal/synctest** reads "status validated; matched 58 of 58 Go / 58 C# verdicts; disclosed 1" on both RIDs and
+  banks `darwin: 58`. The seat adds a darwin-scoped `host-fatal` entry for `TestWaitGroupManyBubbles`, the class (c)
+  thread-cap death above, and lets the mint rule honour an entry's platform scope. A host-fatal entry is withdrawn from
+  both sides and sits in the comparison record's disclosed column only, never in the converter's disclosed-divergent
+  count that a segment's `+ D` is, so the divergent column is 0. The first read (run 43589630577 at c3818674b6) said the
+  same and was banked as 58 + 1 by mistake; the go1.26.11 sweep read that as DISC (58, disclosed 0 vs 1).
+  Before the seat, at master (run 43586434174), both RIDs read "matched 56 of 59 Go / 58 C#", as at 1.26.10.3.
+- **internal/trace** reads "matched 187 of 187 Go / 187 C# verdicts; disclosed 0" on both RIDs and banks the floor,
+  `darwin: 187`, with `TestTraceCPUProfile/Default` and `/AsyncPreemptOff` named as host-conditional disclosures.
+  Both subtests run one native Go program on both sides, and on the hosted macs that program sometimes records no
+  `tracing=on` sample and skips, on either side; the seat's `skipEitherSide` entries disclose either direction pinned
+  on Go's skip text. The sweep absorbs a read where k of them fire (187 - k + k), in either skip direction. The
+  first read (run 43598839509 at 4c946e5cad) was 185 + 2 on osx-arm64 and 186 + 1 on osx-x64; banking that split
+  made this read DISC, which is why the floor form is used.
 
 <!-- {% endraw %} -->
