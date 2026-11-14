@@ -322,7 +322,7 @@ public static void TestClientConnReserveAndConsume(ж<testing.T> t) {
                         }
                     };
 
-                    var (_, cc) = newClientConnTest(new http_test_package.testing_TжTB(tΔ7), mode, new Δhttp.HandlerFunc(handler), optFakeNet.OrTypedNil());
+                    var (_, cc) = newClientConnTest(new http_test_package.testing_TжTB(tΔ7), mode, NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(handler), optFakeNet.OrTypedNil());
                     nint stateHookCalls = 0;
                     cc.SetStateHook((ж<Δhttp.ClientConn> ccΔ1) => {
                         stateHookCalls++;
@@ -412,7 +412,7 @@ internal static partial void testClientConnRoundTripBlocks(ж<testing.T> t, test
         ᏑhandlerCalls.Add(1);
         ᐸꟷ(requestcʗ1);
     };
-    var (_, cc) = newClientConnTest(new http_test_package.testing_TжTB(t), mode, new Δhttp.HandlerFunc(handler), optFakeNet.OrTypedNil(), (ж<Δhttp.Server> s) => {
+    var (_, cc) = newClientConnTest(new http_test_package.testing_TжTB(t), mode, NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(handler), optFakeNet.OrTypedNil(), (ж<Δhttp.Server> s) => {
         s.HTTP2 = Ꮡ(new Δhttp.HTTP2Config(
             MaxConcurrentStreams: 3
         ));

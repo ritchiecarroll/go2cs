@@ -613,11 +613,16 @@ func TestCSharpSourceBadgeOmittedWithoutAPublishedVersion(t *testing.T) {
 	})
 }
 
-// The badge paragraph is the four badges in order — Tests, Docs, then the Source pair in
-// convert-from → convert-to order — over TWO lines: Tests and Docs share the first (Tests is the
-// variable-width badge and gets the room), the Source pair the second, and a trailing-backslash hard
-// break joins them so a narrow renderer breaks where the meaning does. The whole thing collapses to
-// nothing when no badge can be composed, which keeps a context-less conversion's README as it was.
+// readmeGo2csBadge is the converted-by-go2cs badge, pinned as a literal for the same reason the break
+// is: the constant is the thing under test.
+const readmeGo2csBadge = "[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net)"
+
+// The badge paragraph is the five badges in order — converted-by-go2cs, Tests, Docs, then the Source
+// pair in convert-from → convert-to order — over TWO lines: go2cs, Tests and Docs share the first
+// (Tests is the variable-width badge and gets the room), the Source pair the second, and a
+// trailing-backslash hard break joins them so a narrow renderer breaks where the meaning does. The
+// go2cs badge needs no input, so it is always there: with nothing else composable the paragraph is
+// that badge alone.
 //
 // The break form is pinned as a literal rather than through badgeLineBreak: the constant is the thing
 // under test, and a two-trailing-spaces (or `<br/>`) substitution has to fail here.
@@ -637,7 +642,8 @@ func TestReadmeBadgeParagraphSplitsTestsDocsFromBothSources(t *testing.T) {
 		t.Skip("the Go toolchain version is not resolvable")
 	}
 
-	expected := "[![Tests](https://img.shields.io/badge/Tests-59_matched_%2F_2_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/io.html)" +
+	expected := readmeGo2csBadge + " " +
+		"[![Tests](https://img.shields.io/badge/Tests-59_matched_%2F_2_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/io.html)" +
 		" " + fmt.Sprintf("[![Docs](https://img.shields.io/badge/Docs-@%s-00ADD8?logo=go)](https://pkg.go.dev/io@go%s)", goVersion(), goVersion()) +
 		"\\\n" + fmt.Sprintf("[![Source](https://img.shields.io/badge/Source-@%s-00ADD8?logo=go)](https://github.com/golang/go/tree/go%s/src/io)", goVersion(), goVersion()) +
 		" " + "[![Source](https://img.shields.io/badge/Source-@1.23.1.2-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.23.1.2/src/core/io)"
@@ -673,21 +679,21 @@ func TestReadmeBadgeParagraphSplitsTestsDocsFromBothSources(t *testing.T) {
 	}
 
 	// The repository badges and the toolchain badges fail independently. An unseeded reconvert (no
-	// version.props, no docs tree) keeps Docs and Source·Go and drops Tests and Source·C# — one badge
-	// on each line, so the break survives with a single badge either side of it. Pinned whole: this is
-	// the degraded shape a temp-root reconvert emits, and it must not grow a stray break or an empty
-	// line at either end.
-	unseededExpected := fmt.Sprintf("[![Docs](https://img.shields.io/badge/Docs-@%s-00ADD8?logo=go)](https://pkg.go.dev/io@go%s)", goVersion(), goVersion()) +
+	// version.props, no docs tree) keeps go2cs, Docs and Source·Go and drops Tests and Source·C#, so
+	// the break survives between the two lines. Pinned whole: this is the degraded shape a temp-root
+	// reconvert emits, and it must not grow a stray break or an empty line at either end.
+	unseededExpected := readmeGo2csBadge + " " +
+		fmt.Sprintf("[![Docs](https://img.shields.io/badge/Docs-@%s-00ADD8?logo=go)](https://pkg.go.dev/io@go%s)", goVersion(), goVersion()) +
 		"\\\n" + fmt.Sprintf("[![Source](https://img.shields.io/badge/Source-@%s-00ADD8?logo=go)](https://github.com/golang/go/tree/go%s/src/io)", goVersion(), goVersion())
 
 	if unseeded := readmeBadgeLine(t.TempDir(), "io", sourceDir, Options{goRoot: goRoot}); unseeded != unseededExpected {
 		t.Fatalf("unseeded badge paragraph mismatch\n got: %q\nwant: %q", unseeded, unseededExpected)
 	}
 
-	// No badge composable at all — no repository context AND no GOROOT — is an empty paragraph, not a
-	// stray separator or a lone break.
-	if line := readmeBadgeLine(t.TempDir(), "io", sourceDir, Options{}); line != "" {
-		t.Fatalf("expected an empty badge paragraph, got: %q", line)
+	// Nothing else composable — no repository context AND no GOROOT — is the go2cs badge alone: one
+	// line, no stray separator, no lone break.
+	if line := readmeBadgeLine(t.TempDir(), "io", sourceDir, Options{}); line != readmeGo2csBadge {
+		t.Fatalf("expected the go2cs badge alone\n got: %q\nwant: %q", line, readmeGo2csBadge)
 	}
 }
 
@@ -703,35 +709,86 @@ func TestReadmeBadgeParagraphDegradesToOneLineWithoutAStrayBreak(t *testing.T) {
 	// FIRST LINE ONLY. A conversion whose output sits under a go2cs root but outside its core/ (a
 	// -recurse conversion) can compose Tests from the repository, but has no place in the go2cs
 	// repository for Source·C#; with no GOROOT resolved, neither toolchain badge composes either.
-	t.Run("tests only", func(t *testing.T) {
+	t.Run("go2cs and tests only", func(t *testing.T) {
 		root, _ := badgeTree(t, "io", "1.23.1.2")
 		outside := filepath.Join(root, "app", "mypkg")
 		mustMkdirAll(t, outside)
 		addProofPage(t, root, "io", 59, 2)
 		mustWriteFile(t, filepath.Join(outside, "io"+testProjectFileSuffix), "<Project />")
 
-		const expected = "[![Tests](https://img.shields.io/badge/Tests-59_matched_%2F_2_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/io.html)"
+		const expected = readmeGo2csBadge + " " + "[![Tests](https://img.shields.io/badge/Tests-59_matched_%2F_2_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/io.html)"
 
 		if line := readmeBadgeLine(outside, "io", "", Options{}); line != expected {
 			t.Fatalf("first-line-only paragraph mismatch\n got: %q\nwant: %q", line, expected)
 		}
 	})
 
-	// SECOND LINE ONLY. The one shape where Source·Go outlives the Docs badge beside it: a vendored
-	// package with no modules.txt entry has no pinnable documentation URL (Docs says nothing) while
-	// its GOROOT tree link is fully pinned by the Go release alone. Outside any go2cs root, so
-	// neither repository badge composes and the Source pair is alone on the second line.
-	t.Run("go source only", func(t *testing.T) {
+	// THE GO2CS BADGE ALONE ON THE FIRST LINE. The one shape where Source·Go outlives the Docs badge
+	// beside it: a vendored package with no modules.txt entry has no pinnable documentation URL (Docs
+	// says nothing) while its GOROOT tree link is fully pinned by the Go release alone. Outside any
+	// go2cs root, so neither repository badge composes: the go2cs badge holds the first line by
+	// itself, and the break still joins it to the Source badge on the second.
+	t.Run("go2cs and go source only", func(t *testing.T) {
 		goRoot := goRootWithVendor(t, goRootVendorModules)
 		sourceDir := filepath.Join(goRoot, "src", "vendor", "golang.org", "x", "net", "idna")
 		mustMkdirAll(t, sourceDir)
 
-		expected := fmt.Sprintf("[![Source](https://img.shields.io/badge/Source-@%s-00ADD8?logo=go)](https://github.com/golang/go/tree/go%s/src/vendor/golang.org/x/net/idna)", goVersion(), goVersion())
+		expected := readmeGo2csBadge + "\\\n" + fmt.Sprintf("[![Source](https://img.shields.io/badge/Source-@%s-00ADD8?logo=go)](https://github.com/golang/go/tree/go%s/src/vendor/golang.org/x/net/idna)", goVersion(), goVersion())
 
 		if line := readmeBadgeLine(t.TempDir(), "golang.org.x.net.idna", sourceDir, Options{goRoot: goRoot}); line != expected {
-			t.Fatalf("second-line-only paragraph mismatch\n got: %q\nwant: %q", line, expected)
+			t.Fatalf("go2cs-and-source paragraph mismatch\n got: %q\nwant: %q", line, expected)
 		}
 	})
+}
+
+// The converted-by-go2cs badge is the FIRST badge of the FIRST line of a written README — before
+// Tests and Docs — and the attribution blockquote above it is untouched. Read from the file the writer
+// produces, so the placement is pinned where a reader meets it rather than only in the composer.
+func TestReadmeLeadsItsBadgeLineWithTheGo2csBadge(t *testing.T) {
+	root, projectPath := badgeTree(t, "io", "1.23.1.2")
+
+	addProofPage(t, root, "io", 59, 2)
+	mustWriteFile(t, filepath.Join(projectPath, "io"+testProjectFileSuffix), "<Project />")
+
+	goRoot := goRootWithVendor(t, goRootVendorModules)
+	sourceDir := filepath.Join(goRoot, "src", "io")
+	mustMkdirAll(t, sourceDir)
+
+	if err := writeReadmeFile(projectPath, "io", "", sourceDir, "", Options{goRoot: goRoot}); err != nil {
+		t.Fatalf("writeReadmeFile: %v", err)
+	}
+
+	contents, err := os.ReadFile(filepath.Join(projectPath, "README.md"))
+
+	if err != nil {
+		t.Fatalf("read README: %v", err)
+	}
+
+	lines := strings.Split(strings.ReplaceAll(string(contents), "\r\n", "\n"), "\n")
+
+	if len(lines) < 5 {
+		t.Fatalf("README too short: %q", string(contents))
+	}
+
+	if lines[2] != "> C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs)." {
+		t.Fatalf("the attribution blockquote moved or changed: %q", lines[2])
+	}
+
+	badgeLine := lines[4]
+
+	if !strings.HasPrefix(badgeLine, readmeGo2csBadge+" [![Tests]") {
+		t.Fatalf("the first badge line does not lead with the go2cs badge, then Tests: %q", badgeLine)
+	}
+
+	if strings.Count(string(contents), readmeGo2csBadge) != 1 {
+		t.Fatalf("expected exactly one go2cs badge in the README: %q", string(contents))
+	}
+
+	for _, kept := range []string{"[![Tests]", "[![Docs]", "[![Source]"} {
+		if !strings.Contains(badgeLine+lines[5], kept) {
+			t.Fatalf("a badge was lost from the paragraph (%s): %q / %q", kept, badgeLine, lines[5])
+		}
+	}
 }
 
 // The census predicate — the rule the roster's own denominator is built on — applied to package

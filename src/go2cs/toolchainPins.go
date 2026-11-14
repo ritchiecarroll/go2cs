@@ -18,7 +18,7 @@
 
 package main
 
-const pinnedGoVersion = "go1.26.10"
+const pinnedGoVersion = "go1.26.11"
 
 type goArchivePin struct {
 	file   string
@@ -26,19 +26,19 @@ type goArchivePin struct {
 }
 
 var pinnedGoArchives = map[string]goArchivePin{
-	"darwin-amd64":  {"go1.26.10.darwin-amd64.tar.gz", "e820ab780c273ae4a340b79d0f3c4313b74ee029aa3874792145d44b9f4f91da"},
-	"darwin-arm64":  {"go1.26.10.darwin-arm64.tar.gz", "0b5183492292ada170f9b561a834863808dd02edba599e4ad0e89899330020b3"},
-	"linux-amd64":   {"go1.26.10.linux-amd64.tar.gz", "ccfe7ae822d2c2f41f4fe7c956199967a4dac22d0ee0d2b2bfdb440aab3b20c5"},
-	"linux-arm64":   {"go1.26.10.linux-arm64.tar.gz", "3f4227ce7b206a513e794f1393adb473a07b46e94d18bd15d1c684bbb7319797"},
-	"windows-amd64": {"go1.26.10.windows-amd64.zip", "7ecd2d7260e82c59bcbd7f1077a07cee2dea607295b858df67195a1e4e09629b"},
-	"windows-arm64": {"go1.26.10.windows-arm64.zip", "6831fd8c31091243d5695c8fa3a721c9f4ae2bb36482763e77e57ee01b76489f"},
+	"darwin-amd64":  {"go1.26.11.darwin-amd64.tar.gz", "394baae971332f2bc783d6e2004ae57101479bd3b06ed8209a3fe3570d4ce498"},
+	"darwin-arm64":  {"go1.26.11.darwin-arm64.tar.gz", "e3a42e67a7a8acf450ebada2b074c7ca863000ca514907b7185b45e8f5cdff57"},
+	"linux-amd64":   {"go1.26.11.linux-amd64.tar.gz", "9849f4e04ee35303714e34fbc3ac8ab44ea3e448a95aa182f91e3b9b79c710ec"},
+	"linux-arm64":   {"go1.26.11.linux-arm64.tar.gz", "6c2f29b458b5add0835f18b776f69c8881a6d88428f1484a6da55755e620757e"},
+	"windows-amd64": {"go1.26.11.windows-amd64.zip", "71ae086f0137e665f855a811cc119152b6a783e0bbc1b906e709f46d80141eb0"},
+	"windows-arm64": {"go1.26.11.windows-arm64.zip", "a4c7e96d431ad186392a25e00db525839c6ee3840e80385e3c187e41e4f1f8d2"},
 }
 
 var pinnedGoModules = map[string]string{
-	"darwin-amd64":  "h1:0JApOD+sH1DW6WwvTcnIvl6MSylguxhQuhTbt6RJ1uo=",
-	"darwin-arm64":  "h1:SfEWw1me2He9ojf4S+M6xTnGOP6CosVO88yaBsEgjJ0=",
-	"linux-amd64":   "h1:5VAGHlY8yl8pTPVSNIez3SNMy6fWabs+QMR25f3oMT0=",
-	"linux-arm64":   "h1:TuAzKmE5TqYnXpnhgY3GtBJCVg4AfNDA/K1gLyX5Hig=",
-	"windows-amd64": "h1:ZCie1G8rYCijtritoBcOAGoxxCrhTVDHTvM423D7b/o=",
-	"windows-arm64": "h1:9xf/jE9BbIQ7N+XMyPB2VYrfuwklVAYhHD6R8GNA6BE=",
+	"darwin-amd64":  "h1:ydidkBD90rrbnDbAJQcL+jVHdCj0S3OMfLntC/we3fw=",
+	"darwin-arm64":  "h1:cGxzEKi4mhhQFd6Cz/2NSL4Y9nfIBCirzU1yn2rnOY8=",
+	"linux-amd64":   "h1:KyINmJ/FQdKRmDYGuTAAXkumyeR2DyUlSNHZj7XaLFg=",
+	"linux-arm64":   "h1:GFS9FmglLJxMwOSuun3qb8tBjpr8ibzOkt8tBrRLrnk=",
+	"windows-amd64": "h1:p3eip8fM6XzNkBf73c8nCUET3+wTI5uMdqVN4tYv32c=",
+	"windows-arm64": "h1:JWMJ+95jL52+2b456+vvcEtSWpO4TzjD2ZBZo/62E2Y=",
 }

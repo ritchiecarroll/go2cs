@@ -2830,7 +2830,7 @@ internal static void testClientCallsCloseOnlyOnce(ж<testing.T> t, testMode mode
     // Issue occurred non-deterministically: needed to occur after a successful
     // write (into TCP buffer) but before end of body.
     for (nint i = 0; i < 50 && !t.Failed(); i++) {
-        var body = Ꮡ(new issue40382Body(t: t, n: 300000));
+        var body = Ꮡ(new issue40382Body(t: t, n: (256 << 10))); // maxPostHandlerReadBytes large
         var (req, err) = NewRequest(MethodPost, cst.ts.URL, new http_test_package.issue40382BodyжReader(body));
         if (err != nil) {
             t.Fatal(err);

@@ -407,7 +407,26 @@ $editableSites = @(
         Find = '\*\*\[Go {OLD}\]\(https://go\.dev/dl/\)\*\*(?=, exactly that release)'
         Replace = '**[Go {NEW}](https://go.dev/dl/)**'
         Expect = 1
+        Retired = '62fe33bde0'
+        RetiredNote = 'the home page states the Go requirement measured: the Requirements bullet now names the release twice, in the two sites below, and links "Go 1.26" (the minor) for a source build'
         Note = 'the Requirements line -- the exact release go2cs is built with (src/go2cs/go.mod)'
+    }
+    # Re-anchored 2026-11-13 (the 1.26.10 -> 1.26.11 patch hop's H2): 62fe33bde0 rewrote the Requirements bullet,
+    # which names the release in two sentences. The source-build link names the MINOR ("Go 1.26") and moves only at
+    # a minor hop, so it is not anchored here.
+    @{
+        File = 'docs/README.md'; Class = 'DOC-STATEMENT'
+        Find = 'downloads the Go release it converts with, Go {OLD}, on first use'
+        Replace = 'downloads the Go release it converts with, Go {NEW}, on first use'
+        Expect = 1
+        Note = 'the Requirements line -- the release the dotnet tool downloads (toolchainPins.go, generated from src/go2cs/go.mod)'
+    }
+    @{
+        File = 'docs/README.md'; Class = 'DOC-STATEMENT'
+        Find = 'converted from, and validated on, Go {OLD}, and the'
+        Replace = 'converted from, and validated on, Go {NEW}, and the'
+        Expect = 1
+        Note = 'the Requirements line -- the release the standard library is converted from (<GoStdLibVersion>)'
     }
     @{
         File = 'docs/ValidatedTestPackages.md'; Class = 'DOC-STATEMENT'

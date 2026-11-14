@@ -1,0 +1,7 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	absent	divergent_names	run	wall_s	cells	same_names
+H10-L1R	crypto/internal/fips140test	linux-x64	2282	2274	8	8	0	validated	yes	-	TestEdwards25519Allocations;TestMLDSAAllocations;TestNISTECAllocations;TestNISTECAllocations/P224;TestNISTECAllocations/P256;TestNISTECAllocations/P384;TestNISTECAllocations/P521;TestXAESAllocations	43591877724	379	read	yes
+H10-L1R	crypto/internal/fips140test	linux-arm64	2282	2274	8	8	0	validated	yes	-	TestEdwards25519Allocations;TestMLDSAAllocations;TestNISTECAllocations;TestNISTECAllocations/P224;TestNISTECAllocations/P256;TestNISTECAllocations/P384;TestNISTECAllocations/P521;TestXAESAllocations	43591877724	384	read	yes
+H10-L1R	net	linux-x64	600	597	3	3	0	validated	yes	-	TestAllocs;TestIPAppendTextNoAllocs;TestTCPReadWriteAllocs	43591877724	186	read	yes
+H10-L1R	net	linux-arm64	600	597	3	3	0	validated	yes	-	TestAllocs;TestIPAppendTextNoAllocs;TestTCPReadWriteAllocs	43591877724	212	read	yes
+H10-L1R	net/http	linux-x64	1538	1538	0	0	0	validated	yes	-	-	43591877724	295	read	yes
+H10-L1R	net/http	linux-arm64	1538	1538	0	0	0	validated	yes	-	-	43591877724	333	read	yes

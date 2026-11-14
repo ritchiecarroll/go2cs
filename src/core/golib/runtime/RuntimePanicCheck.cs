@@ -46,7 +46,7 @@ namespace go.golib;
 /// exactly. No message text is read and no assembly name is guessed.
 /// </para>
 /// <para>
-/// ONE MEMBER KIND IS BESIDE THE CLASS. From 1.26.10.4 go2cs-gen writes the forwarders of a struct's same-package
+/// ONE MEMBER KIND IS BESIDE THE CLASS. From 1.26.11.1 go2cs-gen writes the forwarders of a struct's same-package
 /// promoted methods on a class of the struct's own, <c>go.runtimeᴛ&lt;Struct&gt;ᴛpkg</c>
 /// (<c>go.runtime_internal_testᴛ&lt;Struct&gt;ᴛpkg</c> for a struct of the bridge), and no longer on the package
 /// class. Go names a promoted method's wrapper <c>runtime.*</c> as well, and the forwarder's frame is the first one
