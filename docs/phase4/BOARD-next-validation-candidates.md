@@ -37930,4 +37930,44 @@ made; the `uint8` is cmd/cgo's rule as its source states it. The fixtures in `cg
 
 — P5 (2026-11-13)
 
+
+## 2026-11-14 — P2 (sqlite-cs S8c): a direct-ж method called on a named result boxes the result; footprint 0 predicted and met at three bases
+
+**Dated 2026-11-14 UTC. Seat `cf82633d2b` on master `a6cefba6ee` (batch 301), docs re-cite `9532e986ef`, merged
+with `314e1d8b60` (batch 302) as `095238264c` and with `c978595f0c` (batch 303) as `f9726527fb`; linux/amd64 box,
+go1.26.10.** sqlite-cs row S8c; the red repro is modernc.org/mathutil's `NewInt128FromFloat32`.
+
+**What was wrong.** `NewInt128FromFloat32` calls `r.SetBigInt(bi)` on its named result `r`. `SetBigInt` uses its
+receiver pointer as a value (`fmt.Errorf("%T…", x)`), so its only emitted receiver form is the box `ж<Int128>`
+(a capture-mode, direct-ж method). Go takes `&r` for the call and moves `r` to the heap. The converter declared `r`
+as a plain local, and the call failed with CS1929. `analyzeNamedResults` boxed a named result for an explicit
+`&r` and for a pointer-method value, but not for a direct-ж call on it, which the value-parameter and
+value-receiver arms already take.
+
+**Silent defect found on the way.** The value-field CHAIN form on a named result, `h.inner.Add(n)` with `Add`
+direct-ж, compiles at master as `Ꮡ(h).Ꮡinner.Add(n)`: a copy box of `h`, so the method's writes land in the copy and
+the returned `h.inner` keeps its old value. Nothing marks it at compile time. Measured with a one-function probe
+(`func chain(n int) (h Holder) { h.name = "h"; h.inner.Add(n); return h }`, n = 300) converted by each arm's
+converter at master `c978595f0c`, linux/amd64: Go prints `h 300 +300`; master's C# builds and prints `h 0 `; the
+fix emits `ref var h = ref heap(new Holder(), out var Ꮡh); … Ꮡh.Ꮡinner.Add(n);` and prints `h 300 +300`. The
+tracked program carries the same shape (`tally`'s `h.inner.Add(n * 100)`), output-compared.
+
+**The fix.** `analyzeNamedResults` takes the same reason through `bodyCallsCaptureModeMethodOnObject` (the bare
+result or a value-field chain rooted at it) beside the existing two, and a named slice/map/chan result records it in
+`packageCaptureModeBoxIdents` as the parameter arm does. Emission: `ref var r = ref heap(new Int128(), out var Ꮡr);
+Ꮡr.SetBig(v); return r;`.
+
+**Predictions, scored.**
+- The tracked program fails at the base: TRUE, CS1929 ×6 (one each in `fromInt` and `fromIntBare`, two in `tally`, two on `build`'s
+  named slice result). With the fix it prints Go's six lines.
+- Two-seeded `-stdlib` footprint, four targets, 0 files: TRUE at `a6cefba6ee` (4,674 .cs per target),
+  at `314e1d8b60` (4,679) and at `c978595f0c` (4,679). Basis written before any conversion: a go/types census of std finds
+  45 pointer-method calls on named results, the same list on all four targets, test files adding 0; every method
+  has a `this ref T` overload (archive/tar `Format.mustNotBe`/`mayOnlyBe`, time `Time.setLoc`,
+  internal/runtime/gc/internal/gen `valAny.initOp`), so none is direct-ж.
+
+**Gates** at each merged tip: go test all ok, CNR byte-identical, the full runner in 8 slices with bin/obj purged
+between, 0 fail. At `f9726527fb`: CNR across 1066 packages (12 platform-exclusive skipped); Target 973/0/0, Output
+943 pass, 0 fail, 30 skip, 0 timeout; tracked deletions 0.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
