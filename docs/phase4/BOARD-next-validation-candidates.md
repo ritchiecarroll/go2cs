@@ -37970,4 +37970,34 @@ result or a value-field chain rooted at it) beside the existing two, and a named
 between, 0 fail. At `f9726527fb`: CNR across 1066 packages (12 platform-exclusive skipped); Target 973/0/0, Output
 943 pass, 0 fail, 30 skip, 0 timeout; tracked deletions 0.
 
+## 2026-11-14 — P2 (sqlite-cs, libc): a sync.Mutex cast from C memory is refused by name; reached only by opt-in worker threads; DISCLOSED, design deferred
+
+**Dated 2026-11-14 UTC. modernc.org/libc v1.80.1, modernc.org/sqlite v1.62.0; converter of master `c978595f0c`;
+linux/amd64 box, go1.26.10.** COORD accepted this as a disclosure (no design now).
+
+**The sites.** libc places a Go `sync.Mutex` inside C memory and reaches it by a pointer cast, in two places.
+`pthread_musl.go` (linux on amd64, arm64, loong64, ppc64le, s390x, riscv64, 386, arm): `:136` Xpthread_create of a
+joinable thread, `(*sync.Mutex)(unsafe.Pointer(p + off)).Lock()`; `:177-179` Xpthread_exit, `mu := (*sync.Mutex)(…);
+mu.TryLock(); mu.Unlock()`; `:190` Xpthread_join, `(…).Lock()`. And `libc_darwin.go:144`, `file.mu()`, a lock placed
+behind every stdio FILE and taken by each darwin stdio function (29 uses). All are method calls through the cast,
+never a whole-value or field read.
+
+**What the converted code does.** The cast becomes a native box `(ж<Δsync.Mutex>)(uintptr)…`, and the hand-owned
+Mutex's `Lock`/`TryLock`/`Unlock` are `[GoRecv] ref Mutex` primaries, so each call takes the box's `ref` value and
+golib's layout check refuses it before any read or write: "runtime error: cannot read native memory as sync.Mutex: its
+CLR layout is not its Go layout (field gate is a managed reference where Go stores the value inline)". Measured with
+a probe of the three pthread spellings over mmap'd memory, one recover per step: Go prints ok three times, the
+converted program prints that refusal three times. In libc the first refusal would leave Xpthread_create before its
+goroutine starts. The darwin FILE lock was not probed; the same refusal applies by the same route.
+
+**Reach.** By `go list` GoFiles per OS on amd64, sqlite/lib calls `Xpthread_create` and `Xpthread_join` once each, on
+linux only (windows 0, darwin 0), both in `_sqlite3ThreadCreate`, the sorter's worker threads.
+`SQLITE_DEFAULT_WORKER_THREADS` is 0, so they run only after `PRAGMA threads=N` (N > 0) or
+`sqlite3_limit(SQLITE_LIMIT_WORKER_THREADS)`; the sqlite-cs demo sets neither and no sqlite `_test.go` mentions
+threads. sqlite/lib reaches darwin stdio only in the proxy-lock conch path (two `Xfprintf` to stderr). Windows libc
+(`pthread.go`) puts no Mutex in C memory.
+
+**The route when a target needs threads or darwin stdio:** a libc hand-own keyed by address, a C-layout lock word
+in the C storage with a side table for the waiters, so nothing managed is read out of raw bytes.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
