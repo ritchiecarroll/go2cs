@@ -1,0 +1,22 @@
+A: 5 "helloXXX"
+   [exit 0]
+B: 6 "abcdefXX"
+   [exit 0]
+E: 4 false "u\x00\x00\x00\x00XXX"
+   [exit 0]
+G: 8 "errno 7\x00"
+   [exit 0]
+H: 4 "rrrrXXXX"
+   [exit 0]
+I: 6 "abcdef"
+   [exit 0]
+K: "WXY!" "WXY!"
+   [exit 0]
+L: 16 "0123456789012345"
+   [exit 0]
+N: false
+   [exit 0]
+O: "field\x00"
+   [exit 0]
+P: "\x00\x00\x00\x00interior\x00\x00"
+   [exit 0]

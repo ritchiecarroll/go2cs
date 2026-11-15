@@ -1,0 +1,7 @@
+<Project>
+  <!-- Injected with -p:CustomAfterMicrosoftCommonTargets=<this file>: adds the census analyzer (analyzer/, built
+       first) to every project the build reaches. Census only: it reports UCC001 warnings and changes no output. -->
+  <ItemGroup>
+    <Analyzer Include="$(MSBuildThisFileDirectory)analyzer\bin\Release\netstandard2.0\UintptrCallCensus.dll" />
+  </ItemGroup>
+</Project>

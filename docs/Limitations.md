@@ -35,6 +35,10 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   `C.CString`, `C.CBytes`, `C.GoString`, `C.GoStringN`, `C.GoBytes`, `C.malloc` and `C.free` convert, and
   so does `defer C.f(…)`. Its C types and constants convert with it. It converts for the machine's own
   operating system and architecture, and the converted package refuses to call C anywhere else.
+  A `-cgo` conversion is one package, and it builds against a go2cs clone
+  (`dotnet build -p:go2csPath=<go2cs>/src/`); it does not use the `go.*` packages yet. Building a cgo
+  package against the `go.*` packages from the feed is planned for the next release.
+  <!-- src/go2cs/main.go:305 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
   Anything else is refused by name, with the phase that will cover it:
   - a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or
     `C.GoStringN` (Phase 3, its next increment). A pointer into a slice or an array is refused when the
@@ -108,16 +112,21 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
        where Go printed {6 [115 101 99 111 110 100 0] 4.5}; fmt of the field alone (h.Buf) matched Go. The census at
        part D's P1 counted 0 fmt %v and reflect uses reaching an admitted type in modernc.org/sqlite's lib and libc. -->
 * **cgo: a pointer rebuilt from a number can hand C Go memory unchecked. This is a known memory-safety
-  gap.** Do not pass C a pointer you rebuilt from a number when it points into Go memory:
-  `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)`, or a `uintptr` kept in a variable and converted
-  back. go2cs refuses every pointer into Go memory that it can still see as one. Once the address has
-  been through `uintptr` arithmetic, or came from a slice element viewed as another type
-  (`(*C.int)(unsafe.Pointer(&b[4]))`) and then through `uintptr`, go2cs cannot tell it from an address
-  in C memory, so the call goes ahead, and the memory may move while C is using it. Go allows the
-  one-expression form, because its memory does not move. Pass `unsafe.Pointer(p)` itself: go2cs refuses
-  that by name until it can hold Go memory still for C.
+  gap.** Do not pass C a pointer you made from a number held in a variable when it points inside Go
+  memory: `u := uintptr(unsafe.Pointer(p))`, then `unsafe.Pointer(u + n)`. Nor one whose sum puts the
+  pointer second, `unsafe.Pointer(n + uintptr(unsafe.Pointer(p)))`. go2cs refuses every pointer into Go
+  memory that it can still see as one. Once such an address has been through a `uintptr`, go2cs cannot
+  tell it from an address in C memory, so the call goes ahead, and the memory may move while C is using
+  it. The same holds for a slice element viewed as another type (`(*C.int)(unsafe.Pointer(&b[4]))`) and
+  then held as a `uintptr`. Go's own form, `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)` written in
+  one expression, converts to `unsafe.Add`, which go2cs sees as Go memory and refuses by name. So does
+  `unsafe.Pointer(p)` itself, until go2cs can hold Go memory still for C.
   <!-- docs/phase4/DESIGN-cgo-phase3-marshaling.md §16.9 (stop line S3.1-E, COORD's ruling C, 2026-11-12); the arm is
-       GolibTests' APointerOverManagedStorageCrossesAVoidPointerOnlyAsTheFourDisclosedNumbers. -->
+       GolibTests' APointerOverManagedStorageCrossesAVoidPointerOnlyAsTheFourDisclosedNumbers. 2026-11-14 (H, the
+       release-notes audit): the one-expression form is emitted as unsafe.Add on master (src/go2cs/pointerArithmetic.go;
+       TestPointerArithmeticFormEmitsUnsafeAdd, whose controls "held" and "reversed" stay numbers), and unsafe.Add's
+       result keeps its box, so the door refuses it (the goadd arms, hosted cgo-e2e on linux-x64, win-x64, osx-arm64
+       and osx-x64). The interior arm is GolibTests' ANumberBuiltByArithmeticOverAGoPointerCrossesAsDisclosed. -->
 * **Goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
   holds its thread for as long as it lives. When it ends, the thread waits to run the next `go` statement,
   so starting goroutines one after another is cheap; holding many alive at once is not. Measured on one
@@ -255,6 +264,17 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   * Copying a struct by value shares any fixed-size array inside an embedded struct.
   * A slice of one number type laid over another's storage
     (`unsafe.Slice((*uint64)(unsafe.Pointer(&b[0])), n)`) is a copy: writes through it never reach `b`.
+  * A pointer's number kept in a `uintptr` and turned back into a pointer in a later statement
+    (`n := uintptr(unsafe.Pointer(p))`, then `(*T)(unsafe.Pointer(n))`) can name memory that has since moved, and
+    the number does not keep the value alive. Go calls this invalid too, but Go's heap does not move values, so
+    it often works there. Do the arithmetic and the conversion in one expression, or use `unsafe.Add`.
+  * A pointer to a field made by arithmetic does not compare equal to the field's own address:
+    `(*int64)(unsafe.Add(unsafe.Pointer(&p), 8)) == &p.y` is false where Go says true.
+  <!-- docs/phase4/DESIGN-interior-pointer-root.md (P5, 2026-11-14): the first item is its section 4.2 and the
+       review's SHOULD of that date; the second is shape 9 of its section 1.1, measured false at master 314e1d8b60
+       and at H's 83fbf28560, disclosed by COORD's ruling 2 (section 10.9) until increment I5 lands. Read again
+       on 2026-11-14 at master c2919b8b16 with the named-array floor, before this landed: for a local and for a
+       heap value Go prints `true`, the conversion `false`, and both read the field's value. -->
   * A type switch's `case int:` also catches an `int32` or `rune` when the switch has no `int32` case of
     its own (`case uint:` likewise for `uint32`).
   * A left shift of an untyped constant that takes a named integer type from its context, such as
