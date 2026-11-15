@@ -685,7 +685,8 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
 
         if (len(addrs) > 0) {
             error errΔ1 = default;
-            (cname, errΔ1) = dnsmessage.NewName(canonical);
+            (var cnameᴛ1, errΔ1) = dnsmessage.NewName(canonical);
+            cname.AssignFrom(cnameᴛ1);
             if (errΔ1 != nil) {
                 return (default, new dnsmessage.Name(), errΔ1);
             }
@@ -812,7 +813,7 @@ loop:
                     }
                     addrs = append(addrs, new IPAddr(IP: ((IP)(a.A[..]))));
                     if (cname.Length == 0 && h.Name.Length != 0) {
-                        cname = h.Name.ΔClone();
+                        cname.AssignFrom(h.Name);
                     }
                     break;
                 }
@@ -828,7 +829,7 @@ loop:
                     }
                     addrs = append(addrs, new IPAddr(IP: ((IP)(aaaa.AAAA[..]))));
                     if (cname.Length == 0 && h.Name.Length != 0) {
-                        cname = h.Name.ΔClone();
+                        cname.AssignFrom(h.Name);
                     }
                     break;
                 }
@@ -843,7 +844,7 @@ loop:
                         goto break_loop;
                     }
                     if (cname.Length == 0 && c.CNAME.Length > 0) {
-                        cname = c.CNAME.ΔClone();
+                        cname.AssignFrom(c.CNAME);
                     }
                     break;
                 }
@@ -887,7 +888,8 @@ break_loop:;
             (addrs, canonical) = goLookupIPFiles(name);
             if (len(addrs) > 0) {
                 error errΔ11 = default;
-                (cname, errΔ11) = dnsmessage.NewName(canonical);
+                (var cnameᴛ2, errΔ11) = dnsmessage.NewName(canonical);
+                cname.AssignFrom(cnameᴛ2);
                 if (errΔ11 != nil) {
                     return (default, new dnsmessage.Name(), errΔ11);
                 }

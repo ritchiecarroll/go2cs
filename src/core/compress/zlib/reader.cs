@@ -130,7 +130,7 @@ internal static error Close(this ref reader z) {
 }
 
 internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
-    z = new reader(decompressor: z.decompressor);
+    z.AssignFrom(new reader(decompressor: z.decompressor));
     var (fr, ok) = r._<flate.Reader>(ᐧ); if (ok) {
         z.r = fr;
     } else {

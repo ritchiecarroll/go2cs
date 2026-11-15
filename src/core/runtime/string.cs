@@ -105,7 +105,7 @@ internal static slice<byte> concatbytes(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
 
     slice<byte> b = default;
     if (Ꮡbuf != nil && l <= 32) {
-        buf = new tmpBuf(new byte[32].array());
+        buf.Assign(new tmpBuf(new byte[32].array()));
         b = buf.Value.slice(0, l);
     } else {
         b = rawbyteslice(l);
@@ -240,7 +240,7 @@ internal static slice<byte> stringtoslicebyte(ж<tmpBuf> Ꮡbuf, @string s) {
 
     slice<byte> b = default;
     if (Ꮡbuf != nil && len(s) <= 32) {
-        buf = new tmpBuf(new byte[32].array());
+        buf.Assign(new tmpBuf(new byte[32].array()));
         b = buf.Value.slice(0, len(s));
     } else {
         b = rawbyteslice(len(s));
@@ -261,7 +261,7 @@ internal static slice<rune> stringtoslicerune(/*[32]*/ ж<array<rune>> Ꮡbuf, @
 
     slice<rune> a = default;
     if (Ꮡbuf != nil && n <= 32) {
-        buf = new rune[]{}.array(32);
+        buf.Assign(new rune[]{}.array(32));
         a = buf.slice(0, n);
     } else {
         a = rawruneslice(n);

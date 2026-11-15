@@ -193,7 +193,7 @@ internal static ж<PrivateKey> newPrivateKey(/*[32]*/ ж<array<byte>> Ꮡseed, p
     nint l = p.l;
 
     var priv = Ꮡ(new PrivateKey(pub: new ΔPublicKey(p: p)));
-    priv.seed = seed.Clone();
+    priv.seed.Assign(seed);
 
     var ξ = sha3.NewShake256();
     ξ.Write(seed[..]);
@@ -208,25 +208,25 @@ internal static ж<PrivateKey> newPrivateKey(/*[32]*/ ж<array<byte>> Ꮡseed, p
 
     var s1 = GoReflect.WithElemDims(priv.s1.slice(0, l), 256);
     foreach (var r in range(l)) {
-        s1[r] = ntt(sampleBoundedPoly(ρs, (byte)r, p));
+        s1[r].Assign(ntt(sampleBoundedPoly(ρs, (byte)r, p)));
     }
     var s2 = GoReflect.WithElemDims(priv.s2.slice(0, k), 256);
     foreach (var r in range(k)) {
-        s2[r] = ntt(sampleBoundedPoly(ρs, (byte)(l + r), p));
+        s2[r].Assign(ntt(sampleBoundedPoly(ρs, (byte)(l + r), p)));
     }
 
     // ˆt = Â ∘ ŝ₁ + ŝ₂
     var tHat = GoReflect.WithElemDims(new slice<nttElement>(k, maxK), 256);
     foreach (var i in range(len(tHat))) {
-        tHat[i] = s2[i].Clone();
+        tHat[i].Assign(s2[i]);
         foreach (var j in range(len(s1))) {
-            tHat[i] = polyAdd(tHat[i], nttMul(A[i * l + j], s1[j]));
+            tHat[i].Assign(polyAdd(tHat[i], nttMul(A[i * l + j], s1[j])));
         }
     }
     // t = NTT⁻¹(ˆt)
     var t = GoReflect.WithElemDims(new slice<ringElement>(k, maxK), 256);
     foreach (var i in range(len(tHat))) {
-        t[i] = inverseNTT(tHat[i]);
+        t[i].Assign(inverseNTT(tHat[i]));
     }
     // (t₁, _) = Power2Round(t)
     // (_, ˆt₀) = NTT(Power2Round(t))
@@ -236,7 +236,7 @@ internal static ж<PrivateKey> newPrivateKey(/*[32]*/ ж<array<byte>> Ꮡseed, p
         foreach (var j in range(len(t[i]))) {
             (t1[i][j], w[j]) = power2Round(t[i][j]);
         }
-        t0[i] = ntt(w);
+        t0[i].Assign(ntt(w));
     }
 
     // The computations below (and their storage in the PrivateKey struct) are
@@ -244,7 +244,7 @@ internal static ж<PrivateKey> newPrivateKey(/*[32]*/ ж<array<byte>> Ꮡseed, p
     // That would require keeping or re-deriving ρ and t/t1, though.
 
     var pk = pkEncode(priv.pub.raw[..0], ρ, t1, p);
-    priv.pub.tr = computePublicKeyHash(pk);
+    priv.pub.tr.Assign(computePublicKeyHash(pk));
     computeT1Hat(GoReflect.WithElemDims(priv.pub.t1.slice(0, k), 256), t1); // NTT(t₁ ⋅ 2ᵈ)
 
     return priv;
@@ -255,7 +255,7 @@ internal static void computeMatrixA(slice<nttElement> A, slice<byte> ρ, paramet
     nint l = p.l;
     foreach (var r in range(k)) {
         foreach (var s in range(l)) {
-            A[r * l + s] = sampleNTT(ρ, (byte)s, (byte)r);
+            A[r * l + s].Assign(sampleNTT(ρ, (byte)s, (byte)r));
         }
     }
 }
@@ -277,7 +277,7 @@ internal static void computeT1Hat(slice<nttElement> t1Hat, slice<array<uint16>> 
             var (z, _) = fieldToMontgomery((uint32)t1[i][j] << 13);
             w[j] = z;
         }
-        t1Hat[i] = ntt(w);
+        t1Hat[i].Assign(ntt(w));
     }
 }
 
@@ -351,7 +351,7 @@ internal static (ж<ΔPublicKey>, error) newPublicKey(slice<byte> pk, parameters
     var pub = Ꮡ(new ΔPublicKey(p: p));
     copy(pub.raw[..], pk);
     computeMatrixA(GoReflect.WithElemDims(pub.a.slice(0, k * l), 256), ρ, p);
-    pub.tr = computePublicKeyHash(pk);
+    pub.tr.Assign(computePublicKeyHash(pk));
     computeT1Hat(GoReflect.WithElemDims(pub.t1.slice(0, k), 256), t1); // NTT(t₁ ⋅ 2ᵈ)
 
     return (pub, default);
@@ -502,21 +502,21 @@ sign:
             var v = new slice<byte>((p.γ1 + 1) * (nint)n / 8, (maxγ1 + 1) * n / 8);
             H.Read(v);
 
-            y[r] = bitUnpack(v, p);
+            y[r].Assign(bitUnpack(v, p));
         }
 
         // w = NTT⁻¹(Â ∘ NTT(y))
         var yHat = GoReflect.WithElemDims(new slice<nttElement>(l, maxL), 256);
         foreach (var i in range(len(y))) {
-            yHat[i] = ntt(y[i]);
+            yHat[i].Assign(ntt(y[i]));
         }
         var w = GoReflect.WithElemDims(new slice<ringElement>(k, maxK), 256);
         foreach (var i in range(len(w))) {
             nttElement wHat = default;
             foreach (var j in range(l)) {
-                wHat = polyAdd(wHat, nttMul(A[i * l + j], yHat[j]));
+                wHat.Assign(polyAdd(wHat, nttMul(A[i * l + j], yHat[j])));
             }
-            w[i] = inverseNTT(wHat);
+            w[i].Assign(inverseNTT(wHat));
         }
 
         H.Reset();
@@ -533,16 +533,16 @@ sign:
 
         var cs1 = GoReflect.WithElemDims(new slice<ringElement>(l, maxL), 256);
         foreach (var i in range(len(cs1))) {
-            cs1[i] = inverseNTT(nttMul(c, s1[i]));
+            cs1[i].Assign(inverseNTT(nttMul(c, s1[i])));
         }
         var cs2 = GoReflect.WithElemDims(new slice<ringElement>(k, maxK), 256);
         foreach (var i in range(len(cs2))) {
-            cs2[i] = inverseNTT(nttMul(c, s2[i]));
+            cs2[i].Assign(inverseNTT(nttMul(c, s2[i])));
         }
 
         var z = GoReflect.WithElemDims(new slice<ringElement>(l, maxL), 256);
         foreach (var i in range(len(y))) {
-            z[i] = polyAdd(y[i], cs1[i]);
+            z[i].Assign(polyAdd(y[i], cs1[i]));
 
             // Reject if ||z||∞ ≥ γ1 − β
             if (coefficientsExceedBound(z[i], γ1β)) {
@@ -567,7 +567,7 @@ sign:
 
         var ct0 = GoReflect.WithElemDims(new slice<ringElement>(k, maxK), 256);
         foreach (var i in range(len(ct0))) {
-            ct0[i] = inverseNTT(nttMul(c, t0[i]));
+            ct0[i].Assign(inverseNTT(nttMul(c, t0[i])));
 
             // Reject if ||ct0||∞ ≥ γ2
             if (coefficientsExceedBound(ct0[i], γ2)) {
@@ -582,7 +582,9 @@ sign:
         var h = GoReflect.WithElemDims(new slice<array<byte>>(k, () => new(256), maxK), 256);
         foreach (var i in range(len(w))) {
             nint count = default;
-            (h[i], count) = makeHint(ct0[i], w[i], cs2[i], p);
+            ref var hᴛ1 = ref h[i];
+            (var hᴛ2, count) = makeHint(ct0[i], w[i], cs2[i], p);
+            hᴛ1.Assign(hᴛ2);
             count1s += count;
         }
         // Reject if number of hints > ω
@@ -737,22 +739,22 @@ internal static error verifyInternal(ref ΔPublicKey pub, /*[64]*/ ж<array<byte
     // w = Â ∘ NTT(z) − NTT(c) ∘ NTT(t₁ ⋅ 2ᵈ)
     var zHat = GoReflect.WithElemDims(new slice<nttElement>(l, maxL), 256);
     foreach (var i in range(len(zHat))) {
-        zHat[i] = ntt(z[i]);
+        zHat[i].Assign(ntt(z[i]));
     }
     var w = GoReflect.WithElemDims(new slice<ringElement>(k, maxK), 256);
     foreach (var i in range(len(w))) {
         nttElement wHat = default;
         foreach (var j in range(l)) {
-            wHat = polyAdd(wHat, nttMul(A[i * l + j], zHat[j]));
+            wHat.Assign(polyAdd(wHat, nttMul(A[i * l + j], zHat[j])));
         }
-        wHat = polySub(wHat, nttMul(c, t1[i]));
-        w[i] = inverseNTT(wHat);
+        wHat.Assign(polySub(wHat, nttMul(c, t1[i])));
+        w[i].Assign(inverseNTT(wHat));
     }
 
     // Use hints h to compute w₁ from w(approx).
     var w1 = GoReflect.WithElemDims(new slice<array<byte>>(k, () => new(256), maxK), 256);
     foreach (var i in range(len(w))) {
-        w1[i] = useHint(w[i], h[i], p);
+        w1[i].Assign(useHint(w[i], h[i], p));
     }
 
     var H = sha3.NewShake256();
@@ -795,7 +797,7 @@ internal static (slice<byte> ch, error err) sigDecode(slice<byte> sig, slice<rin
     (ch, sig) = (sig.slice(0, p.λ / 4), sig.slice(p.λ / 4));
     foreach (var i in range(len(z))) {
         nint length = (p.γ1 + 1) * (nint)n / 8;
-        z[i] = bitUnpack(sig.slice(0, length), p);
+        z[i].Assign(bitUnpack(sig.slice(0, length), p));
         sig = sig.slice(length);
     }
     var errΔ1 = hintDecode(sig, h, p); if (errΔ1 != nil) {

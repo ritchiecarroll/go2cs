@@ -568,7 +568,7 @@ public static void GoroutineTransition(this ref Emitter e, time.Duration ts, GSt
             ))
         )));
     }
-    e.prevGstates = e.gstates.Clone();
+    e.prevGstates.Assign(e.gstates);
 }
 
 public static void IncThreadStateCount(this ref Emitter e, time.Duration ts, ThreadState state, int64 delta) {
@@ -589,7 +589,7 @@ public static void IncThreadStateCount(this ref Emitter e, time.Duration ts, Thr
             ))
         )));
     }
-    e.prevThreadStats = e.threadStats.Clone();
+    e.prevThreadStats.Assign(e.threadStats);
 }
 
 public static void HeapGoal(this ref Emitter e, time.Duration ts, uint64 v) {

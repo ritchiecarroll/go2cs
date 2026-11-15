@@ -50,7 +50,7 @@ public static ж<P224Element> Set(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡ
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
-    e.x = t.x.Clone();
+    e.x.Assign(t.x);
     return Ꮡe;
 }
 

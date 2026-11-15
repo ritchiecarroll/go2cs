@@ -50,7 +50,7 @@ public static ж<P256Element> Set(this ж<P256Element> Ꮡe, ж<P256Element> Ꮡ
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
-    e.x = t.x.Clone();
+    e.x.Assign(t.x);
     return Ꮡe;
 }
 

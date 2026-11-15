@@ -262,9 +262,9 @@ internal static error processSOS(this ref decoder d, nint n) {
 
                     // Load the previous partially decoded coefficients, if applicable.
                     if (d.progressive) {
-                        b = d.progCoeffs[compIndex][by * mxx * hi + bx].Clone();
+                        b.Assign(d.progCoeffs[compIndex][by * mxx * hi + bx]);
                     } else {
-                        b = new block(new int32[64].array());
+                        b.Assign(new block(new int32[64].array()));
                     }
 
                     if (ah != 0) {
@@ -334,7 +334,7 @@ internal static error processSOS(this ref decoder d, nint n) {
 
                     if (d.progressive) {
                         // Save the coefficients.
-                        d.progCoeffs[compIndex][by * mxx * hi + bx] = b.Clone();
+                        d.progCoeffs[compIndex][by * mxx * hi + bx].Assign(b);
                         // At this point, we could call reconstructBlock to dequantize and perform the
                         // inverse DCT, to save early stages of a progressive image to the *image.YCbCr
                         // buffers (the whole point of progressive encoding), but in Go, the jpeg.Decode
@@ -370,7 +370,7 @@ internal static error processSOS(this ref decoder d, nint n) {
                 // Reset the Huffman decoder.
                 d.bits = new bits();
                 // Reset the DC components, as per section F.2.1.3.1.
-                dc = new int32[]{}.array(4);
+                dc.Assign(new int32[]{}.array(4));
                 // Reset the progressive decoder state, as per section G.1.2.2.
                 d.eobRun = 0;
             }

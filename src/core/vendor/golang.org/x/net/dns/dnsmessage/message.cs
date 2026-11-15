@@ -586,7 +586,9 @@ internal static error checkAdvance(this ref Parser p, section sec) {
 internal static (Resource, error) resource(this ref Parser p, section sec) {
     Resource r = new();
     error err = default;
-    (r.Header, err) = p.resourceHeader(sec);
+    ref var rᴛ1 = ref r.Header;
+    (var rᴛ2, err) = p.resourceHeader(sec);
+    rᴛ1.AssignFrom(rᴛ2);
     if (err != nil) {
         return (r.ΔClone(), err);
     }
@@ -1799,7 +1801,7 @@ internal static UntypedInt edns0DNSSECOKMask => 0x00ff8000;
 //
 // The provided extRCode must be an extended RCode.
 public static error SetEDNS0(this ref ResourceHeader h, nint udpPayloadLen, RCode extRCode, bool dnssecOK) {
-    h.Name = new Name(Data: new byte[]{(byte)'.'}.array(255), Length: 1); // RFC 6891 section 6.1.2
+    h.Name.AssignFrom(new Name(Data: new byte[]{(byte)'.'}.array(255), Length: 1)); // RFC 6891 section 6.1.2
     h.Type = TypeOPT;
     h.Class = (Class)(uint16)udpPayloadLen;
     h.TTL = ((uint32)extRCode >> 4) << 24;
@@ -2263,42 +2265,48 @@ internal static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, 
     switch (hdr.Type) {
     case var ᴛ when ᴛ == TypeA: {
         ref var rb = ref heap(new ΔAResource(), out var Ꮡrb);
-        (rb, err) = unpackAResource(msg, off);
+        (var rbᴛ1, err) = unpackAResource(msg, off);
+        rb.AssignFrom(rbᴛ1);
         r = new ΔAResourceжResourceBody(Ꮡrb);
         name = "A";
         break;
     }
     case var ᴛ when ᴛ == TypeNS: {
         ref var rb = ref heap(new ΔNSResource(), out var Ꮡrb);
-        (rb, err) = unpackNSResource(msg, off);
+        (var rbᴛ2, err) = unpackNSResource(msg, off);
+        rb.AssignFrom(rbᴛ2);
         r = new ΔNSResourceжResourceBody(Ꮡrb);
         name = "NS";
         break;
     }
     case var ᴛ when ᴛ == TypeCNAME: {
         ref var rb = ref heap(new ΔCNAMEResource(), out var Ꮡrb);
-        (rb, err) = unpackCNAMEResource(msg, off);
+        (var rbᴛ3, err) = unpackCNAMEResource(msg, off);
+        rb.AssignFrom(rbᴛ3);
         r = new ΔCNAMEResourceжResourceBody(Ꮡrb);
         name = cnameˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeSOA: {
         ref var rb = ref heap(new ΔSOAResource(), out var Ꮡrb);
-        (rb, err) = unpackSOAResource(msg, off);
+        (var rbᴛ4, err) = unpackSOAResource(msg, off);
+        rb.AssignFrom(rbᴛ4);
         r = new ΔSOAResourceжResourceBody(Ꮡrb);
         name = soaˢ;
         break;
     }
     case var ᴛ when ᴛ == TypePTR: {
         ref var rb = ref heap(new ΔPTRResource(), out var Ꮡrb);
-        (rb, err) = unpackPTRResource(msg, off);
+        (var rbᴛ5, err) = unpackPTRResource(msg, off);
+        rb.AssignFrom(rbᴛ5);
         r = new ΔPTRResourceжResourceBody(Ꮡrb);
         name = ptrˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeMX: {
         ref var rb = ref heap(new ΔMXResource(), out var Ꮡrb);
-        (rb, err) = unpackMXResource(msg, off);
+        (var rbᴛ6, err) = unpackMXResource(msg, off);
+        rb.AssignFrom(rbᴛ6);
         r = new ΔMXResourceжResourceBody(Ꮡrb);
         name = "MX";
         break;
@@ -2312,28 +2320,33 @@ internal static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, 
     }
     case var ᴛ when ᴛ == TypeAAAA: {
         ref var rb = ref heap(new ΔAAAAResource(), out var Ꮡrb);
-        (rb, err) = unpackAAAAResource(msg, off);
+        (var rbᴛ7, err) = unpackAAAAResource(msg, off);
+        rb.AssignFrom(rbᴛ7);
         r = new ΔAAAAResourceжResourceBody(Ꮡrb);
         name = aaaaˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeSRV: {
         ref var rb = ref heap(new ΔSRVResource(), out var Ꮡrb);
-        (rb, err) = unpackSRVResource(msg, off);
+        (var rbᴛ8, err) = unpackSRVResource(msg, off);
+        rb.AssignFrom(rbᴛ8);
         r = new ΔSRVResourceжResourceBody(Ꮡrb);
         name = srvˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeSVCB: {
         ref var rb = ref heap(new ΔSVCBResource(), out var Ꮡrb);
-        (rb, err) = unpackSVCBResource(msg, off, hdr.Length);
+        (var rbᴛ9, err) = unpackSVCBResource(msg, off, hdr.Length);
+        rb.AssignFrom(rbᴛ9);
         r = new ΔSVCBResourceжResourceBody(Ꮡrb);
         name = svcbˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeHTTPS: {
         ref var rb = ref heap(new ΔHTTPSResource(), out var Ꮡrb);
-        (rb.SVCBResource, err) = unpackSVCBResource(msg, off, hdr.Length);
+        ref var rbᴛ10 = ref rb.SVCBResource;
+        (var rbᴛ11, err) = unpackSVCBResource(msg, off, hdr.Length);
+        rbᴛ10.AssignFrom(rbᴛ11);
         r = new ΔHTTPSResourceжResourceBody(Ꮡrb);
         name = httpsˢ;
         break;

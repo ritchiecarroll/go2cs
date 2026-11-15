@@ -247,7 +247,7 @@ public static error Close(this ref Reader r) {
 // Reset clears the [Reader]'s state and allows it to be reused again
 // as a new [Reader].
 public static void Reset(this ref Reader r, io.Reader src, Order order, nint litWidth) {
-    r = new Reader();
+    r.AssignFrom(new Reader());
     r.init(src, order, litWidth);
 }
 

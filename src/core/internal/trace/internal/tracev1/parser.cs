@@ -305,7 +305,7 @@ internal static ж<Event> append(this ref Events l, Event v) {
     v = v.ΔClone();
 
     var ptr = l.grow();
-    ptr.Value = v.ΔClone();
+    ptr.Value.AssignFrom(v);
     return ptr;
 }
 
@@ -330,7 +330,11 @@ public static bool Less(this ref Events l, nint i, nint j) {
 }
 
 public static void Swap(this ref Events l, nint i, nint j) {
-    (l.Ptr(i).Value, l.Ptr(j).Value) = (l.Ptr(j).Value.ΔClone(), l.Ptr(i).Value.ΔClone());
+    ref var valᴛ1 = ref l.Ptr(i).Value;
+    ref var valᴛ3 = ref l.Ptr(j).Value;
+    (var valᴛ2, var valᴛ4) = (l.Ptr(j).Value.ΔClone(), l.Ptr(i).Value.ΔClone());
+    valᴛ1.AssignFrom(valᴛ2);
+    valᴛ3.AssignFrom(valᴛ4);
 }
 
 public static (ж<Event>, bool) Pop(this ref Events l) {
@@ -1000,7 +1004,7 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
         break;
     }
     default: {
-        ev = new Event(Type: raw.typ, P: p.lastP, G: p.lastG);
+        ev.AssignFrom(new Event(Type: raw.typ, P: p.lastP, G: p.lastG));
         nint argOffset = default;
         ev.Ts = p.lastTs + ((Timestamp)(int64)raw.args[0]);
         argOffset = 1;

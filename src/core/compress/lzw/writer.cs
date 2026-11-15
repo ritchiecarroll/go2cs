@@ -258,7 +258,7 @@ public static error Close(this ж<Writer> Ꮡw) {
 // Reset clears the [Writer]'s state and allows it to be reused again
 // as a new [Writer].
 public static void Reset(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
-    w = new Writer();
+    w.AssignFrom(new Writer());
     w.init(dst, order, litWidth);
 }
 

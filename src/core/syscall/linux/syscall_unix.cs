@@ -347,7 +347,7 @@ internal static (nint n, error err) recvfromInet4(nint fd, slice<byte> p, nint f
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.ᏑPort, 2);
     from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
-    from.Addr = pp.Addr.Clone();
+    from.Addr.Assign(pp.Addr);
     return (n, err);
 }
 
@@ -365,7 +365,7 @@ internal static (nint n, error err) recvfromInet6(nint fd, slice<byte> p, nint f
     var port = @unsafe.ArrayPointer<byte>.Of(pp.ᏑPort, 2);
     from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
     from.ZoneId = pp.Scope_id;
-    from.Addr = pp.Addr.Clone();
+    from.Addr.Assign(pp.Addr);
     return (n, err);
 }
 
@@ -383,7 +383,7 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet4(nint
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.ᏑPort, 2);
     from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
-    from.Addr = pp.Addr.Clone();
+    from.Addr.Assign(pp.Addr);
     return (n, oobn, recvflags, err);
 }
 
@@ -402,7 +402,7 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet6(nint
     var port = @unsafe.ArrayPointer<byte>.Of(pp.ᏑPort, 2);
     from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
     from.ZoneId = pp.Scope_id;
-    from.Addr = pp.Addr.Clone();
+    from.Addr.Assign(pp.Addr);
     return (n, oobn, recvflags, err);
 }
 

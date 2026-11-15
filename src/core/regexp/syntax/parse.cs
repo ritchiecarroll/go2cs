@@ -148,7 +148,7 @@ internal static ж<Regexp> newRegexp(this ref parser p, Op op) {
     var re = p.free;
     if (re != nil) {
         p.free = re.Sub0[0];
-        re.Value = new Regexp();
+        re.Value.AssignFrom(new Regexp());
     } else {
         re = @new<Regexp>();
         p.numRegexp++;

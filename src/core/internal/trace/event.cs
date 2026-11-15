@@ -400,11 +400,11 @@ public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
     try
     {
         // TODO(felixge): make the evTable reusable.
-        e = new ΔEvent(
+        e.AssignFrom(new ΔEvent(
             table: Ꮡ(new evTable(pcs: new map<uint64, frame>(), sync: new sync(freq: 1D))),
             @base: new baseEvent(time: c.Time),
             ctx: new schedCtx(G: c.Goroutine, P: c.Proc, M: c.Thread)
-        );
+        ));
         var cʗ1 = c;
         defer(() => {
             // N.b. evSync is not in tracev2.Specs()

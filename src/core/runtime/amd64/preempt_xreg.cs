@@ -97,7 +97,7 @@ internal static void xRegSave(ref g gp) {
     // If we ever need to save less state (e.g., avoid saving vector registers
     // that aren't in use), we could have multiple allocation pools for
     // different size states and copy only the registers we need.
-    dest.regs = pp.Value.xRegs.scratch.ΔClone();
+    dest.regs.AssignFrom(pp.Value.xRegs.scratch);
 
     // Save on the G.
     gp.xRegs.state = dest;

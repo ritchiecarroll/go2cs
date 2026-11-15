@@ -805,7 +805,7 @@ internal static (@string target, slice<ж<SRV>> srvs, error err) goLookupSRV(thi
             continue;
         }
         if (cname.Length == 0 && h.Name.Length != 0) {
-            cname = h.Name.ΔClone();
+            cname.AssignFrom(h.Name);
         }
         (var srv, errΔ1) = p.SRVResource();
         if (errΔ1 != nil) {

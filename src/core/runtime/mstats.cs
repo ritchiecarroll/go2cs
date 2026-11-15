@@ -503,8 +503,8 @@ internal static void readmemstats_m(ref MemStats stats) {
     stats.NextGC = heapGoal;
     stats.LastGC = memstats.last_gc_unix;
     stats.PauseTotalNs = memstats.pause_total_ns;
-    stats.PauseNs = memstats.pause_ns.Clone();
-    stats.PauseEnd = memstats.pause_end.Clone();
+    stats.PauseNs.Assign(memstats.pause_ns);
+    stats.PauseEnd.Assign(memstats.pause_end);
     stats.NumGC = memstats.numgc;
     stats.NumForcedGC = memstats.numforcedgc;
     stats.GCCPUFraction = memstats.gc_cpu_fraction;

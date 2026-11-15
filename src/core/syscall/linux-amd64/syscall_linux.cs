@@ -564,7 +564,7 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrLink
     sa.raw.Hatype = sa.Hatype;
     sa.raw.Pkttype = sa.Pkttype;
     sa.raw.Halen = sa.Halen;
-    sa.raw.Addr = sa.Addr.Clone();
+    sa.raw.Addr.Assign(sa.Addr);
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw), SizeofSockaddrLinklayer, default);
 }
 

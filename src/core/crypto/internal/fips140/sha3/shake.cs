@@ -51,7 +51,7 @@ internal static slice<byte> leftEncode(uint64 x) {
 internal static ж<SHAKE> newCShake(ж<SHAKE> Ꮡc, slice<byte> N, slice<byte> S, nint rate, nint outputLen, byte dsbyte) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    c.d = new Digest(rate: rate, outputLen: outputLen, dsbyte: dsbyte);
+    c.d.AssignFrom(new Digest(rate: rate, outputLen: outputLen, dsbyte: dsbyte));
     c.initBlock = new slice<byte>(0, 9 + len(N) + 9 + len(S)); // leftEncode returns max 9 bytes
     c.initBlock = appendꓸꓸꓸ(c.initBlock, leftEncode((uint64)len(N) * 8));
     c.initBlock = appendꓸꓸꓸ(c.initBlock, N);
@@ -146,7 +146,7 @@ internal static ж<SHAKE> newCShake128(ж<SHAKE> Ꮡc, slice<byte> N, slice<byte
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(N) == 0 && len(S) == 0) {
-        c = NewShake128().Value.ΔClone();
+        c.AssignFrom(NewShake128().Value);
         return Ꮡc;
     }
     return newCShake(Ꮡc, N, S, rateK256, 32, dsbyteCShake);
@@ -167,7 +167,7 @@ internal static ж<SHAKE> newCShake256(ж<SHAKE> Ꮡc, slice<byte> N, slice<byte
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(N) == 0 && len(S) == 0) {
-        c = NewShake256().Value.ΔClone();
+        c.AssignFrom(NewShake256().Value);
         return Ꮡc;
     }
     return newCShake(Ꮡc, N, S, rateK512, 64, dsbyteCShake);

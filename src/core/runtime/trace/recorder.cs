@@ -40,7 +40,7 @@ internal static (nint n, error err) Write(this ж<recorder> Ꮡw, slice<byte> b)
             if (len(b) < len(r.header)) {
                 (n, err) = (0, fmt.Errorf("expected at least %d bytes in the first write"u8, len(r.header))); goto ᒐdone;
             }
-            r.header = new array<byte>(b[..16], 16);
+            r.header.Assign(new array<byte>(b[..16], 16));
             n += 16;
             w.headerReceived = true;
         }

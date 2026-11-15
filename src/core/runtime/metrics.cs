@@ -531,7 +531,7 @@ internal static void initMetrics() {
 
     foreach (var (_, info) in range(godebugs.All)) {
         if (!info.Opaque) {
-            metrics["/godebug/non-default-behavior/"u8 + info.Name + ":events"u8] = new metricData(compute: compute0);
+            metrics["/godebug/non-default-behavior/"u8 + info.Name + ":events"u8].AssignFrom(new metricData(compute: compute0));
         }
     }
 
@@ -564,7 +564,7 @@ internal static void godebug_registerMetric(@string name, Func<uint64> read) {
     }
     var recvʗ1 = NilSafeDelegateConversion<metricReader, Func<uint64>>(read);
     d.compute = (ж<statAggregate> p1, ж<metricValue> p2) => recvʗ1.compute(p1, p2);
-    metrics[name] = d.ΔClone();
+    metrics[name].AssignFrom(d);
     metricsUnlock();
 }
 
@@ -850,7 +850,7 @@ internal static void ensure(this ж<statAggregate> Ꮡa, ж<statDepSet> deps) {
             break;
         }}
     }
-    a.ensured = a.ensured.union(missing);
+    a.ensured.Assign(a.ensured.union(missing));
 }
 
 // metricKind is a runtime copy of runtime/metrics.ValueKind and

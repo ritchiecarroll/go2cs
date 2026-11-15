@@ -8641,7 +8641,7 @@ internal static (ж<http2ClientConn>, error) dialClientConn(this ж<http2Transpo
 internal static ж<tls.Config> newTLSConfig(this ref http2Transport t, @string host) {
     var cfg = @new<tls.Config>();
     if (t.TLSClientConfig != nil) {
-        cfg.Value = t.TLSClientConfig.Clone().Value.ΔClone();
+        cfg.Value.AssignFrom(t.TLSClientConfig.Clone().Value);
     }
     if (!http2strSliceContains(cfg.NextProtos, http2NextProtoTLS)) {
         cfg.NextProtos = appendꓸꓸꓸ(slice<@string>([http2NextProtoTLS]), cfg.NextProtos);

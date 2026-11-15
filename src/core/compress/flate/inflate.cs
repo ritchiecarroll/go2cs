@@ -117,7 +117,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
     const bool sanity = false;
 
     if (h.min != 0) {
-        h = new huffmanDecoder();
+        h.AssignFrom(new huffmanDecoder());
     }
 
     // Count number of codes of each length,
@@ -824,13 +824,13 @@ internal static void fixedHuffmanDecoderInit() {
 }
 
 internal static error Reset(this ref decompressor f, io.Reader r, slice<byte> dict) {
-    f = new decompressor(
+    f.AssignFrom(new decompressor(
         rBuf: f.rBuf,
         bits: f.bits,
         codebits: f.codebits,
         dict: f.dict,
         step: ((Action<ж<decompressor>>)(nextBlock))
-    );
+    ));
     f.makeReader(r);
     f.dict.init(maxMatchOffset, dict);
     return default;

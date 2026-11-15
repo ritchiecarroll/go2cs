@@ -60,7 +60,7 @@ internal static void unpin(this ж<pinner> Ꮡp) {
     // The following two lines make all pointers to references
     // in p.refs unreachable, either by deleting them or dropping
     // p.refs' backing store (if it was not backed by refStore).
-    Δp.refStore = new @unsafe.Pointer[]{}.array(5);
+    Δp.refStore.Assign(new @unsafe.Pointer[]{}.array(5));
     Δp.refs = Δp.refStore[..0];
 }
 

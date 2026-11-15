@@ -938,7 +938,7 @@ internal static void schedinit() {
     stkobjinit();    // must run before GC starts
 
     sigsave((~gp).m.of(m.Ꮡsigmask));
-    initSigmask = gp.Value.m.Value.sigmask.Clone();
+    initSigmask.Assign(gp.Value.m.Value.sigmask);
 
     goargs();
     goenvs();
@@ -2488,7 +2488,7 @@ internal static void needm(bool signal) {
     mp.Value.needextram = last;
 
     // Store the original signal mask for use by minit.
-    mp.Value.sigmask = sigmask.Clone();
+    mp.Value.sigmask.Assign(sigmask);
 
     // Install TLS on some platforms (previously setg
     // would do this if necessary).
@@ -2951,7 +2951,7 @@ internal static void newm(Action fn, ж<Δp> pp, int64 id) {
 
     var mp = allocm(pp, fn, id);
     mp.of(m.Ꮡnextp).set(pp);
-    mp.Value.sigmask = initSigmask.Clone();
+    mp.Value.sigmask.Assign(initSigmask);
     var gp = getg(); if (gp != nil && (~gp).m != nil && ((~(~gp).m).lockedExt != 0 || (~(~gp).m).incgo) && GOOS != "plan9"u8) {
         // We're on a locked M or a thread that may have been
         // started by C. The kernel state of this thread may

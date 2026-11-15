@@ -299,7 +299,7 @@ internal static (int64 unsigned, int64 signed) computeChecksum(this ref block b)
 
 // reset clears the block with all zeros.
 internal static void reset(this ref block b) {
-    b = new block(new byte[512].array());
+    b.Assign(new block(new byte[512].array()));
 }
 
 /* [blockSize]byte */
