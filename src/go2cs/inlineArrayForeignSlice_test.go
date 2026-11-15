@@ -178,6 +178,37 @@ func goRunInlineModule(t *testing.T, name string, files map[string]string) strin
 	return strings.TrimSpace(strings.ReplaceAll(string(output), "\r\n", "\n"))
 }
 
+// recurseBuiltProgram is the program a build of project left. A -recurse conversion redirects every project's
+// BaseOutputPath under its output root's .artifacts/bin (generateRecurseBuildFiles), so the program is found there, by
+// the project's AssemblyName and its runtimeconfig, not assumed beside the project.
+func recurseBuiltProgram(t *testing.T, out, project string) string {
+	t.Helper()
+
+	contents, err := os.ReadFile(project)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	name := declaredAssemblyName(string(contents))
+	root := filepath.Dir(filepath.Dir(filepath.Dir(out))) // <root>/src/example.com/<name>
+	var found []string
+
+	_ = filepath.WalkDir(filepath.Join(root, ".artifacts", "bin"), func(path string, entry os.DirEntry, err error) error {
+		if err == nil && !entry.IsDir() && entry.Name() == name+".runtimeconfig.json" {
+			found = append(found, filepath.Join(filepath.Dir(path), name+".dll"))
+		}
+
+		return nil
+	})
+
+	if len(found) != 1 {
+		t.Fatalf("the build left %d programs named %s under %s, want 1: %v", len(found), name, filepath.Join(root, ".artifacts", "bin"), found)
+	}
+
+	return found[0]
+}
+
 // runConvertedInlineModule runs the program a build of the one project under out left, with args.
 func runConvertedInlineModule(t *testing.T, dotnet, out string, args ...string) string {
 	t.Helper()
@@ -188,7 +219,7 @@ func runConvertedInlineModule(t *testing.T, dotnet, out string, args ...string) 
 		t.Fatalf("the conversion wrote %d project files, want 1 (%v)", len(projects), err)
 	}
 
-	output, err := exec.Command(dotnet, append([]string{cgoBuiltAssembly(t, out, projects[0])}, args...)...).CombinedOutput()
+	output, err := exec.Command(dotnet, append([]string{recurseBuiltProgram(t, out, projects[0])}, args...)...).CombinedOutput()
 
 	if err != nil {
 		t.Fatalf("the converted program did not run: %v\n%s", err, output)
@@ -208,7 +239,11 @@ func runConvertedInlineModule(t *testing.T, dotnet, out string, args ...string) 
 //	B3 pinned objects  pinned <= control + 16
 //	B4 peak heap       pinned <= control * 2 + 1 MiB (sampled every millisecond during the run)
 //
-// Elapsed time and collection counts are reported, with no bar. The leak arm keeps every slice reachable, so its pins
+// Two instrument corrections were made after the first run and before any change to the code under test, and both
+// readings were reported: the program drains with runtime.GC() before it exits (collect, wait for finalizers, collect),
+// because finalizers do not run once the process is exiting, so the exit reading held every pin still queued for its
+// box's finalizer; and the peak samples GC.GetTotalMemory, because the last collection's heap size read 0 for a control
+// that never collected. Elapsed time and collection counts are reported, with no bar. The leak arm keeps every slice reachable, so its pins
 // can never be released: it must FAIL B1 and B3, or the bar cannot fail and proves nothing.
 var inlineSliceGCModule = map[string]string{
 	"win/win.go": inlineForeignSliceModule["win/win.go"],
@@ -230,6 +265,7 @@ func (g GUID) HeadCopy() []byte {
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strconv"
 
 	"example.com/slicegc/guid"
@@ -259,6 +295,9 @@ func main() {
 		}
 	}
 
+	// Go's own drain, inside the program's lifetime: the harness reads at process exit, when finalizers no
+	// longer run, so a pin waiting on its box's finalizer would read as retained.
+	runtime.GC()
 	fmt.Println("SUM", sum)
 }
 `,
@@ -282,7 +321,7 @@ const inlineSliceGCHarness = `namespace go2cs_slicegc_harness
             {
                 while (!s_stop)
                 {
-                    long heap = global::System.GC.GetGCMemoryInfo().HeapSizeBytes;
+                    long heap = global::System.GC.GetTotalMemory(false);
                     if (heap > s_peakHeap) s_peakHeap = heap;
                     global::System.Threading.Thread.Sleep(1);
                 }
