@@ -52,10 +52,11 @@ namespace go;
 /// <para>
 /// SCOPE. <typeparamref name="TDst"/> is a value type whose two instance fields are, in declaration order, the
 /// <c>unsafe.Pointer</c> class and an <c>nint</c>: unsafeheader.String, runtime.stringStruct, internal/runtime/maps'
-/// stringStruct.
+/// stringStruct. Or a <c>uintptr</c> and an <c>nint</c>, <c>reflect.StringHeader</c>: the NUMBER shape, whose Data
+/// follows Go's rodata-or-heap split (see <c>s_dataIsNumber</c>; docs/phase4/DESIGN-sqlite-ccgo-ts.md).
 /// </para>
 /// </remarks>
-internal sealed class StringHeaderBox<TDst> : ж<TDst>
+internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
 {
     private static readonly FieldInfo[]? s_fields;      // [0] pointer, [1] len — declaration order
     private static readonly MethodInfo? s_fromBox;      // <pointer type>.FromBoxObject(object box) → pointer object
@@ -81,18 +82,47 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>
 
         Type pointerType = fields[0].FieldType;
 
-        if (!pointerType.IsClass || !typeof(IUnsafePointer).IsAssignableFrom(pointerType) || fields[1].FieldType != typeof(nint))
+        // reflect.StringHeader's Data is a NUMBER (uintptr); see s_dataIsNumber.
+        bool number = pointerType == typeof(uintptr);
+
+        if (fields[1].FieldType != typeof(nint))
             return;
 
-        MethodInfo? fromBox = pointerType.GetMethod("FromBoxObject", BindingFlags.Public | BindingFlags.Static, [typeof(object)]);
+        MethodInfo? fromBox = null;
 
-        if (fromBox is null || !pointerType.IsAssignableFrom(fromBox.ReturnType))
-            return;
+        if (!number)
+        {
+            if (!pointerType.IsClass || !typeof(IUnsafePointer).IsAssignableFrom(pointerType))
+                return;
+
+            fromBox = pointerType.GetMethod("FromBoxObject", BindingFlags.Public | BindingFlags.Static, [typeof(object)]);
+
+            if (fromBox is null || !pointerType.IsAssignableFrom(fromBox.ReturnType))
+                return;
+        }
 
         s_fields = fields;
         s_fromBox = fromBox;
+        s_dataIsNumber = number;
         Applies = true;
     }
+
+    // Whether the header's Data is a uintptr (reflect.StringHeader) rather than the unsafe.Pointer class.
+    //
+    // THE NUMBER SHAPE (docs/phase4/DESIGN-sqlite-ccgo-ts.md, section 10 as amended by 10.1-10.3). Go keeps a string
+    // literal's bytes in read-only data, and every other string's bytes in the heap, and the number follows that split:
+    //
+    //   (L) A header over PACKAGE-LEVEL storage (StaticBox<T>, IPackageLevelStorage) reads the base of an IMMORTAL native
+    //       copy of the backing, plus the window's offset (StringLiteralCopies). ccgo's `__ccgo_ts` is this case: taken
+    //       once at init and read at `__ccgo_ts + N` for the program's life, which a managed address cannot outlive.
+    //   (H) Every other header reads the number of the backing's element at the window's start through that element
+    //       box's pin-only hold, as &b[0] does: live bytes, Go memory at the cgo door, StringData == Data as in Go. The
+    //       number stays valid while the ELEMENT BOX lives, not while the string does; this box keeps it, and
+    //       unsafe.Pointer(h.Data) carries it (IHeaderDataCarrier).
+    //   QW-9: an (H) read whose backing already has an (L) copy takes that copy, so one literal has one number.
+    //   F4: an empty window reads 0, before any table; under (L) a zero-length window of a non-empty backing reads base
+    //       + offset, as Go keeps it; under (H) it has no element to box and reads 0 (disclosed, W5b).
+    private static readonly bool s_dataIsNumber;
 
     internal static ж<TDst> Mint(ж<@string> source)
     {
@@ -104,7 +134,9 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>
     private TDst m_handedOut = default!;
     private bool m_materialized;
     private @string m_pointerFor;        // the string the cached pointer was minted for
-    private object? m_pointer;
+    private object? m_pointer;           // the pointer object; for the number shape under (H), the element box itself
+    private nuint m_number;              // the number shape's Data word for m_pointerFor
+    private bool m_wordFromStore;        // m_number is a word the program STORED (kept while the window is unchanged)
     private bool m_held;                 // L2, as SliceHeaderBox's
     private @string m_heldOver;
 
@@ -160,7 +192,18 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>
         object? data = s_fields![0].GetValue(boxed);
         nint len = (nint)s_fields[1].GetValue(boxed)!;
 
-        HeaderData.Kind kind = HeaderData.Resolve(data, out Array? backing, out nint index, out nuint address);
+        // A number Data (D5) resolves through the registry, or through the element box this header minted it from. An (L)
+        // copy's number is native memory, so a store of it rebuilds the string as a copy.
+        nuint word = s_dataIsNumber ? ((uintptr)data!).Value : 0;
+        object? carried = s_dataIsNumber && word != 0 && word == m_number ? m_pointer : null;
+        Array? backing;
+        nint index;
+        nuint address;
+
+        HeaderData.Kind kind = s_dataIsNumber
+            ? HeaderData.ResolveNumber(word, carried, out backing, out index, out address)
+            : HeaderData.Resolve(data, out backing, out index, out address);
+
         @string? rebuilt = null;
 
         switch (kind)
@@ -203,9 +246,78 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>
 
         m_source.Value = value;
         m_held = false;
-        m_pointer = data;
+
+        // The header keeps the Data it was given while the window it built is unchanged, as Go's header word does: a
+        // later Len-only store commits from it (P3's point 4). For the number shape that is the stored word, with the
+        // element box it was minted from when it is this header's own.
+        if (s_dataIsNumber)
+        {
+            m_number = word;
+            m_pointer = carried;
+            m_wordFromStore = true;
+        }
+        else
+        {
+            m_pointer = data;
+        }
+
         m_pointerFor = value;
         m_handedOut = m_value;
+    }
+
+    /// <inheritdoc/>
+    public nuint HeaderDataWord(out object? carried)
+    {
+        object data = s_fields![0].GetValue(Value)!;
+
+        if (!s_dataIsNumber)
+        {
+            // The unsafe.Pointer shape: its pointer object already carries its box.
+            carried = (data as IUnsafePointer)?.RetainedSource;
+            return data is ж<uintptr> { IsNull: false } word ? word.Value.Value : 0;
+        }
+
+        nuint number = ((uintptr)data).Value;
+        carried = number != 0 && number == m_number ? m_pointer : null;
+        return number;
+    }
+
+    // The number shape's Data for the string now: (L), QW-9, F4 and (H), in that order. elementBox is set only under (H).
+    private nuint NumberFor(@string source, out object? elementBox)
+    {
+        elementBox = null;
+
+        slice<byte> window = source.UnsafeBackingWindow();
+        byte[] backing = window.m_array;
+        nuint offset = (nuint)window.Low;
+
+        // F4: an empty backing is the empty string's, and reads 0 before any table.
+        if (backing.Length == 0)
+            return 0;
+
+        // (L): package-level storage reads its immortal copy, validated on every read (R-a), a zero-length window
+        // included.
+        if (m_source is IPackageLevelStorage)
+            return StringLiteralCopies.BaseOf(backing) + offset;
+
+        // QW-9: a backing that already has an (L) copy, however it is reached, reads that copy, validated too.
+        if (StringLiteralCopies.TryExisting(backing, out nuint @base))
+            return @base + offset;
+
+        // (H) over a zero-length window: there is no element to box (W5b).
+        if (source.Length == 0)
+            return 0;
+
+        // (H): the element at the window's start, through its pin-only hold, reusing the box minted for this window.
+        if (m_pointer is not null && SameWindow(source, m_pointerFor))
+        {
+            elementBox = m_pointer;
+            return m_number;
+        }
+
+        ж<byte> element = builtin.Ꮡ(window, 0);
+        elementBox = element;
+        return ((INilPointer)element).StableAddress();
     }
 
     // L3: the store is dropped, as SliceHeaderBox's is.
@@ -232,15 +344,35 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>
             m_held = false;
         }
 
-        if (m_pointer is null || !SameWindow(source, m_pointerFor))
+        object boxed = default(TDst)!;
+
+        if (s_dataIsNumber)
         {
-            object? elementZero = source.Length == 0 ? null : builtin.Ꮡ(source.UnsafeBackingWindow(), 0);
-            m_pointer = s_fromBox!.Invoke(null, [elementZero]);
-            m_pointerFor = source;
+            // A word the program stored is kept while the window it built is unchanged. Otherwise the number is derived
+            // on every access: (L) and QW-9 validate the copy on each read (R-a), and (H) reuses its element box while
+            // the window is unchanged.
+            if (!m_wordFromStore || !SameWindow(source, m_pointerFor))
+            {
+                m_wordFromStore = false;
+                m_number = NumberFor(source, out object? elementBox);
+                m_pointer = elementBox;
+                m_pointerFor = source;
+            }
+
+            s_fields![0].SetValue(boxed, (uintptr)m_number);
+        }
+        else
+        {
+            if (m_pointer is null || !SameWindow(source, m_pointerFor))
+            {
+                object? elementZero = source.Length == 0 ? null : builtin.Ꮡ(source.UnsafeBackingWindow(), 0);
+                m_pointer = s_fromBox!.Invoke(null, [elementZero]);
+                m_pointerFor = source;
+            }
+
+            s_fields![0].SetValue(boxed, m_pointer);
         }
 
-        object boxed = default(TDst)!;
-        s_fields![0].SetValue(boxed, m_pointer);
         s_fields[1].SetValue(boxed, (nint)source.Length);
 
         m_value = (TDst)boxed;

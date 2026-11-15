@@ -170,19 +170,22 @@ public unsafe class StringHeaderNumberTests
     }
 
     // W7: the cgo door crosses (L)'s number (native memory, as Go's rodata is not a Go pointer to cgoIsGoPointer) and
-    // refuses (H)'s (Go heap memory, as &b[0] is refused under 3.1).
+    // refuses (H)'s (Go heap memory, as &b[0] is refused under 3.1). (H)'s EXACT number is refused by the pin registry;
+    // an INTERIOR one (h + 2) is refused only where the pin-extent index is in the tree, which the arm adds once this
+    // cut sits on the union carrying that seat.
     [TestMethod]
     public void W7_TheDoorCrossesLAndRefusesH()
     {
         ж<@string> Ꮡlit = new StaticBox<@string>("w7-door\x00");
         nuint l = DataOf(Ꮡlit);
+        GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)l), "f");
         GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)(l + 2)), "f");
 
         ref @string s = ref heap(new @string(System.Text.Encoding.ASCII.GetBytes("w7-heap")), out ж<@string> Ꮡs);
         ж<NumberStringHeader> sh = Ꮡs.Reinterpret<@string, NumberStringHeader>();
         nuint h = (nuint)sh.Value.Data;
 
-        Assert.ThrowsException<PanicException>(() => GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)(h + 2)), "f"));
+        Assert.ThrowsException<PanicException>(() => GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)h), "f"));
         GC.KeepAlive(sh);
     }
 
@@ -236,6 +239,159 @@ public unsafe class StringHeaderNumberTests
         PanicException refused = Assert.ThrowsException<PanicException>(() => DataOf(Ꮡpkg));
         StringAssert.Contains(refused.Message, "changed after go2cs copied them");
         GC.KeepAlive(Ꮡlocal);
+    }
+
+    // reflect.SliceHeader: Data uintptr; Len, Cap int.
+    private struct NumberSliceHeader
+    {
+        public uintptr Data;
+        public nint Len;
+        public nint Cap;
+    }
+
+    // W9: churn. 100,000 distinct heap strings read through (H) make NO copy and no compare (the (L) table is touched
+    // only by package-level reads and their shared backings), and the heap returns near its start after collection; 64
+    // distinct package-level literals make exactly 64 copies of exactly their bytes.
+    [TestMethod]
+    public void W9_HeapChurnMakesNoCopyAndPackageReadsCopyOncePerBacking()
+    {
+        long copies = StringLiteralCopies.Copies, bytes = StringLiteralCopies.CopiedBytes;
+        GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+        long heapBefore = GC.GetTotalMemory(forceFullCollection: true);
+
+        for (int i = 0; i < 100_000; i++)
+        {
+            ref @string s = ref heap(new @string(System.Text.Encoding.ASCII.GetBytes($"heap-{i}")), out ж<@string> Ꮡs);
+            _ = DataOf(Ꮡs);
+        }
+
+        Assert.AreEqual(copies, StringLiteralCopies.Copies, "(H) makes no copy");
+        Churn();
+        long heapAfter = GC.GetTotalMemory(forceFullCollection: true);
+        Assert.IsTrue(heapAfter - heapBefore < 16 << 20, $"the heap returns near its start after the churn: {heapBefore} -> {heapAfter}");
+
+        long expected = 0;
+
+        for (int i = 0; i < 64; i++)
+        {
+            byte[] literal = System.Text.Encoding.ASCII.GetBytes($"w9-literal-{i}\x00");
+            expected += literal.Length;
+            _ = DataOf(new StaticBox<@string>(new @string(literal)));
+        }
+
+        Assert.AreEqual(copies + 64, StringLiteralCopies.Copies, "one copy per package-level backing");
+        Assert.AreEqual(bytes + expected, StringLiteralCopies.CopiedBytes, "each copy is exactly its backing's bytes");
+    }
+
+    // W10: the (L) table's first read, raced by 4 threads on each of 2,000 fresh package-level strings. Every thread reads
+    // the same number for a string, and every block a losing offer built was freed: the table accepted exactly one copy
+    // per string.
+    [TestMethod]
+    public void W10_RacedFirstReadsAgreeOnOneNumberAndFreeEveryLoser()
+    {
+        const int strings = 2_000, threads = 4;
+        long copies = StringLiteralCopies.Copies;
+        var boxes = new ж<@string>[strings];
+        nuint[,] got = new nuint[strings, threads];
+        int[] arrived = new int[strings];
+
+        for (int i = 0; i < strings; i++)
+            boxes[i] = new StaticBox<@string>(new @string(System.Text.Encoding.ASCII.GetBytes($"w10-{i}")));
+
+        var workers = new System.Threading.Thread[threads];
+
+        for (int t = 0; t < threads; t++)
+        {
+            int me = t;
+            workers[t] = new System.Threading.Thread(() =>
+            {
+                for (int i = 0; i < strings; i++)
+                {
+                    System.Threading.Interlocked.Increment(ref arrived[i]);
+                    System.Threading.SpinWait spin = default;
+
+                    while (System.Threading.Volatile.Read(ref arrived[i]) < threads)
+                        spin.SpinOnce(-1);
+
+                    got[i, me] = DataOf(boxes[i]);
+                }
+            });
+            workers[t].Start();
+        }
+
+        foreach (System.Threading.Thread worker in workers)
+            worker.Join();
+
+        for (int i = 0; i < strings; i++)
+        {
+            for (int t = 1; t < threads; t++)
+                Assert.AreEqual(got[i, 0], got[i, t], $"string {i}: two threads read different numbers");
+
+            Assert.AreEqual($"w10-{i}", Bytes(got[i, 0], $"w10-{i}".Length));
+        }
+
+        Assert.AreEqual(copies + strings, StringLiteralCopies.Copies, "exactly one accepted copy per string; every loser was freed, not kept");
+    }
+
+    // W13's precursor and W15 (QW-8, P3's item 1): the pointer FromHeaderData answers CARRIES the element box, so a
+    // pointee box derived from it alone, the LAST link, keeps the bytes across forced compacting collections with
+    // finalizers, with the string, the header and the pointer all dropped. W13 proper is written after the rebase onto
+    // 308, against the view door the converter emits for (*RawMem)(p)[:n:n].
+    [TestMethod]
+    public void W13a_AStringHeadersCarriedPointerKeepsTheBytesThroughTheLastLink()
+    {
+        ж<byte> last = LastLinkOfString();
+        Churn();
+
+        Assert.AreEqual((byte)'c', last.Value, "the bytes the header named are still read through the last link");
+    }
+
+    [TestMethod]
+    public void W15_ASliceHeadersCarriedPointerKeepsTheBytesThroughTheLastLink()
+    {
+        ж<byte> last = LastLinkOfSlice();
+        Churn();
+
+        Assert.AreEqual((byte)'s', last.Value, "the slice's bytes are still read through the last link");
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static ж<byte> LastLinkOfString()
+    {
+        ref @string s = ref heap(new @string(System.Text.Encoding.ASCII.GetBytes("carried")), out ж<@string> Ꮡs);
+        ж<NumberStringHeader> sh = Ꮡs.Reinterpret<@string, NumberStringHeader>();
+        @unsafe.Pointer p = @unsafe.Pointer.FromHeaderData(sh);
+
+        Assert.IsNotNull(p.RetainedSource, "a header box's Data pointer carries its element box");
+        return @unsafe.Pointer.To<byte>(p);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static ж<byte> LastLinkOfSlice()
+    {
+        ref slice<byte> b = ref heap(new slice<byte>(System.Text.Encoding.ASCII.GetBytes("slice")), out ж<slice<byte>> Ꮡb);
+        ж<NumberSliceHeader> h = Ꮡb.Reinterpret<slice<byte>, NumberSliceHeader>();
+        Assert.AreEqual(5, (int)h.Value.Len);
+        @unsafe.Pointer p = @unsafe.Pointer.FromHeaderData(h);
+
+        Assert.IsNotNull(p.RetainedSource, "a slice header box's Data pointer carries its element box");
+        return @unsafe.Pointer.To<byte>(p);
+    }
+
+    // W16 (P3's item 2): a header built field by field is a PLAIN struct box; FromHeaderData answers exactly today's
+    // number pointer for it: the same number, carrying nothing.
+    [TestMethod]
+    public void W16_APlainStructHeaderKeepsTodaysNumberPointer()
+    {
+        ref NumberStringHeader plain = ref heap(new NumberStringHeader { Data = (uintptr)(nuint)0x1234, Len = 1 }, out ж<NumberStringHeader> Ꮡplain);
+        @unsafe.Pointer p = @unsafe.Pointer.FromHeaderData(Ꮡplain);
+        @unsafe.Pointer today = (uintptr)(nuint)0x1234;
+
+        Assert.AreEqual((nuint)(uintptr)today, (nuint)(uintptr)p, "the same number as today's (@unsafe.Pointer)p.Data");
+        Assert.IsNull(p.RetainedSource, "a plain struct's Data carries nothing, as today");
+
+        ref NumberStringHeader zero = ref heap(default(NumberStringHeader), out ж<NumberStringHeader> Ꮡzero);
+        Assert.IsTrue(@unsafe.Pointer.FromHeaderData(Ꮡzero).IsNull, "a zero Data is the nil pointer, as today");
     }
 
     // W12's (H) half on a buffer no package variable has read: the header reads the live bytes after the write.
