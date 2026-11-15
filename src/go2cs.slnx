@@ -316,6 +316,7 @@
     <Project Path="tests/Behavioral/AnonStructAliasedConversion/structs/AnonStructAliasedConversion.structs.csproj" />
     <Project Path="tests/Behavioral/AnonStructNamedConversion/AnonStructNamedConversion.csproj" />
     <Project Path="tests/Behavioral/AnonStructNamedConversion/structs/AnonStructNamedConversion.structs.csproj" />
+    <Project Path="tests/Behavioral/AnonStructReinterpretLift/AnonStructReinterpretLift.csproj" />
     <Project Path="tests/Behavioral/AnonStructCrossFile/AnonStructCrossFile.csproj" />
     <Project Path="tests/Behavioral/AnonStructTypeArgVarDecl/AnonStructTypeArgVarDecl.csproj" />
     <Project Path="tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
@@ -544,6 +545,7 @@
     <Project Path="tests/Behavioral/FieldNameShadowsLoopVar/FieldNameShadowsLoopVar.csproj" />
     <Project Path="tests/Behavioral/FieldNameTypeMethodCollision/FieldNameTypeMethodCollision.csproj" />
     <Project Path="tests/Behavioral/FieldNamedAsType/FieldNamedAsType.csproj" />
+    <Project Path="tests/Behavioral/FieldViewOverGoStruct/FieldViewOverGoStruct.csproj" />
     <Project Path="tests/Behavioral/FileNameBuildConstraints/FileNameBuildConstraints.csproj" />
     <Project Path="tests/Behavioral/FindFirstFileData/FindFirstFileData.csproj" />
     <Project Path="tests/Behavioral/FirstClassFunctions/FirstClassFunctions.csproj" />

@@ -1,0 +1,25 @@
+two-hop direct read [1]: 0x12
+two-hop direct write [0]: port 0x12ab
+two-hop local read [1]: 0x12
+two-hop local write [0]: port 0x1222
+two-hop len: 2
+two-hop slice: len 2 cap 2 port 0x3322
+two-hop word [1]: 0x11111111
+variable direct read [1]: 0x12
+variable direct write [0]: port 0x12ab
+variable local read [1]: 0x12
+variable local write [0]: port 0x12cd
+variable local range value: 0x46
+package direct read [1]: 0x12
+package direct write [0]: port 0x12ef
+package local read [1]: 0x12
+deref root direct read [1]: 0x33
+ref two-hop fresh direct read [1]: 0x12
+ref two-hop fresh direct write [0]: raw.port 0x12ab
+ref two-hop fresh direct write [1]: raw.port 0xcdab
+ref two-hop fresh direct address [1]: raw.port 0xeeab
+ref two-hop fresh direct slice: len 2 cap 2 raw.port 0xee11
+ref two-hop local write: raw.port 0x901f
+ref two-hop local read: 0x1f90
+ref two-hop direct write [0]: raw.port 0x90ab
+ref two-hop direct read [1]: 0x90

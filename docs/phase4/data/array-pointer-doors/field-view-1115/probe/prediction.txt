@@ -1,0 +1,26 @@
+F1 scope probe, prediction written 2026-11-15 09:22Z, BEFORE the converted program is built or run.
+Source of the prediction: the base emission (out-base/main.cs at 516586c4a9) and a reading of golib
+(unsafe.ArrayPointer<T>.Of, builtin.NativeFieldArrayPointer, ж<T>.FromNumber, NativeBox<T>.Value,
+PointerExtensions.ElementRef). 64 lines in Go's output.
+
+P1 native root (mmap): the four ElementRef arms (local read, local write, local range index, local word)
+   print Go's lines. Every arm that reads `.Value` (direct read, direct write, direct op-assign, direct word,
+   direct whole, local range value, local whole) panics by name (a native array pointer has no array<T>).
+   direct len prints 2. direct address (.at), direct slice and local slice (.slice()): NOT PREDICTED.
+P2 managed, global and over-bytes roots: Of answers the raw route, a NativeBox<array<T>> over the field's
+   pinned address, and both `.Value[i]` and ElementRef (which falls back to `.Value[i]` for that box) read
+   the field's bytes as array<T>'s three fields. So EVERY arm but direct len is wrong on these roots, the
+   local ones included: a panic with a garbage length, a wrong value, or the host dying on a fabricated
+   reference. If the host dies, the arms after it are not measured and the probe is rerun per root.
+   Falsifier: a local-form arm over the managed root that prints Go's line.
+P3 the reference-bearing struct: all four arms wrong or refused by name (its field has no address).
+P4 syscall's own header (linux/sockaddr_linux_impl.cs) already calls the local form over a Go root "this
+   file's exact defect" in recvfromInet4 and recvfromInet6, dead code. Census of Of sites in the corpus: 11
+   (8 syscall linux+darwin, 2 net darwin over libc memory, 1 runtime/rand.cs 32-bit path).
+
+PREDICTION FOR THE CUT (A + B), written 2026-11-15 09:57Z before the probe is converted or run with it.
+Of Go's 64 lines: the four roots with an address (heap, package variable, struct over a byte slice, mmap)
+print Go's line in 12 of 15 arms each, 48 lines. The 3 arms per root that read the whole array through
+Value (direct whole, local range by value, local whole) refuse by name, 12 lines, and since none of them
+writes, no later line moves. The reference-bearing struct: 4 of 4 refused by name, in the new words.
+Falsifier: any of the 48 differs from Go's line, or any refusal is not by name.

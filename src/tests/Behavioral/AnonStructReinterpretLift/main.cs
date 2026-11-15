@@ -1,0 +1,110 @@
+global using Tuint32_t = uint;
+global using Tuint64_t = ulong;
+
+namespace go;
+
+using fmt = fmt_package;
+using Δmath = math_package;
+using @unsafe = unsafe_package;
+using System.Runtime.InteropServices;
+using go.golib;
+
+partial class main_package {
+
+[global::go.golib.GoInlineLayout(Size = 8, Align = 8), StructLayout(LayoutKind.Explicit, Size = 8)] internal partial struct fpclassify_u /*dyn*/ {
+    [FieldOffset(0)] [GoAlignmentCarrier(typeof(array<Tuint64_t>))] public readonly long Fi;
+    [FieldOffset(0)] public float64 Ff;
+}
+
+internal partial struct fpclassify_type /*dyn*/ {
+    internal float64 f;
+}
+
+internal static int32 fpclassify(float64 x) {
+    int32 e = default;
+    ref var u = ref heap(new fpclassify_u(), out var Ꮡu);
+    _ = u;
+    u = (Ꮡ(new fpclassify_type(f: x)).Reinterpret<fpclassify_type, fpclassify_u>()).Value;
+    e = (int32)((Tuint64_t)((~Ꮡu.Reinterpret<fpclassify_u, Tuint64_t>() >> (int)((int32)52)) & (uint64)0x7ff));
+    return e;
+}
+
+[global::go.golib.GoInlineLayout(Size = 4, Align = 4), StructLayout(LayoutKind.Explicit, Size = 4)] internal partial struct copysignf_ux /*dyn*/ {
+    [FieldOffset(0)] [GoAlignmentCarrier(typeof(array<Tuint32_t>))] public readonly int Fi;
+    [FieldOffset(0)] public float32 Ff;
+}
+
+internal partial struct copysignf_type /*dyn*/ {
+    internal float32 f;
+}
+
+internal static float32 copysignf(float32 x, float32 y) {
+    ref var ux = ref heap(new copysignf_ux(), out var Ꮡux);
+    ref var uy = ref heap(new copysignf_ux(), out var Ꮡuy);
+    _ = ux;
+    _ = uy;
+    ux = (Ꮡ(new copysignf_type(f: x)).Reinterpret<copysignf_type, copysignf_ux>()).Value;
+    uy = (Ꮡ(new copysignf_type(f: y)).Reinterpret<copysignf_type, copysignf_ux>()).Value;
+    (Ꮡux.Reinterpret<copysignf_ux, Tuint32_t>()).Value &= (uint32)0x7fffffff;
+    (Ꮡux.Reinterpret<copysignf_ux, Tuint32_t>()).Value |= (Tuint32_t)(~Ꮡuy.Reinterpret<copysignf_ux, Tuint32_t>() & (uint32)0x80000000U);
+    return ~Ꮡux.Reinterpret<copysignf_ux, float32>();
+}
+
+internal partial struct pair_p /*dyn*/ {
+    public uint32 A;
+}
+
+internal static uint32 pair(uint32 a, uint32 b) {
+    pair_p p = default;
+    pair_p q = default;
+    (p.A, q.A) = (a, b);
+    return p.A * 10 + q.A;
+}
+
+internal partial struct sliceShape_s /*dyn*/ {
+    public uint32 A;
+}
+
+internal static uint32 sliceShape(uint32 a, uint32 b) {
+    slice<sliceShape_s> s = default;
+    slice<sliceShape_s> t = default;
+    s = append(s, new sliceShape_s(a));
+    t = append(t, new sliceShape_s(b));
+    return s[0].A * 10 + t[0].A;
+}
+
+internal partial struct pointerShape_c /*dyn*/ {
+    public uint32 B;
+}
+
+internal static uint32 pointerShape(uint32 a, uint32 b) {
+    ж<pointerShape_c> c = default;
+    ж<pointerShape_c> d = default;
+    (c, d) = (Ꮡ(new pointerShape_c(a)), Ꮡ(new pointerShape_c(b)));
+    c.Value.B++;
+    return (~c).B * 10 + (~d).B;
+}
+
+internal partial struct nestedShape_n_In /*dyn*/ {
+    public uint32 C;
+}
+
+internal partial struct nestedShape_n /*dyn*/ {
+    public nestedShape_n_In In;
+}
+
+internal static uint32 nestedShape(uint32 a, uint32 b) {
+    nestedShape_n n = default;
+    nestedShape_n m = default;
+    (n.In.C, m.In.C) = (a, b);
+    return n.In.C * 10 + m.In.C;
+}
+
+internal static void main() {
+    fmt.Println(fpclassify(1.5D), fpclassify(0D), fpclassify(Δmath.Inf(1)));
+    fmt.Println(copysignf(3F, -1F), copysignf(-2.5F, 1F));
+    fmt.Println(pair(4, 2));
+    fmt.Println(sliceShape(4, 2), pointerShape(4, 2), nestedShape(4, 2));
+}
+
+} // end main_package

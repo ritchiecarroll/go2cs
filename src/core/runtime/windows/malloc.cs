@@ -1383,8 +1383,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcTiny(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0; // Always zero
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0; // Always zero
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
     // See if we need to replace the existing tiny block with the new one
     // based on amount of remaining free space.
     if (!raceenabled && (size < c.tinyoffset || c.tiny == 0)) {
