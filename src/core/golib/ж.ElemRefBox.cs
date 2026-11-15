@@ -55,6 +55,8 @@ namespace go;
     // expression, so the weak-table fallback paid an insert under its lock on every such box.
     internal ViewEntry? m_views;
 
+    internal override ref ViewEntry? ElementViews => ref m_views;
+
     // The native marshals' run source (NativeStructMarshal.CallDeep and the shared darwin/linux marshal): the
     // fast arm's backing and absolute index. The foreign arm has no contiguous backing, so it answers none.
     Array? IElementRun.RunBacking => m_backing;
