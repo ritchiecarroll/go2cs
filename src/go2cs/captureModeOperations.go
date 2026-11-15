@@ -1380,14 +1380,28 @@ func bodyTakesReceiverFieldAddress(body *ast.BlockStmt, recvName string, recvObj
 	pinFree := pinFreeInlineCopySlices(body, info)
 
 	ast.Inspect(body, func(node ast.Node) bool {
-		// The operand whose address the node takes: `&v.f`, or `v.f` of a slice `v.f[lo:hi]` of an array held inline in
-		// the receiver's pointee, which is emitted over the field's address (inlineArraySliceBase) and so needs the
-		// receiver's box as `&v.f` does (but not one a copy reads or writes over a reference, inlineArrayCopyOperand).
+		// A slice `v.f[lo:hi]` of an array held inline in the receiver's storage is emitted over the field's address
+		// (inlineArraySliceBase), so it needs the receiver's box as `&v.f` does (but not one a copy reads or writes over
+		// a reference, inlineArrayCopyOperand). Its root is found by inlineSliceStorageRoot, the predicate every address
+		// walk shares, so an array index or a nested inline array on the way (`v.arr[i].f[:]`, `v.m[i][:]`) is the
+		// receiver's too (P3's review, ruling 2, COORD 2026-11-15). Matched by OBJECT, as the deep `&` chain below is.
+		if slice, ok := node.(*ast.SliceExpr); ok {
+			if pinFree[slice] || !inlineArraySliceSpelled(slice, info) {
+				return true
+			}
+
+			if root, _, ok := inlineSliceStorageRoot(slice.X, info); ok && root.Name == recvName && (recvObj == nil || info.ObjectOf(root) == recvObj) {
+				found = true
+				return false
+			}
+
+			return true
+		}
+
+		// The operand whose address the node takes: `&v.f`.
 		var addressed ast.Expr
 
-		if slice, ok := node.(*ast.SliceExpr); ok && !pinFree[slice] && inlineArraySliceSpelled(slice, info) {
-			addressed = ast.Unparen(slice.X)
-		} else if unaryExpr, ok := node.(*ast.UnaryExpr); ok && unaryExpr.Op == token.AND {
+		if unaryExpr, ok := node.(*ast.UnaryExpr); ok && unaryExpr.Op == token.AND {
 			addressed = unaryExpr.X
 		} else {
 			return true

@@ -14,6 +14,7 @@ import (
 	"go/constant"
 	"go/token"
 	"go/types"
+	"path/filepath"
 	"strings"
 )
 
@@ -255,6 +256,17 @@ func (v *Visitor) inlineArraySliceBase(array ast.Expr) (string, bool) {
 
 	address := v.convUnaryExpr(&ast.UnaryExpr{OpPos: array.Pos(), Op: token.AND, X: array}, DefaultUnaryExprContext())
 
+	// P3's review, ruling 4 (COORD 2026-11-15): a slice cut from golib's one-argument Ꮡ(value) would alias a COPY of the
+	// operand, so every write through it would be lost with nothing said. That spelling means an address walk missed
+	// the variable that holds the array (escape analysis, capture mode, ref lowering or the package-variable scan), which
+	// is a converter defect, so the file is refused here, naming the site: the run fails (GO2CS2008) instead of the
+	// program printing a wrong answer.
+	if addressIsCopyBox(address) {
+		position := v.fset.Position(array.Pos())
+		panic(fmt.Sprintf("a slice of the inline array %s at %s:%d would be cut from a copy (%s), so its writes would be lost: no address walk boxed the variable that holds it",
+			types.ExprString(array), filepath.Base(position.Filename), position.Line, address))
+	}
+
 	if strings.HasPrefix(address, "(") && !isFullyParenthesized(address) || strings.HasPrefix(address, "~") {
 		address = "(" + address + ")"
 	}
@@ -269,10 +281,120 @@ func inlineSliceElementIsPlain(elem types.Type) bool {
 	return ok && basic.Info()&(types.IsNumeric|types.IsBoolean) != 0
 }
 
+// addressIsCopyBox reports whether address, convUnaryExpr's spelling of &x, boxes a COPY of x: golib's one-argument
+// Ꮡ(value) (builtin.cs), alone or followed by a field or element step. Every other Ꮡ overload takes a container and an
+// index and aliases the element. A comma inside a generic argument list at the call's own depth reads as a second
+// argument, so the test can miss a copy there; it never refuses a spelling that aliases.
+func addressIsCopyBox(address string) bool {
+	if !strings.HasPrefix(address, AddressPrefix+"(") {
+		return false
+	}
+
+	depth := 0
+
+	for _, r := range address[len(AddressPrefix):] {
+		switch r {
+		case '(', '[', '{':
+			depth++
+		case ')', ']', '}':
+			depth--
+
+			if depth == 0 {
+				return true
+			}
+		case ',':
+			if depth == 1 {
+				return false
+			}
+		}
+	}
+
+	return false
+}
+
+// inlineSliceStorageRoot walks the operand of a slice of an inline array (x.f, x.a.f, x.arr[i].f, x.m[i], p.f, (*p).f)
+// down its storage chain to the variable whose storage holds it, and reports whether the chain reaches that variable
+// through a pointer (the variable is a pointer and its pointee holds the array). It is THE predicate for the four address
+// walks (escape analysis, objectAddressTaken, capture mode and the package-variable scan), so each boxes exactly the
+// roots inlineArraySliceBase spells (P3's review, ruling 2, COORD 2026-11-15).
+//
+// Only hops that stay inside one variable's storage are walked: a field of a struct value and an element of an array
+// value. A pointer is admitted only at the root (p.f with p a pointer, (*p).f); a slice element, a map element, a call,
+// or a pointer reached deeper in names storage that already has a box of its own, and answers false. A package-qualified
+// variable (pkg.V.f) roots at V.
+func inlineSliceStorageRoot(expr ast.Expr, info *types.Info) (root *ast.Ident, indirect bool, ok bool) {
+	for hops := 0; ; hops++ {
+		switch e := ast.Unparen(expr).(type) {
+		case *ast.SelectorExpr:
+			selection, found := info.Selections[e]
+
+			if !found {
+				// A package-qualified variable: pkg.V.
+				if pkgIdent, isIdent := ast.Unparen(e.X).(*ast.Ident); isIdent && hops > 0 {
+					if _, isPkg := info.Uses[pkgIdent].(*types.PkgName); isPkg {
+						return e.Sel, false, true
+					}
+				}
+
+				return nil, false, false
+			}
+
+			if selection.Kind() != types.FieldVal {
+				return nil, false, false
+			}
+
+			if selection.Indirect() {
+				ident, isIdent := ast.Unparen(e.X).(*ast.Ident)
+
+				if !isIdent {
+					return nil, false, false
+				}
+
+				if _, isPointer := types.Unalias(info.TypeOf(ident)).Underlying().(*types.Pointer); !isPointer {
+					return nil, false, false // a promoted field through an embedded pointer: the pointee's storage
+				}
+
+				return ident, true, true
+			}
+
+			expr = e.X
+		case *ast.IndexExpr:
+			containerType := info.TypeOf(e.X)
+
+			if containerType == nil {
+				return nil, false, false
+			}
+
+			if _, isArray := containerType.Underlying().(*types.Array); !isArray {
+				return nil, false, false
+			}
+
+			expr = e.X
+		case *ast.StarExpr:
+			ident, isIdent := ast.Unparen(e.X).(*ast.Ident)
+
+			if !isIdent || hops == 0 {
+				return nil, false, false
+			}
+
+			return ident, true, true
+		case *ast.Ident:
+			if hops == 0 {
+				return nil, false, false
+			}
+
+			return e, false, true
+		default:
+			return nil, false, false
+		}
+	}
+}
+
 // inlineArraySliceRootsAt reports whether slice cuts an inline array that inlineArraySliceBase spells and that lies in
-// the storage of identObj (x.f[lo:hi], x.a.f[lo:hi], with no pointer on the way), so escape analysis boxes identObj.
+// the storage of identObj itself (no pointer on the way), so escape analysis boxes identObj.
 func (v *Visitor) inlineArraySliceRootsAt(slice *ast.SliceExpr, identObj types.Object) bool {
-	return storageChainRootsAtIdent(slice.X, identObj, v.info) && inlineArraySliceSpelled(slice, v.info)
+	root, indirect, ok := inlineSliceStorageRoot(slice.X, v.info)
+	return ok && !indirect && v.info.ObjectOf(root) == identObj && inlineArraySliceSpelled(slice, v.info)
 }
 
 // inlineArraySliceSpelled reports whether slice cuts an inline array that inlineArraySliceBase spells, over the
@@ -327,6 +449,23 @@ func inlineArrayCopyOperand(call *ast.CallExpr, info *types.Info) (*ast.SliceExp
 
 	if _, isSlice := types.Unalias(info.TypeOf(call.Args[1-position])).Underlying().(*types.Slice); !isSlice {
 		return nil, -1, false
+	}
+
+	// Go checks a slice's bounds when the operand is evaluated, so a DESTINATION's bad bound panics before the source
+	// runs (`copy(x.f[lo:hi], next())` never calls next); the reference spelling checks them inside copy, after it. A
+	// constant bound cannot fail (Go rejects one outside the array at compile time), so the destination is spelled over
+	// a reference only when its bounds are constant or absent; any other keeps the slice's own spelling, which is
+	// evaluated first (P3's review, NIT 6, COORD 2026-11-15). A source is evaluated last either way.
+	if position == 0 {
+		for _, bound := range []ast.Expr{found.Low, found.High} {
+			if bound == nil {
+				continue
+			}
+
+			if typeAndValue, ok := info.Types[bound]; !ok || typeAndValue.Value == nil {
+				return nil, -1, false
+			}
+		}
 	}
 
 	return found, position, true

@@ -52,7 +52,7 @@ public abstract partial class ж<T>
             throw RuntimeErrorPanic.NilPointerDereference();
 
         if (StorageKind is not PointerStorage.Pinnable && NativeAddress == 0)
-            throw new PanicException($"inline array slice: the storage of {typeof(T).Name} cannot be held still, so it cannot be sliced");
+            throw new PanicException("inline array slice: an array held inline in a struct that also holds a Go reference cannot be held still, so it cannot be sliced");
 
         nuint address = ((uintptr)this).Value;
 
