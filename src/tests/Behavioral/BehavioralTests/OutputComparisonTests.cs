@@ -50,6 +50,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAliasStructToInterface() => CheckTarget("AliasStructToInterface");
 
     [TestMethod]
+    public void CheckAliasedImportRenamedMember() => CheckTarget("AliasedImportRenamedMember");
+
+    [TestMethod]
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
@@ -696,6 +699,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckForeignAnonStructAliasAlias() => CheckTarget("ForeignAnonStructAliasAlias");
+
+    [TestMethod]
+    public void CheckForeignAnonStructAliasElemAddress() => CheckTarget("ForeignAnonStructAliasElemAddress");
 
     [TestMethod]
     public void CheckForeignAnonStructForwardAlias() => CheckTarget("ForeignAnonStructForwardAlias");
@@ -1515,6 +1521,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");
+
+    [TestMethod]
+    public void CheckNamedResultCaptureModeReceiver() => CheckTarget("NamedResultCaptureModeReceiver");
 
     [TestMethod]
     public void CheckNamedResultDeferCapture() => CheckTarget("NamedResultDeferCapture");

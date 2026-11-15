@@ -42,6 +42,12 @@ func collectUnspelledFaces(file *ast.File, fset *token.FileSet, info *types.Info
 		}
 
 		stack = append(stack, n)
+
+		if lit, ok := n.(*ast.CompositeLit); ok {
+			collectStructLitFace(lit, fset, info, faces)
+			return true
+		}
+
 		sel, ok := n.(*ast.SelectorExpr)
 
 		if !ok {
@@ -71,6 +77,86 @@ func collectUnspelledFaces(file *ast.File, fset *token.FileSet, info *types.Info
 
 		return true
 	})
+}
+
+// collectStructLitFace records the face of a struct literal that stores a whole array value into an array field. An
+// inline array spells exactly one value there, an array literal, through the member's constructor (nested array
+// literals likewise, inlineArrayEmission.go). Any other value (a variable, a dereference, a call) is a whole value
+// stored, unspelled at I0 as an assignment to x.f is. A literal's key is an identifier, not a selection, so the
+// selection walk above never saw this store: x/sys/windows' RawSockaddrBth was admitted and SockaddrBth.sockaddr's
+// literal handed array<byte> to its array2<byte> field, CS1503 on release-smoke win-x64 (COORD 2026-11-14 21:32Z).
+func collectStructLitFace(lit *ast.CompositeLit, fset *token.FileSet, info *types.Info, faces map[string]string) {
+	litType := info.TypeOf(lit)
+
+	if litType == nil {
+		return
+	}
+
+	st, ok := types.Unalias(litType).Underlying().(*types.Struct)
+
+	if !ok {
+		return
+	}
+
+	key, ok := inlineTypeKey(litType)
+
+	if !ok {
+		return
+	}
+
+	if _, seen := faces[key]; seen {
+		return
+	}
+
+	for i, elt := range lit.Elts {
+		field, value := structLitField(st, i, elt)
+
+		if field < 0 {
+			continue
+		}
+
+		array, isArray := st.Field(field).Type().Underlying().(*types.Array)
+
+		if !isArray || array.Len() == 0 {
+			continue
+		}
+
+		if stored := unspelledArrayLitValue(value, array); stored != nil {
+			position := fset.Position(stored.Pos())
+			faces[key] = fmt.Sprintf("field %s is a whole value stored by a struct literal at %s:%d:%d", st.Field(field).Name(),
+				filepath.Base(position.Filename), position.Line, position.Column)
+
+			return
+		}
+	}
+}
+
+// unspelledArrayLitValue returns the first value, at or below value, that initializes an inline array of type array
+// without being an array literal, or nil when every one is a literal (an element of a nested array is itself inline).
+func unspelledArrayLitValue(value ast.Expr, array *types.Array) ast.Expr {
+	lit, isLit := ast.Unparen(value).(*ast.CompositeLit)
+
+	if !isLit {
+		return value
+	}
+
+	inner, isArray := array.Elem().Underlying().(*types.Array)
+
+	if !isArray || inner.Len() == 0 {
+		return nil
+	}
+
+	for _, elt := range lit.Elts {
+		if kv, isKeyed := elt.(*ast.KeyValueExpr); isKeyed {
+			elt = kv.Value
+		}
+
+		if stored := unspelledArrayLitValue(elt, inner); stored != nil {
+			return stored
+		}
+	}
+
+	return nil
 }
 
 // arrayFieldOwner returns the struct type that declares the array field sel selects (the last struct on the selection's

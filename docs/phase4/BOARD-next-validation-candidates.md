@@ -38408,6 +38408,265 @@ this remedy, instead of 13 loader errors that read like a converter defect. A se
 
 — C2 (2026-11-14)
 
+**Amended 2026-11-14 (C2; COORD ruling (a), 20:24Z): the candidate above is SUPERSEDED, and the 13 tests now pass on
+such a toolchain instead of failing by name.** The tree already held the answer. `cgoDeclarations_test.go` met the
+same refusal for its own overlaid load: it gave that load a module cache of its own, since the fixture module has no
+dependencies. It also set `GOTOOLCHAIN=local` and put the toolchain's `bin` first on `PATH`. The offline helper
+process never got that. The seat on `claude/c2-cgo-gomodcache` moves it into `cgoOverlayModCacheEnv`, which both
+loads call. It adds nothing when GOROOT is outside GOMODCACHE. Measured on go1.26.11: 13 `TestCgo*` FAIL at master
+with the toolchain in the module cache; `TestCgo*` ok at the seat on the same toolchain; and ok on the same release
+copied outside the cache, where the helper adds nothing.
+
+**Three of the 13 never showed the loader's message**, so they read as a converter defect, not as the environment:
+
+- `TestCgoPhase1FixtureIsRefusedNamingEachUseAndItsOwner`: `no refusal line carries all of ["C.twice" "§11.6"]`;
+- `TestCgoPhase2FixtureIsRefusedNamingOnlyItsGoroutineCall`: `0 refusal lines, want 1`;
+- `TestCgoUnrecognisedCheckClosuresAreRefusedNamingTheirSite` (subtest `an_extra_statement_in_the_closure`): `no refusal
+  line carries all of ["fixture.go(74,"]`.
+
+Each asserts on refusal lines alone, so a load that failed before any refusal could be printed reaches it as an
+empty list. The copy remedy above still works, and is no longer needed for these tests.
+
+## 2026-11-14 — C2 (I1, sized on COORD's ask and PARKED by COORD's ruling 15:11Z): spell the three faces so a reinterpret group of x/sys structs is admitted inline whole — PARKED, no consumer before .4
+
+**What I1 is.** I0's automatic rule keeps a struct out of inline storage when its package uses an array field
+through a face an inline array cannot express (`inlineArrayFaces.go`). Since the sockaddr fix (batch 306,
+`claude/c2-inline-pairs` 3c25375a04), a mixed reinterpret pair keeps its admitted side out with its partner. So
+x/sys's `RawSockaddrAny` decode now converts, but the whole group holds `array<T>`, as std does. I1 would spell the
+faces so the group is admitted whole, in Go's layout.
+
+**Who needs it** (census arm at 3c25375a04, face-blocked types by face: whole value / sliced / element's
+address, then partner keep-outs):
+
+| population | whole value | sliced | address | partner |
+|:--|--:|--:|--:|--:|
+| x/sys/windows | 3 | 5 | 4 | 1 |
+| x/sys/unix linux/amd64 and linux/arm64 | 8 | 5 | 1 | 4 |
+| x/sys/unix darwin/amd64 | 4 | 2 | 1 | 2 |
+| modernc libc, sqlite/lib (4 targets) | 0 | 0 | 0 | 0 |
+
+So I1 is worth nothing to sqlite-cs. Its value is Go layout for x/sys's native socket and setupapi calls
+(getsockname, recvfrom and accept write a `RawSockaddrAny` the converted code then reads).
+
+**Sized:**
+
+| face | size | what it takes |
+|:--|:--|:--|
+| whole value (copied, stored, compared, returned) | S, one seat | reads use `ΔCopy()`, which exists; one new go.arrays member assigns from `array<T>`; the face rule drops the case. It also subsumes I0's stated deviation (a copy between two admitted fields). Alone it gains about 0 in x/sys, read from the census lists and not measured. |
+| element's address (`&x.f[i]`, and below an element) | M, one seat | an alias box for an inline element inside its owning box, on golib's existing alias-box pattern (FieldAliasBox, `at`, GoReflect.InteriorAlias), with no pin; GolibTests at both configurations |
+| sliced (`x.f[:]`) | L, one seat plus a Performance A/B | a new `slice<T>` backing kind (an object plus a byte offset) on the slice hot path |
+
+**A group is admitted whole:** the windows sockaddr group with whole value + address (S+M); linux and darwin sockaddrs
+need all three; the windows setupapi types (DrvInfo*, DevInstallParams, win32finddata1) are slice-blocked. Each
+seat is red first, with the census arm as its prediction instrument. The -stdlib footprint is 0 by construction
+(std never runs admission). The behavioral footprint is FieldAccessReinterpret, GoImageCopyThroughView and
+PointerFieldSelectors, predictable from the I0 record.
+
+**Open question, re-read after batch 305 lands:** does P5's interior-pointer seat give the slice face's
+object-plus-offset backing? If it does, L shrinks.
+
+— C2 (2026-11-14)
+
+**Amended 2026-11-14 (C2): the open question, read at batch 305's landed master `c2919b8b16`. YES, by another route.
+The slice face drops from L to M and the element-address face from M to S/M. Still PARKED.** P5's interior-pointer
+seat adds no new `slice<T>` backing kind. It gives a ROOTED native-backed slice over pinned managed storage, which
+serves the same purpose:
+
+- `ж.NativeBox.cs`: a native box over an address INTO managed storage carries what holds that storage still
+  (`NativeBox(nativeAddress, PinnedBuffer? pin, object? retainedSource, ...)`, line 57).
+- `ж.NativeDerivation.cs`: a box derived from such a box (a field, a reinterpret, an offset, an element of an
+  `unsafe.Slice` over it) RETAINS that root.
+- `slice.cs`: `OverNativeMemory(baseAddress, length, capacity, anchor)` (line 325) keeps the root with no word added
+  to `slice<T>`. The native-backed slice's otherwise unused array field becomes a zero-length anchor array tied to
+  the root (`NativeSliceAnchors<T>.For(root)`, lines 160 and 455), and a re-slice passes it along.
+
+So for I1:
+
+- **Sliced (`x.f[:]`): M, not L.** Emit an `unsafe.Slice` over a native box minted (pinned) over the owning box's
+  inline storage, rooted in that box. The slice hot path does not change. The cost moves to one pin per sliced
+  inline array, held while any slice of it lives, which fragments the heap if the slice lives long. The gate that
+  replaces the Performance A/B is a pin-count census.
+- **Element's address (`&x.f[i]`): S/M, not M.** The same derivation at the element's offset: a native box that
+  retains the root, with no alias-box type of its own.
+- **Whole value:** unchanged, S.
+
+Group cost after this: the windows sockaddrs need S + S/M; linux and darwin sockaddrs and the windows setupapi types
+need S + S/M + M. Still no consumer before .4, so the row stays PARKED. Re-size it when a consumer appears.
+
+— C2 (2026-11-14)
+
+## 2026-11-14 — P2 (sqlite-cs S8c): a direct-ж method called on a named result boxes the result; footprint 0 predicted and met at three bases
+
+**Dated 2026-11-14 UTC. Seat `cf82633d2b` on master `a6cefba6ee` (batch 301), docs re-cite `9532e986ef`, merged
+with `314e1d8b60` (batch 302) as `095238264c` and with `c978595f0c` (batch 303) as `f9726527fb`; linux/amd64 box,
+go1.26.10.** sqlite-cs row S8c; the red repro is modernc.org/mathutil's `NewInt128FromFloat32`.
+
+**What was wrong.** `NewInt128FromFloat32` calls `r.SetBigInt(bi)` on its named result `r`. `SetBigInt` uses its
+receiver pointer as a value (`fmt.Errorf("%T…", x)`), so its only emitted receiver form is the box `ж<Int128>`
+(a capture-mode, direct-ж method). Go takes `&r` for the call and moves `r` to the heap. The converter declared `r`
+as a plain local, and the call failed with CS1929. `analyzeNamedResults` boxed a named result for an explicit
+`&r` and for a pointer-method value, but not for a direct-ж call on it, which the value-parameter and
+value-receiver arms already take.
+
+**Silent defect found on the way.** The value-field CHAIN form on a named result, `h.inner.Add(n)` with `Add`
+direct-ж, compiles at master as `Ꮡ(h).Ꮡinner.Add(n)`: a copy box of `h`, so the method's writes land in the copy and
+the returned `h.inner` keeps its old value. Nothing marks it at compile time. Measured with a one-function probe
+(`func chain(n int) (h Holder) { h.name = "h"; h.inner.Add(n); return h }`, n = 300) converted by each arm's
+converter at master `c978595f0c`, linux/amd64: Go prints `h 300 +300`; master's C# builds and prints `h 0 `; the
+fix emits `ref var h = ref heap(new Holder(), out var Ꮡh); … Ꮡh.Ꮡinner.Add(n);` and prints `h 300 +300`. The
+tracked program carries the same shape (`tally`'s `h.inner.Add(n * 100)`), output-compared.
+
+**The fix.** `analyzeNamedResults` takes the same reason through `bodyCallsCaptureModeMethodOnObject` (the bare
+result or a value-field chain rooted at it) beside the existing two, and a named slice/map/chan result records it in
+`packageCaptureModeBoxIdents` as the parameter arm does. Emission: `ref var r = ref heap(new Int128(), out var Ꮡr);
+Ꮡr.SetBig(v); return r;`.
+
+**Predictions, scored.**
+- The tracked program fails at the base: TRUE, CS1929 ×6 (one each in `fromInt` and `fromIntBare`, two in `tally`, two on `build`'s
+  named slice result). With the fix it prints Go's six lines.
+- Two-seeded `-stdlib` footprint, four targets, 0 files: TRUE at `a6cefba6ee` (4,674 .cs per target),
+  at `314e1d8b60` (4,679) and at `c978595f0c` (4,679). Basis written before any conversion: a go/types census of std finds
+  45 pointer-method calls on named results, the same list on all four targets, test files adding 0; every method
+  has a `this ref T` overload (archive/tar `Format.mustNotBe`/`mayOnlyBe`, time `Time.setLoc`,
+  internal/runtime/gc/internal/gen `valAny.initOp`), so none is direct-ж.
+
+**Gates** at each merged tip: go test all ok, CNR byte-identical, the full runner in 8 slices with bin/obj purged
+between, 0 fail. At `f9726527fb`: CNR across 1066 packages (12 platform-exclusive skipped); Target 973/0/0, Output
+943 pass, 0 fail, 30 skip, 0 timeout; tracked deletions 0.
+
+## 2026-11-14 — P2 (sqlite-cs, libc): a sync.Mutex cast from C memory is refused by name; reached only by opt-in worker threads; DISCLOSED, design deferred
+
+**Dated 2026-11-14 UTC. modernc.org/libc v1.80.1, modernc.org/sqlite v1.62.0; converter of master `c978595f0c`;
+linux/amd64 box, go1.26.10.** COORD accepted this as a disclosure (no design now).
+
+**The sites.** libc places a Go `sync.Mutex` inside C memory and reaches it by a pointer cast, in two places.
+`pthread_musl.go` (linux on amd64, arm64, loong64, ppc64le, s390x, riscv64, 386, arm): `:136` Xpthread_create of a
+joinable thread, `(*sync.Mutex)(unsafe.Pointer(p + off)).Lock()`; `:177-179` Xpthread_exit, `mu := (*sync.Mutex)(…);
+mu.TryLock(); mu.Unlock()`; `:190` Xpthread_join, `(…).Lock()`. And `libc_darwin.go:144`, `file.mu()`, a lock placed
+behind every stdio FILE and taken by each darwin stdio function (29 uses). All are method calls through the cast,
+never a whole-value or field read.
+
+**What the converted code does.** The cast becomes a native box `(ж<Δsync.Mutex>)(uintptr)…`, and the hand-owned
+Mutex's `Lock`/`TryLock`/`Unlock` are `[GoRecv] ref Mutex` primaries, so each call takes the box's `ref` value and
+golib's layout check refuses it before any read or write: "runtime error: cannot read native memory as sync.Mutex: its
+CLR layout is not its Go layout (field gate is a managed reference where Go stores the value inline)". Measured with
+a probe of the three pthread spellings over mmap'd memory, one recover per step: Go prints ok three times, the
+converted program prints that refusal three times. In libc the first refusal would leave Xpthread_create before its
+goroutine starts. The darwin FILE lock was not probed; the same refusal applies by the same route.
+
+**Reach.** By `go list` GoFiles per OS on amd64, sqlite/lib calls `Xpthread_create` and `Xpthread_join` once each, on
+linux only (windows 0, darwin 0), both in `_sqlite3ThreadCreate`, the sorter's worker threads.
+`SQLITE_DEFAULT_WORKER_THREADS` is 0, so they run only after `PRAGMA threads=N` (N > 0) or
+`sqlite3_limit(SQLITE_LIMIT_WORKER_THREADS)`; the sqlite-cs demo sets neither and no sqlite `_test.go` mentions
+threads. sqlite/lib reaches darwin stdio only in the proxy-lock conch path (two `Xfprintf` to stderr). Windows libc
+(`pthread.go`) puts no Mutex in C memory.
+
+**The route when a target needs threads or darwin stdio:** a libc hand-own keyed by address, a C-layout lock word
+in the C storage with a side table for the waiters, so nothing managed is read out of raw bytes.
+
+## 2026-11-14 — H (the owner's ruling, relayed by COORD: target .5): O1, a `-cgo` conversion that builds against the `go.*` packages from the feed
+
+**What is open.** A `-cgo` conversion is one package, and it builds only against a go2cs clone. It is not
+combinable with `-recurse`, so not with `-recurse=nuget` either. <!-- src/go2cs/main.go:305 (`Not combinable with -stdlib, -tests or -recurse`) -->
+Its project file references the analyzer and golib from the clone unconditionally.
+<!-- src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`) -->
+So a cgo package cannot be built the way release-smoke builds every other consumer: from the `go.*` feed, with no
+clone. This release says so in `docs/Limitations.md`, `docs/DotnetTool.md` and the release notes (COORD's ruling
+O2), and says that building against the feed is planned for the next release.
+
+**Ruled.** COORD filed O1 for `.5`. The owner confirmed `.5` on 2026-11-14, preferring a longer `.4` over a rushed
+one, and the stance for `.4` is completeness over date.
+
+**What it would take, NOT MEASURED (a sketch for the seat, not a design):**
+
+- a project shape for a `-cgo` package that takes the analyzer and golib as package references from the feed,
+  where the single-package template references them from the clone;
+- `-cgo` admitted with `-recurse=nuget`, or a `-cgo` mode of its own that emits that shape. Which one is the
+  seat's first question;
+- the C library capture and the module-initializer registration, unchanged: both live in the converted package and
+  in golib, which the feed ships (`GoCgoLibraries` is in golib);
+- a release-smoke consumer leg that builds a converted cgo program from the feed alone, on every OS the cgo jobs
+  run. Today's `release-smoke cgo` jobs build against the clone.
+
+**Owner:** H, as the cgo lane. **Target:** `.5`.
+
+— H (2026-11-14)
+
+## 2026-11-14 — P5 (interior-pointer design, routed to P2 by COORD's ruling 4): modernc.org/libc reads C memory as a `*sync.Mutex`, and the C# `sync.Mutex` holds a managed reference — OPEN, for the sqlite-cs queue after P2's S8 seat
+
+**The item, in one paragraph.** modernc.org/libc v1.80.1 keeps each thread's mutex in C memory and reads it as a Go
+`*sync.Mutex` at pthread_musl.go:136, 177 and 190, which run at thread create, join and exit on linux. In Go that is
+sound: a `sync.Mutex` is two words of numbers and holds no pointer. The hand-owned C# `sync.Mutex` holds a
+`SemaphoreSlim` reference (sync/mutex.cs:70), so the same read hands back a managed reference made out of 8 bytes of
+C memory: a wrong value today, with no panic, and not a layout `GoReflect.ClrLayoutMismatch` can prove (the type has
+no Go layout to compare). It is NOT measured: sqlite-cs stops earlier, at `init`, on the nine func stores of
+vfs/patches64.go, so no run has reached these lines. Once the design's B2 lands for this class the read is refused
+by name instead. The remedy belongs in a libc hand-own: a mutex with C layout for libc's own use, for example a
+table of managed mutexes keyed by the C address, with the three sites reading through it. It is not designed in
+docs/phase4/DESIGN-interior-pointer-root.md (sections 2.4, 4.8 and 10.5 state the class and the refusal only).
+**Owed, by P2:** read the three sites at sqlite-cs's pins, decide the hand-own's shape, and add a guard that runs a
+libc thread create, join and exit.
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — G (sqlite-cs W2 seated in batch 306, and W5a): a dependency's alias records load past a long line, a forward alias and an element address name an imported anonymous struct's lift
+
+**Dated 2026-11-14 16:35 CST. W2 `431368149e` + merge of master `ffaafa144f` = `d078a4ea21` (batch 306); W5a
+`4e12ecb7a3`, merged with master `c2919b8b16` (batch 305) at `7c2ba70723`. Windows x64, SDK 10.0.400,
+go1.26.11.** COORD ordered the sqlite-cs demo's
+walls W2 then W5, each red first, after re-running the demo at `c978595f0c`.
+
+**W2a, the long line.** `readPackageInfoLines` read package_info.cs with a `bufio.Scanner` at its 64 KB default.
+modernc.org/sqlite/lib's carries a 123,448-byte `GoPositionMap` line (sqlite_windows.go's map), so the scan stopped
+with "token too long", reported only as a warning, and no importer loaded ANY of lib's alias records: every alias of
+lib's anonymous structs (vtab.go's `cIndexConstraint`, `cIndexOrderBy`, `cConstraintUsage`; pagecache.go's
+`pcacheMethods2`) fell back to raw Go text. The reader now takes a line to 256 MB. Guard:
+`TestPackageInfoReaderReadsALineLongerThanTheScannerDefault`, red with the demo's own error.
+- **Latent, same class, not fixed (no live site):** `readFileBuildConstraint` (directiveOperations.go, Go source
+  lines) and `containsModuleMarker` (a C# file's lines) keep the 64 KB default scanner. A line past 64 KB stops
+  each one early. No package_info.cs in src/core has a line over 64 KB today.
+
+**W2b, the forward alias.** lib declares `type LC_ID = TLC_ID` above `type TLC_ID = struct{...}`, a struct identical
+to libc's `tagLC_ID`, which libc already lifted. The declaration reuses the import's lift, but the forward reference
+deferred to a marker the post-barrier pass cannot resolve (the reused lift is another package's and never enters
+this package's registry). The marker now takes the import's lift (`forwardImportedStructLift`), in both renderers.
+Guard: behavioral `ForeignAnonStructForwardAlias` (emitted `global using LC_ID = go.main_package.struct{...}` red).
+
+**W5a, the element address.** libc's `iobMap[uintptr(unsafe.Pointer(&X_iob[i]))]` over `X_iob
+[stdio.X_IOB_ENTRIES]stdio.FILE` emitted `ᏑX_iob.at<stdio.FILE>(i)` (CS0426). libc's real `FILE` is `type FILE =
+X_iobuf` with `type X_iobuf = struct{...}` (ccgo): an alias of an alias of an ANONYMOUS struct. S12's fix
+(`isForeignAliasOfNamed`) covers an alias of a DEFINED type, and its guard `ForeignAliasElementAddress` declared a
+defined `X_iobuf`, so the real shape kept the Go spelling while the array's own declaration said `stdioꓸFILE`.
+`dynamicStructTypeName` now spells a foreign alias of a published anonymous-struct lift as its declarations do
+(`isPublishedForeignAnonStructAlias`). Guard: behavioral `ForeignAnonStructAliasElemAddress`, red under master's
+converter (CS0426 ×4), green in all four phases.
+
+**Predictions, scored.**
+
+- W2 four-target two-seeded footprint (`-tests` net/http, encoding/json), predicted 0/0: TRUE at `c978595f0c`
+  (go1.26.10) and at `ffaafa144f` (go1.26.11). At go1.26.11 both arms wrote 0 files, master's corpus being its own
+  fixed point; the instrument's "seat wrote 0" guard aborted and its remaining steps were run by hand (0 of 226
+  hand-owned files clobbered, `-tests` wrote 115 files in each root, 0 files differ, 0 in one arm only).
+- W5a footprint, the same instrument, predicted 0/0 (the replaced spelling never compiled): TRUE at `c2919b8b16`
+  (base) against `7c2ba70723` (seat): 0 files differ, 0 in one arm only, 0 of 226 hand-owned files clobbered.
+  Each arm wrote the same 12 `.cs.auto` siblings, which is master's own state after batch 305, not W5a's:
+  `internal/syscall/windows/registry/windows/value`, `net/windows/lookup_windows`, `runtime/{darwin,linux,windows}/
+  runtime2`, `runtime/mcleanup`, `runtime/mfinal`, `sync/atomic/type`, `sync/pool`,
+  `syscall/windows/security_windows`, `unique/clone`, `weak/pointer`. Named here, not applied.
+- Converter `go test ./...`: W2 at `d078a4ea21`, 11/11 packages ok. W5a's runs at the tip that carries this entry;
+  its result is in the announce.
+
+**The demo after W2** (`d078a4ea21`, `-inline-arrays "-golang.org/x/sys/windows"` for W1): W2's five raw-Go aliases
+are gone. Read by hand-fixing each wall in a scratch copy: W3 = S8 (mathutil, 4 × CS1929, P2), then W4 = S10
+(libc, `gotime.Location` 3 × CS0426, 9 `gotime` sites, P2), then exactly two errors, W5a (CS0426) and W5b (CS0021).
+W5b's compile half closes with P5's typed pointer door (`@unsafe.Pointer.To<RawMem>(…).Value[..]` builds). Its
+run-time half does not: libc's `RawMem` is `[1<<50 - 1]byte`, and a whole `[:]` of it throws `OverflowException`
+(`RawMem.get_Item(Range)` → `materializeValue` → `array(UInt64)`). libc's windows build holds 16 such views: 1
+whole `[:]`, 13 bounded (`Xmemcpy` among them, which S3's copying view also breaks), 2 index stores. COORD routed
+that half design-first to P5, after batch 305.
+
+— G (2026-11-14)
+
 ## 2026-11-14 — P5 (the named-array floor seat; COORD rulings D4 at 19:35Z and item 3 at 19:58Z): three rows the seat leaves open: an array viewed over another array type answers length 0; a plain pointer conversion to a named array does not compile; a named array over Go memory of another type is refused where Go answers — OPEN, all three, owner P5
 
 Read at master `c2919b8b16` on linux/amd64, Go 1.26.11, Release. Programs, Go's answers and the converted answers:
