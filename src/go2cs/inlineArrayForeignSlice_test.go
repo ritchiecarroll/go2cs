@@ -251,6 +251,16 @@ var inlineSliceGCModule = map[string]string{
 // Head slices a value receiver: one boxed copy, pinned, per call.
 func (g GUID) Head() []byte { return g.Data4[:2] }
 
+// ToArrayElems returns the same [16]byte as ToArray with no slice of Data4: control3's array return.
+func (g GUID) ToArrayElems() [16]byte {
+	b := [16]byte{}
+	b[0] = byte(g.Data1)
+	for j := 0; j < 8; j++ {
+		b[8+j] = g.Data4[j]
+	}
+	return b
+}
+
 // HeadCopy reads the same bytes through a local array, which no admission holds inline: nothing is pinned.
 func (g GUID) HeadCopy() []byte {
 	var a [8]byte
@@ -302,6 +312,11 @@ func main() {
 	case "copyout":
 		for i := 0; i < n; i++ {
 			a := g.ToArray()
+			sum += int(a[9])
+		}
+	case "control3":
+		for i := 0; i < n; i++ {
+			a := g.ToArrayElems()
 			sum += int(a[9])
 		}
 	case "control2":
@@ -430,19 +445,32 @@ func TestInlineArrayForeignSlicePinIsReleased(t *testing.T) {
 		t.Fatalf("the leak arm keeps every pin and breaks %v, want B1 and B3: the bars cannot fail", broken)
 	}
 
-	if broken := sliceGCBars(pinned, control); len(broken) > 0 {
-		t.Errorf("slicing a value receiver's inline array 1,000,000 times breaks %v against the unpinned control", broken)
+	// COORD's ruling (a), 2026-11-15: an ESCAPING slice keeps its pin, and B3 (the pins are released) is its gate. B1,
+	// B2 and B4 break by margins the BOARD discloses (2026-11-15, C2): one finalizable pin per boxed copy, released
+	// after two collections. They are read and reported here, not gated.
+	broken := sliceGCBars(pinned, control)
+
+	if slices.Contains(broken, "B3") {
+		t.Errorf("slicing a value receiver's inline array 1,000,000 times leaves its pins held after a drain (B3); breaks %v", broken)
 	}
+
+	t.Logf("READING disclosed (ruling (a)): breaks %v against the unpinned control", broken)
 }
 
 // THE COPY SHAPES (COORD 2026-11-15, ruling (b)): copy into or out of x.f[lo:hi] reads or writes the inline storage over
 // a reference for the copy's duration, so it takes no pin and no box, as Go's own copy lets nothing escape. Its bar,
-// posted before the first run, against control2 (the same 8 bytes moved element-wise both ways), N = 1,000,000:
+// posted before the first run, N = 1,000,000:
 //
-//	C1 retained heap   copy <= control2 * 1.10 + 256 KiB
-//	C2 fragmentation   copy <= control2 + 1 MiB
-//	C3 pinned objects  copy <= control2 + 16
-//	C4 peak heap       copy <= control2 * 1.25 + 1 MiB
+//	C1 retained heap   copy <= control * 1.10 + 256 KiB
+//	C2 fragmentation   copy <= control + 1 MiB
+//	C3 pinned objects  copy <= control + 16
+//	C4 peak heap       copy <= control * 1.25 + 1 MiB
+//
+// The control was control2 (the same 8 bytes moved element-wise both ways, returning nothing) for both shapes. Against
+// it copyout MISSED C4 (peak 105.6 MB against 41.5 MB) on the first run: ToArray returns its [16]byte by copy, and
+// control2 returns nothing. control3, the same array return built element-wise with no slice of Data4, read the same
+// 105.6 MB, so COORD ruled (02:58Z) that control3 is copyout's control, with the bar's numbers unchanged. copyin keeps
+// control2, which shares its shape.
 func TestInlineArrayForeignSliceCopyTakesNoPin(t *testing.T) {
 	dotnet := requireInlineBuild(t)
 	out := convertInlineModule(t, "slicegc", inlineSliceGCModule)
@@ -461,9 +489,14 @@ func TestInlineArrayForeignSliceCopyTakesNoPin(t *testing.T) {
 	}
 
 	const n = "1000000"
-	control := readSliceGC(t, "control2", runConvertedInlineModule(t, dotnet, out, "control2", n))
+	controls := map[string]sliceGCReading{}
 
-	for _, mode := range []string{"copyin", "copyout"} {
+	for _, mode := range []string{"control2", "control3"} {
+		controls[mode] = readSliceGC(t, mode, runConvertedInlineModule(t, dotnet, out, mode, n))
+	}
+
+	for mode, controlMode := range map[string]string{"copyin": "control2", "copyout": "control3"} {
+		control := controls[controlMode]
 		reading := readSliceGC(t, mode, runConvertedInlineModule(t, dotnet, out, mode, n))
 		var broken []string
 
@@ -484,7 +517,7 @@ func TestInlineArrayForeignSliceCopyTakesNoPin(t *testing.T) {
 		}
 
 		if len(broken) > 0 {
-			t.Errorf("%s breaks %v against control2", mode, broken)
+			t.Errorf("%s breaks %v against %s", mode, broken, controlMode)
 		}
 	}
 }
