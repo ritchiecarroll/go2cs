@@ -64,23 +64,9 @@ func (v *Visitor) markInlineArrayLiterals(lit *ast.CompositeLit) {
 	}
 
 	for i, elt := range lit.Elts {
-		field, value := -1, elt
+		field, value := structLitField(st, i, elt)
 
-		if kv, ok := elt.(*ast.KeyValueExpr); ok {
-			value = kv.Value
-
-			if id, ok := kv.Key.(*ast.Ident); ok {
-				for j := range st.NumFields() {
-					if st.Field(j).Name() == id.Name {
-						field = j
-					}
-				}
-			}
-		} else {
-			field = i
-		}
-
-		if field < 0 || field >= st.NumFields() {
+		if field < 0 {
 			continue
 		}
 
@@ -95,6 +81,29 @@ func (v *Visitor) markInlineArrayLiterals(lit *ast.CompositeLit) {
 			v.inlineArrayLiterals[valueLit] = array
 		}
 	}
+}
+
+// structLitField maps the i-th element of a struct literal of type st to the field it initializes (keyed by field name
+// or by position) and the value it stores there, or -1 when the element names no field of st. The emitter and the
+// admission's face rule both read a literal through it, so they agree on which field an element initializes.
+func structLitField(st *types.Struct, i int, elt ast.Expr) (int, ast.Expr) {
+	if kv, ok := elt.(*ast.KeyValueExpr); ok {
+		if id, ok := kv.Key.(*ast.Ident); ok {
+			for j := range st.NumFields() {
+				if st.Field(j).Name() == id.Name {
+					return j, kv.Value
+				}
+			}
+		}
+
+		return -1, kv.Value
+	}
+
+	if i >= st.NumFields() {
+		return -1, elt
+	}
+
+	return i, elt
 }
 
 // inlineArrayLiteral renders a marked array literal as the go.arrays member's constructor over its elements, Go's zero

@@ -1,0 +1,100 @@
+fromRef lines (comments excluded): 42
+converted	cast	internal/abi/abi.cs:103
+converted	cast	internal/abi/type.cs:230
+converted	cast	internal/abi/type.cs:243
+converted	cast	internal/runtime/maps/group.cs:132
+converted	cast	internal/runtime/maps/group.cs:134
+converted	cast	internal/runtime/maps/group.cs:142
+converted	cast	internal/runtime/maps/group.cs:145
+converted	cast	internal/sync/mutex.cs:67
+converted	cast	internal/sync/mutex.cs:94
+converted	cast	internal/sync/mutex.cs:189
+converted	cast	internal/sync/mutex.cs:201
+converted test	cast	reflect/all_test.cs:8425
+converted	cast	reflect/type.cs:559
+converted	cast	reflect/type.cs:565
+converted	cast	reflect/type.cs:571
+converted	cast	runtime/darwin/malloc.cs:2575
+converted	cast	runtime/darwin/mheap.cs:730
+converted	cast	runtime/darwin/select.cs:567
+converted	cast	runtime/darwin/stack.cs:1424
+converted	cast	runtime/linux-amd64/malloc.cs:2575
+converted	cast	runtime/linux-amd64/mheap.cs:730
+converted	cast	runtime/linux-amd64/stack.cs:1424
+converted	cast	runtime/linux-arm64/malloc.cs:2575
+converted	cast	runtime/linux-arm64/mheap.cs:730
+converted	cast	runtime/linux-arm64/stack.cs:1424
+converted	cast	runtime/linux/select.cs:567
+hand-owned	bare	runtime/mfinal.cs:376
+converted	cast	runtime/mgcmark_greenteagc.cs:106
+converted	cast	runtime/mgcmark_greenteagc.cs:107
+converted	cast	runtime/mgcmark_greenteagc.cs:146
+converted	cast	runtime/symtab.cs:240
+converted	cast	runtime/synctest.cs:191
+converted	cast	runtime/time.cs:1280
+converted	cast	runtime/windows/malloc.cs:2575
+converted	cast	runtime/windows/mheap.cs:730
+converted	cast	runtime/windows/select.cs:567
+converted	cast	runtime/windows/stack.cs:1424
+review sibling	cast	sync/waitgroup.cs.auto:92
+review sibling	cast	sync/waitgroup.cs.auto:193
+review sibling	cast	sync/waitgroup.cs.auto:231
+converted	cast	syscall/darwin/sockcmsg_unix.cs:28
+converted	cast	syscall/linux/sockcmsg_unix.cs:28
+FromBox: 295 calls in 74 files
+FromPinnedBox: 1138 calls in 186 files
+rawPointer lines (comments excluded): 19
+converted	FromRef	internal/abi/type.cs:230
+converted	FromRef	internal/abi/type.cs:243
+hand-owned	-	internal/syscall/unix/darwin/net_darwin_impl.cs:289
+hand-owned	-	internal/syscall/windows/exec_windows_test.cs:195
+hand-owned	-	internal/syscall/windows/registry/windows/value.cs:126
+hand-owned	-	internal/syscall/windows/registry/windows/value.cs:220
+hand-owned	-	internal/syscall/windows/registry/windows/value.cs:315
+hand-owned	-	internal/syscall/windows/registry/windows/value.cs:348
+review sibling	-	internal/syscall/windows/registry/windows/value.cs.auto:120
+review sibling	-	internal/syscall/windows/registry/windows/value.cs.auto:217
+review sibling	-	internal/syscall/windows/registry/windows/value.cs.auto:311
+review sibling	-	internal/syscall/windows/registry/windows/value.cs.auto:341
+converted	-	runtime/heapdump.cs:61
+converted	-	runtime/heapdump.cs:71
+converted	-	runtime/heapdump.cs:762
+converted	-	runtime/iface.cs:243
+converted	-	runtime/mbitmap.cs:1638
+converted	-	runtime/windows/os_windows.cs:582
+converted	-	runtime/windows/os_windows.cs:616
+handOwned files with the old cast: 34; parenthesised 61, unparenthesised 25
+1	1	crypto/internal/fips140/nistec/p256_impl.cs
+1	0	crypto/internal/fips140/sha3/keccakf_impl.cs
+1	0	internal/poll/windows/fd_windows_impl.cs
+1	0	internal/routebsd/darwin/sys_impl.cs
+1	0	internal/runtime/atomic/atomic_impl.cs
+3	1	internal/syscall/unix/darwin/net_darwin_impl.cs
+1	0	internal/syscall/unix/linux/net_linux_impl.cs
+1	0	internal/syscall/windows/registry/windows/value.cs
+1	1	internal/syscall/windows/windows/security_windows_impl.cs
+0	1	internal/syscall/windows/windows/zsyscall_windows_ptrout_impl.cs
+0	1	net/windows/interface_windows_impl.cs
+5	0	net/windows/lookup_windows.cs
+7	3	reflect/value_impl.cs
+2	0	runtime/hexdump_impl.cs
+0	3	runtime/managed_impl.cs
+7	0	runtime/mem_persistent_impl.cs
+0	1	runtime/metrics/sample.cs
+10	0	runtime/mfinal.cs
+1	0	runtime/mprof_impl.cs
+0	1	runtime/mranges_impl.cs
+3	0	runtime/runtime2.cs
+0	1	runtime/tracemap_impl.cs
+0	3	sync/atomic/type.cs
+1	1	syscall/darwin/sockaddr_darwin_impl.cs
+2	2	syscall/linux/sockaddr_linux_impl.cs
+1	1	syscall/windows/security_windows.cs
+3	0	syscall/windows/syscall_windows_impl.cs
+1	1	syscall/windows/zsyscall_windows_addrinfo_impl.cs
+1	0	syscall/windows/zsyscall_windows_cmdline_impl.cs
+0	1	syscall/windows/zsyscall_windows_dnsrecord_impl.cs
+1	0	syscall/windows/zsyscall_windows_netdb_impl.cs
+0	1	syscall/windows/zsyscall_windows_ptrout_impl.cs
+4	1	syscall/windows/zsyscall_windows_startupinfo_impl.cs
+1	0	time/tick.cs
