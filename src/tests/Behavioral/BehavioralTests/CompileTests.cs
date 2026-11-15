@@ -160,6 +160,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckArrayPointerElementAlias() => CheckTarget("ArrayPointerElementAlias");
 
     [TestMethod]
+    public void CheckArrayPointerElementDoors() => CheckTarget("ArrayPointerElementDoors");
+
+    [TestMethod]
     public void CheckArrayPointerViewDoors() => CheckTarget("ArrayPointerViewDoors");
 
     [TestMethod]

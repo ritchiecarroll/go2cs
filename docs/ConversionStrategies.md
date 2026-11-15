@@ -2351,7 +2351,7 @@ internal static uint32 lowestSetBit(uint32 x) {
 ```
 
 Here `((uint32)0 - x)` is the negation. Both operands of `&` are `uint32`, so the `&` has no cast.
-<!-- unsigned negation: src/go2cs/convUnaryExpr.go:1307-1313#05e413; golden
+<!-- unsigned negation: src/go2cs/convUnaryExpr.go:1313-1319#05e413; golden
      src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:19
      `fmt.Println(z & ((uint64)0 - z));` for Go `fmt.Println(z & -z)` (main.go:29#bb0128).
      C# spec: unary minus on uint converts to long, on byte/ushort promotes to int, on ulong/nuint
@@ -7100,8 +7100,8 @@ VariadicPackPassThrough/VariadicPackPassThrough.go:11 `for i := range xs {`
 -> .cs.target:12 `foreach (var i in range(len(xs))) {`.
 The string control: src/go2cs/rangeIndexOnly_test.go:281 `expect("overString", "foreach (var (i, _) in str)")`;
 the nil pointer: :261 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`. -->
-<!-- The count range: src/go2cs/visitRangeStmt.go:832-833 `case isArrayPointee && rangedThroughPointer && derefdValue:`
-then `foreach (%s%s in range(%d))`, and :840 `foreach (%s%s in range(%s, %d))` for a pointer held in a variable.
+<!-- The count range: src/go2cs/visitRangeStmt.go:844-845 `case isArrayPointee && rangedThroughPointer && derefdValue:`
+then `foreach (%s%s in range(%d))`, and :854 `foreach (%s%s in range(%s, %d))` for a pointer held in a variable.
 src/go2cs/rangeIndexOnly_test.go:267 `expect("overPointerParam", "foreach (var i in range(2))")` and :269
 `expect("setAll", "foreach (var i in range(4))")`; src/go2cs/rangeNilPointerArray_test.go:24
 `func TestRangeOverPointerArrayValueIsCountRange(t *testing.T) {`; the behavioral PointerArrayRange ranges a nil
@@ -10540,7 +10540,7 @@ to a pointer is a box that holds a box. Go's `int` is `nint`
 
 A local that a closure, a `go` statement or a `defer` statement shares with the function that declares
 the local can also get this form, so both sides see one variable. [Function Values and Closures](#function-values-and-closures)
-covers captures. <!-- other routes to the box: `&a`, a method that keeps its receiver's address, a pointer-method value: src/go2cs/escapeAnalysisOperations.go:1189, 1196#e568f1. rule: src/go2cs/escapeAnalysisOperations.go:1173-1175 (`escapes = (closureContainsIdent && !isValueType(...)) || takesAddress || usedAsRef`; isValueType is true only for basic types, variableAnalysisOperations.go:2872-2881#4ff829); go/defer arms: escapeAnalysisOperations.go:1028, 1072#49f594; written-after-capture picks box versus snapshot routing: variableAnalysisOperations.go:2127-2132#9ba65b. reference-shaped types: escapeAnalysisOperations.go:2217-2225, 2018-2032#89b684; probeI1 main.go:152#6d5c24 -> main.cs.target:158#25037b. Examples in src/tests/Behavioral/ClosureWriteVisibility: probeA1 boxed and written through the box, main.cs.target:18-21 (`ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);` … `Ꮡt.Value.total += 100;`); probeA3 boxed but read-only after all writes, so the closure takes a snapshot, main.cs.target:37-41 (`var tʗ1 = t;`); probeN1 captured int stays plain, main.go:193-197#2efa30 -> main.cs.target:202-207 (`nint n = 0; void inc() { n++; }`). Reference: pointers.md:397#ca6b44. heap overloads: src/core/golib/builtin.cs:2948#f029f1 (zero value) and :2992#1853dd (starting value). -->
+covers captures. <!-- other routes to the box: `&a`, a method that keeps its receiver's address, a pointer-method value: src/go2cs/escapeAnalysisOperations.go:1192, 1199#e568f1. rule: src/go2cs/escapeAnalysisOperations.go:1176-1178 (`escapes = (closureContainsIdent && !isValueType(...)) || takesAddress || usedAsRef`; isValueType is true only for basic types, variableAnalysisOperations.go:2872-2881#4ff829); go/defer arms: escapeAnalysisOperations.go:1031, 1075#49f594; written-after-capture picks box versus snapshot routing: variableAnalysisOperations.go:2127-2132#9ba65b. reference-shaped types: escapeAnalysisOperations.go:2220-2228, 2021-2035#89b684; probeI1 main.go:152#6d5c24 -> main.cs.target:158#25037b. Examples in src/tests/Behavioral/ClosureWriteVisibility: probeA1 boxed and written through the box, main.cs.target:18-21 (`ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);` … `Ꮡt.Value.total += 100;`); probeA3 boxed but read-only after all writes, so the closure takes a snapshot, main.cs.target:37-41 (`var tʗ1 = t;`); probeN1 captured int stays plain, main.go:193-197#2efa30 -> main.cs.target:202-207 (`nint n = 0; void inc() { n++; }`). Reference: pointers.md:397#ca6b44. heap overloads: src/core/golib/builtin.cs:2948#f029f1 (zero value) and :2992#1853dd (starting value). -->
 
 A package-level variable whose address is taken is declared the same way, as a static box `ᏑX` and a `ref`
 property `X => ref ((StaticBox<T>)ᏑX).ValueSlot` that reads and writes through it, so `&X` is `ᏑX`. Every exported
@@ -11255,7 +11255,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 ([Struct Types](#struct-types)), and `default!` is its zero value
 ([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
 Go's for the target architecture, here amd64.
-<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:4035-4056#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:4041-4062#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.
@@ -11558,7 +11558,7 @@ In the C#:
 - `getrandomTrap` is the package's system-call number. The first omitted lines try a faster path, and
   the later ones turn a failure number into a Go error.
 - The tuple result is Go's multiple return ([Multi-Result Values](#multi-result-values-and-comma-ok-forms)).
-<!-- SliceData returns ж<T>: src/core/unsafe/unsafe.cs:1547#fa1cf5. The omitted lines: getrandom.cs:29-38#bb9a32 (the vgetrandom fast path and the getrandomUnsupported check) and 42-47 (errno handling). The indent of line 40 is an emission layout artifact; lines 39-41 sit in the same block of GetRandom's body. The keep-alive temp appears across the converted syscall surface, e.g. src/core/internal/syscall/unix/linux/at.cs, src/core/syscall/darwin/syscall_darwin.cs, src/core/internal/syscall/windows/windows/zsyscall_windows.cs. No behavioral test emits this shape (src/tests/Behavioral has no `GC.KeepAlive(ᴋ` in any .cs.target). -->
+<!-- SliceData returns ж<T>: src/core/unsafe/unsafe.cs:1673#fa1cf5. The omitted lines: getrandom.cs:29-38#bb9a32 (the vgetrandom fast path and the getrandomUnsupported check) and 42-47 (errno handling). The indent of line 40 is an emission layout artifact; lines 39-41 sit in the same block of GetRandom's body. The keep-alive temp appears across the converted syscall surface, e.g. src/core/internal/syscall/unix/linux/at.cs, src/core/syscall/darwin/syscall_darwin.cs, src/core/internal/syscall/windows/windows/zsyscall_windows.cs. No behavioral test emits this shape (src/tests/Behavioral has no `GC.KeepAlive(ᴋ` in any .cs.target). -->
 
 **Full detail:** [Reference → Converting a Go pointer to `unsafe.Pointer`](ConversionStrategies-Reference/pointers.md#converting-a-go-pointer-to-unsafepointer) — every conversion form and when each factory is used, address arithmetic, pinning, order tokens, layout folding, value puns, the cases where `unsafe.Slice` or `unsafe.String` copies instead of aliasing, fields read through a reinterpreted pointer, and the syscall keep-alive rule.
 

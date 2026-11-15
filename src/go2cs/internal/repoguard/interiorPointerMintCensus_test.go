@@ -148,7 +148,7 @@ var nativeMints = map[string]interiorMintRow{
 	mintUnsafe + "unsafe.cs|Slice":         {1, "carries: the anchor for NativeDerivation.Kept of the pointer"},
 	mintUnsafe + "unsafe.cs|HeldWindow": {1, "carries: the anchor for the box that owns the pin over the Go value the view door views; the box answered " +
 		"IHeldStorage.HeldBytesFrom for these bytes (array-pointer doors, 4.2 V2 and section 12)"},
-	mintUnsafe + "unsafe.cs|Window": {1, "carries: the anchor for NativeDerivation.Kept of the typed pointer the view door resolved (array-pointer doors, 4.3)"},
+	mintUnsafe + "unsafe.cs|Aliased": {1, "carries: the anchor for NativeDerivation.Kept of the typed pointer the view or element door resolved (array-pointer doors, 4.3 and section 16)"},
 }
 
 // ---- arm 2: two-word pointers

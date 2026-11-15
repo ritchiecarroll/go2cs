@@ -160,6 +160,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckArrayPointerElementAlias() => CheckTarget("ArrayPointerElementAlias");
 
     [TestMethod]
+    public void CheckArrayPointerElementDoors() => CheckTarget("ArrayPointerElementDoors");
+
+    [TestMethod]
     public void CheckArrayPointerViewDoors() => CheckTarget("ArrayPointerViewDoors");
 
     [TestMethod]

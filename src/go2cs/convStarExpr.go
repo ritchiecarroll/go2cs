@@ -27,6 +27,12 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		return emission
 	}
 
+	// A dereference of `(*A)(p)` read for its value, p an unsafe.Pointer and A an unnamed array, is the array
+	// load door (arrayPointerElementDoor.go).
+	if door, ok := v.arrayPointerLoadDoor(starExpr); ok {
+		return door
+	}
+
 	ident := getIdentifier(starExpr.X)
 	pointerRecv, recvName := v.isPointerReceiver()
 

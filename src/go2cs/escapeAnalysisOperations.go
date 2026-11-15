@@ -56,6 +56,9 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 	// And the func words: a func value carried as a number, read or stored (funcWordOperations.go).
 	collectFuncWords(files, info)
 
+	// And where each dereference stands: one read for its value may be an array load door (arrayPointerElementDoor.go).
+	collectArrayPointerLoads(files, info)
+
 	var concurrentTasks sync.WaitGroup
 
 	// A panic raised on THIS side of the `go` statement below cannot be recovered by the caller:

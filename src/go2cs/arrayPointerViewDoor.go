@@ -48,12 +48,19 @@ type arrayPointerView struct {
 	length  int64    // N
 	named   bool     // whether A is a named array type
 	elemGo  types.Type
+	array   string // A, as C# spells it, where A is named
 }
 
 // arrayPointerViewOf reads sliceExpr.X as `(*A)(p)` (extra parentheses and an explicit dereference included), p an
 // unsafe.Pointer and A an array whose element holds no references. False for every other expression.
 func (v *Visitor) arrayPointerViewOf(sliceExpr *ast.SliceExpr) (arrayPointerView, bool) {
-	conversion := v.pointerArrayViewConversion(sliceExpr.X)
+	return v.arrayPointerViewOfBase(sliceExpr.X)
+}
+
+// arrayPointerViewOfBase reads base as `(*A)(p)` with the same rule: the operand of a slice (the view doors) or
+// of an index or a dereference (the element doors, arrayPointerElementDoor.go).
+func (v *Visitor) arrayPointerViewOfBase(base ast.Expr) (arrayPointerView, bool) {
+	conversion := v.pointerArrayViewConversion(base)
 
 	if conversion == nil {
 		return arrayPointerView{}, false
@@ -84,13 +91,19 @@ func (v *Visitor) arrayPointerViewOf(sliceExpr *ast.SliceExpr) (arrayPointerView
 
 	_, named := types.Unalias(pointer.Elem()).(*types.Named)
 
-	return arrayPointerView{
+	view := arrayPointerView{
 		operand: conversion.Args[0],
 		elem:    convertToCSTypeName(v.getAliasQualifiedTypeName(array.Elem(), false)),
 		length:  array.Len(),
 		named:   named,
 		elemGo:  array.Elem(),
-	}, true
+	}
+
+	if named {
+		view.array = convertToCSTypeName(v.getAliasQualifiedTypeName(pointer.Elem(), false))
+	}
+
+	return view, true
 }
 
 // arrayPointerConversionKeepsItsRoute reports whether `(*A)(unsafe.Pointer(p))`, p a Go pointer, is rendered whole

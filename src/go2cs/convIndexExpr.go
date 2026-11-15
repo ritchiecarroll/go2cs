@@ -22,6 +22,12 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		return emission
 	}
 
+	// An index of `(*A)(p)`, p an unsafe.Pointer, is the location the pointer names: the element door, which
+	// receives the pointer itself (arrayPointerElementDoor.go).
+	if door, ok := v.arrayPointerElementRefDoor(indexExpr); ok {
+		return door
+	}
+
 	var contexts []ExprContext
 	var ptrDeref string
 
