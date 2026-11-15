@@ -201,6 +201,16 @@ func (v *Visitor) valueAssignInPlace(assignStmt *ast.AssignStmt, lhs ast.Expr) b
 		return false
 	}
 
+	// A map element is a VALUE, not a location: `m[k] = b` stores a new value, which is new storage in Go too, and a C#
+	// map indexer is not ref-returning (`m[k].Assign(b)` is CS0206). It keeps the clone, as the design's rule says.
+	if index, isIndex := ast.Unparen(lhs).(*ast.IndexExpr); isIndex {
+		if base := v.info.TypeOf(index.X); base != nil {
+			if _, isMap := base.Underlying().(*types.Map); isMap {
+				return false
+			}
+		}
+	}
+
 	switch assignStmt.Tok {
 	case token.ASSIGN:
 	case token.DEFINE:

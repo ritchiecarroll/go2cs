@@ -28,7 +28,7 @@ internal static @string describe(Features f) {
     return fmt.Sprint((f.Value)[0], (f.Value)[1]);
 }
 
-internal static void reset(Features f) { f.Value = new flagSet(new uint8[]{9, 9}.array()); }
+internal static void reset(Features f) { f.Value.Assign(new flagSet(new uint8[]{9, 9}.array())); }
 
 internal static void main() {
     var c = Ꮡ(new CPU(fs: new flagSet(new uint8[]{3, 0}.array())));

@@ -37,7 +37,7 @@ internal static void main() {
     fmt.Println(((fslike.List)sl).Sum(), (((fslike.List)sl))[0], len((fslike.List)sl));
 
     var b = new fslike.Buf(new nint[]{7, 8}.array());
-    var sb = (shuffledBuf)b;
+    var sb = ((shuffledBuf)b).Clone();
     fmt.Println(((fslike.Buf)sb).First(), (((fslike.Buf)sb))[1]);
 
     var ha = new headerA(new map<@string, nint>{["x"] = 9});
