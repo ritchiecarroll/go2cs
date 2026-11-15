@@ -1414,6 +1414,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedApproxStringByteConstraint() => CheckTarget("NamedApproxStringByteConstraint");
 
     [TestMethod]
+    public void CheckNamedArrayAddressWrite() => CheckTarget("NamedArrayAddressWrite");
+
+    [TestMethod]
     public void CheckNamedArrayAnonElement() => CheckTarget("NamedArrayAnonElement");
 
     [TestMethod]
