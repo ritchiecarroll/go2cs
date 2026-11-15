@@ -15,7 +15,7 @@ partial struct holder {
 internal static readonly ж<array<uint32>> Ꮡpkg = new StaticBox<array<uint32>>(new array<uint32>(4));
 internal static ref array<uint32> pkg => ref ((StaticBox<array<uint32>>)Ꮡpkg).ValueSlot;
 
-internal static unsafe void main() {
+internal static void main() {
     ref var a = ref heap(new array<uint32>(4), out var Ꮡa);
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡa);
     a.Assign(new uint32[]{1, 2, 3, 4}.array());
@@ -69,7 +69,7 @@ internal static unsafe void main() {
     @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(Ꮡg);
     _ = (uintptr)v;
     g.Assign(new uint32[]{1, 2, 3, 4}.array());
-    new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(v), 4))[0] = 48;
+    @unsafe.Pointer.View<byte>(v, 0, 4, 16)[0] = 48;
     fmt.Println("byte view:", g[0]);
 
     ref var k = ref heap(new array<uint32>(4), out var Ꮡk);
