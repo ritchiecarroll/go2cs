@@ -216,8 +216,8 @@ keeps it in place. A Go value that holds a reference is still viewed as a copy. 
 
 - a write through such a slice reaches the memory, and a later write to the memory shows through the slice;
 - a two-index view has Go's capacity, the array type's length less the low bound, where it had its own length;
-- a view or a copy that would pass the end of the Go array it points into panics by name, where it read whatever
-  lay past the array;
+- a view or a copy that would pass the end of the Go array or the Go value it points into panics by name, where
+  it read whatever lay past it;
 - a length too large for a slice panics by name, where its low 32 bits were used.
 
 In the standard library 13 lines in four files of `runtime` take the new form. See

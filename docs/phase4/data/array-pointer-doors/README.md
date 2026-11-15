@@ -109,6 +109,8 @@ For section 11 of the design. Converters: base = the batch-305 converter; cut = 
 | `door-a-1115/lazy/census/main.go`, `go.mod`, `go.sum` | a census tool: the defined named array types of a package closure, and each conversion to `unsafe.Pointer` of a pointer to one |
 | `door-a-1115/v2/NativeViewShapes.converted.out`, `prng.converted.out` | the same two kits run against the tree at V2's commit (`a7490fcee7`): N, pa, pb, pc and pe print Go's answers; no other line differs from `door-a-1115/kits/` |
 | `door-a-1115/lazy/census/sq-<target>.tsv`, `.summary.txt` | its rows and totals for `modernc.org/sqlite/...` v1.62.0 on linux/amd64 and windows/amd64 (run inside a module that requires it, `GOFLAGS=-mod=mod`) |
+| `door-a-1115/reassign/main.go`, `go.mod`, `go.out`, `main.cs.txt`, `converted.out` | design 13.1: ten arms that take an array's address, assign the array whole, then write or read through the address; its emission, and its run against the tree at the review fixes (`d133673c65`): eight lines differ from Go |
+| `door-a-1115/reassign-plain/` (the same five files) | the same with no `unsafe`: a slice of the array, or a pointer to an element, taken before the whole assignment; seven of nine lines differ from Go |
 
 In the footprint files `base/` and `cut/` stand for the two conversion roots, and `seed/` and `reconvert/` for
 the arm's. `<kit>` in an `.out` file is the scratch directory the program was converted in. The `lazy` program

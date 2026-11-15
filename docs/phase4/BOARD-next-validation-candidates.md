@@ -38913,4 +38913,88 @@ closes the class.
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — P5 (door A, from the review of V2): a view of a Go value's bytes uses the CLR's layout of the value, and only the element type is checked against Go's — OPEN, no owner
+
+The array-pointer view doors' V2 (`@unsafe.Pointer.View` and the copy doors over a Go value of another type,
+docs/phase4/DESIGN-array-pointer-doors.md section 12) cut a window over the storage the value's box holds still.
+The window's end is the end of that storage as the CLR laid it out. The element type `E` is refused when its C#
+size differs from its Go size (`slice<T>.OverNativeMemory`, `GoLayoutFacts<T>.SizeDiverges`). The VALUE's type is
+not checked. A struct with a Go zero-size field and no explicit layout is larger in C# than in Go, and its later
+fields can sit at other offsets, so a program that views such a value as bytes reads and writes the C# layout where
+Go reads and writes Go's, and the view is longer than Go's value.
+
+Reach: not measured. No V2 site in the standard library or in the two demos is known to view such a struct.
+Candidate remedy: the box answers 0 from `HeldBytesFrom` and false from `TryHeldExtent` when
+`GoLayoutFacts<T>.SizeDiverges` holds for its own pointee, so the door falls to its copy arm and a copy door refuses
+by name. Small (golib only, one test arm per answer).
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door A, from the review of V2): a view at an address the element type is not aligned to is cut without a check — OPEN, no owner
+
+`(*[N]uint64)(unsafe.Pointer(&bytes[1]))[:n]` is a view of 8-byte elements at an odd address. Go's own rule makes
+the conversion invalid when the pointer is not aligned for the new type (checkptr reports it under `-race` or
+`-d=checkptr`; without it the program runs on amd64 and arm64). The view doors cut the window at the address they
+are given, in every arm that views memory (V2 and V3; `HeldWindow` and `Window` in `src/core/unsafe/unsafe.cs`).
+Plain reads and writes of a misaligned element work on amd64 and arm64. The review's concern is an atomic operation
+on such an element (`sync/atomic` over a 64-bit word at an address that is no multiple of 8), which the hardware
+does not promise to perform atomically and may refuse.
+
+Reach: not measured. Candidate remedy: refuse by name when the address is not a multiple of the element's alignment
+and the element is wider than one byte, as checkptr does, or leave it and state it as a limit. A ruling, then small.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door A, from the review of V2): no arm takes views of one Go value on two threads — OPEN, no owner
+
+V2's test arms are single-threaded: one thread takes the view, forces collections and reads. The design record says
+so (docs/phase4/DESIGN-array-pointer-doors.md 12.5). Two threads taking views of one Go value at once both reach
+the box's pin moment (`EnsureStableAddress`, `pinnedArrayData`), and `pinnedArrayData` sets the pin with `??=`,
+which is not atomic: two pins can be made and one dropped, to be released by its finalizer. The review read this
+as benign (both pins hold the same object still, and the address answered is the same). No arm shows it.
+
+Candidate: a two-thread stress arm beside `TenThousandRoundsOfWriteCollectReadKeepEveryViewOnItsValue`. It fits
+the seat that makes the named-array publish interlocked (the lost-write wall's option 2), which adds a two-thread
+arm of its own.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (found by door A's review fix 1): assigning a whole array gives the variable new storage, so everything that named the old storage stops naming the variable — OPEN, no owner, sized
+
+In Go an array variable is its storage. `a = b` copies b's elements into a, and a slice of a, a pointer to an
+element of a, and a's address as a number all still name a afterwards. In converted code an `array<T>` holds a
+reference to a backing array, and a whole assignment swaps the backing: `a = b` is emitted `a = b.Clone()`, and
+`a = [4]int{1, 2, 3, 4}` a fresh array. What was taken from a before the assignment keeps the old backing.
+
+Measured 2026-11-15 on door A's tree (`docs/phase4/data/array-pointer-doors/door-a-1115/`, emission and outputs
+beside each program):
+
+- `reassign-plain/`, no `unsafe`: 7 of 9 lines differ from Go. `s := a[:]; a = [4]int{1,2,3,4}; s[0]` prints 0
+  where Go prints 1; a write through s, or through `p := &a[0]`, does not reach a; the same for a field
+  (`h.arr`), a package variable, an assignment from another variable, and an assignment through `*r = …`. The two
+  lines that agree go through a pointer to the array itself (`q := &a; q[0] = …`), which holds the box.
+- `reassign/`, with `unsafe`: 8 of 10 lines differ. A write through `*(*T)(p)` or through the address as a
+  number, taken before the assignment, is lost (local, package variable, field, named array), and a read
+  through it answers the old elements. The box's pin is made once and holds the old backing
+  (`pinnedArrayData`, `m_pin ??=`), and the registry resolves the old address.
+
+By reading, both are on master: neither the emission nor the pin code is door A's. The runs were not repeated on
+master. Door A's fix 1 makes its own doors refuse or copy instead of writing the old backing; it cures nothing here.
+
+Reach: not measured. The shape that loses is an alias taken BEFORE a whole assignment and used AFTER it. A reset
+(`d.buf = [N]byte{}`) after a slice of the buffer was taken is the likely real form.
+
+Size. Two steps.
+1. A census (small, a go/ast and go/types tool, no converter change): every `=` whose left side is an existing
+   location of array type, and every `=` of a struct that has an array field, in the standard library and in
+   the two demo closures. It says how many lines the cut would move.
+2. The cut (medium; converter, golib, go2cs-gen; a corpus footprint on four targets): such an assignment copies
+   the elements into the destination's own backing (`array<T>` and the named-array wrapper gain an in-place
+   assign; the converter emits it for an existing location and keeps the clone for a declaration, an argument and
+   a map value, which are new storage in Go as well). A struct assignment that carries array fields is the
+   second half and is sized by the census. With the cut the pin never holds storage the variable has left, and
+   fix 1's test becomes a check.
+
+— P5 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

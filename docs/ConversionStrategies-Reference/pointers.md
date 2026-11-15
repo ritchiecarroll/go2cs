@@ -3047,8 +3047,13 @@ form of an array small enough to exist is the whole array from its low bound, `V
   window on that array. Writes reach it and nothing has to be held still. Its capacity ends where the Go
   array ends, and a view or a copy that would pass that end is refused by name, because the managed array is
   all the storage there is.
-- **An address the pointer registry does not know** (C memory, or an interior address of Go memory): a native
-  window over the address, with Go's capacity `N - lo`. It keeps alive what the pointer carried.
+- **C memory, or a number that carries no pointer:** a native window over the address, with Go's capacity
+  `N - lo`. Nothing knows where such memory ends, as in Go.
+- **An address inside a Go value** (`unsafe.Add` over a pointer to the value, pointer arithmetic written in one
+  expression, or an element of a view of the value): the pointer carries the value it was derived from, and the
+  view is a native window from that address to the end of the value's storage, held still as in the next case.
+  A view or a copy that would pass that end is refused by name, and so is an address before the value or past
+  its end, where Go would read or write whatever lies there.
 - **Any other Go value its pointer can hold still** (a number, a struct of numbers, an array of another
   element type, a named array by its own address): a native window over the value's own bytes. Taking the
   value's address pins it, and the view keeps the box that owns the pin, so the value stays where it is for
@@ -3057,7 +3062,12 @@ form of an array small enough to exist is the whole array from its low bound, `V
   code `memcpy` into a Go variable: sqlite seeds its random number state that way.
 - **A Go value nothing can hold still** (it holds a reference): a copy of the elements read at the pointer. A
   read is exact; a write would not reach the value, so a `copy` door refuses such a destination by name
-  instead of losing the write.
+  instead of losing the write. An array assigned whole after its address was taken is answered the same way
+  when the view is of another element type: the address is of the elements the array had, and no window is
+  cut over them.
+<!-- 2026-11-15, the review of V2 (docs/phase4/DESIGN-array-pointer-doors.md section 13): the interior-address
+case was a window with Go's capacity until fix 2, and the assigned-array case a window on the old elements until
+fix 1. That a whole assignment gives an array new elements at all is the BOARD's row of the same date. -->
 
 **What keeps its own emission.** The door replaces one emission, the slice built from a span over the
 pointer cast to a number, which copied. A conversion that another rule already renders whole keeps that
@@ -3076,7 +3086,8 @@ docs/phase4/DESIGN-array-pointer-doors.md. -->
 Guarded by: the behavioral program `ArrayPointerViewDoors` (native pages from `syscall.Mmap` and Go memory,
 written through a view and read back from the memory, against Go); `ArrayPointerViewDoorTests` in
 GolibTests, whose `TenThousandRoundsOfWriteCollectReadKeepEveryViewOnItsValue` holds the pinned case across
-forced compacting collections and whose `WithoutItsAnchorTheSameWindowDoesNotKeepTheValue` is its control; the
+forced compacting collections, whose `WithoutItsAnchorTheSameWindowDoesNotKeepTheValue` is its control, and
+whose `AViewAtAnAddressInsideAGoValueEndsWhereTheValueEnds` and its three siblings hold the interior address; the
 converter's `TestArrayPointerViewDoor`, one arm per form and one control per route that keeps
 its own emission; and repoguard's `TestArrayPointerViewDoors`, which holds the census of copying spans left
 in the corpus and refuses a `FromRef` mint at a door.

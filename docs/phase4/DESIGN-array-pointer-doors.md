@@ -901,3 +901,140 @@ taken before its first use still loses the write, because the box V2 asks is the
   drops the variable.
 - No cost was measured: one anchor object per V2 view, and a pin that lives as long as the view.
 - The `prng` program is libc's `memcpy` shape. sqlite's own generated code was not converted or run here.
+
+## 13. Amendment 2026-11-15 (P5): the review of V2, its three fixes, and what the first one found
+
+COORD's review of V2 (`7765cbe0f8..1fa8b60636`, posted 03:01Z) returned SHIP-WITH-FIXES: two fixes before door A
+seats, one keep-alive, three BOARD rows. This section is what was changed for it, on top of the merge of master at
+batch 307 (`38ccbfd93e`). Code: `d133673c65`.
+
+### 13.1 Fix 1: storage a Go array no longer has
+
+**The gap.** A Go array's box pins the array's elements once (`pinnedArrayData`, `m_pin ??=`) and answers that
+address from then on. A whole assignment gives the array new elements: the converter emits `a = b` as
+`a = b.Clone()` and `a = [4]uint32{…}` as a fresh array, and both replace the backing the `array<T>` holds. The
+pin still holds the old elements, and the registry still resolves the old address to the box. `HeldBytesFrom`
+compared the address with the pin's and nothing else, so V2 cut its window over the old elements: reads were of
+what the variable no longer is, and every write was lost without a word. The replacement is real (the review
+asked): `ArrayValueCopySites` and the kit below show the emission.
+
+**The fix.** The box answers for storage only when the pinned elements are the array's own now
+(`ReferenceEquals` of the pinned object and the array's `Source`); else it holds nothing, the door falls to V4,
+and what V4 does is known: a view is a copy and a copy door refuses to write by name. For a pin-only hold (a
+scalar, a struct, a field or an element) the pinned object must contain the box's own slot, which is a check:
+nothing replaces that storage.
+
+**Red first.** `AViewAtTheNumberOfAGoArrayAssignedSinceIsNoWindowOnItsOldElements`: red before the fix (the view's
+capacity was 16, a window on the old elements), green with it (capacity 4, a copy; `CopyInto` at the number and at
+an address inside the array both refused by name).
+
+**What the fix does not cure, and what the measurement found.** The fix stops the door from writing where the
+variable is not. It does not make the address name the variable again: the pin is still of the old elements. The
+kit `data/array-pointer-doors/door-a-1115/reassign/` takes an array's address, assigns the array whole, then
+writes or reads through the address, ten ways. Against the tree with the fix, eight print something other than
+Go:
+
+| arm | Go | converted |
+|:--|:--|:--|
+| local, write through `*(*uint32)(p)` | `41` | `1` |
+| the same by number | `42` | `1` |
+| assigned from another variable | `43 9` | `9 9` |
+| a named array | `44` | `9` |
+| a package variable, by number | `45` | `5` |
+| a struct field | `46` | `1` |
+| a read through the address | `7` | `0` |
+| `(*[4]uint32)(p)[0] = 47` (the same element type) | `47` | `47` |
+| a byte view (door A, V2) after the assignment | `48` | `1` |
+| control: never assigned whole | `49` | `49` |
+
+Seven of these do not pass through a view door at all (`@unsafe.Pointer.To<T>(p).Value`), so they are not door A's:
+by reading, they are on master (the pin code is not changed by this seat). The run was not repeated on master.
+
+The cause is wider than pins. `data/array-pointer-doors/door-a-1115/reassign-plain/` has no `unsafe` in it: a
+slice of an array, a pointer to an element, and a slice of a field or of a package variable, each taken before a
+whole assignment of the array. Seven of its nine lines differ from Go:
+
+| arm | Go | converted |
+|:--|:--|:--|
+| `s := a[:]; a = [4]int{1,2,3,4}; s[0]` | `1` | `0` |
+| then `s[1] = 20; a[1]` | `20` | `2` |
+| `p := &b[0]; b = …; *p = 30; b[0], *p` | `30 30` | `1 30` |
+| `q := &c; c = …; q[0] = 40; c[0]` | `40` | `40` |
+| `set(&c)` | `50` | `50` |
+| `t := d[:]; d = other; t[0] = 60; d[0], other[0]` | `60 9` | `9 9` |
+| a field, `u := h.arr[:]; h.arr = …; u[0] = 70` | `70` | `1` |
+| a package variable | `80` | `1` |
+| assigned through `*r = …` with a slice taken before | `90` | `1` |
+
+In Go an array variable is its storage: an assignment copies elements into it, and everything that names the
+storage (a slice of it, a pointer to an element, its address as a number) still names the variable. Here an
+array variable holds a reference to a backing, and an assignment swaps the backing. This is its own wall, posted
+with its size on 2026-11-15 and recorded on the BOARD; it is not worked in this seat.
+
+### 13.2 Fix 2: an address inside a Go value
+
+**The gap.** `(*[1<<30]byte)(unsafe.Add(unsafe.Pointer(&v), 4))[:n]`. The address is 4 bytes inside `v`'s pinned
+storage, and the registry knows a box by the address it was pinned at, so the address resolves to nothing and the
+door took V3, the arm for C memory. V3 keeps the pointer's root, so the storage stayed put, and it bounds the view
+by Go's capacity, N less the low bound: 1 << 30 bytes over a value of 16. A write past the value went into
+whatever the managed heap held next. V3 is part of this seat, so this was not on master.
+
+**The fix.** Before V3, the door asks whether the pointer was derived from a Go value
+(`NativeDerivation.HeldSource`): from what the pointer keeps (`Kept`), a chain of derivations is walked to its
+first managed box, as the order token of a derived box walks it (`NativeDerivation.Token`), and through a view as
+well: an element of a native-backed slice, or a native array window, that keeps a root was cut over that root
+(`INativeViewAnchor`). That box answers for the storage it holds still from its first byte to its end
+(`IHeldStorage.TryHeldExtent`, with fix 1's check). Then:
+
+| the pointer | the door |
+|:--|:--|
+| derived from a Go value that holds its storage, address inside it or at its end | V2 at that address: a window to the end of the storage, anchored on what the pointer keeps; past the end is refused by name ("would pass the end of the Go value p points to (K elements of it remain)") |
+| the same, address before the storage or past its end | refused by name ("p is outside the Go value it was derived from") |
+| derived from a Go value that holds nothing still (it cannot be pinned, or its storage was replaced, 13.1) | V4: a view is a copy read at the address, and a copy door refuses to write by name |
+| not derived from a managed box: C memory, or a number that carries nothing | V3, as before |
+
+**What the last row can still do.** A pointer made from a number held in a variable carries nothing
+(`unsafe.Pointer(n)`; Go's own rules call that conversion invalid when n was an address of Go memory), and C
+memory has no end known here. For both, the view has Go's capacity and a write past the real memory is the
+program's, as it is in Go. Arithmetic written in one expression, `unsafe.Pointer(uintptr(p) + n)`, is emitted as
+`unsafe.Add(p, n)` and carries p's root, so it is bounded. The pin-extent index (H's seat) exists in cgo
+processes only and is not used.
+
+**Red first.** Four arms, each red before the fix on its first assertion, which is of the capacity, so the red run
+wrote nothing out of bounds: `AViewAtAnAddressInsideAGoValueEndsWhereTheValueEnds` (the review's shape over a
+struct of scalars: capacity 1 << 30 before, 12 after), `…InsideAGoArrayOfAnotherElementEndsWhereTheArrayEnds`
+(the array-data pin), `AViewAtAnAddressPastOrBeforeAGoValueIsRefusedByName`, and
+`AViewAtAnElementOfAViewOfAGoValueEndsWhereTheValueEnds` (an element of a view of the value, found while
+writing the fix: the same overrun through `&view[1]`). One control, green before and after:
+`AViewAtAnAddressInsideNativeMemoryKeepsGosCapacity` (C memory keeps Go's capacity, through `unsafe.Add` and
+through an element of a view).
+
+### 13.3 Fix 3, the BOARD rows, and the readings
+
+`CopyInto` (both forms) and `CopyFrom` keep `p` alive until the elements are copied (`GC.KeepAlive(p)` after
+`copy`). The review's items 4 to 6 are three BOARD rows of 2026-11-15: the value's own Go and C# sizes are not
+compared (only the element's), no alignment check, no two-thread arm.
+
+Readings, at the code commit on one cloud linux/amd64 VM, Release, `GoTargetOS=linux`:
+
+| | reading |
+|:--|:--|
+| `ArrayPointerViewDoorTests` | 36 of 36 (30 before; five of the six new arms red before the fixes, the C-memory control green) |
+| GolibTests, whole suite | 2793 passed, 0 failed, 49 skipped (2787 before the six arms) |
+| the stress arm and its control (12.2) | in the suite above, green; the made-to-fail of 12.2 was not repeated: `HeldWindow` and the anchor are not changed |
+| NativeViewShapes (24 arms), `prng` (6), `lazy` (7), rebuilt against the fixed tree | each output byte-identical to the one of 12.3 |
+| the behavioral program `ArrayPointerViewDoors`, built by path | 25 lines, equal to `go run` |
+| repoguard (mint census, public surface, provenance) | green; the mint census counts are unchanged: `Window` one site, `HeldWindow` one site |
+
+The gates at the merge result (the seeded `-stdlib runtime` reconvert on four targets, CNR, the by-path builds
+and the converter suite) are scored in the announce of this commit, not here.
+
+### 13.4 What this section does not show
+
+- Nothing here ran on windows or darwin before the hosted runs.
+- The interior-address arms take one derivation step, or two through a view. A longer chain is the same walk, and
+  that is a reading. The walk stops after 64 hops and then answers as for C memory.
+- A field reference over a struct in C memory, and a root that is not a pointer box, are answered as C memory
+  (V3). No arm reaches the door with one.
+- The stale case of 13.1 is checked per view. A view cut BEFORE the assignment is a window on the old elements
+  and stays one: nothing tells it the array has other storage now.
