@@ -1,0 +1,243 @@
+namespace go.example.com;
+
+using fmt = fmt_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+partial struct hdr {
+    internal uint16 family;
+    internal uint16 port;
+    internal uint64 word;
+}
+
+partial struct outer {
+    internal hdr inner;
+}
+
+internal static readonly ж<hdr> Ꮡglobal = new StaticBox<hdr>(default(hdr));
+internal static ref hdr global => ref ((StaticBox<hdr>)Ꮡglobal).ValueSlot;
+
+internal static slice<byte> localOpen(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.slice();
+}
+
+internal static slice<byte> localBounded(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.slice(0, 1);
+}
+
+internal static slice<byte> localFrom(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.slice(1);
+}
+
+internal static slice<byte> localThree(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.slice(0, 1, 2);
+}
+
+internal static slice<byte> derefOpen(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.slice();
+}
+
+internal static slice<byte> derefBounded(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.slice(0, 1);
+}
+
+internal static slice<byte> derefFrom(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.slice(1);
+}
+
+internal static slice<byte> derefThree(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.slice(0, 1, 2);
+}
+
+internal static slice<byte> directBounded(ж<hdr> h) {
+    return @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).slice(0, 1);
+}
+
+internal static slice<byte> directDerefOpen(ж<hdr> h) {
+    return @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).slice();
+}
+
+internal static slice<byte> directDerefBounded(ж<hdr> h) {
+    return @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).slice(0, 1);
+}
+
+internal static byte loadField(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.ElementRef(1);
+}
+
+internal static nint loadLen(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return 2 + 2;
+}
+
+internal static (array<byte>, array<byte>) loadMulti(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    var (a, b) = (@unsafe.ArrayPointer<byte>.Load(p), @unsafe.ArrayPointer<byte>.Load(p));
+    return (a.Clone(), b.Clone());
+}
+
+internal static array<byte> loadVar(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    array<byte> a = @unsafe.ArrayPointer<byte>.Load(p);
+    return a.Clone();
+}
+
+internal static slice<array<byte>> loadInComposite(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return GoReflect.WithElemDims(new array<byte>[]{@unsafe.ArrayPointer<byte>.Load(p)}.slice(), 2);
+}
+
+internal static any loadToInterface(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return @unsafe.ArrayPointer<byte>.Load(p);
+}
+
+partial struct raw {
+    internal array<byte> port = new(2);
+    internal array<byte> word = new(8);
+}
+
+internal static raw loadInStructLiteral(ж<hdr> h) {
+    return new raw(
+        port: @unsafe.ArrayPointer<byte>.Load(@unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2)),
+        word: @unsafe.ArrayPointer<byte>.Load(@unsafe.ArrayPointer<byte>.Of(h.Ꮡword, 8))
+    );
+}
+
+internal static raw loadInStructLiteralLocal(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return new raw(port: (@unsafe.ArrayPointer<byte>.Load(p)));
+}
+
+internal static array<byte> loadSent(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    var ch = new channel<array<byte>>(1, ChanCargo.Of(null, new nint[] { 2 }));
+    ch.ᐸꟷ(@unsafe.ArrayPointer<byte>.Load(p));
+    return ᐸꟷ(ch);
+}
+
+internal static array<byte> loadParen(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    var v = (@unsafe.ArrayPointer<byte>.Load(p));
+    return v.Clone();
+}
+
+internal static void storeLiteral(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    @unsafe.ArrayPointer<byte>.Store(p, new byte[]{1, 2}.array());
+}
+
+internal static void storeFromView(ж<hdr> h, ж<hdr> g) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    var q = @unsafe.ArrayPointer<byte>.Of(g.Ꮡport, 2);
+    @unsafe.ArrayPointer<byte>.Store(p, @unsafe.ArrayPointer<byte>.Load(q));
+}
+
+internal static void storeMulti(ж<hdr> h, ж<hdr> g) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    var q = @unsafe.ArrayPointer<byte>.Of(g.Ꮡport, 2);
+    (p.Value, q.Value) = (@unsafe.ArrayPointer<byte>.Load(q), @unsafe.ArrayPointer<byte>.Load(p));
+}
+
+internal static nint rangeIndexOnly(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    nint n = 0;
+    foreach (var i in range(p, 2)) {
+        n += i;
+    }
+    return n;
+}
+
+internal static nint rangeDerefIndexOnly(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    nint n = 0;
+    foreach (var i in range(2)) {
+        n += i;
+    }
+    return n;
+}
+
+internal static uint32 rangeWord(ж<hdr> h) {
+    var t = @unsafe.ArrayPointer<uint32>.Of(h.Ꮡword, 2);
+    uint32 s = default;
+    foreach (var (_, w) in range(t.slice())) {
+        s += w;
+    }
+    return s;
+}
+
+internal static array<byte> ctlRepointed(ж<hdr> h, /*[2]*/ ж<array<byte>> other) {
+    var q = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    q = other;
+    q.Value = new byte[]{9, 9}.array();
+    foreach (var (_, b) in range(q.Value)) {
+        _ = b;
+    }
+    _ = (q.Value)[..1];
+    return q.Value.Clone();
+}
+
+internal static array<byte> ctlTwoHop(ж<outer> o) {
+    var n = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(o.Ꮡinner.Ꮡport));
+    foreach (var (_, b) in range(n.Value)) {
+        _ = b;
+    }
+    return n.Value.Clone();
+}
+
+internal static array<byte> ctlGlobal() {
+    var g = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡglobal.Ꮡport));
+    return g.Value.Clone();
+}
+
+internal static array<byte> ctlSameElem(/*[4]*/ ж<array<byte>> xs) {
+    var a = array<byte>.AliasPointer(xs.at<byte>(0), 2);
+    a.Value = new byte[]{7, 8}.array();
+    return a.Value.Clone();
+}
+
+internal static array<byte> ctlManaged(ref array<byte> xs) {
+    xs = new byte[]{5, 6}.array();
+    foreach (var (_, b) in range(xs)) {
+        _ = b;
+    }
+    _ = (xs)[..1];
+    return xs.Clone();
+}
+
+internal static void main() {
+    var (h, g) = (Ꮡ(new hdr(port: 0x1234)), Ꮡ(new hdr(port: 0x5678)));
+    fmt.Println(localOpen(h), localBounded(h), localFrom(h), localThree(h));
+    fmt.Println(derefOpen(h), derefBounded(h), derefFrom(h), derefThree(h));
+    fmt.Println(directBounded(h), directDerefOpen(h), directDerefBounded(h));
+    fmt.Println(loadField(h), loadLen(h), loadVar(h), loadInComposite(h), loadToInterface(h));
+    fmt.Println(loadInStructLiteral(h), loadInStructLiteralLocal(h), loadSent(h), loadParen(h));
+    var (a, b) = loadMulti(h);
+    fmt.Println(a, b);
+    storeLiteral(h);
+    fmt.Printf("%#x\n"u8, h.port);
+    storeFromView(h, g);
+    fmt.Printf("%#x\n"u8, h.port);
+    h.word = 0x0000000200000001UL;
+    fmt.Println(rangeIndexOnly(h), rangeDerefIndexOnly(h), rangeWord(h));
+    var ᴛ1 = new byte[]{}.array(2);
+    fmt.Println(ctlRepointed(h, Ꮡ(new byte[]{}.array(2))), ctlSameElem(Ꮡ(new byte[]{}.array(4))), ctlManaged(ref ᴛ1));
+    _ = (Func<ж<outer>, array<byte>>)(ctlTwoHop);
+    _ = (Func<array<byte>>)(ctlGlobal);
+
+    h.port = 0x1111;
+    storeMulti(h, g);
+    fmt.Printf("%#x %#x\n"u8, h.port, g.port);
+}
+
+} // end main_package

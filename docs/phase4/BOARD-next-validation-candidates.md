@@ -39380,4 +39380,84 @@ a behavioral line each; the silent range is its red arm, by value (0x0 against 0
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — P5 (F1, part C; closes the 2026-11-15 row "a form that reads the whole array through the field view is refused by name"; COORD ruling 09:36Z): the whole array through the field view is a load, a store or the view's window — DONE
+
+**What changed.** The unsafe package (`src/core/unsafe/unsafe.cs`, hand-owned): `ArrayPointer<T>.Load` copies
+the view's N elements into a new array, and `ArrayPointer<T>.Store` writes N elements through it. The
+converter names them: `*p` in a value position is `Load(p)`, `*p = v` is `Store(p, v)`, a range over the view
+ranges its window (`p.slice()`), a range over the dereference ranges a load, `(*p)[i]` and `(*p)[lo:hi]` are
+the view's own element and window, and `len(*p)` and an index-only range of the dereference are the constant.
+p is the conversion where it is written or a local bound by it and never pointed elsewhere. No golib change.
+Surface: two members added to `ArrayPointer<T>`, tier 2 (what converted code calls, hidden from IntelliSense);
+no existing name changes.
+
+**The value positions are a list of their own**, wider than door B's by three: an element or field value of
+a composite literal, a sent value, and any of them inside parentheses. Door B's dereference has a general
+emission behind it; the view has none, so a position the list missed would be a refusal at run time. The
+struct-literal position is how `x/sys/windows` writes the form (the census row of this date).
+
+**Scope probe first** (`docs/phase4/data/array-pointer-doors/field-view-1115/probe3/`): 32 functions converted
+by the A+B converter and by the cut. 22 lines differ, each a whole-array form of a field view; the five
+controls are byte-identical. Go prints 11 lines; the cut prints the first 10 equal and stops at the tuple
+store, refused by name (the next row).
+
+**Red first.** The silent arm by its value: a range by value over the kept view read 0x0 where Go reads 0xf1
+at `516586c4a9`, was refused by name after parts A and B, and equals Go's with C. The converter's
+`TestNativeFieldArrayViewWholeArrayGoesThroughTheHelpers`: seven positive arms red at the A+B converter (19
+failed assertions), green with C; the re-pointed control green on both. The helpers are new, so their seven
+GolibTests arms are read green only.
+
+**Readings**, linux/amd64 Release, at `73319097cd`. The behavioral program `FieldViewOverGoStruct`, with part C's forms: 114 lines, equal to Go's. Whole
+GolibTests 2864 passed, 0 failed, 49 skipped (parts A and B: 2857 passed; the seven new arms). By path 25 of
+25. check-no-regression: NO REGRESSION, byte-identical across all 1076 behavioral packages (12 platform-exclusive skipped by name). Footprint, two seeded emissions on each of four targets:
+0 corpus files. Predictions scored in the design record, section 18.7: five of seven met as worded; the
+probe's line count was miscounted (11, not 13) and its stopping line moved when the tuple store was called
+last. **Not predicted:** part C's edits moved 14 cites the docs guards hold (12 provenance notes, 2 samples
+in `pointers.md`); `go test` named them at the code commit and they are re-pointed in the docs commit.
+Kit: `docs/phase4/data/array-pointer-doors/field-view-1115/probe3/`.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (F1, part C's probe): a tuple assignment that stores the whole array through two field views is refused by name — OPEN, proposed .5, owner P5
+
+`*p, *q = *q, *p`, p and q field views. The right side emits two loads. The left side keeps
+`(p.Value, q.Value) = ...`, and the view's `Value` refuses by name ("has no array<T> to dereference"). Go swaps
+the two arrays. Loud, never silent. **Sites:** 0 in the standard library's emitted field views, the sqlite
+demo's closure, the TypeScript closure and the nine nugetgo modules (the census counts no whole-array store
+through a view at all). **Size:** about 25 converter lines in the tuple-assignment path (each left operand
+that is a view dereference becomes a temporary and a `Store` after the tuple is evaluated, as Go orders it),
+one unit arm, one behavioral line. Probe line: `storeMulti` in
+`docs/phase4/data/array-pointer-doors/field-view-1115/probe3/main.go`.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (F1's census over the TypeScript closure and the nine nugetgo modules; COORD ruling 09:54Z; amends the 2026-11-15 row "the field view of a struct that holds a reference is refused by name"): every site is in `golang.org/x/sys`, and windows adds three whole-array loads and one GUID field — recorded, the box-kind seat's population
+
+The typed census of that row, per target and with two more columns (what the field is; whether the view fits
+inside it). Kit: `docs/phase4/data/array-pointer-doors/field-view-1115/census2/`. The TypeScript tree is
+private: counts and `x/sys` site rows only.
+
+| closure | own packages | linux/amd64 | linux/arm64 | darwin/amd64 | windows/amd64 |
+|:--|--:|--:|--:|--:|--:|
+| TypeScript (the tsc module at `ba29a56299`, 104 roots) | 0 | 17 | 17 | 4 | 7 |
+| the nine nugetgo modules (18 roots) | 0 | 17 | 17 | 4 | 0 |
+
+All in `golang.org/x/sys` (`unix` 17 on linux and 4 on darwin, `windows` 7). Every root is a struct whose
+converted form holds references, so every site is refused by name today. Every field but one is a number, and
+every view fits inside its field. Not measured: whether any site is on an executed path.
+
+**New on windows:** `SockaddrBth.sockaddr` (syscall_windows.go:1051-1053) loads the whole array through the
+view where it is written, as field values of a struct literal. Part C emits the three as loads; they answer
+once the box kind exists. One of the three is over a GUID field, a struct whose converted form holds an array:
+its bytes are not contiguous in managed memory, so the reinterpret does not serve it. That site is door C's
+class (a layout copy) and stays refused by name after the box-kind seat. Bluetooth sockets only.
+
+**The seat.** Design approved 11:17Z: an internal `ReinterpretedArrayBox<E>` over the field's own box, made
+only where the field and E hold no reference and N elements fit inside the field, else refused by name; plus
+three arms (identity against Go, the pointer's number, a compacting collection between a store and a read),
+and the field view's shape widened to two selections as its second commit, probe first. Predicted footprint:
+0 corpus files (`src/core/unsafe/unsafe.cs` is hand-owned and changes), behavioral +1.
+
+— P5 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -3316,7 +3316,7 @@ field view, `@unsafe.ArrayPointer<T>.Of(field, N)`, which names the field once, 
 of the view is `ElementRef`, a reference to the element in place, so a read, a store, a compound assignment
 and `++` are each one expression:
 
-<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.go:33-44 -->
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.go:37-48 -->
 ```go
 func directRead(h *hdr) byte {
 	return (*[2]byte)(unsafe.Pointer(&h.port))[1]
@@ -3350,7 +3350,7 @@ internal static void directOpAssign(ж<hdr> h) {
 `h.Ꮡport` is the address of the field, Go's `&h.port`. A view bound to a local is the same call, and the
 local indexes through `ElementRef` too. This is the step `runtime`'s `cheaprand` takes on a 32-bit target:
 
-<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.go:91-98 -->
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.go:95-102 -->
 ```go
 func localWord(h *hdr) uint32 {
 	t := (*[2]uint32)(unsafe.Pointer(&h.word))
@@ -3376,6 +3376,185 @@ internal static uint32 localWord(ж<hdr> h) {
 The address of an element is `.at<T>(i)` and a slice of the view is `.slice(...)`, both over the same bytes.
 `len` of the view is the constant `N`.
 
+**The whole array through the view.** The view has no array value of its own: Go's `*[N]T` there points at
+bare elements. A form that needs all N elements goes through the elements. A dereference read as a value is
+`Load`, which copies the N elements into a new array, as Go's `*p` copies. A store through the dereference is
+`Store`, which writes the N elements in place:
+
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.go:131-137 -->
+```go
+// The load is a copy: a store through the view after it does not reach it.
+func wholeIsACopy(h *hdr) (byte, byte) {
+	p := (*[2]byte)(unsafe.Pointer(&h.port))
+	a := *p
+	p[0]++
+	return a[0], p[0]
+}
+```
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.cs.target:109-114 -->
+```csharp
+internal static (byte, byte) wholeIsACopy(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    var a = @unsafe.ArrayPointer<byte>.Load(p);
+    p.ElementRef(0)++;
+    return (a[0], p.ElementRef(0));
+}
+```
+
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.go:157-160 -->
+```go
+func wholeStoreLocal(h *hdr, v [2]byte) {
+	p := (*[2]byte)(unsafe.Pointer(&h.port))
+	*p = v
+}
+```
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.cs.target:140-145 -->
+```csharp
+internal static void wholeStoreLocal(ж<hdr> h, /*[2]*/ array<byte> v) {
+    v = v.Clone();
+
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    @unsafe.ArrayPointer<byte>.Store(p, v);
+}
+```
+
+`v = v.Clone()` is the array parameter's own copy, as for any array passed by value. The load is taken in
+every position that reads the value: the right side of an assignment or a declaration, a returned value, an
+argument, an operand of `==`, an element or a field value of a composite literal, a sent value, and any of
+these inside parentheses. A load is already a copy, so no `.Clone()` follows it.
+
+A range over the view reads each element when its round comes, as Go's range over a pointer to an array
+does, so it ranges the view's window, `p.slice()`. A range over the dereference ranges a copy that Go takes
+before the first round, so it ranges a load. A store made inside the loop is seen by the first and not by
+the second:
+
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.go:185-215 -->
+```go
+// A range over a pointer to an array reads each element when its round comes.
+func rangeValueSeesAStore(h *hdr) int {
+	p := (*[2]byte)(unsafe.Pointer(&h.port))
+	sum := 0
+
+	for i, b := range p {
+		if i == 0 {
+			p[1] = 0x40
+		}
+
+		sum += int(b)
+	}
+
+	return sum
+}
+
+// A range over the dereference ranges a copy, taken before the first round.
+func rangeDerefIsACopy(h *hdr) int {
+	p := (*[2]byte)(unsafe.Pointer(&h.port))
+	sum := 0
+
+	for i, b := range *p {
+		if i == 0 {
+			p[1] = 0x50
+		}
+
+		sum += int(b)
+	}
+
+	return sum
+}
+```
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.cs.target:168-196 -->
+```csharp
+internal static nint rangeValueSeesAStore(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    nint sum = 0;
+
+    foreach (var (i, b) in range(p.slice())) {
+        if (i == 0) {
+            p.ElementRef(1) = 0x40;
+        }
+
+        sum += (nint)b;
+    }
+
+    return sum;
+}
+
+internal static nint rangeDerefIsACopy(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    nint sum = 0;
+
+    foreach (var (i, b) in range(@unsafe.ArrayPointer<byte>.Load(p))) {
+        if (i == 0) {
+            p.ElementRef(1) = 0x50;
+        }
+
+        sum += (nint)b;
+    }
+
+    return sum;
+}
+```
+
+The dereference of a view local, indexed or sliced, is the view's own element and window, with no copy:
+
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.go:219-229 -->
+```go
+func derefIndex(h *hdr) byte {
+	p := (*[2]byte)(unsafe.Pointer(&h.port))
+	(*p)[0] = 0x77
+	(*p)[1]++
+	return (*p)[0]
+}
+
+func derefSlice(h *hdr) []byte {
+	p := (*[2]byte)(unsafe.Pointer(&h.port))
+	return (*p)[:1]
+}
+```
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.cs.target:198-208 -->
+```csharp
+internal static byte derefIndex(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    p.ElementRef(0) = 0x77;
+    p.ElementRef(1)++;
+    return p.ElementRef(0);
+}
+
+internal static slice<byte> derefSlice(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.slice(0, 1);
+}
+```
+
+Go reads no memory for `len(*p)` or for a range that takes only the index, and both emit the constant:
+
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.go:252-261 -->
+```go
+func derefUnread(h *hdr) int {
+	p := (*[2]byte)(unsafe.Pointer(&h.port))
+	n := len(*p) * 10
+
+	for i := range *p {
+		n += i
+	}
+
+	return n
+}
+```
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.cs.target:229-238 -->
+```csharp
+internal static nint derefUnread(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    nint n = 2 * 10;
+
+    foreach (var i in range(2)) {
+        n += i;
+    }
+
+    return n;
+}
+```
+
 **What the view is** depends on where the struct is, and the helper decides at run time:
 
 - **A struct in native memory** (a `sockaddr` libc returned, a struct laid over a byte slice): the bytes at
@@ -3399,21 +3578,27 @@ which answer over every root. Bound to a local it is the pointer conversion
 [`unsafe.Pointer.To<array<T>>`](#tp-over-an-unsafepointer-is-emitted-as-unsafepointertotp--the-typed-pointer-keeps-what-p-carries),
 which answers where the memory is an array of that type or native, and not over a Go value of another type.
 
-**Limits.** The view has no array value to hand out, so a form that reads the whole array through it (a
-dereference `*p`, a range that reads the values) is refused by name. A local bound to the view and later
-pointed at something else indexes through its array value, `q.Value[i]`, as any pointer to an array does.
+**Limits.** One whole-array form is not routed: a tuple assignment that stores through the dereference of
+two views, `*p, *q = *q, *p`. Its right side loads; its left side keeps the view's array value, which the
+view does not have, and the statement is refused by name at run time. A local bound to the view and later
+pointed at something else is an ordinary pointer to an array: it indexes through its array value,
+`q.Value[i]`, and takes none of the forms above.
 <!-- history: until 2026-11-15 the view answered over native memory only. Over a Go struct it was the pointer
 conversion to the array type, a box that read the field's bytes as an array header: of 15 forms probed over
 such a root, 13 panicked and one, a range by value, ran no rounds and said nothing. And the view indexed
 where it is written emitted `(...Of(field, N)).Value[i]`, which was refused over native memory as well.
-Design and measurements: docs/phase4/DESIGN-array-pointer-doors.md section 18; the native half:
+From then until part C of the same day, a form that read the whole array through the view (`*p`, a range
+that reads the values, `(*p)[i]`) was refused by name on every root; the composite-literal position was
+added for golang.org/x/sys/windows' SockaddrBth.sockaddr, found by census.
+Design and measurements: docs/phase4/DESIGN-array-pointer-doors.md section 18 (part C: 18.7); the native half:
 docs/phase4/DESIGN-native-array-view.md. -->
 
 Guarded by: the behavioral programs `FieldViewOverGoStruct` (every form over a heap struct, a package
 variable, an element of a slice and a struct over a byte slice, against Go) and `NativeFieldPortAlias` (pages
 from `syscall.Mmap`); `FieldArrayViewOverGoStructTests` and `NativeFieldArrayViewTests` in GolibTests; and the
-converter's `TestNativeFieldArrayViewEmitsTheDoorAndElementRef` and
-`TestNativeFieldArrayViewIndexedDirectlyReadsThroughElementRef`.
+converter's `TestNativeFieldArrayViewEmitsTheDoorAndElementRef`,
+`TestNativeFieldArrayViewIndexedDirectlyReadsThroughElementRef` and
+`TestNativeFieldArrayViewWholeArrayGoesThroughTheHelpers`.
 
 <a id="a-pointer-cast-slice-with-a-low-bound-offsets-the-span"></a>
 
