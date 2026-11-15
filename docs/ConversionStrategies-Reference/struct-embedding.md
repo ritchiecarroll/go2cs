@@ -318,6 +318,25 @@ detector, so no stale ready-flag can hand out a pointer into a private copy afte
 fresh zero wrapper. The fast path is lock-free — one acquire read, one type test, one reference
 compare.
 
+**The store into the storage is a compare-and-swap of the wrapper's one holder.** <!-- history: 2026-11-15
+(P5, option 2 of the BOARD row "a write at the ADDRESS of a named array that has not been used yet is lost").
+Until then the store copied the whole wrapper back. Measured on linux/amd64, two threads released together,
+200,000 fresh arrays an arm: 47,334 arrays lost a write at the element door against a direct first use, 78,243
+with two element references of one element, 6,735 through reflect's pointer conversion; 0 in each with the
+swap. --> The box's lock serializes the publishes of that one box. It does not cover the storage: the wrapper's
+own getter fills the same storage with no lock (see [The named-array wrapper publishes its lazy backing
+atomically](#the-named-array-wrapper-publishes-its-lazy-backing-atomically)), and a second box over the same
+storage holds a lock of its own, as two element references of one element do. So the publish stores the copy's
+holder into the storage only where the storage is still empty, and a publish that finds a holder there reads
+the storage again and publishes that one. Both wrappers that reach the publish are exactly one reference
+word, the named array and the array-view wrapper over one, and that is what makes one swap the whole store.
+The two pin paths and reflect's pointer conversion between two names of one array type go through the same
+publish.
+
+Guarded by: `GolibTests`' `NamedArrayHolderPublishRaceTests`. Each racing arm runs beside a control (the copy-back
+written out by hand), and reports Inconclusive on a host where the control loses no write. One arm reads the
+shape of every named array go2cs-gen wrote in the converted `runtime`.
+
 The publish path is also narrowed to the shapes that actually *are* lazy, which fixed a second,
 separate defect the old unconditional probe carried. golib's own `array<T>`/`slice<T>` and every
 named-slice wrapper hold their backing in a field, so there is nothing to publish — and

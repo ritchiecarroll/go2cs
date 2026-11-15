@@ -73,6 +73,11 @@
   <PropertyGroup Condition="'$(GoTargetOS)' == 'linux' and '$(GoCgoGoldenArch)' == 'Arm64'">
     <DefineConstants>$(DefineConstants);GOCGO_CHAR_UNSIGNED</DefineConstants>
   </PropertyGroup>
+  <!-- The pin-extent index's child program (PinExtentsChildTests builds and runs it as its own process): its sources are
+       its own project's, never this suite's. -->
+  <ItemGroup>
+    <Compile Remove="testdata\pinextents\**" />
+  </ItemGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoCgoGoldenArch)' == 'Arm64'">
     <Compile Remove="GoCgoWrappers.linux.golden.cs" />
   </ItemGroup>

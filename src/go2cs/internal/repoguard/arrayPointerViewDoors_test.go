@@ -28,13 +28,16 @@ import (
 //	                    reason it kept it. A file no row names is a view that copies and that nobody read.
 //	NO FromRef AT A DOOR  no line that calls a view door holds a FromRef mint.
 //
+// The element doors (door B, src/go2cs/arrayPointerElementDoor.go: an index, an element's address, a whole array
+// loaded or stored through `(*A)(p)`) follow the same rule for the same reason and are read by the second arm.
+//
 // Hand-owned files and test sources are not converted production emission and are not read.
 
 // copyingSpanEmission is the emission the doors replaced: a slice built from a span over a raw C# pointer.
 var copyingSpanEmission = regexp.MustCompile(`new slice<[^()]+>\(new ReadOnlySpan<[^()]+>\(\([^()]+\*\)`)
 
-// viewDoorCall is a call of one of the doors.
-var viewDoorCall = regexp.MustCompile(`@unsafe\.Pointer\.(?:View<|CopyInto[<(]|CopyFrom<)`)
+// viewDoorCall is a call of one of the doors: the view doors, and the element doors.
+var viewDoorCall = regexp.MustCompile(`@unsafe\.Pointer\.(?:View<|CopyInto[<(]|CopyFrom<|ElementRef<|Element<|LoadArray<|StoreArray<)`)
 
 type copyingSpanRow struct {
 	sites  int
@@ -63,8 +66,8 @@ func viewDoorFindings(under, text string, spans map[string]int) []string {
 		found += len(copyingSpanEmission.FindAllStringIndex(code, -1))
 
 		if viewDoorCall.MatchString(code) && strings.Contains(code, "FromRef(") {
-			findings = append(findings, fmt.Sprintf("FromRef AT A VIEW DOOR: %s:%d calls a view door over a FromRef mint. The door aliases the address, "+
-				"and that address is true for one statement only: the converter keeps the copying span for such an operand "+
+			findings = append(findings, fmt.Sprintf("FromRef AT A DOOR: %s:%d calls a view or element door over a FromRef mint. The door aliases the address, "+
+				"and that address is true for one statement only: the converter keeps its earlier emission for such an operand "+
 				"(arrayPointerViewOperand), so this line was written by hand or the rule was removed", under, number+1))
 		}
 	}
@@ -174,7 +177,7 @@ internal static slice<byte> view(uintptr p, nint n) {
 	findings := viewDoorFindings("runtime/planted.cs", planted, spans)
 
 	expect("a span in a file no row names", findings, "NEW COPYING SPAN: runtime/planted.cs holds 1 slice(s)")
-	expect("a door over FromRef", findings, "FromRef AT A VIEW DOOR: runtime/planted.cs:6")
+	expect("a door over FromRef", findings, "FromRef AT A DOOR: runtime/planted.cs:6")
 
 	if len(findings) != 2 {
 		t.Errorf("the planted file: %d findings, want 2 (the comment and the clean door line are not findings): %v", len(findings), findings)
@@ -191,6 +194,16 @@ internal static slice<byte> view(uintptr p, nint n) {
 	// The copy doors are doors too.
 	for _, door := range []string{"@unsafe.Pointer.CopyInto<byte>(", "@unsafe.Pointer.CopyInto(", "@unsafe.Pointer.CopyFrom<byte>(dst, "} {
 		line := "var n = " + door + "(@unsafe.Pointer)(uintptr)@unsafe.Pointer.FromRef(ref t), 0, 64, src);\n"
-		expect(door, viewDoorFindings("runtime/planted.cs", line, map[string]int{}), "FromRef AT A VIEW DOOR")
+		expect(door, viewDoorFindings("runtime/planted.cs", line, map[string]int{}), "FromRef AT A DOOR")
+	}
+
+	// So are the element doors, and a clean line of each is no finding.
+	for _, door := range []string{"@unsafe.Pointer.ElementRef<byte>(", "@unsafe.Pointer.Element<byte>(", "@unsafe.Pointer.LoadArray<byte>(", "@unsafe.Pointer.StoreArray<byte>("} {
+		line := "var n = " + door + "(@unsafe.Pointer)(uintptr)@unsafe.Pointer.FromRef(ref t), 0, 64);\n"
+		expect(door, viewDoorFindings("runtime/planted.cs", line, map[string]int{}), "FromRef AT A DOOR")
+
+		if findings := viewDoorFindings("runtime/planted.cs", "var n = "+door+"x, 0, 64);\n", map[string]int{}); len(findings) != 0 {
+			t.Errorf("%s over a plain pointer was reported: %v", door, findings)
+		}
 	}
 }
