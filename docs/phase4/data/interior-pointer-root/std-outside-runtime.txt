@@ -1,0 +1,34 @@
+# The 32 sites outside runtime and internal/runtime/maps: union of the five std-*.tsv tables.
+# Columns: package, file:line, via, origin (the tool's label, see the README for its limits), use, pointee holds pointers, target type, targets.
+internal/abi	abi.go:102	uintptr+	managed	held:stored	false	byte	all 5
+internal/abi	type.go:241	helper:addChecked	managed	held:slice-of	false	[65536]abi.Method	all 5
+internal/abi	type.go:248	helper:addChecked	managed	held:slice-of	false	[65536]abi.Method	all 5
+internal/abi	type.go:525	helper:addChecked	managed	held:slice-of	true	[65536]*abi.Type	all 5
+internal/abi	type.go:536	helper:addChecked	managed	held:slice-of	true	[131072]*abi.Type	all 5
+internal/abi	type.go:597	helper:addChecked	managed	held:returned	false	byte	all 5
+internal/abi	type.go:603	helper:addChecked	managed	held:returned	false	byte	all 5
+internal/reflectlite	type.go:151	helper:add	managed	held:returned	false	byte	all 5
+internal/runtime/gc/scan	scan_go.go:37	unsafe.Add	pointer-var	read	false	uintptr	all 5
+internal/runtime/gc/scan	scan_go.go:81	unsafe.Add	managed	write	true	T	all 5
+internal/runtime/gc/scan	scan_reference.go:32	unsafe.Add	pointer-var	read	false	uintptr	all 5
+internal/syscall/execenv	execenv_windows.go:38	local<-unsafe.Add	managed	read	false	uint16	windows-amd64
+internal/syscall/execenv	execenv_windows.go:44	unsafe.Add	pointer-var	held:stored	false	uint16	windows-amd64
+internal/syscall/windows	syscall_windows.go:27	local<-uintptr+	pointer-var	read	false	uint16	windows-amd64
+reflect	makefunc.go:172	helper:add	managed	held:stored	false	uintptr	all 5
+reflect	type.go:1207	local<-unsafe.Add	pointer-var	held:argument	false	int	all 5
+reflect	type.go:1760	helper:add	pointer-var	held:returned	true	abi.Type	all 5
+reflect	value.go:1034	local<-helper:add	pointer-var	read	true	unsafe.Pointer	all 5
+reflect	value.go:1053	local<-helper:add	pointer-var	write	true	unsafe.Pointer	all 5
+reflect	value.go:534	local<-helper:add	pointer-var	write	true	unsafe.Pointer	all 5
+reflect	value.go:546	local<-helper:add	pointer-var	read	true	unsafe.Pointer	all 5
+reflect	value.go:660	local<-helper:add	pointer-var	write	true	unsafe.Pointer	all 5
+reflect	value.go:733	helper:add	pointer-var	read	true	unsafe.Pointer	all 5
+reflect	value.go:748	local<-helper:add	pointer-var	write	true	unsafe.Pointer	all 5
+reflect	value.go:823	local<-helper:add	pointer-var	write	false	uintptr	all 5
+sync	pool.go:302	local<-uintptr+	pointer-var	held:returned	true	sync.poolLocal	all 5
+syscall	env_windows.go:87	local<-unsafe.Add	pointer-var	read	false	uint16	windows-amd64
+syscall	env_windows.go:93	unsafe.Add	pointer-var	held:stored	false	uint16	windows-amd64
+syscall	sockcmsg_linux.go:20	helper:data	number	write	false	syscall.Ucred	linux-amd64,linux-arm64
+syscall	sockcmsg_unix.go:72	helper:data	number	write	false	int32	darwin-amd64,darwin-arm64,linux-amd64,linux-arm64
+syscall	syscall_windows.go:94	local<-uintptr+	pointer-var	read	false	uint16	windows-amd64
+unique	clone.go:23	uintptr+	managed	held:stored	true	string	all 5
