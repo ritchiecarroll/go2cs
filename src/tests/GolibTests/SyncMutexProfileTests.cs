@@ -107,7 +107,8 @@ public class SyncMutexProfileTests
     }
 
     // A thread is PARKED in Lock when its in-Lock flag is set, the gate's SemaphoreSlim counts a thread
-    // inside its monitor section (m_waitCount, read first), and the thread is then in WaitSleepJoin. Read by
+    // inside its monitor section (m_waitCount, read first) and holds no wakeup, and the thread is then in
+    // WaitSleepJoin. Read by
     // the holder, which holds the gate and touches nothing else, about a gate whose stamp record exists
     // (PrecreateStamps): the thread's try has failed, and the only place in Lock where it can wait after
     // that is inside gate.Wait(), past its stamp. WaitSleepJoin alone is not enough: a thread blocked on the
@@ -115,6 +116,18 @@ public class SyncMutexProfileTests
     // counts only a thread that has entered the monitor. (Measured: WaitSleepJoin alone read 13 of 20 idle
     // 300-episode runs red on unchanged golib, mostly at an episode's first Lock.) Plain threads, so Lock's
     // park scope is inert.
+    // And the gate holds NO wakeup (CurrentCount == 0, read after m_waitCount and before the thread state):
+    // a waiter the previous Unlock already woke is still counted in m_waitCount and still in WaitSleepJoin
+    // until it runs, but it is Go's dequeued waiter, charged by that Unlock. If the holder took the lock
+    // straight back, the woken waiter can take it between the holder's next swap to 0 and that Unlock's
+    // charge, retiring its stamp first, and that Unlock then records nothing: Go records nothing there
+    // either (unlockSlow returns on mutexWoken, internal/sync/mutex.go). Only the holder adds a wakeup, so
+    // a 0 the holder reads stays 0 until its own Unlock; with no wakeup to take, the waiter cannot leave
+    // Lock before that Unlock's charge, and the swap it made before waiting left `state` at 2.
+    // (Measured 2026-11-15, this file's alternating-workers arm called 50 times per process, 300 runs on a
+    // quiet 4-cpu box: without this read, 144 runs red, 219 of 101,743 asserted Unlocks, every one with
+    // `state` 1, one wakeup in the gate and one pulsed waiter; the mutex this one replaced read 0 of 300,
+    // because its Unlock charged before it released. With it, 0 of 300, and 0 of 300 beside 4 busy loops.)
     // Every test that reads Parked passes here first, on the test thread and before any thread it starts
     // can call Parked: a renamed or retyped field fails by name, never as a silent "not parked".
     private static void RequireWaitCount() =>
@@ -123,6 +136,7 @@ public class SyncMutexProfileTests
     private static bool Parked(object gate, Thread thread, ref int inLock) =>
         Volatile.Read(ref inLock) == 1 &&
         (int)s_semaphoreWaitCount!.GetValue(gate)! >= 1 &&
+        ((SemaphoreSlim)gate).CurrentCount == 0 &&
         (thread.ThreadState & ThreadState.WaitSleepJoin) != 0;
 
     private static void WithRates(int mutexFraction, nint blockRate, System.Action body)

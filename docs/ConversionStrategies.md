@@ -8725,7 +8725,7 @@ that ends while locked retires its thread instead of handing it to the next goro
 These functions are hand-written C#
 ([Manually-Converted Declarations](#manually-converted-declarations)).
 
-<!-- Mutex wait: src/core/sync/mutex.cs:403 `gate.Wait();`;
+<!-- Mutex wait: src/core/sync/mutex.cs:405 `gate.Wait();`;
 src/core/sync/mutex.cs:135 `private sealed class WaitQueue : SemaphoreSlim {`;
 src/core/sync/atomic/doc_impl.cs:104 `return Interlocked.Add(ref addr.Value, delta);`
 (2026-11-15, sqlite-cs W9a: this sentence cited internal/sync's runtime semaphore, which the hand-owned sync.Mutex never waited on; at 091935257c it waited on a SemaphoreSlim it held by reference, and since W9a on one it names by a handle.) -->

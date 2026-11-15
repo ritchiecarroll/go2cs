@@ -377,9 +377,11 @@ private static void leave(ref Mutex m, WaitQueue queue) {
 //   block event (and can draw a short mutex charge) where Go's lockSlow spin records none;
 // - the block event's cycles end when this waiter wakes, where Go's end at the releaser's readyWithTime;
 // - one block event per Lock, where Go records one per semacquire;
-// - every Unlock while a stamped waiter is outstanding charges the head wait (see TryHandoff), where
-//   Go charges only an Unlock that semreleases to a waiter, so event COUNTS differ and a woken waiter's
-//   run gap is included in its next charge;
+// - every Unlock that still finds a stamped waiter outstanding charges the head wait (see TryHandoff),
+//   where Go charges only an Unlock that semreleases to a waiter, so event COUNTS differ and a woken
+//   waiter's run gap is included in its next charge. "Still finds": the charge follows the swap that
+//   unlocks, so a waiter the previous Unlock woke can take the lock and retire its stamp before the
+//   charge, and that Unlock records nothing, as Go's does (unlockSlow returns on mutexWoken);
 // - a handoff charges the OLDEST stamped wait (Go's dequeued head), not necessarily the waiter the queue
 //   actually wakes;
 // - a blocked waiter that stamped nothing is invisible to both profiles; with the try that narrows to
