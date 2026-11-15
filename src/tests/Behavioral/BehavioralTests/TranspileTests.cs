@@ -724,6 +724,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckForeignAnonStructAliasAlias() => CheckTarget("ForeignAnonStructAliasAlias");
 
     [TestMethod]
+    public void CheckForeignAnonStructAliasElemAddress() => CheckTarget("ForeignAnonStructAliasElemAddress");
+
+    [TestMethod]
     public void CheckForeignAnonStructForwardAlias() => CheckTarget("ForeignAnonStructForwardAlias");
 
     [TestMethod]
