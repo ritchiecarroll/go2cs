@@ -149,12 +149,6 @@ private sealed class QueueStripe(uint32 index) {
     private WaitQueue? m_spare;
     private int m_spares;
 
-    // Stripes are allocated one after another: the padding keeps two stripes' lock words and fields
-    // off one cache line.
-#pragma warning disable CS0169, CS0414, IDE0051
-    private long m_pad0, m_pad1, m_pad2, m_pad3, m_pad4, m_pad5, m_pad6, m_pad7, m_pad8, m_pad9, m_pad10, m_pad11;
-#pragma warning restore CS0169, CS0414, IDE0051
-
     private static int bucketOf(uint32 handle, int buckets) => (int)(handle >> StripeBits) & (buckets - 1);
 
     internal WaitQueue? find(uint32 handle) {
