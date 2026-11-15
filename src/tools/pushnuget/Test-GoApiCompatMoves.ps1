@@ -162,6 +162,22 @@ try {
         $back = Get-GoApiCompatPackageMoves -Baseline $moved -Current $base -WorkDir $work
         Check 'a method that left a marked class is not a move' (@($back.Entries).Count -eq 0 -and @($back.Refused).Count -gt 0) "$(@($back.Entries).Count) entries, $(@($back.Refused).Count) refused"
 
+        Write-Host 'a renamed assembly is read against its baseline under the declared rename, as the guard compares it'
+        $renamedMoved = New-Package 'renamed-moved' @{ 'lib/net10.0/go.Moves.dll' = 'moves-moved.dll'; 'runtimes/linux-x64/lib/net10.0/go.Moves.dll' = 'moves-moved.dll' }
+        $rename = Get-GoApiCompatRenameSuccessors -Id 'go.Moves' -Assets @(Get-GoApiCompatAssets $base) -CurrentAssets @(Get-GoApiCompatAssets $renamedMoved) -ReleaseVersion '1.26.11.1-ci.1'
+        Check 'the declaration pairs each baseline asset with go.Moves.dll beside it' (
+            $rename.Declared -and $rename.Successors.Count -eq 2 -and $rename.Successors[$lib] -ceq 'lib/net10.0/go.Moves.dll' -and
+            $rename.Successors[$linux] -ceq 'runtimes/linux-x64/lib/net10.0/go.Moves.dll') "declared $($rename.Declared), $($rename.Successors.Count) successors"
+        $unpaired = Get-GoApiCompatPackageMoves -Baseline $base -Current $renamedMoved -WorkDir $work
+        Check 'unpaired, a renamed assembly is not read at all' (@($unpaired.Entries).Count -eq 0 -and @($unpaired.Refused).Count -eq 0) "$(@($unpaired.Entries).Count) entries"
+        $paired = Get-GoApiCompatPackageMoves -Baseline $base -Current $renamedMoved -WorkDir $work -Successors $rename.Successors
+        $pairedTargets = @($paired.Entries | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { $_.Target } | Sort-Object -CaseSensitive -Culture '')
+        Check 'paired, the same nine moves on each asset, each entry naming the baseline asset' (
+            @($paired.Entries).Count -eq 18 -and @($paired.Entries | Where-Object { $_.Asset -ceq $linux }).Count -eq 9 -and
+            ($pairedTargets -join ' | ') -ceq ($want -join ' | ')) "$(@($paired.Entries).Count) entries: $(@($paired.Entries | ForEach-Object { $_.Asset } | Sort-Object -Unique) -join ', ')"
+        Check 'another release declares no rename' (-not (Get-GoApiCompatRenameSuccessors -Id 'go.Moves' -Assets @($lib) -CurrentAssets @('lib/net10.0/go.Moves.dll') -ReleaseVersion '1.26.12.1').Declared) 'declared'
+        Check 'go.lib keeps its assembly name: no successor' ((Get-GoApiCompatRenameSuccessors -Id 'go.lib' -Assets @('lib/net10.0/golib.dll') -CurrentAssets @('lib/net10.0/go.lib.dll') -ReleaseVersion '1.26.11.1').Successors.Count -eq 0) 'a successor'
+
         Write-Host 'THE GUARD AGREES: the generated file suppresses the moves, every entry is needed, and the rest reads red'
         $pinned = $null
         try { $pinned = Initialize-GoApiCompatTool -RepoRoot $repoRoot } catch { $pinned = $null; $why = $_.Exception.Message }

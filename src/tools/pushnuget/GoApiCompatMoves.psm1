@@ -627,13 +627,16 @@ function Expand-MovesAsset([string]$Package, [string]$Asset, [string]$Path) {
     The moves between a baseline package and the current one, asset by asset, as the guard compares them. Returns:
       Entries  one per moved member per asset: Asset, Target (its documentation id), Host (the class that has it now)
       Refused  one per other removed member per asset: Asset, Target, Reason
-    An asset only one of the packages carries is not read: the guard reports a missing one itself.
+    An asset only one of the packages carries is not read: the guard reports a missing one itself. $Successors maps a
+    baseline asset the current package lacks to the asset the guard compares it with instead, the declared assembly
+    rename (GoApiCompat.psm1, Get-GoApiCompatRenameSuccessors); its entries name the baseline asset, as the guard's do.
 #>
 function Get-GoApiCompatPackageMoves {
     param(
         [Parameter(Mandatory)][string]$Baseline,
         [Parameter(Mandatory)][string]$Current,
-        [Parameter(Mandatory)][string]$WorkDir
+        [Parameter(Mandatory)][string]$WorkDir,
+        [hashtable]$Successors = @{}
     )
 
     $entries = New-Object System.Collections.Generic.List[object]
@@ -643,11 +646,15 @@ function Get-GoApiCompatPackageMoves {
 
     try {
         foreach ($asset in @(Get-MovesAssets $Baseline)) {
-            if ($currentAssets -notcontains $asset) { continue }
+            $currentAsset = $asset
+            if ($currentAssets -notcontains $asset) {
+                if (-not $Successors.ContainsKey($asset) -or $currentAssets -notcontains $Successors[$asset]) { continue }
+                $currentAsset = $Successors[$asset]
+            }
             $left = Join-Path (Join-Path $work 'left') $asset
             $right = Join-Path (Join-Path $work 'right') $asset
             Expand-MovesAsset $Baseline $asset $left
-            Expand-MovesAsset $Current $asset $right
+            Expand-MovesAsset $Current $currentAsset $right
             $found = Get-GoApiCompatMoves -Baseline $left -Current $right
             foreach ($move in $found.Moves) { $entries.Add([pscustomobject]@{ Asset = $asset; Target = $move.Target; Host = $move.Host }) }
             foreach ($refusal in $found.Refused) { $refused.Add([pscustomobject]@{ Asset = $asset; Target = $refusal.Target; Reason = $refusal.Reason }) }

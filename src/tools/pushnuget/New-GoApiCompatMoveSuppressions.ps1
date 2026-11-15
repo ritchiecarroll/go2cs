@@ -93,7 +93,11 @@ try {
         if (-not $baselineVersion) { $noBaseline++; continue }
 
         $baseline = Save-GoApiCompatBaseline $client $flat $identity.Id $baselineVersion (Join-Path $work '_baselines')
-        $found = Get-GoApiCompatPackageMoves -Baseline $baseline -Current $package.FullName -WorkDir $work
+        # The guard compares a renamed assembly with its baseline under the declaration, and names the baseline asset.
+        $rename = Get-GoApiCompatRenameSuccessors -Id $identity.Id -Assets @(Get-GoApiCompatAssets $baseline) `
+            -CurrentAssets @(Get-GoApiCompatAssets $package.FullName) -ReleaseVersion $ReleaseVersion
+        $successors = if ($rename.Declared) { $rename.Successors } else { @{} }
+        $found = Get-GoApiCompatPackageMoves -Baseline $baseline -Current $package.FullName -WorkDir $work -Successors $successors
         $read++
         foreach ($refusal in $found.Refused) { $refusedLines.Add("$($identity.Id): $($refusal.Asset): $($refusal.Target) $($refusal.Reason) (baseline $baselineVersion)") }
         Remove-Item -LiteralPath $baseline -Force
