@@ -429,9 +429,85 @@ public unsafe class StringHeaderNumberTests
         Assert.AreEqual("cdef", ReadThroughData(h, 4), "unsafe.Pointer(h.Data) reads the window after a collection");
     }
 
-    // a2: Len THEN Data.
+    // ---- DETERMINISM (COORD's ask on A2 and Fix2): a held backing must not move, and the run must be able to show a move.
+
+    // A young (gen0), unpinned backing behind a filler that dies first, so a compacting collection has room to slide it.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static byte[] YoungBacking(string text)
+    {
+        byte[] filler = new byte[16 * 1024];
+        filler[0] = 1;
+        return System.Text.Encoding.ASCII.GetBytes(text);
+    }
+
+    // The array's data address now, read under a `fixed` that ends at once.
+    private static nuint AddressOf(byte[] array)
+    {
+        fixed (byte* data = array)
+            return (nuint)data;
+    }
+
+    // Collect, run finalizers (a dead element box's pin is released by its finalizer), then compact, three times.
+    private static void CompactingChurn()
+    {
+        for (int round = 0; round < 3; round++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            for (int i = 0; i < 4000; i++)
+                _ = new byte[64];
+
+            GC.Collect(0, GCCollectionMode.Forced, blocking: true, compacting: true);
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+        }
+    }
+
+    private static ж<NumberStringHeader> HeaderOver(byte[] bytes, out ж<@string> source)
+    {
+        ref @string s = ref heap(new @string(bytes), out source);
+        return source.Reinterpret<@string, NumberStringHeader>();
+    }
+
+    // The arm's verdict on the move: Inconclusive BY NAME when the unpinned twin did not move (this run could not have
+    // shown one); otherwise the held backing must not have moved.
+    private static void AssertHeldWhileTwinMoved(byte[] held, nuint heldBefore, byte[] twin, nuint twinBefore)
+    {
+        if (AddressOf(twin) == twinBefore)
+            Assert.Inconclusive("the unpinned twin did not move in this run, so the arm could not have shown a move");
+
+        Assert.AreEqual(heldBefore, AddressOf(held), "the backing under the header's word MOVED: nothing held it still");
+    }
+
+    // a2: Len THEN Data, deterministic. The backing under the stored word is held still by the header (fix 1 keeps the
+    // minted box), and the bytes read through unsafe.Pointer(h.Data) are the window's, while an unpinned twin moved.
     [TestMethod]
     public void A2_LenThenDataReSlicesOverTheSameBacking()
+    {
+        byte[] bytes = YoungBacking("abcdef"), twin = YoungBacking("ABCDEF");
+        ж<NumberStringHeader> h = HeaderOver(bytes, out ж<@string> Ꮡs);
+        nuint d = (nuint)h.Value.Data;
+
+        h.Value.Len = 4;
+        h.OnHeaderStore();
+        h.Value.Data = (uintptr)(d + 2);
+        h.OnHeaderStore();
+        Assert.IsTrue(Ꮡs.Value == "cdef", $"got {Ꮡs.Value}");
+
+        nuint before = AddressOf(bytes), twinBefore = AddressOf(twin);
+        CompactingChurn();
+        AssertHeldWhileTwinMoved(bytes, before, twin, twinBefore);
+
+        @unsafe.Pointer p = @unsafe.Pointer.FromHeaderData(h);
+        Assert.AreEqual("cdef", Bytes((nuint)(uintptr)p, 4));
+        GC.KeepAlive(p);
+        GC.KeepAlive(twin);
+    }
+
+    // a2's earlier, non-deterministic form, kept as a plain control.
+    [TestMethod]
+    public void A2b_LenThenDataControl()
     {
         ж<NumberStringHeader> h = HeapHeader("abcdef", out ж<@string> Ꮡs);
         nuint d = (nuint)h.Value.Data;
@@ -491,10 +567,42 @@ public unsafe class StringHeaderNumberTests
     [TestMethod]
     public void Fix2_AWordCopiedFromAnotherHeaderIsKeptAlive()
     {
+        byte[] bytes = YoungBacking("xyz"), twin = YoungBacking("XYZ");
+        ж<NumberStringHeader> h2 = CopiedHeaderOver(bytes, out ж<@string> Ꮡs2);
+        Assert.IsTrue(Ꮡs2.Value == "xyz");
+
+        nuint before = AddressOf(bytes), twinBefore = AddressOf(twin);
+        CompactingChurn();
+        AssertHeldWhileTwinMoved(bytes, before, twin, twinBefore);
+
+        @unsafe.Pointer p = @unsafe.Pointer.FromHeaderData(h2);
+        Assert.AreEqual("xyz", Bytes((nuint)(uintptr)p, 3), "the copied word still names the bytes after h1 is gone");
+        GC.KeepAlive(p);
+        GC.KeepAlive(twin);
+    }
+
+    // Fix 2's earlier, non-deterministic form, kept as a plain control.
+    [TestMethod]
+    public void Fix2b_CopiedWordControl()
+    {
         ж<NumberStringHeader> h2 = CopiedHeader(out ж<@string> Ꮡs2);
 
         Assert.IsTrue(Ꮡs2.Value == "xyz");
-        Assert.AreEqual("xyz", ReadThroughData(h2, 3), "the copied word still names the bytes after h1 is gone");
+        Assert.AreEqual("xyz", ReadThroughData(h2, 3));
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static ж<NumberStringHeader> CopiedHeaderOver(byte[] bytes, out ж<@string> Ꮡs2)
+    {
+        ж<NumberStringHeader> h1 = HeaderOver(bytes, out _);
+        ref @string s2 = ref heap(default(@string), out Ꮡs2);
+        ж<NumberStringHeader> h2 = Ꮡs2.Reinterpret<@string, NumberStringHeader>();
+
+        h2.Value.Data = h1.Value.Data;
+        h2.OnHeaderStore();
+        h2.Value.Len = 3;
+        h2.OnHeaderStore();
+        return h2;
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
@@ -509,6 +617,22 @@ public unsafe class StringHeaderNumberTests
         h2.Value.Len = 3;
         h2.OnHeaderStore();
         return h2;
+    }
+
+    // P3's glance, item a: a MISALIGNED interior word (`Data += 1` over an []int32 header) lies inside the backing's
+    // bytes but on no element, and is no native address either: refused by name, never viewed as native memory.
+    [TestMethod]
+    public void ItemA_AMisalignedInteriorWordIsRefusedByName()
+    {
+        ref slice<int> s = ref heap(new slice<int>(new[] { 1, 2, 3, 4 }), out ж<slice<int>> Ꮡs);
+        ж<NumberSliceHeader> h = Ꮡs.Reinterpret<slice<int>, NumberSliceHeader>();
+        nuint d = (nuint)h.Value.Data;
+
+        h.Value.Data = (uintptr)(d + 1);
+
+        PanicException refused = Assert.ThrowsException<PanicException>(h.OnHeaderStore);
+        StringAssert.Contains(refused.Message, "not on an element boundary");
+        Assert.AreEqual(4, (int)len(Ꮡs.Value), "the slice keeps its last consistent words");
     }
 
     // Nit 5: unsafe.Pointer(h.Data) over a NIL header is Go's nil dereference.

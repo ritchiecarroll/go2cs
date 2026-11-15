@@ -1043,6 +1043,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				if box := v.convExpr(header, []ExprContext{identContext}); strings.HasPrefix(box, AddressPrefix) {
 					return fmt.Sprintf("@unsafe.Pointer.FromHeaderData(%s)", box)
 				}
+
+				// DELIBERATE fall-through to the number pointer below: an alias with no box (a `[GoRecv] this ref T`
+				// receiver) has nothing to carry, so it keeps today's safe old behaviour. For a PARAMETER it is
+				// unreachable: ref-lowering vetoes this use as X3 (isReflectHeaderDataPointerUse), so the parameter keeps
+				// its box and takes the arm above.
 			}
 
 			// A NAMED-numeric arg whose underlying is uintptr — `unsafe.Pointer(v)` where v is

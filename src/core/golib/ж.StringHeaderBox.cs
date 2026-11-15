@@ -122,6 +122,9 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
     //   QW-9: an (H) read whose backing already has an (L) copy takes that copy, so one literal has one number.
     //   F4: an empty window reads 0, before any table; under (L) a zero-length window of a non-empty backing reads base
     //       + offset, as Go keeps it; under (H) it has no element to box and reads 0 (disclosed, W5b).
+    //   A STORED word keeps the box that answered it (P3's fixes 1 and 2), so after `h2.Data = h1.Data` the array stays
+    //   PINNED while h2's header box lives; for a header over package-level storage that is one pinned array for the
+    //   process, per header. Bounded by the headers, not by the reads.
     private static readonly bool s_dataIsNumber;
 
     internal static ж<TDst> Mint(ж<@string> source)

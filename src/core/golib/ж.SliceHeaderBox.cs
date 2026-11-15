@@ -200,10 +200,19 @@ internal static class HeaderData
     /// One past the end is admitted (a zero-length window). A run whose number is an order token (an element of a
     /// reference-bearing array) has no address arithmetic, and is never matched.
     /// </summary>
-    internal static bool TryInterior(object? minted, nuint mintedNumber, nuint word, out Array? backing, out nint index)
+    internal static bool TryInterior(object? minted, nuint mintedNumber, nuint word, out Array? backing, out nint index) =>
+        TryInterior(minted, mintedNumber, word, out backing, out index, out _);
+
+    /// <summary>
+    /// As above, and <paramref name="misaligned"/> reports a word INSIDE the run's bytes that is not on an element
+    /// boundary (<c>Data += 1</c> over an <c>[]int32</c>): no element of the backing, and no native address either, so a
+    /// header refuses it by name (P3's glance, item a) rather than reading it as native memory.
+    /// </summary>
+    internal static bool TryInterior(object? minted, nuint mintedNumber, nuint word, out Array? backing, out nint index, out bool misaligned)
     {
         backing = null;
         index = 0;
+        misaligned = false;
 
         if (minted is not IElementRun { RunBacking: { } run } element || mintedNumber == 0 || word == 0 || ManagedPointerTokens.IsTaggedToken(mintedNumber))
             return false;
@@ -214,18 +223,25 @@ internal static class HeaderData
             return false;
 
         int stride = System.Runtime.CompilerServices.RuntimeHelpers.SizeOf(elementType.TypeHandle);
+
+        if (stride <= 0)
+            return false;
+
         long delta = (long)word - (long)mintedNumber;
+        long first = -(long)element.RunIndex * stride;            // the run's byte 0, relative to the minted number
+        long last = ((long)run.Length - element.RunIndex) * stride; // one past its last byte
 
-        if (stride <= 0 || delta % stride != 0)
+        if (delta < first || delta > last)
             return false;
 
-        long target = element.RunIndex + delta / stride;
-
-        if (target < 0 || target > run.Length)
+        if (delta % stride != 0)
+        {
+            misaligned = true;
             return false;
+        }
 
         backing = run;
-        index = (nint)target;
+        index = (nint)(element.RunIndex + delta / stride);
         return true;
     }
 }
@@ -449,14 +465,29 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>, IHeaderDataCarrier
 
         HeaderData.Kind kind;
         address = 0;
+        object? owner = carried;
+        bool misaligned = false;
 
         // Fix 1: a word inside the run this header minted from is that backing's element, managed and shared.
-        if (s_dataIsNumber && carried is null && HeaderData.TryInterior(m_pointer, m_number, word, out backing, out index))
+        if (s_dataIsNumber && carried is null && HeaderData.TryInterior(m_pointer, m_number, word, out backing, out index, out misaligned))
+        {
             kind = HeaderData.Kind.Run;
+        }
         else if (s_dataIsNumber)
-            kind = HeaderData.ResolveNumber(word, carried, out backing, out index, out address, out _);
+        {
+            // P3's glance, item a: inside the run's bytes but off an element boundary is no element and no native
+            // address, so it is refused by name below.
+            if (misaligned)
+                throw Refusal(data!, "its Data lies inside the slice's backing but not on an element boundary");
+
+            // Item b: the box the registry answered with owns the memory, and a native rebuild keeps it.
+            kind = HeaderData.ResolveNumber(word, carried, out backing, out index, out address, out object? referent);
+            owner = carried ?? referent;
+        }
         else
+        {
             kind = HeaderData.Resolve(data, out backing, out index, out address);
+        }
 
         bool shape = 0 <= len && len <= cap;
         object? rebuilt = null;
@@ -482,7 +513,7 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>, IHeaderDataCarrier
 
             case HeaderData.Kind.Native:
                 if (shape)
-                    rebuilt = s_overNative!(address, len, cap, NativeDerivation.Kept(s_dataIsNumber ? carried : data is IUnsafePointer pointer ? pointer.RetainedSource : data));
+                    rebuilt = s_overNative!(address, len, cap, NativeDerivation.Kept(s_dataIsNumber ? owner : data is IUnsafePointer pointer ? pointer.RetainedSource : data));
                 break;
 
             default:
