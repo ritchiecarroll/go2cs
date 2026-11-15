@@ -154,6 +154,21 @@ namespace go;
         if (s_isNamedArrayShaped && address != null)
             throw RuntimeErrorPanic.NamedArrayViewOfNativeMemory(typeof(T));
 
+        // THE MANAGED-DERIVED STRUCT FLOOR (B0', W14, COORD ruling 2026-11-15). T is a Go struct value that holds a managed
+        // reference and that the layout refusal above could not prove mismatched (an array field whose length the managed
+        // type does not carry leaves its Go offsets unknown), and this box was derived from MANAGED storage: it retains its
+        // source, or it pins it. Managed storage reachable by address never holds a reference -- pinnable storage is
+        // reference-free, and an unpinnable source has no address -- so a whole-value read takes data bytes for references:
+        // an access violation over filled data (sqlite's crypt_blowfish, *(*TBF_ctx)(unsafe.Pointer(&[1042]uint32{...}))),
+        // null references over zeroed data. Neither is Go's answer, so the read is refused by name.
+        //
+        // Its scope is the census's B2b with source=retained or source=pinned (NativeBoxDereferenceCensus). A box with no
+        // retained source and no pin is native-origin (C memory, an OS buffer): that is P5's deferred B2 and its sweep, and
+        // this line does not reach it. A CARRIER over the same box is untouched: a field read at its Go offset (FieldRef),
+        // the number, and a conversion onward do not come through here.
+        if (s_isReferenceBearingGoStruct && address != null && (m_retainedSource is not null || m_pin is not null))
+            throw RuntimeErrorPanic.ManagedDerivedStructRead(typeof(T));
+
         // The dereference census (NativeBoxDereferenceCensus): a T that holds a reference and was not refused above, and
         // a box derived from storage that cannot be pinned. Counted after both refusals, so every count is a read or a
         // write that happened. Null unless the census is on: one test of a static readonly field.
@@ -173,6 +188,11 @@ namespace go;
     private static readonly bool s_isNamedArrayShaped =
         !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>)) &&
         default(T) is IArray and not ISlice && RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+
+    // Is T a Go struct value that holds a managed reference (the census's B2b)? Read by ValueAddress's managed-derived
+    // floor. Decided once per T.
+    private static readonly bool s_isReferenceBearingGoStruct =
+        typeof(T).IsValueType && RuntimeHelpers.IsReferenceOrContainsReferences<T>() && GoReflect.KindOf(typeof(T)) == GoReflect.Struct;
 
     private static readonly NativeBoxDereferenceCensus.Pointee? s_census = NativeBoxDereferenceCensus.Pointee.Of<T>();
 
