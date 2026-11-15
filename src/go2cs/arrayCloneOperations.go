@@ -267,11 +267,26 @@ func valueAssignTarget(lhs ast.Expr, t types.Type, rendered string) string {
 // valueAssignTempRoot names a temporary for an in-place operand after the variable its location is rooted at
 // (`arrs[i]` -> arrs), so a tuple's temporaries read as the operands they stand for; `ᴛ` follows from getTempVarName.
 func valueAssignTempRoot(lhs ast.Expr) string {
-	if ident := getIdentifier(lhs); ident != nil && ident.Name != "_" {
-		return strings.TrimPrefix(getSanitizedIdentifier(ident.Name), "@")
-	}
+	for {
+		switch e := lhs.(type) {
+		case *ast.ParenExpr:
+			lhs = e.X
+		case *ast.IndexExpr:
+			lhs = e.X
+		case *ast.SelectorExpr:
+			lhs = e.X
+		case *ast.StarExpr:
+			lhs = e.X
+		case *ast.Ident:
+			if e.Name != "_" {
+				return strings.TrimPrefix(getSanitizedIdentifier(e.Name), "@")
+			}
 
-	return "val"
+			return "val"
+		default:
+			return "val"
+		}
+	}
 }
 
 // declaresGoMethod reports whether t is (an alias of) a NAMED type declaring a method called name,

@@ -83,6 +83,13 @@ func main() {
 	i, arrs[i] = 2, other
 	fmt.Println("tuple order:", i, s0, arrs)
 
+	// C5: two locations through a pointer, swapped: each is taken first, as Go evaluates the left side's operands.
+	hh := [2][4]int{{1, 1, 1, 1}, {2, 2, 2, 2}}
+	hp := &hh
+	sh0 := hh[0][:]
+	(*hp)[0], (*hp)[1] = (*hp)[1], (*hp)[0]
+	fmt.Println("tuple through a pointer:", sh0, hh)
+
 	// C5: a struct holding an array, by a tuple from a call.
 	var st S
 	sst := st.arr[:]

@@ -87,6 +87,16 @@ internal static void main() {
     arrsᴛ1.Assign(arrsᴛ2);
     fmt.Println("tuple order:", i, s0, arrs);
 
+    ref var hh = ref heap<array<array<nint>>>(new array<nint>[]{new nint[]{1, 1, 1, 1}.array(), new nint[]{2, 2, 2, 2}.array()}.array(), out var Ꮡhh);
+    var hp = Ꮡhh;
+    var sh0 = hh[0][..];
+    ref var hpᴛ1 = ref (hp.Value)[0];
+    ref var hpᴛ3 = ref (hp.Value)[1];
+    (var hpᴛ2, var hpᴛ4) = ((hp.Value)[1].Clone(), (hp.Value)[0].Clone());
+    hpᴛ1.Assign(hpᴛ2);
+    hpᴛ3.Assign(hpᴛ4);
+    fmt.Println("tuple through a pointer:", sh0, hh);
+
     S st = new();
     var sst = st.arr[..];
     (var stᴛ1, err) = structs();

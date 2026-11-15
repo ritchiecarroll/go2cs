@@ -1433,10 +1433,16 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				if _, isIdent := ast.Unparen(lhs).(*ast.Ident); !isIdent {
 					captured := v.getTempVarName(root)
 
+					// The hoist buffer replaces the statement's own leading newline (see its flush below), so the
+					// first entry opens with one and every entry ends with one: consecutive captures stay adjacent.
+					if v.hoistedDecls.Len() == 0 {
+						v.hoistedDecls.WriteString(v.newline)
+					}
+
 					if target != lhsExpr {
-						v.hoistedDecls.WriteString(fmt.Sprintf("%s%svar %s = %s;%s", v.newline, v.indent(v.indentLevel), captured, target, v.newline))
+						v.hoistedDecls.WriteString(fmt.Sprintf("%svar %s = %s;%s", v.indent(v.indentLevel), captured, target, v.newline))
 					} else {
-						v.hoistedDecls.WriteString(fmt.Sprintf("%s%sref var %s = ref %s;%s", v.newline, v.indent(v.indentLevel), captured, target, v.newline))
+						v.hoistedDecls.WriteString(fmt.Sprintf("%sref var %s = ref %s;%s", v.indent(v.indentLevel), captured, target, v.newline))
 					}
 
 					target = captured
