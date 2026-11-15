@@ -11,6 +11,9 @@
 // name holding a non-ASCII character (a user's `élément`, or go2cs's own `Δ` import renames, as in
 // modernc.org/sqlite's `(*libc.RawMem)(unsafe.Pointer(p))[:n:n]`) lost one character of the base: CS1003.
 // The non-ASCII fixture must emit exactly what its ASCII twin emits, with the name substituted.
+//
+// Since the view doors (arrayPointerViewDoor.go) the span branch is reached for one operand only, one that holds
+// a FromRef mint, so the fixture's views are over a pointer receiver.
 
 package main
 
@@ -35,17 +38,19 @@ import "unsafe"
 
 type ELEM byte
 
-func view(p uintptr) []ELEM {
-	return (*[16]ELEM)(unsafe.Pointer(p))[:8:8]
+type holder struct{ src [16]ELEM }
+
+func (h *holder) view() []ELEM {
+	return (*[16]ELEM)(unsafe.Pointer(h))[:8:8]
 }
 
-func viewFrom(p uintptr) []ELEM {
-	return (*[16]ELEM)(unsafe.Pointer(p))[2:8]
+func (h *holder) viewFrom() []ELEM {
+	return (*[16]ELEM)(unsafe.Pointer(h))[2:8]
 }
 
 func main() {
-	src := make([]ELEM, 16)
-	println(len(view(uintptr(unsafe.Pointer(&src[0])))), len(viewFrom(uintptr(unsafe.Pointer(&src[0])))))
+	h := &holder{}
+	println(len(h.view()), len(h.viewFrom()))
 }
 `, "ELEM", elem))
 

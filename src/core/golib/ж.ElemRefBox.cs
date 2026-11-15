@@ -39,7 +39,7 @@ namespace go;
 /// canonicalization that halved the token/hash workloads in the design's §2.2 measurement.
 /// </para>
 /// </remarks>
-[EditorBrowsable(EditorBrowsableState.Never)] public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun, INativeRooted
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun, INativeRooted, INativeViewAnchor
 {
     // The FAST arm: canonical backing + ABSOLUTE index, deref-equivalent by the indexer
     // definitions of the three arms that populate it. Null when the foreign arm is in effect.
@@ -54,6 +54,8 @@ namespace go;
     // The field-view list (ж.Views.cs): `&a[i].f` asks of() of an element box, often a fresh one per
     // expression, so the weak-table fallback paid an insert under its lock on every such box.
     internal ViewEntry? m_views;
+
+    internal override ref ViewEntry? ElementViews => ref m_views;
 
     // The native marshals' run source (NativeStructMarshal.CallDeep and the shared darwin/linux marshal): the
     // fast arm's backing and absolute index. The foreign arm has no contiguous backing, so it answers none.
@@ -268,6 +270,10 @@ namespace go;
 
     bool INativeRooted.IsGenuinelyNativeRoot =>
         m_foreign is slice<T> native && native.IsNativeBacked && NativeSliceAnchors<T>.Of(native) is null;
+
+    // What the native-backed slice this is an element of was cut over (the view doors, design 13.2).
+    object? INativeViewAnchor.AnchoredRoot =>
+        m_foreign is slice<T> native && native.IsNativeBacked ? NativeSliceAnchors<T>.Of(native) : null;
 
     /// <inheritdoc/>
     // Canonical backing identity in the high bits with the element's Go BYTE offset below (absolute

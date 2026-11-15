@@ -1,0 +1,91 @@
+A: 5 "helloXXX"
+   [exit 0]
+B: 6 "abcdefXX"
+   [exit 0]
+C: 4 "/tmpXXXX"
+   [exit 0]
+D: panic: runtime error: cannot view native memory as RawMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/NativeViewShapes/main.go:75
+   [exit 2]
+E: 4 true "u\x00\x00\x00\x00XXX"
+   [exit 0]
+F: panic: runtime error: cannot view native memory as RawMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/NativeViewShapes/main.go:87
+   [exit 2]
+G: 8 "errno 7\x00"
+   [exit 0]
+H: 4 "rrrrXXXX"
+   [exit 0]
+I: 6 "abcdef"
+   [exit 0]
+J: 1125899906842623
+   [exit 0]
+K: "WXY!" "WXY!"
+   [exit 0]
+L: 16 "0123456789012345"
+   [exit 0]
+M: panic: runtime error: cannot view native memory as smallMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/NativeViewShapes/main.go:118
+   [exit 2]
+C0: 4 "/tmp\x00\x00\x00\x00"
+   [exit 0]
+D0: panic: runtime error: cannot view native memory as RawMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/NativeViewShapes/main.go:126
+   [exit 2]
+F0: panic: runtime error: cannot view native memory as RawMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/NativeViewShapes/main.go:131
+   [exit 2]
+M0: panic: runtime error: cannot view native memory as smallMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/NativeViewShapes/main.go:138
+   [exit 2]
+N: true
+   [exit 0]
+O: "field\x00"
+   [exit 0]
+P: "\x00\x00\x00\x00interior\x00\x00"
+   [exit 0]
+Q: panic: runtime error: index out of range [4] with length 0
+
+goroutine 1 [running]:
+main.main()
+	<kit>/NativeViewShapes/main.go:158
+   [exit 2]
+R: panic: runtime error: cannot view native memory as array<Int32>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+S: panic: runtime error: cannot view native memory as array<Int32>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+T: panic: runtime error: cannot view native memory as array<Byte>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]

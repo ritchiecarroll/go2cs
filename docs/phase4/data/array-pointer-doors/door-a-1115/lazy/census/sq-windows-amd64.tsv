@@ -1,0 +1,23 @@
+sq-windows-amd64	type	std	bytes	bytes.go:946	asciiSet	8	uint32	-	-
+sq-windows-amd64	type	std	crypto/internal/entropy/v1.0.0	entropy.go:25	ScratchBuffer	33554432	byte	-	-
+sq-windows-amd64	type	module	golang.org/x/sys/windows	types_windows.go:1428	SockaddrGen	24	byte	-	-
+sq-windows-amd64	type	std	internal/abi	abi.go:87	IntArgRegBitmap	2	uint8	-	-
+sq-windows-amd64	site	std	internal/abi	abi.go:102	IntArgRegBitmap	2	uint8	pointer-var	Get
+sq-windows-amd64	type	std	internal/runtime/gc	scan.go:12	ObjMask	16	uintptr	-	-
+sq-windows-amd64	type	std	internal/runtime/gc	scan.go:15	PtrMask	16	uintptr	-	-
+sq-windows-amd64	type	module	modernc.org/libc	libc64.go:22	RawMem	1125899906842623	byte	-	-
+sq-windows-amd64	type	module	modernc.org/libc	libc.go:48	RawMem64	140737488355327	uint64	-	-
+sq-windows-amd64	type	module	modernc.org/memory	memory64.go:10	rawmem	1125899906842623	byte	-	-
+sq-windows-amd64	type	std	runtime	mprof.go:177	buckhashArray	179999	internal/runtime/atomic.UnsafePointer	-	-
+sq-windows-amd64	type	std	runtime	cgocall.go:97	cgoCallers	32	uintptr	-	-
+sq-windows-amd64	type	std	runtime	mpallocbits.go:12	pageBits	8	uint64	-	-
+sq-windows-amd64	type	std	runtime	mpallocbits.go:129	pallocBits	8	uint64	-	-
+sq-windows-amd64	type	std	runtime	sema.go:51	semTable	251	struct{root runtime.semaRoot; pad [40]byte}	-	-
+sq-windows-amd64	type	std	runtime	metrics.go:601	statDepSet	1	uint64	-	-
+sq-windows-amd64	type	std	runtime	string.go:21	tmpBuf	32	byte	-	-
+sq-windows-amd64	site	std	runtime	mprof.go:286	buckhashArray	179999	internal/runtime/atomic.UnsafePointer	pointer-var	stkbucket
+sq-windows-amd64	site	std	runtime	string.go:168	tmpBuf	32	byte	pointer-var	slicebytetostring
+sq-windows-amd64	type	std	strings	strings.go:960	asciiSet	8	uint32	-	-
+sq-windows-amd64	type	std	strings	replace.go:438	byteReplacer	256	byte	-	-
+sq-windows-amd64	type	std	syscall	types_windows.go:847	SockaddrGen	24	byte	-	-
+sq-windows-amd64	type	std	unicode	letter.go:77	d	3	rune	-	-
