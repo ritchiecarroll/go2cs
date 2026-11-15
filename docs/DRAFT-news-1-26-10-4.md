@@ -147,12 +147,20 @@ memory, was refused by name. A `-cgo` conversion is one package, and it builds a
 the `go.*` packages from the feed is planned for the next release.
 <!-- src/go2cs/main.go:305 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
-**One known memory-safety gap.** Do not pass C a pointer you made from a number held in a variable, when it points
-inside Go memory: `u := uintptr(unsafe.Pointer(p))` followed by `C.f(unsafe.Pointer(u + n))`. The same holds when the
-pointer is the second term of the sum, `unsafe.Pointer(n + uintptr(unsafe.Pointer(p)))`. go2cs cannot yet tell such a
-number from an address in C memory, so the call goes ahead, and the memory may move while C is using it. Go's own
-form, `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)` in one expression, converts to `unsafe.Add`. go2cs sees that
-as Go memory and refuses it by name, as it refuses `unsafe.Pointer(p)` itself. See [Limitations](Limitations.md).
+**A pointer rebuilt from a number is refused too, with a narrow memory-safety gap left.** go2cs refuses, by name,
+any address inside Go memory that it is holding still, even after the address has been through a `uintptr`:
+`u := uintptr(unsafe.Pointer(p))` followed by `C.f(unsafe.Pointer(u + n))`, the reversed sum
+`unsafe.Pointer(n + uintptr(unsafe.Pointer(p)))`, and Go's own one-expression form, which converts to `unsafe.Add`.
+Three cases still cross, because go2cs is no longer holding the memory, or never was. In each, the call goes ahead,
+and the memory may move while C is using it: a number kept after the last use of the pointer it came from, which Go's
+own rules already forbid; a number taken inside a method with a pointer receiver, from a pointer of the receiver's own
+type; and Go memory held still before the program's first cgo package was loaded. A program that needs this
+memory-safety guarantee should avoid those three. See [Limitations](Limitations.md#cgo).
+<!-- 2026-11-15 (H): narrowed by the pin-extent seat (docs/phase4/DESIGN-cgo-pin-extents.md, section 11) to the three
+     rows its section 4 leaves open: 7 (a released pin), 8 (a number minted with no pin) and 11 (an early pin). The
+     arms are named in the Limitations entry's notes. The text it replaces said that go2cs "cannot yet tell such a
+     number from an address in C memory", for every number held in a variable. -->
+
 <!-- docs/phase4/DESIGN-cgo-phase3-marshaling.md §16 (increment 3.1) and §16.9 (the residue, COORD's ruling C). cgo
      Phase 3 is a STRETCH for this release by the owner's ruling: this section ships with the release that carries
      increment 3.1, and moves to that release's notes if it is not this one.

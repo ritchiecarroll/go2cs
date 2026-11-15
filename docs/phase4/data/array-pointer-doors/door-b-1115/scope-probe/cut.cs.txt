@@ -1,0 +1,333 @@
+namespace go.example.com;
+
+using fmt = fmt_package;
+using @unsafe = unsafe_package;
+using System.Runtime.InteropServices;
+using go.arrays;
+using go.golib;
+
+partial class main_package {
+
+/* [1125899906842623L]byte */
+partial struct RawMem /*[1125899906842623]byte*/;
+
+partial struct small /*[64]byte*/;
+
+partial struct sibling /*[64]byte*/;
+
+partial struct pair {
+    internal int32 a;
+    internal int32 b;
+}
+
+internal static void bump(this ref pair p) { p.a++; }
+
+[global::go.golib.GoInlineLayout(Size = 16, Align = 4), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct hdr {
+    [FieldOffset(0)] internal uint32 n;
+    [FieldOffset(4)] internal uint16 port;
+    [FieldOffset(6)] internal array8<byte> tail;
+}
+
+internal static int32 take(int32 v) { return v; }
+
+internal static byte takeArr(/*[2]*/ array<byte> v) {
+    v = v.Clone();
+
+    return v[1];
+}
+
+internal static int32 idxRead(@unsafe.Pointer p, nint i) {
+    return @unsafe.Pointer.ElementRef<int32>(p, i, 4);
+}
+
+internal static void idxStore(uintptr u) {
+    @unsafe.Pointer.ElementRef<int32>((@unsafe.Pointer)u, 1, 4) = 7;
+}
+
+internal static void idxCompound(@unsafe.Pointer p, nint i) {
+    @unsafe.Pointer.ElementRef<int32>(p, i, 4) += 3;
+    @unsafe.Pointer.ElementRef<int32>(p, i, 4)++;
+}
+
+internal static void idxNamedStore(uintptr u, nint n) {
+    @unsafe.Pointer.ElementRef<byte>((@unsafe.Pointer)u, n, 1125899906842623) = 0;
+}
+
+internal static byte idxNamedRead(@unsafe.Pointer p) {
+    return @unsafe.Pointer.ElementRef<byte>(p, 5, 64);
+}
+
+internal static ж<int32> idxAddr(@unsafe.Pointer p) {
+    return @unsafe.Pointer.Element<int32>(p, 2, 4);
+}
+
+internal static int32 idxArg(@unsafe.Pointer p) {
+    return take(@unsafe.Pointer.ElementRef<int32>(p, 1, 4));
+}
+
+internal static int32 idxBound(@unsafe.Pointer p, uint64 i) {
+    var x = @unsafe.Pointer.ElementRef<int32>(p, (nint)(i), 4);
+    return x;
+}
+
+internal static int32 idxField(@unsafe.Pointer p) {
+    @unsafe.Pointer.ElementRef<pair>(p, 1, 3).a = 5;
+    return @unsafe.Pointer.ElementRef<pair>(p, 1, 3).b;
+}
+
+internal static ж<int32> idxFieldAddr(@unsafe.Pointer p) {
+    return @unsafe.Pointer.Element<pair>(p, 1, 3).Ꮡa;
+}
+
+internal static void idxMethod(@unsafe.Pointer p) {
+    @unsafe.Pointer.ElementRef<pair>(p, 1, 3).bump();
+}
+
+internal static int32 idxParen(@unsafe.Pointer p) {
+    return @unsafe.Pointer.ElementRef<int32>(p, 1, 4);
+}
+
+internal static int32 idxDeref(@unsafe.Pointer p) {
+    return @unsafe.Pointer.ElementRef<int32>(p, 1, 4);
+}
+
+internal static void idxTuple(@unsafe.Pointer p) {
+    (@unsafe.Pointer.ElementRef<int32>(p, 0, 4), @unsafe.Pointer.ElementRef<int32>(p, 1, 4)) = (1, 2);
+}
+
+internal static Func<int32> idxClosure(@unsafe.Pointer p) {
+    return () => @unsafe.Pointer.ElementRef<int32>(p, 3, 4);
+}
+
+internal static byte idxAdded(@unsafe.Pointer p, uintptr off) {
+    return @unsafe.Pointer.ElementRef<byte>(@unsafe.Add(p, off), 0, 8);
+}
+
+internal static int32 idxNested(@unsafe.Pointer p) {
+    return (@unsafe.Pointer.To<array<array<int32>>>(p)).Value[1][0];
+}
+
+internal static nint idxIdentity(/*[4]*/ ж<array<nint>> a) {
+    return (a).Value[1];
+}
+
+internal static byte idxIdentityNamed(ж<small> a) {
+    return (a).Value[1];
+}
+
+internal static ж<nint> idxIdentityAddr(/*[4]*/ ж<array<nint>> a) {
+    return (a).at<nint>(1);
+}
+
+internal static uint16 idxAlias(ж<uint16> buf, nint i) {
+    return (array<uint16>.AliasPointer(buf, 10000)).Value[i];
+}
+
+internal static byte idxAliasNamed(ж<byte> b, nint i) {
+    return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(b), i, 1125899906842623);
+}
+
+internal static byte idxSibling(ж<sibling> a) {
+    return (a.Reinterpret<sibling, small>()).Value[1];
+}
+
+internal static byte idxSiblingUnnamed(/*[64]*/ ж<array<byte>> a) {
+    return (a.Reinterpret<array<byte>, small>()).Value[1];
+}
+
+internal static byte idxUnnamedFromNamed(ж<small> a) {
+    return (a.Reinterpret<small, array<byte>>()).Value[1];
+}
+
+internal static byte idxFieldView(ж<hdr> h) {
+    return (@unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2)).Value[1];
+}
+
+internal static byte idxScalar(ж<uint32> x) {
+    return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(x), 0, 4);
+}
+
+internal static byte idxScalarLocal() {
+    ref var x = ref heap<uint32>((uint32)0x01020304, out var Ꮡx);
+    return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡx), 0, 4);
+}
+
+internal static ж<uint8> idxScalarAddr(ж<uintptr> x, nint i) {
+    return @unsafe.Pointer.Element<uint8>(@unsafe.Pointer.FromPinnedBox(x), i, 8);
+}
+
+internal static byte idxOtherElem(/*[4]*/ ж<array<uint32>> w) {
+    return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(w), 8, 16);
+}
+
+internal static byte idxStructBytes(ж<hdr> h) {
+    return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(h), 4, 16);
+}
+
+internal static @unsafe.Pointer idxManaged(@unsafe.Pointer p) {
+    return (@unsafe.Pointer.To<array<@unsafe.Pointer>>(p)).Value[1];
+}
+
+internal static ж<nint> idxManagedPtr(@unsafe.Pointer p) {
+    return (@unsafe.Pointer.To<array<ж<nint>>>(p)).Value[0];
+}
+
+internal static byte first(this ж<hdr> Ꮡh) {
+    ref var h = ref Ꮡh.DerefOrNull();
+
+    return (@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromRef(ref h))).Value[0];
+}
+
+internal static int64 loadBound(@unsafe.Pointer p) {
+    var x = @unsafe.Pointer.LoadArray<int64>(p, 2);
+    return x[1];
+}
+
+internal static byte loadVar(@unsafe.Pointer p) {
+    array<byte> v = @unsafe.Pointer.LoadArray<byte>(p, 2);
+    return v[0];
+}
+
+internal static array<uintptr> loadReturn(@unsafe.Pointer p) {
+    return @unsafe.Pointer.LoadArray<uintptr>(p, 2);
+}
+
+internal static bool loadCompare(@unsafe.Pointer p, @unsafe.Pointer q) {
+    return @unsafe.Pointer.LoadArray<int64>(p, 2) == @unsafe.Pointer.LoadArray<int64>(q, 2);
+}
+
+internal static byte loadArg(@unsafe.Pointer p) {
+    return takeArr(@unsafe.Pointer.LoadArray<byte>(p, 2));
+}
+
+internal static int32 loadStruct(@unsafe.Pointer p) {
+    var x = @unsafe.Pointer.LoadArray<pair>(p, 3);
+    return x[2].b;
+}
+
+internal static byte loadNamed(@unsafe.Pointer p) {
+    var x = (small)@unsafe.Pointer.LoadArray<byte>(p, 64);
+    return x[3];
+}
+
+internal static nint loadIdentity(/*[4]*/ ж<array<nint>> a) {
+    var x = (~a).Clone();
+    return x[0];
+}
+
+internal static byte loadScalar(ж<uint32> x) {
+    var v = @unsafe.Pointer.LoadArray<byte>(@unsafe.Pointer.FromPinnedBox(x), 4);
+    return v[0];
+}
+
+internal static ж<nint> loadManaged(@unsafe.Pointer p) {
+    var v = (~@unsafe.Pointer.To<array<ж<nint>>>(p)).Clone();
+    return v[0];
+}
+
+internal static nint /*n*/ loadRange(@unsafe.Pointer p) {
+    nint n = default;
+
+    foreach (var (_, b) in range(@unsafe.Pointer.LoadArray<byte>(p, 4))) {
+        n += (nint)b;
+    }
+    return n;
+}
+
+internal static nint loadLen(@unsafe.Pointer p) {
+    return 4;
+}
+
+internal static void storeLiteral(uintptr u) {
+    @unsafe.Pointer.StoreArray<byte>((@unsafe.Pointer)u, 2, new byte[]{(byte)'C', 0}.array());
+}
+
+internal static void storeZero(@unsafe.Pointer p) {
+    @unsafe.Pointer.StoreArray<uintptr>(p, 2, new uintptr[]{}.array(2));
+}
+
+internal static void storeVar(@unsafe.Pointer p, /*[2]*/ array<byte> v) {
+    v = v.Clone();
+
+    @unsafe.Pointer.StoreArray<byte>(p, 2, v);
+}
+
+internal static void storeLoad(@unsafe.Pointer p, @unsafe.Pointer q) {
+    @unsafe.Pointer.StoreArray<byte>(p, 2, @unsafe.Pointer.LoadArray<byte>(q, 2));
+}
+
+internal static void storeNamed(@unsafe.Pointer p, small s) {
+    s = s.Clone();
+
+    @unsafe.Pointer.StoreArray<byte>(p, 64, s);
+}
+
+internal static void storeIdentity(/*[4]*/ ж<array<nint>> a, /*[4]*/ array<nint> v) {
+    v = v.Clone();
+
+    (a).Value = v.Clone();
+}
+
+internal static void storeScalar(ж<uint32> x, /*[4]*/ array<byte> v) {
+    v = v.Clone();
+
+    @unsafe.Pointer.StoreArray<byte>(@unsafe.Pointer.FromPinnedBox(x), 4, v);
+}
+
+internal static nint /*n*/ storeTuple(@unsafe.Pointer p, /*[2]*/ array<byte> v) {
+    nint n = default;
+    v = v.Clone();
+
+    ((@unsafe.Pointer.To<array<byte>>(p)).Value, n) = (v.Clone(), 1);
+    return n;
+}
+
+internal static void storeManaged(@unsafe.Pointer p, /*[2]*/ array<ж<nint>> v) {
+    v = v.Clone();
+
+    (@unsafe.Pointer.To<array<ж<nint>>>(p)).Value = v.Clone();
+}
+
+internal static void main() {
+    ref var a = ref heap(new array<nint>(4), out var Ꮡa);
+    ref var s = ref heap(new small(), out var Ꮡs);
+    ref var sib = ref heap(new sibling(), out var Ꮡsib);
+    ref var arr64 = ref heap(new array<byte>(64), out var Ꮡarr64);
+    ref var h = ref heap(new hdr(), out var Ꮡh);
+    ref var x = ref heap(new uint32(), out var Ꮡx);
+    ref var up = ref heap(new uintptr(), out var Ꮡup);
+    ref var w = ref heap(new array<uint32>(4), out var Ꮡw);
+    ref var buf = ref heap(new array<uint16>(16), out var Ꮡbuf);
+    ref var i32 = ref heap(new array<int32>(4), out var Ꮡi32);
+    ref var prs = ref heap(new array<pair>(3), out var Ꮡprs);
+    ref var i64 = ref heap(new array<int64>(2), out var Ꮡi64);
+    ref var ptrs = ref heap(new array<ж<nint>>(4), out var Ꮡptrs);
+    @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡi32);
+    idxStore((uintptr)p);
+    idxCompound(p, 0);
+    idxTuple(p);
+    idxAddr(p).Value = 9;
+    fmt.Println(idxRead(p, 1), idxArg(p), idxBound(p, 2), idxParen(p), idxDeref(p), idxClosure(p)());
+    _ = (Func<@unsafe.Pointer, int32>)(idxNested);
+    @unsafe.Pointer q = @unsafe.Pointer.FromPinnedBox(Ꮡprs);
+    idxMethod(q);
+    idxFieldAddr(q).Value += 2;
+    fmt.Println(idxField(q), prs[1].a, loadStruct(q));
+    @unsafe.Pointer r = @unsafe.Pointer.FromPinnedBox(Ꮡarr64);
+    idxNamedStore((uintptr)r, 3);
+    fmt.Println(idxNamedRead(r), idxAdded(r, 8), idxIdentity(Ꮡa), idxIdentityNamed(Ꮡs), idxIdentityAddr(Ꮡa).Value, idxAlias(Ꮡbuf.at<uint16>(0), 2), idxAliasNamed(Ꮡs.at<byte>(0), 2));
+    fmt.Println(idxSibling(Ꮡsib), idxSiblingUnnamed(Ꮡarr64), idxUnnamedFromNamed(Ꮡs), idxFieldView(Ꮡh), idxScalar(Ꮡx), idxScalarLocal(), idxScalarAddr(Ꮡup, 1).Value, idxOtherElem(Ꮡw), idxStructBytes(Ꮡh));
+    fmt.Println(idxManaged(@unsafe.Pointer.FromPinnedBox(Ꮡptrs)) == nil, idxManagedPtr(@unsafe.Pointer.FromPinnedBox(Ꮡptrs)) == nil, Ꮡh.first());
+    @unsafe.Pointer t = @unsafe.Pointer.FromPinnedBox(Ꮡi64);
+    storeLiteral((uintptr)r);
+    storeVar(r, new byte[]{1, 2}.array());
+    storeLoad(r, @unsafe.Pointer.FromPinnedBox(Ꮡs));
+    storeNamed(r, s);
+    storeIdentity(Ꮡa, new nint[]{1}.array(4));
+    storeScalar(Ꮡx, new byte[]{1}.array(4));
+    storeManaged(@unsafe.Pointer.FromPinnedBox(Ꮡptrs), new ж<nint>[]{}.array(2));
+    fmt.Println(loadBound(t), loadVar(r), loadReturn(t), loadCompare(t, t), loadArg(r), loadNamed(r), loadIdentity(Ꮡa), loadScalar(Ꮡx), loadManaged(@unsafe.Pointer.FromPinnedBox(Ꮡptrs)) == nil, loadRange(r), loadLen(r), storeTuple(r, new byte[]{}.array(2)));
+    storeZero(t);
+}
+
+} // end main_package

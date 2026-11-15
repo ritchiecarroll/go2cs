@@ -2962,6 +2962,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// "not evaluated" carries that carve-out), so those keep the evaluating form rather than
 		// having their side effect silently dropped.
 		if (ident.Name == "len" || ident.Name == "cap") && len(callExpr.Args) == 1 {
+			// A pointer-to-array CONVERSION, dereferenced or not: the length is the type's, and a box of the whole
+			// array would answer the length of whatever Go array the address holds (arrayPointerElementDoor.go).
+			if length, ok := v.arrayPointerConversionLength(callExpr.Args[0]); ok {
+				return fmt.Sprintf("%d", length)
+			}
+
+			// The dereference of a field view: the type's length. The view has no array<T> to ask
+			// (nativeFieldArrayView.go).
+			if v.nativeFieldArrayViewDerefIsUnevaluated(callExpr.Args[0]) {
+				if arr, isArray := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Array); isArray {
+					return fmt.Sprintf("%d", arr.Len())
+				}
+			}
+
 			// An inline array (a go.arrays member, inlineArrayEmission.go) has its length in its type, and golib's len
 			// cannot see the family: the constant, unless the operand calls or receives.
 			if arr, isArray := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Array); isArray && v.isInlineArrayExpr(callExpr.Args[0]) && !v.exprHasCallOrReceive(callExpr.Args[0]) {
@@ -5724,7 +5738,28 @@ func (v *Visitor) reinterpretManagedEmission(callExpr *ast.CallExpr, arg ast.Exp
 	// A source Go already parenthesized renders its own parentheses and is left as written.
 	rendered := v.parenthesizeConversionBase(src, v.convExpr(src, []ExprContext{identContext}))
 
+	// Rendering the source may LIFT the anonymous struct its element names: ccgo's float type-punning
+	// `(*struct{…})(unsafe.Pointer(&struct{ f float64 }{f: x}))` lifts the literal only now. A name taken before
+	// that deferred to a marker no registry answers for a function-local lift, and was emitted as raw Go
+	// (sqlite-cs L1, modernc.org/libc on linux). Name such an element again, now that the lift exists.
+	srcElem = v.reinterpretElemAfterRender(srcElem, src)
+	targetElem = v.reinterpretElemAfterRender(targetElem, callExpr)
+
 	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", rendered, srcElem, targetElem), true
+}
+
+// reinterpretElemAfterRender answers a Reinterpret element name again from expr's pointer type when the name taken
+// before rendering is a deferred dynamic-type marker; any other name is returned unchanged.
+func (v *Visitor) reinterpretElemAfterRender(name string, expr ast.Expr) string {
+	if !strings.Contains(name, dynamicTypeMarkerPrefix) {
+		return name
+	}
+
+	if ptr, ok := types.Unalias(v.info.TypeOf(expr)).(*types.Pointer); ok {
+		return convertToCSTypeName(v.getAliasQualifiedTypeName(ptr.Elem(), false))
+	}
+
+	return name
 }
 
 // The internal/abi record types the managed model can synthesize from a descriptor's carried

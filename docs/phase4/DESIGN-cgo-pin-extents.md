@@ -17,6 +17,12 @@
 > guard's own rule: the cited line, whitespace collapsed, must contain the quote. 15 of 15 resolve. A negative
 > control (one quote deliberately altered) was named by the script, and was not caught by `TestDocs`, which is how
 > the gap was found.
+>
+> **Amended 2026-11-15 (H): BUILT, for `.4`,** on `claude/h-cgo-pin-extents-cut`, gated at `9233d46ed4`. What the seat
+> built where it departs from section 3, and every prediction and bar scored as worded, is section 11. The notes
+> above were re-checked by the same script on 2026-11-15: 15 of 15 resolve at the seat's base `d7f5a59f79`; 8 do not
+> at `9233d46ed4`, because the seat itself moved or renamed the lines they cite; 11 do not at the seat's merge of
+> batch 307. They stay as written: evidence of the tree they were read at, never rewritten.
 
 ## 1. What is open
 
@@ -222,6 +228,10 @@ One row per source of a number over Go memory. Rows 1-9 are section 17.4's and 1
 After this seat the disclosed gap is rows 7, 8 and 11. `docs/Limitations.md` and the release notes are reworded in
 the same seat to say exactly that.
 
+> **Amended 2026-11-15 (H).** Row 11 has two more routes than its text names: the native-box kind and the pin made
+> just before the index is published. Row 7 depends on what `Find`'s strong reference holds against. Both are in
+> section 11.2.
+
 ## 5. Who pays, and when
 
 | Who | When | Cost (H, section 2) |
@@ -234,6 +244,10 @@ the same seat to say exactly that.
 **The DENSE hit figure is not every C call's cost.** A hit means a Go address reached the door. Under 3.1 that is
 the REFUSAL path, an error, so no successful call pays it. From 3.2, a permitted crossing of a pinned Go buffer pays
 it once per call. Every legitimate C call pays the miss: 4 to 9 ns in steady rows, 4 to 23 ns counting first-run rows.
+
+> **Amended 2026-11-15 (H).** The pin rows of this table are superseded by section 11.6, as built. The DENSE hit figure
+> holds for the page path, which now serves objects of 1 or 2 pages only. A hit on a larger object walks the side list
+> instead (M3h, section 11.5).
 
 ## 6. How it composes with M:N's native-call seam (with lane G)
 
@@ -354,3 +368,215 @@ Section 17 was never built, so most of its predictions were never run. Those tha
 - **QG-1** (G): answered (section 6). SB-4 holds.
 
 — H (2026-11-14)
+
+## 11. Record 2026-11-15: the seat as built and measured, and its predictions and bars scored as worded
+
+The seat is `claude/h-cgo-pin-extents-cut`, cut from master `d7f5a59f79`. It was gated at `9233d46ed4` and seats in
+batch 309. Its footprint is golib and GolibTests only: no file under `src/go2cs` or `src/gen` changes, so the corpus
+cannot move. The adversarial review (P3) read the seat at `df78530d60..6923ac7bc3` as SHIP-WITH-FIXES, then
+`6923ac7bc3..3724cbf1bf` and `3724cbf1bf..9233d46ed4` as SHIP. Wrong predictions stay visible below, beside the
+reading that refuted them.
+
+### 11.1 What was built, where it departs from section 3
+
+- **R5 and R6 run in a child process** (section 7's amendment; COORD's ruling on the seat's D-1).
+- **Objects over 2 pages go to a LARGE-OBJECT SIDE LIST, not to the page dictionary.** D3's X-PAGE-LIST stays for an
+  object of 1 or 2 pages. Section 3 did not foresee this. A lone 16 MiB pin on the page path cost 4,097 nodes,
+  569-675 µs and 622,808 B (11.3), so COORD ruled a side list as the primary fix.
+  - **One entry per pinned OBJECT.** Its first pin creates a `Large` entry; every further pin of the same object
+    JOINS it as a holder. So the list has one row per distinct object, not one per pin. That matters because golib's
+    box pins are released by finalizer, so a loop of `&b[i]` over one buffer holds many pins of it at once.
+  - **Pin and release are O(1).** The join finds its entry by base, in a table under the list's one lock
+    (`m_largeGate`). The unlink goes through a writer-only `Previous` link.
+  - **The reader takes no lock.** It walks a pushed list, and an unlink never rewrites a removed entry's `Next`: the
+    page list's argument (section 3).
+  - **An envelope keeps C numbers off the list.** Two bounds cover every live entry. They are widened before an entry
+    is linked, and reset only when the list empties. `Find` asks the page dictionary, then the envelope, and walks the
+    list only for a number inside the envelope.
+  - **The threshold was 16 pages, then 2.** At 16 pages, 1000 pins of one 60 KiB buffer held 16,000 page nodes, at
+    1.6-2.6 µs and 1089 B a pin (P3's re-read, item 2; R13). A page costs about 120 ns and 68-152 B a pin; a side-list
+    entry costs 112-144 B and 200-380 ns whatever the size. So the page path wins only at 1-2 pages.
+- **A process with no cgo package allocates the base's 32-byte buffer.** The entry lives in `IndexedPinnedBuffer`, a
+  subclass that `PinnedBuffer.Of` makes only when the index is on. `PinnedBuffer`'s constructors are private
+  protected, so a pin made any other way does not compile. R6 asserts the exact `32`, against the BASE's size, so it
+  fails on any field growth. The tip it replaced had added a field to every buffer: 40 B per pin in every process.
+- **A pin made before activation enters a table keyed by its GC handle,** through the backfill, and leaves it before
+  the handle is freed.
+- **A release closes the buffer before it frees the handle.** A byte state (`Open`, `Backfilling`, `Closed`) sits in
+  the object's padding. The release closes the buffer first, waiting out a backfill mid-read, then leaves the index,
+  then frees the handle. The backfill claims the buffer before reading its handle, and leaves a closed one out. A
+  second release racing the first reads `Closed` and returns. Before this, the loser threw
+  `InvalidOperationException` out of `Dispose`.
+- **Activation sets a ready flag.** `Activate` publishes the index, backfills in `try`/`finally`, then sets ready. A
+  second `Activate` and `Find` wait for it; the activating thread itself never waits.
+- **A test seam, `s_testHookBeforeFree`,** runs between a release's index read and its free. The child switches the
+  index on there, which makes the Dispose-versus-Activate race deterministic. It costs one static read per release.
+- **D-4: each entry and each holder holds its buffer through a `WeakReference<PinnedBuffer>`,** never a bare handle
+  freed at removal. A lock-free reader may still stand on a removed entry, and a freed handle can be reissued to
+  another object.
+
+### 11.2 Rows 7 and 11, made precise
+
+- **Row 11 has three routes, all outside the index for the pin's whole life:**
+  - a pinned reinterpret, or a hand-owned buffer, pinned before the first cgo module loads and not in the exact
+    registry (section 3, D4);
+  - **the native-box kind**: a reinterpret's `NativeBox` pin taken before activation. The backfill reads only the
+    exact registry, and that pin is not in it;
+  - **pin before publish**: a buffer constructed just BEFORE the index is published is the plain kind. It enters only
+    if the backfill reaches it through the exact registry.
+- **Row 7, and what `Find`'s strong reference holds.** It holds a pin against its FINALIZER only, never against an
+  explicit `Dispose`. 3.2 must take a call-scoped pin of its own; it cannot rely on that reference.
+
+### 11.3 Section 8's predictions, scored as worded
+
+- **PB-1: MET, with one half read by a control.** At the red reading (`3922181292`) exactly R1, R2, R3, R4 and R7
+  were red, each on its predicted half. R5's red half could not be read at the base, because the child did not exist
+  there. Its control was read instead: `Register` with the activation removed left slot+4 crossing. R1-R14 are green
+  at the tip.
+- **PB-2: MISSED, twice.** Its stop line SB-6 ("any GolibTests row outside R1-R8 changes verdict") fired on two rows:
+  - `ACallResultCastToANumberCarriesNothingAndCrossesAsANumber` asserted that the residue crosses, and the index now
+    refuses it. Rewritten in place as `…AndIsRefusedByItsPinExtent`, on COORD's ruling. My census of the arms that
+    assert the residue counted the two the design named and never searched the door's tests (11.7).
+  - The source-scanning guard `NoUncountedBackingAllocations` went red on the hosted linux and darwin legs at
+    `9af2054e4c`, the seat's first push: the multi-page node array was an uncounted backing allocation. Fixed at
+    `df78530d60`: the page nodes chain, with no array.
+  - At `9233d46ed4` the TRX against the base arms holds `df78530d60`'s rows unchanged, plus exactly the seven new
+    arms: R9-R14 and the C-memory-beside-64-large-pins arm.
+- **PB-3: MET.** Golib and GolibTests only. `check-no-regression` is byte-identical across 1072 packages at
+  `9233d46ed4`.
+- **PB-4: NOT SCORED.** The battery at `df78530d60` was stopped mid-canary, because the review's fixes moved golib.
+  It had read crypto/cipher, runtime, crypto/tls and net/http PASS. COORD then ruled the light gate for the tip
+  (11.4), so `os` and `crypto/internal/nistec` were never read twice at a final tree.
+- **PB-5: MET at `d4fac4713c`** under TieredCompilation=0: base 22-26 ns, tip 28-32 ns (default tiering read too
+  noisy to score). At `9233d46ed4` it was read against `6923ac7bc3` in ONE session, alternating: 28.1-33.0 ns against
+  28.4-36.8 ns. An earlier 34-41 ns reading at `9233d46ed4` was drift between sessions, as that A/B shows.
+- **PB-6: MET.** Hosted `cgo-e2e`, `converter-cgo` and `golib-tests`, each on linux, windows and darwin, read success
+  at `9233d46ed4` (9 of 9).
+- **PB-7: MET at `9233d46ed4`.** A one-page pin and release: 16 B 523-656 ns and 145-216 B; 64 KiB 259-622 ns and
+  144 B; flat from N=16 to 5000.
+- **The light gate at `9233d46ed4`** (COORD's ruling of 2026-11-15): GolibTests Release 2735, 0 failed, 50 skipped;
+  Debug 2735, 0 failed, 75 skipped; GenTests 530, 0 failed; `go test` 11 ok, 0 FAIL; `check-no-regression` NO
+  REGRESSION over 1072. One prediction was CORRECTED BEFORE its measurement: I had predicted Debug's skips equal to
+  Release's (50); COORD's reading of master is 75, and I re-predicted 75 before the run.
+- **Not run at the final tip,** by that ruling: the full behavioral suite, the reflect canaries, and the
+  four-target two-seeded comparison. The comparison is 0 by construction, since nothing under `src/go2cs` or
+  `src/gen` changed.
+
+### 11.4 The review's rounds: the bars as written, scored, then the bars as re-stated
+
+**Step 1, at `df78530d60`** (TieredCompilation=0, 2 processes x 2 readings; OFF nulls the index for the arm).
+- L1, one live pin: 4 KiB OFF 95-145 ns, 40 B, ON 507-723 ns, 368 B; 64 KiB ON 2343-2488 ns, 2648 B; 16 MiB ON
+  569-675 µs, 622,808 B.
+- L2, K pins of one 16 MiB array held at once: 0.4 ms a pin at K=1, rising to 1.0-1.2 ms at K=1000, which holds
+  about 4.1 million nodes.
+- Scored: OFF "75-140 ns, 32 B" MISSED (two readings at 143 and 145 ns; 40 B on every row, the field that 11.1's
+  subclass removed). ON at 4 KiB, 64 KiB and 16 MiB MET. L2 "flat in K" MISSED: time rose with K.
+
+**COORD's bars for the side list** (2026-11-15), scored:
+- **(a)** the Nth pin of a pinned 16 MiB object at most 1 µs and 400 B.
+  - At `6923ac7bc3`, K=100 read over 1 µs in a 200-op sample. A discriminator, predicted before its run, showed the
+    excess is a COLLECTION inside the sample (H1): 206-262 ns in the 8 readings with no collection, 479-712 ns in the
+    8 with one. Amortized over 200,000 ops, 361-386 ns and 112 B. MET amortized.
+  - At `9233d46ed4` the same shape repeats: K=100's first reading is 6312 and 5953 ns, in both processes; every other
+    reading at K=1 to 1000 is 217-305 ns and 112-144 B. **MISSED as worded** on that one sample per process; MET
+    amortized (D1 below).
+- **(d)** a lone 16 MiB pin and release at most 2 µs and 400 B: **MET**, 218-272 ns and 144 B.
+- **(e)** the door's C miss stays within +4 to +9 ns with 64 large pins live: **MET**, 31.3-36.1 ns against 31.2-35.3
+  ns with none.
+- **(f)** PB-7's small-object rows unchanged: **MET**, in the one-session A/B above.
+
+**My bars for the review's items 2 and 3** (2026-11-15, before the remedy), scored at `9233d46ed4`:
+- M2a, 1000 held pins of one 60 KiB array, at most 450 ns: **MISSED**. 882, 492, 676 and 253 ns at 20,000 ops (3 of
+  4 over; the two over 600 contain a collection), and 429, 353, 463 and 356 ns amortized over 200,000 (1 of 4 over).
+- M2a at most 160 B: **MET**, 112 B.
+- M3, L=1000 distinct 128 KiB objects, pin at most 600 ns: **MISSED** on the FIRST reading of every process (866 to
+  1121 ns); later readings 306-416 ns.
+- M3 release at most 600 ns: **MET**, 103-232 ns. C `Find` within 2 ns of before: **MET** on the means. One-page rows:
+  **MET**.
+- My predictions in the same post that missed: M2a 200-400 ns (3 of 4 over); M2a's interior find 15-40 ns (11-15);
+  M2b, 8 KiB, 200-400 ns (2 of 4 over, both with a collection); M3 pin 250-500 ns (the first reading); M3h 1.2-2.2 µs
+  (1 of 4, 3164 ns); the oldest entry's find 2.5-3.5 µs (4.0-4.4); the refusal 10-40 µs (4.2-9.7); the lone pin's
+  136 B (144: `Large` grew a `Previous`); D1 250-450 ns (1 of 4); D2's later readings 350-550 ns (306-339). D2's first
+  reading, 800-1200 ns, MET.
+- **The stop line fired** on M2a and M3 pin, and I stopped before pushing.
+
+**COORD's ruling (a), 2026-11-15: accept, with the bars re-stated as measured, and the bars above left as written.**
+- **M2a at most 500 ns amortized, at 112 B.** Read 353-463 ns amortized.
+- **M3 pin at most 600 ns after the first L=1000 ramp of a process, the first ramp disclosed at about 1 µs.** Read
+  306-416 ns after it; the first ramp 866-1121 ns.
+- **D2's mechanism is UNROOTED: the base table, or the GC handle table at 2000 live handles.** The cost is once per
+  process and does not recur; no arm separated those two.
+- Why: the path is O(1). M2a went from 1.6-2.6 µs and 1,089 B to 253-492 ns and 112 B. What is left over the bars is
+  allocation, the collections it causes, and a once-per-process ramp.
+
+### 11.5 M3h, and the precondition 3.2 inherits
+
+- **M3h, read at `9233d46ed4`:** `Find` on a MID entry's interior at L=1000 costs 1672-3164 ns. On the page path
+  (`3724cbf1bf`) the same hit was about 9 ns. The oldest entry costs 4.0-4.4 µs, the newest 12-29 ns, a C number
+  6.5-10.1 ns. The refusal a hit leads to (`VoidPointer`, throw and catch) costs 4.2-9.7 µs a call.
+- **Who can HIT a live large entry, read from `GoCgoArgs.cs` and confirmed by P3:** `VoidPointer` and
+  `HelperVoidPointer`, through `GoMemory`, refuse. `IsGenuinelyNative` answers false, and its callers
+  `StructPointer`, `PointerMember` and `HelperPointer` throw. The backfill never calls `Find`. A C return that points
+  into Go memory comes back as a native box, and passing it again goes through `IsGenuinelyNative`. **Under 3.1 every
+  hit ends in a refusal**, so the walk sits on cold paths only. COORD accepted M3h on that read.
+- **THE 3.2 PRECONDITION.** Once 3.2 lets Go memory cross, a hit IS a crossing path. **Before Go memory crosses, the
+  side list gets an ordered index (O(log L)), or the threshold goes back to 16 pages.** Also a BOARD row tied to cgo
+  Phase 3.2.
+
+### 11.6 What the index costs now (amends section 5)
+
+| Who | Cost, read at `9233d46ed4` |
+|---|---|
+| a cgo program, a pin of an object of 1-2 pages | 16 B: 523-656 ns and 145-216 B; 4 KiB: 536-771 ns and 368 B |
+| a cgo program, a lone pin of an object over 2 pages | 218-453 ns and 144 B, whatever its size |
+| a cgo program, a further pin of an object already pinned | 112 B (the buffer, a holder and a `WeakReference`); 353-463 ns amortized, collections included |
+| a cgo program, its collections | about 2.5x as frequent with the index on (K=100 over 200,000 ops: 5 collections against 2), because a pin allocates 112 B, not 32. The pause per collection is not the index's: 4.4-5.7 ms on, 3.5-4.0 ms off |
+| every process | one interlocked byte CAS per release, a few ns on the handle's free path; one static read (the test seam). A pin is 32 B, as at the base |
+
+- **Under segments, a C number can walk the side list.** The envelope resets only when the list empties. Under the
+  GC's regions C memory lies outside it, so a C number never walks the list. Under segments it can fall inside, and
+  then walks the whole list. The answer is still right; it costs about 3 ns an entry, so about 30 µs per pointer
+  argument at 10,000 live entries. That figure is P3's estimate; it was not measured on a segments host. The code
+  comment's "slower" does not carry it yet. It goes in with the next golib change, because this record's commit is
+  docs only.
+- **Concurrent pins (P3's note 3), 4 threads against 1.** Each thread pinned and released its OWN array 200,000
+  times. TieredCompilation=0, 2 processes x 2 readings, 8 logical CPUs. Predictions were written before the run.
+
+  | arm | per op, 1 thread → 4 threads | ratio |
+  |---|---|---|
+  | 64 KiB, index ON (takes `m_largeGate`) | 382-423 → 2210-2550 ns | 5.5-6.7 |
+  | 64 KiB, index OFF | 106-132 → 644-694 ns | 5.2-6.2 |
+  | 16 B, index ON (page path, no global lock) | 469-524 → 2173-2430 ns | 4.1-5.1 |
+  | 16 B, index OFF | 102-125 → 600-718 ns | 5.2-6.5 |
+
+  - Throughput at 4 threads is below one thread's in every arm.
+  - Scored as worded:
+    - C1, OFF 64 KiB ratio 1.0-2.0: **MISSED**. I assumed the runtime's own pin and release scale; they do not.
+    - C2, ON 16 B ratio 1.0-2.0 and within 0.5 of OFF's: **MISSED**.
+    - C3, ON 64 KiB ratio 1.5-4.0 and at least 0.5 above OFF's: **MISSED**.
+    - C4, the one-thread costs: **MET**.
+  - The reading rule, stated before the run: ON 64 KiB's ratio at least 1.5x OFF's in both processes means
+    `m_largeGate` is contended. It read 1.03-1.10x, so COORD ruled it **NOT contended**.
+  - The 16 B control, which takes no global lock, collapses as far as the 64 KiB arm, and the OFF arms collapse by
+    the same ratio. So the shared resource is upstream of the index. **UNROOTED.** It is a `.5` BOARD row with its
+    discriminator.
+- **The `.5` candidate:** pool or elide the joiner's holder and `WeakReference`. M2a's remaining cost is allocation and
+  the collections it causes.
+
+### 11.7 Misses in method, and what each one teaches
+
+- **A census of constructor sites missed a target-typed `new`.** It read `new PinnedBuffer(` and missed slice.cs's
+  `new(m_array, Length)`. The compiler found it, once the constructors became private protected. Making the
+  constructor inaccessible IS the census: the compiler cannot miss a site.
+- **A census of the arms a residue's closing moves must search the TESTS, not the design.** I counted the two arms
+  the design named, and SB-6 found a third (11.3, PB-2). Before closing a disclosed residue, search every test that
+  calls the door for an assertion that the residue crosses.
+- **A run before the battery, for any golib change, is the UNFILTERED GolibTests.** The source-scanning allocation
+  guard sits outside every filter a pin change suggests, and it reached red only on two hosted legs.
+- **A premise is checked before it is fixed.** The racing-release defect COORD named as a GC-handle double free
+  turned out to be `InvalidOperationException` thrown by the loser. It is still a defect, and it is fixed; the arm's
+  message names what the loser did.
+- **A sample of 200 operations can hold a collection.** A per-pin figure from it reads the pause. Score per-op bars
+  amortized over enough operations to contain collections, or read with the collection count beside them.
+
+— H (2026-11-15)

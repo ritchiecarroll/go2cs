@@ -142,16 +142,13 @@ public static partial class GoReflect
         {
             // The same array under two Go names: re-type the HEADER (the elements stay shared through
             // its backing) into the destination pointee and box it.
-            object? header = ReadPointerSlot(src);
-
             // A defined array pointee installs its holder on first use (a zero `new(MyBytesArray0)` starts
-            // with none): touch Length on the copy read from the slot and write that copy back, so the
-            // box and every later copy share ONE holder -- the elements then alias through it.
-            if (header is IArray lazy && !header.GetType().IsGenericType)
-            {
-                _ = lazy.Length;
-                WritePointerSlot(src, header);
-            }
+            // with none): the box publishes it into its own storage before the header is read, so the box
+            // and every later copy share ONE holder -- the elements then alias through it. The publish is
+            // the element door's (ж<T>.publishArrayBacking), which stores the holder by compare-and-swap:
+            // a touch on a copy and a plain write-back, as this was, replaced the holder a goroutine's first
+            // use of the variable had just installed.
+            object? header = ((IGoReflectBox)src).ReadBoxSlotPublished();
 
             if (header is null || !TryConvertTo(header, dstPointee, out object? retyped) || retyped is null)
                 return false;
