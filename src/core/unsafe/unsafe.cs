@@ -1892,6 +1892,37 @@ public static ж<byte> StringData(@string str) {
 public static class ArrayPointer<T> {
     public static ж<array<T>> Of<TField>(ж<TField> field, nint length) =>
         builtin.NativeFieldArrayPointer<T>(field, length) ?? Pointer.FieldView<T>(Pointer.FromPinnedBox(field), length);
+
+    // THE WHOLE ARRAY THROUGH THE VIEW (section 18, part C). The view has no array<T> of its own, so its Value
+    // refuses by name, and the forms that need all N elements go through the elements instead. Both take the view's
+    // window, golib's slice of a pointer to an array, which answers for a native array pointer and for an ordinary
+    // box alike, with Go's nil dereference for a nil one.
+    //
+    //     v := *p        Load(p)        a Go array value: a copy of the N elements
+    //     *p = v         Store(p, v)    N element stores, in place
+    //
+    // A range that reads the values ranges the same window, `p.slice()`, where the elements are.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static array<T> Load(ж<array<T>> view)
+    {
+        slice<T> window = view.slice();
+        array<T> value = new array<T>((int)window.Length);
+
+        copy(value[..], window);
+
+        return value;
+    }
+
+    // A value shorter than N (the zero value of an array that was never given storage) is zeros from where it
+    // ends, as Go's is.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static void Store(ж<array<T>> view, in array<T> value)
+    {
+        slice<T> window = view.slice();
+
+        for (nint i = copy(window, value[..]); i < window.Length; i++)
+            window[i] = default!;
+    }
 }
 
 // Go's `(*[unsafe.Sizeof(s)]byte)(unsafe.Pointer(&s))[lo:hi]` as a direct argument of copy, where s's struct is

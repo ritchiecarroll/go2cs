@@ -374,6 +374,11 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		}
 	}
 
+	// `(*p)[i]`, p a local bound by the field view, is the same element, in place.
+	if star, ok := ast.Unparen(indexExpr.X).(*ast.StarExpr); ok && ptrDeref == "" && v.isNativeFieldArrayViewLocal(star.X) {
+		return fmt.Sprintf("%s.ElementRef(%s)", v.convExpr(star.X, xContexts), index)
+	}
+
 	if derefd != nil && ptrDeref == "" {
 		baseExpr, ptrDeref = "("+v.convExpr(derefd, xContexts)+")", ".Value"
 	} else {

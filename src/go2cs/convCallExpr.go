@@ -2963,6 +2963,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				return fmt.Sprintf("%d", length)
 			}
 
+			// The dereference of a field view: the type's length. The view has no array<T> to ask
+			// (nativeFieldArrayView.go).
+			if v.nativeFieldArrayViewDerefIsUnevaluated(callExpr.Args[0]) {
+				if arr, isArray := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Array); isArray {
+					return fmt.Sprintf("%d", arr.Len())
+				}
+			}
+
 			// An inline array (a go.arrays member, inlineArrayEmission.go) has its length in its type, and golib's len
 			// cannot see the family: the constant, unless the operand calls or receives.
 			if arr, isArray := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Array); isArray && v.isInlineArrayExpr(callExpr.Args[0]) && !v.exprHasCallOrReceive(callExpr.Args[0]) {

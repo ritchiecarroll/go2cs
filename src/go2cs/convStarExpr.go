@@ -33,6 +33,12 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		return door
 	}
 
+	// A field view read for its whole value copies its elements: the view has no array of its own
+	// (nativeFieldArrayView.go).
+	if load, ok := v.nativeFieldArrayViewLoad(starExpr); ok {
+		return load
+	}
+
 	ident := getIdentifier(starExpr.X)
 	pointerRecv, recvName := v.isPointerReceiver()
 

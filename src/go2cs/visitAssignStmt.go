@@ -697,7 +697,14 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	// A whole array stored through `(*A)(p)`, p an unsafe.Pointer, is copied to what the pointer names by the
 	// array store door (arrayPointerElementDoor.go).
 	if lhsLen == 1 && rhsLen == 1 && assignStmt.Tok == token.ASSIGN {
-		if store, isStore := v.arrayPointerStoreDoor(lhsExprs[0], rhsExprs[0]); isStore {
+		store, isStore := v.arrayPointerStoreDoor(lhsExprs[0], rhsExprs[0])
+
+		// A whole array stored through a field view writes its elements (nativeFieldArrayView.go).
+		if !isStore {
+			store, isStore = v.nativeFieldArrayViewStore(lhsExprs[0], rhsExprs[0])
+		}
+
+		if isStore {
 			result.WriteString(store)
 
 			if hoistBuf != nil && hoistBuf.Len() > 0 {

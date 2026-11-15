@@ -245,4 +245,146 @@ public class FieldArrayViewOverGoStructTests
         Assert.IsFalse(text.Contains("native memory"), text);
         Assert.AreEqual((ushort)0x1234, named.Value.Port);
     }
+
+    // ---- the whole array through the view (section 18, part C) ----
+    //
+    // The view's Value refuses by name: there is no array<T> behind it. The converter emits these two helpers for
+    // the forms that need all N elements, and `p.slice()` for a range that reads the values.
+
+    /// <summary>
+    /// Go's <c>v := *p</c>: the N elements, copied. A store through the view after the load does not reach the
+    /// copy, and a store to the copy does not reach the field.
+    /// </summary>
+    [TestMethod]
+    public void TheWholeArrayIsLoadedAsACopy()
+    {
+        ж<Header> header = NewHeader();
+        ж<array<byte>> p = @unsafe.ArrayPointer<byte>.Of(header.of(Header.ᏑPort), 2);
+
+        array<byte> v = @unsafe.ArrayPointer<byte>.Load(p);
+
+        Assert.AreEqual(2, (int)v.Length);
+        Assert.AreEqual((byte)0x34, v[0]);
+        Assert.AreEqual((byte)0x12, v[1]);
+
+        p.ElementRef(0) = 0xAB;
+        Assert.AreEqual((byte)0x34, v[0], "the load is a copy");
+
+        v[1] = 0xEE;
+        Assert.AreEqual((ushort)0x12AB, header.Value.Port, "a store to the copy stays in the copy");
+    }
+
+    /// <summary>A <c>uint64</c> field loaded as its two halves, the low word first.</summary>
+    [TestMethod]
+    public void AWordFieldIsLoadedAsItsTwoHalves()
+    {
+        ж<Header> header = NewHeader();
+
+        array<uint> v = @unsafe.ArrayPointer<uint>.Load(@unsafe.ArrayPointer<uint>.Of(header.of(Header.ᏑWord), 2));
+
+        Assert.AreEqual(0x22222222u, v[0]);
+        Assert.AreEqual(0x11111111u, v[1]);
+    }
+
+    /// <summary>
+    /// Go's <c>*p = v</c>: N element stores into the field, and nothing but the field.
+    /// </summary>
+    [TestMethod]
+    public void TheWholeArrayIsStoredInPlace()
+    {
+        ж<Header> header = NewHeader();
+        ж<array<byte>> p = @unsafe.ArrayPointer<byte>.Of(header.of(Header.ᏑPort), 2);
+
+        @unsafe.ArrayPointer<byte>.Store(p, new array<byte>(new byte[] { 0xA1, 0xA2 }));
+
+        Assert.AreEqual((ushort)0xA2A1, header.Value.Port);
+        Assert.AreEqual((ushort)0x5678, header.Value.Tail, "the field after it");
+        Assert.AreEqual((ushort)0, header.Value.Pad, "the field before it");
+    }
+
+    /// <summary>
+    /// An array value that was never given storage is Go's zero value: the store writes zeros.
+    /// </summary>
+    [TestMethod]
+    public void TheZeroValueStoresZeros()
+    {
+        ж<Header> header = NewHeader();
+        ж<array<byte>> p = @unsafe.ArrayPointer<byte>.Of(header.of(Header.ᏑPort), 2);
+
+        @unsafe.ArrayPointer<byte>.Store(p, default);
+
+        Assert.AreEqual((ushort)0, header.Value.Port);
+        Assert.AreEqual((ushort)0x5678, header.Value.Tail);
+    }
+
+    /// <summary>
+    /// A range that reads the values ranges the view's window, so each element is read when its round comes: a
+    /// store made in round 0 is seen in round 1, as Go's range over a pointer to an array sees it.
+    /// </summary>
+    [TestMethod]
+    public void ARangeOverTheWindowReadsEachElementInItsRound()
+    {
+        ж<Header> header = NewHeader();
+        ж<array<byte>> p = @unsafe.ArrayPointer<byte>.Of(header.of(Header.ᏑPort), 2);
+        int sum = 0, rounds = 0;
+
+        foreach (var (i, b) in range(p.slice()))
+        {
+            if (i == 0)
+                p.ElementRef(1) = 0x40;
+
+            sum += b;
+            rounds++;
+        }
+
+        Assert.AreEqual(2, rounds, "the range ran no rounds over the box the view was");
+        Assert.AreEqual(0x34 + 0x40, sum);
+    }
+
+    /// <summary>
+    /// The same two helpers over native memory, where the view is golib's native array pointer.
+    /// </summary>
+    [TestMethod]
+    public unsafe void TheWholeArrayLoadsAndStoresOverNativeMemory()
+    {
+        byte* block = (byte*)System.Runtime.InteropServices.NativeMemory.AllocZeroed(8);
+
+        try
+        {
+            block[2] = 0x34;
+            block[3] = 0x12;
+
+            ж<array<byte>> p = builtin.NativeArrayPointer<byte>((nuint)(block + 2), 2);
+            array<byte> v = @unsafe.ArrayPointer<byte>.Load(p);
+
+            Assert.AreEqual((byte)0x34, v[0]);
+            Assert.AreEqual((byte)0x12, v[1]);
+
+            @unsafe.ArrayPointer<byte>.Store(p, new array<byte>(new byte[] { 0xB1, 0xB2 }));
+
+            Assert.AreEqual((byte)0xB1, block[2]);
+            Assert.AreEqual((byte)0xB2, block[3]);
+            Assert.AreEqual((byte)0, block[1], "the byte before the view");
+            Assert.AreEqual((byte)0, block[4], "the byte after the view");
+            Assert.AreEqual((byte)0x34, v[0], "the load is a copy");
+        }
+        finally
+        {
+            System.Runtime.InteropServices.NativeMemory.Free(block);
+        }
+    }
+
+    /// <summary>
+    /// The view's own Value still refuses by name: nothing here made an array out of the field's bytes.
+    /// </summary>
+    [TestMethod]
+    public void TheHelpersDoNotGoThroughValue()
+    {
+        ж<Header> header = NewHeader();
+        ж<array<byte>> p = @unsafe.ArrayPointer<byte>.Of(header.of(Header.ᏑPort), 2);
+
+        _ = @unsafe.ArrayPointer<byte>.Load(p);
+
+        StringAssert.Contains(PanicText(() => _ = p.Value), "has no array<T> to dereference");
+    }
 }

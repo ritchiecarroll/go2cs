@@ -193,3 +193,166 @@ func (v *Visitor) nativeFieldArrayViewBinds(obj types.Object) bool {
 
 	return binds
 }
+
+// THE WHOLE ARRAY THROUGH THE VIEW (docs/phase4/DESIGN-array-pointer-doors.md, section 18, part C)
+//
+// The view has no array<T> for Value to return, so a form that needs all N elements goes through the elements:
+//
+//	v := *p             @unsafe.ArrayPointer<T>.Load(p)        read for its value: a copy
+//	*p = v              @unsafe.ArrayPointer<T>.Store(p, v)
+//	for _, x := range p     range(p.slice())                   each element read when its round comes
+//	(*p)[i]             p.ElementRef(i)                        no copy: the view's own element
+//
+//	(*p)[lo:hi]         p.slice(lo, hi)                        the view's own window (convSliceExpr.go)
+//	len(*p), range *p for its index alone                      N: Go reads no memory for either
+//
+// p is the conversion where it is written or a local bound by it and never re-pointed. The value positions are
+// packageFieldViewLoads'. A dereference anywhere else keeps `p.Value`, which the view refuses by name: the left
+// side of a tuple assignment is the one such position a probe found.
+
+// packageFieldViewLoads marks each dereference that stands where Go copies its value, for the field view. Its
+// list is packageArrayPointerLoads' and three positions more: an element of a composite literal (a struct
+// literal's field value is how x/sys/windows writes the form), a sent value, and any of them inside parentheses.
+// The view has no general emission to fall back on, so a value position the list misses is a refusal at run
+// time. It is rebuilt with packageArrayPointerLoads, in the same walk.
+var packageFieldViewLoads map[*ast.StarExpr]bool
+
+// starExprIsFieldViewLoad reports whether a dereference stands in one of packageFieldViewLoads' positions.
+// ancestors is the walk's stack above the dereference, nearest last.
+func starExprIsFieldViewLoad(star *ast.StarExpr, ancestors []ast.Node, info *types.Info) bool {
+	var operand ast.Expr = star
+	at := len(ancestors) - 1
+
+	for ; at >= 0; at-- {
+		paren, ok := ancestors[at].(*ast.ParenExpr)
+
+		if !ok {
+			break
+		}
+
+		operand = paren
+	}
+
+	if at < 0 {
+		return false
+	}
+
+	switch parent := ancestors[at].(type) {
+	case *ast.CompositeLit:
+		for _, elt := range parent.Elts {
+			if elt == operand {
+				return true
+			}
+		}
+
+		return false
+	case *ast.KeyValueExpr:
+		return parent.Key == operand || parent.Value == operand
+	case *ast.SendStmt:
+		return parent.Value == operand
+	}
+
+	return starExprIsValueOperand(operand, ancestors[at], info)
+}
+
+// nativeFieldArrayViewDerefIsUnevaluated reports whether expr, parentheses aside, is the dereference of a field
+// view with no call or receive inside it: `len` of it and a range for its index alone are the array type's
+// length, and Go evaluates nothing.
+func (v *Visitor) nativeFieldArrayViewDerefIsUnevaluated(expr ast.Expr) bool {
+	star, ok := ast.Unparen(expr).(*ast.StarExpr)
+
+	if !ok || v.exprHasCallOrReceive(expr) {
+		return false
+	}
+
+	_, isView := v.nativeFieldArrayViewPointer(star.X)
+
+	return isView
+}
+
+// nativeFieldArrayViewPointer reports whether x, parentheses aside, is a pointer the field view answered: the
+// conversion itself, or a local bound by it and never re-pointed. It answers the C# name of the element type.
+func (v *Visitor) nativeFieldArrayViewPointer(x ast.Expr) (string, bool) {
+	if !v.isNativeFieldArrayViewConversion(x) && !v.isNativeFieldArrayViewLocal(x) {
+		return "", false
+	}
+
+	ptr, ok := v.info.TypeOf(x).Underlying().(*types.Pointer)
+
+	if !ok {
+		return "", false
+	}
+
+	arr, ok := types.Unalias(ptr.Elem()).(*types.Array)
+
+	if !ok {
+		return "", false
+	}
+
+	return convertToCSTypeName(v.getAliasQualifiedTypeName(arr.Elem(), false)), true
+}
+
+// nativeFieldArrayViewLoad renders `*p` read for its value, p a field view, as the load helper: a new Go array
+// value, copied element by element from the view.
+func (v *Visitor) nativeFieldArrayViewLoad(star *ast.StarExpr) (string, bool) {
+	if !packageFieldViewLoads[star] {
+		return "", false
+	}
+
+	elem, ok := v.nativeFieldArrayViewPointer(star.X)
+
+	if !ok {
+		return "", false
+	}
+
+	return fmt.Sprintf("@unsafe.ArrayPointer<%s>.Load(%s)", elem, v.convExpr(star.X, nil)), true
+}
+
+// nativeFieldArrayViewLoadIsOwnCopy reports whether expr is a dereference the load helper renders. Its answer
+// is already a copy, so the value-copy clone has nothing to add to it.
+func (v *Visitor) nativeFieldArrayViewLoadIsOwnCopy(expr ast.Expr) bool {
+	star, ok := ast.Unparen(expr).(*ast.StarExpr)
+
+	if !ok || !packageFieldViewLoads[star] {
+		return false
+	}
+
+	_, isView := v.nativeFieldArrayViewPointer(star.X)
+
+	return isView
+}
+
+// nativeFieldArrayViewStore renders the statement `*p = v`, p a field view, as the store helper. Go evaluates
+// the pointer before the value, and the arguments keep that order.
+func (v *Visitor) nativeFieldArrayViewStore(lhs ast.Expr, rhs ast.Expr) (string, bool) {
+	star, ok := ast.Unparen(lhs).(*ast.StarExpr)
+
+	if !ok {
+		return "", false
+	}
+
+	elem, ok := v.nativeFieldArrayViewPointer(star.X)
+
+	if !ok {
+		return "", false
+	}
+
+	return fmt.Sprintf("@unsafe.ArrayPointer<%s>.Store(%s, %s);", elem, v.convExpr(star.X, nil), v.convExpr(rhs, nil)), true
+}
+
+// nativeFieldArrayViewRangeWindow renders the operand of a range that reads the values of a field view, the
+// pointer itself and not its dereference, as the view's window. Go reads each element when its round comes, and
+// so does a range over the window; a range over the dereference copies first, and takes the load helper.
+func (v *Visitor) nativeFieldArrayViewRangeWindow(rangeStmt *ast.RangeStmt) (string, types.Type, bool) {
+	if !rangeReadsValues(rangeStmt) {
+		return "", nil, false
+	}
+
+	if _, ok := v.nativeFieldArrayViewPointer(rangeStmt.X); !ok {
+		return "", nil, false
+	}
+
+	arr := types.Unalias(v.info.TypeOf(rangeStmt.X).Underlying().(*types.Pointer).Elem()).(*types.Array)
+
+	return v.convExpr(rangeStmt.X, nil) + ".slice()", arr.Elem(), true
+}
