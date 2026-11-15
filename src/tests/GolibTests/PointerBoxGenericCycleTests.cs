@@ -16,7 +16,8 @@ namespace GolibTests;
 
 /// <summary>
 /// Guards the edge that closes Native AOT's generic cycle through the pointer box: no method of
-/// <c>ж&lt;T&gt;</c>, or of a type nested in it, may name <c>ElemRefBox&lt;&gt;</c>.
+/// <c>ж&lt;T&gt;</c>, or of a type nested in it, may name <c>ElemRefBox&lt;T&gt;</c>, the element box of its own
+/// pointee.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -27,6 +28,13 @@ namespace GolibTests;
 /// cut-off (IL3054 lines) for every type a program touches. The cycle was broken once and closed again a week
 /// later by a type test in the field-view lookup, and no gate saw it return, because only a Native AOT publish
 /// shows it. This reads the IL instead, so it runs wherever GolibTests runs.
+/// </para>
+/// <para>
+/// It is the box of the pointer's OWN <c>T</c> that closes the loop. <c>at&lt;Telem&gt;</c> names
+/// <c>ElemRefBox&lt;Telem&gt;</c> over a METHOD's type parameter and is not the edge: it is compiled only for the
+/// element types a program takes addresses of, and from <c>ж&lt;array&lt;Telem&gt;&gt;</c> it leads back to
+/// <c>ж&lt;array&lt;Telem&gt;&gt;</c>, no deeper (<c>ElementWindow.TryGet&lt;T&gt;</c> is the same shape, moved out of
+/// <c>slice&lt;T&gt;</c> for the same reason). The second control holds the reader to that distinction.
 /// </para>
 /// <para>
 /// It guards this edge, not the absence of every cycle: a different growth path would pass here. The
@@ -67,7 +75,7 @@ public class PointerBoxGenericCycleTests
             {
                 methods++;
 
-                if (TypesNamedBy(method).Any(IsElementBox))
+                if (TypesNamedBy(method).Any(IsElementBoxOfTheOwnPointee))
                     offenders.Add($"{type.Name}.{method.Name}");
             }
         }
@@ -76,7 +84,7 @@ public class PointerBoxGenericCycleTests
         Assert.IsTrue(methods > 50, $"read only {methods} methods of ж<T> and its nested types: the walk is not seeing the type");
 
         Assert.AreEqual(0, offenders.Count,
-            $"ж<T> names ElemRefBox<> in: {string.Join(", ", offenders.Distinct())}. That one mention closes Native AOT's " +
+            $"ж<T> names ElemRefBox<T> in: {string.Join(", ", offenders.Distinct())}. That one mention closes Native AOT's " +
             "generic cycle (ж<T> -> ElemRefBox<T> -> array<T> -> ж<array<T>> -> ...): ask a non-generic interface " +
             "the element box implements instead (IElementViewSlot is the existing one)");
     }
@@ -84,21 +92,49 @@ public class PointerBoxGenericCycleTests
     [TestMethod]
     public void TheReaderSeesAnElementBoxTypeTestWhereThereIsOne()
     {
-        // The positive control: the same reader over a method that DOES test for the element box.
-        MethodInfo control = typeof(PointerBoxGenericCycleTests).GetMethod(nameof(TestsForTheElementBox), BindingFlags.NonPublic | BindingFlags.Static)!;
+        // The positive control: the same reader over a method of a generic TYPE that tests for the element box
+        // of that type's own parameter, which is the shape the guard exists for.
+        MethodInfo control = typeof(OwnPointee<>).GetMethod(nameof(OwnPointee<int>.TestsForTheElementBox), BindingFlags.NonPublic | BindingFlags.Static)!;
 
-        Assert.IsTrue(TypesNamedBy(control).Any(IsElementBox),
-            "the IL reader did not report ElemRefBox<> for a method whose body is `box is ElemRefBox<T>`: it cannot guard anything");
+        Assert.IsTrue(TypesNamedBy(control).Any(IsElementBoxOfTheOwnPointee),
+            "the IL reader did not report ElemRefBox<T> for a method whose body is `box is ElemRefBox<T>`: it cannot guard anything");
     }
 
-    private static bool TestsForTheElementBox<T>(ж<T> box)
+    [TestMethod]
+    public void TheReaderLeavesAMethodsOwnTypeParameterAlone()
     {
-        return box is ElemRefBox<T>;
+        // The negative control: the element box of a METHOD's type parameter, as ж<T>.at<Telem> names it. The
+        // reader must see the mention and must not call it the edge, or the guard is red for a reason that
+        // is not the cycle.
+        MethodInfo control = typeof(OwnPointee<>).GetMethod(nameof(OwnPointee<int>.TestsForAnotherElementBox), BindingFlags.NonPublic | BindingFlags.Static)!;
+        Type[] named = TypesNamedBy(control).ToArray();
+
+        Assert.IsTrue(named.Any(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ElemRefBox<>)),
+            "the IL reader did not see ElemRefBox<Telem> in a method whose body is `box is ElemRefBox<Telem>`");
+
+        Assert.IsFalse(named.Any(IsElementBoxOfTheOwnPointee),
+            "the reader took ElemRefBox<Telem>, over a method's type parameter, for the element box of the type's own T");
     }
 
-    private static bool IsElementBox(Type type)
+    private static class OwnPointee<T>
     {
-        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ElemRefBox<>);
+        internal static bool TestsForTheElementBox(ж<T> box)
+        {
+            return box is ElemRefBox<T>;
+        }
+
+        internal static bool TestsForAnotherElementBox<Telem>(ж<Telem> box)
+        {
+            return box is ElemRefBox<Telem>;
+        }
+    }
+
+    // ElemRefBox<...T...>, T being the type parameter of the generic type the method belongs to: ж<T>'s own,
+    // or a nested type's copy of it, which keeps position 0.
+    private static bool IsElementBoxOfTheOwnPointee(Type type)
+    {
+        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ElemRefBox<>) &&
+               Flatten(type.GetGenericArguments()[0]).Any(argument => argument.IsGenericParameter && argument.DeclaringMethod is null && argument.GenericParameterPosition == 0);
     }
 
     private static IEnumerable<Type> WithNestedTypes(Type type)
