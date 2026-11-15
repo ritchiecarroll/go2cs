@@ -1,0 +1,256 @@
+diff -ruN --strip-trailing-cr base/src/core/internal/runtime/maps/runtime_faststr.cs cut/src/core/internal/runtime/maps/runtime_faststr.cs
+--- base/src/core/internal/runtime/maps/runtime_faststr.cs
++++ cut/src/core/internal/runtime/maps/runtime_faststr.cs
+@@ -84,13 +84,13 @@
+     @unsafe.Pointer x = stringPtr(a);
+     @unsafe.Pointer y = stringPtr(b);
+     // Check first 8 bytes.
+-    if (~@unsafe.Pointer.To<array<byte>>(x) != ~@unsafe.Pointer.To<array<byte>>(y)) {
++    if (@unsafe.Pointer.LoadArray<byte>(x, 8) != @unsafe.Pointer.LoadArray<byte>(y, 8)) {
+         return false;
+     }
+     // Check last 8 bytes.
+     x = @unsafe.Add(x, (uintptr)len(a) - 8);
+     y = @unsafe.Add(y, (uintptr)len(a) - 8);
+-    if (~@unsafe.Pointer.To<array<byte>>(x) != ~@unsafe.Pointer.To<array<byte>>(y)) {
++    if (@unsafe.Pointer.LoadArray<byte>(x, 8) != @unsafe.Pointer.LoadArray<byte>(y, 8)) {
+         return false;
+     }
+     return true;
+diff -ruN --strip-trailing-cr base/src/core/runtime/alg.cs cut/src/core/runtime/alg.cs
+--- base/src/core/runtime/alg.cs
++++ cut/src/core/runtime/alg.cs
+@@ -300,7 +300,7 @@
+     return ~@unsafe.Pointer.To<int64>(Δp) == ~@unsafe.Pointer.To<int64>(q);
+ }
+ internal static bool memequal128(@unsafe.Pointer Δp, @unsafe.Pointer q) {
+-    return ~@unsafe.Pointer.To<array<int64>>(Δp) == ~@unsafe.Pointer.To<array<int64>>(q);
++    return @unsafe.Pointer.LoadArray<int64>(Δp, 2) == @unsafe.Pointer.LoadArray<int64>(q, 2);
+ }
+ internal static bool f32equal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
+     return ~@unsafe.Pointer.To<float32>(Δp) == ~@unsafe.Pointer.To<float32>(q);
+diff -ruN --strip-trailing-cr base/src/core/runtime/linux-arm64/malloc.cs cut/src/core/runtime/linux-arm64/malloc.cs
+--- base/src/core/runtime/linux-arm64/malloc.cs
++++ cut/src/core/runtime/linux-arm64/malloc.cs
+@@ -1383,8 +1383,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0; // Always zero
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0; // Always zero
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+     // See if we need to replace the existing tiny block with the new one
+     // based on amount of remaining free space.
+     if (!raceenabled && (size < c.tinyoffset || c.tiny == 0)) {
+diff -ruN --strip-trailing-cr base/src/core/runtime/lock_spinbit.cs cut/src/core/runtime/lock_spinbit.cs
+--- base/src/core/runtime/lock_spinbit.cs
++++ cut/src/core/runtime/lock_spinbit.cs
+@@ -67,9 +67,9 @@
+ //go:nosplit
+ internal static ж<uint8> key8(ж<uintptr> Δp) {
+     if (goarch.BigEndian) {
+-        return (@unsafe.Pointer.To<array<uint8>>(@unsafe.Pointer.FromPinnedBox(Δp))).at<uint8>(goarch.PtrSize / 1 - 1);
++        return @unsafe.Pointer.Element<uint8>(@unsafe.Pointer.FromPinnedBox(Δp), goarch.PtrSize / 1 - 1, 8);
+     }
+-    return (@unsafe.Pointer.To<array<uint8>>(@unsafe.Pointer.FromPinnedBox(Δp))).at<uint8>(0);
++    return @unsafe.Pointer.Element<uint8>(@unsafe.Pointer.FromPinnedBox(Δp), 0, 8);
+ }
+ 
+ // mWaitList is part of the M struct, and holds the list of Ms that are waiting
+diff -ruN --strip-trailing-cr base/src/core/runtime/malloc_generated.cs cut/src/core/runtime/malloc_generated.cs
+--- base/src/core/runtime/malloc_generated.cs
++++ cut/src/core/runtime/malloc_generated.cs
+@@ -4196,8 +4196,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -4341,8 +4341,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -4486,8 +4486,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -4631,8 +4631,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -4776,8 +4776,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -4921,8 +4921,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -5066,8 +5066,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -5211,8 +5211,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -5356,8 +5356,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -5501,8 +5501,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -5646,8 +5646,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -5791,8 +5791,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -5936,8 +5936,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -6081,8 +6081,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+@@ -6226,8 +6226,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+ 
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+         c.tiny = (uintptr)x;
+diff -ruN --strip-trailing-cr base/src/core/runtime/malloc_stubs.cs cut/src/core/runtime/malloc_stubs.cs
+--- base/src/core/runtime/malloc_stubs.cs
++++ cut/src/core/runtime/malloc_stubs.cs
+@@ -436,8 +436,8 @@
+         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
+     }
+     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0; // Always zero
+-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
++    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0; // Always zero
++    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+     // See if we need to replace the existing tiny block with the new one
+     // based on amount of remaining free space.
+     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+diff -ruN --strip-trailing-cr base/src/core/runtime/mfinal.cs.auto cut/src/core/runtime/mfinal.cs.auto
+--- base/src/core/runtime/mfinal.cs.auto
++++ cut/src/core/runtime/mfinal.cs.auto
+@@ -255,7 +255,7 @@
+                     // memory. That means we have to clear
+                     // it before writing to it to avoid
+                     // confusing the write barrier.
+-                    (@unsafe.Pointer.To<array<uintptr>>(frame)).Value = new uintptr[]{}.array(2);
++                    @unsafe.Pointer.StoreArray<uintptr>(frame, 2, new uintptr[]{}.array(2));
+                 }
+                 switch ((~f).fint.Kind()) {
+                 case var ᴛ when ᴛ == abi.Pointer: {
+# omitted, a run artifact (timings): diff -ruN --strip-trailing-cr base/src/reports/conversion_report.html cut/src/reports/conversion_report.html
+# omitted, a run artifact (timings): diff -ruN --strip-trailing-cr base/src/stdlib_conversion_progress.txt cut/src/stdlib_conversion_progress.txt

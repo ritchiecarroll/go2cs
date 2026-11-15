@@ -277,13 +277,19 @@ namespace go.golib;
         if (ManagedPointerTokens.Resolve(number) is { } registered && registered is not INativeRooted { IsGenuinelyNativeRoot: true })
             return "the address of Go memory (a Go variable, field or element)";
 
+        // Inside Go memory that golib holds pinned: an interior number, or one whose pin the exact registry never saw
+        // (docs/phase4/DESIGN-cgo-pin-extents.md). Under 3.1 a hit only refuses, so the buffer found need not be held.
+        if (PinExtents.Find(number) is not null)
+            return "an address inside Go memory golib holds pinned (a number built from a Go pointer)";
+
         address = number;
         return null;
     }
 
-    // Whether the registry knows a number as a live Go box's: a token, or the address a Go pointer was converted to.
+    // Whether the registry knows a number as a live Go box's (a token, or the address a Go pointer was converted to), or a
+    // live pin's extent holds it (runtime/PinExtents.cs).
     private static bool IsKnownGoAddress(nuint address) =>
-        ManagedPointerTokens.IsTaggedToken(address) || ManagedPointerTokens.Resolve(address) is not null;
+        ManagedPointerTokens.IsTaggedToken(address) || ManagedPointerTokens.Resolve(address) is not null || PinExtents.Find(address) is not null;
 
     private static PanicException HelperRefused(string helper, string what) =>
         RuntimeErrorPanic.ErrorString($"cgo: C.{helper} over Go memory: the pointer it was handed is {what}. Reading Go memory through cmd/cgo's helpers is cgo Phase 3's increment 3.2; until then go2cs refuses the call");
