@@ -223,11 +223,63 @@ golib-tests on 3 OSes; P3's adversarial review of section 5.
 - **SW-4.** W6 or W10 cannot be made deterministic; then I post before asserting the lifetime another way.
 - **SW-5.** W9's peak exceeds half the bytes copied.
 
+> **Amended 2026-11-15, 10:15Z (H): two arms from the census, and a LIFETIME GAP the second one exposes.**
+> - **W1b.** The vfs pair: a second header-over-literal variable in the same package (`ts`/`ts1` beside
+>   `__ccgo_ts`/`__ccgo_ts1`) gets its own copy and its own stable number, and each reads its own bytes.
+> - **W1c.** The gethostname shape: a header pointer held in a local, its `.Data` read over a HEAP string, a pointer
+>   formed from the number in the same expression, and a copy out through it. The bytes are right, and the block is
+>   freed once the string and the pointer are gone (W6's counter).
+>
+> **THE GAP (D2 as written is not enough for W1c).**
+> - In Go, `unsafe.Pointer(sh.Data)` formed while the string is live is a REAL pointer: it keeps the string's bytes
+>   alive for as long as it is used. That is the point of Go's `unsafe` rule for the header's `Data` field.
+> - In go2cs, `unsafe.Pointer(uintptr)` is `new Pointer(value)` (`unsafe/unsafe.cs`), and the box minted from it keeps
+>   nothing alive. `NativeBox` has a retained-source slot, `m_retainedSource`, but nothing fills it on this path.
+> - So in `Xgethostname`, once `s` and `sh` are last used, a collection plus the finalizer can free the block before
+>   the copy-out reads it: a use-after-free. It is rare, because it needs a collection and a finalizer run inside one
+>   statement, but it can happen.
+> - Package literals (`__ccgo_ts`, the vfs `ts`) are never freed, so they are not affected. Only a HEAP string read
+>   through a header can reach the gap.
+>
+> **PROPOSED REMEDY R1 (QW-7, for a ruling): a pointer minted from a number inside a live block roots the block's
+> holder.**
+> - Live blocks are kept in a small range registry. The number-to-pointer mints (`Pointer(uintptr)`, and the box
+>   minted from a pointer's number) consult it. On a hit, the holder rides in the minted object: a new slot on
+>   `Pointer`, and `NativeBox`'s `m_retainedSource`.
+> - The holder then stays alive, and its block stays allocated, while any pointer formed from the number lives,
+>   which is Go's rule. The backing's death alone no longer frees the block.
+> - **The cost is on a hot path.** libc reads C strings byte by byte through numbers, so the lookup runs on every
+>   mint while any block is live. A package literal's block is live for ever, so the registry is never empty in a
+>   sqlite process. The lookup is one envelope compare, then a search among live blocks. It is predicted at tens of
+>   ns a mint and measured in the cut against an allocation-only base; a bar is to be ruled.
+> - `unsafe/unsafe.cs` is hand-owned, so R1 touches a hand-owned file. The registry is golib's.
+> - **The alternatives, and why not:**
+>   - immortal blocks: unbounded for heap strings read in a loop, and W9 fails;
+>   - freeing a block later than the backing's death: no delay is long enough for a pointer that may be used at any
+>     time;
+>   - pinning a heap string's backing for the header's life: the same rooting question, with a pin.
+> - **New arm W11, red under D2 as written:** form `p` from `hdr.Data` while the string is live; drop every reference
+>   to the string and the header; force collections and finalizers; read through `p`. The bytes are intact, and the
+>   live-block counter has not dropped. Then drop `p`, collect, and the counter returns to its start.
+> - **PW-5:** W11 is red with R1 removed and green with it; the mint's added cost is within the bar to be ruled.
+
 ## 8. `reflect.SliceHeader` (D6), the census owed
 
 The header-use class is new at this document's tip; its controls read in `readings-h.txt`. Its i7 reading on both
 module pins goes here, by dated block, when it arrives. If `reflect.SliceHeader`'s `Data` is read or written in
 either module, it is a named next wall; if not, the BOARD row says 0.
+
+> **Amended 2026-11-15, 10:15Z (H): the census of header uses, read on the i7 at `6b42b488db`** (COORD; whole
+> outputs on the mailbox; controls: pos finds all 4 SliceHeader plants, neg none, earlier classes unchanged).
+> - **`reflect.SliceHeader`: 0 in both modules.** My prediction MET. D6 is a BOARD row whose census reads 0.
+> - **`reflect.StringHeader` apart from the `__ccgo_ts` declarations: my prediction ("0") MISSED as worded.**
+>   - sqlite: `hdr-String-Data-read` 18. Each is the declaration's shape under another name,
+>     `ts = (*reflect.StringHeader)(unsafe.Pointer(&ts1)).Data`, in `vfs/vfs_<goos>_<arch>.go`, including
+>     `vfs_linux_amd64.go` and `vfs_windows_amd64.go`. So the demo's own VFS reaches it.
+>   - libc: 13 of that shape (the musl files of non-linux targets), plus `hdr-String-type` 1 at `libc_unix.go`:
+>     `Xgethostname`. It holds `sh := (*reflect.StringHeader)(unsafe.Pointer(&s))` in a local, over a HEAP string
+>     from `os.Hostname()`, then reads `(*RawMem)(unsafe.Pointer(sh.Data))`.
+> - **Both are the mechanism (b) covers.** COORD's ruling makes each an arm: W1b and W1c, section 7's block below.
 
 ## 9. Rulings (COORD, 2026-11-15)
 
@@ -237,7 +289,11 @@ either module, it is a named next wall; if not, the BOARD row says 0.
 - **QW-3:** header writes in this cut, through the number-to-pointer operator (D5).
 - **QW-4:** this document, on `claude/h-w8-ccgo-ts`, beside the census data.
 - **QW-5:** the cut follows the gated pin-extent 308-merge seat, never beside it: one battery on the box.
-- **Additions:** memory pressure (section 6; QW-6 open), the `reflect.SliceHeader` census class (section 8), and P3's
-  review of section 5.
+- **Additions:** memory pressure (section 6), the `reflect.SliceHeader` census class (section 8), and P3's review of
+  section 5.
+- **QW-6 (ruled 10:10Z):** native WITHOUT explicit pressure, on section 6's measurement: both shapes stay bounded and
+  return to 0, and the managed twin drives the GC. W9 holds the bound (under a quarter of the bytes copied), and SW-5
+  stops at half. The three-arm table stays in the record, so the choice is visible.
+- **QW-7 (asked 10:15Z):** remedy R1 for the lifetime gap that W1c exposes (section 7's amendment).
 
 — H (2026-11-15)
