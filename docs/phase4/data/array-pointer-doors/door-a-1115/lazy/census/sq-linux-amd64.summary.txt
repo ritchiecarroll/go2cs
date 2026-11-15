@@ -1,0 +1,1 @@
+sq-linux-amd64: 151 packages (load errors 0); module packages: 6 defined named arrays, 4 sites; std packages: 16 defined named arrays, 3 sites

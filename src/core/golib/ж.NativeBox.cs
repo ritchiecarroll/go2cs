@@ -189,7 +189,7 @@ namespace go;
     // number conversion (ж<T>.FromNumber). `default(T) is I` is a type test on a value type: the JIT and ILC answer
     // it from the type, with no box and no reflection. Decided once per T, read by ValueAddress above.
     private static readonly bool s_isNamedArrayShaped =
-        !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>)) &&
+        !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>)) && // ONE TEST, THREE SPELLINGS: ж<T>.s_isArrayShaped and the last line of ж<T>.PublishesArrayBacking (ж.cs) are this one; change the three together
         default(T) is IArray and not ISlice && RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
     // Is T a Go struct value that holds a managed reference (the census's B2b)? Read by ValueAddress's managed-derived
@@ -344,4 +344,14 @@ namespace go;
     // What this box was derived from, for the identity of an unsafe.Pointer that carries it (NativeDerivation.Token).
     // A box over an order token has no address to measure a distance from.
     object? INativeRooted.NativeDerivedFrom => m_aliasesAnOrderToken ? null : m_retainedSource;
+
+    // What a box derived from this one retains in its place (NativeDerivation.Kept). A box that owns no pin holds its
+    // source and nothing else: the source is what keeps the storage where this box's address says it is, and a box
+    // derived from this one needs the source and not this box. A box that owns a pin is kept itself (the pin is
+    // released when the box is collected). So is a box over an order token or the number 0, which has no address to
+    // measure a distance from (NativeDerivation.Token).
+    object? INativeRooted.NativeRetainedInItsPlace =>
+        m_pin is null && !m_aliasesAnOrderToken && m_nativeAddr != 0 && !ManagedPointerTokens.IsTaggedToken(m_nativeAddr)
+            ? m_retainedSource
+            : null;
 }
