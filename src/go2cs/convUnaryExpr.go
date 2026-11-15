@@ -468,6 +468,12 @@ func pointerToStruct(t types.Type) bool {
 func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprContext) string {
 	// Check if the unary expression is a pointer dereference
 	if unaryExpr.Op == token.AND {
+		// The address of an element of `(*A)(p)`, p an unsafe.Pointer, is the element door's pointer
+		// (arrayPointerElementDoor.go).
+		if door, ok := v.arrayPointerElementAddressDoor(unaryExpr); ok {
+			return door
+		}
+
 		// Inside a lambda, a captured heap-boxed local is referenced through its box (the ref-local
 		// alias `ref var m = ref Ꮡm.Value` can't be captured — CS8175). Build address forms from the
 		// box name directly, bypassing the value-rewrite that renders the box as `Ꮡm.Value`.

@@ -167,6 +167,16 @@ public static partial class GoReflect
             return "[" + arrayDims[0] + "]" + GoTypeName(t.GetGenericArguments()[0], innerDims);
         }
 
+        // A member of the inline-array family (go.arrays arrayN<T>) IS the Go array [N]T: its dims are those handed down,
+        // or its own when none are. Without this arm a [0][N]T carrier's element, array<arrayN<T>>, printed as
+        // [0]arrayN[T] where Go prints [0][N]T (W15, P3's review, 2026-11-15).
+        if (InlineArrayLength(t) is > 0 and int inlineLength)
+        {
+            nint[] dims = arrayDims is { Length: > 0 } ? arrayDims : inlineArrayDims(t, inlineLength);
+            nint[]? innerDims = dims.Length > 1 ? dims[1..] : null;
+            return "[" + dims[0] + "]" + GoTypeName(t.GetGenericArguments()[0], innerDims);
+        }
+
         if (t == typeof(bool)) return "bool";
         if (t == typeof(nint)) return "int";
         if (t == typeof(sbyte)) return "int8";

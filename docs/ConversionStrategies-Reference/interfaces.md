@@ -1481,9 +1481,11 @@ cast (`(ж<array<byte>>)(uintptr)(p)`, crypto/internal/nistec's p256 init over
 parentheses — `((ж<…>)(p)).Value` — whenever the pointer-unwrap deref is active and `rangeStmt.X` is a
 `*ast.CallExpr` whose `Fun` is a type expression (`info.Types[Fun].IsType()`, which catches the
 unsafe.Pointer conversions `isTypeConversion` deliberately excludes). Only a pointer-producing conversion
-in range position takes the parentheses. Guarded by `RangePointerArrayConversion` (transpile+compile+target only — the
-exact cast shape needs an
-`unsafe.Pointer` source, whose runtime round-trip golib does not reproduce, so it is not output-compared).
+in range position takes the parentheses. An `unsafe.Pointer` operand whose element holds no references does not
+reach this route when it is ranged for its values: it ranges the view door's window,
+`range(@unsafe.Pointer.View<nint>(p, 0, 3, 3))` (see the element doors in [pointers](pointers.md)). Guarded by
+`RangePointerArrayConversion`, output-compared: its first loop is the window, and its second, over an element
+that is itself an array (the nistec shape), is the parenthesized route.
 
 ## Adapter accessibility: symbol-OR-name on both sides
 The adapter class scope cannot be derived from Go name casing alone (`error` is lowercase yet the golib interface is public METADATA - the name rule made io/fs's PathErrorжerror internal, CS0122 x40) nor from symbols alone (sibling generators' `public partial` modifiers are invisible to a single-pass generator - the symbol rule broke same-assembly interfaces like `CrossPkgLib.Reporter`). The ImplementGenerator takes symbol-OR-name on the struct AND the interface.

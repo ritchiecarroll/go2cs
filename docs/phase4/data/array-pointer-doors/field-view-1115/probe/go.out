@@ -1,0 +1,64 @@
+managed direct read [1]: 0x12
+managed direct write [0]: port 0x12ab
+managed direct address: port 0xcdab
+managed direct op-assign: port 0xcfab
+managed direct len: 2
+managed direct slice: len 2 cap 2 port 0xcf11
+managed direct whole: 0x11 0xcf
+managed direct word [1]: 0x11111111
+managed local read [1]: 0xcf
+managed local write [0]: port 0xcf22
+managed local range index: 0xcf22
+managed local range value: 0xf1
+managed local word: 0x33333333
+managed local slice: len 2 cap 2 port 0x3322
+managed local whole: 0x22 0x33
+global direct read [1]: 0x12
+global direct write [0]: port 0x12ab
+global direct address: port 0xcdab
+global direct op-assign: port 0xcfab
+global direct len: 2
+global direct slice: len 2 cap 2 port 0xcf11
+global direct whole: 0x11 0xcf
+global direct word [1]: 0x11111111
+global local read [1]: 0xcf
+global local write [0]: port 0xcf22
+global local range index: 0xcf22
+global local range value: 0xf1
+global local word: 0x33333333
+global local slice: len 2 cap 2 port 0x3322
+global local whole: 0x22 0x33
+over-bytes direct read [1]: 0x12
+over-bytes direct write [0]: port 0x12ab
+over-bytes direct address: port 0xcdab
+over-bytes direct op-assign: port 0xcfab
+over-bytes direct len: 2
+over-bytes direct slice: len 2 cap 2 port 0xcf11
+over-bytes direct whole: 0x11 0xcf
+over-bytes direct word [1]: 0x11111111
+over-bytes local read [1]: 0xcf
+over-bytes local write [0]: port 0xcf22
+over-bytes local range index: 0xcf22
+over-bytes local range value: 0xf1
+over-bytes local word: 0x33333333
+over-bytes local slice: len 2 cap 2 port 0x3322
+over-bytes local whole: 0x22 0x33
+native direct read [1]: 0x12
+native direct write [0]: port 0x12ab
+native direct address: port 0xcdab
+native direct op-assign: port 0xcfab
+native direct len: 2
+native direct slice: len 2 cap 2 port 0xcf11
+native direct whole: 0x11 0xcf
+native direct word [1]: 0x11111111
+native local read [1]: 0xcf
+native local write [0]: port 0xcf22
+native local range index: 0xcf22
+native local range value: 0xf1
+native local word: 0x33333333
+native local slice: len 2 cap 2 port 0x3322
+native local whole: 0x22 0x33
+ref direct read [1]: 0x12
+ref direct write [0]: port 0x12ab name "x"
+ref local read [1]: 0x12
+ref local write [0]: port 0x1222 name "x"

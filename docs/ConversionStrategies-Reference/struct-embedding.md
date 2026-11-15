@@ -19,7 +19,7 @@
 
 <!-- owner ruling (A), 2026-10-16: the converter declares every embed; before it, go2cs-gen declared the embed's
      storage (a `ʗT` field) and a `partial ref` accessor.
-     src/go2cs/visitStructType.go:1008 `An embed that PROMOTES (a defined type, or a pointer to one) is a FIELD`. -->
+     src/go2cs/visitStructType.go:1024 `An embed that PROMOTES (a defined type, or a pointer to one) is a FIELD`. -->
 
 Go structs use "[type embedding](https://go101.org/article/type-embedding.html)" instead of inheritance. Since converted structs are C# `struct`s (no inheritance), the `TypeGenerator` manages the equivalent: it adds a field for the embedded type and promotes the embedded type's fields and methods (selection shorthand). Both field and method promotion are **transitive through every embedding level**: when `top` embeds `mid` which embeds `inner`, `top` gets an accessor for `inner`'s field `n` (`top.n => ref mid.n`) and a forwarding receiver for `inner`'s method `describe` (`top.describe() => target.mid.describe()`), each resolving through `mid`'s own one-level promotion. The generator collects an embedded struct's members and methods recursively (following each field whose name equals its type's simple name — Go's embedding marker), with the closest declaration of a name winning, matching Go's promotion rules. **Pointer embeds promote too.** Go also embeds by pointer (`*traceBuf`), whose C# field type is `ж<traceBuf>`; its methods and fields are promoted exactly like a value embed (the embed field is dereferenced — `target.traceBuf.Value.method()` — which binds the pointer-receiver method via the `this ref` `ж<T>` overload). The embedding-marker comparison dereferences the field type first, because a pointer field's simple name carries a `.Value` suffix (`traceBuf.Value`) that would never match the bare embed field name. This matters most *transitively*: `traceExpWriter` embeds `traceWriter` (value) which embeds `*traceBuf` (pointer), and `traceBuf`'s `varint`/`byte` must promote all the way up — without the deref-aware marker the nested pointer embed is skipped and the upper struct silently loses the method (CS1929). (Guarded by the `NestedEmbeddingPromotion` behavioral test for value embeds and the `PointerEmbeddingPromotion` test for one-level and two-level-transitive pointer embeds; runtime relies on the field case for `stackWorkBuf` → `stackWorkBufHdr` → `workbufhdr.nobj` and the pointer case for the trace writers.) Because the promotion is performed at conversion time by the generator, methods added later in hand-written C# are not automatically promoted; keeping the source in Go and re-converting (or using explicit interfaces) is the maintainable path.
 
@@ -47,7 +47,7 @@ freshly `make`d slice's elements) runs no constructor, so a value embed whose ty
 null backing and a pointer embed holds a null reference rather than a nil box; golib cannot run a constructor
 generically there. (Guarded by the `NamedTypeOverStruct` behavioral test — `var s shadowed` with explicit
 `s.ctxt.fn` and promoted `s.fn` access, plus `new(shadowed)`, vs Go.)
-<!-- The declared embed fields: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:40 `/*embed*/ public Padded Padded;`; src/tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.cs.target:21 `/*embed*/ public ж<MyError> MyError;`. The generator reads them: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:57 `private HashSet<string> DeclaredEmbedFields => m_declaredEmbedFields ??=`, and builds each in both zero-value constructors: :2400 `result.Append($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);\r\n");` (a pointer type maps to `new StandardBox<T>(nil)`, the nil box). The declaration: src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:101 `shadowed z = new(nil);`. Detection: src/go2cs/visitStructType.go:1145 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`. -->
+<!-- The declared embed fields: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:40 `/*embed*/ public Padded Padded;`; src/tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.cs.target:21 `/*embed*/ public ж<MyError> MyError;`. The generator reads them: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:57 `private HashSet<string> DeclaredEmbedFields => m_declaredEmbedFields ??=`, and builds each in both zero-value constructors: :2400 `result.Append($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);\r\n");` (a pointer type maps to `new StandardBox<T>(nil)`, the nil box). The declaration: src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:101 `shadowed z = new(nil);`. Detection: src/go2cs/visitStructType.go:1161 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`. -->
 
 **A C#-keyword-named embed composes generated names from the unescaped member name.** A Go struct named for a C# keyword (`type base struct{…}`) is emitted with the `@` escape (`@base`), and embedding it makes `@base` the member name. Standalone identifier positions keep the escape (the declared embed field `/*embed*/ internal @base @base;`, the constructor parameter, member accesses like `instance.@base.id`), but every *composed* generated name must strip it, because `@` is only valid leading an identifier: the `Ꮡ`-prefixed field-reference statics, the converter's `structFieldBoxName`, and the generator-owned backing field of the property form that hand-owned files may still spell (`ʗbase`; `ʗ@base` is CS1002). <!-- src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:49 `/*embed*/ internal @base @base;` --> (Guarded by the `NamedTypeOverStruct` extension — a keyword-named embed with promoted field/method access, a keyword-keyed composite literal, and a write through `&p.id` promoted through the embed, all vs Go.)
 
@@ -317,6 +317,25 @@ exactly the cold-start window the race lives in), and a *different* backing is t
 detector, so no stale ready-flag can hand out a pointer into a private copy after `*p` is assigned a
 fresh zero wrapper. The fast path is lock-free — one acquire read, one type test, one reference
 compare.
+
+**The store into the storage is a compare-and-swap of the wrapper's one holder.** <!-- history: 2026-11-15
+(P5, option 2 of the BOARD row "a write at the ADDRESS of a named array that has not been used yet is lost").
+Until then the store copied the whole wrapper back. Measured on linux/amd64, two threads released together,
+200,000 fresh arrays an arm: 47,334 arrays lost a write at the element door against a direct first use, 78,243
+with two element references of one element, 6,735 through reflect's pointer conversion; 0 in each with the
+swap. --> The box's lock serializes the publishes of that one box. It does not cover the storage: the wrapper's
+own getter fills the same storage with no lock (see [The named-array wrapper publishes its lazy backing
+atomically](#the-named-array-wrapper-publishes-its-lazy-backing-atomically)), and a second box over the same
+storage holds a lock of its own, as two element references of one element do. So the publish stores the copy's
+holder into the storage only where the storage is still empty, and a publish that finds a holder there reads
+the storage again and publishes that one. Both wrappers that reach the publish are exactly one reference
+word, the named array and the array-view wrapper over one, and that is what makes one swap the whole store.
+The two pin paths and reflect's pointer conversion between two names of one array type go through the same
+publish.
+
+Guarded by: `GolibTests`' `NamedArrayHolderPublishRaceTests`. Each racing arm runs beside a control (the copy-back
+written out by hand), and reports Inconclusive on a host where the control loses no write. One arm reads the
+shape of every named array go2cs-gen wrote in the converted `runtime`.
 
 The publish path is also narrowed to the shapes that actually *are* lazy, which fixed a second,
 separate defect the old unconditional probe carried. golib's own `array<T>`/`slice<T>` and every

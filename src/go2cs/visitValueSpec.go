@@ -369,6 +369,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 					// A type ARGUMENT of the declared type, `var seen Set[struct{…}]` (see liftDeclaredAnonStructTypeArgs).
 					v.liftDeclaredAnonStructTypeArgs(valueSpecType, csIDName)
 
+					// This name's own type object takes the spec's lifts (see aliasPerNameLifts).
+					if v.inFunction && valueSpecType != nil {
+						v.aliasPerNameLifts(v.info.TypeOf(valueSpecType), def.Type())
+					}
+
 					// Check if value spec type is an interface or a pointer to an interface
 					if subInterfaceType, exprType := v.extractInterfaceType(valueSpecType); subInterfaceType != nil && !v.liftedTypeExists(subInterfaceType) {
 						v.visitInterfaceType(subInterfaceType, exprType, csIDName, valueSpec.Comment, true, nil)
