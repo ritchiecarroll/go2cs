@@ -1,0 +1,137 @@
+namespace go.example.com;
+
+using fmt = fmt_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+/* [1125899906842623L]byte */
+partial struct RawMem /*[1125899906842623]byte*/;
+
+partial struct small /*[64]byte*/;
+
+partial struct sibling /*[64]byte*/;
+
+partial struct hdr {
+    internal uint32 n;
+    internal uint16 port;
+    internal array<byte> tail = new(8);
+}
+
+internal static slice<nint> identityLocal() {
+    ref var arr = ref heap<array<nint>>(new nint[]{1, 2, 3, 4}.array(), out var Ꮡarr);
+    return Ꮡarr.slice(0, 4);
+}
+
+internal static slice<nint> identityParam(/*[4]*/ ж<array<nint>> a) {
+    return a.slice(1, 3);
+}
+
+internal static slice<nint> identityThree(/*[4]*/ ж<array<nint>> a, nint n) {
+    return a.slice(0, n, n);
+}
+
+internal static slice<byte> identityNamed(ж<small> a) {
+    return a.Value[..4];
+}
+
+internal static slice<byte> identityNamedOpen(ж<small> a) {
+    return a.Value[2..];
+}
+
+internal static slice<byte> identityField(ж<hdr> h) {
+    return h.Ꮡtail.slice(0, 4);
+}
+
+internal static slice<uint16> aliasElem(ж<uint16> buf, nint n) {
+    return array<uint16>.AliasPointer(buf, 10000).slice(0, n, n);
+}
+
+internal static unsafe slice<byte> aliasNamed(ж<byte> b, nint n) {
+    return new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromPinnedBox(b)), (int)(n)));
+}
+
+internal static slice<byte> siblingNamed(ж<sibling> a) {
+    return a.Reinterpret<sibling, small>().Value[..4];
+}
+
+internal static slice<byte> siblingUnnamed(/*[64]*/ ж<array<byte>> a) {
+    return a.Reinterpret<array<byte>, small>().Value[..4];
+}
+
+internal static slice<byte> unnamedFromNamed(ж<small> a) {
+    return a.Reinterpret<small, array<byte>>().slice(0, 4);
+}
+
+internal static slice<byte> fieldView(ж<hdr> h) {
+    return @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).slice(0, 2);
+}
+
+internal static slice<byte> fieldViewOpen(ж<hdr> h) {
+    return @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).slice();
+}
+
+internal static slice<byte> fieldViewThree(ж<hdr> h, nint n) {
+    return @unsafe.ArrayPointer<byte>.Of(h.Ꮡn, 4).slice(0, n, n);
+}
+
+internal static unsafe slice<byte> scalar(ж<uint32> x) {
+    return new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromPinnedBox(x)), 4));
+}
+
+internal static unsafe byte scalarLocal() {
+    ref var x = ref heap<uint32>((uint32)0x01020304, out var Ꮡx);
+    return new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡx)), 4))[0];
+}
+
+internal static unsafe slice<byte> otherElem(/*[4]*/ ж<array<uint32>> w) {
+    return new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromPinnedBox(w)), 8));
+}
+
+internal static unsafe slice<byte> structBytes(ж<hdr> h) {
+    return new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromPinnedBox(h)), 4));
+}
+
+internal static unsafe slice<byte> number(uintptr p, nint n) {
+    return new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p), (int)(n)));
+}
+
+internal static unsafe slice<byte> plain(@unsafe.Pointer p, nint n) {
+    return new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(p), (int)(n)));
+}
+
+internal static unsafe slice<byte> added(@unsafe.Pointer p, uintptr off) {
+    return new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Add(p, off)), 8));
+}
+
+internal static slice<nint> parenthesized(/*[4]*/ ж<array<nint>> a) {
+    return (a).slice(0, 2);
+}
+
+internal static slice<nint> dereferenced(/*[4]*/ ж<array<nint>> a) {
+    return (~a)[..2];
+}
+
+internal static nint copies(/*[4]*/ ж<array<nint>> a, ж<small> b, slice<nint> src) {
+    nint n = copy(a.slice(), src);
+    n += copy(b.Value[..], "ab"u8);
+    return n;
+}
+
+internal static void main() {
+    ref var a = ref heap(new array<nint>(4), out var Ꮡa);
+    ref var s = ref heap(new small(), out var Ꮡs);
+    ref var sib = ref heap(new sibling(), out var Ꮡsib);
+    ref var arr64 = ref heap(new array<byte>(64), out var Ꮡarr64);
+    ref var h = ref heap(new hdr(), out var Ꮡh);
+    ref var x = ref heap(new uint32(), out var Ꮡx);
+    ref var w = ref heap(new array<uint32>(4), out var Ꮡw);
+    ref var buf = ref heap(new array<uint16>(16), out var Ꮡbuf);
+    fmt.Println(len(identityLocal()), len(identityParam(Ꮡa)), len(identityThree(Ꮡa, 2)), len(identityNamed(Ꮡs)), len(identityNamedOpen(Ꮡs)), len(identityField(Ꮡh)));
+    fmt.Println(len(aliasElem(Ꮡbuf.at<uint16>(0), 3)), len(aliasNamed(Ꮡs.at<byte>(0), 3)), len(siblingNamed(Ꮡsib)), len(siblingUnnamed(Ꮡarr64)), len(unnamedFromNamed(Ꮡs)));
+    fmt.Println(len(fieldView(Ꮡh)), len(fieldViewOpen(Ꮡh)), len(fieldViewThree(Ꮡh, 2)), len(scalar(Ꮡx)), scalarLocal(), len(otherElem(Ꮡw)), len(structBytes(Ꮡh)));
+    @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡarr64);
+    fmt.Println(len(number((uintptr)p, 2)), len(plain(p, 3)), len(added(p, 8)), len(parenthesized(Ꮡa)), len(dereferenced(Ꮡa)), copies(Ꮡa, Ꮡs, [1, 2]));
+}
+
+} // end main_package

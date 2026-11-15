@@ -315,6 +315,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// (goImageCopyView.go); marked before the arguments are converted.
 	v.markGoImageCopyArgs(callExpr)
 
+	// A copy into or out of the open view of a named array, `copy((*A)(p)[lo:], src)`, is one of golib's copy
+	// doors (arrayPointerViewDoor.go).
+	if door, ok := v.arrayPointerCopyDoor(callExpr); ok {
+		return door
+	}
+
 	// The //go:cgo_unsafe_args block lift (cgoUnsafeArgsLift.go): the ONE `unsafe.Pointer(&first)` the
 	// current declaration's lift consumes renders as the synthesized block's pinned box. Intercepted
 	// ahead of every arm because the conversion reaches two of them -- the type-conversion arm for a
@@ -5866,15 +5872,9 @@ func unsafePointerTargetLevels(t types.Type) (int, bool) {
 //
 // A NAMED array target keeps the pre-existing route, matching the slice form (none in the corpus).
 func (v *Visitor) arrayPointerAliasEmission(callExpr *ast.CallExpr, arg ast.Expr) (string, bool) {
-	p, srcPtr, targetPtr := v.pointerConversionSource(callExpr, arg)
+	p, targetArr, ok := v.arrayPointerAliasSource(callExpr, arg)
 
-	if p == nil {
-		return "", false
-	}
-
-	targetArr, ok := types.Unalias(targetPtr.Elem()).(*types.Array)
-
-	if !ok || !types.Identical(srcPtr.Elem(), targetArr.Elem()) {
+	if !ok {
 		return "", false
 	}
 
@@ -5884,6 +5884,25 @@ func (v *Visitor) arrayPointerAliasEmission(callExpr *ast.CallExpr, arg ast.Expr
 	elemName := convertToCSTypeName(v.getAliasQualifiedTypeName(targetArr.Elem(), false))
 
 	return fmt.Sprintf("array<%s>.AliasPointer(%s, %s)", elemName, v.convExpr(p, []ExprContext{identContext}), csNintLiteral(targetArr.Len())), true
+}
+
+// arrayPointerAliasSource reads `(*[N]T)(unsafe.Pointer(p))` as the same-element alias conversion: p, a `*T`, and
+// the unnamed target array. It is the ONE test of that shape: the emission above asks it, and so does the view door
+// (arrayPointerViewOf), which leaves such a conversion to the alias route when it is sliced.
+func (v *Visitor) arrayPointerAliasSource(callExpr *ast.CallExpr, arg ast.Expr) (ast.Expr, *types.Array, bool) {
+	p, srcPtr, targetPtr := v.pointerConversionSource(callExpr, arg)
+
+	if p == nil {
+		return nil, nil, false
+	}
+
+	targetArr, ok := types.Unalias(targetPtr.Elem()).(*types.Array)
+
+	if !ok || !types.Identical(srcPtr.Elem(), targetArr.Elem()) {
+		return nil, nil, false
+	}
+
+	return p, targetArr, true
 }
 
 // convNewOfValue renders Go 1.26's `new(expr)`: a fresh variable holding a COPY of expr's value, boxed.

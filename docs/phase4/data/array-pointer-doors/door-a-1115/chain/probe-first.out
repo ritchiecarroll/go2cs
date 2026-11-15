@@ -1,0 +1,14 @@
+first probe (linux/amd64, Release): steps = unsafe.Add calls on one pointer; the view is taken 4 bytes inside a 16-byte Go struct, so 12 is the bounded answer
+PROBE capacity derivations=1 capacity=12
+PROBE capacity derivations=3 capacity=12
+PROBE capacity derivations=21 capacity=12
+PROBE capacity derivations=61 capacity=12
+PROBE capacity derivations=63 capacity=1073741824
+PROBE capacity derivations=65 capacity=1073741824
+PROBE capacity derivations=67 capacity=1073741824
+PROBE capacity derivations=201 capacity=1073741824
+PROBE capacity derivations=2001 capacity=1073741824
+PROBE retained derivations=2001 bytes=109568 per_step=54.8
+PROBE retained derivations=200001 bytes=11092760 per_step=55.5
+PROBE retained derivations=1000001 bytes=44800040 per_step=44.8
+equality arm of the first probe: the host process ended with 'Stack overflow' in the 1,000,001-step case; its trace held 104,679 go.NativeDerivation.Token frames

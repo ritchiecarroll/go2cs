@@ -6,9 +6,13 @@
 // version 3 only, which can be found in the LICENSE file.
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
-// Guards copyingSliceViewNote.go: a slice of a pointer-to-array cast lowers to a COPYING span, so a
-// function that writes through it loses the write, and the converter says so at conversion time,
-// naming both lines. A function that only reads the view gets no note. The emission is unchanged.
+// Guards copyingSliceViewNote.go: a slice of a pointer-to-array cast that keeps the COPYING span loses a write
+// made through it, and the converter says so at conversion time, naming both lines. A function that only reads
+// the view gets no note. The emission is unchanged.
+//
+// Since the view doors (arrayPointerViewDoor.go) the span is kept for one operand only, one that holds a FromRef
+// mint, so the fixture's views are over a pointer receiver. Every other operand takes a door, which aliases, and
+// gets no note.
 
 package main
 
@@ -32,30 +36,31 @@ func TestAWriteThroughACopyingSliceViewIsNoted(t *testing.T) {
 
 import "unsafe"
 
-var words [4]uint32
+type words struct{ w [4]uint32 }
 
-// writer stores through the view, as runtime's itabInit does.
-func writer() {
-	view := (*[16]byte)(unsafe.Pointer(&words[0]))[:8:8]
+// writer stores through the view.
+func (w *words) writer() {
+	view := (*[16]byte)(unsafe.Pointer(w))[:8:8]
 	view[3] = 7
 }
 
-// clearer clears a reslice of the view, as runtime's makeheapobjbv does.
-func clearer() {
-	view := (*[16]byte)(unsafe.Pointer(&words[0]))[:8:8]
+// clearer clears a reslice of the view.
+func (w *words) clearer() {
+	view := (*[16]byte)(unsafe.Pointer(w))[:8:8]
 	clear(view[:4])
 }
 
 // reader only reads the view: the copy is exact.
-func reader() byte {
-	view := (*[16]byte)(unsafe.Pointer(&words[0]))[:8:8]
+func (w *words) reader() byte {
+	view := (*[16]byte)(unsafe.Pointer(w))[:8:8]
 	return view[3]
 }
 
 func main() {
-	writer()
-	clearer()
-	println(reader())
+	var w words
+	w.writer()
+	w.clearer()
+	println(w.reader())
 }
 `)
 

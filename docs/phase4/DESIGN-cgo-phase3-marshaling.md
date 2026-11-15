@@ -1381,5 +1381,7 @@ then restored byte-identical (same sha256), and the edit was never committed.
 - The narrow re-review of the combined fix.
 - PF-6, the registration census from row 23.
 - Then the pin-registry proposal (17.11), re-gated on the same base.
+  - Pointer (2026-11-14): its design is `docs/phase4/DESIGN-cgo-pin-extents.md` (accepted; design only). Its seat
+    is the `.4` item, cut separately off master.
 
 — H (2026-11-14)
