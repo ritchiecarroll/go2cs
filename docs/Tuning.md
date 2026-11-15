@@ -137,7 +137,7 @@ same; it is larger, and its symbol table is larger.
 | Program (`win-x64`) | Compiler time, default | Compiler time, folding off | Executable | Compiler memory | Symbol names |
 |:--|--:|--:|--:|--:|--:|
 | PerfStartup | 6 min 29 s | 1 min 27 s | 87.6 → 101.0 MB (+15%) | +13% | 115.7 → 131.8 MB (+14%) |
-| TypeScript `parsedemo` | [[TS_ILC_DEFAULT]] | [[TS_ILC_NOFOLD]] | [[TS_IMAGE]] | [[TS_MEM]] | [[TS_NAMES]] |
+| TypeScript `parsedemo` | 32 min 20 s | 7 min 6 s | 252.3 → 280.1 MB (+11%) | +13% | 616.2 → 657.3 MB (+7%) |
 
 Turn folding off where build time matters more than size: a development loop, or a CI job that publishes Native
 AOT to test it. Keep the default for what you ship when the executable's size matters, and for a very large program:
@@ -162,7 +162,9 @@ go2cs's project templates do not set it, so a converted program builds with the 
      +15.3%); output identical (checksum 42 on both, and native Go prints the same). The folding pass runs lazily and
      single-threaded on the object writer's first deduplication call and logs nothing while it runs: 73% of ILC's
      time at PerfStartup (4.7 of 6.5 min) and 83% at the TypeScript parsedemo (26 m 50 s of 32 m 20 s). The
-     TypeScript row is a placeholder until the i9 posts its folding-off parsedemo build. Owner ruling 2026-11-15:
+     TypeScript row: the i9, 2026-11-15 (win-x64, parsedemo of the converted TypeScript compiler, the same one change):
+     ILC 32 m 20 s -> 7 m 06 s (4.6x); image 252.3 -> 280.1 MB (+11%); ILC memory 15.69 -> 17.66 GB (+13%); symbol
+     names 616.2 -> 657.3 MB (+7%); same output (the demo, and 17,422 of 17,422 corpus files). Owner ruling 2026-11-15:
      keep the SDK default in the templates and document the opt-out here. -->
 
 
