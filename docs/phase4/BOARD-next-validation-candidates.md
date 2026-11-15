@@ -39737,4 +39737,26 @@ and the field view's shape widened to two selections as its second commit, probe
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — H (cgo 3.2's flip list, COORD's ruling): a one-expression uintptr round trip is emitted as a NUMBER, so Go-valid code is refused at the void door — OPEN, fidelity gap, .5
+
+**What.** `C.f(unsafe.Pointer(uintptr(unsafe.Pointer(&x))))`, a pointer converted to `uintptr` and back in ONE
+expression with no arithmetic, is Go-valid. go2cs emits it as `new @unsafe.Pointer((uintptr)@unsafe.Pointer.FromPinnedBox(Ꮡx))`,
+a bare number that carries no box. Under cgo 3.2's ruling (numbers stay refused) the void door refuses it, where Go
+runs it. The arm is `govoidexpr` (`src/go2cs/testdata/cgo/p3`), read refused on linux, windows and darwin (cgo-e2e
+43765795991, 43765805154, 43765814200), while its twin `govoid` (`unsafe.Pointer(&x)`) crosses in 3.2
+(DESIGN-cgo-phase3-marshaling section 18.1).
+
+**Not the ruling's target.** The ruling refuses numbers because Go-INVALID code holds them, across statements. This
+number exists only because the conversion is spelled out. The form with arithmetic already converts to `unsafe.Add`
+(`src/go2cs/pointerArithmetic.go`), which keeps the box.
+
+**The direction, NOT proposed now** (COORD, 2026-11-15): a converter fold of the identity round trip
+`unsafe.Pointer(uintptr(p))` to `p`, which keeps the box. It is an emission change that every package can reach, so its
+corpus cost (the two-seeded comparison on four targets) is UNMEASURED. Measure it when a consumer's census shows the
+shape. Until then it stays refused by name, as a number.
+
+**State.** OPEN, owner H, .5.
+
+— H (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
