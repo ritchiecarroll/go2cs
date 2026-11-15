@@ -62,7 +62,7 @@ public class SyncMutexProfileTests
         }) { IsBackground = true };
         holder.Start();
         held.Wait();
-        gate = GateOf(shared);
+        gate = GateOf(ref shared.M);
         PrecreateStamps(gate);
         ready.Set();
         Volatile.Write(ref inLock, 1);
@@ -75,22 +75,25 @@ public class SyncMutexProfileTests
 
     private static readonly TimeSpan ParkBound = TimeSpan.FromMinutes(1);
 
-    private static readonly FieldInfo? s_gateField =
-        typeof(sync_package.Mutex).GetField("gate", BindingFlags.NonPublic | BindingFlags.Instance);
+    private static readonly MethodInfo? s_gateOf =
+        typeof(sync_package).GetMethod("gateOf", BindingFlags.NonPublic | BindingFlags.Static);
     private static readonly FieldInfo? s_waitStampsField =
         typeof(sync_package).GetField("s_waitStamps", BindingFlags.NonPublic | BindingFlags.Static);
     private static readonly FieldInfo? s_semaphoreWaitCount =
         typeof(SemaphoreSlim).GetField("m_waitCount", BindingFlags.NonPublic | BindingFlags.Instance);
 
-    // The mutex's gate, once a Lock has created it.
-    private static object GateOf(Shared shared) => GateOf(shared.M);
-
-    private static object GateOf(sync_package.Mutex m)
+    // The mutex's wait queue (its gate), installed now if the mutex has not contended yet: Lock installs
+    // it only on contention, and these fixtures read the gate before the waiter's Lock. The mutex is passed
+    // by ref and written back, so the handle lands in the mutex itself; every caller holds the only thread
+    // that touches the mutex at that point.
+    private static object GateOf(ref sync_package.Mutex m)
     {
-        Assert.IsNotNull(s_gateField, "the hand-own's Mutex.gate field");
+        Assert.IsNotNull(s_gateOf, "the hand-own's gateOf(ref Mutex)");
         RequireWaitCount();
-        object? gate = s_gateField.GetValue(m);
-        Assert.IsNotNull(gate, "a mutex that has been locked has its gate");
+        object?[] args = [m];
+        object? gate = s_gateOf.Invoke(null, args);
+        m = (sync_package.Mutex)args[0]!;
+        Assert.IsNotNull(gate, "gateOf returns the mutex's wait queue");
         return gate;
     }
 
@@ -198,9 +201,9 @@ public class SyncMutexProfileTests
         WithRates(1, 1, () =>
         {
             var shared = new Shared();
-            shared.M.Lock();                      // creates the gate; uncontended, so it records nothing
+            shared.M.Lock();                      // uncontended, so it records nothing (GateOf installs the gate)
             shared.M.Unlock();
-            object gate = GateOf(shared);
+            object gate = GateOf(ref shared.M);
             PrecreateStamps(gate);
             int64 blockBefore = Total(mutex: false);
             var missed = new System.Collections.Generic.List<string>();
@@ -402,7 +405,7 @@ public class SyncMutexProfileTests
                 }) { IsBackground = true };
                 holder.Start();
                 held.Wait();
-                gate = GateOf(box.Value);
+                gate = GateOf(ref box.Value);
                 PrecreateStamps(gate);
                 ready.Set();
                 Volatile.Write(ref inLock, 1);
@@ -511,7 +514,7 @@ public class SyncMutexProfileTests
             {
                 var shared = new Shared();
                 shared.M.Lock();
-                object gate = GateOf(shared);
+                object gate = GateOf(ref shared.M);
                 PrecreateStamps(gate);
                 int inLock = 0;
                 var waiter = new Thread(() =>
@@ -565,9 +568,9 @@ public class SyncMutexProfileTests
             for (; episode < MaxEpisodes && contended < MinContended && elapsed.Elapsed < budget; episode++)
             {
                 var shared = new Shared();
-                shared.M.Lock();                  // creates the gate; uncontended, so it records nothing
+                shared.M.Lock();                  // uncontended, so it records nothing (GateOf installs the gate)
                 shared.M.Unlock();
-                object gate = GateOf(shared);
+                object gate = GateOf(ref shared.M);
                 PrecreateStamps(gate);
                 using var start = new ManualResetEventSlim();
                 int[] inLock = new int[2];

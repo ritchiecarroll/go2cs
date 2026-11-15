@@ -247,24 +247,32 @@ public unsafe class NativeBoxDereferenceCensusControlTests
         }
     }
 
-    // The design named the hand-owned sync.Mutex (one C# reference field) as B2b's known member (10.5). Measured here:
-    // it is not in the population. Its layout is known and its field is a managed reference where Go has inline
-    // bytes, so the layout check refuses a whole-value read of it by name, and the census never sees it. The refusal
-    // is asserted with the census on or off; the count only when it is on.
+    // The design named the hand-owned sync.Mutex as B2b's known member (10.5), and this arm first measured that it
+    // was not: it held one managed reference where Go has inline bytes, so the layout check refused a whole-value
+    // read of it by name. Since sqlite-cs W9a the Mutex is Go's eight bytes and holds no reference. Its layout is
+    // Go's, a whole-value read out of native memory succeeds, and the census counts that read in the total and in
+    // no class: still not in B2b, now because there is no reference in it. The layout and the read are asserted
+    // with the census on or off; the counts only when it is on.
     [TestMethod]
-    public void TheHandOwnedMutexIsRefusedByLayoutAndIsNotInThePopulation()
+    public void TheMutexIsGosLayoutIsReadWholeAndIsInNoClassOfThePopulation()
     {
         nuint memory = Zeroed();
 
         try
         {
-            StringAssert.Contains(GoReflect.ClrLayoutMismatch(typeof(sync.Mutex)) ?? "", "managed reference");
+            Assert.IsNull(GoReflect.ClrLayoutMismatch(typeof(sync.Mutex)), "Go's eight bytes hold no managed reference");
 
             var before = NativeBoxDereferenceCensus.Snapshot();
 
-            Assert.ThrowsException<PanicException>(() => _ = new NativeBox<sync.Mutex>(memory).Value);
+            sync.Mutex read = new NativeBox<sync.Mutex>(memory).Value;
+            Assert.IsTrue(read.TryLock(), "eight zero bytes read out of native memory are an unlocked mutex");
 
-            Assert.AreEqual(before, NativeBoxDereferenceCensus.Snapshot());
+            var after = NativeBoxDereferenceCensus.Snapshot();
+
+            Assert.AreEqual((before.b2a, before.b2b, before.unpinnable), (after.b2a, after.b2b, after.unpinnable), "a Mutex is in no class");
+
+            if (NativeBoxDereferenceCensus.Enabled)
+                Assert.AreEqual(before.dereferences + 1, after.dereferences, "the whole-value read is counted in the total");
         }
         finally
         {
