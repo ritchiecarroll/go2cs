@@ -165,6 +165,7 @@ var golibNamespaceTypes = nameSet(
 // golibFriendNamespaceTypes holds golib's internal types of namespace `go` that take no type
 // parameter. An assembly golib names in InternalsVisibleTo reads them as it reads the public ones.
 var golibFriendNamespaceTypes = nameSet(
+	"AnyElementArrayViewCheck",
 	"ChanCore",
 	"ElementWindow",
 	"EqualityFallbacks",
@@ -191,9 +192,11 @@ var golibFriendNamespaceTypes = nameSet(
 	"IGoReflectBox",
 	"IGoReflectChannel",
 	"IGoReflectMapFirstEntry",
+	"IHeldStorage",
 	"IInteriorPointer",
 	"INativeIdentity",
 	"INativeRooted",
+	"INativeViewAnchor",
 	"INativeWordElements",
 	"IPackageLevelStorage",
 	"IPlainHeapRoot",
@@ -257,6 +260,7 @@ var golibGenericNamespaceTypes = nameSet(
 	"IPointer",
 	"ISliceWrap",
 	"ISupportMake",
+	"InlineArrayShape",
 	"LinknameVar",
 	"MapKeySet",
 	"NativeArrayBox",
