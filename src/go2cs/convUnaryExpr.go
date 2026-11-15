@@ -1138,7 +1138,17 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 		if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok && v.selectorBasePackageObj(selectorExpr) != nil {
 			if varObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Var); ok && varObj.Pkg() != nil && varObj.Parent() == varObj.Pkg().Scope() {
 				if _, isPtr := types.Unalias(varObj.Type()).(*types.Pointer); !isPtr && importedGlobalIsBoxed(varObj) {
-					return fmt.Sprintf("%s.%s%s", v.convExpr(selectorExpr.X, nil), AddressPrefix, strings.TrimPrefix(getSanitizedIdentifier(varObj.Name()), "@"))
+					// The owner declares the box beside the var under the var's DECLARED name, so a var the owner
+					// collision-renamed (`var Tid` beside `func (*T) Tid()`, declared `ΔTid`) is boxed `ᏑΔTid`: take the
+					// renamed member from the owner's published `const:` record, as a value reference does (W13's
+					// importer arm; `lib.ᏑTid` was CS0117).
+					member := strings.TrimPrefix(getSanitizedIdentifier(varObj.Name()), "@")
+
+					if renamed, ok := v.foreignRenamedValueMember(varObj); ok {
+						member = renamed
+					}
+
+					return fmt.Sprintf("%s.%s%s", v.convExpr(selectorExpr.X, nil), AddressPrefix, member)
 				}
 			}
 		}

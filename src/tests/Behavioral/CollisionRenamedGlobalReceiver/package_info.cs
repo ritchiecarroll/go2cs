@@ -49,7 +49,8 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABImgoLqlJSCgoKCloKCloI=")]
+[assembly: GoPositionMap("dotimport.go", "dotimport.cs", "/IKC")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABQqgoKoloKCgoKC6pSUgoKCgpaCgpaCloKWgpaCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -76,6 +77,7 @@ public static partial class main_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸCollisionRenamedGlobalReceiverꓸlib() => builtin.initPackage(typeof(CollisionRenamedGlobalReceiver.lib_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(sync.atomic_package));
     // </ImportInitializers>

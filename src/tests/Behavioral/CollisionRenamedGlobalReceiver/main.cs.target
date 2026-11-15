@@ -2,6 +2,8 @@ namespace go;
 
 using fmt = fmt_package;
 using atomic = sync.atomic_package;
+using lib = CollisionRenamedGlobalReceiver.lib_package;
+using CollisionRenamedGlobalReceiver;
 using sync;
 
 partial class main_package {
@@ -19,6 +21,16 @@ partial struct counter {
 internal static nint bump(this ref counter c) {
     c.n++;
     return c.n;
+}
+
+internal static ж<counter> self(this ж<counter> Ꮡc) { return Ꮡc; }
+
+internal static int32 shadow() {
+    ref var Δtid = ref heap(new atomic.Int32(), out var Ꮡtid);
+    Ꮡtid.Add(5);
+    var p = Ꮡtid;
+    p.Add(1);
+    return Ꮡtid.Load();
 }
 
 partial struct TLS {
@@ -41,6 +53,18 @@ internal static void main() {
 
     Δcount.bump();
     fmt.Println(Δcount.bump(), Δcount.n, tls.count());
+
+    ᏑΔcount.self().bump();
+    fmt.Println(ᏑΔcount.self().bump(), Δcount.n, ᏑΔcount.self() == ᏑΔcount);
+
+    var before = ᏑΔtid.Load();
+    fmt.Println(before, shadow(), ᏑΔtid.Load());
+
+    lib.ᏑΔTid.Add(1);
+    var q = lib.ᏑΔTid;
+    q.Add(10);
+    fmt.Println(lib.ᏑΔTid.Load(), q.Load(), lib.Next(), (Ꮡ(new lib.T(ID: 9))).Tid());
+    fmt.Println(viaDot(), lib.ᏑΔTid.Load());
 }
 
 } // end main_package
