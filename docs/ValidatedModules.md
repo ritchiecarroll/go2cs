@@ -18,7 +18,7 @@ writes it as an HTML code element so that GitHub and this site show the same nam
 VALIDATION.md below the leading notice lines. The one exception is timefmt-go@v0.1.8/index.md line 26: the
 converter's proof-page writer (validationProofPages.go, escapeProofCell) puts a backslash-pipe inside a code span,
 which TestDocsTableCodeSpanHasNoEscapedPipe refuses; the row is rewritten in the guard's HTML form. Kit file
-sha256 90f63ae649aa9c00..., page as committed 4341668c19ea7164.... A converter fix makes the page byte-equal again
+sha256 90f63ae649aa9c003c90d38d29f8a91d3907ef8e89edfa2c10492b90b6c7ea56, page as committed 4341668c19ea71646bfac76087b35876262b72f53b5cfb8e872ee7607b829a69. A converter fix makes the page byte-equal again
 at the next regeneration. -->
 
 The rows are readings with Go 1.26.10, built on the go.* 1.26.10.3 standard-library packages, on `linux/amd64`,
