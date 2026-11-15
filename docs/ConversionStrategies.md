@@ -8725,11 +8725,13 @@ that ends while locked retires its thread instead of handing it to the next goro
 These functions are hand-written C#
 ([Manually-Converted Declarations](#manually-converted-declarations)).
 
-<!-- Mutex wait: src/core/internal/sync/runtime_impl.cs:126 `RuntimeSemaphore.Acquire(s, WaitReason.SyncMutexLock);`;
-src/core/golib/runtime/RuntimeSemaphore.cs:53 `internal readonly ManualResetEventSlim Signal = new(false);`;
-src/core/sync/atomic/doc_impl.cs:104 `return Interlocked.Add(ref addr.Value, delta);` -->
-**`sync` and `sync/atomic` run on .NET primitives.** A `sync.Mutex` that must wait blocks its thread in
-golib's runtime semaphore, which waits on a .NET event. Most `sync/atomic` functions are one line: `AddInt32` returns
+<!-- Mutex wait: src/core/sync/mutex.cs:403 `gate.Wait();`;
+src/core/sync/mutex.cs:135 `private sealed class WaitQueue : SemaphoreSlim {`;
+src/core/sync/atomic/doc_impl.cs:104 `return Interlocked.Add(ref addr.Value, delta);`
+(2026-11-15, sqlite-cs W9a: this sentence cited internal/sync's runtime semaphore, which the hand-owned sync.Mutex never waited on; at 091935257c it waited on a SemaphoreSlim it held by reference, and since W9a on one it names by a handle.) -->
+**`sync` and `sync/atomic` run on .NET primitives.** A `sync.Mutex` is Go's eight bytes, and one that must
+wait blocks its thread on a .NET semaphore it names by a number in those bytes
+([Reference](ConversionStrategies-Reference/manual-conversions.md#syncmutex-is-gos-eight-bytes-and-its-wait-queue-is-a-handle-in-the-sema-word)). Most `sync/atomic` functions are one line: `AddInt32` returns
 `Interlocked.Add(ref addr.Value, delta)`. Here `addr` is a `ж<int32>`, golib's box for a Go pointer,
 and `.Value` is the `int32` it points to ([Pointers](#pointers)).
 

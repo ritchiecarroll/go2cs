@@ -1411,6 +1411,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMulticastGroupJoin() => CheckTarget("MulticastGroupJoin");
 
     [TestMethod]
+    public void CheckMutexInNativeMemory() => CheckTarget("MutexInNativeMemory");
+
+    [TestMethod]
     public void CheckNamedAnySliceType() => CheckTarget("NamedAnySliceType");
 
     [TestMethod]

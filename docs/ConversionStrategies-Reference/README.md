@@ -514,6 +514,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Stop-the-world: the CONTRACT model, and the regions that run without Ps](manual-conversions.md#stop-the-world-the-contract-model-and-the-regions-that-run-without-ps)
   - [The GC measurement surface — one recorder, one ring, one snapshot](manual-conversions.md#the-gc-measurement-surface--one-recorder-one-ring-one-snapshot)
   - [`iter.Pull`'s coro — a symmetric handoff between two threads, and the goroutine count that had never been wired](manual-conversions.md#iterpulls-coro--a-symmetric-handoff-between-two-threads-and-the-goroutine-count-that-had-never-been-wired)
+  - [`sync.Mutex` is Go's eight bytes, and its wait queue is a handle in the `sema` word](manual-conversions.md#syncmutex-is-gos-eight-bytes-and-its-wait-queue-is-a-handle-in-the-sema-word)
   - [`sync.Pool` — a managed-reference ring slot, and a thread-affine stand-in for the P pin](manual-conversions.md#syncpool--a-managed-reference-ring-slot-and-a-thread-affine-stand-in-for-the-p-pin)
   - [A pointer's REFERENT, not its box, answers every lifetime and identity question](manual-conversions.md#a-pointers-referent-not-its-box-answers-every-lifetime-and-identity-question)
   - [`sync.Cond`'s copy detector, on reference identity rather than an address](manual-conversions.md#syncconds-copy-detector-on-reference-identity-rather-than-an-address)
