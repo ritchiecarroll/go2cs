@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace go.golib;
 
@@ -26,10 +27,16 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     private readonly int m_len;
     private bool m_disposed;
 
+    // This pin's entry in the pin-extent index (runtime/PinExtents.cs), null when the index is off or the pin holds no
+    // bytes, and s_closed once the buffer is released, so a backfill that races the release cannot enter it afterwards.
+    private object? m_extent;
+    private static readonly object s_closed = new();
+
     public PinnedBuffer(byte[] array)
     {
         m_handle = GCHandle.Alloc(array, GCHandleType.Pinned);
         m_len = array.Length;
+        EnterIndex();
     }
 
     public PinnedBuffer(object? src, nint len) : this(src, (int)len) {}
@@ -38,6 +45,7 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     {
         m_handle = src is null ? default : GCHandle.Alloc(src, GCHandleType.Pinned);
         m_len = len;
+        EnterIndex();
     }
 
     ~PinnedBuffer()
@@ -55,6 +63,9 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     {
         if (m_disposed)
             return;
+
+        // Out of the index BEFORE the pin is released: from here on the extent's bytes may move.
+        LeaveIndex();
 
         if (m_handle.IsAllocated)
             m_handle.Free();
@@ -94,6 +105,37 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     }
 
     public unsafe byte* Pointer => (byte*)m_handle.AddrOfPinnedObject();
+
+    /// <summary>
+    /// Enters this pin's extent, the pinned OBJECT's data and not this buffer's own length (a pin-only hold is length 0),
+    /// into the pin-extent index when a cgo package has switched it on. Called at construction, and by the index's
+    /// backfill for a pin taken before it switched on; idempotent.
+    /// </summary>
+    internal void EnterIndex()
+    {
+        if (PinExtents.Current is not { } index || Volatile.Read(ref m_extent) is not null || !m_handle.IsAllocated || m_handle.Target is not { } target)
+            return;
+
+        nuint start = (nuint)m_handle.AddrOfPinnedObject();
+        nuint length = PinExtents.ExtentOf(target, m_len);
+
+        if (start == 0 || length == 0)
+            return;
+
+        object extent = index.Add(this, start, start + length);
+
+        // A concurrent entry (or release) won: take ours back out.
+        if (Interlocked.CompareExchange(ref m_extent, extent, null) is not null)
+            index.Remove(extent);
+    }
+
+    private void LeaveIndex()
+    {
+        object? extent = Interlocked.Exchange(ref m_extent, s_closed);
+
+        if (extent is not null && extent != s_closed)
+            PinExtents.Current?.Remove(extent);
+    }
 
     // The pinned storage object itself (normally the byte[] the buffer wraps). PinnedBuffer is a
     // per-access VIEW — e.g. @string.buffer creates a fresh one per unsafe.StringData call — so
