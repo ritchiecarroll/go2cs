@@ -679,6 +679,9 @@ jobs:
           exit $packExit
 
       - name: Upload the feed
+        # Also when the pack step fails after packing: a red binary-compatibility guard leaves the merged packages in feed/,
+        # and New-GoApiCompatMoveSuppressions.ps1 reads exactly those. No consumer leg runs on a red pack (needs:).
+        if: always() && hashFiles('feed/*.nupkg') != ''
         uses: actions/upload-artifact@v6
         with:
           name: release-smoke-feed
