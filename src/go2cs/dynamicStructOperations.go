@@ -268,3 +268,55 @@ func (v *Visitor) extractStructType(expr ast.Expr) (*ast.StructType, types.Type)
 
 	return found.(*ast.StructType), v.getType(found, false)
 }
+
+// aliasPerNameLifts keys every lift recorded under a value spec's type on one declared name's own type as well.
+// go/types checks a multi-name spec's type once PER NAME (Checker.varDecl evaluates the type expression for each
+// variable), so `var ux, uy struct{…}` holds two identical struct objects and Info.Types records only the last. The
+// lift, keyed on the spec node's object, never answered for the first name, whose declaration and every
+// `Ꮡux.Reinterpret<…>` were emitted as raw Go (sqlite-cs L1, modernc.org/libc's Xcopysignf on linux). The two types
+// are walked in step, so a struct nested in a pointer, slice, array, map, channel or field takes its lift too.
+func (v *Visitor) aliasPerNameLifts(specType, nameType types.Type) {
+	if specType == nil || nameType == nil || specType == nameType {
+		return
+	}
+
+	switch spec := specType.(type) {
+	case *types.Struct:
+		named, ok := nameType.(*types.Struct)
+
+		if !ok || spec.NumFields() != named.NumFields() {
+			return
+		}
+
+		if lift, lifted := v.liftedTypeMap[spec]; lifted {
+			if _, taken := v.liftedTypeMap[named]; !taken {
+				v.liftedTypeMap[named] = lift
+			}
+		}
+
+		for i := range spec.NumFields() {
+			v.aliasPerNameLifts(spec.Field(i).Type(), named.Field(i).Type())
+		}
+	case *types.Pointer:
+		if named, ok := nameType.(*types.Pointer); ok {
+			v.aliasPerNameLifts(spec.Elem(), named.Elem())
+		}
+	case *types.Slice:
+		if named, ok := nameType.(*types.Slice); ok {
+			v.aliasPerNameLifts(spec.Elem(), named.Elem())
+		}
+	case *types.Array:
+		if named, ok := nameType.(*types.Array); ok {
+			v.aliasPerNameLifts(spec.Elem(), named.Elem())
+		}
+	case *types.Map:
+		if named, ok := nameType.(*types.Map); ok {
+			v.aliasPerNameLifts(spec.Key(), named.Key())
+			v.aliasPerNameLifts(spec.Elem(), named.Elem())
+		}
+	case *types.Chan:
+		if named, ok := nameType.(*types.Chan); ok {
+			v.aliasPerNameLifts(spec.Elem(), named.Elem())
+		}
+	}
+}

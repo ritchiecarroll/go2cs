@@ -98,6 +98,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAnonStructNamedConversion() => CheckTarget("AnonStructNamedConversion");
 
     [TestMethod]
+    public void CheckAnonStructReinterpretLift() => CheckTarget("AnonStructReinterpretLift");
+
+    [TestMethod]
     public void CheckAnonStructTypeArgVarDecl() => CheckTarget("AnonStructTypeArgVarDecl");
 
     [TestMethod]
