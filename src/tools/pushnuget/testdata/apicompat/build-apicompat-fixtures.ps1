@@ -20,7 +20,8 @@
                            methods: the baseline.
       moves-moved.dll      the forwarders have left the package class: seven into a class marked [GoPromotedHost] for
                            their struct, unchanged, and seven in ways the suppression generator must refuse; and the
-                           type's two methods into its method holder, a class marked [GoMethodHost].
+                           type's two methods into its method holder, a class marked [GoMethodHost]; and the Delta
+                           drop (OQ2): ten renames and five negative controls the generator must refuse.
 #>
 #Requires -Version 7.0
 $ErrorActionPreference = 'Stop'

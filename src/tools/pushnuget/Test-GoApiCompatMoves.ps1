@@ -94,15 +94,17 @@ try {
     else {
         Write-Host 'a moved forwarder gets one entry per asset, and nothing else gets any'
         $found = Get-GoApiCompatPackageMoves -Baseline $base -Current $moved -WorkDir $work
-        $targets = @($found.Entries | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { $_.Target } | Sort-Object -CaseSensitive -Culture '')
+        $moves = @($found.Entries | Where-Object { $_.Kind -ceq 'move' })
+        $targets = @($moves | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { $_.Target } | Sort-Object -CaseSensitive -Culture '')
         $want = @('M:go.ann_package.Named(go.ann_package.Tree)', 'M:go.ann_package.Plain(go.ann_package.Tree)', "M:go.ann_package.Plain(go.$zh{go.ann_package.Tree})",
                   'M:go.hold_package.Read(go.hold_package.Clock)', "M:go.hold_package.Reset(go.$zh{go.hold_package.Clock})",
                   'M:go.internal.abi_package.Size(go.internal.abi_package.Named)', 'M:go.pkg_package.Get``1(go.pkg_package.Box{``0},``0)',
                   'M:go.pkg_package.Val(go.pkg_package.Outer)', "M:go.pkg_package.Val(go.$zh{go.pkg_package.Outer})")
         Check 'the nine moves: value and pointer forms, a generic struct''s, one below a keyword namespace, three whose nullable attributes sit elsewhere, and a method holder''s two' (
             ($targets -join ' | ') -ceq ($want -join ' | ')) ($targets -join ' | ')
-        Check 'each asset has the same nine' (@($found.Entries).Count -eq 18 -and @($found.Entries | Where-Object { $_.Asset -ceq $linux }).Count -eq 9) "$(@($found.Entries).Count) entries"
-        $hosts = @($found.Entries | ForEach-Object { $_.Host } | Sort-Object -Unique)
+        Check 'each asset has the same nine, each a CP0002' (
+            $moves.Count -eq 18 -and @($moves | Where-Object { $_.Asset -ceq $linux }).Count -eq 9 -and @($moves | Where-Object { $_.DiagnosticId -cne 'CP0002' }).Count -eq 0) "$($moves.Count) moves"
+        $hosts = @($moves | ForEach-Object { $_.Host } | Sort-Object -Unique)
         $holder = 'go.hold' + [string][char]0x1D1B + 'Clock'
         Check 'each move names the class that holds the method now' (
             ($hosts -join ',') -ceq "go.forwardersOfBox,go.forwardersOfOuter,go.forwardersOfTree,$holder,go.internal.forwardersOfNamed") ($hosts -join ',')
@@ -112,7 +114,7 @@ try {
             $needle = '.' + $Member + '('
             return [string](@($refused | Where-Object { $_.Target.Contains($needle) } | ForEach-Object { $_.Reason }) -join ' ; ')
         }
-        Check 'seven other removed members are refused, per asset' ($refused.Count -eq 7 -and @($found.Refused).Count -eq 14) "$($refused.Count) of $(@($found.Refused).Count): $(@($refused | ForEach-Object { $_.Target }) -join ' | ')"
+        Check 'twelve other removed or changed members are refused, per asset: seven moves gone wrong and five Delta-drop negative controls' ($refused.Count -eq 12 -and @($found.Refused).Count -eq 24) "$($refused.Count) of $(@($found.Refused).Count): $(@($refused | ForEach-Object { $_.Target }) -join ' | ')"
         Check 'a changed return type is not a move' ((Reason 'Changed').Contains('declares no Changed of the same signature')) (Reason 'Changed')
         Check 'a dropped attribute is not a move' ((Reason 'Unmarked').Contains('declares no Unmarked of the same signature')) (Reason 'Unmarked')
         Check 'a changed nullable annotation is not a move, and the reason shows both readings' (
@@ -157,10 +159,31 @@ try {
         Check 'the fixtures differ in where NullableContext sits: Named gains its own, both forms of Plain lose theirs' (
             $placed -ceq 'Named False -> True; Plain True True -> False False') $placed
 
+        Write-Host 'THE DELTA DROP: a rename gets the entry the engine reports, and only an exact one does'
+        $d = [string][char]0x394
+        $renames = @($found.Entries | Where-Object { $_.Kind -ceq 'rename' })
+        $renameLib = @($renames | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { "$($_.DiagnosticId) $($_.Target)" } | Sort-Object -CaseSensitive -Culture '')
+        $wantRenames = @("CP0001 T:go.ren_package.${d}Stamp", "CP0001 T:go.ren_package.${d}Text", 'CP0002 F:go.ren_package.Holder.When',
+                         "CP0002 M:go.ren_package.get_${d}Limit", 'CP0002 M:go.ren_package.IClock.Now', 'CP0002 M:go.ren_package.Spin(go.ren_package.Dial)', "CP0002 M:go.ren_package.Tick(go.ren_package.${d}Stamp)",
+                         "CP0002 M:go.ren_package.Use(go.ren_package.${d}Stamp)", 'CP0006 M:go.ren_package.IClock.Now', 'CP0008 T:go.ren_package.Italic') |
+            Sort-Object -CaseSensitive -Culture ''
+        Check 'ten renames: the type, the interface, the constant by its getter, a function over the type, a method of the type now in its holder, a method whose receiver parameter dropped its prefix, a field and an interface member that name the type (CP0002 and CP0006), and a type that implements the renamed interface (CP0008)' (
+            ($renameLib -join ' | ') -ceq ($wantRenames -join ' | ')) ($renameLib -join ' | ')
+        Check 'each asset has the same ten renames' ($renames.Count -eq 20) "$($renames.Count) renames"
+        $tick = @($renames | Where-Object { $_.Asset -ceq $lib -and $_.Target.Contains('.Tick(') })
+        Check 'the receiver''s method is a rename into its holder, by the Go-named signature' (
+            $tick.Count -eq 1 -and $tick[0].Host -ceq ('M:go.ren' + [string][char]0x1D1B + 'Stamp.Tick(go.ren_package.Stamp)')) "$(@($tick | ForEach-Object { $_.Host }) -join ', ')"
+        $negatives = @("T:go.ren_package.${d}Orphan", "M:go.ren_package.Orphan(go.ren_package.${d}Orphan)", "M:go.ren_package.Shifted(go.ren_package.${d}Stamp)", 'M:go.ren_package.Retyped', 'M:go.ren_package.Spun(go.ren_package.Dial)')
+        $refusedTargets = @($refused | ForEach-Object { $_.Target })
+        Check 'NEGATIVE CONTROL: a Delta type with no Go-named successor, a parameter added, a return type changed, and a receiver parameter renamed to anything but its Go name are refused' (
+            @($negatives | Where-Object { $refusedTargets -ccontains $_ }).Count -eq 5) "refused: $(@($negatives | Where-Object { $refusedTargets -ccontains $_ }) -join ' | ')"
+        Check 'NEGATIVE CONTROL: no entry names any of them' (@($found.Entries | Where-Object { $negatives -ccontains $_.Target }).Count -eq 0) "$(@($found.Entries | Where-Object { $negatives -ccontains $_.Target } | ForEach-Object { $_.Target }) -join ' | ')"
+        Check 'the changed return type says both types' ((@($refused | Where-Object { $_.Target -ceq 'M:go.ren_package.Retyped' })[0].Reason).Contains('changed its type from')) 'no reason'
+
         $same = Get-GoApiCompatPackageMoves -Baseline $base -Current $base -WorkDir $work
         Check 'the same surface has no move and no refusal' (@($same.Entries).Count -eq 0 -and @($same.Refused).Count -eq 0) "$(@($same.Entries).Count) entries, $(@($same.Refused).Count) refused"
         $back = Get-GoApiCompatPackageMoves -Baseline $moved -Current $base -WorkDir $work
-        Check 'a method that left a marked class is not a move' (@($back.Entries).Count -eq 0 -and @($back.Refused).Count -gt 0) "$(@($back.Entries).Count) entries, $(@($back.Refused).Count) refused"
+        Check 'a method that left a marked class is not a move, and a Delta GAINED is no rename' (@($back.Entries).Count -eq 0 -and @($back.Refused).Count -gt 0) "$(@($back.Entries).Count) entries ($(@($back.Entries | ForEach-Object { "$($_.DiagnosticId) $($_.Target)" }) -join ' | ')), $(@($back.Refused).Count) refused"
 
         Write-Host 'a renamed assembly is read against its baseline under the declared rename, as the guard compares it'
         $renamedMoved = New-Package 'renamed-moved' @{ 'lib/net10.0/go.Moves.dll' = 'moves-moved.dll'; 'runtimes/linux-x64/lib/net10.0/go.Moves.dll' = 'moves-moved.dll' }
@@ -171,9 +194,10 @@ try {
         $unpaired = Get-GoApiCompatPackageMoves -Baseline $base -Current $renamedMoved -WorkDir $work
         Check 'unpaired, a renamed assembly is not read at all' (@($unpaired.Entries).Count -eq 0 -and @($unpaired.Refused).Count -eq 0) "$(@($unpaired.Entries).Count) entries"
         $paired = Get-GoApiCompatPackageMoves -Baseline $base -Current $renamedMoved -WorkDir $work -Successors $rename.Successors
-        $pairedTargets = @($paired.Entries | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { $_.Target } | Sort-Object -CaseSensitive -Culture '')
-        Check 'paired, the same nine moves on each asset, each entry naming the baseline asset' (
-            @($paired.Entries).Count -eq 18 -and @($paired.Entries | Where-Object { $_.Asset -ceq $linux }).Count -eq 9 -and
+        $pairedMoves = @($paired.Entries | Where-Object { $_.Kind -ceq 'move' })
+        $pairedTargets = @($pairedMoves | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { $_.Target } | Sort-Object -CaseSensitive -Culture '')
+        Check 'paired, the same nine moves and ten renames on each asset, each entry naming the baseline asset' (
+            @($paired.Entries).Count -eq 38 -and $pairedMoves.Count -eq 18 -and @($paired.Entries | Where-Object { $_.Asset -ceq $linux }).Count -eq 19 -and
             ($pairedTargets -join ' | ') -ceq ($want -join ' | ')) "$(@($paired.Entries).Count) entries: $(@($paired.Entries | ForEach-Object { $_.Asset } | Sort-Object -Unique) -join ', ')"
         Check 'another release declares no rename' (-not (Get-GoApiCompatRenameSuccessors -Id 'go.Moves' -Assets @($lib) -CurrentAssets @('lib/net10.0/go.Moves.dll') -ReleaseVersion '1.26.12.1').Declared) 'declared'
         Check 'go.lib keeps its assembly name: no successor' ((Get-GoApiCompatRenameSuccessors -Id 'go.lib' -Assets @('lib/net10.0/golib.dll') -CurrentAssets @('lib/net10.0/go.lib.dll') -ReleaseVersion '1.26.11.1').Successors.Count -eq 0) 'a successor'
@@ -184,15 +208,16 @@ try {
         Check 'the pinned tool restores from the manifest' ([bool]$pinned) "$why"
         if ($pinned) {
             $r = Test-GoApiCompatPackage -Id 'fixture.moves' -Baseline $base -Current $moved -SuppressionFile $null -RepoRoot $repoRoot -WorkDir $work
-            Check 'unsuppressed, the guard names all sixteen removed members on each asset' ($r.Failures.Count -eq 32 -and $r.Compared -eq 2) "$($r.Failures.Count) failures, compared $($r.Compared)"
+            Check 'unsuppressed, the guard names all thirty-one breaks on each asset' ($r.Failures.Count -eq 62 -and $r.Compared -eq 2) "$($r.Failures.Count) failures, compared $($r.Compared)"
 
             $generated = Join-Path $work 'generated.xml'
             Write-GoApiCompatMoveSuppressions -Entries $found.Entries -Path $generated -Comment $comment
             $r = Test-GoApiCompatPackage -Id 'fixture.moves' -Baseline $base -Current $moved -SuppressionFile $generated -RepoRoot $repoRoot -WorkDir $work
             Check 'no generated entry is unnecessary' (@($r.Failures | Where-Object { $_.Contains('unnecessary') }).Count -eq 0) "$(@($r.Failures | Where-Object { $_.Contains('unnecessary') }) -join '; ')"
-            Check 'the fourteen refused removals still read red, and nothing else does' (
-                $r.Failures.Count -eq 14 -and @($r.Failures | Where-Object { $_.Contains('CP0002') }).Count -eq 14 -and $r.Compared -eq 2) "$($r.Failures.Count) failures: $($r.Failures -join '; ')"
-            foreach ($member in 'Changed', 'Unmarked', 'Kind', 'Elsewhere', 'Misfiled', 'Gone', 'Only') {
+            Check 'the twenty-four refused breaks still read red (the negative controls among them), and nothing else does' (
+                $r.Failures.Count -eq 24 -and @($r.Failures | Where-Object { $_.Contains('CP0002') }).Count -eq 22 -and
+                @($r.Failures | Where-Object { $_.Contains('CP0001') }).Count -eq 2 -and $r.Compared -eq 2) "$($r.Failures.Count) failures: $($r.Failures -join '; ')"
+            foreach ($member in 'Changed', 'Unmarked', 'Kind', 'Elsewhere', 'Misfiled', 'Gone', 'Only', 'Orphan', 'Shifted', 'Retyped', 'Spun') {
                 $needle = '.' + $member + '('
                 $named = @($r.Failures | Where-Object { $_.Contains($needle) }).Count
                 Check "the guard still names $member" ($named -eq 2) "$named of 2"

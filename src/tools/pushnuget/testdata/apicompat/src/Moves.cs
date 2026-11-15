@@ -178,3 +178,83 @@ namespace go
     }
 #endif
 }
+
+// THE DELTA DROP (OQ2). Without MOVED a type and an interface whose Go names a method of the package shared, and a
+// constant, carry the converter's U+0394 prefix, as through 1.26.10.3; with MOVED they keep their Go names, and every
+// member that names them names them so. Renames: the type, the interface, the constant (a property), a function over
+// the type, a method of the type (now in its holder), a field and an interface member's return type that name it,
+// and a type that implements the renamed interface; and Dial's method Spin, whose receiver parameter loses its prefix
+// in the holder. NEGATIVE CONTROLS, which must stay red: Orphan's parameter type loses its U+0394 and no Go-named type
+// replaces it; Shifted keeps the Go-named parameter and gains another; Retyped's return type becomes another type;
+// Spun's receiver parameter takes another name, not its Go name.
+namespace go
+{
+    public static class ren_package
+    {
+        public struct Dial { }
+
+#if !MOVED
+        public struct \u0394Stamp { public long At; }
+
+        public interface \u0394Text { string Say(); }
+
+        public struct \u0394Orphan { }
+
+        public struct Holder { public \u0394Stamp When; }
+
+        public interface IClock { \u0394Stamp Now(); }
+
+        public struct Italic : \u0394Text { public string Say() => ""; }
+
+        public static long \u0394Limit => 1;
+
+        public static void Use(\u0394Stamp s) { }
+
+        public static long Tick(this \u0394Stamp s) => s.At;
+
+        public static void Orphan(\u0394Orphan g) { }
+
+        public static void Shifted(\u0394Stamp s) { }
+
+        public static \u0394Stamp Retyped() => default;
+
+        public static void Spin(this Dial \u0394d) { }
+
+        public static void Spun(this Dial \u0394d) { }
+#else
+        public struct Stamp { public long At; }
+
+        public interface Text { string Say(); }
+
+        public struct Holder { public Stamp When; }
+
+        public interface IClock { Stamp Now(); }
+
+        public struct Italic : Text { public string Say() => ""; }
+
+        public static long Limit => 1;
+
+        public static void Use(Stamp s) { }
+
+        public static void Shifted(Stamp s, int extra) { }
+
+        public static long Retyped() => default;
+#endif
+    }
+
+#if MOVED
+    [GoMethodHost(typeof(ren_package.Stamp))]
+    public static class ren\u1D1BStamp
+    {
+        public static long Tick(this ren_package.Stamp s) => s.At;
+    }
+
+    [GoMethodHost(typeof(ren_package.Dial))]
+    public static class ren\u1D1BDial
+    {
+        public static void Spin(this ren_package.Dial d) { }
+
+        public static void Spun(this ren_package.Dial other) { }
+    }
+#endif
+}

@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
-    Generates the binary-compatibility suppressions of one kind of announced break: a public method that left a
+    Generates the binary-compatibility suppressions of two kinds of announced break: a public method that left a
     package class for a class marked [GoPromotedHost(typeof(S))] or [GoMethodHost(typeof(S))], unchanged in every
-    other respect.
+    other respect; and a name that dropped go2cs's Delta prefix (OQ2), unchanged in every other respect.
 
 .DESCRIPTION
     1.26.11.1 moved every struct's same-package promoted-method forwarders out of the package class into a class of
@@ -25,8 +25,17 @@
     attribute or, without one, the context of the nearest enclosing method, class or module, and a position whose
     type takes no annotation is read as none. A method that moved AND changed an annotation is refused.
 
-    Only a move gets an entry. Every other removed member is returned as REFUSED with its reason, and the guard
-    (GoApiCompat.psm1) still reads it red: a break nobody announced.
+    THE DELTA DROP is the second kind. go2cs prefixed U+0394 (Delta) to a type, constant or variable whose Go name a
+    method of its package shared, because both were members of the package class; with the methods in their holders
+    (OQ2) the prefix is gone. A removed type or member is a RENAME only when its documentation id with every Delta
+    dropped is in the current surface exactly, or, for a method, when it is a move once its receiver, name and
+    signature drop their Delta and the result equals the current method's signature exactly. The same one-way test
+    gives the drop's other diagnostics (RenamedShapes): a member whose return or value type was renamed, an interface
+    member added under the Go-named id, a type that implements a renamed interface, a renamed constraint. Each rename
+    is the diagnostic the engine reports for it, with its target in the engine's form.
+
+    Only a move or a rename gets an entry. Every other removed or changed member is returned as REFUSED with its
+    reason, and the guard (GoApiCompat.psm1) still reads it red: a break nobody announced.
 
     The surface is read with the Roslyn that PowerShell 7 ships for Add-Type, so the documentation ids are the ones
     the ApiCompat engine prints. Windows PowerShell 5.1 has no Roslyn: Test-GoApiCompatMovesAvailable says so, and
@@ -65,9 +74,19 @@ namespace Go2cs.ApiCompatMoves
         public string Reason;
     }
 
+    // One entry of the Delta drop: the diagnostic the engine reports, its target, and the documentation id the member
+    // or type has now.
+    public sealed class Rename
+    {
+        public string DiagnosticId;
+        public string Target;
+        public string Now;
+    }
+
     public sealed class Result
     {
         public List<Move> Moves = new List<Move>();
+        public List<Rename> Renames = new List<Rename>();
         public List<Refusal> Refused = new List<Refusal>();
     }
 
@@ -76,6 +95,11 @@ namespace Go2cs.ApiCompatMoves
         // The two marks of a class a method may move into: a struct's promoted-method forwarders (go2cs-gen) and a
         // receiver type's method holder (the converter). Both take the type as typeof, stored as its name.
         private static readonly string[] HostAttributes = { "go.GoPromotedHostAttribute", "go.GoMethodHostAttribute" };
+
+        // The prefix (U+0394, Delta) go2cs gave a type, constant or variable whose Go name a method of its package
+        // shared (ShadowVarMarker in the converter). With the methods in their holders the names no longer meet, and
+        // the prefix is gone.
+        private const string ShadowMarker = "\u0394";
 
         private const string NullableAttribute = "System.Runtime.CompilerServices.NullableAttribute";
         private const string NullableContextAttribute = "System.Runtime.CompilerServices.NullableContextAttribute";
@@ -127,13 +151,33 @@ namespace Go2cs.ApiCompatMoves
                     if (entry.Value.ContainingType != null && !after.ContainsKey(Id(entry.Value.ContainingType)))
                         continue;
 
-                    string host, reason;
+                    string host, reason, now;
 
                     if (Moved(entry.Value, hosts, baselineTables.Reader, currentTables.Reader, out host, out reason))
                         result.Moves.Add(new Move { Target = entry.Key, Host = host });
+                    else if (Renamed(entry.Key, entry.Value, after, hosts, baselineTables.Reader, currentTables.Reader, out now))
+                    {
+                        ISymbol successor;
+                        IPropertySymbol property = entry.Value as IPropertySymbol;
+                        IPropertySymbol renamed = after.TryGetValue(now, out successor) ? successor as IPropertySymbol : null;
+
+                        // The engine names a removed property by its accessors.
+                        if (property != null && renamed != null)
+                        {
+                            if (property.GetMethod != null)
+                                result.Renames.Add(new Rename { DiagnosticId = "CP0002", Target = Id(property.GetMethod), Now = renamed.GetMethod == null ? "" : Id(renamed.GetMethod) });
+
+                            if (property.SetMethod != null)
+                                result.Renames.Add(new Rename { DiagnosticId = "CP0002", Target = Id(property.SetMethod), Now = renamed.SetMethod == null ? "" : Id(renamed.SetMethod) });
+                        }
+                        else
+                            result.Renames.Add(new Rename { DiagnosticId = entry.Value is INamedTypeSymbol ? "CP0001" : "CP0002", Target = entry.Key, Now = now });
+                    }
                     else
                         result.Refused.Add(new Refusal { Target = entry.Key, Reason = reason });
                 }
+
+                RenamedShapes(before, after, result);
 
                 return result;
             }
@@ -329,6 +373,250 @@ namespace Go2cs.ApiCompatMoves
             return Qualified(reader.GetString(declaring.Namespace), reader.GetString(declaring.Name));
         }
 
+        private static string Strip(string text)
+        {
+            return text.Replace(ShadowMarker, "");
+        }
+
+        // A type as the engine names one in a target: T: and the documentation id, a constructed generic type's
+        // arguments in braces, a method's type parameter as ``n and a type's as `n (wrap{``1}).
+        private static string ReferenceId(ITypeSymbol type)
+        {
+            return "T:" + TypeName(type);
+        }
+
+        private static string TypeName(ITypeSymbol type)
+        {
+            ITypeParameterSymbol parameter = type as ITypeParameterSymbol;
+
+            if (parameter != null)
+                return (parameter.TypeParameterKind == TypeParameterKind.Method ? "``" : "`") + parameter.Ordinal;
+
+            INamedTypeSymbol named = type as INamedTypeSymbol;
+            string id = Id(type.OriginalDefinition);
+
+            if (id.StartsWith("T:", StringComparison.Ordinal))
+                id = id.Substring(2);
+
+            if (named == null || !named.IsGenericType || ReferenceEquals(named, named.OriginalDefinition))
+                return id.Length > 0 ? id : type.ToDisplayString(s_type);
+
+            int arity = id.LastIndexOf('`');
+
+            return (arity < 0 ? id : id.Substring(0, arity)) + "{" + string.Join(",", named.TypeArguments.Select(TypeName)) + "}";
+        }
+
+        // The type a receiver parameter names: S for S, and S for the pointer form, go.zh<S>.
+        private static INamedTypeSymbol Receiver(IMethodSymbol method)
+        {
+            INamedTypeSymbol receiver = method.Parameters[0].Type as INamedTypeSymbol;
+
+            if (receiver != null && receiver.Arity == 1 && receiver.MetadataName == "\u0436`1" && receiver.ContainingType == null &&
+                Namespace(receiver.ContainingNamespace) == "go")
+            {
+                receiver = receiver.TypeArguments[0] as INamedTypeSymbol;
+            }
+
+            return receiver;
+        }
+
+        // THE DELTA DROP, the second announced kind. A removed type or member is a rename only when its documentation id
+        // with every Delta dropped is in the current surface exactly, or, for a method, when it is a move once its
+        // receiver, its name and both signatures drop their Delta: the method of a renamed receiver (syscall's Handle,
+        // now in the holder marked GoMethodHost(typeof(Handle))) or one whose signature names a renamed type. Anything
+        // else is refused.
+        private static bool Renamed(string id, ISymbol removed, Dictionary<string, ISymbol> after, Dictionary<string, List<INamedTypeSymbol>> hosts,
+                                    Srm.MetadataReader baseline, Srm.MetadataReader current, out string now)
+        {
+            now = Strip(id);
+
+            if (now != id && after.ContainsKey(now))
+                return true;
+
+            now = null;
+            IMethodSymbol method = removed as IMethodSymbol;
+
+            if (method == null || method.MethodKind != MethodKind.Ordinary || !method.IsStatic || method.Parameters.Length == 0)
+                return false;
+
+            INamedTypeSymbol receiver = Receiver(method);
+
+            if (receiver == null)
+                return false;
+
+            // A parameter may keep its Delta (trace's timeDelta1 still shadows an import) or lose it (runtime's Pinner
+            // receiver, Deltap while it shared the scope of the type p, is p in its holder): both are the drop.
+            string signature = Signature(baseline, method), dropped = Signature(baseline, method, true),
+                   droppedNames = Signature(baseline, method, true, true), key = MetadataName(receiver.OriginalDefinition);
+
+            // Nothing of it was renamed: the move test already refused it as it stands.
+            if (droppedNames == signature && Strip(key) == key)
+                return false;
+
+            List<INamedTypeSymbol> candidates;
+
+            if (!hosts.TryGetValue(Strip(key), out candidates))
+                return false;
+
+            foreach (INamedTypeSymbol candidate in candidates)
+            {
+                foreach (IMethodSymbol other in candidate.GetMembers(Strip(method.Name)).OfType<IMethodSymbol>())
+                {
+                    string found = Signature(current, other);
+
+                    if (found == dropped || found == droppedNames)
+                    {
+                        now = Id(other);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        // What a caller compiled against a member binds besides its documentation id, which leaves out a method's
+        // return type and a field's, property's or event's type: those, by their full names.
+        private static string Shape(ISymbol symbol)
+        {
+            IMethodSymbol method = symbol as IMethodSymbol;
+            IPropertySymbol property = symbol as IPropertySymbol;
+            IFieldSymbol field = symbol as IFieldSymbol;
+            IEventSymbol @event = symbol as IEventSymbol;
+
+            if (method != null)
+                return method.RefKind + " " + method.ReturnType.ToDisplayString(s_type);
+
+            if (property != null)
+                return property.RefKind + " " + property.Type.ToDisplayString(s_type);
+
+            if (field != null)
+                return field.Type.ToDisplayString(s_type);
+
+            return @event != null ? @event.Type.ToDisplayString(s_type) : "";
+        }
+
+        private static HashSet<string> Interfaces(INamedTypeSymbol type)
+        {
+            return new HashSet<string>(type.AllInterfaces.Select(ReferenceId), StringComparer.Ordinal);
+        }
+
+        // The Delta drop's diagnostics on a type or member both builds declare under one id, each entered only when the
+        // difference is the dropped Delta and nothing else:
+        //   CP0002  a member whose return or value type now names a renamed type by its Go name (the id leaves the type
+        //           out, so the engine sees the old member removed), and CP0006 too where an interface declares it;
+        //   CP0006  an interface member added under the Go-named id of one the baseline declared;
+        //   CP0008  a type that no longer implements an interface a renamed interface replaced (go/doc/comment's
+        //           Italic implemented the Delta-named Text and implements Text);
+        //   CP0021  a method type parameter's constraint that names a renamed type by its Go name.
+        // Every test reads one way: the baseline's form with its Delta dropped is the current form exactly. A difference
+        // the drop does not explain, the reverse included, is refused: the guard reads it red.
+        private static void RenamedShapes(Dictionary<string, ISymbol> before, Dictionary<string, ISymbol> after, Result result)
+        {
+            Dictionary<string, List<string>> removedByStripped = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+
+            foreach (KeyValuePair<string, ISymbol> entry in before)
+            {
+                if (after.ContainsKey(entry.Key) || entry.Value.ContainingType == null || entry.Value.ContainingType.TypeKind != TypeKind.Interface)
+                    continue;
+
+                List<string> list;
+
+                if (!removedByStripped.TryGetValue(Strip(entry.Key), out list))
+                    removedByStripped[Strip(entry.Key)] = list = new List<string>();
+
+                list.Add(entry.Key);
+            }
+
+            foreach (KeyValuePair<string, ISymbol> entry in after.OrderBy(pair => pair.Key, StringComparer.Ordinal))
+            {
+                ISymbol now = entry.Value, was;
+                bool inInterface = now.ContainingType != null && now.ContainingType.TypeKind == TypeKind.Interface;
+
+                if (!before.TryGetValue(entry.Key, out was))
+                {
+                    if (inInterface && !(now is INamedTypeSymbol) && before.ContainsKey(Id(now.ContainingType)) && removedByStripped.ContainsKey(entry.Key))
+                        result.Renames.Add(new Rename { DiagnosticId = "CP0006", Target = entry.Key, Now = entry.Key });
+
+                    continue;
+                }
+
+                if (!(now is INamedTypeSymbol))
+                {
+                    string had = Shape(was), has = Shape(now);
+
+                    if (had != has)
+                    {
+                        if (Strip(had) == has)
+                        {
+                            // The engine names a property by its accessors: the getter keeps its id, the setter's
+                            // takes the value's type.
+                            IPropertySymbol oldProperty = was as IPropertySymbol, newProperty = now as IPropertySymbol;
+                            List<KeyValuePair<string, string>> targets = new List<KeyValuePair<string, string>>();
+
+                            if (oldProperty == null)
+                                targets.Add(new KeyValuePair<string, string>(entry.Key, entry.Key));
+                            else
+                            {
+                                if (oldProperty.GetMethod != null)
+                                    targets.Add(new KeyValuePair<string, string>(Id(oldProperty.GetMethod), newProperty.GetMethod == null ? "" : Id(newProperty.GetMethod)));
+
+                                if (oldProperty.SetMethod != null)
+                                    targets.Add(new KeyValuePair<string, string>(Id(oldProperty.SetMethod), newProperty.SetMethod == null ? "" : Id(newProperty.SetMethod)));
+                            }
+
+                            foreach (KeyValuePair<string, string> target in targets)
+                            {
+                                result.Renames.Add(new Rename { DiagnosticId = "CP0002", Target = target.Key, Now = target.Value });
+
+                                if (inInterface && target.Value.Length > 0)
+                                    result.Renames.Add(new Rename { DiagnosticId = "CP0006", Target = target.Value, Now = target.Value });
+                            }
+                        }
+                        else
+                        {
+                            result.Refused.Add(new Refusal { Target = entry.Key, Reason = "changed its type from " + had + " to " + has });
+                        }
+                    }
+                }
+
+                INamedTypeSymbol type = now as INamedTypeSymbol, oldType = was as INamedTypeSymbol;
+
+                if (type != null && oldType != null)
+                {
+                    HashSet<string> implemented = Interfaces(type);
+                    List<string> lost = Interfaces(oldType).Where(each => !implemented.Contains(each)).OrderBy(each => each, StringComparer.Ordinal).ToList();
+
+                    if (lost.Count > 0)
+                    {
+                        if (lost.All(each => Strip(each) != each && implemented.Contains(Strip(each)) && !Interfaces(oldType).Contains(Strip(each))))
+                            result.Renames.Add(new Rename { DiagnosticId = "CP0008", Target = entry.Key, Now = entry.Key });
+                        else
+                            result.Refused.Add(new Refusal { Target = entry.Key, Reason = "no longer implements " + string.Join(", ", lost) });
+                    }
+                }
+
+                IMethodSymbol method = now as IMethodSymbol, oldMethod = was as IMethodSymbol;
+
+                if (method != null && oldMethod != null && method.TypeParameters.Length == oldMethod.TypeParameters.Length)
+                {
+                    for (int i = 0; i < method.TypeParameters.Length; i++)
+                    {
+                        HashSet<string> had = new HashSet<string>(oldMethod.TypeParameters[i].ConstraintTypes.Select(ReferenceId), StringComparer.Ordinal);
+                        HashSet<string> has = new HashSet<string>(method.TypeParameters[i].ConstraintTypes.Select(ReferenceId), StringComparer.Ordinal);
+
+                        foreach (string added in has.Where(each => !had.Contains(each)).OrderBy(each => each, StringComparer.Ordinal))
+                        {
+                            if (had.Any(each => !has.Contains(each) && each != added && Strip(each) == added))
+                                result.Renames.Add(new Rename { DiagnosticId = "CP0021", Target = entry.Key + "``" + i + ":" + added, Now = entry.Key });
+                            else
+                                result.Refused.Add(new Refusal { Target = entry.Key, Reason = "type parameter " + i + " gained the constraint " + added });
+                        }
+                    }
+                }
+            }
+        }
+
         private static bool Moved(ISymbol removed, Dictionary<string, List<INamedTypeSymbol>> hosts, Srm.MetadataReader baseline,
                                   Srm.MetadataReader current, out string host, out string reason)
         {
@@ -341,14 +629,8 @@ namespace Go2cs.ApiCompatMoves
                 return false;
             }
 
-            INamedTypeSymbol receiver = method.Parameters[0].Type as INamedTypeSymbol;
-
             // The pointer form takes the struct's box.
-            if (receiver != null && receiver.Arity == 1 && receiver.MetadataName == "\u0436`1" && receiver.ContainingType == null &&
-                Namespace(receiver.ContainingNamespace) == "go")
-            {
-                receiver = receiver.TypeArguments[0] as INamedTypeSymbol;
-            }
+            INamedTypeSymbol receiver = Receiver(method);
 
             if (receiver == null)
             {
@@ -561,21 +843,26 @@ namespace Go2cs.ApiCompatMoves
         }
 
         // Everything a caller compiled against the method depends on, the declaring type left out.
-        private static string Signature(Srm.MetadataReader reader, IMethodSymbol method)
+        // dropDelta reads the baseline as the Delta drop would have written it: every type, attribute and the method's
+        // name without the prefix. A parameter's name keeps any it has unless dropNames says otherwise.
+        private static string Signature(Srm.MetadataReader reader, IMethodSymbol method, bool dropDelta = false, bool dropNames = false)
         {
+            Func<string, string> types = text => dropDelta ? Strip(text) : text;
+            Func<string, string> names = text => dropNames ? Strip(text) : text;
+
             IEnumerable<string> parameters = method.Parameters.Select(parameter =>
-                "[" + Attributes(parameter.GetAttributes()) + "]" + parameter.RefKind + " " + parameter.Type.ToDisplayString(s_type) + " " + parameter.Name +
+                "[" + types(Attributes(parameter.GetAttributes())) + "]" + parameter.RefKind + " " + types(parameter.Type.ToDisplayString(s_type)) + " " + names(parameter.Name) +
                 (parameter.IsParams ? " params" : "") + (parameter.HasExplicitDefaultValue ? " = " + (parameter.ExplicitDefaultValue ?? "null") : ""));
 
             IEnumerable<string> typeParameters = method.TypeParameters.Select(parameter =>
-                parameter.Name + ":" + string.Join("&", parameter.ConstraintTypes.Select(type => type.ToDisplayString(s_type))) +
+                parameter.Name + ":" + string.Join("&", parameter.ConstraintTypes.Select(type => types(type.ToDisplayString(s_type)))) +
                 (parameter.HasReferenceTypeConstraint ? "&class" : "") + (parameter.HasValueTypeConstraint ? "&struct" : "") +
                 (parameter.HasUnmanagedTypeConstraint ? "&unmanaged" : "") + (parameter.HasNotNullConstraint ? "&notnull" : "") +
                 (parameter.HasConstructorConstraint ? "&new()" : ""));
 
-            return "[" + Attributes(method.GetAttributes()) + "][return: " + Attributes(method.GetReturnTypeAttributes()) + "] " +
+            return "[" + types(Attributes(method.GetAttributes())) + "][return: " + types(Attributes(method.GetReturnTypeAttributes())) + "] " +
                    method.DeclaredAccessibility + (method.IsExtensionMethod ? " extension " : " static ") + method.RefKind + " " +
-                   method.ReturnType.ToDisplayString(s_type) + " " + method.Name + "<" + string.Join(",", typeParameters) + ">(" + string.Join(", ", parameters) +
+                   types(method.ReturnType.ToDisplayString(s_type)) + " " + types(method.Name) + "<" + string.Join(",", typeParameters) + ">(" + string.Join(", ", parameters) +
                    ") nullable " + Nullability(reader, method);
         }
     }
@@ -656,7 +943,8 @@ function Get-GoApiCompatPackageMoves {
             Expand-MovesAsset $Baseline $asset $left
             Expand-MovesAsset $Current $currentAsset $right
             $found = Get-GoApiCompatMoves -Baseline $left -Current $right
-            foreach ($move in $found.Moves) { $entries.Add([pscustomobject]@{ Asset = $asset; Target = $move.Target; Host = $move.Host }) }
+            foreach ($move in $found.Moves) { $entries.Add([pscustomobject]@{ Asset = $asset; DiagnosticId = 'CP0002'; Kind = 'move'; Target = $move.Target; Host = $move.Host }) }
+            foreach ($rename in $found.Renames) { $entries.Add([pscustomobject]@{ Asset = $asset; DiagnosticId = $rename.DiagnosticId; Kind = 'rename'; Target = $rename.Target; Host = $rename.Now }) }
             foreach ($refusal in $found.Refused) { $refused.Add([pscustomobject]@{ Asset = $asset; Target = $refusal.Target; Reason = $refusal.Reason }) }
         }
     }
@@ -685,10 +973,11 @@ function Write-GoApiCompatMoveSuppressions {
     foreach ($line in ($Comment -split "`r?`n")) { $lines.Add(("  " + $line).TrimEnd()) }
     $lines.Add('-->')
     $lines.Add('<Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">')
-    $sorted = @($Entries | Sort-Object -Property @{ Expression = { $_.Asset } }, @{ Expression = { $_.Target } } -CaseSensitive -Culture '')
+    $sorted = @($Entries | Sort-Object -Property @{ Expression = { $_.Asset } }, @{ Expression = { $_.Target } }, @{ Expression = { if ($_.PSObject.Properties['DiagnosticId']) { $_.DiagnosticId } else { 'CP0002' } } } -CaseSensitive -Culture '')
     foreach ($entry in $sorted) {
         $lines.Add('  <Suppression>')
-        $lines.Add('    <DiagnosticId>CP0002</DiagnosticId>')
+        $diagnostic = if ($entry.PSObject.Properties['DiagnosticId'] -and $entry.DiagnosticId) { $entry.DiagnosticId } else { 'CP0002' }
+        $lines.Add("    <DiagnosticId>$diagnostic</DiagnosticId>")
         $lines.Add("    <Target>$([System.Security.SecurityElement]::Escape($entry.Target))</Target>")
         $lines.Add("    <Left>$($entry.Asset)</Left>")
         $lines.Add("    <Right>$($entry.Asset)</Right>")
