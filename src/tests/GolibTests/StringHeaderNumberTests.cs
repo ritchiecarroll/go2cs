@@ -170,9 +170,8 @@ public unsafe class StringHeaderNumberTests
     }
 
     // W7: the cgo door crosses (L)'s number (native memory, as Go's rodata is not a Go pointer to cgoIsGoPointer) and
-    // refuses (H)'s (Go heap memory, as &b[0] is refused under 3.1). (H)'s EXACT number is refused by the pin registry;
-    // an INTERIOR one (h + 2) is refused only where the pin-extent index is in the tree, which the arm adds once this
-    // cut sits on the union carrying that seat.
+    // refuses (H)'s (Go heap memory, as &b[0] is refused under 3.1). (H)'s EXACT number is refused by the pin registry,
+    // and an INTERIOR one (h + 2) by the pin-extent index: the element box's pin covers the whole backing.
     [TestMethod]
     public void W7_TheDoorCrossesLAndRefusesH()
     {
@@ -185,7 +184,8 @@ public unsafe class StringHeaderNumberTests
         ж<NumberStringHeader> sh = Ꮡs.Reinterpret<@string, NumberStringHeader>();
         nuint h = (nuint)sh.Value.Data;
 
-        Assert.ThrowsException<PanicException>(() => GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)h), "f"));
+        Assert.ThrowsException<PanicException>(() => GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)h), "f"), "(H)'s exact number");
+        Assert.ThrowsException<PanicException>(() => GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)(h + 2)), "f"), "(H)'s interior number, h + 2");
         GC.KeepAlive(sh);
     }
 
@@ -335,8 +335,8 @@ public unsafe class StringHeaderNumberTests
 
     // W13's precursor and W15 (QW-8, P3's item 1): the pointer FromHeaderData answers CARRIES the element box, so a
     // pointee box derived from it alone, the LAST link, keeps the bytes across forced compacting collections with
-    // finalizers, with the string, the header and the pointer all dropped. W13 proper is written after the rebase onto
-    // 308, against the view door the converter emits for (*RawMem)(p)[:n:n].
+    // finalizers, with the string, the header and the pointer all dropped. W13 proper (below) is the same chain through
+    // the view door the converter emits for (*RawMem)(p)[:n:n].
     [TestMethod]
     public void W13a_AStringHeadersCarriedPointerKeepsTheBytesThroughTheLastLink()
     {
@@ -376,6 +376,75 @@ public unsafe class StringHeaderNumberTests
 
         Assert.IsNotNull(p.RetainedSource, "a slice header box's Data pointer carries its element box");
         return @unsafe.Pointer.To<byte>(p);
+    }
+
+    // W13 (R-b), on the view door: Xgethostname's chain as the converter emits it, `copy(dst,
+    // (*RawMem)(unsafe.Pointer(sh.Data))[:n:n])` = copy(dst, View<byte>(FromHeaderData(sh), 0, n, n, N)). Only the LAST
+    // link, the slice, is held across forced compacting collections with finalizers; the string, the header and the
+    // pointer are dropped. The carried pointer names the element box itself, so the door takes V1: a managed window on
+    // the string's own backing, with no raw span to go stale. After the copy, once the chain is collected, the element
+    // box's pin has left the pin-extent index.
+    [TestMethod]
+    public void W13_TheHostnameChainThroughTheViewDoorReadsTheBytesHoldingOnlyTheSlice()
+    {
+        (slice<byte> view, nuint h, nint n) = HostnameView("w13-hostname");
+        Churn();
+
+        Assert.IsFalse(view.IsNativeBacked, "V1: a managed window on the string's backing, no raw span");
+
+        slice<byte> name = new(n);
+        Assert.AreEqual(n, copy(name, view));
+        Assert.AreEqual("w13-hostname", System.Text.Encoding.ASCII.GetString(name.ToSpan()));
+
+        Churn();
+        Assert.AreEqual(0, PinExtents.EntriesOver(h, h + (nuint)n), "after the copy and a collection, the element box's pin has left the index");
+    }
+
+    // W13b: what the carry buys at the view door. W13 does not need it: while the header box lives, the bare number
+    // resolves through the pin registry to the same element box, and the door takes V1 either way. Here only the
+    // POINTER outlives the chain (the string and the header are dropped, then compacting collections with finalizers),
+    // and the view is cut afterwards: the carried element box is all that keeps the number resolvable, so the door still
+    // takes V1 over the string's own bytes. A bare number would resolve to nothing and be cut as a raw native window.
+    [TestMethod]
+    public void W13b_TheCarriedPointerAloneStillCutsAManagedWindowAfterTheHeaderIsGone()
+    {
+        @unsafe.Pointer p = CarriedPointerOnly("w13b-carried", out nint n);
+        Churn();
+
+        slice<byte> view = @unsafe.Pointer.View<byte>(p, 0, n, n, 1L << 20);
+
+        Assert.IsFalse(view.IsNativeBacked, "V1: the carried element box keeps the number resolvable, so no raw span is cut");
+
+        slice<byte> name = new(n);
+        Assert.AreEqual(n, copy(name, view));
+        Assert.AreEqual("w13b-carried", System.Text.Encoding.ASCII.GetString(name.ToSpan()));
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static @unsafe.Pointer CarriedPointerOnly(string text, out nint n)
+    {
+        ref @string s = ref heap(new @string(System.Text.Encoding.ASCII.GetBytes(text)), out ж<@string> Ꮡs);
+        ж<NumberStringHeader> sh = Ꮡs.Reinterpret<@string, NumberStringHeader>();
+        n = sh.Value.Len;
+
+        return @unsafe.Pointer.FromHeaderData(sh);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static (slice<byte> view, nuint h, nint n) HostnameView(string text)
+    {
+        ref @string s = ref heap(new @string(System.Text.Encoding.ASCII.GetBytes(text)), out ж<@string> Ꮡs);
+        ж<NumberStringHeader> sh = Ꮡs.Reinterpret<@string, NumberStringHeader>();
+        nint n = sh.Value.Len;
+        nuint h = (nuint)sh.Value.Data;
+
+        // The one live entry is the ELEMENT BOX's pin-only hold, taken when (H) minted h at the Data read above and kept
+        // by the header box; FromHeaderData below carries that same box. The slice the view door returns pins nothing.
+        Assert.AreEqual(1, PinExtents.EntriesOver(h, h + (nuint)n), "while the chain lives, the element box's pin is one index entry over the backing");
+
+        slice<byte> view = @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromHeaderData(sh), 0, n, n, 1L << 20);
+
+        return (view, h, n);
     }
 
     // W16 (P3's item 2): a header built field by field is a PLAIN struct box; FromHeaderData answers exactly today's
