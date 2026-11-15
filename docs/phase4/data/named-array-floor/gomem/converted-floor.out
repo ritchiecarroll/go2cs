@@ -1,0 +1,41 @@
+ga: panic: runtime error: cannot view native memory as smallMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/gomem/main.go:20
+   [exit 2]
+gb: panic: runtime error: cannot view native memory as smallMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+gd: panic: runtime error: cannot view native memory as smallMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/gomem/main.go:30
+   [exit 2]
+ge: panic: runtime error: index out of range [5] with length 0
+
+goroutine 1 [running]:
+main.main()
+	<kit>/gomem/main.go:36
+   [exit 2]
+gf: 8 8 [0 0 0 0 0 0 8 0]
+   [exit 0]
+gg: panic: runtime error: cannot view native memory as smallMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+gh: panic: runtime error: cannot view native memory as smallMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]

@@ -4091,7 +4091,9 @@ release published nothing: §2, AMENDED
    OS)*: a `release-smoke` dispatch at the tree that ships — one windows pack feeding all four shipped RIDs, the
    only check that the packages carry what that tree's converter emits on every OS (C2: N's converter emits
    `unsafe.ArrayPointer`, absent from the published 1.24.13.3). Every leg must pass all four arms, A–D, before the
-   PIN; darwin's D (the README walkthrough on a Mac) gates since darwin-xsys-libc (TRAIN O). On a release that ships
+   PIN; darwin's D (the README walkthrough on a Mac) gates since darwin-xsys-libc (TRAIN O). The same dispatch's four
+   `release-smoke cgo` jobs must pass too *(added 2026-11-14: cgo 3.1's release path; a `-cgo` conversion builds
+   against the tree, not the packages, so that job reads the tree; [CIMatrix](CIMatrix.md#release-smoke--consume-a-rehearsal-feed-the-way-a-user-does))*. On a release that ships
    macOS assets, the darwin `census` must also be green AT that tree (the daily schedule lags master by up to a day;
    dispatch one when the tip landed after it).
 3. **The publish** is the owner's act at the release machine's own console, from a checkout with empty porcelain
