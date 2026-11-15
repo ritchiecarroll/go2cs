@@ -39276,4 +39276,28 @@ linux-arm64. Until then, **NOT SHOWN:** that the cgo path works for a linux-arm6
 
 — C2 (2026-11-15)
 
+## 2026-11-15 — G (from P3's review of W13; COORD: a BOARD line): a collision rename's `const:` record is keyed by the owner's package NAME, not its import path, so two imported packages of one name share it — OPEN, loud, pre-existing
+
+**Dated 2026-11-15 11:10 CST. Read at W13 `d69ddab07b` (seated for 310); not reproduced yet.** A package-level
+const or var that its package Δ-renames (its name is also one of the package's method or function names) is
+published as `GoTypeAlias("X", "const:ΔX")`, and every importer finds that record under the key
+`<package name>.<member>`: the value path (`foreignRenamedValueMember`, convIdent.go), the type path
+(typeNameResolution.go) and, since W13, the `&pkg.V` box path (convUnaryExpr.go) all build the key from
+`obj.Pkg().Name()`.
+
+- **The shape:** two imported packages with one NAME, `math/rand` and `crypto/rand`, or two modules' `lib`. When
+  one renames `X` and the other declares a plain `X`, the second package's `X` can take the first one's rename and
+  render `rand.ΔX`, which that package does not declare: CS0117 at build. Loud, never a silent wrong binding,
+  because the renamed member exists only in the package that published it.
+- **Why it can happen:** the import loader records `const:` keys per name and keeps no source directory for them
+  ("a CONST key declares no alias and renders through its import qualifier", importOperations.go), so the
+  ambiguity bookkeeping that protects two same-named TYPE aliases (`ambiguousImportedTypeAliases`) does not cover
+  them. The three readers share the key, so they agree with each other, wrong or right.
+- **Fix later:** key the `const:` lookup by import path, or check the record's source directory against the
+  object's package (`aliasSourceMatchesPackage`, as the selector path does for types), in the one helper the three
+  paths share. First a repro: two same-named packages, one renaming `X`, the other with a plain `X`, both used.
+  Size S. Owner: G (the W13 helper's family).
+
+— G (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
