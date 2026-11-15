@@ -102,7 +102,11 @@ separately by the Startup row.
   with the compiler peaking at 12.4 to 13.5 GB, and TlsHandshake's took about 26 minutes at a 24 GB peak. The
   full disclosure, the reasoning, and the compile-farm mitigation live in the suite README's
   ["What the AOT column costs to produce"](https://github.com/ritchiecarroll/go2cs/blob/master/src/tests/Performance/README.md#what-the-aot-column-costs-to-produce--the-honesty-footnote)
-  section.
+  section. Most of that compile time is one pass: ILC folding identical method bodies, which the .NET SDK does by default
+  and go2cs keeps. Turning it off (`IlcFoldIdenticalMethodBodies=false`) cut ILC's time about 4.5 times on one
+  measured publish (PerfStartup, `win-x64`, on a different machine from the one that ran the timed table), for an
+  executable about 15% larger and a larger symbol table. The table measures the default; [Tuning converted code](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#native-aot-method-body-folding) says how
+  to make that trade.
 
 ## Running it
 
@@ -320,6 +324,11 @@ binary costs to **build**, and the cost is large enough that omitting it would m
   target), and TlsHandshake's took about 26 minutes. A program that references fewer packages publishes faster: a
   31-package consumer publishes in under four minutes on a hosted Linux runner
   ([Known issues](https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)).
+  Most of that compile time is one pass: ILC folding identical method bodies, which the .NET SDK does by default
+  and go2cs keeps. Turning it off (`IlcFoldIdenticalMethodBodies=false`) cut ILC's time about 4.5 times on one
+  measured publish (PerfStartup, `win-x64`, on a different machine from the one that ran the timed table), for an
+  executable about 15% larger and a larger symbol table. The table measures the default; [Tuning converted code](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#native-aot-method-body-folding) says how
+  to make that trade.
   <!-- Measured figures and the run series: [DATA-hopN-perf.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DATA-hopN-perf.md)
        (an internal record; visible link removed 2026-10-26, OQ-1). -->
 - **Build memory.** On the same machine, the compiler peaked at **12.4 to 13.5 GB working set** per publish,

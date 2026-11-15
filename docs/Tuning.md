@@ -126,6 +126,8 @@ against the default:
      package's loop 5.421 -> 0.848 (0.156); PerfStringMatch hot phase 1,142 -> 725 ms (0.643); PerfStartup and
      PerfTlsHandshake wall inside the band (-0.0%, +0.3%); sizes -18 KB, -23 KB, -29 KB. -->
 
+<a id="native-aot-method-body-folding"></a>
+
 **A Native AOT build spends most of its time folding identical method bodies.** After it compiles a program, the
 Native AOT compiler looks for methods whose machine code came out identical and keeps one copy of each. The .NET SDK
 does this by default in an optimized build, and the pass runs on a single core. On the go2cs programs measured, this
