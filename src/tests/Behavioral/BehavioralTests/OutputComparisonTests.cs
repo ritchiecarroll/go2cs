@@ -698,6 +698,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForeignAnonStructAliasAlias() => CheckTarget("ForeignAnonStructAliasAlias");
 
     [TestMethod]
+    public void CheckForeignAnonStructForwardAlias() => CheckTarget("ForeignAnonStructForwardAlias");
+
+    [TestMethod]
     public void CheckForeignConstraintProxy() => CheckTarget("ForeignConstraintProxy");
 
     [TestMethod]
@@ -992,6 +995,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckHexByteStringLiteral() => CheckTarget("HexByteStringLiteral");
 
     [TestMethod]
+    public void CheckIfStatements() => CheckTarget("IfStatements");
+
+    [TestMethod]
     public void CheckIfaceChainPointerAssert() => CheckTarget("IfaceChainPointerAssert");
 
     [TestMethod]
@@ -1065,6 +1071,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckInterfaceAssertionMapKey() => CheckTarget("InterfaceAssertionMapKey");
+
+    [TestMethod]
+    public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
 
     [TestMethod]
     public void CheckInterfaceEqualityTyped() => CheckTarget("InterfaceEqualityTyped");
@@ -2033,6 +2042,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckRangeOverIntegerTypes() => CheckTarget("RangeOverIntegerTypes");
 
     [TestMethod]
+    public void CheckRangePointerArrayConversion() => CheckTarget("RangePointerArrayConversion");
+
+    [TestMethod]
     public void CheckRangeShadowSelectorMethod() => CheckTarget("RangeShadowSelectorMethod");
 
     [TestMethod]
@@ -2721,6 +2733,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsafePointerReceiverCopy() => CheckTarget("UnsafePointerReceiverCopy");
+
+    [TestMethod]
+    public void CheckUnsafePointerReinterpret() => CheckTarget("UnsafePointerReinterpret");
 
     [TestMethod]
     public void CheckUnsafePointerTypeAlias() => CheckTarget("UnsafePointerTypeAlias");

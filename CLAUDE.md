@@ -49,7 +49,8 @@ still the *minimal* solution, just the one that generalizes.
 
 **Two solutions, one tree**: `src/go2cs.slnx` is the converter-dev workspace; `src/go2cs-stdlib.slnx`
 is every `core/` package. They overlap deliberately. ⚠ **Nothing routinely builds `go2cs.slnx` end to
-end**, so a broken solution member rots invisibly — build it once after any golib/runtime API change.
+end**, so a broken solution member rots invisibly — build it once after any golib/runtime API change
+(os-matrix stage `solution-build`).
 
 Full taxonomy: [`docs/Architecture.md`](docs/Architecture.md). Converter entry `src/go2cs/main.go`;
 `visit*.go` walk AST → C#, `conv*.go` convert expressions/types.

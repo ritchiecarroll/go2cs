@@ -34923,6 +34923,29 @@ while Go's signal-driven profiler delivered one.
 - Unmeasured: how often the converted sampler misses the window per host, and whether the sampler's period or its
   start-up latency is the cause.
 
+> **CORRECTION 2026-11-14 (P4, read on COORD's order of 11:42Z; the row above is kept as written).** The premise is
+> false: the converted sampler is not in the path. `testTraceProg` (trace_test.go; converted `trace_test.cs`) builds
+> `testdata/testprog/cpu-profile.go` with the real `go` tool (`testenv.GoToolPath`) and runs that NATIVE program on BOTH
+> sides. The program profiles, parses its own profile and prints the `tracing=on` sample summary; each side's test only
+> parses that stderr and skips at `pprofSamples == 0`. `go2cs.CpuProfiler` is never loaded. So every skip on either side
+> is the native Go profiler missing the 100 ms window on the hosted mac, and the osx-x64 `Default` C#=skip above is the
+> native program's run under the converted test, not a converted-sampler miss. D-W1's Go-side-only reading (2026-10-25)
+> falls with it. Linux control (4 vCPU, go1.26.10, the same testprog): 40 runs, 0 with zero samples, 5 to 13 each.
+>
+> **Rate** (4 stack-probe + 2 sweep-shard reads at master 314e1d8b60 / c978595f0c, 12 runs each of `Default` and
+> `AsyncPreemptOff` per RID): the sides disagreed in 7 of 12 on each RID, in both directions on both; skips at least
+> 6 Go / 3 C# on osx-arm64 and 2 Go / 5 C# on osx-x64 (a stack-probe read shows only disagreements, so skip/skip is
+> counted only in the two sweep reads). `Stress` runs the same program and never skipped (0 of 6 per side per RID).
+> Runs: 43591393256, 43591400051, 43593684487, 43595545217 (probe); 43586434174, 43593728853 (sweep).
+>
+> **What follows instead.** No converted fix exists. COORD ruled a symmetric native-subprocess admission for this test
+> only: G's arm (a) extended with `skipEitherSide` (Go=pass / C#=skip admitted on the converted side's skip text, which
+> is Go's own `t.Skip` text), and the two subtests entered as darwin-scoped `host-identity` disclosures pinned on
+> "CPU profile did not include any samples while tracing was active" (`claude/p4-trace-skip-both`). The same seat
+> found arm (a) inert on real input: `go test -json` carries a test's `t.Skip` text in `output` events and nothing on
+> the terminal `skip` event, so the Go side's skip text read empty and the Go=skip shape could never be admitted; the
+> Go side's text is now joined from its output events.
+
 ## 2026-11-09 — G: runtime's `TestDecorateMappings` passes VACUOUSLY on the converted side, because `setVMANameSupported()` is never probed
 
 **The mechanism.** The converted `setVMANameSupported()` (`src/core/runtime/linux/set_vma_name_linux.cs`) returns
@@ -38266,6 +38289,124 @@ or a wrong anchor. Dropping the two names for every line is too wide: it moves 6
 where `Pointer` is the package's own type.
 
 — P5 (2026-11-14)
+
+## 2026-11-14 — P4: B3 sizing on TypeScript hello: the double read is 18.5 ms; the first read's 211-233 ms of host reflection needs OQ2 then A1; one untested idea
+
+**What was measured.** Master `314e1d8b60`, linux-x64, 4 vCPU. TypeScript hello is `parsedemo good.ts`, built against
+that master. A scratch probe golib (three timers, never committed) was swapped into a copy of the bin directory; the
+output was byte-identical to the unprobed bin. Three probe runs, stable to about 15 ms.
+
+| step | call 1 (`ast.Kind`, value set) | call 2 (`ast.Kind`, pointer set) |
+|---|---|---|
+| `WalkExtensionHosts` | 123-130 ms | 0 (cached) |
+| host reads (221 hosts, 114,694 methods, reflection) | 211-233 ms | 0 (cached) |
+| `GetExtensionMethodsHomedIn` total | 402-436 ms | 5.1-5.5 ms |
+| `CollectGoMethodSetCandidates` total | 421-457 ms | 18.4-18.7 ms |
+
+Each call scans 114,694 entries and returns 1 candidate. Hello wall over 12 unprobed runs: median 2,120 ms, standard
+deviation 110 ms. The prediction for the second read (10 to 25 ms) was MET.
+
+**What follows.**
+- The double read (value set, then pointer set, cached per key) costs about 18 ms: about 5 ms rebuilding the homed-in
+  list and about 13 ms walking it again through `ResolveReceiverElement`. Collecting both sets in one walk saves it all;
+  a memo of the homed-in list saves about 5 ms. Neither shows in hello's wall time against a 110 ms deviation.
+- A receiver-key filter while building the homed-in list removes the list and its walk (about 18 ms per call) but cannot
+  skip a host read: a package-scoped host holds every receiver in its package, and its methods are known only after
+  reflection reads them. Skipping the 211-233 ms (about 10% of hello) needs a host per receiver type (OQ2's method-holder
+  move) and then A1. The 123-130 ms assembly walk is A3's. About 50-75 ms of call 1 is unattributed (first-call JIT,
+  `ExtensionHomesOf`, list building).
+
+**Untested idea, unpriced.** Decode each method's receiver from its metadata signature (the walk already reads the
+metadata tables) and materialize `MethodInfo` only for methods whose receiver matches. That could cut the host-read cost
+without OQ2. It is the seed of A1's "the table is already in the metadata", to be priced with A1.
+
+— P4 (2026-11-14)
+
+## 2026-11-14 — P4: internal/synctest banks darwin 58 + 1 through a darwin-scoped host-fatal entry; the mint rule now honours an entry's platform scope, so a non-windows-scoped host-fatal entry is UNCHECKED, not cleared
+
+**The row.** On both mac RIDs `TestWaitGroupManyBubbles` keeps 10,100 goroutines alive at once; go2cs runs each on its
+own OS thread and macOS caps a process's threads (2,028 osx-arm64, 3,052 osx-x64; DATA-mn-spike-2 T6), so thread
+creation throws an OutOfMemoryException in `GoroutineThreadPool.Worker.Start` and the host dies, taking
+`TestHappensBefore` and `TestWeak` with it. Scout reading (os-matrix sweep-shard run 43586434174 at master
+`314e1d8b60`): "matched 56 of 59 Go / 58 C#" on both RIDs. COORD ruled `host-fatal` for it on darwin (11:03Z), by the
+precedent of runtime's init-deadlock entry: the cause is go2cs's 1:1 thread model meeting the host cap, and Go runs it.
+The new `src/core/internal/synctest/go2cs_test_disclosures.json` scopes the entry `"platforms": ["darwin"]` and states
+its retirement: M:N scheduling (R5/R6). Seat reading (run 43589630577 on `claude/p4-darwin-synctest`, both RIDs):
+"status validated; matched 58 of 58 Go / 58 C# verdicts; disclosed 1; undisclosed divergences 0" (arm64 236 s, x64 454 s).
+Predicted before the run: `TestHappensBefore` and `TestWeak` pass once the host survives, 58 + 1 on both. HIT.
+Evidence: `docs/phase4/rebank-1.26.10.3/darwin/reread/SYNC-HF.tsv`.
+
+**The mint rule.** `hostFatalMintViolations` read the package's proof page and never the entry's `platforms`, so the
+darwin entry would have been REFUSED at mint on a darwin run, before either side ran: the page is the windows record
+and shows the test pass/pass. Read in the code, not met on a runner. The rule now reads the page's platform from its
+totals line and reports an entry scoped away from that platform as UNCHECKED (the existing warning, naming both
+platforms). In-scope, unscoped and unreadable-platform entries are refused as before. Guard
+`TestHostFatalMintHonoursThePlatformScope`, red with the arm disabled and red with the page pattern broken. All 253
+committed proof pages parse, and all 253 are windows.
+
+**The gap this leaves, named so the warning is not read as a check.** Every proof page is the windows record, so
+EVERY host-fatal entry scoped away from windows (today: this one) is unchecked at mint: no committed page says whether
+the platform it names runs the test successfully. The mint can refuse such an entry only once per-OS proof pages
+exist. Until then the evidence for a non-windows host-fatal entry is its own reading (here, the scout run and the seat
+run), not the mint.
+
+**Side readings, not this seat's.** (1) Both darwin runs, at master and on the seat, re-emit one line of
+`synctest_test.cs` (`TestIteratorPull`: `new iter.Seq<time.Time>(seqʗ1)` becomes `NilSafeDelegateConversion<...>`), so
+the committed test source trails the converter. (2) The sweep's README badge rewrite on darwin reads "58 matched / 0
+disclosed": the badge does not count the host-fatal disclosure. Neither was committed.
+
+— P4 (2026-11-14)
+
+## 2026-11-14 — P4: Q31 amended (COORD, 19:39Z): a host-conditional-disclosure entry may fire in the mirror shape, Go=skip/C#=pass; and the darwin re-read at go1.26.11 corrects both of this seat's banks
+
+**Q31 amendment, 2026-11-14.** `Test-HostConditionalDisclosureDelta` in `src/_roster.ps1` absorbed a fired entry only
+in the Go=pass/C#=skip shape. It now also admits Go=skip/C#=pass, which is exactly the shape a `skipEitherSide`
+manifest entry discloses (a native subprocess that both sides run, so either side can be the one that skips).
+fail/pass and skip/fail stay refused. Guard: three `check-roster-format` fixtures (the mirror accepted; fail/pass and
+skip/fail refused); red with the shape narrowed back, restored byte-identical. COORD accepted it as keeping Q31's
+"nothing else is absorbed": no per-package flag.
+
+**Corrections to the banks above and to the 2026-11-14 internal/trace bank.** Read on os-matrix run 43620172118
+(go1.26.11, both mac RIDs; evidence `docs/phase4/rebank-1.26.10.3/darwin/reread/P4-R11.tsv`, which supersedes
+SYNC-HF.tsv and TRACE-NS.tsv):
+- internal/synctest banks darwin **58**, not 58 + 1. The run printed "disclosed 1" because the host-fatal entry is
+  disclosed, but the converter's disclosed-divergent count, which the roster segment uses, excludes host-fatal.
+  The entry above scored its own prediction against the wrong count.
+- internal/trace banks the **187 floor** on darwin with `TestTraceCPUProfile/Default` and
+  `TestTraceCPUProfile/AsyncPreemptOff` annotated as host-conditional disclosures. The earlier 185 + 2 (osx-arm64)
+  / 186 + 1 (osx-x64) split came from one sweep where the native skip fired; the skip rate is 7 of 12 runs per RID,
+  so a fixed split reads DISC on most later runs. This re-read fired nothing: 187 + 0 on both RIDs.
+
+— P4 (2026-11-14)
+
+## 2026-11-14 — C2 (found by the `[GoInlineLayout]` seat's `go test ./...`; seen the same day by C2, P4 and P5): the converter's offline cgo tests fail when GOROOT is a toolchain that `GOTOOLCHAIN` downloaded into the module cache — ENVIRONMENT, no converter change; remedy below
+
+**What fails.** Under go1.26.11, `go test ./...` in `src/go2cs` failed 13 `TestCgo*` tests on this box (P4 read 14 on
+its box, the same set as master; P5 saw the same reds, as COORD relayed 2026-11-14 20:14Z). Every one fails at the
+package load with the same line:
+
+    go: overlay contains a replacement for <GOROOT>/src/runtime/cgo/go2cs_incomplete.go.
+    Files beneath GOMODCACHE (<GOMODCACHE>) must not be replaced.
+
+**Cause.** The offline cgo route loads a test's checked-in cmd/cgo output at `CGO_ENABLED=0` and overlays a file
+into `runtime/cgo` (`conversionDriver.go:153-158`). A toolchain that `GOTOOLCHAIN` fetched lives at
+`$GOMODCACHE/golang.org/toolchain@v0.0.1-go<version>.<os>-<arch>`, so GOROOT is under GOMODCACHE, and the go command
+refuses any overlay of a file there. It is independent of the commit under test: the same 13 fail at any SHA on
+such a toolchain.
+
+**Who reaches it.** Only the converter's own tests. `cgoOfflineTrees` is set only by `cgoDriver_test.go`
+(`cgoRoute.go:45`), so a user's `-cgo` conversion never builds this overlay.
+
+**Remedy** (the copy measured here; the `golang.org/dl` route as COORD named it, not run here). Use a GOROOT outside the module cache. Either copy the downloaded toolchain out (`cp -a
+$GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.11.linux-amd64 <dir>`, make it writable, and point `GOROOT` and
+`PATH` at the copy, so `go env GOROOT` prints `<dir>`), or install with `go install golang.org/dl/go1.26.11@latest`
+and `go1.26.11 download`, which puts the toolchain under `~/sdk`. With the copy, all 13 `TestCgo*` pass (29 s) and
+the whole suite reads 11 ok at `ae272556a6`.
+
+**Candidate, not applied.** The cgo tests could check `go env GOMODCACHE` against GOROOT once and fail by name with
+this remedy, instead of 13 loader errors that read like a converter defect. A seat for the cgo route's owner if wanted.
+
+— C2 (2026-11-14)
 
 ## 2026-11-14 — P5 (the named-array floor seat; COORD rulings D4 at 19:35Z and item 3 at 19:58Z): three rows the seat leaves open: an array viewed over another array type answers length 0; a plain pointer conversion to a named array does not compile; a named array over Go memory of another type is refused where Go answers — OPEN, all three, owner P5
 

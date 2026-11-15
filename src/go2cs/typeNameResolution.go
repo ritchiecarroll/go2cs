@@ -592,6 +592,13 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 	// + ~170-error parser cascade).
 	if !isUnderlying {
 		if name := v.deferredDynamicTypeName(t); name != "" {
+			// A marker an import's identical lift can answer now (sqlite-cs W2, forwardImportedStructLift).
+			if strings.HasPrefix(name, dynamicTypeMarkerPrefix) {
+				if imported := v.forwardImportedStructLift(t); imported != "" {
+					return imported
+				}
+			}
+
 			return name
 		}
 	}
@@ -876,6 +883,20 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 	// name or a deferred marker, never raw Go type text (see the getAliasQualifiedTypeName twin).
 	if !isUnderlying {
 		if name := v.deferredDynamicTypeName(t); name != "" {
+			// A marker an import's identical lift can answer now: another package's type, so this package's
+			// qualifier never prefixes it (sqlite-cs W2, forwardImportedStructLift).
+			if strings.HasPrefix(name, dynamicTypeMarkerPrefix) {
+				if imported := v.forwardImportedStructLift(t); imported != "" {
+					if v.inUsingAliasTarget {
+						if target, ok := importedStructLiftTarget(imported); ok {
+							return target
+						}
+					}
+
+					return imported
+				}
+			}
+
 			qualifier := v.usingAliasTypeQualifier(t)
 
 			// A deferred MARKER is replaced by the lift's name only after the file-visit barrier, so the
