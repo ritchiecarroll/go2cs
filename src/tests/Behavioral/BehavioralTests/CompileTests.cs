@@ -2290,6 +2290,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckRenamedTypeAliasReexport() => CheckTarget("RenamedTypeAliasReexport");
 
     [TestMethod]
+    public void CheckRenamedTypeAliasReexportRecords() => CheckTarget("RenamedTypeAliasReexportRecords");
+
+    [TestMethod]
     public void CheckReservedNameShadows() => CheckTarget("ReservedNameShadows");
 
     [TestMethod]
