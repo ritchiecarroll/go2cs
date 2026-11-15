@@ -2225,6 +2225,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckRenamedTypeAliasReexport() => CheckTarget("RenamedTypeAliasReexport");
 
     [TestMethod]
+    public void CheckRenamedTypeAliasReexportRecords() => CheckTarget("RenamedTypeAliasReexportRecords");
+
+    [TestMethod]
     public void CheckReservedNameShadows() => CheckTarget("ReservedNameShadows");
 
     [TestMethod]

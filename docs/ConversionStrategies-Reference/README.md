@@ -454,6 +454,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Foreign renamed types reference the recorded imported-type alias](golib-namespace.md#foreign-renamed-types-reference-the-recorded-imported-type-alias)
   - [A foreign package's collision rename is derived from that package, not from the conversion run](golib-namespace.md#a-foreign-packages-collision-rename-is-derived-from-that-package-not-from-the-conversion-run)
   - [A foreign package's re-exported type ALIAS is derived from that package too](golib-namespace.md#a-foreign-packages-re-exported-type-alias-is-derived-from-that-package-too)
+  - [A renamed type reached only through another package's alias is spelled by its producer's member](golib-namespace.md#a-renamed-type-reached-only-through-another-packages-alias-is-spelled-by-its-producers-member)
   - [A DOT-IMPORTED renamed type is spelled through the same alias as the qualified reference](golib-namespace.md#a-dot-imported-renamed-type-is-spelled-through-the-same-alias-as-the-qualified-reference)
   - [The reflection bridge answers a read where the answer EXISTS](golib-namespace.md#the-reflection-bridge-answers-a-read-where-the-answer-exists)
   - [A typed nil keeps its type across BOTH interface-space boundaries](golib-namespace.md#a-typed-nil-keeps-its-type-across-both-interface-space-boundaries)
