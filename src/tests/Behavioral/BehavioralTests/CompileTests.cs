@@ -724,6 +724,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckForeignAnonStructAliasAlias() => CheckTarget("ForeignAnonStructAliasAlias");
 
     [TestMethod]
+    public void CheckForeignAnonStructForwardAlias() => CheckTarget("ForeignAnonStructForwardAlias");
+
+    [TestMethod]
     public void CheckForeignConstraintProxy() => CheckTarget("ForeignConstraintProxy");
 
     [TestMethod]
