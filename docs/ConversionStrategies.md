@@ -1852,10 +1852,10 @@ rules further down this section):
   `static ref readonly @string name => ref nameᵇ;`, over the private field `nameᵇ`. The value is a struct, the JIT
   will not inline a function that copies a struct out of a static field, and a read through the accessor is a
   reference it can inline; every use still spells the constant's name. Other packages keep the one field.
-<!-- forms: src/go2cs/visitValueSpec.go:1475 `else if constExpr == "const"`, :1498 `static %s %s =>%s %s;`,
-     :1293 `structStaticReadAccessorDecl(access, strTypeName, csIDName`; the accessor:
+<!-- forms: src/go2cs/visitValueSpec.go:1480 `else if constExpr == "const"`, :1503 `static %s %s =>%s %s;`,
+     :1298 `structStaticReadAccessorDecl(access, strTypeName, csIDName`; the accessor:
      src/go2cs/hoistedLiteralOperations.go:1757 `func structStaticReadAccessorDecl(`; the GoBigConst field, for an
-     int-kind value that fits neither int64 nor uint64: src/go2cs/visitValueSpec.go:1216-1223 `writeUntypedConst(true)`, e.g.
+     int-kind value that fits neither int64 nor uint64: src/go2cs/visitValueSpec.go:1221-1228 `writeUntypedConst(true)`, e.g.
      src/core/math/big/arith.cs:23-24 `internal static ref readonly GoBigConst _B => ref _Bᵇ;` … `private static readonly GoBigConst _Bᵇ`
      (the accessor over its backing field); the alias: src/go2cs/csproj-template.xml:156 `Alias="GoBigConst"`. -->
 
@@ -2358,7 +2358,7 @@ internal static uint32 lowestSetBit(uint32 x) {
 ```
 
 Here `((uint32)0 - x)` is the negation. Both operands of `&` are `uint32`, so the `&` has no cast.
-<!-- unsigned negation: src/go2cs/convUnaryExpr.go:1310-1316#05e413; golden
+<!-- unsigned negation: src/go2cs/convUnaryExpr.go:1316-1322#05e413; golden
      src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:19
      `fmt.Println(z & ((uint64)0 - z));` for Go `fmt.Println(z & -z)` (main.go:29#bb0128).
      C# spec: unary minus on uint converts to long, on byte/ushort promotes to int, on ulong/nuint
@@ -2829,7 +2829,7 @@ a golib type that keeps the constant's exact value.
      for main.go:25 `a := 0x1p-2` and :31 `d := 2.`. Typed const:
      src/core/math/asinh.cs:49 `const float64 Ln2 = 6.93147180559945286227e-01;` and
      src/core/runtime/stubs.cs:157 `0.875f;`, from
-     src/go2cs/visitValueSpec.go:1424-1425 `constValExpr += "f"`. -->
+     src/go2cs/visitValueSpec.go:1429-1430 `constValExpr += "f"`. -->
 
 **A float prints as Go prints it.** go2cs converts `fmt` and `strconv` from Go's own source, so `fmt.Println`
 formats a float with Go's own `strconv` code, never with .NET's `ToString`. Go's default form is the shortest
@@ -11368,7 +11368,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 ([Struct Types](#struct-types)), and `default!` is its zero value
 ([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
 Go's for the target architecture, here amd64.
-<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:4029-4050#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:4043-4064#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.

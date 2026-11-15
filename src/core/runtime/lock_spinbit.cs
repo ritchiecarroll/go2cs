@@ -67,9 +67,9 @@ internal static UntypedInt mutexTailWakePeriod => 16;
 //go:nosplit
 internal static ж<uint8> key8(ж<uintptr> p) {
     if (goarch.BigEndian) {
-        return (@unsafe.Pointer.To<array<uint8>>(@unsafe.Pointer.FromPinnedBox(p))).at<uint8>(goarch.PtrSize / 1 - 1);
+        return @unsafe.Pointer.Element<uint8>(@unsafe.Pointer.FromPinnedBox(p), goarch.PtrSize / 1 - 1, 8);
     }
-    return (@unsafe.Pointer.To<array<uint8>>(@unsafe.Pointer.FromPinnedBox(p))).at<uint8>(0);
+    return @unsafe.Pointer.Element<uint8>(@unsafe.Pointer.FromPinnedBox(p), 0, 8);
 }
 
 // mWaitList is part of the M struct, and holds the list of Ms that are waiting
