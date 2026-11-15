@@ -260,11 +260,32 @@ func (v *Visitor) boxBaseName(ident *ast.Ident) string {
 		}
 	}
 
+	// A PACKAGE-LEVEL var is the exception to the collision rule: its box is declared beside it as `Ꮡ` plus the
+	// RENDERED name (globalAddressOperations' box declaration), so a var collision-renamed for a same-named
+	// method (`var tid atomic.Int32` beside `func (*TLS) tid()`, `tid`→`Δtid`) is boxed `ᏑΔtid`, and its
+	// pointer-receiver call `tid.Add(1)` must name that box, not the raw `Ꮡtid` (CS0103, libc's musl TLS, W13).
+	if v.identIsPackageVar(ident) {
+		return base
+	}
+
 	if base == ShadowVarMarker+ident.Name {
 		return ident.Name
 	}
 
 	return base
+}
+
+// identIsPackageVar reports whether the identifier resolves to a package-level var.
+func (v *Visitor) identIsPackageVar(ident *ast.Ident) bool {
+	obj := v.info.Uses[ident]
+
+	if obj == nil {
+		obj = v.info.Defs[ident]
+	}
+
+	varObj, ok := obj.(*types.Var)
+
+	return ok && varObj.Pkg() != nil && varObj.Parent() == varObj.Pkg().Scope()
 }
 
 // lambdaBoxRefAddressForm renders `&m` / `&m.field` when `m` is a heap-boxed local captured by-box

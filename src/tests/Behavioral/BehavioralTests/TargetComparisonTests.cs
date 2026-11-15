@@ -349,6 +349,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
 
     [TestMethod]
+    public void CheckCollisionRenamedGlobalReceiver() => CheckTarget("CollisionRenamedGlobalReceiver");
+
+    [TestMethod]
     public void CheckCollisionRenamedLocalBox() => CheckTarget("CollisionRenamedLocalBox");
 
     [TestMethod]

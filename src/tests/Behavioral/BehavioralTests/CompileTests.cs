@@ -346,6 +346,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
 
     [TestMethod]
+    public void CheckCollisionRenamedGlobalReceiver() => CheckTarget("CollisionRenamedGlobalReceiver");
+
+    [TestMethod]
     public void CheckCollisionRenamedLocalBox() => CheckTarget("CollisionRenamedLocalBox");
 
     [TestMethod]

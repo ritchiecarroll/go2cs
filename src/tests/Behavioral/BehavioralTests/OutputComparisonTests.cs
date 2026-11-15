@@ -338,6 +338,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
 
     [TestMethod]
+    public void CheckCollisionRenamedGlobalReceiver() => CheckTarget("CollisionRenamedGlobalReceiver");
+
+    [TestMethod]
     public void CheckCollisionRenamedLocalBox() => CheckTarget("CollisionRenamedLocalBox");
 
     [TestMethod]
