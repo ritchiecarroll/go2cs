@@ -2528,7 +2528,7 @@ operators and from `quo` and `rem` alike. When golib's panic handling catches th
 into Go's `runtime error: integer divide by zero` panic.
 So [`recover`](#defer--panic--recover) catches it as in Go, and an unrecovered one reports Go's message.
 <!-- golden: src/tests/Behavioral/DivideByZeroPanic (safeDiv/safeMod recover, outerGuard crosses a frame);
-     mapping: src/core/golib/runtime/RuntimeErrorPanic.cs:602#b581bf (TryAsPanic adopts DivideByZeroException as
+     mapping: src/core/golib/runtime/RuntimeErrorPanic.cs:619#b581bf (TryAsPanic adopts DivideByZeroException as
      Go's integer-divide-by-zero runtime error). -->
 
 **A slice bound keeps its full value.** C#'s range syntax, `s[lo..hi]`, accepts only an `int`, and Go's `int`
@@ -8397,7 +8397,7 @@ pointer's deref alias, golden DirectBoxReceiverPassedWhole/main.cs.target:18#8f4
 `nonnil`, src/core/golib/ж.cs `operator ~` and ж.StandardBox.cs `Value`, all throwing
 RuntimeErrorPanic.NilPointerDereference(). No divide check is emitted anywhere in src/go2cs.
 The catch filter maps DivideByZeroException and NullReferenceException:
-src/core/golib/runtime/RuntimeErrorPanic.cs:592#351d17 (TryAsPanic). Bounds checks throw
+src/core/golib/runtime/RuntimeErrorPanic.cs:609#351d17 (TryAsPanic). Bounds checks throw
 RuntimeErrorPanic.IndexOutOfRange directly: src/core/golib/slice.cs:282#ae078f, array.cs:403#ae078f.
 2026-09-27 accuracy pass: `divide` has no frame, so the mapping happens in outerGuard's catch filter. -->
 **Runtime errors are panics too.** In `divide`, `a / b` with `b` zero raises .NET's `DivideByZeroException`.
