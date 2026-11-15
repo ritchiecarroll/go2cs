@@ -41,6 +41,8 @@
     <None Include="$(MSBuildThisFileDirectory)arrayCloneOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayCloneShadow_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsNilCargo.go" />
+    <None Include="$(MSBuildThisFileDirectory)arrayPointerViewDoor.go" />
+    <None Include="$(MSBuildThisFileDirectory)arrayPointerViewDoor_test.go" />
     <None Include="$(MSBuildThisFileDirectory)asmForwardBodies.go" />
     <None Include="$(MSBuildThisFileDirectory)asmForwardBodies_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsCompanion.go" />
@@ -332,6 +334,7 @@
     <None Include="$(MSBuildThisFileDirectory)inlineArrayEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayForeignSlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintClosedRecord_test.go" />
@@ -390,6 +393,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\annotatorSelfTest_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\arrayPointerViewDoors_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\behavioralHarnessOptions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\breakFloorGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\contextBudget_test.go" />
@@ -405,6 +409,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsFragmentLinks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsSamplesHoldTheirLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\certContextReachGuard_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\consumerLegRids_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\converterGofmt_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\coreReferencesResolve_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\darwinLinknamePulls_test.go" />
@@ -414,6 +419,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\golibGrowSlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\golibInode64Renames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnedGoStatementPositions_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnedUnsafeDeclared_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnPackageBoxParity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnSourcePins_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\l3BlockPosition_test.go" />

@@ -421,6 +421,18 @@ internal readonly struct RuntimeArrayViewCheck(Type elementType) : IArrayViewChe
 }
 
 /// <summary>
+/// The test of a pin path, which holds the whole array still whatever its element: every view is accepted. The publish
+/// (<c>publishArrayBacking</c>) asks <see cref="Accepts"/> only; <see cref="ElementType"/> is the native-view
+/// question of the element door, which a pin path answers before it reaches the publish, so no element is named.
+/// </summary>
+internal readonly struct AnyElementArrayViewCheck : IArrayViewCheck
+{
+    public Type ElementType => typeof(void);
+
+    public bool Accepts(IArray view) => true;
+}
+
+/// <summary>
 /// Defines an interface that represents a pointer <see cref="ж{T}"/> type.
 /// </summary>
 /// <typeparam name="T">Type for heap based reference.</typeparam>

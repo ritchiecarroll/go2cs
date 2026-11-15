@@ -237,7 +237,7 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
 // //go:nowritebarrier enforces that (see the methods store below).
 //
 //go:nowritebarrier
-internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
+internal static @string itabInit(ж<itab> Ꮡm, bool firstTime) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var inter = m.Inter;
@@ -250,7 +250,7 @@ internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
     // the loop is O(ni+nt) not O(ni*nt).
     nint ni = len(inter.Methods);
     nint nt = (nint)x.Mcount;
-    var xmhdr = new slice<abi.Method>(new ReadOnlySpan<abi.Method>((abi.Method*)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)x.Moff)), (int)(nt)));
+    var xmhdr = @unsafe.Pointer.View<abi.Method>(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)x.Moff), 0, nt, nt, 65536);
     nint j = 0;
     // These are code pointers, not heap pointers. Use a uintptr slice so the
     // store emits no write barrier: on wasm a code pointer can look like a

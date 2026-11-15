@@ -6,6 +6,14 @@
 
 Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) · [Converted Go module NuGet packages](https://www.nuget.org/packages?q=nugetgo)
 
+[nugetgo.net](https://nugetgo.net) is the registry that maps a Go module path to the NuGet package (`nugetgo.*`) of
+its conversion. `go2cs -recurse=nuget` reads it, so a dependency someone has already converted and published is
+restored as a package instead of converted again ([how](ConvertingAModule.md#mapping-modules-to-nuget-packages)).
+<!-- Owner request 2026-11-15, relayed by COORD (20261115T082152Z). Wording checked against ConvertingAModule.md,
+     "Mapping modules to NuGet packages" (go2cs asks the registry whether a module was converted and published; a
+     mapped module is referenced, not converted) and NugetgoPublish.md step 5 (the site serves
+     https://nugetgo.net/v1/mappings.txt). No count of modules and no statement of who may publish. -->
+
 ---
 
 **go2cs converts Go source code into C# that reads like the Go it came from and behaves the same.**

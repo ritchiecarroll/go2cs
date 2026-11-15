@@ -1,0 +1,9 @@
+slice reads: 1
+slice writes: 20
+element pointer: 30 30
+array pointer: 40
+array pointer argument: 50
+from a variable: 60 9
+field: 70
+package: 80
+through a pointer: 90

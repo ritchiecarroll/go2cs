@@ -560,7 +560,7 @@ internal static void exit(int32 code) {
 // ASCII path.
 //
 //go:nosplit
-internal static unsafe int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
+internal static int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
     uintptr _STD_OUTPUT_HANDLE = /* ^uintptr(10) */ unchecked((uintptr)18446744073709551605); // -11
     uintptr _STD_ERROR_HANDLE = /* ^uintptr(11) */ unchecked((uintptr)18446744073709551604);  // -12
     uintptr handle = default;
@@ -579,7 +579,7 @@ internal static unsafe int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
         break;
     }}
     var isASCII = true;
-    var b = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(buf), (int)(n)));
+    var b = @unsafe.Pointer.View<byte>(buf, 0, n, 1073741824);
     foreach (var (_, x) in range(b)) {
         if (x >= 0x80) {
             isASCII = false;
@@ -607,13 +607,13 @@ internal static ref mutex utf16ConsoleBackLock => ref ((StaticBox<mutex>)Ꮡutf1
 
 // writeConsole writes bufLen bytes from buf to the console File.
 // It returns the number of bytes written.
-internal static unsafe nint writeConsole(uintptr handle, @unsafe.Pointer buf, int32 bufLen) {
+internal static nint writeConsole(uintptr handle, @unsafe.Pointer buf, int32 bufLen) {
     const uint16 surr2 = /* (surrogateMin + surrogateMax + 1) / 2 */ 56320;
 
     // Do not use defer for unlock. May cause issues when printing a panic.
     @lock(Ꮡutf16ConsoleBackLock);
 
-    ref var b = ref heap<slice<byte>>(new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(buf), (int)(bufLen))), out var Ꮡb);
+    ref var b = ref heap<slice<byte>>(@unsafe.Pointer.View<byte>(buf, 0, bufLen, 1073741824), out var Ꮡb);
     @string s = ~Ꮡb.Reinterpret<slice<byte>, @string>();
 
     var utf16tmp = utf16ConsoleBack[..];

@@ -1,0 +1,171 @@
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using go;
+using static go.builtin;
+using @unsafe = go.unsafe_package;
+
+namespace GolibTests;
+
+// SCRATCH PROBE v2, never committed: what a pointer advanced step by step (`p = unsafe.Add(p, 1)` in a loop) carries.
+// N = 10, 100, 10,000, 1,000,000 steps. Two bases: a Go value (pinned box) and C memory (the control).
+[TestClass]
+public unsafe class ZzChainProbeTests
+{
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Quad
+    {
+        internal uint a;
+        internal uint b;
+        internal ulong c;
+    }
+
+    private const long Big = 1L << 30;
+    private static readonly string s_out = Environment.GetEnvironmentVariable("ZZ_PROBE_OUT") ?? "zzprobe.txt";
+    private static readonly int[] s_steps = { 10, 100, 10_000, 1_000_000 };
+
+    private static void Say(string line) => File.AppendAllText(s_out, line + "\n");
+
+    // N single steps, +1 then -1 in turn: N even, so the pointer ends where it began.
+    private static @unsafe.Pointer Walk(@unsafe.Pointer p, int steps)
+    {
+        for (int i = 0; i < steps; i++)
+            p = @unsafe.Add(p, (i & 1) == 0 ? 1 : -1);
+
+        return p;
+    }
+
+    [TestMethod]
+    public void ProbeCapacity()
+    {
+        foreach (int n in new[] { 0, 10, 60, 61, 62, 63, 64, 65, 100, 10_000, 1_000_000 })
+        {
+            if ((n & 1) != 0)
+            {
+                // odd: one more forward step, the pointer ends one byte inside.
+            }
+
+            heap(new Quad { a = 1, b = 2, c = 3 }, out ж<Quad> box);
+            @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(box);
+
+            for (int i = 0; i < n; i++)
+                p = @unsafe.Add(p, (i & 1) == 0 ? 1 : -1);
+
+            string reading;
+
+            try
+            {
+                reading = @unsafe.Pointer.View<byte>(p, 0, 1, Big).Capacity.ToString();
+            }
+            catch (Exception ex)
+            {
+                reading = ex.GetType().Name + ": " + ex.Message;
+            }
+
+            Say($"capacity go-value steps={n} at_offset={n & 1} capacity={reading} (bounded would be {16 - (n & 1)})");
+            GC.KeepAlive(box);
+        }
+    }
+
+    [TestMethod]
+    public void ProbeRetained()
+    {
+        foreach (int n in s_steps)
+        {
+            heap(new Quad { a = 1, b = 2, c = 3 }, out ж<Quad> box);
+            @unsafe.Pointer start = @unsafe.Pointer.FromPinnedBox(box);
+            long before = GC.GetTotalMemory(true);
+            @unsafe.Pointer walked = Walk(start, n);
+            long after = GC.GetTotalMemory(true);
+
+            Say($"retained go-value steps={n} bytes={after - before} per_step={(after - before) / (double)n:F1}");
+            GC.KeepAlive(walked);
+            GC.KeepAlive(box);
+
+            void* mem = NativeMemory.AllocZeroed(16);
+            @unsafe.Pointer cstart = new @unsafe.Pointer((uintptr)(nuint)mem);
+            before = GC.GetTotalMemory(true);
+            @unsafe.Pointer cwalked = Walk(cstart, n);
+            after = GC.GetTotalMemory(true);
+
+            Say($"retained c-memory steps={n} bytes={after - before} per_step={(after - before) / (double)n:F1}");
+            GC.KeepAlive(cwalked);
+            NativeMemory.Free(mem);
+        }
+    }
+
+    // The loop `for p != end { p = unsafe.Add(p, 1) }`: one comparison per step.
+    [TestMethod]
+    public void ProbeLoopCost()
+    {
+        foreach (int n in new[] { 10, 100, 1_000, 10_000, 20_000 })
+        {
+            heap(new Quad { a = 1, b = 2, c = 3 }, out ж<Quad> box);
+            @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(box);
+            @unsafe.Pointer end = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(box), 8);
+            Stopwatch sw = Stopwatch.StartNew();
+            int unequal = 0;
+
+            for (int i = 0; i < n; i++)
+            {
+                if (p != end)
+                    unequal++;
+
+                p = @unsafe.Add(p, (i & 1) == 0 ? 1 : -1);
+            }
+
+            sw.Stop();
+            Say($"loopcost go-value steps={n} ms={sw.Elapsed.TotalMilliseconds:F2} ns_per_step={sw.Elapsed.TotalMilliseconds * 1e6 / n:F0} unequal={unequal}");
+            GC.KeepAlive(box);
+
+            void* mem = NativeMemory.AllocZeroed(16);
+            @unsafe.Pointer cp = new @unsafe.Pointer((uintptr)(nuint)mem);
+            @unsafe.Pointer cend = new @unsafe.Pointer((uintptr)((nuint)mem + 8));
+            sw.Restart();
+            unequal = 0;
+
+            for (int i = 0; i < n; i++)
+            {
+                if (cp != cend)
+                    unequal++;
+
+                cp = @unsafe.Add(cp, (i & 1) == 0 ? 1 : -1);
+            }
+
+            sw.Stop();
+            Say($"loopcost c-memory steps={n} ms={sw.Elapsed.TotalMilliseconds:F2} ns_per_step={sw.Elapsed.TotalMilliseconds * 1e6 / n:F0} unequal={unequal}");
+            NativeMemory.Free(mem);
+        }
+    }
+
+    // Run ALONE: a deep recursion ends the process. Each line is written before the comparison it announces.
+    [TestMethod]
+    public void ProbeEquality()
+    {
+        foreach (int n in new[] { 10, 100, 10_000, 100_000, 1_000_000 })
+        {
+            void* mem = NativeMemory.AllocZeroed(16);
+            @unsafe.Pointer cstart = new @unsafe.Pointer((uintptr)(nuint)mem);
+            @unsafe.Pointer cwalked = Walk(cstart, n);
+            bool cequal = cwalked == cstart;
+
+            Say($"equality c-memory steps={n} equal={cequal}");
+            NativeMemory.Free(mem);
+
+            heap(new Quad { a = 1, b = 2, c = 3 }, out ж<Quad> box);
+            @unsafe.Pointer start = @unsafe.Pointer.FromPinnedBox(box);
+            @unsafe.Pointer walked = Walk(start, n);
+
+            Say($"equality go-value steps={n} entering");
+
+            Stopwatch sw = Stopwatch.StartNew();
+            bool equal = walked == start;
+            sw.Stop();
+
+            Say($"equality go-value steps={n} equal={equal} us={sw.Elapsed.TotalMilliseconds * 1000:F1}");
+            GC.KeepAlive(box);
+        }
+    }
+}
