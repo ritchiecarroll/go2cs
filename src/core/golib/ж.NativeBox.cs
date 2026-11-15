@@ -321,4 +321,14 @@ namespace go;
     // What this box was derived from, for the identity of an unsafe.Pointer that carries it (NativeDerivation.Token).
     // A box over an order token has no address to measure a distance from.
     object? INativeRooted.NativeDerivedFrom => m_aliasesAnOrderToken ? null : m_retainedSource;
+
+    // What a box derived from this one retains in its place (NativeDerivation.Kept). A box that owns no pin holds its
+    // source and nothing else: the source is what keeps the storage where this box's address says it is, and a box
+    // derived from this one needs the source and not this box. A box that owns a pin is kept itself (the pin is
+    // released when the box is collected). So is a box over an order token or the number 0, which has no address to
+    // measure a distance from (NativeDerivation.Token).
+    object? INativeRooted.NativeRetainedInItsPlace =>
+        m_pin is null && !m_aliasesAnOrderToken && m_nativeAddr != 0 && !ManagedPointerTokens.IsTaggedToken(m_nativeAddr)
+            ? m_retainedSource
+            : null;
 }
