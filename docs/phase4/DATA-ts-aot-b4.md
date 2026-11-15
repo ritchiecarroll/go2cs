@@ -515,3 +515,224 @@ the sampler logged 3.07 GB, killed ILC by process id, and the run exited non-zer
 
 **No guard counts cut-off lines.** That is how the cycle returned unseen a week after it was fixed. The
 consumer above is such a guard in under a minute; a cheaper one that needs no publish is owed by the seat.
+
+## 16. Amendment, 2026-11-15 04:00Z: lever G is seated, in a different form from the one section 15 measured
+
+**The form changed.** Section 15's lever G asked an internal interface, `IElementViewSlot`. Measured on
+`PerfFieldView` under the JIT before landing, that form is a real regression on the row: the hit path of the
+field-view lookup is inlined at every `&p.f` operand, and an interface test plus an interface call per operand
+is not an exact type test. It was dropped. The seat carries `ElementViews`, an internal **virtual** on `ж<T>`
+that answers a null reference and that the element box overrides with its own slot. It sits with `ArrayRef`,
+`TryGetElementStorage` and `TryPinnedReinterpret` in `ж.cs`, which is the same arrangement: the base names
+nothing, the one kind that has the thing overrides. No method of `ж<T>` names `ElemRefBox<T>` in either form.
+
+**Its cost, recorded as a cost: +2.7% on `PerfFieldView` under the JIT, one virtual call per element-box
+field-view lookup** (the slotted and field-view kinds are still found by their exact type tests first). That
+reading is outside its own A/A band and was taken on a loaded box; the timing of record is the Performance
+re-baseline's. COORD ruled the price paid: 0 `IL3054` lines and the image and memory reductions of section 15
+for every Native AOT consumer.
+
+**The seat.** `claude/i9-golib-elemview-cycle`, `c08c2bba8c` on master `091935257c`, seated in batch 308. Three
+golib files (+26 -4), no converter or generator change, nothing public, 0 B of instance state.
+
+**The guard needs no publish.** `GolibTests` `PointerBoxGenericCycleTests` reads the IL of every method of
+`ж<T>` and of the types nested in it, and fails if one names `ElemRefBox<T>` over the type's OWN parameter. That
+qualifier is the edge: `at<Telem>` names `ElemRefBox<Telem>` over a METHOD's type parameter by design, is
+compiled only for the element types a program takes addresses of, and leads from `ж<array<Telem>>` back to
+`ж<array<Telem>>`, no deeper. A first cut of the guard without the qualifier would have stayed red after the
+fix. Two controls hold the reader: on a generic type it must report the type test, and it must see
+`ElemRefBox<Telem>` without calling it the edge.
+
+| leg | reading |
+|:--|:--|
+| red first, guard only (`a23a6e6182`) | 3 executed; the guard fails naming exactly `viewsHead` and `viewOf`; both controls pass |
+| guard, fix (`d22b5edaab`) and merge result (`c08c2bba8c`) | 3 of 3 |
+| `GolibTests` whole, master `d7f5a59f79` | 2,723 total, 0 failed |
+| `GolibTests` whole, `d22b5edaab` | 2,726 total, 0 failed; by name master's verdicts plus the 3 new tests, and one scheduling-dependent test (below) |
+| `GolibTests` whole, `c08c2bba8c` | 2,757 total, 0 failed; the 31 further names are all batch 307's new tests |
+| golib-only Native AOT consumer, `IL3054` lines | 654 at master `d7f5a59f79` (19.70 MB), 0 at `c08c2bba8c` (11.20 MB) |
+| `go2cs.slnx`, Debug, at `d22b5edaab` | 0 errors |
+
+**A finding beside the seat.** `RuntimeStopTheWorldContractTests.AHolderIsItsGoroutineNotTheThreadItRanOn` ends
+in `Assert.Inconclusive` ("goroutine B never landed on goroutine A's reused thread; nothing to assert") on most
+runs: alone, it passed 2 of 5 on the seat build and 1 of 5 on the master build. It moved between passed and
+not executed across the whole-suite runs above for that reason and no other. Routed by COORD as a BOARD row.
+
+**Scored.** Red leg names the two lookups: MET. Whole suite total 2,726: MET. The interface form inside the
+noise on `PerfFieldView`: **MISSED**, a regression. The virtual form under +3% and clearly cheaper than the
+interface: MET, MET. Verdicts by name equal to master's plus three: MISSED by the one name above. Consumer 654
+and 0: MET, MET.
+
+## 17. Amendment, 2026-11-15 06:00Z: the converted demos on Windows, under the JIT, against native Go
+
+Not a Native AOT result, but the same closure on the same box, and it is what the AOT images are compared
+against. P4's `ts-proof-kit` gate script (`run-gate.ps1`, `b3dbdd3ef8`) at three trees, each a fresh worktree
+and a fresh conversion, TypeScript `ba29a56299`, go1.26.11, SDK 10.0.403, `GoTargetOS=windows`.
+
+**At master the Windows build of the TypeScript closure has been red since batch 302.** Two packages that only
+Windows compiles, so no linux gate could see it:
+
+| tree | build | wall |
+|:--|:--|:--|
+| master `c2919b8b16` | failed | `golang.org/x/sys/windows`: `CS0246`, the `[GoInlineLayout]` stamp emitted unqualified in a file with no `using go.golib` |
+| `76bf490d38` (master + C2's two fixes) | failed | `x/sys/windows` builds; `github.com/Microsoft/go-winio/pkg/guid`, 17 errors: `type GUID windows.GUID` is a named type in one module over an inline-layout struct of another, and its consumer still emits a value clone (`ΔClone`) and a range slice of the `array8<byte>` field |
+| `651c4ad147` (the last master whose Windows closure builds) | built | none |
+
+The inline-array admission of a type did not reach a named type declared over it in another package. Routed to
+C2 as release-blocking.
+
+**At `651c4ad147` every comparison matches native Go on Windows:**
+
+| comparison | result |
+|:--|:--|
+| `parsedemo` demo | match |
+| parse corpus | 17,422 of 17,422 |
+| `checkdemo`, `emitdemo`, `mfdemo` demos | match, match, match |
+| full emit, every single-file compiler case | 7,404 of 7,404 |
+| full type-check, the same cases | 7,404 of 7,404 |
+
+None of the three Windows walls the kit's author predicted (path spelling, the `newLine` default, the
+`os`/`filepath`/`syscall` closure) appears. This is the reading at the last buildable master, not the gate of
+record: that is one rerun at the tree that carries the `go-winio` fix.
+
+**The script exits 1, from its census step only.** 1,267 hits over the staged tree: 1,266 are a deny list derived
+on this box from the account and the git identity matching the repository's own public URL, which the
+converter writes into every emitted project file (0 hits outside that URL); 1 is the `local` mode's `go2csPath`
+fallback, an absolute path, in the staged `Directory.Build.props`. Neither is a leak; both are for the kit.
+
+**Scored.** Converts and builds at `76bf490d38` (85%): MISSED, the second wall. At `651c4ad147`: converts and
+builds (90%), the four small comparisons match (85%), full emit all match (60%), full check all match (65%):
+all MET.
+
+## 18. Amendment, 2026-11-15 07:30Z: lever G alone is enough, and ILC's long phase is method body folding
+
+**Lever G alone fits.** `parsedemo`, `651c4ad147`, full trim, no native debug symbols, one build per arm, each
+image matching native Go on the demo and 17,422 of 17,422 corpus units:
+
+| | P1: E v2 alone | P4: G alone | P3: E v2 + G |
+|:--|:--|:--|:--|
+| symbol string table | 655.1 MB | 616.2 MB | 429.6 MB |
+| image | 297.4 MB | 252.3 MB | 219.5 MB |
+| ILC peak private | 17.60 GB | 15.69 GB | 11.66 GB |
+| `IL3054` lines | 884 | 0 | 0 |
+
+G alone is smaller than E v2 alone, and E v2 on top of G takes a further 30% off the names, not the 44% it took
+at PerfStartup without G. COORD ruled on it: the release in progress ships lever G only (section 16), and lever
+E is an option for the release after, with its own seat (the BOARD row of 2026-11-15). P4 is built with the
+form of G that landed, the virtual; P3 was the interface form.
+
+**The long single-core phase is located and then identified.** Sections 13 to 15 carried ILC's long phase at
+flat memory as unidentified. ILC's own `--verbose` lines (`IlcVerboseLogging`), laid against the per-process
+sampler on one wall clock, on P4:
+
+| ILC's line | from start | cores | private |
+|:--|:--|:--|:--|
+| `Scanning N methods...` (38 rounds) | 0 | 1.5 to 2.3 | to 5.8 GB |
+| `Compiling 654280 methods...` (16 rounds) | 2 m 33 s | up to 2.7 | to 7.9 GB |
+| `Writing 6322655 object nodes...` | 4 m 50 s | 1.0 | flat, 7.8 to 8.1 GB |
+| `10%...` through `100%...`, all inside 25 s | 31 m 40 s | 1 | rising to 15.69 GB |
+| `Done writing object file in 00:27:35` | 32 m 30 s | | |
+
+The phase is not spread over the object nodes: it is everything between the writer's first line and the first
+tenth of them, 26 m 50 s of a 32 m 20 s run. One instrument note: the package's `Exec` task logs ILC's output at
+low importance, so the verbose lines reach only a detailed logger; a file logger carries them, and they have
+no timestamps of their own, so the log was clocked every 5 s beside the sampler.
+
+**It is method body folding.** The SDK passes `--methodbodyfolding:generic` at `-O` by default
+(`Microsoft.NETCore.Native.targets`, the `_IlcMethodBodyFoldingValue` group). One property turns it off,
+`IlcFoldIdenticalMethodBodies=false`, and the rsp then reads `--methodbodyfolding:none`. Each row is one build
+that differs from its neighbour by that property alone:
+
+| | PerfStartup (E v2 + G): on | off | `parsedemo` (G alone): on | off |
+|:--|:--|:--|:--|:--|
+| ILC wall | 6 m 29 s | 1 m 27 s | 32 m 20 s | 7 m 06 s |
+| object write, as ILC logs it | about 4.7 min | 15.7 s | 27 m 35 s | 2 m 20 s |
+| symbols | 1,617,603 | 2,111,528 | 5,098,182 | 6,105,032 |
+| symbol string table | 115.7 MB | 131.8 MB (+13.9%) | 616.2 MB | 657.3 MB (+6.7%) |
+| image | 87.6 MB | 101.0 MB (+15.3%) | 252.3 MB | 280.1 MB (+11.0%) |
+| ILC peak private | 3.84 GB | 4.35 GB (+13%) | 15.69 GB | 17.66 GB (+12.6%) |
+| output | same as native Go | same | same | same |
+
+So on these closures folding is three quarters to five sixths of ILC's time, it is the SDK default, and every
+Native AOT publish of a converted program pays it. Turning it off is a build-time lever a user holds: a build
+four and a half times faster for an image 11 to 15% larger. Its cost on the limit of section 3 is the symbol
+table, which grows 7 to 14%. That ILC computes the folding lazily, on the writer's first de-duplication call,
+is an inference from `ObjectWriter.cs` and from where the phase sits; it is not read from the interner.
+
+**`emitdemo` and `mfdemo`, built with lever G alone and without folding:**
+
+| | `emitdemo` | `mfdemo` |
+|:--|:--|:--|
+| symbol string table | 1,248.9 MB (58.2% of 2 GiB) | 1,249.0 MB (58.2%) |
+| symbols | 10,031,055 | 10,032,887 |
+| object file | 2,344.1 MB | 2,344.4 MB |
+| image | 477.1 MB | 477.2 MB |
+| ILC wall | 12 m 59 s | 12 m 54 s |
+| ILC peak private | 30.09 GB | 29.93 GB |
+| `IL3054` lines | 0 | 0 |
+| output against native Go | demo matches; emit slice 102 of 102 | demo matches |
+
+A table that fits without folding fits with it, since folding only removes symbols. With these two, every one
+of the four converted TypeScript demos has a Native AOT image on Windows that prints what native Go prints.
+
+**Scored.** `parsedemo` with G alone: builds and matches, MET; names 720 MB in 600 to 800, MET (616.2); peak 19
+GB in 15 to 23, MET (15.69); the plateau still there, MET; **which phase it is (a folding or ordering pass
+after compilation 50%, a second dependency phase 30%, unnamed 20%, falsified by verbose lines that place it
+inside `Writing N object nodes`): REFUTED by that falsifier as worded**, and the first clause named the right
+cause in the wrong place; `dotnet-stack ps` does not list `ilc`: MISSED, it does. Folding is the phase (55%):
+MET. Names up 10 to 40% and image up 5 to 25% at PerfStartup: MET. `parsedemo` without folding: ILC under 8 min,
+MET; the writer under 2 min, MISSED (2 m 20 s); names 760 MB in 700 to 860, MISSED on the good side (657.3);
+peak and image, MET. `emitdemo`: builds and matches, MET; names 1,550 MB in 1,400 to 1,750, ILC 22 min in 16 to
+32, image 570 MB in 520 to 660, **all three MISSED on the good side** (1,248.9 MB, 12 m 59 s, 477.1 MB); peak
+33.5 GB in 30 to 37, MET at the bottom (30.09). The three misses share a cause: `emitdemo` was sized from
+`checkdemo`'s object on an IL census that reads the two closures as equal, and the IL census has now failed as
+a predictor twice.
+
+## 19. Amendment, 2026-11-15 08:00Z: the four demos with the lever that ships, and what the IL census is worth
+
+**`checkdemo` with lever G alone is measured, not projected.** Section 18 could only project it from
+`parsedemo`'s ratio (1,453 MB with folding). Built like `emitdemo` and `mfdemo`, `651c4ad147` plus lever G alone,
+no folding: exit 0, 0 `IL3054` lines, `checkdemo check.ts good.ts` matches native Go, and the type-check slice
+matches 102 of 102. With it the answer of section 1 no longer rests on lever E for any image.
+
+**The four demos, lever G alone, full trim, no native debug symbols.** Image size and ILC wall, with method
+body folding off and on:
+
+| demo | folding | symbol string table | image | ILC wall | ILC peak private | matches Go |
+|:--|:--|:--|:--|:--|:--|:--|
+| `parsedemo` | off | 657.3 MB | 280.1 MB | 7 m 06 s | 17.66 GB | demo; corpus 17,422 of 17,422 |
+| `parsedemo` | on (SDK default) | 616.2 MB | 252.3 MB | 32 m 20 s | 15.69 GB | demo; corpus 17,422 of 17,422 |
+| `checkdemo` | off | 1,248.6 MB | 476.8 MB | 13 m 00 s | 30.16 GB | demo; type-check slice 102 of 102 |
+| `emitdemo` | off | 1,248.9 MB | 477.1 MB | 12 m 59 s | 30.09 GB | demo; emit slice 102 of 102 |
+| `mfdemo` | off | 1,249.0 MB | 477.2 MB | 12 m 54 s | 29.93 GB | demo |
+| `checkdemo`, `emitdemo`, `mfdemo` | on | not built | not built | not built | not built | |
+
+The three large demos were not built with folding on. A table that fits without folding fits with it, so
+their fit under the default is implied; their sizes and times under the default are **projections** from
+`parsedemo`'s two rows (names about 6% lower, image about 10% lower, and an ILC run several times longer), not
+readings. The one large image that was built with folding on is `checkdemo` under lever E v2 alone (section
+14): 1,545.2 MB of names, 577.0 MB, 2 h 21 m 40 s of ILC, of which 124 minutes were the same one-core phase at flat memory.
+
+**The largest table is 58.2% of the 2 GiB stream** with lever G alone and no folding. The limit of section 3 is
+still there and still silent past 4 GiB; these images are under it with room, not past it.
+
+**The IL census failed as a predictor of size twice, and it is recorded here as failed.** Section 6 built a
+ratio model on IL metadata counts and section 13 showed it could not see generic instantiation. It was used
+again to size `emitdemo` from `checkdemo` (their closures read equal to 0.02% in types and methods), and
+`emitdemo` came in 19% under that size. The measured `checkdemo` cell says why: the three large objects ARE
+equal, to 0.04%, exactly as the census read them. What was wrong was the ratio carried from `parsedemo`. Like for
+like (lever G alone without folding, against lever E v2 alone with it), the names are 657.3 against 655.1 MB on
+`parsedemo`, equal, and 1,248.6 against 1,545.2 MB on `checkdemo`, 19% lower: lever G is worth more the larger
+the closure, and no ratio measured on the small one carries to the large one. So the census is good for one
+thing, saying two closures are the same size, and for nothing else; a size is measured on an object.
+
+**Stack frames of the folding pass were taken and have no names.** `dotnet-stack ps` lists `ilc.exe` (it has a
+diagnostic port, which the prediction said it would not). `dotnet-stack report` at one, two and three minutes
+into the pass on a default-folding PerfStartup build, and a 30 s `dotnet-trace`, all attached and returned
+cleanly with ILC unharmed, and every frame reads `?!?`: `ilc.exe` is a Native AOT image shipped without symbols.
+One busy thread about 13 frames deep and one idle thread, three times. That build also read ILC at 6 m 34 s
+with the verbose logger on, against 6 m 29 s without it, so the logger does not move the wall.
+
+**Scored.** `checkdemo` with G alone: names 1,300 MB in 1,200 to 1,560, peak 31 GB in 29 to 37, ILC 14 min in 12
+to 20, matches Go: all MET. `mfdemo`: as `emitdemo` in every row. The sampler's 37 GB line was not reached by
+any of the three; the smallest available RAM at a peak was 7.6 GB.
