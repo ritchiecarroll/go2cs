@@ -419,3 +419,101 @@ emission changes), and **SW-6: (H) needs anything beyond the element box's exist
 retired with W6 and the mortal copies.
 
 — H (2026-11-15)
+
+### 10.1 Amended 2026-11-15, 11:00Z: P3's read of section 10 (SHIP as amended), its six items and its addendum
+
+P3's two notes are on the mailbox: `docs/phase4/inbox/COORD/20261115T102314Z-P3.md` and `…102419Z-P3.md`. COORD
+adopted every item. Items 1 and 2, and the addendum, are owed before the cut.
+
+**1. R-b, restated: a miss is a MEMORY-UNSAFE READ, and it was measured before the cut.**
+- A pointer re-formed from an (H) number resolves through the registry only while the element box lives. On a miss
+  the number reads as a native address into a managed array that may have been collected or moved.
+- MEASURED on `&b[0]`'s route, which (H) reuses, at a tree whose golib is master's (`data/w8-ccgo-ts/roundtrip-probe`;
+  the prediction written first):
+  - a heap string's element-0 box mints a number, then the box and the string are dropped;
+  - compacting collections with finalizers run;
+  - a pointer is re-formed from the number and read.
+  - Control, with the box held: 0 of 200 wrong, in both processes.
+  - The window: resolved 0 of 200, and the bytes read were WRONG in 199 of 200, in both processes.
+- **The gethostname shape is NOT closed by the header box's cached element box.** In the emitted code `sh` is dead
+  once `.Data` is read, so its element box is reachable from nothing. Hitting the window needs a collection, a
+  finalizer run, and a second collection inside one statement: rare, but a memory-unsafe read when it happens.
+  **COORD asked to hear this before the cut: it is a `.4` question.**
+- **PROPOSED, for a ruling (QW-8): a carrying pointer for Go's own rule-6 shape.** Go's `unsafe` rule for a header's
+  `Data` field covers `unsafe.Pointer(h.Data)` formed in one expression, with `h` a `*reflect.StringHeader` or
+  `*reflect.SliceHeader`.
+  - The converter would emit, for exactly that shape, a pointer that CARRIES the element box: the header box's
+    `unsafe.Pointer` for its `Data`, the same object the `unsafe.Pointer`-typed header shape already returns. This is
+    how it already emits `unsafe.Add` for Go's one-expression arithmetic.
+  - The box then lives while the pointer does, as Go's rule says, and the window closes for every Go-valid use.
+  - A number kept across statements stays Go-invalid, and is the BOARD line below.
+  - Footprint: the converted standard library writes the shape nowhere (`GOROOT/src`, non-test, outside `cmd/vendor`
+    and comments: 0). So a converter change predicts 0 corpus lines; it would be its own small seat or part of the
+    cut, as ruled.
+  - W13 then asserts the BYTES read after a forced collection, through the converted shape.
+- **The BOARD line, either way:** "the `&b[0]` round trip, a number kept across statements and re-formed into a
+  pointer, is a MEMORY-UNSAFE READ when its element box has died in between (measured: 199 of 200 wrong under a
+  forced collection)". Go calls that use invalid; go2cs reads moved memory without a fault.
+
+**2. R-a: the whole backing.** Validate-on-read compares the WHOLE backing with the whole copy, not the reader's
+window. It costs O(length of the backing) per package-level header read, paid once per ccgo declaration: each is read
+once, at package init.
+
+**3. F4 under (H): a zero-length window at the END of a non-empty backing** (offset == length) has no element to box.
+Under (H) it reads `Data` 0, as an empty string does; (L) reads base + offset. Go keeps base + offset in both. This is
+a disclosed difference, with arm **W5b**.
+
+**4. D4's third difference: one literal, two numbers.** A package variable's header reads (L)'s copy. After
+`s := lit`, a header over the local `s` shares the backing and, under section 10 as written, reads (H)'s managed
+address.
+- **PROPOSED (QW-9): an (H) read whose backing already has an (L) copy takes that copy.** It is a lock-free lookup
+  in (L)'s table, made only when the table is non-empty. Then one literal has ONE number, and the local-copy route is
+  closed in the safe direction: the addendum's first bypass, below.
+- W4 asserts both reads on the SAME literal: equal numbers under QW-9, or the two numbers disclosed without it.
+
+**5. (L)'s table: STRONG keys.** Every key is the backing of a package-level variable, and the copy is never freed,
+so a weak key would buy nothing and could not be relied on. A test-readable copy counter (blocks and bytes) lets W9
+hold the leak bound.
+
+**6. The rule beside the loser-frees line:** no number is formed from a block before the table has ACCEPTED it. A
+thread whose offer loses frees its own block, then reads the winner's.
+
+**THE ADDENDUM: the routing is release-critical, and the bypass is the unsafe direction for ccgo.** If a ccgo
+declaration landed on (H), `Data` would be pinned only while an element box lived, and that box is dropped when the
+initializer returns. Every later `__ccgo_ts + N` would then read memory that may have moved, for the life of the
+process. The three routes, and what closes each:
+- **A local copy** (`s := __ccgo_ts1`, then a header over `s`): QW-9 closes it once the package variable's own header
+  has been read; ccgo reads it at init, before any function runs.
+- **A string FIELD of a package-level struct**, which is a field box, not a `StaticBox`. **Census line:** every one of
+  the 44 header reads in both modules (the 13 declarations and the 31 `ts` reads) is a file-scope
+  `var x = (*reflect.StringHeader)(unsafe.Pointer(&y)).Data` with `y` a bare file-scope identifier. None takes a
+  field. The one other header use is `Xgethostname`'s LOCAL. So ccgo never takes this route.
+- **A copy box `Ꮡ(value)`** where the converter spells a variable's address that way: the converter has ONE emitter
+  for a package-level variable's box (`symbols.go`'s `PackageBoxConstructPrefix`), and `&y` of a package-level
+  variable reads that field. The probe's emission shows it:
+  `(Ꮡ__ccgo_ts1.Reinterpret<@string, reflect.StringHeader>()).Value.Data`.
+- **W14, REQUIRED: a BEHAVIORAL program through the converter's REAL emission.** It declares both pairs, `__ccgo_ts1`
+  / `__ccgo_ts` and the vfs `ts1` / `ts`. In a LATER function, after forced collections with finalizers and allocation
+  churn, it reads through `__ccgo_ts + N` and `ts + N`.
+  - Go and C# must print the same, so the program prints the bytes it read, never the identity, which differs at
+    package level by design.
+  - The route is asserted by the READS. Under (H) the numbers dangle once init returns, and the probe above measured
+    a dangling read wrong 199 times in 200. So the correct bytes after the churn discriminate (L) from (H).
+  - Its golden shows the emitted `StaticBox` read.
+  - **Its negative control:** with golib's routing forced to (H) for a run (a scratch edit, restored byte-identical),
+    W14 must read wrong bytes. A gate never made to fail proves nothing.
+- **Refusing an (H) read during a package initializer: NOT robustly feasible.** golib would have to know it is inside
+  a type initializer, which means walking the stack for a `.cctor` frame. Under Native AOT a frame carries no method
+  metadata, so the refusal would go silently inert exactly where it is needed. It would also refuse VALID Go: an
+  `init` that reads a local's header and uses the number inside the function. Stated in D4. The protection is the
+  routing proof (W14), the census line, and QW-9.
+- **P3's Q3 sentence, in D4:** under (H), the number stays valid while the ELEMENT BOX lives, not while the string
+  does. QW-8 makes the Go-valid one-expression shape hold that box.
+
+**The arms, changed:** W5b (item 3); W4 on one literal (item 4); W9 with the counter (item 5); W13 on BYTES (item 1);
+W14, behavioral, with its negative control (the addendum).
+
+**Rulings asked:** QW-8, the carrying pointer for `unsafe.Pointer(h.Data)`: in this cut (converter plus golib), as
+its own seat first, or BOARD only. QW-9, (H) taking an existing (L) copy.
+
+— H (2026-11-15)
