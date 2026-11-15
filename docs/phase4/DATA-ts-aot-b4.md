@@ -786,8 +786,9 @@ body folding, one ILC at a time.
 | `emitdemo` | 1,270.6 MB | +1.7% | 488.6 MB | 13 m 40 s | 30.90 GB | 0 | demo; emit slice 102 of 102 |
 | `mfdemo` | 1,270.8 MB | +1.7% | 488.7 MB | 13 m 38 s | 31.35 GB | 0 | demo |
 
-The largest table is 59.2% of the 2 GiB stream. The seven batches between the two trees, which change how arrays
-are stored, cost these images under 2% in names and about 2.3% in size, and nothing in what they print. The
+The largest table is 59.2% of the 2 GiB stream. The eight batches between the two trees (301 to 308), which
+change how arrays are stored, cost these images under 2% in names and 2.2 to 2.4% in size, and nothing in what
+they print. The
 kept binaries are now the release tree's.
 
 **One hand edit stands between a fresh local conversion and any Native AOT publish, and every build in this
