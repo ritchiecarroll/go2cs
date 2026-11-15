@@ -39,4 +39,5 @@ StorageKind
 ToString
 Value
 ValueSlot
+ΔInlineSlice
 Ꮡelem
