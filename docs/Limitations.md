@@ -241,12 +241,12 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   or have that package export an accessor function.
   <!-- The fix of 1.26.10.2 (docs/phase4/DESIGN-crosspkg-exported-box.md, ACCEPTED; owner's option (b) of 2026-10-25,
        COORD's OQ-1 ruling value kind only). The owner boxes an exported value-kind var:
-       src/go2cs/globalAddressOperations.go:347 (`func markExportedBoxOnlyGlobals(pkg *types.Package, files []*ast.File, into map[types.Object]bool) {`),
+       src/go2cs/globalAddressOperations.go:365 (`func markExportedBoxOnlyGlobals(pkg *types.Package, files []*ast.File, into map[types.Object]bool) {`),
        skipping a pointer, an interface, `package main`, and a linkname forward or registered external-storage var:
-       :389 (`func linknameForwardVars(pkg *types.Package, files []*ast.File) map[string]bool {`) and
-       :424 (`var externalStorageVars = map[string]string{`). An importer runs the same predicate over the owner's
-       syntax, :461 (`func importedGlobalIsBoxed(varObj *types.Var) bool {`), and roots a field or element address on
-       the owner's box, :517 (`func (v *Visitor) rootsAtImportedBoxedGlobal(expr ast.Expr) bool {`).
+       :407 (`func linknameForwardVars(pkg *types.Package, files []*ast.File) map[string]bool {`) and
+       :442 (`var externalStorageVars = map[string]string{`). An importer runs the same predicate over the owner's
+       syntax, :479 (`func importedGlobalIsBoxed(varObj *types.Var) bool {`), and roots a field or element address on
+       the owner's box, :535 (`func (v *Visitor) rootsAtImportedBoxedGlobal(expr ast.Expr) bool {`).
        Behavioral guard: src/tests/Behavioral/CrossPackageExportedVarAddress (every shape above, against Go's output).
        Before 1.26.10.2 every non-pointer exported var bound a copy unless its own package addressed it (diagnosed by
        lane R on windows/amd64 and linux/amd64 at 9b0269c2e8, 2026-10-25). -->
