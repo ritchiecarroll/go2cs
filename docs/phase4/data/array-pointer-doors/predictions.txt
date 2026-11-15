@@ -136,3 +136,27 @@ Scored 2026-11-15, P10 of the sixth set, at V2's commit (a7490fcee7). Outputs: d
   P1   with N: met for every arm it names (it was MET without N at a37a986860).
   The other 23 arms of NativeViewShapes, and pd pf, print what they printed at a37a986860.
   door-a-1115/lazy: the seven arms print the same with V2 as without it.
+
+Scored 2026-11-15, at door B's cut (code 5244cfbe2b, regen ef92f09825). Outputs: door-b-1115/. Design section 16.5.
+  P2   MET as worded. D D0 M M0 R S T print Go's answers (door-b-1115/kits/, one arm per process). 21 of the 24
+       arms now equal Go; F and F0 stop at the named floor (door C) and Q answers length 0, as before.
+  P6   MISSED as worded. Four targets, the same on each: 39 lines in 6 converted files, no GoPositionMap line,
+       no .csproj. The 34 stores: MET, in the malloc files. The 2 address-of: MET in count, in
+       runtime/lock_spinbit.cs, which is no malloc file. The 1 argument: MISSED, 0 lines (sync/pool.go:93 has an
+       element that holds a reference, and the corpus sync/pool.cs is hand-owned). The 6 dereference forms: 4
+       emitted (3 load lines in internal/runtime/maps/runtime_faststr.cs and runtime/alg.cs; 1 StoreArray line in
+       runtime/mfinal.cs.auto, named and not applied); reflect/value.go:1622 is hand-owned and
+       internal/runtime/maps/map_test.go:666 is a test file. "In the malloc files only" is wrong on three
+       files, one of them outside runtime.
+       Falsifier 1 (an index form outside runtime): did not fire; the form outside runtime is a load.
+       Falsifier 2 (a banked runtime row changing verdict): did not fire in what was run. The banked
+       internal/runtime/maps row reads 19 matched and 108 disclosed through -tests on linux/amd64, as banked.
+  P12  MET. AnIndexedLoopOverNativeMemoryAllocatesNothing reads 0 bytes for 100,000 stores and reads over C
+       memory; its control reads above 0; with the fast path taken out it reads 22,400,000.
+  Two further predictions, made in posts of 2026-11-15 (inbox/COORD/20261115T060046Z-P5.md, 061407Z, 063050Z):
+       "every changed line of the scope probe is the whole-array box over an unsafe.Pointer with a scalar
+       element": MET at the final cut, 40 lines. "F4, F5 and the named whole door move 0 corpus lines": MET.
+  The behavioral corpus: no prediction was made. The full re-transpile at the regen commit moved five programs,
+       12 lines (ArrayCastDerefClone 2, ExplicitDerefConversionStore 4, RangePointerArrayConversion 1,
+       SwitchPointerSentinelCase 2, UnsafePointerReinterpret 3), each a form the doors take. All five print Go's
+       output from the new emission; goldens re-baselined in cf55010966.

@@ -375,6 +375,11 @@ func (v *Visitor) exprReadsValueNeedingClone(expr ast.Expr) bool {
 		return false
 	}
 
+	// The array load door answers a new array, copied from the memory (arrayPointerElementDoor.go).
+	if v.arrayPointerLoadIsOwnCopy(expr) || v.nativeFieldArrayViewLoadIsOwnCopy(expr) {
+		return false
+	}
+
 	return typeNeedsValueClone(v.getExprType(expr))
 }
 

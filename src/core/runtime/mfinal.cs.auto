@@ -255,7 +255,7 @@ internal static void runFinalizers() {
                     // memory. That means we have to clear
                     // it before writing to it to avoid
                     // confusing the write barrier.
-                    (@unsafe.Pointer.To<array<uintptr>>(frame)).Assign(new uintptr[]{}.array(2));
+                    @unsafe.Pointer.StoreArray<uintptr>(frame, 2, new uintptr[]{}.array(2));
                 }
                 switch ((~f).fint.Kind()) {
                 case var ᴛ when ᴛ == abi.Pointer: {
