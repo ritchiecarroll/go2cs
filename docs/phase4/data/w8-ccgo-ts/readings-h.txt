@@ -1,0 +1,79 @@
+# readings on H, 2026-11-15, Go 1.26.11, windows/amd64
+
+## the probe under Go (go run, probe-main.go)
+read: hello world %s=%d
+after GC: hello world %s=%d
+same number on a second read: true
+equals StringData: true
+
+## the probe converted by go2cs at 9f2eeb8f23, then run
+panic: runtime error: dereference of a managed pointer with no address (*StringHeader over 0x8000000500000000 — the order token of a reference-bearing pointee at offset 0, Q44 §10.3 arm 2a; a Go-layout byte offset into CLR-laid-out storage cannot be honoured)
+
+## census on ctl/pos (run from ctl/)
+files parsed 1; files naming __ccgo_ts 1
+decl       1
+decl-ref   1
+ts1-decl   1
+plusN      3
+value      0
+plusExpr   1
+compare    1
+subtract   1
+ts1use     2
+other      0
+store      2
+memwrite   1
+parseerror 0
+
+== decl (1)
+   pos/pos.go:9:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+
+== plusExpr (1)
+   pos/pos.go:25:6  __ccgo_ts + uintptr(len(__ccgo_ts1))
+
+== compare (1)
+   pos/pos.go:16:6  __ccgo_ts == other
+
+== subtract (1)
+   pos/pos.go:17:14  other - __ccgo_ts
+
+== ts1use (2)
+   pos/pos.go:18:24  unsafe.StringData(__ccgo_ts1)
+   pos/pos.go:25:30  len(__ccgo_ts1)
+
+== store (2)
+   pos/pos.go:21:2  *(*byte)(unsafe.Pointer(q)) = 'x'
+   pos/pos.go:22:2  *(*byte)(unsafe.Pointer(__ccgo_ts + 1))++
+
+== memwrite (1)
+   pos/pos.go:23:2  Xmemcpy(tls, __ccgo_ts+0, other, 1)
+
+== escapes: a tainted number passed to a call (not followed), by callee, top 25 of 3 callees
+   ?                                2
+   Pointer                          2
+   g                                1
+
+## census on ctl/neg (run from ctl/)
+files parsed 1; files naming __ccgo_ts 1
+decl       1
+decl-ref   1
+ts1-decl   1
+plusN      2
+value      1
+plusExpr   0
+compare    0
+subtract   0
+ts1use     0
+other      0
+store      0
+memwrite   0
+parseerror 0
+
+== decl (1)
+   neg/neg.go:9:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+
+== escapes: a tainted number passed to a call (not followed), by callee, top 25 of 3 callees
+   ?                                1
+   Pointer                          1
+   Xprintf                          1
+
