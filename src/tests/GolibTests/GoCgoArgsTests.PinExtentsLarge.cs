@@ -45,6 +45,36 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(big);
     }
 
+    // R13 (P3's re-read, item 2): the same for an object of a few pages -- a 60 KiB read buffer, a loop of &b[i] over it --
+    // which costs a node per page per pin if it stays on the per-page path.
+    [TestMethod]
+    public void ManyPinsOfOneMidSizedObjectCostTheIndexOneEntryEach()
+    {
+        const int pins = 1000;
+        byte[] buffer = new byte[60 * 1024];
+        var held = new List<PinnedBuffer>(pins);
+
+        try
+        {
+            for (int i = 0; i < pins; i++)
+                held.Add(PinnedBuffer.PinOnly(buffer)!);
+
+            nuint start = (nuint)held[0].Pointer;
+            nuint end = start + (nuint)buffer.Length;
+            int entries = PinExtents.EntriesOver(start, end);
+
+            Assert.IsTrue(entries is > 0 and <= pins, $"{pins} pins of one 60 KiB object hold {entries} index entries");
+            Assert.AreEqual(1, PinExtents.LargeEntriesOver(start, end), $"{pins} pins of one 60 KiB object, as distinct large entries");
+        }
+        finally
+        {
+            foreach (PinnedBuffer pin in held)
+                pin.Dispose();
+        }
+
+        GC.KeepAlive(buffer);
+    }
+
     // R10: a LONE pin of a 16 MiB object, taken and released, allocates what a pin of a small one does -- the index's
     // share of it does not grow with the pages the object covers.
     [TestMethod]
