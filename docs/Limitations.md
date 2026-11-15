@@ -111,22 +111,40 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
        "reflect: field Named.FzName is a Go array held inline (go.arrays); reflection does not read or address it"
        where Go printed {6 [115 101 99 111 110 100 0] 4.5}; fmt of the field alone (h.Buf) matched Go. The census at
        part D's P1 counted 0 fmt %v and reflect uses reaching an admitted type in modernc.org/sqlite's lib and libc. -->
-* **cgo: a pointer rebuilt from a number can hand C Go memory unchecked. This is a known memory-safety
-  gap.** Do not pass C a pointer you made from a number held in a variable when it points inside Go
-  memory: `u := uintptr(unsafe.Pointer(p))`, then `unsafe.Pointer(u + n)`. Nor one whose sum puts the
-  pointer second, `unsafe.Pointer(n + uintptr(unsafe.Pointer(p)))`. go2cs refuses every pointer into Go
-  memory that it can still see as one. Once such an address has been through a `uintptr`, go2cs cannot
-  tell it from an address in C memory, so the call goes ahead, and the memory may move while C is using
-  it. The same holds for a slice element viewed as another type (`(*C.int)(unsafe.Pointer(&b[4]))`) and
-  then held as a `uintptr`. Go's own form, `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)` written in
-  one expression, converts to `unsafe.Add`, which go2cs sees as Go memory and refuses by name. So does
-  `unsafe.Pointer(p)` itself, until go2cs can hold Go memory still for C.
+* **cgo: in three narrow cases, a pointer rebuilt from a number can hand C Go memory unchecked. This is
+  a known memory-safety gap.** go2cs refuses, by name, any address inside Go memory that it is holding
+  still, even after the address has been through a `uintptr`. So `u := uintptr(unsafe.Pointer(p))`
+  followed by `unsafe.Pointer(u + n)` is refused. So is the reversed sum,
+  `unsafe.Pointer(n + uintptr(unsafe.Pointer(p)))`, and so is a slice element viewed as another type
+  (`(*C.int)(unsafe.Pointer(&b[4]))`) and then held as a `uintptr`. Three cases still cross, because
+  go2cs is no longer holding the memory, or never was. In each, the call goes ahead, and the memory may
+  move while C is using it:
+  * **The number outlives the pointer it came from.** Once nothing uses `p`, go2cs stops holding its
+    memory still, and a number kept in a variable reads as C memory. Go's own rules already forbid keeping a pointer
+    as a `uintptr` like this.
+  * **A number taken inside a method with a pointer receiver, from a pointer of the receiver's own
+    type.** go2cs makes that number without holding the memory still. Passing such a pointer to C
+    directly is refused when the package is converted; taking it through a `uintptr` first is not caught.
+  * **Go memory held still before the program's first cgo package was loaded.** That memory can be
+    missing from go2cs's record of what it holds.
+
+  Go's own form, `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)` written in one expression, converts to
+  `unsafe.Add`, and go2cs refuses it by name, as it refuses `unsafe.Pointer(p)` itself, until go2cs can
+  hold Go memory still for C.
   <!-- docs/phase4/DESIGN-cgo-phase3-marshaling.md §16.9 (stop line S3.1-E, COORD's ruling C, 2026-11-12); the arm is
        GolibTests' APointerOverManagedStorageCrossesAVoidPointerOnlyAsTheFourDisclosedNumbers. 2026-11-14 (H, the
        release-notes audit): the one-expression form is emitted as unsafe.Add on master (src/go2cs/pointerArithmetic.go;
        TestPointerArithmeticFormEmitsUnsafeAdd, whose controls "held" and "reversed" stay numbers), and unsafe.Add's
        result keeps its box, so the door refuses it (the goadd arms, hosted cgo-e2e on linux-x64, win-x64, osx-arm64
        and osx-x64). The interior arm is GolibTests' ANumberBuiltByArithmeticOverAGoPointerCrossesAsDisclosed. -->
+  <!-- 2026-11-15 (H): narrowed by the pin-extent seat to the three cases docs/phase4/DESIGN-cgo-pin-extents.md
+       section 4 leaves open: rows 7 (a released pin), 8 (a number minted with no pin) and 11 (an early pin; its routes
+       are in section 11.2). The two arms named above were rewritten by that seat to assert the refusal:
+       APointerOverManagedStorageNeverCrossesAVoidPointer and
+       ANumberBuiltByArithmeticOverAGoPointerIsRefusedForEveryKindOfPin. Row 7 is AReleasedPinLeavesNoStaleRefusal;
+       row 11 is asserted as disclosed in PinExtentsChildTests; row 8 is the receiver-type FromRef arm of
+       DESIGN-cgo-phase3-marshaling.md section 16.9, whose direct form the cgo route refuses at conversion. -->
+
 * **Goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
   holds its thread for as long as it lives. When it ends, the thread waits to run the next `go` statement,
   so starting goroutines one after another is cheap; holding many alive at once is not. Measured on one
