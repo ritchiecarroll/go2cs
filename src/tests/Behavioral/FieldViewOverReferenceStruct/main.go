@@ -174,6 +174,57 @@ func twoViewsAreOnePointer(raw *rawInet4) bool {
 	return p == q && p != f && p != nil
 }
 
+// ---- a chain of field selections: x/sys/unix writes the port two selections deep, `&sa.raw.Port`
+// (syscall_linux.go:394), and the root may be a struct variable or a package variable
+
+type sockInet4 struct {
+	port int
+	addr [4]byte
+	raw  rawInet4
+}
+
+func (sa *sockInet4) sockaddr() {
+	p := (*[2]byte)(unsafe.Pointer(&sa.raw.port))
+	p[0] = byte(sa.port >> 8)
+	p[1] = byte(sa.port)
+	sa.raw.addr = sa.addr
+}
+
+func anyToPort(sa *sockInet4) int {
+	p := (*[2]byte)(unsafe.Pointer(&sa.raw.port))
+	return int(p[0])<<8 + int(p[1])
+}
+
+func twoDeepDirect(sa *sockInet4) byte {
+	(*[2]byte)(unsafe.Pointer(&sa.raw.port))[1]++
+	return (*[2]byte)(unsafe.Pointer(&sa.raw.port))[1]
+}
+
+func variableRoot() uint16 {
+	var s rawInet4
+	p := (*[2]byte)(unsafe.Pointer(&s.port))
+	p[0] = 0xCD
+	p[1] = 0x12
+	return s.port
+}
+
+func packageRoot() uint16 {
+	p := (*[2]byte)(unsafe.Pointer(&global.port))
+	p[1] = 0x77
+	return global.port
+}
+
+// An array field viewed as an array of another element type of its size, in a struct variable: os's readdir on
+// darwin reads a directory entry's name this way (dir_darwin.go:77). The view is of the field's own array.
+func arrayFieldOfVariable() string {
+	var raw rawInet4
+	raw.addr = [4]byte{0x7f, 0xff, 0, 1}
+	p := (*[4]int8)(unsafe.Pointer(&raw.addr))
+	p[3] = -2
+	s := (*[4]int8)(unsafe.Pointer(&raw.addr))[:]
+	return fmt.Sprint(p[0], p[1], s[3], raw.addr[3], len(s))
+}
+
 // ---- an index outside the view is Go's panic
 
 func outOfRange(raw *rawInet4, i int) (text string) {
@@ -224,6 +275,13 @@ func main() {
 	structs := []rawInet4{{port: 1}, {port: 2}}
 	encodePort(&structs[1], 0x0102)
 	fmt.Printf("element: %#04x %#04x\n", structs[0].port, structs[1].port)
+
+	sa := &sockInet4{port: 8443, addr: [4]byte{192, 168, 0, 1}}
+	sa.sockaddr()
+	fmt.Printf("two deep: raw.port=%#04x decode=%d raw.addr=%v\n", sa.raw.port, anyToPort(sa), sa.raw.addr)
+	fmt.Printf("two deep direct: %#02x raw.port=%#04x\n", twoDeepDirect(sa), sa.raw.port)
+	fmt.Printf("variable: %#04x package: %#04x\n", variableRoot(), packageRoot())
+	fmt.Printf("array field of a variable: %s\n", arrayFieldOfVariable())
 
 	fmt.Printf("out of range: %s\n", outOfRange(raw, 2))
 }

@@ -45,6 +45,7 @@ using static go.main_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(rawInet4))]
 [assembly: GoFieldAccess(typeof(record))]
+[assembly: GoFieldAccess(typeof(sockInet4))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -54,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABtYqIKCgqaCgqqCpoKmgoKmgqqigoKCgqaCgoKCqoKCgqaCgoKmgoKqgoKCgqaigqaCgpSCpqqigoKCgoKCgqqCgqaCgqaCgoKmgoKCgqqygqaC5oKUgpSCgoKClIKClIKCgpSCgoKClIKUgpSClIKClA==", "180-182:1", "", "", "", "158:21,159:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABtYqIKCgqaCgqqCpoKmgoKmgqqigoKCgqaCgoKCqoKCgqaCgoKmgoKqgoKCgqaigqaCgpSCpqqigoKCgoKCgqqCgqaCgqaCgoKmgoKCggAIGKKCgoKmgoKmgoKmgoKCgoKmgoKCqoKCgoKCgqqygqaC5oKUgpSCgoKClIKClIKCgpSCgoKClIKUgpSClIKClIKCgoKClA==", "231-233:1", "", "", "", "206:21,207:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -73,6 +74,7 @@ public static partial class main_package
     internal partial struct pair {}
     [GoValueClone("addr", "zero")] internal partial struct rawInet4 {}
     internal partial struct record {}
+    [GoValueClone("addr", "raw")] internal partial struct sockInet4 {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

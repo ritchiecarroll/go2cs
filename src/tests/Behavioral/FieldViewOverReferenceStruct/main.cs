@@ -151,6 +151,54 @@ internal static bool twoViewsAreOnePointer(ж<rawInet4> raw) {
     return p == q && p != f && p != nil;
 }
 
+partial struct sockInet4 {
+    internal nint port;
+    internal array<byte> addr = new(4);
+    internal rawInet4 raw;
+}
+
+internal static void sockaddr(this ж<sockInet4> Ꮡsa) {
+    ref var sa = ref Ꮡsa.DerefOrNull();
+
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡsa.Ꮡraw.Ꮡport, 2);
+    p.ElementRef(0) = (byte)(sa.port >> 8);
+    p.ElementRef(1) = (byte)sa.port;
+    sa.raw.addr = sa.addr.Clone();
+}
+
+internal static nint anyToPort(ж<sockInet4> sa) {
+    var p = @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2);
+    return ((nint)p.ElementRef(0) << 8) + (nint)p.ElementRef(1);
+}
+
+internal static byte twoDeepDirect(ж<sockInet4> sa) {
+    @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2).ElementRef(1)++;
+    return @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2).ElementRef(1);
+}
+
+internal static uint16 variableRoot() {
+    ref var s = ref heap(new rawInet4(), out var Ꮡs);
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2);
+    p.ElementRef(0) = 0xCD;
+    p.ElementRef(1) = 0x12;
+    return s.port;
+}
+
+internal static uint16 packageRoot() {
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡglobal.Ꮡport, 2);
+    p.ElementRef(1) = 0x77;
+    return global.port;
+}
+
+internal static @string arrayFieldOfVariable() {
+    ref var raw = ref heap(new rawInet4(), out var Ꮡraw);
+    raw.addr = new byte[]{0x7f, 0xff, 0, 1}.array();
+    var p = @unsafe.ArrayPointer<int8>.Of(Ꮡraw.Ꮡaddr, 4);
+    p.ElementRef(3) = (int8)(-2);
+    var s = @unsafe.ArrayPointer<int8>.Of(Ꮡraw.Ꮡaddr, 4).slice();
+    return fmt.Sprint(p.ElementRef(0), p.ElementRef(1), s[3], raw.addr[3], len(s));
+}
+
 internal static @string /*text*/ outOfRange(ж<rawInet4> raw, nint i) {
     @string text = default;
     GoFrame ᒐ = default;
@@ -206,6 +254,13 @@ internal static void main() {
     var structs = slice<rawInet4>([new(port: 1), new(port: 2)]);
     encodePort(Ꮡ(structs, 1), 0x0102);
     fmt.Printf("element: %#04x %#04x\n"u8, structs[0].port, structs[1].port);
+
+    var sa = Ꮡ(new sockInet4(port: 8443, addr: new byte[]{192, 168, 0, 1}.array()));
+    sa.sockaddr();
+    fmt.Printf("two deep: raw.port=%#04x decode=%d raw.addr=%v\n"u8, sa.raw.port, anyToPort(sa), sa.raw.addr);
+    fmt.Printf("two deep direct: %#02x raw.port=%#04x\n"u8, twoDeepDirect(sa), sa.raw.port);
+    fmt.Printf("variable: %#04x package: %#04x\n"u8, variableRoot(), packageRoot());
+    fmt.Printf("array field of a variable: %s\n"u8, arrayFieldOfVariable());
 
     fmt.Printf("out of range: %s\n"u8, outOfRange(raw, 2));
 }
