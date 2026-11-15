@@ -61,8 +61,11 @@ internal sealed class PinExtents
     private readonly ConcurrentDictionary<nuint, Page> m_pages = new();
 
     // The large list: a pushed list read without a lock, written under m_largeGate. [m_low, m_high) covers every live
-    // entry, widened BEFORE an entry is linked and narrowed AFTER one is unlinked, so a number outside it -- C memory,
-    // which lies outside the GC's own address range -- never walks the list however many large pins are live.
+    // entry, widened BEFORE an entry is linked and narrowed AFTER one is unlinked, so a number outside it never walks the
+    // list however many large pins are live. C memory is outside it under the GC's regions (the 64-bit default since .NET
+    // 7), which reserve the managed heap as one range apart from native allocations. Under segments (a 32-bit process, or
+    // a configured segments GC), large objects and native memory can interleave, and a C number inside the envelope walks
+    // the list: slower, and never a wrong answer.
     private readonly object m_largeGate = new();
     private volatile Large? m_large;
     private volatile nuint m_low = nuint.MaxValue;
@@ -130,6 +133,12 @@ internal sealed class PinExtents
     /// The live pin whose extent holds <paramref name="address"/>, as a STRONG reference the caller keeps for as long as
     /// it relies on the answer, or null when no pin holds it.
     /// </summary>
+    /// <remarks>
+    /// The strong reference holds the buffer, and so its pin, against its FINALIZER only, not against an explicit
+    /// Dispose: whoever owns the buffer can still release it while a caller holds this answer. The door only refuses on
+    /// it, which needs nothing held. A caller that must keep the bytes still through a native call (3.2) takes a pin of
+    /// its own, scoped to the call, rather than relying on this one.
+    /// </remarks>
     internal static PinnedBuffer? Find(nuint address)
     {
         PinExtents? index = Volatile.Read(ref s_current);
@@ -166,22 +175,32 @@ internal sealed class PinExtents
     {
         lock (m_backfillGate)
         {
-            if (buffer.Closed || m_backfilled.ContainsKey(buffer.HandleKey) || !buffer.TryExtent(out nuint start, out nuint end))
+            // The claim first: a buffer whose release has begun is left out, and one that is claimed is not released
+            // until the claim ends, so the handle read below is never of a freed handle.
+            if (!buffer.TryBeginBackfill())
                 return;
 
-            m_backfilled.Add(buffer.HandleKey, Add(buffer, start, end));
+            try
+            {
+                if (m_backfilled.ContainsKey(buffer.HandleKey) || !buffer.TryExtent(out nuint start, out nuint end))
+                    return;
+
+                m_backfilled.Add(buffer.HandleKey, Add(buffer, start, end));
+            }
+            finally
+            {
+                buffer.EndBackfill();
+            }
         }
     }
 
+    // Called by a release after it has closed the buffer, so no backfill enters it from here on.
     internal void LeaveBackfilled(PinnedBuffer buffer)
     {
         object? extent;
 
         lock (m_backfillGate)
         {
-            // Closed first: a backfill that reaches this buffer from here on leaves it out.
-            buffer.Closed = true;
-
             if (!m_backfilled.Remove(buffer.HandleKey, out extent))
                 return;
         }

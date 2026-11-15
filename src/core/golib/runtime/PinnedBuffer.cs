@@ -27,10 +27,15 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     private readonly int m_len;
     private bool m_disposed;
 
-    // Set, under the pin-extent index's backfill gate, as a buffer made BEFORE the index switched on is released, so a
-    // backfill racing the release cannot enter it afterwards. A bool, so it sits in the object's padding: a process that
-    // links no cgo package allocates the same 32-byte buffer it did before the index existed (R6 holds that number).
-    private bool m_closed;
+    // Whether the pin-extent index's backfill may read this buffer's handle: Open, Backfilling while it does, Closed once
+    // the release has begun. The release closes it BEFORE it frees the handle, waiting out a backfill mid-read, so the
+    // backfill never reads a freed (or re-issued) handle and never enters a buffer whose release has already looked for
+    // its entry (P3's re-read, item 1: a release that read the index as off, then a backfill, then the free, left the
+    // entry behind). A byte, so it sits in the object's padding: a process that links no cgo package allocates the same
+    // 32-byte buffer it did before the index existed (R6 holds that number).
+    private byte m_state;
+
+    private const byte Open = 0, Backfilling = 1, Closed = 2;
 
     // Not constructible directly: Of picks the indexed kind when a cgo package has switched the index on, so a buffer
     // made any other way could never enter the index, and a missed pin is the door's unsafe direction.
@@ -50,6 +55,11 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     /// Pins <paramref name="array"/>. In a process where a cgo package has switched the pin-extent index on, the buffer
     /// is the indexed kind, which carries its entry; anywhere else it is this one, and the index costs it nothing.
     /// </summary>
+    /// <remarks>
+    /// A buffer made here just BEFORE the index is published is the plain kind, and enters only if the backfill reaches
+    /// it through the exact registry. One whose box registers after the backfill's walk, or never, stays out for its life:
+    /// another route into the early-pin residual, row 11 of the design's section 4.
+    /// </remarks>
     internal static PinnedBuffer Of(byte[] array) =>
         PinExtents.Current is null ? new PinnedBuffer(array) : new IndexedPinnedBuffer(array);
 
@@ -76,7 +86,14 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
         if (m_disposed)
             return;
 
-        // Out of the index BEFORE the pin is released: from here on the extent's bytes may move.
+        // Closed first: no backfill reads the handle from here on, and none is still reading it.
+        SpinWait spin = default;
+
+        while (Interlocked.CompareExchange(ref m_state, Closed, Open) == Backfilling)
+            spin.SpinOnce();
+
+        // Out of the index BEFORE the pin is released: from here on the extent's bytes may move. Asked AFTER closing, so a
+        // backfill that entered this buffer (after the index was published) is seen here, and none can enter it later.
         LeaveIndex();
 
         if (m_handle.IsAllocated)
@@ -129,12 +146,11 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     // index pays one read of it.
     private protected virtual void LeaveIndex() => PinExtents.Current?.LeaveBackfilled(this);
 
-    // Under the backfill gate only.
-    internal bool Closed
-    {
-        get => m_closed;
-        set => m_closed = value;
-    }
+    // The backfill's claim on the handle: false once the release has closed the buffer, and while it holds, the release
+    // waits before it frees the handle. Ended by EndBackfill.
+    internal bool TryBeginBackfill() => Interlocked.CompareExchange(ref m_state, Backfilling, Open) == Open;
+
+    internal void EndBackfill() => Volatile.Write(ref m_state, Open);
 
     internal nint HandleKey => GCHandle.ToIntPtr(m_handle);
 
@@ -143,9 +159,10 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     /// or false when the buffer pins nothing.
     /// </summary>
     /// <remarks>
-    /// It reads the handle with no fence against a concurrent explicit Dispose (P3's review, item 4), and nothing can
-    /// race one. The indexed kind calls it only from its own constructor, before anything else can see the buffer. The
-    /// backfill calls it under the backfill gate, which a release must take (LeaveBackfilled) before it frees the handle.
+    /// It reads the handle with no lock of its own, and no release can free the handle under it (P3's review, item 4,
+    /// and its re-read, item 1). The indexed kind calls it only from its own constructor, before anything else can see
+    /// the buffer. The backfill calls it only inside TryBeginBackfill / EndBackfill, and a release closes the buffer,
+    /// waiting out that claim, before it frees the handle.
     /// </remarks>
     internal bool TryExtent(out nuint start, out nuint end)
     {
