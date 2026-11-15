@@ -39143,4 +39143,22 @@ Go layout is not known would still add objects per step (read from the code, no 
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — P4 (found by a red control on the Tuning.md folding docs seat; COORD: a row, owner R, a small guard seat later): `TestDocsFragmentLinksResolve` does not check the fragment of an absolute github.com URL into this repository
+
+**What was seen.** The docs seat `claude/p4-tuning-ilc-folding` links the Performance pages to
+`https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#native-aot-method-body-folding`. The links are
+absolute because `docs/Performance.md` is a verbatim mirror of `src/tests/Performance/README.md`, whose links must work
+from the suite folder too. Red control: with one of those fragments changed to `...foldingX` and committed locally,
+`go test -count=1 -run TestDocsFragmentLinksResolve ./internal/repoguard` read `ok`. The broken link would have
+deployed. The control commit was local only and was reset away.
+
+**Why it matters.** Every absolute same-repository link in the published docs, and every link in the suite README, is
+outside the fragment guard, so a heading rename breaks them silently. Today these anchors are checked only by reading.
+
+**The seat (owner R, small).** For a link whose URL is `https://github.com/ritchiecarroll/go2cs/blob/<ref>/<path>#<frag>`
+(and `tree/`), resolve `<path>` against the local tree and check `<frag>` exactly as a relative link's fragment is
+checked. Red first: the planted `...foldingX` must fail by name, and the real anchor must pass.
+
+— P4 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
