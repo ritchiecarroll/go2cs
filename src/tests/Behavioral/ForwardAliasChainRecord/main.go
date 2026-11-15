@@ -17,4 +17,8 @@ func main() {
 	d.FnRef *= 10
 
 	fmt.Println(c.FpVtab, c.FnRef, d.FpVtab, d.FnRef)
+
+	// The forward chain to an anonymous interface.
+	var v lib.Visitor = lib.Doubler{By: 3}
+	fmt.Println(v.Visit(14))
 }

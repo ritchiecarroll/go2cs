@@ -12,6 +12,7 @@
 // <ImportedTypeAliases>
 global using libꓸCursor = go.ForwardAliasChainRecord.lib_package.Tsqlite3_vtab_cursorᴛ1;
 global using libꓸSqlite3_vtab_cursor = go.ForwardAliasChainRecord.lib_package.Tsqlite3_vtab_cursorᴛ1;
+global using libꓸVisitor = go.ForwardAliasChainRecord.lib_package.Tvisitorᴛ1;
 // </ImportedTypeAliases>
 
 using go;
@@ -38,6 +39,7 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<go.ForwardAliasChainRecord.lib_package.Doubler, go.ForwardAliasChainRecord.lib_package.Tvisitorᴛ1>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -51,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAgYgoKUgpQ=")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAgYgoKUgpSWgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

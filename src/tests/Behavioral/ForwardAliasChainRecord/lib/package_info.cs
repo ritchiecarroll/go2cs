@@ -27,10 +27,13 @@ using static go.ForwardAliasChainRecord.lib_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("696e746572666163657b5669736974286e20696e7433322920696e7433327d", "Tvisitorᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b4670567461622075696e747074723b20466e52656620696e7433327d", "Tsqlite3_vtab_cursorᴛ1")]
 [assembly: GoTypeAlias("Cursor", "go.ForwardAliasChainRecord.lib_package.Tsqlite3_vtab_cursorᴛ1")]
 [assembly: GoTypeAlias("Sqlite3_vtab_cursor", "go.ForwardAliasChainRecord.lib_package.Tsqlite3_vtab_cursorᴛ1")]
 [assembly: GoTypeAlias("Tsqlite3_vtab_cursor", "go.ForwardAliasChainRecord.lib_package.Tsqlite3_vtab_cursorᴛ1")]
+[assembly: GoTypeAlias("Tvisitor", "go.ForwardAliasChainRecord.lib_package.Tvisitorᴛ1")]
+[assembly: GoTypeAlias("Visitor", "go.ForwardAliasChainRecord.lib_package.Tvisitorᴛ1")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -53,7 +56,7 @@ using static go.ForwardAliasChainRecord.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA4g")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "ABEgAAkc")]
 // </GoSourcePositionMaps>
 
 namespace go.ForwardAliasChainRecord;
@@ -68,6 +71,8 @@ public static partial class lib_package
     // via declarations below.
 
     // <TypeAccessibility>
+    public partial interface Tvisitorᴛ1 {}
+    public partial struct Doubler {}
     public partial struct Tsqlite3_vtab_cursorᴛ1 {}
     // </TypeAccessibility>
 

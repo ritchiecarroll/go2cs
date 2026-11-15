@@ -559,14 +559,15 @@ func lookupAnyDynamicTypeName(signature string) string {
 }
 
 // resolvedDynamicTypeText answers text with each dynamic-type marker replaced by the lift the registries name for its
-// signature (lookupAnyDynamicTypeName). A marker no registry answers stays as written, for its caller to judge.
+// signature (lookupAnyDynamicTypeName). A marker no registry answers stays as written, and its signature (or, for an
+// undecodable payload, the payload itself) is returned in unresolved, for its caller to report.
 //
 // package_info.cs's GoTypeAlias records are written from values captured while files were visited, so a forward alias
 // chain to an anonymous struct (modernc.org/sqlite/lib's `Sqlite3_vtab_cursor = sqlite3_vtab_cursor =
 // Tsqlite3_vtab_cursor`, the first declared above the struct) recorded the marker resolveDynamicTypeMarkers later
 // rewrote in the .cs files only. Importers copy a record into a `global using`, where the marker does not parse
-// (sqlite-cs W7: 3,080 of lib's 15,499 records).
-func resolvedDynamicTypeText(text string) string {
+// (sqlite-cs W7: 3,080 of lib's 15,499 records). A prefix with no suffix after it is not a marker and stays as text.
+func resolvedDynamicTypeText(text string) (result string, unresolved []string) {
 	var resolved strings.Builder
 
 	for {
@@ -584,10 +585,15 @@ func resolvedDynamicTypeText(text string) string {
 		}
 
 		markerEnd := payloadStart + length + len(dynamicTypeMarkerSuffix)
+		payload := text[payloadStart : payloadStart+length]
 		name := ""
 
-		if signature, decoded := dynamicTypeMarkerSignature(text[payloadStart : payloadStart+length]); decoded {
-			name = lookupAnyDynamicTypeName(signature)
+		if signature, decoded := dynamicTypeMarkerSignature(payload); decoded {
+			if name = lookupAnyDynamicTypeName(signature); name == "" {
+				unresolved = append(unresolved, signature)
+			}
+		} else {
+			unresolved = append(unresolved, "«undecodable marker payload: "+payload+"»")
 		}
 
 		if name == "" {
@@ -601,5 +607,5 @@ func resolvedDynamicTypeText(text string) string {
 
 	resolved.WriteString(text)
 
-	return resolved.String()
+	return resolved.String(), unresolved
 }

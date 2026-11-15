@@ -16,3 +16,17 @@ type Cursor = Tsqlite3_vtab_cursor
 func Open(n int32) Sqlite3_vtab_cursor { return Sqlite3_vtab_cursor{FpVtab: 7, FnRef: n} }
 
 type sqlite3_vtab_cursor = Tsqlite3_vtab_cursor
+
+// The same forward chain to an anonymous INTERFACE (P3's review of W7, arm b): its lift is resolved from the record
+// as the struct's is.
+type Visitor = visitor
+
+type Tvisitor = interface {
+	Visit(n int32) int32
+}
+
+type Doubler struct{ By int32 }
+
+func (d Doubler) Visit(n int32) int32 { return n * d.By }
+
+type visitor = Tvisitor
