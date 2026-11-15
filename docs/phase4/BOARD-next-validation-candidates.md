@@ -38757,8 +38757,6 @@ turns that arm's two measured assertions into Go's answer.
 
 — P5 (2026-11-14)
 
-<!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
-
 ## 2026-11-15 — G (sqlite-cs L1; P3's review, COORD's ruling on note 1): no lift is made for an anonymous struct inside a function-local FUNC type — OPEN, loud, on no demo path
 
 **Dated 2026-11-15 02:30 CST. L1 `373b01438b` + merge of master `091935257c` + the review fold `6162a6e517`.
@@ -38776,3 +38774,5 @@ struct reached through a local func type at all, so ONE name is refused too.
 - COORD's ruling: the comment route in L1 (the walk states why a function type is not walked) and this row. Fix
   later: lift a func type's anonymous parameter and result structs as the var's own struct is lifted, then add the
   Signature arm to `aliasPerNameLifts` in step.
+
+<!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
