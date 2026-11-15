@@ -41,6 +41,15 @@
 // mutex is locked, and a copy of an idle mutex is a free mutex with no queue. Go's vet forbids the copy
 // ("must not be copied after first use") but its bytes work, and so do these.
 //
+// WHAT A CONTENDED LOCK ALLOCATES: nothing, once its thread has the spare queues it needs. The first
+// Lock of a thread that has to install a queue allocates the queue (104 bytes: the semaphore and its
+// lock object) and the thread's stripe slot (32 bytes, see t_stripe), and the thread allocates one more
+// queue each time more of the queues it installed are in use at once than ever before. Queues are kept
+// for the life of the process (QueueStripe has the bound). Go's waiter takes its sudog from a per-P
+// cache the same way, and allocates one when the cache is empty. The mutex this file replaced allocated
+// one semaphore (88 bytes) for every Mutex ever locked, contended or not, and kept it as long as the
+// mutex lived.
+//
 // WHERE THIS DIFFERS FROM GO, each stated and none cured (BOARD, W9a):
 // - A mutex copied WHILE a goroutine waits on it carries the queue's handle. Until that queue empties,
 //   a waiter of the copy joins the original's queue and can take a wakeup meant for the original,
@@ -118,8 +127,9 @@ internal static partial void fatal(@string s) => FatalReport.Fatal(s, userFault:
 // it has the lock (gateOf, leave). The queue of a mutex nobody waits on is taken out of the table and
 // kept for the next mutex that needs one, which gets it under a NEW handle: a handle read from a mutex
 // before its queue was given up names nothing afterwards. So a contended Lock allocates a queue only
-// while its thread's stripe has no spare one. `handle`, `waiters` and `next` are written under the
-// stripe's lock.
+// while its thread's stripe has no spare one: the first time the thread installs a queue, and again
+// each time more of the queues it installed are in use at once than ever before. `handle`, `waiters`
+// and `next` are written under the stripe's lock.
 private sealed class WaitQueue : SemaphoreSlim {
     internal uint32 handle;
     internal int waiters;
@@ -135,19 +145,24 @@ private sealed class WaitQueue : SemaphoreSlim {
 // number is 26 bits: a stripe that installs a queue every microsecond wraps it in about a minute.
 private const int StripeBits = 6, QueueStripes = 1 << StripeBits;
 
-// One stripe: its queues, hashed by sequence number and chained through WaitQueue.next, and a few spare
+// One stripe: its queues, hashed by sequence number and chained through WaitQueue.next, and its spare
 // queues. Every read and write of a stripe happens under `lock (stripe)`, and that lock is what makes
 // the three compound steps of the protocol atomic: find a queue and count a waiter into it (gateOf),
 // install a queue together with its handle (gateOf), and count the last waiter out and remove the queue
 // (leave).
+//
+// A stripe keeps every queue it created, for the life of the process. It creates one only when all of
+// its queues are in the table, and a queue in the table has a waiter, so a stripe never holds more
+// queues than the most goroutines that ever waited at one moment on queues it installed. The worst case
+// is QueueStripes stripes, each with as many queues as the most goroutines that waited at once, at 104
+// bytes a queue. A thread that installed a queue moves on while others still wait on it, so one thread
+// can have several in the table at once; with a limit on the spares (four, at first) such a thread
+// allocated a queue and dropped one again and again.
 private sealed class QueueStripe(uint32 index) {
-    private const int MaxSpare = 4;
-
     private WaitQueue?[] m_buckets = new WaitQueue?[16];
     private int m_queues;
     private uint32 m_sequence;
     private WaitQueue? m_spare;
-    private int m_spares;
 
     private static int bucketOf(uint32 handle, int buckets) => (int)(handle >> StripeBits) & (buckets - 1);
 
@@ -181,7 +196,6 @@ private sealed class QueueStripe(uint32 index) {
             queue = new WaitQueue();
         } else {
             m_spare = queue.next;
-            m_spares--;
 
             // A wakeup sent to the queue after its last waiter left belongs to nobody.
             while (queue.CurrentCount != 0 && queue.Wait(0)) { }
@@ -199,7 +213,8 @@ private sealed class QueueStripe(uint32 index) {
         return queue;
     }
 
-    // retire takes a queue nobody waits on out of the table and keeps it as a spare.
+    // retire takes a queue nobody waits on out of the table and keeps it as a spare. Every queue is
+    // kept: see the bound above.
     internal void retire(WaitQueue queue) {
         ref WaitQueue? link = ref m_buckets[bucketOf(queue.handle, m_buckets.Length)];
 
@@ -210,13 +225,8 @@ private sealed class QueueStripe(uint32 index) {
         link = queue.next;
         m_queues--;
         queue.handle = 0;
-        queue.next = null;
-
-        if (m_spares < MaxSpare) {
-            queue.next = m_spare;
-            m_spare = queue;
-            m_spares++;
-        }
+        queue.next = m_spare;
+        m_spare = queue;
     }
 
     private void grow() {
@@ -250,6 +260,7 @@ private static QueueStripe[] newStripes() {
 private static QueueStripe stripeOf(uint32 handle) => s_stripes[(int)(handle & (QueueStripes - 1))];
 
 // The stripe this thread installs its queues in, given out in turn the first time the thread needs one.
+// The runtime allocates the thread's storage for the field at that first read (32 bytes on .NET 10).
 [System.ThreadStatic] private static QueueStripe? t_stripe;
 
 private static int s_stripeTurn;

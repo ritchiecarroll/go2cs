@@ -343,6 +343,57 @@ public unsafe class SyncMutexQueueTests
         }
     }
 
+    // A stripe keeps every queue it created. A thread that installed a queue moves on while other threads still
+    // wait on it, so one thread can have several queues in the table at once, and when they are given up they
+    // all wait for that thread's next installs. Here one thread holds a queue on each of six mutexes, as a
+    // waiter holds it, gives the six up and takes six again: the second six are the first six, so nothing
+    // was created and nothing was dropped. With a limit of four spares, two of the second six were new, and
+    // a thread that kept more than four queues in use paid an allocation every time it came back to them.
+    [TestMethod]
+    public void TheQueuesAThreadInstalledAtOnceAllServeItAgain()
+    {
+        const int Mutexes = 6;
+        sync.Mutex* ms = (sync.Mutex*)NativeMemory.AllocZeroed((nuint)(Mutexes * sizeof(sync.Mutex)));
+
+        try
+        {
+            SemaphoreSlim[] first = new SemaphoreSlim[Mutexes], second = new SemaphoreSlim[Mutexes];
+
+            for (int i = 0; i < Mutexes; i++)
+            {
+                first[i] = GateOf(ms + i);
+
+                for (int earlier = 0; earlier < i; earlier++)
+                    Assert.AreNotSame(first[earlier], first[i], "two mutexes with a waiter each have two queues");
+            }
+
+            for (int i = 0; i < Mutexes; i++)
+                Leave(ms + i, first[i]);
+
+            for (int i = 0; i < Mutexes; i++)
+                Assert.AreEqual(0u, Sema(ms + i), "a mutex nobody waits on holds no queue handle");
+
+            int created = 0;
+
+            for (int i = 0; i < Mutexes; i++)
+            {
+                second[i] = GateOf(ms + i);
+
+                if (Array.IndexOf(first, second[i]) < 0)
+                    created++;
+            }
+
+            for (int i = 0; i < Mutexes; i++)
+                Leave(ms + i, second[i]);
+
+            Assert.AreEqual(0, created, $"of {Mutexes} queues the thread took the second time, {created} were not among the {Mutexes} it gave up: the stripe dropped spare queues");
+        }
+        finally
+        {
+            NativeMemory.Free(ms);
+        }
+    }
+
     // Unlock sends its wakeup outside the stripe's lock, so the queue it looked up can be given up, and
     // installed for ANOTHER mutex, before the wakeup arrives. The late wakeup is played here by a Release on
     // the queue object this thread kept. Arriving while the queue is a spare, it is dropped when the queue is
