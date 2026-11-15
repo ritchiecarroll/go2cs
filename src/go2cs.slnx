@@ -310,6 +310,7 @@
     <Project Path="tests/Behavioral/AnonInterfaceSignatureAssert/AnonInterfaceSignatureAssert.csproj" />
     <Project Path="tests/Behavioral/AnonInterfaceVarWitness/AnonInterfaceVarWitness.csproj" />
     <Project Path="tests/Behavioral/AnonStructArrayElement/AnonStructArrayElement.csproj" />
+    <Project Path="tests/Behavioral/AnonStructArrayPointerDoor/AnonStructArrayPointerDoor.csproj" />
     <Project Path="tests/Behavioral/AnonStructComposedTypes/AnonStructComposedTypes.csproj" />
     <Project Path="tests/Behavioral/AnonStructAliasedConversion/AnonStructAliasedConversion.csproj" />
     <Project Path="tests/Behavioral/AnonStructAliasedConversion/structs/AnonStructAliasedConversion.structs.csproj" />
