@@ -9,7 +9,13 @@ equals StringData: true
 ## the probe converted by go2cs at 9f2eeb8f23, then run
 panic: runtime error: dereference of a managed pointer with no address (*StringHeader over 0x8000000500000000 — the order token of a reference-bearing pointee at offset 0, Q44 §10.3 arm 2a; a Go-layout byte offset into CLR-laid-out storage cannot be honoured)
 
-## census on ctl/pos (run from ctl/; write classes judged at the destination)
+## a write into the literals under Go (scratch, the probe's shape with one store through __ccgo_ts)
+before: 104
+unexpected fault address 0x7ff70adebd0a
+fatal error: fault
+[signal 0xc0000005 code=0x1 addr=0x7ff70adebd0a pc=0x7ff70adc4ce0]
+
+## census on ctl/pos (run from ctl/; writes judged at the destination; header uses)
 files parsed 1; files naming __ccgo_ts 1
 decl       1
 decl-ref   1
@@ -51,12 +57,30 @@ parseerror 0
 == memwrite (1)
    pos/pos.go:23:2  Xmemcpy(tls, __ccgo_ts+0, other, 1)
 
+== header uses: reflect.SliceHeader and reflect.StringHeader (the __ccgo_ts declarations' own Data read counted apart: 1)
+   hdr-Slice-Data-read          1
+   hdr-Slice-Data-write         1
+   hdr-Slice-Len-read           1
+   hdr-Slice-type               1
+
+== hdr-Slice-Data-read (1)
+   pos/pos.go:39:9  d := (*reflect.SliceHeader)(unsafe.Pointer(&b)).Data
+
+== hdr-Slice-Data-write (1)
+   pos/pos.go:40:4  (*reflect.SliceHeader)(unsafe.Pointer(&b)).Data = n
+
+== hdr-Slice-Len-read (1)
+   pos/pos.go:41:8  _ = (*reflect.SliceHeader)(unsafe.Pointer(&b)).Len
+
+== hdr-Slice-type (1)
+   pos/pos.go:42:8  reflect.SliceHeader
+
 == escapes: a tainted number passed to a call (not followed), by callee, top 25 of 3 callees
    ?                                3
    Pointer                          3
    g                                1
 
-## census on ctl/neg (run from ctl/; write classes judged at the destination)
+## census on ctl/neg (run from ctl/; writes judged at the destination; header uses)
 files parsed 1; files naming __ccgo_ts 1
 decl       1
 decl-ref   1
@@ -79,6 +103,9 @@ parseerror 0
 
 == store-may (1)
    neg/neg.go:35:2  *(*byte)(unsafe.Pointer(m)) = 1
+
+== header uses: reflect.SliceHeader and reflect.StringHeader (the __ccgo_ts declarations' own Data read counted apart: 1)
+   none
 
 == escapes: a tainted number passed to a call (not followed), by callee, top 25 of 4 callees
    ?                                2

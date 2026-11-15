@@ -27,6 +27,11 @@
 // Reported apart and never as the verdict: store-may and memwrite-may, where the destination is derived only when a
 // local counts with at least ONE derived source (least fixpoint). A __ccgo_ts number stored as a VALUE, or passed as
 // a format or a source, is not a write through it.
+// HEADER USES (COORD's D6 class): every reflect.SliceHeader and reflect.StringHeader the files name, as
+// hdr-<Slice|String>-<field>-<read|write|addr> for the conversion (*reflect.XHeader)(p).Field, or hdr-<kind>-type for any
+// other use of the name. The __ccgo_ts declarations' own StringHeader Data read is counted apart. Files that name
+// neither __ccgo_ts nor "Header" are not parsed.
+//
 // LIMITS: no inter-procedural flow (a tainted number passed into a function that writes through its parameter is
 // counted under "escapes" by callee, not followed); no flow through struct fields, globals or memory.
 package main
@@ -63,6 +68,8 @@ type stats struct {
 	counts   map[string]int
 	sites    map[string][]site
 	escapes  map[string]int
+
+	headerClasses map[string]bool
 }
 
 func main() {
@@ -71,7 +78,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "usage: census [-tests] <dir>...")
 		os.Exit(2)
 	}
-	st := &stats{counts: map[string]int{}, sites: map[string][]site{}, escapes: map[string]int{}}
+	st := &stats{counts: map[string]int{}, sites: map[string][]site{}, escapes: map[string]int{}, headerClasses: map[string]bool{}}
 	fset := token.NewFileSet()
 	for _, root := range flag.Args() {
 		err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -86,10 +93,13 @@ func main() {
 			if err != nil {
 				return err
 			}
-			if !strings.Contains(string(src), "__ccgo_ts") {
+			names := strings.Contains(string(src), "__ccgo_ts")
+			if !names && !strings.Contains(string(src), "Header") {
 				return nil
 			}
-			st.refFiles++
+			if names {
+				st.refFiles++
+			}
 			f, err := parser.ParseFile(fset, path, src, parser.SkipObjectResolution)
 			if err != nil {
 				st.add("parseerror", fset, token.NoPos, nil, err.Error())
@@ -170,7 +180,84 @@ func censusFile(fset *token.FileSet, f *ast.File, st *stats, name string) {
 		}
 		writesIn(fset, st, fd)
 	}
+	headerUses(fset, f, st)
 	_ = name
+}
+
+// HEADER USES: every reflect.SliceHeader and reflect.StringHeader named in the file, classified as
+// hdr-<Slice|String>-<field>-<read|write|addr> when it is the conversion (*reflect.XHeader)(p) followed by .Field, or
+// hdr-<Slice|String>-type when the name is used any other way (a declared variable, a composite literal, a parameter).
+// Every site but the __ccgo_ts declaration's own StringHeader Data read is printed.
+func headerUses(fset *token.FileSet, f *ast.File, st *stats) {
+	var stack []ast.Node
+	ast.Inspect(f, func(n ast.Node) bool {
+		if n == nil {
+			stack = stack[:len(stack)-1]
+			return true
+		}
+		stack = append(stack, n)
+		sel, ok := n.(*ast.SelectorExpr)
+		if !ok || !isIdent(sel.X, "reflect") || (sel.Sel.Name != "SliceHeader" && sel.Sel.Name != "StringHeader") {
+			return true
+		}
+		kind := strings.TrimSuffix(sel.Sel.Name, "Header")
+		class, at := "hdr-"+kind+"-type", ast.Node(sel)
+		// Up from the name: ( * reflect.XHeader ) as a conversion's Fun, then ( ... ).Field, then its use.
+		i := len(stack) - 2
+		for i >= 0 {
+			switch stack[i].(type) {
+			case *ast.ParenExpr, *ast.StarExpr:
+				i--
+				continue
+			}
+			break
+		}
+		if i >= 0 {
+			if call, ok := stack[i].(*ast.CallExpr); ok && len(call.Args) == 1 {
+				j := i - 1
+				for j >= 0 {
+					if _, ok := stack[j].(*ast.ParenExpr); ok {
+						j--
+						continue
+					}
+					break
+				}
+				if j >= 0 {
+					if fsel, ok := stack[j].(*ast.SelectorExpr); ok && unparen(fsel.X) == ast.Expr(call) {
+						use := "read"
+						if j >= 1 {
+							switch u := stack[j-1].(type) {
+							case *ast.AssignStmt:
+								for _, l := range u.Lhs {
+									if l == ast.Expr(fsel) {
+										use = "write"
+									}
+								}
+							case *ast.IncDecStmt:
+								use = "write"
+							case *ast.UnaryExpr:
+								if u.Op == token.AND {
+									use = "addr"
+								}
+							}
+						}
+						class = "hdr-" + kind + "-" + fsel.Sel.Name + "-" + use
+						at = fsel
+						if j >= 1 {
+							at = stack[j-1]
+						}
+					}
+				}
+			}
+		}
+		if kind == "String" && class == "hdr-String-Data-read" && strings.Contains(render(fset, at), "__ccgo_ts1") {
+			st.counts["hdr-String-Data-read-ccgo_ts-decl"]++
+			return true
+		}
+		st.add(class, fset, sel.Pos(), at, "")
+		st.headerClasses[class] = true
+		return true
+	})
 }
 
 func classify(fset *token.FileSet, st *stats, id *ast.Ident, parent ast.Node, stack []ast.Node) {
@@ -488,6 +575,29 @@ func report(st *stats) {
 		if len(ss) == 0 {
 			continue
 		}
+		fmt.Printf("\n== %s (%d)\n", c, len(ss))
+		for i, s := range ss {
+			if i == *maxPrint {
+				fmt.Printf("   ... %d more\n", len(ss)-i)
+				break
+			}
+			fmt.Printf("   %s  %s\n", s.pos, s.text)
+		}
+	}
+	fmt.Printf("\n== header uses: reflect.SliceHeader and reflect.StringHeader (the __ccgo_ts declarations' own Data read counted apart: %d)\n", st.counts["hdr-String-Data-read-ccgo_ts-decl"])
+	var hc []string
+	for c := range st.headerClasses {
+		hc = append(hc, c)
+	}
+	sort.Strings(hc)
+	if len(hc) == 0 {
+		fmt.Println("   none")
+	}
+	for _, c := range hc {
+		fmt.Printf("   %-28s %d\n", c, st.counts[c])
+	}
+	for _, c := range hc {
+		ss := st.sites[c]
 		fmt.Printf("\n== %s (%d)\n", c, len(ss))
 		for i, s := range ss {
 			if i == *maxPrint {

@@ -33,3 +33,13 @@ func h() {
 	s += 4
 	*(*byte)(unsafe.Pointer(s)) = 1 // store
 }
+
+// Header uses (the D6 class): a SliceHeader Data read and write, a Len read, and a declared variable.
+func hdr(b []byte, n uintptr) uintptr {
+	d := (*reflect.SliceHeader)(unsafe.Pointer(&b)).Data
+	(*reflect.SliceHeader)(unsafe.Pointer(&b)).Data = n
+	_ = (*reflect.SliceHeader)(unsafe.Pointer(&b)).Len
+	var h reflect.SliceHeader
+	_ = h
+	return d
+}
