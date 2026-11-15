@@ -20,10 +20,13 @@ restored as a package instead of converted again ([how](ConvertingAModule.md#map
 A Go developer can read the converted code and follow it, and a .NET developer can use a Go library as
 ordinary managed code. Go's slices, maps, channels, goroutines, `defer`, multiple returns, struct
 embedding and interfaces come from a small runtime library and compile-time source generators, so that
-machinery stays out of the converted files. Behavior comes first: a goroutine runs on its own thread
-and is not rewritten into `async`. The converted Go standard library passes Go's own tests, package by
-package, on Windows and Linux. On macOS, a package is validated when its row on the
-[roster](ValidatedTestPackages.md) carries a macOS count.
+machinery stays out of the converted files. Behavior comes first: goroutines, channels, `select` and
+`defer` keep Go's semantics. The converted Go standard library passes Go's own tests, package by package,
+on Windows, on Linux (x64 and Arm64) and on macOS (Intel and Apple silicon); the
+[roster](ValidatedTestPackages.md) has each package's counts.
+<!-- Parity, read at the roster for 1.26.11.1 (2026-11-15, seat 1 of the user-facing docs audit): every row carries a Windows
+     reading; every row but the two Windows-only ones (internal/syscall/windows and its registry child) carries a linux-arm64
+     reading and a darwin reading, each chip shown where Intel and Apple silicon differ. -->
 
 ## 📰 NEWS — Faster Native AOT, and a Release standard library from source
 
@@ -111,9 +114,9 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
   To build the converter from source instead, you need [Go 1.26.11](https://go.dev/dl/) or later. The standard
   library packages are converted from, and validated on, Go 1.26.11, and the
   [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
-- **Windows or Linux on x64**, where the converted standard library is validated against Go's own
-  tests. macOS, on Intel and Apple silicon, has packages; a package validated there shows a macOS
-  count on the [roster](ValidatedTestPackages.md) ([Platforms](Roadmap.md#platforms)).
+- **Windows (x64), Linux (x64 or Arm64) or macOS (Intel or Apple silicon)**, where the converted
+  standard library is validated against Go's own tests ([roster](ValidatedTestPackages.md),
+  [Platforms](Roadmap.md#platforms)).
   A minimal Linux, such as a container or a fresh server, also needs `git` and `curl`, and .NET's
   native dependencies ICU and OpenSSL
   ([Microsoft's list](https://learn.microsoft.com/dotnet/core/install/linux-scripted-manual#dependencies)).
@@ -215,7 +218,7 @@ NuGet packages. Wondering which Go modules make good conversions? The
 
 The whole Go standard library converts and compiles as .NET assemblies, and every package that can be
 validated matches its own Go test suite in C#, verdict for verdict, with every difference disclosed, on
-Windows and Linux.
+Windows (x64), on Linux (x64 and Arm64) and on macOS (Intel and Apple silicon).
 [Validated Test Packages](ValidatedTestPackages.md) carries the current counts, package by package, and
 the [Roadmap](Roadmap.md) says where the project stands and what comes next.
 

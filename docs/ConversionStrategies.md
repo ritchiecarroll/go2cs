@@ -1036,8 +1036,9 @@ which can be a local path:
 
 **Build constraints pick each target's Go files.** The converter selects Go files by their build
 constraints and file-name suffixes, as `go build` does. The standard library is converted for Windows,
-Linux and macOS, each on amd64. Files whose C# differs between them go into `windows/`, `linux/` and
-`darwin/` subfolders. For example, `os` keeps `dir_windows.cs` in `os/windows/` and `dirent_linux.cs` in
+Linux and macOS on amd64, and for Linux on arm64. Files whose C# differs between them go into `windows/`,
+`linux/` and `darwin/` subfolders, and a package whose C# also differs by architecture adds folders such as
+`amd64/`, `linux-amd64/` and `linux-arm64/`. For example, `os` keeps `dir_windows.cs` in `os/windows/` and `dirent_linux.cs` in
 `os/linux/`.
 <!-- the multi-target run: docs/ConversionStrategies-Reference/package-conversion.md:601 (`-platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64`) -->
 
@@ -8437,7 +8438,7 @@ runtime library every converted program uses ([`goǃ`](../src/core/golib/builtin
 letter U+01C3, which most fonts draw the same way. That letter keeps the method's name apart from `go`, the C#
 namespace every converted file lives in ([glyphs](#reading-converted-code-names-and-glyphs)).
 
-Each goroutine runs on an operating-system thread of its own, from start to finish. That is the main difference
+By default, each goroutine runs on an operating-system thread of its own, from start to finish. That is the main difference
 from Go, and the last part of this section explains what it means for a program.
 
 **`goǃ` takes the function and its arguments separately.** Most `goǃ` overloads take an `Action`, a C#
@@ -8630,7 +8631,7 @@ internal static partial void main() {
 the receive `<-done`, which waits until the panic ends the process
 ([Channels](#channels-and-select)).
 
-**A goroutine keeps its own thread from start to finish.** golib's
+**By default, a goroutine keeps its own thread from start to finish.** golib's
 [`Goroutine`](../src/core/golib/runtime/Goroutine.cs) class runs every `goǃ` on a background thread that
 belongs to that goroutine until it ends. A goroutine that blocks on a channel, a lock or a sleep blocks only its
 own thread. When a goroutine ends, its thread waits for the next `goǃ` instead of exiting, so a `go` statement
@@ -8698,19 +8699,21 @@ reservation. A mistaken mark would crash where Go grows the stack, so the proof 
      or a runtime callback. Guards: the converter's goroutineStackAnalysis_test.go, GolibTests GoroutinePoolTests
      (a bounded goroutine's measured stack; a default goroutine never on a bounded worker). -->
 
-**Converted code is ordinary blocking code, not `async` code.** A goroutine pauses by blocking its
-thread, so each goroutine needs a thread of its own. `goǃ` does not use the .NET thread pool, because
-a blocked goroutine would hold a shared pool thread and starve the others. golib cannot run many
-goroutines on fewer threads either, because .NET cannot move a running call to another stack. That is
-a property of .NET 10 rather than of the conversion: goroutines are started in one place in golib,
-so if .NET gains threads its runtime can park cheaply, golib can adopt them and converted code stays as
-it is.
+**Converted code is ordinary blocking code.** By default a goroutine pauses by blocking its thread, so
+each goroutine needs a thread of its own. `goǃ` does not use the .NET thread pool, because a blocked
+goroutine would hold a shared pool thread and starve the others.
+<!-- 2026-11-15 (owner-asked wording that holds in this release and the next, user-facing docs audit amendment 8): two
+     sentences dropped here, because the next release's opt-in scheduler (owner ruling 2026-11-12, Roadmap Performance)
+     runs many goroutines on fewer threads. They read: "golib cannot run many goroutines on fewer threads either, because
+     .NET cannot move a running call to another stack. That is a property of .NET 10 rather than of the conversion:
+     goroutines are started in one place in golib, so if .NET gains threads its runtime can park cheaply, golib can adopt
+     them and converted code stays as it is." -->
 
 **Each goroutine thread reserves a large stack.** Go stacks grow as needed, but a .NET stack overflow
 ends the process. A goroutine thread therefore reserves 256 MiB of address space, or 16 MiB when the converter
 proves the goroutine cannot recurse (above); memory is committed only as it is used. The `GO2CS_GOROUTINE_STACK` environment variable sets a different size.
 
-**Operating-system threads bound live goroutines far below Go's limit.** Go's goroutines are cheap enough
+**With the default threads, the operating system bounds live goroutines far below Go's limit.** Go's goroutines are cheap enough
 that a program can keep very many alive at once. The limit here comes from how many threads the operating system can keep alive at once, not from
 the stack reservation. A Go program that starts hundreds of thousands of goroutines at once does not
 run the same way after conversion.

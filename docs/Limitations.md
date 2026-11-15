@@ -15,7 +15,7 @@ spots real code hits today.
 ## The short version
 
 **Good odds tonight:** pure Go that builds with the Go release go2cs tracks and `CGO_ENABLED=0`, leans mostly on the
-standard library, and runs on x64 Windows or Linux. **A longer evening:** lots of third-party modules,
+standard library, and runs on Windows, Linux or macOS. **A longer evening:** lots of third-party modules,
 `unsafe`, assembly fast paths, cgo, or tests that pull in testify.
 
 * **Your code must build with the Go release go2cs tracks**, the one in
@@ -23,8 +23,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 * **cgo converts only through `-cgo`, and only calls of C functions a shared library defines** ([cgo](#cgo)).
 * **Assembly, `//go:linkname` and deep `unsafe` tricks compile clean, then fail at run time.** Many
   libraries ship a pure-Go fallback behind a build tag, and you have to pass that tag yourself.
-* **Each live goroutine holds an operating-system thread.** Thousands alive at once are fine; Go's million are
-  out of reach.
+* **By default, each live goroutine holds an operating-system thread.** Thousands alive at once are fine; Go's
+  million are out of reach.
 * **It's usually slower than Go**, starts slower and uses more memory.
 * **One conversion targets one operating system.**
 * **Most failures are loud. A few differences are silent**: see the last bullet under
@@ -83,11 +83,11 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
        BOARD row (a slice backing that is an object plus a field offset, with no pin). The arms that assert the named
        panic are GolibTests' InlineSliceStorageTests.AFieldOfAReferenceBearingRootIsRefusedByName and the refroot mode
        of TestInlineArrayForeignSliceReviewShapes (src/go2cs/inlineArrayForeignSlice_test.go). -->
-* **Goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
+* **By default, goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
   holds its thread for as long as it lives; when it ends, the thread runs the next `go` statement, so starting
   goroutines one after another is cheap and holding many alive at once is not. On Windows x64, ten thousand parked
   goroutines cost several times Go's memory and seconds to start, a hundred thousand take minutes, and a million do
-  not finish starting. `runtime.GOMAXPROCS(1)` does not make anything run one at a time. Bound your fan-out with a
+  not finish starting. With threads, `runtime.GOMAXPROCS(1)` does not make anything run one at a time. Bound your fan-out with a
   worker pool, and remember that a `net/http` server spends one on every open connection. On macOS the kernel caps
   the threads one process may run (`kern.num_taskthreads`, a few thousand on the hosted macOS 15 machines measured),
   and the `go` statement past it ends the program
@@ -111,7 +111,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 * **A deadlock usually hangs** where Go prints `all goroutines are asleep - deadlock!`. The message
   appears only when every goroutine, `main` included, waits on a nil channel or an empty `select {}`, and then
   with Go's goroutine blocks. A deadlock on an ordinary channel or lock blocks forever: break in with a debugger,
-  where each goroutine is a thread named `goroutine-N`.
+  where, by default, each goroutine is a thread named `goroutine-N`.
   <!-- src/core/golib/runtime/Goroutine.cs:1088 `internal static bool IsForeverWait(WaitReason reason) =>`
        and :1161 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
 * **Stacks don't grow.** `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
@@ -444,11 +444,10 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
        GitHub Release with the archives, SHA256SUMS and the attestation bundle. src/sign-release-binaries.ps1 (the
        release machine) signs the Windows executables and SHA256SUMS on the draft; .github/workflows/attest-release.yml
        attests the archives as the draft then holds them. Signing began with the 1.26.10.2 release. -->
-* **Where it runs.** The standard library is validated on x64 Windows and on Linux, x64 and arm64 (glibc, on
-  Microsoft's build of .NET: Ubuntu's own package has an entry in [Known issues](KnownIssues.md)). macOS, Intel
-  and Apple silicon, has packages and runs the README walkthrough, and is being validated package by package: a
-  [roster](ValidatedTestPackages.md) row shows a macOS count once its package validates on both chips. The
-  packages ship `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`; a build for any other platform
+* **Where it runs.** The standard library is validated on x64 Windows, on Linux, x64 and arm64 (glibc, on
+  Microsoft's build of .NET: Ubuntu's own package has an entry in [Known issues](KnownIssues.md)), and on macOS,
+  Intel and Apple silicon. The [roster](ValidatedTestPackages.md) shows each package's counts on each platform; two
+  Windows-only packages have no Linux or macOS reading. The packages ship `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`; a build for any other platform
   is refused or warned about
   ([Known issues](KnownIssues.md#platforms-the-packages-do-not-ship)).
   <!-- linux-arm64: the roster's Linux line (236 of 236 banked at linux-arm64, S7 waves, DATA-la64-s7-bank-plan.md). -->
@@ -478,7 +477,7 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
 
 The language itself (generics, closures, struct embedding, range-over-func, typed nil pointers in
 interfaces, randomized map order), `defer`/`panic`/`recover`, channels and `select`, `reflect`
-(`encoding/json` and `text/template` pass their own suites on it, on Windows and Linux), and `net/http` with HTTP/2 and
+(`encoding/json` and `text/template` pass their own suites on it, on Windows, Linux and macOS), and `net/http` with HTTP/2 and
 `crypto/tls` over real sockets.
 
 ## When you hit a seam

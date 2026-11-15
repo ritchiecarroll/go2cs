@@ -130,7 +130,7 @@ one only through a standard-library path; if yours does, report the call path.
 
 ## On macOS, a `go` statement past the system's thread limit ends the program
 
-Each goroutine is an operating-system thread, and macOS caps how many threads one process may run. When a
+By default each goroutine is an operating-system thread, and macOS caps how many threads one process may run. When a
 program already has nearly that many goroutines alive, the next `go` statement throws
 `System.OutOfMemoryException`, and the program ends unless something catches it. On the macOS 15 machines measured
 the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; a Mac's own limit is the
@@ -145,7 +145,7 @@ the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; 
 
 ## On Linux, a program with more than about 16,000 goroutines alive ends
 
-Each goroutine is an operating-system thread, and on Linux each .NET thread uses about four of the process's memory
+By default each goroutine is an operating-system thread, and on Linux each .NET thread uses about four of the process's memory
 mappings. Linux caps the mappings at the `vm.max_map_count` setting, 65,530 by default. When a program has about
 16,000 goroutines alive (measured on `linux-x64`, Ubuntu 22.04 under WSL, at the default setting), the next `go` statement fails with `Fatal error. Failed to create RW mapping for RX memory`,
 and the program ends; nothing can catch it. A Go goroutine is not a thread, so the limit does not apply to Go itself.

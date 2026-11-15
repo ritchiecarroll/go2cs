@@ -59,7 +59,7 @@ as `GO2CS2005` and `GO2CS2006` ([diagnostic codes](DiagnosticCodes.md)).
 
 **Concurrency**
 
-- Goroutines, each on its own thread (behavioral equivalence first — not rewritten into `async`)
+- Goroutines with Go's semantics, each on its own thread by default
 - Channels with channel-operator (`<-`) lowering, and `select`-statement lowering
 
 **Composition & polymorphism**

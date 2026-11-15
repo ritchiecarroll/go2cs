@@ -548,10 +548,16 @@ says what that proves and what it does not.
   inapplicable, in neither the numerator nor the applicable denominator, never pending, and skipped
   by name when the sweep runs under that OS. The Linux line above sums the annotations exactly as
   the verdict line sums the columns.
-- A row validated on macOS carries a `darwin: N + D` annotation in the same place. One annotation
-  covers both chips: a row gains it only when Apple silicon (arm64) and Intel (x64) agree with each
-  other verdict for verdict. macOS validation is in progress, so a row with no `darwin:` annotation
-  has not been validated there yet.
+- A row validated on macOS carries a `darwin: N + D` annotation in the same place, read on both
+  Apple silicon (`osx-arm64`) and Intel (`osx-x64`), each chip compared with Go built for that chip.
+  When the two chips' counts differ, the annotation names the chip it banks and gives the other's
+  reading beside it, as in `darwin: 636 (osx-x64; osx-arm64: 634)`. Every row carries one except the
+  two Windows-only packages.
+  <!-- 2026-11-15 (user-facing docs audit, seat 1): was "One annotation covers both chips: a row gains it only when Apple
+       silicon (arm64) and Intel (x64) agree with each other verdict for verdict. macOS validation is in progress, so a
+       row with no `darwin:` annotation has not been validated there yet." The per-RID form (check-roster-format.ps1,
+       Get-ArchCountReading and the arch-strict form) banks rows whose chips differ, e.g. go/internal/gcimporter; read
+       at this tree, every row but internal/syscall/windows and its registry child carries a darwin: segment. -->
 - Every count on every platform is measured with `CGO_ENABLED=0`, the state the corpus is emitted
   in, which the sweep pins for the whole run, so cgo-gated tests (`testenv.HasCGO()` variants,
   cgo-only subtests) are absent on Linux exactly as on Windows.

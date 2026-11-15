@@ -494,7 +494,7 @@ describes both forms.
 
 ### Goroutine stacks
 
-Each goroutine other than `main` runs on its own thread, and the thread reserves a fixed stack, because a .NET stack
+By default, each goroutine other than `main` runs on its own thread, and the thread reserves a fixed stack, because a .NET stack
 cannot grow the way a Go stack does. The reserve is 256 MiB, or 16 MiB for a goroutine the converter proves cannot
 recurse ([how](ConversionStrategies.md#goroutines)). `main` runs on a thread that reserves 1 GiB, Go's own limit,
 and the settings below do not change it. It is address space, not memory, but it is what a thread start pays for:
