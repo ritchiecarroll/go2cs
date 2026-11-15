@@ -38757,4 +38757,51 @@ turns that arm's two measured assertions into Go's answer.
 
 — P5 (2026-11-14)
 
+## 2026-11-15 — P2 (sqlite-cs W9b, the third form): `&*p` boxed a copy of the pointee for ANY pointer; it is now the pointer after Go's nil check, and one generic shape is left out with the erasure that declines it
+
+**Cited at Go 1.26.11, linux/amd64, on the W9b tip `1145614922`.** G's read of the converted sqlite closure
+(20261115T065022Z) named three spellings that still reached `Ꮡ((@unsafe.Pointer.To<T>(P)).Value…)`. Two were
+already the W9b arm (`&(*(*T)(q)).F`, 50 linux sites; `&(*T)(p).F` under a reinterpret, 76 sites). The third,
+`&*(*struct{ Fi [0]uint64; Ff float64 })(p)`, 23 sites in libc's float functions, had no arm of its own and was
+not a conversion defect at all: `&*p` fell to the address-of builtin over the dereferenced VALUE for every
+pointer, so the result was a new box over a copy, never equal to `p`, and every write through it was lost.
+
+**Measured, one fixture, three converters** (`AddressOfFieldThroughConversion` as it stood before its
+increment line, 15 lines against `go run`): master's converter differs on 14 lines; the W9b tip holds 11 and
+differs on exactly the four `&*p` lines; the tip with this arm equals Go on all 15. The nil line (`runtime
+error: invalid memory address or nil pointer dereference`) equals Go at all three, because the copy form
+dereferenced too. As committed the fixture has 16 lines and `AddressOfFieldThroughConversionNative` 17, and
+both equal Go with this commit's converter.
+
+**The cure.** `&*p` renders `p.nilcheck()` (COORD ruling 20261115T065612Z, a golib member and not an inline
+throw). `PointerExtensions.nilcheck<T>(this ж<T>? p)` is hidden from IntelliSense inside a hidden class, so it
+owes no PublicSurface line; it owes one line in `src/go2cs/fieldAccessCollisions.txt`, which the converter and
+go2cs-gen both read. A named pointer type is converted to its box first; a type parameter the converter erases
+(`[P *T]`) is the box already.
+
+**Census of Go source** (`&*` before a name or a parenthesis, comment lines out): std outside `cmd/` 10 sites,
+all in `crypto/internal/boring/sha.go` (build tag `boringcrypto`, not in the corpus); behavioral corpus 0. The
+two-seeded `-stdlib` footprint is predicted 0 files on each of the four targets (windows/amd64, linux/amd64, darwin/amd64,
+linux/arm64), posted before the run; the reading is in the seat's DONE post, and a miss lands as a dated block
+under this row.
+
+**Left out, with the shape that leaves it out.** A type parameter whose pointer constraint the erasure
+declines (`~*T`, a union of pointers, a pointer constraint with methods; `pointerCoreConstraint`, 0 std
+occurrences) keeps the copy form, and that is not reachable today: the function does not build. The probe
+`func tilde[P ~*T, T any](p P) *T { return &*p }` converts with the standing warning ("approximate/union/
+method-carrying pointer constraint `~*T` ... is not erased; emission may not compile") and fails with CS1061
+(`'P' does not contain a definition for 'ValueSlot'`) on `return Ꮡ(p.ValueSlot)`. Whoever makes those
+constraints build owes `&*p` the same arm, and this row is the note.
+
+**Found by the fixture and cured in the same commit: `*(*T)(x)++` did not compile.** The native fixture's
+`*(*int32)(unsafe.Pointer(&(*expr)(unsafe.Pointer(b)).u))++` failed with CS1059 at master, at the W9b tip and
+with the arm above: the increment statement rendered `~<pointer>++`, a value, where the assignment forms beside
+it render `(<pointer>).Value`. `visitIncDecStmt` never told the dereference it was a write (`visitAssignStmt`
+does, for libc's qsort swap). It now passes the same context. Census (a line holding `*(*`
+and later `)++` or `)--`, comment lines out): 0 sites in std outside `cmd/` and `testdata`, 0 in the behavioral
+corpus outside these two fixtures, and 0 in every Go file of sqlite 1.62.0 and libc 1.80.1, for every platform.
+Both fixtures carry the form: `++` and `--` through a conversion, with `*ip++` and `*ip--` through an ordinary
+pointer as the control (`ip.Value++`, unchanged).
+— P2 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

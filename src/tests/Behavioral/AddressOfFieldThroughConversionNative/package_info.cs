@@ -27,6 +27,9 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("7374727563747b69205b305d75696e7436343b206620666c6f617436347d", "main_type")]
+[assembly: GoDynamicTypeLift("7374727563747b694f667374205b305d696e7433323b20694a6f696e20696e7433327d", "expr_w")]
+[assembly: GoDynamicTypeLift("7374727563747b6956616c7565205b305d696e7433323b207a546f6b656e2075696e747074727d", "expr_u")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -38,11 +41,23 @@ using static go.main_package;
 // <InterfaceImplementations>
 // </InterfaceImplementations>
 
+// The struct types whose arrays this package holds inline (the go.arrays family), as the converter
+// admitted them: a `GoInlineArrayType` record per named type, a `GoInlineArrayKeys` record with the
+// count and a digest of every admitted type (anonymous ones included), and a `GoInlineArrays` record
+// naming the rule when it is not the default. A -tests conversion applies the same rule rather than
+// deciding again, and refuses a production set that admits differently. The section exists only while
+// there is a record to hold.
+// <InlineArrays>
+[assembly: go.golib.GoInlineArrayKeys(4, "da63e45e31b8c33c")]
+[assembly: go.golib.GoInlineArrayType("expr")]
+// </InlineArrays>
+
 // <ImplicitConversions>
 // </ImplicitConversions>
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(expr))]
 [assembly: GoFieldAccess(typeof(rec))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -53,7 +68,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABEuooKCgpSUlIKUgpSCgpSi")]
+[assembly: GoPositionMap("main.go", "main.cs", "ACZa5KKCgoKUlJSClIKUgoKUloKCloKWgpaCgpaCgpaCloKCloKWgpaCloKCloKCloKCiJyCgqI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -70,6 +85,10 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct expr {}
+    internal partial struct expr_u {}
+    internal partial struct expr_w {}
+    internal partial struct main_type {}
     internal partial struct rec {}
     // </TypeAccessibility>
 

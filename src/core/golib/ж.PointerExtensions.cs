@@ -600,6 +600,37 @@ namespace go;
     }
 
     /// <summary>
+    /// Go's <c>&amp;*p</c>: the pointer itself, after the nil check Go's indirection makes.
+    /// </summary>
+    /// <typeparam name="T">Pointee type.</typeparam>
+    /// <param name="p">Pointer the Go expression dereferences without reading.</param>
+    /// <returns><paramref name="p"/>, the same box.</returns>
+    /// <remarks>
+    /// <para>
+    /// The address of the variable a pointer indirection denotes is the pointer, so <c>&amp;*p</c> yields
+    /// <c>p</c>; and Go still evaluates <c>*p</c>, so a nil <c>p</c> panics with
+    /// <c>runtime error: invalid memory address or nil pointer dereference</c> at that expression, whether
+    /// or not anything is read through the result. The converter emits this for the form, where it used to
+    /// emit <c>Ꮡ(~p)</c>, a NEW box over a copy of the pointee, which lost every write through the result.
+    /// </para>
+    /// <para>
+    /// The nil question is the dereference operator's own (<see cref="ж{T}.IsNilPointer"/>), plus the null
+    /// reference, the other managed spelling of a Go nil pointer: an extension and not an instance member so
+    /// that a null <c>p</c> takes Go's panic here rather than a <see cref="NullReferenceException"/> on the
+    /// way in. Named as Go's compiler names the operation it lowers <c>&amp;*p</c> to (NilCheck: panics if
+    /// the pointer is nil, returns it unmodified).
+    /// </para>
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never), MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ж<T> nilcheck<T>(this ж<T>? p)
+    {
+        if (p is null || p.IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        return p;
+    }
+
+    /// <summary>
     /// Renders a pointer as a hexadecimal address token — the shape Go prints for <c>%p</c> — or
     /// <c>"&lt;nil&gt;"</c> for the nil pointer. This is what <see cref="ж{T}.ToString"/> returns;
     /// Go's own <c>%p</c>/<c>%v</c> are served by the converted <c>fmt</c> through the reflection

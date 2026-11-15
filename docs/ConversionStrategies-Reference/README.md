@@ -434,6 +434,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Every spelling of a pointer-cast slice takes the span, and a MAX bound sets its capacity](pointers.md#every-spelling-of-a-pointer-cast-slice-takes-the-span-and-a-max-bound-sets-its-capacity)
   - [A store through an EXPLICIT dereference of a pointer conversion reaches the pointee](pointers.md#a-store-through-an-explicit-dereference-of-a-pointer-conversion-reaches-the-pointee)
   - [The address of a field reached through a pointer conversion is the field's own address](pointers.md#the-address-of-a-field-reached-through-a-pointer-conversion-is-the-fields-own-address)
+  - [`&*p` is `p`, after Go's nil check](pointers.md#p-is-p-after-gos-nil-check)
   - [`unsafe.Pointer(p)` on a pointer PARAMETER renders the box, never a deref](pointers.md#unsafepointerp-on-a-pointer-parameter-renders-the-box-never-a-deref)
   - [A reference-type-pointee pointer parameter uses the nil-check-free `.ValueSlot` deref alias](pointers.md#a-reference-type-pointee-pointer-parameter-uses-the-nil-check-free-valueslot-deref-alias)
   - [A pointer-element composite literal takes the box for a deref-aliased ident](pointers.md#a-pointer-element-composite-literal-takes-the-box-for-a-deref-aliased-ident)
