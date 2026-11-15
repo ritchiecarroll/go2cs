@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all five shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all five RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
         type: choice
         required: true
         default: census
@@ -425,7 +425,7 @@ jobs:
           if ($arch -ne 'x64') {
               if ($env:INPUT_GOOS -ne 'linux') { throw "arch '$arch' applies to goos linux only; got goos '$($env:INPUT_GOOS)'." }
               if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior') {
-                  throw "arch '$arch' does not apply to $($env:INPUT_STAGE), which runs every SHIPPED RID from one pack; linux-arm64 joins it when the packages ship it (seat S5c)."
+                  throw "arch '$arch' does not apply to $($env:INPUT_STAGE), which runs every SHIPPED RID from one pack, linux-arm64 included (seat S5c): its leg is already in that stage's list."
               }
               $armFlavour = @(Get-ChildItem -Path 'src/core' -Directory -Recurse -Filter 'linux-arm64' -ErrorAction SilentlyContinue).Count -gt 0
               $calibration = -not $armFlavour
@@ -455,17 +455,22 @@ jobs:
           # release-smoke runs EVERY shipped RID from ONE pack, whatever goos says: its question is whether
           # the packages a release would publish carry what this tree's converter emits, on every OS they
           # ship for (C2, ec147f1d7f: N's converter emits unsafe.ArrayPointer, which the published 1.24.13.3
-          # lacks). Three dispatches would be three packs of the same tree; one pack feeds all four legs.
-          # aot-smoke reads the same pack, on all four RIDs (osx-arm64 since 2026-10-14, below).
+          # lacks). Three dispatches would be three packs of the same tree; one pack feeds every leg.
+          # aot-smoke reads the same pack, on every shipped RID (osx-arm64 since 2026-10-14, below).
           # nugetgo-behavior owes a row for EVERY shipped RID, each run on its own OS (COORD ruling 2026-10-12: no row is
-          # inferred from another), so it takes the same four legs, with no pack.
+          # inferred from another), so it takes the same legs, with no pack.
+          # The list is push-nuget.ps1's $ridFlavors keys, one leg each, and TestConsumerLegsReadEveryShippedRid holds the
+          # two equal: S6 shipped linux-arm64 while this list kept four legs, so no hosted leg consumed that flavour until
+          # seat S5c added its leg (DESIGN-linux-arm64-flavour.md section 6). The arm leg carries arch = arm64, which the run
+          # job binds as GoTargetArch beside GoTargetOS, as the arch input's arm leg does above.
           if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior') {
               $targets = @(
                   @{ goos = 'windows'; runner = 'windows-latest';  rid = 'win-x64'   },
                   @{ goos = 'linux';   runner = 'ubuntu-latest';   rid = 'linux-x64' },
                   @{ goos = 'darwin';  runner = 'macos-15';        rid = 'osx-arm64' },
-                  @{ goos = 'darwin';  runner = 'macos-15-intel';  rid = 'osx-x64'   })
-              Write-Host "$($env:INPUT_STAGE): all four shipped RIDs (goos '$($env:INPUT_GOOS)' does not narrow it)"
+                  @{ goos = 'darwin';  runner = 'macos-15-intel';  rid = 'osx-x64'   },
+                  @{ goos = 'linux';   runner = 'ubuntu-24.04-arm'; rid = 'linux-arm64'; arch = 'arm64' })
+              Write-Host "$($env:INPUT_STAGE): all five shipped RIDs (goos '$($env:INPUT_GOOS)' does not narrow it)"
           }
 
           # aot-smoke dropped osx-arm64 from 2026-10-07 (COORD ruling) to 2026-10-14: on a hosted macos-15 (3-core arm64) runner the
@@ -533,7 +538,7 @@ jobs:
                                          # src/tests/PackageTests/release-smoke.ps1) against the
                                          # feed, each restoring into a fresh cache. PROVISIONAL
                                          # until the first run.
-              'aot-smoke'        = 240   # the LEG only (four RIDs): ONE Native AOT publish + run of PackageSymbols
+              'aot-smoke'        = 240   # the LEG only (five RIDs): ONE Native AOT publish + run of PackageSymbols
                                          # under go.lib's TrimMode=partial, which compiles the whole
                                          # go.* closure (31 assemblies). Its measured wall times, before
                                          # and after golib's generic-cycle fix, are in docs/CIMatrix.md's
@@ -2467,7 +2472,7 @@ jobs:
       # aot-smoke — ONE Native AOT publish and run of a hand-written consumer of the pack's packages.
       # A consumer with no trim mode of its own takes go.lib's TrimMode=partial, so the publish compiles
       # every referenced go.* assembly whole (COORD ruling 2026-10-06: its own stage, out of release-smoke).
-      # The executable must exit 0 and print its PACKAGE-SYMBOLS line; the publish wall time is a READ line. FOUR RIDs: osx-arm64
+      # The executable must exit 0 and print its PACKAGE-SYMBOLS line; the publish wall time is a READ line. FIVE RIDs (linux-arm64 since seat S5c): osx-arm64
       # since 2026-10-14 (run 38587876788, after e2move broke ILC's generic cycle; it was NOT MEASURED from 2026-10-07).
       # Non-gating on its first train; from the release after, read before a release like the census.
       # -------------------------------------------------------------------------------------
