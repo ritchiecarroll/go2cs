@@ -103,9 +103,29 @@ func nested(o *outer) byte {
 	return n[0]
 }
 
+// DIRECT 1 — the view indexed where it is written: a read, a store, a compound store and a step.
+func directPort(sa *sockaddr) int {
+	(*[2]byte)(unsafe.Pointer(&sa.Port))[0] = 1
+	(*[2]byte)(unsafe.Pointer(&sa.Port))[1] += 2
+	(*[2]byte)(unsafe.Pointer(&sa.Port))[1]++
+	return int((*[2]byte)(unsafe.Pointer(&sa.Port))[0])<<8 | int((*[2]byte)(unsafe.Pointer(&sa.Port))[1])
+}
+
+// DIRECT 2 — the explicit dereference names the same element.
+func directDeref(h *holder) uint32 {
+	(*(*[2]uint32)(unsafe.Pointer(&h.cheap)))[0] = 7
+	return (*(*[2]uint32)(unsafe.Pointer(&h.cheap)))[1]
+}
+
+// DIRECT CONTROL — a same-element view indexed where it is written keeps its own route.
+func directSameElem(xs *[4]byte) byte {
+	return (*[2]byte)(unsafe.Pointer(&xs[0]))[1]
+}
+
 func main() {
 	sa := &sockaddr{}
 	setPort(sa, 80)
+	fmt.Println(directPort(sa), directDeref(&holder{cheap: 1}), directSameElem(&[4]byte{1, 2, 3, 4}))
 	other := [2]byte{1, 2}
 	xs := [4]byte{1, 2, 3, 4}
 	h := &holder{cheap: 1}
@@ -230,5 +250,50 @@ func TestNativeFieldArrayViewEmitsTheDoorAndElementRef(t *testing.T) {
 	// CONTROL 3 — a two-hop selector keeps the raw route, spelled as the typed door.
 	if body := emittedFunctionBody(t, mainCs, "nested"); strings.Contains(body, "@unsafe.ArrayPointer<") || !strings.Contains(body, "@unsafe.Pointer.To<array<byte>>(") {
 		t.Errorf("nested: a two-hop selector must keep the raw route, got:\n%s", body)
+	}
+}
+
+// The view indexed where it is written reads through ElementRef, as a local bound by it does. It went through
+// Value, which a native array pointer refuses, and the view is one over every root that has an address
+// (docs/phase4/DESIGN-array-pointer-doors.md, section 18).
+func TestNativeFieldArrayViewIndexedDirectlyReadsThroughElementRef(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	mainCs := convertNativeFieldArrayViewFixture(t)
+
+	for _, arm := range []struct {
+		function string
+		forms    []string
+	}{
+		{"directPort", []string{
+			"@unsafe.ArrayPointer<byte>.Of(sa.ᏑPort, 2).ElementRef(0) = 1;",
+			"@unsafe.ArrayPointer<byte>.Of(sa.ᏑPort, 2).ElementRef(1) += 2;",
+			"@unsafe.ArrayPointer<byte>.Of(sa.ᏑPort, 2).ElementRef(1)++;",
+			"(nint)@unsafe.ArrayPointer<byte>.Of(sa.ᏑPort, 2).ElementRef(0) << 8",
+		}},
+		{"directDeref", []string{
+			"@unsafe.ArrayPointer<uint32>.Of(h.Ꮡcheap, 2).ElementRef(0) = 7;",
+			"return @unsafe.ArrayPointer<uint32>.Of(h.Ꮡcheap, 2).ElementRef(1);",
+		}},
+	} {
+		body := emittedFunctionBody(t, mainCs, arm.function)
+
+		for _, form := range arm.forms {
+			if !strings.Contains(body, form) {
+				t.Errorf("%s: expected %q, got:\n%s", arm.function, form, body)
+			}
+		}
+
+		if strings.Contains(body, ".Value[") {
+			t.Errorf("%s: the view has no Value to index, got:\n%s", arm.function, body)
+		}
+	}
+
+	// CONTROL — a same-element view is not this shape: it keeps array<T>.AliasPointer and its Value.
+	if body := emittedFunctionBody(t, mainCs, "directSameElem"); !strings.Contains(body, "array<byte>.AliasPointer(") || strings.Contains(body, ".ElementRef(") {
+		t.Errorf("directSameElem: a same-element view must keep array<T>.AliasPointer and Value, got:\n%s", body)
 	}
 }

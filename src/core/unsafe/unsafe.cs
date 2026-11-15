@@ -669,7 +669,8 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         CopySource,
         Element,
         ArrayLoad,
-        ArrayStore
+        ArrayStore,
+        FieldView
     }
 
     // `(*A)(p)[lo:hi]`: length hi-lo, capacity N-lo.
@@ -857,6 +858,39 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         GC.KeepAlive(p);
     }
 
+    // ---- Go's `(*[N]E)(unsafe.Pointer(&p.f))`, f not an E, over a root that is not native: the FIELD VIEW ----
+    //
+    // docs/phase4/DESIGN-array-pointer-doors.md, section 18. ArrayPointer<E>.Of answers this where golib's native
+    // field door declines. p is the pinned pointer to the field. The route was the pointer conversion to the array
+    // type, which answered a native box of array<E> over the field: its Value read the field's bytes as the three
+    // fields of array<E> itself, a managed reference made out of content.
+    //
+    // The answer is the view doors' own (Aliased), for a window of N elements at the field:
+    //
+    //   V2  a native array pointer over the bytes the field's root holds still. It is anchored on the box that
+    //       holds them, so the view keeps the root, and it ends where the root's storage ends: a view longer than
+    //       its field reads the fields after it, as Go does, and one that would pass the end of the root is
+    //       refused by name.
+    //   V3  the same over a field whose own box is native.
+    //   V1  a field that is an element of managed E storage: a window on that array.
+    //   V4  a root with no address (a struct that holds references) is refused by name. Nothing can be viewed, and
+    //       an array pointer over a copy would lose every write.
+    internal static ж<array<E>> FieldView<E>(Pointer p, nint length)
+    {
+        if (p.IsNull)
+            return To<array<E>>(p);
+
+        slice<E> window = Aliased<E>(p, 0, length, length, length, ViewUse.FieldView, out ж<E>? unaliased);
+
+        if (unaliased is not null)
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(0, length, length, ViewUse.FieldView)}: the field is in a Go value that has no address (a struct that holds references has none), so its bytes cannot be viewed as an array");
+
+        if (window.IsNativeBacked)
+            return builtin.NativeArrayPointer<E>(window.NativeElementAddressUnchecked(0), length, NativeSliceAnchors<E>.Of(window));
+
+        return array<E>.AliasPointer(ElementAddressUnchecked(window, 0), length);
+    }
+
     // Slicing through a nil array pointer is Go's nil dereference, before any bound is read.
     private static void RequireArrayPointer(Pointer? p)
     {
@@ -883,6 +917,7 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
             ViewUse.Element => $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}]",
             ViewUse.ArrayLoad => $"*(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)",
             ViewUse.ArrayStore => $"*(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p) = v",
+            ViewUse.FieldView => $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(unsafe.Pointer(&p.f))",
             _ => $"copy through (*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:]"
         };
 
@@ -1838,22 +1873,25 @@ public static ж<byte> StringData(@string str) {
 // (docs/phase4/DESIGN-native-array-view.md, the LookupServicePort door).
 //
 // It carries both routes. A field one hop off a NATIVE root takes golib's native field-view door, which
-// views the field at its GO offset (builtin.NativeFieldArrayPointer); every other root -- managed,
-// pinned-managed, nil, or a struct whose Go layout cannot be known -- takes the raw-address route the
-// converter emitted before. The route lives here rather than in golib because golib sits
-// below this package and cannot name Pointer.FromPinnedBox, the retaining pin the raw route needs.
+// views the field at its GO offset (builtin.NativeFieldArrayPointer). Every other root takes the field view over
+// Go storage (Pointer.FieldView): a native array pointer over the bytes the field's root holds still, which keeps
+// the root and ends where its storage ends, and a refusal by name for a root with no address. The route lives
+// here rather than in golib because golib sits below this package and cannot name Pointer.FromPinnedBox, the
+// retaining pin it needs.
 //
-// The raw route hands the POINTER to the typed door (Pointer.To), so the array pointer keeps the field's box by
-// what the pointer carries. It was spelled `(ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field)`: the cast to a number
-// dropped the box, and the result kept it only because the registry still resolved the pinned address, which
-// held as long as something else kept the box alive between the two casts
-// (docs/phase4/DESIGN-array-pointer-doors.md 10.6).
+// So the answer is a native array pointer for every root that has an address, and the forms the converter emits
+// over it are the same: ElementRef for an index, at and slice for an address and a slice.
+//
+// The other roots took the pointer conversion to the array type until section 18 of the doors' design: first
+// spelled `(ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field)`, a cast through a number that dropped the box, then
+// the typed door Pointer.To, which kept it (10.6). Either way the box answered was a native box of array<T> over
+// the field, whose Value is no array.
 //
 // T rides on the CLASS and TField on the method so the call site names only T: C# infers TField from
 // the field argument, and an extension member cannot take T alone (CS1061 under C# 14).
 public static class ArrayPointer<T> {
     public static ж<array<T>> Of<TField>(ж<TField> field, nint length) =>
-        builtin.NativeFieldArrayPointer<T>(field, length) ?? Pointer.To<array<T>>(Pointer.FromPinnedBox(field));
+        builtin.NativeFieldArrayPointer<T>(field, length) ?? Pointer.FieldView<T>(Pointer.FromPinnedBox(field), length);
 }
 
 // Go's `(*[unsafe.Sizeof(s)]byte)(unsafe.Pointer(&s))[lo:hi]` as a direct argument of copy, where s's struct is
