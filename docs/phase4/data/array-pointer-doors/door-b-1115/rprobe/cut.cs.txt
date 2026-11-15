@@ -1,0 +1,49 @@
+global using uuidT = go.array<byte>;
+
+namespace go.example.com;
+
+using fmt = fmt_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+partial struct small /*[8]byte*/;
+
+internal static void main() {
+    ref var g = ref heap<array<uint64>>(new uint64[]{1, 2}.array(), out var Ꮡg);
+    @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(Ꮡg);
+    @unsafe.Pointer.View<byte>(v, 0, 4, 16)[0] = 48;
+    fmt.Println("byte view, pointer var  :", g[0]);
+
+    ref var h = ref heap<array<uint64>>(new uint64[]{1, 2}.array(), out var Ꮡh);
+    var u = (uintptr)Ꮡh;
+    @unsafe.Pointer.View<byte>((@unsafe.Pointer)u, 0, 4, 16)[0] = 48;
+    fmt.Println("byte view, number       :", h[0]);
+
+    ref var k = ref heap<array<uint64>>(new uint64[]{1, 2}.array(), out var Ꮡk);
+    @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡk), 0, 4, 16)[0] = 48;
+    fmt.Println("byte view, address-of   :", k[0]);
+
+    ref var arr = ref heap(new array<byte>(8), out var Ꮡarr);
+    @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡarr);
+    @unsafe.Pointer.StoreArray<byte>(p, 8, new small(new byte[]{1, 2, 3, 4, 5, 6, 7, 8}.array()));
+    var x = (small)@unsafe.Pointer.LoadArray<byte>(p, 8);
+    x[0] = 99;
+    fmt.Println("named whole, same shape :", arr, x[0], (small)@unsafe.Pointer.LoadArray<byte>(p, 8) == new small(new byte[]{1, 2, 3, 4, 5, 6, 7, 8}.array()));
+
+    ref var w = ref heap(new uint64(), out var Ꮡw);
+    @unsafe.Pointer.StoreArray<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡw), 8, new small(new byte[]{1, 0, 0, 0, 0, 0, 0, 1}.array()));
+    var y = (small)@unsafe.Pointer.LoadArray<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡw), 8);
+    fmt.Printf("named whole, a uint64   : %#x %v\n"u8, w, y);
+
+    ref var a = ref heap(new array<uint8>(16), out var Ꮡa);
+    ref var b = ref heap(new array<uint8>(16), out var Ꮡb);
+    foreach (var i in range(len(a))) {
+        a[i] = (byte)i;
+    }
+    var (dst, src) = ((uintptr)Ꮡb, (uintptr)Ꮡa);
+    @unsafe.Pointer.StoreArray<uint8>((@unsafe.Pointer)dst, 16, @unsafe.Pointer.LoadArray<uint8>((@unsafe.Pointer)src, 16));
+    fmt.Println("alias whole             :", b);
+}
+
+} // end main_package
