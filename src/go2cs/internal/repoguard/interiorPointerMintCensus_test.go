@@ -132,6 +132,7 @@ var nativeMints = map[string]interiorMintRow{
 	mintGolib + "ж.FieldRefBox.cs|NativeArrayWindow":        {1, "carries: NativeDerivation.Kept of the struct it is a field of"},
 	mintGolib + "ж.HeaderSliceBox.cs|HeaderSliceBox":        {1, "carries: the root its caller resolved for the re-based header (design 4.5)"},
 	mintGolib + "ж.SliceHeaderBox.cs|SliceHeaderBox":        {1, "carries: the root its caller resolved for the re-based header (design 4.5)"},
+	mintGolib + "ж.InlineSlice.cs|ΔInlineSlice":             {1, "carries: the anchor for NativeDerivation.Kept of the box itself, which holds the pin its uintptr conversion took (go-winio Part 2, ruling (a))"},
 	mintGolib + "ж.NativeArrayBox.cs|Over":                  {1, "carries: the anchor for retainedSource"},
 	mintGolib + "ж.NativeArrayBox.cs|TryGetNativeArrayView": {1, "carries: the box's own anchor"},
 	mintGolib + "ж.NativeDerivation.cs|Moved":               {1, "carries: NativeDerivation.Kept of what the pointer carried"},

@@ -4469,7 +4469,7 @@ constant calls `.slice`* below).
 A write through either slice shows through the other, as in Go. In this example `base` is a C#
 keyword, so the variable appears as `@base`
 ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
-<!-- The rule: src/go2cs/convSliceExpr.go:446 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool {` (a bound that is not a constant within int32 takes the method) and :479 `func (v *Visitor) sliceMethodCall(ident string, sliceExpr *ast.SliceExpr) (string, bool) {`; e.g. src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:48 `trim = trim.slice(0, len(trim) - 1);`. -->
+<!-- The rule: src/go2cs/convSliceExpr.go:452 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool {` (a bound that is not a constant within int32 takes the method) and :485 `func (v *Visitor) sliceMethodCall(ident string, sliceExpr *ast.SliceExpr) (string, bool) {`; e.g. src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:48 `trim = trim.slice(0, len(trim) - 1);`. -->
 
 <!-- source: src/tests/Behavioral/SliceAliasing/main.go:18-26 -->
 ```go
@@ -4614,7 +4614,7 @@ omitted low bound is written as the `0` it means, so `arr[:n:n]` starts at 0. `.
 (`nint`), so an `int` bound passes as is. Here `n` is a `uintptr`, so it is cast to `nint`:
 `arr.slice(0, (nint)(n), (nint)(n))`.
 <!-- source: src/tests/Behavioral/SliceAliasing/main.go:51 and src/tests/Behavioral/SliceAliasing/main.cs.target:40; src/tests/Behavioral/Slice3IndexWideBound/main.go:19 and src/tests/Behavioral/Slice3IndexWideBound/main.cs.target:13 -->
-<!-- A three-index bound is cast only when it is wide or unsigned (uint, uint32, uint64, uintptr, int64): src/go2cs/convSliceExpr.go:518 `func (v *Visitor) castWideIntegerToNint(expr ast.Expr) string {`. `arr[:n:n]` over a `uintptr` n: Slice3IndexWideBound/main.cs.target:12 `var a = arr.slice(0, (nint)(n), (nint)(n));`; a `nint` bound passes uncast, main.cs.target:20 `var e = arr.slice(0, k, k);`, and so does `len(anys)`, src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 `anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));`. The method: src/core/golib/slice.cs:1887 `public static slice<T> slice<T>(this in slice<T> slice, nint low, nint high, nint max)`. -->
+<!-- A three-index bound is cast only when it is wide or unsigned (uint, uint32, uint64, uintptr, int64): src/go2cs/convSliceExpr.go:524 `func (v *Visitor) castWideIntegerToNint(expr ast.Expr) string {`. `arr[:n:n]` over a `uintptr` n: Slice3IndexWideBound/main.cs.target:12 `var a = arr.slice(0, (nint)(n), (nint)(n));`; a `nint` bound passes uncast, main.cs.target:20 `var e = arr.slice(0, k, k);`, and so does `len(anys)`, src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 `anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));`. The method: src/core/golib/slice.cs:1887 `public static slice<T> slice<T>(this in slice<T> slice, nint low, nint high, nint max)`. -->
 
 **A nil slice is the default value.** `var zero []byte` becomes `slice<byte> zero = default;`, and
 `zero == nil` stays `zero == nil`, which binds `slice<T>`'s `operator ==(slice<T>, NilType)`. `default` is
@@ -5728,7 +5728,7 @@ and builds the zero value of a struct whose `default` is not Go's zero value. Th
 cannot hold a negative one, so Go's out-of-range panic could be lost. A bound that is not a constant within
 `int` goes to golib's `slice` method, which checks it as Go does. The result shares the backing array as Go's `s[:i]` does, and does
 not copy ([Slices and Arrays](#slices-and-arrays)).
-<!-- GoZero<T>() for a type parameter: src/go2cs/visitArrayType.go:347-364 `func (v *Visitor) typeParamZero(t types.Type) string`; golib: src/core/golib/builtin.cs:1625 `public static T GoZero<T>() =>`. Range vs slice method: src/go2cs/convSliceExpr.go:431-449 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool` -->
+<!-- GoZero<T>() for a type parameter: src/go2cs/visitArrayType.go:347-364 `func (v *Visitor) typeParamZero(t types.Type) string`; golib: src/core/golib/builtin.cs:1625 `public static T GoZero<T>() =>`. Range vs slice method: src/go2cs/convSliceExpr.go:437-455 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool` -->
 
 Using the type reads as in Go. Go's `int` is C# `nint`
 ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). `Stack[int]{}` calls the constructor that
@@ -6346,7 +6346,7 @@ public static (nint, nint) ReadOnlyRecv(this Box bʗp) {
     return (p.R.Min, p.Tag);
 }
 ```
-<!-- receiver reversion: commit 468ee62c6; censusFuncLocals origin "recv", src/go2cs/captureModeOperations.go:1802-1817 `A receiver ж-box A2 reverted (every address use feeds a ref-lowered position) has no box reason`; pinned by src/go2cs/recvRefLowering_test.go -->
+<!-- receiver reversion: commit 468ee62c6; censusFuncLocals origin "recv", src/go2cs/captureModeOperations.go:1811-1826 `A receiver ж-box A2 reverted (every address use feeds a ref-lowered position) has no box reason`; pinned by src/go2cs/recvRefLowering_test.go -->
 
 Either way the caller's value is untouched: `rb.BumpedRecv()` returns 16 and `rb.Tag` stays 6.
 
@@ -10540,7 +10540,7 @@ to a pointer is a box that holds a box. Go's `int` is `nint`
 
 A local that a closure, a `go` statement or a `defer` statement shares with the function that declares
 the local can also get this form, so both sides see one variable. [Function Values and Closures](#function-values-and-closures)
-covers captures. <!-- other routes to the box: `&a`, a method that keeps its receiver's address, a pointer-method value: src/go2cs/escapeAnalysisOperations.go:1189, 1196#e568f1. rule: src/go2cs/escapeAnalysisOperations.go:1173-1175 (`escapes = (closureContainsIdent && !isValueType(...)) || takesAddress || usedAsRef`; isValueType is true only for basic types, variableAnalysisOperations.go:2872-2881#4ff829); go/defer arms: escapeAnalysisOperations.go:1028, 1072#49f594; written-after-capture picks box versus snapshot routing: variableAnalysisOperations.go:2127-2132#9ba65b. reference-shaped types: escapeAnalysisOperations.go:2217-2225, 2018-2032#89b684; probeI1 main.go:152#6d5c24 -> main.cs.target:158#25037b. Examples in src/tests/Behavioral/ClosureWriteVisibility: probeA1 boxed and written through the box, main.cs.target:18-21 (`ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);` … `Ꮡt.Value.total += 100;`); probeA3 boxed but read-only after all writes, so the closure takes a snapshot, main.cs.target:37-41 (`var tʗ1 = t;`); probeN1 captured int stays plain, main.go:193-197#2efa30 -> main.cs.target:202-207 (`nint n = 0; void inc() { n++; }`). Reference: pointers.md:397#ca6b44. heap overloads: src/core/golib/builtin.cs:2948#f029f1 (zero value) and :2992#1853dd (starting value). -->
+covers captures. <!-- other routes to the box: `&a`, a method that keeps its receiver's address, a pointer-method value: src/go2cs/escapeAnalysisOperations.go:1207, 1214#e568f1. rule: src/go2cs/escapeAnalysisOperations.go:1191-1193 (`escapes = (closureContainsIdent && !isValueType(...)) || takesAddress || usedAsRef`; isValueType is true only for basic types, variableAnalysisOperations.go:2872-2881#4ff829); go/defer arms: escapeAnalysisOperations.go:1046, 1090#49f594; written-after-capture picks box versus snapshot routing: variableAnalysisOperations.go:2127-2132#9ba65b. reference-shaped types: escapeAnalysisOperations.go:2235-2243, 2036-2050#89b684; probeI1 main.go:152#6d5c24 -> main.cs.target:158#25037b. Examples in src/tests/Behavioral/ClosureWriteVisibility: probeA1 boxed and written through the box, main.cs.target:18-21 (`ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);` … `Ꮡt.Value.total += 100;`); probeA3 boxed but read-only after all writes, so the closure takes a snapshot, main.cs.target:37-41 (`var tʗ1 = t;`); probeN1 captured int stays plain, main.go:193-197#2efa30 -> main.cs.target:202-207 (`nint n = 0; void inc() { n++; }`). Reference: pointers.md:397#ca6b44. heap overloads: src/core/golib/builtin.cs:2948#f029f1 (zero value) and :2992#1853dd (starting value). -->
 
 A package-level variable whose address is taken is declared the same way, as a static box `ᏑX` and a `ref`
 property `X => ref ((StaticBox<T>)ᏑX).ValueSlot` that reads and writes through it, so `&X` is `ᏑX`. Every exported
@@ -11255,7 +11255,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 ([Struct Types](#struct-types)), and `default!` is its zero value
 ([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
 Go's for the target architecture, here amd64.
-<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:4029-4050#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:4034-4055#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.
