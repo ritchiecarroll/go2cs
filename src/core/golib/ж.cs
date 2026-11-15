@@ -344,6 +344,13 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // again rather than trusting a stale "ready" flag).
     private object? m_publishedArrayBacking;
 
+    // Is a T exactly ONE object reference? Every wrapper the publish serves today is: go2cs-gen's named array holds
+    // one holder field, and the array-view wrapper holds one such wrapper. Then the publish can store the holder
+    // with a compare-and-swap on the slot itself (publishArrayBacking). A reference fills a whole aligned word, so a
+    // struct of that size that holds a reference holds nothing else. Two type queries, no code built (the rule at
+    // s_publishArrayBacking), and asked only where that flag is set.
+    private static readonly bool s_arrayHolderIsOneWord = Unsafe.SizeOf<T>() == IntPtr.Size && RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+
     /// <summary>
     /// Gets a view of the array or slice this pointer references, with any lazily-materialized
     /// backing already published into this box's own storage.
@@ -421,34 +428,61 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // `value` is the box's own storage, resolved by the caller: the element door passes Value, which panics on
     // a nil pointer as Go's &p[i] does, and the pin paths pass ValueSlot after their own nil test
     // (pinnedArrayData).
+    //
+    // The lock serializes the publishes of THIS box. It does not cover the storage: the wrapper's own getter
+    // fills the same slot with no lock (a compare-and-swap of its one holder field, go2cs-gen's materializeValue),
+    // and a second box over the same storage (an element reference is minted per take) holds its own lock. So the
+    // store into the slot is a compare-and-swap too, against the empty slot, and a publish that finds another
+    // holder there adopts it. Until 2026-11-15 the store was a plain write of the whole wrapper: a first use that
+    // landed between this publish's read and its write had its holder replaced, and every element written through
+    // it was lost without a panic (NamedArrayHolderPublishRaceTests: 47,334 of 200,000 arrays at the element door).
     [MethodImpl(MethodImplOptions.NoInlining)]
     private IArray publishArrayBacking<TCheck>(TCheck check, ref T value) where TCheck : struct, IArrayViewCheck
     {
         lock (this)
         {
-            if (value is not IArray view || !check.Accepts(view))
-                throw notAnArrayOrSlice();
-
-            // Materializes the lazy backing on the boxed copy, and hands back the RAW backing
-            // reference — the identity token the fast path compares against. (Only the lazy
-            // wrappers reach here; everything whose Source is defined to copy was excluded by
-            // computePublishArrayBacking, so this neither allocates nor detaches.)
-            object? backing = view.Source;
-
-            if (!ReferenceEquals(backing, m_publishedArrayBacking))
+            while (true)
             {
-                // Copy the whole wrapper — a struct over a SHARED backing reference — back over
-                // the real storage, which lands that reference where every later reader looks.
-                value = (T)(object)view;
+                if (value is not IArray view || !check.Accepts(view))
+                    throw notAnArrayOrSlice();
 
-                // RELEASE: the copy-back above must be visible to any thread that later observes
-                // this write on the lock-free fast path.
-                Volatile.Write(ref m_publishedArrayBacking, backing);
+                // Materializes the lazy backing on the boxed copy, and hands back the RAW backing
+                // reference — the identity token the fast path compares against. (Only the lazy
+                // wrappers reach here; everything whose Source is defined to copy was excluded by
+                // computePublishArrayBacking, so this neither allocates nor detaches.)
+                object? backing = view.Source;
+
+                if (!ReferenceEquals(backing, m_publishedArrayBacking))
+                {
+                    if (s_arrayHolderIsOneWord)
+                    {
+                        // The copy's holder: the one the slot held when it was read, or the one the line above
+                        // just filled. It goes into the slot only where the slot is still empty.
+                        T filled = (T)(object)view;
+                        object? holder = Unsafe.As<T, object?>(ref filled);
+                        object? found = Interlocked.CompareExchange(ref Unsafe.As<T, object?>(ref value), holder, null);
+
+                        // Another holder got there between the read and the swap: read the slot again and
+                        // publish that one. The copy's own backing was reachable from nowhere else.
+                        if (found is not null && !ReferenceEquals(found, holder))
+                            continue;
+                    }
+                    else
+                    {
+                        // A wrapper of another shape (none exists today): copy the whole wrapper back over the
+                        // real storage, as before.
+                        value = (T)(object)view;
+                    }
+
+                    // RELEASE: the store above must be visible to any thread that later observes
+                    // this write on the lock-free fast path.
+                    Volatile.Write(ref m_publishedArrayBacking, backing);
+                }
+
+                // The view we just published, not a fresh copy of it — the element box then names the
+                // published backing by construction rather than by a re-read that could race.
+                return view;
             }
-
-            // The view we just published, not a fresh copy of it — the element box then names the
-            // published backing by construction rather than by a re-read that could race.
-            return view;
         }
     }
 
@@ -909,6 +943,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // for every ж<T> the program has, which Native AOT requires.
 
     object? IGoReflectBox.ReadBoxSlot() => ValueSlot;
+
+    // The pointee for reflect's pointer conversion between two names of one array type (GoReflect.TryConvertPointer):
+    // a named array's lazily filled backing is published into this box's own storage first, through the gate the
+    // element door and the pin paths use, so the conversion's result and the variable share one holder.
+    object? IGoReflectBox.ReadBoxSlotPublished() =>
+        s_publishArrayBacking && !IsNilPointer ? publishArrayBacking(new AnyElementArrayViewCheck(), ref ValueSlot) : ((IGoReflectBox)this).ReadBoxSlot();
 
     bool IGoReflectBox.NamesZeroBase => NamesZeroBase;
 

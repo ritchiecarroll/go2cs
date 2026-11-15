@@ -377,6 +377,13 @@ internal interface IGoReflectBox
     /// <summary>The pointee through the kind's own <c>ValueSlot</c>.</summary>
     object? ReadBoxSlot();
 
+    /// <summary>
+    /// <see cref="ReadBoxSlot"/> for a pointee that is about to be re-typed and shared: a named array's lazily filled
+    /// backing is first published into the box's own storage (<c>publishArrayBacking</c>), so the value read and the
+    /// variable hold one backing. Any other pointee reads as <see cref="ReadBoxSlot"/> does.
+    /// </summary>
+    object? ReadBoxSlotPublished();
+
     /// <summary>Stores <paramref name="value"/> through the kind's own <c>ValueSlot</c>; a nil box panics as Go's nil store does.</summary>
     void WriteBoxSlot(object? value);
 
