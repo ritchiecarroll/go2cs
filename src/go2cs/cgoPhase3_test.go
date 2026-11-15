@@ -397,6 +397,9 @@ func cgoP3Arms() []cgoG1Arm {
 		// hosted legs before 3.2 changes anything.
 		{name: "s6field"},
 		{name: "s6next"},
+		{name: "s6nextnil"},
+		{name: "s6nextdirect"},
+		{name: "s6name"},
 		{name: "s6reinterp"},
 		{name: "s6slice"},
 		// Their twins over C memory, which run to their end both ways.

@@ -347,6 +347,19 @@ func main() {
 		defer C.go2cs_probe_list_release(l)
 		p := &l.next
 		fmt.Println("s6next", int((*p).family), C.GoString((*p).name))
+	// s6next's discriminators (DESIGN-cgo-phase3-marshaling 18.1): which read of a pointer FIELD of C memory fails.
+	case "s6nextnil":
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		fmt.Println("s6nextnil", l.next == nil)
+	case "s6nextdirect":
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		fmt.Println("s6nextdirect", int(l.next.family))
+	case "s6name":
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		fmt.Println("s6name", C.GoString(l.name))
 	case "s6reinterp":
 		// C memory reinterpreted as a Go struct of scalars, and a field read.
 		raw := C.go2cs_probe_address()
