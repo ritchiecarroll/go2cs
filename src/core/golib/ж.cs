@@ -853,8 +853,21 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (IsNilPointer)
             throw RuntimeErrorPanic.NilPointerDereference();
 
+        // reflect's `*p = x` (Value.Elem().Set) for a pointee that owns array storage (an array, a named array, a
+        // value-clone struct) is Go's whole assignment INTO the pointee, so a slice taken from it beforehand sees the new
+        // elements: the in-place copy, written back (IGoValueAssign; DESIGN-array-reassign-in-place.md §8 N2). Any other
+        // pointee is stored as before.
+        if (s_assignsInPlace)
+        {
+            ValueSlot = ((IGoValueAssign<T>)ValueSlot!).AssignedFrom((T)value!);
+            return;
+        }
+
         ValueSlot = (T)value!;
     }
+
+    // Whether WriteBoxSlot stores through IGoValueAssign<T>, decided once per T (a type test, no code built).
+    private static readonly bool s_assignsInPlace = typeof(IGoValueAssign<T>).IsAssignableFrom(typeof(T));
 
     // reflect's element door (GoReflect.ElementAliasBoxOfBox; trim stage 3c-1): at<Telem>'s body for an element type
     // known only at run time. The same view and publish (arrayView), the same bounds panic, and the same ElemRefBox over

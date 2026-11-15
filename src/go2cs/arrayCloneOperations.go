@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 )
@@ -180,6 +181,99 @@ func valueCloneSuffix(t types.Type) string {
 	return ""
 }
 
+// valueAssignInPlace reports whether lhs, one left operand of assignStmt, takes the IN-PLACE copy: it is an EXISTING
+// location (not `_`) whose type owns array storage (valueAssignMethod). In Go an array variable IS its storage, so
+// `a = b` copies b's elements INTO a, and a slice, an element pointer or a's address taken beforehand still names a
+// afterwards; a struct holding an array is the same one level up. The emitted `array<T>` (the named-array wrapper, a
+// [GoValueClone] struct) is a struct over a shared backing, so the swap `a = b.Clone()` gave a new storage and left
+// everything taken from a on the old one (docs/phase4/DESIGN-array-reassign-in-place.md). `a.Assign(b)` copies into
+// a's own storage instead. A declaration, an argument, a return, a map value and a send are new storage in Go too,
+// and keep the clone (cloneValueCopy).
+//
+// The predicate is "existing location", decided PER OPERAND (P5's C5): every operand of an `=`, and an operand of a
+// `:=` that REDECLARES a variable already in scope (`a, err := f()` with `a` declared: go/types records no new object
+// for it, so it assigns the existing `a`). The caller decides the emission shape (a single assignment, a tuple's
+// temporaries, a range or select binding).
+func (v *Visitor) valueAssignInPlace(assignStmt *ast.AssignStmt, lhs ast.Expr) bool {
+	ident, isIdent := ast.Unparen(lhs).(*ast.Ident)
+
+	if isIdent && ident.Name == "_" {
+		return false
+	}
+
+	switch assignStmt.Tok {
+	case token.ASSIGN:
+	case token.DEFINE:
+		if !isIdent || v.info.Defs[ident] != nil {
+			return false
+		}
+	default:
+		return false
+	}
+
+	return valueAssignMethod(v.info.TypeOf(lhs)) != ""
+}
+
+// valueAssignMethod is the in-place copy's member on t, or "" when t owns no array storage. An array (direct, aliased
+// or named) takes Assign: golib's ArrayExtensions.Assign for array<T>, the generated member for a named array. A
+// struct holding one ([GoValueClone], typeNeedsValueClone) takes go2cs-gen's AssignFrom. A Go type that declares its
+// OWN method of that name gets the Δ-prefixed member instead, which the generator names the same way so it cannot
+// shadow Go's method (the ValueCloneMethod precedent). A struct whose arrays are held inline is copied whole by a
+// plain C# assignment already, and is not one of these.
+func valueAssignMethod(t types.Type) string {
+	if t == nil {
+		return ""
+	}
+
+	if typeIsArrayValue(t) {
+		if declaresGoMethod(t, "Assign") {
+			return "ΔAssign"
+		}
+
+		return "Assign"
+	}
+
+	if _, isStruct := t.Underlying().(*types.Struct); isStruct && typeNeedsValueClone(t) {
+		if declaresGoMethod(t, "AssignFrom") {
+			return "ΔAssignFrom"
+		}
+
+		return "AssignFrom"
+	}
+
+	return ""
+}
+
+// valueAssignTarget is the rendered location an in-place copy is called on. `*p = R` for a pointer to an UNNAMED array
+// calls golib's ж<array<T>> extension, `p.Assign(R)`, so a box over NATIVE memory stores through its element door
+// (P5's C6: NativeArrayBox has no array<T> to hand out, and `p.Value` throws there by design); the rendering's
+// `.Value` deref is dropped for it. Every other location keeps its rendering.
+func valueAssignTarget(lhs ast.Expr, t types.Type, rendered string) string {
+	if _, isStar := ast.Unparen(lhs).(*ast.StarExpr); !isStar || t == nil {
+		return rendered
+	}
+
+	if _, unnamed := types.Unalias(t).(*types.Array); !unnamed {
+		return rendered
+	}
+
+	if trimmed, ok := strings.CutSuffix(rendered, ".Value"); ok {
+		return trimmed
+	}
+
+	return rendered
+}
+
+// valueAssignTempRoot names a temporary for an in-place operand after the variable its location is rooted at
+// (`arrs[i]` -> arrs), so a tuple's temporaries read as the operands they stand for; `ᴛ` follows from getTempVarName.
+func valueAssignTempRoot(lhs ast.Expr) string {
+	if ident := getIdentifier(lhs); ident != nil && ident.Name != "_" {
+		return strings.TrimPrefix(getSanitizedIdentifier(ident.Name), "@")
+	}
+
+	return "val"
+}
+
 // declaresGoMethod reports whether t is (an alias of) a NAMED type declaring a method called name,
 // with either receiver form.
 func declaresGoMethod(t types.Type, name string) bool {
@@ -240,8 +334,18 @@ func (v *Visitor) exprReadsValueNeedingClone(expr ast.Expr) bool {
 		expr = paren.X
 	}
 
-	switch expr.(type) {
+	switch e := expr.(type) {
 	case *ast.Ident, *ast.SelectorExpr, *ast.IndexExpr, *ast.StarExpr:
+	case *ast.CallExpr:
+		// A CONVERSION between clone-needing types (`[4]int(named)`, `N(arr)`, a struct to a struct of the same
+		// layout) is the operand's value under another type: the converted `(array<nint>)n` hands n's backing over
+		// through the wrapper's operator, so it reads existing storage exactly when its operand does
+		// (DESIGN-array-reassign-in-place.md §8 N1). appendValueClone parenthesizes the cast it then clones.
+		if len(e.Args) != 1 || !v.callExprIsTypeConversion(e) || !typeNeedsValueClone(v.getExprType(expr)) {
+			return false
+		}
+
+		return v.exprReadsValueNeedingClone(e.Args[0])
 	default:
 		return false
 	}
@@ -266,11 +370,46 @@ func appendValueClone(rendered string, valueType types.Type) string {
 		return rendered
 	}
 
-	if strings.HasPrefix(rendered, PointerDerefOp) {
+	if strings.HasPrefix(rendered, PointerDerefOp) || renderedIsCast(rendered) {
 		return fmt.Sprintf("(%s)%s", rendered, suffix)
 	}
 
 	return rendered + suffix
+}
+
+// renderedIsCast reports whether rendered is a C# cast, `(T)x` or `(T)(x)`: its leading parenthesis closes before the
+// end and an operand follows it. A postfix suffix binds tighter than a cast, so `(array<nint>)n.Clone()` would clone
+// n under its own type; the conversion arm of exprReadsValueNeedingClone is the clone site that renders one. A
+// parenthesized primary (`(x).Value`, `(a + b)`) is not a cast and is left alone.
+func renderedIsCast(rendered string) bool {
+	if !strings.HasPrefix(rendered, "(") {
+		return false
+	}
+
+	depth := 0
+
+	for i, r := range rendered {
+		switch r {
+		case '(':
+			depth++
+		case ')':
+			depth--
+
+			if depth == 0 {
+				rest := rendered[i+1:]
+
+				if rest == "" {
+					return false
+				}
+
+				next := rest[0]
+
+				return next == '(' || next == '@' || next == '_' || (next >= 'a' && next <= 'z') || (next >= 'A' && next <= 'Z') || next >= 0x80
+			}
+		}
+	}
+
+	return false
 }
 
 // appendRangeSnapshot appends the array RANGE-EXPRESSION copy (RangeSnapshotMethod) to an

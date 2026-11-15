@@ -871,7 +871,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 					keyType = v.getCSharpTypeName(v.getExprType(rangeStmt.Key)) + " "
 				}
 
-				innerPrefix += fmt.Sprintf("%s%s%s = %s%s;", v.newline, v.indent(v.indentLevel+1), keyExpr, tempKeyExpr, keyCloneSuffix)
+				innerPrefix += v.rangeAssignVar(rangeStmt.Key, keyExpr, tempKeyExpr, keyCloneSuffix)
 			}
 
 			if valExpr == "_" {
@@ -883,7 +883,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 					valType = v.getCSharpTypeName(v.getExprType(rangeStmt.Value)) + " "
 				}
 
-				innerPrefix += fmt.Sprintf("%s%s%s = %s%s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr, valCloneSuffix)
+				innerPrefix += v.rangeAssignVar(rangeStmt.Value, valExpr, tempValExpr, valCloneSuffix)
 			}
 
 			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, pairExpr)
@@ -1102,4 +1102,16 @@ func isYieldFunc(t types.Type) int {
 	}
 
 	return -1
+}
+
+// rangeAssignVar is one per-iteration store of a `for k, v = range x` loop (the range ASSIGNS existing variables) into
+// the variable `rendered` from the iteration temporary. A variable that owns array storage takes the element IN PLACE
+// (valueAssignMethod; DESIGN-array-reassign-in-place.md §8 C5), so a slice or a pointer taken from it before the loop
+// sees each element, as in Go; any other variable is stored, with the clone suffix the caller computed.
+func (v *Visitor) rangeAssignVar(goExpr ast.Expr, rendered, temp, cloneSuffix string) string {
+	if method := valueAssignMethod(v.info.TypeOf(goExpr)); method != "" {
+		return fmt.Sprintf("%s%s%s.%s(%s);", v.newline, v.indent(v.indentLevel+1), valueAssignTarget(goExpr, v.info.TypeOf(goExpr), rendered), method, temp)
+	}
+
+	return fmt.Sprintf("%s%s%s = %s%s;", v.newline, v.indent(v.indentLevel+1), rendered, temp, cloneSuffix)
 }

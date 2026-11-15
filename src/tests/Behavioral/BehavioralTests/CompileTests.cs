@@ -166,6 +166,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckArrayReassignAliases() => CheckTarget("ArrayReassignAliases");
 
     [TestMethod]
+    public void CheckArrayReassignForms() => CheckTarget("ArrayReassignForms");
+
+    [TestMethod]
     public void CheckArrayReassignUnsafe() => CheckTarget("ArrayReassignUnsafe");
 
     [TestMethod]

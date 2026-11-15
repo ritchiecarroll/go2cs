@@ -178,6 +178,7 @@ public class TypeGenerator : ISourceGenerator
                                 hasEqualityOperators ? null : structDeclaration.GetEqualityFallbackMembers(context.Compilation),
                                 structDeclaration.GetInterfaceValueMembers(context.Compilation)),
                             ValueCloneFields = valueCloneFields,
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
                         };
 

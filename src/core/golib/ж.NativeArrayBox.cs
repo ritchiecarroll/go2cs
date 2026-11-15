@@ -43,7 +43,15 @@ namespace go;
 /// (the page allocator's <c>l2Size</c>). Nothing downstream can recover it from the address.
 /// </para>
 /// </remarks>
-internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox, INativeRooted
+// Go's `*p = arr` through a box over NATIVE memory (P5's C6): there is no array<T> there to assign into, so the store is
+// N element stores through the box's element door. ArrayExtensions.Assign(this ж<array<T>>, …) routes here; reflect's
+// WriteBoxSlot is the same store.
+internal interface INativeArrayStore<T>
+{
+    void StoreElements(in array<T> source);
+}
+
+internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox, INativeRooted, INativeArrayStore<T>
 {
     // The base of the element block — never managed storage this box owns.
     private readonly nuint m_nativeAddr;
@@ -144,15 +152,23 @@ internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox, INativeRo
 
     // reflect's store of the pointee, `*p = arr` (Value.Elem().Set): Go's array assignment, N element stores into the
     // block, each through p[i]'s element door, exactly as `p[i] = arr[i]` for every i.
-    void IGoReflectBox.WriteBoxSlot(object? value)
+    void IGoReflectBox.WriteBoxSlot(object? value) => StoreElements((array<T>)value!);
+
+    // `*p = source` (ArrayExtensions.Assign over this box, and reflect's store above): min(N, len(source)) element stores,
+    // then the zero value for the rest, as ArrayExtensions.Assign does for a managed array (P5's C1). The source's own
+    // length never decides how far the block is written.
+    public void StoreElements(in array<T> source)
     {
         if (IsNilPointer)
             throw RuntimeErrorPanic.NilPointerDereference();
 
-        array<T> source = (array<T>)value!;
+        nint count = Math.Min(m_length, source.Length);
 
-        for (nint i = 0; i < source.Length; i++)
+        for (nint i = 0; i < count; i++)
             ElementRef(i) = source[i];
+
+        for (nint i = count; i < m_length; i++)
+            ElementRef(i) = default!;
     }
 
     /// <inheritdoc/>

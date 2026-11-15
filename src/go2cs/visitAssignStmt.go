@@ -1202,6 +1202,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	if tupleResult || lhsLen == reassignedCount || parallelHazard || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer && !anyRhsIsFunctionValue {
 		leftExprs := hashset.HashSet[string]{}
 
+		// The tuple in-place copy (P5's C5) appends its Assign statements after this one and takes its left locations in
+		// the statement's hoist buffer, so it needs statement position: a for-loop clause has neither.
+		tupleInPlaceOK := format.useNewLine && format.includeSemiColon && v.hoistedDecls != nil
+		var tupleInPlaceAssigns []string
+
 		// Go's partial redeclaration `a, b := f()` reuses any already-declared LHS variable and
 		// declares only the new ones. A single blanket `var` prefix would re-declare the reused
 		// variable (CS0136, and its earlier uses become "before declaration" CS0841), so for a
@@ -1409,6 +1414,38 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			leftExprs.Add(lhsExpr)
 
+			// A single in-place copy on `*p` for an unnamed array calls the box's own Assign (valueAssignTarget, C6).
+			if lhsLen == 1 && rhsLen == 1 && assignStmt.Tok == token.ASSIGN && v.valueAssignInPlace(assignStmt, lhs) {
+				lhsExpr = valueAssignTarget(lhs, v.info.TypeOf(lhs), lhsExpr)
+			}
+
+			// A tuple operand that takes the in-place copy (P5's C5) becomes a temporary in the deconstruction, and its
+			// Assign follows the statement, left to right. Go evaluates the left side's index and pointer operands before
+			// any assignment, so a location that is not a plain identifier is taken first, as a `ref` local (or, for a
+			// box's own Assign, the box), ahead of the right side.
+			tupleTemp := ""
+
+			if lhsLen > 1 && tupleInPlaceOK && v.valueAssignInPlace(assignStmt, lhs) {
+				lhsType := v.info.TypeOf(lhs)
+				root := valueAssignTempRoot(lhs)
+				target := valueAssignTarget(lhs, lhsType, lhsExpr)
+
+				if _, isIdent := ast.Unparen(lhs).(*ast.Ident); !isIdent {
+					captured := v.getTempVarName(root)
+
+					if target != lhsExpr {
+						v.hoistedDecls.WriteString(fmt.Sprintf("%s%svar %s = %s;%s", v.newline, v.indent(v.indentLevel), captured, target, v.newline))
+					} else {
+						v.hoistedDecls.WriteString(fmt.Sprintf("%s%sref var %s = ref %s;%s", v.newline, v.indent(v.indentLevel), captured, target, v.newline))
+					}
+
+					target = captured
+				}
+
+				tupleTemp = v.getTempVarName(root)
+				tupleInPlaceAssigns = append(tupleInPlaceAssigns, fmt.Sprintf("%s.%s(%s);", target, valueAssignMethod(lhsType), tupleTemp))
+			}
+
 			// Per-element `var` for the newly-declared members of a mixed redeclaration tuple. An
 			// escaping element is already declared by its heap decl above, so it takes no `var`.
 			// Only a DIRECT ident element can declare — an index/selector/star element assigns
@@ -1428,14 +1465,26 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
-			result.WriteString(lhsExpr)
+			if tupleTemp != "" {
+				result.WriteString("var " + tupleTemp)
+			} else {
+				result.WriteString(lhsExpr)
+			}
 		}
 
 		if lhsLen > 1 {
 			result.WriteRune(')')
 		}
 
-		result.WriteString(operator)
+		// A single `=` to an existing location that owns array storage copies into the location's own storage
+		// (valueAssignInPlace).
+		inPlace := lhsLen == 1 && rhsLen == 1 && assignStmt.Tok == token.ASSIGN && v.valueAssignInPlace(assignStmt, lhsExprs[0])
+
+		if inPlace {
+			result.WriteString("." + valueAssignMethod(v.info.TypeOf(lhsExprs[0])) + "(")
+		} else {
+			result.WriteString(operator)
+		}
 
 		// A tuple DECONSTRUCTION (one call RHS, several LHS) whose call components need an
 		// INTERFACE conversion the C# tuple assignment cannot perform implicitly — a pointer
@@ -1685,8 +1734,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 
 			// A Go array copied by value out of existing storage takes golib's `.Clone()` so the
-			// target gets independent backing storage (see cloneValueCopy).
-			rhsExpr = v.cloneValueCopy(lhs, rhs, rhsExpr)
+			// target gets independent backing storage (see cloneValueCopy). The in-place copy takes none: the
+			// elements land in the destination's own backing.
+			if !inPlace {
+				rhsExpr = v.cloneValueCopy(lhs, rhs, rhsExpr)
+			}
 
 			// A directional channel LHS taking a bidirectional value narrows the Go type with no
 			// construction to hook (`s = ch`) — the assignment arm of the live-copy narrowing
@@ -1778,8 +1830,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			result.WriteRune(')')
 		}
 
+		if inPlace {
+			result.WriteRune(')')
+		}
+
 		if format.includeSemiColon {
 			result.WriteRune(';')
+		}
+
+		for _, tupleAssign := range tupleInPlaceAssigns {
+			result.WriteString(v.newline)
+			result.WriteString(v.indent(v.indentLevel))
+			result.WriteString(tupleAssign)
 		}
 
 		if len(leftExprs) > 0 && operator == " = " {
@@ -2027,13 +2089,21 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					lhsContexts = append(lhsContexts, starExprContext)
 				}
 
+				inPlace := v.valueAssignInPlace(assignStmt, lhs)
+
 				if len(signedAssignTarget) > 0 {
 					result.WriteString(signedAssignTarget)
+				} else if inPlace {
+					result.WriteString(valueAssignTarget(lhs, v.info.TypeOf(lhs), v.convExpr(lhs, lhsContexts)))
 				} else {
 					result.WriteString(v.convExpr(lhs, lhsContexts))
 				}
 
-				result.WriteString(operator)
+				if inPlace {
+					result.WriteString("." + valueAssignMethod(v.info.TypeOf(lhs)) + "(")
+				} else {
+					result.WriteString(operator)
+				}
 
 				rhsExpr := v.convExpr(rhs, v.appendNilArrayDimsContext(v.appendEmptyIfaceLitContext(v.appendRhsPtrContext(contexts, rhs), lhs), rhs, lhs))
 
@@ -2050,7 +2120,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 				// A Go array copied by value into existing storage (`s.arr = a` / `*p = a`) takes
 				// golib's `.Clone()` for independent backing storage (see cloneValueCopy).
-				rhsExpr = v.cloneValueCopy(lhs, rhs, rhsExpr)
+				if !inPlace {
+					rhsExpr = v.cloneValueCopy(lhs, rhs, rhsExpr)
+				}
 
 				// A C# compound shift-assign requires an `int` shift count; the RHS's own (possibly
 				// unsigned/native-width) type — `s.allocCache >>= (nuint)x` — is rejected (CS0019). A
@@ -2102,6 +2174,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					result.WriteRune(')')
 				}
 
+				if inPlace {
+					result.WriteRune(')')
+				}
+
 				if format.includeSemiColon || i < lhsLen-1 {
 					result.WriteRune(';')
 				}
@@ -2113,7 +2189,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						result.WriteString(v.convExpr(lhs, lhsContexts))
 					}
 
-					result.WriteString(operator)
+					inPlace := v.valueAssignInPlace(assignStmt, lhs)
+
+					if inPlace {
+						result.WriteString("." + valueAssignMethod(v.info.TypeOf(lhs)) + "(")
+					} else {
+						result.WriteString(operator)
+					}
 
 					rhsExpr := v.convExpr(rhs, v.appendNilArrayDimsContext(v.appendEmptyIfaceLitContext(v.appendRhsPtrContext(contexts, rhs), lhs), rhs, lhs))
 
@@ -2129,7 +2211,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 					// A Go array copied by value over an existing variable takes golib's `.Clone()`
 					// for independent backing storage (see cloneValueCopy).
-					rhsExpr = v.cloneValueCopy(lhs, rhs, rhsExpr)
+					if !inPlace {
+						rhsExpr = v.cloneValueCopy(lhs, rhs, rhsExpr)
+					}
 
 					// A GUARDED shift-assign (`lhs.RshAssign(`) takes the count widened to uint64.
 					if shiftAssignGuarded {
@@ -2144,6 +2228,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 					if andNotUncheckedClose {
 						// Close the `unchecked((Type)~` wrapper opened by the narrow `&^=` operator.
+						result.WriteRune(')')
+					}
+
+					if inPlace {
 						result.WriteRune(')')
 					}
 
