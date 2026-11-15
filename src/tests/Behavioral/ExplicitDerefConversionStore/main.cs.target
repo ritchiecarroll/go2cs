@@ -29,10 +29,10 @@ internal static void main() {
 
     var arr = Ꮡ(new array<int32>(4));
     var ap = (uintptr)arr;
-    (@unsafe.Pointer.To<array<int32>>(ptr(ap))).Value[1] = 11;
-    (@unsafe.Pointer.To<array<int32>>(ptr(ap))).Value[2] += 12;
-    (@unsafe.Pointer.To<array<int32>>(ptr(ap))).Value[3] = 13;
-    fmt.Println(arr.Value, (@unsafe.Pointer.To<array<int32>>(ptr(ap))).Value[1]);
+    @unsafe.Pointer.ElementRef<int32>(ptr(ap), 1, 4) = 11;
+    @unsafe.Pointer.ElementRef<int32>(ptr(ap), 2, 4) += 12;
+    @unsafe.Pointer.ElementRef<int32>(ptr(ap), 3, 4) = 13;
+    fmt.Println(arr.Value, @unsafe.Pointer.ElementRef<int32>(ptr(ap), 1, 4));
 }
 
 } // end main_package

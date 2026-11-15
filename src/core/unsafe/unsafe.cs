@@ -691,7 +691,11 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     {
         Slice,
         CopyDestination,
-        CopySource
+        CopySource,
+        Element,
+        ArrayLoad,
+        ArrayStore,
+        FieldView
     }
 
     // `(*A)(p)[lo:hi]`: length hi-lo, capacity N-lo.
@@ -777,6 +781,141 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         return copied;
     }
 
+    // ---- Go's `(*A)(p)[i]`, `&(*A)(p)[i]`, `*(*A)(p)` and `*(*A)(p) = v`: the ELEMENT and ARRAY doors (door B) ----
+    //
+    // docs/phase4/DESIGN-array-pointer-doors.md, 4.5 and 10.5. These forms went through the pointer conversion to
+    // the array type, which has no answer over memory that is no Go array of that type: C memory was refused by
+    // name (`cannot view native memory as array<...>`), and a named array was read as a managed wrapper out of it.
+    // No box of the whole array is made here. N is a bound, as it is for the view doors.
+    //
+    //     (*A)(p)[i]          ElementRef<E>(p, i, N)        read, store, compound assignment, ++ and --
+    //     &(*A)(p)[i]         Element<E>(p, i, N)
+    //     v := *(*A)(p)       LoadArray<E>(p, N)            a Go array value: a copy
+    //     *(*A)(p) = v        StoreArray<E>(p, N, v)
+    //
+    // Go's order: the nil check, then the index against N with Go's index panic, then the element. WHAT THE ELEMENT
+    // IS follows the view doors' four answers (Aliased), for a window of one element at i:
+    //
+    //   V1  the Go array's own element box. An index past the end of the Go array is refused by name.
+    //   V3  a native box at the element's address, which keeps what the pointer carried.
+    //   V2  a native box at the element's address inside the Go value, anchored on the box that holds the value
+    //       still. An index past the end of the value is refused by name.
+    //   V4  Go's own definition of the form, `(*E)(unsafe.Add(p, i*size))`, which the pointer conversion answers.
+
+    // `&(*A)(p)[i]`: the pointer to element i.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ж<E> Element<E>(Pointer? p, long i, long length)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)i >= (ulong)length)
+            throw RuntimeErrorPanic.IndexOutOfRange(i, length);
+
+        slice<E> window = Aliased<E>(p!, i, 1, 1, length, ViewUse.Element, out ж<E>? unaliased);
+
+        if (unaliased is not null)
+            return i == 0 ? unaliased : To<E>(Moved(p, (nuint)i * (nuint)Unsafe.SizeOf<E>()));
+
+        return ElementAddressUnchecked(window, 0);
+    }
+
+    // `(*A)(p)[i]` as a location: read, stored, compounded or stepped in the one expression that names it.
+    //
+    // THE V3 FAST PATH (10.5). The index form is in hot generated code (sqlite's chacha block, its b-tree balance),
+    // nearly always over C memory. A pointer that keeps nothing, whose number the registry does not know and that
+    // names user memory, is C memory: the element is at p + i*size and nothing has a lifetime, so no box is made.
+    // Every other pointer takes the element door, whose box is what keeps the root until the reference is used: a
+    // reference into Go storage is one the collector follows by itself.
+    //
+    // A `ref` result cannot live across an await (CS8178): a site that cannot keep it in one expression takes
+    // Element(...).Value.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ref E ElementRef<E>(Pointer? p, long i, long length)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)i >= (ulong)length)
+            throw RuntimeErrorPanic.IndexOutOfRange(i, length);
+
+        if (!RuntimeHelpers.IsReferenceOrContainsReferences<E>() && NativeDerivation.Kept(p!.m_retainedSource) is null)
+        {
+            nuint number = (nuint)p.Value.Value;
+
+            if (!ManagedPointerTokens.NamesNoUserMemory(number) && ManagedPointerTokens.Resolve(number) is null)
+                return ref Unsafe.AsRef<E>((void*)(number + (nuint)i * (nuint)Unsafe.SizeOf<E>()));
+        }
+
+        return ref Element<E>(p, i, length).Value;
+    }
+
+    // `v := *(*A)(p)`: the array's N elements, copied, as a Go array value is. Over a Go value nothing can alias
+    // (V4) the read is still exact.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static array<E> LoadArray<E>(Pointer? p, long length)
+    {
+        RequireArrayPointer(p);
+
+        slice<E> view = Window<E>(p!, 0, length, length, length, ViewUse.ArrayLoad);
+        array<E> value = new array<E>((int)length);
+
+        copy(value[..], view);
+        GC.KeepAlive(p);
+
+        return value;
+    }
+
+    // `*(*A)(p) = v`: N elements copied to where p points. A Go value nothing can alias (V4) is refused by name: the
+    // write would land in a copy. A value shorter than N (the zero value of an array that was never given storage)
+    // is zeros from where it ends, as Go's is.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static void StoreArray<E>(Pointer? p, long length, in array<E> value)
+    {
+        RequireArrayPointer(p);
+
+        if (length == 0)
+            return;
+
+        slice<E> view = Window<E>(p!, 0, length, length, length, ViewUse.ArrayStore);
+
+        for (nint i = copy(view, value[..]); i < view.Length; i++)
+            view[i] = default!;
+
+        GC.KeepAlive(p);
+    }
+
+    // ---- Go's `(*[N]E)(unsafe.Pointer(&p.f))`, f not an E, over a root that is not native: the FIELD VIEW ----
+    //
+    // docs/phase4/DESIGN-array-pointer-doors.md, section 18. ArrayPointer<E>.Of answers this where golib's native
+    // field door declines. p is the pinned pointer to the field. The route was the pointer conversion to the array
+    // type, which answered a native box of array<E> over the field: its Value read the field's bytes as the three
+    // fields of array<E> itself, a managed reference made out of content.
+    //
+    // The answer is the view doors' own (Aliased), for a window of N elements at the field:
+    //
+    //   V2  a native array pointer over the bytes the field's root holds still. It is anchored on the box that
+    //       holds them, so the view keeps the root, and it ends where the root's storage ends: a view longer than
+    //       its field reads the fields after it, as Go does, and one that would pass the end of the root is
+    //       refused by name.
+    //   V3  the same over a field whose own box is native.
+    //   V1  a field that is an element of managed E storage: a window on that array.
+    //   V4  a root with no address (a struct that holds references) is refused by name. Nothing can be viewed, and
+    //       an array pointer over a copy would lose every write.
+    internal static ж<array<E>> FieldView<E>(Pointer p, nint length)
+    {
+        if (p.IsNull)
+            return To<array<E>>(p);
+
+        slice<E> window = Aliased<E>(p, 0, length, length, length, ViewUse.FieldView, out ж<E>? unaliased);
+
+        if (unaliased is not null)
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(0, length, length, ViewUse.FieldView)}: the field is in a Go value that has no address (a struct that holds references has none), so its bytes cannot be viewed as an array");
+
+        if (window.IsNativeBacked)
+            return builtin.NativeArrayPointer<E>(window.NativeElementAddressUnchecked(0), length, NativeSliceAnchors<E>.Of(window));
+
+        return array<E>.AliasPointer(ElementAddressUnchecked(window, 0), length);
+    }
+
     // Slicing through a nil array pointer is Go's nil dereference, before any bound is read.
     private static void RequireArrayPointer(Pointer? p)
     {
@@ -797,15 +936,43 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
 
     // The Go form a refusal names: N and E are the array's, the bounds the site's.
     private static string ViewForm<E>(long lo, long count, long length, ViewUse use) =>
-        use is ViewUse.Slice
-            ? $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:{lo + count}]"
-            : $"copy through (*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:]";
+        use switch
+        {
+            ViewUse.Slice => $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:{lo + count}]",
+            ViewUse.Element => $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}]",
+            ViewUse.ArrayLoad => $"*(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)",
+            ViewUse.ArrayStore => $"*(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p) = v",
+            ViewUse.FieldView => $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(unsafe.Pointer(&p.f))",
+            _ => $"copy through (*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:]"
+        };
 
     // The view of `count` elements starting `lo` elements after p, with room for `capacity`. The bounds are checked
     // by the caller. p is resolved where it points and the view starts lo elements on, so a number the registry
     // knows keeps its answer for every lo.
     private static slice<E> Window<E>(Pointer p, long lo, long count, long capacity, long length, ViewUse use)
     {
+        slice<E> window = Aliased<E>(p, lo, count, capacity, length, use, out ж<E>? unaliased);
+
+        if (unaliased is null)
+            return window;
+
+        // V4. A write would land in the copy, so a destination is refused instead of written and lost.
+        if (use is ViewUse.CopyDestination or ViewUse.ArrayStore)
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)} cannot write the Go value p points to: it is not an array of {GoReflect.GoTypeName(typeof(E))}, and a view of it is a copy");
+
+        if (count == 0)
+            return new slice<E>(Array.Empty<E>());
+
+        fixed (E* source = &unaliased.Value)
+            return new slice<E>(new ReadOnlySpan<E>(source + lo, (int)count));
+    }
+
+    // The window that ALIASES what p points to (V1, V2, V3), or `unaliased`: the pointer to the first element where
+    // nothing can be aliased (V4), for the caller to answer as its form requires.
+    private static slice<E> Aliased<E>(Pointer p, long lo, long count, long capacity, long length, ViewUse use, out ж<E>? unaliased)
+    {
+        unaliased = null;
+
         // The converter refuses such an element at the site; the doors are public, so they refuse it too.
         if (RuntimeHelpers.IsReferenceOrContainsReferences<E>())
             throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)}: an element that holds references cannot be viewed at an address");
@@ -887,15 +1054,9 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         if (holder is IHeldStorage storage && storage.HeldBytesFrom(held) is var room and not 0)
             return HeldWindow<E>(holder, held, room, lo, count, capacity, length, use);
 
-        // V4. A write would land in the copy, so copy's destination is refused instead of written and lost.
-        if (use is ViewUse.CopyDestination)
-            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)} cannot write the Go value p points to: it is not an array of {GoReflect.GoTypeName(typeof(E))}, and a view of it is a copy");
+        unaliased = ptr;
 
-        if (count == 0)
-            return new slice<E>(Array.Empty<E>());
-
-        fixed (E* source = &ptr.Value)
-            return new slice<E>(new ReadOnlySpan<E>(source + lo, (int)count));
+        return default;
     }
 
     // A window on the bytes of a Go value its box holds still (V2): `room` bytes exist from `address` to the end of
@@ -1737,22 +1898,56 @@ public static ж<byte> StringData(@string str) {
 // (docs/phase4/DESIGN-native-array-view.md, the LookupServicePort door).
 //
 // It carries both routes. A field one hop off a NATIVE root takes golib's native field-view door, which
-// views the field at its GO offset (builtin.NativeFieldArrayPointer); every other root -- managed,
-// pinned-managed, nil, or a struct whose Go layout cannot be known -- takes the raw-address route the
-// converter emitted before. The route lives here rather than in golib because golib sits
-// below this package and cannot name Pointer.FromPinnedBox, the retaining pin the raw route needs.
+// views the field at its GO offset (builtin.NativeFieldArrayPointer). Every other root takes the field view over
+// Go storage (Pointer.FieldView): a native array pointer over the bytes the field's root holds still, which keeps
+// the root and ends where its storage ends, and a refusal by name for a root with no address. The route lives
+// here rather than in golib because golib sits below this package and cannot name Pointer.FromPinnedBox, the
+// retaining pin it needs.
 //
-// The raw route hands the POINTER to the typed door (Pointer.To), so the array pointer keeps the field's box by
-// what the pointer carries. It was spelled `(ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field)`: the cast to a number
-// dropped the box, and the result kept it only because the registry still resolved the pinned address, which
-// held as long as something else kept the box alive between the two casts
-// (docs/phase4/DESIGN-array-pointer-doors.md 10.6).
+// So the answer is a native array pointer for every root that has an address, and the forms the converter emits
+// over it are the same: ElementRef for an index, at and slice for an address and a slice.
+//
+// The other roots took the pointer conversion to the array type until section 18 of the doors' design: first
+// spelled `(ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field)`, a cast through a number that dropped the box, then
+// the typed door Pointer.To, which kept it (10.6). Either way the box answered was a native box of array<T> over
+// the field, whose Value is no array.
 //
 // T rides on the CLASS and TField on the method so the call site names only T: C# infers TField from
 // the field argument, and an extension member cannot take T alone (CS1061 under C# 14).
 public static class ArrayPointer<T> {
     public static ж<array<T>> Of<TField>(ж<TField> field, nint length) =>
-        builtin.NativeFieldArrayPointer<T>(field, length) ?? Pointer.To<array<T>>(Pointer.FromPinnedBox(field));
+        builtin.NativeFieldArrayPointer<T>(field, length) ?? Pointer.FieldView<T>(Pointer.FromPinnedBox(field), length);
+
+    // THE WHOLE ARRAY THROUGH THE VIEW (section 18, part C). The view has no array<T> of its own, so its Value
+    // refuses by name, and the forms that need all N elements go through the elements instead. Both take the view's
+    // window, golib's slice of a pointer to an array, which answers for a native array pointer and for an ordinary
+    // box alike, with Go's nil dereference for a nil one.
+    //
+    //     v := *p        Load(p)        a Go array value: a copy of the N elements
+    //     *p = v         Store(p, v)    N element stores, in place
+    //
+    // A range that reads the values ranges the same window, `p.slice()`, where the elements are.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static array<T> Load(ж<array<T>> view)
+    {
+        slice<T> window = view.slice();
+        array<T> value = new array<T>((int)window.Length);
+
+        copy(value[..], window);
+
+        return value;
+    }
+
+    // A value shorter than N (the zero value of an array that was never given storage) is zeros from where it
+    // ends, as Go's is.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static void Store(ж<array<T>> view, in array<T> value)
+    {
+        slice<T> window = view.slice();
+
+        for (nint i = copy(window, value[..]); i < window.Length; i++)
+            window[i] = default!;
+    }
 }
 
 // Go's `(*[unsafe.Sizeof(s)]byte)(unsafe.Pointer(&s))[lo:hi]` as a direct argument of copy, where s's struct is
