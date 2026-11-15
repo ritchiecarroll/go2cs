@@ -40,10 +40,11 @@ namespace go.golib;
 /// once no reader can reach the node.
 /// </para>
 /// <para>
-/// An object over more than 16 pages is not in the pages at all: it is one entry in a short side list, which the door
-/// asks only for a number inside the envelope of the live large entries, and every further pin of the same object joins
-/// that entry. So a pin costs the index the same whatever the size of the object it pins, and however many pins of that
-/// object are live (P3's review of the seat, item 1).
+/// An object over more than 2 pages is not in the pages at all: it is one entry in a side list, which the door asks only
+/// for a number inside the envelope of the live large entries, and every further pin of the same object joins that entry,
+/// found by its base. So a pin costs the index the same whatever the size of the object it pins, however many pins of
+/// that object are live, and however many such objects are pinned (P3's review of the seat, item 1, and its re-read,
+/// items 2 and 3).
 /// </para>
 /// </remarks>
 internal sealed class PinExtents
@@ -51,22 +52,28 @@ internal sealed class PinExtents
     private const int PageShift = 12;
 
     // An extent over MORE than this many pages is one entry in the large list, never a node per page: a pin's cost to the
-    // index must not grow with the object it pins (P3's review, item 1: a 16 MiB pin cost 4,097 nodes, 0.6 ms and 623 KB).
-    // At or under it, the per-page path costs at most about 16 x (120 ns, 152 B), the measured 64 KiB row. Over it, every
-    // live entry is at least 64 KiB of pinned memory, so the list stays short in any real program.
-    private const int LargePages = 16;
+    // index must not grow with the object it pins (P3's review, item 1: a 16 MiB pin cost 4,097 nodes, 0.6 ms and 623 KB;
+    // its re-read, item 2: 1,000 live pins of one 60 KiB buffer held 16,000 nodes, 1.6-2.6 us and 1,089 B a pin). A page
+    // costs about 120 ns and 68-152 B a pin, a large entry 112-136 B and 200-380 ns whatever the size, so the pages win
+    // only for an object over one or two of them (a 4 KiB array's data spans two).
+    private const int LargePages = 2;
 
     private static PinExtents? s_current;
 
     private readonly ConcurrentDictionary<nuint, Page> m_pages = new();
 
-    // The large list: a pushed list read without a lock, written under m_largeGate. [m_low, m_high) covers every live
-    // entry, widened BEFORE an entry is linked and narrowed AFTER one is unlinked, so a number outside it never walks the
-    // list however many large pins are live. C memory is outside it under the GC's regions (the 64-bit default since .NET
-    // 7), which reserve the managed heap as one range apart from native allocations. Under segments (a 32-bit process, or
-    // a configured segments GC), large objects and native memory can interleave, and a C number inside the envelope walks
-    // the list: slower, and never a wrong answer.
+    // The large list: a pushed list read without a lock, written under m_largeGate, with each entry also found by its
+    // base (m_largeByBase, writer-only) so a pin joins or adds in O(1) however many objects are pinned. [m_low, m_high)
+    // covers every live entry: widened BEFORE an entry is linked, and reset only when the list empties -- narrowing it on
+    // every release is a walk of the list (P3's re-read, item 3: at 1,000 entries a release cost 2.7-3.0 us), so between
+    // those points it may be wider than what is live, which costs a walk and never a wrong answer. A number outside it never
+    // walks the list. C memory is outside it under the GC's regions (the 64-bit default since .NET 7), which reserve the
+    // managed heap as one range apart from native allocations. Under segments (a 32-bit process, or a configured segments
+    // GC), large objects and native memory can interleave, and a C number inside the envelope walks the list: slower, and
+    // never a wrong answer. A number inside it that no entry holds is a Go-memory number the door goes on to refuse, or
+    // unpinned managed memory: the walk sits on those paths only, and costs about 3 ns an entry.
     private readonly object m_largeGate = new();
+    private readonly Dictionary<nuint, Large> m_largeByBase = new();
     private volatile Large? m_large;
     private volatile nuint m_low = nuint.MaxValue;
     private volatile nuint m_high;
@@ -354,20 +361,20 @@ internal sealed class PinExtents
 
     // One entry per large OBJECT. Golib's box pins are released by finalizer, so a loop over one big buffer holds many
     // pins of it at once: each later pin JOINS the live entry with the same extent as a holder, so the list holds one entry
-    // per distinct object and a pin costs one lock however many pins of its object are live.
+    // per distinct object, and a pin costs one lock and one lookup by base however many pins and objects are live.
     private object AddLarge(WeakReference<PinnedBuffer> weak, nuint start, nuint end)
     {
         lock (m_largeGate)
         {
-            for (Large? entry = m_large; entry is not null; entry = entry.Next)
+            // Every entry in the table is linked and live (Dead is set only as it leaves, under this lock), so its count is
+            // above 0. Two live pinned objects cannot share a base, so a base names one object.
+            if (m_largeByBase.TryGetValue(start, out Large? live))
             {
-                // Every linked entry is live (Dead is set only as it is unlinked, under this lock), so its count is above 0.
-                if (entry.Base != start || entry.End != end)
-                    continue;
+                Debug.Assert(live.End == end, "one pinned object, two extents");
 
-                Holder holder = new(weak, entry) { Next = entry.Holders };
-                entry.Holders = holder;
-                entry.Count++;
+                Holder holder = new(weak, live) { Next = live.Holders };
+                live.Holders = holder;
+                live.Count++;
                 return holder;
             }
 
@@ -380,8 +387,14 @@ internal sealed class PinExtents
             if (end > m_high)
                 m_high = end;
 
-            created.Next = m_large;
+            Large? head = m_large;
+            created.Next = head;
+
+            if (head is not null)
+                head.Previous = created;
+
             m_large = created;
+            m_largeByBase.Add(start, created);
             return created;
         }
     }
@@ -401,39 +414,28 @@ internal sealed class PinExtents
                 return;
             }
 
-            // The last pin of the object: dead, unlinked, and the envelope narrowed to what is left. Every linked entry is
-            // live, so the predecessor rewritten here is live, and a reader standing on this entry keeps its Next.
+            // The last pin of the object: dead, out of the table, unlinked in O(1) through Previous. Every linked entry is
+            // live, so the predecessor whose Next is rewritten here is live, and a reader standing on this entry keeps its
+            // own Next, which is never rewritten.
             entry.Dead = 1;
+            m_largeByBase.Remove(entry.Base);
 
-            if (m_large == entry)
-            {
-                m_large = entry.Next;
-            }
+            Large? previous = entry.Previous, next = entry.Next;
+
+            if (previous is null)
+                m_large = next;
             else
+                previous.Next = next;
+
+            if (next is not null)
+                next.Previous = previous;
+
+            // The envelope resets only when nothing is left (see m_low): narrowing it here would walk the list.
+            if (m_large is null)
             {
-                for (Large? previous = m_large; previous is not null; previous = previous.Next)
-                {
-                    if (previous.Next == entry)
-                    {
-                        previous.Next = entry.Next;
-                        break;
-                    }
-                }
+                m_low = nuint.MaxValue;
+                m_high = 0;
             }
-
-            nuint low = nuint.MaxValue, high = 0;
-
-            for (Large? rest = m_large; rest is not null; rest = rest.Next)
-            {
-                if (rest.Base < low)
-                    low = rest.Base;
-
-                if (rest.End > high)
-                    high = rest.End;
-            }
-
-            m_low = low;
-            m_high = high;
         }
     }
 
@@ -562,6 +564,9 @@ internal sealed class PinExtents
         internal volatile Holder? Holders;
         internal volatile int Dead;
         internal volatile Large? Next;
+
+        // Writer-only, under the list's lock: the unlink's O(1) predecessor. No reader follows it.
+        internal Large? Previous;
         internal int Count = 1;
         internal int DeadHolders;
 
