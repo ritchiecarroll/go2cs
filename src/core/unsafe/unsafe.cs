@@ -709,7 +709,15 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     {
         long count = OpenFormCount(p, lo, length, src.Length);
 
-        return count == 0 ? 0 : copy(Window<E>(p!, lo, count, count, length, ViewUse.CopyDestination), src);
+        if (count == 0)
+            return 0;
+
+        // p is held until the elements are copied: the window is over memory p keeps.
+        nint copied = copy(Window<E>(p!, lo, count, count, length, ViewUse.CopyDestination), src);
+
+        GC.KeepAlive(p);
+
+        return copied;
     }
 
     // The same with a string source, which Go allows into a byte destination.
@@ -718,7 +726,14 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     {
         long count = OpenFormCount(p, lo, length, src.Length);
 
-        return count == 0 ? 0 : copy(Window<byte>(p!, lo, count, count, length, ViewUse.CopyDestination), src);
+        if (count == 0)
+            return 0;
+
+        nint copied = copy(Window<byte>(p!, lo, count, count, length, ViewUse.CopyDestination), src);
+
+        GC.KeepAlive(p);
+
+        return copied;
     }
 
     // `copy(dst, (*A)(p)[lo:])`: min(len(dst), N-lo) elements.
@@ -727,7 +742,14 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     {
         long count = OpenFormCount(p, lo, length, dst.Length);
 
-        return count == 0 ? 0 : copy(dst, Window<E>(p!, lo, count, count, length, ViewUse.CopySource));
+        if (count == 0)
+            return 0;
+
+        nint copied = copy(dst, Window<E>(p!, lo, count, count, length, ViewUse.CopySource));
+
+        GC.KeepAlive(p);
+
+        return copied;
     }
 
     // Slicing through a nil array pointer is Go's nil dereference, before any bound is read.
@@ -787,21 +809,46 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         {
             object? resolved = ManagedPointerTokens.Resolve(ptr.NativeAddress);
 
-            // V3. Kept answers null for C memory alone, so no anchor is allocated for it.
             if (resolved is null)
             {
-                nuint address = ptr.NativeAddress + (nuint)lo * (nuint)Unsafe.SizeOf<E>();
+                object? kept = NativeDerivation.Kept(ptr);
 
-                return slice<E>.OverNativeMemory(address, (nint)count, (nint)capacity, NativeSliceAnchors<E>.For(NativeDerivation.Kept(ptr)));
+                // An address the registry does not know that was DERIVED from a Go value (unsafe.Add over a pointer
+                // to it, an element of a view of it) is inside that value's storage, or was meant to be. Go's
+                // capacity N-lo is no bound on it: `(*[1<<30]byte)(unsafe.Add(unsafe.Pointer(&v), 4))[:n]` would
+                // read and write the heap past v. So the Go value answers for where its storage ends (V2 at an
+                // interior address), and an address outside it is refused by name.
+                if (NativeDerivation.HeldSource(kept) is not { } origin)
+                {
+                    // V3: C memory, or a number that carries nothing. Kept answers null for C memory alone, so no
+                    // anchor is allocated for it. Nothing here knows where such memory ends, as in Go.
+                    nuint address = ptr.NativeAddress + (nuint)lo * (nuint)Unsafe.SizeOf<E>();
+
+                    return slice<E>.OverNativeMemory(address, (nint)count, (nint)capacity, NativeSliceAnchors<E>.For(kept));
+                }
+
+                if (origin.TryHeldExtent(out nuint start, out nuint end))
+                {
+                    if (ptr.NativeAddress < start || ptr.NativeAddress > end)
+                        throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)}: p is outside the Go value it was derived from");
+
+                    return HeldWindow<E>(kept!, ptr.NativeAddress, end - ptr.NativeAddress, lo, count, capacity, length, use);
+                }
+
+                // The Go value holds nothing still at this address (it cannot be pinned, or it has other storage
+                // now): no window is cut over it, and the copy arm below answers.
             }
-
-            // V1, a Go array of E named by its own address (`unsafe.Pointer(&a)`, or that number): the address is
-            // the array's element 0, so the view is a window on the array.
-            if (resolved is ж<array<E>> { IsNilPointer: false } arrayBox && arrayBox.ValueSlot is { Source: { } source } whole)
+            else if (resolved is ж<array<E>> { IsNilPointer: false } arrayBox && arrayBox.ValueSlot is { Source: { } source } whole)
+            {
+                // V1, a Go array of E named by its own address (`unsafe.Pointer(&a)`, or that number): the address
+                // is the array's element 0, so the view is a window on the array.
                 return ManagedWindow(source, whole.Low, whole.Length, lo, count, capacity, length, use);
-
-            holder = resolved;
-            held = ptr.NativeAddress;
+            }
+            else
+            {
+                holder = resolved;
+                held = ptr.NativeAddress;
+            }
         }
         else if (!ptr.IsNative && !ptr.IsNilPointer && ptr.StorageKind is PointerStorage.Pinnable)
         {

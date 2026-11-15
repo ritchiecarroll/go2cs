@@ -743,25 +743,63 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
             return (nuint)ptr == address;
     }
 
-    // IHeldStorage, for the array-pointer view doors' V2. Three facts, each of which must hold or the answer is 0:
-    // this box owns a pin (m_pin, set at the address-take and never cleared, released by its finalizer once the
-    // box is unreachable); this box is pinned AT `address` (IsPinnedAt, the registry's own validate-on-read); and
-    // the pinned object is a managed array (the value slot, an element array, or the root's slot for a field or
-    // element view), whose data ends at a known address. The pinned object does not move while the pin is held,
-    // so the two addresses read here are the ones a window over them will use.
-    unsafe nuint IHeldStorage.HeldBytesFrom(nuint address)
+    // IHeldStorage, for the array-pointer view doors' V2. Two facts, each of which must hold or the answer is 0: this
+    // box is pinned AT `address` (IsPinnedAt, the registry's own validate-on-read), and it holds storage still that
+    // the address is in (TryHeldExtent).
+    nuint IHeldStorage.HeldBytesFrom(nuint address) =>
+        IsPinnedAt(address) && heldExtent(out nuint start, out nuint end) && address >= start && address < end ? end - address : 0;
+
+    bool IHeldStorage.TryHeldExtent(out nuint start, out nuint end) => heldExtent(out start, out end);
+
+    // The storage this box holds still. Three facts, each of which must hold: this box owns a pin (m_pin, set at the
+    // address-take and never cleared, released by its finalizer once the box is unreachable); the pinned object is
+    // a managed array (the value slot, an element array, or the root's slot for a field or element view), whose
+    // data ends at a known address; and the pinned object is the storage the value has NOW. The pinned object does
+    // not move while the pin is held, so the two addresses read here are the ones a window over them will use.
+    private unsafe bool heldExtent(out nuint start, out nuint end)
     {
+        start = 0;
+        end = 0;
+
         PinnedBuffer? pin = m_pin;
 
-        if (pin is null || !IsPinnedAt(address) || pin.PinnedTarget is not Array target)
-            return 0;
+        if (pin is null || NativeAddress != 0 || pin.PinnedTarget is not Array target)
+            return false;
+
+        nuint first = (nuint)pin.Pointer;
+        int elements;
 
         // A Go array's box pins the array's elements and records the array's length; a pin-only hold records 0.
-        int elements = pin.Length > 0 ? (int)Math.Min(pin.Length, target.Length) : target.Length;
-        nuint start = (nuint)pin.Pointer;
-        nuint end = (nuint)(nint)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(target, elements);
+        if (pin.Length > 0)
+        {
+            // The pin is made once (pinnedArrayData) and holds the elements the array had then. A whole
+            // assignment gives the array new ones (`a = b` is emitted `a = b.Clone()`), and the pin still holds the
+            // old: a window over them would read what the variable no longer is and lose every write (the review of
+            // 2026-11-15, fix 1). So the pinned elements must be the array's own now.
+            if (ValueSlot is not IArray current || !ReferenceEquals(current.Source, target))
+                return false;
 
-        return address >= start && address < end ? end - address : 0;
+            elements = (int)Math.Min(pin.Length, target.Length);
+            end = (nuint)(nint)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(target, elements);
+        }
+        else
+        {
+            // A pin-only hold is of the object this box's own slot is in.
+            elements = target.Length;
+            end = (nuint)(nint)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(target, elements);
+
+            fixed (void* slot = &this.ValueSlot)
+            {
+                if ((nuint)slot < first || (nuint)slot >= end)
+                {
+                    end = 0;
+                    return false;
+                }
+            }
+        }
+
+        start = first;
+        return true;
     }
 
     /// <inheritdoc/>

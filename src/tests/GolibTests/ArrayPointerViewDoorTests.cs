@@ -601,6 +601,215 @@ public class ArrayPointerViewDoorTests
         GC.KeepAlive(Ꮡpair);
     }
 
+    // ---- The review of 2026-11-15: an address inside a Go value, and storage a Go array no longer has ----
+
+    // An array type longer than any Go value here and short enough for a span, so its length bounds nothing.
+    private const long Big = 1L << 30;
+
+    /// <summary>
+    /// <c>(*[1 &lt;&lt; 30]byte)(unsafe.Add(unsafe.Pointer(&amp;pair), 4))[:n]</c>. An address inside a Go value is not
+    /// one the registry knows, so the view was cut as over C memory, with Go's capacity: 1 &lt;&lt; 30 bytes over a
+    /// value of 16, and a write past the twelfth went into whatever the heap held next. The view ends where the
+    /// value ends, and a longer one is refused by name before anything is read or written.
+    /// </summary>
+    [TestMethod]
+    public void AViewAtAnAddressInsideAGoValueEndsWhereTheValueEnds()
+    {
+        heap(new Pair { a = 1, b = 2, c = 0x0102030405060708UL }, out ж<Pair> Ꮡpair);
+        @unsafe.Pointer inside = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡpair), 4);
+
+        slice<byte> view = @unsafe.Pointer.View<byte>(inside, 0, 12, Big);
+
+        Assert.AreEqual((nint)12, view.Capacity, "the view ends where the value ends");
+        Assert.AreEqual((byte)2, view[0]);
+
+        view[4] = 0xee;
+        Assert.AreEqual(0x01020304050607eeUL, Ꮡpair.Value.c, "a write through the view must reach the value");
+
+        Assert.AreEqual((nint)12, @unsafe.Pointer.View<byte>(inside, 0, 4, Big).Capacity);
+        Assert.AreEqual((nint)2, @unsafe.Pointer.View<uint>(inside, 1, 2, Big).Capacity, "a wider element counts what remains in its own size");
+
+        string past = PanicText(() => @unsafe.Pointer.View<byte>(inside, 0, 13, Big));
+
+        Assert.AreEqual($"go2cs: (*[{Big}]uint8)(p)[0:13] would pass the end of the Go value p points to (12 elements of it remain)", past);
+
+        string three = PanicText(() => @unsafe.Pointer.View<byte>(inside, 8, 13, 13, Big));
+
+        Assert.AreEqual($"go2cs: (*[{Big}]uint8)(p)[8:13] would pass the end of the Go value p points to (4 elements of it remain)", three);
+
+        string copied = PanicText(() => @unsafe.Pointer.CopyInto(inside, 0, Big, Bytes("thirteen byte")));
+
+        Assert.AreEqual($"go2cs: copy through (*[{Big}]uint8)(p)[0:] would pass the end of the Go value p points to (12 elements of it remain)", copied);
+        Assert.AreEqual(2u, Ꮡpair.Value.b, "a refused copy must write nothing");
+        Assert.AreEqual(0x01020304050607eeUL, Ꮡpair.Value.c, "a refused copy must write nothing");
+
+        Assert.AreEqual((nint)12, @unsafe.Pointer.CopyInto(inside, 0, Big, Bytes("twelve bytes")));
+        Assert.AreEqual(1u, Ꮡpair.Value.a);
+        Assert.AreEqual(0x6c657774u, Ꮡpair.Value.b);
+        Assert.AreEqual(0x7365747962206576UL, Ꮡpair.Value.c);
+        GC.KeepAlive(Ꮡpair);
+    }
+
+    /// <summary>
+    /// The same inside a Go array of another element type, whose box holds the array's elements still rather than
+    /// its own slot: <c>(*[1 &lt;&lt; 30]byte)(unsafe.Add(unsafe.Pointer(&amp;init), 4))[:n]</c>, init a [4]uint32.
+    /// </summary>
+    [TestMethod]
+    public void AViewAtAnAddressInsideAGoArrayOfAnotherElementEndsWhereTheArrayEnds()
+    {
+        heap(ChachaInit(), out ж<array<uint>> Ꮡinit);
+        @unsafe.Pointer inside = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡinit), 4);
+
+        slice<byte> view = @unsafe.Pointer.View<byte>(inside, 0, 4, Big);
+
+        Assert.AreEqual((nint)12, view.Capacity, "the view ends where the array ends");
+        Assert.AreEqual((byte)0x6e, view[0]);
+
+        view[0] = 0x01;
+        Assert.AreEqual(0x33206401u, Ꮡinit.Value[1], "a write through the view must reach the array");
+
+        string past = PanicText(() => @unsafe.Pointer.View<byte>(inside, 0, 13, Big));
+
+        Assert.AreEqual($"go2cs: (*[{Big}]uint8)(p)[0:13] would pass the end of the Go value p points to (12 elements of it remain)", past);
+        GC.KeepAlive(Ꮡinit);
+    }
+
+    /// <summary>
+    /// An address at the end of a Go value is a pointer Go allows and nothing may be read at; one further on, or
+    /// before the value, is in no Go value the pointer was derived from. Each is refused by name for any element.
+    /// </summary>
+    [TestMethod]
+    public void AViewAtAnAddressPastOrBeforeAGoValueIsRefusedByName()
+    {
+        heap(new Pair { a = 1, b = 2, c = 3 }, out ж<Pair> Ꮡpair);
+        @unsafe.Pointer end = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡpair), 16);
+
+        Assert.AreEqual((nint)0, @unsafe.Pointer.View<byte>(end, 0, 0, Big).Length, "no element is a view Go allows at the end");
+
+        string atEnd = PanicText(() => @unsafe.Pointer.View<byte>(end, 0, 1, Big));
+
+        Assert.AreEqual($"go2cs: (*[{Big}]uint8)(p)[0:1] would pass the end of the Go value p points to (0 elements of it remain)", atEnd);
+
+        @unsafe.Pointer beyond = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡpair), 24);
+        string after = PanicText(() => @unsafe.Pointer.View<byte>(beyond, 0, 1, Big));
+
+        Assert.AreEqual($"go2cs: (*[{Big}]uint8)(p)[0:1]: p is outside the Go value it was derived from", after);
+
+        @unsafe.Pointer before = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡpair), -8);
+        string under = PanicText(() => @unsafe.Pointer.CopyInto(before, 0, Big, Bytes("x")));
+
+        Assert.AreEqual($"go2cs: copy through (*[{Big}]uint8)(p)[0:]: p is outside the Go value it was derived from", under);
+        Assert.AreEqual(1u, Ꮡpair.Value.a);
+        GC.KeepAlive(Ꮡpair);
+    }
+
+    /// <summary>
+    /// An element of a view of a Go value is an address inside that value too:
+    /// <c>w := (*[4]uint32)(unsafe.Pointer(&amp;pair))[:]; (*[1 &lt;&lt; 30]byte)(unsafe.Pointer(&amp;w[1]))[:n]</c>. The
+    /// second view ends where the value ends, whatever the first view's element type.
+    /// </summary>
+    [TestMethod]
+    public void AViewAtAnElementOfAViewOfAGoValueEndsWhereTheValueEnds()
+    {
+        heap(new Pair { a = 1, b = 2, c = 0x0102030405060708UL }, out ж<Pair> Ꮡpair);
+
+        slice<uint> words = @unsafe.Pointer.View<uint>(@unsafe.Pointer.FromPinnedBox(Ꮡpair), 0, 4, 4);
+        @unsafe.Pointer second = @unsafe.Pointer.FromPinnedBox(Ꮡ(words, 1));
+
+        slice<byte> view = @unsafe.Pointer.View<byte>(second, 0, 12, Big);
+
+        Assert.AreEqual((nint)12, view.Capacity, "the view ends where the value ends");
+        Assert.AreEqual((byte)2, view[0]);
+
+        view[4] = 0xee;
+        Assert.AreEqual(0x01020304050607eeUL, Ꮡpair.Value.c, "a write through the view must reach the value");
+
+        string past = PanicText(() => @unsafe.Pointer.View<byte>(second, 0, 13, Big));
+
+        Assert.AreEqual($"go2cs: (*[{Big}]uint8)(p)[0:13] would pass the end of the Go value p points to (12 elements of it remain)", past);
+
+        slice<byte> bytes = @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡpair), 0, 16, 16);
+        @unsafe.Pointer fifth = @unsafe.Pointer.FromPinnedBox(Ꮡ(bytes, 4));
+
+        slice<byte> same = @unsafe.Pointer.View<byte>(fifth, 0, 12, Big);
+
+        Assert.AreEqual((nint)12, same.Capacity, "the view ends where the value ends");
+
+        same[0] = 0x07;
+        Assert.AreEqual(7u, Ꮡpair.Value.b, "a write through a view at an element of a view must reach the value");
+
+        string pastSame = PanicText(() => @unsafe.Pointer.View<byte>(fifth, 0, 13, Big));
+
+        Assert.AreEqual($"go2cs: (*[{Big}]uint8)(p)[0:13] would pass the end of the Go value p points to (12 elements of it remain)", pastSame);
+        GC.KeepAlive(Ꮡpair);
+    }
+
+    /// <summary>
+    /// The same pointers over C memory keep Go's capacity: nothing here knows where a C allocation ends, and Go
+    /// does not either.
+    /// </summary>
+    [TestMethod]
+    public void AViewAtAnAddressInsideNativeMemoryKeepsGosCapacity()
+    {
+        nint block = Filled("0123456789");
+
+        try
+        {
+            @unsafe.Pointer inside = @unsafe.Add(Pointer(block), 4);
+            slice<byte> view = @unsafe.Pointer.View<byte>(inside, 0, 4, Big);
+
+            Assert.AreEqual("4567", Text(view));
+            Assert.AreEqual((nint)Big, view.Capacity);
+
+            view[0] = (byte)'x';
+            Assert.AreEqual("0123x5", Peek(block, 6));
+
+            slice<byte> first = @unsafe.Pointer.View<byte>(Pointer(block), 0, 8, Big);
+            slice<byte> again = @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡ(first, 2)), 0, 4, Big);
+
+            Assert.AreEqual((nint)Big, again.Capacity, "a view at an element of a view of C memory is a view of C memory");
+
+            again[0] = (byte)'y';
+            Assert.AreEqual("01y3x5", Peek(block, 6));
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(block);
+        }
+    }
+
+    /// <summary>
+    /// A Go array assigned whole after its number was taken has new elements, and the box still holds the old ones
+    /// at that number. A view of another element type at the number was a window on the old elements, so a write
+    /// through it was lost without a word. It is no window now: a view is a copy, and a copy door refuses to write.
+    /// </summary>
+    [TestMethod]
+    public void AViewAtTheNumberOfAGoArrayAssignedSinceIsNoWindowOnItsOldElements()
+    {
+        heap(ChachaInit(), out ж<array<uint>> Ꮡinit);
+        uintptr number = Ꮡinit;
+
+        Assert.AreEqual((nint)16, @unsafe.Pointer.View<byte>((@unsafe.Pointer)number, 0, 4, RawMem).Capacity, "before the assignment the view is a window on the array");
+
+        // `init = other`, as the converter emits the assignment of a whole array.
+        Ꮡinit.Value = ChachaInit().Clone();
+
+        slice<byte> view = @unsafe.Pointer.View<byte>((@unsafe.Pointer)number, 0, 4, RawMem);
+
+        Assert.AreEqual((nint)4, view.Capacity, "a view of elements the array no longer has is a copy, not a window on them");
+
+        string refused = PanicText(() => @unsafe.Pointer.CopyInto((@unsafe.Pointer)number, 0, RawMem, Bytes("wxyz")));
+
+        Assert.AreEqual($"go2cs: copy through (*[{RawMem}]uint8)(p)[0:] cannot write the Go value p points to: it is not an array of uint8, and a view of it is a copy", refused);
+
+        @unsafe.Pointer inside = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡinit), 4);
+        string refusedInside = PanicText(() => @unsafe.Pointer.CopyInto(inside, 0, Big, Bytes("wxyz")));
+
+        Assert.AreEqual($"go2cs: copy through (*[{Big}]uint8)(p)[0:] cannot write the Go value p points to: it is not an array of uint8, and a view of it is a copy", refusedInside);
+        Assert.AreEqual(0x3320646eu, Ꮡinit.Value[1]);
+        GC.KeepAlive(Ꮡinit);
+    }
+
     /// <summary>
     /// One Go value of the element type (<c>(*[1]byte)(unsafe.Pointer(&amp;b))[:]</c>) is that value, and a view of
     /// more than one element of it is refused by name.
