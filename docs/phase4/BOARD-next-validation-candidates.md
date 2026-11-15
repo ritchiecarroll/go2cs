@@ -38804,4 +38804,37 @@ Both fixtures carry the form: `++` and `--` through a conversion, with `*ip++` a
 pointer as the control (`ip.Value++`, unchanged).
 — P2 (2026-11-15)
 
+**Dated 2026-11-15 12:50Z, read at `fb41027880` (the W9b tip `1145614922` plus the form-3 commit). The footprint
+prediction above MISSED, and the miss is the census's.** Predicted: 0 files on each of the four targets. Read
+from the two-seeded `-stdlib` diff: **1 file and 1 changed line on each target** (windows/amd64, linux/amd64,
+darwin/amd64, linux/arm64; 4681 `.cs` in both roots of each pair; the changed line is the same text on all
+four). The file is `runtime/malloc.cs`, the statement is `runtime/malloc.go:899` in `(*mheap).sysAlloc`,
+`*(*notInHeapSlice)(unsafe.Pointer(&(*arenaList))) = notInHeapSlice{...}`. Before:
+`(Ꮡ((arenaList)).Reinterpret<slice<arenaIdx>, notInHeapSlice>()).Value = ...`. After:
+`(ᏑarenaList.nilcheck().Reinterpret<slice<arenaIdx>, notInHeapSlice>()).Value = ...`.
+
+**Why the census missed it.** Its predicate was text, `&*` before a name or a parenthesis, and Go writes this
+site `&(*arenaList)`, with a parenthesis BETWEEN the two operators. The converter's arm peels parentheses, as it
+must. The row's "10 sites" in `boring/sha.go` was a count of LINES, too: there are 15 sites on 10 lines.
+
+**The corrected census reads the syntax tree** (`docs/phase4/probes/p2-addr-deref-census`: a unary `&` whose
+operand, parentheses peeled, is a dereference). Std outside `cmd/` and `testdata`, 4353 files: 16 sites, the 15
+in `crypto/internal/boring/sha.go` (build tag `boringcrypto`, not in the corpus) and this one. Behavioral
+corpus: 10 sites, all in this seat's two fixtures (8 and 2), which is the positive control. libc 1.80.1 has 656
+and sqlite 1.62.0 has 117 across every platform file, all of the form `&*(*T)(x)` and none with a parenthesis
+between the operators. So the footprint the census predicts is 1 line in `runtime/malloc.cs` per target, which
+is what the diff reads.
+
+**The changed line is the cure reaching a real site: master loses the write there.** `arenaList` is a
+`*[]arenaIdx` parameter (`ж<slice<arenaIdx>> ᏑarenaList`, read through `ref var arenaList = ref
+ᏑarenaList.DerefOrNull()`). Go's statement replaces the slice header THROUGH that pointer when the arena list
+grows. The old emission boxed a copy of the slice and stored the new header in the copy; the new one stores
+through the pointer. Whether any banked row executes the statement is not measured (it is the Go heap's arena
+registration); the runtime row is read at the commit that carries this block and scored in the seat's DONE post.
+
+**Applied in the same commit as this block**: the one line in each of the four `malloc.cs` copies
+(`src/core/runtime/windows`, `linux-amd64`, `linux-arm64`, `darwin`), numstat 1/1 each, byte-equal to the
+changed line of the measured diff.
+— P2 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
