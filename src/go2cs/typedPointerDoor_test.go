@@ -15,7 +15,7 @@
 // star type is the callee (most sites), and the CONVERSION path, the operand of a dereference. The CONTROLS
 // carry the scope:
 //
-//   - a span view `(*[N]T)(p)[lo:hi]` keeps the cast text its lowering cuts, and reads through a raw pointer;
+//   - a view `(*[N]T)(p)[lo:hi]` takes the view door (arrayPointerViewDoor.go), which receives the pointer too;
 //   - a managed reinterpret `(*U)(unsafe.Pointer(t))` keeps its own route, ahead of the door.
 
 package main
@@ -73,7 +73,7 @@ func toNamed(p unsafe.Pointer) named {
 	return named(p)
 }
 
-// CONTROL 1 — a span view keeps the cast its lowering cuts.
+// CONTROL 1 — a view takes the view door, not the typed one.
 func view(p unsafe.Pointer, n int) []byte {
 	return (*[1 << 20]byte)(p)[:n]
 }
@@ -149,9 +149,9 @@ func TestTypedPointerDoorReplacesTheNumberCast(t *testing.T) {
 		}
 	}
 
-	// CONTROL 1 — the span view reads through a raw pointer over the number, and takes no door.
-	if body := emittedFunctionBody(t, mainCs, "view"); !strings.Contains(body, "new ReadOnlySpan<byte>((byte*)(uintptr)(p), ") || strings.Contains(body, "@unsafe.Pointer.To<") {
-		t.Errorf("view: a span view must keep its raw-pointer lowering and take no door, got:\n%s", body)
+	// CONTROL 1 — the view takes the view door with the pointer itself, and not the typed door.
+	if body := emittedFunctionBody(t, mainCs, "view"); !strings.Contains(body, "@unsafe.Pointer.View<byte>(p, 0, n, 1048576)") || strings.Contains(body, "@unsafe.Pointer.To<") {
+		t.Errorf("view: a view must take the view door and not the typed door, got:\n%s", body)
 	}
 
 	// CONTROL 2 — the managed reinterpret answers first.
