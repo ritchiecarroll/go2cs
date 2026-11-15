@@ -62,7 +62,7 @@ internal static void main() {
     ref var e = ref heap(new array<uint32>(4), out var Ꮡe);
     @unsafe.Pointer u = @unsafe.Pointer.FromPinnedBox(Ꮡe);
     e.Assign(new uint32[]{1, 2, 3, 4}.array());
-    (@unsafe.Pointer.To<array<uint32>>(u)).Value[0] = 47;
+    @unsafe.Pointer.ElementRef<uint32>(u, 0, 4) = 47;
     fmt.Println("array pointer:", e[0]);
 
     ref var g = ref heap(new array<uint32>(4), out var Ꮡg);
