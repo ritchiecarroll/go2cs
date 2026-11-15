@@ -356,3 +356,75 @@ on the go2cs side, README's registry line and ConvertingAModule's mapping sectio
 
 The Native AOT lines follow P1's reading (Q5). A short delta pass at the release cut re-reads whatever 309 and 310
 changed on these pages.
+
+## 8. Amendment, 2026-11-15 (owner-asked via COORD 18:36Z): wording that must hold in 1.26.11.1 and the next release
+
+**The rule.** A present-tense sentence that is true at 1.26.11.1 but turns false when the next release lands an item
+of Roadmap's "The next two releases" is reworded so it is true in both. Nothing predicts the next release in present
+tense; the sentence just stops asserting what that release changes. `async` stays only where it names M:N's async
+twins (none on a visitor page today). Version-qualified text (NEWS entries, roster rows, the release-notes draft)
+stays as is.
+
+**What the next release changes, as Roadmap and the rulings put it.** M:N scheduling arrives first as an option, a
+runtime switch a program turns on (owner ruling 2026-11-12), while one thread per goroutine stays the default
+(Roadmap, Performance). The same ruling reserves hidden twin members for it (the async twins of the functions
+that can park; `DESIGN-mn-scheduler-sizing.md` option B is the selective lowering they come from), so the visible
+converted code keeps its shape. So "by default" makes a thread claim
+true in both releases, and a claim that goroutines are "not rewritten into `async`" is the one to drop. The cgo
+steps (Go memory handed to C, cgo under `-recurse=nuget`, the `net` resolver) and door C lift refusals that pages
+list today.
+
+**Method.** A scan of the visitor page set (comments stripped) for `async`, `await`, own/OS/operating-system thread,
+one thread, thread per goroutine, `GOMAXPROCS`, thread caps, and the cgo and door C refusals: 53 thread and async
+lines, 20 cgo-shaped lines, each read in context.
+
+### 8.1 For the owner first: the README header (docs/README.md:23-24)
+
+As read: "Behavior comes first: a goroutine runs on its own thread and is not rewritten into `async`."
+
+Proposed: "Behavior comes first: goroutines, channels, `select` and `defer` keep Go's semantics."
+
+True at 1.26.11.1, and true under the next release's opt-in M:N, whose async twins are hidden from the converted
+files the same sentence's paragraph describes.
+
+### 8.2 Reword (true in both)
+
+| Page:line | As read (shortened) | Proposed |
+|---|---|---|
+| Limitations:26 | "**Each live goroutine holds an operating-system thread.** Thousands alive at once are fine; Go's million are out of reach." | "**By default, each live goroutine holds an operating-system thread.** Thousands alive at once are fine; Go's million are out of reach." |
+| Limitations:85, 89 | "**Goroutines are operating-system threads** ... `runtime.GOMAXPROCS(1)` does not make anything run one at a time." | "**By default, goroutines are operating-system threads** ... With threads, `runtime.GOMAXPROCS(1)` does not make anything run one at a time." |
+| Limitations:113 | "break in with a debugger, where each goroutine is a thread named `goroutine-N`" | "...where, by default, each goroutine is a thread named `goroutine-N`" |
+| KnownIssues:131, 146 | "Each goroutine is an operating-system thread, and macOS caps ..." / "... and on Linux each .NET thread uses ..." | "By default each goroutine is an operating-system thread, and ..." (both entries) |
+| FAQ:40-41 | "A goroutine is an operating-system thread, so thousands are fine and hundreds of thousands are not." | "By default a goroutine is an operating-system thread, so thousands are fine and hundreds of thousands are not." |
+| Features:61 | "Goroutines, each on its own thread (behavioral equivalence first — not rewritten into `async`)" | "Goroutines with Go's semantics, each on its own thread by default" |
+| GoFeatureSupport:107 | "Go's semantics, on real threads, not rewritten into `async`. Each live goroutine holds an operating-system thread, so ..." | "Go's semantics, on real threads by default. Each live goroutine then holds an operating-system thread, so ..." |
+| GoFeatureSupport:109 | "`runtime.GOMAXPROCS` ... Read and set, but it does not limit parallelism" | "Read and set; with the default threads it does not limit parallelism" |
+| ConsumingGoFromCSharp:628 | "Each goroutine runs on its own thread for as long as it runs." | "By default, each goroutine runs on its own thread for as long as it runs." |
+| Architecture:61 | "`go` (goroutine → its own OS thread, reused through `GoroutineThreadPool`)" | "`go` (a `goǃ` call; golib runs the goroutine on its own OS thread by default, reused through `GoroutineThreadPool`)" |
+| Tuning:497 | "Each goroutine other than `main` runs on its own thread" (seat 2 wording) | "By default, each goroutine other than `main` runs on its own thread" |
+| ConversionStrategies:8440 | "Each goroutine runs on an operating-system thread of its own, from start to finish. That is the main difference from Go" | "By default, each goroutine runs on an operating-system thread of its own, from start to finish. That is the main difference from Go" |
+| ConversionStrategies:8633 | "**A goroutine keeps its own thread from start to finish.**" | "**By default, a goroutine keeps its own thread from start to finish.**" |
+| ConversionStrategies:8701-8707 | "**Converted code is ordinary blocking code, not `async` code.** A goroutine pauses by blocking its thread ... golib cannot run many goroutines on fewer threads either, because .NET cannot move a running call to another stack. That is a property of .NET 10 ..." | "**Converted code is ordinary blocking code.** By default a goroutine pauses by blocking its thread, so each goroutine needs a thread of its own. `goǃ` does not use the .NET thread pool, because a blocked goroutine would hold a shared pool thread and starve the others." (the two sentences on what golib cannot do are dropped: the next release's opt-in scheduler does it) |
+| ConversionStrategies:8713 | "**Operating-system threads bound live goroutines far below Go's limit.**" | "**With the default threads, the operating system bounds live goroutines far below Go's limit.**" (and the "about a million" figure goes, per finding 8714) |
+| ConversionStrategies:12394 | "`runtime.GOMAXPROCS`, `Gosched`, `LockOSThread` and `Goexit`, on .NET threads" | keep: true in both (the M:N workers are .NET threads too) |
+| manual-conversions:3198 | `GOMAXPROCS(n)`: "does **not** cap parallelism — the CLR schedules goroutine threads" | "with the default threads, does **not** cap parallelism ..." (reference page; the M:N seat re-reads this table anyway) |
+
+### 8.3 Keep (true in both, or not about goroutines)
+
+PublicSurface:79 (thread identity is not promised, which already
+allows M:N); ConsumingGoFromCSharp:631 and 724 (`ReceiveAsync`/`SendAsync` are API names); CommandLine:50 (a shell
+`cmd &`); manual-conversions:68, 75, 2798 (Windows overlapped I/O and `SemaphoreSlim`, not goroutines); package-conversion:53
+(`main`'s thread); maps-and-channels:839; Roadmap:473-476 (future tense, already says "today" and "default").
+
+### 8.4 .4-only by nature
+
+NEWS and the release-notes draft (dated); roster rows ValidatedTestPackages:748-819 (version-qualified readings).
+
+### 8.5 The cgo steps and door C: no wording holds both
+
+Limitations:244 (the refused list, Go memory handed to C among it), Limitations:276-285 (the pointer rebuilt from a
+number), FAQ:51 ("Other C uses are refused, by name, with the phase that covers them"), GoFeatureSupport:165, and
+the Roadmap's "Next" lists. Each states a refusal the next release lifts. A version-free rewording would either
+hide the refusal or predict the lift; a version-qualified one ("1.26.11.1 refuses ...") turns a reference page into
+history. Recommendation: keep them, already phase-labelled as Limitations words them, and change each line in the
+same seat that lifts its refusal. FAQ:51 already reads true in both ("refused ... with the phase that covers them").
