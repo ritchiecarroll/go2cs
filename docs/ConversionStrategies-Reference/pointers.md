@@ -139,8 +139,8 @@ chunk, not its length. Only the object count changes, never Go's semantics. (Gua
 `ElemBoxPersistTests`: identity across expressions and all three index overloads, the view cache hitting
 with zero bytes allocated, Go's aliasing and equality, the chunk cost, a type with no field view keeping
 fresh boxes, and a dropped backing being collected.)
-<!-- The table: src/core/golib/ж.ElemRefBox.cs:168 (`internal static ж<T> OfArrayElement(array<T> array, int index)`),
-     the chunk: src/core/golib/ж.ElemRefBox.cs:158 (`private const int ElementBoxChunk = 64;`), the first of the
+<!-- The table: src/core/golib/ж.ElemRefBox.cs:170 (`internal static ж<T> OfArrayElement(array<T> array, int index)`),
+     the chunk: src/core/golib/ж.ElemRefBox.cs:160 (`private const int ElementBoxChunk = 64;`), the first of the
      three Ꮡ(array<T>, …) overloads: src/core/golib/builtin.cs:2694 (`return ElemRefBox<T>.OfArrayElement(target, index);`).
      Commits 8a714cf6dd, edb753ebca, 29d469bc11. The slice<T> overloads keep a fresh box per expression. -->
 

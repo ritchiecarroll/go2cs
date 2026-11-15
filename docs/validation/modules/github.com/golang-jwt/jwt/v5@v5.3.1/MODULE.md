@@ -7,8 +7,8 @@ Both sides of every reading were built with `-tags purego,math_big_pure_go,safe`
 
 | Package | Matched | Disclosed | Input digest | Proof |
 |:--|--:|--:|:--|:--|
-| `github.com/golang-jwt/jwt/v5` | 186 | 0 | `sha256-9647af3692e22d534f884f8a59f731746d35bc4c31966ad54c405af23b24eb78` | [index.md](index.md) |
-| `github.com/golang-jwt/jwt/v5/request` | 3 | 0 | `sha256-4a1b7eb540934d7a448b0026aa284ce46c76fb8391dfd946258d9647b2c0f8cb` | [request.md](request.md) |
+| `github.com/golang-jwt/jwt/v5` | 186 | 0 | `sha256-6e79a04200395d225703d2cb786b86d2a44b3f93af5f9102a319430ed28cfe8a` | [index.md](index.md) |
+| `github.com/golang-jwt/jwt/v5/request` | 3 | 0 | `sha256-87efbf9de641f0ea5b1f1f717842228f932618130da2eb4422d534c325916450` | [request.md](request.md) |
 
 **Total: 189 matched · 0 disclosed** across 2 package(s).
 
