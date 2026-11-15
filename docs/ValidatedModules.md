@@ -9,11 +9,12 @@ failure, as something the converted code does not do.
 
 Each module's pages are written by the converter beside its conversion and copied here unedited:
 the module summary sums the per-package proof pages, and each proof page lists every verdict. Every
-module's summary is the `VALIDATION.md` its NuGet package carries, below the package's notice.
+module's summary is the `VALIDATION.md` its NuGet package carries, below the package's notices.
 
-The rows are readings with Go 1.24.13, at `Release` with the tiered JIT off, the test host's default; they
-have not been re-measured with Go 1.26.10. Each summary gives the module's counts of matched and disclosed
-verdicts.
+The rows are readings with Go 1.26.10, built on the go.* 1.26.10.3 standard-library packages, on `linux/amd64`,
+at `Release` with the tiered JIT off, the test host's default. Each summary gives the module's counts of matched
+and disclosed verdicts. `mousetrap` has no Go tests, so its row is a behavioral proof instead: one hosted row per
+RID it ships.
 
 | Module | Version | Packages | Platform | Proof |
 |:--|:--|--:|:--|:--|
@@ -22,19 +23,28 @@ verdicts.
 | `github.com/golang-jwt/jwt/v5` | v5.3.1 | 2 | `linux/amd64` | [summary](validation/modules/github.com/golang-jwt/jwt/v5@v5.3.1/MODULE.md) |
 | `github.com/ritchiecarroll/hashset` | v1.0.0 | 1 | `linux/amd64` | [summary](validation/modules/github.com/ritchiecarroll/hashset@v1.0.0/MODULE.md) |
 | `github.com/spf13/pflag` | v1.0.9 | 1 | `linux/amd64` | [summary](validation/modules/github.com/spf13/pflag@v1.0.9/MODULE.md) |
+| `github.com/inconshreveable/mousetrap` | v1.1.0 | 1 | `win-x64`, `linux-x64`, `osx-x64`, `osx-arm64` | [behavior rows](validation/modules/github.com/inconshreveable/mousetrap@v1.1.0/MODULE.md) |
+| `github.com/spf13/cobra` | v1.10.2 | 1 | `linux/amd64` | [summary](validation/modules/github.com/spf13/cobra@v1.10.2/MODULE.md) |
+| `github.com/itchyny/timefmt-go` | v0.1.8 | 1 | `linux/amd64` | [summary](validation/modules/github.com/itchyny/timefmt-go@v0.1.8/MODULE.md) |
+| `github.com/itchyny/gojq` | v0.12.19 | 1 | `linux/amd64` | [summary](validation/modules/github.com/itchyny/gojq@v0.12.19/MODULE.md) |
 
 **`golang.org/x/sync`:** `semaphore`'s `TestWeightedAcquire` gives each acquire attempt a 10 ms deadline. With
 the tiered JIT off, the first attempt compiles the acquire path at full optimization before it can wait, which
-on the `linux/amd64` machine measured takes longer than 10 ms, so the test fails there and is disclosed as
-`runtime-capability`; the semaphore proof page pins the exact failure. With the tiered JIT on (`-test-tiered`),
-the same machine matches every one of `semaphore`'s tests and every test in the module. On `windows/amd64`, two
-runs on their own each matched every verdict, and a third, made while the machine was running other heavy test jobs,
-failed `TestWeightedAcquire` once; those proof pages are not reproduced here. That test depends on timing, so the
-result above is claimed only for a machine that is not busy with other work.
+on the `linux/amd64` machine that measured it takes longer than 10 ms, so the test fails there and is disclosed as
+`runtime-capability`; the semaphore proof page pins the exact failure. The test depends on timing: on a machine
+fast enough to pass it, the entry reads as orphaned and the package still validates.
 
-**`github.com/google/uuid` and `github.com/golang-jwt/jwt/v5`:** the proof pages linked above are the `linux/amd64`
-readings their packages carry. Each module was also read on `windows/amd64` from the same module sources (their
-module sums match), with the same counts and no test differing; those proof pages are not reproduced here.
-`uuid`'s `TestClockSeqRace` skips on both sides. `uuid`'s `TestVersion6` has an upstream race that can fail it on
-either runtime; its proof page cites the race without disclosing it, and the proof is a run in which both sides
-passed. `jwt/v5` also holds `cmd/jwt` and `test`, which have no tests of their own.
+**`github.com/google/uuid`:** `TestClockSeqRace` skips on both sides. `TestVersion6` has an upstream race that can
+fail it on either runtime, so it carries a timing-sensitive disclosure; in this reading both sides passed it, and
+the entry is reported as orphaned, the ruled alternative reading.
+
+**`github.com/golang-jwt/jwt/v5`:** the module also holds `cmd/jwt` and `test`, which have no tests of their own.
+
+**`github.com/inconshreveable/mousetrap`:** each behavior row is a sample program run on that RID's own hosted
+runner: the converted program and `go run` printed the same bytes, and the row names the assembly that loaded.
+No row stands for another RID.
+
+**`github.com/spf13/cobra` and `github.com/itchyny/gojq`:** each summary names one more package that was validated
+and is not packed, so it is not counted in the row and its proof page is not shipped: `cobra/doc`, whose imports
+are not go2cs NuGet packages, and gojq's `cli`, whose closure is deferred. gojq's row is the library root;
+`cmd/gojq` is a main package.

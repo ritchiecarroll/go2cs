@@ -7,10 +7,10 @@ Both sides of every reading were built with `-tags purego,math_big_pure_go,safe`
 
 | Package | Matched | Disclosed | Input digest | Proof |
 |:--|--:|--:|:--|:--|
-| `golang.org/x/sync/errgroup` | 5 | 0 | `sha256-89d3a237dfa62e0d7fd18ef891bed649abcf482b840aeb26e7eafa447df7d41a` | [errgroup.md](errgroup.md) |
-| `golang.org/x/sync/semaphore` | 7 | 1 | `sha256-ed3ee1b889d0eeb98b472fe70e016c59b05164c834ddf284d2298c8b9f873b93` | [semaphore.md](semaphore.md) |
-| `golang.org/x/sync/singleflight` | 12 | 0 | `sha256-95ea7063a3b0972451062f3b2ab9678255ef9744d93b18bcf1118082366acf86` | [singleflight.md](singleflight.md) |
-| `golang.org/x/sync/syncmap` | 3 | 0 | `sha256-3686b75eac2364f2fadd04e3033c88d9db7021d3f43676a0dd7605eedb64764b` | [syncmap.md](syncmap.md) |
+| `golang.org/x/sync/errgroup` | 5 | 0 | `sha256-895ade5d54638791d97b29ca7c5b54164e7ec29ae2282986569b7359a6330ffa` | [errgroup.md](errgroup.md) |
+| `golang.org/x/sync/semaphore` | 7 | 1 | `sha256-2280fe09cdcddd438df847fa7e122834cbcb397190c4ac3cd9cc1ed3c2e963f6` | [semaphore.md](semaphore.md) |
+| `golang.org/x/sync/singleflight` | 12 | 0 | `sha256-e835be902c0c21049d3fd5f9c238a393dbcb79aaf82d5d85f9bbe857a58ecf47` | [singleflight.md](singleflight.md) |
+| `golang.org/x/sync/syncmap` | 3 | 0 | `sha256-cd7c0587437f81cd16ea2ab62994be560a62dd6459031ec9efc5c159c306e04f` | [syncmap.md](syncmap.md) |
 
 **Total: 27 matched · 1 disclosed** across 4 package(s).
 
