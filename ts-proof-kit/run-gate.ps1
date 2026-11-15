@@ -139,7 +139,7 @@ $fill = @("-I", (Join-Path $KIT "layout.py"), "fill", "--dest", (Join-Path $T "s
     "--gostdlib", $(if ($GoStdLibVersion) { $GoStdLibVersion } else { "local" }), "--sdk", $sdk, "--platform", $plat, "--goversion", $gov)
 if ($env:OWNER_README) { $fill += @("--owner-readme", $env:OWNER_README) }
 if ((Run $log $PY $fill) -ne 0) { Die fill }
-$census = @("-I", (Join-Path $KIT "layout.py"), "census", "--dest", (Join-Path $T "stage"))
+$census = @("-I", (Join-Path $KIT "layout.py"), "census", "--dest", (Join-Path $T "stage"), "--mode", $Mode)
 if ($env:DENY) { $census += @("--deny", $env:DENY) }
 & $PY @census 2>&1 | Tee-Object -FilePath $log -Append; $crc = $LASTEXITCODE
 Step "done; census rc=$crc"; exit $crc

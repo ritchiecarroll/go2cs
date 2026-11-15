@@ -275,8 +275,19 @@ INTERNAL = [r"\bCOORD\b", r"\bi7\b", r"\bi9\b", r"\bmailbox\b", r"\bfleet\b",
 AUTHORED = re.compile(r"^(README\.md|PROOF\.md|MODIFICATIONS\.md|\.git\w+|[^/]*\.slnx|proof/[^/]*\.py|go/.*|samples/.*)$")
 
 
+# 2026-11-15 (the i9's first Windows run): two classes of hit that are not leaks.
+# PUBLIC: the converter writes the go2cs repository's own public address into every .csproj (RepositoryUrl,
+# PackageProjectUrl) and some pages. A deny list derived from an account or git identity matches inside it. Deny
+# patterns do not count a match that lies wholly inside one of these addresses; PATHS and INTERNAL still do.
+PUBLIC = [r"https://github\.com/ritchiecarroll/go2cs[\w./#?=&%-]*"]
+# LOCAL_PATH: a --mode local conversion writes the root it resolved against as Directory.Build.props's go2csPath
+# fallback, a host path by design. In local mode that one element is reported and exempted; any other hit still
+# fails. A nuget-mode tree carries no such element, and there it is a hit like any other.
+LOCAL_PATH = re.compile(r"<go2csPath>[^<]*</go2csPath>")
+
+
 def census(A):
-    hits = []
+    hits, exempt = [], []
     deny = [l.strip() for l in open(A.deny, encoding="utf-8")] if A.deny else []
     deny = [l for l in deny if l and not l.startswith("#")]
     if not deny:
@@ -293,10 +304,22 @@ def census(A):
             # proof data quotes TypeScript's test-case file names, some of which are Windows-style (C:/foo/...):
             # there, only the drive-letter rule is relaxed.
             paths = [x for x in PATHS if not (rel.startswith("proof/") and not rel.endswith(".py") and x.startswith(r"\b[A-Z]"))]
+            public = [m.span() for u in PUBLIC for m in re.finditer(u, s)]
+            local = [m.span() for m in LOCAL_PATH.finditer(s)] if A.mode == "local" and f == "Directory.Build.props" else []
             for pat in paths + deny + (INTERNAL if AUTHORED.match(rel) else []):
                 for m in re.finditer(pat, s):
                     line = s.count("\n", 0, m.start()) + 1
-                    hits.append(f"{rel}:{line}: {pat}: {s[max(0, m.start() - 40):m.end() + 40]!r}")
+                    where = f"{rel}:{line}: {pat}: {s[max(0, m.start() - 40):m.end() + 40]!r}"
+                    if pat in deny and any(a <= m.start() and m.end() <= b for a, b in public):
+                        continue
+                    if any(a <= m.start() and m.end() <= b for a, b in local):
+                        exempt.append(where)
+                        continue
+                    hits.append(where)
+    if exempt:
+        print(f"census: {len(exempt)} exempt in local mode (the go2csPath fallback; a local tree is never the published one):")
+        for h in exempt[:20]:
+            print(" ", h)
     print(f"census: {len(hits)} hit(s)")
     for h in hits[:200]:
         print(" ", h)
@@ -308,5 +331,6 @@ ap.add_argument("cmd", choices=("stage", "fill", "census"))
 for a in ("tree", "tsc", "ts-root", "proof", "dest", "results", "converter", "gostdlib", "sdk", "platform", "goversion",
           "handpatches", "owner-readme", "deny"):
     ap.add_argument("--" + a)
+ap.add_argument("--mode", choices=("local", "nuget"), default="nuget")
 A = ap.parse_args()
 {"stage": stage, "fill": fill, "census": census}[A.cmd](A)

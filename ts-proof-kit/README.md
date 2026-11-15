@@ -18,5 +18,9 @@ variables, plus PYTHON if Python 3 is not `python`):
 
 The two scripts are twins: a change to one step goes into both.
 
+The census reads clean in both modes. In `local` mode it reports and exempts only the `go2csPath` fallback in
+`Directory.Build.props` (a host path by design: a local tree is never the published one); a `nuget` tree has none.
+Deny patterns do not count a match inside the go2cs repository's own public address, which every `.csproj` carries.
+
 `layout.py fill` never writes the repository's README.md. It writes the fill values, and with `--owner-readme` a
 patch on the existing README, into `<staging dir>.readme/`.
