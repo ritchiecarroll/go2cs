@@ -1,4 +1,5 @@
 # A whole-array assignment copies into the destination's storage
+<!-- {% raw %} — Jekyll/Liquid guard: this doc quotes Go composite-literal syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 **Status: PLAN, for P5's review before the cut (R, 2026-11-15); amended after that review in §8.** The census is
 `docs/phase4/data/array-reassign-census/`; the finding is P5's (2026-11-15, BOARD row and
@@ -217,3 +218,4 @@ also implements `IGoValueAssign<S>`. A named-array wrapper's `Assign` forwards t
 
 **Stop lines, added.** A tuple statement's emission outside the shapes above; a form that census v2 counts and the
 converter leaves on the swap; any ApiCompat finding other than the new interface and the new extension.
+<!-- {% endraw %} — keep this the FINAL line, so every later amendment lands inside the raw guard. -->
