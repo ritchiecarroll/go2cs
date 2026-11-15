@@ -132,8 +132,14 @@ public abstract partial class ж<T>
         if (this is FieldRefBox<T> view)
             return ref view.m_views;
 
-        if (this is ElemRefBox<T> element)
-            return ref element.m_views;
+        // The element box answers through a virtual it overrides (ElementViews, ж.cs), never as
+        // `this is ElemRefBox<T>`: naming the element box of T in a method every ж<T> carries makes every
+        // ж<T> reach array<T>, whose AliasPointer names ж<array<T>>, and Native AOT expands that loop to its
+        // cut-off for every type a program touches (PointerBoxGenericCycleTests).
+        ref ViewEntry? element = ref ElementViews;
+
+        if (!Unsafe.IsNullRef(ref element))
+            return ref element;
 
         return ref s_views.GetOrCreateValue(this).Head;
     }
@@ -172,8 +178,7 @@ public abstract partial class ж<T>
         if (!FieldViewCache.Disabled)
         {
             ViewEntry? e = this is SlottedStandardBox<T> slotted ? slotted.m_views :
-                this is ElemRefBox<T> element ? element.m_views :
-                this is FieldRefBox<T> view ? view.m_views : null;
+                this is FieldRefBox<T> view ? view.m_views : elementViews();
 
             for (; e is not null; e = e.Next)
             {
@@ -183,6 +188,15 @@ public abstract partial class ж<T>
         }
 
         return viewOfSlow(fieldRefFunc);
+    }
+
+    // The element box's view list for the hit path, null for every other kind (see viewsHead).
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ViewEntry? elementViews()
+    {
+        ref ViewEntry? element = ref ElementViews;
+
+        return Unsafe.IsNullRef(ref element) ? null : element;
     }
 
     /// <summary>

@@ -1,0 +1,18 @@
+sq-windows-amd64: 26 packages, 0 load errors, 433 sites
+  deref/bound                  5
+  deref/return (test)          1
+  deref/store                  6
+  index/arg                    51
+  index/bound                  92
+  index/bound (test)           1
+  index/read                   106
+  index/return                 2
+  index/store                  172
+  index/store (test)           1
+  pointer/bound                3
+  slice-open/copy-dst          1
+  slice2/arg                   1
+  slice2/bound                 6
+  slice3/bound                 4
+  slice3/copy-dst              15
+  slice3/copy-src              7
