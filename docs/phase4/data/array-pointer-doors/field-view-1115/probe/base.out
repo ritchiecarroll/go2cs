@@ -1,0 +1,64 @@
+managed direct read [1]: PANIC runtime error: index out of range [1] with length 0
+managed direct write [0]: PANIC runtime error: index out of range [0] with length 0
+managed direct address: PANIC runtime error: index out of range [1] with length 0
+managed direct op-assign: PANIC runtime error: index out of range [1] with length 0
+managed direct len: 2
+managed direct slice: PANIC runtime error: invalid memory address or nil pointer dereference
+managed direct whole: PANIC runtime error: invalid memory address or nil pointer dereference
+managed direct word [1]: PANIC runtime error: index out of range [1] with length 0
+managed local read [1]: PANIC runtime error: index out of range [1] with length 0
+managed local write [0]: PANIC runtime error: index out of range [0] with length 0
+managed local range index: PANIC runtime error: index out of range [0] with length 0
+managed local range value: 0x0
+managed local word: PANIC runtime error: index out of range [0] with length 0
+managed local slice: PANIC runtime error: invalid memory address or nil pointer dereference
+managed local whole: PANIC runtime error: invalid memory address or nil pointer dereference
+global direct read [1]: PANIC runtime error: index out of range [1] with length 0
+global direct write [0]: PANIC runtime error: index out of range [0] with length 0
+global direct address: PANIC runtime error: index out of range [1] with length 0
+global direct op-assign: PANIC runtime error: index out of range [1] with length 0
+global direct len: 2
+global direct slice: PANIC runtime error: invalid memory address or nil pointer dereference
+global direct whole: PANIC runtime error: invalid memory address or nil pointer dereference
+global direct word [1]: PANIC runtime error: index out of range [1] with length 0
+global local read [1]: PANIC runtime error: index out of range [1] with length 0
+global local write [0]: PANIC runtime error: index out of range [0] with length 0
+global local range index: PANIC runtime error: index out of range [0] with length 0
+global local range value: 0x0
+global local word: PANIC runtime error: index out of range [0] with length 0
+global local slice: PANIC runtime error: invalid memory address or nil pointer dereference
+global local whole: PANIC runtime error: invalid memory address or nil pointer dereference
+over-bytes direct read [1]: PANIC go2cs: native-backed array at 0x7f72d9fb8ae4: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes direct write [0]: PANIC go2cs: native-backed array at 0x7f72d9fb8ae4: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes direct address: port 0xcd34
+over-bytes direct op-assign: PANIC go2cs: native-backed array at 0x7f72d9fb8ae4: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes direct len: 2
+over-bytes direct slice: len 2 cap 2 port 0xcd11
+over-bytes direct whole: PANIC go2cs: native-backed array at 0x7f72d9fb8ae4: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes direct word [1]: PANIC go2cs: native-backed array at 0x7f72d9fb8ae8: a *[N]UInt32 over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes local read [1]: 0xcd
+over-bytes local write [0]: port 0xcd22
+over-bytes local range index: 0xcd22
+over-bytes local range value: PANIC go2cs: native-backed array at 0x7f72d9fb8ae4: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes local word: 0x33333333
+over-bytes local slice: len 2 cap 2 port 0x3322
+over-bytes local whole: PANIC go2cs: native-backed array at 0x7f72d9fb8ae4: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native direct read [1]: PANIC go2cs: native-backed array at 0x7f7ff07f0004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native direct write [0]: PANIC go2cs: native-backed array at 0x7f7ff07f0004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native direct address: port 0xcd34
+native direct op-assign: PANIC go2cs: native-backed array at 0x7f7ff07f0004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native direct len: 2
+native direct slice: len 2 cap 2 port 0xcd11
+native direct whole: PANIC go2cs: native-backed array at 0x7f7ff07f0004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native direct word [1]: PANIC go2cs: native-backed array at 0x7f7ff07f0008: a *[N]UInt32 over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native local read [1]: 0xcd
+native local write [0]: port 0xcd22
+native local range index: 0xcd22
+native local range value: PANIC go2cs: native-backed array at 0x7f7ff07f0004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native local word: 0x33333333
+native local slice: len 2 cap 2 port 0x3322
+native local whole: PANIC go2cs: native-backed array at 0x7f7ff07f0004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+ref direct read [1]: PANIC runtime error: cannot view native memory as array<Byte>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+ref direct write [0]: PANIC runtime error: cannot view native memory as array<Byte>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+ref local read [1]: PANIC runtime error: cannot view native memory as array<Byte>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+ref local write [0]: PANIC runtime error: cannot view native memory as array<Byte>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)

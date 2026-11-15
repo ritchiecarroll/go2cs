@@ -23,9 +23,9 @@ internal static partial (Action, bool) funcAt(@unsafe.Pointer p) {
 }
 
 internal static partial uint64 zeroPair(@unsafe.Pointer x) {
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
-    return (@unsafe.Pointer.To<array<uint64>>(x)).Value[0];
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
+    return @unsafe.Pointer.ElementRef<uint64>(x, 0, 2);
 }
 
 partial struct linkaddr /*num:uintptr*/;
