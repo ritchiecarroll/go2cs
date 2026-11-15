@@ -1038,3 +1038,77 @@ and the converter suite) are scored in the announce of this commit, not here.
   (V3). No arm reaches the door with one.
 - The stale case of 13.1 is checked per view. A view cut BEFORE the assignment is a window on the old elements
   and stays one: nothing tells it the array has other storage now.
+
+## 14. Amendment 2026-11-15 (P5): the lost write at a named array's address, option 1, and two lines owed to section 13
+
+This is the finding of 11.6 ("a write at the address of a named array that has not been used yet is lost"),
+ruled into .4 as its own golib seat directly after door A (01:19Z). The doors emit nothing at these sites; the
+section is here because this record named the finding and its kit. Code: `ddba5cc1e7`.
+
+### 14.1 What was wrong, and the change
+
+A named array, `type small [8]byte`, is a wrapper struct go2cs-gen writes. The wrapper holds one field and
+fills it with the array's backing on first use. A pointer box's two pin paths (its conversion to a number and
+to a raw pointer) read the box's value as an `IArray`, which for a value type is a boxed COPY of the wrapper,
+and `pinnedArrayData` pinned that copy's `Source`. On a wrapper nothing had used, reading `Source` filled a
+backing of the copy's own. The address handed out was of an array the variable never reads; the variable made
+its own backing on its next use, and the write was lost without a panic.
+
+The element pointer `&p[i]` has had a gate for this class since August (`arrayView`, `publishArrayBacking`):
+fill on the boxed copy, then copy the wrapper back over the box's real storage, under the box's lock.
+`pinnedArrayData` now goes through that gate before it pins, when the pointee is a type whose backing is filled
+on first use (`s_publishArrayBacking`) and the box holds no pin yet. `publishArrayBacking` takes the storage as
+a `ref T` parameter: the element door passes `Value`, which panics on a nil pointer as Go's `&p[i]` does, and
+the pin passes `ValueSlot`, after the operators' own nil test. The pin's check (`AnyElementArrayViewCheck`)
+accepts a view of any element, where the element door asks for one element type. golib only: no public surface,
+no converter change, no emitted line moves.
+
+### 14.2 Red first, and the readings
+
+`NamedArrayPinPublishTests` has one arm per shape, each as the converter spells it, and each reads the variable
+after the write, never the pointer the write used: a local, a package variable by number, a struct field,
+`new(small)` by number, libc's memcpy destination, the raw-pointer conversion, and the number taken twice. Seven
+were red before the change and the two controls green (a named array used before its address is taken; an
+unnamed array), as predicted before the run. All nine are green with it.
+
+The kit `door-a-1115/lazy/` is now the behavioral project `NamedArrayAddressWrite`, output compared with
+`go run`. It imports `fmt` and `unsafe` only, so it is not exclusive to a platform.
+
+| reading (linux/amd64, Release) | at `996ce6c9bf` | with the change |
+|:--|:--|:--|
+| `NamedArrayPinPublishTests`, nine arms | 7 red, 2 green | 9 green |
+| the door, floor and publish classes together | not read as one set | 58 of 58 |
+| whole GolibTests | 2793 passed, 0 failed, 49 skipped | 2802 passed, 0 failed, 49 skipped |
+| `NamedArrayAddressWrite` against `go run` | la, lb, lc, ld and le differ (`door-a-1115/lazy/converted.out`) | seven lines equal (`converted-option1.out`) |
+
+Nothing here ran on windows or darwin before the hosted runs. The local gates (by-path builds, the repository
+guards, the converter suite, CNR) are scored in the announce of this commit, not here.
+
+### 14.3 What option 1 leaves
+
+- The gate's copy-back is a plain write under the box's lock, and the wrapper's own getter publishes without
+  that lock. A goroutine that first uses the variable directly at the moment another takes its address for the
+  first time can leave the two on different backings. The element door has the same window. Option 2 closes it
+  (an interlocked publish of the wrapper's one holder field into the slot, in the element gate and in the pin,
+  with a two-thread stress arm): the seat after door B.
+- A field or element reference is a box minted per take. Two takes of one field's address on two goroutines hold
+  two locks. Each publish is still of the same storage, and the second finds the first's backing there unless
+  the two interleave inside the window above.
+- A named array ASSIGNED whole after its address was taken keeps its old pin (13.1). That wall is routed to
+  another lane (ruled 03:46Z), with the kits of 13.1.
+
+### 14.4 Two lines owed to section 13
+
+- 13.4 says the walk from a derived pointer to its Go value "stops after 64 hops and then answers as for C
+  memory". Said in full, as the review asked (04:16Z), and as measured the same day: each `unsafe.Add` over a
+  pointer that carries Go storage adds one hop, so a pointer advanced step by step reaches the cap. At an
+  interior address of the value the view is bounded by the value through 61 steps and takes Go's capacity (N
+  less the low bound, nothing bounding it by the Go value) from 63. At the value's own first address the
+  registry answers and the bound holds at any depth. The same chain keeps 55 bytes per step for as long as the
+  last pointer lives, and a comparison of such a pointer recurses once per step: at 1,000,000 steps the
+  process ends in a stack overflow. Those two are on master since batch 305. The finding is its own BOARD row
+  of this date with its reach and its remedy, ruled into .4 as the seat cut from this one (04:39Z); the probe
+  and its readings are `door-a-1115/chain/`.
+- The linux solution build read red at door A's earlier tip (72 error lines in the 10 windows-native behavioral
+  members) and reads the same at master (COORD's control run, 03:58Z). It is a first reading of that leg and is
+  not door A's; the windows solution build is the gate.

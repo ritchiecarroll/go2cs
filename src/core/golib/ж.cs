@@ -417,17 +417,19 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (published is not null && Value is IArray view && check.Accepts(view) && ReferenceEquals(view.Source, published))
             return view;
 
-        return publishArrayBacking(check);
+        // The storage reference is resolved BEFORE the publish takes its lock: for a field or element
+        // reference that walk runs through the parent box, and the lock guards the publish, not the walk.
+        return publishArrayBacking(check, ref Value);
     }
 
     // The at-most-once publish. Kept out of line so arrayView stays small enough to inline.
+    //
+    // `value` is the box's own storage, resolved by the caller: the element door passes Value, which panics on
+    // a nil pointer as Go's &p[i] does, and the pin paths pass ValueSlot after their own nil test
+    // (pinnedArrayData).
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private IArray publishArrayBacking<TCheck>(TCheck check) where TCheck : struct, IArrayViewCheck
+    private IArray publishArrayBacking<TCheck>(TCheck check, ref T value) where TCheck : struct, IArrayViewCheck
     {
-        // Resolve the storage reference BEFORE taking the lock: for a field or element reference
-        // that walk runs through the parent box, and the lock guards the publish, not the walk.
-        ref T value = ref Value;
-
         lock (this)
         {
             if (value is not IArray view || !check.Accepts(view))
@@ -845,9 +847,23 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         internal static readonly bool HoldReferences = typeof(T).IsValueType && default(T) is IArray { ElementHoldsReferences: true };
     }
 
+    //
+    // `arr` is what the caller read from ValueSlot, and for a value-type T that is a boxed COPY. A named array
+    // nothing has used yet fills its backing on first use (computePublishArrayBacking names the shape), so
+    // reading the copy's Source filled a backing of the copy's own: the pin held an array the variable never
+    // reads, and a write at the address handed out was lost without a panic. Such a T publishes first, through
+    // the gate the element door uses (publishArrayBacking), and the pin is of the backing that gate put in the
+    // box's own storage. Any other T has no lazy backing and pins what it was given.
     private unsafe void* pinnedArrayData(IArray arr)
     {
-        m_pin ??= new PinnedBuffer(arr.Source, arr.Length);
+        if (m_pin is null)
+        {
+            if (s_publishArrayBacking)
+                arr = publishArrayBacking(new AnyElementArrayViewCheck(), ref ValueSlot);
+
+            m_pin ??= new PinnedBuffer(arr.Source, arr.Length);
+        }
+
         return m_pin.Pointer;
     }
 

@@ -1417,6 +1417,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedApproxStringByteConstraint() => CheckTarget("NamedApproxStringByteConstraint");
 
     [TestMethod]
+    public void CheckNamedArrayAddressWrite() => CheckTarget("NamedArrayAddressWrite");
+
+    [TestMethod]
     public void CheckNamedArrayAnonElement() => CheckTarget("NamedArrayAnonElement");
 
     [TestMethod]

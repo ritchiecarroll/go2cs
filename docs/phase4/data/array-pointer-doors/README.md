@@ -111,6 +111,10 @@ For section 11 of the design. Converters: base = the batch-305 converter; cut = 
 | `door-a-1115/lazy/census/sq-<target>.tsv`, `.summary.txt` | its rows and totals for `modernc.org/sqlite/...` v1.62.0 on linux/amd64 and windows/amd64 (run inside a module that requires it, `GOFLAGS=-mod=mod`) |
 | `door-a-1115/reassign/main.go`, `go.mod`, `go.out`, `main.cs.txt`, `converted.out` | design 13.1: ten arms that take an array's address, assign the array whole, then write or read through the address; its emission, and its run against the tree at the review fixes (`d133673c65`): eight lines differ from Go |
 | `door-a-1115/reassign-plain/` (the same five files) | the same with no `unsafe`: a slice of the array, or a pointer to an element, taken before the whole assignment; seven of nine lines differ from Go |
+| `door-a-1115/lazy/converted-option1.out` | design 14: the same program run against the tree with the pin paths publishing first (`ddba5cc1e7`); seven lines equal to `go.out`. The program is now the behavioral project `NamedArrayAddressWrite` |
+| `door-a-1115/chain/ZzChainProbeTests.cs.txt`, `probe.out` | design 14.4: a scratch GolibTests class (never committed as a test) that advances one pointer N times with `unsafe.Add` over a Go value and over C memory, and its readings: view capacity, bytes kept, the cost of the comparing loop, and `==` after N steps. The last line is the 1,000,000-step comparison it did not return from |
+| `door-a-1115/chain/probe-first.out` | the first form of the probe, with the view taken 4 bytes inside the value: bounded through 61 steps, Go's capacity from 63 |
+| `door-a-1115/chain/reach.txt` | the lines that assign `unsafe.Add`'s result back to its first argument, in the sqlite closure's Go sources and in the standard library at 1.26.11 |
 
 In the footprint files `base/` and `cut/` stand for the two conversion roots, and `seed/` and `reconvert/` for
 the arm's. `<kit>` in an `.out` file is the scratch directory the program was converted in. The `lazy` program

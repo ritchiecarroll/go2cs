@@ -39023,4 +39023,93 @@ Size. Two steps.
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — P5 (the lost-write seat; closes option 1 of the 2026-11-15 row "a write at the ADDRESS of a named array that has not been used yet is lost"; COORD ruling 01:19Z): the two pin paths publish a named array's backing before they pin — option 1 DONE, option 2 OPEN, owner P5, the seat after door B
+
+**What changed.** golib only, `src/core/golib/ж.cs` and `ж.Contracts.cs`. `pinnedArrayData`, which both pin paths
+call (the `uintptr` operator and the `void*` operator), now takes the array from the box's publish gate when the
+pointee is a type whose backing is filled on first use (`s_publishArrayBacking`: a go2cs-gen named array wrapper,
+or a view wrapper over one) and the box holds no pin yet. `publishArrayBacking` takes the storage as a `ref T`
+parameter: the element door passes `Value`, as before, and the pin passes `ValueSlot`, after the operators' own
+nil test. `AnyElementArrayViewCheck` is the pin's check: it accepts a view of any element. No public surface, no
+converter change, no emitted line moves.
+
+**Red first, one arm per shape** (`src/tests/GolibTests/NamedArrayPinPublishTests.cs`, linux/amd64, Release):
+seven red before the change and two controls green, as predicted; nine green after.
+
+| arm | shape | before | after |
+|:--|:--|:--|:--|
+| local | `var local small; fill(unsafe.Pointer(&local), 41)` | 0 | 41 |
+| package variable | by number | 0 | 42 |
+| struct field | `fill(unsafe.Pointer(&h.buf), 43)` | 0 | 43 |
+| `new(small)` | by number | 0 | 44 |
+| memcpy destination | libc's `Xmemcpy` shape | zeros | the eight bytes |
+| raw pointer | the `void*` operator | 0 | written |
+| stable number | the number taken twice is one number, and names the variable | not the variable | the variable |
+| control | a named array used before its address is taken | right | right |
+| control | an unnamed array | right | right |
+
+**The program.** `door-a-1115/lazy/main.go` is now the behavioral project `NamedArrayAddressWrite`, output
+compared with `go run`: seven lines, all equal (linux/amd64, built by path against this tree). It imports `fmt` and `unsafe` only, so it runs
+on every target.
+
+**Readings.** Whole GolibTests, linux/amd64 Release: 2802 passed, 0 failed, 49 skipped (2793 / 0 / 49 at
+`996ce6c9bf`, so the nine new arms and nothing else). Code: `ddba5cc1e7`. The local gates and the hosted set are scored in
+the announce, not here.
+
+**What option 1 leaves, as the row said.** The gate's copy-back is a plain write under the box's lock, and the
+wrapper's own getter publishes without that lock. A goroutine that first uses the variable directly at the moment
+another takes its address for the first time can leave the two on different elements. The element door has had
+the same window since August. A field or element reference is a box minted per take, so two takes of one field's
+address on two goroutines do not share a lock either. Option 2 (an interlocked publish of the wrapper's one
+holder field into the slot, in the element gate and in the pin, with a two-thread stress arm) is the seat after
+door B, and the BOARD row of this date "no arm takes views of one Go value on two threads" fits the same seat.
+
+**Not this seat.** A named array ASSIGNED whole after its address was taken (the 2026-11-15 row "assigning a
+whole array gives the variable new storage", routed to R): the pin still holds the elements the array had when
+it was pinned.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (found while writing design 14.4; COORD ruling 04:39Z): a pointer advanced step by step with `unsafe.Add` over a Go value keeps every step — OPEN, ruled .4, owner P5, its own golib seat cut from the lost-write seat, before door B
+
+**The finding.** `unsafe.Add` over a pointer that carries Go storage mints a native box that retains the box
+before it (`NativeDerivation.Moved`), so `p = unsafe.Add(p, 1)` in a loop builds a chain one hop per step. Over C
+memory nothing is retained. Measured on linux/amd64, Release, over a pinned 16-byte Go struct, with 16 bytes of
+C memory as the control (`docs/phase4/data/array-pointer-doors/door-a-1115/chain/`):
+
+| steps | bytes kept, Go value | bytes kept, C memory | one `==` on the walked pointer |
+|--:|--:|--:|:--|
+| 10 | 656 | 96 | equal |
+| 100 | 4,976 | 0 | equal |
+| 10,000 | 554,336 | 24 | equal, 0.5 ms |
+| 100,000 | not read | not read | equal, 6.6 ms |
+| 1,000,000 | 55,440,880 | 0 | stack overflow, the process ends |
+
+- Memory: 55.4 bytes per step, linear, kept as long as the last pointer lives.
+- Comparison and hashing: `NativeDerivation.Token` recurses once per step. The overflow trace held 104,679
+  `Token` frames.
+- The usual loop, one `!=` per step: 10,000 steps 659 ms and 20,000 steps 2,094 ms over the Go value, 0.46 ms
+  and 1.65 ms over C memory.
+- The view doors (door A's fix 2, not on master at this date): at an interior address the capacity is bounded
+  by the value through 61 steps and is Go's capacity from 63, because the walk to the Go value stops at 64 hops.
+  At the value's own first address the registry answers and the bound holds at any depth.
+
+The first three are on master since batch 305.
+
+**Reach, read from Go sources.** Predicate: an assignment whose left side is the first argument of the
+`unsafe.Add` on its right, in non-test files, every platform file (`chain/reach.txt`). The standard library
+outside cmd has 3 such lines: two walk the Windows environment block, which is C memory, and one in reflect is a
+single step. The sqlite closure (sqlite 1.62.0, libc 1.80.1, memory, mathutil) has 11 in 10,210 lines that call
+`unsafe.Add`, in two functions, `_sqlite3Fts5GetVarint` (eight straight-line steps) and `_whereOrInsert` (a loop
+bounded by `N_OR_COST`). Neither reaches 62 steps. The TypeScript closure is not read. The predicate does not
+match a pointer carried through a second variable, a struct field or a call between steps.
+
+**The remedy, as ruled.** A derivation from a native box that owns no pin retains that box's SOURCE, so the
+chain stays one hop. The order token does not change: it is the source's token plus an address difference, and
+the differences add up. `Token` becomes a loop. The 64-hop cap stays as a guard. Red first from the probe's
+arms: bytes kept per step, the hop count after N steps, `==` at 1,000,000 steps, a 1,000-step pointer equal to
+the same address minted directly, and the view bound at 63 and 10,000 steps.
+
+— P5 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
