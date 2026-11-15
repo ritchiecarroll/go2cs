@@ -1,0 +1,305 @@
+# W8 census, H's census-main.go @ fe2059ff76, run by COORD on the i7, go1.26.11, 2026-11-15T09:46Z
+# modules: modernc.org/sqlite@v1.62.0 and libc@v1.80.1 from the i7 module cache; whole outputs, untailed
+# (filled by a second commit: the first commit of this file was empty by a script slip)
+
+##### ctl/pos
+files parsed 1; files naming __ccgo_ts 1
+decl       1
+decl-ref   1
+ts1-decl   1
+plusN      3
+value      0
+plusExpr   1
+compare    1
+subtract   1
+ts1use     2
+other      0
+store      2
+memwrite   1
+parseerror 0
+
+== decl (1)
+   ctl/pos/pos.go:9:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+
+== plusExpr (1)
+   ctl/pos/pos.go:25:6  __ccgo_ts + uintptr(len(__ccgo_ts1))
+
+== compare (1)
+   ctl/pos/pos.go:16:6  __ccgo_ts == other
+
+== subtract (1)
+   ctl/pos/pos.go:17:14  other - __ccgo_ts
+
+== ts1use (2)
+   ctl/pos/pos.go:18:24  unsafe.StringData(__ccgo_ts1)
+   ctl/pos/pos.go:25:30  len(__ccgo_ts1)
+
+== store (2)
+   ctl/pos/pos.go:21:2  *(*byte)(unsafe.Pointer(q)) = 'x'
+   ctl/pos/pos.go:22:2  *(*byte)(unsafe.Pointer(__ccgo_ts + 1))++
+
+== memwrite (1)
+   ctl/pos/pos.go:23:2  Xmemcpy(tls, __ccgo_ts+0, other, 1)
+
+== escapes: a tainted number passed to a call (not followed), by callee, top 25 of 3 callees
+   ?                                2
+   Pointer                          2
+   g                                1
+rc=0
+##### ctl/neg
+files parsed 1; files naming __ccgo_ts 1
+decl       1
+decl-ref   1
+ts1-decl   1
+plusN      2
+value      1
+plusExpr   0
+compare    0
+subtract   0
+ts1use     0
+other      0
+store      0
+memwrite   0
+parseerror 0
+
+== decl (1)
+   ctl/neg/neg.go:9:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+
+== escapes: a tainted number passed to a call (not followed), by callee, top 25 of 3 callees
+   ?                                1
+   Pointer                          1
+   Xprintf                          1
+rc=0
+
+##### sqlite@v1.62.0
+files parsed 684; files naming __ccgo_ts 104
+decl       5
+decl-ref   5
+ts1-decl   14
+plusN      31782
+value      18
+plusExpr   0
+compare    0
+subtract   0
+ts1use     0
+other      0
+store      2350
+memwrite   625
+parseerror 0
+
+== decl (5)
+   sqlite@v1.62.0/lib/sqlite.go:13751:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+   sqlite@v1.62.0/vec/vec.go:1164:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+   sqlite@v1.62.0/vfs/vfs_illumos_amd64.go:3041:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+   sqlite@v1.62.0/vfs/vfs_linux_loong64.go:2752:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+   sqlite@v1.62.0/vfs/vfs_windows_386.go:2190:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+
+== store (2350)
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:955:4  *(*Tu32)(unsafe.Pointer(v4)) = Tu32(int64(*(*Tu32)(unsafe.Pointer(v4))) + length)
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:1056:6  *(*Tu8)(unsafe.Pointer(v4)) = Tu8(int32(*(*Tu8)(unsafe.Pointer(v4))) | libc.Int32FromInt32(SQLITE_PRINTF_MALLOCED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3484:3  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | libc.Int32FromInt32(TERM_VARSELECT))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3530:4  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | libc.Int32FromInt32(TERM_IS))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3548:6  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | libc.Int32FromInt32(TERM_IS))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3552:5  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | libc.Int32FromInt32(TERM_COPIED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3555:6  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | libc.Int32FromInt32(WO_EQUIV))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3563:4  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | libc.Int32FromUint16(_exprCommute(tls, pParse, pDup)))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3575:5  *(*uintptr)(unsafe.Pointer(pExpr + 8)) = __ccgo_ts + 8231
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3629:8  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | libc.Int32FromInt32(TERM_COPIED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3644:8  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | libc.Int32FromInt32(TERM_LIKE))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3741:3  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | (libc.Int32FromInt32(TERM_CODED) | libc.Int32FromInt32(TERM_VIRTUAL)))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3754:5  *(*int32)(unsafe.Pointer((*TWhereClause)(unsafe.Pointer(pWC)).Fa + uintptr(idxNew4)*48 + 24 + 4)) = i3 + int32(1)
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3794:7  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | libc.Int32FromInt32(TERM_COPIED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:8869:3  *(*Tu8)(unsafe.Pointer(v1)) = Tu8(int32(*(*Tu8)(unsafe.Pointer(v1))) | libc.Int32FromInt32(JSTRING_MALFORMED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:8947:4  *(*Tu8)(unsafe.Pointer(v1)) = Tu8(int32(*(*Tu8)(unsafe.Pointer(v1))) | libc.Int32FromInt32(JSTRING_MALFORMED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:9051:4  *(*Tu8)(unsafe.Pointer(v1)) = Tu8(int32(*(*Tu8)(unsafe.Pointer(v1))) | libc.Int32FromInt32(JSTRING_MALFORMED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:9062:5  *(*Tu8)(unsafe.Pointer(v1)) = Tu8(int32(*(*Tu8)(unsafe.Pointer(v1))) | libc.Int32FromInt32(JSTRING_MALFORMED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:9084:5  *(*Tu8)(unsafe.Pointer(v1)) = Tu8(int32(*(*Tu8)(unsafe.Pointer(v1))) | libc.Int32FromInt32(JSTRING_MALFORMED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:9109:2  *(*Tu16)(unsafe.Pointer(v1)) = *(*Tu16)(unsafe.Pointer(v1)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:9121:3  *(*Tu8)(unsafe.Pointer(v1)) = Tu8(int32(*(*Tu8)(unsafe.Pointer(v1))) | libc.Int32FromInt32(JSTRING_MALFORMED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:9135:2  *(*Tu16)(unsafe.Pointer(v1)) = *(*Tu16)(unsafe.Pointer(v1)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:9154:3  *(*Tu8)(unsafe.Pointer(v1)) = Tu8(int32(*(*Tu8)(unsafe.Pointer(v1))) | libc.Int32FromInt32(JSTRING_MALFORMED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:9167:2  *(*Tu8)(unsafe.Pointer(v1)) = Tu8(int32(*(*Tu8)(unsafe.Pointer(v1))) | libc.Int32FromInt32(JSTRING_MALFORMED))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:14793:3  *(*int32)(unsafe.Pointer(v2)) = *(*int32)(unsafe.Pointer(v2)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:15597:3  *(*int32)(unsafe.Pointer(v1)) = *(*int32)(unsafe.Pointer(v1)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:15602:3  *(*int32)(unsafe.Pointer(v1)) = *(*int32)(unsafe.Pointer(v1)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:15625:3  *(*int32)(unsafe.Pointer(v1)) = *(*int32)(unsafe.Pointer(v1)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:16725:3  *(*int32)(unsafe.Pointer(v2)) = *(*int32)(unsafe.Pointer(v2)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:16806:5  *(*int32)(unsafe.Pointer(v2)) = *(*int32)(unsafe.Pointer(v2)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:16951:2  *(*int32)(unsafe.Pointer(v2)) = *(*int32)(unsafe.Pointer(v2)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:17207:4  *(*Tu16)(unsafe.Pointer(v2)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v2))) | libc.Int32FromInt32(COLFLAG_NOEXPAND))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:17718:3  *(*Tu16)(unsafe.Pointer(v2)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v2))) | libc.Int32FromInt32(COLFLAG_UNIQUE))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:18002:5  *(*int32)(unsafe.Pointer(v2)) = *(*int32)(unsafe.Pointer(v2)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:20882:3  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | libc.Int32FromInt32(DB_SchemaLoaded))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:21016:4  *(*Tu16)(unsafe.Pointer(v1)) = Tu16(int32(*(*Tu16)(unsafe.Pointer(v1))) | libc.Int32FromInt32(DB_SchemaLoaded))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:21247:2  *(*int32)(unsafe.Pointer(v1)) = *(*int32)(unsafe.Pointer(v1)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:22293:3  *(*int32)(unsafe.Pointer(v1)) = *(*int32)(unsafe.Pointer(v1)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:23121:3  *(*int32)(unsafe.Pointer(v1)) = *(*int32)(unsafe.Pointer(v1)) + 1
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:24269:3  *(*int32)(unsafe.Pointer(v1)) = *(*int32)(unsafe.Pointer(v1)) + 1
+   ... 2310 more
+
+== memwrite (625)
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:605:4  libc.Xmemset(tls, bufpt, int32('0'), libc.Uint32FromInt64(nn))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:843:5  libc.Xmemcpy(tls, bufpt, (*(*TFpDecode)(__ccgo_ptr(bp + 72))).Fz, libc.Uint32FromInt32(j))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:847:6  libc.Xmemset(tls, bufpt, int32('0'), libc.Uint32FromInt32(e2+int32(1)))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:866:4  libc.Xmemset(tls, bufpt, int32('0'), libc.Uint32FromInt32(nn2))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:877:5  libc.Xmemcpy(tls, bufpt, (*(*TFpDecode)(__ccgo_ptr(bp + 72))).Fz+uintptr(j), libc.Uint32FromInt32(nn3))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:882:5  libc.Xmemset(tls, bufpt, int32('0'), libc.Uint32FromInt64(precision))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:938:5  libc.Xmemset(tls, bufpt, int32(' '), libc.Uint32FromInt64(nPad))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:941:6  libc.Xmemmove(tls, zOut+uintptr(nPad), zOut, libc.Uint32FromInt64(length))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:942:6  libc.Xmemset(tls, zOut, int32(' '), libc.Uint32FromInt64(nPad))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:945:6  libc.Xmemmove(tls, zOut+uintptr(nPad)+uintptr(adj), zOut+uintptr(adj), libc.Uint32FromInt64(length-int64(adj)))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:946:6  libc.Xmemset(tls, zOut+uintptr(adj), int32('0'), libc.Uint32FromInt64(nPad))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:1225:6  libc.Xmemmove(tls, zz+uintptr(sp), zz, libc.Uint32FromInt64(n1))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:1340:5  libc.Xmemcpy(tls, bufpt+uintptr(j2), __ccgo_ts+1756, uint32(8))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3217:3  libc.Xmemcpy(tls, zStmt+uintptr(k), zSep, libc.Uint32FromInt32(len1))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3223:3  libc.Xmemcpy(tls, zStmt+uintptr(k), zType, libc.Uint32FromInt32(len1))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3232:2  libc.Xmemcpy(tls, zStmt+uintptr(k), zEnd, libc.Uint32FromInt32(len1+int32(1)))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3329:2  libc.Xmemset(tls, pInfo, 0, uint32(76))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:3331:2  libc.Xmemcpy(tls, pBlob, pSrc, (*TRtreeMatchArg)(unsafe.Pointer(pSrc)).FiSize)
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:4875:7  libc.Xmemcpy(tls, pSpace, p2, libc.Uint32FromInt32(int32(p1)-int32(p2)))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:13272:3  libc.Xmemcpy(tls, zOut, zSql, libc.Uint32FromInt64(nSql))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:13293:5  libc.Xmemcpy(tls, zBuf1, (*TRenameToken)(unsafe.Pointer(pBest)).Ft.Fz, (*TRenameToken)(unsafe.Pointer(pBest)).Ft.Fn)
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:13307:5  libc.Xmemmove(tls, zOut+uintptr(int64(iOff)+nReplace), zOut+uintptr(libc.Uint32FromInt32(iOff)+(*TRenameToken)(unsafe.Pointer(pBest)).Ft.Fn), libc.Uint32FromInt64(nOut-libc.Int64FromUint32(libc.Uint32…
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:13311:4  libc.Xmemcpy(tls, zOut+uintptr(iOff), zReplace, libc.Uint32FromInt64(nReplace))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:17764:2  libc.Xmemcpy(tls, (*TIndex)(unsafe.Pointer(pIndex)).FzName, zName, libc.Uint32FromInt32(nName+int32(1)))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:17840:4  libc.Xmemcpy(tls, zExtra, zColl, libc.Uint32FromInt32(nColl))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:20169:2  libc.Xmemset(tls, pRet, 0, uint32(164))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:28032:3  libc.Xmemcpy(tls, pOut, bp, uint32(8))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:28194:3  libc.Xmemcpy(tls, pOut, pVar, uint32(libc.UintptrFromInt32(0)+20))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:28403:4  libc.Xmemcpy(tls, (*TMem)(unsafe.Pointer(pOut)).Fz, (*TMem)(unsafe.Pointer(pIn2)).Fz, libc.Uint32FromInt32((*TMem)(unsafe.Pointer(pIn2)).Fn))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:28406:3  libc.Xmemcpy(tls, (*TMem)(unsafe.Pointer(pOut)).Fz+uintptr((*TMem)(unsafe.Pointer(pIn2)).Fn), (*TMem)(unsafe.Pointer(pIn1)).Fz, libc.Uint32FromInt32((*TMem)(unsafe.Pointer(pIn1)).Fn))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:29696:5  libc.Xmemcpy(tls, pDest, bp+64, uint32(8))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:29724:5  libc.Xmemcpy(tls, (*TMem)(unsafe.Pointer(pDest)).Fz, zData, libc.Uint32FromInt32(len1))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:30198:7  libc.Xmemcpy(tls, zPayload, bp+72, uint32(8))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:30201:7  libc.Xmemcpy(tls, zPayload, bp+72+uintptr(8)-uintptr(len11), len11)
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:30211:7  libc.Xmemcpy(tls, zPayload, (*TMem)(unsafe.Pointer(pRec)).Fz, libc.Uint32FromInt32((*TMem)(unsafe.Pointer(pRec)).Fn))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:30217:7  libc.Xmemcpy(tls, zPayload, (*TMem)(unsafe.Pointer(pRec)).Fz, libc.Uint32FromInt32((*TMem)(unsafe.Pointer(pRec)).Fn))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:30288:6  libc.Xmemcpy(tls, (*TSavepoint)(unsafe.Pointer(pNew)).FzName, zName, libc.Uint32FromInt32(nName+int32(1)))
+   sqlite@v1.62.0/lib/sqlite_freebsd_386.go:33354:3  libc.Xmemset(tls, (*TVdbeFrame)(unsafe.Pointer(pFrame2)).FaOnce, 0, libc.Uint32FromInt32(((*TSubProgram)(unsafe.Pointer(pProgram)).FnOp+int32(7))/int32(8)))
+   sqlite@v1.62.0/lib/sqlite_freebsd_amd64.go:451:4  libc.Xmemset(tls, bufpt, int32('0'), libc.Uint64FromInt64(nn))
+   sqlite@v1.62.0/lib/sqlite_freebsd_amd64.go:689:5  libc.Xmemcpy(tls, bufpt, (*(*TFpDecode)(__ccgo_ptr(bp + 72))).Fz, libc.Uint64FromInt32(j))
+   ... 585 more
+
+== escapes: a tainted number passed to a call (not followed), by callee, top 25 of 599 callees
+   ?                                34614
+   Pointer                          30161
+   uintptr                          5791
+   __ccgo_ptr                       5228
+   int32                            3673
+   Xsqlite3_mprintf                 2742
+   _sqlite3ErrorMsg                 2679
+   VaList                           2426
+   Int32FromUint16                  2421
+   Int32FromUint8                   2229
+   Xsqlite3_str_appendf             1395
+   int64                            1139
+   Xmemcmp                          1028
+   _sqlite3MPrintf                  906
+   Xsqlite3_stricmp                 753
+   Xsqlite3_strnicmp                738
+   Xsqlite3_free                    711
+   Xvtab_set_error                  677
+   Uint32FromInt32                  659
+   Xsqlite3_result_error            557
+   Uint16FromInt32                  554
+   Tu16                             542
+   _sqlite3VdbeAddOp2               508
+   _sqlite3VdbeAddOp3               465
+   uint32                           464
+rc=0
+##### libc@v1.80.1
+files parsed 1375; files naming __ccgo_ts 8
+decl       8
+decl-ref   8
+ts1-decl   8
+plusN      2126
+value      544
+plusExpr   0
+compare    0
+subtract   0
+ts1use     0
+other      0
+store      0
+memwrite   110
+parseerror 0
+
+== decl (8)
+   libc@v1.80.1/ccgo_linux_386.go:155887:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+   libc@v1.80.1/ccgo_linux_amd64.go:153681:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+   libc@v1.80.1/ccgo_linux_arm.go:155346:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+   libc@v1.80.1/ccgo_linux_arm64.go:152650:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+   libc@v1.80.1/ccgo_linux_loong64.go:152473:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+   libc@v1.80.1/ccgo_linux_ppc64le.go:153554:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+   libc@v1.80.1/ccgo_linux_riscv64.go:152755:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+   libc@v1.80.1/ccgo_linux_s390x.go:153205:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
+
+== memwrite (110)
+   libc@v1.80.1/ccgo_linux_386.go:11682:18  Xsprintf(tls, p, __ccgo_ts+170, VaList(bp+232, bp+200, slen, salt))
+   libc@v1.80.1/ccgo_linux_386.go:12250:18  Xsprintf(tls, p, __ccgo_ts+185, VaList(bp+424, bp+392, slen, salt))
+   libc@v1.80.1/ccgo_linux_386.go:30881:4  Xmemcpy(tls, bp+uintptr(i), v, l)
+   libc@v1.80.1/ccgo_linux_386.go:98895:4  Xmemcpy(tls, bp+uintptr(l)+uintptr(1), val, n)
+   libc@v1.80.1/ccgo_linux_386.go:98906:5  Xmemcpy(tls, new1+8, val, n)
+   libc@v1.80.1/ccgo_linux_386.go:98929:3  Xmemcpy(tls, new1+8, val, n)
+   libc@v1.80.1/ccgo_linux_386.go:99429:4  Xmemcpy(tls, s, part1, l)
+   libc@v1.80.1/ccgo_linux_386.go:99607:22  Xsnprintf(tls, s, n, __ccgo_ts+485, VaList(bp+8, w, rp, x))
+   libc@v1.80.1/ccgo_linux_386.go:115128:7  Xvsnprintf(tls, bp+68+uintptr(l), uint32(1024)-Uint32FromInt32(l), message, ap)
+   libc@v1.80.1/ccgo_linux_386.go:118426:19  Xsprintf(tls, x, v2, VaList(bp+8, Int32FromUint8(*(*Tuint8_t)(__ccgo_ptr(p_a + uintptr(ii))))))
+   libc@v1.80.1/ccgo_linux_386.go:126498:3  Xmemcpy(tls, b, p, Uint32FromInt32(int32(z)-int32(p)))
+   libc@v1.80.1/ccgo_linux_386.go:126500:3  Xmemcpy(tls, b+uintptr(int32(z)-int32(p))+BoolUintptr(z > p), file, k+uint32(1))
+   libc@v1.80.1/ccgo_linux_386.go:138817:2  Xmemcpy(tls, bp+1+uintptr(dl)+uintptr(1), pfx, pl)
+   libc@v1.80.1/ccgo_linux_386.go:148220:3  Xmemcpy(tls, _old_tz, s, i+uint32(1))
+   libc@v1.80.1/ccgo_linux_386.go:148252:6  Xmemcpy(tls, pathname-uintptr(l), try, l)
+   libc@v1.80.1/ccgo_linux_amd64.go:11566:18  Xsprintf(tls, p, __ccgo_ts+170, VaList(bp+240, bp+200, slen, salt))
+   libc@v1.80.1/ccgo_linux_amd64.go:12135:18  Xsprintf(tls, p, __ccgo_ts+185, VaList(bp+432, bp+392, slen, salt))
+   libc@v1.80.1/ccgo_linux_amd64.go:30519:4  Xmemcpy(tls, bp+uintptr(i), v, l)
+   libc@v1.80.1/ccgo_linux_amd64.go:98521:4  Xmemcpy(tls, bp+uintptr(l)+uintptr(1), val, n)
+   libc@v1.80.1/ccgo_linux_amd64.go:98532:5  Xmemcpy(tls, new1+16, val, n)
+   libc@v1.80.1/ccgo_linux_amd64.go:98555:3  Xmemcpy(tls, new1+16, val, n)
+   libc@v1.80.1/ccgo_linux_amd64.go:99055:4  Xmemcpy(tls, s, part1, l)
+   libc@v1.80.1/ccgo_linux_amd64.go:99233:22  Xsnprintf(tls, s, n, __ccgo_ts+485, VaList(bp+8, w, rp, x))
+   libc@v1.80.1/ccgo_linux_amd64.go:114941:7  Xvsnprintf(tls, bp+80+uintptr(l), uint64(1024)-Uint64FromInt32(l), message, ap)
+   libc@v1.80.1/ccgo_linux_amd64.go:118148:19  Xsprintf(tls, x, v2, VaList(bp+8, Int32FromUint8(*(*Tuint8_t)(__ccgo_ptr(p_a + uintptr(ii))))))
+   libc@v1.80.1/ccgo_linux_amd64.go:125856:3  Xmemcpy(tls, b, p, Uint64FromInt64(int64(z)-int64(p)))
+   libc@v1.80.1/ccgo_linux_amd64.go:125858:3  Xmemcpy(tls, b+uintptr(int64(z)-int64(p))+BoolUintptr(z > p), file, k+uint64(1))
+   libc@v1.80.1/ccgo_linux_amd64.go:137979:2  Xmemcpy(tls, bp+1+uintptr(dl)+uintptr(1), pfx, pl)
+   libc@v1.80.1/ccgo_linux_amd64.go:147379:3  Xmemcpy(tls, _old_tz, s, i+uint64(1))
+   libc@v1.80.1/ccgo_linux_amd64.go:147411:6  Xmemcpy(tls, pathname-uintptr(l), try, l)
+   libc@v1.80.1/ccgo_linux_arm.go:11751:18  Xsprintf(tls, p, __ccgo_ts+170, VaList(bp+232, bp+200, slen, salt))
+   libc@v1.80.1/ccgo_linux_arm.go:12320:18  Xsprintf(tls, p, __ccgo_ts+185, VaList(bp+424, bp+392, slen, salt))
+   libc@v1.80.1/ccgo_linux_arm.go:99570:22  Xsnprintf(tls, s, n, __ccgo_ts+485, VaList(bp+8, w, rp, x))
+   libc@v1.80.1/ccgo_linux_arm.go:115331:7  Xvsnprintf(tls, bp+68+uintptr(l), uint32(1024)-Uint32FromInt32(l), message, ap)
+   libc@v1.80.1/ccgo_linux_arm.go:118534:19  Xsprintf(tls, x, v2, VaList(bp+8, Int32FromUint8(*(*Tuint8_t)(__ccgo_ptr(p_a + uintptr(ii))))))
+   libc@v1.80.1/ccgo_linux_arm64.go:11489:18  Xsprintf(tls, p, __ccgo_ts+170, VaList(bp+240, bp+200, slen, salt))
+   libc@v1.80.1/ccgo_linux_arm64.go:12058:18  Xsprintf(tls, p, __ccgo_ts+185, VaList(bp+432, bp+392, slen, salt))
+   libc@v1.80.1/ccgo_linux_arm64.go:30348:4  Xmemcpy(tls, bp+uintptr(i), v, l)
+   libc@v1.80.1/ccgo_linux_arm64.go:98350:4  Xmemcpy(tls, bp+uintptr(l)+uintptr(1), val, n)
+   libc@v1.80.1/ccgo_linux_arm64.go:98361:5  Xmemcpy(tls, new1+16, val, n)
+   ... 70 more
+
+== escapes: a tainted number passed to a call (not followed), by callee, top 25 of 127 callees
+   ?                                1369
+   __ccgo_ptr                       1248
+   int64                            644
+   int32                            415
+   uintptr                          296
+   Int32FromUint8                   275
+   BoolInt32                        224
+   Uint32FromInt32                  216
+   Uint64FromInt32                  210
+   Pointer                          153
+   Xstrncmp                         128
+   _out                             128
+   _pad3                            120
+   _strlen                          112
+   VaList                           104
+   Xgetenv                          96
+   Xstrcmp                          96
+   float64                          96
+   uint32                           92
+   Xfprintf                         88
+   uint64                           76
+   Xfclose                          72
+   Xfopen                           64
+   Xmemcmp                          64
+   X__builtin_nanf                  56
+rc=0
