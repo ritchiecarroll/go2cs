@@ -20,8 +20,15 @@ namespace GolibTests;
 /// <remarks>
 /// Every mutex here lives in native memory, which gives the test a stable address to read the two words at:
 /// state at offset 0 and sema at offset 4.
+/// <para>
+/// Not parallel: several arms read what one stripe of the queue table holds, and threads share stripes, so a
+/// thread of another test class running at the same moment could take or leave a spare queue between two reads.
+/// GolibTests runs its classes one at a time today (the assembly has no Parallelize attribute); the attribute
+/// keeps these arms out of any parallel run it gains.
+/// </para>
 /// </remarks>
 [TestClass]
+[DoNotParallelize]
 public unsafe class SyncMutexQueueTests
 {
     private static readonly TimeSpan Bound = TimeSpan.FromSeconds(20);
@@ -343,12 +350,14 @@ public unsafe class SyncMutexQueueTests
         }
     }
 
-    // A stripe keeps every queue it created. A thread that installed a queue moves on while other threads still
-    // wait on it, so one thread can have several queues in the table at once, and when they are given up they
-    // all wait for that thread's next installs. Here one thread holds a queue on each of six mutexes, as a
-    // waiter holds it, gives the six up and takes six again: the second six are the first six, so nothing
-    // was created and nothing was dropped. With a limit of four spares, two of the second six were new, and
-    // a thread that kept more than four queues in use paid an allocation every time it came back to them.
+    // A stripe keeps every queue it created. A thread that installed a queue moves on while other threads are
+    // still counted on it, so one thread can have several queues in the table at once, and when they are given
+    // up they all wait in its stripe for the next installs. Here one thread holds a queue on each of six
+    // mutexes, as a waiter holds it, gives the six up and takes six again: the second six are the first six,
+    // so nothing was created and nothing was dropped. With a limit of four spares, two of the second six were
+    // new, and a stripe with more than four queues in use paid an allocation every time it came back to them.
+    // No other thread may touch this thread's stripe between the six leaves and the six retakes (it could
+    // take one of the spares), which is why the class is not parallel.
     [TestMethod]
     public void TheQueuesAThreadInstalledAtOnceAllServeItAgain()
     {

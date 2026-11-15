@@ -41,14 +41,15 @@
 // mutex is locked, and a copy of an idle mutex is a free mutex with no queue. Go's vet forbids the copy
 // ("must not be copied after first use") but its bytes work, and so do these.
 //
-// WHAT A CONTENDED LOCK ALLOCATES: nothing, once its thread has the spare queues it needs. The first
-// Lock of a thread that has to install a queue allocates the queue (104 bytes: the semaphore and its
-// lock object) and the thread's stripe slot (32 bytes, see t_stripe), and the thread allocates one more
-// queue each time more of the queues it installed are in use at once than ever before. Queues are kept
-// for the life of the process (QueueStripe has the bound). Go's waiter takes its sudog from a per-P
-// cache the same way, and allocates one when the cache is empty. The mutex this file replaced allocated
-// one semaphore (88 bytes) for every Mutex ever locked, contended or not, and kept it as long as the
-// mutex lived.
+// WHAT A CONTENDED LOCK ALLOCATES: nothing, while its thread's stripe has a spare queue. Spare queues
+// belong to the STRIPE, and threads share stripes (always, past QueueStripes threads). A Lock that has
+// to install a queue allocates one (104 bytes: the semaphore and its lock object) when the stripe has
+// no spare, which is when more of that stripe's queues are in use at once than ever before. So a
+// thread's first install often allocates nothing, and one thread can pay for another's peak. A thread's
+// first read of its stripe slot allocates 32 bytes (see t_stripe). Queues are kept for the life of the
+// process (QueueStripe has the bound). Go's waiter takes its sudog from a per-P cache the same way, and
+// allocates one when the cache is empty. The mutex this file replaced allocated one semaphore (88
+// bytes) for every Mutex ever locked, contended or not, and kept it as long as the mutex lived.
 //
 // WHERE THIS DIFFERS FROM GO, each stated and none cured (BOARD, W9a):
 // - A mutex copied WHILE a goroutine waits on it carries the queue's handle. Until that queue empties,
@@ -66,7 +67,9 @@
 // - A waiter blocks its OS THREAD in the semaphore, where Go parks a goroutine and frees its M, and an
 //   Unlock that read 2 takes the stripe's monitor for its lookup. A scheduler that parks instead must
 //   keep "a wakeup is waiting to be taken" readable by Unlock, which is the semaphore's CurrentCount
-//   here.
+//   here. Under such a scheduler the population counted on queues is goroutines, not OS threads, so
+//   the peak a stripe keeps queues for can be far larger: re-read the keep-every-queue rule
+//   (QueueStripe) then.
 // - Go 1.26 declares sync.Mutex as one field, an internal/sync.Mutex that holds the two words. Reflect
 //   sees `state` and `sema` on sync.Mutex itself here: the same eight bytes, one level flatter.
 using System.Runtime.CompilerServices;
@@ -127,9 +130,8 @@ internal static partial void fatal(@string s) => FatalReport.Fatal(s, userFault:
 // it has the lock (gateOf, leave). The queue of a mutex nobody waits on is taken out of the table and
 // kept for the next mutex that needs one, which gets it under a NEW handle: a handle read from a mutex
 // before its queue was given up names nothing afterwards. So a contended Lock allocates a queue only
-// while its thread's stripe has no spare one: the first time the thread installs a queue, and again
-// each time more of the queues it installed are in use at once than ever before. `handle`, `waiters`
-// and `next` are written under the stripe's lock.
+// while its thread's stripe has no spare one, which is when more of that stripe's queues are in use at
+// once than ever before. `handle`, `waiters` and `next` are written under the stripe's lock.
 private sealed class WaitQueue : SemaphoreSlim {
     internal uint32 handle;
     internal int waiters;
@@ -152,12 +154,14 @@ private const int StripeBits = 6, QueueStripes = 1 << StripeBits;
 // (leave).
 //
 // A stripe keeps every queue it created, for the life of the process. It creates one only when all of
-// its queues are in the table, and a queue in the table has a waiter, so a stripe never holds more
-// queues than the most goroutines that ever waited at one moment on queues it installed. The worst case
-// is QueueStripes stripes, each with as many queues as the most goroutines that waited at once, at 104
-// bytes a queue. A thread that installed a queue moves on while others still wait on it, so one thread
-// can have several in the table at once; with a limit on the spares (four, at first) such a thread
-// allocated a queue and dropped one again and again.
+// its queues are in the table, and a queue in the table has a goroutine counted on it (from gateOf
+// until leave: one that has not blocked yet, one that is blocked, or one that has the lock and has not
+// left). So a stripe never holds more queues than the most goroutines that were ever inside a contended
+// Lock at one moment on queues it installed. The worst case is QueueStripes stripes, each with as many
+// queues as the most goroutines that were inside a contended Lock at once, at 104 bytes a queue; it is
+// loose, because the stripes' peaks need not coincide. A thread that installed a queue moves on while
+// others are still counted on it, so one thread can have several in the table at once; with a limit on
+// the spares (four, at first) such a stripe allocated a queue and dropped one again and again.
 private sealed class QueueStripe(uint32 index) {
     private WaitQueue?[] m_buckets = new WaitQueue?[16];
     private int m_queues;
