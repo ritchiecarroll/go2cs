@@ -38758,3 +38758,21 @@ turns that arm's two measured assertions into Go's answer.
 — P5 (2026-11-14)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
+
+## 2026-11-15 — G (sqlite-cs L1; P3's review, COORD's ruling on note 1): no lift is made for an anonymous struct inside a function-local FUNC type — OPEN, loud, on no demo path
+
+**Dated 2026-11-15 02:30 CST. L1 `373b01438b` + merge of master `091935257c` + the review fold `6162a6e517`.
+Windows x64, go1.26.11.** P3 asked whether L1's per-name walk (`aliasPerNameLifts`) needed a `*types.Signature`
+arm for `var f, g func(struct{A int}) struct{B int}`. It does not help: the converter makes no lift for an anonymous
+struct reached through a local func type at all, so ONE name is refused too.
+
+- Repro: `var f func(struct{ A uint32 }) struct{ B uint32 }` inside a function. The convert exits rc=1 with 3
+  unresolved dynamic types, and the declaration is emitted as raw Go,
+  `Func<struct{A uint32}, struct{B uint32}> f = default;` (CS1525 and friends). Same at master and at L1's tip.
+- `liftDeclaredAnonStructTypeArgs` walks only the type ARGUMENTS of instantiations (`declaredTypeArgs`), and the
+  local var's own struct lift does not descend into a signature's parameters or results.
+- Loud, not silent: the conversion fails. A census of GOROOT/src (tests included) finds no function-local var
+  whose type reaches an anonymous struct through two or more names; single-name func-typed sites were not counted.
+- COORD's ruling: the comment route in L1 (the walk states why a function type is not walked) and this row. Fix
+  later: lift a func type's anonymous parameter and result structs as the var's own struct is lifted, then add the
+  Signature arm to `aliasPerNameLifts` in step.
