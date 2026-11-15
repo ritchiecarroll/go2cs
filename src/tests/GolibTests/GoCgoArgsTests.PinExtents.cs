@@ -71,6 +71,53 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(bytes);
     }
 
+    // R8, lane G's hazard (it bites at 3.2): a pinned buffer whose last user reference is gone while something that holds
+    // its address is still running. The door's find answers a STRONG reference, and while that is held the buffer, its
+    // pin and its entry survive a forced collection, so the bytes cannot move under a native call. Under 3.1 the door
+    // only refuses, and does. Once the strong reference is dropped the finalizer releases the pin and takes the extent
+    // out, and the number crosses as any number golib does not know does: row 7, the released pin, disclosed.
+    [TestMethod]
+    public void TheDoorsStrongFindKeepsAPinAcrossACollection()
+    {
+        nuint inside = PinAndDropEveryReference();
+
+        HoldAcrossACollection(inside);
+
+        // No frame holds the buffer now: the helper's returned, so no temporary of it outlives the hold.
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+
+        Assert.IsNull(PinExtents.Find(inside), "released by its finalizer: the extent left the index");
+        Assert.IsTrue(Crosses(inside), "DISCLOSED (row 7): a released pin's number crosses");
+    }
+
+    // The strong reference the door's find answers, held across a forced collection, in its own frame so that nothing
+    // of it outlives the call (a tier-0 frame keeps its temporaries alive to the method's end).
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static void HoldAcrossACollection(nuint inside)
+    {
+        PinnedBuffer? held = PinExtents.Find(inside);
+
+        Assert.IsNotNull(held, "the entry answers while the buffer is alive");
+
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+
+        Assert.AreSame(held, PinExtents.Find(inside), "held across a collection: the entry still resolves");
+        Assert.IsFalse(Crosses(inside), "held: refused");
+
+        GC.KeepAlive(held);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static nuint PinAndDropEveryReference()
+    {
+        PinnedBuffer pinned = new PinnedBuffer(new byte[64]);
+        return (nuint)pinned.Pointer + 8;
+    }
+
     // R7: pins come and go on eight threads while two more ask the door about C memory. Every pinning thread asks about
     // its own LIVE pin's interior (always refused), and the C threads' numbers always cross. The door's read takes no
     // lock, so this is the arm that would show a torn list or a stale page.
