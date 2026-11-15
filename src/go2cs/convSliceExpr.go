@@ -82,6 +82,12 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		}
 	}
 
+	// A slice of an array held inline (a go.arrays member, which has no slice face of its own) is cut from the whole
+	// array as a slice over the struct's own storage; the bounds below apply to it as to any slice.
+	if ident == "" && v.isInlineArrayExpr(sliceExpr.X) {
+		ident, _ = v.inlineArraySliceBase(sliceExpr.X)
+	}
+
 	if ident == "" {
 		ident = v.convExpr(sliceExpr.X, nil)
 	}

@@ -38757,6 +38757,32 @@ turns that arm's two measured assertions into Go's answer.
 
 — P5 (2026-11-14)
 
+## 2026-11-14 — G (row, found by the i9; owner of the runtime / M:N thread-reuse contract): RuntimeStopTheWorldContractTests' holder arm usually asserts nothing
+
+**Dated 2026-11-14 21:50 CST. Read at master `091935257c` (batch 307). Not fixed here; this row records it.**
+
+`GolibTests.RuntimeStopTheWorldContractTests.AHolderIsItsGoroutineNotTheThreadItRanOn` guards the stop-the-world
+contract's holder rule: worldsema's and metricsSema's holder is the GOROUTINE, not the thread it ran on, because
+goroutine threads are reused (GoroutineThreadPool). Its probe, `GoSemaHolderReuseProbe` (runtime/managed_impl.cs),
+starts goroutine A, which takes both locks and ends holding them, then starts goroutine B up to 20 times, hoping
+the pool hands B A's just-idled worker; only then does B call the releases and the test assert that A still holds
+both. Otherwise the test ends `Assert.Inconclusive("goroutine B never landed on goroutine A's reused thread; nothing
+to assert")`.
+
+**The reading (the i9's).** 1 or 2 of 5 runs assert when the test runs ALONE, also at master; the rest end
+Inconclusive. Whether A's worker is back in the idle set before B starts, and whether the pool picks that worker
+among the idle ones, is scheduling: nothing in the probe makes it happen. A contract test that usually asserts
+nothing proves nothing, and an Inconclusive does not fail a run, so a regression of the holder rule would most
+often pass unseen.
+
+**The fix (later, after the sqlite-cs .4 gate work):** make the reuse deterministic, or assert the rule another
+way. Candidates: a GolibTests-only hook that runs B on A's worker by identity (or waits until that worker is the
+only idle one), or an arm that reads the holder key the locks record and checks it names A's goroutine and not
+the managed thread id, which needs no reuse at all. Either way the arm must be made to fail once (safety floor
+item 13): key the holder by thread id, see the arm go red, restore.
+
+— G (2026-11-14)
+
 ## 2026-11-15 — P5 (corrects one phrase of the 2026-11-14 floor-review entry above; COORD, 01:20Z): the nil array pointer's missing length is cured by door C, not door A — the row stays OPEN, owner P5, with door C
 
 The entry above says of a nil pointer to an unnamed array made from a number: "owner P5, cure in door A", and
@@ -39116,6 +39142,139 @@ Go layout is not known would still add objects per step (read from the code, no 
 64 stay as guards that no mint reaches.
 
 — P5 (2026-11-15)
+
+## 2026-11-15 — P4 (found by a red control on the Tuning.md folding docs seat; COORD: a row, owner R, a small guard seat later): `TestDocsFragmentLinksResolve` does not check the fragment of an absolute github.com URL into this repository
+
+**What was seen.** The docs seat `claude/p4-tuning-ilc-folding` links the Performance pages to
+`https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#native-aot-method-body-folding`. The links are
+absolute because `docs/Performance.md` is a verbatim mirror of `src/tests/Performance/README.md`, whose links must work
+from the suite folder too. Red control: with one of those fragments changed to `...foldingX` and committed locally,
+`go test -count=1 -run TestDocsFragmentLinksResolve ./internal/repoguard` read `ok`. The broken link would have
+deployed. The control commit was local only and was reset away.
+
+**Why it matters.** Every absolute same-repository link in the published docs, and every link in the suite README, is
+outside the fragment guard, so a heading rename breaks them silently. Today these anchors are checked only by reading.
+
+**The seat (owner R, small).** For a link whose URL is `https://github.com/ritchiecarroll/go2cs/blob/<ref>/<path>#<frag>`
+(and `tree/`), resolve `<path>` against the local tree and check `<frag>` exactly as a relative link's fragment is
+checked. Red first: the planted `...foldingX` must fail by name, and the real anchor must pass.
+
+— P4 (2026-11-15)
+
+## 2026-11-15 — i9 (B4, the TypeScript Native AOT sizing; COORD ruling 06:30Z: a .5 option with its own seat, not .4): lever E, golib's per-instantiation static tables moved to one non-generic holder, takes a further 30% off a Native AOT image's symbol names once lever G is in — OPEN, not started, after 1.26.11.1
+
+**What it is.** golib keeps several static tables inside its generic pointer-box types (`ж<T>`'s view table,
+`ElemRefBox<T>`'s element-box table, `FieldRefBox<T>`'s accessor wrappers and its two offset records,
+`NilArrayBox`'s). Each is a `ConditionalWeakTable` or dictionary closed over `T`, so every pointee type a
+program touches instantiates the table's whole method set under its own names. Lever E moves them to one
+internal non-generic class, `GoBoxTables`, keyed by object. The experiment is `claude/i9-b4-lever-e`
+(`f6633c0e8f`, v2); `GolibTests` whole read every verdict equal to the unpatched tree's, after one text guard's
+allow-list entry (`NoUncountedBackingAllocationsTests`) was updated for the moved line.
+
+**What it buys, on `parsedemo` (converted TypeScript, `651c4ad147`, full trim, no native debug symbols), one
+build per arm, each image matching native Go on the demo and 17,422 of 17,422 corpus units:**
+
+| | E v2 alone | G alone | E v2 + G |
+|:--|:--|:--|:--|
+| symbol names (the string table with the 2 GiB limit) | 655.1 MB | 616.2 MB | 429.6 MB |
+| image | 297.4 MB | 252.3 MB | 219.5 MB |
+| ILC peak private | 17.60 GB | 15.69 GB | 11.66 GB |
+| `IL3054` lines | 884 | 0 | 0 |
+
+So with lever G landed (batch 308), E is worth a further 30% of the names (616.2 to 429.6), 13% of the image and
+a quarter of ILC's memory. At PerfStartup, before G, it took 44% of the names (366.8 to 206.7 MB): the two
+levers overlap, since G removes instantiations and E removes tables per instantiation.
+
+**Why it is not .4.** G alone fits: `checkdemo`, the largest image measured (1,545.2 MB of names under E v2
+alone), projects to 1,453 MB with G alone, 68% of the stream. E is margin, and it moves six tables that hold
+weak references and pointer identity, which wants its own seat and review rather than release-week risk.
+
+**What a seat owes.** The form of the two lever G lookups has changed since the experiment (a virtual, not an
+interface), so the patch is re-cut on master, not applied. A guard that the tables are not per-instantiation
+again (the IL reader of `PointerBoxGenericCycleTests` is the model: no static field of a generic box type whose
+type is closed over the box's own `T`). `PerfFieldView` and the alloc rows before and after, since the tables
+are on the field-view and element-box paths. Record: `docs/phase4/DATA-ts-aot-b4.md`, sections 7, 13 to 15, 18 and 19.
+
+— i9 (2026-11-15)
+
+## 2026-11-15 — C2 (go-winio Part 2, COORD ruling (b)+(a) 02:38Z): an escaping slice of a foreign inline array pays a finalizable pin per box; the pinned-object-heap variant is a .5 candidate — DISCLOSED cost, (c) OPEN, not started
+
+**What it is.** A slice of an array held inline by another package's admission (go-winio's `guid.GUID` over
+`windows.GUID`, `Data4 [8]byte`) aliases the struct, so its box is pinned for as long as the box lives
+(`ж<T>.ΔInlineSlice<E>()`, DESIGN-array-value-storage.md, amended 2026-11-15). The copy shapes (`copy` into or out
+of `x.f[lo:hi]`) take no pin (ruling (b)). An ESCAPING slice keeps the pin (ruling (a)): go-winio's `String`, whose
+`g.Data4[:2]` and `g.Data4[2:]` go to `fmt.Sprintf`.
+
+**Measured** (`TestInlineArrayForeignSlicePinIsReleased`, linux-x64, Debug, workstation GC; N = 1,000,000 calls of a
+value-receiver method returning `g.Data4[:2]`, read after `runtime.GC()`):
+
+| arm | retained heap | fragmentation | pinned | peak (sampled) | time |
+|---|---|---|---|---|---|
+| unpinned control | 2.1 MB | 1.1 MB | 3 | 33.4 MB | 0.35 s |
+| escaping slice | 27.5-28.7 MB | 10.6-11.7 MB | 4 | 200.7-261.2 MB | 3.3-3.8 s |
+| leak control (every slice kept) | 500-532 MB | 64-96 MB | 1,000,003 | 660 MB | 8.1-8.6 s |
+
+B3 (pins released after a drain) holds and is the gate. B1, B2 and B4 (retained heap, fragmentation, peak against the
+control) do not, by the margins above, and are disclosed here per the ruling.
+
+**Why.** Each slicing of a value receiver allocates a boxed copy, a FINALIZABLE `PinnedBuffer` with a pinned
+`GCHandle`, an anchor array with its `ConditionalWeakTable` entry, and a provenance entry. A pin is released by its
+box's finalizer, so it survives two collections, with the slot pinned in gen0 the whole time: peak and fragmentation
+are the cost. Go allocates the receiver on the heap here too (the slice escapes), but without a pin.
+
+**Who reaches it.** A consumer that slices a foreign inline array of numeric or boolean elements and lets the slice
+escape. go-winio's `String` is a format path. sqlite-cs's foreign faces are all spelled (0 sliced), and std admits
+nothing.
+
+**(c), OPEN, a .5 candidate (COORD).** Allocate the box of a struct whose inline array is sliced on the pinned object
+heap: no `GCHandle` and no finalizer, but the box is reclaimed only by gen2 collections. A golib heap variant the
+converter selects. Not started; measure against this row's table.
+
+— C2 (2026-11-15)
+
+## 2026-11-15 — C2 (go-winio Part 2, P3's review, COORD rulings 05:21Z): a slice of an inline array inside a root that holds a Go reference panics by name — DISCLOSED for .4, the cure a .5 candidate, OPEN; a nested inline array's slice is CS0411, OPEN
+
+**What it is.** A slice of an array held inline (`p.ID.Data4[:2]`) aliases the storage, so the storage is pinned for
+as long as the slice lives (`ж<T>.ΔInlineSlice<E>()`). A root that holds a string, a slice, a map, an interface or a
+pointer cannot be pinned: such a box is a `StandardBox` with no pinnable slot (`ж.FieldRefBox.cs` StorageKind), so the
+slice panics with `inline array slice: an array held inline in a struct that also holds a Go reference cannot be held
+still, so it cannot be sliced`. Go slices it. This is plain Go and probably the common foreign shape:
+`type P struct { ID guid.GUID; name string }`. go-winio users who keep a GUID beside a string will hit it.
+
+**Measured** (`TestInlineArrayForeignSliceReviewShapes`, its `refroot` mode; GolibTests'
+`InlineSliceStorageTests.AFieldOfAReferenceBearingRootIsRefusedByName`): Go prints `1 beside`, go2cs panics with the
+message above. Not affected: go-winio's own GUID methods (each slices its receiver's reference-free copy), a `copy`
+into or out of the array with constant bounds (no pin), and a slice of a local copy of the array.
+
+**Cure, .5 candidate (COORD's ruling 3b).** A slice backing that is an object plus a field offset, with no pin: the
+slice holds the box and reads through the offset, so the GC may move it. Not started.
+
+**Also OPEN, loud.** A slice of a NESTED inline array (`g.M[i][:]`, a go.arrays member of go.arrays members) is a C#
+compile error, CS0411 at `Ꮡ(g.M, i)`, because golib has no element address for a go.arrays member. It read the same
+before and after the review. go-winio does not reach it.
+
+## 2026-11-15 — C2 (batch 308, COORD 10:45Z, option (b)): release-smoke cgo skips linux-arm64 until zig has a linux-arm64 pin — OPEN, the pin is owed for 309
+
+**What happened.** Seat S5c added linux-arm64 to the consumer legs. `release-smoke-cgo` (batch 307) ran on the same
+matrix, so it inherited the leg, and `.github/cgo-toolchain.ps1` refused it: "release-smoke cgo probe: no zig pin for
+runner linux-arm64" (run 43696423446, the 308 union). The pin table has zig for linux-x64, osx-x64, osx-arm64 and
+win-x64, and llvm-mingw for win-x64; nothing for aarch64-linux.
+
+**What changed.** The plan step emits a second matrix, `cgo-matrix`: the consumer legs less the RIDs in
+`$cgoUnpinnedRids` (today `linux-arm64`). `release-smoke-cgo` reads it; release-smoke, aot-smoke and nugetgo-behavior
+keep all five legs. `TestCgoSmokeSkipsOnlyTheLegsWithNoPinnedToolchain` (repoguard) holds the list equal to the consumer
+legs whose OS default toolchain (llvm-mingw on windows, zig elsewhere) has no pin, both ways: red before the list
+existed, and red with a planted `zig|linux-arm64` key (the file restored byte-identical after).
+
+**Why not the pin now.** Option (a) is one pin-table line, but its sha256 must be the publisher's, read from
+ziglang.org's download index, and that host is outside this box's network policy. A hash computed from our own
+download is not the publisher's statement, so it is not used.
+
+**OPEN, for 309:** add `'zig|linux-arm64'` (zig 0.17.0, `zig-aarch64-linux-0.17.0.tar.xz`, the index's sha256), drop
+`linux-arm64` from `$cgoUnpinnedRids` (the guard fails until both move together), and read release-smoke cgo on
+linux-arm64. Until then, **NOT SHOWN:** that the cgo path works for a linux-arm64 consumer.
+
+— C2 (2026-11-15)
 
 ## 2026-11-15 — P5 (door B of `DESIGN-array-pointer-doors.md`; COORD rulings 06:07Z, 06:14Z, 06:22Z): an index, an element's address and a whole array through `(*A)(p)` reach the memory p names; the length of the dereference is the type's — DONE
 
