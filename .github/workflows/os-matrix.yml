@@ -164,6 +164,8 @@ jobs:
     timeout-minutes: 10
     outputs:
       matrix: ${{ steps.derive.outputs.matrix }}
+      # The consumer legs less the RIDs with no pinned cgo toolchain; release-smoke-cgo reads it ($cgoUnpinnedRids below).
+      cgo-matrix: ${{ steps.derive.outputs.cgo-matrix }}
       go-version: ${{ steps.derive.outputs.go-version }}
       # The EFFECTIVE dispatch parameters. Every consumer downstream reads these rather than
       # `inputs.*`, because `inputs.*` is empty on a schedule event.
@@ -582,6 +584,18 @@ jobs:
           Write-Host "matrix: $json"
 
           Add-Content -Path $env:GITHUB_OUTPUT -Value "matrix=$json" -Encoding utf8
+
+          # release-smoke-cgo's legs: the same targets less those whose OS default cgo toolchain (.github/cgo-probe.ps1:
+          # llvm-mingw on windows, zig elsewhere) has no pin in .github/cgo-toolchain.ps1. linux-arm64 joined the consumer
+          # legs in seat S5c with no zig pin, and the cgo job refused it (batch 308, run 43696423446): its pin is owed for
+          # the next batch, the publisher's sha256 read from ziglang.org's index. Every other stage keeps the full matrix.
+          # TestCgoSmokeSkipsOnlyTheLegsWithNoPinnedToolchain holds this list to exactly the unpinned legs, so it retires
+          # the day the pin lands.
+          $cgoUnpinnedRids = @('linux-arm64')
+          $cgoEntries = @($entries | Where-Object { $_.rid -notin $cgoUnpinnedRids })
+          $cgoJson = ConvertTo-Json -InputObject $cgoEntries -Compress -Depth 4
+          if ($cgoEntries.Count -lt @($entries).Count) { Write-Host "cgo matrix: $cgoJson (no pinned cgo toolchain: $(@($entries | Where-Object { $_.rid -in $cgoUnpinnedRids } | ForEach-Object { $_.rid }) -join ', '))" }
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-matrix=$cgoJson" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "go-version=$goVersion" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "goos=$goos" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "stage=$stage" -Encoding utf8
@@ -702,7 +716,8 @@ jobs:
           if-no-files-found: warn
 
   # ---------------------------------------------------------------------------------------------
-  # release-smoke-cgo -- the cgo path, on every release-smoke, on all four shipped RIDs (COORD's ruling 2026-11-14, cgo
+  # release-smoke-cgo -- the cgo path, on every release-smoke, on every shipped RID with a pinned C toolchain (the
+  # plan's cgo-matrix; linux-arm64 has none yet, batch 308) (COORD's ruling 2026-11-14, cgo
   # 3.1's release-path seat). A -cgo conversion is ONE package and builds against a go2cs clone, never the go.*
   # packages: src/go2cs/main.go's -cgo help says it is not combinable with -recurse, and csproj-template.xml references
   # $(go2csPath)'s go2cs-gen and golib. So this job reads the TREE the release is cut from, needs no pack, and runs
@@ -724,7 +739,7 @@ jobs:
       # Every RID's reading is wanted, whatever another reads.
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.plan.outputs.matrix) }}
+        include: ${{ fromJson(needs.plan.outputs.cgo-matrix) }}
     env:
       GOOS_TARGET: ${{ matrix.goos }}
       RID: ${{ matrix.rid }}

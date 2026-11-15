@@ -80,3 +80,80 @@ func TestConsumerLegsReadEveryShippedRid(t *testing.T) {
 		t.Errorf("os-matrix.yml lists a consumer RID twice: %v", legs)
 	}
 }
+
+// EVERY CONSUMER LEG THE CGO SMOKE SKIPS IS A LEG WITH NO PINNED C TOOLCHAIN, AND ONLY THAT (batch 308).
+//
+// release-smoke-cgo builds its probe library with the OS's DEFAULT pinned toolchain (.github/cgo-probe.ps1: llvm-mingw on
+// windows, zig elsewhere, from .github/cgo-toolchain.ps1's one pin table). It ran on the consumer legs' matrix, so when
+// seat S5c added linux-arm64 the cgo job inherited a leg with no pin and refused ("no zig pin for runner linux-arm64",
+// run 43696423446). The plan step now emits a cgo matrix without the RIDs named in $cgoUnpinnedRids. This test holds
+// that list to exactly the consumer legs whose default toolchain has no pin: a leg with no pin that the list does not
+// name fails here (the refusal reached the run first), and a listed RID that gains a pin fails here too, so the list
+// retires the day the pin lands and the leg rejoins the cgo smoke.
+var cgoUnpinnedRidsLine = regexp.MustCompile(`\$cgoUnpinnedRids = @\(([^)]*)\)`)
+
+// consumerLegTarget is one target's goos and rid in the consumer-leg block.
+var consumerLegTarget = regexp.MustCompile(`goos = '([^']+)';\s*runner = '[^']+';\s*rid = '([^']+)'`)
+
+// cgoPinKey is one key of cgo-toolchain.ps1's pin table, 'toolchain|rid'.
+var cgoPinKey = regexp.MustCompile(`'(zig|llvm-mingw)\|([^']+)'\s*=`)
+
+// quotedWord is one single-quoted item of a PowerShell array literal.
+var quotedWord = regexp.MustCompile(`'([^']+)'`)
+
+func TestCgoSmokeSkipsOnlyTheLegsWithNoPinnedToolchain(t *testing.T) {
+	workflow := readRepoFile(t, ".github/workflows/os-matrix.yml")
+	blocks := consumerLegBlock.FindAllStringSubmatch(workflow, -1)
+
+	if len(blocks) != 1 {
+		t.Fatalf(".github/workflows/os-matrix.yml: %d consumer-leg target lists match, want 1", len(blocks))
+	}
+
+	lists := cgoUnpinnedRidsLine.FindAllStringSubmatch(workflow, -1)
+
+	if len(lists) != 1 {
+		t.Fatalf(".github/workflows/os-matrix.yml: %d $cgoUnpinnedRids lists, want 1: release-smoke-cgo reads the consumer legs less the RIDs it names", len(lists))
+	}
+
+	var unpinned []string
+
+	for _, word := range quotedWord.FindAllStringSubmatch(lists[0][1], -1) {
+		unpinned = append(unpinned, word[1])
+	}
+
+	pins := map[string]bool{}
+
+	for _, key := range cgoPinKey.FindAllStringSubmatch(readRepoFile(t, ".github/cgo-toolchain.ps1"), -1) {
+		pins[key[1]+"|"+key[2]] = true
+	}
+
+	if len(pins) == 0 {
+		t.Fatalf(".github/cgo-toolchain.ps1: no pin keys match %s; the table moved and this test reads nothing", cgoPinKey)
+	}
+
+	var want []string
+	legs := consumerLegTarget.FindAllStringSubmatch(blocks[0][1], -1)
+
+	if len(legs) == 0 {
+		t.Fatalf("the consumer-leg block names no goos/rid targets matching %s", consumerLegTarget)
+	}
+
+	for _, leg := range legs {
+		toolchain := "zig"
+
+		if leg[1] == "windows" {
+			toolchain = "llvm-mingw"
+		}
+
+		if !pins[toolchain+"|"+leg[2]] {
+			want = append(want, leg[2])
+		}
+	}
+
+	slices.Sort(want)
+	slices.Sort(unpinned)
+
+	if !slices.Equal(want, unpinned) {
+		t.Errorf("$cgoUnpinnedRids is %v; the consumer legs whose default cgo toolchain has no pin in .github/cgo-toolchain.ps1 are %v. A leg with no pin runs the cgo smoke into a refusal; a listed RID with a pin is skipped for nothing (retire it from the list).", unpinned, want)
+	}
+}
