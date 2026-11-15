@@ -199,6 +199,11 @@ def fill(A):
         left = re.findall(r"\{\{[A-Z_]+\}\}", t)
         if left:
             sys.exit(f"{name}: unfilled {left}")
+        # [[CELL]]s are the performance section's hand-filled numbers (G's benchmark run, after go.* publishes).
+        # fill cannot supply them, so it names them: a README that still holds one is not ready to publish.
+        cells = sorted(set(re.findall(r"\[\[[A-Z_]+\]\]", t)))
+        if cells:
+            print(f"{name}: {len(cells)} performance cells still to fill by hand: {' '.join(cells)}")
         filled[name] = t
     open(os.path.join(A.dest, "PROOF.md"), "w", encoding="utf-8", newline="\n").write(filled["PROOF.md"])
     readme_patch(A, v, filled["README.md"])
