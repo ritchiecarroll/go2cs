@@ -304,6 +304,7 @@
     <Project Path="tests/Behavioral/AdapterNameInterfaceCollision/AdapterNameInterfaceCollision.csproj" />
     <Project Path="tests/Behavioral/AliasStructToInterface/AliasStructToInterface.csproj" />
     <Project Path="tests/Behavioral/AliasStructToInterfaceLib/AliasStructToInterfaceLib.csproj" />
+    <Project Path="tests/Behavioral/AliasedImportRenamedMember/AliasedImportRenamedMember.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceThroughPointerAdapter/AnonIfaceThroughPointerAdapter.csproj" />
     <Project Path="tests/Behavioral/AnonInterfaceCrossFile/AnonInterfaceCrossFile.csproj" />
     <Project Path="tests/Behavioral/AnonInterfaceSignatureAssert/AnonInterfaceSignatureAssert.csproj" />
@@ -338,6 +339,8 @@
     <Project Path="tests/Behavioral/ForeignAliasElementAddress/stdio/ForeignAliasElementAddress.stdio.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructAliasAlias/ForeignAnonStructAliasAlias.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructAliasAlias/lib/ForeignAnonStructAliasAlias.lib.csproj" />
+    <Project Path="tests/Behavioral/ForeignAnonStructAliasElemAddress/ForeignAnonStructAliasElemAddress.csproj" />
+    <Project Path="tests/Behavioral/ForeignAnonStructAliasElemAddress/stdio/ForeignAnonStructAliasElemAddress.stdio.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructForwardAlias/ForeignAnonStructForwardAlias.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructForwardAlias/dep/ForeignAnonStructForwardAlias.dep.csproj" />
     <Project Path="tests/Behavioral/KeywordNamedTypeAlias/KeywordNamedTypeAlias.csproj" />
@@ -852,6 +855,7 @@
     <Project Path="tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/NamedPointerValueSlot/NamedPointerValueSlot.csproj" />
     <Project Path="tests/Behavioral/NamedResultAddressEscape/NamedResultAddressEscape.csproj" />
+    <Project Path="tests/Behavioral/NamedResultCaptureModeReceiver/NamedResultCaptureModeReceiver.csproj" />
     <Project Path="tests/Behavioral/NamedResultLambdaInfer/NamedResultLambdaInfer.csproj" />
     <Project Path="tests/Behavioral/NamedReturnDefer/NamedReturnDefer.csproj" />
     <Project Path="tests/Behavioral/NamedSliceCaptureMethod/NamedSliceCaptureMethod.csproj" />

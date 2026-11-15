@@ -52,6 +52,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAliasStructToInterfaceLib() => CheckTarget("AliasStructToInterfaceLib");
 
     [TestMethod]
+    public void CheckAliasedImportRenamedMember() => CheckTarget("AliasedImportRenamedMember");
+
+    [TestMethod]
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
@@ -725,6 +728,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckForeignAnonStructAliasAlias() => CheckTarget("ForeignAnonStructAliasAlias");
+
+    [TestMethod]
+    public void CheckForeignAnonStructAliasElemAddress() => CheckTarget("ForeignAnonStructAliasElemAddress");
 
     [TestMethod]
     public void CheckForeignAnonStructForwardAlias() => CheckTarget("ForeignAnonStructForwardAlias");
@@ -1559,6 +1565,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");
+
+    [TestMethod]
+    public void CheckNamedResultCaptureModeReceiver() => CheckTarget("NamedResultCaptureModeReceiver");
 
     [TestMethod]
     public void CheckNamedResultDeferCapture() => CheckTarget("NamedResultDeferCapture");

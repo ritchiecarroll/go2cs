@@ -1,0 +1,107 @@
+A: 5 "XXXXXXXX"
+   [exit 0]
+B: 6 "XXXXXXXX"
+   [exit 0]
+C: panic: runtime error: cannot view native memory as RawMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+D: panic: runtime error: cannot view native memory as RawMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+E: 4 false "XXXXXXXX"
+   [exit 0]
+F: panic: runtime error: cannot view native memory as RawMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+G: 8 "\x00\x00\x00\x00\x00\x00\x00\x00"
+   [exit 0]
+H: 4 "XXXXXXXX"
+   [exit 0]
+I: 6 "abcdef"
+   [exit 0]
+J: 1125899906842623
+   [exit 0]
+K: "abc!" "WXYZ"
+   [exit 0]
+L: 16 "XXXXXXXXXXXXXXXX"
+   [exit 0]
+M: panic: runtime error: cannot view native memory as smallMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+C0: panic: runtime error: cannot view native memory as RawMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+D0: panic: runtime error: cannot view native memory as RawMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+F0: panic: runtime error: cannot view native memory as RawMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+M0: panic: runtime error: cannot view native memory as smallMem: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+N: false
+   [exit 0]
+O: "\x00\x00\x00\x00\x00\x00"
+   [exit 0]
+P: "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+   [exit 0]
+Q: panic: runtime error: index out of range [4] with length 0
+
+goroutine 1 [running]:
+main.main()
+	<kit>/NativeViewShapes/main.go:158
+   [exit 2]
+R: panic: runtime error: cannot view native memory as array<Int32>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+S: panic: runtime error: cannot view native memory as array<Int32>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]
+T: panic: runtime error: cannot view native memory as array<Byte>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+unsafe.To[...]()
+	<tree>/src/core/unsafe/unsafe.cs:620
+main.main()
+   [exit 2]

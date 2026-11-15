@@ -340,20 +340,37 @@ instead of a local transpile. The converter side is built and on by default (see
 
 ## cgo
 
-**In short.** Go code that calls C through cgo cannot be converted yet. The converter says so and
-stops, naming the file, and a bridge to native code is planned from 2027.
+**In short.** `go2cs -cgo` converts a Go package that calls C library functions, on a machine with a
+C compiler. Go memory handed to C, C code written inline in the Go file, and callbacks from C into Go
+come next. Without `-cgo`, a package that imports `"C"` is refused by name.
 
-A Go file that imports `"C"` is not converted, and the standard library is converted with
-`CGO_ENABLED=0`. The plan:
+The standard library is still converted with `CGO_ENABLED=0`. What cgo converts today:
 <!-- The plan is [`PLAN-cgo-interop.md`](PLAN-cgo-interop.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 
-- **It fails loudly today.** When a file the build selects imports `"C"`, the conversion stops with
-  error `GO2CS2001`, which names the file and the cause, instead of skipping the file silently
-  ([Limitations](Limitations.md)). Test-only and platform-deselected files are skipped as usual.
-- **Next, a phased P/Invoke bridge** (from Q1 2027, as capacity allows): recognize and extract the C
-  declarations, generate P/Invoke calls and blittable structs, then marshal pointers, strings and
-  slices, starting with a slice limited to the C library. Platform order: Linux, then Windows, then
-  macOS. Each target needs a C toolchain on the converting machine.
+- **C library calls, through `-cgo`.** One package converts when every C use it makes is a call of a C
+  function a shared library defines. Integers, floating-point numbers, pointers, and structs of integers
+  and pointers cross. `C.CString`, `C.CBytes`, `C.GoString`, `C.GoStringN`, `C.GoBytes`, `C.malloc`
+  and `C.free` convert, as do a `void *` that is nil or points at C memory, and `defer C.f(…)`. It
+  converts for the machine's own operating system and architecture. A converted cgo program was built
+  and run against the Go build of the same program on linux/amd64, darwin/amd64, darwin/arm64 and
+  windows/amd64, and printed what Go printed apart from the differences
+  [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) lists. The machine
+  that converts needs a C compiler (`go env CC`). A program that uses the converted package needs only
+  the C library.
+- **Without `-cgo` it fails loudly.** When a file the build selects imports `"C"`, the conversion stops
+  with error `GO2CS2001`, which names the file and the cause, instead of skipping the file silently
+  ([Limitations](Limitations.md#what-wont-make-the-trip)). Test-only and platform-deselected files are
+  skipped as usual.
+- **Next:**
+  - Go memory handed to C without a copy, and a slice viewed over C memory (the rest of Phase 3).
+  - C code written inline in the Go file (Phase 4).
+  - `//export` and callbacks from C into Go (Phase 5).
+  - Until then, each is refused by name, with the phase that covers it.
+<!-- 2026-11-14 (H, the release-notes audit's item for H): present tense at the release tip. cgo Phase 2's real route
+     and G1 gate (docs/phase4/DESIGN-cgo-phase2-pinvoke.md section 11.22: hosted legs on linux/amd64, darwin/amd64,
+     darwin/arm64 and windows/amd64) and Phase 3 increment 3.1 (43ac9e33fa, batch 305; DESIGN-cgo-phase3-marshaling.md
+     section 16; its hosted cgo-e2e legs 43638330006 linux-x64, 43638338397 win-x64, 43638346986 osx-arm64 and osx-x64,
+     each 50 of 50 arms as Go does or refused as the arm's table says). -->
 
 ## Phase 4D: examples, fuzz seed corpora and benchmarks
 
@@ -561,7 +578,7 @@ something else finishing first.
 |:--|:--|
 | Now | macOS validation of the standard library, package by package. The trimming work for Native AOT. The start-up cost of a converted process. Further converted modules as NuGet packages. |
 | Next | The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. Goroutine scheduling. The generic-methods design for Go 1.27. The decision on how often later hops run. |
-| Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work, whose design is written. |
+| Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's next phases (Go memory handed to C, inline C), after its first phases shipped in 1.26.11.1. The Phase 4D design kickoff. The allocation work, whose design is written. |
 | Unscheduled | The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
 ## How progress is tracked

@@ -128,6 +128,32 @@ namespace go;
 
         void* address = DereferenceableAddress();
 
+        // THE NAMED-ARRAY FLOOR, at the read of the whole value (2026-11-14; docs/phase4/DESIGN-native-array-view.md,
+        // the blocks of that date). T is the wrapper struct of a named array type, whose one field is a managed
+        // reference, and Value reads a T at the address with Unsafe.AsRef. No real address holds a wrapper: storage
+        // that holds a reference is never pinned, and C memory never held one. So the read took raw bytes for a
+        // reference, and where the bytes were zero the wrapper's lazy fill allocated a managed array and stored its
+        // reference INTO those bytes, C memory or a Go array's elements, with no error and where the collector cannot
+        // see it. Measured before the floor, five Go shapes of seven stored an address into the Go array they viewed.
+        //
+        // HERE AND NOT IN THE CONSTRUCTOR, where this line first stood. A box of the wrapper is a CARRIER until it
+        // is read: its number, its equality, a conversion onward to another pointee and a copy-back that hands it
+        // to a caller who never dereferences it read no memory, and all of them worked before the floor
+        // (NamedArrayCarrierTests). The same ruling as OrderTokenRefusal above. Every whole-value read of a native
+        // box comes through this method, the wrapper's indexer and its lazy fill included, since they take the ref
+        // Value returns.
+        //
+        // AFTER DereferenceableAddress, so an order token keeps its own refusal and needs no exemption here.
+        // NOT THE NUMBER 0, which does need one: a nil box passes DereferenceableAddress (that method refuses
+        // tokens, and 0 is not one) and must then answer what a nil pointer of every other pointee answers, the
+        // fault of the read itself. This line first stood here with no test of the address, on the belief that
+        // nil never reached it, and a nil named-array pointer answered the floor's text
+        // (NamedArrayViewFloorTests.ANilNamedArrayPointerReadsAsANilPointerAndItsTypeAnswersItsLength, red before
+        // the conjunct). It cures nothing: the shapes panic by name until a conversion exists that answers a
+        // wrapper box sharing the array.
+        if (s_isNamedArrayShaped && address != null)
+            throw RuntimeErrorPanic.NamedArrayViewOfNativeMemory(typeof(T));
+
         // The dereference census (NativeBoxDereferenceCensus): a T that holds a reference and was not refused above, and
         // a box derived from storage that cannot be pinned. Counted after both refusals, so every count is a read or a
         // write that happened. Null unless the census is on: one test of a static readonly field.
@@ -138,6 +164,15 @@ namespace go;
     }
 
     private static readonly string? s_layoutMismatch = GoReflect.ClrLayoutMismatch(typeof(T));
+
+    // Is T the wrapper struct go2cs-gen writes for a NAMED array type (`type RawMem [N]byte`)? It is a value type that
+    // is an IArray and holds a managed reference (its one field is a lazily filled holder of the array<E>). A slice is
+    // an IArray too (ISlice extends it) and is not this shape, and array<E> itself is not: its floor is arm 5 of the
+    // number conversion (ж<T>.FromNumber). `default(T) is I` is a type test on a value type: the JIT and ILC answer
+    // it from the type, with no box and no reflection. Decided once per T, read by ValueAddress above.
+    private static readonly bool s_isNamedArrayShaped =
+        !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>)) &&
+        default(T) is IArray and not ISlice && RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
     private static readonly NativeBoxDereferenceCensus.Pointee? s_census = NativeBoxDereferenceCensus.Pointee.Of<T>();
 
