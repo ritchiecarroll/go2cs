@@ -111,6 +111,19 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
        "reflect: field Named.FzName is a Go array held inline (go.arrays); reflection does not read or address it"
        where Go printed {6 [115 101 99 111 110 100 0] 4.5}; fmt of the field alone (h.Buf) matched Go. The census at
        part D's P1 counted 0 fmt %v and reflect uses reaching an admitted type in modernc.org/sqlite's lib and libc. -->
+* **A slice of an array held inline panics when the struct around it also holds a string, a slice, a map, an interface
+  or a pointer.** A slice of such an array (`p.ID.Data4[:2]`) uses the array's own bytes, as in Go, so go2cs holds
+  the storage still for as long as the slice lives. It cannot hold still a struct that holds a Go reference, so the
+  slice panics with `inline array slice: an array held inline in a struct that also holds a Go reference cannot be
+  held still, so it cannot be sliced`. This is ordinary Go, and programs that use go-winio will hit it when they keep
+  a GUID beside a string: `type P struct { ID guid.GUID; name string }`, then `p.ID.Data4[:2]`. go-winio's own GUID
+  methods are not affected, because each slices its own copy of the GUID. Two forms work today: a `copy` into or out of
+  the array with constant bounds (`copy(buf, p.ID.Data4[:])`), and slicing a local copy of the array
+  (`d := p.ID.Data4; s := d[:2]`) when writes need not reach `p`.
+  <!-- P3's review of go-winio Part 2, item 3b, and COORD's ruling 3b (2026-11-15): disclosed for .4, the cure is a .5
+       BOARD row (a slice backing that is an object plus a field offset, with no pin). The arms that assert the named
+       panic are GolibTests' InlineSliceStorageTests.AFieldOfAReferenceBearingRootIsRefusedByName and the refroot mode
+       of TestInlineArrayForeignSliceReviewShapes (src/go2cs/inlineArrayForeignSlice_test.go). -->
 * **cgo: a pointer rebuilt from a number can hand C Go memory unchecked. This is a known memory-safety
   gap.** Do not pass C a pointer you made from a number held in a variable when it points inside Go
   memory: `u := uintptr(unsafe.Pointer(p))`, then `unsafe.Pointer(u + n)`. Nor one whose sum puts the
@@ -228,12 +241,12 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   or have that package export an accessor function.
   <!-- The fix of 1.26.10.2 (docs/phase4/DESIGN-crosspkg-exported-box.md, ACCEPTED; owner's option (b) of 2026-10-25,
        COORD's OQ-1 ruling value kind only). The owner boxes an exported value-kind var:
-       src/go2cs/globalAddressOperations.go:347 (`func markExportedBoxOnlyGlobals(pkg *types.Package, files []*ast.File, into map[types.Object]bool) {`),
+       src/go2cs/globalAddressOperations.go:365 (`func markExportedBoxOnlyGlobals(pkg *types.Package, files []*ast.File, into map[types.Object]bool) {`),
        skipping a pointer, an interface, `package main`, and a linkname forward or registered external-storage var:
-       :389 (`func linknameForwardVars(pkg *types.Package, files []*ast.File) map[string]bool {`) and
-       :424 (`var externalStorageVars = map[string]string{`). An importer runs the same predicate over the owner's
-       syntax, :461 (`func importedGlobalIsBoxed(varObj *types.Var) bool {`), and roots a field or element address on
-       the owner's box, :517 (`func (v *Visitor) rootsAtImportedBoxedGlobal(expr ast.Expr) bool {`).
+       :407 (`func linknameForwardVars(pkg *types.Package, files []*ast.File) map[string]bool {`) and
+       :442 (`var externalStorageVars = map[string]string{`). An importer runs the same predicate over the owner's
+       syntax, :479 (`func importedGlobalIsBoxed(varObj *types.Var) bool {`), and roots a field or element address on
+       the owner's box, :535 (`func (v *Visitor) rootsAtImportedBoxedGlobal(expr ast.Expr) bool {`).
        Behavioral guard: src/tests/Behavioral/CrossPackageExportedVarAddress (every shape above, against Go's output).
        Before 1.26.10.2 every non-pointer exported var bound a copy unless its own package addressed it (diagnosed by
        lane R on windows/amd64 and linux/amd64 at 9b0269c2e8, 2026-10-25). -->
