@@ -205,6 +205,27 @@ namespace go;
     /// <inheritdoc/>
     public override unsafe ref T ValueSlot => ref Unsafe.AsRef<T>(ValueAddress());
 
+    // B2's value decode (COORD ruling 2026-11-15; ж<T>.GoValue): a Go struct that holds a managed reference, read as a
+    // VALUE, is decoded out of the bytes at Go's own field offsets into a fresh T (NativeStructMarshal.DecodeValue), which
+    // is Go's answer for a copy whatever the memory's origin: Go storage of another type (sqlite's crypt_blowfish,
+    // *(*TBF_ctx)(unsafe.Pointer(&[1042]uint32{...}))) or C memory (COORD's Q1). Only arrays decode; a struct holding
+    // any other reference is refused by name, since memory holds no image of one. Every other T reads as Value does,
+    // floors included. The floors above refuse the whole-value REF, which a copy does not need: the layout floor's
+    // mismatch is exactly what the decode reads past, and B0' refuses taking bytes for references, which a decode
+    // never does.
+    private protected override unsafe T ReadGoValue()
+    {
+        if (!s_isReferenceBearingGoStruct)
+            return ValueSlot;
+
+        void* address = DereferenceableAddress();
+
+        if (address == null)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        return (T)NativeStructMarshal.DecodeValue(typeof(T), (byte*)address);
+    }
+
     /// <summary>
     /// The field <paramref name="fieldRefFunc"/> names, at its GO offset in the native memory this box aliases --
     /// the managed reference behind <see cref="ж{T}.field{TF}"/> for a native root.

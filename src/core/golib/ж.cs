@@ -139,6 +139,30 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </remarks>
     public abstract ref T ValueSlot { get; }
 
+    /// <summary>
+    /// Go's <c>*p</c> read as a VALUE (a copy), panicking on a nil dereference. The converter emits it in place of
+    /// <c>~p</c> for an rvalue dereference whose pointee is a Go struct kept out of inline arrays.
+    /// </summary>
+    /// <remarks>
+    /// On every box but a <see cref="NativeBox{T}"/> this is <c>~p</c>. A native box over such a struct reads its
+    /// bytes at Go's own field offsets into a fresh managed value (B2, 2026-11-15): the struct's arrays are managed
+    /// references in go2cs, so its CLR layout is not its Go layout and the whole-value read through
+    /// <see cref="Value"/> is refused by name. A copy is exact for a read, since nothing can alias it, so the
+    /// decode never has to write back. Writes keep <see cref="Value"/>, and its refusals.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public T GoValue()
+    {
+        if (IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        return ReadGoValue();
+    }
+
+    // The value GoValue returns once the nil check has passed: the slot's, except where the box's storage is not a T
+    // laid out by the CLR (NativeBox).
+    private protected virtual T ReadGoValue() => ValueSlot;
+
     /// <inheritdoc/>
     // The dereference-guard nil question. For every non-standard kind this is exactly the
     // structural mark (their storage resolves without a null check); StandardBox refines it with
