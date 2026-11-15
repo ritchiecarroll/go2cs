@@ -83,7 +83,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // GoTwinsPairs=false: N3's D3 core off (no pairs, no pair test), the A/B control.
         bool pairs = !(options.TryGetValue("build_property.GoTwinsPairs", out string? pairing) && string.Equals(pairing, "false", StringComparison.OrdinalIgnoreCase));
 
-        new Run(context, goSites, ifaceShape, ifaceAll) { Self = self, Pairs = pairs }.Execute();
+        // GoTwinsCallerRule=false: N3's caller rule alone off, the pair core kept -- the rule's own A/B control.
+        bool callerRule = !(options.TryGetValue("build_property.GoTwinsCallerRule", out string? ruling) && string.Equals(ruling, "false", StringComparison.OrdinalIgnoreCase));
+
+        new Run(context, goSites, ifaceShape, ifaceAll) { Self = self, Pairs = pairs, CallerRule = callerRule }.Execute();
     }
 
     internal sealed partial class Run(GeneratorExecutionContext context, bool goSites, IfaceShape ifaceShape, bool ifaceAll)
@@ -145,6 +148,14 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 }
 
                 changed |= ComputeIfaceParks();
+            }
+
+            // C1's refusal, by name, after the fixpoint: a function whose twin would hold a ref it cannot derive again
+            // across an await (TwinGenerator.RefAliases.cs). Its callers keep their twins; their calls to it run plain.
+            foreach (Candidate candidate in m_ordered)
+            {
+                if (candidate.Twinned && UnrederivableLive(candidate))
+                    candidate.Refusal = "ref-unrederivable";
             }
 
             foreach (Candidate candidate in m_ordered)

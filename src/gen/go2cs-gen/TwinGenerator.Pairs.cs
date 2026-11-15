@@ -24,7 +24,10 @@ public sealed partial class TwinGenerator
         // through CanPark: a twinned function's callers park on it, so they are twinned too. The test is the rewriter's
         // own (PairShape), so every function twinned by this rule has a call that takes the pair test -- HOISTED to the
         // twin's entry for a parameter never reassigned. Off with the pair core (GoTwinsPairs=false), the A/B control.
-        internal bool CallerRuleTwins(Site site) => Pairs && site.PairCallable;
+        internal bool CallerRuleTwins(Site site) => Pairs && CallerRule && site.PairCallable;
+
+        // GoTwinsCallerRule (default on): the caller rule alone; off keeps the pair core, the rule's own A/B control.
+        internal bool CallerRule { get; init; } = true;
 
         // GoTwinsPairs (default on): the D3 core itself. Off, every piece below is skipped and the emission is the one
         // before N3's core: the A/B control.

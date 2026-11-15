@@ -22,7 +22,7 @@ public sealed partial class TwinGenerator
     {
         private readonly Run m_run;
         private readonly SemanticModel m_model;
-        private readonly HashSet<string> m_assigned = [];
+        private readonly RefAliases m_aliases;
         private List<List<string>> m_scopes = [];
         private int m_awaits, m_passive, m_temps;
         private StatementSyntax? m_current;
@@ -48,21 +48,9 @@ public sealed partial class TwinGenerator
             m_method = model.GetDeclaredSymbol(method);
             m_blockBody = method.Body is not null;
 
-            // A box or path that is assigned anywhere in the function may name another variable after an await.
-            foreach (SyntaxNode node in method.DescendantNodes())
-            {
-                ExpressionSyntax? written = node switch
-                {
-                    AssignmentExpressionSyntax assignment => assignment.Left,
-                    PrefixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.PreIncrementExpression or (int)SyntaxKind.PreDecrementExpression } prefix => prefix.Operand,
-                    PostfixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.PostIncrementExpression or (int)SyntaxKind.PostDecrementExpression } postfix => postfix.Operand,
-                    ArgumentSyntax argument when !argument.RefKindKeyword.IsKind(SyntaxKind.None) => argument.Expression,
-                    _ => null
-                };
-
-                if (written is IdentifierNameSyntax name)
-                    m_assigned.Add(name.Identifier.Text);
-            }
+            // A box or path that is assigned anywhere in the function may name another variable after an await, unless
+            // every assignment of it is the converter's own re-alias form (C1, TwinGenerator.RefAliases.cs).
+            m_aliases = new RefAliases(method);
         }
 
         private static SyntaxToken Twin(SyntaxToken identifier) =>
@@ -165,7 +153,7 @@ public sealed partial class TwinGenerator
         // static method names and calls that already moved.
         private bool RefLikeBefore(InvocationExpressionSyntax node, out bool movable)
         {
-            bool refLike = false;
+            bool refLike = false, refTarget = false;
             bool inert = true;
             SyntaxNode child = node;
 
@@ -223,7 +211,17 @@ public sealed partial class TwinGenerator
 
                         break;
                     case AssignmentExpressionSyntax assignment when child == assignment.Right && assignment.IsKind(SyntaxKind.SimpleAssignmentExpression):
-                        inert &= m_model.GetSymbolInfo(assignment.Left).Symbol is ILocalSymbol { RefKind: RefKind.None } or IParameterSymbol { RefKind: RefKind.None };
+                        // C2 (COORD's approval, 2026-11-15): a store into a ref local, or through one or a ref-returning
+                        // member (`err = …`, `(t.Trailer, err) = …`), would hold the target's reference over the await
+                        // (CS9217 / CS8178). The awaited value moves ahead instead, the live ref locals are derived
+                        // again (Rule S), and the store runs after: every store still lands in the box the Go variable
+                        // names. Go's two-phase assignment leaves the order between reading a plain variable on the
+                        // left and the call on the right unspecified, so reading the left after the call is Go-legal.
+                        if (WritesThroughRef(assignment.Left))
+                            refTarget = true;
+                        else
+                            inert &= m_model.GetSymbolInfo(assignment.Left).Symbol is ILocalSymbol { RefKind: RefKind.None } or IParameterSymbol { RefKind: RefKind.None };
+
                         break;
                     default:
                         foreach (SyntaxNode sibling in parent.ChildNodes())
@@ -242,7 +240,32 @@ public sealed partial class TwinGenerator
 
             movable = inert;
 
-            return refLike;
+            return refLike || refTarget;
+        }
+
+        // Whether an assignment's left side writes through a reference: a ref local, a member or element reached from
+        // one, or a ref-returning property or call (the field-access generator's `GoFieldAccess.get_F(ж<T>)`); a
+        // tuple's elements each count.
+        private bool WritesThroughRef(ExpressionSyntax left)
+        {
+            if (left is TupleExpressionSyntax tuple)
+                return tuple.Arguments.Any(argument => WritesThroughRef(argument.Expression));
+
+            foreach (SyntaxNode node in left.DescendantNodesAndSelf())
+            {
+                if (node is not ExpressionSyntax expression)
+                    continue;
+
+                switch (m_model.GetSymbolInfo(expression).Symbol)
+                {
+                    case ILocalSymbol { RefKind: not RefKind.None }:
+                    case IPropertySymbol { ReturnsByRef: true }:
+                    case IMethodSymbol { ReturnsByRef: true }:
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         private static IdentifierNameSyntax Launcher(InvocationExpressionSyntax node) =>
@@ -404,7 +427,7 @@ public sealed partial class TwinGenerator
             string name = callee.Identifier.Text;
             string arguments = ((ArgumentListSyntax)Visit(node.ArgumentList)!).WithoutTrivia().ToFullString();
             bool hoisted = m_blockBody && m_model.GetSymbolInfo(callee).Symbol is IParameterSymbol parameter &&
-                           SymbolEqualityComparer.Default.Equals(parameter.ContainingSymbol, m_method) && !m_assigned.Contains(name);
+                           SymbolEqualityComparer.Default.Equals(parameter.ContainingSymbol, m_method) && !m_aliases.Assigned(name);
 
             string pairName;
             string test;
@@ -484,6 +507,18 @@ public sealed partial class TwinGenerator
             ExpressionSyntax twin = node.WithBody(body).WithoutTrivia()
                 .WithModifiers(node.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space)))
                 .WithLeadingTrivia(ParseLeadingTrivia(directive));
+
+            // C3 (COORD's approval, 2026-11-15): a literal with an EXPLICIT return type (`(uint32, error) () => {…}`)
+            // keeps it on the plain half; the twin half returns the task of it, as its twin delegate does (CS8934).
+            if (twin is ParenthesizedLambdaExpressionSyntax { ReturnType: { } declared } typed)
+            {
+                IMethodSymbol invoke = type.DelegateInvokeMethod!;
+                string task = invoke.ReturnsVoid
+                    ? "global::go.golib.GoTask"
+                    : "global::go.golib.GoTask<" + invoke.ReturnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) + ">";
+
+                twin = typed.WithReturnType(ParseTypeName(task).WithTriviaFrom(declared));
+            }
 
             string plainType = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             string pairClass = m_run.PairClass(type, twinType);
@@ -568,50 +603,12 @@ public sealed partial class TwinGenerator
 
         // ---- ref locals ----
 
-        private static bool Idempotent(ExpressionSyntax expression, out string root)
-        {
-            switch (expression)
-            {
-                case IdentifierNameSyntax name:
-                    root = name.Identifier.Text;
-                    return true;
-                case MemberAccessExpressionSyntax access when access.IsKind(SyntaxKind.SimpleMemberAccessExpression):
-                    return Idempotent(access.Expression, out root);
-                case InvocationExpressionSyntax { ArgumentList.Arguments.Count: 0, Expression: MemberAccessExpressionSyntax { Name.Identifier.Text: "DerefOrNull" or "Deref" } deref }:
-                    return Idempotent(deref.Expression, out root);
-                default:
-                    root = "";
-                    return false;
-            }
-        }
-
         private void Register(StatementSyntax statement)
         {
-            if (statement is not LocalDeclarationStatementSyntax { Declaration: { Type: RefTypeSyntax, Variables: { Count: 1 } variables } } ||
-                variables[0].Initializer?.Value is not RefExpressionSyntax { Expression: { } source })
+            string? rederive = m_aliases.Rederive(statement, out string? name);
+
+            if (name is null)
                 return;
-
-            string name = variables[0].Identifier.Text;
-            string? rederive = null;
-
-            if (Idempotent(source, out string root))
-            {
-                if (!m_assigned.Contains(root))
-                    rederive = name + " = ref " + source.WithoutTrivia().ToFullString() + ";";
-            }
-            else if (source is InvocationExpressionSyntax { Expression: SimpleNameSyntax { Identifier.Text: "heap" } } heap &&
-                     heap.ArgumentList.Arguments.LastOrDefault() is { RefKindKeyword.RawKind: (int)SyntaxKind.OutKeyword } last)
-            {
-                string? box = last.Expression switch
-                {
-                    DeclarationExpressionSyntax { Designation: SingleVariableDesignationSyntax designation } => designation.Identifier.Text,
-                    IdentifierNameSyntax identifier => identifier.Identifier.Text,
-                    _ => null
-                };
-
-                if (box is not null && !m_assigned.Contains(box))
-                    rederive = name + " = ref " + box + ".ValueSlot;";
-            }
 
             if (rederive is null)
                 Unrederivable++;
