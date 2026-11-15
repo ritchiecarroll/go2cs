@@ -39276,4 +39276,58 @@ linux-arm64. Until then, **NOT SHOWN:** that the cgo path works for a linux-arm6
 
 — C2 (2026-11-15)
 
+## 2026-11-15 — H (the pin-extent seat; COORD's ruling (a) and P3's final read, 2026-11-15): four rows the seat leaves for `.5`
+
+The seat is `claude/h-cgo-pin-extents-cut`, gated at `9233d46ed4`; its record is
+[`DESIGN-cgo-pin-extents.md`](DESIGN-cgo-pin-extents.md) section 11.
+
+**Row 1. The 3.2 PRECONDITION: before Go memory crosses to C, the pin-extent side list gets an ordered index
+(O(log L)), or its threshold goes back to 16 pages (owner H, tied to cgo Phase 3.2, `.5`).** Every pinned object over
+2 pages is one entry in a side list that `Find` walks, O(L). At L=1000 a hit on a MID entry's interior costs
+1672-3164 ns, where the page path answered the same hit in about 9 ns (M3h, section 11.5). Under 3.1 every hit ends in
+a refusal, so the walk is on cold paths only. From 3.2 a hit IS a crossing, paid once per call.
+
+**Row 2. Pool or elide the joiner's holder and `WeakReference`: M2a's remaining cost is allocation and the
+collections it causes (owner H, `.5` candidate).** A further pin of an object already pinned costs 112 B: the buffer, a
+holder and a finalizable `WeakReference` (D-4). It costs 353-463 ns amortized over 200,000 ops, collections included,
+and 253-492 ns in samples without a collection. With the index on, a process collects about 2.5x as often (K=100,
+200,000 ops: 5 collections against 2). The pause per collection is not the index's (4.4-5.7 ms on, 3.5-4.0 ms off). D-4
+needs the weak reference, because a lock-free reader may stand on a removed entry, so a pool is a design change to D-4.
+
+**Row 3. Concurrent pins collapse upstream of the index (owner open, UNROOTED, `.5`).** 4 threads, each pinning its
+OWN array, run 4-6.7x slower per op than 1 thread, with throughput BELOW one thread's. That holds with the index ON or
+OFF, and on the 16 B per-page path as much as on the 64 KiB one. Measured at `9233d46ed4`: TieredCompilation=0, 2
+processes x 2 readings, 8 logical CPUs, 200,000 pin-and-release ops a thread, an 8 KiB filler keeping any two arrays
+off one page.
+
+| arm | per op, 1 thread → 4 threads | ratio |
+|---|---|---|
+| 64 KiB, index ON | 382-423 → 2210-2550 ns | 5.5-6.7 |
+| 64 KiB, index OFF | 106-132 → 644-694 ns | 5.2-6.2 |
+| 16 B, index ON | 469-524 → 2173-2430 ns | 4.1-5.1 |
+| 16 B, index OFF | 102-125 → 600-718 ns | 5.2-6.5 |
+
+- The candidates, none measured: the runtime's GC handle table (a pinned handle per pin, plus the `WeakReference`'s
+  weak handle when ON), and the registration of the finalizable `PinnedBuffer`.
+- **The cheap discriminator, for whoever takes it:** three arms in one process, at 1 and at 4 threads.
+  - (a) `GCHandle.Alloc(Pinned)` plus `Free` alone.
+  - (b) A `PinnedBuffer` made with the index OFF but without the finalizer (`GC.SuppressFinalize` on construction,
+    test-only).
+  - (c) A `fixed` statement over the same array.
+  Whichever arm collapses names the resource.
+- **It is not the index's lock.** The rule stated before the run said `m_largeGate` is contended if ON 64 KiB's ratio
+  is at least 1.5x OFF 64 KiB's in both processes. It read 1.03-1.10x, so COORD ruled it NOT contended.
+- **Not `.4`.** Under 3.1 a cgo call pins only what crosses, and the demos are single-threaded at the crossing.
+- The run's own predictions, scored as worded: C1-C3 MISSED, C4 MET (section 11.6). The miss was my model: I assumed
+  the runtime's own pin and release scale across threads.
+
+**Row 4. `src/safe-push.sh` reports a toolchain refusal as a failed security guard (owner R).** When the tree's
+`go.mod` asks for a newer Go than the shell's (`GOTOOLCHAIN=local`), the security gate's inner `go test` refuses to run.
+safe-push then aborts with "repository fleet-identifier guard FAILED (exit 1) -- NOT pushed". The abort is right, since
+nothing was checked. The message names a finding where there is none, and sends the reader to re-run a guard that
+fails the same way. Met on 2026-11-15, when master moved to go 1.26.11 under a 1.26.10 lane default. The cure is to
+tell `go`'s toolchain refusal apart from a guard failure, and to say which it is.
+
+— H (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
