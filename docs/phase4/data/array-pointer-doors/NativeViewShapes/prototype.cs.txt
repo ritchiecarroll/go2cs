@@ -1,0 +1,207 @@
+namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+/* [1125899906842623L]byte */
+partial struct RawMem /*[1125899906842623]byte*/;
+
+partial struct smallMem /*[64]byte*/;
+
+partial struct hdr {
+    internal uint32 a;
+    internal array<byte> buf = new(12);
+}
+
+internal static uintptr native(nint n) {
+    var (b, err) = syscall.Mmap(-1, 0, n, (nint)((nint)syscall.PROT_READ | (nint)syscall.PROT_WRITE), (nint)((nint)syscall.MAP_ANON | (nint)syscall.MAP_PRIVATE));
+    if (err != nil) {
+        throw panic(err);
+    }
+    return (uintptr)Ꮡ(b, 0);
+}
+
+internal static @string peek(uintptr p, nint n) {
+    var @out = new slice<byte>(n);
+    for (nint i = 0; i < n; i++) {
+        @out[i] = ~@unsafe.Pointer.To<byte>((@unsafe.Pointer)(p + (uintptr)i));
+    }
+    return fmt.Sprintf("%q"u8, @out);
+}
+
+internal static void poke(uintptr p, @string s) {
+    for (nint i = 0; i < len(s); i++) {
+        (@unsafe.Pointer.To<byte>((@unsafe.Pointer)(p + (uintptr)i))).Value = s[i];
+    }
+}
+
+internal static nint fill(slice<byte> b, byte c) {
+    foreach (var i in range(len(b))) {
+        b[i] = c;
+    }
+    return len(b);
+}
+
+internal static unsafe void main() {
+    @string arm = os.Args[1];
+    var p = native(4096);
+    var q = native(4096);
+    poke(p, "XXXXXXXXXXXXXXXX");
+    poke(q, "abcdefghijklmnop");
+
+    var exprᴛ1 = arm;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "A"u8: {
+        @string s = "hello";
+        nint n = len(s);
+        nint c = copy(@unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)p), (int)(n)), s);
+        fmt.Println(c, peek(p, 8));
+        break;
+    }
+    case {} when exprᴛ1 == "B"u8: {
+        nint n = 6;
+        nint c = copy(@unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)p), (int)(n)), @unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)q), (int)(n)));
+        fmt.Println(c, peek(p, 8));
+        break;
+    }
+    case {} when exprᴛ1 == "C"u8: {
+        var wd = slice<byte>("/tmp"u8);
+        nint c = copy(@unsafe.Pointer.To<RawMem>((@unsafe.Pointer)p).Value[..], wd);
+        fmt.Println(c, peek(p, 8));
+        break;
+    }
+    case {} when exprᴛ1 == "D"u8: {
+        var wd = slice<byte>("/tmp"u8);
+        (@unsafe.Pointer.To<RawMem>((@unsafe.Pointer)p)).Value[len(wd)] = 0;
+        fmt.Println(peek(p, 8));
+        break;
+    }
+    case {} when exprᴛ1 == "E"u8: {
+        nint n = 5;
+        var b = @unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)p), (int)(n));
+        foreach (var i in range(len(b))) {
+            b[i] = 0;
+        }
+        b[0] = (byte)'u';
+        b = b[1..];
+        fmt.Println(len(b), cap(b) == unchecked((nint)(1125899906842622L)), peek(p, 8));
+        break;
+    }
+    case {} when exprᴛ1 == "F"u8: {
+        ж<RawMem> raw = @unsafe.Pointer.To<RawMem>((@unsafe.Pointer)q);
+        var w = ~raw.at<byte>(2).Reinterpret<byte, uint16>();
+        raw.Value[1] = (byte)'Z';
+        fmt.Println(w, peek(q, 4));
+        break;
+    }
+    case {} when exprᴛ1 == "G"u8: {
+        ref var buf = ref heap(new array<byte>(16), out var Ꮡbuf);
+        nint c = copy(@unsafe.Slice(@unsafe.Pointer.To<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡbuf.at<byte>(0))), (int)(len(buf))), "errno 7\x00"u8);
+        fmt.Printf("%d %q\n"u8, c, buf[..8]);
+        break;
+    }
+    case {} when exprᴛ1 == "H"u8: {
+        nint n = fill(@unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)p), 4), (byte)'r');
+        fmt.Println(n, peek(p, 8));
+        break;
+    }
+    case {} when exprᴛ1 == "I"u8: {
+        var v = new slice<byte>(6);
+        nint c = copy(v, @unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)q), 6));
+        fmt.Printf("%d %q\n"u8, c, v);
+        break;
+    }
+    case {} when exprᴛ1 == "J"u8: {
+        fmt.Println((uint64)/* unsafe.Sizeof(RawMem{}) */ (uintptr)1125899906842623);
+        break;
+    }
+    case {} when exprᴛ1 == "K"u8: {
+        var mem = @unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)q), 4);
+        poke(q, "WXYZ");
+        mem[3] = (byte)'!';
+        fmt.Printf("%q %s\n"u8, mem, peek(q, 4));
+        break;
+    }
+    case {} when exprᴛ1 == "L"u8: {
+        array<byte> r = new(16);
+        foreach (var i in range(len(r))) {
+            r[i] = (byte)('0' + i % 10);
+        }
+        nint c = copy(@unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)p), (int)(/* unsafe.Sizeof(r) */ (uintptr)16)), r[..]);
+        fmt.Println(c, peek(p, 16));
+        break;
+    }
+    case {} when exprᴛ1 == "M"u8: {
+        nint c = copy(@unsafe.Pointer.To<smallMem>((@unsafe.Pointer)p).Value[..], "small"u8);
+        (@unsafe.Pointer.To<smallMem>((@unsafe.Pointer)p)).Value[5] = 0;
+        fmt.Println(c, peek(p, 8));
+        break;
+    }
+    case {} when exprᴛ1 == "C0"u8: {
+        var z = native(4096);
+        var wd = slice<byte>("/tmp"u8);
+        nint c = copy(@unsafe.Pointer.To<RawMem>((@unsafe.Pointer)z).Value[..], wd);
+        fmt.Println(c, peek(z, 8));
+        break;
+    }
+    case {} when exprᴛ1 == "D0"u8: {
+        var z = native(4096);
+        (@unsafe.Pointer.To<RawMem>((@unsafe.Pointer)z)).Value[4] = 7;
+        fmt.Println(peek(z, 8));
+        break;
+    }
+    case {} when exprᴛ1 == "F0"u8: {
+        var z = native(4096);
+        ж<RawMem> raw = @unsafe.Pointer.To<RawMem>((@unsafe.Pointer)z);
+        var w = ~raw.at<byte>(2).Reinterpret<byte, uint16>();
+        raw.Value[1] = (byte)'Z';
+        fmt.Println(w, peek(z, 4));
+        break;
+    }
+    case {} when exprᴛ1 == "M0"u8: {
+        var z = native(4096);
+        nint c = copy(@unsafe.Pointer.To<smallMem>((@unsafe.Pointer)z).Value[..], "small"u8);
+        (@unsafe.Pointer.To<smallMem>((@unsafe.Pointer)z)).Value[5] = 0;
+        fmt.Println(c, peek(z, 8));
+        break;
+    }
+    case {} when exprᴛ1 == "N"u8: {
+        ref var x = ref heap(new uint64(), out var Ꮡx);
+        x = 0x0102030405060708UL;
+        var b = @unsafe.Slice(@unsafe.Pointer.To<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡx)), 8);
+        b[0] = 0xff;
+        fmt.Println(x == 0x01020304050607ffUL);
+        break;
+    }
+    case {} when exprᴛ1 == "O"u8: {
+        var h = Ꮡ(new hdr());
+        var v = @unsafe.Slice(@unsafe.Pointer.To<byte>(@unsafe.Pointer.FromPinnedBox(h.at(hdr.Ꮡbuf, 0))), 12);
+        runtime.GC();
+        copy(v, "field"u8);
+        fmt.Printf("%q\n"u8, h.buf[..6]);
+        break;
+    }
+    case {} when exprᴛ1 == "P"u8: {
+        var buf = new slice<byte>(32);
+        var v = @unsafe.Slice(@unsafe.Pointer.To<byte>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(buf, 0)), 4)), 8);
+        runtime.GC();
+        copy(v, "interior"u8);
+        fmt.Printf("%q\n"u8, buf[..14]);
+        break;
+    }
+    case {} when exprᴛ1 == "Q"u8: {
+        ref var arr = ref heap(new array<uint32>(4), out var Ꮡarr);
+        var w = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡarr)).slice();
+        w[4] = 1;
+        fmt.Println(arr);
+        break;
+    }}
+
+}
+
+} // end main_package

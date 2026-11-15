@@ -85,8 +85,26 @@ func collectAddressedGlobals(files []FileEntry, pkg *types.Package, info *types.
 // IMPORTED package's syntax (importedGlobalIsBoxed) — an importer must bind the owner's box exactly
 // when the owner's own emission declares one.
 func scanAddressedGlobals(file *ast.File, pkg *types.Package, info *types.Info, into map[types.Object]bool) {
+	pinFree := pinFreeInlineCopySlices(file, info)
+
 	ast.Inspect(file, func(n ast.Node) bool {
 		switch node := n.(type) {
+		case *ast.SliceExpr:
+			// g.f[lo:hi] of an array held INLINE in g's storage (a go.arrays member) is (&g.f)[lo:hi]: it is emitted over
+			// the field's address (inlineArraySliceBase), so g needs its box as for &g.f. Without it the address would be
+			// the one-argument Ꮡ(value), a COPY, and every write through the slice would be lost (P3's review, ruling 1,
+			// COORD 2026-11-15). The root is found by inlineSliceStorageRoot, the predicate the other three walks share.
+			// A copy that reads or writes the array over a reference takes no address (inlineArrayCopyOperand).
+			if pinFree[node] || !inlineArraySliceSpelled(node, info) {
+				return true
+			}
+
+			if root, indirect, ok := inlineSliceStorageRoot(node.X, info); ok && !indirect {
+				if varObj, ok := info.Uses[root].(*types.Var); ok && varObj.Parent() == pkg.Scope() {
+					into[varObj] = true
+				}
+			}
+
 		case *ast.UnaryExpr:
 			if node.Op != token.AND {
 				return true

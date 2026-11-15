@@ -47,6 +47,13 @@ internal interface INativeRooted
     object? NativeDerivedFrom => null;
 
     /// <summary>
+    /// What a box derived from this one retains IN ITS PLACE, else null (<see cref="NativeDerivation.Kept"/>): the
+    /// source of a native root that holds its source and nothing else. A pointer advanced step by step then stays one
+    /// hop from what it was first derived from.
+    /// </summary>
+    object? NativeRetainedInItsPlace => null;
+
+    /// <summary>
     /// A field reference's address at its GO offset when it sits ONE field hop off a native root, else 0
     /// -- the address the native field-view door views (<see cref="builtin.NativeFieldArrayPointer{T}"/>).
     /// </summary>

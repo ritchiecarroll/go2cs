@@ -51,7 +51,7 @@ internal interface INativeArrayStore<T>
     void StoreElements(in array<T> source);
 }
 
-internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox, INativeRooted, INativeArrayStore<T>
+internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox, INativeRooted, INativeViewAnchor, INativeArrayStore<T>
 {
     // The base of the element block — never managed storage this box owns.
     private readonly nuint m_nativeAddr;
@@ -99,6 +99,9 @@ internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox, INativeRo
     bool INativeRooted.IsNativeRooted => false;
 
     bool INativeRooted.IsGenuinelyNativeRoot => m_anchor is null;
+
+    // What this window was cut over (the view doors, design 13.2).
+    object? INativeViewAnchor.AnchoredRoot => NativeSliceAnchors<T>.OfAnchor(m_anchor);
 
     /// <summary>
     /// The element view, and the only honest way through this box. A <c>slice&lt;T&gt;</c> over the
