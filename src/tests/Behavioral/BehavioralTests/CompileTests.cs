@@ -163,6 +163,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckArrayPointerElementAlias() => CheckTarget("ArrayPointerElementAlias");
 
     [TestMethod]
+    public void CheckArrayPointerElementDoors() => CheckTarget("ArrayPointerElementDoors");
+
+    [TestMethod]
     public void CheckArrayPointerViewDoors() => CheckTarget("ArrayPointerViewDoors");
 
     [TestMethod]
@@ -674,6 +677,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckFieldNamedAsType() => CheckTarget("FieldNamedAsType");
+
+    [TestMethod]
+    public void CheckFieldViewOverGoStruct() => CheckTarget("FieldViewOverGoStruct");
 
     [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");

@@ -1,0 +1,23 @@
+namespace go.example.com;
+
+using fmt = fmt_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+internal partial struct fp_iface /*[2]uintptr*/;
+
+internal static uintptr fp(any fʗp) {
+    ref var f = ref heap(fʗp, out var Ꮡf);
+
+    return (uintptr)GoFuncCookie.Of((Delegate)f);
+}
+
+internal static nint one() { return 1; }
+
+internal static void main() {
+    fmt.Println(fp(one) != 0);
+    fmt.Println(fp(one) == fp(one));
+}
+
+} // end main_package

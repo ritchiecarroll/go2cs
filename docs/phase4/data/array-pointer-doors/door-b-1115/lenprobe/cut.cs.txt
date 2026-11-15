@@ -1,0 +1,137 @@
+namespace go.example.com;
+
+using fmt = fmt_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+partial struct small /*[8]byte*/;
+
+internal static nint lenDeref(@unsafe.Pointer p) { return 4; }
+internal static nint capDeref(@unsafe.Pointer p) { return 4; }
+internal static nint lenPtr(@unsafe.Pointer p) { return 4; }
+internal static nint capPtr(@unsafe.Pointer p) { return 4; }
+internal static nint lenNamed(@unsafe.Pointer p) { return 8; }
+internal static nint lenAddr(ж<uint64> x) { return 4; }
+
+internal static nint calls;
+
+internal static @unsafe.Pointer get(@unsafe.Pointer p) {
+    calls++;
+    return p;
+}
+
+internal static nint lenCall(@unsafe.Pointer p) { return len(@unsafe.Pointer.LoadArray<byte>(get(p), 4)); }
+
+internal static nint /*n*/ rangeVal(@unsafe.Pointer p) {
+    nint n = default;
+
+    foreach (var (_, b) in range(@unsafe.Pointer.LoadArray<byte>(p, 4))) {
+        n += 1 + (nint)b * 100;
+    }
+    return n;
+}
+
+internal static nint /*n*/ rangeKeyVal(@unsafe.Pointer p) {
+    nint n = default;
+
+    foreach (var (i, b) in range(@unsafe.Pointer.LoadArray<byte>(p, 4))) {
+        n += i + (nint)b * 100;
+    }
+    return n;
+}
+
+internal static nint /*n*/ rangeKey(@unsafe.Pointer p) {
+    nint n = default;
+
+    foreach (var i in range(4)) {
+        n += i + 1;
+    }
+    return n;
+}
+
+internal static nint /*n*/ rangeNone(@unsafe.Pointer p) {
+    nint n = default;
+
+    foreach (var _ᴛ1 in range(4)) {
+        n++;
+    }
+    return n;
+}
+
+internal static nint /*n*/ rangePtrKey(@unsafe.Pointer p) {
+    nint n = default;
+
+    foreach (var i in range((@unsafe.Pointer.To<array<byte>>(p)), 4)) {
+        n += i + 1;
+    }
+    return n;
+}
+
+internal static nint /*n*/ rangePtrVal(@unsafe.Pointer p) {
+    nint n = default;
+
+    foreach (var (_, b) in range(@unsafe.Pointer.View<byte>(p, 0, 4, 4))) {
+        n += 1 + (nint)b * 100;
+    }
+    return n;
+}
+
+internal static nint /*n*/ rangeCopy(@unsafe.Pointer p) {
+    nint n = default;
+
+    foreach (var (i, b) in range(@unsafe.Pointer.LoadArray<byte>(p, 4))) {
+        @unsafe.Pointer.ElementRef<byte>(p, 3, 4) = 9;
+        n += i + (nint)b;
+    }
+    return n;
+}
+
+internal static nint /*n*/ rangePtrLive(@unsafe.Pointer p) {
+    nint n = default;
+
+    foreach (var (i, b) in range(@unsafe.Pointer.View<byte>(p, 0, 4, 4))) {
+        if (i == 0) {
+            @unsafe.Pointer.ElementRef<byte>(p, 3, 4) = 50;
+        }
+        n += (nint)b;
+    }
+    return n;
+}
+
+internal static nint /*n*/ rangePtrNil() {
+    nint n = default;
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            recover();
+            n = -1;
+        }, ref ᒐ);
+        foreach (var (_, b) in range((ж<array<byte>>.NilBoxOfDims(4L)).Value)) {
+            n += (nint)b;
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return n;
+}
+
+internal static void main() {
+    ref var arr = ref heap(new array<byte>(64), out var Ꮡarr);
+    foreach (var i in range(len(arr))) {
+        arr[i] = (byte)(i + 1);
+    }
+    ref var x = ref heap(new uint64(), out var Ꮡx);
+    x = 0x0807060504030201UL;
+    @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡarr);
+    fmt.Println(lenDeref(p), capDeref(p), lenPtr(p), capPtr(p), lenAddr(Ꮡx));
+    fmt.Println(lenCall(p), calls);
+    fmt.Println(rangeVal(p), rangeKeyVal(p), rangeKey(p), rangeNone(p), rangePtrKey(p), rangePtrVal(p));
+    fmt.Println(rangeVal(@unsafe.Pointer.FromPinnedBox(Ꮡx)), rangeKey(@unsafe.Pointer.FromPinnedBox(Ꮡx)), rangePtrVal(@unsafe.Pointer.FromPinnedBox(Ꮡx)));
+    fmt.Println(rangeCopy(p), arr[3]);
+    fmt.Println(lenDeref(nil), capDeref(nil), lenPtr(nil), rangeKey(nil), rangeNone(nil), rangePtrKey(nil));
+    fmt.Println(lenNamed(p));
+    fmt.Println(rangePtrLive(p), rangePtrLive(@unsafe.Pointer.FromPinnedBox(Ꮡx)), x == 0x0807060532030201UL, rangePtrNil());
+}
+
+} // end main_package
