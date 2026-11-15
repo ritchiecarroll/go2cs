@@ -85,7 +85,7 @@ namespace go;
 
 [System.Diagnostics.DebuggerDisplay("{ToString(),nq}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(ж<>.DebugView))]
-public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IGoReflectBox, IAllocationIdentity, IPrintPointer, IGoEquatable
+public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IGoReflectBox, IAllocationIdentity, IPrintPointer, IGoEquatable, IHeldStorage
 {
     // The debugger's view (DebuggerTypeProxy): the pointee, or null for the nil pointer -- reading a nil
     // box's Value would be Go's nil dereference, which a debugger must never trigger.
@@ -741,6 +741,27 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
         fixed (void* ptr = &this.ValueSlot)
             return (nuint)ptr == address;
+    }
+
+    // IHeldStorage, for the array-pointer view doors' V2. Three facts, each of which must hold or the answer is 0:
+    // this box owns a pin (m_pin, set at the address-take and never cleared, released by its finalizer once the
+    // box is unreachable); this box is pinned AT `address` (IsPinnedAt, the registry's own validate-on-read); and
+    // the pinned object is a managed array (the value slot, an element array, or the root's slot for a field or
+    // element view), whose data ends at a known address. The pinned object does not move while the pin is held,
+    // so the two addresses read here are the ones a window over them will use.
+    unsafe nuint IHeldStorage.HeldBytesFrom(nuint address)
+    {
+        PinnedBuffer? pin = m_pin;
+
+        if (pin is null || !IsPinnedAt(address) || pin.PinnedTarget is not Array target)
+            return 0;
+
+        // A Go array's box pins the array's elements and records the array's length; a pin-only hold records 0.
+        int elements = pin.Length > 0 ? (int)Math.Min(pin.Length, target.Length) : target.Length;
+        nuint start = (nuint)pin.Pointer;
+        nuint end = (nuint)(nint)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(target, elements);
+
+        return address >= start && address < end ? end - address : 0;
     }
 
     /// <inheritdoc/>

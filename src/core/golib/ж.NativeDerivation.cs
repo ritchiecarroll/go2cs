@@ -19,6 +19,15 @@ namespace go;
 // pointer that is not C memory alone RETAINS that pointer. The root, its pin and its source then live as long as the
 // derived box, and a door refuses it by the test it already makes (a native box with a retained source is not C
 // memory alone). A native box's retained source has one production reader, the cgo doors.
+internal interface IHeldStorage
+{
+    // The bytes of Go storage this box holds still from `address` to the end of the object it pinned, or 0 when it
+    // holds nothing still at that address. Asked by the array-pointer view doors before they view a Go value of
+    // another type as native memory (docs/phase4/DESIGN-array-pointer-doors.md 4.2, V2): a window is cut only over
+    // bytes this answers for, and it is anchored on this box, whose pin is released when the box is collected.
+    nuint HeldBytesFrom(nuint address);
+}
+
 internal static class NativeDerivation
 {
     // What a box derived from `root` retains: `root` itself, unless it is a native box over C memory alone. The other

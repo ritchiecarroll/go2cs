@@ -651,8 +651,14 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     //   V3  an address the pointer registry does not know (C memory, or an interior address of Go memory): a native
     //       window over the address, with Go's capacity. It keeps what the pointer carried, which is nothing for C
     //       memory alone.
-    //   V4  any other Go value: a COPY of the elements read at the pointer, as before the doors. A read is exact
-    //       and a write does not reach the value, so a copy door refuses such a destination by name.
+    //   V2  any other Go value that its box holds still (a scalar, a struct of scalars, an array of another element
+    //       type, a named array by its own address): a native window over the value's own bytes, ANCHORED on the
+    //       box. The box owns the pin, so the storage stays where it is for as long as any slice cut from the view
+    //       lives, and writes reach the value. The window ends where the pinned storage ends; a view that would
+    //       pass that end is refused by name.
+    //   V4  a Go value nothing can hold still (it holds references): a COPY of the elements read at the pointer, as
+    //       before the doors. A read is exact and a write does not reach the value, so a copy door refuses such a
+    //       destination by name.
     //
     // The length is taken at full width and refused by name past what a span can hold, as unsafe.Slice refuses it:
     // the cast to int it replaces wrapped (2^32 + 5 would have read five elements).
@@ -771,6 +777,10 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         if (ptr.TryGetElementStorage(out E[]? elements, out nint first))
             return ManagedWindow(elements, first, elements.Length - first, lo, count, capacity, length, use);
 
+        // What holds the storage still, for V2: the box a number resolved to, or the pointer's own box.
+        object? holder = null;
+        nuint held = 0;
+
         // An order token is a number that is no address: it is never viewed as memory (the copy below reads through
         // the box, which refuses a token by name).
         if (ptr.IsNative && !ManagedPointerTokens.IsTaggedToken(ptr.NativeAddress))
@@ -789,7 +799,21 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
             // the array's element 0, so the view is a window on the array.
             if (resolved is ж<array<E>> { IsNilPointer: false } arrayBox && arrayBox.ValueSlot is { Source: { } source } whole)
                 return ManagedWindow(source, whole.Low, whole.Length, lo, count, capacity, length, use);
+
+            holder = resolved;
+            held = ptr.NativeAddress;
         }
+        else if (!ptr.IsNative && !ptr.IsNilPointer && ptr.StorageKind is PointerStorage.Pinnable)
+        {
+            // A pointer to one E that is no element of an array (`unsafe.Pointer(&x)`, x an E): its number is the
+            // pin moment, and the box is its own holder.
+            holder = ptr;
+            held = (nuint)((uintptr)ptr).Value;
+        }
+
+        // V2. The holder answers for the bytes it holds still from the address; nothing else is viewed.
+        if (holder is IHeldStorage storage && storage.HeldBytesFrom(held) is var room and not 0)
+            return HeldWindow<E>(holder, held, room, lo, count, capacity, length, use);
 
         // V4. A write would land in the copy, so copy's destination is refused instead of written and lost.
         if (use is ViewUse.CopyDestination)
@@ -800,6 +824,19 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
 
         fixed (E* source = &ptr.Value)
             return new slice<E>(new ReadOnlySpan<E>(source + lo, (int)count));
+    }
+
+    // A window on the bytes of a Go value its box holds still (V2): `room` bytes exist from `address` to the end of
+    // the storage the holder pinned. The window is anchored on the holder, whose pin keeps the bytes where they are.
+    private static slice<E> HeldWindow<E>(object holder, nuint address, nuint room, long lo, long count, long capacity, long length, ViewUse use)
+    {
+        nuint size = (nuint)Unsafe.SizeOf<E>();
+        long remain = (long)(room / size) - lo;
+
+        if (count > remain)
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)} would pass the end of the Go value p points to ({Math.Max(remain, 0)} elements of it remain)");
+
+        return slice<E>.OverNativeMemory(address + (nuint)lo * size, (nint)count, (nint)Math.Min(capacity, remain), NativeSliceAnchors<E>.For(holder));
     }
 
     // A window on a Go array of E: `available` elements exist from the pointer's element to the array's end.
