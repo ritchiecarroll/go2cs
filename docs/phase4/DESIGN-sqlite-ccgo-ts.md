@@ -577,3 +577,64 @@ converter test for QW-8's spelling.
 from the GOROOT census and MEASURED by the two-seeded comparison, because the converter changes.
 
 — H (2026-11-15)
+
+### 10.3 Amended 2026-11-15, 11:45Z: P3's glance at 10.1 and 10.2 (SHIP), five items adopted
+
+P3's note: `docs/phase4/inbox/COORD/20261115T104711Z-P3.md`. Items 1 and 2 shape the cut; 3 to 5 are stated here.
+
+**1. The hold is carried through the WHOLE chain, not only the first link.** In `Xgethostname` the pointer is the
+first of four links:
+
+```go
+copy((*RawMem)(unsafe.Pointer(name))[:n:n], (*RawMem)(unsafe.Pointer(sh.Data))[:n:n])
+```
+
+1. `unsafe.Pointer(sh.Data)`: QW-8's carrying pointer, which holds the element box under (H) or names (L)'s
+   immortal block.
+2. `(*RawMem)(…)`: the box minted from that pointer. It must take the pointer's held box as its retained source.
+3. `[:n:n]`: the slice cut from that box. Its anchor must retain the box it was cut from.
+4. `copy(…)`: reads through the slice.
+
+- Every link must hand the hold on to the next, or the window reopens one link later.
+- The cut checks each link in the code, and any link that drops the hold is FILLED. This includes the gap the 10:15Z
+  amendment named: `NativeBox`'s retained-source slot, which nothing fills on the number path. On this path it takes
+  the carrying pointer's held box.
+- **W13 holds ONLY THE LAST LINK** (the slice) across the forced collection with finalizers, then reads the bytes.
+  Not the pointer, and not `sh`. **W15** is the same for a `*reflect.SliceHeader`.
+
+**2. Dispatch at RUN TIME, on the box's type.** The converter sees only the static type `*reflect.StringHeader`. But
+`p := &reflect.StringHeader{Data: n, Len: k}` is a plain struct box, and `unsafe.Pointer(p.Data)` there is just a
+number, correctly.
+- So the converter emits ONE golib call for the matched shape. It answers the carrying pointer when the box is a
+  HEADER box (`StringHeaderBox` or `SliceHeaderBox` with the number flag), and today's number pointer,
+  `new Pointer(value)`, for any other box.
+- **Arm W16:** a plain-struct header built field by field keeps today's behaviour exactly: the same number, and the
+  same pointer as before the cut.
+
+**3. The spellings matched, each with its own converter test:**
+- `h.Data`, with `h` a local `*reflect.StringHeader` or `*reflect.SliceHeader` (Xgethostname's shape);
+- the inline `(*reflect.StringHeader)(unsafe.Pointer(&s)).Data`, and the SliceHeader twin;
+- `(*h).Data`.
+- Each test is red first on today's spelling (a number) and green on the call. The converter's tests, not only the
+  goldens, are searched for the current spelling before the emission changes.
+
+**4. QW-9's cost.** In a sqlite process (L)'s table is never empty: `__ccgo_ts` and the vfs `ts` are always in it.
+So every (H) header read pays the lock-free lookup, and a HIT also pays the whole-backing compare, O(length).
+- ccgo does not loop over substrings of large literals through headers. The census reads exactly ONE (H) header use
+  in both modules, `Xgethostname`'s local over `os.Hostname()`, a heap string and never a literal, so a lookup that
+  misses.
+- The test counter counts COMPARES as well as copies, and W9 reads both.
+
+**5. W4 states its ORDER, and asserts it.**
+- A local copy whose header is read BEFORE the package variable's header gets (H)'s number: no (L) copy exists yet.
+- The package variable's header, read after, gets (L)'s number.
+- Any header read after that, of the package variable or of a local copy, gets (L)'s number.
+- So one literal can have TWO valid numbers, the (H) one first. W4 asserts exactly that sequence, on one literal,
+  and both numbers read the literal's bytes. ccgo reads the package variable at init, before any function runs, so
+  it sees only (L)'s number.
+
+**The arm list, final as of this block:** W1, W1b, W1c, W2, W3, W4 (the order above), W5, W5b, W7, W8, W9 (copies
+and compares), W10, W12, W13 (only the last link held), W14 (behavioral, with its negative control), W15 (the same
+for SliceHeader), W16 (a plain-struct header keeps today's behaviour); and three converter tests (item 3).
+
+— H (2026-11-15)
