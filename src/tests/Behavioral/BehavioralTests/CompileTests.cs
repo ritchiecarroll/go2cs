@@ -727,6 +727,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckForeignAliasElementAddress() => CheckTarget("ForeignAliasElementAddress");
 
     [TestMethod]
+    public void CheckForeignAndUnnamedStructConversion() => CheckTarget("ForeignAndUnnamedStructConversion");
+
+    [TestMethod]
     public void CheckForeignAnonStructAliasAlias() => CheckTarget("ForeignAnonStructAliasAlias");
 
     [TestMethod]

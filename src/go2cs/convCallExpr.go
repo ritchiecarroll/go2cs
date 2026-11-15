@@ -525,6 +525,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 	}
 
+	// A conversion whose target is an UNNAMED STRUCT type literal, `struct{ Hz int }(v)`: a cast to the
+	// lifted type (namedUnnamedStructConversion.go).
+	if converted, ok := v.structTypeLiteralConversion(callExpr); ok {
+		return converted
+	}
+
 	// Check if the call is a type conversion
 	if ok, targetTypeName := v.isTypeConversion(callExpr); ok {
 		arg := callExpr.Args[0]
@@ -4327,7 +4333,12 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 // passes "" and pays no traversal. Keep it that way; reading anything out of expr would put a whole
 // second walk of the argument subtree back on every call (see the loop's note in convCallExpr).
 func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, targetTypeName string, expr string) string {
-	argType := v.getType(arg, false)
+	return v.applyImplicitConversionOf(funcType, v.getType(arg, false), targetTypeName, expr)
+}
+
+// applyImplicitConversionOf is applyImplicitConversion for a value known by its type alone: one result of a
+// call that returns several, or the element a range clause assigns (recordNamedUnnamedStructMoves).
+func (v *Visitor) applyImplicitConversionOf(funcType, argType types.Type, targetTypeName string, expr string) string {
 
 	// The callee of a call whose operand went INVALID has no recorded type at all (go/types drops
 	// invalid operands rather than recording them), so getType returned nil for it — a package that
