@@ -39737,4 +39737,28 @@ and the field view's shape widened to two selections as its second commit, probe
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — G (sqlite-cs W17, COORD: a BOARD row): a type NAMED instead of the visit that lifts it — the class of L1 and W17, OPEN as a class
+
+**Dated 2026-11-15 15:25 CST. Read at master `0c1d295ea8` (batch 309).** Two sqlite-cs walls in two days had one
+root shape. The converter LIFTS a function-local anonymous struct to a C# type when it VISITS the struct's type
+syntax. A path that only NAMES the type, without that visit, gets a deferred marker that no registry ever answers,
+and the conversion refuses with raw Go text.
+
+- **L1 (fixed, batch 309).** A Reinterpret's type arguments were named before the operand rendered, and the
+  render is what made the lift (arm A). And a multi-name `var p, q struct{…}` lifted only one of go/types' two
+  struct objects (arm B).
+- **W17 (open, P5, batch 310).** Door B (batch 309) names the element of `(*[N]struct{…})(p)` from its type for
+  `@unsafe.Pointer.ElementRef<E>`/`View<E>`/`LoadArray<E>`/`StoreArray<E>` (arrayPointerViewDoor.go:96). It no
+  longer renders the conversion. ccgo declares these structs only through a blank `var _ /* x at bp+N */ [N]struct{…}`,
+  and a blank var gets no lift, so nothing lifts them. sqlite's WAL-index merge sort and fts5's tokenizer table
+  refuse on both operating systems.
+- **The question for any new emission.** Does it name a type the source spells inline without visiting that type
+  syntax? Doors, records (W7's GoTypeAlias, a sibling shape: a value captured before the resolver ran) and generic
+  type-argument renders are the places it recurs.
+- **The guard that catches it.** sqlite-cs's convert-only leg (COORD is adding it to the batch battery). It fails
+  loudly (rc=1, "unresolved dynamic type(s) were emitted as raw Go"). A behavioral fixture per shape keeps it fixed:
+  L1's AnonStructReinterpretLift, and W17's own when P5 lands it.
+
+— G (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
