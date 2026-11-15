@@ -1385,3 +1385,67 @@ then restored byte-identical (same sha256), and the edit was never committed.
     is the `.4` item, cut separately off master.
 
 — H (2026-11-14)
+
+## 18. Amendment 2026-11-15: increment 3.2, the plan (posted before code; the .5 train)
+
+**Where Phase 3 stands on master `0c1d295ea8`.**
+- 3.0 landed in batch 292, and 3.1 in batch 305 (with its re-gate in 306).
+- 3.3's red, the realloc shape (a `copy` into a view of C memory that Go then reads), is covered by P5's view doors,
+  which landed in batch 308: `View`, `CopyInto` and `CopyFrom`, whose V3 arm is a native window over C memory
+  (`src/core/unsafe/unsafe.cs`; GolibTests `CopyIntoNativeMemoryCopiesTheSourcesLength` and the native-view arms). Its
+  same-element reslice is V1. 3.3 is therefore closed by that seat, not by this plan.
+- 3.4 (`net` and the harness) needs 3.2's pinned class.
+- **So the next increment is 3.2.**
+
+**What 3.2 admits** (sections 4 and 6 as ruled, with section 13's M1 to M5):
+1. **Reading C memory.** Section 6's four shapes, each READ as a red before any change: a scalar field of a native
+   struct with pointer fields; a pointer field's address loaded through; C memory reinterpreted as a Go struct; and
+   an element of a native-backed slice reinterpreted as a C struct pointer and passed back, which must classify as C
+   memory. A new box kind or a go2cs-gen change is stop line S-B (a design posted first).
+2. **The PINNED class.** An element of a Go slice or array, or a reinterpretation of one or of a whole Go value,
+   classified ON THE BOX (M2) and never on a number (M3). The wrapper pins the whole backing for the call and hands C
+   the element's address. A pointee that holds Go pointers is refused with cgo's own panic.
+3. **The out-parameter** (`&db`, `char **`), ruled shape (i): a stack word, copied in and copied back by the
+   pointer-member rules.
+4. **The no-copy case under GC pressure:** C writes the pinned memory while another thread forces compacting
+   collections, and Go reads C's write.
+5. The converter lowers cmd/cgo's `_cgoIndex` and `_cgoSlice` check closures to the direct call, as it does the
+   address and variable forms.
+
+**The pin path, with pin-extent rows 2 and 3 folded in** (BOARD, 2026-11-15: concurrent pins collapse at the runtime's
+GC handle table and at finalizable registration, not in the index). A call-scoped pin takes NEITHER:
+- The wrapper pins with a C# `fixed` over the backing's data reference. The door returns the backing and the byte
+  offset, and the wrapper takes `fixed (byte* p = &MemoryMarshal.GetArrayDataReference(backing))` around the call.
+  That is a pinned local the GC already honours across a P/Invoke.
+- No `GCHandle`, no `PinnedBuffer`, no finalizer, and no index entry: the pin's extent is the call, and the box
+  classified the argument.
+- In the row-3 probe, `fixed` was the arm that did not collapse: 1 ns per op at 1 and at 4 threads, with throughput 2x.
+- The long-lived box pins (`m_pin`, the address-take contract) keep `PinnedBuffer`. Their cure (pooled or long-lived
+  handles, no per-pin finalizer) touches `ж<T>`'s lifetime contract corpus-wide. It is NOT in 3.2; it stays the
+  rows 2+3 BOARD direction, and a design of its own when it is taken.
+
+**Pin-extent row 1 (the 3.2 precondition).** It assumed "from 3.2 a hit IS a crossing". In this plan it is not: 3.2
+admits Go memory only when the BOX classifies it, and a NUMBER that the index finds inside a pin is still refused.
+So the side list stays on refusal paths, and the precondition does not bind 3.2. If the ruling is that a number
+inside a pin should cross, row 1 binds first, and this plan changes before code.
+
+**Predictions** (scored as worded, at the cut's tip):
+- **I-1 corpus footprint, 0 files on all four targets.** The change is behind `-cgo` plus golib's `GoCgoArgs`, and the
+  standard library converts with `CGO_ENABLED=0`. The two-seeded comparison, seeded so the hand-owns stay.
+- **I-2 the flip set is exactly the BOX-carried refusals.** Every arm that asserts a box-classified element or
+  whole-value pointer refused with "increment 3.2" turns to the crossing. Every arm that asserts a NUMBER refused stays
+  refused. The uses: GolibTests 15 (Phase3 8, Derived 4, Review2 2, PinExtents 1) and `cgoPhase3_test.go` 26. Each
+  is classified box or number, by reading, before code, and the predicted flip set is posted as a list.
+- **I-3 section 6's four reds.** I do not predict which pass today; they are READ first, as the plan says.
+- **I-4 the pinned arm under pressure.** C's write is read by Go in every one of N rounds, with an unpinned twin shown
+  to move (Inconclusive otherwise).
+- **I-5 gates**, all unfiltered: GolibTests Release and Debug, GenTests, `go test ./...`, CNR, the footprint, and hosted
+  cgo-e2e, converter-cgo and golib-tests on three OSes.
+
+**Stop lines.**
+- S-B: a new box kind or a go2cs-gen change.
+- Any NUMBER that crosses into Go memory.
+- A `fixed` that cannot reach a backing (a reference-bearing pointee, which is refused instead).
+- Any corpus line moved.
+
+— H (2026-11-15)
