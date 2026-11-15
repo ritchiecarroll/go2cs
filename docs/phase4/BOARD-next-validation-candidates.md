@@ -38614,4 +38614,44 @@ by name.
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — P5 (found adding V2's mint to door A; COORD ruling 02:54Z: a BOARD row, the fix is a later seat): the repoguard mint census reads a statement line `return F(a, b);` as a MEMBER DECLARATION named F, so a mint below it in the same method is attributed to F — OPEN, no owner; no mint is attributed that way today
+
+`src/go2cs/internal/repoguard/interiorPointerMintCensus_test.go`, `mintMemberSites`: the census keys each mint
+as `<file>|<member>`, and the member is the name captured by the last line above the mint that matched one of
+the four `mintMemberDecls` patterns. The fourth pattern is meant for a bare interface member
+(`nuint HeldBytesFrom(nuint address);`): a type, a name, a parameter list of `type name` pairs, a semicolon. Its
+type class admits letters, digits, `.` and `,`, so a call statement fits it:
+
+| line | read as |
+|:--|:--|
+| `return ManagedWindow(source, whole.Low, whole.Length, lo, count, capacity, length, use);` | a member `ManagedWindow` of type `return` |
+| `return Compute(a, b);` and `return Compute(a, b, c);` | a member `Compute` (the comma is read as a type) |
+| `return ManagedWindow(elements, first, elements.Length - first, lo, ...);` | not matched: the ` - ` |
+| `Store(a, b);` | not matched: no leading word |
+
+Measured with the pattern alone on those lines (go1.26.11).
+
+**How it showed.** V2's first shape minted its window inside `Window<E>` (`src/core/unsafe/unsafe.cs`), below
+the second `return ManagedWindow(...)`. The census failed with "NEW NATIVE MINT: src/core/unsafe/unsafe.cs|
+ManagedWindow ... is in no row", naming a method that mints nothing. A row under that name would have recorded
+a false member, so the mint was moved to its own method, `HeldWindow<E>`, with the row `unsafe.cs|HeldWindow`
+(`a7490fcee7`). The scanner was not changed.
+
+**Reach, measured at `08125e154e`.** In the 202 tracked `.cs` files under `src/core/golib` and
+`src/core/unsafe`, 87 statement lines are read as a member declaration. No native mint and no pointer mint is
+attributed through one of them today: 0 of the census's sites in those two arms. The third arm (a receiver's
+`FromRef` in converted files) was not probed.
+
+**Why it matters.** The failure above was loud, because `ManagedWindow` had no row. It is silent when the
+misread name has a row whose count the stray mint happens to complete, or when a mint leaves the member it
+belongs to and the two rows still sum: the census then holds a "what keeps this mint" sentence against the
+wrong method.
+
+**Options, not sized beyond a reading.** (1) Refuse a statement keyword as the fourth pattern's type (`return`,
+`throw`, `yield`, `await`), and require a `type name` pair to hold no comma in its type; small, with a planted
+arm per misread shape. (2) Track brace depth and take a declaration only at type-body depth; larger, and it
+closes the class.
+
+— P5 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
