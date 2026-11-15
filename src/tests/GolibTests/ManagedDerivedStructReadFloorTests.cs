@@ -142,6 +142,43 @@ public unsafe class ManagedDerivedStructReadFloorTests
         Assert.AreEqual(9u, (uint)pair.B);
     }
 
+    // P5's check (2026-11-15): the census's two "UNPINNABLE T=System.Int64 root=go.FieldRefBox<System.IntPtr>" rows, built as
+    // NativeBoxDereferenceCensusControlTests builds them. The source is a reference-free FIELD of a struct that holds a
+    // reference: a real address nothing holds still, and the box retains it. The pointee is reference-free, so this floor
+    // must not fire, directly or through a derivation.
+    private struct Named
+    {
+        internal string name;
+        internal nint scalar;
+
+        internal static ref nint Ꮡscalar(ref Named instance) => ref instance.scalar;
+    }
+
+    [TestMethod]
+    public void AnUnpinnableSourceWithAReferenceFreePointeeIsNotThisFloor()
+    {
+        nuint memory = (nuint)NativeMemory.AllocZeroed(64);
+
+        try
+        {
+            ж<Named> container = new StandardBox<Named>(new Named { name = "tcp", scalar = 5 });
+            ж<nint> field = container.of(Named.Ꮡscalar);
+
+            Assert.AreEqual(PointerStorage.Unpinnable, field.StorageKind, "the premise: a field of a struct that holds a reference");
+
+            PanicException? direct = Attempt(() => _ = new NativeBox<long>(memory, retainedSource: field).Value);
+            PanicException? derived = Attempt(() => _ = new NativeBox<long>(memory + 8, retainedSource: new NativeBox<byte>(memory + 8, retainedSource: field)).Value);
+
+            Assert.IsNull(direct, "directly: " + direct?.Message);
+            Assert.IsNull(derived, "through a derivation: " + derived?.Message);
+            GC.KeepAlive(container);
+        }
+        finally
+        {
+            NativeMemory.Free((void*)memory);
+        }
+    }
+
     [TestMethod]
     public void ANativeOriginReadIsNotThisFloor()
     {

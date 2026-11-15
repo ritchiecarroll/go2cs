@@ -157,8 +157,11 @@ namespace go;
         // THE MANAGED-DERIVED STRUCT FLOOR (B0', W14, COORD ruling 2026-11-15). T is a Go struct value that holds a managed
         // reference and that the layout refusal above could not prove mismatched (an array field whose length the managed
         // type does not carry leaves its Go offsets unknown), and this box was derived from MANAGED storage: it retains its
-        // source, or it pins it. Managed storage reachable by address never holds a reference -- pinnable storage is
-        // reference-free, and an unpinnable source has no address -- so a whole-value read takes data bytes for references:
+        // source, or it pins it. The bytes at such an address are never a T's references. Pinnable storage is reference-free;
+        // a pointee that holds a reference has no address at all (its number is an order token); and an UNPINNABLE real
+        // address -- a reference-free field or element of a struct that holds references (PointerStorage.Unpinnable) --
+        // holds that field's bytes, and a T read there can run past the field (P5, 2026-11-15). So a whole-value read takes
+        // data bytes for references:
         // an access violation over filled data (sqlite's crypt_blowfish, *(*TBF_ctx)(unsafe.Pointer(&[1042]uint32{...}))),
         // null references over zeroed data. Neither is Go's answer, so the read is refused by name.
         //
