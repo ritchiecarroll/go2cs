@@ -333,6 +333,7 @@
     <None Include="$(MSBuildThisFileDirectory)initScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayAdmission.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayAdmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayCarrierLength_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayEmission.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces.go" />
@@ -793,6 +794,7 @@
     <None Include="$(MSBuildThisFileDirectory)untypedPackageConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedRegionShapes_test.go" />
     <None Include="$(MSBuildThisFileDirectory)usingStaticNamespaceAlias_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)validationProofCodePipe_test.go" />
     <None Include="$(MSBuildThisFileDirectory)validationProofPages.go" />
     <None Include="$(MSBuildThisFileDirectory)validationProofPages_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueCloneFieldSpelling_test.go" />

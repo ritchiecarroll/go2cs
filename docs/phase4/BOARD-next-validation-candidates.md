@@ -39276,6 +39276,60 @@ linux-arm64. Until then, **NOT SHOWN:** that the cgo path works for a linux-arm6
 
 — C2 (2026-11-15)
 
+## 2026-11-15 — H (the pin-extent seat; COORD's ruling (a) and P3's final read, 2026-11-15): four rows the seat leaves for `.5`
+
+The seat is `claude/h-cgo-pin-extents-cut`, gated at `9233d46ed4`; its record is
+[`DESIGN-cgo-pin-extents.md`](DESIGN-cgo-pin-extents.md) section 11.
+
+**Row 1. The 3.2 PRECONDITION: before Go memory crosses to C, the pin-extent side list gets an ordered index
+(O(log L)), or its threshold goes back to 16 pages (owner H, tied to cgo Phase 3.2, `.5`).** Every pinned object over
+2 pages is one entry in a side list that `Find` walks, O(L). At L=1000 a hit on a MID entry's interior costs
+1672-3164 ns, where the page path answered the same hit in about 9 ns (M3h, section 11.5). Under 3.1 every hit ends in
+a refusal, so the walk is on cold paths only. From 3.2 a hit IS a crossing, paid once per call.
+
+**Row 2. Pool or elide the joiner's holder and `WeakReference`: M2a's remaining cost is allocation and the
+collections it causes (owner H, `.5` candidate).** A further pin of an object already pinned costs 112 B: the buffer, a
+holder and a finalizable `WeakReference` (D-4). It costs 353-463 ns amortized over 200,000 ops, collections included,
+and 253-492 ns in samples without a collection. With the index on, a process collects about 2.5x as often (K=100,
+200,000 ops: 5 collections against 2). The pause per collection is not the index's (4.4-5.7 ms on, 3.5-4.0 ms off). D-4
+needs the weak reference, because a lock-free reader may stand on a removed entry, so a pool is a design change to D-4.
+
+**Row 3. Concurrent pins collapse upstream of the index (owner open, UNROOTED, `.5`).** 4 threads, each pinning its
+OWN array, run 4-6.7x slower per op than 1 thread, with throughput BELOW one thread's. That holds with the index ON or
+OFF, and on the 16 B per-page path as much as on the 64 KiB one. Measured at `9233d46ed4`: TieredCompilation=0, 2
+processes x 2 readings, 8 logical CPUs, 200,000 pin-and-release ops a thread, an 8 KiB filler keeping any two arrays
+off one page.
+
+| arm | per op, 1 thread → 4 threads | ratio |
+|---|---|---|
+| 64 KiB, index ON | 382-423 → 2210-2550 ns | 5.5-6.7 |
+| 64 KiB, index OFF | 106-132 → 644-694 ns | 5.2-6.2 |
+| 16 B, index ON | 469-524 → 2173-2430 ns | 4.1-5.1 |
+| 16 B, index OFF | 102-125 → 600-718 ns | 5.2-6.5 |
+
+- The candidates, none measured: the runtime's GC handle table (a pinned handle per pin, plus the `WeakReference`'s
+  weak handle when ON), and the registration of the finalizable `PinnedBuffer`.
+- **The cheap discriminator, for whoever takes it:** three arms in one process, at 1 and at 4 threads.
+  - (a) `GCHandle.Alloc(Pinned)` plus `Free` alone.
+  - (b) A `PinnedBuffer` made with the index OFF but without the finalizer (`GC.SuppressFinalize` on construction,
+    test-only).
+  - (c) A `fixed` statement over the same array.
+  Whichever arm collapses names the resource.
+- **It is not the index's lock.** The rule stated before the run said `m_largeGate` is contended if ON 64 KiB's ratio
+  is at least 1.5x OFF 64 KiB's in both processes. It read 1.03-1.10x, so COORD ruled it NOT contended.
+- **Not `.4`.** Under 3.1 a cgo call pins only what crosses, and the demos are single-threaded at the crossing.
+- The run's own predictions, scored as worded: C1-C3 MISSED, C4 MET (section 11.6). The miss was my model: I assumed
+  the runtime's own pin and release scale across threads.
+
+**Row 4. `src/safe-push.sh` reports a toolchain refusal as a failed security guard (owner R).** When the tree's
+`go.mod` asks for a newer Go than the shell's (`GOTOOLCHAIN=local`), the security gate's inner `go test` refuses to run.
+safe-push then aborts with "repository fleet-identifier guard FAILED (exit 1) -- NOT pushed". The abort is right, since
+nothing was checked. The message names a finding where there is none, and sends the reader to re-run a guard that
+fails the same way. Met on 2026-11-15, when master moved to go 1.26.11 under a 1.26.10 lane default. The cure is to
+tell `go`'s toolchain refusal apart from a guard failure, and to say which it is.
+
+— H (2026-11-15)
+
 ## 2026-11-15 — P5 (door B of `DESIGN-array-pointer-doors.md`; COORD rulings 06:07Z, 06:14Z, 06:22Z): an index, an element's address and a whole array through `(*A)(p)` reach the memory p names; the length of the dereference is the type's — DONE
 
 **The change** (`5244cfbe2b` code, `ef92f09825` regen, `cf55010966` goldens; design section 16). Four doors on `@unsafe.Pointer` replace the
@@ -39371,6 +39425,24 @@ modernc.org/libc v1.80.1 or in modernc.org/sqlite v1.62.0 as an index or a deref
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — G (sqlite-cs L1; P3's review, COORD's ruling on note 1): no lift is made for an anonymous struct inside a function-local FUNC type — OPEN, loud, on no demo path
+
+**Dated 2026-11-15 02:30 CST. L1 `373b01438b` + merge of master `091935257c` + the review fold `6162a6e517`.
+Windows x64, go1.26.11.** P3 asked whether L1's per-name walk (`aliasPerNameLifts`) needed a `*types.Signature`
+arm for `var f, g func(struct{A int}) struct{B int}`. It does not help: the converter makes no lift for an anonymous
+struct reached through a local func type at all, so ONE name is refused too.
+
+- Repro: `var f func(struct{ A uint32 }) struct{ B uint32 }` inside a function. The convert exits rc=1 with 3
+  unresolved dynamic types, and the declaration is emitted as raw Go,
+  `Func<struct{A uint32}, struct{B uint32}> f = default;` (CS1525 and friends). Same at master and at L1's tip.
+- `liftDeclaredAnonStructTypeArgs` walks only the type ARGUMENTS of instantiations (`declaredTypeArgs`), and the
+  local var's own struct lift does not descend into a signature's parameters or results.
+- Loud, not silent: the conversion fails. A census of GOROOT/src (tests included) finds no function-local var
+  whose type reaches an anonymous struct through two or more names; single-name func-typed sites were not counted.
+- COORD's ruling: the comment route in L1 (the walk states why a function type is not walked) and this row. Fix
+  later: lift a func type's anonymous parameter and result structs as the var's own struct is lifted, then add the
+  Signature arm to `aliasPerNameLifts` in step.
+
 ## 2026-11-15 — P5 (option 2; closes the 2026-11-15 row "a write at the ADDRESS of a named array that has not been used yet is lost"; COORD rulings 01:19Z and 08:54Z): the publish of a named array's holder is a compare-and-swap — DONE
 
 **What was wrong.** The publish of a named array's backing into a pointer box's storage (`publishArrayBacking` in
@@ -39429,6 +39501,34 @@ arm: that row stays OPEN for it.
 row "assigning a whole array gives the variable new storage", another lane's cut).
 
 — P5 (2026-11-15)
+
+## 2026-11-15 — R (COORD's seat, from P4's ValidatedModules refresh): a proof page wrote a test name holding a pipe as `\|` inside a table code span, which GitHub and the Pages site render differently — FIXED, claude/r-proof-pipe a39559ef2094287a43461b2696800647013e26a5
+
+**The defect.** `escapeProofCell` (`src/go2cs/validationProofPages.go`) turned a pipe into a backslash-pipe, and
+every caller wrapped the result in backticks. In a TABLE cell GitHub removes the backslash before a pipe even in a
+code span, and kramdown keeps it, so one renderer was always wrong; repoguard's
+`TestDocsTableCodeSpanHasNoEscapedPipe` refuses the form. timefmt-go's proof page (index.md:26) is the first page
+whose test name holds a pipe; P4 hand-fixed that line while copying the 1.26.10.3 nugetgo wave's pages. No
+standard-library test name holds one, which is why no roster page had met it.
+
+**Red first.** `TestValidationProofPageCodeCellWithAPipe` renders the fixture page with a verdict named
+`TestFormat/2006-01-02|15:04`. At master 091935257c it read ``| `TestFormat/2006-01-02\|15:04` | pass | pass |``
+and failed on both of its assertions.
+
+**The fix.** A table code cell takes `proofCodeCell`: the backtick span when the value has no pipe (byte for byte what
+every committed page holds), and with a pipe `<code>…&#124;…</code>`, with the backslash and the Markdown-active
+characters as entities (the form the guard's header names). A prose code span (the skip-class paragraphs, the
+withdrawn and host lists) takes `proofCodeSpan`: there a span is literal on both renderers, so the pipe is written
+as it is, where the old escape showed its backslash. A non-code cell keeps `escapeProofCell`'s escape, which both
+renderers read the same outside code. `TestProofCodeForms` pins both forms.
+
+**Footprint: 0 committed proof pages, as predicted.** An exact census of the 3,915 tracked pages under
+`docs/validation` finds a backslash-pipe inside a code span on 4 lines, all in the frozen 1.24.13.1 and 1.24.13.2
+`ValidatedTestPackages.md` snapshots: build-tag text (`(amd64 || arm64 …)` with the pipes escaped), not this writer's
+output, and outside the guard's living pages. The census catches a planted proof row. The .4 nugetgo wave
+regenerates timefmt-go's page byte-equal to P4's hand fix, and that hand fix retires.
+
+— R (2026-11-15)
 
 ## 2026-11-15 — P5 (F1, parts A and B; closes the 2026-11-15 row "a direct index of the native field view panics with length 0"; COORD rulings 06:07Z, 09:36Z): the field view answers over a Go struct, and is indexed in place where it is written — DONE
 
@@ -39538,6 +39638,24 @@ N elements, or ranges them. **Size:** a load door on the view and three converte
 a behavioral line each; the silent range is its red arm, by value (0x0 against 0xf1).
 
 — P5 (2026-11-15)
+
+## 2026-11-15 — C2 (batch 309, COORD 11:32Z): zig pinned for linux-arm64; release-smoke cgo reads all five legs again — closes the 308 skip above, pending one hosted reading
+
+**The pin.** `.github/cgo-toolchain.ps1` gains `zig|linux-arm64`: zig 0.17.0, `zig-aarch64-linux-0.17.0.tar.xz`, sha256
+`9e8d11661d4ae3bd57702a3832781e23ad151dde5798e16a5ccd503f65234ff8`. The value is the publisher's, from
+`https://ziglang.org/download/index.json` as i9 fetched it (2026-11-15T11:31:08Z, HTTP 200). The same index gives the four
+existing zig pins equal, so it is the source they came from. The hex was copied from i9's post by a script, not typed.
+The runner still hashes the download against it, as it does for the other four.
+
+**The skip retires in the same cut.** `$cgoUnpinnedRids` is `@()`, and TestCgoSmokeSkipsOnlyTheLegsWithNoPinnedToolchain
+holds it equal to the unpinned legs (none). The cgo-matrix mechanism stays, so the next RID without a pin is named, not
+refused.
+
+**OPEN until the hosted run:** the cgo path on a linux-arm64 consumer is new ground. One release-smoke on this tip reads
+`release-smoke cgo (linux / linux-arm64)` by name. If it fails for a reason beyond the pin, the first error is posted and
+the skip returns with that reason.
+
+— C2 (2026-11-15)
 
 ## 2026-11-15 — P5 (F1, part C; closes the 2026-11-15 row "a form that reads the whole array through the field view is refused by name"; COORD ruling 09:36Z): the whole array through the field view is a load, a store or the view's window — DONE
 

@@ -586,12 +586,12 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "matrix=$json" -Encoding utf8
 
           # release-smoke-cgo's legs: the same targets less those whose OS default cgo toolchain (.github/cgo-probe.ps1:
-          # llvm-mingw on windows, zig elsewhere) has no pin in .github/cgo-toolchain.ps1. linux-arm64 joined the consumer
-          # legs in seat S5c with no zig pin, and the cgo job refused it (batch 308, run 43696423446): its pin is owed for
-          # the next batch, the publisher's sha256 read from ziglang.org's index. Every other stage keeps the full matrix.
-          # TestCgoSmokeSkipsOnlyTheLegsWithNoPinnedToolchain holds this list to exactly the unpinned legs, so it retires
-          # the day the pin lands.
-          $cgoUnpinnedRids = @('linux-arm64')
+          # llvm-mingw on windows, zig elsewhere) has no pin in .github/cgo-toolchain.ps1. EMPTY since batch 309: linux-arm64
+          # joined the consumer legs in seat S5c with no zig pin and the cgo job refused it (batch 308, run 43696423446), so
+          # 308 skipped it here; 309 pinned zig for linux-arm64 and emptied the list. Every other stage keeps the full matrix.
+          # TestCgoSmokeSkipsOnlyTheLegsWithNoPinnedToolchain holds this list to exactly the unpinned legs, so a RID the
+          # consumer legs gain without a pin has to be named here (and on the BOARD) before the cgo smoke can run.
+          $cgoUnpinnedRids = @()
           $cgoEntries = @($entries | Where-Object { $_.rid -notin $cgoUnpinnedRids })
           $cgoJson = ConvertTo-Json -InputObject $cgoEntries -Compress -Depth 4
           if ($cgoEntries.Count -lt @($entries).Count) { Write-Host "cgo matrix: $cgoJson (no pinned cgo toolchain: $(@($entries | Where-Object { $_.rid -in $cgoUnpinnedRids } | ForEach-Object { $_.rid }) -join ', '))" }
@@ -717,7 +717,7 @@ jobs:
 
   # ---------------------------------------------------------------------------------------------
   # release-smoke-cgo -- the cgo path, on every release-smoke, on every shipped RID with a pinned C toolchain (the
-  # plan's cgo-matrix; linux-arm64 has none yet, batch 308) (COORD's ruling 2026-11-14, cgo
+  # plan's cgo-matrix; all five since batch 309) (COORD's ruling 2026-11-14, cgo
   # 3.1's release-path seat). A -cgo conversion is ONE package and builds against a go2cs clone, never the go.*
   # packages: src/go2cs/main.go's -cgo help says it is not combinable with -recurse, and csproj-template.xml references
   # $(go2csPath)'s go2cs-gen and golib. So this job reads the TREE the release is cut from, needs no pack, and runs
