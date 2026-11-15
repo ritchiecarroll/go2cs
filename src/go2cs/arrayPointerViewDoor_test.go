@@ -13,9 +13,11 @@
 //
 // Each form has an arm. The CONTROLS carry the scope: the open form of an UNNAMED array keeps the box route; an
 // element that holds references takes no door; an operand that holds a FromRef mint keeps the span; a BOUNDED view
-// under copy stays builtin copy over the view door, because only the open form needs the copy doors; and the
-// same-element alias conversion, `(*[N]T)(unsafe.Pointer(p))` with p a `*T`, keeps array<T>.AliasPointer, which
-// already windows p's own storage and which banked rows run on.
+// under copy stays builtin copy over the view door, because only the open form needs the copy doors; and a
+// conversion that another route renders whole keeps that route when it is sliced (controls 5 to 9: the
+// same-element alias, the identity conversion in its bounded and open forms, the reinterpret between two array
+// types of one shape, and the native field view). Each of those is already a view of the storage and banked rows
+// run on them; the door replaces the copying span and nothing else.
 
 package main
 
@@ -111,6 +113,35 @@ func sameElem(buf *uint16, n int) []uint16 {
 	return (*[10000]uint16)(unsafe.Pointer(buf))[:n:n]
 }
 
+// CONTROL 6: the identity conversion (the operand is already a pointer to the array) keeps the box.
+func identity(a *[4]int) []int {
+	return (*[4]int)(unsafe.Pointer(a))[1:3]
+}
+
+// CONTROL 7: the identity conversion of a named array, in the open form and under copy.
+func identityNamed(a *small, src []byte) int {
+	return len((*small)(unsafe.Pointer(a))[2:]) + copy((*small)(unsafe.Pointer(a))[:], src)
+}
+
+// CONTROL 8: two array types of one shape keep the reinterpret.
+func sibling(a *[64]byte) []byte {
+	return (*small)(unsafe.Pointer(a))[:4]
+}
+
+// CONTROL 9: a field of another type, one hop off a pointer, keeps the native field view.
+func field(h *hdr) []byte {
+	return (*[2]byte)(unsafe.Pointer(&h.n))[:2]
+}
+
+// POSITIVE 8 and 9: a Go pointer to another type is no route of its own; it took the span and takes the door.
+func scalar(x *uint32) []byte {
+	return (*[4]byte)(unsafe.Pointer(x))[:4]
+}
+
+func elemOfNamed(b *byte, n int) []byte {
+	return (*RawMem)(unsafe.Pointer(b))[:n:n]
+}
+
 func main() {
 	var buf [64]byte
 	p := unsafe.Pointer(&buf)
@@ -120,6 +151,12 @@ func main() {
 	fmt.Println(len(openUnnamed(&x)), len(h.bytes()), len(wide(uintptr(p), 2)))
 	_ = managed
 	_ = sameElem
+	_ = identity
+	_ = identityNamed
+	_ = sibling
+	_ = field
+	_ = scalar
+	_ = elemOfNamed
 }
 `)
 
@@ -171,6 +208,8 @@ func TestArrayPointerViewDoorReplacesTheCopyingSpan(t *testing.T) {
 		{"intoString", "return @unsafe.Pointer.CopyInto(p, 4, 1125899906842623, \"text\"u8);"},
 		{"from", "return @unsafe.Pointer.CopyFrom<byte>(dst, p, 0, 1125899906842623);"},
 		{"bounded", "return copy(@unsafe.Pointer.View<byte>(p, 0, len(src), 1125899906842623), src);"},
+		{"scalar", "return @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(x), 0, 4, 4);"},
+		{"elemOfNamed", "return @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(b), 0, n, n, 1125899906842623);"},
 	} {
 		body := emittedFunctionBody(t, mainCs, arm.function)
 
@@ -193,6 +232,10 @@ func TestArrayPointerViewDoorReplacesTheCopyingSpan(t *testing.T) {
 		{"managed", "", "an element that holds references takes no door"},
 		{"bytes", "new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromRef(ref h)), 4)", "an operand that holds a FromRef mint keeps the span"},
 		{"sameElem", "return array<uint16>.AliasPointer(buf, 10000).slice(0, n, n);", "the same-element alias conversion keeps the alias route"},
+		{"identity", "return a.slice(1, 3);", "the identity conversion keeps the box"},
+		{"identityNamed", "return len(a.Value[2..]) + copy(a.Value[..], src);", "the identity conversion of a named array keeps the box in the open form and under copy"},
+		{"sibling", "return a.Reinterpret<array<byte>, small>().Value[..4];", "two array types of one shape keep the reinterpret"},
+		{"field", "return @unsafe.ArrayPointer<byte>.Of(h.Ꮡn, 2).slice(0, 2);", "a field of another type keeps the native field view"},
 	} {
 		body := emittedFunctionBody(t, mainCs, arm.function)
 

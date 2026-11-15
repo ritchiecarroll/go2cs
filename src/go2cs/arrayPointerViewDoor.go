@@ -33,10 +33,10 @@ import (
 // What a view is (a window on a Go array, a window on native memory, or a copy of another Go value) is decided at
 // run time by what the pointer names; see the doors in src/core/unsafe/unsafe.cs.
 //
-// Four forms keep what they had. An element that holds references is refused by name (managedSliceViewRefusal).
-// The same-element alias conversion of an UNNAMED array, `(*[N]T)(unsafe.Pointer(p))` with p a `*T`, keeps
-// `array<T>.AliasPointer`, which already windows p's own storage (arrayPointerAliasEmission).
-// The open form of an UNNAMED array (`(*[4]byte)(unsafe.Pointer(&x))[:]`) keeps the box route: it runs on banked
+// THE SCOPE IS THE COPYING SPAN AND NOTHING ELSE. An element that holds references is refused by name
+// (managedSliceViewRefusal). A conversion that another route renders whole keeps that route when it is sliced
+// (arrayPointerConversionKeepsItsRoute): each of those routes is already a view of the storage, and banked rows
+// run on them. The open form of an UNNAMED array (`(*[4]byte)(unsafe.Pointer(&x))[:]`) keeps the box route: it runs on banked
 // rows, and its own defect is a separate row (the design's decision D4). And an operand that holds a `FromRef`
 // mint keeps the span: that number is an address read under `fixed` for one statement, and a window that
 // aliases it would outlive the statement that made the address true (design 4.6).
@@ -59,9 +59,7 @@ func (v *Visitor) arrayPointerViewOf(sliceExpr *ast.SliceExpr) (arrayPointerView
 		return arrayPointerView{}, false
 	}
 
-	// The same-element alias conversion, `(*[N]T)(unsafe.Pointer(p))` with p a `*T`, is already a window on p's own
-	// storage (arrayPointerAliasEmission), and banked rows run on it. Sliced, it keeps that route.
-	if _, _, alias := v.arrayPointerAliasSource(conversion, conversion.Args[0]); alias {
+	if v.arrayPointerConversionKeepsItsRoute(conversion) {
 		return arrayPointerView{}, false
 	}
 
@@ -93,6 +91,36 @@ func (v *Visitor) arrayPointerViewOf(sliceExpr *ast.SliceExpr) (arrayPointerView
 		named:   named,
 		elemGo:  array.Elem(),
 	}, true
+}
+
+// arrayPointerConversionKeepsItsRoute reports whether `(*A)(unsafe.Pointer(p))`, p a Go pointer, is rendered whole
+// by a route of its own, which never reaches the pointer cast the span was built from. Four routes, each read
+// from the predicate that route itself uses, so the door and the route cannot disagree about a conversion:
+//
+//	p is already a `*A`                      the box itself                   pointerReinterpretIdentitySource
+//	p is a `*B`, B and A one array shape     p.Reinterpret<B, A>()            pointerReinterpretManagedSource
+//	p is a `*T`, A an unnamed `[N]T`         array<T>.AliasPointer(p, N)      arrayPointerAliasSource
+//	p is `&q.f`, f not a T                   @unsafe.ArrayPointer<T>.Of(…)    nativeFieldArrayViewOf
+//
+// A slice of any of them slices that route's result, as it did before the doors.
+func (v *Visitor) arrayPointerConversionKeepsItsRoute(conversion *ast.CallExpr) bool {
+	operand := conversion.Args[0]
+
+	if v.pointerReinterpretIdentitySource(conversion, operand) != nil {
+		return true
+	}
+
+	if source, _, _ := v.pointerReinterpretManagedSource(conversion, operand); source != nil {
+		return true
+	}
+
+	if _, _, alias := v.arrayPointerAliasSource(conversion, operand); alias {
+		return true
+	}
+
+	_, fieldView := v.nativeFieldArrayViewOf(conversion, operand)
+
+	return fieldView
 }
 
 // arrayPointerViewOperand renders p, or reports false where the operand holds a FromRef mint and the site keeps
