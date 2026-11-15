@@ -1,0 +1,7 @@
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/windows	syscall_windows.go:967
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/windows	syscall_windows.go:986
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/windows	syscall_windows.go:1087
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/windows	syscall_windows.go:1095
+hook=true other-elem root-pointer-ident direct-deref root-struct-holds-reference field-number fits=true	golang.org/x/sys/windows	syscall_windows.go:1051
+hook=true other-elem root-pointer-ident direct-deref root-struct-holds-reference field-number fits=true	golang.org/x/sys/windows	syscall_windows.go:1052
+hook=true other-elem root-pointer-ident direct-deref root-struct-holds-reference field-struct-holds-reference fits=true	golang.org/x/sys/windows	syscall_windows.go:1053

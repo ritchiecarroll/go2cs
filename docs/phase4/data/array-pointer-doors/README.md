@@ -122,3 +122,24 @@ In the footprint files `base/` and `cut/` stand for the two conversion roots, an
 the arm's. `<kit>` in an `.out` file is the scratch directory the program was converted in. The `lazy` program
 is a finding on master that the doors do not touch (design 11.6); it is here because this seat's kit runs
 found it.
+
+## Amendment 2026-11-15: door B as cut (`door-b-1115/`)
+
+For section 16 of the design. Converters: base = the converter built at `04660ffaa6` (the chain seat's tip); cut =
+the converter built at `5244cfbe2b`. One cloud linux/amd64 VM, Go 1.26.11, .NET SDK 10.0, Release,
+`GoTargetOS=linux`.
+
+| Path | What it is |
+|:--|:--|
+| `door-b-1115/scope-probe/main.go`, `go.mod`, `go.out` | 55 sibling shapes of an index, an element's address, a dereference and a whole store through `(*A)(p)`: the forms the doors take and the forms they decline |
+| `door-b-1115/scope-probe/base.cs.txt`, `cut.cs.txt`, `base-against-cut.diff.txt` | its emission by each converter and their diff: 40 lines change, one for one |
+| `door-b-1115/lenprobe/main.go`, `go.mod`, `go.out` | the shapes of 16.3: `len`, `cap` and `range` over the dereference and over the conversion, with and without a call in the operand |
+| `door-b-1115/lenprobe/base.cs.txt`, `cut.cs.txt`, `converted-base.out`, `converted.out` | its emission by each converter and each one's run: the base's five printed lines differ from Go's and it then panics on nil; the cut's equals `go.out` |
+| `door-b-1115/rprobe/main.go`, `go.mod`, `go.out`, `cut.cs.txt`, `converted.out` | 16.6: the byte-view line R's kit reported, in three operand forms, with a named whole store and an alias whole store; the run equals `go.out` |
+| `door-b-1115/iprobe/main.go`, `go.mod`, `go.out`, `base.cs.txt`, `cut.cs.txt` | sqlite's function-number helper, `(*iface)(unsafe.Pointer(&f))[1]` with `f` an interface: both converters emit the same file (the function-cookie route, which the doors do not reach) and it prints Go's two lines |
+| `door-b-1115/kits/NativeViewShapes.main.cs.txt`, `.converted.out` | the 24-arm program as the cut converter emits it, and its run against the tree at the regen commit, one arm per process: 21 arms equal `NativeViewShapes/go.out`; F, F0 and Q do not |
+| `door-b-1115/footprint/two-seeded-<target>.files.txt` | `diff -rq` of the base root against the cut root, each seeded from `src/core` at `04660ffaa6`, per target |
+| `door-b-1115/footprint/two-seeded-<target>.diff.txt` | the same roots' unified diff under `src`, CR-stripped; the two run artifacts that differ are named and their bodies omitted |
+
+In the footprint files `base/` and `cut/` stand for the two conversion roots. The panic traces in an `.out` file
+name the program by its module path.

@@ -1,0 +1,17 @@
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:394
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:406
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:508
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:514
+hook=false same-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:1182
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	sockcmsg_linux.go:68
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	sockcmsg_linux.go:76
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:1036
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:1059
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:1174
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:1178
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:1189
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:1193
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:592
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:596
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:621
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_linux.go:625

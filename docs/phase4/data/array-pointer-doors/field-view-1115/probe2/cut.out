@@ -1,0 +1,25 @@
+two-hop direct read [1]: 0x12
+two-hop direct write [0]: port 0x12ab
+two-hop local read [1]: PANIC runtime error: invalid memory address or nil pointer dereference
+two-hop local write [0]: PANIC runtime error: invalid memory address or nil pointer dereference
+two-hop len: 2
+two-hop slice: PANIC runtime error: invalid memory address or nil pointer dereference
+two-hop word [1]: 0x11111111
+variable direct read [1]: 0x12
+variable direct write [0]: port 0x12ab
+variable local read [1]: PANIC runtime error: index out of range [1] with length 0
+variable local write [0]: PANIC runtime error: index out of range [0] with length 0
+variable local range value: 0x0
+package direct read [1]: 0x12
+package direct write [0]: port 0x12ef
+package local read [1]: PANIC runtime error: invalid memory address or nil pointer dereference
+deref root direct read [1]: 0x12
+ref two-hop fresh direct read [1]: 0x12
+ref two-hop fresh direct write [0]: raw.port 0x12ab
+ref two-hop fresh direct write [1]: raw.port 0xcdab
+ref two-hop fresh direct address [1]: raw.port 0xeeab
+ref two-hop fresh direct slice: PANIC runtime error: cannot view native memory as array<Byte>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+ref two-hop local write: PANIC runtime error: cannot view native memory as array<Byte>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+ref two-hop local read: PANIC runtime error: cannot view native memory as array<Byte>: the address has no managed element storage behind it, and a Go array is a window on a real managed array (see docs/phase4/DESIGN-native-array-view.md)
+ref two-hop direct write [0]: raw.port 0xab
+ref two-hop direct read [1]: 0x0

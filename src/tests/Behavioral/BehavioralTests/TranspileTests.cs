@@ -163,6 +163,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckArrayPointerElementAlias() => CheckTarget("ArrayPointerElementAlias");
 
     [TestMethod]
+    public void CheckArrayPointerElementDoors() => CheckTarget("ArrayPointerElementDoors");
+
+    [TestMethod]
     public void CheckArrayPointerViewDoors() => CheckTarget("ArrayPointerViewDoors");
 
     [TestMethod]
@@ -677,6 +680,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckFieldNamedAsType() => CheckTarget("FieldNamedAsType");
+
+    [TestMethod]
+    public void CheckFieldViewOverGoStruct() => CheckTarget("FieldViewOverGoStruct");
 
     [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
