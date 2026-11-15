@@ -39330,4 +39330,99 @@ tell `go`'s toolchain refusal apart from a guard failure, and to say which it is
 
 — H (2026-11-15)
 
+## 2026-11-15 — P5 (door B of `DESIGN-array-pointer-doors.md`; COORD rulings 06:07Z, 06:14Z, 06:22Z): an index, an element's address and a whole array through `(*A)(p)` reach the memory p names; the length of the dereference is the type's — DONE
+
+**The change** (`5244cfbe2b` code, `ef92f09825` regen, `cf55010966` goldens; design section 16). Four doors on `@unsafe.Pointer` replace the
+box of the whole array the conversion made, which C memory could not answer and which every such form in sqlite
+and libc went through:
+
+    (*A)(p)[i]      ElementRef<E>(p, i, N)      a `ref E`; no allocation over C memory
+    &(*A)(p)[i]     Element<E>(p, i, N)
+    *(*A)(p)        LoadArray<E>(p, N)          a copy, cast to A when A is named
+    *(*A)(p) = v    StoreArray<E>(p, N, v)
+
+What the element is follows door A's four answers. Ruled into the seat on the way: `len` and `cap` of
+`*(*A)(p)` and `(*A)(p)`, and an index-only range over the dereference, answer the type's `N` where Go evaluates
+nothing (F4, a silent wrong answer before: the length of whatever array was behind the address); the conversion
+ranged for its values ranges door A's window (F5, silent before); a named array's whole load and store take the
+doors (C6).
+
+**Readings** (linux/amd64, Release):
+
+| | before (`04660ffaa6`) | with the change |
+|:--|:--|:--|
+| `ArrayPointerElementDoors`, 38 lines against Go | a panic at the first line | 38 of 38 equal |
+| 100,000 stores and reads through the index form over C memory | (no answer: refused by name) | 0 bytes allocated |
+| `len(*(*[4]byte)(p))` over a `[64]byte`, over a `uint64`, over nil | 64, 0, a panic | 4, 4, 4, as Go |
+| `for _, b := range (*[4]byte)(p)` over a `[64]byte` | 64 rounds | 4 rounds, a store in the body seen |
+| converter test, 35 arms; GolibTests door arms, 20 | red first | green |
+| whole GolibTests | 2818 passed, 0 failed, 49 skipped | 2838 passed, 0 failed, 49 skipped |
+| `NativeViewShapes`, 24 arms against Go | 14 equal (at V2's commit) | 21 equal: D D0 M M0 R S T join, so P2 is MET; F, F0 (door C) and Q (the floor's row) remain |
+| `internal/runtime/maps` through `-tests`, the one banked row with a test site of the cut | 19 matched, 108 disclosed (banked) | the same |
+| the behavioral corpus re-transpiled | | five programs move, 12 lines, each a form the doors take; all five print Go's output; goldens re-baselined. No prediction was made for it |
+| the regenerated packages (`runtime`, `internal/runtime/maps`) built for four targets | | 8 of 8 builds, 0 errors (linux/amd64, windows/amd64, darwin/amd64, linux/arm64) |
+
+**Corpus.** Two-seeded on four targets, the same on each: 39 lines in 6 converted files (34 index stores in `runtime`'s
+malloc files, 2 element addresses in `runtime/lock_spinbit.cs`, 3 whole loads in `runtime/alg.cs` and
+`internal/runtime/maps/runtime_faststr.cs`), no position-map line, no `.csproj`. Applied by the hunk rule: 45
+lines in 9 files. `runtime/mfinal.cs.auto` gains one `StoreArray` line and is not applied (hand-owned
+`mfinal.cs`). P6 MISSED as worded: it named the malloc files only and one argument site; three files are not
+malloc files, one of them outside `runtime`, and the argument site (`sync/pool.go:93`) has a managed element
+and a hand-owned corpus file. Its index-form falsifier did not fire.
+
+**Left:** the four entries below, and door C (the conversion kept in a variable, passed or returned).
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door B, a shape the cut does not move; COORD ruling 06:07Z): a direct index of the native field view panics with length 0 — OPEN, ruled .4, owner P5, its own small seat after option 2
+
+`(*[2]byte)(unsafe.Pointer(&h.port))[1]`, `h` a Go struct, emits
+`(@unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2)).Value[1]` and panics "index out of range [1] with length 0". Go
+answers the field's second byte. The emission is the same at `04660ffaa6`. It is one of the four routes door A's
+predicate leaves alone, so door B declines it. **Census: 0 sites.** The 11 corpus field-view sites bind the
+conversion to a local and index through the route's in-place path, which is right. **Size:** about 20 lines
+inside that route (index through its own element path) and one behavioral line.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door B, a shape the cut does not move; COORD ruling 06:07Z): an index through a named array over memory that holds an unnamed array of the same shape is refused by name — OPEN, door C's, .5 unless the sqlite-cs demo reaches it
+
+`(*small)(unsafe.Pointer(a))[1]`, `a` a `*[64]byte` and `small` a `[64]byte` by name, emits
+`(a.Reinterpret<array<byte>, small>()).Value[1]` and stops at the named floor ("cannot view native memory as
+small"). Loud. Go answers the element. Its whole-load and whole-store half (`*(*small)(p) = s`,
+`x := *(*small)(p)`) is closed by door B's named whole door. **Census: 0 sites.** In the stored tables
+(`docs/phase4/data/array-pointer-doors/census/`, the standard library on five targets, sqlite and libc on two)
+an index or a dereference whose operand is `unsafe.Pointer(q)` with `q` a typed pointer has 2 sites per target
+in the standard library, both `runtime/lock_spinbit.go` over a `*uintptr`, which door B takes, and none in
+sqlite or libc. None has an array behind `q`. **Cure:** door C's named form (design 4.5).
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door B, a shape the cut does not move; COORD ruling 06:07Z): an index through `(*A)(p)` where p is made from a pointer receiver keeps the box and reads length 0 — OPEN, no owner
+
+`(*[12]byte)(unsafe.Pointer(h))[0]` in a pointer-receiver method emits
+`(@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromRef(ref h))).Value[0]` and panics "index out of range [0]
+with length 0". The doors decline a `FromRef` operand by design: its address is true for one statement only
+(design 4.6), and repoguard refuses one at a door. **Census: 0 corpus lines** match
+`To<array<...>>(...FromRef(`. This is the receiver-box question, not an array question, and it has no estimate
+until a site exists.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door B's limits; COORD ruling 06:07Z): three forms through `(*A)(p)` keep the box of the whole array — OPEN, no owner, no site
+
+All three are stated in design 16.7. None has a site in the standard library with its tests, in
+modernc.org/libc v1.80.1 or in modernc.org/sqlite v1.62.0 as an index or a dereference over an `unsafe.Pointer`.
+
+- **An element that is itself an array** (`(*[2][2]int32)(p)[1][0]`). The element is managed, so the doors
+  decline it and the box route answers length 0 over memory that is no Go array of that type.
+- **An element that holds a reference** (`(*[2]unsafe.Pointer)(p)[1]`, and its whole store). Refused by name by
+  the pointee rule, by design. `sync/pool.go:93` has this form in Go; the corpus file is hand-owned and does not
+  carry it.
+- **A call inside the pointer form under `len`** (`len((*[4]byte)(get(p)))`). Go answers 4 after one call and no
+  dereference; the emission keeps `len(To<...>(get(p)).Value)`, which dereferences. golib has no door for
+  "evaluate, then answer N".
+
+— P5 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

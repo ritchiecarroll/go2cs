@@ -666,7 +666,10 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     {
         Slice,
         CopyDestination,
-        CopySource
+        CopySource,
+        Element,
+        ArrayLoad,
+        ArrayStore
     }
 
     // `(*A)(p)[lo:hi]`: length hi-lo, capacity N-lo.
@@ -752,6 +755,108 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         return copied;
     }
 
+    // ---- Go's `(*A)(p)[i]`, `&(*A)(p)[i]`, `*(*A)(p)` and `*(*A)(p) = v`: the ELEMENT and ARRAY doors (door B) ----
+    //
+    // docs/phase4/DESIGN-array-pointer-doors.md, 4.5 and 10.5. These forms went through the pointer conversion to
+    // the array type, which has no answer over memory that is no Go array of that type: C memory was refused by
+    // name (`cannot view native memory as array<...>`), and a named array was read as a managed wrapper out of it.
+    // No box of the whole array is made here. N is a bound, as it is for the view doors.
+    //
+    //     (*A)(p)[i]          ElementRef<E>(p, i, N)        read, store, compound assignment, ++ and --
+    //     &(*A)(p)[i]         Element<E>(p, i, N)
+    //     v := *(*A)(p)       LoadArray<E>(p, N)            a Go array value: a copy
+    //     *(*A)(p) = v        StoreArray<E>(p, N, v)
+    //
+    // Go's order: the nil check, then the index against N with Go's index panic, then the element. WHAT THE ELEMENT
+    // IS follows the view doors' four answers (Aliased), for a window of one element at i:
+    //
+    //   V1  the Go array's own element box. An index past the end of the Go array is refused by name.
+    //   V3  a native box at the element's address, which keeps what the pointer carried.
+    //   V2  a native box at the element's address inside the Go value, anchored on the box that holds the value
+    //       still. An index past the end of the value is refused by name.
+    //   V4  Go's own definition of the form, `(*E)(unsafe.Add(p, i*size))`, which the pointer conversion answers.
+
+    // `&(*A)(p)[i]`: the pointer to element i.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ж<E> Element<E>(Pointer? p, long i, long length)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)i >= (ulong)length)
+            throw RuntimeErrorPanic.IndexOutOfRange(i, length);
+
+        slice<E> window = Aliased<E>(p!, i, 1, 1, length, ViewUse.Element, out ж<E>? unaliased);
+
+        if (unaliased is not null)
+            return i == 0 ? unaliased : To<E>(Moved(p, (nuint)i * (nuint)Unsafe.SizeOf<E>()));
+
+        return ElementAddressUnchecked(window, 0);
+    }
+
+    // `(*A)(p)[i]` as a location: read, stored, compounded or stepped in the one expression that names it.
+    //
+    // THE V3 FAST PATH (10.5). The index form is in hot generated code (sqlite's chacha block, its b-tree balance),
+    // nearly always over C memory. A pointer that keeps nothing, whose number the registry does not know and that
+    // names user memory, is C memory: the element is at p + i*size and nothing has a lifetime, so no box is made.
+    // Every other pointer takes the element door, whose box is what keeps the root until the reference is used: a
+    // reference into Go storage is one the collector follows by itself.
+    //
+    // A `ref` result cannot live across an await (CS8178): a site that cannot keep it in one expression takes
+    // Element(...).Value.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ref E ElementRef<E>(Pointer? p, long i, long length)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)i >= (ulong)length)
+            throw RuntimeErrorPanic.IndexOutOfRange(i, length);
+
+        if (!RuntimeHelpers.IsReferenceOrContainsReferences<E>() && NativeDerivation.Kept(p!.m_retainedSource) is null)
+        {
+            nuint number = (nuint)p.Value.Value;
+
+            if (!ManagedPointerTokens.NamesNoUserMemory(number) && ManagedPointerTokens.Resolve(number) is null)
+                return ref Unsafe.AsRef<E>((void*)(number + (nuint)i * (nuint)Unsafe.SizeOf<E>()));
+        }
+
+        return ref Element<E>(p, i, length).Value;
+    }
+
+    // `v := *(*A)(p)`: the array's N elements, copied, as a Go array value is. Over a Go value nothing can alias
+    // (V4) the read is still exact.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static array<E> LoadArray<E>(Pointer? p, long length)
+    {
+        RequireArrayPointer(p);
+
+        slice<E> view = Window<E>(p!, 0, length, length, length, ViewUse.ArrayLoad);
+        array<E> value = new array<E>((int)length);
+
+        copy(value[..], view);
+        GC.KeepAlive(p);
+
+        return value;
+    }
+
+    // `*(*A)(p) = v`: N elements copied to where p points. A Go value nothing can alias (V4) is refused by name: the
+    // write would land in a copy. A value shorter than N (the zero value of an array that was never given storage)
+    // is zeros from where it ends, as Go's is.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static void StoreArray<E>(Pointer? p, long length, in array<E> value)
+    {
+        RequireArrayPointer(p);
+
+        if (length == 0)
+            return;
+
+        slice<E> view = Window<E>(p!, 0, length, length, length, ViewUse.ArrayStore);
+
+        for (nint i = copy(view, value[..]); i < view.Length; i++)
+            view[i] = default!;
+
+        GC.KeepAlive(p);
+    }
+
     // Slicing through a nil array pointer is Go's nil dereference, before any bound is read.
     private static void RequireArrayPointer(Pointer? p)
     {
@@ -772,15 +877,42 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
 
     // The Go form a refusal names: N and E are the array's, the bounds the site's.
     private static string ViewForm<E>(long lo, long count, long length, ViewUse use) =>
-        use is ViewUse.Slice
-            ? $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:{lo + count}]"
-            : $"copy through (*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:]";
+        use switch
+        {
+            ViewUse.Slice => $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:{lo + count}]",
+            ViewUse.Element => $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}]",
+            ViewUse.ArrayLoad => $"*(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)",
+            ViewUse.ArrayStore => $"*(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p) = v",
+            _ => $"copy through (*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:]"
+        };
 
     // The view of `count` elements starting `lo` elements after p, with room for `capacity`. The bounds are checked
     // by the caller. p is resolved where it points and the view starts lo elements on, so a number the registry
     // knows keeps its answer for every lo.
     private static slice<E> Window<E>(Pointer p, long lo, long count, long capacity, long length, ViewUse use)
     {
+        slice<E> window = Aliased<E>(p, lo, count, capacity, length, use, out ж<E>? unaliased);
+
+        if (unaliased is null)
+            return window;
+
+        // V4. A write would land in the copy, so a destination is refused instead of written and lost.
+        if (use is ViewUse.CopyDestination or ViewUse.ArrayStore)
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)} cannot write the Go value p points to: it is not an array of {GoReflect.GoTypeName(typeof(E))}, and a view of it is a copy");
+
+        if (count == 0)
+            return new slice<E>(Array.Empty<E>());
+
+        fixed (E* source = &unaliased.Value)
+            return new slice<E>(new ReadOnlySpan<E>(source + lo, (int)count));
+    }
+
+    // The window that ALIASES what p points to (V1, V2, V3), or `unaliased`: the pointer to the first element where
+    // nothing can be aliased (V4), for the caller to answer as its form requires.
+    private static slice<E> Aliased<E>(Pointer p, long lo, long count, long capacity, long length, ViewUse use, out ж<E>? unaliased)
+    {
+        unaliased = null;
+
         // The converter refuses such an element at the site; the doors are public, so they refuse it too.
         if (RuntimeHelpers.IsReferenceOrContainsReferences<E>())
             throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)}: an element that holds references cannot be viewed at an address");
@@ -862,15 +994,9 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         if (holder is IHeldStorage storage && storage.HeldBytesFrom(held) is var room and not 0)
             return HeldWindow<E>(holder, held, room, lo, count, capacity, length, use);
 
-        // V4. A write would land in the copy, so copy's destination is refused instead of written and lost.
-        if (use is ViewUse.CopyDestination)
-            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)} cannot write the Go value p points to: it is not an array of {GoReflect.GoTypeName(typeof(E))}, and a view of it is a copy");
+        unaliased = ptr;
 
-        if (count == 0)
-            return new slice<E>(Array.Empty<E>());
-
-        fixed (E* source = &ptr.Value)
-            return new slice<E>(new ReadOnlySpan<E>(source + lo, (int)count));
+        return default;
     }
 
     // A window on the bytes of a Go value its box holds still (V2): `room` bytes exist from `address` to the end of
