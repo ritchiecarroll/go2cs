@@ -109,3 +109,12 @@ is preferred over A for .5: it keeps Go's answer in every shape, where A trades 
 values. The red arm O is worth writing now as a DISCLOSED arm, if COORD wants the hazard pinned in GolibTests before .5.
 
 — H (2026-11-15)
+
+## 6. Amended 2026-11-15, later: the sqlite path's type-based census
+
+COORD ran the tool on the i7 over `modernc.org/sqlite/...` and `modernc.org/libc/...` (v1.62.0 and v1.80.1, from the
+sqlite-cs demo module, tests excluded). It reads `none` on all four targets: windows/amd64 280 files, linux/amd64 393,
+darwin/amd64 356 and linux/arm64 384 (`data/hdr-native-commit/readings/sqlite-*.txt`). The prediction was "none" on
+each: MET x4. The recommendation in section 5 stands, now on a measured census: a .5 BOARD row, cure shape C.
+
+— H (2026-11-15)

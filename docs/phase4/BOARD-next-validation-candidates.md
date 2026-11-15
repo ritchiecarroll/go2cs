@@ -39796,4 +39796,14 @@ census, with the type-based confirmation pending.
 
 — H (2026-11-15)
 
+## 2026-11-15 — H (W8 BOARD row 3, the census completed): the sqlite path reads none on all four targets
+
+The type-based run pending in the row above, over `modernc.org/sqlite/...` and `modernc.org/libc/...`, read by COORD on
+the i7. The tool is `data/hdr-native-commit/census-main.go` from `235efa55be`, run from the sqlite-cs demo module
+(sqlite v1.62.0, libc v1.80.1), with tests excluded. It reads `none` on windows/amd64 (280 files), linux/amd64 (393),
+darwin/amd64 (356) and linux/arm64 (384), as predicted (`data/hdr-native-commit/readings/sqlite-*.txt`). The row
+stays .5: no known population on std's non-test code or on the sqlite path.
+
+— H (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
