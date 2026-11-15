@@ -87,6 +87,8 @@ public unsafe class ManagedDerivedStructReadFloorTests
 
         StringAssert.Contains(message, $"cannot read {typeName} whole", $"{path}: by this floor, naming the type");
         StringAssert.Contains(message, "holds managed references", $"{path}: the reason");
+        StringAssert.Contains(message, $"are not {typeName}'s", $"{path}: the type is named where the bytes are said not to be its");
+        Assert.IsFalse(message.Contains('{') || message.Contains('}'), $"{path}: no unformatted placeholder survives: {message}");
     }
 
     [TestMethod]
