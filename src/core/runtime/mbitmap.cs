@@ -1633,9 +1633,9 @@ private static readonly @string progToPointerMaskˢᵇ = "progToPointerMask: ove
 // progToPointerMask returns the 1-bit pointer mask output by the GC program prog.
 // size the size of the region described by prog, in bytes.
 // The resulting bitvector will have no more than size/goarch.PtrSize bits.
-internal static unsafe bitvector progToPointerMask(ж<byte> prog, uintptr size) {
+internal static bitvector progToPointerMask(ж<byte> prog, uintptr size) {
     var n = (size / (uintptr)goarch.PtrSize + 7) / 8;
-    var x = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(persistentalloc(n + 1, 1, Ꮡmemstats.Ꮡbuckhash_sys)), (int)(n + 1)));
+    var x = @unsafe.Pointer.View<byte>(persistentalloc(n + 1, 1, Ꮡmemstats.Ꮡbuckhash_sys), 0, (nint)(n + 1), 1073741824);
     x[len(x) - 1] = 0xa1; // overflow check sentinel
     n = runGCProg(prog, Ꮡ(x, 0));
     if (x[len(x) - 1] != 0xa1) {

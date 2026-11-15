@@ -11,7 +11,7 @@
 // span-over-address view, which would read the words behind p as fabricated managed references (C#
 // CS8500; runtime's itabInit is the corpus's one site). Three arms: managed and not an aliasing pair
 // (the refusal); managed and a pair (arrayPointerAliasEmission's door, synthetic -- the corpus has
-// none); and an unmanaged element (today's span form, the control).
+// none); and an unmanaged element (the view door of arrayPointerViewDoor.go, the control).
 
 package main
 
@@ -44,7 +44,7 @@ func pointersAsPointers(ptrs *[4]*int, n int) []*int {
 	return (*[4]*int)(unsafe.Pointer(&ptrs[0]))[:n:n]
 }
 
-// CONTROL -- an unmanaged element keeps the span-over-address view.
+// CONTROL -- an unmanaged element takes the view door.
 func bytesAsWords(b []byte, n int) []uint16 {
 	return (*[1 << 16]uint16)(unsafe.Pointer(&b[0]))[:n:n]
 }
@@ -131,7 +131,7 @@ func TestManagedSliceViewRefusesWithoutAnAliasingPair(t *testing.T) {
 
 	control := emittedFunctionText(t, mainCs, "bytesAsWords")
 
-	if !strings.Contains(control, "new slice<uint16>(new ReadOnlySpan<uint16>((uint16*)") || strings.Contains(control, "throw panic(") {
-		t.Errorf("an unmanaged element keeps the span-over-address view:\n%s", control)
+	if !strings.Contains(control, "@unsafe.Pointer.View<uint16>(") || strings.Contains(control, "throw panic(") {
+		t.Errorf("an unmanaged element takes the view door, not the refusal:\n%s", control)
 	}
 }

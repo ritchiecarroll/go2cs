@@ -514,3 +514,96 @@ func main() {
 		}
 	}
 }
+
+// A defined type over an admitted struct: go-winio's `type GUID windows.GUID` (pkg/guid, v0.6.2). go2cs-gen lays the
+// defined type out as a wrapper over its base, forwarding the base's fields, so guid.GUID holds windows.GUID's inline
+// array8<byte> and, like windows.GUID, copies by value with no ΔClone. The converter keyed the defined type by its own
+// name, which nothing admits, so it emitted g.ΔClone() at every value copy (CS1061 x13 in the i9's Windows TypeScript
+// build, COORD 2026-11-15 01:19Z). Admission now follows the base: the defined type is held inline exactly when its base
+// is, and its package's record says so, so a consumer one package further (the root here, pkg/etw in go-winio) reads
+// it too. The pointer conversion back to the base, which go-winio's etw makes, needs the shared layout. Slicing the
+// field from the defined type's package is not spelled here; that is the separate face question.
+var inlineDefinedOverModule = map[string]string{
+	"win/win.go": `package win
+
+import "unsafe"
+
+type GUID struct {
+	Data1 uint32
+	Data2 uint16
+	Data3 uint16
+	Data4 [8]byte
+}
+
+func Register(g *GUID) uintptr { return uintptr(unsafe.Pointer(g)) }
+`,
+	"guid/guid.go": `package guid
+
+import "example.com/definedover/win"
+
+type GUID win.GUID
+
+func FromParts(a uint32, d4 [8]byte) GUID {
+	var g GUID
+	g.Data1 = a
+	for i := range d4 {
+		g.Data4[i] = d4[i]
+	}
+	return g
+}
+
+func (g GUID) First() byte { return g.Data4[0] }
+
+func Copy(g GUID) GUID {
+	h := g
+	return h
+}
+`,
+	"definedover.go": `package definedover
+
+import (
+	"example.com/definedover/guid"
+	"example.com/definedover/win"
+)
+
+type Provider struct {
+	ID guid.GUID
+}
+
+func (p *Provider) Register() uintptr { return win.Register((*win.GUID)(&p.ID)) }
+
+func Snapshot(p Provider) guid.GUID {
+	id := p.ID
+	return id
+}
+`,
+}
+
+func TestInlineArrayDefinedTypeFollowsItsBase(t *testing.T) {
+	out := convertInlineModule(t, "definedover", inlineDefinedOverModule)
+	guidCs := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "guid", "guid.cs")), "\r\n", "\n")
+	guidInfo := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "guid", "package_info.cs")), "\r\n", "\n")
+	rootCs := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "definedover.cs")), "\r\n", "\n")
+
+	if strings.Contains(guidCs, "ΔClone") {
+		t.Errorf("guid.GUID is laid out over the admitted win.GUID and copies by value; want no ΔClone:\n%s", guidCs)
+	}
+
+	if !strings.Contains(guidInfo, `GoInlineArrayType("GUID")`) {
+		t.Errorf("want guid's record to list GUID as held inline, so a consumer package reads it:\n%s", guidInfo)
+	}
+
+	if strings.Contains(rootCs, "ΔClone") {
+		t.Errorf("a consumer of guid.GUID reads guid's record; want no ΔClone:\n%s", rootCs)
+	}
+}
+
+// The same module BUILT with the .NET SDK: at the admission that keyed a defined type by its own name it fails with
+// CS1061 ('GUID' does not contain a definition for 'ΔClone').
+func TestInlineArrayDefinedTypeModuleBuilds(t *testing.T) {
+	dotnet := requireInlineBuild(t)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, convertInlineModule(t, "definedover", inlineDefinedOverModule)); err != nil {
+		t.Fatalf("a defined type over an admitted struct does not build: %v\n%s", err, built)
+	}
+}
