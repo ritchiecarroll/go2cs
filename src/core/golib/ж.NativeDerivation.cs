@@ -45,13 +45,32 @@ internal static class NativeDerivation
 {
     // What a box derived from `root` retains: `root` itself, unless it is a native box over C memory alone. The other
     // native kinds (a window over a native array) retain nothing here, as before.
-    internal static object? Kept(object? root) => root switch
+    //
+    // ONE HOP (2026-11-15, docs/phase4/DESIGN-array-pointer-doors.md 15). A native box that owns no pin holds its
+    // source and nothing else, so a box derived from it retains that SOURCE in its place. Before, each step of
+    // `for ... { p = unsafe.Add(p, 1) }` retained the box of the step before: N steps held N boxes, Token walked N
+    // links to compare two pointers, and HeldSource stopped short of the Go value past its depth bound, so a view at
+    // the walked address lost the value's end. The order token is the same either way: it is the source's token plus
+    // the sum of the distances, and the sum from the source to this address does not depend on the steps taken. The
+    // loop serves a chain no mint makes now (one built link by link).
+    internal static object? Kept(object? root)
     {
-        null => null,
-        INativeRooted rooted => rooted.IsGenuinelyNativeRoot ? null : root,
-        IGoReflectBox { NativeAddress: not 0 } => null,
-        _ => root
-    };
+        if (root is INativeRooted { NativeRetainedInItsPlace: { } source })
+        {
+            while (source is INativeRooted { NativeRetainedInItsPlace: { } next })
+                source = next;
+
+            return source;
+        }
+
+        return root switch
+        {
+            null => null,
+            INativeRooted rooted => rooted.IsGenuinelyNativeRoot ? null : root,
+            IGoReflectBox { NativeAddress: not 0 } => null,
+            _ => root
+        };
+    }
 
     // The number-to-pointer conversion's own case: its number RESOLVED to a live Go box of another pointee type, and
     // the native box it mints over that number is a view of that box's pinned storage. A flagged order token keeps its
@@ -111,27 +130,35 @@ internal static class NativeDerivation
     // answers the derived box's place in the token space of what it was derived from: the source's token plus the
     // distance from the source's address to the box's own. The source of a derived box is held still for the box's
     // life (the derivation asked its number, which is the pin moment), so its address is the one the distance was
-    // measured from. A chain of derivations is walked to its first managed source.
+    // measured from. A chain of derivations is walked to its first managed source, in a LOOP: the distances are
+    // summed link by link, and the first link that is not derived from a native address answers the base. It was a
+    // call per link, and a pointer advanced 1,000,000 steps overflowed the stack when it was compared (Kept keeps
+    // such a pointer one link long now; the loop is for a chain built any other way).
     //
     // A box over C memory alone, over an order token, or derived from a source with no address answers its own
     // number, as before.
     internal static nuint Token(INativeRooted box)
     {
         nuint address = box.NativeRootAddress;
+        nuint moved = 0;
+        object? from = box.NativeDerivedFrom;
 
-        switch (box.NativeDerivedFrom)
+        while (from is INativeRooted { NativeRootAddress: var at and not 0 } inner)
         {
-            case INativeRooted { NativeRootAddress: var from and not 0 } inner:
-                return unchecked(Token(inner) + (address - from));
-
-            case IGoReflectBox { NativeAddress: 0, IsNilPointer: false, NamesZeroBase: false } source when source is INilPointer tokened:
-                nuint held = source.NativeArgumentAddress();
-
-                return held == 0 || ManagedPointerTokens.IsTaggedToken(held) ? address : unchecked(tokened.PointerOrderToken + (address - held));
-
-            default:
-                return address;
+            moved = unchecked(moved + (address - at));
+            address = at;
+            from = inner.NativeDerivedFrom;
         }
+
+        if (from is IGoReflectBox { NativeAddress: 0, IsNilPointer: false, NamesZeroBase: false } source && source is INilPointer tokened)
+        {
+            nuint held = source.NativeArgumentAddress();
+
+            if (held != 0 && !ManagedPointerTokens.IsTaggedToken(held))
+                return unchecked(tokened.PointerOrderToken + (address - held) + moved);
+        }
+
+        return unchecked(address + moved);
     }
 }
 
