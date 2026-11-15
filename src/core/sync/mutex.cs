@@ -54,9 +54,10 @@
 // - Unlock reads the `sema` word after the swap that unlocks, so a mutex freed by another goroutine the
 //   moment it is unlocked is read after the free. Go's own Unlock does as much: with a waiter recorded,
 //   unlockSlow loads `state` again and semrelease adds to `sema`, both after the unlocking store.
-// - A waiter blocks its OS THREAD in the semaphore, where Go parks a goroutine and frees its M. A
-//   scheduler that parks instead must keep "a wakeup is waiting to be taken" readable by Unlock, which
-//   is the semaphore's CurrentCount here.
+// - A waiter blocks its OS THREAD in the semaphore, where Go parks a goroutine and frees its M, and an
+//   Unlock that read 2 takes the stripe's monitor for its lookup. A scheduler that parks instead must
+//   keep "a wakeup is waiting to be taken" readable by Unlock, which is the semaphore's CurrentCount
+//   here.
 // - Go 1.26 declares sync.Mutex as one field, an internal/sync.Mutex that holds the two words. Reflect
 //   sees `state` and `sema` on sync.Mutex itself here: the same eight bytes, one level flatter.
 using System.Runtime.CompilerServices;
@@ -130,7 +131,8 @@ private sealed class WaitQueue : SemaphoreSlim {
 // The table of wait queues is QueueStripes stripes. A handle is its stripe's index in the low StripeBits
 // bits and a sequence number above them, so a handle names its stripe; and a thread installs every queue
 // it installs in ONE stripe (t_stripe), so threads that contend on different mutexes work in different
-// stripes, and one thread meets the same lock and the same spare queue again and again.
+// stripes, and one thread meets the same lock and the same spare queue again and again. The sequence
+// number is 26 bits: a stripe that installs a queue every microsecond wraps it in about a minute.
 private const int StripeBits = 6, QueueStripes = 1 << StripeBits;
 
 // One stripe: its queues, hashed by sequence number and chained through WaitQueue.next, and a few spare

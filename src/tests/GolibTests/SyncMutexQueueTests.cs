@@ -28,6 +28,8 @@ public unsafe class SyncMutexQueueTests
 
     private static readonly MethodInfo? s_gateOf =
         typeof(sync).GetMethod("gateOf", BindingFlags.NonPublic | BindingFlags.Static);
+    private static readonly MethodInfo? s_leave =
+        typeof(sync).GetMethod("leave", BindingFlags.NonPublic | BindingFlags.Static);
     private static readonly MethodInfo? s_queueOf =
         typeof(sync).GetMethod("queueOf", BindingFlags.NonPublic | BindingFlags.Static);
     private static readonly MethodInfo? s_stripeOf =
@@ -341,6 +343,63 @@ public unsafe class SyncMutexQueueTests
         }
     }
 
+    // Unlock sends its wakeup outside the stripe's lock, so the queue it looked up can be given up, and
+    // installed for ANOTHER mutex, before the wakeup arrives. The late wakeup is played here by a Release on
+    // the queue object this thread kept. Arriving while the queue is a spare, it is dropped when the queue is
+    // installed again. Arriving after, it is one extra wakeup on the other mutex: its waiter takes it, finds
+    // the mutex still held and blocks again, and the mutex's own Unlock is what gives it the lock. Both
+    // queues are installed by this thread, so the second mutex gets the first one's queue from the stripe.
+    [TestMethod]
+    public void AWakeupThatArrivesAfterItsQueueServesAnotherMutexCostsOneReCheck()
+    {
+        sync.Mutex* block = (sync.Mutex*)NativeMemory.AllocZeroed((nuint)(2 * sizeof(sync.Mutex)));
+        sync.Mutex* first = block, second = block + 1;
+        bool leak = false;
+
+        try
+        {
+            SemaphoreSlim firstGate = GateOf(first);
+            uint firstHandle = Sema(first);
+            Leave(first, firstGate);
+            Assert.AreEqual(0u, Sema(first), "the last waiter out clears the first mutex's handle");
+            Assert.IsNull(QueueOf(firstHandle), "the first mutex's handle names nothing once its queue is given up");
+
+            firstGate.Release();     // late, onto the spare queue
+            second->Lock();
+            SemaphoreSlim secondGate = GateOf(second);
+            Assert.AreSame(firstGate, secondGate, "the second mutex is served by the queue the first gave up");
+            Assert.AreNotEqual(firstHandle, Sema(second), "under a new handle");
+            Assert.AreEqual(0, secondGate.CurrentCount, "a wakeup sent to a spare queue is dropped when the queue is installed");
+
+            firstGate.Release();     // late, onto the second mutex's queue
+            leak = true;
+            Thread waiter = LockAndUnlockOnAThread(second);
+            bool blocked = BlockedWithin(waiter);
+            int heldState = State(second);
+            int kept = secondGate.CurrentCount;
+
+            // Unlocking a mutex the waiter already unlocked would end the process: a failed run stops here.
+            if (heldState != 0)
+                second->Unlock();
+
+            bool woken = waiter.Join(Bound);
+            leak = !woken;
+
+            Assert.IsTrue(blocked, "the waiter took the late wakeup for the lock: it did not block on the held mutex");
+            Assert.AreEqual(2, heldState, "the second mutex is still held, with a waiter recorded");
+            Assert.AreEqual(0, kept, "the waiter took the late wakeup and waits again");
+            Assert.IsTrue(woken, "the second mutex's own Unlock did not wake its waiter");
+            Assert.AreEqual(0, State(first), "the first mutex was never locked");
+            Assert.IsTrue(first->TryLock(), "the first mutex is free");
+        }
+        finally
+        {
+            // A waiter still blocked reads this memory when it wakes, so a failed run keeps the block.
+            if (!leak)
+                NativeMemory.Free(block);
+        }
+    }
+
     // Queues come and go while other threads read the handle: eight threads move across four mutexes, and the
     // holder yields often enough that waiters block and queues empty many times. Every counter is exact, no
     // worker is left waiting, and afterwards no mutex holds a queue.
@@ -435,6 +494,15 @@ public unsafe class SyncMutexQueueTests
         *m = (sync.Mutex)args[0]!;
         Assert.IsTrue(gate is SemaphoreSlim, "gateOf returns the mutex's wait queue");
         return (SemaphoreSlim)gate!;
+    }
+
+    // Gives back a queue GateOf returned, as a waiter that has the lock does.
+    private static void Leave(sync.Mutex* m, SemaphoreSlim gate)
+    {
+        Assert.IsNotNull(s_leave, "the hand-own's leave(ref Mutex, WaitQueue)");
+        object?[] args = [*m, gate];
+        s_leave.Invoke(null, args);
+        *m = (sync.Mutex)args[0]!;
     }
 
     // One contention episode, start to finish: this thread holds m, a waiter blocks in Lock, this thread
