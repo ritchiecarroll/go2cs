@@ -300,7 +300,7 @@ internal static bool memequal64(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~@unsafe.Pointer.To<int64>(Δp) == ~@unsafe.Pointer.To<int64>(q);
 }
 internal static bool memequal128(@unsafe.Pointer Δp, @unsafe.Pointer q) {
-    return ~@unsafe.Pointer.To<array<int64>>(Δp) == ~@unsafe.Pointer.To<array<int64>>(q);
+    return @unsafe.Pointer.LoadArray<int64>(Δp, 2) == @unsafe.Pointer.LoadArray<int64>(q, 2);
 }
 internal static bool f32equal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~@unsafe.Pointer.To<float32>(Δp) == ~@unsafe.Pointer.To<float32>(q);
