@@ -38296,4 +38296,39 @@ this remedy, instead of 13 loader errors that read like a converter defect. A se
 
 — C2 (2026-11-14)
 
+## 2026-11-15 — C2 (go-winio Part 2, COORD ruling (b)+(a) 02:38Z): an escaping slice of a foreign inline array pays a finalizable pin per box; the pinned-object-heap variant is a .5 candidate — DISCLOSED cost, (c) OPEN, not started
+
+**What it is.** A slice of an array held inline by another package's admission (go-winio's `guid.GUID` over
+`windows.GUID`, `Data4 [8]byte`) aliases the struct, so its box is pinned for as long as the box lives
+(`ж<T>.ΔInlineSlice<E>()`, DESIGN-array-value-storage.md, amended 2026-11-15). The copy shapes (`copy` into or out
+of `x.f[lo:hi]`) take no pin (ruling (b)). An ESCAPING slice keeps the pin (ruling (a)): go-winio's `String`, whose
+`g.Data4[:2]` and `g.Data4[2:]` go to `fmt.Sprintf`.
+
+**Measured** (`TestInlineArrayForeignSlicePinIsReleased`, linux-x64, Debug, workstation GC; N = 1,000,000 calls of a
+value-receiver method returning `g.Data4[:2]`, read after `runtime.GC()`):
+
+| arm | retained heap | fragmentation | pinned | peak (sampled) | time |
+|---|---|---|---|---|---|
+| unpinned control | 2.1 MB | 1.1 MB | 3 | 33.4 MB | 0.35 s |
+| escaping slice | 27.5-28.7 MB | 10.6-11.7 MB | 4 | 200.7-261.2 MB | 3.3-3.8 s |
+| leak control (every slice kept) | 500-532 MB | 64-96 MB | 1,000,003 | 660 MB | 8.1-8.6 s |
+
+B3 (pins released after a drain) holds and is the gate. B1, B2 and B4 (retained heap, fragmentation, peak against the
+control) do not, by the margins above, and are disclosed here per the ruling.
+
+**Why.** Each slicing of a value receiver allocates a boxed copy, a FINALIZABLE `PinnedBuffer` with a pinned
+`GCHandle`, an anchor array with its `ConditionalWeakTable` entry, and a provenance entry. A pin is released by its
+box's finalizer, so it survives two collections, with the slot pinned in gen0 the whole time: peak and fragmentation
+are the cost. Go allocates the receiver on the heap here too (the slice escapes), but without a pin.
+
+**Who reaches it.** A consumer that slices a foreign inline array of numeric or boolean elements and lets the slice
+escape. go-winio's `String` is a format path. sqlite-cs's foreign faces are all spelled (0 sliced), and std admits
+nothing.
+
+**(c), OPEN, a .5 candidate (COORD).** Allocate the box of a struct whose inline array is sliced on the pinned object
+heap: no `GCHandle` and no finalizer, but the box is reclaimed only by gen2 collections. A golib heap variant the
+converter selects. Not started; measure against this row's table.
+
+— C2 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
