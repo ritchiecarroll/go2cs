@@ -39502,4 +39502,32 @@ row "assigning a whole array gives the variable new storage", another lane's cut
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — R (COORD's seat, from P4's ValidatedModules refresh): a proof page wrote a test name holding a pipe as `\|` inside a table code span, which GitHub and the Pages site render differently — FIXED, claude/r-proof-pipe a39559ef2094287a43461b2696800647013e26a5
+
+**The defect.** `escapeProofCell` (`src/go2cs/validationProofPages.go`) turned a pipe into a backslash-pipe, and
+every caller wrapped the result in backticks. In a TABLE cell GitHub removes the backslash before a pipe even in a
+code span, and kramdown keeps it, so one renderer was always wrong; repoguard's
+`TestDocsTableCodeSpanHasNoEscapedPipe` refuses the form. timefmt-go's proof page (index.md:26) is the first page
+whose test name holds a pipe; P4 hand-fixed that line while copying the 1.26.10.3 nugetgo wave's pages. No
+standard-library test name holds one, which is why no roster page had met it.
+
+**Red first.** `TestValidationProofPageCodeCellWithAPipe` renders the fixture page with a verdict named
+`TestFormat/2006-01-02|15:04`. At master 091935257c it read ``| `TestFormat/2006-01-02\|15:04` | pass | pass |``
+and failed on both of its assertions.
+
+**The fix.** A table code cell takes `proofCodeCell`: the backtick span when the value has no pipe (byte for byte what
+every committed page holds), and with a pipe `<code>…&#124;…</code>`, with the backslash and the Markdown-active
+characters as entities (the form the guard's header names). A prose code span (the skip-class paragraphs, the
+withdrawn and host lists) takes `proofCodeSpan`: there a span is literal on both renderers, so the pipe is written
+as it is, where the old escape showed its backslash. A non-code cell keeps `escapeProofCell`'s escape, which both
+renderers read the same outside code. `TestProofCodeForms` pins both forms.
+
+**Footprint: 0 committed proof pages, as predicted.** An exact census of the 3,915 tracked pages under
+`docs/validation` finds a backslash-pipe inside a code span on 4 lines, all in the frozen 1.24.13.1 and 1.24.13.2
+`ValidatedTestPackages.md` snapshots: build-tag text (`(amd64 || arm64 …)` with the pipes escaped), not this writer's
+output, and outside the guard's living pages. The census catches a planted proof row. The .4 nugetgo wave
+regenerates timefmt-go's page byte-equal to P4's hand fix, and that hand fix retires.
+
+— R (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
