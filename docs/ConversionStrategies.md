@@ -2528,7 +2528,7 @@ operators and from `quo` and `rem` alike. When golib's panic handling catches th
 into Go's `runtime error: integer divide by zero` panic.
 So [`recover`](#defer--panic--recover) catches it as in Go, and an unrecovered one reports Go's message.
 <!-- golden: src/tests/Behavioral/DivideByZeroPanic (safeDiv/safeMod recover, outerGuard crosses a frame);
-     mapping: src/core/golib/runtime/RuntimeErrorPanic.cs:574#b581bf (TryAsPanic adopts DivideByZeroException as
+     mapping: src/core/golib/runtime/RuntimeErrorPanic.cs:602#b581bf (TryAsPanic adopts DivideByZeroException as
      Go's integer-divide-by-zero runtime error). -->
 
 **A slice bound keeps its full value.** C#'s range syntax, `s[lo..hi]`, accepts only an `int`, and Go's `int`
@@ -8397,7 +8397,7 @@ pointer's deref alias, golden DirectBoxReceiverPassedWhole/main.cs.target:18#8f4
 `nonnil`, src/core/golib/ж.cs `operator ~` and ж.StandardBox.cs `Value`, all throwing
 RuntimeErrorPanic.NilPointerDereference(). No divide check is emitted anywhere in src/go2cs.
 The catch filter maps DivideByZeroException and NullReferenceException:
-src/core/golib/runtime/RuntimeErrorPanic.cs:564#351d17 (TryAsPanic). Bounds checks throw
+src/core/golib/runtime/RuntimeErrorPanic.cs:592#351d17 (TryAsPanic). Bounds checks throw
 RuntimeErrorPanic.IndexOutOfRange directly: src/core/golib/slice.cs:282#ae078f, array.cs:403#ae078f.
 2026-09-27 accuracy pass: `divide` has no frame, so the mapping happens in outerGuard's catch filter. -->
 **Runtime errors are panics too.** In `divide`, `a / b` with `b` zero raises .NET's `DivideByZeroException`.
@@ -10893,7 +10893,7 @@ its zero value and then assigned, because `bump(&xy)` needs its address. The pro
 
 **Pointers compare by address.** Two pointers are equal when they point to the same storage, even when
 they are taken through different slices: `Ꮡ(t, 0) == Ꮡ(s, 1)` is true when `t` is `s[1:]`. So a pointer works
-as a [map](#maps) key. Raw addresses are covered in [`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr). <!-- equality: src/tests/Behavioral/SlicePointerIdentity/main.go:26-27 `t := s[1:]` / `&t[0] == &s[1]` -> main.cs.target:21-22 `Ꮡelem(t, 0) == Ꮡelem(s, 1)` (both operands element address-ofs, so Ꮡelem); the whole file main.go:20-69#af40fc (element pointers as map keys: main.go:56-59#d4029b -> main.cs.target:45-48 `new map<ж<nint>, @string>{}`). pinning: golib pins the storage only where it is pinnable, src/core/golib/ж.cs:63#309359 (PointerStorage: None = order token, Unpinnable = correct when taken but may move, Pinnable = pinned), ж.cs:710#9fcd40 (EnsureStableAddress), ж.cs:1292#828d85 (uintptr conversion returns an order token for a reference-holding pointee) -->
+as a [map](#maps) key. Raw addresses are covered in [`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr). <!-- equality: src/tests/Behavioral/SlicePointerIdentity/main.go:26-27 `t := s[1:]` / `&t[0] == &s[1]` -> main.cs.target:21-22 `Ꮡelem(t, 0) == Ꮡelem(s, 1)` (both operands element address-ofs, so Ꮡelem); the whole file main.go:20-69#af40fc (element pointers as map keys: main.go:56-59#d4029b -> main.cs.target:45-48 `new map<ж<nint>, @string>{}`). pinning: golib pins the storage only where it is pinnable, src/core/golib/ж.cs:63#309359 (PointerStorage: None = order token, Unpinnable = correct when taken but may move, Pinnable = pinned), ж.cs:710#9fcd40 (EnsureStableAddress), ж.cs:1297#828d85 (uintptr conversion returns an order token for a reference-holding pointee) -->
 
 **Full detail:** [Reference → Pointers](ConversionStrategies-Reference/pointers.md#pointers) — which parameters become `ref` and their call forms, the deferred nil panic, per-iteration loop boxes, closures over boxed locals, equality and pinning, and `unsafe.Pointer` conversions.
 
@@ -11294,7 +11294,7 @@ internal static uintptr addrOf(ж<point> p) {
 
 `point` holds only two `int32`s, so its storage can be pinned. It is a type declared in Go,
 which the [source generators](#source-generators) complete.
-<!-- nil gives 0: UintptrUnsafePointerIdiom/main.go:45-46#75324d -> main.cs.target:27-28 (`ж<point> missing = default;` / `addrOf(missing) == 0`); golib's ж<T> -> uintptr operator returns 0 for a nil box (src/core/golib/ж.cs:1229-1248#95b7af); since 2026-10-16 that is the structural nil question, so a box HOLDING a nil pointer (`&p`, p nil) is not nil and takes the token arm below. point is reference-free (UintptrUnsafePointerIdiom/main.go:23-25#60ec9e), so it is pinnable. A reference-bearing pointee returns value.PointerOrderToken instead: ж.cs:1292#828d85, with PointerStorage.None from ж.StandardBox.cs:221-222#435ab0 and ж.ElemRefBox.cs:386-388#b9ec7b. -->
+<!-- nil gives 0: UintptrUnsafePointerIdiom/main.go:45-46#75324d -> main.cs.target:27-28 (`ж<point> missing = default;` / `addrOf(missing) == 0`); golib's ж<T> -> uintptr operator returns 0 for a nil box (src/core/golib/ж.cs:1234-1253#95b7af); since 2026-10-16 that is the structural nil question, so a box HOLDING a nil pointer (`&p`, p nil) is not nil and takes the token arm below. point is reference-free (UintptrUnsafePointerIdiom/main.go:23-25#60ec9e), so it is pinnable. A reference-bearing pointee returns value.PointerOrderToken instead: ж.cs:1297#828d85, with PointerStorage.None from ж.StandardBox.cs:221-222#435ab0 and ж.ElemRefBox.cs:386-388#b9ec7b. -->
 
 **Pointer arithmetic moves the pointer, and the moved pointer aliases the same memory.** Go writes it as
 one expression: convert the pointer to a number, add an offset, convert the sum back. The converter emits
@@ -11360,7 +11360,7 @@ an address does in Go.
 A token has no memory behind it, so it has no neighbours. Adding an offset to a token and converting the
 result back to a pointer raises a Go panic that says so. Like any Go panic, `recover` can catch it
 ([Defer / Panic / Recover](#defer--panic--recover)).
-<!-- the panics: src/core/golib/ж.cs:976-1214#50ed5c (token arithmetic refused; arm 2a panics at dereference of an order token read as another type, unless the number is a live box's own token and the direct reinterpret would alias that pair); src/core/golib/runtime/RuntimeErrorPanic.cs:61#c45947 (UnsafePointerArithmeticWithoutAddress, arithmetic refusal) and :95#d277a9 (UnsafePointerOrderTokenDereferenced, order-token dereference refusal); GolibTests TokenArithmeticRefusalTests, OrderTokenOffsetZeroRefusalTests -->
+<!-- the panics: src/core/golib/ж.cs:976-1219#1f5133 (token arithmetic refused; arm 2a panics at dereference of an order token read as another type, unless the number is a live box's own token and the direct reinterpret would alias that pair); src/core/golib/runtime/RuntimeErrorPanic.cs:61#c45947 (UnsafePointerArithmeticWithoutAddress, arithmetic refusal) and :95#d277a9 (UnsafePointerOrderTokenDereferenced, order-token dereference refusal); GolibTests TokenArithmeticRefusalTests, OrderTokenOffsetZeroRefusalTests -->
 
 **`unsafe.Pointer(p)` keeps what it points to alive.** A standalone conversion becomes a factory call
 such as `@unsafe.Pointer.FromPinnedBox(e0)`. The `@unsafe.Pointer` it builds stores the source box beside

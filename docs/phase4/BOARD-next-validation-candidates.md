@@ -38667,4 +38667,94 @@ that half design-first to P5, after batch 305.
 
 — G (2026-11-14)
 
+## 2026-11-14 — P5 (the named-array floor seat; COORD rulings D4 at 19:35Z and item 3 at 19:58Z): three rows the seat leaves open: an array viewed over another array type answers length 0; a plain pointer conversion to a named array does not compile; a named array over Go memory of another type is refused where Go answers — OPEN, all three, owner P5
+
+Read at master `c2919b8b16` on linux/amd64, Go 1.26.11, Release. Programs, Go's answers and the converted answers:
+`docs/phase4/data/named-array-floor/` and, for Q, `docs/phase4/data/array-pointer-doors/` (design branch
+`claude/p5-native-view-design`). The floor seat (`claude/p5-named-array-floor`) refuses the named-array half of this
+class by name; these three are what it does not change.
+
+**1. A whole view of an array over Go memory of another array type answers length 0 (wrong answer or a panic, owner
+P5, deferred by ruling D4).** Two shapes, one emission (`Reinterpret` over the pinned box, then the array read
+through a box whose pointee is the destination array):
+
+- **Q, unnamed over unnamed.** `w := (*[16]byte)(unsafe.Pointer(&arr))[:]` over `var arr [4]uint32`, then
+  `w[4] = 1`. Go prints `[0 1 0 0]`. Converted: `index out of range [4] with length 0`.
+- **ge, a named array viewed as the unnamed one.** `e := (*[64]byte)(unsafe.Pointer(&sm))` over `var sm smallMem`
+  (`type smallMem [64]byte`), then `e[5] = 7`. Go prints `7 7 [0 0 0 0 0 7 0 0]`. Converted:
+  `index out of range [5] with length 0`.
+
+Neither stores anything it should not: the view is empty, so the store panics. The floor seat leaves both as they
+are (its refusal is keyed on the generated wrapper as the POINTEE, and here the pointee is `array<E>`). The cure is
+door C of the array-pointer design, ruled to .5.
+
+**2. A plain conversion between a pointer to an unnamed array and a pointer to a named array of the same
+underlying type does not compile (CS0030, owner P5, not in the floor seat by COORD's 19:58Z ruling).** Go:
+`g := (*smallMem)(&h.buf)` with `buf [64]byte` and no `unsafe`. Emitted: `(ж<smallMem>)(h.Ꮡbuf)`, and C# has no
+conversion from the box of `array<byte>` to the box of `smallMem`. Go allows it because the two pointer types have
+identical underlying base types. Found while writing the Go-memory probe; the arm was taken out of the probe and
+its source and emission are kept beside it (`gomem/plain-conversion.go.txt`, `.cs.txt`). No std or behavioral site
+is known: none was looked for, so this is a shape, not a census.
+
+**3. A named array viewed over Go memory of ANOTHER type is refused by name from this seat on, where Go answers
+(owner P5, cure in doors B and C).** Five shapes of seven in the probe: over a `[64]byte` field (`ga`), over a
+`[64]byte` variable (`gb`), over a `[8]uint64` (`gd`), over a slice's first element (`gg`), over a struct's first
+field (`gh`). At master each stored a managed address into the Go storage and lost the program's write (Go prints
+3, 4, 6, 9, 1; converted, in the committed run, 162, 207, 161, 0, 139934896735784: the values are addresses and
+differ per run), which is why the seat refuses them. The same-type
+round trip (`gf`) is right before and after. std has 8 conversions to a named array per target and none of them
+runs on a banked row (3 in `mprof.go` inside the hand-owned `stkbucket`, 4 in `mgcmark_greenteagc.go` in the
+collector's own scan, 1 in `internal/runtime/maps` `TestMapIndirect`, which is disclosed and refuses earlier).
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — P5 (the named-array floor seat after COORD's review, items 5 and 6): the floor's census of conversions to a named array missed seven sites, named here and read safe; and a nil array pointer made from a number carries no length — the census CORRECTED (15 sites per target, not 8); the nil row OPEN, owner P5, cure in door A
+
+Read at `claude/p5-named-array-floor` on linux/amd64, Go 1.26.11, Release. This entry corrects the count in row 3
+of the entry above (which stays as written) and adds one row.
+
+**The census correction.** Row 3 above says std has 8 conversions to a named array per target. COORD's review
+of the seat found 7 more with a search for the `Reinterpret` spelling, all in `runtime/mpallocbits.go`, where
+`type pallocBits pageBits` and `type pageBits [pallocChunkPages / 64]uint64`:
+
+| Go line | Method and its conversion | Emitted (`src/core/runtime/mpallocbits.cs`) |
+|:--|:--|:--|
+| 344 | `(*pallocBits).allocRange`: `(*pageBits)(b).setRange(i, n)` | :362 `Ꮡb.Reinterpret<pallocBits, pageBits>()` |
+| 349 | `allocAll`: `setAll()` | :367 |
+| 354 | `free1`: `clear(i)` | :372 |
+| 359 | `free`: `clearRange(i, n)` | :377 |
+| 364 | `freeAll`: `clearAll()` | :382 |
+| 371 | `pages64`: `block64(i)` | :389 |
+| 377 | `allocPages64`: `setBlock64(i, alloc)` | :395 |
+
+So the count is 15 per target, not 8. My census searched for conversions through `unsafe.Pointer`; these seven
+are plain conversions between two named array types of one underlying type, which Go allows without `unsafe` and
+the converter emits as `Reinterpret`. The predicate was narrower than the claim it supported.
+
+**Why the seven are safe, read and then tested.** The source of each is a pointer to a `pallocBits` in managed
+storage. For two named arrays of one field sequence `Reinterpret` takes its alias arm
+(`ReinterpretAliasesStorage`, `ж.PointerExtensions.cs`) before any native route: the result is a field view on
+the SAME box, no native box is made, and the floor is not reached. The arm
+`NamedArrayCarrierTests.ANamedArrayReinterpretedAsAnotherOfItsShapeAliasesTheSameArray` holds that pair shape
+(two named `[64]byte` types): a store through the converted pointer is read back through the original. If a
+`pallocBits` ever sat in native memory, the conversion would still succeed (the box is a carrier) and the first
+read through it would be refused by name.
+
+**New row. A nil pointer to an unnamed array made from a number carries no length (wrong answer from reflect,
+owner P5, cure in door A).** Go: `reflect.TypeOf((*[4]byte)(unsafe.Pointer(nil))).Elem().Len()` is 4, and the
+same for a pointer made from the number 0. Converted: 0, the type prints as `*[]uint8`, and `Size()` panics
+"the size of [?]uint8 is not known". The language's own nil, `(*[4]byte)(nil)`, is emitted as `NilBoxOfDims(4)`
+and answers 4. The difference is the construction: the number conversion's type argument is `array<byte>`, which
+carries no length, so the runtime has no 4 to attach, and golib cannot cure it from its side. The array-pointer
+creation door of `DESIGN-array-pointer-doors.md` (door A) is handed N by the converter and can answer
+`NilBoxOfDims(N)` for a nil source. Not affected: `len(p)` and `cap(p)`, which the converter writes as the
+constant when the operand neither calls nor receives; equality (the two nils compare equal); `IsNil`. A NAMED
+array pointee is not affected either: its type declares its length, and reflect reads 64 for a nil
+`*smallMem`-shaped pointer. No std or behavioral site is known to read the length of such a nil: none was looked
+for. The measured answer is asserted, and this row named, in
+`NativeArrayViewFloorTests.ANilArrayPointerFromANumberCarriesNoLengthWhereTheLanguagesNilDoes`; whoever cures it
+turns that arm's two measured assertions into Go's answer.
+
+— P5 (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
