@@ -736,3 +736,38 @@ with the verbose logger on, against 6 m 29 s without it, so the logger does not 
 **Scored.** `checkdemo` with G alone: names 1,300 MB in 1,200 to 1,560, peak 31 GB in 29 to 37, ILC 14 min in 12
 to 20, matches Go: all MET. `mfdemo`: as `emitdemo` in every row. The sampler's 37 GB line was not reached by
 any of the three; the smallest available RAM at a peak was 7.6 GB.
+
+## 20. Amendment, 2026-11-15 11:30Z: the Windows run of record, at the tree that carries the `go-winio` fix
+
+Section 17 read the demos on Windows at the last master that built there. This is the same script at
+`5cc8de74b2` (`claude/c2-inline-foreign-slice`, which contains master `091935257c`): a fresh worktree, a fresh
+conversion, TypeScript `ba29a56299`, go1.26.11, SDK 10.0.403, `GoTargetOS=windows`, under the JIT.
+
+**The Windows build of the TypeScript closure is green again, for the first time since batch 302.** All four
+demos build with 0 errors. `github.com.Microsoft.go-winio.pkg.guid`, the project that failed with 17 errors in
+section 17, builds clean, and so do the two projects that reference it and that MSBuild had skipped behind it
+(`go-winio.internal.socket` and `go-winio` itself), with everything above them: no fourth wall stood behind
+the third.
+
+| comparison against native Go | `651c4ad147` (section 17) | `5cc8de74b2` |
+|:--|:--|:--|
+| `parsedemo` demo | match | match |
+| parse corpus | 17,422 of 17,422 | 17,422 of 17,422 |
+| `checkdemo`, `emitdemo`, `mfdemo` demos | match, match, match | match, match, match |
+| full emit, every single-file compiler case | 7,404 of 7,404 | 7,404 of 7,404 |
+| full type-check, the same cases | 7,404 of 7,404 | 7,404 of 7,404 |
+
+The four demo outputs hash the same at both trees. Between the two trees are batches 301 to 307 and the
+`go-winio` cut, which change how arrays are stored; nothing in the converted compiler's output moved.
+
+**The script's exit is 1 from its census step alone, as in section 17 and for the same two reasons:** 1,267
+hits, of which 1,266 are the locally derived deny list matching the repository's own public URL in emitted
+project files (0 outside that URL) and 1 is the `local` mode's absolute `go2csPath` in the staged
+`Directory.Build.props`.
+
+**If the converter changes after this run,** a rerun is owed only if the emitted `.cs` of the TypeScript closure
+differs between the two conversions; this run's converted tree is kept for that comparison.
+
+**Scored.** Converts and builds all four (65%): MET. One clean build line for the `guid` project (80%): MET. The
+four small comparisons and the corpus (85%): MET. Full emit all match (85%): MET. Full check all match (85%):
+MET. The script exits 1 from the census alone, the same two classes (90%): MET.
