@@ -27,6 +27,18 @@ package, on Windows and Linux. On macOS, a package is validated when its row on 
 
 ## 📰 NEWS — Faster Native AOT, and a Release standard library from source
 
+<!-- HELD for the 1.26.11.1 news item (owner ask, relayed by COORD 2026-11-15 18:16Z): when this block's item replaces
+     the 1.26.10.3 item below, the item ends with the preview sentence that follows, uncommented. Each highlight is
+     kept to what Roadmap says ("The next two releases", Performance, cgo, Native AOT and trimming); no date, and no
+     word about announcements. Its links resolve at this commit.
+
+**Coming next.** The next release is expected to run many goroutines over a few threads
+([goroutine scheduling](Roadmap.md#performance)), to take cgo further, with Go memory handed to C, cgo packages in
+`-recurse=nuget` conversions and the `net` resolver converted and validated ([cgo](Roadmap.md#cgo)), and, as an
+option, to make Native AOT builds of large programs smaller ([Native AOT](Roadmap.md#native-aot-and-trimming)); the
+[plan for the next two releases](Roadmap.md#the-next-two-releases) has the rest.
+-->
+
 <!-- HELD for release day with the NEWS.md entry (the .2 precedent): "November XX" and the anchor's "november-xx" both
      become the publish date as the last change before the release tag. The gojq sentence is PENDING on the publish
      (the nugetgo wave); drop it if gojq misses the wave. This block quotes no roster figure (check-roster-format 2e).
