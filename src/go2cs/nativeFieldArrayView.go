@@ -39,7 +39,9 @@ import (
 // the raw route's retaining pin; an earlier form spelled both routes at the call site and so named the
 // field twice. And because a native array pointer has no array<T> for Value to return, a local bound by
 // the door and never re-pointed reads `p[i]` through ElementRef, which indexes a native array in place and
-// falls back to `ref p.Value[i]` for every other box.
+// falls back to `ref p.Value[i]` for every other box. The view indexed where it is written,
+// `(*[N]T)(unsafe.Pointer(&p.f))[i]`, reads through ElementRef too (convIndexExpr.go): it went through Value,
+// which the view refuses on every root (docs/phase4/DESIGN-array-pointer-doors.md, section 18).
 //
 // SCOPE, kept to the one site class the census found (12 sites across 5 converted files): ONE field
 // hop off a pointer-typed identifier, a numeric element type, and a different element type than the
@@ -109,6 +111,19 @@ func (v *Visitor) nativeFieldArrayViewEmission(view nativeFieldArrayView) string
 	return fmt.Sprintf("@unsafe.ArrayPointer<%s>.Of(%s, %s)", elemName, v.convExpr(view.field, nil), csNintLiteral(view.length))
 }
 
+// isNativeFieldArrayViewConversion reports whether expr, parentheses aside, is the field-view conversion
+// itself, `(*[N]T)(unsafe.Pointer(&p.f))`.
+func (v *Visitor) isNativeFieldArrayViewConversion(expr ast.Expr) bool {
+	call, ok := ast.Unparen(expr).(*ast.CallExpr)
+
+	if !ok || len(call.Args) != 1 {
+		return false
+	}
+
+	_, ok = v.nativeFieldArrayViewOf(call, call.Args[0])
+	return ok
+}
+
 // isNativeFieldArrayViewLocal reports whether an index base is a local bound by the door and never
 // re-pointed, so `p[i]` may read through ElementRef. A local that is re-pointed or whose address is
 // taken may later name a managed array, which `p.Value[i]` already serves, so it keeps that form.
@@ -143,17 +158,7 @@ func (v *Visitor) isNativeFieldArrayViewLocal(x ast.Expr) bool {
 // native field-view shape — `p := (*[N]T)(unsafe.Pointer(&x.f))` or `var p = …`.
 func (v *Visitor) nativeFieldArrayViewBinds(obj types.Object) bool {
 	binds := false
-
-	isView := func(expr ast.Expr) bool {
-		call, ok := ast.Unparen(expr).(*ast.CallExpr)
-
-		if !ok || len(call.Args) != 1 {
-			return false
-		}
-
-		_, ok = v.nativeFieldArrayViewOf(call, call.Args[0])
-		return ok
-	}
+	isView := v.isNativeFieldArrayViewConversion
 
 	ast.Inspect(v.currentFuncDecl.Body, func(n ast.Node) bool {
 		if binds {

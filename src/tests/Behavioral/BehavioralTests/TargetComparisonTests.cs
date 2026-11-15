@@ -679,6 +679,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFieldNamedAsType() => CheckTarget("FieldNamedAsType");
 
     [TestMethod]
+    public void CheckFieldViewOverGoStruct() => CheckTarget("FieldViewOverGoStruct");
+
+    [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]

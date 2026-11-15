@@ -676,6 +676,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFieldNamedAsType() => CheckTarget("FieldNamedAsType");
 
     [TestMethod]
+    public void CheckFieldViewOverGoStruct() => CheckTarget("FieldViewOverGoStruct");
+
+    [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]

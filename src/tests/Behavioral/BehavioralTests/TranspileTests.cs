@@ -676,6 +676,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFieldNamedAsType() => CheckTarget("FieldNamedAsType");
 
     [TestMethod]
+    public void CheckFieldViewOverGoStruct() => CheckTarget("FieldViewOverGoStruct");
+
+    [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]

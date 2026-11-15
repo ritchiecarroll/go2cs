@@ -359,8 +359,23 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 	// root of sqlite-cs S17).
 	var baseExpr string
 
-	if call := v.derefdPointerConversion(indexExpr.X); call != nil && ptrDeref == "" {
-		baseExpr, ptrDeref = "("+v.convExpr(call, xContexts)+")", ".Value"
+	derefd := v.derefdPointerConversion(indexExpr.X)
+
+	// The field view indexed where it is written, `(*[N]T)(unsafe.Pointer(&p.f))[i]` or its explicit
+	// dereference, reads through ElementRef as a local bound by it does: the view has no array<T> for Value
+	// to return (see nativeFieldArrayView.go). The helper is a call, so it takes no wrapping parentheses.
+	if view := indexExpr.X; ptrDeref == ".Value" || derefd != nil && ptrDeref == "" {
+		if derefd != nil {
+			view = derefd
+		}
+
+		if v.isNativeFieldArrayViewConversion(view) {
+			return fmt.Sprintf("%s.ElementRef(%s)", v.convExpr(view, xContexts), index)
+		}
+	}
+
+	if derefd != nil && ptrDeref == "" {
+		baseExpr, ptrDeref = "("+v.convExpr(derefd, xContexts)+")", ".Value"
 	} else {
 		baseExpr = v.convExpr(indexExpr.X, xContexts)
 	}
