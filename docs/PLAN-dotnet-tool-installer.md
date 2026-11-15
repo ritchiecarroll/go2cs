@@ -39,11 +39,14 @@
 | `modulesLock.go:176` | `go mod download` (`-mod=readonly`) | dependency preflight; needs network or a warm module cache |
 | `projectFileWriter.go:45` | `go env <name>` | GOROOT/GOPATH/GOVERSION resolution (`main.go:216-225`, `toolchainResolution.go`) |
 | `stackAppendHints.go:681-712` | `go build` / `go test -c` with `-gcflags=-m -d=variablemakehash=vy` | the stack-append harvest, for **three targets** (`windows/linux/darwin amd64`) |
-| `testConversion.go:10564` | `go test`, the oracle (`-tests` mode) | contributor validation only |
+| `testConversion.go:10647#a7d5e7` | `go test -json`, the oracle (`-tests` mode; `oracleTestArgs`) | contributor validation only |
 
 Plus every `packages.Load` (`conversionDriver.go:206-220`, `moduleConverter.go:266`, `moduleTestsDriver.go:115`,
 `linknameOperations.go:160`, `testConversion.go:761,1775`, `stdLibConverter.go:311,391`), which shells out to
 `go list` on `PATH`.
+<!-- 2026-11-14 (R): the oracle row re-pointed from :10564, which by batch 305's master cited an unrelated comment, to
+     oracleTestArgs, the `go test -json` argument list the -tests comparison runs: src/go2cs/testConversion.go:10647#a7d5e7.
+     This note carries the fingerprint so the provenance guard holds the cite (the table cell is not read). -->
 
 **1b. GOROOT/src.** `go/types` type-checks the standard library from source (`LoadAllSyntax`); `checkGoRootSpelling`
 (`main.go:161`) refuses a GOROOT with no `src`. Not needed: `src/cmd`, `testdata`, `*_test.go`, `*.syso` (consumer

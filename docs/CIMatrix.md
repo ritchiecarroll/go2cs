@@ -203,6 +203,16 @@ A leg is green when arms A-D, G and H pass. Dispatch it at the tree that ships, 
 it is what proves the packages carry what that tree's converter emits on every OS (a converter that emits
 a runtime API the packages lack fails here). The pack job's budget is its own
 (240 min; measured 38-53 min).
+
+**The cgo job, `release-smoke cgo`**, one per shipped RID, runs beside `pack` and the legs on every `release-smoke`;
+no input turns it on or off. A `-cgo` conversion is one package and builds against a go2cs clone, never the `go.*`
+packages, so the job reads the tree the release is cut from, not the feed. Go builds cgo Phase 3's end-to-end program
+with the runner's C compiler (gcc, clang on macOS) and the probe library (`.github/cgo-probe.ps1`, cgo-e2e's own
+build), go2cs converts, builds and runs it, and every arm is read both ways: `TestCgoPhase3ProgramRunsAsGoDoes`,
+cgo-e2e's own test, through `.github/release-smoke-cgo.ps1`. It is green only when the test passed and every arm that
+started passed, so a skip or a renamed test reads red. It gates: a release-smoke dispatch is green when its legs and
+its four cgo jobs are.
+<!-- COORD's ruling O3, 2026-11-14 (cgo 3.1's release-path seat): the cgo path proved on every release. -->
 <!-- Pre-2026-10-26 wording: "(C2's 2026-10-03 finding: N's converter emits `unsafe.ArrayPointer`, which the
      published 1.24.13.3 lacks)". C2 and N were fleet lane names. -->
 
@@ -363,6 +373,7 @@ disclosure count is half of what makes a row honest.
 | `converter-cgo` | 15 min | 23 min | The converter's `go test` filtered to its cgo tests: one cold module download and build, plus one converter `go build` for the driver-level arms. Provisional. |
 | `cgo-e2e` | 45 min | 68 min | cgo's end-to-end gate: a cgo program is built by Go and converted by go2cs with the leg's C compiler, the converted project is built with the .NET SDK, and each check is run both ways and compared. Provisional. |
 | `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus eight small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
+| `release-smoke` cgo job | 60 min | 60 min | One per shipped RID, beside the legs: one cold module download and converter test build, the probe library, and cgo-e2e's Phase 3 test alone, which builds golib and the converted closure cold. The slowest cgo-e2e job, four more tests, read 22 min (osx-x64). Provisional. |
 | `nugetgo-behavior` | 90 min | 135 min | The leg: converter `go build`, one `go run`, one conversion against the feed, and one cold restore, build and run of the sample. `release-smoke`'s leg is the closest shape. Provisional. |
 | `aot-smoke` | 240 min | 360 min | The leg only, four RIDs: one Native AOT publish of a 31-package consumer under `TrimMode=partial` -- linux 56, windows 71, osx-x64 293 min before golib's generic-cycle fix (37523439849, where osx-arm64 did not finish in 360); after it, linux 212 s, windows 167 s, osx-arm64 354 s (38587876788), osx-x64 654 s (38575258530). |
 

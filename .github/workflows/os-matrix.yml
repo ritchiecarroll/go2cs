@@ -697,6 +697,68 @@ jobs:
           if-no-files-found: warn
 
   # ---------------------------------------------------------------------------------------------
+  # release-smoke-cgo -- the cgo path, on every release-smoke, on all four shipped RIDs (COORD's ruling 2026-11-14, cgo
+  # 3.1's release-path seat). A -cgo conversion is ONE package and builds against a go2cs clone, never the go.*
+  # packages: src/go2cs/main.go's -cgo help says it is not combinable with -recurse, and csproj-template.xml references
+  # $(go2csPath)'s go2cs-gen and golib. So this job reads the TREE the release is cut from, needs no pack, and runs
+  # beside pack and the consumer legs, adding no wall time unless it outlasts them. go builds cgo Phase 3's end-to-end
+  # program with this runner's C compiler (gcc, clang on darwin) and the probe library, go2cs converts, builds and runs
+  # it, and every arm is read both ways (TestCgoPhase3ProgramRunsAsGoDoes, cgo-e2e's own test and table). The probe is
+  # .github/cgo-probe.ps1's, the same build cgo-e2e uses. ON by default: no input turns it on or off, so every release
+  # proves its cgo path. Its own job keeps the C toolchain out of the consumer legs. .github/release-smoke-cgo.ps1 reads
+  # the outcome and refuses a vacuous green (a SKIP, or a filter that matched nothing).
+  # ---------------------------------------------------------------------------------------------
+  release-smoke-cgo:
+    needs: plan
+    if: needs.plan.outputs.stage == 'release-smoke'
+    name: release-smoke cgo (${{ matrix.goos }} / ${{ matrix.rid }})
+    runs-on: ${{ matrix.runner }}
+    # The test's own deadline is 40 min (cgo-e2e's); the slowest cgo-e2e JOB, which runs four more tests, read 22 min.
+    timeout-minutes: 60
+    strategy:
+      # Every RID's reading is wanted, whatever another reads.
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.plan.outputs.matrix) }}
+    env:
+      GOOS_TARGET: ${{ matrix.goos }}
+      RID: ${{ matrix.rid }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go (pinned to the corpus release)
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ needs.plan.outputs.go-version }}
+          check-latest: false
+          cache-dependency-path: src/go2cs/go.sum
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ needs.plan.outputs.dotnet }}
+
+      - name: Release smoke cgo — build the cgo probe library
+        shell: pwsh
+        run: |
+          & ./.github/cgo-probe.ps1 -Label 'release-smoke cgo probe'
+
+      - name: Release smoke cgo — the Phase 3 program, converted, built and run both ways
+        shell: pwsh
+        run: |
+          & ./.github/release-smoke-cgo.ps1
+
+      - name: Upload the cgo log
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-smoke-cgo-${{ matrix.rid }}
+          path: artifacts/
+          retention-days: 7
+          if-no-files-found: warn
+
+  # ---------------------------------------------------------------------------------------------
   # run — one leg per (goos, runner, rid).
   # ---------------------------------------------------------------------------------------------
   run:
@@ -1116,54 +1178,13 @@ jobs:
       # search for a bare name reached the current directory, 42936395011), and windows from the test assembly's own
       # directory, where CgoProbeTests copies it. converter-cgo builds it too (increment 5b): the cgo route's real-route
       # test links the Phase 2 fixture's probe functions against it through CGO_LDFLAGS, and on windows llvm-mingw's
-      # linker reads an import library, never the DLL itself, so the build writes one beside it.
+      # linker reads an import library, never the DLL itself, so the build writes one beside it. The build is
+      # .github/cgo-probe.ps1, shared with release-smoke's cgo job (release-smoke-cgo).
       - name: GolibTests — build the cgo probe library
         if: (needs.plan.outputs.stage == 'golib-tests' || needs.plan.outputs.stage == 'converter-cgo' || needs.plan.outputs.stage == 'cgo-e2e') && contains(fromJSON('["linux-x64","osx-x64","osx-arm64","win-x64"]'), matrix.rid)
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-
-          $goos = $env:GOOS_TARGET
-          $cc = if ($goos -eq 'windows') { 'llvm-mingw' } else { 'zig' }
-          $toolchain = & ./.github/cgo-toolchain.ps1 -Cc $cc -Rid $env:RID -Label 'golib-tests cgo probe'
-
-          # darwin's directory is fixed, since the golden binds the probe by its absolute install name there.
-          $dir = if ($goos -eq 'darwin') { '/tmp/go2cs-cgo-probe' } else { Join-Path $env:RUNNER_TEMP 'cgo-probe' }
-          New-Item -ItemType Directory -Force -Path $dir | Out-Null
-
-          # Each OS's load-time name, which the golden's probe fixture binds (src/go2cs's cgoProbeLibrary): the SONAME on
-          # linux, the absolute install name on darwin, the DLL's own name on windows.
-          $probe = @{
-              windows = @{ name = 'go2csprobe.dll'; flags = @("-Wl,--out-implib,$dir/libgo2csprobe.dll.a") }
-              darwin  = @{ name = 'libgo2csprobe.dylib'; flags = @("-Wl,-install_name,$dir/libgo2csprobe.dylib") }
-              linux   = @{ name = 'libgo2csprobe.so'; flags = @('-fPIC', '-Wl,-soname,libgo2csprobe.so') }
-          }[$goos]
-          $name = $probe.name
-          $flags = $probe.flags
-          $library = Join-Path $dir $name
-          $source = Join-Path $PWD 'src/tests/GolibTests/cgo-probe/probe.c'
-
-          $clock = [Diagnostics.Stopwatch]::StartNew()
-          & $toolchain.Exe @($toolchain.Args) -shared -O2 @flags -o $library $source
-          $buildExit = $LASTEXITCODE
-          $buildSeconds = [math]::Round($clock.Elapsed.TotalSeconds, 1)
-          if ($buildExit -ne 0 -or -not (Test-Path -LiteralPath $library)) { throw "golib-tests cgo probe: $($toolchain.Version) could not build $name (exit $buildExit)." }
-
-          Add-Content -Path $env:GITHUB_ENV -Value "GO2CS_CGO_PROBE_DIR=$dir" -Encoding utf8
-          Add-Content -Path $env:GITHUB_ENV -Value 'GO2CS_REQUIRE_CGO_PROBE=1' -Encoding utf8
-
-          if ($goos -eq 'linux') {
-              $path = if ([string]::IsNullOrEmpty($env:LD_LIBRARY_PATH)) { $dir } else { "${dir}:$($env:LD_LIBRARY_PATH)" }
-              Add-Content -Path $env:GITHUB_ENV -Value "LD_LIBRARY_PATH=$path" -Encoding utf8
-          }
-
-          $summary = @(
-              "## golib-tests cgo probe -- $($toolchain.Version) on $($env:RID)"
-              ''
-              "READING built $name ($((Get-Item -LiteralPath $library).Length) bytes) in $buildSeconds s, into GO2CS_CGO_PROBE_DIR"
-          )
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
-          & ./.github/annotate-summary.ps1 -Title "golib-tests cgo probe $($env:RID)" -Lines $summary
+          & ./.github/cgo-probe.ps1 -Label 'golib-tests cgo probe'
 
       # -------------------------------------------------------------------------------------
       # golib-tests — GolibTests on this leg's own host. Added for guards whose subject only exists on one

@@ -1,0 +1,38 @@
+ga: panic: runtime error: cannot view native memory as smallMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/gomem/main.go:21
+   [exit 2]
+gb: panic: runtime error: cannot view native memory as smallMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/gomem/main.go:26
+   [exit 2]
+gd: panic: runtime error: cannot view native memory as smallMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/gomem/main.go:31
+   [exit 2]
+ge: panic: runtime error: index out of range [5] with length 0
+
+goroutine 1 [running]:
+main.main()
+	<kit>/gomem/main.go:36
+   [exit 2]
+gf: 8 8 [0 0 0 0 0 0 8 0]
+   [exit 0]
+gg: panic: runtime error: cannot view native memory as smallMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/gomem/main.go:46
+   [exit 2]
+gh: panic: runtime error: cannot view native memory as smallMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.main()
+	<kit>/gomem/main.go:51
+   [exit 2]

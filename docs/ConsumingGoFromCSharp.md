@@ -86,8 +86,9 @@ If you convert and publish a module of your own, its nuget.org page is covered i
 
 The check arrives with `go.*` 1.26.11.1; a project whose `go.lib` is 1.26.10.3 or older is not checked. From that
 release, the build checks each converted package it uses against the **break floor**: the newest `go.*` release that
-changed members that compiled code binds. The floor is `go.*` 1.26.10.3, which changed the member a `foreach` over a
-slice binds. A package built below it, such as a `nugetgo.*` revision built against `go.*` 1.26.10.2, still restores
+changed members that compiled code binds. The floor is `go.*` 1.26.11.1, which moved promoted-method forwarders into
+classes of their own and renamed the standard-library assemblies. A package built below it, such as a `nugetgo.*`
+revision built against `go.*` 1.26.10.3, still restores
 beside the newer `go.*` packages, and then fails at run time with `MissingMethodException`. So the build stops before
 compiling anything, with [`GO2CS3002`](DiagnosticCodes.md): one error for each such package, naming it and the release
 it was built on, and one more saying the build stops.
