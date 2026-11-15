@@ -92,14 +92,19 @@ internal sealed class PinExtents
         return null;
     }
 
-    // The extent [start, end) of owner's pinned object, in one node per page it covers. Returns the node, or the
-    // nodes' array for an extent over more than one page: what Remove takes back.
+    // The extent [start, end) of owner's pinned object, in one node per page it covers, chained page to page through
+    // NextPage. Returns the first node: what Remove takes back.
+    //
+    // NextPage is WRITER-ONLY state. It is written here, before Add returns, so before the caller publishes the node
+    // (PinnedBuffer's Interlocked.CompareExchange of its extent, a full fence), and it is read only by Remove, which
+    // starts from that published node. No reader follows it: Find walks one page's list through Next and nothing else,
+    // and Remove never changes NextPage. So a reader cannot meet a node whose next-page link is being written or
+    // unlinked; it meets only Next, which RemoveOne changes under the page lock exactly as before.
     internal object Add(PinnedBuffer owner, nuint start, nuint end)
     {
         WeakReference<PinnedBuffer> weak = new(owner, trackResurrection: false);
         nuint first = start >> PageShift, last = (end - 1) >> PageShift;
-        Node[]? many = first == last ? null : new Node[(int)(last - first + 1)];
-        Node? one = null;
+        Node? head = null, previous = null;
 
         for (nuint number = first; number <= last; number++)
         {
@@ -122,28 +127,24 @@ internal sealed class PinExtents
                 }
             }
 
-            if (many is null)
-                one = node;
+            if (previous is null)
+                head = node;
             else
-                many[(int)(number - first)] = node;
+                previous.NextPage = node;
+
+            previous = node;
         }
 
-        return (object?)many ?? one!;
+        return head!;
     }
 
     internal void Remove(object extent)
     {
-        if (extent is Node node)
-        {
-            RemoveOne(node.Base >> PageShift, node);
-            return;
-        }
+        Node head = (Node)extent;
+        nuint number = head.Base >> PageShift;
 
-        Node[] nodes = (Node[])extent;
-        nuint first = nodes[0].Base >> PageShift;
-
-        for (int i = 0; i < nodes.Length; i++)
-            RemoveOne(first + (nuint)i, nodes[i]);
+        for (Node? node = head; node is not null; node = node.NextPage, number++)
+            RemoveOne(number, node);
     }
 
     private void RemoveOne(nuint number, Node node)
@@ -225,6 +226,9 @@ internal sealed class PinExtents
         internal readonly WeakReference<PinnedBuffer> Owner = owner;
         internal volatile int Dead;
         internal volatile Node? Next;
+
+        // The same pin's node on the next page (writer-only; see Add).
+        internal Node? NextPage;
     }
 
     private sealed class Page

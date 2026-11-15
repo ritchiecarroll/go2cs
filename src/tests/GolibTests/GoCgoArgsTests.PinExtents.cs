@@ -69,6 +69,22 @@ public unsafe partial class GoCgoArgsTests
 
         Assert.IsTrue(Crosses(inside), "released: no stale refusal");
         GC.KeepAlive(bytes);
+
+        // A pin over several 4 KiB pages enters and leaves every page it covers.
+        byte[] wide = new byte[12 * 1024];
+        PinnedBuffer pages = new PinnedBuffer(wide);
+        nuint start = (nuint)pages.Pointer;
+        nuint[] across = [start, start + 4096, start + 6000, start + 8192, start + (nuint)wide.Length - 1];
+
+        foreach (nuint number in across)
+            Assert.IsFalse(Crosses(number), $"a multi-page pin, live: refused at +{number - start}");
+
+        pages.Dispose();
+
+        foreach (nuint number in across)
+            Assert.IsTrue(Crosses(number), $"a multi-page pin, released: no stale refusal at +{number - start}");
+
+        GC.KeepAlive(wide);
     }
 
     // R8, lane G's hazard (it bites at 3.2): a pinned buffer whose last user reference is gone while something that holds
@@ -133,7 +149,8 @@ public unsafe partial class GoCgoArgsTests
 
         for (int i = 0; i < pinners; i++)
         {
-            int size = 8 + i * 24;
+            // One pinner spans pages, so its chain is added and removed while the other threads read.
+            int size = i == 0 ? 9000 : 8 + i * 24;
 
             threads.Add(new Thread(() =>
             {
