@@ -88,7 +88,7 @@ func TestInlineArrayValueDecodeCensus(t *testing.T) {
 		fmt.Printf("B2CENSUS KEPT-OUT %s (in %s)\n", key, blocked[key])
 	}
 
-	sites := 0
+	sites, stampedFields := 0, 0
 
 	for _, pkg := range pkgs {
 		if pkg.TypesInfo == nil {
@@ -105,30 +105,26 @@ func TestInlineArrayValueDecodeCensus(t *testing.T) {
 				}
 
 				stack = append(stack, n)
+
+				// G1's footprint: a struct field that IS an array with a zero length above an inner array, which now
+				// carries its own dims (fieldCargoDims).
+				if field, ok := n.(*ast.Field); ok && len(stack) > 2 {
+					if _, inStruct := stack[len(stack)-3].(*ast.StructType); inStruct {
+						if array, isArray := types.Unalias(pkg.TypesInfo.TypeOf(field.Type)).(*types.Array); isArray && zeroLengthAboveAnArray(goArrayDims(array)) {
+							stampedFields++
+							fmt.Printf("B2CENSUS G1FIELD %s %s %s\n", pkg.PkgPath, relativePosition(pkg.Fset.Position(field.Pos())), array)
+						}
+					}
+				}
+
 				star, ok := n.(*ast.StarExpr)
 
-				if !ok {
+				// The converter's own D2 trigger (valueDecodeSites.go), over the kept-out set unioned across packages.
+				if !ok || !valueDecodeSite(stack, pkg.TypesInfo, blocked) {
 					return true
 				}
 
-				tv, ok := pkg.TypesInfo.Types[star.X]
-
-				if !ok || tv.IsType() {
-					return true
-				}
-
-				ptr, ok := tv.Type.Underlying().(*types.Pointer)
-
-				if !ok {
-					return true
-				}
-
-				key, ok := inlineTypeKey(ptr.Elem())
-
-				if !ok || blocked[key] == "" || !valueDecodeRvalue(stack) || insideConstant(stack, pkg.TypesInfo) {
-					return true
-				}
-
+				key, _ := inlineTypeKey(pkg.TypesInfo.Types[star.X].Type.Underlying().(*types.Pointer).Elem())
 				sites++
 				fmt.Printf("B2CENSUS SITE %s %s *%s\n", pkg.PkgPath, relativePosition(pkg.Fset.Position(star.Pos())), key)
 				return true
@@ -136,61 +132,7 @@ func TestInlineArrayValueDecodeCensus(t *testing.T) {
 		}
 	}
 
-	fmt.Printf("B2CENSUS TOTAL target=%s packages=%d kept-out=%d rvalue-sites=%d\n", target, len(pkgs), len(blocked), sites)
-}
-
-// insideConstant reports whether an enclosing expression of the StarExpr on top of stack is a compile-time constant
-// (`unsafe.Sizeof(*p)` and its kin): its operand is never evaluated, so the dereference reads nothing.
-func insideConstant(stack []ast.Node, info *types.Info) bool {
-	for i := len(stack) - 2; i >= 0; i-- {
-		expr, ok := stack[i].(ast.Expr)
-
-		if !ok {
-			return false
-		}
-
-		if tv, ok := info.Types[expr]; ok && tv.Value != nil {
-			return true
-		}
-	}
-
-	return false
-}
-
-// valueDecodeRvalue reports whether the StarExpr on top of stack reads its pointee's WHOLE value.
-func valueDecodeRvalue(stack []ast.Node) bool {
-	star := stack[len(stack)-1]
-	i := len(stack) - 2
-
-	for i >= 0 {
-		if _, paren := stack[i].(*ast.ParenExpr); !paren {
-			break
-		}
-
-		star = stack[i]
-		i--
-	}
-
-	if i < 0 {
-		return true
-	}
-
-	switch parent := stack[i].(type) {
-	case *ast.AssignStmt:
-		for _, lhs := range parent.Lhs {
-			if lhs == star {
-				return false
-			}
-		}
-	case *ast.UnaryExpr:
-		return parent.Op != token.AND
-	case *ast.IncDecStmt:
-		return false
-	case *ast.SelectorExpr:
-		return parent.X != star
-	}
-
-	return true
+	fmt.Printf("B2CENSUS TOTAL target=%s packages=%d kept-out=%d rvalue-sites=%d g1-fields=%d\n", target, len(pkgs), len(blocked), sites, stampedFields)
 }
 
 // relativePosition trims a position to its path below the last "/src/" or module root, for a portable census line.
