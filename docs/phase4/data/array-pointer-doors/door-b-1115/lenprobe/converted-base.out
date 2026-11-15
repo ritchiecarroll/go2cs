@@ -1,0 +1,12 @@
+64 64 64 64 0
+64 1
+208064 210016 2080 64 10 208064
+0 0 0
+4096 9
+panic: runtime error: invalid memory address or nil pointer dereference
+
+goroutine 1 [running]:
+main.lenDeref()
+	example.com/lenprobe/main.go:10
+main.main()
+	example.com/lenprobe/main.go:105

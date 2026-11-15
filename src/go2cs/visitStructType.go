@@ -682,7 +682,23 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				v.addRequiredUsing("go.golib")
 
 				if array.Len() == 0 {
-					carrierAttr = fmt.Sprintf("[GoAlignmentCarrier(typeof(%s))] ", csDisplayTypeName)
+					// The attribute names the Go field's type. For a [0][N]T, the element [N]T is named as the go.arrays
+					// member arrayN<T>, the same type a nonzero [N]T field of this struct takes, because golib reads the
+					// element's length from the member: array<array<T>> dropped N, so golib could not place the struct
+					// (W15, COORD 2026-11-15: libc's in6 statics and sqlite's TBitvec, on every CREATE TABLE).
+					//
+					// Only an UNNAMED element is renamed (an alias is looked through): a named element (type V [4]T, a
+					// field [0]V) keeps array<V>, so reflection still names it [0]V as Go does (P3's review of W15). A
+					// second zero ([0][0]T, [0][0][N]T) keeps the old spelling too: its reflected dims stop at the
+					// second zero, which holds no bytes, so the layout is unchanged.
+					goType := csDisplayTypeName
+
+					if inner, ok := types.Unalias(array.Elem()).(*types.Array); ok && inner.Len() > 0 {
+						goType = fmt.Sprintf("array<%s>", v.inlineArrayTypeName(inner))
+						v.addRequiredUsing("go.arrays")
+					}
+
+					carrierAttr = fmt.Sprintf("[GoAlignmentCarrier(typeof(%s))] ", goType)
 					csDisplayTypeName = v.alignmentCarrierType(array.Elem())
 				} else {
 					csDisplayTypeName = v.inlineArrayTypeName(array)

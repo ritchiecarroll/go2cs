@@ -431,6 +431,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [`unsafe.Slice` over MANAGED element storage ALIASES it](pointers.md#unsafeslice-over-managed-element-storage-aliases-it)
   - [A reinterpret of a MANAGED pointer aliases the box — it never round-trips through the address](pointers.md#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address)
   - [A slice taken through `(*[N]T)(p)` ALIASES the memory p names: the view doors](pointers.md#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors)
+  - [The bytes of one field through `(*[N]T)(unsafe.Pointer(&p.f))`: the field view](pointers.md#the-bytes-of-one-field-through-ntunsafepointerpf-the-field-view)
   - [A pointer-cast slice with a LOW bound starts its view at that element](pointers.md#a-pointer-cast-slice-with-a-low-bound-starts-its-view-at-that-element)
   - [Every spelling of a pointer-cast slice takes the view door, and a MAX bound sets its capacity](pointers.md#every-spelling-of-a-pointer-cast-slice-takes-the-view-door-and-a-max-bound-sets-its-capacity)
   - [A store through an EXPLICIT dereference of a pointer conversion reaches the pointee](pointers.md#a-store-through-an-explicit-dereference-of-a-pointer-conversion-reaches-the-pointee)

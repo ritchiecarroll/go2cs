@@ -1,0 +1,6 @@
+byte view, pointer var  : 48
+byte view, number       : 48
+byte view, address-of   : 48
+named whole, same shape : [1 2 3 4 5 6 7 8] 99 true
+named whole, a uint64   : 0x100000000000001 [1 0 0 0 0 0 0 1]
+alias whole             : [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15]

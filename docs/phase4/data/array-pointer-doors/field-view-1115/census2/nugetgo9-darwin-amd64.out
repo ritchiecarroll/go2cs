@@ -1,0 +1,5 @@
+roots: 18, errors: 0
+packages with a module: 28, files: 225
+     2  hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true
+     2  hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true
+     4  total field-address array views

@@ -84,13 +84,13 @@ internal static bool longStringQuickEqualityTest(@string a, @string b) {
     @unsafe.Pointer x = stringPtr(a);
     @unsafe.Pointer y = stringPtr(b);
     // Check first 8 bytes.
-    if (~@unsafe.Pointer.To<array<byte>>(x) != ~@unsafe.Pointer.To<array<byte>>(y)) {
+    if (@unsafe.Pointer.LoadArray<byte>(x, 8) != @unsafe.Pointer.LoadArray<byte>(y, 8)) {
         return false;
     }
     // Check last 8 bytes.
     x = @unsafe.Add(x, (uintptr)len(a) - 8);
     y = @unsafe.Add(y, (uintptr)len(a) - 8);
-    if (~@unsafe.Pointer.To<array<byte>>(x) != ~@unsafe.Pointer.To<array<byte>>(y)) {
+    if (@unsafe.Pointer.LoadArray<byte>(x, 8) != @unsafe.Pointer.LoadArray<byte>(y, 8)) {
         return false;
     }
     return true;

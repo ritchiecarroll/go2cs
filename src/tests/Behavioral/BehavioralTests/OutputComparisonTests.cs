@@ -107,6 +107,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAnonStructNamedConversion() => CheckTarget("AnonStructNamedConversion");
 
     [TestMethod]
+    public void CheckAnonStructReinterpretLift() => CheckTarget("AnonStructReinterpretLift");
+
+    [TestMethod]
     public void CheckAnonStructTypeArgVarDecl() => CheckTarget("AnonStructTypeArgVarDecl");
 
     [TestMethod]
@@ -162,6 +165,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckArrayPointerElementAlias() => CheckTarget("ArrayPointerElementAlias");
+
+    [TestMethod]
+    public void CheckArrayPointerElementDoors() => CheckTarget("ArrayPointerElementDoors");
 
     [TestMethod]
     public void CheckArrayPointerViewDoors() => CheckTarget("ArrayPointerViewDoors");
@@ -654,6 +660,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckFieldNamedAsType() => CheckTarget("FieldNamedAsType");
+
+    [TestMethod]
+    public void CheckFieldViewOverGoStruct() => CheckTarget("FieldViewOverGoStruct");
 
     [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
