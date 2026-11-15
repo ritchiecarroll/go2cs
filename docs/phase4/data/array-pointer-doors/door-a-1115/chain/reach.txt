@@ -1,0 +1,22 @@
+Predicate: an assignment whose left side is the first argument of the unsafe.Add on its right.
+Non-test .go files, every platform file. Paths are relative to the module root or to GOROOT/src.
+
+modernc.org/sqlite v1.62.0: 8325 lines call unsafe.Add, 11 match
+  lib/sqlite.go:32473: p = unsafe.Add(p, 1)
+  lib/sqlite.go:32484: p = unsafe.Add(p, 1)
+  lib/sqlite.go:32498: p = unsafe.Add(p, 1)
+  lib/sqlite.go:32519: p = unsafe.Add(p, 1)
+  lib/sqlite.go:32537: p = unsafe.Add(p, 1)
+  lib/sqlite.go:32551: p = unsafe.Add(p, 1)
+  lib/sqlite.go:32566: p = unsafe.Add(p, 1)
+  lib/sqlite.go:32580: p = unsafe.Add(p, 1)
+  lib/sqlite_g_0000000000000084.go:27036: p = unsafe.Add(p, 12)
+  lib/sqlite_g_000000000003ff7b.go:144: p = unsafe.Add(p, 16)
+  lib/sqlite_g_00000000000c0000.go:116655: p = unsafe.Add(p, 16)
+modernc.org/libc v1.80.1: 1885 lines call unsafe.Add, 0 match
+modernc.org/memory v1.12.1: 0 lines call unsafe.Add, 0 match
+modernc.org/mathutil v1.7.1: 0 lines call unsafe.Add, 0 match
+Go 1.26.11 standard library outside cmd: 19 lines call unsafe.Add, 3 match
+  internal/syscall/execenv/execenv_windows.go:39: end = unsafe.Add(end, size)
+  reflect/type.go:1205: p = unsafe.Add(p, 4)
+  syscall/env_windows.go:88: end = unsafe.Add(end, size)

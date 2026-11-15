@@ -27,6 +27,11 @@ import (
 // Census at the TRAIN M union (BOARD, 2026-10-02, "the copying slice view"): 14 emissions in src/core,
 // 3 writers -- runtime/iface.go's itabInit, runtime/heapdump.go's makeheapobjbv and
 // runtime/mbitmap.go's progToPointerMask -- none reachable from executed code today.
+//
+// Since the view doors (arrayPointerViewDoor.go, 2026-11-14) a view over an unsafe.Pointer is emitted as a door
+// that ALIASES, and those three writers write the memory. The copying branch, and so this note, is left for an
+// operand that holds a FromRef mint (design docs/phase4/DESIGN-array-pointer-doors.md 4.6) and for an operand
+// that is not an unsafe.Pointer.
 
 // noteCopyingSliceViewWrite reports when the slice the copying branch produces for sliceExpr is
 // written through in the same function: an element store or op-assign, an increment, or the
