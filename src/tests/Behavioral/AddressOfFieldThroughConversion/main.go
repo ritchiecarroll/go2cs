@@ -139,6 +139,15 @@ func main() {
 	*ip--
 	fmt.Println("increment:", g.cnt, g.id)
 
+	// a parenthesis between the two operators, as the runtime writes a slice header in place (`&(*arenaList)` in
+	// mheap.sysAlloc): &(*p) is p as well, for a struct and for a slice
+	e := &(*r)
+	e.cnt = 41
+	list := []int32{1, 2}
+	lp := &list
+	*(&(*lp)) = []int32{7, 8, 9}
+	fmt.Println("parenthesized indirection:", g.cnt, e == r, len(list), list[2], &(*lp) == lp)
+
 	// a nil pointer panics at the indirection
 	fmt.Println("nil indirection:", nilIndirection())
 }

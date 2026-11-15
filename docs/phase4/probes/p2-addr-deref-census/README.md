@@ -37,5 +37,8 @@ No file failed to parse in any of the four.
 - **behavioral**: all 10 are in `AddressOfFieldThroughConversion` (8) and
   `AddressOfFieldThroughConversionNative` (2), the seat's own fixtures. They are the positive control: a census
   that read 0 there would be blind.
+- **behavioral, after the miss**: the seat then added the `paren` spelling to `AddressOfFieldThroughConversion`
+  (three sites, `main.go:144`, `:148` and `:149`), so the corpus reads 13 sites from that commit on: 5 `bare`,
+  5 `bare-conv`, 3 `paren`. `census-behavioral.txt` is the reading before that commit.
 - **libc and sqlite**: every site is the form the seat's fixtures carry, and none has a parenthesis between
   the operators.

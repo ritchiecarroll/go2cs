@@ -3140,6 +3140,9 @@ A pointer conversion is the operand as it stands, `@unsafe.Pointer.To<rec>(gp).n
 pointer type (`type recp *rec`) is a generated wrapper over the box and the expression yields a plain
 `*rec`, so the wrapper is converted first, `((ж<rec>)np).nilcheck()`; and a type parameter whose only
 type is a pointer (`[P *T]`) is erased to that pointer, so it is the box already.
+Parentheses between the two operators change nothing: `&(*p)` is the same expression and renders the
+same way. The runtime replaces a slice header in place through one, `&(*arenaList)` in
+`(*mheap).sysAlloc`.
 
 **Why.** The form this replaces was `Ꮡ(~p)`: the address-of builtin over the dereferenced VALUE, a new
 box holding a copy of the pointee, so every write through the result was lost and the result was never
@@ -3150,11 +3153,13 @@ named for the operation Go's compiler lowers the form to (NilCheck: panics if th
 returns it unmodified), and it is an extension, not an instance member, so a null reference, the other
 managed spelling of a nil pointer, takes Go's panic and not a `NullReferenceException`.
 <!-- 2026-11-15, sqlite-cs wall W9b, the third of three spellings G's corpus read named (COORD ruling 20261115T065612Z: a golib member, not an inline throw). Census of Go source: 10 sites in std, all in crypto/internal/boring/sha.go (build tag boringcrypto, not in the corpus); 0 in the behavioral corpus. -->
+<!-- 2026-11-15, corrected the same day: that census was a text search (`&*` before a name or a parenthesis) and counted lines. Read off the syntax tree (docs/phase4/probes/p2-addr-deref-census) std has 16 sites: 15 in crypto/internal/boring/sha.go and runtime/malloc.go:899, `&(*arenaList)`, which is the one changed line of the seat's -stdlib footprint on each target (predicted 0; BOARD, the dated block under the W9b row). -->
 The pointer constraints the type-parameter erasure declines (`~*T`, a union of pointers, a pointer
 constraint with methods) keep their current emission as a whole, this form included.
 (Guarded by the `AddressOfFieldThroughConversion` behavioral output test: a write through `&*r`
 compared with `r`, the whole-object union stored and shifted through a conversion, a named pointer,
-two indirections, a type parameter, and the panic text of a nil pointer; by
+two indirections, a type parameter, a parenthesis between the two operators over a struct pointer and
+over a slice pointer, and the panic text of a nil pointer; by
 `AddressOfFieldThroughConversionNative`, linux only, for libc's shift over pages the kernel owns; and
 by GolibTests' `PointerNilCheckTests`, one arm per spelling of a Go pointer and of nil.)
 

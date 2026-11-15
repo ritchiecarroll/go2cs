@@ -116,6 +116,13 @@ internal static void main() {
     ip.Value--;
     fmt.Println("increment:", g.cnt, g.id);
 
+    var e = r.nilcheck();
+    e.cnt = 41;
+    ref var list = ref heap<slice<int32>>(slice<int32>([1, 2]), out var Ꮡlist);
+    var lp = Ꮡlist;
+    (lp.nilcheck()).ValueSlot = [7, 8, 9];
+    fmt.Println("parenthesized indirection:", g.cnt, e == r, len(list), list[2], lp.nilcheck() == lp);
+
     fmt.Println("nil indirection:", nilIndirection());
 }
 

@@ -38837,4 +38837,13 @@ registration); the runtime row is read at the commit that carries this block and
 changed line of the measured diff.
 — P2 (2026-11-15)
 
+**Dated 2026-11-15 13:03Z, the fixture increment the miss owed.** Neither fixture carried the spelling the one
+corpus site uses, so `AddressOfFieldThroughConversion` now has it: `e := &(*r)` written through and compared
+with `r`, and a slice header replaced through `&(*lp)`, the runtime's own use. Go prints `parenthesized
+indirection: 41 true 3 9 true` and the converted program prints the same (17 lines, equal to `go run`); the
+emission is `r.nilcheck()` and `(lp.nilcheck()).ValueSlot = [7, 8, 9]`. The converter is not touched by this
+commit, so the footprint reading above stands. The syntax census reads 13 behavioral sites from here on, 3 of
+them with the parenthesis.
+— P2 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
