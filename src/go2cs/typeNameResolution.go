@@ -549,6 +549,17 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 					return aliasQualifier + "." + target[strings.LastIndex(target, ".")+1:]
 				}
 
+				// An EXPLICITLY-aliased import (`gotime "time"`) qualifies the type with the file's alias, and the
+				// alias table is keyed by the DECLARED package name, so a member the package collision-renames kept
+				// its Go name: `ж<gotime.Location>` where time declares `ΔLocation` (CS0426, sqlite-cs S10). Swap
+				// the member and keep the alias. A member the table does not rename (cryptobyte's
+				// `encoding_asn1.BitString`) keeps its spelling.
+				if fileAlias, ok := v.importPathAliases[pkg.Path()]; ok && fileAlias != "" && fileAlias != pkg.Name() {
+					if member, renamed := explicitAliasRenamedTypeMember(key, obj.Name(), pkg); renamed {
+						return aliasQualifier + "." + member
+					}
+				}
+
 				// A collision-renamed type this file reaches ONLY through another package's alias, with no import
 				// of the type's own package, so no alias key was loaded for it: spell the producer's member,
 				// `jsontext.ΔEncoder`, not the Go name (TS readiness C22e; see foreignRenamedTypeSpelling). A file
@@ -592,6 +603,13 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 	// + ~170-error parser cascade).
 	if !isUnderlying {
 		if name := v.deferredDynamicTypeName(t); name != "" {
+			// A marker an import's identical lift can answer now (sqlite-cs W2, forwardImportedStructLift).
+			if strings.HasPrefix(name, dynamicTypeMarkerPrefix) {
+				if imported := v.forwardImportedStructLift(t); imported != "" {
+					return imported
+				}
+			}
+
 			return name
 		}
 	}
@@ -876,6 +894,20 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 	// name or a deferred marker, never raw Go type text (see the getAliasQualifiedTypeName twin).
 	if !isUnderlying {
 		if name := v.deferredDynamicTypeName(t); name != "" {
+			// A marker an import's identical lift can answer now: another package's type, so this package's
+			// qualifier never prefixes it (sqlite-cs W2, forwardImportedStructLift).
+			if strings.HasPrefix(name, dynamicTypeMarkerPrefix) {
+				if imported := v.forwardImportedStructLift(t); imported != "" {
+					if v.inUsingAliasTarget {
+						if target, ok := importedStructLiftTarget(imported); ok {
+							return target
+						}
+					}
+
+					return imported
+				}
+			}
+
 			qualifier := v.usingAliasTypeQualifier(t)
 
 			// A deferred MARKER is replaced by the lift's name only after the file-visit barrier, so the
@@ -1153,6 +1185,29 @@ func getAliasedTypeName(typeName string) string {
 	return typeName
 }
 
+// explicitAliasRenamedTypeMember returns the C# member name a published TYPE alias entry gives the
+// foreign type behind key (`time.Location` -> `ΔLocation`) when that name differs from the Go name, and
+// only when the entry came from pkg (see aliasSourceMatchesPackage). A const entry, an unpublished key
+// or an unrenamed member answers false.
+func explicitAliasRenamedTypeMember(key, goName string, pkg *types.Package) (string, bool) {
+	packageLock.Lock()
+	target, published := importedTypeAliases[key]
+	isConst := constImportedTypeAliases.Contains(key)
+	packageLock.Unlock()
+
+	if !published || isConst || !aliasSourceMatchesPackage(key, pkg) {
+		return "", false
+	}
+
+	member := target[strings.LastIndex(target, ".")+1:]
+
+	if member == getCoreSanitizedIdentifier(goName) || member == getSanitizedIdentifier(goName) {
+		return "", false
+	}
+
+	return member, true
+}
+
 // getRefParameterTypeName renders t as the C#-shaped spelling a `ref` parameter position needs.
 // A Go pointer parameter that the converter passes by reference is `ref T`, not the `ж<T>` box the
 // ordinary C# rendering would produce — the box is the heap-allocated form, while a `ref` param is
@@ -1267,6 +1322,16 @@ func (v *Visitor) isForeignAliasOfNamed(t types.Type) bool {
 	_, isNamed := types.Unalias(alias).(*types.Named)
 
 	return isNamed
+}
+
+// isPublishedForeignAnonStructAlias reports whether t is another package's alias of a non-empty ANONYMOUS struct
+// whose lift that package published (foreignAnonStructAliasTarget): libc's real `stdio.FILE` is `type FILE =
+// X_iobuf` with `type X_iobuf = struct{...}` (ccgo), so isForeignAliasOfNamed's defined-type test misses it
+// (sqlite-cs W5a). Its declarations already spell it `stdioꓸFILE`; an unpublished one keeps its path.
+func (v *Visitor) isPublishedForeignAnonStructAlias(t types.Type) bool {
+	_, ok := foreignAnonStructAliasTarget(t, v.pkg)
+
+	return ok
 }
 
 // foreignAliasedTypeName resolves a cross-package type that is RENAMED (or Go-aliased) inside

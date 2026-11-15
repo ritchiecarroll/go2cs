@@ -14,7 +14,7 @@ workarounds.
 
 ## On Apple silicon, the standard library is the `amd64` build {#on-apple-silicon-runtimegoarch-reports-amd64}
 
-The packages ship for four platforms: `win-x64`, `linux-x64`, `osx-x64` and `osx-arm64`. The converted standard library
+The packages ship for five platforms: `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. The converted standard library
 for macOS is built once, for `darwin/amd64`, and the same packages serve Intel and Apple-silicon Macs. On an
 Apple-silicon Mac a converted program runs as a native arm64 .NET process:
 - `runtime.GOARCH` reads `arm64`, as Go's own program on the same Mac does. It is read from the process when the

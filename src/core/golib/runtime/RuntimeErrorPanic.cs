@@ -131,6 +131,34 @@ namespace go.golib;
         return new PanicException(string.Format(NativeArrayViewMessage, shape));
     }
 
+    private const string NamedArrayNativeViewMessage =
+        $"{RuntimeErrorMessage}cannot view native memory as {{0}}: a named Go array is a window on a real "
+        + "managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) "
+        + "(see docs/phase4/DESIGN-native-array-view.md)";
+    /// <summary>
+    /// The NAMED-ARRAY FLOOR: the whole value of a named array type read through a pointer at a real
+    /// address (<c>ж.NativeBox.cs</c>, <c>ValueAddress</c>).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Its OWN text, beside <see cref="NativeArrayViewWithoutElementStorage(Type)"/> and not that
+    /// one's. The unnamed array is refused where an unrecorded address is converted, and "no managed
+    /// element storage behind it" is true there. This refusal also meets pinned Go storage of another
+    /// type (a named array laid over a slice element, or over a Go array of another element type), and
+    /// that memory HAS managed storage behind it: what it lacks is the wrapper, whose one field is a
+    /// reference no pinned storage and no C memory ever held. So the text names both arrivals.
+    /// </para>
+    /// <para>
+    /// The prefix <c>cannot view native memory as &lt;shape&gt;:</c> and the document pointer are the
+    /// unnamed array's, on purpose: a reader searching a failing run for either refusal uses one key.
+    /// Internal, because the only thrower is the native box's read.
+    /// </para>
+    /// </remarks>
+    internal static PanicException NamedArrayViewOfNativeMemory(Type namedArrayType)
+    {
+        return new PanicException(string.Format(NamedArrayNativeViewMessage, namedArrayType.Name));
+    }
+
     private const string UnknownGoSizeMessage =
         $"{RuntimeErrorMessage}{{0}} of {{1}} is not known (the length of {{2}} is not carried for an unnamed array type argument)";
     private const string UnknownGoSizeInnerMessage =

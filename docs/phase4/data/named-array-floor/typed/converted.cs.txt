@@ -1,0 +1,73 @@
+namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using syscall = syscall_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+internal static uintptr native(nint n) {
+    var (b, err) = syscall.Mmap(-1, 0, n, (nint)((nint)syscall.PROT_READ | (nint)syscall.PROT_WRITE), (nint)((nint)syscall.MAP_ANON | (nint)syscall.MAP_PRIVATE));
+    if (err != nil) {
+        throw panic(err);
+    }
+    return (uintptr)Ꮡ(b, 0);
+}
+
+internal static @string peek(uintptr p, nint n) {
+    var @out = new slice<byte>(n);
+    for (nint i = 0; i < n; i++) {
+        @out[i] = ~@unsafe.Pointer.To<byte>((@unsafe.Pointer)(p + (uintptr)i));
+    }
+    return fmt.Sprintf("%q"u8, @out);
+}
+
+partial struct smallMem /*[64]byte*/;
+
+partial struct hdr {
+    internal int32 n;
+    internal array<byte> buf = new(64);
+}
+
+internal static void viaByte(ж<byte> bp) {
+    (@unsafe.Pointer.To<smallMem>(@unsafe.Pointer.FromPinnedBox(bp))).Value[5] = 7;
+    var raw = @unsafe.Pointer.To<smallMem>(@unsafe.Pointer.FromPinnedBox(bp));
+    raw.Value[6] = 8;
+    fmt.Println(raw.Value[5], raw.Value[6]);
+}
+
+internal static void viaStruct(ж<hdr> Ꮡh) {
+    ref var h = ref Ꮡh.DerefOrNull();
+
+    var a = Ꮡh.Ꮡbuf.Reinterpret<array<byte>, smallMem>();
+    a.Value[1] = 3;
+    var b = @unsafe.Pointer.To<smallMem>(@unsafe.Pointer.FromPinnedBox(Ꮡh.at(hdr.Ꮡbuf, 0)));
+    b.Value[2] = 4;
+    fmt.Println(h.buf[1], h.buf[2]);
+}
+
+internal static void main() {
+    var z = native(4096);
+    var exprᴛ1 = os.Args[1];
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "go"u8: {
+        ref var h = ref heap(new hdr(), out var Ꮡh);
+        viaStruct(Ꮡh);
+        viaByte(Ꮡh.at(hdr.Ꮡbuf, 0));
+        break;
+    }
+    case {} when exprᴛ1 == "byte"u8: {
+        viaByte(@unsafe.Pointer.To<byte>((@unsafe.Pointer)z));
+        fmt.Println(peek(z, 8));
+        break;
+    }
+    case {} when exprᴛ1 == "struct"u8: {
+        viaStruct(@unsafe.Pointer.To<hdr>((@unsafe.Pointer)z));
+        fmt.Println(peek(z, 12));
+        break;
+    }}
+
+}
+
+} // end main_package

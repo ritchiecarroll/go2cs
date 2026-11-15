@@ -1,0 +1,139 @@
+file	line	class	consumer	callee	kind
+fmt/print.cs	690	NUMBER	go.uintptr	go.reflect_package.ΔValue.UnsafePointer()	converted
+internal/abi/type.cs	230	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.@internal.abi_package.UncommonType>(ref go.@internal.abi_package.UncommonType)	converted
+internal/abi/type.cs	230	POINTER-CAST	go.@internal.abi_package.Method*	go.@internal.abi_package.addChecked(go.unsafe_package.Pointer, go.uintptr, go.@string)	converted
+internal/abi/type.cs	243	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.@internal.abi_package.UncommonType>(ref go.@internal.abi_package.UncommonType)	converted
+internal/abi/type.cs	243	POINTER-CAST	go.@internal.abi_package.Method*	go.@internal.abi_package.addChecked(go.unsafe_package.Pointer, go.uintptr, go.@string)	converted
+internal/sync/mutex.cs	67	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.@internal.sync_package.Mutex>(ref go.@internal.sync_package.Mutex)	converted
+internal/sync/mutex.cs	94	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.@internal.sync_package.Mutex>(ref go.@internal.sync_package.Mutex)	converted
+internal/sync/mutex.cs	189	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.@internal.sync_package.Mutex>(ref go.@internal.sync_package.Mutex)	converted
+internal/sync/mutex.cs	201	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.@internal.sync_package.Mutex>(ref go.@internal.sync_package.Mutex)	converted
+reflect/all_test.cs	1054	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	1056	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	1831	POINTER-CAST	go.ж<V>	go.unsafe_package.Add(go.unsafe_package.Pointer, go.uintptr)	converted
+reflect/all_test.cs	3989	NUMBER	go.uintptr	go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	3989	NUMBER	go.uintptr	go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	3993	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	4039	NUMBER	go.uintptr	go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	4039	NUMBER	go.uintptr	go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	4043	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	4318	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	4320	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	4383	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	4385	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	8425	POINTER-CAST	go.uintptr	go.unsafe_package.Pointer.FromRef<go.reflect_test_package.Inner>(ref go.reflect_test_package.Inner)	converted
+reflect/all_test.cs	8926	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	9995	POINTER-CAST	go.uintptr	go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/all_test.cs	10692	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/export_test.cs	101	POINTER-CAST	go.ж<go.reflect_package.rtype>	go.reflect_package.resolveTypeOff(go.unsafe_package.Pointer, int)	converted
+reflect/set_test.cs	88	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/set_test.cs	103	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/set_test.cs	103	NUMBER	go.uintptr	go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/set_test.cs	117	BACK-TO-POINTER		go.reflect_package.ΔValue.UnsafePointer()	converted
+reflect/type.cs	559	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.reflect_package.rtype>(ref go.reflect_package.rtype)	converted
+reflect/type.cs	565	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.reflect_package.rtype>(ref go.reflect_package.rtype)	converted
+reflect/type.cs	571	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.reflect_package.rtype>(ref go.reflect_package.rtype)	converted
+runtime/export_test.cs	130	POINTER-CAST	go.ж<go.runtime_internal_test_package.LFNode>	go.ж<go.runtime_package.lfstack>.pop()	converted
+runtime/export_test.cs	647	BACK-TO-POINTER		go.runtime_package.sysReserve(go.unsafe_package.Pointer, go.uintptr, go.@string)	converted
+runtime/export_test.cs	1436	POINTER-CAST	go.ж<go.runtime_package.mspan>	go.ж<go.runtime_package.fixalloc>.alloc()	converted
+runtime/export_test.cs	2009	BACK-TO-POINTER		go.runtime_package.persistentalloc(go.uintptr, go.uintptr, go.ж<go.runtime_package.sysMemStat>)	converted
+runtime/export_test.cs	2159	BACK-TO-POINTER		go.runtime_package.listHead.pop()	converted
+runtime/export_test.cs	2183	BACK-TO-POINTER		go.runtime_package.listHeadManual.pop()	converted
+runtime/hexdump_test.cs	172	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/iface.cs	243	POINTER-CAST	go.@internal.abi_package.Method*	go.runtime_package.add(go.unsafe_package.Pointer, go.uintptr)	converted
+runtime/lfstack_test.cs	26	POINTER-CAST	go.ж<go.runtime_test_package.MyNode>	go.runtime_internal_test_package.PersistentAlloc(go.uintptr, go.uintptr)	converted
+runtime/list_manual_test.cs	54	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	63	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	72	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	81	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	119	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	123	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	127	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	153	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	157	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	161	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	187	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	191	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	195	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	223	BACK-TO-POINTER		go.runtime_internal_test_package.ListHeadManual.Pop()	converted
+runtime/list_manual_test.cs	241	POINTER-CAST	go.ж<go.runtime_test_package.listedValNIH>	go.runtime_internal_test_package.PersistentAlloc(go.uintptr, go.uintptr)	converted
+runtime/list_manual_test.cs	247	POINTER-CAST	go.ж<go.runtime_internal_test_package.ListHeadManual>	go.runtime_internal_test_package.PersistentAlloc(go.uintptr, go.uintptr)	converted
+runtime/list_manual_test.cs	263	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	272	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	281	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	290	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	324	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	328	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	332	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	354	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	358	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	362	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	384	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	388	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	392	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_manual_test.cs	416	BACK-TO-POINTER		go.ж<go.runtime_internal_test_package.ListHeadManual>.Pop()	converted
+runtime/list_test.cs	38	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	47	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	56	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	65	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	99	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	103	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	107	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	129	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	133	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	137	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	159	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	163	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	167	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/list_test.cs	191	BACK-TO-POINTER		go.runtime_internal_test_package.ListHead.Pop()	converted
+runtime/mbitmap.cs	1638	POINTER-CAST	byte*	go.runtime_package.persistentalloc(go.uintptr, go.uintptr, go.ж<go.runtime_package.sysMemStat>)	converted
+runtime/mem_persistent_impl.cs	96	POINTER-CAST	go.ж<go.runtime_package.notInHeap>	go.runtime_package.sysAlloc(go.uintptr, go.ж<go.runtime_package.sysMemStat>, go.@string)	impl
+runtime/mem_persistent_impl.cs	108	POINTER-CAST	go.ж<go.runtime_package.notInHeap>	go.runtime_package.sysAlloc(go.uintptr, go.ж<go.runtime_package.sysMemStat>, go.@string)	impl
+runtime/mem_persistent_impl.cs	184	POINTER-CAST	go.ж<go.runtime_package.notInHeap>	go.runtime_package.sysAlloc(go.uintptr, go.ж<go.runtime_package.sysMemStat>, go.@string)	impl
+runtime/mem_persistent_impl.cs	205	POINTER-CAST	go.ж<go.runtime_package.notInHeap>	go.runtime_package.sysAlloc(go.uintptr, go.ж<go.runtime_package.sysMemStat>, go.@string)	impl
+runtime/mfinal.cs	178	POINTER-CAST	go.ж<go.runtime_package.finBlock>	go.runtime_package.persistentalloc(go.uintptr, go.uintptr, go.ж<go.runtime_package.sysMemStat>)	converted
+runtime/mfixalloc.cs	99	NUMBER	go.uintptr	go.runtime_package.persistentalloc(go.uintptr, go.uintptr, go.ж<go.runtime_package.sysMemStat>)	converted
+runtime/mgc.cs	2259	NUMBER	go.uintptr	go.runtime_package.noescape(go.unsafe_package.Pointer)	converted
+runtime/mgcmark.cs	491	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.ж<go.@internal.runtime.atomic_package.Uintptr>>(go.ж<go.ж<go.@internal.runtime.atomic_package.Uintptr>>)	converted
+runtime/mgcmark.cs	522	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.ж<go.runtime_package.funcval>>(go.ж<go.ж<go.runtime_package.funcval>>)	converted
+runtime/mgcmark.cs	1036	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.unsafe_package.Pointer>(go.ж<go.unsafe_package.Pointer>)	converted
+runtime/mgcmark.cs	1060	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.ж<go.runtime_package._defer>>(go.ж<go.ж<go.runtime_package._defer>>)	converted
+runtime/mgcmark.cs	1066	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.ж<go.runtime_package._defer>>(go.ж<go.ж<go.runtime_package._defer>>)	converted
+runtime/mgcmark_greenteagc.cs	144	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.runtime_package.spanInlineMarkBits>(ref go.runtime_package.spanInlineMarkBits)	converted
+runtime/mpagealloc_64bit.cs	133	NUMBER	go.uintptr	go.runtime_package.add(go.unsafe_package.Pointer, go.uintptr)	converted
+runtime/mpagealloc_64bit.cs	134	NUMBER	go.uintptr	go.runtime_package.add(go.unsafe_package.Pointer, go.uintptr)	converted
+runtime/mprof_impl.cs	194	POINTER-CAST	go.ж<go.runtime_package.bucket>	go.ж<go.@internal.runtime.atomic_package.UnsafePointer>.Load()	impl
+runtime/mwbbuf.cs	79	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/mwbbuf.cs	85	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/mwbbuf.cs	101	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/mwbbuf.cs	106	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/mwbbuf.cs	199	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/runtime2.cs	364	POINTER-CAST	go.ж<go.runtime_package.Δhchan>	go.runtime_package.maybeTraceablePtr.get()	converted
+runtime/synctest.cs	191	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.runtime_package.synctestBubble>(ref go.runtime_package.synctestBubble)	converted
+runtime/syscall_windows_test.cs	1345	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/syscall_windows_test.cs	1345	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/syscall_windows_test.cs	1359	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/syscall_windows_test.cs	1359	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/time.cs	1280	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.runtime_package.timer>(ref go.runtime_package.timer)	converted
+runtime/windows/malloc.cs	705	NUMBER	go.uintptr	go.runtime_package.sysReserve(go.unsafe_package.Pointer, go.uintptr, go.@string)	converted
+runtime/windows/mem.cs	209	NUMBER	go.uintptr	go.runtime_package.sysReserve(go.unsafe_package.Pointer, go.uintptr, go.@string)	converted
+runtime/windows/mem_windows_impl.cs	170	NUMBER	go.uintptr	go.runtime_package.sysAllocOS(go.uintptr, go.@string)	impl
+runtime/windows/mem_windows_impl.cs	174	NUMBER	go.uintptr	go.runtime_package.sysReserveOS(go.unsafe_package.Pointer, go.uintptr, go.@string)	impl
+runtime/windows/mheap.cs	730	BACK-TO-POINTER		go.unsafe_package.Pointer.FromRef<go.runtime_package.mheap>(ref go.runtime_package.mheap)	converted
+runtime/windows/mheap.cs	2173	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.ж<go.runtime_package.funcval>>(go.ж<go.ж<go.runtime_package.funcval>>)	converted
+runtime/windows/mheap.cs	2603	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.ж<go.@internal.runtime.atomic_package.Uintptr>>(go.ж<go.ж<go.@internal.runtime.atomic_package.Uintptr>>)	converted
+runtime/windows/os_windows.cs	321	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/windows/os_windows.cs	327	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/windows/os_windows.cs	327	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/windows/os_windows.cs	873	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/windows/os_windows.cs	898	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/windows/os_windows.cs	992	NUMBER	go.uintptr	go.@internal.abi_package.NoEscape(go.unsafe_package.Pointer)	converted
+runtime/windows/os_windows.cs	1013	NUMBER	go.uintptr	go.@internal.abi_package.NoEscape(go.unsafe_package.Pointer)	converted
+runtime/windows/os_windows.cs	1148	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/windows/os_windows.cs	1233	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/windows/proc.cs	1921	NUMBER	go.uintptr	go.runtime_package.noescape(go.unsafe_package.Pointer)	converted
+runtime/windows/signal_windows.cs	24	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/windows/signal_windows.cs	315	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/windows/signal_windows.cs	319	NUMBER	go.uintptr	go.unsafe_package.Pointer.FromBox<go.uintptr>(go.ж<go.uintptr>)	converted
+runtime/windows/syscall_windows.cs	456	NUMBER	go.uintptr	go.runtime_package.noescape(go.unsafe_package.Pointer)	converted
+unsafe/unsafe.cs	1452	POINTER-CAST	go.ж<go.array<T>>	go.unsafe_package.Pointer.FromPinnedBox<TField>(go.ж<TField>)	manual

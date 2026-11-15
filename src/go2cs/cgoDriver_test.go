@@ -229,9 +229,36 @@ func convertCgoOfflineInto(t *testing.T, files map[string]string, output string,
 
 	cmd := exec.Command(os.Args[0], "-test.run=^TestCgoOfflineHelperProcess$", "-test.timeout=0")
 	cmd.Env = append(os.Environ(), cgoOfflineHelperEnv+"="+string(encoded), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=")
+	cmd.Env = append(cmd.Env, cgoOverlayModCacheEnv(t, dir)...)
 	combined, err := cmd.CombinedOutput()
 
 	return string(combined), output, err
+}
+
+// cgoOverlayModCacheEnv is what a load from dir that overlays a file into GOROOT (the offline route's runtime/cgo
+// Incomplete) adds to its environment. The go command refuses an overlay beneath GOMODCACHE, and a toolchain it fetched
+// under GOTOOLCHAIN lives there, so on such a toolchain every offline cgo test failed at the load, most of them with
+// that message and some only as a missing refusal line, which read like a converter defect (BOARD, 2026-11-14, C2).
+// The load then takes a module cache of its own: the offline fixtures' modules have no dependencies, so an empty one
+// serves. GOTOOLCHAIN=local and the toolchain's bin first on PATH pin it to the GOROOT resolved here. Nothing is added
+// when GOROOT is outside GOMODCACHE.
+func cgoOverlayModCacheEnv(t *testing.T, dir string) []string {
+	t.Helper()
+
+	goRoot, err := getGoEnvFrom(dir, "GOROOT")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	modCache, err := getGoEnvFrom(dir, "GOMODCACHE")
+
+	if err != nil || modCache == "" || !isPathUnder(goRoot, modCache) {
+		return nil
+	}
+
+	return []string{"GOMODCACHE=" + t.TempDir(), "GOTOOLCHAIN=local",
+		"PATH=" + filepath.Join(goRoot, "bin") + string(os.PathListSeparator) + os.Getenv("PATH")}
 }
 
 // cgoRefusalLines are the lines of a conversion's output that refuse one C use of fixture.go under -cgo.
