@@ -38757,4 +38757,31 @@ turns that arm's two measured assertions into Go's answer.
 
 — P5 (2026-11-14)
 
+## 2026-11-15 — H (sqlite-cs wall W8, the reflect.StringHeader number Data; docs/phase4/DESIGN-sqlite-ccgo-ts.md): three rows the cut leaves
+
+**Row 1. The `&b[0]` round trip, a number kept ACROSS STATEMENTS and re-formed into a pointer, is a MEMORY-UNSAFE READ
+in Go-invalid code only (owner open; not `.4`).** A number minted from an element box (`&b[0]`, and a header's Data under
+route (H)) stays valid while that ELEMENT BOX lives. Once the box is collected its pin is released, the registry
+validates "alive and still pinned" and misses, and the number reads as a native address into a managed array that may
+have moved. Measured (`docs/phase4/data/w8-ccgo-ts/roundtrip-probe`, golib at master `091935257c`, the prediction
+written first): with the box dropped and a compacting collection with finalizers between, 0 of 200 resolved and the
+bytes read were WRONG in 199 of 200, in both processes (control with the box held: 0 of 200). Go's rule 6 shape,
+`unsafe.Pointer(h.Data)` in one expression, is CLOSED by the cut's carrying pointer (`FromHeaderData`); a number held
+across statements is what Go calls invalid, and keeps the window.
+
+**Row 2. `reflect.SliceHeader`: the census reads 0 in modernc.org/sqlite v1.62.0 and modernc.org/libc v1.80.1 (owner
+H, closed by measurement).** COORD's run of the census instrument on the i7 (`docs/phase4/data/w8-ccgo-ts/census-main.go`,
+header-use class; controls: all four planted SliceHeader uses found, none in the negative control). The cut admits
+the uintptr shape on `SliceHeaderBox` under (H) anyway, because Go's rule covers it; no ccgo wall needs it.
+
+**Row 3. A header store of a NATIVE Data, then Len, commits once with the OLD Len first (owner open; inherited, not
+the W8 cut's).** `StringHeaderBox`'s commit (both the `unsafe.Pointer` and the number shape) and `SliceHeaderBox`'s run on
+every field store. `hdr.Data = n` over native memory commits the string or slice at the header's CURRENT Len before
+`hdr.Len = k` arrives, so the first commit reads (or views) the old Len bytes at `n`. Past a small native block that is
+an over-read, and an unmapped page there is a fatal access violation rather than Go's silent wrong bytes. P3's code read
+of the W8 cut, note 3 (`docs/phase4/inbox/COORD/20261115T113448Z-P3.md`). A cure would hold a native Data until a
+Len store arrives, or commit lazily at the next read; neither is in this cut.
+
+— H (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

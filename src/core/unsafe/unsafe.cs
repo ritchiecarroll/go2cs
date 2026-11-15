@@ -605,6 +605,10 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     // exactly today's number pointer, from the Data word Go's layout puts first.
     public static Pointer FromHeaderData<T>(ж<T> header)
     {
+        // A nil header is Go's nil dereference at `h.Data`, never a .NET NullReferenceException (P3's code read, nit 5).
+        if (header is null || header.IsNilPointer)
+            throw RuntimeErrorPanic.ErrorString("invalid memory address or nil pointer dereference");
+
         if (header is IHeaderDataCarrier source)
         {
             nuint word = source.HeaderDataWord(out object? carried);

@@ -1028,8 +1028,21 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// so the emission hands golib the header's BOX: `@unsafe.Pointer.FromHeaderData(box)` answers a pointer that
 			// CARRIES the element box for a header box, and today's number pointer for any other box, decided at run time
 			// (docs/phase4/DESIGN-sqlite-ccgo-ts.md, QW-8 and section 10.3; TestHeaderDataPointerEmitsFromHeaderData).
+			//
+			// A pointer PARAMETER or RECEIVER renders as the pointed-to VALUE alias, so its box is asked for by the pointer
+			// context (`Ꮡsh`). Where the body has NO box (a `ref T` parameter or receiver), there is nothing to carry, and
+			// the emission stays today's number pointer (P3's arm b: it must compile).
 			if header, ok := v.reflectHeaderDataOperand(arg); ok {
-				return fmt.Sprintf("@unsafe.Pointer.FromHeaderData(%s)", v.convExpr(header, nil))
+				if !v.exprIsDerefAliasedPointer(header) {
+					return fmt.Sprintf("@unsafe.Pointer.FromHeaderData(%s)", v.convExpr(header, nil))
+				}
+
+				identContext := DefaultIdentContext()
+				identContext.isPointer = true
+
+				if box := v.convExpr(header, []ExprContext{identContext}); strings.HasPrefix(box, AddressPrefix) {
+					return fmt.Sprintf("@unsafe.Pointer.FromHeaderData(%s)", box)
+				}
 			}
 
 			// A NAMED-numeric arg whose underlying is uintptr — `unsafe.Pointer(v)` where v is

@@ -135,7 +135,8 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
     private bool m_materialized;
     private @string m_pointerFor;        // the string the cached pointer was minted for
     private object? m_pointer;           // the pointer object; for the number shape under (H), the element box itself
-    private nuint m_number;              // the number shape's Data word for m_pointerFor
+    private nuint m_number;              // the number shape's Data word now
+    private nuint m_mintNumber;          // the number m_pointer (an element box) was minted for, or 0
     private bool m_wordFromStore;        // m_number is a word the program STORED (kept while the window is unchanged)
     private bool m_held;                 // L2, as SliceHeaderBox's
     private @string m_heldOver;
@@ -195,14 +196,36 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
         // A number Data (D5) resolves through the registry, or through the element box this header minted it from. An (L)
         // copy's number is native memory, so a store of it rebuilds the string as a copy.
         nuint word = s_dataIsNumber ? ((uintptr)data!).Value : 0;
-        object? carried = s_dataIsNumber && word != 0 && word == m_number ? m_pointer : null;
+        object? carried = s_dataIsNumber && word != 0 && m_pointer is not null && word == m_mintNumber ? m_pointer : null;
         Array? backing;
         nint index;
-        nuint address;
+        nuint address = 0;
 
-        HeaderData.Kind kind = s_dataIsNumber
-            ? HeaderData.ResolveNumber(word, carried, out backing, out index, out address)
-            : HeaderData.Resolve(data, out backing, out index, out address);
+        // What the header keeps once the word commits, and the number that box was minted for.
+        object? keep = carried;
+        nuint keepMint = carried is null ? 0 : m_mintNumber;
+
+        HeaderData.Kind kind;
+
+        if (s_dataIsNumber && carried is null && HeaderData.TryInterior(m_pointer, m_mintNumber, word, out backing, out index))
+        {
+            // Fix 1: a word inside the run this header minted from (`Data += k`) is that backing's byte, managed and
+            // shared, and the minted box keeps the run pinned.
+            kind = HeaderData.Kind.Run;
+            keep = m_pointer;
+            keepMint = m_mintNumber;
+        }
+        else if (s_dataIsNumber)
+        {
+            // Fix 2: the box the registry answered with is KEPT, so the pin behind the word lives with this header.
+            kind = HeaderData.ResolveNumber(word, carried, out backing, out index, out address, out object? referent);
+            keep = referent;
+            keepMint = referent is null ? 0 : word;
+        }
+        else
+        {
+            kind = HeaderData.Resolve(data, out backing, out index, out address);
+        }
 
         @string? rebuilt = null;
 
@@ -253,7 +276,8 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
         if (s_dataIsNumber)
         {
             m_number = word;
-            m_pointer = carried;
+            m_pointer = keep;
+            m_mintNumber = keepMint;
             m_wordFromStore = true;
         }
         else
@@ -278,7 +302,9 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
         }
 
         nuint number = ((uintptr)data).Value;
-        carried = number != 0 && number == m_number ? m_pointer : null;
+
+        // The kept box carries an exact word, and a word inside the run it pins (fix 1).
+        carried = number != 0 && m_pointer is not null && (number == m_mintNumber || HeaderData.TryInterior(m_pointer, m_mintNumber, number, out _, out _)) ? m_pointer : null;
         return number;
     }
 
@@ -309,10 +335,10 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
             return 0;
 
         // (H): the element at the window's start, through its pin-only hold, reusing the box minted for this window.
-        if (m_pointer is not null && SameWindow(source, m_pointerFor))
+        if (m_pointer is not null && m_mintNumber != 0 && SameWindow(source, m_pointerFor))
         {
             elementBox = m_pointer;
-            return m_number;
+            return m_mintNumber;
         }
 
         ж<byte> element = builtin.Ꮡ(window, 0);
@@ -356,6 +382,7 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
                 m_wordFromStore = false;
                 m_number = NumberFor(source, out object? elementBox);
                 m_pointer = elementBox;
+                m_mintNumber = elementBox is null ? 0 : m_number;
                 m_pointerFor = source;
             }
 

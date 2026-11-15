@@ -76,6 +76,18 @@ func plain(n uintptr) uintptr {
 	return uintptr(unsafe.Pointer(p.Data))
 }
 
+// P3's (b): a pointer PARAMETER, the shape libc's helpers take.
+func param(sh *reflect.StringHeader) unsafe.Pointer {
+	return unsafe.Pointer(sh.Data)
+}
+
+// CONTROL 3 (P3's (c)): a header VALUE has no header box behind it; its Data stays a number.
+func value(s string) unsafe.Pointer {
+	var h reflect.StringHeader
+	h.Len = len(s)
+	return unsafe.Pointer(h.Data)
+}
+
 // CONTROL 1: a bare number stays a number pointer.
 func number(n uintptr) unsafe.Pointer {
 	return unsafe.Pointer(n)
@@ -88,7 +100,7 @@ func other(x *notHeader) unsafe.Pointer {
 
 func main() {
 	dst := make([]byte, 8)
-	fmt.Println(hostname("host", dst), string(dst[:4]), inline("x"), deref("y"), sliceData([]byte{7}), plain(0) == 0, number(0) == nil, other(&notHeader{}) == nil)
+	fmt.Println(hostname("host", dst), string(dst[:4]), inline("x"), deref("y"), sliceData([]byte{7}), plain(0) == 0, number(0) == nil, other(&notHeader{}) == nil, param(&reflect.StringHeader{}) == nil, value("v") == nil)
 }
 `)
 
@@ -136,6 +148,7 @@ func TestHeaderDataPointerEmitsFromHeaderData(t *testing.T) {
 		{"deref", "@unsafe.Pointer.FromHeaderData(h)"},
 		{"sliceData", "@unsafe.Pointer.FromHeaderData(h)"},
 		{"plain", "@unsafe.Pointer.FromHeaderData(p)"},
+		{"param", "@unsafe.Pointer.FromHeaderData(sh)"},
 	} {
 		body := emittedFunctionBody(t, mainCs, arm.function)
 
@@ -144,12 +157,19 @@ func TestHeaderDataPointerEmitsFromHeaderData(t *testing.T) {
 		}
 	}
 
+	// P3's arm b: a pointer PARAMETER used this way keeps its BOX (ref-lowering's X3 veto), so the call has a box to
+	// hand over and the function compiles. A ref-lowered parameter (`ref reflect.StringHeader sh`) would have none.
+	if body := emittedFunctionBody(t, mainCs, "param"); !strings.Contains(body, "param(ж<reflect.StringHeader> sh)") {
+		t.Errorf("param: the header pointer parameter must keep its box, got:\n%s", body)
+	}
+
 	// The controls: each stays a pointer made from a number, and takes no FromHeaderData.
 	for _, arm := range []struct {
 		function, want string
 	}{
 		{"number", "return (@unsafe.Pointer)n;"},
 		{"other", "(@unsafe.Pointer)"},
+		{"value", "(@unsafe.Pointer)"},
 	} {
 		body := emittedFunctionBody(t, mainCs, arm.function)
 

@@ -140,26 +140,29 @@ internal static class HeaderData
             return Kind.Nil;
 
         // The box the pointer was minted from (FromPinnedBox, FromBox) rides along as the referent.
-        return ResolveNumber(word.Value.Value, ((IUnsafePointer)data).RetainedSource, out backing, out index, out address);
+        return ResolveNumber(word.Value.Value, ((IUnsafePointer)data).RetainedSource, out backing, out index, out address, out _);
     }
 
     /// <summary>
     /// The same answer for a header whose Data is a NUMBER (<c>reflect.StringHeader</c>, <c>reflect.SliceHeader</c>):
     /// the number goes through what the number-to-pointer conversion asks, the token registry, unless the header box
-    /// itself knows the box it minted the number from (<paramref name="carried"/>).
+    /// itself knows the box it minted the number from (<paramref name="carried"/>). <paramref name="referent"/> is the box
+    /// the answer came from, which a header that commits the word KEEPS, so the pin behind the number lives as long as
+    /// the header (P3's code read, fix 2: `h2.Data = h1.Data`).
     /// </summary>
-    internal static Kind ResolveNumber(nuint number, object? carried, out Array? backing, out nint index, out nuint address)
+    internal static Kind ResolveNumber(nuint number, object? carried, out Array? backing, out nint index, out nuint address, out object? referent)
     {
         backing = null;
         index = 0;
         address = 0;
+        referent = null;
 
         if (number == 0)
             return Kind.Nil;
 
         // The box the number was minted from when it is known; else whatever the token registry recovers for a bare
         // number, as the uintptr conversion does.
-        object? referent = carried ?? ManagedPointerTokens.Resolve(number);
+        referent = carried ?? ManagedPointerTokens.Resolve(number);
 
         if (referent is IElementRun { RunBacking: { } run } element)
         {
@@ -187,6 +190,43 @@ internal static class HeaderData
         }
 
         return Kind.Other;
+    }
+
+    /// <summary>
+    /// P3's code read, fix 1: a stored word INSIDE the run a header minted its number from (<c>h.Data += k</c>, the
+    /// re-slice idiom) is that run's element <c>RunIndex + delta / stride</c> of the SAME managed backing: shared, and
+    /// pinned by <paramref name="minted"/> while the header keeps it. The registry resolves exact keys only, so without
+    /// this the word fell to <see cref="Kind.Native"/> and was read and written as native memory the collector may move.
+    /// One past the end is admitted (a zero-length window). A run whose number is an order token (an element of a
+    /// reference-bearing array) has no address arithmetic, and is never matched.
+    /// </summary>
+    internal static bool TryInterior(object? minted, nuint mintedNumber, nuint word, out Array? backing, out nint index)
+    {
+        backing = null;
+        index = 0;
+
+        if (minted is not IElementRun { RunBacking: { } run } element || mintedNumber == 0 || word == 0 || ManagedPointerTokens.IsTaggedToken(mintedNumber))
+            return false;
+
+        Type? elementType = run.GetType().GetElementType();
+
+        if (elementType is null)
+            return false;
+
+        int stride = System.Runtime.CompilerServices.RuntimeHelpers.SizeOf(elementType.TypeHandle);
+        long delta = (long)word - (long)mintedNumber;
+
+        if (stride <= 0 || delta % stride != 0)
+            return false;
+
+        long target = element.RunIndex + delta / stride;
+
+        if (target < 0 || target > run.Length)
+            return false;
+
+        backing = run;
+        index = (nint)target;
+        return true;
     }
 }
 
@@ -407,9 +447,16 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>, IHeaderDataCarrier
         nint index;
         nuint address;
 
-        HeaderData.Kind kind = s_dataIsNumber
-            ? HeaderData.ResolveNumber(word, carried, out backing, out index, out address)
-            : HeaderData.Resolve(data, out backing, out index, out address);
+        HeaderData.Kind kind;
+        address = 0;
+
+        // Fix 1: a word inside the run this header minted from is that backing's element, managed and shared.
+        if (s_dataIsNumber && carried is null && HeaderData.TryInterior(m_pointer, m_number, word, out backing, out index))
+            kind = HeaderData.Kind.Run;
+        else if (s_dataIsNumber)
+            kind = HeaderData.ResolveNumber(word, carried, out backing, out index, out address, out _);
+        else
+            kind = HeaderData.Resolve(data, out backing, out index, out address);
 
         bool shape = 0 <= len && len <= cap;
         object? rebuilt = null;

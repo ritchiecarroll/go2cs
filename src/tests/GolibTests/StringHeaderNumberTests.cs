@@ -394,6 +394,134 @@ public unsafe class StringHeaderNumberTests
         Assert.IsTrue(@unsafe.Pointer.FromHeaderData(Ꮡzero).IsNull, "a zero Data is the nil pointer, as today");
     }
 
+    // ---- P3's code read of fe14d5faf8: arms a (store orders), fix 2 and nit 5. Read red at fe14d5faf8 first. ----
+
+    private static ж<NumberStringHeader> HeapHeader(string text, out ж<@string> source)
+    {
+        ref @string s = ref heap(new @string(System.Text.Encoding.ASCII.GetBytes(text)), out source);
+        return source.Reinterpret<@string, NumberStringHeader>();
+    }
+
+    // A read through unsafe.Pointer(h.Data) after compacting collections with finalizers: the bytes the header names now.
+    private static string ReadThroughData<THeader>(ж<THeader> header, int length)
+    {
+        Churn();
+        @unsafe.Pointer p = @unsafe.Pointer.FromHeaderData(header);
+        string read = Bytes((nuint)(uintptr)p, length);
+        GC.KeepAlive(p);
+        return read;
+    }
+
+    // a1: Data THEN Len, the re-slice idiom `h.Data += 2; h.Len -= 2`: the Data store alone names a window past the
+    // backing (held), the Len store commits the string over the SAME backing from byte 2.
+    [TestMethod]
+    public void A1_DataThenLenReSlicesOverTheSameBacking()
+    {
+        ж<NumberStringHeader> h = HeapHeader("abcdef", out ж<@string> Ꮡs);
+        nuint d = (nuint)h.Value.Data;
+
+        h.Value.Data = (uintptr)(d + 2);
+        h.OnHeaderStore();
+        h.Value.Len -= 2;
+        h.OnHeaderStore();
+
+        Assert.IsTrue(Ꮡs.Value == "cdef", $"the re-slice is the backing's bytes from 2, got {Ꮡs.Value}");
+        Assert.AreEqual("cdef", ReadThroughData(h, 4), "unsafe.Pointer(h.Data) reads the window after a collection");
+    }
+
+    // a2: Len THEN Data.
+    [TestMethod]
+    public void A2_LenThenDataReSlicesOverTheSameBacking()
+    {
+        ж<NumberStringHeader> h = HeapHeader("abcdef", out ж<@string> Ꮡs);
+        nuint d = (nuint)h.Value.Data;
+
+        h.Value.Len = 4;
+        h.OnHeaderStore();
+        Assert.IsTrue(Ꮡs.Value == "abcd");
+
+        h.Value.Data = (uintptr)(d + 2);
+        h.OnHeaderStore();
+
+        Assert.IsTrue(Ꮡs.Value == "cdef", $"got {Ꮡs.Value}");
+        Assert.AreEqual("cdef", ReadThroughData(h, 4));
+    }
+
+    // a3: Data alone, with its OWN word: the string is unchanged and still read after a collection.
+    [TestMethod]
+    public void A3_DataStoredWithItsOwnWordChangesNothing()
+    {
+        ж<NumberStringHeader> h = HeapHeader("abcdef", out ж<@string> Ꮡs);
+
+        h.Value.Data = h.Value.Data;
+        h.OnHeaderStore();
+
+        Assert.IsTrue(Ꮡs.Value == "abcdef");
+        Assert.AreEqual("abcdef", ReadThroughData(h, 6));
+    }
+
+    // a4: the slice twin of the re-slice, then a WRITE through the rebuilt slice: it lands in the shared backing after a
+    // compacting collection, as Go's write through the re-sliced header does.
+    [TestMethod]
+    public void A4_ASliceReSlicedThroughItsHeaderSharesAndWritesTheBacking()
+    {
+        byte[] backing = System.Text.Encoding.ASCII.GetBytes("abcdef");
+        ref slice<byte> b = ref heap(new slice<byte>(backing), out ж<slice<byte>> Ꮡb);
+        ж<NumberSliceHeader> h = Ꮡb.Reinterpret<slice<byte>, NumberSliceHeader>();
+        nuint d = (nuint)h.Value.Data;
+
+        h.Value.Data = (uintptr)(d + 2);
+        h.OnHeaderStore();
+        h.Value.Len = 4;
+        h.OnHeaderStore();
+        h.Value.Cap = 4;
+        h.OnHeaderStore();
+
+        Churn();
+
+        Assert.AreEqual(4, (int)len(Ꮡb.Value));
+        Assert.AreEqual((byte)'c', Ꮡb.Value[0], "the rebuilt slice reads the backing's byte 2 after a collection");
+
+        Ꮡb.Value[0] = (byte)'X';
+        Assert.AreEqual((byte)'X', backing[2], "a write through the rebuilt slice lands in the shared backing");
+    }
+
+    // Fix 2: a word copied from ANOTHER header (`h2.Data = h1.Data`) commits, and the header keeps the box the registry
+    // answered with, so the bytes are still read after h1, its string and every other hold are gone.
+    [TestMethod]
+    public void Fix2_AWordCopiedFromAnotherHeaderIsKeptAlive()
+    {
+        ж<NumberStringHeader> h2 = CopiedHeader(out ж<@string> Ꮡs2);
+
+        Assert.IsTrue(Ꮡs2.Value == "xyz");
+        Assert.AreEqual("xyz", ReadThroughData(h2, 3), "the copied word still names the bytes after h1 is gone");
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static ж<NumberStringHeader> CopiedHeader(out ж<@string> Ꮡs2)
+    {
+        ж<NumberStringHeader> h1 = HeapHeader("xyz", out _);
+        ref @string s2 = ref heap(default(@string), out Ꮡs2);
+        ж<NumberStringHeader> h2 = Ꮡs2.Reinterpret<@string, NumberStringHeader>();
+
+        h2.Value.Data = h1.Value.Data;
+        h2.OnHeaderStore();
+        h2.Value.Len = 3;
+        h2.OnHeaderStore();
+        return h2;
+    }
+
+    // Nit 5: unsafe.Pointer(h.Data) over a NIL header is Go's nil dereference.
+    [TestMethod]
+    public void Nit5_ANilHeaderPanicsAsGoNilDereference()
+    {
+        PanicException fromNull = Assert.ThrowsException<PanicException>(() => @unsafe.Pointer.FromHeaderData<NumberStringHeader>(null!));
+        StringAssert.Contains(fromNull.Message, "nil pointer dereference");
+
+        PanicException fromNilBox = Assert.ThrowsException<PanicException>(() => @unsafe.Pointer.FromHeaderData(go.ж<NumberStringHeader>.NilBox));
+        StringAssert.Contains(fromNilBox.Message, "nil pointer dereference");
+    }
+
     // W12's (H) half on a buffer no package variable has read: the header reads the live bytes after the write.
     [TestMethod]
     public void W12b_ThroughHAWrittenBufferReadsItsNewBytes()

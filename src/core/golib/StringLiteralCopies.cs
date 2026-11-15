@@ -80,13 +80,18 @@ internal static unsafe class StringLiteralCopies
 
         Block mine = Copy(backing);
 
+        // The count rises BEFORE the entry is visible, so a concurrent QW-9 lookup that sees the entry never skips the
+        // table as empty (P3's code read, nit 4); a losing offer gives its increment back.
+        Interlocked.Increment(ref s_count);
+
         if (s_table.TryAdd(backing, mine))
         {
-            Interlocked.Increment(ref s_count);
             Interlocked.Increment(ref Copies);
             Interlocked.Add(ref CopiedBytes, mine.Length);
             return mine.Base;
         }
+
+        Interlocked.Decrement(ref s_count);
 
         // Lost the first-read race: the block was never offered to a caller, so it is freed now, and the winner's is read.
         NativeMemory.Free((void*)mine.Base);
