@@ -246,10 +246,10 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:10,31,73,76#5da42c · src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5#5f67f9 ·
   src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:30#3e7716 · src/core/io/io.cs:84#df5e5e ·
   src/tests/Behavioral/ReflectValueSingles/ReflectValueSingles.cs.target:47#64aa80 + src/core/reflect/type.cs:1251#6bb2cb + src/core/golib/GoReflect.cs:19#9c197b ·
-  src/tests/Behavioral/PointerToPointer/PointerToPointer.go:25#c3ddc3 + PointerToPointer.cs.target:24,32#78f549 + src/core/golib/ж.cs:952#3d6147 ·
+  src/tests/Behavioral/PointerToPointer/PointerToPointer.go:25#c3ddc3 + PointerToPointer.cs.target:24,32#78f549 + src/core/golib/ж.cs:958#3d6147 ·
   src/tests/Behavioral/ClosureSelfShadowCapture/main.cs.target:22#fb95b4 · src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:80,97#be1df4 ·
   src/core/math/dim_asm.cs:11#710d59 · src/core/unicode/utf8/utf8.cs:20#83c559 (the Comments row: placement is best effort, see the Comments section)
-  Glyph-brief facts: `goǃ` ends in U+01C3 (a Latin letter); `~` on ж<T> is src/core/golib/ж.cs:952#3d6147; `ꟷ`/`ᐧ` uses per the glyph table rows (golib const bool ꟷ = false, ᐧ = true).
+  Glyph-brief facts: `goǃ` ends in U+01C3 (a Latin letter); `~` on ж<T> is src/core/golib/ж.cs:958#3d6147; `ꟷ`/`ᐧ` uses per the glyph table rows (golib const bool ꟷ = false, ᐧ = true).
   `new reg()`: the generator's parameterless constructor builds the zero value, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs (Struct Types section).
   License header always kept: Comments section ("Apart from the license header, Go's comments appear only with -comments"). -->
 
@@ -9135,7 +9135,7 @@ boxed value, and `Ꮡblue` is the box itself, which is what `&blue` gives ([Poin
 returns a `ref` to the `val` field of a given `Thing`. The field's generated address property applies it
 through the box method `.of(…)`, so `Ꮡx.Ꮡval` is a `ж<nint>` pointing at `val` inside the box that holds
 `x`. `p.Value` is Go's `*p`, so the write reaches `x`:
-<!-- accessor shape: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2289 `static ref {typeName} {accessor}(ref {StructName} instance) => {target};`; of: src/core/golib/ж.cs:223-234#2a847a -->
+<!-- accessor shape: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2289 `static ref {typeName} {accessor}(ref {StructName} instance) => {target};`; of: src/core/golib/ж.cs:229-240#2a847a -->
 
 <!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.go:10-25 -->
 ```go
@@ -9712,7 +9712,7 @@ to that field. The box's `of` method applies it and returns a `ж<inner>` that p
 <!-- Why the converter routes this call itself: docs/ConversionStrategies-Reference/struct-embedding.md,
 "A pointer-receiver method promoted through a VALUE embed is routed at the call site, not by a generator
 forwarder" (a forwarder body over the value field would copy it and lose the write). The of() surface:
-src/core/golib/ж.cs:223-234#2a847a.
+src/core/golib/ж.cs:229-240#2a847a.
 Moved to the reference: inside another pointer-receiver method the receiver is already a C# `ref`, so its
 field is addressable and Go's `c.set(1)` becomes `c.flags.set(1)`, with no box (src/tests/Behavioral/
 EmbeddedValuePointerMethod/main.go:51-56#cd17df; main.cs.target:32-37#f87b03). Pointer-param form: main.go:35#7fdfa7 ->
@@ -10491,7 +10491,7 @@ At a glance:
 | `&a[i]` | `Ꮡa.at<T>(i)` | The address of an array element. |
 | `&x.f` | `Ꮡx.Ꮡf` | The address of a struct field, through its generated address property. |
 
-<!-- table sources, in row order (paths under src/tests/Behavioral/): PointerToPointer/PointerToPointer.cs.target:19-20#451253 (ж<ж<nint>>); PointerToPointer.cs.target:24#06ea55 (ptr = Ꮡa); IncDecPointerField/main.cs.target:19#bc1189 (Ꮡ(new counter(n: 5))); PointerToArrayElementAddress/main.cs.target:20#973281 (@new<grid>()); NilPointerValueReceiverCall/main.cs.target:49#0e574a (~p, the copy a method value binds) and PointerToPointer.cs.target:32#c84a6c (ptr.Value for a whole-value *ptr read, Go PointerToPointer.go:35#e45beb); SlicePointerIdentity/main.cs.target:42#04fe83 (p.Value = 42); SlicePointerIdentity/main.cs.target:41#963cd5 (Ꮡ(s, 1)); PointerToArrayElementAddress/main.cs.target:22#e5ae00 and ArrayRangeSnapshot/ArrayRangeSnapshot.cs.target:149 (`Ꮡa.at<nint>(2)`); PointerToPointer.cs.target:47#011070 (Ꮡb.Ꮡoff). `~` is ж<T>'s operator ~, src/core/golib/ж.cs:952#3d6147 (returns ValueSlot, throws the nil-dereference panic); `.Value` performs the same nil check (ж.cs:126-140#3e6cc3, ValueSlot is "identical to Value except it never throws"). box nil compare: src/tests/Behavioral/NilPointerParamMethods/main.cs.target:17#575444; `return nil` -> `return default`: same file :20#25320b -->
+<!-- table sources, in row order (paths under src/tests/Behavioral/): PointerToPointer/PointerToPointer.cs.target:19-20#451253 (ж<ж<nint>>); PointerToPointer.cs.target:24#06ea55 (ptr = Ꮡa); IncDecPointerField/main.cs.target:19#bc1189 (Ꮡ(new counter(n: 5))); PointerToArrayElementAddress/main.cs.target:20#973281 (@new<grid>()); NilPointerValueReceiverCall/main.cs.target:49#0e574a (~p, the copy a method value binds) and PointerToPointer.cs.target:32#c84a6c (ptr.Value for a whole-value *ptr read, Go PointerToPointer.go:35#e45beb); SlicePointerIdentity/main.cs.target:42#04fe83 (p.Value = 42); SlicePointerIdentity/main.cs.target:41#963cd5 (Ꮡ(s, 1)); PointerToArrayElementAddress/main.cs.target:22#e5ae00 and ArrayRangeSnapshot/ArrayRangeSnapshot.cs.target:149 (`Ꮡa.at<nint>(2)`); PointerToPointer.cs.target:47#011070 (Ꮡb.Ꮡoff). `~` is ж<T>'s operator ~, src/core/golib/ж.cs:958#3d6147 (returns ValueSlot, throws the nil-dereference panic); `.Value` performs the same nil check (ж.cs:126-140#3e6cc3, ValueSlot is "identical to Value except it never throws"). box nil compare: src/tests/Behavioral/NilPointerParamMethods/main.cs.target:17#575444; `return nil` -> `return default`: same file :20#25320b -->
 
 **An address-taken local has two names for one storage.** A converted Go pointer is a `ж<T>`
 box, a heap object, and a heap object cannot point at a C# local. So when Go takes a local's address, golib's
@@ -10893,7 +10893,7 @@ its zero value and then assigned, because `bump(&xy)` needs its address. The pro
 
 **Pointers compare by address.** Two pointers are equal when they point to the same storage, even when
 they are taken through different slices: `Ꮡ(t, 0) == Ꮡ(s, 1)` is true when `t` is `s[1:]`. So a pointer works
-as a [map](#maps) key. Raw addresses are covered in [`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr). <!-- equality: src/tests/Behavioral/SlicePointerIdentity/main.go:26-27 `t := s[1:]` / `&t[0] == &s[1]` -> main.cs.target:21-22 `Ꮡelem(t, 0) == Ꮡelem(s, 1)` (both operands element address-ofs, so Ꮡelem); the whole file main.go:20-69#af40fc (element pointers as map keys: main.go:56-59#d4029b -> main.cs.target:45-48 `new map<ж<nint>, @string>{}`). pinning: golib pins the storage only where it is pinnable, src/core/golib/ж.cs:63#309359 (PointerStorage: None = order token, Unpinnable = correct when taken but may move, Pinnable = pinned), ж.cs:712#9fcd40 (EnsureStableAddress), ж.cs:1372#828d85 (uintptr conversion returns an order token for a reference-holding pointee) -->
+as a [map](#maps) key. Raw addresses are covered in [`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr). <!-- equality: src/tests/Behavioral/SlicePointerIdentity/main.go:26-27 `t := s[1:]` / `&t[0] == &s[1]` -> main.cs.target:21-22 `Ꮡelem(t, 0) == Ꮡelem(s, 1)` (both operands element address-ofs, so Ꮡelem); the whole file main.go:20-69#af40fc (element pointers as map keys: main.go:56-59#d4029b -> main.cs.target:45-48 `new map<ж<nint>, @string>{}`). pinning: golib pins the storage only where it is pinnable, src/core/golib/ж.cs:63#309359 (PointerStorage: None = order token, Unpinnable = correct when taken but may move, Pinnable = pinned), ж.cs:718#9fcd40 (EnsureStableAddress), ж.cs:1378#828d85 (uintptr conversion returns an order token for a reference-holding pointee) -->
 
 **Full detail:** [Reference → Pointers](ConversionStrategies-Reference/pointers.md#pointers) — which parameters become `ref` and their call forms, the deferred nil panic, per-iteration loop boxes, closures over boxed locals, equality and pinning, and `unsafe.Pointer` conversions.
 
@@ -11294,7 +11294,7 @@ internal static uintptr addrOf(ж<point> p) {
 
 `point` holds only two `int32`s, so its storage can be pinned. It is a type declared in Go,
 which the [source generators](#source-generators) complete.
-<!-- nil gives 0: UintptrUnsafePointerIdiom/main.go:45-46#75324d -> main.cs.target:27-28 (`ж<point> missing = default;` / `addrOf(missing) == 0`); golib's ж<T> -> uintptr operator returns 0 for a nil box (src/core/golib/ж.cs:1309-1328#95b7af); since 2026-10-16 that is the structural nil question, so a box HOLDING a nil pointer (`&p`, p nil) is not nil and takes the token arm below. point is reference-free (UintptrUnsafePointerIdiom/main.go:23-25#60ec9e), so it is pinnable. A reference-bearing pointee returns value.PointerOrderToken instead: ж.cs:1372#828d85, with PointerStorage.None from ж.StandardBox.cs:221-222#435ab0 and ж.ElemRefBox.cs:390-392#b9ec7b. -->
+<!-- nil gives 0: UintptrUnsafePointerIdiom/main.go:45-46#75324d -> main.cs.target:27-28 (`ж<point> missing = default;` / `addrOf(missing) == 0`); golib's ж<T> -> uintptr operator returns 0 for a nil box (src/core/golib/ж.cs:1315-1334#95b7af); since 2026-10-16 that is the structural nil question, so a box HOLDING a nil pointer (`&p`, p nil) is not nil and takes the token arm below. point is reference-free (UintptrUnsafePointerIdiom/main.go:23-25#60ec9e), so it is pinnable. A reference-bearing pointee returns value.PointerOrderToken instead: ж.cs:1378#828d85, with PointerStorage.None from ж.StandardBox.cs:221-222#435ab0 and ж.ElemRefBox.cs:392-394#b9ec7b. -->
 
 **Pointer arithmetic moves the pointer, and the moved pointer aliases the same memory.** Go writes it as
 one expression: convert the pointer to a number, add an offset, convert the sum back. The converter emits
@@ -11349,18 +11349,18 @@ it is, for as long as `nextPtr` is in use. Arithmetic on a number held in a vari
 (`u := uintptr(p)`, then `unsafe.Pointer(u + n)`): there the pointer is built from a bare number and
 carries no box. The conversion back finds the storage from its address, and as in Go a number alone does
 not keep its object alive, so that form works only while the object is still in use.
-<!-- expected output: src/tests/Behavioral/UnsafeOperations (Go's `go run` output is the behavioral oracle; the second element of [4]int{1, 2, 3, 4}). The reverse conversion `explicit operator ж<T>(uintptr)` at src/core/golib/ж.cs:1051#1a042b resolves a pinned address through its provenance record, a weak entry that dies with its box (ж.cs:1253#7dae18 comment "the WEAK-ENTRY bound"): a program that drops every reference and converts back later is one Go itself declares invalid. -->
+<!-- expected output: src/tests/Behavioral/UnsafeOperations (Go's `go run` output is the behavioral oracle; the second element of [4]int{1, 2, 3, 4}). The reverse conversion `explicit operator ж<T>(uintptr)` at src/core/golib/ж.cs:1057#1a042b resolves a pinned address through its provenance record, a weak entry that dies with its box (ж.cs:1259#7dae18 comment "the WEAK-ENTRY bound"): a program that drops every reference and converts back later is one Go itself declares invalid. -->
 
 **A pointer to a value that holds a managed reference gets an order token, not an address.**
 The CLR cannot pin such a value, so golib hands out a unique stand-in number instead. A token compares
 and sorts like an address. It converts back to the same pointer while that pointer is still in use, as
 an address does in Go.
-<!-- the three storage kinds: src/core/golib/ж.cs:63-84#d29f39 (None = order token, Unpinnable, Pinnable); ж.StandardBox.cs:222#4b2f08 and ж.ElemRefBox.cs:391#ec7e60 (None for a reference-bearing T); ж.FieldRefBox.cs:407-440#da3041 (a field reference always names a real interior address, held still only when the enclosing variable can be pinned, except a reinterpret of a first field whose root's CLR layout is not Go's, which answers its root's token; the Unpinnable kind, whose address may move after it is taken, is documented at ж.cs:71-77#48cb0e). Shown by: src/tests/Behavioral/ReflectFieldAddrWrite (a reflect-projected token converted back to a pointer and written through); GolibTests PointerTokenConversionTests, ManagedPointerTokenMintTests. -->
+<!-- the three storage kinds: src/core/golib/ж.cs:63-84#d29f39 (None = order token, Unpinnable, Pinnable); ж.StandardBox.cs:222#4b2f08 and ж.ElemRefBox.cs:393#ec7e60 (None for a reference-bearing T); ж.FieldRefBox.cs:407-440#da3041 (a field reference always names a real interior address, held still only when the enclosing variable can be pinned, except a reinterpret of a first field whose root's CLR layout is not Go's, which answers its root's token; the Unpinnable kind, whose address may move after it is taken, is documented at ж.cs:71-77#48cb0e). Shown by: src/tests/Behavioral/ReflectFieldAddrWrite (a reflect-projected token converted back to a pointer and written through); GolibTests PointerTokenConversionTests, ManagedPointerTokenMintTests. -->
 
 A token has no memory behind it, so it has no neighbours. Adding an offset to a token and converting the
 result back to a pointer raises a Go panic that says so. Like any Go panic, `recover` can catch it
 ([Defer / Panic / Recover](#defer--panic--recover)).
-<!-- the panics: src/core/golib/ж.cs:1051-1294#1f5133 (token arithmetic refused; arm 2a panics at dereference of an order token read as another type, unless the number is a live box's own token and the direct reinterpret would alias that pair); src/core/golib/runtime/RuntimeErrorPanic.cs:61#c45947 (UnsafePointerArithmeticWithoutAddress, arithmetic refusal) and :95#d277a9 (UnsafePointerOrderTokenDereferenced, order-token dereference refusal); GolibTests TokenArithmeticRefusalTests, OrderTokenOffsetZeroRefusalTests -->
+<!-- the panics: src/core/golib/ж.cs:1057-1300#1f5133 (token arithmetic refused; arm 2a panics at dereference of an order token read as another type, unless the number is a live box's own token and the direct reinterpret would alias that pair); src/core/golib/runtime/RuntimeErrorPanic.cs:61#c45947 (UnsafePointerArithmeticWithoutAddress, arithmetic refusal) and :95#d277a9 (UnsafePointerOrderTokenDereferenced, order-token dereference refusal); GolibTests TokenArithmeticRefusalTests, OrderTokenOffsetZeroRefusalTests -->
 
 **`unsafe.Pointer(p)` keeps what it points to alive.** A standalone conversion becomes a factory call
 such as `@unsafe.Pointer.FromPinnedBox(e0)`. The `@unsafe.Pointer` it builds stores the source box beside
