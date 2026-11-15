@@ -52,7 +52,7 @@
 set -u
 
 PROG="fleet-read.sh"
-LANES=" COORD C1 C2 R G i9 P1 P2 FLEET "
+LANES=" COORD C1 C2 R G H i9 P1 P2 P3 P4 P5 FLEET "
 REF="origin/claude/mailbox"
 LEDGERP="docs/phase4/LEDGER.md"
 
