@@ -268,6 +268,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
 
     [TestMethod]
+    public void CheckCcgoStringTable() => CheckTarget("CcgoStringTable");
+
+    [TestMethod]
     public void CheckCgoPseudoPackageTypes() => CheckTarget("CgoPseudoPackageTypes");
 
     [TestMethod]

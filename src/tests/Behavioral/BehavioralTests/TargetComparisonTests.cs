@@ -271,6 +271,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
 
     [TestMethod]
+    public void CheckCcgoStringTable() => CheckTarget("CcgoStringTable");
+
+    [TestMethod]
     public void CheckCgoPseudoPackageTypes() => CheckTarget("CgoPseudoPackageTypes");
 
     [TestMethod]
