@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -36,6 +37,9 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     private byte m_state;
 
     private const byte Open = 0, Backfilling = 1, Closed = 2;
+
+    // TEST SEAM (see Dispose). Set only by the pin-extent child test.
+    internal static Action? s_testHookBeforeFree;
 
     // Not constructible directly: Of picks the indexed kind when a cgo package has switched the index on, so a buffer
     // made any other way could never enter the index, and a missed pin is the door's unsafe direction.
@@ -86,15 +90,25 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
         if (m_disposed)
             return;
 
-        // Closed first: no backfill reads the handle from here on, and none is still reading it.
+        // Closed first: no backfill reads the handle from here on, and none is still reading it. A release that finds the
+        // buffer already Closed lost a race with another release and returns: only the one that closed it frees the handle
+        // (two explicit releases on two threads both passed m_disposed before, and the loser's free threw).
         SpinWait spin = default;
+        byte prior;
 
-        while (Interlocked.CompareExchange(ref m_state, Closed, Open) == Backfilling)
+        while ((prior = Interlocked.CompareExchange(ref m_state, Closed, Open)) == Backfilling)
             spin.SpinOnce();
+
+        if (prior == Closed)
+            return;
 
         // Out of the index BEFORE the pin is released: from here on the extent's bytes may move. Asked AFTER closing, so a
         // backfill that entered this buffer (after the index was published) is seen here, and none can enter it later.
         LeaveIndex();
+
+        // TEST SEAM: what runs between the index read above and the free below. The pin-extent child switches the index
+        // on here, which is the race P3's re-read named, made deterministic. Null everywhere else: one static read.
+        s_testHookBeforeFree?.Invoke();
 
         if (m_handle.IsAllocated)
             m_handle.Free();
@@ -166,6 +180,7 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     /// </remarks>
     internal bool TryExtent(out nuint start, out nuint end)
     {
+        Debug.Assert(m_state != Closed, "the handle of a buffer whose release has begun was read");
         start = end = 0;
 
         if (!m_handle.IsAllocated || m_handle.Target is not { } target)

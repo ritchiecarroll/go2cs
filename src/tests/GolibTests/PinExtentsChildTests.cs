@@ -55,7 +55,8 @@ public class PinExtentsChildTests
 
         // ...and the buffer object is the size it was BEFORE the index existed: 32 bytes on a 64-bit runtime, measured at
         // the seat's base (d7f5a59f79). Comparing the pin with a buffer of the SAME build cannot see a field the index
-        // adds to every buffer, in every process; this can.
+        // adds to every buffer, in every process; this can. In TIME a release does pay one thing in every process: an
+        // interlocked byte CAS (the release's close), a few ns on the GC-handle free path. Nothing else of the index runs.
         Assert.AreEqual("32", bytes[2], $"a process with no cgo package pays for the index in every pin: {Line("R6 bytes-per-pin")}");
 
         // R5: before registration nothing is refused by extent; registration creates the index and backfills the exact
@@ -69,6 +70,10 @@ public class PinExtentsChildTests
         // A pin the backfill entered leaves the index when it is released, by its finalizer here.
         Assert.AreEqual("R5 backfilled+4 refused entries 1", Line("R5 backfilled+4"));
         Assert.AreEqual("R5 backfilled-released entries 0", Line("R5 backfilled-released"), "a released backfilled pin left an entry behind");
+
+        // A release that races the registration (the index switched on between the release's read of it and its free)
+        // leaves nothing behind.
+        Assert.AreEqual("R5 raced-release entries 0", Line("R5 raced-release"), "a release raced by the index's activation left the backfill's entry behind");
     }
 
     private static string[] Lines(string output) =>

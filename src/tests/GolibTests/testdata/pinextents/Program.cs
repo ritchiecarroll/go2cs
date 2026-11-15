@@ -59,7 +59,18 @@ internal static unsafe class Program
         // the entry count is read.
         nuint releasedNumber = PinABoxHeldOnlyByAStatic();
 
-        GoCgoLibraries.Register(typeof(Program).Assembly);
+        // A fourth, whose RELEASE races the registration (P3's re-read of the seat, item 1): the release reads the index
+        // as off, the index is switched on and backfilled, and only then is the handle freed. The test seam in
+        // PinnedBuffer.Dispose runs the registration at exactly that point, so the race is deterministic. A release
+        // that skipped the index would leave the backfill's entry behind for a handle that is already free.
+        ж<long> raced = new StandardBox<long>(0);
+        nuint racedNumber = ((uintptr)raced).Value;
+        IDisposable racedPin = (IDisposable)(typeof(ж<long>).GetField("m_pin", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(raced) ?? throw new MissingFieldException("ж<T>.m_pin"));
+        FieldInfo hook = s_pinnedBuffer.GetField("s_testHookBeforeFree", BindingFlags.NonPublic | BindingFlags.Static) ?? throw new MissingFieldException("PinnedBuffer.s_testHookBeforeFree");
+
+        hook.SetValue(null, (Action)(() => GoCgoLibraries.Register(typeof(Program).Assembly)));
+        racedPin.Dispose();
+        hook.SetValue(null, null);
 
         Console.WriteLine($"R5 index-after-register {(Created() ? "created" : "uncreated")}");
         Console.WriteLine($"R5 after-register slot {Door(slotNumber)} slot+4 {Door(slotNumber + 4)} direct+8 {Door(directNumber + 8)}");
@@ -72,6 +83,8 @@ internal static unsafe class Program
         GC.WaitForPendingFinalizers();
 
         Console.WriteLine($"R5 backfilled-released entries {Entries(releasedNumber)}");
+        Console.WriteLine($"R5 raced-release entries {Entries(racedNumber)}");
+        GC.KeepAlive(raced);
 
         // A pin made AFTER registration enters at construction.
         byte[] later = new byte[64];
