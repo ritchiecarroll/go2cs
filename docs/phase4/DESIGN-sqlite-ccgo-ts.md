@@ -6,6 +6,11 @@
 > never runs beside it. The adversarial review of section 5 (native memory lifetime, the finalizer, the first-read
 > race) is P3's.
 >
+> **Amended 2026-11-15, 10:40Z: READ SECTION 10 FIRST.** After P3's read, COORD ruled the (L)+(H) split. Only
+> package-level storage gets the (immortal) native copy; every other string takes the `&b[0]` route. Section 10
+> supersedes D2, D4, section 5's race, section 6's choice, QW-7 and the arms list where they differ. The sections
+> before it are the record of how the design got there.
+>
 > The census instrument, its controls and every probe named here are kept beside this file in
 > [`data/w8-ccgo-ts/`](data/w8-ccgo-ts/). Amended by dated blocks, never rewritten.
 
@@ -295,5 +300,122 @@ either module, it is a named next wall; if not, the BOARD row says 0.
   return to 0, and the managed twin drives the GC. W9 holds the bound (under a quarter of the bytes copied), and SW-5
   stops at half. The three-arm table stays in the record, so the choice is visible.
 - **QW-7 (asked 10:15Z):** remedy R1 for the lifetime gap that W1c exposes (section 7's amendment).
+
+— H (2026-11-15)
+
+## 10. Amended 2026-11-15, 10:40Z: the design as ruled after P3's read, (L)+(H)
+
+P3 read `6b42b488db`: SHIP-WITH-FIXES, and no number can reach a loser's block (the read is on the mailbox,
+`docs/phase4/inbox/COORD/20261115T101108Z-P3.md`). Its finding F1 asked whether a string OWNS its backing.
+**It cannot be told.**
+- `@string` is three private fields with no ownership mark.
+- `AliasOf` shares a caller's mutable array (for `unsafe.String`, `StringHeaderBox`'s own commit, and the
+  converter's transient map keys).
+- The public `@string(byte[])` constructor and its implicit operator ADOPT the array, uncopied. The converter emits a
+  non-UTF-8 literal through that same operator, `(@string)(new byte[]{0x61, 0xff, …})`.
+- A side set of aliased arrays would cost every `unsafe.String` call; a mark in the offset field, the hottest type in
+  golib.
+
+So COORD ruled Go's own split instead (10:35Z). **This section supersedes D2, D4, section 5's race, section 6's
+choice, QW-7 and the arms list where they differ; everything above stays as the record of how the design got here.**
+
+**The split, as Go draws it.** A literal's bytes are read-only data: immutable, immortal, and not a Go pointer to
+`cgoIsGoPointer`. Every other string's bytes are Go heap memory: live (they can be shared with a `[]byte`), collected,
+and a Go pointer.
+
+- **(L) Package-level storage: an IMMORTAL native copy.** A header read whose SOURCE box is package-level storage
+  (`StaticBox<T>`, `IPackageLevelStorage`) gets a native copy of the backing.
+  - `StaticBox<T>` is the one emitter of a package variable's box (`symbols.go`'s `PackageBoxConstructPrefix`),
+    sealed, never rebound.
+  - It covers every census declaration (`__ccgo_ts`, the vfs `ts`, libc's 13), and every literal spelling: valid
+    UTF-8, the non-UTF-8 `byte[]` form, `u8`, a concatenation.
+  - The copy is never freed and never registered. It is held in a table keyed by the backing, read lock-free first
+    (F5). On a miss the block is built and offered to the table; a thread whose offer loses frees its own block at
+    once, then reads the winner's. No finalizer is involved.
+  - F4: an empty string is answered by its LENGTH, before the table: `Data` 0. A zero-length window of a non-empty
+    backing reads base + offset, as Go keeps it.
+- **(H) Every other header read: the route `&b[0]` takes today.** `Data` is the number of the backing's element 0 at
+  the window's offset, through the element box's pin-only hold, and a pointer re-formed from it resolves back to
+  that box.
+  - The bytes are LIVE, so a string over a reused buffer reads the new bytes (P3's F1 scenario), with no snapshot to
+    go stale.
+  - It is Go memory at the cgo door: refused under 3.1, as `&b[0]` is, and as Go counts heap bytes.
+  - `uintptr(unsafe.Pointer(unsafe.StringData(s))) == Data` HOLDS here, as in Go. This covers the gethostname shape
+    (`libc_unix.go`'s `Xgethostname`, a local over a heap string).
+
+**D4, as ruled: the known differences, now only at package level.**
+- For a package-level source, `StringData != Data`. The census found no consumer.
+- A write through a package-level `Data` number lands on the copy. Go faults for a literal, which is what ccgo's
+  are.
+- **R-a, validate-on-read.** A package-level variable whose value is NOT a literal (assigned from `unsafe.String`
+  over a live buffer, or reassigned) gets an immortal copy of the backing it held when its header was read.
+  - Every header read of a package-level source compares the copy with the live window, and a mismatch is REFUSED BY
+    NAME. So a stale copy is never handed out again; a number formed before the write still names the old bytes.
+  - Leak: one copy per distinct backing ever read that way.
+  - The census line that bounds it: every ccgo declaration is initialised from a literal and never assigned.
+- **A header write that sets only `Len`** (P3's point 4) now commits from a native `Data` for a package-level source,
+  so the string becomes a copy, and an over-long `Len` reads past the block. Go calls that invalid too. Under (H)
+  the managed bound `Len <= len(backing) - i` still applies.
+
+**R-b, the round trip under (H).** A pointer re-formed from `Data` resolves through the number registry to the
+element box only while that box is alive. If the box is collected between the `Data` read and the re-forming, the
+pin is released and resolution misses.
+- This is the window every `&b[0]` number go2cs hands out has today: not new, and not widened by this cut.
+- The header box caches its element box, which holds it while the header lives. Whether that closes the window for
+  the gethostname shape, where `sh` may be dead once `Data` is read, is MEASURED in the cut: arm W13, a forced
+  collection with finalizers between the read and the re-forming.
+- If it does not close it, a BOARD line names the `&b[0]` round-trip window in general, with this shape as one
+  instance. It is not fixed in this cut.
+
+**P3's findings, each CLOSED, and how:**
+- **F1 (a stale snapshot over a shared backing):** under (H) no snapshot exists. Under (L) the snapshot is refused by
+  name once the live bytes differ (R-a, W12).
+- **F2 (a resurrected key meets a freed base):** no block is ever freed, so no reader can meet a freed base.
+- **F3 (`KeepAlive` after the number is formed):** an (L) block is immortal, so the key's liveness cannot free it.
+  Under (H) the number's liveness is the element box's, which is R-b.
+- **F4 (length first):** adopted, in (L).
+- **F5 (`TryGetValue` first):** adopted, as (L)'s lock-free read.
+
+**Withdrawn:** QW-7, remedy R1, its range registry and its bars B1-B3, because there are no mortal copies. Section
+6's memory table stays as the record of the question. Mortal copies are gone, so the pressure question no longer
+arises.
+
+**The arms, as ruled (GolibTests; every one red at base, where the header read panics):**
+- **W1.** ccgo's shape: a package-level literal's NUL-terminated reads at `Data`+0, +6 and +12.
+- **W1b.** The vfs pair: a second package-level literal in one package, with its own copy, its own stable number,
+  and its own bytes.
+- **W1c.** The gethostname shape through (H): live bytes, and a pointer re-formed from `Data` reads them.
+- **W2.** Stability: the same number on a second read; a second package-level variable sharing the backing reads the
+  same number; a substring reads base + offset.
+- **W3.** A package-level copy's bytes are unchanged across 3 forced collections under churn.
+- **W4.** Under (L), `StringData != Data`, asserted as go2cs's answer. Under (H), `StringData == Data`, as in Go.
+- **W5 (F4).** An empty string reads `Data` 0 and `Len` 0. A zero-length window of a non-empty backing reads base +
+  offset.
+- **W7.** The door crosses (L)'s number and refuses (H)'s, as Go's `cgoIsGoPointer` would.
+- **W8.** A header store with a native `Data` rebuilds the string, as a copy.
+- **W9.** Churn: 100,000 distinct heap strings read through (H) stay bounded like any pins; under (L) only
+  package-level reads copy.
+- **W10.** The (L) table's first read raced by 4 threads, 20,000 strings: every thread reads the same number, and
+  every losing block is freed (a live-block counter equals the table's size).
+- **W12 (P3's F1 scenario).** Over a reused buffer through (H), the NEW bytes are read. Behind a package-level
+  variable, the second header read is refused by name, and the old bytes are never handed out again.
+- **W13 (R-b).** The gethostname shape, with a forced collection and finalizers between the `Data` read and the
+  re-forming. It reports, either way, whether the header box's cached element box closes the window.
+
+Dropped with the mortal copy: W6 (a freed block), W11 (rooting). W9 and W10 are rewritten as above.
+
+**Predictions.**
+- **PW-1.** Every arm above red at base and green at the tip, with W13's result read rather than predicted. Every
+  other GolibTests row unchanged; the total rises by the new arms only.
+- **PW-2.** Corpus 0 on four targets: golib only; CNR byte-identical.
+- **PW-3.** The probe program under go2cs prints Go's first three lines, then "equals StringData: false" (package
+  level, W4).
+- **PW-4.** A process that never reads such a header pays nothing.
+- **PW-5.** The footprint is `ж.StringHeaderBox.cs` plus one new golib file for the (L) table, and NOT `unsafe.cs`
+  (R1 is gone) and NOT `ж.cs`.
+
+**Stop lines:** SW-1 (an existing header arm changes), SW-2 (an (L) copy needs a pin or touches the index), SW-3 (an
+emission changes), and **SW-6: (H) needs anything beyond the element box's existing pin route.** SW-4 and SW-5 are
+retired with W6 and the mortal copies.
 
 — H (2026-11-15)
