@@ -5730,7 +5730,28 @@ func (v *Visitor) reinterpretManagedEmission(callExpr *ast.CallExpr, arg ast.Exp
 	// A source Go already parenthesized renders its own parentheses and is left as written.
 	rendered := v.parenthesizeConversionBase(src, v.convExpr(src, []ExprContext{identContext}))
 
+	// Rendering the source may LIFT the anonymous struct its element names: ccgo's float type-punning
+	// `(*struct{…})(unsafe.Pointer(&struct{ f float64 }{f: x}))` lifts the literal only now. A name taken before
+	// that deferred to a marker no registry answers for a function-local lift, and was emitted as raw Go
+	// (sqlite-cs L1, modernc.org/libc on linux). Name such an element again, now that the lift exists.
+	srcElem = v.reinterpretElemAfterRender(srcElem, src)
+	targetElem = v.reinterpretElemAfterRender(targetElem, callExpr)
+
 	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", rendered, srcElem, targetElem), true
+}
+
+// reinterpretElemAfterRender answers a Reinterpret element name again from expr's pointer type when the name taken
+// before rendering is a deferred dynamic-type marker; any other name is returned unchanged.
+func (v *Visitor) reinterpretElemAfterRender(name string, expr ast.Expr) string {
+	if !strings.Contains(name, dynamicTypeMarkerPrefix) {
+		return name
+	}
+
+	if ptr, ok := types.Unalias(v.info.TypeOf(expr)).(*types.Pointer); ok {
+		return convertToCSTypeName(v.getAliasQualifiedTypeName(ptr.Elem(), false))
+	}
+
+	return name
 }
 
 // The internal/abi record types the managed model can synthesize from a descriptor's carried
