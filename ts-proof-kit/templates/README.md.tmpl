@@ -33,35 +33,41 @@ A result is "identical" only when the converted program's output equals the nati
 
 Inputs use LF line endings, as git stores them; byte counts and hashes in this repository assume that.
 
+<!-- typescript-go-cs:performance -->
 ## Performance
 
 The converted compiler is slower than native Go. That is expected for a line-by-line translation running on a
-different runtime, and it is improving. The table gives seconds. Each converted time is split into start-up (the
-time before any TypeScript work begins) and work (everything after it), so the work column can be compared with
-native Go directly.
+different runtime, and it is improving. The table gives seconds. Each time is split into start-up (the time before any
+TypeScript work begins) and work (everything after it), so the work columns can be compared directly.
 
-<!-- PERF DRAFT (staged, not published until go.* 1.26.11.1 is on nuget.org): every [[cell]] is filled from G's
-     post-publish run on its benchmark machine. Start-up = the median wall of `parsedemo` on an empty file for that build; work = the
-     case's median wall minus that start-up. Median of 5 timed runs after 1 warm-up, one process per run, every
-     converted output byte-identical to native. Ratios only as a secondary note, if at all (owner, 2026-11-15). -->
+<!-- PERF DRAFT, staged: not published until go.* 1.26.11.1 is on nuget.org. Every [[CELL]] is filled by hand from
+     the post-publish benchmark run. The method both the writer and the timer work to:
+     - Start-up is measured PER BINARY: the median wall of THAT ROW'S OWN binary on its minimal input (an empty .ts
+       file; for mfdemo, an empty project with only a tsconfig.json). checkdemo's start-up includes loading lib.d.ts
+       and a larger closure than parsedemo's, so one shared start-up would bill start-up cost to work.
+     - Go's start-up is defined the same way, with its own binary on the same minimal input.
+     - Work = the row's median wall minus that row's start-up, for each of Go, JIT and Native AOT.
+     - Median of 5 timed runs after 1 warm-up, one process per run; every converted output byte-identical to native.
+     - Seconds only; a ratio, if any, as a secondary note. -->
 Measured on [[MACHINE]] ([[CPU]], [[RAM]], [[OS]]), [[DATE]]. Go [[GOVERSION]]; .NET SDK [[SDK]]; go.* [[GOSTDLIB]].
 
-| Case | What runs | Go | Converted, JIT: start-up + work = total | Converted, Native AOT: start-up + work = total |
+Each cell reads start-up + work = total, in seconds.
+
+| Case | What runs | Go | Converted, JIT | Converted, Native AOT |
 |:--|:--|--:|--:|--:|
-| Start-up | `parsedemo` on an empty file | [[GO_HELLO]] s | [[JIT_START]] s | [[AOT_START]] s |
-| Parse | the {{CORPUS_UNITS}}-file parser corpus, one process | [[GO_PARSE]] s | [[JIT_START]] + [[JIT_PARSE_WORK]] = [[JIT_PARSE]] s | [[AOT_START]] + [[AOT_PARSE_WORK]] = [[AOT_PARSE]] s |
-| Type-check | [[BENCH_UNITS]] compiler-test files, each its own program, one process | [[GO_TC]] s | [[JIT_START]] + [[JIT_TC_WORK]] = [[JIT_TC]] s | [[AOT_START]] + [[AOT_TC_WORK]] = [[AOT_TC]] s |
-| Emit | the same files, JavaScript and `.d.ts` | [[GO_EM]] s | [[JIT_START]] + [[JIT_EM_WORK]] = [[JIT_EM]] s | [[AOT_START]] + [[AOT_EM_WORK]] = [[AOT_EM]] s |
-| Multi-file | `mfdemo` on `shop` and `legacy` | [[GO_MF]] s | [[JIT_START]] + [[JIT_MF_WORK]] = [[JIT_MF]] s | [[AOT_START]] + [[AOT_MF_WORK]] = [[AOT_MF]] s |
+| Parse | `parsedemo`, the {{CORPUS_UNITS}}-file parser corpus in one process | [[GO_PARSE_START]] + [[GO_PARSE_WORK]] = [[GO_PARSE]] | [[JIT_PARSE_START]] + [[JIT_PARSE_WORK]] = [[JIT_PARSE]] | [[AOT_PARSE_START]] + [[AOT_PARSE_WORK]] = [[AOT_PARSE]] |
+| Type-check | `checkdemo`, [[BENCH_UNITS]] compiler-test files, each its own program, in one process | [[GO_TC_START]] + [[GO_TC_WORK]] = [[GO_TC]] | [[JIT_TC_START]] + [[JIT_TC_WORK]] = [[JIT_TC]] | [[AOT_TC_START]] + [[AOT_TC_WORK]] = [[AOT_TC]] |
+| Emit | `emitdemo`, the same files, JavaScript and `.d.ts` | [[GO_EM_START]] + [[GO_EM_WORK]] = [[GO_EM]] | [[JIT_EM_START]] + [[JIT_EM_WORK]] = [[JIT_EM]] | [[AOT_EM_START]] + [[AOT_EM_WORK]] = [[AOT_EM]] |
+| Multi-file | `mfdemo` on `shop` and `legacy` | [[GO_MF_START]] + [[GO_MF_WORK]] = [[GO_MF]] | [[JIT_MF_START]] + [[JIT_MF_WORK]] = [[JIT_MF]] | [[AOT_MF_START]] + [[AOT_MF_WORK]] = [[AOT_MF]] |
 
 ### Where the time goes
 
 These are the largest differences we measured, and each is a target for future work in go2cs.
 
-- **Start-up.** A converted program spends about [[JIT_START]] s before it does any work: compiling methods on
-  first call, running every package's initializers, and building Go-style method sets by reflection the first time a
-  type is asserted to an interface. Native AOT removes the compiling; the rest remains. Native Go starts in
-  milliseconds.
+- **Start-up.** A converted demo spends [[JIT_START_RANGE]] s before it does any work, where native Go needs
+  [[GO_START_RANGE]] s: compiling methods on first call, running every package's initializers, and building
+  Go-style method sets by reflection the first time a type is asserted to an interface. Native AOT removes the
+  compiling; the rest remains.
 - **Garbage collection.** The converted compiler allocates much more than the Go original, and collection pauses
   were about [[GC_SHARE]] of the type-check time. The demo projects here turn on server garbage collection with
   dynamic adaptation off, which cut [[SERVER_GC_GAIN]] in our measurements. go2cs's
@@ -75,6 +81,7 @@ These are the largest differences we measured, and each is a target for future w
 Fixed in go2cs since the first measurement: a string conversion that copied the rest of the source text for each
 non-ASCII character (the largest single source of allocation), nil checks on named maps that went through
 reflection, and struct equality that boxed both operands.
+<!-- /typescript-go-cs:performance -->
 
 ## What is not here
 

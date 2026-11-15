@@ -221,6 +221,11 @@ def fill(A):
 # and the block between the RESULTS markers, which takes the generated block. The i7 applies it on top after COORD
 # has seen the diff. A README with neither placeholders nor markers gives an empty patch, and fill says so.
 RESULTS_BEGIN, RESULTS_END = "<!-- typescript-go-cs:results -->", "<!-- /typescript-go-cs:results -->"
+# 2026-11-15 (COORD 04:22Z): the Performance section has its own markers. An owner README that holds them takes the
+# generated block between them, like RESULTS. One that does not yet hold them, but holds RESULTS_END, gets the generated
+# block (markers included) inserted before its first "## " heading after RESULTS_END, so the patch adds the markers
+# once and later fills replace between them.
+PERF_BEGIN, PERF_END = "<!-- typescript-go-cs:performance -->", "<!-- /typescript-go-cs:performance -->"
 
 
 def readme_patch(A, v, generated):
@@ -240,9 +245,18 @@ def readme_patch(A, v, generated):
     new = owner
     for k, val in v.items():
         new = new.replace("{{" + k + "}}", val)
-    block = lambda t: t[t.index(RESULTS_BEGIN):t.index(RESULTS_END) + len(RESULTS_END)] if RESULTS_BEGIN in t and RESULTS_END in t else None
-    if block(new) is not None and block(generated) is not None:
-        new = new.replace(block(new), block(generated), 1)
+    def block(t, b, e):
+        return t[t.index(b):t.index(e) + len(e)] if b in t and e in t else None
+    if block(new, RESULTS_BEGIN, RESULTS_END) is not None and block(generated, RESULTS_BEGIN, RESULTS_END) is not None:
+        new = new.replace(block(new, RESULTS_BEGIN, RESULTS_END), block(generated, RESULTS_BEGIN, RESULTS_END), 1)
+    perf = block(generated, PERF_BEGIN, PERF_END)
+    if perf is not None:
+        if block(new, PERF_BEGIN, PERF_END) is not None:
+            new = new.replace(block(new, PERF_BEGIN, PERF_END), perf, 1)
+        elif RESULTS_END in new:
+            at = new.find("\n## ", new.index(RESULTS_END))
+            at = len(new) if at < 0 else at + 1
+            new = new[:at] + perf + "\n\n" + new[at:]
     left = re.findall(r"\{\{[A-Z_]+\}\}", new)
     if left:
         sys.exit(f"owner README asks for values fill does not have: {sorted(set(left))}")
