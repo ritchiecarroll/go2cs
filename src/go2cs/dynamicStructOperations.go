@@ -275,6 +275,9 @@ func (v *Visitor) extractStructType(expr ast.Expr) (*ast.StructType, types.Type)
 // lift, keyed on the spec node's object, never answered for the first name, whose declaration and every
 // `Ꮡux.Reinterpret<…>` were emitted as raw Go (sqlite-cs L1, modernc.org/libc's Xcopysignf on linux). The two types
 // are walked in step, so a struct nested in a pointer, slice, array, map, channel or field takes its lift too.
+//
+// A FUNCTION type is deliberately not walked: no lift is made for an anonymous struct inside a local func type at
+// all (`var f func(struct{A int})` is refused for a single name too, loudly), so there is nothing to alias.
 func (v *Visitor) aliasPerNameLifts(specType, nameType types.Type) {
 	if specType == nil || nameType == nil || specType == nameType {
 		return
@@ -286,6 +289,12 @@ func (v *Visitor) aliasPerNameLifts(specType, nameType types.Type) {
 
 		if !ok || spec.NumFields() != named.NumFields() {
 			return
+		}
+
+		for i := range spec.NumFields() {
+			if spec.Field(i).Name() != named.Field(i).Name() {
+				return
+			}
 		}
 
 		if lift, lifted := v.liftedTypeMap[spec]; lifted {

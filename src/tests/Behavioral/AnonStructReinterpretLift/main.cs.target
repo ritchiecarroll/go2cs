@@ -61,10 +61,50 @@ internal static uint32 pair(uint32 a, uint32 b) {
     return p.A * 10 + q.A;
 }
 
+internal partial struct sliceShape_s /*dyn*/ {
+    public uint32 A;
+}
+
+internal static uint32 sliceShape(uint32 a, uint32 b) {
+    slice<sliceShape_s> s = default;
+    slice<sliceShape_s> t = default;
+    s = append(s, new sliceShape_s(a));
+    t = append(t, new sliceShape_s(b));
+    return s[0].A * 10 + t[0].A;
+}
+
+internal partial struct pointerShape_c /*dyn*/ {
+    public uint32 B;
+}
+
+internal static uint32 pointerShape(uint32 a, uint32 b) {
+    ж<pointerShape_c> c = default;
+    ж<pointerShape_c> d = default;
+    (c, d) = (Ꮡ(new pointerShape_c(a)), Ꮡ(new pointerShape_c(b)));
+    c.Value.B++;
+    return (~c).B * 10 + (~d).B;
+}
+
+internal partial struct nestedShape_n_In /*dyn*/ {
+    public uint32 C;
+}
+
+internal partial struct nestedShape_n /*dyn*/ {
+    public nestedShape_n_In In;
+}
+
+internal static uint32 nestedShape(uint32 a, uint32 b) {
+    nestedShape_n n = default;
+    nestedShape_n m = default;
+    (n.In.C, m.In.C) = (a, b);
+    return n.In.C * 10 + m.In.C;
+}
+
 internal static void main() {
     fmt.Println(fpclassify(1.5D), fpclassify(0D), fpclassify(Δmath.Inf(1)));
     fmt.Println(copysignf(3F, -1F), copysignf(-2.5F, 1F));
     fmt.Println(pair(4, 2));
+    fmt.Println(sliceShape(4, 2), pointerShape(4, 2), nestedShape(4, 2));
 }
 
 } // end main_package

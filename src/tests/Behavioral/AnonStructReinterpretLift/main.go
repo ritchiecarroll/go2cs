@@ -59,8 +59,30 @@ func pair(a, b uint32) uint32 {
 	return p.A*10 + q.A
 }
 
+// The same per-name split, with the struct reached through a slice, a pointer and a field.
+func sliceShape(a, b uint32) uint32 {
+	var s, t []struct{ A uint32 }
+	s = append(s, struct{ A uint32 }{a})
+	t = append(t, struct{ A uint32 }{b})
+	return s[0].A*10 + t[0].A
+}
+
+func pointerShape(a, b uint32) uint32 {
+	var c, d *struct{ B uint32 }
+	c, d = &struct{ B uint32 }{a}, &struct{ B uint32 }{b}
+	c.B++
+	return c.B*10 + d.B
+}
+
+func nestedShape(a, b uint32) uint32 {
+	var n, m struct{ In struct{ C uint32 } }
+	n.In.C, m.In.C = a, b
+	return n.In.C*10 + m.In.C
+}
+
 func main() {
 	fmt.Println(fpclassify(1.5), fpclassify(0), fpclassify(math.Inf(1)))
 	fmt.Println(copysignf(3, -1), copysignf(-2.5, 1))
 	fmt.Println(pair(4, 2))
+	fmt.Println(sliceShape(4, 2), pointerShape(4, 2), nestedShape(4, 2))
 }
