@@ -156,6 +156,23 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   string, slice, map, interface, pointer or fixed-size array gets a stand-in number, not an address, so
   the older tricks (the `*(*string)(unsafe.Pointer(&b))` pun, a hand-built slice header) don't convert
   mechanically.
+* **One array view can end the process.** Go's `(*[N]E)(unsafe.Pointer(&x.f))[:]`, where `f` is an array field
+  read as an array of another element type (an `[8]int8` name read as `[8]byte`), works when `x` is a variable or
+  a pointer, and through any chain of named fields from one (`&x.a.f`). When the field is promoted from an embedded
+  struct (`&w.f`), or belongs to a slice element (`&s[i].f`) or to a call's result (`&g().f`), the converted
+  program can stop with an access violation, which `recover` does not catch. Take the field's address from a
+  variable or a pointer instead: write the embedded field out (`&w.inner.f`), or bind the element or the result
+  first (`p := &s[i]`, then `&p.f`)
+  ([the field view](ConversionStrategies-Reference/pointers.md#the-bytes-of-one-field-through-ntunsafepointerpf-the-field-view)).
+  <!-- 2026-11-15, P5, the box-kind seat. The fix (the open slice routed through the array view door) is ruled
+       for .5 (COORD 13:44Z): BOARD row of 2026-11-15, "the open slice of a pointer conversion over an array field
+       of another element type ends the process". This bullet is the disclosure for .4, ruled in the same line: an
+       access violation that ends the process is the worst failure class. Measured on linux/amd64, Release, one
+       arm per process, each arm under a recover, predictions written first
+       (docs/phase4/data/array-pointer-doors/reinterpret-box-1115/probe-open/): the three roots named end the
+       process with System.AccessViolationException in slice<byte>'s constructor and the recover does not run;
+       the three workaround forms print Go's lines. Census: 0 sites in the standard library on four targets and 0
+       in the demo closures. DESIGN-array-pointer-doors.md 19.7. -->
 * **The address of another package's pointer- or interface-typed variable is the address of a copy.** An
   exported variable with a value type has its own storage, so `&otherpkg.V`, `f := otherpkg.V.Reset`,
   `flag.BoolVar(&otherpkg.Debug, ...)` and `&otherpkg.S.Field` reach the variable itself, as in Go. Two kinds are

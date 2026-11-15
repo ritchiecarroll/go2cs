@@ -39618,5 +39618,153 @@ and the field view's shape widened to two selections as its second commit, probe
 0 corpus files (`src/core/unsafe/unsafe.cs` is hand-owned and changes), behavioral +1.
 
 — P5 (2026-11-15)
+## 2026-11-15 — P5 (the box-kind seat; closes the 2026-11-15 row "the field view of a struct that holds a reference is refused by name, and that is where the 26 known sites are"; COORD rulings 09:54Z and 11:17Z): a field view over a struct that holds a reference reads and writes the field's own bytes — DONE
+
+**What changed.** `(*[N]E)(unsafe.Pointer(&x.f))`, x a Go struct whose converted form holds a reference (a
+fixed array is enough), f a field that holds none. golib gains an internal box kind,
+`ReinterpretedArrayBox<E>` (`src/core/golib/ж.ReinterpretedArrayBox.cs`): it holds the field's own pointer and
+N, and element i is byte `i x size(E)` of the field's slot, found again from the live box at every access. No
+copy, no pin, no address. `ArrayPointer<E>.Of` makes it in the arm that refused
+(`src/core/unsafe/unsafe.cs`, hand-owned); the index, the whole-array load and the whole-array store that
+parts A and C emit gain an arm for it. The converter's emission for these forms does not change. Surface: none
+added or changed (the kind and its interface are internal; `Of` keeps its signature).
+
+**The 26 sites** of the closed row (17 in `golang.org/x/sys/unix`'s sockaddr code, 8 in `syscall`, of which 4
+are in its emitted `recvfrom` code and 4 in functions a hand-owned file displaces, 1 in `runtime`'s
+`cheaprand`) and the 7 `x/sys/windows` sites of the census row of this date:
+each views a number field as its bytes, inside the field, and binds a local that is indexed, or (3 on
+windows) loads the whole array. All are served, but for one: the Bluetooth GUID field, whose converted form
+holds an array (door C's class, refused by name). The 4 sites two selections deep (`&sa.raw.Port`,
+syscall_linux.go:394, 406, 508, 514) are served by the second commit, which widens the field view's shape.
+
+**A 27th site, in the standard library.** `syscall.LsfSocket` (lsf_linux.go:32) views a port field of a struct
+VARIABLE as two bytes. The closed row's standard-library count was made by reading; its instrument skips
+packages that have no module, so it never read `std`. Run with that filter flipped on four targets
+(`reinterpret-box-1115/census-std/`: 13 sites on linux, 15 on darwin, 12 on windows) it agrees with the row on
+linux and adds this one. The second commit's shape takes it, and its emitted file
+(`src/core/syscall/linux/lsf_linux.cs`) moves in the third commit.
+
+**The second commit: the field view's shape is a chain of field selections off a variable.** It was one field
+selected from a pointer-typed variable. It is now one or more single-field selections whose root is any
+variable: `&p.f`, `&sa.raw.Port`, `&s.f` (s a struct variable), `&global.f`. A promoted field, and a root that
+is an index, a call or a dereference, keep their earlier route. Probe first, as ruled
+(`docs/phase4/data/array-pointer-doors/reinterpret-box-1115/probe/`, 36 lines of Go output, both emissions
+built against the cut): the converter of part C prints 12 lines equal to Go's, the widened one 32. 49 emitted
+lines differ, each a field view through such a chain. A second probe, of an ARRAY field viewed as an array of
+another element type (`probe-arr/`, 7 lines, `os`'s `readdir` shape on darwin): the widened converter prints
+Go's 7; part C's prints 2, panics on 2 and ends the process on 3 (the last row of this seat, below).
+
+This also closes the field shapes of the 2026-11-15 row "an array view of a Go value of another type, kept in
+a local, panics, and a range by value over it is silent": over a struct with no reference those shapes now
+take the field view of part B, and the silent range reads Go's 0x46. What that row still holds: a promoted
+field and a field of a slice element or of a call's result, kept in a local ("index out of range with length
+0", 2 control lines of the probe, loud), and a kept view of an address that is not a field's.
+
+**Three arms ruled 11:17Z.** Identity: `unsafe.Pointer(p) == unsafe.Pointer(&x.f)` is true, two views of one
+field are one pointer, views of two fields or of two structs are not; it holds across a move. The move: 200
+rounds of store, forced compacting collection, read, with the field's own number as the witness that the
+struct moved. The number: see the next row, it is not as the ruling worded it.
+
+**Red first.** The 16 new GolibTests arms against part C's golib and unsafe package: 14 red (12 by the old
+refusal, 2 on the refusal's words), 2 green (the control that the struct has no address, and the nil field
+pointer). The converter arm of the second commit (`TestNativeFieldArrayViewTakesAChainOfFieldSelections`) at part C's
+converter: red on 12 assertions. The behavioral program converted by part C's converter and run against part C's
+tree: no line printed, refused by name at its first view.
+
+**Readings**, linux/amd64 Release. The seat was merged with batch 308 before it was gated whole
+(`e245e697be`). GolibTests 2935, 0 failed (2886 passed, 49 skipped: merged part C's 2919 and the 16 arms); GenTests
+530 of 530; check-no-regression 1089 transpiled, NO REGRESSION across 1077; the behavioral program's 18 lines equal
+Go's; the converter's `go test ./...` rc 0, 11 packages ok. Footprint, two-seeded on four targets against merged part C's
+converter: `src/core/syscall/linux/lsf_linux.cs` alone, 3 lines, on linux/amd64 and linux/arm64, and no corpus file
+on windows/amd64 or darwin/amd64, as the corrected prediction said (the first wording, 0 files, would have missed
+by this one; it was corrected before any footprint ran). At the second commit before the merge GolibTests read
+2929 with 2886 passed and 43 skipped against a predicted 2880 and 49: that run had the pinned Go toolchain on its
+path and six toolchain arms ran that otherwise report inconclusive. Scores and the one run that read a timing arm
+red under load: DESIGN-array-pointer-doors 19.5.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (the box-kind seat, against COORD's arm 2 of 11:17Z): `uintptr(unsafe.Pointer(p))` of a view over a reference-bearing struct's field is the field's address at that moment, not an order token — recorded, no change proposed
+
+The ruling asked that the number follow "the existing rule for a no-address pointee (the order token)", be
+stable across two reads and equal the field pointer's own number. The last holds by construction: the view
+forwards the field pointer's number and mints nothing. But that number is an address. The STRUCT has no
+address and its pointer's number is a token; a reference-free FIELD of it is `PointerStorage.Unpinnable`, a
+real address that nothing holds still (`ж.FieldRefBox.cs`; tokenising such a field made the kernel refuse
+every Windows TCP dial, which is why it is not a token). So two reads agree only when no collection moved the
+struct between them, as `uintptr(unsafe.Pointer(&x.f))` already did before this seat. The unit arm reads the
+two inside a no-GC region and asserts the token equality separately. Pointer identity does not depend on the
+number and holds across a move. This is the standing hole of an unpinnable field, older than this seat and
+not widened by it.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (the box-kind seat; departs from the design block approved 11:17Z): a range by value, a slice and an element's address over a view of a reference-bearing struct's field are refused by name — OPEN, proposed .5, owner P5
+
+`for _, b := range p`, `p[lo:hi]` and `&p[i]`, p a field view over a struct that holds a reference. Each needs
+storage it can name: part C emits the range as `range(p.slice())`, and a slice header or an element pointer
+over bytes that the collector may move has nothing to point at. The view's `Value` refuses by name and says
+which forms are served ("Index it (p[i]), load it (*p) or store it (*p = v)"). The approved design block said
+the range "takes the element per round"; it does not, and this row is that departure. The index-only range
+and `len` read no memory and are served.
+
+**One change of behaviour to name.** `&(*[2]byte)(unsafe.Pointer(&sa.raw.port))[1]`, the element's address
+where the conversion is written, two selections deep: before the second commit it took door B's element door
+and printed Go's answer, through a box at an address nothing holds still. Probe
+(`reinterpret-box-1115/probe-unpinnable/`): over 200 rounds with a forced compacting collection, the struct
+moved in 200 and the kept pointer read stale in 200 (index 1) and 196 (index 0). That is the UNPINNABLE class
+of DESIGN-interior-pointer-root 10.1, whose refusal is ruled for after 1.26.11.1. With the widened shape this
+one form is refused by name now. One selection deep it already was a field view and already refused.
+
+**Sites:** 0 in the standard library's emitted field views, the sqlite demo's closure, the TypeScript closure
+and the nine nugetgo modules, for all three forms.
+
+**Size.** The range: an enumerator over the element door in the unsafe package and the converter naming it
+where it now emits `range(p.slice())` for this kind only at run time, about 20 lines of C#, 10 of Go, one unit
+arm and one behavioral line. The element's address: a second internal box kind, one element of the field's
+bytes at an offset, about 60 lines with its identity arms. The slice: not served without a layout copy, which
+is door C's remedy and would lose writes; it stays refused.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (the box-kind seat; adds a reading to the 2026-11-15 row "an array view of a Go value of another type, kept in a local, panics, and a range by value over it is silent"): the open slice of a pointer conversion over an array field of another element type ends the process — OPEN, .5 (COORD 13:44Z), disclosed in docs/Limitations.md for .4, owner P5
+
+`(*[8]byte)(unsafe.Pointer(&d.name))[:]`, name a `[8]int8`. Where the address is not the field view's shape the
+converter emits the pointer conversion and its open slice, `Pointer.To<array<byte>>(...).slice()` (door A
+keeps the open form of an unnamed array on that route, decision D4). The conversion reads the field's pointer
+as a pointer to an `array<byte>`, and the slice reads an array header from what is behind it. Read at part C's
+converter and tree, one arm per process (`reinterpret-box-1115/probe-arr/`): over a struct variable, a package
+variable and a two-selection chain the process ends with an `AccessViolationException` in `slice<byte>`'s
+constructor. It is not a panic, and a `recover` does not take it. The same form over a number field panics or
+is refused by name (DESIGN-array-pointer-doors 18.5).
+
+**What this seat closes:** the three roots read. The second commit makes them field views, and they print Go's
+lines.
+
+**What it leaves, read** (`reinterpret-box-1115/probe-open/`: predictions written before the probe was
+converted, this seat's converter and tree merged with batch 308, linux/amd64 Release, one arm per process, each
+arm under a `recover`). The same `[:]` over a promoted field (`&w.name`), over a field of a slice element
+(`&ds[1].name`) and over a field of a call's result (`&get().name`) ends the process with the same
+`AccessViolationException`, exit code 134, no line printed; the `recover` does not run. The three forms that
+reach the field from a variable or a pointer print Go's lines: the embedded field written out
+(`&w.dirent.name`), the element bound to a pointer variable first (`p := &ds[1]`, then `&p.name`; a store
+through the slice is read in the element), and the call's result bound first. All six read as predicted.
+
+**Sites:** 0 in the standard library on four targets and 0 in the TypeScript, nugetgo and sqlite closures, by
+the typed censuses (every field-address view that is not of the earlier shape is a two-selection chain or a
+variable root, and those are field views now). `os`'s `readdir` on darwin (dir_darwin.go:77) has the
+struct-variable shape and is hand-converted.
+
+**Size.** The open form routed through door A's view (`View<E>(p, 0, N, N)`), which answers per root and
+refuses by name where it cannot: about 15 lines in `convSliceExpr.go`, 4 unit arms, 3 behavioral lines, and a
+footprint of the 5 emitted open slices of a pointer conversion in the standard library (`runtime/type.cs`,
+`reflect/type.cs`, `internal/reflectlite/type.cs`, `runtime/linux/os_linux.cs`, `runtime/windows/os_windows.cs`),
+each to be read against Go before it moves. Half a seat. It reopens decision D4.
+
+**Ruled (COORD 13:44Z, read against the finding post of 13:42Z).** .5, as this row, landing with the box kind's
+docs commit. An access violation that ends the process is the worst failure class, so for .4 the form and its
+workaround are a bullet of `docs/Limitations.md` ("One array view can end the process"), in the same commit.
+
+— P5 (2026-11-15)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
