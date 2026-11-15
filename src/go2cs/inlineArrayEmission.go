@@ -283,8 +283,10 @@ func inlineSliceElementIsPlain(elem types.Type) bool {
 
 // addressIsCopyBox reports whether address, convUnaryExpr's spelling of &x, boxes a COPY of x: golib's one-argument
 // Ꮡ(value) (builtin.cs), alone or followed by a field or element step. Every other Ꮡ overload takes a container and an
-// index and aliases the element. A comma inside a generic argument list at the call's own depth reads as a second
-// argument, so the test can miss a copy there; it never refuses a spelling that aliases.
+// index and aliases the element. The test counts brackets over the spelled text, so three spellings inside the one
+// argument can read as a second argument and make a copy read as an alias: a comma in a generic argument list at the
+// call's own depth, and a comma or a bracket inside a string or a rune literal. Each misses toward "not refused"; the
+// test never refuses a spelling that aliases (P3's re-read, note 3, 2026-11-15).
 func addressIsCopyBox(address string) bool {
 	if !strings.HasPrefix(address, AddressPrefix+"(") {
 		return false
@@ -322,6 +324,11 @@ func addressIsCopyBox(address string) bool {
 // value. A pointer is admitted only at the root (p.f with p a pointer, (*p).f); a slice element, a map element, a call,
 // or a pointer reached deeper in names storage that already has a box of its own, and answers false. A package-qualified
 // variable (pkg.V.f) roots at V.
+//
+// A bare variable (x[:], pkg.V[:]: no hop) answers false, and no caller reaches it: inlineArraySliceSpelled admits only a
+// field selection or an element of one, since an array is held inline only as a field of an admitted struct. A field
+// promoted through an EMBEDDED POINTER of a pointer root (p.f, with f in *E embedded in *p) answers (p, indirect) though
+// its storage is E's; the only effect is one receiver box capture mode did not need (P3's re-read, notes 1 and 2).
 func inlineSliceStorageRoot(expr ast.Expr, info *types.Info) (root *ast.Ident, indirect bool, ok bool) {
 	for hops := 0; ; hops++ {
 		switch e := ast.Unparen(expr).(type) {
