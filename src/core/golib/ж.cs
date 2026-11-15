@@ -1372,6 +1372,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (value.NamesZeroBase)
             return GoZeroBase.Address;
 
+        // A view with no storage of its own (a field's bytes viewed as an array over a Go value that has no
+        // address) answers the number of the field it views, minted by the field's own conversion. Asked before
+        // the slot is read, which such a box refuses by name.
+        if (value is IPointerNumberForwarder forwarder)
+            return (uintptr)forwarder.ForwardedNumber();
+
         // A pointer to a Go fixed array (`unsafe.Pointer(&arr)`): the native address must reference the
         // array's DATA (element 0), pinned so a syscall can fill it in and the managed reads afterward
         // observe the result — not the transient address of the `array<T>` struct wrapper. Slices keep
@@ -1457,6 +1463,10 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // The zerobase's one address, as in the uintptr operator above.
         if (value.NamesZeroBase)
             return (void*)GoZeroBase.Address;
+
+        // The number of the field a storage-less view views, as in the uintptr operator above.
+        if (value is IPointerNumberForwarder forwarder)
+            return (void*)forwarder.ForwardedNumber();
 
         // A pointer to a Go fixed array resolves to the pinned address of the array data — see the
         // uintptr operator above for the full rationale, including why the address is REGISTERED
