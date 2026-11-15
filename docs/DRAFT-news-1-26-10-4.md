@@ -176,3 +176,28 @@ pointer now. No call site in the standard library does. See
      81. None passes a base that its own code allows to be nil together with an offset that is not 0: runtime/list.go
      and list_manual.go test `p == nil` before the call, and the others add to the address of a variable, a receiver
      or an allocation. -->
+
+### A slice taken through an array-pointer conversion is a view of the memory (P5)
+
+**`(*[N]T)(p)[lo:hi]` over an `unsafe.Pointer` is now a view of the memory `p` names, as in Go.** The slice was a
+copy before, so a write through it never reached the memory. Code translated from C reaches memory this way
+throughout: modernc.org/libc's `memcpy` is `copy((*RawMem)(unsafe.Pointer(dest))[:n:n], …)`, and with a copy as its
+destination it copied nothing. The converted code now calls `@unsafe.Pointer.View`, and `copy` over an open form
+(`copy((*RawMem)(p)[:], src)`) calls `@unsafe.Pointer.CopyInto` or `CopyFrom`. A view of C memory, and of a Go array
+or slice of the same element type, aliases it. What a program can see change:
+
+- a write through such a slice reaches the memory, and a later write to the memory shows through the slice;
+- a two-index view has Go's capacity, the array type's length less the low bound, where it had its own length;
+- a view or a copy that would pass the end of the Go array it points into panics by name, where it read whatever
+  lay past the array;
+- a length too large for a slice panics by name, where its low 32 bits were used.
+
+In the standard library 13 lines in four files of `runtime` take the new form. See
+[Pointers](ConversionStrategies-Reference/pointers.md#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors).
+<!-- docs/phase4/DESIGN-array-pointer-doors.md, sections 4, 10 and 11; golib's unsafe.Pointer.View, CopyInto and
+     CopyFrom. Arms: the behavioral program ArrayPointerViewDoors (linux; native pages from syscall.Mmap and Go memory)
+     and the goldens of PointerArrayViewForms and PointerCastSliceReinterpret, GolibTests ArrayPointerViewDoorTests,
+     the converter's TestArrayPointerViewDoor, repoguard's TestArrayPointerViewDoors. FOOTPRINT, two-seeded, four
+     targets, 2026-11-15 at go1.26.11: runtime/heapdump.cs 5 lines, iface.cs 2, mbitmap.cs 2,
+     runtime/windows/os_windows.cs 4; the hand-owned internal/syscall/windows/registry value.cs is respelled by
+     hand, 8 lines. -->

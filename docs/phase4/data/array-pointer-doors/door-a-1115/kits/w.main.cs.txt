@@ -1,0 +1,22 @@
+namespace go;
+
+using fmt = fmt_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+/* [1125899906842623L]byte */
+partial struct RawMem /*[1125899906842623]byte*/;
+
+internal static void main() {
+    ref var buf = ref heap(new array<byte>(16), out var Ꮡbuf);
+    nint n = @unsafe.Pointer.CopyInto(@unsafe.Pointer.FromPinnedBox(Ꮡbuf.at<byte>(0)), 0, 1125899906842623, "name\x00"u8);
+    fmt.Printf("%d %q\n"u8, n, buf[..6]);
+    array<byte> @out = new(4);
+    nint m = @unsafe.Pointer.CopyFrom<byte>(@out[..], @unsafe.Pointer.FromPinnedBox(Ꮡbuf.at<byte>(0)), 0, 1125899906842623);
+    fmt.Printf("%d %q\n"u8, m, @out[..]);
+    nint k = @unsafe.Pointer.CopyInto(@unsafe.Pointer.FromPinnedBox(Ꮡbuf.at<byte>(0)), 12, 1125899906842623, "wxyz"u8);
+    fmt.Printf("%d %q\n"u8, k, buf[10..]);
+}
+
+} // end main_package

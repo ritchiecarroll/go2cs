@@ -655,3 +655,170 @@ GolibTests arm beside it).
   measured.
 - 10.6 is a reading. The window at `unsafe.cs:1452` was not produced.
 - sqlite-cs's own tree was not built; `:5802` is read from the module, not observed failing in the demo.
+
+## 11. Amendment 2026-11-15 01:30Z (P5): door A as cut (V1, V3, V4), its scorings, and what it found
+
+Door A is cut on `claude/p5-array-door-a`, ten commits on `31a22d3e7c`, tip `a37a986860` before this block.
+Nothing above is rewritten; where this section and an earlier one differ, this one is later. V2 is not in these
+ten commits. It is the last commits of the seat, as ruled, and gets its own block. Evidence:
+`data/array-pointer-doors/door-a-1115/` and `data/array-pointer-doors/scope-probe/`.
+
+<!-- Provenance. Rulings: claude/mailbox docs/phase4/inbox/P5/20261114T223917Z-COORD.md (V1/V3/V4 first, V2 last;
+     stop line 1; D8 = a), 20261114T234748Z-COORD.md (the hand-own respell is eight lines), 20261115T001446Z-COORD.md
+     (the failed behavioral prediction scored; the rule line), 20261115T004631Z-COORD.md (the project-file remedy),
+     20261115T011951Z-COORD.md (the lost write at a named array's address: its own seat), 20261115T012026Z-COORD.md
+     (the scoring accepted; the nil-length row is door C's). My posts: inbox/COORD/20261114T230543Z-P5.md,
+     20261114T234701Z-P5.md, 20261115T001409Z-P5.md, 20261115T003530Z-P5.md, 20261115T004525Z-P5.md,
+     20261115T011848Z-P5.md, 20261115T011939Z-P5.md. Box: one cloud linux/amd64 VM, Go 1.26.11, .NET SDK 10.0,
+     Release, GoTargetOS=linux unless a line says otherwise. Converters: base = the batch-305 converter, cut = the
+     converter built at a0c43a357b. -->
+
+### 11.1 What landed
+
+| commit | what |
+|:--|:--|
+| `27cc695f78` | golib: `View` (three overloads), `CopyInto` (slice source, string source), `CopyFrom` on `@unsafe.Pointer`; 20 GolibTests arms |
+| `a993b432a0` | `ArrayPointer<T>.Of` hands the pointer to the typed door (10.6); the three `array<>` predicates tied by comments (10.1) |
+| `cab7b3a2d1` | converter: the emission of 4.1 and 4.3, and the `FromRef` rule of 4.6 |
+| `5d6eac352a` | scope fix 1: the same-element alias conversion keeps `array<T>.AliasPointer` |
+| `c24cb00630` | the behavioral project `ArrayPointerViewDoors` (25 lines, linux-exclusive); two goldens re-baselined |
+| `a0c43a357b` | scope fix 2: the door replaces the copying span and nothing else |
+| `53f22a53ce` | the rule line in the converter rules; the 25-shape probe stored |
+| `2c91fe4748` | five hand-owned `runtime` files declare their own unsafe code; a guard (11.5) |
+| `961d63313b` | the hand-owned registry `value.cs` takes the door at its four sites, eight lines |
+| `a37a986860` | the regen, 13 lines in 4 files of `runtime`; the repoguard guard of 4.7 |
+
+The emitted forms, as the converter writes them:
+
+    (*A)(p)[lo:hi]              @unsafe.Pointer.View<E>(p, lo, hi, N)
+    (*A)(p)[lo:hi:max]          @unsafe.Pointer.View<E>(p, lo, hi, max, N)
+    (*A)(p)[lo:]                @unsafe.Pointer.View<E>(p, lo, N)              A a named array
+    copy((*A)(p)[lo:], src)     @unsafe.Pointer.CopyInto<E>(p, lo, N, src)     A a named array
+    copy(dst, (*A)(p)[lo:])     @unsafe.Pointer.CopyFrom<E>(dst, p, lo, N)     A a named array
+
+### 11.2 Where the cut departs from sections 4 and 10
+
+1. **Three `View` overloads, with `long` bounds, where 4.1 has one.** Go's panic text differs by form (two
+   indices, three indices, the open form), and one door could not tell which the program wrote. The two-index
+   form passes no `max`; the door uses `N`.
+2. **The pointer is resolved first and `lo` is applied per arm.** 4.2 moves the pointer by `lo*size` and then
+   classifies it. Resolving first lets V1 answer a window by element index and lets a pointer to the array by
+   its own number (pd, pf of 10.4) reach V1.
+3. **A view past the end of the Go array the pointer resolved to is refused by name.** 4.2 clamps the capacity
+   to the array's remaining elements. The cut clamps the capacity and refuses a LENGTH past the end, because Go
+   has no answer for that program. The copy doors refuse the same way and copy nothing (ruling 6, 10.3).
+4. **`CopyInto` refuses a snapshot destination by name.** A copy into a snapshot is a write nobody can read.
+   The door sees this write because the open form under `copy` is its own emission. A bounded view under
+   `copy` still hands out a snapshot and cannot know it will be written: D8, ruled (a).
+5. **A snapshot's capacity is its length** (V4). Go's capacity would let an `append` write into memory the
+   snapshot does not have.
+6. **A pointer made by `unsafe.Add` from Go storage takes the anchored native window.** It carries its root, so
+   the window keeps it. This is arm P's mechanism, already in the interior-pointer cut; the door reaches it.
+7. **The pointer-to-array arm reads `ж<array<E>>` only.** A box of a named array wrapper takes the snapshot until
+   V2 lands.
+8. **The conversion-time note "COPIES the memory it views" no longer fires at a door site.** Until V2 lands, a
+   write through a view of Go storage of another type takes the snapshot and is lost without a note. That is the
+   state of pa, pb, pc and pe in 10.4, and it is what V2 is for.
+9. **The repoguard guard of 4.7 was made to fail by text**, not by a converter with the `FromRef` rule removed:
+   one of `internal/abi/type.cs`'s two spans rewritten as a door over its `FromRef` mint; the guard named
+   `type.cs:230` and the row's count. The converter test `arrayPointerViewDoor_test.go` is where the rule itself
+   was switched off and the test went red.
+
+### 11.3 Two scope defects, both mine, both found before any corpus emission
+
+The door's hook sits ahead of every route that renders a pointer-to-array conversion whole, and it took a
+sliced conversion away from three of them.
+
+- **The same-element alias** (`(*[N]T)(unsafe.Pointer(p))`, `p` a `*T`): found by reading where
+  `os_windows_test.go:243`, `:340` and `:730` land. It would have moved `reparse_windows.cs` :65 :89,
+  `runtime/iface.cs` :248, the three test lines and two behavioral files. Fixed in `5d6eac352a`. So those three
+  test lines keep the alias route, and 10.4's open question about their arm is closed: they never reach a door.
+- **Identity, two array types of one shape, and the native field view**: the no-regression re-transpile at
+  `c24cb00630` moved one golden I had predicted would not move (`PointerCastSliceRange`, an identity
+  conversion). A probe of 25 sliced shapes under both converters then read 22 changed, 14 of them not the
+  copying span (identity 9, one shape 3, field view 2). The field view would have been wrong and not only
+  different: its helper resolves the field's Go offset for a native root. Fixed in `a0c43a357b` with one
+  predicate, `arrayPointerConversionKeepsItsRoute`, built from the predicates the four routes themselves use.
+  After it: 8 changed, each the copying span; 17 byte-identical.
+
+The lesson is a rule line in `.claude/rules/converter.md`: a hook ahead of existing routes is scoped by
+converting every sibling shape with the base converter and the cut before the first commit, and it declines
+through each route's own predicate.
+
+### 11.4 Predictions, scored as worded
+
+| | prediction | score |
+|:--|:--|:--|
+| P5 (section 6) | 11 lines in 5 files | **Corrected twice BEFORE any emission ran, then measured.** First (23:05Z): registry `value.cs` is a hand-own, so the converter writes its `.cs.auto`; 7 lines in 4 files. Second (23:47Z): a function whose only spans become doors loses `unsafe` on its declaration line; **13 lines in 4 files, `value.cs.auto` 8**. MET as corrected, on linux/amd64, windows/amd64, darwin/amd64 and linux/arm64: `heapdump.cs` 5, `iface.cs` 2, `mbitmap.cs` 2 on every target, `windows/os_windows.cs` 4 on windows. No other `.cs`, 0 `GoPositionMap` lines, `internal/abi/type.cs` and the alias sites unmoved, the base arm reproduces the committed file. |
+| P5's added falsifier "a .csproj moving" (23:47Z) | none moves | **FIRED.** `runtime/runtime.csproj` moved `AllowUnsafeBlocks` true to false on linux/amd64, windows/amd64 and linux/arm64. See 11.5. |
+| behavioral (23:47Z) | the full re-transpile moves no file beyond the two re-baselined goldens | **MISSED**: one file, the second scope defect of 11.3. After the fix: NO REGRESSION across 1067 packages (MET, 00:35Z). |
+| P9 | W's three lines, pd and pf print Go's answers; pa pb pc pe still print zeros | **MET** (`door-a-1115/kits/`). |
+| P11 | ruling 6's refusals carry the remaining count and copy nothing | **MET** by the GolibTests arm `TheCopyDoorsRefusePastTheEndOfAGoArrayByNameAndCopyNothing`. |
+| P1 | arms A B E G H I K L N O P and C C0 print Go's answers; M's first line lands | **MET without N**: A B C E G H I K L O P C0 print Go's answers; M reaches its index store and stops there at the floor's refusal (door B). **N prints false**: it is V2's arm and is scored with V2. |
+| P8 | no banked row changes verdict | **NOT SCORED.** No banked row was swept at this tip. It is stop line 4, read at the merge result. |
+| P2, P3, P6, P7, P10, P12, P13 | doors B and C, V2, D8 (b) | not in this cut |
+
+Arms D F D0 F0 M0 R S T are doors B and C and stop at named panics, as before the cut. Q answers length 0, the
+floor's row.
+
+P8's reading of the registry lines is corrected: `value.cs` :315 and :348 are a byte view over `[]uint16`
+storage, so they are V2's case and not V1. All four sites read through the view and none writes, so the
+snapshot answers them until V2 lands.
+
+### 11.5 The project-file miss and its remedy
+
+`<AllowUnsafeBlocks>` is the converter's own emission holding an unsafe function, OR a
+`[module: go.GoRequiresUnsafe]` declaration in the package. The six functions the doors rewrote were the only
+converted unsafe code in `runtime`, and five hand-owned files there used unsafe code with no declaration:
+`memmove_impl.cs`, `linux/mem_linux_impl.cs`, `linux/stubs2_impl.cs`, `windows/signal_windows_impl.cs`,
+`darwin/libccall_impl.cs`. They compiled only because converted code beside them happened to be unsafe.
+
+I predicted "no .csproj moves" from the lines the change rewrites, and never counted what those lines were
+holding up for the rest of the package. Posted alone before anything was applied; remedy accepted (00:46Z).
+
+- `2c91fe4748`: the declaration on the five files; repoguard `TestHandOwnedUnsafeIsDeclared` and its planted
+  control; the rule in `.claude/rules/corpus.md`. Census: 43 hand-owned production files use unsafe code in 7
+  packages; `runtime` was the only package without a declaration.
+- The arm, at `961d63313b` with the cut converter: a seeded `-stdlib runtime` reconvert leaves `runtime.csproj`
+  byte-identical to the seed on all four targets. `runtime` builds at Release, `GoTargetOS=linux`, with the
+  regen applied: 0 errors.
+- Negative control: the same build with `AllowUnsafeBlocks` false is red, 2 errors, both CS0227, at
+  `linux/mem_linux_impl.cs(123)` and `linux/stubs2_impl.cs(66)`.
+
+Two statements of my 00:45Z post were wrong and are corrected here and in the 01:19Z post. darwin/amd64's
+project file does NOT move: a named pointer type there (`machVMRegionInfo`) keeps the package unsafe by itself,
+so a three-target merge would have kept `true` in the committed file, and the hole was real for a per-hunk
+apply and for any single-flavour regen. And the first CS0227 is not at `memmove_impl.cs`: its unsafe code is in
+blocks inside bodies, which the compiler reports only after the declaration errors.
+
+Named, not applied: `runtime`'s `.cs.auto` siblings `mcleanup`, `mfinal` and `runtime2` differ from the seed
+under the reconvert, and the committed registry `value.cs.auto` differs from the base converter's emission.
+Both are stale review siblings and were so before this seat.
+
+### 11.6 Two findings that are not door A's
+
+- **The nil array pointer's length is door C's, not door A's.** The floor's BOARD row of 2026-11-14 ("a nil
+  array pointer made from a number carries no length") says "cure in door A". Door A emits views only. The kept
+  pointer `(*[N]T)(p)` is still `@unsafe.Pointer.To<array<T>>(p)`, and the cure needs `N` handed over at that
+  conversion: door C's unnamed form (P7, D5: 84 lines in 28 files). Corrected by a BOARD append of this date;
+  the row stays OPEN, owner P5, and is .5 with door C unless the sqlite-cs demo reaches it (ruled 01:20Z).
+- **A write at the address of a named array that has not been used yet is lost.** Found while rerunning the
+  kits; it is on master and independent of the doors. `type small [8]byte; var local small;
+  *(*byte)(unsafe.Pointer(&local)) = 41` prints 41 in Go and 0 converted, in five shapes, with both controls
+  right (`door-a-1115/lazy/`). The box's two pin paths box a copy of the wrapper, and the lazy backing is
+  allocated on the copy. BOARD row of this date; ruled into .4 as its own golib seat directly after this one
+  (01:19Z).
+
+### 11.7 What this section does not show
+
+- Nothing ran on windows or darwin. Their footprints are emissions on linux under the target's `GOOS`/`GOARCH`;
+  the registry package was BUILT for the windows target, and no windows row was run.
+- No banked row was swept at this tip (stop line 4). The windows flavour of `os` and of the registry package,
+  `runtime`, and the reflect consumers are read at the merge result.
+- V2 is not in these commits. Until it is, pa pb pc pe and N are red, and `sqlite_windows.go:5802` loses its
+  write as 10.4 describes.
+- The repoguard door guard was made to fail by text (11.2, item 9).
+- No cost was measured: a view's allocation, the anchor per native window.
+- `src/go2cs.slnx`, the binary-compat guard and the full converter suite were not yet run at this tip when this
+  block was written. They are run before the announce, and their readings go in the announce and in V2's block.
+- The sqlite-cs demo was not re-run past W5b. That is G's arm (section 5).

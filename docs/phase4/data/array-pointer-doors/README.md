@@ -89,3 +89,27 @@ cd amend-1114/prng && go build -o prng . && for a in pa pb pc pd pe pf; do ./prn
 go2cs -go2cspath <tree>/src <kit>/prng <kit>/prng
 dotnet build prngprobe.csproj -c Release -p:GoTargetOS=linux -p:go2csPath=<tree>/src/
 ```
+
+## Amendment 2026-11-15: door A as cut (`scope-probe/`, `door-a-1115/`)
+
+For section 11 of the design. Converters: base = the batch-305 converter; cut = the converter built at
+`a0c43a357b`. One cloud linux/amd64 VM, Go 1.26.11, .NET SDK 10.0, Release, `GoTargetOS=linux`.
+
+| Path | What it is |
+|:--|:--|
+| `scope-probe/main.go`, `go.mod`, `go.out` | 25 sliced pointer-to-array conversions, one per route the converter has for the conversion |
+| `scope-probe/base-305.cs.txt`, `cut-before-fix.cs.txt`, `cut.cs.txt` | the program's emission by the base converter, by the cut before `a0c43a357b` (22 shapes changed, 14 of them not the copying span) and by the cut at it (8 changed, each the copying span) |
+| `door-a-1115/footprint/two-seeded-<target>.files.txt` | `diff -rq` of the base root against the cut root, each seeded from `src/core`, per target |
+| `door-a-1115/footprint/two-seeded-<target>.diff.txt` | the same roots' unified diff under `src/core`, CR-stripped; the two run artifacts that differ are named and their bodies omitted |
+| `door-a-1115/footprint/arm-961d63313b-<target>.files.txt` | `diff -rq` of a seed taken at `961d63313b` against a `-stdlib runtime` reconvert of it by the cut converter: `runtime.csproj` is not in it on any target |
+| `door-a-1115/kits/NativeViewShapes.main.cs.txt`, `.converted.out` | the 24-arm program as the cut converter emits it, and its run against the tree at `a37a986860`, one arm per process |
+| `door-a-1115/kits/prng.*`, `w.*` | the same for the six memcpy arms of `amend-1114/prng/` and for arm W |
+| `door-a-1115/lazy/main.go`, `go.mod`, `go.out` | seven arms that write at the address of a named array: five before the array's first use, two controls |
+| `door-a-1115/lazy/main.cs.txt`, `converted.out` | its emission and its run: the five print 0 where Go prints the value written |
+| `door-a-1115/lazy/census/main.go`, `go.mod`, `go.sum` | a census tool: the defined named array types of a package closure, and each conversion to `unsafe.Pointer` of a pointer to one |
+| `door-a-1115/lazy/census/sq-<target>.tsv`, `.summary.txt` | its rows and totals for `modernc.org/sqlite/...` v1.62.0 on linux/amd64 and windows/amd64 (run inside a module that requires it, `GOFLAGS=-mod=mod`) |
+
+In the footprint files `base/` and `cut/` stand for the two conversion roots, and `seed/` and `reconvert/` for
+the arm's. `<kit>` in an `.out` file is the scratch directory the program was converted in. The `lazy` program
+is a finding on master that the doors do not touch (design 11.6); it is here because this seat's kit runs
+found it.

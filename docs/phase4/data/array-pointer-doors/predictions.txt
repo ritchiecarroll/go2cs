@@ -103,3 +103,28 @@ SIXTH SET, written 2026-11-14 22:40Z before any door exists. To be scored at doo
   P13  D8, if ruled (b): a snapshot destination directly under `copy` refuses by name, arms pa pb pc pe refuse
        where P9 has them printing zeros, and no std line reaches the refusal (no production line is a copy
        destination through a view; the three os test lines are unclassified and read first). Falsifier: a two-seeded emission showing a std `CopyInto`; a banked row refusing.
+
+Scored 2026-11-15, sixth set, at door A's cut (tip a37a986860, V1 V3 V4, no V2). Outputs: door-a-1115/kits/.
+  P9   MET as worded. W prints its three lines; pd and pf print Go's answers; pa pb pc pe print zeros.
+  P11  MET. GolibTests TheCopyDoorsRefusePastTheEndOfAGoArrayByNameAndCopyNothing: both refusals by name with
+       the remaining count, the array unchanged after the refused write.
+  P10, P12, P13: not in this cut (V2, door B, D8 (b) not ruled).
+  NativeViewShapes at the same tip: A B C E G H I K L O P C0 print Go's answers. N prints false (V2's arm).
+  D F M D0 F0 M0 R S T stop at named panics (doors B and C). Q answers length 0 (the floor's row).
+
+SEVENTH SET, corpus footprint. Written 2026-11-14 23:47Z in the post inbox/COORD/20261114T234701Z-P5.md (branch
+claude/mailbox), before any emission, as the second correction of P5; recorded in this file on 2026-11-15:
+  13 lines in 4 files of runtime (heapdump.cs 5, iface.cs 2, mbitmap.cs 2, windows/os_windows.cs 4);
+  value.cs.auto 8, named and not applied; no GoPositionMap line; no .csproj moves; internal/abi/type.cs and the
+  alias sites do not move. Falsifiers: any other file; any of the four not moving; a .csproj; a map line.
+Scored 2026-11-15, four targets (door-a-1115/footprint/): every line MET except one.
+  FIRED: "a .csproj moving". runtime/runtime.csproj moved AllowUnsafeBlocks true to false on linux/amd64,
+  windows/amd64 and linux/arm64, not on darwin/amd64. Cause and remedy: design 11.5.
+  A further prediction of mine, made in the post that reported the miss, was also wrong: I expected the same
+  line on darwin/amd64. A named pointer type there keeps the package unsafe.
+
+EIGHTH SET, behavioral corpus, written in the same post: the full re-transpile moves no file beyond
+PointerArrayViewForms and PointerCastSliceReinterpret.
+Scored 2026-11-15 at c24cb00630: MISSED. One more file moved (PointerCastSliceRange, an identity conversion that
+the door took from its route). Fixed in a0c43a357b; at that tree the re-transpile reads NO REGRESSION, 1067
+packages.

@@ -844,7 +844,7 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:891-900 -->
+<!-- source: src/core/unsafe/unsafe.cs:1079-1088 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
@@ -1181,7 +1181,7 @@ internal static uint32 readU32(ptr p, uintptr o) {
 
 **Every spelling of the conversion takes it:** the operand of a dereference (`*(*T)(p)`, read or written), a conversion used as a value or as a call argument, and a named type over a pointer, which applies its own conversion to the result (`(named)@unsafe.Pointer.To<int32>(p)`).
 
-**Limits.** Two conversions keep their own emission. A span view, `(*[N]T)(p)[lo:hi]`, [reads through a raw element pointer](#every-spelling-of-a-pointer-cast-slice-takes-the-span-and-a-max-bound-sets-its-capacity) over the number. A conversion whose operand is `unsafe.Pointer(q)` over a managed pointer `q` is [the managed reinterpret](#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address), which never leaves the box. A pointer made from a number carries nothing into the conversion. [Pointer arithmetic written in one expression](#unsafepointeruintptrp--n-is-emitted-as-unsafeaddp-n--the-moved-pointer-keeps-what-p-carries) is not made from a number.
+**Limits.** Two conversions keep their own emission. A slice of an array-pointer conversion, `(*[N]T)(p)[lo:hi]`, is [a view door](#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors), which takes the pointer itself. A conversion whose operand is `unsafe.Pointer(q)` over a managed pointer `q` is [the managed reinterpret](#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address), which never leaves the box. A pointer made from a number carries nothing into the conversion. [Pointer arithmetic written in one expression](#unsafepointeruintptrp--n-is-emitted-as-unsafeaddp-n--the-moved-pointer-keeps-what-p-carries) is not made from a number.
 
 Guarded by: `TestTypedPointerDoorReplacesTheNumberCast`; `TestNativeFieldArrayViewEmitsTheDoorAndElementRef`; `InteriorPointerRootTests`; the behavioral programs `UnsafePointerTypeAlias`, `UnsafeOperations` and `ExplicitDerefConversionStore`.
 
@@ -2972,6 +2972,10 @@ or not. (`reparse_windows.path()` → `os.Readlink`, registry `Get`/`SetStringVa
 were unchanged. <!-- registry ×4; 17 further corpus sites --> The same-element-type members of this
 shape take the element-aliasing `AliasPointer` route — *An element pointer reinterpreted as an
 array pointer ALIASES the element's storage*, above.)
+Since 2026-11-15 the slice on that address route is no longer a span: it is
+[a view door](#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors), which takes the pointer
+itself and aliases the memory. The exclusion stands for the same reason: a door needs the pointer, not a
+reinterpreted box.
 
 (Guarded by the `ReinterpretPointerLifetime` behavioral output test — an aliasing case, plus a
 lifetime case whose reinterpreted pointer is the only surviving reference across heavy allocation
@@ -2981,10 +2985,98 @@ array-target exclusion by `PointerCastSliceReinterpret`, an output test over the
 pointer-cast slice that `PointerCastSliceRange` explicitly defers to "the stdlib exercises that
 shape" — which is exactly how the fabrication reached the corpus untested.)
 
-## A pointer-cast slice with a LOW bound offsets the span
-`(*[N]T)(ptr)[lo:hi]` lowers to a `slice<T>` over a `ReadOnlySpan<T>` of the pointed-to memory (see
-the fusion above). Go's expression is the elements `lo..hi`, so the span starts at element `lo` and
-runs `hi - lo`; a span built from element 0 with length `hi` would drop the low bound and hold the
+## A slice taken through `(*[N]T)(p)` ALIASES the memory p names: the view doors
+Go's `(*A)(p)[lo:hi]`, with `A` an array type and `p` an `unsafe.Pointer`, is a slice of the memory `p`
+names. Nothing is copied: a write through the slice is a write to that memory. The idiom is how C-shaped Go
+reaches memory by address. modernc.org/libc declares `type RawMem [1<<50 - 1]byte`, an array far larger than
+any memory, only to cut slices from it, and its `memcpy` is one `copy` between two such slices:
+
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.go:81 -->
+```go
+		copy((*RawMem)(unsafe.Pointer(dest))[:n:n], (*RawMem)(unsafe.Pointer(src))[:n:n])
+```
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.cs.target:64 -->
+```csharp
+        copy(@unsafe.Pointer.View<byte>((@unsafe.Pointer)dest, 0, (nint)(n), (nint)(n), 1125899906842623), @unsafe.Pointer.View<byte>((@unsafe.Pointer)src, 0, (nint)(n), (nint)(n), 1125899906842623));
+```
+
+The conversion and the slice are emitted together as one call of a **view door** on `@unsafe.Pointer`
+(`src/core/unsafe/unsafe.cs`). The door takes the pointer itself, the bounds as written, and the array's
+length `N` as a constant (`1125899906842623` is `1<<50 - 1`). `N` is only a bound: nothing of length `N` is
+allocated or spanned.
+
+| Go | C# |
+|---|---|
+| `(*A)(p)[lo:hi]` | `@unsafe.Pointer.View<E>(p, lo, hi, N)` |
+| `(*A)(p)[lo:hi:max]` | `@unsafe.Pointer.View<E>(p, lo, hi, max, N)` |
+| `(*A)(p)[lo:]` | `@unsafe.Pointer.View<E>(p, lo, N)` |
+| `copy((*A)(p)[lo:], src)` | `@unsafe.Pointer.CopyInto<E>(p, lo, N, src)` |
+| `copy(dst, (*A)(p)[lo:])` | `@unsafe.Pointer.CopyFrom<E>(dst, p, lo, N)` |
+
+`E` is the array's element type, also for a named array (`byte` for `RawMem`). A door does what Go does, in
+Go's order: the nil check, then the bounds against `N` with Go's own slice panics for an array, then the view.
+The length is taken at full width and refused by name past what a slice can hold.
+
+**The open form.** `(*RawMem)(p)[:]` has a length no slice can hold. Go only writes it under `copy`, which
+takes the other operand's length, so `copy` with an open view on either side is its own door and no slice of
+length `N` is ever built:
+
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.go:107 -->
+```go
+	c = copy((*RawMem)(unsafe.Pointer(p))[:], wd)
+```
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.cs.target:87 -->
+```csharp
+    c = @unsafe.Pointer.CopyInto<byte>((@unsafe.Pointer)p, 0, 1125899906842623, wd);
+```
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.go:120 -->
+```go
+	c = copy(v, (*RawMem)(unsafe.Pointer(q))[:])
+```
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.cs.target:98 -->
+```csharp
+    c = @unsafe.Pointer.CopyFrom<byte>(v, (@unsafe.Pointer)q, 0, 1125899906842623);
+```
+A string source has its own overload, so the literal stays a `u8` span
+(`@unsafe.Pointer.CopyInto((@unsafe.Pointer)p, 2, 1125899906842623, "lo"u8)`). Away from `copy`, an open
+form of an array small enough to exist is the whole array from its low bound, `View<E>(p, lo, N)`.
+
+**What the view is** depends on what `p` points to, and the door decides at run time:
+
+- **An element of a Go array or slice of `E`, or a Go array of `E` named by its own address:** a managed
+  window on that array. Writes reach it and nothing has to be held still. Its capacity ends where the Go
+  array ends, and a view or a copy that would pass that end is refused by name, because the managed array is
+  all the storage there is.
+- **An address the pointer registry does not know** (C memory, or an interior address of Go memory): a native
+  window over the address, with Go's capacity `N - lo`. It keeps alive what the pointer carried.
+- **Any other Go value:** a copy of the elements read at the pointer. A read is exact; a write would not
+  reach the value, so a `copy` door refuses such a destination by name instead of losing the write.
+
+**What keeps its own emission.** The door replaces one emission, the slice built from a span over the
+pointer cast to a number, which copied. A conversion that another rule already renders whole keeps that
+rule: a conversion back to the pointer's own type slices the box; two array types of one shape are
+[the managed reinterpret](#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address);
+a same-element view of an unnamed array is `array<T>.AliasPointer`; and an array field of a native struct is
+`@unsafe.ArrayPointer<T>.Of(field, N)`. One operand keeps the copying span: a `FromRef` mint, whose address
+is true for one statement only, so a window over it would outlive the statement that made it true
+(`internal/abi`'s `Methods` and `ExportedMethods`, which only read). A function whose spans all became doors
+no longer needs the `unsafe` modifier and loses it.
+<!-- history: until 2026-11-15 every form here was `new slice<E>(new ReadOnlySpan<E>((E*)(uintptr)p + lo, n))`,
+a COPY: a write through the slice never reached the memory, the open form built nothing usable, and a named
+array was read as a managed wrapper out of C memory. Design and measurements:
+docs/phase4/DESIGN-array-pointer-doors.md. -->
+
+Guarded by: the behavioral program `ArrayPointerViewDoors` (native pages from `syscall.Mmap` and Go memory,
+written through a view and read back from the memory, against Go); `ArrayPointerViewDoorTests` in
+GolibTests; the converter's `TestArrayPointerViewDoor`, one arm per form and one control per route that keeps
+its own emission; and repoguard's `TestArrayPointerViewDoors`, which holds the census of copying spans left
+in the corpus and refuses a `FromRef` mint at a door.
+
+<a id="a-pointer-cast-slice-with-a-low-bound-offsets-the-span"></a>
+
+## A pointer-cast slice with a LOW bound starts its view at that element
+`(*[N]T)(ptr)[lo:hi]` is the elements `lo..hi`, so [the view door](#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors)
+is handed the low bound and starts there; a view built from element 0 with length `hi` would hold the
 **wrong elements** whenever `lo` is not 0. A byte view of wider elements shows it:
 
 <!-- source: src/tests/Behavioral/PointerCastSliceReinterpret/main.go:66 -->
@@ -2993,34 +3085,34 @@ runs `hi - lo`; a span built from element 0 with length `hi` would drop the low 
 ```
 <!-- source: src/tests/Behavioral/PointerCastSliceReinterpret/main.cs.target:32 -->
 ```csharp
-    var tail = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡ(words, 0))) + 3, 7 - 3));
+    var tail = @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡ(words, 0)), 3, 7, 8);
 ```
 A same-element-type view such as the reparse buffer's `(*[0xffff]uint16)(unsafe.Pointer(&rb.PathBuffer[0]))[n1:n2:n2]`
-(`*[0xffff]uint16` over a `*uint16`) takes the element-aliasing route instead —
-`array<uint16>.AliasPointer(Ꮡ(rb.PathBuffer, 0), 65535).slice(n1, n2, n2)` (above) — and the span
-lowering, with this low-bound offset, serves the pointer-cast slices that route does not.
-<!-- history: the span was once always built from element 0 with length hi; the example was
-reparse_windows' `(uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(rb.PathBuffer[0]))) + (int)(n1), (int)(n2) - (int)(n1)`. -->
+(`*[0xffff]uint16` over a `*uint16`) takes the element-aliasing route instead:
+`array<uint16>.AliasPointer(Ꮡ(rb.PathBuffer, 0), 65535).slice(n1, n2, n2)` (above).
+<!-- history: before the view doors this was a span, `(byte*)(uintptr)(…) + 3, 7 - 3`, and before that the
+span was always built from element 0 with length hi; the example then was reparse_windows'
+`(uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(rb.PathBuffer[0]))) + (int)(n1), (int)(n2) - (int)(n1)`. -->
 
-A pointer cast binds tighter than `+`, so the offset lands on the typed pointer with no extra
-parentheses. Two consequences a dropped low bound would have: `internal/syscall/windows`'s
+Two consequences a dropped low bound would have: `internal/syscall/windows`'s
 `(*symbolicLinkReparseBuffer).path()` slices `[n1:n2:n2]` to skip the print name, so `os.Readlink`
 would return the reparse buffer from offset 0 instead of the substitute name; and `internal/abi`'s
 `FuncType.OutSlice()` slices `[InCount : InCount+outCount]`, so it would return the **in**-parameters
 followed by the out-parameters and `reflect.Type.Out(i)` would index the wrong half (`reflect.gcSlice`
 `[begin:end:end]` likewise would read the GC bitmap from the wrong start). (Guarded by the non-zero-low
-arms of `PointerCastSliceReinterpret` — the reparse `[n1:n2:n2]` shape and a byte reinterpret of a
+arms of `PointerCastSliceReinterpret`: the reparse `[n1:n2:n2]` shape and a byte reinterpret of a
 wider element sliced `[3:7]`, both matching Go. `StdLibInternalAbi`'s golden
 pins the corrected `OutSlice`; its own stdout does not depend on the offset.)
 
-## Every spelling of a pointer-cast slice takes the span, and a MAX bound sets its capacity
-The span lowering above is recognized from the Go expression, not from the text the conversion
-rendered. Extra parentheses around the conversion and an explicit dereference of it are the same
-expression to Go, and both take the span: ccgo writes `((*rawmem)(unsafe.Pointer(r)))[:size:size]`
-and `(*(*RawMem)(unsafe.Pointer(s)))[:n:n]`. A slice of a NAMED array type takes its element type
-from the array (`[]byte` for `rawmem`, a `[1<<50 - 1]byte`), never the array's own name. And a
-three-index slice whose max differs from its high bound covers `lo..max` and is cut to its length
-with `.slice(0, hi - lo)`, so its capacity is `max - lo` as in Go:
+<a id="every-spelling-of-a-pointer-cast-slice-takes-the-span-and-a-max-bound-sets-its-capacity"></a>
+
+## Every spelling of a pointer-cast slice takes the view door, and a MAX bound sets its capacity
+The view door is chosen from the Go expression, not from the text the conversion rendered. Extra
+parentheses around the conversion and an explicit dereference of it are the same expression to Go, and both
+take the door: ccgo writes `((*rawmem)(unsafe.Pointer(r)))[:size:size]` and
+`(*(*RawMem)(unsafe.Pointer(s)))[:n:n]`. A slice of a NAMED array type takes its element type from the
+array (`[]byte` for `rawmem`, a `[1<<50 - 1]byte`), never the array's own name. And a three-index slice
+hands the door its max, so its capacity is `max - lo` as in Go:
 
 <!-- source: src/tests/Behavioral/PointerArrayViewForms/main.go:22-27 -->
 ```go
@@ -3033,21 +3125,19 @@ with `.slice(0, hi - lo)`, so its capacity is `max - lo` as in Go:
 ```
 <!-- source: src/tests/Behavioral/PointerArrayViewForms/main.cs.target:17-22 -->
 ```csharp
-    var b = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p), (int)(n)));
-    var c = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p), (int)(n)));
-    var d = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p) + 2, 6 - 2));
-    var e = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p), 4));
-    var f = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p) + 1, 5 - 1)).slice(0, 3 - 1);
-    var g = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p) + 2, 7 - 2)).slice(0, 3 - 2);
+    var b = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 0, n, n, 1125899906842623);
+    var c = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 0, n, n, 1125899906842623);
+    var d = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 2, 6, 1125899906842623);
+    var e = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 0, 4, 1125899906842623);
+    var f = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 1, 3, 5, 1125899906842623);
+    var g = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 2, 3, 7, 1125899906842623);
 ```
-Before, the parenthesized form fell through to `((ж<array<byte>>)…).slice(0, n, n)`, reading an
-`array<byte>` out of the pointee's own bytes (a nil dereference here, a fabricated reference in
-general); the dereferenced form copied the whole array first (`~`); a named array emitted
-`slice<rawmem>`; and `g` read capacity 1 where Go reads 5. A plain view keeps its bytes: the
-recognition only adds the forms the text match missed, and the capacity form is emitted only when
-max and high are written differently. The span still COPIES `lo..max` (the copying slice view);
-a write through it does not reach the memory. (Guarded by the `PointerArrayViewForms` behavioral
-output test, which prints what Go prints.)
+Before the recognition read the expression, the parenthesized form fell through to
+`((ж<array<byte>>)…).slice(0, n, n)`, reading an `array<byte>` out of the pointee's own bytes (a nil
+dereference here, a fabricated reference in general); the dereferenced form copied the whole array first
+(`~`); a named array emitted `slice<rawmem>`; and `g` read capacity 1 where Go reads 5. A two-index view's
+capacity is the array's, `N - lo`, where the span it replaced gave `hi - lo`. (Guarded by the
+`PointerArrayViewForms` behavioral output test, which prints what Go prints.)
 
 ## A store through an EXPLICIT dereference of a pointer conversion reaches the pointee
 `(*(*T)(p)).F = x` and `(*(*[N]T)(p))[i] = x` are the same stores as `(*T)(p).F = x` and

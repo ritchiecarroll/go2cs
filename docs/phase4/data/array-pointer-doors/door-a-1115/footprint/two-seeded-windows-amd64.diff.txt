@@ -1,0 +1,204 @@
+diff -ruN --strip-trailing-cr base/src/core/internal/syscall/windows/registry/windows/value.cs.auto cut/src/core/internal/syscall/windows/registry/windows/value.cs.auto
+--- base/src/core/internal/syscall/windows/registry/windows/value.cs.auto
++++ cut/src/core/internal/syscall/windows/registry/windows/value.cs.auto
+@@ -102,7 +102,7 @@
+ // If value does not exist, GetStringValue returns ErrNotExist.
+ // If value is not SZ or EXPAND_SZ, it will return the correct value
+ // type and ErrUnexpectedType.
+-public static unsafe (@string val, uint32 valtype, error err) GetStringValue(this Key k, @string name) {
++public static (@string val, uint32 valtype, error err) GetStringValue(this Key k, @string name) {
+     var (data, typ, err2) = k.getValue(name, new slice<byte>(64));
+     if (err2 != nil) {
+         return ("", typ, err2);
+@@ -117,7 +117,7 @@
+     if (len(data) == 0) {
+         return ("", typ, default);
+     }
+-    var u = new slice<uint16>(new ReadOnlySpan<uint16>((uint16*)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡ(data, 0))), (int)(len(data) / 2)));
++    var u = @unsafe.Pointer.View<uint16>(@unsafe.Pointer.FromPinnedBox(Ꮡ(data, 0)), 0, len(data) / 2, len(data) / 2, 536870912);
+     return (syscall.UTF16ToString(u), typ, default);
+ }
+ 
+@@ -201,7 +201,7 @@
+ // If value does not exist, GetStringsValue returns ErrNotExist.
+ // If value is not MULTI_SZ, it will return the correct value
+ // type and ErrUnexpectedType.
+-public static unsafe (slice<@string> val, uint32 valtype, error err) GetStringsValue(this Key k, @string name) {
++public static (slice<@string> val, uint32 valtype, error err) GetStringsValue(this Key k, @string name) {
+     slice<@string> val = default;
+ 
+     var (data, typ, err2) = k.getValue(name, new slice<byte>(64));
+@@ -214,7 +214,7 @@
+     if (len(data) == 0) {
+         return (default, typ, default);
+     }
+-    var p = new slice<uint16>(new ReadOnlySpan<uint16>((uint16*)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡ(data, 0))), (int)(len(data) / 2)));
++    var p = @unsafe.Pointer.View<uint16>(@unsafe.Pointer.FromPinnedBox(Ꮡ(data, 0)), 0, len(data) / 2, len(data) / 2, 536870912);
+     if (len(p) == 0) {
+         return (default, typ, default);
+     }
+@@ -303,12 +303,12 @@
+     return k.setValue(name, QWORD, @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡvalue)).slice());
+ }
+ 
+-internal static unsafe error setStringValue(this Key k, @string name, uint32 valtype, @string value) {
++internal static error setStringValue(this Key k, @string name, uint32 valtype, @string value) {
+     var (v, err) = syscall.UTF16FromString(value);
+     if (err != nil) {
+         return err;
+     }
+-    var buf = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡ(v, 0))), (int)(len(v) * 2)));
++    var buf = @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡ(v, 0)), 0, len(v) * 2, len(v) * 2, 536870912);
+     return k.setValue(name, valtype, buf);
+ }
+ 
+@@ -327,7 +327,7 @@
+ // SetStringsValue sets the data and type of a name value
+ // under key k to value and MULTI_SZ. The value strings
+ // must not contain a zero byte.
+-public static unsafe error SetStringsValue(this Key k, @string name, slice<@string> value) {
++public static error SetStringsValue(this Key k, @string name, slice<@string> value) {
+     @string ss = ""u8;
+     foreach (var (_, s) in range(value)) {
+         for (nint i = 0; i < len(s); i++) {
+@@ -338,7 +338,7 @@
+         ss += s + "\x00"u8;
+     }
+     var v = utf16.Encode(slice<rune>(ss + "\x00"));
+-    var buf = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡ(v, 0))), (int)(len(v) * 2)));
++    var buf = @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡ(v, 0)), 0, len(v) * 2, len(v) * 2, 536870912);
+     return k.setValue(name, MULTI_SZ, buf);
+ }
+ 
+diff -ruN --strip-trailing-cr base/src/core/runtime/heapdump.cs cut/src/core/runtime/heapdump.cs
+--- base/src/core/runtime/heapdump.cs
++++ cut/src/core/runtime/heapdump.cs
+@@ -53,12 +53,12 @@
+ internal static ref array<byte> buf => ref ((StaticBox<array<byte>>)Ꮡbuf).ValueSlot;
+ internal static uintptr nbuf;
+ 
+-internal static unsafe void dwrite(@unsafe.Pointer data, uintptr len) {
++internal static void dwrite(@unsafe.Pointer data, uintptr len) {
+     if (len == 0) {
+         return;
+     }
+     if (nbuf + len <= bufSize) {
+-        copy(buf.slice((nint)(nbuf)), new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(data), (int)(len))));
++        copy(buf.slice((nint)(nbuf)), @unsafe.Pointer.View<byte>(data, 0, (nint)(len), 4096));
+         nbuf += len;
+         return;
+     }
+@@ -68,7 +68,7 @@
+         write(dumpfd, data, (int32)len);
+         nbuf = 0;
+     } else {
+-        copy(buf[..], new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(data), (int)(len))));
++        copy(buf[..], @unsafe.Pointer.View<byte>(data, 0, (nint)(len), 4096));
+         nbuf = len;
+     }
+ }
+@@ -747,7 +747,7 @@
+ internal static ref readonly @string heapdumpOutOfMemoryˢ => ref heapdumpOutOfMemoryˢᵇ;
+ private static readonly @string heapdumpOutOfMemoryˢᵇ = "heapdump: out of memory"u8;
+ 
+-internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
++internal static bitvector makeheapobjbv(uintptr Δp, uintptr size) {
+     // Extend the temp buffer if necessary.
+     var nptr = size / (uintptr)goarch.PtrSize;
+     if ((uintptr)len(tmpbuf) < nptr / 8 + 1) {
+@@ -759,7 +759,7 @@
+         if (pΔ1 == nil) {
+             @throw(heapdumpOutOfMemoryˢ);
+         }
+-        tmpbuf = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(pΔ1), (int)(n)));
++        tmpbuf = @unsafe.Pointer.View<byte>(pΔ1, 0, (nint)(n), 1073741824);
+     }
+     // Convert heap bitmap to pointer bitmap.
+     builtin.clear(tmpbuf.slice(0, (nint)(nptr / 8 + 1)));
+diff -ruN --strip-trailing-cr base/src/core/runtime/iface.cs cut/src/core/runtime/iface.cs
+--- base/src/core/runtime/iface.cs
++++ cut/src/core/runtime/iface.cs
+@@ -227,7 +227,7 @@
+ // //go:nowritebarrier enforces that (see the methods store below).
+ //
+ //go:nowritebarrier
+-internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
++internal static @string itabInit(ж<itab> Ꮡm, bool firstTime) {
+     ref var m = ref Ꮡm.DerefOrNull();
+ 
+     var inter = m.Inter;
+@@ -240,7 +240,7 @@
+     // the loop is O(ni+nt) not O(ni*nt).
+     nint ni = len(inter.Methods);
+     nint nt = (nint)x.Mcount;
+-    var xmhdr = new slice<abi.Method>(new ReadOnlySpan<abi.Method>((abi.Method*)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)x.Moff)), (int)(nt)));
++    var xmhdr = @unsafe.Pointer.View<abi.Method>(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)x.Moff), 0, nt, nt, 65536);
+     nint j = 0;
+     // These are code pointers, not heap pointers. Use a uintptr slice so the
+     // store emits no write barrier: on wasm a code pointer can look like a
+diff -ruN --strip-trailing-cr base/src/core/runtime/mbitmap.cs cut/src/core/runtime/mbitmap.cs
+--- base/src/core/runtime/mbitmap.cs
++++ cut/src/core/runtime/mbitmap.cs
+@@ -1633,9 +1633,9 @@
+ // progToPointerMask returns the 1-bit pointer mask output by the GC program prog.
+ // size the size of the region described by prog, in bytes.
+ // The resulting bitvector will have no more than size/goarch.PtrSize bits.
+-internal static unsafe bitvector progToPointerMask(ж<byte> prog, uintptr size) {
++internal static bitvector progToPointerMask(ж<byte> prog, uintptr size) {
+     var n = (size / (uintptr)goarch.PtrSize + 7) / 8;
+-    var x = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(persistentalloc(n + 1, 1, Ꮡmemstats.Ꮡbuckhash_sys)), (int)(n + 1)));
++    var x = @unsafe.Pointer.View<byte>(persistentalloc(n + 1, 1, Ꮡmemstats.Ꮡbuckhash_sys), 0, (nint)(n + 1), 1073741824);
+     x[len(x) - 1] = 0xa1; // overflow check sentinel
+     n = runGCProg(prog, Ꮡ(x, 0));
+     if (x[len(x) - 1] != 0xa1) {
+diff -ruN --strip-trailing-cr base/src/core/runtime/runtime.csproj cut/src/core/runtime/runtime.csproj
+--- base/src/core/runtime/runtime.csproj
++++ cut/src/core/runtime/runtime.csproj
+@@ -101,7 +101,7 @@
+   </Target>
+ 
+   <PropertyGroup>
+-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
++    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+   </PropertyGroup>
+ 
+   <!-- NuGet packaging metadata for library projects; packing itself is explicit ('dotnet pack' via push-nuget.ps1), so plain builds emit no .nupkg -->
+diff -ruN --strip-trailing-cr base/src/core/runtime/windows/os_windows.cs cut/src/core/runtime/windows/os_windows.cs
+--- base/src/core/runtime/windows/os_windows.cs
++++ cut/src/core/runtime/windows/os_windows.cs
+@@ -560,7 +560,7 @@
+ // ASCII path.
+ //
+ //go:nosplit
+-internal static unsafe int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
++internal static int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
+     uintptr _STD_OUTPUT_HANDLE = /* ^uintptr(10) */ unchecked((uintptr)18446744073709551605); // -11
+     uintptr _STD_ERROR_HANDLE = /* ^uintptr(11) */ unchecked((uintptr)18446744073709551604);  // -12
+     uintptr handle = default;
+@@ -579,7 +579,7 @@
+         break;
+     }}
+     var isASCII = true;
+-    var b = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(buf), (int)(n)));
++    var b = @unsafe.Pointer.View<byte>(buf, 0, n, 1073741824);
+     foreach (var (_, x) in range(b)) {
+         if (x >= 0x80) {
+             isASCII = false;
+@@ -607,13 +607,13 @@
+ 
+ // writeConsole writes bufLen bytes from buf to the console File.
+ // It returns the number of bytes written.
+-internal static unsafe nint writeConsole(uintptr handle, @unsafe.Pointer buf, int32 bufLen) {
++internal static nint writeConsole(uintptr handle, @unsafe.Pointer buf, int32 bufLen) {
+     const uint16 surr2 = /* (surrogateMin + surrogateMax + 1) / 2 */ 56320;
+ 
+     // Do not use defer for unlock. May cause issues when printing a panic.
+     @lock(Ꮡutf16ConsoleBackLock);
+ 
+-    ref var b = ref heap<slice<byte>>(new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(buf), (int)(bufLen))), out var Ꮡb);
++    ref var b = ref heap<slice<byte>>(@unsafe.Pointer.View<byte>(buf, 0, bufLen, 1073741824), out var Ꮡb);
+     @string s = ~Ꮡb.Reinterpret<slice<byte>, @string>();
+ 
+     var utf16tmp = utf16ConsoleBack[..];
+# run artifact, body omitted: reports/conversion_report.html
+# run artifact, body omitted: stdlib_conversion_progress.txt
