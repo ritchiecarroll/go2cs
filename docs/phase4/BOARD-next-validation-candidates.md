@@ -39443,4 +39443,63 @@ struct reached through a local func type at all, so ONE name is refused too.
   later: lift a func type's anonymous parameter and result structs as the var's own struct is lifted, then add the
   Signature arm to `aliasPerNameLifts` in step.
 
+## 2026-11-15 — P5 (option 2; closes the 2026-11-15 row "a write at the ADDRESS of a named array that has not been used yet is lost"; COORD rulings 01:19Z and 08:54Z): the publish of a named array's holder is a compare-and-swap — DONE
+
+**What was wrong.** The publish of a named array's backing into a pointer box's storage (`publishArrayBacking` in
+golib's `ж.cs`: the gate of the element door `&p[i]`, and since option 1 of the two pin paths) filled a boxed
+copy of the wrapper and then copied the whole wrapper back, under the box's lock. The wrapper's own getter fills
+the same storage with no lock, and a second box over the same storage holds a lock of its own. A goroutine that
+first used the variable between the gate's read and its write had its holder replaced, and the elements it had
+written were lost without a panic. Go has one array.
+
+**What changed.** golib only, `ж.cs`, `ж.Contracts.cs`, `GoReflect.PointerConversions.cs`. The publish stores
+the copy's holder into the storage with a compare-and-swap against the empty slot; a publish that finds another
+holder reads the storage again and publishes that one. The swap is taken where the wrapper is one reference word,
+which both wrappers that reach the gate are; a wrapper of another shape would keep the plain write, and none
+exists. A third site with the same plain write was found by reading: reflect's pointer conversion between two
+names of one array type. It goes through the same gate by one internal member on the box. No public surface, no
+converter change, no emitted line moves, no instance state on a box.
+
+**Red first** (`src/tests/GolibTests/NamedArrayHolderPublishRaceTests.cs`; linux/amd64, Release, 4 processors;
+two threads released together, 200,000 fresh arrays an arm; "lost" counts the arrays where one side's write was
+not read back):
+
+| arm | at `8536236dd6` | with the change |
+|:--|:--|:--|
+| control: the old publish by hand against a direct first use | 81,465 lost | 62,831 lost (it must lose: where it does not, the arms report Inconclusive) |
+| a direct first use against the element door | 47,334 lost | 0 |
+| a direct first use against the pin by number | 15,878 lost | 0 |
+| a direct first use against the raw pointer | 32,698 lost | 0 |
+| two element references of one element | 78,243 lost | 0 |
+| a direct first use against reflect's pointer conversion | 6,735 lost | 0 |
+| two field references of one field (a control) | 0 lost | 0 |
+
+**Prediction missed.** The two-field-references arm was predicted red and read 0. A field's address is one cached
+box for each parent box and field, so its two takes share one lock. The option 1 entry above and design 14.3 say
+"a field or element reference is a box minted per take"; that holds for elements only. Design 17.2 carries the
+correction.
+
+**Four more arms.** Each door alone still publishes. A publish after a whole assignment follows the storage. Two
+pins by number of one array on two threads, named and unnamed (green with the plain write as well). Every named
+array go2cs-gen wrote in the converted `runtime` is one reference word (8 wrappers), so a change of the
+generator's layout reads red and does not return the publish to the plain write silently.
+
+**Planted regressions,** each restored byte-identical by hash. The publish forced onto the plain write reds
+exactly the five racing arms (44,698, 46,668, 42,426, 77,670 and 204 lost). Reflect's site put back as it was
+reds the reflect arm alone (6,320 lost).
+
+**Readings.** Whole GolibTests, linux/amd64 Release: 2849 passed, 0 failed, 49 skipped (2838 / 0 / 49 at `8536236dd6`, so the eleven
+new arms and nothing else). Code: `1ecae62963`. The local gates and the hosted set are scored in the announce,
+not here.
+
+**The row "no arm takes views of one Go value on two threads"** (2026-11-15, door A's review) named this seat
+for its arm. The two-pin arm covers the pin of an array taken on two threads (`pinnedArrayData`), and reads
+green. A view of a Go value that is not an array, taken on two threads (`EnsureStableAddress`), still has no
+arm: that row stays OPEN for it.
+
+**Not this seat.** A named array ASSIGNED whole after its address was taken keeps its old pin (the 2026-11-15
+row "assigning a whole array gives the variable new storage", another lane's cut).
+
+— P5 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

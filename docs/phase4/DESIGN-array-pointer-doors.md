@@ -1410,3 +1410,89 @@ Go does (`door-b-1115/rprobe/`).
   splits the expression today; nothing here tests one that would.
 - The V3 fast path decides "C memory" by the pointer keeping nothing and the registry not knowing the number.
   A number that named Go storage which has since moved or died is outside every door, as 13.4 says.
+
+## 17. Amendment 2026-11-15 (P5): the publish of a named array's holder is a compare-and-swap (option 2)
+
+This is the first item of 14.3, ruled the seat after door B (01:19Z) and accepted as planned (08:54Z). golib
+only: no public surface, no converter change, no emitted line moves. Code: `1ecae62963`.
+
+### 17.1 What was wrong, and the change
+
+The wrapper go2cs-gen writes for `type small [8]byte` holds one field, a holder, and its own getter fills that
+field on first use with an interlocked compare-and-swap. That half was already right. The plain write was
+golib's: `publishArrayBacking`, the gate of the element door `&p[i]` and, since section 14, of the two pin
+paths, filled a boxed copy of the wrapper and then copied the whole wrapper back over the box's storage. It did
+so under the box's lock, and the lock covers the publishes of that one box. The getter takes no lock. A
+goroutine that first used the variable directly, between the gate's read of the storage and its write, had the
+holder it had just installed replaced by the copy's, and every element it had written through its own holder
+was lost without a panic. Go has one array.
+
+The gate now stores the copy's holder into the storage with a compare-and-swap against the empty slot. A
+publish that finds another holder there reads the storage again and publishes that one; the copy's own backing
+was reachable from nowhere else. The swap is taken where the wrapper is exactly one reference word
+(`s_arrayHolderIsOneWord`: the size of a pointer, and holding a reference), which both wrapper shapes that reach
+the gate are: the named array, and the array-view wrapper over one (`type pallocBits pageBits`). A wrapper of
+any other shape would keep the plain write. None exists, and a GolibTests arm reads the shape of every such
+wrapper in the converted `runtime` so that a change of the generator's layout is a red test and not a silent
+return to the plain write.
+
+A third site made the same plain write and was found by reading, not by a test: reflect's pointer conversion
+between two names of one array type (`GoReflect.TryConvertPointer`) touched the length of a copy and wrote the
+copy back. It now reads the pointee through the same gate, by one internal member on the box
+(`IGoReflectBox.ReadBoxSlotPublished`).
+
+### 17.2 A correction to 14.3
+
+14.3 says: "A field or element reference is a box minted per take. Two takes of one field's address on two
+goroutines hold two locks." That is wrong for fields. A field's address is one cached box for each pair of
+parent box and field (the field-view cache), so two takes share one lock, and two publishes through it never
+overlapped. It is right for elements: `at` mints a box per take, and two element references of one element of
+an array of named arrays hold two locks. I predicted the two-field-references arm red before its first run and
+it read 0 lost of 200,000. The arm stays as a control, and an arm for two element references was added; it
+read 78,243. The text of 14.3 stands as written, with this correction beside it.
+
+### 17.3 Red first, and the readings
+
+`NamedArrayHolderPublishRaceTests` runs two sides on two threads released together, once for each of 200,000
+fresh arrays, and reads both writes back through the variable. A host that cannot run the two sides inside each
+other's window proves nothing, so every arm first asks a control: the old publish written out by hand in the
+test file, against a direct first use. Where the control loses no write the arms report Inconclusive, not
+green. "Lost" counts the arrays where one side's write was not read back.
+
+| arm (linux/amd64, Release, 4 processors) | at `8536236dd6` | with the change |
+|:--|:--|:--|
+| control: the old publish by hand against a direct first use | 81,465 lost | 62,831 lost (it must lose) |
+| a direct first use against the element door | 47,334 lost | 0 |
+| a direct first use against the pin by number | 15,878 lost | 0 |
+| a direct first use against the raw pointer | 32,698 lost | 0 |
+| two element references of one element | 78,243 lost | 0 |
+| a direct first use against reflect's pointer conversion | 6,735 lost | 0 |
+| two field references of one field (a control, 17.2) | 0 lost | 0 |
+| each door alone still publishes | green | green |
+| two pins by number of one array on two threads, named and unnamed | (arm added with the change; 0 and 0 with the plain write) | 0 and 0 |
+| a publish after a whole assignment follows the storage | (arm added with the change) | green |
+| every named array the generator wrote is one reference word | (arm added with the change) | green: 8 wrappers in the converted `runtime` |
+| whole GolibTests | 2838 passed, 0 failed, 49 skipped | 2849 passed, 0 failed, 49 skipped |
+
+Planted regressions, each restored byte-identical by hash. The publish forced onto the plain write reds exactly
+the five racing arms (44,698, 46,668, 42,426, 77,670 and 204 lost, in the table's order) and leaves the other
+six green. Reflect's site put back as it was, with the gate fixed, reds the reflect arm alone (6,320 lost).
+
+The local gates (by-path builds, the repository guards, the converter suite, CNR) are scored in the announce of
+this commit, not here. Nothing here ran on windows or darwin before the hosted runs.
+
+### 17.4 What this leaves
+
+- A named array ASSIGNED whole after its address was taken keeps its old pin (13.1). That is another lane's cut
+  (ruled 03:46Z) and is not touched here. The publish does follow a whole assignment (the arm of 17.3): the gate compares
+  the storage's backing with the one it last published, and a holder already in the storage is the one it
+  adopts.
+- The BOARD row "no arm takes views of one Go value on two threads" (door A's review) named this seat for its
+  arm. The two-pin arm covers the pin of an array taken on two threads and reads green. A view of a Go value
+  that is not an array, taken on two threads, still has no arm.
+- The stress arms race hand-written copies of the generator's wrapper, as every GolibTests class of this
+  record does. What ties them to the generator is the shape arm of 17.1 and the behavioral program
+  `NamedArrayAddressWrite`, which runs the generated wrapper on one thread.
+- The readings are of one host with four processors. An arm that reads 0 lost of 200,000 beside a control that
+  loses tens of thousands is evidence that the window is closed, not a proof; the argument that it is closed is
+  the compare-and-swap in 17.1.
