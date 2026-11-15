@@ -361,7 +361,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
 
 //go:nosplit
 [GoRecv] internal static ж<Δhchan> get(this ref maybeTraceableChan Δp) {
-    return (ж<Δhchan>)(uintptr)(Δp.maybeTraceablePtr.get());
+    return @unsafe.Pointer.To<Δhchan>(Δp.maybeTraceablePtr.get());
 }
 
 // sudog (pseudo-g) represents a g in a wait list, such as for sending/receiving
@@ -1402,8 +1402,8 @@ internal const bool framepointer_enabled = /* GOARCH == "amd64" || GOARCH == "ar
 internal static partial uintptr getcallerfp() {
     var fp = getfp(); // This frame's FP.
     if (fp != 0) {
-        fp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)fp); // The caller's FP.
-        fp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)fp); // The caller's caller's FP.
+        fp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)fp); // The caller's FP.
+        fp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)fp); // The caller's caller's FP.
     }
     return fp;
 }

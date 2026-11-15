@@ -175,7 +175,7 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
     @lock(Ꮡfinlock);
     if (finq == nil || (~finq).cnt == (uint32)len((~finq).fin)) {
         if (finc == nil) {
-            finc = (ж<finBlock>)(uintptr)(persistentalloc(finBlockSize, 0, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
+            finc = @unsafe.Pointer.To<finBlock>(persistentalloc(finBlockSize, 0, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
             finc.Value.alllink = allfin;
             allfin = finc;
             if (finptrmask[0] == 0) {
@@ -247,7 +247,7 @@ internal static void createfing() {
 internal static bool finalizercommit(ж<g> Ꮡgp, @unsafe.Pointer @lock) {
     ref var gp = ref Ꮡgp.Value;
 
-    unlock((ж<mutex>)(uintptr)(@lock));
+    unlock(@unsafe.Pointer.To<mutex>(@lock));
     // fingStatus should be modified after fing is put into a waiting state
     // to avoid waking fing in running state, even if it is about to be parked.
     ᏑfingStatus.Or(fingWait);
@@ -326,22 +326,22 @@ internal static void runFinalizers() {
                     // memory. That means we have to clear
                     // it before writing to it to avoid
                     // confusing the write barrier.
-                    ((ж<array<uintptr>>)(uintptr)(frame)).Value = new uintptr[]{}.array();
+                    (@unsafe.Pointer.To<array<uintptr>>(frame)).Value = new uintptr[]{}.array();
                 }
                 var exprᴛ1 = (~f).fint.Kind();
                 if (exprᴛ1 == abi.Pointer) {
-                    ((ж<@unsafe.Pointer>)(uintptr)(r)).Value = f.Value.arg;
+                    (@unsafe.Pointer.To<@unsafe.Pointer>(r)).Value = f.Value.arg;
                 }
                 else if (exprᴛ1 == abi.Interface) {
-                    var ityp = (ж<interfacetype>)(uintptr)(new @unsafe.Pointer((~f).fint));
-                    ((ж<eface>)(uintptr)(r)).Value._type = (~f).ot.of(ptrtype.ᏑType);
-                    ((ж<eface>)(uintptr)(r)).Value.data = f.Value.arg;
+                    var ityp = @unsafe.Pointer.To<interfacetype>(new @unsafe.Pointer((~f).fint));
+                    (@unsafe.Pointer.To<eface>(r)).Value._type = (~f).ot.of(ptrtype.ᏑType);
+                    (@unsafe.Pointer.To<eface>(r)).Value.data = f.Value.arg;
                     if (len((~ityp).Methods) != 0) {
                         // direct use of pointer
                         // set up with empty interface
                         // convert to interface with methods
                         // this conversion is guaranteed to succeed - we checked in SetFinalizer
-                        ((ж<iface>)(uintptr)(r)).Value.tab = assertE2I(ityp, ((ж<eface>)(uintptr)(r)).Value._type);
+                        (@unsafe.Pointer.To<iface>(r)).Value.tab = assertE2I(ityp, (@unsafe.Pointer.To<eface>(r)).Value._type);
                     }
                 }
                 else { /* default: */

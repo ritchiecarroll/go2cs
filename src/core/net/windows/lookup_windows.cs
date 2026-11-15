@@ -229,12 +229,12 @@ internal static (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, context.
                 @unsafe.Pointer addr = ((@unsafe.Pointer)(uintptr)((~result).Addr));
                 var exprᴛ1 = (~result).Family;
                 if (exprᴛ1 == syscall.AF_INET) {
-                    var a = ((ж<syscall.RawSockaddrInet4>)(uintptr)(addr)).of(syscall.RawSockaddrInet4.ᏑAddr).slice();
+                    var a = (@unsafe.Pointer.To<syscall.RawSockaddrInet4>(addr)).of(syscall.RawSockaddrInet4.ᏑAddr).slice();
                     addrs = append(addrs, new IPAddr(IP: copyIP(a)));
                 }
                 else if (exprᴛ1 == syscall.AF_INET6) {
-                    var a = ((ж<syscall.RawSockaddrInet6>)(uintptr)(addr)).of(syscall.RawSockaddrInet6.ᏑAddr).slice();
-                    @string zone = zoneCache.name((nint)((ж<syscall.RawSockaddrInet6>)(uintptr)(addr)).of(syscall.RawSockaddrInet6.ᏑScope_id).Value);
+                    var a = (@unsafe.Pointer.To<syscall.RawSockaddrInet6>(addr)).of(syscall.RawSockaddrInet6.ᏑAddr).slice();
+                    @string zone = zoneCache.name((nint)(@unsafe.Pointer.To<syscall.RawSockaddrInet6>(addr)).of(syscall.RawSockaddrInet6.ᏑScope_id).Value);
                     addrs = append(addrs, new IPAddr(IP: copyIP(a), Zone: zone));
                 }
                 else { /* default: */
@@ -347,11 +347,11 @@ Err: "unknown network"u8, Name: network + "/"u8 + service))));
         @unsafe.Pointer addr = ((@unsafe.Pointer)(uintptr)((~result).Addr));
         var exprᴛ2 = (~result).Family;
         if (exprᴛ2 == syscall.AF_INET) {
-            var a = (ж<syscall.RawSockaddrInet4>)(uintptr)(addr);
+            var a = @unsafe.Pointer.To<syscall.RawSockaddrInet4>(addr);
             return ((nint)syscall.Ntohs(a.Port), default!);
         }
         if (exprᴛ2 == syscall.AF_INET6) {
-            var a = (ж<syscall.RawSockaddrInet6>)(uintptr)(addr);
+            var a = @unsafe.Pointer.To<syscall.RawSockaddrInet6>(addr);
             return ((nint)syscall.Ntohs(a.Port), default!);
         }
 
