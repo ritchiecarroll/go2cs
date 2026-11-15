@@ -31,19 +31,34 @@
 // The CLR's semaphore keeps what the protocol needs: release from any thread (Go allows unlock on a
 // different goroutine), a release that finds no waiter is kept rather than lost, and a second Lock on
 // the same goroutine blocks, matching Go's self-deadlock. A kept wakeup only ever makes a later waiter
-// re-check `state` once, never acquire a held lock, and Unlock keeps at most one (see Unlock). Wakeups
-// follow the semaphore's monitor order, and a woken waiter competes with newcomers for the free lock,
-// as in Go's normal mode; Go's starvation mode is not reproduced. See runtime_impl.cs for the shared
-// rationale.
+// re-check `state` once, never acquire a held lock. Unlock sends none while it can see one kept (see
+// Unlock); two Unlocks that both see none can leave two, and a second one costs one more re-check.
+// Wakeups follow the semaphore's monitor order, and a woken waiter competes with newcomers for the free
+// lock, as in Go's normal mode; Go's starvation mode is not reproduced. See runtime_impl.cs for the
+// shared rationale.
 //
 // A COPY of a Mutex is a separate mutex, as in Go: it copies the state word, so a copy of a locked
 // mutex is locked, and a copy of an idle mutex is a free mutex with no queue. Go's vet forbids the copy
-// ("must not be copied after first use") but its bytes work, and so do these. One copy differs: a
-// mutex copied WHILE a goroutine waits on it carries the queue's handle, and until that queue empties
-// a waiter of the copy can take a wakeup meant for the original, re-check its own state and wait
-// again, which leaves the original's waiter asleep. In Go the two wait on different addresses. That
-// copy reads the two words while other goroutines write them. BOARD, W9a.
-using System.Collections.Concurrent;
+// ("must not be copied after first use") but its bytes work, and so do these.
+//
+// WHERE THIS DIFFERS FROM GO, each stated and none cured (BOARD, W9a):
+// - A mutex copied WHILE a goroutine waits on it carries the queue's handle. Until that queue empties,
+//   a waiter of the copy joins the original's queue and can take a wakeup meant for the original,
+//   re-check its own state and wait again, which leaves the original's waiter asleep. In Go the two
+//   wait on different addresses. That copy reads the two words while other goroutines write them.
+// - A Mutex must start as ZEROED memory, as Go's must. A handle the mutex never wrote is harmless only
+//   while it names no queue: gateOf replaces it. One that happens to name a LIVE queue (bytes left in
+//   recycled C memory, or the stale handle of the copy above, once its stripe's 26-bit sequence number
+//   has come round to it) joins an unrelated mutex's queue, with the copy's fault above. A state word
+//   that is neither 0 nor a locked mutex somebody will unlock blocks its first Lock forever, as in Go.
+// - Unlock reads the `sema` word after the swap that unlocks, so a mutex freed by another goroutine the
+//   moment it is unlocked is read after the free. Go's own Unlock does as much: with a waiter recorded,
+//   unlockSlow loads `state` again and semrelease adds to `sema`, both after the unlocking store.
+// - A waiter blocks its OS THREAD in the semaphore, where Go parks a goroutine and frees its M. A
+//   scheduler that parks instead must keep "a wakeup is waiting to be taken" readable by Unlock, which
+//   is the semaphore's CurrentCount here.
+// - Go 1.26 declares sync.Mutex as one field, an internal/sync.Mutex that holds the two words. Reflect
+//   sees `state` and `sema` on sync.Mutex itself here: the same eight bytes, one level flatter.
 using System.Runtime.CompilerServices;
 using System.Threading;
 // Aliased rather than imported wholesale: this file needs exactly three golib types, and a blanket
@@ -86,7 +101,7 @@ internal static partial void fatal(@string s) => FatalReport.Fatal(s, userFault:
 [GoType] partial struct Mutex {
     // Go's layout (internal/sync.Mutex): the lock word and the semaphore word, eight bytes, no managed
     // reference. `state`: 0 unlocked, 1 locked, 2 locked with a waiter possibly blocked. `sema`: the
-    // handle of this mutex's wait queue in s_queues, 0 while no goroutine waits.
+    // handle of this mutex's wait queue (queueOf), 0 while no goroutine waits.
     internal int32 state;
     internal uint32 sema;
 }
@@ -99,81 +114,224 @@ internal static partial void fatal(@string s) => FatalReport.Fatal(s, userFault:
 
 // A mutex's wait queue: the semaphore its waiters block on, the handle the mutex holds for it, and the
 // number of waiters that hold it. A waiter holds the queue from before its first swap of `state` until
-// it has the lock (gateOf, leave), and the queue of a mutex nobody waits on is retired: `waiters` goes
-// from 0 to -1 once and for all, and a retired queue is never handed out again. It is never disposed
-// either, so an Unlock that read the handle just before the retirement releases a semaphore nobody
-// waits on, which is harmless.
+// it has the lock (gateOf, leave). The queue of a mutex nobody waits on is taken out of the table and
+// kept for the next mutex that needs one, which gets it under a NEW handle: a handle read from a mutex
+// before its queue was given up names nothing afterwards. So a contended Lock allocates a queue only
+// while its thread's stripe has no spare one. `handle`, `waiters` and `next` are written under the
+// stripe's lock.
 private sealed class WaitQueue : SemaphoreSlim {
     internal uint32 handle;
     internal int waiters;
+    internal WaitQueue? next;   // the next queue of its bucket, or the next spare one
 
     internal WaitQueue() : base(0) { }
 }
 
-// The wait queues, by handle. A queue is published here BEFORE its handle is written into a mutex, so
-// any thread that reads a handle from a mutex finds its queue, or finds none because it was retired.
-private static readonly ConcurrentDictionary<uint32, WaitQueue> s_queues = new();
+// The table of wait queues is QueueStripes stripes. A handle is its stripe's index in the low StripeBits
+// bits and a sequence number above them, so a handle names its stripe; and a thread installs every queue
+// it installs in ONE stripe (t_stripe), so threads that contend on different mutexes work in different
+// stripes, and one thread meets the same lock and the same spare queue again and again.
+private const int StripeBits = 6, QueueStripes = 1 << StripeBits;
 
-private static int s_lastQueue;
+// One stripe: its queues, hashed by sequence number and chained through WaitQueue.next, and a few spare
+// queues. Every read and write of a stripe happens under `lock (stripe)`, and that lock is what makes
+// the three compound steps of the protocol atomic: find a queue and count a waiter into it (gateOf),
+// install a queue together with its handle (gateOf), and count the last waiter out and remove the queue
+// (leave).
+private sealed class QueueStripe(uint32 index) {
+    private const int MaxSpare = 4;
 
-// gateOf returns the mutex's wait queue with the caller counted as one of its waiters, installing a
-// queue if the mutex has none (race-safe). The caller gives the queue back with leave. Reached only from
-// a contended Lock: an uncontended Lock/Unlock pair never comes here.
-//
-// While a waiter holds the queue, the mutex's handle cannot change: only a retirement clears it, a
-// retirement needs the count at 0, and a handle whose queue is in the table is never replaced. So an
-// Unlock that follows a waiter's swap of `state` reads that waiter's handle and finds that waiter's queue.
-//
-// A handle with no queue is replaced like a zero one: bytes the mutex never wrote (recycled C memory
-// that was not zeroed), or the handle of a retired queue in a mutex copied while it had waiters. A new
-// handle skips 0 and every handle in use, so the 32-bit counter can wrap. Takes the mutex BY REF: the
-// methods that call it are `ref Mutex` primaries, and the mutex can live where no box reaches it.
-private static WaitQueue gateOf(ref Mutex m) {
-    while (true) {
-        uint32 seen = Volatile.Read(ref m.sema);
+    private WaitQueue?[] m_buckets = new WaitQueue?[16];
+    private int m_queues;
+    private uint32 m_sequence;
+    private WaitQueue? m_spare;
+    private int m_spares;
 
-        if (seen != 0 && s_queues.TryGetValue(seen, out WaitQueue? queue)) {
-            for (int waiters = Volatile.Read(ref queue.waiters); waiters >= 0;) {
-                int found = Interlocked.CompareExchange(ref queue.waiters, waiters + 1, waiters);
+    // Stripes are allocated one after another: the padding keeps two stripes' lock words and fields
+    // off one cache line.
+#pragma warning disable CS0169, CS0414, IDE0051
+    private long m_pad0, m_pad1, m_pad2, m_pad3, m_pad4, m_pad5, m_pad6, m_pad7, m_pad8, m_pad9, m_pad10, m_pad11;
+#pragma warning restore CS0169, CS0414, IDE0051
 
-                if (found == waiters) {
-                    return queue;
-                }
+    private static int bucketOf(uint32 handle, int buckets) => (int)(handle >> StripeBits) & (buckets - 1);
 
-                waiters = found;
+    internal WaitQueue? find(uint32 handle) {
+        for (WaitQueue? queue = m_buckets[bucketOf(handle, m_buckets.Length)]; queue is not null; queue = queue.next) {
+            if (queue.handle == handle) {
+                return queue;
             }
-
-            // Retired between the two reads. Its last waiter is clearing the handle; do the same and
-            // install a new queue.
-            Interlocked.CompareExchange(ref m.sema, 0, seen);
-            continue;
         }
 
-        var created = new WaitQueue { waiters = 1 };
+        return null;
+    }
 
-        do {
-            created.handle = unchecked((uint32)Interlocked.Increment(ref s_lastQueue));
-        } while (created.handle == 0 || !s_queues.TryAdd(created.handle, created));
+    // newHandle returns a handle of this stripe that no queue holds: never 0, and never a handle in use,
+    // so the sequence number can wrap.
+    internal uint32 newHandle() {
+        while (true) {
+            uint32 handle = ++m_sequence << StripeBits | index;
 
-        if (Interlocked.CompareExchange(ref m.sema, created.handle, seen) == seen) {
-            return created;
+            if (handle != 0 && find(handle) is null) {
+                return handle;
+            }
+        }
+    }
+
+    // install puts a queue with one waiter into the table under handle, a spare queue if there is one.
+    internal WaitQueue install(uint32 handle) {
+        WaitQueue? queue = m_spare;
+
+        if (queue is null) {
+            queue = new WaitQueue();
+        } else {
+            m_spare = queue.next;
+            m_spares--;
+
+            // A wakeup sent to the queue after its last waiter left belongs to nobody.
+            while (queue.CurrentCount != 0 && queue.Wait(0)) { }
         }
 
-        // Another thread installed a queue first: give ours back, which retires it, and take theirs.
-        leave(ref m, created);
+        if (++m_queues > m_buckets.Length) {
+            grow();
+        }
+
+        ref WaitQueue? bucket = ref m_buckets[bucketOf(handle, m_buckets.Length)];
+        queue.handle = handle;
+        queue.waiters = 1;
+        queue.next = bucket;
+        bucket = queue;
+        return queue;
+    }
+
+    // retire takes a queue nobody waits on out of the table and keeps it as a spare.
+    internal void retire(WaitQueue queue) {
+        ref WaitQueue? link = ref m_buckets[bucketOf(queue.handle, m_buckets.Length)];
+
+        while (!ReferenceEquals(link, queue)) {
+            link = ref link!.next;
+        }
+
+        link = queue.next;
+        m_queues--;
+        queue.handle = 0;
+        queue.next = null;
+
+        if (m_spares < MaxSpare) {
+            queue.next = m_spare;
+            m_spare = queue;
+            m_spares++;
+        }
+    }
+
+    private void grow() {
+        WaitQueue?[] buckets = new WaitQueue?[m_buckets.Length * 2];
+
+        foreach (WaitQueue? head in m_buckets) {
+            for (WaitQueue? queue = head, next; queue is not null; queue = next) {
+                next = queue.next;
+                ref WaitQueue? bucket = ref buckets[bucketOf(queue.handle, buckets.Length)];
+                queue.next = bucket;
+                bucket = queue;
+            }
+        }
+
+        m_buckets = buckets;
     }
 }
 
-// leave gives back a queue gateOf returned. The last waiter out retires the queue, removes it from the
-// table and writes 0 back into the mutex, so an idle mutex holds no handle. A waiter that arrives
-// between the count reaching 0 and the retirement keeps the queue alive, and retires it when it leaves.
-private static void leave(ref Mutex m, WaitQueue queue) {
-    if (Interlocked.Decrement(ref queue.waiters) != 0 || Interlocked.CompareExchange(ref queue.waiters, -1, 0) != 0) {
-        return;
+private static readonly QueueStripe[] s_stripes = newStripes();
+
+private static QueueStripe[] newStripes() {
+    var stripes = new QueueStripe[QueueStripes];
+
+    for (uint32 i = 0; i < QueueStripes; i++) {
+        stripes[i] = new QueueStripe(i);
     }
 
-    s_queues.TryRemove(new System.Collections.Generic.KeyValuePair<uint32, WaitQueue>(queue.handle, queue));
-    Interlocked.CompareExchange(ref m.sema, 0, queue.handle);
+    return stripes;
+}
+
+private static QueueStripe stripeOf(uint32 handle) => s_stripes[(int)(handle & (QueueStripes - 1))];
+
+// The stripe this thread installs its queues in, given out in turn the first time the thread needs one.
+[System.ThreadStatic] private static QueueStripe? t_stripe;
+
+private static int s_stripeTurn;
+
+// queueOf returns the wait queue a handle names, or null: a handle whose queue was given up, or bytes
+// that were never a handle.
+private static WaitQueue? queueOf(uint32 handle) {
+    QueueStripe stripe = stripeOf(handle);
+
+    lock (stripe) {
+        return stripe.find(handle);
+    }
+}
+
+// gateOf returns the mutex's wait queue with the caller counted as one of its waiters, installing a
+// queue if the mutex has none. The caller gives the queue back with leave. Reached only from a
+// contended Lock: an uncontended Lock/Unlock pair never comes here.
+//
+// While a waiter holds the queue, the mutex's handle cannot change: only leave clears it, and only
+// when it counts the last waiter out; and a handle whose queue is in the table is never replaced. So an
+// Unlock that follows a waiter's swap of `state` reads that waiter's handle and finds that waiter's
+// queue.
+//
+// A queue and its handle are installed together under the stripe's lock, and every reader of the table
+// takes that lock, so a thread that reads a handle from a mutex finds its queue, or finds none because
+// the queue was given up. A handle with no queue is replaced like a zero one: the handle of a queue
+// given up since the read, or bytes the mutex never wrote. Takes the mutex BY REF: the methods that
+// call it are `ref Mutex` primaries, and the mutex can live where no box reaches it.
+private static WaitQueue gateOf(ref Mutex m) {
+    while (true) {
+        uint32 seen = Volatile.Read(ref m.sema);
+        QueueStripe stripe;
+
+        if (seen != 0) {
+            stripe = stripeOf(seen);
+
+            lock (stripe) {
+                if (stripe.find(seen) is { } queue) {
+                    // The second read: the mutex still holds the handle now that the queue is known to
+                    // be in the table, so the queue is this mutex's, and not another's under a handle
+                    // the sequence came round to since the first read.
+                    if (Volatile.Read(ref m.sema) != seen) {
+                        continue;
+                    }
+
+                    queue.waiters++;
+                    return queue;
+                }
+            }
+        }
+
+        stripe = t_stripe ??= s_stripes[(int)((uint)Interlocked.Increment(ref s_stripeTurn) % QueueStripes)];
+
+        lock (stripe) {
+            // A lost CompareAndSwap means another waiter installed a queue, or the queue behind `seen`
+            // was given up, since the read: look again.
+            uint32 handle = stripe.newHandle();
+
+            if (Interlocked.CompareExchange(ref m.sema, handle, seen) == seen) {
+                return stripe.install(handle);
+            }
+        }
+    }
+}
+
+// leave gives back a queue gateOf returned. The last waiter out takes the queue out of the table and
+// writes 0 back into the mutex, so an idle mutex holds no handle. Both happen under the lock gateOf
+// counts under, so no waiter is counted into a queue that is being given up.
+private static void leave(ref Mutex m, WaitQueue queue) {
+    uint32 handle = queue.handle;
+    QueueStripe stripe = stripeOf(handle);
+
+    lock (stripe) {
+        if (--queue.waiters == 0) {
+            stripe.retire(queue);
+            Interlocked.CompareExchange(ref m.sema, 0, handle);
+        }
+    }
 }
 
 // Lock locks m.
@@ -353,6 +511,13 @@ private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Sem
 // swap to 0, so a wakeup it sees is taken by a thread that will see this Unlock. Sending one per Unlock
 // would count up without bound while waiters take the lock on their first swap and nobody blocks.
 //
+// The wakeup is sent outside the stripe's lock, so the queue can be given up, and handed to another
+// mutex, between the lookup and the Release. The wakeup then reaches a spare queue, which drops it when
+// it is next installed, or a waiter of the other mutex, which re-checks its `state` and waits again. No
+// waiter of THIS mutex misses it: a queue is given up only when every waiter that held it has the lock.
+// With a profile rate on, the same late lookup can charge a stamped wait of the other mutex to this
+// unlocker: one misplaced mutex event.
+//
 // A handoff to a stamped waiter records Go's mutex event first, on this unlocker's stack, as
 // semrelease1 does before it readies the waiter. NoInlining for the same reason as Lock: this frame is
 // the mutex event's top frame (Go's sync.(*Mutex).Unlock).
@@ -364,15 +529,15 @@ private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Sem
     // A stamped waiter exists only on a mutex whose queue is installed (Lock stamps after gateOf), so a
     // zero handle needs no lookup. The charge does not wait for a swap that read 2: a woken waiter that
     // has not yet swapped 2 back in is still Go's dequeued waiter, as the stamp rule above states.
+    bool stamped = Volatile.Read(ref WaitStamps.s_outstanding) != 0;
     uint32 handle;
-    if (Volatile.Read(ref WaitStamps.s_outstanding) != 0 && (handle = Volatile.Read(ref m.sema)) != 0 &&
-        s_queues.TryGetValue(handle, out WaitQueue? stamped) &&
-        s_waitStamps.TryGetValue(stamped, out WaitStamps? stamps) && stamps.TryHandoff(out int64 dt)) {
-        runtime_package.GoSyncMutexEvent(dt);
-    }
-    if (old == 2 && (handle = Volatile.Read(ref m.sema)) != 0 &&
-        s_queues.TryGetValue(handle, out WaitQueue? gate) && gate.CurrentCount == 0) {
-        gate.Release();
+    if ((old == 2 || stamped) && (handle = Volatile.Read(ref m.sema)) != 0 && queueOf(handle) is { } gate) {
+        if (stamped && s_waitStamps.TryGetValue(gate, out WaitStamps? stamps) && stamps.TryHandoff(out int64 dt)) {
+            runtime_package.GoSyncMutexEvent(dt);
+        }
+        if (old == 2 && gate.CurrentCount == 0) {
+            gate.Release();
+        }
     }
 }
 
