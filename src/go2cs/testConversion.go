@@ -8481,6 +8481,16 @@ func classAdmitsFailShape(class string) bool {
 // it as one would make it a second way to disclose a failure -- the laundering the ruling forbids.
 const hostFatalClass = "host-fatal"
 
+// hostIdentityClass names a divergence that follows from a property of the HOST the test reads
+// (its name, its frames, its profiler's delivery), not from the converted code. It is the one class
+// that may carry a GoSkipSignature (testDisclosure.GoSkipSignature), the ruling's named home for a
+// Go-side host-data skip.
+const hostIdentityClass = "host-identity"
+
+// goSkipSignatureFloor is the shortest GoSkipSignature the loader accepts: the pin must be a
+// distinctive line of Go's own skip text, never a fragment like "skip" that any skip contains.
+const goSkipSignatureFloor = 16
+
 // hostFatalSkipExpression builds the ONE regexp handed verbatim to both sides. Anchored per name
 // so `TestFoo` cannot withdraw `TestFooBar`, and sorted so the string is stable run to run (a
 // reader comparing two logs should see the same expression, not a map-iteration reshuffle).
@@ -8519,6 +8529,10 @@ func corpusImportPathOf(root, packageDir string) string {
 
 	return filepath.ToSlash(relative)
 }
+
+// proofPagePlatformPattern reads a proof page's platform from the totals line the page writer
+// emits (validationProofPages.go, proofTotalsFormat + " — Go %s, `%s`, converted package").
+var proofPagePlatformPattern = regexp.MustCompile("(?m)^\\*\\*\\d+ matched · \\d+ disclosed\\*\\* — Go [^,]+, `([a-z0-9]+)/[a-z0-9]+`, converted package")
 
 // hostFatalMintViolations enforces the class's mint rule (coordinator ruling, 2026-09-02): a
 // host-fatal entry must NOT name a test that any committed proof page records as a MATCHING
@@ -8578,6 +8592,10 @@ func corpusImportPathOf(root, packageDir string) string {
 // row'") has EXPIRED: runtime/debug is banked on both axes now, so the answer is no longer always
 // that. The qualifier is a schema change and belongs in its own cut; making the vacuity visible is
 // what surfaces whether it is needed and how often, which is why it comes first.
+// That qualifier now exists as testDisclosure.Platforms, and since 2026-11-14 the rule honours it: a
+// page is evidence only about an entry that applies to the page's own platform, read from the page's
+// totals line. An entry scoped away from it is reported unchecked, never refused or cleared by it.
+// First member: internal/synctest's darwin-only TestWaitGroupManyBubbles (the macOS thread cap).
 // The second return names what the rule could NOT decide, and it exists because until 2026-09-06
 // all three of the early returns below produced a bare nil: "I checked and found no agreement" and
 // "I could not check" were the same value, and only one of the three carried a comment saying which
@@ -8646,6 +8664,17 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 		return nil, unchecked
 	}
 
+	// The page's own platform, from the totals line the page writer emits (validationProofPages.go):
+	// "**N matched · M disclosed** — Go <version>, `<goos>/<goarch>`, converted package". A page is
+	// one platform's record, so it is evidence only about an entry that applies to that platform. An
+	// entry scoped away from the page's platform (testDisclosure.Platforms) withdraws nothing there,
+	// so the page cannot refuse it, and it cannot clear it either: the entry is reported unchecked,
+	// naming both platforms. A page whose platform cannot be read keeps the refusal (fail safe).
+	pageGOOS := ""
+	if m := proofPagePlatformPattern.FindSubmatch(data); m != nil {
+		pageGOOS = string(m[1])
+	}
+
 	row := regexp.MustCompile("^\\|\\s*`([^`]+)`\\s*\\|([^|]*)\\|([^|]*)\\|")
 	seen := map[string]bool{}
 	for _, line := range strings.Split(string(data), "\n") {
@@ -8656,6 +8685,12 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 		// The name reached the evidence base: whatever the verdict pair says, the rule has
 		// something to decide on and this entry is no longer unexamined.
 		seen[m[1]] = true
+		if scope := disclosures[m[1]].Platforms; pageGOOS != "" && len(scope) > 0 && !scope.includes(pageGOOS) {
+			unchecked = append(unchecked, fmt.Sprintf(
+				"%s: scoped to %s, and %s is the %s record, so it neither refuses nor clears the entry",
+				m[1], strings.Join(scope, ", "), filepath.Base(page), pageGOOS))
+			continue
+		}
 		if strings.TrimSpace(m[2]) == strings.TrimSpace(m[3]) {
 			violations = append(violations, fmt.Sprintf(
 				"%s is disclosed %s, but %s records it as a MATCHING verdict (%s/%s): excluding it "+
@@ -8754,6 +8789,20 @@ func orphanedDisclosures(disclosures map[string]testDisclosure, goResults, csRes
 
 	for name, disclosure := range disclosures {
 		if csResults[name] != "pass" {
+			continue
+		}
+
+		// A converted-side pass is a GoSkipSignature entry's LIVE shape, so where the Go side skipped
+		// the entry is doing its job (or is a mismatch the matcher already names), not stale. Where Go
+		// passes too it is idle here and reported like any other.
+		if disclosure.GoSkipSignature != "" && goResults[name] == "skip" {
+			continue
+		}
+
+		// A SkipEitherSide entry pins a host that sometimes skips on either side, so pass/pass is its
+		// healthy reading, not a sign it is stale; reported on most runs, the line would teach readers to
+		// ignore the report. Its retirement is read at a rebank instead (the entry's history says when).
+		if disclosure.SkipEitherSide && goResults[name] == "pass" {
 			continue
 		}
 
@@ -8872,6 +8921,34 @@ type testDisclosure struct {
 	// while the converted side could not is a real divergence, and pinning it is exactly what
 	// this field must never launder. Empty for every disclosure that is not host-conditional.
 	HostConditionalSignature string `json:"hostConditionalSignature,omitempty"`
+
+	// GoSkipSignature unlocks the one shape pinned on the GO side: Go=skip / C#=pass, admitted only
+	// when Go's OWN skip output for the test contains it (ruling R1 of
+	// docs/phase4/DESIGN-comparator-arms.md, inside PLAN-rebank-1-26-10-3 §4: a Go skip on a
+	// host-DATA predicate the converted side legitimately does not share).
+	//
+	// 2026-11-14: the member this field was first written for, internal/trace's TestTraceCPUProfile,
+	// was read as Go's profiler starving while the converted side's sampler did not. That premise is
+	// false: both sides build and run the same native Go program (testTraceProg), so either side can
+	// skip, and that test carries SkipEitherSide below.
+	//
+	// The loader's guards are the safety argument (see goSkipSignatureRefusal): host-identity only,
+	// never beside HostConditional (the two tolerate opposite halves and together would admit
+	// Go=fail), and a distinctive pin of at least goSkipSignatureFloor characters. Go=fail / C#=pass
+	// stays a strict mismatch whatever the entry says. The C# Signature may be empty on such an entry,
+	// and only there: in this shape the converted side passes and prints nothing to pin, so its pin is
+	// the pass itself, and any C# fail or skip is a mismatch. Empty for every other disclosure.
+	GoSkipSignature string `json:"goSkipSignature,omitempty"`
+
+	// SkipEitherSide extends a GoSkipSignature entry to the mirror shape, Go=pass / C#=skip, pinned on
+	// the CONVERTED side's skip output carrying the same Go text. It is for a test whose verdict is
+	// decided by a native Go subprocess that BOTH sides build and run, so the skip is the host's on
+	// either side and the converted code is not in the path: internal/trace's TestTraceCPUProfile
+	// subtests, where the native cpu-profile testprog sometimes records no sample while tracing on
+	// macOS. The pin is Go's own t.Skip text, which the converted test prints unchanged. Any other skip
+	// text, a fail, or a skip on both sides stays what it was. Refused without a GoSkipSignature.
+	// pass/pass is such an entry's healthy reading, so orphanedDisclosures does not report it.
+	SkipEitherSide bool `json:"skipEitherSide,omitempty"`
 
 	// Want, Reading and Plan carry the DEFERRED class's contract (see deferredClass below). They
 	// are what makes a deferred entry a commitment rather than an excuse, and the loader refuses a
@@ -9121,9 +9198,13 @@ func (d testDisclosure) reasonLabel() string {
 // signatureMatches reports whether the C# side's terminal output carries what the entry pins: a plain
 // entry's signature anywhere in the log, exactly as before; a two-half entry's EVERY signature, each in
 // a record of its own when the host's record list is present, and in the whole log otherwise.
+//
+// An EMPTY signature matches nothing. The loader admits one only on a host-fatal entry (no verdict on
+// either side) and beside a GoSkipSignature, whose one shape has the converted side passing; there a
+// substring test would match every failure and disclose any C# fail as pinned.
 func signatureMatches(name string, disclosure testDisclosure, csOutput string, csRecords map[string]testRecords) bool {
 	if len(disclosure.Halves) == 0 {
-		return strings.Contains(csOutput, disclosure.Signature)
+		return disclosure.Signature != "" && strings.Contains(csOutput, disclosure.Signature)
 	}
 
 	if records, ok := csRecords[name]; ok && records.Present {
@@ -9273,12 +9354,20 @@ func readTestDisclosureManifest(outputPath string) (map[string]testDisclosure, [
 
 	disclosures := make(map[string]testDisclosure, len(manifest.Disclosures))
 	for _, disclosure := range manifest.Disclosures {
+		// The Go-side skip pin's guards come first, so a two-half entry carrying one is refused by
+		// them rather than read past.
+		if err := goSkipSignatureRefusal(disclosure); err != nil {
+			return nil, nil, err
+		}
+
 		// The signature requirement is CLASS-AWARE, and hostFatalClass is the one exemption: its
 		// test is withdrawn from both command lines and produces no verdict on either side, so
 		// there is no captured output for a signature to pin. Requiring one would mean inventing a
 		// string nothing can ever match -- worse than useless, because it would read as a pin.
 		// Every other class keeps the requirement: the signature IS the integrity guard that stops
-		// a disclosure absorbing a regression beyond the documented divergence.
+		// a disclosure absorbing a regression beyond the documented divergence. An entry carrying a
+		// GoSkipSignature may leave it empty too: its one shape has the converted side passing, which
+		// prints nothing to pin, and an empty signature matches nothing (signatureMatches).
 		if len(disclosure.Halves) > 0 {
 			if err := validateDisclosureHalves(disclosure); err != nil {
 				return nil, nil, err
@@ -9287,8 +9376,8 @@ func readTestDisclosureManifest(outputPath string) (map[string]testDisclosure, [
 			if disclosure.Name == "" || disclosure.Class == "" || disclosure.Reason == "" {
 				return nil, nil, fmt.Errorf("disclosure entries require name, class, and reason: %+v", disclosure)
 			}
-			if disclosure.Signature == "" && disclosure.Class != hostFatalClass {
-				return nil, nil, fmt.Errorf("disclosure entries require a signature except for %s: %+v", hostFatalClass, disclosure)
+			if disclosure.Signature == "" && disclosure.Class != hostFatalClass && disclosure.GoSkipSignature == "" {
+				return nil, nil, fmt.Errorf("disclosure entries require a signature except for %s or beside a goSkipSignature: %+v", hostFatalClass, disclosure)
 			}
 		}
 
@@ -9352,6 +9441,35 @@ func readTestDisclosureManifest(outputPath string) (map[string]testDisclosure, [
 	}
 
 	return disclosures, manifest.Notes, nil
+}
+
+// goSkipSignatureRefusal holds a GoSkipSignature to its guards (testDisclosure.GoSkipSignature), and
+// is nil for an entry that carries none. A two-half entry has no top-level class, so it is refused by
+// the first guard.
+func goSkipSignatureRefusal(disclosure testDisclosure) error {
+	if disclosure.GoSkipSignature == "" {
+		if disclosure.SkipEitherSide {
+			return fmt.Errorf("disclosure %s sets skipEitherSide without a goSkipSignature; the mirror shape is pinned on the same Go skip text", disclosure.Name)
+		}
+
+		return nil
+	}
+
+	if disclosure.Class != hostIdentityClass {
+		return fmt.Errorf("disclosure %s carries a goSkipSignature on class %q; only %s may pin a Go-side skip", disclosure.Name, disclosure.Class, hostIdentityClass)
+	}
+
+	// The two tolerate opposite halves: hostConditional the Go side failing, goSkipSignature the Go
+	// side skipping. Together they would admit a Go failure beside a converted pass.
+	if disclosure.HostConditional != "" {
+		return fmt.Errorf("disclosure %s carries a goSkipSignature beside hostConditional; the two tolerate opposite halves and together would admit Go=fail", disclosure.Name)
+	}
+
+	if length := len(strings.TrimSpace(disclosure.GoSkipSignature)); length < goSkipSignatureFloor {
+		return fmt.Errorf("disclosure %s has a goSkipSignature of %d character(s); it must be a distinctive line of Go's own skip text, at least %d", disclosure.Name, length, goSkipSignatureFloor)
+	}
+
+	return nil
 }
 
 // validateDisclosureRetirement holds one reason's class-bound fields to the rules every disclosure
@@ -9994,10 +10112,10 @@ func recordPinFailure(name string, disclosure testDisclosure, csRecords map[stri
 // record-count pin is out of play, so each disclosure admits by its signature alone. It is the
 // entry point of callers that carry no terminal records.
 func matchTerminalStatuses(names []string, goResults, csResults map[string]string, disclosures map[string]testDisclosure, csOutputs map[string]string) (mismatches, skipped, disclosed, withdrawn []string) {
-	return matchTerminalStatusesWithRecords(names, goResults, csResults, disclosures, csOutputs, nil)
+	return matchTerminalStatusesWithRecords(names, goResults, csResults, disclosures, csOutputs, nil, nil)
 }
 
-func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[string]string, disclosures map[string]testDisclosure, csOutputs map[string]string, csRecords map[string]testRecords) (mismatches, skipped, disclosed, withdrawn []string) {
+func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[string]string, disclosures map[string]testDisclosure, csOutputs map[string]string, csRecords map[string]testRecords, goOutputs map[string]string) (mismatches, skipped, disclosed, withdrawn []string) {
 	// Deepest names classify FIRST: a subtest failure rolls up to its ancestors in BOTH
 	// runtimes, so an ancestor whose Go=pass/C#=fail divergence is PURELY the aggregation of
 	// disclosed descendants — no failure output of its own, no own disclosure entry, at least
@@ -10102,6 +10220,37 @@ func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[s
 			if goOK && !csOK && underDisclosureRoot(name, disclosureRoots) {
 				withdrawn = append(withdrawn, name)
 				continue
+			}
+
+			// The Go-side HOST-DATA SKIP (testDisclosure.GoSkipSignature): Go=skip / C#=pass, pinned on
+			// Go's OWN skip output, the one shape that reads the Go side's text. Only skip/pass reaches
+			// it: Go=fail / C#=pass is never admitted, and a C# side that fails or skips has moved. It
+			// roots no withdrawal, so a C#-only row under the skipped test still compares strictly.
+			//
+			// With SkipEitherSide the mirror shape, Go=pass / C#=skip, is admitted the same way, pinned on
+			// the converted side's skip output: both sides run one native subprocess, so the skip may
+			// land on either. Go=pass / C#=fail is never admitted.
+			if disclosure, ok := disclosures[name]; ok && disclosure.GoSkipSignature != "" && goOK && csOK {
+				skipSide, skipOutput := "", ""
+
+				if goStatus == "skip" && csStatus == "pass" {
+					skipSide, skipOutput = "Go", goOutputs[name]
+				} else if disclosure.SkipEitherSide && goStatus == "pass" && csStatus == "skip" {
+					skipSide, skipOutput = "C#", csOutputs[name]
+				}
+
+				if skipSide != "" {
+					if strings.Contains(skipOutput, disclosure.GoSkipSignature) {
+						disclosed = append(disclosed, name)
+						disclosedNames.Add(name)
+						continue
+					}
+
+					mismatches = append(mismatches, fmt.Sprintf("%s: Go=%q C#=%q (%s's skip output does not carry the disclosed goSkipSignature %q)",
+						name, goStatus, csStatus, skipSide, disclosure.GoSkipSignature))
+					mismatchNames.Add(name)
+					continue
+				}
 			}
 
 			// The THIRD accepted shape: a SOURCE-DEFINED PLATFORM SKIP. Go's own test source
@@ -10638,6 +10787,9 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	csResults := terminalTestResults(csOutput)
 	csOutputs := terminalTestOutputs(csOutput)
 	csRecords := terminalTestRecords(csOutput)
+	// Go's own per-test output is read for ONE purpose: the GoSkipSignature pin, which a Go-side skip
+	// is admitted on (testDisclosure.GoSkipSignature). No other shape reads it.
+	goOutputs := goSideTestOutputs(goOutput)
 	var manifest testManifest
 	var censusGaps []string
 	var runtimeDeclared []string
@@ -10719,7 +10871,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 		result.Errors = append(result.Errors, "census: go test reported tests the manifest does not declare: "+strings.Join(censusGaps, ", "))
 	}
 
-	mismatches, skipped, disclosed, withdrawn := matchTerminalStatusesWithRecords(names, goResults, csResults, disclosures, csOutputs, csRecords)
+	mismatches, skipped, disclosed, withdrawn := matchTerminalStatusesWithRecords(names, goResults, csResults, disclosures, csOutputs, csRecords, goOutputs)
 	mismatches = labelAbandonedTests(mismatches, terminalAbandonedTests(csOutput), options.testDeadline)
 	if len(mismatches) > 0 {
 		result.Matched = false
@@ -11002,6 +11154,25 @@ func terminalTestOutputs(output string) map[string]string {
 		switch event.Action {
 		case "pass", "fail", "skip", "timeout", "infrastructure-error":
 			result[event.Test] = event.Output
+		}
+	}
+	return result
+}
+
+// goSideTestOutputs gathers go test -json's per-test text. Unlike the converted host, go test puts
+// nothing on a terminal event: a test's log lines, its t.Skip text included, arrive as separate
+// "output" events before it, so terminalTestOutputs reads an empty string for every Go test. This
+// joins each test's output events, which is where a GoSkipSignature's pin is found.
+func goSideTestOutputs(output string) map[string]string {
+	result := make(map[string]string)
+	for _, line := range testStreamLines(output) {
+		var event normalizedTestEvent
+		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
+			continue
+		}
+		switch event.Action {
+		case "output", "pass", "fail", "skip", "timeout", "infrastructure-error":
+			result[event.Test] += event.Output
 		}
 	}
 	return result
