@@ -428,3 +428,19 @@ the Roadmap's "Next" lists. Each states a refusal the next release lifts. A vers
 hide the refusal or predict the lift; a version-qualified one ("1.26.11.1 refuses ...") turns a reference page into
 history. Recommendation: keep them, already phase-labelled as Limitations words them, and change each line in the
 same seat that lifts its refusal. FAQ:51 already reads true in both ("refused ... with the phase that covers them").
+
+## 9. Amendment, 2026-11-15: the pass over batch 309's tree (master `0c1d295ea8`)
+
+309 changed twelve visitor pages: README (P4's own Explore lines), Limitations and ConversionStrategies (the cgo
+pin-extent narrowing to three cases), the release-notes draft, and seven reference sub-pages (pointers +491 lines
+for doors B and F1, slices-and-arrays, struct-embedding, interfaces, labels-and-loop-variables, manual-conversions,
+variable-initialization-order).
+- **Scripted, over the visible lines 309 inserted or replaced** (comments stripped, diffed against `b2214e00e4`):
+  process names, TypeScript and sqlite names, internal record paths, exact counts and unplatformed measurements.
+  0 hits; the scan was positive-controlled by a planted line, caught once. Every new "Guarded by" name (8) exists in
+  `src/` at `0c1d295ea8`. repoguard (links, anchors, provenance) is green at 309 by the batch's own battery.
+- **Read:** the new Limitations and ConversionStrategies cgo text states its three open cases in present tense and
+  links Limitations' cgo section; no finding.
+- **The record's findings still stand at 309**, re-read for the ones 309's pages touch: pointers:3114
+  (`TestArrayPointerViewDoor`), ConversionStrategies' index-only `range(s)` (lines moved), slices-and-arrays:183 (the
+  copying span) and :505 (`ref Ꮡt.Value`), manual-conversions:3326 ("now **empty**"). Seat 3 fixes them at 309.
