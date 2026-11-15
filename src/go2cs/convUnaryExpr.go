@@ -557,11 +557,17 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 			_, baseIsIndex := base.(*ast.IndexExpr)
 
 			// A genuine pointer-returning CALL (`getg()`) is a postfix expression `.of(…)` chains off
-			// cleanly; a type-CONVERSION CallExpr (`(*T)(p)`) renders as a C# cast (low precedence) on
-			// which `.of(…)` would mis-bind, so it keeps the `Ꮡ(value)` form (S1 pointer-reinterpret).
+			// cleanly. A type-CONVERSION to a pointer (`(*T)(p)`, `(*T)(unsafe.Pointer(p))`) yields the box
+			// just the same, so its field is taken through that box too; its rendering is made a postfix
+			// operand first (postfixOperand), since a C# cast binds looser than `.of(…)`. It used to keep
+			// the `Ꮡ(value)` form, which boxes a COPY of the struct: every write through `&(*T)(p).f` was
+			// lost -- sqlite's mutex owner stores, libc's pthread owner CAS and ccgo's union writes
+			// `*(*int32)(unsafe.Pointer(&(*TMem)(unsafe.Pointer(p)).Fu)) = n` (sqlite-cs W9b).
 			baseIsCall := false
-			if call, ok := base.(*ast.CallExpr); ok {
-				baseIsCall = !v.callExprIsTypeConversion(call)
+			baseIsConversion := false
+			if call, ok := ast.Unparen(base).(*ast.CallExpr); ok {
+				baseIsConversion = v.callExprIsTypeConversion(call)
+				baseIsCall = !baseIsConversion
 			}
 
 			// A TYPE-ASSERTION base — `&c.(*UDPConn).conn` (net's udpsock_test, reaching the
@@ -590,7 +596,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 				_, baseIsStar = unwrapped.(*ast.StarExpr)
 			}
 
-			if baseIsIdent || baseIsSelector || baseIsCall || baseIsIndex || baseIsStar || baseIsTypeAssert {
+			if baseIsIdent || baseIsSelector || baseIsCall || baseIsConversion || baseIsIndex || baseIsStar || baseIsTypeAssert {
 				// A NAMED pointer type (`type P *T`) is a pointer through its underlying type: its
 				// generated wrapper declares the same `of` a ж<T> does, so the field-ref form applies
 				// unchanged. Matching only *types.Pointer sent `&pp.f` to the struct arm, which
@@ -598,6 +604,10 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 				if ptrType, ok := types.Unalias(v.getType(base, false)).Underlying().(*types.Pointer); ok {
 					if _, ok := ptrType.Elem().Underlying().(*types.Struct); ok {
 						structExpr := v.convExpr(base, nil)
+
+						if baseIsConversion {
+							structExpr = postfixOperand(structExpr)
+						}
 
 						// A pointer *parameter* is deref'd to a value alias (`ref var s = ref Ꮡs.Value`),
 						// so its box is `Ꮡs` — field-ref through the box. A pointer *local* or a
@@ -663,7 +673,8 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 					// In both cases the `Ꮡ(value)` fallback would copy the chain, losing writes (atomic
 					// corruption). (The single-field root `&Δp.scav` is handled directly by the receiver /
 					// param-deref branches above; only the multi-level chain needs this recursion.)
-					if v.exprIsValueFieldOfPointer(selectorExpr.X) || v.exprIsValueFieldOfDerefdPointerRoot(selectorExpr.X) {
+					if v.exprIsValueFieldOfPointer(selectorExpr.X) || v.exprIsValueFieldOfDerefdPointerRoot(selectorExpr.X) ||
+						v.exprIsValueFieldOfPointerConversion(selectorExpr.X) {
 						baseAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 						return baseAddr + step
 					}
@@ -1384,4 +1395,39 @@ func (v *Visitor) parenthesizeConversionBase(base ast.Expr, rendered string) str
 	}
 
 	return "(" + rendered + ")"
+}
+
+// postfixOperand makes a rendered pointer CONVERSION safe to take a member on: a C# cast (`(ж<T>)p`) binds looser
+// than `.of(…)` or `.Ꮡf`, so it is parenthesized; a conversion that renders as a call (`@unsafe.Pointer.To<T>(p)`,
+// `Ꮡt.Reinterpret<A, B>()`) or is already one parenthesized group is returned unchanged.
+func postfixOperand(expr string) string {
+	if strings.HasPrefix(expr, "(") && !isFullyParenthesized(expr) {
+		return "(" + expr + ")"
+	}
+
+	return expr
+}
+
+// exprIsValueFieldOfPointerConversion reports whether expr is a VALUE struct field, at any depth of further value
+// fields, of a pointer CONVERSION: `(*T)(p).in` in `&(*T)(p).in.cnt`. Its address is the conversion's box field-viewed
+// down the chain, so the struct arm takes it through the address-of machinery rather than `Ꮡ(value)`, which boxes a
+// COPY and loses every write through the result (sqlite-cs W9b).
+func (v *Visitor) exprIsValueFieldOfPointerConversion(expr ast.Expr) bool {
+	for {
+		sel, ok := ast.Unparen(expr).(*ast.SelectorExpr)
+		if !ok {
+			return false
+		}
+
+		if selection := v.info.Selections[sel]; selection == nil || selection.Kind() != types.FieldVal {
+			return false
+		}
+
+		if pointerToStruct(v.getType(sel.X, false)) {
+			call, ok := ast.Unparen(sel.X).(*ast.CallExpr)
+			return ok && v.callExprIsTypeConversion(call)
+		}
+
+		expr = sel.X
+	}
 }

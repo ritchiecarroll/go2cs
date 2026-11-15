@@ -3072,6 +3072,35 @@ __ccgo_ptr(bp))).Fpgno = pgno`). (Guarded by the `ExplicitDerefConversionStore` 
 test: the struct field store, op-assign and method call, the array element store and op-assign,
 each beside the implicit form as its control.)
 
+## The address of a field reached through a pointer conversion is the field's own address
+`&(*T)(p).f` is the address of field `f` inside the memory `p` points at. It renders as the
+conversion followed by the field-address accessor, the same form a pointer-returning call takes
+(`&mk().f` is `mk().Ꮡf`):
+
+<!-- source: src/tests/Behavioral/AddressOfFieldThroughConversion/main.go:39 -->
+```go
+	atomic.StoreInt32(&(*rec)(gp).id, 3)
+```
+<!-- source: src/tests/Behavioral/AddressOfFieldThroughConversion/main.cs.target:29 -->
+```csharp
+    atomic.StoreInt32(@unsafe.Pointer.To<rec>(gp).Ꮡid, 3);
+```
+A parenthesized operand keeps its parentheses, `(@unsafe.Pointer.To<rec>(gp)).Ꮡid`; a field of a
+value field chains the accessor, `@unsafe.Pointer.To<outer>(op).Ꮡin.Ꮡcnt`; and a conversion
+between two named pointer types takes the managed reinterpret, `Ꮡh.Reinterpret<rec2, rec>().Ꮡcnt`.
+
+**Why.** The form this replaces was `Ꮡ(<conversion>.Value.f)`. The address-of builtin takes its
+argument by value and boxes a copy, so every write through the result was lost, and the result was
+never the same pointer as the field's address. sqlite's mutex owner checks
+(`atomic.StoreInt32(&(*mutex)(unsafe.Pointer(m)).id, tls.ID)`), libc's pthread mutex owner and
+count, and ccgo's union writes all take this shape; in the standard library it is
+`internal/abi`'s `Uncommon()` and the linux/amd64 signal context. <!-- 2026-11-15, sqlite-cs wall W9b. Found by a recursive-mutex probe whose owner id never reached the mutex. -->
+(Guarded by the `AddressOfFieldThroughConversion` behavioral output test, over the Go heap: an
+atomic store, a union write, a kept address compared with `&g.id`, a parenthesized CAS, a nested
+field, a named pointer conversion, and a pointer-returning call as the control; and by
+`AddressOfFieldThroughConversionNative`, linux only, which runs the first four over pages the
+kernel owns.)
+
 ## `unsafe.Pointer(p)` on a pointer PARAMETER renders the box, never a deref
 A pointer parameter is emitted as the box `ж<T> Ꮡp` plus a deref'd VALUE alias
 (`ref var p = ref Ꮡp.DerefOrNull()`; the strict `ref Ꮡp.Value` when this rule was written). Taking its address through
