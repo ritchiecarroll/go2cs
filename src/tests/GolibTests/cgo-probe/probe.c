@@ -225,11 +225,11 @@ GO2CS_PROBE_EXPORT void go2cs_probe_release(void *pointer)
 
 // cgo Phase 3 increment 3.2's first reds (docs/phase4/DESIGN-cgo-phase3-marshaling.md section 6): C memory that Go
 // reads. A node holds a pointer field, as addrinfo does; the address is a struct of scalars, as sockaddr_in is.
-struct go2cs_probe_node
+struct go2cs_probe_entry
 {
     int family;
     char *name;
-    struct go2cs_probe_node *next;
+    struct go2cs_probe_entry *next;
 };
 
 struct go2cs_probe_address
@@ -240,10 +240,10 @@ struct go2cs_probe_address
 };
 
 // A two-node list in C memory: (2, "a") then (10, "b").
-GO2CS_PROBE_EXPORT struct go2cs_probe_node *go2cs_probe_list(void)
+GO2CS_PROBE_EXPORT struct go2cs_probe_entry *go2cs_probe_list(void)
 {
-    struct go2cs_probe_node *second = calloc(1, sizeof *second);
-    struct go2cs_probe_node *first = calloc(1, sizeof *first);
+    struct go2cs_probe_entry *second = calloc(1, sizeof *second);
+    struct go2cs_probe_entry *first = calloc(1, sizeof *first);
     char *a = calloc(2, 1);
     char *b = calloc(2, 1);
 
@@ -259,11 +259,11 @@ GO2CS_PROBE_EXPORT struct go2cs_probe_node *go2cs_probe_list(void)
 }
 
 // Releases a list go2cs_probe_list made.
-GO2CS_PROBE_EXPORT void go2cs_probe_list_release(struct go2cs_probe_node *node)
+GO2CS_PROBE_EXPORT void go2cs_probe_list_release(struct go2cs_probe_entry *node)
 {
     while (node)
     {
-        struct go2cs_probe_node *next = node->next;
+        struct go2cs_probe_entry *next = node->next;
         free(node->name);
         free(node);
         node = next;

@@ -27,15 +27,15 @@ char *go2cs_probe_log_new(void);
 void go2cs_probe_log_put(char *log, int value);
 void go2cs_probe_release(void *pointer);
 
-struct go2cs_probe_node
+struct go2cs_probe_entry
 {
     int family;
     char *name;
-    struct go2cs_probe_node *next;
+    struct go2cs_probe_entry *next;
 };
 
-struct go2cs_probe_node *go2cs_probe_list(void);
-void go2cs_probe_list_release(struct go2cs_probe_node *node);
+struct go2cs_probe_entry *go2cs_probe_list(void);
+void go2cs_probe_list_release(struct go2cs_probe_entry *node);
 void *go2cs_probe_address(void);
 */
 import "C"
@@ -358,7 +358,7 @@ func main() {
 		buf := C.malloc(64)
 		defer C.free(buf)
 		mem := unsafe.Slice((*byte)(buf), 64)
-		r := (*C.struct_go2cs_probe_node)(unsafe.Pointer(&mem[0]))
+		r := (*C.struct_go2cs_probe_entry)(unsafe.Pointer(&mem[0]))
 		fmt.Println("s6slice", C.go2cs_probe_same(unsafe.Pointer(r)) == buf)
 	case "caddtyped":
 		p := C.malloc(16)
