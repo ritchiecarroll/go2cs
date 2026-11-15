@@ -273,6 +273,36 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 		})
 	}
 
+	// A defined type over a named struct (`type GUID windows.GUID`) is laid out by go2cs-gen as a wrapper of its base,
+	// forwarding the base's fields, so its layout IS the base's: it is held inline exactly when its base is, and never on
+	// its own (go-winio's pkg/guid, COORD 2026-11-15 01:19Z). A face its uses spell against it is a face on the base's
+	// layout, so a local base answers for it; a foreign base is that package's decision, read from its record.
+	definedOver := definedOverNamedStructs(files, fset, pkg, info)
+
+	for changed := true; changed; {
+		changed = false
+
+		for key, over := range definedOver {
+			baseKey, _ := inlineTypeKey(over.base)
+
+			if face, found := faces[key]; found && over.base.Obj().Pkg() == pkg {
+				if _, has := faces[baseKey]; !has {
+					faces[baseKey] = face
+					changed = true
+				}
+			}
+		}
+	}
+
+	// A reinterpret of a defined type reinterprets its base's layout: the seed is the base.
+	for i, seed := range seeds {
+		seedKey, _ := inlineTypeKey(seed.t)
+
+		for over, seen := definedOver[seedKey], 0; over != nil && seen < len(definedOver); over, seen = definedOver[mustTypeKey(over.base)], seen+1 {
+			seeds[i].t = over.base
+		}
+	}
+
 	// Every struct type in each seed's closure, and whether the closure is admissible as a whole.
 	candidates := map[string]types.Type{}
 	blockedBy := map[string]string{} // key -> why it stays out
@@ -365,6 +395,8 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 		}
 	}
 
+	a.reconcileDefinedTypes(definedOver, candidates, fset)
+
 	for key, in := range a.admitted {
 		if !in {
 			continue
@@ -456,6 +488,96 @@ func (a *inlineArrayAdmission) keepMixedPairsOut(pairs []inlineReinterpretPair, 
 	}
 
 	return changed
+}
+
+// definedOverType is a local defined type declared over a named struct, and where.
+type definedOverType struct {
+	t    types.Type
+	base *types.Named
+	pos  token.Pos
+}
+
+// definedOverNamedStructs maps each local defined type declared over a named struct (`type T U`, U a non-generic named
+// struct, local or foreign) to that base, by the defined type's key. An alias is the same type and needs no entry.
+func definedOverNamedStructs(files []*ast.File, fset *token.FileSet, pkg *types.Package, info *types.Info) map[string]*definedOverType {
+	definedOver := map[string]*definedOverType{}
+
+	for _, file := range files {
+		if strings.HasSuffix(strings.ToLower(fset.Position(file.Pos()).Filename), "_test.go") {
+			continue
+		}
+
+		ast.Inspect(file, func(n ast.Node) bool {
+			spec, ok := n.(*ast.TypeSpec)
+
+			if !ok || spec.Assign.IsValid() || spec.TypeParams != nil {
+				return true
+			}
+
+			obj, ok := info.Defs[spec.Name].(*types.TypeName)
+
+			if !ok || obj.Pkg() != pkg {
+				return true
+			}
+
+			base, ok := types.Unalias(info.TypeOf(spec.Type)).(*types.Named)
+
+			if !ok || base.TypeArgs().Len() > 0 || base.Obj().Pkg() == nil {
+				return true
+			}
+
+			if _, isStruct := base.Underlying().(*types.Struct); !isStruct {
+				return true
+			}
+
+			if key, ok := inlineTypeKey(obj.Type()); ok {
+				definedOver[key] = &definedOverType{obj.Type(), base, spec.Pos()}
+			}
+
+			return true
+		})
+	}
+
+	return definedOver
+}
+
+// mustTypeKey is inlineTypeKey for a type known to be a keyed named struct.
+func mustTypeKey(t types.Type) string {
+	key, _ := inlineTypeKey(t)
+	return key
+}
+
+// reconcileDefinedTypes gives each local defined type over a named struct its base's answer: held inline when the base
+// is (admitted here, or by its own package's record), kept out with its holders when the base is not. Repeated until
+// stable, since a defined type may be declared over another one.
+func (a *inlineArrayAdmission) reconcileDefinedTypes(definedOver map[string]*definedOverType, candidates map[string]types.Type, fset *token.FileSet) {
+	for pass := 0; pass <= len(definedOver); pass++ {
+		changed := false
+
+		for key, over := range definedOver {
+			baseKey := mustTypeKey(over.base)
+			held := a.admitted[baseKey]
+
+			if over.base.Obj().Pkg() != a.pkg {
+				in, known := a.foreignAdmits(over.base)
+				held = known && in
+			}
+
+			switch {
+			case held && !a.admitted[key]:
+				a.admitted[key] = true
+				candidates[key] = over.t
+				changed = true
+			case !held && a.admitted[key]:
+				a.keepOut(key, fmt.Sprintf("its layout is %s's, whose arrays are not held inline", types.TypeString(over.base, packageQualifier(a.pkg))), fset.Position(over.pos))
+				changed = true
+			}
+		}
+
+		if !changed {
+			return
+		}
+	}
 }
 
 // keepOut removes an admitted struct from the admitted set with its GO2CS2009 warning, and with it every admitted
