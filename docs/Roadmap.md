@@ -161,7 +161,10 @@ did not fit. Neither has a date: completeness comes first.
 It also carries the cgo work under [cgo](#cgo) as "What converts".
 
 **The release after 1.26.11.1** is planned to carry:
-- goroutine scheduling, many goroutines over a few threads ([Performance](#performance));
+- goroutine scheduling, many goroutines over a few threads ([Performance](#performance)), which lands on the Go 1.26
+  line, before the corpus moves to the next Go minor release;
+  <!-- Owner ruling 2026-11-12, given in session to COORD (relayed 20261115T083540Z): M:N lands on the Go 1.26 line,
+       then one Go minor hop; 1.26 patch hops continue meanwhile. -->
 - the next cgo steps ([cgo](#cgo));
 - viewing a Go array through a pointer to an array of another type, when that pointer is kept, unless the SQLite
   program needs it first, in which case it moves into 1.26.11.1;
