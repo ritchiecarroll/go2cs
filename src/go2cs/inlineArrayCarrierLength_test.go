@@ -33,9 +33,19 @@ type Deep struct {
 	X   uint16
 }
 
+// A NAMED inner array keeps its name (P3's review of W15): Go reflects the field as [0]V, not [0][4]uint32.
+type V [4]uint32
+
+type Named struct {
+	Pad [0]V
+	X   uint32
+}
+
 func view(p unsafe.Pointer) *Bitvec { return (*Bitvec)(p) }
 
 func deep(p unsafe.Pointer) *Deep { return (*Deep)(p) }
+
+func named(p unsafe.Pointer) *Named { return (*Named)(p) }
 `
 
 func TestInlineArrayCarrierNamesTheInnerLength(t *testing.T) {
@@ -44,6 +54,7 @@ func TestInlineArrayCarrierNamesTheInnerLength(t *testing.T) {
 	for _, want := range []string{
 		`[GoAlignmentCarrier(typeof(array<array4<uint32>>))]`,
 		`[GoAlignmentCarrier(typeof(array<array2<array3<uint16>>>))]`,
+		`[GoAlignmentCarrier(typeof(array<V>))]`,
 	} {
 		if !strings.Contains(cs, want) {
 			t.Errorf("want %q:\n%s", want, cs)
@@ -54,7 +65,7 @@ func TestInlineArrayCarrierNamesTheInnerLength(t *testing.T) {
 // The same shapes built and run: the layout read (unsafe.Sizeof, unsafe.Offsetof, a view over raw bytes read and
 // written) prints what Go prints. GO2CS_INLINE_BUILD=1 runs it.
 var inlineCarrierLengthModule = map[string]string{
-	"main.go": strings.NewReplacer("package carrier", "package main", `import "unsafe"`, "import (\n\t\"fmt\"\n\t\"unsafe\"\n)").Replace(inlineCarrierLengthSource) + `
+	"main.go": strings.NewReplacer("package carrier", "package main", `import "unsafe"`, "import (\n\t\"fmt\"\n\t\"reflect\"\n\t\"unsafe\"\n)").Replace(inlineCarrierLengthSource) + `
 func main() {
 	var raw [32]byte
 	for i := range raw {
@@ -69,6 +80,10 @@ func main() {
 
 	d := deep(unsafe.Pointer(&raw[16]))
 	fmt.Println(unsafe.Sizeof(*d), unsafe.Alignof(*d), d.X)
+
+	n := named(unsafe.Pointer(&raw[20]))
+	fmt.Println(unsafe.Sizeof(*n), unsafe.Alignof(*n), unsafe.Offsetof(n.X), n.X)
+	fmt.Println(reflect.TypeOf((*Named)(nil)).Elem().Field(0).Type.String(), reflect.TypeOf((*Bitvec)(nil)).Elem().Field(0).Type.String())
 }
 `,
 }
