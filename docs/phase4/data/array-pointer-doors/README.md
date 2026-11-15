@@ -115,6 +115,8 @@ For section 11 of the design. Converters: base = the batch-305 converter; cut = 
 | `door-a-1115/chain/ZzChainProbeTests.cs.txt`, `probe.out` | design 14.4: a scratch GolibTests class (never committed as a test) that advances one pointer N times with `unsafe.Add` over a Go value and over C memory, and its readings: view capacity, bytes kept, the cost of the comparing loop, and `==` after N steps. The last line is the 1,000,000-step comparison it did not return from |
 | `door-a-1115/chain/probe-first.out` | the first form of the probe, with the view taken 4 bytes inside the value: bounded through 61 steps, Go's capacity from 63 |
 | `door-a-1115/chain/reach.txt` | the lines that assign `unsafe.Add`'s result back to its first argument, in the sqlite closure's Go sources and in the standard library at 1.26.11 |
+| `door-a-1115/chain/red-first.out` | design 15: `UnsafeAddChainTests` at the parent commit `70abf5dd5a`: 5 rows green, 9 red, and the two rows that end the test host with a stack overflow, run alone |
+| `door-a-1115/chain/probe-after.out` | design 15: the probe of `probe.out` run again with the change (`fcc2a35455`): bounded at every depth, no bytes kept, `==` returns at 1,000,000 steps |
 
 In the footprint files `base/` and `cut/` stand for the two conversion roots, and `seed/` and `reconvert/` for
 the arm's. `<kit>` in an `.out` file is the scratch directory the program was converted in. The `lazy` program

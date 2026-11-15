@@ -1112,3 +1112,101 @@ guards, the converter suite, CNR) are scored in the announce of this commit, not
 - The linux solution build read red at door A's earlier tip (72 error lines in the 10 windows-native behavioral
   members) and reads the same at master (COORD's control run, 03:58Z). It is a first reading of that leg and is
   not door A's; the windows solution build is the gate.
+
+## 15. Amendment 2026-11-15 (P5): a pointer advanced step by step stays one hop from its Go value
+
+This is the finding of 14.4 and of the BOARD row of this date ("a pointer advanced step by step with
+`unsafe.Add` over a Go value keeps every step"), ruled into .4 as its own golib seat, cut from the lost-write
+seat and before door B (04:39Z). The doors emit nothing here; the section is in this record because door A's
+bound by the Go value (13.2) is one of the three things the chain broke. Code: `fcc2a35455`.
+
+### 15.1 What was wrong, and the change
+
+`unsafe.Add` over a pointer that carries Go storage mints a native box at the new address, and that box retained
+the box the pointer carried (`NativeDerivation.Kept`). The pointer a second `unsafe.Add` receives carries the
+first one's box, so `for ... { p = unsafe.Add(p, 1) }` built a chain one box per step. Three things read the
+chain. The collector kept every box (55 bytes a step). `NativeDerivation.Token`, which a comparison and a hash
+ask, made one call per box and overflowed the stack at 1,000,000 steps. `NativeDerivation.HeldSource`, which a
+view door asks for the Go value's end, stops after 64 boxes, so a view at the walked address took Go's capacity
+and lost the value's end from 63 steps.
+
+The change is in what a derivation retains. A native box that owns no pin holds its source and nothing else:
+the source is what keeps the storage where the box's address says it is. A box derived from such a box now
+retains that box's SOURCE in its place (`INativeRooted.NativeRetainedInItsPlace`, answered by `NativeBox<T>`;
+`Kept` passes over such boxes in a loop). Every step of the walk is then one box from the Go value, and the box
+of the step before is garbage as soon as its pointer is. `Token` is a loop that sums the distances; it was a
+call per box. The 64-box bounds in `HeldSource` and in the dereference census stay as guards.
+
+A box is NOT passed over when it owns a pin (its pin is released when it is collected, so it must be kept),
+when its number is an order token or 0 (there is no address to measure a distance from, and token arithmetic
+has its own route, which mints no box), or when it is any other box kind. The rule sits in `Kept`, so it covers
+every derivation that asks there: `unsafe.Add` in both forms, a typed conversion of a native pointer, a field
+of a struct in native memory at a known Go offset, `unsafe.Slice`, and the view doors' anchors.
+
+golib only (`ж.NativeDerivation.cs`, `ж.NativeBox.cs`, `ж.FieldRefBox.cs`). The interface is internal and the new
+member has a default body. No public surface, no instance state added to a box, no converter change, no emitted
+line moves.
+
+### 15.2 The order token is the same at every step
+
+Asked at 04:39Z: does the order token stay identical however the address was reached? It does, before and
+after. A derived box's token is its source's token plus the distance from the source's address to its own.
+Along a chain that is the head's token plus the sum of the steps, and the sum is the distance from the head to
+the last address, which is what one box retaining the head answers directly. The three ways a walk can end (a
+managed box with an address, a managed box whose number is a token, anything else) each give the same number
+either way.
+
+The arm that holds it walks 1,000 steps over a `[1024]byte` and asserts at EVERY step that the walked pointer's
+token is the token of `&b[k]`, is the token of `unsafe.Add(p, k)` minted in one step, that the walked pointer
+`==` both, hashes with both, and `!=` where it began. It is green at the parent commit and green with the
+change: the identity did not move.
+
+### 15.3 Red first, and the readings
+
+`UnsafeAddChainTests` has 16 rows. Two of them ended the test host at the parent commit (a stack overflow in
+`Token`), so they were run alone there.
+
+| reading (linux/amd64, Release) | at `70abf5dd5a` | with the change |
+|:--|:--|:--|
+| what the pointer's box retains after 2, 10 and 1,000 steps | the box of the step before (3 red) | the element box the walk began at |
+| the box of step 1, after 100 steps and a collection | alive (red) | collected |
+| `==` after 1,000,000 steps | stack overflow, the host ends | equal, one hash, unequal to the next address |
+| a chain of 1,000,000 boxes built link by link, compared | stack overflow, the host ends (104,681 `Token` frames) | equal; its token is the token of the place; `Kept` answers its head |
+| view capacity one byte inside a 16-byte Go value, after 63, 65, 2,001 and 10,001 steps | 1,073,741,824 (4 red) | 15 |
+| a typed walk of two steps from a view that owns its pin | retains the first step's box (red) | retains the view |
+| controls: 1 step; 15.2's arm; capacity after 1 and 61 steps; C memory | 5 green | 5 green |
+| `UnsafeAddChainTests`, 16 rows | 5 green, 9 red, 2 end the host | 16 green |
+| `UnsafeAddCarryTests`, 5 arms (batch 305's) | 5 green | 5 green |
+| whole GolibTests | 2802 passed, 0 failed, 49 skipped | 2818 passed, 0 failed, 49 skipped |
+
+The probe of 14.4, run again with the change (`door-a-1115/chain/probe-after.out`):
+
+| reading | before | with the change |
+|:--|--:|--:|
+| bytes kept after 10,000 steps over a Go value | 554,336 | none (the reading is -64) |
+| bytes kept after 1,000,000 steps | 55,440,880 | none (the reading is -64) |
+| a loop of 10,000 steps with one `!=` per step | 659 ms | 23 ms |
+| the same, 20,000 steps | 2,094 ms | 13 ms |
+| `==` after 100,000 steps | 6.6 ms | 13 microseconds |
+| `==` after 1,000,000 steps | did not return | 23 microseconds |
+
+The two loop timings were taken while another battery ran on the same box. They show that the cost no longer
+grows with the square of the steps; they are not a benchmark. Over C memory the same loops read 2 ms and 4 ms.
+
+Nothing here ran on windows or darwin before the hosted runs. The local gates are scored in the announce of this
+commit, not here.
+
+### 15.4 What this leaves
+
+- A chain through a box kind that is not passed over. Read from the code, not measured: a field's address taken
+  through a typed view whose Go layout is not known is a field reference over the view, and a pointer made from
+  it carries that reference. A loop of the form `p = unsafe.Pointer(&(*T)(p).f)` over such a type would add two
+  objects per step. Where the layout is known the field is a native box at the field's Go offset, which asks
+  `Kept` and stays one box from the Go value. No site of the first form is known.
+- The two bounds of 64 stay. No mint builds a chain now, and a chain built link by link is passed over by `Kept`
+  before `HeldSource` is asked. The dereference census walks what a box retains directly and would stop at 64 on
+  a hand-built chain; it is a census, not a door.
+- The two cases of 13.4 that no bound reaches are as they were: C memory, and a number that carries nothing.
+- A view door's window, and a slice from `unsafe.Slice`, are now anchored on the Go value's own box where they
+  were anchored on the last step's box. Each keeps the value's storage pinned as long as before, since the last
+  step's box kept nothing else.

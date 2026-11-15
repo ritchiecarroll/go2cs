@@ -39085,5 +39085,36 @@ arms: bytes kept per step, the hop count after N steps, `==` at 1,000,000 steps,
 the same address minted directly, and the view bound at 63 and 10,000 steps.
 
 — P5 (2026-11-15)
+## 2026-11-15 — P5 (the chain seat; closes the 2026-11-15 row "a pointer advanced step by step with `unsafe.Add` over a Go value keeps every step"; COORD ruling 04:39Z): a derivation from a native box that owns no pin retains that box's source — DONE
+
+**The change** (`fcc2a35455`, golib only; design `DESIGN-array-pointer-doors.md` 15). A native box that owns no pin
+holds its source and nothing else, so a box derived from it retains that SOURCE in its place
+(`NativeDerivation.Kept`, through `INativeRooted.NativeRetainedInItsPlace`). A pointer advanced with
+`p = unsafe.Add(p, 1)` is then one box from its Go value at every step. `NativeDerivation.Token` is a loop. A box
+that owns a pin, a box over an order token or 0, and every other box kind are kept as before. No public surface,
+no instance state, no converter change, no emitted line moves.
+
+**Readings** (linux/amd64, Release; `UnsafeAddChainTests`, 16 rows; the probe's second run is
+`docs/phase4/data/array-pointer-doors/door-a-1115/chain/probe-after.out`):
+
+| | before (`70abf5dd5a`) | with the change |
+|:--|:--|:--|
+| what the box retains after 2, 10, 1,000 steps | the box of the step before | the box the walk began at |
+| bytes kept after 1,000,000 steps | 55,440,880 | none |
+| `==` after 1,000,000 steps | stack overflow, the process ends | equal, 23 microseconds |
+| a loop of 10,000 steps with one `!=` per step | 659 ms | 23 ms, on a loaded box |
+| view capacity one byte inside a 16-byte value after 63 to 10,001 steps | Go's capacity, 1,073,741,824 | 15 |
+| `UnsafeAddChainTests` | 5 green, 9 red, 2 end the host | 16 green |
+| whole GolibTests | 2802 passed, 0 failed, 49 skipped | 2818 passed, 0 failed, 49 skipped |
+
+**The order token** is the same at every step, before and after: an arm walks 1,000 steps over a `[1024]byte`
+and asserts at each that the walked pointer's token is the token of `&b[k]` and of `unsafe.Add(p, k)` minted in
+one step, and that it `==` and hashes with both.
+
+**Left, stated in design 15.4, no row opened:** a loop that takes a field's address through a typed view whose
+Go layout is not known would still add objects per step (read from the code, no site known); the two bounds of
+64 stay as guards that no mint reaches.
+
+— P5 (2026-11-15)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
