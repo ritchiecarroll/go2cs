@@ -58,7 +58,8 @@ lists them all.
 - **One form of generic type alias**, an alias of an anonymous struct or interface.
 - **A generic call over a pointer element whose constraint shares the element's storage.** `Walk[*Node]`
   under `Walk[N Tree[N]]`, where `Children()` returns `[]N`, is refused with `GO2CS2002`, naming the site
-  and the method. The same code over a value element converts.
+  and the method. The same code over a value element converts. Two related shapes are refused as
+  `GO2CS2005` and `GO2CS2006` ([diagnostic codes](DiagnosticCodes.md)).
 
 [What won't make the trip](Limitations.md#what-wont-make-the-trip) has the detail and the workarounds.
 

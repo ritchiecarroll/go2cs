@@ -282,8 +282,10 @@ runtime-library change that cuts the memory and image size of the publish of a l
 Converted packages are built for the default x64 instruction set: `x86-64-v3` gives no gain across the
 benchmark suite on `win-x64`, and an image built that way does not start without AVX2.
 
-The release check publishes a program with Native AOT and runs it on `linux-x64`, `win-x64` and
-`osx-arm64`. On `osx-x64` the publish is read when it finishes inside the hosted runner's time limit, and
+The release check publishes a program with Native AOT and runs it on `linux-x64`, `linux-arm64`, `win-x64` and
+`osx-arm64`.
+<!-- 2026-11-15 (P4, docs audit Q5): linux-arm64 added (os-matrix.yml aot-smoke, all five shipped RIDs since seat
+     S5c); the rest of the Native AOT lines wait for P1's PublishAot reading. Kept word-identical with KnownIssues. --> On `osx-x64` the publish is read when it finishes inside the hosted runner's time limit, and
 reported as not measured when it does not.
 
 **The cost today is real.** With the default trim, Native AOT compiles every `go.*` assembly a program

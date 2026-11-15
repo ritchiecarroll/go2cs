@@ -110,7 +110,7 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 - **No Go installation, with the go2cs dotnet tool.** The converter uses the Go toolchain to load and
   type-check the source it converts, so that source must already build with `go build`. The
   [dotnet tool](DotnetTool.md) downloads the Go release it converts with, Go 1.26.11, on first use.
-  To build the converter from source instead, you need [Go 1.26](https://go.dev/dl/). The standard
+  To build the converter from source instead, you need [Go 1.26.11](https://go.dev/dl/) or later. The standard
   library packages are converted from, and validated on, Go 1.26.11, and the
   [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
 - **Windows or Linux on x64**, where the converted standard library is validated against Go's own

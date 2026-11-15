@@ -35,11 +35,12 @@ works, what works with limits and what does not yet, see [Go feature support](Go
 
 ## Go language coverage
 
-go2cs converts the full Go language surface except two generic forms, which it reports and does not yet
+go2cs converts the full Go language surface except a few generic forms, which it reports and does not yet
 convert: a generic type alias whose target is an anonymous struct or interface type
-(`type A[T any] = struct{…}`), and a generic call over a pointer element whose constraint shares the
-element's storage (`Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N`, refused with `GO2CS2002`;
-see [Limitations](Limitations.md#what-wont-make-the-trip)).
+(`type A[T any] = struct{…}`), and three shapes of a generic call over a pointer element: one whose
+constraint shares the element's storage (`Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N`,
+refused with `GO2CS2002`; see [Limitations](Limitations.md#what-wont-make-the-trip)), and the shapes refused
+as `GO2CS2005` and `GO2CS2006` ([diagnostic codes](DiagnosticCodes.md)).
 
 **Types & values**
 

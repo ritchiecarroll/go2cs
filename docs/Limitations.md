@@ -35,7 +35,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 * **cgo beyond calls of shared-library C functions**: see [cgo](#cgo).
 * **A self-referential constraint over a pointer, when a method shares the element's storage.**
   `Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N` stops the run with `error GO2CS2002`,
-  naming the site and the method. A pointer element reaches the generic code through a proxy object, and
+  naming the site and the method. Two related shapes over a pointer element are refused the same way, as
+  `GO2CS2005` and `GO2CS2006` ([diagnostic codes](DiagnosticCodes.md)). A pointer element reaches the generic code through a proxy object, and
   a `[]N`, `map[K]N`, `chan N` or `*N` the proxy passed along would be a copy, not Go's shared value.
   The same function over a value element converts, and so does a constraint whose methods pass only
   `N`, funcs and arrays ([how](ConversionStrategies-Reference/generic-constraints.md#what-a-proxy-forwards-and-the-instantiations-go2cs-refuses)).
@@ -212,8 +213,9 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
        and at H's 83fbf28560, disclosed by COORD's ruling 2 (section 10.9) until increment I5 lands. Read again
        on 2026-11-14 at master c2919b8b16 with the named-array floor, before this landed: for a local and for a
        heap value Go prints `true`, the conversion `false`, and both read the field's value. -->
-  * A type switch's `case int:` also catches an `int32` or `rune` when the switch has no `int32` case of
-    its own (`case uint:` likewise for `uint32`).
+  <!-- 2026-11-15 (P4, docs audit before 1.26.11.1): the bullet "A type switch's `case int:` also catches an
+       `int32` or `rune`..." was removed: fixed in 1.26.10.2 (NEWS.md, November 2026 entry; converter
+       visitTypeSwitchStmt.go, "an int32 (or rune) must NOT take the int arm"; Behavioral TypeSwitchIntWidthCases). -->
   * A left shift of an untyped constant that takes a named integer type from its context, such as
     `m & (1 << uint(32-1-i))` with `m` an `fs.FileMode`, wraps its count at the type's width: a count of the
     width or more gives the wrapped result where Go gives 0, and a negative count does not panic.
@@ -416,7 +418,8 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
        lines: docs/PLAN-version-lines.md (master carries the current Go line with patch hops). -->
 * **One Go release, one .NET release.** Convert with the Go release in
   [Requirements](README.md#requirements), which the go2cs dotnet tool downloads for you; building the
-  converter from a clone needs Go 1.26. `go2cs -version` should show that one release throughout. Rebuild after
+  converter from a clone needs Go 1.26.11 or later (the release `src/go2cs/go.mod` names). `go2cs -version`
+  should show that one release throughout. Rebuild after
   every pull. Each [GitHub release](https://github.com/ritchiecarroll/go2cs/releases) carries the converter
   prebuilt for six platforms, with Authenticode-signed Windows executables and a GPG-signed `SHA256SUMS`
   (`SHA256SUMS.asc`, by the key that signs the release tag). Converted projects and the `go.*` packages target

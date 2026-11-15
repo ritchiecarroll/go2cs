@@ -79,7 +79,7 @@ entry that is supported with limits or not supported yet.
 | Interface comparison | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | `==` on interface values compares dynamic type and value. [Example](../src/tests/Behavioral/InterfaceEqualityTyped/) |
 | Struct embedding and promotion | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | Promoted fields and methods, through pointers, across several levels and packages. [How](ConversionStrategies.md#struct-type-embedding) · [example](../src/tests/Behavioral/StructPromotion/) |
 | Type assertions | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | Both the panicking form and comma-ok. [Example](../src/tests/Behavioral/TypeAssert/) |
-| Type switches | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | [How](ConversionStrategies.md#type-switch-statements) · [example](../src/tests/Behavioral/TypeSwitch/). [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) lists one rare `int`/`int32` case (status to confirm). |
+| Type switches | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | [How](ConversionStrategies.md#type-switch-statements) · [example](../src/tests/Behavioral/TypeSwitch/) |
 
 ## Generics
 
@@ -90,7 +90,7 @@ entry that is supported with limits or not supported yet.
 | Constraints and type sets | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | Unions, `~T`, `comparable`, and constraints with methods. [How](ConversionStrategies-Reference/generic-constraints.md) · [example](../src/tests/Behavioral/Constraints/) |
 | Type inference | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | [Example](../src/tests/Behavioral/TypeInference/) |
 | Generic type aliases | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Converted, except an alias whose target is an anonymous struct or interface ([Limitations](Limitations.md#what-wont-make-the-trip)). [Example](../src/tests/Behavioral/GenericTypeAlias/) |
-| A pointer element under a self-referential constraint whose method returns a collection of the element | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | `Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N` is refused with `GO2CS2002`; the same code over a value element converts ([Limitations](Limitations.md#what-wont-make-the-trip)). |
+| A pointer element under a self-referential constraint whose method returns a collection of the element | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | `Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N` is refused with `GO2CS2002`; the same code over a value element converts ([Limitations](Limitations.md#what-wont-make-the-trip)). Two related pointer-element shapes are refused as `GO2CS2005` and `GO2CS2006` ([diagnostic codes](DiagnosticCodes.md)). |
 
 ## Concurrency
 
@@ -108,7 +108,7 @@ entry that is supported with limits or not supported yet.
 | Goroutine stacks | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Stacks do not grow: each goroutine reserves a large fixed stack, and recursion past it ends the process ([Tuning](Tuning.md#goroutine-stacks)). |
 | `runtime.GOMAXPROCS` | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Read and set, but it does not limit parallelism: `GOMAXPROCS(1)` does not run goroutines one at a time ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). |
 | Deadlock detection | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Go's `all goroutines are asleep` report, with its goroutine blocks, appears only when every goroutine waits on a nil channel or an empty `select {}`; any other deadlock hangs ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). |
-| The race detector (`-race`) | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | Validation runs without it ([Limitations](Limitations.md#what-validated-means-and-what-it-doesnt)); converted code has no race detector (status to confirm). |
+| The race detector (`-race`) | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | Validation runs without it ([Limitations](Limitations.md#what-validated-means-and-what-it-doesnt)); converted code has no race detector. |
 
 ## Memory and runtime
 
