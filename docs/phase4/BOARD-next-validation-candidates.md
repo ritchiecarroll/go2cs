@@ -38443,4 +38443,34 @@ superseded by this table; one of the two files was a 5 KB stub and not sqlite's 
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — P5 (door A's decision D8; COORD ruling (a), 2026-11-14 22:39Z): after the view doors, three kinds of `(*[N]T)(p)[lo:hi]` are still a COPY or still lose a write — OPEN as a record, owner P5; the first kind has no known site
+
+`DESIGN-array-pointer-doors.md` sections 11 and 12. A slice taken through an array-pointer conversion over an
+`unsafe.Pointer` is now a view of the memory in every case but these:
+
+1. **The pointee is a Go value that holds a reference.** Nothing can hold it still, so the view is a copy of
+   the elements read at the pointer. A read is exact. `copy` with an OPEN view of it as the destination is
+   refused by name. A BOUNDED view of it under `copy`, or an element store through the view, writes the copy
+   and the write is lost: no panic, and no conversion-time note since the doors replaced the span the note
+   was attached to. No site of this kind is known in modernc.org/libc, modernc.org/sqlite or the standard
+   library; none was searched for beyond the design's census (10.4), which reads the 17 parameter lines of
+   libc's C ABI by their callers in sqlite's generated code on windows/amd64 only.
+2. **The conversion's operand holds a `FromRef` mint.** The address is true for one statement, so the site
+   keeps the copying span: two lines of `internal/abi/type.cs`, which only read. Held by repoguard's
+   `TestArrayPointerViewDoors`.
+3. **The pointee is a named array whose address is taken before the array's first use.** The view is over a
+   backing the variable never reads: the row above of this date, with its own seat.
+
+What the doors cured that this row used to hold: sqlite's first seeding of its random number state,
+`sqlite_windows.go:5802`, `memcpy(&sqlite3Prng, &chacha20_init, 16)`, a write through a byte view of a Go
+struct of scalars and arrays. It is the anchored arm's case (design 12) and prints Go's answer on the shape
+measured (`data/array-pointer-doors/amend-1114/prng/`, arms pa pb pc pe). It was not observed in the sqlite-cs
+demo itself.
+
+If a site of kind 1 appears, the options are the ones of design 10.4's D8 (b): emit a bounded view that is
+`copy`'s direct destination through the copy door, so the door sees the write and refuses a copy destination
+by name.
+
+— P5 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

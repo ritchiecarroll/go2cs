@@ -128,3 +128,11 @@ PointerArrayViewForms and PointerCastSliceReinterpret.
 Scored 2026-11-15 at c24cb00630: MISSED. One more file moved (PointerCastSliceRange, an identity conversion that
 the door took from its route). Fixed in a0c43a357b; at that tree the re-transpile reads NO REGRESSION, 1067
 packages.
+
+Scored 2026-11-15, P10 of the sixth set, at V2's commit (a7490fcee7). Outputs: door-a-1115/v2/.
+  P10  MET as worded. pa pb pc pe print Go's lines (prng's whole output equals amend-1114/prng/go.out); N prints
+       true. The stress arm is right in 10,000 of 10,000 rounds (1 min 28 s; the unheld control moved in 9,971
+       of them). Neither falsifier fired.
+  P1   with N: met for every arm it names (it was MET without N at a37a986860).
+  The other 23 arms of NativeViewShapes, and pd pf, print what they printed at a37a986860.
+  door-a-1115/lazy: the seven arms print the same with V2 as without it.

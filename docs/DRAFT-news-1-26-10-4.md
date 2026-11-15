@@ -183,8 +183,10 @@ pointer now. No call site in the standard library does. See
 copy before, so a write through it never reached the memory. Code translated from C reaches memory this way
 throughout: modernc.org/libc's `memcpy` is `copy((*RawMem)(unsafe.Pointer(dest))[:n:n], …)`, and with a copy as its
 destination it copied nothing. The converted code now calls `@unsafe.Pointer.View`, and `copy` over an open form
-(`copy((*RawMem)(p)[:], src)`) calls `@unsafe.Pointer.CopyInto` or `CopyFrom`. A view of C memory, and of a Go array
-or slice of the same element type, aliases it. What a program can see change:
+(`copy((*RawMem)(p)[:], src)`) calls `@unsafe.Pointer.CopyInto` or `CopyFrom`. A view of C memory aliases it. So
+does a view of a Go array or slice of the same element type, and a view of any other Go value that holds no
+reference (a number, a struct of numbers, an array of another element type): the value is pinned and the view
+keeps it in place. A Go value that holds a reference is still viewed as a copy. What a program can see change:
 
 - a write through such a slice reaches the memory, and a later write to the memory shows through the slice;
 - a two-index view has Go's capacity, the array type's length less the low bound, where it had its own length;
@@ -197,7 +199,9 @@ In the standard library 13 lines in four files of `runtime` take the new form. S
 <!-- docs/phase4/DESIGN-array-pointer-doors.md, sections 4, 10 and 11; golib's unsafe.Pointer.View, CopyInto and
      CopyFrom. Arms: the behavioral program ArrayPointerViewDoors (linux; native pages from syscall.Mmap and Go memory)
      and the goldens of PointerArrayViewForms and PointerCastSliceReinterpret, GolibTests ArrayPointerViewDoorTests,
-     the converter's TestArrayPointerViewDoor, repoguard's TestArrayPointerViewDoors. FOOTPRINT, two-seeded, four
+     the converter's TestArrayPointerViewDoor, repoguard's TestArrayPointerViewDoors. The pinned case (a Go value
+     of another type): design section 12, golib's IHeldStorage, GolibTests' stress arm and its control, 10,000
+     rounds, 2026-11-15. FOOTPRINT, two-seeded, four
      targets, 2026-11-15 at go1.26.11: runtime/heapdump.cs 5 lines, iface.cs 2, mbitmap.cs 2,
      runtime/windows/os_windows.cs 4; the hand-owned internal/syscall/windows/registry value.cs is respelled by
      hand, 8 lines. -->

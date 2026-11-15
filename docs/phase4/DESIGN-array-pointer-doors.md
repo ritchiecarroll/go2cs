@@ -822,3 +822,82 @@ Both are stale review siblings and were so before this seat.
 - `src/go2cs.slnx`, the binary-compat guard and the full converter suite were not yet run at this tip when this
   block was written. They are run before the announce, and their readings go in the announce and in V2's block.
 - The sqlite-cs demo was not re-run past W5b. That is G's arm (section 5).
+
+## 12. Amendment 2026-11-15 (P5): V2, the anchored window over Go storage of another type
+
+The last commits of door A's seat, as ruled (22:39Z): the eleven commits before them stand without these two.
+Code: `a7490fcee7`. Stop line 1 was not hit.
+
+### 12.1 What V2 is, as cut
+
+A view of a Go value that is NOT an array of the element type, where something holds the value still, is a
+native window over the value's own bytes, anchored on the box that owns the pin.
+
+- **Who holds it.** One new internal interface, `IHeldStorage.HeldBytesFrom(address)`, which every pointer box
+  implements: the bytes this box holds still from `address` to the end of the storage it pinned, or 0. Three
+  facts must hold or the answer is 0: the box owns a pin; the box is pinned AT that address (the registry's own
+  validate-on-read, `IsPinnedAt`); the pinned object is a managed array whose end is known.
+- **Who is asked.** For a number: the box the registry resolves it to. For a pointer that carries its own box
+  (`unsafe.Pointer(&x)`): that box, and its number is taken there, which is the pin moment.
+- **What is cut.** `slice<E>.OverNativeMemory(address + lo*size, count, min(capacity, remaining), anchor)`, the
+  anchor being `NativeSliceAnchors<E>.For(holder)`. The anchor keeps the box; the box's pin is released by its
+  finalizer once the box is unreachable. So the storage stays where it is for as long as any slice cut from the
+  view lives.
+- **Where it ends.** At the end of the pinned storage. A view or a copy that would pass it is refused by name
+  ("would pass the end of the Go value p points to (K elements of it remain)"), as V1 refuses past its array.
+  A view at a FIELD of a struct has room to the end of the struct, the allocation Go's pointer rules allow.
+- **What is left for V4.** A value nothing holds still: one that holds a reference. Its pointer's number is an
+  order token and never an address, so it is not viewed as memory; the copy reads through the box.
+
+`unsafe.Slice` is not changed (decision D6). Public surface: no new public member; `IHeldStorage` is internal.
+
+### 12.2 Acceptance
+
+| | arm | reading |
+|:--|:--|:--|
+| stress (section 5, stop line 1) | `TenThousandRoundsOfWriteCollectReadKeepEveryViewOnItsValue`: 10,000 rounds; a `uint64`, a `uint32` array and structs of scalars; write through the views, force a compacting collection, read through the variables and the views; second mode, the variables go out of use and the views alone keep them | right in 10,000 of 10,000 rounds, 1 min 28 s; the unheld control array moved in 9,971 rounds, so the rounds could move a value |
+| made to fail (floor item 13) | `WithoutItsAnchorTheSameWindowDoesNotKeepTheValue`: the same window cut with no anchor | the value is collected. And with the door's anchor replaced by null, the stress arm is red at round 0 ("a view did not keep the value it views"); restored byte-identical |
+| P10 | arm N, and pa pb pc pe of 10.4 | see 12.3 |
+| GolibTests, whole suite, Release, linux | | 2787 passed, 0 failed, 49 skipped |
+
+### 12.3 P10 scored
+
+P10 as worded (sixth set, written 2026-11-14 22:40Z): with V2 added, pa, pb, pc, pe and N print Go's answers,
+and the stress arm is right in 10,000 of 10,000 rounds. **MET.** The two kits were rebuilt against the tree at
+`a7490fcee7` and run one arm per process; their emission is the one of 11.4, since V2 changes no converter line.
+Outputs: `data/array-pointer-doors/door-a-1115/v2/`.
+
+| arm | before V2 (`a37a986860`) | with V2 | Go |
+|:--|:--|:--|:--|
+| N (NativeViewShapes) | `false` | `true` | `true` |
+| pa (prng) | `0x0 0x0 0x0 0x0` | `0x61707865 0x3320646e 0x79622d32 0x6b206574` | the same |
+| pb | `0 0 0` | `7 9 3` | the same |
+| pc | `0x0 0x0 0x0` | `0x61707865 0x3320646e 0x6b20657479622d32` | the same |
+| pe | `0x0 0x0` | `0xf905d5d9 0xd763a120` | the same |
+
+`prng`'s six lines are now Go's six lines (`diff` against `amend-1114/prng/go.out`: empty). The other 23 arms of
+NativeViewShapes print what they printed before V2: the two outputs differ in N's line alone. With N, P1 of 11.4
+is met for every arm it names.
+
+The seven arms of `door-a-1115/lazy/` print the same with V2 as without it: a named array whose address is
+taken before its first use still loses the write, because the box V2 asks is the box of that row.
+
+### 12.4 What stays a snapshot or a lost write after V2 (D8, ruled (a): a BOARD row)
+
+- A Go value that holds a reference: a copy. `CopyInto` refuses it as a destination by name; a bounded view
+  under `copy` writes the copy and the write is lost, with no note at conversion time since the doors (11.2,
+  item 8). No site of this kind is known in libc, sqlite or std.
+- An operand that holds a `FromRef` mint: the copying span, two lines of `internal/abi/type.cs`, read only.
+- A named array whose address is taken before its first use: the BOARD's row of 2026-11-15, its own seat. V2's
+  named-array arm writes an element first, so it does not meet that row.
+- `sqlite_windows.go:5802` (10.4) is V2's case and is cured by it on the shape measured here. It was not
+  observed in the sqlite-cs demo itself.
+
+### 12.5 What this section does not show
+
+- Nothing ran on windows or darwin. V2 rests on the CLR's pinned handle and on the registry, which are the same
+  code on every target, and that is a reading.
+- The stress arm forces collections on one thread. No arm takes a view on one goroutine while another moves or
+  drops the variable.
+- No cost was measured: one anchor object per V2 view, and a pin that lives as long as the view.
+- The `prng` program is libc's `memcpy` shape. sqlite's own generated code was not converted or run here.

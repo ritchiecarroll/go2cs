@@ -3049,8 +3049,15 @@ form of an array small enough to exist is the whole array from its low bound, `V
   all the storage there is.
 - **An address the pointer registry does not know** (C memory, or an interior address of Go memory): a native
   window over the address, with Go's capacity `N - lo`. It keeps alive what the pointer carried.
-- **Any other Go value:** a copy of the elements read at the pointer. A read is exact; a write would not
-  reach the value, so a `copy` door refuses such a destination by name instead of losing the write.
+- **Any other Go value its pointer can hold still** (a number, a struct of numbers, an array of another
+  element type, a named array by its own address): a native window over the value's own bytes. Taking the
+  value's address pins it, and the view keeps the box that owns the pin, so the value stays where it is for
+  as long as any slice cut from the view lives. Writes reach the value. The window ends where the value's
+  storage ends, and a view or a copy that would pass that end is refused by name. This is what lets C-shaped
+  code `memcpy` into a Go variable: sqlite seeds its random number state that way.
+- **A Go value nothing can hold still** (it holds a reference): a copy of the elements read at the pointer. A
+  read is exact; a write would not reach the value, so a `copy` door refuses such a destination by name
+  instead of losing the write.
 
 **What keeps its own emission.** The door replaces one emission, the slice built from a span over the
 pointer cast to a number, which copied. A conversion that another rule already renders whole keeps that
@@ -3068,7 +3075,9 @@ docs/phase4/DESIGN-array-pointer-doors.md. -->
 
 Guarded by: the behavioral program `ArrayPointerViewDoors` (native pages from `syscall.Mmap` and Go memory,
 written through a view and read back from the memory, against Go); `ArrayPointerViewDoorTests` in
-GolibTests; the converter's `TestArrayPointerViewDoor`, one arm per form and one control per route that keeps
+GolibTests, whose `TenThousandRoundsOfWriteCollectReadKeepEveryViewOnItsValue` holds the pinned case across
+forced compacting collections and whose `WithoutItsAnchorTheSameWindowDoesNotKeepTheValue` is its control; the
+converter's `TestArrayPointerViewDoor`, one arm per form and one control per route that keeps
 its own emission; and repoguard's `TestArrayPointerViewDoors`, which holds the census of copying spans left
 in the corpus and refuses a `FromRef` mint at a door.
 

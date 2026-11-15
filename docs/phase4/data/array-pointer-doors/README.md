@@ -107,6 +107,7 @@ For section 11 of the design. Converters: base = the batch-305 converter; cut = 
 | `door-a-1115/lazy/main.go`, `go.mod`, `go.out` | seven arms that write at the address of a named array: five before the array's first use, two controls |
 | `door-a-1115/lazy/main.cs.txt`, `converted.out` | its emission and its run: the five print 0 where Go prints the value written |
 | `door-a-1115/lazy/census/main.go`, `go.mod`, `go.sum` | a census tool: the defined named array types of a package closure, and each conversion to `unsafe.Pointer` of a pointer to one |
+| `door-a-1115/v2/NativeViewShapes.converted.out`, `prng.converted.out` | the same two kits run against the tree at V2's commit (`a7490fcee7`): N, pa, pb, pc and pe print Go's answers; no other line differs from `door-a-1115/kits/` |
 | `door-a-1115/lazy/census/sq-<target>.tsv`, `.summary.txt` | its rows and totals for `modernc.org/sqlite/...` v1.62.0 on linux/amd64 and windows/amd64 (run inside a module that requires it, `GOFLAGS=-mod=mod`) |
 
 In the footprint files `base/` and `cut/` stand for the two conversion roots, and `seed/` and `reconvert/` for
