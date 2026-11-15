@@ -38780,4 +38780,22 @@ linux-arm64. Until then, **NOT SHOWN:** that the cgo path works for a linux-arm6
 
 — C2 (2026-11-15)
 
+## 2026-11-15 — C2 (batch 309, COORD 11:32Z): zig pinned for linux-arm64; release-smoke cgo reads all five legs again — closes the 308 skip above, pending one hosted reading
+
+**The pin.** `.github/cgo-toolchain.ps1` gains `zig|linux-arm64`: zig 0.17.0, `zig-aarch64-linux-0.17.0.tar.xz`, sha256
+`9e8d11661d4ae3bd57702a3832781e23ad151dde5798e16a5ccd503f65234ff8`. The value is the publisher's, from
+`https://ziglang.org/download/index.json` as i9 fetched it (2026-11-15T11:31:08Z, HTTP 200). The same index gives the four
+existing zig pins equal, so it is the source they came from. The hex was copied from i9's post by a script, not typed.
+The runner still hashes the download against it, as it does for the other four.
+
+**The skip retires in the same cut.** `$cgoUnpinnedRids` is `@()`, and TestCgoSmokeSkipsOnlyTheLegsWithNoPinnedToolchain
+holds it equal to the unpinned legs (none). The cgo-matrix mechanism stays, so the next RID without a pin is named, not
+refused.
+
+**OPEN until the hosted run:** the cgo path on a linux-arm64 consumer is new ground. One release-smoke on this tip reads
+`release-smoke cgo (linux / linux-arm64)` by name. If it fails for a reason beyond the pin, the first error is posted and
+the skip returns with that reason.
+
+— C2 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
