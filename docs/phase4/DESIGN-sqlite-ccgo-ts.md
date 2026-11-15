@@ -517,3 +517,63 @@ W14, behavioral, with its negative control (the addendum).
 its own seat first, or BOARD only. QW-9, (H) taking an existing (L) copy.
 
 — H (2026-11-15)
+
+### 10.2 Amended 2026-11-15, 11:15Z: QW-8 and QW-9, as ruled
+
+COORD ruled both IN THIS CUT, on section 10.1's measured reading.
+
+**QW-8: the carrying pointer for Go's rule-6 shape.**
+- `unsafe.Pointer(h.Data)` in ONE expression, with `h` a `*reflect.StringHeader` or a `*reflect.SliceHeader`, is
+  emitted as the header box's CARRYING `unsafe.Pointer` for its `Data`, not as a number. The converter already
+  emits Go's one-expression arithmetic as `unsafe.Add` the same way.
+- The pointer holds the element box (under (H)) or names (L)'s immortal block. So the round-trip window closes for
+  every Go-valid use, `Xgethostname` included.
+- **The converter part, red first:**
+  - a converter test asserts the emitted spelling for both header types;
+  - before the emission changes, the converter's TESTS (not only the goldens) are searched for the current
+    spelling;
+  - CNR is byte-identical;
+  - the four-target corpus footprint is predicted 0 lines, from the GOROOT census in 10.1.
+- **golib:** each header box answers its `Data` as a carrying pointer: the string header box under (L) or (H), and
+  the slice header box. SliceHeader is in scope because Go's rule covers it.
+  - `SliceHeaderBox` (`ж.SliceHeaderBox.cs`), like `StringHeaderBox`, admits today only a header whose `Data` is the
+    `unsafe.Pointer` class. So `reflect.SliceHeader`, (`uintptr`, `nint`, `nint`), is refused today too.
+  - The cut widens it the same way, with a number flag, under (H) ONLY: a slice's elements are always Go heap memory,
+    and there is no (L) for a slice.
+  - The census reads 0 `reflect.SliceHeader` uses in both modules. This is Go's rule, not a ccgo need.
+- **Arms:**
+  - **W13**, the gethostname shape through the converted emission: the BYTES are right after a forced collection
+    with finalizers, now green by construction;
+  - **W15**, the same for `*reflect.SliceHeader`.
+- **The shapes Go calls invalid keep the window:** a `Data` number held across statements, then re-formed. They go
+  in a BOARD row, worded "memory-unsafe read, Go-invalid code only", with section 10.1's reading (199 of 200 wrong
+  under a forced collection). Not `.4`.
+
+**QW-9: an (H) read takes an existing (L) copy.**
+- When the backing already has an (L) copy, an (H) read returns that copy's number. The lookup is lock-free, and is
+  made only while (L)'s table is non-empty. A literal's bytes are rodata however they are reached, so this is
+  closer to Go, and it closes the local-copy bypass in the safe direction.
+- **CONDITION: validate-on-read applies on this path too.** The whole-backing compare runs here as well, so a
+  backing aliased mutably after its (L) copy is refused by name rather than handed out stale through (H).
+- P3's item 4 resolves to EQUALITY. **W4** asserts ONE number for a literal and for a local copy of it, and
+  `StringData != Data` for both, because both name the copy. Section 10's (H) identity (`StringData == Data`)
+  holds only for a backing with no (L) copy.
+
+**D4, as of this block.**
+- For a backing with an (L) copy, however it is reached, `StringData != Data`.
+- For every other string, `StringData == Data`, and the number stays valid while the ELEMENT BOX lives (P3's Q3).
+  The carrying pointer holds that box for the Go-valid one-expression shape.
+- Initializer refusal: not feasible under Native AOT (10.1), accepted as stated.
+
+**The arm list, final:** W1, W1b, W1c, W2, W3, W4 (one number), W5, W5b, W7, W8, W9 (with the counter), W10, W12,
+W13 (bytes, through the converted shape), W14 (behavioral, with its negative control), W15 (SliceHeader); plus the
+converter test for QW-8's spelling.
+
+**The footprint, restated (PW-5):**
+- golib: `ж.StringHeaderBox.cs`, the slice header box (`ж.SliceHeaderBox.cs`), and one new file for (L)'s table;
+- the converter: QW-8's one emission arm and its test;
+- one behavioral program (W14) with its golden.
+`unsafe.cs` and `ж.cs` are not touched. PW-2 now reads: the corpus footprint is 0 lines on four targets, predicted
+from the GOROOT census and MEASURED by the two-seeded comparison, because the converter changes.
+
+— H (2026-11-15)
