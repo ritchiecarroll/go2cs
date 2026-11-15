@@ -41,6 +41,7 @@
     <None Include="$(MSBuildThisFileDirectory)arrayCloneOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayCloneShadow_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsNilCargo.go" />
+    <None Include="$(MSBuildThisFileDirectory)arrayPointerDoorAnonStructElement_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayPointerElementDoor.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayPointerElementDoor_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayPointerViewDoor.go" />
