@@ -230,7 +230,7 @@ call-deref swap, output-compared vs `go run`; the pre-fix converter leaves all t
 A single assignment to `*(*T)(p)` writes through the converted box, `(@unsafe.Pointer.To<T>(p)).Value = v`. The tuple
 target was rendered as a read instead, with the prefix `~` dereference, which is a value and not a variable,
 so a parallel assignment through two such targets did not compile (CS0131). modernc.org/libc's `qsort.go`
-swaps elements this way (sqlite-cs row S14):
+swaps elements this way:<!-- sqlite-cs row S14 -->
 
 ```go
 *(*uint64)(unsafe.Pointer(p)), *(*uint64)(unsafe.Pointer(q)) = *(*uint64)(unsafe.Pointer(q)), *(*uint64)(unsafe.Pointer(p))

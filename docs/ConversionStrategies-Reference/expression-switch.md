@@ -199,8 +199,7 @@ a clause that ends in a `for` with no condition reads as falling out of the swit
 that is not the last clause did not set the flag at all. So the trailing return also asks the Go
 specification's rule for a terminating statement (`isGoSpecTerminating`, given the switch's label so a
 `break Label` counts). The switch has a default, no clause breaks out of it, and every clause ends in a
-terminating statement or a `fallthrough`. modernc.org/libc's `(*mutex).lock` is the witness (sqlite-cs
-row S13):
+terminating statement or a `fallthrough`. modernc.org/libc's `(*mutex).lock` is the witness:
 
 ```go
 switch typ {

@@ -1266,8 +1266,8 @@ A module function written in assembly that holds real machine code has nothing t
 target, no linkname. Its bodyless declaration would convert to a stub that throws when called. For
 golang.org/x/sys/cpu that stub sat in the package's init: x/sys/cpu decodes its feature flags from `cpuid`
 and `xgetbv` as it loads, and modernc.org/libc imports it on windows and darwin, so every converted
-program on that path died before `main` (sqlite-cs row S21; `docs/phase4/DESIGN-sqlite-cs-funcptr.md`
-sections 2.3 and 3.7).
+program on that path died before `main`.<!-- sqlite-cs row S21; docs/phase4/DESIGN-sqlite-cs-funcptr.md sections
+2.3 and 3.7. -->
 
 **A small table, `asmForwardBodies` (`asmForwardBodies.go`), maps (package, function) to a managed body
 in golib, `go.golib.GoCpu`, together with the Go signature that body implements.** A listed function
@@ -3323,7 +3323,7 @@ frame, golib's backstop parks the main thread (`MainGoexit.Park`) until no other
 left in a forever wait reports the deadlock itself, since the dead-program check counts an exited main as blocked
 (`docs/DESIGN-goexit-main.md`). The test host catches it around `TestMain` and parks the same way. Guarded by the
 `GoexitFromMain` behavioral test (six arms against `go run`) and GolibTests `MainGoexitTests`. Consequently
-`unsupportedRuntimeCapabilities` (`testConversion.go`) is now **empty**: the mechanism remains — a test
+`unsupportedRuntimeCapabilities` (`testConversion.go`) no longer lists the `Goexit`-from-main capability: the mechanism remains — a test
 whose transitive closure reaches a listed symbol converts as `unsupported`, disclosed by name, the
 same gate an unsupported `testing.*` member uses — with `TestUnsupportedRuntimeCapabilityGate` as its
 positive control so an empty list cannot masquerade as a working lookup. Add an entry only for

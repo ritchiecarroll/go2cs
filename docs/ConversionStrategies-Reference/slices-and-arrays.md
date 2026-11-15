@@ -502,7 +502,7 @@ through a **per-box atomic publish** (see *The array-backing publish is atomic p
 <!-- history: first a reflection-built constrained delegate (fatal under Native AOT, d5c0c9c10), then an
 unsynchronized box-touch-copy-back, and since 2026-08-30 the per-box atomic publish. --> The base is
 rendered in POINTER context so it yields the box: a deref-aliased pointer
-PARAMETER gives `Ꮡt` (the parameter is `ж<[N]E> Ꮡt`, deref-aliased to `ref var t = ref Ꮡt.Value` in
+PARAMETER gives `Ꮡt` (the parameter is `ж<[N]E> Ꮡt`, deref-aliased to `ref var t = ref Ꮡt.DerefOrNull()` in
 the prologue), while a box-valued LOCAL from `new([N]E)` gives the plain `t`. The generic `Ꮡ(t.Value[i])`
 **copy** form would box a snapshot of the element and silently drop any write made through the returned
 pointer — hash/crc32's `simplePopulateTable(poly, &t[0])` would populate a throwaway copy and leave every
@@ -1694,7 +1694,7 @@ Go gives `type fermat nat`, where `type nat []uint64`, every slice operation: `m
 slicing, `append`, `range`, `len` and `cap`, plus the conversions `fermat(n)` and `nat(f)`. Methods are
 not inherited. The converter writes the definition as the Go source does, `partial struct fermat /*nat*/;`,
 and go2cs-gen used to generate a plain wrapper over the `nat` struct, which has none of that surface
-(CS1503, CS0021, CS0315; github.com/remyoudompheng/bigfft, sqlite-cs row S4). The generator now follows
+(CS1503, CS0021, CS0315; github.com/remyoudompheng/bigfft). The generator now follows
 the chain of definitions down to the `[]elem` at its bottom, as it already does for a named array
 (`type pallocBits pageBits`), and generates the slice wrapper over `slice<uint64>`, with an implicit
 conversion to and from `nat` through that slice. The walk stays inside one compilation: an element spelled

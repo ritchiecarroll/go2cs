@@ -75,7 +75,7 @@ the Go does.
 - Past the reservation, .NET ends the process with `Stack overflow.` where Go prints
   `goroutine stack exceeds 1000000000-byte limit` and `fatal error: stack overflow` and exits 2.
 
-**Cost.** The thread hop, measured on all four shipped RIDs on hosted runners: 0.07 to 0.45 ms on linux-x64
+**Cost.** The thread hop, measured on hosted linux-x64, win-x64 and macOS runners: 0.07 to 0.45 ms on linux-x64
 and win-x64, inside the process's start-up spread. On macOS runners thread creation is slower and highly
 variable, a median of up to about 3 ms. A 1 GiB reservation costs the same as a default-stack thread on every
 RID.
@@ -1284,8 +1284,9 @@ partial class mainꓸC_package
 **Accessibility.** Every member is `internal`, whatever the case of its C name: cgo keeps C types out of a package's
 exported surface. For the same reason a typedef publishes no `GoTypeAlias` record to importers.
 
-**Limits.** A package that imports `"C"` is still refused: converting cmd/cgo's own files, and the bindings of C
-functions, are not done yet. C functions, variables and macros are not members of the class yet. A declaration that
+**Limits.** Under `-cgo`, a package that imports `"C"` converts when every C use it makes is one cgo support binds
+(calls of C functions a shared library defines; see [Limitations](../Limitations.md#cgo)), and any other use is
+refused by name; without `-cgo`, it is refused with `GO2CS2001`. C variables and macros are not members of the class. A declaration that
 groups a C name with a Go name is refused by name, since cmd/cgo writes each C declaration alone. The rule applies by
 name, through the prefixes cmd/cgo reserves, so a package that declares none converts exactly as before.
 
@@ -1757,12 +1758,12 @@ the windows flavor's Δ-renamed `Sockaddr` (CS0305 against the linux flavor's ow
 
 The two halves must name the SAME platform, so `-recurse=nuget` writes that platform into the output
 root's `Directory.Build.props` as a conditioned `GoCompileRuntimeIdentifier` default (windows → `win-x64`,
-linux → `linux-x64`, darwin → `osx-x64` or `osx-arm64` by the target's arch, otherwise unset;
+linux → `linux-x64` or `linux-arm64` and darwin → `osx-x64` or `osx-arm64` by the target's arch, otherwise unset;
 `compileRuntimeIdentifierForTarget`), which `go.lib.targets` honors before `$(RuntimeIdentifier)` or the
 build host. The compile flavor therefore follows the platform the tree was CONVERTED for, not the machine
 doing the build, so a linux conversion built on windows, or a windows conversion built under WSL, pairs each
-flavor's metadata with its own assembly. Background: `docs/phase4/DESIGN-multiplatform-corpus.md` §12.
-<!-- the 2026-09-24 amendment of that section -->
+flavor's metadata with its own assembly.
+<!-- Background: docs/phase4/DESIGN-multiplatform-corpus.md §12, the 2026-09-24 amendment of that section. -->
 Guards: `TestStdLibExportedMetadataSelectsTheTargetFlavor`, `TestStdLibExportedMetadataReadsAFlavorOnlyRecord`,
 `TestStdLibMetadataCollectFlatWins`, `TestRecurseNuGetImportsTheTargetFlavorsAliases` (an emission arm) and
 `TestRecurseNuGetPinsTheCompileRidToTheTarget` (the props emission).
