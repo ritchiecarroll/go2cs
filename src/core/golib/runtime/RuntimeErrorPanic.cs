@@ -161,7 +161,7 @@ namespace go.golib;
 
     private const string ManagedDerivedStructReadMessage =
         $"{RuntimeErrorMessage}cannot read {{0}} whole through a pointer into Go storage of another type: {{0}} holds managed "
-        + "references, and the bytes at that address are not {{0}}'s (a reference-free value, or one field of a larger value), "
+        + "references, and the bytes at that address are not {0}'s (a reference-free value, or one field of a larger value), "
         + "so the read would take them for references (a field read at its Go offset is unaffected)";
     /// <summary>
     /// THE MANAGED-DERIVED STRUCT FLOOR (B0', W14): the whole value of a Go struct that holds a managed reference, read

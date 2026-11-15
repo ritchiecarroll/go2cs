@@ -206,6 +206,20 @@ namespace go;
     internal static int TableCount => s_table.Count;
 
     /// <summary>
+    /// Visits every live registrant that is still pinned at the address it registered: READ ONLY, for the pin-extent
+    /// index's backfill when a cgo package switches it on (runtime/PinExtents.cs). The table is not changed, and a dead or
+    /// moved entry is passed by as Resolve would miss it.
+    /// </summary>
+    internal static void VisitPinnedRegistrants(Action<object> visit)
+    {
+        foreach ((nuint address, WeakReference<object> weak) in s_table)
+        {
+            if (weak.TryGetTarget(out object? box) && box is INilPointer pinned && pinned.IsPinnedAt(address))
+                visit(box);
+        }
+    }
+
+    /// <summary>
     /// Remembers that <paramref name="token"/> was handed out as the scalar form of
     /// <paramref name="box"/>, so a conversion back to a pointer can recover it.
     /// </summary>

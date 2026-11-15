@@ -7,7 +7,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace go.golib;
 
@@ -26,19 +28,51 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     private readonly int m_len;
     private bool m_disposed;
 
-    public PinnedBuffer(byte[] array)
+    // Whether the pin-extent index's backfill may read this buffer's handle: Open, Backfilling while it does, Closed once
+    // the release has begun. The release closes it BEFORE it frees the handle, waiting out a backfill mid-read, so the
+    // backfill never reads a freed (or re-issued) handle and never enters a buffer whose release has already looked for
+    // its entry (P3's re-read, item 1: a release that read the index as off, then a backfill, then the free, left the
+    // entry behind). A byte, so it sits in the object's padding: a process that links no cgo package allocates the same
+    // 32-byte buffer it did before the index existed (R6 holds that number).
+    private byte m_state;
+
+    private const byte Open = 0, Backfilling = 1, Closed = 2;
+
+    // TEST SEAM (see Dispose). Set only by the pin-extent child test.
+    internal static Action? s_testHookBeforeFree;
+
+    // Not constructible directly: Of picks the indexed kind when a cgo package has switched the index on, so a buffer
+    // made any other way could never enter the index, and a missed pin is the door's unsafe direction.
+    private protected PinnedBuffer(byte[] array)
     {
         m_handle = GCHandle.Alloc(array, GCHandleType.Pinned);
         m_len = array.Length;
     }
 
-    public PinnedBuffer(object? src, nint len) : this(src, (int)len) {}
-
-    public PinnedBuffer(object? src, int len)
+    private protected PinnedBuffer(object? src, int len)
     {
         m_handle = src is null ? default : GCHandle.Alloc(src, GCHandleType.Pinned);
         m_len = len;
     }
+
+    /// <summary>
+    /// Pins <paramref name="array"/>. In a process where a cgo package has switched the pin-extent index on, the buffer
+    /// is the indexed kind, which carries its entry; anywhere else it is this one, and the index costs it nothing.
+    /// </summary>
+    /// <remarks>
+    /// A buffer made here just BEFORE the index is published is the plain kind, and enters only if the backfill reaches
+    /// it through the exact registry. One whose box registers after the backfill's walk, or never, stays out for its life:
+    /// another route into the early-pin residual, row 11 of the design's section 4.
+    /// </remarks>
+    internal static PinnedBuffer Of(byte[] array) =>
+        PinExtents.Current is null ? new PinnedBuffer(array) : new IndexedPinnedBuffer(array);
+
+    /// <summary>Pins <paramref name="src"/>, as <see cref="Of(byte[])"/> does.</summary>
+    internal static PinnedBuffer Of(object? src, int len) =>
+        PinExtents.Current is null ? new PinnedBuffer(src, len) : new IndexedPinnedBuffer(src, len);
+
+    /// <summary>Pins <paramref name="src"/>, as <see cref="Of(byte[])"/> does.</summary>
+    internal static PinnedBuffer Of(object? src, nint len) => Of(src, (int)len);
 
     ~PinnedBuffer()
     {
@@ -55,6 +89,26 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     {
         if (m_disposed)
             return;
+
+        // Closed first: no backfill reads the handle from here on, and none is still reading it. A release that finds the
+        // buffer already Closed lost a race with another release and returns: only the one that closed it frees the handle
+        // (two explicit releases on two threads both passed m_disposed before, and the loser's free threw).
+        SpinWait spin = default;
+        byte prior;
+
+        while ((prior = Interlocked.CompareExchange(ref m_state, Closed, Open)) == Backfilling)
+            spin.SpinOnce();
+
+        if (prior == Closed)
+            return;
+
+        // Out of the index BEFORE the pin is released: from here on the extent's bytes may move. Asked AFTER closing, so a
+        // backfill that entered this buffer (after the index was published) is seen here, and none can enter it later.
+        LeaveIndex();
+
+        // TEST SEAM: what runs between the index read above and the free below. The pin-extent child switches the index
+        // on here, which is the race P3's re-read named, made deterministic. Null everywhere else: one static read.
+        s_testHookBeforeFree?.Invoke();
 
         if (m_handle.IsAllocated)
             m_handle.Free();
@@ -85,7 +139,7 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     {
         try
         {
-            return new PinnedBuffer(storage, 0);
+            return Of(storage, 0);
         }
         catch (ArgumentException)
         {
@@ -94,6 +148,49 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     }
 
     public unsafe byte* Pointer => (byte*)m_handle.AddrOfPinnedObject();
+
+    /// <summary>
+    /// The index's backfill, for a pin taken before a cgo package switched the index on: enters this buffer's extent,
+    /// keyed by its handle, unless it is already in or already released. Idempotent. The indexed kind enters at
+    /// construction instead, and its override does nothing.
+    /// </summary>
+    internal virtual void EnterIndex() => PinExtents.Current?.EnterBackfilled(this);
+
+    // Out of the index, before the pin is released. Here only a backfilled buffer can be in it, and a process with no
+    // index pays one read of it.
+    private protected virtual void LeaveIndex() => PinExtents.Current?.LeaveBackfilled(this);
+
+    // The backfill's claim on the handle: false once the release has closed the buffer, and while it holds, the release
+    // waits before it frees the handle. Ended by EndBackfill.
+    internal bool TryBeginBackfill() => Interlocked.CompareExchange(ref m_state, Backfilling, Open) == Open;
+
+    internal void EndBackfill() => Volatile.Write(ref m_state, Open);
+
+    internal nint HandleKey => GCHandle.ToIntPtr(m_handle);
+
+    /// <summary>
+    /// The extent [start, end) of the pinned OBJECT's data, and not this buffer's own length (a pin-only hold is length 0),
+    /// or false when the buffer pins nothing.
+    /// </summary>
+    /// <remarks>
+    /// It reads the handle with no lock of its own, and no release can free the handle under it (P3's review, item 4,
+    /// and its re-read, item 1). The indexed kind calls it only from its own constructor, before anything else can see
+    /// the buffer. The backfill calls it only inside TryBeginBackfill / EndBackfill, and a release closes the buffer,
+    /// waiting out that claim, before it frees the handle.
+    /// </remarks>
+    internal bool TryExtent(out nuint start, out nuint end)
+    {
+        Debug.Assert(m_state != Closed, "the handle of a buffer whose release has begun was read");
+        start = end = 0;
+
+        if (!m_handle.IsAllocated || m_handle.Target is not { } target)
+            return false;
+
+        start = (nuint)m_handle.AddrOfPinnedObject();
+        nuint length = PinExtents.ExtentOf(target, m_len);
+        end = start + length;
+        return start != 0 && length != 0;
+    }
 
     // The pinned storage object itself (normally the byte[] the buffer wraps). PinnedBuffer is a
     // per-access VIEW — e.g. @string.buffer creates a fresh one per unsafe.StringData call — so
@@ -177,12 +274,12 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
         // slot would both finalize it, and the second Free lands on whatever the runtime re-issued
         // the slot to — GC handle-table corruption. A pinned object cannot move, so the fresh pin
         // answers the same address.
-        return new PinnedBuffer(PinnedTarget, m_len);
+        return Of(PinnedTarget, m_len);
     }
 
     public static implicit operator PinnedBuffer(byte[] array)
     {
-        return new PinnedBuffer(array);
+        return Of(array);
     }
 
     public static implicit operator Span<byte>(PinnedBuffer buffer)
@@ -197,6 +294,43 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
 
     public static implicit operator PinnedBuffer(@string src)
     {
-        return new PinnedBuffer(src, src.Length);
+        return Of(src, src.Length);
+    }
+}
+
+/// <summary>
+/// A pin made while the pin-extent index is on: it enters the index at construction and carries its entry, so it leaves
+/// without a lookup. Only <see cref="PinnedBuffer.Of(byte[])"/> makes one, so a process that never switches the index on
+/// never allocates the extra field.
+/// </summary>
+internal sealed class IndexedPinnedBuffer : PinnedBuffer
+{
+    // The entry, or s_none when the pin holds no bytes or has left.
+    private object? m_extent;
+    private static readonly object s_none = new();
+
+    internal IndexedPinnedBuffer(byte[] array) : base(array) => Enter();
+
+    internal IndexedPinnedBuffer(object? src, int len) : base(src, len) => Enter();
+
+    private void Enter()
+    {
+        object? extent = null;
+
+        if (PinExtents.Current is { } index && TryExtent(out nuint start, out nuint end))
+            extent = index.Add(this, start, end);
+
+        m_extent = extent ?? s_none;
+    }
+
+    // Entered at construction, so the backfill has nothing to do.
+    internal override void EnterIndex() { }
+
+    private protected override void LeaveIndex()
+    {
+        object? extent = Interlocked.Exchange(ref m_extent, s_none);
+
+        if (extent is not null && extent != s_none)
+            PinExtents.Current?.Remove(extent);
     }
 }

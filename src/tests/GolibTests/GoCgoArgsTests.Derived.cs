@@ -188,10 +188,11 @@ public unsafe partial class GoCgoArgsTests
     }
 
     // Why the emission matters to every arm above: a call result that is CAST to a number, as the converter emitted it
-    // until DESIGN-unsafe-pointer-call-result, carries nothing. It reaches the door as a bare number, and an interior
-    // number crosses (the disclosed number residue). The arms above hold only because the cast is gone.
+    // until DESIGN-unsafe-pointer-call-result, carries nothing. It reaches the door as a bare number. Under 3.1 that
+    // interior number crossed (the disclosed number residue); the pin-extent index (docs/phase4/DESIGN-cgo-pin-extents.md)
+    // refuses it by the extent of the pin it lies in, so the cast form is refused too, by the number alone.
     [TestMethod]
-    public void ACallResultCastToANumberCarriesNothingAndCrossesAsANumber()
+    public void ACallResultCastToANumberCarriesNothingAndIsRefusedByItsPinExtent()
     {
         array<byte> bytes = new array<byte>(32);
         ж<byte> first = new ElemRefBox<byte>(bytes, 0);
@@ -203,7 +204,8 @@ public unsafe partial class GoCgoArgsTests
         Assert.IsNotNull(kept.RetainedSource, "the call's own result carries a box");
         Assert.IsNull(cast.RetainedSource, "the same result cast to a number carries nothing");
         StringAssert.Contains(RefusalOf(() => GoCgoArgs.VoidPointer(kept, "f")), GoMemoryOwner);
-        Assert.AreEqual(carrying.Value.Value + 4, GoCgoArgs.VoidPointer(cast, "f"), "DISCLOSED: the bare interior number crosses");
+        Assert.AreEqual(carrying.Value.Value + 4, cast.Value.Value, "the cast number is the interior address");
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.VoidPointer(cast, "f")), "an address inside Go memory golib holds pinned");
 
         GC.KeepAlive(first);
     }
