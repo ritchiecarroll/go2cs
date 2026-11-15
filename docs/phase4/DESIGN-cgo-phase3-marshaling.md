@@ -1449,3 +1449,73 @@ inside a pin should cross, row 1 binds first, and this plan changes before code.
 - Any corpus line moved.
 
 — H (2026-11-15)
+
+### 18.1 Record 2026-11-15: section 6's four reds READ, and the I-2 flip list (before code)
+
+COORD approved 18 for the .5 train. Rulings: numbers stay REFUSED in 3.2, so pin-extent row 1 does not bind it; a
+call-scoped `fixed` is the pin; `m_pin` stays out.
+
+**Section 6, read end to end** (`testdata/cgo/p3`: arms `s6field`, `s6next`, `s6reinterp` and `s6slice`; new probe.c
+functions `go2cs_probe_list`, `_list_release` and `_address`). Each is asserted as Go prints it. H has no C compiler,
+so the hosted cgo-e2e legs are the instrument: linux 43765795991, windows 43765805154, darwin 43765814200, at `0ae7d5c230`.
+
+| arm | shape | Go | go2cs today, all three OSes |
+|---|---|---|---|
+| `s6field` | a scalar field of a C struct that also holds pointer fields | `2` | `2`: ALREADY GREEN |
+| `s6next` | the address of a pointer field, loaded through | `10 b` | **RED**: `panic: runtime error: invalid memory address or nil pointer dereference` |
+| `s6reinterp` | C memory reinterpreted as a Go struct of scalars | `2 8080 2130706433` | the same: ALREADY GREEN |
+| `s6slice` | an element of a slice over C memory, reinterpreted as a C struct pointer and handed back to C | `true` | `true`: ALREADY GREEN, classified as C memory |
+
+- Three of the four already pass, and stay as guards.
+- The one red is a POINTER FIELD of a C struct read from C memory, whose value reads nil. Its root is not yet READ.
+  If the cure needs a new box kind or a go2cs-gen change, that is stop line S-B, and a design is posted first.
+- **The void run, recorded as void and not a red.** The first dispatch (`0de78b7bee`; 43765347265 / 43765356418 /
+  43765365459) never built the probe library: `probe.c` already defines `struct go2cs_probe_node`, and H had read
+  only its function lines. Lesson: read the WHOLE C file before adding to it.
+
+**I-2, the flip list.** Each hand-over form of the arms that assert the "increment 3.2" refusal was classified by the
+door's own branch (a scratch probe calling `GoCgoArgs.GoMemory` on every form, never committed), then corrected by
+reading for the one thing the probe could not see, the ROOT storage (M2). The probe checked only the carried box's
+own element type, so it scored a view over a reference-bearing struct as crossing.
+- **Crosses in 3.2 (FLIP), 18 GolibTests hand-overs.**
+  - `AVoidPointerIntoGoMemoryIsRefusedBeforeTheCallInEveryFormItArrivesIn`: the retaining and pinning mints of a
+    scalar (2 of its 9 forms).
+  - `APointerOverManagedStorageNeverCrossesAVoidPointer`: the pinning and retaining mints of a wider view pinned over
+    an element, a view aliasing a struct, a native box with a retained source, a native box over a pinned managed
+    buffer, `unsafe.StringData` and `unsafe.SliceData` (12 of its 36).
+  - `ACallResultCastToANumberCarriesNothingAndIsRefusedByItsPinExtent`: the kept `unsafe.Add` result (1 of 2).
+  - `AnElementOfAnArrayFieldOfAViewOverGoMemoryIsStillRefusedAtTheVoidDoor`: both mints (2 of 2).
+  - `AHelpersPointerIsNilOrCMemoryAndGoMemoryIsRefusedNamingTheHelper`: the typed helper over a Go box (1).
+- **Refused with cgo's own panic** (the storage holds Go references or is an order token): the bare mint of a box that
+  holds references; the three mints of a view over a reference-bearing struct; the three mints of a native box that
+  aliases an order token; and both token numbers.
+- **Stays refused as a NUMBER** (unchanged outcome, new text): every number held in a variable, every bare mint (it
+  carries no box), the one-expression round trip, the two forms of `AVoidPointerToAViewReinterpretedOverGoMemoryIsRefused`,
+  all 14 of `ANumberBuiltByArithmeticOverAGoPointerIsRefusedForEveryKindOfPin`, the three of
+  `ANumberStaysRefusedWhileAnyPointerThatPinsItsStorageIsAlive`, and the pin-extent arms' numbers.
+  - Also the pinning and retaining mints of a pointer REBUILT from a Go array's number. Their native box has no
+    source, so 3.2 has no storage to fix and refuses them as numbers.
+- **The end-to-end arms** (`cgoP3Arms`; the converter mints `unsafe.Pointer(&x)` as `FromPinnedBox`, so the arms
+  whose pointer is written in the call carry their box). **22 flip to Go's output:**
+  - `goinnerdefer`, `goinnergo`, `govoid`;
+  - `gobytes`, `gostring`;
+  - `goviewfield`, `goviewfieldarray`, `goviewagain`, `goviewelem`, `goviewelemstring`;
+  - `goslice`, `goslicedata`;
+  - `goadd`, `goaddlocal`, `goaddvar`, `goaddfunc`, `goaddtyped`;
+  - `goviewfieldfunc`, `goviewfieldvar`;
+  - `goviewnamestring`, `goviewnameadd`, `goviewnameslice`.
+  - **2 stay refused as numbers:** `govoidnumber`, and `govoidexpr`. `govoidexpr` is Go-valid: a one-expression
+    round trip that the converter emits as a number. By the ruling it reopens only with a consumer's census, and a
+    converter fold of the identity round trip would keep the box at a corpus cost not yet measured.
+  - The three write-through arms of the typed door (`goaddfill`, `gofieldtyped`, `goviewnamedata`) flip too, as the
+    pinned class for a typed pointer.
+
+**COORD's notes on the reds.**
+- (a) A C callback that re-enters a cgo call while the `fixed` is held cannot arise in 3.2. `//export` (Phase 5) and a
+  C function used as a value (Phase 2) are both refused by name. The arm is named for Phase 5.
+- (b) The pressure arm forces compaction MID-CALL: a slow C fill, another thread calling
+  `GC.Collect(2, Forced, true, compacting: true)`, and an unpinned twin shown to move (Inconclusive otherwise). It lives
+  in GolibTests' CgoProbeTests around the 3.2 wrapper, because converted `runtime.GC()` is a plain `GC.Collect()` that
+  does not guarantee compaction.
+
+— H (2026-11-15)
