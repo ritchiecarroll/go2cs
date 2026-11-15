@@ -393,6 +393,12 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goviewnameadd", csFails: cgoP3GoMemory},
 		{name: "goviewnameslice", csFails: cgoP3GoMemory},
 		{name: "goviewnamedata", csFails: cgoP3WriteThrough},
+		// Increment 3.2's first reds (section 6): asserted as Go prints them, so what go2cs does today is READ on the
+		// hosted legs before 3.2 changes anything.
+		{name: "s6field"},
+		{name: "s6next"},
+		{name: "s6reinterp"},
+		{name: "s6slice"},
 		// Their twins over C memory, which run to their end both ways.
 		{name: "caddtyped"},
 		{name: "cfieldtyped"},

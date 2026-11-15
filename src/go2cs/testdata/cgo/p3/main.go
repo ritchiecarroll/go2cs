@@ -26,6 +26,17 @@ void *go2cs_probe_same(void *pointer);
 char *go2cs_probe_log_new(void);
 void go2cs_probe_log_put(char *log, int value);
 void go2cs_probe_release(void *pointer);
+
+struct go2cs_probe_node
+{
+    int family;
+    char *name;
+    struct go2cs_probe_node *next;
+};
+
+struct go2cs_probe_node *go2cs_probe_list(void);
+void go2cs_probe_list_release(struct go2cs_probe_node *node);
+void *go2cs_probe_address(void);
 */
 import "C"
 
@@ -34,6 +45,14 @@ import (
 	"os"
 	"unsafe"
 )
+
+// goAddress is a Go struct of scalars, the shape of go2cs_probe_address, that increment 3.2's reinterpret arm reads C
+// memory through.
+type goAddress struct {
+	Family uint16
+	Port   uint16
+	Addr   uint32
+}
 
 // goHeader is a Go struct the derived-pointer arms view Go memory through.
 type goHeader struct {
@@ -315,6 +334,32 @@ func main() {
 		s := h.name[:]
 		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(unsafe.SliceData(s))), 8)
 		fmt.Printf("goviewnamedata %d %q\n", int(n), string(s[:n]))
+	// Increment 3.2's first reds (DESIGN-cgo-phase3-marshaling section 6): C memory that Go reads. Go runs each to its
+	// end; what go2cs does with each is READ before 3.2 changes anything.
+	case "s6field":
+		// A scalar field of a C struct that also holds pointer fields.
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		fmt.Println("s6field", int(l.family))
+	case "s6next":
+		// The address of a pointer field, loaded through.
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		p := &l.next
+		fmt.Println("s6next", int((*p).family), C.GoString((*p).name))
+	case "s6reinterp":
+		// C memory reinterpreted as a Go struct of scalars, and a field read.
+		raw := C.go2cs_probe_address()
+		defer C.go2cs_probe_release(raw)
+		sa := (*goAddress)(raw)
+		fmt.Println("s6reinterp", sa.Family, sa.Port, sa.Addr)
+	case "s6slice":
+		// An element of a slice over C memory, reinterpreted as a C struct pointer and handed back to C: C memory.
+		buf := C.malloc(64)
+		defer C.free(buf)
+		mem := unsafe.Slice((*byte)(buf), 64)
+		r := (*C.struct_go2cs_probe_node)(unsafe.Pointer(&mem[0]))
+		fmt.Println("s6slice", C.go2cs_probe_same(unsafe.Pointer(r)) == buf)
 	case "caddtyped":
 		p := C.malloc(16)
 		defer C.free(p)

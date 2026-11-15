@@ -222,3 +222,62 @@ GO2CS_PROBE_EXPORT void go2cs_probe_release(void *pointer)
 {
     free(pointer);
 }
+
+// cgo Phase 3 increment 3.2's first reds (docs/phase4/DESIGN-cgo-phase3-marshaling.md section 6): C memory that Go
+// reads. A node holds a pointer field, as addrinfo does; the address is a struct of scalars, as sockaddr_in is.
+struct go2cs_probe_node
+{
+    int family;
+    char *name;
+    struct go2cs_probe_node *next;
+};
+
+struct go2cs_probe_address
+{
+    unsigned short family;
+    unsigned short port;
+    unsigned int addr;
+};
+
+// A two-node list in C memory: (2, "a") then (10, "b").
+GO2CS_PROBE_EXPORT struct go2cs_probe_node *go2cs_probe_list(void)
+{
+    struct go2cs_probe_node *second = calloc(1, sizeof *second);
+    struct go2cs_probe_node *first = calloc(1, sizeof *first);
+    char *a = calloc(2, 1);
+    char *b = calloc(2, 1);
+
+    a[0] = 'a';
+    b[0] = 'b';
+    second->family = 10;
+    second->name = b;
+    first->family = 2;
+    first->name = a;
+    first->next = second;
+
+    return first;
+}
+
+// Releases a list go2cs_probe_list made.
+GO2CS_PROBE_EXPORT void go2cs_probe_list_release(struct go2cs_probe_node *node)
+{
+    while (node)
+    {
+        struct go2cs_probe_node *next = node->next;
+        free(node->name);
+        free(node);
+        node = next;
+    }
+}
+
+// An address in C memory: family 2, port 8080, addr 0x7f000001. Released by go2cs_probe_release.
+GO2CS_PROBE_EXPORT void *go2cs_probe_address(void)
+{
+    struct go2cs_probe_address *address = calloc(1, sizeof *address);
+
+    address->family = 2;
+    address->port = 8080;
+    address->addr = 0x7f000001u;
+
+    return address;
+}
