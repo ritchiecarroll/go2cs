@@ -195,6 +195,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         return false;
     }
 
+    // The element box's field-view slot (ж.Views.cs), a null reference for every other kind. The view lookup
+    // reaches the slot through this virtual because a method of ж<T> must not name ElemRefBox<T>: that one
+    // mention makes every pointer type reach array<T>, whose AliasPointer names ж<array<T>>, one nesting level
+    // deeper each lap, and Native AOT expands the loop to its cut-off (IL3054) for every type a program touches.
+    internal virtual ref ViewEntry? ElementViews => ref Unsafe.NullRef<ViewEntry?>();
+
     // The pinned-reinterpret arm of the Reinterpret fallback (element storage only).
     internal virtual ж<TDst>? TryPinnedReinterpret<TDst>() => null;
 

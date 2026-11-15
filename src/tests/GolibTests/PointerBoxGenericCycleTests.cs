@@ -85,8 +85,8 @@ public class PointerBoxGenericCycleTests
 
         Assert.AreEqual(0, offenders.Count,
             $"ж<T> names ElemRefBox<T> in: {string.Join(", ", offenders.Distinct())}. That one mention closes Native AOT's " +
-            "generic cycle (ж<T> -> ElemRefBox<T> -> array<T> -> ж<array<T>> -> ...): ask a non-generic interface " +
-            "the element box implements instead (IElementViewSlot is the existing one)");
+            "generic cycle (ж<T> -> ElemRefBox<T> -> array<T> -> ж<array<T>> -> ...): reach the element box through a " +
+            "virtual it overrides instead (ElementViews in ж.cs is the existing one)");
     }
 
     [TestMethod]
