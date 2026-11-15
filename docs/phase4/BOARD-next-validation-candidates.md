@@ -39737,4 +39737,45 @@ and the field view's shape widened to two selections as its second commit, probe
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — H (pin-extent row 3, the discriminator run): concurrent pins collapse in the RUNTIME, at the GC handle table and finalizer registration, not in the index — ROOTED, .5
+
+Row 3 of the pin-extent seat's rows (4 threads pinning their own arrays ran 4-6.7x slower per op than 1, index ON or
+OFF) was UNROOTED. Its discriminator ran on H (8 logical CPUs), at master `0c1d295ea8`. The plan and predictions were
+posted to COORD first. The probe was a scratch file in GolibTests, never committed; its source and both readings are
+in `data/pin-collapse/`.
+- Setup: TieredCompilation=0, the index OFF, 2 processes x 2 readings, 200,000 ops per thread.
+- Each of 1 and 4 threads works on its OWN 64 KiB and 16 B array, separated by 8 KiB fillers.
+- GC mode, as run: workstation (GolibTests' default), latency Interactive, concurrent at the runtime default.
+
+| arm | 1 thread → 4 threads, per-op median | ratio | 4-thread throughput vs 1 |
+|---|---|---|---|
+| (a) `GCHandle.Alloc(Pinned)` + `Free` alone | 28-35 → 247-353 ns | 8.2-10.4 | ~0.4x |
+| (b) `PinnedBuffer.Of` (index OFF) + `Dispose`, today's whole plain pin | 93-115 → 568-666 ns | 4.9-6.9 | ~0.7x |
+| (b2) a finalizable object of PinnedBuffer's shape + `SuppressFinalize`, no handle | 59-79 → 501-615 ns | 6.8-9.9 | ~0.5x |
+| (c) `fixed` over the array | 1 → 1-2 ns | (resolution) | ~2.1x |
+| (d) a non-finalizable object of the same shape | 8-23 → 33-42 ns | 1.4-4.75 | ~1.0-2.7x |
+
+**Scored against the predictions posted first.**
+- P1 MET: (b) reproduces the row.
+- P3 MET: both candidates collapse, (a) and (b2) alike, each with 4-thread throughput below one thread's.
+- P4 MET: the costs compose; (b) at 1 thread is about (a) + (b2) + (d).
+- P2 MISSED on both controls, as worded:
+  - (c) prints 1 → 2 ns at the probe's 1-ns resolution, while its throughput doubles;
+  - (d), plain allocation, rises 1.4-4.75x per op, though its throughput does not fall below one thread's.
+
+**Server GC** (COORD's added axis, arms (a) and (b2) only): the collapse holds, milder.
+- (a) 33-37 → 184-277 ns, ratio 5.3-7.7, throughput below one thread's in every reading.
+- (b2) 43-112 → 217-558 ns, ratio 2.0-12, throughput below one thread's in 6 of 8 readings.
+
+**So.** The collapse is the runtime's, in two places: the GC handle table (a pinned handle allocated and freed per pin)
+and finalizable-object registration (one per `PinnedBuffer`). It holds for both GC modes on H. The pin-extent index
+adds its own cost on top (row 2), not the collapse.
+
+**A cure** would take the per-pin handle and finalizer off the hot path:
+- pool pinned handles per thread, or re-pin through one long-lived handle per object;
+- release through `IDisposable` without a finalizer, where the box's lifetime allows.
+That joins row 2 (pool or elide the holder and `WeakReference`) as one `.5` design.
+
+— H (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
