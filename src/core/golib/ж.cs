@@ -85,7 +85,7 @@ namespace go;
 
 [System.Diagnostics.DebuggerDisplay("{ToString(),nq}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(ж<>.DebugView))]
-public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IGoReflectBox, IAllocationIdentity, IPrintPointer, IGoEquatable, IHeldPin
+public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IGoReflectBox, IAllocationIdentity, IPrintPointer, IGoEquatable
 {
     // The debugger's view (DebuggerTypeProxy): the pointee, or null for the nil pointer -- reading a nil
     // box's Value would be Go's nil dereference, which a debugger must never trigger.
@@ -115,10 +115,6 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // slot, a field/element reference's canonical backing, and a reinterpret-derived native
     // box's source storage are all "an address of managed storage that must hold still".
     private protected PinnedBuffer? m_pin;
-
-    // The pin-extent index's backfill reads the pin through this, when a cgo package switches the index on after
-    // pins were already taken (runtime/PinExtents.cs).
-    PinnedBuffer? IHeldPin.HeldPin => m_pin;
 
     private protected ж(bool isNull = false) => m_isNull = isNull;
 
