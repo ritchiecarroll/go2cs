@@ -675,7 +675,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // element pointers (Ꮡ / SliceData), which answer the real one.
     internal PinnedBuffer buffer => m_nativeBase != 0
         ? throw new PanicException("native-backed slice: pinning is meaningless for native memory — take an element address instead")
-        : new(m_array, Length);
+        : PinnedBuffer.Of(m_array, Length);
 
     public nint Low => m_low;
 

@@ -4196,8 +4196,8 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -4341,8 +4341,8 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -4486,8 +4486,8 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -4631,8 +4631,8 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -4776,8 +4776,8 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -4921,8 +4921,8 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5066,8 +5066,8 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5211,8 +5211,8 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5356,8 +5356,8 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> typ, b
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5501,8 +5501,8 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5646,8 +5646,8 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5791,8 +5791,8 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -5936,8 +5936,8 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -6081,8 +6081,8 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;
@@ -6226,8 +6226,8 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> typ, 
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[0] = 0;
-    (@unsafe.Pointer.To<array<uint64>>(x)).Value[1] = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 0, 2) = 0;
+    @unsafe.Pointer.ElementRef<uint64>(x, 1, 2) = 0;
 
     if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         c.tiny = (uintptr)x;

@@ -1,0 +1,230 @@
+namespace go;
+
+using fmt = fmt_package;
+using syscall = syscall_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+partial struct hdr {
+    internal uint16 family;
+    internal uint16 pad;
+    internal uint16 port;
+    internal uint16 tail;
+    internal uint64 word;
+}
+
+partial struct refhdr {
+    internal @string name;
+    internal uint16 port;
+    internal uint16 tail;
+    internal uint64 word;
+}
+
+internal static readonly ж<hdr> Ꮡglobal = new StaticBox<hdr>(new hdr(port: 0x1234, tail: 0x5678, word: 0x1111111122222222UL));
+internal static ref hdr global => ref ((StaticBox<hdr>)Ꮡglobal).ValueSlot;
+
+internal static void @try(@string name, Func<@string> f) {
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: PANIC %v\n"u8, name, r);
+            }
+        }, ref ᒐ);
+
+        fmt.Printf("%s: %s\n"u8, name, f());
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+internal static byte directRead(ж<hdr> h) {
+    return @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).ElementRef(1);
+}
+
+internal static void directWrite(ж<hdr> h, byte v) {
+    @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).ElementRef(0) = v;
+}
+
+internal static ж<byte> directAddr(ж<hdr> h) {
+    return (@unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2)).at<byte>(1);
+}
+
+internal static nint directLen(ж<hdr> h) {
+    return 2;
+}
+
+internal static slice<byte> directSlice(ж<hdr> h) {
+    return @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).slice();
+}
+
+internal static array<byte> directWhole(ж<hdr> h) {
+    return (~@unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2)).Clone();
+}
+
+internal static uint32 directWord(ж<hdr> h) {
+    return @unsafe.ArrayPointer<uint32>.Of(h.Ꮡword, 2).ElementRef(1);
+}
+
+internal static void directOpAssign(ж<hdr> h) {
+    @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).ElementRef(1) += 2;
+}
+
+internal static byte localRead(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.ElementRef(1);
+}
+
+internal static void localWrite(ж<hdr> h, byte v) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    p.ElementRef(0) = v;
+}
+
+internal static nint localRange(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    nint sum = 0;
+
+    foreach (var i in range(p, 2)) {
+        sum += ((nint)p.ElementRef(i)).Lsh((int64)(8 * i));
+    }
+
+    return sum;
+}
+
+internal static nint localRangeValue(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    nint sum = 0;
+
+    foreach (var (_, b) in range(p.Value)) {
+        sum += (nint)b;
+    }
+
+    return sum;
+}
+
+internal static uint64 localWord(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<uint32>.Of(h.Ꮡword, 2);
+    return (uint64)p.ElementRef(0) + (uint64)p.ElementRef(1);
+}
+
+internal static slice<byte> localSlice(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.slice();
+}
+
+internal static array<byte> localWhole(ж<hdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.Value.Clone();
+}
+
+internal static byte refDirectRead(ж<refhdr> h) {
+    return @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).ElementRef(1);
+}
+
+internal static void refDirectWrite(ж<refhdr> h, byte v) {
+    @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).ElementRef(0) = v;
+}
+
+internal static byte refLocalRead(ж<refhdr> h) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    return p.ElementRef(1);
+}
+
+internal static void refLocalWrite(ж<refhdr> h, byte v) {
+    var p = @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2);
+    p.ElementRef(0) = v;
+}
+
+internal static void arms(@string root, ж<hdr> h) {
+    @try(root + " direct read [1]"u8, () => fmt.Sprintf("%#x"u8, directRead(h)));
+    @try(root + " direct write [0]"u8, () => {
+        directWrite(h, 0xAB);
+        return fmt.Sprintf("port %#x"u8, h.Value.port);
+    });
+    @try(root + " direct address"u8, () => {
+        var q = directAddr(h);
+        q.Value = 0xCD;
+        return fmt.Sprintf("port %#x"u8, h.Value.port);
+    });
+    @try(root + " direct op-assign"u8, () => {
+        directOpAssign(h);
+        return fmt.Sprintf("port %#x"u8, h.Value.port);
+    });
+    @try(root + " direct len"u8, () => fmt.Sprint(directLen(h)));
+    @try(root + " direct slice"u8, () => {
+        var s = directSlice(h);
+        s[0] = 0x11;
+        return fmt.Sprintf("len %d cap %d port %#x"u8, len(s), cap(s), h.Value.port);
+    });
+    @try(root + " direct whole"u8, () => {
+        var a = directWhole(h);
+        return fmt.Sprintf("%#x %#x"u8, a[0], a[1]);
+    });
+    @try(root + " direct word [1]"u8, () => fmt.Sprintf("%#x"u8, directWord(h)));
+    @try(root + " local read [1]"u8, () => fmt.Sprintf("%#x"u8, localRead(h)));
+    @try(root + " local write [0]"u8, () => {
+        localWrite(h, 0x22);
+        return fmt.Sprintf("port %#x"u8, h.Value.port);
+    });
+    @try(root + " local range index"u8, () => fmt.Sprintf("%#x"u8, localRange(h)));
+    @try(root + " local range value"u8, () => fmt.Sprintf("%#x"u8, localRangeValue(h)));
+    @try(root + " local word"u8, () => fmt.Sprintf("%#x"u8, localWord(h)));
+    @try(root + " local slice"u8, () => {
+        var s = localSlice(h);
+        s[1] = 0x33;
+        return fmt.Sprintf("len %d cap %d port %#x"u8, len(s), cap(s), h.Value.port);
+    });
+    @try(root + " local whole"u8, () => {
+        var a = localWhole(h);
+        return fmt.Sprintf("%#x %#x"u8, a[0], a[1]);
+    });
+}
+
+internal static void main() {
+    GoFrame ᒐ = default;
+    try {
+        var managed = Ꮡ(new hdr(port: 0x1234, tail: 0x5678, word: 0x1111111122222222UL));
+        arms("managed", managed);
+
+        arms("global", Ꮡglobal);
+
+        var buf = new slice<byte>(64);
+        var over = Ꮡ(buf, 0).Reinterpret<byte, hdr>();
+        (over.port, over.tail, over.word) = (0x1234, 0x5678, 0x1111111122222222UL);
+        arms("over-bytes", over);
+
+        var (page, err) = syscall.Mmap(-1, 0, 4096, (nint)((nint)syscall.PROT_READ | (nint)syscall.PROT_WRITE), (nint)((nint)syscall.MAP_ANON | (nint)syscall.MAP_PRIVATE));
+
+        if (err != nil) {
+            fmt.Println("mmap:", err);
+            return;
+        }
+
+        defer(syscall.Munmap, page, ref ᒐ);
+
+        var native = Ꮡ(page, 0).Reinterpret<byte, hdr>();
+        (native.port, native.tail, native.word) = (0x1234, 0x5678, 0x1111111122222222UL);
+        arms("native", native);
+
+        var @ref = Ꮡ(new refhdr(name: "x", port: 0x1234, tail: 0x5678));
+        var refʗ1 = @ref;
+        @try("ref direct read [1]", () => fmt.Sprintf("%#x"u8, refDirectRead(refʗ1)));
+        var refʗ2 = @ref;
+        @try("ref direct write [0]", () => {
+            refDirectWrite(refʗ2, 0xAB);
+            return fmt.Sprintf("port %#x name %q"u8, refʗ2.port, refʗ2.name);
+        });
+        var refʗ3 = @ref;
+        @try("ref local read [1]", () => fmt.Sprintf("%#x"u8, refLocalRead(refʗ3)));
+        var refʗ4 = @ref;
+        @try("ref local write [0]", () => {
+            refLocalWrite(refʗ4, 0x22);
+            return fmt.Sprintf("port %#x name %q"u8, refʗ4.port, refʗ4.name);
+        });
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+} // end main_package
