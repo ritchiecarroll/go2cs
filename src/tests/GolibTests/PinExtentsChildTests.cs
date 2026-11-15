@@ -53,6 +53,11 @@ public class PinExtentsChildTests
         // "R6 bytes-per-pin <pin> bare-buffer <bare>"
         Assert.AreEqual(bytes[4], bytes[2], $"a pin allocated more than its buffer object: {Line("R6 bytes-per-pin")}");
 
+        // ...and the buffer object is the size it was BEFORE the index existed: 32 bytes on a 64-bit runtime, measured at
+        // the seat's base (d7f5a59f79). Comparing the pin with a buffer of the SAME build cannot see a field the index
+        // adds to every buffer, in every process; this can.
+        Assert.AreEqual("32", bytes[2], $"a process with no cgo package pays for the index in every pin: {Line("R6 bytes-per-pin")}");
+
         // R5: before registration nothing is refused by extent; registration creates the index and backfills the exact
         // registry's pins, so the value slot's interior is refused. The buffer made before registration and never handed
         // through the exit is row 11, disclosed: it crosses. A pin made after registration enters at construction.

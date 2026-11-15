@@ -92,6 +92,33 @@ internal sealed class PinExtents
         return null;
     }
 
+    /// <summary>
+    /// TEST DIAGNOSTIC: how many live index entries describe some byte of [<paramref name="start"/>,
+    /// <paramref name="end"/>). What a pin costs the index is the arm that reads it.
+    /// </summary>
+    internal static int EntriesOver(nuint start, nuint end)
+    {
+        PinExtents? index = Volatile.Read(ref s_current);
+        int count = 0;
+
+        if (index is null || end <= start)
+            return 0;
+
+        for (nuint number = start >> PageShift; number <= (end - 1) >> PageShift; number++)
+        {
+            if (!index.m_pages.TryGetValue(number, out Page? page))
+                continue;
+
+            for (Node? node = page.Head; node is not null; node = node.Next)
+            {
+                if (node.Dead == 0 && node.Base < end && node.End > start)
+                    count++;
+            }
+        }
+
+        return count;
+    }
+
     // The extent [start, end) of owner's pinned object, in one node per page it covers, chained page to page through
     // NextPage. Returns the first node: what Remove takes back.
     //
