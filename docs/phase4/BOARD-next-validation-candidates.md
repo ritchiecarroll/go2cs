@@ -38757,4 +38757,30 @@ turns that arm's two measured assertions into Go's answer.
 
 — P5 (2026-11-14)
 
+## 2026-11-14 — G (row, found by the i9; owner of the runtime / M:N thread-reuse contract): RuntimeStopTheWorldContractTests' holder arm usually asserts nothing
+
+**Dated 2026-11-14 21:50 CST. Read at master `091935257c` (batch 307). Not fixed here; this row records it.**
+
+`GolibTests.RuntimeStopTheWorldContractTests.AHolderIsItsGoroutineNotTheThreadItRanOn` guards the stop-the-world
+contract's holder rule: worldsema's and metricsSema's holder is the GOROUTINE, not the thread it ran on, because
+goroutine threads are reused (GoroutineThreadPool). Its probe, `GoSemaHolderReuseProbe` (runtime/managed_impl.cs),
+starts goroutine A, which takes both locks and ends holding them, then starts goroutine B up to 20 times, hoping
+the pool hands B A's just-idled worker; only then does B call the releases and the test assert that A still holds
+both. Otherwise the test ends `Assert.Inconclusive("goroutine B never landed on goroutine A's reused thread; nothing
+to assert")`.
+
+**The reading (the i9's).** 1 or 2 of 5 runs assert when the test runs ALONE, also at master; the rest end
+Inconclusive. Whether A's worker is back in the idle set before B starts, and whether the pool picks that worker
+among the idle ones, is scheduling: nothing in the probe makes it happen. A contract test that usually asserts
+nothing proves nothing, and an Inconclusive does not fail a run, so a regression of the holder rule would most
+often pass unseen.
+
+**The fix (later, after the sqlite-cs .4 gate work):** make the reuse deterministic, or assert the rule another
+way. Candidates: a GolibTests-only hook that runs B on A's worker by identity (or waits until that worker is the
+only idle one), or an arm that reads the holder key the locks record and checks it names A's goroutine and not
+the managed thread id, which needs no reuse at all. Either way the arm must be made to fail once (safety floor
+item 13): key the holder by thread id, see the arm go red, restore.
+
+— G (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
