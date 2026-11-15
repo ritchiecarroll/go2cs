@@ -9,20 +9,22 @@ equals StringData: true
 ## the probe converted by go2cs at 9f2eeb8f23, then run
 panic: runtime error: dereference of a managed pointer with no address (*StringHeader over 0x8000000500000000 — the order token of a reference-bearing pointee at offset 0, Q44 §10.3 arm 2a; a Go-layout byte offset into CLR-laid-out storage cannot be honoured)
 
-## census on ctl/pos (run from ctl/)
+## census on ctl/pos (run from ctl/; write classes judged at the destination)
 files parsed 1; files naming __ccgo_ts 1
 decl       1
 decl-ref   1
 ts1-decl   1
 plusN      3
-value      0
+value      1
 plusExpr   1
 compare    1
 subtract   1
 ts1use     2
 other      0
-store      2
+store      3
 memwrite   1
+store-may  0
+memwrite-may 0
 parseerror 0
 
 == decl (1)
@@ -41,25 +43,26 @@ parseerror 0
    pos/pos.go:18:24  unsafe.StringData(__ccgo_ts1)
    pos/pos.go:25:30  len(__ccgo_ts1)
 
-== store (2)
+== store (3)
    pos/pos.go:21:2  *(*byte)(unsafe.Pointer(q)) = 'x'
    pos/pos.go:22:2  *(*byte)(unsafe.Pointer(__ccgo_ts + 1))++
+   pos/pos.go:34:2  *(*byte)(unsafe.Pointer(s)) = 1
 
 == memwrite (1)
    pos/pos.go:23:2  Xmemcpy(tls, __ccgo_ts+0, other, 1)
 
 == escapes: a tainted number passed to a call (not followed), by callee, top 25 of 3 callees
-   ?                                2
-   Pointer                          2
+   ?                                3
+   Pointer                          3
    g                                1
 
-## census on ctl/neg (run from ctl/)
+## census on ctl/neg (run from ctl/; write classes judged at the destination)
 files parsed 1; files naming __ccgo_ts 1
 decl       1
 decl-ref   1
 ts1-decl   1
-plusN      2
-value      1
+plusN      5
+value      2
 plusExpr   0
 compare    0
 subtract   0
@@ -67,13 +70,19 @@ ts1use     0
 other      0
 store      0
 memwrite   0
+store-may  1
+memwrite-may 0
 parseerror 0
 
 == decl (1)
    neg/neg.go:9:5  __ccgo_ts = (*reflect.StringHeader)(unsafe.Pointer(&__ccgo_ts1)).Data
 
-== escapes: a tainted number passed to a call (not followed), by callee, top 25 of 3 callees
-   ?                                1
-   Pointer                          1
+== store-may (1)
+   neg/neg.go:35:2  *(*byte)(unsafe.Pointer(m)) = 1
+
+== escapes: a tainted number passed to a call (not followed), by callee, top 25 of 4 callees
+   ?                                2
+   Pointer                          2
    Xprintf                          1
+   k                                1
 

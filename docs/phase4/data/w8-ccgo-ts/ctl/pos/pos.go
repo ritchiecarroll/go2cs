@@ -26,3 +26,10 @@ func f(tls *TLS, other uintptr) {
 }
 
 func g(uintptr) {}
+
+// A local whose every source is derived, through +=: a store through it is a write into the literals.
+func h() {
+	s := __ccgo_ts
+	s += 4
+	*(*byte)(unsafe.Pointer(s)) = 1 // store
+}
