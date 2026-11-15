@@ -638,3 +638,61 @@ and compares), W10, W12, W13 (only the last link held), W14 (behavioral, with it
 for SliceHeader), W16 (a plain-struct header keeps today's behaviour); and three converter tests (item 3).
 
 — H (2026-11-15)
+
+### 10.4 Amended 2026-11-15, evening: the cut on the union, its gates and what they found
+
+The cut was merged (not rebased; it was pushed) onto the pin-extent seat's 308 merge (`bbc531c384`), then onto master
+`0c1d295ea8` (batch 309, which carries that seat). The pin-extent index is in the tree from here on.
+
+**Arms added on the union.**
+- **W13** is Xgethostname's chain as the converter emits it after 308, `copy(dst, View<byte>(FromHeaderData(sh), 0, n, n, N))`,
+  with ONLY the slice held across compacting collections with finalizers. The view door takes **V1**, a managed window
+  on the string's own backing (`IsNativeBacked` false). So nothing is pinned for the slice's life and no raw span exists.
+  This is not the V2 window first guessed: `To<E>` returns a carried `ж<E>` itself, so the door's element-storage arm
+  answers. While the chain lives, `EntriesOver(h, h+n) == 1`. That one entry is the ELEMENT BOX's pin-only hold, taken
+  when (H) mints `h` at the Data read and kept by the header box. The slice pins nothing. After the copy and a
+  collection the count is 0.
+- **W13b** keeps only the POINTER past the chain, then compacting churn, then cuts the view: still V1, because the
+  carried element box keeps the number resolvable.
+- **W7** now also asserts (H)'s interior number `h + 2` refused, by the pin-extent index.
+
+**Red reads**, each build-gated, files restored by hash:
+- (i) The index forced off (`PinnedBuffer.Of` always the plain kind): W7 fails at `h + 2`, W13 at its live entry
+  (Actual 0). As predicted.
+- (ii) `FromHeaderData` returning the bare number pointer: W13a and W15 fail. **PREDICTION MISSED for W13**, which
+  passes, because while the header box lives the bare number resolves through the pin registry to the same element
+  box. W13 does not discriminate the carry. W13b was written for that, read red under (ii) (a raw native window), and
+  is green at the tip.
+
+**What the first unfiltered battery found** (at `edafc0f3bf`, the first time this cut's suites ran unfiltered): two
+reds in the cut's own code, present since `fe14d5faf8`. Every earlier reading had been FILTERED to the header classes
+(GolibTests) or `-run` (the converter).
+- `PublicSurfaceTests`: `IHeaderDataCarrier` was a new public name in namespace `go`. It moved to
+  `src/core/golib/IHeaderDataCarrier.cs`, namespace `go.golib`, as the guard instructs. The baseline is unchanged.
+- `TestProjitemsRegistersEveryGoSource`: `headerDataPointer_test.go` was unregistered; it now is.
+
+**Footprint** (`edafc0f3bf`): the two-seeded `-stdlib` comparison, A = the seat's converter and B = the cut's, both
+roots seeded from the cut's tip, reads 0 files differing on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64.
+Every root seeded 4686 `.cs`, both arms rc 0, 0 degraded.
+- The hand-own check as first written was **VACUOUS**. It compared a `git archive` copy (CRLF) with a `git show` copy
+  (LF), so it printed NO in all eight roots.
+- Re-measured with a valid check (a byte compare against the archive's own copy, control SAME before conversion), on
+  one seeded B conversion, windows/amd64: `unsafe.cs` is kept. The converter rewrote 14 files, none of them `unsafe.cs`.
+- Census line (the header-use class of `data/w8-ccgo-ts/census-main.go`, both controls read): GOROOT/src holds one
+  rule-6 header Data use, in `cmd/vendor/golang.org/x/sys/unix/syscall_zos_s390x.go:3018`. That file is outside
+  `-stdlib` and the four targets, so the count in the converted population is 0.
+
+**The re-gate at `833f1073bc`, all unfiltered.**
+- GolibTests: Release 2861/0/50, Debug 2836/0/75.
+- GenTests: 530/0.
+- go test: 11 ok, 0 FAIL, 0 cached.
+- CNR: NO REGRESSION, byte-identical, 1080 packages.
+- Hosted 9/9 success: golib-tests, converter-cgo and cgo-e2e on linux, windows and darwin.
+
+Two count predictions MISSED, each in the instrument:
+- GolibTests' added names read 48 against a predicted 46, all Passed. The name census keyed on the method name alone,
+  and its pattern required `public void`, so it missed one name shared with another class and one `public unsafe void`.
+- CNR read 1080 against a predicted 1081. The prediction counted 309's platform-exclusive `ArrayPointerElementDoors`,
+  which the measured set excludes.
+
+— H (2026-11-15)
