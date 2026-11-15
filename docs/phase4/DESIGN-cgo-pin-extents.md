@@ -284,6 +284,13 @@ here.
   `Exit`: the bytes are unchanged after a forced collection inside the call. Under 3.1 the arm asserts the
   refusal, and that the index entry still resolves after the collection.
 
+> **Amended 2026-11-14 (the seat, COORD's ruling on its D-1).** R5 and R6 run in a CHILD PROCESS that links golib and
+> no cgo package, built and run by GolibTests. They cannot run inside GolibTests: it is itself a cgo process, because
+> its OS golden's module initializer calls `GoCgoLibraries.Register` at load. **golib assumes one copy per process;
+> never load it in a second AssemblyLoadContext.** A second copy runs golib's module initializer again, and on linux
+> and darwin its standard-descriptor hygiene would close the console's own descriptors mid-run. On windows that step
+> does nothing, so the failure would not show on the box that measures it.
+
 ## 8. The seat it proposes
 
 **Predictions, to be scored as worded at seat time.**
