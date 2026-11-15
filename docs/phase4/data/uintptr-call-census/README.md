@@ -91,3 +91,28 @@ next `-tests` regeneration; that is expected, not measured here.
   `unsafe.Pointer` as a type (it names it only inside a `DynamicDependency` string), so it cannot hold this shape.
   Packages outside the four builds' closures hold no hand-written text hit (the reconciliation above), so nothing in
   scope went uncompiled.
+
+## Amendment 2026-11-15 (R): the marker test missed the namespace-qualified spelling
+
+**The defect.** The file-kind test above keys on a line beginning `[module: GoManualConversion]`. 198 of the 226
+whole-file hand-owns spell it `[module: go.GoManualConversion]`, so the first reading counted them as converted. It
+was found while cutting the next seat, the hand-owns' pointer-cast respelling, when that seat's census missed
+`runtime/mfinal.cs`, `runtime/runtime2.cs` and `net/windows/lookup_windows.cs`. `report.py` now accepts both spellings
+(`\[module:\s*(go\.)?GoManualConversion\]`), and `readings/` is regenerated from the same `.ucc` files. No build was
+re-run, because the analyzer's records do not depend on the file kind.
+
+**The result does not change.** Hand-written `BACK-TO-POINTER` is still 0 on every target, so there are still 0 true
+sites. The figures above that do change:
+
+| Figure | First reading | Corrected |
+|---|---|---|
+| Hand-written files | 264 | 294 |
+| Textual `(uintptr)<call>(` hits in them | 52 (12 typed, 40 not) | 55 (14 typed, 41 not) |
+| Hand-written `POINTER-CAST` per target | 6 | 8 |
+| Hand-written `NUMBER` per target | 2 | 2 |
+
+The two added `POINTER-CAST` sites are both in the namespace-qualified hand-owns, and both take a pointer that can carry
+a box: `runtime/mfinal.cs:178`, `(ж<finBlock>)(uintptr)(persistentalloc(…))`, and `runtime/runtime2.cs:364`,
+`(ж<Δhchan>)(uintptr)(Δp.maybeTraceablePtr.get())`. Like the two named above, they are the pointer-cast route. They
+are in scope for the respelling seat (`claude/r-handown-ptr-root`), which takes every `(ж<…>)(uintptr)(` cast in a
+hand-owned file.

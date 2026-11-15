@@ -4,8 +4,9 @@ import io, os, re, sys
 #   1. class x file-kind tallies per flavour;
 #   2. BACK-TO-POINTER sites whose callee is not a Pointer.FromRef conversion, production vs test files;
 #   3. the TEXT census of hand-written files, each hit reconciled with the typed records.
-# File kind: manual = a LINE beginning `[module: GoManualConversion]` (the converter's placeholder comments quote the
-# marker in prose, so a substring test admits converted files); impl = *_impl.cs; handowned = src/core/unsafe or
+# File kind: manual = a LINE beginning `[module: GoManualConversion]` or `[module: go.GoManualConversion]` (most
+# hand-owns spell it qualified; the converter's placeholder comments quote the marker in prose, so a substring test
+# admits converted files); impl = *_impl.cs; handowned = src/core/unsafe or
 # src/core/testing; converted = everything else.
 sys.stdout.reconfigure(encoding='utf-8')
 W, U, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -22,7 +23,7 @@ def kind_of(rel):
             s = io.open(os.path.join(CORE, rel), encoding='utf-8', errors='replace').read()
         except OSError:
             s = ''
-        _kinds[rel] = ('manual' if any(l.strip().startswith('[module: GoManualConversion]') for l in s.splitlines())
+        _kinds[rel] = ('manual' if any(re.match(r'\[module:\s*(go\.)?GoManualConversion\]', l.strip()) for l in s.splitlines())
                        else 'impl' if rel.endswith('_impl.cs')
                        else 'handowned' if rel.split('/')[0] in ('unsafe', 'testing') else 'converted')
     return _kinds[rel]
