@@ -1054,3 +1054,61 @@ opt-in's population. Auto is a SUBSET of the opt-in:
 >   19/7/4 to 17/9/0; libc and sqlite/lib identical on all four targets; `GO2CS2010` 0 in every population. The unix
 >   packages lose more than `RawSockaddrAny`: the family sockaddrs no face kept out (`RawSockaddrCAN`, `IUCV` and `VM`
 >   on linux, `RawSockaddrCtl` on darwin) agreed with the `Any` while it was admitted, and leave with it.
+
+> **Amended 2026-11-15 (C2): a defined type follows its base, and a consumer slices a foreign inline array**
+> (COORD's go-winio GUID wall, release-blocking; Part 2 ruled (a), then (b)+(a) at 02:38Z):
+> - **Part 1, a defined type over a named struct.** go-winio declares `type GUID windows.GUID`, and go2cs-gen lays the
+>   defined type out as a wrapper over its base, so it holds the base's inline `array8<byte>`. The admission now maps
+>   each local `type T U` (U a named, non-generic struct) to its base: T is held inline exactly when U is, here or in
+>   U's package record, and T lands in its own package's record. Converter: `inlineArrayAdmission.go`.
+> - **Part 2, the slice face of a foreign inline array.** A consumer cannot keep another package's type out, so
+>   `x.f[lo:hi]` over a foreign inline array (or a local defined type over one) is spelled as Go means it, a slice
+>   that ALIASES the struct's storage: `Ꮡx.of(X.Ꮡf).ΔInlineSlice<E>()[lo..hi]`. golib's `ж<T>.ΔInlineSlice<E>()`
+>   pins the box through its uintptr conversion (the pin moment and the provenance record) and the slice's anchor keeps
+>   the box, so the pin lives as long as the box. It is a new golib member and not `unsafe.Slice(Pointer.To(...))`,
+>   for two reasons: `unsafe.Slice` reads an address the provenance record resolves as a COPY, and a consumer such as
+>   go-winio's `guid` does not import `unsafe`. The variable is boxed by the address walks (escape analysis,
+>   `objectAddressTaken`, capture mode, ref lowering); a value receiver that is sliced is boxed as a COPY at entry.
+> - **(b) The two copy shapes take no pin.** `copy(x.f[lo:hi], src)` and `copy(dst, x.f[lo:hi])`, with the other
+>   operand a slice, are `copy(ref x.f, lo, hi, src)` and `copy(dst, ref x.f, lo, hi)`: a span over the inline
+>   storage for the copy's duration (`builtin.InlineArrayCopy.cs`), no box. A three-index slice, a string operand and
+>   two inline operands keep the slice's own spelling. The test is structural, so a consumer reading an imported
+>   method's body classifies it as the declaring package did.
+> - **Element types.** Only a numeric or boolean element is spelled. Any other element (a pointer, a string, a
+>   struct, a nested array) stays a C# compile error, as every unspelled face is: a reference-bearing element cannot be
+>   pinned, and a native window cannot carry it.
+> - **Cost, measured** (N = 1,000,000; `inlineArrayForeignSlice_test.go`). The copy shapes cost what Go's copy
+>   does. A sliced value receiver whose slice escapes pays one boxed copy and one finalizable pin per slicing,
+>   released after two collections: B3 (pins released) holds, and retained heap, fragmentation and peak exceed an
+>   unpinned control. Disclosed on the BOARD (2026-11-15, C2). Three instrument corrections were made after the first
+>   GC reading, before any code change, with the bars unchanged: find the `-recurse` program, drain with
+>   `runtime.GC()` before the exit reading, and sample the peak with `GC.GetTotalMemory`.
+> - **P3's review of Part 2 (COORD's rulings, 2026-11-15 05:21Z), each arm read at the unfixed tree first.**
+>   `TestInlineArrayForeignSliceReviewShapes` prints what Go prints for every root a slice can be cut from.
+>   - *Ruling 1, a package variable: red, silent.* The package-variable scan (`scanAddressedGlobals`, which the
+>     importer's `importedGlobalIsBoxed` shares) recorded only `&g...` and method calls, so `s := id.Data4[:]` over an
+>     unexported or `package main` variable sliced the one-argument `Ꮡ(id)`, a copy: Go printed 1, go2cs 0. The scan
+>     now records the inline slice. An exported variable of an importable package was already boxed for importers.
+>   - *Ruling 2, one predicate.* `inlineSliceStorageRoot` walks a slice's operand to the variable that holds it (field
+>     and array-element hops, a pointer only at the root), and escape analysis, `objectAddressTaken`, capture mode and
+>     the package-variable scan all ask it. Its two shapes did not read red: an index chain (`p.arr[i].f[:]`) already
+>     aliased through the array element's box (`Ꮡ(p.arr, i)`), and now also boxes the receiver; a NESTED inline array
+>     (`g.m[i][:]`) is a C# compile error, CS0411 at `Ꮡ(g.M, i)`, before and after, because golib has no element
+>     address for a go.arrays member. Loud, not reached by go-winio, recorded on the BOARD.
+>   - *Ruling 4, refuse the copy.* `inlineArraySliceBase` refuses an address spelled as the one-argument `Ꮡ(value)`,
+>     naming the site; the file is dropped and the run fails (GO2CS2008). Shown red by removing ruling 1's walk: both
+>     of its sites were named.
+>   - *3a, a field of a struct in C memory: did not reproduce.* `ж.of` over a native root returns a `NativeBox` at the
+>     field's Go address, which passes the refusal. A native-rooted `FieldRefBox` remains only where the Go offset
+>     cannot be resolved, and there `NativeIdentity` is the CLR slot, not necessarily Go's address, so the refusal is
+>     unchanged. GolibTests' `InlineSliceStorageTests` keeps the native arm as a guard.
+>   - *3b, a root that holds a Go reference: disclosed.* Such a root cannot be pinned, so the slice panics by name:
+>     `inline array slice: an array held inline in a struct that also holds a Go reference cannot be held still, so it
+>     cannot be sliced`. Go slices it. go-winio users who keep a GUID beside a string will hit it. Limitations.md says
+>     so; the cure (a slice backing of an object plus a field offset, no pin) is a .5 BOARD row.
+>   - *NIT 5, a range value variable: did not reproduce.* A deconstructing `foreach` declares ordinary locals, and the
+>     channel's single-variable form compiled too; both copies print what Go prints.
+>   - *NIT 6, bounds order: red, fixed.* Go checks a destination's bounds before its source runs:
+>     `copy(x.f[0:hi], next())` with a bad `hi` never calls `next`, and go2cs called it. A destination is now spelled
+>     over a reference only when its bounds are constant or absent; any other keeps the slice's own spelling, evaluated
+>     first.

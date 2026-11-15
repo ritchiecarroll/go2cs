@@ -1,0 +1,44 @@
+capacity go-value steps=0 at_offset=0 capacity=16 (bounded would be 16)
+capacity go-value steps=10 at_offset=0 capacity=16 (bounded would be 16)
+capacity go-value steps=60 at_offset=0 capacity=16 (bounded would be 16)
+capacity go-value steps=61 at_offset=1 capacity=15 (bounded would be 15)
+capacity go-value steps=62 at_offset=0 capacity=16 (bounded would be 16)
+capacity go-value steps=63 at_offset=1 capacity=15 (bounded would be 15)
+capacity go-value steps=64 at_offset=0 capacity=16 (bounded would be 16)
+capacity go-value steps=65 at_offset=1 capacity=15 (bounded would be 15)
+capacity go-value steps=100 at_offset=0 capacity=16 (bounded would be 16)
+capacity go-value steps=10000 at_offset=0 capacity=16 (bounded would be 16)
+capacity go-value steps=1000000 at_offset=0 capacity=16 (bounded would be 16)
+retained go-value steps=10 bytes=152 per_step=15.2
+retained c-memory steps=10 bytes=-440 per_step=-44.0
+retained go-value steps=100 bytes=-600 per_step=-6.0
+retained c-memory steps=100 bytes=-24 per_step=-0.2
+retained go-value steps=10000 bytes=-64 per_step=-0.0
+retained c-memory steps=10000 bytes=0 per_step=0.0
+retained go-value steps=1000000 bytes=-64 per_step=-0.0
+retained c-memory steps=1000000 bytes=0 per_step=0.0
+loopcost go-value steps=10 ms=0.72 ns_per_step=71890 unequal=10
+loopcost c-memory steps=10 ms=0.05 ns_per_step=4810 unequal=10
+loopcost go-value steps=100 ms=0.09 ns_per_step=870 unequal=100
+loopcost c-memory steps=100 ms=0.02 ns_per_step=200 unequal=100
+loopcost go-value steps=1000 ms=0.78 ns_per_step=776 unequal=1000
+loopcost c-memory steps=1000 ms=0.20 ns_per_step=199 unequal=1000
+loopcost go-value steps=10000 ms=23.14 ns_per_step=2314 unequal=10000
+loopcost c-memory steps=10000 ms=2.16 ns_per_step=216 unequal=10000
+loopcost go-value steps=20000 ms=13.28 ns_per_step=664 unequal=20000
+loopcost c-memory steps=20000 ms=4.37 ns_per_step=218 unequal=20000
+equality c-memory steps=10 equal=True
+equality go-value steps=10 entering
+equality go-value steps=10 equal=True us=4.4
+equality c-memory steps=100 equal=True
+equality go-value steps=100 entering
+equality go-value steps=100 equal=True us=0.7
+equality c-memory steps=10000 equal=True
+equality go-value steps=10000 entering
+equality go-value steps=10000 equal=True us=5.7
+equality c-memory steps=100000 equal=True
+equality go-value steps=100000 entering
+equality go-value steps=100000 equal=True us=13.1
+equality c-memory steps=1000000 equal=True
+equality go-value steps=1000000 entering
+equality go-value steps=1000000 equal=True us=23.1

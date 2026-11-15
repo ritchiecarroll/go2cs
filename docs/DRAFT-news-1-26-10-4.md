@@ -147,7 +147,7 @@ memory, was refused by name. A `-cgo` conversion is one package, and it builds a
 the `go.*` packages from the feed is planned for the next release.
 <!-- src/go2cs/main.go:305 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
-**A pointer rebuilt from a number is refused too, with one narrow memory-safety gap left.** go2cs refuses, by name,
+**A pointer rebuilt from a number is refused too, with a narrow memory-safety gap left.** go2cs refuses, by name,
 any address inside Go memory that it is holding still, even after the address has been through a `uintptr`:
 `u := uintptr(unsafe.Pointer(p))` followed by `C.f(unsafe.Pointer(u + n))`, the reversed sum
 `unsafe.Pointer(n + uintptr(unsafe.Pointer(p)))`, and Go's own one-expression form, which converts to `unsafe.Add`.
@@ -155,7 +155,7 @@ Three cases still cross, because go2cs is no longer holding the memory, or never
 and the memory may move while C is using it: a number kept after the last use of the pointer it came from, which Go's
 own rules already forbid; a number taken inside a method with a pointer receiver, from a pointer of the receiver's own
 type; and Go memory held still before the program's first cgo package was loaded. A program that needs this
-memory-safety guarantee should avoid those three. See [Limitations](Limitations.md).
+memory-safety guarantee should avoid those three. See [Limitations](Limitations.md#cgo).
 <!-- 2026-11-15 (H): narrowed by the pin-extent seat (docs/phase4/DESIGN-cgo-pin-extents.md, section 11) to the three
      rows its section 4 leaves open: 7 (a released pin), 8 (a number minted with no pin) and 11 (an early pin). The
      arms are named in the Limitations entry's notes. The text it replaces said that go2cs "cannot yet tell such a
@@ -210,6 +210,35 @@ pointer now. No call site in the standard library does. See
      81. None passes a base that its own code allows to be nil together with an offset that is not 0: runtime/list.go
      and list_manual.go test `p == nil` before the call, and the others add to the address of a variable, a receiver
      or an allocation. -->
+
+### A slice taken through an array-pointer conversion is a view of the memory (P5)
+
+**`(*[N]T)(p)[lo:hi]` over an `unsafe.Pointer` is now a view of the memory `p` names, as in Go.** The slice was a
+copy before, so a write through it never reached the memory. Code translated from C reaches memory this way
+throughout: modernc.org/libc's `memcpy` is `copy((*RawMem)(unsafe.Pointer(dest))[:n:n], …)`, and with a copy as its
+destination it copied nothing. The converted code now calls `@unsafe.Pointer.View`, and `copy` over an open form
+(`copy((*RawMem)(p)[:], src)`) calls `@unsafe.Pointer.CopyInto` or `CopyFrom`. A view of C memory aliases it. So
+does a view of a Go array or slice of the same element type, and a view of any other Go value that holds no
+reference (a number, a struct of numbers, an array of another element type): the value is pinned and the view
+keeps it in place. A Go value that holds a reference is still viewed as a copy. What a program can see change:
+
+- a write through such a slice reaches the memory, and a later write to the memory shows through the slice;
+- a two-index view has Go's capacity, the array type's length less the low bound, where it had its own length;
+- a view or a copy that would pass the end of the Go array or the Go value it points into panics by name, where
+  it read whatever lay past it;
+- a length too large for a slice panics by name, where its low 32 bits were used.
+
+In the standard library 13 lines in four files of `runtime` take the new form. See
+[Pointers](ConversionStrategies-Reference/pointers.md#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors).
+<!-- docs/phase4/DESIGN-array-pointer-doors.md, sections 4, 10 and 11; golib's unsafe.Pointer.View, CopyInto and
+     CopyFrom. Arms: the behavioral program ArrayPointerViewDoors (linux; native pages from syscall.Mmap and Go memory)
+     and the goldens of PointerArrayViewForms and PointerCastSliceReinterpret, GolibTests ArrayPointerViewDoorTests,
+     the converter's TestArrayPointerViewDoor, repoguard's TestArrayPointerViewDoors. The pinned case (a Go value
+     of another type): design section 12, golib's IHeldStorage, GolibTests' stress arm and its control, 10,000
+     rounds, 2026-11-15. FOOTPRINT, two-seeded, four
+     targets, 2026-11-15 at go1.26.11: runtime/heapdump.cs 5 lines, iface.cs 2, mbitmap.cs 2,
+     runtime/windows/os_windows.cs 4; the hand-owned internal/syscall/windows/registry value.cs is respelled by
+     hand, 8 lines. -->
 
 <!-- 2026-11-14 (R, the release-notes audit, COORD item 5): every first-parent merge from the nuget-1.26.10.3 tag
      (c35c0269b8) to master c2919b8b16 was classified, and each user-visible change with no section here or in
@@ -700,7 +729,7 @@ goroutine waits on a nil channel or an empty `select {}`; any other deadlock han
 goroutine, nor for the deadlock report: those went to stderr alone. They now reach the crash file too.
 <!-- Deadlock: merge 01986cdd81 (4078bdc81b): red first at master 3da19d0e2e (the line alone; the three-goroutine case
      twice); behavioral DeadlockGoroutineBlocks; golib + hand-owned runtime only, 0 corpus lines; no platform named.
-     Limitations.md:178-182#02e695 and GoFeatureSupport.md:110#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
+     Limitations.md:110-113#c9d2eb and GoFeatureSupport.md:110#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
      builtin.WriteFatalReport; GolibTests BackstopCrashOutputTests red with the crash file empty, green, linux. -->
 
 ### Runtime fixes (G, C1, i9)

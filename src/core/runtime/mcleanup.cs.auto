@@ -173,7 +173,7 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S arg
             (tp, addr) = tp.next(cBase + cSpan.elemsize); if (addr == 0) {
                 break;
             }
-            var ptrΔ1 = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)addr);
+            var ptrΔ1 = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)addr);
             if (ptrΔ1 >= @base && ptrΔ1 < @base + span.elemsize) {
                 throw panic("runtime.AddCleanup: cleanup function closes over ptr, cleanup will never run");
             }
@@ -214,7 +214,7 @@ internal static partial void callCleanup<T>(ж<funcval> Ꮡfn, @unsafe.Pointer a
     ref var fn = ref Ꮡfn.DerefOrNull();
 
     var cleanup = (Ꮡ(fn).Reinterpret<ж<funcval>, Action<T>>()).ValueSlot;
-    cleanup(~(ж<T>)(uintptr)(arg));
+    cleanup(~@unsafe.Pointer.To<T>(arg));
 }
 
 // Cleanup is a handle to a cleanup call for a specific object.
@@ -469,11 +469,11 @@ internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
         if (Ꮡq.of(cleanupQueue.Ꮡflushed).Load()) {
             Ꮡq.of(cleanupQueue.Ꮡflushed).Store(false);
         }
-        b = (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡfree).pop());
+        b = @unsafe.Pointer.To<cleanupBlock>(Ꮡq.of(cleanupQueue.Ꮡfree).pop());
         if (b == nil) {
-            b = (ж<cleanupBlock>)(uintptr)(persistentalloc(cleanupBlockSize, tagAlign, Ꮡmemstats.ᏑgcMiscSys));
+            b = @unsafe.Pointer.To<cleanupBlock>(persistentalloc(cleanupBlockSize, tagAlign, Ꮡmemstats.ᏑgcMiscSys));
             for (;;) {
-                var next = (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡall).Load());
+                var next = @unsafe.Pointer.To<cleanupBlock>(Ꮡq.of(cleanupQueue.Ꮡall).Load());
                 b.Value.alllink = next;
                 if (Ꮡq.of(cleanupQueue.Ꮡall).CompareAndSwap(@unsafe.Pointer.FromPinnedBox(next), @unsafe.Pointer.FromPinnedBox(b))) {
                     break;
@@ -499,7 +499,7 @@ internal static ж<cleanupBlock> dequeue(this ж<cleanupQueue> Ꮡq) {
     for (;;) {
         if (Ꮡq.tryTakeWork()) {
             // Guaranteed to be non-nil.
-            return (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡfull).pop());
+            return @unsafe.Pointer.To<cleanupBlock>(Ꮡq.of(cleanupQueue.Ꮡfull).pop());
         }
         @lock(Ꮡq.of(cleanupQueue.Ꮡlock));
         // Increment asleep first. We may have to undo this if we abort the sleep.
