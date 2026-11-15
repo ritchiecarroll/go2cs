@@ -32,6 +32,9 @@ public unsafe partial class GoCgoArgsTests
             int entries = PinExtents.EntriesOver(start, start + (nuint)big.Length);
 
             Assert.IsTrue(entries is > 0 and <= pins, $"{pins} pins of one 16 MiB object hold {entries} index entries");
+
+            // ...and they share ONE entry for the object, so the list the door walks holds one row per distinct object.
+            Assert.AreEqual(1, PinExtents.LargeEntriesOver(start, start + (nuint)big.Length), $"{pins} pins of one object, as distinct large entries");
         }
         finally
         {

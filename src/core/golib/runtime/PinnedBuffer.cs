@@ -27,26 +27,38 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     private readonly int m_len;
     private bool m_disposed;
 
-    // This pin's entry in the pin-extent index (runtime/PinExtents.cs), null when the index is off or the pin holds no
-    // bytes, and s_closed once the buffer is released, so a backfill that races the release cannot enter it afterwards.
-    private object? m_extent;
-    private static readonly object s_closed = new();
+    // Set, under the pin-extent index's backfill gate, as a buffer made BEFORE the index switched on is released, so a
+    // backfill racing the release cannot enter it afterwards. A bool, so it sits in the object's padding: a process that
+    // links no cgo package allocates the same 32-byte buffer it did before the index existed (R6 holds that number).
+    private bool m_closed;
 
-    public PinnedBuffer(byte[] array)
+    // Not constructible directly: Of picks the indexed kind when a cgo package has switched the index on, so a buffer
+    // made any other way could never enter the index, and a missed pin is the door's unsafe direction.
+    private protected PinnedBuffer(byte[] array)
     {
         m_handle = GCHandle.Alloc(array, GCHandleType.Pinned);
         m_len = array.Length;
-        EnterIndex();
     }
 
-    public PinnedBuffer(object? src, nint len) : this(src, (int)len) {}
-
-    public PinnedBuffer(object? src, int len)
+    private protected PinnedBuffer(object? src, int len)
     {
         m_handle = src is null ? default : GCHandle.Alloc(src, GCHandleType.Pinned);
         m_len = len;
-        EnterIndex();
     }
+
+    /// <summary>
+    /// Pins <paramref name="array"/>. In a process where a cgo package has switched the pin-extent index on, the buffer
+    /// is the indexed kind, which carries its entry; anywhere else it is this one, and the index costs it nothing.
+    /// </summary>
+    internal static PinnedBuffer Of(byte[] array) =>
+        PinExtents.Current is null ? new PinnedBuffer(array) : new IndexedPinnedBuffer(array);
+
+    /// <summary>Pins <paramref name="src"/>, as <see cref="Of(byte[])"/> does.</summary>
+    internal static PinnedBuffer Of(object? src, int len) =>
+        PinExtents.Current is null ? new PinnedBuffer(src, len) : new IndexedPinnedBuffer(src, len);
+
+    /// <summary>Pins <paramref name="src"/>, as <see cref="Of(byte[])"/> does.</summary>
+    internal static PinnedBuffer Of(object? src, nint len) => Of(src, (int)len);
 
     ~PinnedBuffer()
     {
@@ -96,7 +108,7 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     {
         try
         {
-            return new PinnedBuffer(storage, 0);
+            return Of(storage, 0);
         }
         catch (ArgumentException)
         {
@@ -107,34 +119,45 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
     public unsafe byte* Pointer => (byte*)m_handle.AddrOfPinnedObject();
 
     /// <summary>
-    /// Enters this pin's extent, the pinned OBJECT's data and not this buffer's own length (a pin-only hold is length 0),
-    /// into the pin-extent index when a cgo package has switched it on. Called at construction, and by the index's
-    /// backfill for a pin taken before it switched on; idempotent.
+    /// The index's backfill, for a pin taken before a cgo package switched the index on: enters this buffer's extent,
+    /// keyed by its handle, unless it is already in or already released. Idempotent. The indexed kind enters at
+    /// construction instead, and its override does nothing.
     /// </summary>
-    internal void EnterIndex()
+    internal virtual void EnterIndex() => PinExtents.Current?.EnterBackfilled(this);
+
+    // Out of the index, before the pin is released. Here only a backfilled buffer can be in it, and a process with no
+    // index pays one read of it.
+    private protected virtual void LeaveIndex() => PinExtents.Current?.LeaveBackfilled(this);
+
+    // Under the backfill gate only.
+    internal bool Closed
     {
-        if (PinExtents.Current is not { } index || Volatile.Read(ref m_extent) is not null || !m_handle.IsAllocated || m_handle.Target is not { } target)
-            return;
-
-        nuint start = (nuint)m_handle.AddrOfPinnedObject();
-        nuint length = PinExtents.ExtentOf(target, m_len);
-
-        if (start == 0 || length == 0)
-            return;
-
-        object extent = index.Add(this, start, start + length);
-
-        // A concurrent entry (or release) won: take ours back out.
-        if (Interlocked.CompareExchange(ref m_extent, extent, null) is not null)
-            index.Remove(extent);
+        get => m_closed;
+        set => m_closed = value;
     }
 
-    private void LeaveIndex()
-    {
-        object? extent = Interlocked.Exchange(ref m_extent, s_closed);
+    internal nint HandleKey => GCHandle.ToIntPtr(m_handle);
 
-        if (extent is not null && extent != s_closed)
-            PinExtents.Current?.Remove(extent);
+    /// <summary>
+    /// The extent [start, end) of the pinned OBJECT's data, and not this buffer's own length (a pin-only hold is length 0),
+    /// or false when the buffer pins nothing.
+    /// </summary>
+    /// <remarks>
+    /// It reads the handle with no fence against a concurrent explicit Dispose (P3's review, item 4), and nothing can
+    /// race one. The indexed kind calls it only from its own constructor, before anything else can see the buffer. The
+    /// backfill calls it under the backfill gate, which a release must take (LeaveBackfilled) before it frees the handle.
+    /// </remarks>
+    internal bool TryExtent(out nuint start, out nuint end)
+    {
+        start = end = 0;
+
+        if (!m_handle.IsAllocated || m_handle.Target is not { } target)
+            return false;
+
+        start = (nuint)m_handle.AddrOfPinnedObject();
+        nuint length = PinExtents.ExtentOf(target, m_len);
+        end = start + length;
+        return start != 0 && length != 0;
     }
 
     // The pinned storage object itself (normally the byte[] the buffer wraps). PinnedBuffer is a
@@ -219,12 +242,12 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
         // slot would both finalize it, and the second Free lands on whatever the runtime re-issued
         // the slot to — GC handle-table corruption. A pinned object cannot move, so the fresh pin
         // answers the same address.
-        return new PinnedBuffer(PinnedTarget, m_len);
+        return Of(PinnedTarget, m_len);
     }
 
     public static implicit operator PinnedBuffer(byte[] array)
     {
-        return new PinnedBuffer(array);
+        return Of(array);
     }
 
     public static implicit operator Span<byte>(PinnedBuffer buffer)
@@ -239,6 +262,43 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
 
     public static implicit operator PinnedBuffer(@string src)
     {
-        return new PinnedBuffer(src, src.Length);
+        return Of(src, src.Length);
+    }
+}
+
+/// <summary>
+/// A pin made while the pin-extent index is on: it enters the index at construction and carries its entry, so it leaves
+/// without a lookup. Only <see cref="PinnedBuffer.Of(byte[])"/> makes one, so a process that never switches the index on
+/// never allocates the extra field.
+/// </summary>
+internal sealed class IndexedPinnedBuffer : PinnedBuffer
+{
+    // The entry, or s_none when the pin holds no bytes or has left.
+    private object? m_extent;
+    private static readonly object s_none = new();
+
+    internal IndexedPinnedBuffer(byte[] array) : base(array) => Enter();
+
+    internal IndexedPinnedBuffer(object? src, int len) : base(src, len) => Enter();
+
+    private void Enter()
+    {
+        object? extent = null;
+
+        if (PinExtents.Current is { } index && TryExtent(out nuint start, out nuint end))
+            extent = index.Add(this, start, end);
+
+        m_extent = extent ?? s_none;
+    }
+
+    // Entered at construction, so the backfill has nothing to do.
+    internal override void EnterIndex() { }
+
+    private protected override void LeaveIndex()
+    {
+        object? extent = Interlocked.Exchange(ref m_extent, s_none);
+
+        if (extent is not null && extent != s_none)
+            PinExtents.Current?.Remove(extent);
     }
 }

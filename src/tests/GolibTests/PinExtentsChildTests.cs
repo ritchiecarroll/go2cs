@@ -65,6 +65,10 @@ public class PinExtentsChildTests
         Assert.AreEqual("R5 index-after-register created", Line("R5 index-after-register"));
         Assert.AreEqual("R5 after-register slot refused slot+4 refused direct+8 crossed", Line("R5 after-register"), "row 11 (direct+8) is DISCLOSED as crossing");
         Assert.AreEqual("R5 pinned-after-register+8 refused", Line("R5 pinned-after-register+8"));
+
+        // A pin the backfill entered leaves the index when it is released, by its finalizer here.
+        Assert.AreEqual("R5 backfilled+4 refused entries 1", Line("R5 backfilled+4"));
+        Assert.AreEqual("R5 backfilled-released entries 0", Line("R5 backfilled-released"), "a released backfilled pin left an entry behind");
     }
 
     private static string[] Lines(string output) =>

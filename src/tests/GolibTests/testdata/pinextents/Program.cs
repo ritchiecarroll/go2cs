@@ -54,10 +54,24 @@ internal static unsafe class Program
 
         Console.WriteLine($"R5 before-register slot+4 {Door(slotNumber + 4)} direct+8 {Door(directNumber + 8)}");
 
+        // A third, held only by a static, so it can be released after registration: the backfill's entry must leave
+        // with it. Its door answer alone cannot show that (a stale entry's weak owner is gone, so it answers nothing), so
+        // the entry count is read.
+        nuint releasedNumber = PinABoxHeldOnlyByAStatic();
+
         GoCgoLibraries.Register(typeof(Program).Assembly);
 
         Console.WriteLine($"R5 index-after-register {(Created() ? "created" : "uncreated")}");
         Console.WriteLine($"R5 after-register slot {Door(slotNumber)} slot+4 {Door(slotNumber + 4)} direct+8 {Door(directNumber + 8)}");
+        Console.WriteLine($"R5 backfilled+4 {Door(releasedNumber + 4)} entries {Entries(releasedNumber)}");
+
+        s_released = null;
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+
+        Console.WriteLine($"R5 backfilled-released entries {Entries(releasedNumber)}");
 
         // A pin made AFTER registration enters at construction.
         byte[] later = new byte[64];
@@ -79,6 +93,21 @@ internal static unsafe class Program
         return 0;
     }
 
+    private static ж<long>? s_released;
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static nuint PinABoxHeldOnlyByAStatic()
+    {
+        s_released = new StandardBox<long>(0);
+        return ((uintptr)s_released).Value;
+    }
+
+    private static int Entries(nuint number)
+    {
+        MethodInfo entriesOver = s_pinExtents.GetMethod("EntriesOver", BindingFlags.NonPublic | BindingFlags.Static) ?? throw new MissingMethodException("PinExtents.EntriesOver");
+        return (int)entriesOver.Invoke(null, [number, number + 8])!;
+    }
+
     private static string Door(nuint number)
     {
         try
@@ -92,12 +121,13 @@ internal static unsafe class Program
         }
     }
 
-    // PinnedBuffer(byte[]) as a compiled delegate, so the measured loop allocates only what the constructor does.
+    // PinnedBuffer.Of(byte[]), golib's one way to pin, as a compiled delegate, so the measured loop allocates only what
+    // the pin does.
     private static Func<byte[], IDisposable> PinOf()
     {
-        ConstructorInfo constructor = s_pinnedBuffer.GetConstructor(BindingFlags.Public | BindingFlags.Instance, [typeof(byte[])]) ?? throw new MissingMethodException("PinnedBuffer(byte[])");
+        MethodInfo of = s_pinnedBuffer.GetMethod("Of", BindingFlags.NonPublic | BindingFlags.Static, [typeof(byte[])]) ?? throw new MissingMethodException("PinnedBuffer.Of(byte[])");
         ParameterExpression array = Expression.Parameter(typeof(byte[]), "array");
-        return Expression.Lambda<Func<byte[], IDisposable>>(Expression.Convert(Expression.New(constructor, array), typeof(IDisposable)), array).Compile();
+        return Expression.Lambda<Func<byte[], IDisposable>>(Expression.Convert(Expression.Call(of, array), typeof(IDisposable)), array).Compile();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]

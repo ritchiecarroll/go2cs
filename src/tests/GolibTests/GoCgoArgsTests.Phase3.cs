@@ -162,7 +162,7 @@ public unsafe partial class GoCgoArgsTests
         ж<cgoPoint> standard = new StandardBox<cgoPoint>(default(cgoPoint));
         ж<cgoHolder> holder = new StandardBox<cgoHolder>(default(cgoHolder));
         byte[] pinnedBytes = new byte[32];
-        PinnedBuffer pinned = new PinnedBuffer(pinnedBytes);
+        PinnedBuffer pinned = PinnedBuffer.Of(pinnedBytes);
         @string text = new @string("go2cs"u8);
         slice<byte> sliced = new slice<byte>(new byte[8]);
 
@@ -263,7 +263,7 @@ public unsafe partial class GoCgoArgsTests
 
         // A pinned managed buffer, constructed directly (as hand-owned code does): 32 bytes.
         byte[] bytes = new byte[32];
-        PinnedBuffer pinned = new PinnedBuffer(bytes);
+        PinnedBuffer pinned = PinnedBuffer.Of(bytes);
         nuint buffer = (nuint)pinned.Pointer;
 
         (string form, nuint number)[] refused =

@@ -16,7 +16,7 @@ public class PinnedBufferTests
         // the runtime re-issued it to: GC handle-table corruption, the same table WeakReference,
         // ConditionalWeakTable and every other pin live in.
         var bytes = new byte[] { 1, 2, 3, 4 };
-        var original = new PinnedBuffer(bytes);
+        var original = PinnedBuffer.Of(bytes);
         var clone = (PinnedBuffer)original.Clone();
 
         // Same pinned storage: a write through one view reads back through the other.

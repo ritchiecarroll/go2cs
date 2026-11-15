@@ -782,7 +782,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
     private unsafe void* pinnedArrayData(IArray arr)
     {
-        m_pin ??= new PinnedBuffer(arr.Source, arr.Length);
+        m_pin ??= PinnedBuffer.Of(arr.Source, arr.Length);
         return m_pin.Pointer;
     }
 

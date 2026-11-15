@@ -32,7 +32,7 @@ public unsafe partial class GoCgoArgsTests
     public void CMemoryCrossesAtItsExactAndInteriorNumbersBesideLivePins()
     {
         byte[] bytes = new byte[64];
-        PinnedBuffer pinned = new PinnedBuffer(bytes);
+        PinnedBuffer pinned = PinnedBuffer.Of(bytes);
         void* memory = NativeMemory.AllocZeroed(16);
 
         try
@@ -60,7 +60,7 @@ public unsafe partial class GoCgoArgsTests
     public void AReleasedPinLeavesNoStaleRefusal()
     {
         byte[] bytes = new byte[64];
-        PinnedBuffer pinned = new PinnedBuffer(bytes);
+        PinnedBuffer pinned = PinnedBuffer.Of(bytes);
         nuint inside = (nuint)pinned.Pointer + 8;
 
         Assert.IsFalse(Crosses(inside), "live: refused");
@@ -72,7 +72,7 @@ public unsafe partial class GoCgoArgsTests
 
         // A pin over several 4 KiB pages enters and leaves every page it covers.
         byte[] wide = new byte[12 * 1024];
-        PinnedBuffer pages = new PinnedBuffer(wide);
+        PinnedBuffer pages = PinnedBuffer.Of(wide);
         nuint start = (nuint)pages.Pointer;
         nuint[] across = [start, start + 4096, start + 6000, start + 8192, start + (nuint)wide.Length - 1];
 
@@ -130,7 +130,7 @@ public unsafe partial class GoCgoArgsTests
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
     private static nuint PinAndDropEveryReference()
     {
-        PinnedBuffer pinned = new PinnedBuffer(new byte[64]);
+        PinnedBuffer pinned = PinnedBuffer.Of(new byte[64]);
         return (nuint)pinned.Pointer + 8;
     }
 
@@ -157,7 +157,7 @@ public unsafe partial class GoCgoArgsTests
                 while (!stop.IsSet)
                 {
                     byte[] bytes = new byte[size];
-                    PinnedBuffer pinned = new PinnedBuffer(bytes);
+                    PinnedBuffer pinned = PinnedBuffer.Of(bytes);
 
                     if (Crosses((nuint)pinned.Pointer + (nuint)(size / 2)))
                         Interlocked.Increment(ref livePinsCrossed);
