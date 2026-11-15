@@ -41,6 +41,7 @@ $mingw = 'https://github.com/mstorsjo/llvm-mingw/releases/download/20261020'
 $pins = @{
     'zig|win-x64'        = @{ version = 'zig 0.17.0'; url = "$zig/zig-x86_64-windows-0.17.0.zip"; sha256 = 'b5663f69581dcf391293fbf16c06cb80d81d806545ce618b4d0bab7f0eb8c428'; cc = @('zig.exe', 'cc') }
     'zig|linux-x64'      = @{ version = 'zig 0.17.0'; url = "$zig/zig-x86_64-linux-0.17.0.tar.xz"; sha256 = '1cbe9df9f27e6b78d14ccbca43b6703a404ef79ef1c463de901d7f088d4e2026'; cc = @('zig', 'cc') }
+    'zig|linux-arm64'    = @{ version = 'zig 0.17.0'; url = "$zig/zig-aarch64-linux-0.17.0.tar.xz"; sha256 = '9e8d11661d4ae3bd57702a3832781e23ad151dde5798e16a5ccd503f65234ff8'; cc = @('zig', 'cc') }
     'zig|osx-x64'        = @{ version = 'zig 0.17.0'; url = "$zig/zig-x86_64-macos-0.17.0.tar.xz"; sha256 = '4f9a1c5269aa17ebda5e6d3c2b89d6cbf36f7d2b22a0306e9ab98f25f95529c6'; cc = @('zig', 'cc') }
     'zig|osx-arm64'      = @{ version = 'zig 0.17.0'; url = "$zig/zig-aarch64-macos-0.17.0.tar.xz"; sha256 = 'b607e9b9234790a008116ae5bdb71c6243b84b9fb42a53a9e70fde41c06c536a'; cc = @('zig', 'cc') }
     'llvm-mingw|win-x64' = @{ version = 'llvm-mingw 20261020 (ucrt)'; url = "$mingw/llvm-mingw-20261020-ucrt-x86_64.zip"; sha256 = 'fd5462b7f5d93b2ff981fcd3f9c7e427e47f3203c64ea91c27bcc444eebd74cd'; cc = @('bin/x86_64-w64-mingw32-clang.exe') }
