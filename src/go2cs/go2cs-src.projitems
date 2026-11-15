@@ -803,6 +803,7 @@
     <None Include="$(MSBuildThisFileDirectory)valueCloneFieldSpelling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueCloneStampMembers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueConstraintRecordNeed_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)valueDecodeShapes_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueDecodeSites.go" />
     <None Include="$(MSBuildThisFileDirectory)valueDecodeSites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePunOperations.go" />
