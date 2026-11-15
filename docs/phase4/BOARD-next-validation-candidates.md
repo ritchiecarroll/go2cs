@@ -38495,4 +38495,73 @@ need S + S/M + M. Still no consumer before .4, so the row stays PARKED. Re-size 
 
 — C2 (2026-11-14)
 
+## 2026-11-14 — P2 (sqlite-cs S8c): a direct-ж method called on a named result boxes the result; footprint 0 predicted and met at three bases
+
+**Dated 2026-11-14 UTC. Seat `cf82633d2b` on master `a6cefba6ee` (batch 301), docs re-cite `9532e986ef`, merged
+with `314e1d8b60` (batch 302) as `095238264c` and with `c978595f0c` (batch 303) as `f9726527fb`; linux/amd64 box,
+go1.26.10.** sqlite-cs row S8c; the red repro is modernc.org/mathutil's `NewInt128FromFloat32`.
+
+**What was wrong.** `NewInt128FromFloat32` calls `r.SetBigInt(bi)` on its named result `r`. `SetBigInt` uses its
+receiver pointer as a value (`fmt.Errorf("%T…", x)`), so its only emitted receiver form is the box `ж<Int128>`
+(a capture-mode, direct-ж method). Go takes `&r` for the call and moves `r` to the heap. The converter declared `r`
+as a plain local, and the call failed with CS1929. `analyzeNamedResults` boxed a named result for an explicit
+`&r` and for a pointer-method value, but not for a direct-ж call on it, which the value-parameter and
+value-receiver arms already take.
+
+**Silent defect found on the way.** The value-field CHAIN form on a named result, `h.inner.Add(n)` with `Add`
+direct-ж, compiles at master as `Ꮡ(h).Ꮡinner.Add(n)`: a copy box of `h`, so the method's writes land in the copy and
+the returned `h.inner` keeps its old value. Nothing marks it at compile time. Measured with a one-function probe
+(`func chain(n int) (h Holder) { h.name = "h"; h.inner.Add(n); return h }`, n = 300) converted by each arm's
+converter at master `c978595f0c`, linux/amd64: Go prints `h 300 +300`; master's C# builds and prints `h 0 `; the
+fix emits `ref var h = ref heap(new Holder(), out var Ꮡh); … Ꮡh.Ꮡinner.Add(n);` and prints `h 300 +300`. The
+tracked program carries the same shape (`tally`'s `h.inner.Add(n * 100)`), output-compared.
+
+**The fix.** `analyzeNamedResults` takes the same reason through `bodyCallsCaptureModeMethodOnObject` (the bare
+result or a value-field chain rooted at it) beside the existing two, and a named slice/map/chan result records it in
+`packageCaptureModeBoxIdents` as the parameter arm does. Emission: `ref var r = ref heap(new Int128(), out var Ꮡr);
+Ꮡr.SetBig(v); return r;`.
+
+**Predictions, scored.**
+- The tracked program fails at the base: TRUE, CS1929 ×6 (one each in `fromInt` and `fromIntBare`, two in `tally`, two on `build`'s
+  named slice result). With the fix it prints Go's six lines.
+- Two-seeded `-stdlib` footprint, four targets, 0 files: TRUE at `a6cefba6ee` (4,674 .cs per target),
+  at `314e1d8b60` (4,679) and at `c978595f0c` (4,679). Basis written before any conversion: a go/types census of std finds
+  45 pointer-method calls on named results, the same list on all four targets, test files adding 0; every method
+  has a `this ref T` overload (archive/tar `Format.mustNotBe`/`mayOnlyBe`, time `Time.setLoc`,
+  internal/runtime/gc/internal/gen `valAny.initOp`), so none is direct-ж.
+
+**Gates** at each merged tip: go test all ok, CNR byte-identical, the full runner in 8 slices with bin/obj purged
+between, 0 fail. At `f9726527fb`: CNR across 1066 packages (12 platform-exclusive skipped); Target 973/0/0, Output
+943 pass, 0 fail, 30 skip, 0 timeout; tracked deletions 0.
+
+## 2026-11-14 — P2 (sqlite-cs, libc): a sync.Mutex cast from C memory is refused by name; reached only by opt-in worker threads; DISCLOSED, design deferred
+
+**Dated 2026-11-14 UTC. modernc.org/libc v1.80.1, modernc.org/sqlite v1.62.0; converter of master `c978595f0c`;
+linux/amd64 box, go1.26.10.** COORD accepted this as a disclosure (no design now).
+
+**The sites.** libc places a Go `sync.Mutex` inside C memory and reaches it by a pointer cast, in two places.
+`pthread_musl.go` (linux on amd64, arm64, loong64, ppc64le, s390x, riscv64, 386, arm): `:136` Xpthread_create of a
+joinable thread, `(*sync.Mutex)(unsafe.Pointer(p + off)).Lock()`; `:177-179` Xpthread_exit, `mu := (*sync.Mutex)(…);
+mu.TryLock(); mu.Unlock()`; `:190` Xpthread_join, `(…).Lock()`. And `libc_darwin.go:144`, `file.mu()`, a lock placed
+behind every stdio FILE and taken by each darwin stdio function (29 uses). All are method calls through the cast,
+never a whole-value or field read.
+
+**What the converted code does.** The cast becomes a native box `(ж<Δsync.Mutex>)(uintptr)…`, and the hand-owned
+Mutex's `Lock`/`TryLock`/`Unlock` are `[GoRecv] ref Mutex` primaries, so each call takes the box's `ref` value and
+golib's layout check refuses it before any read or write: "runtime error: cannot read native memory as sync.Mutex: its
+CLR layout is not its Go layout (field gate is a managed reference where Go stores the value inline)". Measured with
+a probe of the three pthread spellings over mmap'd memory, one recover per step: Go prints ok three times, the
+converted program prints that refusal three times. In libc the first refusal would leave Xpthread_create before its
+goroutine starts. The darwin FILE lock was not probed; the same refusal applies by the same route.
+
+**Reach.** By `go list` GoFiles per OS on amd64, sqlite/lib calls `Xpthread_create` and `Xpthread_join` once each, on
+linux only (windows 0, darwin 0), both in `_sqlite3ThreadCreate`, the sorter's worker threads.
+`SQLITE_DEFAULT_WORKER_THREADS` is 0, so they run only after `PRAGMA threads=N` (N > 0) or
+`sqlite3_limit(SQLITE_LIMIT_WORKER_THREADS)`; the sqlite-cs demo sets neither and no sqlite `_test.go` mentions
+threads. sqlite/lib reaches darwin stdio only in the proxy-lock conch path (two `Xfprintf` to stderr). Windows libc
+(`pthread.go`) puts no Mutex in C memory.
+
+**The route when a target needs threads or darwin stdio:** a libc hand-own keyed by address, a C-layout lock word
+in the C storage with a side table for the waiters, so nothing managed is read out of raw bytes.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
