@@ -19,11 +19,12 @@ public sealed partial class TwinGenerator
 {
     internal sealed partial class Run
     {
-        // N3's CALLER RULE, the one predicate the owner's ruling plugs into (COORD's condition, 2026-11-14): whether a
-        // function is twinned BECAUSE it calls through a func value. Unruled -- the owner chooses between the
-        // propagating rule (sections 10.2-10.3) and fix 1 alone (11) -- so no function is. The pair core never decides
-        // it: only an existing twin tests a func-value call for a pair.
-        internal static bool CallerRuleTwins(Site site) => false;
+        // N3's CALLER RULE (the owner's ruling, 2026-11-14 via COORD: PROPAGATING, sections 10.2-10.3): a function whose
+        // body calls through a func value that a twin can test for a pair is twinned for that call alone. It propagates
+        // through CanPark: a twinned function's callers park on it, so they are twinned too. The test is the rewriter's
+        // own (PairShape), so every function twinned by this rule has a call that takes the pair test -- HOISTED to the
+        // twin's entry for a parameter never reassigned. Off with the pair core (GoTwinsPairs=false), the A/B control.
+        internal bool CallerRuleTwins(Site site) => Pairs && site.PairCallable;
 
         // GoTwinsPairs (default on): the D3 core itself. Off, every piece below is skipped and the emission is the one
         // before N3's core: the A/B control.

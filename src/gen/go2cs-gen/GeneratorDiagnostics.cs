@@ -173,5 +173,17 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    // GO2CS0013, TwinGenerator (M:N PROTOTYPE, N3's must-fix 3, DESIGN-mn-func-values.md 10.4): under the propagating
+    // caller rule a function that calls through a func value is twinned, so its call can await a pair's twin. A function
+    // the generator REFUSES a twin (a by-ref or ref-like parameter, unsafe, an iterator, ...) keeps calling the plain
+    // delegate, so a func value that can park blocks its carrier there. Reported once per function, not per call.
+    public static readonly DiagnosticDescriptor RefusedFuncValueCaller = new(
+        id: "GO2CS0013",
+        title: "A function refused a twin calls through a func value",
+        messageFormat: "'{0}' calls through a func value but gets no twin ({1}): a func value that can park runs plain here and blocks its carrier",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 #pragma warning restore RS2008
 }

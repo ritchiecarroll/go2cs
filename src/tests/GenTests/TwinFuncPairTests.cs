@@ -20,8 +20,8 @@ namespace GenTests;
 /// <summary>
 /// M:N PROTOTYPE, N3's D3 core (docs/phase4/DESIGN-mn-func-values.md section 4; COORD's condition 2026-11-14): in an
 /// EXISTING twin, a call through a func value tests for a pair and awaits the pair's twin; a can-park literal created
-/// in a twin body becomes a pair. The core does not decide which functions get twins for calling a func value: that is
-/// the caller rule's one predicate, unruled, under which no function is twinned for that reason alone.
+/// in a twin body becomes a pair. Which functions get twins for calling a func value is the caller rule's one predicate:
+/// the owner ruled it PROPAGATING (2026-11-14), so such a function is twinned, and so is every function that reaches it.
 /// </summary>
 [TestClass]
 public class TwinFuncPairTests
@@ -54,9 +54,24 @@ public class TwinFuncPairTests
                 return v + s[0];
             }
 
-            // Calls through a func value and parks nowhere else: under the unruled caller rule, NOT twinned.
+            // Calls through a func value and parks nowhere else: under the owner's PROPAGATING caller rule (2026-11-14)
+            // it is twinned for that call alone, and its never-reassigned parameter is tested once, at the twin's entry.
             public static void onlyCalls(Action f)
             {
+                f();
+            }
+
+            // Parks nowhere and calls no func value; it only reaches onlyCalls, so the rule PROPAGATES to it.
+            public static void callsOnlyCalls()
+            {
+                onlyCalls(() => { });
+            }
+
+            // Calls through a func value but is refused a twin (a by-ref receiver, byref-param): under the rule it warns
+            // ONCE (must-fix 3), however many such calls it makes.
+            public static void refusedCaller(this ref nint r, Action f)
+            {
+                f();
                 f();
             }
 
@@ -90,7 +105,10 @@ public class TwinFuncPairTests
         }
         """;
 
-    private static (string twins, Diagnostic[] errors) Run(bool pairs = true)
+    private static (string twins, Diagnostic[] errors) Run(bool pairs = true) => RunAll(pairs) is var (twins, errors, _) ? (twins, errors) : default;
+
+    // The emission, the compilation's errors and the GENERATOR's own diagnostics (warnings included).
+    private static (string twins, Diagnostic[] errors, Diagnostic[] generator) RunAll(bool pairs = true)
     {
         CSharpParseOptions options = new(LanguageVersion.Preview);
         CSharpCompilation compilation = CSharpCompilation.Create("twinpairs",
@@ -103,7 +121,7 @@ public class TwinFuncPairTests
             properties["build_property.GoTwinsPairs"] = "false";
 
         CSharpGeneratorDriver.Create([new TwinGenerator()], parseOptions: options, optionsProvider: new BuildProperties(properties))
-            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out var generatorDiagnostics);
 
         string twins = string.Join("\n", output.SyntaxTrees.Skip(compilation.SyntaxTrees.Length).Select(tree => tree.ToString()));
 
@@ -111,7 +129,8 @@ public class TwinFuncPairTests
         if (Environment.GetEnvironmentVariable("GO2CS_DUMP_TWINS") is { Length: > 0 } dump)
             File.WriteAllText(dump, twins);
 
-        return (twins, output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray());
+        return (twins, output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray(),
+            [.. generatorDiagnostics]);
     }
 
     private static string Body(string twins, string method)
@@ -130,7 +149,39 @@ public class TwinFuncPairTests
         Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
         StringAssert.Contains(twins, "callerꞏtwin(", "control: a function that parks is twinned");
         StringAssert.Contains(twins, "mainꞏtwin(", "control: a function that reaches a twin is twinned");
-        Assert.IsFalse(twins.Contains("onlyCallsꞏtwin(", StringComparison.Ordinal), "the unruled caller rule twins nothing for a func-value call alone");
+    }
+
+    // The owner's ruling (2026-11-14, via COORD): the caller rule PROPAGATES. A function whose body calls through a func
+    // value a twin can test gets a twin, and every function that reaches it does too (DESIGN-mn-func-values.md 10.2).
+    [TestMethod]
+    public void UnderThePropagatingCallerRuleAFuncValueCallerAndItsCallersAreTwinned()
+    {
+        (string twins, Diagnostic[] errors) = Run();
+
+        Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
+
+        string onlyCalls = Body(twins, "onlyCalls");
+        StringAssert.Contains(onlyCalls, "fꞏpair", "the never-reassigned parameter's pair test is HOISTED to the twin's entry");
+        StringAssert.Contains(onlyCalls, ".Twin", "and the call awaits the pair's twin");
+
+        StringAssert.Contains(twins, "callsOnlyCallsꞏtwin(", "the rule PROPAGATES: a function that only reaches onlyCalls is twinned");
+
+        Assert.IsFalse(twins.Contains("refusedCallerꞏtwin(", StringComparison.Ordinal), "control: a refused function stays refused");
+    }
+
+    // Must-fix 3 (10.4): a refused function whose body calls through a func value warns ONCE, at the function, naming
+    // its refusal -- a silent fallback there would be the rule's largest silent hole.
+    [TestMethod]
+    public void ARefusedFuncValueCallerWarnsOnceNamingItsRefusal()
+    {
+        (_, _, Diagnostic[] generator) = RunAll();
+
+        Diagnostic[] warnings = generator.Where(diagnostic => diagnostic.Id == "GO2CS0013").ToArray();
+
+        Assert.AreEqual(1, warnings.Length, "one warning, for refusedCaller's two calls: " + string.Join("\n", generator.Select(d => d.ToString())));
+        Assert.AreEqual(DiagnosticSeverity.Warning, warnings[0].Severity);
+        StringAssert.Contains(warnings[0].GetMessage(), "refusedCaller");
+        StringAssert.Contains(warnings[0].GetMessage(), "byref");
     }
 
     [TestMethod]

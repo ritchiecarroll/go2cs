@@ -34,6 +34,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
         public IMethodSymbol? GoTarget;
         public GoKind Go;
         public bool Active, Direct, Renameable, Unbound, Delegate, Interface, IfaceCallable;
+
+        // A call through a func value that a twin CAN test for a pair: the callee is a local or parameter whose delegate
+        // type has a canonical twin delegate (the rewriter's own PairShape test, asked here for N3's caller rule).
+        public bool PairCallable;
         public IMethodSymbol? IfaceTarget;
     }
 
@@ -144,7 +148,20 @@ public sealed partial class TwinGenerator : ISourceGenerator
             }
 
             foreach (Candidate candidate in m_ordered)
-                candidate.GoOnly = candidate.Parks && !candidate.Sites.Any(site => site.Direct && ShouldAwait(site));
+            {
+                candidate.GoOnly = candidate.Parks && !candidate.Sites.Any(site => site.Direct && (ShouldAwait(site) || site.Delegate && CallerRuleTwins(site)));
+
+                // Must-fix 3 (DESIGN-mn-func-values.md 10.4): a function refused a twin whose body calls through a func
+                // value warns ONCE, at the function, naming its refusal. Its calls run the plain delegate even when the
+                // value is a pair, so a can-park func value blocks a carrier there; iterators, the yield callers, are the
+                // largest such set. A function with a twin of its own (has-twin) is not a hole.
+                if (candidate.Refusal is { } refusal && refusal != "has-twin" &&
+                    candidate.Sites.Any(site => site.Direct && site.Delegate && CallerRuleTwins(site)))
+                {
+                    Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.RefusedFuncValueCaller,
+                        candidate.Syntax.Identifier.GetLocation(), candidate.Symbol.ToDisplayString(), refusal));
+                }
+            }
 
             m_analysisMs = m_watch.ElapsedMilliseconds - m_siblingMs;
             Emit();
@@ -363,7 +380,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
             }
 
             if (method.MethodKind == MethodKind.DelegateInvoke)
+            {
                 site.Delegate = true;
+                site.PairCallable = node.Expression is IdentifierNameSyntax &&
+                    model.GetTypeInfo(node.Expression).Type is INamedTypeSymbol { TypeKind: TypeKind.Delegate } delegateType &&
+                    TwinDelegateType(delegateType) is not null;
+            }
             else if (method.MethodKind != MethodKind.LocalFunction && method.ContainingType?.TypeKind == TypeKind.Interface)
             {
                 // An interface call is awaited only in its plain shape, a member read off an interface-typed value.
