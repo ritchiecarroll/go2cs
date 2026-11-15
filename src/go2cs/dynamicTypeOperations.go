@@ -487,8 +487,10 @@ func (v *Visitor) dynamicStructTypeName(expr ast.Expr) string {
 
 	// Another package's alias of a defined type (`stdio.FILE`, `type FILE = X_iobuf`) is that defined type, spelled
 	// through the importer's alias table (`stdioꓸFILE`) as its declarations are. The normal path below returns its
-	// Go-shaped name, which names no member of the package class (CS0426, sqlite-cs S12).
-	if t != nil && v.isForeignAliasOfNamed(t) {
+	// Go-shaped name, which names no member of the package class (CS0426, sqlite-cs S12). The same holds where the
+	// alias reaches an ANONYMOUS struct its package lifted and published (libc's `type X_iobuf = struct{...}`,
+	// `type FILE = X_iobuf`): `&X_iob[i]` took `.at<stdio.FILE>` (CS0426, sqlite-cs W5a).
+	if t != nil && (v.isForeignAliasOfNamed(t) || v.isPublishedForeignAnonStructAlias(t)) {
 		return convertToCSTypeName(v.getScopeCheckedTypeName(t))
 	}
 

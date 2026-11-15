@@ -1,0 +1,17 @@
+1 func store at +8 landed: true
+1 slot is add's word: false
+1 call through slot: PANIC
+2 word store at +16: 42
+3 word store unsafe.Add +24: 43
+4 read +8: 2
+5 write +16: 30
+6 slice write +4: [1 2 3 4 13 12 11 10]
+6 slice read +2: 1027
+7 array field write +8: [10 20 33 40]
+7 array field read via struct +12: 33
+8 interior keeps base alive: 2
+8 interior write survives: 0
+10 slice interior held across GC: [0 0 0 0 4 3 2 1]
+11 struct interior held across GC: 33
+12 mixed interior: 66
+9 interior == &field: false

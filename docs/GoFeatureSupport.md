@@ -16,10 +16,15 @@ An *example* link opens a behavioral test: a Go program, its converted C#, and t
 print. [Limitations](Limitations.md) and [Known issues](KnownIssues.md) have the detail behind every
 entry that is supported with limits or not supported yet.
 
-<!-- Assumed release state: the cgo, linux/arm64 and windows/arm64 rows describe the state planned for the
-     next release and get a final accuracy pass before it ships. Grounding: cgo, docs/PLAN-cgo-interop.md and the
-     converter's cgo*.go files; linux/arm64, docs/phase4/DESIGN-linux-arm64-flavour.md; windows/arm64,
-     docs/KnownIssues.md (GO2CS3004). Internal records stay unlinked from published pages. -->
+<!-- Assumed release state: the linux/arm64 and windows/arm64 rows describe the state planned for the
+     next release and get a final accuracy pass before it ships. Grounding: linux/arm64,
+     docs/phase4/DESIGN-linux-arm64-flavour.md; windows/arm64, docs/KnownIssues.md (GO2CS3004). Internal records stay
+     unlinked from published pages.
+     The two cgo rows are NOT assumed: 2026-11-14 (H, the release-notes audit's item for H), they describe the release
+     tip, where cgo Phase 2 and Phase 3 increment 3.1 have landed (43ac9e33fa, batch 305). Grounding:
+     docs/Limitations.md's cgo items; docs/phase4/DESIGN-cgo-phase2-pinvoke.md section 11.22 (the G1 gate, hosted on
+     linux/amd64, darwin/amd64, darwin/arm64, windows/amd64); docs/phase4/DESIGN-cgo-phase3-marshaling.md section 16 and
+     the hosted cgo-e2e legs 43638330006, 43638338397 and 43638346986 (the same four targets, 50 of 50 arms). -->
 
 <div class="feature-matrix" markdown="1">
 
@@ -155,9 +160,9 @@ entry that is supported with limits or not supported yet.
 |---|---|---|
 | Calling converted Go from C# | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | A converted package is an ordinary .NET library ([Consuming converted Go](ConsumingGoFromCSharp.md)). [Example](../src/tests/CSharpConsumer/) |
 | System calls | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | The `syscall` package on Windows, Linux and macOS, including `syscall.NewCallback` on Windows. [Example](../src/tests/Behavioral/LinuxSpawnBasics/) · [callback](../src/tests/Behavioral/WindowsNewCallback/) |
-| cgo: calling C functions | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | A package that calls C library functions converts and compiles, and loads its C library at run time. C types, typedefs and constants arrive through a `C` pseudo-package, and structs pass by value or by pointer ([Roadmap](Roadmap.md#cgo)). |
+| cgo: calling C functions | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Under `go2cs -cgo`, a package that calls C library functions converts and compiles, and loads its C library at run time. C types, typedefs and constants arrive through a `C` pseudo-package. Structs pass by value or by pointer. `C.CString`, `C.GoString`, `C.GoBytes`, `C.malloc`, `C.free`, a `void *` into C memory, and `defer C.f(…)` convert. Measured on linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64 ([Roadmap](Roadmap.md#cgo)). |
 | Calling .NET from Go source | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | The road runs one way: Go source cannot name a .NET API ([Limitations](Limitations.md#reading-and-debugging-the-output)). |
-| cgo: callbacks, C globals, unions, inline C | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | Function pointers and callbacks into Go, C global variables, unions by value, flexible array members, a pointer into an array element as an argument, and C code written inline in the Go file ([Roadmap](Roadmap.md#cgo)). |
+| cgo: callbacks, C globals, unions, inline C | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | Function pointers and callbacks into Go, C global variables, unions by value, flexible array members, a pointer into Go memory handed to C (an array or slice element, or `unsafe.Pointer(&x)`), and C code written inline in the Go file. Each is refused by name ([Roadmap](Roadmap.md#cgo)). |
 | Hand-written assembly (`.s` files) | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | Not translated: such a function converts to a stub that fails when called. Many libraries have a pure-Go build tag ([Limitations](Limitations.md#what-wont-make-the-trip)). The standard library uses Go's portable code and hand-written C# instead ([how](ConversionStrategies.md#the-standard-library-reproduces-go--tags-purego)). |
 | `plugin` | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | `plugin.Open` returns `plugin: not implemented`, as in a Go build without cgo. |
 

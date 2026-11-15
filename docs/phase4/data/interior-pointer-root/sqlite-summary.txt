@@ -1,0 +1,83 @@
+# modernc.org/sqlite v1.62.0 with modernc.org/libc v1.80.1: counts from the per-site tables (not committed: about 700 KB each).
+
+== sq-linux-amd64: 5929 sites, in 6 packages ==
+sq-linux-amd64: packages 35, load errors 0, helpers 0, sites 5929
+
+-- by use --
+  3714  read
+  2206  write
+     9  held
+
+-- by origin label, pointee holds pointers --
+   104  managed	refBearing=false
+     9  managed	refBearing=true
+  3422  number	refBearing=false
+  2394  pointer-var	refBearing=false
+
+-- by package --
+  5399  modernc.org/sqlite/lib
+   357  modernc.org/libc
+   146  modernc.org/sqlite/vec
+    19  modernc.org/sqlite/vfs
+     7  modernc.org/sqlite
+     1  modernc.org/memory
+
+-- held sites --
+modernc.org/libc	pthread_musl.go:147	uintptr+	number	held:argument	false	false	int32
+modernc.org/libc	pthread_musl.go:177	uintptr+	number	held:stored	false	false	sync.Mutex
+modernc.org/libc	pthread_musl.go:180	uintptr+	number	held:argument	false	false	int32
+modernc.org/libc	pthread_musl.go:536	uintptr+	number	held:argument	false	false	int32
+modernc.org/memory	decommit_unix.go:47	uintptr+	number	held:slice-of	false	false	memory.rawmem
+modernc.org/sqlite	vtab.go:415	uintptr+	number	held:stored	false	false	sqlite.cIndexConstraint
+modernc.org/sqlite	vtab.go:471	uintptr+	number	held:stored	false	false	sqlite.cIndexOrderBy
+modernc.org/sqlite	vtab.go:501	uintptr+	number	held:stored	false	false	sqlite.cConstraintUsage
+modernc.org/sqlite/lib	sqlite_g_0000000000007d00.go:10626	uintptr+	number	held:address-of	false	false	sqlite3.TTable
+
+-- sites whose target type is a func --
+modernc.org/sqlite/vfs	patches64.go:18	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr) int32
+modernc.org/sqlite/vfs	patches64.go:19	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, uintptr, int32, vfs.sqlite_int64) int32
+modernc.org/sqlite/vfs	patches64.go:20	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, uintptr) int32
+modernc.org/sqlite/vfs	patches64.go:21	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, int32) int32
+modernc.org/sqlite/vfs	patches64.go:22	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, int32) int32
+modernc.org/sqlite/vfs	patches64.go:23	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, uintptr) int32
+modernc.org/sqlite/vfs	patches64.go:24	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, int32, uintptr) int32
+modernc.org/sqlite/vfs	patches64.go:25	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr) int32
+modernc.org/sqlite/vfs	patches64.go:26	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr) int32
+
+== sq-windows-amd64: 5630 sites, in 5 packages ==
+sq-windows-amd64: packages 23, load errors 0, helpers 0, sites 5630
+
+-- by use --
+  3560  read
+  2066  write
+     4  held
+
+-- by origin label, pointee holds pointers --
+    88  managed	refBearing=false
+     9  managed	refBearing=true
+  3390  number	refBearing=false
+  2143  pointer-var	refBearing=false
+
+-- by package --
+  5396  modernc.org/sqlite/lib
+   146  modernc.org/sqlite/vec
+    62  modernc.org/libc
+    19  modernc.org/sqlite/vfs
+     7  modernc.org/sqlite
+
+-- held sites --
+modernc.org/sqlite	vtab.go:415	uintptr+	number	held:stored	false	false	sqlite.cIndexConstraint
+modernc.org/sqlite	vtab.go:471	uintptr+	number	held:stored	false	false	sqlite.cIndexOrderBy
+modernc.org/sqlite	vtab.go:501	uintptr+	number	held:stored	false	false	sqlite.cConstraintUsage
+modernc.org/sqlite/lib	sqlite_windows.go:53915	uintptr+	number	held:address-of	false	false	sqlite3.TTable
+
+-- sites whose target type is a func --
+modernc.org/sqlite/vfs	patches64.go:18	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr) int32
+modernc.org/sqlite/vfs	patches64.go:19	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, uintptr, int32, vfs.sqlite_int64) int32
+modernc.org/sqlite/vfs	patches64.go:20	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, uintptr) int32
+modernc.org/sqlite/vfs	patches64.go:21	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, int32) int32
+modernc.org/sqlite/vfs	patches64.go:22	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, int32) int32
+modernc.org/sqlite/vfs	patches64.go:23	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, uintptr) int32
+modernc.org/sqlite/vfs	patches64.go:24	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr, int32, uintptr) int32
+modernc.org/sqlite/vfs	patches64.go:25	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr) int32
+modernc.org/sqlite/vfs	patches64.go:26	uintptr+	managed	write	true	false	func(*libc.TLS, uintptr) int32

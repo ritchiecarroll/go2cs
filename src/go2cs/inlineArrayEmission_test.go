@@ -149,14 +149,22 @@ func View(p unsafe.Pointer) *Holder { return (*Holder)(p) }
 // convertInlineLayoutStampModule converts the two-file module and returns its output root.
 func convertInlineLayoutStampModule(t *testing.T) string {
 	t.Helper()
+
+	return convertInlineModule(t, "stamponly", inlineLayoutStampModule)
+}
+
+// convertInlineModule converts the module example.com/<name> made of files, for the host platform, and returns its
+// output root.
+func convertInlineModule(t *testing.T, name string, files map[string]string) string {
+	t.Helper()
 	isolateConverterPathGlobals(t)
 
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
-	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/stamponly\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/"+name+"\n\ngo 1.23\n")
 
-	for name, source := range inlineLayoutStampModule {
-		writeModuleFile(t, filepath.Join(appDir, name), source)
+	for file, source := range files {
+		writeModuleFile(t, filepath.Join(appDir, file), source)
 	}
 
 	goRoot := build.Default.GOROOT
@@ -175,7 +183,7 @@ func convertInlineLayoutStampModule(t *testing.T) string {
 		t.Fatalf("ConvertModule: %v", err)
 	}
 
-	return filepath.Join(options.go2csPath, "src", "example.com", "stamponly")
+	return filepath.Join(options.go2csPath, "src", "example.com", name)
 }
 
 func TestInlineArrayLayoutStampIsFullyQualified(t *testing.T) {
@@ -194,6 +202,18 @@ func TestInlineArrayLayoutStampIsFullyQualified(t *testing.T) {
 // The same module BUILT with the .NET SDK. GO2CS_INLINE_BUILD=1 runs it (it builds golib too, so it is opt-in like the
 // cgo build arms).
 func TestInlineArrayLayoutStampModuleBuilds(t *testing.T) {
+	dotnet := requireInlineBuild(t)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, convertInlineLayoutStampModule(t)); err != nil {
+		t.Fatalf("a module file whose only golib name is the layout stamp does not build: %v\n%s", err, built)
+	}
+}
+
+// requireInlineBuild skips unless GO2CS_INLINE_BUILD=1 and returns the dotnet SDK the template's framework needs. These
+// arms build golib too, so they are opt-in like the cgo build arms.
+func requireInlineBuild(t *testing.T) string {
+	t.Helper()
+
 	if os.Getenv("GO2CS_INLINE_BUILD") != "1" {
 		t.Skip("NOT RUN: set GO2CS_INLINE_BUILD=1 to build the converted module with the .NET SDK (Inconclusive, not a pass)")
 	}
@@ -204,8 +224,14 @@ func TestInlineArrayLayoutStampModuleBuilds(t *testing.T) {
 		t.Fatal("the rendered template names no TargetFramework")
 	}
 
-	dotnet := requireDotnetSdk(t, framework[1])
-	out := convertInlineLayoutStampModule(t)
+	return requireDotnetSdk(t, framework[1])
+}
+
+// buildConvertedInlineModule builds the one project under out for the host and returns the tail of the build output.
+// Each compiler error is logged as it reads.
+func buildConvertedInlineModule(t *testing.T, dotnet, out string) (string, error) {
+	t.Helper()
+
 	projects, err := filepath.Glob(filepath.Join(out, "*.csproj"))
 
 	if err != nil || len(projects) != 1 {
@@ -220,8 +246,84 @@ func TestInlineArrayLayoutStampModuleBuilds(t *testing.T) {
 		t.Logf("READING build error %s", line)
 	}
 
-	if err != nil {
-		t.Fatalf("a module file whose only golib name is the layout stamp does not build: %v\n%s", err, lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40))
+	return lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40), err
+}
+
+// A struct literal that stores a whole array value into an array field: an inline array spells only an array literal
+// there (the member's constructor), so any other value (a variable, a dereference, a call) is a whole value stored,
+// unspelled at I0 as an assignment to x.f is. The face rule read selections only, so x/sys/windows' RawSockaddrBth was
+// admitted and SockaddrBth.sockaddr's literal handed four array<byte> values to array2<byte>..array16<byte> fields:
+// CS1503 at syscall_windows.cs(673,24), release-smoke win-x64 run 43633010415 (COORD 2026-11-14 21:32Z). The
+// control, Pair, stores only an array literal and stays inline.
+var inlineLiteralStoreModule = map[string]string{
+	"bth.go": `package literalstore
+
+import "unsafe"
+
+const AF_BTH = 32
+
+type GUID struct {
+	Data1 uint32
+	Data2 uint16
+	Data3 uint16
+	Data4 [8]byte
+}
+
+type RawSockaddrBth struct {
+	AddressFamily  [2]byte
+	BtAddr         [8]byte
+	ServiceClassId [16]byte
+	Port           [4]byte
+}
+
+type SockaddrBth struct {
+	BtAddr         uint64
+	ServiceClassId GUID
+	Port           uint32
+	raw            RawSockaddrBth
+}
+
+func (sa *SockaddrBth) sockaddr() (unsafe.Pointer, int32) {
+	family := AF_BTH
+	sa.raw = RawSockaddrBth{
+		AddressFamily:  *(*[2]byte)(unsafe.Pointer(&family)),
+		BtAddr:         *(*[8]byte)(unsafe.Pointer(&sa.BtAddr)),
+		Port:           *(*[4]byte)(unsafe.Pointer(&sa.Port)),
+		ServiceClassId: *(*[16]byte)(unsafe.Pointer(&sa.ServiceClassId)),
+	}
+	return unsafe.Pointer(&sa.raw), int32(unsafe.Sizeof(sa.raw))
+}
+
+type Pair struct {
+	A [2]byte
+	N uint16
+}
+
+func View(p unsafe.Pointer) *Pair { return (*Pair)(p) }
+
+func Make() Pair { return Pair{A: [2]byte{1, 2}, N: 3} }
+`,
+}
+
+func TestInlineArrayStructLiteralStoreKeepsTheTypeOut(t *testing.T) {
+	out := convertInlineModule(t, "literalstore", inlineLiteralStoreModule)
+	cs := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "bth.cs")), "\r\n", "\n")
+
+	if !strings.Contains(cs, "\npartial struct RawSockaddrBth {") {
+		t.Errorf("want RawSockaddrBth kept as array<T> storage (its literal stores a whole value):\n%s", cs)
+	}
+
+	if !strings.Contains(cs, "partial struct Pair {") || !strings.Contains(cs, "GoInlineLayout(Size = 4, Align = 2), StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Pair {") {
+		t.Errorf("want Pair held inline (its literal stores only an array literal):\n%s", cs)
+	}
+}
+
+// The same module BUILT with the .NET SDK: at the face rule that read selections only it fails with CS1503.
+func TestInlineArrayStructLiteralStoreModuleBuilds(t *testing.T) {
+	dotnet := requireInlineBuild(t)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, convertInlineModule(t, "literalstore", inlineLiteralStoreModule)); err != nil {
+		t.Fatalf("a struct literal storing a whole array value into an admitted field does not build: %v\n%s", err, built)
 	}
 }
 
