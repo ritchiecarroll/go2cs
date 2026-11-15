@@ -128,6 +128,78 @@ public class ArrayAssignInPlaceTests
     }
 
     [TestMethod]
+    public void C6_ASourceLongerThanTheBlockNeverWritesPastIt()
+    {
+        // P5's ask b: the block's N decides how far the store writes, never the source's length. Four elements, then a
+        // guard word the store must not touch; the source holds six.
+        nuint addr = (nuint)(nint)Marshal.AllocHGlobal(5 * sizeof(long));
+
+        try
+        {
+            unsafe
+            {
+                long* raw = (long*)addr;
+                for (int i = 0; i < 4; i++)
+                    raw[i] = 0;
+                raw[4] = 0x5A5A5A5A;
+            }
+
+            ж<array<long>> p = NativeArrayBox<long>.Over(addr, 4);
+
+            p.Assign(new array<long>(new long[] { 1, 2, 3, 4, 5, 6 }));
+
+            unsafe
+            {
+                long* raw = (long*)addr;
+                Assert.AreEqual("1 2 3 4", $"{raw[0]} {raw[1]} {raw[2]} {raw[3]}");
+                Assert.AreEqual(0x5A5A5A5AL, raw[4], "the store wrote past the block");
+            }
+        }
+        finally
+        {
+            Marshal.FreeHGlobal((nint)addr);
+        }
+    }
+
+    [TestMethod]
+    public void C6_APointerArrayOverNativeWordsStoresThenLeavesNilWords()
+    {
+        // P5's ask a: NativePointerArrayBox.StoreElements stores min(N, len(source)) words, then the nil pointer for the
+        // rest. Three zero words and a guard word after them. The source is one nil pointer, so every slot keeps the
+        // nil a zero word mints (null): the next read of each word refuses nothing, and no word moves.
+        nuint addr = (nuint)(nint)Marshal.AllocHGlobal(4 * sizeof(long));
+
+        try
+        {
+            unsafe
+            {
+                long* raw = (long*)addr;
+                raw[0] = raw[1] = raw[2] = 0;
+                raw[3] = 0x77;
+            }
+
+            ж<array<ж<long>>> p = NativePointerArrayBox<long>.Over(addr, 3);
+
+            p.Assign(new array<ж<long>>(1));
+
+            IArray words = p.TryGetNativeArrayView(typeof(ж<long>))!;
+
+            for (nint i = 0; i < 3; i++)
+                Assert.IsNull(words[i], $"word {i} reads as nil");
+
+            unsafe
+            {
+                long* raw = (long*)addr;
+                Assert.AreEqual("0 0 0 119", $"{raw[0]} {raw[1]} {raw[2]} {raw[3]}");
+            }
+        }
+        finally
+        {
+            Marshal.FreeHGlobal((nint)addr);
+        }
+    }
+
+    [TestMethod]
     public void C6_TheValueDerefStillRefusesOverNativeMemory()
     {
         // Cut A's emission, `p.Value.Assign(b)`: the deref has no array<T> to hand out and refuses by name. This is

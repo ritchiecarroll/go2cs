@@ -113,8 +113,10 @@ internal sealed class NativePointerArrayBox<E> : ж<array<ж<E>>>, INativeWordAr
         for (nint i = 0; i < count; i++)
             m_words[i] = source[i];
 
+        // The nil pointer a word slot holds is null: mint answers null for a zero word, and a default array<ж<E>>
+        // element is null too. NilBox here would read as a CHANGED value on a zero word, refused at the next access.
         for (nint i = count; i < m_words.Length; i++)
-            m_words[i] = ж<E>.NilBox;
+            m_words[i] = default!;
     }
 
     private PanicException noMaterializableArray() =>
