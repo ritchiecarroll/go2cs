@@ -1627,6 +1627,41 @@ is the correct value. `archive/tar`'s `testClose{nil}` is the reported shape; `d
 
 **An imported type ALIAS through an aliased import renders as its `global using` name.** A `global using` alias is not a member of the package class, so `import al "AliasImportLib"` with `al.B2{V: 7}`, where `B2` is an exported alias, cannot render `new al.B2(…)` (CS0426). The alias table is keyed by the package's declared name, and `aliasResolvedSelector` looks a published, non-const type alias up under that name, rendering `new AliasImportLibꓸB2(V: 7)` as the canonical import does. Every other member keeps the file's alias (`new al.Box(V: 8)`). (Guarded by the `AliasImport` behavioral test's `aliased.go`.)
 
+**A member its package collision-renames keeps the file's alias and takes the renamed name.** time declares `ΔLocation`, `ΔMonth`, `ΔUTC`, `ΔLocal` and `ΔSecond`, because each Go name collides with a `Time` method. modernc.org/libc imports time as `gotime "time"` (sqlite-cs S10), so both lookups that swap in the renamed member missed: the alias table is keyed by the declared name `time`, the type arm (`getAliasQualifiedTypeName`) rendered `ж<gotime.Location>` (CS0426), and the value arm (`aliasResolvedSelector`) redirected only non-const entries, so `gotime.UTC`, `gotime.Local` and `gotime.Second` named the `Time` methods' groups (CS1503 for `gotime.UTC` as an argument, CS0019 for `gotime.Local != nil`). Both arms now look the member up under the declared name and keep the file's own qualifier:
+
+<!-- source: src/tests/Behavioral/AliasedImportRenamedMember/main.go:15-26 -->
+```go
+type tzLocation struct {
+	tz  string
+	loc *gotime.Location
+}
+
+func fixed(name string, offset int) *gotime.Location {
+	return gotime.FixedZone(name, offset)
+}
+
+func timeout(n int) gotime.Duration {
+	return gotime.Duration(n)*gotime.Second + 250*gotime.Millisecond
+}
+```
+<!-- source: src/tests/Behavioral/AliasedImportRenamedMember/main.cs.target:9-20 -->
+```csharp
+partial struct tzLocation {
+    internal @string tz;
+    internal ж<gotime.ΔLocation> loc;
+}
+
+internal static ж<gotime.ΔLocation> @fixed(@string name, nint offset) {
+    return gotime.FixedZone(name, offset);
+}
+
+internal static gotime.Duration timeout(nint n) {
+    return ((gotime.Duration)(int64)n) * gotime.ΔSecond + 250 * gotime.Millisecond;
+}
+```
+
+A member time does not rename (`Millisecond`, `March`, `RFC3339`, `FixedZone`) keeps its spelling, and neither arm is reached by a plain import, whose qualifier already is the declared name. (Guarded by the `AliasedImportRenamedMember` behavioral test, Output compared with Go.) <!-- P2 W4, 2026-11-14: census over std found 0 such sites on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64, test files included; libc v1.80.1 has 10 on windows and darwin, 0 on linux. -->
+
 ---
 
 [← Type Switch Statements](type-switch.md) · [Index](README.md) · [Struct Type Embedding →](struct-embedding.md)
