@@ -1,0 +1,9 @@
+kit-reassign	reassignprobe	door-a-1115/reassign/main.go:21	ARRAY	LOCAL	HELD-BEFORE
+kit-reassign	reassignprobe	door-a-1115/reassign/main.go:28	ARRAY	LOCAL	HELD-BEFORE
+kit-reassign	reassignprobe	door-a-1115/reassign/main.go:36	ARRAY	LOCAL	HELD-BEFORE
+kit-reassign	reassignprobe	door-a-1115/reassign/main.go:44	ARRAY	LOCAL	HELD-BEFORE
+kit-reassign	reassignprobe	door-a-1115/reassign/main.go:50	ARRAY	PKGVAR	UNKNOWN
+kit-reassign	reassignprobe	door-a-1115/reassign/main.go:57	ARRAY	FIELD	UNKNOWN
+kit-reassign	reassignprobe	door-a-1115/reassign/main.go:64	ARRAY	LOCAL	HELD-BEFORE
+kit-reassign	reassignprobe	door-a-1115/reassign/main.go:70	ARRAY	LOCAL	HELD-BEFORE
+kit-reassign	reassignprobe	door-a-1115/reassign/main.go:78	ARRAY	LOCAL	HELD-BEFORE

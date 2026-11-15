@@ -1,0 +1,7 @@
+kit-reassign-plain	reassignplain	door-a-1115/reassign-plain/main.go:19	ARRAY	LOCAL	HELD-BEFORE
+kit-reassign-plain	reassignplain	door-a-1115/reassign-plain/main.go:27	ARRAY	LOCAL	HELD-BEFORE
+kit-reassign-plain	reassignplain	door-a-1115/reassign-plain/main.go:34	ARRAY	LOCAL	HELD-BEFORE
+kit-reassign-plain	reassignplain	door-a-1115/reassign-plain/main.go:44	ARRAY	LOCAL	HELD-BEFORE
+kit-reassign-plain	reassignplain	door-a-1115/reassign-plain/main.go:51	ARRAY	FIELD	UNKNOWN
+kit-reassign-plain	reassignplain	door-a-1115/reassign-plain/main.go:57	ARRAY	PKGVAR	UNKNOWN
+kit-reassign-plain	reassignplain	door-a-1115/reassign-plain/main.go:65	ARRAY	DEREF	UNKNOWN
