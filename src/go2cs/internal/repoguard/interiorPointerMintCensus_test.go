@@ -132,6 +132,7 @@ var nativeMints = map[string]interiorMintRow{
 	mintGolib + "ж.FieldRefBox.cs|NativeArrayWindow":        {1, "carries: NativeDerivation.Kept of the struct it is a field of"},
 	mintGolib + "ж.HeaderSliceBox.cs|HeaderSliceBox":        {1, "carries: the root its caller resolved for the re-based header (design 4.5)"},
 	mintGolib + "ж.SliceHeaderBox.cs|SliceHeaderBox":        {1, "carries: the root its caller resolved for the re-based header (design 4.5)"},
+	mintGolib + "ж.InlineSlice.cs|ΔInlineSlice":             {1, "carries: the anchor for NativeDerivation.Kept of the box itself, which holds the pin its uintptr conversion took (go-winio Part 2, ruling (a))"},
 	mintGolib + "ж.NativeArrayBox.cs|Over":                  {1, "carries: the anchor for retainedSource"},
 	mintGolib + "ж.NativeArrayBox.cs|TryGetNativeArrayView": {1, "carries: the box's own anchor"},
 	mintGolib + "ж.NativeDerivation.cs|Moved":               {1, "carries: NativeDerivation.Kept of what the pointer carried"},
@@ -146,6 +147,9 @@ var nativeMints = map[string]interiorMintRow{
 	mintGolib + "ж.cs|FromNumber":          {1, "carries: the box an exact address resolved to, else NativeDerivation.Kept of what the pointer carried (design 4.1)"},
 	mintUnsafe + "unsafe.cs|Add":           {1, "carries: NativeDerivation.Kept of the typed pointer it moves"},
 	mintUnsafe + "unsafe.cs|Slice":         {1, "carries: the anchor for NativeDerivation.Kept of the pointer"},
+	mintUnsafe + "unsafe.cs|HeldWindow": {1, "carries: the anchor for the box that owns the pin over the Go value the view door views; the box answered " +
+		"IHeldStorage.HeldBytesFrom for these bytes (array-pointer doors, 4.2 V2 and section 12)"},
+	mintUnsafe + "unsafe.cs|Window": {1, "carries: the anchor for NativeDerivation.Kept of the typed pointer the view door resolved (array-pointer doors, 4.3)"},
 }
 
 // ---- arm 2: two-word pointers

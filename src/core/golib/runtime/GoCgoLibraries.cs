@@ -40,6 +40,10 @@ namespace go.golib;
     /// </summary>
     public static void Register(Assembly assembly, string target, params GoCgoLibrary[] libraries)
     {
+        // A process that links a cgo package keeps the pin-extent index, which the void pointer's door asks
+        // (docs/phase4/DESIGN-cgo-pin-extents.md, D4). Every other process never creates it.
+        PinExtents.Activate();
+
         List<GoCgoLibrary> owned = [.. libraries];
         NativeLibrary.SetDllImportResolver(assembly, (name, importing, _) => Resolve(name, importing, owned, target));
     }

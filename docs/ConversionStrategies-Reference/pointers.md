@@ -139,8 +139,8 @@ chunk, not its length. Only the object count changes, never Go's semantics. (Gua
 `ElemBoxPersistTests`: identity across expressions and all three index overloads, the view cache hitting
 with zero bytes allocated, Go's aliasing and equality, the chunk cost, a type with no field view keeping
 fresh boxes, and a dropped backing being collected.)
-<!-- The table: src/core/golib/ж.ElemRefBox.cs:168 (`internal static ж<T> OfArrayElement(array<T> array, int index)`),
-     the chunk: src/core/golib/ж.ElemRefBox.cs:158 (`private const int ElementBoxChunk = 64;`), the first of the
+<!-- The table: src/core/golib/ж.ElemRefBox.cs:170 (`internal static ж<T> OfArrayElement(array<T> array, int index)`),
+     the chunk: src/core/golib/ж.ElemRefBox.cs:160 (`private const int ElementBoxChunk = 64;`), the first of the
      three Ꮡ(array<T>, …) overloads: src/core/golib/builtin.cs:2694 (`return ElemRefBox<T>.OfArrayElement(target, index);`).
      Commits 8a714cf6dd, edb753ebca, 29d469bc11. The slice<T> overloads keep a fresh box per expression. -->
 
@@ -844,7 +844,7 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:916-925 -->
+<!-- source: src/core/unsafe/unsafe.cs:1188-1197 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
@@ -893,6 +893,29 @@ public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
 **A null `Pointer` *reference* (from `unsafe.Pointer(nil)`) also converts to 0.** Distinct from the nil-*box* case above: the untyped `nil` literal in `unsafe.Pointer(nil)` renders as `(@unsafe.Pointer)default!`, and `default` of the reference type `Pointer` is a C# **null**, not a `ж<T>` box. golib's `Pointer → uintptr` and `void*` conversion operators honor the null-tolerance `Pointer`'s own `==`/`!=` operators have (`value?.IsNull ?? true`) — `value is null ? 0/null : value.Value` — rather than dereferencing `value.Value` and throwing `NullReferenceException`, so `uintptr(unsafe.Pointer(nil))` yields 0 whether the nil arrives as a nil box or a null `Pointer` reference. (Both the package-scope crash and this null-reference conversion are guarded by the extended `NilPointerUintptr` behavioral **output** test — package-level `var gPtr = uintptr(unsafe.Pointer(&global))` (non-zero) and `var gNil = uintptr(unsafe.Pointer(nil))` (0), vs Go; the pre-fix converter panics on the package-scope declaration and, once past that, the pre-fix golib NREs on `gNil`.)
 
 **A pointer to a Go fixed array resolves to the array's DATA, pinned across the FFI call.** The other half of that `fixed`-block operator is wrong for a `ж<array<T>>` (`unsafe.Pointer(&arr)` where `arr` is a Go `[N]T`): `&value.Value` is the address of the golib `array<T>` **struct wrapper** — which holds the backing `T[]` as a reference field, an offset, and a length — *not* the address of the array data, and the `fixed` releases it before the operator even returns. A native syscall handed that address writes over the wrapper's fields (clobbering the `T[]` reference), so a later `buf[i]` reads through a corrupted array and faults. This is exactly the go-isatty MSYS/cygwin-pipe probe: `IsCygwinTerminal` fills a `[262]uint16` with a `FILE_NAME_INFO` via `GetFileInformationByHandleEx(…, uintptr(unsafe.Pointer(&buf)), …)`, then reads `l := *(*uint32)(unsafe.Pointer(&buf))` (the `FileNameLength`) and slices `buf[2 : 2+l/2]` — the garbage `l` drove `array<uint16>.get_Item(Range)` off the end (`AccessViolationException`). The converted **fatih/color** sample went **empty on a pipe** because of it: fatih/color's `NoColor` probe evaluates `!isatty.IsTerminal(fd) && !isatty.IsCygwinTerminal(fd)`, so only a *pipe* (where `IsTerminal` is false, unlike a console, and `GetFileType` is `FILE_TYPE_PIPE`, unlike a file) reaches the faulting FFI call — file-redirect and real-console output were fine, matching the observed matrix. The operators special-case a value that is a Go fixed array — an `IArray` that is **not** an `ISlice` (a `slice<T>`'s `&s` is its header, exactly as in Go, so slices stay on the value-slot path) — and return the pinned address of element 0 of the backing `T[]`, via a `PinnedBuffer` (a `GCHandle.Alloc(…, Pinned)`) cached on the box. The pin lives for the box's lifetime — so the syscall write lands in the real backing array and every managed read afterward (the `l` reinterpret and the `buf[2:]` slice) observes it — and is released when the box is collected (the `PinnedBuffer` finalizer frees the handle). This is golib behavior (the emitted code does not depend on it); non-array pointers keep the transient `fixed`-address behavior. (Guarded by the `FixedArrayBufferPointer` behavioral **output** test — the `*(*uint32)(unsafe.Pointer(&buf))` read-back idiom, the array still readable through its own indexer afterward, and address-stability across repeated conversions, vs Go; end-to-end, the converted fatih/color sample prints byte-identically to `go run` through a pipe on Windows.)
+
+**The address of a named array is the array's data too, also before anything has used the array.** <!-- history: 2026-11-15 (P5, the lost-write seat, option 1). Before it the pin read `Source` on the boxed copy, which filled a backing of the copy's own; five shapes lost the write (BOARD, 2026-11-15, "a write at the ADDRESS of a named array that has not been used yet is lost"). --> A defined array type, `type small [8]byte`, converts to a wrapper struct that go2cs-gen writes, and the wrapper allocates its elements on the array's first use. The pin of the entry above is of those elements. A pointer box can only read its value as an array through a boxed COPY of the wrapper, so for a named array that nothing has used yet the box first publishes the elements into its own storage, through the same gate the element pointer `&p[i]` uses (`publishArrayBacking` in golib's `ж.cs`), and pins what it published. A write at the address reaches the variable whether or not the program touched the array before.
+
+```go
+type small [8]byte
+
+func fill(p unsafe.Pointer, b byte) {
+	*(*byte)(p) = b
+}
+
+var local small
+fill(unsafe.Pointer(&local), 41)
+fmt.Println("la", local[0]) // la 41
+```
+
+<!-- source: src/tests/Behavioral/NamedArrayAddressWrite/main.cs.target:31-33 -->
+```csharp
+    ref var local = ref heap(new small(), out var Ꮡlocal);
+    fill(@unsafe.Pointer.FromPinnedBox(Ꮡlocal), 41);
+    fmt.Println("la", local[0]);
+```
+
+The same holds for a package variable, a struct field, `new(small)`, and the address converted to a number or to a raw pointer. Limit: the publish takes the pointer box's lock and the wrapper's own first use does not, so a first use of the variable on one goroutine at the moment another takes its address for the first time can leave the two on different elements. Guarded by `GolibTests`' `NamedArrayPinPublishTests` (seven shapes that lost the write, two controls) and the `NamedArrayAddressWrite` behavioral **output** test, whose seven lines are compared with `go run`.
 
 **EVERY managed address handed to native code is pinned for the pointer's lifetime — a `fixed` block cannot outlive its own statement.** <!-- history: added 2026-08-03 (r38-os-fin); before it only the fixed-array case above was pinned, under a soundness note in syscall/dll_windows.cs that called the window "short and allocation-free". --> The fixed-array entry above is one case of a general rule: a transient `fixed` address is unsafe for a BLOCKING syscall, because the window between capture and the trampoline's `calli` stays open for as long as the kernel takes. `os`'s `TestPipeEOF` (on Windows) parks in `ReadFile` on a pipe for 10 ms per read while the rest of a parallel suite allocates around it, and a gen0 collection in that window would move both the `*uint32` byte-count box `syscall.Read` passes and the caller's read buffer — measured directly, a `heap(new uint32(), out var Ꮡdone)` box and a `Ꮡ(buf, 0)` element pointer BOTH report a different address after one forced collection. Unpinned, the kernel would write to neither: `done` would stay 0, `syscall.Read` would return `(0, nil)`, and `internal/poll`'s `FD.eofError` would turn that into a premature `io.EOF`, while the buffer's half writes 4 KB into freed heap. <!-- The board row "bufio.Reader.ReadBytes over a converted os.Pipe returns a premature io.EOF, and only under parallel load" was exactly this, monotone in the parallelism level (0 of 4 at -parallel 1, 1 of 3 at 4, 5 of 5 at 8, 100% at the default), independent of finalizers; the buffer half was the moving-site ExecutionEngineException recorded beside it. --> **golib pins before it reads an address**: `ж<T>`'s `uintptr`/`void*` operators call `EnsureStableAddress`, which takes a lifetime `GCHandle` on the ROOT storage the pointer names — a standard heap box pins its own value slot, an element reference pins the canonical backing array, a field reference recurses to the allocation that contains the field — on exactly the terms `pinnedArrayData` already used for the fixed-array case, and released when the box is collected. What makes this possible is that a standard heap box's value STORAGE is a one-element array for a `T` that contains no references (`ж<T>.m_slot`): a box is a class with reference fields and `GCHandle` refuses to pin anything that contains pointers, so the value had nowhere pinnable to live. It is allocated EAGERLY and never migrated — `heap<T>(out ж<T>)` hands the caller a `ref` alias before any address is taken (`ref var done = ref heap(new uint32(), out var Ꮡdone)`), so moving the storage on first address-take would leave that alias on the abandoned copy, which is this very bug one level down. A `T` that DOES carry references gets no slot and keeps the transient address: its C# layout is not a native layout either, so no syscall can meaningfully be handed its address — the change is additive, and `RuntimeHelpers.IsReferenceOrContainsReferences<T>()` is a JIT constant, so neither the branch nor the allocation costs such a box anything. This also makes Go's unsafe.Pointer RULE 3 (pointer arithmetic through `uintptr`) sound. This is golib behavior; the emitted code does not depend on it. (Guarded by `src/tests/GolibTests/NativeAddressStabilityTests.cs`, a neutered-fix control across all four box kinds plus the reference-bearing negative case: with `EnsureStableAddress` removed every address assertion fails on the first forced collection.) <!-- Operationally, os's residual went from 13 rows to 3 in one change: TestPipeEOF and the whole child-stdout family, whose empty child output was the same premature EOF read through exec's pipe. -->
 
@@ -1150,7 +1173,7 @@ internal static partial @unsafe.Pointer own(slice<byte> b) { return same(@unsafe
 
 **Why.** A `(uintptr)` cast on the call's result turns the pointer into a number, and the number converts back to a fresh pointer that carries nothing. Nothing then holds the pin, the collector may move the storage, and a write through the pointer no longer reaches it. <!-- The converter emitted that cast on every true call returning unsafe.Pointer until 2026-11-13. A program with no cgo lost a write through `p := f(q)` after a collection and died with an internal CLR error where Go printed its answer: docs/phase4/DESIGN-unsafe-pointer-call-result.md. -->
 
-**`unsafe.Add` is such a call.** Over a pointer that carries a box it returns a pointer that still does: a native box at the new address, which retains what the pointer carried. A bare number and C memory keep the plain number; over an order token the moved pointer keeps the box the token names.
+**`unsafe.Add` is such a call.** Over a pointer that carries a box it returns a pointer that still does: a native box at the new address, which retains what the pointer carried. When what it carried is itself a native box that owns no pin (the result of an earlier `unsafe.Add`, or of a typed conversion), the new box retains what that box retained, so a pointer advanced in a loop (`p = unsafe.Add(p, 1)`) is one box away from the Go value at every step and keeps no earlier step alive. A bare number and C memory keep the plain number; over an order token the moved pointer keeps the box the token names.
 
 **Limits.** The conversion `unsafe.Pointer(x)` has its own emission, above. A consumer that needs a number builds its own cast, as `uintptr(f())` does, and a number stored in a `uintptr` keeps nothing alive, as in Go. A pointer conversion `(*T)(f())` takes the pointer itself, [through `unsafe.Pointer.To<T>`](#tp-over-an-unsafepointer-is-emitted-as-unsafepointertotp--the-typed-pointer-keeps-what-p-carries). A callee that takes its pointer through a `uintptr` returns a pointer that carries nothing; the [`GC.KeepAlive` drain](#pointer-derived-funnel-arguments-and-bridged-unsafepointer-arguments-keep-their-box-alive-across-the-call--the-statement-scoped-gckeepalive-drain) covers the frame-minted box of such a call's argument. A statement that discards the result is the bare call.
 
@@ -1181,7 +1204,7 @@ internal static uint32 readU32(ptr p, uintptr o) {
 
 **Every spelling of the conversion takes it:** the operand of a dereference (`*(*T)(p)`, read or written), a conversion used as a value or as a call argument, and a named type over a pointer, which applies its own conversion to the result (`(named)@unsafe.Pointer.To<int32>(p)`).
 
-**Limits.** Two conversions keep their own emission. A span view, `(*[N]T)(p)[lo:hi]`, [reads through a raw element pointer](#every-spelling-of-a-pointer-cast-slice-takes-the-span-and-a-max-bound-sets-its-capacity) over the number. A conversion whose operand is `unsafe.Pointer(q)` over a managed pointer `q` is [the managed reinterpret](#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address), which never leaves the box. A pointer made from a number carries nothing into the conversion. [Pointer arithmetic written in one expression](#unsafepointeruintptrp--n-is-emitted-as-unsafeaddp-n--the-moved-pointer-keeps-what-p-carries) is not made from a number.
+**Limits.** Two conversions keep their own emission. A slice of an array-pointer conversion, `(*[N]T)(p)[lo:hi]`, is [a view door](#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors), which takes the pointer itself. A conversion whose operand is `unsafe.Pointer(q)` over a managed pointer `q` is [the managed reinterpret](#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address), which never leaves the box. A pointer made from a number carries nothing into the conversion. [Pointer arithmetic written in one expression](#unsafepointeruintptrp--n-is-emitted-as-unsafeaddp-n--the-moved-pointer-keeps-what-p-carries) is not made from a number.
 
 Guarded by: `TestTypedPointerDoorReplacesTheNumberCast`; `TestNativeFieldArrayViewEmitsTheDoorAndElementRef`; `InteriorPointerRootTests`; the behavioral programs `UnsafePointerTypeAlias`, `UnsafeOperations` and `ExplicitDerefConversionStore`.
 
@@ -2972,6 +2995,10 @@ or not. (`reparse_windows.path()` → `os.Readlink`, registry `Get`/`SetStringVa
 were unchanged. <!-- registry ×4; 17 further corpus sites --> The same-element-type members of this
 shape take the element-aliasing `AliasPointer` route — *An element pointer reinterpreted as an
 array pointer ALIASES the element's storage*, above.)
+Since 2026-11-15 the slice on that address route is no longer a span: it is
+[a view door](#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors), which takes the pointer
+itself and aliases the memory. The exclusion stands for the same reason: a door needs the pointer, not a
+reinterpreted box.
 
 (Guarded by the `ReinterpretPointerLifetime` behavioral output test — an aliasing case, plus a
 lifetime case whose reinterpreted pointer is the only surviving reference across heavy allocation
@@ -2981,10 +3008,118 @@ array-target exclusion by `PointerCastSliceReinterpret`, an output test over the
 pointer-cast slice that `PointerCastSliceRange` explicitly defers to "the stdlib exercises that
 shape" — which is exactly how the fabrication reached the corpus untested.)
 
-## A pointer-cast slice with a LOW bound offsets the span
-`(*[N]T)(ptr)[lo:hi]` lowers to a `slice<T>` over a `ReadOnlySpan<T>` of the pointed-to memory (see
-the fusion above). Go's expression is the elements `lo..hi`, so the span starts at element `lo` and
-runs `hi - lo`; a span built from element 0 with length `hi` would drop the low bound and hold the
+## A slice taken through `(*[N]T)(p)` ALIASES the memory p names: the view doors
+Go's `(*A)(p)[lo:hi]`, with `A` an array type and `p` an `unsafe.Pointer`, is a slice of the memory `p`
+names. Nothing is copied: a write through the slice is a write to that memory. The idiom is how C-shaped Go
+reaches memory by address. modernc.org/libc declares `type RawMem [1<<50 - 1]byte`, an array far larger than
+any memory, only to cut slices from it, and its `memcpy` is one `copy` between two such slices:
+
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.go:81 -->
+```go
+		copy((*RawMem)(unsafe.Pointer(dest))[:n:n], (*RawMem)(unsafe.Pointer(src))[:n:n])
+```
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.cs.target:64 -->
+```csharp
+        copy(@unsafe.Pointer.View<byte>((@unsafe.Pointer)dest, 0, (nint)(n), (nint)(n), 1125899906842623), @unsafe.Pointer.View<byte>((@unsafe.Pointer)src, 0, (nint)(n), (nint)(n), 1125899906842623));
+```
+
+The conversion and the slice are emitted together as one call of a **view door** on `@unsafe.Pointer`
+(`src/core/unsafe/unsafe.cs`). The door takes the pointer itself, the bounds as written, and the array's
+length `N` as a constant (`1125899906842623` is `1<<50 - 1`). `N` is only a bound: nothing of length `N` is
+allocated or spanned.
+
+| Go | C# |
+|---|---|
+| `(*A)(p)[lo:hi]` | `@unsafe.Pointer.View<E>(p, lo, hi, N)` |
+| `(*A)(p)[lo:hi:max]` | `@unsafe.Pointer.View<E>(p, lo, hi, max, N)` |
+| `(*A)(p)[lo:]` | `@unsafe.Pointer.View<E>(p, lo, N)` |
+| `copy((*A)(p)[lo:], src)` | `@unsafe.Pointer.CopyInto<E>(p, lo, N, src)` |
+| `copy(dst, (*A)(p)[lo:])` | `@unsafe.Pointer.CopyFrom<E>(dst, p, lo, N)` |
+
+`E` is the array's element type, also for a named array (`byte` for `RawMem`). A door does what Go does, in
+Go's order: the nil check, then the bounds against `N` with Go's own slice panics for an array, then the view.
+The length is taken at full width and refused by name past what a slice can hold.
+
+**The open form.** `(*RawMem)(p)[:]` has a length no slice can hold. Go only writes it under `copy`, which
+takes the other operand's length, so `copy` with an open view on either side is its own door and no slice of
+length `N` is ever built:
+
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.go:107 -->
+```go
+	c = copy((*RawMem)(unsafe.Pointer(p))[:], wd)
+```
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.cs.target:87 -->
+```csharp
+    c = @unsafe.Pointer.CopyInto<byte>((@unsafe.Pointer)p, 0, 1125899906842623, wd);
+```
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.go:120 -->
+```go
+	c = copy(v, (*RawMem)(unsafe.Pointer(q))[:])
+```
+<!-- source: src/tests/Behavioral/ArrayPointerViewDoors/main.cs.target:98 -->
+```csharp
+    c = @unsafe.Pointer.CopyFrom<byte>(v, (@unsafe.Pointer)q, 0, 1125899906842623);
+```
+A string source has its own overload, so the literal stays a `u8` span
+(`@unsafe.Pointer.CopyInto((@unsafe.Pointer)p, 2, 1125899906842623, "lo"u8)`). Away from `copy`, an open
+form of an array small enough to exist is the whole array from its low bound, `View<E>(p, lo, N)`.
+
+**What the view is** depends on what `p` points to, and the door decides at run time:
+
+- **An element of a Go array or slice of `E`, or a Go array of `E` named by its own address:** a managed
+  window on that array. Writes reach it and nothing has to be held still. Its capacity ends where the Go
+  array ends, and a view or a copy that would pass that end is refused by name, because the managed array is
+  all the storage there is.
+- **C memory, or a number that carries no pointer:** a native window over the address, with Go's capacity
+  `N - lo`. Nothing knows where such memory ends, as in Go.
+- **An address inside a Go value** (`unsafe.Add` over a pointer to the value, pointer arithmetic written in one
+  expression, or an element of a view of the value): the pointer carries the value it was derived from, and the
+  view is a native window from that address to the end of the value's storage, held still as in the next case.
+  A view or a copy that would pass that end is refused by name, and so is an address before the value or past
+  its end, where Go would read or write whatever lies there.
+- **Any other Go value its pointer can hold still** (a number, a struct of numbers, an array of another
+  element type, a named array by its own address): a native window over the value's own bytes. Taking the
+  value's address pins it, and the view keeps the box that owns the pin, so the value stays where it is for
+  as long as any slice cut from the view lives. Writes reach the value. The window ends where the value's
+  storage ends, and a view or a copy that would pass that end is refused by name. This is what lets C-shaped
+  code `memcpy` into a Go variable: sqlite seeds its random number state that way.
+- **A Go value nothing can hold still** (it holds a reference): a copy of the elements read at the pointer. A
+  read is exact; a write would not reach the value, so a `copy` door refuses such a destination by name
+  instead of losing the write. An array assigned whole after its address was taken is answered the same way
+  when the view is of another element type: the address is of the elements the array had, and no window is
+  cut over them.
+<!-- 2026-11-15, the review of V2 (docs/phase4/DESIGN-array-pointer-doors.md section 13): the interior-address
+case was a window with Go's capacity until fix 2, and the assigned-array case a window on the old elements until
+fix 1. That a whole assignment gives an array new elements at all is the BOARD's row of the same date. -->
+
+**What keeps its own emission.** The door replaces one emission, the slice built from a span over the
+pointer cast to a number, which copied. A conversion that another rule already renders whole keeps that
+rule: a conversion back to the pointer's own type slices the box; two array types of one shape are
+[the managed reinterpret](#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address);
+a same-element view of an unnamed array is `array<T>.AliasPointer`; and an array field of a native struct is
+`@unsafe.ArrayPointer<T>.Of(field, N)`. One operand keeps the copying span: a `FromRef` mint, whose address
+is true for one statement only, so a window over it would outlive the statement that made it true
+(`internal/abi`'s `Methods` and `ExportedMethods`, which only read). A function whose spans all became doors
+no longer needs the `unsafe` modifier and loses it.
+<!-- history: until 2026-11-15 every form here was `new slice<E>(new ReadOnlySpan<E>((E*)(uintptr)p + lo, n))`,
+a COPY: a write through the slice never reached the memory, the open form built nothing usable, and a named
+array was read as a managed wrapper out of C memory. Design and measurements:
+docs/phase4/DESIGN-array-pointer-doors.md. -->
+
+Guarded by: the behavioral program `ArrayPointerViewDoors` (native pages from `syscall.Mmap` and Go memory,
+written through a view and read back from the memory, against Go); `ArrayPointerViewDoorTests` in
+GolibTests, whose `TenThousandRoundsOfWriteCollectReadKeepEveryViewOnItsValue` holds the pinned case across
+forced compacting collections, whose `WithoutItsAnchorTheSameWindowDoesNotKeepTheValue` is its control, and
+whose `AViewAtAnAddressInsideAGoValueEndsWhereTheValueEnds` and its three siblings hold the interior address; the
+converter's `TestArrayPointerViewDoor`, one arm per form and one control per route that keeps
+its own emission; and repoguard's `TestArrayPointerViewDoors`, which holds the census of copying spans left
+in the corpus and refuses a `FromRef` mint at a door.
+
+<a id="a-pointer-cast-slice-with-a-low-bound-offsets-the-span"></a>
+
+## A pointer-cast slice with a LOW bound starts its view at that element
+`(*[N]T)(ptr)[lo:hi]` is the elements `lo..hi`, so [the view door](#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors)
+is handed the low bound and starts there; a view built from element 0 with length `hi` would hold the
 **wrong elements** whenever `lo` is not 0. A byte view of wider elements shows it:
 
 <!-- source: src/tests/Behavioral/PointerCastSliceReinterpret/main.go:66 -->
@@ -2993,34 +3128,34 @@ runs `hi - lo`; a span built from element 0 with length `hi` would drop the low 
 ```
 <!-- source: src/tests/Behavioral/PointerCastSliceReinterpret/main.cs.target:32 -->
 ```csharp
-    var tail = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡ(words, 0))) + 3, 7 - 3));
+    var tail = @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡ(words, 0)), 3, 7, 8);
 ```
 A same-element-type view such as the reparse buffer's `(*[0xffff]uint16)(unsafe.Pointer(&rb.PathBuffer[0]))[n1:n2:n2]`
-(`*[0xffff]uint16` over a `*uint16`) takes the element-aliasing route instead —
-`array<uint16>.AliasPointer(Ꮡ(rb.PathBuffer, 0), 65535).slice(n1, n2, n2)` (above) — and the span
-lowering, with this low-bound offset, serves the pointer-cast slices that route does not.
-<!-- history: the span was once always built from element 0 with length hi; the example was
-reparse_windows' `(uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(rb.PathBuffer[0]))) + (int)(n1), (int)(n2) - (int)(n1)`. -->
+(`*[0xffff]uint16` over a `*uint16`) takes the element-aliasing route instead:
+`array<uint16>.AliasPointer(Ꮡ(rb.PathBuffer, 0), 65535).slice(n1, n2, n2)` (above).
+<!-- history: before the view doors this was a span, `(byte*)(uintptr)(…) + 3, 7 - 3`, and before that the
+span was always built from element 0 with length hi; the example then was reparse_windows'
+`(uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(rb.PathBuffer[0]))) + (int)(n1), (int)(n2) - (int)(n1)`. -->
 
-A pointer cast binds tighter than `+`, so the offset lands on the typed pointer with no extra
-parentheses. Two consequences a dropped low bound would have: `internal/syscall/windows`'s
+Two consequences a dropped low bound would have: `internal/syscall/windows`'s
 `(*symbolicLinkReparseBuffer).path()` slices `[n1:n2:n2]` to skip the print name, so `os.Readlink`
 would return the reparse buffer from offset 0 instead of the substitute name; and `internal/abi`'s
 `FuncType.OutSlice()` slices `[InCount : InCount+outCount]`, so it would return the **in**-parameters
 followed by the out-parameters and `reflect.Type.Out(i)` would index the wrong half (`reflect.gcSlice`
 `[begin:end:end]` likewise would read the GC bitmap from the wrong start). (Guarded by the non-zero-low
-arms of `PointerCastSliceReinterpret` — the reparse `[n1:n2:n2]` shape and a byte reinterpret of a
+arms of `PointerCastSliceReinterpret`: the reparse `[n1:n2:n2]` shape and a byte reinterpret of a
 wider element sliced `[3:7]`, both matching Go. `StdLibInternalAbi`'s golden
 pins the corrected `OutSlice`; its own stdout does not depend on the offset.)
 
-## Every spelling of a pointer-cast slice takes the span, and a MAX bound sets its capacity
-The span lowering above is recognized from the Go expression, not from the text the conversion
-rendered. Extra parentheses around the conversion and an explicit dereference of it are the same
-expression to Go, and both take the span: ccgo writes `((*rawmem)(unsafe.Pointer(r)))[:size:size]`
-and `(*(*RawMem)(unsafe.Pointer(s)))[:n:n]`. A slice of a NAMED array type takes its element type
-from the array (`[]byte` for `rawmem`, a `[1<<50 - 1]byte`), never the array's own name. And a
-three-index slice whose max differs from its high bound covers `lo..max` and is cut to its length
-with `.slice(0, hi - lo)`, so its capacity is `max - lo` as in Go:
+<a id="every-spelling-of-a-pointer-cast-slice-takes-the-span-and-a-max-bound-sets-its-capacity"></a>
+
+## Every spelling of a pointer-cast slice takes the view door, and a MAX bound sets its capacity
+The view door is chosen from the Go expression, not from the text the conversion rendered. Extra
+parentheses around the conversion and an explicit dereference of it are the same expression to Go, and both
+take the door: ccgo writes `((*rawmem)(unsafe.Pointer(r)))[:size:size]` and
+`(*(*RawMem)(unsafe.Pointer(s)))[:n:n]`. A slice of a NAMED array type takes its element type from the
+array (`[]byte` for `rawmem`, a `[1<<50 - 1]byte`), never the array's own name. And a three-index slice
+hands the door its max, so its capacity is `max - lo` as in Go:
 
 <!-- source: src/tests/Behavioral/PointerArrayViewForms/main.go:22-27 -->
 ```go
@@ -3033,21 +3168,19 @@ with `.slice(0, hi - lo)`, so its capacity is `max - lo` as in Go:
 ```
 <!-- source: src/tests/Behavioral/PointerArrayViewForms/main.cs.target:17-22 -->
 ```csharp
-    var b = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p), (int)(n)));
-    var c = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p), (int)(n)));
-    var d = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p) + 2, 6 - 2));
-    var e = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p), 4));
-    var f = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p) + 1, 5 - 1)).slice(0, 3 - 1);
-    var g = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)p) + 2, 7 - 2)).slice(0, 3 - 2);
+    var b = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 0, n, n, 1125899906842623);
+    var c = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 0, n, n, 1125899906842623);
+    var d = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 2, 6, 1125899906842623);
+    var e = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 0, 4, 1125899906842623);
+    var f = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 1, 3, 5, 1125899906842623);
+    var g = @unsafe.Pointer.View<byte>((@unsafe.Pointer)p, 2, 3, 7, 1125899906842623);
 ```
-Before, the parenthesized form fell through to `((ж<array<byte>>)…).slice(0, n, n)`, reading an
-`array<byte>` out of the pointee's own bytes (a nil dereference here, a fabricated reference in
-general); the dereferenced form copied the whole array first (`~`); a named array emitted
-`slice<rawmem>`; and `g` read capacity 1 where Go reads 5. A plain view keeps its bytes: the
-recognition only adds the forms the text match missed, and the capacity form is emitted only when
-max and high are written differently. The span still COPIES `lo..max` (the copying slice view);
-a write through it does not reach the memory. (Guarded by the `PointerArrayViewForms` behavioral
-output test, which prints what Go prints.)
+Before the recognition read the expression, the parenthesized form fell through to
+`((ж<array<byte>>)…).slice(0, n, n)`, reading an `array<byte>` out of the pointee's own bytes (a nil
+dereference here, a fabricated reference in general); the dereferenced form copied the whole array first
+(`~`); a named array emitted `slice<rawmem>`; and `g` read capacity 1 where Go reads 5. A two-index view's
+capacity is the array's, `N - lo`, where the span it replaced gave `hi - lo`. (Guarded by the
+`PointerArrayViewForms` behavioral output test, which prints what Go prints.)
 
 ## A store through an EXPLICIT dereference of a pointer conversion reaches the pointee
 `(*(*T)(p)).F = x` and `(*(*[N]T)(p))[i] = x` are the same stores as `(*T)(p).F = x` and

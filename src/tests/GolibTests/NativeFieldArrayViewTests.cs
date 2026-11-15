@@ -223,6 +223,52 @@ public class NativeFieldArrayViewTests
             "a managed root must take today's raw route through the helper, unchanged");
     }
 
+    // A struct with no reference in it: its box can be pinned, so its field has a real address.
+    private struct Endpoint
+    {
+        public ushort Family;
+        public ushort Port;
+
+        // Converter-named, as the generated accessors are.
+        internal static ref ushort ᏑPort(ref Endpoint instance) => ref instance.Port;
+    }
+
+    /// <summary>
+    /// The raw route over a PINNABLE managed root: the array pointer is at the field's pinned address and keeps
+    /// the struct its field is in, by what the pointer carries (<c>Pointer.To</c> over the pinned pointer; it was
+    /// a cast through a number, which kept the struct only while the registry still resolved the address).
+    /// With no other reference to the struct, collections leave it alive and where it was.
+    /// </summary>
+    [TestMethod]
+    public void TheRawRouteKeepsThePinnableStructItsFieldIsIn()
+    {
+        (ж<array<byte>> p, WeakReference root) = PortOfAStructNothingElseHolds();
+        nuint address = p.NativeAddress;
+
+        Assert.AreNotEqual((nuint)0, address, "a pinnable root's field has an address");
+
+        for (int i = 0; i < 3; i++)
+        {
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+        }
+
+        Assert.IsTrue(root.IsAlive, "the array pointer is the only reference, and it must keep the struct its field is in");
+
+        ж<Endpoint> endpoint = (ж<Endpoint>)root.Target!;
+
+        Assert.AreEqual(address, (nuint)(uintptr)@unsafe.Pointer.FromPinnedBox(endpoint.of(Endpoint.ᏑPort)), "the field is still at the address the array pointer names");
+        GC.KeepAlive(p);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static (ж<array<byte>>, WeakReference) PortOfAStructNothingElseHolds()
+    {
+        ж<Endpoint> endpoint = new StandardBox<Endpoint>(new Endpoint { Family = 2, Port = 80 });
+
+        return (@unsafe.ArrayPointer<byte>.Of(endpoint.of(Endpoint.ᏑPort), 2), new WeakReference(endpoint));
+    }
+
     private static string Outcome(Func<ж<array<byte>>> route)
     {
         try
