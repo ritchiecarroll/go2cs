@@ -38783,4 +38783,244 @@ item 13): key the holder by thread id, see the arm go red, restore.
 
 — G (2026-11-14)
 
+## 2026-11-15 — P5 (corrects one phrase of the 2026-11-14 floor-review entry above; COORD, 01:20Z): the nil array pointer's missing length is cured by door C, not door A — the row stays OPEN, owner P5, with door C
+
+The entry above says of a nil pointer to an unnamed array made from a number: "owner P5, cure in door A", and
+"The array-pointer creation door of `DESIGN-array-pointer-doors.md` (door A) is handed N by the converter". That
+names the wrong door. It is left as written; this entry is the correction.
+
+Door A, as designed (4.1) and as cut (`claude/p5-array-door-a`, design section 11), emits VIEWS: a slice of the
+conversion. The conversion whose value is KEPT, `(*[N]T)(p)`, is still emitted as
+`@unsafe.Pointer.To<array<T>>(p)`, and that is the construction the row measures. Handing it `N` is door C's
+unnamed form, `@unsafe.Pointer.ToArray<E>(p, N)` (design 4.5): 84 `To<array<...>>` lines in 28 files by the
+design's census (P7, D5), not proposed in the first cut.
+
+**State.** OPEN, owner P5, cure in door C. Door C is in .5 unless the sqlite-cs demo reaches it, and the nil
+case goes with it: it is a wrong length from reflect, not a lost store. Everything else in the row stands: what
+is measured, what is not affected, and the arm that holds the measured answer
+(`NativeArrayViewFloorTests.ANilArrayPointerFromANumberCarriesNoLengthWhereTheLanguagesNilDoes`).
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (found rerunning door A's kits; COORD ruling 01:19Z): a write at the ADDRESS of a named array that has not been used yet is lost, silently, on master — OPEN, owner P5, in .4: option 1 as its own golib seat after door A, option 2 after door B
+
+**Finding (measured, linux/amd64, golib and go2cs-gen as on master).** Seven arms, `type small [8]byte`:
+
+| arm | Go | Go prints | converted prints |
+|:--|:--|:--|:--|
+| la | `var local small; fill(unsafe.Pointer(&local), 41)` | `41` | `0` |
+| lb | a package variable, by number: `fillNumber(uintptr(unsafe.Pointer(&global)), 42)` | `42` | `0` |
+| lc | a field: `h := &holder{}; fill(unsafe.Pointer(&h.buf), 43)` | `43` | `0` |
+| ld | `x := new(small); fillNumber(uintptr(unsafe.Pointer(x)), 44)` | `44` | `0` |
+| le | libc's memcpy shape into a fresh named array | `[1 2 3 4 5 6 7 8]` | `[0 0 0 0 0 0 0 0]` |
+| lf | control: the named array is written once before its address is taken | `45 9` | `45 9` |
+| lg | control: an unnamed `[8]byte`, never used before | `46` | `46` |
+
+No panic and no diagnostic: five lost writes, both controls right. The doors of
+`DESIGN-array-pointer-doors.md` emit nothing at these sites, so this is not that seat's. Program, emission and
+both outputs: `docs/phase4/data/array-pointer-doors/door-a-1115/lazy/`.
+
+**Cause (read).** A named array's generated wrapper is a one-field struct whose backing is allocated on the
+first use of its `Value` getter (go2cs-gen `InheritedTypeTemplate`, the lazy backing with its interlocked
+publish). The box's two pin paths, the `uintptr` operator and the `void*` path in golib's `ж.cs`, test
+`value.ValueSlot is IArray arr`. For a value-type pointee that BOXES A COPY of the wrapper. `pinnedArrayData`
+then reads `arr.Source`, which allocates the backing on the copy and pins that. The real slot stays empty, so
+the address names an array the variable never reads, and the variable allocates its own on its next use.
+
+This is the by-value-copy class `INVESTIGATION-element-aliasing.md` closed for ELEMENTS in August: `arrayView`
+and `publishArrayBacking` materialize on the boxed copy and copy the wrapper back under the box's lock. The pin
+paths never went through that gate.
+
+**Reach.** The corpus declares named arrays on 228 lines in 140 files of `src/core` (per-platform files each
+counted). For the sqlite-cs demo, a census of its package closure (`modernc.org/sqlite/...` v1.62.0 with its
+dependencies, loaded with go/packages; tool and rows in `door-a-1115/lazy/census/`) counts every conversion to
+`unsafe.Pointer` whose operand is a pointer to a defined named array:
+
+| target | packages | module packages: named arrays, sites | std packages: named arrays, sites |
+|:--|--:|:--|:--|
+| linux/amd64 | 151 | 6, 4 | 16, 3 |
+| windows/amd64 | 161 | 4, 0 | 16, 3 |
+
+The four module sites are all in `golang.org/x/sys/unix` (`SchedGetaffinity`, `SchedSetaffinity`,
+`SetMemPolicy` over a `CPUSet`, and the PPPoX socket address), and no non-test file of the closure's other
+modules names any of the four (a grep, not a call graph). The three std sites are `internal/abi`'s
+`IntArgRegBitmap.Get` and `runtime`'s `stkbucket` and `slicebytetostring`. libc's `RawMem` and `RawMem64` and
+`modernc.org/memory`'s `rawmem` are defined named arrays, and nothing takes the address of one: they are only
+conversion TARGETS, which is the doors' side. So no site was found in the demo's generated code or in libc.
+
+What the predicate does not see: a struct that holds a named array field and has its OWN address taken, and
+golib or hand-owned C# that calls the pin paths directly. The TypeScript demo's closure is not measured: its
+source is not on the box this was run on. An earlier reading of mine (a grep of two files, posted 01:18Z) is
+superseded by this table; one of the two files was a 5 KB stub and not sqlite's generated code.
+
+**Two options, both ruled into .4.**
+
+1. **golib only, about half a day: its own seat directly after door A.** The two pin sites take their array
+   through the existing per-box publish gate before pinning. No public surface, no converter change, so no
+   corpus footprint. With it: a GolibTests arm per shape and per control, each red first; the program as a
+   behavioral project; the full behavioral suite; `go2cs.slnx`. What it leaves: the gate's copy-back is a plain
+   write under the box's lock, and the wrapper's own getter publishes without that lock, so a goroutine that
+   first-touches the variable directly while another pins it can still lose one of the two backings. That
+   window exists today for the element door as well.
+2. **Closing that window, about one more day: the seat after door B.** The copy-back becomes an interlocked
+   publish of the holder into the slot (the wrapper is exactly one reference field; asserted by size per type),
+   in the element gate and in the pin paths, with a two-thread stress arm. It touches the August gate's code, so
+   it owes that gate's own tests and the `crypto/internal/boring/bcache` row.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door A's decision D8; COORD ruling (a), 2026-11-14 22:39Z): after the view doors, three kinds of `(*[N]T)(p)[lo:hi]` are still a COPY or still lose a write — OPEN as a record, owner P5; the first kind has no known site
+
+`DESIGN-array-pointer-doors.md` sections 11 and 12. A slice taken through an array-pointer conversion over an
+`unsafe.Pointer` is now a view of the memory in every case but these:
+
+1. **The pointee is a Go value that holds a reference.** Nothing can hold it still, so the view is a copy of
+   the elements read at the pointer. A read is exact. `copy` with an OPEN view of it as the destination is
+   refused by name. A BOUNDED view of it under `copy`, or an element store through the view, writes the copy
+   and the write is lost: no panic, and no conversion-time note since the doors replaced the span the note
+   was attached to. No site of this kind is known in modernc.org/libc, modernc.org/sqlite or the standard
+   library; none was searched for beyond the design's census (10.4), which reads the 17 parameter lines of
+   libc's C ABI by their callers in sqlite's generated code on windows/amd64 only.
+2. **The conversion's operand holds a `FromRef` mint.** The address is true for one statement, so the site
+   keeps the copying span: two lines of `internal/abi/type.cs`, which only read. Held by repoguard's
+   `TestArrayPointerViewDoors`.
+3. **The pointee is a named array whose address is taken before the array's first use.** The view is over a
+   backing the variable never reads: the row above of this date, with its own seat.
+
+What the doors cured that this row used to hold: sqlite's first seeding of its random number state,
+`sqlite_windows.go:5802`, `memcpy(&sqlite3Prng, &chacha20_init, 16)`, a write through a byte view of a Go
+struct of scalars and arrays. It is the anchored arm's case (design 12) and prints Go's answer on the shape
+measured (`data/array-pointer-doors/amend-1114/prng/`, arms pa pb pc pe). It was not observed in the sqlite-cs
+demo itself.
+
+If a site of kind 1 appears, the options are the ones of design 10.4's D8 (b): emit a bounded view that is
+`copy`'s direct destination through the copy door, so the door sees the write and refuses a copy destination
+by name.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (found adding V2's mint to door A; COORD ruling 02:54Z: a BOARD row, the fix is a later seat): the repoguard mint census reads a statement line `return F(a, b);` as a MEMBER DECLARATION named F, so a mint below it in the same method is attributed to F — OPEN, no owner; no mint is attributed that way today
+
+`src/go2cs/internal/repoguard/interiorPointerMintCensus_test.go`, `mintMemberSites`: the census keys each mint
+as `<file>|<member>`, and the member is the name captured by the last line above the mint that matched one of
+the four `mintMemberDecls` patterns. The fourth pattern is meant for a bare interface member
+(`nuint HeldBytesFrom(nuint address);`): a type, a name, a parameter list of `type name` pairs, a semicolon. Its
+type class admits letters, digits, `.` and `,`, so a call statement fits it:
+
+| line | read as |
+|:--|:--|
+| `return ManagedWindow(source, whole.Low, whole.Length, lo, count, capacity, length, use);` | a member `ManagedWindow` of type `return` |
+| `return Compute(a, b);` and `return Compute(a, b, c);` | a member `Compute` (the comma is read as a type) |
+| `return ManagedWindow(elements, first, elements.Length - first, lo, ...);` | not matched: the ` - ` |
+| `Store(a, b);` | not matched: no leading word |
+
+Measured with the pattern alone on those lines (go1.26.11).
+
+**How it showed.** V2's first shape minted its window inside `Window<E>` (`src/core/unsafe/unsafe.cs`), below
+the second `return ManagedWindow(...)`. The census failed with "NEW NATIVE MINT: src/core/unsafe/unsafe.cs|
+ManagedWindow ... is in no row", naming a method that mints nothing. A row under that name would have recorded
+a false member, so the mint was moved to its own method, `HeldWindow<E>`, with the row `unsafe.cs|HeldWindow`
+(`a7490fcee7`). The scanner was not changed.
+
+**Reach, measured at `08125e154e`.** In the 202 tracked `.cs` files under `src/core/golib` and
+`src/core/unsafe`, 87 statement lines are read as a member declaration. No native mint and no pointer mint is
+attributed through one of them today: 0 of the census's sites in those two arms. The third arm (a receiver's
+`FromRef` in converted files) was not probed.
+
+**Why it matters.** The failure above was loud, because `ManagedWindow` had no row. It is silent when the
+misread name has a row whose count the stray mint happens to complete, or when a mint leaves the member it
+belongs to and the two rows still sum: the census then holds a "what keeps this mint" sentence against the
+wrong method.
+
+**Options, not sized beyond a reading.** (1) Refuse a statement keyword as the fourth pattern's type (`return`,
+`throw`, `yield`, `await`), and require a `type name` pair to hold no comma in its type; small, with a planted
+arm per misread shape. (2) Track brace depth and take a declaration only at type-body depth; larger, and it
+closes the class.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door A, from the review of V2): a view of a Go value's bytes uses the CLR's layout of the value, and only the element type is checked against Go's — OPEN, no owner
+
+The array-pointer view doors' V2 (`@unsafe.Pointer.View` and the copy doors over a Go value of another type,
+docs/phase4/DESIGN-array-pointer-doors.md section 12) cut a window over the storage the value's box holds still.
+The window's end is the end of that storage as the CLR laid it out. The element type `E` is refused when its C#
+size differs from its Go size (`slice<T>.OverNativeMemory`, `GoLayoutFacts<T>.SizeDiverges`). The VALUE's type is
+not checked. A struct with a Go zero-size field and no explicit layout is larger in C# than in Go, and its later
+fields can sit at other offsets, so a program that views such a value as bytes reads and writes the C# layout where
+Go reads and writes Go's, and the view is longer than Go's value.
+
+Reach: not measured. No V2 site in the standard library or in the two demos is known to view such a struct.
+Candidate remedy: the box answers 0 from `HeldBytesFrom` and false from `TryHeldExtent` when
+`GoLayoutFacts<T>.SizeDiverges` holds for its own pointee, so the door falls to its copy arm and a copy door refuses
+by name. Small (golib only, one test arm per answer).
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door A, from the review of V2): a view at an address the element type is not aligned to is cut without a check — OPEN, no owner
+
+`(*[N]uint64)(unsafe.Pointer(&bytes[1]))[:n]` is a view of 8-byte elements at an odd address. Go's own rule makes
+the conversion invalid when the pointer is not aligned for the new type (checkptr reports it under `-race` or
+`-d=checkptr`; without it the program runs on amd64 and arm64). The view doors cut the window at the address they
+are given, in every arm that views memory (V2 and V3; `HeldWindow` and `Window` in `src/core/unsafe/unsafe.cs`).
+Plain reads and writes of a misaligned element work on amd64 and arm64. The review's concern is an atomic operation
+on such an element (`sync/atomic` over a 64-bit word at an address that is no multiple of 8), which the hardware
+does not promise to perform atomically and may refuse.
+
+Reach: not measured. Candidate remedy: refuse by name when the address is not a multiple of the element's alignment
+and the element is wider than one byte, as checkptr does, or leave it and state it as a limit. A ruling, then small.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door A, from the review of V2): no arm takes views of one Go value on two threads — OPEN, no owner
+
+V2's test arms are single-threaded: one thread takes the view, forces collections and reads. The design record says
+so (docs/phase4/DESIGN-array-pointer-doors.md 12.5). Two threads taking views of one Go value at once both reach
+the box's pin moment (`EnsureStableAddress`, `pinnedArrayData`), and `pinnedArrayData` sets the pin with `??=`,
+which is not atomic: two pins can be made and one dropped, to be released by its finalizer. The review read this
+as benign (both pins hold the same object still, and the address answered is the same). No arm shows it.
+
+Candidate: a two-thread stress arm beside `TenThousandRoundsOfWriteCollectReadKeepEveryViewOnItsValue`. It fits
+the seat that makes the named-array publish interlocked (the lost-write wall's option 2), which adds a two-thread
+arm of its own.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (found by door A's review fix 1): assigning a whole array gives the variable new storage, so everything that named the old storage stops naming the variable — OPEN, no owner, sized
+
+In Go an array variable is its storage. `a = b` copies b's elements into a, and a slice of a, a pointer to an
+element of a, and a's address as a number all still name a afterwards. In converted code an `array<T>` holds a
+reference to a backing array, and a whole assignment swaps the backing: `a = b` is emitted `a = b.Clone()`, and
+`a = [4]int{1, 2, 3, 4}` a fresh array. What was taken from a before the assignment keeps the old backing.
+
+Measured 2026-11-15 on door A's tree (`docs/phase4/data/array-pointer-doors/door-a-1115/`, emission and outputs
+beside each program):
+
+- `reassign-plain/`, no `unsafe`: 7 of 9 lines differ from Go. `s := a[:]; a = [4]int{1,2,3,4}; s[0]` prints 0
+  where Go prints 1; a write through s, or through `p := &a[0]`, does not reach a; the same for a field
+  (`h.arr`), a package variable, an assignment from another variable, and an assignment through `*r = …`. The two
+  lines that agree go through a pointer to the array itself (`q := &a; q[0] = …`), which holds the box.
+- `reassign/`, with `unsafe`: 8 of 10 lines differ. A write through `*(*T)(p)` or through the address as a
+  number, taken before the assignment, is lost (local, package variable, field, named array), and a read
+  through it answers the old elements. The box's pin is made once and holds the old backing
+  (`pinnedArrayData`, `m_pin ??=`), and the registry resolves the old address.
+
+By reading, both are on master: neither the emission nor the pin code is door A's. The runs were not repeated on
+master. Door A's fix 1 makes its own doors refuse or copy instead of writing the old backing; it cures nothing here.
+
+Reach: not measured. The shape that loses is an alias taken BEFORE a whole assignment and used AFTER it. A reset
+(`d.buf = [N]byte{}`) after a slice of the buffer was taken is the likely real form.
+
+Size. Two steps.
+1. A census (small, a go/ast and go/types tool, no converter change): every `=` whose left side is an existing
+   location of array type, and every `=` of a struct that has an array field, in the standard library and in
+   the two demo closures. It says how many lines the cut would move.
+2. The cut (medium; converter, golib, go2cs-gen; a corpus footprint on four targets): such an assignment copies
+   the elements into the destination's own backing (`array<T>` and the named-array wrapper gain an in-place
+   assign; the converter emits it for an existing location and keeps the clone for a declaration, an argument and
+   a map value, which are new storage in Go as well). A struct assignment that carries array fields is the
+   second half and is sized by the census. With the cut the pin never holds storage the variable has left, and
+   fix 1's test becomes a check.
+
+— P5 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

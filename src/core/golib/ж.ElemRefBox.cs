@@ -39,7 +39,7 @@ namespace go;
 /// canonicalization that halved the token/hash workloads in the design's §2.2 measurement.
 /// </para>
 /// </remarks>
-[EditorBrowsable(EditorBrowsableState.Never)] public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun, INativeRooted
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun, INativeRooted, INativeViewAnchor
 {
     // The FAST arm: canonical backing + ABSOLUTE index, deref-equivalent by the indexer
     // definitions of the three arms that populate it. Null when the foreign arm is in effect.
@@ -270,6 +270,10 @@ namespace go;
 
     bool INativeRooted.IsGenuinelyNativeRoot =>
         m_foreign is slice<T> native && native.IsNativeBacked && NativeSliceAnchors<T>.Of(native) is null;
+
+    // What the native-backed slice this is an element of was cut over (the view doors, design 13.2).
+    object? INativeViewAnchor.AnchoredRoot =>
+        m_foreign is slice<T> native && native.IsNativeBacked ? NativeSliceAnchors<T>.Of(native) : null;
 
     /// <inheritdoc/>
     // Canonical backing identity in the high bits with the element's Go BYTE offset below (absolute

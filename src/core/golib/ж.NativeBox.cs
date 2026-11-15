@@ -171,7 +171,7 @@ namespace go;
     // number conversion (ж<T>.FromNumber). `default(T) is I` is a type test on a value type: the JIT and ILC answer
     // it from the type, with no box and no reflection. Decided once per T, read by ValueAddress above.
     private static readonly bool s_isNamedArrayShaped =
-        !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>)) &&
+        !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>)) && // ONE TEST, THREE SPELLINGS: ж<T>.s_isArrayShaped and the last line of ж<T>.PublishesArrayBacking (ж.cs) are this one; change the three together
         default(T) is IArray and not ISlice && RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
     private static readonly NativeBoxDereferenceCensus.Pointee? s_census = NativeBoxDereferenceCensus.Pointee.Of<T>();

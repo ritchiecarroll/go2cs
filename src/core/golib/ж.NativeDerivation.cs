@@ -19,6 +19,28 @@ namespace go;
 // pointer that is not C memory alone RETAINS that pointer. The root, its pin and its source then live as long as the
 // derived box, and a door refuses it by the test it already makes (a native box with a retained source is not C
 // memory alone). A native box's retained source has one production reader, the cgo doors.
+internal interface IHeldStorage
+{
+    // The bytes of Go storage this box holds still from `address` to the end of the object it pinned, or 0 when it
+    // holds nothing still at that address. Asked by the array-pointer view doors before they view a Go value of
+    // another type as native memory (docs/phase4/DESIGN-array-pointer-doors.md 4.2, V2): a window is cut only over
+    // bytes this answers for, and it is anchored on this box, whose pin is released when the box is collected.
+    nuint HeldBytesFrom(nuint address);
+
+    // The Go storage this box holds still, from its first byte to its end, or false when it holds none: nothing was
+    // pinned, the storage cannot be pinned, or the pin holds storage the value no longer has. Asked for a pointer
+    // DERIVED from this box (an offset, an element of a view of it): its address is inside the storage and is no
+    // address the registry knows, so the box cannot be asked about that address alone (design 13.2).
+    bool TryHeldExtent(out nuint start, out nuint end);
+}
+
+// A view of memory that keeps a root: an element of a native-backed slice, or a window over a native array. The root
+// is what the view was cut over (NativeSliceAnchors), null for a view of C memory alone.
+internal interface INativeViewAnchor
+{
+    object? AnchoredRoot { get; }
+}
+
 internal static class NativeDerivation
 {
     // What a box derived from `root` retains: `root` itself, unless it is a native box over C memory alone. The other
@@ -49,6 +71,35 @@ internal static class NativeDerivation
             return null;
 
         return new NativeBox<byte>(value, retainedSource: kept);
+    }
+
+    // The first MANAGED box `kept` was derived from, for the array-pointer view doors at an address inside a Go value
+    // (design 13.2). A chain of derivations is walked as Token walks it, and through a view as well: an element of
+    // a native-backed slice, or a native array window, that keeps a root was cut over that root. Null for C memory
+    // alone and for a root that is no managed box, where nothing here knows the storage's end.
+    internal static IHeldStorage? HeldSource(object? kept)
+    {
+        for (int hop = 0; kept is not null && hop < 64; hop++)
+        {
+            if (kept is INativeRooted { NativeRootAddress: not 0 } native)
+            {
+                kept = native.NativeDerivedFrom;
+                continue;
+            }
+
+            if (kept is INativeViewAnchor { AnchoredRoot: { } root })
+            {
+                kept = root;
+                continue;
+            }
+
+            return kept is IHeldStorage storage && kept is INativeIdentity { NativeIdentityOrZero: 0 } &&
+                   kept is IGoReflectBox { IsNilPointer: false, NamesZeroBase: false }
+                ? storage
+                : null;
+        }
+
+        return null;
     }
 
     // THE ORDER TOKEN OF A DERIVED BOX (2026-11-14), read by unsafe.Pointer's equality and hash and by nothing else.
@@ -124,6 +175,10 @@ internal static class NativeSliceAnchors<T>
         if (root is not null && words.m_array is { Length: > 0 } array)
             s_roots.AddOrUpdate(array, root);
     }
+
+    // The root tied to an anchor array, or null.
+    internal static object? OfAnchor(T[]? anchor) =>
+        anchor is not null && s_roots.TryGetValue(anchor, out object? root) ? root : null;
 
     // The root a native-backed slice keeps, or null: one reference compare for every slice that keeps none.
     internal static object? Of(in slice<T> view) =>

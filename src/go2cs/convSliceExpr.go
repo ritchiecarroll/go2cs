@@ -45,6 +45,14 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 	viewConv := v.pointerArrayViewConversion(sliceExpr.X)
 	var ident string
 
+	// An unsafe.Pointer operand takes the view door, which receives the pointer itself (arrayPointerViewDoor.go).
+	// What remains for the span path below is an operand that holds a FromRef mint.
+	if viewConv != nil {
+		if door, ok := v.arrayPointerViewDoor(sliceExpr); ok {
+			return door
+		}
+	}
+
 	// The span path below reads the conversion's TEXT: it matches a leading `(ж<…>` and cuts that prefix off, so
 	// the conversion must render as the cast and not as the typed door (see typedPointerDoorEmission).
 	if viewConv != nil && v.inFunction && sliceExpr.High != nil {

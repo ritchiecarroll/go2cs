@@ -1,0 +1,1 @@
+sq-windows-amd64: 161 packages (load errors 0); module packages: 4 defined named arrays, 0 sites; std packages: 16 defined named arrays, 3 sites

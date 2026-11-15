@@ -1,0 +1,10 @@
+The prototype is the converted main.cs with one line changed by hand, in memcpy:
+
+converted (master's emission, converter of c2919b8b16; the floor seat changes no converter file):
+    copy(new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)dest), (int)(n))), new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)((@unsafe.Pointer)src), (int)(n))));
+
+prototype:
+    copy(@unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)dest), (int)(n)), @unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)src), (int)(n)));
+
+Both were built -c Release -p:GoTargetOS=linux against golib at 4c8ee1cbd2 (the floor seat's tip) on linux/amd64.
+The struct prngType is emitted with an inline layout: [GoInlineLayout(Size = 132, Align = 4)], fields at 0, 64, 128.
