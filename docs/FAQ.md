@@ -45,8 +45,12 @@ lists them all.
 
 ## What does not convert?
 
-- **cgo.** A package that imports `"C"` is refused, by name, and the run stops
-  ([the plan](Roadmap.md#cgo)).
+- **Most of cgo.** `go2cs -cgo` converts a package whose C uses are calls of C library functions, on
+  a machine with a C compiler. It was measured on linux/amd64, darwin/amd64, darwin/arm64 and
+  windows/amd64.
+  Other C uses are refused, by name, with the phase that covers them: Go memory handed to C, C code
+  written inline in the Go file, and callbacks into Go. Without `-cgo`, a package that imports `"C"`
+  stops the run ([what converts, and what comes next](Roadmap.md#cgo)).
 - **Hand-written assembly.** A function whose body lives in a `.s` file becomes a stub that throws when
   it is called. Many libraries ship a pure-Go fallback behind a build tag, and converting with that tag
   is the usual answer.

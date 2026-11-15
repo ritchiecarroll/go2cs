@@ -1,0 +1,18 @@
+ga: 162 3 [40 162 208 89 22 127 0 0]
+   [exit 0]
+gb: 207 4 [32 210 207 89 143 127 0 0]
+   [exit 0]
+gd: 161 6 [96 75 208 201 161 127 0 0]
+   [exit 0]
+ge: panic: runtime error: index out of range [5] with length 0
+
+goroutine 1 [running]:
+main.main()
+	<kit>/gomem/main.go:36
+   [exit 2]
+gf: 8 8 [0 0 0 0 0 0 8 0]
+   [exit 0]
+gg: 0 9 [8 7 208 149 227 127 0 0]
+   [exit 0]
+gh: 139934896735784 1 [139934896735784 0]
+   [exit 0]
