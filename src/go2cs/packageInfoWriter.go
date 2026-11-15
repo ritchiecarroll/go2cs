@@ -379,6 +379,9 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 				continue
 			}
 
+			// A forward alias chain recorded a deferred marker the .cs files have since resolved (sqlite-cs W7).
+			typeName = resolvedDynamicTypeText(typeName)
+
 			lines.Add(fmt.Sprintf("[assembly: GoTypeAlias(\"%s\", \"%s\")]", alias, typeName))
 		}
 

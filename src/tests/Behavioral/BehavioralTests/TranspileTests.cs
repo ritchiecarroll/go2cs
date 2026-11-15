@@ -757,6 +757,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFormatTypeAdapters() => CheckTarget("FormatTypeAdapters");
 
     [TestMethod]
+    public void CheckForwardAliasChainRecord() => CheckTarget("ForwardAliasChainRecord");
+
+    [TestMethod]
     public void CheckFrameFuncIdentity() => CheckTarget("FrameFuncIdentity");
 
     [TestMethod]
