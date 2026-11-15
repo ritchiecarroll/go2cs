@@ -521,3 +521,257 @@ func TestInlineArrayForeignSliceCopyTakesNoPin(t *testing.T) {
 		}
 	}
 }
+
+// P3'S REVIEW, 2026-11-15 (COORD's rulings 05:21Z). Every root a slice of a foreign inline array can be cut from, so
+// each of the converter's four address walks (escape, capture mode, ref lowering, package variables) is asked once:
+//
+//   - a package variable, sliced in its own package and in the importer, the importer's own included (ruling 1);
+//   - a pointer receiver reached through an array index (ruling 2). A NESTED inline array (`g.m[i][:]`, a go.arrays
+//     member of go.arrays members) is not here: its element has no address golib can spell, so it is a C# compile
+//     error (CS0411 at Ꮡ(g.M, 1)) before and after the review, loud, and recorded on the BOARD;
+//   - a range value variable, a closure-captured local, a by-value parameter and a named result (ruling 4);
+//   - a pin-free copy out of a range value variable, deconstructed and single (NIT 5), and the order of a copy's bounds
+//     check against its other operand (NIT 6).
+//
+// Each prints what Go prints. A root the walks miss would be sliced through the one-argument Ꮡ(value), a COPY, so
+// writes would be lost silently; the converter refuses that spelling instead (ruling 4), so a miss is loud.
+var inlineSliceReviewModule = map[string]string{
+	"win/win.go": `package win
+
+import "unsafe"
+
+type GUID struct {
+	Data1 uint32
+	Data2 uint16
+	Data3 uint16
+	Data4 [8]byte
+}
+
+func Register(g *GUID) uintptr { return uintptr(unsafe.Pointer(g)) }
+`,
+	"guid/guid.go": `package guid
+
+import "example.com/inlinereview/win"
+
+type GUID win.GUID
+
+var pkgID GUID
+
+var ID GUID
+
+var Other GUID
+
+// A package variable of the owner, sliced by the owner.
+func PkgVar() (byte, byte) {
+	s := pkgID.Data4[:]
+	s[0] = 1
+	pkgID.Data4[1] = 2
+	return pkgID.Data4[0], s[1]
+}
+
+// An exported package variable, sliced by the owner and read and sliced by the importer.
+func SliceID() []byte { return ID.Data4[:] }
+
+// A range value variable: each iteration's copy is sliced, and the slice outlives the iteration.
+func RangeVal(gs []GUID) (byte, byte, byte, byte) {
+	var keep [][]byte
+	var first byte
+	for _, g := range gs {
+		s := g.Data4[:]
+		g.Data4[1] = 6
+		s[0] = 5
+		keep = append(keep, s)
+		first = g.Data4[0]
+	}
+	return gs[0].Data4[0], keep[1][0], keep[1][1], first
+}
+
+// A local captured by a closure that slices it.
+func Captured() (byte, byte) {
+	var g GUID
+	f := func() []byte { return g.Data4[:] }
+	s := f()
+	s[0] = 3
+	g.Data4[1] = 4
+	return g.Data4[0], s[1]
+}
+
+// A by-value parameter.
+func Param(g GUID) (byte, byte) {
+	s := g.Data4[:]
+	s[0] = 4
+	g.Data4[1] = 5
+	return g.Data4[0], s[1]
+}
+
+// A named result.
+func Named() (g GUID) {
+	s := g.Data4[:]
+	s[0] = 6
+	g.Data4[1] = 7
+	s[2] = s[1]
+	return
+}
+
+// A pointer receiver whose inline array is reached through an array index.
+type Pair struct {
+	arr [2]win.GUID
+}
+
+func (p *Pair) Second() []byte { return p.arr[1].Data4[:] }
+
+func (p *Pair) Get(i int) byte { return p.arr[1].Data4[i] }
+
+// NIT 5: a pin-free copy out of a range value variable.
+func CopyAll(gs []GUID) []byte {
+	var buf []byte
+	for _, g := range gs {
+		b := make([]byte, 8)
+		copy(b, g.Data4[:])
+		buf = append(buf, b[0])
+	}
+	return buf
+}
+
+// NIT 5, the single-variable foreach: a channel's range variable.
+func CopyChan(ch chan GUID) []byte {
+	var buf []byte
+	for g := range ch {
+		b := make([]byte, 8)
+		copy(b, g.Data4[:])
+		buf = append(buf, b[0])
+	}
+	return buf
+}
+
+func next(ran *bool) []byte {
+	*ran = true
+	return []byte{1}
+}
+
+// NIT 6: copy into x.f[lo:hi] with a bad bound and a call as the other operand. Go's order decides whether the call ran.
+func Bounds(hi int) (ran bool, recovered bool) {
+	var x GUID
+	defer func() { recovered = recover() != nil }()
+	copy(x.Data4[0:hi], next(&ran))
+	return
+}
+`,
+	"main.go": `package main
+
+import (
+	"fmt"
+	"os"
+
+	"example.com/inlinereview/guid"
+	"example.com/inlinereview/win"
+)
+
+// P3's exact shape for ruling 1: a package variable of the importer, sliced and written.
+var mainID win.GUID
+
+// 3b: a root that holds a managed reference beside the GUID.
+type P struct {
+	ID   win.GUID
+	name string
+}
+
+func main() {
+	if len(os.Args) > 1 && os.Args[1] == "refroot" {
+		p := P{name: "beside"}
+		s := p.ID.Data4[:2]
+		s[0] = 1
+		fmt.Println(p.ID.Data4[0], p.name)
+		return
+	}
+
+	s := mainID.Data4[:]
+	s[0] = 1
+	fmt.Println("pkgvar", mainID.Data4[0])
+
+	fmt.Println(guid.PkgVar())
+
+	t := guid.SliceID()
+	t[0] = 9
+	fmt.Println("importer", guid.ID.Data4[0])
+
+	u := guid.ID.Data4[2:]
+	u[0] = 7
+	fmt.Println("importer-slice", guid.ID.Data4[2], t[2])
+
+	v := guid.Other.Data4[:]
+	v[3] = 4
+	fmt.Println("importer-only", guid.Other.Data4[3])
+
+	fmt.Println(guid.RangeVal([]guid.GUID{{}, {}}))
+	fmt.Println(guid.Captured())
+
+	var g guid.GUID
+	a, b := guid.Param(g)
+	fmt.Println("param", a, b, g.Data4[0])
+	fmt.Println("named", guid.Named().Data4)
+
+	var pr guid.Pair
+	sec := pr.Second()
+	sec[0] = 3
+	fmt.Println("index-chain", pr.Get(0))
+
+	fmt.Println("foreach-copy", guid.CopyAll([]guid.GUID{{Data4: [8]byte{1}}, {Data4: [8]byte{2}}}))
+
+	ch := make(chan guid.GUID, 2)
+	ch <- guid.GUID{Data4: [8]byte{3}}
+	ch <- guid.GUID{Data4: [8]byte{4}}
+	close(ch)
+	fmt.Println("chan-copy", guid.CopyChan(ch))
+	fmt.Println(guid.Bounds(9))
+}
+`,
+}
+
+// The review module converts, builds and prints what go prints. GO2CS_INLINE_BUILD=1 runs it.
+func TestInlineArrayForeignSliceReviewShapes(t *testing.T) {
+	dotnet := requireInlineBuild(t)
+	want := goRunInlineModule(t, "inlinereview", inlineSliceReviewModule)
+	out := convertInlineModule(t, "inlinereview", inlineSliceReviewModule)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, out); err != nil {
+		t.Fatalf("the review module does not build: %v\n%s", err, built)
+	}
+
+	got := runConvertedInlineModule(t, dotnet, out)
+	t.Logf("READING go prints:\n%s\nREADING go2cs prints:\n%s", want, got)
+
+	if got != want || want == "" {
+		t.Fatalf("the two runs differ, or printed nothing:\n   go:\n%s\ngo2cs:\n%s", want, got)
+	}
+
+	// 3b, DISCLOSED (COORD's ruling 3b): a root holding a managed reference cannot be pinned, so slicing an inline array
+	// inside it panics by name. Go slices it. Docs/Limitations.md names it; the cure is a .5 BOARD row.
+	projects, _ := filepath.Glob(filepath.Join(out, "*.csproj"))
+	refRoot, err := exec.Command(dotnet, recurseBuiltProgram(t, out, projects[0]), "refroot").CombinedOutput()
+
+	if err == nil || !strings.Contains(string(refRoot), "cannot be held still, so it cannot be sliced") {
+		t.Errorf("a slice of an inline array inside a reference-bearing root must panic by name; exit %v:\n%s", err, refRoot)
+	}
+}
+
+// The copy-box test behind ruling 4's refusal (inlineArraySliceBase): golib's one-argument Ꮡ(value) boxes a COPY, alone
+// or with a step after it; every other spelling aliases. The refusal itself fires only where an address walk misses
+// the variable, so it is shown red by removing one (the review's 2026-11-15 neuter of the package-variable walk named
+// both of its sites), not by a fixture the converter gets wrong on purpose.
+func TestInlineSliceCopyBoxAddressIsRecognized(t *testing.T) {
+	for address, copyBox := range map[string]bool{
+		"Ꮡ(pkgID).of(GUID.ᏑData4)": true,  // the package variable, unboxed (P3's ruling 1 at HEAD)
+		"Ꮡ(mainID).ᏑData4":         true,  // the same, through a promoted accessor
+		"Ꮡ(f(a, b)).ᏑData4":        true,  // a comma inside the one argument
+		"Ꮡ(x[i, j]).ᏑData4":        true,  // and inside an index
+		"Ꮡ(p.arr, 1).ᏑData4":       false, // an element of an array: aliases
+		"Ꮡ(s, i).ᏑData4":           false, // an element of a slice: aliases
+		"ᏑpkgID.of(GUID.ᏑData4)":   false, // the variable's own box
+		"Ꮡg.of(GUID.ᏑData4)":       false,
+	} {
+		if got := addressIsCopyBox(address); got != copyBox {
+			t.Errorf("addressIsCopyBox(%q) = %v, want %v", address, got, copyBox)
+		}
+	}
+}
