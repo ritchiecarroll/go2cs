@@ -1496,3 +1496,159 @@ this commit, not here. Nothing here ran on windows or darwin before the hosted r
 - The readings are of one host with four processors. An arm that reads 0 lost of 200,000 beside a control that
   loses tens of thousands is evidence that the window is closed, not a proof; the argument that it is closed is
   the compare-and-swap in 17.1.
+
+## 18. Amendment 2026-11-15 (P5): the field view over a Go struct (F1 of 16.7, and what its probe found)
+
+16.7 left F1 as "the native field view indexed directly ... panics index out of range [1] with length 0",
+loud, 0 sites, a small seat. A probe of every sibling shape, run before any fix, read a wider defect, and COORD
+ruled the seat in three parts (09:36Z): A, the direct index; B, the route for a Go struct; C, the forms that
+read the whole array, as a commit on top. This section is A and B. Code: `d3d9786321`.
+
+### 18.1 What the probe read
+
+`(*[N]T)(unsafe.Pointer(&h.f))`, f not a T, is emitted `@unsafe.ArrayPointer<T>.Of(field, N)` since the native
+field-view door (docs/phase4/DESIGN-native-array-view.md). The helper answered golib's native door for a NATIVE
+root and the pointer conversion to the array type for every other root. The probe
+(`data/array-pointer-doors/field-view-1115/probe/`:
+15 forms over each of four roots and 4 over a fifth, 64 lines, Go's output against the emission at
+`516586c4a9`, linux/amd64 Release):
+
+| root | at `516586c4a9` |
+|:--|:--|
+| pages from `mmap`, and a struct laid over a Go byte slice (15 forms each) | 8 answer in place. 7 are refused by name: every form the converter spelled with `.Value` (the index where the view is written: read, store, compound, word; the whole load direct and through a local; a range by value) |
+| a Go struct with no reference in it, on the heap and as a package variable (15 each) | `len` is right, a folded constant. 9 panic "index out of range with length 0", 4 panic "nil pointer dereference", and 1 is silent: a range by value over a local answers 0x0 where Go answers 0xf1 |
+| a Go struct that holds a reference (4) | refused by name at the conversion, as "cannot view native memory" |
+
+So the row's panic was the Go root's, and over a Go root the forms through a local failed as well. The
+conversion answered a native box of `array<T>` over the field, and its `Value` read the field's bytes as the
+three fields of `array<T>` itself: a managed reference made out of content, the class the floor's own comment
+in `ж<T>.FromNumber` names. "Length 0" is what sat after the probe's struct.
+
+One line of the prediction written before the run MISSED: the struct laid over a Go byte slice was predicted
+wrong in every form, and it behaves as the native root. Its pointer is a native box over the pinned slice, so
+golib's native door answers for it.
+
+### 18.2 The change
+
+**A, the converter** (`convIndexExpr.go`, `nativeFieldArrayView.go`). The view indexed where it is written,
+`(*[N]T)(unsafe.Pointer(&p.f))[i]`, and its explicit dereference, `(*(*[N]T)(unsafe.Pointer(&p.f)))[i]`, emit
+`@unsafe.ArrayPointer<T>.Of(field, N).ElementRef(i)`, as a local bound by the view does. They emitted
+`(...Of(field, N)).Value[i]`.
+
+**B, the unsafe package** (`src/core/unsafe/unsafe.cs`, hand-owned; no golib change, no public surface).
+`ArrayPointer<T>.Of` answers `Pointer.FieldView<T>` where the native door declines. It resolves the pinned
+pointer to the field as the view doors do (`Aliased`, 4.2) for a window of N elements at the field, and
+answers a native array pointer over that window:
+
+- V2, a Go value its box holds still: over the bytes the field's root holds, anchored on the box that holds
+  them. The view keeps the root, and it ends where the root's storage ends (13.2's held extent): a view longer
+  than its field reads the fields after it, as Go does, and one that would pass the end of the root is refused
+  by name.
+- V3 and V1 are answered as the doors answer them; neither is a field of a Go struct of another type.
+- V4, a root with no address: refused by name, "the field is in a Go value that has no address (a struct that
+  holds references has none)". It was refused as native memory.
+
+So the helper answers a native array pointer for every root that has an address, and the converter's forms
+over it are one set: `ElementRef`, `at`, `slice`.
+
+### 18.3 Red first, and the readings
+
+`FieldArrayViewOverGoStructTests`, 8 arms, at `516586c4a9` with the arms added: 8 of 8 red, each for its own
+reason. Four panic with a length that is no view's; two are null references (the word view, the slice); one
+fails "no panic" where `Value` answered a header; one reads the refusal that says native memory. With the
+change: 8 of 8 green. The arms: the index in place and a store through it; a `uint64` field as two `uint32`;
+the slice and the element address; `Value` refused by name; the held extent (a view of 12 bytes from a field at
+offset 4 of a 16-byte struct reads its last byte, and 13 is refused by name); a struct that is an element of a
+slice; the view as the only reference across three forced compacting collections; the refusal for a struct
+that holds a reference.
+
+One older arm changed. `NativeFieldArrayViewTests` held the helper equal to the pointer conversion over a
+reference-bearing root, "box for box or panic for panic"; it read red with the change, as it should, and now
+asserts the refusal's new words.
+
+The converter's arms (`TestNativeFieldArrayViewIndexedDirectlyReadsThroughElementRef`): red at the base
+converter on every form, green with A. Its control, a same-element view indexed where it is written, keeps
+`array<T>.AliasPointer`.
+
+The probe again, 64 lines against Go's:
+
+| emission | unsafe package | lines equal to Go's |
+|:--|:--|:--|
+| base | base | 8 |
+| base | cut | 12 |
+| cut | cut | 48 |
+
+Predicted for the cut before it ran: 48 equal, the 12 whole-array forms (3 on each of the four roots with an
+address) refused by name, and the 4 forms over the reference-bearing struct refused in the new words. MET as
+worded. The counts of the two upper rows are low partly because a refused store changes every line after it;
+the row that carries the claim is the third, where no refused form writes.
+
+The behavioral program `FieldViewOverGoStruct` runs the forms of A and B over a heap struct, a package
+variable, an element of a slice of structs and a struct laid over a Go byte slice: 62 lines, equal to Go's.
+The converter's emission of the probe moves 6 lines between the two binaries, each a direct index.
+
+Whole GolibTests, linux/amd64 Release: 2857 passed, 0 failed, 49 skipped (2849 passed, 0 failed, 49 skipped at `516586c4a9`, so the
+eight new arms and nothing else).
+
+Footprint, two seeded standard-library emissions on each of the four targets with the base and the cut
+converter: 0 corpus files on linux/amd64, windows/amd64, darwin/amd64 and linux/arm64, as predicted. Each pair of roots differs in 2 files, the run's own dated report and progress log (`reports/conversion_report.html`, `stdlib_conversion_progress.txt`). The 11 emitted field-view sites all bind a local, which A does not touch.
+
+### 18.4 Where the sites are
+
+A typed census with the converter's own predicate over the sqlite demo's module closure on linux/amd64 (12
+module packages, 310 files; `field-view-1115/census/`): 17 field-address array views, all in
+`golang.org/x/sys/unix`'s sockaddr code, all bound to a local. 12 are the field view's shape; 4 are two
+selections deep and 1 is a same-element view. sqlite and libc have none. Every one of the 17 is over a struct
+whose converted form holds references: a fixed array, its own or an embedded raw sockaddr's. So are the 8
+sites in `syscall`'s own `recvfrom` code, which is displaced by a hand-owned file, and the 1 in `runtime`'s
+`cheaprand`, on the 32-bit path. That is 26 sites, and a Go struct with no reference in it, the class B cures,
+has none in these trees.
+
+The 26 are refused by name before this cut and after it. Each views exactly its field (by reading the lines),
+and a view that fits inside its field needs no address: it is a managed reinterpret of the field's own
+storage. That is a new box kind in golib, ruled the next seat after C (09:54Z), with its design written first.
+
+### 18.5 The shapes beside the field view (probe 2)
+
+The field view is one field selected from a pointer-typed identifier. A second probe
+(`data/array-pointer-doors/field-view-1115/probe2/`, 25 lines) ran the shapes that are not: a field two
+selections deep (`&o.inner.port`), a field of a struct variable and of a package variable selected directly,
+and the two-selection shape over a struct that holds a reference, which is `x/sys/unix`'s
+(`&sa.raw.Port`, syscall_linux.go:394). The converter emits all of them identically at the base and at the
+cut: this cut does not touch them. 12 of the 25 lines equal Go's, and 3 of the other 13 only follow from a
+store refused on an earlier line.
+
+| form | a Go struct with no reference in it | a Go struct that holds a reference |
+|:--|:--|:--|
+| the index where the view is written: a read, a store, the address of an element | right, 7 of 7 (and `len`): door B's element door | right, 4 of 4: the element door's fourth arm, Go's own `(*E)(unsafe.Add(p, i*size))`, reads and writes inside the field, and needs no address |
+| the view bound to a local, then indexed | 5 of 5 panic: "nil pointer dereference" or "index out of range with length 0" | 2 of 2 refused by name, as native memory |
+| a range by value over the local | silent: 0x0 where Go answers 0x46 | not run |
+| the open slice `[:]` where the view is written | panics, a nil dereference (the open form of an unnamed array, which door A leaves: decision D4) | refused by name |
+
+Two things follow.
+
+- **The conversion kept in a local, over a Go value of another type that holds no reference, is the class of
+  18.1 for every shape the field view does not take.** Decision D5 says of door C's unnamed form that "the form
+  works over Go memory today". That holds where the memory is a Go array of that type. It does not hold here.
+  The census of 18.4 counts 0 field-address views over a struct with no reference; a kept view of an address
+  that is not a field's (`&x`, x a number) was not counted by it. BOARD row of this date, with its size.
+- **Over a struct that holds a reference, the index where it is written already answers.** So the element
+  access the 26 sites of 18.4 need is in the tree: an array pointer whose element i is the pointer conversion at
+  offset i times the element size. What the next seat adds is the pointer that carries it, the bound that keeps
+  it inside the field, and the field view's shape widened to a field two selections deep, which 4 of the 17
+  census sites are.
+
+### 18.6 What this leaves
+
+- **C, the forms that read the whole array through the view** (`*p`, a range that reads the values,
+  `(*p)[i]` through a local): refused by name on every root, where over a Go struct they were a panic or the
+  silent range. A commit on top of this one.
+- **The refusal's words over a Go struct.** The view's `Value` refuses as "native-backed array at 0x...: a
+  *[N]T over native memory has no array<T> to dereference". Over a Go struct the memory is the struct's, held
+  still. The text is golib's and is not changed here.
+- **A field of a struct that holds a reference:** the 26 sites of 18.4. Refused by name; the next seat.
+- **The shapes of 18.5 over a struct with no reference**, kept in a local: a panic, and one silent form. 0
+  sites in the trees read. Sized on the BOARD; the field shapes go with the next seat's widened view, and the
+  rest is door C's unnamed form.
+- Nothing here ran on windows or darwin before the hosted runs. The sqlite-cs demo was not built at this cut;
+  the census says it has no site of this shape outside `x/sys/unix`.

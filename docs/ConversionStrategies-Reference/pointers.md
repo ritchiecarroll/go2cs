@@ -844,7 +844,7 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:1289-1298 -->
+<!-- source: src/core/unsafe/unsafe.cs:1324-1333 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
@@ -3096,7 +3096,8 @@ fix 1. That a whole assignment gives an array new elements at all is the BOARD's
 pointer cast to a number, which copied. A conversion that another rule already renders whole keeps that
 rule: a conversion back to the pointer's own type slices the box; two array types of one shape are
 [the managed reinterpret](#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address);
-a same-element view of an unnamed array is `array<T>.AliasPointer`; and an array field of a native struct is
+a same-element view of an unnamed array is `array<T>.AliasPointer`; and a view of one field's bytes is
+[the field view](#the-bytes-of-one-field-through-ntunsafepointerpf-the-field-view),
 `@unsafe.ArrayPointer<T>.Of(field, N)`. One operand keeps the copying span: a `FromRef` mint, whose address
 is true for one statement only, so a window over it would outlive the statement that made it true
 (`internal/abi`'s `Methods` and `ExportedMethods`, which only read). A function whose spans all became doors
@@ -3287,7 +3288,7 @@ the array's `N` elements:
 **What keeps its own emission.** The doors replace one emission: the box of the whole array made from the
 pointer, `@unsafe.Pointer.To<array<E>>(p)`, and its `.Value`. A conversion that another rule already renders
 whole keeps that rule, as it does under a slice: a conversion back to the pointer's own type, two array types
-of one shape, a same-element view of an unnamed array, and an array field of a native struct. An element that
+of one shape, a same-element view of an unnamed array, and a view of one field's bytes. An element that
 holds a reference (a pointer, a string, an interface, or an element that is itself an array) keeps the box of
 the whole array: memory that is no Go array of that type has no such elements to hand out. A `FromRef` mint as
 the operand keeps the box too, because its address is true for one statement only. And a conversion that is
@@ -3306,6 +3307,113 @@ holds the index over C memory at no allocation and whose `TheAddressOfAnElementO
 the pinned case across a collection; the converter's `TestArrayPointerElementDoorReplacesTheWholeArrayBox`,
 one arm per form and one control per route that keeps its own emission; and repoguard's
 `TestArrayPointerViewDoors`, which refuses a `FromRef` mint at any door.
+
+## The bytes of one field through `(*[N]T)(unsafe.Pointer(&p.f))`: the field view
+
+Go reads and writes the bytes of one field by converting the field's address to a pointer to an array of
+another element type: the two bytes of a port, the two halves of a 64-bit word. The converter emits the
+field view, `@unsafe.ArrayPointer<T>.Of(field, N)`, which names the field once, as the Go line does. An index
+of the view is `ElementRef`, a reference to the element in place, so a read, a store, a compound assignment
+and `++` are each one expression:
+
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.go:33-44 -->
+```go
+func directRead(h *hdr) byte {
+	return (*[2]byte)(unsafe.Pointer(&h.port))[1]
+}
+
+func directWrite(h *hdr, v byte) {
+	(*[2]byte)(unsafe.Pointer(&h.port))[0] = v
+}
+
+func directOpAssign(h *hdr) {
+	(*[2]byte)(unsafe.Pointer(&h.port))[1] += 2
+	(*[2]byte)(unsafe.Pointer(&h.port))[1]++
+}
+```
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.cs.target:19-30 -->
+```csharp
+internal static byte directRead(ж<hdr> h) {
+    return @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).ElementRef(1);
+}
+
+internal static void directWrite(ж<hdr> h, byte v) {
+    @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).ElementRef(0) = v;
+}
+
+internal static void directOpAssign(ж<hdr> h) {
+    @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).ElementRef(1) += 2;
+    @unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2).ElementRef(1)++;
+}
+```
+
+`h.Ꮡport` is the address of the field, Go's `&h.port`. A view bound to a local is the same call, and the
+local indexes through `ElementRef` too. This is the step `runtime`'s `cheaprand` takes on a 32-bit target:
+
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.go:91-98 -->
+```go
+func localWord(h *hdr) uint32 {
+	t := (*[2]uint32)(unsafe.Pointer(&h.word))
+	s1, s0 := t[0], t[1]
+	s1 ^= s1 << 17
+	s1 = s1 ^ s0 ^ s1>>7 ^ s0>>16
+	t[0], t[1] = s0, s1
+	return s0 + s1
+}
+```
+<!-- source: src/tests/Behavioral/FieldViewOverGoStruct/main.cs.target:74-81 -->
+```csharp
+internal static uint32 localWord(ж<hdr> h) {
+    var t = @unsafe.ArrayPointer<uint32>.Of(h.Ꮡword, 2);
+    var (s1, s0) = (t.ElementRef(0), t.ElementRef(1));
+    s1 ^= (uint32)((s1 << 17));
+    s1 = s1 ^ s0 ^ s1 >> 7 ^ s0 >> 16;
+    (t.ElementRef(0), t.ElementRef(1)) = (s0, s1);
+    return s0 + s1;
+}
+```
+
+The address of an element is `.at<T>(i)` and a slice of the view is `.slice(...)`, both over the same bytes.
+`len` of the view is the constant `N`.
+
+**What the view is** depends on where the struct is, and the helper decides at run time:
+
+- **A struct in native memory** (a `sockaddr` libc returned, a struct laid over a byte slice): the bytes at
+  the field's Go offset in that memory. The offset is resolved from the struct's Go layout, because the CLR
+  may lay a converted struct out in another order.
+- **A Go struct with no reference in it** (on the heap, a package variable, an element of a slice of such
+  structs): the field's own bytes. Taking the view pins the struct, and the view keeps the box that owns the
+  pin, so the struct stays alive and where it is for as long as the view or anything cut from it lives. The
+  view ends where the struct's storage ends: a view longer than its field reads the fields after it, as Go
+  does, and one that would pass the end of the struct is refused by name.
+- **A Go struct that holds a reference** (a string, a pointer, a slice, or a fixed array, which converts to a
+  managed array): refused by name. Such a struct has no address, and a view of a copy would lose every write.
+
+**Scope.** The field view is one field selected from a pointer-typed variable, an element type that is a
+number, and a field whose type is not that element type. A view of the same element type is
+[`array<T>.AliasPointer`](#an-element-pointer-reinterpreted-as-an-array-pointer-aliases-the-elements-storage).
+A field two selections deep, or selected from a struct variable, is not the field view. Indexed where it is
+written it takes
+[the element doors](#an-index-an-elements-address-or-a-whole-array-through-ntp-reaches-the-memory-p-names-the-element-doors),
+which answer over every root. Bound to a local it is the pointer conversion
+[`unsafe.Pointer.To<array<T>>`](#tp-over-an-unsafepointer-is-emitted-as-unsafepointertotp--the-typed-pointer-keeps-what-p-carries),
+which answers where the memory is an array of that type or native, and not over a Go value of another type.
+
+**Limits.** The view has no array value to hand out, so a form that reads the whole array through it (a
+dereference `*p`, a range that reads the values) is refused by name. A local bound to the view and later
+pointed at something else indexes through its array value, `q.Value[i]`, as any pointer to an array does.
+<!-- history: until 2026-11-15 the view answered over native memory only. Over a Go struct it was the pointer
+conversion to the array type, a box that read the field's bytes as an array header: of 15 forms probed over
+such a root, 13 panicked and one, a range by value, ran no rounds and said nothing. And the view indexed
+where it is written emitted `(...Of(field, N)).Value[i]`, which was refused over native memory as well.
+Design and measurements: docs/phase4/DESIGN-array-pointer-doors.md section 18; the native half:
+docs/phase4/DESIGN-native-array-view.md. -->
+
+Guarded by: the behavioral programs `FieldViewOverGoStruct` (every form over a heap struct, a package
+variable, an element of a slice and a struct over a byte slice, against Go) and `NativeFieldPortAlias` (pages
+from `syscall.Mmap`); `FieldArrayViewOverGoStructTests` and `NativeFieldArrayViewTests` in GolibTests; and the
+converter's `TestNativeFieldArrayViewEmitsTheDoorAndElementRef` and
+`TestNativeFieldArrayViewIndexedDirectlyReadsThroughElementRef`.
 
 <a id="a-pointer-cast-slice-with-a-low-bound-offsets-the-span"></a>
 
