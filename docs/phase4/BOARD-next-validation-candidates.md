@@ -38757,4 +38757,40 @@ turns that arm's two measured assertions into Go's answer.
 
 — P5 (2026-11-14)
 
+## 2026-11-15 — i9 (B4, the TypeScript Native AOT sizing; COORD ruling 06:30Z: a .5 option with its own seat, not .4): lever E, golib's per-instantiation static tables moved to one non-generic holder, takes a further 30% off a Native AOT image's symbol names once lever G is in — OPEN, not started, after 1.26.11.1
+
+**What it is.** golib keeps several static tables inside its generic pointer-box types (`ж<T>`'s view table,
+`ElemRefBox<T>`'s element-box table, `FieldRefBox<T>`'s accessor wrappers and its two offset records,
+`NilArrayBox`'s). Each is a `ConditionalWeakTable` or dictionary closed over `T`, so every pointee type a
+program touches instantiates the table's whole method set under its own names. Lever E moves them to one
+internal non-generic class, `GoBoxTables`, keyed by object. The experiment is `claude/i9-b4-lever-e`
+(`f6633c0e8f`, v2); `GolibTests` whole read every verdict equal to the unpatched tree's, after one text guard's
+allow-list entry (`NoUncountedBackingAllocationsTests`) was updated for the moved line.
+
+**What it buys, on `parsedemo` (converted TypeScript, `651c4ad147`, full trim, no native debug symbols), one
+build per arm, each image matching native Go on the demo and 17,422 of 17,422 corpus units:**
+
+| | E v2 alone | G alone | E v2 + G |
+|:--|:--|:--|:--|
+| symbol names (the string table with the 2 GiB limit) | 655.1 MB | 616.2 MB | 429.6 MB |
+| image | 297.4 MB | 252.3 MB | 219.5 MB |
+| ILC peak private | 17.60 GB | 15.69 GB | 11.66 GB |
+| `IL3054` lines | 884 | 0 | 0 |
+
+So with lever G landed (batch 308), E is worth a further 30% of the names (616.2 to 429.6), 13% of the image and
+a quarter of ILC's memory. At PerfStartup, before G, it took 44% of the names (366.8 to 206.7 MB): the two
+levers overlap, since G removes instantiations and E removes tables per instantiation.
+
+**Why it is not .4.** G alone fits: `checkdemo`, the largest image measured (1,545.2 MB of names under E v2
+alone), projects to 1,453 MB with G alone, 68% of the stream. E is margin, and it moves six tables that hold
+weak references and pointer identity, which wants its own seat and review rather than release-week risk.
+
+**What a seat owes.** The form of the two lever G lookups has changed since the experiment (a virtual, not an
+interface), so the patch is re-cut on master, not applied. A guard that the tables are not per-instantiation
+again (the IL reader of `PointerBoxGenericCycleTests` is the model: no static field of a generic box type whose
+type is closed over the box's own `T`). `PerfFieldView` and the alloc rows before and after, since the tables
+are on the field-view and element-box paths. Record: `docs/phase4/DATA-ts-aot-b4.md`, sections 7, 13 to 15, 18 and 19.
+
+— i9 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
