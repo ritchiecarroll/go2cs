@@ -737,6 +737,12 @@ func (v *Visitor) objectAddressTaken(obj types.Object, body ast.Node, directOnly
 			return false
 		}
 
+		// A slice of an array held inline in obj's storage is an address of it (inlineArraySliceBase).
+		if slice, ok := n.(*ast.SliceExpr); ok && !directOnly && v.inlineArraySliceRootsAt(slice, obj) {
+			found = true
+			return false
+		}
+
 		unary, ok := n.(*ast.UnaryExpr)
 
 		if !ok || unary.Op != token.AND {
@@ -949,6 +955,14 @@ func (v *Visitor) performEscapeAnalysisForObject(identObj types.Object, parentBl
 					// for field values, not directly stored in the composite literal
 					return true
 				}
+			}
+
+		case *ast.SliceExpr:
+			// A slice of an array held inline in the ident's own storage, `x.f[lo:hi]`, is Go's (&x.f)[lo:hi]: it is
+			// emitted over the field's address (inlineArraySliceBase), so the ident lives in a box, as for `&x.f`.
+			if v.inlineArraySliceRootsAt(n, identObj) {
+				escapes = true
+				return false
 			}
 
 		case *ast.CallExpr:

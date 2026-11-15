@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/constant"
+	"go/token"
 	"go/types"
 	"strings"
 )
@@ -33,17 +34,23 @@ import (
 // package's, or one another package records as admitted: C1's review, m3), or an array element of one (an admitted
 // closure holds every array inline, nested ones included).
 func (v *Visitor) isInlineArrayExpr(expr ast.Expr) bool {
+	return isInlineArrayExprIn(expr, v.info)
+}
+
+// isInlineArrayExprIn is isInlineArrayExpr for a pass that holds the package's types.Info but no visitor (the
+// ref-lowering analysis).
+func isInlineArrayExprIn(expr ast.Expr, info *types.Info) bool {
 	if packageInlineAdmission == nil {
 		return false
 	}
 
 	switch e := ast.Unparen(expr).(type) {
 	case *ast.SelectorExpr:
-		owner, _, ok := arrayFieldOwner(e, v.info)
+		owner, _, ok := arrayFieldOwner(e, info)
 		return ok && inlineArrayHeld(owner)
 	case *ast.IndexExpr:
-		if _, isArray := types.Unalias(v.info.TypeOf(e)).Underlying().(*types.Array); isArray {
-			return v.isInlineArrayExpr(e.X)
+		if _, isArray := types.Unalias(info.TypeOf(e)).Underlying().(*types.Array); isArray {
+			return isInlineArrayExprIn(e.X, info)
 		}
 	}
 
@@ -225,4 +232,57 @@ func inlineArrayHeld(t types.Type) bool {
 	}
 
 	return false
+}
+
+// inlineArraySliceBase renders the base of a slice of an inline array, `x.f[lo:hi]` (go-winio's pkg/guid slicing
+// windows.GUID's Data4, COORD 2026-11-15, Part 2 ruled (a)): the whole array as a slice that ALIASES the struct's own
+// storage, `Ꮡx.of(X.Ꮡf).ΔInlineSlice<E>()`, to which the caller applies the expression's bounds. Go's x.f[lo:hi] is
+// (&x.f)[lo:hi], so the base is the field's address, and x is boxed by the address-taken path (escape analysis reads the
+// slice as an address of x, inlineArraySliceRoots). golib's ΔInlineSlice pins the box and keeps it for as long as any
+// slice cut from it lives (ж.InlineSlice.cs). A value receiver that is sliced is boxed as a COPY, so its slice never
+// reaches the caller's struct, as in Go.
+//
+// Reached only where the admission did not keep the type out: a field another package holds inline, and a local
+// defined type over one (inlineArrayAdmission.go's reconcileDefinedTypes), plus forced mode. An element whose C# form
+// holds a managed reference cannot be pinned, so it is not spelled (ok is false) and stays a C# compile error, as
+// every unspelled face is.
+func (v *Visitor) inlineArraySliceBase(array ast.Expr) (string, bool) {
+	arrayType, ok := types.Unalias(v.info.TypeOf(array)).Underlying().(*types.Array)
+
+	if !ok || arrayType.Len() == 0 || !inlineSliceElementIsPlain(arrayType.Elem()) {
+		return "", false
+	}
+
+	address := v.convUnaryExpr(&ast.UnaryExpr{OpPos: array.Pos(), Op: token.AND, X: array}, DefaultUnaryExprContext())
+
+	if strings.HasPrefix(address, "(") && !isFullyParenthesized(address) || strings.HasPrefix(address, "~") {
+		address = "(" + address + ")"
+	}
+
+	return fmt.Sprintf("%s.ΔInlineSlice<%s>()", address, convertToCSTypeName(v.getAliasQualifiedTypeName(arrayType.Elem(), false))), true
+}
+
+// inlineSliceElementIsPlain reports whether an inline array of elem can be sliced as a native window: a numeric or
+// boolean element, whose C# form holds no managed reference.
+func inlineSliceElementIsPlain(elem types.Type) bool {
+	basic, ok := elem.Underlying().(*types.Basic)
+	return ok && basic.Info()&(types.IsNumeric|types.IsBoolean) != 0
+}
+
+// inlineArraySliceRootsAt reports whether slice cuts an inline array that inlineArraySliceBase spells and that lies in
+// the storage of identObj (x.f[lo:hi], x.a.f[lo:hi], with no pointer on the way), so escape analysis boxes identObj.
+func (v *Visitor) inlineArraySliceRootsAt(slice *ast.SliceExpr, identObj types.Object) bool {
+	return storageChainRootsAtIdent(slice.X, identObj, v.info) && inlineArraySliceSpelled(slice, v.info)
+}
+
+// inlineArraySliceSpelled reports whether slice cuts an inline array that inlineArraySliceBase spells, over the
+// array's address.
+func inlineArraySliceSpelled(slice *ast.SliceExpr, info *types.Info) bool {
+	if !isInlineArrayExprIn(slice.X, info) {
+		return false
+	}
+
+	arrayType, ok := types.Unalias(info.TypeOf(slice.X)).Underlying().(*types.Array)
+
+	return ok && arrayType.Len() > 0 && inlineSliceElementIsPlain(arrayType.Elem())
 }

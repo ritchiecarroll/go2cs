@@ -1296,6 +1296,12 @@ func (a *refLoweringAnalysis) classifyPointeeUse(chainRoot ast.Node, parents map
 			return a.classifyDerivedAddress(p, parents)
 
 		case *ast.SliceExpr:
+			// p.f[:] of an array held INLINE in the pointee (a go.arrays member) is (&p.f)[:]: it is emitted over the
+			// field's address (inlineArraySliceBase), which needs p's box, as &p.f does.
+			if p.X == node && inlineArraySliceSpelled(p, a.info) {
+				return refVetoOtherUse, nil
+			}
+
 			// p.f[:] — slices the pointee's array backing; the resulting header aliases heap
 			// backing in both emissions (array<T> keeps a shared T[]), value-level for the
 			// parameter's own classification.
