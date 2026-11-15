@@ -23,7 +23,7 @@ project records them (`GoInputDigest`).
 |:--|:--:|:--:|
 | `TestAppendFormat` | pass | pass |
 | `TestFormat` | pass | pass |
-| `TestFormat/%!%.%[%]%\|%$%-/%!%.%[%]%\|%$%-` | pass | pass |
+| <code>TestFormat/%!%.%&#91;%&#93;%&#124;%$%-/%!%.%&#91;%&#93;%&#124;%$%-</code> | pass | pass |
 | `TestFormat/%#/%#` | pass | pass |
 | `TestFormat/%/%` | pass | pass |
 | `TestFormat/%0/%0` | pass | pass |

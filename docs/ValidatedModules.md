@@ -10,6 +10,16 @@ failure, as something the converted code does not do.
 Each module's pages are written by the converter beside its conversion and copied here unedited:
 the module summary sums the per-package proof pages, and each proof page lists every verdict. Every
 module's summary is the `VALIDATION.md` its NuGet package carries, below the package's notices.
+One row of the `timefmt-go` proof page differs from the converter's text: its test name holds a pipe, and the row
+writes it as an HTML code element so that GitHub and this site show the same name.
+
+<!-- Provenance (2026-11-15, P4): pages copied from the go.* 1.26.10.3 wave kits (claude/c2-nugetgo-* and the
+1261003 kits), each per-package page sha256-equal to its kit's file and each MODULE.md equal to its kit's
+VALIDATION.md below the leading notice lines. The one exception is timefmt-go@v0.1.8/index.md line 26: the
+converter's proof-page writer (validationProofPages.go, escapeProofCell) puts a backslash-pipe inside a code span,
+which TestDocsTableCodeSpanHasNoEscapedPipe refuses; the row is rewritten in the guard's HTML form. Kit file
+sha256 90f63ae649aa9c00..., page as committed 4341668c19ea7164.... A converter fix makes the page byte-equal again
+at the next regeneration. -->
 
 The rows are readings with Go 1.26.10, built on the go.* 1.26.10.3 standard-library packages, on `linux/amd64`,
 at `Release` with the tiered JIT off, the test host's default. Each summary gives the module's counts of matched
