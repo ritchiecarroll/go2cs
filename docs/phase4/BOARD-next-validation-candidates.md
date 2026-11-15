@@ -39253,6 +39253,27 @@ slice holds the box and reads through the offset, so the GC may move it. Not sta
 compile error, CS0411 at `Ꮡ(g.M, i)`, because golib has no element address for a go.arrays member. It read the same
 before and after the review. go-winio does not reach it.
 
+## 2026-11-15 — C2 (batch 308, COORD 10:45Z, option (b)): release-smoke cgo skips linux-arm64 until zig has a linux-arm64 pin — OPEN, the pin is owed for 309
+
+**What happened.** Seat S5c added linux-arm64 to the consumer legs. `release-smoke-cgo` (batch 307) ran on the same
+matrix, so it inherited the leg, and `.github/cgo-toolchain.ps1` refused it: "release-smoke cgo probe: no zig pin for
+runner linux-arm64" (run 43696423446, the 308 union). The pin table has zig for linux-x64, osx-x64, osx-arm64 and
+win-x64, and llvm-mingw for win-x64; nothing for aarch64-linux.
+
+**What changed.** The plan step emits a second matrix, `cgo-matrix`: the consumer legs less the RIDs in
+`$cgoUnpinnedRids` (today `linux-arm64`). `release-smoke-cgo` reads it; release-smoke, aot-smoke and nugetgo-behavior
+keep all five legs. `TestCgoSmokeSkipsOnlyTheLegsWithNoPinnedToolchain` (repoguard) holds the list equal to the consumer
+legs whose OS default toolchain (llvm-mingw on windows, zig elsewhere) has no pin, both ways: red before the list
+existed, and red with a planted `zig|linux-arm64` key (the file restored byte-identical after).
+
+**Why not the pin now.** Option (a) is one pin-table line, but its sha256 must be the publisher's, read from
+ziglang.org's download index, and that host is outside this box's network policy. A hash computed from our own
+download is not the publisher's statement, so it is not used.
+
+**OPEN, for 309:** add `'zig|linux-arm64'` (zig 0.17.0, `zig-aarch64-linux-0.17.0.tar.xz`, the index's sha256), drop
+`linux-arm64` from `$cgoUnpinnedRids` (the guard fails until both move together), and read release-smoke cgo on
+linux-arm64. Until then, **NOT SHOWN:** that the cgo path works for a linux-arm64 consumer.
+
 — C2 (2026-11-15)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
