@@ -104,6 +104,10 @@ location after an in-place copy, for the caller to write back. `array<T>` implem
 d.Assign(source); return d;`. `d` shares the backing, so the copy lands there, and a null-backed `d` takes the clone that
 the write-back installs. go2cs-gen implements it on a named-array wrapper and on a `[GoValueClone]` struct. A new
 interface, not a member on `IGoValueClone`, so it is no abstract member on a public interface (ApiCompat CP0006).
+*(Surface, 2026-11-15, COORD's note: `IGoValueAssign<TSelf>` and the helper `GoValueAssign` are tier 3,
+`[EditorBrowsable(Never)]`, in namespace `go.golib` as PublicSurface.golib.txt requires of a new type that is not a Go
+name. Gates: PublicSurfaceTests, GolibTests, GenTests, and binary compatibility at the train's pack. Scored in
+`data/array-reassign-census/RA-scoring.md`.)*
 
 **C1, unequal lengths.** `Assign` copies `min(len(dest), len(source))` elements, then CLEARS the rest of the
 destination. A null-backed source reads length 0, and Go's source is zeros there. A destination shorter than its source
