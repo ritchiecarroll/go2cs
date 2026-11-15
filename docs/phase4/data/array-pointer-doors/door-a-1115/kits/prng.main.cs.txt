@@ -1,0 +1,86 @@
+namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using @unsafe = unsafe_package;
+using System.Runtime.InteropServices;
+using go.arrays;
+using go.golib;
+
+partial class main_package {
+
+/* [1125899906842623L]byte */
+partial struct RawMem /*[1125899906842623]byte*/;
+
+[GoInlineLayout(Size = 132, Align = 4), StructLayout(LayoutKind.Explicit, Size = 132)] partial struct prngType {
+    [FieldOffset(0)] internal array16<uint32> s;
+    [FieldOffset(64)] internal array64<uint8> @out;
+    [FieldOffset(128)] internal uint8 n;
+}
+
+partial struct pair {
+    internal uint32 a, b;
+    internal uint64 c;
+}
+
+internal static readonly ж<prngType> Ꮡprng = new StaticBox<prngType>(new prngType());
+internal static ref prngType prng => ref ((StaticBox<prngType>)Ꮡprng).ValueSlot;
+internal static readonly ж<prngType> Ꮡsaved = new StaticBox<prngType>(new prngType());
+internal static ref prngType saved => ref ((StaticBox<prngType>)Ꮡsaved).ValueSlot;
+internal static readonly ж<array<uint32>> ᏑchachaInit = new StaticBox<array<uint32>>(new uint32[]{0x61707865, 0x3320646e, 0x79622d32, 0x6b206574}.array());
+internal static ref array<uint32> chachaInit => ref ((StaticBox<array<uint32>>)ᏑchachaInit).ValueSlot;
+internal static readonly ж<array<uint8>> Ꮡmagic = new StaticBox<array<uint8>>(new uint8[]{0xd9, 0xd5, 0x05, 0xf9, 0x20, 0xa1, 0x63, 0xd7}.array());
+internal static ref array<uint8> magic => ref ((StaticBox<array<uint8>>)Ꮡmagic).ValueSlot;
+internal static readonly ж<pair> Ꮡscalars = new StaticBox<pair>(default(pair));
+internal static ref pair scalars => ref ((StaticBox<pair>)Ꮡscalars).ValueSlot;
+
+internal static uintptr memcpy(uintptr dest, uintptr src, uintptr n) {
+    if (n != 0) {
+        copy(@unsafe.Pointer.View<byte>((@unsafe.Pointer)dest, 0, (nint)(n), (nint)(n), 1125899906842623), @unsafe.Pointer.View<byte>((@unsafe.Pointer)src, 0, (nint)(n), (nint)(n), 1125899906842623));
+    }
+    return dest;
+}
+
+internal static void main() {
+    var exprᴛ1 = os.Args[1];
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "pa"u8: {
+        memcpy((uintptr)Ꮡprng, (uintptr)ᏑchachaInit, 16);
+        fmt.Printf("%#x %#x %#x %#x\n"u8, prng.s[0], prng.s[1], prng.s[2], prng.s[3]);
+        break;
+    }
+    case {} when exprᴛ1 == "pb"u8: {
+        prng.s[5] = 7;
+        prng.@out[2] = 9;
+        prng.n = 3;
+        memcpy((uintptr)Ꮡsaved, (uintptr)Ꮡprng, /* unsafe.Sizeof(prng) */ (uintptr)132);
+        fmt.Println(saved.s[5], saved.@out[2], saved.n);
+        break;
+    }
+    case {} when exprᴛ1 == "pc"u8: {
+        memcpy((uintptr)Ꮡscalars, (uintptr)ᏑchachaInit, 16);
+        fmt.Printf("%#x %#x %#x\n"u8, scalars.a, scalars.b, scalars.c);
+        break;
+    }
+    case {} when exprᴛ1 == "pd"u8: {
+        ref var buf = ref heap(new array<byte>(8), out var Ꮡbuf);
+        memcpy((uintptr)Ꮡbuf, (uintptr)Ꮡmagic, 8);
+        fmt.Println(buf);
+        break;
+    }
+    case {} when exprᴛ1 == "pe"u8: {
+        ref var w = ref heap(new array<uint32>(4), out var Ꮡw);
+        memcpy((uintptr)Ꮡw, (uintptr)Ꮡmagic, 8);
+        fmt.Printf("%#x %#x\n"u8, w[0], w[1]);
+        break;
+    }
+    case {} when exprᴛ1 == "pf"u8: {
+        ref var buf = ref heap(new array<byte>(16), out var Ꮡbuf);
+        memcpy((uintptr)Ꮡbuf, (uintptr)ᏑchachaInit, 16);
+        fmt.Println(buf);
+        break;
+    }}
+
+}
+
+} // end main_package

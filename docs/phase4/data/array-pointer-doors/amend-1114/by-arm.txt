@@ -1,0 +1,91 @@
+Door A's population by arm, 2026-11-14 (P5). Read at modernc.org/sqlite v1.62.0 and modernc.org/libc v1.80.1
+(the pins of census/), and at go1.26.11 for std. The site lists are the rows of census/sq-*.tsv whose form is a
+slice form and whose array is named (RawMem). A site's arm is decided at run time by what its operand names, so
+each row below is a reading of the site's Go source, not a tool's column.
+
+1. sqlite + libc, the 34 lines on windows/amd64 and the 16 on linux/amd64
+
+  what the operand is at the site                         windows  linux  arm
+  a fresh allocation or a C result in the same function        16     12  V3
+  the address of an element of a Go byte array                  1      0  V1
+  a uintptr PARAMETER of the function (the C ABI)              17      4  the caller's
+                                                               34     16
+
+  V3, windows: libc etc.go:434 and :662 (Xmalloc), libc.go:123 and :197 (Xcalloc), and sqlite's 12:
+      conn.go:280 :317 :1393 :1408 :1505, pre_update_hook.go:189, sqlite.go:1025 :1068 :1257,
+      vtab.go:333 :381 :593 (column blobs, sqlite3_malloc, the connection's malloc).
+  V3, linux: the same 12 of sqlite.
+  V1, windows: libc_windows.go:1657 (Xstrerror, &strerrorBuf[0]).
+  A parameter, windows, 17 lines in 15 functions:
+      fgets.go:45 Xfgets; libc.go:751 Xsprintf, :915 Xsnprintf, :1965 Xmemcpy (2 lines: both operands),
+      :2006 Xmemmove (2 lines), :2617 Xgetentropy, :2715 Xbzero; libc_windows.go:710 Xgetcwd, :760 Xread,
+      :798 Xwrite, :1835 Xrealpath, :1904 Xfread, :1948 Xfwrite, :7876 Xstrftime; sqlite vfs/patches.go:195.
+  A parameter, linux, 4 lines: libc_musl.go:1508 :1518 :1527 (the three uuid functions), vfs/patches.go:195.
+
+2. Who calls the parameter functions, and with what (windows/amd64)
+
+  File set: `GOOS=windows GOARCH=amd64 go list -f '{{range .GoFiles}}...' modernc.org/sqlite/lib` (96 files).
+  Calls into the 14 libc functions of section 1 from that package: Xmemcpy 412, Xmemmove 42, the others 0.
+  (grep -o 'libc\.X<name>(' over the 96 files.)
+
+  Of the 454 calls, those whose argument is written AT THE CALL as the address of a Go package variable,
+  `uintptr(unsafe.Pointer(&_name))`:
+
+    as the DESTINATION (first argument): 3
+      sqlite_windows.go:5802           Xmemcpy(&_sqlite3Prng, &_chacha20_init, 16)      in Xsqlite3_randomness
+      sqlite_g_000000000007fd68.go:2045  Xmemcpy(&_sqlite3Prng, &_sqlite3SavedPrng, 132)  _sqlite3PrngRestoreState
+      sqlite_g_000000000007fd68.go:2049  Xmemcpy(&_sqlite3SavedPrng, &_sqlite3Prng, 132)  _sqlite3PrngSaveState
+    as the SOURCE (second argument): 13
+      _sqlite3Prng 3, _aJournalMagic 2, and one each of _zMagicHeader, _vfs_template, _sqlite3SavedPrng,
+      _sqlite3Config, _chacha20_init, _aVal, _aHardLimit, _aAsciiTokenChar.
+
+  The variables' Go types: _sqlite3Prng and _sqlite3SavedPrng are
+      struct { Fs [16]uint32; Fout [64]uint8; Fn uint8 }                 (132 bytes, no pointers)
+  _chacha20_init [4]uint32, _aJournalMagic [8]uint8, _aAsciiTokenChar [128]uint8, _zMagicHeader [16]int8,
+  _aHardLimit [15]int32, _aVal [5]TLogEst (int16), _vfs_template and _sqlite3Config structs holding uintptr words.
+
+  These counts are a LOWER bound: an address that reaches memcpy through a variable, a field or arithmetic
+  (`uintptr(unsafe.Pointer(&_sqlite3Prng))+4*4` is passed to the VFS's randomness function two lines below
+  :5802) is not counted. The packages sqlite, sqlite/vfs and sqlite/vec were not read for callers.
+
+  On linux/amd64 libc's memcpy is not a view form (the three linux parameter sites are the uuid functions),
+  so this section's finding is the windows flavour's. What the linux flavour's memcpy does with the same
+  destination was not measured.
+
+3. The same shape, run (prng/)
+
+  prng/main.go is libc's windows Xmemcpy body with six callers; go.out is Go's answer (go1.26.11, linux/amd64),
+  converted.out the conversion at master's emission, prototype.out the hand edit of prototype-edit.txt, both
+  against golib at 4c8ee1cbd2.
+
+  arm  destination <- source                                 Go                   converted  prototype
+  pa   the 132-byte struct <- [4]uint32 (sqlite :5802)       0x61707865 ...       zeros      zeros
+  pb   the struct <- the struct (save state)                 7 9 3                0 0 0      0 0 0
+  pc   a struct of scalars <- [4]uint32                      0x61707865 ...       zeros      zeros
+  pd   [8]byte <- [8]uint8, each named by the ARRAY's number [217 213 ...]        zeros      zeros
+  pe   [4]uint32 <- [8]uint8                                 0xf905d5d9 ...       zeros      zeros
+  pf   [16]byte <- [4]uint32                                 [101 120 ...]        zeros      zeros
+
+  Every destination write is lost in both. The prototype is `unsafe.Slice` as it stands: for a number the
+  registry knows it leaves its native arm and takes its snapshot, which is what door A answers for Go storage
+  of another type when V2 is absent. pd and pf show a second thing: a byte array named by the number of the
+  ARRAY (`uintptr(unsafe.Pointer(&buf))`, not `&buf[0]`) does not reach the element window either.
+
+4. std, the 11 lines of P5 (read at the Go source, go1.26.11)
+
+  registry/value.go:110 :206   a uint16 view of a []byte the syscall filled     read only
+  registry/value.go:294 :324   a byte view of a []uint16, handed to setValue     read only
+  runtime/heapdump.go:84 :94   direct copy sources                               read only
+  runtime/heapdump.go:743      sysAlloc memory (the OS: a number)                V3, written after
+  runtime/mbitmap.go:1536      persistentalloc memory (from sysAlloc)            V3, written after
+  runtime/iface.go:220         type-descriptor memory                            read only
+  runtime/os_windows.go:570 :605   the print buffer                              read only
+
+  No std line writes through a view of Go storage of another type. Section 6's P8 says the two os_windows
+  lines are "read and written"; read at the source they are read only (a range loop, and a string made
+  from the view).
+
+5. The arm W programs (w/)
+
+  w/main.go: G's w5b2 as a twin that runs as Go, three statements over one local [16]byte.
+  go.out: `5 "name\x00\x00"`, `4 "name"`, `4 "\x00\x00wxyz"`.

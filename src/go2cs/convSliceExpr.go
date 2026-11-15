@@ -45,6 +45,14 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 	viewConv := v.pointerArrayViewConversion(sliceExpr.X)
 	var ident string
 
+	// An unsafe.Pointer operand takes the view door, which receives the pointer itself (arrayPointerViewDoor.go).
+	// What remains for the span path below is an operand that holds a FromRef mint.
+	if viewConv != nil {
+		if door, ok := v.arrayPointerViewDoor(sliceExpr); ok {
+			return door
+		}
+	}
+
 	// The span path below reads the conversion's TEXT: it matches a leading `(ж<…>` and cuts that prefix off, so
 	// the conversion must render as the cast and not as the typed door (see typedPointerDoorEmission).
 	if viewConv != nil && v.inFunction && sliceExpr.High != nil {
@@ -61,6 +69,12 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		if isMatch, _ := isPointerCast(bare); isMatch {
 			ident = bare
 		}
+	}
+
+	// A slice of an array held inline (a go.arrays member, which has no slice face of its own) is cut from the whole
+	// array as a slice over the struct's own storage; the bounds below apply to it as to any slice.
+	if ident == "" && v.isInlineArrayExpr(sliceExpr.X) {
+		ident, _ = v.inlineArraySliceBase(sliceExpr.X)
 	}
 
 	if ident == "" {

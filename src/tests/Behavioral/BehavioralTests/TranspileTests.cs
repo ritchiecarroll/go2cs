@@ -166,6 +166,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckArrayPointerElementAlias() => CheckTarget("ArrayPointerElementAlias");
 
     [TestMethod]
+    public void CheckArrayPointerViewDoors() => CheckTarget("ArrayPointerViewDoors");
+
+    [TestMethod]
     public void CheckArrayRangeSnapshot() => CheckTarget("ArrayRangeSnapshot");
 
     [TestMethod]
@@ -1415,6 +1418,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedApproxStringByteConstraint() => CheckTarget("NamedApproxStringByteConstraint");
+
+    [TestMethod]
+    public void CheckNamedArrayAddressWrite() => CheckTarget("NamedArrayAddressWrite");
 
     [TestMethod]
     public void CheckNamedArrayAnonElement() => CheckTarget("NamedArrayAnonElement");

@@ -607,6 +607,22 @@ Reading a `-tests` result, mass-empty signatures and the census/launch traps now
   PROCESS PER UNIT counts per unit.** <!-- ⚠ 2026-09-13, C2 `d0807ee31` s2. The license dedupe is a
      process-global `sync.Map` and CNR spawns one converter per project, so "reported once per module"
      bounds ONE invocation and says nothing about a corpus sweep's total. -->
+- **A HOOK PLACED AHEAD OF EXISTING ROUTES IS SCOPED BY CONVERTING EVERY SIBLING SHAPE WITH BOTH BINARIES
+  BEFORE THE FIRST COMMIT** — one probe file, the base converter and the cut, every changed line classified.
+  Reading the sites you already know scopes the hook to those sites. Where a route has a predicate, the hook
+  declines through THAT predicate, never through a copy of it. <!-- ⚠ 2026-11-15, P5, door A
+     (claude/p5-array-door-a), ruled into this file by COORD the same day. The view door's hook in
+     convSliceExpr.go sits ahead of every route that renders `(*A)(unsafe.Pointer(p))` whole, and the seat
+     paid for that twice: 5d6eac352a (the same-element alias, found by reading where three test lines
+     land) and a0c43a357b (check-no-regression at c24cb00630 moved PointerCastSliceRange, an identity
+     conversion; the behavioral prediction "no other file moves" MISSED). A probe of 25 sliced shapes,
+     converted by the 305 converter and by the cut, then read 22 changed where only 8 were the copying span
+     the door exists to replace: identity 9, the reinterpret between two array types of one shape 3, the
+     native field view 2. The field view would have been WRONG and not only different: its helper resolves
+     the field's Go offset for a native root, and a view door over the field's box does not. After
+     arrayPointerConversionKeepsItsRoute, which calls the four routes' own predicates: 8 changed, each a
+     span, 17 byte-identical. The probe took ten minutes; it and both emissions are in
+     docs/phase4/data/array-pointer-doors/scope-probe/. -->
 
 ## Test-harness mechanics (important when changing the converter)
 

@@ -43,7 +43,7 @@ namespace go;
 /// (the page allocator's <c>l2Size</c>). Nothing downstream can recover it from the address.
 /// </para>
 /// </remarks>
-internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox, INativeRooted
+internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox, INativeRooted, INativeViewAnchor
 {
     // The base of the element block — never managed storage this box owns.
     private readonly nuint m_nativeAddr;
@@ -91,6 +91,9 @@ internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox, INativeRo
     bool INativeRooted.IsNativeRooted => false;
 
     bool INativeRooted.IsGenuinelyNativeRoot => m_anchor is null;
+
+    // What this window was cut over (the view doors, design 13.2).
+    object? INativeViewAnchor.AnchoredRoot => NativeSliceAnchors<T>.OfAnchor(m_anchor);
 
     /// <summary>
     /// The element view, and the only honest way through this box. A <c>slice&lt;T&gt;</c> over the

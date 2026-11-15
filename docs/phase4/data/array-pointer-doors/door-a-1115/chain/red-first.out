@@ -1,0 +1,36 @@
+# UnsafeAddChainTests at 70abf5dd5a (no fix), linux/amd64 Release. 14 rows in one run; the two that end the host run alone.
+  Passed AStepwiseWalkStaysOneHopFromWhatItWasDerivedFrom (1)
+  Failed AStepwiseWalkStaysOneHopFromWhatItWasDerivedFrom (2)
+  Failed AStepwiseWalkStaysOneHopFromWhatItWasDerivedFrom (10)
+  Failed AStepwiseWalkStaysOneHopFromWhatItWasDerivedFrom (1000)
+  Failed AStepwiseWalkKeepsNoEarlierStepAlive
+  Passed AWalkedPointerEqualsTheSameAddressMintedDirectlyAtEveryStep
+  Passed AViewAtAWalkedInteriorAddressIsBoundedByTheGoValue (1)
+  Passed AViewAtAWalkedInteriorAddressIsBoundedByTheGoValue (61)
+  Failed AViewAtAWalkedInteriorAddressIsBoundedByTheGoValue (63)
+  Failed AViewAtAWalkedInteriorAddressIsBoundedByTheGoValue (65)
+  Failed AViewAtAWalkedInteriorAddressIsBoundedByTheGoValue (2001)
+  Failed AViewAtAWalkedInteriorAddressIsBoundedByTheGoValue (10001)
+  Failed ATypedWalkStaysOneHopFromTheViewThatOwnsThePin
+  Passed AWalkOverCMemoryCarriesNothing
+Total tests: 14
+     Passed: 5
+     Failed: 9
+Assert.IsTrue failed. after 2 steps the pointer carries a native box at its own value that retains the element box itself, not the box of the step before
+Assert.IsTrue failed. after 10 steps the pointer carries a native box at its own value that retains the element box itself, not the box of the step before
+Assert.IsTrue failed. after 1000 steps the pointer carries a native box at its own value that retains the element box itself, not the box of the step before
+Assert.IsFalse failed. the box of step 1 is collected while the pointer walked 100 steps from it is alive
+Assert.AreEqual failed. Expected:<15>. Actual:<1073741824>. after 63 steps the view's capacity ends where the Go value ends
+Assert.AreEqual failed. Expected:<15>. Actual:<1073741824>. after 65 steps the view's capacity ends where the Go value ends
+Assert.AreEqual failed. Expected:<15>. Actual:<1073741824>. after 2001 steps the view's capacity ends where the Go value ends
+Assert.AreEqual failed. Expected:<15>. Actual:<1073741824>. after 10001 steps the view's capacity ends where the Go value ends
+Assert.IsTrue failed. two steps retain the view too, not the box of the first step
+
+# AMillionStepWalkComparesEqualToWhereItBegan, alone:
+The active test run was aborted. Reason: Test host process crashed : Stack overflow.
+Test Run Aborted.
+
+# AChainBuiltLinkByLinkIsWalkedInALoop, alone:
+The active test run was aborted. Reason: Test host process crashed : Stack overflow.
+Repeated 104681 times:
+Test Run Aborted.
