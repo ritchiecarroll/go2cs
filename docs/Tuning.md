@@ -126,6 +126,47 @@ against the default:
      package's loop 5.421 -> 0.848 (0.156); PerfStringMatch hot phase 1,142 -> 725 ms (0.643); PerfStartup and
      PerfTlsHandshake wall inside the band (-0.0%, +0.3%); sizes -18 KB, -23 KB, -29 KB. -->
 
+<a id="native-aot-method-body-folding"></a>
+
+**A Native AOT build spends most of its time folding identical method bodies.** After it compiles a program, the
+Native AOT compiler looks for methods whose machine code came out identical and keeps one copy of each. The .NET SDK
+does this by default in an optimized build, and the pass runs on a single core. On the go2cs programs measured, this
+one pass took three quarters or more of the compiler's time. Turning it off makes the build several times faster. The program runs the
+same; it is larger, and its symbol table is larger.
+
+| Program (`win-x64`) | Compiler time, default | Compiler time, folding off | Executable | Compiler memory | Symbol names |
+|:--|--:|--:|--:|--:|--:|
+| PerfStartup | 6 min 29 s | 1 min 27 s | 87.6 → 101.0 MB (+15%) | +13% | 115.7 → 131.8 MB (+14%) |
+| TypeScript `parsedemo` | 32 min 20 s | 7 min 6 s | 252.3 → 280.1 MB (+11%) | +13% | 616.2 → 657.3 MB (+7%) |
+
+Turn folding off where build time matters more than size: a development loop, or a CI job that publishes Native
+AOT to test it. Keep the default for what you ship when the executable's size matters, and for a very large program:
+the symbol names grow, and the native symbol table has a 2 GiB ceiling, so a program already close to it can stop
+fitting. Folding only removes symbols, so a program that builds with folding off also builds with it on.
+
+The setting is a project property, `IlcFoldIdenticalMethodBodies`. Set it in one of three places:
+
+| Where | How |
+|:--|:--|
+| The program's project file | `<IlcFoldIdenticalMethodBodies>false</IlcFoldIdenticalMethodBodies>` in a `<PropertyGroup>` |
+| One publish, on the command line | `dotnet publish -r <rid> -p:PublishAot=true -p:IlcFoldIdenticalMethodBodies=false` |
+| Every project under a folder | the same property in a `<PropertyGroup>` of a `Directory.Build.props` there |
+
+go2cs's project templates do not set it, so a converted program builds with the SDK's default.
+
+<!-- Source: the i9's measurement, 2026-11-15 (win-x64, Native AOT publish of PerfStartup with verbose ILC logging,
+     one change between the arms: -p:IlcFoldIdenticalMethodBodies=false, which turns the compiler's
+     --methodbodyfolding from generic to none). ILC wall 6 m 29 s -> 1 m 27 s; the object writer 15.69 s with folding
+     off; ILC peak private 3.84 -> 4.35 GB (+13%); symbols 1,617,603 -> 2,111,528 (+30.5%); string-table names
+     115.7 -> 131.8 MB (+13.9%); object file 304.3 -> 365.0 MB (+20.0%); image 87.6 -> 101.0 MB (101,044,736 B,
+     +15.3%); output identical (checksum 42 on both, and native Go prints the same). The folding pass runs lazily and
+     single-threaded on the object writer's first deduplication call and logs nothing while it runs: 73% of ILC's
+     time at PerfStartup (4.7 of 6.5 min) and 83% at the TypeScript parsedemo (26 m 50 s of 32 m 20 s). The
+     TypeScript row: the i9, 2026-11-15 (win-x64, parsedemo of the converted TypeScript compiler, the same one change):
+     ILC 32 m 20 s -> 7 m 06 s (4.6x); image 252.3 -> 280.1 MB (+11%); ILC memory 15.69 -> 17.66 GB (+13%); symbol
+     names 616.2 -> 657.3 MB (+7%); same output (the demo, and 17,422 of 17,422 corpus files). Owner ruling 2026-11-15:
+     keep the SDK default in the templates and document the opt-out here. -->
+
 
 ## .NET runtime settings
 

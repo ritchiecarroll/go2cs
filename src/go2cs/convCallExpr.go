@@ -315,6 +315,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// (goImageCopyView.go); marked before the arguments are converted.
 	v.markGoImageCopyArgs(callExpr)
 
+	// A copy into or out of the open view of a named array, `copy((*A)(p)[lo:], src)`, is one of golib's copy
+	// doors (arrayPointerViewDoor.go).
+	if door, ok := v.arrayPointerCopyDoor(callExpr); ok {
+		return door
+	}
+
 	// The //go:cgo_unsafe_args block lift (cgoUnsafeArgsLift.go): the ONE `unsafe.Pointer(&first)` the
 	// current declaration's lift consumes renders as the synthesized block's pinned box. Intercepted
 	// ahead of every arm because the conversion reaches two of them -- the type-conversion arm for a
@@ -331,6 +337,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	}
 
 	if emission, ok := v.pointerArithmeticEmission(callExpr); ok {
+		return emission
+	}
+
+	// copy into or out of a slice of an inline array, over a reference to its storage (inlineArrayEmission.go).
+	if emission, ok := v.inlineArrayCopyEmission(callExpr); ok {
 		return emission
 	}
 
@@ -5713,7 +5724,28 @@ func (v *Visitor) reinterpretManagedEmission(callExpr *ast.CallExpr, arg ast.Exp
 	// A source Go already parenthesized renders its own parentheses and is left as written.
 	rendered := v.parenthesizeConversionBase(src, v.convExpr(src, []ExprContext{identContext}))
 
+	// Rendering the source may LIFT the anonymous struct its element names: ccgo's float type-punning
+	// `(*struct{…})(unsafe.Pointer(&struct{ f float64 }{f: x}))` lifts the literal only now. A name taken before
+	// that deferred to a marker no registry answers for a function-local lift, and was emitted as raw Go
+	// (sqlite-cs L1, modernc.org/libc on linux). Name such an element again, now that the lift exists.
+	srcElem = v.reinterpretElemAfterRender(srcElem, src)
+	targetElem = v.reinterpretElemAfterRender(targetElem, callExpr)
+
 	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", rendered, srcElem, targetElem), true
+}
+
+// reinterpretElemAfterRender answers a Reinterpret element name again from expr's pointer type when the name taken
+// before rendering is a deferred dynamic-type marker; any other name is returned unchanged.
+func (v *Visitor) reinterpretElemAfterRender(name string, expr ast.Expr) string {
+	if !strings.Contains(name, dynamicTypeMarkerPrefix) {
+		return name
+	}
+
+	if ptr, ok := types.Unalias(v.info.TypeOf(expr)).(*types.Pointer); ok {
+		return convertToCSTypeName(v.getAliasQualifiedTypeName(ptr.Elem(), false))
+	}
+
+	return name
 }
 
 // The internal/abi record types the managed model can synthesize from a descriptor's carried
@@ -5861,15 +5893,9 @@ func unsafePointerTargetLevels(t types.Type) (int, bool) {
 //
 // A NAMED array target keeps the pre-existing route, matching the slice form (none in the corpus).
 func (v *Visitor) arrayPointerAliasEmission(callExpr *ast.CallExpr, arg ast.Expr) (string, bool) {
-	p, srcPtr, targetPtr := v.pointerConversionSource(callExpr, arg)
+	p, targetArr, ok := v.arrayPointerAliasSource(callExpr, arg)
 
-	if p == nil {
-		return "", false
-	}
-
-	targetArr, ok := types.Unalias(targetPtr.Elem()).(*types.Array)
-
-	if !ok || !types.Identical(srcPtr.Elem(), targetArr.Elem()) {
+	if !ok {
 		return "", false
 	}
 
@@ -5879,6 +5905,25 @@ func (v *Visitor) arrayPointerAliasEmission(callExpr *ast.CallExpr, arg ast.Expr
 	elemName := convertToCSTypeName(v.getAliasQualifiedTypeName(targetArr.Elem(), false))
 
 	return fmt.Sprintf("array<%s>.AliasPointer(%s, %s)", elemName, v.convExpr(p, []ExprContext{identContext}), csNintLiteral(targetArr.Len())), true
+}
+
+// arrayPointerAliasSource reads `(*[N]T)(unsafe.Pointer(p))` as the same-element alias conversion: p, a `*T`, and
+// the unnamed target array. It is the ONE test of that shape: the emission above asks it, and so does the view door
+// (arrayPointerViewOf), which leaves such a conversion to the alias route when it is sliced.
+func (v *Visitor) arrayPointerAliasSource(callExpr *ast.CallExpr, arg ast.Expr) (ast.Expr, *types.Array, bool) {
+	p, srcPtr, targetPtr := v.pointerConversionSource(callExpr, arg)
+
+	if p == nil {
+		return nil, nil, false
+	}
+
+	targetArr, ok := types.Unalias(targetPtr.Elem()).(*types.Array)
+
+	if !ok || !types.Identical(srcPtr.Elem(), targetArr.Elem()) {
+		return nil, nil, false
+	}
+
+	return p, targetArr, true
 }
 
 // convNewOfValue renders Go 1.26's `new(expr)`: a fresh variable holding a COPY of expr's value, boxed.

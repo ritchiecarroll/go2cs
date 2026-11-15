@@ -315,6 +315,7 @@
     <Project Path="tests/Behavioral/AnonStructAliasedConversion/structs/AnonStructAliasedConversion.structs.csproj" />
     <Project Path="tests/Behavioral/AnonStructNamedConversion/AnonStructNamedConversion.csproj" />
     <Project Path="tests/Behavioral/AnonStructNamedConversion/structs/AnonStructNamedConversion.structs.csproj" />
+    <Project Path="tests/Behavioral/AnonStructReinterpretLift/AnonStructReinterpretLift.csproj" />
     <Project Path="tests/Behavioral/AnonStructCrossFile/AnonStructCrossFile.csproj" />
     <Project Path="tests/Behavioral/AnonStructTypeArgVarDecl/AnonStructTypeArgVarDecl.csproj" />
     <Project Path="tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
@@ -573,6 +574,8 @@
     <Project Path="tests/Behavioral/ForVariants/ForVariants.csproj" />
     <Project Path="tests/Behavioral/FormatTypeAdapters/FormatTypeAdapters.csproj" />
     <Project Path="tests/Behavioral/FormatTypeAdapters/typelib/FormatTypeAdapters.typelib.csproj" />
+    <Project Path="tests/Behavioral/ForwardAliasChainRecord/ForwardAliasChainRecord.csproj" />
+    <Project Path="tests/Behavioral/ForwardAliasChainRecord/lib/ForwardAliasChainRecord.lib.csproj" />
     <Project Path="tests/Behavioral/FuncFieldNestedTupleParam/FuncFieldNestedTupleParam.csproj" />
     <Project Path="tests/Behavioral/FuncForPCName/FuncForPCName.csproj" />
     <Project Path="tests/Behavioral/FuncMethodSameNameCollision/FuncMethodSameNameCollision.csproj" />
@@ -807,6 +810,7 @@
     <Project Path="tests/Behavioral/MultiValueReturnOrder/MultiValueReturnOrder.csproj" />
     <Project Path="tests/Behavioral/NamedAnySliceType/NamedAnySliceType.csproj" />
     <Project Path="tests/Behavioral/NamedApproxStringByteConstraint/NamedApproxStringByteConstraint.csproj" />
+    <Project Path="tests/Behavioral/NamedArrayAddressWrite/NamedArrayAddressWrite.csproj" />
     <Project Path="tests/Behavioral/NamedArrayAnonElement/NamedArrayAnonElement.csproj" />
     <Project Path="tests/Behavioral/NamedArrayComposite/NamedArrayComposite.csproj" />
     <Project Path="tests/Behavioral/NamedArrayKeyedLiteral/NamedArrayKeyedLiteral.csproj" />

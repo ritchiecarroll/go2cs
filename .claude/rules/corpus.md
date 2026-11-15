@@ -152,6 +152,20 @@ ONE stdlib, on disk and in any build; no path rewriting anywhere. Five kinds of 
      (`Current().Uid == user.Uid`), so `listGroupsForUsernameAndDomain` is reached only by a test that
      creates an account — skipped outside Go's own builders. When Go's suite cannot reach a hand-own on
      any fleet box, the row owes a `GolibTests` observer that drives the branch through a seam. -->
+- **A HAND-OWN THAT USES UNSAFE CODE DECLARES IT: `[module: go.GoRequiresUnsafe]`, BESIDE ITS
+  `[module: go.GoManualConversion]`.** The package's `<AllowUnsafeBlocks>` is the converter's own emission OR a
+  declaration; a hand-own with neither compiles only while converted code beside it happens to be unsafe, and
+  the converter change that removes the last such function reds the package on every target (CS0227). Guard:
+  repoguard `TestHandOwnedUnsafeIsDeclared`. <!-- ⚠ 2026-11-15 (P5, door A's four-target footprint, base 305
+     converter against the a0c43a357b converter). The posted prediction said "no .csproj moves"; `runtime/runtime.csproj`
+     moved `<AllowUnsafeBlocks>true</AllowUnsafeBlocks>` to `false` on linux/amd64 and windows/amd64. The functions
+     the view doors rewrote (heapdump 2, iface 1, mbitmap 1, os_windows 2) were the ONLY converted unsafe code in
+     `runtime`, and five hand-owned files there (memmove_impl.cs, linux/mem_linux_impl.cs, linux/stubs2_impl.cs,
+     windows/signal_windows_impl.cs, darwin/libccall_impl.cs) used unsafe code with no declaration. Census the
+     same day over tracked src/core: 43 hand-owned production files use unsafe code in 7 packages, and `runtime`
+     was the only package with no declaration. Remedy: the declaration on the five, as its own commit before the
+     regen, so the project file does not move. The prediction missed because it was derived from the lines the
+     change rewrites and never counted what those lines were holding up for the rest of the package. -->
 
 ## Layout L3 — per-GOOS folders
 
