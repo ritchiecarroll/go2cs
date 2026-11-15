@@ -7,7 +7,7 @@ Both sides of every reading were built with `-tags purego,math_big_pure_go,safe`
 
 | Package | Matched | Disclosed | Input digest | Proof |
 |:--|--:|--:|:--|:--|
-| `github.com/spf13/pflag` | 177 | 0 | `sha256-f1fe1ae88c96ff7ae3cb08a9e7a4d2cdd0785c4797be118724a2b08f6eeee6b3` | [index.md](index.md) |
+| `github.com/spf13/pflag` | 177 | 0 | `sha256-7cfbdcf735ed5990fa66a7301fb078762d0f89c32f9f017c26f118e3c9a8d7bd` | [index.md](index.md) |
 
 **Total: 177 matched · 0 disclosed** across 1 package(s).
 

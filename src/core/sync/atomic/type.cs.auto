@@ -62,13 +62,13 @@ partial struct Pointer<T> {
 }
 
 // Load atomically loads and returns the value stored in x.
-public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡx) { return (ж<T>)(uintptr)(LoadPointer(Ꮡx.of(Pointer<T>.Ꮡv))); }
+public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡx) { return @unsafe.Pointer.To<T>(LoadPointer(Ꮡx.of(Pointer<T>.Ꮡv))); }
 
 // Store atomically stores val into x.
 public static void Store<T>(this ж<Pointer<T>> Ꮡx, ж<T> val) { StorePointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(val)); }
 
 // Swap atomically stores new into x and returns the previous value.
-public static ж<T> /*old*/ Swap<T>(this ж<Pointer<T>> Ꮡx, ж<T> @new) { return (ж<T>)(uintptr)(SwapPointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(@new))); }
+public static ж<T> /*old*/ Swap<T>(this ж<Pointer<T>> Ꮡx, ж<T> @new) { return @unsafe.Pointer.To<T>(SwapPointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(@new))); }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
 public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T> old, ж<T> @new) {

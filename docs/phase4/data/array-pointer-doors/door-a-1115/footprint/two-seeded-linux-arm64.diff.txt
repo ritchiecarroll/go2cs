@@ -1,0 +1,95 @@
+diff -ruN --strip-trailing-cr base/src/core/runtime/heapdump.cs cut/src/core/runtime/heapdump.cs
+--- base/src/core/runtime/heapdump.cs
++++ cut/src/core/runtime/heapdump.cs
+@@ -53,12 +53,12 @@
+ internal static ref array<byte> buf => ref ((StaticBox<array<byte>>)Ꮡbuf).ValueSlot;
+ internal static uintptr nbuf;
+ 
+-internal static unsafe void dwrite(@unsafe.Pointer data, uintptr len) {
++internal static void dwrite(@unsafe.Pointer data, uintptr len) {
+     if (len == 0) {
+         return;
+     }
+     if (nbuf + len <= bufSize) {
+-        copy(buf.slice((nint)(nbuf)), new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(data), (int)(len))));
++        copy(buf.slice((nint)(nbuf)), @unsafe.Pointer.View<byte>(data, 0, (nint)(len), 4096));
+         nbuf += len;
+         return;
+     }
+@@ -68,7 +68,7 @@
+         write(dumpfd, data, (int32)len);
+         nbuf = 0;
+     } else {
+-        copy(buf[..], new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(data), (int)(len))));
++        copy(buf[..], @unsafe.Pointer.View<byte>(data, 0, (nint)(len), 4096));
+         nbuf = len;
+     }
+ }
+@@ -747,7 +747,7 @@
+ internal static ref readonly @string heapdumpOutOfMemoryˢ => ref heapdumpOutOfMemoryˢᵇ;
+ private static readonly @string heapdumpOutOfMemoryˢᵇ = "heapdump: out of memory"u8;
+ 
+-internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
++internal static bitvector makeheapobjbv(uintptr Δp, uintptr size) {
+     // Extend the temp buffer if necessary.
+     var nptr = size / (uintptr)goarch.PtrSize;
+     if ((uintptr)len(tmpbuf) < nptr / 8 + 1) {
+@@ -759,7 +759,7 @@
+         if (pΔ1 == nil) {
+             @throw(heapdumpOutOfMemoryˢ);
+         }
+-        tmpbuf = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(pΔ1), (int)(n)));
++        tmpbuf = @unsafe.Pointer.View<byte>(pΔ1, 0, (nint)(n), 1073741824);
+     }
+     // Convert heap bitmap to pointer bitmap.
+     builtin.clear(tmpbuf.slice(0, (nint)(nptr / 8 + 1)));
+diff -ruN --strip-trailing-cr base/src/core/runtime/iface.cs cut/src/core/runtime/iface.cs
+--- base/src/core/runtime/iface.cs
++++ cut/src/core/runtime/iface.cs
+@@ -227,7 +227,7 @@
+ // //go:nowritebarrier enforces that (see the methods store below).
+ //
+ //go:nowritebarrier
+-internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
++internal static @string itabInit(ж<itab> Ꮡm, bool firstTime) {
+     ref var m = ref Ꮡm.DerefOrNull();
+ 
+     var inter = m.Inter;
+@@ -240,7 +240,7 @@
+     // the loop is O(ni+nt) not O(ni*nt).
+     nint ni = len(inter.Methods);
+     nint nt = (nint)x.Mcount;
+-    var xmhdr = new slice<abi.Method>(new ReadOnlySpan<abi.Method>((abi.Method*)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)x.Moff)), (int)(nt)));
++    var xmhdr = @unsafe.Pointer.View<abi.Method>(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)x.Moff), 0, nt, nt, 65536);
+     nint j = 0;
+     // These are code pointers, not heap pointers. Use a uintptr slice so the
+     // store emits no write barrier: on wasm a code pointer can look like a
+diff -ruN --strip-trailing-cr base/src/core/runtime/mbitmap.cs cut/src/core/runtime/mbitmap.cs
+--- base/src/core/runtime/mbitmap.cs
++++ cut/src/core/runtime/mbitmap.cs
+@@ -1633,9 +1633,9 @@
+ // progToPointerMask returns the 1-bit pointer mask output by the GC program prog.
+ // size the size of the region described by prog, in bytes.
+ // The resulting bitvector will have no more than size/goarch.PtrSize bits.
+-internal static unsafe bitvector progToPointerMask(ж<byte> prog, uintptr size) {
++internal static bitvector progToPointerMask(ж<byte> prog, uintptr size) {
+     var n = (size / (uintptr)goarch.PtrSize + 7) / 8;
+-    var x = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(persistentalloc(n + 1, 1, Ꮡmemstats.Ꮡbuckhash_sys)), (int)(n + 1)));
++    var x = @unsafe.Pointer.View<byte>(persistentalloc(n + 1, 1, Ꮡmemstats.Ꮡbuckhash_sys), 0, (nint)(n + 1), 1073741824);
+     x[len(x) - 1] = 0xa1; // overflow check sentinel
+     n = runGCProg(prog, Ꮡ(x, 0));
+     if (x[len(x) - 1] != 0xa1) {
+diff -ruN --strip-trailing-cr base/src/core/runtime/runtime.csproj cut/src/core/runtime/runtime.csproj
+--- base/src/core/runtime/runtime.csproj
++++ cut/src/core/runtime/runtime.csproj
+@@ -101,7 +101,7 @@
+   </Target>
+ 
+   <PropertyGroup>
+-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
++    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+   </PropertyGroup>
+ 
+   <!-- NuGet packaging metadata for library projects; packing itself is explicit ('dotnet pack' via push-nuget.ps1), so plain builds emit no .nupkg -->
+# run artifact, body omitted: reports/conversion_report.html
+# run artifact, body omitted: stdlib_conversion_progress.txt
