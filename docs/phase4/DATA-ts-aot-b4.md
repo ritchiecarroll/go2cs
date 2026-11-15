@@ -771,3 +771,34 @@ differs between the two conversions; this run's converted tree is kept for that 
 **Scored.** Converts and builds all four (65%): MET. One clean build line for the `guid` project (80%): MET. The
 four small comparisons and the corpus (85%): MET. Full emit all match (85%): MET. Full check all match (85%):
 MET. The script exits 1 from the census alone, the same two classes (90%): MET.
+
+## 21. Amendment, 2026-11-15 15:30Z: the four images re-cut on the landed tree
+
+Sections 13 to 19 built their images on `651c4ad147` with lever G applied by hand. Lever G landed in batch 308.
+This is the same four images on master `b2214e00e4` as it stands: a fresh worktree, a fresh conversion (the gate
+script's own first three steps), golib as landed with no patch, full trim, no native debug symbols, no method
+body folding, one ILC at a time.
+
+| demo | symbol string table | against section 19 | image | ILC wall | ILC peak private | `IL3054` | matches Go |
+|:--|:--|:--|:--|:--|:--|:--|:--|
+| `parsedemo` | 667.7 MB | +1.6% | 286.4 MB | 7 m 22 s | 17.17 GB | 0 | demo; corpus 17,422 of 17,422 |
+| `checkdemo` | 1,270.3 MB | +1.7% | 488.3 MB | 13 m 40 s | 31.05 GB | 0 | demo; type-check slice 102 of 102 |
+| `emitdemo` | 1,270.6 MB | +1.7% | 488.6 MB | 13 m 40 s | 30.90 GB | 0 | demo; emit slice 102 of 102 |
+| `mfdemo` | 1,270.8 MB | +1.7% | 488.7 MB | 13 m 38 s | 31.35 GB | 0 | demo |
+
+The largest table is 59.2% of the 2 GiB stream. The seven batches between the two trees, which change how arrays
+are stored, cost these images under 2% in names and about 2.3% in size, and nothing in what they print. The
+kept binaries are now the release tree's.
+
+**One hand edit stands between a fresh local conversion and any Native AOT publish, and every build in this
+record went through it.** `go2cs -recurse` emits a tree whose projects reference the `go2cs-gen` analyzer as a
+project. That project targets `netstandard2.0`, and a `PublishAot=true` that reaches it fails with `NETSDK1207`
+(reproduced at this tree by restoring the analyzer project alone with the property set). So each converted tree
+used here carries four added lines in its `Directory.Build.targets`: `PublishAot=true` for the `Exe` project
+only, under a private switch. `docs/Tuning.md` gives `dotnet publish -r <rid> -p:PublishAot=true` as the
+route; that was not tested here against a tree converted with `-recurse=nuget`, where the analyzer arrives as a
+package and there is no analyzer project for the property to reach. Whether `-recurse` should emit the `Exe`-only
+switch itself is a converter question this record only raises.
+
+**Scored.** All four build and match (85%): MET. Names within 3% of section 19's: MET (+1.6 to +1.7%). Peaks
+within 2 GB of section 19's: MET (-0.49, +0.89, +0.81 and +1.42 GB). The sampler's 37 GB line was not reached.
