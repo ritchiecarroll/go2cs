@@ -20,7 +20,17 @@
 //	       reachable).
 //
 // The left side of a `:=`, a var declaration, a range clause, an argument, a return or a map value is new storage in
-// Go too, and is not counted.
+// Go too, and is not counted -- except (v2, P5's C5) a `:=` operand that REDECLARES an existing variable and a
+// `for k, v = range` operand, which assign an existing location.
+//
+// v2 appends two columns, leaving the first six as v1 printed them:
+//
+//	form   SINGLE (a = b), RECV (a = <-ch), SELECT (case a = <-ch:), TUPLE-N (a, b = x, y), TUPLE-CALL (a, b = f()),
+//	       TUPLE-COMMAOK (a, ok = m[k] / x.(T) / <-ch), DEFINE-REDECL (a, err := f() with a declared), RANGE
+//	door   for DEREF (*p): UNSAFE-CONV (p is a (*[N]T)(unsafe.Pointer(…)) result, direct or through a variable it
+//	       was stored into), SLICE-CONV (a (*[N]T)(slice) result), OTHER; "-" for every other dest
+//
+// v1's rows are the rows whose form is not DEFINE-REDECL or RANGE.
 //
 // usage: GOOS=… GOARCH=… reassigncensus [-tests] [-dir module-dir] <target-label> <pattern...>
 package main
@@ -95,7 +105,42 @@ func rootIdent(e ast.Expr, info *types.Info) (*ast.Ident, bool) {
 }
 
 type site struct {
-	pkg, pos, kind, dest, alias string
+	pkg, pos, kind, dest, alias, form, door string
+}
+
+// arrayPtrConv classifies e as a conversion to a pointer-to-array type: UNSAFE-CONV from an unsafe.Pointer operand,
+// SLICE-CONV from a slice operand (Go 1.17's slice-to-array-pointer conversion), "" otherwise.
+func arrayPtrConv(e ast.Expr, info *types.Info) string {
+	call, ok := ast.Unparen(e).(*ast.CallExpr)
+	if !ok || len(call.Args) != 1 {
+		return ""
+	}
+
+	tv, ok := info.Types[call.Fun]
+	if !ok || !tv.IsType() {
+		return ""
+	}
+
+	ptr, ok := tv.Type.Underlying().(*types.Pointer)
+	if !ok {
+		return ""
+	}
+
+	if _, ok := ptr.Elem().Underlying().(*types.Array); !ok {
+		return ""
+	}
+
+	switch at := info.TypeOf(call.Args[0]); {
+	case at == nil:
+	case types.Identical(at, types.Typ[types.UnsafePointer]):
+		return "UNSAFE-CONV"
+	default:
+		if _, ok := at.Underlying().(*types.Slice); ok {
+			return "SLICE-CONV"
+		}
+	}
+
+	return ""
 }
 
 func main() {
@@ -312,15 +357,96 @@ func main() {
 					return class
 				}
 
+				// v2 (C5, C6): the assignments that are a select case's communication, and the variables a
+				// `(*[N]T)(unsafe.Pointer(…))` or a `(*[N]T)(slice)` conversion is stored into.
+				selectComm := map[ast.Node]bool{}
+				convVar := map[types.Object]string{}
 				ast.Inspect(body, func(m ast.Node) bool {
-					as, ok := m.(*ast.AssignStmt)
-					if !ok || as.Tok != token.ASSIGN {
+					switch x := m.(type) {
+					case *ast.CommClause:
+						if x.Comm != nil {
+							selectComm[x.Comm] = true
+						}
+					case *ast.AssignStmt:
+						if len(x.Lhs) == len(x.Rhs) {
+							for i, l := range x.Lhs {
+								if id, ok := l.(*ast.Ident); ok {
+									if c := arrayPtrConv(x.Rhs[i], info); c != "" {
+										if o := info.ObjectOf(id); o != nil {
+											convVar[o] = c
+										}
+									}
+								}
+							}
+						}
+					case *ast.ValueSpec:
+						if len(x.Names) == len(x.Values) {
+							for i, nm := range x.Names {
+								if c := arrayPtrConv(x.Values[i], info); c != "" {
+									if o := info.Defs[nm]; o != nil {
+										convVar[o] = c
+									}
+								}
+							}
+						}
+					}
+					return true
+				})
+
+				ast.Inspect(body, func(m ast.Node) bool {
+					var lhsList []ast.Expr
+					form := ""
+
+					switch x := m.(type) {
+					case *ast.AssignStmt:
+						if x.Tok != token.ASSIGN && x.Tok != token.DEFINE {
+							return true
+						}
+						lhsList = x.Lhs
+						switch {
+						case x.Tok == token.DEFINE:
+							form = "DEFINE-REDECL"
+						case selectComm[x]:
+							form = "SELECT"
+						case len(x.Lhs) == 1 && len(x.Rhs) == 1:
+							form = "SINGLE"
+							if u, ok := ast.Unparen(x.Rhs[0]).(*ast.UnaryExpr); ok && u.Op == token.ARROW {
+								form = "RECV"
+							}
+						case len(x.Lhs) == len(x.Rhs):
+							form = "TUPLE-N"
+						default:
+							form = "TUPLE-CALL"
+							switch ast.Unparen(x.Rhs[0]).(type) {
+							case *ast.IndexExpr, *ast.TypeAssertExpr, *ast.UnaryExpr:
+								form = "TUPLE-COMMAOK"
+							}
+						}
+					case *ast.RangeStmt:
+						if x.Tok != token.ASSIGN {
+							return true
+						}
+						form = "RANGE"
+						for _, e := range []ast.Expr{x.Key, x.Value} {
+							if e != nil {
+								lhsList = append(lhsList, e)
+							}
+						}
+					default:
 						return true
 					}
 
-					for _, lhs := range as.Lhs {
+					for _, lhs := range lhsList {
 						if id, ok := lhs.(*ast.Ident); ok && id.Name == "_" {
 							continue
+						}
+
+						// A `:=` operand is counted only when it REDECLARES an existing variable (C5: it assigns it).
+						if form == "DEFINE-REDECL" {
+							id, ok := lhs.(*ast.Ident)
+							if !ok || info.Defs[id] != nil {
+								continue
+							}
 						}
 
 						t := info.TypeOf(lhs)
@@ -348,7 +474,7 @@ func main() {
 								dest = "PKGVAR"
 							case params[o]:
 								dest, alias = "PARAM", "NONE"
-								if c := heldClass(o, as.Pos()); c != "" {
+								if c := heldClass(o, m.Pos()); c != "" {
 									alias = c
 								} else if aliased[o] {
 									alias = "TRANSIENT"
@@ -357,7 +483,7 @@ func main() {
 								dest = "CAPTURED"
 							default:
 								dest, alias = "LOCAL", "NONE"
-								if c := heldClass(o, as.Pos()); c != "" {
+								if c := heldClass(o, m.Pos()); c != "" {
 									alias = c
 								} else if aliased[o] {
 									alias = "TRANSIENT"
@@ -371,6 +497,21 @@ func main() {
 							dest = "DEREF"
 						}
 
+						// C6: what the dereferenced pointer is. UNSAFE-CONV: a `(*[N]T)(unsafe.Pointer(…))` result, direct
+						// or through a variable it was stored into; SLICE-CONV: a `(*[N]T)(slice)` result (door A's managed
+						// window); OTHER: anything else.
+						door := "-"
+						if st, ok := ast.Unparen(lhs).(*ast.StarExpr); ok {
+							door = "OTHER"
+							if c := arrayPtrConv(st.X, info); c != "" {
+								door = c
+							} else if id, ok := ast.Unparen(st.X).(*ast.Ident); ok {
+								if c := convVar[info.ObjectOf(id)]; c != "" {
+									door = c
+								}
+							}
+						}
+
 						pos := p.Fset.Position(lhs.Pos())
 						key := fmt.Sprintf("%s:%d:%d", pos.Filename, pos.Line, pos.Column)
 						if seenPos[key] {
@@ -382,7 +523,7 @@ func main() {
 						if i := strings.Index(filepath.ToSlash(rel), "/src/"); i >= 0 {
 							rel = filepath.ToSlash(rel)[i+5:]
 						}
-						sites = append(sites, site{p.PkgPath, fmt.Sprintf("%s:%d", rel, pos.Line), kind, dest, alias})
+						sites = append(sites, site{p.PkgPath, fmt.Sprintf("%s:%d", rel, pos.Line), kind, dest, alias, form, door})
 					}
 					return true
 				})
@@ -395,7 +536,7 @@ func main() {
 	sort.Slice(sites, func(i, j int) bool { return sites[i].pos < sites[j].pos })
 
 	for _, s := range sites {
-		fmt.Printf("%s\t%s\t%s\t%s\t%s\t%s\n", label, s.pkg, s.pos, s.kind, s.dest, s.alias)
+		fmt.Printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", label, s.pkg, s.pos, s.kind, s.dest, s.alias, s.form, s.door)
 	}
 
 	fmt.Fprintf(os.Stderr, "%s: %d packages, %d files, %d load errors, %d sites\n", label, len(pkgs), files, loadErrs, len(sites))

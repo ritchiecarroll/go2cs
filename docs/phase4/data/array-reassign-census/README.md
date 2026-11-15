@@ -59,3 +59,55 @@ GOOS=linux GOARCH=amd64 bash docs/phase4/data/array-reassign-census/run.sh <scra
 It needs Go 1.26.11 and golang.org/x/tools v0.52.0 (src/go2cs's own pin) in the module cache. The tool builds outside
 the repository; this record carries its sources under renamed files (`reassigncensus-*`), so the tree holds no stray
 Go module.
+
+## Amendment, 2026-11-15 (R): census v2 for P5's review (C5, C6), and the run.sh build fix
+
+P5's review of the design (`DESIGN-array-reassign-in-place.md` §8) asked for two more censuses: every assignment FORM
+that writes an existing location (C5), and every `*p = …` whose `p` is a `(*[N]T)(unsafe.Pointer(…))` result (C6).
+`reassigncensus-main.go` is now **v2** (v1 is this file at c41b321558). It appends two columns and leaves the first six
+as v1 printed them:
+
+| Column | Values |
+|---|---|
+| `form` | `SINGLE` (`a = b`), `RECV` (`a = <-ch`), `SELECT` (`case a = <-ch:`), `TUPLE-N` (`a, b = x, y`), `TUPLE-CALL` (`a, b = f()`), `TUPLE-COMMAOK` (`a, ok = m[k]`, `x.(T)`, `<-ch`), `DEFINE-REDECL` (`a, err := f()` with `a` already declared: it assigns `a`), `RANGE` (`for k, v = range`) |
+| `door` | for `DEREF` only: `UNSAFE-CONV` (`p` is a `(*[N]T)(unsafe.Pointer(…))` result, directly or through a variable it was stored into), `SLICE-CONV` (a `(*[N]T)(slice)` result, door A's managed window), `OTHER`; `-` for every other dest |
+
+v2 also counts the two forms v1 left out: a redeclared `:=` operand and a range `=` operand. v1's rows are the v2 rows
+whose form is neither.
+
+**Control.** `control-v2-forms.go` (run as `main.go` in its own module): every form and every door kind once. 15 rows, each as designed
+(`readings/v2/control-v2-forms.tsv`); the `:=` in it counts its redeclared operand and not the new `err`.
+
+**v1 reproduced.** On all eight std readings, the v2 rows minus `DEFINE-REDECL` and `RANGE`, cut to six columns, are
+byte-identical to the v1 file (`readings/` beside `readings/v2/`).
+
+| Reading (Go 1.26.11) | SINGLE | TUPLE-CALL | TUPLE-N | RANGE | RECV, SELECT, COMMAOK, DEFINE-REDECL | DEREF: UNSAFE-CONV / OTHER |
+|---|---|---|---|---|---|---|
+| std windows/amd64 | 196 | 24 | 8 | 0 | 0 | 1 / 30 |
+| std linux/amd64 | 198 | 24 | 8 | 0 | 0 | 1 / 28 |
+| std darwin/amd64 | 196 | 24 | 8 | 0 | 0 | 1 / 28 |
+| std linux/arm64 | 198 | 24 | 8 | 0 | 0 | 1 / 28 |
+| std with tests, windows/amd64 | 340 | 26 | 8 | 1 | 0 | 1 / 106 |
+| std with tests, linux/amd64 | 347 | 26 | 8 | 1 | 0 | 1 / 106 |
+| std with tests, darwin/amd64 | 341 | 26 | 8 | 1 | 0 | 1 / 104 |
+| std with tests, linux/arm64 | 345 | 26 | 8 | 1 | 0 | 1 / 105 |
+| sqlite v1.62.0 closure, linux/amd64 (12 packages) | 392 | 0 | 1 | 0 | 0 | 69 / 71 |
+| sqlite v1.62.0 closure, windows/amd64 (22 packages) | 60 | 0 | 0 | 0 | 0 | 6 / 24 |
+
+- The tuple forms are 28 statements per target in production std, in seven packages (`fips140/drbg`, `mldsa`, `mlkem`,
+  `internal/trace/internal/tracev1`, `log/slog`, `net`, vendored `dnsmessage`). The one RANGE is a test
+  (`image/jpeg/dct_test.go:19`).
+- std's one UNSAFE-CONV is `runtime/mfinal.go:252`, in the hand-owned `mfinal.cs` (unreachable; §4 of the design).
+- sqlite's UNSAFE-CONV sites, by `c6class.py`: linux 68 unnamed `*(*[N]T)(…)` and 1 named
+  (`*(*uuid.Uuid_t)(unsafe.Pointer(dst)) = …`); windows 6 unnamed. These write libc's heap: native memory, where the
+  pointer is a `NativeArrayBox`.
+- Paths under the module cache read `$GOMODCACHE/…`; `c6class.py` expands them from `go env GOMODCACHE`.
+
+**run.sh build fix** (found by G): it built the tool under the caller's `GOOS`/`GOARCH`, so a closure run with
+`GOOS=linux` set built a linux binary that this Windows host cannot run. It now builds with both unset. Red, then green:
+the c41b321558 run.sh under `GOOS=linux GOARCH=amd64` exits 127 (no runnable binary); this one reads the control's 15
+rows. `sqlite-closure.sh` is the closure run above, through run.sh.
+
+```
+bash docs/phase4/data/array-reassign-census/sqlite-closure.sh <module dir> <scratch dir> <out dir>
+```

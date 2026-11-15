@@ -12,7 +12,9 @@ mkdir -p "$W" "$O"
 cp "$HERE/reassigncensus-main.go" "$W/main.go"
 cp "$HERE/reassigncensus-go.mod" "$W/go.mod"
 cp "$HERE/reassigncensus-go.sum" "$W/go.sum"
-(cd "$W" && GOFLAGS=-mod=mod go build -o reassigncensus .)
+# The tool runs on THIS host: build it with GOOS/GOARCH unset, whatever target the caller set for the load (G, 2026-11-15:
+# a caller-set GOOS=linux built a linux binary that a Windows host cannot run).
+(cd "$W" && env -u GOOS -u GOARCH GOFLAGS=-mod=mod go build -o reassigncensus .)
 T="$W/reassigncensus"
 [ -x "$T" ] || T="$W/reassigncensus.exe"
 if [ $# -ge 2 ]; then
