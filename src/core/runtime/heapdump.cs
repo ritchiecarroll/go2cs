@@ -53,12 +53,12 @@ internal static readonly ж<array<byte>> Ꮡbuf = new StaticBox<array<byte>>(new
 internal static ref array<byte> buf => ref ((StaticBox<array<byte>>)Ꮡbuf).ValueSlot;
 internal static uintptr nbuf;
 
-internal static unsafe void dwrite(@unsafe.Pointer data, uintptr len) {
+internal static void dwrite(@unsafe.Pointer data, uintptr len) {
     if (len == 0) {
         return;
     }
     if (nbuf + len <= bufSize) {
-        copy(buf.slice((nint)(nbuf)), new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(data), (int)(len))));
+        copy(buf.slice((nint)(nbuf)), @unsafe.Pointer.View<byte>(data, 0, (nint)(len), 4096));
         nbuf += len;
         return;
     }
@@ -68,7 +68,7 @@ internal static unsafe void dwrite(@unsafe.Pointer data, uintptr len) {
         write(dumpfd, data, (int32)len);
         nbuf = 0;
     } else {
-        copy(buf[..], new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(data), (int)(len))));
+        copy(buf[..], @unsafe.Pointer.View<byte>(data, 0, (nint)(len), 4096));
         nbuf = len;
     }
 }
@@ -747,7 +747,7 @@ private static readonly @string heapdumpˢᵇ = "heapdump"u8;
 internal static ref readonly @string heapdumpOutOfMemoryˢ => ref heapdumpOutOfMemoryˢᵇ;
 private static readonly @string heapdumpOutOfMemoryˢᵇ = "heapdump: out of memory"u8;
 
-internal static unsafe bitvector makeheapobjbv(uintptr p, uintptr size) {
+internal static bitvector makeheapobjbv(uintptr p, uintptr size) {
     // Extend the temp buffer if necessary.
     var nptr = size / (uintptr)goarch.PtrSize;
     if ((uintptr)len(tmpbuf) < nptr / 8 + 1) {
@@ -759,7 +759,7 @@ internal static unsafe bitvector makeheapobjbv(uintptr p, uintptr size) {
         if (pΔ1 == nil) {
             @throw(heapdumpOutOfMemoryˢ);
         }
-        tmpbuf = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(pΔ1), (int)(n)));
+        tmpbuf = @unsafe.Pointer.View<byte>(pΔ1, 0, (nint)(n), 1073741824);
     }
     // Convert heap bitmap to pointer bitmap.
     clear(tmpbuf.slice(0, (nint)(nptr / 8 + 1)));
