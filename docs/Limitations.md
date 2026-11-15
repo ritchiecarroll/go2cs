@@ -111,6 +111,19 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
        "reflect: field Named.FzName is a Go array held inline (go.arrays); reflection does not read or address it"
        where Go printed {6 [115 101 99 111 110 100 0] 4.5}; fmt of the field alone (h.Buf) matched Go. The census at
        part D's P1 counted 0 fmt %v and reflect uses reaching an admitted type in modernc.org/sqlite's lib and libc. -->
+* **A slice of an array held inline panics when the struct around it also holds a string, a slice, a map, an interface
+  or a pointer.** A slice of such an array (`p.ID.Data4[:2]`) uses the array's own bytes, as in Go, so go2cs holds
+  the storage still for as long as the slice lives. It cannot hold still a struct that holds a Go reference, so the
+  slice panics with `inline array slice: an array held inline in a struct that also holds a Go reference cannot be
+  held still, so it cannot be sliced`. This is ordinary Go, and programs that use go-winio will hit it when they keep
+  a GUID beside a string: `type P struct { ID guid.GUID; name string }`, then `p.ID.Data4[:2]`. go-winio's own GUID
+  methods are not affected, because each slices its own copy of the GUID. Two forms work today: a `copy` into or out of
+  the array with constant bounds (`copy(buf, p.ID.Data4[:])`), and slicing a local copy of the array
+  (`d := p.ID.Data4; s := d[:2]`) when writes need not reach `p`.
+  <!-- P3's review of go-winio Part 2, item 3b, and COORD's ruling 3b (2026-11-15): disclosed for .4, the cure is a .5
+       BOARD row (a slice backing that is an object plus a field offset, with no pin). The arms that assert the named
+       panic are GolibTests' InlineSliceStorageTests.AFieldOfAReferenceBearingRootIsRefusedByName and the refroot mode
+       of TestInlineArrayForeignSliceReviewShapes (src/go2cs/inlineArrayForeignSlice_test.go). -->
 * **cgo: a pointer rebuilt from a number can hand C Go memory unchecked. This is a known memory-safety
   gap.** Do not pass C a pointer you made from a number held in a variable when it points inside Go
   memory: `u := uintptr(unsafe.Pointer(p))`, then `unsafe.Pointer(u + n)`. Nor one whose sum puts the

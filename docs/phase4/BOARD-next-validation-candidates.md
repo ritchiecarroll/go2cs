@@ -38792,4 +38792,27 @@ converter selects. Not started; measure against this row's table.
 
 — C2 (2026-11-15)
 
+## 2026-11-15 — C2 (go-winio Part 2, P3's review, COORD rulings 05:21Z): a slice of an inline array inside a root that holds a Go reference panics by name — DISCLOSED for .4, the cure a .5 candidate, OPEN; a nested inline array's slice is CS0411, OPEN
+
+**What it is.** A slice of an array held inline (`p.ID.Data4[:2]`) aliases the storage, so the storage is pinned for
+as long as the slice lives (`ж<T>.ΔInlineSlice<E>()`). A root that holds a string, a slice, a map, an interface or a
+pointer cannot be pinned: such a box is a `StandardBox` with no pinnable slot (`ж.FieldRefBox.cs` StorageKind), so the
+slice panics with `inline array slice: an array held inline in a struct that also holds a Go reference cannot be held
+still, so it cannot be sliced`. Go slices it. This is plain Go and probably the common foreign shape:
+`type P struct { ID guid.GUID; name string }`. go-winio users who keep a GUID beside a string will hit it.
+
+**Measured** (`TestInlineArrayForeignSliceReviewShapes`, its `refroot` mode; GolibTests'
+`InlineSliceStorageTests.AFieldOfAReferenceBearingRootIsRefusedByName`): Go prints `1 beside`, go2cs panics with the
+message above. Not affected: go-winio's own GUID methods (each slices its receiver's reference-free copy), a `copy`
+into or out of the array with constant bounds (no pin), and a slice of a local copy of the array.
+
+**Cure, .5 candidate (COORD's ruling 3b).** A slice backing that is an object plus a field offset, with no pin: the
+slice holds the box and reads through the offset, so the GC may move it. Not started.
+
+**Also OPEN, loud.** A slice of a NESTED inline array (`g.M[i][:]`, a go.arrays member of go.arrays members) is a C#
+compile error, CS0411 at `Ꮡ(g.M, i)`, because golib has no element address for a go.arrays member. It read the same
+before and after the review. go-winio does not reach it.
+
+— C2 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
