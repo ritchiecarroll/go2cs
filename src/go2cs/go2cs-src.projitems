@@ -271,6 +271,7 @@
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignWrittenRHS_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)forwardAliasChainTestRecord_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcLitNamedNumericLiteralArm_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcResultProjection_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcWordOperations.go" />
@@ -663,6 +664,7 @@
     <None Include="$(MSBuildThisFileDirectory)repoRoot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)requiresUnsafeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)resolveBuildTags_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)resolvedDynamicTypeText_test.go" />
     <None Include="$(MSBuildThisFileDirectory)resolveGo2CSPath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)returnOperandOrder.go" />
     <None Include="$(MSBuildThisFileDirectory)returnOperandOrder_test.go" />
