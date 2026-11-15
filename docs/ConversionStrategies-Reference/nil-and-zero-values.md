@@ -207,7 +207,7 @@ the dereference guard):
   `PointerNilIdentity<T>` applies the same rule there: when the STATIC type `T` is a Go pointer (a ж
   box or a generated named-pointer wrapper), a value is nil when it is null or `IsNilPointer`. The
   test reads the type, never the value, so an interface type argument still keeps a typed nil apart
-  from the nil interface. Without it, typescript-go's `core.OrElse(nil, x)` (`value != *new(T)`)
+  from the nil interface. Without it, a generic `OrElse(nil, x)` (`value != *new(T)`)
   returned the nil, generic `==` answered false, and a `map[*T]V` or `map[[1]*T]V` held two nil keys
   (TS C49; the `NilPtrIdentity` behavioral test).
 
