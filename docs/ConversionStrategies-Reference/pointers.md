@@ -3115,6 +3115,198 @@ converter's `TestArrayPointerViewDoor`, one arm per form and one control per rou
 its own emission; and repoguard's `TestArrayPointerViewDoors`, which holds the census of copying spans left
 in the corpus and refuses a `FromRef` mint at a door.
 
+## An index, an element's address or a whole array through `(*[N]T)(p)` reaches the memory p names: the element doors
+Go's `(*A)(p)[i]`, with `A` an array type and `p` an `unsafe.Pointer`, is the element at `p + i*size`. No array
+of type `A` has to exist there: C-shaped Go uses an array type as a way to index memory. modernc.org/libc
+stores a terminator at an index of its `RawMem`, and sqlite indexes small unnamed arrays through the helper
+its generator writes for turning a number into a pointer (`ptr` below):
+
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:92 -->
+```go
+	(*RawMem)(unsafe.Pointer(p))[len(wd)] = 0
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:82 -->
+```csharp
+    @unsafe.Pointer.ElementRef<byte>((@unsafe.Pointer)p, len(wd), 1125899906842623) = 0;
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:107-108 -->
+```go
+	(*[4]int32)(ptr(p))[1] = 7
+	fmt.Println("store, then read        :", (*[4]int32)(ptr(p))[1], (*[4]int32)(ptr(p))[0], peek(p, 8))
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:94-95 -->
+```csharp
+    @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4) = 7;
+    fmt.Println("store, then read        :", @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4), @unsafe.Pointer.ElementRef<int32>(ptr(p), 0, 4), peek(p, 8));
+```
+
+The conversion and the form applied to it are emitted together as one call of an **element door** on
+`@unsafe.Pointer` (`src/core/unsafe/unsafe.cs`). The door takes the pointer itself and the array's length `N`
+as a constant. As with [the view doors](#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors),
+`N` is only a bound, and no box of the whole array is made.
+
+| Go | C# |
+|---|---|
+| `(*A)(p)[i]` | `@unsafe.Pointer.ElementRef<E>(p, i, N)` |
+| `&(*A)(p)[i]` | `@unsafe.Pointer.Element<E>(p, i, N)` |
+| `*(*A)(p)`, read for its value | `@unsafe.Pointer.LoadArray<E>(p, N)` |
+| `*(*A)(p) = v` | `@unsafe.Pointer.StoreArray<E>(p, N, v)` |
+
+`E` is the array's element type, also for a named array. Each door does what Go does, in Go's order: the nil
+check, then the index against `N` with Go's index panic, then the element.
+
+**The index is a location.** `ElementRef` answers a `ref E`, so a read, a store, a compound assignment, an
+increment and a field of a struct element are all the one emitted form:
+
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:111-113 -->
+```go
+	(*[4]int32)(ptr(p))[1] += 3
+	(*[4]int32)(ptr(p))[1]++
+	(*[4]int32)(ptr(p))[2] |= 0x0102
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:97-99 -->
+```csharp
+    @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4) += 3;
+    @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4)++;
+    @unsafe.Pointer.ElementRef<int32>(ptr(p), 2, 4) |= (int32)(0x0102);
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:138 -->
+```go
+	(*[3]pair)(ptr(p))[1].a = 5
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:119 -->
+```csharp
+    @unsafe.Pointer.ElementRef<pair>(ptr(p), 1, 3).a = 5;
+```
+
+**The address of an element** is a pointer to `E`, `ж<E>`, from `Element`. A store through it reaches the
+memory, and it can be converted and advanced like any other pointer:
+
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:130-131 -->
+```go
+	e := &(*[4]int32)(ptr(p))[2]
+	*e = 9
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:112-113 -->
+```csharp
+    var e = @unsafe.Pointer.Element<int32>(ptr(p), 2, 4);
+    e.Value = 9;
+```
+
+**A whole array** is loaded as a new Go array value, a copy of the `N` elements, and stored by copying `N`
+elements to where the pointer points. A named array is loaded as its own type, and its value is stored as it
+is:
+
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:156 -->
+```go
+	*(*[4]byte)(ptr(q + 4)) = *(*[4]byte)(ptr(p))
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:134 -->
+```csharp
+    @unsafe.Pointer.StoreArray<byte>(ptr(q + 4), 4, @unsafe.Pointer.LoadArray<byte>(ptr(p), 4));
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:177-178 -->
+```go
+	*(*sixteen)(ptr(nm)) = id
+	back := *(*sixteen)(ptr(nm))
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:151-152 -->
+```csharp
+    @unsafe.Pointer.StoreArray<byte>(ptr(nm), 16, id);
+    var back = (nativeMemory_sixteen)@unsafe.Pointer.LoadArray<byte>(ptr(nm), 16);
+```
+`sixteen` is declared inside the Go function `nativeMemory` as `type sixteen [16]byte`, so its C# name carries
+the function's.
+
+**What the element is** depends on what `p` points to, and the door decides at run time. The cases are the
+view doors', for one element:
+
+- **An element of a Go array or slice of `E`, or a Go array of `E` named by its own address:** that array's
+  element. An index past the end of the Go array is refused by name.
+- **C memory, or a number that carries no pointer:** the element at the address. The index form allocates
+  nothing here: it is a reference computed from the number.
+- **An address inside a Go value, or any other Go value its pointer can hold still** (a number, a struct of
+  numbers, an array of another element type): the element's bytes inside the value, which is held still for
+  as long as the element's pointer lives. An index past the end of the value's storage is refused by name.
+- **A Go value nothing can hold still** (it holds a reference): the index and the address answer what Go's own
+  definition of the form answers through the pointer conversion, `(*E)(unsafe.Add(p, i*size))`. A whole load is
+  an exact copy. A whole store would land in a copy, so it is refused by name instead of lost.
+
+**The length is the type's.** Go answers `len` and `cap` of `*(*A)(p)` and of `(*A)(p)` from the type `A`
+and evaluates nothing, so the emission is the constant, whatever the address holds. A range over the
+dereference that reads only the index runs `N` rounds the same way:
+
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:268 -->
+```go
+	fmt.Println("len, cap Go, 64 behind  :", len(*(*[4]byte)(g)), cap(*(*[4]byte)(g)), cap((*[4]byte)(g)))
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:229 -->
+```csharp
+    fmt.Println("len, cap Go, 64 behind  :", 4, 4, 4);
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:274 -->
+```go
+	for i := range *(*[4]byte)(g) {
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:236 -->
+```csharp
+    foreach (var i in range(4)) {
+```
+Where Go does evaluate the dereference it is a load: a range that reads the values ranges a copy of the
+array, and an operand with a call in it runs the call once.
+
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:291 -->
+```go
+	for _, b := range *(*[4]byte)(g) {
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:253 -->
+```csharp
+    foreach (var (_, b) in range(@unsafe.Pointer.LoadArray<byte>(g, 4))) {
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:270 -->
+```go
+	fmt.Println("len with a call         :", len(*(*[4]byte)(ptr(p))))
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:231 -->
+```csharp
+    fmt.Println("len with a call         :", len(@unsafe.Pointer.LoadArray<byte>(ptr(p), 4)));
+```
+The conversion itself, ranged for its values, is different again: Go reads each element through the pointer
+as the loop reaches it, so a store in the body is seen. That is a view, and the range takes the view door over
+the array's `N` elements:
+
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.go:313 -->
+```go
+	for i, b := range (*[4]byte)(g) {
+```
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:272 -->
+```csharp
+    foreach (var (i, b) in range(@unsafe.Pointer.View<byte>(g, 0, 4, 4))) {
+```
+
+**What keeps its own emission.** The doors replace one emission: the box of the whole array made from the
+pointer, `@unsafe.Pointer.To<array<E>>(p)`, and its `.Value`. A conversion that another rule already renders
+whole keeps that rule, as it does under a slice: a conversion back to the pointer's own type, two array types
+of one shape, a same-element view of an unnamed array, and an array field of a native struct. An element that
+holds a reference (a pointer, a string, an interface, or an element that is itself an array) keeps the box of
+the whole array: memory that is no Go array of that type has no such elements to hand out. A `FromRef` mint as
+the operand keeps the box too, because its address is true for one statement only. And a conversion that is
+kept (bound to a variable, passed or returned) is still the pointer conversion: the doors take the forms
+applied to the conversion directly.
+<!-- history: until 2026-11-15 every form here was `(@unsafe.Pointer.To<array<E>>(p)).Value[i]`, `.at<E>(i)`,
+`~@unsafe.Pointer.To<array<E>>(p)` or a store to its `.Value`. Over C memory each was refused by name ("cannot
+view native memory as array<...>"), and a named array was read as a managed wrapper out of the memory. `len` of
+the dereference answered the length of whatever array was behind the address. Design and measurements:
+docs/phase4/DESIGN-array-pointer-doors.md section 16. -->
+
+Guarded by: the behavioral program `ArrayPointerElementDoors` (native pages from `syscall.Mmap`, Go arrays by
+their number and Go values of another type, each form stored through and read back from the memory, against
+Go); `ArrayPointerElementDoorTests` in GolibTests, whose `AnIndexedLoopOverNativeMemoryAllocatesNothing`
+holds the index over C memory at no allocation and whose `TheAddressOfAnElementOfAGoValueKeepsTheValue` holds
+the pinned case across a collection; the converter's `TestArrayPointerElementDoorReplacesTheWholeArrayBox`,
+one arm per form and one control per route that keeps its own emission; and repoguard's
+`TestArrayPointerViewDoors`, which refuses a `FromRef` mint at any door.
+
 <a id="a-pointer-cast-slice-with-a-low-bound-offsets-the-span"></a>
 
 ## A pointer-cast slice with a LOW bound starts its view at that element

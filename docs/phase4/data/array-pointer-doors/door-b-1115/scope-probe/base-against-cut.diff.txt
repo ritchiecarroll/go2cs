@@ -1,0 +1,156 @@
+40c40
+<     return (@unsafe.Pointer.To<array<int32>>(p)).Value[i];
+---
+>     return @unsafe.Pointer.ElementRef<int32>(p, i, 4);
+44c44
+<     (@unsafe.Pointer.To<array<int32>>((@unsafe.Pointer)u)).Value[1] = 7;
+---
+>     @unsafe.Pointer.ElementRef<int32>((@unsafe.Pointer)u, 1, 4) = 7;
+48,49c48,49
+<     (@unsafe.Pointer.To<array<int32>>(p)).Value[i] += 3;
+<     (@unsafe.Pointer.To<array<int32>>(p)).Value[i]++;
+---
+>     @unsafe.Pointer.ElementRef<int32>(p, i, 4) += 3;
+>     @unsafe.Pointer.ElementRef<int32>(p, i, 4)++;
+53c53
+<     (@unsafe.Pointer.To<RawMem>((@unsafe.Pointer)u)).Value[n] = 0;
+---
+>     @unsafe.Pointer.ElementRef<byte>((@unsafe.Pointer)u, n, 1125899906842623) = 0;
+57c57
+<     return (@unsafe.Pointer.To<small>(p)).Value[5];
+---
+>     return @unsafe.Pointer.ElementRef<byte>(p, 5, 64);
+61c61
+<     return (@unsafe.Pointer.To<array<int32>>(p)).at<int32>(2);
+---
+>     return @unsafe.Pointer.Element<int32>(p, 2, 4);
+65c65
+<     return take((@unsafe.Pointer.To<array<int32>>(p)).Value[1]);
+---
+>     return take(@unsafe.Pointer.ElementRef<int32>(p, 1, 4));
+69c69
+<     var x = (@unsafe.Pointer.To<array<int32>>(p)).Value[i];
+---
+>     var x = @unsafe.Pointer.ElementRef<int32>(p, (nint)(i), 4);
+74,75c74,75
+<     (@unsafe.Pointer.To<array<pair>>(p)).Value[1].a = 5;
+<     return (@unsafe.Pointer.To<array<pair>>(p)).Value[1].b;
+---
+>     @unsafe.Pointer.ElementRef<pair>(p, 1, 3).a = 5;
+>     return @unsafe.Pointer.ElementRef<pair>(p, 1, 3).b;
+79c79
+<     return (@unsafe.Pointer.To<array<pair>>(p)).at<pair>(1).Ꮡa;
+---
+>     return @unsafe.Pointer.Element<pair>(p, 1, 3).Ꮡa;
+83c83
+<     (@unsafe.Pointer.To<array<pair>>(p)).Value[1].bump();
+---
+>     @unsafe.Pointer.ElementRef<pair>(p, 1, 3).bump();
+87c87
+<     return (@unsafe.Pointer.To<array<int32>>(p)).Value[1];
+---
+>     return @unsafe.Pointer.ElementRef<int32>(p, 1, 4);
+91c91
+<     return (@unsafe.Pointer.To<array<int32>>(p)).Value[1];
+---
+>     return @unsafe.Pointer.ElementRef<int32>(p, 1, 4);
+95c95
+<     ((@unsafe.Pointer.To<array<int32>>(p)).Value[0], (@unsafe.Pointer.To<array<int32>>(p)).Value[1]) = (1, 2);
+---
+>     (@unsafe.Pointer.ElementRef<int32>(p, 0, 4), @unsafe.Pointer.ElementRef<int32>(p, 1, 4)) = (1, 2);
+99c99
+<     return () => (@unsafe.Pointer.To<array<int32>>(p)).Value[3];
+---
+>     return () => @unsafe.Pointer.ElementRef<int32>(p, 3, 4);
+103c103
+<     return (@unsafe.Pointer.To<array<byte>>(@unsafe.Add(p, off))).Value[0];
+---
+>     return @unsafe.Pointer.ElementRef<byte>(@unsafe.Add(p, off), 0, 8);
+127c127
+<     return (@unsafe.Pointer.To<RawMem>(@unsafe.Pointer.FromPinnedBox(b))).Value[i];
+---
+>     return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(b), i, 1125899906842623);
+147c147
+<     return (@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(x))).Value[0];
+---
+>     return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(x), 0, 4);
+152c152
+<     return (@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡx))).Value[0];
+---
+>     return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡx), 0, 4);
+156c156
+<     return (@unsafe.Pointer.To<array<uint8>>(@unsafe.Pointer.FromPinnedBox(x))).at<uint8>(i);
+---
+>     return @unsafe.Pointer.Element<uint8>(@unsafe.Pointer.FromPinnedBox(x), i, 8);
+160c160
+<     return (@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(w))).Value[8];
+---
+>     return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(w), 8, 16);
+164c164
+<     return (@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(h))).Value[4];
+---
+>     return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(h), 4, 16);
+182c182
+<     var x = (~@unsafe.Pointer.To<array<int64>>(p)).Clone();
+---
+>     var x = @unsafe.Pointer.LoadArray<int64>(p, 2);
+187c187
+<     array<byte> v = (~@unsafe.Pointer.To<array<byte>>(p)).Clone();
+---
+>     array<byte> v = @unsafe.Pointer.LoadArray<byte>(p, 2);
+192c192
+<     return (~@unsafe.Pointer.To<array<uintptr>>(p)).Clone();
+---
+>     return @unsafe.Pointer.LoadArray<uintptr>(p, 2);
+196c196
+<     return ~@unsafe.Pointer.To<array<int64>>(p) == ~@unsafe.Pointer.To<array<int64>>(q);
+---
+>     return @unsafe.Pointer.LoadArray<int64>(p, 2) == @unsafe.Pointer.LoadArray<int64>(q, 2);
+200c200
+<     return takeArr(~@unsafe.Pointer.To<array<byte>>(p));
+---
+>     return takeArr(@unsafe.Pointer.LoadArray<byte>(p, 2));
+204c204
+<     var x = (~@unsafe.Pointer.To<array<pair>>(p)).Clone();
+---
+>     var x = @unsafe.Pointer.LoadArray<pair>(p, 3);
+209c209
+<     var x = (~@unsafe.Pointer.To<small>(p)).Clone();
+---
+>     var x = (small)@unsafe.Pointer.LoadArray<byte>(p, 64);
+219c219
+<     var v = (~@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(x))).Clone();
+---
+>     var v = @unsafe.Pointer.LoadArray<byte>(@unsafe.Pointer.FromPinnedBox(x), 4);
+231c231
+<     foreach (var (_, b) in range((~@unsafe.Pointer.To<array<byte>>(p)).ΔRangeSnapshot())) {
+---
+>     foreach (var (_, b) in range(@unsafe.Pointer.LoadArray<byte>(p, 4))) {
+238c238
+<     return len(~@unsafe.Pointer.To<array<byte>>(p));
+---
+>     return 4;
+242c242
+<     (@unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)u)).Value = new byte[]{(byte)'C', 0}.array();
+---
+>     @unsafe.Pointer.StoreArray<byte>((@unsafe.Pointer)u, 2, new byte[]{(byte)'C', 0}.array());
+246c246
+<     (@unsafe.Pointer.To<array<uintptr>>(p)).Value = new uintptr[]{}.array(2);
+---
+>     @unsafe.Pointer.StoreArray<uintptr>(p, 2, new uintptr[]{}.array(2));
+252c252
+<     (@unsafe.Pointer.To<array<byte>>(p)).Value = v.Clone();
+---
+>     @unsafe.Pointer.StoreArray<byte>(p, 2, v);
+256c256
+<     (@unsafe.Pointer.To<array<byte>>(p)).Value = (@unsafe.Pointer.To<array<byte>>(q)).Value.Clone();
+---
+>     @unsafe.Pointer.StoreArray<byte>(p, 2, @unsafe.Pointer.LoadArray<byte>(q, 2));
+262c262
+<     (@unsafe.Pointer.To<small>(p)).Value = s.Clone();
+---
+>     @unsafe.Pointer.StoreArray<byte>(p, 64, s);
+274c274
+<     (@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(x))).Value = v.Clone();
+---
+>     @unsafe.Pointer.StoreArray<byte>(@unsafe.Pointer.FromPinnedBox(x), 4, v);
