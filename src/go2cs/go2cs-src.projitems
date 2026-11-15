@@ -333,6 +333,7 @@
     <None Include="$(MSBuildThisFileDirectory)initScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayAdmission.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayAdmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayCarrierLength_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayEmission.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces.go" />
