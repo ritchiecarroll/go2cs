@@ -38564,4 +38564,32 @@ threads. sqlite/lib reaches darwin stdio only in the proxy-lock conch path (two 
 **The route when a target needs threads or darwin stdio:** a libc hand-own keyed by address, a C-layout lock word
 in the C storage with a side table for the waiters, so nothing managed is read out of raw bytes.
 
+## 2026-11-14 — H (the owner's ruling, relayed by COORD: target .5): O1, a `-cgo` conversion that builds against the `go.*` packages from the feed
+
+**What is open.** A `-cgo` conversion is one package, and it builds only against a go2cs clone. It is not
+combinable with `-recurse`, so not with `-recurse=nuget` either. <!-- src/go2cs/main.go:305 (`Not combinable with -stdlib, -tests or -recurse`) -->
+Its project file references the analyzer and golib from the clone unconditionally.
+<!-- src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`) -->
+So a cgo package cannot be built the way release-smoke builds every other consumer: from the `go.*` feed, with no
+clone. This release says so in `docs/Limitations.md`, `docs/DotnetTool.md` and the release notes (COORD's ruling
+O2), and says that building against the feed is planned for the next release.
+
+**Ruled.** COORD filed O1 for `.5`. The owner confirmed `.5` on 2026-11-14, preferring a longer `.4` over a rushed
+one, and the stance for `.4` is completeness over date.
+
+**What it would take, NOT MEASURED (a sketch for the seat, not a design):**
+
+- a project shape for a `-cgo` package that takes the analyzer and golib as package references from the feed,
+  where the single-package template references them from the clone;
+- `-cgo` admitted with `-recurse=nuget`, or a `-cgo` mode of its own that emits that shape. Which one is the
+  seat's first question;
+- the C library capture and the module-initializer registration, unchanged: both live in the converted package and
+  in golib, which the feed ships (`GoCgoLibraries` is in golib);
+- a release-smoke consumer leg that builds a converted cgo program from the feed alone, on every OS the cgo jobs
+  run. Today's `release-smoke cgo` jobs build against the clone.
+
+**Owner:** H, as the cgo lane. **Target:** `.5`.
+
+— H (2026-11-14)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
