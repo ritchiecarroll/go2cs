@@ -1,0 +1,147 @@
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Threading;
+using go;
+using go.golib;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using @unsafe = go.unsafe_package;
+
+namespace GolibTests;
+
+// The pin-extent index behind the void pointer's door (docs/phase4/DESIGN-cgo-pin-extents.md, section 7). GolibTests
+// is a cgo process: its OS golden's module initializer registers C libraries at load, which is what switches the index
+// on, so every arm here runs with it on.
+public unsafe partial class GoCgoArgsTests
+{
+    private static bool Crosses(nuint number)
+    {
+        try
+        {
+            return GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)number), "fill") == number;
+        }
+        catch (PanicException refusal)
+        {
+            StringAssert.Contains(refusal.Message, GoMemoryOwner);
+            return false;
+        }
+    }
+
+    // R3, the stop line's own arm (SB-1): C memory crosses, at its exact number and inside, whatever golib has pinned.
+    [TestMethod]
+    public void CMemoryCrossesAtItsExactAndInteriorNumbersBesideLivePins()
+    {
+        byte[] bytes = new byte[64];
+        PinnedBuffer pinned = new PinnedBuffer(bytes);
+        void* memory = NativeMemory.AllocZeroed(16);
+
+        try
+        {
+            nuint c = (nuint)memory;
+
+            Assert.IsTrue(Crosses(c), "C memory's exact number");
+            Assert.IsTrue(Crosses(c + 7), "C memory's interior number");
+            Assert.IsTrue(Crosses(c + 15), "C memory's last byte");
+            Assert.IsFalse(Crosses((nuint)pinned.Pointer + 9), "the live pin beside it is still refused");
+        }
+        finally
+        {
+            NativeMemory.Free(memory);
+            pinned.Dispose();
+        }
+
+        GC.KeepAlive(bytes);
+    }
+
+    // R4: a released pin leaves no stale refusal. While the buffer is pinned its interior is Go memory; once it is
+    // disposed, the extent has left the index, and the same number crosses as any number golib does not know does (row 7,
+    // a released pin, is the disclosed residue this leaves: the memory may have moved, and the door cannot tell).
+    [TestMethod]
+    public void AReleasedPinLeavesNoStaleRefusal()
+    {
+        byte[] bytes = new byte[64];
+        PinnedBuffer pinned = new PinnedBuffer(bytes);
+        nuint inside = (nuint)pinned.Pointer + 8;
+
+        Assert.IsFalse(Crosses(inside), "live: refused");
+
+        pinned.Dispose();
+
+        Assert.IsTrue(Crosses(inside), "released: no stale refusal");
+        GC.KeepAlive(bytes);
+    }
+
+    // R7: pins come and go on eight threads while two more ask the door about C memory. Every pinning thread asks about
+    // its own LIVE pin's interior (always refused), and the C threads' numbers always cross. The door's read takes no
+    // lock, so this is the arm that would show a torn list or a stale page.
+    [TestMethod]
+    public void PinsComingAndGoingOnManyThreadsNeverOpenALivePinOrCloseCMemory()
+    {
+        const int pinners = 8, askers = 2;
+        TimeSpan window = TimeSpan.FromSeconds(2);
+
+        long livePinsCrossed = 0, cNumbersRefused = 0, pins = 0, asks = 0;
+        using var stop = new ManualResetEventSlim();
+        var threads = new List<Thread>();
+
+        for (int i = 0; i < pinners; i++)
+        {
+            int size = 8 + i * 24;
+
+            threads.Add(new Thread(() =>
+            {
+                while (!stop.IsSet)
+                {
+                    byte[] bytes = new byte[size];
+                    PinnedBuffer pinned = new PinnedBuffer(bytes);
+
+                    if (Crosses((nuint)pinned.Pointer + (nuint)(size / 2)))
+                        Interlocked.Increment(ref livePinsCrossed);
+
+                    pinned.Dispose();
+                    GC.KeepAlive(bytes);
+                    Interlocked.Increment(ref pins);
+                }
+            }));
+        }
+
+        for (int i = 0; i < askers; i++)
+        {
+            threads.Add(new Thread(() =>
+            {
+                void* memory = NativeMemory.AllocZeroed(256);
+
+                try
+                {
+                    while (!stop.IsSet)
+                    {
+                        for (nuint offset = 0; offset < 256; offset += 32)
+                        {
+                            if (!Crosses((nuint)memory + offset))
+                                Interlocked.Increment(ref cNumbersRefused);
+
+                            Interlocked.Increment(ref asks);
+                        }
+                    }
+                }
+                finally
+                {
+                    NativeMemory.Free(memory);
+                }
+            }));
+        }
+
+        foreach (Thread thread in threads)
+            thread.Start();
+
+        Thread.Sleep(window);
+        stop.Set();
+
+        foreach (Thread thread in threads)
+            thread.Join();
+
+        Assert.IsTrue(pins > 0 && asks > 0, $"the arm ran: {pins} pins, {asks} C asks");
+        Assert.AreEqual(0L, livePinsCrossed, $"a live pin crossed ({pins} pins)");
+        Assert.AreEqual(0L, cNumbersRefused, $"C memory was refused ({asks} asks)");
+    }
+}

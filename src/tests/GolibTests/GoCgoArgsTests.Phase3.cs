@@ -147,13 +147,13 @@ public unsafe partial class GoCgoArgsTests
     // storage is managed? Every way golib has a pointer over managed storage is handed to the door through each of the
     // converter's own mints, through the bare mint, and as a number held in a variable.
     //
-    // NO for a box: every hand-over that carries its box is refused. For a bare NUMBER there is a residue, ruled and
-    // disclosed (stop line S3.1-E, docs/Limitations.md): two pin moments register nothing, so a number minted from a
-    // pointer whose storage golib pinned for a reinterpret view, or from a native box over a pinned buffer, crosses.
-    // This arm asserts exactly those four crossings and no others, and that every other hand-over is refused: a fifth
-    // crossing is a red, and so is one of these four closing without this arm being told.
+    // NO for a box: every hand-over that carries its box is refused. For a bare NUMBER, 3.1 left a residue, ruled and
+    // disclosed (stop line S3.1-E): two pin moments registered nothing, so a number minted from a pointer whose storage
+    // golib pinned for a reinterpret view, or from a native box over a pinned buffer, crossed. The pin-extent index
+    // (docs/phase4/DESIGN-cgo-pin-extents.md, rows 3 and 4) registers every pin, so the four are refused too: no
+    // hand-over of a pointer over managed storage crosses, in any form.
     [TestMethod]
-    public void APointerOverManagedStorageCrossesAVoidPointerOnlyAsTheFourDisclosedNumbers()
+    public void APointerOverManagedStorageNeverCrossesAVoidPointer()
     {
         array<int32> wide = new array<int32>(4);
         ж<array<int32>> wideBox = new StandardBox<array<int32>>(wide);
@@ -235,34 +235,76 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(boxes);
         GC.KeepAlive(wideBox);
 
-        string[] disclosed =
-        [
-            "a wider view pinned over an element, the bare mint",
-            "a wider view pinned over an element, its number in a variable",
-            "a native box over a pinned managed buffer, the bare mint",
-            "a native box over a pinned managed buffer, its number in a variable",
-        ];
-
-        CollectionAssert.AreEquivalent(disclosed, crossed, "the hand-overs that crossed as C memory:\n" + string.Join("\n", crossed));
-        Assert.AreEqual(boxes.Length * 4 - disclosed.Length, refusals, "every other hand-over is refused");
+        Assert.AreEqual(0, crossed.Count, "the hand-overs that crossed as C memory:\n" + string.Join("\n", crossed));
+        Assert.AreEqual(boxes.Length * 4, refusals, "every hand-over is refused");
     }
 
-    // The disclosed residue's other half: an INTERIOR address. The registry's entries are exact addresses, so a number
-    // built by arithmetic over a Go pointer's number misses it and crosses, for every kind of pin. The exact number
-    // beside it is the control, and is refused. This arm pins the gap, so the closure that ends it is told here.
+    // 3.1's residue's other half: an INTERIOR address. The registry's entries are exact addresses, so a number built by
+    // arithmetic over a Go pointer's number missed it and crossed, for every kind of pin. The pin-extent index answers
+    // for the pinned object's whole extent, end-exclusive (docs/phase4/DESIGN-cgo-pin-extents.md, rows 1 to 4 and 6):
+    // every byte inside is refused, beside its refused exact number, and one past each end crosses.
     [TestMethod]
-    public void ANumberBuiltByArithmeticOverAGoPointerCrossesAsDisclosed()
+    public void ANumberBuiltByArithmeticOverAGoPointerIsRefusedForEveryKindOfPin()
     {
+        // A value slot: an 8-byte struct in its pinned one-element slot.
         ж<cgoPoint> standard = new StandardBox<cgoPoint>(default(cgoPoint));
-        uintptr number = (uintptr)standard;
+        nuint slot = ((uintptr)standard).Value;
 
-        string exact = RefusalOf(() => GoCgoArgs.VoidPointer(new @unsafe.Pointer(number), "fill"));
-        StringAssert.Contains(exact, GoMemoryOwner);
+        // A fixed array's pinned data: 8 int32, 32 bytes.
+        ж<array<int32>> fixedArray = new StandardBox<array<int32>>(new array<int32>(8));
+        nuint data = ((uintptr)fixedArray).Value;
 
-        nuint interior = number.Value + 4;
-        Assert.AreEqual(interior, GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)interior), "fill"), "DISCLOSED: an interior address crosses");
+        // A wider view pinned over an element: the pin holds the WHOLE 16-byte backing array, and the view's number is
+        // its element, base + 4.
+        array<byte> backing = new array<byte>(16);
+        ж<int32> wide = new ElemRefBox<byte>(backing, 4).Reinterpret<byte, int32>();
+        nuint element = ((uintptr)wide).Value;
+        nuint view = element - 4;
+
+        // A pinned managed buffer, constructed directly (as hand-owned code does): 32 bytes.
+        byte[] bytes = new byte[32];
+        PinnedBuffer pinned = new PinnedBuffer(bytes);
+        nuint buffer = (nuint)pinned.Pointer;
+
+        (string form, nuint number)[] refused =
+        [
+            ("the value slot", slot), ("the value slot +4", slot + 4), ("the value slot +7", slot + 7),
+            ("the array data", data), ("the array data +4", data + 4), ("the array data +28", data + 28), ("the array data +31", data + 31),
+            ("the view's element", element), ("the view's pin base", view), ("the view's pin base +1", view + 1), ("the view's last byte", view + 15),
+            ("the buffer", buffer), ("the buffer +1", buffer + 1), ("the buffer +31", buffer + 31),
+        ];
+
+        var crossed = new System.Collections.Generic.List<string>();
+
+        foreach ((string form, nuint number) in refused)
+        {
+            try
+            {
+                GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)number), "fill");
+                crossed.Add(form);
+            }
+            catch (PanicException refusal)
+            {
+                StringAssert.Contains(refusal.Message, GoMemoryOwner, form);
+            }
+        }
+
+        Assert.AreEqual(0, crossed.Count, "crossed as C memory:\n" + string.Join("\n", crossed));
+
+        (string form, nuint number)[] onePastTheEnd =
+        [
+            ("one past the value slot", slot + 8), ("one past the array data", data + 32), ("one past the view's pin", view + 16), ("one past the buffer", buffer + 32),
+        ];
+
+        foreach ((string form, nuint number) in onePastTheEnd)
+            Assert.AreEqual(number, GoCgoArgs.VoidPointer(new @unsafe.Pointer((uintptr)number), "fill"), form);
 
         GC.KeepAlive(standard);
+        GC.KeepAlive(fixedArray);
+        GC.KeepAlive(wide);
+        GC.KeepAlive(backing);
+        GC.KeepAlive(pinned);
+        GC.KeepAlive(bytes);
     }
 
     // What C.free leaves behind is still a pointer to C memory, as it is in Go: Go has no check for a C pointer used
