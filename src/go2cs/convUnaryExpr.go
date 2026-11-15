@@ -472,6 +472,40 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 			return boxForm
 		}
 
+		// `&*p` is p: the address of the variable a pointer indirection denotes is the pointer itself. No arm
+		// took it, so it fell to the last line of this arm, `Ꮡ(<*p>)`, which boxes a COPY of the pointee, and
+		// every write through the result was lost -- for any pointer. ccgo spells the member of a C union that
+		// is the whole object this way, `*(*uint64)(unsafe.Pointer(&*(*struct{ Fi [0]uint64; Ff float64 })(p)))
+		// <<= n` (libc's fmod and remquo; sqlite-cs W9b, the third form). Render the pointer operand as its box.
+		// Go still evaluates `*p`, so a nil p panics HERE, as the copy form's dereference did: golib's nilcheck
+		// returns the box after that check. A type parameter whose only type is a pointer (`[P *T]`) is erased
+		// to that pointer, so it is the box already (paramPointerType). A NAMED pointer type (`type P *T`) is a
+		// generated wrapper over the box and the expression yields a plain `*T`, so its operand is converted
+		// to the box first. The pointer constraints the erasure declines (`~*T`, a union, one with methods:
+		// pointerCoreConstraint) keep the old form here as they keep theirs everywhere.
+		if star, ok := ast.Unparen(unaryExpr.X).(*ast.StarExpr); ok {
+			operandType := types.Unalias(v.getType(star.X, false))
+			pointerType, isBox := v.paramPointerType(operandType)
+
+			if !isBox {
+				pointerType, _ = operandType.Underlying().(*types.Pointer)
+			}
+
+			if pointerType != nil {
+				pointerContext := DefaultIdentContext()
+				pointerContext.isPointer = true
+
+				pointer := memberOperand(star.X, v.convExpr(star.X, []ExprContext{pointerContext}))
+
+				if !isBox {
+					elemTypeName := convertToCSTypeName(v.getAliasQualifiedTypeName(pointerType.Elem(), false))
+					pointer = fmt.Sprintf("((%s<%s>)%s)", PointerPrefix, elemTypeName, pointer)
+				}
+
+				return pointer + ".nilcheck()"
+			}
+		}
+
 		// Since pointer-based receiver functions are converted to C# as ref-based
 		// extension functions, we handle these cases separately
 		var recv *types.Var
@@ -1391,6 +1425,24 @@ func (v *Visitor) parenthesizeConversionBase(base ast.Expr, rendered string) str
 	}
 
 	if tv, ok := v.info.Types[callExpr.Fun]; !ok || !tv.IsType() {
+		return rendered
+	}
+
+	return "(" + rendered + ")"
+}
+
+// memberOperand makes a rendered operand safe to take a member on. A name, a selection and an index are primary
+// expressions already; a call is one unless it is a conversion that renders as a C# cast (postfixOperand); anything
+// else (`~pp`, a second indirection) becomes one parenthesized group.
+func memberOperand(operand ast.Expr, rendered string) string {
+	switch ast.Unparen(operand).(type) {
+	case *ast.Ident, *ast.SelectorExpr, *ast.IndexExpr:
+		return rendered
+	case *ast.CallExpr:
+		return postfixOperand(rendered)
+	}
+
+	if isFullyParenthesized(rendered) {
 		return rendered
 	}
 

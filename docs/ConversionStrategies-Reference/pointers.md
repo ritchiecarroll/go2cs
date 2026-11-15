@@ -3072,16 +3072,34 @@ __ccgo_ptr(bp))).Fpgno = pgno`). (Guarded by the `ExplicitDerefConversionStore` 
 test: the struct field store, op-assign and method call, the array element store and op-assign,
 each beside the implicit form as its control.)
 
+An increment or decrement statement is a store too, so `*(*T)(x)++` takes the box's `.Value` exactly as
+the assignment forms do:
+
+<!-- source: src/tests/Behavioral/AddressOfFieldThroughConversion/main.go:134 -->
+```go
+	*(*int32)(unsafe.Pointer(&(*rec)(gp).cnt))++
+```
+<!-- source: src/tests/Behavioral/AddressOfFieldThroughConversion/main.cs.target:111 -->
+```csharp
+    (@unsafe.Pointer.To<rec>(gp).Ꮡcnt).Value++;
+```
+The statement used to render `~<pointer>++`, the dereferenced value, which C# rejects (CS1059): the
+increment statement did not tell the dereference it was a write, as the assignment statement does.
+<!-- 2026-11-15, sqlite-cs wall W9b: found by the native fixture's union increment, which did not build at master. Census of Go source: 0 sites in std outside cmd/, 0 in the behavioral corpus outside the two fixtures, and 0 in every Go file of sqlite 1.62.0 and libc 1.80.1. -->
+(Guarded by the `AddressOfFieldThroughConversion` behavioral output test's increment line, `++` and `--`
+through a conversion with `*ip++` and `*ip--` through an ordinary pointer as the control, and by
+`AddressOfFieldThroughConversionNative`'s union increment and decrement.)
+
 ## The address of a field reached through a pointer conversion is the field's own address
 `&(*T)(p).f` is the address of field `f` inside the memory `p` points at. It renders as the
 conversion followed by the field-address accessor, the same form a pointer-returning call takes
 (`&mk().f` is `mk().Ꮡf`):
 
-<!-- source: src/tests/Behavioral/AddressOfFieldThroughConversion/main.go:39 -->
+<!-- source: src/tests/Behavioral/AddressOfFieldThroughConversion/main.go:65 -->
 ```go
 	atomic.StoreInt32(&(*rec)(gp).id, 3)
 ```
-<!-- source: src/tests/Behavioral/AddressOfFieldThroughConversion/main.cs.target:29 -->
+<!-- source: src/tests/Behavioral/AddressOfFieldThroughConversion/main.cs.target:56 -->
 ```csharp
     atomic.StoreInt32(@unsafe.Pointer.To<rec>(gp).Ꮡid, 3);
 ```
@@ -3097,9 +3115,48 @@ count, and ccgo's union writes all take this shape; in the standard library it i
 `internal/abi`'s `Uncommon()` and the linux/amd64 signal context. <!-- 2026-11-15, sqlite-cs wall W9b. Found by a recursive-mutex probe whose owner id never reached the mutex. -->
 (Guarded by the `AddressOfFieldThroughConversion` behavioral output test, over the Go heap: an
 atomic store, a union write, a kept address compared with `&g.id`, a parenthesized CAS, a nested
-field, a named pointer conversion, and a pointer-returning call as the control; and by
-`AddressOfFieldThroughConversionNative`, linux only, which runs the first four over pages the
-kernel owns.)
+field, a named pointer conversion, and a pointer-returning call as the control; the same address
+with its star written out, `&(*(*rec)(gp)).id`, alone and under `unsafe.Add`, and reinterpreted to a
+type other than the field's; and by `AddressOfFieldThroughConversionNative`, linux only, which runs
+the first four over pages the kernel owns and then ccgo's own union spelling over a `uintptr`: a
+member stored, read, compound-assigned and incremented, a pointer-sized member, a second union, the
+address as a number, an atomic operation on it and a kept address.)
+
+## `&*p` is `p`, after Go's nil check
+The address of the variable a pointer indirection denotes is the pointer itself, so `&*p` yields `p`.
+Go still evaluates `*p`, so a nil `p` panics at the expression although nothing is read through it.
+It renders as the pointer's box followed by golib's `nilcheck()`, which throws Go's nil dereference
+panic for a nil pointer and otherwise returns the same box:
+
+<!-- source: src/tests/Behavioral/AddressOfFieldThroughConversion/main.go:110 -->
+```go
+	s := &*r
+```
+<!-- source: src/tests/Behavioral/AddressOfFieldThroughConversion/main.cs.target:91 -->
+```csharp
+    var s = r.nilcheck();
+```
+A pointer conversion is the operand as it stands, `@unsafe.Pointer.To<rec>(gp).nilcheck()`; a named
+pointer type (`type recp *rec`) is a generated wrapper over the box and the expression yields a plain
+`*rec`, so the wrapper is converted first, `((ж<rec>)np).nilcheck()`; and a type parameter whose only
+type is a pointer (`[P *T]`) is erased to that pointer, so it is the box already.
+
+**Why.** The form this replaces was `Ꮡ(~p)`: the address-of builtin over the dereferenced VALUE, a new
+box holding a copy of the pointee, so every write through the result was lost and the result was never
+equal to `p`. ccgo spells the member of a C union that is the whole object this way,
+`*(*uint64)(unsafe.Pointer(&*(*struct{ Fi [0]uint64; Ff float64 })(p))) <<= n`, which is how libc's
+`fmod` and `remquo` shift the bits of a double; with the copy, both lost their writes. The member is
+named for the operation Go's compiler lowers the form to (NilCheck: panics if the pointer is nil,
+returns it unmodified), and it is an extension, not an instance member, so a null reference, the other
+managed spelling of a nil pointer, takes Go's panic and not a `NullReferenceException`.
+<!-- 2026-11-15, sqlite-cs wall W9b, the third of three spellings G's corpus read named (COORD ruling 20261115T065612Z: a golib member, not an inline throw). Census of Go source: 10 sites in std, all in crypto/internal/boring/sha.go (build tag boringcrypto, not in the corpus); 0 in the behavioral corpus. -->
+The pointer constraints the type-parameter erasure declines (`~*T`, a union of pointers, a pointer
+constraint with methods) keep their current emission as a whole, this form included.
+(Guarded by the `AddressOfFieldThroughConversion` behavioral output test: a write through `&*r`
+compared with `r`, the whole-object union stored and shifted through a conversion, a named pointer,
+two indirections, a type parameter, and the panic text of a nil pointer; by
+`AddressOfFieldThroughConversionNative`, linux only, for libc's shift over pages the kernel owns; and
+by GolibTests' `PointerNilCheckTests`, one arm per spelling of a Go pointer and of nil.)
 
 ## `unsafe.Pointer(p)` on a pointer PARAMETER renders the box, never a deref
 A pointer parameter is emitted as the box `ж<T> Ꮡp` plus a deref'd VALUE alias

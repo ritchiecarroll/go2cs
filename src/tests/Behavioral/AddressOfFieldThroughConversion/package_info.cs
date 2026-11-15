@@ -54,7 +54,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABhEgoKWgpaCloKClpaCgoKWgoKWgoI=", "66-66:1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABpalpCUsoCkgoKU5oKCloKWgpaCgpaWgoKCloKCloKCloKWgpaCloKCgpaCgpaCgoKCgoKWgoKWgoKCgoKClg==", "51-51:1;92-92:1", "", "", "", "37:21,38:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -70,6 +70,7 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial class recp {}
     internal partial struct outer {}
     internal partial struct rec {}
     internal partial struct rec2 {}
