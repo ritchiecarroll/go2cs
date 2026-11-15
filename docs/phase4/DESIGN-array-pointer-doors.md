@@ -1411,6 +1411,61 @@ Go does (`door-b-1115/rprobe/`).
 - The V3 fast path decides "C memory" by the pointer keeping nothing and the registry not knowing the number.
   A number that named Go storage which has since moved or died is outside every door, as 13.4 says.
 
+### 16.9 Amendment 2026-11-15 (P5): an anonymous struct element is lifted before a door names it
+
+G found it at master `0c1d295ea8` (batch 309), on windows and on linux: the conversion of the sqlite-cs demo ends
+with exit code 1, "2 unresolved dynamic type(s) were emitted as raw Go source". Both types are the element of an
+array that C compiled to Go keeps in a function's frame block, which Go source declares once, as a blank
+placeholder, and then reaches only through conversions:
+
+```go
+var _ /* aSub at bp+0 */ [13]struct {
+	FnList int32
+	FaList uintptr
+}
+
+(*[13]struct {
+	FnList int32
+	FaList uintptr
+})(unsafe.Pointer(bp))[iSub].FaList = aMerge
+```
+
+**The cause.** An anonymous struct written in a conversion's type is lifted to a C# type where the conversion is
+rendered (`liftConversionTargetAnonStruct`, called from the call arm of `convCallExpr`). The doors render from the
+index, the slice, the dereference or the range, so a conversion a door takes is never rendered. Every door of 308
+and 309 names its element in one function, `arrayPointerViewOfBase`, and it named this one with no lift behind it:
+the deferred name resolved to nothing and the emission carried the Go struct text. Before batch 309 the index form
+rendered the conversion, which made the lift. Door A (batch 308) has had the same hole for its slice and copy
+forms; the sqlite sources index, so it first showed with door B.
+
+**The change.** `arrayPointerViewOfBase` makes that lift itself, after the door's declines and before it names the
+element, under the name the call arm gives it. A door that declines changes nothing. The lift reuses a C# type the
+function already has for the same Go type: the blank placeholder's (`subLists__ᴛ1`) or a literal's bound to a
+variable (`bound_v`), so a whole store of such a value assigns. With neither, the type is `<function>_type`. No
+golib change.
+
+**The other naming sites, and the predicate.** A site is in the class when a door names a type the conversion
+alone writes. The doors have one naming site, and it is the one changed. The field view (18.2) names an element at
+two sites, both behind its own rule that the element is a numeric basic type, so it cannot name a struct; a
+conversion over a field's address whose element is an anonymous struct is the element door's, and the converter
+test has that arm. A named array's name (the whole doors) is a declared type. The census
+(`data/array-pointer-doors/anon-elem-1115/`) reads the standard library, production and test files, on four
+targets for a conversion to a pointer to an array whose element holds an anonymous struct: 0 sites, with any
+operand, beside 118 to 128 `unsafe.Pointer` conversions to a pointer to an array per target, and 13 sites in the
+behavioral program planted as the positive.
+
+| reading (linux/amd64, Release) | before | with the change |
+|:--|:--|:--|
+| converter test `TestArrayPointerDoorLiftsAnAnonymousStructElement`: six functions, one for each door form and one over a field's address | red: 6 unresolved types, one for each function | green: 0 unresolved, no Go struct text, each door over a lifted type, one declaration for each |
+| `AnonStructArrayPointerDoor`, 13 lines: the two sqlite shapes, and a literal bound first | master's converter exits 1 with 2 unresolved types | converts, builds, 13 of 13 equal Go |
+
+**What this leaves.** The open slice `[lo:]` of an unnamed array stays on its older route (decision D4, and the
+BOARD row of 2026-11-14, "an array viewed over another array type answers length 0"). Over an anonymous struct
+element that route converts, as before this change, and at run time it is that row: `[1:]` over six words panics
+"slice bounds out of range [1:0]". The program's slice arm is written closed (`[1:2]`) for that reason. Nothing
+here ran on windows or darwin, and the sqlite-cs conversion itself is G's to re-run at this tip. The local gates are
+scored in the announce of this commit, not here.
+
 ## 17. Amendment 2026-11-15 (P5): the publish of a named array's holder is a compare-and-swap (option 2)
 
 This is the first item of 14.3, ruled the seat after door B (01:19Z) and accepted as planned (08:54Z). golib
