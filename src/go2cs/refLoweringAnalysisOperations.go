@@ -1298,7 +1298,7 @@ func (a *refLoweringAnalysis) classifyPointeeUse(chainRoot ast.Node, parents map
 		case *ast.SliceExpr:
 			// p.f[:] of an array held INLINE in the pointee (a go.arrays member) is (&p.f)[:]: it is emitted over the
 			// field's address (inlineArraySliceBase), which needs p's box, as &p.f does.
-			if p.X == node && inlineArraySliceSpelled(p, a.info) {
+			if p.X == node && inlineArraySliceSpelled(p, a.info) && !a.inlineCopyOperandAt(p, parents) {
 				return refVetoOtherUse, nil
 			}
 
@@ -2294,4 +2294,30 @@ func relPathForCensus(root, path string) string {
 	}
 
 	return path
+}
+
+// inlineCopyOperandAt reports whether slice is the operand of a copy that reads or writes it over a reference to the
+// inline storage (inlineArrayCopyOperand), which takes no address of the pointee.
+func (a *refLoweringAnalysis) inlineCopyOperandAt(slice *ast.SliceExpr, parents map[ast.Node]ast.Node) bool {
+	parent := parents[slice]
+
+	for {
+		paren, ok := parent.(*ast.ParenExpr)
+
+		if !ok {
+			break
+		}
+
+		parent = parents[paren]
+	}
+
+	call, ok := parent.(*ast.CallExpr)
+
+	if !ok {
+		return false
+	}
+
+	operand, _, ok := inlineArrayCopyOperand(call, a.info)
+
+	return ok && operand == slice
 }

@@ -275,7 +275,8 @@ var kept [][]byte
 
 func main() {
 	n, _ := strconv.Atoi(os.Args[2])
-	g := guid.FromArray([16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
+	b := [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
+	g := guid.FromArray(b)
 	sum := 0
 
 	switch os.Args[1] {
@@ -292,6 +293,28 @@ func main() {
 			s := g.Head()
 			kept = append(kept, s)
 			sum += int(s[1])
+		}
+	case "copyin":
+		for i := 0; i < n; i++ {
+			h := guid.FromArray(b)
+			sum += int(h.Data4[1])
+		}
+	case "copyout":
+		for i := 0; i < n; i++ {
+			a := g.ToArray()
+			sum += int(a[9])
+		}
+	case "control2":
+		for i := 0; i < n; i++ {
+			var h guid.GUID
+			for j := 0; j < 8; j++ {
+				h.Data4[j] = b[8+j]
+			}
+			var a [16]byte
+			for j := 0; j < 8; j++ {
+				a[8+j] = h.Data4[j]
+			}
+			sum += int(a[9])
 		}
 	}
 
@@ -409,5 +432,59 @@ func TestInlineArrayForeignSlicePinIsReleased(t *testing.T) {
 
 	if broken := sliceGCBars(pinned, control); len(broken) > 0 {
 		t.Errorf("slicing a value receiver's inline array 1,000,000 times breaks %v against the unpinned control", broken)
+	}
+}
+
+// THE COPY SHAPES (COORD 2026-11-15, ruling (b)): copy into or out of x.f[lo:hi] reads or writes the inline storage over
+// a reference for the copy's duration, so it takes no pin and no box, as Go's own copy lets nothing escape. Its bar,
+// posted before the first run, against control2 (the same 8 bytes moved element-wise both ways), N = 1,000,000:
+//
+//	C1 retained heap   copy <= control2 * 1.10 + 256 KiB
+//	C2 fragmentation   copy <= control2 + 1 MiB
+//	C3 pinned objects  copy <= control2 + 16
+//	C4 peak heap       copy <= control2 * 1.25 + 1 MiB
+func TestInlineArrayForeignSliceCopyTakesNoPin(t *testing.T) {
+	dotnet := requireInlineBuild(t)
+	out := convertInlineModule(t, "slicegc", inlineSliceGCModule)
+	guidCs := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "guid", "guid.cs")), "\r\n", "\n")
+
+	for _, want := range []string{"copy(ref g.Data4, 0, 8, b[8..16]);", "copy(b[8..16], ref g.Data4, 0, 8);"} {
+		if !strings.Contains(guidCs, want) {
+			t.Errorf("want the pin-free copy %q:\n%s", want, guidCs)
+		}
+	}
+
+	writeModuleFile(t, filepath.Join(out, "GcHarness.cs"), inlineSliceGCHarness)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, out); err != nil {
+		t.Fatalf("the GC module does not build: %v\n%s", err, built)
+	}
+
+	const n = "1000000"
+	control := readSliceGC(t, "control2", runConvertedInlineModule(t, dotnet, out, "control2", n))
+
+	for _, mode := range []string{"copyin", "copyout"} {
+		reading := readSliceGC(t, mode, runConvertedInlineModule(t, dotnet, out, mode, n))
+		var broken []string
+
+		if float64(reading.heap) > float64(control.heap)*1.10+256<<10 {
+			broken = append(broken, "C1")
+		}
+
+		if reading.frag > control.frag+1<<20 {
+			broken = append(broken, "C2")
+		}
+
+		if reading.pinned > control.pinned+16 {
+			broken = append(broken, "C3")
+		}
+
+		if float64(reading.peak) > float64(control.peak)*1.25+1<<20 {
+			broken = append(broken, "C4")
+		}
+
+		if len(broken) > 0 {
+			t.Errorf("%s breaks %v against control2", mode, broken)
+		}
 	}
 }

@@ -1377,13 +1377,15 @@ func recvObjectOf(funcDecl *ast.FuncDecl, info *types.Info) types.Object {
 func bodyTakesReceiverFieldAddress(body *ast.BlockStmt, recvName string, recvObj types.Object, info *types.Info) bool {
 	found := false
 
+	pinFree := pinFreeInlineCopySlices(body, info)
+
 	ast.Inspect(body, func(node ast.Node) bool {
 		// The operand whose address the node takes: `&v.f`, or `v.f` of a slice `v.f[lo:hi]` of an array held inline in
 		// the receiver's pointee, which is emitted over the field's address (inlineArraySliceBase) and so needs the
-		// receiver's box as `&v.f` does.
+		// receiver's box as `&v.f` does (but not one a copy reads or writes over a reference, inlineArrayCopyOperand).
 		var addressed ast.Expr
 
-		if slice, ok := node.(*ast.SliceExpr); ok && inlineArraySliceSpelled(slice, info) {
+		if slice, ok := node.(*ast.SliceExpr); ok && !pinFree[slice] && inlineArraySliceSpelled(slice, info) {
 			addressed = ast.Unparen(slice.X)
 		} else if unaryExpr, ok := node.(*ast.UnaryExpr); ok && unaryExpr.Op == token.AND {
 			addressed = unaryExpr.X

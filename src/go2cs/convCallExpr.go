@@ -334,6 +334,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		return emission
 	}
 
+	// copy into or out of a slice of an inline array, over a reference to its storage (inlineArrayEmission.go).
+	if emission, ok := v.inlineArrayCopyEmission(callExpr); ok {
+		return emission
+	}
+
 	v.markCarriedPointerArgument(callExpr)
 
 	// An EXPORTED generic of this package called with an array type argument at a parameter whose

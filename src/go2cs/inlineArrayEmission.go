@@ -286,3 +286,104 @@ func inlineArraySliceSpelled(slice *ast.SliceExpr, info *types.Info) bool {
 
 	return ok && arrayType.Len() > 0 && inlineSliceElementIsPlain(arrayType.Elem())
 }
+
+// inlineArrayCopyOperand reports whether call is Go's copy with exactly one operand a two-index slice of an inline array
+// that inlineArraySliceBase spells, and the other operand a slice (COORD 2026-11-15, Part 2 ruling (b)): that slice and
+// its position (0, the destination; 1, the source). Such a copy is spelled over a reference to the inline storage for
+// the copy's duration (inlineArrayCopyEmission), so the slice takes no pin and no box: Go's own copy does not let it
+// escape. A string operand, a three-index slice, and two inline operands keep the slice's own spelling.
+//
+// The test is structural (the call, its operands and their types), so every pass that asks it, in the declaring
+// package or in a consumer reading an imported method's body, gets the same answer.
+func inlineArrayCopyOperand(call *ast.CallExpr, info *types.Info) (*ast.SliceExpr, int, bool) {
+	if len(call.Args) != 2 || call.Ellipsis.IsValid() {
+		return nil, -1, false
+	}
+
+	if builtin := calledBuiltin(call.Fun, info); builtin == nil || builtin.Name() != "copy" {
+		return nil, -1, false
+	}
+
+	var found *ast.SliceExpr
+	position := -1
+
+	for i, arg := range call.Args {
+		slice, ok := ast.Unparen(arg).(*ast.SliceExpr)
+
+		if !ok || slice.Slice3 || !inlineArraySliceSpelled(slice, info) {
+			continue
+		}
+
+		if found != nil {
+			return nil, -1, false // both operands inline
+		}
+
+		found, position = slice, i
+	}
+
+	if found == nil {
+		return nil, -1, false
+	}
+
+	if _, isSlice := types.Unalias(info.TypeOf(call.Args[1-position])).Underlying().(*types.Slice); !isSlice {
+		return nil, -1, false
+	}
+
+	return found, position, true
+}
+
+// pinFreeInlineCopySlices collects, in body, every slice inlineArrayCopyOperand spells without a pin, for the address
+// walks to pass over.
+func pinFreeInlineCopySlices(body ast.Node, info *types.Info) map[*ast.SliceExpr]bool {
+	if body == nil || packageInlineAdmission == nil {
+		return nil
+	}
+
+	var slices map[*ast.SliceExpr]bool
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if call, ok := n.(*ast.CallExpr); ok {
+			if slice, _, ok := inlineArrayCopyOperand(call, info); ok {
+				if slices == nil {
+					slices = map[*ast.SliceExpr]bool{}
+				}
+
+				slices[slice] = true
+			}
+		}
+
+		return true
+	})
+
+	return slices
+}
+
+// inlineArrayCopyEmission renders a copy inlineArrayCopyOperand spells: copy(ref x.f, lo, hi, src) for a destination
+// slice and copy(dst, ref x.f, lo, hi) for a source slice, over golib's two overloads (builtin.InlineArrayCopy.cs).
+func (v *Visitor) inlineArrayCopyEmission(call *ast.CallExpr) (string, bool) {
+	slice, position, ok := inlineArrayCopyOperand(call, v.info)
+
+	if !ok {
+		return "", false
+	}
+
+	arrayType := types.Unalias(v.info.TypeOf(slice.X)).Underlying().(*types.Array)
+	low, high := "0", fmt.Sprintf("%d", arrayType.Len())
+
+	if slice.Low != nil {
+		low = v.castWideIntegerToNint(slice.Low)
+	}
+
+	if slice.High != nil {
+		high = v.castWideIntegerToNint(slice.High)
+	}
+
+	window := fmt.Sprintf("ref %s, %s, %s", v.convExpr(slice.X, nil), low, high)
+	other := v.convExpr(call.Args[1-position], nil)
+
+	if position == 0 {
+		return fmt.Sprintf("copy(%s, %s)", window, other), true
+	}
+
+	return fmt.Sprintf("copy(%s, %s)", other, window), true
+}

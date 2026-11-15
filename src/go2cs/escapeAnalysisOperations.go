@@ -731,14 +731,16 @@ func (v *Visitor) objectAddressTaken(obj types.Object, body ast.Node, directOnly
 	}
 
 	found := false
+	pinFree := pinFreeInlineCopySlices(body, v.info)
 
 	ast.Inspect(body, func(n ast.Node) bool {
 		if found {
 			return false
 		}
 
-		// A slice of an array held inline in obj's storage is an address of it (inlineArraySliceBase).
-		if slice, ok := n.(*ast.SliceExpr); ok && !directOnly && v.inlineArraySliceRootsAt(slice, obj) {
+		// A slice of an array held inline in obj's storage is an address of it (inlineArraySliceBase), unless a copy
+		// reads or writes it without one (inlineArrayCopyOperand).
+		if slice, ok := n.(*ast.SliceExpr); ok && !directOnly && !pinFree[slice] && v.inlineArraySliceRootsAt(slice, obj) {
 			found = true
 			return false
 		}
@@ -868,6 +870,7 @@ func (v *Visitor) performEscapeAnalysisForObject(identObj types.Object, parentBl
 	}
 
 	escapes := false
+	pinFree := pinFreeInlineCopySlices(parentBlock, v.info)
 
 	// Visitor function to traverse the AST
 	inspectFunc := func(node ast.Node) bool {
@@ -959,8 +962,9 @@ func (v *Visitor) performEscapeAnalysisForObject(identObj types.Object, parentBl
 
 		case *ast.SliceExpr:
 			// A slice of an array held inline in the ident's own storage, `x.f[lo:hi]`, is Go's (&x.f)[lo:hi]: it is
-			// emitted over the field's address (inlineArraySliceBase), so the ident lives in a box, as for `&x.f`.
-			if v.inlineArraySliceRootsAt(n, identObj) {
+			// emitted over the field's address (inlineArraySliceBase), so the ident lives in a box, as for `&x.f`. A
+			// copy that reads or writes the slice over a reference instead (inlineArrayCopyOperand) takes no address.
+			if !pinFree[n] && v.inlineArraySliceRootsAt(n, identObj) {
 				escapes = true
 				return false
 			}
