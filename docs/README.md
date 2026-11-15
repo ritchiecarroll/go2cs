@@ -27,12 +27,27 @@ package, on Windows and Linux. On macOS, a package is validated when its row on 
 
 ## 📰 NEWS — Faster Native AOT, and a Release standard library from source
 
-<!-- HELD for the 1.26.11.1 news item (owner ask, relayed by COORD 2026-11-15 18:16Z): when this block's item replaces
-     the 1.26.10.3 item below, the item ends with the preview sentence that follows, uncommented. Each highlight is
-     kept to what Roadmap says ("The next two releases", Performance, cgo, Native AOT and trimming); no date, and no
-     word about announcements. Its links resolve at this commit.
+<!-- HELD: the 1.26.11.1 news item, drafted from DRAFT-news-1-26-10-4.md (COORD 2026-11-15 18:23Z). At the release cut
+     it replaces the heading above and the 1.26.10.3 item below, uncommented, with "<DATE>" and the NEWS.md anchor set to
+     the publish date. The last paragraph is the owner's preview of the next release (owner ask, relayed by COORD
+     2026-11-15 18:16Z); each highlight is kept to what Roadmap says ("The next two releases", Performance with the
+     opt-in ruling of 2026-11-12, cgo, Native AOT and trimming), with no date and no word about announcements. The
+     platform sentence waits for the owner's read of the parity wording (AUDIT-user-facing-docs-1-26-11-1.md section 3)
+     and quotes no roster figure (check-roster-format 2e). Its links resolve at this commit, except the NEWS.md anchor.
 
-**Coming next.** The next release is expected to run many goroutines over a few threads
+## 📰 NEWS — Linux on Arm64, cgo, and the standard library from Go 1.26.11
+
+**<DATE>, 2026, NuGet 1.26.11.1.** Built from Go 1.26.11, a Go patch release with security fixes. The `go.*`
+packages now ship a Linux Arm64 build of the standard library, and the converted standard library passes Go's own
+tests on Windows, on Linux (x64 and Arm64) and on macOS (Intel and Apple silicon). `go2cs -cgo` converts a package
+that calls C library functions, on a machine with a C compiler ([cgo](Limitations.md#cgo)). Converting a module
+picks a library's pure-Go code over its assembly, and a package go2cs refuses no longer stops the rest of the
+module. Each standard-library assembly is now named after its package (`go.fmt.dll`), so code built against
+1.26.10.3 or earlier must be rebuilt. Two large real Go programs produce output byte-identical to Go's: the converted SQLite library on
+Windows and Linux, and the converted TypeScript compiler under the JIT.
+[Full announcement](NEWS.md#date-2026--title).
+
+**Coming next.** The next release is expected to run many goroutines over a few threads, at first as an option
 ([goroutine scheduling](Roadmap.md#performance)), to take cgo further, with Go memory handed to C, cgo packages in
 `-recurse=nuget` conversions and the `net` resolver converted and validated ([cgo](Roadmap.md#cgo)), and, as an
 option, to make Native AOT builds of large programs smaller ([Native AOT](Roadmap.md#native-aot-and-trimming)); the

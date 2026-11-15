@@ -472,7 +472,10 @@ runtime settings to choose. It is the before picture for the .NET 11 measurement
 - **Goroutine scheduling** (planned for the release after 1.26.11.1): each live goroutine runs on its own
   OS thread today, so a program can hold only as many goroutines alive at once as the system allows threads,
   a limit macOS reaches first ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)).
-  The work moves toward Go's model of many goroutines over a few threads.
+  The work moves toward Go's model of many goroutines over a few threads. It arrives first as an option, a
+  runtime switch a program turns on, while one thread per goroutine stays the default.
+  <!-- Owner ruling 2026-11-12, relayed by COORD 2026-11-15 18:23Z: M:N arrives as a host runtime switch, opt-in first
+       (with the 1.26.11.1 NEWS contract sentences: threading is tier 3; hidden twin members are reserved). -->
   <!-- Owner ruling 2026-11-08, relayed by COORD, verbatim: "In addition to the TypeScript issues, M:N scheduling
        right after .3 sounds appropriate." The trigger is C1's macOS thread-cap measurement (run 42497561630; see the
        Limitations bullet's comment). The design starts from docs/DESIGN-mn-scheduler-sizing.md and
