@@ -35,6 +35,17 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		}
 	}
 
+	// The explicit dereference of a field view, sliced: `(*p)[lo:hi]` slices the array p names in place, which is
+	// `p[lo:hi]`. The view has no array<T> for the dereference to return (nativeFieldArrayView.go, part C).
+	if star, ok := ast.Unparen(sliceExpr.X).(*ast.StarExpr); ok {
+		if _, isView := v.nativeFieldArrayViewPointer(star.X); isView {
+			through := *sliceExpr
+			through.X = star.X
+
+			return v.convSliceExpr(&through)
+		}
+	}
+
 	// A slice of a pointer-to-array CONVERSION, `(*[N]T)(p)[lo:hi]`, reads the memory p names (the span
 	// below copies it), and it is recognized by its AST and type, not by the emitted text. The forms that wrap the
 	// conversion — extra parentheses, `((*[N]T)(p))[lo:hi]`, and an explicit dereference,

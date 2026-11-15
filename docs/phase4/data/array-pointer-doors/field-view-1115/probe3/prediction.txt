@@ -1,0 +1,17 @@
+PART C PREDICTIONS, written 2026-11-15T11:27Z before the probe is run and before any footprint is measured.
+
+1. probe3 (sibling shapes, 13 lines of Go output), the C emission built against the C tree: lines 1 to 8 equal
+   Go's. Line 9 is storeMulti, a tuple assignment that stores through two views: its left side keeps Value, so
+   the run stops there with golib's "has no array<T> to dereference". Lines 10 and 11 are not reached.
+2. The behavioral program (114 lines): equal to Go's on every line.
+3. The A+B emission of the same behavioral program against the A+B tree: stops at its first whole-array form
+   ("whole load"), refused by name. At 516586c4a9 (base converter and base package) the range-by-value line
+   reads 0x0 where Go reads 0xf1: that is in probe/base.out already, and is the silent arm's red.
+4. Footprint, two-seeded, four targets: 0 corpus files. Basis: the 11 emitted field-view sites (syscall linux
+   and darwin 4 each, runtime rand 1, net darwin 2) each bind a local and only index it, read at the committed
+   emission. The four shared-code touches (the value-operand predicate's parameter type, the slice hook, the
+   len fold, the index-only range) fire only for a field-view pointer.
+5. Whole GolibTests linux/amd64: A+B's 2857 passed + 7 new arms = 2864 passed, 0 failed, 49 skipped, 2913.
+6. CNR: NO REGRESSION, 1076 packages (no new program; FieldViewOverGoStruct's golden moves with its source).
+7. Converter unit arms: red at the A+B converter on all seven positive arms, green with C; the re-pointed
+   control green on both.

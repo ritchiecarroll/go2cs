@@ -60,6 +60,7 @@ var packageArrayPointerLoads map[*ast.StarExpr]bool
 // recorded dereference is a door's is decided at emission, by arrayPointerLoadDoor.
 func collectArrayPointerLoads(files []FileEntry, info *types.Info) {
 	packageArrayPointerLoads = map[*ast.StarExpr]bool{}
+	packageFieldViewLoads = map[*ast.StarExpr]bool{}
 
 	for _, fileEntry := range files {
 		var stack []ast.Node
@@ -76,6 +77,10 @@ func collectArrayPointerLoads(files []FileEntry, info *types.Info) {
 				parent = stack[len(stack)-1]
 			}
 
+			if star, ok := n.(*ast.StarExpr); ok && starExprIsFieldViewLoad(star, stack, info) {
+				packageFieldViewLoads[star] = true
+			}
+
 			stack = append(stack, n)
 
 			if star, ok := n.(*ast.StarExpr); ok && starExprIsValueOperand(star, parent, info) {
@@ -90,7 +95,7 @@ func collectArrayPointerLoads(files []FileEntry, info *types.Info) {
 // starExprIsValueOperand reports whether a dereference stands where Go copies its value: the right side of an
 // assignment or a declaration, a returned value, a call argument, an operand of == and !=, or the operand of a range
 // that Go evaluates. The list is the positions themselves, so a position it does not name keeps the general emission.
-func starExprIsValueOperand(star *ast.StarExpr, parent ast.Node, info *types.Info) bool {
+func starExprIsValueOperand(star ast.Expr, parent ast.Node, info *types.Info) bool {
 	among := func(exprs []ast.Expr) bool {
 		for _, expr := range exprs {
 			if expr == star {

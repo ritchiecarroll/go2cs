@@ -193,6 +193,11 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	// the whole array, a slice (arrayPointerElementDoor.go).
 	rangeExpr, rangeWindowElem, isRangeWindow := v.arrayPointerRangeWindow(rangeStmt)
 
+	// A field view ranged for its values ranges its own window (nativeFieldArrayView.go).
+	if !isRangeWindow {
+		rangeExpr, rangeWindowElem, isRangeWindow = v.nativeFieldArrayViewRangeWindow(rangeStmt)
+	}
+
 	if !isRangeWindow {
 		rangeExpr = v.convExpr(rangeStmt.X, nil)
 	}
@@ -849,6 +854,9 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
 		case isArrayPointee && !rangedThroughPointer && v.arrayPointerConversionIsUnevaluated(rangeStmt.X):
 			// `for i := range *(*A)(p)`: the type's length, and no memory (arrayPointerElementDoor.go).
+			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
+		case isArrayPointee && !rangedThroughPointer && v.nativeFieldArrayViewDerefIsUnevaluated(rangeStmt.X):
+			// `for i := range *p`, p a field view: the same (nativeFieldArrayView.go).
 			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
 		case isArrayPointee && rangedThroughPointer && ptrDeref != "":
 			v.writeOutput("foreach (%s%s in range(%s, %d))", decl, iterExpr, rangeExpr, arrayType.Len())

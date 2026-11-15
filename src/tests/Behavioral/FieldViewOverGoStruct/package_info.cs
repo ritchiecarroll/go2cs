@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA86qIKmgqaCgqaCgqaCpoKmgqaCqoKCpoKCpoKClIKmqIKCgoKCgqaCgqiigoKmopSCgoKCgoKCgoKCgoKUgoKCgoKCgoKCpoSWloKCloKC")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA9CqIKmgqaCgqaCgqaCpoKmgqaCqoKCpoKCpoKClIKmqIKCgoKCgqaCgqiigoKqgqaCgqaCqIKCgoKmooKmoqaCgqaipqKCqoKClIKmpoKUgqaogoKUgoKmpqiCgpSCgqamqoKCgoKmgoIABxSC3IKCgoKmgoKUgqamopSCgoKCgoKCgoKCgoKUgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKmhJaWgoKWgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -70,6 +70,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     internal partial struct hdr {}
+    [GoValueClone("port", "word")] internal partial struct raw {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

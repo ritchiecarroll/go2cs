@@ -1652,3 +1652,131 @@ Two things follow.
   rest is door C's unnamed form.
 - Nothing here ran on windows or darwin before the hosted runs. The sqlite-cs demo was not built at this cut;
   the census says it has no site of this shape outside `x/sys/unix`.
+
+### 18.7 Amendment 2026-11-15 (P5): part C, the whole array through the view
+
+The view has no `array<T>` for `Value` to return, so every form that needs all N elements goes through the
+elements. `ArrayPointer<T>` gains two helpers (`src/core/unsafe/unsafe.cs`, hand-owned), and the converter
+names them:
+
+| Go, p a field view | emitted | what it does |
+|:--|:--|:--|
+| `v := *p`, and `*p` as a returned value, an argument, an operand of `==`, an element or field value of a composite literal, a sent value | `@unsafe.ArrayPointer<T>.Load(p)` | a new Go array, the N elements copied |
+| `*p = v` | `@unsafe.ArrayPointer<T>.Store(p, v);` | N element stores; a value with no storage stores zeros |
+| `for _, x := range p` | `range(p.slice())` | each element read when its round comes, as Go reads through the pointer |
+| `for _, x := range *p` | `range(...Load(p))` | Go copies the array first, and so does the load |
+| `(*p)[i]` | `p.ElementRef(i)` | the view's own element, no copy |
+| `(*p)[lo:hi]` | `p.slice(lo, hi)` | the view's own window |
+| `len(*p)`, `for i := range *p` | `N` | Go reads no memory for either |
+
+p is the conversion where it is written or a local bound by it and never re-pointed, the same test A uses.
+
+**The value positions are a list of their own.** `packageFieldViewLoads` is door B's list
+(`packageArrayPointerLoads`) and three positions more: an element or field value of a composite literal, a
+sent value, and any of them inside parentheses. Door B's list can leave a position out because its dereference
+has a general emission to fall back on. The view has none: a value position the list misses is a refusal at
+run time. The composite literal is not a corner. It is how `x/sys/windows` writes the form
+(`RawSockaddrBth{BtAddr: *(*[8]byte)(unsafe.Pointer(&sa.BtAddr)), ...}`), found by the census of 18.8.
+
+**The scope probe** (`field-view-1115/probe3/`: 32 functions, every sliced, dereferenced, loaded, stored and
+ranged form of a view local and of the conversion where it is written, with five controls), converted by the
+A+B converter and by the cut. 22 lines differ, every one a whole-array form of a field view: 6 slices of the
+dereference (4 through a local, 2 where the conversion is written), 1 index of the dereference, 1 `len`, 9
+lines of loads (a tuple of two, a typed declaration, an element of a slice literal, a returned value, two
+field values of a struct literal, a field value inside parentheses, a sent value, a value inside
+parentheses), 2 stores, 1 tuple store, 1 range over the pointer and 1 index-only range over the dereference.
+The five controls (a local pointed at something else afterwards, a field two selections deep, a package
+variable, a pointer to a real array, a slice) are byte-identical. Run: Go prints 11 lines. The cut's emission
+prints the first 10 equal to Go's and stops at the tuple store, refused by name.
+
+**One position stays refused by name:** the left side of a tuple assignment, `*p, *q = *q, *p`. The emission
+is `(p.Value, q.Value) = (Load(q), Load(p))`, and `Value` refuses. 0 sites in the trees read. A BOARD row
+carries it, with its size.
+
+**Red first.** The silent arm reads red by its value: at `516586c4a9` the range by value over the kept view
+ran no rounds and answered 0x0 where Go answers 0xf1 (`probe/base.out`); after A and B the form is refused by
+name (`probe/cut.out`); with C it equals Go's. The converter's arms
+(`TestNativeFieldArrayViewWholeArrayGoesThroughTheHelpers`): at the A+B converter all seven positive arms are
+red, 19 failed assertions, and the control, a local pointed at something else, is green; with C all are
+green. The golib helpers are new, so their seven arms in `FieldArrayViewOverGoStructTests` cannot be red at
+the base: they are read green, and the converter's arms and the behavioral program carry the red.
+
+**Readings**, linux/amd64 Release, at `73319097cd`.
+
+| gate | reading |
+|:--|:--|
+| the behavioral program `FieldViewOverGoStruct`, with part C's forms added | 114 lines, equal to Go's |
+| whole GolibTests | 2864 passed, 0 failed, 49 skipped, 2913 (parts A and B: 2857 passed, so the seven new arms and nothing else) |
+| GolibTests by path | 25 of 25 |
+| `go vet` of the converter | clean |
+| `go test ./...` at the code commit | 10 packages ok, 1 red: `internal/repoguard`, on 14 cites in the docs that part C's own edits moved (below) |
+| `go test ./...` with this docs commit | read after the commit and posted with the announce |
+| check-no-regression | NO REGRESSION, byte-identical across all 1076 behavioral packages (12 platform-exclusive skipped by name) |
+| footprint, two seeded standard-library emissions per target, base the converter of parts A and B | 0 corpus files on linux/amd64, windows/amd64, darwin/amd64 and linux/arm64. Each pair of roots differs in 2 files, the run's own dated report and progress log |
+
+**Not predicted: the docs guards.** Part C's converter edits moved lines that 12 provenance notes cite
+(`convSliceExpr.go`, `visitRangeStmt.go`, `convCallExpr.go`; 7 in `ConversionStrategies.md`, 5 in
+`labels-and-loop-variables.md` by the guard's count of cited spans), and its additions to the behavioral
+program moved two samples that `pointers.md` cites. `TestDocsProvenanceNotesResolve` and
+`TestDocsSamplesHoldTheirLines` named all 14, and the two tests that plant a stale note into the same page
+failed with them. The cites are re-pointed in this docs commit and nothing else in those pages changes.
+
+**One gate run was mine to repeat.** The first check-no-regression run was killed by a cleanup I ran in the
+same tree while it was running: it removed build output, the converter binary the check had built among it,
+and the check stopped with the binary's path not found. No tracked file was touched. The reading in the table
+is the second run, alone on the box. A build-output purge in a tree leaves `src/go2cs/bin` alone and waits
+for a running check.
+
+**Predictions** (`field-view-1115/probe3/prediction.txt`, written before the probe ran), scored as worded:
+
+1. Probe 3: the first 8 lines equal to Go's, the run stops at the tuple store, refused by name. **The
+   mechanism MET, the specifics MISSED as worded.** The prediction says Go prints 13 lines; it prints 11. And
+   after writing it I moved the tuple store's call to the end of the probe so that every other line is
+   reached, so the run prints 10 equal lines and stops at the 11th, with the refusal the prediction names.
+2. The behavioral program, 114 lines, equal to Go's on every line: **MET.**
+3. The emission of the same program by the converter of parts A and B, against their tree, stops at its first
+   whole-array form, refused by name: it prints 14 lines equal to Go's and stops at the 15th, `heap whole load`, with the view's refusal by name. **MET.**
+4. Footprint 0 corpus files on four targets: **MET.**
+5. Whole GolibTests 2864 passed, 0 failed, 49 skipped, 2913: **MET**, each number.
+6. check-no-regression, NO REGRESSION at 1076 packages: NO REGRESSION, byte-identical across all 1076 behavioral packages (12 platform-exclusive skipped by name). **MET.**
+7. The converter's arms red on all seven positive arms at the converter of parts A and B and green with C,
+   the control green on both: **MET** (19 failed assertions at the base).
+
+No prediction covered the docs guards; that reading is above, on its own.
+
+**What this leaves.** The tuple store above. The refusal's words, which still say "native memory" over a Go
+struct (18.6). The 26 sites of 18.4 and the sites of 18.8 are over a struct that holds a reference: C's
+helpers answer for them once the next seat's box exists, and not before.
+
+### 18.8 Amendment 2026-11-15 (P5): the census over the TypeScript closure and the nine nugetgo modules
+
+Ruled with the box kind (COORD 09:54Z). The instrument is 18.4's typed census, taking its target from the
+environment and printing two more columns: what the field is, and whether the view's N elements fit inside
+the field at the target's sizes (`field-view-1115/census2/`). Go 1.26.11, `GOWORK=off`, cgo off. The
+TypeScript tree is private: this record holds counts and the `golang.org/x/sys` site rows, and no line of it.
+
+| closure | own packages | linux/amd64 | linux/arm64 | darwin/amd64 | windows/amd64 |
+|:--|--:|--:|--:|--:|--:|
+| TypeScript (the tsc module at `ba29a56299`, 104 roots) | 0 | 17 | 17 | 4 | 7 |
+| the nine nugetgo modules (18 roots) | 0 | 17 | 17 | 4 | 0 |
+
+Every site is in `golang.org/x/sys`: `unix` (17 on linux, 4 on darwin) and `windows` (7). It arrives through
+tsc's native-path and file-watch packages and `x/term`, and for the nine through gojq's command line
+(go-isatty). Whether any site is on an executed path was not measured; by reading, all are in the
+socket-address encoders and decoders.
+
+- **The field** is a number in every site but one, and the view fits inside its field in all.
+- **The root** is a struct whose converted form holds references, in all: the class refused by name today.
+- **The use** is a local bound to the view and indexed, in all but three.
+- **The shape**, on linux: 12 the field view's, 4 two selections deep, 1 a same-element view.
+
+**Three on windows that the sqlite count does not hold:** `x/sys/windows`' `SockaddrBth.sockaddr`
+(syscall_windows.go:1051-1053) loads the whole array through the view where it is written, as field values of
+a struct literal. Part C emits them as loads. Two are over a number field. The third is over a GUID field, a
+struct whose converted form holds an array: its 16 bytes are not contiguous in managed memory, so no
+reinterpret of the field's storage serves it. That one is door C's class, a layout copy, and the box kind is
+not sized as if it covered it.
+
+So the population the next seat serves is "a number field viewed as its bytes", inside its field. The design
+block for that box (`ReinterpretedArrayBox<E>` over the field's own box) was approved 11:17Z with three arms
+added: identity against Go, the pointer's number, and a compacting collection between a store and a read.
