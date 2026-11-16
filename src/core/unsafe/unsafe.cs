@@ -600,6 +600,31 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         return new Pointer((uintptr)box, box);
     }
 
+    // The converter's emission for Go's unsafe rule 6 on a reflect header's Data field: `unsafe.Pointer(h.Data)` in ONE
+    // expression, with h a *reflect.StringHeader or *reflect.SliceHeader (docs/phase4/DESIGN-sqlite-ccgo-ts.md, QW-8
+    // and section 10.3). Go's pointer keeps what the header describes alive; the number the field holds keeps nothing,
+    // and a pointer re-formed from it after its element box died read moved memory (measured: 199 of 200 wrong, 10.1).
+    //
+    // So the converter hands over the header's BOX, and the answer is decided at RUN TIME, because the converter sees
+    // only the static type: a HEADER box (golib's string and slice header boxes) answers its Data word together with
+    // the element box it minted the word from, and the pointer CARRIES that box, so the pin and the bytes live while
+    // the pointer does; any other box (a header built field by field, `&reflect.StringHeader{Data: n}`) answers
+    // exactly today's number pointer, from the Data word Go's layout puts first.
+    public static Pointer FromHeaderData<T>(ж<T> header)
+    {
+        // A nil header is Go's nil dereference at `h.Data`, never a .NET NullReferenceException (P3's code read, nit 5).
+        if (header is null || header.IsNilPointer)
+            throw RuntimeErrorPanic.ErrorString("invalid memory address or nil pointer dereference");
+
+        if (header is IHeaderDataCarrier source)
+        {
+            nuint word = source.HeaderDataWord(out object? carried);
+            return new Pointer((uintptr)word, carried);
+        }
+
+        return new Pointer(Unsafe.As<T, uintptr>(ref header.Value));
+    }
+
     // Go's `(*T)(p)` for an unsafe.Pointer VALUE p (docs/phase4/DESIGN-interior-pointer-root.md 4.1 and 10.1). The
     // converter's earlier spelling was `(ж<T>)(uintptr)(p)`: the cast to a number dropped what p carried before
     // golib saw it, so an interior address of Go memory came back as a native box that kept nothing and pinned
