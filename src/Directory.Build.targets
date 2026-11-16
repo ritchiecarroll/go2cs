@@ -43,6 +43,9 @@
     adds the generator's stopwatch to its report. Both are read from the environment as well. GoTwinsPairs=false
     (M:N PROTOTYPE, N3) switches off the func-value pairs and the pair test, the A/B control for the D3 core;
     GoTwinsCallerRule=false switches off N3's caller rule alone (the pair core kept), the rule's own A/B control.
+    GoTwinsIfaceUnmark (M:N PROTOTYPE, stage (c)) names interface members, Namespace.Type.Member separated by ',', that
+    carry no park mark: no twin slot, so every caller calls them plain. Given on the command line it reaches every
+    project, which is the point: a mark is read across assemblies.
   -->
   <PropertyGroup Condition="'$(GoAotFor)' != '' and $([System.String]::Copy(';$(GoAotFor);').Contains(';$(MSBuildProjectName);'))">
     <PublishAot>true</PublishAot>
@@ -61,6 +64,7 @@
     <CompilerVisibleProperty Include="GoTwinsCallerRule" />
     <CompilerVisibleProperty Include="GoTwinsIface" />
     <CompilerVisibleProperty Include="GoTwinsIfaceAll" />
+    <CompilerVisibleProperty Include="GoTwinsIfaceUnmark" />
     <CompilerVisibleProperty Include="GoTwinsSiblings" />
     <CompilerVisibleProperty Include="GoTwinsTiming" />
   </ItemGroup>

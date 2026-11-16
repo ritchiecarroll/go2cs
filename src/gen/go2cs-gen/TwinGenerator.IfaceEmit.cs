@@ -152,6 +152,7 @@ public sealed partial class TwinGenerator
                 .Append(" iface-members=").Append(m_ifaceOrdered.Count)
                 .Append(" iface-refused=").Append(m_ifaceOrdered.Count(member => member.Refusal is not null))
                 .Append(" iface-twinned=").Append(m_ifaceOrdered.Count(member => member.Parks))
+                .Append(" iface-unmarked=").Append(m_ifaceOrdered.Count(member => member.Unmarked))
                 .Append(" iface-await-sites=").Append(m_ifaceAwaits)
                 .Append(" forwarders=").Append(m_forwarders.Count)
                 .Append(" forwarders-twinned=").Append(m_ifaceForwarded).Append("\r\n");

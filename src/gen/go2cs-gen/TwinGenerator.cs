@@ -94,7 +94,17 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // GoTwinsCallerRule=false: N3's caller rule alone off, the pair core kept -- the rule's own A/B control.
         bool callerRule = !(options.TryGetValue("build_property.GoTwinsCallerRule", out string? ruling) && string.Equals(ruling, "false", StringComparison.OrdinalIgnoreCase));
 
-        new Run(context, goSites, ifaceShape, ifaceAll) { Self = self, Pairs = pairs, CallerRule = callerRule }.Execute();
+        // GoTwinsIfaceUnmark (stage (c), record 10.3): interface members, `Namespace.Type.Member` with ',' or ';' between,
+        // that carry no park mark: no twin slot, so a caller in any assembly calls them plain.
+        HashSet<string> unmark = new(StringComparer.Ordinal);
+
+        if (options.TryGetValue("build_property.GoTwinsIfaceUnmark", out string? unmarked))
+        {
+            foreach (string entry in unmarked.Split([',', ';'], StringSplitOptions.RemoveEmptyEntries))
+                unmark.Add(entry.Trim());
+        }
+
+        new Run(context, goSites, ifaceShape, ifaceAll) { Self = self, Pairs = pairs, CallerRule = callerRule, IfaceUnmark = unmark }.Execute();
     }
 
     internal sealed partial class Run(GeneratorExecutionContext context, bool goSites, IfaceShape ifaceShape, bool ifaceAll)

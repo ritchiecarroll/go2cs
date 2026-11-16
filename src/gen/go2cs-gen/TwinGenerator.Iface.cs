@@ -26,7 +26,7 @@ public sealed partial class TwinGenerator
     {
         public IMethodSymbol Symbol = null!;
         public string? Refusal;
-        public bool Parks;
+        public bool Parks, Unmarked;
     }
 
     // An explicit interface implementation a sibling generator wrote: it forwards one interface member to a method.
@@ -53,6 +53,12 @@ public sealed partial class TwinGenerator
 
         internal bool IfaceHidden => ifaceShape == IfaceShape.Hidden;
 
+        // GoTwinsIfaceUnmark's list (stage (c)); empty when the property is unset.
+        internal HashSet<string> IfaceUnmark { get; init; } = [];
+
+        private bool Unmarked(IMethodSymbol member) =>
+            IfaceUnmark.Count > 0 && IfaceUnmark.Contains(member.ContainingType.ToDisplayString() + "." + member.Name);
+
         private void CollectIface()
         {
             if (ifaceShape == IfaceShape.None)
@@ -75,8 +81,8 @@ public sealed partial class TwinGenerator
                             Model(tree).GetDeclaredSymbol(method, Context.CancellationToken) is not { } symbol || m_ifaceMembers.ContainsKey(symbol))
                             continue;
 
-                        IfaceMember member = new() { Symbol = symbol, Refusal = IfaceRefusal(type, symbol) };
-                        member.Parks = ifaceAll && member.Refusal is null;
+                        IfaceMember member = new() { Symbol = symbol, Refusal = IfaceRefusal(type, symbol), Unmarked = Unmarked(symbol) };
+                        member.Parks = ifaceAll && member.Refusal is null && !member.Unmarked;
                         m_ifaceMembers[symbol] = member;
                         m_ifaceOrdered.Add(member);
                     }
@@ -207,7 +213,7 @@ public sealed partial class TwinGenerator
             foreach (Forwarder forwarder in m_forwarders)
             {
                 if (forwarder.Skip is not null || !m_ifaceMembers.TryGetValue(forwarder.Member, out IfaceMember? member) ||
-                    member.Parks || member.Refusal is not null || !CanPark(forwarder.Target))
+                    member.Parks || member.Refusal is not null || member.Unmarked || !CanPark(forwarder.Target))
                     continue;
 
                 member.Parks = true;
