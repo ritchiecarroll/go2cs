@@ -11,8 +11,9 @@
 // itself, the bounds at their full value and the array's length as a constant. The form it replaces built the
 // slice from a span, which copies, so a write through the slice never reached the memory.
 //
-// Each form has an arm. The CONTROLS carry the scope: the open form of an UNNAMED array keeps the box route; an
-// element that holds references takes no door; an operand that holds a FromRef mint keeps the span; a BOUNDED view
+// Each form has an arm, the open form of an UNNAMED array among them (decision D4, taken in section 16.10: its box
+// route answered length 0 over memory that is no Go array of that type, and in a copy it could end the process).
+// The CONTROLS carry the scope: an element that holds references takes no door; an operand that holds a FromRef mint keeps the span; a BOUNDED view
 // under copy stays builtin copy over the view door, because only the open form needs the copy doors; and a
 // conversion that another route renders whole keeps that route when it is sliced (controls 5 to 9: the
 // same-element alias, the identity conversion in its bounded and open forms, the reinterpret between two array
@@ -88,9 +89,23 @@ func from(dst []byte, p unsafe.Pointer) int {
 	return copy(dst, (*RawMem)(p)[:])
 }
 
-// CONTROL 1: the open form of an UNNAMED array keeps the box route.
+// POSITIVE 10 to 12: the open form of an UNNAMED array, alone and as copy's destination and source. The first two
+// are over a Go value of another type (reflect's nameOff copy is the second).
 func openUnnamed(x *uint32) []byte {
 	return (*[4]byte)(unsafe.Pointer(x))[:]
+}
+
+func intoUnnamed(n *int32, src []byte) int {
+	return copy((*[4]byte)(unsafe.Pointer(n))[:], src)
+}
+
+func fromUnnamed(dst []byte, p unsafe.Pointer) int {
+	return copy(dst, (*[8]byte)(p)[2:])
+}
+
+// CONTROL 1: the open form over a field of another type, one hop off a pointer, keeps the native field view.
+func fieldOpen(h *hdr) []byte {
+	return (*[2]byte)(unsafe.Pointer(&h.n))[:]
 }
 
 // CONTROL 2: an element that holds references takes no door.
@@ -148,7 +163,8 @@ func main() {
 	fmt.Println(len(two(p, 4)), len(three(p, 1, 4)), len(open(p)), into(p, []byte("ab")), intoString(p), from(make([]byte, 3), p), bounded(p, []byte("xy")))
 	var x uint32
 	h := &hdr{}
-	fmt.Println(len(openUnnamed(&x)), len(h.bytes()), len(wide(uintptr(p), 2)))
+	var n int32
+	fmt.Println(len(openUnnamed(&x)), intoUnnamed(&n, []byte("abcd")), fromUnnamed(make([]byte, 8), p), len(fieldOpen(h)), len(h.bytes()), len(wide(uintptr(p), 2)))
 	_ = managed
 	_ = sameElem
 	_ = identity
@@ -210,6 +226,9 @@ func TestArrayPointerViewDoorReplacesTheCopyingSpan(t *testing.T) {
 		{"bounded", "return copy(@unsafe.Pointer.View<byte>(p, 0, len(src), 1125899906842623), src);"},
 		{"scalar", "return @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(x), 0, 4, 4);"},
 		{"elemOfNamed", "return @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(b), 0, n, n, 1125899906842623);"},
+		{"openUnnamed", "return @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(x), 0, 4);"},
+		{"intoUnnamed", "return @unsafe.Pointer.CopyInto<byte>(@unsafe.Pointer.FromPinnedBox(n), 0, 4, src);"},
+		{"fromUnnamed", "return @unsafe.Pointer.CopyFrom<byte>(dst, p, 2, 8);"},
 	} {
 		body := emittedFunctionBody(t, mainCs, arm.function)
 
@@ -228,7 +247,7 @@ func TestArrayPointerViewDoorReplacesTheCopyingSpan(t *testing.T) {
 	for _, arm := range []struct {
 		function, keeps, why string
 	}{
-		{"openUnnamed", "@unsafe.Pointer.To<array<byte>>(", "the open form of an unnamed array keeps the box route"},
+		{"fieldOpen", "return @unsafe.ArrayPointer<byte>.Of(h.Ꮡn, 2).slice();", "the open form over a field of another type keeps the native field view"},
 		{"managed", "", "an element that holds references takes no door"},
 		{"bytes", "new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromRef(ref h)), 4)", "an operand that holds a FromRef mint keeps the span"},
 		{"sameElem", "return array<uint16>.AliasPointer(buf, 10000).slice(0, n, n);", "the same-element alias conversion keeps the alias route"},
