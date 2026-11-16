@@ -45,6 +45,7 @@ using static go.main_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(acct))]
 [assembly: GoFieldAccess(typeof(bag))]
+[assembly: GoFieldAccess(typeof(cell))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -54,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABs2gqaClIKCgqaCgoKmgoKCqIKCgoKCqIKCgqbSgoKmgubSgoKmguaClJCSgpSQkoKUgoKCkJKCgpSCkJKClJCSgoKUkpQ=", "69-73:1;79-83:1;91-91:1;95-95:2;102-102:3;108-108:4;112-112:5;117-117:6", "", "", "", "73:21,74:13,92:21,93:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABs2gqaClIKCgqaCgoKmgoKCqIKCgoKCqoKCgqiCqIKCgqbSgoKmgubSgoKmguaClJCSgpSQkoKUgoKCkJKCgpSCkJKClIKQkoKUkJKClJCSgoKUkpQ=", "82-86:1;92-96:1;104-104:1;108-108:2;115-115:3;121-121:4;126-126:5;130-130:6;134-134:7;139-139:8", "", "", "", "83:21,84:13,102:21,103:13")]
 // </GoSourcePositionMaps>
 
 namespace go;

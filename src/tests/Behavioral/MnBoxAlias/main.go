@@ -58,6 +58,19 @@ func (a acct) valueRead() int {
 	return got
 }
 
+// byref-param rows (DESIGN-mn-box-twin.md 12): an unexported function whose pointer parameter the converter
+// ref-lowers to `ref cell c`; it parks, another goroutine writes through the same pointer, and it reads the write.
+func readCell(c *cell) int {
+	ready <- struct{}{}
+	<-resume
+	return c.v
+}
+
+// forward hands its own pointer parameter on: inside its twin the parameter is a box already.
+func forward(c *cell) int {
+	return readCell(c)
+}
+
 // writer waits for the method to park, writes, and lets it resume.
 func writer(write func()) {
 	<-ready
@@ -108,6 +121,15 @@ func main() {
 	go writer(func() { b.s[1].v = 3 })
 	ownElement := b.waitAt(1)
 	fmt.Println("own-element", ownElement)
+
+	pc := &cell{v: 1}
+	go writer(func() { pc.v = 5 })
+	param := readCell(pc)
+	fmt.Println("param", param)
+
+	go writer(func() { pc.v = 6 })
+	forwarded := forward(pc)
+	fmt.Println("param-forward", forwarded)
 
 	go writer(func() { a.bal = 50 })
 	value := a.valueRead()

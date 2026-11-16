@@ -58,6 +58,16 @@ internal static nint valueRead(this acct a) {
     return got;
 }
 
+internal static nint readCell(ref cell c) {
+    ready.ᐸꟷ(new EmptyStruct());
+    ᐸꟷ(resume);
+    return c.v;
+}
+
+internal static nint forward(ref cell c) {
+    return readCell(ref c);
+}
+
 internal static void writer(Action write) {
     ᐸꟷ(ready);
     write();
@@ -137,6 +147,21 @@ internal static partial void main() {
     });
     nint ownElement = b.waitAt(1);
     fmt.Println("own-element", ownElement);
+
+    var pc = Ꮡ(new cell(v: 1));
+    var pcʗ1 = pc;
+    goǃ(writer, () => {
+        pcʗ1.v = 5;
+    });
+    nint param = readCell(ref (pc).DerefOrNull());
+    fmt.Println("param", param);
+
+    var pcʗ2 = pc;
+    goǃ(writer, () => {
+        pcʗ2.v = 6;
+    });
+    nint forwarded = forward(ref (pc).DerefOrNull());
+    fmt.Println("param-forward", forwarded);
 
     var aʗ3 = a;
     goǃ(writer, () => {

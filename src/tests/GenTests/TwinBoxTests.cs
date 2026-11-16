@@ -291,6 +291,41 @@ public class TwinBoxTests
 
         """;
 
+    // byref-param (DESIGN-mn-box-twin.md 12): a ref-lowered pointer parameter `ref T p` gets the box, as a receiver does.
+    private const string ByRefParams = """
+            internal static void pp(ref T p) { ᐸꟷ(ch); p.x = 1; }
+
+            internal static void fw(ref T p) { pp(ref p); }
+
+            internal static void two(ref T a, ref T b) { ᐸꟷ(ch); a.x = b.x; }
+
+            public static void runDeref(ж<T> px) { pp(ref (px).DerefOrNull()); }
+
+            public static void runLocal(ж<T> Ꮡx)
+            {
+                ref var x = ref Ꮡx.DerefOrNull();
+                pp(ref x);
+            }
+
+            public static void runTwo(ж<T> px) { two(ref (px).DerefOrNull(), ref (px).DerefOrNull()); }
+
+            public static void runEl(slice<T> xs, nint i) { pp(ref xs[i]); }
+
+            public static void runStack()
+            {
+                T st = default;
+                pp(ref st);
+                ᐸꟷ(ch);
+            }
+
+        """;
+
+    // `out` stays refused: Go has no out parameter; the four parking `out` functions are hand-owned.
+    private const string OutParam = """
+            internal static void op(out T p) { p = default; ᐸꟷ(ch); }
+
+        """;
+
     // The review's nit: an element under a package variable is named-plain in the first cut.
     private const string PackageVarElement = """
             internal static ж<T> Ꮡpv = Ꮡ(new T());
@@ -619,6 +654,69 @@ public class TwinBoxTests
         Assert.AreEqual(0, errors.Length, Errors(errors));
         Assert.IsFalse(twins.Contains("Ꮡx.bꞏtwin(", StringComparison.Ordinal), "never the declared root's box");
         StringAssert.Contains(twins, "|b|x", "the plain call is named");
+    }
+
+    [TestMethod]
+    public void P1_ARefParameterTakesItsBox()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "ppꞏtwin(global::go.ж<T> Ꮡp)", "the parameter's box");
+        StringAssert.Contains(twins, "ref var p = ref Ꮡp.DerefOrNull();", "its prologue");
+        StringAssert.Contains(twins, "await ppꞏtwin(px)", "a `(x).DerefOrNull()` argument hands x, read once");
+        StringAssert.Contains(twins, "await ppꞏtwin(Ꮡp)", "a forwarded box parameter hands its own box");
+        StringAssert.Contains(twins, "await ppꞏtwin(Ꮡx)", "a current ref local hands its root");
+        StringAssert.Contains(twins, "await ppꞏtwin(global::go.builtin.Ꮡ(xs, i))", "an element hands its pointer, index once");
+    }
+
+    [TestMethod]
+    public void P2_TwoParametersEachTakeABox()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "twoꞏtwin(global::go.ж<T> Ꮡa, global::go.ж<T> Ꮡb)", "two box parameters");
+        StringAssert.Contains(twins, "await twoꞏtwin(px, px)", "two arguments over one box, as two Go pointers may");
+    }
+
+    [TestMethod]
+    public void P3_AStackLocalArgumentStaysPlainAndNamed()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("ppꞏtwin(st", StringComparison.Ordinal), "no box for a stack local");
+        StringAssert.Contains(twins, "|pp|st", "the plain call is named");
+    }
+
+    [TestMethod]
+    public void P4_AnOutParameterStaysRefused()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, OutParam);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("opꞏtwin(", StringComparison.Ordinal), "no twin");
+        StringAssert.Contains(twins, "|op|byref-out", "refused by name");
+    }
+
+    [TestMethod]
+    public void P5_TheParamSwitchOffKeepsByRefParamRefused()
+    {
+        (string twins, Diagnostic[] errors) = Run(new() { ["build_property.GoTwinsBoxParam"] = "false" }, ByRefParams);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("ppꞏtwin(", StringComparison.Ordinal), "no parameter box twin with the switch off");
+        StringAssert.Contains(twins, "|pp|byref-param", "pp is refused as before");
+    }
+
+    [TestMethod]
+    public void P6_TheCopyControlCopiesParametersToo()
+    {
+        (string twins, Diagnostic[] errors) = Run(new() { ["build_property.GoTwinsBoxCopy"] = "true" }, ByRefParams);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "var ᴛcopyp = Ꮡp.DerefOrNull(); ref var p = ref ᴛcopyp;", "the control copies, on purpose");
     }
 
     [TestMethod]
