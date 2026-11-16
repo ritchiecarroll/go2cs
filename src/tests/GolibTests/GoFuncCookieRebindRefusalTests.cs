@@ -41,4 +41,12 @@ public class GoFuncCookieRebindRefusalTests
             "the delegate type it was read through");
         Assert.IsFalse(refused.Message.Contains('`'), "no arity-only name survives: " + refused.Message);
     }
+
+    [TestMethod]
+    public void ANonGenericAndANestedArrayArgumentAreNamedInFull()
+    {
+        Assert.AreEqual("System.Action", GoFuncCookie.FullTypeName(typeof(Action)));
+        Assert.AreEqual("System.Func<GolibTests.GoFuncCookieRebindRefusalTests+LiftA[], System.Func<System.Int32>>",
+            GoFuncCookie.FullTypeName(typeof(Func<LiftA[], Func<int>>)));
+    }
 }
