@@ -210,7 +210,10 @@ public sealed partial class TwinGenerator
                             Earlier(invocation.Expression is MemberAccessExpressionSyntax access ? access.Expression : invocation.Expression);
 
                         break;
-                    case AssignmentExpressionSyntax assignment when child == assignment.Right && assignment.IsKind(SyntaxKind.SimpleAssignmentExpression):
+                    // A COMPOUND store through a ref (`c.scanAlloc += f()`, stage (c)) takes the same spill: `x op= y` reads x
+                    // once, and the spec leaves that read and the call on the right unordered, as for a plain store.
+                    case AssignmentExpressionSyntax assignment when child == assignment.Right &&
+                                                                    (assignment.IsKind(SyntaxKind.SimpleAssignmentExpression) || WritesThroughRef(assignment.Left)):
                         // C2 (COORD's approval, 2026-11-15): a store into a ref local, or through one or a ref-returning
                         // member (`err = …`, `(t.Trailer, err) = …`), would hold the target's reference over the await
                         // (CS9217 / CS8178). The awaited value moves ahead instead, the live ref locals are derived

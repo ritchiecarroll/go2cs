@@ -49,6 +49,9 @@ public class TwinRefAcrossAwaitTests
 
             internal static (nint, object) parks2() { ᐸꟷ(ch); return (1, "y"); }
 
+            // A ref-returning field read (the field-access generator's `GoFieldAccess.get_F(ж<T>)` shape).
+            internal static ref nint xOf(ж<T> p) => ref p.DerefOrNull().x;
+
         """;
 
     private const string Footer = "}\n";
@@ -121,6 +124,15 @@ public class TwinRefAcrossAwaitTests
                     return y;
                 }
                 finally { }
+            }
+
+        """;
+
+    // Stage (c): a COMPOUND store through a ref-returning field read (runtime's `c.scanAlloc += heapSetType…(…)`): CS8178.
+    private const string Compound = """
+            public static void compound(ж<T> Ꮡt)
+            {
+                xOf(Ꮡt) += parksN();
             }
 
         """;
@@ -202,6 +214,9 @@ public class TwinRefAcrossAwaitTests
 
     [TestMethod]
     public void APairedLiteralWithAnExplicitReturnTypeGetsATwinTypedTwinHalf() => AssertTwinCompiles("typed", Typed);
+
+    [TestMethod]
+    public void AnAwaitedValueStoredByACompoundAssignmentThroughARefSpillsFirst() => AssertTwinCompiles("compound", Compound);
 
     [TestMethod]
     public void AnUnrederivableRefLiveAcrossAnAwaitRefusesTheTwinByName()
