@@ -34,6 +34,25 @@ func word(f interface{}) uintptr { return (*[2]uintptr)(unsafe.Pointer(&f))[1] }
 
 // Word is Sum carried as a number, the way ccgo carries a function pointer.
 var Word = word(Sum)
+
+// largeInteger is libc's ccgo union, verbatim: its [0] fields make its lift carry [GoValueClone], so its public
+// record is an attributed line.
+type largeInteger = struct {
+	Fu [0]struct {
+		FLowPart  uint32
+		FHighPart int32
+	}
+	FQuadPart  [0]int64
+	F__ccgo0_0 struct {
+		FLowPart  uint32
+		FHighPart int32
+	}
+}
+
+func Seek(d largeInteger) int64 { return int64(d.F__ccgo0_0.FLowPart) + int64(d.F__ccgo0_0.FHighPart)*100 }
+
+// SeekWord is Seek as a number: XSetFilePointerEx's word in sqlite's _aSyscall.
+var SeekWord = word(Seek)
 `
 
 // The importer spells the identical struct through a local alias of uint32 and reads lib's word through a func type
@@ -54,9 +73,32 @@ type LA = struct {
 	Hi int32
 }
 
+// sqlite/lib's TLARGE_INTEGER: libc's union spelled through lib's own aliases.
+type TDWORD = uint32
+type TLONG = int32
+type TLONGLONG = int64
+
+type TLARGE_INTEGER = struct {
+	Fu [0]struct {
+		FLowPart  TDWORD
+		FHighPart TLONG
+	}
+	FQuadPart  [0]TLONGLONG
+	F__ccgo0_0 struct {
+		FLowPart  TDWORD
+		FHighPart TLONG
+	}
+}
+
 func main() {
 	sum := *(*func(LA) int64)(unsafe.Pointer(&struct{ uintptr }{lib.Word}))
 	fmt.Println(sum(LA{Lo: 3, Hi: 4}))
+
+	var li TLARGE_INTEGER
+	li.F__ccgo0_0.FLowPart = 5
+	li.F__ccgo0_0.FHighPart = 6
+	seek := *(*func(TLARGE_INTEGER) int64)(unsafe.Pointer(&struct{ uintptr }{lib.SeekWord}))
+	fmt.Println(seek(li))
 }
 `
 
@@ -72,6 +114,47 @@ func TestAliasSpelledFieldStructReusesTheImportsLift(t *testing.T) {
 
 	if strings.Contains(emitted, "struct LAᴛ1") {
 		t.Errorf("main declares a second struct for a type Go calls the same:\n%s", emitted)
+	}
+}
+
+// The union: libc's largeInteger record is `[GoValueClone("Fu", "FQuadPart")] public partial struct largeIntegerᴛ1 {}`,
+// an attributed line the public-lift reader did not match, so the lift was never reusable whatever the spelling (W18's
+// second root: TLARGE_INTEGER stayed lib's own type).
+func TestAliasSpelledUnionReusesTheImportsAttributedLift(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	emitted := convertModuleMainWithLib(t, "lib", aliasSpelledLib, aliasSpelledMain)
+
+	if !strings.Contains(emitted, "global using TLARGE_INTEGER = go.example.com.app.lib_package.largeIntegerᴛ1;") {
+		t.Errorf("TLARGE_INTEGER does not name lib's lift of the identical union:\n%s", emitted)
+	}
+
+	if strings.Contains(emitted, "struct TLARGE_INTEGERᴛ1") {
+		t.Errorf("main declares a second union for a type Go calls the same:\n%s", emitted)
+	}
+}
+
+// The public-lift record reader takes a record whatever attributes precede it, and still only a public one.
+func TestPublicLiftRecordPatternReadsAnAttributedRecord(t *testing.T) {
+	cases := map[string]string{
+		`    public partial struct largeIntegerᴛ1_Fu {}`:                                  "largeIntegerᴛ1_Fu",
+		`    [GoValueClone("Fu", "FQuadPart")] public partial struct largeIntegerᴛ1 {}`:   "largeIntegerᴛ1",
+		`    [GoMemberRecord("a")] [GoValueClone("b")] public partial struct Pairᴛ1 {}`:   "Pairᴛ1",
+		`    [GoValueClone("a]b", "c\"d]")] public partial struct Quoteᴛ1 {}`:             "Quoteᴛ1",
+		`    [GoValueClone("Fu", "FQuadPart")] internal partial struct largeIntegerᴛ1 {}`: "",
+		`    [GoValueClone("Fu")] public partial struct largeIntegerᴛ1 { public int x; }`: "",
+	}
+
+	for line, want := range cases {
+		got := ""
+
+		if match := publicLiftRecordPattern.FindStringSubmatch(line); match != nil {
+			got = match[1]
+		}
+
+		if got != want {
+			t.Errorf("%q reads as %q, want %q", line, got, want)
+		}
 	}
 }
 
