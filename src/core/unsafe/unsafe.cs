@@ -540,6 +540,13 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         if (box.NativeAddress != 0)
             return new Pointer((uintptr)box.NativeAddress, box);
 
+        // A view with no storage of its own (golib's view of a field's bytes over a Go value that has no address)
+        // has no slot to take the address of. Its number is the field's, through the box's untyped face, and the
+        // view rides along as the referent: its identity is the field's, so `unsafe.Pointer(p)` and
+        // `unsafe.Pointer(&x.f)` are one pointer, as in Go.
+        if (box is IPointerNumberForwarder)
+            return new Pointer((uintptr)((IGoReflectBox)box).TransientSlotAddress(), box);
+
         fixed (T* ptr = &box.ValueSlot)
             return new Pointer((uintptr)ptr, box);
     }
@@ -898,9 +905,12 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     //       refused by name.
     //   V3  the same over a field whose own box is native.
     //   V1  a field that is an element of managed E storage: a window on that array.
-    //   V4  a root with no address (a struct that holds references) is refused by name. Nothing can be viewed, and
-    //       an array pointer over a copy would lose every write.
-    internal static ж<array<E>> FieldView<E>(Pointer p, nint length)
+    //   V4  a root with no address (a struct that holds references): nothing holds the field's bytes still, so no
+    //       native array pointer can be made over them, and an array pointer over a copy would lose every write.
+    //       The answer is golib's view of the FIELD's own bytes through the field's pointer, read again at every
+    //       access (ReinterpretedArrayBox, section 19). It is made when the field holds no reference and the view
+    //       fits inside it; a longer view, or a field whose converted form holds a reference, is refused by name.
+    internal static ж<array<E>> FieldView<E>(Pointer p, nint length, object? field)
     {
         if (p.IsNull)
             return To<array<E>>(p);
@@ -908,7 +918,7 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         slice<E> window = Aliased<E>(p, 0, length, length, length, ViewUse.FieldView, out ж<E>? unaliased);
 
         if (unaliased is not null)
-            throw new PanicException((@string)$"go2cs: {ViewForm<E>(0, length, length, ViewUse.FieldView)}: the field is in a Go value that has no address (a struct that holds references has none), so its bytes cannot be viewed as an array");
+            return ReinterpretedArrayBox<E>.TryOver(field, length, out string? refusal) ?? throw new PanicException((@string)$"go2cs: {ViewForm<E>(0, length, length, ViewUse.FieldView)}: {refusal}");
 
         if (window.IsNativeBacked)
             return builtin.NativeArrayPointer<E>(window.NativeElementAddressUnchecked(0), length, NativeSliceAnchors<E>.Of(window));
@@ -1900,12 +1910,15 @@ public static ж<byte> StringData(@string str) {
 // It carries both routes. A field one hop off a NATIVE root takes golib's native field-view door, which
 // views the field at its GO offset (builtin.NativeFieldArrayPointer). Every other root takes the field view over
 // Go storage (Pointer.FieldView): a native array pointer over the bytes the field's root holds still, which keeps
-// the root and ends where its storage ends, and a refusal by name for a root with no address. The route lives
-// here rather than in golib because golib sits below this package and cannot name Pointer.FromPinnedBox, the
-// retaining pin it needs.
+// the root and ends where its storage ends, and for a root with no address (a struct that holds references)
+// golib's view of the field's own bytes, read again at every access (section 19). The route lives here rather
+// than in golib because golib sits below this package and cannot name Pointer.FromPinnedBox, the retaining pin it
+// needs.
 //
 // So the answer is a native array pointer for every root that has an address, and the forms the converter emits
-// over it are the same: ElementRef for an index, at and slice for an address and a slice.
+// over it are the same: ElementRef for an index, at and slice for an address and a slice. Over a root with no
+// address the index and the whole-array load and store below are served; a slice and an element's address need
+// storage that can be named, and are refused by name.
 //
 // The other roots took the pointer conversion to the array type until section 18 of the doors' design: first
 // spelled `(ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field)`, a cast through a number that dropped the box, then
@@ -1916,12 +1929,13 @@ public static ж<byte> StringData(@string str) {
 // the field argument, and an extension member cannot take T alone (CS1061 under C# 14).
 public static class ArrayPointer<T> {
     public static ж<array<T>> Of<TField>(ж<TField> field, nint length) =>
-        builtin.NativeFieldArrayPointer<T>(field, length) ?? Pointer.FieldView<T>(Pointer.FromPinnedBox(field), length);
+        builtin.NativeFieldArrayPointer<T>(field, length) ?? Pointer.FieldView<T>(Pointer.FromPinnedBox(field), length, field);
 
     // THE WHOLE ARRAY THROUGH THE VIEW (section 18, part C). The view has no array<T> of its own, so its Value
     // refuses by name, and the forms that need all N elements go through the elements instead. Both take the view's
     // window, golib's slice of a pointer to an array, which answers for a native array pointer and for an ordinary
-    // box alike, with Go's nil dereference for a nil one.
+    // box alike, with Go's nil dereference for a nil one. A view of a field's bytes over a root with no address has
+    // no window, and copies element by element.
     //
     //     v := *p        Load(p)        a Go array value: a copy of the N elements
     //     *p = v         Store(p, v)    N element stores, in place
@@ -1930,6 +1944,10 @@ public static class ArrayPointer<T> {
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     public static array<T> Load(ж<array<T>> view)
     {
+        // A view of a field's bytes over a Go value that has no address has no window: element by element.
+        if (view is ReinterpretedArrayBox<T> field)
+            return field.Load();
+
         slice<T> window = view.slice();
         array<T> value = new array<T>((int)window.Length);
 
@@ -1943,6 +1961,12 @@ public static class ArrayPointer<T> {
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     public static void Store(ж<array<T>> view, in array<T> value)
     {
+        if (view is ReinterpretedArrayBox<T> field)
+        {
+            field.Store(value);
+            return;
+        }
+
         slice<T> window = view.slice();
 
         for (nint i = copy(window, value[..]); i < window.Length; i++)

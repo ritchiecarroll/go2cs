@@ -198,9 +198,12 @@ var pointerMintPattern = regexp.MustCompile(`\bnew Pointer\(`)
 // pointerMints is the declared census: member of unsafe.cs -> its two-word mints, and whether each number is its
 // source's own address. A NO over storage that can move is stop line S10 unless every derivation asks the source.
 var pointerMints = map[string]interiorMintRow{
-	mintUnsafe + "unsafe.cs|FromBox": {3, "zerobase: YES, the zerobase's one address. A native alias: YES, its address. A managed box: NO, an address read under " +
+	mintUnsafe + "unsafe.cs|FromBox": {4, "zerobase: YES, the zerobase's one address. A native alias: YES, its address. A managed box: NO, an address read under " +
 		"`fixed` for one statement over storage that can move; the pointer names its source at offset 0 and every derivation asks the " +
-		"source (BaseOf, design 10.1)"},
+		"source (BaseOf, design 10.1). A view with no storage of its own (golib's view of a field's bytes over a Go value that has no " +
+		"address, DESIGN-array-pointer-doors 19.2): NO, the field's own slot address, read for that statement over storage that can " +
+		"move; the pointer names the view as its source, the view answers every address question from its field's box, and every " +
+		"derivation asks the source"},
 	mintUnsafe + "unsafe.cs|FromBoxObject": {3, "the three answers of FromBox, through the box's untyped face"},
 	mintUnsafe + "unsafe.cs|FromPinnedBox": {1, "YES: the box's own number conversion, which is the pin moment"},
 	mintUnsafe + "unsafe.cs|FromHeaderData": {2, "a header box: YES, the element box's own pinned, registered number (StableAddress, the pin moment), or a " +

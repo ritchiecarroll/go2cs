@@ -1,0 +1,7 @@
+Open-slice probe, predictions written 2026-11-15 14:07Z, before the probe was converted. Converter and tree: the box kind
+merged with master (e245e697be), linux/amd64, Release, one arm per process.
+- Arms 0, 1, 2 (a promoted field, a field of a slice element, a field of a call's result): the process ends with an
+  AccessViolationException, no line printed. By the emission these take the pointer conversion and `.slice()`, the form
+  that ended the process over a struct variable at part C.
+- Arms 3, 4, 5 (the embedded field written out, the slice element through a pointer variable, the call's result through a
+  pointer variable): Go's lines, the write in arm 4 seen through the slice element (69).

@@ -1,0 +1,25 @@
+# Run D (sqlite-cs demo/file, WAL pass): -shm open and mmap, linux-x64 (WSL2), 2026-11-15, tree df6f0598ce.
+# strace -f -e trace=open,openat,mmap,munmap,fcntl, counted per line; paths as <tmp>; addresses as 0xADDR.
+# Only the open and mmap sections: this pass's fcntl lines were split by thread interleaving (see shm-strace-locks.txt).
+
+===== CONVERTED
+-- open/openat of demo-* files:
+      2 open("<tmp>/demo-delete.db", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 294
+      3 open("<tmp>/demo-delete.db-journal", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 295
+      2 open("<tmp>/demo-wal.db", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 294
+      1 open("<tmp>/demo-wal.db-journal", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 295
+      2 open("<tmp>/demo-wal.db-shm", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 296
+      2 open("<tmp>/demo-wal.db-wal", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 295
+-- -shm fd 296: mmap of it:
+      2 mmap(NULL, 32768, PROT_READ|PROT_WRITE, MAP_SHARED, 296, 0) = 0xADDR
+
+===== NATIVE
+-- open/openat of demo-* files:
+      2 open("<tmp>/demo-delete.db", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 3
+      3 open("<tmp>/demo-delete.db-journal", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 4
+      2 open("<tmp>/demo-wal.db", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 3
+      1 open("<tmp>/demo-wal.db-journal", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 4
+      2 open("<tmp>/demo-wal.db-shm", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 5
+      2 open("<tmp>/demo-wal.db-wal", O_RDWR|O_CREAT|O_LARGEFILE|O_NOFOLLOW|O_CLOEXEC, 0644) = 4
+-- -shm fd 5: mmap of it:
+      2 mmap(NULL, 32768, PROT_READ|PROT_WRITE, MAP_SHARED, 5, 0) = 0xADDR

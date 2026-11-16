@@ -39,6 +39,11 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		return load
 	}
 
+	// A whole-value read of a struct the inline-array admission kept out decodes at Go's offsets (valueDecodeSites.go).
+	if emission, ok := v.valueDecodeEmission(starExpr, context); ok {
+		return emission
+	}
+
 	ident := getIdentifier(starExpr.X)
 	pointerRecv, recvName := v.isPointerReceiver()
 
