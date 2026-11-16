@@ -1404,8 +1404,8 @@ hooks it carries in turn, so the runtime walks the graph one link at a time.
 
 Computing it in process is possible because `go/packages` is loaded with `LoadAllSyntax`, which
 carries **syntax and type information for every dependency**, not only for the package being
-converted (measured on `log/slog`: 66 transitive dependencies, 66 with `TypesInfo`, 65 with `Syntax`
-— the one without is `unsafe`, which the pseudo-package fence already answers). Three shapes make
+converted (on `log/slog`, every transitive dependency carries `TypesInfo` and every one but `unsafe` carries
+`Syntax`; `unsafe` is answered by the pseudo-package fence).<!-- Re-measured 2026-11-16 at go1.26.11 (docs audit seat 5), packages.LoadAllSyntax with -tags=purego,math_big_pure_go: windows/amd64 74 transitive dependencies (74 TypesInfo, 73 Syntax), linux/amd64 72 (72/71), darwin/amd64 70 (70/69), linux/arm64 72 (72/71); the one without Syntax is unsafe on every target. Earlier reading: 66/66/65, release and target not recorded. --> Three shapes make
 that materially better than publishing the fact as a `package_info.cs` record: the
 **hand-owned-by-consequence** packages (`internal/godebug`)
 never re-emit a `package_info.cs` at all, so a published record could never appear for them — and

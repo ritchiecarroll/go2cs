@@ -1781,6 +1781,7 @@ $structuralClass = 'structural'
 $manifestsChecked = 0
 $entriesChecked = 0
 $manifestParseFailures = 0
+$classEntryCounts = @{}
 
 # Enumerated from the FILESYSTEM rather than from $rows, and that is the whole of this change.
 # Reading the roster made this arm blind to a package that has no row -- which is the state EVERY
@@ -1893,6 +1894,7 @@ foreach ($manifestFile in $manifestFiles) {
             $reason = $reasons[$r]
             $label = $labels[$r]
             $class = [string]$reason.class
+            if (-not [string]::IsNullOrWhiteSpace($class)) { $classEntryCounts[$class] = 1 + [int]$classEntryCounts[$class] }
 
             if ($class -eq $deferredClass) {
                 # Each field separately, so the failure NAMES the missing one.
@@ -1955,6 +1957,53 @@ foreach ($manifestFile in $manifestFiles) {
 # thing under test measures nothing -- the corrective is a second derivation, and here that is a
 # separate walk of the same tree.
 $manifestsOnDisk = @(Get-ChildItem -LiteralPath $coreRoot -Recurse -File -Filter 'go2cs_test_disclosures.json' -ErrorAction SilentlyContinue).Count
+
+# The roster's disclosure-class table (its "Entries" column) is derived here from the same walk: each class's entries
+# in the committed manifests, a two-half entry counting once in each half's class (user-facing docs audit seat 5,
+# COORD 2026-11-16: "derive it or drop the figures"). Every class with an entry must have a row, every row must name a
+# class with entries, and each row's count must equal the manifests' count. Get-ClassTableRows reads the table: the
+# rows after the `| Class | Entries |` header, a class in backticks and a number.
+function Get-ClassTableRows {
+    param([string[]] $Lines)
+
+    $table = [ordered]@{}
+    $inTable = $false
+    foreach ($line in $Lines) {
+        if ($line -match '^\|\s*Class\s*\|\s*Entries\s*\|') { $inTable = $true; continue }
+        if (-not $inTable) { continue }
+        if ($line -match '^\|\s*:?-') { continue }
+        if ($line -match '^\|\s*`([^`]+)`\s*\|\s*(\d+)\s*\|') { $table[$Matches[1]] = [int]$Matches[2]; continue }
+        break
+    }
+    return $table
+}
+
+function Get-ClassTableMismatches {
+    param($Table, $Counts)
+
+    $problems = @()
+    foreach ($class in @($Counts.Keys | Sort-Object)) {
+        if (-not $Table.Contains($class)) { $problems += "$class has $($Counts[$class]) entries and no row" }
+        elseif ($Table[$class] -ne $Counts[$class]) { $problems += "$class row says $($Table[$class]), the manifests hold $($Counts[$class])" }
+    }
+    foreach ($class in @($Table.Keys)) {
+        if (-not $Counts.ContainsKey($class)) { $problems += "$class has a row and no entries" }
+    }
+    return $problems
+}
+
+$classFixtureTable = Get-ClassTableRows -Lines @('intro', '| Class | Entries | What |', '|:--|:--:|:--|', '| `a` | 2 | x |', '| `b` | 1 | y |', '', '| `c` | 9 | after the table |')
+Assert-Equal 'class table: the reader takes the rows after the header and stops at the first non-row' 'a=2; b=1' `
+    ((@($classFixtureTable.Keys | ForEach-Object { "$_=$($classFixtureTable[$_])" })) -join '; ')
+Assert-Equal 'class table: a matching table reads clean' '' ((Get-ClassTableMismatches -Table $classFixtureTable -Counts @{ a = 2; b = 1 }) -join '; ')
+Assert-Equal 'class table: a wrong count, a missing row and a row with no entries are each named' `
+    'a row says 2, the manifests hold 3; z has 4 entries and no row; b has a row and no entries' `
+    ((Get-ClassTableMismatches -Table $classFixtureTable -Counts @{ a = 3; z = 4 }) -join '; ')
+
+$classTable = Get-ClassTableRows -Lines $lines
+Assert-Equal 'class table: the roster carries the disclosure-class table' $true ($classTable.Count -gt 0)
+Assert-Equal 'class table: each row''s Entries equals the committed manifests'' count for its class' '' `
+    ((Get-ClassTableMismatches -Table $classTable -Counts $classEntryCounts) -join '; ')
 Assert-Equal 'the manifest arm reaches every committed manifest, not just the banked rows' $manifestsOnDisk ($manifestsChecked + $manifestParseFailures)
 
 # Vacuity guard: this arm is worthless if it silently checks nothing, which is exactly what a wrong

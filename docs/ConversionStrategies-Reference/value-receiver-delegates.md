@@ -181,10 +181,9 @@ So that site mints its own temp too, gated on the variable actually *being* box-
 path keeps producing the one snapshot it produces correctly — two would be a second copy of a
 single evaluation. It is gated on a value, non-interface receiver besides: a pointer receiver binds the
 ADDRESS and must not be copied, and marking one for snapshot is what turns this fix into CS1003/CS1002
-across production files. A census of the whole standard library found that **every** box-ref
-assignment-context method-value site has a pointer receiver (in `database/sql`, `go/parser`,
-`go/types` and `net`) — so this arm fires nowhere in the corpus today and its emission
-is byte-identical.<!-- measured at the time: 54 assignment-context sites, 8 box-ref, all 8 pointer-receiver
+across production files. In the standard library and its tests no assignment-context method value binds a value receiver over a
+variable that is address-taken or captured, the condition a box-ref receiver needs, so this arm fires
+nowhere there and its emission is byte-identical.<!-- Re-measured 2026-11-16 at go1.26.11 (docs audit seat 5) with a go/types census over std with tests, -tags=purego,math_big_pure_go: assignment-context method values 93 (windows/amd64), 102 (linux/amd64), 104 (darwin/amd64), 102 (linux/arm64); 11 on each bind a value receiver over a value; 0 on each over an address-taken or closure-captured variable (a superset of box-ref). Positive control: a fixture with a captured `m = x.label` reads 1 and names that line, with a non-captured value-receiver site and a pointer-receiver site excluded. --><!-- measured at the time: 54 assignment-context sites, 8 box-ref, all 8 pointer-receiver
 (database/sql, go/parser ×4, go/types ×2, net) --> Both silent members are reachable and neither is currently reached:
 they close a
 shape one refactor away, not an observed wrong answer.

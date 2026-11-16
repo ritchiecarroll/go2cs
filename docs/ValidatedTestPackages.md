@@ -973,25 +973,26 @@ committed manifests, never this prose, are the authority on which classes are in
      pass on it on windows and linux, and their pins retired as orphans at TRAIN J (coordinator
      ruling 2026-09-30). The class keeps its other entries, so the count of classes does not move. -->
 
-At a glance, as of 2026-10-01. **Entries** counts each class's entries in the committed manifests
-(an entry split between two classes counts in each). Entries are not verdicts, so the column does
+At a glance. **Entries** counts each class's entries in the committed manifests (an entry split
+between two classes counts in each); the roster guard re-derives the column from the manifests. Entries are not verdicts, so the column does
 not sum to a Disclosed figure.
 
 | Class | Entries | What it means (one line) |
 |:--|:--:|:--|
-| `deferred` | 153 | An allocation-count assert the CLR can meet in principle; it carries Go's want, a measured reading and a retirement plan. |
-| `structural` | 9 | Its reason proves that no managed implementation can meet the assert, so it carries no plan. |
+| `deferred` | 158 | An allocation-count assert the CLR can meet in principle; it carries Go's want, a measured reading and a retirement plan. |
+| `structural` | 8 | Its reason proves that no managed implementation can meet the assert, so it carries no plan. |
 | `alloc-count-semantics` | 8 | An allocation-count assert whose allocations golib's counter never sees, so the host reports only bytes; nothing to retire. |
-| `codegen-liveness` | 11 | A test asserts from its own frame that an object it just stopped using is collectible; the CLR can still report that slot live. |
+| `codegen-liveness` | 16 | A test asserts from its own frame that an object it just stopped using is collectible; the CLR can still report that slot live. |
 | `runtime-capability` | 124 | A facility defined over the replaced runtime's own internals, which the managed runtime cannot truthfully describe. |
-| `host-identity` | 16 | Only the test host impersonating an identity Go's own `go test` supplies could satisfy it, and the host must not claim one. |
+| `host-identity` | 6 | Only the test host impersonating an identity Go's own `go test` supplies could satisfy it, and the host must not claim one. |
 | `host-limit` | 5 | The test's premise needs a property of the test binary that the host's deployment shape structurally lacks. |
-| `host-fatal` | 12 | The test crashes the host or hangs it to the deadline, so it is withdrawn from both sides by name and counted in Disclosed. |
-| `platform-skip` | 16 | The converted side takes a skip Go's own test source writes, for a property the corpus permanently holds. |
+| `host-fatal` | 14 | The test crashes the host or hangs it to the deadline, so it is withdrawn from both sides by name and counted in Disclosed. |
+| `platform-skip` | 29 | The converted side takes a skip Go's own test source writes, for a property the corpus permanently holds. |
 | `cgo-configuration` | 4 | A Go pass / C# skip pair left by the two sides' different cgo configurations at one seam. |
 | `compiler-property` | 2 | A Go pass / C# skip pair at Go's own self-check for a Go compiler property (inlining) that a converted program lacks. |
+| `performance-margin` | 1 | A fixed deadline excludes the managed runtime's measured completion time on its host class: not a *cannot*, a *not yet fast enough*. |
 
-Not tabulated: `alloc-profile` and `performance-margin`, which have no entries, and the retired
+Not tabulated: `alloc-profile`, which has no entries, and the retired
 `chan-direction`. Each is described below.
 
 <!-- Provenance, 2026-09-30 (coordinator ruling): the Entries column is a census of the "class" keys in
@@ -1007,6 +1008,14 @@ Not tabulated: `alloc-profile` and `performance-margin`, which have no entries, 
      compiler-property 2; 361 class values over 359 named entries. The one manifest TRAIN K changed,
      runtime/pprof's, moved a signature (TestGenericsHashKeyInPprofBuilder's shape-name half), not a
      class. Only the "as of" date above moved, 2026-09-30 -> 2026-10-01. -->
+
+<!-- Re-counted and derived, 2026-11-16 (user-facing docs audit seat 5; COORD 2026-11-16 00:48Z): over the 50 committed
+     manifests (git ls-files src/core/**/go2cs_test_disclosures.json at seat 4's tip ec3b6a332a) the classes read deferred
+     158, runtime-capability 124, platform-skip 29, codegen-liveness 16, host-fatal 14, alloc-count-semantics 8, structural 8,
+     host-identity 6, host-limit 5, cgo-configuration 4, compiler-property 2, performance-margin 1; 375 class values. The
+     "as of" date is gone because src/check-roster-format.ps1 (Get-ClassTableRows / Get-ClassTableMismatches) now derives
+     the column from the same manifest walk on every run, and reds on a wrong count, a class with entries and no row, or a
+     row with no entries. performance-margin gained its row: net's TestDialerFallbackDelay (darwin). -->
 
 <!-- Re-counted 2026-10-10 (C1, the TestGCMAsm retirement): the same census over src/core/**/go2cs_test_disclosures.json reads 47
      manifests -- crypto/cipher's is removed with its only entry, TestGCMAsm [platform-skip] -- and every class unchanged except
@@ -1323,9 +1332,10 @@ The classes in full:
        value where .NET must heap-allocate it."
        -->
 - **`performance-margin`** — a fixed deadline excludes the managed runtime's measured completion
-  time on its host class: not a *cannot*, a *not yet fast enough*. No entries: its founding row,
-  `net/http`'s `TestWriteDeadlineExtendedOnNewRequest/h2`, passes at the Release + tiering-off
-  default.<!-- founding row minted 2026-08-29; the default since 2026-09-02 -->
+  time on its host class: not a *cannot*, a *not yet fast enough*. Its entry is `net`'s
+  `TestDialerFallbackDelay` on macOS, whose fixed margin over the fallback delay is shorter than the
+  converted dial needs on Apple silicon. Its founding row, `net/http`'s
+  `TestWriteDeadlineExtendedOnNewRequest/h2`, passes at the Release + tiering-off default.<!-- founding row minted 2026-08-29; the default since 2026-09-02. The net entry: src/core/net/go2cs_test_disclosures.json, platforms [darwin], read 2026-11-16 (docs audit seat 5). -->
   <!-- Provenance, roster restructure 2026-09-30: docs/phase4/CENSUS-release-tc0-delta.md section 1
        (the test and both subtests pass on both sides at Release+TC0, and net/http's disclosed list
        is empty); net/http's row carries a blank Disclosed column; the manifest census found no entry
