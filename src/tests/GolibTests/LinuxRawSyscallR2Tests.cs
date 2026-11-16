@@ -29,9 +29,9 @@ namespace GolibTests;
 [TestClass]
 public class LinuxRawSyscallR2Tests
 {
-    private static readonly uintptr A1 = (nuint)0x1111_0000_1111UL;
-    private static readonly uintptr A2 = (nuint)0x2222_0000_2222UL;
-    private static readonly uintptr A3 = (nuint)0x3333_0000_3333UL;
+    private static readonly uintptr A1 = unchecked((nuint)0x1111_0000_1111UL);
+    private static readonly uintptr A2 = unchecked((nuint)0x2222_0000_2222UL);
+    private static readonly uintptr A3 = unchecked((nuint)0x3333_0000_3333UL);
 
     // Go's register reading, per architecture: the x86 family's second return register (DX/EDX) carries a3 through
     // the trap; every other Linux architecture Go supports returns its a2 register as r2.
