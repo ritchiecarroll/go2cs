@@ -1360,8 +1360,11 @@ func loadImportedDynamicTypeLiftLines(lines []string, sourceDir string) {
 }
 
 // publicLiftRecordPattern matches a package_info.cs accessibility record that declares a lifted struct
-// public: `    public partial struct largeIntegerᴛ1 {}`.
-var publicLiftRecordPattern = regexp.MustCompile(`^\s*public partial struct (\S+) \{\}\s*$`)
+// public: `    public partial struct largeIntegerᴛ1 {}`, after any attributes the record carries. A lift that needs a
+// value clone writes `[GoValueClone("Fu", "FQuadPart")] public partial struct largeIntegerᴛ1 {}` (libc's ccgo union),
+// and a bare-only pattern left such a lift never public, so no importer could reuse it (W18). Each attribute is one
+// bracket whose quoted strings may hold ']' or an escaped quote.
+var publicLiftRecordPattern = regexp.MustCompile(`^\s*(?:\[(?:[^\]"]|"(?:[^"\\]|\\.)*")*\]\s*)*public partial struct (\S+) \{\}\s*$`)
 
 // preloadImportedTypeAliases loads the exported type aliases of EVERY package imported by ANY file in
 // the current package, BEFORE file conversion begins. importedTypeAliases is package-global but was
