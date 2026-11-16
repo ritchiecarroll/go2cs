@@ -6,13 +6,7 @@
 
 Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) · [Converted Go module NuGet packages](https://www.nuget.org/packages?q=nugetgo)
 
-[nugetgo.net](https://nugetgo.net) is the registry that maps a Go module path to the NuGet package (`nugetgo.*`) of
-its conversion. `go2cs -recurse=nuget` reads it, so a dependency someone has already converted and published is
-restored as a package instead of converted again ([how](ConvertingAModule.md#mapping-modules-to-nuget-packages)).
-<!-- Owner request 2026-11-15, relayed by COORD (20261115T082152Z). Wording checked against ConvertingAModule.md,
-     "Mapping modules to NuGet packages" (go2cs asks the registry whether a module was converted and published; a
-     mapped module is referenced, not converted) and NugetgoPublish.md step 5 (the site serves
-     https://nugetgo.net/v1/mappings.txt). No count of modules and no statement of who may publish. -->
+Go module to NuGet package registry: [nugetgo.net](https://nugetgo.net). Used during `go2cs -recurse=nuget` so an already converted dependency is restored as a package instead of converted again ([how](ConvertingAModule.md#mapping-modules-to-nuget-packages)).
 
 ---
 
@@ -94,11 +88,11 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 
 * Go and C# side by side: [Tour of go2cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/tour/README.md)
 * Real converted code: [the Go standard library](https://github.com/ritchiecarroll/go2cs/tree/master/src/core)
-* How each Go construct maps to C#: [Conversion Strategies](ConversionStrategies.md)
-* What the converter does and which Go features work: [Features](Features.md) and [Go feature support](GoFeatureSupport.md)
+* How Go constructs map to C#: [Conversion Strategies](ConversionStrategies.md)
+* What the converter does: [Features](Features.md) &rarr; current [Go feature support](GoFeatureSupport.md)
 * Call converted Go from C#: [Consuming converted Go](ConsumingGoFromCSharp.md)
 * What stays stable for C# code: [The public surface](PublicSurface.md)
-* Packages and modules passing Go's own tests: [Validated Test Packages](ValidatedTestPackages.md) and [Validated Modules](ValidatedModules.md)
+* Passing Go's own tests: [Validated Test Packages](ValidatedTestPackages.md) / [Validated Modules](ValidatedModules.md)
 * Before you start: [Limitations](Limitations.md) and [Known issues](KnownIssues.md)
 * Where it stands: [Status](#status) and the [Roadmap](Roadmap.md)
 * Build it yourself: [Building go2cs from source](BuildingGo2cs.md)
