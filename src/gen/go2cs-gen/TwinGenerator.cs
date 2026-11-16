@@ -417,6 +417,33 @@ public sealed partial class TwinGenerator : ISourceGenerator
             return site;
         }
 
+        // The converter's go wrapper: an expression-bodied literal over ONE call whose callee is a name (or a member of
+        // one) and whose arguments are names or literals. Null for any other literal; else whether an argument is by-ref.
+        private static bool? WrapperCall(ParenthesizedLambdaExpressionSyntax lambda)
+        {
+            if (lambda.ExpressionBody is not InvocationExpressionSyntax call ||
+                call.Expression is not (IdentifierNameSyntax or GenericNameSyntax or MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax }))
+            {
+                return null;
+            }
+
+            bool byRef = false;
+
+            foreach (ArgumentSyntax argument in call.ArgumentList.Arguments)
+            {
+                if (!argument.RefKindKeyword.IsKind(SyntaxKind.None))
+                {
+                    byRef = true;
+                    continue;
+                }
+
+                if (argument.NameColon is not null || argument.Expression is not (IdentifierNameSyntax or LiteralExpressionSyntax))
+                    return null;
+            }
+
+            return byRef;
+        }
+
         internal Site Classify(InvocationExpressionSyntax node, SemanticModel model)
         {
             Site site = new();
@@ -432,9 +459,26 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 // parameter types spelled out, so its twin lambda takes them as they are.
                 if (arguments.Count >= 1 && arguments[0].Expression is ParenthesizedLambdaExpressionSyntax lambda)
                 {
-                    if (plainArguments && !lambda.Modifiers.Any(SyntaxKind.AsyncKeyword) && lambda.ParameterList.Parameters.Count == arguments.Count - 1 &&
-                        lambda.ParameterList.Parameters.All(parameter => parameter.Type is not null && parameter.Modifiers.Count == 0))
+                    SeparatedSyntaxList<ParameterSyntax> parameters = lambda.ParameterList.Parameters;
+                    bool shaped = plainArguments && !lambda.Modifiers.Any(SyntaxKind.AsyncKeyword) && parameters.Count == arguments.Count - 1 &&
+                                  parameters.All(parameter => parameter.Modifiers.Count == 0);
+
+                    // Typed: a go literal, its parameter types spelled out.
+                    if (shaped && parameters.All(parameter => parameter.Type is not null))
                     {
+                        site.Go = GoKind.Literal;
+                        return site;
+                    }
+
+                    // Implicitly typed: the converter's WRAPPER of a go call with a constant or by-ref argument,
+                    // `goǃ((ᴛ1, ᴛ2) => f(ᴛ1, ᴛ2, 1), a, b)`; C# infers its types from a and b. One call over the parameters,
+                    // names and literals, so nothing in it spills. A by-ref argument means f takes a ref, which refuses f a
+                    // twin (byref-param): the wrapper's twin would only move the block from a thread onto a carrier.
+                    if (shaped && parameters.All(parameter => parameter.Type is null) && WrapperCall(lambda) is { } wrapped)
+                    {
+                        if (wrapped)
+                            return GoOther(site, "ref-wrapper", true);
+
                         site.Go = GoKind.Literal;
                         return site;
                     }

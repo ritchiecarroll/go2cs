@@ -48,6 +48,29 @@ public class TwinGoLaunchTests
 
             internal static void parks() { ᐸꟷ(ch); }
 
+            internal static void parksWith(channel<nint> c, nint v, nint k) { ᐸꟷ(c); }
+
+            internal static void parksRef(channel<nint> c, ref nint v) { ᐸꟷ(c); }
+
+        """;
+
+    // The converter's WRAPPER for a go call with a constant argument: an implicitly typed literal over the call.
+    private const string Wrapper = """
+            public static void launchWrapper(channel<nint> c, nint v)
+            {
+                goǃ((ᴛ1, ᴛ2) => parksWith(ᴛ1, ᴛ2, 1), c, v);
+            }
+
+        """;
+
+    // Its by-ref form (`go f(c, &v)` into a `ref` parameter): the function it calls is refused a twin (byref-param), so
+    // a twin of the wrapper would only move the block from a thread onto a carrier. It stays plain, and warns.
+    private const string RefWrapper = """
+            public static void launchRefWrapper(channel<nint> c, ж<nint> Ꮡv)
+            {
+                goǃ((ᴛ1, ᴛ2) => parksRef(ᴛ1, ref ᴛ2.DerefOrNull()), c, Ꮡv);
+            }
+
         """;
 
     private const string Footer = "}\n";
@@ -146,6 +169,25 @@ public class TwinGoLaunchTests
     [TestMethod]
     public void AGoLiteralWithArgumentsLaunchesItsTwin() =>
         AssertLaunchesTwin(LiteralArgs, "launchLiteral", "async (nint iΔ1, @string sΔ1) =>");
+
+    [TestMethod]
+    public void AnImplicitlyTypedWrapperLaunchesItsTwin() =>
+        AssertLaunchesTwin(Wrapper, "launchWrapper", "async (ᴛ1, ᴛ2) => await parksWithꞏtwin(ᴛ1, ᴛ2, 1), c, v)");
+
+    [TestMethod]
+    public void AByRefWrapperStaysPlainAndWarnsByName()
+    {
+        (string twins, Diagnostic[] errors, Diagnostic[] generator) = Run(RefWrapper);
+
+        Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
+        Assert.IsFalse(twins.Contains("async (ᴛ1, ᴛ2) =>", StringComparison.Ordinal), "no twin of the by-ref wrapper");
+
+        string[] warnings = generator.Where(diagnostic => diagnostic.Id == "GO2CS0014").Select(diagnostic => diagnostic.GetMessage()).ToArray();
+        string all = string.Join("\n", generator.Select(diagnostic => diagnostic.ToString()));
+
+        Assert.AreEqual(1, warnings.Length, all);
+        StringAssert.Contains(warnings[0], "(ref-wrapper)", all);
+    }
 
     [TestMethod]
     public void AGoStatementLaunchedPlainWhereItCouldParkWarnsByName()
