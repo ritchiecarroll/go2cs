@@ -682,6 +682,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFieldViewOverGoStruct() => CheckTarget("FieldViewOverGoStruct");
 
     [TestMethod]
+    public void CheckFieldViewOverReferenceStruct() => CheckTarget("FieldViewOverReferenceStruct");
+
+    [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]

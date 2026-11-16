@@ -685,6 +685,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFieldViewOverGoStruct() => CheckTarget("FieldViewOverGoStruct");
 
     [TestMethod]
+    public void CheckFieldViewOverReferenceStruct() => CheckTarget("FieldViewOverReferenceStruct");
+
+    [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]

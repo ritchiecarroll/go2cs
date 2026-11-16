@@ -844,7 +844,7 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:1324-1333 -->
+<!-- source: src/core/unsafe/unsafe.cs:1334-1343 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
@@ -3566,17 +3566,111 @@ internal static nint derefUnread(ж<hdr> h) {
   view ends where the struct's storage ends: a view longer than its field reads the fields after it, as Go
   does, and one that would pass the end of the struct is refused by name.
 - **A Go struct that holds a reference** (a string, a pointer, a slice, or a fixed array, which converts to a
-  managed array): refused by name. Such a struct has no address, and a view of a copy would lose every write.
+  managed array): the field's own bytes, found again at every access. Such a struct has no address, because
+  the collector may move it and nothing can hold it still, so the view keeps the field's pointer and no
+  address: element `i` is byte `i` times the element size of the field, read or written where the field is at
+  that moment. A store through the view is a store to the field, the field's own accesses and the view's see
+  each other, and a collection between a store and a read changes nothing. The view must fit inside its
+  field, and the field must not be a struct that holds a reference; otherwise it is refused by name, as
+  below. A field that is itself an array of numbers is storage of its own: the view is over that array, as
+  for a struct with an address.
 
-**Scope.** The field view is one field selected from a pointer-typed variable, an element type that is a
-number, and a field whose type is not that element type. A view of the same element type is
+It is how `golang.org/x/sys` writes the port of a socket address: two bytes in network order, through a view
+of the port field of a struct whose address field is an array.
+
+<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.go:24-29 -->
+```go
+type rawInet4 struct {
+	family uint16
+	port   uint16
+	addr   [4]byte
+	zero   [8]uint8
+}
+```
+<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.go:48-57 -->
+```go
+func encodePort(raw *rawInet4, port int) {
+	p := (*[2]byte)(unsafe.Pointer(&raw.port))
+	p[0] = byte(port >> 8)
+	p[1] = byte(port)
+}
+
+func decodePort(raw *rawInet4) int {
+	p := (*[2]byte)(unsafe.Pointer(&raw.port))
+	return int(p[0])<<8 + int(p[1])
+}
+```
+<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:31-40 -->
+```csharp
+internal static void encodePort(ж<rawInet4> raw, nint port) {
+    var p = @unsafe.ArrayPointer<byte>.Of(raw.Ꮡport, 2);
+    p.ElementRef(0) = (byte)(port >> 8);
+    p.ElementRef(1) = (byte)port;
+}
+
+internal static nint decodePort(ж<rawInet4> raw) {
+    var p = @unsafe.ArrayPointer<byte>.Of(raw.Ꮡport, 2);
+    return ((nint)p.ElementRef(0) << 8) + (nint)p.ElementRef(1);
+}
+```
+
+Over such a struct the view is equal to the field's pointer, as in Go: `unsafe.Pointer(p) ==
+unsafe.Pointer(&raw.port)` is true, two views of one field are one pointer, and views of two fields or of two
+structs are different pointers. A whole-array load and store go through the same helpers as over any root.
+
+The field may be reached through more than one selection, and from a variable of any kind:
+
+<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.go:186-191 -->
+```go
+func (sa *sockInet4) sockaddr() {
+	p := (*[2]byte)(unsafe.Pointer(&sa.raw.port))
+	p[0] = byte(sa.port >> 8)
+	p[1] = byte(sa.port)
+	sa.raw.addr = sa.addr
+}
+```
+<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:160-167 -->
+```csharp
+internal static void sockaddr(this ж<sockInet4> Ꮡsa) {
+    ref var sa = ref Ꮡsa.DerefOrNull();
+
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡsa.Ꮡraw.Ꮡport, 2);
+    p.ElementRef(0) = (byte)(sa.port >> 8);
+    p.ElementRef(1) = (byte)sa.port;
+    sa.raw.addr = sa.addr.Clone();
+}
+```
+
+
+**Scope.** The field view is a chain of one or more field selections whose root is a variable (`&p.f`,
+`&sa.raw.port`, `&s.f` for a struct variable, `&global.f` for a package variable), an element type that is
+a number, and a field whose type is not that element type. A view of the same element type is
 [`array<T>.AliasPointer`](#an-element-pointer-reinterpreted-as-an-array-pointer-aliases-the-elements-storage).
-A field two selections deep, or selected from a struct variable, is not the field view. Indexed where it is
-written it takes
+A promoted field, and a field whose root is an index, a call or a dereference (`&s[i].f`, `&f().x`), is not
+the field view. Indexed where it is written it takes
 [the element doors](#an-index-an-elements-address-or-a-whole-array-through-ntp-reaches-the-memory-p-names-the-element-doors),
 which answer over every root. Bound to a local it is the pointer conversion
 [`unsafe.Pointer.To<array<T>>`](#tp-over-an-unsafepointer-is-emitted-as-unsafepointertotp--the-typed-pointer-keeps-what-p-carries),
 which answers where the memory is an array of that type or native, and not over a Go value of another type.
+Sliced open where it is written (`(*[N]E)(unsafe.Pointer(&w.f))[:]`), that conversion over an array field of
+another element type reads the field as an array it is not, and the process can end with an access violation
+that `recover` does not take ([Limitations](../Limitations.md)). Reach the field from a variable or a pointer
+instead, which is the field view: write an embedded field out (`&w.inner.f`), or bind the element or the
+result first (`p := &s[i]`, then `&p.f`).
+<!-- 2026-11-15, P5: measured over a promoted field, a slice element's field and a call's result, one arm per
+     process, each under a recover (docs/phase4/data/array-pointer-doors/reinterpret-box-1115/probe-open/). The
+     route through the array view door is ruled for .5 (COORD 13:44Z, BOARD row of 2026-11-15). -->
+
+**Limits over a struct that holds a reference.** The view has no storage it can name, so three forms that
+need some are refused by name at run time: a slice of the view (`p[lo:hi]`, `p[:]`), the address of an
+element (`&p[i]`), and a range that reads the values (`for _, v := range p`). The index, the whole-array
+load and store, `len`, and a range that takes only the index are served. A view longer than its field is
+refused by name where it is made: over a struct with an address it reads on into the fields after it, and
+here those fields have no address to read. A field that is a struct holding a reference is refused the
+same way, because its bytes are not contiguous. None of this applies to a field that is an array of
+numbers, whose view is over the field's own array. The number of such a pointer,
+`uintptr(unsafe.Pointer(p))`, is the field's address when it is read and is not held still, as for the
+field's own pointer.
 
 **Limits.** One whole-array form is not routed: a tuple assignment that stores through the dereference of
 two views, `*p, *q = *q, *p`. Its right side loads; its left side keeps the view's array value, which the
@@ -3590,15 +3684,24 @@ where it is written emitted `(...Of(field, N)).Value[i]`, which was refused over
 From then until part C of the same day, a form that read the whole array through the view (`*p`, a range
 that reads the values, `(*p)[i]`) was refused by name on every root; the composite-literal position was
 added for golang.org/x/sys/windows' SockaddrBth.sockaddr, found by census.
+Until the box-kind seat of the same day the view over a struct that holds a reference was refused by name
+(26 known sites, all in golang.org/x/sys/unix, syscall's displaced recvfrom code and runtime's cheaprand),
+and the field view's shape was one field selected from a pointer-typed variable: a field two selections
+deep or selected from a struct variable took the pointer conversion, which panicked when kept in a local
+over a Go value of another type (section 19).
 Design and measurements: docs/phase4/DESIGN-array-pointer-doors.md section 18 (part C: 18.7); the native half:
 docs/phase4/DESIGN-native-array-view.md. -->
 
 Guarded by: the behavioral programs `FieldViewOverGoStruct` (every form over a heap struct, a package
-variable, an element of a slice and a struct over a byte slice, against Go) and `NativeFieldPortAlias` (pages
-from `syscall.Mmap`); `FieldArrayViewOverGoStructTests` and `NativeFieldArrayViewTests` in GolibTests; and the
+variable, an element of a slice and a struct over a byte slice, against Go), `FieldViewOverReferenceStruct`
+(a struct that holds a reference: the port, the field's own accesses beside the view's, a collection between
+a store and a read, the view's address, and the chain shapes) and `NativeFieldPortAlias` (pages from
+`syscall.Mmap`); `FieldArrayViewOverGoStructTests`, `ReinterpretedFieldArrayViewTests` and
+`NativeFieldArrayViewTests` in GolibTests; and the
 converter's `TestNativeFieldArrayViewEmitsTheDoorAndElementRef`,
 `TestNativeFieldArrayViewIndexedDirectlyReadsThroughElementRef` and
-`TestNativeFieldArrayViewWholeArrayGoesThroughTheHelpers`.
+`TestNativeFieldArrayViewWholeArrayGoesThroughTheHelpers` and
+`TestNativeFieldArrayViewTakesAChainOfFieldSelections`.
 
 <a id="a-pointer-cast-slice-with-a-low-bound-offsets-the-span"></a>
 

@@ -659,6 +659,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFieldViewOverGoStruct() => CheckTarget("FieldViewOverGoStruct");
 
     [TestMethod]
+    public void CheckFieldViewOverReferenceStruct() => CheckTarget("FieldViewOverReferenceStruct");
+
+    [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]

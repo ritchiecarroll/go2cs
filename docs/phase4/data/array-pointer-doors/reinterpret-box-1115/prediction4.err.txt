@@ -1,0 +1,11 @@
+panic: go2cs: (*[2]uint8)(unsafe.Pointer(&p.f)): the field is in a Go value that has no address (a struct that holds references has none), so its bytes cannot be viewed as an array
+
+goroutine 1 [running]:
+unsafe.FieldView[...]()
+	<part C tree>/src/core/unsafe/unsafe.cs:886
+unsafe.Of[...]()
+	<part C tree>/src/core/unsafe/unsafe.cs:1894
+main.encodePort()
+	go2cs/FieldViewOverReferenceStruct/main.go:49
+main.main()
+	go2cs/FieldViewOverReferenceStruct/main.go:191
