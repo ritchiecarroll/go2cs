@@ -260,11 +260,32 @@ func (v *Visitor) boxBaseName(ident *ast.Ident) string {
 		}
 	}
 
+	// A PACKAGE-LEVEL var is the exception to the collision rule: its box is declared beside it as `Ꮡ` plus the
+	// RENDERED name (globalAddressOperations' box declaration), so a var collision-renamed for a same-named
+	// method (`var tid atomic.Int32` beside `func (*TLS) tid()`, `tid`→`Δtid`) is boxed `ᏑΔtid`, and its
+	// pointer-receiver call `tid.Add(1)` must name that box, not the raw `Ꮡtid` (CS0103, libc's musl TLS, W13).
+	if v.identIsPackageVar(ident) {
+		return base
+	}
+
 	if base == ShadowVarMarker+ident.Name {
 		return ident.Name
 	}
 
 	return base
+}
+
+// identIsPackageVar reports whether the identifier resolves to a package-level var.
+func (v *Visitor) identIsPackageVar(ident *ast.Ident) bool {
+	obj := v.info.Uses[ident]
+
+	if obj == nil {
+		obj = v.info.Defs[ident]
+	}
+
+	varObj, ok := obj.(*types.Var)
+
+	return ok && varObj.Pkg() != nil && varObj.Parent() == varObj.Pkg().Scope()
 }
 
 // lambdaBoxRefAddressForm renders `&m` / `&m.field` when `m` is a heap-boxed local captured by-box
@@ -1123,7 +1144,17 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 		if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok && v.selectorBasePackageObj(selectorExpr) != nil {
 			if varObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Var); ok && varObj.Pkg() != nil && varObj.Parent() == varObj.Pkg().Scope() {
 				if _, isPtr := types.Unalias(varObj.Type()).(*types.Pointer); !isPtr && importedGlobalIsBoxed(varObj) {
-					return fmt.Sprintf("%s.%s%s", v.convExpr(selectorExpr.X, nil), AddressPrefix, strings.TrimPrefix(getSanitizedIdentifier(varObj.Name()), "@"))
+					// The owner declares the box beside the var under the var's DECLARED name, so a var the owner
+					// collision-renamed (`var Tid` beside `func (*T) Tid()`, declared `ΔTid`) is boxed `ᏑΔTid`: take the
+					// renamed member from the owner's published `const:` record, as a value reference does (W13's
+					// importer arm; `lib.ᏑTid` was CS0117).
+					member := strings.TrimPrefix(getSanitizedIdentifier(varObj.Name()), "@")
+
+					if renamed, ok := v.foreignRenamedValueMember(varObj); ok {
+						member = renamed
+					}
+
+					return fmt.Sprintf("%s.%s%s", v.convExpr(selectorExpr.X, nil), AddressPrefix, member)
 				}
 			}
 		}

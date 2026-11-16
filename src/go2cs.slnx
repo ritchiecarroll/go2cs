@@ -416,6 +416,8 @@
     <Project Path="tests/Behavioral/CollidingPackageNames/duprenamed/collidea.dup.csproj" />
     <Project Path="tests/Behavioral/CollidingPackageNames/dupplain/collideb.dup.csproj" />
     <Project Path="tests/Behavioral/CollisionFieldBoxAccessor/CollisionFieldBoxAccessor.csproj" />
+    <Project Path="tests/Behavioral/CollisionRenamedGlobalReceiver/CollisionRenamedGlobalReceiver.csproj" />
+    <Project Path="tests/Behavioral/CollisionRenamedGlobalReceiver/lib/CollisionRenamedGlobalReceiver.lib.csproj" />
     <Project Path="tests/Behavioral/CollisionRenamedLocalBox/CollisionRenamedLocalBox.csproj" />
     <Project Path="tests/Behavioral/ComplexConstContext/ComplexConstContext.csproj" />
     <Project Path="tests/Behavioral/ComplexFormat/ComplexFormat.csproj" />
