@@ -98,18 +98,31 @@ public sealed partial class TwinGenerator
         {
             MethodDeclarationSyntax method = candidate.Syntax;
             SyntaxTree tree = method.SyntaxTree;
-            Rewriter rewriter = new(this, Model(tree), method) { BoxReceiver = candidate.BoxReceiver };
+            Rewriter rewriter = new(this, Model(tree), method) { BoxReceiver = candidate.BoxReceiver, BoxParams = candidate.BoxParams };
             BlockSyntax? body = (BlockSyntax?)rewriter.Visit(method.Body);
             ArrowExpressionClauseSyntax? arrow = (ArrowExpressionClauseSyntax?)rewriter.Visit(method.ExpressionBody);
 
             // N2: the box twin's prologue derives its receiver's ref from the box, on the opening brace's own line so the
             // body keeps its #line mapping. Under GoTwinsBoxCopy (the aliasing probe's negative control) it copies instead.
-            if (body is not null && candidate.BoxReceiver is { } receiver)
+            // byref-param (12.1): each boxed parameter takes the same prologue, in parameter order.
+            List<string> boxedNames = [.. candidate.BoxReceiver is { } boxedReceiver ? [boxedReceiver] : Array.Empty<string>(), .. candidate.BoxParams ?? []];
+
+            if (body is not null && boxedNames.Count > 0)
             {
-                List<StatementSyntax> entry = BoxCopy
-                    ? [SyntaxFactory.ParseStatement(" var ᴛcopy" + receiver + " = Ꮡ" + receiver + ".DerefOrNull();"),
-                       SyntaxFactory.ParseStatement(" ref var " + Local(receiver) + " = ref ᴛcopy" + receiver + ";")]
-                    : [SyntaxFactory.ParseStatement(" ref var " + Local(receiver) + " = ref Ꮡ" + receiver + ".DerefOrNull();")];
+                List<StatementSyntax> entry = [];
+
+                foreach (string receiver in boxedNames)
+                {
+                    if (BoxCopy)
+                    {
+                        entry.Add(SyntaxFactory.ParseStatement(" var ᴛcopy" + receiver + " = Ꮡ" + receiver + ".DerefOrNull();"));
+                        entry.Add(SyntaxFactory.ParseStatement(" ref var " + Local(receiver) + " = ref ᴛcopy" + receiver + ";"));
+                    }
+                    else
+                    {
+                        entry.Add(SyntaxFactory.ParseStatement(" ref var " + Local(receiver) + " = ref Ꮡ" + receiver + ".DerefOrNull();"));
+                    }
+                }
 
                 entry[^1] = entry[^1].WithTrailingTrivia(body.OpenBraceToken.TrailingTrivia);
                 body = body.WithOpenBraceToken(body.OpenBraceToken.WithTrailingTrivia()).WithStatements(body.Statements.InsertRange(0, entry));
@@ -157,6 +170,21 @@ public sealed partial class TwinGenerator
                     .WithIdentifier(SyntaxFactory.Identifier("Ꮡ" + receiverParameter.Identifier.ValueText).WithTriviaFrom(receiverParameter.Identifier));
 
                 parameters = parameters.WithParameters(parameters.Parameters.Replace(receiverParameter, boxed));
+            }
+
+            // byref-param: each boxed `ref T p` becomes `ж<T> Ꮡp`, its box.
+            foreach (string name in candidate.BoxParams ?? [])
+            {
+                if (parameters.Parameters.FirstOrDefault(parameter => parameter.Identifier.ValueText == name) is not { Type: { } type } parameter)
+                    continue;
+
+                ParameterSyntax boxed = parameter
+                    .WithModifiers(default)
+                    .WithType(SyntaxFactory.ParseTypeName("global::go.ж<" + type.WithoutTrivia().ToFullString() + ">")
+                        .WithLeadingTrivia(parameter.GetLeadingTrivia()).WithTrailingTrivia(SyntaxFactory.Space))
+                    .WithIdentifier(SyntaxFactory.Identifier("Ꮡ" + parameter.Identifier.ValueText).WithTriviaFrom(parameter.Identifier));
+
+                parameters = parameters.WithParameters(parameters.Parameters.Replace(parameter, boxed));
             }
 
             MethodDeclarationSyntax twin = method
@@ -222,6 +250,8 @@ public sealed partial class TwinGenerator
                 .Append(" ref-blocked=").Append(m_refBlocked).Append(" go-plain=").Append(GoPlain).Append("\r\n");
             report.Append("// box: twins=").Append(twinned.Count(candidate => candidate.BoxReceiver is not null))
                 .Append(" calls=").Append(BoxCalls).Append(" plain=").Append(BoxPlain)
+                .Append(" param-twins=").Append(twinned.Count(candidate => candidate.BoxParams is not null)).Append(" param=").Append(BoxParam ? "on" : "off")
+                .Append(BoxArgCopy ? " ARGCOPY(control)" : "")
                 .Append(" recv=").Append(BoxRecv ? "on" : "off").Append(" forwarders=").Append(BoxForwarders ? "on" : "off").Append(BoxCopy ? " COPY(control)" : "").Append("\r\n");
 
             foreach (string row in BoxPlainRows)

@@ -44,7 +44,11 @@ public sealed partial class TwinGenerator
         // N2: the box twin's receiver (`this ref T t` becomes `this ж<T> Ꮡt`), whose ref the prologue declares; Rule R
         // derives it again after each await from the box (or, under GoTwinsBoxCopy, the probe's control, from a copy).
         public string? BoxReceiver { get; init; }
-        private bool m_boxSeeded;
+
+        // byref-param (12.1): the boxed `ref` parameters (`ref T p` becomes `ж<T> Ꮡp`), each a ref local of the twin as the
+        // receiver is, declared by the prologue and derived again by Rule R.
+        public List<string>? BoxParams { get; init; }
+        private bool m_boxSeeded, m_paramsSeeded;
 
         public Rewriter(Run run, SemanticModel model, MethodDeclarationSyntax method)
         {
@@ -107,7 +111,7 @@ public sealed partial class TwinGenerator
             {
                 // N2: a call to a box twin with no box to name stays plain, and is named in the report (SN-7).
                 if (site.Active && !site.PairBody && m_run.IsBoxTwinTarget(site.Target) && !m_run.BoxCallable(site))
-                    m_run.NoteBoxPlain(node, site.Target!);
+                    m_run.NoteBoxPlain(node, site.Target!, text: site.ArgPlain);
 
                 return base.VisitInvocationExpression(node);
             }
@@ -139,6 +143,27 @@ public sealed partial class TwinGenerator
             }
             else if (site.ViaBoxOverload && m_run.IsBoxTwinTarget(site.Target))
             {
+                m_run.BoxCalls++;
+            }
+            // byref-param (12.1): each by-ref argument becomes the box it names, read once, at the call; under
+            // GoTwinsBoxArgCopy (the call-site control) a fresh COPY of the argument's value instead.
+            else if (site.ArgBoxes is { } boxes && m_run.IsParamBoxTwin(site.Target) && boxes.Length == call.ArgumentList.Arguments.Count)
+            {
+                SeparatedSyntaxList<ArgumentSyntax> arguments = call.ArgumentList.Arguments;
+
+                for (int i = 0; i < boxes.Length; i++)
+                {
+                    if (boxes[i] is not { } argumentBox)
+                        continue;
+
+                    ExpressionSyntax handed = m_run.BoxArgCopy
+                        ? ParseExpression("global::go.builtin.Ꮡ(" + arguments[i].Expression.WithoutTrivia().ToFullString() + ")")
+                        : ParseExpression(argumentBox);
+
+                    arguments = arguments.Replace(arguments[i], arguments[i].WithRefKindKeyword(default).WithExpression(handed.WithTriviaFrom(arguments[i].Expression)));
+                }
+
+                call = call.WithArgumentList(call.ArgumentList.WithArguments(arguments));
                 m_run.BoxCalls++;
             }
 
@@ -324,7 +349,9 @@ public sealed partial class TwinGenerator
         private bool IsRefLocal(ISymbol? symbol) =>
             symbol is ILocalSymbol { RefKind: not RefKind.None } ||
             BoxReceiver is { } receiver && symbol is IParameterSymbol { Ordinal: 0, RefKind: RefKind.Ref, ContainingSymbol: IMethodSymbol { IsExtensionMethod: true } } parameter &&
-            parameter.Name == receiver;
+            parameter.Name == receiver ||
+            BoxParams is { } boxed && symbol is IParameterSymbol { RefKind: RefKind.Ref } boxedParameter &&
+            SymbolEqualityComparer.Default.Equals(boxedParameter.ContainingSymbol, m_method) && boxed.Contains(boxedParameter.Name);
 
         // Whether an assignment's left side writes through a reference: a ref local, a member or element reached from
         // one, or a ref-returning property or call (the field-access generator's `GoFieldAccess.get_F(ж<T>)`); a
@@ -734,6 +761,15 @@ public sealed partial class TwinGenerator
             {
                 m_boxSeeded = true;
                 m_scopes[^1].Add(Run.Local(receiver) + " = ref " + (m_run.BoxCopy ? "ᴛcopy" + receiver : "Ꮡ" + receiver + ".DerefOrNull()") + ";");
+            }
+
+            // byref-param: each boxed parameter likewise.
+            if (BoxParams is { } boxedParams && !m_paramsSeeded)
+            {
+                m_paramsSeeded = true;
+
+                foreach (string name in boxedParams)
+                    m_scopes[^1].Add(Run.Local(name) + " = ref " + (m_run.BoxCopy ? "ᴛcopy" + name : "Ꮡ" + name + ".DerefOrNull()") + ";");
             }
             List<StatementSyntax> result = [];
 

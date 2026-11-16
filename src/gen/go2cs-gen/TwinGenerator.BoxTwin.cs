@@ -28,6 +28,12 @@ public sealed partial class TwinGenerator
         internal bool BoxForwarders { get; init; } = true;
         internal bool BoxCopy { get; init; }
 
+        // byref-param (DESIGN-mn-box-twin.md 12.1): GoTwinsBoxParam (default on) gives a ref-lowered pointer parameter
+        // `ref T p` the box, as a receiver has it; GoTwinsBoxArgCopy (default off) is the CALL-SITE control: each box a
+        // call hands is replaced by a fresh copy `builtin.Ꮡ(arg)` -- wrong on purpose, never a build anyone ships.
+        internal bool BoxParam { get; init; } = true;
+        internal bool BoxArgCopy { get; init; }
+
         internal int BoxCalls, BoxPlain;
         private readonly List<string> m_boxPlainRows = [];
         private readonly List<string> m_viaOverloadRows = [];
@@ -52,6 +58,170 @@ public sealed partial class TwinGenerator
 
             return method.Body.DescendantTokens().Any(token => token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == box) ? null : name;
         }
+
+        // byref-param (12.1): the names of every plain `ref` parameter of a NON-extension function when its twin takes
+        // their boxes, each `Ꮡp`, under `ref var p = ref Ꮡp.DerefOrNull();`. Null when the switch is off, when any by-ref
+        // parameter is `out`, `in` or `ref readonly` (Go copies none of those; refused `byref-out`), when there is no
+        // block body, or when the body already names one of the boxes. Ref-lowering never applies to methods, so a
+        // `this ref` method with another `ref` parameter is refused by name (`byref-mixed`), never boxed here.
+        private List<string>? BoxParamsOf(MethodDeclarationSyntax method, IMethodSymbol symbol)
+        {
+            if (!BoxParam || symbol.IsExtensionMethod || method.Body is null)
+                return null;
+
+            List<string> names = [];
+
+            foreach (IParameterSymbol parameter in symbol.Parameters)
+            {
+                if (parameter.RefKind == RefKind.None)
+                    continue;
+
+                if (parameter.RefKind != RefKind.Ref)
+                    return null;
+
+                names.Add(parameter.Name);
+            }
+
+            if (names.Count == 0)
+                return null;
+
+            HashSet<string> boxes = new(names.Select(name => "Ꮡ" + name), StringComparer.Ordinal);
+
+            return method.Body.DescendantTokens().Any(token => token.IsKind(SyntaxKind.IdentifierToken) && boxes.Contains(token.ValueText)) ? null : names;
+        }
+
+        // The refusal of a function for its by-ref parameters, or null when each one gets a box. With GoTwinsBoxParam off
+        // it is the N2 rule, unchanged (the switch-off arm equals arm N by construction).
+        private string? ByRefRefusal(MethodDeclarationSyntax method, IMethodSymbol symbol)
+        {
+            for (int i = 0; i < symbol.Parameters.Length; i++)
+            {
+                RefKind kind = symbol.Parameters[i].RefKind;
+
+                if (kind == RefKind.None)
+                    continue;
+
+                bool receiver = i == 0 && symbol.IsExtensionMethod;
+
+                // N2: a plain `ref` receiver without [GoCopyBound] gets a box twin instead (BoxReceiverOf).
+                if (receiver && BoxReceiverOf(method, symbol) is not null)
+                    continue;
+
+                if (!BoxParam)
+                    return receiver ? "byref-recv" : "byref-param";
+
+                if (receiver)
+                    return BoxRecv && kind == RefKind.Ref && symbol.Parameters.Skip(1).Any(parameter => parameter.RefKind == RefKind.Ref) ? "byref-mixed" : "byref-recv";
+
+                if (kind != RefKind.Ref)
+                    return "byref-out";
+
+                if (symbol.IsExtensionMethod)
+                    return symbol.Parameters[0].RefKind == RefKind.Ref ? "byref-mixed" : "byref-param";
+
+                if (BoxParamsOf(method, symbol) is null)
+                    return "byref-param";
+            }
+
+            return null;
+        }
+
+        // Whether a call to `target` reaches a byref-param box twin this run emits (no such callee is in another assembly:
+        // ref-lowering applies only to unexported functions, 12.1's scope facts).
+        internal bool IsParamBoxTwin(IMethodSymbol? target) =>
+            target is not null && m_candidates.TryGetValue(target, out Candidate? candidate) && candidate.BoxParams is not null && candidate.Twinned;
+
+        // The boxes a call hands a byref-param box twin, one per by-ref argument (12.1, all or nothing): `boxes[i]` is the
+        // box for argument i (null for a by-value argument), or `boxes` is null and `plain` names the first by-ref
+        // argument that names no box, the call's `// P` row. Each box is bound by SN-1 to ж<the argument's type>.
+        internal string?[]? ArgumentBoxes(InvocationExpressionSyntax node, IMethodSymbol target, SemanticModel model, Candidate caller, RefAliases aliases, out string? plain)
+        {
+            SeparatedSyntaxList<ArgumentSyntax> arguments = node.ArgumentList.Arguments;
+            string?[] boxes = new string?[arguments.Count];
+            plain = null;
+
+            for (int i = 0; i < arguments.Count; i++)
+            {
+                ArgumentSyntax argument = arguments[i];
+
+                if (argument.RefKindKeyword.IsKind(SyntaxKind.None))
+                    continue;
+
+                string? box = null;
+
+                if (argument.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) && argument.NameColon is null && i < target.Parameters.Length &&
+                    target.Parameters[i].RefKind == RefKind.Ref && model.GetTypeInfo(argument.Expression).Type is { } type)
+                {
+                    box = ArgBoxOf(argument.Expression, model, caller, aliases, node.SpanStart);
+
+                    if (box is not null && !Binds(box, type, model, caller, node.SpanStart))
+                        box = null;
+                }
+
+                if (box is null)
+                {
+                    plain = argument.Expression.ToString().Replace("\r", " ").Replace("\n", " ");
+                    return null;
+                }
+
+                boxes[i] = box;
+            }
+
+            return boxes;
+        }
+
+        // 12.1's enumerated aliasing forms for an ARGUMENT, beside the receiver rows BoxOf already knows: (a) `(E).DerefOrNull()`,
+        // `E.DerefOrNull()` or `E.Value` with E a side-effect-free ж expression or an element pointer `Ꮡ(x, i)`: E itself,
+        // read once at the call as Go reads it; (c) ruling 10.4's nil-checked field `nonnil(ref e).f`: the field pointer
+        // from e's box, which faults as Go does when e is nil. Never `builtin.Ꮡ(v)` (it COPIES v into a new box).
+        private string? ArgBoxOf(ExpressionSyntax operand, SemanticModel model, Candidate caller, RefAliases aliases, int position)
+        {
+            while (operand is ParenthesizedExpressionSyntax parenthesized)
+                operand = parenthesized.Expression;
+
+            ExpressionSyntax? boxed = operand switch
+            {
+                InvocationExpressionSyntax { ArgumentList.Arguments.Count: 0, Expression: MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression, Name.Identifier.ValueText: "DerefOrNull" } deref } => deref.Expression,
+                MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression, Name.Identifier.ValueText: "Value" } value
+                    when model.GetTypeInfo(value.Expression).Type is INamedTypeSymbol { Name: "ж", TypeArguments.Length: 1 } => value.Expression,
+                _ => null
+            };
+
+            if (boxed is not null)
+            {
+                while (boxed is ParenthesizedExpressionSyntax inner)
+                    boxed = inner.Expression;
+
+                return BoxSideEffectFree(boxed, model) ? boxed.WithoutTrivia().ToFullString() : null;
+            }
+
+            if (operand is MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression, Name: IdentifierNameSyntax } member &&
+                member.Expression is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nonnil" }, ArgumentList.Arguments: [{ RefKindKeyword.RawKind: (int)SyntaxKind.RefKeyword } checkedArgument] } &&
+                model.GetSymbolInfo(member).Symbol is IFieldSymbol { IsStatic: false } field)
+            {
+                return ArgBoxOf(checkedArgument.Expression, model, caller, aliases, position) is { } parent ? FieldBox(parent, field, model, caller, position) : null;
+            }
+
+            return BoxOf(operand, model, caller, aliases, position);
+        }
+
+        // A ж expression a call can read once and hand on: a name (a local, a parameter or a static), a field chain over
+        // one, a `~` dereference of one, or an element pointer `Ꮡ(x, i)` over such operands. A package-level root is read
+        // at the call, once, as Go reads it; the box is spilled nowhere, since nothing is evaluated between.
+        private static bool BoxSideEffectFree(ExpressionSyntax expression, SemanticModel model) => expression switch
+        {
+            IdentifierNameSyntax => true,
+            ParenthesizedExpressionSyntax parenthesized => BoxSideEffectFree(parenthesized.Expression, model),
+            PrefixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.BitwiseNotExpression } deref => BoxSideEffectFree(deref.Operand, model),
+            MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression } member =>
+                model.GetSymbolInfo(member).Symbol is IFieldSymbol && BoxSideEffectFree(member.Expression, model),
+            InvocationExpressionSyntax { ArgumentList.Arguments.Count: 2 } element when
+                element.Expression is IdentifierNameSyntax { Identifier.ValueText: "Ꮡ" } or MemberAccessExpressionSyntax { Name.Identifier.ValueText: "Ꮡ" } &&
+                element.ArgumentList.Arguments.All(argument => argument.RefKindKeyword.IsKind(SyntaxKind.None) &&
+                    (argument.Expression is LiteralExpressionSyntax || BoxSideEffectFree(argument.Expression, model))) =>
+                model.GetSymbolInfo(element).Symbol is IMethodSymbol { Parameters.Length: 2 } method && method.Parameters[0].Type is INamedTypeSymbol { Name: "slice" or "array" or "IArray" },
+            _ => false
+        };
 
         // Whether `definition`, a `this ref T` method of a REFERENCED assembly, has a generated box twin there:
         // `Mꞏtwin(this ж<T>, …)` beside it. Never with the switch off: CanPark and IsBoxTwinTarget then read as the base.
@@ -110,7 +280,7 @@ public sealed partial class TwinGenerator
         // and routing through it would leave plain each call that names no box (closure arm O's 5 `Lock` rows).
         internal bool IsBoxTwinTarget(IMethodSymbol? target) =>
             target is not null &&
-            (m_candidates.TryGetValue(target, out Candidate? candidate) ? candidate.BoxReceiver is not null && candidate.Twinned : HasBoxTwinMember(target) && !HasTwinMember(target));
+            (m_candidates.TryGetValue(target, out Candidate? candidate) ? (candidate.BoxReceiver is not null || candidate.BoxParams is not null) && candidate.Twinned : HasBoxTwinMember(target) && !HasTwinMember(target));
 
         // Must-fix 2 of the re-review: a call bound to RecvGenerator's box overload `M(this ж<T> Ꮡt, …)`, which forwards to
         // the `this ref T` method, is followed to that method -- resolved by FULL SIGNATURE (an sstring pair holds two
@@ -191,10 +361,16 @@ public sealed partial class TwinGenerator
         {
             string check = box;
 
-            if (caller is { BoxReceiver: { } receiver, Symbol.Parameters.Length: > 0 } && (box == "Ꮡ" + receiver || box.StartsWith("Ꮡ" + receiver + ".", StringComparison.Ordinal)))
+            foreach (IParameterSymbol parameter in caller.Symbol.Parameters)
             {
-                check = "((global::go.ж<" + caller.Symbol.Parameters[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) + ">)default!)" +
-                        box.Substring(("Ꮡ" + receiver).Length);
+                bool boxed = parameter.Ordinal == 0 && caller.BoxReceiver == parameter.Name || caller.BoxParams?.Contains(parameter.Name) == true;
+                string own = "Ꮡ" + parameter.Name;
+
+                if (boxed && (box == own || box.StartsWith(own + ".", StringComparison.Ordinal)))
+                {
+                    check = "((global::go.ж<" + parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) + ">)default!)" + box.Substring(own.Length);
+                    break;
+                }
             }
 
             TypeInfo bound = model.GetSpeculativeTypeInfo(position, SyntaxFactory.ParseExpression(check), SpeculativeBindingOption.BindAsExpression);
@@ -241,6 +417,11 @@ public sealed partial class TwinGenerator
                 case IdentifierNameSyntax name when symbol is IParameterSymbol { RefKind: RefKind.Ref, Ordinal: 0 } && caller.BoxReceiver == name.Identifier.ValueText:
                     return "Ꮡ" + name.Identifier.ValueText;
 
+                // byref-param (12.1 (b)): the twin's own boxed parameter, by its symbol.
+                case IdentifierNameSyntax name when symbol is IParameterSymbol { RefKind: RefKind.Ref, ContainingSymbol: IMethodSymbol owner } && caller.BoxParams is { } boxed &&
+                                                    SymbolEqualityComparer.Default.Equals(Normalize(owner), caller.Symbol) && boxed.Contains(name.Identifier.ValueText):
+                    return "Ꮡ" + name.Identifier.ValueText;
+
                 // A ref local over a box, CURRENT (9.4): declared exactly `ref Ꮡx.DerefOrNull()` / `ref Ꮡx.Value` (or a heap
                 // local's `ref Ꮡv.ValueSlot`) over a plain root, and Rederivable -- a root reassigned other than in the
                 // converter's re-alias form would hand M another object than the one the ref local names.
@@ -248,6 +429,16 @@ public sealed partial class TwinGenerator
                 {
                     if (local.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is not VariableDeclaratorSyntax { Initializer.Value: RefExpressionSyntax { Expression: var source } })
                         return null;
+
+                    // byref-param (12.1 (b)): a HEAP local, `ref var v = ref heap(…, out var Ꮡv)`, hands its own box, never
+                    // re-pointed. Gated on GoTwinsBoxParam, so the switch-off arm equals arm N.
+                    if (BoxParam && HeapBox(source) is { } heapBox)
+                    {
+                        string heapDeclared = source.WithoutTrivia().ToString();
+
+                        return caller.Syntax.DescendantNodes().OfType<AssignmentExpressionSyntax>().Any(assignment =>
+                            assignment.Left is IdentifierNameSyntax left && (left.Identifier.ValueText == name.Identifier.ValueText || left.Identifier.ValueText == heapBox)) ? null : heapBox;
+                    }
 
                     IdentifierNameSyntax? rootName = BoxRoot(source);
 
@@ -306,6 +497,13 @@ public sealed partial class TwinGenerator
             _ => null
         };
 
+        // A heap local's box: `heap<T>(out var Ꮡv)` or `heap(init, out var Ꮡv)`.
+        private static string? HeapBox(ExpressionSyntax source) =>
+            source is InvocationExpressionSyntax { Expression: GenericNameSyntax { Identifier.ValueText: "heap" } or IdentifierNameSyntax { Identifier.ValueText: "heap" } } heap &&
+            heap.ArgumentList.Arguments.LastOrDefault() is { RefKindKeyword.RawKind: (int)SyntaxKind.OutKeyword, Expression: DeclarationExpressionSyntax { Designation: SingleVariableDesignationSyntax designation } }
+                ? designation.Identifier.ValueText
+                : null;
+
         // A keyword-named local keeps its escape (code review 3: `func (in *T) M()` converts to `this ref T @in`).
         internal static string Local(string name) =>
             SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
@@ -320,10 +518,10 @@ public sealed partial class TwinGenerator
 
         // A plain call to a box twin, for the report (SN-7 reads their count); `reason` tags a row that is plain for a
         // named reason (code review 4: `generic-unfollowed`).
-        internal void NoteBoxPlain(InvocationExpressionSyntax node, IMethodSymbol target, string? reason = null)
+        internal void NoteBoxPlain(InvocationExpressionSyntax node, IMethodSymbol target, string? reason = null, string? text = null)
         {
             BoxPlain++;
-            m_boxPlainRows.Add("// P " + Where(node) + "|" + target.Name + "|" + ReceiverText(node) + (reason is null ? "" : "|" + reason));
+            m_boxPlainRows.Add("// P " + Where(node) + "|" + target.Name + "|" + (text ?? ReceiverText(node)) + (reason is null ? "" : "|" + reason));
         }
 
         // Code review 2: each call followed through a box overload, with the method it was followed to, so that a unit

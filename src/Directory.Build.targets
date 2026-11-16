@@ -49,6 +49,9 @@
     N2 (M:N PROTOTYPE, the box twin): GoTwinsBoxRecv=false keeps every by-ref receiver refused (the cut's A/B control);
     GoTwinsBoxForwarders=false keeps interface forwarders to box twins sync (their own arm); GoTwinsBoxCopy=true makes a
     box twin COPY its receiver, wrong on purpose: the aliasing probe's negative control only.
+    byref-param (M:N PROTOTYPE, DESIGN-mn-box-twin.md 12.1): GoTwinsBoxParam=false keeps every ref-lowered pointer
+    parameter refused (its A/B control); GoTwinsBoxArgCopy=true makes each call hand a COPY of its box, wrong on purpose:
+    the probe's call-site negative control only.
   -->
   <PropertyGroup Condition="'$(GoAotFor)' != '' and $([System.String]::Copy(';$(GoAotFor);').Contains(';$(MSBuildProjectName);'))">
     <PublishAot>true</PublishAot>
@@ -71,6 +74,8 @@
     <CompilerVisibleProperty Include="GoTwinsBoxRecv" />
     <CompilerVisibleProperty Include="GoTwinsBoxForwarders" />
     <CompilerVisibleProperty Include="GoTwinsBoxCopy" />
+    <CompilerVisibleProperty Include="GoTwinsBoxParam" />
+    <CompilerVisibleProperty Include="GoTwinsBoxArgCopy" />
     <CompilerVisibleProperty Include="GoTwinsSiblings" />
     <CompilerVisibleProperty Include="GoTwinsTiming" />
   </ItemGroup>

@@ -320,6 +320,44 @@ public class TwinBoxTests
 
         """;
 
+    // byref-param, 12.1's other enumerated forms (P4's cut): a heap local, a field of a current ref local, ruling 10.4's
+    // nil-checked field, a generic callee, a `this ref` method with another `ref` (byref-mixed), and a COPY box
+    // (`Ꮡ(v)`, never handed).
+    private const string ByRefForms = """
+            internal static void ppS(ref S s) { ᐸꟷ(ch); s.y = 1; }
+
+            internal static void gp<TV>(ref TV p) { ᐸꟷ(ch); }
+
+            public static void runHeap()
+            {
+                ref var v = ref heap(new T(), out var Ꮡv);
+                pp(ref v);
+            }
+
+            public static void runField(ж<T> Ꮡy)
+            {
+                ref var y = ref Ꮡy.DerefOrNull();
+                ppS(ref y.inner);
+            }
+
+            public static void runNonnil(ж<T> pe) { ppS(ref nonnil(ref (pe).DerefOrNull()).inner); }
+
+            public static void runGeneric(ж<nint> pn) { gp(ref (pn).DerefOrNull()); }
+
+            public static void runCopyBox(T st)
+            {
+                pp(ref Ꮡ(st).DerefOrNull());
+                ᐸꟷ(ch);
+            }
+
+        """;
+
+    // A hand-written `this ref` method with another `ref` parameter (the converter emits none: ref-lowering skips methods).
+    private const string MixedRef = """
+            internal static void mx(this ref T t, ref T u) { ᐸꟷ(ch); }
+
+        """;
+
     // `out` stays refused: Go has no out parameter; the four parking `out` functions are hand-owned.
     private const string OutParam = """
             internal static void op(out T p) { p = default; ᐸꟷ(ch); }
@@ -717,6 +755,69 @@ public class TwinBoxTests
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
         StringAssert.Contains(twins, "var ᴛcopyp = Ꮡp.DerefOrNull(); ref var p = ref ᴛcopyp;", "the control copies, on purpose");
+    }
+
+    [TestMethod]
+    public void P7_AHeapLocalHandsItsOwnBox()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ByRefForms);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await ppꞏtwin(Ꮡv)", "a heap local's own box");
+    }
+
+    [TestMethod]
+    public void P8_AFieldArgumentHandsTheFieldPointer()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ByRefForms);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await ppSꞏtwin(Ꮡy.", "a field of a current ref local: the field pointer from its root");
+        StringAssert.Contains(twins, "await ppSꞏtwin(pe.", "ruling 10.4's nil-checked field: the field pointer from e's box");
+    }
+
+    [TestMethod]
+    public void P9_AGenericCalleeTakesItsBox()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ByRefForms);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "gpꞏtwin<TV>(global::go.ж<TV> Ꮡp)", "the generic twin");
+        StringAssert.Contains(twins, "await gpꞏtwin(pn)", "its call binds");
+    }
+
+    [TestMethod]
+    public void P10_ARefMethodWithAnotherRefIsRefusedMixed()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, MixedRef);
+
+        // RecvGenerator's box overload of such a method does not compile (CS1620, its second `ref` passed bare): a sibling
+        // generator's limit on a shape the converter never emits, so only the twin generator's own output is held here.
+        Diagnostic[] own = errors.Where(error => error.Location.SourceTree?.FilePath.Contains("RecvGenerator", StringComparison.Ordinal) != true).ToArray();
+
+        Assert.AreEqual(0, own.Length, Errors(own));
+        Assert.IsFalse(twins.Contains("mxꞏtwin(", StringComparison.Ordinal), "no twin");
+        StringAssert.Contains(twins, "|mx|byref-mixed", "refused by name");
+    }
+
+    [TestMethod]
+    public void P11_ACopyBoxIsNeverHanded()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ByRefForms);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("ppꞏtwin(Ꮡ(st)", StringComparison.Ordinal), "builtin.Ꮡ(v) copies v: never a box argument");
+        StringAssert.Contains(twins, "|pp|Ꮡ(st).DerefOrNull()", "the plain call is named");
+    }
+
+    [TestMethod]
+    public void P12_TheArgCopyControlHandsCopies()
+    {
+        (string twins, Diagnostic[] errors) = Run(new() { ["build_property.GoTwinsBoxArgCopy"] = "true" }, ByRefParams);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await ppꞏtwin(global::go.builtin.Ꮡ((px).DerefOrNull()))", "the call-site control copies, on purpose");
+        StringAssert.Contains(twins, "ARGCOPY(control)", "and says so in the report");
     }
 
     [TestMethod]

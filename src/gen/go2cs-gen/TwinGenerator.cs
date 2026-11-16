@@ -58,6 +58,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // Code review 4: a generic `this ref` method this box-overload call would reach once constructed, not followed.
         public IMethodSymbol? BoxGenericUnfollowed;
 
+        // byref-param (12.1): the box each by-ref argument hands a byref-param box twin (ArgBoxes[i] for argument i), or
+        // null with ArgPlain naming the first by-ref argument that names none -- the whole call is then plain (all or
+        // nothing per call).
+        public string?[]? ArgBoxes;
+        public string? ArgPlain;
+
         // The call, for the report's named-plain row of a function that parks nowhere else (SN-7).
         public InvocationExpressionSyntax? Node;
     }
@@ -75,6 +81,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         // N2: the receiver parameter's name when this `this ref T` method's twin takes the box (`Mꞏtwin(this ж<T> Ꮡt)`).
         public string? BoxReceiver;
+
+        // byref-param (12.1): the names of the plain `ref` parameters whose boxes this function's twin takes (`Ꮡp`).
+        public List<string>? BoxParams;
         public readonly List<Site> Sites = [];
         public bool Twinned => Refusal is null && Parks;
     }
@@ -131,9 +140,16 @@ public sealed partial class TwinGenerator : ISourceGenerator
         bool boxForwarders = !(options.TryGetValue("build_property.GoTwinsBoxForwarders", out string? forward) && string.Equals(forward, "false", StringComparison.OrdinalIgnoreCase));
         bool boxCopy = options.TryGetValue("build_property.GoTwinsBoxCopy", out string? copy) && string.Equals(copy, "true", StringComparison.OrdinalIgnoreCase);
 
+        // byref-param (DESIGN-mn-box-twin.md 12.1): GoTwinsBoxParam=false keeps every ref-lowered parameter refused, its A/B
+        // control (equal to arm N by construction); GoTwinsBoxArgCopy=true makes each call hand a COPY of its box, the
+        // call-site control of the probe (SB-4), as GoTwinsBoxCopy is the callee's.
+        bool boxParam = !(options.TryGetValue("build_property.GoTwinsBoxParam", out string? param) && string.Equals(param, "false", StringComparison.OrdinalIgnoreCase));
+        bool boxArgCopy = options.TryGetValue("build_property.GoTwinsBoxArgCopy", out string? argCopy) && string.Equals(argCopy, "true", StringComparison.OrdinalIgnoreCase);
+
         new Run(context, goSites, ifaceShape, ifaceAll)
         {
-            Self = self, Pairs = pairs, CallerRule = callerRule, IfaceUnmark = unmark, BoxRecv = boxRecv, BoxForwarders = boxForwarders, BoxCopy = boxCopy
+            Self = self, Pairs = pairs, CallerRule = callerRule, IfaceUnmark = unmark, BoxRecv = boxRecv, BoxForwarders = boxForwarders, BoxCopy = boxCopy,
+            BoxParam = boxParam, BoxArgCopy = boxArgCopy
         }.Execute();
     }
 
@@ -223,7 +239,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     foreach (Site site in candidate.Sites)
                     {
                         if (site is { Active: true, PairBody: false, Node: { } node } && IsBoxTwinTarget(site.Target) && !BoxCallable(site))
-                            NoteBoxPlain(node, site.Target!);
+                            NoteBoxPlain(node, site.Target!, text: site.ArgPlain);
                     }
                 }
 
@@ -341,7 +357,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
             Candidate candidate = new() { Syntax = method, Symbol = symbol, Refusal = PreRefusal(method, symbol) };
 
             if (candidate.Refusal is null)
+            {
                 candidate.BoxReceiver = BoxReceiverOf(method, symbol);
+                candidate.BoxParams = BoxParamsOf(method, symbol);
+            }
 
             m_candidates[symbol] = candidate;
             m_ordered.Add(candidate);
@@ -395,15 +414,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
             if (symbol.ReturnsByRef || symbol.ReturnsByRefReadonly)
                 return "ref-return";
 
-            for (int i = 0; i < symbol.Parameters.Length; i++)
-            {
-                // N2: a plain `ref` receiver without [GoCopyBound] gets a box twin instead (BoxReceiverOf).
-                if (i == 0 && BoxReceiverOf(method, symbol) is not null)
-                    continue;
-
-                if (symbol.Parameters[i].RefKind != RefKind.None)
-                    return i == 0 && symbol.IsExtensionMethod ? "byref-recv" : "byref-param";
-            }
+            // N2 and byref-param: a by-ref receiver or parameter that gets a box is no refusal (ByRefRefusal).
+            if (ByRefRefusal(method, symbol) is { } byRef)
+                return byRef;
 
             if (symbol.ReturnType.IsRefLikeType || symbol.Parameters.Any(parameter => parameter.Type.IsRefLikeType))
                 return "reflike";
@@ -482,8 +495,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // N2: a call to a box twin is awaited only through a box -- the box overload's receiver, or the box BoxExpression
         // named (9.1); without one it stays plain, named. A box-overload call to a method with no box twin parks as at the
         // base, through the overload's own twin (ShouldAwait; closure arm N lost syscall's 199 twins to a plain call there).
+        // byref-param (12.1, must-fix 2): a call to a parameter box twin is awaited only when EVERY by-ref argument names a box.
         internal bool BoxCallable(Site site) =>
-            IsBoxTwinTarget(site.Target) ? site.ViaBoxOverload || site.BoxOf is not null : !site.ViaBoxOverload;
+            IsBoxTwinTarget(site.Target)
+                ? IsParamBoxTwin(site.Target) ? site.ArgBoxes is not null : site.ViaBoxOverload || site.BoxOf is not null
+                : !site.ViaBoxOverload;
 
         internal bool GoTwinnable(Site site) =>
             site.Active && (site.Go == GoKind.Literal || site.Go == GoKind.Group && CanPark(site.GoTarget));
@@ -686,6 +702,14 @@ public sealed partial class TwinGenerator : ISourceGenerator
             // N2: the box a `this ref` call can name for its receiver, whatever the target becomes after the fixpoint.
             if (site is { ViaBoxOverload: false, Target: { IsExtensionMethod: true, Parameters.Length: > 0 } target } && target.Parameters[0].RefKind == RefKind.Ref)
                 site.BoxOf = run.BoxExpression(node, model, candidate, m_aliases ??= new RefAliases(candidate.Syntax));
+
+            // byref-param: the boxes a call to a function with plain `ref` parameters can hand (12.1), whatever the target
+            // becomes after the fixpoint.
+            if (run.BoxParam && site is { ViaBoxOverload: false, Target: { IsExtensionMethod: false } callee } && callee.Parameters.Any(parameter => parameter.RefKind == RefKind.Ref))
+            {
+                site.ArgBoxes = run.ArgumentBoxes(node, callee, model, candidate, m_aliases ??= new RefAliases(candidate.Syntax), out string? plain);
+                site.ArgPlain = plain;
+            }
 
             run.Sites[node] = site;
             candidate.Sites.Add(site);

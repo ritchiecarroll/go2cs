@@ -63,8 +63,10 @@ public class TwinGoLaunchTests
 
         """;
 
-    // Its by-ref form (`go f(c, &v)` into a `ref` parameter): the function it calls is refused a twin (byref-param), so
+    // Its by-ref form (`go f(c, &v)` into a `ref` parameter): the function it calls was refused a twin (byref-param), so
     // a twin of the wrapper would only move the block from a thread onto a carrier. It stays plain, and warns.
+    // byref-param (DESIGN-mn-box-twin.md 12.1) gives f a box twin; following the thunk (handing ᴛ2, bound once at the go
+    // statement) is not in the first cut, so the wrapper still launches plain under its own name, ref-wrapper.
     private const string RefWrapper = """
             public static void launchRefWrapper(channel<nint> c, ж<nint> Ꮡv)
             {
@@ -112,8 +114,11 @@ public class TwinGoLaunchTests
                 goǃ(parksValue, v);
             }
 
-            public static void launchInRefused(ref nint x)
+            // byref-param (DESIGN-mn-box-twin.md 12.1): a plain `ref` parameter now gets a box twin, so the refused
+            // function takes an `out` parameter, which stays refused (byref-out).
+            public static void launchInRefused(out nint x)
             {
+                x = 0;
                 goǃ(parks);
             }
 
@@ -200,7 +205,7 @@ public class TwinGoLaunchTests
         string all = string.Join("\n", generator.Select(diagnostic => diagnostic.ToString()));
 
         Assert.AreEqual(2, warnings.Length, "two plain launches that could park, not the control: " + all);
-        Assert.IsTrue(warnings.Any(text => text.Contains("launchInRefused", StringComparison.Ordinal) && text.Contains("byref-param", StringComparison.Ordinal)), all);
+        Assert.IsTrue(warnings.Any(text => text.Contains("launchInRefused", StringComparison.Ordinal) && text.Contains("byref-out", StringComparison.Ordinal)), all);
         Assert.IsTrue(warnings.Any(text => text.Contains("launchValue", StringComparison.Ordinal) && text.Contains("returns-value", StringComparison.Ordinal)), all);
         Assert.IsFalse(warnings.Any(text => text.Contains("launchQuiet", StringComparison.Ordinal)), "a function that never parks loses nothing: " + all);
     }
