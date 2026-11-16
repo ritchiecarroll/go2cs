@@ -575,6 +575,8 @@
     <Project Path="tests/Behavioral/ForVariants/ForVariants.csproj" />
     <Project Path="tests/Behavioral/FormatTypeAdapters/FormatTypeAdapters.csproj" />
     <Project Path="tests/Behavioral/FormatTypeAdapters/typelib/FormatTypeAdapters.typelib.csproj" />
+    <Project Path="tests/Behavioral/ForwardAliasChainRecord/ForwardAliasChainRecord.csproj" />
+    <Project Path="tests/Behavioral/ForwardAliasChainRecord/lib/ForwardAliasChainRecord.lib.csproj" />
     <Project Path="tests/Behavioral/FuncFieldNestedTupleParam/FuncFieldNestedTupleParam.csproj" />
     <Project Path="tests/Behavioral/FuncForPCName/FuncForPCName.csproj" />
     <Project Path="tests/Behavioral/FuncMethodSameNameCollision/FuncMethodSameNameCollision.csproj" />

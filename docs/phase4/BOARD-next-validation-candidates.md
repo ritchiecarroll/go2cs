@@ -39910,4 +39910,28 @@ workaround are a bullet of `docs/Limitations.md` ("One array view can end the pr
 
 — P5 (2026-11-15)
 
+## 2026-11-15 — G (sqlite-cs W7, P3's review): implicit-conversion and implement records still consult the narrower lift lookup — OPEN, not riding W7; and the L1/W7/W13 footprint prediction scored
+
+**Dated 2026-11-15 07:00 CST. W7 `ff06d10513` + merge of master `091935257c` + regen `a90b81039f` + the review fold
+on top. Windows x64, go1.26.11.**
+
+**P3's note 2, not folded.** `resolveImplicitConvTypeName` (typeNameResolution.go) resolves a deferred marker through
+`lookupDynamicTypeName` alone: this package's own lifts. W7's GoTypeAlias records now go through
+`lookupAnyDynamicTypeName`, which also asks the production package's lifts (a -tests conversion) and the
+inline-constraint lifts. So under -tests a GoImplicitConv or GoImplement record whose type is a lift only the
+production package holds is DROPPED, while an alias record to the same lift resolves.
+- Why not in W7: the one-line reroute is trivial, but it changes -tests emission wherever such a record exists
+  (records that drop today would appear). No census predicts where, so proving it needs a -tests measure across the
+  roster, not W7's census-scoped leg. -stdlib cannot move: during a production conversion the production registry is
+  empty, and constraint keys (`constraint <path>.<name>#<i>`) never equal a type signature.
+- Fix later: reroute it, then run the roster's -tests convert leg two-seeded and attribute every new record.
+
+**The footprint prediction, scored.** COORD asked for the whole-corpus footprint of L1, W7 and W13 (four targets,
+two-seeded, one N-arm run at base `091935257c`, -tests leg over every corpus package whose test files hold a census
+hit). G predicted 0 / 0 / 0 from three censuses: no function-local multi-name spec reaching an anonymous struct in
+GOROOT/src (L1 arm B), no `«DYNTYPE:` marker in the committed corpus (L1 arm A, W7), and 22 collision-renamed
+package vars whose raw box name cannot exist (W13). P3 predicted NONZERO for L1 arm B. Read: 0 / 0 / 0 on both legs,
+emission 1949 / 2023 / 2022 / 2017 .cs per target in all four arms. The census-based prediction held; the
+structural guess did not, because std has no site of the shape.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -781,6 +781,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFormatTypeAdapters() => CheckTarget("FormatTypeAdapters");
 
     [TestMethod]
+    public void CheckForwardAliasChainRecord() => CheckTarget("ForwardAliasChainRecord");
+
+    [TestMethod]
     public void CheckFrameFuncIdentity() => CheckTarget("FrameFuncIdentity");
 
     [TestMethod]
