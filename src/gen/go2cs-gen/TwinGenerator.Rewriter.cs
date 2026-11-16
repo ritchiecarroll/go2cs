@@ -79,7 +79,7 @@ public sealed partial class TwinGenerator
                 return base.VisitInvocationExpression(node);
 
             if (site.Go == GoKind.Literal)
-                return GoLiteral(node);
+                return m_run.LiteralLaunches(site) ? GoLiteral(node) : base.VisitInvocationExpression(node);
 
             if (site.Go == GoKind.Group && m_run.CanPark(site.GoTarget))
                 return GoGroup(node);

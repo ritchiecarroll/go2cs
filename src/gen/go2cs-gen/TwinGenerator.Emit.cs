@@ -260,7 +260,7 @@ public sealed partial class TwinGenerator
             foreach (string row in ViaOverloadRows)
                 report.Append(row).Append("\r\n");
             report.Append("// in-twins: go-group-left=").Append(sites.Count(site => site.Go == GoKind.Group && !GoTwinnable(site)))
-                .Append(" go-other=").Append(sites.Count(site => site.Go == GoKind.Other))
+                .Append(" go-other=").Append(sites.Count(site => site.Go == GoKind.Other || site.Go == GoKind.Literal && !LiteralLaunches(site)))
                 .Append(" go-passive=").Append(sites.Count(site => site.Go != GoKind.None && !site.Active))
                 .Append(" unbound=").Append(sites.Count(site => site.Unbound))
                 .Append(" delegate-calls=").Append(sites.Count(site => site.Delegate))

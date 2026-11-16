@@ -84,6 +84,12 @@ internal static nint readArr(ref array<cell> a, ref cell c) {
     return a[1].v * 100 + c.v;
 }
 
+internal static void thunkRead(channel<nint> done, ref cell c) {
+    ready.ᐸꟷ(new EmptyStruct());
+    ᐸꟷ(resume);
+    done.ᐸꟷ(c.v);
+}
+
 internal static @string /*out*/ nilParam(ref holder nh) {
     @string @out = default;
     GoFrame ᒐ = default;
@@ -240,6 +246,15 @@ internal static partial void main() {
         apʗ1.Value[1].v = 13;
     });
     fmt.Println("param-array", readArr(ref arr, ref arr[1]));
+
+    var tp = Ꮡ(new cell(v: 1));
+    var done = new channel<nint>(0);
+    goǃ((ᴛ1, ᴛ2) => thunkRead(ᴛ1, ref ᴛ2.DerefOrNull()), done, tp);
+    var tpʗ1 = tp;
+    goǃ(writer, () => {
+        tpʗ1.v = 14;
+    });
+    fmt.Println("param-thunk", ᐸꟷ(done));
 
     var aʗ3 = a;
     goǃ(writer, () => {

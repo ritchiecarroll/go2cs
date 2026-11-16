@@ -63,14 +63,35 @@ public class TwinGoLaunchTests
 
         """;
 
-    // Its by-ref form (`go f(c, &v)` into a `ref` parameter): the function it calls was refused a twin (byref-param), so
-    // a twin of the wrapper would only move the block from a thread onto a carrier. It stays plain, and warns.
-    // byref-param (DESIGN-mn-box-twin.md 12.1) gives f a box twin; following the thunk (handing ᴛ2, bound once at the go
-    // statement) is not in the first cut, so the wrapper still launches plain under its own name, ref-wrapper.
+    // Its by-ref form (`go f(c, &v)` into a `ref` parameter). byref-param (DESIGN-mn-box-twin.md 12.1, Thunks) gives f a
+    // box twin, and the wrapper's twin hands it ᴛ2, the box bound once at the go statement as Go evaluates `&v`. With the
+    // switch off, or where f gets no box twin, a twin of the wrapper would only move the block from a thread onto a
+    // carrier: it stays plain, and warns by name, ref-wrapper.
     private const string RefWrapper = """
             public static void launchRefWrapper(channel<nint> c, ж<nint> Ꮡv)
             {
                 goǃ((ᴛ1, ᴛ2) => parksRef(ᴛ1, ref ᴛ2.DerefOrNull()), c, Ꮡv);
+            }
+
+        """;
+
+    // A thunk whose callee is refused its box twin (its body names `Ꮡv` already): not followed.
+    private const string RefWrapperRefused = """
+            internal static void parksRefNamed(channel<nint> c, ref nint v) { ж<nint> Ꮡv = default; ᐸꟷ(c); }
+
+            public static void launchRefRefused(channel<nint> c, ж<nint> Ꮡv)
+            {
+                goǃ((ᴛ1, ᴛ2) => parksRefNamed(ᴛ1, ref ᴛ2.DerefOrNull()), c, Ꮡv);
+            }
+
+        """;
+
+    // A by-ref argument the go statement did not bind: `s[i]` would be read when the goroutine runs, where Go takes
+    // `&s[i]` at the go statement, so the element box it could name is not handed. Not followed.
+    private const string RefWrapperUnbound = """
+            public static void launchRefUnbound(channel<nint> c, slice<nint> s, nint i)
+            {
+                goǃ((ᴛ1) => parksRef(ᴛ1, ref s[i]), c);
             }
 
         """;
@@ -129,7 +150,9 @@ public class TwinGoLaunchTests
 
         """;
 
-    private static (string twins, Diagnostic[] errors, Diagnostic[] generator) Run(params string[] shapes)
+    private static (string twins, Diagnostic[] errors, Diagnostic[] generator) Run(params string[] shapes) => Run(null, shapes);
+
+    private static (string twins, Diagnostic[] errors, Diagnostic[] generator) Run(Dictionary<string, string>? extra, params string[] shapes)
     {
         CSharpParseOptions options = new(LanguageVersion.CSharp13);
         string source = Header + string.Concat(shapes) + Footer;
@@ -138,6 +161,9 @@ public class TwinGoLaunchTests
             References(), new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
 
         Dictionary<string, string> properties = new() { ["build_property.GoTwins"] = "true" };
+
+        foreach ((string key, string value) in extra ?? [])
+            properties[key] = value;
 
         CSharpGeneratorDriver.Create([new TwinGenerator()], parseOptions: options, optionsProvider: new BuildProperties(properties))
             .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out var generatorDiagnostics);
@@ -180,12 +206,27 @@ public class TwinGoLaunchTests
         AssertLaunchesTwin(Wrapper, "launchWrapper", "async (ᴛ1, ᴛ2) => await parksWithꞏtwin(ᴛ1, ᴛ2, 1), c, v)");
 
     [TestMethod]
-    public void AByRefWrapperStaysPlainAndWarnsByName()
+    public void ABoxedByRefThunkLaunchesItsTwin() =>
+        AssertLaunchesTwin(RefWrapper, "launchRefWrapper", "async (ᴛ1, ᴛ2) => await parksRefꞏtwin(ᴛ1, ᴛ2), c, Ꮡv)");
+
+    [TestMethod]
+    public void TheSwitchOffKeepsTheByRefWrapperPlainAndWarnsByName() =>
+        AssertRefWrapperPlain(new() { ["build_property.GoTwinsBoxParam"] = "false" }, RefWrapper);
+
+    [TestMethod]
+    public void AThunkWhoseCalleeIsRefusedItsBoxTwinStaysPlainAndWarnsByName() =>
+        AssertRefWrapperPlain(null, RefWrapperRefused);
+
+    [TestMethod]
+    public void AThunkWithAnUnboundByRefArgumentStaysPlainAndWarnsByName() =>
+        AssertRefWrapperPlain(null, RefWrapperUnbound);
+
+    private static void AssertRefWrapperPlain(Dictionary<string, string>? extra, string shape)
     {
-        (string twins, Diagnostic[] errors, Diagnostic[] generator) = Run(RefWrapper);
+        (string twins, Diagnostic[] errors, Diagnostic[] generator) = Run(extra, shape);
 
         Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
-        Assert.IsFalse(twins.Contains("async (ᴛ1, ᴛ2) =>", StringComparison.Ordinal), "no twin of the by-ref wrapper");
+        Assert.IsFalse(twins.Contains("goǃtwin(", StringComparison.Ordinal), "no twin launch of the by-ref wrapper");
 
         string[] warnings = generator.Where(diagnostic => diagnostic.Id == "GO2CS0014").Select(diagnostic => diagnostic.GetMessage()).ToArray();
         string all = string.Join("\n", generator.Select(diagnostic => diagnostic.ToString()));

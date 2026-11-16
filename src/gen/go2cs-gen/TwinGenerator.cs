@@ -45,6 +45,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
         public string? GoReason;
         public bool GoCouldPark, PairLaunch, PairBody;
 
+        // byref-param (12.1, Thunks): a by-ref go wrapper whose every by-ref argument is a box the go statement bound, and
+        // its one call (set once the collector has visited the literal). It launches its twin only where that call is awaited.
+        public bool RefThunk;
+        public Site? Thunk;
+
         // N2 (DESIGN-mn-box-twin.md 9): a call to a function whose twin takes its receiver's BOX. BoxOf is the box this
         // call site names for the receiver without a copy (null: none, and the call stays plain, named); ViaBoxOverload,
         // that the call binds RecvGenerator's box overload `M(this ж<T>)`, whose receiver already is the box.
@@ -312,9 +317,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 // In a twin, only an Other launch stays plain (a pair-testing func value does not). In a function refused a
                 // twin, every launch does. A function that is neither parks nowhere: its literal and group launches are
                 // plain only because GoTwinsGo=false asked for it, so they do not warn.
-                string? reason = candidate.Twinned ? site.Go == GoKind.Other && !site.PairLaunch ? site.GoReason : null
+                string? reason = candidate.Twinned ? PlainGoReason(site)
                     : candidate.Refusal is { } refusal ? "refused " + refusal
-                    : site.Go == GoKind.Other ? site.GoReason : null;
+                    : site.Go == GoKind.Other ? site.GoReason : PlainGoReason(site);
 
                 if (reason is null)
                     continue;
@@ -502,7 +507,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 : !site.ViaBoxOverload;
 
         internal bool GoTwinnable(Site site) =>
-            site.Active && (site.Go == GoKind.Literal || site.Go == GoKind.Group && CanPark(site.GoTarget));
+            site.Active && (site.Go == GoKind.Literal && LiteralLaunches(site) || site.Go == GoKind.Group && CanPark(site.GoTarget));
 
         private bool ComputeParks(Candidate candidate)
         {
@@ -561,6 +566,30 @@ public sealed partial class TwinGenerator : ISourceGenerator
             return byRef;
         }
 
+        // A by-ref wrapper's thunk is followed only where each by-ref argument reads a box the go statement bound: a
+        // `ref ᴛk.DerefOrNull()` over one of the literal's own parameters, never a variable read when the goroutine runs.
+        private static bool BoundThunk(ParenthesizedLambdaExpressionSyntax lambda)
+        {
+            HashSet<string> bound = [.. lambda.ParameterList.Parameters.Select(parameter => parameter.Identifier.ValueText)];
+
+            return ((InvocationExpressionSyntax)lambda.ExpressionBody!).ArgumentList.Arguments
+                .Where(argument => !argument.RefKindKeyword.IsKind(SyntaxKind.None))
+                .All(argument => argument.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) &&
+                                 argument.Expression is InvocationExpressionSyntax
+                                 {
+                                     Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax box, Name.Identifier.ValueText: "DerefOrNull" },
+                                     ArgumentList.Arguments.Count: 0
+                                 } && bound.Contains(box.Identifier.ValueText));
+        }
+
+        // A go literal launches its twin; a by-ref thunk, only where its call is awaited through the boxes (12.1, Thunks).
+        internal bool LiteralLaunches(Site site) => !site.RefThunk || site.Thunk is { } thunk && ShouldAwait(thunk);
+
+        // The name a go statement left plain is reported under (GO2CS0014), or null where it launched its twin.
+        private string? PlainGoReason(Site site) =>
+            site.Go == GoKind.Other ? site.PairLaunch ? null : site.GoReason :
+            site.Go == GoKind.Literal && !LiteralLaunches(site) ? "ref-wrapper" : null;
+
         internal Site Classify(InvocationExpressionSyntax node, SemanticModel model)
         {
             Site site = new();
@@ -593,8 +622,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     // twin (byref-param): the wrapper's twin would only move the block from a thread onto a carrier.
                     if (shaped && parameters.All(parameter => parameter.Type is null) && WrapperCall(lambda) is { } wrapped)
                     {
-                        if (wrapped)
+                        if (wrapped && !(BoxParam && BoundThunk(lambda)))
                             return GoOther(site, "ref-wrapper", true);
+
+                        site.RefThunk = wrapped;
 
                         site.Go = GoKind.Literal;
                         return site;
@@ -717,8 +748,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
             if (site is { Go: GoKind.Literal, Active: true })
             {
                 m_literal++;
-                Visit(((ParenthesizedLambdaExpressionSyntax)node.ArgumentList.Arguments[0].Expression).Body);
+                ParenthesizedLambdaExpressionSyntax literal = (ParenthesizedLambdaExpressionSyntax)node.ArgumentList.Arguments[0].Expression;
+                Visit(literal.Body);
                 m_literal--;
+
+                if (site.RefThunk && literal.ExpressionBody is InvocationExpressionSyntax thunk)
+                    site.Thunk = run.Sites.TryGetValue(thunk, out Site? called) ? called : null;
 
                 // A go literal's arguments are evaluated by the go statement, in the function's own body.
                 foreach (ArgumentSyntax argument in node.ArgumentList.Arguments.Skip(1))

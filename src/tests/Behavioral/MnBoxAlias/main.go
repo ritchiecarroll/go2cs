@@ -90,6 +90,14 @@ func readArr(a *[2]cell, c *cell) int {
 	return a[1].v*100 + c.v
 }
 
+// thunkRead is launched by a go statement (12.1, Thunks): the converter wraps `go thunkRead(done, p)` in a literal
+// that binds p at the go statement and hands it to the ref parameter; its twin hands the bound box.
+func thunkRead(done chan int, c *cell) {
+	ready <- struct{}{}
+	<-resume
+	done <- c.v
+}
+
 func nilParam(nh *holder) (out string) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -186,6 +194,12 @@ func main() {
 	ap := &arr // the address escapes: arr is a heap local
 	go writer(func() { ap[1].v = 13 })
 	fmt.Println("param-array", readArr(&arr, &arr[1]))
+
+	tp := &cell{v: 1}
+	done := make(chan int)
+	go thunkRead(done, tp)
+	go writer(func() { tp.v = 14 })
+	fmt.Println("param-thunk", <-done)
 
 	go writer(func() { a.bal = 50 })
 	value := a.valueRead()
