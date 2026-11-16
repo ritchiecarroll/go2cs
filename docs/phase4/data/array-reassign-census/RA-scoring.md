@@ -66,3 +66,16 @@ GenTests 530 pass at the merge. Binary compatibility (the hosted release-smoke p
 array<T> (`ж<array<T>>`), and it asserts that skip is live. No Go field or method can own such a receiver. Listing
 Assign instead would have moved about 20 go/ast, go/parser, go/printer and go/types field reads to the explicit form
 (0b4c6313df).
+
+**The sweep (COORD: in the gate), 2026-11-16, at 465df2117c (the 309 base).** The 25 banked packages the footprint
+touches, holding all 35 alloc-assert rows:
+- Windows, R-LAPTOP, one -Exact row at a time: 25 of 25 PASS at their banked counts. Among them: runtime 11,083;
+  crypto/tls 4,920; net/http 1,538; net 506; reflect 445; syscall 66; internal/poll 13.
+- Hosted linux, os-matrix sweep-shard run 43800645110: 24 rows PASS at their linux counts. Among them: runtime
+  11,094; crypto/tls 4,921; net/http 1,538; net 597; reflect 445. syscall validated (50 matched, 9 disclosed, 0
+  undisclosed).
+- internal/poll FAILS on linux: TestSplicePipePool runs to the 30-minute per-test deadline instead of failing with
+  its disclosed "leaked descriptors" signature. The control (run 43814418853, master 0c1d295ea8, the row alone) fails
+  identically, and the cut alone (run 43814422725) reproduces it. That red is MASTER'S, not the cut's.
+- RA-4 at the verdict level: every alloc-assert row passes on both hosts, so none regressed. A cheaper move does not
+  show at the verdict level, and no row was re-baselined.
