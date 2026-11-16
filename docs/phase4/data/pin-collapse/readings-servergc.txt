@@ -1,0 +1,34 @@
+servergc-p1 box H cpus 8 serverGC True latency Interactive concurrent-config default tc 0
+servergc-p1 r1 a  64K t1 per-op median 33 ns (min 33 max 33) | 30.47 Mops/s
+servergc-p1 r1 a  64K t4 per-op median 184 ns (min 176 max 184) | 21.75 Mops/s
+servergc-p1 r1 a  16B t1 per-op median 32 ns (min 32 max 32) | 30.84 Mops/s
+servergc-p1 r1 a  16B t4 per-op median 203 ns (min 197 max 203) | 19.70 Mops/s
+servergc-p1 r1 b2 64K t1 per-op median 97 ns (min 97 max 97) | 10.33 Mops/s
+servergc-p1 r1 b2 64K t4 per-op median 523 ns (min 452 max 526) | 7.60 Mops/s
+servergc-p1 r1 b2 16B t1 per-op median 43 ns (min 43 max 43) | 23.43 Mops/s
+servergc-p1 r1 b2 16B t4 per-op median 470 ns (min 375 max 473) | 8.44 Mops/s
+servergc-p1 r2 a  64K t1 per-op median 36 ns (min 36 max 36) | 27.65 Mops/s
+servergc-p1 r2 a  64K t4 per-op median 223 ns (min 206 max 223) | 17.90 Mops/s
+servergc-p1 r2 a  16B t1 per-op median 36 ns (min 36 max 36) | 27.68 Mops/s
+servergc-p1 r2 a  16B t4 per-op median 224 ns (min 214 max 224) | 17.87 Mops/s
+servergc-p1 r2 b2 64K t1 per-op median 103 ns (min 103 max 103) | 9.67 Mops/s
+servergc-p1 r2 b2 64K t4 per-op median 406 ns (min 335 max 440) | 8.98 Mops/s
+servergc-p1 r2 b2 16B t1 per-op median 99 ns (min 99 max 99) | 10.12 Mops/s
+servergc-p1 r2 b2 16B t4 per-op median 269 ns (min 242 max 278) | 14.38 Mops/s
+servergc-p2 box H cpus 8 serverGC True latency Interactive concurrent-config default tc 0
+servergc-p2 r1 a  64K t1 per-op median 33 ns (min 33 max 33) | 30.64 Mops/s
+servergc-p2 r1 a  64K t4 per-op median 236 ns (min 219 max 236) | 16.94 Mops/s
+servergc-p2 r1 a  16B t1 per-op median 34 ns (min 34 max 34) | 29.59 Mops/s
+servergc-p2 r1 a  16B t4 per-op median 210 ns (min 203 max 212) | 18.86 Mops/s
+servergc-p2 r1 b2 64K t1 per-op median 103 ns (min 103 max 103) | 9.74 Mops/s
+servergc-p2 r1 b2 64K t4 per-op median 486 ns (min 408 max 492) | 8.11 Mops/s
+servergc-p2 r1 b2 16B t1 per-op median 44 ns (min 44 max 44) | 22.92 Mops/s
+servergc-p2 r1 b2 16B t4 per-op median 558 ns (min 525 max 560) | 7.15 Mops/s
+servergc-p2 r2 a  64K t1 per-op median 36 ns (min 36 max 36) | 27.71 Mops/s
+servergc-p2 r2 a  64K t4 per-op median 277 ns (min 260 max 277) | 14.43 Mops/s
+servergc-p2 r2 a  16B t1 per-op median 37 ns (min 37 max 37) | 26.98 Mops/s
+servergc-p2 r2 a  16B t4 per-op median 197 ns (min 192 max 197) | 20.21 Mops/s
+servergc-p2 r2 b2 64K t1 per-op median 108 ns (min 108 max 108) | 9.24 Mops/s
+servergc-p2 r2 b2 64K t4 per-op median 440 ns (min 426 max 525) | 7.61 Mops/s
+servergc-p2 r2 b2 16B t1 per-op median 112 ns (min 112 max 112) | 8.91 Mops/s
+servergc-p2 r2 b2 16B t4 per-op median 217 ns (min 185 max 249) | 16.06 Mops/s

@@ -207,6 +207,64 @@ are under test, and the `other` it re-exports from — carrying one declaration 
 every declined one, asserting the derivation, its independence from run-accumulated state, and the end-to-end
 render with no `package_info.cs` present.)
 
+## A renamed type reached only through another package's alias is spelled by its producer's member
+
+Alias keys are loaded per **import** (and on demand for a delegate element, above). A package can still name a
+collision-renamed type of a package it never imports, because another package re-exports it under a Go alias:
+`golang.org/x/sys/unix` declares `type Signal = syscall.Signal`, and modernc.org/libc writes
+`ch <- unix.Signal(sig)` on a `chan os.Signal` without importing `syscall`. No `syscall.Signal` key is loaded
+for libc, so the key lookup that swaps in the renamed member (`convertToCSFullTypeName`'s default arm) finds
+nothing, and the Go name stands: `syscall_package.Signal`, where `syscall` declares `ΔSignal` (CS0426).
+
+Both type renderers therefore ask the **producer** when no key is published. `foreignRenamedTypeSpelling`
+reads the producer's own published entries (`foreignCollisionTypeAliases`, derived from its scope) and returns
+the member it declares, or, for the two-hop form (`type Token any`), the concrete type that member stands for.
+A package that does import the producer holds the key and keeps its lookup route, which gives the same member.
+
+* `getAliasQualifiedTypeName` spells the type in declarations and expressions: `tone.ΔTone`, with the file's
+  own qualifier.
+* `getFullyQualifiedTypeName` spells it wherever the name must stand without a file's `using` lines: the
+  implementer records, the adapter class names composed from them, a box's type argument, the field-access
+  record, and the target of a local alias of the alias.
+
+The fixture's `main` shows each spelling. The target of its alias of the alias, an adapter over a value,
+and a box with the adapter over its pointer:
+
+<!-- source: src/tests/Behavioral/RenamedTypeAliasReexportRecords/main.cs:1 -->
+```csharp
+global using localTone = go.RenamedTypeAliasReexportRecords.tone_package.ΔTone;
+```
+<!-- source: src/tests/Behavioral/RenamedTypeAliasReexportRecords/main.cs:26 -->
+```csharp
+    toner t = new tone_ΔToneᴠtoner(((tone.ΔTone)3));
+```
+<!-- source: src/tests/Behavioral/RenamedTypeAliasReexportRecords/main.cs:34-35 -->
+```csharp
+    ref var p = ref heap<RenamedTypeAliasReexportRecords.tone_package.ΔPitch>(lt.Pitch(), out var Ꮡp);
+    raiser r = new tone_ΔPitchжraiser(Ꮡp);
+```
+
+Its records:
+
+<!-- source: src/tests/Behavioral/RenamedTypeAliasReexportRecords/package_info.cs:39-40 -->
+```csharp
+[assembly: GoImplement<go.RenamedTypeAliasReexportRecords.tone_package.ΔPitch, raiser>(Pointer = true)]
+[assembly: GoImplement<go.RenamedTypeAliasReexportRecords.tone_package.ΔTone, toner>]
+```
+<!-- source: src/tests/Behavioral/RenamedTypeAliasReexportRecords/package_info.cs:48 -->
+```csharp
+[assembly: GoFieldAccess(typeof(go.RenamedTypeAliasReexportRecords.tone_package.ΔPitch))]
+```
+
+Guarded by `RenamedTypeAliasReexport` (every position the type takes in code: parameter, result, field, slice,
+map value, local, conversion, composite literal, assertion, type switch, method value, the two-hop form) and by
+`RenamedTypeAliasReexportRecords` (the spellings above; `main` imports `tonealias`, never `tone`).
+<!-- sqlite-cs W11, 2026-11-15, at master 091935257c: the second fixture read CS0426 x8 with the Go name in all
+six spellings (two GoImplement records, GoFieldAccess, the global using target, the heap type argument and the
+two adapter names), found as libc's package_info.cs
+`[assembly: GoImplement<syscall_package.Signal, os_package.ΔSignal>]`. The first renderer's arm is TS readiness
+C22e. -->
+
 ## A DOT-IMPORTED renamed type is spelled through the same alias as the qualified reference
 
 The two subsections above are about the alias metadata being **derived**; this one is about it being

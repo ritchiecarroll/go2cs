@@ -1,0 +1,9 @@
+written 2026-11-15T09:55:23Z, before the run. 100,000 distinct 1 KiB backings (97.7 MiB copied), workstation GC, Release, one process per arm.
+POH: after 3 forced collections the live copies are 0 KiB; at the sampled peak well under the total (under 20 MiB): the GC sees the copies as managed and collects the dropped backings with them.
+NATIVE (no pressure): after 3 forced collections 0 KiB (the finalizers freed them); at the sampled peak under 50 MiB, because the 1 KiB managed backings alone drive gen0 collections. The arm that would pile up is one whose backings are LARGE and few, not this one; reported, not predicted.
+NATIVE+P: after collections 0 KiB; peak at or below NATIVE's.
+LARGE ARM, written 2026-11-15T09:55:51Z after the 1 KiB readings and before this run: 200 distinct 8 MiB backings (1600 MiB copied), nothing else allocated.
+NATIVE (no pressure): bounded, peak under 400 MiB of live copies: each 8 MiB backing is a large-object allocation that counts against the gen2 budget, so the backings alone force full collections, and each collection frees the copies of the backings it collects. After 3 forced collections, 0.
+POH: peak under 400 MiB; after, 0. NATIVE+P: peak at or below NATIVE's; after, 0.
+STOP if NATIVE's peak exceeds 800 MiB (half the total): then pressure is needed, as COORD's addition says.
+RACE ARM, written 2026-11-15T09:57:44Z, before the run: 'keys where two callers got different objects' = 0 on every run; 'callback ran more than once' > 0 on at least one of 3 runs (the race is reached; if it reads 0 on all 3, the arm proves nothing and says so).

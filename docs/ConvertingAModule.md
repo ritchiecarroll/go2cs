@@ -155,15 +155,18 @@ internal static void main() {
 } // end main_package
 ```
 
-> **NOTE — platforms:** _all four steps run on **Windows** (`windows/amd64`) and **Linux** (`linux/amd64`).
-> The conversion records the platform it targets, and the go2cs packages compile and run against that
-> platform's flavor: `win-x64` for a Windows conversion, `linux-x64` for a Linux one. Use a go2cs converter
-> and `go.*` packages of the same release (`go2cs -version` names it). The output matches `go run`, including
-> `fatih/color`'s colors in an interactive terminal, on both platforms.
-> macOS (Intel and Apple silicon): packages ship for both chips, the behavioral suite passes on both, and this
-> walkthrough runs. On macOS, a package whose [roster](ValidatedTestPackages.md) row shows a macOS count
-> (`darwin:`) is validated there; a package without one is not yet validated on macOS. Other platforms and
-> architectures are tracked in the Roadmap's [Platforms section](Roadmap.md#platforms)._
+> **NOTE — platforms:** _all four steps run on **Windows** (`windows/amd64`), **Linux** (`linux/amd64` and
+> `linux/arm64`) and **macOS** (Intel and Apple silicon); the release check runs this walkthrough on every
+> platform the packages ship for. The conversion records the platform it targets, and the go2cs packages
+> compile and run against that platform's flavor: `win-x64` for a Windows conversion, `linux-x64` or
+> `linux-arm64` for a Linux one, `osx-x64` or `osx-arm64` for a macOS one. Use a go2cs converter and `go.*`
+> packages of the same release (`go2cs -version` names it). The output matches `go run`, including
+> `fatih/color`'s colors in an interactive terminal. The standard library is validated on each of these
+> platforms ([roster](ValidatedTestPackages.md)). Other platforms and architectures are tracked in the
+> Roadmap's [Platforms section](Roadmap.md#platforms)._
+<!-- 2026-11-15 (user-facing docs audit, seat 1): linux/arm64 and macOS added; release-smoke arm D (the walkthrough)
+     gates on every shipped RID, linux-arm64 included since its leg joined the shipped-RID list (os-matrix.yml, the
+     release-smoke target list). -->
 
 **3 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole
 converted dependency tree, restoring the go2cs packages on the way; opening it in Visual Studio makes the
@@ -316,7 +319,8 @@ dotnet run -c Debug
 ```
 
 On Linux and macOS, add
-`-p:GoTargetOS=linux` (or `darwin`) to `dotnet build` and `dotnet run`: a local standard library builds its
+`-p:GoTargetOS=linux` (or `darwin`) to `dotnet build` and `dotnet run`, and on Linux Arm64 also
+`-p:GoTargetArch=arm64`: a local standard library builds its
 Windows flavor unless told otherwise, and that program stops at start-up with a warning that says so. The converted C# is
 the same either way — only the reference style in the generated projects differs.
 

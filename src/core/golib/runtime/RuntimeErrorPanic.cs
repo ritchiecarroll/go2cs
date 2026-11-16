@@ -159,6 +159,35 @@ namespace go.golib;
         return new PanicException(string.Format(NamedArrayNativeViewMessage, namedArrayType.Name));
     }
 
+    private const string ManagedDerivedStructReadMessage =
+        $"{RuntimeErrorMessage}cannot read {{0}} whole through a pointer into Go storage of another type: {{0}} holds managed "
+        + "references, and the bytes at that address are not {0}'s (a reference-free value, or one field of a larger value), "
+        + "so the read would take them for references (a field read at its Go offset is unaffected)";
+    /// <summary>
+    /// THE MANAGED-DERIVED STRUCT FLOOR (B0', W14): the whole value of a Go struct that holds a managed reference, read
+    /// through a native box derived from Go storage of another type (<c>ж.NativeBox.cs</c>, <c>ValueAddress</c>).
+    /// </summary>
+    /// <remarks>
+    /// The census's class B2b with source=retained or source=pinned. Internal, because the only thrower is the native
+    /// box's read. Native-origin boxes (C memory) are not refused here; they are the deferred B2 of the same census.
+    /// </remarks>
+    internal static PanicException ManagedDerivedStructRead(Type structType)
+    {
+        return new PanicException(string.Format(ManagedDerivedStructReadMessage, structType.Name));
+    }
+
+    private const string ValueDecodeRefusedMessage =
+        $"{RuntimeErrorMessage}cannot read {{0}} as a value out of memory: {{1}}";
+    /// <summary>
+    /// B2's value decode refused (<c>NativeStructMarshal.DecodeValue</c>): a Go struct read as a VALUE through a native
+    /// box (<see cref="ж{T}.GoValue"/>) whose bytes cannot be decoded at Go's offsets, with the reason, which names the
+    /// field where there is one.
+    /// </summary>
+    internal static PanicException ValueDecodeRefused(Type structType, string reason)
+    {
+        return new PanicException(string.Format(ValueDecodeRefusedMessage, structType.Name, reason));
+    }
+
     private const string UnknownGoSizeMessage =
         $"{RuntimeErrorMessage}{{0}} of {{1}} is not known (the length of {{2}} is not carried for an unnamed array type argument)";
     private const string UnknownGoSizeInnerMessage =

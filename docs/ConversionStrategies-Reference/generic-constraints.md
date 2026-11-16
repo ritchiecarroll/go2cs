@@ -274,7 +274,7 @@ C# has no cast to or from a type parameter, so the Go conversions in `rand.N[Int
 
 ### A float converted to an integer type parameter takes gc's answer for the process's architecture
 
-`T(value.(float64))` with `T ~int32` (typescript-go's internal/tsoptions) emits the same
+`T(value.(float64))` with `T ~int32` emits the same
 `ConvertToType<T>(value._<float64>())`, and golib's `double` overload decides it. An in-range value truncates
 toward zero, as Go's float-to-integer conversion does. An out-of-range value or NaN is implementation-defined in
 Go, and gc's answer differs by GOARCH, so golib gives the answer for the architecture the process runs on:
@@ -642,9 +642,10 @@ interface and each method). An instantiation over a VALUE element needs no proxy
 `Children()` slice aliases the element's backing array exactly as in Go. Because go2cs-gen publishes the
 generic proxy for every self-referential constraint, it also gives such a method no slot and makes its
 forwarder throw the same refusal. The interface's own package still compiles: without the slot rule, a single
-`Children() []N` would break that package's build (CS0029), even when only value elements used it. The
-refusal is fatal to a conversion, so the converted standard library, which converts, reaches no refused
-shape, and no behavioral fixture does either.
+`Children() []N` would break that package's build (CS0029), even when only value elements used it. By
+default the refusal is fatal to the conversion; `-warn GO2CS2002` downgrades it to a warning, and each refused site
+then panics with the refusal text when it is reached. The converted standard library reaches no refused shape, and
+no behavioral fixture does either.
 <!-- census of 2026-10-19 (Go 1.24 corpus): 6 self-referential interfaces in std, 12 in the behavioral tree, 0 sharing
 shapes. src/go2cs/conversionDriver.go:365 `return refusePackage(options, diagnosticProxyRefused, refusal)`, fatal outside -recurse: src/go2cs/recurseRefusal.go:41 `log.Fatalf("Refusing to convert: %s\n", err)`. -->
 
@@ -1007,8 +1008,8 @@ Then every instantiation satisfies the interface the same way. The converter rec
 package-qualified, and names the adapter at each cast site with the instantiation's arguments as C# type
 arguments. `ImplementGenerator` emits ONE generic adapter, package-prefixed like every foreign adapter
 (`fieldlib_ExpectedжField<T>`, wrapping `ж<global::…fieldlib_package.Expected<T>>`). Several instantiations of
-one pair in one package therefore share it (tsc's internal/module, C33: `Expected[string]` and
-`Expected[map[string]string]` as `TypeValidatedField`):
+one pair in one package therefore share it (`Expected[string]` and `Expected[map[string]string]` as
+`TypeValidatedField`):
 
 <!-- source: src/tests/Behavioral/GenericForeignAdapterInstantiations/package_info.cs:39 -->
 ```csharp

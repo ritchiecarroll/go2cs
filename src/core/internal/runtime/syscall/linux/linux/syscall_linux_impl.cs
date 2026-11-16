@@ -61,10 +61,13 @@
 // on success, so this is a documented edge rather than an active defect; the only true fix is an
 // instruction-level bottom, which needs assembly the managed model cannot express.
 //
-// PORTABILITY, for the arm64 increment. Both the register mapping and r2's meaning are
-// architecture-specific: asm_linux_arm64.s puts a1..a6 in X0..X5 with the number in X8 and reads
-// r2 from X1 — which holds a2 on entry, not a3 — so an arm64 flavor of this file must echo a2 and
-// must re-run probe (2) there rather than inherit this one's answer. The variadic question is also
+// PORTABILITY. r2's meaning is architecture-specific, and this one file serves every linux flavour, so
+// rawSyscall6 chooses it by the architecture the process runs as (s_r2IsA3 below): asm_linux_arm64.s puts
+// a1..a6 in X0..X5 with the number in X8 and reports r2 from X1, which holds a2, not a3. So does every
+// other Linux architecture Go supports (arm, riscv64, loong64, ppc64, s390x); only the x86 family's second
+// return register (DX/EDX) carries a3. Until 2026-11-16 this file echoed a3 on arm64 too, latent because
+// no reachable converted code reads r2 (the reader census: runtime.runPerThreadSyscall alone, unreachable
+// in go2cs); GolibTests' LinuxRawSyscallR2Tests guards it on both hosted linux legs. The variadic question is also
 // live on that target: standard AAPCS64 passes variadic integer arguments in the same registers as
 // named ones, but Apple's arm64 ABI deliberately does not, so the "declare it fixed" shortcut is a
 // per-platform judgment, not a general one. Library resolution is a third: LibraryImport("libc")
@@ -152,7 +155,13 @@ private static (uintptr r1, uintptr r2, uintptr errno) rawSyscall6(uintptr num, 
 
     return result == -1
         ? (r1, default(uintptr), new uintptr((nuint)Marshal.GetLastPInvokeError()))
-        : (r1, a3, default(uintptr));
+        : (r1, s_r2IsA3 ? a3 : a2, default(uintptr));
 }
+
+// r2 is the second return register Go's asm reports after the trap, which the kernel leaves holding the argument it
+// carried in: DX (a3) on the x86 family (asm_linux_amd64.s, `MOVQ DX, BX`), and a2's register everywhere else
+// (asm_linux_arm64.s, `MOVD R1, r2+64(FP)`). The process architecture is the ABI the call runs under, an emulated
+// x64 process on arm64 hardware included; a static readonly, so the JIT folds the choice.
+private static readonly bool s_r2IsA3 = RuntimeInformation.ProcessArchitecture is Architecture.X64 or Architecture.X86;
 
 } // end linux_package

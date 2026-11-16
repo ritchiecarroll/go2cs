@@ -127,8 +127,8 @@ library, and the runtime and converter work still ahead. The completed phases ar
 [Roadmap history](RoadmapHistory.md). Dates are month or quarter targets.
 
 **Where things stand.** Every implementable package of the converted standard library validates
-against Go's own tests on Windows and Linux, and the same validation is under way on macOS, package
-by package. `go2cs -tests -recurse` validates third-party modules against their own tests the same way,
+against Go's own tests on Windows, on Linux (x64 and arm64) and on macOS (Intel and Apple silicon).
+`go2cs -tests -recurse` validates third-party modules against their own tests the same way,
 and converted modules are published as NuGet packages, listed on [nugetgo.net](https://nugetgo.net).
 [Validated Test Packages](ValidatedTestPackages.md) carries the current state of the standard library, and
 [Validated Modules](ValidatedModules.md) that of third-party modules.
@@ -175,15 +175,15 @@ It also carries the cgo work under [cgo](#cgo) as "What converts".
 ## Phase 4: validation against Go's own tests
 
 **In short.** Phase 4 checks the converted standard library against Go's own tests, package by package,
-so that "it works" is measured and not claimed. It is done on Windows and Linux, under way on macOS, and
-has one planned extension.
+so that "it works" is measured and not claimed. It is done on Windows, Linux and macOS, and has one
+planned extension.
 
 - **Phases 4A to 4C are complete.** The test pipeline, subtests and parallelism, and the package-by-package
   validation are done: every implementable package validates on Windows and on Linux, x64 and arm64
   ([Roadmap history](RoadmapHistory.md#phase-4--convert-and-run-go-package-tests)).
-- **macOS parity is in progress.** A roster row gains its macOS count when the package validates on both Apple
-  silicon and Intel, each chip compared with Go built for that chip. The [roster](ValidatedTestPackages.md) rows
-  carry the live state; see [Platforms](#platforms).
+- **macOS parity is reached.** Every package that applies to macOS validates on Apple silicon and on Intel, each
+  chip compared with Go built for that chip; where the two chips' counts differ, the
+  [roster](ValidatedTestPackages.md) row shows both. See [Platforms](#platforms).
 - **Phase 4D is planned.** It widens validation to examples, fuzz seed corpora and benchmarks
   ([below](#phase-4d-examples-fuzz-seed-corpora-and-benchmarks)).
 
@@ -282,8 +282,10 @@ runtime-library change that cuts the memory and image size of the publish of a l
 Converted packages are built for the default x64 instruction set: `x86-64-v3` gives no gain across the
 benchmark suite on `win-x64`, and an image built that way does not start without AVX2.
 
-The release check publishes a program with Native AOT and runs it on `linux-x64`, `win-x64` and
-`osx-arm64`. On `osx-x64` the publish is read when it finishes inside the hosted runner's time limit, and
+The release check publishes a program with Native AOT and runs it on `linux-x64`, `linux-arm64`, `win-x64` and
+`osx-arm64`.
+<!-- 2026-11-15 (P4, docs audit Q5): linux-arm64 added (os-matrix.yml aot-smoke, all five shipped RIDs since seat
+     S5c); the rest of the Native AOT lines wait for P1's PublishAot reading. Kept word-identical with KnownIssues. --> On `osx-x64` the publish is read when it finishes inside the hosted runner's time limit, and
 reported as not measured when it does not.
 
 **The cost today is real.** With the default trim, Native AOT compiles every `go.*` assembly a program
@@ -293,8 +295,8 @@ A build, `dotnet run` and a publish without Native AOT are not affected.
 
 ## Platforms
 
-**In short.** go2cs is validated on x64 Windows and on Linux, x64 and arm64. macOS, on Intel and on Apple
-silicon, has packages and is being validated package by package. Other platforms are not supported yet.
+**In short.** go2cs is validated on x64 Windows, on Linux, x64 and arm64, and on macOS, Intel and Apple
+silicon. Other platforms are not supported yet.
 
 **Windows and Linux.** The converter runs on both, and the standard library is multi-target on disk:
 platform-shared files sit flat, and a package whose Go source varies by platform keeps one folder per target.
@@ -305,9 +307,9 @@ Windows record. A few Linux operational items remain open.
      and the multi-target design (internal records, unlinked 2026-10-26, OQ-1). -->
 
 **macOS (Intel and Apple silicon):** packages ship for both chips, the behavioral suite passes on both,
-and the README walkthrough runs. A roster row gains its macOS count only when both chips agree with Go;
-until a package has its count, don't expect it to be fully operational there. The work finds macOS-only gaps,
-each fixed as it is found. The compile is checked daily in CI on macOS arm64 and x64 runners
+and the standard library validates on both: each chip is compared with Go built for that chip, and where
+the two chips' counts differ the roster row shows both. The two Windows-only packages are the only rows
+without a macOS reading. The compile is checked daily in CI on macOS arm64 and x64 runners
 ([`CIMatrix.md`](CIMatrix.md)).
 
 **Other platforms.** A build for a platform the packages do not ship is refused, or, on `win-arm64`, warned
@@ -564,7 +566,7 @@ something else finishing first.
 
 | When | Planned |
 |:--|:--|
-| Now | 1.26.11.1: the SQLite and TypeScript programs that gate it. macOS validation of the standard library. The trimming work for Native AOT. The start-up cost of a converted process. |
+| Now | 1.26.11.1: the SQLite and TypeScript programs that gate it. The trimming work for Native AOT. The start-up cost of a converted process. |
 | Next | The release after 1.26.11.1: goroutine scheduling and the next cgo steps ([The next two releases](#the-next-two-releases)). The .NET 11 measurement stage (.NET 11 ships in November 2026). The generic-methods design for Go 1.27. The decision on how often later hops run. |
 | Q1 2027 | Go 1.27 hop, by about February. The Phase 4D design kickoff. The allocation work, whose design is written. |
 | Unscheduled | Inline C and callbacks from C (cgo Phases 4 and 5). The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
@@ -575,7 +577,7 @@ something else finishing first.
 
 | What | Where |
 |:--|:--|
-| Validation | [Validated Test Packages](ValidatedTestPackages.md), the authoritative roster: each package's verdict counts on Windows and Linux, its macOS count once it has one, its disclosures with their stated reasons, and its proof page. Its header carries the current totals. |
+| Validation | [Validated Test Packages](ValidatedTestPackages.md), the authoritative roster: each package's verdict counts on Windows, Linux and macOS, its disclosures with their stated reasons, and its proof page. Its header carries the current totals. |
 | Third-party modules | [Validated Modules](ValidatedModules.md): each validated module, its version, the platforms it was measured on, and its proof pages. |
 | Compilation | The whole converted standard library builds with zero errors (`src/go2cs-stdlib.slnx`) for Windows and Linux; the macOS compile runs daily in CI ([`CIMatrix.md`](CIMatrix.md)). |
 | The converter | Hundreds of Go-vs-C# behavioral projects under `src/tests/Behavioral`, each transpiled, compiled, compared against a committed golden and, where it is a runnable program, output-compared against Go. |
