@@ -1319,17 +1319,22 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
 // Size_ from, so answering here through it makes unsafe.Sizeof and reflect.Type.Size() the same
 // rule rather than two — the unification GoReflect.TypeLayout.cs recorded as deferred pending a
 // named consumer. Dims come from the live value because array<T> carries its Go length in the
-// INSTANCE. Marshal.SizeOf remains the fallback for the shapes GoSizeOf declines (-1), so no
-// operand that resolves today stops resolving.
+// INSTANCE. A shape TryGoSizeOf declines (a type past the address space, an array length nothing
+// carries, the depth bound) is REFUSED BY NAME. Marshal.SizeOf<T>() was the fallback here, and it
+// answered a MARSHALLING size, which is not Go's: dnsmessage's SVCParam marshals as 48 where Go says
+// 32, and a struct holding a [1<<62]int64 field (2^65 bytes in Go) marshals as 16. And because the
+// call was generic, ILC compiled a Marshal struct thunk for every T that reaches this method: for a T
+// holding a slice, string or array value field (SVCParam, string, debug/macho.Symbol,
+// debug/pe.COFFSymbol) that thunk is a "will always throw" stub in every Native AOT image reaching
+// it, though no T in the corpus ever took the branch (each answers through TryGoSizeOf).
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
-    // signed form reported a type of 2^63 bytes and up as -1, indistinguishable from
-    // "unknown", and this line then answered with Marshal.SizeOf<T>() -- a DIFFERENT layout
-    // model's number for a type whose Go size was in fact known exactly. The marshalled
-    // fallback now applies only where the Go size genuinely is not derivable.
-    return GoReflect.TryGoSizeOf(typeof(T), GoReflect.ArrayDimsOfValue(x), out nuint size)
+    // signed form reported a type of 2^63 bytes and up as -1, indistinguishable from "unknown".
+    nint[]? dims = GoReflect.ArrayDimsOfValue(x);
+
+    return GoReflect.TryGoSizeOf(typeof(T), dims, out nuint size)
         ? (uintptr)size
-        : (uintptr)Marshal.SizeOf<T>();
+        : throw new PanicException($"runtime error: unsafe.Sizeof: the Go size of {GoReflect.GoTypeName(typeof(T), dims)} cannot be derived (GoReflect.TryGoSizeOf declined it)");
 }
 
 // Offsetof returns the offset within the struct of the field represented by x,
