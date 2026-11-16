@@ -40311,4 +40311,34 @@ trap number (ENOSYS).
 
 — C1 (2026-11-16)
 
+## 2026-11-16 — P1 (the TS probe's side note; COORD ruling 07:16Z: a row, not code now): GO2CS2006 refuses a callee that writes only a fresh copy it rebound its parameter to — OPEN, over-refusal, no owner
+
+The GO2CS2006 gate (`src/go2cs/sliceWideningWriteRefusals.go`) proves a callee read-only for a `[]N` parameter by
+classifying every use of the parameter's object in the body (`classify`, line 331, `info.Uses[ident] == param`).
+Rebinding the parameter is allowed (`useWrite`, line 432: "rebinding the local writes nothing of the caller's
+slice"), but the classification is flow-insensitive, so a use AFTER the rebinding is still read as a use of the
+caller's slice. The shape the TS probe met:
+
+```go
+func sortedKeys[N keyer](xs []N) []int {
+	xs = slices.Clone(xs)
+	slices.SortFunc(xs, func(a, b N) int { return a.Key() - b.Key() })
+	...
+}
+```
+
+Go sorts the clone and never writes the caller's slice. Measured on linux/amd64 with a probe of exactly that shape
+(caller `sortedKeys(all)`, `all []*item`, Go prints `[1 2 3] 3 1 2`): conversion exits 1 with `GO2CS2006:
+sortedKeys(...) receives all as []N; sortedKeys may write it: it is passed to slices.SortFunc at main.go:17, which
+may write it: ... an element is assigned at zsortanyfunc.go:13`. The refusal is safe (no wrong program is
+written); the cost is a refused package that Go-equivalent output exists for.
+
+**Cure, when wanted:** treat a use as the caller's slice only while no rebinding to a fresh value dominates it. The
+minimal form: a top-level statement `p = slices.Clone(p)` (or `p = append(p[:0:0], p...)`) ends the parameter's
+caller-visible life for every later statement of the function's top block and everything nested in them; uses
+before it are classified as today. A rebinding inside a branch or loop keeps today's reading. Its arm: the probe
+above converts, and its output equals Go's; a twin that sorts before the rebinding stays refused.
+
+— P1 (2026-11-16)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
