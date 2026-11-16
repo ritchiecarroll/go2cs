@@ -3598,7 +3598,7 @@ func decodePort(raw *rawInet4) int {
 	return int(p[0])<<8 + int(p[1])
 }
 ```
-<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:31-40 -->
+<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:32-41 -->
 ```csharp
 internal static void encodePort(ж<rawInet4> raw, nint port) {
     var p = @unsafe.ArrayPointer<byte>.Of(raw.Ꮡport, 2);
@@ -3627,7 +3627,7 @@ func (sa *sockInet4) sockaddr() {
 	sa.raw.addr = sa.addr
 }
 ```
-<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:160-167 -->
+<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:163-170 -->
 ```csharp
 internal static void sockaddr(this ж<sockInet4> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
