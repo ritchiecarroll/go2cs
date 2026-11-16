@@ -1,0 +1,7 @@
+arm 0 rc=0: pointer root slice: ptr | 
+arm 1 rc=0: pointer root local: 80 116 80 | 
+arm 2 rc=0: variable root slice: var | 
+arm 3 rc=0: variable root local: 86 97 86 | 
+arm 4 rc=0: package root slice: glob | 
+arm 5 rc=0: two-hop slice: two | 
+arm 6 rc=0: two-hop local: 116 87 87 | 

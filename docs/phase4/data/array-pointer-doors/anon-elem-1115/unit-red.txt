@@ -1,0 +1,6 @@
+arrayPointerDoorAnonStructElement_test.go:138: the conversion recorded 6 unresolved dynamic type(s), which ends it: [{
+struct{nList int32; aList uintptr} <out>/example.com/anonelemdoor/main.cs 26} {struct{count int32; next uintptr} <out>
+/example.com/anonelemdoor/main.cs 32} {struct{name uintptr; x example.com/anonelemdoor.tokenizer} <out>/example.com/an
+onelemdoor/main.cs 43} {struct{lo uint16; hi uint16} <out>/example.com/anonelemdoor/main.cs 53} {struct{tag uint32; si
+ze uint32} <out>/example.com/anonelemdoor/main.cs 61} {struct{a uint16; b uint16} <out>/example.com/anonelemdoor/main.
+cs 71}]

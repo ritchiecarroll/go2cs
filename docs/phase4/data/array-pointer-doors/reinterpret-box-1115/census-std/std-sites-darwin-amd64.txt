@@ -1,0 +1,15 @@
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_bsd.go:167
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_bsd.go:180
+hook=false other-elem root-value-ident direct-slice root-struct-holds-reference field-array-of-numbers fits=true	os	dir_darwin.go:77
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-array-of-numbers fits=false	runtime	mgcmark_greenteagc.go:202
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-array-of-numbers fits=false	runtime	mgcmark_greenteagc.go:948
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-array-of-numbers fits=false	runtime	mgcmark_greenteagc.go:949
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	net	cgo_unix.go:146
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	net	cgo_unix.go:150
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	runtime	rand.go:245
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_bsd.go:258
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_bsd.go:266
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_unix.go:338
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_unix.go:351
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_unix.go:365
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_unix.go:378

@@ -1,0 +1,7 @@
+# read by COORD on the i7, 2026-11-15: census-main.go from 235efa55be built in its own module (golang.org/x/tools v0.52.0,
+# go1.26.11, GOTOOLCHAIN=local), run from the sqlite-cs demo module (sqlite-cs a5a508c7e1; demo/go.mod pins
+# modernc.org/sqlite v1.62.0, modernc.org/libc v1.80.1, mathutil v1.7.1, memory v1.12.1, x/sys v0.49.0):
+#   hdrcensus -goos linux -goarch arm64 modernc.org/sqlite/... modernc.org/libc/...   (rc=0)
+# transcribed by H from COORD's post; the tool prints nothing more than these lines for an empty census.
+target linux/arm64 tests=false; files 384
+   none

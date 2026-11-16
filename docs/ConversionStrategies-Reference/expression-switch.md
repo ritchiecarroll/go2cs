@@ -199,8 +199,7 @@ a clause that ends in a `for` with no condition reads as falling out of the swit
 that is not the last clause did not set the flag at all. So the trailing return also asks the Go
 specification's rule for a terminating statement (`isGoSpecTerminating`, given the switch's label so a
 `break Label` counts). The switch has a default, no clause breaks out of it, and every clause ends in a
-terminating statement or a `fallthrough`. modernc.org/libc's `(*mutex).lock` is the witness (sqlite-cs
-row S13):
+terminating statement or a `fallthrough`. modernc.org/libc's `(*mutex).lock` is the witness:
 
 ```go
 switch typ {
@@ -222,7 +221,7 @@ terminating and keeps its own final return. Guarded by `TerminatingSwitchDefault
 leading default, a middle default and a non-terminating control, output-compared vs Go.
 
 ## A clause's `else` may only be dropped when EVERY preceding clause terminates
-Since seat #28 this governs only a switch with `fallthrough`: the shape below has none, so it now
+This governs only a switch with `fallthrough`<!-- since seat #28 -->: the shape below has none, so it
 emits as a pattern switch, as the excerpt from `src/core` below shows. In the if-chain lowering the converter omits the `else` before a clause when the preceding clause
 ended in a `return` — the chain is then unnecessary, since control cannot reach the later clause
 anyway. Dropping the `else` is sound only when **every** preceding clause terminates; a *shallow* "the

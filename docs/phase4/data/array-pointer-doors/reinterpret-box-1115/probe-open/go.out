@@ -1,0 +1,6 @@
+promoted field: prom
+field of a slice element: elem
+field of a call's result: call
+promoted field, embedded field written out: prom
+slice element through a pointer variable: Elem 69
+call's result through a pointer variable: call

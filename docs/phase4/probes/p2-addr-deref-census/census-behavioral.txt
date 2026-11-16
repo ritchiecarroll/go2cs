@@ -1,0 +1,10 @@
+bare	AddressOfFieldThroughConversion/main.go:110
+bare	AddressOfFieldThroughConversion/main.go:121
+bare	AddressOfFieldThroughConversion/main.go:124
+bare	AddressOfFieldThroughConversion/main.go:45
+bare	AddressOfFieldThroughConversion/main.go:48
+bare-conv	AddressOfFieldThroughConversion/main.go:115
+bare-conv	AddressOfFieldThroughConversion/main.go:116
+bare-conv	AddressOfFieldThroughConversion/main.go:117
+bare-conv	AddressOfFieldThroughConversionNative/main.go:126
+bare-conv	AddressOfFieldThroughConversionNative/main.go:130

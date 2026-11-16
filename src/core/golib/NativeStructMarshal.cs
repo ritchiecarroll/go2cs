@@ -12,6 +12,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using go.golib;
 using static go.GoReflect;
 
 namespace go;
@@ -403,7 +404,10 @@ namespace go;
     // the cap only turns a misclassification into "unsupported" rather than a stack overflow.
     private const int MaxDepth = 32;
 
-    private static Shape classify(Type type, int depth, bool nilPointersAsZero)
+    // nestedArrays admits an array of arrays of leaves ([4][256]uint32) for a VALUE decode (DecodeValue) only. A system
+    // call's argument keeps the one-level rule: its encode is not written for nesting, and widening what crosses into
+    // the kernel is not this admission's business.
+    private static Shape classify(Type type, int depth, bool nilPointersAsZero, bool nestedArrays = false)
     {
         if (depth > MaxDepth || KindOf(type) != GoReflect.Struct || !TryGoSizeOf(type, null, out nuint size) || GoFieldOffsets(type) is not { } offsets)
             return Unsupported;
@@ -446,7 +450,7 @@ namespace go;
             switch (kind)
             {
                 case GoReflect.Struct:
-                    Shape nested = classify(field.Type, depth + 1, nilPointersAsZero);
+                    Shape nested = classify(field.Type, depth + 1, nilPointersAsZero, nestedArrays);
 
                     if (nested.PointerField is not null)
                         return new Shape(false, 0, field.Name + "." + nested.PointerField);
@@ -457,12 +461,13 @@ namespace go;
                     hasPointerWords |= nested.HasPointerWords;
                     break;
                 case GoReflect.Array:
-                    Type? element = ElementType(field.Type);
+                    int levels = nestedArrays && field.ArrayDims is { Length: > 1 } all ? all.Length : 1;
+                    Type? element = arrayLeaf(field.Type, levels);
 
                     if (element is null || isReferenceKind(KindOf(element)))
                         return element is null ? Unsupported : new Shape(false, 0, field.Name + "[]");
 
-                    if (field.ArrayDims is not { Length: 1 } || Leaf.Of(element) is null)
+                    if (field.ArrayDims?.Length != levels || Leaf.Of(element) is null)
                         return Unsupported;
 
                     break;
@@ -500,6 +505,18 @@ namespace go;
         }
 
         return true;
+    }
+
+    // The element an array type reaches through `levels` array levels ([4][256]uint32 through 2 is uint32), or null when
+    // a level is not an array.
+    private static Type? arrayLeaf(Type arrayType, int levels)
+    {
+        Type? element = ElementType(arrayType);
+
+        for (int level = 1; level < levels && element is not null; level++)
+            element = KindOf(element) == GoReflect.Array ? ElementType(element) : null;
+
+        return element;
     }
 
     private static bool lastFieldIsZeroSize(GoFieldInfo field) =>
@@ -558,10 +575,47 @@ namespace go;
         }
     }
 
+    private static readonly ConcurrentDictionary<Type, Shape> s_valueShapes = new();
+
+    /// <summary>
+    /// The Go struct value of type <paramref name="type"/> whose bytes are at <paramref name="source"/>, decoded at Go's
+    /// own field offsets into a fresh managed value: Go's <c>*p</c> read as a value through a native box
+    /// (<see cref="ж{T}.GoValue"/>; B2, COORD ruling 2026-11-15).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The admission is the system call's (scalars, arrays of scalars, nested structs of the same, at Go's offsets) with
+    /// one widening, arrays of arrays, since a value decode allocates its arrays fresh at the field's dims. A struct
+    /// outside it is refused by name: a field holding any other reference (a pointer, string, slice, map, channel, func,
+    /// interface or unsafe.Pointer) has no image in memory, which is P5's B2 and not this decode, and a layout this class
+    /// cannot prove is not guessed at.
+    /// </para>
+    /// <para>
+    /// Every array is ALLOCATED rather than decoded into the zero value's: a copy shares nothing with the memory it was
+    /// read from, and with any earlier copy.
+    /// </para>
+    /// </remarks>
+    internal static object DecodeValue(Type type, byte* source)
+    {
+        Shape shape = s_valueShapes.GetOrAdd(type, static t => classify(t, 0, nilPointersAsZero: false, nestedArrays: true));
+
+        if (!shape.Marshallable)
+        {
+            throw RuntimeErrorPanic.ValueDecodeRefused(type, shape.PointerField is { } field
+                ? $"field {field} is a managed reference, and memory holds no image of one"
+                : "its fields cannot be decoded at Go's offsets (an embedded field, an array whose length the type does not carry, or a leaf whose managed size is not Go's)");
+        }
+
+        object value = ZeroValueOf(type)!;
+        decode(value, type, source, fresh: true);
+        return value;
+    }
+
     // Decodes INTO the boxed struct value in place: a scalar through its FieldInfo, an array element
     // through the array's own storage (which the value shares with the box), a nested struct into its
-    // own boxed copy that is then set back.
-    private static void decode(object structValue, Type type, byte* source)
+    // own boxed copy that is then set back. FRESH (a value decode) allocates each array at the field's dims and sets it,
+    // so the result shares no storage with the value it started from.
+    private static void decode(object structValue, Type type, byte* source, bool fresh = false)
     {
         GoFieldInfo[] fields = GoFields(type);
         nint[] offsets = GoFieldOffsets(type)!;
@@ -576,7 +630,7 @@ namespace go;
             {
                 case GoReflect.Struct:
                     object nested = member.GetValue(structValue)!;
-                    decode(nested, field.Type, at);
+                    decode(nested, field.Type, at, fresh);
                     member.SetValue(structValue, nested);
                     break;
                 case GoReflect.Pointer:
@@ -584,11 +638,14 @@ namespace go;
                     // A pointer word has no managed image to decode into: the nil the call carried stays.
                     break;
                 case GoReflect.Array:
-                    Leaf element = Leaf.Of(ElementType(field.Type)!)!;
-                    IArray array = (IArray)member.GetValue(structValue)!;
+                    nint[] dims = field.ArrayDims!;
+                    Leaf element = Leaf.Of(arrayLeaf(field.Type, dims.Length)!)!;
+                    IArray array = (IArray)(fresh ? MakeSizedArray(field.Type, dims, 0) : member.GetValue(structValue)!);
 
-                    for (nint index = 0; index < array.Length; index++)
-                        array[index] = element.Read(at + index * element.Size);
+                    decodeArray(array, dims, 0, element, at);
+
+                    if (fresh)
+                        member.SetValue(structValue, array);
 
                     break;
                 default:
@@ -596,6 +653,28 @@ namespace go;
                     break;
             }
         }
+    }
+
+    // One array level at a time: the innermost level reads leaves, each outer level hands its elements (arrays sharing the
+    // outer's storage) their slice of the bytes. Go's array of arrays is dense, so a level's stride is the product of the
+    // dims below it times the leaf's size.
+    private static void decodeArray(IArray array, nint[] dims, int level, Leaf element, byte* source)
+    {
+        if (level == dims.Length - 1)
+        {
+            for (nint index = 0; index < array.Length; index++)
+                array[index] = element.Read(source + index * element.Size);
+
+            return;
+        }
+
+        nint stride = element.Size;
+
+        for (int inner = level + 1; inner < dims.Length; inner++)
+            stride *= dims[inner];
+
+        for (nint index = 0; index < array.Length; index++)
+            decodeArray((IArray)array[index]!, dims, level + 1, element, source + index * stride);
     }
 
     // ---- a leaf: one unmanaged value whose managed size IS its Go size, copied as raw bytes ----

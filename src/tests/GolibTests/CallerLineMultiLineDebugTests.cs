@@ -38,7 +38,10 @@ public class CallerLineMultiLineDebugTests
 
     // The whole test's budget: under the os-matrix stage's 10-minute --blame-hang-timeout, with room left for
     // ChildTimeoutDiagnostics to dump a timed-out child (see ChildDeadline).
-    private const int BudgetMs = 360_000;
+    // 540 s (was 360 s, 2026-11-15): on an idle linux box the whole test took 255 s alone, 85 per cent of the old 300 s
+    // build cap, and under load the build overran that cap. The build cap is now 480 s inside this budget, and 540 s keeps
+    // the named failure 60 s inside the stage's 10-minute watchdog, room for the dump.
+    private const int BudgetMs = 540_000;
 
     [TestMethod]
     public void EveryShapeEqualsGoInADebugBuild()
@@ -63,7 +66,7 @@ public class CallerLineMultiLineDebugTests
 
         // The program runs on this host, so it is built for this host's GOOS. Without it the corpus builds its default
         // flavour, windows, and on linux syscall/windows' dll loader throws at package init (every linux run since 10-20).
-        (int buildCode, string buildOut) = Run(dotnet!, ["build", Path.Combine(project, "CallerLineMultiLine.csproj"), "-c", "Debug", "-nologo", "-nodeReuse:false", "-p:go2csPath=" + go2csPath, "-p:GoTargetOS=" + HostGoos(), "-p:CustomBeforeMicrosoftCommonTargets=" + releaseReferences], project, deadline.For(300_000));
+        (int buildCode, string buildOut) = Run(dotnet!, ["build", Path.Combine(project, "CallerLineMultiLine.csproj"), "-c", "Debug", "-nologo", "-nodeReuse:false", "-p:go2csPath=" + go2csPath, "-p:GoTargetOS=" + HostGoos(), "-p:CustomBeforeMicrosoftCommonTargets=" + releaseReferences], project, deadline.For(480_000));
         Assert.AreEqual(0, buildCode, $"the Debug build failed:{Environment.NewLine}{Tail(buildOut)}");
 
         (int csCode, string csOut) = Run(dotnet!, [Path.Combine(project, "bin", "Debug", "net10.0", "CallerLineMultiLine.dll")], project, deadline.For(120_000));
