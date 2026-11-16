@@ -18,12 +18,14 @@ ExchangePointerWord
 field
 GetHashCode
 GetType
+GoValue
 IsNative
 IsNilPointer
 IsNull
 IsOrderTokenAt
 IsPinnedAt
 NativeAddress
+nilcheck
 of
 OnHeaderStore
 OrTypedNil

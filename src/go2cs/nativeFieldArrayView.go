@@ -43,9 +43,13 @@ import (
 // `(*[N]T)(unsafe.Pointer(&p.f))[i]`, reads through ElementRef too (convIndexExpr.go): it went through Value,
 // which the view refuses on every root (docs/phase4/DESIGN-array-pointer-doors.md, section 18).
 //
-// SCOPE, kept to the one site class the census found (12 sites across 5 converted files): ONE field
-// hop off a pointer-typed identifier, a numeric element type, and a different element type than the
-// field's (the same-type view stays array<T>.AliasPointer). Anything else keeps the raw route.
+// SCOPE: the address of a field reached by one or more field selections off a variable (`&p.f`,
+// `&sa.raw.Port`, `&s.f`, `&global.f`), a numeric element type, and a different element type than the
+// field's (the same-type view stays array<T>.AliasPointer). Anything else keeps the raw route. It was ONE
+// field hop off a pointer-typed identifier, the one site class the first census found (12 sites across 5
+// converted files), until docs/phase4/DESIGN-array-pointer-doors.md, section 19: golang.org/x/sys writes
+// a port through `&sa.raw.Port`, two selections deep, and the raw route's pointer over such a field has no
+// array behind its Value on any root.
 
 // nativeFieldArrayView is the one shape the door serves.
 type nativeFieldArrayView struct {
@@ -78,29 +82,50 @@ func (v *Visitor) nativeFieldArrayViewOf(callExpr *ast.CallExpr, arg ast.Expr) (
 		return nativeFieldArrayView{}, false
 	}
 
-	sel, ok := ast.Unparen(unary.X).(*ast.SelectorExpr)
-
-	if !ok {
+	if !v.isFieldSelectionChainOffVariable(unary.X) {
 		return nativeFieldArrayView{}, false
 	}
 
-	selection := v.info.Selections[sel]
+	return nativeFieldArrayView{field: unary, elem: targetArr.Elem(), length: targetArr.Len()}, true
+}
 
-	if selection == nil || selection.Kind() != types.FieldVal || len(selection.Index()) != 1 {
-		return nativeFieldArrayView{}, false
+// isFieldSelectionChainOffVariable reports whether expr is one or more field selections, each of a field
+// declared in the type it is selected from, off a variable: `p.f`, `sa.raw.Port`, `s.f` for a struct variable,
+// `global.f`. That is every shape whose address the converter already emits as the field's own pointer
+// (`p.Ꮡf`, `Ꮡsa.Ꮡraw.ᏑPort`, `Ꮡs.Ꮡf`), which is what the helper takes. A promoted field (a selection that
+// passes through an embedded field), a root that is not an identifier (an index, a call, a dereference
+// written out) and a package-qualified name keep the raw route.
+func (v *Visitor) isFieldSelectionChainOffVariable(expr ast.Expr) bool {
+	sel, ok := ast.Unparen(expr).(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	for {
+		selection := v.info.Selections[sel]
+
+		if selection == nil || selection.Kind() != types.FieldVal || len(selection.Index()) != 1 {
+			return false
+		}
+
+		inner, ok := ast.Unparen(sel.X).(*ast.SelectorExpr)
+
+		if !ok {
+			break
+		}
+
+		sel = inner
 	}
 
 	root, ok := ast.Unparen(sel.X).(*ast.Ident)
 
 	if !ok {
-		return nativeFieldArrayView{}, false
+		return false
 	}
 
-	if _, ok := v.info.TypeOf(root).Underlying().(*types.Pointer); !ok {
-		return nativeFieldArrayView{}, false
-	}
-
-	return nativeFieldArrayView{field: unary, elem: targetArr.Elem(), length: targetArr.Len()}, true
+	_, ok = v.info.Uses[root].(*types.Var)
+	return ok
 }
 
 // nativeFieldArrayViewEmission renders the unsafe package's helper, which carries the door and the raw

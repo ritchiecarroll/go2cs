@@ -91,7 +91,7 @@ gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=comp
 | `nugetgo_feed` | a NuGet v3 feed URL, or `git:REF:FOLDER`, optional | `nugetgo-behavior` only. Blank takes int.nugettest.org, where module releases are rehearsed. `git:REF:FOLDER` is a folder of nupkgs in this repository at a branch or commit, for a package no gallery serves: the plan resolves REF to one commit, and each leg extracts the folder and passes it to the row as a local folder feed. The go.* closure still restores from nuget.org. |
 | `nugetgo_feed_sha256` | 64 hex digits | `nugetgo-behavior` with a `git:` feed only, and required there: the SHA-256 of the package's nupkg in that folder. Each leg refuses a nupkg that hashes otherwise. Refused with a gallery feed. |
 | `aot_bound_minutes` | 1-340, optional | `aot-smoke` only: the AOT step's own limit. Blank takes 330 (5 h 30 m). An expired bound reads NOT MEASURED (timeout) on osx-x64 and fails the leg on linux-x64 and win-x64. A small value makes the bound fire on purpose. |
-| `arch` | `x64` · `arm64` · `both` | `goos` `linux` only. `x64`, the default, is the `ubuntu-latest` leg (`linux-x64`) every linux dispatch runs; a dispatch that omits the input, and the schedule, derive the same matrix as before the input existed. `arm64` runs the `ubuntu-24.04-arm` leg (`linux-arm64`) instead, and `both` runs the two. Until the linux/arm64 flavour exists (no `linux-arm64/` folder under `src/core`), the arm leg is a **calibration**: it builds the linux/amd64 flavour, so it runs `census` and `golib-tests` only, its environment report says `calibration: YES`, and it banks nothing. Every other stage refuses it by name, as do `release-smoke`, `aot-smoke` and `nugetgo-behavior`, which run the shipped RIDs. Once the flavour exists, the arm leg is no calibration: the plan gives it `arch: arm64`, which the leg binds as `GoTargetArch` beside `GoTargetOS`, so it builds the linux/arm64 flavour. `census` and `golib-tests` run there. `behavioral-smoke`, `behavioral-full`, `behavioral-stderr`, `sweep-shard` and `stack-probe` stay refused by name until seat S3 (the linux hand-owns at arm64) lands, because they run converted programs. Every leg that builds the corpus opens with a **flavour probe** (`.github/flavour-probe.ps1`). It reads which `zgoarch_<GOARCH>.cs` `internal/goarch` compiles, and fails the leg when that is not the arch the plan gave it (amd64 when it gave none): an unbound arm leg compiles amd64 and stops there. Before it builds, the `pack` job runs `.github/pack-flavour-guard.ps1`: it reads push-nuget's GOOS/GOARCH pair map, refuses the pack unless linux-arm64 packs at linux/arm64 and every other RID at amd64, and runs the same probe for each pair with the `-p:GoTargetOS` and `-p:GoTargetArch` the pack passes (seat S6). Its budgets take the mac legs' 1.5x until its own runs replace them. |
+| `arch` | `x64` · `arm64` · `both` | `goos` `linux` only. `x64`, the default, is the `ubuntu-latest` leg (`linux-x64`) every linux dispatch runs; a dispatch that omits the input, and the schedule, derive the same matrix as before the input existed. `arm64` runs the `ubuntu-24.04-arm` leg (`linux-arm64`) instead, and `both` runs the two. The plan gives the arm leg `arch: arm64`, which the leg binds as `GoTargetArch` beside `GoTargetOS`, so it builds the linux/arm64 flavour. `census`, `golib-tests` and `sweep-shard` run there. `behavioral-smoke`, `behavioral-full`, `behavioral-stderr` and `stack-probe` are refused on it by name until the linux hand-owned runtime files are arm64's, because they run converted programs. `release-smoke`, `aot-smoke` and `nugetgo-behavior` refuse the input: they already run every shipped RID, linux-arm64 included. (A tree with no `linux-arm64/` folder under `src/core` runs the arm leg as a **calibration**: it builds the linux/amd64 flavour, runs `census` and `golib-tests` only, says `calibration: YES` in its environment report, and banks nothing.) Every leg that builds the corpus opens with a **flavour probe** (`.github/flavour-probe.ps1`). It reads which `zgoarch_<GOARCH>.cs` `internal/goarch` compiles, and fails the leg when that is not the arch the plan gave it (amd64 when it gave none): an unbound arm leg compiles amd64 and stops there. Before it builds, the `pack` job runs `.github/pack-flavour-guard.ps1`: it reads push-nuget's GOOS/GOARCH pair map, refuses the pack unless linux-arm64 packs at linux/arm64 and every other RID at amd64, and runs the same probe for each pair with the `-p:GoTargetOS` and `-p:GoTargetArch` the pack passes (seat S6). Its budgets take the mac legs' 1.5x until its own runs replace them. |
 | `filter` options | `;key=value` pairs after the stage's own filter, no `;` inside a value | The dispatch form's input count is guarded (`Test-NugetgoBehaviorProof.ps1`), so the two diagnostic stages take their options here, parsed and checked by the plan job. `golib-tests`: `;jit=PATTERN`, a `DOTNET_JitDisasm` pattern; with tiering off, the JIT's listing of each matching method is printed to the job log (e.g. `FullyQualifiedName~P256FieldDifferential;jit=p256Mul p384Mul`). `stack-probe`: `ROW;test=REGEX[;at=S,S]` -- `test` is required and passed as `-TestFilter`, which filters both sides of the compare; `at` is when to dump the test host, in seconds from when it starts (default `120,870`; the per-test deadline is 900 s). `sweep-shard`, on goos `darwin` only: `ROWS;dns=IP[,IP]` sets the job's DNS servers on every enabled network service before the sweep (an opt-in for `net`'s `TestLookupNoSuchHost` NXDOMAIN keys, which the hosted mac resolver answers late), flushes the caches, logs the effective resolver, and times NXDOMAIN for `invalid.invalid` through Go's resolvers before and after as `DNSPROBE` lines. `sweep-shard`, any goos: `ROWS;timeout=Nm` is the sweep's `-TestTimeout` in whole minutes, 1-180 (blank takes `45m`); the script's per-row `$longTimeouts` floors still win over a smaller value. It exists for a row whose own test sizes a wait from its deadline: `internal/poll`'s `TestSplicePipePool` waits 0.9 x the deadline, so at `45m` it outlasts the row's 30m per-test floor and is cut before its disclosed failure prints (COORD R4, 2026-11-12). An unknown or repeated key, an empty value, or an option on any other stage fails the plan by name. |
 
 There is no `all` value: one dispatch per flavor keeps each leg's artifacts, budget and verdict
@@ -157,7 +157,7 @@ as a prerelease of the release the tree would publish next, `<GoStdLibVersion>.<
 labelled with the published build fails every consumer's `GO2CS3002` once `<GoBreakFloor>` names the release in
 development, and the pack's own "Pack floor" check refuses it). It uploads the
 merged packages as the `release-smoke-feed` artifact. It is the only Release-configuration build of the
-darwin flavor anywhere. The stage fans out to ALL FOUR shipped RIDs (win-x64, linux-x64, osx-arm64, osx-x64) from that
+darwin flavor anywhere. The stage fans out to ALL FIVE shipped RIDs (win-x64, linux-x64, linux-arm64, osx-arm64, osx-x64) from that
 one pack, whatever `goos` says. Each leg then runs `src/tests/PackageTests/release-smoke.ps1` against the feed,
 every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
 
@@ -211,13 +211,13 @@ with the runner's C compiler (gcc, clang on macOS) and the probe library (`.gith
 build), go2cs converts, builds and runs it, and every arm is read both ways: `TestCgoPhase3ProgramRunsAsGoDoes`,
 cgo-e2e's own test, through `.github/release-smoke-cgo.ps1`. It is green only when the test passed and every arm that
 started passed, so a skip or a renamed test reads red. It gates: a release-smoke dispatch is green when its legs and
-its four cgo jobs are.
+its five cgo jobs are.
 <!-- COORD's ruling O3, 2026-11-14 (cgo 3.1's release-path seat): the cgo path proved on every release. -->
 <!-- Pre-2026-10-26 wording: "(C2's 2026-10-03 finding: N's converter emits `unsafe.ArrayPointer`, which the
      published 1.24.13.3 lacks)". C2 and N were fleet lane names. -->
 
 **After the publish**, the same stage with `published_version` set to the version just pushed
-(`-f published_version=<version>`) skips the pack and runs the same arms on the same four RIDs against
+(`-f published_version=<version>`) skips the pack and runs the same arms on the same five RIDs against
 nuget.org itself, `go.*` and everything else restored from there: the release as a user receives it. It is
 dispatchable once every id in the walkthrough's restore closure is listed (a partial index fails restore loudly,
 NU1102). The input is refused on any other stage and must be four numeric parts.
@@ -225,7 +225,7 @@ NU1102). The input is refused on any other stage and must be four numeric parts.
 ### `aot-smoke` — a Native AOT publish of a package consumer
 
 The same `pack` job, then ONE Native AOT publish and run of `PackageSymbols` (a hand-written consumer that sets no trim
-mode of its own) on all FOUR shipped RIDs (win-x64, linux-x64, osx-arm64, osx-x64): `test-package-symbols.ps1 -AotOnly`. The executable must exit 0 and print
+mode of its own) on all FIVE shipped RIDs (win-x64, linux-x64, linux-arm64, osx-arm64, osx-x64): `test-package-symbols.ps1 -AotOnly`. The executable must exit 0 and print
 its `PACKAGE-SYMBOLS` line (the value printed, not judged); the publish wall time is a `READ` line, and so are two ILC
 readings, measured and not judged: `READ (ILC cycle-cutoff methods)` (distinct "will always throw" lines ILC logs when it cuts a
 self-nesting generic instantiation) and `READ (IlcCompile ms)` (from MSBuild's performance summary). The cut-off count is
@@ -259,9 +259,9 @@ while a publish that ENDED with a non-zero exit stays red. linux-x64 and win-x64
 
 A third-party module with no Go tests cannot be validated by `go2cs -recurse -tests`, so its nugetgo package ships a
 behavioral proof: one row per shipped RID, each written ON a host of that RID. A module WITH Go tests may carry the
-same four rows beside its test proof, never in its place: its page gains a "Sample behavior" section and its README a
+same rows beside its test proof, never in its place: its page gains a "Sample behavior" section and its README a
 Sample behavior badge, and the rows replace a local-feed sample run in the module publishing procedure. No row is
-inferred from another, so the stage runs the same four legs as `release-smoke`, whatever `goos` says, with no pack.
+inferred from another, so the stage runs the same five legs as `release-smoke`, whatever `goos` says, with no pack.
 <!-- Both rules were COORD rulings of 2026-10-12. Pre-2026-10-26 wording: "the rows replace the owner's local-feed
      sample run in the runbook's section 3" (the runbook is docs/NugetgoPublish.md, an internal record). -->
 Each leg builds the converter and runs `src/tools/nugetgo/Invoke-NugetgoBehaviorRow.ps1`: the sample program under
@@ -271,7 +271,7 @@ that loaded, the RID the host's dotnet reports, the GOOS go reports, and the hos
 `ImageVersion`. The leg exits non-zero when the outputs differ; the row is still written, as the evidence.
 
 The row is annotated in its OWN step as one base64 notice titled `nugetgo-row <rid>`, and kept in the artifact.
-`src/tools/nugetgo/Get-NugetgoBehaviorRows.ps1 -RunId <id> -OutDir <dir>` reads the four rows back through the
+`src/tools/nugetgo/Get-NugetgoBehaviorRows.ps1 -RunId <id> -OutDir <dir>` reads the rows back through the
 annotations API, and `nugetgo-pack.ps1 -BehaviorProofDir <dir>` binds each to the bytes the release packs for its RID.
 The plan refuses the three `nugetgo_*` inputs on any other stage, a malformed value, and a module with no sample at the
 dispatched ref.
@@ -367,15 +367,15 @@ disclosure count is half of what makes a row honest.
 | `behavioral-stderr` | 60 min | 90 min | Converter `go build`, a transpile and compile of a handful of named projects, and one direct run of each. Provisional. |
 | `sweep-shard` | 210 min | 315 min | One convert/build/run/compare cycle per matched row; the sweep's own per-package floors are the reason this is the largest. |
 | `golib-tests` | 90 min | 135 min | One Release build of `GolibTests` and its core closure for the GOOS, from cold, then `dotnet test` (the whole suite, or a `--filter`). Provisional. |
-| `gen-tests` | 30 min | 45 min | One Release build of `GenTests` (go2cs-gen and golib), from cold, then `dotnet test` (the whole suite, or a `--filter`); 526 tests in about 2 min on a laptop. Provisional. |
-| `solution-build` | 60 min | 90 min | One cold build of `src/go2cs.slnx`: golib, go2cs-gen, the test projects, every behavioral and performance member and their core closure; 622 s on a laptop. Provisional. |
+| `gen-tests` | 30 min | 45 min | One Release build of `GenTests` (go2cs-gen and golib), from cold, then `dotnet test` (the whole suite, or a `--filter`)<!-- 526 tests in about 2 min on a laptop (machine not recorded) -->. Provisional. |
+| `solution-build` | 60 min | 90 min | One cold build of `src/go2cs.slnx`: golib, go2cs-gen, the test projects, every behavioral and performance member and their core closure<!-- 622 s on a laptop (machine not recorded) -->. Provisional. |
 | `stack-probe` | 90 min | 135 min | One row's `-tests` convert and build, the filtered compare, and up to the 900 s per-test deadline while the probe waits. Provisional. |
 | `converter-cgo` | 15 min | 23 min | The converter's `go test` filtered to its cgo tests: one cold module download and build, plus one converter `go build` for the driver-level arms. Provisional. |
 | `cgo-e2e` | 45 min | 68 min | cgo's end-to-end gate: a cgo program is built by Go and converted by go2cs with the leg's C compiler, the converted project is built with the .NET SDK, and each check is run both ways and compared. Provisional. |
 | `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus eight small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
 | `release-smoke` cgo job | 60 min | 60 min | One per shipped RID, beside the legs: one cold module download and converter test build, the probe library, and cgo-e2e's Phase 3 test alone, which builds golib and the converted closure cold. The slowest cgo-e2e job, four more tests, read 22 min (osx-x64). Provisional. |
 | `nugetgo-behavior` | 90 min | 135 min | The leg: converter `go build`, one `go run`, one conversion against the feed, and one cold restore, build and run of the sample. `release-smoke`'s leg is the closest shape. Provisional. |
-| `aot-smoke` | 240 min | 360 min | The leg only, four RIDs: one Native AOT publish of a 31-package consumer under `TrimMode=partial` -- linux 56, windows 71, osx-x64 293 min before golib's generic-cycle fix (37523439849, where osx-arm64 did not finish in 360); after it, linux 212 s, windows 167 s, osx-arm64 354 s (38587876788), osx-x64 654 s (38575258530). |
+| `aot-smoke` | 240 min | 360 min | The leg only, five RIDs: one Native AOT publish of a 31-package consumer under `TrimMode=partial` -- linux 56, windows 71, osx-x64 293 min before golib's generic-cycle fix (37523439849, where osx-arm64 did not finish in 360); after it, linux 212 s, windows 167 s, osx-arm64 354 s (38587876788), osx-x64 654 s (38575258530). |
 
 <!-- Pre-2026-10-26 wording: the census row said "on the fleet's slowest anchored box", and the aot-smoke row named the
      generic-cycle fix by its branch, "before e2move". -->
@@ -400,8 +400,8 @@ What a darwin leg establishes, and what it cannot, so a failure is recognized ra
   <!-- Settled 2026-08-23. -->
   <!-- Settled 2026-08-23. -->
 - **Converted programs run on both legs.** A darwin `behavioral-full` runs on both legs (run
-  33898025427), and the [roster](ValidatedTestPackages.md) shows a macOS count for each package that
-  validates on both chips.
+  33898025427), and the [roster](ValidatedTestPackages.md) shows each package's macOS count, with both
+  chips' counts where they differ.
   <!-- Settled 2026-08-25; the behavioral-full run 33898025427 was by 2026-09-04. Evidence and remedy shapes:
        [`phase4/FINDING-darwin-run-layer.md`](phase4/FINDING-darwin-run-layer.md) (an internal record). -->
 - **The `darwin` binding reaches MSBuild.** `GoTargetOS` in this workflow's `env:` block reaches

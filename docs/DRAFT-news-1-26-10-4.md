@@ -824,7 +824,7 @@ goroutine waits on a nil channel or an empty `select {}`; any other deadlock han
 goroutine, nor for the deadlock report: those went to stderr alone. They now reach the crash file too.
 <!-- Deadlock: merge 01986cdd81 (4078bdc81b): red first at master 3da19d0e2e (the line alone; the three-goroutine case
      twice); behavioral DeadlockGoroutineBlocks; golib + hand-owned runtime only, 0 corpus lines; no platform named.
-     Limitations.md:110-113#c9d2eb and GoFeatureSupport.md:110#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
+     Limitations.md:111-114#ab9ea8 and GoFeatureSupport.md:110#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
      builtin.WriteFatalReport; GolibTests BackstopCrashOutputTests red with the crash file empty, green, linux. -->
 
 ### Runtime fixes (G, C1, i9)
@@ -1040,3 +1040,90 @@ beside the standard-library roster.
      c978595f0c (R: CODE_OF_CONDUCT.md, .github/PULL_REQUEST_TEMPLATE.md). Validated modules: merges 65be87fd89 (P4,
      batch 308; docs/ValidatedModules.md, 9 rows, read with Go 1.26.10 on go.* 1.26.10.3) and 64a5cc7e24 (P4, batch
      309; docs/README.md's Explore list). -->
+
+<!-- 2026-11-15 (P4, docs audit Q2): the section below stood in NEWS.md as a held, visible "November XX" entry.
+     Moved here verbatim (its heading demoted to ###) so the archive page shows no PENDING text; its items repeat
+     some of this draft's (the assembly renaming, the break floor) and are merged at the release cut. -->
+
+### Packages with very large method sets load (moved from NEWS.md; merge at the release cut)
+
+<!-- Written ahead and HELD for release day (the .2 and .3 precedent): "November XX" becomes the publish date as the
+     last change before the release tag (GoCorpusMigration.md, the release ritual, item 1). Section opened by the
+     promoted-forwarder seat (P1, COORD ruling 2026-11-10 08:28Z); later seats for the release append to it. Every item is
+     PENDING until 1.26.11.1 publishes. The release was prepared as 1.26.10.4; the owner ruled it ships as
+     1.26.11.1, built from Go 1.26.11 (2026-11-12, the 1.26.11 patch hop). -->
+
+**NuGet 1.26.11.1.** PENDING. The fourth release on the Go 1.26 line, and the first built from Go 1.26.11, a Go patch
+release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a promoted
+method through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
+
+**Upgrading from 1.26.10.3.**
+
+- **Rebuild what you built against 1.26.10.3.** PENDING. A Go struct that embeds another struct of its own package
+  gets a forwarder for each method the embedding promotes. Through 1.26.10.3 those forwarders were members of the
+  package class (`bufio_package` for `bufio`); from 1.26.11.1 each struct's forwarders are in a class of the
+  struct's own, beside the package class in the same namespace. In the standard library 900 public forwarders moved,
+  counted once for each assembly a package ships, in 20 packages; a program can import 13 of the 20, and the other
+  7 are internal or vendored. An assembly or nugetgo package compiled against go.* 1.26.10.3 that calls such a
+  promoted method fails at that call under 1.26.11.1 with `MissingMethodException`. The build refuses the
+  combination first: a package built below the new break floor is error `GO2CS3002`, which names the package
+  ([Diagnostic codes](DiagnosticCodes.md)). Rebuild against 1.26.11.1, and move each `nugetgo.*` reference to its
+  1.26.11.1 revision.
+  <!-- source: the promoted-forwarder seat (docs/phase4/DESIGN-promoted-forwarder-placement.md; owner ruling
+       2026-11-10: "better breaking changes now than before we're deep with users"). The moved members are announced
+       to the binary-compatibility guard as generated CP0002 entries, 900 entries in 20 suppression files
+       (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1), and <GoBreakFloor> is 1.26.11.1. The nugetgo
+       rebuild wave ships with this release (the owner's hands). -->
+- **Standard-library assemblies are named after their packages.** PENDING. Package `go.fmt` now ships `go.fmt.dll`,
+  not `fmt.dll`, and likewise every converted standard-library assembly (`go.net.dll`, `go.crypto.tls.dll`,
+  `go.go.ast.dll` for package `go.go.ast`, `go.testing.dll`). The package IDs do not change, nor do `golib.dll`
+  (package go.lib), the go2cs-gen analyzer, or a converted module's own assemblies. A library converted and built
+  against go.* 1.26.10.3 or earlier binds the standard library's assemblies by their OLD names, so it must be rebuilt
+  against 1.26.11.1; the same break floor names it at build time (`GO2CS3002`) rather than letting it fail as a
+  missing assembly at run time. A C# project that referenced a converted assembly by file name (`fmt.dll`) or by an
+  assembly-qualified type name (`go.fmt_package, fmt`) uses the new name.
+  <!-- source: OQ4, docs/PLAN-public-surface-stability.md (ruled), the design docs/phase4/DESIGN-assembly-identity.md;
+       src/go2cs/assemblyIdentity.go. The binary-compatibility guard compares each renamed assembly with its 1.26.10.3
+       baseline through a rename map keyed to this release (src/tools/pushnuget/GoApiCompat.psm1). -->
+- **`using static` alone no longer brings promoted methods.** PENDING. C# that calls into a converted package with
+  only `using static go.bufio_package;` still sees the package's types, functions and the methods its types declare.
+  A method a struct promotes from an embedded struct of the same package now needs the namespace as well:
+  add `using go;` (or `using go.<path>;` for a package below the root). Converted code already has it.
+  [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
+  <!-- source: the same seat; GenTests PromotedHostClassTests.UsingStaticAloneBringsDeclaredMethodsAndNoPromotedOne
+       (CS1929 without the namespace) and TheNamespaceBringsThePromotedMethods. -->
+
+**A package whose types promote very many methods now loads.** PENDING. The .NET runtime loads no type with more
+than 65,521 methods. A converted package class held every promoted-method forwarder of every struct in the package,
+so a package where many structs embed one method-rich base could pass that limit: it compiled, and its first use
+threw `TypeLoadException`. With each struct's forwarders in a class of their own, the package class holds only what
+the package declares. A type that would still exceed the limit is now a compile error, `GO2CS0012`, which names the
+type and its method count.
+<!-- source: the same seat. Measured shape: N methods on one base embedded by M structs put 2NM + 2N + 5 methods in
+     the package class; N=250, M=131 (66,005) failed to load and M=130 (65,505) loaded. One converted package class
+     held 116,102 methods, 107,835 of them forwarders. -->
+
+**A promoted method that returns a string, a bool or several values can be called from another package.** PENDING.
+A Go struct that embeds an exported struct promotes its methods, and code in another package may call them on the
+outer struct. The C# forwarder for such a method was `internal` whenever its return type's C# spelling ended in a
+lowercase name (`@string`, `bool`, `error`, any multi-value return), so a call that Go accepts did not compile in
+the converted program (`CS1929`). The forwarder of an exported method is now public unless its signature names a
+type that is not public. In the standard library 268 forwarders in 12 packages became public, `bufio.ReadWriter`'s
+`Read` and `Peek` among them; none was removed, so nothing compiled against 1.26.10.3 breaks on this change.
+<!-- source: C34 of the TypeScript-Go readiness run (repro c34promotedbuiltinreturn at 4505b95021 on
+     claude/i7-ts-readiness-rerun), folded into the promoted-forwarder seat. GenTests PromotedForwarderScopeTests;
+     behavioral PromotedValueEmbedLib / PromotedValueEmbedUser. The count is of forwarder methods in one target's
+     packed assemblies, the same on windows, linux and darwin (docs/phase4/DESIGN-promoted-forwarder-placement.md,
+     amendment section H). -->
+
+**A method whose receiver type is written through an alias runs on a nil pointer, as in Go.** PENDING. Go accepts
+`type AttrNode = Node` with `func (n *AttrNode) Mode() int`, and the method is `Node`'s: it can be called on a nil
+pointer and test `n == nil` itself. The converter took such a method's receiver by reference, so the nil test read
+the struct through the nil pointer and the call panicked where Go returns; a method that used the receiver as a
+pointer in any other way did not compile. Such a method is now emitted as it is when the receiver is written with
+the type's own name. The standard library has no such method, so its converted code is unchanged. A receiver that
+is an alias of the pointer type itself (`type P = *T`) still does not compile after conversion.
+<!-- source: C48 of the TypeScript-Go readiness run (one type-check unit panicked in
+     ast.(*Node).GetResolutionModeOverride), P1; docs/phase4/DESIGN-alias-receiver-form.md. Behavioral
+     AliasReceiverForms; converter tests TestAliasReceiverTakesTheNamedForm and
+     TestAliasReceiverEmitsAsNamedReceiver. -->

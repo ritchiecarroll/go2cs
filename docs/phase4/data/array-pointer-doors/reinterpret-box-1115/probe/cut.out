@@ -1,0 +1,36 @@
+two-hop direct read [1]: 0x12
+two-hop direct write [0]: port 0x12ab
+two-hop local read [1]: 0x12
+two-hop local write [0]: port 0x1222
+two-hop len: 2
+two-hop slice: len 2 cap 2 port 0x3322
+two-hop word [1]: 0x11111111
+variable direct read [1]: 0x12
+variable direct write [0]: port 0x12ab
+variable local read [1]: 0x12
+variable local write [0]: port 0x12cd
+variable local range value: 0x46
+package direct read [1]: 0x12
+package direct write [0]: port 0x12ef
+package local read [1]: 0x12
+deref root direct read [1]: 0x33
+ref two-hop fresh direct read [1]: 0x12
+ref two-hop fresh direct write [0]: raw.port 0x12ab
+ref two-hop fresh direct write [1]: raw.port 0xcdab
+ref two-hop fresh direct address [1]: PANIC go2cs: a *[2]uint8 over a field of a Go value that has no address (a struct that holds references has none) has no array<T> to dereference: its elements are the field's own bytes. Index it (p[i]), load it (*p) or store it (*p = v); a slice of it, a range over its values and the address of an element need storage that can be named, which this value does not have
+ref two-hop fresh direct slice: PANIC go2cs: a *[2]uint8 over a field of a Go value that has no address (a struct that holds references has none) has no array<T> to dereference: its elements are the field's own bytes. Index it (p[i]), load it (*p) or store it (*p = v); a slice of it, a range over its values and the address of an element need storage that can be named, which this value does not have
+ref two-hop local write: raw.port 0x901f
+ref two-hop local read: 0x1f90
+ref two-hop direct write [0]: raw.port 0x90ab
+ref two-hop direct read [1]: 0x90
+three-hop local: 0x12 port 0x1244
+pointer-hop local: 0x12 port 0x1255
+ref pointer-hop local: 0x12 port 0x1266
+ref variable local: port 0x12cd
+ref package local: port 0x7734
+ref value parameter: port 0x1201
+ref two-hop load: 0x34 0x12
+ref two-hop store: raw.port 0x201
+promoted local (control): PANIC runtime error: index out of range [1] with length 0
+element root local (control): PANIC runtime error: index out of range [1] with length 0
+call root direct (control): 0x33

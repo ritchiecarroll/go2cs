@@ -124,7 +124,7 @@ another assembly, and a loop that runs only once never leaves its precompiled fo
 
 To precompile your own code as well, set `<GoReadyToRunUserCode>true</GoReadyToRunUserCode>`. That is rarely
 worth it. Across the [performance suite](Performance.md), on the same machine, precompiling the program's own code
-makes 11 of the 17 programs slower than the default ReadyToRun publish and none faster. FieldView, Fib, RefLower,
+makes 11 of the 17 programs measured slower than the default ReadyToRun publish and none faster. FieldView, Fib, RefLower,
 Sort, Startup and TlsHandshake stay within measurement noise. Medians in ms; the ratio is precompiled-user-code
 against the default:
 
@@ -221,7 +221,7 @@ that the tiers collect, and the profile is worth more.
      than either setting. -->
 
 Across the [performance suite](Performance.md), on `win-x64` (an AMD Ryzen 5 PRO 6650U), turning
-dynamic PGO off with `DOTNET_TieredPGO=0` makes 13 of the 17 programs slower under the JIT and none faster; Startup,
+dynamic PGO off with `DOTNET_TieredPGO=0` makes 13 of the 17 programs measured slower under the JIT and none faster; Startup,
 Fib, Sieve and Channel stay within measurement noise. Turning it off is not recommended. Medians in ms, in-program
 time; the ratio is PGO off against the default:
 
@@ -349,7 +349,7 @@ on Windows) and time a few runs with `DOTNET_TC_CallCountingDelayMs=0`, then wit
 [performance suite's](Performance.md) programs ran with the template's delay of 0 and with .NET's own 100 ms. These
 programs run for about 0.1 to 2.5 s, so the delay decides how much of each run executes before the optimized code
 arrives. In a long-running service the delay is only a start-up transient, so the table overstates what the setting
-costs once a service is warm. With the delay at 100, 13 of the 17 programs are slower under the JIT and 11 under
+costs once a service is warm. With the delay at 100, 13 of the 17 programs measured are slower under the JIT and 11 under
 ReadyToRun; Startup is faster under both. Medians in ms, in-program time except Startup's process wall time; the
 ratio is delay 100 against delay 0:
 
@@ -473,7 +473,7 @@ Every use still reads `Version` and `Name`, so the Go function bodies are unchan
 The second and third bullets, and the URL-query reading, were measured against the direct field read; the accessor
 reads faster than that field.
 
-**Before and after, across the performance suite.** Of the [performance suite's](Performance.md) 17 programs, only
+**Before and after, across the performance suite.** Of the 17 [performance suite](Performance.md) programs measured, only
 StringMatch moves beyond measurement noise with `-hoist-literals`. The other 16 stay within noise under both the JIT
 and ReadyToRun, including TlsHandshake and StringView, which also get hoisted fields. Native AOT was timed for
 StringMatch only. Medians in ms, in-program time; the ratio is hoisted against plain:
@@ -530,9 +530,10 @@ describes both forms.
 
 ### Goroutine stacks
 
-Each goroutine runs on its own thread, and the thread reserves a fixed stack, because a .NET stack cannot grow the
-way a Go stack does. The reserve is 256 MiB, or 16 MiB for a goroutine the converter proves cannot recurse
-([how](ConversionStrategies.md#goroutines)). It is address space, not memory, but it is what a thread start pays for:
+By default, each goroutine other than `main` runs on its own thread, and the thread reserves a fixed stack, because a .NET stack
+cannot grow the way a Go stack does. The reserve is 256 MiB, or 16 MiB for a goroutine the converter proves cannot
+recurse ([how](ConversionStrategies.md#goroutines)). `main` runs on a thread that reserves 1 GiB, Go's own limit,
+and the settings below do not change it. It is address space, not memory, but it is what a thread start pays for:
 on `win-x64`, parking 100,000 goroutines at once took roughly five times as long with the 256 MiB reserve as with
 16 MiB. On `linux-x64`, at 10,000 goroutines, the reserve made no measurable difference, and a kernel limit on
 memory mappings, not the reserve, stopped thread creation at around 16,000.
