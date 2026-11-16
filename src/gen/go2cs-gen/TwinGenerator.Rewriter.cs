@@ -213,8 +213,20 @@ public sealed partial class TwinGenerator
                         break;
                     case InvocationExpressionSyntax invocation when child is ArgumentListSyntax:
                         if (m_model.GetSymbolInfo(invocation).Symbol is not IMethodSymbol { IsStatic: true, MethodKind: MethodKind.Ordinary or MethodKind.LocalFunction })
-                            Earlier(invocation.Expression is MemberAccessExpressionSyntax access ? access.Expression : invocation.Expression);
+                        {
+                            ExpressionSyntax receiver = invocation.Expression is MemberAccessExpressionSyntax access ? access.Expression : invocation.Expression;
+                            refLike |= ByRefReceiver(receiver);
+                            Earlier(receiver);
+                        }
 
+                        break;
+                    // Stage (c): crypto/x509's `s.haveSum[sha256.Sum224(…)]`. A struct indexer takes `this` by reference,
+                    // so a struct receiver that reaches a ref local, evaluated before the await, would hold the ref
+                    // across it (CS9217): the awaited index moves ahead where it can, and stays plain where it cannot.
+                    case ElementAccessExpressionSyntax element when child == element.ArgumentList:
+                        refLike |= ByRefReceiver(element.Expression);
+                        Earlier(element.Expression);
+                        inert = false;
                         break;
                     // A COMPOUND store through a ref (`c.scanAlloc += f()`, stage (c)) takes the same spill: `x op= y` reads x
                     // once, and the spec leaves that read and the call on the right unordered, as for a plain store.
@@ -251,6 +263,12 @@ public sealed partial class TwinGenerator
 
             return refLike || refTarget || RefReadAfter(node);
         }
+
+        // Stage (c): a receiver passed by reference (a struct value: its instance members take `this` by ref) that reaches
+        // a ref local, so evaluating it before an await holds that ref across it.
+        private bool ByRefReceiver(ExpressionSyntax receiver) =>
+            m_model.GetTypeInfo(receiver).Type is { IsValueType: true } &&
+            receiver.DescendantNodesAndSelf().OfType<IdentifierNameSyntax>().Any(name => m_model.GetSymbolInfo(name).Symbol is ILocalSymbol { RefKind: not RefKind.None });
 
         // Stage (c): whether a ref local is read LATER in the call's statement than the call (math/big's
         // `@new<Float>().SetPrec(n).SetMode(x.mode)`, crypto/rsa's `encryptOAEP(opts.Hash.New(), opts.Hash.New(), …)`).

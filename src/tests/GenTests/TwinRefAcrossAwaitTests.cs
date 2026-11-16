@@ -37,7 +37,10 @@ public class TwinRefAcrossAwaitTests
         {
             internal static channel<nint> ch;
 
-            public struct T { public nint x; }
+            public struct T { public nint x; public Bag b; }
+
+            // golib's map<K, V> is a readonly struct: its indexer takes `this` by reference.
+            public readonly struct Bag { public nint this[nint i] => i; }
 
             // A method with a by-ref receiver (net/http's req.closeBody()): C# 13/14 accept a ref local's plain field
             // reads and writes after an await, but NOT passing it by reference, so the shapes below use this.
@@ -196,6 +199,21 @@ public class TwinRefAcrossAwaitTests
 
         """;
 
+    // crypto/x509's `s.haveSum[sha256.Sum224(cert.Raw)]`: a struct field of a ref local is the RECEIVER of an indexer,
+    // evaluated before the awaited index, so the ref would be held across the await.
+    private const string IndexBefore = """
+            public static nint indexBefore(ж<T> Ꮡt)
+            {
+                try
+                {
+                    ref var t = ref Ꮡt.DerefOrNull();
+                    return t.b[parksN()];
+                }
+                finally { }
+            }
+
+        """;
+
     private const string UseAfterAnd = """
             public static bool useAfterAnd(ж<T> Ꮡt)
             {
@@ -298,6 +316,9 @@ public class TwinRefAcrossAwaitTests
 
     [TestMethod]
     public void ARefIsDerivedAgainAfterEachMovedCall() => AssertTwinCompiles("useAfterTwo", UseAfterTwo);
+
+    [TestMethod]
+    public void AStructReceiverReachingARefBeforeAnAwaitedIndexCompiles() => AssertTwinCompiles("indexBefore", IndexBefore);
 
     [TestMethod]
     public void AnAwaitInsideALockRefusesTheTwinByName()
