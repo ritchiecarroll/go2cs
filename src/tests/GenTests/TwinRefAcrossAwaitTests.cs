@@ -236,6 +236,27 @@ public class TwinRefAcrossAwaitTests
 
         """;
 
+    // MnMixedStorm's worker: `switch (select(…)) { case 1: ᐸꟷ(s.start); }`. A ref read in a NESTED statement (a case
+    // body) is not evaluated with the switch's expression: Rule R derives the ref again before it, so the awaited
+    // call stays awaited. 4db1a48034 read the whole switch and left the select plain (ref-blocked).
+    private const string SwitchBody = """
+            public static void switchBody(ж<T> Ꮡt)
+            {
+                try
+                {
+                    ref var t = ref Ꮡt.DerefOrNull();
+                    switch (parksN())
+                    {
+                        case 1:
+                            t.x = 2;
+                            break;
+                    }
+                }
+                finally { }
+            }
+
+        """;
+
     private const string UseAfterAnd = """
             public static bool useAfterAnd(ж<T> Ꮡt)
             {
@@ -347,6 +368,15 @@ public class TwinRefAcrossAwaitTests
 
     [TestMethod]
     public void AStructReceiverThroughARefReturningPropertyCompiles() => AssertTwinCompiles("valueRecv", ValueRecv);
+
+    [TestMethod]
+    public void ARefReadInANestedStatementLeavesTheAwaitInPlace()
+    {
+        AssertTwinCompiles("switchBody", SwitchBody);
+
+        (string twins, _) = Run(SwitchBody);
+        StringAssert.Contains(twins, "await parksNꞏtwin()", "the switch's call is still awaited, not left plain");
+    }
 
     [TestMethod]
     public void AnAwaitInsideALockRefusesTheTwinByName()

@@ -284,8 +284,13 @@ public sealed partial class TwinGenerator
 
             foreach (IdentifierNameSyntax name in m_current.DescendantNodes().OfType<IdentifierNameSyntax>())
             {
-                if (name.SpanStart >= node.Span.End && m_model.GetSymbolInfo(name).Symbol is ILocalSymbol { RefKind: not RefKind.None })
+                // Only a read evaluated with the statement's own expression: one in a NESTED statement (a switch case,
+                // an if body: MnMixedStorm's worker) comes after Rule R has derived the ref again.
+                if (name.SpanStart >= node.Span.End && ReferenceEquals(name.Ancestors().OfType<StatementSyntax>().FirstOrDefault(), m_current) &&
+                    m_model.GetSymbolInfo(name).Symbol is ILocalSymbol { RefKind: not RefKind.None })
+                {
                     return true;
+                }
             }
 
             return false;
