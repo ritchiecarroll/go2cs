@@ -55,6 +55,52 @@ public class TwinHostTests
         }
         """;
 
+    // Stage (c), arm B: runtime's hand-owned `interface IGoCpuSampler` is not partial; under the all-members rule its
+    // members would get twin slots in the interface reopened as `partial` (CS0260).
+    private const string IfaceSource = """
+        namespace go;
+
+        public static partial class host_package
+        {
+            internal interface ISampler
+            {
+                void Sample();
+            }
+
+            public partial interface Reader
+            {
+                void Read();
+            }
+        }
+        """;
+
+    [TestMethod]
+    public void ANonPartialInterfaceGetsNoTwinSlotsUnderTheAllMembersRule()
+    {
+        CSharpParseOptions options = new(LanguageVersion.CSharp13);
+        CSharpCompilation compilation = CSharpCompilation.Create("twinhostiface",
+            [CSharpSyntaxTree.ParseText(IfaceSource, options, path: @"C:\twinhost\iface.cs")],
+            References(), new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        Dictionary<string, string> properties = new()
+        {
+            ["build_property.GoTwins"] = "true",
+            ["build_property.GoTwinsIface"] = "default",
+            ["build_property.GoTwinsIfaceAll"] = "true"
+        };
+
+        CSharpGeneratorDriver.Create([new TwinGenerator()], parseOptions: options, optionsProvider: new BuildProperties(properties))
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+
+        string twins = string.Join("\n", output.SyntaxTrees.Skip(compilation.SyntaxTrees.Length).Select(tree => tree.ToString()));
+        Diagnostic[] errors = output.Emit(Stream.Null).Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
+
+        Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
+        Assert.IsFalse(twins.Contains("Sampleꞏtwin(", StringComparison.Ordinal), "ISampler is not partial: no twin slot");
+        StringAssert.Contains(twins, "Readꞏtwin(", "the partial interface's member keeps its slot");
+        StringAssert.Contains(twins, "iface-refused-by host-not-partial=1", "the report counts it");
+    }
+
     [TestMethod]
     public void AMethodOfANonPartialHostIsRefusedByNameAndCalledPlain()
     {

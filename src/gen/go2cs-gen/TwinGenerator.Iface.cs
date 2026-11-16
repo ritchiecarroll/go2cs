@@ -81,7 +81,14 @@ public sealed partial class TwinGenerator
                             Model(tree).GetDeclaredSymbol(method, Context.CancellationToken) is not { } symbol || m_ifaceMembers.ContainsKey(symbol))
                             continue;
 
-                        IfaceMember member = new() { Symbol = symbol, Refusal = IfaceRefusal(type, symbol), Unmarked = Unmarked(symbol) };
+                        // Stage (c), arm B: twin slots are written into the interface reopened as `partial`, so a member of a
+                        // hand-owned interface that is not (runtime's IGoCpuSampler) gets none: CS0260 otherwise. Named as
+                        // the methods' refusal is (TwinGenerator.cs, PreRefusal), and counted in the report.
+                        string? refusal = declaration.AncestorsAndSelf().OfType<TypeDeclarationSyntax>().Any(host => !host.Modifiers.Any(SyntaxKind.PartialKeyword))
+                            ? "host-not-partial"
+                            : IfaceRefusal(type, symbol);
+
+                        IfaceMember member = new() { Symbol = symbol, Refusal = refusal, Unmarked = Unmarked(symbol) };
                         member.Parks = ifaceAll && member.Refusal is null && !member.Unmarked;
                         m_ifaceMembers[symbol] = member;
                         m_ifaceOrdered.Add(member);
