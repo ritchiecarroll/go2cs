@@ -686,7 +686,8 @@ public sealed partial class TwinGenerator
                 m_spills = outerSpills;
 
                 // Rule S: a call that moved ahead of its statement stands before it on the statement's own line,
-                // and the live ref locals are derived again between the two.
+                // and the live ref locals are derived again after EACH moved call (stage (c): crypto/rsa's
+                // `encryptOAEP(opts.Hash.New(), opts.Hash.New(), …)` moves two, and the second reads `opts`).
                 if (spills.Count > 0)
                 {
                     spills[0] = spills[0].WithLeadingTrivia(visited.GetLeadingTrivia());
@@ -694,8 +695,12 @@ public sealed partial class TwinGenerator
                     for (int i = 1; i < spills.Count; i++)
                         spills[i] = spills[i].WithLeadingTrivia(Space);
 
-                    result.AddRange(spills);
-                    result.AddRange(Live(TriviaList(Space)));
+                    foreach (StatementSyntax spill in spills)
+                    {
+                        result.Add(spill);
+                        result.AddRange(Live(TriviaList(Space)));
+                    }
+
                     visited = visited.WithLeadingTrivia(Space);
                 }
 

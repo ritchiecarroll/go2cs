@@ -177,6 +177,25 @@ public class TwinRefAcrossAwaitTests
 
         """;
 
+    // crypto/rsa's `encryptOAEP(opts.Hash.New(), opts.Hash.New(), …, opts.Label)`: TWO moved calls, the second of
+    // which reads the ref the first's await left stale; the ref is derived again after each.
+    private const string UseAfterTwo = """
+            public static nint useAfterTwo(ж<T> Ꮡt)
+            {
+                try
+                {
+                    ref var t = ref Ꮡt.DerefOrNull();
+                    return sum3(t.x.parksOn(), t.x.parksOn(), t.x);
+                }
+                finally { }
+            }
+
+            internal static nint sum3(nint a, nint b, nint c) => a + b + c;
+
+            internal static nint parksOn(this nint k) { ᐸꟷ(ch); return k; }
+
+        """;
+
     private const string UseAfterAnd = """
             public static bool useAfterAnd(ж<T> Ꮡt)
             {
@@ -276,6 +295,9 @@ public class TwinRefAcrossAwaitTests
 
     [TestMethod]
     public void ARefReadAfterAnAwaitedShortCircuitOperandIsDerivedAgainFirst() => AssertTwinCompiles("useAfterAnd", UseAfterAnd);
+
+    [TestMethod]
+    public void ARefIsDerivedAgainAfterEachMovedCall() => AssertTwinCompiles("useAfterTwo", UseAfterTwo);
 
     [TestMethod]
     public void AnAwaitInsideALockRefusesTheTwinByName()
