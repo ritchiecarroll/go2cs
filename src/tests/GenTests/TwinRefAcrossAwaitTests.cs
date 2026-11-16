@@ -54,6 +54,12 @@ public class TwinRefAcrossAwaitTests
 
             internal static readonly object gate = new();
 
+            internal static bool parksB() { ᐸꟷ(ch); return true; }
+
+            internal static T parksT() { ᐸꟷ(ch); return default; }
+
+            internal static nint Next(this T r, nint k) => r.x + k;
+
         """;
 
     private const string Footer = "}\n";
@@ -155,6 +161,35 @@ public class TwinRefAcrossAwaitTests
 
         """;
 
+    // Stage (c): a ref local read LATER in the same statement than an awaited call -- math/big's
+    // `@new<Float>().SetPrec(n).SetMode(x.mode)` (a chain) and `probablyPrimeMillerRabin(…) && x.abs.probablyPrimeLucas(…)`
+    // (a short circuit): CS9217. The ref is read after the await, before Rule R derives it again at the next statement.
+    private const string UseAfterChain = """
+            public static nint useAfterChain(ж<T> Ꮡt)
+            {
+                try
+                {
+                    ref var t = ref Ꮡt.DerefOrNull();
+                    return parksT().Next(t.x);
+                }
+                finally { }
+            }
+
+        """;
+
+    private const string UseAfterAnd = """
+            public static bool useAfterAnd(ж<T> Ꮡt)
+            {
+                try
+                {
+                    ref var t = ref Ꮡt.DerefOrNull();
+                    return parksB() && t.x > 0;
+                }
+                finally { }
+            }
+
+        """;
+
     // S3 (C3): a can-park literal with an EXPLICIT return type, created in a twin body, so it is paired.
     private const string Typed = """
             public static nint typed()
@@ -235,6 +270,12 @@ public class TwinRefAcrossAwaitTests
 
     [TestMethod]
     public void AnAwaitedValueStoredByACompoundAssignmentThroughARefSpillsFirst() => AssertTwinCompiles("compound", Compound);
+
+    [TestMethod]
+    public void ARefReadLaterInAChainThanAnAwaitIsDerivedAgainFirst() => AssertTwinCompiles("useAfterChain", UseAfterChain);
+
+    [TestMethod]
+    public void ARefReadAfterAnAwaitedShortCircuitOperandIsDerivedAgainFirst() => AssertTwinCompiles("useAfterAnd", UseAfterAnd);
 
     [TestMethod]
     public void AnAwaitInsideALockRefusesTheTwinByName()

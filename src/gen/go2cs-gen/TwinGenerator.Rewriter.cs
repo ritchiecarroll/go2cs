@@ -192,6 +192,12 @@ public sealed partial class TwinGenerator
                         break;
                     case BaseObjectCreationExpressionSyntax when child is ArgumentListSyntax:
                         break;
+                    // Stage (c): nothing is evaluated before a call's receiver, nor before a binary operator's left
+                    // operand (`parksT().Next(…)`, `parksB() && …`), so a call there moves ahead of its statement.
+                    case InvocationExpressionSyntax invocation when child == invocation.Expression:
+                        break;
+                    case BinaryExpressionSyntax binary when child == binary.Left:
+                        break;
                     case VariableDeclarationSyntax declaration:
                         inert &= declaration.Variables.Count == 1;
                         break;
@@ -243,7 +249,25 @@ public sealed partial class TwinGenerator
 
             movable = inert;
 
-            return refLike || refTarget;
+            return refLike || refTarget || RefReadAfter(node);
+        }
+
+        // Stage (c): whether a ref local is read LATER in the call's statement than the call (math/big's
+        // `@new<Float>().SetPrec(n).SetMode(x.mode)`, crypto/rsa's `encryptOAEP(opts.Hash.New(), opts.Hash.New(), …)`).
+        // Awaited in place, the ref would be read after the await, before Rule R derives it again at the next statement
+        // (CS9217); spilled, the call runs first as it did, and the rest of the statement reads the ref derived again.
+        private bool RefReadAfter(InvocationExpressionSyntax node)
+        {
+            if (m_current is null || !m_current.Span.Contains(node.Span))
+                return false;
+
+            foreach (IdentifierNameSyntax name in m_current.DescendantNodes().OfType<IdentifierNameSyntax>())
+            {
+                if (name.SpanStart >= node.Span.End && m_model.GetSymbolInfo(name).Symbol is ILocalSymbol { RefKind: not RefKind.None })
+                    return true;
+            }
+
+            return false;
         }
 
         // Whether an assignment's left side writes through a reference: a ref local, a member or element reached from
