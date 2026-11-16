@@ -1519,3 +1519,165 @@ own element type, so it scored a view over a reference-bearing struct as crossin
   does not guarantee compaction.
 
 — H (2026-11-15)
+
+### 18.2 Amendment 2026-11-15: s6next rooted, and the design for a pointer field of C memory (S-B; posted before code)
+
+**The root, read on the hosted legs** (cgo-e2e at `27a41b889c`: linux 43769940571, windows 43769950200, darwin
+43769959680 on amd64 and arm64, identical everywhere).
+- Every read of a POINTER field of a C struct in C memory fails: `l.next == nil` (`s6nextnil`), `l.next.family`
+  (`s6nextdirect`) and `C.GoString(l.name)` (`s6name`). Each is refused by name: "cannot read native memory as
+  `_Ctype_struct_go2cs_probe_entry`: its CLR layout is not its Go layout (field next / name is a managed reference
+  where Go stores the value inline)".
+- go2cs-gen's accessor for a field is `public ref TF f { get => ref ʗp.field(T.Ꮡf); }`, and `ж<T>.field` sends a native
+  receiver to `NativeBox<T>.FieldRef`. That reads a SCALAR field at its Go offset (`s6field` is green), and refuses a
+  field whose C# type is a managed reference: a C pointer field is `ж<U>` in C#, where C stores an address word.
+- `s6next`'s own route (`&l.next`, then a load) does not reach that refusal. It makes a native box whose pointee type is
+  itself a reference, over C memory, and its read takes the C word as a managed reference. That is memory-unsafe. Its
+  floor is a separate .4 seat (`claude/h-nativebox-ref-floor`), which refuses such a box by name.
+
+**The design (.5, part of 3.2; a review follows, since it touches the gen accessor).**
+1. **Which fields.**
+   - Covered: a field of a C struct or union that cmd/cgo declares (`_Ctype_struct_*`, `_Ctype_union_*`), whose Go
+     type is a pointer (`*T`, `*C.char`) or `unsafe.Pointer`.
+   - The converter marks such a type with a new `[GoCgoStruct]` attribute, and only under `-cgo`, so the corpus moves
+     0 lines.
+   - The generator reads the marker, never the `_Ctype_` spelling.
+2. **The accessor.** For those fields go2cs-gen emits a GET/SET property in place of the `ref` property, as it already
+   does for header-shaped structs. The getter calls `ʗp.cgoPointerField(T.Ꮡf)`, and the setter calls
+   `ʗp.cgoPointerField(T.Ꮡf, value)`. A `ref` to such a field then does not compile, by design, as for headers: a ref
+   into C memory has no managed slot to name.
+3. **The read** (golib, `ж<T>.cgoPointerField<U>`).
+   - A MANAGED receiver (a C struct value Go allocated: `var n C.struct_x`, `new(C.struct_x)`) reads the slot, as
+     today.
+   - A NATIVE receiver reads the address WORD at the field's Go offset (`FieldRefBox.GoFieldOffsetOf`, the offset
+     `s6field` already reads).
+     - A 0 word is nil.
+     - Any other word mints `new NativeBox<U>(word)`, which is C memory and keeps nothing, as `PointerMemberBack` mints a
+       pointer C returned. For `unsafe.Pointer`, it mints the number pointer.
+4. **The write.** Go stores an address into C memory here.
+   - A MANAGED receiver stores into the slot, as today.
+   - A NATIVE receiver:
+     - nil writes 0;
+     - a pointer to C memory alone (a genuinely native root, the void door's test) writes its address;
+     - a pointer into Go memory is REFUSED by name. Go's rule is that C memory must not hold a Go pointer
+       (cgocheck=2's "write of unpinned Go pointer into non-Go memory"), and go2cs refuses it in every mode, since a
+       managed address stored where the collector does not look is the corruption the floor exists to stop.
+5. **The address of such a field** (`&l.next`) over a native receiver needs a box whose value is the word: a NEW BOX
+   KIND (S-B), `NativePointerFieldBox<U> : ж<ж<U>>`, whose `Value` get and set are 3 and 4.
+   - Proposed for 3.2 too, because `s6next` is its arm and `getaddrinfo`'s walk `for p := res; p != nil; p = p.ai_next`
+     reads through the field, not its address.
+   - Until it lands, the floor refuses `&l.next` by name.
+6. **Not changed:** a scalar field (already read at its Go offset), a struct or array field (`FieldRef` as today), and
+   any type cmd/cgo did not declare. modernc's libc types are plain Go types, so they are outside the marker.
+
+**Predictions** (scored as worded, at the cut):
+- D-1 corpus footprint 0 files on four targets: the marker is emitted only under `-cgo`.
+- D-2 the end-to-end arms `s6next`, `s6nextnil`, `s6nextdirect` and `s6name` print what Go prints on three OSes;
+  `s6field`, `s6reinterp` and `s6slice` stay green.
+- D-3 GenTests gain the GET/SET shape for a marked struct's pointer field and keep the `ref` shape for every other
+  field. A `ref` to a marked pointer field fails to compile, asserted by a compile arm.
+- D-4 a new write arm: a C pointer stored into a C struct's pointer field reads back in C, and a Go pointer stored
+  there is refused by name.
+
+**Stop lines.**
+- Any unmarked type's accessor changes (the corpus moves).
+- A converter `ref` to a marked pointer field that the converter emits today. The GenTests compile arm and the e2e
+  build find it, and it is posted before any workaround.
+- The new box kind reaching any type outside the marker.
+
+— H (2026-11-15)
+
+### 18.3 Amendment 2026-11-16: 18.2 after the reference floor, and (B) word semantics for `unsafe.Pointer` (posted for review before code)
+
+**What changed under 18.2.** The reference floor (`claude/h-nativebox-ref-floor`, seated in batch 311 at `3ce394cbc0`)
+now refuses, by name, every whole-value read or write of a reference-type pointee through a native box: "a managed
+reference where Go stores words".
+- `s6next`'s `&l.next` route reads a refusal instead of a garbage reference. 18.2 item 5's "until it lands" is now true.
+- The floor makes one exemption, ruled (C)-narrowed: `unsafe.Pointer` over MANAGED storage (the box retains its source
+  or carries a pin). Two places in the converted runtime need it: `map.go`'s indirect key and `atomic_pointer.go`'s
+  atomicwb, both seen live in the behavioral program `UnsafePointerReinterpret`.
+- The exemption keeps a hazard, recorded as a `.5` BOARD row (2026-11-16): golib's `unsafe.Pointer` is a CLR class, so
+  the exempt write puts a managed reference into a slot the storage types as a word. The collector does not trace that
+  slot, so the reference can go stale or be collected.
+- (B), below, is that row's cure. When it lands, the exemption is deleted and the floor refuses `unsafe.Pointer`
+  regardless of the box's source.
+
+**Why (B) is not a golib-only change.** `NativeBox<T>.Value` is a `ref T` over the address, and a store goes through
+`DerefOrNull`'s `ref`. Converting between a word and a CLR object cannot sit behind a `ref`:
+- a read can return a ref to a shadow;
+- a write through that ref lands in the shadow, and nothing tells the box to write the word back.
+So the load and the store must be CALLS at the emitted site.
+
+**The population, read at master `2c1ce10b25`.**
+- `To<unsafe.Pointer>`, the `(*unsafe.Pointer)(p)` reinterpret, appears at 89 sites in 15 converted files: the
+  internal/runtime/maps group (7 files), reflect and reflectlite `value.cs`, runtime `atomic_pointer.cs`,
+  `cgocheck.cs`, `type.cs`, and `cgocall.cs` on three OSes.
+- `ж<unsafe.Pointer>` appears 40 times in 20 files, including hand-owned `sync/atomic/doc_impl.cs` and
+  `internal/runtime/atomic/atomic_impl.cs`. Their `LoadPointer` / `StorePointer` / `SwapPointer` /
+  `CompareAndSwapPointer` doors take a `*unsafe.Pointer` and are the same class.
+- LIVE, measured by the dereference census at 311:
+  - GolibTests (C1): 3 rows, all controls;
+  - behavioral (C2): 2 rows, both `UnsafePointerReinterpret`;
+  - the 13-package C3 set before the floor: 0.
+  The cure's corpus footprint is therefore wide (every load and store through a `*unsafe.Pointer`), while its live
+  population is narrow.
+
+**The design.**
+- **W1, the load:** `*p` where `p`'s static type is `*unsafe.Pointer` emits `@unsafe.Pointer.LoadWord(p)` instead of
+  `p.Value`.
+  - Over a box that holds a CLR `Pointer` slot (a `StandardBox<Pointer>`, a field or element box over one) it returns
+    the slot: today's semantics, no conversion.
+  - Over a `NativeBox<Pointer>` it reads the address WORD. 0 is nil. A number that resolves to Go storage (the exact
+    registry, then the pin-extent index) returns a `Pointer` that carries that storage's box, as `FromHeaderData`
+    carries an element box. Any other number returns the number pointer, which is C memory and keeps nothing.
+- **W2, the store:** `*p = v` emits `@unsafe.Pointer.StoreWord(p, v)`.
+  - Over a CLR `Pointer` slot it stores the slot, as today.
+  - Over a `NativeBox<Pointer>` it writes `v`'s NUMBER. Then:
+    - (a) the destination is C memory (no retained source, no pin) and `v` names Go memory: REFUSED by name, as 18.2
+      item 4 refuses a Go pointer stored into a C struct field;
+    - (b) the destination is managed storage and `v` names Go memory: the store also records a KEEP-ALIVE edge from the
+      destination's root storage to `v`'s pin. A `ConditionalWeakTable` keyed by the root object maps the slot's
+      offset to the pin, so the stored number stays valid (pinned and alive) as long as the destination storage lives.
+      Overwriting the slot through W2 releases the old edge;
+    - (c) `v` is nil or C memory: the number is written and no edge is recorded.
+- **W3, the atomic doors:** the hand-owned `sync/atomic` and `internal/runtime/atomic` pointer doors take the same
+  dispatch: W1 for Load, W2 for Store, and W1 then W2 under the existing atomic for Swap and CompareAndSwap, whose
+  compare is on the WORD.
+- **W4, the floor:** with W1 and W2 in place, delete the exemption (`s_isUnsafePointer && (retained || pin)`). A
+  `.Value` read of a `NativeBox<Pointer>` is then reached only by code W1 and W2 did not rewrite, and it is refused by
+  name, like every other reference.
+
+**Faithfulness.** In Go an `unsafe.Pointer` IS a word, and storage typed as pointer-bearing is traced by the collector.
+W2(b)'s edge is the stand-in for that tracing: a Go pointer stored into managed word storage keeps its object alive and
+in place.
+- A `uintptr` store does NOT take the edge, by Go's own rule: a `uintptr` keeps nothing alive.
+- A number written by arithmetic through a `ж<uintptr>` stays a number, exactly as in Go.
+
+**Predictions (scored as worded at the cut; the corpus is measured with the two-seeded diff on four targets).**
+- B-1: the corpus footprint is confined to load and store sites through a `*unsafe.Pointer`: the 15 `To<unsafe.Pointer>`
+  files plus the deref sites over `*unsafe.Pointer` parameters and fields. No other line moves. The count is predicted
+  from a seeded emission before the cut, not from this grep.
+- B-2: C1 and C2 read 0 B2a `kind=UnsafePointer` rows after W4, because every live row moves to W1/W2, which do not
+  dereference a `ref`.
+- B-3: `UnsafePointerReinterpret`'s output is unchanged.
+- B-4: a new pressure arm. A Go pointer is stored through W2 into managed word storage, every other reference to the
+  object is dropped, and forced compacting collections with finalizers run. The pointer then reads back through W1
+  and names the same bytes. Today's exempt path is the red arm, and it can read a moved or collected object.
+- B-5: a refusal arm, a Go pointer stored through W2 into C memory, is refused by name.
+
+**Stop lines.**
+- A W1/W2 site outside a `*unsafe.Pointer` load or store.
+- A changed outcome in any validated row.
+- A keep-alive edge reached from a `uintptr` store.
+- The floor's exemption deleted before B-2 reads 0.
+
+**Open for the review.**
+- (i) Is W2(b)'s edge table keyed right? A root storage object can hold many slots, so it is keyed by root plus offset.
+  Each edge is one pin, so the cost is bounded by the number of live stored pointers.
+- (ii) W1 for a number that resolves to Go storage RE-CARRIES a box. Should it instead return the number pointer and
+  let the void door refuse it later, as 3.2 does for numbers?
+- (iii) Does W3's CompareAndSwap on the word match Go when two different `Pointer` objects carry the same number?
+  Go compares words, so yes by construction; the arm pins it.
+- (iv) Sequencing: W1–W3 and W4 as one cut, or W4 as its own seat after B-2 is read at a batch.
+
+— H (2026-11-16)
