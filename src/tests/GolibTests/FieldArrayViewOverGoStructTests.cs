@@ -22,7 +22,8 @@ namespace GolibTests;
 /// <para>
 /// The route now answers a native array pointer over the bytes the field's root holds still, which is the view
 /// doors' second answer (V2): the elements are read and written in place, the view ends where the root's storage
-/// ends, and it keeps the root. A root with no address, a struct that holds a reference, is refused by name.
+/// ends, and it keeps the root. A root with no address, a struct that holds a reference, is viewed through the
+/// field's own bytes (section 19, ReinterpretedFieldArrayViewTests): it was refused by name until then.
 /// </para>
 /// </remarks>
 [TestClass]
@@ -231,16 +232,23 @@ public class FieldArrayViewOverGoStructTests
     }
 
     /// <summary>
-    /// A struct that holds a reference has no address, so its field cannot be viewed as memory. It is refused by
-    /// name, in words that are true: it was refused as "native memory", which it is not.
+    /// A struct that holds a reference has no address, so no native array pointer can be made over its field. The
+    /// view is over the field's own bytes instead (section 19; its arms are ReinterpretedFieldArrayViewTests), and
+    /// what cannot be viewed, here a view longer than the field, is refused by name in words that are true: such a
+    /// root was refused as "native memory", which it is not.
     /// </summary>
     [TestMethod]
-    public void AStructThatHoldsAReferenceIsRefusedInWordsThatAreTrue()
+    public void AStructThatHoldsAReferenceIsViewedThroughItsFieldAndRefusedInWordsThatAreTrue()
     {
         ж<Named> named = new StandardBox<Named>(new Named { Name = "x", Port = 0x1234 });
-        string text = PanicText(() => @unsafe.ArrayPointer<byte>.Of(named.of(Named.ᏑPort), 2));
+        ж<array<byte>> p = @unsafe.ArrayPointer<byte>.Of(named.of(Named.ᏑPort), 2);
 
-        StringAssert.Contains(text, "(*[2]uint8)(unsafe.Pointer(&p.f))");
+        Assert.AreEqual((nuint)0, p.NativeAddress, "no native array pointer: nothing holds the field's bytes still");
+        Assert.AreEqual((byte)0x34, p.ElementRef(0));
+
+        string text = PanicText(() => @unsafe.ArrayPointer<byte>.Of(named.of(Named.ᏑPort), 4));
+
+        StringAssert.Contains(text, "(*[4]uint8)(unsafe.Pointer(&p.f))");
         StringAssert.Contains(text, "holds references");
         Assert.IsFalse(text.Contains("native memory"), text);
         Assert.AreEqual((ushort)0x1234, named.Value.Port);

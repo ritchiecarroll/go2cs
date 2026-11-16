@@ -15,6 +15,7 @@
     <None Include="$(MSBuildThisFileDirectory)adapterStructLocality_test.go" />
     <None Include="$(MSBuildThisFileDirectory)addCleanupCaptures.go" />
     <None Include="$(MSBuildThisFileDirectory)addressTakenPredicates_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)aliasArrayFieldZero_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasDocComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasKeywordName_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasPublicization_test.go" />
@@ -41,6 +42,7 @@
     <None Include="$(MSBuildThisFileDirectory)arrayCloneOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayCloneShadow_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsNilCargo.go" />
+    <None Include="$(MSBuildThisFileDirectory)arrayPointerDoorAnonStructElement_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayPointerElementDoor.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayPointerElementDoor_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayPointerViewDoor.go" />
@@ -275,6 +277,7 @@
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignWrittenRHS_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)forwardAliasChainTestRecord_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcLitNamedNumericLiteralArm_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcResultProjection_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcWordOperations.go" />
@@ -305,6 +308,7 @@
     <None Include="$(MSBuildThisFileDirectory)handOwnReferences_test.go" />
     <None Include="$(MSBuildThisFileDirectory)handOwnTypeAccessibility_test.go" />
     <None Include="$(MSBuildThisFileDirectory)handPackageReadme_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)headerDataPointer_test.go" />
     <None Include="$(MSBuildThisFileDirectory)helpDefaultTags_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostFatalClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostLaunchLoadTime_test.go" />
@@ -339,8 +343,10 @@
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayForeignSlice_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayOverCap_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayValueDecodeCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintClosedRecord_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintNamed.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintPublished_test.go" />
@@ -527,6 +533,8 @@
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness_test.go" />
     <None Include="$(MSBuildThisFileDirectory)namedShiftCount_test.go" />
     <None Include="$(MSBuildThisFileDirectory)namedUnionBreadcrumb_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)namedUnnamedStructConversion.go" />
+    <None Include="$(MSBuildThisFileDirectory)namedUnnamedStructConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)narrowArithmeticOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)nativeBackedArrayPointerStore_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nativeFieldArrayView.go" />
@@ -672,6 +680,7 @@
     <None Include="$(MSBuildThisFileDirectory)repoRoot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)requiresUnsafeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)resolveBuildTags_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)resolvedDynamicTypeText_test.go" />
     <None Include="$(MSBuildThisFileDirectory)resolveGo2CSPath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)returnOperandOrder.go" />
     <None Include="$(MSBuildThisFileDirectory)returnOperandOrder_test.go" />
@@ -800,6 +809,9 @@
     <None Include="$(MSBuildThisFileDirectory)valueCloneFieldSpelling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueCloneStampMembers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueConstraintRecordNeed_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)valueDecodeShapes_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)valueDecodeSites.go" />
+    <None Include="$(MSBuildThisFileDirectory)valueDecodeSites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePunOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)valueReceiverBoxTwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePun_test.go" />

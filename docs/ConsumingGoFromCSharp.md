@@ -64,9 +64,9 @@ There are two ways to get one:
   `nugetgo.github.com.ritchiecarroll.hashset`. Add them as a `PackageReference`, like any other package.
   A `nugetgo.*` package is compiled against one `go.*` release, which its README names: use it with that release
   of the `go.*` packages. A later release can change a package's public shape, and then the package needs its
-  rebuild for that release. For example, exported package-level value variables such as `os.Args` are ref
-  properties, so an assembly compiled against a `go.*` release that exposed them as fields fails with
-  `MissingFieldException` until it is rebuilt.
+  rebuild for that release. For example, an exported package variable whose address Go code takes, such as
+  `os.Args`, is a ref property, so an assembly compiled against a `go.*` release that exposed it as a field fails
+  with `MissingFieldException` until it is rebuilt.
 - **Convert it yourself.** `go2cs -recurse=nuget <module_dir> <output_root>` converts a module and its dependencies
   (see [Converting a real-world module](README.md#converting-a-real-world-module)). Each Go package becomes one C#
   project; add the ones you call as `ProjectReference` items.
@@ -77,7 +77,7 @@ of them in a project.
 **A converted project takes the newest `go.*` release of its Go minor.** `-recurse=nuget` sets `GoStdLibVersion` to
 the converting toolchain's minor with a float, for example `1.26.*`, so a restore picks up later go2cs releases and
 patch releases of that minor without a reconversion. To pin one exact version, set `GoStdLibVersion` yourself, for
-example `dotnet build -p:GoStdLibVersion=1.26.10.3`.
+example `dotnet build -p:GoStdLibVersion=1.26.11.1`.
 
 If you convert and publish a module of your own, its nuget.org page is covered in
 [Publishing your conversion: the package page](ConvertingAModule.md#publishing-your-conversion-the-package-page).
@@ -625,7 +625,7 @@ goǃ(() => replies.Send(99));
 
 A few things behave as Go's runtime does, so they are worth knowing from the C# side:
 
-- Each goroutine runs on its own thread for as long as it runs. golib reuses the thread for a later goroutine
+- By default, each goroutine runs on its own thread for as long as it runs. golib reuses the thread for a later goroutine
   once it ends, so starting one usually costs a hand-off rather than a new thread.
 - `Send`, `Receive` and `WaitGroup.Wait` block the calling thread until they can complete. Keep them off a UI
   thread: await `ReceiveAsync` or `SendAsync` instead, or run them inside `Task.Run`.

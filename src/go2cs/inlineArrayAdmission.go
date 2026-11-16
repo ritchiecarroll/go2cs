@@ -864,6 +864,14 @@ func inlineUnmanaged(t types.Type, depth int) bool {
 
 // inlineArrayCaps names the first array, at any depth of a field's type, over a cap.
 func inlineArrayCaps(t types.Type, sizes types.Sizes, depth int) string {
+	return inlineArrayCapsOf(t, sizes, depth, true)
+}
+
+// inlineArrayCapsOf is inlineArrayCaps, with the byte caps applied only while countBytes holds. A zero-length array
+// occupies no bytes, so below one nothing is laid out and no byte cap applies: [0][1042]uint32 is 0 bytes, not the
+// 4168 of its element (W14, sqlite's TBF_ctx). Its element still meets the ELEMENT-count cap, because the [0][N]T
+// alignment carrier names the element as a go.arrays family member (W15), and that family stops at 4096.
+func inlineArrayCapsOf(t types.Type, sizes types.Sizes, depth int, countBytes bool) string {
 	if depth > 10 {
 		return ""
 	}
@@ -873,11 +881,11 @@ func inlineArrayCaps(t types.Type, sizes types.Sizes, depth int) string {
 			return fmt.Sprintf("%s has %d elements, over the %d-element cap", types.TypeString(t, nil), array.Len(), inlineArrayMaxElements)
 		}
 
-		if size := sizes.Sizeof(array); size > inlineArrayMaxBytes {
+		if size := sizes.Sizeof(array); countBytes && size > inlineArrayMaxBytes {
 			return fmt.Sprintf("%s is %d bytes, over the %d-byte array cap", types.TypeString(t, nil), size, inlineArrayMaxBytes)
 		}
 
-		return inlineArrayCaps(array.Elem(), sizes, depth+1)
+		return inlineArrayCapsOf(array.Elem(), sizes, depth+1, countBytes && array.Len() > 0)
 	}
 
 	return ""

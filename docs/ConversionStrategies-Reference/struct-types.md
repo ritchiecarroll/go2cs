@@ -535,8 +535,8 @@ alias TARGET has, so the *same* three token-match arms above decide both, with n
 keep in sync. Only the record's generic argument list is scanned (first `<` to last `>`, so a nested
 `ж<…>` argument is covered whole) — an attribute's `(Pointer = true)` / `(ValueType = "…")` payload is
 metadata, and the `ValueType` is a string, not a reference. Additive as before, and the manifest's
-dependency list stays import-derived. This is what lets **os/signal** validate (its `TestCtrlBreak`,
-1/1 vs `go test`). Guarded by `TestAliasReferenceImportsMatchesConversionRecordPackages`,
+dependency list stays import-derived. This is what lets **os/signal** validate (its `TestCtrlBreak`
+agrees with `go test`). Guarded by `TestAliasReferenceImportsMatchesConversionRecordPackages`,
 `TestAliasReferenceImportsMatchesConversionRecordQualifierShapes` and
 `TestAliasReferenceImportsIgnoresConversionRecordAttributePayload`.
 
@@ -805,6 +805,159 @@ Seeding from the declaration is what keeps the name unique per var, as `readers�
 (Guarded by the `PackageVarFuncLitTypeLift` behavioral test, whose two files cover BOTH symptoms:
 `main.go` places a function declaration before the var — the dropped-declaration form — and
 `varfirst.go` declares the var first — the panic form.)
+
+## A struct value moves between a named type, an unnamed type and a second lift of the unnamed type
+Go lets a struct value move between two struct types with identical fields: an explicit conversion is always
+legal, the value is ASSIGNABLE with nothing written when at least one side is unnamed, and the two compare with
+`==` and `!=`. C# has two unrelated types wherever Go has two declarations: a named struct is its own
+`partial struct`, and an unnamed struct type is LIFTED to a generated one (see *Lifted function-local types*
+above). Every such move binds a conversion operator that go2cs-gen writes from a
+`[assembly: GoImplicitConv<Source, Target>]` record in `package_info.cs`; the converter's part is to record the
+pair at every place Go assigns the value, and to write a cast at the two places C# will not apply the operator
+by itself.
+
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.go:57, 98, 188 -->
+```go
+func made() hertz { return hertz(lib.Middle()) }
+…
+func convLocal(h hertz) int       { x := struct{ Hz int }(h); x.Hz++; return x.Hz + h.Hz }
+…
+func sameLocal(a struct{ Hz int }, h hertz) (bool, bool)       { return a == h, h != a }
+```
+
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:34, 78-82 -->
+```csharp
+internal static hertz made() { return (hertz)lib.Middle(); }
+…
+internal static nint convLocal(hertz h) {
+    var x = (convLocal_x)h;
+    x.Hz++;
+    return x.Hz + h.Hz;
+}
+```
+
+- **A conversion to an unnamed struct type is a cast to its lift.** `struct{ Hz int }(h)` is written as a call
+  and its target has no declared name, so it was emitted as a call of the lifted type's name (CS1955: a type is
+  not invocable). It reads `(convLocal_x)h`, parenthesised when a member is read off it, and the pair is recorded
+  (`structTypeLiteralConversion` in `namedUnnamedStructConversion.go`).
+- **Every place Go assigns a value records its pair.** The existing recorder covered arguments, returns and
+  `append`. A pass over the file after its declarations (`recordNamedUnnamedStructMoves`) records the rest: a
+  declaration with a type, an assignment (to a variable, a field, an element, a map entry or through a pointer),
+  a composite literal's field, element, key and value, a map index and `delete`, a channel send and receive,
+  the comma-ok forms, a call's several results, a `range` clause that assigns, and a package variable's
+  initializer. The pass runs after the declarations because a lift's name is not final until the file's
+  declarations have all been visited. A pair is recorded in the direction of the move, and once per pair.
+- **A comparison casts the unnamed operand to the named type.** With a record in each direction C# finds two
+  user-defined `==` candidates for `a == h` (CS9342), so the unnamed side is cast: `(hertz)a == h`. A `switch`
+  whose tag and case value are one of each does the same in its `when` clause.
+
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:246, 589-596 -->
+```csharp
+internal static (bool, bool) sameLocal(anonBox_V a, hertz h) { return ((hertz)a == h, h != (hertz)a); }
+…
+internal static nint caseLocal(anonBox_V a, hertz h) {
+    switch (h) {
+    case var ᴛ when ᴛ == (hertz)a: {
+        return 1;
+    }}
+
+    return 0;
+}
+```
+
+- **A FOREIGN named source converts to a LOCAL struct through an operator the local type hosts.** `hertz(p)`
+  where `p` is another package's `lib.Pitch`: an operator must be declared in one of its two operand types and
+  a referenced assembly's type cannot be reopened, so `ImplicitConvGenerator` declares it in the local target and
+  names the source by its QUALIFIED name. Two packages that each declare a `Pitch` are two records and get an
+  operator each (they were one by simple name: CS0030 at the second). The source named bare was CS0246.
+
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/package_info.cs:46, 49-50, 66, 72 -->
+```csharp
+[assembly: GoImplicitConv<anonBox_V, hertz>]
+…
+[assembly: GoImplicitConv<hertz, anonBox_V>]
+[assembly: GoImplicitConv<hertz, convLocal_x>]
+…
+[assembly: GoImplicitConv<lib.Pitch, hertz>]
+…
+[assembly: GoImplicitConv<other.Pitch, hertz>]
+```
+
+### Two lifts of one unnamed type
+The same unnamed struct type written in two places is ONE Go type. The lifter gives both places one C# type when
+they are in one function, or when the second is written below a signature or package-level declaration that
+already registered its lift. It makes TWO when a function's own slot takes its value from a declaration BELOW
+it (a later function's result or parameter, a later type's field, a later alias). The value then moves between
+two C# types with nothing written in Go, exactly as a named and an unnamed value do, so the same pass records
+the pair (`recordStructLiftMove`), and a comparison or `switch` casts one operand to the other's lift
+(`structLiftComparisonCast`). Where the lifter already made one type there is no move between two types and
+nothing is recorded; the converter's unit matrix holds six such one-lift forms to no record.
+
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.go:542-546, 618-622, 642-645 -->
+```go
+func liftVar() int {
+	var x struct{ Bpm int } = laterTempo()
+	x.Bpm++
+	return x.Bpm + laterTempo().Bpm
+}
+…
+func liftCompare(bpm int) (bool, bool) {
+	var x struct{ Bpm int }
+	x.Bpm = bpm
+	return x == laterTempo(), laterTempo() != x
+}
+…
+func laterTempo() (r struct{ Bpm int }) {
+	r.Bpm = 60
+	return
+}
+```
+
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:685-689, 801-805, 835-840 -->
+```csharp
+internal static nint liftVar() {
+    liftVar_x x = laterTempo();
+    x.Bpm++;
+    return x.Bpm + laterTempo().Bpm;
+}
+…
+internal static (bool, bool) liftCompare(nint bpm) {
+    liftCompare_x x = default;
+    x.Bpm = bpm;
+    return (x == (liftCompare_x)laterTempo(), (liftCompare_x)laterTempo() != x);
+}
+…
+internal static laterTempo_r /*r*/ laterTempo() {
+    laterTempo_r r = default;
+
+    r.Bpm = 60;
+    return r;
+}
+```
+
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/package_info.cs:54, 60 -->
+```csharp
+[assembly: GoImplicitConv<laterTempo_r, liftCompare_x>]
+…
+[assembly: GoImplicitConv<laterTempo_r, liftVar_x>]
+```
+
+(Guarded by the `ForeignAndUnnamedStructConversion` behavioral test, three packages whose output is compared with
+Go's, by `TestEachNamedUnnamedStructMoveRecordsItsConversion` in the converter, one package per site, and by the
+`ForeignStructSourceConversionTests` generator tests.)
+
+**Limits, each loud (a C# compile error, never a wrong value), with repros in
+`docs/phase4/probes/p2-struct-lift-neighbours` and a BOARD row of 2026-11-15:**
+
+- two lifts in two FILES of one package record nothing (CS0029): a lift's name is known per file;
+- the unnamed type behind a pointer, slice, map or channel, `*struct{…}` against a second lift's pointer: no
+  operator converts `ж<A>` to `ж<B>`, and the cure is one lift, in the lifter;
+- an exported package-level declaration that reuses an unexported declaration's lift in one file
+  (CS0050/CS0052/CS0053: the reused lift is less accessible than the member that names it).
+
+An unnamed struct inside a FUNC type (a variable, field, parameter or result of func type, or a named func type)
+gets no lift at all and the conversion stops with `Unresolved dynamic struct type`; a declared function taken as
+a value and a called func literal convert.
 
 ## A methodless named func type renders as its base delegate
 
@@ -1098,7 +1251,7 @@ instance method cannot have null 'this'" when `x` is null. So the classifier dis
   type renders as the structural delegate of its signature
   ([A methodless named func type renders as its base delegate](#a-methodless-named-func-type-renders-as-its-base-delegate)),
   so a value of the unnamed signature, or of another methodless named type with the identical
-  signature, is already the target's C# type. typescript-go's relater is the shape:
+  signature, is already the target's C# type. A type relater is the shape:
   `core.IfElse(reportErrors, r.reportError, nil)` passed to an `ErrorReporter func(*Message, ...any)`
   parameter is an `Actionꓸꓸꓸ<ж<Message>, any>` reaching an `Actionꓸꓸꓸ<ж<Message>, any>` parameter.
 - **Any other value** converts through golib's `NilSafeDelegateConversion<TTarget, TSource>`, the
@@ -1114,7 +1267,7 @@ serve(NilSafeDelegateConversion<Handler, Func<nint, @string>>(g));          // g
 
 (Guarded by the `NilFuncNamedDelegateArg` behavioral test — the nil and non-nil `IfElse` results, a
 method value, a literal, nil locals of the unnamed and the named type, a nil value passed to a named
-type with methods, the structural mirror and the composite-literal fields, values vs Go; TS C47.)
+type with methods, the structural mirror and the composite-literal fields, values vs Go.)<!-- TS C47 -->
 
 ## Func-typed fields with a cross-package (slash-path) type render structurally
 A func-typed struct field whose signature names a type from a **multi-segment** import path —
@@ -1286,7 +1439,7 @@ user functions exactly that way. <!-- 13 of text/template's 52 verdicts. -->
 The call is made in **typed code** instead (`GoReflect.InvokeVariadic`, GoReflect.TypeLayout.cs).
 One small generic trampoline per family arity — eighteen, the closed set golib's variadic.cs
 declares — is closed over the delegate's own parameter types by `MakeGenericMethod` and cached as
-an ordinary delegate, the `elementBoxViaAt` idiom GoReflect.FieldAccess.cs already uses:
+an ordinary delegate, the `MakeGenericMethod` + `CreateDelegate` idiom GoReflect.FieldAccess.cs already uses:
 
 <!-- source: src/core/golib/GoReflect.TypeLayout.cs:1927-1928 -->
 ```csharp
@@ -1534,7 +1687,7 @@ test reading only the field cannot tell a correct render from a mangled one — 
 writes the fully-qualified string verbatim into both `main.cs` and the `[GoTypeAlias]` record.
 
 Neuter-proven three ways: both reverted reproduces the reported `fatal error: stack overflow`; the
-bound alone reverted fails the child test in 0.02 s; the rewrite alone reverted (bound in place)
+bound alone reverted fails the child test at once;<!-- in 0.02 s --> the rewrite alone reverted (bound in place)
 makes the converter print the warning, exit 0, and still write every `.cs` — the crash-proofing
 demonstrated independently of the rendering — while the integration test fails on the emitted
 `global using TopoChan = go.<_chan example.com.mongo_driver.…;`.
@@ -1627,7 +1780,7 @@ is the correct value. `archive/tar`'s `testClose{nil}` is the reported shape; `d
 
 **An imported type ALIAS through an aliased import renders as its `global using` name.** A `global using` alias is not a member of the package class, so `import al "AliasImportLib"` with `al.B2{V: 7}`, where `B2` is an exported alias, cannot render `new al.B2(…)` (CS0426). The alias table is keyed by the package's declared name, and `aliasResolvedSelector` looks a published, non-const type alias up under that name, rendering `new AliasImportLibꓸB2(V: 7)` as the canonical import does. Every other member keeps the file's alias (`new al.Box(V: 8)`). (Guarded by the `AliasImport` behavioral test's `aliased.go`.)
 
-**A member its package collision-renames keeps the file's alias and takes the renamed name.** time declares `ΔLocation`, `ΔMonth`, `ΔUTC`, `ΔLocal` and `ΔSecond`, because each Go name collides with a `Time` method. modernc.org/libc imports time as `gotime "time"` (sqlite-cs S10), so both lookups that swap in the renamed member missed: the alias table is keyed by the declared name `time`, the type arm (`getAliasQualifiedTypeName`) rendered `ж<gotime.Location>` (CS0426), and the value arm (`aliasResolvedSelector`) redirected only non-const entries, so `gotime.UTC`, `gotime.Local` and `gotime.Second` named the `Time` methods' groups (CS1503 for `gotime.UTC` as an argument, CS0019 for `gotime.Local != nil`). Both arms now look the member up under the declared name and keep the file's own qualifier:
+**A member its package collision-renames keeps the file's alias and takes the renamed name.** time declares `ΔLocation`, `ΔMonth`, `ΔUTC`, `ΔLocal` and `ΔSecond`, because each Go name collides with a `Time` method. modernc.org/libc imports time as `gotime "time"`, so both lookups that swap in the renamed member missed: the alias table is keyed by the declared name `time`, the type arm (`getAliasQualifiedTypeName`) rendered `ж<gotime.Location>` (CS0426), and the value arm (`aliasResolvedSelector`) redirected only non-const entries, so `gotime.UTC`, `gotime.Local` and `gotime.Second` named the `Time` methods' groups (CS1503 for `gotime.UTC` as an argument, CS0019 for `gotime.Local != nil`). Both arms now look the member up under the declared name and keep the file's own qualifier:
 
 <!-- source: src/tests/Behavioral/AliasedImportRenamedMember/main.go:15-26 -->
 ```go

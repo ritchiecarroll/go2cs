@@ -147,7 +147,7 @@ false green must be made impossible rather than noticed.
 ## Where performance actually stands
 
 The honest table, measured on one machine across Go, C# JIT and
-C# Native AOT, is in [Performance](../Performance.md). Native AOT startup is within a few percent of Go
+C# Native AOT, is in [Performance](../Performance.md). Native AOT startup is within about a sixth of Go
 (1.16×); recursive integer work is 1.23× on the JIT and 1.10× under AOT; `map` is *faster* than Go
 (0.85× on the JIT, 0.32× under AOT, riding .NET's `Dictionary`). Channels are 2.03×, down from 3.39×
 before the channels redesign brought real unbuffered rendezvous and single-fire select. The

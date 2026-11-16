@@ -1,0 +1,4 @@
+ PROBE index=1 kind: NativeBox`1 native=0x7f87d5c02cb1 storage=None
+ PROBE index=1 rounds=200 moved=200 staleReads=200
+ PROBE index=0 kind: NativeBox`1 native=0x7f87d5c02cb0 storage=None
+ PROBE index=0 rounds=200 moved=200 staleReads=196

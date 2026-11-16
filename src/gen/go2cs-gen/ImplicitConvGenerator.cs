@@ -202,6 +202,24 @@ public class ImplicitConvGenerator : ISourceGenerator
             if (foreignStructTarget && genericHost is null)
                 lhTypeNameOverride = targetType.ToDisplayString(s_qualifiedFormat);
 
+            // A foreign struct SOURCE converted to a LOCAL struct, `hertz(p)` where p is a `lib.Pitch`: an
+            // operator is declared in one of its two operand types and a type of a referenced assembly cannot be
+            // reopened here, so the local target hosts it and takes the source by its QUALIFIED name. Hosted in
+            // the source's simple name it was declared in a second, empty local type (CS1061 at the member
+            // reads, CS0030 at the cast); hosted in the target by the mixed-accessibility arm below, it named
+            // the source bare (CS0246). The members are the local target's, read above. A foreign source LESS
+            // accessible than the local target has no operator at all (see ForeignSideIsLessAccessible).
+            if (!inverted && genericHost is null && string.IsNullOrWhiteSpace(valueType) &&
+                !SymbolEqualityComparer.Default.Equals(sourceType.ContainingAssembly, context.Compilation.Assembly) &&
+                SymbolEqualityComparer.Default.Equals(targetType.ContainingAssembly, context.Compilation.Assembly))
+            {
+                if (ForeignSideIsLessAccessible(sourceType, targetType, context.Compilation.Assembly))
+                    continue;
+
+                hostTypeNameOverride = targetTypeName;
+                rhTypeNameOverride = sourceType.ToDisplayString(s_qualifiedFormat);
+            }
+
             if (!string.IsNullOrWhiteSpace(valueType))
             {
                 ITypeSymbol constructedType = inverted ? sourceType : targetType; // the type built via `new`
@@ -334,7 +352,14 @@ public class ImplicitConvGenerator : ISourceGenerator
             // targetTypeName, inverted) — `direct` vs `indirect` only changes the body. The same
             // pair can be recorded as BOTH a direct and an indirect conversion (e.g. `g` ↔ `ж<g>`),
             // which would emit two identical operators (CS0557). Skip an exact-signature duplicate.
-            if (!emittedConversions.Add($"{sourceTypeName}->{targetTypeName}|{inverted}"))
+            //
+            // A FOREIGN side is told apart by its qualified name, the spelling the operator declares it by: two
+            // packages may each declare a `Pitch`, and by simple name the second one's record read as a repeat of
+            // the first, so its cast had no operator (CS0030).
+            string sourceKey = (inverted ? lhTypeNameOverride : rhTypeNameOverride) ?? sourceTypeName;
+            string targetKey = (inverted ? rhTypeNameOverride : lhTypeNameOverride) ?? targetTypeName;
+
+            if (!emittedConversions.Add($"{sourceKey}->{targetKey}|{inverted}"))
                 continue;
 
             // A C type of a cgo package lives in the package's C pseudo-package class, a second class beside the
@@ -344,7 +369,7 @@ public class ImplicitConvGenerator : ISourceGenerator
             // class is named through its class, since its bare name resolves only inside its own.
             if (genericHost is null)
             {
-                bool hostIsTarget = hostTypeNameOverride is not null && hostTypeNameOverride == targetType.Name;
+                bool hostIsTarget = hostTypeNameOverride is not null && (hostTypeNameOverride == targetType.Name || hostTypeNameOverride == targetTypeName);
                 ITypeSymbol hostType = hostIsTarget ? targetType : sourceType;
                 INamedTypeSymbol? hostHolder = hostType.ContainingType;
 
