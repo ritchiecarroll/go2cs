@@ -39,10 +39,18 @@ using static go.main_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<@base, Connector>(Pointer = true)]
 [assembly: GoImplement<counting, Connector>(Pointer = true)]
+[assembly: GoImplement<fbase, go.database.sql.driver_package.Connector>]
+[assembly: GoImplement<fcounting, go.database.sql.driver_package.Connector>(Pointer = true)]
+[assembly: GoImplement<ΔDriver, go.database.sql.driver_package.Driver>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(fcounting))]
+[assembly: GoFieldAccess(typeof(ΔDriver))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -52,7 +60,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABQwggAKEoKCppSCgoKEopSClIKCgpSC")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA4qAAoSggAKEoKC3oIACg6CgqaUgoKChKKUgpSCgoKUgqamgoKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -70,6 +78,8 @@ public static partial class main_package
     // <TypeAccessibility>
     internal partial struct @base {}
     internal partial struct counting {}
+    internal partial struct fbase {}
+    internal partial struct fcounting {}
     public partial interface Connector {}
     public partial struct ΔDriver {}
     // </TypeAccessibility>
@@ -81,6 +91,8 @@ public static partial class main_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸcontext() => builtin.initPackage(typeof(context_package));
+    [GoInit] internal static void initᴛᴛimportꓸdatabaseꓸsqlꓸdriver() => builtin.initPackage(typeof(database.sql.driver_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     // </ImportInitializers>
