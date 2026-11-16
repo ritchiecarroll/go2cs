@@ -97,6 +97,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]
+    public void CheckAnonStructArrayPointerDoor() => CheckTarget("AnonStructArrayPointerDoor");
+
+    [TestMethod]
     public void CheckAnonStructAssertLiftDedupe() => CheckTarget("AnonStructAssertLiftDedupe");
 
     [TestMethod]
