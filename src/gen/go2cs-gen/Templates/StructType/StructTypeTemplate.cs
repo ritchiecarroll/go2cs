@@ -383,6 +383,9 @@ internal class StructTypeTemplate : TemplateBase
     // emits `L.AssignFrom(R)`; a Go method named AssignFrom makes the member ΔAssignFrom.
     private string AssignFromMethod => GoMethodNames.Contains("AssignFrom") ? "ΔAssignFrom" : "AssignFrom";
 
+    // Every field is written `this.<field>`, and the two locals carry the converter's temp marker (ᴛ, symbols.go), so no
+    // Go field name can shadow or be shadowed by them: a cgo struct with a field named `from` made the unqualified form
+    // write its own local (behavioral CgoPseudoPackageTypes, CS0411 at Into).
     private string ValueAssignImplementation(string declaredName)
     {
         StringBuilder result = new();
@@ -390,14 +393,14 @@ internal class StructTypeTemplate : TemplateBase
         result.Append($"\r\n{TypeElemIndent}// Go whole assignment into this struct's own storage");
         result.Append($"\r\n{TypeElemIndent}public void {AssignFromMethod}(in {declaredName} source)");
         result.Append($"\r\n{TypeElemIndent}{{");
-        result.Append($"\r\n{TypeElemIndent}    {declaredName} from = source;");
-        result.Append($"\r\n{TypeElemIndent}    {declaredName} own = this;");
-        result.Append($"\r\n{TypeElemIndent}    this = from;");
+        result.Append($"\r\n{TypeElemIndent}    {declaredName} fromᴛ = source;");
+        result.Append($"\r\n{TypeElemIndent}    {declaredName} ownᴛ = this;");
+        result.Append($"\r\n{TypeElemIndent}    this = fromᴛ;");
 
         foreach (string fieldName in ValueCloneFields)
         {
-            result.Append($"\r\n{TypeElemIndent}    {fieldName} = own.{fieldName};");
-            result.Append($"\r\n{TypeElemIndent}    global::go.golib.GoValueAssign.Into(ref {fieldName}, from.{fieldName});");
+            result.Append($"\r\n{TypeElemIndent}    this.{fieldName} = ownᴛ.{fieldName};");
+            result.Append($"\r\n{TypeElemIndent}    global::go.golib.GoValueAssign.Into(ref this.{fieldName}, fromᴛ.{fieldName});");
         }
 
         result.Append($"\r\n{TypeElemIndent}}}");
