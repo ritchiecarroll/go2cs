@@ -181,7 +181,8 @@ internal sealed class ReinterpretedArrayBox<E> : ж<array<E>>, IGoReflectBox, IP
 
     void IGoReflectBox.WriteBoxSlot(object? value) => Store((array<E>)value!);
 
-    // `*p = arr` through the converter's `p.Assign(arr)` (ArrayExtensions.Assign): the same N element stores.
+    // Go's `*p = v` reached through ArrayExtensions.Assign, which the converter emits for the tuple and range stores
+    // (`*p, n = v, 9`, `for _, *p = range vs`): the same store, since Value has no array<E> to assign into.
     void INativeArrayStore<E>.StoreElements(in array<E> source) => Store(source);
 
     // The view's number is the field's (see IPointerNumberForwarder): the transient address of the field's slot for
