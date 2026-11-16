@@ -228,6 +228,12 @@ func (v *Visitor) arrayPointerCopyDoor(callExpr *ast.CallExpr) (string, bool) {
 			return nil, arrayPointerView{}, false
 		}
 
+		// A byte view over a reference-bearing struct keeps the Go-image route (goImageCopyView.go), which
+		// markGoImageCopyArgs has marked before this door is asked: that struct's box has no address.
+		if v.goImageCopySlices[sliceExpr] {
+			return nil, arrayPointerView{}, false
+		}
+
 		view, ok := v.arrayPointerViewOf(sliceExpr)
 
 		return sliceExpr, view, ok

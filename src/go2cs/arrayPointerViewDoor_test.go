@@ -15,9 +15,9 @@
 // route answered length 0 over memory that is no Go array of that type, and in a copy it could end the process).
 // The CONTROLS carry the scope: an element that holds references takes no door; an operand that holds a FromRef mint keeps the span; a BOUNDED view
 // under copy stays builtin copy over the view door, because only the open form needs the copy doors; and a
-// conversion that another route renders whole keeps that route when it is sliced (controls 5 to 9: the
+// conversion that another route renders whole keeps that route when it is sliced (controls 5 to 10: the
 // same-element alias, the identity conversion in its bounded and open forms, the reinterpret between two array
-// types of one shape, and the native field view). Each of those is already a view of the storage and banked rows
+// types of one shape, the native field view, and the Go-image view of a reference-bearing struct under copy). Each of those is already a view of the storage and banked rows
 // run on them; the door replaces the copying span and nothing else.
 
 package main
@@ -54,6 +54,11 @@ type refs [4]*int
 type hdr struct {
 	n    uint32
 	tail [8]byte
+}
+
+type rec struct {
+	n    uint32
+	name [4]byte
 }
 
 // POSITIVE 1: two indices over an unnamed array.
@@ -148,6 +153,12 @@ func field(h *hdr) []byte {
 	return (*[2]byte)(unsafe.Pointer(&h.n))[:2]
 }
 
+// CONTROL 10: a byte view over a struct that holds an array (reference-bearing in go2cs's model), as copy's
+// destination, keeps the Go-image route: that struct's box has no address for a door.
+func goImage(r *rec, src []byte) int {
+	return copy((*[8]byte)(unsafe.Pointer(r))[:], src)
+}
+
 // POSITIVE 8 and 9: a Go pointer to another type is no route of its own; it took the span and takes the door.
 func scalar(x *uint32) []byte {
 	return (*[4]byte)(unsafe.Pointer(x))[:4]
@@ -173,6 +184,7 @@ func main() {
 	_ = field
 	_ = scalar
 	_ = elemOfNamed
+	_ = goImage
 }
 `)
 
@@ -255,6 +267,7 @@ func TestArrayPointerViewDoorReplacesTheCopyingSpan(t *testing.T) {
 		{"identityNamed", "return len(a.Value[2..]) + copy(a.Value[..], src);", "the identity conversion of a named array keeps the box in the open form and under copy"},
 		{"sibling", "return a.Reinterpret<array<byte>, small>().Value[..4];", "two array types of one shape keep the reinterpret"},
 		{"field", "return @unsafe.ArrayPointer<byte>.Of(h.Ꮡn, 2).slice(0, 2);", "a field of another type keeps the native field view"},
+		{"goImage", "return copy(@unsafe.GoImage(r).slice(), src);", "a byte view over a reference-bearing struct under copy keeps the Go-image route"},
 	} {
 		body := emittedFunctionBody(t, mainCs, arm.function)
 
