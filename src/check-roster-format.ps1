@@ -1479,6 +1479,86 @@ if ($linuxNaRows.Count -gt 0) {
         (Get-HeaderNumber $lines 'Linux:' '(\d+)\s+row(?:s)?\s+platform-exclusive')
 }
 
+# The roster's osx-x64 reading in a darwin segment: the headline when the headline is osx-x64's (or the segment has no
+# note), else the note's. darwin never takes pending, so a noted segment always yields one.
+function Get-DarwinX64Reading {
+    param($Segment)
+
+    $other = if ($Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
+    $rid = if ($Segment.PSObject.Properties['Rid']) { $Segment.Rid } else { $null }
+    if ((-not $rid) -or ($rid -ceq 'osx-x64')) { return [PSCustomObject]@{ Expected = [int]$Segment.Expected; Disclosed = [int]$Segment.Disclosed } }
+    if (($null -ne $other) -and ($other.Rid -ceq 'osx-x64')) { return [PSCustomObject]@{ Expected = [int]$other.Expected; Disclosed = [int]$other.Disclosed } }
+    return $null
+}
+
+# The macOS line's population. A darwin segment is banked only when BOTH chips read it (osx-x64 and osx-arm64, each
+# against Go built for that chip), so one count serves both RIDs: Validated is the applicable rows carrying a darwin
+# segment, and the verdict sums are each segment's osx-x64 reading, as the Linux line sums linux-x64's. Applicable is
+# the table minus the Windows-only rows, which are the `linux: n/a` rows (a package that cannot exist on Linux is
+# Windows-exclusive by the n/a ruling, so it cannot exist on macOS either). WindowsOnlyWithDarwin names a Windows-only
+# row that carries a darwin count (a contradiction); NoX64 a segment with no osx-x64 reading (the parser never yields
+# one).
+function Get-DarwinHeaderPopulation {
+    param($Rows)
+
+    $population = [PSCustomObject]@{ Applicable = 0; Validated = 0; WindowsOnly = 0; X64Matched = 0; X64Disclosed = 0; NoX64 = @(); WindowsOnlyWithDarwin = @() }
+    foreach ($row in $Rows) {
+        $windowsOnly = $row.OS.ContainsKey('linux') -and -not $row.OS['linux'].Applicable
+        $hasDarwin = $row.OS.ContainsKey('darwin') -and $row.OS['darwin'].Applicable
+        if ($windowsOnly) {
+            $population.WindowsOnly++
+            if ($hasDarwin) { $population.WindowsOnlyWithDarwin += $row.Package }
+            continue
+        }
+        $population.Applicable++
+        if (-not $hasDarwin) { continue }
+        $population.Validated++
+        $x64 = Get-DarwinX64Reading $row.OS['darwin']
+        if ($null -eq $x64) { $population.NoX64 += $row.Package } else { $population.X64Matched += $x64.Expected; $population.X64Disclosed += $x64.Disclosed }
+    }
+    return $population
+}
+
+# The macOS progress line and the three-OS parity sentence (user-facing docs audit, section 3 (a) and (b); COORD
+# 2026-11-16). Both are summed from the darwin segments exactly as the Linux line is summed from its annotations, so a
+# roster change that moves a darwin count, adds a row or drops a segment moves the stated numbers or reds here.
+$darFixturePopulation = Get-DarwinHeaderPopulation -Rows (Read-FixtureRoster @(
+        "| [``dha/pkg``](https://x/dha) | 1 |  | Plain. $dot linux: 10 $dot darwin: 10 + 1 $dot [proof](p.md) |"
+        "| [``dhb/pkg``](https://x/dhb) | 1 |  | Arm headlines. $dot linux: 8 $dot darwin: 7 + 3 (osx-arm64; osx-x64: 10) $dot [proof](p.md) |"
+        "| [``dhc/pkg``](https://x/dhc) | 1 |  | X64 headlines. $dot linux: 5 $dot darwin: 6 (osx-x64; osx-arm64: 4) $dot [proof](p.md) |"
+        "| [``dhd/pkg``](https://x/dhd) | 1 |  | Not read on macOS yet. $dot linux: 7 $dot [proof](p.md) |"
+        "| [``dhe/pkg``](https://x/dhe) | 1 |  | Windows only. $dot linux: n/a $dot [proof](p.md) |"))
+Assert-Equal 'darwin header population: osx-x64 matched sums each row''s osx-x64 reading (the note''s where osx-arm64 headlines)' 26 $darFixturePopulation.X64Matched
+Assert-Equal 'darwin header population: osx-x64 disclosed likewise' 1 $darFixturePopulation.X64Disclosed
+Assert-Equal 'darwin header population: validated counts the applicable rows carrying a darwin segment' 3 $darFixturePopulation.Validated
+Assert-Equal 'darwin header population: applicable is the table minus the Windows-only (linux: n/a) rows' 4 $darFixturePopulation.Applicable
+Assert-Equal 'darwin header population: the Windows-only rows are counted' 1 $darFixturePopulation.WindowsOnly
+$darBadPopulation = Get-DarwinHeaderPopulation -Rows (Read-FixtureRoster @(
+        "| [``dhx/pkg``](https://x/dhx) | 1 |  | Windows only, yet a darwin count. $dot linux: n/a $dot darwin: 3 $dot [proof](p.md) |"))
+Assert-Equal 'darwin header population: a Windows-only row carrying a darwin count is named' 'dhx/pkg' ($darBadPopulation.WindowsOnlyWithDarwin -join ', ')
+
+$darwinPopulation = Get-DarwinHeaderPopulation -Rows $rows
+$macPattern = 'macOS:\s*\*{0,2}(\d+)\s+of\s+(\d+)\s+applicable rows validated on Intel \(`osx-x64`\) and on Apple silicon \(`osx-arm64`\)'
+Assert-Equal 'macOS header: no Windows-only row carries a darwin count' '' ($darwinPopulation.WindowsOnlyWithDarwin -join ', ')
+Assert-Equal 'macOS header: no darwin segment lacks an osx-x64 reading' '' ($darwinPopulation.NoX64 -join ', ')
+Assert-Equal 'macOS header: validated rows, derived from the darwin segments' $darwinPopulation.Validated (Get-HeaderNumber $lines 'macOS:' $macPattern)
+Assert-Equal 'macOS header: denominator is the applicable table (whole minus Windows-only)' $darwinPopulation.Applicable (Get-HeaderNumber $lines 'macOS:' $macPattern 2)
+Assert-Equal 'macOS header: matching verdicts equal the osx-x64 darwin sum' $darwinPopulation.X64Matched `
+    (Get-HeaderNumber $lines 'macOS:' 'osx-x64 counts,\s*([\d,]+)\s+matching verdicts')
+Assert-Equal 'macOS header: disclosed equals the osx-x64 darwin sum' $darwinPopulation.X64Disclosed `
+    (Get-HeaderNumber $lines 'macOS:' '([\d,]+)\s+disclosed')
+Assert-Equal 'macOS header: the Windows-only count is stated, derived from the n/a annotations' $darwinPopulation.WindowsOnly `
+    (Get-HeaderNumber $lines 'macOS:' '(\d+)\s+row(?:s)?\s+Windows-only')
+
+# The parity sentence: every number in it is one this guard already derives, so it cannot drift from the lines above.
+$parityPattern = 'Windows,\s*(\d+)\s+of\s+(\d+);\s*Linux,\s*(\d+)\s+of\s+(\d+)\s+on x64 and\s+(\d+)\s+of\s+(\d+)\s+on arm64;\s*macOS,\s*(\d+)\s+of\s+(\d+)\s+on Intel and on Apple silicon'
+$paritySelect = 'Every package that applies to a platform is validated on it'
+$parityExpected = @($rows.Count, $implementable, $linuxRows.Count, ($rows.Count - $linuxNaRows.Count), $linuxPopulation.ArmBanked, $linuxPopulation.Applicable, $darwinPopulation.Validated, $darwinPopulation.Applicable)
+$parityNames = @('Windows validated (the table rows)', 'Windows denominator (the implementable set)', 'Linux x64 validated', 'Linux x64 denominator', 'Linux arm64 banked', 'Linux arm64 denominator', 'macOS validated', 'macOS denominator')
+for ($i = 0; $i -lt $parityExpected.Count; $i++) {
+    Assert-Equal "parity sentence: $($parityNames[$i])" $parityExpected[$i] (Get-HeaderNumber $lines $paritySelect $parityPattern ($i + 1))
+}
+
 # Every applicable annotation must be a real expectation, not a placeholder: a zero-count row would
 # read as "validated at nothing" in the header's numerator. (The n/a form is the ONLY legal
 # non-count annotation, and it is excluded above by construction.)

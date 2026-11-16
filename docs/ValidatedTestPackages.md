@@ -19,10 +19,25 @@ says what that proves and what it does not.
 > measures against only those a faithful managed conversion can honestly validate at all.
 >
 > **Every implementable package is validated**; the four packages outside the 238 are listed, each with its
-> reason, under [Excluded packages](#excluded-packages). Every row's columns are its own Go 1.26.10 Windows
-> measurement.
+> reason, under [Excluded packages](#excluded-packages). Every row's columns are its own Windows measurement, read
+> at Go 1.26.10, or at Go 1.26.11 for each package whose converted code changed in that patch release.
 >
 > **Linux: 236 of 236 applicable rows validated at their linux-x64 counts** — 77,524 matching verdicts · 404 disclosed · linux-arm64: 236 of 236 banked, 0 pending · 2 rows platform-exclusive (`linux: n/a`). (They are `internal/syscall/windows` and its child `internal/syscall/windows/registry`; the parent is Windows-exclusive by its own name, every source file is `*_windows.go`, and its layout-L3 csproj compiles nothing under `GoTargetOS=linux`.)
+>
+> **macOS: 236 of 236 applicable rows validated on Intel (`osx-x64`) and on Apple silicon (`osx-arm64`)** — at their osx-x64 counts, 73,765 matching verdicts · 373 disclosed · 2 rows Windows-only, the same two as Linux's `linux: n/a` rows, with no `darwin:` annotation. Each chip is compared with Go built for that chip; a row whose chips differ names both readings (see [Reading the table](#reading-the-table)).
+>
+> **Every package that applies to a platform is validated on it.** Windows, 238 of 238; Linux, 236 of 236 on x64 and 236 of 236 on arm64; macOS, 236 of 236 on Intel and on Apple silicon. The two packages missing from Linux and macOS are Windows-only.
+
+<!-- Added 2026-11-16 (user-facing docs audit, section 3 (a) and (b); COORD 2026-11-16 00:18Z): the macOS line and the
+     parity sentence. src/check-roster-format.ps1 (Get-DarwinHeaderPopulation) derives every number in both: the macOS
+     validated count is the applicable rows carrying a darwin: segment, its denominator the table minus the Windows-only
+     rows (the linux: n/a rows), its verdict sums each segment's osx-x64 reading (the note's where osx-arm64 headlines),
+     and the parity sentence's Windows, Linux and macOS figures are the counts the guard already derives for the lines
+     above. The audit draft spelled the Windows-only rows as `darwin: n/a`; the roster carries no darwin: n/a annotation
+     (those two rows simply have no darwin: segment), so the line says what the table holds. The columns sentence was
+     "Every row's columns are its own Go 1.26.10 Windows measurement."; at this tree the guard reads 11 rows banked
+     against their go1.26.11 proof page (the packages the 1.26.10 -> 1.26.11 hop changed, merge ffaafa144f) and 227
+     at go1.26.10. -->
 
 <!-- Updated 2026-11-11 (S7-a, the linux two-RID grammar; COORD 2026-11-11, DATA-la64-s7-bank-plan.md 2.4): the Linux
      line states one population per RID. Its counts are the linux-x64 bank's, named so ("at their linux-x64 counts"
