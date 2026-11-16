@@ -43,8 +43,8 @@ namespace go;
 /// (the page allocator's <c>l2Size</c>). Nothing downstream can recover it from the address.
 /// </para>
 /// </remarks>
-// Go's `*p = arr` through a box over NATIVE memory (P5's C6): there is no array<T> there to assign into, so the store is
-// N element stores through the box's element door. ArrayExtensions.Assign(this ж<array<T>>, …) routes here; reflect's
+// Go's `*p = arr` through a box over NATIVE memory (P5's C6), or over a field's bytes (ReinterpretedArrayBox): there is
+// no array<T> there to assign into, so the store is N element stores through the box's element door. ArrayExtensions.Assign(this ж<array<T>>, …) routes here; reflect's
 // WriteBoxSlot is the same store.
 internal interface INativeArrayStore<T>
 {
