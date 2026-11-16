@@ -1,0 +1,17 @@
+runtime 10.0.11, 64-bit True, tiered=default, heapverify=off
+PASS  layout: SizeOf<ItemProxy> = 8, IntPtr.Size = 8
+PASS  by-ref span view aliases (stack-only): p,q2
+PASS  read through view: b,a,c
+PASS  swap through view is seen by the box array: a,b,c
+PASS  write through view is the same box: arr[2] is fresh: True
+PASS  Array.Sort<T> through view: z,b,a
+PASS  Span ctor + CopyTo (no covariance check for a struct T): copied 3
+PASS  GetType sees Box<Item>[]: Box`1[]
+PASS  `is ItemProxy[]` is false on the punned object: o is ItemProxy[]: False
+PASS  Array.Copy refuses: ArrayTypeMismatchException
+PASS  Clone cast refuses: InvalidCastException
+PASS  direct covariant store refused: ArrayTypeMismatchException
+PASS  struct-view store into a covariant array is NOT refused (type hole): a OtherBox`1 now sits in a StandardBox`1[]
+PASS  the exact-type gate tells them apart: arr exact: True, cov exact: False
+PASS  GC card marking: gen0 boxes written through the view into a gen2 array survive and read back: array generation 2, 200 rounds x 4096 writes, 0 lost or wrong
+PROBE-PASS
