@@ -329,3 +329,84 @@ emission; SB-6 GenTests red; SB-7 byref-param named-plain above 40; SB-8 a sweep
 
 **Order:** after the code review's changes land (COORD's ruling): the probe rows red first, the units red first, the
 switch `GoTwinsBoxParam` (default on) beside `GoTwinsBoxRecv`, then the arms from a per-run clone.
+
+### 12.1 Revision 1, after the design review (dated block, 2026-11-16)
+
+COORD's Fable design review of section 12 (458941b71b, the implementation at cb38d22455): APPROVE WITH CHANGES. The
+callee side carries over (it holds the box; Rule R derives the parameter again). The call side was under-specified,
+and a silent copy enters there. This block supersedes section 12 where they differ.
+
+**The call side, as rules.**
+
+- **Only enumerated aliasing forms hand a box (must-fix 1).** A box argument is one of: (a) `(E).DerefOrNull()`,
+  `E.DerefOrNull()` or `E.Value` with E a side-effect-free ж expression (a name, a field chain, a `~` deref) or the
+  element pointer `Ꮡ(x, i)`: E itself; (b) a bare name, decided by its SYMBOL (must-fix 3): the twin's own boxed
+  parameter (`Ꮡp`), a ref local passing BoxRoot + Rederivable + the re-point check (its root), a heap local (`Ꮡv`),
+  or a static ref property (`Ꮡname`), never a stack local and never an unrelated `Ꮡx` that happens to be in scope;
+  (c) 9.1's field and element rows, including ruling 10.4's nil-checked `nonnil(ref e).f` (the field pointer from
+  e's box). Anything else, `builtin.Ꮡ(v)` above all (it COPIES v into a new box), is never handed.
+- **All or nothing per call (must-fix 2).** A call awaits the twin only if EVERY by-ref argument names a box;
+  otherwise the whole call is named-plain. One twin shape per function (every plain-ref parameter boxed), never 2^n.
+  ShouldAwait and BoxCallable generalise from one box (`site.BoxOf`) to one per by-ref position.
+- **Evaluated once (should-fix 5).** Each box value is SPILLED to a temp ahead of any await in the argument list and
+  never read again: `f(p, <-ch)` then `p = p.next` hands the p read before the receive; `Ꮡ(s, i)` takes i at that
+  point too.
+- **Nil (should-fix 4).** Go panics at `&e.x` with e nil, at the call, with later arguments unevaluated. The box form
+  (`e.Ꮡx`, `e.of(…)`) faults there too, as golib's nil dereference, in argument order. A nil box value
+  (`ref ((ж<T>)default).DerefOrNull()`) is handed as is; the callee's prologue faults at its first dereference, as
+  Go's does.
+- **Thunks.** A go literal's call is followed when the literal is twinned: `goǃ((ᴛ1, ᴛ2, ᴛ3) =>
+  awaitLegacyCancel(ᴛ1, ᴛ2, ref ᴛ3.DerefOrNull()), …)` (2 sites, net/http) hands ᴛ3, bound once at the go statement
+  as Go evaluates `&req`. A deferred call runs plain (`defer(ᴛ1 => unwindm(ref ᴛ1.DerefOrNull()), …)`, 3 sites): not
+  followed, not counted named-plain.
+- **Carried over for every boxed parameter (must-fix 3):** the refusal when the body already names `Ꮡ<name>`, and
+  Local()'s keyword escape.
+
+**Scope facts the design relies on (nit 8).** Ref-lowering never applies to methods, exported functions or func
+values (its X5 class), so a receiver with a by-ref parameter, a cross-assembly callee, an interface member and a
+delegate cannot arise from the converter: every callee is an unexported function of the same compilation, found
+among this run's candidates. A hand-written `this ref` method with another `ref` parameter stays refused by name
+(`byref-mixed`). A generic `f<T>(ref T p)` gets a unit for its twin and its call binding. The four parking `out`
+functions are all hand-owned `_impl.cs` companions: syscall_windows_impl.cs `lookupExtensionFunction`,
+deepequal_impl.cs `tryScalarSliceEqual` and `tryNestedSequenceEqual`, value_impl.cs `tryConvertOnlyShape`.
+
+**Rules already known to be needed (should-fix 6; section 12's "nothing new in the rewriter" was false).** The
+rewriter's ref-local test that cured CS9217 knows only the receiver (Ordinal 0 of an extension); BoxReceiverOf
+refuses every other ref parameter; ShouldAwait and BoxCallable read one box. All three generalise. (IsBoxTwinOf's
+metadata lookup does not: no byref-param callee is in another assembly.)
+
+**Census, split (should-fix 7).** The 64 bare names: 55 forwarded parameters (boxable when the enclosing function is
+boxed too), 4 heap locals (boxable), 5 stack locals (named-plain: two deepequal_impl locals, two copies of a
+traceback local, a composite-literal temp in crypto/x509, `parsePublicKey(ref ᴛ1)`). The 21 "other": 13 hand a ж
+value read once (a field of a local or parameter, a `~` deref, an element pointer `Ꮡ(x, i)`), 8 are nil-checked
+fields (`nonnil(ref priv).PublicKey`). So of 194 by-ref arguments: 6 `out` (refused), 5 named-plain, 183 boxable.
+This is a census of today's call sites, NOT a hypothetical fixpoint: section 5 counted that way and 9.1 found it
+short by about 4x once callers twinned in turn. PB-2 and PB-3 are widened for it.
+
+**Allocation (nit 9).** A field pointer (a FieldRefBox) or an element pointer the twin's call builds allocates per
+call where the plain `ref e.f` / `ref xs[i]` does not. On today's sites that is the 11 field arguments (8 nil-checked,
+3 plain); the 5 element arguments are `(Ꮡ(x, i)).DerefOrNull()`, whose box the PLAIN call already allocates.
+`testing.AllocsPerRun` would see it on a twinned path; the closure runs no test, so the exposure is named here and
+read later by a `-tests` row under twins.
+
+**Predictions, revised** (PB-1, PB-4 and PB-6 stand):
+
+- PB-2 (65%): twinned 3,806 -> 3,875-4,100.
+- PB-3 (60%): refused parkers 175 -> 105-130.
+- PB-5 (75%): byref-param's own named-plain call sites at most 12 (the 5 stack locals and what the cascade adds).
+- PB-7 (60%): at most two rules beyond the three named above, each with a unit red first.
+- PB-8 (80%): every probe row green with byref-param and red under BOTH controls.
+
+**Stop lines, revised.** SB-1: any box ARGUMENT not produced by an enumerated aliasing form above (a call-site copy),
+or any parameter COPY in the callee. SB-4: the probe rows below, each a callee that writes AFTER its park while the
+caller reads AFTER the return, green with byref-param and red under GoTwinsBoxCopy (the callee copies) AND under a
+new call-site control, GoTwinsBoxArgCopy (each handed box replaced by a fresh copy `builtin.Ꮡ(arg)`). SB-7: named-
+plain above 20. The rest stand.
+
+**Probe rows (SB-4), one per boxable shape:** `(x).DerefOrNull()` (a pointer local); a forwarded parameter; a heap
+local (`&v` of a local whose address escapes); an element `&s[i]`; a field `&e.x`; a ж field `f(e.p)`; two over one
+storage `f(&s, &s.x)`; an array local and its element `f(&a, &a[1])`; a nil field `f(&e.x)` with e nil, under
+recover (Go's line, at the same point); a later parking argument `f(p, <-ch)` with `p` reassigned meanwhile.
+
+**Order.** Units red first (written at 458941b71b's successor: P1-P6), this block, COORD's GO on it; then the code,
+the probe rows red first under both controls, the arms from a per-run clone of equal path length.
