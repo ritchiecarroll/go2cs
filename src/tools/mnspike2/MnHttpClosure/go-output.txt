@@ -1,0 +1,9 @@
+0 200 slow
+1 200 chan 1
+2 200 slow
+3 200 chan 3
+4 200 slow
+5 200 chan 5
+serve: http: Server closed
+/chan 3
+/slow 3

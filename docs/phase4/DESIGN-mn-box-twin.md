@@ -410,3 +410,84 @@ recover (Go's line, at the same point); a later parking argument `f(p, <-ch)` wi
 
 **Order.** Units red first (written at 458941b71b's successor: P1-P6), this block, COORD's GO on it; then the code,
 the probe rows red first under both controls, the arms from a per-run clone of equal path length.
+
+## 13. HANDOFF to P4, a brief (dated block, 2026-11-16)
+
+Owner ruling, as amended: M:N works on account B until account A's reset (2026-11-20 06:00Z), then comes back to G,
+whatever the .4 status. **G remains the authority**: P4 works as G's sub-agent, a fresh set of eyes mainly on the
+code (byref-param per 12.1), with timed arms only as its hardware allows. G sets P4's next step and rules on design,
+by mailbox (`docs/phase4/inbox/P4/`, short); P4 asks G the same way. **P4 leaves a clean HANDBACK block here
+(section 14, dated) for Friday**: the tip, which units and probe rows are green, what each arm read and on which
+host, and anything ruled or open. 12.1 is ACCEPTED by COORD; code past the units has COORD's GO; **arms wait for
+P3's short Fable re-review of 12.1 plus the code** (account B), then COORD's GO.
+
+**P4's next step:** the code step below, to units P1-P6 green with the rest of GenTests green, then the eight probe
+rows red first under both controls; post the code tip to G and COORD for P3's re-review. No arm before that GO.
+
+**Where it stopped.** Branch `claude/g-mn-proto-b0`, WIP commit 244dffb9f4. No byref-param code is written.
+TwinBoxTests P1, P2, P3, P4 and P6 are RED BY DESIGN: they assert the parameter box twin (`ppꞏtwin(global::go.ж<T>
+Ꮡp)`), the call boxes (`await ppꞏtwin(px)`, `(Ꮡp)`, `(Ꮡx)`, the element pointer), two parameters over one box, a
+stack local named-plain (`|pp|st`), `out` refused `byref-out`, and the copy control on parameters. P5 (switch off)
+is green and must stay so. Every other unit is green (588 before P1-P6). MnBoxAlias has the first two probe rows
+(readCell, forward; Go prints 11 lines); they equal Go today because both functions are still refused and run plain.
+
+**The next code step** (all in src/gen/go2cs-gen):
+1. TwinGenerator.BoxTwin.cs: switches `BoxParam` (GoTwinsBoxParam, default on) and `BoxArgCopy` (GoTwinsBoxArgCopy,
+   the call-site control); `BoxParamsOf(method, symbol)`: every plain `ref` parameter of a non-extension function
+   (null on any `out`/`in`, or when the body names `Ꮡ<name>`); the argument box per 12.1 (forms (a)-(c)), each bound
+   by `Binds` to ж<parameter type>; a `nonnil(ref e).f` row; the nil `((ж<T>)default)` operand side-effect free.
+2. TwinGenerator.cs: PreRefusal skips boxed positions, names `byref-out` and `byref-mixed`; the candidate keeps the
+   boxed parameter names; the Collector computes one box per by-ref argument; ShouldAwait/BoxCallable are all or
+   nothing per call; read the switches beside GoTwinsBoxRecv (Execute) and add them to src/Directory.Build.targets.
+3. TwinGenerator.Emit.cs and .Rewriter.cs: each boxed parameter becomes `global::go.ж<T> Ꮡp` with its prologue
+   (Local() escape; the copy control per parameter); IsRefLocal admits every boxed parameter (it knows only the
+   receiver today); Statements seeds the re-derive per parameter; an awaited call replaces each `ref` argument by its
+   box; a `// P` row names a plain call by its first unboxable argument. **12.1 item 5 (spill each box ahead of any
+   await in the argument list) is the hard part.** G's suggestion, NOT ruled: if it proves costly, leave such a call
+   named-plain (`arg-await`) in the first cut and ask COORD.
+4. Then the other eight probe rows of 12.1, each red under GoTwinsBoxCopy AND GoTwinsBoxArgCopy before the code is
+   called done.
+
+**The arm recipe** (MnHttpClosure, arm B rule; the program, its 9-line Go output and its 186-project list are now in
+`src/tools/mnspike2/MnHttpClosure/`):
+
+- Convert once per tree: build the converter from the tree (`go -C src/go2cs build -o go2cs.exe .`), then
+  `go2cs.exe -recurse -go2cspath <tree>/src <MnHttpClosure> <out>` (the output positional is required). The generated
+  output root imports `$(go2csPath)Directory.Build.targets`; without it twins are off (DATA-mn-stage-c.md).
+- Per arm: delete obj, bin and Generated under `<tree>/src/core/<pkg>` for each of the 186 packages and the program;
+  touch a stamp; `dotnet build <out>/src/MnHttpClosure/MnHttpClosure.csproj -c Release -p:go2csPath=<tree>/src/
+  -p:GoTwinsFor=<the 186 names joined by %3B>%3BMnHttpClosure -p:GoTwinsForIface=default -p:GoTwinsForIfaceAll=true
+  -p:EmitCompilerGeneratedFiles=true` plus the three CreateHardLinks* properties (disk) and the arm's switches:
+  O = `GoTwinsBoxRecv=false` (the base, stage (c)'s arm B), N = defaults (N2), the byref-param arm = defaults once
+  GoTwinsBoxParam exists, and `GoTwinsBoxParam=false`, which must equal N.
+- Read every `go2cs.twins.report.g.cs` newer than the stamp, summed: `// candidates= twinned=`, `// await-sites=`,
+  `// iface: ... forwarders=`, `// forwarders-sync=`, `// refused <reason>=N blocked=M`, `// box: twins= calls=
+  plain=`, and the `// P`, `// V`, `// R` rows. Bytes: the sum of go.*.dll beside the exe.
+- Run 5 times from the exe's directory: `GOMAXPROCS=12 GO2CS_MN=1 GO2CS_MN_READING=1 MnHttpClosure.exe`, with a
+  120 s timeout. stdout must equal go-output.txt byte for byte; stderr's `READING go-scheduler` line gives
+  `handoffs`, `thread-blocks`, `peak-os-threads`, `parks`, `steps`, `steps-over-10ms`, `peak-carriers`.
+- Floors: build from a per-run CLONE at a committed SHA (an edit can never reach a running arm); one closure job at
+  a time (the output root is shared); at least 25 GB free; never two conversions at once.
+- **PDB-path rule:** go.*.dll embeds each PDB path; compare byte totals only between trees whose paths are as long as
+  each other (on G's box, `g-run-rev` read +1,536 against `g-mn3`).
+- The probe: the behavioral runner, `GoTwinsFor=MnBoxAlias GO2CS_MN=1 run-behavioral.ps1 --filter MnBoxAlias`, then
+  the same with `GoTwinsBoxCopy=true` and with `GoTwinsBoxArgCopy=true` (both must FAIL). The sweep: the 30 programs
+  of DATA-mn-n2-receivers.md through the same runner (30/30). GenTests: `dotnet test src/tests/GenTests -c Release`.
+
+**Host dependencies.** G's box: 12 cores, GOMAXPROCS=12, Windows, .NET SDK 10.0.400, Go 1.26.10 for this tree's
+converter. Host-SENSITIVE readings: hand-offs, thread-blocks, peak OS threads, parks, steps, steps over 10 ms, walls,
+and bytes (path length, SDK). Host-INDEPENDENT (the generator is deterministic): twinned, await sites, refusals,
+box counts, named-plain, V rows, the sweep's verdicts, Go's output. On another host, read arms O and N first (5 runs
+each) and restate PB-1 relative to that N before the byref-param arm: on G's box N read 130-137 hand-offs + 0
+thread-blocks (about 133) against O's 110-116 + 81-86 (about 197); PB-1's 105-128 is a fall of 4-21% from N.
+
+**The predictions, as revised in 12.1:** PB-1 (host-sensitive) the plain-block total falls 4-21% from N,
+thread-blocks stay 0, peak OS threads at most N's; PB-2 (independent) twinned 3,806 -> 3,875-4,100; PB-3 (independent)
+refused parkers 175 -> 105-130; PB-4 (host- and path-sensitive) +0.05 to +0.35 MB; PB-5 (independent) byref-param
+named-plain at most 12; PB-6 (independent) sweep 30/30 and Go's 9 lines every run; PB-7 at most two rules beyond the
+three of 12.1; PB-8 every probe row green and red under both controls. Stop lines SB-1..SB-8 as in 12 and 12.1 (SB-1
+and SB-4 reworded, SB-7 at 20).
+
+**Read first:** this document's sections 9-12.1; DATA-mn-n2-receivers.md (the arms, the scores, the re-gates, the
+PDB-path rule); DATA-mn-stage-c.md (the closure and its harness); the commit messages of 3b52c5c216 (the cut) and
+cb38d22455 (the review's seven changes); TwinBoxTests.cs (the units, including P1-P6).
