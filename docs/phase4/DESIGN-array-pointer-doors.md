@@ -1527,6 +1527,53 @@ length (the 2026-11-14 row after it). The windows reading of the banked rows the
 runtime, internal/reflectlite, internal/abi) is COORD's to place; the local gates and the hosted set are scored in
 the announce of this seat.
 
+### 16.11 Amendment 2026-11-16 (P5): the doors read inline admission for the element (W19)
+
+G found, on 2026-11-16, that door B still stepped aside in the sqlite-cs demo for arrays whose element is a ccgo
+union, so the old copying box remained and G's demo carried a stand-in for those reads (W12b's: 11 reads on
+windows, 18 reads and 1 store on linux). COORD's brief of 02:52Z asked for the size first; its 03:30Z reading
+approved the plan below as written.
+
+**The root.** Each door names its element in `arrayPointerViewOfBase` and requires it to be unmanaged in C#. It
+asked `csManagedField(E, 0)`, the plain reading, where every Go array is golib's `array<T>`, a reference. A ccgo
+union, `struct{ Fi [0]int32; Fu [0]uint32; Ff float32 }`, holds a `[0]T` carrier for each member but the one that
+has storage, so under that reading it is managed and the door declined. The old route,
+`To<array<E>>(p).Value[i]`, reads the whole array as a value and answers length 0 over memory that is no Go array
+of that type, which libc's heap is not. But a struct ADMITTED to inline arrays (inlineArrayAdmission.go) holds a
+`[0]T` as a readonly primitive marked `GoAlignmentCarrier` and a nonzero array as a `go.arrays` member, and
+zeroSizeFieldLayout.go already reads such a struct with `csManagedFieldInline`. The door never asked admission.
+COORD's question, whether a `[0]T` carrier is a managed field for the door's purpose: not once the struct is
+admitted, and yes when it is not (then it really is an `array<T>`). The carrier classification (C2's B2 side) is
+right as it stands; no change there.
+
+**The change.** The element rule asks admission: admitted, `csManagedFieldInline`; otherwise `csManagedField` as
+before. No golib change. The door's own `(*[N]E)(p)` converts the element whole, which is itself an admission
+seed (condition 1 of the admission rule), so a union the doors meet is admitted unless a cap, a face, a foreign
+closure or the pair rule keeps it out. The standard library is never admitted, so no corpus line moves by
+construction.
+
+**The census** (the doors' operand rule over modernc.org/sqlite v1.62.0 and libc v1.80.1; the tool and its output
+are in the kit): elements managed under the plain reading and unmanaged under the inline one. linux/amd64 19 sites:
+TExpr 7 and TRtreeCoord 4 (every array a `[0]T` carrier), Taddress 4 and the sockaddr union
+`struct{ Fsin6 [0]Tsockaddr_in6; Fsin Tsockaddr_in; F__ccgo_pad2 [12]byte }` 4 (a nonzero array among them).
+windows/amd64 11: TExpr 7 and TRtreeCoord 4. That is G's list exactly.
+
+| reading (linux/amd64, Release) | at D4's tip | with the change |
+|:--|:--|:--|
+| converter test: read, store, nested union, nonzero inline array; control a union a cap keeps out | the four red: the box route; the control unchanged | green; the control unchanged |
+| `UnionElementArrayDoor`, 7 arms under a recover each | 6 panic (length 0, and slice bounds [1:0]); arm F, a Go array of the same type, equal | 7 of 7 equal Go |
+| footprint, two seeded `-stdlib` roots per target | | 0 corpus files on linux/amd64, windows/amd64, darwin/amd64 and linux/arm64; 0 unresolved markers |
+
+**The control, and a premise that did not hold.** The plan's control was "the same union never converted whole,
+so not admitted". The first run showed that premise false: the door's `(*[N]E)(p)` is the whole conversion, so
+that union was admitted and took the door. The control is now a union the 4096-element cap keeps out (GO2CS2009),
+whose `[0]T` stays an `array<T>`: it keeps the box route at both converters, which is the reading the not-admitted
+arm of the rule must give.
+
+**What this leaves.** Whether each of G's 19 types is admitted in its own package is read where it is converted:
+G's sqlite-cs demo with no W12b stand-in, both demos, windows and linux, is the proof. A type a face or the pair
+rule keeps out would keep the box route and name itself in that package's GO2CS2009 warnings.
+
 ## 17. Amendment 2026-11-15 (P5): the publish of a named array's holder is a compare-and-swap (option 2)
 
 This is the first item of 14.3, ruled the seat after door B (01:19Z) and accepted as planned (08:54Z). golib

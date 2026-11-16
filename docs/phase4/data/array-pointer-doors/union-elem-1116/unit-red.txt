@@ -1,0 +1,47 @@
+Recursively converting module at <tmp>/app
+Applying build tags: none
+Closure: 62 packages discovered — converting 1 app + 0 third-party, referencing 60 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting example.com/unionelemdoor
+<tmp>/app/main.go(54,9): warning GO2CS2009: [4]TLoose is converted whole through unsafe.Pointer but keeps array<T> storage: field Fpad: [4100]byte has 4100 elements, over the 4096-element cap
+Inline arrays (auto): example.com/unionelemdoor admits 5 struct types (5 holding arrays), 1 kept out (GO2CS2009), 0 mixed pairs (GO2CS2010)
+
+Recursive conversion complete in 1.15s: 1/1 packages converted
+Build file generated: <tmp>/out/Directory.Build.props
+Build file generated: <tmp>/out/Directory.Build.targets
+--- FAIL: TestArrayPointerDoorTakesAnAdmittedUnionElement (1.15s)
+    arrayPointerDoorUnionElement_test.go:115: readCoord: an admitted union element takes the element door "return @unsafe.Pointer.ElementRef<TCoord>(p, i, 4).Ff;", got:
+        internal static float32 readCoord(@unsafe.Pointer p, nint i) {
+            return (@unsafe.Pointer.To<array<TCoord>>(p)).Value[i].Ff;
+        }
+    arrayPointerDoorUnionElement_test.go:119: readCoord: an admitted union element keeps the box route, got:
+        internal static float32 readCoord(@unsafe.Pointer p, nint i) {
+            return (@unsafe.Pointer.To<array<TCoord>>(p)).Value[i].Ff;
+        }
+    arrayPointerDoorUnionElement_test.go:115: writeCoord: an admitted union element takes the element door "@unsafe.Pointer.ElementRef<TCoord>(p, i, 4).Ff = f;", got:
+        internal static void writeCoord(@unsafe.Pointer p, nint i, float32 f) {
+            (@unsafe.Pointer.To<array<TCoord>>(p)).Value[i].Ff = f;
+        }
+    arrayPointerDoorUnionElement_test.go:119: writeCoord: an admitted union element keeps the box route, got:
+        internal static void writeCoord(@unsafe.Pointer p, nint i, float32 f) {
+            (@unsafe.Pointer.To<array<TCoord>>(p)).Value[i].Ff = f;
+        }
+    arrayPointerDoorUnionElement_test.go:115: joinOf: an admitted union element takes the element door "return @unsafe.Pointer.ElementRef<TExpr>(p, i, 3).Fw.FiJoin;", got:
+        internal static int32 joinOf(@unsafe.Pointer p, nint i) {
+            return (@unsafe.Pointer.To<array<TExpr>>(p)).Value[i].Fw.FiJoin;
+        }
+    arrayPointerDoorUnionElement_test.go:119: joinOf: an admitted union element keeps the box route, got:
+        internal static int32 joinOf(@unsafe.Pointer p, nint i) {
+            return (@unsafe.Pointer.To<array<TExpr>>(p)).Value[i].Fw.FiJoin;
+        }
+    arrayPointerDoorUnionElement_test.go:115: addrByte: an admitted union element takes the element door "@unsafe.Pointer.ElementRef<TAddr>(p, i, 2).Fb", got:
+        internal static byte addrByte(@unsafe.Pointer p, nint i) {
+            return (@unsafe.Pointer.To<array<TAddr>>(p)).Value[i].Fb[3];
+        }
+    arrayPointerDoorUnionElement_test.go:119: addrByte: an admitted union element keeps the box route, got:
+        internal static byte addrByte(@unsafe.Pointer p, nint i) {
+            return (@unsafe.Pointer.To<array<TAddr>>(p)).Value[i].Fb[3];
+        }
+FAIL
+FAIL	go2cs	1.172s
+FAIL
