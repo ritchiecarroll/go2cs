@@ -217,15 +217,15 @@ func TestNonSelfProxyRefusalsNameTheirReason(t *testing.T) {
 	}
 
 	for marker, reason := range map[string]string{
-		"REFUSED named":     "generic NAMED type",
-		"REFUSED union":     "type-term union with methods",
-		"REFUSED aliasing":  "the parameter of type map[string]O",
+		"REFUSED named":           "generic NAMED type",
+		"REFUSED union":           "type-term union with methods",
+		"REFUSED aliasing":        "the parameter of type map[string]O",
 		"REFUSED aliasing-result": "the result of type []O",
-		"REFUSED sibling":   "sibling type parameter S",
-		"REFUSED zero-call": "the zero value zero has the method Parse called on it",
-		"REFUSED zero-any":  "the zero value zero is assigned to an interface",
-		"REFUSED onward":    "O is passed on to inner under the different constraint",
-		"REFUSED onward-any": "O is passed on to Clone under the different constraint any",
+		"REFUSED sibling":         "sibling type parameter S",
+		"REFUSED zero-call":       "the zero value zero has the method Parse called on it",
+		"REFUSED zero-any":        "the zero value zero is assigned to an interface",
+		"REFUSED onward":          "O is passed on to inner under the different constraint",
+		"REFUSED onward-any":      "O is passed on to Clone under the different constraint any",
 	} {
 		if text := byLine[nonSelfFixtureLine(t, marker)]; !strings.Contains(text, reason) {
 			t.Errorf("%s: the refusal does not name %q:\n%s", marker, reason, text)
