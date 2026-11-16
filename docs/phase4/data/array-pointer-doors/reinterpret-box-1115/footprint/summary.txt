@@ -1,0 +1,32 @@
+seed=e245e697beca4825b0fde1f021845a2214649452 base=8a588d5d8fea4907 cut=784fe22df6b71d51 15:21:00Z
+linux/amd64 base rc=0 seeded_cs=4684 written=18 wall=272s 15:25:34Z
+linux/amd64 cut rc=0 seeded_cs=4684 written=19 wall=259s 15:29:56Z
+linux/amd64 differing files: 3 only-in: 0 lines -364 +364
+  src/core/syscall/linux/lsf_linux.cs base==committed:yes cut==committed:no
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+linux/amd64 cut arm equals the committed file in 0 of 3
+linux/amd64 unresolved lift markers in cut root: 0
+linux/arm64 base rc=0 seeded_cs=4684 written=18 wall=255s 15:34:19Z
+linux/arm64 cut rc=0 seeded_cs=4684 written=19 wall=246s 15:38:28Z
+linux/arm64 differing files: 3 only-in: 0 lines -362 +362
+  src/core/syscall/linux/lsf_linux.cs base==committed:yes cut==committed:no
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+linux/arm64 cut arm equals the committed file in 0 of 3
+linux/arm64 unresolved lift markers in cut root: 0
+windows/amd64 base rc=0 seeded_cs=4684 written=19 wall=234s 15:42:29Z
+windows/amd64 cut rc=0 seeded_cs=4684 written=19 wall=231s 15:46:23Z
+windows/amd64 differing files: 2 only-in: 0 lines -363 +363
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+windows/amd64 cut arm equals the committed file in 0 of 2
+windows/amd64 unresolved lift markers in cut root: 0
+darwin/amd64 base rc=0 seeded_cs=4684 written=17 wall=242s 15:50:32Z
+darwin/amd64 cut rc=0 seeded_cs=4684 written=17 wall=254s 15:54:49Z
+darwin/amd64 differing files: 2 only-in: 0 lines -361 +361
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+darwin/amd64 cut arm equals the committed file in 0 of 2
+darwin/amd64 unresolved lift markers in cut root: 0
+DONE

@@ -58,7 +58,7 @@ Each `visit*` file handles one Go AST node category, emitting the corresponding 
 | `visitIfStmt.go` / `visitForStmt.go` / `visitRangeStmt.go` | Conditionals & loops (range handles ptr deref). |
 | `visitSwitchStmt.go` / `visitTypeSwitchStmt.go` / `visitSelectStmt.go` / `visitCommClause.go` | switch / type-switch / select + comm clauses. |
 | `visitReturnStmt.go` / `visitBranchStmt.go` / `visitLabeledStmt.go` | return, break/continue/goto, labels. |
-| `visitDeferStmt.go` / `visitGoStmt.go` | `defer` (registers into the enclosing `GoFrame`, drained LIFO), `go` (goroutine → its own OS thread, reused through `GoroutineThreadPool`). |
+| `visitDeferStmt.go` / `visitGoStmt.go` | `defer` (registers into the enclosing `GoFrame`, drained LIFO), `go` (a `goǃ` call; golib runs the goroutine on its own OS thread by default, reused through `GoroutineThreadPool`). |
 | `visitIdent.go` | Identifier emission / name sanitization. |
 
 ## `conv*.go` — expression & type converters
@@ -116,10 +116,11 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | `ExtensionHostListGenerator` | every converted project | `[assembly: GoExtensionHostList]` and one `[assembly: GoExtensionHost(typeof(X))]` per top-level static class, which golib's extension-method scan reads in place of `Assembly.GetTypes()` under Native AOT. |
 
 Four analyzers ship beside them: `StringLiteralBindingAnalyzer` fails the build when a C# string literal in
-converted code binds a C# type where Go has a `string`, `StackAppendBufferAnalyzer` fails it when a
-stack-append buffer is passed as anything but a plain local, `MethodLimitAnalyzer` when a type declares more
-methods than the runtime loads, and `MethodHolderNameAnalyzer` when a name in a method-holder class binds
-another member than its package's.
+converted code binds a C# type where Go has a `string`; `StackAppendBufferAnalyzer` fails it when a
+stack-append buffer is passed as anything but a plain local; `MethodLimitAnalyzer` fails it on a type with
+more methods than the .NET runtime loads (`GO2CS0012`); `MethodHolderNameAnalyzer` fails it when a name in a
+method-holder class binds another member than its package's (`GO2CS0013`); and `RefusalDowngradedAnalyzer`
+warns, in every build, on each refusal a conversion downgraded with `-warn` (`GO2CS0011`).
 
 ## Runtime type map (`src/core/golib/`)
 

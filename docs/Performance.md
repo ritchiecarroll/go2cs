@@ -118,7 +118,7 @@ cd src/tests/Performance
 ./run-performance.ps1 --runs 10 --update-readme   # refresh the results block below
 ```
 
-Requirements: Go 1.26.10 (the release go2cs converts), a .NET SDK matching the corpus target
+Requirements: the Go release go2cs converts (Go 1.26.11, the `<GoStdLibVersion>` in `src/version.props`), a .NET SDK matching the corpus target
 framework (`net10.0`, named by `src/Directory.Build.props`), and — for the AOT column — a native
 linker and toolchain, which differs by host:
 
@@ -144,7 +144,7 @@ silently report a benchmark that computes something different in C#.
 
 ## Results
 
-The table below has all 17 of the suite's programs, measured against the published `go.*` 1.26.10.2
+The table below has the 17 programs the suite held when it was measured (`PerfDeferPanic` joined after), measured against the published `go.*` 1.26.10.2
 packages. The same programs measured in the same session against `go.*` 1.24.13.7 are
 [under History](#go-124137-measured-in-the-same-session), with the older tables.
 

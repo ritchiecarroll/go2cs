@@ -975,7 +975,7 @@ mapped:
                 @throw(outOfMemoryAllocatingˢ3);
             }
             var oldSlice = (arenaList);
-            (Ꮡ((arenaList)).Reinterpret<slice<arenaIdx>, notInHeapSlice>()).Value = new notInHeapSlice(newArray, len((arenaList)), (nint)(sizeΔ1 / (uintptr)goarch.PtrSize));
+            (ᏑarenaList.nilcheck().Reinterpret<slice<arenaIdx>, notInHeapSlice>()).Value = new notInHeapSlice(newArray, len((arenaList)), (nint)(sizeΔ1 / (uintptr)goarch.PtrSize));
             copy((arenaList), oldSlice);
             // Do not free the old backing array because
             // there may be concurrent readers. Since we

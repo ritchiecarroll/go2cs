@@ -1838,6 +1838,12 @@ func (v *Visitor) isU8StringOperand(expr ast.Expr) bool {
 }
 
 func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext, litContext BasicLitContext) string {
+	// A named struct value compared with an unnamed one casts the unnamed operand
+	// (namedUnnamedStructConversion.go).
+	if compared, ok := v.namedUnnamedStructComparison(binaryExpr); ok {
+		return compared
+	}
+
 	lhsType := v.getExprType(binaryExpr.X)
 	rhsType := v.getExprType(binaryExpr.Y)
 

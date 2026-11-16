@@ -234,6 +234,9 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 	v.outputBuilder, v.emittedClassName, cgoEmittingPseudoPackage = packageBuilder, packageClassName, false
 
+	// Every unnamed struct type the file writes has its C# name by now (see recordNamedUnnamedStructMoves)
+	v.recordNamedUnnamedStructMoves(file, nil)
+
 	if v.options.includeComments {
 		// Add any remaining standalone comments
 		postCodeComments := strings.Builder{}

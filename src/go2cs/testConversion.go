@@ -3251,6 +3251,16 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		packageInlineArrayRecords = inlineArrayStampRecords(admission, inlineArrayMode(pkg.Types.Path(), pkg.Dir, stampedOptions(options, pkg.Types.Path(), stamp.mode)))
 	}
 
+	// B2's D2 sites (valueDecodeSites.go), over every file the variant emits, test files included: a test that reads a
+	// kept-out struct through a pointer reads it as the production code does.
+	allFiles := make([]*ast.File, 0, len(allEntries))
+
+	for _, entry := range allEntries {
+		allFiles = append(allFiles, entry.file)
+	}
+
+	packageValueDecodeSites = collectValueDecodeSites(allFiles, pkg.TypesInfo, packageInlineAdmission)
+
 	// ж-box A2 (three-driver rule, DESIGN-zh-box-reduction §3.5): the ref-lowering classification
 	// runs in the -tests driver too — over the PRODUCTION files only (prodEntries; the entry point
 	// additionally filters `_test.go` structurally), so the merged white-box package's test-side

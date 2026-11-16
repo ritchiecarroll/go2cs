@@ -18,9 +18,9 @@ The guiding goal: the generated C# should be both *behaviorally* and *visually* 
 original Go, so that a Go developer can read the output and follow it. The runtime library and
 the generators exist to keep the visible converted code close to the Go original.
 
-> **How this reference is organized.** Each `##` topic opens with the high-level rule (the same
-> ground the summary covers) and is then followed by `###` subsections documenting specific
-> conversion decisions, edge cases, and fixes — most keyed to the [behavioral test](../Glossary.md#guard) that guards them.
+> **How this reference is organized.** Each topic is a page that opens with the high-level rule (the
+> same ground the summary covers); each `##` heading on the page then states one specific conversion
+> decision, edge case or fix, most keyed to the [behavioral test](../Glossary.md#guard) that guards it.
 > When updating the converter, add the deep detail here and the reader-facing example to the
 > summary.
 
@@ -29,6 +29,7 @@ the generators exist to keep the visible converted code close to the Go original
 Each topic is its own page. The summary, [Conversion Strategies](../ConversionStrategies.md), gives the short, example-driven version of each one.
 
 - **[Package Conversion](package-conversion.md)**
+  - [`main` keeps its name, and the entry point is generated](package-conversion.md#main-keeps-its-name-and-the-entry-point-is-generated)
   - [A project name is the package's FULL import path — a go-file-free container directory does not truncate it](package-conversion.md#a-project-name-is-the-packages-full-import-path--a-go-file-free-container-directory-does-not-truncate-it)
   - [The repository's own `go2cs/` module marker is elided — on BOTH sides, by one rule](package-conversion.md#the-repositorys-own-go2cs-module-marker-is-elided--on-both-sides-by-one-rule)
   - [The emitted project PATH is budgeted — the file name compresses, the identity never does](package-conversion.md#the-emitted-project-path-is-budgeted--the-file-name-compresses-the-identity-never-does)
@@ -109,6 +110,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A multi-value RETURN reads its plain operands AFTER its calls](multi-assignment.md#a-multi-value-return-reads-its-plain-operands-after-its-calls)
   - [A SELECTOR left-hand side counts as a reassignment — a field swap must stay simultaneous](multi-assignment.md#a-selector-left-hand-side-counts-as-a-reassignment--a-field-swap-must-stay-simultaneous)
   - [A STAR-DEREF of a CALL result counts as a reassignment — the last shape of the classification gap](multi-assignment.md#a-star-deref-of-a-call-result-counts-as-a-reassignment--the-last-shape-of-the-classification-gap)
+  - [A dereferenced pointer CONVERSION as a tuple target writes through `.Value`](multi-assignment.md#a-dereferenced-pointer-conversion-as-a-tuple-target-writes-through-value)
   - [An address-taken reference-typed local heap-boxes too — `Ꮡ(value)` copies are only for reads](multi-assignment.md#an-address-taken-reference-typed-local-heap-boxes-too--ꮡvalue-copies-are-only-for-reads)
   - [An address-taken NAMED RESULT heap-boxes too](multi-assignment.md#an-address-taken-named-result-heap-boxes-too)
   - [An address-taken VALUE PARAMETER heap-boxes too](multi-assignment.md#an-address-taken-value-parameter-heap-boxes-too)
@@ -120,8 +122,10 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A PACKAGE-LEVEL function literal's own locals are analyzed too](multi-assignment.md#a-package-level-function-literals-own-locals-are-analyzed-too)
   - [A pointer-receiver METHOD VALUE heap-boxes its receiver — the implicit `(&x).M`](multi-assignment.md#a-pointer-receiver-method-value-heap-boxes-its-receiver--the-implicit-xm)
 - **[Short Variable Redeclaration (Shadowing)](shadowing.md)**
+  - [An init statement keeps its block only where moving its names could change what they mean](shadowing.md#an-init-statement-keeps-its-block-only-where-moving-its-names-could-change-what-they-mean)
   - [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)
   - [Test-variant names: a test file's method needs no rename](shadowing.md#test-variant-names-a-test-files-method-needs-no-rename)
+  - [A production free function and a same-named method: the function Δ-renames](shadowing.md#a-production-free-function-and-a-same-named-method-the-function-δ-renames)
   - [A NESTED package's production `GoImplement` record anchors to the production metadata file](shadowing.md#a-nested-packages-production-goimplement-record-anchors-to-the-production-metadata-file)
   - [Test suites REFERENCE the production project instead of recompiling it](shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it)
   - [Under the RECOMPILE model the test half CONTINUES the production emission (the `productionSeed`)](shadowing.md#under-the-recompile-model-the-test-half-continues-the-production-emission-the-productionseed)
@@ -129,6 +133,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [An Example/Benchmark-ONLY test file is dropped from the compile set](shadowing.md#an-examplebenchmark-only-test-file-is-dropped-from-the-compile-set)
   - [A package-qualifier `using` in a converted TEST SOURCE contributes a project reference](shadowing.md#a-package-qualifier-using-in-a-converted-test-source-contributes-a-project-reference)
   - [Shadowing the names go2cs itself spells (`nil`, golib names, emitter-spelled type names, C# keywords)](shadowing.md#shadowing-the-names-go2cs-itself-spells-nil-golib-names-emitter-spelled-type-names-c-keywords)
+  - [A Go type named `Value` yields its wrapper's `Value` property to the door `Value‿`](shadowing.md#a-go-type-named-value-yields-its-wrappers-value-property-to-the-door-value‿)
   - [A parameter that shadows an imported package is renamed at its declaration too](shadowing.md#a-parameter-that-shadows-an-imported-package-is-renamed-at-its-declaration-too)
   - [A declaration shadowing a BUILT-IN makes the call an ordinary call](shadowing.md#a-declaration-shadowing-a-built-in-makes-the-call-an-ordinary-call)
   - [A declaration named `heap` qualifies the boxing intrinsic](shadowing.md#a-declaration-named-heap-qualifies-the-boxing-intrinsic)
@@ -157,6 +162,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A fixed-size array constructs its ELEMENTS when `default(T)` is not usable storage](slices-and-arrays.md#a-fixed-size-array-constructs-its-elements-when-defaultt-is-not-usable-storage)
   - [A NAMED array's ZERO VALUE constructs its elements through the wrapper's lazy backing](slices-and-arrays.md#a-named-arrays-zero-value-constructs-its-elements-through-the-wrappers-lazy-backing)
   - [A NAMED array compared with the unnamed array it is written over casts the unnamed side](slices-and-arrays.md#a-named-array-compared-with-the-unnamed-array-it-is-written-over-casts-the-unnamed-side)
+  - [A defined type over another DEFINED slice type is a slice wrapper too](slices-and-arrays.md#a-defined-type-over-another-defined-slice-type-is-a-slice-wrapper-too)
   - [`make([]E, n)` constructs its ELEMENTS by the same rule](slices-and-arrays.md#makee-n-constructs-its-elements-by-the-same-rule)
   - [`clear` rebuilds each element through golib's `GoZero` — the RUN-TIME half of zero-value construction](slices-and-arrays.md#clear-rebuilds-each-element-through-golibs-gozero--the-run-time-half-of-zero-value-construction)
   - [A map READ of a shape-carrying element supplies the zero from the CALL SITE](slices-and-arrays.md#a-map-read-of-a-shape-carrying-element-supplies-the-zero-from-the-call-site)
@@ -213,6 +219,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [The `comparable` constraint](generic-constraints.md#the-comparable-constraint)
   - [Generic struct equality is decided per FIELD, not per type parameter](generic-constraints.md#generic-struct-equality-is-decided-per-field-not-per-type-parameter)
   - [A generic struct implementing an interface BY VALUE partials at its OPEN definition](generic-constraints.md#a-generic-struct-implementing-an-interface-by-value-partials-at-its-open-definition)
+  - [A conversion at a generic type's OWN type parameters is recorded by the type's DEFINITION](generic-constraints.md#a-conversion-at-a-generic-types-own-type-parameters-is-recorded-by-the-types-definition)
   - [The `string | []byte` union](generic-constraints.md#the-string--byte-union)
   - [Explicit type arguments come from the callee's instantiation](generic-constraints.md#explicit-type-arguments-come-from-the-callees-instantiation)
   - [A CONSTANT argument that fixes a type parameter is retyped to the instantiation](generic-constraints.md#a-constant-argument-that-fixes-a-type-parameter-is-retyped-to-the-instantiation)
@@ -283,6 +290,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Literal case labels under a named-type tag compare through a cast](expression-switch.md#literal-case-labels-under-a-named-type-tag-compare-through-a-cast)
   - [A trailing `default` in a switch WITH `fallthrough` is guarded on `!match`](expression-switch.md#a-trailing-default-in-a-switch-with-fallthrough-is-guarded-on-match)
   - [A NON-TRAILING `default` is guarded on the PRECOMPUTED any-case-match, never the running flag](expression-switch.md#a-non-trailing-default-is-guarded-on-the-precomputed-any-case-match-never-the-running-flag)
+  - [A switch that is terminating by the Go spec ends with `return default;`](expression-switch.md#a-switch-that-is-terminating-by-the-go-spec-ends-with-return-default)
   - [A clause's `else` may only be dropped when EVERY preceding clause terminates](expression-switch.md#a-clauses-else-may-only-be-dropped-when-every-preceding-clause-terminates)
   - [A `break` in a case that also `fallthrough`s must skip the fallthrough](expression-switch.md#a-break-in-a-case-that-also-fallthroughs-must-skip-the-fallthrough)
   - [A `continue` in a break-wrapped case targets the LOOP, not the wrapper](expression-switch.md#a-continue-in-a-break-wrapped-case-targets-the-loop-not-the-wrapper)
@@ -302,6 +310,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A `:=`-bound func literal states its declared result type when its body cannot supply it](struct-types.md#a--bound-func-literal-states-its-declared-result-type-when-its-body-cannot-supply-it)
   - [Lifted function-local types: anonymous structs dedupe, named types carry [GoLocalName]](struct-types.md#lifted-function-local-types-anonymous-structs-dedupe-named-types-carry-golocalname)
   - [A lift inside a PACKAGE-LEVEL func literal flushes at package scope, seeded by the declaration](struct-types.md#a-lift-inside-a-package-level-func-literal-flushes-at-package-scope-seeded-by-the-declaration)
+  - [A struct value moves between a named type, an unnamed type and a second lift of the unnamed type](struct-types.md#a-struct-value-moves-between-a-named-type-an-unnamed-type-and-a-second-lift-of-the-unnamed-type)
   - [A methodless named func type renders as its base delegate](struct-types.md#a-methodless-named-func-type-renders-as-its-base-delegate)
   - [Named delegate types wrap mismatched initializers](struct-types.md#named-delegate-types-wrap-mismatched-initializers)
   - [A named delegate value passed to a structural func parameter re-wraps](struct-types.md#a-named-delegate-value-passed-to-a-structural-func-parameter-re-wraps)
@@ -328,6 +337,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [An EMBEDDED field whose derived name equals the enclosing type is Δ-renamed](struct-embedding.md#an-embedded-field-whose-derived-name-equals-the-enclosing-type-is-δ-renamed)
   - [Promoted pointer methods descend multi-hop value-embed chains](struct-embedding.md#promoted-pointer-methods-descend-multi-hop-value-embed-chains)
   - [A promotion forwarder's receiver never shares a name with the method's parameters](struct-embedding.md#a-promotion-forwarders-receiver-never-shares-a-name-with-the-methods-parameters)
+  - [A struct's promotion forwarders live in a class of the struct's own](struct-embedding.md#a-structs-promotion-forwarders-live-in-a-class-of-the-structs-own)
   - [A nil embedded pointer is holdable and assignable — only its dereference panics](struct-embedding.md#a-nil-embedded-pointer-is-holdable-and-assignable--only-its-dereference-panics)
   - [A field promoted through an embedded POINTER is rooted at the POINTED-TO allocation](struct-embedding.md#a-field-promoted-through-an-embedded-pointer-is-rooted-at-the-pointed-to-allocation)
 - **[Interfaces](interfaces.md)**
@@ -394,6 +404,9 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [The run-time `unsafe.Sizeof` answers through Go's layout rule, not the CLR's marshaller](pointers.md#the-run-time-unsafesizeof-answers-through-gos-layout-rule-not-the-clrs-marshaller)
   - [Converting a Go pointer to `unsafe.Pointer`](pointers.md#converting-a-go-pointer-to-unsafepointer)
   - [Pointer-derived funnel arguments and bridged `unsafe.Pointer` arguments keep their box alive across the call — the statement-scoped `GC.KeepAlive` drain](pointers.md#pointer-derived-funnel-arguments-and-bridged-unsafepointer-arguments-keep-their-box-alive-across-the-call--the-statement-scoped-gckeepalive-drain)
+  - [A call that returns an `unsafe.Pointer` is emitted as the call itself — the pointer keeps what it carries](pointers.md#a-call-that-returns-an-unsafepointer-is-emitted-as-the-call-itself--the-pointer-keeps-what-it-carries)
+  - [`(*T)(p)` over an `unsafe.Pointer` is emitted as `unsafe.Pointer.To<T>(p)` — the typed pointer keeps what `p` carries](pointers.md#tp-over-an-unsafepointer-is-emitted-as-unsafepointertotp--the-typed-pointer-keeps-what-p-carries)
+  - [`unsafe.Pointer(uintptr(p) + n)` is emitted as `unsafe.Add(p, n)` — the moved pointer keeps what `p` carries](pointers.md#unsafepointeruintptrp--n-is-emitted-as-unsafeaddp-n--the-moved-pointer-keeps-what-p-carries)
   - [A numeric value pun READ is a bitcast — `*(*uint64)(unsafe.Pointer(&f))` boxes nothing](pointers.md#a-numeric-value-pun-read-is-a-bitcast--uint64unsafepointerf-boxes-nothing)
   - [The pointer-word read — `*(*unsafe.Pointer)(unsafe.Pointer(&x))` emits a CARRYING pointer, never a byte pun](pointers.md#the-pointer-word-read--unsafepointerunsafepointerx-emits-a-carrying-pointer-never-a-byte-pun)
   - [A func value carried as a number — one word per static function, through `GoFuncCookie`](pointers.md#a-func-value-carried-as-a-number--one-word-per-static-function-through-gofunccookie)
@@ -421,8 +434,10 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Promoted methods through a FOREIGN pointer embed forward via the embedded box](pointers.md#promoted-methods-through-a-foreign-pointer-embed-forward-via-the-embedded-box)
   - [Promoted methods through embedded INTERFACE fields route per-member to the declaring field](pointers.md#promoted-methods-through-embedded-interface-fields-route-per-member-to-the-declaring-field)
   - [A pointer parameter used only through its box gets no deref VALUE alias](pointers.md#a-pointer-parameter-used-only-through-its-box-gets-no-deref-value-alias)
+  - [A pointer parameter with no deref alias keeps its Go name](pointers.md#a-pointer-parameter-with-no-deref-alias-keeps-its-go-name)
   - [A pointer RECEIVER compared to `nil` compares its box, not its deref'd value](pointers.md#a-pointer-receiver-compared-to-nil-compares-its-box-not-its-derefd-value)
   - [A pointer RECEIVER's deref alias is nil-DEFERRING — the panic moves to the body, it does not vanish](pointers.md#a-pointer-receivers-deref-alias-is-nil-deferring--the-panic-moves-to-the-body-it-does-not-vanish)
+  - [A receiver written through an ALIAS takes the form of the type the alias denotes](pointers.md#a-receiver-written-through-an-alias-takes-the-form-of-the-type-the-alias-denotes)
   - [A pointer PARAMETER is nil-deferring for exactly the reason a receiver is](pointers.md#a-pointer-parameter-is-nil-deferring-for-exactly-the-reason-a-receiver-is)
   - [A receiver or parameter RE-POINTED before first use — the normalization idiom](pointers.md#a-receiver-or-parameter-re-pointed-before-first-use--the-normalization-idiom)
   - [A reinterpreted raw address ALIASES native memory instead of boxing a copy](pointers.md#a-reinterpreted-raw-address-aliases-native-memory-instead-of-boxing-a-copy)
@@ -431,10 +446,13 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [`unsafe.Slice` over MANAGED element storage ALIASES it](pointers.md#unsafeslice-over-managed-element-storage-aliases-it)
   - [A reinterpret of a MANAGED pointer aliases the box — it never round-trips through the address](pointers.md#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address)
   - [A slice taken through `(*[N]T)(p)` ALIASES the memory p names: the view doors](pointers.md#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors)
+  - [An index, an element's address or a whole array through `(*[N]T)(p)` reaches the memory p names: the element doors](pointers.md#an-index-an-elements-address-or-a-whole-array-through-ntp-reaches-the-memory-p-names-the-element-doors)
   - [The bytes of one field through `(*[N]T)(unsafe.Pointer(&p.f))`: the field view](pointers.md#the-bytes-of-one-field-through-ntunsafepointerpf-the-field-view)
   - [A pointer-cast slice with a LOW bound starts its view at that element](pointers.md#a-pointer-cast-slice-with-a-low-bound-starts-its-view-at-that-element)
   - [Every spelling of a pointer-cast slice takes the view door, and a MAX bound sets its capacity](pointers.md#every-spelling-of-a-pointer-cast-slice-takes-the-view-door-and-a-max-bound-sets-its-capacity)
   - [A store through an EXPLICIT dereference of a pointer conversion reaches the pointee](pointers.md#a-store-through-an-explicit-dereference-of-a-pointer-conversion-reaches-the-pointee)
+  - [The address of a field reached through a pointer conversion is the field's own address](pointers.md#the-address-of-a-field-reached-through-a-pointer-conversion-is-the-fields-own-address)
+  - [`&*p` is `p`, after Go's nil check](pointers.md#p-is-p-after-gos-nil-check)
   - [`unsafe.Pointer(p)` on a pointer PARAMETER renders the box, never a deref](pointers.md#unsafepointerp-on-a-pointer-parameter-renders-the-box-never-a-deref)
   - [A reference-type-pointee pointer parameter uses the nil-check-free `.ValueSlot` deref alias](pointers.md#a-reference-type-pointee-pointer-parameter-uses-the-nil-check-free-valueslot-deref-alias)
   - [A pointer-element composite literal takes the box for a deref-aliased ident](pointers.md#a-pointer-element-composite-literal-takes-the-box-for-a-deref-aliased-ident)
@@ -456,6 +474,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Foreign renamed types reference the recorded imported-type alias](golib-namespace.md#foreign-renamed-types-reference-the-recorded-imported-type-alias)
   - [A foreign package's collision rename is derived from that package, not from the conversion run](golib-namespace.md#a-foreign-packages-collision-rename-is-derived-from-that-package-not-from-the-conversion-run)
   - [A foreign package's re-exported type ALIAS is derived from that package too](golib-namespace.md#a-foreign-packages-re-exported-type-alias-is-derived-from-that-package-too)
+  - [A renamed type reached only through another package's alias is spelled by its producer's member](golib-namespace.md#a-renamed-type-reached-only-through-another-packages-alias-is-spelled-by-its-producers-member)
   - [A DOT-IMPORTED renamed type is spelled through the same alias as the qualified reference](golib-namespace.md#a-dot-imported-renamed-type-is-spelled-through-the-same-alias-as-the-qualified-reference)
   - [The reflection bridge answers a read where the answer EXISTS](golib-namespace.md#the-reflection-bridge-answers-a-read-where-the-answer-exists)
   - [A typed nil keeps its type across BOTH interface-space boundaries](golib-namespace.md#a-typed-nil-keeps-its-type-across-both-interface-space-boundaries)
@@ -530,6 +549,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [`reflect.StructOf` MINTS a CLR value type, and then changes nothing else](manual-conversions.md#reflectstructof-mints-a-clr-value-type-and-then-changes-nothing-else)
   - [`reflect.SliceOf` is the same one-liner as `PointerTo`](manual-conversions.md#reflectsliceof-is-the-same-one-liner-as-pointerto)
   - [`runtime.Pinner` — a pin BIT keyed by the referent allocation, and Go's two-level cgo walk over managed values](manual-conversions.md#runtimepinner--a-pin-bit-keyed-by-the-referent-allocation-and-gos-two-level-cgo-walk-over-managed-values)
+  - [A displaced body may re-implement the algorithm, and then its Go source text is pinned](manual-conversions.md#a-displaced-body-may-re-implement-the-algorithm-and-then-its-go-source-text-is-pinned)
 - **[Comments](comments.md)**
   - [Where a comment is attached, and where it is not](comments.md#where-a-comment-is-attached-and-where-it-is-not)
   - [Blank lines](comments.md#blank-lines)

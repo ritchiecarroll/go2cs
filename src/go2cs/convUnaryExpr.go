@@ -263,11 +263,32 @@ func (v *Visitor) boxBaseName(ident *ast.Ident) string {
 		}
 	}
 
+	// A PACKAGE-LEVEL var is the exception to the collision rule: its box is declared beside it as `Ꮡ` plus the
+	// RENDERED name (globalAddressOperations' box declaration), so a var collision-renamed for a same-named
+	// method (`var tid atomic.Int32` beside `func (*TLS) tid()`, `tid`→`Δtid`) is boxed `ᏑΔtid`, and its
+	// pointer-receiver call `tid.Add(1)` must name that box, not the raw `Ꮡtid` (CS0103, libc's musl TLS, W13).
+	if v.identIsPackageVar(ident) {
+		return base
+	}
+
 	if base == ShadowVarMarker+ident.Name {
 		return ident.Name
 	}
 
 	return base
+}
+
+// identIsPackageVar reports whether the identifier resolves to a package-level var.
+func (v *Visitor) identIsPackageVar(ident *ast.Ident) bool {
+	obj := v.info.Uses[ident]
+
+	if obj == nil {
+		obj = v.info.Defs[ident]
+	}
+
+	varObj, ok := obj.(*types.Var)
+
+	return ok && varObj.Pkg() != nil && varObj.Parent() == varObj.Pkg().Scope()
 }
 
 // lambdaBoxRefAddressForm renders `&m` / `&m.field` when `m` is a heap-boxed local captured by-box
@@ -481,6 +502,40 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 			return boxForm
 		}
 
+		// `&*p` is p: the address of the variable a pointer indirection denotes is the pointer itself. No arm
+		// took it, so it fell to the last line of this arm, `Ꮡ(<*p>)`, which boxes a COPY of the pointee, and
+		// every write through the result was lost -- for any pointer. ccgo spells the member of a C union that
+		// is the whole object this way, `*(*uint64)(unsafe.Pointer(&*(*struct{ Fi [0]uint64; Ff float64 })(p)))
+		// <<= n` (libc's fmod and remquo; sqlite-cs W9b, the third form). Render the pointer operand as its box.
+		// Go still evaluates `*p`, so a nil p panics HERE, as the copy form's dereference did: golib's nilcheck
+		// returns the box after that check. A type parameter whose only type is a pointer (`[P *T]`) is erased
+		// to that pointer, so it is the box already (paramPointerType). A NAMED pointer type (`type P *T`) is a
+		// generated wrapper over the box and the expression yields a plain `*T`, so its operand is converted
+		// to the box first. The pointer constraints the erasure declines (`~*T`, a union, one with methods:
+		// pointerCoreConstraint) keep the old form here as they keep theirs everywhere.
+		if star, ok := ast.Unparen(unaryExpr.X).(*ast.StarExpr); ok {
+			operandType := types.Unalias(v.getType(star.X, false))
+			pointerType, isBox := v.paramPointerType(operandType)
+
+			if !isBox {
+				pointerType, _ = operandType.Underlying().(*types.Pointer)
+			}
+
+			if pointerType != nil {
+				pointerContext := DefaultIdentContext()
+				pointerContext.isPointer = true
+
+				pointer := memberOperand(star.X, v.convExpr(star.X, []ExprContext{pointerContext}))
+
+				if !isBox {
+					elemTypeName := convertToCSTypeName(v.getAliasQualifiedTypeName(pointerType.Elem(), false))
+					pointer = fmt.Sprintf("((%s<%s>)%s)", PointerPrefix, elemTypeName, pointer)
+				}
+
+				return pointer + ".nilcheck()"
+			}
+		}
+
 		// Since pointer-based receiver functions are converted to C# as ref-based
 		// extension functions, we handle these cases separately
 		var recv *types.Var
@@ -566,11 +621,17 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 			_, baseIsIndex := base.(*ast.IndexExpr)
 
 			// A genuine pointer-returning CALL (`getg()`) is a postfix expression `.of(…)` chains off
-			// cleanly; a type-CONVERSION CallExpr (`(*T)(p)`) renders as a C# cast (low precedence) on
-			// which `.of(…)` would mis-bind, so it keeps the `Ꮡ(value)` form (S1 pointer-reinterpret).
+			// cleanly. A type-CONVERSION to a pointer (`(*T)(p)`, `(*T)(unsafe.Pointer(p))`) yields the box
+			// just the same, so its field is taken through that box too; its rendering is made a postfix
+			// operand first (postfixOperand), since a C# cast binds looser than `.of(…)`. It used to keep
+			// the `Ꮡ(value)` form, which boxes a COPY of the struct: every write through `&(*T)(p).f` was
+			// lost -- sqlite's mutex owner stores, libc's pthread owner CAS and ccgo's union writes
+			// `*(*int32)(unsafe.Pointer(&(*TMem)(unsafe.Pointer(p)).Fu)) = n` (sqlite-cs W9b).
 			baseIsCall := false
-			if call, ok := base.(*ast.CallExpr); ok {
-				baseIsCall = !v.callExprIsTypeConversion(call)
+			baseIsConversion := false
+			if call, ok := ast.Unparen(base).(*ast.CallExpr); ok {
+				baseIsConversion = v.callExprIsTypeConversion(call)
+				baseIsCall = !baseIsConversion
 			}
 
 			// A TYPE-ASSERTION base — `&c.(*UDPConn).conn` (net's udpsock_test, reaching the
@@ -599,7 +660,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 				_, baseIsStar = unwrapped.(*ast.StarExpr)
 			}
 
-			if baseIsIdent || baseIsSelector || baseIsCall || baseIsIndex || baseIsStar || baseIsTypeAssert {
+			if baseIsIdent || baseIsSelector || baseIsCall || baseIsConversion || baseIsIndex || baseIsStar || baseIsTypeAssert {
 				// A NAMED pointer type (`type P *T`) is a pointer through its underlying type: its
 				// generated wrapper declares the same `of` a ж<T> does, so the field-ref form applies
 				// unchanged. Matching only *types.Pointer sent `&pp.f` to the struct arm, which
@@ -607,6 +668,10 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 				if ptrType, ok := types.Unalias(v.getType(base, false)).Underlying().(*types.Pointer); ok {
 					if _, ok := ptrType.Elem().Underlying().(*types.Struct); ok {
 						structExpr := v.convExpr(base, nil)
+
+						if baseIsConversion {
+							structExpr = postfixOperand(structExpr)
+						}
 
 						// A pointer *parameter* is deref'd to a value alias (`ref var s = ref Ꮡs.Value`),
 						// so its box is `Ꮡs` — field-ref through the box. A pointer *local* or a
@@ -672,7 +737,8 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 					// In both cases the `Ꮡ(value)` fallback would copy the chain, losing writes (atomic
 					// corruption). (The single-field root `&Δp.scav` is handled directly by the receiver /
 					// param-deref branches above; only the multi-level chain needs this recursion.)
-					if v.exprIsValueFieldOfPointer(selectorExpr.X) || v.exprIsValueFieldOfDerefdPointerRoot(selectorExpr.X) {
+					if v.exprIsValueFieldOfPointer(selectorExpr.X) || v.exprIsValueFieldOfDerefdPointerRoot(selectorExpr.X) ||
+						v.exprIsValueFieldOfPointerConversion(selectorExpr.X) {
 						baseAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 						return baseAddr + step
 					}
@@ -1126,7 +1192,17 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 		if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok && v.selectorBasePackageObj(selectorExpr) != nil {
 			if varObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Var); ok && varObj.Pkg() != nil && varObj.Parent() == varObj.Pkg().Scope() {
 				if _, isPtr := types.Unalias(varObj.Type()).(*types.Pointer); !isPtr && importedGlobalIsBoxed(varObj) {
-					return fmt.Sprintf("%s.%s%s", v.convExpr(selectorExpr.X, nil), AddressPrefix, strings.TrimPrefix(getSanitizedIdentifier(varObj.Name()), "@"))
+					// The owner declares the box beside the var under the var's DECLARED name, so a var the owner
+					// collision-renamed (`var Tid` beside `func (*T) Tid()`, declared `ΔTid`) is boxed `ᏑΔTid`: take the
+					// renamed member from the owner's published `const:` record, as a value reference does (W13's
+					// importer arm; `lib.ᏑTid` was CS0117).
+					member := strings.TrimPrefix(getSanitizedIdentifier(varObj.Name()), "@")
+
+					if renamed, ok := v.foreignRenamedValueMember(varObj); ok {
+						member = renamed
+					}
+
+					return fmt.Sprintf("%s.%s%s", v.convExpr(selectorExpr.X, nil), AddressPrefix, member)
 				}
 			}
 		}
@@ -1393,4 +1469,57 @@ func (v *Visitor) parenthesizeConversionBase(base ast.Expr, rendered string) str
 	}
 
 	return "(" + rendered + ")"
+}
+
+// memberOperand makes a rendered operand safe to take a member on. A name, a selection and an index are primary
+// expressions already; a call is one unless it is a conversion that renders as a C# cast (postfixOperand); anything
+// else (`~pp`, a second indirection) becomes one parenthesized group.
+func memberOperand(operand ast.Expr, rendered string) string {
+	switch ast.Unparen(operand).(type) {
+	case *ast.Ident, *ast.SelectorExpr, *ast.IndexExpr:
+		return rendered
+	case *ast.CallExpr:
+		return postfixOperand(rendered)
+	}
+
+	if isFullyParenthesized(rendered) {
+		return rendered
+	}
+
+	return "(" + rendered + ")"
+}
+
+// postfixOperand makes a rendered pointer CONVERSION safe to take a member on: a C# cast (`(ж<T>)p`) binds looser
+// than `.of(…)` or `.Ꮡf`, so it is parenthesized; a conversion that renders as a call (`@unsafe.Pointer.To<T>(p)`,
+// `Ꮡt.Reinterpret<A, B>()`) or is already one parenthesized group is returned unchanged.
+func postfixOperand(expr string) string {
+	if strings.HasPrefix(expr, "(") && !isFullyParenthesized(expr) {
+		return "(" + expr + ")"
+	}
+
+	return expr
+}
+
+// exprIsValueFieldOfPointerConversion reports whether expr is a VALUE struct field, at any depth of further value
+// fields, of a pointer CONVERSION: `(*T)(p).in` in `&(*T)(p).in.cnt`. Its address is the conversion's box field-viewed
+// down the chain, so the struct arm takes it through the address-of machinery rather than `Ꮡ(value)`, which boxes a
+// COPY and loses every write through the result (sqlite-cs W9b).
+func (v *Visitor) exprIsValueFieldOfPointerConversion(expr ast.Expr) bool {
+	for {
+		sel, ok := ast.Unparen(expr).(*ast.SelectorExpr)
+		if !ok {
+			return false
+		}
+
+		if selection := v.info.Selections[sel]; selection == nil || selection.Kind() != types.FieldVal {
+			return false
+		}
+
+		if pointerToStruct(v.getType(sel.X, false)) {
+			call, ok := ast.Unparen(sel.X).(*ast.CallExpr)
+			return ok && v.callExprIsTypeConversion(call)
+		}
+
+		expr = sel.X
+	}
 }

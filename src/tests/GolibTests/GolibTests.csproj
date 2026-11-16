@@ -100,6 +100,7 @@
 
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux'">
     <Compile Remove="LinuxSpawnSeamTests.cs" />
+    <Compile Remove="LinuxRawSyscallR2Tests.cs" />
     <Compile Remove="LinuxPipelineEnvironmentTests.cs" />
     <Compile Remove="LinuxSignalMaskTests.cs" />
     <Compile Remove="LinuxSigpipeTests.cs" />

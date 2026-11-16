@@ -367,31 +367,31 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
     }
     switch (t.Kind()) {
     case var ᴛ when ᴛ == Struct: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, structTypeUncommon>()).Value.u);
+        return Ꮡt.Reinterpret<Type, structTypeUncommon>().Ꮡu;
     }
     case var ᴛ when ᴛ == Pointer: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_u>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_u>().Ꮡu;
     }
     case var ᴛ when ᴛ == Func: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ1>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ1>().Ꮡu;
     }
     case var ᴛ when ᴛ == Slice: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ2>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ2>().Ꮡu;
     }
     case var ᴛ when ᴛ == Array: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ3>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ3>().Ꮡu;
     }
     case var ᴛ when ᴛ == Chan: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ4>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ4>().Ꮡu;
     }
     case var ᴛ when ᴛ == Map: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ5>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ5>().Ꮡu;
     }
     case var ᴛ when ᴛ == Interface: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ6>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ6>().Ꮡu;
     }
     default: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ7>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ7>().Ꮡu;
     }}
 }
 

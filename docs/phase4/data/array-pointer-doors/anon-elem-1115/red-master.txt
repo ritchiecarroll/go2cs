@@ -1,0 +1,6 @@
+tree=0c1d295ea8 bin=db6bf1f66a52ded2
+convert rc=1
+WARNING: Unresolved dynamic struct type: struct{nList int32; aList uintptr} in "<kit>/main.cs"(23)
+WARNING: Unresolved dynamic struct type: struct{name uintptr; x go2cs/AnonStructArrayPointerDoor.tokenizer} in "<kit>/main.cs"(45)
+2026/11/15 20:43:25 2 unresolved dynamic type(s) were emitted as raw Go source, which cannot compile:
+raw Go struct text in the emission: 8

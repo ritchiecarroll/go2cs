@@ -1,0 +1,373 @@
+namespace go;
+
+using fmt = fmt_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+partial struct inner {
+    internal uint16 family;
+    internal uint16 port;
+    internal uint64 word;
+}
+
+partial struct outer {
+    internal uint32 id;
+    internal inner inner;
+}
+
+internal static readonly ж<inner> Ꮡglobal = new StaticBox<inner>(new inner(port: 0x1234, word: 0x1111111122222222UL));
+internal static ref inner global => ref ((StaticBox<inner>)Ꮡglobal).ValueSlot;
+
+internal static void @try(@string name, Func<@string> f) {
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: PANIC %v\n"u8, name, r);
+            }
+        }, ref ᒐ);
+
+        fmt.Printf("%s: %s\n"u8, name, f());
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+internal static byte twoHopRead(ж<outer> o) {
+    return @unsafe.ArrayPointer<byte>.Of(o.Ꮡinner.Ꮡport, 2).ElementRef(1);
+}
+
+internal static void twoHopWrite(ж<outer> o, byte v) {
+    @unsafe.ArrayPointer<byte>.Of(o.Ꮡinner.Ꮡport, 2).ElementRef(0) = v;
+}
+
+internal static byte twoHopLocalRead(ж<outer> o) {
+    var p = @unsafe.ArrayPointer<byte>.Of(o.Ꮡinner.Ꮡport, 2);
+    return p.ElementRef(1);
+}
+
+internal static void twoHopLocalWrite(ж<outer> o, byte v) {
+    var p = @unsafe.ArrayPointer<byte>.Of(o.Ꮡinner.Ꮡport, 2);
+    p.ElementRef(0) = v;
+}
+
+internal static nint twoHopLen(ж<outer> o) {
+    return 2;
+}
+
+internal static slice<byte> twoHopSlice(ж<outer> o) {
+    return @unsafe.ArrayPointer<byte>.Of(o.Ꮡinner.Ꮡport, 2).slice();
+}
+
+internal static byte varRead() {
+    ref var s = ref heap(new inner(), out var Ꮡs);
+    s.port = 0x1234;
+    return @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2).ElementRef(1);
+}
+
+internal static uint16 varWrite() {
+    ref var s = ref heap(new inner(), out var Ꮡs);
+    s.port = 0x1234;
+    @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2).ElementRef(0) = 0xAB;
+    return s.port;
+}
+
+internal static byte varLocalRead() {
+    ref var s = ref heap(new inner(), out var Ꮡs);
+    s.port = 0x1234;
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2);
+    return p.ElementRef(1);
+}
+
+internal static uint16 varLocalWrite() {
+    ref var s = ref heap(new inner(), out var Ꮡs);
+    s.port = 0x1234;
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2);
+    p.ElementRef(0) = 0xCD;
+    return s.port;
+}
+
+internal static nint varLocalRangeValue() {
+    ref var s = ref heap(new inner(), out var Ꮡs);
+    s.port = 0x1234;
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2);
+    nint sum = 0;
+
+    foreach (var (_, b) in range(p.slice())) {
+        sum += (nint)b;
+    }
+
+    return sum;
+}
+
+internal static byte globalRead() {
+    return @unsafe.ArrayPointer<byte>.Of(Ꮡglobal.Ꮡport, 2).ElementRef(1);
+}
+
+internal static uint16 globalWrite() {
+    @unsafe.ArrayPointer<byte>.Of(Ꮡglobal.Ꮡport, 2).ElementRef(0) = 0xEF;
+    return global.port;
+}
+
+internal static byte globalLocalRead() {
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡglobal.Ꮡport, 2);
+    return p.ElementRef(1);
+}
+
+internal static byte derefRootRead(ж<inner> o) {
+    return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(o.Ꮡport), 1, 2);
+}
+
+internal static uint32 wordHalves(ж<outer> o) {
+    return @unsafe.ArrayPointer<uint32>.Of(o.Ꮡinner.Ꮡword, 2).ElementRef(1);
+}
+
+partial struct rawSock {
+    internal uint16 family;
+    internal uint16 port;
+    internal array<byte> addr = new(4);
+}
+
+partial struct sock {
+    internal nint port;
+    internal array<byte> addr = new(4);
+    internal rawSock raw;
+}
+
+internal static void refTwoHopLocalWrite(ж<sock> Ꮡsa) {
+    ref var sa = ref Ꮡsa.DerefOrNull();
+
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡsa.Ꮡraw.Ꮡport, 2);
+    p.ElementRef(0) = (byte)(sa.port >> 8);
+    p.ElementRef(1) = (byte)sa.port;
+}
+
+internal static nint refTwoHopLocalRead(ж<sock> sa) {
+    var p = @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2);
+    return ((nint)p.ElementRef(0) << 8) + (nint)p.ElementRef(1);
+}
+
+internal static void refTwoHopDirectWrite(ж<sock> sa, byte v) {
+    @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2).ElementRef(0) = v;
+}
+
+internal static byte refTwoHopDirectRead(ж<sock> sa) {
+    return @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2).ElementRef(1);
+}
+
+internal static void refTwoHopDirectWrite1(ж<sock> sa, byte v) {
+    @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2).ElementRef(1) = v;
+}
+
+internal static ж<byte> refTwoHopDirectAddr(ж<sock> sa) {
+    return (@unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2)).at<byte>(1);
+}
+
+internal static slice<byte> refTwoHopDirectSlice(ж<sock> sa) {
+    return @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2).slice();
+}
+
+partial struct top {
+    internal @string tag;
+    internal outer o;
+}
+
+partial struct holder {
+    internal ж<inner> @in;
+    internal ж<rawSock> rs;
+}
+
+partial struct emb {
+    /*embed*/ internal inner inner;
+    internal uint32 extra;
+}
+
+internal static readonly ж<sock> Ꮡgsock = new StaticBox<sock>(new sock(raw: new rawSock(port: 0x1234)));
+internal static ref sock gsock => ref ((StaticBox<sock>)Ꮡgsock).ValueSlot;
+
+internal static byte threeHopLocal(ж<top> t) {
+    var p = @unsafe.ArrayPointer<byte>.Of(t.Ꮡo.Ꮡinner.Ꮡport, 2);
+    p.ElementRef(0) = 0x44;
+    return p.ElementRef(1);
+}
+
+internal static byte ptrHopLocal(ж<holder> Ꮡh) {
+    ref var h = ref Ꮡh.DerefOrNull();
+
+    var p = @unsafe.ArrayPointer<byte>.Of(h.@in.Ꮡport, 2);
+    p.ElementRef(0) = 0x55;
+    return p.ElementRef(1);
+}
+
+internal static byte refPtrHopLocal(ж<holder> Ꮡh) {
+    ref var h = ref Ꮡh.DerefOrNull();
+
+    var p = @unsafe.ArrayPointer<byte>.Of(h.rs.Ꮡport, 2);
+    p.ElementRef(0) = 0x66;
+    return p.ElementRef(1);
+}
+
+internal static uint16 refVarLocal() {
+    ref var s = ref heap(new rawSock(), out var Ꮡs);
+    s.port = 0x1234;
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2);
+    p.ElementRef(0) = 0xCD;
+    return s.port;
+}
+
+internal static uint16 refGlobalLocal() {
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡgsock.Ꮡraw.Ꮡport, 2);
+    p.ElementRef(1) = 0x77;
+    return gsock.raw.port;
+}
+
+internal static uint16 refValueParam(rawSock sʗp) {
+    ref var s = ref heap(sʗp.ΔClone(), out var Ꮡs);
+
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2);
+    p.ElementRef(0) = 0x01;
+    return s.port;
+}
+
+internal static array<byte> refTwoHopLoad(ж<sock> sa) {
+    var p = @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2);
+    return @unsafe.ArrayPointer<byte>.Load(p);
+}
+
+internal static void refTwoHopStore(ж<sock> sa, /*[2]*/ array<byte> v) {
+    v = v.Clone();
+
+    var p = @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2);
+    @unsafe.ArrayPointer<byte>.Store(p, v);
+}
+
+internal static byte promotedLocal(ж<emb> e) {
+    var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(e.of(emb.Ꮡport)));
+    return p.Value[1];
+}
+
+internal static byte elemRootLocal(slice<inner> s) {
+    var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡ(s, 1).Ꮡport));
+    return p.Value[1];
+}
+
+internal static byte callRootDirect(ж<outer> o) {
+    return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(pick(o).Ꮡport), 1, 2);
+}
+
+internal static ж<inner> pick(ж<outer> o) {
+    return o.Ꮡinner;
+}
+
+internal static void main() {
+    var o = Ꮡ(new outer(id: 7, inner: new inner(port: 0x1234, word: 0x1111111122222222UL)));
+
+    var oʗ1 = o;
+    @try("two-hop direct read [1]", () => fmt.Sprintf("%#x"u8, twoHopRead(oʗ1)));
+    var oʗ2 = o;
+    @try("two-hop direct write [0]", () => {
+        twoHopWrite(oʗ2, 0xAB);
+        return fmt.Sprintf("port %#x"u8, oʗ2.inner.port);
+    });
+    var oʗ3 = o;
+    @try("two-hop local read [1]", () => fmt.Sprintf("%#x"u8, twoHopLocalRead(oʗ3)));
+    var oʗ4 = o;
+    @try("two-hop local write [0]", () => {
+        twoHopLocalWrite(oʗ4, 0x22);
+        return fmt.Sprintf("port %#x"u8, oʗ4.inner.port);
+    });
+    var oʗ5 = o;
+    @try("two-hop len", () => fmt.Sprint(twoHopLen(oʗ5)));
+    var oʗ6 = o;
+    @try("two-hop slice", () => {
+        var s = twoHopSlice(oʗ6);
+        s[1] = 0x33;
+        return fmt.Sprintf("len %d cap %d port %#x"u8, len(s), cap(s), oʗ6.inner.port);
+    });
+    var oʗ7 = o;
+    @try("two-hop word [1]", () => fmt.Sprintf("%#x"u8, wordHalves(oʗ7)));
+    @try("variable direct read [1]", () => fmt.Sprintf("%#x"u8, varRead()));
+    @try("variable direct write [0]", () => fmt.Sprintf("port %#x"u8, varWrite()));
+    @try("variable local read [1]", () => fmt.Sprintf("%#x"u8, varLocalRead()));
+    @try("variable local write [0]", () => fmt.Sprintf("port %#x"u8, varLocalWrite()));
+    @try("variable local range value", () => fmt.Sprintf("%#x"u8, varLocalRangeValue()));
+    @try("package direct read [1]", () => fmt.Sprintf("%#x"u8, globalRead()));
+    @try("package direct write [0]", () => fmt.Sprintf("port %#x"u8, globalWrite()));
+    @try("package local read [1]", () => fmt.Sprintf("%#x"u8, globalLocalRead()));
+    var oʗ8 = o;
+    @try("deref root direct read [1]", () => fmt.Sprintf("%#x"u8, derefRootRead(oʗ8.Ꮡinner)));
+
+    var sb = Ꮡ(new sock(port: 1, raw: new rawSock(port: 0x1234)));
+    var sbʗ1 = sb;
+    @try("ref two-hop fresh direct read [1]", () => fmt.Sprintf("%#x"u8, refTwoHopDirectRead(sbʗ1)));
+    var sbʗ2 = sb;
+    @try("ref two-hop fresh direct write [0]", () => {
+        refTwoHopDirectWrite(sbʗ2, 0xAB);
+        return fmt.Sprintf("raw.port %#x"u8, sbʗ2.raw.port);
+    });
+    var sbʗ3 = sb;
+    @try("ref two-hop fresh direct write [1]", () => {
+        refTwoHopDirectWrite1(sbʗ3, 0xCD);
+        return fmt.Sprintf("raw.port %#x"u8, sbʗ3.raw.port);
+    });
+    var sbʗ4 = sb;
+    @try("ref two-hop fresh direct address [1]", () => {
+        var q = refTwoHopDirectAddr(sbʗ4);
+        q.Value = 0xEE;
+        return fmt.Sprintf("raw.port %#x"u8, sbʗ4.raw.port);
+    });
+    var sbʗ5 = sb;
+    @try("ref two-hop fresh direct slice", () => {
+        var s = refTwoHopDirectSlice(sbʗ5);
+        s[0] = 0x11;
+        return fmt.Sprintf("len %d cap %d raw.port %#x"u8, len(s), cap(s), sbʗ5.raw.port);
+    });
+
+    var sa = Ꮡ(new sock(port: 0x1F90));
+    var saʗ1 = sa;
+    @try("ref two-hop local write", () => {
+        refTwoHopLocalWrite(saʗ1);
+        return fmt.Sprintf("raw.port %#x"u8, saʗ1.raw.port);
+    });
+    var saʗ2 = sa;
+    @try("ref two-hop local read", () => fmt.Sprintf("%#x"u8, refTwoHopLocalRead(saʗ2)));
+    var saʗ3 = sa;
+    @try("ref two-hop direct write [0]", () => {
+        refTwoHopDirectWrite(saʗ3, 0xAB);
+        return fmt.Sprintf("raw.port %#x"u8, saʗ3.raw.port);
+    });
+    var saʗ4 = sa;
+    @try("ref two-hop direct read [1]", () => fmt.Sprintf("%#x"u8, refTwoHopDirectRead(saʗ4)));
+
+    var t = Ꮡ(new top(tag: "t", o: new outer(inner: new inner(port: 0x1234))));
+    var tʗ1 = t;
+    @try("three-hop local", () => fmt.Sprintf("%#x port %#x"u8, threeHopLocal(tʗ1), tʗ1.o.inner.port));
+    var h = Ꮡ(new holder(@in: Ꮡ(new inner(port: 0x1234)), rs: Ꮡ(new rawSock(port: 0x1234))));
+    var hʗ1 = h;
+    @try("pointer-hop local", () => fmt.Sprintf("%#x port %#x"u8, ptrHopLocal(hʗ1), hʗ1.@in.port));
+    var hʗ2 = h;
+    @try("ref pointer-hop local", () => fmt.Sprintf("%#x port %#x"u8, refPtrHopLocal(hʗ2), hʗ2.rs.port));
+    @try("ref variable local", () => fmt.Sprintf("port %#x"u8, refVarLocal()));
+    @try("ref package local", () => fmt.Sprintf("port %#x"u8, refGlobalLocal()));
+    @try("ref value parameter", () => fmt.Sprintf("port %#x"u8, refValueParam(new rawSock(port: 0x1234))));
+    var sc = Ꮡ(new sock(raw: new rawSock(port: 0x1234)));
+    var scʗ1 = sc;
+    @try("ref two-hop load", () => {
+        var v = refTwoHopLoad(scʗ1);
+        return fmt.Sprintf("%#x %#x"u8, v[0], v[1]);
+    });
+    var scʗ2 = sc;
+    @try("ref two-hop store", () => {
+        refTwoHopStore(scʗ2, new byte[]{1, 2}.array());
+        return fmt.Sprintf("raw.port %#x"u8, scʗ2.raw.port);
+    });
+    var e = Ꮡ(new emb(inner: new inner(port: 0x1234)));
+    var eʗ1 = e;
+    @try("promoted local (control)", () => fmt.Sprintf("%#x"u8, promotedLocal(eʗ1)));
+    @try("element root local (control)", () => fmt.Sprintf("%#x"u8, elemRootLocal([new(), new(port: 0x1234)])));
+    var oʗ9 = o;
+    @try("call root direct (control)", () => fmt.Sprintf("%#x"u8, callRootDirect(oʗ9)));
+}
+
+} // end main_package

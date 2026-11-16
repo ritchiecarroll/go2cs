@@ -193,6 +193,11 @@ type Visitor struct {
 	liftedTypeNames hashset.HashSet[string]
 	liftedTypeMap   map[types.Type]string
 
+	// structLiftCasts holds the casts the visit wrote between two lifts of one unnamed struct type, as
+	// (operand type, cast type) pairs, until the file's lifts all have their names and the pairs can be
+	// recorded (recordNamedUnnamedStructMoves).
+	structLiftCasts [][2]types.Type
+
 	// capturedLiftNames dedups lifts that close over type parameters (liftedTypeParams.go) WITHIN the
 	// declaration owning those parameters, where one signature is one Go type; liftBaseMarked records the
 	// lifts whose instantiation base parts are written (dynamicInterfaceBase.go).

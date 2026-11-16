@@ -24,14 +24,14 @@ without installing it, use `dnx go2cs -- <arguments>`.
 
 The converter reads Go with Go's own tools: it loads and type-checks the source with the Go toolchain, and
 compiles it once to collect hints for the C#. A tool release converts with one Go release, the one its `go.*`
-packages are converted from (Go 1.26.10 for go2cs 1.26.10.x). It uses the first of these that is set:
+packages are converted from (Go 1.26.11 for go2cs 1.26.11.x). It uses the first of these that is set:
 
 1. `GO2CS_GOROOT`, the root of an existing install of that release. Any other release is refused.
 2. `GOROOT`, when you set it. go2cs leaves your choice alone.
 3. The `go` on `PATH`, when it is that release.
 4. Its own copy in the user cache folder, downloaded on the first conversion that needs it.
 
-The download is about 65 to 75 MB and unpacks to about 240 MB, once per release. It comes from
+The download is a Go release archive, tens of megabytes that unpack to a few hundred, once per release. It comes from
 [go.dev](https://go.dev/dl/), or else from the Go module proxy (`GOPROXY`, which defaults to
 `https://proxy.golang.org`) as the `golang.org/toolchain` module. Either way go2cs checks it against hashes
 built into the converter before it uses it: go.dev's SHA-256 for the release archive, or the
@@ -41,9 +41,9 @@ built into the converter before it uses it: go.dev's SHA-256 for the release arc
 
 | Platform | The copy lives in |
 |:--|:--|
-| Windows | `%LocalAppData%\go2cs\toolchains\go1.26.10.windows-<arch>` |
-| macOS | `~/Library/Caches/go2cs/toolchains/go1.26.10.darwin-<arch>` |
-| Linux | `$XDG_CACHE_HOME/go2cs/toolchains/go1.26.10.linux-<arch>`, or `~/.cache/...` |
+| Windows | `%LocalAppData%\go2cs\toolchains\go1.26.11.windows-<arch>` |
+| macOS | `~/Library/Caches/go2cs/toolchains/go1.26.11.darwin-<arch>` |
+| Linux | `$XDG_CACHE_HOME/go2cs/toolchains/go1.26.11.linux-<arch>`, or `~/.cache/...` |
 
 A module whose `go` line names a newer Go than the tool converts with is refused with a message that says so:
 use the go2cs release built for that Go, or lower the module's `go` line.
@@ -57,7 +57,7 @@ go2cs toolchain env                 # print GOROOT, GOVERSION and GO, the go com
 go2cs toolchain prune               # remove copies of other Go releases; -all removes this one too
 ```
 
-`install -from` takes the release archive go.dev publishes (`go1.26.10.<os>-<arch>.tar.gz`, or `.zip` on Windows)
+`install -from` takes the release archive go.dev publishes (`go1.26.11.<os>-<arch>.tar.gz`, or `.zip` on Windows)
 or the module zip a Go module proxy serves, and checks it against the same hashes, so a machine with no network
 access can be set up from a file copied to it.
 

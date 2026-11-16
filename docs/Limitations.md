@@ -15,7 +15,7 @@ spots real code hits today.
 ## The short version
 
 **Good odds tonight:** pure Go that builds with the Go release go2cs tracks and `CGO_ENABLED=0`, leans mostly on the
-standard library, and runs on x64 Windows or Linux. **A longer evening:** lots of third-party modules,
+standard library, and runs on Windows, Linux or macOS. **A longer evening:** lots of third-party modules,
 `unsafe`, assembly fast paths, cgo, or tests that pull in testify.
 
 * **Your code must build with the Go release go2cs tracks**, the one in
@@ -23,8 +23,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 * **cgo converts only through `-cgo`, and only calls of C functions a shared library defines** ([cgo](#cgo)).
 * **Assembly, `//go:linkname` and deep `unsafe` tricks compile clean, then fail at run time.** Many
   libraries ship a pure-Go fallback behind a build tag, and you have to pass that tag yourself.
-* **Each live goroutine holds an operating-system thread.** Thousands alive at once are fine; Go's million are
-  out of reach.
+* **By default, each live goroutine holds an operating-system thread.** Thousands alive at once are fine; Go's
+  million are out of reach.
 * **It's usually slower than Go**, starts slower and uses more memory.
 * **One conversion targets one operating system.**
 * **Most failures are loud. A few differences are silent**: see the last bullet under
@@ -35,7 +35,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 * **cgo beyond calls of shared-library C functions**: see [cgo](#cgo).
 * **A self-referential constraint over a pointer, when a method shares the element's storage.**
   `Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N` stops the run with `error GO2CS2002`,
-  naming the site and the method. A pointer element reaches the generic code through a proxy object, and
+  naming the site and the method. Two related shapes over a pointer element are refused the same way, as
+  `GO2CS2005` and `GO2CS2006` ([diagnostic codes](DiagnosticCodes.md)). A pointer element reaches the generic code through a proxy object, and
   a `[]N`, `map[K]N`, `chan N` or `*N` the proxy passed along would be a copy, not Go's shared value.
   The same function over a value element converts, and so does a constraint whose methods pass only
   `N`, funcs and arrays ([how](ConversionStrategies-Reference/generic-constraints.md#what-a-proxy-forwards-and-the-instantiations-go2cs-refuses)).
@@ -82,11 +83,11 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
        BOARD row (a slice backing that is an object plus a field offset, with no pin). The arms that assert the named
        panic are GolibTests' InlineSliceStorageTests.AFieldOfAReferenceBearingRootIsRefusedByName and the refroot mode
        of TestInlineArrayForeignSliceReviewShapes (src/go2cs/inlineArrayForeignSlice_test.go). -->
-* **Goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
+* **By default, goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
   holds its thread for as long as it lives; when it ends, the thread runs the next `go` statement, so starting
   goroutines one after another is cheap and holding many alive at once is not. On Windows x64, ten thousand parked
   goroutines cost several times Go's memory and seconds to start, a hundred thousand take minutes, and a million do
-  not finish starting. `runtime.GOMAXPROCS(1)` does not make anything run one at a time. Bound your fan-out with a
+  not finish starting. With threads, `runtime.GOMAXPROCS(1)` does not make anything run one at a time. Bound your fan-out with a
   worker pool, and remember that a `net/http` server spends one on every open connection. On macOS the kernel caps
   the threads one process may run (`kern.num_taskthreads`, a few thousand on the hosted macOS 15 machines measured),
   and the `go` statement past it ends the program
@@ -110,7 +111,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 * **A deadlock usually hangs** where Go prints `all goroutines are asleep - deadlock!`. The message
   appears only when every goroutine, `main` included, waits on a nil channel or an empty `select {}`, and then
   with Go's goroutine blocks. A deadlock on an ordinary channel or lock blocks forever: break in with a debugger,
-  where each goroutine is a thread named `goroutine-N`.
+  where, by default, each goroutine is a thread named `goroutine-N`.
   <!-- src/core/golib/runtime/Goroutine.cs:1089 `internal static bool IsForeverWait(WaitReason reason) =>`
        and :1162 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
 * **Stacks don't grow.** `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
@@ -156,6 +157,23 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   string, slice, map, interface, pointer or fixed-size array gets a stand-in number, not an address, so
   the older tricks (the `*(*string)(unsafe.Pointer(&b))` pun, a hand-built slice header) don't convert
   mechanically.
+* **One array view can end the process.** Go's `(*[N]E)(unsafe.Pointer(&x.f))[:]`, where `f` is an array field
+  read as an array of another element type (an `[8]int8` name read as `[8]byte`), works when `x` is a variable or
+  a pointer, and through any chain of named fields from one (`&x.a.f`). When the field is promoted from an embedded
+  struct (`&w.f`), or belongs to a slice element (`&s[i].f`) or to a call's result (`&g().f`), the converted
+  program can stop with an access violation, which `recover` does not catch. Take the field's address from a
+  variable or a pointer instead: write the embedded field out (`&w.inner.f`), or bind the element or the result
+  first (`p := &s[i]`, then `&p.f`)
+  ([the field view](ConversionStrategies-Reference/pointers.md#the-bytes-of-one-field-through-ntunsafepointerpf-the-field-view)).
+  <!-- 2026-11-15, P5, the box-kind seat. The fix (the open slice routed through the array view door) is ruled
+       for .5 (COORD 13:44Z): BOARD row of 2026-11-15, "the open slice of a pointer conversion over an array field
+       of another element type ends the process". This bullet is the disclosure for .4, ruled in the same line: an
+       access violation that ends the process is the worst failure class. Measured on linux/amd64, Release, one
+       arm per process, each arm under a recover, predictions written first
+       (docs/phase4/data/array-pointer-doors/reinterpret-box-1115/probe-open/): the three roots named end the
+       process with System.AccessViolationException in slice<byte>'s constructor and the recover does not run;
+       the three workaround forms print Go's lines. Census: 0 sites in the standard library on four targets and 0
+       in the demo closures. DESIGN-array-pointer-doors.md 19.7. -->
 * **The address of another package's pointer- or interface-typed variable is the address of a copy.** An
   exported variable with a value type has its own storage, so `&otherpkg.V`, `f := otherpkg.V.Reset`,
   `flag.BoolVar(&otherpkg.Debug, ...)` and `&otherpkg.S.Field` reach the variable itself, as in Go. Two kinds are
@@ -212,8 +230,9 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
        and at H's 83fbf28560, disclosed by COORD's ruling 2 (section 10.9) until increment I5 lands. Read again
        on 2026-11-14 at master c2919b8b16 with the named-array floor, before this landed: for a local and for a
        heap value Go prints `true`, the conversion `false`, and both read the field's value. -->
-  * A type switch's `case int:` also catches an `int32` or `rune` when the switch has no `int32` case of
-    its own (`case uint:` likewise for `uint32`).
+  <!-- 2026-11-15 (P4, docs audit before 1.26.11.1): the bullet "A type switch's `case int:` also catches an
+       `int32` or `rune`..." was removed: fixed in 1.26.10.2 (NEWS.md, November 2026 entry; converter
+       visitTypeSwitchStmt.go, "an int32 (or rune) must NOT take the int arm"; Behavioral TypeSwitchIntWidthCases). -->
   * A left shift of an untyped constant that takes a named integer type from its context, such as
     `m & (1 << uint(32-1-i))` with `m` an `fs.FileMode`, wraps its count at the type's width: a count of the
     width or more gives the wrapped result where Go gives 0, and a negative count does not panic.
@@ -432,7 +451,8 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
        lines: docs/PLAN-version-lines.md (master carries the current Go line with patch hops). -->
 * **One Go release, one .NET release.** Convert with the Go release in
   [Requirements](README.md#requirements), which the go2cs dotnet tool downloads for you; building the
-  converter from a clone needs Go 1.26. `go2cs -version` should show that one release throughout. Rebuild after
+  converter from a clone needs Go 1.26.11 or later (the release `src/go2cs/go.mod` names). `go2cs -version`
+  should show that one release throughout. Rebuild after
   every pull. Each [GitHub release](https://github.com/ritchiecarroll/go2cs/releases) carries the converter
   prebuilt for six platforms, with Authenticode-signed Windows executables and a GPG-signed `SHA256SUMS`
   (`SHA256SUMS.asc`, by the key that signs the release tag). Converted projects and the `go.*` packages target
@@ -441,11 +461,10 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
        GitHub Release with the archives, SHA256SUMS and the attestation bundle. src/sign-release-binaries.ps1 (the
        release machine) signs the Windows executables and SHA256SUMS on the draft; .github/workflows/attest-release.yml
        attests the archives as the draft then holds them. Signing began with the 1.26.10.2 release. -->
-* **Where it runs.** The standard library is validated on x64 Windows and on Linux, x64 and arm64 (glibc, on
-  Microsoft's build of .NET: Ubuntu's own package has an entry in [Known issues](KnownIssues.md)). macOS, Intel
-  and Apple silicon, has packages and runs the README walkthrough, and is being validated package by package: a
-  [roster](ValidatedTestPackages.md) row shows a macOS count once its package validates on both chips. The
-  packages ship `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`; a build for any other platform
+* **Where it runs.** The standard library is validated on x64 Windows, on Linux, x64 and arm64 (glibc, on
+  Microsoft's build of .NET: Ubuntu's own package has an entry in [Known issues](KnownIssues.md)), and on macOS,
+  Intel and Apple silicon. The [roster](ValidatedTestPackages.md) shows each package's counts on each platform; two
+  Windows-only packages have no Linux or macOS reading. The packages ship `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`; a build for any other platform
   is refused or warned about
   ([Known issues](KnownIssues.md#platforms-the-packages-do-not-ship)).
   <!-- linux-arm64: the roster's Linux line (236 of 236 banked at linux-arm64, S7 waves, DATA-la64-s7-bank-plan.md). -->
@@ -475,7 +494,7 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
 
 The language itself (generics, closures, struct embedding, range-over-func, typed nil pointers in
 interfaces, randomized map order), `defer`/`panic`/`recover`, channels and `select`, `reflect`
-(`encoding/json` and `text/template` pass their own suites on it, on Windows and Linux), and `net/http` with HTTP/2 and
+(`encoding/json` and `text/template` pass their own suites on it, on Windows, Linux and macOS), and `net/http` with HTTP/2 and
 `crypto/tls` over real sockets.
 
 ## When you hit a seam
