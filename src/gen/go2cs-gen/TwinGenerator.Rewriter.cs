@@ -315,7 +315,15 @@ public sealed partial class TwinGenerator
             GoTwinned++;
             Literals++;
 
-            SyntaxNodeOrToken[] list = [Argument(original.WithoutTrailingTrivia()), Token(SyntaxKind.CommaToken), Argument(twin)];
+            // A literal with arguments (`go func(i int) { ... }(v)`): they follow the twin, as goǃtwin's ladder takes them.
+            SeparatedSyntaxList<ArgumentSyntax> arguments = node.ArgumentList.Arguments;
+            List<SyntaxNodeOrToken> list = [Argument(original.WithoutTrailingTrivia()), Token(SyntaxKind.CommaToken), Argument(twin)];
+
+            for (int i = 1; i < arguments.Count; i++)
+            {
+                list.Add(arguments.GetSeparator(i - 1));
+                list.Add((ArgumentSyntax)Visit(arguments[i])!);
+            }
 
             return node.WithExpression(Launcher(node)).WithArgumentList(node.ArgumentList.WithArguments(SeparatedList<ArgumentSyntax>(list)));
         }
@@ -384,7 +392,7 @@ public sealed partial class TwinGenerator
             SeparatedSyntaxList<ArgumentSyntax> arguments = node.ArgumentList.Arguments;
 
             if (!m_run.Pairs || node.Expression is not IdentifierNameSyntax { Identifier.Text: "goǃ" } ||
-                arguments.Count is < 1 or > 5 || arguments.Any(argument => !argument.RefKindKeyword.IsKind(SyntaxKind.None) || argument.NameColon is not null) ||
+                arguments.Count is < 1 or > MaxGoArguments + 1 || arguments.Any(argument => !argument.RefKindKeyword.IsKind(SyntaxKind.None) || argument.NameColon is not null) ||
                 arguments[0].Expression is not IdentifierNameSyntax callee ||
                 m_model.GetTypeInfo(callee).Type is not INamedTypeSymbol { TypeKind: TypeKind.Delegate, DelegateInvokeMethod: { ReturnsVoid: true } invoke } type ||
                 invoke.Parameters.Length != arguments.Count - 1 || Run.TwinDelegateType(type) is not { } twinType)

@@ -192,7 +192,7 @@ public sealed partial class TwinGenerator
                 .Append(" go-only=").Append(twinned.Count(candidate => candidate.GoOnly)).Append("\r\n");
             report.Append("// await-sites=").Append(m_awaitSites).Append(" go-twinned=").Append(m_goTwinned).Append(" go-literals=").Append(m_goLiterals)
                 .Append(" ref-unrederivable=").Append(m_unrederivable).Append(" ref-spills=").Append(m_spills)
-                .Append(" ref-blocked=").Append(m_refBlocked).Append("\r\n");
+                .Append(" ref-blocked=").Append(m_refBlocked).Append(" go-plain=").Append(GoPlain).Append("\r\n");
             report.Append("// in-twins: go-group-left=").Append(sites.Count(site => site.Go == GoKind.Group && !GoTwinnable(site)))
                 .Append(" go-other=").Append(sites.Count(site => site.Go == GoKind.Other))
                 .Append(" go-passive=").Append(sites.Count(site => site.Go != GoKind.None && !site.Active))

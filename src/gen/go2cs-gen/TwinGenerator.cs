@@ -39,7 +39,15 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // type has a canonical twin delegate (the rewriter's own PairShape test, asked here for N3's caller rule).
         public bool PairCallable;
         public IMethodSymbol? IfaceTarget;
+
+        // A go statement the generator cannot launch as a twin (GoKind.Other): why, and whether its goroutine could park
+        // (the LOUD fallback, GO2CS0014). PairLaunch: a func value a twin's go statement tests for a pair (fix 6).
+        public string? GoReason;
+        public bool GoCouldPark, PairLaunch, PairBody;
     }
+
+    // golib's goǃ and goǃtwin ladders take the goroutine's function and at most 16 arguments.
+    internal const int MaxGoArguments = 16;
 
     internal sealed class Candidate
     {
@@ -172,10 +180,54 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.RefusedFuncValueCaller,
                         candidate.Syntax.Identifier.GetLocation(), candidate.Symbol.ToDisplayString(), refusal));
                 }
+
+                ReportPlainLaunches(candidate);
             }
 
             m_analysisMs = m_watch.ElapsedMilliseconds - m_siblingMs;
             Emit();
+        }
+
+        internal int GoPlain;
+
+        // The LOUD fallback (COORD's A3 ruling; the owner's severity, FREEZE-SHEET.md 2026-11-13): a go statement the
+        // generator does not launch as a twin keeps its plain launch -- a thread, where a goroutine that parks blocks it --
+        // and warns ONCE, at the statement, naming the reason. It does not warn where the goroutine's function provably
+        // never parks: nothing is lost there. Named limit: a go statement inside a literal that may become a pair (its
+        // launch follows the pair's) is not judged here.
+        private void ReportPlainLaunches(Candidate candidate)
+        {
+            if (candidate.Refusal == "has-twin")
+                return;
+
+            foreach (InvocationExpressionSyntax node in candidate.Syntax.DescendantNodes().OfType<InvocationExpressionSyntax>())
+            {
+                if (!Sites.TryGetValue(node, out Site? site) || site is not { Active: true, PairBody: false } || site.Go == GoKind.None)
+                    continue;
+
+                bool couldPark = site.Go switch
+                {
+                    GoKind.Literal => true,
+                    GoKind.Group => CanPark(site.GoTarget),
+                    _ => site.GoCouldPark || CanPark(site.GoTarget)
+                };
+
+                if (!couldPark)
+                    continue;
+
+                // In a twin, only an Other launch stays plain (a pair-testing func value does not). In a function refused a
+                // twin, every launch does. A function that is neither parks nowhere: its literal and group launches are
+                // plain only because GoTwinsGo=false asked for it, so they do not warn.
+                string? reason = candidate.Twinned ? site.Go == GoKind.Other && !site.PairLaunch ? site.GoReason : null
+                    : candidate.Refusal is { } refusal ? "refused " + refusal
+                    : site.Go == GoKind.Other ? site.GoReason : null;
+
+                if (reason is null)
+                    continue;
+
+                GoPlain++;
+                Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.PlainGoLaunch, node.GetLocation(), candidate.Symbol.ToDisplayString(), reason));
+            }
         }
 
         private void ReadRefusals()
@@ -355,6 +407,16 @@ public sealed partial class TwinGenerator : ISourceGenerator
             _ => false
         };
 
+        // A go statement the generator launches plain, and why. couldPark false: it could park only if its function can,
+        // which the fallback asks once the fixpoint has settled (site.GoTarget).
+        private static Site GoOther(Site site, string reason, bool couldPark)
+        {
+            site.Go = GoKind.Other;
+            site.GoReason = reason;
+            site.GoCouldPark = couldPark;
+            return site;
+        }
+
         internal Site Classify(InvocationExpressionSyntax node, SemanticModel model)
         {
             Site site = new();
@@ -363,23 +425,55 @@ public sealed partial class TwinGenerator : ISourceGenerator
             {
                 SeparatedSyntaxList<ArgumentSyntax> arguments = node.ArgumentList.Arguments;
 
-                if (arguments.Count == 1 && arguments[0].Expression is ParenthesizedLambdaExpressionSyntax { ParameterList.Parameters.Count: 0 } lambda &&
-                    !lambda.Modifiers.Any(SyntaxKind.AsyncKeyword))
+                bool plainArguments = arguments.Count is >= 1 and <= MaxGoArguments + 1 &&
+                    arguments.All(argument => argument.RefKindKeyword.IsKind(SyntaxKind.None) && argument.NameColon is null);
+
+                // A go literal, with or without arguments: `go func(i int) { ... }(v)` is written with the literal's
+                // parameter types spelled out, so its twin lambda takes them as they are.
+                if (arguments.Count >= 1 && arguments[0].Expression is ParenthesizedLambdaExpressionSyntax lambda)
                 {
-                    site.Go = GoKind.Literal;
-                }
-                else if (arguments.Count is >= 1 and <= 5 && arguments.All(argument => argument.RefKindKeyword.IsKind(SyntaxKind.None) && argument.NameColon is null) &&
-                         IsRenameable(arguments[0].Expression) && model.GetSymbolInfo(arguments[0].Expression).Symbol is IMethodSymbol { ReturnsVoid: true } target)
-                {
-                    site.Go = GoKind.Group;
-                    site.GoTarget = Normalize(target);
-                }
-                else
-                {
-                    site.Go = GoKind.Other;
+                    if (plainArguments && !lambda.Modifiers.Any(SyntaxKind.AsyncKeyword) && lambda.ParameterList.Parameters.Count == arguments.Count - 1 &&
+                        lambda.ParameterList.Parameters.All(parameter => parameter.Type is not null && parameter.Modifiers.Count == 0))
+                    {
+                        site.Go = GoKind.Literal;
+                        return site;
+                    }
+
+                    return GoOther(site, "literal-shape", true);
                 }
 
-                return site;
+                if (arguments.Count > MaxGoArguments + 1)
+                    return GoOther(site, "arity", true);
+
+                ISymbol? callee = arguments.Count >= 1 ? model.GetSymbolInfo(arguments[0].Expression).Symbol : null;
+
+                if (callee is IMethodSymbol { MethodKind: not MethodKind.DelegateInvoke } goMethod)
+                {
+                    IMethodSymbol target = Normalize(goMethod);
+
+                    if (plainArguments && IsRenameable(arguments[0].Expression) && goMethod.ReturnsVoid)
+                    {
+                        site.Go = GoKind.Group;
+                        site.GoTarget = target;
+                        return site;
+                    }
+
+                    site.GoTarget = target;
+
+                    return GoOther(site, !plainArguments ? "ref-argument" : !goMethod.ReturnsVoid ? "returns-value" : "callee-shape", false);
+                }
+
+                // A func value: a twin's go statement tests it for a pair when it is a void local or parameter (fix 6).
+                if (arguments.Count >= 1 && model.GetTypeInfo(arguments[0].Expression).Type is INamedTypeSymbol { TypeKind: TypeKind.Delegate } delegateType)
+                {
+                    site.PairLaunch = Pairs && plainArguments && arguments[0].Expression is IdentifierNameSyntax &&
+                        delegateType.DelegateInvokeMethod is { ReturnsVoid: true } invoke && invoke.Parameters.Length == arguments.Count - 1 &&
+                        TwinDelegateType(delegateType) is not null;
+
+                    return GoOther(site, "func-value", TwinDelegateType(delegateType) is not null);
+                }
+
+                return GoOther(site, !plainArguments ? "ref-argument" : "unbound", true);
             }
 
             site.Renameable = IsRenameable(node.Expression);
@@ -417,13 +511,14 @@ public sealed partial class TwinGenerator : ISourceGenerator
     // literals, passive inside any other closure, where nothing is awaited.
     private sealed class Collector(Run run, SemanticModel model, Candidate candidate) : CSharpSyntaxWalker
     {
-        private int m_passive, m_literal;
+        private int m_passive, m_literal, m_pair;
 
         public override void VisitInvocationExpression(InvocationExpressionSyntax node)
         {
             Site site = run.Classify(node, model);
             site.Active = m_passive == 0;
             site.Direct = m_passive == 0 && m_literal == 0;
+            site.PairBody = m_pair > 0;
             run.Sites[node] = site;
             candidate.Sites.Add(site);
 
@@ -432,6 +527,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 m_literal++;
                 Visit(((ParenthesizedLambdaExpressionSyntax)node.ArgumentList.Arguments[0].Expression).Body);
                 m_literal--;
+
+                // A go literal's arguments are evaluated by the go statement, in the function's own body.
+                foreach (ArgumentSyntax argument in node.ArgumentList.Arguments.Skip(1))
+                    Visit(argument);
+
                 return;
             }
 
@@ -444,18 +544,18 @@ public sealed partial class TwinGenerator : ISourceGenerator
         {
             bool pairable = run.Pairs && m_passive == 0 && !node.Modifiers.Any(SyntaxKind.AsyncKeyword);
 
-            if (pairable) m_literal++; else m_passive++;
+            if (pairable) { m_literal++; m_pair++; } else m_passive++;
             base.VisitParenthesizedLambdaExpression(node);
-            if (pairable) m_literal--; else m_passive--;
+            if (pairable) { m_literal--; m_pair--; } else m_passive--;
         }
 
         public override void VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
         {
             bool pairable = run.Pairs && m_passive == 0 && !node.Modifiers.Any(SyntaxKind.AsyncKeyword);
 
-            if (pairable) m_literal++; else m_passive++;
+            if (pairable) { m_literal++; m_pair++; } else m_passive++;
             base.VisitSimpleLambdaExpression(node);
-            if (pairable) m_literal--; else m_passive--;
+            if (pairable) { m_literal--; m_pair--; } else m_passive--;
         }
 
         public override void VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)

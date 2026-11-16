@@ -185,5 +185,17 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
+
+    // GO2CS0014, TwinGenerator (M:N PROTOTYPE, the LOUD fallback: COORD's A3 ruling 2026-11-12; severity by the owner,
+    // FREEZE-SHEET.md 2026-11-13): a go statement the generator does not launch as a twin, where its goroutine could
+    // park, keeps its plain launch on a thread. A WARNING by default; WarningsAsErrors (or an .editorconfig severity) on
+    // this code is the opt-in that makes it an error. Reported once per go statement, naming the reason.
+    public static readonly DiagnosticDescriptor PlainGoLaunch = new(
+        id: "GO2CS0014",
+        title: "A go statement launches its goroutine plain",
+        messageFormat: "A go statement in '{0}' launches its goroutine plain ({1}): a goroutine that parks there blocks a thread",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 #pragma warning restore RS2008
 }
