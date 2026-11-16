@@ -39443,6 +39443,15 @@ struct reached through a local func type at all, so ONE name is refused too.
   later: lift a func type's anonymous parameter and result structs as the var's own struct is lifted, then add the
   Signature arm to `aliasPerNameLifts` in step.
 
+**Dated 2026-11-15 21:12Z, P2 (COORD ruling 16:22Z), master `0c1d295ea8` (batch 309) and W12 `2899b91992`, linux/amd64,
+go1.26.11.** Five more shapes, one package each, all exit 1 with `Unresolved dynamic struct type: struct{Hz int}`
+and emit raw Go, at master and with W12 alike: a package variable of func type (`var take func(struct{ Hz int }) int
+= func...`), a struct field of func type, a parameter of func type (`func apply(take func(struct{ Hz int }) int)`), a
+result of func type (`func mk() func(struct{ Hz int }) int`), and a named func type (`type taker func(struct{ Hz int })
+int`). Two forms convert: a declared function taken as a value (`f := take`) and a called func literal. The fix this
+row names covers all five: a func type's anonymous parameter and result structs are lifted wherever the func type is
+written, not only for a local variable.
+
 ## 2026-11-15 — P5 (option 2; closes the 2026-11-15 row "a write at the ADDRESS of a named array that has not been used yet is lost"; COORD rulings 01:19Z and 08:54Z): the publish of a named array's holder is a compare-and-swap — DONE
 
 **What was wrong.** The publish of a named array's backing into a pointer box's storage (`publishArrayBacking` in
@@ -39736,5 +39745,73 @@ and the field view's shape widened to two selections as its second commit, probe
 0 corpus files (`src/core/unsafe/unsafe.cs` is hand-owned and changes), behavioral +1.
 
 — P5 (2026-11-15)
+
+## 2026-11-15 — P2 (sqlite-cs W12; COORD rulings 10:46Z, 15:22Z, 16:22Z): a struct value moves between a named type, an unnamed type and a second lift of the unnamed type — CLOSED for the moves in one file; three neighbour shapes OPEN, loud, census reach 0
+
+**What was wrong.** Go converts, assigns and compares two struct types with identical fields. C# has an unrelated
+type per declaration, and an unnamed struct type is a generated lift, so each move needs a recorded operator. Five
+shapes had none or the wrong one at master `b2214e00e4`:
+
+| Shape | Go | At master |
+|---|---|---|
+| foreign source, local target | `hertz(p)`, `p` a `lib.Pitch` | CS0246, the operator named the foreign type bare |
+| A: conversion to an unnamed type | `struct{ Hz int }(h)` | CS1955, the lift's name emitted as a callee |
+| A': every other assignment | `var x struct{ Hz int } = h`, a field, an element, a send ... | CS0029 / CS1503, only arguments, returns and `append` recorded |
+| B: comparison | `a == h`, a `switch` over one with a case of the other | CS9342, two candidate operators |
+| U2U: two lifts of one unnamed type | a function's slot filled from a declaration BELOW it | CS0029 / CS1503 / CS0019 |
+
+**What changed.** go2cs-gen `ImplicitConvGenerator`: a foreign source converted to a local struct is hosted in the
+local target and named by its qualified name, and a foreign side is told apart by that name (two packages' `Pitch`
+are two operators). Converter, `namedUnnamedStructConversion.go`: A is a cast to the lift; A' is a pass after the
+file's declarations (`recordNamedUnnamedStructMoves`) that records the pair at every place Go assigns a value; B
+casts the unnamed operand to the named type; U2U records the pair between two lifts (`recordStructLiftMove`) and
+casts one comparison operand to the other's lift. Where the lifter already made one type nothing is recorded.
+Reference: `struct-types.md`, *A struct value moves between a named type, an unnamed type and a second lift of the
+unnamed type*.
+
+**Evidence.** Unit matrix `TestEachNamedUnnamedStructMoveRecordsItsConversion`: 176 packages, one site each (142
+named and unnamed arms: each form in the directions Go allows, with a local and a foreign named side; and 34 two-lift
+arms); with the U2U fix off 24 of the 34 are red, the other 10 being the argument kinds the old recorder covered;
+with it on 0 of 176. Fixture `ForeignAndUnnamedStructConversion` (three packages, 59 output lines) equals Go's
+output. GenTests `ForeignStructSourceConversionTests` 7 arms (8 test cases; with the generator fix off 6 red, with it
+on 8 of 8). Gates at the 310 stack `854b3967e9` (W12 merged at `2899b91992` with W9b, W11, W9a on master
+`0c1d295ea8`): go test 11 ok; CNR byte-identical over 1086 packages (12 platform-exclusive skipped); GolibTests 0
+failed; GenTests 537/537; go2cs.slnx 0 errors; the fixture passes; runtime row PASS 11094. Corpus footprint on 4
+targets: 0 lines of W12 (each file the stack moves is W9b's committed regen, equal byte for byte;
+predicted 0 lines, falsifier any corpus line). W12 seats in 310 without W9a; W12 alone at 309, and the three seats
+without W9a, are not gated (W9a's 22 files are disjoint from W12's).
+
+**Reach (a syntax census, an upper bound, taken before the work).** std on 4 targets: 0 sites of any of these shapes.
+sqlite on 3 targets: 1, `modernc.org/libc`'s `Xglob`, an alias declared above its use, which is one lift today.
+TypeScript on 3 targets: 0. std tests: 8 (2 `runtime_test` arguments, 6 `encoding/xml` one-lift adoptions). The
+behavioral suite: 12 sites in 6 fixtures that pass at master; their emission is 0 lines different (A/B of the six,
+master converter against the seat's) under this change.
+
+**OPEN, three neighbours, each loud (a C# compile error, never a wrong value):**
+
+1. **Two lifts in two FILES of one package record nothing.** `var x struct{ Hz int } = src()` in `a.go`, with `func
+   src() (r struct{ Hz int })` in `b.go`: CS0029, `Src_r` to `Run_x` (package-level form: CS0029, `V0ᴛ1` to `Xᴛ1`). A
+   lift's name is known per file. Cure: a package table of lifts by type, replayed after the file-visit barrier as
+   `replayDeferredConstraintRecords` is. Sized 1.5-2 h.
+2. **The unnamed type behind a pointer, slice, map or channel.** `var p *struct{ Hz int } = psrc()` with `psrc`
+   declared below: CS0029, `ж<psrc_R0>` to `ж<Run_p>` (slice form: `slice<all_R0>` to `slice<Run_s>`). No operator
+   converts `ж<A>` to `ж<B>`; the cure is ONE lift, in the lifter (register signature and package-level lifts before
+   bodies, so adoption stops depending on declaration order). Ruled a seat of its own after wall C, after .4; it is
+   not footprint-free, so a rename census comes first.
+3. **An exported package-level declaration reuses an unexported declaration's lift in one file.** An exported package
+   variable written below an unexported one of the same unnamed type adopts the unexported `internal` lift: CS0052,
+   CS0053; as an exported type's field: CS0050, CS0051, CS0052. Cure: publish the reused lift. Sized 1 h.
+
+Repros: `docs/phase4/probes/p2-struct-lift-neighbours/` (six one-site packages; each prints 3 under Go and stops at
+the C# build with exactly the codes above).
+
+**Known limit, G's row.** An unnamed struct inside a FUNC type gets no lift and the conversion stops, exit 1; see the
+2026-11-15 row "no lift is made for an anonymous struct inside a function-local FUNC type". My five further shapes
+are a dated block under that row.
+
+**NOT SHOWN.** A generic struct on either side of a two-lift move (skipped by `typeContainsTypeParams`); the moves
+under `-tests` white-box conversion.
+
+— P2 (2026-11-15; gate readings 2026-11-16)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
