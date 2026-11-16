@@ -19,9 +19,12 @@
 //
 //   - a re-pointed local keeps `.Value[i]` — after `q = other` the local may name a managed array;
 //   - a SAME-element view keeps array<T>.AliasPointer, the half that already windows real storage;
-//   - a TWO-hop selector keeps the raw route — the door folds one field's offset, no more. The raw route is
-//     spelled as the typed door, `@unsafe.Pointer.To<array<T>>(…)`, since the interior-pointer root
+//   - a field reached through a PROMOTION, an index or a call keeps the raw route. The raw route is spelled as
+//     the typed door, `@unsafe.Pointer.To<array<T>>(…)`, since the interior-pointer root
 //     (typedPointerDoor_test.go); it was the cast `(ж<array<T>>)(uintptr)(…)`.
+//
+// A chain of field selections off a variable takes the helper since docs/phase4/DESIGN-array-pointer-doors.md,
+// section 19 (`&sa.raw.Port`, golang.org/x/sys's port): a two-hop selector was a control here until then.
 
 package main
 
@@ -65,6 +68,17 @@ type outer struct {
 	inner sockaddr
 }
 
+type top struct {
+	o outer
+}
+
+type embeds struct {
+	sockaddr
+	extra uint32
+}
+
+var shared sockaddr
+
 // POSITIVE 1 — the read, net's cgoLookupServicePort.
 func portOf(sa *sockaddr) int {
 	p := (*[2]byte)(unsafe.Pointer(&sa.Port))
@@ -97,10 +111,48 @@ func sameElem(xs *[4]byte) byte {
 	return a[1]
 }
 
-// CONTROL 3 — a two-hop selector.
+// CHAIN 1 — a two-hop selector, x/sys's port (it was control 3 until section 19).
 func nested(o *outer) byte {
 	n := (*[2]byte)(unsafe.Pointer(&o.inner.Port))
 	return n[0]
+}
+
+// CHAIN 2 — three hops, bound and stored through; and the two-hop view indexed where it is written.
+func deep(t *top) {
+	d := (*[2]byte)(unsafe.Pointer(&t.o.inner.Port))
+	d[1] = 7
+	(*[2]byte)(unsafe.Pointer(&t.o.inner.Port))[0] = 9
+}
+
+// CHAIN 3 — a struct variable and a package variable.
+func variable() uint16 {
+	var s sockaddr
+	v := (*[2]byte)(unsafe.Pointer(&s.Port))
+	v[0] = 1
+	g := (*[2]byte)(unsafe.Pointer(&shared.Port))
+	g[1] = 2
+	return s.Port
+}
+
+// CONTROL 3 — a promoted field: the selection passes through the embedded struct.
+func promoted(e *embeds) byte {
+	m := (*[2]byte)(unsafe.Pointer(&e.Port))
+	return m[0]
+}
+
+// CONTROL 4 — a field of an element and of a call's result: the root is no variable.
+func elementRoot(xs []sockaddr) byte {
+	x := (*[2]byte)(unsafe.Pointer(&xs[1].Port))
+	return x[0]
+}
+
+func callRoot(o *outer) byte {
+	c := (*[2]byte)(unsafe.Pointer(&pick(o).Port))
+	return c[0]
+}
+
+func pick(o *outer) *sockaddr {
+	return &o.inner
 }
 
 // DIRECT 1 — the view indexed where it is written: a read, a store, a compound store and a step.
@@ -203,6 +255,8 @@ func main() {
 	h := &holder{cheap: 1}
 	w0, w1 := words(h)
 	fmt.Println(portOf(sa), repointed(sa, &other), sameElem(&xs), nested(&outer{}), w0, w1)
+	deep(&top{})
+	fmt.Println(variable(), promoted(&embeds{}), elementRoot(make([]sockaddr, 2)), callRoot(&outer{}))
 }
 `)
 
@@ -319,9 +373,46 @@ func TestNativeFieldArrayViewEmitsTheDoorAndElementRef(t *testing.T) {
 		t.Errorf("sameElem: a same-element view must keep array<T>.AliasPointer, got:\n%s", body)
 	}
 
-	// CONTROL 3 — a two-hop selector keeps the raw route, spelled as the typed door.
-	if body := emittedFunctionBody(t, mainCs, "nested"); strings.Contains(body, "@unsafe.ArrayPointer<") || !strings.Contains(body, "@unsafe.Pointer.To<array<byte>>(") {
-		t.Errorf("nested: a two-hop selector must keep the raw route, got:\n%s", body)
+	// CONTROL 3 — a promoted field keeps the raw route, spelled as the typed door; CONTROL 4 — so does a field
+	// of an element and of a call's result.
+	for _, control := range []string{"promoted", "elementRoot", "callRoot"} {
+		if body := emittedFunctionBody(t, mainCs, control); strings.Contains(body, "@unsafe.ArrayPointer<") || !strings.Contains(body, "@unsafe.Pointer.To<array<byte>>(") || strings.Contains(body, ".ElementRef(") {
+			t.Errorf("%s: a field that is not reached by field selections off a variable must keep the raw route, got:\n%s", control, body)
+		}
+	}
+}
+
+// A chain of field selections off a variable takes the helper, as one selection off a pointer does: the
+// converter already emits the address of such a field as the field's own pointer, which is what the helper
+// takes (docs/phase4/DESIGN-array-pointer-doors.md, section 19). golang.org/x/sys writes a port through
+// `&sa.raw.Port`; the raw route's pointer over such a field has no array behind its Value on any root.
+func TestNativeFieldArrayViewTakesAChainOfFieldSelections(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	mainCs := convertNativeFieldArrayViewFixture(t)
+
+	for _, arm := range []struct {
+		function string
+		expected []string
+	}{
+		{"nested", []string{"var n = @unsafe.ArrayPointer<byte>.Of(o.Ꮡinner.ᏑPort, 2);", "n.ElementRef(0)"}},
+		{"deep", []string{"var d = @unsafe.ArrayPointer<byte>.Of(t.Ꮡo.Ꮡinner.ᏑPort, 2);", "d.ElementRef(1) = 7;", "@unsafe.ArrayPointer<byte>.Of(t.Ꮡo.Ꮡinner.ᏑPort, 2).ElementRef(0) = 9;"}},
+		{"variable", []string{"var v = @unsafe.ArrayPointer<byte>.Of(Ꮡs.ᏑPort, 2);", "v.ElementRef(0) = 1;", "var g = @unsafe.ArrayPointer<byte>.Of(Ꮡshared.ᏑPort, 2);", "g.ElementRef(1) = 2;"}},
+	} {
+		body := emittedFunctionBody(t, mainCs, arm.function)
+
+		for _, expected := range arm.expected {
+			if !strings.Contains(body, expected) {
+				t.Errorf("%s: expected %q, got:\n%s", arm.function, expected, body)
+			}
+		}
+
+		if strings.Contains(body, ".Value[") || strings.Contains(body, "@unsafe.Pointer.To<array<byte>>(") {
+			t.Errorf("%s: the raw route's pointer has no array behind its Value; neither may be emitted, got:\n%s", arm.function, body)
+		}
 	}
 }
 

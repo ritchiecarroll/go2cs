@@ -1,0 +1,47 @@
+# Run D (sqlite-cs demo/file, WAL pass): fcntl locks and mmap on the -shm fd, linux-x64 (WSL2), 2026-11-15, tree df6f0598ce.
+# strace -ff -e trace=open,openat,mmap,munmap,fcntl,close (one file per thread, so no call is split), counted per call;
+# start=120 is WAL_WRITE_LOCK, 121-122 CKPT/RECOVER, 123-127 the read marks, 128 the DMS lock.
+conv rc=0
+native rc=0
+===== CONVERTED
+  -shm fds: 297
+      4 fcntl(297, F_GETLK F_UNLCK start=128 l_len=1
+      7 fcntl(297, F_SETLK F_RDLCK start=123 l_len=1
+      3 fcntl(297, F_SETLK F_RDLCK start=124 l_len=1
+      2 fcntl(297, F_SETLK F_RDLCK start=128 l_len=1
+      5 fcntl(297, F_SETLK F_UNLCK start=120 l_len=1
+      2 fcntl(297, F_SETLK F_UNLCK start=121 l_len=2
+      7 fcntl(297, F_SETLK F_UNLCK start=123 l_len=1
+      8 fcntl(297, F_SETLK F_UNLCK start=124 l_len=1
+      2 fcntl(297, F_SETLK F_UNLCK start=125 l_len=1
+      2 fcntl(297, F_SETLK F_UNLCK start=126 l_len=1
+      2 fcntl(297, F_SETLK F_UNLCK start=127 l_len=1
+      5 fcntl(297, F_SETLK F_WRLCK start=120 l_len=1
+      2 fcntl(297, F_SETLK F_WRLCK start=121 l_len=2
+      5 fcntl(297, F_SETLK F_WRLCK start=124 l_len=1
+      2 fcntl(297, F_SETLK F_WRLCK start=125 l_len=1
+      2 fcntl(297, F_SETLK F_WRLCK start=126 l_len=1
+      2 fcntl(297, F_SETLK F_WRLCK start=127 l_len=1
+      2 fcntl(297, F_SETLK F_WRLCK start=128 l_len=1
+      2 mmap(NULL, 32768, PROT_READ|PROT_WRITE, MAP_SHARED, 297, 0) = ADDR
+===== NATIVE
+  -shm fds: 5
+      4 fcntl(5, F_GETLK F_UNLCK start=128 l_len=1
+      7 fcntl(5, F_SETLK F_RDLCK start=123 l_len=1
+      3 fcntl(5, F_SETLK F_RDLCK start=124 l_len=1
+      2 fcntl(5, F_SETLK F_RDLCK start=128 l_len=1
+      5 fcntl(5, F_SETLK F_UNLCK start=120 l_len=1
+      2 fcntl(5, F_SETLK F_UNLCK start=121 l_len=2
+      7 fcntl(5, F_SETLK F_UNLCK start=123 l_len=1
+      8 fcntl(5, F_SETLK F_UNLCK start=124 l_len=1
+      2 fcntl(5, F_SETLK F_UNLCK start=125 l_len=1
+      2 fcntl(5, F_SETLK F_UNLCK start=126 l_len=1
+      2 fcntl(5, F_SETLK F_UNLCK start=127 l_len=1
+      5 fcntl(5, F_SETLK F_WRLCK start=120 l_len=1
+      2 fcntl(5, F_SETLK F_WRLCK start=121 l_len=2
+      5 fcntl(5, F_SETLK F_WRLCK start=124 l_len=1
+      2 fcntl(5, F_SETLK F_WRLCK start=125 l_len=1
+      2 fcntl(5, F_SETLK F_WRLCK start=126 l_len=1
+      2 fcntl(5, F_SETLK F_WRLCK start=127 l_len=1
+      2 fcntl(5, F_SETLK F_WRLCK start=128 l_len=1
+      2 mmap(NULL, 32768, PROT_READ|PROT_WRITE, MAP_SHARED, 5, 0) = ADDR

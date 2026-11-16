@@ -86,9 +86,13 @@ func fieldCargoDims(t types.Type) (elemDims []int64, keyDims []int64) {
 	switch core := resolved.(type) {
 	case *types.Array:
 		// Only a POINTEE needs the stamp; a field that is itself an array is carried by the
-		// `= new(N)` initializer the generated parameterless constructor runs.
-		if behindPointer {
-			elemDims = goArrayDims(core)
+		// `= new(N)` initializer the generated parameterless constructor runs -- unless a ZERO
+		// length sits above an inner array. `new(0, () => new(1042))` builds no element, so the zero
+		// instance measures [0] and every length below it is lost (modernc libc's TBF_ctx.FPS,
+		// `[0][1042]TBF_word`, which left the struct's Go layout unproven). That field carries its
+		// own dims, and GoReflect.FieldArrayDims reads a stamp before it measures.
+		if dims := goArrayDims(core); behindPointer || zeroLengthAboveAnArray(dims) {
+			elemDims = dims
 		}
 	case *types.Map:
 		elemDims = goArrayDims(core.Elem())
@@ -111,6 +115,18 @@ func fieldCargoDims(t types.Type) (elemDims []int64, keyDims []int64) {
 	}
 
 	return elemDims, keyDims
+}
+
+// zeroLengthAboveAnArray reports whether a zero length appears anywhere but the innermost position
+// of dims: the shape whose zero value has no element from which the inner lengths could be measured.
+func zeroLengthAboveAnArray(dims []int64) bool {
+	for _, dim := range dims[:max(len(dims)-1, 0)] {
+		if dim == 0 {
+			return true
+		}
+	}
+
+	return false
 }
 
 // elementArrayDims returns the dims a CONTAINER's element position must carry -- the array the

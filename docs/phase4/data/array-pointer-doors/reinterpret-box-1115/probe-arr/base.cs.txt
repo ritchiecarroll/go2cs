@@ -1,0 +1,129 @@
+namespace go.example.com;
+
+using fmt = fmt_package;
+using os = os_package;
+using strconv = strconv_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+partial struct dirent {
+    internal uint64 ino;
+    internal array<int8> name = new(8);
+}
+
+partial struct holder {
+    internal dirent d;
+}
+
+internal static readonly ж<dirent> Ꮡgd = new StaticBox<dirent>(new dirent(ino: 7, name: new int8[]{(int8)'g', (int8)'l', (int8)'o', (int8)'b'}.array(8)));
+internal static ref dirent gd => ref ((StaticBox<dirent>)Ꮡgd).ValueSlot;
+
+internal static void @try(@string name, Func<@string> f) {
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: PANIC %v\n"u8, name, r);
+            }
+        }, ref ᒐ);
+
+        fmt.Printf("%s: %s\n"u8, name, f());
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+internal static @string trim(slice<byte> b) {
+    foreach (var (i, c) in range(b)) {
+        if (c == 0) {
+            return (@string)(b.slice(0, i));
+        }
+    }
+
+    return (@string)b;
+}
+
+internal static @string ptrSlice(ж<dirent> d) {
+    var name = @unsafe.ArrayPointer<byte>.Of(d.Ꮡname, 8).slice();
+    return trim(name);
+}
+
+internal static @string ptrLocal(ж<dirent> Ꮡd) {
+    ref var d = ref Ꮡd.DerefOrNull();
+
+    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡd.Ꮡname, 8);
+    p.ElementRef(0) = (byte)'P';
+    return fmt.Sprint(p.ElementRef(0), p.ElementRef(1), d.name[0]);
+}
+
+internal static @string varSlice() {
+    ref var d = ref heap(new dirent(), out var Ꮡd);
+    d.name = new int8[]{(int8)'v', (int8)'a', (int8)'r'}.array(8);
+    var name = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡd.Ꮡname)).slice();
+    return trim(name);
+}
+
+internal static @string varLocal() {
+    ref var d = ref heap(new dirent(), out var Ꮡd);
+    d.name = new int8[]{(int8)'v', (int8)'a', (int8)'r'}.array(8);
+    var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡd.Ꮡname));
+    p.Value[0] = (byte)'V';
+    return fmt.Sprint(p.Value[0], p.Value[1], d.name[0]);
+}
+
+internal static @string globalSlice() {
+    var name = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡgd.Ꮡname)).slice();
+    return trim(name);
+}
+
+internal static @string twoHopSlice(ж<holder> h) {
+    var name = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(h.Ꮡd.Ꮡname)).slice();
+    return trim(name);
+}
+
+internal static @string twoHopLocal(ж<holder> Ꮡh) {
+    ref var h = ref Ꮡh.DerefOrNull();
+
+    var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡh.Ꮡd.Ꮡname));
+    p.Value[1] = (byte)'W';
+    return fmt.Sprint(p.Value[0], p.Value[1], h.d.name[1]);
+}
+
+internal partial struct main_arms /*dyn*/ {
+    internal @string name;
+    internal Func<@string> f;
+}
+
+internal static void main() {
+    var d = Ꮡ(new dirent(ino: 1, name: new int8[]{(int8)'p', (int8)'t', (int8)'r'}.array(8)));
+    var h = Ꮡ(new holder(d: new dirent(name: new int8[]{(int8)'t', (int8)'w', (int8)'o'}.array(8))));
+        var dʗ1 = d;
+
+        var dʗ2 = d;
+
+        var hʗ1 = h;
+
+        var hʗ2 = h;
+    var arms = slice<main_arms>([
+        new("pointer root slice", () => ptrSlice(dʗ1)),
+        new("pointer root local", () => ptrLocal(dʗ2)),
+        new("variable root slice", varSlice),
+        new("variable root local", varLocal),
+        new("package root slice", globalSlice),
+        new("two-hop slice", () => twoHopSlice(hʗ1)),
+        new("two-hop local", () => twoHopLocal(hʗ2))
+    ]);
+
+    if (len(os.Args) > 1) {
+        var (n, _) = strconv.Atoi(os.Args[1]);
+        @try(arms[n].name, arms[n].f);
+        return;
+    }
+
+    foreach (var (_, a) in range(arms)) {
+        @try(a.name, a.f);
+    }
+}
+
+} // end main_package

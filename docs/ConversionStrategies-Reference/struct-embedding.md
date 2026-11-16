@@ -11,7 +11,7 @@
 > generator declared would sit in a later partial part, which the CLR lays after every converter field,
 > so an embed declared first would sit at the wrong offset for any struct read at Go's layout (runtime's lfstack node,
 > `struct{ LFNode; data int }`); a zero-size blank before an embed (`struct{ _ sys.NotInHeap; listedValManual }`)
-> takes the zero-size layout arc, which could not place generator-owned storage. Converted code reads the
+> takes the zero-size layout, which could not place generator-owned storage. Converted code reads the
 > same at every use site (`s.T`, `ref s.T`, `Ꮡ(s).of(S.ᏑT)`). Some sections below explain a generator rule in
 > terms of the generator-owned property form, which go2cs-gen still READS for hand-owned files that spell it;
 > where one says "the `partial ref` property", read "the declared embed field".
@@ -19,7 +19,7 @@
 
 <!-- owner ruling (A), 2026-10-16: the converter declares every embed; before it, go2cs-gen declared the embed's
      storage (a `ʗT` field) and a `partial ref` accessor.
-     src/go2cs/visitStructType.go:1024 `An embed that PROMOTES (a defined type, or a pointer to one) is a FIELD`. -->
+     src/go2cs/visitStructType.go:1033 `An embed that PROMOTES (a defined type, or a pointer to one) is a FIELD`. -->
 
 Go structs use "[type embedding](https://go101.org/article/type-embedding.html)" instead of inheritance. Since converted structs are C# `struct`s (no inheritance), the `TypeGenerator` manages the equivalent: it adds a field for the embedded type and promotes the embedded type's fields and methods (selection shorthand). Both field and method promotion are **transitive through every embedding level**: when `top` embeds `mid` which embeds `inner`, `top` gets an accessor for `inner`'s field `n` (`top.n => ref mid.n`) and a forwarding receiver for `inner`'s method `describe` (`top.describe() => target.mid.describe()`), each resolving through `mid`'s own one-level promotion. The generator collects an embedded struct's members and methods recursively (following each field whose name equals its type's simple name — Go's embedding marker), with the closest declaration of a name winning, matching Go's promotion rules. **Pointer embeds promote too.** Go also embeds by pointer (`*traceBuf`), whose C# field type is `ж<traceBuf>`; its methods and fields are promoted exactly like a value embed (the embed field is dereferenced — `target.traceBuf.Value.method()` — which binds the pointer-receiver method via the `this ref` `ж<T>` overload). The embedding-marker comparison dereferences the field type first, because a pointer field's simple name carries a `.Value` suffix (`traceBuf.Value`) that would never match the bare embed field name. This matters most *transitively*: `traceExpWriter` embeds `traceWriter` (value) which embeds `*traceBuf` (pointer), and `traceBuf`'s `varint`/`byte` must promote all the way up — without the deref-aware marker the nested pointer embed is skipped and the upper struct silently loses the method (CS1929). (Guarded by the `NestedEmbeddingPromotion` behavioral test for value embeds and the `PointerEmbeddingPromotion` test for one-level and two-level-transitive pointer embeds; runtime relies on the field case for `stackWorkBuf` → `stackWorkBufHdr` → `workbufhdr.nobj` and the pointer case for the trace writers.) Because the promotion is performed at conversion time by the generator, methods added later in hand-written C# are not automatically promoted; keeping the source in Go and re-converting (or using explicit interfaces) is the maintainable path.
 
@@ -47,11 +47,11 @@ freshly `make`d slice's elements) runs no constructor, so a value embed whose ty
 null backing and a pointer embed holds a null reference rather than a nil box; golib cannot run a constructor
 generically there. (Guarded by the `NamedTypeOverStruct` behavioral test — `var s shadowed` with explicit
 `s.ctxt.fn` and promoted `s.fn` access, plus `new(shadowed)`, vs Go.)
-<!-- The declared embed fields: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:40 `/*embed*/ public Padded Padded;`; src/tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.cs.target:20 `/*embed*/ public ж<MyError> MyError;`. The generator reads them: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:60 `private HashSet<string> DeclaredEmbedFields => m_declaredEmbedFields ??=`, and builds each in both zero-value constructors: :2444 `result.Append($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);\r\n");` (a pointer type maps to `new StandardBox<T>(nil)`, the nil box). The declaration: src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:92 `shadowed z = new(nil);`. Detection: src/go2cs/visitStructType.go:1161 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`. -->
+<!-- The declared embed fields: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:40 `/*embed*/ public Padded Padded;`; src/tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.cs.target:20 `/*embed*/ public ж<MyError> MyError;`. The generator reads them: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:57 `private HashSet<string> DeclaredEmbedFields => m_declaredEmbedFields ??=`, and builds each in both zero-value constructors: :2400 `result.Append($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);\r\n");` (a pointer type maps to `new StandardBox<T>(nil)`, the nil box). The declaration: src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:92 `shadowed z = new(nil);`. Detection: src/go2cs/visitStructType.go:1170 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`. -->
 
 **A C#-keyword-named embed composes generated names from the unescaped member name.** A Go struct named for a C# keyword (`type base struct{…}`) is emitted with the `@` escape (`@base`), and embedding it makes `@base` the member name. Standalone identifier positions keep the escape (the declared embed field `/*embed*/ internal @base @base;`, the constructor parameter, member accesses like `instance.@base.id`), but every *composed* generated name must strip it, because `@` is only valid leading an identifier: the `Ꮡ`-prefixed field-reference statics, the converter's `structFieldBoxName`, and the generator-owned backing field of the property form that hand-owned files may still spell (`ʗbase`; `ʗ@base` is CS1002). <!-- src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:44 `/*embed*/ internal @base @base;` --> (Guarded by the `NamedTypeOverStruct` extension — a keyword-named embed with promoted field/method access, a keyword-keyed composite literal, and a write through `&p.id` promoted through the embed, all vs Go.)
 
-**Cross-package embeds resolve through the semantic model.** The member-collection above resolves the embedded struct's *syntax* (`GetStructDeclaration`) — same-package or via `CompilationReference`s. In a real [MSBuild](../Glossary.md#msbuild) build, project references arrive as **metadata** references (never `CompilationReference`), so a cross-package embed — `type rtype struct { *abi.Type }` (runtime `type.go`) or a user package embedding a library struct — silently promoted **nothing**: the generated "Promoted Struct Field Accessors" section was empty and every `t.TFlag`/`t.Str`/`t.Kind_` was CS1061. The field collection therefore falls back to the **type's metadata symbol** (`GetTypeByMetadataName` on the normalized nested name, e.g. `go.internal.abi_package+Type`) and enumerates its public instance fields; the emitted accessors are unchanged in form — true refs through the embed (`public ref abi.TFlag TFlag => ref Type.Value.TFlag;` for a pointer embed), so writes through a promoted name reach the embedded target. Transitive promotion through a *metadata* type's own embeds is not chased (no corpus site needs it). **Promoted POINTER-RECEIVER method calls through a cross-package *pointer* embed are routed at the call site**: the generator emits no method forwarder for a metadata embed (method promotion is syntax-resolved), so `t.Uncommon()` on `Δrtype` (embeds `*abi.Type`, runtime `type.go`) would be CS1929; the converter emits the explicit hop through the embed field's box — `t.Type.Value.Kind()` (runtime `type.go`), where the deref'd `.Value` is a ref return, binding the `ref` extension addressably; a method the converter emits with a box receiver binds the held `ж<T>` directly (`t.Type.Uncommon()`, since `abi.Type.Uncommon` is `this ж<Type>`). A *same-package* pointer embed keeps its generated forwarder (no churn). A promoted **value-receiver** method call takes the same explicit hop: `p.Hot()` through a cross-package pointer embed emits `p.Sensor.Value.Hot()`, and through a cross-package value embed `r.Sensor.Hot()`; no behavioral test calls that promoted form. (Guarded by the `CrossPkgUser` Phase-4b extension — a promoted pointer-receiver `Calibrate` through the cross-assembly pointer embed, write-through observed via the target.) (Guarded by the `CrossPkgUser` extension that covers pointer-embed and value-embed field promotion across the assembly boundary, write-through observed via the embedded target, vs Go.) <!-- the fix cleared runtime type.go's 4 CS1061, 68 → 64. -->
+**Cross-package embeds resolve through the semantic model.** The member-collection above resolves the embedded struct's *syntax* (`GetStructDeclaration`) — same-package or via `CompilationReference`s. In a real [MSBuild](../Glossary.md#msbuild) build, project references arrive as **metadata** references (never `CompilationReference`), so a cross-package embed — `type rtype struct { *abi.Type }` (runtime `type.go`) or a user package embedding a library struct — silently promoted **nothing**: the generated "Promoted Struct Field Accessors" section was empty and every `t.TFlag`/`t.Str`/`t.Kind_` was CS1061. The field collection therefore falls back to the **type's metadata symbol** (`GetTypeByMetadataName` on the normalized nested name, e.g. `go.internal.abi_package+Type`) and enumerates its public instance fields; the emitted accessors are unchanged in form — true refs through the embed (`public ref abi.TFlag TFlag => ref Type.Value.TFlag;` for a pointer embed), so writes through a promoted name reach the embedded target. Transitive promotion through a *metadata* type's own embeds is not chased (no corpus site needs it). **Promoted POINTER-RECEIVER method calls through a cross-package *pointer* embed are routed at the call site**: the generator emits no method forwarder for a metadata embed (method promotion is syntax-resolved), so `t.Uncommon()` on `Δrtype` (embeds `*abi.Type`, runtime `type.go`) would be CS1929; the converter emits the explicit hop through the embed field's box — `t.Type.Value.Kind()` (runtime `type.go`), where the deref'd `.Value` is a ref return, binding the `ref` extension addressably; a method the converter emits with a box receiver binds the held `ж<T>` directly (`t.Type.Uncommon()`, since `abi.Type.Uncommon` is `this ж<Type>`). A *same-package* pointer embed keeps its generated forwarder (no churn). A promoted **value-receiver** method call takes the same explicit hop: `p.Hot()` through a cross-package pointer embed emits `p.Sensor.Value.Hot()`, and through a cross-package value embed `r.Sensor.Hot()`; no behavioral test calls that promoted form. (Guarded by an extension of the `CrossPkgUser` behavioral test — a promoted pointer-receiver `Calibrate` through the cross-assembly pointer embed, write-through observed via the target.) (Guarded by the `CrossPkgUser` extension that covers pointer-embed and value-embed field promotion across the assembly boundary, write-through observed via the embedded target, vs Go.) <!-- the fix cleared runtime type.go's 4 CS1061, 68 → 64. -->
 
 Two refinements complete the cross-package pointer-embed story <!-- 2026-07-03, internal/reflectlite's last 4 errors -->: **(a) the hop names the FIELD, which is struct-scoped** — an embed field named like a Δ-renamed package type (rtype's embedded `Type` vs reflectlite's `Type` interface, Δ-renamed `ΔType` by its type-vs-method collision) is *declared* unrenamed, so the hop emission must not apply the package-level rename (`t.ΔType.Value.Uncommon()` was CS1061); both hop arms route through `structFieldBoxName`, the same struct-scoped naming the box accessors use. **(b) A generated interface implementation forwards through the hop too**: when an interface member has NO direct struct method and is satisfied purely by Go promotion through a single embedded-pointer field (`GoImplement<rtype, ΔType>` — `Size`/`Kind` live on `*abi.Type`), the `InterfaceImplTemplate` emits `this.Type.Value.Size()` instead of the unbindable `this.Size()` (CS1929); the `IжAdapter` template forwards the same members `m_box.Value.Type.Value.M()`. Detection is syntax-level — the embed is the converter's `/*embed*/ public ж<X> F;` field (or the legacy `partial ref ж<X> F` property of a hand-owned file; `GetEmbeddedPointerHopNames`) — and was first gated to a SINGLE hop, on the reasoning that multi-embed interface satisfaction was rare. The corpus surfaced one (jsonrpc's `pipe`), and the gate is gone: several embeds route each member to the unique embed declaring it (see [*With SEVERAL embedded pointers the hop is chosen per member, not per struct*](interfaces.md#with-several-embedded-pointers-the-hop-is-chosen-per-member-not-per-struct)). (Guarded by the `CrossPkgUser` extension that covers a local Δ-renamed `Meter` interface colliding with the embed field name, satisfied purely by promotion through `*CrossPkgLib.Meter`, with all bump paths aliasing one shared object, vs Go.)
 
@@ -96,8 +96,8 @@ a package-level **function** also carries (Go scopes them apart — `LookupHost`
 `(*Resolver).LookupHost` — but the emission folds both into one static package class). A forwarder
 by that name lives in the *test* class, and C# member lookup finds class methods before `using
 static` imports, so it would shadow every bare function call — net's `lookupCustomResolver` embeds
-`*Resolver`, and unsuppressed `Lookup*` forwarders cost 54 CS1501s on plain `LookupHost(host)`
-calls. The bare function call has no other spelling the converter emits, while a promoted-method
+`*Resolver`, and unsuppressed `Lookup*` forwarders cost dozens of CS1501s on plain `LookupHost(host)`
+calls.<!-- 54 CS1501s --> The bare function call has no other spelling the converter emits, while a promoted-method
 call always has the explicit hop, so the function wins (residual, unmeasured: a Go promoted call of
 such a colliding method through the embedding struct would need the converter's explicit hop). No record schema moved: there IS no promotion witness in any
 `package_info` file — an embed's promotion has always been resolved at generation time (syntax
@@ -106,8 +106,8 @@ same-assembly, metadata otherwise), and the fix completes the metadata half for 
 the real `TypeGenerator` over the two-assembly friend shape, promoted internal fields and methods
 asserted, the collision suppression asserted, plus the cross-package control pinning
 public-fields-only and no method forwarders; verified end-to-end by net's linux-target
-`net.tests.csproj` building clean — the 8 promotion errors and the 46-site shadowing class both
-closed.)
+`net.tests.csproj` building clean, with the promotion errors and the shadowing class both
+closed.)<!-- the 8 promotion errors and the 46-site shadowing class -->
 
 ## An embedded struct is an INLINE field, so a value copy copies it
 
@@ -130,9 +130,9 @@ Every by-value transfer inherited it — assignment, `c := *p`, a value paramete
 element read out of a slice — so the copy and its source shared one embedded storage while the
 enclosing struct's own fields copied correctly.
 
-**What it cost.** This is the root of go/types' *type parameter judged not identical to itself* wall
-(gcimporter's 108 `TestImportTypeparamTests` mismatches, go/types' own 33 failures, and the
-`validType0` stack overflow at `TestFixedbugs/issue48951.go`). `go/types.Var` embeds `object`, which
+**What it cost.** This is the root of go/types' *type parameter judged not identical to itself* failures
+(gcimporter's `TestImportTypeparamTests` mismatches, go/types' own failures, and the
+`validType0` stack overflow at `TestFixedbugs/issue48951.go`).<!-- 108 TestImportTypeparamTests mismatches, 33 go/types failures --> `go/types.Var` embeds `object`, which
 carries the field's `typ`, and substitution copies a `*Var` to retype it:
 
 ```go
@@ -293,7 +293,7 @@ backing on the value itself", which is exactly the gap the next section closes.)
 `ж<T>` is deliberately **unconstrained** in `T`, so golib cannot call an interface member on
 `ref Value` without boxing a copy. The sequence it used was box the wrapper, touch `Source` so the
 backing materializes on that copy, copy the whole wrapper back over the real storage — correct
-single-threaded (that copy-back IS `47ddd5a50`'s fix for the same lost write) and **lossy with two
+single-threaded (that copy-back is the fix for the same lost write<!-- 47ddd5a50 -->) and **lossy with two
 threads**, because it is an unsynchronized read-modify-write of shared state. Two threads reaching a
 still-lazy wrapper each allocated their own backing; the second copy-back discarded the first along
 with every element already written into it, and the element pointers already handed out kept naming
@@ -310,8 +310,8 @@ start-up window rather than of a broken CAS or a GC interaction (both A/B-elimin
 reads 72.2 % of runs and the first ~15 entries -->
 
 The publish is now gated per **box**, which is the only durable unit available: the by-value copy
-cannot be one, and constraining `T` is not on the table — the constrained-CALL route was torn out in
-`d5c0c9c10` for killing every Native AOT binary at type-init. `m_publishedArrayBacking` serves two
+cannot be one, and constraining `T` is not on the table — the constrained-CALL route was removed
+because it killed every Native AOT binary at type-init.<!-- d5c0c9c10 --> `m_publishedArrayBacking` serves two
 jobs at once: `null` is the once-only gate (every thread serializes through `lock (this)`, which is
 exactly the cold-start window the race lives in), and a *different* backing is the reassignment
 detector, so no stale ready-flag can hand out a pointer into a private copy after `*p` is assigned a
@@ -341,13 +341,12 @@ The publish path is also narrowed to the shapes that actually *are* lazy, which 
 separate defect the old unconditional probe carried. golib's own `array<T>`/`slice<T>` and every
 named-slice wrapper hold their backing in a field, so there is nothing to publish — and
 **`slice<T>.Source` is defined to return a DETACHED COPY**, so the old code allocated and threw away
-a full copy of the backing on *every* element take through a `ж<slice<T>>`. Measured in isolated
-processes, every shape got faster — the slice `.at()` path by several times; the fix removes an
+a full copy of the backing on *every* element take through a `ж<slice<T>>`. The fix removes that
 allocation from the hot path rather than adding a lock to it. <!-- measured (isolated processes, median of
 three; platform not recorded): slice .at() 215.09 -> 29.00 ns/op, array 23.66 -> 21.84, named wrapper
 28.51 -> 26.22 -->
 
-> **Doctrine: a lazy-initialization fix is not finished until the publish is atomic.** `47ddd5a50`
+> **A lazy-initialization fix is not finished until the publish is atomic.** The copy-back fix<!-- 47ddd5a50 -->
 > correctly diagnosed "the allocation landed on the copy and the real storage stayed virgin" and
 > added the copy-back. The single-threaded repair of a lost-write defect is exactly the shape that
 > leaves a concurrency residue behind.
@@ -416,7 +415,7 @@ storage. The route it replaced, `Ꮡ((pageBits)(b))`, bound golib's standard-box
 generated by-value conversion operator (`implicit operator pageBits(pallocBits value) => value.view`),
 which materialized on the operator's own parameter copy, so first-touch writes were lost (measured both
 ways, ElemAliasProbe `arm8`). The converter's pointer-conversion route records the case
-(`convCallExpr.go`, the named-array-over-named-array branch; `9028f55ef6`).
+(`convCallExpr.go`, the named-array-over-named-array branch).<!-- 9028f55ef6 -->
 
 ## The named-array wrapper publishes its lazy backing atomically
 
@@ -459,7 +458,7 @@ build. The getter holds only the warm path, a null test and a load, and is marke
 touch, which allocates and publishes, is the out-of-line `materializeValue()`, so
 that an element loop over a named array inlines its reads as it does over `array<E>`.
 <!-- the warm/cold split landed 2026-10-22:
-     src/gen/go2cs-gen/Templates/InheritedType/InheritedTypeTemplate.cs:374 `get => m_value is { } value ? value.Value`
+     src/gen/go2cs-gen/Templates/InheritedType/InheritedTypeTemplate.cs:359 `get => m_value is { } value ? value.Value`
 --> The CAS publish
 is unchanged by the split: `materializeValue()` publishes into the same `m_value` of the same wrapper.
 
@@ -697,7 +696,7 @@ internal static class mainᴛouterᴛpkg
     [global::go.GoPromoted] internal static global::go.@string Val(this global::go.main_package.outer target) => target.mid.Val();
 }
 ```
-Through 1.26.10.3 they were members of the package class. Two things follow from the move. A package class no longer grows with every struct that embeds a method-rich base: the .NET runtime loads at most 65,521 methods on a static class, and one converted package class held 107,835 forwarders and threw `TypeLoadException` at its first use (`GO2CS0012` now fails the build for a type that would). And a forwarder is no longer a frame of the Go program: `runtime.Caller` inside a promoted method reads the caller, as Go does, where it read the forwarder's name before. A method expression that selects a promoted method (`outer.Val`, `(*outer).Ptr`) names the forwarder in the struct's class, `((Func<outer, @string>)(mainᴛouterᴛpkg.Val))`: it is the one function the struct's method table holds, as in Go, so `reflect` and `runtime.FuncForPC` read the expression and the table as the same func, named `main.outer.Val`. Where no forwarder takes the expression's receiver (a value method off the pointer type, or a pointer method off a value type that reaches it through a pointer embed), it is a lambda marked `[GoWrapper]`. Forwarders for an embed from another package have their own class, `<pkg>ᴛ<Struct>ᴛxpkg`, as before. Guarded by GenTests `PromotedHostClassTests` and the `PromotedMethodFrames` and `PromotedMethodExpr` behavioral tests.
+Through 1.26.10.3 they were members of the package class. Two things follow from the move. A package class no longer grows with every struct that embeds a method-rich base: the .NET runtime loads at most 65,521 methods on a static class, and one converted package class held well over that many forwarders and threw `TypeLoadException` at its first use<!-- 107,835 forwarders, as measured when the limit was found; moved out of the text 2026-11-15 (seat 3b): an exact corpus figure. --> (`GO2CS0012` now fails the build for a type that would). And a forwarder is no longer a frame of the Go program: `runtime.Caller` inside a promoted method reads the caller, as Go does, where it read the forwarder's name before. A method expression that selects a promoted method (`outer.Val`, `(*outer).Ptr`) names the forwarder in the struct's class, `((Func<outer, @string>)(mainᴛouterᴛpkg.Val))`: it is the one function the struct's method table holds, as in Go, so `reflect` and `runtime.FuncForPC` read the expression and the table as the same func, named `main.outer.Val`. Where no forwarder takes the expression's receiver (a value method off the pointer type, or a pointer method off a value type that reaches it through a pointer embed), it is a lambda marked `[GoWrapper]`. Forwarders for an embed from another package have their own class, `<pkg>ᴛ<Struct>ᴛxpkg`, as before. Guarded by GenTests `PromotedHostClassTests` and the `PromotedMethodFrames` and `PromotedMethodExpr` behavioral tests.
 <!-- the design and its measurements: docs/phase4/DESIGN-promoted-forwarder-placement.md -->
 
 ## A nil embedded pointer is holdable and assignable — only its dereference panics

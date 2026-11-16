@@ -154,6 +154,24 @@ namespace go;
         if (s_isNamedArrayShaped && address != null)
             throw RuntimeErrorPanic.NamedArrayViewOfNativeMemory(typeof(T));
 
+        // THE MANAGED-DERIVED STRUCT FLOOR (B0', W14, COORD ruling 2026-11-15). T is a Go struct value that holds a managed
+        // reference and that the layout refusal above could not prove mismatched (an array field whose length the managed
+        // type does not carry leaves its Go offsets unknown), and this box was derived from MANAGED storage: it retains its
+        // source, or it pins it. The bytes at such an address are never a T's references. Pinnable storage is reference-free;
+        // a pointee that holds a reference has no address at all (its number is an order token); and an UNPINNABLE real
+        // address -- a reference-free field or element of a struct that holds references (PointerStorage.Unpinnable) --
+        // holds that field's bytes, and a T read there can run past the field (P5, 2026-11-15). So a whole-value read takes
+        // data bytes for references:
+        // an access violation over filled data (sqlite's crypt_blowfish, *(*TBF_ctx)(unsafe.Pointer(&[1042]uint32{...}))),
+        // null references over zeroed data. Neither is Go's answer, so the read is refused by name.
+        //
+        // Its scope is the census's B2b with source=retained or source=pinned (NativeBoxDereferenceCensus). A box with no
+        // retained source and no pin is native-origin (C memory, an OS buffer): that is P5's deferred B2 and its sweep, and
+        // this line does not reach it. A CARRIER over the same box is untouched: a field read at its Go offset (FieldRef),
+        // the number, and a conversion onward do not come through here.
+        if (s_isReferenceBearingGoStruct && address != null && (m_retainedSource is not null || m_pin is not null))
+            throw RuntimeErrorPanic.ManagedDerivedStructRead(typeof(T));
+
         // The dereference census (NativeBoxDereferenceCensus): a T that holds a reference and was not refused above, and
         // a box derived from storage that cannot be pinned. Counted after both refusals, so every count is a read or a
         // write that happened. Null unless the census is on: one test of a static readonly field.
@@ -174,6 +192,11 @@ namespace go;
         !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>)) && // ONE TEST, THREE SPELLINGS: ж<T>.s_isArrayShaped and the last line of ж<T>.PublishesArrayBacking (ж.cs) are this one; change the three together
         default(T) is IArray and not ISlice && RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
+    // Is T a Go struct value that holds a managed reference (the census's B2b)? Read by ValueAddress's managed-derived
+    // floor. Decided once per T.
+    private static readonly bool s_isReferenceBearingGoStruct =
+        typeof(T).IsValueType && RuntimeHelpers.IsReferenceOrContainsReferences<T>() && GoReflect.KindOf(typeof(T)) == GoReflect.Struct;
+
     private static readonly NativeBoxDereferenceCensus.Pointee? s_census = NativeBoxDereferenceCensus.Pointee.Of<T>();
 
     /// <inheritdoc/>
@@ -181,6 +204,27 @@ namespace go;
 
     /// <inheritdoc/>
     public override unsafe ref T ValueSlot => ref Unsafe.AsRef<T>(ValueAddress());
+
+    // B2's value decode (COORD ruling 2026-11-15; ж<T>.GoValue): a Go struct that holds a managed reference, read as a
+    // VALUE, is decoded out of the bytes at Go's own field offsets into a fresh T (NativeStructMarshal.DecodeValue), which
+    // is Go's answer for a copy whatever the memory's origin: Go storage of another type (sqlite's crypt_blowfish,
+    // *(*TBF_ctx)(unsafe.Pointer(&[1042]uint32{...}))) or C memory (COORD's Q1). Only arrays decode; a struct holding
+    // any other reference is refused by name, since memory holds no image of one. Every other T reads as Value does,
+    // floors included. The floors above refuse the whole-value REF, which a copy does not need: the layout floor's
+    // mismatch is exactly what the decode reads past, and B0' refuses taking bytes for references, which a decode
+    // never does.
+    private protected override unsafe T ReadGoValue()
+    {
+        if (!s_isReferenceBearingGoStruct)
+            return ValueSlot;
+
+        void* address = DereferenceableAddress();
+
+        if (address == null)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        return (T)NativeStructMarshal.DecodeValue(typeof(T), (byte*)address);
+    }
 
     /// <summary>
     /// The field <paramref name="fieldRefFunc"/> names, at its GO offset in the native memory this box aliases --
