@@ -367,8 +367,8 @@ disclosure count is half of what makes a row honest.
 | `behavioral-stderr` | 60 min | 90 min | Converter `go build`, a transpile and compile of a handful of named projects, and one direct run of each. Provisional. |
 | `sweep-shard` | 210 min | 315 min | One convert/build/run/compare cycle per matched row; the sweep's own per-package floors are the reason this is the largest. |
 | `golib-tests` | 90 min | 135 min | One Release build of `GolibTests` and its core closure for the GOOS, from cold, then `dotnet test` (the whole suite, or a `--filter`). Provisional. |
-| `gen-tests` | 30 min | 45 min | One Release build of `GenTests` (go2cs-gen and golib), from cold, then `dotnet test` (the whole suite, or a `--filter`); 526 tests in about 2 min on a laptop. Provisional. |
-| `solution-build` | 60 min | 90 min | One cold build of `src/go2cs.slnx`: golib, go2cs-gen, the test projects, every behavioral and performance member and their core closure; 622 s on a laptop. Provisional. |
+| `gen-tests` | 30 min | 45 min | One Release build of `GenTests` (go2cs-gen and golib), from cold, then `dotnet test` (the whole suite, or a `--filter`)<!-- 526 tests in about 2 min on a laptop (machine not recorded) -->. Provisional. |
+| `solution-build` | 60 min | 90 min | One cold build of `src/go2cs.slnx`: golib, go2cs-gen, the test projects, every behavioral and performance member and their core closure<!-- 622 s on a laptop (machine not recorded) -->. Provisional. |
 | `stack-probe` | 90 min | 135 min | One row's `-tests` convert and build, the filtered compare, and up to the 900 s per-test deadline while the probe waits. Provisional. |
 | `converter-cgo` | 15 min | 23 min | The converter's `go test` filtered to its cgo tests: one cold module download and build, plus one converter `go build` for the driver-level arms. Provisional. |
 | `cgo-e2e` | 45 min | 68 min | cgo's end-to-end gate: a cgo program is built by Go and converted by go2cs with the leg's C compiler, the converted project is built with the .NET SDK, and each check is run both ways and compared. Provisional. |

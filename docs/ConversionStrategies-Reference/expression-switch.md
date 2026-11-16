@@ -221,7 +221,7 @@ terminating and keeps its own final return. Guarded by `TerminatingSwitchDefault
 leading default, a middle default and a non-terminating control, output-compared vs Go.
 
 ## A clause's `else` may only be dropped when EVERY preceding clause terminates
-Since seat #28 this governs only a switch with `fallthrough`: the shape below has none, so it now
+This governs only a switch with `fallthrough`<!-- since seat #28 -->: the shape below has none, so it
 emits as a pattern switch, as the excerpt from `src/core` below shows. In the if-chain lowering the converter omits the `else` before a clause when the preceding clause
 ended in a `return` — the chain is then unnecessary, since control cannot reach the later clause
 anyway. Dropping the `else` is sound only when **every** preceding clause terminates; a *shallow* "the

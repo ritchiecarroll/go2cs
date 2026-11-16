@@ -535,8 +535,8 @@ alias TARGET has, so the *same* three token-match arms above decide both, with n
 keep in sync. Only the record's generic argument list is scanned (first `<` to last `>`, so a nested
 `ж<…>` argument is covered whole) — an attribute's `(Pointer = true)` / `(ValueType = "…")` payload is
 metadata, and the `ValueType` is a string, not a reference. Additive as before, and the manifest's
-dependency list stays import-derived. This is what lets **os/signal** validate (its `TestCtrlBreak`,
-1/1 vs `go test`). Guarded by `TestAliasReferenceImportsMatchesConversionRecordPackages`,
+dependency list stays import-derived. This is what lets **os/signal** validate (its `TestCtrlBreak`
+agrees with `go test`). Guarded by `TestAliasReferenceImportsMatchesConversionRecordPackages`,
 `TestAliasReferenceImportsMatchesConversionRecordQualifierShapes` and
 `TestAliasReferenceImportsIgnoresConversionRecordAttributePayload`.
 
@@ -1114,7 +1114,7 @@ serve(NilSafeDelegateConversion<Handler, Func<nint, @string>>(g));          // g
 
 (Guarded by the `NilFuncNamedDelegateArg` behavioral test — the nil and non-nil `IfElse` results, a
 method value, a literal, nil locals of the unnamed and the named type, a nil value passed to a named
-type with methods, the structural mirror and the composite-literal fields, values vs Go; TS C47.)
+type with methods, the structural mirror and the composite-literal fields, values vs Go.)<!-- TS C47 -->
 
 ## Func-typed fields with a cross-package (slash-path) type render structurally
 A func-typed struct field whose signature names a type from a **multi-segment** import path —
@@ -1534,7 +1534,7 @@ test reading only the field cannot tell a correct render from a mangled one — 
 writes the fully-qualified string verbatim into both `main.cs` and the `[GoTypeAlias]` record.
 
 Neuter-proven three ways: both reverted reproduces the reported `fatal error: stack overflow`; the
-bound alone reverted fails the child test in 0.02 s; the rewrite alone reverted (bound in place)
+bound alone reverted fails the child test at once;<!-- in 0.02 s --> the rewrite alone reverted (bound in place)
 makes the converter print the warning, exit 0, and still write every `.cs` — the crash-proofing
 demonstrated independently of the rendering — while the integration test fails on the emitted
 `global using TopoChan = go.<_chan example.com.mongo_driver.…;`.

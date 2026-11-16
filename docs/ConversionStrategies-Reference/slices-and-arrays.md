@@ -79,7 +79,7 @@ A literal whose element holds a function call keeps the builtin in every positio
 call inside an element on its own Go line in an optimized build. A span target, which is what `SliceBuilder.Create`
 takes, lowers to an inline stack buffer whose element stores the optimizing JIT maps to no IL offset of their own, so
 `runtime.Caller` inside a struct element answered its literal's spec line, and with tiering off even the previous
-statement's (seat #54).
+statement's.<!-- seat #54 -->
 
 An element that begins with a call to a Go function named `with` is written `@with(…)`: from C# 15, a
 collection-expression element spelled `with(…)` is the collection's construction arguments, not a call, so
@@ -97,7 +97,7 @@ A keyed literal keeps its sparse form, a fixed array its `.array()` projection, 
 type's own literal its constructor (below). (Guarded by the converter test
 `TestSliceLiteralsAtTargetedPositionsAreCollectionExpressions`, by the behavioral test `CollectionExpressionSlices`, by golib's
 `SliceLiteralBindingTests` and, for the lines, `CallerLineSliceLiteralsReleaseTests` over the behavioral project
-`CallerLineSliceLiterals`; 1.26.10.2 parity seats #30 and #54.)
+`CallerLineSliceLiterals`.)<!-- 1.26.10.2 parity seats #30 and #54 -->
 
 A **named** slice/array type (`type d [3]rune`, `type s []int`) lowers to a struct wrapping `array<T>`/`slice<T>`; its composite literal cannot use C# collection-initializer braces (the lowered struct has no `Add`), so it is constructed through the underlying-collection constructor: `d{0, 32, 0}` → `new d(new rune[]{0, 32, 0}.array())`.
 
@@ -1158,8 +1158,8 @@ green while leaving the storage-free path unsound for the next consumer.)
 
 **Named slice/map/channel wrappers (defined types).** The distinction extends to DEFINED types
 (`type S []int`, generated as go2cs-gen `InheritedTypeTemplate` wrappers). The comparison Go permits on
-a named slice/map/channel is `x == nil`; the converter renders it as `s == nil` (before parity seat #24,
-`s == default!` in value context), and — verified against the emitted C# — **both spellings bind the
+a named slice/map/channel is `x == nil`; the converter renders it as `s == nil` (formerly
+`s == default!` in value context),<!-- before parity seat #24 --> and — verified against the emitted C# — **both spellings bind the
 wrapper's `operator ==(S, NilType)` overload**, not the same-type `operator ==(S, S)` (reverting the
 latter has no observable effect; reverting the former flips the result). For a **slice** wrapper that
 overload delegates to `slice<T>`'s own `== NilType` — REPRESENTATION nilness (null backing array) — via

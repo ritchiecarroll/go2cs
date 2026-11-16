@@ -514,8 +514,8 @@ receiver the capture analysis routed to box-ref storage must never take the `ʗp
 neither `bodyCallsCaptureModeMethodOn` nor `isLambdaBoxRefVar` joins the receiver gate.
 
 The receiver reuses `paramAddressTakenNeedsBox`, so an inherently-heap receiver still boxes only for
-the bare `&r`. **Measured, that restriction rejected no corpus site at the landing** — unlike the parameter
-arm's — and the reason is worth recording: the parameter over-boxings came from the first
+the bare `&r`. **That restriction rejects no site in the converted standard library**, unlike the parameter
+arm's, and the reason is worth recording: the parameter over-boxings came from the first
 cut *also* recording `packageCaptureModeBoxIdents`, which forces `identHasHeapBox` to grant a box. The
 receiver arm never records it, so for a `&r[i]`-only slice receiver `identHasHeapBox`'s own gate
 refuses the box independently and the emission is byte-identical either way. The restriction is kept
@@ -523,14 +523,14 @@ because it keeps the analysis verdict and that gate in **agreement**: marking a 
 refuses leaves `identEscapesHeap` set with no box, and that map is read raw by the capture analysis and
 several emitters.
 
-Corpus footprint of the fix, from a two-seeded-root A/B (master converter vs fixed, both reconverting
-every project into their own temp root)<!-- 305 projects; 3 receiver sites across 2 files -->: the receiver sites
+<!-- Corpus footprint of the fix, from a two-seeded-root A/B (master converter vs fixed, both reconverting
+every project into their own temp root)(305 projects; 3 receiver sites across 2 files): the receiver sites
 `encoding/base64`'s
 `WithPadding` and `Strict` and `encoding/base32`'s `WithPadding`, each `func (enc Encoding) … *Encoding`
 returning `&enc`. All three are *correct-by-luck* under the old emission: `&enc` is the last operation,
 after every mutation, so the `Ꮡ(enc)` copy carried the mutated value out. They are now one storage
 identity rather than two, at the same single allocation. That there is no live victim is the point —
-this path was closed at its root rather than after a sixth package was found broken by it.
+this path was closed at its root rather than after a sixth package was found broken by it. -->
 
 **The receiver decision is MODE-STABLE, structurally** — `-stdlib` and `-tests` cannot disagree about
 it, and that is worth stating because the sibling category *can*. A package-level var's address may be
@@ -731,7 +731,7 @@ across a process's early life. Guarded by `GolibTests/FieldViewCacheTests.cs` (i
 by type, the chain hop, the fallback, the nil box, the negative arm, and concurrent first calls).
 <!-- The concurrent-first-calls arm caught a publish race before the cut was announced. -->
 
-Since parity seat #32 the emitted spelling is the field's address property, `Ꮡrecv.Ꮡfield.Method()` (`&x.f` is
+The emitted spelling is the field's address property,<!-- since parity seat #32 --> `Ꮡrecv.Ꮡfield.Method()` (`&x.f` is
 `Ꮡx.Ꮡf`; [the rule](pointers.md)), and the property hands `of()` the struct's ONE accessor token for the field,
 `T.Ꮡf‿`, a `static readonly FieldRefFunc<T, F>` on `T` in `T`'s own assembly. Before it, each `&x.f` site
 converted the accessor method group to its own delegate, so one field reached a box as several delegate objects and

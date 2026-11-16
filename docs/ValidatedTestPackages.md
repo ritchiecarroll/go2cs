@@ -1185,7 +1185,7 @@ The classes in full:
   class alive:
   - `crypto/tls`'s `TestBogoSuite`: BoringSSL's runner spawns the host once per case inside Go's
     10-minute test-binary wall. The interop passes, but the run is throughput-bound, not
-    startup-bound (2.2x over the wall on the ReadyToRun rung on a 6-core host, 2026-08-28); it
+    startup-bound<!-- 2.2x over the wall on the ReadyToRun rung on a 6-core host, 2026-08-28 -->; it
     retires when managed steady-state TLS throughput on the sweep host crosses the runner's deadline.
     <!-- Provenance, roster restructure 2026-09-30: the TestBogoSuite measurements moved into this
          comment, the key figure kept visible above; src/core/crypto/tls/go2cs_test_disclosures.json

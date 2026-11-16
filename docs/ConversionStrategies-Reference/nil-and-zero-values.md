@@ -209,7 +209,7 @@ the dereference guard):
   test reads the type, never the value, so an interface type argument still keeps a typed nil apart
   from the nil interface. Without it, a generic `OrElse(nil, x)` (`value != *new(T)`)
   returned the nil, generic `==` answered false, and a `map[*T]V` or `map[[1]*T]V` held two nil keys
-  (TS C49; the `NilPtrIdentity` behavioral test).
+  (the `NilPtrIdentity` behavioral test).<!-- TS C49 -->
 
 **Every consumer that asks "is this THE nil pointer" must ask the structural predicate.** The
 managed-slot `atomic.Pointer<T>` (`core/sync/atomic/type.cs`) canonicalizes the nil pointer to a null
