@@ -1,0 +1,6 @@
+arm 0 rc=134:  | Fatal error.
+arm 1 rc=134:  | Fatal error.
+arm 2 rc=134:  | Fatal error.
+arm 3 rc=0: promoted field, embedded field written out: prom | 
+arm 4 rc=0: slice element through a pointer variable: Elem 69 | 
+arm 5 rc=0: call's result through a pointer variable: call | 

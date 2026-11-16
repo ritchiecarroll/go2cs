@@ -481,6 +481,20 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt, label string) 
 			for li, expr := range cc.List {
 				needAreEqualClose := false
 
+				// A named struct tag and an unnamed struct value, or the reverse, compare as `==` does
+				// (namedUnnamedStructComparison): the unnamed one is cast to the named type.
+				tagOperand, labelCast := exprVarName, ""
+
+				if tag != nil && !usePattenMatch && !tagNeedsAreEqual {
+					if namedName, tagIsUnnamed, ok := v.namedUnnamedStructCase(tag, expr); ok {
+						if tagIsUnnamed {
+							tagOperand = "(" + namedName + ")" + exprVarName
+						} else {
+							labelCast = namedName
+						}
+					}
+				}
+
 				if li == 0 {
 					if tag != nil {
 						if usePattenMatch {
@@ -490,7 +504,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt, label string) 
 							cond.WriteString(fmt.Sprintf("AreEqual(%s, ", exprVarName))
 							needAreEqualClose = true
 						} else {
-							cond.WriteString(exprVarName)
+							cond.WriteString(tagOperand)
 							cond.WriteString(" == ")
 						}
 					}
@@ -505,7 +519,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt, label string) 
 								cond.WriteString(fmt.Sprintf("AreEqual(%s, ", exprVarName))
 								needAreEqualClose = true
 							} else {
-								cond.WriteString(exprVarName)
+								cond.WriteString(tagOperand)
 								cond.WriteString(" == ")
 							}
 						}
@@ -522,6 +536,10 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt, label string) 
 				}
 
 				labelExpr := v.convExpr(expr, []ExprContext{context})
+
+				if labelCast != "" {
+					labelExpr = v.structCastOf(labelCast, expr, labelExpr)
+				}
 
 				// A CONSTANT label under a named-wrapper tag renders from its underlying-typed
 				// parts (a bare `0x01`), so the `==` is ambiguous between the wrapper's operator
