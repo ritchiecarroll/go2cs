@@ -325,7 +325,7 @@ public class ImplementGenerator : ISourceGenerator
                     .SelectMany(iface => iface.GetMembers()
                         .OfType<IMethodSymbol>()
                         .Where(method => method.MethodKind == MethodKind.Ordinary)
-                        .Where(method => !method.IsStatic)
+                        .Where(method => !method.IsStatic && !IsTwinMember(method))
                         .Select(method => (name: iface.ToDisplayString(), method)))
                     .Select(info => new MethodInfo
                     {
@@ -457,7 +457,7 @@ public class ImplementGenerator : ISourceGenerator
                 .SelectMany(iface => iface.GetMembers()
                     .OfType<IMethodSymbol>()
                     .Where(method => method.MethodKind == MethodKind.Ordinary)
-                    .Where(method => !method.IsStatic)
+                    .Where(method => !method.IsStatic && !IsTwinMember(method))
                     .Select(method => (name: iface.ToDisplayString(), method)))
                 .Select(info => new MethodInfo
                 {
@@ -1894,7 +1894,7 @@ public class ImplementGenerator : ISourceGenerator
 
         foreach ((string declaringRef, INamedTypeSymbol methodSet) in methodSets)
         {
-            foreach (IMethodSymbol method in methodSet.GetMembers().OfType<IMethodSymbol>().Where(member => member.MethodKind == MethodKind.Ordinary && !member.IsStatic))
+            foreach (IMethodSymbol method in methodSet.GetMembers().OfType<IMethodSymbol>().Where(member => member.MethodKind == MethodKind.Ordinary && !member.IsStatic && !IsTwinMember(member)))
             {
                 string methodName = EscapeCsKeyword(method.Name);
                 string returnType = RenderWithProxy(method.ReturnType, selfParameter, proxyName);
@@ -1998,6 +1998,12 @@ public class ImplementGenerator : ISourceGenerator
     // The method set a constraint proxy forwards, each method paired with the interface that DECLARES it closed over
     // the proxy: the constraint's own members first, in declaration order, then every embedded interface's, ordered
     // by its rendered reference (see EmitConstraintProxy, whose order this repeats).
+    // M:N PROTOTYPE, stage (c) (2026-11-15): a hidden twin member a package built with interface twins (shape `default`)
+    // adds beside a marked member (`Readꞏtwin`). It has a default body, the sync fallback, so an adapter never forwards
+    // it: the implementer's own twin may not exist (refused, a by-ref receiver), and `m_box.Readꞏtwin(p)` then binds
+    // nothing (CS1929). The twin generator adds a twin forwarder where the implementer has one (its forwarders pass).
+    private static bool IsTwinMember(IMethodSymbol method) => method.Name.EndsWith(TwinGenerator.Suffix, StringComparison.Ordinal);
+
     private static List<(string DeclaringRef, IMethodSymbol Method)> ConstraintMethodSet(INamedTypeSymbol interfaceDef, string interfaceRef, string proxyRef)
     {
         ITypeParameterSymbol selfParameter = interfaceDef.TypeParameters[0];
@@ -2009,7 +2015,7 @@ public class ImplementGenerator : ISourceGenerator
 
         return methodSets
             .SelectMany(entry => entry.Interface.GetMembers().OfType<IMethodSymbol>()
-                .Where(member => member.MethodKind == MethodKind.Ordinary && !member.IsStatic)
+                .Where(member => member.MethodKind == MethodKind.Ordinary && !member.IsStatic && !IsTwinMember(member))
                 .Select(method => (entry.DeclaringRef, method)))
             .ToList();
     }
@@ -2499,7 +2505,7 @@ public class ImplementGenerator : ISourceGenerator
         IEnumerable<IMethodSymbol> members = candidate.GetAllBaseInterfaces(compilation)
             .Concat([candidate])
             .SelectMany(iface => iface.GetMembers().OfType<IMethodSymbol>())
-            .Where(method => method.MethodKind == MethodKind.Ordinary && !method.IsStatic);
+            .Where(method => method.MethodKind == MethodKind.Ordinary && !method.IsStatic && !IsTwinMember(method));
 
         foreach (IMethodSymbol member in members)
         {
