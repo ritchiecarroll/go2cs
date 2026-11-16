@@ -2203,10 +2203,32 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// (GO2CS2006, sliceWideningWriteRefusals.go), and the trigger here is the one that gate
 			// examines. convertToInterfaceType supplies the adapter reference AND the
 			// GoImplement recording, exactly as at scalar *T→iface call sites.
+			//
+			// Where the callee reaches N outside its []N parameters too, the call renders N as
+			// something else, and the slice must agree with it (sliceWideningRoute; TS readiness
+			// class B, tsc's `GetErrorBaseline[T Diagnostic](…, diagnostics []T,
+			// compareDiagnostics func(a, b T) int, …)`): as the non-self proxy, the elements
+			// project to the proxy (`widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new
+			// itemжNamedᴾ(elemᴛ0))`); as the box, where the clause is elided, the caller's slice
+			// binds as it is and nothing is copied.
 			if paramHasArg && (replacementArgs == nil || len(replacementArgs[i]) == 0) {
 				if tp, ptrElem := v.elementWiseSliceWidening(callExpr, i); tp != nil {
 					elemVar := fmt.Sprintf("elem%s%d", TempVarMarker, i)
-					wrapped := v.convertToInterfaceType(tp.Constraint(), ptrElem, elemVar)
+					var wrapped, target string
+
+					switch v.sliceWideningRoute(callExpr, tp) {
+					case wideningToProxy:
+						funIdent := getCallFunIdent(callExpr.Fun)
+						instance := v.info.Instances[funIdent]
+
+						if proxyName, ok := v.nonSelfConstraintProxyFor(funIdent, v.signatureTypeParams(funIdent), instance.TypeArgs, tp.Index()); ok {
+							target = proxyName
+							wrapped = fmt.Sprintf("new %s(%s)", proxyName, elemVar)
+						}
+					case wideningToConstraint:
+						target = v.getCSharpTypeName(tp.Constraint())
+						wrapped = v.convertToInterfaceType(tp.Constraint(), ptrElem, elemVar)
+					}
 
 					if strings.HasPrefix(wrapped, "new ") {
 						if replacementArgs == nil {
@@ -2214,7 +2236,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						}
 
 						replacementArgs[i] = fmt.Sprintf("widen<%s, %s>(%s, %s => %s)",
-							v.getCSharpTypeName(ptrElem), v.getCSharpTypeName(tp.Constraint()), DynamicCastArgMarker, elemVar, wrapped)
+							v.getCSharpTypeName(ptrElem), target, DynamicCastArgMarker, elemVar, wrapped)
 					}
 				}
 			}

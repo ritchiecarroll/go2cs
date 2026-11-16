@@ -1837,6 +1837,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNonSelfConstraintPointerArg() => CheckTarget("NonSelfConstraintPointerArg");
 
     [TestMethod]
+    public void CheckNonSelfConstraintSliceArg() => CheckTarget("NonSelfConstraintSliceArg");
+
+    [TestMethod]
     public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
 
     [TestMethod]

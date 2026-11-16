@@ -15,10 +15,14 @@ import (
 	"testing"
 )
 
-// One site per refusal of nonSelfConstraintProxyRefusals.go, each on its own marked line, and the two shapes that
-// must NOT be refused: tsc's own (a direct position, a method called through the constraint, the parameter returned),
-// and a zero value that is only returned.
+// One site per refusal of nonSelfConstraintProxyRefusals.go, each on its own marked line, and the shapes that must
+// NOT be refused: tsc's own (a direct position, a method called through the constraint, the parameter returned), a
+// zero value that is only returned, a []O PARAMETER beside the direct position (the element-wise widening's, governed
+// by GO2CS2006), and class B: tsc's GetErrorBaseline shape, []O beside a func(O, O) parameter, handing O on under
+// the SAME constraint. Its flat twin hands O to slices.Clone under `any`, and ruling 3c refuses it.
 const nonSelfRefusalFixture = `package nsr
+
+import "slices"
 
 type parser interface{ Parse(string) bool }
 
@@ -46,7 +50,15 @@ func unionSite() *impl { return viaUnion(&impl{}) } // REFUSED union
 
 func many[O parser](p O, all []O) O { p.Parse("m"); return p }
 
-func aliasSite() *impl { return many(&impl{}, nil) } // REFUSED aliasing
+func manySite() *impl { return many(&impl{}, nil) } // ALLOWED
+
+func keyed[O parser](p O, all map[string]O) O { p.Parse("k"); return p }
+
+func aliasSite() *impl { return keyed(&impl{}, nil) } // REFUSED aliasing
+
+func listed[O parser](p O) []O { p.Parse("l"); return []O{p} }
+
+func aliasResultSite() []*impl { return listed(&impl{}) } // REFUSED aliasing-result
 
 func sib[O parser, S ~[]O](p O, s S) O { p.Parse("s"); return p }
 
@@ -96,6 +108,26 @@ func inner[Q other](q Q) Q { q.Name(); return q }
 func outer[O both](p O) O { p.Parse("o"); return inner(p) }
 
 func onwardSite() *impl { return outer(&impl{}) } // REFUSED onward
+
+func byN(a, b *impl) int { return a.n - b.n }
+
+func parsedAll[O parser](ps []O, cmp func(a, b O) int) int { return parsedSorted(ps, cmp) }
+
+func parsedSorted[O parser](ps []O, cmp func(a, b O) int) int {
+	qs := slices.Clone(ps)
+	slices.SortFunc(qs, cmp)
+	n := 0
+	for _, q := range qs {
+		if q.Parse("b") {
+			n++
+		}
+	}
+	return n
+}
+
+func classBSite() int { return parsedAll([]*impl{{}, {}}, byN) } // ALLOWED
+
+func flatSite() int { return parsedSorted([]*impl{{}, {}}, byN) } // REFUSED onward-any
 `
 
 func loadNonSelfRefusal(t *testing.T) *nonSelfProxyRefusal {
@@ -150,7 +182,7 @@ func TestNonSelfProxyRefusalsFireBySite(t *testing.T) {
 
 	var want []int
 
-	for _, marker := range []string{"REFUSED named", "REFUSED union", "REFUSED aliasing", "REFUSED sibling", "REFUSED zero-call", "REFUSED zero-any", "REFUSED onward"} {
+	for _, marker := range []string{"REFUSED named", "REFUSED union", "REFUSED aliasing", "REFUSED aliasing-result", "REFUSED sibling", "REFUSED zero-call", "REFUSED zero-any", "REFUSED onward", "REFUSED onward-any"} {
 		want = append(want, nonSelfFixtureLine(t, marker))
 	}
 
@@ -187,11 +219,13 @@ func TestNonSelfProxyRefusalsNameTheirReason(t *testing.T) {
 	for marker, reason := range map[string]string{
 		"REFUSED named":     "generic NAMED type",
 		"REFUSED union":     "type-term union with methods",
-		"REFUSED aliasing":  "the parameter of type []O",
+		"REFUSED aliasing":  "the parameter of type map[string]O",
+		"REFUSED aliasing-result": "the result of type []O",
 		"REFUSED sibling":   "sibling type parameter S",
 		"REFUSED zero-call": "the zero value zero has the method Parse called on it",
 		"REFUSED zero-any":  "the zero value zero is assigned to an interface",
 		"REFUSED onward":    "O is passed on to inner under the different constraint",
+		"REFUSED onward-any": "O is passed on to Clone under the different constraint any",
 	} {
 		if text := byLine[nonSelfFixtureLine(t, marker)]; !strings.Contains(text, reason) {
 			t.Errorf("%s: the refusal does not name %q:\n%s", marker, reason, text)

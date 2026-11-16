@@ -87,6 +87,9 @@ func TestSliceWideningReadOnlyCalleeStillConverts(t *testing.T) {
 	}
 }
 
+// A callee that reaches N beside its []N parameter (a direct N, or a []N or *N result) calls a method on N, so its
+// clause is kept and the call still copies the slice (class B: with the clause elided, N binds the box and nothing is
+// copied; boxWrite is that row).
 // The prototype's 17 shapes (DESIGN-slice-widening-write-refusal.md, section 3), then one shape for each rule of that
 // section the 17 leave uncovered. Every call site is on its own line, marked `shape:<name>`; copyIn's two arguments
 // are two sites, one per parameter.
@@ -125,17 +128,17 @@ func first[N Named](ns []N) string {
 
 func viaHelperRead[N Named](ns []N)  { walk(ns) }
 func viaHelperWrite[N Named](ns []N) { reverse(ns) }
-func appends[N Named](ns []N, x N)   { ns = append(ns, x); _ = ns }
+func appends[N Named](ns []N, x N)   { _ = x.Name(); ns = append(ns, x); _ = ns }
 func copyIn[N Named](ns, src []N)    { copy(ns, src) }
 func copyOut[N Named](ns []N)        { dst := make([]N, len(ns)); copy(dst, ns) }
 func slicesReverse[N Named](ns []N)  { slices.Reverse(ns) }
 func sortSlice[N Named](ns []N) {
 	sort.Slice(ns, func(i, j int) bool { return ns[i].Name() < ns[j].Name() })
 }
-func closureWrite[N Named](ns []N, x N) { f := func() { ns[0] = x }; f() }
-func aliasWrite[N Named](ns []N, x N)   { y := ns; y[0] = x }
-func returns[N Named](ns []N) []N       { return ns }
-func addr[N Named](ns []N) *N           { return &ns[0] }
+func closureWrite[N Named](ns []N, x N) { _ = x.Name(); f := func() { ns[0] = x }; f() }
+func aliasWrite[N Named](ns []N, x N)   { _ = x.Name(); y := ns; y[0] = x }
+func returns[N Named](ns []N) []N       { _ = ns[0].Name(); return ns }
+func addr[N Named](ns []N) *N           { _ = ns[0].Name(); return &ns[0] }
 func recursive[N Named](ns []N, d int) {
 	if d > 0 {
 		recursive(ns, d-1)
@@ -148,9 +151,9 @@ func rangeSub[N Named](ns []N) {
 }
 
 func capNil[N Named](ns []N) bool    { return cap(ns) > 0 && nil != ns }
-func zeroView[N Named](ns []N) []N   { return append(ns[:0:0], ns...) }
-func spread[N Named](ns []N) []N     { var out []N; return append(out, ns...) }
-func cloned[N Named](ns []N) []N     { return slices.Clone(ns) }
+func zeroView[N Named](ns []N) []N   { _ = ns[0].Name(); return append(ns[:0:0], ns...) }
+func spread[N Named](ns []N) []N     { _ = ns[0].Name(); var out []N; return append(out, ns...) }
+func cloned[N Named](ns []N) []N     { _ = ns[0].Name(); return slices.Clone(ns) }
 func lenOfReslice[N Named](ns []N) int { return len(ns[1:]) }
 func selfReslice[N Named](ns []N) {
 	for len(ns) > 0 {
@@ -158,12 +161,23 @@ func selfReslice[N Named](ns []N) {
 		ns = ns[1:]
 	}
 }
-func rebind[N Named](ns []N, x N) int { ns = []N{x}; return len(ns) }
+func rebind[N Named](ns []N, x N) int { _ = x.Name(); ns = []N{x}; return len(ns) }
 func clears[N Named](ns []N)      { clear(ns) }
 func printed[N Named](ns []N)     { fmt.Println(ns) }
 func funcValue[N Named](ns []N)   { g := walk[N]; g(ns) }
 func sent[N Named](ns []N)        { ch := make(chan []N, 1); ch <- ns }
-func keptReslice[N Named](ns []N) []N { return ns[1:] }
+func keptReslice[N Named](ns []N) []N { _ = ns[0].Name(); return ns[1:] }
+
+// Class B: N is reached beside the []N parameter. sortedBy keeps its clause, so N takes the non-self proxy and the
+// slice projects to it, a copy the gate examines. boxWrite elides its clause, so N binds the box and the caller's
+// slice is passed as it is, with nothing to refuse.
+func sortedBy[N Named](ns []N, less func(a, b N) bool) {
+	if less(ns[1], ns[0]) {
+		ns[0], ns[1] = ns[1], ns[0]
+	}
+	_ = ns[0].Name()
+}
+func boxWrite[N Named](ns []N, x N) { ns[0] = x }
 
 func sites(all, other []*item, one *item) {
 	walk(all) // shape:walk
@@ -194,6 +208,8 @@ func sites(all, other []*item, one *item) {
 	funcValue(all) // shape:funcValue
 	sent(all) // shape:sent
 	_ = keptReslice(all) // shape:keptReslice
+	sortedBy(all, func(a, b *item) bool { return a.n < b.n }) // shape:sortedBy
+	boxWrite(all, one) // shape:boxWrite
 }
 `
 
@@ -229,6 +245,13 @@ var sliceWideningShapes = []struct{ shape, arg, write string }{
 	{"funcValue", "all", "it is passed to a call that is not a declared function at fx.go:"},
 	{"sent", "all", "it is used where a read is not proven at fx.go:"},
 	{"keptReslice", "all", "it is resliced and the reslice kept at fx.go:"},
+	{"sortedBy", "all", "an element is assigned at fx.go:"},
+}
+
+// sliceWideningUnexamined is each site the gate must NOT examine: the call copies nothing there (class B's elided
+// clause, where N binds the box and the caller's slice is passed as it is).
+var sliceWideningUnexamined = []struct{ shape, arg string }{
+	{"boxWrite", "all"},
 }
 
 // TestSliceWideningVerdictPerShape: every shape's site is examined, each verdict is the expected one, and a refused
@@ -283,6 +306,14 @@ func TestSliceWideningVerdictPerShape(t *testing.T) {
 			t.Errorf("shape %s (%s): read-only, want refused naming %q", row.shape, row.arg, row.write)
 		case row.write != "" && !strings.Contains(text, row.write):
 			t.Errorf("shape %s (%s): the refusal does not name %q:\n%s", row.shape, row.arg, row.write, text)
+		}
+	}
+
+	for _, row := range sliceWideningUnexamined {
+		if line, ok := lines[row.shape]; !ok {
+			t.Errorf("shape %s: no fixture line is marked shape:%s", row.shape, row.shape)
+		} else if text, examined := sites[siteKey{line, row.arg}]; examined {
+			t.Errorf("shape %s (%s): examined, but the call passes the caller's slice as it is: %q", row.shape, row.arg, text)
 		}
 	}
 }
