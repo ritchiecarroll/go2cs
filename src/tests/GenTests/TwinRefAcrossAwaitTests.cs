@@ -52,6 +52,8 @@ public class TwinRefAcrossAwaitTests
             // A ref-returning field read (the field-access generator's `GoFieldAccess.get_F(ж<T>)` shape).
             internal static ref nint xOf(ж<T> p) => ref p.DerefOrNull().x;
 
+            internal static readonly object gate = new();
+
         """;
 
     private const string Footer = "}\n";
@@ -137,6 +139,22 @@ public class TwinRefAcrossAwaitTests
 
         """;
 
+    // Stage (c): an await inside a `lock` (runtime's gcCycle): CS1996. Refused by name; its caller keeps its twin.
+    private const string Locked = """
+            public static void locked()
+            {
+                lock (gate)
+                    parksN();
+            }
+
+            public static void callsLocked()
+            {
+                ᐸꟷ(ch);
+                locked();
+            }
+
+        """;
+
     // S3 (C3): a can-park literal with an EXPLICIT return type, created in a twin body, so it is paired.
     private const string Typed = """
             public static nint typed()
@@ -217,6 +235,17 @@ public class TwinRefAcrossAwaitTests
 
     [TestMethod]
     public void AnAwaitedValueStoredByACompoundAssignmentThroughARefSpillsFirst() => AssertTwinCompiles("compound", Compound);
+
+    [TestMethod]
+    public void AnAwaitInsideALockRefusesTheTwinByName()
+    {
+        (string twins, Diagnostic[] errors) = Run(Locked);
+
+        Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
+        Assert.IsFalse(twins.Contains("lockedꞏtwin(", StringComparison.Ordinal), "locked is refused a twin");
+        StringAssert.Contains(twins, "|locked|await-in-lock", "the report's refusal row names it");
+        StringAssert.Contains(twins, "callsLockedꞏtwin(", "its caller keeps its twin and calls it plain");
+    }
 
     [TestMethod]
     public void AnUnrederivableRefLiveAcrossAnAwaitRefusesTheTwinByName()

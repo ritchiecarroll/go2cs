@@ -174,6 +174,8 @@ public sealed partial class TwinGenerator : ISourceGenerator
             {
                 if (candidate.Twinned && UnrederivableLive(candidate))
                     candidate.Refusal = "ref-unrederivable";
+                else if (candidate.Twinned && AwaitsInLock(candidate))
+                    candidate.Refusal = "await-in-lock";
             }
 
             foreach (Candidate candidate in m_ordered)
@@ -197,6 +199,14 @@ public sealed partial class TwinGenerator : ISourceGenerator
             m_analysisMs = m_watch.ElapsedMilliseconds - m_siblingMs;
             Emit();
         }
+
+        // Stage (c) (2026-11-15): C# cannot await inside a `lock` (CS1996), and a Monitor is owned by a thread, so a twin
+        // that resumed elsewhere could not release it. A hand-owned function that would await inside one (runtime's
+        // gcCycle) is refused its twin by name; its callers call it plain, holding the carrier, as the lock always did.
+        private bool AwaitsInLock(Candidate candidate) =>
+            candidate.Syntax.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(node =>
+                Sites.TryGetValue(node, out Site? site) && site.Active && (ShouldAwait(site) || site.Delegate && CallerRuleTwins(site)) &&
+                node.Ancestors().TakeWhile(ancestor => ancestor != candidate.Syntax).OfType<LockStatementSyntax>().Any());
 
         internal int GoPlain;
 
