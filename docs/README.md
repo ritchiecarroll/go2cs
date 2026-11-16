@@ -6,7 +6,8 @@
 
 Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) · [Converted Go module NuGet packages](https://www.nuget.org/packages?q=nugetgo)
 
-Go module to NuGet package registry: [nugetgo.net](https://nugetgo.net). Used during `go2cs -recurse=nuget` so an already converted dependency is restored as a package instead of converted again ([how](ConvertingAModule.md#mapping-modules-to-nuget-packages)).
+Go module to NuGet package registry: [nugetgo.net](https://nugetgo.net)
+> Used during `go2cs -recurse=nuget` so an already converted dependency is restored as a package instead of converted again ([how](ConvertingAModule.md#mapping-modules-to-nuget-packages)).
 
 ---
 
@@ -89,7 +90,7 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 * Go and C# side by side: [Tour of go2cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/tour/README.md)
 * Real converted code: [the Go standard library](https://github.com/ritchiecarroll/go2cs/tree/master/src/core)
 * How Go constructs map to C#: [Conversion Strategies](ConversionStrategies.md)
-* What the converter does: [Features](Features.md) &rarr; current [Go feature support](GoFeatureSupport.md)
+* What the converter does: [Features](Features.md) &rarr; [Current Go feature support](GoFeatureSupport.md)
 * Call converted Go from C#: [Consuming converted Go](ConsumingGoFromCSharp.md)
 * What stays stable for C# code: [The public surface](PublicSurface.md)
 * Passing Go's own tests: [Validated Test Packages](ValidatedTestPackages.md) / [Validated Modules](ValidatedModules.md)
