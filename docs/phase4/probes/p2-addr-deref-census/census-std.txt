@@ -1,0 +1,16 @@
+bare-conv	crypto/internal/boring/sha.go:105
+bare-conv	crypto/internal/boring/sha.go:105
+bare-conv	crypto/internal/boring/sha.go:143
+bare-conv	crypto/internal/boring/sha.go:226
+bare-conv	crypto/internal/boring/sha.go:264
+bare-conv	crypto/internal/boring/sha.go:407
+bare-conv	crypto/internal/boring/sha.go:445
+bare-conv	crypto/internal/boring/sha.go:77
+bare-conv	crypto/internal/boring/sha.go:77
+bare-conv	crypto/internal/boring/sha.go:84
+bare-conv	crypto/internal/boring/sha.go:84
+bare-conv	crypto/internal/boring/sha.go:91
+bare-conv	crypto/internal/boring/sha.go:91
+bare-conv	crypto/internal/boring/sha.go:98
+bare-conv	crypto/internal/boring/sha.go:98
+paren	runtime/malloc.go:899

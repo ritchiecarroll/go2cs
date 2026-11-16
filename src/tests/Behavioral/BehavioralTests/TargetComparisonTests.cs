@@ -28,6 +28,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAddCleanupClosesOverPtr() => CheckTarget("AddCleanupClosesOverPtr");
 
     [TestMethod]
+    public void CheckAddressOfFieldThroughConversion() => CheckTarget("AddressOfFieldThroughConversion");
+
+    [TestMethod]
+    public void CheckAddressOfFieldThroughConversionNative() => CheckTarget("AddressOfFieldThroughConversionNative");
+
+    [TestMethod]
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]

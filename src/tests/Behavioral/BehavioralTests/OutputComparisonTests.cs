@@ -29,6 +29,12 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAddCleanupClosesOverPtr() => CheckTarget("AddCleanupClosesOverPtr");
 
     [TestMethod]
+    public void CheckAddressOfFieldThroughConversion() => CheckTarget("AddressOfFieldThroughConversion");
+
+    [TestMethod]
+    public void CheckAddressOfFieldThroughConversionNative() => CheckTarget("AddressOfFieldThroughConversionNative");
+
+    [TestMethod]
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]

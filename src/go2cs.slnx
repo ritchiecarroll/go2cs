@@ -286,6 +286,7 @@
   </Folder>
   <Folder Name="/tests/behavioral/target-projects/">
     <Project Path="tests/Behavioral/AddCleanupClosesOverPtr/AddCleanupClosesOverPtr.csproj" />
+    <Project Path="tests/Behavioral/AddressOfFieldThroughConversion/AddressOfFieldThroughConversion.csproj" />
     <Project Path="tests/Behavioral/AddressOfParamWrite/AddressOfParamWrite.csproj" />
     <Project Path="tests/Behavioral/AliasImport/AliasImport.csproj" />
     <Project Path="tests/Behavioral/AliasImportLib/AliasImportLib.csproj" />

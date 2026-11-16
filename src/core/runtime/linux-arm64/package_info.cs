@@ -252,6 +252,7 @@ using static go.runtime_package;
 [assembly: GoFieldAccess(typeof(traceStringTable))]
 [assembly: GoFieldAccess(typeof(traceTypeTable))]
 [assembly: GoFieldAccess(typeof(typeCacheBucket))]
+[assembly: GoFieldAccess(typeof(ucontext))]
 [assembly: GoFieldAccess(typeof(uncommontype))]
 [assembly: GoFieldAccess(typeof(unwinder))]
 [assembly: GoFieldAccess(typeof(updateMaxProcsGState))]

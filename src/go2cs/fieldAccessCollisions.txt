@@ -24,6 +24,7 @@ IsNull
 IsOrderTokenAt
 IsPinnedAt
 NativeAddress
+nilcheck
 of
 OnHeaderStore
 OrTypedNil
