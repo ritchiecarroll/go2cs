@@ -621,6 +621,20 @@ follow-up): more than 0 bytes per element for V3 stops door B.**
 The control is the same loop over a Go `[]uint32` through `&s[0]` (V1), which is expected to allocate and
 shows the instrument can read a non-zero.
 
+**Amended 2026-11-16 (P5, COORD's ask of 08:38Z): the window is bounded, not zero.** A full-suite GolibTests
+Release run read 5,784 bytes once in the 100,000-iteration window (H's W8 re-gate at master 2c1ce10b25). That is
+far below one object per access (a box per access is at least 24 B x 200,000 = 4.8 MB), so it is a cost paid once,
+and the instrument counts every byte the thread allocates, including what a tier change costs when the JIT moves
+the loop inside the window. Measured on linux/amd64 at 2c1ce10b25: the loop's unoptimized body allocates 24 B per
+call, so with on-stack replacement held past the window (`DOTNET_TC_OnStackReplacement_InitialCounter=50000`)
+or off, the zero form read 24 and failed. CPU load (six busy processes) and three in-process allocating threads
+did not reproduce the red in 15 probe runs. The arm now measures 1,000,000 iterations (2,000,000 accesses) and
+asserts fewer than 65,536 bytes: eleven times the one-time cost seen, and below one 24-byte object per 700
+accesses, so a per-access cost (at least 48 MB) still fails it. The control now asserts at least 24 bytes per
+access. Readings: green 2 of 2 in each of four arms (plain, on-stack replacement late, off, tiering off), 3 of 3
+under CPU load; the negative control (the store through the boxing door `Element<E>(...).Value` on the native
+pointer) read 112,000,000 bytes and failed.
+
 **For whoever cuts N3** (G's caveat): a `ref` return cannot live across an `await` (CS8178). `ElementRef`'s
 result is used inside one expression, and the spill the N3 twin introduces must never split that expression.
 If a site cannot be kept in one expression, it takes `Element(...).Value`.
