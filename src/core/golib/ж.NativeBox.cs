@@ -154,9 +154,33 @@ namespace go;
         if (s_isNamedArrayShaped && address != null)
             throw RuntimeErrorPanic.NamedArrayViewOfNativeMemory(typeof(T));
 
+        // THE REFERENCE FLOOR (2026-11-15; docs/phase4/DESIGN-cgo-phase3-marshaling.md section 18, the s6next root). T is
+        // a CLR REFERENCE type (a Go pointer ж<U>, a func, an interface, unsafe.Pointer), and Unsafe.AsRef reads a T at the
+        // address: it took Go's word for a managed reference. C's `entry.next`, a pointer to C memory, became a reference
+        // to an object that does not exist, and the next dereference faulted (cgo-e2e s6next on every hosted target). A
+        // write stored a managed reference where the collector cannot see it. Measured before the floor with the census
+        // (the seat's BOARD row): outside the census's own controls, the one population was unsafe.Pointer over a Go word.
+        //
+        // NOT a map, a channel, a string, a slice or an array value: golib's forms of those are value types that hold a
+        // reference, so this test does not reach them. They stay the census's B2a value kinds below.
+        //
+        // ONE EXEMPTION (COORD's ruling): unsafe.Pointer over MANAGED Go storage, a box that retains its source or carries
+        // a pin. `(*unsafe.Pointer)(p)` over a Go word is a shape the converted runtime emits (map.go's indirect key,
+        // atomic_pointer.go's atomicwb), and refusing it would refuse the runtime. Over C memory (no source, no pin) it
+        // is the cgo `void*` field, and it is refused like every other reference. The exempt read still stores and reads
+        // a reference in a word the collector does not scan: that hazard is named on the BOARD, and its cure, an
+        // unsafe.Pointer read and written as the word it is, is the section 18.2 design.
+        //
+        // AFTER the named-array floor and NOT for the number 0, for the reason given there: a nil pointer to a Go pointer
+        // answers what every nil pointer answers. BEFORE the census, so a refused read is never counted.
+        if (s_isReference && address != null && !(s_isUnsafePointer && (m_retainedSource is not null || m_pin is not null)))
+            throw RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), ManagedReferenceReason);
+
         // The dereference census (NativeBoxDereferenceCensus): a T that holds a reference and was not refused above, and
-        // a box derived from storage that cannot be pinned. Counted after both refusals, so every count is a read or a
-        // write that happened. Null unless the census is on: one test of a static readonly field.
+        // a box derived from storage that cannot be pinned. Counted after the refusals, so no refused read is counted.
+        // Every count at a non-zero address is a read or a write that happened; a nil box passes the floors above and is
+        // counted as an ATTEMPT, and the read then faults (COORD 2026-11-16: the census keeps counting it). Null unless
+        // the census is on: one test of a static readonly field.
         if (s_census is { } census)
             NativeBoxDereferenceCensus.Dereference(census, m_retainedSource, m_pin is not null);
 
@@ -173,6 +197,13 @@ namespace go;
     private static readonly bool s_isNamedArrayShaped =
         !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>)) && // ONE TEST, THREE SPELLINGS: ж<T>.s_isArrayShaped and the last line of ж<T>.PublishesArrayBacking (ж.cs) are this one; change the three together
         default(T) is IArray and not ISlice && RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+
+    // The reference floor's two facts about T, read by ValueAddress above. Decided once per T.
+    private static readonly bool s_isReference = !typeof(T).IsValueType;
+
+    private static readonly bool s_isUnsafePointer = s_isReference && GoReflect.KindOf(typeof(T)) == GoReflect.UnsafePointer;
+
+    private const string ManagedReferenceReason = "a managed reference where Go stores words";
 
     private static readonly NativeBoxDereferenceCensus.Pointee? s_census = NativeBoxDereferenceCensus.Pointee.Of<T>();
 
