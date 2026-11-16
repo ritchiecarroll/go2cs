@@ -91,6 +91,12 @@ func (v *Visitor) arrayPointerViewOfBase(base ast.Expr) (arrayPointerView, bool)
 
 	_, named := types.Unalias(pointer.Elem()).(*types.Named)
 
+	// The doors render from the index, the slice, the dereference or the range, so the conversion never reaches the
+	// call arm that lifts an anonymous struct written in a conversion's type (convCallExpr). An element that is one,
+	// `(*[13]struct{ n int32; a uintptr })(p)[i]`, is lifted here, under the name that arm gives it, before the
+	// element is named: a name with no lift behind it resolves to the raw Go struct text, which ends the conversion.
+	v.liftConversionTargetAnonStruct(conversion, "type")
+
 	view := arrayPointerView{
 		operand: conversion.Args[0],
 		elem:    convertToCSTypeName(v.getAliasQualifiedTypeName(array.Elem(), false)),

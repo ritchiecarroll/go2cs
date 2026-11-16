@@ -1,0 +1,27 @@
+target linux/arm64 tests=false; files 1669
+   slice-data-then-len/go-derived           1
+   slice-data-then-len/other                3
+   slice-len-then-data/other                7
+   slice-value-header/other                 3
+
+== slice-data-then-len/go-derived (1)
+   runtime/debuglog.go:361:3  slice.Data-store key=bb
+
+== slice-data-then-len/other (3)
+   runtime/debuglog.go:383:2  slice.Data-store key=bb
+   runtime/mheap.go:557:3  slice.Data-store key=sp
+   runtime/print.go:23:2  slice.Data-store key=rp
+
+== slice-len-then-data/other (7)
+   reflect/value.go:2373:3  slice.Data-store key=s
+   reflect/value.go:2376:3  slice.Data-store key=s
+   reflect/value.go:2425:3  slice.Data-store key=s
+   reflect/value.go:2428:3  slice.Data-store key=s
+   runtime/mranges.go:258:2  slice.Data-store key=ranges
+   runtime/mranges.go:385:4  slice.Data-store key=ranges
+   runtime/mranges.go:455:3  slice.Data-store key=ranges
+
+== slice-value-header/other (3)
+   reflect/value.go:2848:3  slice.Data-store key=ds
+   reflect/value.go:2855:3  slice.Data-store key=ss
+   reflect/value.go:2862:3  slice.Data-store key=ss

@@ -583,15 +583,7 @@ func resolveDynamicTypeMarkers(outputFileNames []string) {
 				return payload, false
 			}
 
-			replacement := lookupDynamicTypeName(signature)
-
-			if replacement == "" {
-				replacement = lookupProductionDynamicTypeName(signature)
-			}
-
-			if replacement == "" {
-				replacement = lookupConstraintLift(signature)
-			}
+			replacement := lookupAnyDynamicTypeName(signature)
 
 			if replacement == "" {
 				showWarning("Unresolved dynamic struct type: %s in \"%s\"(%d)", signature, fileName, line)
@@ -608,4 +600,71 @@ func resolveDynamicTypeMarkers(outputFileNames []string) {
 			// them all at once and warn about the signature only once.
 			return replacement, true
 		})
+}
+
+// lookupAnyDynamicTypeName names a structural signature's lift from the registries the marker resolver consults, in
+// its order: this package's lifts, the production package's (a -tests conversion), then inline-constraint lifts.
+// It answers "" when none holds the signature.
+func lookupAnyDynamicTypeName(signature string) string {
+	if name := lookupDynamicTypeName(signature); name != "" {
+		return name
+	}
+
+	if name := lookupProductionDynamicTypeName(signature); name != "" {
+		return name
+	}
+
+	return lookupConstraintLift(signature)
+}
+
+// resolvedDynamicTypeText answers text with each dynamic-type marker replaced by the lift the registries name for its
+// signature (lookupAnyDynamicTypeName). A marker no registry answers stays as written, and its signature (or, for an
+// undecodable payload, the payload itself) is returned in unresolved, for its caller to report.
+//
+// package_info.cs's GoTypeAlias records are written from values captured while files were visited, so a forward alias
+// chain to an anonymous struct (modernc.org/sqlite/lib's `Sqlite3_vtab_cursor = sqlite3_vtab_cursor =
+// Tsqlite3_vtab_cursor`, the first declared above the struct) recorded the marker resolveDynamicTypeMarkers later
+// rewrote in the .cs files only. Importers copy a record into a `global using`, where the marker does not parse
+// (sqlite-cs W7: 3,080 of lib's 15,499 records). A prefix with no suffix after it is not a marker and stays as text.
+func resolvedDynamicTypeText(text string) (result string, unresolved []string) {
+	var resolved strings.Builder
+
+	for {
+		start := strings.Index(text, dynamicTypeMarkerPrefix)
+
+		if start < 0 {
+			break
+		}
+
+		payloadStart := start + len(dynamicTypeMarkerPrefix)
+		length := strings.Index(text[payloadStart:], dynamicTypeMarkerSuffix)
+
+		if length < 0 {
+			break
+		}
+
+		markerEnd := payloadStart + length + len(dynamicTypeMarkerSuffix)
+		payload := text[payloadStart : payloadStart+length]
+		name := ""
+
+		if signature, decoded := dynamicTypeMarkerSignature(payload); decoded {
+			if name = lookupAnyDynamicTypeName(signature); name == "" {
+				unresolved = append(unresolved, signature)
+			}
+		} else {
+			unresolved = append(unresolved, "«undecodable marker payload: "+payload+"»")
+		}
+
+		if name == "" {
+			name = text[start:markerEnd]
+		}
+
+		resolved.WriteString(text[:start])
+		resolved.WriteString(name)
+		text = text[markerEnd:]
+	}
+
+	resolved.WriteString(text)
+
+	return resolved.String(), unresolved
 }

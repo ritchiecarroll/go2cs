@@ -860,7 +860,10 @@ RID-specific assets in a single package — one `go.<pkg>` ID carrying each targ
 emission under `runtimes/<rid>/`, selected automatically by the consumer's runtime identifier —
 so Go-faithful per-platform semantics never fork the package graph.
 
-## Progress tracking
+## Progress tracking (as recorded 2026-09-23)
+
+The table is the state recorded when the history was split from the Roadmap; the [Roadmap](Roadmap.md) and
+[Validated Test Packages](ValidatedTestPackages.md) carry the current state.
 
 | Metric | Source | Status |
 |---|---|---|
@@ -872,9 +875,12 @@ so Go-faithful per-platform semantics never fork the package graph.
 | Assembly-backed implementations | Phase 5 external-declaration inventory | ◻ Phase 5 planned — gated by Phase 4 validation |
 | Linux / multi-target | Platforms section above | ◻ converts on Windows and Linux; a module reaching `golang.org/x/sys/unix` (the README walkthrough) builds and runs on `linux/amd64` with go2cs packages ≥ 1.24.13.2 and a converter from a checkout that includes them; the wider operational `syscall` surface and a Linux validation roster are in progress |
 
-## Reference: open converter items (`src/go2cs/ToDo.md`)
+## Reference: open converter items
 
-`visitMapType` completion; remaining dynamic-struct implicit-cast checks across `AssignStmt`/`CompositeLit`/
-`IndexExpr`/`BinaryExpr`/`UnaryExpr`/`SelectorExpr`/`TypeSwitchStmt`/`ValueSpec`; optional recursive
-dependent-package conversion; map/channel `GoType` generator support (`IMap`/`IChannel`); comment
-conversion; cgo + Go-assembler (`.s`) targets.
+The open items are on the Roadmap, under [Open converter items](Roadmap.md#open-converter-items).
+<!-- 2026-11-15 (P4, docs audit): the list that stood here named done work as open (`visitMapType` completion and
+     recursive dependent-package conversion are struck in src/go2cs/ToDo.md; cgo ships Phases 1, 2 and 3.1 in
+     1.26.11.1). It read: `visitMapType` completion; remaining dynamic-struct implicit-cast checks across
+     AssignStmt/CompositeLit/IndexExpr/BinaryExpr/UnaryExpr/SelectorExpr/TypeSwitchStmt/ValueSpec; optional recursive
+     dependent-package conversion; map/channel GoType generator support (IMap/IChannel); comment conversion; cgo +
+     Go-assembler (.s) targets. -->

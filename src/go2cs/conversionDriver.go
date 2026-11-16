@@ -398,6 +398,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// automatic rule (GO2CS2009) and refuses the package when forced (GO2CS2010).
 		packageInlineAdmission = computeInlineArrayAdmission(pkg.Syntax, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, options)
 		packageInlineArrayRecords = inlineArrayStampRecords(packageInlineAdmission, inlineArrayMode(pkg.Types.Path(), pkg.Dir, options))
+		packageValueDecodeSites = collectValueDecodeSites(pkg.Syntax, pkg.TypesInfo, packageInlineAdmission)
 
 		if err := reportInlineArrayAdmission(packageInlineAdmission); err != nil {
 			return refusePackage(options, diagnosticInlineArrayMixedPair, err)

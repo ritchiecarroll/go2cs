@@ -194,17 +194,19 @@ public class NativeFieldArrayViewTests
 
     /// <summary>
     /// The helper the converter EMITS, <c>@unsafe.ArrayPointer&lt;T&gt;.Of(field, N)</c>, which names the field
-    /// once: a native root reaches the door, and a Go root with no address is refused by name.
+    /// once: a native root reaches the door, and a Go root with no address is viewed through the field's own
+    /// bytes.
     /// </summary>
     /// <remarks>
     /// Every other root took the pointer conversion to the array type until 2026-11-15, and this arm held the
     /// helper equal to it, "box for box or panic for panic". Over a Go struct that conversion answered a box whose
     /// Value was no array, and refused a struct that holds references as "native memory"
     /// (docs/phase4/DESIGN-array-pointer-doors.md, section 18; the roots that are viewed are in
-    /// FieldArrayViewOverGoStructTests).
+    /// FieldArrayViewOverGoStructTests). A struct that holds references was then refused by name, in true words,
+    /// until the view of the field's own bytes (section 19, ReinterpretedFieldArrayViewTests).
     /// </remarks>
     [TestMethod]
-    public void TheEmittedHelperTakesTheDoorForANativeRootAndRefusesAGoRootWithNoAddress()
+    public void TheEmittedHelperTakesTheDoorForANativeRootAndViewsTheFieldOfAGoRootWithNoAddress()
     {
         nint block = NativeSockaddrForHttp();
 
@@ -222,11 +224,23 @@ public class NativeFieldArrayViewTests
         }
 
         // A Go root: the build flavour's sockaddr carries array<> fields, so the converted struct holds references
-        // and has no address. The helper says so, and names the Go form.
+        // and has no address. The view is over the Port field's own two bytes: x/sys writes the port through it in
+        // network order, and the field holds it.
         ж<syscall.RawSockaddrInet4> managed = new StandardBox<syscall.RawSockaddrInet4>(default(syscall.RawSockaddrInet4));
-        string outcome = Outcome(() => @unsafe.ArrayPointer<byte>.Of(managed.of(syscall.RawSockaddrInet4.ᏑPort), 2));
+        ж<array<byte>> port = @unsafe.ArrayPointer<byte>.Of(managed.of(syscall.RawSockaddrInet4.ᏑPort), 2);
 
-        StringAssert.StartsWith(outcome, "threw PanicException: go2cs: (*[2]uint8)(unsafe.Pointer(&p.f))");
+        Assert.AreEqual((nuint)0, port.NativeAddress, "a Go root is no native pointer");
+
+        port.ElementRef(0) = (byte)(8080 >> 8);
+        port.ElementRef(1) = unchecked((byte)8080);
+
+        Assert.AreEqual(BitConverter.IsLittleEndian ? (ushort)0x901F : (ushort)8080, (ushort)managed.Value.Port, "the store is to the field");
+        Assert.AreEqual(8080, port.ElementRef(0) << 8 | port.ElementRef(1), "and the port decodes back");
+
+        // A view longer than the field is refused by name, and names the Go form.
+        string outcome = Outcome(() => @unsafe.ArrayPointer<byte>.Of(managed.of(syscall.RawSockaddrInet4.ᏑPort), 4));
+
+        StringAssert.StartsWith(outcome, "threw PanicException: go2cs: (*[4]uint8)(unsafe.Pointer(&p.f))");
         StringAssert.Contains(outcome, "has no address");
     }
 

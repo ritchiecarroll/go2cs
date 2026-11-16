@@ -1,0 +1,3 @@
+written 2026-11-15T10:25:44Z, before the run, at wt-w8 master 091935257c: 200 trials per arm, 64-byte heap strings, 2 processes.
+CONTROL (element box held): wrong bytes 0/200 (the pin holds the backing still, and the number resolves).
+WINDOW (box and string dropped, compacting GC + finalizers between): resolved 0/200 (the box's finalizer released its pin and the registry validates "alive AND still pinned"); wrong bytes > 0/200 in both processes. A miss falls to a native box over the old address of a managed array that was collected or moved, so a memory-unsafe read. A fault would show as a crashed run, and is reported as such.
