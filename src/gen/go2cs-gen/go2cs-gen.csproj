@@ -1,10 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="PublishAot">
 
   <!-- Shared NuGet version: go.gen carries the same stamp as the converted stdlib (src\version.props) -->
   <Import Project="..\..\version.props" />
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- An analyzer is loaded by the compiler, never published. A program's publish with -p:PublishAot=true
+         reaches this project through its analyzer reference; TreatAsLocalProperty lets this value win over
+         that global, where netstandard2.0 would otherwise stop the build with NETSDK1207. -->
+    <PublishAot>false</PublishAot>
     <RootNamespace>go2cs</RootNamespace>
     <Product>go2cs</Product>
     <Description>go2cs Roslyn source generator/analyzer emitting the C# glue (interface satisfaction, implicit conversions, receiver overloads, init ordering) for go2cs converted projects: $(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>

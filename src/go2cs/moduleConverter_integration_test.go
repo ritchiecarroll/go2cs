@@ -997,6 +997,14 @@ func TestRecurseGoFileFreeContainerDirsKeepDistinctProjectNames(t *testing.T) {
 	if !strings.Contains(targets, `<Import Project="$(go2csPath)core/golib/buildTransitive/go.lib.symbols.targets"`) {
 		t.Errorf("output-root Directory.Build.targets does not import golib's go.lib.symbols.targets:\n%s", targets)
 	}
+
+	// A converted LIBRARY is not an application: a `dotnet publish -r <rid> -p:PublishAot=true` that reaches it
+	// through a solution (the per-project .slnx of -recurse=nuget) would otherwise publish it as its own native
+	// library. The .targets, not the .props, because OutputType is set in the project body.
+	if !strings.Contains(targets, `<PropertyGroup Condition="'$(OutputType)' == 'Library'">`) ||
+		!strings.Contains(targets, "<IsPublishable>false</IsPublishable>") {
+		t.Errorf("output-root Directory.Build.targets does not mark a converted library unpublishable:\n%s", targets)
+	}
 }
 
 // assertEmittedPathsInsideBudget fails if anything the conversion wrote under root exceeds
