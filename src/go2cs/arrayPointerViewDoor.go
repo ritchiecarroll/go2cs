@@ -86,7 +86,11 @@ func (v *Visitor) arrayPointerViewOfBase(base ast.Expr) (arrayPointerView, bool)
 	pointer := types.Unalias(v.info.TypeOf(conversion)).Underlying().(*types.Pointer)
 	array := types.Unalias(pointer.Elem()).Underlying().(*types.Array)
 
-	if csManagedField(array.Elem(), 0) {
+	// The element must be unmanaged in C#. A struct admitted to inline arrays holds its arrays as go.arrays members and
+	// its [0]T fields as alignment carriers (zeroSizeFieldLayout.go), so for it the inline reading applies: a ccgo union,
+	// `struct{ Fi [0]int32; Ff float32 }`, is four bytes of Go memory, not an array<T> reference.
+	if packageInlineAdmission.admits(array.Elem()) && csManagedFieldInline(array.Elem(), 0) ||
+		!packageInlineAdmission.admits(array.Elem()) && csManagedField(array.Elem(), 0) {
 		return arrayPointerView{}, false
 	}
 
