@@ -282,3 +282,50 @@ The cut's arms, scores and stop lines: [DATA-mn-n2-receivers.md](DATA-mn-n2-rece
 -> 3,806, refused parkers 175, +1.18 MB, Go's 9 lines in every run, the probe green with N2 and red with the copy
 control; PN-1 and PN-4 missed (four rules found by the arms; hand-offs rose as more goroutines run on carriers).
 `byref-param` (395, 63 parking) is the next measured step, as ruled.
+
+## 12. byref-param: design, census and predictions (dated block, 2026-11-16, before any arm)
+
+**Where the parameters come from.** The converter's ref-lowering pass (refLoweringAnalysisOperations.go) lowers a
+pointer parameter `p *T` of an unexported package-level function to `ref T p` when every use only dereferences or
+forwards it. Go still passes a POINTER: the callee shares the caller's object. So the twin takes the parameter's box,
+exactly as a receiver's: `fꞏtwin(..., global::go.ж<T> Ꮡp, ...)` under `ref var p = ref Ꮡp.DerefOrNull();`, which
+Rule R derives again after each await. Nothing new in the rewriter beyond what N2 made for the receiver.
+
+**Eligible:** a plain `ref` parameter, any position, several per function (each boxed on its own; two may name one
+box, as two Go pointers may). `out`, `in` and `ref readonly` stay refused, named `byref-out` (the 4 parking `out`
+functions are all hand-owned golib-adjacent files: deepequal_impl, value_impl, syscall_windows_impl).
+
+**Census** (closure arm N at 3b52c5c216, and src/core's call sites, read only): 63 refused byref-param functions park
+(58 with one `ref`, 1 with two, 4 with one `out`; none is a method). Their 194 by-ref arguments, by shape:
+
+| argument, as converted | box the twin is handed | count |
+|---|---|---|
+| `ref (x).DerefOrNull()`, x a ж local or param | `x`, read once at the call, as Go reads it | 59 |
+| `ref (Ꮡx).DerefOrNull()` / `ref Ꮡx.Value` | `Ꮡx` | 41 |
+| `ref x`, a bare name | own box `Ꮡx`, a current ref local's root, or none (stack) | 64 |
+| `ref (e.f).DerefOrNull()` (a ж field), other | `e.f` if side-effect free and bound (SN-1), else none | 21 |
+| `ref x.f` (a field) | the field pointer (9.1's row) | 3 |
+| `out var x` | (refused: byref-out) | 6 |
+
+**The instrument, split first** (56baaf2de4, COORD's order; MnHttpClosure, 5 runs): `handoffs` counts a
+carrier-mounted goroutine's plain block, `thread-blocks` a goroutine with no carrier blocking its own thread. Base O:
+110-115 + 81-86 (about 197 plain blocks), peak OS threads 57-61. N2: 132-135 + 0 (about 133), threads 39 in all five.
+N2 moved every off-carrier block onto a carrier and cut the total by a third; PN-4 read only half of it.
+
+**Predictions** (scored on MnHttpClosure, arm N + byref-param, 5 runs, against arm N):
+
+- PB-1 (70%): the plain-block TOTAL (handoffs + thread-blocks), median, falls from about 133 to 105-128; thread-blocks
+  stay 0; peak OS threads at most 39 in every run. THE HEADLINE.
+- PB-2 (70%): twinned 3,806 -> 3,875-3,990 (the 59 ref-parameter parkers and the callers they unblock).
+- PB-3 (65%): refused parkers 175 -> 110-125 (byref-param 63 -> at most 6; a few new parkers surface behind them).
+- PB-4 (75%): go.*.dll +0.05 to +0.35 MB over arm N.
+- PB-5 (70%): byref-param's own named-plain call sites at most 30 (the bare-name stack locals and call results).
+- PB-6 (85%): the 30-program twin sweep 30/30; Go's 9 lines in every closure run.
+
+**Stop lines:** SB-1 any parameter COPY (a twin holding `T` where Go holds `*T`); SB-2 a new error class; SB-3
+go.*.dll over P above +15%; SB-4 the probe's new rows (an unexported pointer-parameter function parking while another
+goroutine writes through the pointer) not green with byref-param and red with GoTwinsBoxCopy; SB-5 a change to plain
+emission; SB-6 GenTests red; SB-7 byref-param named-plain above 40; SB-8 a sweep regression.
+
+**Order:** after the code review's changes land (COORD's ruling): the probe rows red first, the units red first, the
+switch `GoTwinsBoxParam` (default on) beside `GoTwinsBoxRecv`, then the arms from a per-run clone.
