@@ -20,6 +20,7 @@
     <None Include="$(MSBuildThisFileDirectory)aliasPublicization_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasReceiverForm_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasReferenceImports_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)aliasSpelledLiftReuse_test.go" />
     <None Include="$(MSBuildThisFileDirectory)allocInliningFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bridgeTypeAccess_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoBuild_test.go" />
