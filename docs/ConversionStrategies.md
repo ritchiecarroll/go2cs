@@ -12360,7 +12360,7 @@ The hand-owned `syscall_linux_impl.cs` gives `Syscall6` its body. In the ordinar
 arguments to `rawSyscall6`, which calls glibc's `syscall(2)` through one .NET native binding,
 `libc_syscall`:
 
-<!-- source: src/core/internal/runtime/syscall/linux/linux/syscall_linux_impl.cs:103-156 -->
+<!-- source: src/core/internal/runtime/syscall/linux/linux/syscall_linux_impl.cs:106-159 -->
 ```csharp
 [LibraryImport("libc", EntryPoint = "syscall", SetLastError = true)]
 private static partial nint libc_syscall(nint number, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6);
@@ -12376,13 +12376,13 @@ private static (uintptr r1, uintptr r2, uintptr errno) rawSyscall6(uintptr num, 
 
     return result == -1
         ? (r1, default(uintptr), new uintptr((nuint)Marshal.GetLastPInvokeError()))
-        : (r1, a3, default(uintptr));
+        : (r1, s_r2IsA3 ? a3 : a2, default(uintptr));
 }
 ```
 
 `SetLastError = true` makes .NET keep libc's error number, which `Marshal.GetLastPInvokeError()` reads
-back as `errno`. `r2` matches what Go's own assembly reports: zero on failure, and the unchanged third
-argument on success. Converted Linux wrappers such as open, read or stat all run on that one binding.
+back as `errno`. `r2` matches what Go's own assembly reports: zero on failure, and on success the argument register
+the kernel leaves unchanged, the third argument on x64 and x86 and the second on Arm64. Converted Linux wrappers such as open, read or stat all run on that one binding.
 Go's network poller works the same way: its runtime hooks have no Go body, and a hand-owned
 `runtime_netpoll_impl.cs` per operating system implements them.
 

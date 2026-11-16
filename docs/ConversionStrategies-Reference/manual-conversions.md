@@ -1827,7 +1827,7 @@ Everything funnels through it: `syscall`'s `RawSyscall`/`RawSyscall6`/`Syscall`/
 
 The hand-own (`core/internal/runtime/syscall/linux/linux/syscall_linux_impl.cs`) binds **glibc's `syscall(2)`** rather than reproducing the instruction — a deliberate choice over the alternative of mapping each wrapper onto a .NET API. One P/Invoke lights the whole generated surface at once; the per-call alternative is N hand-owns, each independently guessing at semantics the kernel already defines exactly.
 
-<!-- source: src/core/internal/runtime/syscall/linux/linux/syscall_linux_impl.cs:103-104 -->
+<!-- source: src/core/internal/runtime/syscall/linux/linux/syscall_linux_impl.cs:106-107 -->
 ```csharp
 [LibraryImport("libc", EntryPoint = "syscall", SetLastError = true)]
 private static partial nint libc_syscall(nint number, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6);
