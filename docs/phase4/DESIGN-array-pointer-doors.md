@@ -1466,6 +1466,55 @@ element that route converts, as before this change, and at run time it is that r
 here ran on windows or darwin, and the sqlite-cs conversion itself is G's to re-run at this tip. The local gates are
 scored in the announce of this commit, not here.
 
+### 16.10 Amendment 2026-11-16 (P5): the open slice of an unnamed array takes the doors (decision D4, taken)
+
+Section 4.3 kept door A's open form for a named array, and section 8 put the unnamed one to the owner as decision
+D4, recommending a BOARD row. That row is the 2026-11-14 row "an array viewed over another array type answers
+length 0" (its first item, shape Q). COORD's brief of 2026-11-16 00:57Z asked for it in .4, and its 01:10Z
+reading approved the plan below as written.
+
+**What D4 left.** The view door declined `(*[N]T)(p)[lo:]` when the array was unnamed, and the copy door took the
+open form only for a named one. The unnamed form kept the older route, `@unsafe.Pointer.To<array<E>>(p).slice(lo)`:
+the box of the whole array, read as a value. Over memory that is a Go array of that very type it is right. Over
+anything else it answers length 0, so a store panics where Go slices, and as `copy`'s destination over the bytes of
+a number (reflect's `nameOff` copy) the box read itself ends the process (an access violation in the constructor
+of `slice<byte>`, which no `recover` sees).
+
+**The change.** Both `named` conditions go (`arrayPointerViewDoor.go`): the unnamed open form is the view door's
+`View<E>(p, lo, N)` wherever it stands, and `CopyInto` / `CopyFrom` where it is a direct argument of `copy`. The
+open form over a field's address stays the field view's (`ArrayPointer<E>.Of(h.Ꮡf, N).slice()`), and the converter
+test keeps that as its control. No golib change.
+
+**The census.** Over the door census of 11-14: the sqlite closure (modernc.org/sqlite v1.62.0, libc v1.80.1)
+holds 0 unnamed open forms; its three open forms are libc's `RawMem`, named, door A's already. The standard
+library holds 7 (linux), 8 (darwin) and 11 (windows); in the corpus they are the seven lines below, and the other
+windows sites take a typed pointer, which is no door operand.
+
+| reading (linux/amd64, Release) | at W17's tip | with the change |
+|:--|:--|:--|
+| converter test, three new positives (open view, copy into, copy from) and the field-address control | the three red: the old route | green; the control unchanged |
+| `OpenSliceUnnamedArray`, 7 arms under a recover each (the probe) | A and B panic where Go slices; C ends the process (exit 134) | 7 of 7 equal Go |
+| footprint, two seeded `-stdlib` roots per target | | linux/amd64 and arm64 4 files, darwin/amd64 3, windows/amd64 5 files, 6 lines; 0 unresolved markers |
+
+The moved lines: the `nameOff` copy in `reflect/type.cs`, `internal/reflectlite/type.cs` and `runtime/type.cs`
+(every target) is now `CopyInto<byte>(FromPinnedBox(ᏑnameOff), 0, 4, ...)`; `runtime/linux/os_linux.cs` reads
+`startupRand` through `View<byte>(val, 0, 16)`; `runtime/windows/os_windows.cs` reads the environment block
+through `View<uint16>(strings, 0, 16777216)`; and the registry's `value.cs.auto` review sibling takes
+`View<byte>(..., 0, 4)` and `(..., 0, 8)` in `SetDWordValue` and `SetQWordValue`. The sibling was also stale since
+batch 308 in four other sites (the span copy with the `unsafe` modifier); by COORD's 01:46Z note it is taken whole
+to this tip's emission, 8 lines more, in its own commit.
+
+**A candidate, not this seat.** The registry's `value.cs` is hand-owned because of this form: its own header says
+the generated `(*[N]byte)(unsafe.Pointer(&value))[:]` read the value's bytes as a managed array and failed
+`TestValues` with a nil dereference. With door A serving it, the review sibling
+now emits the view, so retiring that hand-own is a candidate for a later seat, measured on its own.
+
+**What this leaves.** The 11-14 row's other shape, `ge` (a named array bound to a local and then indexed as an unnamed
+one), is the kept-local class of door C and stays .5. A nil array pointer made from a number still carries no
+length (the 2026-11-14 row after it). The windows reading of the banked rows the moved lines touch (reflect,
+runtime, internal/reflectlite, internal/abi) is COORD's to place; the local gates and the hosted set are scored in
+the announce of this seat.
+
 ## 17. Amendment 2026-11-15 (P5): the publish of a named array's holder is a compare-and-swap (option 2)
 
 This is the first item of 14.3, ruled the seat after door B (01:19Z) and accepted as planned (08:54Z). golib

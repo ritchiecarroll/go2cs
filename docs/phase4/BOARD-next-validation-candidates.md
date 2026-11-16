@@ -39737,4 +39737,22 @@ and the field view's shape widened to two selections as its second commit, probe
 
 — P5 (2026-11-15)
 
+## 2026-11-16 — P5 (decision D4 taken; COORD rulings 00:57Z and 01:10Z; closes shape Q of item 1 of the 2026-11-14 row "an array viewed over another array type answers length 0"): the open slice of an unnamed array takes the array pointer doors — CLOSED for Q, `ge` stays OPEN for door C
+
+`(*[N]T)(p)[lo:]` with an unnamed array kept the box route (`To<array<E>>(p).slice(lo)`), which reads the whole
+array as a value: length 0 over memory that is no Go array of that type, and as `copy`'s destination over a
+number's bytes (reflect's `nameOff` copy) an access violation that ends the process. The view and copy doors now
+take it for an unnamed array as for a named one (design 16.10, branch `claude/p5-d4-open-slice`).
+
+- **Q** (`w := (*[16]byte)(unsafe.Pointer(&arr))[:]` over `[4]uint32`, `w[4] = 1`): Go `16 [0 1 0 0]`; converted
+  now the same (arm B of the behavioral program `OpenSliceUnnamedArray`). CLOSED.
+- **`ge`** (a named array bound to a local, then indexed as an unnamed one) is the kept-local class: door C, .5,
+  unchanged. Items 2 and 3 of the 11-14 row are unchanged.
+- Census: sqlite closure 0 sites; std 7 / 8 / 11 (linux / darwin / windows). Corpus: 7 lines in 6 files (the
+  three `nameOff` copies, `os_linux.cs`, `os_windows.cs`, the registry `value.cs.auto`), and the registry sibling
+  taken whole to the emission (8 lines more, stale since 308).
+- Candidate for a later seat: retiring the registry `value.cs` hand-own, which exists because of this form.
+
+— P5 (2026-11-16)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
