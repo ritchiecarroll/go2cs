@@ -196,3 +196,13 @@ test-file methods included (`declaredInTestFile`).
 Battery at 138e3a2e10 (linux/amd64 box, Go 1.26.11): go test, CNR, GolibTests 2814/0, GenTests 564/0, go2cs.slnx
 0 errors, stdlib on four targets 0 errors, runner 10/10 PASS, leg B PASS, -tests sample 11 rows PASS. The runner ran
 with -IgnoreDiskPreflight (13-14 GB free against its 25 GB floor).
+
+## The batch 309 merge (bc4923b670, fba44db7a6)
+
+- The same four-target seeded reconvert of the merge commit differs from the tree in exactly runtime/alg.cs and
+  runtime/lock_spinbit.cs on every target, byte-identical across the four (309's array loads over OQ2's dropped Δ),
+  +3/-3, as predicted before the run. Windows adds the two extras named above, unchanged.
+- Seven provenance notes both sides had moved were re-cited (visitValueSpec.go five times, convUnaryExpr.go,
+  convCallExpr.go). GolibTests' namespace-name test passes without a change: 309 added no golib type to `go`.
+- Battery at fba44db7a6: go test, CNR, GolibTests 2875/0, GenTests 564/0, go2cs.slnx 0 errors, stdlib on four targets
+  0 errors, runner 10/10 PASS, leg B PASS, -tests sample 11 rows PASS (runner with -IgnoreDiskPreflight).
