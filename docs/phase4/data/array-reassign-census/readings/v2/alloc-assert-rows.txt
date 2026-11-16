@@ -1,0 +1,26 @@
+archive/tar: 0
+compress/flate: 0
+compress/gzip: 0
+compress/lzw: 0
+compress/zlib: 0
+crypto/internal/fips140/edwards25519: 0
+crypto/internal/fips140/mldsa: 0
+crypto/internal/fips140/mlkem: 0
+crypto/sha3: 1  sha3_test.go:TestAllocations
+crypto/tls: 0
+hash/crc64: 0
+image/jpeg: 0
+internal/chacha8rand: 0
+internal/poll: 0
+internal/trace: 0
+internal/trace/internal/tracev1: 0
+log/slog/internal/benchmarks: 0
+math/rand/v2: 0
+net: 3  ip_test.go:TestIPAppendTextNoAllocs, tcpsock_test.go:TestTCPReadWriteAllocs, udpsock_test.go:TestAllocs
+net/http: 1  header_test.go:TestHeaderWriteSubsetAllocs
+reflect: 10  all_test.go:TestMapIterSet, all_test.go:TestDeepEqualAllocs, all_test.go:noAlloc, all_test.go:TestAllocsInterfaceBig, all_test.go:TestAllocsInterfaceSmall, all_test.go:TestSmallZero, all_test.go:TestMapAlloc, all_test.go:TestChanAlloc, all_test.go:TestMapIterReset, all_test.go:TestTypeAssertAllocs
+regexp/syntax: 0
+runtime: 19  hash_test.go:TestArrayHash, hash_test.go:TestStructHash, iface_test.go:TestCmpIfaceConcreteAlloc, iface_test.go:TestNonEscapingConvT2E, iface_test.go:TestNonEscapingConvT2I, iface_test.go:TestZeroConvT2x, malloc_test.go:TestStringConcatenationAllocs, malloc_test.go:TestFreegc, map_test.go:TestMapStringBytesLookup, map_test.go:TestNonEscapingMap, slice_test.go:TestAppendByteInLoop, slice_test.go:TestAppendPtrInLoop, slice_test.go:TestAppendByteCapInLoop, string_test.go:TestConcatTempString, string_test.go:TestCompareTempString, string_test.go:TestStringIndexHaystack, string_test.go:TestStringIndexNeedle, string_test.go:TestIntStringAllocs, string_test.go:TestRangeStringCast
+runtime/trace: 0
+syscall: 1  syscall_windows_test.go:TestSyscallAllocations
+TOTAL 35

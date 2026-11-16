@@ -36,6 +36,12 @@ gap the design keeps).
 literals and tuples; a box per element in place. Two named costs: N1's two return clones in mlkem and mldsa field.cs
 (one allocation more per call, the copy a plain `return f` already took), and the per-element box. No alloc-assert row
 was re-baselined. The sweep census naming the rows that such sites reach is owed before a sweep.
+*(Amended 2026-11-16, before any sweep:* the census is done. The cut's footprint touches 35 production packages, 25 of them
+banked; their _test.go files hold 35 alloc-assert rows (functions calling testing.AllocsPerRun):
+runtime 19, reflect 10, net 3, crypto/sha3 1 (TestAllocations), net/http 1 (TestHeaderWriteSubsetAllocs), syscall 1
+(TestSyscallAllocations); the other 19 banked packages hold none. The rows are named in
+`readings/v2/alloc-assert-rows.txt` (the tool is `alloc-census.py`). Each is named before any sweep; a row that
+moves cheaper is still a move, and none is re-baselined.)*
 
 **RA-5 (CNR moves only the census-named goldens). MECHANISM MET; TWO SPECIFICS MISSED.** The prediction was committed
 before CNR (5bf4fd5e11): 9 programs.
