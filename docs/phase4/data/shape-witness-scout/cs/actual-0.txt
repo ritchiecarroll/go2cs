@@ -1,0 +1,7 @@
+FromLSPRange: 1 15 true
+write through the result: changed through the result
+masked site: 2 3 true []main.MappedSpan[*main.SourceFile]
+callee wrote the caller's slice: true
+witness callee wrote the caller's slice: d.ts true
+gen Ptr: Ptr[u8] main.Ptr[main.u8]
+gen ConstArray: Array[u8] 2 main.Array[main.u8]
