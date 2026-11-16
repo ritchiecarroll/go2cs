@@ -40164,4 +40164,18 @@ published as `GoTypeAlias("X", "const:ΔX")`, and every importer finds that reco
 
 — G (2026-11-15)
 
+## 2026-11-15 — C2 (COORD 16:54Z): CallerLineMultiLineDebugTests' Debug build ran at 85 per cent of its budget on an idle box and overran it under load — budget 360 s -> 540 s, build cap 300 s -> 480 s — DONE
+
+**The reading.** GolibTests Debug, linux/amd64, at a b2214e00e4 merge of W15 (738803f6e7): one red,
+`EveryShapeEqualsGoInADebugBuild`, "dotnet build ... -c Debug did not finish in 300 s". The same run was writing three
+crash dumps of about 0.5 GB each, which loaded the box. Re-run alone on the same tip: PASSED, in 4 min 15 s for the whole
+test (255 s), 85 per cent of the old 300 s build cap. The margin was the defect, not the converted code.
+
+**The cure.** The build cap goes to 480 s, and the test's whole budget (ChildDeadline) goes from 360 s to 540 s. The
+stage's `--blame-hang-timeout 10m` (os-matrix.yml) is unchanged, so a slow build still fails BY NAME 60 s inside the
+watchdog, with room for ChildTimeoutDiagnostics to dump the child. That is the test's own purpose (98973cdb3f). 600 s, as
+first asked, would have put the whole test at the watchdog, which COORD ruled out.
+
+— C2 (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
