@@ -17,6 +17,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 )
 
 // Sentinels wrapping a deferred dynamic-type-name reference, resolved to the lifted
@@ -326,6 +327,11 @@ func (v *Visitor) forwardImportedStructLift(t types.Type) string {
 // libc's largeInteger alias one anonymous struct, and two lifts made libc's function unbindable through
 // sqlite's delegate type (DESIGN-sqlite-cs-funcptr.md section 3.3). An internal lift is never reused:
 // it is CS0122 from this assembly. When two imports qualify, the lexically smallest import path wins.
+//
+// The import's lift record is keyed by the DECLARING package's spelling of the struct, and an identical struct can be
+// spelled differently here: sqlite/lib writes TLARGE_INTEGER's fields through its own aliases (`LowPart DWORD`) where
+// libc writes uint32, and types.Struct.String() names the alias (W18). So when this package's spelling finds no
+// record, each identical struct the import declares is tried by ITS spelling, in the import's scope order.
 func (v *Visitor) importedStructLift(st *types.Struct) string {
 	if st == nil || isEmptyStructType(st) || v.pkg == nil {
 		return ""
@@ -344,12 +350,32 @@ func (v *Visitor) importedStructLift(st *types.Struct) string {
 
 		key := filepath.Clean(meta.Dir)
 
-		packageLock.Lock()
-		name := importedDynamicTypeNames[key][signature]
-		public := name != "" && importedPublicLiftNames[key][name]
-		packageLock.Unlock()
+		publicLift := func(spelling string) string {
+			packageLock.Lock()
+			defer packageLock.Unlock()
 
-		if !public || !packageDeclaresIdenticalStruct(pkg, st) {
+			if name := importedDynamicTypeNames[key][spelling]; name != "" && importedPublicLiftNames[key][name] {
+				return name
+			}
+
+			return ""
+		}
+
+		var name string
+
+		if name = publicLift(signature); name != "" {
+			if !packageDeclaresIdenticalStruct(pkg, st) {
+				name = ""
+			}
+		} else {
+			for _, identical := range packageIdenticalStructs(pkg, st) {
+				if name = publicLift(identical.String()); name != "" {
+					break
+				}
+			}
+		}
+
+		if name == "" {
 			continue
 		}
 
@@ -382,54 +408,87 @@ func importedStructLiftTarget(codeName string) (string, bool) {
 // defined struct, through pointers, slices, arrays, maps and channels. Two structs with the same text
 // and an unexported field are different Go types, so text alone is not identity.
 func packageDeclaresIdenticalStruct(pkg *types.Package, st *types.Struct) bool {
-	seen := map[types.Type]bool{}
-	var found func(t types.Type, depth int) bool
+	return len(packageIdenticalStructs(pkg, st)) > 0
+}
 
-	found = func(t types.Type, depth int) bool {
+// packageIdenticalStructs returns the anonymous structs identical to st that pkg's package-level declarations spell
+// (packageDeclaredStructs), one per distinct types.Struct.String() spelling, in the order the declarations are walked.
+func packageIdenticalStructs(pkg *types.Package, st *types.Struct) []*types.Struct {
+	var identical []*types.Struct
+	spellings := map[string]bool{}
+
+	for _, declared := range packageDeclaredStructs(pkg) {
+		if !types.Identical(declared, st) {
+			continue
+		}
+
+		if spelling := declared.String(); !spellings[spelling] {
+			spellings[spelling] = true
+			identical = append(identical, declared)
+		}
+	}
+
+	return identical
+}
+
+var (
+	declaredStructsLock      sync.Mutex
+	declaredStructsByPackage = map[*types.Package][]*types.Struct{}
+)
+
+// packageDeclaredStructs returns every anonymous struct that appears in pkg's package-level declarations: an alias
+// target, a variable, a function signature, or a field of a defined struct, through pointers, slices, arrays, maps and
+// channels, in scope order (scope.Names is sorted). It is walked once per package and kept: an importer asks it once
+// per anonymous struct it lifts, and libc's scope is large.
+func packageDeclaredStructs(pkg *types.Package) []*types.Struct {
+	declaredStructsLock.Lock()
+	cached, ok := declaredStructsByPackage[pkg]
+	declaredStructsLock.Unlock()
+
+	if ok {
+		return cached
+	}
+
+	seen := map[types.Type]bool{}
+	var structs []*types.Struct
+	var walk func(t types.Type, depth int)
+
+	walk = func(t types.Type, depth int) {
 		if t == nil || depth > 8 || seen[t] {
-			return false
+			return
 		}
 
 		seen[t] = true
 
 		switch x := t.(type) {
 		case *types.Alias:
-			return found(types.Unalias(x), depth)
+			walk(types.Unalias(x), depth)
 		case *types.Struct:
-			if types.Identical(x, st) {
-				return true
-			}
+			structs = append(structs, x)
 
 			for i := range x.NumFields() {
-				if found(x.Field(i).Type(), depth+1) {
-					return true
-				}
+				walk(x.Field(i).Type(), depth+1)
 			}
 		case *types.Pointer:
-			return found(x.Elem(), depth+1)
+			walk(x.Elem(), depth+1)
 		case *types.Slice:
-			return found(x.Elem(), depth+1)
+			walk(x.Elem(), depth+1)
 		case *types.Array:
-			return found(x.Elem(), depth+1)
+			walk(x.Elem(), depth+1)
 		case *types.Map:
-			return found(x.Key(), depth+1) || found(x.Elem(), depth+1)
+			walk(x.Key(), depth+1)
+			walk(x.Elem(), depth+1)
 		case *types.Chan:
-			return found(x.Elem(), depth+1)
+			walk(x.Elem(), depth+1)
 		case *types.Signature:
 			for i := range x.Params().Len() {
-				if found(x.Params().At(i).Type(), depth+1) {
-					return true
-				}
+				walk(x.Params().At(i).Type(), depth+1)
 			}
 
 			for i := range x.Results().Len() {
-				if found(x.Results().At(i).Type(), depth+1) {
-					return true
-				}
+				walk(x.Results().At(i).Type(), depth+1)
 			}
 		}
-
-		return false
 	}
 
 	scope := pkg.Scope()
@@ -438,20 +497,20 @@ func packageDeclaresIdenticalStruct(pkg *types.Package, st *types.Struct) bool {
 		switch obj := scope.Lookup(name).(type) {
 		case *types.TypeName:
 			if named, ok := obj.Type().(*types.Named); ok {
-				if found(named.Underlying(), 0) {
-					return true
-				}
-			} else if found(obj.Type(), 0) {
-				return true
+				walk(named.Underlying(), 0)
+			} else {
+				walk(obj.Type(), 0)
 			}
 		case *types.Var, *types.Func:
-			if found(obj.Type(), 0) {
-				return true
-			}
+			walk(obj.Type(), 0)
 		}
 	}
 
-	return false
+	declaredStructsLock.Lock()
+	declaredStructsByPackage[pkg] = structs
+	declaredStructsLock.Unlock()
+
+	return structs
 }
 
 // dynamicStructTypeName resolves the C# type name of an expression whose type is
