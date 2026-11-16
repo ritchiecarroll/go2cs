@@ -1,0 +1,429 @@
+#!/usr/bin/env bash
+# sqlite-standins-win.shar : run `bash sqlite-standins-win.shar DIR` to unpack the sqlite-cs WINDOWS stand-in set
+# (G, 2026-11-15; DIAGNOSIS ONLY, never committed) into DIR. Then: bash DIR/apply.sh <converted-out> <copy-out>.
+# apply.sh copies the converted root, drops bin/obj, and applies W11 W8 W9 W10 W12 W12b W9b W9b2, each printing
+# its count (W10 and W12 read 0 at the combined tree; W11 is linux-only and reads 0 on windows).
+set -eu
+D=${1:?usage: bash sqlite-standins-win.shar DIR}
+mkdir -p "$D"
+cat > "$D/apply.sh" <<'G_STANDIN_EOF'
+#!/usr/bin/env bash
+# win-standins-b2.sh <src-out> <dst-out> : WINDOWS. DIAGNOSIS ONLY. The B2 gate set: every stand-in of
+# wsl-standins.sh EXCEPT the walls B2 or the 310 stack cure: W13 (real fix in the stack), W14 (TBF_ctx), W15/W15b
+# ([0][N] carriers: Bitvec, in6_addr). Kept: W8, W9, W9b, W9b2, W10, W11, W12, W12b.
+# Each prints its count.
+set -u
+SRC=$1
+DST=$2
+P=$(cd "$(dirname "$0")" && pwd)
+[ -e "$DST" ] && { echo "REFUSE: $DST exists"; exit 1; }
+cp -r "$SRC" "$DST" || exit 1
+find "$DST" -type d \( -name bin -o -name obj -o -name .artifacts \) -prune -exec rm -rf {} +
+PK=$DST/pkg
+n=$(grep -c 'GoImplement<syscall_package\.Signal,' "$PK/modernc.org/libc/package_info.cs")
+sed -i 's/GoImplement<syscall_package\.Signal,/GoImplement<syscall_package.ΔSignal,/g' "$PK/modernc.org/libc/package_info.cs"
+echo "W11 stand-in: records=$n"
+# W11's other half: the converter names the adapter from the implementer's Go name; the generator, from the record.
+a=$(grep -rl 'syscall_SignalᴠΔSignal' "$PK/modernc.org/libc" --include=*.cs)
+[ -n "$a" ] && sed -i 's/syscall_SignalᴠΔSignal/syscall_ΔSignalᴠΔSignal/g' $a
+echo "W11 stand-in: adapter files=$(echo $a | wc -w)"
+perl "$P/standin-w8-any.pl" $(grep -rl 'initᴛ__ccgo_ts()' "$PK" --include=*.cs)
+grep -rn 'Reinterpret<@string, reflect.StringHeader>' "$PK" --include=*.cs | cut -c1-200 | head -5
+perl "$P/standin-w9.pl" "$PK/modernc.org/sqlite/lib/mutex.cs"
+perl "$P/standin-w10.pl" $(grep -rl 'new ReadOnlySpan<' "$PK" --include=*.cs)
+perl "$P/standin-w12.pl" $(grep -rl 'To<array<' "$PK" --include=*.cs) | tail -1
+perl "$P/standin-w12b.pl" $(grep -rl "To<array<" "$PK" --include=*.cs) | tail -1
+perl "$P/standin-w9b.pl" $(grep -rl "FromPinnedBox(Ꮡ((~@unsafe.Pointer.To<" "$PK" --include=*.cs) | tail -1
+perl "$P/standin-w9b2.pl" $(grep -rl "Ꮡ((@unsafe.Pointer.To<" "$PK" --include=*.cs) | tail -1
+echo "STANDINS-DONE"
+G_STANDIN_EOF
+cat > "$D/standin-w8-any.pl" <<'G_STANDIN_EOF'
+#!/usr/bin/perl
+# standin-w8-any.pl FILE... : DIAGNOSIS ONLY stand-in for W8 in any converted file (lib's and, on linux, libc's own
+# `__ccgo_ts`): `initᴛ__ccgo_ts`'s StringHeader reinterpret becomes a one-time copy of the immutable literal bytes into
+# native memory held for the process. A file without the line is left alone.
+use strict;
+use warnings;
+my $old = 'internal static void initᴛ__ccgo_ts() { __ccgo_ts = (Ꮡ__ccgo_ts1.Reinterpret<@string, reflect.StringHeader>()).Value.Data; }';
+my $new = 'internal static void initᴛ__ccgo_ts() { var b = __ccgo_ts1.ToSpan().ToArray(); var m = global::System.Runtime.InteropServices.Marshal.AllocHGlobal(b.Length + 1); global::System.Runtime.InteropServices.Marshal.Copy(b, 0, m, b.Length); global::System.Runtime.InteropServices.Marshal.WriteByte(m, b.Length, 0); __ccgo_ts = (uintptr)(nuint)m; } // W8 STAND-IN (scratch only)';
+my $total = 0;
+for my $f (@ARGV) {
+    open(my $in, '<:raw', $f) or die $!;
+    my $s = do { local $/; <$in> };
+    close $in;
+    my $n = $s =~ s/\Q$old\E/$new/g;
+    next unless $n;
+    open(my $out, '>:raw', $f) or die $!;
+    print $out $s;
+    close $out;
+    print "$f: $n\n";
+    $total += $n;
+}
+print "W8 stand-in: sites=$total\n";
+G_STANDIN_EOF
+cat > "$D/standin-w9.pl" <<'G_STANDIN_EOF'
+#!/usr/bin/perl
+# standin-w9.pl LIB_MUTEX_CS : DIAGNOSIS ONLY stand-in for wall W9 (sqlite's lib/mutex.go keeps a Go struct holding a
+# sync.Mutex in C memory -- calloc'd -- and go2cs's sync.Mutex is a managed reference, so reading it is refused). The
+# demo is ONE goroutine, so the stand-in makes sqlite's mutex methods no-ops: the RECURSIVE arm's store into the C
+# struct is dropped, Enter/Leave do nothing, Try succeeds, Held/Notheld answer 1 (they back debug asserts only).
+# Each function is replaced from its signature line to the next column-0 `}`. Line endings kept.
+use strict;
+use warnings;
+my $f = shift;
+open(my $in, '<:raw', $f) or die $!;
+my $s = do { local $/; <$in> };
+close $in;
+my $eol = ($s =~ /\r\n/) ? "\r\n" : "\n";
+my $store = '(@unsafe.Pointer.To<mutex>((@unsafe.Pointer)r)).Value.recursive = true;';
+my $n = () = $s =~ /\Q$store\E/g;
+$n == 1 or die "recursive store found $n times";
+$s =~ s/\Q$store\E/\/\/ W9 STAND-IN: recursive store into C memory dropped/;
+my %body = (
+    mutexEnter   => '{ } // W9 STAND-IN',
+    mutexLeave   => '{ } // W9 STAND-IN',
+    mutexTry     => '{ return SQLITE_OK; } // W9 STAND-IN',
+    mutexHeld    => '{ return 1; } // W9 STAND-IN',
+    mutexNotheld => '{ return 1; } // W9 STAND-IN',
+);
+for my $fn (sort keys %body) {
+    my $re = qr/^(internal static [^\r\n]*\b$fn\([^\r\n]*\)) \{\r?\n.*?^\}\r?\n/ms;
+    $s =~ s/$re/$1 $body{$fn}$eol/ or die "function $fn not found";
+}
+open(my $out, '>:raw', $f) or die $!;
+print $out $s;
+close $out;
+print "W9 stand-in applied\n";
+G_STANDIN_EOF
+cat > "$D/standin-w10.pl" <<'G_STANDIN_EOF'
+#!/usr/bin/perl
+# standin-w10.pl FILE... : DIAGNOSIS ONLY stand-in for wall W10 = S3 (a slice of a pointer-to-array cast COPIES the
+# memory it views: libc's Xmemcpy wrote into a temporary, so every memcpy was a no-op). P5's own prototype
+# (DESIGN-array-pointer-doors.md 1.3): each span emission
+#     new slice<T>(new ReadOnlySpan<T>((T*)BASE, LEN))
+# becomes
+#     @unsafe.Slice(@unsafe.Pointer.To<T>(BASE), LEN)
+# whose native arm aliases C memory. BASE and LEN are matched with balanced parentheses. A capacity form
+# (`.slice(0, …)` after it) keeps its tail unchanged. Prints the count per file.
+use strict;
+use warnings;
+
+my $total = 0;
+for my $f (@ARGV) {
+    open(my $in, '<:raw', $f) or die "$f: $!";
+    my $s = do { local $/; <$in> };
+    close $in;
+    my $n = 0;
+    my $out = '';
+    while ($s =~ /new slice<([^<>]+)>\(new ReadOnlySpan<\1>\(\(\1\*\)/g) {
+        my $t = $1;
+        my $start = $-[0];
+        my $p = $+[0];
+        # BASE: up to the ", " at depth 0
+        my ($depth, $i) = (0, $p);
+        for (; $i < length($s); $i++) {
+            my $c = substr($s, $i, 1);
+            if ($c eq '(') { $depth++ }
+            elsif ($c eq ')') { last if $depth == 0; $depth-- }
+            elsif ($c eq ',' && $depth == 0) { last }
+        }
+        die "no base end in $f\n" unless substr($s, $i, 2) eq ', ';
+        my $base = substr($s, $p, $i - $p);
+        # LEN: from after ", " to the ")" closing ReadOnlySpan( at depth 0, then one more ")" closing slice(
+        my $q = $i + 2;
+        ($depth, $i) = (0, $q);
+        for (; $i < length($s); $i++) {
+            my $c = substr($s, $i, 1);
+            if ($c eq '(') { $depth++ }
+            elsif ($c eq ')') { last if $depth == 0; $depth-- }
+        }
+        my $len = substr($s, $q, $i - $q);
+        die "no slice close in $f\n" unless substr($s, $i, 2) eq '))';
+        my $end = $i + 2;
+        $out .= substr($s, 0, $start) . "\@unsafe.Slice(\@unsafe.Pointer.To<$t>($base), $len)";
+        $s = substr($s, $end);
+        $n++;
+        pos($s) = 0;
+    }
+    $out .= $s;
+    next unless $n;
+    open(my $o, '>:raw', $f) or die $!;
+    print $o $out;
+    close $o;
+    print "$f: $n\n";
+    $total += $n;
+}
+print "W10 stand-in: span views replaced=$total\n";
+G_STANDIN_EOF
+cat > "$D/standin-w12.pl" <<'G_STANDIN_EOF'
+#!/usr/bin/perl
+# standin-w12.pl FILE... : DIAGNOSIS ONLY stand-in for wall W12 = P5's door B (an index through a conversion to an
+# UNNAMED array over C memory, `(*[N]T)(p)[i]`, is refused by name: arm 5). Each emitted
+#     (@unsafe.Pointer.To<array<T>>(P)).Value[I]
+# becomes door B's own definition, the element at p + i*size:
+#     (@unsafe.Pointer.To<T>(@unsafe.Add((@unsafe.Pointer)(P), (nint)(I) * SIZE))).Value
+# for an element T whose size is known from the table below (primitives and sqlite's primitive aliases). Any other
+# element type, or a form not followed by `.Value[`, is left as it stands. P and I are matched with balanced brackets.
+use strict;
+use warnings;
+
+my %size = (
+    byte => 1, uint8 => 1, int8 => 1, Tu8 => 1, Ti8 => 1, Tuint8_t => 1, Tint8_t => 1,
+    uint16 => 2, int16 => 2, Tu16 => 2, Ti16 => 2, TWCHAR => 2, Tuint16_t => 2, Tint16_t => 2, TLogEst => 2,
+    uint32 => 4, int32 => 4, Tu32 => 4, Ti32 => 4, float32 => 4, Tuint32_t => 4, Tint32_t => 4, TPgno => 4,
+    uint64 => 8, int64 => 8, Tu64 => 8, Ti64 => 8, float64 => 8, uintptr => 8, Tsqlite3_int64 => 8,
+    Tsqlite3_uint64 => 8, Tsqlite_int64 => 8, Tsqlite3_rtree_dbl => 8, Tuint64_t => 8, Tint64_t => 8, Tsize_t => 8,
+);
+
+sub balanced {    # index just after an opening bracket -> index of its matching closer; skips '…' and "…" literals
+    my ($s, $i, $open, $close) = @_;
+    my $depth = 0;
+    for (; $i < length($s); $i++) {
+        my $c = substr($s, $i, 1);
+        if ($c eq "'" || $c eq '"') {
+            for ($i++; $i < length($s); $i++) {
+                my $d = substr($s, $i, 1);
+                if ($d eq '\\') { $i++; next }
+                last if $d eq $c;
+            }
+            next;
+        }
+        if ($c eq $open) { $depth++ }
+        elsif ($c eq $close) { return $i if $depth == 0; $depth-- }
+    }
+    return -1;
+}
+
+my ($total, %skipped) = (0);
+for my $f (@ARGV) {
+    open(my $in, '<:raw', $f) or die "$f: $!";
+    my $s = do { local $/; <$in> };
+    close $in;
+    my ($n, $out, $from) = (0, '', 0);
+    while ($s =~ /\(\@unsafe\.Pointer\.To<array<([A-Za-z0-9_]+)>>\(/g) {
+        my ($t, $start, $p) = ($1, $-[0], $+[0]);
+        my $pEnd = balanced($s, $p, '(', ')');
+        next if $pEnd < 0;
+        next unless substr($s, $pEnd, 9) eq ')).Value[';
+        if (!exists $size{$t}) { $skipped{$t}++; next }
+        my $iStart = $pEnd + 9;
+        my $iEnd = balanced($s, $iStart, '[', ']');
+        next if $iEnd < 0;
+        my $ptr = substr($s, $p, $pEnd - $p);
+        my $idx = substr($s, $iStart, $iEnd - $iStart);
+        $out .= substr($s, $from, $start - $from)
+              . "(\@unsafe.Pointer.To<$t>(\@unsafe.Add((\@unsafe.Pointer)($ptr), (nint)($idx) * $size{$t}))).Value";
+        $from = $iEnd + 1;
+        pos($s) = $from;
+        $n++;
+    }
+    next unless $n;
+    $out .= substr($s, $from);
+    open(my $o, '>:raw', $f) or die $!;
+    print $o $out;
+    close $o;
+    print "$f: $n\n";
+    $total += $n;
+}
+print "W12 stand-in: element doors=$total; skipped element types: ",
+      join(', ', map { "$_ x$skipped{$_}" } sort keys %skipped), "\n";
+G_STANDIN_EOF
+cat > "$D/standin-w12b.pl" <<'G_STANDIN_EOF'
+#!/usr/bin/perl
+# standin-w12b.pl FILE... : DIAGNOSIS ONLY, door B for the forms standin-w12.pl left: an element type it has no size
+# for (a lifted struct such as `_sqlite3Fts5TokenizerInit__ᴛ1`), and the whole-array STORE form.
+#   (@unsafe.Pointer.To<array<T>>(P)).Value[I]   ->  (@unsafe.Pointer.To<T>(@unsafe.Add((@unsafe.Pointer)(P), (nint)(I) * SZ))).Value
+#   (@unsafe.Pointer.To<array<T>>(P)).Value = E; ->  { var ᴛsv = E; for (int ᴛsi = 0; ᴛsi < ᴛsv.Length; ᴛsi++)
+#                                                     (@unsafe.Pointer.To<T>(@unsafe.Add((@unsafe.Pointer)(P), (nint)ᴛsi * SZ))).Value = ᴛsv[ᴛsi]; }
+# SZ = global::System.Runtime.CompilerServices.Unsafe.SizeOf<T>(), the CLR size: right for a struct whose CLR layout is
+# its Go layout (the uintptr-only ccgo structs here). Brackets matched with '…' and "…" literals skipped.
+use strict;
+use warnings;
+
+sub closer {    # from index i (just after an opener), the index of the matching closer of kind ($o,$c)
+    my ($s, $i, $o, $c) = @_;
+    my $depth = 0;
+    for (; $i < length($s); $i++) {
+        my $ch = substr($s, $i, 1);
+        if ($ch eq "'" || $ch eq '"') {
+            for ($i++; $i < length($s); $i++) { my $d = substr($s, $i, 1); if ($d eq '\\') { $i++; next } last if $d eq $ch }
+            next;
+        }
+        if ($ch eq $o) { $depth++ } elsif ($ch eq $c) { return $i if $depth == 0; $depth-- }
+    }
+    return -1;
+}
+
+sub stmt_end {    # from index i, the index of the ';' that ends the statement at bracket depth 0
+    my ($s, $i) = @_;
+    my $depth = 0;
+    for (; $i < length($s); $i++) {
+        my $ch = substr($s, $i, 1);
+        if ($ch eq "'" || $ch eq '"') {
+            for ($i++; $i < length($s); $i++) { my $d = substr($s, $i, 1); if ($d eq '\\') { $i++; next } last if $d eq $ch }
+            next;
+        }
+        if ($ch =~ /[\(\{\[]/) { $depth++ } elsif ($ch =~ /[\)\}\]]/) { $depth-- } elsif ($ch eq ';' && $depth == 0) { return $i }
+    }
+    return -1;
+}
+
+my %prim = map { $_ => 1 } qw(byte uint8 int8 Tu8 Ti8 uint16 int16 Tu16 Ti16 TWCHAR uint32 int32 Tu32 Ti32 float32
+    uint64 int64 Tu64 Ti64 float64 uintptr Tsqlite3_int64 Tsqlite3_uint64 Tsqlite3_rtree_dbl TLogEst TPgno);
+my ($reads, $stores) = (0, 0);
+for my $f (@ARGV) {
+    open(my $in, '<:raw', $f) or die "$f: $!";
+    my $s = do { local $/; <$in> };
+    close $in;
+    my ($out, $from, $n) = ('', 0, 0);
+    while ($s =~ /\(\@unsafe\.Pointer\.To<array<([A-Za-z0-9_\x80-\xff]+)>>\(/g) {
+        my ($t, $start, $p) = ($1, $-[0], $+[0]);
+        my $pEnd = closer($s, $p, '(', ')');
+        next if $pEnd < 0;
+        my $ptr = substr($s, $p, $pEnd - $p);
+        my $sz = "global::System.Runtime.CompilerServices.Unsafe.SizeOf<$t>()";
+        my $tail = substr($s, $pEnd, 12);
+        if ($tail =~ /^\)\)\.Value\[/) {
+            next if $prim{$t};    # standin-w12.pl's sized form already took these
+            my $iStart = $pEnd + 9;
+            my $iEnd = closer($s, $iStart, '[', ']');
+            next if $iEnd < 0;
+            my $idx = substr($s, $iStart, $iEnd - $iStart);
+            $out .= substr($s, $from, $start - $from)
+                  . "(\@unsafe.Pointer.To<$t>(\@unsafe.Add((\@unsafe.Pointer)($ptr), (nint)($idx) * $sz))).Value";
+            $from = $iEnd + 1; $reads++; $n++;
+        } elsif ($tail =~ /^\)\)\.Value = /) {
+            my $eStart = $pEnd + 11;
+            my $semi = stmt_end($s, $eStart);
+            next if $semi < 0;
+            my $e = substr($s, $eStart, $semi - $eStart);
+            $out .= substr($s, $from, $start - $from)
+                  . "{ var ᴛsv = $e; for (int ᴛsi = 0; ᴛsi < ᴛsv.Length; ᴛsi++) (\@unsafe.Pointer.To<$t>(\@unsafe.Add((\@unsafe.Pointer)($ptr), (nint)ᴛsi * $sz))).Value = ᴛsv[ᴛsi]; } /* W12b STAND-IN */";
+            $from = $semi + 1; $stores++; $n++;
+        } else {
+            next;
+        }
+        pos($s) = $from;
+    }
+    next unless $n;
+    $out .= substr($s, $from);
+    open(my $o, '>:raw', $f) or die $!;
+    print $o $out;
+    close $o;
+    print "$f: $n\n";
+}
+print "W12b stand-in: struct element reads=$reads, whole-array stores=$stores\n";
+G_STANDIN_EOF
+cat > "$D/standin-w9b.pl" <<'G_STANDIN_EOF'
+#!/usr/bin/perl
+# standin-w9b.pl FILE... : DIAGNOSIS ONLY stand-in for W9b (P2: a write through `&(*T)(p).f` is LOST -- the conversion
+# base `~@unsafe.Pointer.To<T>(P)` reads the struct BY VALUE, `Ꮡ(…)` boxes that copy and `.of(T.ᏑF)` points into the
+# copy). sqlite's union writes (`&(*(*TWalker)(bp)).Fu`) and recursive-mutex owner checks take it. Each
+#     @unsafe.Pointer.FromPinnedBox(Ꮡ((~@unsafe.Pointer.To<T>(P))).of(T.ᏑF))
+# becomes the field's own address in the memory P names:
+#     @unsafe.Add((@unsafe.Pointer)(P), (nint)global::System.Runtime.InteropServices.Marshal.OffsetOf<T>("F"))
+# Marshal.OffsetOf is right for a blittable C struct; a non-blittable T throws by name at run time (not silently).
+use strict;
+use warnings;
+
+sub closer {
+    my ($s, $i) = @_;
+    my $depth = 0;
+    for (; $i < length($s); $i++) {
+        my $c = substr($s, $i, 1);
+        if ($c eq "'" || $c eq '"') {
+            for ($i++; $i < length($s); $i++) { my $d = substr($s, $i, 1); if ($d eq '\\') { $i++; next } last if $d eq $c }
+            next;
+        }
+        if ($c eq '(') { $depth++ } elsif ($c eq ')') { return $i if $depth == 0; $depth-- }
+    }
+    return -1;
+}
+
+my $total = 0;
+for my $f (@ARGV) {
+    open(my $in, '<:raw', $f) or die "$f: $!";
+    my $s = do { local $/; <$in> };
+    close $in;
+    my ($out, $from, $n) = ('', 0, 0);
+    while ($s =~ /\@unsafe\.Pointer\.FromPinnedBox\(Ꮡ\(\(~\@unsafe\.Pointer\.To<([A-Za-z0-9_\x80-\xff]+)>\(/g) {
+        my ($t, $start, $p) = ($1, $-[0], $+[0]);
+        my $pEnd = closer($s, $p);
+        next if $pEnd < 0;
+        my $rest = substr($s, $pEnd);
+        next unless $rest =~ /^\)\)\)\.of\(\Q$t\E\.Ꮡ([A-Za-z0-9_\x80-\xff]+)\)\)/;
+        my ($field, $len) = ($1, length($&));
+        my $ptr = substr($s, $p, $pEnd - $p);
+        $out .= substr($s, $from, $start - $from)
+              . "\@unsafe.Add((\@unsafe.Pointer)($ptr), (nint)global::System.Runtime.InteropServices.Marshal.OffsetOf<$t>(\"$field\"))";
+        $from = $pEnd + $len;
+        pos($s) = $from;
+        $n++;
+    }
+    next unless $n;
+    $out .= substr($s, $from);
+    open(my $o, '>:raw', $f) or die $!;
+    print $o $out;
+    close $o;
+    print "$f: $n\n";
+    $total += $n;
+}
+print "W9b stand-in: field addresses=$total\n";
+G_STANDIN_EOF
+cat > "$D/standin-w9b2.pl" <<'G_STANDIN_EOF'
+#!/usr/bin/perl
+# standin-w9b2.pl FILE... : DIAGNOSIS ONLY stand-in for W9b's SECOND emission form. Go's `*(*X)(unsafe.Pointer(
+# &(*T)(unsafe.Pointer(p)).F))` is emitted
+#     Ꮡ((@unsafe.Pointer.To<T>(P)).Value.F).Reinterpret<FT, X>()
+# where `Ꮡ(…)` boxes a COPY of the field, so a store through it is lost (sqlite's `Expr.u.iValue = v`: every integer
+# literal evaluated to 0). Each such form becomes the field's own address in the memory P names:
+#     @unsafe.Pointer.To<X>(@unsafe.Add((@unsafe.Pointer)(P), (nint)global::System.Runtime.InteropServices.Marshal.OffsetOf<T>("F")))
+# P is matched with balanced parentheses; reads and writes are both rewritten (a read through the copy was right).
+use strict;
+use warnings;
+
+sub closer {
+    my ($s, $i) = @_;
+    my $depth = 0;
+    for (; $i < length($s); $i++) {
+        my $c = substr($s, $i, 1);
+        if ($c eq "'" || $c eq '"') {
+            for ($i++; $i < length($s); $i++) { my $d = substr($s, $i, 1); if ($d eq '\\') { $i++; next } last if $d eq $c }
+            next;
+        }
+        if ($c eq '(') { $depth++ } elsif ($c eq ')') { return $i if $depth == 0; $depth-- }
+    }
+    return -1;
+}
+
+my $total = 0;
+for my $f (@ARGV) {
+    open(my $in, '<:raw', $f) or die "$f: $!";
+    my $s = do { local $/; <$in> };
+    close $in;
+    my ($out, $from, $n) = ('', 0, 0);
+    while ($s =~ /Ꮡ\(\(\@unsafe\.Pointer\.To<([A-Za-z0-9_\x80-\xff]+)>\(/g) {
+        my ($t, $start, $p) = ($1, $-[0], $+[0]);
+        my $pEnd = closer($s, $p);
+        next if $pEnd < 0;
+        my $rest = substr($s, $pEnd);
+        next unless $rest =~ /^\)\)\.Value\.([A-Za-z0-9_\x80-\xff]+)\)\.Reinterpret<([^<>]+(?:<[^<>]*>)?), ([^<>]+(?:<[^<>]*>)?)>\(\)/;
+        my ($field, $x, $len) = ($1, $3, length($&));
+        my $ptr = substr($s, $p, $pEnd - $p);
+        $out .= substr($s, $from, $start - $from)
+              . "\@unsafe.Pointer.To<$x>(\@unsafe.Add((\@unsafe.Pointer)($ptr), (nint)global::System.Runtime.InteropServices.Marshal.OffsetOf<$t>(\"$field\")))";
+        $from = $pEnd + $len;
+        pos($s) = $from;
+        $n++;
+    }
+    next unless $n;
+    $out .= substr($s, $from);
+    open(my $o, '>:raw', $f) or die $!;
+    print $o $out;
+    close $o;
+    print "$f: $n\n";
+    $total += $n;
+}
+print "W9b second-form stand-in: field reinterprets=$total\n";
+G_STANDIN_EOF
+echo "unpacked into $D:"; ls "$D"
