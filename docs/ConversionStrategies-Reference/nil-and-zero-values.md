@@ -259,7 +259,7 @@ internal static typeId tReserved7 = bootstrapType("_reserved1", (ж<eᴛ1>)nil);
 
 Guarded by `TypedNilInterface` (extended with the slice/map/anonymous-struct type-literal targets),
 `PointerToNilPointerIdentity`, and `NamedPointerReinterpret` (the canonical singleton keeps its
-`object`-reference nil compare working). Design: `docs/phase4/DESIGN-reflection-bridge.md`.
+`object`-reference nil compare working). <!-- Design: docs/phase4/DESIGN-reflection-bridge.md (internal record). -->
 
 **A nil converted to an unnamed MAP type is a cast, not an invocation.** The star form above is one
 half of the type-literal problem; `map[string]int(nil)` — no pointer, the map type literal written

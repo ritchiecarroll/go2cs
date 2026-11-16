@@ -712,7 +712,7 @@ carried exactly one per op. --><!-- The seg-3 sizing censused 965 receiver-base 
 parameter-base call sites in 52 stdlib packages paying that box after the ref-primary machinery had freed 1,023 of the
 2,036 shape sites. -->
 
-With the field-view cache (`golib/ж.Views.cs`, design `docs/phase4/DESIGN-field-view-cache.md`),
+With the field-view cache (`golib/ж.Views.cs`)<!-- design: docs/phase4/DESIGN-field-view-cache.md (internal record) -->,
 `of()` returns the SAME `FieldRefBox` for the same (box, accessor token) for the box's life — minted
 on the first call, reused afterwards. Nothing in the emission changes; what changes is the identity
 contract at run time, and it changes in the STRONGER direction: `FieldRefBox.Equals` was already
@@ -747,8 +747,7 @@ there (go/types: *"symbolic variables t in t := x.(type) … the corresponding o
 the real binding is one implicit `*types.Var` PER CASE CLAUSE, in `info.Implicits`). So no
 address form on a type-switch binding was ever seen: `d.translate(&t1.Name, true)` handed a
 ж<Name> **method** parameter (a method's pointer parameter is never
-[ref-lowered](pointers.md#a-pointer-parameter-whose-every-use-is-a-dereference-is-a-ref-parameter--the-ж-box-ref-lowering);
-see §10.1 of `phase4/DESIGN-zh-box-reduction.md`) the `Ꮡ(t1).of(StartElement.ᏑName)` copy-box, and
+[ref-lowered](pointers.md#a-pointer-parameter-whose-every-use-is-a-dereference-is-a-ref-parameter--the-ж-box-ref-lowering))<!-- see §10.1 of phase4/DESIGN-zh-box-reduction.md (internal record) --> the `Ꮡ(t1).of(StartElement.ᏑName)` copy-box, and
 encoding/xml's Token() namespace translation wrote into a heap copy that `t = t1` then discarded
 — a shipped lost write, invisible to every compile gate because the copy READS correctly.
 

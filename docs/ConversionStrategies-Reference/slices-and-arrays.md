@@ -181,21 +181,20 @@ a struct-**field** `(*Buf)(&h.preformatted)` appended across a reallocating grow
 derived pointer — output-compared vs Go.)
 
 **Pointer-cast slice (`(*[N]T)(ptr)[:n]`).** A Go conversion that casts an `unsafe.Pointer` to a pointer-to-array and
-slices it produces a `[]T` over the pointed-to memory. It is emitted as the golib **`slice<T>`** — the C# representation
-of *every* `[]T` — built from a `ReadOnlySpan<T>` over the raw pointer:
-`new slice<T>(new ReadOnlySpan<T>((T*)ptr, (int)n))`. (A bare `Span<T>` would not do: it does **not** range as
-`(index, element)` tuples — `for i := range s` → CS8130 — and has no `Ꮡ(s, i)` element-address — CS0411; `slice<T>`
-supports both, since it is `IArray<T>`.) The `ReadOnlySpan<T>` constructor takes a C# `int`, so a Go `int`/`uint` length
-(`nint`/`nuint`) is narrowed via `getRangeIndexer` (through the underlying for a named numeric); an int literal is left
-as-is. The slice **copies** the pointed-to memory (`ReadOnlySpan.ToArray()`), which is self-consistent for code that
-only uses the resulting slice (e.g. runtime's `os_windows` ranges an unsafe `[]byte` read-only). Since this is always the `(*[N]T)(ptr)` unsafe-cast
-form, it is memory-layout-dependent code whose raw values flow through the `unsafe.Pointer`=`nuint` round-trip (a
-transient `fixed` address → not GC-stable), so the runtime values are not the contract — only compilable, rangeable,
-element-addressable C#. No behavioral test emits this Span form: the `PointerCastSliceRange` test's source is already a `*[4]int`, so its
-`(*[4]int)(unsafe.Pointer(&arr))[:4]` is an identity cast that the converter collapses to the array box and slices
-directly (`Ꮡarr.slice(0, 4)`), and that test guards the index range, value range and `&s[i]` element-address over the
-result. The standard-library sites of the Span form are runtime's `os_windows`, `heapdump` and `mbitmap`. The length
-narrowing is covered by `StdLibInternalAbi`.
+slices it produces a `[]T` over the pointed-to memory, and the conversion keeps that aliasing: it is emitted as a golib
+view door that receives the pointer itself and the array's length `N` as a constant, `@unsafe.Pointer.View<E>(p, lo, hi, N)`
+(with `max` for a three-index slice), and, for a named array type, `copy` into or out of such a slice takes `CopyInto` / `CopyFrom`. What the
+view is (a window on a Go array, a window on native memory, or a copy of another Go value) is decided at run time by
+what the pointer names. An element type that holds references is refused by name. A conversion that another route
+already renders as a view keeps that route when it is sliced, and an identity cast such as
+`(*[4]int)(unsafe.Pointer(&arr))[:4]` over a `*[4]int` collapses to the array box (`Ꮡarr.slice(0, 4)`). The full rule,
+its limits and its guards are in [A slice taken through `(*[N]T)(p)` ALIASES the memory p names](pointers.md#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors).
+<!-- 2026-11-15 (user-facing docs audit, seat 3b): the paragraph described the form the view doors replaced, a
+     `new slice<T>(new ReadOnlySpan<T>((T*)ptr, (int)n))` that COPIED the memory (writes never reached it, cap = len, the
+     length narrowed to int). Source of the new text: src/go2cs/arrayPointerViewDoor.go (header comment) and
+     src/core/runtime/heapdump.cs:61 (`@unsafe.Pointer.View<byte>(data, 0, (nint)(len), 4096)`). The old text's
+     PointerCastSliceRange note (an identity cast, guarded index/value range and &s[i]) and StdLibInternalAbi (length
+     narrowing) are kept above and here. -->
 
 An **untyped (type-inferred) composite literal** — the inner `{…}` of a `[][]rank{ key: {…} }`, which has no explicit type node — is emitted as a target-typed `new(…)` when its inferred type is a struct (the struct constructor takes the field values). When the inferred type is a **slice or array**, that form is wrong (`slice<rank>`/`array<rank>` have no element-list constructor → CS1729); the converter emits the [slice-literal form](#a-slice-literal-is-a-collection-expression-where-c-knows-its-target) for a slice — `{rA, rB}` (inferred `[]rank`) → `slice<rank>([rA, rB])` — and the element-array projection for an array — an inferred `[2]int` → `new nint[]{…}.array()`. When the inferred type is a **pointer-to-struct** — the `[]*T{ {…} }` shorthand for `&T{…}` — it is emitted as the boxed struct constructor `Ꮡ(new T(field: val, …))` (a bare `new(…)` would target the box `ж<T>`, whose constructor lacks the struct's fields → CS1739). When such an untyped slice/array literal is **keyed** (`{joiningL: stateBefore, …}` — the inner `{…}` of x/net/idna's `joinStates = [][numJoinTypes]joinState{stateStart: {…}, …}`), the element-array projection above cannot take Go's `key: value` syntax — `new joinState[]{ joiningL: stateBefore }` is a C# array initializer, which has no keyed element form (CS1003 ×62). The keyed case is routed to a golib `golib.SparseArray<T>` collection initializer instead — `new golib.SparseArray<joinState>{ [joiningL] = stateBefore, … }.array()` (`.slice()` for a slice element) — the same form the *typed* keyed slice/array path emits (see below); the `.array()`/`.slice()` `IEnumerable<T>` extension materializes the dense backing, and a defined-integer key takes the `[(int)key]` cast exactly as in the typed path. (Guarded by `UntypedNestedSliceComposite`; runtime/lockrank.go's `lockPartialOrder` is a `[][]lockRank` and runtime1.go's `dbgvars` is a `[]*dbgVar` of the positional forms, and x/net/idna's `joinStates` is the keyed form.)
 
