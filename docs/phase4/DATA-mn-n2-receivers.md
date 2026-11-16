@@ -81,3 +81,22 @@ own shape keeps the base form; the switch off knows no referenced box twin). Eve
 is void: the first chain's arm O read 2,998 twinned, 7,159 await sites, 125 box calls and 5 named-plain with the
 switch off. The table above is the reading after it. For byref-param, the hand-off counter is split BEFORE any
 prediction: carrier-mounted against non-carrier blocks, with peak OS threads as the headline.
+
+## The code review and its re-gates (dated block, 2026-11-16)
+
+COORD's Fable code review of 3cd9db89a8..adf81cf40f: APPROVE WITH CHANGES; the seven changes landed in cb38d22455,
+each with a unit red first (DESIGN-mn-box-twin.md 10 and the commit say which). Re-gated from a per-run CLONE at
+cb38d22455: the probe green with N2 and red with GoTwinsBoxCopy; the sweep 30/30; repoguard green; arm N 3,806
+twinned, named-plain 24 (no `generic-unfollowed` row), Go 5/5; arm O 2,999 / 7,167 / 658 and 82,780,672 bytes,
+stage (c)'s arm B byte for byte.
+
+**Measurement rule (found here).** Every converted dll embeds its PDB path, so a tree whose path is longer than the
+reference tree's grows dlls by 512-byte alignment units: the same arm O read 82,782,208 (+1,536 = 3 x 512) from
+`g-run-rev`, 4 characters longer than `g-mn3`, and 82,780,672 from `g-rv3`, as long. Compare go.*.dll byte totals
+only between trees whose paths are as long as each other, or strip the PDB path first. The split clone's +2,048
+(`g-run-split`, 6 characters longer) is that effect, not the golib counter it was first credited to; the counter's
+own size is UNREAD.
+
+**PN-4, settled by the split counter** (56baaf2de4, 5 runs each): base O 110-115 carrier hand-offs + 81-86 thread
+blocks (about 197 plain blocks), peak OS threads 57-61; N2 130-136 + 0 (about 133), threads 39-40. Every off-carrier
+block moved onto a carrier and the total fell by a third. byref-param's headline is that total.
