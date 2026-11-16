@@ -62,3 +62,22 @@ reads the write after the park, through a root pointer, a field (the field token
 old backing array), an element of the own receiver's slice field, a value method through a pointer (the write NOT
 seen, its own mutation NOT reaching `*p`), a nil receiver and a nil pointer's field (Go's panics). Go prints 9 lines,
 stable over 3 runs. N2: equal. GoTwinsBoxCopy=true (each box twin copies its receiver): differs.
+
+## COORD's rulings (dated block, 2026-11-16)
+
+**SN-7: NOT FIRED**, on the census's definition: a refused caller never gets a twin, so its plain call sites are
+outside the population N2 acts on. The three numbers, as the ruling requires:
+
+- **37 raw**: arm N's report before its last fix.
+- **13 under refused callers**: fmt's `ss.advance` 7 (`sstring format`), `ss.consume` 2 and `ss.peek` 2 (`sstring
+  ok`), `ss.scanNumber` 1 (`sstring digits`), refused `reflike` (a ref-struct parameter); and bidi's
+  `resolvePairedBrackets(ref isolatingRunSequence s)` 1, refused `byref-param` (the post to COORD said reflike for
+  it: wrong; it is in the next step's population). None parks, so none has an R row in its report.
+- **24 counted**: stack locals 19, the package-variable element 3, a field of a value parameter 1, a `.Value` chain
+  over a ж value 1. The exclusion's GenTests unit (red first) is in the cut.
+
+**PN-1 and PN-4 stand as scored.** Arm O was NOT the base until rule (2) of PN-1 landed (a method with a twin of its
+own shape keeps the base form; the switch off knows no referenced box twin). Every arm-O number read before rule (2)
+is void: the first chain's arm O read 2,998 twinned, 7,159 await sites, 125 box calls and 5 named-plain with the
+switch off. The table above is the reading after it. For byref-param, the hand-off counter is split BEFORE any
+prediction: carrier-mounted against non-carrier blocks, with peak OS threads as the headline.
