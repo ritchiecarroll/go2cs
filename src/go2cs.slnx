@@ -338,6 +338,9 @@
     <Project Path="tests/Behavioral/BclTypeNameShadow/BclTypeNameShadow.csproj" />
     <Project Path="tests/Behavioral/ForeignAliasElementAddress/ForeignAliasElementAddress.csproj" />
     <Project Path="tests/Behavioral/ForeignAliasElementAddress/stdio/ForeignAliasElementAddress.stdio.csproj" />
+    <Project Path="tests/Behavioral/ForeignAndUnnamedStructConversion/ForeignAndUnnamedStructConversion.csproj" />
+    <Project Path="tests/Behavioral/ForeignAndUnnamedStructConversion/lib/ForeignAndUnnamedStructConversion.lib.csproj" />
+    <Project Path="tests/Behavioral/ForeignAndUnnamedStructConversion/other/ForeignAndUnnamedStructConversion.other.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructAliasAlias/ForeignAnonStructAliasAlias.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructAliasAlias/lib/ForeignAnonStructAliasAlias.lib.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructAliasElemAddress/ForeignAnonStructAliasElemAddress.csproj" />

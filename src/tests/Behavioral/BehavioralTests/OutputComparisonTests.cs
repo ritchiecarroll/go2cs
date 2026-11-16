@@ -722,6 +722,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForeignAliasElementAddress() => CheckTarget("ForeignAliasElementAddress");
 
     [TestMethod]
+    public void CheckForeignAndUnnamedStructConversion() => CheckTarget("ForeignAndUnnamedStructConversion");
+
+    [TestMethod]
     public void CheckForeignAnonStructAliasAlias() => CheckTarget("ForeignAnonStructAliasAlias");
 
     [TestMethod]

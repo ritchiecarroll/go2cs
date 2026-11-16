@@ -530,6 +530,8 @@
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness_test.go" />
     <None Include="$(MSBuildThisFileDirectory)namedShiftCount_test.go" />
     <None Include="$(MSBuildThisFileDirectory)namedUnionBreadcrumb_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)namedUnnamedStructConversion.go" />
+    <None Include="$(MSBuildThisFileDirectory)namedUnnamedStructConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)narrowArithmeticOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)nativeBackedArrayPointerStore_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nativeFieldArrayView.go" />
