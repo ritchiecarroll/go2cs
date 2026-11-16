@@ -320,7 +320,18 @@ public sealed partial class Goroutine
     /// </summary>
     public static ParkScope Park(WaitReason reason) => ParkCore(reason, handoff: true);
 
-    // A multiplexed goroutine about to block its carrier's thread gives the P away first.
-    private static bool HandOffBeforeBlocking(Goroutine goroutine, int previous) =>
-        previous == (int)WaitReason.Zero && goroutine.m_multiplexed && GoScheduler.EnterBlocked();
+    // A multiplexed goroutine about to block its carrier's thread gives the P away first. An outermost plain park with
+    // no carrier to give away blocks its own thread: counted apart (`thread-blocks`), the other half of `handoffs`.
+    private static bool HandOffBeforeBlocking(Goroutine goroutine, int previous)
+    {
+        if (previous != (int)WaitReason.Zero)
+            return false;
+
+        if (goroutine.m_multiplexed && GoScheduler.EnterBlocked())
+            return true;
+
+        GoScheduler.NoteThreadBlock();
+
+        return false;
+    }
 }

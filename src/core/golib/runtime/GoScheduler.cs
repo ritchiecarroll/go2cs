@@ -160,6 +160,11 @@ public static class GoScheduler
     private static long s_migrations;
     private static long s_migrated;
     private static long s_handoffs;
+
+    // The other half of the hand-off counter (COORD's split for byref-param, 2026-11-16): an outermost PLAIN park of a
+    // goroutine with no carrier to hand off (a thread goroutine, or one off its carrier), so it blocks its own thread.
+    // `handoffs` alone rose under N2 as more goroutines came onto carriers; the two together show where blocks went.
+    private static long s_threadBlocks;
     private static long s_injections;
     private static long s_carrierStartFailures;
     private static long s_carriersStarted;
@@ -286,7 +291,8 @@ public static class GoScheduler
                $" carriers-started={Interlocked.Read(ref s_carriersStarted)} peak-os-threads={Volatile.Read(ref s_peakThreads)}" +
                $" steps={Interlocked.Read(ref s_steps)} parks={Interlocked.Read(ref s_parks)}" +
                $" migrations={Interlocked.Read(ref s_migrations)} migrated-goroutines={Interlocked.Read(ref s_migrated)}" +
-               $" handoffs={Interlocked.Read(ref s_handoffs)} injections={Interlocked.Read(ref s_injections)}" +
+               $" handoffs={Interlocked.Read(ref s_handoffs)} thread-blocks={Interlocked.Read(ref s_threadBlocks)}" +
+               $" injections={Interlocked.Read(ref s_injections)}" +
                $" run-next-steps={Interlocked.Read(ref s_runNextSteps)} run-next-steals={Interlocked.Read(ref s_runNextSteals)}" +
                $" steps-over-10ms={Interlocked.Read(ref s_longSteps)}" +
                $" max-step-ms={Interlocked.Read(ref s_maxStepTicks) * 1000 / Stopwatch.Frequency}" +
@@ -331,6 +337,9 @@ public static class GoScheduler
         carrier.PendingSlot = slot;
         carrier.PendingContinuation = continuation;
     }
+
+    /// <summary>A plain park's block with no carrier to hand off: counted only (the `thread-blocks` reading).</summary>
+    internal static void NoteThreadBlock() => Interlocked.Increment(ref s_threadBlocks);
 
     /// <summary>
     /// The mounted goroutine is about to block its thread (a park with no twin): give the P away, and make
