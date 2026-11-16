@@ -176,6 +176,18 @@ namespace go.golib;
         return new PanicException(string.Format(ManagedDerivedStructReadMessage, structType.Name));
     }
 
+    private const string ValueDecodeRefusedMessage =
+        $"{RuntimeErrorMessage}cannot read {{0}} as a value out of memory: {{1}}";
+    /// <summary>
+    /// B2's value decode refused (<c>NativeStructMarshal.DecodeValue</c>): a Go struct read as a VALUE through a native
+    /// box (<see cref="ж{T}.GoValue"/>) whose bytes cannot be decoded at Go's offsets, with the reason, which names the
+    /// field where there is one.
+    /// </summary>
+    internal static PanicException ValueDecodeRefused(Type structType, string reason)
+    {
+        return new PanicException(string.Format(ValueDecodeRefusedMessage, structType.Name, reason));
+    }
+
     private const string UnknownGoSizeMessage =
         $"{RuntimeErrorMessage}{{0}} of {{1}} is not known (the length of {{2}} is not carried for an unnamed array type argument)";
     private const string UnknownGoSizeInnerMessage =

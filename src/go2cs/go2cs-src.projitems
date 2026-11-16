@@ -15,6 +15,7 @@
     <None Include="$(MSBuildThisFileDirectory)adapterStructLocality_test.go" />
     <None Include="$(MSBuildThisFileDirectory)addCleanupCaptures.go" />
     <None Include="$(MSBuildThisFileDirectory)addressTakenPredicates_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)aliasArrayFieldZero_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasDocComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasKeywordName_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasPublicization_test.go" />
@@ -345,6 +346,7 @@
     <None Include="$(MSBuildThisFileDirectory)inlineArrayOverCap_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayValueDecodeCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintClosedRecord_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintNamed.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintPublished_test.go" />
@@ -807,6 +809,9 @@
     <None Include="$(MSBuildThisFileDirectory)valueCloneFieldSpelling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueCloneStampMembers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueConstraintRecordNeed_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)valueDecodeShapes_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)valueDecodeSites.go" />
+    <None Include="$(MSBuildThisFileDirectory)valueDecodeSites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePunOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)valueReceiverBoxTwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePun_test.go" />
