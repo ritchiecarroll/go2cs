@@ -46,6 +46,8 @@ using static go.main_package;
 [assembly: GoFieldAccess(typeof(acct))]
 [assembly: GoFieldAccess(typeof(bag))]
 [assembly: GoFieldAccess(typeof(cell))]
+[assembly: GoFieldAccess(typeof(holder))]
+[assembly: GoFieldAccess(typeof(ptrs))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,7 +57,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABs2gqaClIKCgqaCgoKmgoKCqIKCgoKCqoKCgqiCqIKCgqbSgoKmgubSgoKmguaClJCSgpSQkoKUgoKCkJKCgpSCkJKClIKQkoKUkJKClJCSgoKUkpQ=", "82-86:1;92-96:1;104-104:1;108-108:2;115-115:3;121-121:4;126-126:5;130-130:6;134-134:7;139-139:8", "", "", "", "83:21,84:13,102:21,103:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABs2gqaClIKCgqaCgoKmgoKCqIKCgoKCqoKCgqiCAAYUgoKCpoKCgqaygoKmguiCgoKm0oKCpoLm0oKCpoLmgpSQkoKUkJKClIKCgpCSgoKUgpCSgpSCkJKClJCSgpSCgoKQkpSCkJKUgpCSlIKQkpSCkJKUgoKQkpSQkoKClJKUmA==", "94-98:1;111-115:1;121-125:1;133-133:1;137-137:2;144-144:3;150-150:4;155-155:5;159-159:6;166-166:7;170-170:8;174-174:9;178-178:10;182-182:11;187-187:12;190-190:13;195-195:14", "", "", "", "91:21,92:13,116:21,117:13,135:21,136:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -76,6 +78,7 @@ public static partial class main_package
     internal partial struct cell {}
     internal partial struct holder {}
     internal partial struct inner {}
+    internal partial struct ptrs {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

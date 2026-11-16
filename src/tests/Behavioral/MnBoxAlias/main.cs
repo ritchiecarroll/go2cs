@@ -68,6 +68,39 @@ internal static nint forward(ref cell c) {
     return readCell(ref c);
 }
 
+partial struct ptrs {
+    internal ж<cell> p;
+}
+
+internal static nint readBoth(ref holder h, ref cell c) {
+    ready.ᐸꟷ(new EmptyStruct());
+    ᐸꟷ(resume);
+    return h.c.v * 100 + c.v;
+}
+
+internal static nint readArr(ref array<cell> a, ref cell c) {
+    ready.ᐸꟷ(new EmptyStruct());
+    ᐸꟷ(resume);
+    return a[1].v * 100 + c.v;
+}
+
+internal static @string /*out*/ nilParam(ref holder nh) {
+    @string @out = default;
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            var r = recover(); if (r != nil) {
+                @out = fmt.Sprint("panic: ", r);
+            }
+        }, ref ᒐ);
+        nint v = readCell(ref nonnil(ref nh).c);
+        @out = fmt.Sprint(v);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return @out;
+}
+
 internal static void writer(Action write) {
     ᐸꟷ(ready);
     write();
@@ -163,6 +196,51 @@ internal static partial void main() {
     nint forwarded = forward(ref (pc).DerefOrNull());
     fmt.Println("param-forward", forwarded);
 
+    ref var hc = ref heap(new cell(), out var Ꮡhc);
+    hc.v = 1;
+    var hp = Ꮡhc;
+    var hpʗ1 = hp;
+    goǃ(writer, () => {
+        hpʗ1.v = 8;
+    });
+    fmt.Println("param-heap", readCell(ref hc));
+
+    var cs = slice<cell>([new(v: 1), new(v: 1)]);
+    var csʗ1 = cs;
+    goǃ(writer, () => {
+        csʗ1[1].v = 9;
+    });
+    fmt.Println("param-element", readCell(ref cs[1]));
+
+    var h = Ꮡ(new holder(c: new cell(v: 1)));
+    var hʗ1 = h;
+    goǃ(writer, () => {
+        hʗ1.c.v = 10;
+    });
+    fmt.Println("param-field", readCell(ref (h.Ꮡc).DerefOrNull()));
+
+    var e = Ꮡ(new ptrs(p: Ꮡ(new cell(v: 1))));
+    var eʗ1 = e;
+    goǃ(writer, () => {
+        eʗ1.p.v = 11;
+    });
+    fmt.Println("param-ptr-field", readCell(ref (e.p).DerefOrNull()));
+
+    var hh = Ꮡ(new holder(c: new cell(v: 1)));
+    var hhʗ1 = hh;
+    goǃ(writer, () => {
+        hhʗ1.c.v = 12;
+    });
+    fmt.Println("param-two", readBoth(ref (hh).DerefOrNull(), ref (hh.Ꮡc).DerefOrNull()));
+
+    ref var arr = ref heap(new array<cell>(2), out var Ꮡarr);
+    var ap = Ꮡarr;
+    var apʗ1 = ap;
+    goǃ(writer, () => {
+        apʗ1.Value[1].v = 13;
+    });
+    fmt.Println("param-array", readArr(ref arr, ref arr[1]));
+
     var aʗ3 = a;
     goǃ(writer, () => {
         aʗ3.bal = 50;
@@ -176,6 +254,8 @@ internal static partial void main() {
     fmt.Println("nil", nilRoot(nil));
 
     fmt.Println("nil-field", nilField(nil));
+
+    fmt.Println("param-nil-field", nilParam(ref ((ж<holder>)default).DerefOrNull()));
 }
 
 } // end main_package

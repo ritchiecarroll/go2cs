@@ -205,6 +205,20 @@ public sealed partial class TwinGenerator
             return BoxOf(operand, model, caller, aliases, position);
         }
 
+        // The field-access generator's members over a box (`e.f`, a ref to the field; `e.Ꮡf`, the field's pointer): a field
+        // read through the box, nothing else, so a field chain may cross them (the probe's `(h.Ꮡc).DerefOrNull()` and
+        // `(e.p).DerefOrNull()`). They are extension properties of `go.GoFieldAccess`.
+        private static bool FieldAccessMember(INamedTypeSymbol type)
+        {
+            for (INamedTypeSymbol? current = type; current is not null; current = current.ContainingType)
+            {
+                if (current is { Name: "GoFieldAccess", ContainingType: null, ContainingNamespace.Name: "go" })
+                    return true;
+            }
+
+            return false;
+        }
+
         // A ж expression a call can read once and hand on: a name (a local, a parameter or a static), a field chain over
         // one, a `~` dereference of one, or an element pointer `Ꮡ(x, i)` over such operands. A package-level root is read
         // at the call, once, as Go reads it; the box is spilled nowhere, since nothing is evaluated between.
@@ -212,9 +226,13 @@ public sealed partial class TwinGenerator
         {
             IdentifierNameSyntax => true,
             ParenthesizedExpressionSyntax parenthesized => BoxSideEffectFree(parenthesized.Expression, model),
+            // 12.1's nil (should-fix 4): the converter's nil pointer `(ж<T>)default`, handed as is; the callee faults at its
+            // first dereference, as Go's does.
+            CastExpressionSyntax { Expression: LiteralExpressionSyntax { RawKind: (int)SyntaxKind.DefaultLiteralExpression } } => true,
             PrefixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.BitwiseNotExpression } deref => BoxSideEffectFree(deref.Operand, model),
             MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression } member =>
-                model.GetSymbolInfo(member).Symbol is IFieldSymbol && BoxSideEffectFree(member.Expression, model),
+                model.GetSymbolInfo(member).Symbol is var symbol && (symbol is IFieldSymbol || symbol is IPropertySymbol { ContainingType: { } accessor } && FieldAccessMember(accessor)) &&
+                BoxSideEffectFree(member.Expression, model),
             InvocationExpressionSyntax { ArgumentList.Arguments.Count: 2 } element when
                 element.Expression is IdentifierNameSyntax { Identifier.ValueText: "Ꮡ" } or MemberAccessExpressionSyntax { Name.Identifier.ValueText: "Ꮡ" } &&
                 element.ArgumentList.Arguments.All(argument => argument.RefKindKeyword.IsKind(SyntaxKind.None) &&

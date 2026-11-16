@@ -352,6 +352,15 @@ public class TwinBoxTests
 
         """;
 
+    // G's ruling 1 (a): a later argument that parks, after a box argument (`f(p, <-ch)`), is NOT moved ahead of the call's
+    // statement; it stays a blocking call in place, so the box is read where the plain emission reads it.
+    private const string LaterParkingArgument = """
+            internal static nint rw(ref T c, nint k) { ᐸꟷ(ch); return c.x + k; }
+
+            public static void runLater(ж<T> px) { rw(ref (px).DerefOrNull(), ᐸꟷ(ch)); }
+
+        """;
+
     // A hand-written `this ref` method with another `ref` parameter (the converter emits none: ref-lowering skips methods).
     private const string MixedRef = """
             internal static void mx(this ref T t, ref T u) { ᐸꟷ(ch); }
@@ -818,6 +827,16 @@ public class TwinBoxTests
         Assert.AreEqual(0, errors.Length, Errors(errors));
         StringAssert.Contains(twins, "await ppꞏtwin(global::go.builtin.Ꮡ((px).DerefOrNull()))", "the call-site control copies, on purpose");
         StringAssert.Contains(twins, "ARGCOPY(control)", "and says so in the report");
+    }
+
+    [TestMethod]
+    public void P13_ALaterParkingArgumentIsNotMovedAheadOfABoxCall()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, LaterParkingArgument);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await rwꞏtwin(px, ᐸꟷ(ch))", "the inner receive stays in place, plain, after the box");
+        Assert.IsFalse(twins.Contains("runLaterꞏtwin(ж<T> px) { var ᴛtwin", StringComparison.Ordinal), "nothing spilled ahead of the statement");
     }
 
     [TestMethod]

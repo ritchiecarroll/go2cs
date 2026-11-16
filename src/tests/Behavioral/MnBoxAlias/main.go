@@ -71,6 +71,35 @@ func forward(c *cell) int {
 	return readCell(c)
 }
 
+// byref-param probe rows of 12.1 (P4): each callee parks, a writer writes through the same storage, and the callee
+// reads after the park. Two parameters over one storage, an array and its element, a nil field. 12.1's later-parking-
+// argument row `f(p, <-ch)` is NOT here: gc reads p after the receive and the plain emission reads it before, a
+// pre-existing converter divergence (COORD 2026-11-16 15:12Z, a BOARD row) that would redden this fixture's Output
+// phase under every arm; its repro is src/tools/mnspike2/MnLaterArg.
+type ptrs struct{ p *cell }
+
+func readBoth(h *holder, c *cell) int {
+	ready <- struct{}{}
+	<-resume
+	return h.c.v*100 + c.v
+}
+
+func readArr(a *[2]cell, c *cell) int {
+	ready <- struct{}{}
+	<-resume
+	return a[1].v*100 + c.v
+}
+
+func nilParam(nh *holder) (out string) {
+	defer func() {
+		if r := recover(); r != nil {
+			out = fmt.Sprint("panic: ", r)
+		}
+	}()
+	v := readCell(&nh.c)
+	return fmt.Sprint(v)
+}
+
 // writer waits for the method to park, writes, and lets it resume.
 func writer(write func()) {
 	<-ready
@@ -131,6 +160,33 @@ func main() {
 	forwarded := forward(pc)
 	fmt.Println("param-forward", forwarded)
 
+	var hc cell
+	hc.v = 1
+	hp := &hc // the address escapes: hc is a heap local
+	go writer(func() { hp.v = 8 })
+	fmt.Println("param-heap", readCell(&hc))
+
+	cs := []cell{{v: 1}, {v: 1}}
+	go writer(func() { cs[1].v = 9 })
+	fmt.Println("param-element", readCell(&cs[1]))
+
+	h := &holder{c: cell{v: 1}}
+	go writer(func() { h.c.v = 10 })
+	fmt.Println("param-field", readCell(&h.c))
+
+	e := &ptrs{p: &cell{v: 1}}
+	go writer(func() { e.p.v = 11 })
+	fmt.Println("param-ptr-field", readCell(e.p))
+
+	hh := &holder{c: cell{v: 1}}
+	go writer(func() { hh.c.v = 12 })
+	fmt.Println("param-two", readBoth(hh, &hh.c))
+
+	var arr [2]cell
+	ap := &arr // the address escapes: arr is a heap local
+	go writer(func() { ap[1].v = 13 })
+	fmt.Println("param-array", readArr(&arr, &arr[1]))
+
 	go writer(func() { a.bal = 50 })
 	value := a.valueRead()
 	fmt.Println("value", value)
@@ -140,4 +196,8 @@ func main() {
 	fmt.Println("nil", nilRoot(nil))
 
 	fmt.Println("nil-field", nilField(nil))
+
+	// Last: under GoTwinsBoxCopy the callee's prologue copies through the nil box and faults before nilParam's recover
+	// is installed, which ends the program; every row above is read first.
+	fmt.Println("param-nil-field", nilParam(nil))
 }
