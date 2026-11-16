@@ -257,6 +257,28 @@ public class TwinRefAcrossAwaitTests
 
         """;
 
+    // net/http's server.cs `case {} when isCommonNetReadError(err): …; default: … c.rwc …`: an await in a CASE GUARD runs
+    // before the sections' bodies, so each section derives the ref again on entry, as for an awaited switch expression.
+    private const string GuardAwait = """
+            public static void guardAwait(ж<T> Ꮡt, nint k)
+            {
+                try
+                {
+                    ref var t = ref Ꮡt.DerefOrNull();
+                    switch (k)
+                    {
+                        case 1 when parksB():
+                            return;
+                        default:
+                            t.closeBody();
+                            break;
+                    }
+                }
+                finally { }
+            }
+
+        """;
+
     private const string UseAfterAnd = """
             public static bool useAfterAnd(ж<T> Ꮡt)
             {
@@ -368,6 +390,9 @@ public class TwinRefAcrossAwaitTests
 
     [TestMethod]
     public void AStructReceiverThroughARefReturningPropertyCompiles() => AssertTwinCompiles("valueRecv", ValueRecv);
+
+    [TestMethod]
+    public void AnAwaitInACaseGuardDerivesTheRefAgainInEachSection() => AssertTwinCompiles("guardAwait", GuardAwait);
 
     [TestMethod]
     public void ARefReadInANestedStatementLeavesTheAwaitInPlace()

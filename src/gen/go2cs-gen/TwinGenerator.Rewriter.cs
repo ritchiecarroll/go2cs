@@ -898,9 +898,17 @@ public sealed partial class TwinGenerator
             bool stale = HeaderAwaits > 0;
             List<SwitchSectionSyntax> sections = [];
 
-            foreach (SwitchSectionSyntax section in node.Sections)
+            // Stage (c): an await in a CASE GUARD (net/http's `case {} when isCommonNetReadError(err)`) runs before the
+            // sections' bodies, as the switch expression's does, so it too makes every section derive the refs again
+            // on entry. The labels are visited first, all of them, to know.
+            int labelAwaits = m_awaits;
+            List<SyntaxList<SwitchLabelSyntax>> visitedLabels = [.. node.Sections.Select(section => List(section.Labels.Select(label => (SwitchLabelSyntax)Visit(label)!)))];
+            stale |= m_awaits != labelAwaits;
+
+            for (int index = 0; index < node.Sections.Count; index++)
             {
-                SyntaxList<SwitchLabelSyntax> labels = List(section.Labels.Select(label => (SwitchLabelSyntax)Visit(label)!));
+                SwitchSectionSyntax section = node.Sections[index];
+                SyntaxList<SwitchLabelSyntax> labels = visitedLabels[index];
                 SyntaxList<StatementSyntax> statements = Statements(section.Statements);
 
                 if (stale && statements.Count > 0)
