@@ -268,10 +268,10 @@ public sealed partial class TwinGenerator
         }
 
         // Stage (c): a receiver passed by reference (a struct value: its instance members take `this` by ref) that reaches
-        // a ref local, so evaluating it before an await holds that ref across it.
+        // a reference -- a ref local, a ref-returning property such as ж<T>.Value (h2_bundle's `Ꮡsc.Value.logf(…)`) or a
+        // ref-returning call -- so evaluating it before an await holds that reference across it.
         private bool ByRefReceiver(ExpressionSyntax receiver) =>
-            m_model.GetTypeInfo(receiver).Type is { IsValueType: true } &&
-            receiver.DescendantNodesAndSelf().OfType<IdentifierNameSyntax>().Any(name => m_model.GetSymbolInfo(name).Symbol is ILocalSymbol { RefKind: not RefKind.None });
+            m_model.GetTypeInfo(receiver).Type is { IsValueType: true } && WritesThroughRef(receiver);
 
         // Stage (c): whether a ref local is read LATER in the call's statement than the call (math/big's
         // `@new<Float>().SetPrec(n).SetMode(x.mode)`, crypto/rsa's `encryptOAEP(opts.Hash.New(), opts.Hash.New(), …)`).

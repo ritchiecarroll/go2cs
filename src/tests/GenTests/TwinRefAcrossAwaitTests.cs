@@ -37,7 +37,7 @@ public class TwinRefAcrossAwaitTests
         {
             internal static channel<nint> ch;
 
-            public struct T { public nint x; public Bag b; }
+            public struct T { public nint x; public Bag b; public nint Add(nint k) => x + k; }
 
             // golib's map<K, V> is a readonly struct: its indexer takes `this` by reference.
             public readonly struct Bag { public nint this[nint i] => i; }
@@ -226,6 +226,16 @@ public class TwinRefAcrossAwaitTests
 
         """;
 
+    // net/http's h2_bundle `Ꮡsc.Value.logf(…, Ꮡsc.Value.conn.RemoteAddr(), …)`: the struct receiver is a ref-returning
+    // property (ж<T>.Value), evaluated before an awaited argument (CS8178).
+    private const string ValueRecv = """
+            public static nint valueRecv(ж<T> Ꮡt)
+            {
+                return Ꮡt.Value.Add(parksN());
+            }
+
+        """;
+
     private const string UseAfterAnd = """
             public static bool useAfterAnd(ж<T> Ꮡt)
             {
@@ -334,6 +344,9 @@ public class TwinRefAcrossAwaitTests
 
     [TestMethod]
     public void AByRefArgumentBeforeAnAwaitedArgumentCompiles() => AssertTwinCompiles("refArgBefore", RefArgBefore);
+
+    [TestMethod]
+    public void AStructReceiverThroughARefReturningPropertyCompiles() => AssertTwinCompiles("valueRecv", ValueRecv);
 
     [TestMethod]
     public void AnAwaitInsideALockRefusesTheTwinByName()
