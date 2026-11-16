@@ -267,10 +267,14 @@ through it works as Go's `*p` does: `*p` read as a value is a copy, `*p = v` sto
 slice of the field, and a `range` over `p` reads each element when its round comes, while a `range` over `*p`
 ranges a copy.
 
-A limit: the view of a field of a struct that holds a string, a slice, a map, an interface or a pointer panics by
-name. Every such site found in the TypeScript compiler and in the nine nugetgo modules is in `golang.org/x/sys`
-(`unix` on linux and macOS, `windows` on Windows). A tuple assignment that stores the whole array through two
-such views at once is also refused by name. See
+The view also works over a struct that holds a string, a slice, a map, an interface or a pointer, which is where
+`golang.org/x/sys` reads a socket address (`unix` on linux and macOS, `windows` on Windows), and through a chain of
+field selections from a variable (`&sa.raw.port`). Over such a struct the index, the whole-array load and store,
+`len` and a `range` that takes only the index work; a slice of the view, the address of one of its elements and a
+`range` by value are refused by name, and so is a tuple assignment that stores the whole array through two views at
+once. One related form can end the process: a slice taken where it is written, `(*[N]E)(unsafe.Pointer(&x.f))[:]`,
+over a promoted field, a slice element's field or a call's result
+([Limitations](Limitations.md)). See
 [Pointers](ConversionStrategies-Reference/pointers.md#the-bytes-of-one-field-through-ntunsafepointerpf-the-field-view).
 <!-- F1 parts A and B: merge 0d1f6f1f3f (P5, claude/p5-field-view-index d073be7130), BOARD 2026-11-15 "the field view
      answers over a Go struct, and is indexed in place where it is written" (the before-probe at 516586c4a9,
@@ -281,7 +285,14 @@ such views at once is also refused by name. See
      holds a reference is refused by name" and its census amendment (TypeScript closure: 17/17/4/7 sites on
      linux/amd64, linux/arm64, darwin/amd64, windows/amd64; nugetgo modules 17/17/4/0; all x/sys). The tuple store:
      BOARD 2026-11-15 "a tuple assignment that stores the whole array through two field views is refused by name"
-     (proposed .5). REVISIT AT 310: P5's box-kind seat (a1a1d8534b) answers the reference-holding sites. -->
+     (proposed .5). The reference-holding struct and the chain: batch 310 merge e207d6f5b6 (P5, claude/p5-reinterpret-array-box
+     a1a1d8534b), BOARD 2026-11-15 "a field view over a struct that holds a reference reads and writes the field's own
+     bytes" (DONE; footprint lsf_linux.cs 3 lines on linux x2) and its row "a range by value, a slice and an element's
+     address ... are refused by name" (proposed .5). The process-ending open slice: BOARD 2026-11-15 "the open slice of
+     a pointer conversion over an array field of another element type ends the process" (.5), disclosed in
+     docs/Limitations.md for this release. 2026-11-16 (P4): the earlier text's limit ("the view of a field of a struct
+     that holds a string ... panics by name") was rewritten after 310 landed; if P5's D4 (311) cures the open slice in
+     this release, drop that sentence. -->
 
 ### A write at the address of a named array is no longer lost (P5)
 
