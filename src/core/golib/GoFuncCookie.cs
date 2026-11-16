@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace go;
 
@@ -244,10 +245,10 @@ namespace go;
         if (!type.IsGenericType)
             return type.FullName ?? type.Name;
 
-        // Every arity mark goes, not only the first: a nested type of a generic type reads Outer`1+Inner.
+        // Every arity mark goes, not only the first: a nested type of a generic type reads Outer`1+Inner. Built in a
+        // StringBuilder, with no raw array of its own (NoUncountedBackingAllocations).
         string definition = type.GetGenericTypeDefinition().FullName ?? type.GetGenericTypeDefinition().Name;
-        char[] name = new char[definition.Length];
-        int length = 0;
+        StringBuilder name = new(definition.Length + 32);
 
         for (int i = 0; i < definition.Length; i++)
         {
@@ -259,16 +260,20 @@ namespace go;
                 continue;
             }
 
-            name[length++] = definition[i];
+            name.Append(definition[i]);
         }
 
-        Type[] arguments = type.GetGenericArguments();
-        string[] names = new string[arguments.Length];
+        name.Append('<');
 
-        for (int i = 0; i < arguments.Length; i++)
-            names[i] = FullTypeName(arguments[i]);
+        foreach (Type argument in type.GetGenericArguments())
+        {
+            if (name[^1] != '<')
+                name.Append(", ");
 
-        return new string(name, 0, length) + "<" + string.Join(", ", names) + ">";
+            name.Append(FullTypeName(argument));
+        }
+
+        return name.Append('>').ToString();
     }
 
     /// <summary>
