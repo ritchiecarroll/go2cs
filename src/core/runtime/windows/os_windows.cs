@@ -504,7 +504,7 @@ internal static void goenvs() {
     //     "envA=valA\x00envB=valB\x00\x00" (in UTF-16)
     // Two consecutive zero bytes end the list.
     @unsafe.Pointer strings = (@unsafe.Pointer)stdcall(_GetEnvironmentStringsW);
-    var Δp = @unsafe.Pointer.To<array<uint16>>(strings).slice();
+    var Δp = @unsafe.Pointer.View<uint16>(strings, 0, 16777216);
 
     nint n = 0;
     for ((nint from, nint i) = (0, 0); true; i++) {

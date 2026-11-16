@@ -456,7 +456,7 @@ internal static @string pkgPath(abiꓸName n) {
         off += i2 + l2;
     }
     ref var nameOff = ref heap(new nameOff(), out var ᏑnameOff);
-    copy(@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)).slice(), array<byte>.AliasPointer(n.Data(off), 4).slice());
+    @unsafe.Pointer.CopyInto<byte>(@unsafe.Pointer.FromPinnedBox(ᏑnameOff), 0, 4, array<byte>.AliasPointer(n.Data(off), 4).slice());
     var pkgPathName = resolveNameOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff);
     return pkgPathName.Name();
 }

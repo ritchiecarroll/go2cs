@@ -320,7 +320,7 @@ internal static nint /*pairs*/ sysauxv(slice<uintptr> auxv) {
             // and musl use the value as-is for stack and pointer protector
             // cookies from libc_start_main and/or dl_start. Also, cgo programs
             // may use the value after we do.
-            startupRand = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)val).slice();
+            startupRand = @unsafe.Pointer.View<byte>((@unsafe.Pointer)val, 0, 16);
             break;
         }
         case var ᴛ when ᴛ == _AT_PAGESZ: {
