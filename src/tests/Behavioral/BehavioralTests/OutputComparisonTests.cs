@@ -2723,6 +2723,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUnicodeConsoleOutput() => CheckTarget("UnicodeConsoleOutput");
 
     [TestMethod]
+    public void CheckUnionElementArrayDoor() => CheckTarget("UnionElementArrayDoor");
+
+    [TestMethod]
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");
 
     [TestMethod]
