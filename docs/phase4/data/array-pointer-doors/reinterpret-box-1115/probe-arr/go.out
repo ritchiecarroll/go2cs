@@ -1,0 +1,7 @@
+pointer root slice: ptr
+pointer root local: 80 116 80
+variable root slice: var
+variable root local: 86 97 86
+package root slice: glob
+two-hop slice: two
+two-hop local: 116 87 87

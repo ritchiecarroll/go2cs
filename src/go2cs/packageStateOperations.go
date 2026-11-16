@@ -115,6 +115,7 @@ func resetPackageState(pkg *packages.Package) {
 	packageHoistedConstOrdinals = nil
 	packageInlineAdmission = nil
 	packageInlineArrayRecords = nil
+	packageValueDecodeSites = nil
 	productionHoistedConstOrdinals = nil
 	metadataAnchorClassPrefix = ""
 	metadataAnchorLocalTypes = false

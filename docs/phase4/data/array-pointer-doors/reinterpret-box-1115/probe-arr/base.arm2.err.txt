@@ -1,0 +1,12 @@
+Fatal error.
+System.AccessViolationException: Attempted to read or write protected memory. This is often an indication that other memory is corrupt.
+   at go.slice`1[[System.Byte]]..ctor(Byte[], IntPtr, IntPtr, IntPtr)
+   at go.array`1[[System.Byte]].Slice(Int32, Int32)
+   at go.array`1[[System.Byte]].Slice2(IntPtr, IntPtr)
+   at go.array`1[[System.Byte]].get_Item(System.Range)
+   at go.SliceExtensions.slice[[System.Byte]](go.ж`1<go.array`1<Byte>>)
+   at go.example.com.main_package.varSlice()
+   at go.example.com.main_package.try(go.string, System.Func`1<go.string>)
+   at go.example.com.main_package.main()
+   at go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0()
+   at System.Threading.Thread.StartCallback()

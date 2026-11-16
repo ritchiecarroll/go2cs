@@ -1,0 +1,23 @@
+BOX KIND PREDICTIONS, written 2026-11-15T12:24Z, after the 41 field-view arms read green and before anything below is measured.
+
+1. Whole GolibTests linux/amd64 Release at the cut: part C's 2864 passed + 16 new arms = 2880 passed, 0 failed,
+   49 skipped, 2929. Falsifier: any failure, or a count that is not +16 (the two rewritten arms keep their count).
+2. Footprint, two-seeded, four targets, base = part C's converter and tree: 0 corpus files for commit 1 (no
+   converter change; src/core/unsafe/unsafe.cs is hand-owned and is named). Commit 2 (the hook widened to a chain
+   of field selections): 0 corpus files, since the sqlite census read the 4 two-deep sites in x/sys/unix only and
+   the std corpus's field-view sites are one selection deep. Falsifier: any std file that moves.
+3. Behavioral: +1 program (FieldViewOverReferenceStruct), its 14 lines equal to Go's. CNR: NO REGRESSION at 1077.
+4. The behavioral program converted by part C's converter and run against part C's tree: refused by name at its
+   first line (encodePort), the red.
+
+CORRECTION to prediction 2, written 2026-11-15T13:17Z, BEFORE any footprint for this seat has run. The first wording stays above.
+Reading the committed corpus for field addresses that take the raw route (a grep for the pointer conversion to an
+array type over a field's own pointer) found one site the widened shape takes:
+src/core/syscall/linux/lsf_linux.cs:30, Go's syscall.LsfSocket, `p := (*[2]byte)(unsafe.Pointer(&lsall.Protocol))`,
+lsall a struct VARIABLE of a type that holds a reference. It is not one of the 26 sites: the census's standard-library
+rows counted the views the converter already emitted as field views. So, corrected:
+2'. Commit 1: 0 corpus files (no converter change). Commit 2: exactly 1 corpus file on linux/amd64 and on
+    linux/arm64, syscall/linux/lsf_linux.cs, 3 lines (the view's declaration becomes ArrayPointer<byte>.Of over the
+    field's pointer, and the two indexed stores become ElementRef), no position-map line (no line count changes);
+    0 corpus files on windows/amd64 and darwin/amd64. Falsifier: any other file, or a map line.
+A typed census over the standard library on four targets is running to check that this is the only one.
