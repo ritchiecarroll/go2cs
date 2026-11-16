@@ -304,6 +304,13 @@ public sealed partial class TwinGenerator : ISourceGenerator
             if (HasTwinMember(symbol))
                 return "has-twin";
 
+            // Stage (c)'s SC-1 (COORD's GO, 2026-11-15): a twin is written into its host reopened as `partial`, so a method
+            // whose host chain is not all partial (a hand-owned helper such as runtime's Sysmon) cannot get one: CS0260.
+            // Refused by name, as the interface forwarders skip such a host (ForwarderSkip). Its callers keep their twins
+            // and call it plain: a thread, never a wrong answer. The count is record 10.8's owed number.
+            if (method.Ancestors().OfType<TypeDeclarationSyntax>().Any(type => !type.Modifiers.Any(SyntaxKind.PartialKeyword)))
+                return "host-not-partial";
+
             if (method.Parent is InterfaceDeclarationSyntax)
                 return "interface-member";
 
