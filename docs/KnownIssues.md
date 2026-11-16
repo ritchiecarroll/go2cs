@@ -307,13 +307,24 @@ A full trim (`TrimMode` set to `full`) produces a program that runs as well. Tha
 one development machine, with the 1.24.13.5 packages; the hosted check measures the default.
 
 **What it costs.** With `partial`, Native AOT compiles every `go.*` assembly the program references in
-full, not only the parts the program uses. For a small program that references about thirty of them, the
-publish took under four minutes on a hosted CI runner for Linux and for Windows, about six minutes on a Mac
-with Apple silicon and about eleven on an Intel Mac (measured 2026-10-14, with packages converted from Go
-1.24.13). A converted project pays the same cost, because it uses the same setting. A build, `dotnet run` and a publish without
+full, not only the parts the program uses. On a 4-core Linux cloud machine, converted from source at the
+tree of the coming 1.26.11.1 release, a hello world that imports `strings` and `fmt` took about 19 minutes to publish, and the README
+walkthrough's program, which uses github.com/fatih/color, about 26 minutes. A converted project pays the same
+cost, because it uses the same setting. With the 1.26.10.3 packages the walkthrough's program does not publish at
+all on `linux-x64`: the compiler stops at the native string table's 2 GiB ceiling
+([how to recognize it](Tuning.md#native-aot-method-body-folding)). A build, `dotnet run` and a publish without
 Native AOT are not affected. For the 1.24.13.7 packages and earlier, see the section that follows.
 
-<!-- 2026-10-26: re-read at a6214f0c5d. The visible costs are the hosted aot-smoke readings after golib's generic-cycle
+<!-- 2026-11-16 (P4, P3's docs item 3 and COORD's AOT ruling): the cost sentence's figures were "under four minutes
+     on a hosted CI runner for Linux and for Windows, about six minutes on a Mac with Apple silicon and about eleven on
+     an Intel Mac (measured 2026-10-14, with packages converted from Go 1.24.13)", a reading of the 1.24.13 packages
+     that no 1.26 run repeats. Replaced by P1's readings, 2026-11-16, a linux-x64 cloud box (4 cores, SDK 10.0.403,
+     ILCompiler 10.0.14), local -recurse at master 0c1d295ea8 with <PublishAot>true</PublishAot> in the program's
+     csproj: the strings/fmt hello 1146 s, colordemo (fatih/color v1.18.0) 1545 s, both executables ran, 0 'will
+     always throw'. The 1.26.10.3 failure: P3 runs A and B (2026-11-15) and P1 row 2 (2026-11-16): ILC fails at
+     StringTableBuilder.CreateIndex after 1509-1599 s with 6,188 'will always throw' lines; batch 308's lever G
+     (merge 055f4e6230) removed the generic cycle that caused it.
+     2026-10-26: re-read at a6214f0c5d. The visible costs are the hosted aot-smoke readings after golib's generic-cycle
      fix (e2move, merge b1ba1380b4, 2026-10-14), from the BOARD's 2026-10-14 entry under "the AOT-cost row" and
      docs/CIMatrix.md's aot-smoke budget row: 0 ILC cycle cut-offs on every RID; linux 224 s, windows 230 s, osx-x64 654 s
      on the e2move tip (run 38575258530); linux 212 s, windows 167 s, osx-arm64 354 s from master (run 38587876788).

@@ -311,8 +311,8 @@ See [Pointers](ConversionStrategies-Reference/pointers.md).
      0c1d295ea8), the lost write (882e3da582, 85b1c4181b), five sqlite-cs shapes (6992717d09, c09d5e04da,
      39b40c8c3a, b62c67b6d8, 4c101b8e57), the inline-array slice limit (6b78cef1a1) and the validated-modules page
      (65be87fd89, 64a5cc7e24). Already carried by their own seats' edits: door A (2d7ac32ffb), the pin-extent fixes
-     (dbd872acad), cgo 3.1 and the cgo truth pass (d658f700cb, 3b202a6c56). HELD for P1: 055f4e6230 and d39b1ffe00
-     (the Tuning section's note). LEFT OUT, each a fix to a feature new in this release, so no released build had
+     (dbd872acad), cgo 3.1 and the cgo truth pass (d658f700cb, 3b202a6c56). Written after P1's AOT reading (2026-11-16): 055f4e6230 and d39b1ffe00, in the
+     Tuning section. LEFT OUT, each a fix to a feature new in this release, so no released build had
      the defect: the inline-array fixes 6b78cef1a1 (the foreign slice itself), b1c73ce844, d7f5a59f79, a6f526f31e
      and 63c2a339c7; the unsafe.Add box chain 18b36cb712, which came with batch 305's derived pointers. LEFT OUT as
      internal (CI, tests, records, design docs): 6f5def3cca (two darwin roster rows; the roster carries them),
@@ -991,14 +991,35 @@ Converted projects keep .NET's default, workstation GC. See [.NET runtime settin
      converted-project default". "Since 1.26.10.2": Tuning.md at nuget-1.26.10.3 attributed most of the 1.26.10.1 ->
      1.26.10.2 JIT speed-up to the delay of 0. -->
 
-<!-- 2026-11-16 (P4): HELD for P1's AOT reading (COORD: "the AOT items still wait for P1"). Two user-visible Native AOT
-     changes from batch 308 have no line yet, and get one when P1's reading lands:
-     (1) merge 055f4e6230 (i9, lever G): golib's ж<T> no longer names ElemRefBox<T> in its view lookup, which ends a
-     generic cycle; Native AOT IL3054 654 -> 0 on a golib-only consumer, image 19.7 -> 11.2 MB, PerfStartup -44%,
-     parsedemo -34%, ILC peak -34..-41%; +2.7% PerfFieldView under the JIT.
-     (2) merge d39b1ffe00 (P4): Tuning.md's "Native AOT method-body folding" (anchor native-aot-method-body-folding):
-     IlcFoldIdenticalMethodBodies=false makes the AOT compiler 4.5x faster on PerfStartup and parsedemo 32m20s ->
-     7m06s, for an image 11-15% larger; go2cs keeps the SDK default (the owner's ruling). -->
+**A Native AOT publish is smaller and lighter to build, and the README walkthrough's program now publishes.**
+golib's pointer box named a type that named the pointer box again, one level deeper each time, and Native AOT
+expanded that cycle until it reached its nesting limit, compiling every method past the limit as one that always
+throws. The cycle is gone. A program that uses only golib went from 654 such cut-offs to none and from a 19.7 MB
+executable to 11.2 MB. A larger benchmark program's executable shrank by about a quarter, and the AOT compiler's
+peak memory by a third or more (measured on `win-x64`). With the 1.26.10.3 packages the README walkthrough's
+program, which uses github.com/fatih/color, did not publish with Native AOT on `linux-x64`: the compiler stopped at
+the native string table's 2 GiB ceiling. Now it publishes, and its string table is 250 MiB. To publish a program
+that `go2cs -recurse` converted, put `<PublishAot>true</PublishAot>` in the program's own project file and name
+that project to `dotnet publish`; [Tuning](Tuning.md#choosing-a-deployment) says why the command-line property
+does not work there yet. A program under the JIT runs as before, with one benchmark 2.7% slower.
+
+**Tuning has a new section on Native AOT build time.** One pass of the AOT compiler, which folds identical method
+bodies, takes most of its time on go2cs programs. Turning it off with `IlcFoldIdenticalMethodBodies=false` built
+one benchmark program 4.5 times faster and a large program in 7 minutes instead of 32, for an executable 11% to 15%
+larger. go2cs keeps the .NET default. See
+[Native AOT method-body folding](Tuning.md#native-aot-method-body-folding).
+<!-- Lever G: merge 055f4e6230 (i9, claude/i9-golib-elemview-cycle c08c2bba8c): golib's ж<T> no longer names
+     ElemRefBox<T> in its view lookup (an internal virtual the element box overrides); the cycle had returned with
+     4ad8e8df66 (2026-10-21), so 1.26.10.3 carries it. docs/phase4/DATA-ts-aot-b4.md section 15 (win-x64): the
+     golib-only consumer 654 IL3054 lines -> 0, image 19,697,664 -> 11,214,848 B; PerfStartup image 120.5 -> 87.6 MB
+     (-27.3%), ILC peak private 6.54 -> 3.84 GB (-41.3%); parsedemo image -26.2%, ILC peak -33.8%. JIT cost: +2.7%
+     PerfFieldView (the merge message). The walkthrough program: P1's AOT rows 1-3, 2026-11-16, linux-x64 (mailbox
+     20261116T041238Z-P1.md): at master colordemo publishes with the property in its csproj, .strtab 262,013,197
+     bytes, 0 'will always throw'; at 1.26.10.3 ILC fails at StringTableBuilder.CreateIndex with 6,188 such lines,
+     on both routes. P3's runs A and B, 2026-11-15, read the same failure. The command-line property: P1's seat
+     E1+E2 (proposed for batch 311) makes it work; reword the sentence if that seat lands in this release.
+     Folding: merge d39b1ffe00 (P4); Tuning.md's table (win-x64: PerfStartup 6 min 29 s -> 1 min 27 s, parsedemo
+     32 min 20 s -> 7 min 6 s; executables +15% and +11%); the owner's ruling keeps the SDK default. -->
 
 ### Documentation (COORD)
 

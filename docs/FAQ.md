@@ -130,7 +130,9 @@ than under the JIT on most rows of the [performance comparison](Performance.md),
 [Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
 has the measured cost and the platform it was measured on, and the
 [Roadmap](Roadmap.md#native-aot-and-trimming) has the work under way to reduce it.
-[Tuning converted code](Tuning.md#choosing-a-deployment) compares Native AOT with the JIT and ReadyToRun.
+[Tuning converted code](Tuning.md#choosing-a-deployment) compares Native AOT with the JIT and ReadyToRun,
+and says how to publish: put `<PublishAot>true</PublishAot>` in the program's own project file and name that
+project to `dotnet publish`. On Linux the publish needs `clang` and `zlib1g-dev`.
 
 ## What does converted code depend on at run time?
 
