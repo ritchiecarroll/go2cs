@@ -55,6 +55,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // call parks as at the base, through the overload's own twin (stage (c)'s forwarder twin, `Lockꞏtwin(this ж<T>)`).
         public IMethodSymbol? BoxOverload;
 
+        // Code review 4: a generic `this ref` method this box-overload call would reach once constructed, not followed.
+        public IMethodSymbol? BoxGenericUnfollowed;
+
         // The call, for the report's named-plain row of a function that parks nowhere else (SN-7).
         public InvocationExpressionSyntax? Node;
     }
@@ -203,7 +206,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     candidate.Refusal = "ref-unrederivable";
                 else if (candidate.Twinned && AwaitsInLock(candidate))
                     candidate.Refusal = "await-in-lock";
-                else if (candidate.Twinned && SharedMemberRef(candidate))
+                // Gated on GoTwinsBoxRecv (code review 5): with the switch off the base is reproduced by construction, not
+                // by the detector's zero count on one closure. Its hazard predates N2, so it is N2's own change, kept with N2.
+                else if (candidate.Twinned && BoxRecv && SharedMemberRef(candidate))
                     candidate.Refusal = "ref-shared-member";
             }
 
@@ -219,6 +224,17 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     {
                         if (site is { Active: true, PairBody: false, Node: { } node } && IsBoxTwinTarget(site.Target) && !BoxCallable(site))
                             NoteBoxPlain(node, site.Target!);
+                    }
+                }
+
+                // Code review 4: a box-overload call to a GENERIC method with a box twin, not followed, stays plain: named, in a
+                // twin or not (no rewriter sees it as a box-twin call, so no row is written twice).
+                if (candidate.Refusal is null)
+                {
+                    foreach (Site site in candidate.Sites)
+                    {
+                        if (site is { Active: true, PairBody: false, Node: { } node, BoxGenericUnfollowed: { } generic } && IsBoxTwinTarget(generic) && !ShouldAwait(site))
+                            NoteBoxPlain(node, generic, "generic-unfollowed");
                     }
                 }
 
@@ -635,11 +651,16 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
                 // N2: a call through a ж<T> expression binds RecvGenerator's box overload; its target is the `this ref`
                 // method behind it, and its receiver already is the box (no copy, no row of 9.1 needed).
-                if (BoxOverloadTarget(site.Target) is { } boxed)
+                if (BoxOverloadTarget(site.Target, out IMethodSymbol? genericUnfollowed) is { } boxed)
                 {
+                    NoteViaOverload(node, site.Target, boxed);
                     site.BoxOverload = site.Target;
                     site.Target = boxed;
                     site.ViaBoxOverload = true;
+                }
+                else
+                {
+                    site.BoxGenericUnfollowed = genericUnfollowed;
                 }
             }
 

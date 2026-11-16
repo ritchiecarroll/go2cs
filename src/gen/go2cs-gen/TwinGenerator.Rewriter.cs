@@ -733,7 +733,7 @@ public sealed partial class TwinGenerator
             if (BoxReceiver is { } receiver && !m_boxSeeded)
             {
                 m_boxSeeded = true;
-                m_scopes[^1].Add(receiver + " = ref " + (m_run.BoxCopy ? "ᴛcopy" + receiver : "Ꮡ" + receiver + ".DerefOrNull()") + ";");
+                m_scopes[^1].Add(Run.Local(receiver) + " = ref " + (m_run.BoxCopy ? "ᴛcopy" + receiver : "Ꮡ" + receiver + ".DerefOrNull()") + ";");
             }
             List<StatementSyntax> result = [];
 

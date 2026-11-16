@@ -175,6 +175,122 @@ public class TwinBoxTests
 
         """;
 
+    // N2 code review, finding 1: a ref local over a PACKAGE-LEVEL pointer `gp` would be derived again from `gp` after a
+    // park, though another goroutine may have replaced it (Go read it once). Its twin is refused; its call names no box.
+    private const string StaticRoot = """
+            internal static ж<T> gp = Ꮡ(new T());
+
+            public static void runG()
+            {
+                ref var x = ref gp.DerefOrNull();
+                x.b();
+                ᐸꟷ(ch);
+            }
+
+        """;
+
+    // Finding 2: the box-overload guards, pinned by the `// V` row of each followed call. Two same-name methods of
+    // different signatures; a [GoCopyBound] method and a value method behind their box overloads (never followed).
+    private const string OverloadGuards = """
+            internal static void ov(this ref T t, nint a) { ᐸꟷ(ch); }
+
+            internal static void ov(this ref T t, @string s) { ᐸꟷ(ch); }
+
+            [GoCopyBound]
+            internal static void cbp(this ref T t) { ᐸꟷ(ch); }
+
+            internal static nint vv(this T t) { ᐸꟷ(ch); return t.x; }
+
+            public static void runOv(ж<T> Ꮡp)
+            {
+                Ꮡp.ov((nint)1);
+                Ꮡp.ov((@string)"x");
+                Ꮡp.cbp();
+                Ꮡp.vv();
+            }
+
+        """;
+
+    // Finding 3: a receiver named by a C# keyword (`func (in *T) M()` converts to `this ref T @in`).
+    private const string KeywordReceiver = """
+            internal static void kw(this ref T @in) { ᐸꟷ(ch); @in.x = 1; }
+
+        """;
+
+    // Finding 4: a GENERIC receiver's box overload is not followed (its type parameters are the overload's own); the
+    // call stays plain and is named `generic-unfollowed`.
+    private const string GenericReceiver = """
+            public partial struct GG<P> { public P v; }
+
+            internal static void gm<P>(this ref GG<P> g) { ᐸꟷ(ch); }
+
+            public static void runGen(ж<GG<nint>> Ꮡg)
+            {
+                Ꮡg.gm();
+            }
+
+        """;
+
+    // Finding 5: with the switch off the shared-member detector is off, so a non-receiver function the base twins keeps
+    // its twin (the base by construction).
+    private const string SharedMemberLocal = """
+            public static void smf(ж<N> Ꮡn)
+            {
+                ref var n = ref Ꮡn.DerefOrNull();
+                ref var m = ref n.next.DerefOrNull();
+                ᐸꟷ(ch);
+                m.v = 1;
+            }
+
+        """;
+
+    // Finding 7: a ref local RE-POINTED at another box names no box (it would hand the callee the declared root's object).
+    private const string RePointed = """
+            public static void rp(ж<T> Ꮡx, ж<T> Ꮡy)
+            {
+                ref var x = ref Ꮡx.DerefOrNull();
+                x = ref Ꮡy.DerefOrNull();
+                x.b();
+                ᐸꟷ(ch);
+            }
+
+        """;
+
+    // Finding 6: a referenced box-SHAPED twin whose return is not a task is no box twin (display strings matched it).
+    private const string LibraryBadTwin = """
+        using System;
+
+        namespace go;
+
+        public static partial class lib_package
+        {
+            public partial struct M
+            {
+                public nint v;
+
+                public static bool operator ==(M a, M b) => a.v == b.v;
+                public static bool operator !=(M a, M b) => a.v != b.v;
+                public override bool Equals(object? obj) => obj is M other && other == this;
+                public override int GetHashCode() => v.GetHashCode();
+            }
+
+            public static void rt(this ref M m) { }
+            public static int rtꞏtwin(this ж<M> Ꮡm) => 0;
+        }
+        """;
+
+    private const string UsesBadTwin = """
+            public partial struct H { public lib_package.M m; }
+
+            public static void useRt(ж<H> Ꮡh)
+            {
+                ref var h = ref Ꮡh.DerefOrNull();
+                h.m.rt();
+                ᐸꟷ(ch);
+            }
+
+        """;
+
     // The review's nit: an element under a package variable is named-plain in the first cut.
     private const string PackageVarElement = """
             internal static ж<T> Ꮡpv = Ꮡ(new T());
@@ -402,7 +518,8 @@ public class TwinBoxTests
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
         StringAssert.Contains(twins, "await h.m.lkꞏtwin()", "its own-shape twin is awaited in place, as at the base");
-        Assert.IsFalse(twins.Contains("|lk|", StringComparison.Ordinal), "and never named-plain");
+        Assert.IsFalse(twins.Split('\n').Any(line => line.StartsWith("// P ", StringComparison.Ordinal) && line.Contains("|lk|", StringComparison.Ordinal)),
+                       "and never named-plain");
         StringAssert.Contains(twins, "await Ꮡm.lkꞏtwin()", "a box-overload call parks as at the base, through the overload's own twin");
         StringAssert.Contains(twins, ".bxꞏtwin()", "a box-only twin is reached through the box");
         Assert.IsFalse(twins.Contains("await h.m.bxꞏtwin()", StringComparison.Ordinal), "never through the ref");
@@ -428,6 +545,80 @@ public class TwinBoxTests
         Assert.AreEqual(0, errors.Length, Errors(errors));
         Assert.IsFalse(twins.Contains("rqꞏtwin(", StringComparison.Ordinal), "rq is refused (a ref-struct parameter)");
         Assert.IsFalse(twins.Contains("|sPark|q", StringComparison.Ordinal), "its call is no named-plain row");
+    }
+
+    [TestMethod]
+    public void R1_ARefLocalOverAPackageLevelPointerIsRefused()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StaticRoot);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("gp.bꞏtwin(", StringComparison.Ordinal), "no box from a package-level root");
+        StringAssert.Contains(twins, "|runG|ref-shared-member", "the twin is refused by name");
+    }
+
+    [TestMethod]
+    public void R2_TheBoxOverloadGuardsArePinnedByTheirRows()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, OverloadGuards);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "|ov|go.box_package.ov(ref go.box_package.T, nint)", "ov(1) follows to the nint method");
+        StringAssert.Contains(twins, "|ov|go.box_package.ov(ref go.box_package.T, go.@string)", "ov(\"x\") follows to the string method");
+        Assert.IsFalse(twins.Split('\n').Any(line => line.StartsWith("// V ", StringComparison.Ordinal) && line.Contains("|cbp|", StringComparison.Ordinal)),
+                       "a [GoCopyBound] method is never followed");
+        Assert.IsFalse(twins.Split('\n').Any(line => line.StartsWith("// V ", StringComparison.Ordinal) && line.Contains("|vv|", StringComparison.Ordinal)),
+                       "a value method is never followed");
+    }
+
+    [TestMethod]
+    public void R3_AKeywordNamedReceiverKeepsItsEscape()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, KeywordReceiver);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "kwꞏtwin(this global::go.ж<T> Ꮡin)", "the box parameter");
+        StringAssert.Contains(twins, "ref var @in = ref Ꮡin.DerefOrNull();", "the prologue keeps the @");
+    }
+
+    [TestMethod]
+    public void R4_AGenericReceiversUnfollowedCallIsNamed()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, GenericReceiver);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "|gm|Ꮡg|generic-unfollowed", "the plain call is named, with its reason");
+    }
+
+    [TestMethod]
+    public void R5_WithTheSwitchOffNoSharedMemberRefusal()
+    {
+        (string on, Diagnostic[] errorsOn) = Run(null, SharedMemberLocal);
+        (string off, Diagnostic[] errorsOff) = Run(new() { ["build_property.GoTwinsBoxRecv"] = "false" }, SharedMemberLocal);
+
+        Assert.AreEqual(0, errorsOn.Length + errorsOff.Length, Errors([.. errorsOn, .. errorsOff]));
+        StringAssert.Contains(on, "|smf|ref-shared-member", "refused with N2 on");
+        Assert.IsFalse(off.Contains("|smf|ref-shared-member", StringComparison.Ordinal), "the base twins it, switch off");
+        StringAssert.Contains(off, "smfꞏtwin(", "its base twin");
+    }
+
+    [TestMethod]
+    public void R6_AReferencedBoxShapedTwinThatReturnsNoTaskIsNoBoxTwin()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(LibraryBadTwin, null, UsesBadTwin);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains(".rtꞏtwin()", StringComparison.Ordinal), "never awaited");
+    }
+
+    [TestMethod]
+    public void R7_ARePointedRefLocalNamesNoBox()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, RePointed);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("Ꮡx.bꞏtwin(", StringComparison.Ordinal), "never the declared root's box");
+        StringAssert.Contains(twins, "|b|x", "the plain call is named");
     }
 
     [TestMethod]

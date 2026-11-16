@@ -108,8 +108,8 @@ public sealed partial class TwinGenerator
             {
                 List<StatementSyntax> entry = BoxCopy
                     ? [SyntaxFactory.ParseStatement(" var ᴛcopy" + receiver + " = Ꮡ" + receiver + ".DerefOrNull();"),
-                       SyntaxFactory.ParseStatement(" ref var " + receiver + " = ref ᴛcopy" + receiver + ";")]
-                    : [SyntaxFactory.ParseStatement(" ref var " + receiver + " = ref Ꮡ" + receiver + ".DerefOrNull();")];
+                       SyntaxFactory.ParseStatement(" ref var " + Local(receiver) + " = ref ᴛcopy" + receiver + ";")]
+                    : [SyntaxFactory.ParseStatement(" ref var " + Local(receiver) + " = ref Ꮡ" + receiver + ".DerefOrNull();")];
 
                 entry[^1] = entry[^1].WithTrailingTrivia(body.OpenBraceToken.TrailingTrivia);
                 body = body.WithOpenBraceToken(body.OpenBraceToken.WithTrailingTrivia()).WithStatements(body.Statements.InsertRange(0, entry));
@@ -225,6 +225,9 @@ public sealed partial class TwinGenerator
                 .Append(" recv=").Append(BoxRecv ? "on" : "off").Append(" forwarders=").Append(BoxForwarders ? "on" : "off").Append(BoxCopy ? " COPY(control)" : "").Append("\r\n");
 
             foreach (string row in BoxPlainRows)
+                report.Append(row).Append("\r\n");
+
+            foreach (string row in ViaOverloadRows)
                 report.Append(row).Append("\r\n");
             report.Append("// in-twins: go-group-left=").Append(sites.Count(site => site.Go == GoKind.Group && !GoTwinnable(site)))
                 .Append(" go-other=").Append(sites.Count(site => site.Go == GoKind.Other))

@@ -30,6 +30,7 @@ public sealed partial class TwinGenerator
 
         internal int BoxCalls, BoxPlain;
         private readonly List<string> m_boxPlainRows = [];
+        private readonly List<string> m_viaOverloadRows = [];
         private readonly Dictionary<ISymbol, bool> m_hasBoxTwin = new(SymbolEqualityComparer.Default);
 
         private static bool CopyBound(IMethodSymbol method) =>
@@ -71,12 +72,36 @@ public sealed partial class TwinGenerator
             return m_hasBoxTwin[definition] = has;
         }
 
-        private static bool IsBoxTwinOf(IMethodSymbol twin, IMethodSymbol definition) =>
-            twin.IsStatic && twin.Parameters.Length == definition.Parameters.Length && twin.TypeParameters.Length == definition.TypeParameters.Length &&
-            twin.Parameters[0].RefKind == RefKind.None &&
-            twin.Parameters[0].Type is INamedTypeSymbol { Name: "ж", TypeArguments.Length: 1 } box &&
-            box.TypeArguments[0].ToDisplayString() == definition.Parameters[0].Type.ToDisplayString() &&
-            twin.Parameters.Skip(1).Zip(definition.Parameters.Skip(1), (a, b) => a.Type.ToDisplayString() == b.Type.ToDisplayString()).All(same => same);
+        // Code review 6: compared as SYMBOLS, ref kinds and the return included (display strings matched a box-shaped
+        // member returning no task). A generic twin is read over the definition's own type parameters.
+        private static bool IsBoxTwinOf(IMethodSymbol twin, IMethodSymbol definition)
+        {
+            if (!twin.IsStatic || twin.Parameters.Length != definition.Parameters.Length || twin.TypeParameters.Length != definition.TypeParameters.Length)
+                return false;
+
+            IMethodSymbol shaped = twin.TypeParameters.Length > 0 ? twin.Construct(definition.TypeParameters.Cast<ITypeSymbol>().ToArray()) : twin;
+
+            if (shaped.Parameters[0].RefKind != RefKind.None || shaped.Parameters[0].Type is not INamedTypeSymbol { Name: "ж", TypeArguments.Length: 1 } box ||
+                !SymbolEqualityComparer.Default.Equals(box.TypeArguments[0], definition.Parameters[0].Type))
+            {
+                return false;
+            }
+
+            for (int i = 1; i < shaped.Parameters.Length; i++)
+            {
+                if (shaped.Parameters[i].RefKind != definition.Parameters[i].RefKind ||
+                    !SymbolEqualityComparer.Default.Equals(shaped.Parameters[i].Type, definition.Parameters[i].Type))
+                {
+                    return false;
+                }
+            }
+
+            // The twin's task over the definition's result: GoTask for a void method, GoTask<R> for R.
+            return shaped.ReturnType is INamedTypeSymbol { Name: "GoTask" } task &&
+                   (definition.ReturnsVoid
+                       ? task.TypeArguments.Length == 0
+                       : task.TypeArguments.Length == 1 && SymbolEqualityComparer.Default.Equals(task.TypeArguments[0], definition.ReturnType));
+        }
 
         // Whether a call to `target` (normalized) reaches a box twin: one this run emits, or one a referenced assembly holds.
         // Never with the switch off, so that arm is the base by construction. And never for a method that has a twin of its
@@ -91,8 +116,14 @@ public sealed partial class TwinGenerator
         // the `this ref T` method, is followed to that method -- resolved by FULL SIGNATURE (an sstring pair holds two
         // forwarders of one name), and only to a plain-`ref`, non-[GoCopyBound] target. A VALUE receiver's box overload
         // copies (`var t = ~Ꮡt;`) and never matches, since its target takes `T`, not `ref T`.
-        internal IMethodSymbol? BoxOverloadTarget(IMethodSymbol method)
+        // Code review 4: a GENERIC method compares its own type parameters with the overload's, so it never matches as is.
+        // It is not followed (substituted matching is a later step, if a census asks for it); where it would match once
+        // constructed over the overload's type parameters it is handed back in `genericUnfollowed`, so its plain call is
+        // named (`generic-unfollowed`) and SN-7 counts it.
+        internal IMethodSymbol? BoxOverloadTarget(IMethodSymbol method, out IMethodSymbol? genericUnfollowed)
         {
+            genericUnfollowed = null;
+
             if (!BoxRecv || !method.IsExtensionMethod || method.Parameters.Length == 0 || m_candidates.ContainsKey(method) ||
                 method.Parameters[0].Type is not INamedTypeSymbol { Name: "ж", TypeArguments.Length: 1 } box || method.ContainingType is not { } type)
             {
@@ -104,25 +135,38 @@ public sealed partial class TwinGenerator
                 IMethodSymbol definition = Normalize(other);
 
                 if (SymbolEqualityComparer.Default.Equals(definition, method) || !definition.IsExtensionMethod || definition.Parameters.Length != method.Parameters.Length ||
-                    definition.Parameters[0].RefKind != RefKind.Ref || CopyBound(definition) || definition.TypeParameters.Length != method.TypeParameters.Length ||
-                    !SymbolEqualityComparer.Default.Equals(definition.Parameters[0].Type, box.TypeArguments[0]))
+                    definition.Parameters[0].RefKind != RefKind.Ref || CopyBound(definition) || definition.TypeParameters.Length != method.TypeParameters.Length)
                 {
                     continue;
                 }
 
-                bool same = true;
-
-                for (int i = 1; same && i < definition.Parameters.Length; i++)
-                {
-                    same = definition.Parameters[i].RefKind == method.Parameters[i].RefKind &&
-                           SymbolEqualityComparer.Default.Equals(definition.Parameters[i].Type, method.Parameters[i].Type);
-                }
-
-                if (same && SymbolEqualityComparer.Default.Equals(definition.ReturnType, method.ReturnType))
+                if (Matches(definition, method, box))
                     return definition;
+
+                if (definition.TypeParameters.Length > 0 && Matches(definition.Construct(method.TypeParameters.Cast<ITypeSymbol>().ToArray()), method, box))
+                    genericUnfollowed = definition;
             }
 
             return null;
+        }
+
+        // The full signature: the receiver's type is the box's element, every other parameter by ref kind and type, the
+        // same return type.
+        private static bool Matches(IMethodSymbol definition, IMethodSymbol overload, INamedTypeSymbol box)
+        {
+            if (!SymbolEqualityComparer.Default.Equals(definition.Parameters[0].Type, box.TypeArguments[0]))
+                return false;
+
+            for (int i = 1; i < definition.Parameters.Length; i++)
+            {
+                if (definition.Parameters[i].RefKind != overload.Parameters[i].RefKind ||
+                    !SymbolEqualityComparer.Default.Equals(definition.Parameters[i].Type, overload.Parameters[i].Type))
+                {
+                    return false;
+                }
+            }
+
+            return SymbolEqualityComparer.Default.Equals(definition.ReturnType, overload.ReturnType);
         }
 
         // The box a call site names for a `this ref T` receiver WITHOUT A COPY (9.1's rows), or null: the call stays plain.
@@ -205,14 +249,28 @@ public sealed partial class TwinGenerator
                     if (local.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is not VariableDeclaratorSyntax { Initializer.Value: RefExpressionSyntax { Expression: var source } })
                         return null;
 
-                    string? root = source switch
-                    {
-                        InvocationExpressionSyntax { ArgumentList.Arguments.Count: 0, Expression: MemberAccessExpressionSyntax { Name.Identifier.ValueText: "DerefOrNull", Expression: IdentifierNameSyntax r } } => r.Identifier.ValueText,
-                        MemberAccessExpressionSyntax { Name.Identifier.ValueText: "Value" or "ValueSlot", Expression: IdentifierNameSyntax r } => r.Identifier.ValueText,
-                        _ => null
-                    };
+                    IdentifierNameSyntax? rootName = BoxRoot(source);
 
-                    return root is not null && aliases.Rederivable(root, name.Identifier.ValueText) ? root : null;
+                    // Code review 1: the root is a plain LOCAL or PARAMETER. A package-level pointer would be read again
+                    // after a park, though another goroutine may have replaced it, where Go read it once.
+                    if (rootName is null || model.GetSymbolInfo(rootName).Symbol is not (ILocalSymbol { RefKind: RefKind.None } or IParameterSymbol { RefKind: RefKind.None }))
+                        return null;
+
+                    // Code review 7: a ref local RE-POINTED anywhere in the function (`x = ref Ꮡy.DerefOrNull()`) no longer
+                    // names its declared root's object; only the converter's re-alias form (the declaration's own source)
+                    // keeps it.
+                    string declared = source.WithoutTrivia().ToString();
+
+                    if (caller.Syntax.DescendantNodes().OfType<AssignmentExpressionSyntax>().Any(assignment =>
+                            assignment.Left is IdentifierNameSyntax left && left.Identifier.ValueText == name.Identifier.ValueText &&
+                            assignment.Right is RefExpressionSyntax { Expression: var repointed } && repointed.WithoutTrivia().ToString() != declared))
+                    {
+                        return null;
+                    }
+
+                    string root = rootName.Identifier.ValueText;
+
+                    return aliases.Rederivable(root, name.Identifier.ValueText) ? root : null;
                 }
 
                 // `Ꮡx.DerefOrNull()` as the receiver.
@@ -240,6 +298,18 @@ public sealed partial class TwinGenerator
             }
         }
 
+        // The box a ref local's source derives from: `Ꮡx.DerefOrNull()`, `Ꮡx.Value` or a heap local's `Ꮡv.ValueSlot`.
+        private static IdentifierNameSyntax? BoxRoot(ExpressionSyntax source) => source switch
+        {
+            InvocationExpressionSyntax { ArgumentList.Arguments.Count: 0, Expression: MemberAccessExpressionSyntax { Name.Identifier.ValueText: "DerefOrNull", Expression: IdentifierNameSyntax r } } => r,
+            MemberAccessExpressionSyntax { Name.Identifier.ValueText: "Value" or "ValueSlot", Expression: IdentifierNameSyntax r } => r,
+            _ => null
+        };
+
+        // A keyword-named local keeps its escape (code review 3: `func (in *T) M()` converts to `this ref T @in`).
+        internal static string Local(string name) =>
+            SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
+
         private static bool SideEffectFree(ExpressionSyntax expression, SemanticModel model) => expression switch
         {
             IdentifierNameSyntax => true,
@@ -248,16 +318,28 @@ public sealed partial class TwinGenerator
             _ => false
         };
 
-        // A plain call to a box twin, for the report (SN-7 reads their count).
-        internal void NoteBoxPlain(InvocationExpressionSyntax node, IMethodSymbol target)
+        // A plain call to a box twin, for the report (SN-7 reads their count); `reason` tags a row that is plain for a
+        // named reason (code review 4: `generic-unfollowed`).
+        internal void NoteBoxPlain(InvocationExpressionSyntax node, IMethodSymbol target, string? reason = null)
         {
             BoxPlain++;
-            FileLinePositionSpan span = node.SyntaxTree.GetLineSpan(node.Span);
-            m_boxPlainRows.Add("// P " + System.IO.Path.GetFileName(node.SyntaxTree.FilePath) + "|" + (span.StartLinePosition.Line + 1) + "|" + target.Name + "|" +
-                               (node.Expression is MemberAccessExpressionSyntax access ? access.Expression.ToString().Replace("\r", " ").Replace("\n", " ") : "-"));
+            m_boxPlainRows.Add("// P " + Where(node) + "|" + target.Name + "|" + ReceiverText(node) + (reason is null ? "" : "|" + reason));
         }
 
+        // Code review 2: each call followed through a box overload, with the method it was followed to, so that a unit
+        // pins BoxOverloadTarget's guards directly (an overload pair, a [GoCopyBound] method, a value method).
+        internal void NoteViaOverload(InvocationExpressionSyntax node, IMethodSymbol overload, IMethodSymbol target) =>
+            m_viaOverloadRows.Add("// V " + Where(node) + "|" + overload.Name + "|" + target.ToDisplayString());
+
+        private static string Where(SyntaxNode node) =>
+            System.IO.Path.GetFileName(node.SyntaxTree.FilePath) + "|" + (node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition.Line + 1);
+
+        private static string ReceiverText(InvocationExpressionSyntax node) =>
+            node.Expression is MemberAccessExpressionSyntax access ? access.Expression.ToString().Replace("\r", " ").Replace("\n", " ") : "-";
+
         internal IEnumerable<string> BoxPlainRows => m_boxPlainRows;
+
+        internal IEnumerable<string> ViaOverloadRows => m_viaOverloadRows;
 
         // Must-fix 1 of the re-review: a ref local whose source CROSSES a ж-typed member (`ref var m = ref n.next.DerefOrNull()`)
         // would be derived again after a park through a member another goroutine may have replaced, where Go read it once.
@@ -284,6 +366,11 @@ public sealed partial class TwinGenerator
                 {
                     return true;
                 }
+
+                // Code review 1: the same hazard through a PACKAGE-LEVEL pointer (`ref var x = ref gp.DerefOrNull()`, gp a
+                // static field or property): derived again from gp after a park, where Go read it once.
+                if (BoxRoot(source) is { } root && model.GetSymbolInfo(root).Symbol is IFieldSymbol { IsStatic: true } or IPropertySymbol { IsStatic: true })
+                    return true;
             }
 
             return false;

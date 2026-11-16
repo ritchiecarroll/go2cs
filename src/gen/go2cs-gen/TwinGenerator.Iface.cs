@@ -187,7 +187,7 @@ public sealed partial class TwinGenerator
                 return "return-type";
 
             forwarder.Target = definition;
-            forwarder.BoxTarget = BoxOverloadTarget(definition);
+            forwarder.BoxTarget = BoxOverloadTarget(definition, out _);
             forwarder.Receiver = access.Expression.ToString();
             return null;
         }
