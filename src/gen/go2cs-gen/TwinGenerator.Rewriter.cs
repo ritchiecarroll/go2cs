@@ -207,6 +207,9 @@ public sealed partial class TwinGenerator
                             if (argument == child)
                                 break;
 
+                            // Stage (c): net/http's `refererForURL(…, ref (req.URL).DerefOrNull(), req.Header.Get(…))`. A
+                            // by-ref argument evaluated before the await would hold its reference across it (CS8178).
+                            refLike |= !argument.RefKindKeyword.IsKind(SyntaxKind.None);
                             Earlier(argument.Expression);
                         }
 

@@ -214,6 +214,18 @@ public class TwinRefAcrossAwaitTests
 
         """;
 
+    // net/http's `refererForURL(…, ref (req.URL).DerefOrNull(), req.Header.Get(…))`: a by-ref ARGUMENT evaluated before
+    // an awaited later argument would hold its reference across the await (CS8178).
+    private const string RefArgBefore = """
+            public static nint refArgBefore(ж<T> Ꮡt)
+            {
+                return takesRef(ref Ꮡt.DerefOrNull(), parksN());
+            }
+
+            internal static nint takesRef(ref T r, nint k) => r.x + k;
+
+        """;
+
     private const string UseAfterAnd = """
             public static bool useAfterAnd(ж<T> Ꮡt)
             {
@@ -319,6 +331,9 @@ public class TwinRefAcrossAwaitTests
 
     [TestMethod]
     public void AStructReceiverReachingARefBeforeAnAwaitedIndexCompiles() => AssertTwinCompiles("indexBefore", IndexBefore);
+
+    [TestMethod]
+    public void AByRefArgumentBeforeAnAwaitedArgumentCompiles() => AssertTwinCompiles("refArgBefore", RefArgBefore);
 
     [TestMethod]
     public void AnAwaitInsideALockRefusesTheTwinByName()
