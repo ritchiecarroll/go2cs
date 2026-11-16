@@ -40202,4 +40202,48 @@ and the conversion refuses with raw Go text.
 
 — G (2026-11-15)
 
+## 2026-11-15 — H (W8 BOARD row 3, measured; docs/phase4/DESIGN-header-native-commit.md): a string header's native Data store copies at the OLD Len — OPEN, .5, cure direction shape C
+
+**What.** `StringHeaderBox` commits on every header field store (go2cs-gen's setter calls `ж<T>.OnHeaderStore()` after
+each one), and it commits a native Data as a COPY, because `@string` has no native-backed form. So in
+`hdr.Data = p; hdr.Len = n` over C memory, the `Data` store copies the header's OLD Len bytes at `p` before the `Len`
+store arrives.
+- When the old Len exceeds the block at `p`, that is an over-read, and at an unmapped page a fatal access violation.
+- Go reads no byte at either store.
+- `SliceHeaderBox` does NOT share it: a native Data commits as a view (`OverNativeMemory`) that touches no byte, so its
+  value between the stores is Go's `(p, oldLen, oldCap)`.
+
+**Census** (type-based, go/packages, per target; the predicate, both controls and the readings are in
+`data/hdr-native-commit/`; the controls read exactly as the expectations written in their files):
+- std on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64, WITHOUT tests: 0 string-header stores on all four.
+- WITH tests: one, `internal/unsafeheader/unsafeheader_test.go:93`, classified `fresh-empty` (its string starts
+  empty, so it cannot over-read).
+- modernc.org/sqlite v1.62.0 and modernc.org/libc v1.80.1: W8's syntactic census over every platform file reads 0
+  header writes. The type-based run over both modules on the four targets is COORD's, on the i7, predicted "none" on
+  each, and is appended here when read.
+
+**Cure**, compared in the record's section 3, with the ruling of 2026-11-15:
+- Shape A (hold a native Data until a Len store) trades the over-read for two silent wrong values.
+- Shape B (commit at the next read) is not buildable: converted code reads the string without the box.
+- **Shape C, one commit after a run of consecutive header stores, is the .5 DIRECTION.** It spans the go2cs-gen setter,
+  the converter and the box's L1 rule, so it takes a review at design time. It is not a seat yet.
+- The red arm (a child process; two pages, the second inaccessible, a 3-byte block ending at the boundary, a
+  4096-byte string's header stored Data then Len = 3: today a fault, Go prints `abc`) is written red FIRST in that cure
+  seat, not before. An arm asserting today's fault would pin wrong behaviour on every RID's CI for no .4 gain.
+
+**State.** OPEN, owner H, .5. No known population: 0 on std's non-test code, and 0 on the sqlite path by the syntactic
+census, with the type-based confirmation pending.
+
+— H (2026-11-15)
+
+## 2026-11-15 — H (W8 BOARD row 3, the census completed): the sqlite path reads none on all four targets
+
+The type-based run pending in the row above, over `modernc.org/sqlite/...` and `modernc.org/libc/...`, read by COORD on
+the i7. The tool is `data/hdr-native-commit/census-main.go` from `235efa55be`, run from the sqlite-cs demo module
+(sqlite v1.62.0, libc v1.80.1), with tests excluded. It reads `none` on windows/amd64 (280 files), linux/amd64 (393),
+darwin/amd64 (356) and linux/arm64 (384), as predicted (`data/hdr-native-commit/readings/sqlite-*.txt`). The row
+stays .5: no known population on std's non-test code or on the sqlite path.
+
+— H (2026-11-15)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
