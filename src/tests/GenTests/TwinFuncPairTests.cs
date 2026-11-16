@@ -67,16 +67,17 @@ public class TwinFuncPairTests
                 onlyCalls(() => { });
             }
 
-            // Calls through a func value but is refused a twin (a by-ref receiver, byref-param): under the rule it warns
-            // ONCE (must-fix 3), however many such calls it makes.
-            public static void refusedCaller(this ref nint r, Action f)
+            // Calls through a func value but is refused a twin (an `in` receiver, byref-recv: N2's box twin takes only a
+            // plain `ref` receiver, since Go copies an `in` one): under the rule it warns ONCE (must-fix 3), however many
+            // such calls it makes.
+            public static void refusedCaller(this in nint r, Action f)
             {
                 f();
                 f();
             }
 
             // A value-receiver method whose body parks; `r.wait` is a bound method value. (A pointer receiver is
-            // `this ref`, which the generator refuses to twin, byref-param: no twin, so no pair.)
+            // `this ref`, which gets N2's box twin; a bound method value over one is still not paired: a named limit.)
             public static void wait(this nint r) { ᐸꟷ(ch); }
 
             // A twin (it reaches caller); its literal parks, so the twin body makes it a pair.

@@ -98,9 +98,22 @@ public sealed partial class TwinGenerator
         {
             MethodDeclarationSyntax method = candidate.Syntax;
             SyntaxTree tree = method.SyntaxTree;
-            Rewriter rewriter = new(this, Model(tree), method);
+            Rewriter rewriter = new(this, Model(tree), method) { BoxReceiver = candidate.BoxReceiver };
             BlockSyntax? body = (BlockSyntax?)rewriter.Visit(method.Body);
             ArrowExpressionClauseSyntax? arrow = (ArrowExpressionClauseSyntax?)rewriter.Visit(method.ExpressionBody);
+
+            // N2: the box twin's prologue derives its receiver's ref from the box, on the opening brace's own line so the
+            // body keeps its #line mapping. Under GoTwinsBoxCopy (the aliasing probe's negative control) it copies instead.
+            if (body is not null && candidate.BoxReceiver is { } receiver)
+            {
+                List<StatementSyntax> entry = BoxCopy
+                    ? [SyntaxFactory.ParseStatement(" var ᴛcopy" + receiver + " = Ꮡ" + receiver + ".DerefOrNull();"),
+                       SyntaxFactory.ParseStatement(" ref var " + receiver + " = ref ᴛcopy" + receiver + ";")]
+                    : [SyntaxFactory.ParseStatement(" ref var " + receiver + " = ref Ꮡ" + receiver + ".DerefOrNull();")];
+
+                entry[^1] = entry[^1].WithTrailingTrivia(body.OpenBraceToken.TrailingTrivia);
+                body = body.WithOpenBraceToken(body.OpenBraceToken.WithTrailingTrivia()).WithStatements(body.Statements.InsertRange(0, entry));
+            }
 
             // N3's D3 core: a func-value parameter never reassigned is tested for a pair ONCE, at the twin's entry. The
             // declarations sit on the opening brace's own line, so every line of the body keeps its #line mapping.
@@ -133,7 +146,21 @@ public sealed partial class TwinGenerator
             SyntaxTokenList modifiers = SyntaxFactory.TokenList(method.Modifiers.Where(modifier => !modifier.IsKind(SyntaxKind.PartialKeyword)))
                 .Add(SyntaxFactory.Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(SyntaxFactory.Space));
 
+            ParameterListSyntax parameters = method.ParameterList;
+
+            // N2: `this ref T t` becomes `this ж<T> Ꮡt`, the receiver's box.
+            if (candidate.BoxReceiver is not null && parameters.Parameters.Count > 0 && parameters.Parameters[0] is { Type: { } receiverType } receiverParameter)
+            {
+                ParameterSyntax boxed = receiverParameter
+                    .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.ThisKeyword).WithTrailingTrivia(SyntaxFactory.Space)))
+                    .WithType(SyntaxFactory.ParseTypeName("global::go.ж<" + receiverType.WithoutTrivia().ToFullString() + ">").WithTrailingTrivia(SyntaxFactory.Space))
+                    .WithIdentifier(SyntaxFactory.Identifier("Ꮡ" + receiverParameter.Identifier.ValueText).WithTriviaFrom(receiverParameter.Identifier));
+
+                parameters = parameters.WithParameters(parameters.Parameters.Replace(receiverParameter, boxed));
+            }
+
             MethodDeclarationSyntax twin = method
+                .WithParameterList(parameters)
                 .WithAttributeLists(default)
                 .WithModifiers(modifiers)
                 .WithReturnType(SyntaxFactory.ParseTypeName(result).WithTriviaFrom(method.ReturnType))
@@ -193,6 +220,12 @@ public sealed partial class TwinGenerator
             report.Append("// await-sites=").Append(m_awaitSites).Append(" go-twinned=").Append(m_goTwinned).Append(" go-literals=").Append(m_goLiterals)
                 .Append(" ref-unrederivable=").Append(m_unrederivable).Append(" ref-spills=").Append(m_spills)
                 .Append(" ref-blocked=").Append(m_refBlocked).Append(" go-plain=").Append(GoPlain).Append("\r\n");
+            report.Append("// box: twins=").Append(twinned.Count(candidate => candidate.BoxReceiver is not null))
+                .Append(" calls=").Append(BoxCalls).Append(" plain=").Append(BoxPlain)
+                .Append(" recv=").Append(BoxRecv ? "on" : "off").Append(" forwarders=").Append(BoxForwarders ? "on" : "off").Append(BoxCopy ? " COPY(control)" : "").Append("\r\n");
+
+            foreach (string row in BoxPlainRows)
+                report.Append(row).Append("\r\n");
             report.Append("// in-twins: go-group-left=").Append(sites.Count(site => site.Go == GoKind.Group && !GoTwinnable(site)))
                 .Append(" go-other=").Append(sites.Count(site => site.Go == GoKind.Other))
                 .Append(" go-passive=").Append(sites.Count(site => site.Go != GoKind.None && !site.Active))

@@ -1387,6 +1387,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
 
     [TestMethod]
+    public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
+
+    [TestMethod]
     public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
 
     [TestMethod]

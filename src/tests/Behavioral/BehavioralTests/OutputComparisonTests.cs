@@ -1337,6 +1337,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
 
     [TestMethod]
+    public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
+
+    [TestMethod]
     public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
 
     [TestMethod]

@@ -37,6 +37,10 @@ public sealed partial class TwinGenerator
         public IMethodSymbol? Target;
         public string Receiver = "";
         public string? Skip;
+
+        // N2: the `this ref` method behind Target when Target is RecvGenerator's box overload (its box twin is the
+        // forwarder's twin target once known, under GoTwinsBoxForwarders).
+        public IMethodSymbol? BoxTarget;
     }
 
     internal sealed partial class Run
@@ -144,7 +148,7 @@ public sealed partial class TwinGenerator
             return null;
         }
 
-        private static string? ForwarderSkip(Forwarder forwarder, MethodDeclarationSyntax method, InvocationExpressionSyntax call, SemanticModel model)
+        private string? ForwarderSkip(Forwarder forwarder, MethodDeclarationSyntax method, InvocationExpressionSyntax call, SemanticModel model)
         {
             if (method.Parent is not TypeDeclarationSyntax host)
                 return "host";
@@ -183,9 +187,14 @@ public sealed partial class TwinGenerator
                 return "return-type";
 
             forwarder.Target = definition;
+            forwarder.BoxTarget = BoxOverloadTarget(definition);
             forwarder.Receiver = access.Expression.ToString();
             return null;
         }
+
+        // N2: the forwarder's twin target: the box twin behind a box overload (GoTwinsBoxForwarders, its own arm), else Target.
+        internal IMethodSymbol? ForwarderTarget(Forwarder forwarder) =>
+            BoxForwarders && forwarder.BoxTarget is { } boxed && IsBoxTwinTarget(boxed) ? boxed : forwarder.Target;
 
         // An interface member of this compilation has a twin once one of its implementers here can park (or always,
         // under the "all" policy); one of a referenced assembly has a twin when that assembly was built with it.
@@ -220,7 +229,7 @@ public sealed partial class TwinGenerator
             foreach (Forwarder forwarder in m_forwarders)
             {
                 if (forwarder.Skip is not null || !m_ifaceMembers.TryGetValue(forwarder.Member, out IfaceMember? member) ||
-                    member.Parks || member.Refusal is not null || member.Unmarked || !CanPark(forwarder.Target))
+                    member.Parks || member.Refusal is not null || member.Unmarked || !CanPark(ForwarderTarget(forwarder)))
                     continue;
 
                 member.Parks = true;

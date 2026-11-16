@@ -41,6 +41,11 @@ public sealed partial class TwinGenerator
         private readonly bool m_blockBody;
         private int m_pairAwaits;
 
+        // N2: the box twin's receiver (`this ref T t` becomes `this ж<T> Ꮡt`), whose ref the prologue declares; Rule R
+        // derives it again after each await from the box (or, under GoTwinsBoxCopy, the probe's control, from a copy).
+        public string? BoxReceiver { get; init; }
+        private bool m_boxSeeded;
+
         public Rewriter(Run run, SemanticModel model, MethodDeclarationSyntax method)
         {
             m_run = run;
@@ -99,7 +104,13 @@ public sealed partial class TwinGenerator
             }
 
             if (!m_run.ShouldAwait(site))
+            {
+                // N2: a call to a box twin with no box to name stays plain, and is named in the report (SN-7).
+                if (site.Active && !site.PairBody && m_run.IsBoxTwinTarget(site.Target) && !m_run.BoxCallable(site))
+                    m_run.NoteBoxPlain(node, site.Target!);
+
                 return base.VisitInvocationExpression(node);
+            }
 
             // A ref struct value evaluated before the await (a u8 literal passed as a format, say) cannot live
             // across it. Where everything evaluated earlier is inert, the awaited call moves ahead of its
@@ -119,6 +130,17 @@ public sealed partial class TwinGenerator
             InvocationExpressionSyntax call = site.Interface && m_run.IfaceHidden
                 ? m_run.IfaceCall(site.IfaceTarget!, visited)
                 : visited.WithExpression(Rename(visited.Expression)).WithoutTrivia();
+
+            // N2: a call to a box twin through a `this ref` receiver hands the twin the receiver's box (9.1) instead.
+            if (site.BoxOf is { } box && !site.ViaBoxOverload && m_run.IsBoxTwinTarget(site.Target) && call.Expression is MemberAccessExpressionSyntax member)
+            {
+                call = call.WithExpression(member.WithExpression(ParseExpression(box)));
+                m_run.BoxCalls++;
+            }
+            else if (site.ViaBoxOverload && m_run.IsBoxTwinTarget(site.Target))
+            {
+                m_run.BoxCalls++;
+            }
 
             ExpressionSyntax awaited = AwaitExpression(Token(SyntaxKind.AwaitKeyword).WithTrailingTrivia(Space), call);
 
@@ -287,7 +309,7 @@ public sealed partial class TwinGenerator
                 // Only a read evaluated with the statement's own expression: one in a NESTED statement (a switch case,
                 // an if body: MnMixedStorm's worker) comes after Rule R has derived the ref again.
                 if (name.SpanStart >= node.Span.End && ReferenceEquals(name.Ancestors().OfType<StatementSyntax>().FirstOrDefault(), m_current) &&
-                    m_model.GetSymbolInfo(name).Symbol is ILocalSymbol { RefKind: not RefKind.None })
+                    IsRefLocal(m_model.GetSymbolInfo(name).Symbol))
                 {
                     return true;
                 }
@@ -295,6 +317,14 @@ public sealed partial class TwinGenerator
 
             return false;
         }
+
+        // A ref local of the twin. N2: in a box twin the receiver is one too (the prologue's `ref var t = ref
+        // Ꮡt.DerefOrNull()`), though the plain method's model binds it as the `this ref` parameter (closure arm N's
+        // CS9217 in runtime's gcWork.putObjBatch).
+        private bool IsRefLocal(ISymbol? symbol) =>
+            symbol is ILocalSymbol { RefKind: not RefKind.None } ||
+            BoxReceiver is { } receiver && symbol is IParameterSymbol { Ordinal: 0, RefKind: RefKind.Ref, ContainingSymbol: IMethodSymbol { IsExtensionMethod: true } } parameter &&
+            parameter.Name == receiver;
 
         // Whether an assignment's left side writes through a reference: a ref local, a member or element reached from
         // one, or a ref-returning property or call (the field-access generator's `GoFieldAccess.get_F(ж<T>)`); a
@@ -309,9 +339,13 @@ public sealed partial class TwinGenerator
                 if (node is not ExpressionSyntax expression)
                     continue;
 
-                switch (m_model.GetSymbolInfo(expression).Symbol)
+                ISymbol? symbol = m_model.GetSymbolInfo(expression).Symbol;
+
+                if (IsRefLocal(symbol))
+                    return true;
+
+                switch (symbol)
                 {
-                    case ILocalSymbol { RefKind: not RefKind.None }:
                     case IPropertySymbol { ReturnsByRef: true }:
                     case IMethodSymbol { ReturnsByRef: true }:
                         return true;
@@ -694,6 +728,13 @@ public sealed partial class TwinGenerator
         private SyntaxList<StatementSyntax> Statements(SyntaxList<StatementSyntax> statements)
         {
             m_scopes.Add([]);
+
+            // N2: the box twin's receiver is a ref local over the box, declared by the prologue before the body.
+            if (BoxReceiver is { } receiver && !m_boxSeeded)
+            {
+                m_boxSeeded = true;
+                m_scopes[^1].Add(receiver + " = ref " + (m_run.BoxCopy ? "ᴛcopy" + receiver : "Ꮡ" + receiver + ".DerefOrNull()") + ";");
+            }
             List<StatementSyntax> result = [];
 
             foreach (StatementSyntax statement in statements)

@@ -44,6 +44,19 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // (the LOUD fallback, GO2CS0014). PairLaunch: a func value a twin's go statement tests for a pair (fix 6).
         public string? GoReason;
         public bool GoCouldPark, PairLaunch, PairBody;
+
+        // N2 (DESIGN-mn-box-twin.md 9): a call to a function whose twin takes its receiver's BOX. BoxOf is the box this
+        // call site names for the receiver without a copy (null: none, and the call stays plain, named); ViaBoxOverload,
+        // that the call binds RecvGenerator's box overload `M(this ж<T>)`, whose receiver already is the box.
+        public string? BoxOf;
+        public bool ViaBoxOverload;
+
+        // The box overload a ViaBoxOverload call bound, kept: where the `this ref` method behind it gets no box twin, the
+        // call parks as at the base, through the overload's own twin (stage (c)'s forwarder twin, `Lockꞏtwin(this ж<T>)`).
+        public IMethodSymbol? BoxOverload;
+
+        // The call, for the report's named-plain row of a function that parks nowhere else (SN-7).
+        public InvocationExpressionSyntax? Node;
     }
 
     // golib's goǃ and goǃtwin ladders take the goroutine's function and at most 16 arguments.
@@ -56,6 +69,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
         public string? Refusal;
         public bool Parks, GoOnly;
         public int Awaits;
+
+        // N2: the receiver parameter's name when this `this ref T` method's twin takes the box (`Mꞏtwin(this ж<T> Ꮡt)`).
+        public string? BoxReceiver;
         public readonly List<Site> Sites = [];
         public bool Twinned => Refusal is null && Parks;
     }
@@ -104,7 +120,18 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 unmark.Add(entry.Trim());
         }
 
-        new Run(context, goSites, ifaceShape, ifaceAll) { Self = self, Pairs = pairs, CallerRule = callerRule, IfaceUnmark = unmark }.Execute();
+        // N2 (DESIGN-mn-box-twin.md 9.8): GoTwinsBoxRecv=false keeps every by-ref receiver refused, the cut's A/B control;
+        // GoTwinsBoxForwarders=false keeps the interface forwarders to box twins sync, their own arm; GoTwinsBoxCopy=true
+        // makes a box twin COPY its receiver -- wrong on purpose, the aliasing probe's negative control (SN-6), never a
+        // build anyone ships.
+        bool boxRecv = !(options.TryGetValue("build_property.GoTwinsBoxRecv", out string? box) && string.Equals(box, "false", StringComparison.OrdinalIgnoreCase));
+        bool boxForwarders = !(options.TryGetValue("build_property.GoTwinsBoxForwarders", out string? forward) && string.Equals(forward, "false", StringComparison.OrdinalIgnoreCase));
+        bool boxCopy = options.TryGetValue("build_property.GoTwinsBoxCopy", out string? copy) && string.Equals(copy, "true", StringComparison.OrdinalIgnoreCase);
+
+        new Run(context, goSites, ifaceShape, ifaceAll)
+        {
+            Self = self, Pairs = pairs, CallerRule = callerRule, IfaceUnmark = unmark, BoxRecv = boxRecv, BoxForwarders = boxForwarders, BoxCopy = boxCopy
+        }.Execute();
     }
 
     internal sealed partial class Run(GeneratorExecutionContext context, bool goSites, IfaceShape ifaceShape, bool ifaceAll)
@@ -176,10 +203,25 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     candidate.Refusal = "ref-unrederivable";
                 else if (candidate.Twinned && AwaitsInLock(candidate))
                     candidate.Refusal = "await-in-lock";
+                else if (candidate.Twinned && SharedMemberRef(candidate))
+                    candidate.Refusal = "ref-shared-member";
             }
 
             foreach (Candidate candidate in m_ordered)
             {
+                // N2 (SN-7): a function whose only parks were calls to a box twin it has no box for parks NOT AT ALL, so
+                // no twin's rewriter sees those calls; they are named here, beside the plain calls inside twins. A REFUSED
+                // function is not: it never has a twin, and its calls are plain under its own refusal's name (closure arm
+                // N: 12 of 37 rows were fmt's `ss` methods, refused reflike for their sstring parameters).
+                if (!candidate.Parks && candidate.Refusal is null)
+                {
+                    foreach (Site site in candidate.Sites)
+                    {
+                        if (site is { Active: true, PairBody: false, Node: { } node } && IsBoxTwinTarget(site.Target) && !BoxCallable(site))
+                            NoteBoxPlain(node, site.Target!);
+                    }
+                }
+
                 candidate.GoOnly = candidate.Parks && !candidate.Sites.Any(site => site.Direct && (ShouldAwait(site) || site.Delegate && CallerRuleTwins(site)));
 
                 // Must-fix 3 (DESIGN-mn-func-values.md 10.4): a function refused a twin whose body calls through a func
@@ -281,6 +323,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 return;
 
             Candidate candidate = new() { Syntax = method, Symbol = symbol, Refusal = PreRefusal(method, symbol) };
+
+            if (candidate.Refusal is null)
+                candidate.BoxReceiver = BoxReceiverOf(method, symbol);
+
             m_candidates[symbol] = candidate;
             m_ordered.Add(candidate);
         }
@@ -335,6 +381,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
             for (int i = 0; i < symbol.Parameters.Length; i++)
             {
+                // N2: a plain `ref` receiver without [GoCopyBound] gets a box twin instead (BoxReceiverOf).
+                if (i == 0 && BoxReceiverOf(method, symbol) is not null)
+                    continue;
+
                 if (symbol.Parameters[i].RefKind != RefKind.None)
                     return i == 0 && symbol.IsExtensionMethod ? "byref-recv" : "byref-param";
             }
@@ -404,12 +454,20 @@ public sealed partial class TwinGenerator : ISourceGenerator
             if (target is null)
                 return false;
 
-            return HasTwinMember(target) || m_candidates.TryGetValue(target, out Candidate? candidate) && candidate.Twinned;
+            return HasTwinMember(target) || HasBoxTwinMember(target) || m_candidates.TryGetValue(target, out Candidate? candidate) && candidate.Twinned;
         }
 
         internal bool ShouldAwait(Site site) =>
             site is { Active: true, Go: GoKind.None, Renameable: true, Delegate: false } &&
-            (site.Interface ? site.IfaceCallable && IfaceCanPark(site.IfaceTarget) : CanPark(site.Target));
+            (site.Interface ? site.IfaceCallable && IfaceCanPark(site.IfaceTarget) :
+             site is { ViaBoxOverload: true, BoxOverload: { } overload } && !IsBoxTwinTarget(site.Target) ? CanPark(overload) :
+             CanPark(site.Target) && BoxCallable(site));
+
+        // N2: a call to a box twin is awaited only through a box -- the box overload's receiver, or the box BoxExpression
+        // named (9.1); without one it stays plain, named. A box-overload call to a method with no box twin parks as at the
+        // base, through the overload's own twin (ShouldAwait; closure arm N lost syscall's 199 twins to a plain call there).
+        internal bool BoxCallable(Site site) =>
+            IsBoxTwinTarget(site.Target) ? site.ViaBoxOverload || site.BoxOf is not null : !site.ViaBoxOverload;
 
         internal bool GoTwinnable(Site site) =>
             site.Active && (site.Go == GoKind.Literal || site.Go == GoKind.Group && CanPark(site.GoTarget));
@@ -572,7 +630,18 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     model.GetTypeInfo(access.Expression).Type?.TypeKind == TypeKind.Interface;
             }
             else if (method.MethodKind != MethodKind.LocalFunction)
+            {
                 site.Target = Normalize(method);
+
+                // N2: a call through a ж<T> expression binds RecvGenerator's box overload; its target is the `this ref`
+                // method behind it, and its receiver already is the box (no copy, no row of 9.1 needed).
+                if (BoxOverloadTarget(site.Target) is { } boxed)
+                {
+                    site.BoxOverload = site.Target;
+                    site.Target = boxed;
+                    site.ViaBoxOverload = true;
+                }
+            }
 
             return site;
         }
@@ -583,6 +652,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
     private sealed class Collector(Run run, SemanticModel model, Candidate candidate) : CSharpSyntaxWalker
     {
         private int m_passive, m_literal, m_pair;
+        private RefAliases? m_aliases;
 
         public override void VisitInvocationExpression(InvocationExpressionSyntax node)
         {
@@ -590,6 +660,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
             site.Active = m_passive == 0;
             site.Direct = m_passive == 0 && m_literal == 0;
             site.PairBody = m_pair > 0;
+            site.Node = node;
+
+            // N2: the box a `this ref` call can name for its receiver, whatever the target becomes after the fixpoint.
+            if (site is { ViaBoxOverload: false, Target: { IsExtensionMethod: true, Parameters.Length: > 0 } target } && target.Parameters[0].RefKind == RefKind.Ref)
+                site.BoxOf = run.BoxExpression(node, model, candidate, m_aliases ??= new RefAliases(candidate.Syntax));
+
             run.Sites[node] = site;
             candidate.Sites.Add(site);
 

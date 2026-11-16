@@ -1,0 +1,496 @@
+// TwinBoxTests.cs - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// Use of this source code is governed by an MIT-style license
+// that can be found in the LICENSE file.
+
+extern alias golib;
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using go2cs;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace GenTests;
+
+/// <summary>
+/// M:N PROTOTYPE, N2, the BOX TWIN (docs/phase4/DESIGN-mn-box-twin.md, revision 1; COORD's GO after the re-review): a
+/// `this ref T` method's twin takes the receiver's box, `Mꞏtwin(this ж<T> Ꮡt)`, and each call names a box without a
+/// copy (9.1's rows) or stays plain. The two must-fixes of the re-review are pinned: a ref local crossing a ж-typed
+/// member refuses the twin by name; a VALUE receiver's box overload (which copies) is never followed.
+/// </summary>
+[TestClass]
+public class TwinBoxTests
+{
+    private const string Header = """
+        using System;
+        using static go.builtin;
+
+        namespace go;
+
+        public static partial class box_package
+        {
+            internal static channel<nint> ch;
+
+            public partial struct S { public nint y; }
+
+            public partial struct T { public nint x; public S inner; public slice<S> items; }
+
+            public partial struct N { public nint v; public ж<N> next; }
+
+            internal static void b(this ref T t) { ᐸꟷ(ch); t.x = 1; }
+
+            internal static void sPark(this ref S s) { ᐸꟷ(ch); s.y = 2; }
+
+        """;
+
+    private const string Footer = "}\n";
+
+    // The box twin's own receiver, and a caller's ref local over a box.
+    private const string OwnAndLocal = """
+            internal static void a(this ref T t) { t.b(); t.x++; }
+
+            public static void run(ж<T> Ꮡx)
+            {
+                ref var x = ref Ꮡx.DerefOrNull();
+                x.a();
+            }
+
+        """;
+
+    // A call through a ж<T> expression binds RecvGenerator's box overload; its receiver is the box.
+    private const string ViaOverload = """
+            public static void runP(ж<T> Ꮡp)
+            {
+                Ꮡp.b();
+            }
+
+        """;
+
+    // The currency guard (9.4): the root reassigned other than in the re-alias form, so `x` no longer names Ꮡx's object.
+    private const string NotCurrent = """
+            public static void stale(ж<T> Ꮡx)
+            {
+                ref var x = ref Ꮡx.DerefOrNull();
+                Ꮡx = Ꮡ(new T());
+                x.b();
+                ᐸꟷ(ch);
+            }
+
+        """;
+
+    // Must-fix 1: a ref local whose source crosses a ж-typed member.
+    private const string SharedMember = """
+            internal static void walk(this ref N n)
+            {
+                ref var m = ref n.next.DerefOrNull();
+                ᐸꟷ(ch);
+                m.v = 1;
+            }
+
+        """;
+
+    // Closure arm O: a HEAP local initialized from a ж-typed member is derived again from its own box, never through the
+    // member: no shared-member refusal (runtime's `ref var block = ref heap<ж<…>>(…a.current…, out var Ꮡblock)`).
+    private const string HeapFromMember = """
+            internal static void hw(this ref N n)
+            {
+                ref var m = ref heap<ж<N>>(n.next, out var Ꮡm);
+                ᐸꟷ(ch);
+                m = default!;
+            }
+
+        """;
+
+    // A [GoCopyBound] receiver is bound through a copy: never boxed (9.3).
+    private const string CopyBound = """
+            [GoCopyBound]
+            internal static void cb(this ref T t) { ᐸꟷ(ch); }
+
+        """;
+
+    // Must-fix 2: a VALUE receiver's box overload copies (`var t = ~Ꮡt;`): never followed.
+    private const string ValueReceiver = """
+            internal static nint v(this T t) { ᐸꟷ(ch); return t.x; }
+
+            public static void runV(ж<T> Ꮡp)
+            {
+                Ꮡp.v();
+            }
+
+        """;
+
+    // A field of a boxed receiver, and a slice element of one (9.1's field and element rows).
+    private const string FieldAndElement = """
+            public static void runF(ж<T> Ꮡx, nint i)
+            {
+                ref var x = ref Ꮡx.DerefOrNull();
+                x.inner.sPark();
+                x.items[i].sPark();
+            }
+
+        """;
+
+    // A function whose ONLY park is a call with no box to name (a stack local, named-plain as ruled): it parks nowhere,
+    // gets no twin, and no twin's rewriter sees the call.
+    private const string OnlyUnboxed = """
+            public static void onlyF()
+            {
+                S v = default;
+                v.sPark();
+            }
+
+        """;
+
+    // A field of a type with no [GoFieldAccess] pointer but the field token every converted struct has (TypeGenerator's
+    // `Field‿Tokens`): the design's field row, `Ꮡx.of(T.Ꮡf)` (the probe's `nh.c`), here on the box twin's OWN receiver,
+    // whose `Ꮡt` SN-1 binds through its typed stand-in.
+    private const string FieldToken = """
+            internal static void own(this ref T t) { t.inner.sPark(); }
+
+        """;
+
+    // Closure arm N's CS9217 (runtime's gcWork.putObjBatch): in a box twin the receiver is a REF LOCAL, though the plain
+    // method's model binds it as the `this ref` parameter. A store through it with an awaited call on the right
+    // (`(w.wbuf1, w.wbuf2) = (w.wbuf2, getempty())`, and the plain store `d.a = pk() + d.b`) must spill or stay plain.
+    private const string StoreThroughReceiver = """
+            public partial struct D { public nint a; public nint b; }
+
+            internal static nint pk() { return ᐸꟷ(ch); }
+
+            internal static void swapPark(this ref D d) { (d.a, d.b) = (d.b, pk()); }
+
+            internal static void addPark(this ref D d) { d.a = pk() + d.b; }
+
+        """;
+
+    // Closure arm N's report: a REFUSED caller (a ref-struct parameter: reflike, as fmt's `ss.consume(…, sstring ok)`)
+    // never has a twin, so its calls are plain under its own refusal's name, not named-plain box calls (SN-7).
+    private const string RefusedCaller = """
+            internal static void rq(this ref S q, ReadOnlySpan<byte> r) { q.sPark(); }
+
+        """;
+
+    // The review's nit: an element under a package variable is named-plain in the first cut.
+    private const string PackageVarElement = """
+            internal static ж<T> Ꮡpv = Ꮡ(new T());
+            internal static ref T pv => ref Ꮡpv.Value;
+
+            public static void runPv(nint i)
+            {
+                pv.items[i].sPark();
+                ᐸꟷ(ch);
+            }
+
+        """;
+
+    // Closure arm O: a REFERENCED method with a twin of its own shape (sync's hand-written `Lockꞏtwin(this ref Mutex)`)
+    // beside a box-shaped one (stage (c)'s interface-forwarder twin, `*Mutex` implements Locker), and one with ONLY a box
+    // twin (an N2 box twin of another package). Compiled first, without generators, and referenced by image.
+    private const string Library = """
+        using System;
+
+        namespace go;
+
+        public static partial class lib_package
+        {
+            public partial struct M
+            {
+                public nint v;
+
+                // A converted struct's equality, as TypeGenerator gives it: the consumer's struct H compares its field.
+                public static bool operator ==(M a, M b) => a.v == b.v;
+                public static bool operator !=(M a, M b) => a.v != b.v;
+                public override bool Equals(object? obj) => obj is M other && other == this;
+                public override int GetHashCode() => v.GetHashCode();
+            }
+
+            public static void lk(this ref M m) { }
+            public static void lk(this ж<M> Ꮡm) { }
+            public static global::go.golib.GoTask lkꞏtwin(this ref M m) => default;
+            public static global::go.golib.GoTask lkꞏtwin(this ж<M> Ꮡm) => default;
+
+            public static void bx(this ref M m) { }
+            public static global::go.golib.GoTask bxꞏtwin(this ж<M> Ꮡm) => default;
+        }
+        """;
+
+    private const string UsesLibrary = """
+            public partial struct H { public lib_package.M m; }
+
+            public static void useLk(ж<H> Ꮡh)
+            {
+                ref var h = ref Ꮡh.DerefOrNull();
+                h.m.lk();
+            }
+
+            public static void useLkBox(ж<lib_package.M> Ꮡm)
+            {
+                Ꮡm.lk();
+            }
+
+            public static void useBx(ж<H> Ꮡh)
+            {
+                ref var h = ref Ꮡh.DerefOrNull();
+                h.m.bx();
+            }
+
+        """;
+
+    private static (string twins, Diagnostic[] errors) Run(Dictionary<string, string>? extra, params string[] shapes) =>
+        RunWith(null, extra, shapes);
+
+    private static (string twins, Diagnostic[] errors) RunWith(string? library, Dictionary<string, string>? extra, params string[] shapes)
+    {
+        CSharpParseOptions options = new(LanguageVersion.CSharp13);
+        string source = Header + string.Concat(shapes) + Footer;
+        IEnumerable<MetadataReference> references = References();
+
+        if (library is not null)
+        {
+            CSharpCompilation lib = CSharpCompilation.Create("twinboxlib", [CSharpSyntaxTree.ParseText(library, options)], References(),
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+            using MemoryStream image = new();
+            Microsoft.CodeAnalysis.Emit.EmitResult built = lib.Emit(image);
+            Assert.IsTrue(built.Success, "library: " + Errors(built.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray()));
+            references = references.Append(MetadataReference.CreateFromImage(image.ToArray())).ToArray();
+        }
+
+        CSharpCompilation compilation = CSharpCompilation.Create("twinbox",
+            [CSharpSyntaxTree.ParseText(source, options, path: @"C:\twinbox\main.cs")],
+            references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        Dictionary<string, string> properties = new() { ["build_property.GoTwins"] = "true" };
+
+        foreach (KeyValuePair<string, string> pair in extra ?? [])
+            properties[pair.Key] = pair.Value;
+
+        // RecvGenerator (the box overloads), FieldAccessGenerator (the field pointers) and TypeGenerator (every converted
+        // struct's field tokens, by rule) beside the twin generator, as a converted project builds: the twin generator
+        // binds against its siblings' output, so the final compilation must carry it too.
+        CSharpGeneratorDriver.Create([new RecvGenerator(), new FieldAccessGenerator(), new TypeGenerator(), new TwinGenerator()], parseOptions: options, optionsProvider: new BuildProperties(properties))
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+
+        string twins = string.Join("\n", output.SyntaxTrees.Skip(compilation.SyntaxTrees.Length).Select(tree => tree.ToString()));
+
+        if (Environment.GetEnvironmentVariable("GO2CS_DUMP_TWINS") is { Length: > 0 } dump)
+            File.WriteAllText(dump, twins);
+
+        // EMIT, not GetDiagnostics: an async lowering error is reported only while the state machine is built.
+        Microsoft.CodeAnalysis.Emit.EmitResult emitted = output.Emit(Stream.Null);
+
+        return (twins, emitted.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray());
+    }
+
+    private static string Errors(Diagnostic[] errors) => string.Join("\n", errors.Select(error => error.ToString()));
+
+    [TestMethod]
+    public void ABoxTwinTakesTheBoxAndItsCallersHandItTheirs()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, OwnAndLocal);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "bꞏtwin(this global::go.ж<T> Ꮡt)", "b's twin takes the box");
+        StringAssert.Contains(twins, "ref var t = ref Ꮡt.DerefOrNull();", "the prologue derives the receiver's ref");
+        StringAssert.Contains(twins, "await Ꮡt.bꞏtwin()", "a's twin hands b its OWN box");
+        StringAssert.Contains(twins, "await Ꮡx.aꞏtwin()", "run's twin hands a the box its ref local is over");
+    }
+
+    [TestMethod]
+    public void ACallThroughABoxExpressionAwaitsTheBoxTwin()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ViaOverload);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await Ꮡp.bꞏtwin()", "the box overload's receiver is the box");
+    }
+
+    [TestMethod]
+    public void AStaleRefLocalNamesNoBoxAndTheCallStaysPlain()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, NotCurrent);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("Ꮡx.bꞏtwin(", StringComparison.Ordinal), "a stale ref local hands no box");
+        StringAssert.Contains(twins, "|b|x", "the plain call is named in the report");
+    }
+
+    [TestMethod]
+    public void ARefLocalCrossingABoxTypedMemberRefusesTheTwinByName()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, SharedMember);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("walkꞏtwin(", StringComparison.Ordinal), "walk is refused a twin");
+        StringAssert.Contains(twins, "|walk|ref-shared-member", "the refusal names it");
+    }
+
+    [TestMethod]
+    public void AHeapLocalFromABoxTypedMemberIsNoSharedMemberChain()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, HeapFromMember);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("|hw|ref-shared-member", StringComparison.Ordinal), "a heap local is not refused");
+        StringAssert.Contains(twins, "hwꞏtwin(this global::go.ж<N> Ꮡn)", "hw is a box twin");
+    }
+
+    [TestMethod]
+    public void ACopyBoundReceiverIsNeverBoxed()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, CopyBound);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("cbꞏtwin(", StringComparison.Ordinal), "cb gets no box twin");
+        StringAssert.Contains(twins, "|cb|byref-recv", "it keeps its by-ref refusal");
+    }
+
+    [TestMethod]
+    public void AValueReceiversBoxOverloadIsNeverFollowed()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ValueReceiver);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("Ꮡp.vꞏtwin(", StringComparison.Ordinal), "the copying box overload is not followed to a twin");
+
+        // The danger itself: a VALUE receiver given a box twin would SHARE where Go copies. Its twin keeps `this T`.
+        StringAssert.Contains(twins, "vꞏtwin(this T t)", "a value receiver's twin takes its value, as Go copies it");
+        Assert.IsFalse(twins.Contains("vꞏtwin(this global::go.ж<T>", StringComparison.Ordinal), "a value receiver never gets a box twin");
+    }
+
+    [TestMethod]
+    public void AFieldAndAnElementOfABoxedReceiverNameTheirPointers()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, FieldAndElement);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await global::go.builtin.Ꮡ(x.items, i).sParkꞏtwin()", "the element pointer, index once");
+
+        // The fixture records no [GoFieldAccess] type, so `Ꮡx.Ꮡinner` does not bind; the field token does.
+        StringAssert.Contains(twins, "await Ꮡx.of(global::go.box_package.T.Field‿Tokens.Ꮡinner‿).sParkꞏtwin()", "the field pointer, by its token");
+    }
+
+    [TestMethod]
+    public void AFieldWithOnlyItsTokenNamesThePointerThroughIt()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, FieldToken);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "ownꞏtwin(this global::go.ж<T> Ꮡt)", "own's twin takes the box");
+        StringAssert.Contains(twins, "await Ꮡt.of(global::go.box_package.T.Field‿Tokens.Ꮡinner‿).sParkꞏtwin()", "the field token's pointer");
+        Assert.IsFalse(twins.Contains("|sPark|t.inner", StringComparison.Ordinal), "no named-plain row for it");
+    }
+
+    [TestMethod]
+    public void AStoreThroughTheBoxReceiverHoldsNoRefAcrossAnAwait()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StoreThroughReceiver);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "addParkꞏtwin(this global::go.ж<D> Ꮡd)", "addPark is a box twin");
+        StringAssert.Contains(twins, "= await pkꞏtwin(); d = ref Ꮡd.DerefOrNull();", "the plain store's call spills ahead, the receiver derived again");
+    }
+
+    [TestMethod]
+    public void AReferencedMethodWithItsOwnRefTwinKeepsTheBaseForm()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(Library, null, UsesLibrary);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await h.m.lkꞏtwin()", "its own-shape twin is awaited in place, as at the base");
+        Assert.IsFalse(twins.Contains("|lk|", StringComparison.Ordinal), "and never named-plain");
+        StringAssert.Contains(twins, "await Ꮡm.lkꞏtwin()", "a box-overload call parks as at the base, through the overload's own twin");
+        StringAssert.Contains(twins, ".bxꞏtwin()", "a box-only twin is reached through the box");
+        Assert.IsFalse(twins.Contains("await h.m.bxꞏtwin()", StringComparison.Ordinal), "never through the ref");
+    }
+
+    [TestMethod]
+    public void WithTheSwitchOffAReferencedBoxTwinIsNotATarget()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(Library, new() { ["build_property.GoTwinsBoxRecv"] = "false" }, UsesLibrary);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await h.m.lkꞏtwin()", "the base form");
+        StringAssert.Contains(twins, "await Ꮡm.lkꞏtwin()", "the base form through the box overload");
+        Assert.IsFalse(twins.Contains("bxꞏtwin(", StringComparison.Ordinal), "a box-only twin is unknown with the switch off: bx is no parker");
+        Assert.IsFalse(twins.Contains("// P ", StringComparison.Ordinal), "and nothing is named-plain");
+    }
+
+    [TestMethod]
+    public void ARefusedCallersCallsAreNotNamedPlain()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, RefusedCaller);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("rqꞏtwin(", StringComparison.Ordinal), "rq is refused (a ref-struct parameter)");
+        Assert.IsFalse(twins.Contains("|sPark|q", StringComparison.Ordinal), "its call is no named-plain row");
+    }
+
+    [TestMethod]
+    public void AnElementUnderAPackageVariableStaysPlainAndNamed()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, PackageVarElement);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("Ꮡ(pv.items, i)", StringComparison.Ordinal), "no element pointer under a package variable");
+        StringAssert.Contains(twins, "|sPark|pv.items[i]", "the plain call is named");
+    }
+
+    [TestMethod]
+    public void AFunctionThatParksOnlyThroughAnUnboxedCallIsStillNamed()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, OnlyUnboxed);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("onlyFꞏtwin(", StringComparison.Ordinal), "onlyF parks nowhere: no twin");
+        StringAssert.Contains(twins, "|sPark|v", "its plain call to a box twin is named all the same (SN-7)");
+    }
+
+    [TestMethod]
+    public void TheSwitchOffKeepsEveryByRefReceiverRefused()
+    {
+        (string twins, Diagnostic[] errors) = Run(new() { ["build_property.GoTwinsBoxRecv"] = "false" }, OwnAndLocal);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("bꞏtwin(", StringComparison.Ordinal), "no box twin with the switch off");
+        StringAssert.Contains(twins, "|b|byref-recv", "b is refused as before");
+    }
+
+    [TestMethod]
+    public void TheCopyControlCopiesTheReceiver()
+    {
+        (string twins, Diagnostic[] errors) = Run(new() { ["build_property.GoTwinsBoxCopy"] = "true" }, OwnAndLocal);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "var ᴛcopyt = Ꮡt.DerefOrNull(); ref var t = ref ᴛcopyt;", "the control copies, on purpose");
+    }
+
+    private static IEnumerable<MetadataReference> References()
+    {
+        string trusted = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!;
+
+        return trusted.Split(Path.PathSeparator)
+            .Select(path => MetadataReference.CreateFromFile(path))
+            .Append(MetadataReference.CreateFromFile(typeof(golib::go.IGoEquatable).Assembly.Location));
+    }
+
+    private sealed class BuildProperties(Dictionary<string, string> properties) : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptionsProvider
+    {
+        private readonly Options m_global = new(properties);
+
+        public override Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions GlobalOptions => m_global;
+
+        public override Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions GetOptions(SyntaxTree tree) => m_global;
+
+        public override Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions GetOptions(AdditionalText textFile) => m_global;
+
+        private sealed class Options(Dictionary<string, string> values) : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions
+        {
+            public override bool TryGetValue(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value) => values.TryGetValue(key, out value);
+        }
+    }
+}

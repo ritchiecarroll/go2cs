@@ -1387,6 +1387,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
 
     [TestMethod]
+    public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
+
+    [TestMethod]
     public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
 
     [TestMethod]

@@ -230,3 +230,55 @@ snapshots the intermediate box into a local once, or the function is refused.
 Receivers first (plain `ref`, no `[GoCopyBound]`), with the currency guard and SN-1's diagnostic; the forwarders in
 the same cut behind a switch, read as an arm of their own; `byref-param` after, as its own measured step. Red first:
 the aliasing probe (SN-6) and a GenTests unit per box row of 9.1.
+
+## 10. Before the measured arms: the re-review's changes and the forwarder prediction (dated block, 2026-11-16)
+
+COORD's re-review of revision 1 cleared the cut to code, with two must-fixes, four should-fixes and a nit. Recorded
+here before any arm of the cut is read.
+
+- **9.1, the post-pass (should-fix).** The v2 census did NOT run UnrederivableLive or await-in-lock on the
+  hypothetically twinned bodies: its 3,718 counts twins before either refusal. The cut runs both, and the
+  shared-member detector below, after the fixpoint on every twin, so PN-2 is read against 3,718 less whatever those
+  three refuse.
+- **Must-fix 1, shared-member chains.** A twin with a ref local whose source crosses a ж-typed member
+  (`ref var m = ref n.next.DerefOrNull()`) is refused by name, `ref-shared-member`; a GenTests unit was red first.
+- **Must-fix 2, the value-receiver forwarder.** The box overload is followed only to a plain `ref`,
+  non-`[GoCopyBound]` method of the same name, matched by its FULL signature (every other parameter by ref kind and
+  type, and the return type); a value method's box overload, which copies, is never followed. A GenTests unit was
+  red first, and the probe carries a value method called through a pointer: the write during its park is not seen,
+  and its own mutation does not reach `*p`.
+- **The field row, as built.** `parent.Ꮡf` (the field-access generator's property) where the type is recorded
+  `[GoFieldAccess]`, else `parent.of(T.Field‿Tokens.Ꮡf‿)`, the token every converted struct carries (TypeGenerator
+  emits it by rule): the same FieldRefBox either way. **SN-1, as built:** every box form is bound speculatively at
+  the call and must type as ж<the receiver's type>; a form that does not is named-plain (a `// P` report row), never
+  emitted. The forms are enumerated by construction, so a diagnostic for a form "outside" them could never fire; the
+  P rows are SN-7's count, including those of a function that parks nowhere else (it gets no twin, so no rewriter sees
+  the call).
+- **The nit.** An element under a package variable (`name.f[i]`, 3 sites) is named-plain in this cut.
+- **SN-6, widened.** The probe also covers a nil pointer's field (`nh.c.M()` panics as Go) and the `t.s[i]` row (an
+  element of the own receiver's slice field).
+- **PN-4, the base (should-fix).** Arm B's hand-offs are read again, 5 runs, at the cut's base, beside the cut's 5.
+- **Found by the first closure arms, each cured with a GenTests unit red first** (the arms were read again after):
+  (1) arm N did not build, 4 CS9217 in runtime's `gcWork.putObjBatch`, `(w.wbuf1, w.wbuf2) = (w.wbuf2, getempty())`:
+  the rewriter's ref-local tests (a store through a ref, a ref read after the call) bind with the PLAIN method's
+  model, where a box twin's receiver is the `this ref` parameter, not the ref local it becomes; it now counts as one,
+  so such a call spills or stays plain (ref-blocked), as C1 does for any ref local. (2) arm O, the switch off, was
+  not the base: sync's hand-written `Lockꞏtwin(this ref Mutex)` sits beside stage (c)'s interface-forwarder twin
+  `Lockꞏtwin(this ж<Mutex>)`, which read as a box twin, so calls the base awaits in place were routed through boxes
+  and 5 left plain. A method with a twin of its own shape now keeps the base form, and with the switch off no
+  referenced box twin is known at all. (3) the shared-member detector refused runtime's `traceRegionAlloc.alloc` for
+  a HEAP local, `ref heap<ж<…>>(…a.current…, out var Ꮡblock)`, which is derived again from its own box, never through
+  the member: heap locals are exempt. So the census's "0 shared-member chains" stands. (4) arm N, once built, lost
+  528 of the base's twins (syscall 199 -> 1, and every package above it): a call through RecvGenerator's box overload
+  (`Ꮡx.M()`) was remapped to the `this ref` method and, where that method got no box twin, left PLAIN, though the
+  base awaited it through the overload's own twin (stage (c)'s forwarder twin). Such a call now parks as at the base.
+- **PN-7 (55%), the forwarders (should-fix).** With GoTwinsBoxForwarders on, arm B's 658 sync forwarders fall to
+  450-600 (the rest forward to implementers that cannot park, or to refused ones); with it off they stay at the
+  receivers-only arm's count. Hand-offs, median of 5: forwarders on at most forwarders off.
+
+## 11. Measured (dated block, 2026-11-16)
+
+The cut's arms, scores and stop lines: [DATA-mn-n2-receivers.md](DATA-mn-n2-receivers.md). In short: twinned 2,999
+-> 3,806, refused parkers 175, +1.18 MB, Go's 9 lines in every run, the probe green with N2 and red with the copy
+control; PN-1 and PN-4 missed (four rules found by the arms; hand-offs rose as more goroutines run on carriers).
+`byref-param` (395, 63 parking) is the next measured step, as ruled.

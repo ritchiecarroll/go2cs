@@ -121,11 +121,11 @@ public sealed partial class TwinGenerator
 
             foreach (Forwarder forwarder in m_forwarders)
             {
-                if (forwarder.Skip is not null || !IfaceCanPark(forwarder.Member) || !CanPark(forwarder.Target))
+                if (forwarder.Skip is not null || !IfaceCanPark(forwarder.Member) || !CanPark(ForwarderTarget(forwarder)))
                     continue;
 
                 INamedTypeSymbol host = forwarder.Symbol.ContainingType;
-                IMethodSymbol target = forwarder.Target!;
+                IMethodSymbol target = ForwarderTarget(forwarder)!;
                 string iface = forwarder.Member.ContainingType.ToDisplayString(s_full) + (IfaceHidden ? Suffix : "");
                 string arguments = Arguments(forwarder.Symbol);
                 string indent = Open(source, host.ContainingType, host.ContainingNamespace, out int depth);
@@ -163,7 +163,7 @@ public sealed partial class TwinGenerator
             foreach (IGrouping<string, Forwarder> reason in m_forwarders.Where(forwarder => forwarder.Skip is not null).GroupBy(forwarder => forwarder.Skip!).OrderBy(group => group.Key, StringComparer.Ordinal))
                 report.Append("// forwarder-skipped ").Append(reason.Key).Append('=').Append(reason.Count()).Append("\r\n");
 
-            report.Append("// forwarders-sync=").Append(m_forwarders.Count(forwarder => forwarder.Skip is null && IfaceCanPark(forwarder.Member) && !CanPark(forwarder.Target))).Append("\r\n");
+            report.Append("// forwarders-sync=").Append(m_forwarders.Count(forwarder => forwarder.Skip is null && IfaceCanPark(forwarder.Member) && !CanPark(ForwarderTarget(forwarder)))).Append("\r\n");
         }
     }
 }
