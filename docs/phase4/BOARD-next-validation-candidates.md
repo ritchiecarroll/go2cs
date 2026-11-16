@@ -40287,4 +40287,28 @@ That joins row 2 (pool or elide the holder and `WeakReference`) as one `.5` desi
 
 — H (2026-11-15)
 
+## 2026-11-16 — C1 (the arm64 r2 seat's side finding; COORD ruling 01:01Z: a row, not code): syscall's `rawSyscallNoError` returns -1 and 0 when its syscall fails, where Go returns the negated errno and the register — OPEN, latent, no owner
+
+Go's `rawSyscallNoError` is assembly that traps and returns the two result registers without testing them
+(`asm_linux_amd64.s`: `MOVQ AX, r1`, `MOVQ DX, r2`; `asm_linux_arm64.s`: `MOVD R0, r1`, `MOVD R1, r2`). On a
+failed syscall r1 is the kernel's raw return, the negated errno, and r2 is the register's unchanged argument
+(a3 on amd64, a2 on arm64). The converted body (`src/core/syscall/linux/syscall_linux_impl.cs`, hand-owned) calls
+`internal/runtime/syscall/linux.Syscall6`, whose failure branch answers `(-1, 0, errno)`, and drops the errno, so
+a failure reads r1 = -1 and r2 = 0. Success is exact on both architectures since this seat.
+
+**Callers: 9, and none can fail.** The 8 generated wrappers in each linux `zsyscall_linux_*.go` (Getpid,
+Getppid, Gettid, Umask, Getegid, Geteuid, Getgid, Getuid) and `forkAndExecInChild1` in `exec_linux.go`
+(4 sites, getpid and getppid). Linux documents all eight syscalls as always successful. Every caller discards
+r2, and none compares r1 against an error value. The one way such a syscall fails is a seccomp filter that
+answers it with an errno (`SECCOMP_RET_ERRNO`); the caller then reads -1 where Go reads -errno. Not measured:
+whether any validated package runs under such a filter (none is known to).
+
+**Go-exact fix, for when it is wanted:** on failure return `((uintptr)(-(nint)errno), a3 on x86 or a2 elsewhere)`
+from `rawSyscallNoError`, choosing the register the way the converted `rawSyscall6` already does. About 5
+lines in the one hand-owned file. Its arm needs a syscall that fails without side effects through the same
+door, which none of the 9 callers has; a GolibTests arm can drive `rawSyscallNoError` itself with an invalid
+trap number (ENOSYS).
+
+— C1 (2026-11-16)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
