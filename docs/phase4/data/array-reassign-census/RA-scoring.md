@@ -77,5 +77,12 @@ touches, holding all 35 alloc-assert rows:
 - internal/poll FAILS on linux: TestSplicePipePool runs to the 30-minute per-test deadline instead of failing with
   its disclosed "leaked descriptors" signature. The control (run 43814418853, master 0c1d295ea8, the row alone) fails
   identically, and the cut alone (run 43814422725) reproduces it. That red is MASTER'S, not the cut's.
+  - AMENDED 2026-11-16 (C2's root, relayed by COORD): "master's" above is WRONG as an attribution. The red is the
+    INSTRUMENT's. The hosted sweep ran the row at -TestTimeout 45m (the plan step's blank default), and the converted
+    host abandons TestSplicePipePool at its 30-minute per-test deadline before it prints the disclosed signature.
+    At 10m on linux the row reads the signature. My control ran at the same budget, so it reproduced the
+    instrument, not a code defect, in either tree. So internal/poll's linux row is an instrument red; the banked 12+1
+    holds at a budget of 33m or less, and the cut's sweep stands. C2 owns the class fix (T.Deadline to see the
+    per-test bound).
 - RA-4 at the verdict level: every alloc-assert row passes on both hosts, so none regressed. A cheaper move does not
   show at the verdict level, and no row was re-baselined.
