@@ -1036,8 +1036,9 @@ which can be a local path:
 
 **Build constraints pick each target's Go files.** The converter selects Go files by their build
 constraints and file-name suffixes, as `go build` does. The standard library is converted for Windows,
-Linux and macOS, each on amd64. Files whose C# differs between them go into `windows/`, `linux/` and
-`darwin/` subfolders. For example, `os` keeps `dir_windows.cs` in `os/windows/` and `dirent_linux.cs` in
+Linux and macOS on amd64, and for Linux on arm64. Files whose C# differs between them go into `windows/`,
+`linux/` and `darwin/` subfolders, and a package whose C# also differs by architecture adds folders such as
+`amd64/`, `linux-amd64/` and `linux-arm64/`. For example, `os` keeps `dir_windows.cs` in `os/windows/` and `dirent_linux.cs` in
 `os/linux/`.
 <!-- the multi-target run: docs/ConversionStrategies-Reference/package-conversion.md:601 (`-platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64`) -->
 
@@ -4440,7 +4441,7 @@ capacity. An array has a fixed length.
 
 Indexing, `len`, `cap`, `append` and `copy` keep their Go names and read as they do in Go
 ([Built-in Functions](#built-in-functions)). A `range` loop becomes a `foreach` over `(index, value)`
-pairs; an index-only `for i := range s` becomes `foreach (var i in range(s))`, which counts the indexes
+pairs; an index-only `for i := range s` becomes `foreach (var i in range(len(s)))`, which counts the indexes
 and reads no element ([Loops, Range and Labels](#loops-range-and-labels)).
 
 Go's type names stay readable too. Go's `int` appears as C# `nint`, a native-sized integer. Sized names
@@ -4764,7 +4765,7 @@ internal static void forward(params ꓸꓸꓸnint xsʗp) {
 `xsʗp.sslice()` gives golib's [`sslice<T>`](../src/core/golib/sslice.cs): a stack-only view of the span
 that allocates nothing. The converter uses it when the function only reads the pack, copies from it, or
 passes it on to another call, as `forward` does. Passing it on keeps it inside the call chain. `bump`'s
-index-only `for i := range xs` becomes `foreach (var i in range(xs))`, which reads no element.
+index-only `for i := range xs` becomes `foreach (var i in range(len(xs)))`, which reads no element.
 
 **A spread passes the slice itself.** `bump(xs...)` becomes `bump(xs.ꓸꓸꓸ)`. `.ꓸꓸꓸ` is a property on
 both `slice<T>` and `sslice<T>` that returns the slice's own storage as a `Span<T>`. So the writes in
@@ -6300,7 +6301,7 @@ internal static @string show(this digest d) {
 ```
 
 Go's `int` is C# `nint` ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). The index-only
-`range d.h` becomes `foreach` over golib's `range(d.h)`, which yields each index and reads no element
+`range d.h` becomes `foreach` over `range(len(d.h))`, which yields each index and reads no element
 ([Loops, Range and Labels](#loops-range-and-labels)). The pointer receiver `bump` needs no clone,
 because it works on the caller's own value.
 
@@ -6606,7 +6607,7 @@ internal static void variadic(@string _Δp0, params ꓸꓸꓸnint ʗp) { }
 ```
 
 **Each `init` becomes a `[GoInit]` method.** `[GoInit]` is the project's alias for .NET's `[ModuleInitializer]`
-attribute, so .NET runs the method once, when the package's assembly loads. [Package Conversion](#package-conversion)
+attribute, so .NET runs the method once, before the first use of anything in the package's assembly. [Package Conversion](#package-conversion)
 explains how imported packages are made to initialize first. C# cannot declare two methods with the same
 name and signature, so the first `init` keeps its name and the rest take a `Δ` suffix and a number, counted across the whole package:
 
@@ -7110,8 +7111,8 @@ For statements with range clause: with at most one iteration variable and a cons
 is not evaluated. Before H's seat (claude/h-range-nil-ptrarray, 55ffd992e1) a nil pointer parameter or receiver
 faulted at `range(p)`; C2 measured that on linux/amd64 at 3e3f18925a (Go 1.26.10 printed 3 and 4). -->
 **An index-only range reads no element.** When a range over a slice, an array or a pointer to an array
-names only the index (`for i := range s`, `for i, _ := range s`, or `for range s`), golib's `range(s)`
-reads the length once and counts the indexes, as Go does. The same holds for a variadic parameter
+names only the index (`for i := range s`, `for i, _ := range s`, or `for range s`), the loop ranges
+`range(len(s))`, which reads the length once and counts the indexes, as Go does. The same holds for a variadic parameter
 that the converter emits as golib's stack-only `sslice<T>` ([Slices and Arrays](#slices-and-arrays)). A pointer
 to an array held in a variable passes its type's length, `range(p, N)`, so a nil one ranges `N` times without
 being read, as in Go. A pointer parameter or pointer receiver ranges the count itself, `range(N)`. In C# it
@@ -8437,7 +8438,7 @@ runtime library every converted program uses ([`goǃ`](../src/core/golib/builtin
 letter U+01C3, which most fonts draw the same way. That letter keeps the method's name apart from `go`, the C#
 namespace every converted file lives in ([glyphs](#reading-converted-code-names-and-glyphs)).
 
-Each goroutine runs on an operating-system thread of its own, from start to finish. That is the main difference
+By default, each goroutine runs on an operating-system thread of its own, from start to finish. That is the main difference
 from Go, and the last part of this section explains what it means for a program.
 
 **`goǃ` takes the function and its arguments separately.** Most `goǃ` overloads take an `Action`, a C#
@@ -8630,7 +8631,7 @@ internal static partial void main() {
 the receive `<-done`, which waits until the panic ends the process
 ([Channels](#channels-and-select)).
 
-**A goroutine keeps its own thread from start to finish.** golib's
+**By default, a goroutine keeps its own thread from start to finish.** golib's
 [`Goroutine`](../src/core/golib/runtime/Goroutine.cs) class runs every `goǃ` on a background thread that
 belongs to that goroutine until it ends. A goroutine that blocks on a channel, a lock or a sleep blocks only its
 own thread. When a goroutine ends, its thread waits for the next `goǃ` instead of exiting, so a `go` statement
@@ -8698,20 +8699,22 @@ reservation. A mistaken mark would crash where Go grows the stack, so the proof 
      or a runtime callback. Guards: the converter's goroutineStackAnalysis_test.go, GolibTests GoroutinePoolTests
      (a bounded goroutine's measured stack; a default goroutine never on a bounded worker). -->
 
-**Converted code is ordinary blocking code, not `async` code.** A goroutine pauses by blocking its
-thread, so each goroutine needs a thread of its own. `goǃ` does not use the .NET thread pool, because
-a blocked goroutine would hold a shared pool thread and starve the others. golib cannot run many
-goroutines on fewer threads either, because .NET cannot move a running call to another stack. That is
-a property of .NET 10 rather than of the conversion: goroutines are started in one place in golib,
-so if .NET gains threads its runtime can park cheaply, golib can adopt them and converted code stays as
-it is.
+**Converted code is ordinary blocking code.** By default a goroutine pauses by blocking its thread, so
+each goroutine needs a thread of its own. `goǃ` does not use the .NET thread pool, because a blocked
+goroutine would hold a shared pool thread and starve the others.
+<!-- 2026-11-15 (owner-asked wording that holds in this release and the next, user-facing docs audit amendment 8): two
+     sentences dropped here, because the next release's opt-in scheduler (owner ruling 2026-11-12, Roadmap Performance)
+     runs many goroutines on fewer threads. They read: "golib cannot run many goroutines on fewer threads either, because
+     .NET cannot move a running call to another stack. That is a property of .NET 10 rather than of the conversion:
+     goroutines are started in one place in golib, so if .NET gains threads its runtime can park cheaply, golib can adopt
+     them and converted code stays as it is." -->
 
 **Each goroutine thread reserves a large stack.** Go stacks grow as needed, but a .NET stack overflow
 ends the process. A goroutine thread therefore reserves 256 MiB of address space, or 16 MiB when the converter
 proves the goroutine cannot recurse (above); memory is committed only as it is used. The `GO2CS_GOROUTINE_STACK` environment variable sets a different size.
 
-**Operating-system threads bound live goroutines far below Go's limit.** Go's goroutines reach
-about a million. The limit comes from how many threads the operating system can keep alive at once, not from
+**With the default threads, the operating system bounds live goroutines far below Go's limit.** Go's goroutines are cheap enough
+that a program can keep very many alive at once. The limit here comes from how many threads the operating system can keep alive at once, not from
 the stack reservation. A Go program that starts hundreds of thousands of goroutines at once does not
 run the same way after conversion.
 <!-- figure: the Goroutine.cs type remarks put the bound at "roughly 10⁴ concurrent goroutines rather than Go's 10⁶";
@@ -9298,7 +9301,7 @@ internal static void identCopy() {
 
 `c := d` becomes `d.ΔClone()`. A value receiver or value parameter of such a struct is cloned at the top
 of the function, as `show` does with `d = d.ΔClone();`. Methods become C# extension methods, and
-`this ref` is a pointer receiver ([Functions and Methods](#functions-and-methods)). `range(d.h)` is the
+`this ref` is a pointer receiver ([Functions and Methods](#functions-and-methods)). `range(len(d.h))` is the
 index-only `range d.h`, which reads no element ([Loops](#loops-range-and-labels)).
 <!-- parameter clone: StructArrayFieldValueCopy.go:35#e7823a takeValue(c digest) -> StructArrayFieldValueCopy.cs.target:32-33 `c = c.ΔClone();` -->
 
@@ -11523,7 +11526,7 @@ internal/unsafeheader's own tests, which build a slice and a string this way, pa
      (docs/phase4/DATA-rebank-prep-c1-2026-10-22.md, section 2). The page said "on linux and windows"; no
      windows reading at go1.26.10 is recorded (the re-bank owes it,
      docs/PLAN-rebank-go126.md:450 (`E3 retires, and the row rejoins`)), so windows is left off until one is. -->
-<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:298-304#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:53-59#0b034b (remarks), :349 (`{receiver}.OnHeaderStore();`, the setter, receiver being ʗp or the box a named pointer wrapper holds), :656-672#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:63-81#63bcd1 (remarks), :436#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-59#3cb9c4. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2741-2750#cc40fb. Platform: see the note above. -->
+<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:298-304#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:53-59#0b034b (remarks), :349 (`{receiver}.OnHeaderStore();`, the setter, receiver being ʗp or the box a named pointer wrapper holds), :656-672#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:63-81#63bcd1 (remarks), :436#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-59#3cb9c4. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2740-2749#cc40fb. Platform: see the note above. -->
 
 **A pointer passed to a system call stays alive until the call returns, as in Go.** Go guarantees this
 for `uintptr(unsafe.Pointer(p))` written directly in a `syscall.Syscall` argument list. The converter

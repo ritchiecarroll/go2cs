@@ -66,8 +66,10 @@ Several Go semantics cannot be written directly in C#, so the converter emits co
 `TypeGenerator`, `ImplementGenerator`, `EscapeRegistryGenerator` and `NativeArrayOpenerGenerator` also fill golib
 registries that code finds at run time, and none of them fills its registry at startup; see
 [Run-time registrations wait for the first lookup that misses](#run-time-registrations-wait-for-the-first-lookup-that-misses).
-The same assembly ships two analyzers, which report and generate nothing: `StringLiteralBindingAnalyzer`
-([`GO2CS0004`](../DiagnosticCodes.md)) and `StackAppendBufferAnalyzer` ([`GO2CS0007`](../DiagnosticCodes.md)).
+The same assembly ships four analyzers, which report and generate nothing: `StringLiteralBindingAnalyzer`
+([`GO2CS0004`](../DiagnosticCodes.md)), `StackAppendBufferAnalyzer` ([`GO2CS0007`](../DiagnosticCodes.md)),
+`RefusalDowngradedAnalyzer` ([`GO2CS0011`](../DiagnosticCodes.md)) and `MethodLimitAnalyzer`
+([`GO2CS0012`](../DiagnosticCodes.md)).
 <!-- The list is every class under src/gen/go2cs-gen declared `[Generator]`: nineteen at C46 (2026-11-11), whose MainEntryGenerator is one;
      BoundedGoroutineInterceptorGenerator and ExtensionHostListGenerator are not yet listed above. Sixteen at 3e3f18925a (fourteen
      at b335356d6; grep for `^\[Generator`); the two analyzers are declared
