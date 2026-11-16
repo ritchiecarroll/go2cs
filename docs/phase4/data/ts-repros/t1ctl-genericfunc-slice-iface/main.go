@@ -1,0 +1,40 @@
+// t1ctl: the same call with T inferred as the INTERFACE Named (a []Named argument), the green control.
+// Go prints: a,b 2
+package main
+
+import (
+	"fmt"
+	"slices"
+	"strings"
+)
+
+type Named interface{ Name() string }
+
+type item struct{ n string }
+
+func (i *item) Name() string { return i.n }
+
+func compareItems(a, b Named) int { return strings.Compare(a.Name(), b.Name()) }
+
+func wrap(ns []string) []Named {
+	out := make([]Named, len(ns))
+	for i, n := range ns {
+		out[i] = &item{n}
+	}
+	return out
+}
+
+func join[T Named](xs []T, cmp func(a, b T) int) string {
+	ys := slices.Clone(xs) // as tsbaseline.iterateErrorBaseline: a NEW local, the parameter is never written
+	slices.SortFunc(ys, cmp)
+	names := make([]string, len(ys))
+	for i, x := range ys {
+		names[i] = x.Name()
+	}
+	return strings.Join(names, ",")
+}
+
+func main() {
+	items := wrap([]string{"b", "a"})
+	fmt.Println(join(items, compareItems), len(items))
+}
