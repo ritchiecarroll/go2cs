@@ -1504,6 +1504,18 @@ through `View<uint16>(strings, 0, 16777216)`; and the registry's `value.cs.auto`
 batch 308 in four other sites (the span copy with the `unsafe` modifier); by COORD's 01:46Z note it is taken whole
 to this tip's emission, 8 lines more, in its own commit.
 
+**What the first gate battery found, two reds of this seat, each fixed on the branch.** (1) check-no-regression
+moved one behavioral program, `GoImageCopyThroughView`: its open-form copies through a byte view of a struct that
+holds an array (darwin's `Dirent`) had taken the Go-image view (`copy(@unsafe.GoImage(Ꮡd).slice(), data)`), and
+with D4 the copy door, which is asked before the arguments are converted, took them as `CopyInto` over the box.
+Such a box has no address for a door, so the copy door now declines a slice the Go-image route has marked, through
+that route's own mark (`goImageCopySlices`), and the converter test carries it as CONTROL 10, red without the
+decline. The corpus holds no Go-image site, so the footprint above stands. (2) `TestCommentParityCensus` rose 350
+to 352 on the comment above the `nameOff` copy in reflect and internal/reflectlite: the comment is where Go has it,
+but the census asked the C# line for Go's `copy` and the door spells it `CopyInto`. The census now reads a copy
+door's line as carrying `copy` (as it already reads `new slice<T>` for `make`), with an anchor fixture arm, red
+without the change, and the corpus census is back at 350.
+
 **A candidate, not this seat.** The registry's `value.cs` is hand-owned because of this form: its own header says
 the generated `(*[N]byte)(unsafe.Pointer(&value))[:]` read the value's bytes as a managed array and failed
 `TestValues` with a nil dereference. With door A serving it, the review sibling
