@@ -286,6 +286,7 @@
   </Folder>
   <Folder Name="/tests/behavioral/target-projects/">
     <Project Path="tests/Behavioral/AddCleanupClosesOverPtr/AddCleanupClosesOverPtr.csproj" />
+    <Project Path="tests/Behavioral/AddressOfFieldThroughConversion/AddressOfFieldThroughConversion.csproj" />
     <Project Path="tests/Behavioral/AddressOfParamWrite/AddressOfParamWrite.csproj" />
     <Project Path="tests/Behavioral/AliasImport/AliasImport.csproj" />
     <Project Path="tests/Behavioral/AliasImportLib/AliasImportLib.csproj" />
@@ -310,6 +311,7 @@
     <Project Path="tests/Behavioral/AnonInterfaceSignatureAssert/AnonInterfaceSignatureAssert.csproj" />
     <Project Path="tests/Behavioral/AnonInterfaceVarWitness/AnonInterfaceVarWitness.csproj" />
     <Project Path="tests/Behavioral/AnonStructArrayElement/AnonStructArrayElement.csproj" />
+    <Project Path="tests/Behavioral/AnonStructArrayPointerDoor/AnonStructArrayPointerDoor.csproj" />
     <Project Path="tests/Behavioral/AnonStructComposedTypes/AnonStructComposedTypes.csproj" />
     <Project Path="tests/Behavioral/AnonStructAliasedConversion/AnonStructAliasedConversion.csproj" />
     <Project Path="tests/Behavioral/AnonStructAliasedConversion/structs/AnonStructAliasedConversion.structs.csproj" />
@@ -337,6 +339,9 @@
     <Project Path="tests/Behavioral/BclTypeNameShadow/BclTypeNameShadow.csproj" />
     <Project Path="tests/Behavioral/ForeignAliasElementAddress/ForeignAliasElementAddress.csproj" />
     <Project Path="tests/Behavioral/ForeignAliasElementAddress/stdio/ForeignAliasElementAddress.stdio.csproj" />
+    <Project Path="tests/Behavioral/ForeignAndUnnamedStructConversion/ForeignAndUnnamedStructConversion.csproj" />
+    <Project Path="tests/Behavioral/ForeignAndUnnamedStructConversion/lib/ForeignAndUnnamedStructConversion.lib.csproj" />
+    <Project Path="tests/Behavioral/ForeignAndUnnamedStructConversion/other/ForeignAndUnnamedStructConversion.other.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructAliasAlias/ForeignAnonStructAliasAlias.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructAliasAlias/lib/ForeignAnonStructAliasAlias.lib.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructAliasElemAddress/ForeignAnonStructAliasElemAddress.csproj" />
@@ -387,6 +392,7 @@
     <Project Path="tests/Behavioral/CaptureModeValueParamLib/CaptureModeValueParamLib.csproj" />
     <Project Path="tests/Behavioral/CaptureModeValueParamUser/CaptureModeValueParamUser.csproj" />
     <Project Path="tests/Behavioral/CastNegativeNamedType/CastNegativeNamedType.csproj" />
+    <Project Path="tests/Behavioral/CcgoStringTable/CcgoStringTable.csproj" />
     <Project Path="tests/Behavioral/CgoPseudoPackageTypes/CgoPseudoPackageTypes.csproj" />
     <Project Path="tests/Behavioral/ChanDirectionChain/ChanDirectionChain.csproj" />
     <Project Path="tests/Behavioral/ChanElemDims/ChanElemDims.csproj" />
@@ -415,6 +421,8 @@
     <Project Path="tests/Behavioral/CollidingPackageNames/duprenamed/collidea.dup.csproj" />
     <Project Path="tests/Behavioral/CollidingPackageNames/dupplain/collideb.dup.csproj" />
     <Project Path="tests/Behavioral/CollisionFieldBoxAccessor/CollisionFieldBoxAccessor.csproj" />
+    <Project Path="tests/Behavioral/CollisionRenamedGlobalReceiver/CollisionRenamedGlobalReceiver.csproj" />
+    <Project Path="tests/Behavioral/CollisionRenamedGlobalReceiver/lib/CollisionRenamedGlobalReceiver.lib.csproj" />
     <Project Path="tests/Behavioral/CollisionRenamedLocalBox/CollisionRenamedLocalBox.csproj" />
     <Project Path="tests/Behavioral/ComplexConstContext/ComplexConstContext.csproj" />
     <Project Path="tests/Behavioral/ComplexFormat/ComplexFormat.csproj" />
@@ -545,6 +553,7 @@
     <Project Path="tests/Behavioral/FieldNameTypeMethodCollision/FieldNameTypeMethodCollision.csproj" />
     <Project Path="tests/Behavioral/FieldNamedAsType/FieldNamedAsType.csproj" />
     <Project Path="tests/Behavioral/FieldViewOverGoStruct/FieldViewOverGoStruct.csproj" />
+    <Project Path="tests/Behavioral/FieldViewOverReferenceStruct/FieldViewOverReferenceStruct.csproj" />
     <Project Path="tests/Behavioral/FileNameBuildConstraints/FileNameBuildConstraints.csproj" />
     <Project Path="tests/Behavioral/FindFirstFileData/FindFirstFileData.csproj" />
     <Project Path="tests/Behavioral/FirstClassFunctions/FirstClassFunctions.csproj" />
@@ -573,6 +582,8 @@
     <Project Path="tests/Behavioral/ForVariants/ForVariants.csproj" />
     <Project Path="tests/Behavioral/FormatTypeAdapters/FormatTypeAdapters.csproj" />
     <Project Path="tests/Behavioral/FormatTypeAdapters/typelib/FormatTypeAdapters.typelib.csproj" />
+    <Project Path="tests/Behavioral/ForwardAliasChainRecord/ForwardAliasChainRecord.csproj" />
+    <Project Path="tests/Behavioral/ForwardAliasChainRecord/lib/ForwardAliasChainRecord.lib.csproj" />
     <Project Path="tests/Behavioral/FuncFieldNestedTupleParam/FuncFieldNestedTupleParam.csproj" />
     <Project Path="tests/Behavioral/FuncForPCName/FuncForPCName.csproj" />
     <Project Path="tests/Behavioral/FuncMethodSameNameCollision/FuncMethodSameNameCollision.csproj" />
@@ -1116,6 +1127,9 @@
     <Project Path="tests/Behavioral/RenamedTypeAliasReexport/RenamedTypeAliasReexport.csproj" />
     <Project Path="tests/Behavioral/RenamedTypeAliasReexport/lib/RenamedTypeAliasReexport.lib.csproj" />
     <Project Path="tests/Behavioral/RenamedTypeAliasReexport/wrap/RenamedTypeAliasReexport.wrap.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexportRecords/RenamedTypeAliasReexportRecords.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexportRecords/tone/RenamedTypeAliasReexportRecords.tone.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexportRecords/tonealias/RenamedTypeAliasReexportRecords.tonealias.csproj" />
     <Project Path="tests/Behavioral/ReturnPointerFieldOfParam/ReturnPointerFieldOfParam.csproj" />
     <Project Path="tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.csproj" />
     <Project Path="tests/Behavioral/ReturnTupleFuncLitArg/ReturnTupleFuncLitArg.csproj" />

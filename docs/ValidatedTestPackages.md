@@ -19,10 +19,25 @@ says what that proves and what it does not.
 > measures against only those a faithful managed conversion can honestly validate at all.
 >
 > **Every implementable package is validated**; the four packages outside the 238 are listed, each with its
-> reason, under [Excluded packages](#excluded-packages). Every row's columns are its own Go 1.26.10 Windows
-> measurement.
+> reason, under [Excluded packages](#excluded-packages). Every row's columns are its own Windows measurement, read
+> at Go 1.26.10, or at Go 1.26.11 for each package whose converted code changed in that patch release.
 >
 > **Linux: 236 of 236 applicable rows validated at their linux-x64 counts** — 77,524 matching verdicts · 404 disclosed · linux-arm64: 236 of 236 banked, 0 pending · 2 rows platform-exclusive (`linux: n/a`). (They are `internal/syscall/windows` and its child `internal/syscall/windows/registry`; the parent is Windows-exclusive by its own name, every source file is `*_windows.go`, and its layout-L3 csproj compiles nothing under `GoTargetOS=linux`.)
+>
+> **macOS: 236 of 236 applicable rows validated on Intel (`osx-x64`) and on Apple silicon (`osx-arm64`)** — at their osx-x64 counts, 73,765 matching verdicts · 373 disclosed · 2 rows Windows-only, the same two as Linux's `linux: n/a` rows, with no `darwin:` annotation. Each chip is compared with Go built for that chip; a row whose chips differ names both readings (see [Reading the table](#reading-the-table)).
+>
+> **Every package that applies to a platform is validated on it.** Windows, 238 of 238; Linux, 236 of 236 on x64 and 236 of 236 on arm64; macOS, 236 of 236 on Intel and on Apple silicon. The two packages missing from Linux and macOS are Windows-only.
+
+<!-- Added 2026-11-16 (user-facing docs audit, section 3 (a) and (b); COORD 2026-11-16 00:18Z): the macOS line and the
+     parity sentence. src/check-roster-format.ps1 (Get-DarwinHeaderPopulation) derives every number in both: the macOS
+     validated count is the applicable rows carrying a darwin: segment, its denominator the table minus the Windows-only
+     rows (the linux: n/a rows), its verdict sums each segment's osx-x64 reading (the note's where osx-arm64 headlines),
+     and the parity sentence's Windows, Linux and macOS figures are the counts the guard already derives for the lines
+     above. The audit draft spelled the Windows-only rows as `darwin: n/a`; the roster carries no darwin: n/a annotation
+     (those two rows simply have no darwin: segment), so the line says what the table holds. The columns sentence was
+     "Every row's columns are its own Go 1.26.10 Windows measurement."; at this tree the guard reads 11 rows banked
+     against their go1.26.11 proof page (the packages the 1.26.10 -> 1.26.11 hop changed, merge ffaafa144f) and 227
+     at go1.26.10. -->
 
 <!-- Updated 2026-11-11 (S7-a, the linux two-RID grammar; COORD 2026-11-11, DATA-la64-s7-bank-plan.md 2.4): the Linux
      line states one population per RID. Its counts are the linux-x64 bank's, named so ("at their linux-x64 counts"
@@ -548,10 +563,16 @@ says what that proves and what it does not.
   inapplicable, in neither the numerator nor the applicable denominator, never pending, and skipped
   by name when the sweep runs under that OS. The Linux line above sums the annotations exactly as
   the verdict line sums the columns.
-- A row validated on macOS carries a `darwin: N + D` annotation in the same place. One annotation
-  covers both chips: a row gains it only when Apple silicon (arm64) and Intel (x64) agree with each
-  other verdict for verdict. macOS validation is in progress, so a row with no `darwin:` annotation
-  has not been validated there yet.
+- A row validated on macOS carries a `darwin: N + D` annotation in the same place, read on both
+  Apple silicon (`osx-arm64`) and Intel (`osx-x64`), each chip compared with Go built for that chip.
+  When the two chips' counts differ, the annotation names the chip it banks and gives the other's
+  reading beside it, as in `darwin: 636 (osx-x64; osx-arm64: 634)`. Every row carries one except the
+  two Windows-only packages.
+  <!-- 2026-11-15 (user-facing docs audit, seat 1): was "One annotation covers both chips: a row gains it only when Apple
+       silicon (arm64) and Intel (x64) agree with each other verdict for verdict. macOS validation is in progress, so a
+       row with no `darwin:` annotation has not been validated there yet." The per-RID form (check-roster-format.ps1,
+       Get-ArchCountReading and the arch-strict form) banks rows whose chips differ, e.g. go/internal/gcimporter; read
+       at this tree, every row but internal/syscall/windows and its registry child carries a darwin: segment. -->
 - Every count on every platform is measured with `CGO_ENABLED=0`, the state the corpus is emitted
   in, which the sweep pins for the whole run, so cgo-gated tests (`testenv.HasCGO()` variants,
   cgo-only subtests) are absent on Linux exactly as on Windows.
@@ -862,11 +883,13 @@ says what that proves and what it does not.
 
 ## How the header's figures are derived
 
-**Denominator:** the packages `go list std` reports at go1.26.10 whose test files surviving the
-corpus axis (windows/amd64, `-tags purego,math_big_pure_go`) declare a `Test` function, listed one
-import path per line in the repository's population file for the release,
-`docs/phase4/data/population-go1.26.10.txt`. The file is generated by
+**Denominator:** the packages `go list std` reports at the pinned Go release whose test files surviving
+the corpus axis (windows/amd64, `-tags purego,math_big_pure_go`) declare a `Test` function, listed one
+import path per line in the repository's population file for that release. The file is generated by
 `src/go2cs/internal/genpopulation`, and its header carries the derivation.
+<!-- 2026-11-15 (user-facing docs audit, seat 3b): the file is docs/phase4/data/population-go<GoStdLibVersion>.txt, chosen by
+     src/check-roster-format.ps1 from src/version.props (1.26.11 at this tree: population-go1.26.11.txt, the same set of import
+     paths as population-go1.26.10.txt). The visible text named the go1.26.10 file and a path into the internal records. -->
 <!-- Until 2026-10-26 (owner ruling OQ-1) the file name above was a link:
      [`docs/phase4/data/population-go1.26.10.txt`](phase4/data/population-go1.26.10.txt) -->
 
@@ -950,25 +973,26 @@ committed manifests, never this prose, are the authority on which classes are in
      pass on it on windows and linux, and their pins retired as orphans at TRAIN J (coordinator
      ruling 2026-09-30). The class keeps its other entries, so the count of classes does not move. -->
 
-At a glance, as of 2026-10-01. **Entries** counts each class's entries in the committed manifests
-(an entry split between two classes counts in each). Entries are not verdicts, so the column does
+At a glance. **Entries** counts each class's entries in the committed manifests (an entry split
+between two classes counts in each); the roster guard re-derives the column from the manifests. Entries are not verdicts, so the column does
 not sum to a Disclosed figure.
 
 | Class | Entries | What it means (one line) |
 |:--|:--:|:--|
-| `deferred` | 153 | An allocation-count assert the CLR can meet in principle; it carries Go's want, a measured reading and a retirement plan. |
-| `structural` | 9 | Its reason proves that no managed implementation can meet the assert, so it carries no plan. |
+| `deferred` | 158 | An allocation-count assert the CLR can meet in principle; it carries Go's want, a measured reading and a retirement plan. |
+| `structural` | 8 | Its reason proves that no managed implementation can meet the assert, so it carries no plan. |
 | `alloc-count-semantics` | 8 | An allocation-count assert whose allocations golib's counter never sees, so the host reports only bytes; nothing to retire. |
-| `codegen-liveness` | 11 | A test asserts from its own frame that an object it just stopped using is collectible; the CLR can still report that slot live. |
+| `codegen-liveness` | 16 | A test asserts from its own frame that an object it just stopped using is collectible; the CLR can still report that slot live. |
 | `runtime-capability` | 124 | A facility defined over the replaced runtime's own internals, which the managed runtime cannot truthfully describe. |
-| `host-identity` | 16 | Only the test host impersonating an identity Go's own `go test` supplies could satisfy it, and the host must not claim one. |
+| `host-identity` | 6 | Only the test host impersonating an identity Go's own `go test` supplies could satisfy it, and the host must not claim one. |
 | `host-limit` | 5 | The test's premise needs a property of the test binary that the host's deployment shape structurally lacks. |
-| `host-fatal` | 12 | The test crashes the host or hangs it to the deadline, so it is withdrawn from both sides by name and counted in Disclosed. |
-| `platform-skip` | 16 | The converted side takes a skip Go's own test source writes, for a property the corpus permanently holds. |
+| `host-fatal` | 14 | The test crashes the host or hangs it to the deadline, so it is withdrawn from both sides by name and counted in Disclosed. |
+| `platform-skip` | 29 | The converted side takes a skip Go's own test source writes, for a property the corpus permanently holds. |
 | `cgo-configuration` | 4 | A Go pass / C# skip pair left by the two sides' different cgo configurations at one seam. |
 | `compiler-property` | 2 | A Go pass / C# skip pair at Go's own self-check for a Go compiler property (inlining) that a converted program lacks. |
+| `performance-margin` | 1 | A fixed deadline excludes the managed runtime's measured completion time on its host class: not a *cannot*, a *not yet fast enough*. |
 
-Not tabulated: `alloc-profile` and `performance-margin`, which have no entries, and the retired
+Not tabulated: `alloc-profile`, which has no entries, and the retired
 `chan-direction`. Each is described below.
 
 <!-- Provenance, 2026-09-30 (coordinator ruling): the Entries column is a census of the "class" keys in
@@ -984,6 +1008,14 @@ Not tabulated: `alloc-profile` and `performance-margin`, which have no entries, 
      compiler-property 2; 361 class values over 359 named entries. The one manifest TRAIN K changed,
      runtime/pprof's, moved a signature (TestGenericsHashKeyInPprofBuilder's shape-name half), not a
      class. Only the "as of" date above moved, 2026-09-30 -> 2026-10-01. -->
+
+<!-- Re-counted and derived, 2026-11-16 (user-facing docs audit seat 5; COORD 2026-11-16 00:48Z): over the 50 committed
+     manifests (git ls-files src/core/**/go2cs_test_disclosures.json at seat 4's tip ec3b6a332a) the classes read deferred
+     158, runtime-capability 124, platform-skip 29, codegen-liveness 16, host-fatal 14, alloc-count-semantics 8, structural 8,
+     host-identity 6, host-limit 5, cgo-configuration 4, compiler-property 2, performance-margin 1; 375 class values. The
+     "as of" date is gone because src/check-roster-format.ps1 (Get-ClassTableRows / Get-ClassTableMismatches) now derives
+     the column from the same manifest walk on every run, and reds on a wrong count, a class with entries and no row, or a
+     row with no entries. performance-margin gained its row: net's TestDialerFallbackDelay (darwin). -->
 
 <!-- Re-counted 2026-10-10 (C1, the TestGCMAsm retirement): the same census over src/core/**/go2cs_test_disclosures.json reads 47
      manifests -- crypto/cipher's is removed with its only entry, TestGCMAsm [platform-skip] -- and every class unchanged except
@@ -1162,7 +1194,7 @@ The classes in full:
   class alive:
   - `crypto/tls`'s `TestBogoSuite`: BoringSSL's runner spawns the host once per case inside Go's
     10-minute test-binary wall. The interop passes, but the run is throughput-bound, not
-    startup-bound (2.2x over the wall on the ReadyToRun rung on a 6-core host, 2026-08-28); it
+    startup-bound<!-- 2.2x over the wall on the ReadyToRun rung on a 6-core host, 2026-08-28 -->; it
     retires when managed steady-state TLS throughput on the sweep host crosses the runner's deadline.
     <!-- Provenance, roster restructure 2026-09-30: the TestBogoSuite measurements moved into this
          comment, the key figure kept visible above; src/core/crypto/tls/go2cs_test_disclosures.json
@@ -1300,9 +1332,10 @@ The classes in full:
        value where .NET must heap-allocate it."
        -->
 - **`performance-margin`** — a fixed deadline excludes the managed runtime's measured completion
-  time on its host class: not a *cannot*, a *not yet fast enough*. No entries: its founding row,
-  `net/http`'s `TestWriteDeadlineExtendedOnNewRequest/h2`, passes at the Release + tiering-off
-  default.<!-- founding row minted 2026-08-29; the default since 2026-09-02 -->
+  time on its host class: not a *cannot*, a *not yet fast enough*. Its entry is `net`'s
+  `TestDialerFallbackDelay` on macOS, whose fixed margin over the fallback delay is shorter than the
+  converted dial needs on Apple silicon. Its founding row, `net/http`'s
+  `TestWriteDeadlineExtendedOnNewRequest/h2`, passes at the Release + tiering-off default.<!-- founding row minted 2026-08-29; the default since 2026-09-02. The net entry: src/core/net/go2cs_test_disclosures.json, platforms [darwin], read 2026-11-16 (docs audit seat 5). -->
   <!-- Provenance, roster restructure 2026-09-30: docs/phase4/CENSUS-release-tc0-delta.md section 1
        (the test and both subtests pass on both sides at Release+TC0, and net/http's disclosed list
        is empty); net/http's row carries a blank Disclosed column; the manifest census found no entry

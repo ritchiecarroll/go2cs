@@ -109,14 +109,16 @@ architecture (`linux-x64` run on `linux-arm64`).
      example moved to linux-riscv64, as S0's gate did. The old anchor is kept as an explicit id: go.lib.targets in the
      packages already published links to it. -->
 
-## On linux-arm64, 15 standard-library members throw when called
+## On linux-arm64, a few standard-library members throw when called {#on-linux-arm64-15-standard-library-members-throw-when-called}
 
-The linux-arm64 build of the standard library has 15 members that Go implements in arm64 assembly and that have no
-managed body yet, so each throws when called: `getisar0` and `getpfr0` in `internal/cpu`; `getisar0`, `getisar1`,
+The linux-arm64 build of the standard library has a few members that Go implements in arm64 assembly and that have
+no managed body yet, so each throws when called: `getisar0` and `getpfr0` in `internal/cpu`; `getisar0`, `getisar1`,
 `getpfr0` and `getzfr0` in `vendor/golang.org/x/sys/cpu`; `load_g`, `save_g`, `spillArgs`, `unspillArgs`,
 `asmcgocall_no_g`, `emptyfunc`, `panicBounds` and `panicExtend` in `runtime`; and `rawVforkSyscall` in `syscall`.
-Nine of them exist only in the linux-arm64 build; the other six are routines that the other builds also leave
-without a body.
+Most of them exist only in the linux-arm64 build; the rest are routines that the other builds also leave without a
+body.
+<!-- 2026-11-15 (P4, docs audit Q3): the heading and text no longer carry the census counts (15; nine and six), which
+     no standing process re-measures; the explicit id keeps the old anchor, which published pages link. -->
 
 **To avoid it**, do not call these members. All of them are internal to the standard library, so a program reaches
 one only through a standard-library path; if yours does, report the call path.
@@ -128,7 +130,7 @@ one only through a standard-library path; if yours does, report the call path.
 
 ## On macOS, a `go` statement past the system's thread limit ends the program
 
-Each goroutine is an operating-system thread, and macOS caps how many threads one process may run. When a
+By default each goroutine is an operating-system thread, and macOS caps how many threads one process may run. When a
 program already has nearly that many goroutines alive, the next `go` statement throws
 `System.OutOfMemoryException`, and the program ends unless something catches it. On the macOS 15 machines measured
 the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; a Mac's own limit is the
@@ -143,9 +145,9 @@ the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; 
 
 ## On Linux, a program with more than about 16,000 goroutines alive ends
 
-Each goroutine is an operating-system thread, and on Linux each .NET thread uses about four of the process's memory
+By default each goroutine is an operating-system thread, and on Linux each .NET thread uses about four of the process's memory
 mappings. Linux caps the mappings at the `vm.max_map_count` setting, 65,530 by default. When a program has about
-16,000 goroutines alive, the next `go` statement fails with `Fatal error. Failed to create RW mapping for RX memory`,
+16,000 goroutines alive (measured on `linux-x64`, Ubuntu 22.04 under WSL, at the default setting), the next `go` statement fails with `Fatal error. Failed to create RW mapping for RX memory`,
 and the program ends; nothing can catch it. A Go goroutine is not a thread, so the limit does not apply to Go itself.
 
 **To avoid it**, bound how many goroutines are alive at once, with a worker pool for example. Two settings may raise
@@ -298,8 +300,8 @@ framework-dependent build run the same code under the JIT.
      on every publish), in master through the merge 4d9046eb70. -->
 
 A program that references the `go.*` packages and publishes with Native AOT (`PublishAot`) runs. The check
-that gates each release publishes a C# consumer of the packages and runs it on `linux-x64`, `win-x64` and
-`osx-arm64`. On `osx-x64` the publish is read when it finishes inside the hosted runner's time limit, and reported as
+that gates each release publishes a C# consumer of the packages and runs it on `linux-x64`, `linux-arm64`,
+`win-x64` and `osx-arm64`. On `osx-x64` the publish is read when it finishes inside the hosted runner's time limit, and reported as
 not measured when it does not. A project that sets no trim mode of its own gets the packages' default, `partial`,
 which is the setting a converted project carries in its generated project file.
 

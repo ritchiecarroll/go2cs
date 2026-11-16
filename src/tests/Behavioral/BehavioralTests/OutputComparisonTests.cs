@@ -29,6 +29,12 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAddCleanupClosesOverPtr() => CheckTarget("AddCleanupClosesOverPtr");
 
     [TestMethod]
+    public void CheckAddressOfFieldThroughConversion() => CheckTarget("AddressOfFieldThroughConversion");
+
+    [TestMethod]
+    public void CheckAddressOfFieldThroughConversionNative() => CheckTarget("AddressOfFieldThroughConversionNative");
+
+    [TestMethod]
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]
@@ -87,6 +93,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
+
+    [TestMethod]
+    public void CheckAnonStructArrayPointerDoor() => CheckTarget("AnonStructArrayPointerDoor");
 
     [TestMethod]
     public void CheckAnonStructAssertLiftDedupe() => CheckTarget("AnonStructAssertLiftDedupe");
@@ -272,6 +281,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
 
     [TestMethod]
+    public void CheckCcgoStringTable() => CheckTarget("CcgoStringTable");
+
+    [TestMethod]
     public void CheckCgoPseudoPackageTypes() => CheckTarget("CgoPseudoPackageTypes");
 
     [TestMethod]
@@ -345,6 +357,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
+
+    [TestMethod]
+    public void CheckCollisionRenamedGlobalReceiver() => CheckTarget("CollisionRenamedGlobalReceiver");
 
     [TestMethod]
     public void CheckCollisionRenamedLocalBox() => CheckTarget("CollisionRenamedLocalBox");
@@ -659,6 +674,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFieldViewOverGoStruct() => CheckTarget("FieldViewOverGoStruct");
 
     [TestMethod]
+    public void CheckFieldViewOverReferenceStruct() => CheckTarget("FieldViewOverReferenceStruct");
+
+    [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]
@@ -707,6 +725,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForeignAliasElementAddress() => CheckTarget("ForeignAliasElementAddress");
 
     [TestMethod]
+    public void CheckForeignAndUnnamedStructConversion() => CheckTarget("ForeignAndUnnamedStructConversion");
+
+    [TestMethod]
     public void CheckForeignAnonStructAliasAlias() => CheckTarget("ForeignAnonStructAliasAlias");
 
     [TestMethod]
@@ -741,6 +762,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckFormatTypeAdapters() => CheckTarget("FormatTypeAdapters");
+
+    [TestMethod]
+    public void CheckForwardAliasChainRecord() => CheckTarget("ForwardAliasChainRecord");
 
     [TestMethod]
     public void CheckFrameFuncIdentity() => CheckTarget("FrameFuncIdentity");
@@ -2241,6 +2265,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckRenamedTypeAliasReexport() => CheckTarget("RenamedTypeAliasReexport");
+
+    [TestMethod]
+    public void CheckRenamedTypeAliasReexportRecords() => CheckTarget("RenamedTypeAliasReexportRecords");
 
     [TestMethod]
     public void CheckReservedNameShadows() => CheckTarget("ReservedNameShadows");

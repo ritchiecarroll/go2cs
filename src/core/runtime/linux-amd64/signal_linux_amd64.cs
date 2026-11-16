@@ -17,7 +17,7 @@ partial struct sigctxt {
 //go:nosplit
 //go:nowritebarrierrec
 internal static ж<sigcontext> regs(this ref sigctxt c) {
-    return Ꮡ((@unsafe.Pointer.To<ucontext>(c.ctxt)).Value.uc_mcontext).Reinterpret<mcontext, sigcontext>();
+    return @unsafe.Pointer.To<ucontext>(c.ctxt).Ꮡuc_mcontext.Reinterpret<mcontext, sigcontext>();
 }
 
 internal static uint64 rax(this ref sigctxt c) { return c.regs().rax; }

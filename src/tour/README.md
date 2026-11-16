@@ -106,7 +106,7 @@ Useful options:
 - `-solutions-url=https://…`: target of the header's exercise-solutions link;
   empty removes the link, and only `http`/`https` targets are shown
 - `-solutions-text=Exercise solutions`: text for that link
-- `-tool-timeout=15m`: budget for the one-time go2cs build described below —
+- `-tool-timeout=10m`: budget for the one-time go2cs build described below —
   a duration (`15m`) or a whole number of seconds (`900`)
 - `-no-tour`: do not launch the upstream Tour process
 - `-no-open`: do not open a browser
@@ -116,7 +116,7 @@ Useful options:
 `start.ps1` and `start.sh` pass any option they do not recognize straight
 through, so `.\src\tour\scripts\start.ps1 -Runtime nuget -solutions-url=` starts
 the app with the header link removed. Through `start.ps1`, give a value after a
-space (`-nuget-version 1.26.10.1`, `-solutions-url https://...`): PowerShell
+space (`-nuget-version <version>`, `-solutions-url https://...`): PowerShell
 splits a `-name=value` argument at a `.` or a `:`.
 
 `GO_TOUR_BIN` can point to the upstream `tour` executable. `GO2CS_BIN` can point

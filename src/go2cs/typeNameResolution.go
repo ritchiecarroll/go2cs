@@ -845,6 +845,24 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 				return baseName + "[" + strings.Join(args, ", ") + "]"
 			}
 
+			// A collision-renamed type this package reaches ONLY through another package's alias has no alias key
+			// loaded (keys are loaded per IMPORT), so the renderer's key lookup cannot swap the member and the Go
+			// name stood: libc sends `unix.Signal(sig)` on a `chan os.Signal` and never imports syscall, so its
+			// record read `GoImplement<syscall_package.Signal, os_package.ΔSignal>` where syscall declares
+			// `ΔSignal` (CS0426, sqlite-cs W11). Spell the producer's member, as getAliasQualifiedTypeName's twin
+			// arm does (see foreignRenamedTypeSpelling). A package that imports the producer holds the key and
+			// keeps the lookup route, which gives the same member.
+			if !importedTypeAliasPublished(getSanitizedIdentifier(pkg.Name()) + "." + getCoreSanitizedIdentifier(obj.Name())) {
+				if spelling, bare, ok := foreignRenamedTypeSpelling(obj); ok {
+					// The two-hop form (`type Token any`): the member stands for the concrete type its definition names.
+					if bare {
+						return v.getFullyQualifiedTypeName(named.Underlying(), isUnderlying)
+					}
+
+					return getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + spelling
+				}
+			}
+
 			return baseName
 		}
 

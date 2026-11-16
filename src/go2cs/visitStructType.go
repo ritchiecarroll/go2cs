@@ -660,6 +660,15 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				fieldInitializer = fmt.Sprintf(" = new(%s)", v.arrayZeroValueArgs(lengthExpr, fieldType))
 			}
+		} else if _, isAlias := fieldType.(*types.Alias); isAlias {
+			// The same field spelled through an ALIAS of an unnamed array (`FP TBF_key` with `type TBF_key =
+			// [18]TBF_word`, libc's crypt_blowfish) is an array field all the same, and its Go zero carries the length
+			// too. Without the initializer it kept default(array<T>), length 0: Go's c.FP[0] read an empty array, and
+			// golib measured the field's dims as [0] (B2's probe: a decoded TBF_ctx with an empty FP). The length is
+			// the alias's constant. A DEFINED array type is a go2cs-gen wrapper holding its own length: not this.
+			if array, ok := types.Unalias(fieldType).(*types.Array); ok {
+				fieldInitializer = fmt.Sprintf(" = new(%s)", v.arrayZeroValueArgs(fmt.Sprintf("%d", array.Len()), fieldType))
+			}
 		}
 
 		// A DIRECTIONAL channel FIELD carries its direction the same way an array field carries its

@@ -116,8 +116,7 @@ strictly.
 
 <a id="diagnostics"></a>
 
-The `GO2CS` error codes a conversion reports are listed in
-[Command-line options, Diagnostics](CommandLine.md#diagnostics).
+The `GO2CS` codes a conversion or a build reports are listed in [Diagnostic codes](DiagnosticCodes.md).
 
 ## Project layout
 
