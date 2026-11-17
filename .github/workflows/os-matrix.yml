@@ -1464,6 +1464,8 @@ jobs:
         env:
           CGO_TEST_FILTER: ${{ needs.plan.outputs.filter }}
           GO2CS_CGO_BUILD: ${{ needs.plan.outputs.stage == 'cgo-e2e' && '1' || '' }}
+          # SCRATCH (C1): the GO2CS_TESTS_E2E line batch 312 seats, carried here only to read red 2 before 312 lands.
+          GO2CS_TESTS_E2E: ${{ needs.plan.outputs.stage == 'cgo-e2e' && '1' || '' }}
           # The dotnet arms (TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet) skip where no .NET SDK is installed; here
           # one always is, so its absence must read red, not skipped.
           GO2CS_REQUIRE_DOTNET: '1'
