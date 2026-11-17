@@ -6,13 +6,8 @@
 
 Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) · [Converted Go module NuGet packages](https://www.nuget.org/packages?q=nugetgo)
 
-[nugetgo.net](https://nugetgo.net) is the registry that maps a Go module path to the NuGet package (`nugetgo.*`) of
-its conversion. `go2cs -recurse=nuget` reads it, so a dependency someone has already converted and published is
-restored as a package instead of converted again ([how](ConvertingAModule.md#mapping-modules-to-nuget-packages)).
-<!-- Owner request 2026-11-15, relayed by COORD (20261115T082152Z). Wording checked against ConvertingAModule.md,
-     "Mapping modules to NuGet packages" (go2cs asks the registry whether a module was converted and published; a
-     mapped module is referenced, not converted) and NugetgoPublish.md step 5 (the site serves
-     https://nugetgo.net/v1/mappings.txt). No count of modules and no statement of who may publish. -->
+Go module to NuGet package registry: [nugetgo.net](https://nugetgo.net)
+> Used during `go2cs -recurse=nuget` so an already converted dependency is restored as a package instead of converted again ([how](ConvertingAModule.md#mapping-modules-to-nuget-packages)).
 
 ---
 
@@ -20,10 +15,13 @@ restored as a package instead of converted again ([how](ConvertingAModule.md#map
 A Go developer can read the converted code and follow it, and a .NET developer can use a Go library as
 ordinary managed code. Go's slices, maps, channels, goroutines, `defer`, multiple returns, struct
 embedding and interfaces come from a small runtime library and compile-time source generators, so that
-machinery stays out of the converted files. Behavior comes first: a goroutine runs on its own thread
-and is not rewritten into `async`. The converted Go standard library passes Go's own tests, package by
-package, on Windows and Linux. On macOS, a package is validated when its row on the
-[roster](ValidatedTestPackages.md) carries a macOS count.
+machinery stays out of the converted files. Behavior comes first: goroutines, channels, `select` and
+`defer` keep Go's semantics. The converted Go standard library passes Go's own tests, package by package,
+on Windows, on Linux (x64 and Arm64) and on macOS (Intel and Apple silicon); the
+[roster](ValidatedTestPackages.md) has each package's counts.
+<!-- Parity, read at the roster for 1.26.11.1 (2026-11-15, seat 1 of the user-facing docs audit): every row carries a Windows
+     reading; every row but the two Windows-only ones (internal/syscall/windows and its registry child) carries a linux-arm64
+     reading and a darwin reading, each chip shown where Intel and Apple silicon differ. -->
 
 ## 📰 NEWS — Faster Native AOT, and a Release standard library from source
 
@@ -91,11 +89,11 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 
 * Go and C# side by side: [Tour of go2cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/tour/README.md)
 * Real converted code: [the Go standard library](https://github.com/ritchiecarroll/go2cs/tree/master/src/core)
-* How each Go construct maps to C#: [Conversion Strategies](ConversionStrategies.md)
-* What the converter does and which Go features work: [Features](Features.md) and [Go feature support](GoFeatureSupport.md)
+* How Go constructs map to C#: [Conversion Strategies](ConversionStrategies.md)
+* What the converter does: [Features](Features.md) &rarr; [Current Go feature support](GoFeatureSupport.md)
 * Call converted Go from C#: [Consuming converted Go](ConsumingGoFromCSharp.md)
 * What stays stable for C# code: [The public surface](PublicSurface.md)
-* Packages and modules passing Go's own tests: [Validated Test Packages](ValidatedTestPackages.md) and [Validated Modules](ValidatedModules.md)
+* Passing Go's own tests: [Validated Test Packages](ValidatedTestPackages.md) / [Validated Modules](ValidatedModules.md)
 * Before you start: [Limitations](Limitations.md) and [Known issues](KnownIssues.md)
 * Where it stands: [Status](#status) and the [Roadmap](Roadmap.md)
 * Build it yourself: [Building go2cs from source](BuildingGo2cs.md)
@@ -108,12 +106,12 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 - **No Go installation, with the go2cs dotnet tool.** The converter uses the Go toolchain to load and
   type-check the source it converts, so that source must already build with `go build`. The
   [dotnet tool](DotnetTool.md) downloads the Go release it converts with, Go 1.26.11, on first use.
-  To build the converter from source instead, you need [Go 1.26](https://go.dev/dl/). The standard
+  To build the converter from source instead, you need [Go 1.26.11](https://go.dev/dl/) or later. The standard
   library packages are converted from, and validated on, Go 1.26.11, and the
   [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
-- **Windows or Linux on x64**, where the converted standard library is validated against Go's own
-  tests. macOS, on Intel and Apple silicon, has packages; a package validated there shows a macOS
-  count on the [roster](ValidatedTestPackages.md) ([Platforms](Roadmap.md#platforms)).
+- **Windows (x64), Linux (x64 or Arm64) or macOS (Intel or Apple silicon)**, where the converted
+  standard library is validated against Go's own tests ([roster](ValidatedTestPackages.md),
+  [Platforms](Roadmap.md#platforms)).
   A minimal Linux, such as a container or a fresh server, also needs `git` and `curl`, and .NET's
   native dependencies ICU and OpenSSL
   ([Microsoft's list](https://learn.microsoft.com/dotnet/core/install/linux-scripted-manual#dependencies)).
@@ -215,7 +213,7 @@ NuGet packages. Wondering which Go modules make good conversions? The
 
 The whole Go standard library converts and compiles as .NET assemblies, and every package that can be
 validated matches its own Go test suite in C#, verdict for verdict, with every difference disclosed, on
-Windows and Linux.
+Windows (x64), on Linux (x64 and Arm64) and on macOS (Intel and Apple silicon).
 [Validated Test Packages](ValidatedTestPackages.md) carries the current counts, package by package, and
 the [Roadmap](Roadmap.md) says where the project stands and what comes next.
 

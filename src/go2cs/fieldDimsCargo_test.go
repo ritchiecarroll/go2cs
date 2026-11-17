@@ -77,6 +77,16 @@ func TestFieldDimsCargo(t *testing.T) {
 		{"array field", array3, ""},
 		{"nested array field", nested, ""},
 
+		// ...unless a ZERO length sits above an inner array: the zero instance's `new(0, ...)` has no element to
+		// measure, so every length below it is lost (modernc libc's TBF_ctx.FPS is [0][1042]TBF_word, and its Go
+		// layout read as unproven). That field carries its own dims, which FieldArrayDims takes first.
+		{"zero-length array of arrays", types.NewArray(types.NewArray(intType, 1042), 0), "[GoArrayDims(0, 1042)]"},
+		{"zero length in the middle", types.NewArray(types.NewArray(types.NewArray(intType, 4), 0), 2), "[GoArrayDims(2, 0, 4)]"},
+		{"zero length innermost", types.NewArray(types.NewArray(intType, 0), 3), ""},
+		{"zero-length array of scalars", types.NewArray(intType, 0), ""},
+		{"zero-length array of an alias for an array", types.NewArray(aliased, 0), "[GoArrayDims(0, 4)]"},
+		{"zero-length array of a defined array type", types.NewArray(named, 0), ""},
+
 		// A slice's element DOES have somewhere to live -- the elemDims slot, the one a map's element
 		// already uses. This row emitted "" while `Elem()` CONSUMED the head of the dims vector for
 		// non-pointer, non-map kinds, which made a one-element vector hand the element nothing:

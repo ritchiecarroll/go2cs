@@ -18,6 +18,7 @@ ExchangePointerWord
 field
 GetHashCode
 GetType
+GoValue
 IsNative
 IsNilPointer
 IsNull

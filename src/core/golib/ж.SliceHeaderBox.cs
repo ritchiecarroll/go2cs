@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using go.golib;
@@ -84,7 +85,9 @@ namespace go;
 /// SCOPE. <typeparamref name="T"/> is exactly <c>slice&lt;X&gt;</c>; <typeparamref name="TDst"/> is a
 /// value type whose three instance fields are, in declaration order, a class implementing
 /// <see cref="IUnsafePointer"/> (the <c>unsafe.Pointer</c> class; golib cannot name that assembly, so
-/// the factory is resolved by reflection once per pair and pinned by a guard), then two <c>nint</c>s.
+/// the factory is resolved by reflection once per pair and pinned by a guard), then two <c>nint</c>s;
+/// or a <c>uintptr</c> then two <c>nint</c>s, <c>reflect.SliceHeader</c>: the NUMBER shape, whose Data is the
+/// element-0 box's pinned, registered address, the box kept (docs/phase4/DESIGN-sqlite-ccgo-ts.md, QW-8).
 /// A header whose first field is a typed <c>ж&lt;…&gt;</c> (<c>notInHeapSlice</c>) is NOT admitted —
 /// every corpus site that takes that view of a managed slice is a WRITER (the field-by-field family,
 /// hand-owned; the whole-header family, unreached), so there is no reaching READ for it to serve. The STRING header
@@ -136,11 +139,30 @@ internal static class HeaderData
         if (data is not ж<uintptr> word || word.IsNull)
             return Kind.Nil;
 
-        nuint number = word.Value.Value;
+        // The box the pointer was minted from (FromPinnedBox, FromBox) rides along as the referent.
+        return ResolveNumber(word.Value.Value, ((IUnsafePointer)data).RetainedSource, out backing, out index, out address, out _);
+    }
 
-        // The box the pointer was minted from (FromPinnedBox, FromBox); else whatever the token registry recovers for
-        // a bare number, as the uintptr conversion does.
-        object? referent = ((IUnsafePointer)data).RetainedSource ?? ManagedPointerTokens.Resolve(number);
+    /// <summary>
+    /// The same answer for a header whose Data is a NUMBER (<c>reflect.StringHeader</c>, <c>reflect.SliceHeader</c>):
+    /// the number goes through what the number-to-pointer conversion asks, the token registry, unless the header box
+    /// itself knows the box it minted the number from (<paramref name="carried"/>). <paramref name="referent"/> is the box
+    /// the answer came from, which a header that commits the word KEEPS, so the pin behind the number lives as long as
+    /// the header (P3's code read, fix 2: `h2.Data = h1.Data`).
+    /// </summary>
+    internal static Kind ResolveNumber(nuint number, object? carried, out Array? backing, out nint index, out nuint address, out object? referent)
+    {
+        backing = null;
+        index = 0;
+        address = 0;
+        referent = null;
+
+        if (number == 0)
+            return Kind.Nil;
+
+        // The box the number was minted from when it is known; else whatever the token registry recovers for a bare
+        // number, as the uintptr conversion does.
+        referent = carried ?? ManagedPointerTokens.Resolve(number);
 
         if (referent is IElementRun { RunBacking: { } run } element)
         {
@@ -169,9 +191,62 @@ internal static class HeaderData
 
         return Kind.Other;
     }
+
+    /// <summary>
+    /// P3's code read, fix 1: a stored word INSIDE the run a header minted its number from (<c>h.Data += k</c>, the
+    /// re-slice idiom) is that run's element <c>RunIndex + delta / stride</c> of the SAME managed backing: shared, and
+    /// pinned by <paramref name="minted"/> while the header keeps it. The registry resolves exact keys only, so without
+    /// this the word fell to <see cref="Kind.Native"/> and was read and written as native memory the collector may move.
+    /// One past the end is admitted (a zero-length window). A run whose number is an order token (an element of a
+    /// reference-bearing array) has no address arithmetic, and is never matched.
+    /// </summary>
+    internal static bool TryInterior(object? minted, nuint mintedNumber, nuint word, out Array? backing, out nint index) =>
+        TryInterior(minted, mintedNumber, word, out backing, out index, out _);
+
+    /// <summary>
+    /// As above, and <paramref name="misaligned"/> reports a word INSIDE the run's bytes that is not on an element
+    /// boundary (<c>Data += 1</c> over an <c>[]int32</c>): no element of the backing, and no native address either, so a
+    /// header refuses it by name (P3's glance, item a) rather than reading it as native memory.
+    /// </summary>
+    internal static bool TryInterior(object? minted, nuint mintedNumber, nuint word, out Array? backing, out nint index, out bool misaligned)
+    {
+        backing = null;
+        index = 0;
+        misaligned = false;
+
+        if (minted is not IElementRun { RunBacking: { } run } element || mintedNumber == 0 || word == 0 || ManagedPointerTokens.IsTaggedToken(mintedNumber))
+            return false;
+
+        Type? elementType = run.GetType().GetElementType();
+
+        if (elementType is null)
+            return false;
+
+        int stride = System.Runtime.CompilerServices.RuntimeHelpers.SizeOf(elementType.TypeHandle);
+
+        if (stride <= 0)
+            return false;
+
+        long delta = (long)word - (long)mintedNumber;
+        long first = -(long)element.RunIndex * stride;            // the run's byte 0, relative to the minted number
+        long last = ((long)run.Length - element.RunIndex) * stride; // one past its last byte
+
+        if (delta < first || delta > last)
+            return false;
+
+        if (delta % stride != 0)
+        {
+            misaligned = true;
+            return false;
+        }
+
+        backing = run;
+        index = (nint)(element.RunIndex + delta / stride);
+        return true;
+    }
 }
 
-internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
+internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>, IHeaderDataCarrier
 {
     // ---- the shape, resolved once per (T, TDst) ----
 
@@ -184,6 +259,9 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
 
     /// <summary>Whether the pair (<typeparamref name="T"/>, <typeparamref name="TDst"/>) is a slice → header reinterpretation this box serves.</summary>
     internal static readonly bool Applies;
+
+    // Whether the header's Data is a uintptr (reflect.SliceHeader) rather than the unsafe.Pointer class.
+    private static readonly bool s_dataIsNumber;
 
     // The header's pointer type is unsafe.Pointer, the one IUnsafePointer (no generated type implements it), in an
     // assembly golib cannot reference; its FromBoxObject is found by name. The dependency keeps that method in a
@@ -208,7 +286,13 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
 
         Type pointerType = fields[0].FieldType;
 
-        if (!pointerType.IsClass || !typeof(IUnsafePointer).IsAssignableFrom(pointerType))
+        // reflect.SliceHeader's Data is a NUMBER (uintptr), not the unsafe.Pointer class: the header reads the number
+        // of the slice's element 0 through that element box's pin-only hold, as &b[0] does, and keeps the box so
+        // unsafe.Pointer(h.Data) can carry it (docs/phase4/DESIGN-sqlite-ccgo-ts.md, QW-8; a slice's elements are Go
+        // heap memory, so route (H) only).
+        bool number = pointerType == typeof(uintptr);
+
+        if (!number && (!pointerType.IsClass || !typeof(IUnsafePointer).IsAssignableFrom(pointerType)))
             return;
 
         if (fields[1].FieldType != typeof(nint) || fields[2].FieldType != typeof(nint))
@@ -218,14 +302,20 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
         // `public static <Pointer> FromBoxObject(object box)` (unsafe.Pointer's untyped twin of FromBox<X>; trim stage
         // 3c-2a, so nothing here closes a generic method over the element). Resolved by name because the marker interface
         // is empty and golib cannot reference the assembly that defines the class; the contract is pinned by
-        // SliceHeaderReinterpretTests.
-        MethodInfo? fromBox = pointerType.GetMethod("FromBoxObject", BindingFlags.Public | BindingFlags.Static, [typeof(object)]);
+        // SliceHeaderReinterpretTests. The number shape needs none.
+        MethodInfo? fromBox = null;
 
-        if (fromBox is null || !pointerType.IsAssignableFrom(fromBox.ReturnType))
-            return;
+        if (!number)
+        {
+            fromBox = pointerType.GetMethod("FromBoxObject", BindingFlags.Public | BindingFlags.Static, [typeof(object)]);
+
+            if (fromBox is null || !pointerType.IsAssignableFrom(fromBox.ReturnType))
+                return;
+        }
 
         s_fields = fields;
         s_fromBox = fromBox;
+        s_dataIsNumber = number;
 
         // The slice's identity words, without allocating: backing array (null for a nil slice), low, len, cap.
         s_describe = static array => ((IGoReflectSlice)array).ReflectDescribe();
@@ -261,7 +351,8 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     private TDst m_value = default!;   // the header handed out through Value (a ref into this field)
     private TDst m_handedOut = default!; // what that header held when it was handed out
     private bool m_materialized;
-    private object? m_pointer;          // the cached pointer object, minted for (m_pointerBacking, m_pointerLow, cap == 0)
+    private object? m_pointer;          // the cached pointer object, minted for (m_pointerBacking, m_pointerLow, cap == 0); for the number shape, the element-0 box itself
+    private nuint m_number;              // the number shape's Data word for m_pointer: the element box's pinned, registered address
     private object? m_pointerBacking;
     private nint m_pointerLow = -1;
     private bool m_pointerZeroCapacity;  // a cap-0 slice names the zerobase, so cap 0 is part of the key
@@ -311,6 +402,23 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
         return m_source.GetHashCode();
     }
 
+    /// <inheritdoc/>
+    public nuint HeaderDataWord(out object? carried)
+    {
+        object data = s_fields![0].GetValue(Value)!;
+
+        if (!s_dataIsNumber)
+        {
+            // The unsafe.Pointer shape: its pointer object already carries its box.
+            carried = (data as IUnsafePointer)?.RetainedSource;
+            return data is ж<uintptr> { IsNull: false } word ? word.Value.Value : 0;
+        }
+
+        nuint number = ((uintptr)data).Value;
+        carried = number != 0 && number == m_number ? m_pointer : null;
+        return number;
+    }
+
     /// <summary>
     /// Commits the header's words to the slice variable when they name a slice Go could build, and holds them (L2) when
     /// they do not yet:
@@ -332,7 +440,39 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
         nint len = (nint)s_fields[1].GetValue(boxed)!;
         nint cap = (nint)s_fields[2].GetValue(boxed)!;
 
-        HeaderData.Kind kind = HeaderData.Resolve(data, out Array? backing, out nint index, out nuint address);
+        // A number Data resolves through the registry, or through the element box this header minted it from.
+        nuint word = s_dataIsNumber ? ((uintptr)data!).Value : 0;
+        object? carried = s_dataIsNumber && word != 0 && word == m_number ? m_pointer : null;
+        Array? backing;
+        nint index;
+        nuint address;
+
+        HeaderData.Kind kind;
+        address = 0;
+        object? owner = carried;
+        bool misaligned = false;
+
+        // Fix 1: a word inside the run this header minted from is that backing's element, managed and shared.
+        if (s_dataIsNumber && carried is null && HeaderData.TryInterior(m_pointer, m_number, word, out backing, out index, out misaligned))
+        {
+            kind = HeaderData.Kind.Run;
+        }
+        else if (s_dataIsNumber)
+        {
+            // P3's glance, item a: inside the run's bytes but off an element boundary is no element and no native
+            // address, so it is refused by name below.
+            if (misaligned)
+                throw Refusal(data!, "its Data lies inside the slice's backing but not on an element boundary");
+
+            // Item b: the box the registry answered with owns the memory, and a native rebuild keeps it.
+            kind = HeaderData.ResolveNumber(word, carried, out backing, out index, out address, out object? referent);
+            owner = carried ?? referent;
+        }
+        else
+        {
+            kind = HeaderData.Resolve(data, out backing, out index, out address);
+        }
+
         bool shape = 0 <= len && len <= cap;
         object? rebuilt = null;
 
@@ -357,7 +497,7 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
 
             case HeaderData.Kind.Native:
                 if (shape)
-                    rebuilt = s_overNative!(address, len, cap, NativeDerivation.Kept(data is IUnsafePointer pointer ? pointer.RetainedSource : data));
+                    rebuilt = s_overNative!(address, len, cap, NativeDerivation.Kept(s_dataIsNumber ? owner : data is IUnsafePointer pointer ? pointer.RetainedSource : data));
                 break;
 
             default:
@@ -379,7 +519,9 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
         // The header already holds these words, and its Data object is the pointer the variable now names, so the next
         // access reuses it rather than minting another.
         (object? newBacking, nint newLow, _, nint newCap) = s_describe!((IArray)rebuilt);
-        m_pointer = data;
+
+        // The number shape stores no pointer object: the next access mints the element box for the new words.
+        m_pointer = s_dataIsNumber ? null : data;
         m_pointerBacking = newBacking;
         m_pointerLow = newLow;
         m_pointerZeroCapacity = newCap == 0;
@@ -415,14 +557,26 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
         if (m_pointer is null || !ReferenceEquals(backing, m_pointerBacking) || low != m_pointerLow || (cap == 0) != m_pointerZeroCapacity)
         {
             object? elementZero = backing is null ? null : s_elementZero!((IArray)(object)m_source.Value!);
-            m_pointer = s_fromBox!.Invoke(null, [elementZero]);
+
+            if (s_dataIsNumber)
+            {
+                // The element box's own uintptr answer: pinned where the storage is pinnable, registered either way. The
+                // box is kept, so the pin lives while this header does, and FromHeaderData can carry it.
+                m_pointer = elementZero;
+                m_number = elementZero is null ? 0 : ((INilPointer)elementZero).StableAddress();
+            }
+            else
+            {
+                m_pointer = s_fromBox!.Invoke(null, [elementZero]);
+            }
+
             m_pointerBacking = backing;
             m_pointerLow = low;
             m_pointerZeroCapacity = cap == 0;
         }
 
         object boxed = default(TDst)!;
-        s_fields![0].SetValue(boxed, m_pointer);
+        s_fields![0].SetValue(boxed, s_dataIsNumber ? (uintptr)m_number : m_pointer);
         s_fields[1].SetValue(boxed, len);
         s_fields[2].SetValue(boxed, cap);
 

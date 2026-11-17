@@ -1,0 +1,66 @@
+using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using go;
+using static go.builtin;
+using @unsafe = go.unsafe_package;
+
+namespace GolibTests;
+
+// TEMPORARY PROBE, not for commit: what door B's element door hands out over a field of a struct that holds a
+// reference, and whether it follows the field across a move. Read only.
+[TestClass]
+public class ZzProbeElementDoorOverUnpinnableTests
+{
+    private struct Named
+    {
+        public @string Name;
+        public ushort Port;
+
+        internal static ref ushort ᏑPort(ref Named instance) => ref instance.Port;
+    }
+
+    [TestMethod]
+    public void Probe() => Run(1);
+
+    [TestMethod]
+    public void ProbeZero() => Run(0);
+
+    private static void Run(int index)
+    {
+        int moved = 0, stale = 0, rounds = 200;
+        string kind = "";
+
+        for (int round = 0; round < rounds; round++)
+        {
+            byte[][] garbage = new byte[64][];
+
+            for (int i = 0; i < garbage.Length; i++)
+                garbage[i] = new byte[128 + round % 7];
+
+            ж<Named> named = new StandardBox<Named>(new Named { Name = "x", Port = 0x1234 });
+            ж<byte> q = @unsafe.Pointer.Element<byte>(@unsafe.Pointer.FromPinnedBox(named.of(Named.ᏑPort)), index, 2);
+            nuint before = (nuint)((uintptr)named.of(Named.ᏑPort)).Value;
+
+            kind = $"{q.GetType().Name} native=0x{q.NativeAddress:x} storage={q.StorageKind}";
+            named.Value.Port = (ushort)(0x5500 | round & 0xFF);
+            GC.KeepAlive(garbage);
+            garbage = null!;
+
+            for (int i = 0; i < 3; i++)
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+
+            bool didMove = (nuint)((uintptr)named.of(Named.ᏑPort)).Value != before;
+
+            if (didMove)
+                moved++;
+
+            named.Value.Port = 0x7700;
+
+            if (q.Value != (index == 1 ? 0x77 : 0x00))
+                stale++;
+        }
+
+        Console.WriteLine($"PROBE index={index} kind: {kind}");
+        Console.WriteLine($"PROBE index={index} rounds={rounds} moved={moved} staleReads={stale}");
+    }
+}

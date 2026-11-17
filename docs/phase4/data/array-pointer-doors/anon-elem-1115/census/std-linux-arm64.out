@@ -1,0 +1,3 @@
+roots: 966, errors: 0
+packages: 2491, files: 3064
+   121  control: (*A)(x), x an unsafe.Pointer

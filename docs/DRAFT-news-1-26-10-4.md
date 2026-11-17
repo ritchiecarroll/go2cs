@@ -240,10 +240,85 @@ In the standard library 13 lines in four files of `runtime` take the new form. S
      runtime/windows/os_windows.cs 4; the hand-owned internal/syscall/windows/registry value.cs is respelled by
      hand, 8 lines. -->
 
+**An index, an element's address or the whole array through `(*A)(p)` reaches the memory as well.** `(*A)(p)[i]`
+(a read, a store, a compound assignment or `++`), `&(*A)(p)[i]`, `*(*A)(p)` and `*(*A)(p) = v` now go to the
+memory `p` names without making a box of the whole array, so an indexed loop over C memory allocates nothing.
+modernc.org/libc writes a string's terminator this way (`(*RawMem)(unsafe.Pointer(p))[len(wd)] = 0`), and sqlite
+indexes small unnamed arrays the same way. In the standard library 45 lines take the new form, nearly all of them in
+`runtime`'s memory allocator. A named array type that holds references, read as a whole value from memory that cannot hold it, now panics by
+name at that read. It used to store a managed reference into that memory, and nothing reported it. See
+[Pointers](ConversionStrategies-Reference/pointers.md#an-index-an-elements-address-or-a-whole-array-through-ntp-reaches-the-memory-p-names-the-element-doors).
+<!-- Door B: merge 0cbd1eae70 (P5, claude/p5-array-door-b 6946dcc33e): Element, ElementRef, LoadArray and StoreArray on
+     @unsafe.Pointer; "0 B over C memory" (GolibTests ArrayPointerElementDoorTests.AnIndexedLoopOverNativeMemoryAllocatesNothing);
+     regen 45 lines in 9 files (runtime malloc_generated.cs 30, the four per-target malloc.cs and malloc_stubs.cs 2
+     each, alg.cs 1, lock_spinbit.cs 2, internal/runtime/maps runtime_faststr.cs 2; git diff --stat of the merge). The floor: merge a9dc1336a2 (P5,
+     claude/p5-named-array-floor 4c8ee1cbd2): "a native box of a named-array wrapper (reference-holding, e.g. libc RawMem)
+     is refused BY NAME at its first whole-value READ (ValueAddress), never at mint ... the silent managed-reference store
+     into C or Go memory (arm M0) is gone". -->
+
+### The bytes of one field through `(*[N]T)(unsafe.Pointer(&s.f))` (P5)
+
+**A view of one field's bytes over an ordinary Go struct now reads and writes the field, as in Go.** Go code reads
+the two bytes of a port, or the halves of a 64-bit word, with `(*[2]byte)(unsafe.Pointer(&h.port))[1]`. Over a Go
+struct holding no reference, only `len` of such a view was right: an index panicked with "index out of range with
+length 0" or a nil dereference, and a `range` by value over it read zeros where Go read the field, with no error.
+Now the view indexes the field in place (a read, a store, a compound assignment and `++`), and the whole array
+through it works as Go's `*p` does: `*p` read as a value is a copy, `*p = v` stores in place, `p[lo:hi]` is a
+slice of the field, and a `range` over `p` reads each element when its round comes, while a `range` over `*p`
+ranges a copy.
+
+A limit: the view of a field of a struct that holds a string, a slice, a map, an interface or a pointer panics by
+name. Every such site found in the TypeScript compiler and in the nine nugetgo modules is in `golang.org/x/sys`
+(`unix` on linux and macOS, `windows` on Windows). A tuple assignment that stores the whole array through two
+such views at once is also refused by name. See
+[Pointers](ConversionStrategies-Reference/pointers.md#the-bytes-of-one-field-through-ntunsafepointerpf-the-field-view).
+<!-- F1 parts A and B: merge 0d1f6f1f3f (P5, claude/p5-field-view-index d073be7130), BOARD 2026-11-15 "the field view
+     answers over a Go struct, and is indexed in place where it is written" (the before-probe at 516586c4a9,
+     linux/amd64 Release: over a Go struct with no reference, 9 forms panic "index out of range with length 0", 4 "nil
+     pointer dereference", a range by value reads 0x0 where Go reads 0xf1). Part C: merge 0c1d295ea8 (claude/p5-field-view-whole
+     da7cb0d29f), BOARD 2026-11-15 "the whole array through the field view is a load, a store or the view's window".
+     Both footprint 0 on four targets. The reference-holding limit: BOARD 2026-11-15 "the field view of a struct that
+     holds a reference is refused by name" and its census amendment (TypeScript closure: 17/17/4/7 sites on
+     linux/amd64, linux/arm64, darwin/amd64, windows/amd64; nugetgo modules 17/17/4/0; all x/sys). The tuple store:
+     BOARD 2026-11-15 "a tuple assignment that stores the whole array through two field views is refused by name"
+     (proposed .5). REVISIT AT 310: P5's box-kind seat (a1a1d8534b) answers the reference-holding sites. -->
+
+### A write at the address of a named array is no longer lost (P5)
+
+**A write through the address of a named array type reaches the array, also before the program has used it.** For
+`type small [8]byte`, `var local small; fill(unsafe.Pointer(&local), 41)` left `local[0]` at 0, where Go prints 41.
+The same write was lost through a package variable, a struct field, `new(small)`, and the address converted to a
+`uintptr` or to a raw pointer, and so was a `memcpy` from libc into a fresh named array. It reaches the array now,
+and a first use of the array on one goroutine racing another's first use of its address no longer loses writes
+either. No line of the converted standard library changes; the fix is in golib.
+See [Pointers](ConversionStrategies-Reference/pointers.md).
+<!-- BOARD 2026-11-15 "a write at the ADDRESS of a named array that has not been used yet is lost" (arms la-le lost,
+     lf/lg controls right, linux/amd64). Option 1: merge 882e3da582 (P5, claude/p5-lazy-named-array-pin 70abf5dd5a;
+     7 red + 2 controls -> 9 green; behavioral NamedArrayAddressWrite = go run; golib only). Option 2: merge 85b1c4181b
+     (claude/p5-holder-publish c6479baf76; 5 racing arms lost 6,735-78,243 of 200,000 -> 0, the control still loses;
+     golib only, no emitted line). The lazy backing (the go2cs-gen InheritedType template's interlocked publish) and both
+     pin paths (golib's ж box, `ValueSlot is IArray`) are in the nuget-1.26.10.3 tree, read with git grep at the tag, so
+     this is a fix to released behaviour. -->
+
 <!-- 2026-11-14 (R, the release-notes audit, COORD item 5): every first-parent merge from the nuget-1.26.10.3 tag
      (c35c0269b8) to master c2919b8b16 was classified, and each user-visible change with no section here or in
      NEWS.md's held entry got one below, verified against its merge and records. The heading names the owning
      seat so its owner can correct it. Ordered with the headline first; at release they merge into the prose. -->
+
+<!-- 2026-11-16 (P4, COORD's order: the draft brought current through batch 309, checked against master 0c1d295ea8).
+     Every first-parent merge of batches 306-309 was classified. A line was added for each user-visible change to
+     released behaviour: door B and the named-array floor (0cbd1eae70, a9dc1336a2), the field view (0d1f6f1f3f,
+     0c1d295ea8), the lost write (882e3da582, 85b1c4181b), five sqlite-cs shapes (6992717d09, c09d5e04da,
+     39b40c8c3a, b62c67b6d8, 4c101b8e57), the inline-array slice limit (6b78cef1a1) and the validated-modules page
+     (65be87fd89, 64a5cc7e24). Already carried by their own seats' edits: door A (2d7ac32ffb), the pin-extent fixes
+     (dbd872acad), cgo 3.1 and the cgo truth pass (d658f700cb, 3b202a6c56). HELD for P1: 055f4e6230 and d39b1ffe00
+     (the Tuning section's note). LEFT OUT, each a fix to a feature new in this release, so no released build had
+     the defect: the inline-array fixes 6b78cef1a1 (the foreign slice itself), b1c73ce844, d7f5a59f79, a6f526f31e
+     and 63c2a339c7; the unsafe.Add box chain 18b36cb712, which came with batch 305's derived pointers. LEFT OUT as
+     internal (CI, tests, records, design docs): 6f5def3cca (two darwin roster rows; the roster carries them),
+     9b05e0dc4c, bd709b8206, 9c3f648b52, 1cfa713959, ec0a21ea2f, 3923dcda87, b4ac41960f, 5aa38c3ac2, 2c2c5b0ec0,
+     b2214e00e4, 4415da65d3, 927441cd79, ec250198ff, d5a1f672fd, a0878172b2, be8c7a6859 (the zig pin for the
+     linux-arm64 cgo smoke), 9615f7fc18 (proof-page pipe rendering; no committed page changed). -->
 
 ### Derived pointers keep what they point into (P5+H)
 
@@ -282,8 +357,8 @@ pointer arithmetic on its receiver pays for keeping the value at each call. On l
 standard library's own shape, and nearly twice the time when the receiver is a field of another struct, which no
 standard-library caller does. See
 [Pointers](ConversionStrategies-Reference/pointers.md#tp-over-an-unsafepointer-is-emitted-as-unsafepointertotp--the-typed-pointer-keeps-what-p-carries).
-<!-- The interior-pointer root: docs/phase4/DESIGN-interior-pointer-root.md (NOT on master: origin
-     claude/p5-interior-pointer-root 5a21eeb512; read through the GitHub API) sections 1.1 (the 12-shape program, shape 8:
+<!-- The interior-pointer root: docs/phase4/DESIGN-interior-pointer-root.md (on master since
+     batch 307, merge 3923dcda87) sections 1.1 (the 12-shape program, shape 8:
      Go 2 then 22, converted 2 then 0, linux/amd64, 3 runs), 1.3 (CmsgStress, 3 runs x 300,000 messages, 0 wrong,
      recorded LATENT), 4.1-4.5, 10.1 (H's U2, ATypedPointerConvertedFromAnInteriorUnsafePointerKeepsItsStorageAlive: red
      3 of 3 after a compacting collection, the pointer reads the old bytes at the old address), 10.12 (leftmost-term
@@ -464,7 +539,9 @@ the rule picks but cannot hold inline (an array or struct over 4096 bytes, an ar
 struct from another package) converts as before, with warning `GO2CS2009`. Error `GO2CS2010` refuses a
 reinterpret between two structs whose arrays disagree, inline on one side and not on the other, when the packages
 are forced or the inline side belongs to another package. A known limit: reflection over a struct that holds inline
-arrays, `fmt.Printf("%v", s)` among it, panics by name. Print the fields one at a time. See
+arrays, `fmt.Printf("%v", s)` among it, panics by name. Print the fields one at a time. A slice of an array held
+inline panics by name when the struct around it also holds a string, a slice, a map, an interface or a pointer;
+a `copy` into or out of the array with constant bounds works, and so does slicing a local copy of the array. See
 [`-inline-arrays`](CommandLine.md), [Limitations](Limitations.md) and [diagnostic codes](DiagnosticCodes.md).
 <!-- docs/phase4/DESIGN-array-value-storage.md section 7 (the scout, 7.3 for the before-state:
      src/core/golib/runtime/RuntimeErrorPanic.cs refuses the whole-struct read) and its dated part-D and mixed-pair
@@ -472,7 +549,10 @@ arrays, `fmt.Printf("%v", s)` among it, panics by name. Print the fields one at 
      a pack without it fails). The converter: merge 817b56e8b0 (C2, I0 part D; std footprint 0; the census P1 on
      linux/amd64 over modernc.org/sqlite v1.62.0 and libc v1.80.1). Mixed pairs: merge 555e30c826 (C2,
      claude/c2-inline-pairs, 3c25375a04). Emission shape: src/tests/Behavioral/InlineArrayFields. The reflection
-     limit: docs/Limitations.md "Reflection cannot read a struct whose arrays are held inline". -->
+     limit: docs/Limitations.md "Reflection cannot read a struct whose arrays are held inline". The slice limit:
+     docs/Limitations.md "A slice of an array held inline panics when the struct around it also holds a string, …",
+     merge 6b78cef1a1 (C2, go-winio Part 2, claude/c2-inline-foreign-slice 0333434616; COORD ruling 3b, disclosed for
+     .4). -->
 
 ### A defined type over an instantiated generic converts (P1, H)
 
@@ -602,6 +682,16 @@ everywhere in translated C. These now convert and run as in Go:
 - a defined type over a defined slice type (`type fermat nat` with `type nat []uint64`);
 - a terminating `switch` whose guarded `default` falls through, a multiple assignment whose target is `*(*T)(x)`,
   and an integer converted to a named string type;
+- a member that its package renames to avoid a name collision, reached through an import alias: `time` declares
+  `Location` as `ΔLocation`, because `Time` has a method of that name, and libc imports `time` as `gotime`;
+- the address of an element of an array whose element type is an alias of an alias of an anonymous struct that
+  another package declares (`&X_iob[i]` over libc's `FILE`);
+- an anonymous struct type declared inside a function and reinterpreted through `unsafe.Pointer`, and one
+  declaration that names several variables of such a type;
+- a pointer method called on a named result (`r.SetBigInt(bi)` in modernc.org/mathutil), which did not compile,
+  and a pointer method called on a field of a named result, which compiled but wrote into a copy, so the write was lost;
+- importing a converted package whose position map is one line longer than 64 KB, as modernc.org/sqlite's `lib`
+  package's is. Its importers read none of its type aliases;
 - one instantiation of a generic type used as a non-generic interface whose method names the type argument
   (`box[point]` as `interface{ val() point }`);
 
@@ -635,7 +725,12 @@ program that never calls it is unaffected. If yours does, report it as a go2cs i
      "x/sys/cpu's cpuid and xgetbv take golib bodies by name": Windows x64, x/sys/cpu v0.49.0, exit 2 at master,
      29 flags equal Go's at the fix; gated on packages outside GOROOT; arm64 getisar0/getisar1/getpfr0/getzfr0 kept
      as stubs; darwin and linux conversions not run). GO2CS2012's reach on sqlite-cs: 8 stubs, none reached (1f2d0748ba).
-     The sqlite-cs demo itself is NOT REACHED past start-up (BOARD S1 row, Q4: it stops at row S22). -->
+     The sqlite-cs demo itself is NOT REACHED past start-up (BOARD S1 row, Q4: it stops at row S22).
+     306-309 (P4, 2026-11-16, bringing the draft through batch 309): W2 6992717d09 (G; readPackageInfoLines' scanner
+     stopped at its 64 KB default on lib's 123,448-byte GoPositionMap line; footprint 0/0 on 4 targets), W4/S10
+     c09d5e04da (P2; CS0426 x5 fixture / x8 repro; footprint 0 x4), W5a 39b40c8c3a (G; CS0426 x4; footprint 0/0 on 4
+     targets), S8c b62c67b6d8 (P2; CS1929 x6, and the silent write into a copy box on master; footprint 0 on 4 targets),
+     L1 4c101b8e57 (G; 4 unresolved dynamic types at master; footprint 0 on 4 targets). -->
 
 ### An `unsafe`-free xxh3 for a `replace` (C1)
 
@@ -729,7 +824,7 @@ goroutine waits on a nil channel or an empty `select {}`; any other deadlock han
 goroutine, nor for the deadlock report: those went to stderr alone. They now reach the crash file too.
 <!-- Deadlock: merge 01986cdd81 (4078bdc81b): red first at master 3da19d0e2e (the line alone; the three-goroutine case
      twice); behavioral DeadlockGoroutineBlocks; golib + hand-owned runtime only, 0 corpus lines; no platform named.
-     Limitations.md:110-113#c9d2eb and GoFeatureSupport.md:110#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
+     Limitations.md:111-114#ab9ea8 and GoFeatureSupport.md:110#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
      builtin.WriteFatalReport; GolibTests BackstopCrashOutputTests red with the crash file empty, green, linux. -->
 
 ### Runtime fixes (G, C1, i9)
@@ -896,6 +991,15 @@ Converted projects keep .NET's default, workstation GC. See [.NET runtime settin
      converted-project default". "Since 1.26.10.2": Tuning.md at nuget-1.26.10.3 attributed most of the 1.26.10.1 ->
      1.26.10.2 JIT speed-up to the delay of 0. -->
 
+<!-- 2026-11-16 (P4): HELD for P1's AOT reading (COORD: "the AOT items still wait for P1"). Two user-visible Native AOT
+     changes from batch 308 have no line yet, and get one when P1's reading lands:
+     (1) merge 055f4e6230 (i9, lever G): golib's ж<T> no longer names ElemRefBox<T> in its view lookup, which ends a
+     generic cycle; Native AOT IL3054 654 -> 0 on a golib-only consumer, image 19.7 -> 11.2 MB, PerfStartup -44%,
+     parsedemo -34%, ILC peak -34..-41%; +2.7% PerfFieldView under the JIT.
+     (2) merge d39b1ffe00 (P4): Tuning.md's "Native AOT method-body folding" (anchor native-aot-method-body-folding):
+     IlcFoldIdenticalMethodBodies=false makes the AOT compiler 4.5x faster on PerfStartup and parsedemo 32m20s ->
+     7m06s, for an image 11-15% larger; go2cs keeps the SDK default (the owner's ruling). -->
+
 ### Documentation (COORD)
 
 **A new page, [Go feature support](GoFeatureSupport.md), says feature by feature what converts.** Each Go feature is
@@ -906,8 +1010,99 @@ Roadmap and Consuming Go from C#, and [Command line](CommandLine.md) now lists e
 repository or a package page as converted by go2cs, use the badge served from go2cs.net
 ([how](ConvertingAModule.md#publishing-your-conversion-the-package-page)). The nugetgo pack now puts it first in the
 block it writes into a package's README. The repository also has a code of conduct (the Contributor Covenant 2.1) and
-a pull-request template.
+a pull-request template. [Validated modules](ValidatedModules.md) is refreshed: nine Go modules whose own test
+suites go2cs converts and runs, each read with Go 1.26.10 on the 1.26.10.3 packages, and the README links it
+beside the standard-library roster.
 <!-- merges 48665b310f and e02f6729d0 (docs/GoFeatureSupport.md, linked from docs/README.md and docs/Features.md);
      bce71f3ae9 (P2, the user-facing docs audit; the guard TestCommandLineDocListsEveryFlag); 6869ec2b54 and
      8792630525 (docs/images/go2cs-badge.svg, ConvertingAModule.md, src/tools/nugetgo/NugetgoReadme.psm1);
-     c978595f0c (R: CODE_OF_CONDUCT.md, .github/PULL_REQUEST_TEMPLATE.md). -->
+     c978595f0c (R: CODE_OF_CONDUCT.md, .github/PULL_REQUEST_TEMPLATE.md). Validated modules: merges 65be87fd89 (P4,
+     batch 308; docs/ValidatedModules.md, 9 rows, read with Go 1.26.10 on go.* 1.26.10.3) and 64a5cc7e24 (P4, batch
+     309; docs/README.md's Explore list). -->
+
+<!-- 2026-11-15 (P4, docs audit Q2): the section below stood in NEWS.md as a held, visible "November XX" entry.
+     Moved here verbatim (its heading demoted to ###) so the archive page shows no PENDING text; its items repeat
+     some of this draft's (the assembly renaming, the break floor) and are merged at the release cut. -->
+
+### Packages with very large method sets load (moved from NEWS.md; merge at the release cut)
+
+<!-- Written ahead and HELD for release day (the .2 and .3 precedent): "November XX" becomes the publish date as the
+     last change before the release tag (GoCorpusMigration.md, the release ritual, item 1). Section opened by the
+     promoted-forwarder seat (P1, COORD ruling 2026-11-10 08:28Z); later seats for the release append to it. Every item is
+     PENDING until 1.26.11.1 publishes. The release was prepared as 1.26.10.4; the owner ruled it ships as
+     1.26.11.1, built from Go 1.26.11 (2026-11-12, the 1.26.11 patch hop). -->
+
+**NuGet 1.26.11.1.** PENDING. The fourth release on the Go 1.26 line, and the first built from Go 1.26.11, a Go patch
+release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a promoted
+method through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
+
+**Upgrading from 1.26.10.3.**
+
+- **Rebuild what you built against 1.26.10.3.** PENDING. A Go struct that embeds another struct of its own package
+  gets a forwarder for each method the embedding promotes. Through 1.26.10.3 those forwarders were members of the
+  package class (`bufio_package` for `bufio`); from 1.26.11.1 each struct's forwarders are in a class of the
+  struct's own, beside the package class in the same namespace. In the standard library 900 public forwarders moved,
+  counted once for each assembly a package ships, in 20 packages; a program can import 13 of the 20, and the other
+  7 are internal or vendored. An assembly or nugetgo package compiled against go.* 1.26.10.3 that calls such a
+  promoted method fails at that call under 1.26.11.1 with `MissingMethodException`. The build refuses the
+  combination first: a package built below the new break floor is error `GO2CS3002`, which names the package
+  ([Diagnostic codes](DiagnosticCodes.md)). Rebuild against 1.26.11.1, and move each `nugetgo.*` reference to its
+  1.26.11.1 revision.
+  <!-- source: the promoted-forwarder seat (docs/phase4/DESIGN-promoted-forwarder-placement.md; owner ruling
+       2026-11-10: "better breaking changes now than before we're deep with users"). The moved members are announced
+       to the binary-compatibility guard as generated CP0002 entries, 900 entries in 20 suppression files
+       (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1), and <GoBreakFloor> is 1.26.11.1. The nugetgo
+       rebuild wave ships with this release (the owner's hands). -->
+- **Standard-library assemblies are named after their packages.** PENDING. Package `go.fmt` now ships `go.fmt.dll`,
+  not `fmt.dll`, and likewise every converted standard-library assembly (`go.net.dll`, `go.crypto.tls.dll`,
+  `go.go.ast.dll` for package `go.go.ast`, `go.testing.dll`). The package IDs do not change, nor do `golib.dll`
+  (package go.lib), the go2cs-gen analyzer, or a converted module's own assemblies. A library converted and built
+  against go.* 1.26.10.3 or earlier binds the standard library's assemblies by their OLD names, so it must be rebuilt
+  against 1.26.11.1; the same break floor names it at build time (`GO2CS3002`) rather than letting it fail as a
+  missing assembly at run time. A C# project that referenced a converted assembly by file name (`fmt.dll`) or by an
+  assembly-qualified type name (`go.fmt_package, fmt`) uses the new name.
+  <!-- source: OQ4, docs/PLAN-public-surface-stability.md (ruled), the design docs/phase4/DESIGN-assembly-identity.md;
+       src/go2cs/assemblyIdentity.go. The binary-compatibility guard compares each renamed assembly with its 1.26.10.3
+       baseline through a rename map keyed to this release (src/tools/pushnuget/GoApiCompat.psm1). -->
+- **`using static` alone no longer brings promoted methods.** PENDING. C# that calls into a converted package with
+  only `using static go.bufio_package;` still sees the package's types, functions and the methods its types declare.
+  A method a struct promotes from an embedded struct of the same package now needs the namespace as well:
+  add `using go;` (or `using go.<path>;` for a package below the root). Converted code already has it.
+  [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
+  <!-- source: the same seat; GenTests PromotedHostClassTests.UsingStaticAloneBringsDeclaredMethodsAndNoPromotedOne
+       (CS1929 without the namespace) and TheNamespaceBringsThePromotedMethods. -->
+
+**A package whose types promote very many methods now loads.** PENDING. The .NET runtime loads no type with more
+than 65,521 methods. A converted package class held every promoted-method forwarder of every struct in the package,
+so a package where many structs embed one method-rich base could pass that limit: it compiled, and its first use
+threw `TypeLoadException`. With each struct's forwarders in a class of their own, the package class holds only what
+the package declares. A type that would still exceed the limit is now a compile error, `GO2CS0012`, which names the
+type and its method count.
+<!-- source: the same seat. Measured shape: N methods on one base embedded by M structs put 2NM + 2N + 5 methods in
+     the package class; N=250, M=131 (66,005) failed to load and M=130 (65,505) loaded. One converted package class
+     held 116,102 methods, 107,835 of them forwarders. -->
+
+**A promoted method that returns a string, a bool or several values can be called from another package.** PENDING.
+A Go struct that embeds an exported struct promotes its methods, and code in another package may call them on the
+outer struct. The C# forwarder for such a method was `internal` whenever its return type's C# spelling ended in a
+lowercase name (`@string`, `bool`, `error`, any multi-value return), so a call that Go accepts did not compile in
+the converted program (`CS1929`). The forwarder of an exported method is now public unless its signature names a
+type that is not public. In the standard library 268 forwarders in 12 packages became public, `bufio.ReadWriter`'s
+`Read` and `Peek` among them; none was removed, so nothing compiled against 1.26.10.3 breaks on this change.
+<!-- source: C34 of the TypeScript-Go readiness run (repro c34promotedbuiltinreturn at 4505b95021 on
+     claude/i7-ts-readiness-rerun), folded into the promoted-forwarder seat. GenTests PromotedForwarderScopeTests;
+     behavioral PromotedValueEmbedLib / PromotedValueEmbedUser. The count is of forwarder methods in one target's
+     packed assemblies, the same on windows, linux and darwin (docs/phase4/DESIGN-promoted-forwarder-placement.md,
+     amendment section H). -->
+
+**A method whose receiver type is written through an alias runs on a nil pointer, as in Go.** PENDING. Go accepts
+`type AttrNode = Node` with `func (n *AttrNode) Mode() int`, and the method is `Node`'s: it can be called on a nil
+pointer and test `n == nil` itself. The converter took such a method's receiver by reference, so the nil test read
+the struct through the nil pointer and the call panicked where Go returns; a method that used the receiver as a
+pointer in any other way did not compile. Such a method is now emitted as it is when the receiver is written with
+the type's own name. The standard library has no such method, so its converted code is unchanged. A receiver that
+is an alias of the pointer type itself (`type P = *T`) still does not compile after conversion.
+<!-- source: C48 of the TypeScript-Go readiness run (one type-check unit panicked in
+     ast.(*Node).GetResolutionModeOverride), P1; docs/phase4/DESIGN-alias-receiver-form.md. Behavioral
+     AliasReceiverForms; converter tests TestAliasReceiverTakesTheNamedForm and
+     TestAliasReceiverEmitsAsNamedReceiver. -->

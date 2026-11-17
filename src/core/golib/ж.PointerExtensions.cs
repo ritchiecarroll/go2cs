@@ -107,13 +107,18 @@ namespace go;
     /// reads through <c>Value</c>, exactly as <c>p.Value[i]</c> does, with the same overloads and so the
     /// same bounds checks and panics. One type test per read; no element box (runtime's cheaprand is on
     /// the emitted population). A pointer array over FOREIGN memory reads its element's word in place
-    /// (<see cref="NativePointerArrayBox{E}"/>); that second test exists only for a reference-bearing
-    /// <typeparamref name="T"/>, a JIT-time constant, so an unmanaged element's read is unchanged.
+    /// (<see cref="NativePointerArrayBox{E}"/>); that test exists only for a reference-bearing
+    /// <typeparamref name="T"/>, a JIT-time constant. A view of one field's bytes over a Go value that has no
+    /// address reads the field's live slot (<see cref="ReinterpretedArrayBox{E}"/>); that test exists only for a
+    /// reference-free <typeparamref name="T"/>, the same constant, and is one exact-type compare.
     /// </remarks>
     public static ref T ElementRef<T>(this ж<array<T>> pointer, int index)
     {
         if (pointer is NativeArrayBox<T> native)
             return ref native.ElementRef(index);
+
+        if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is ReinterpretedArrayBox<T> field)
+            return ref field.ElementRef(index);
 
         if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
             return ref words.ElementRef(index);
@@ -127,6 +132,9 @@ namespace go;
         if (pointer is NativeArrayBox<T> native)
             return ref native.ElementRef(index);
 
+        if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is ReinterpretedArrayBox<T> field)
+            return ref field.ElementRef(index);
+
         if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
             return ref words.ElementRef(index);
 
@@ -138,6 +146,9 @@ namespace go;
     {
         if (pointer is NativeArrayBox<T> native)
             return ref native.ElementRef(index);
+
+        if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is ReinterpretedArrayBox<T> field)
+            return ref field.ElementRef(index);
 
         if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
         {
