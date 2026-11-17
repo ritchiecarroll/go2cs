@@ -3178,7 +3178,7 @@ Two places are deliberately **not** Go. Upstream `Stop` drains after releasing `
 
 ## The runtime's PROCESS-CONTROL surface: implement the CONTRACT, never the mechanism
 
-`runtime`'s public control API — `GC`, `GOMAXPROCS`, `Gosched`, `Stack`, `ReadMemStats`,
+`runtime`'s public control API — `GC`, `GOMAXPROCS`, `SetDefaultGOMAXPROCS`, `Gosched`, `Stack`, `ReadMemStats`,
 `LockOSThread`/`UnlockOSThread` — converts faithfully and **compiles**, then dies on its first call.
 Each body drives machinery that has no managed counterpart: `GC()` → `gcStart` → `acquirem` →
 `getg()`; `GOMAXPROCS(n)` → `stopTheWorldGC` → `semacquire` → `getg()`; `Gosched()` →
@@ -3191,7 +3191,7 @@ goroutine (a managed thread) that is an unhandled exception and
 The rule is the one sync's `Mutex`/`notifyList` established: **where a Go mechanism has no managed
 counterpart but its public contract does, reimplement the CONTRACT at the API boundary and never
 emulate the mechanism.** Synthesizing a plausible `g`/`m` so the converted scheduler can walk it buys
-nothing — the code underneath still wants a real run queue, a real heap and real stacks. The seven
+nothing — the code underneath still wants a real run queue, a real heap and real stacks. The eight
 declarations above are dropped from emission by the type-level registry
 (`manualConversionFuncs["runtime"]`) and answered in a hand-owned `runtime/managed_impl.cs`;
 everything below them stays auto-converted and simply becomes unreachable.
@@ -3200,6 +3200,7 @@ everything below them stays auto-converted and simply becomes unreachable.
 |---|---|---|
 | `Gosched()` | `Thread.Yield()` | none — same "offer the rest of the slice, then continue" contract |
 | `GOMAXPROCS(n)` | remembered value, defaults to `Environment.ProcessorCount`; `n < 1` queries | with the default threads, does **not** cap parallelism — the CLR schedules goroutine threads. The universal save/restore idiom `defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(n))` is exactly right |
+| `SetDefaultGOMAXPROCS()` | Go's body over the remembered value: it sets `defaultGOMAXPROCS(0)`, the CPUs the process may run on, which on linux is lowered to the cgroup's CPU limit (rounded up, at least 2; the cgroup is opened at start-up, after `parsedebugvars`, as `schedinit`'s `defaultGOMAXPROCSInit` does). `GOMAXPROCS(n)` marks the setting custom, as Go's does, and this clears the mark | Go's automatic update, which sysmon runs at most once a second while the setting is not custom, does not run, so the value follows a CPU or cgroup change only when the program calls this. The converted body set `newprocs` for a `startTheWorldWithSema` that never runs, so before 2026-11-17 the call changed nothing |
 | `GC()` | blocking compacting collect → `WaitForPendingFinalizers` → collect → **`GcPauseRecorder.Drain()`** | none observable; the second pass reclaims what finalizers released, which is the state a completed Go cycle leaves. The drain is what makes `NumGC` current on return |
 | `Stack(buf, all)` | a Go-shaped traceback rendered from the managed stack into `buf`; `all` enumerates every live goroutine | see *`runtime.Stack` renders a GO-shaped traceback* and *`runtime.Stack(all: true)`* below |
 | `ReadMemStats(m)` | `GC.GetTotalMemory`/`GetTotalAllocatedBytes` + one `GcPauseRecorder` snapshot | allocator-internal fields (`Mallocs`/`Frees`/`HeapObjects`/`BySize`) and `GCCPUFraction` stay **zero** rather than invented; the pause history, `LastGC`, `PauseTotalNs`, `NumGC`, `NumForcedGC` and `HeapReleased` are **real** (see below) |

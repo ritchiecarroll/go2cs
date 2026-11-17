@@ -403,9 +403,42 @@ partial class runtime_package
     {
         nint previous = Volatile.Read(ref s_gomaxprocs);
 
-        if (n < 1 || n == previous)
+        if (n < 1)
             return previous;
 
+        // Go marks the setting custom before its equal-value return, so a program that sets GOMAXPROCS to
+        // the value it already has has still set it: SetDefaultGOMAXPROCS then resets it, and the default no
+        // longer follows the CPUs on its own.
+        sched.customGOMAXPROCS = true;
+
+        if (n == previous)
+            return previous;
+
+        setGOMAXPROCS(n, custom: true);
+
+        return previous;
+    }
+
+    // SetDefaultGOMAXPROCS updates the GOMAXPROCS setting to the runtime default, as described by
+    // GOMAXPROCS, ignoring the GOMAXPROCS environment variable. Go's body sets newprocs for the
+    // converted startTheWorldWithSema, which never runs here, so the setting did not move; this is Go's
+    // body over the managed setting.
+    public static void SetDefaultGOMAXPROCS()
+    {
+        nint procs = defaultGOMAXPROCS(0);
+
+        if (!sched.customGOMAXPROCS && procs == Volatile.Read(ref s_gomaxprocs))
+        {
+            // Nothing to do if we're already using automatic GOMAXPROCS and the limit is unchanged.
+            return;
+        }
+
+        setGOMAXPROCS(procs, custom: false);
+    }
+
+    // The setting's one writer, GOMAXPROCS and SetDefaultGOMAXPROCS alike.
+    private static void setGOMAXPROCS(nint n, bool custom)
+    {
         // Go changes the P count inside stopTheWorldGC(stwGOMAXPROCS); the pause is recorded the
         // same way (the stop-the-world contract, stopTheWorld below).
         worldStop stw = stopTheWorldGC(stwGOMAXPROCS);
@@ -425,9 +458,18 @@ partial class runtime_package
             gomaxprocs = (int32)n;
         }
 
-        startTheWorldGC(stw);
+        sched.customGOMAXPROCS = custom;
 
-        return previous;
+        startTheWorldGC(stw);
+    }
+
+    // schedinit's GOMAXPROCS steps, which the converted schedinit (never run here) would take after
+    // parsedebugvars: goenvs_impl.cs's module initializer calls this at the same point. On linux,
+    // defaultGOMAXPROCSInit opens the process's CPU cgroup, so defaultGOMAXPROCS lowers the default to
+    // the cgroup's CPU limit as Go's does (debug.containermaxprocs, on by default); elsewhere it is empty.
+    internal static void startGOMAXPROCS()
+    {
+        defaultGOMAXPROCSInit();
     }
 
     // TEST SEAM (malloc_impl.cs's pattern: GolibTests is outside the InternalsVisibleTo grant): the value

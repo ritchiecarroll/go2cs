@@ -12,7 +12,7 @@ namespace GolibTests;
 [TestClass]
 public class RuntimeSetDefaultGOMAXPROCSTests
 {
-    // A setting no default can equal: Go caps GOMAXPROCS at 1024 Ps, and no test host has that many CPUs.
+    // A setting no default can equal: no test host has 1000 CPUs.
     private const nint Explicit = 1000;
 
     [TestMethod]

@@ -782,6 +782,9 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"GC":         goosAny,
 		"GOMAXPROCS": goosAny,
 		"Gosched":    goosAny,
+		// SetDefaultGOMAXPROCS resets the setting GOMAXPROCS keeps; the converted body set newprocs for a
+		// startTheWorldWithSema that never runs, so the setting did not move.
+		"SetDefaultGOMAXPROCS": goosAny,
 		// Goexit belongs to the same surface for the same reason: its converted body drives Go's
 		// own _panic record and stack unwinder (p.start(getcallerpc(), getcallersp()) → nextDefer →
 		// goexit1), all of it assembly. The managed shape unwinds the calling goroutine with a
