@@ -5,16 +5,15 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static int32 @lock(nint typ) {
-    var exprᴛ1 = typ;
     var matchᴛ1 = false;
-    var matchᴛ2 = exprᴛ1 is 0 || exprᴛ1 is 1;
+    var matchᴛ2 = typ is 0 || typ is 1;
     if (!matchᴛ2) { /* default: */
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 0) {
+    if (fallthrough || !matchᴛ1 && typ is 0) {
         return 10;
     }
-    if (exprᴛ1 is 1) { matchᴛ1 = true;
+    if (typ is 1) { matchᴛ1 = true;
         for (nint n = 0; ; n++) {
             if (n == 3) {
                 return (int32)(20 + n);
@@ -26,16 +25,15 @@ internal static int32 @lock(nint typ) {
 }
 
 internal static @string middle(nint n) {
-    var exprᴛ1 = n;
     var matchᴛ1 = false;
-    var matchᴛ2 = exprᴛ1 is 0 || exprᴛ1 is 1;
-    if (exprᴛ1 is 0) {
+    var matchᴛ2 = n is 0 || n is 1;
+    if (n is 0) {
         return "zero";
     }
     if (!matchᴛ2) { /* default: */
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && n is 1) { matchᴛ1 = true;
         return fmt.Sprint("one or other ", n);
     }
     return default;
@@ -43,16 +41,16 @@ internal static @string middle(nint n) {
 }
 
 internal static nint notTerminal(nint n) {
-    var exprᴛ1 = n;
+    var nᴛ1 = n;
     var matchᴛ1 = false;
-    var matchᴛ2 = exprᴛ1 is 0 || exprᴛ1 is 1;
+    var matchᴛ2 = nᴛ1 is 0 || nᴛ1 is 1;
     if (!matchᴛ2) { /* default: */
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 0) {
+    if (fallthrough || !matchᴛ1 && nᴛ1 is 0) {
         n += 100;
     }
-    else if (exprᴛ1 is 1) { matchᴛ1 = true;
+    else if (nᴛ1 is 1) { matchᴛ1 = true;
         return 1;
     }
 
