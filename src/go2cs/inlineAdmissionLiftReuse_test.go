@@ -258,3 +258,142 @@ func TestAdmittedImporterOverUnadmittedForeignLiftBuildsAndReadsAsGo(t *testing.
 		t.Fatalf("go2cs differs from go:\n   go: %s\ngo2cs: %s", want, got)
 	}
 }
+
+// TRANSITIVE admission (G's linux-x64 red at 6bcc05d11f, COORD ruling 2026-11-17 10:32Z): libc's Titimerval named
+// libc/uuid/uuid's lift Itimervalᴛ1, since neither package admits Itimerval and it holds no array, while its field type
+// Ttimeval kept libc's OWN lift, which libc admits and uuid does not. libc's own literal
+// `new Titimerval(Fit_value: new Ttimeval(...))` then passed libc's Ttimevalᴛ1 where uuid's lift declares uuid's: CS1503
+// three times in ccgo_linux_amd64.cs. A foreign lift is reused only if every struct it holds, at any depth, through
+// fields, arrays and embeds, resolves to that same package's lift here too.
+//
+// lib spells the structs the way uuid does and admits none of them.
+const transitiveLiftLib = `package lib
+
+type TV = struct {
+	Sec  int64
+	Usec int64
+}
+
+type ITV = struct {
+	Interval TV
+	Value    TV
+}
+
+type ITV2 = struct {
+	Outer ITV
+	Flags int32
+}
+
+func Usec(i ITV2) int64 { return i.Outer.Value.Usec }
+
+const Name = "lib"
+`
+
+// main spells the same structs the way libc does. It converts Trusage whole through unsafe.Pointer, so it admits Trusage
+// and Ttv, which Trusage holds by value (libc admits Ttimeval the same way). It admits neither Titv nor Titv2: Titv holds
+// Ttv (depth 1) and Titv2 holds it through Titv (depth 2).
+const transitiveLiftMain = `package main
+
+import (
+	"fmt"
+	"unsafe"
+
+	"example.com/app/lib"
+)
+
+type Ttv = struct {
+	Sec  int64
+	Usec int64
+}
+
+type Titv = struct {
+	Interval Ttv
+	Value    Ttv
+}
+
+type Titv2 = struct {
+	Outer Titv
+	Flags int32
+}
+
+type Trusage = struct {
+	Utime Ttv
+	Pad   [2]int64
+}
+
+func main() {
+	var raw [4]int64
+	ru := (*Trusage)(unsafe.Pointer(&raw))
+	ru.Utime.Sec = 3
+	ru.Pad[1] = 4
+	itv := Titv{Value: Ttv{Sec: 5, Usec: 6}}
+	itv2 := Titv2{Outer: Titv{Interval: Ttv{Sec: 7, Usec: 8}}, Flags: 9}
+	fmt.Println(raw[0]+raw[3], itv.Value.Sec*10+itv.Value.Usec, itv2.Outer.Interval.Usec+int64(itv2.Flags), unsafe.Sizeof(itv2), lib.Name)
+}
+`
+
+// The emission: neither container names lib's lift, since the struct each holds (directly, or through Titv) keeps main's
+// own admitted lift.
+func TestReusedLiftWhoseFieldKeepsItsOwnLiftIsNotReused(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	emitted := convertModuleMainWithLib(t, "lib", transitiveLiftLib, transitiveLiftMain)
+
+	if strings.Contains(emitted, "lib_package.ITVᴛ1") {
+		t.Errorf("depth 1: Titv names lib's lift while its field type Ttv keeps main's own admitted lift (CS1503 at the literal):\n%s", emitted)
+	}
+
+	if strings.Contains(emitted, "lib_package.ITV2ᴛ1") {
+		t.Errorf("depth 2: Titv2 names lib's lift while Ttv, held through Titv, keeps main's own admitted lift:\n%s", emitted)
+	}
+
+	if strings.Contains(emitted, "lib_package.TVᴛ1") {
+		t.Errorf("the admitted Ttv names lib's unadmitted lift:\n%s", emitted)
+	}
+}
+
+// The control: where main admits nothing (no unsafe.Pointer conversion), every field resolves to lib's lift too, so
+// all three reuses stay.
+func TestReusedLiftWhoseFieldsMatchIsStillReused(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	notAdmitted := strings.Replace(transitiveLiftMain,
+		"\tru := (*Trusage)(unsafe.Pointer(&raw))\n",
+		"\tru := &Trusage{}\n", 1)
+
+	if notAdmitted == transitiveLiftMain {
+		t.Fatal("the control's edit did not apply")
+	}
+
+	emitted := convertModuleMainWithLib(t, "lib", transitiveLiftLib, notAdmitted)
+
+	for _, want := range []string{
+		"global using Ttv = go.example.com.app.lib_package.TVᴛ1;",
+		"global using Titv = go.example.com.app.lib_package.ITVᴛ1;",
+		"global using Titv2 = go.example.com.app.lib_package.ITV2ᴛ1;",
+	} {
+		if !strings.Contains(emitted, want) {
+			t.Errorf("with matching admission at every depth the reuse is lost; want %q:\n%s", want, emitted)
+		}
+	}
+}
+
+// End to end: the converted module builds (CS1503 at both literals at 6bcc05d11f) and prints what go prints.
+// GO2CS_INLINE_BUILD=1 runs it.
+func TestTransitiveLiftReuseBuildsAndReadsAsGo(t *testing.T) {
+	dotnet := requireInlineBuild(t)
+	files := map[string]string{"lib/lib.go": transitiveLiftLib, "main.go": transitiveLiftMain}
+	want := goRunInlineModule(t, "app", files)
+	out := convertInlineModule(t, "app", files)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, out); err != nil {
+		t.Fatalf("the converted module does not build: %v\n%s", err, built)
+	}
+
+	got := runConvertedInlineModule(t, dotnet, out)
+	t.Logf("READING go prints: %s; go2cs prints: %s", want, got)
+
+	if got != want || want == "" {
+		t.Fatalf("go2cs differs from go:\n   go: %s\ngo2cs: %s", want, got)
+	}
+}
