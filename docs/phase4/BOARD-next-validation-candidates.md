@@ -40345,4 +40345,87 @@ classification is unchanged.
 
 — P5 (2026-11-16)
 
+## 2026-11-16 — H (the NativeBox reference floor; COORD ruling C and the 311 plan): a native box refuses a whole-value read or write of a reference-type pointee — SEATED for 311, branch `claude/h-nativebox-ref-floor`
+
+`NativeBox<T>.ValueAddress` now throws `NativeStructLayoutMismatch(T, "a managed reference where Go stores words")`
+when `T` is a CLR reference type (a Go pointer, a func, an interface, `unsafe.Pointer`) and the address is not the
+number 0. Before it, `Unsafe.AsRef` read Go's word as a managed reference: cgo-e2e s6next's `entry.next` became a
+reference to an object that does not exist, and a write stored a reference the collector could not see
+(DESIGN-cgo-phase3-marshaling.md, section 18).
+- **Order in `ValueAddress`:** the layout mismatch, the dereferenceable address, the named-array floor, 310's B0'
+  (managed-derived struct reads), this floor, then the census. B0' and this floor cover disjoint populations: B0' a
+  value-type Go struct holding a reference, this floor a CLR reference type. A refused read is never counted.
+- **One exemption (ruling C, narrowed by source):** `unsafe.Pointer` over MANAGED Go storage, where the box retains
+  its source or carries a pin. These are the converted runtime's `map.go` indirect key and `atomic_pointer.go`
+  atomicwb. Over native memory it is refused like every other reference. The exempt read's hazard is the next row.
+- **Not refused:** golib's map, channel, string, slice and array, which are value types and stay census B2a value
+  kinds. The number 0 also passes: a nil pointer to a Go pointer answers what every nil pointer answers. The census
+  counts that attempt before the read faults (COORD 2026-11-16: it stays counted).
+- **Tests:** `NativeBoxReferenceFloorTests`, with 4 refusal arms that were red before the floor and 4 controls (the
+  managed `unsafe.Pointer` control among them). The census controls that minted reference-type boxes over C memory
+  are re-pointed:
+  - the off arm, the source-tag arm and the file arm, to value kinds (string, `array<short>`, `Unsized`);
+  - the reference-kind arm, to "refused and not counted";
+  - a new arm keeps the exempt `unsafe.Pointer` counted as B2a source=retained.
+
+**The census, before and after** (GolibTests Release unfiltered, census on; behavioral executed, census on):
+
+| reading | tree | GolibTests | B2a rows |
+|---|---|---|---|
+| C1 before | master `0c1d295ea8` | 2839/0/44 of 2883 | 12: three kind=Func (`Func<short>` none, `Func<int>` retained, `Func<long,long>` none), kind=Pointer `ж<long>` none 1, String none 1, `array<short>` none 1, `array<array<uint>>` retained 2, `FloorSmallMem` none 4 |
+| C1 after | `0c1d295ea8` + the floor | 2849/0/44 of 2893 | 14 |
+| C1 after | 311, `f17b5ddc40` | 2909/1/44 of 2954 | 14: kind=Func gone, kind=Pointer `ж<long>` none 1 (the nil control alone), String none 1, String retained 1, `array<short>` none 2, `array<array<uint>>` retained 2, `FloorSmallMem` none 4, UnsafePointer retained 3 |
+| arm A, FILTERED to the nil control | `f17b5ddc40` | 1/0/0 | 1: kind=Pointer `ж<long>` none |
+| arm B, FILTERED to all but the nil control | `f17b5ddc40` | 2909/0/44 of 2953 | 13, no kind=Pointer row |
+| C2 before | `0c1d295ea8` | behavioral, 956 census files | 2: UnsafePointer retained |
+| C2 after | `f17b5ddc40` | Output 966/0/26, 968 census files | 2: UnsafePointer retained |
+
+- B2b and unpinnable at 311 read 2 and 4, against 1 and 2 before. The extra B2b row (`ManagedDerivedStructReadFloorTests+Ctx`
+  source=none) and the 2 extra unpinnable rows are 310's own `ManagedDerivedStructReadFloorTests`.
+- The C3 package arms (13 packages: crypto/tls, encoding/json, the runtime and others) read b2a 0 in every package
+  before the floor. They were NOT re-measured after it.
+
+**Gates at `f17b5ddc40`, all unfiltered:** GolibTests R 2902/0/52 and D 2877/0/77 (total 2954, which is 310's 2944
+plus the floor's 10); GenTests 537/0; go test 11 ok, 0 FAIL, 0 cached; CNR byte-identical across 1093 (11
+platform-exclusive). At `0c1d295ea8` + the floor, before 310: R 2841/0/52, D 2816/0/77, GenTests 530/0, CNR
+byte-identical across 1079.
+
+**Scored against the predictions posted first.**
+- 0c1d C1 after, b2a: MISSED, 14 against 13. The 14th row is the nil control's counted attempt, the mechanism its
+  author had named for the `FloorSmallMem` rows. Arms A and B settle it at 311: 14 = 13 + the nil control.
+- 311 C1: MET on mechanism (b2a 14, total 2954, skipped 44), MISSED on three specifics:
+  - **the fail set** read `[AnIndexedLoopOverNativeMemoryAllocatesNothing]` (Actual 3696 B), not empty. This is the
+    door-B alloc test's one-time cost, not the floor's: it also failed once at W8 `9d3401725c`, which has no floor
+    (5784 B), and it passed in 3 other full Release runs that night. P5's `p5-alloc-loop-harden` `4fe430f549`,
+    seated in 311, bounds the window at 1,000,000 iterations and 64 KiB, so both costs pass under it by construction.
+    Not re-run for it;
+  - **b2b** read 2, not 1;
+  - **unpinnable** read 4, not 2.
+- **The b2b and unpinnable misses** are census counts carried from 0c1d, not re-derived at the tree (corpus-reconvert
+  section 1 already holds the rule). The extras are 310's. That holds by construction (the floor throws before the
+  census and cannot add a count), and a filtered arm at W8 (master + the should-fix, no floor),
+  `FullyQualifiedName~ManagedDerivedStructReadFloorTests`, read exactly them: b2b 1 `Ctx`, unpinnable 2. That arm ran
+  before its prediction was posted, so it is a CONFIRMATION, not a predicted measurement.
+- Arms A and B, C2, and every gate: MET. Stop lines clean: no kind=UnsafePointer source=none row anywhere.
+
+— H (2026-11-16)
+
+## 2026-11-16 — H (COORD ruling C: a BOARD row): the exempt `unsafe.Pointer` read keeps a managed reference in a word the collector does not track — OPEN, .5, cure carried into DESIGN-cgo-phase3-marshaling.md section 18.2
+
+The reference floor (row above) exempts one population: `NativeBox<unsafe.Pointer>` over MANAGED Go storage (the box
+retains its source or carries a pin). It is the converted runtime's `map.go` indirect key and `atomic_pointer.go`
+atomicwb, which store a pointer into storage Go types as words.
+- **The hazard:** golib's `unsafe.Pointer` is a CLR reference (a class), so the exempt read and write put a managed
+  reference into a slot the storage declares as a word (`uintptr` or bytes). The collector does not trace that
+  slot. A reference kept only there does not keep its object alive and is not updated if the object moves, so it
+  can go stale or be collected.
+- **Measured:** the exempt population is live. C2 at 311 (behavioral, executed, census on, 968 files) reads 2 B2a
+  rows, both kind=UnsafePointer source=retained, and C1 reads 3 (the controls).
+- **Not measured:** a failure from the hazard. Nothing has been reproduced; the row records the mechanism, not an
+  observed fault.
+- **Cure direction (B):** word semantics for `unsafe.Pointer`, carried into the section 18.2 design, where it
+  belongs (COORD ruling). Owner: H, with the S-B 18.2 design.
+
+— H (2026-11-16)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
