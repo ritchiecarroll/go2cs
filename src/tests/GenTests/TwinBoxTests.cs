@@ -1000,7 +1000,7 @@ public class TwinBoxTests
     }
 
     [TestMethod]
-    public void P22_AFieldChainThroughAPointerFieldTakesThatPointerAsItsRoot()
+    public void P22_AFieldChainThroughAPointerFieldStaysNamedPlain()
     {
         (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ByRefForms, TwoLevelField);
 
@@ -1009,6 +1009,7 @@ public class TwinBoxTests
         // e.pt); the handed root is the pointer read once, never a field pointer of e's object.
         Assert.IsFalse(twins.Contains("await ppSꞏtwin(pu.of(global::go.box_package.U.Field‿Tokens.Ꮡpt‿).of(", StringComparison.Ordinal),
             "never the field pointer of the POINTER field");
+        StringAssert.Contains(twins, "|ppS|nonnil(ref (nonnil(ref (pu).DerefOrNull()).pt).DerefOrNull()).inner", "named-plain");
     }
 
     [TestMethod]

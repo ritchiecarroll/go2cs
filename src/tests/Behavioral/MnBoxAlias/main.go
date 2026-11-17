@@ -21,6 +21,22 @@ type cell struct{ v int }
 
 type holder struct{ c cell }
 
+// P3's re-read of step 1: the chain over structs that hold REFERENCE fields (a slice, a string) at both levels.
+type rcell struct {
+	name string
+	v    int
+}
+
+type rholder struct {
+	s []int
+	c rcell
+}
+
+type rnest struct {
+	p []int
+	h rholder
+}
+
 // G's next step 1: a two-level field chain `&n.h.c` (the field pointer of a field pointer).
 type nest struct{ h holder }
 
@@ -108,6 +124,16 @@ func thunkRead(done chan int, c *cell) {
 // field pointer of a field pointer from n's box.
 func chainRead(n *nest) int {
 	return readCell(&n.h.c)
+}
+
+func readRCell(c *rcell) int {
+	ready <- struct{}{}
+	<-resume
+	return c.v
+}
+
+func chainRef(n *rnest) int {
+	return readRCell(&n.h.c)
 }
 
 // The two-level chain over a nil: Go panics at the OUTER nil, at the call.
@@ -233,6 +259,10 @@ func main() {
 
 	go writer(func() { nc.h.c.v = 17 })
 	fmt.Println("param-chain-param", chainRead(nc))
+
+	rn := &rnest{p: []int{1}, h: rholder{s: []int{2}, c: rcell{name: "r", v: 1}}}
+	go writer(func() { rn.h.c.v = 18 })
+	fmt.Println("param-chain-ref", chainRef(rn))
 
 	go writer(func() { a.bal = 50 })
 	value := a.valueRead()

@@ -49,10 +49,11 @@ using static go.main_package;
 [assembly: GoFieldAccess(typeof(holder))]
 [assembly: GoFieldAccess(typeof(nest))]
 [assembly: GoFieldAccess(typeof(ptrs))]
+[assembly: GoFieldAccess(typeof(rnest))]
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 280, 5, 12)]
+[assembly: GoBoundedGoroutine("main.cs", 305, 5, 12)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,7 +63,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AB88gqikgpSCgoKmgoKCpoKCgqiCgoKCgqqCgoKoggAGFIKCgqaCgoKqgoKCqoKosoKCpoLmsoKCpoLogoKCptKCgqaC5tKCgqaC5oKUkJKClJCSgpSCgoKQkoKClIKQkoKUgpCSgpSQkoKUgoKCkJKUgpCSlIKQkpSCkJKUgpCSlIKCkJKUgoKCkJKUgJKUgpCSlJCSlJCSgoKUkpSYgg==", "115-119:1;125-129:1;142-146:1;152-156:1;164-164:1;168-168:2;175-175:3;181-181:4;186-186:5;190-190:6;197-197:7;201-201:8;205-205:9;209-209:10;213-213:11;218-218:12;224-224:13;227-227:14;231-231:15;234-234:16;237-237:17;242-242:18", "", "", "280:21", "108:21,109:13,125:21,126:13,150:21,151:13,169:21,170:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "AC5cgqikgpSCgoKmgoKCpoKCgqiCgoKCgqqCgoKoggAGFIKCgqaCgoKqgoKCqoKmgoKCpoKosoKCpoLmsoKCpoLogoKCptKCgqaC5tKCgqaC5oKUkJKClJCSgpSCgoKQkoKClIKQkoKUgpCSgpSQkoKUgoKCkJKUgpCSlIKQkpSCkJKUgpCSlIKCkJKUgoKCkJKUgJKUgpCSlJCSlIKQkpSQkoKClJKUmII=", "141-145:1;151-155:1;168-172:1;178-182:1;190-190:1;194-194:2;201-201:3;207-207:4;212-212:5;216-216:6;223-223:7;227-227:8;231-231:9;235-235:10;239-239:11;244-244:12;250-250:13;253-253:14;257-257:15;260-260:16;264-264:17;267-267:18;272-272:19", "", "", "305:21", "133:21,134:13,150:21,151:13,175:21,176:13,194:21,195:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -85,6 +86,9 @@ public static partial class main_package
     internal partial struct inner {}
     internal partial struct nest {}
     internal partial struct ptrs {}
+    internal partial struct rcell {}
+    internal partial struct rholder {}
+    internal partial struct rnest {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

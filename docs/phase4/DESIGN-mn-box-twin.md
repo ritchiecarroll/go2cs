@@ -452,6 +452,9 @@ records where the code departs from 12.1, as ruled. It supersedes 12.1 on these 
 - **Probe rows.** param-chain (form (a), 16), param-chain-param (the nonnil chain in a twin, 17) and param-nil-chain (the
   outer nil, after param-nil-field, so neither control reaches it). Before the rule the twin arm read box plain=2 (the
   two chain calls); after it plain=0. Both controls read param-chain 1 and param-chain-param 16.
+- **After P3's delta read (same day).** Row param-chain-ref (18) runs the chain over structs that hold reference fields
+  at both levels (a slice and a string beside the nested struct): twins EQUAL Go, both controls read 1. P22 is renamed
+  for what it asserts (the pointer-field chain stays named-plain) and asserts its `|ppS|` row.
 - **P3's re-read, note 4 (coverage).** A by-value `nil` in a by-ref wrapper is a static readonly field, neither a
   constant nor a bound parameter, so that thunk stays plain and warns ref-wrapper (unit
   AThunkWithAByValueNilStaysPlainAndWarnsByName). No such wrapper exists in src/core.

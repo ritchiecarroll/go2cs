@@ -21,6 +21,21 @@ partial struct holder {
     internal cell c;
 }
 
+partial struct rcell {
+    internal @string name;
+    internal nint v;
+}
+
+partial struct rholder {
+    internal slice<nint> s;
+    internal rcell c;
+}
+
+partial struct rnest {
+    internal slice<nint> p;
+    internal rholder h;
+}
+
 partial struct nest {
     internal holder h;
 }
@@ -99,6 +114,16 @@ internal static void thunkRead(channel<nint> done, ref cell c) {
 
 internal static nint chainRead(ref nest n) {
     return readCell(ref nonnil(ref n).h.c);
+}
+
+internal static nint readRCell(ref rcell c) {
+    ready.ᐸꟷ(new EmptyStruct());
+    ᐸꟷ(resume);
+    return c.v;
+}
+
+internal static nint chainRef(ref rnest n) {
+    return readRCell(ref nonnil(ref n).h.c);
 }
 
 internal static @string /*out*/ nilChain(ref nest n) {
@@ -301,6 +326,13 @@ internal static partial void main() {
         ncʗ2.h.c.v = 17;
     });
     fmt.Println("param-chain-param", chainRead(ref (nc).DerefOrNull()));
+
+    var rn = Ꮡ(new rnest(p: [1], h: new rholder(s: [2], c: new rcell(name: "r", v: 1))));
+    var rnʗ1 = rn;
+    goǃ(writer, () => {
+        rnʗ1.h.c.v = 18;
+    });
+    fmt.Println("param-chain-ref", chainRef(ref (rn).DerefOrNull()));
 
     var aʗ3 = a;
     goǃ(writer, () => {
