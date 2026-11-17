@@ -40311,4 +40311,56 @@ trap number (ENOSYS).
 
 — C1 (2026-11-16)
 
+## 2026-11-17 — P2 (sqlite-cs wall C + W-conv-copy): a struct conversion between two FOREIGN types calls a generated function, and every struct or array conversion copies its operand — FIXED
+
+**Wall C, the reading.** `lib.Pitch(o)` with `o` an `other.Pitch` converts two struct types that both belong to
+other packages. Go allows it because the fields are identical. The converter emitted the cast it emits for every
+named target, `(lib.Pitch)o`, and nothing bound it (CS0030): a C# conversion operator must be declared by one of its
+two types, and both are in closed assemblies.
+
+**Wall C, the fix.** The pair is recorded as any conversion is (`GoImplicitConv`), and go2cs-gen writes ONE static
+function for it in the converting package's class, named as Go names the target:
+`internal static lib.Pitch libꓸPitch(other.Pitch src) => new lib.Pitch(src.Hz);`. The site calls `libꓸPitch(o)`.
+A second source type overloads the name. The route is taken only when both types are written with a struct
+literal, neither is generic or this package's own, every field is exported, and no field's type holds an unnamed
+struct. Any other pair keeps its cast. (Converter `src/go2cs/foreignPairStructConversion.go`, generator
+`ImplicitConvGenerator`, GenTests `ForeignPairStructConversionTests`, fixture `ForeignPairStructConversion`;
+docs struct-types.md, *A struct conversion between two types of OTHER packages calls a generated function*.)
+
+**Wall C, limits, each still the cast (CS0030) and named here:** a field that is unexported (it is `internal`
+to its assembly); a field whose type holds an unnamed struct (each package lifts its own C# type); a generic type;
+two same-named target types in two same-named packages (both functions get one name, CS0111). A file's own
+import alias does not rename the function, which is named from the type on both sides.
+
+**W-conv-copy, the reading** (found by wall C's copy probe, 2026-11-16). Go converts a COPY of its operand: after
+`c := chord(lc)` a write to `c.Notes` does not reach `lc`. Every emitted conversion (the cast's operator, the
+unnamed-struct route, wall C's function) builds its result from the operand's fields, so an `array<T>` field, or a
+nested struct holding one, shared its backing store with the operand. An assignment, a return or a send already
+cloned such a value; a conversion did not.
+
+**W-conv-copy, the fix.** Where the operand is existing storage (an identifier, a field, an element, a
+dereference) and its type needs a value clone, it is cloned first: `(chord)lc.ΔClone()`, `(notes)b.Clone()`. A
+fresh operand (a call, a composite literal) is left as it is. A pair served by an inherited wrapper's operators,
+`type Counts counts`, is left to them, because those operators already copy (`[GoValueClone]`), so the value is
+copied once. A type written with a struct LITERAL is no wrapper and still takes the site clone. (Converter
+`src/go2cs/structConversionCopy.go`, fixture `StructConversionCopy`, 12 routes; docs struct-types.md, *A
+conversion copies its operand*.) Not covered: an array reached only through an EMBEDDED struct, which no copy
+site clones today. That is W-embed-array, ruled a seat of its own after this one.
+
+**Measured at `9293b261c9`** (master `b2eaf5290a` merged), go1.26.11, linux/amd64:
+go test rc 0, 11 ok; CNR NO REGRESSION over 1098 (+12 platform-exclusive), with the two predicted re-baselines,
+`DefinedOverNamedComposite` (`(shuffledBuf)b.Clone()`) and `PackageVarTupleInitOrder` (`(Sum)src.Clone()`);
+GenTests 545/545; go2cs.slnx 0 errors; fixtures `ForeignPairStructConversion`, `StructConversionCopy`,
+`DefinedOverNamedComposite`, `PackageVarTupleInitOrder` and `DefinedStructConversionCopy` match Go.
+Two-seeded `-stdlib` footprint, master's converter against this one over master's corpus, on all four targets:
+2 files, 4 lines, identical on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64, exactly as predicted:
+`crypto/internal/fips140/mldsa/field.cs` and `mlkem/field.cs`, `return (nttElement)(array<fieldElement>)f;` and
+its `ringElement` twin each gain `.Clone()`. Wall C moves no corpus file (no corpus record pairs two foreign
+types). The four lines are applied to `src/core` in this commit. `f` is a parameter cloned on entry, so the new copy
+is not needed for correctness there; it follows the rule every `return f` of a local array already follows
+(`return f.Clone();` appears 5 times in those packages). Removing copies of a local at its last use would be a
+separate liveness optimization for every copy site, not part of this fix.
+
+— P2 (2026-11-17)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
