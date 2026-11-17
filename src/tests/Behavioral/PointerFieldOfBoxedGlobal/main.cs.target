@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,13 +9,19 @@ partial struct profBuf {
     internal slice<nint> data;
 }
 
+} partial class mainᴛprofBuf {
+
 internal static void push(this ж<profBuf> Ꮡb, nint v) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     appendInt(ref nonnil(ref b).data, v);
 }
 
+} partial class main_package {
+
 internal static void appendInt(ref slice<nint> s, nint v) { s = append(s, v); }
+
+} partial class mainᴛprofBuf {
 
 internal static nint sum(this ref profBuf b) {
     nint t = 0;
@@ -23,6 +30,8 @@ internal static nint sum(this ref profBuf b) {
     }
     return t;
 }
+
+} partial class main_package {
 
 partial struct cpuProfile {
     internal nint count;

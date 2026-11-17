@@ -71,14 +71,14 @@ call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift nam
 (mirroring the composite-literal and hpke map-value lifts), so the declaration, the `@new<…>` type
 argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
 `liftedTypeMap`:
-<!-- source: src/core/go/internal/gccgoimporter/parser.cs:531-534, 554 -->
+<!-- source: src/core/go/internal/gccgoimporter/parser.cs:546-549, 571 -->
 ```csharp
 partial struct reservedᴛ1 /*dyn*/ {
-    /*embed*/ public global::go.go.types_package.ΔType Type;
+    /*embed*/ public global::go.go.types_package.Type Type;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
 …
-        p.typeList[n] = new reservedᴛ1жΔType(reserved);
+        p.typeList[n] = new reservedᴛ1жType(reserved);
 ```
 and `visitStructType` itself falls back to the generic `"type"` when a lift arrives with an empty
 name (the FUNCTION-LOCAL `x := new(struct{…})` form still reaches it through the unnamed-parameter
@@ -738,8 +738,8 @@ method would forward to `recvᴛ.<Func>_<name>.F()` (CS0120/CS1061, met in Burnt
 `TestEncodeAnonymousNoStructField`). The interface lift therefore records its stamp exactly as the struct lift does:
 
 <!-- illustration: the two strings the guard asserts, the declaration and its record:
-     src/go2cs/internalTestLocalInterfaceStamp_test.go:88 `internal partial interface TestLocalEmbeddedInterface_Inner`
-     and :102 `[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}` -->
+     src/go2cs/internalTestLocalInterfaceStamp_test.go:84 `internal partial interface TestLocalEmbeddedInterface_Inner`
+     and :98 `[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}` -->
 ```csharp
 internal partial interface TestLocalEmbeddedInterface_Inner /*dyn*/ {
 …
@@ -825,7 +825,7 @@ func convLocal(h hertz) int       { x := struct{ Hz int }(h); x.Hz++; return x.H
 func sameLocal(a struct{ Hz int }, h hertz) (bool, bool)       { return a == h, h != a }
 ```
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:34, 78-82 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:39-87 -->
 ```csharp
 internal static hertz made() { return (hertz)lib.Middle(); }
 …
@@ -851,7 +851,7 @@ internal static nint convLocal(hertz h) {
   user-defined `==` candidates for `a == h` (CS9342), so the unnamed side is cast: `(hertz)a == h`. A `switch`
   whose tag and case value are one of each does the same in its `when` clause.
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:246, 589-596 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:251-609 -->
 ```csharp
 internal static (bool, bool) sameLocal(anonBox_V a, hertz h) { return ((hertz)a == h, h != (hertz)a); }
 …
@@ -913,7 +913,7 @@ func laterTempo() (r struct{ Bpm int }) {
 }
 ```
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:685-689, 801-805, 835-840 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:698-853 -->
 ```csharp
 internal static nint liftVar() {
     liftVar_x x = laterTempo();
@@ -1284,9 +1284,9 @@ type Config struct {
     Values func([]reflect.Value, *rand.Rand)   // rand is math/rand
 }
 ```
-<!-- source: src/core/testing/quick/quick.cs:247 -->
+<!-- source: src/core/testing/quick/quick.cs:248 -->
 ```csharp
-public Action<slice<reflectꓸValue>, ж<rand.Rand>> Values;
+public Action<slice<reflect.Value>, ж<rand.Rand>> Values;
 ```
 
 The re-routing is gated on the signature string containing `/` **or the signature being variadic**:
@@ -1780,7 +1780,7 @@ is the correct value. `archive/tar`'s `testClose{nil}` is the reported shape; `d
 
 **An imported type ALIAS through an aliased import renders as its `global using` name.** A `global using` alias is not a member of the package class, so `import al "AliasImportLib"` with `al.B2{V: 7}`, where `B2` is an exported alias, cannot render `new al.B2(…)` (CS0426). The alias table is keyed by the package's declared name, and `aliasResolvedSelector` looks a published, non-const type alias up under that name, rendering `new AliasImportLibꓸB2(V: 7)` as the canonical import does. Every other member keeps the file's alias (`new al.Box(V: 8)`). (Guarded by the `AliasImport` behavioral test's `aliased.go`.)
 
-**A member its package collision-renames keeps the file's alias and takes the renamed name.** time declares `ΔLocation`, `ΔMonth`, `ΔUTC`, `ΔLocal` and `ΔSecond`, because each Go name collides with a `Time` method. modernc.org/libc imports time as `gotime "time"`, so both lookups that swap in the renamed member missed: the alias table is keyed by the declared name `time`, the type arm (`getAliasQualifiedTypeName`) rendered `ж<gotime.Location>` (CS0426), and the value arm (`aliasResolvedSelector`) redirected only non-const entries, so `gotime.UTC`, `gotime.Local` and `gotime.Second` named the `Time` methods' groups (CS1503 for `gotime.UTC` as an argument, CS0019 for `gotime.Local != nil`). Both arms now look the member up under the declared name and keep the file's own qualifier:
+**A member its package collision-renames keeps the file's alias and takes the renamed name.** Before methods moved to their own holder classes, time declared `ΔLocation`, `ΔMonth`, `ΔUTC`, `ΔLocal` and `ΔSecond`, because each Go name collided with a `Time` method. modernc.org/libc imports time as `gotime "time"`, and the alias table is keyed by the declared name `time`, so the type arm (`getAliasQualifiedTypeName`) and the value arm (`aliasResolvedSelector`) both missed the renamed member (CS0426, CS1503, CS0019). Both arms look the member up under the declared name and keep the file's own qualifier. With the methods in `timeᴛTime`, time renames none of these members, so the arms find nothing to swap and the Go names stand:
 
 <!-- source: src/tests/Behavioral/AliasedImportRenamedMember/main.go:15-26 -->
 ```go
@@ -1801,19 +1801,19 @@ func timeout(n int) gotime.Duration {
 ```csharp
 partial struct tzLocation {
     internal @string tz;
-    internal ж<gotime.ΔLocation> loc;
+    internal ж<gotime.Location> loc;
 }
 
-internal static ж<gotime.ΔLocation> @fixed(@string name, nint offset) {
+internal static ж<gotime.Location> @fixed(@string name, nint offset) {
     return gotime.FixedZone(name, offset);
 }
 
 internal static gotime.Duration timeout(nint n) {
-    return ((gotime.Duration)(int64)n) * gotime.ΔSecond + 250 * gotime.Millisecond;
+    return ((gotime.Duration)(int64)n) * gotime.Second + 250 * gotime.Millisecond;
 }
 ```
 
-A member time does not rename (`Millisecond`, `March`, `RFC3339`, `FixedZone`) keeps its spelling, and neither arm is reached by a plain import, whose qualifier already is the declared name. (Guarded by the `AliasedImportRenamedMember` behavioral test, Output compared with Go.) <!-- P2 W4, 2026-11-14: census over std found 0 such sites on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64, test files included; libc v1.80.1 has 10 on windows and darwin, 0 on linux. -->
+A member a package does not rename keeps its spelling, and neither arm is reached by a plain import, whose qualifier already is the declared name. (Guarded by the `AliasedImportRenamedMember` behavioral test, Output compared with Go.) <!-- P2 W4, 2026-11-14: census over std found 0 such sites on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64, test files included; libc v1.80.1 has 10 on windows and darwin, 0 on linux. -->
 
 ---
 

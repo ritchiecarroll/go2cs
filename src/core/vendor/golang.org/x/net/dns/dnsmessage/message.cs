@@ -13,6 +13,8 @@
 namespace go.vendor.golang.org.x.net.dns;
 
 using errors = errors_package;
+using dnsmessage = dnsmessage_package;
+using static dnsmessage_package;
 
 partial class dnsmessage_package {
 
@@ -75,6 +77,8 @@ public static Type TypeALL => 255;
     [TypeALL] = "TypeALL"
 }; }
 
+} partial class dnsmessageᴛType {
+
 // String implements fmt.Stringer.String.
 public static @string String(this Type t) {
     var (n, ok) = typeNames[t, ꟷ]; if (ok) {
@@ -90,6 +94,8 @@ public static @string GoString(this Type t) {
     }
     return printUint16((uint16)t);
 }
+
+} partial class dnsmessage_package {
 
 // A Class is a type of network.
 partial struct Class /*num:uint16*/;
@@ -111,6 +117,8 @@ internal static map<Class, @string> classNames = new map<Class, @string>{
     [ClassANY] = "ClassANY"
 };
 
+} partial class dnsmessageᴛClass {
+
 // String implements fmt.Stringer.String.
 public static @string String(this Class c) {
     var (n, ok) = classNames[c, ꟷ]; if (ok) {
@@ -127,13 +135,19 @@ public static @string GoString(this Class c) {
     return printUint16((uint16)c);
 }
 
+} partial class dnsmessage_package {
+
 // An OpCode is a DNS operation code.
 partial struct OpCode /*num:uint16*/;
+
+} partial class dnsmessageᴛOpCode {
 
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this OpCode o) {
     return printUint16((uint16)o);
 }
+
+} partial class dnsmessage_package {
 
 // An RCode is a DNS response status code.
 partial struct RCode /*num:uint16*/;
@@ -155,6 +169,8 @@ public static RCode RCodeRefused => 5;        // Refused
     [RCodeRefused] = "RCodeRefused"
 }; }
 
+} partial class dnsmessageᴛRCode {
+
 // String implements fmt.Stringer.String.
 public static @string String(this RCode r) {
     var (n, ok) = rCodeNames[r, ꟷ]; if (ok) {
@@ -170,6 +186,8 @@ public static @string GoString(this RCode r) {
     }
     return printUint16((uint16)r);
 }
+
+} partial class dnsmessage_package {
 
 internal static @string printPaddedUint8(uint8 i) {
     var b = (byte)i;
@@ -319,10 +337,14 @@ partial struct nestedError {
     internal error err;
 }
 
+} partial class dnsmessageᴛnestedError {
+
 // nestedError implements error.Error.
 internal static @string Error(this ref nestedError e) {
     return e.s + ": "u8 + e.err.Error();
 }
+
+} partial class dnsmessage_package {
 
 // Header is a representation of a DNS message header.
 partial struct Header {
@@ -337,6 +359,8 @@ partial struct Header {
     public bool CheckingDisabled;
     public RCode RCode;
 }
+
+} partial class dnsmessageᴛHeader {
 
 internal static (uint16 id, uint16 bits) pack(this ref Header m) {
     uint16 id = default;
@@ -373,10 +397,12 @@ public static @string GoString(this ref Header m) {
     return "dnsmessage.Header{"u8 + "ID: "u8 + printUint16(m.ID) + ", "u8 + "Response: "u8 + printBool(m.Response) + ", "u8 + "OpCode: "u8 + m.OpCode.GoString() + ", "u8 + "Authoritative: "u8 + printBool(m.Authoritative) + ", "u8 + "Truncated: "u8 + printBool(m.Truncated) + ", "u8 + "RecursionDesired: "u8 + printBool(m.RecursionDesired) + ", "u8 + "RecursionAvailable: "u8 + printBool(m.RecursionAvailable) + ", "u8 + "AuthenticData: "u8 + printBool(m.AuthenticData) + ", "u8 + "CheckingDisabled: "u8 + printBool(m.CheckingDisabled) + ", "u8 + "RCode: "u8 + m.RCode.GoString() + "}"u8;
 }
 
+} partial class dnsmessage_package {
+
 // Message is a representation of a DNS message.
 partial struct Message {
     /*embed*/ public Header Header;
-    public slice<ΔQuestion> Questions;
+    public slice<Question> Questions;
     public slice<Resource> Answers;
     public slice<Resource> Authorities;
     public slice<Resource> Additionals;
@@ -409,7 +435,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 };
 
 // header is the wire format for a DNS message header.
-partial struct Δheader {
+partial struct header {
     internal uint16 id;
     internal uint16 bits;
     internal uint16 questions;
@@ -418,7 +444,9 @@ partial struct Δheader {
     internal uint16 additionals;
 }
 
-internal static uint16 count(this ref Δheader h, section sec) {
+} partial class dnsmessageᴛheader {
+
+internal static uint16 count(this ref header h, section sec) {
     switch (sec) {
     case var ᴛ when ᴛ == sectionQuestions: {
         return h.questions;
@@ -436,7 +464,7 @@ internal static uint16 count(this ref Δheader h, section sec) {
 }
 
 // pack appends the wire format of the header to msg.
-internal static slice<byte> pack(this ref Δheader h, slice<byte> msg) {
+internal static slice<byte> pack(this ref header h, slice<byte> msg) {
     msg = packUint16(msg, h.id);
     msg = packUint16(msg, h.bits);
     msg = packUint16(msg, h.questions);
@@ -445,7 +473,7 @@ internal static slice<byte> pack(this ref Δheader h, slice<byte> msg) {
     return packUint16(msg, h.additionals);
 }
 
-internal static (nint, error) unpack(this ref Δheader h, slice<byte> msg, nint off) {
+internal static (nint, error) unpack(this ref header h, slice<byte> msg, nint off) {
     nint newOff = off;
     error err = default;
     (h.id, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
@@ -469,7 +497,7 @@ internal static (nint, error) unpack(this ref Δheader h, slice<byte> msg, nint 
     return (newOff, default);
 }
 
-internal static Header header(this ref Δheader h) {
+internal static Header header(this ref header h) {
     return new Header(
         ID: h.id,
         Response: ((uint16)(h.bits & (uint16)headerBitQR)) != 0,
@@ -484,15 +512,21 @@ internal static Header header(this ref Δheader h) {
     );
 }
 
+} partial class dnsmessage_package {
+
 // A Resource is a DNS resource record.
 partial struct Resource {
     public ResourceHeader Header;
     public ResourceBody Body;
 }
 
+} partial class dnsmessageᴛResource {
+
 public static @string GoString(this ref Resource r) {
     return "dnsmessage.Resource{"u8 + "Header: "u8 + r.Header.GoString() + ", Body: &"u8 + r.Body.GoString() + "}"u8;
 }
+
+} partial class dnsmessage_package {
 
 // A ResourceBody is a DNS resource record minus the header.
 partial interface ResourceBody {
@@ -504,6 +538,8 @@ partial interface ResourceBody {
     // GoString implements fmt.GoStringer.GoString.
     @string GoString();
 }
+
+} partial class dnsmessageᴛResource {
 
 // pack appends the wire format of the Resource to msg.
 internal static (slice<byte>, error) pack(this ref Resource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
@@ -527,6 +563,8 @@ internal static (slice<byte>, error) pack(this ref Resource r, slice<byte> msg, 
     return (msg, default);
 }
 
+} partial class dnsmessage_package {
+
 // A Parser allows incrementally parsing a DNS message.
 //
 // When parsing is started, the Header is parsed. Next, each Question can be
@@ -543,7 +581,7 @@ internal static (slice<byte>, error) pack(this ref Resource r, slice<byte> msg, 
 // Note that there is no requirement to fully skip or parse the message.
 partial struct Parser {
     internal slice<byte> msg;
-    internal Δheader header;
+    internal header header;
     internal section section;
     internal nint off;
     internal nint index;
@@ -552,6 +590,8 @@ partial struct Parser {
     internal Type resHeaderType;
     internal uint16 resHeaderLength;
 }
+
+} partial class dnsmessageᴛParser {
 
 // Start parses the header and enables the parsing of Questions.
 public static (Header, error) Start(this ref Parser p, slice<byte> msg) {
@@ -635,7 +675,7 @@ internal static error skipResource(this ref Parser p, section sec) {
         return errΔ1;
     }
     error err = default;
-    (p.off, err) = skipResource(p.msg, p.off);
+    (p.off, err) = dnsmessage.skipResource(p.msg, p.off);
     if (err != nil) {
         return new nestedErrorжerror(Ꮡ(new nestedError("skipping: " + sectionNames[sec], err)));
     }
@@ -644,37 +684,37 @@ internal static error skipResource(this ref Parser p, section sec) {
 }
 
 // Question parses a single Question.
-public static (ΔQuestion, error) Question(this ref Parser p) {
+public static (Question, error) Question(this ref Parser p) {
     var errΔ1 = p.checkAdvance(sectionQuestions); if (errΔ1 != nil) {
-        return (new ΔQuestion(), errΔ1);
+        return (new Question(), errΔ1);
     }
     Name name = new();
     var (off, err) = name.unpack(p.msg, p.off);
     if (err != nil) {
-        return (new ΔQuestion(), new nestedErrorжerror(Ꮡ(new nestedError("unpacking Question.Name", err))));
+        return (new Question(), new nestedErrorжerror(Ꮡ(new nestedError("unpacking Question.Name", err))));
     }
     (var typ, off, err) = unpackType(p.msg, off);
     if (err != nil) {
-        return (new ΔQuestion(), new nestedErrorжerror(Ꮡ(new nestedError("unpacking Question.Type", err))));
+        return (new Question(), new nestedErrorжerror(Ꮡ(new nestedError("unpacking Question.Type", err))));
     }
     (var @class, off, err) = unpackClass(p.msg, off);
     if (err != nil) {
-        return (new ΔQuestion(), new nestedErrorжerror(Ꮡ(new nestedError("unpacking Question.Class", err))));
+        return (new Question(), new nestedErrorжerror(Ꮡ(new nestedError("unpacking Question.Class", err))));
     }
     p.off = off;
     p.index++;
-    return (new ΔQuestion(name.ΔClone(), typ, @class), default);
+    return (new Question(name.ΔClone(), typ, @class), default);
 }
 
 // AllQuestions parses all Questions.
-public static (slice<ΔQuestion>, error) AllQuestions(this ref Parser p) {
+public static (slice<Question>, error) AllQuestions(this ref Parser p) {
     // Multiple questions are valid according to the spec,
     // but servers don't actually support them. There will
     // be at most one question here.
     //
     // Do not pre-allocate based on info in p.header, since
     // the data is untrusted.
-    var qs = slice<ΔQuestion>([]);
+    var qs = slice<Question>([]);
     for (;;) {
         var (q, err) = p.Question();
         if (AreEqual(err, ErrSectionDone)) {
@@ -881,13 +921,13 @@ public static error SkipAllAdditionals(this ref Parser p) {
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-public static (ΔCNAMEResource, error) CNAMEResource(this ref Parser p) {
+public static (CNAMEResource, error) CNAMEResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeCNAME) {
-        return (new ΔCNAMEResource(), ErrNotStarted);
+        return (new CNAMEResource(), ErrNotStarted);
     }
     var (r, err) = unpackCNAMEResource(p.msg, p.off);
     if (err != nil) {
-        return (new ΔCNAMEResource(), err);
+        return (new CNAMEResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
@@ -899,13 +939,13 @@ public static (ΔCNAMEResource, error) CNAMEResource(this ref Parser p) {
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-public static (ΔMXResource, error) MXResource(this ref Parser p) {
+public static (MXResource, error) MXResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeMX) {
-        return (new ΔMXResource(), ErrNotStarted);
+        return (new MXResource(), ErrNotStarted);
     }
     var (r, err) = unpackMXResource(p.msg, p.off);
     if (err != nil) {
-        return (new ΔMXResource(), err);
+        return (new MXResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
@@ -917,13 +957,13 @@ public static (ΔMXResource, error) MXResource(this ref Parser p) {
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-public static (ΔNSResource, error) NSResource(this ref Parser p) {
+public static (NSResource, error) NSResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeNS) {
-        return (new ΔNSResource(), ErrNotStarted);
+        return (new NSResource(), ErrNotStarted);
     }
     var (r, err) = unpackNSResource(p.msg, p.off);
     if (err != nil) {
-        return (new ΔNSResource(), err);
+        return (new NSResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
@@ -935,13 +975,13 @@ public static (ΔNSResource, error) NSResource(this ref Parser p) {
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-public static (ΔPTRResource, error) PTRResource(this ref Parser p) {
+public static (PTRResource, error) PTRResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypePTR) {
-        return (new ΔPTRResource(), ErrNotStarted);
+        return (new PTRResource(), ErrNotStarted);
     }
     var (r, err) = unpackPTRResource(p.msg, p.off);
     if (err != nil) {
-        return (new ΔPTRResource(), err);
+        return (new PTRResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
@@ -953,13 +993,13 @@ public static (ΔPTRResource, error) PTRResource(this ref Parser p) {
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-public static (ΔSOAResource, error) SOAResource(this ref Parser p) {
+public static (SOAResource, error) SOAResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeSOA) {
-        return (new ΔSOAResource(), ErrNotStarted);
+        return (new SOAResource(), ErrNotStarted);
     }
     var (r, err) = unpackSOAResource(p.msg, p.off);
     if (err != nil) {
-        return (new ΔSOAResource(), err);
+        return (new SOAResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
@@ -971,13 +1011,13 @@ public static (ΔSOAResource, error) SOAResource(this ref Parser p) {
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-public static (ΔTXTResource, error) TXTResource(this ref Parser p) {
+public static (TXTResource, error) TXTResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeTXT) {
-        return (new ΔTXTResource(), ErrNotStarted);
+        return (new TXTResource(), ErrNotStarted);
     }
     var (r, err) = unpackTXTResource(p.msg, p.off, p.resHeaderLength);
     if (err != nil) {
-        return (new ΔTXTResource(), err);
+        return (new TXTResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
@@ -989,13 +1029,13 @@ public static (ΔTXTResource, error) TXTResource(this ref Parser p) {
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-public static (ΔSRVResource, error) SRVResource(this ref Parser p) {
+public static (SRVResource, error) SRVResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeSRV) {
-        return (new ΔSRVResource(), ErrNotStarted);
+        return (new SRVResource(), ErrNotStarted);
     }
     var (r, err) = unpackSRVResource(p.msg, p.off);
     if (err != nil) {
-        return (new ΔSRVResource(), err);
+        return (new SRVResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
@@ -1007,13 +1047,13 @@ public static (ΔSRVResource, error) SRVResource(this ref Parser p) {
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-public static (ΔAResource, error) AResource(this ref Parser p) {
+public static (AResource, error) AResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeA) {
-        return (new ΔAResource(), ErrNotStarted);
+        return (new AResource(), ErrNotStarted);
     }
     var (r, err) = unpackAResource(p.msg, p.off);
     if (err != nil) {
-        return (new ΔAResource(), err);
+        return (new AResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
@@ -1025,13 +1065,13 @@ public static (ΔAResource, error) AResource(this ref Parser p) {
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-public static (ΔAAAAResource, error) AAAAResource(this ref Parser p) {
+public static (AAAAResource, error) AAAAResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeAAAA) {
-        return (new ΔAAAAResource(), ErrNotStarted);
+        return (new AAAAResource(), ErrNotStarted);
     }
     var (r, err) = unpackAAAAResource(p.msg, p.off);
     if (err != nil) {
-        return (new ΔAAAAResource(), err);
+        return (new AAAAResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
@@ -1043,13 +1083,13 @@ public static (ΔAAAAResource, error) AAAAResource(this ref Parser p) {
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-public static (ΔOPTResource, error) OPTResource(this ref Parser p) {
+public static (OPTResource, error) OPTResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeOPT) {
-        return (new ΔOPTResource(), ErrNotStarted);
+        return (new OPTResource(), ErrNotStarted);
     }
     var (r, err) = unpackOPTResource(p.msg, p.off, p.resHeaderLength);
     if (err != nil) {
-        return (new ΔOPTResource(), err);
+        return (new OPTResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
@@ -1061,19 +1101,21 @@ public static (ΔOPTResource, error) OPTResource(this ref Parser p) {
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-public static (ΔUnknownResource, error) UnknownResource(this ref Parser p) {
+public static (UnknownResource, error) UnknownResource(this ref Parser p) {
     if (!p.resHeaderValid) {
-        return (new ΔUnknownResource(), ErrNotStarted);
+        return (new UnknownResource(), ErrNotStarted);
     }
     var (r, err) = unpackUnknownResource(p.resHeaderType, p.msg, p.off, p.resHeaderLength);
     if (err != nil) {
-        return (new ΔUnknownResource(), err);
+        return (new UnknownResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default);
 }
+
+} partial class dnsmessageᴛMessage {
 
 // Unpack parses a full Message.
 public static error Unpack(this ref Message m, slice<byte> msg) {
@@ -1121,7 +1163,7 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
         return (default, errTooManyAdditionals);
     }
 
-    Δheader h = default;
+    header h = default;
     (h.id, h.bits) = m.Header.pack();
 
     h.questions = (uint16)len(m.Questions);
@@ -1211,6 +1253,8 @@ public static @string GoString(this ref Message m) {
     return s + "}}"u8;
 }
 
+} partial class dnsmessage_package {
+
 // A Builder allows incrementally packing a DNS message.
 //
 // Example usage:
@@ -1229,7 +1273,7 @@ partial struct Builder {
     internal section section;
     // header keeps track of what should go in the header when Finish is
     // called.
-    internal Δheader header;
+    internal header header;
     // start is the starting index of the bytes allocated in msg for header.
     internal nint start;
     // compression is a mapping from name suffixes to their starting index
@@ -1258,6 +1302,8 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     b.section = sectionHeader;
     return b;
 }
+
+} partial class dnsmessageᴛBuilder {
 
 // EnableCompression enables compression in the Builder.
 //
@@ -1354,7 +1400,7 @@ internal static error incrementSectionCount(this ж<Builder> Ꮡb) {
 }
 
 // Question adds a single Question.
-public static error Question(this ж<Builder> Ꮡb, ΔQuestion q) {
+public static error Question(this ж<Builder> Ꮡb, Question q) {
     q = q.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1386,7 +1432,7 @@ internal static error checkResourceSection(this ref Builder b) {
 }
 
 // CNAMEResource adds a single CNAMEResource.
-public static error CNAMEResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔCNAMEResource r) {
+public static error CNAMEResource(this ж<Builder> Ꮡb, ResourceHeader h, CNAMEResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -1414,7 +1460,7 @@ public static error CNAMEResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔCNA
 }
 
 // MXResource adds a single MXResource.
-public static error MXResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔMXResource r) {
+public static error MXResource(this ж<Builder> Ꮡb, ResourceHeader h, MXResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -1442,7 +1488,7 @@ public static error MXResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔMXReso
 }
 
 // NSResource adds a single NSResource.
-public static error NSResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔNSResource r) {
+public static error NSResource(this ж<Builder> Ꮡb, ResourceHeader h, NSResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -1470,7 +1516,7 @@ public static error NSResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔNSReso
 }
 
 // PTRResource adds a single PTRResource.
-public static error PTRResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔPTRResource r) {
+public static error PTRResource(this ж<Builder> Ꮡb, ResourceHeader h, PTRResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -1498,7 +1544,7 @@ public static error PTRResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔPTRRe
 }
 
 // SOAResource adds a single SOAResource.
-public static error SOAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSOAResource r) {
+public static error SOAResource(this ж<Builder> Ꮡb, ResourceHeader h, SOAResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -1526,7 +1572,7 @@ public static error SOAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSOARe
 }
 
 // TXTResource adds a single TXTResource.
-public static error TXTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔTXTResource r) {
+public static error TXTResource(this ж<Builder> Ꮡb, ResourceHeader h, TXTResource r) {
     h = h.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1553,7 +1599,7 @@ public static error TXTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔTXTRe
 }
 
 // SRVResource adds a single SRVResource.
-public static error SRVResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSRVResource r) {
+public static error SRVResource(this ж<Builder> Ꮡb, ResourceHeader h, SRVResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -1581,7 +1627,7 @@ public static error SRVResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSRVRe
 }
 
 // AResource adds a single AResource.
-public static error AResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAResource r) {
+public static error AResource(this ж<Builder> Ꮡb, ResourceHeader h, AResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -1609,7 +1655,7 @@ public static error AResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAResour
 }
 
 // AAAAResource adds a single AAAAResource.
-public static error AAAAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAAAAResource r) {
+public static error AAAAResource(this ж<Builder> Ꮡb, ResourceHeader h, AAAAResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -1637,7 +1683,7 @@ public static error AAAAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAAAA
 }
 
 // OPTResource adds a single OPTResource.
-public static error OPTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔOPTResource r) {
+public static error OPTResource(this ж<Builder> Ꮡb, ResourceHeader h, OPTResource r) {
     h = h.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1664,7 +1710,7 @@ public static error OPTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔOPTRe
 }
 
 // UnknownResource adds a single UnknownResource.
-public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔUnknownResource r) {
+public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, UnknownResource r) {
     h = h.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1701,6 +1747,8 @@ public static (slice<byte>, error) Finish(this ref Builder b) {
     return (b.msg, default);
 }
 
+} partial class dnsmessage_package {
+
 // A ResourceHeader is the header of a DNS resource record. There are
 // many types of DNS resource records, but they all share the same header.
 partial struct ResourceHeader {
@@ -1722,6 +1770,8 @@ partial struct ResourceHeader {
     // This field will be set automatically during packing.
     public uint16 Length;
 }
+
+} partial class dnsmessageᴛResourceHeader {
 
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this ref ResourceHeader h) {
@@ -1788,12 +1838,16 @@ internal static error fixLen(this ref ResourceHeader h, slice<byte> msg, nint le
     return default;
 }
 
+} partial class dnsmessage_package {
+
 // EDNS(0) wire constants.
 internal static UntypedInt edns0Version => 0;
 
 internal static UntypedInt edns0DNSSECOK => 0x00008000;
 internal static UntypedInt ednsVersionMask => 0x00ff0000;
 internal static UntypedInt edns0DNSSECOKMask => 0x00ff8000;
+
+} partial class dnsmessageᴛResourceHeader {
 
 // SetEDNS0 configures h for EDNS(0).
 //
@@ -1823,6 +1877,8 @@ public static RCode ExtendedRCode(this ref ResourceHeader h, RCode rcode) {
     }
     return rcode;
 }
+
+} partial class dnsmessage_package {
 
 internal static (nint, error) skipResource(slice<byte> msg, nint off) {
     var (newOff, err) = skipName(msg, off);
@@ -1985,6 +2041,8 @@ public static Name MustNewName(@string name) {
     }
     return n.ΔClone();
 }
+
+} partial class dnsmessageᴛName {
 
 // String implements fmt.Stringer.String.
 //
@@ -2163,6 +2221,8 @@ break_Loop:;
     return (newOff, default);
 }
 
+} partial class dnsmessage_package {
+
 internal static (nint, error) skipName(slice<byte> msg, nint off) {
     // newOff is the offset where the next record will start. Pointers lead
     // to data that belongs to other names and thus doesn't count towards to
@@ -2211,14 +2271,16 @@ break_Loop:;
 }
 
 // A Question is a DNS query.
-partial struct ΔQuestion {
+partial struct Question {
     public Name Name;
     public Type Type;
     public Class Class;
 }
 
+} partial class dnsmessageᴛQuestion {
+
 // pack appends the wire format of the Question to msg.
-internal static (slice<byte>, error) pack(this ref ΔQuestion q, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref Question q, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     (msg, var err) = q.Name.pack(msg, compression, compressionOff);
     if (err != nil) {
         return (msg, new nestedErrorжerror(Ꮡ(new nestedError("Name", err))));
@@ -2228,9 +2290,11 @@ internal static (slice<byte>, error) pack(this ref ΔQuestion q, slice<byte> msg
 }
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔQuestion q) {
+public static @string GoString(this ref Question q) {
     return "dnsmessage.Question{"u8 + "Name: "u8 + q.Name.GoString() + ", "u8 + "Type: "u8 + q.Type.GoString() + ", "u8 + "Class: "u8 + q.Class.GoString() + "}"u8;
 }
+
+} partial class dnsmessage_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string cnameˢ => ref cnameˢᵇ;
@@ -2262,93 +2326,93 @@ internal static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, 
     @string name = default;
     switch (hdr.Type) {
     case var ᴛ when ᴛ == TypeA: {
-        ref var rb = ref heap(new ΔAResource(), out var Ꮡrb);
+        ref var rb = ref heap(new AResource(), out var Ꮡrb);
         (rb, err) = unpackAResource(msg, off);
-        r = new ΔAResourceжResourceBody(Ꮡrb);
+        r = new AResourceжResourceBody(Ꮡrb);
         name = "A";
         break;
     }
     case var ᴛ when ᴛ == TypeNS: {
-        ref var rb = ref heap(new ΔNSResource(), out var Ꮡrb);
+        ref var rb = ref heap(new NSResource(), out var Ꮡrb);
         (rb, err) = unpackNSResource(msg, off);
-        r = new ΔNSResourceжResourceBody(Ꮡrb);
+        r = new NSResourceжResourceBody(Ꮡrb);
         name = "NS";
         break;
     }
     case var ᴛ when ᴛ == TypeCNAME: {
-        ref var rb = ref heap(new ΔCNAMEResource(), out var Ꮡrb);
+        ref var rb = ref heap(new CNAMEResource(), out var Ꮡrb);
         (rb, err) = unpackCNAMEResource(msg, off);
-        r = new ΔCNAMEResourceжResourceBody(Ꮡrb);
+        r = new CNAMEResourceжResourceBody(Ꮡrb);
         name = cnameˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeSOA: {
-        ref var rb = ref heap(new ΔSOAResource(), out var Ꮡrb);
+        ref var rb = ref heap(new SOAResource(), out var Ꮡrb);
         (rb, err) = unpackSOAResource(msg, off);
-        r = new ΔSOAResourceжResourceBody(Ꮡrb);
+        r = new SOAResourceжResourceBody(Ꮡrb);
         name = soaˢ;
         break;
     }
     case var ᴛ when ᴛ == TypePTR: {
-        ref var rb = ref heap(new ΔPTRResource(), out var Ꮡrb);
+        ref var rb = ref heap(new PTRResource(), out var Ꮡrb);
         (rb, err) = unpackPTRResource(msg, off);
-        r = new ΔPTRResourceжResourceBody(Ꮡrb);
+        r = new PTRResourceжResourceBody(Ꮡrb);
         name = ptrˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeMX: {
-        ref var rb = ref heap(new ΔMXResource(), out var Ꮡrb);
+        ref var rb = ref heap(new MXResource(), out var Ꮡrb);
         (rb, err) = unpackMXResource(msg, off);
-        r = new ΔMXResourceжResourceBody(Ꮡrb);
+        r = new MXResourceжResourceBody(Ꮡrb);
         name = "MX";
         break;
     }
     case var ᴛ when ᴛ == TypeTXT: {
-        ref var rb = ref heap(new ΔTXTResource(), out var Ꮡrb);
+        ref var rb = ref heap(new TXTResource(), out var Ꮡrb);
         (rb, err) = unpackTXTResource(msg, off, hdr.Length);
-        r = new ΔTXTResourceжResourceBody(Ꮡrb);
+        r = new TXTResourceжResourceBody(Ꮡrb);
         name = txtˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeAAAA: {
-        ref var rb = ref heap(new ΔAAAAResource(), out var Ꮡrb);
+        ref var rb = ref heap(new AAAAResource(), out var Ꮡrb);
         (rb, err) = unpackAAAAResource(msg, off);
-        r = new ΔAAAAResourceжResourceBody(Ꮡrb);
+        r = new AAAAResourceжResourceBody(Ꮡrb);
         name = aaaaˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeSRV: {
-        ref var rb = ref heap(new ΔSRVResource(), out var Ꮡrb);
+        ref var rb = ref heap(new SRVResource(), out var Ꮡrb);
         (rb, err) = unpackSRVResource(msg, off);
-        r = new ΔSRVResourceжResourceBody(Ꮡrb);
+        r = new SRVResourceжResourceBody(Ꮡrb);
         name = srvˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeSVCB: {
-        ref var rb = ref heap(new ΔSVCBResource(), out var Ꮡrb);
+        ref var rb = ref heap(new SVCBResource(), out var Ꮡrb);
         (rb, err) = unpackSVCBResource(msg, off, hdr.Length);
-        r = new ΔSVCBResourceжResourceBody(Ꮡrb);
+        r = new SVCBResourceжResourceBody(Ꮡrb);
         name = svcbˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeHTTPS: {
-        ref var rb = ref heap(new ΔHTTPSResource(), out var Ꮡrb);
+        ref var rb = ref heap(new HTTPSResource(), out var Ꮡrb);
         (rb.SVCBResource, err) = unpackSVCBResource(msg, off, hdr.Length);
-        r = new ΔHTTPSResourceжResourceBody(Ꮡrb);
+        r = new HTTPSResourceжResourceBody(Ꮡrb);
         name = httpsˢ;
         break;
     }
     case var ᴛ when ᴛ == TypeOPT: {
-        ref var rb = ref heap(new ΔOPTResource(), out var Ꮡrb);
+        ref var rb = ref heap(new OPTResource(), out var Ꮡrb);
         (rb, err) = unpackOPTResource(msg, off, hdr.Length);
-        r = new ΔOPTResourceжResourceBody(Ꮡrb);
+        r = new OPTResourceжResourceBody(Ꮡrb);
         name = optˢ;
         break;
     }
     default: {
-        ref var rb = ref heap(new ΔUnknownResource(), out var Ꮡrb);
+        ref var rb = ref heap(new UnknownResource(), out var Ꮡrb);
         (rb, err) = unpackUnknownResource(hdr.Type, msg, off, hdr.Length);
-        r = new ΔUnknownResourceжResourceBody(Ꮡrb);
+        r = new UnknownResourceжResourceBody(Ꮡrb);
         name = unknownˢ;
         break;
     }}
@@ -2359,44 +2423,50 @@ internal static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, 
 }
 
 // A CNAMEResource is a CNAME Resource record.
-partial struct ΔCNAMEResource {
+partial struct CNAMEResource {
     public Name CNAME;
 }
 
-internal static Type realType(this ref ΔCNAMEResource r) {
+} partial class dnsmessageᴛCNAMEResource {
+
+internal static Type realType(this ref CNAMEResource r) {
     return TypeCNAME;
 }
 
 // pack appends the wire format of the CNAMEResource to msg.
-internal static (slice<byte>, error) pack(this ref ΔCNAMEResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref CNAMEResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return r.CNAME.pack(msg, compression, compressionOff);
 }
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔCNAMEResource r) {
+public static @string GoString(this ref CNAMEResource r) {
     return "dnsmessage.CNAMEResource{CNAME: "u8 + r.CNAME.GoString() + "}"u8;
 }
 
-internal static (ΔCNAMEResource, error) unpackCNAMEResource(slice<byte> msg, nint off) {
+} partial class dnsmessage_package {
+
+internal static (CNAMEResource, error) unpackCNAMEResource(slice<byte> msg, nint off) {
     Name cname = new();
     var (_, err) = cname.unpack(msg, off); if (err != nil) {
-        return (new ΔCNAMEResource(), err);
+        return (new CNAMEResource(), err);
     }
-    return (new ΔCNAMEResource(cname.ΔClone()), default);
+    return (new CNAMEResource(cname.ΔClone()), default);
 }
 
 // An MXResource is an MX Resource record.
-partial struct ΔMXResource {
+partial struct MXResource {
     public uint16 Pref;
     public Name MX;
 }
 
-internal static Type realType(this ref ΔMXResource r) {
+} partial class dnsmessageᴛMXResource {
+
+internal static Type realType(this ref MXResource r) {
     return TypeMX;
 }
 
 // pack appends the wire format of the MXResource to msg.
-internal static (slice<byte>, error) pack(this ref ΔMXResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref MXResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
     msg = packUint16(msg, r.Pref);
     (msg, var err) = r.MX.pack(msg, compression, compressionOff);
@@ -2407,78 +2477,88 @@ internal static (slice<byte>, error) pack(this ref ΔMXResource r, slice<byte> m
 }
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔMXResource r) {
+public static @string GoString(this ref MXResource r) {
     return "dnsmessage.MXResource{"u8 + "Pref: "u8 + printUint16(r.Pref) + ", "u8 + "MX: "u8 + r.MX.GoString() + "}"u8;
 }
 
-internal static (ΔMXResource, error) unpackMXResource(slice<byte> msg, nint off) {
+} partial class dnsmessage_package {
+
+internal static (MXResource, error) unpackMXResource(slice<byte> msg, nint off) {
     (var pref, off, var err) = unpackUint16(msg, off);
     if (err != nil) {
-        return (new ΔMXResource(), new nestedErrorжerror(Ꮡ(new nestedError("Pref", err))));
+        return (new MXResource(), new nestedErrorжerror(Ꮡ(new nestedError("Pref", err))));
     }
     Name mx = new();
     var (_, errΔ1) = mx.unpack(msg, off); if (errΔ1 != nil) {
-        return (new ΔMXResource(), new nestedErrorжerror(Ꮡ(new nestedError("MX", errΔ1))));
+        return (new MXResource(), new nestedErrorжerror(Ꮡ(new nestedError("MX", errΔ1))));
     }
-    return (new ΔMXResource(pref, mx.ΔClone()), default);
+    return (new MXResource(pref, mx.ΔClone()), default);
 }
 
 // An NSResource is an NS Resource record.
-partial struct ΔNSResource {
+partial struct NSResource {
     public Name NS;
 }
 
-internal static Type realType(this ref ΔNSResource r) {
+} partial class dnsmessageᴛNSResource {
+
+internal static Type realType(this ref NSResource r) {
     return TypeNS;
 }
 
 // pack appends the wire format of the NSResource to msg.
-internal static (slice<byte>, error) pack(this ref ΔNSResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref NSResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return r.NS.pack(msg, compression, compressionOff);
 }
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔNSResource r) {
+public static @string GoString(this ref NSResource r) {
     return "dnsmessage.NSResource{NS: "u8 + r.NS.GoString() + "}"u8;
 }
 
-internal static (ΔNSResource, error) unpackNSResource(slice<byte> msg, nint off) {
+} partial class dnsmessage_package {
+
+internal static (NSResource, error) unpackNSResource(slice<byte> msg, nint off) {
     Name ns = new();
     var (_, err) = ns.unpack(msg, off); if (err != nil) {
-        return (new ΔNSResource(), err);
+        return (new NSResource(), err);
     }
-    return (new ΔNSResource(ns.ΔClone()), default);
+    return (new NSResource(ns.ΔClone()), default);
 }
 
 // A PTRResource is a PTR Resource record.
-partial struct ΔPTRResource {
+partial struct PTRResource {
     public Name PTR;
 }
 
-internal static Type realType(this ref ΔPTRResource r) {
+} partial class dnsmessageᴛPTRResource {
+
+internal static Type realType(this ref PTRResource r) {
     return TypePTR;
 }
 
 // pack appends the wire format of the PTRResource to msg.
-internal static (slice<byte>, error) pack(this ref ΔPTRResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref PTRResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return r.PTR.pack(msg, compression, compressionOff);
 }
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔPTRResource r) {
+public static @string GoString(this ref PTRResource r) {
     return "dnsmessage.PTRResource{PTR: "u8 + r.PTR.GoString() + "}"u8;
 }
 
-internal static (ΔPTRResource, error) unpackPTRResource(slice<byte> msg, nint off) {
+} partial class dnsmessage_package {
+
+internal static (PTRResource, error) unpackPTRResource(slice<byte> msg, nint off) {
     Name ptr = new();
     var (_, err) = ptr.unpack(msg, off); if (err != nil) {
-        return (new ΔPTRResource(), err);
+        return (new PTRResource(), err);
     }
-    return (new ΔPTRResource(ptr.ΔClone()), default);
+    return (new PTRResource(ptr.ΔClone()), default);
 }
 
 // An SOAResource is an SOA Resource record.
-partial struct ΔSOAResource {
+partial struct SOAResource {
     public Name NS;
     public Name MBox;
     public uint32 Serial;
@@ -2491,12 +2571,14 @@ partial struct ΔSOAResource {
     public uint32 MinTTL;
 }
 
-internal static Type realType(this ref ΔSOAResource r) {
+} partial class dnsmessageᴛSOAResource {
+
+internal static Type realType(this ref SOAResource r) {
     return TypeSOA;
 }
 
 // pack appends the wire format of the SOAResource to msg.
-internal static (slice<byte>, error) pack(this ref ΔSOAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref SOAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
     (msg, var err) = r.NS.pack(msg, compression, compressionOff);
     if (err != nil) {
@@ -2514,54 +2596,58 @@ internal static (slice<byte>, error) pack(this ref ΔSOAResource r, slice<byte> 
 }
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔSOAResource r) {
+public static @string GoString(this ref SOAResource r) {
     return "dnsmessage.SOAResource{"u8 + "NS: "u8 + r.NS.GoString() + ", "u8 + "MBox: "u8 + r.MBox.GoString() + ", "u8 + "Serial: "u8 + printUint32(r.Serial) + ", "u8 + "Refresh: "u8 + printUint32(r.Refresh) + ", "u8 + "Retry: "u8 + printUint32(r.Retry) + ", "u8 + "Expire: "u8 + printUint32(r.Expire) + ", "u8 + "MinTTL: "u8 + printUint32(r.MinTTL) + "}"u8;
 }
 
-internal static (ΔSOAResource, error) unpackSOAResource(slice<byte> msg, nint off) {
+} partial class dnsmessage_package {
+
+internal static (SOAResource, error) unpackSOAResource(slice<byte> msg, nint off) {
     Name ns = new();
     (off, var err) = ns.unpack(msg, off);
     if (err != nil) {
-        return (new ΔSOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("NS", err))));
+        return (new SOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("NS", err))));
     }
     Name mbox = new();
     (off, err) = mbox.unpack(msg, off); if (err != nil) {
-        return (new ΔSOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("MBox", err))));
+        return (new SOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("MBox", err))));
     }
     (var serial, off, err) = unpackUint32(msg, off);
     if (err != nil) {
-        return (new ΔSOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("Serial", err))));
+        return (new SOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("Serial", err))));
     }
     (var refresh, off, err) = unpackUint32(msg, off);
     if (err != nil) {
-        return (new ΔSOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("Refresh", err))));
+        return (new SOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("Refresh", err))));
     }
     (var retry, off, err) = unpackUint32(msg, off);
     if (err != nil) {
-        return (new ΔSOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("Retry", err))));
+        return (new SOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("Retry", err))));
     }
     (var expire, off, err) = unpackUint32(msg, off);
     if (err != nil) {
-        return (new ΔSOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("Expire", err))));
+        return (new SOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("Expire", err))));
     }
     (var minTTL, _, err) = unpackUint32(msg, off);
     if (err != nil) {
-        return (new ΔSOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("MinTTL", err))));
+        return (new SOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("MinTTL", err))));
     }
-    return (new ΔSOAResource(ns.ΔClone(), mbox.ΔClone(), serial, refresh, retry, expire, minTTL), default);
+    return (new SOAResource(ns.ΔClone(), mbox.ΔClone(), serial, refresh, retry, expire, minTTL), default);
 }
 
 // A TXTResource is a TXT Resource record.
-partial struct ΔTXTResource {
+partial struct TXTResource {
     public slice<@string> TXT;
 }
 
-internal static Type realType(this ref ΔTXTResource r) {
+} partial class dnsmessageᴛTXTResource {
+
+internal static Type realType(this ref TXTResource r) {
     return TypeTXT;
 }
 
 // pack appends the wire format of the TXTResource to msg.
-internal static (slice<byte>, error) pack(this ref ΔTXTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref TXTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
     foreach (var (_, s) in range(r.TXT)) {
         error err = default;
@@ -2578,7 +2664,7 @@ private static ref readonly @string dnsmessageTXTResourceTxtˢ => ref dnsmessage
 private static readonly @string dnsmessageTXTResourceTxtˢᵇ = "dnsmessage.TXTResource{TXT: []string{"u8;
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔTXTResource r) {
+public static @string GoString(this ref TXTResource r) {
     @string s = dnsmessageTXTResourceTxtˢ;
     if (len(r.TXT) == 0) {
         return s + "}}"u8;
@@ -2590,38 +2676,42 @@ public static @string GoString(this ref ΔTXTResource r) {
     return s + @"""}}"u8;
 }
 
-internal static (ΔTXTResource, error) unpackTXTResource(slice<byte> msg, nint off, uint16 length) {
+} partial class dnsmessage_package {
+
+internal static (TXTResource, error) unpackTXTResource(slice<byte> msg, nint off, uint16 length) {
     var txts = new slice<@string>(0, 1);
     for (var n = (uint16)0; n < length; ) {
         @string t = default;
         error err = default;
         (t, off, err) = unpackText(msg, off); if (err != nil) {
-            return (new ΔTXTResource(), new nestedErrorжerror(Ꮡ(new nestedError("text", err))));
+            return (new TXTResource(), new nestedErrorжerror(Ꮡ(new nestedError("text", err))));
         }
         // Check if we got too many bytes.
         if ((uint16)(length - n) < (uint16)((uint16)len(t) + 1)) {
-            return (new ΔTXTResource(), errCalcLen);
+            return (new TXTResource(), errCalcLen);
         }
         n += (uint16)((uint16)len(t) + 1);
         txts = append(txts, t);
     }
-    return (new ΔTXTResource(txts), default);
+    return (new TXTResource(txts), default);
 }
 
 // An SRVResource is an SRV Resource record.
-partial struct ΔSRVResource {
+partial struct SRVResource {
     public uint16 Priority;
     public uint16 Weight;
     public uint16 Port;
     public Name Target; // Not compressed as per RFC 2782.
 }
 
-internal static Type realType(this ref ΔSRVResource r) {
+} partial class dnsmessageᴛSRVResource {
+
+internal static Type realType(this ref SRVResource r) {
     return TypeSRV;
 }
 
 // pack appends the wire format of the SRVResource to msg.
-internal static (slice<byte>, error) pack(this ref ΔSRVResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref SRVResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
     msg = packUint16(msg, r.Priority);
     msg = packUint16(msg, r.Weight);
@@ -2634,89 +2724,99 @@ internal static (slice<byte>, error) pack(this ref ΔSRVResource r, slice<byte> 
 }
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔSRVResource r) {
+public static @string GoString(this ref SRVResource r) {
     return "dnsmessage.SRVResource{"u8 + "Priority: "u8 + printUint16(r.Priority) + ", "u8 + "Weight: "u8 + printUint16(r.Weight) + ", "u8 + "Port: "u8 + printUint16(r.Port) + ", "u8 + "Target: "u8 + r.Target.GoString() + "}"u8;
 }
 
-internal static (ΔSRVResource, error) unpackSRVResource(slice<byte> msg, nint off) {
+} partial class dnsmessage_package {
+
+internal static (SRVResource, error) unpackSRVResource(slice<byte> msg, nint off) {
     (var priority, off, var err) = unpackUint16(msg, off);
     if (err != nil) {
-        return (new ΔSRVResource(), new nestedErrorжerror(Ꮡ(new nestedError("Priority", err))));
+        return (new SRVResource(), new nestedErrorжerror(Ꮡ(new nestedError("Priority", err))));
     }
     (var weight, off, err) = unpackUint16(msg, off);
     if (err != nil) {
-        return (new ΔSRVResource(), new nestedErrorжerror(Ꮡ(new nestedError("Weight", err))));
+        return (new SRVResource(), new nestedErrorжerror(Ꮡ(new nestedError("Weight", err))));
     }
     (var port, off, err) = unpackUint16(msg, off);
     if (err != nil) {
-        return (new ΔSRVResource(), new nestedErrorжerror(Ꮡ(new nestedError("Port", err))));
+        return (new SRVResource(), new nestedErrorжerror(Ꮡ(new nestedError("Port", err))));
     }
     Name target = new();
     var (_, errΔ1) = target.unpack(msg, off); if (errΔ1 != nil) {
-        return (new ΔSRVResource(), new nestedErrorжerror(Ꮡ(new nestedError("Target", errΔ1))));
+        return (new SRVResource(), new nestedErrorжerror(Ꮡ(new nestedError("Target", errΔ1))));
     }
-    return (new ΔSRVResource(priority, weight, port, target.ΔClone()), default);
+    return (new SRVResource(priority, weight, port, target.ΔClone()), default);
 }
 
 // An AResource is an A Resource record.
-partial struct ΔAResource {
+partial struct AResource {
     public array<byte> A = new(4);
 }
 
-internal static Type realType(this ref ΔAResource r) {
+} partial class dnsmessageᴛAResource {
+
+internal static Type realType(this ref AResource r) {
     return TypeA;
 }
 
 // pack appends the wire format of the AResource to msg.
-internal static (slice<byte>, error) pack(this ref ΔAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref AResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return (packBytes(msg, r.A[..]), default);
 }
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔAResource r) {
+public static @string GoString(this ref AResource r) {
     return "dnsmessage.AResource{"u8 + "A: [4]byte{"u8 + printByteSlice(r.A[..]) + "}}"u8;
 }
 
-internal static (ΔAResource, error) unpackAResource(slice<byte> msg, nint off) {
+} partial class dnsmessage_package {
+
+internal static (AResource, error) unpackAResource(slice<byte> msg, nint off) {
     array<byte> a = new(4);
     var (_, err) = unpackBytes(msg, off, a[..]); if (err != nil) {
-        return (new ΔAResource(), err);
+        return (new AResource(), err);
     }
-    return (new ΔAResource(a.Clone()), default);
+    return (new AResource(a.Clone()), default);
 }
 
 // An AAAAResource is an AAAA Resource record.
-partial struct ΔAAAAResource {
+partial struct AAAAResource {
     public array<byte> AAAA = new(16);
 }
 
-internal static Type realType(this ref ΔAAAAResource r) {
+} partial class dnsmessageᴛAAAAResource {
+
+internal static Type realType(this ref AAAAResource r) {
     return TypeAAAA;
 }
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔAAAAResource r) {
+public static @string GoString(this ref AAAAResource r) {
     return "dnsmessage.AAAAResource{"u8 + "AAAA: [16]byte{"u8 + printByteSlice(r.AAAA[..]) + "}}"u8;
 }
 
 // pack appends the wire format of the AAAAResource to msg.
-internal static (slice<byte>, error) pack(this ref ΔAAAAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref AAAAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return (packBytes(msg, r.AAAA[..]), default);
 }
 
-internal static (ΔAAAAResource, error) unpackAAAAResource(slice<byte> msg, nint off) {
+} partial class dnsmessage_package {
+
+internal static (AAAAResource, error) unpackAAAAResource(slice<byte> msg, nint off) {
     array<byte> aaaa = new(16);
     var (_, err) = unpackBytes(msg, off, aaaa[..]); if (err != nil) {
-        return (new ΔAAAAResource(), err);
+        return (new AAAAResource(), err);
     }
-    return (new ΔAAAAResource(aaaa.Clone()), default);
+    return (new AAAAResource(aaaa.Clone()), default);
 }
 
 // An OPTResource is an OPT pseudo Resource record.
 //
 // The pseudo resource record is part of the extension mechanisms for DNS
 // as defined in RFC 6891.
-partial struct ΔOPTResource {
+partial struct OPTResource {
     public slice<Option> Options;
 }
 
@@ -2729,16 +2829,20 @@ partial struct Option {
     public slice<byte> Data;
 }
 
+} partial class dnsmessageᴛOption {
+
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this ref Option o) {
     return "dnsmessage.Option{"u8 + "Code: "u8 + printUint16(o.Code) + ", "u8 + "Data: []byte{"u8 + printByteSlice(o.Data) + "}}"u8;
 }
 
-internal static Type realType(this ref ΔOPTResource r) {
+} partial class dnsmessageᴛOPTResource {
+
+internal static Type realType(this ref OPTResource r) {
     return TypeOPT;
 }
 
-internal static (slice<byte>, error) pack(this ref ΔOPTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref OPTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     foreach (var (_, opt) in range(r.Options)) {
         msg = packUint16(msg, opt.Code);
         var l = (uint16)len(opt.Data);
@@ -2753,7 +2857,7 @@ private static ref readonly @string dnsmessageOPTResourceˢ => ref dnsmessageOPT
 private static readonly @string dnsmessageOPTResourceˢᵇ = "dnsmessage.OPTResource{Options: []dnsmessage.Option{"u8;
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔOPTResource r) {
+public static @string GoString(this ref OPTResource r) {
     @string s = dnsmessageOPTResourceˢ;
     if (len(r.Options) == 0) {
         return s + "}}"u8;
@@ -2767,57 +2871,63 @@ public static @string GoString(this ref ΔOPTResource r) {
     return s + "}}"u8;
 }
 
-internal static (ΔOPTResource, error) unpackOPTResource(slice<byte> msg, nint off, uint16 length) {
+} partial class dnsmessage_package {
+
+internal static (OPTResource, error) unpackOPTResource(slice<byte> msg, nint off, uint16 length) {
     slice<Option> opts = default;
     for (nint oldOff = off; off < oldOff + (nint)length; ) {
         error err = default;
         Option o = default;
         (o.Code, off, err) = unpackUint16(msg, off);
         if (err != nil) {
-            return (new ΔOPTResource(), new nestedErrorжerror(Ꮡ(new nestedError("Code", err))));
+            return (new OPTResource(), new nestedErrorжerror(Ꮡ(new nestedError("Code", err))));
         }
         uint16 l = default;
         (l, off, err) = unpackUint16(msg, off);
         if (err != nil) {
-            return (new ΔOPTResource(), new nestedErrorжerror(Ꮡ(new nestedError("Data", err))));
+            return (new OPTResource(), new nestedErrorжerror(Ꮡ(new nestedError("Data", err))));
         }
         o.Data = new slice<byte>(l);
         if (copy(o.Data, msg.slice(off)) != (nint)l) {
-            return (new ΔOPTResource(), new nestedErrorжerror(Ꮡ(new nestedError("Data", errCalcLen))));
+            return (new OPTResource(), new nestedErrorжerror(Ꮡ(new nestedError("Data", errCalcLen))));
         }
         off += (nint)l;
         opts = append(opts, o);
     }
-    return (new ΔOPTResource(opts), default);
+    return (new OPTResource(opts), default);
 }
 
 // An UnknownResource is a catch-all container for unknown record types.
-partial struct ΔUnknownResource {
+partial struct UnknownResource {
     public Type Type;
     public slice<byte> Data;
 }
 
-internal static Type realType(this ref ΔUnknownResource r) {
+} partial class dnsmessageᴛUnknownResource {
+
+internal static Type realType(this ref UnknownResource r) {
     return r.Type;
 }
 
 // pack appends the wire format of the UnknownResource to msg.
-internal static (slice<byte>, error) pack(this ref ΔUnknownResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref UnknownResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return (packBytes(msg, r.Data[..]), default);
 }
 
 // GoString implements fmt.GoStringer.GoString.
-public static @string GoString(this ref ΔUnknownResource r) {
+public static @string GoString(this ref UnknownResource r) {
     return "dnsmessage.UnknownResource{"u8 + "Type: "u8 + r.Type.GoString() + ", "u8 + "Data: []byte{"u8 + printByteSlice(r.Data) + "}}"u8;
 }
 
-internal static (ΔUnknownResource, error) unpackUnknownResource(Type recordType, slice<byte> msg, nint off, uint16 length) {
-    var parsed = new ΔUnknownResource(
+} partial class dnsmessage_package {
+
+internal static (UnknownResource, error) unpackUnknownResource(Type recordType, slice<byte> msg, nint off, uint16 length) {
+    var parsed = new UnknownResource(
         Type: recordType,
         Data: new slice<byte>(length)
     );
     var (_, err) = unpackBytes(msg, off, parsed.Data); if (err != nil) {
-        return (new ΔUnknownResource(), err);
+        return (new UnknownResource(), err);
     }
     return (parsed, default);
 }

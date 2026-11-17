@@ -22,7 +22,7 @@ internal static void secret_dec() { }
 //go:linkname secret_eraseSecrets runtime/secret.eraseSecrets
 internal static void secret_eraseSecrets() { }
 
-internal static void addSecret(@unsafe.Pointer Δp, uintptr size) { }
+internal static void addSecret(@unsafe.Pointer p, uintptr size) { }
 
 //go:linkname secret_getStack runtime/secret.getStack
 internal static (uintptr, uintptr) secret_getStack() { return (0, 0); }

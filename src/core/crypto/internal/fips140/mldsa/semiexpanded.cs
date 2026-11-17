@@ -70,7 +70,7 @@ public static (ж<PrivateKey>, error) TestingOnlyNewPrivateKeyFromSemiExpanded(s
         return (default, err);
     }
 
-    var priv = Ꮡ(new PrivateKey(pub: new ΔPublicKey(p: p)));
+    var priv = Ꮡ(new PrivateKey(pub: new PublicKey(p: p)));
     priv.k = K.Clone();
     priv.pub.tr = tr.Clone();
     var A = GoReflect.WithElemDims(priv.pub.a.slice(0, k * l), 256);

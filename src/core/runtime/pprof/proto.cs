@@ -15,6 +15,7 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
 using compress;
+using static pprof_package;
 
 partial class pprof_package {
 
@@ -123,6 +124,8 @@ internal static UntypedInt tagFunction_SystemName => 3; // int64 (string table i
 internal static UntypedInt tagFunction_Filename => 4;   // int64 (string table index)
 internal static UntypedInt tagFunction_StartLine => 5;  // int64
 
+} partial class pprofᴛprofileBuilder {
+
 // stringIndex adds s to the string table if not already present
 // and returns the index of s in the string table.
 internal static int64 stringIndex(this ref profileBuilder b, @string s) {
@@ -201,6 +204,8 @@ internal static void pbMapping(this ref profileBuilder b, nint tag, uint64 id, u
     b.pb.endMessage(tag, start);
 }
 
+} partial class pprof_package {
+
 internal static (slice<runtime.Frame>, symbolizeFlag) allFrames(uintptr addr) {
     // Expand this one address using CallersFrames so we can cache
     // each expansion. In general, CallersFrames takes a whole
@@ -263,6 +268,8 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
     b.readMapping();
     return b;
 }
+
+} partial class pprofᴛprofileBuilder {
 
 // addCPUData adds the CPU profiling data to the profile.
 //
@@ -340,8 +347,12 @@ internal static error addCPUData(this ref profileBuilder b, slice<uint64> data, 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string samplesˢ => ref samplesˢᵇ;
 private static readonly @string samplesˢᵇ = "samples"u8;
+internal static ref readonly @string countˢ => ref countˢᵇ;
+private static readonly @string countˢᵇ = "count"u8;
 internal static ref readonly @string cpuˢ => ref cpuˢᵇ;
 private static readonly @string cpuˢᵇ = "cpu"u8;
+internal static ref readonly @string nanosecondsˢ => ref nanosecondsˢᵇ;
+private static readonly @string nanosecondsˢᵇ = "nanoseconds"u8;
 
 // build completes and returns the constructed profile.
 internal static error build(this ж<profileBuilder> Ꮡb) {
@@ -501,6 +512,8 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
     return locs;
 }
 
+} partial class pprof_package {
+
 // Here's an example of how Go 1.17 writes out inlined functions, compiled for
 // linux/amd64. The disassembly of main.main shows two levels of inlining: main
 // calls b, b calls a, a does some work.
@@ -555,6 +568,8 @@ partial struct pcDeck {
     internal symbolizeFlag firstPCSymbolizeResult;
 }
 
+} partial class pprofᴛpcDeck {
+
 internal static void reset(this ref pcDeck d) {
     d.pcs = d.pcs[..0];
     d.frames = d.frames[..0];
@@ -596,6 +611,8 @@ internal static bool /*success*/ tryAdd(this ref pcDeck d, uintptr pc, slice<run
     return true;
 }
 
+} partial class pprof_package {
+
 // We can't write out functions while in the middle of the
 // Location message, so record new functions we encounter and
 // write them out after the Location.
@@ -604,6 +621,8 @@ internal partial struct emitLocation_newFunc /*dyn*/ {
     internal @string name, @file;
     internal int64 startLine;
 }
+
+} partial class pprofᴛprofileBuilder {
 
 // emitLocation emits the new location and function information recorded in the deck
 // and returns the location ID encoded in the profile protobuf.
@@ -684,6 +703,8 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
     finally { if (ᒐd1) Ꮡb.DerefOrNull().deck.reset(); ᒐ.Run(); }
 }
 
+} partial class pprof_package {
+
 internal static slice<byte> space = slice<byte>(" "u8);
 internal static slice<byte> newline = slice<byte>("\n"u8);
 
@@ -726,7 +747,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
     while (len(data) > 0) {
         (line, data, _) = bytes.Cut(data, newline);
         var addr = next();
-        var (loStr, hiStr, ok) = strings_package.Cut((@string)addr, "-");
+        var (loStr, hiStr, ok) = strings.Cut((@string)addr, "-");
         if (!ok) {
             continue;
         }
@@ -782,6 +803,8 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
     }
 }
 
+} partial class pprofᴛprofileBuilder {
+
 internal static void addMapping(this ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID) {
     b.addMappingEntry(lo, hi, offset, @file, buildID, false);
 }
@@ -797,4 +820,4 @@ internal static void addMappingEntry(this ref profileBuilder b, uint64 lo, uint6
     ));
 }
 
-} // end pprof_package
+} // end pprofᴛprofileBuilder

@@ -10,6 +10,7 @@ using errors = errors_package;
 using sync = sync_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140.nistec;
+using static nistec_package;
 
 partial class nistec_package {
 
@@ -32,6 +33,8 @@ public static ж<P224Point> NewP224Point() {
         z: @new<fiat.P224Element>()
     ));
 }
+
+} partial class nistecᴛP224Point {
 
 // SetGenerator sets p to the canonical generator and returns p.
 public static ж<P224Point> SetGenerator(this ж<P224Point> Ꮡp) {
@@ -120,6 +123,8 @@ public static (ж<P224Point>, error) SetBytes(this ж<P224Point> Ꮡp, slice<byt
     }}
 }
 
+} partial class nistec_package {
+
 internal static ж<fiat.P224Element> _p224B;
 internal static readonly ж<sync.Once> Ꮡ_p224BOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once _p224BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p224BOnce).ValueSlot;
@@ -156,6 +161,8 @@ internal static error p224CheckOnCurve(ж<fiat.P224Element> x, ж<fiat.P224Eleme
     }
     return default;
 }
+
+} partial class nistecᴛP224Point {
 
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
@@ -359,10 +366,14 @@ public static ж<P224Point> Select(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1,
     return Ꮡq;
 }
 
+} partial class nistec_package {
+
 // A p224Table holds the first 15 multiples of a point at offset -1, so [1]P
 // is at table[0], [15]P is at table[14], and [0]P is implicitly the identity
 // point.
 partial struct p224Table /*[15]ж<P224Point>*/;
+
+} partial class nistecᴛp224Table {
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
@@ -376,6 +387,8 @@ internal static void Select(this ref p224Table table, ж<P224Point> p, uint8 n) 
         p.Select(table.Value[(uint8)(i - 1)], p, cond);
     }
 }
+
+} partial class nistecᴛP224Point {
 
 // ScalarMult sets p = scalar * q, and returns p.
 public static (ж<P224Point>, error) ScalarMult(this ж<P224Point> Ꮡp, ж<P224Point> q, slice<byte> scalar) {
@@ -422,9 +435,13 @@ public static (ж<P224Point>, error) ScalarMult(this ж<P224Point> Ꮡp, ж<P224
     return (Ꮡp, default);
 }
 
+} partial class nistec_package {
+
 internal static ж<array<p224Table>> p224GeneratorTable;
 internal static readonly ж<sync.Once> Ꮡp224GeneratorTableOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once p224GeneratorTableOnce => ref ((StaticBox<sync.Once>)Ꮡp224GeneratorTableOnce).ValueSlot;
+
+} partial class nistecᴛP224Point {
 
 // generatorTable returns a sequence of p224Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
@@ -484,6 +501,8 @@ public static (ж<P224Point>, error) ScalarBaseMult(this ж<P224Point> Ꮡp, sli
 
     return (Ꮡp, default);
 }
+
+} partial class nistec_package {
 
 // p224Sqrt sets e to a square root of x. If x is not a square, p224Sqrt returns
 // false and e is unchanged. e and x can overlap.

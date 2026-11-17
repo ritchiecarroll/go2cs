@@ -27,7 +27,6 @@ using static go.hash.crc64_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Size", "const:ΔSize")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -58,7 +57,7 @@ using static go.hash.crc64_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/crc64/crc64.go", "crc64.cs", "ACNKlIKCqqKClKSkuIKCgoKCgpSmlKaCgoKCgoKCpgAIHMCUlJTegoKCgqaCAAoGgoKUgpSClIKmgoKmgoKUgoKCgoKUppSmgoIAABC4gpSokqaCgqaUgoKqkJaygoKCgqY=")]
+[assembly: GoPositionMap("hash/crc64/crc64.go", "crc64.cs", "ACVKlIKCqqKClKSkuIKCgoKCgpSmlKaCgoKCgoKCpgAIHMC0lJQACQ6CgoKCpoIACgaCgpSClIKUgqaCgsaCgpSCgoKCgpSmlKaCggAAELiClKiSxoKCppSCgsqQlrKCgoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
@@ -89,3 +88,13 @@ public static partial class crc64_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(crc64_package.digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class crc64ᴛdigest;
+// </MethodHolders>

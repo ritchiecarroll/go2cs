@@ -7,6 +7,7 @@ using fmt = fmt_package;
 using slices = slices_package;
 using time = time_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // added for go linkname usage
+using static trace_package;
 
 partial class trace_package {
 
@@ -15,6 +16,8 @@ partial struct recorder {
     internal ж<FlightRecorder> r;
     internal bool headerReceived;
 }
+
+} partial class traceᴛrecorder {
 
 internal static (nint n, error err) Write(this ж<recorder> Ꮡw, slice<byte> b) {
     nint n = default;
@@ -105,6 +108,8 @@ internal static void endGeneration(this ref recorder w) {
     r.active = new rawGeneration();
 }
 
+} partial class trace_package {
+
 partial struct rawGeneration {
     internal uint64 gen;
     internal nint size;
@@ -122,10 +127,14 @@ internal static partial uint64 runtime_traceClockNow();
 // frequency is nanoseconds per timestamp unit.
 partial struct frequency /*num:float64*/;
 
+} partial class traceᴛfrequency {
+
 // mul multiplies an unprocessed timestamp to produce a time in nanoseconds.
 internal static eventTime mul(this frequency f, timestamp t) {
     return (eventTime)(int64)((float64)t * (float64)f);
 }
+
+} partial class trace_package {
 
 // eventTime is a timestamp in nanoseconds.
 //
@@ -148,9 +157,11 @@ internal static eventTime mul(this frequency f, timestamp t) {
 // to collect those timestamps.
 partial struct eventTime /*num:int64*/;
 
+} partial class traceᴛeventTime {
+
 // Sub subtracts t0 from t, returning the duration in nanoseconds.
 internal static time.Duration Sub(this eventTime t, eventTime t0) {
     return (time.Duration)((int64)t - (int64)t0);
 }
 
-} // end trace_package
+} // end traceᴛeventTime

@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using CrossPkgLibꓸGrade = go.CrossPkgLib_package.ΔGrade;
-global using CrossPkgLibꓸStatus = go.CrossPkgLib_package.ΔStatus;
 global using CrossPkgLibꓸTemperature = go.CrossPkgLib_package.Celsius;
 global using CrossPkgLibꓸToken = object;
 using CrossPkgLib = go.CrossPkgLib_package;
@@ -32,7 +30,6 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Meter", "ΔMeter")]
 [assembly: GoTypeAlias("Tagged", "go.CrossPkgLib_package.Labeled")]
 // </ExportedTypeAliases>
 
@@ -48,7 +45,7 @@ using static go.main_package;
 [assembly: GoImplement<badge, Labeled>]
 [assembly: GoImplement<cert, Labeled>]
 [assembly: GoImplement<cert, certificate>]
-[assembly: GoImplement<counter, ΔMeter>]
+[assembly: GoImplement<counter, Meter>]
 [assembly: GoImplement<dial, CrossPkgLib_package.Labeled>(Pointer = true)]
 [assembly: GoImplement<emblem, Labeled>]
 [assembly: GoImplement<emblem, namedLabel>]
@@ -69,7 +66,7 @@ using static go.main_package;
 [assembly: GoFieldAccess(typeof(CrossPkgLib_package.Node))]
 [assembly: GoFieldAccess(typeof(CrossPkgLib_package.Probe))]
 [assembly: GoFieldAccess(typeof(CrossPkgLib_package.Sensor))]
-[assembly: GoFieldAccess(typeof(CrossPkgLib_package.ΔStatus))]
+[assembly: GoFieldAccess(typeof(CrossPkgLib_package.Status))]
 [assembly: GoFieldAccess(typeof(Holder<>))]
 [assembly: GoFieldAccess(typeof(holder<>))]
 
@@ -81,7 +78,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAognIIAByKiggAGGgAKHgAFEgAMKoIADyyCAAUWAA0egoKCAAoilJSAvgABEJyCsoKCuJTSlIKCgpaCgpaCloKCnoKCgoKegpaCgoKcgp6CgoKCgp6CgoKCgpqCgoKIioKalLS0upSCgoKCgpyCgpiCgoIAARSCgoKChoKCgoKCgoKUgpSCgpSCnIKCgpqClIKUgoKCgpqCgpSCnIKcgpyCggABEIIAARCCmoKCgoKalgABFIKYgoIAARCCgoKCAAEUgoKCAAEQgoKCgoKCgqIACiaCgpQAAhSCABBEAA4q", "196-200:1;435-435:1", "", "", "147:21")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAsgnIIAByKiggAGGgAKHgAHEgAQKoIAEyyCAAkWABEegoKCAA4itJSAvgABEJyCsoKCuJTSlIKCgpaCgpaCloKCnoKCgoKegpaCgoKcgp6CgoKCgp6CgoKCgpqCgoKIioKalLS0upSCgoKCgpyCgpiCgoIAARSCgoKChoKCgoKCgoKUgpSCgpSCnIKCgpqClIKUgoKCgpqCgpSCnIKcgpyCggABEIIAARCCmoKCgoKalgABFIKYgoIAARCCgoKCAAEUgoKCAAEQgoKCgoKCgqIACiaCgpQAAhSCABJEABIq", "196-200:1;435-435:1", "", "", "172:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -119,7 +116,7 @@ public static partial class main_package
     internal partial struct tagged {}
     internal partial struct tallies {}
     public partial interface Labeled {}
-    public partial interface ΔMeter {}
+    public partial interface Meter {}
     public partial struct Holder<T> {}
     // </TypeAccessibility>
 
@@ -134,3 +131,20 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.badge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbadge;
+[GoMethodHost(typeof(main_package.cert)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcert;
+[GoMethodHost(typeof(main_package.dial)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛdial;
+[GoMethodHost(typeof(main_package.emblem)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛemblem;
+[GoMethodHost(typeof(main_package.relay)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛrelay;
+[GoMethodHost(typeof(main_package.seal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛseal;
+[GoMethodHost(typeof(main_package.tagged)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛtagged;
+[GoMethodHost(typeof(main_package.tallies)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛtallies;
+// </MethodHolders>

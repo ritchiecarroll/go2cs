@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using atomic = sync.atomic_package;
 using sync;
+using static main_package;
 
 partial class main_package {
 
@@ -18,9 +19,13 @@ partial struct runner {
     internal Func<ж<atomic.Int32>, nint> gen;
 }
 
+} partial class mainᴛrunner {
+
 internal static nint invoke(this runner r, ж<atomic.Int32> v) {
     return r.gen(v);
 }
+
+} partial class main_package {
 
 // type loadFunc is a methodless func type — rendered inline as its base delegate
 

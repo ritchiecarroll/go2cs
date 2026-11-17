@@ -15,6 +15,7 @@ using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
+using static types_package;
 
 partial class types_package {
 
@@ -23,7 +24,7 @@ partial struct operandMode /*num:byte*/;
 
 internal static operandMode invalid => /* iota */ 0; // operand is invalid
 internal static operandMode novalue => 1;            // operand represents no value (result of a function call w/o result)
-internal static operandMode Δbuiltinᴛ => 2;          // operand is a built-in function
+internal static operandMode Δbuiltin => 2;           // operand is a built-in function
 internal static operandMode typexpr => 3;            // operand is a type
 internal static operandMode constant_ => 4;          // operand is a constant; the operand's typ is a Basic type
 internal static operandMode variable => 5;           // operand is an addressable variable
@@ -37,7 +38,7 @@ internal static operandMode cgofunc => 11;           // operand is a cgo functio
 [GoLazy] partial class lazyᴛoperandModeString { internal static array<@string> operandModeString = new golib.SparseArray<@string>{
     [invalid] = "invalid operand",
     [novalue] = "no value",
-    [Δbuiltinᴛ] = "built-in",
+    [Δbuiltin] = "built-in",
     [typexpr] = "type",
     [constant_] = "constant",
     [variable] = "variable",
@@ -57,20 +58,24 @@ internal static operandMode cgofunc => 11;           // operand is a cgo functio
 partial struct operand {
     internal operandMode mode;
     internal ast.Expr expr;
-    internal ΔType typ;
+    internal Type typ;
     internal constant.Value val;
     internal builtinId id;
 }
 
+} partial class typesᴛoperand {
+
 // Pos returns the position of the expression corresponding to x.
 // If x is invalid the position is nopos.
-internal static tokenꓸPos Pos(this ref operand x) {
+internal static token.Pos Pos(this ref operand x) {
     // x.expr may not be set if x is invalid
     if (x.expr == nil) {
         return nopos;
     }
     return x.expr.Pos();
 }
+
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilWithInvalidTypeˢ => ref nilWithInvalidTypeˢᵇ;
@@ -148,7 +153,7 @@ internal static @string operandString(ref operand x, Func<ж<Package>, @string> 
         expr = ExprString(x.expr);
     } else {
         switch (x.mode) {
-        case var ᴛ when ᴛ == Δbuiltinᴛ: {
+        case var ᴛ when ᴛ == Δbuiltin: {
             expr = predeclaredFuncs[x.id].name;
             break;
         }
@@ -171,7 +176,7 @@ internal static @string operandString(ref operand x, Func<ж<Package>, @string> 
     // <untyped kind>
     var hasType = false;
     switch (x.mode) {
-    case var ᴛ when ᴛ == invalid || ᴛ == novalue || ᴛ == Δbuiltinᴛ || ᴛ == typexpr: {
+    case var ᴛ when ᴛ == invalid || ᴛ == novalue || ᴛ == Δbuiltin || ᴛ == typexpr: {
         // no type
         break;
     }
@@ -234,7 +239,7 @@ internal static @string operandString(ref operand x, Func<ж<Package>, @string> 
                 buf.WriteString(constrainedByˢ);
                 WriteType(Ꮡbuf, tpar.bound, qf); // do not compute interface type sets here
                 // If we have the type set and it's empty, say so for better error messages.
-                if (hasEmptyTypeset(new TypeParamжΔType(tpar))) {
+                if (hasEmptyTypeset(new TypeParamжType(tpar))) {
                     buf.WriteString(withEmptyTypeSetˢ);
                 }
             }
@@ -272,7 +277,7 @@ private static readonly @string unionˢᵇ = "union"u8;
 // compositeKind returns the kind of the given composite type
 // ("array", "slice", etc.) or the empty string if typ is not
 // composite but a basic type.
-internal static @string compositeKind(ΔType typ) {
+internal static @string compositeKind(Type typ) {
     switch (typ.Underlying().type()) {
     case ж<Basic>: {
         return ""u8;
@@ -289,7 +294,7 @@ internal static @string compositeKind(ΔType typ) {
     case ж<Pointer>: {
         return pointerˢ;
     }
-    case ж<ΔSignature>: {
+    case ж<Signature>: {
         return funcˢ;
     }
     case ж<Interface>: {
@@ -312,6 +317,8 @@ internal static @string compositeKind(ΔType typ) {
         break;
     }}
 }
+
+} partial class typesᴛoperand {
 
 internal static @string String(this ж<operand> Ꮡx) {
     return operandString(ref (Ꮡx).DerefOrNull(), default);
@@ -349,11 +356,11 @@ internal static void setConst(this ref operand x, token.Token k, @string lit) {
     var val = makeFromLiteral(lit, k);
     if (val.Kind() == constant.Unknown) {
         x.mode = invalid;
-        x.typ = new BasicжΔType(Typ[Invalid]);
+        x.typ = new BasicжType(Typ[Invalid]);
         return;
     }
     x.mode = constant_;
-    x.typ = new BasicжΔType(Typ[kind]);
+    x.typ = new BasicжType(Typ[kind]);
     x.val = val;
 }
 
@@ -376,7 +383,7 @@ private static readonly @string needTypeAssertionˢᵇ = "need type assertion"u8
 // is only valid if the (first) result is false. The check parameter may be nil
 // if assignableTo is invoked through an exported API call, i.e., when all
 // methods have been type-checked.
-internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Checker> check, ΔType T, ж<@string> Ꮡcause) {
+internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Checker> check, Type T, ж<@string> Ꮡcause) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
 
@@ -404,7 +411,7 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
         if (Tp != nil) {
             // T is a type parameter: x is assignable to T if it is
             // representable by each specific type in the type set of T.
-            return (Tp.@is((ж<Δterm> t) => {
+            return (Tp.@is((ж<term> t) => {
                 if (t == nil) {
                     return false;
                 }
@@ -491,7 +498,7 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
         errors.Code code = IncompatibleAssign;
         var Tpʗ1 = Tp;
         var errorfʗ1 = errorf;
-        Tp.@is((ж<Δterm> TΔ1) => {
+        Tp.@is((ж<term> TΔ1) => {
             if (TΔ1 == nil) {
                 return false; // no specific types
             }
@@ -515,7 +522,7 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
         var Vpʗ1 = Vp;
         var errorfʗ2 = errorf;
         var origTʗ1 = origT;
-        Vp.@is((ж<Δterm> VΔ1) => {
+        Vp.@is((ж<term> VΔ1) => {
             if (VΔ1 == nil) {
                 return false; // no specific types
             }
@@ -533,4 +540,4 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
     return (false, IncompatibleAssign);
 }
 
-} // end types_package
+} // end typesᴛoperand

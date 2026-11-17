@@ -64,7 +64,7 @@ public class GoMethodTextTests
     public void AValueTypesErrorMethodIsItsToString()
     {
         syscall_package.Errno errno = new(2);
-        string expected = syscall_package.Error(errno).ToString();
+        string expected = errno.Error().ToString();
 
         Assert.AreNotEqual("2", expected, "the fixture: Errno(2) has error text");
         Assert.AreEqual(expected, errno.ToString(), "syscall.Errno has a value-receiver Error()");
@@ -119,7 +119,7 @@ public class GoMethodTextTests
     public void PrintAndPrintlnStillPrintAPointersAddress()
     {
         MethodInfo printArg = typeof(builtin).GetMethod("printArg", BindingFlags.NonPublic | BindingFlags.Static)!;
-        ж<go.math.big_package.ΔInt> pointer = go.math.big_package.NewInt(42);
+        ж<go.math.big_package.Int> pointer = go.math.big_package.NewInt(42);
         string printed = (string)printArg.Invoke(null, [pointer])!;
 
         Assert.IsTrue(printed.StartsWith("0x"), $"println prints the address, never String(): {printed}");

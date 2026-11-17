@@ -27,7 +27,6 @@ using static go.image.color_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("RGBA", "ΔRGBA")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -55,13 +54,13 @@ using static go.image.color_package;
 [assembly: GoImplement<NYCbCrA, Color>]
 [assembly: GoImplement<Palette, Model>(Pointer = true)]
 [assembly: GoImplement<Palette, Model>]
+[assembly: GoImplement<RGBA, Color>(Pointer = true)]
+[assembly: GoImplement<RGBA, Color>]
 [assembly: GoImplement<RGBA64, Color>(Pointer = true)]
 [assembly: GoImplement<RGBA64, Color>]
 [assembly: GoImplement<YCbCr, Color>(Pointer = true)]
 [assembly: GoImplement<YCbCr, Color>]
 [assembly: GoImplement<modelFunc, Model>(Pointer = true)]
-[assembly: GoImplement<ΔRGBA, Color>(Pointer = true)]
-[assembly: GoImplement<ΔRGBA, Color>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -81,8 +80,8 @@ using static go.image.color_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("image/color/color.go", "color.cs", "AB880oKCgoKCgoKCAAsYggAHENKCgoKCgoKCgoKCgoKCggAIEtKCgoKCgoKCgoKCAAcQooKCAAcQooIABxCCgoIABxCCggAIFOzugrqCgoKCgoKCloKClIKmgoKUgqaCgpSCgpSCpoKCgqaCgpSCgpSCpoKCgqaCgpSCpoKClIKmgoKUAAkUlKaCgpTulN6SgpSqxoKSgoKCgoKUpq4AGi6CupKSkg==")]
-[assembly: GoPositionMap("image/color/ycbcr.go", "ycbcr.cs", "AAcQ/oKCygAQIoKClLiCgpSmqAA5coKCAA4egoKUpoKClKaCgpSmABEkABEkgoIADBqCgpSmgoKUpoKClKa4lIKClIKCAAkUlIKCAAwagoKUpoKClKaCgpS4gsqUgpSklKaCgoKmgqiSgoKCgoKUgpSClIKCgqiSgoKCggAKFriCgoKCuJSCgpSCgg==")]
+[assembly: GoPositionMap("image/color/color.go", "color.cs", "ACM80oKCgoKCgoKCAA8YggALENKCgoKCgoKCgoKCgoKCggAMEtKCgoKCgoKCgoKCAAsQooKCAAsQooIACxCCgoIACxCCggAKFOwACA6C2oKCgoKCgoKWgoKUgqaCgpSCpoKClIKClIKmgoKCpoKClIKClIKmgoKCpoKClIKmgoKUgqaCgpQACRSUpoKClO6U/pKClKrGgpKCgoKCgpSmzgAaLoK6kpKS")]
+[assembly: GoPositionMap("image/color/ycbcr.go", "ycbcr.cs", "AAkQ/oKCygAQIoKClLiCgpSmqAA5coKCAA4egoKUpoKClKaCgpSmABMkABEkgoIADBqCgpSmgoKUpoKClKbYlIKClIKCAAsUlIKCAAwagoKUpoKClKaCgpS4guqUgpSklKaCgoKmgqiSgoKCgoKUgpSClIKCgqiSgoKCggAMFriCgoKC2JSCgpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
@@ -109,9 +108,9 @@ public static partial class color_package
     public partial struct NRGBA64 {}
     public partial struct NYCbCrA {}
     public partial struct Palette {}
+    public partial struct RGBA {}
     public partial struct RGBA64 {}
     public partial struct YCbCr {}
-    public partial struct ΔRGBA {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -123,3 +122,25 @@ public static partial class color_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(color_package.Alpha)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛAlpha;
+[GoMethodHost(typeof(color_package.Alpha16)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛAlpha16;
+[GoMethodHost(typeof(color_package.CMYK)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛCMYK;
+[GoMethodHost(typeof(color_package.Gray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛGray;
+[GoMethodHost(typeof(color_package.Gray16)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛGray16;
+[GoMethodHost(typeof(color_package.NRGBA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛNRGBA;
+[GoMethodHost(typeof(color_package.NRGBA64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛNRGBA64;
+[GoMethodHost(typeof(color_package.NYCbCrA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛNYCbCrA;
+[GoMethodHost(typeof(color_package.Palette)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛPalette;
+[GoMethodHost(typeof(color_package.RGBA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛRGBA;
+[GoMethodHost(typeof(color_package.RGBA64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛRGBA64;
+[GoMethodHost(typeof(color_package.YCbCr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛYCbCr;
+[GoMethodHost(typeof(color_package.modelFunc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛmodelFunc;
+// </MethodHolders>

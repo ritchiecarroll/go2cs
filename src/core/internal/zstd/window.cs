@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
+using static zstd_package;
+
 partial class zstd_package {
 
 // window stores up to size bytes of data.
@@ -17,6 +19,8 @@ partial struct window {
     internal slice<byte> data;
     internal nint off;
 }
+
+} partial class zstdᴛwindow {
 
 // reset clears stored data and configures window size.
 internal static void reset(this ref window w, nint size) {
@@ -94,4 +98,4 @@ internal static slice<byte> appendTo(this ref window w, slice<byte> buf, uint32 
     }
 }
 
-} // end zstd_package
+} // end zstdᴛwindow

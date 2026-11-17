@@ -6,6 +6,7 @@ namespace go;
 
 using runtime = runtime_package;
 using @unsafe = unsafe_package;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -223,6 +224,8 @@ partial struct RouteMessage {
     public slice<byte> Data;
 }
 
+} partial class syscallᴛRouteMessage {
+
 internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
     var b = m.Data[..];
@@ -265,6 +268,8 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) {
     return (sas[..], default);
 }
 
+} partial class syscall_package {
+
 // InterfaceMessage represents a routing message containing
 // network interface entries.
 //
@@ -273,6 +278,8 @@ partial struct InterfaceMessage {
     public IfMsghdr Header;
     public slice<byte> Data;
 }
+
+} partial class syscallᴛInterfaceMessage {
 
 internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
@@ -287,6 +294,8 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMessage m) {
     return (sas[..], default);
 }
 
+} partial class syscall_package {
+
 // InterfaceAddrMessage represents a routing message containing
 // network interface address entries.
 //
@@ -295,6 +304,8 @@ partial struct InterfaceAddrMessage {
     public IfaMsghdr Header;
     public slice<byte> Data;
 }
+
+} partial class syscallᴛInterfaceAddrMessage {
 
 internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
@@ -337,6 +348,8 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage 
     }
     return (sas[..], default);
 }
+
+} partial class syscall_package {
 
 // ParseRoutingMessage parses b as routing messages and returns the
 // slice containing the [RoutingMessage] interfaces.

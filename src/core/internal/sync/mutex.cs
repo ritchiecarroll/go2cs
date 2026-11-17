@@ -13,6 +13,7 @@ using atomic = sync.atomic_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using sync;
+using static sync_package;
 
 partial class sync_package {
 
@@ -54,6 +55,8 @@ internal static UntypedInt mutexWaiterShift => /* iota */ 3;
 // a mutex several times in a row even if there are blocked waiters.
 // Starvation mode is important to prevent pathological cases of tail latency.
 internal static UntypedFloat starvationThresholdNs => 1e6;
+
+} partial class syncᴛMutex {
 
 // Lock locks m.
 //
@@ -250,4 +253,4 @@ internal static void unlockSlow(this ж<Mutex> Ꮡm, int32 @new) {
     }
 }
 
-} // end sync_package
+} // end syncᴛMutex

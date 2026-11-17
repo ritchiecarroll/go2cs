@@ -20,6 +20,7 @@ namespace go.debug;
 using binary = encoding.binary_package;
 using errors = errors_package;
 using encoding;
+using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -44,7 +45,7 @@ partial struct Data {
     internal map<uint64, abbrevTable> abbrevCache;
     internal bool bigEndian;
     internal binary.ByteOrder order;
-    internal map<Offset, ΔType> typeCache;
+    internal map<Offset, Type> typeCache;
     internal map<uint64, ж<typeUnit>> typeSigs;
     internal slice<unit> unit;
 }
@@ -70,7 +71,7 @@ public static (ж<Data>, error) New(slice<byte> abbrev, slice<byte> aranges, sli
         ranges: ranges,
         str: str,
         abbrevCache: new map<uint64, abbrevTable>(),
-        typeCache: new map<Offset, ΔType>(),
+        typeCache: new map<Offset, Type>(),
         typeSigs: new map<uint64, ж<typeUnit>>()
     ));
 
@@ -115,6 +116,8 @@ public static (ж<Data>, error) New(slice<byte> abbrev, slice<byte> aranges, sli
     return (d, default);
 }
 
+} partial class dwarfᴛData {
+
 // AddTypes will add one .debug_types section to the DWARF data. A
 // typical object with DWARF version 4 debug info will have multiple
 // .debug_types sections. The name is used for error reporting only,
@@ -151,4 +154,4 @@ public static error AddSection(this ref Data d, @string name, slice<byte> conten
     return err;
 }
 
-} // end dwarf_package
+} // end dwarfᴛData

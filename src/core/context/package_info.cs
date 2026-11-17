@@ -75,7 +75,7 @@ using static go.context_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("context/context.go", "context.cs", "AKYBzgK4AAgIgoLssqaCpoKmggAKCoIACgqCrsKuwgAIIPKCkAAPNAALAoKQtoKClIKCAAIS4oKClIKCgoKC7gACKAARAqaCkoKClIKUAA0cooKClIIAEzDigoKUgoKUgoKUqJKCgpSCgpSCgpQAChaUggARHqKClKbSgoKUgoKCgoKU1pSUgpSqwpSCgqa2gtiAlIKUlIKUlIK2gJSCgpS4graCgrQADBSCgpSmgqzSgpSClIKCgpSCgoKClJSUlIKUggADEMKClO6ypoKmgqaCpoIAAhgACQKs0oKUlJSmgoKCgpCkgpKCkqaQAA8agqaCqqKClJSCgoKUAAIaAAoCrLIAAiAADQKClIKUgpQAGRqylKSklKaCqoKClKaCgpSClLSClLSmlLSClNS0", "242-242:1;270-270:1;330-339:1;332-334:1.1;357-359:1;510-512:1;522-528:2;647-647:1;652-654:2;656-656:3", "", "750=String/1/2/1,Until/1/1/2,String/2/2/2;857=stringify/1/2/1,stringify/2/2/2")]
+[assembly: GoPositionMap("context/context.go", "context.cs", "AKgBzgK4AAoIgoIACgyypoKmgqaCAA4KggAOCoLOwq7CAAgg8oKQAA80AAsCgpC2goKUgoIAAhLigoKUgoKCgoLuAAIoABECpoKSgoKUgpQADxyigoKUggAVMOKCgpSCgpSCgpSokoKClIKClIKClAAKFpSCABMeooKUptKCgpSCgoKCgpTWlJSClKrClIKCpraC2ICUgpSUgpSUgraAlIKClLiCtoKCtAAOFIKClMaCrNKClIKUgoKClIKCgoKUlJSUgpSCAAUQwoKUAAgOsqaCpoKmgqaCAAQYAAkCrNKClJSUpoKCgoKQpIKSgpKmkAARGoKmgqqigpSUgoKClAAEGgAKAqyyAAIgAA0CgpSClIKUABkaspSkpJTGgqqCgpTGgoKUgpS0gpS0ppS0gpTUtA==", "242-242:1;270-270:1;330-339:1;332-334:1.1;357-359:1;510-512:1;522-528:2;647-647:1;652-654:2;656-656:3", "", "786=String/1/2/1,Until/1/1/2,String/2/2/2;897=stringify/1/2/1,stringify/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -120,3 +120,21 @@ public static partial class context_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(context_package.afterFuncCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛafterFuncCtx;
+[GoMethodHost(typeof(context_package.backgroundCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛbackgroundCtx;
+[GoMethodHost(typeof(context_package.cancelCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛcancelCtx;
+[GoMethodHost(typeof(context_package.deadlineExceededError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛdeadlineExceededError;
+[GoMethodHost(typeof(context_package.emptyCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛemptyCtx;
+[GoMethodHost(typeof(context_package.timerCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛtimerCtx;
+[GoMethodHost(typeof(context_package.todoCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛtodoCtx;
+[GoMethodHost(typeof(context_package.valueCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛvalueCtx;
+[GoMethodHost(typeof(context_package.withoutCancelCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛwithoutCancelCtx;
+// </MethodHolders>

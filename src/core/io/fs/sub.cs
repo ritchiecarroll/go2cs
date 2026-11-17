@@ -5,6 +5,8 @@ namespace go.io;
 
 using errors = errors_package;
 using path = path_package;
+using fs = fs_package;
+using static fs_package;
 
 partial class fs_package {
 
@@ -54,6 +56,8 @@ partial struct subFS {
     internal FS fsys;
     internal @string dir;
 }
+
+} partial class fsᴛsubFS {
 
 // fullName maps name to the fully-qualified name dir/name.
 internal static (@string, error) fullName(this ref subFS f, @string op, @string name) {
@@ -106,7 +110,7 @@ internal static (slice<DirEntry>, error) ReadDir(this ref subFS f, @string name)
     if (err != nil) {
         return (default, err);
     }
-    (var dir, err) = ReadDir(f.fsys, full);
+    (var dir, err) = fs.ReadDir(f.fsys, full);
     return (dir, f.fixErr(err));
 }
 
@@ -115,7 +119,7 @@ internal static (slice<byte>, error) ReadFile(this ref subFS f, @string name) {
     if (err != nil) {
         return (default, err);
     }
-    (var data, err) = ReadFile(f.fsys, full);
+    (var data, err) = fs.ReadFile(f.fsys, full);
     return (data, f.fixErr(err));
 }
 
@@ -128,7 +132,7 @@ internal static (@string, error) ReadLink(this ref subFS f, @string name) {
     if (err != nil) {
         return ("", err);
     }
-    (var target, err) = ReadLink(f.fsys, full);
+    (var target, err) = fs.ReadLink(f.fsys, full);
     if (err != nil) {
         return ("", f.fixErr(err));
     }
@@ -144,7 +148,7 @@ internal static (FileInfo, error) Lstat(this ref subFS f, @string name) {
     if (err != nil) {
         return (default, err);
     }
-    (var info, err) = Lstat(f.fsys, full);
+    (var info, err) = fs.Lstat(f.fsys, full);
     if (err != nil) {
         return (default, f.fixErr(err));
     }
@@ -161,7 +165,7 @@ internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) 
     }
 
     @string full = f.dir + "/"u8 + pattern;
-    var (list, err) = Glob(f.fsys, full);
+    var (list, err) = fs.Glob(f.fsys, full);
     foreach (var (i, name) in range(list)) {
         var (nameΔ1, ok) = f.shorten(name);
         if (!ok) {
@@ -190,4 +194,4 @@ internal static (FS, error) Sub(this ж<subFS> Ꮡf, @string dir) {
     return (new subFSжFS(Ꮡ(new subFS(f.fsys, full))), default);
 }
 
-} // end fs_package
+} // end fsᴛsubFS

@@ -6,8 +6,8 @@ using sync;
 partial class main_package {
 
 internal static int32 viaDot() {
-    ΔTid.Add(100);
-    return ΔTid.Load();
+    Tid.Add(100);
+    return Tid.Load();
 }
 
 } // end main_package

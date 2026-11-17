@@ -7,6 +7,7 @@ using poll = @internal.poll_package;
 using Δio = io_package;
 using syscall = syscall_package;
 using @internal;
+using static os_package;
 
 partial class os_package {
 
@@ -14,6 +15,8 @@ internal static readonly ж<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, 
 internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> pollCopyFileRange => ref ((StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>)ᏑpollCopyFileRange).ValueSlot;
 internal static readonly ж<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>> ᏑpollSplice = new StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>(poll.Splice);
 internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> pollSplice => ref ((StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>)ᏑpollSplice).ValueSlot;
+
+} partial class osᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sendfileˢ => ref sendfileˢᵇ;
@@ -150,6 +153,8 @@ internal static (int64 written, bool handled, error err) copyFileRange(this ж<F
     }
     return (written, handled, wrapSyscallError(copyFileRangeˢ, err));
 }
+
+} partial class os_package {
 
 internal partial interface getPollFDAndNetwork_type /*dyn*/ {
     ж<poll.FD> PollFD();

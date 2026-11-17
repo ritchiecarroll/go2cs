@@ -13,6 +13,7 @@ using errors = errors_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
+using static mldsa_package;
 
 partial class mldsa_package {
 
@@ -58,12 +59,14 @@ internal static UntypedInt maxPubKeySize => /* PublicKeySize87 */ 2592;
 
 partial struct PrivateKey {
     internal array<byte> seed = new(32);
-    internal ΔPublicKey pub;
+    internal PublicKey pub;
     internal array<nttElement> s1 = new(maxL);
     internal array<nttElement> s2 = new(maxK);
     internal array<nttElement> t0 = new(maxK);
     internal array<byte> k = new(32);
 }
+
+} partial class mldsaᴛPrivateKey {
 
 public static bool Equal(this ref PrivateKey priv, ж<PrivateKey> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -76,13 +79,15 @@ public static slice<byte> Bytes(this ref PrivateKey priv) {
     return seed[..];
 }
 
-public static ж<ΔPublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
+public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
     // Note that this is likely to keep the entire PrivateKey reachable for
     // the lifetime of the PublicKey, which may be undesirable.
     return Ꮡpriv.Ꮡpub;
 }
 
-partial struct ΔPublicKey {
+} partial class mldsa_package {
+
+partial struct PublicKey {
     internal array<byte> raw = new(maxPubKeySize);
     internal parameters p;
     internal array<nttElement> a = new(maxK * maxL);
@@ -90,14 +95,16 @@ partial struct ΔPublicKey {
     internal array<byte> tr = new(64);         // public key hash
 }
 
-public static bool Equal(this ref ΔPublicKey pub, ж<ΔPublicKey> Ꮡx) {
+} partial class mldsaᴛPublicKey {
+
+public static bool Equal(this ref PublicKey pub, ж<PublicKey> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     nint size = pubKeySize(pub.p);
     return pub.p == x.p && subtle.ConstantTimeCompare(pub.raw.slice(0, size), x.raw.slice(0, size)) == 1;
 }
 
-public static slice<byte> Bytes(this ref ΔPublicKey pub) {
+public static slice<byte> Bytes(this ref PublicKey pub) {
     nint size = pubKeySize(pub.p);
     return bytes.Clone(pub.raw.slice(0, size));
 }
@@ -110,7 +117,7 @@ private static readonly @string mlDsa65ˢᵇ = "ML-DSA-65"u8;
 internal static ref readonly @string mlDsa87ˢ => ref mlDsa87ˢᵇ;
 private static readonly @string mlDsa87ˢᵇ = "ML-DSA-87"u8;
 
-public static @string Parameters(this ref ΔPublicKey pub) {
+public static @string Parameters(this ref PublicKey pub) {
     switch (pub.p) {
     case var ᴛ when ᴛ == params44: {
         return mlDsa44ˢ;
@@ -126,6 +133,8 @@ public static @string Parameters(this ref ΔPublicKey pub) {
         break;
     }}
 }
+
+} partial class mldsa_package {
 
 public static ж<PrivateKey> GenerateKey44() {
     fipsSelfTest();
@@ -192,7 +201,7 @@ internal static ж<PrivateKey> newPrivateKey(/*[32]*/ ж<array<byte>> Ꮡseed, p
     nint k = p.k;
     nint l = p.l;
 
-    var priv = Ꮡ(new PrivateKey(pub: new ΔPublicKey(p: p)));
+    var priv = Ꮡ(new PrivateKey(pub: new PublicKey(p: p)));
     priv.seed = seed.Clone();
 
     var ξ = sha3.NewShake256();
@@ -326,19 +335,19 @@ internal static (slice<byte> ρ, error err) pkDecode(slice<byte> pk, slice<array
 
 internal static error errInvalidPublicKeyLength = errors.New("mldsa: invalid public key length");
 
-public static (ж<ΔPublicKey>, error) NewPublicKey44(slice<byte> pk) {
+public static (ж<PublicKey>, error) NewPublicKey44(slice<byte> pk) {
     return newPublicKey(pk, params44);
 }
 
-public static (ж<ΔPublicKey>, error) NewPublicKey65(slice<byte> pk) {
+public static (ж<PublicKey>, error) NewPublicKey65(slice<byte> pk) {
     return newPublicKey(pk, params65);
 }
 
-public static (ж<ΔPublicKey>, error) NewPublicKey87(slice<byte> pk) {
+public static (ж<PublicKey>, error) NewPublicKey87(slice<byte> pk) {
     return newPublicKey(pk, params87);
 }
 
-internal static (ж<ΔPublicKey>, error) newPublicKey(slice<byte> pk, parameters p) {
+internal static (ж<PublicKey>, error) newPublicKey(slice<byte> pk, parameters p) {
     nint k = p.k;
     nint l = p.l;
 
@@ -348,7 +357,7 @@ internal static (ж<ΔPublicKey>, error) newPublicKey(slice<byte> pk, parameters
         return (default, err);
     }
 
-    var pub = Ꮡ(new ΔPublicKey(p: p));
+    var pub = Ꮡ(new PublicKey(p: p));
     copy(pub.raw[..], pk);
     computeMatrixA(GoReflect.WithElemDims(pub.a.slice(0, k * l), 256), ρ, p);
     pub.tr = computePublicKeyHash(pk);
@@ -691,7 +700,7 @@ internal static error errInvalidSignatureHintLimits = errors.New("mldsa: invalid
 internal static error errInvalidSignatureHintIndexOrder = errors.New("mldsa: invalid signature encoding");
 internal static error errInvalidSignatureHintExtraIndices = errors.New("mldsa: invalid signature encoding");
 
-public static error Verify(ж<ΔPublicKey> Ꮡpub, slice<byte> msg, slice<byte> sig, @string context) {
+public static error Verify(ж<PublicKey> Ꮡpub, slice<byte> msg, slice<byte> sig, @string context) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     fipsSelfTest();
@@ -704,7 +713,7 @@ public static error Verify(ж<ΔPublicKey> Ꮡpub, slice<byte> msg, slice<byte> 
     return verifyInternal(ref (Ꮡpub).DerefOrNull(), Ꮡμ, sig);
 }
 
-public static error VerifyExternalMu(ж<ΔPublicKey> pub, slice<byte> μ, slice<byte> sig) {
+public static error VerifyExternalMu(ж<PublicKey> pub, slice<byte> μ, slice<byte> sig) {
     fipsSelfTest();
     fips140.RecordApproved();
     if (len(μ) != 64) {
@@ -713,7 +722,7 @@ public static error VerifyExternalMu(ж<ΔPublicKey> pub, slice<byte> μ, slice<
     return verifyInternal(ref (pub).DerefOrNull(), Ꮡ(array<byte>.Alias(μ, 64)), sig);
 }
 
-internal static error verifyInternal(ref ΔPublicKey pub, /*[64]*/ ж<array<byte>> Ꮡμ, slice<byte> sig) {
+internal static error verifyInternal(ref PublicKey pub, /*[64]*/ ж<array<byte>> Ꮡμ, slice<byte> sig) {
     ref var μ = ref Ꮡμ.DerefOrNull();
 
     var p = pub.p;

@@ -673,10 +673,10 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
 <!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:26-28 (`go2cs-gen calls one of these for every variadic signature that can`),
      :49-53 (`GoDeferredRegistrations.EscapeRegistry.Run()`), :82-83
      (`if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))`),
-     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:423
+     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:427
      (`internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)`),
-     src/gen/go2cs-gen/MethodSet.cs:431 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
-     :392 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
+     src/gen/go2cs-gen/MethodSet.cs:432 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
+     :393 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
      (`body.Append(register);`). Guards: src/tests/GolibTests/GoReflectBridgeClosureTests.cs:173
      (`public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()`), :209
      (`public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()`);
@@ -1171,9 +1171,9 @@ Left as an ordinary bodyless declaration, it would emit a `partial` that the [`P
 
 <!-- illustration: not converter output -->
 ```csharp
-/*linkname*/ internal static partial (ΔHandle handle, Errno err) syscall_loadlibrary(ж<uint16> filename) {
+/*linkname*/ internal static partial (Handle handle, Errno err) syscall_loadlibrary(ж<uint16> filename) {
     var (ᴛ1, ᴛ2) = syscall.loadlibrary(filename);
-    return ((ΔHandle)(uintptr)ᴛ1, (Errno)(uintptr)ᴛ2);
+    return ((Handle)(uintptr)ᴛ1, (Errno)(uintptr)ᴛ2);
 }
 ```
 
@@ -1336,7 +1336,7 @@ FORWARDED — the pushed body is ordinary converted Go, so call it (`crypto/inte
 
 UNHONORABLE — announce the pair, never fabricate a body (`weak/pointer.cs`'s `.cs.auto` review sibling):
 
-<!-- source: src/core/weak/pointer.cs.auto:102-105 -->
+<!-- source: src/core/weak/pointer.cs.auto:107-110 -->
 ```csharp
 //go:linkname runtime_registerWeakPointer
 internal static @unsafe.Pointer runtime_registerWeakPointer(@unsafe.Pointer _) {
@@ -2139,7 +2139,7 @@ The converter emits a tagged field's Go struct tag verbatim at the declaration:
 ```go
 NamedCurveOID asn1.ObjectIdentifier `asn1:"optional,explicit,tag:0"`
 ```
-<!-- source: src/core/crypto/x509/sec1.cs:31 -->
+<!-- source: src/core/crypto/x509/sec1.cs:32 -->
 ```csharp
 public asn1.ObjectIdentifier NamedCurveOID; /*`asn1:"optional,explicit,tag:0"`*/
 ```
@@ -2897,7 +2897,7 @@ go2cs-gen records on the struct, and golib's field projection reads that record 
 **An embed's TAG is read like any other field's.** The converter writes the tag as a comment after the
 embed's declaration, exactly as it does for a named field, and go2cs-gen records it the same way:
 
-<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:33-38 -->
+<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:34-39 -->
 ```csharp
 partial struct host {
     public nint Plain;
@@ -3530,7 +3530,7 @@ contract, and the entire `poolChain` half:
 
 <!-- source: src/core/sync/poolqueue.cs:73-78 -->
 <!-- attribute-shown: a hand-written file keeps the attribute -->
-<!-- source: src/core/sync/poolqueue.cs:73-78 -->
+<!-- source: src/core/sync/poolqueue.cs:75-80 -->
 ```csharp
 // eface is Go's two-word {type, value} representation of an `any`. Under the CLR an `any` IS a single
 // managed reference, so the slot holds that reference directly; see the file header for why the
@@ -3703,7 +3703,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5084 (`INLINED PANIC SITES`), :5092 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5112 (`INLINED PANIC SITES`), :5120 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
@@ -4077,7 +4077,7 @@ statement it replaces, and maps no other line, so a traceback's `created by` lin
 The guard `TestHandOwnedGoStatementsMapToGo` checks every tracked hand-owned file under `src/core` against the pinned
 GOROOT: one record per file, each `goǃ(` line mapped to a Go `go` statement, and every other line left unmapped.
 <!-- src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283 `func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`;
-     examples: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "APUB3AMAANsD")]`),
+     examples: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AP0B3AMAANsD")]`),
      src/core/net/windows/lookup_windows.cs:55 (`[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs",`). -->
 
 **The path is SPELLED Go's way, whichever file it names.** Which source a frame's path points
@@ -4428,9 +4428,9 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3587-3608 -->
+<!-- source: src/core/reflect/value_impl.cs:3673-3694 -->
 ```csharp
-public static ΔType ArrayOf(nint length, ΔType elem) {
+public static Type ArrayOf(nint length, Type elem) {
     if (length < 0) {
         throw panic("reflect: negative length passed to ArrayOf");
     }

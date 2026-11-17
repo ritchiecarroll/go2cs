@@ -8,8 +8,11 @@ namespace go.go;
 using ast = global::go.go.ast_package;
 using global::go.go;
 using token = global::go.go.token_package;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // directCycles searches for direct cycles among package level type declarations.
 // See directCycle for details.
@@ -69,7 +72,7 @@ internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtnam
         if (found) {
             // tname is marked grey - we have a cycle on the path beginning at start.
             // Mark tname as invalid.
-            Ꮡtname.of(TypeName.Ꮡobject).setType(new BasicжΔType(Typ[Invalid]));
+            Ꮡtname.of(TypeName.Ꮡobject).setType(new BasicжType(Typ[Invalid]));
 
             // collect type names on cycle
             slice<Object> cycle = default;
@@ -122,7 +125,7 @@ internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtnam
 // TODO(markfreeman): Can the value cached on Named be used in validType / hasVarSize?
 
 // finiteSize returns whether a type has finite size.
-internal static bool finiteSize(this ж<Checker> Ꮡcheck, ΔType t) {
+internal static bool finiteSize(this ж<Checker> Ꮡcheck, Type t) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -175,4 +178,4 @@ internal static bool finiteSize(this ж<Checker> Ꮡcheck, ΔType t) {
     finally { ᒐ.Run(); }
 }
 
-} // end types_package
+} // end typesᴛChecker

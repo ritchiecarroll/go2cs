@@ -14,6 +14,7 @@ namespace go.encoding;
 // before diving into the scanner itself.
 using strconv = strconv_package;
 using sync = sync_package;
+using static json_package;
 
 partial class json_package {
 
@@ -55,7 +56,11 @@ partial struct SyntaxError {
     public int64 Offset;  // error occurred after reading Offset bytes
 }
 
+} partial class jsonᴛSyntaxError {
+
 public static @string Error(this ref SyntaxError e) { return e.msg; }
+
+} partial class json_package {
 
 // A scanner is a JSON scanning state machine.
 // Callers call scan.reset and then pass bytes in one at a time
@@ -144,6 +149,8 @@ internal static UntypedInt parseArrayValue => 2;   // parsing array value
 // This is permitted by https://tools.ietf.org/html/rfc7159#section-9
 internal static UntypedInt maxNestingDepth => 10000;
 
+} partial class jsonᴛscanner {
+
 // reset prepares the scanner for use.
 // It must be called before calling s.step.
 internal static void reset(this ref scanner s) {
@@ -200,6 +207,8 @@ internal static void popParseState(this ref scanner s) {
         s.step = stateEndValue;
     }
 }
+
+} partial class json_package {
 
 internal static bool isSpace(byte c) {
     return c <= ' ' && (c == ' ' || c == '\t' || c == '\r' || c == '\n');
@@ -738,12 +747,16 @@ internal static nint stateError(ж<scanner> s, byte c) {
     return scanError;
 }
 
+} partial class jsonᴛscanner {
+
 // error records an error and switches to the error state.
 internal static nint error(this ref scanner s, byte c, @string context) {
     s.step = stateError;
     s.err = new SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character "u8 + quoteChar(c) + " "u8 + context, s.bytes)));
     return scanError;
 }
+
+} partial class json_package {
 
 // quoteChar formats c as a quoted character literal.
 internal static @string quoteChar(byte c) {

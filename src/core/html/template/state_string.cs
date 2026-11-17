@@ -2,6 +2,7 @@
 namespace go.html;
 
 using strconv = strconv_package;
+using static template_package;
 
 partial class template_package {
 
@@ -47,6 +48,8 @@ private static readonly @string _state_nameᵇ = "stateTextstateTagstateAttrName
 
 [GoLazy] partial class lazyᴛ_state_index { internal static array<uint16> _state_index = new uint16[]{0, 9, 17, 30, 44, 60, 72, 83, 92, 100, 111, 118, 130, 142, 156, 169, 184, 198, 216, 235, 243, 256, 269, 282, 295, 306, 322, 337, 347, 363, 382, 391}.array(); }
 
+} partial class templateᴛstate {
+
 internal static @string String(this state i) {
     if (i >= ((state)(uint8)(len(_state_index) - 1))) {
         return "state("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
@@ -54,4 +57,4 @@ internal static @string String(this state i) {
     return _state_name.slice(_state_index[i], _state_index[i + 1]);
 }
 
-} // end template_package
+} // end templateᴛstate

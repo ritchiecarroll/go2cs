@@ -1,10 +1,13 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 internal delegate nint handlerFunc(@string _);
+
+} partial class mainᴛhandlerFunc {
 
 internal static nint call(this handlerFunc h, @string s) {
     if (h == nil) {
@@ -13,6 +16,8 @@ internal static nint call(this handlerFunc h, @string s) {
 
     return h(s);
 }
+
+} partial class main_package {
 
 internal static void main() {
     func(() => {

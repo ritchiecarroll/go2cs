@@ -277,7 +277,6 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// build-selected in-package test files for declarator names before collision analysis.
 		// This is package-local (important for ./... loads) and reads no test dependencies.
 		siblingSignals := collectSiblingTestSignals(pkg.Dir, pkg.Name, options)
-		siblingTestFuncMethodNames = siblingSignals.funcMethodNames
 		siblingTestAddressedGlobalNames = siblingSignals.addressedGlobalNames
 		siblingTestMethodValues = siblingSignals.methodValues
 		siblingTestPublicizedTypeNames = siblingSignals.publicizedTypeNames
@@ -297,6 +296,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 		files := []FileEntry{}
 		unmarkedFileCount := 0
+		var handOwnedTypeNames map[string]bool // the package's C# type names, read at its first hand-owned file
 		fset := pkg.Fset
 		packageTypes := pkg.Types
 		info := pkg.TypesInfo
@@ -489,7 +489,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					// file-visit loop below). Dropping the visit entirely corrupted every sibling
 					// file of a seeded reconvert: raw Go `struct{...}` text where a lifted type
 					// name belongs, and package-var assignments re-declared as shadowing locals.
-					files = append(files, newFileEntry(file, path, true))
+					if handOwnedTypeNames == nil {
+						handOwnedTypeNames = csharpDeclaredTypeNames(packageOutputPath, options.targetPlatform)
+					}
+
+					entry := newFileEntry(file, path, true)
+					entry.handOwnedTypeNames = handOwnedTypeNames
+					files = append(files, entry)
 				}
 			}
 		}
@@ -626,6 +632,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// transitive import closure (CS0576) so alias emission and every package-qualifier
 		// render Δ-renames them consistently.
 		computeImportAliasRenames(files, packageTypes, packageNamespace, options.go2csPath, goosOfTarget(options.targetPlatform), false)
+		computeSelfAlias(packageTypes, packageNamespace)
 
 		// Find unexported types used as exported struct fields so they can be emitted as public
 		// (an exported field's type must be at least as accessible — CS0051/CS0052).

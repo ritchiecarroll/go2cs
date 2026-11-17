@@ -14,11 +14,14 @@ using io = io_package;
 using net = net_package;
 using strconv = strconv_package;
 using time = time_package;
+using static http_package;
 
 partial class http_package {
 
 internal static time.Time socksnoDeadline = new time.Time();
 internal static time.Time socksaLongTimeAgo = time.Unix(1, 0);
+
+} partial class httpᴛsocksDialer {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tooManyAuthenticationˢ => ref tooManyAuthenticationˢᵇ;
@@ -32,8 +35,8 @@ private static readonly @string fqdnTooLongˢᵇ = "FQDN too long"u8;
 internal static ref readonly @string nonZeroReservedFieldˢ => ref nonZeroReservedFieldˢᵇ;
 private static readonly @string nonZeroReservedFieldˢᵇ = "non-zero reserved field"u8;
 
-internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string address) {
-    netꓸAddr _ᴛ1 = default;
+internal static partial (net.Addr, error ctxErr) connect(this ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string address) {
+    net.Addr _ᴛ1 = default;
     error ctxErr = default;
     GoFrame ᒐ = default;
     try {
@@ -49,13 +52,13 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
                 defer(c.SetDeadline, socksnoDeadline, ref ᒐ);
             }
         }
-        if (!AreEqual(ctx, context_package.Background())) {
+        if (!AreEqual(ctx, context.Background())) {
             var errCh = new channel<error>(1);
             var done = new channel<EmptyStruct>(0);
             var doneʗ1 = done;
             var errChʗ1 = errCh;
             defer(() => {
-                builtin.close(doneʗ1);
+                close(doneʗ1);
                 if (ctxErr == nil) {
                     ctxErr = ᐸꟷ(errChʗ1);
                 }
@@ -78,16 +81,16 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
             });
         }
 
-        var b = new slice<byte>(0, 6 + builtin.len(host)); // the size here is just an estimate
+        var b = new slice<byte>(0, 6 + len(host)); // the size here is just an estimate
         b = append(b, (byte)(socksVersion5));
-        if (builtin.len(d.AuthMethods) == 0 || d.Authenticate == nil) {
+        if (len(d.AuthMethods) == 0 || d.Authenticate == nil) {
             b = append(b, (byte)1, (byte)socksAuthMethodNotRequired);
         } else {
             var ams = d.AuthMethods;
-            if (builtin.len(ams) > 255) {
+            if (len(ams) > 255) {
                 (_ᴛ1, ctxErr) = (default, errors.New(tooManyAuthenticationˢ)); goto ᒐdone;
             }
-            b = append(b, (byte)builtin.len(ams));
+            b = append(b, (byte)len(ams));
             foreach (var (_, amΔ1) in range(ams)) {
                 b = append(b, (byte)amΔ1);
             }
@@ -125,11 +128,11 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
                 (_ᴛ1, ctxErr) = (default, errors.New(unknownAddressTypeˢ)); goto ᒐdone;
             }
         } else {
-            if (builtin.len(host) > 255) {
+            if (len(host) > 255) {
                 (_ᴛ1, ctxErr) = (default, errors.New(fqdnTooLongˢ)); goto ᒐdone;
             }
             b = append(b, (byte)(socksAddrTypeFQDN));
-            b = append(b, (byte)builtin.len(host));
+            b = append(b, (byte)len(host));
             b = append(b, host.ꓸꓸꓸ);
         }
         b = append(b, (byte)(port >> 8), (byte)port);
@@ -183,15 +186,17 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
         if (a.IP != nil) {
             copy(a.IP, b);
         } else {
-            a.Name = (@string)(b.slice(0, builtin.len(b) - 2));
+            a.Name = (@string)(b.slice(0, len(b) - 2));
         }
-        a.Port = (nint)b[builtin.len(b) - 2] << 8 | (nint)b[builtin.len(b) - 1];
-        (_ᴛ1, ctxErr) = (new socksAddrжΔAddr(Ꮡa), default);
+        a.Port = (nint)b[len(b) - 2] << 8 | (nint)b[len(b) - 1];
+        (_ᴛ1, ctxErr) = (new socksAddrжAddr(Ꮡa), default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
     ᒐdone: return (_ᴛ1, ctxErr);
 }
+
+} partial class http_package {
 
 internal static (@string, nint, error) sockssplitHostPort(@string address) {
     var (host, port, err) = net.SplitHostPort(address);
@@ -210,6 +215,8 @@ internal static (@string, nint, error) sockssplitHostPort(@string address) {
 
 // A Command represents a SOCKS command.
 partial struct socksCommand /*num:nint*/;
+
+} partial class httpᴛsocksCommand {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string socksConnectˢ => ref socksConnectˢᵇ;
@@ -230,11 +237,15 @@ internal static @string String(this socksCommand cmd) {
     }}
 }
 
+} partial class http_package {
+
 // An AuthMethod represents a SOCKS authentication method.
 public partial struct socksAuthMethod /*num:nint*/;
 
 // A Reply represents a SOCKS command reply code.
 partial struct socksReply /*num:nint*/;
+
+} partial class httpᴛsocksReply {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string succeededˢ => ref succeededˢᵇ;
@@ -290,6 +301,8 @@ internal static @string String(this socksReply code) {
     }}
 }
 
+} partial class http_package {
+
 // Wire protocol constants.
 internal static UntypedInt socksVersion5 => 0x05;
 
@@ -314,6 +327,8 @@ partial struct socksAddr {
     public nint Port;
 }
 
+} partial class httpᴛsocksAddr {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string socksˢ => ref socksˢᵇ;
 private static readonly @string socksˢᵇ = "socks"u8;
@@ -337,15 +352,19 @@ internal static @string String(this ж<socksAddr> Ꮡa) {
     return net.JoinHostPort(a.IP.String(), port);
 }
 
+} partial class http_package {
+
 // A Conn represents a forward proxy connection.
 partial struct socksConn {
     /*embed*/ public net_package.Conn Conn;
-    internal netꓸAddr boundAddr;
+    internal net.Addr boundAddr;
 }
+
+} partial class httpᴛsocksConn {
 
 // BoundAddr returns the address assigned by the proxy server for
 // connecting to the command target address from the proxy server.
-internal static netꓸAddr BoundAddr(this ж<socksConn> Ꮡc) {
+internal static net.Addr BoundAddr(this ж<socksConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc == nil) {
@@ -353,6 +372,8 @@ internal static netꓸAddr BoundAddr(this ж<socksConn> Ꮡc) {
     }
     return c.boundAddr;
 }
+
+} partial class http_package {
 
 // A Dialer holds SOCKS-specific options.
 partial struct socksDialer {
@@ -371,6 +392,8 @@ partial struct socksDialer {
     // It must return an error when the authentication is failed.
     public Func<context.Context, io.ReadWriter, socksAuthMethod, error> Authenticate;
 }
+
+} partial class httpᴛsocksDialer {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilContextˢ => ref nilContextˢᵇ;
@@ -424,7 +447,7 @@ internal static (net.Conn, error) DialContext(this ж<socksDialer> Ꮡd, context
 //
 // It returns the connection's local address assigned by the SOCKS
 // server.
-internal static (netꓸAddr, error) DialWithConn(this ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string network, @string address) {
+internal static (net.Addr, error) DialWithConn(this ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string network, @string address) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var errΔ1 = d.validateTarget(network, address); if (errΔ1 != nil) {
@@ -459,7 +482,7 @@ internal static (net.Conn, error) Dial(this ж<socksDialer> Ꮡd, @string networ
     error err = default;
     net.Conn c = default;
     if (d.ProxyDial != nil) {
-        (c, err) = d.ProxyDial(context_package.Background(), d.proxyNetwork, d.proxyAddress);
+        (c, err) = d.ProxyDial(context.Background(), d.proxyNetwork, d.proxyAddress);
     } else {
         (c, err) = net.Dial(d.proxyNetwork, d.proxyAddress);
     }
@@ -467,7 +490,7 @@ internal static (net.Conn, error) Dial(this ж<socksDialer> Ꮡd, @string networ
         var (proxy, dst, _) = d.pathAddrs(address);
         return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: err))));
     }
-    var (_, errΔ2) = Ꮡd.DialWithConn(context_package.Background(), c, network, address); if (errΔ2 != nil) {
+    var (_, errΔ2) = Ꮡd.DialWithConn(context.Background(), c, network, address); if (errΔ2 != nil) {
         c.Close();
         return (default, errΔ2);
     }
@@ -499,9 +522,9 @@ internal static error validateTarget(this ref socksDialer d, @string network, @s
     return default;
 }
 
-internal static (netꓸAddr proxy, netꓸAddr dst, error err) pathAddrs(this ref socksDialer d, @string address) {
-    netꓸAddr proxy = default;
-    netꓸAddr dst = default;
+internal static (net.Addr proxy, net.Addr dst, error err) pathAddrs(this ref socksDialer d, @string address) {
+    net.Addr proxy = default;
+    net.Addr dst = default;
     error err = default;
 
     foreach (var (i, s) in range(slice<@string>([d.proxyAddress, address]))) {
@@ -516,13 +539,15 @@ internal static (netꓸAddr proxy, netꓸAddr dst, error err) pathAddrs(this ref
             a.Name = host;
         }
         if (i == 0) {
-            proxy = new socksAddrжΔAddr(a);
+            proxy = new socksAddrжAddr(a);
         } else {
-            dst = new socksAddrжΔAddr(a);
+            dst = new socksAddrжAddr(a);
         }
     }
     return (proxy, dst, err);
 }
+
+} partial class http_package {
 
 // NewDialer returns a new Dialer that dials through the provided
 // proxy server's network and address.
@@ -540,6 +565,8 @@ partial struct socksUsernamePassword {
     public @string Password;
 }
 
+} partial class httpᴛsocksUsernamePassword {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidUsernamePasswordˢ => ref invalidUsernamePasswordˢᵇ;
 private static readonly @string invalidUsernamePasswordˢᵇ = "invalid username/password"u8;
@@ -556,13 +583,13 @@ internal static error Authenticate(this ref socksUsernamePassword up, context.Co
         return default;
     }
     case var ᴛ when ᴛ == socksAuthMethodUsernamePassword: {
-        if (builtin.len(up.Username) == 0 || builtin.len(up.Username) > 255 || builtin.len(up.Password) > 255) {
+        if (len(up.Username) == 0 || len(up.Username) > 255 || len(up.Password) > 255) {
             return errors.New(invalidUsernamePasswordˢ);
         }
         var b = slice<byte>([socksauthUsernamePasswordVersion]);
-        b = append(b, (byte)builtin.len(up.Username));
+        b = append(b, (byte)len(up.Username));
         b = append(b, up.Username.ꓸꓸꓸ);
-        b = append(b, (byte)builtin.len(up.Password));
+        b = append(b, (byte)len(up.Password));
         b = append(b, up.Password.ꓸꓸꓸ);
         // TODO(mikio): handle IO deadlines and cancellation if
         // necessary
@@ -587,4 +614,4 @@ internal static error Authenticate(this ref socksUsernamePassword up, context.Co
     return errors.New("unsupported authentication method "u8 + strconv.Itoa((nint)auth));
 }
 
-} // end http_package
+} // end httpᴛsocksUsernamePassword

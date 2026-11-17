@@ -158,7 +158,7 @@ internal static void lockRankMayQueueFinalizer() {
     lockWithRankMayAcquire(Ꮡfinlock, getLockRank(Ꮡfinlock));
 }
 
-internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uintptr nret, ж<_type> Ꮡfint, ж<ptrtype> Ꮡot) {
+internal static void queuefinalizer(@unsafe.Pointer p, ж<funcval> Ꮡfn, uintptr nret, ж<_type> Ꮡfint, ж<ptrtype> Ꮡot) {
     ref var fn = ref Ꮡfn.Value;
     ref var fint = ref Ꮡfint.Value;
     ref var ot = ref Ꮡot.Value;
@@ -201,7 +201,7 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
     f.Value.nret = nret;
     f.Value.fint = Ꮡfint;
     f.Value.ot = Ꮡot;
-    f.Value.arg = Δp;
+    f.Value.arg = p;
     finqueued++;
     unlock(Ꮡfinlock);
     ᏑfingStatus.Or(fingWake);
@@ -371,9 +371,9 @@ internal static void runFinalizers() {
     }
 }
 
-internal static bool isGoPointerWithoutSpan(@unsafe.Pointer Δp) {
+internal static bool isGoPointerWithoutSpan(@unsafe.Pointer p) {
     // 0-length objects are okay.
-    if (Δp.Value == @unsafe.Pointer.FromRef(ref (Ꮡzerobase).Value)) {
+    if (p.Value == @unsafe.Pointer.FromRef(ref (Ꮡzerobase).Value)) {
         return true;
     }
     // Global initializers might be linker-allocated.
@@ -385,7 +385,7 @@ internal static bool isGoPointerWithoutSpan(@unsafe.Pointer Δp) {
     // We cannot assume they are in any order or even contiguous,
     // due to external linking.
     for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.Value.next) {
-        if ((~datap).noptrdata <= (uintptr)Δp && (uintptr)Δp < (~datap).enoptrdata || (~datap).data <= (uintptr)Δp && (uintptr)Δp < (~datap).edata || (~datap).bss <= (uintptr)Δp && (uintptr)Δp < (~datap).ebss || (~datap).noptrbss <= (uintptr)Δp && (uintptr)Δp < (~datap).enoptrbss) {
+        if ((~datap).noptrdata <= (uintptr)p && (uintptr)p < (~datap).enoptrdata || (~datap).data <= (uintptr)p && (uintptr)p < (~datap).edata || (~datap).bss <= (uintptr)p && (uintptr)p < (~datap).ebss || (~datap).noptrbss <= (uintptr)p && (uintptr)p < (~datap).enoptrbss) {
             return true;
         }
     }
@@ -659,7 +659,7 @@ private sealed class GoFinalizerSentinel
 //                re-attached at once.
 //   CANCELLED -- SetFinalizer(obj, nil) cleared the finalizer: nothing to wait for, so cleanups queue
 //                at the object's first death as they would with no finalizer at all.
-private sealed class GoFinalizerGate
+internal sealed class GoFinalizerGate
 {
     private const int Pending = 0, Ran = 1, Cancelled = 2;
 

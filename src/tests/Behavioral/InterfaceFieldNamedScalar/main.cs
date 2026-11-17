@@ -1,18 +1,27 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct myErr /*num:nint*/;
 
+} partial class mainᴛmyErr {
+
 internal static @string Error(this myErr e) {
     return fmt.Sprintf("myErr(%d)"u8, (nint)e);
 }
 
+} partial class main_package {
+
 partial struct tag /*@string*/;
 
+} partial class mainᴛtag {
+
 internal static @string Name(this tag t) { return "tag:"u8 + ((@string)t); }
+
+} partial class main_package {
 
 partial interface named {
     @string Name();

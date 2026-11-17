@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static CaptureModeValueParamLib_package;
 
 partial class CaptureModeValueParamLib_package {
 
@@ -8,6 +9,8 @@ partial struct Config {
     public nint Indent;
     internal @string trace;
 }
+
+} partial class CaptureModeValueParamLibᴛConfig {
 
 internal static (@string @out, error err) fprint(this ж<Config> Ꮡcfg, @string label) {
     @string @out = default;
@@ -37,4 +40,4 @@ public static @string Trace(this ref Config cfg) {
     return cfg.trace;
 }
 
-} // end CaptureModeValueParamLib_package
+} // end CaptureModeValueParamLibᴛConfig

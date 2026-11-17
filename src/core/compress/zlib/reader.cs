@@ -33,6 +33,7 @@ using io = io_package;
 using encoding;
 using go.compress;
 using go.hash;
+using static zlib_package;
 
 partial class zlib_package {
 
@@ -87,6 +88,8 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
     }
     return (new readerжReadCloser(z), default);
 }
+
+} partial class zlibᴛreader {
 
 internal static (nint, error) Read(this ref reader z, slice<byte> p) {
     if (z.err != nil) {
@@ -179,4 +182,4 @@ internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
     return default;
 }
 
-} // end zlib_package
+} // end zlibᴛreader

@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct UUID /*[16]byte*/;
 
 partial struct UUIDs /*[]UUID*/;
+
+} partial class mainᴛUUIDs {
 
 public static slice<@string> Strings(this UUIDs us) {
     var @out = new slice<@string>(len(us));
@@ -18,7 +21,11 @@ public static slice<@string> Strings(this UUIDs us) {
     return @out;
 }
 
+} partial class main_package {
+
 partial struct Rows /*[]array<nint>*/;
+
+} partial class mainᴛRows {
 
 public static nint Sum(this Rows r) {
     nint total = 0;
@@ -31,6 +38,8 @@ public static nint Sum(this Rows r) {
     }
     return total;
 }
+
+} partial class main_package {
 
 internal static void main() {
     var (a, b) = (new UUID(new byte[]{0xab, 0x01}.array(16)), new UUID(new byte[]{0xcd, 0x02}.array(16)));

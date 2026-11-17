@@ -84,7 +84,7 @@ internal partial struct main_ptrSlots /*dyn*/ {
 internal static void main() {
     ref var xs = ref heap<slice<nint>>(slice<nint>([1, 2, 3, 4, 5, 6, 7, 8]), out var Ꮡxs);
     ref var xa = ref heap<array<nint>>(new nint[]{10, 20, 30, 40, 50, 60, 70, 80}.array(), out var Ꮡxa);
-    ref var vs = ref heap<reflectꓸValue>(reflect.ValueOf(Ꮡxs).Elem(), out var Ꮡvs);
+    ref var vs = ref heap<reflect.Value>(reflect.ValueOf(Ꮡxs).Elem(), out var Ꮡvs);
     var vsʗ1 = vs;
     expectPanic("SetLen(10)", "SetLen", () => {
         vsʗ1.SetLen(10);
@@ -119,7 +119,7 @@ internal static void main() {
     expectPanic("SetLen(6)>cap", "SetLen", () => {
         vsʗ7.SetLen(6);
     });
-    ref var va = ref heap<reflectꓸValue>(reflect.ValueOf(Ꮡxa).Elem(), out var Ꮡva);
+    ref var va = ref heap<reflect.Value>(reflect.ValueOf(Ꮡxa).Elem(), out var Ꮡva);
     var vaʗ1 = va;
     expectPanic("array SetLen", "SetLen", () => {
         vaʗ1.SetLen(8);
@@ -224,7 +224,7 @@ internal static void main() {
     var ap = reflect.ValueOf(src).Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(4L))).Interface()._<ж<array<byte>>>();
     ap.Value[2] = 99;
     fmt.Println("array pointer aliases the slice:", src[2] == 99);
-    ref var sh = ref heap<reflectꓸValue>(reflect.ValueOf(slice<byte>([1, 2, 3, 4])), out var Ꮡsh);
+    ref var sh = ref heap<reflect.Value>(reflect.ValueOf(slice<byte>([1, 2, 3, 4])), out var Ꮡsh);
     var shʗ1 = sh;
     expectPanic("Convert short slice", "cannot convert slice with length 4 to pointer to array with length 8", () => {
         shʗ1.Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(8L)));
@@ -244,7 +244,7 @@ internal static void main() {
     sendOnly.Interface()._<channel/*<-*/<nint>>().ᐸꟷ(7);
     fmt.Println("converted send-only view type:", sendOnly.Type(), " interface type:", reflect.TypeOf(sendOnly.Interface()), " received on the original:", ᐸꟷ<nint>(live));
 
-    void setRow(@string label, reflectꓸType slotΔ1, reflectꓸValue xΔ1) {
+    void setRow(@string label, reflect.Type slotΔ1, reflect.Value xΔ1) {
         GoFrame ᒐ = default;
         try {
             defer(() => {

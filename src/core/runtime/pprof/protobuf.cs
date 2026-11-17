@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.runtime;
 
+using static pprof_package;
+
 partial class pprof_package {
 
 // A protobuf is a simple protocol buffer encoder.
@@ -11,6 +13,8 @@ partial struct protobuf {
     internal array<byte> tmp = new(16);
     internal nint nest;
 }
+
+} partial class pprofᴛprotobuf {
 
 internal static void varint(this ref protobuf b, uint64 x) {
     while (x >= 128) {
@@ -123,7 +127,11 @@ internal static void boolOpt(this ref protobuf b, nint tag, bool x) {
     b.@bool(tag, x);
 }
 
+} partial class pprof_package {
+
 partial struct msgOffset /*num:nint*/;
+
+} partial class pprofᴛprotobuf {
 
 internal static msgOffset startMessage(this ref protobuf b) {
     b.nest++;
@@ -141,4 +149,4 @@ internal static void endMessage(this ref protobuf b, nint tag, msgOffset start) 
     b.nest--;
 }
 
-} // end pprof_package
+} // end pprofᴛprotobuf

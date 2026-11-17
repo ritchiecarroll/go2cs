@@ -118,8 +118,9 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 Four analyzers ship beside them: `StringLiteralBindingAnalyzer` fails the build when a C# string literal in
 converted code binds a C# type where Go has a `string`; `StackAppendBufferAnalyzer` fails it when a
 stack-append buffer is passed as anything but a plain local; `MethodLimitAnalyzer` fails it on a type with
-more methods than the .NET runtime loads (`GO2CS0012`); and `RefusalDowngradedAnalyzer` warns, in every
-build, on each refusal a conversion downgraded with `-warn` (`GO2CS0011`).
+more methods than the .NET runtime loads (`GO2CS0012`); `MethodHolderNameAnalyzer` fails it when a name in a
+method-holder class binds another member than its package's (`GO2CS0013`); and `RefusalDowngradedAnalyzer`
+warns, in every build, on each refusal a conversion downgraded with `-warn` (`GO2CS0011`).
 
 ## Runtime type map (`src/core/golib/`)
 

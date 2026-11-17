@@ -8,6 +8,7 @@ using token = global::go.go.token_package;
 using io = io_package;
 using sort = sort_package;
 using global::go.go;
+using static scanner_package;
 
 partial class scanner_package {
 
@@ -15,13 +16,15 @@ partial class scanner_package {
 // The position Pos, if valid, points to the beginning of
 // the offending token, and the error condition is described
 // by Msg.
-partial struct ΔError {
-    public tokenꓸPosition Pos;
+partial struct Error {
+    public token.Position Pos;
     public @string Msg;
 }
 
+} partial class scannerᴛError {
+
 // Error implements the error interface.
-public static @string Error(this ΔError e) {
+public static @string Error(this Error e) {
     if (e.Pos.Filename != ""u8 || e.Pos.IsValid()) {
         // don't print "<unknown position>"
         // TODO(gri) reconsider the semantics of Position.IsValid
@@ -30,13 +33,17 @@ public static @string Error(this ΔError e) {
     return e.Msg;
 }
 
+} partial class scanner_package {
+
 // ErrorList is a list of *Errors.
 // The zero value for an ErrorList is an empty ErrorList ready to use.
-partial struct ErrorList /*[]ж<ΔError>*/;
+partial struct ErrorList /*[]ж<Error>*/;
+
+} partial class scannerᴛErrorList {
 
 // Add adds an [Error] with given position and error message to an [ErrorList].
-public static void Add(this ref ErrorList p, tokenꓸPosition pos, @string msg) {
-    p = append(p, Ꮡ(new ΔError(pos, msg)));
+public static void Add(this ref ErrorList p, token.Position pos, @string msg) {
+    p = append(p, Ꮡ(new Error(pos, msg)));
 }
 
 // Reset resets an [ErrorList] to no errors.
@@ -76,9 +83,9 @@ public static void RemoveMultiples(this ж<ErrorList> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     sort.Sort(new ErrorListжInterface(Ꮡp));
-    tokenꓸPosition last = default; // initial last.Line is != any legal error line
+    token.Position last = default; // initial last.Line is != any legal error line
     nint i = 0;
-    foreach (var (_, e) in range<ж<ΔError>>(p)) {
+    foreach (var (_, e) in range<ж<Error>>(p)) {
         if (e.Pos.Filename != last.Filename || e.Pos.Line != last.Line) {
             last = e.Pos;
             (p)[i] = e;
@@ -113,12 +120,14 @@ public static error Err(this ErrorList p) {
     return p;
 }
 
+} partial class scanner_package {
+
 // PrintError is a utility function that prints a list of errors to w,
 // one error per line, if the err parameter is an [ErrorList]. Otherwise
 // it prints the err string.
 public static void PrintError(io.Writer w, error err) {
     var (list, ok) = err._<ErrorList>(ᐧ); if (ok) {
-        foreach (var (_, e) in range<ж<ΔError>>(list)) {
+        foreach (var (_, e) in range<ж<Error>>(list)) {
             fmt.Fprintf(w, "%s\n"u8, e.OrTypedNil());
         }
     } else if (err != nil) {

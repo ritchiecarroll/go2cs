@@ -21,6 +21,7 @@ using go.crypto;
 using go.crypto.tls.@internal;
 using go.sync;
 using math;
+using static tls_package;
 
 partial class tls_package {
 
@@ -37,10 +38,12 @@ partial struct serverHandshakeState {
     internal bool rsaDecryptOk;
     internal bool rsaSignOk;
     internal ж<SessionState> sessionState;
-    internal ΔfinishedHash finishedHash;
+    internal finishedHash finishedHash;
     internal slice<byte> masterSecret;
     internal ж<Certificate> cert;
 }
+
+} partial class tlsᴛConn {
 
 // serverHandshake performs a TLS handshake as a server.
 internal static error serverHandshake(this ж<Conn> Ꮡc, context.Context ctx) {
@@ -68,6 +71,8 @@ internal static error serverHandshake(this ж<Conn> Ꮡc, context.Context ctx) {
     ), out var Ꮡhs);
     return Ꮡhs.handshake();
 }
+
+} partial class tlsᴛserverHandshakeState {
 
 internal static error handshake(this ж<serverHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
@@ -168,6 +173,8 @@ internal static error handshake(this ж<serverHandshakeState> Ꮡhs) {
     return default;
 }
 
+} partial class tlsᴛConn {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsEncryptedClientHelloˢ => ref tlsEncryptedClientHelloˢᵇ;
 private static readonly @string tlsEncryptedClientHelloˢᵇ = "tls: Encrypted Client Hello cannot be used pre-TLS 1.3"u8;
@@ -260,9 +267,13 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) readClientHell
     return (clientHello, ech, default);
 }
 
+} partial class tlsᴛserverHandshakeState {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsClientDoesNotSupportˢ => ref tlsClientDoesNotSupportˢᵇ;
 private static readonly @string tlsClientDoesNotSupportˢᵇ = "tls: client does not support uncompressed connections"u8;
+internal static ref readonly @string tlsInitialHandshakeHadˢ => ref tlsInitialHandshakeHadˢᵇ;
+private static readonly @string tlsInitialHandshakeHadˢᵇ = "tls: initial handshake had non-empty renegotiation extension"u8;
 
 internal static error processClientHello(this ref serverHandshakeState hs) {
     var c = hs.c;
@@ -388,6 +399,8 @@ internal static error processClientHello(this ref serverHandshakeState hs) {
     return default;
 }
 
+} partial class tls_package {
+
 // negotiateALPN picks a shared ALPN protocol that both sides support in server
 // preference order. If ALPN is not configured or the peer doesn't support it,
 // it returns "" and no error.
@@ -456,6 +469,8 @@ internal static (bool, error) supportsECDHE(ж<Config> c, uint16 version, slice<
 
     return (supportsCurve && supportsPointFormat, default);
 }
+
+} partial class tlsᴛserverHandshakeState {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsClientUsingˢ => ref tlsClientUsingˢᵇ;
@@ -561,7 +576,7 @@ internal static error checkForResumption(this ж<serverHandshakeState> Ꮡhs) {
     // TLS 1.2 tickets don't natively have a lifetime, but we want to avoid
     // re-wrapping the same master secret in different tickets over and over for
     // too long, weakening forward secrecy.
-    var createdAt = time_package.Unix((int64)sessionState.createdAt, 0);
+    var createdAt = time.Unix((int64)sessionState.createdAt, 0);
     if (c.config.time().Sub(createdAt) > maxSessionTicketLifetime) {
         return default;
     }
@@ -656,12 +671,12 @@ internal static error doResumeHandshake(this ж<serverHandshakeState> Ꮡhs) {
     hs.finishedHash = newFinishedHash(c.vers, ref (hs.suite).DerefOrNull());
     hs.finishedHash.discardHandshakeBuffer();
     {
-        var err = transcriptMsg(new clientHelloMsgжhandshakeMessage(hs.clientHello), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (err != nil) {
+        var err = transcriptMsg(new clientHelloMsgжhandshakeMessage(hs.clientHello), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (err != nil) {
             return err;
         }
     }
     {
-        var (_, err) = hs.c.writeHandshakeRecord(new serverHelloMsgжhandshakeMessage(hs.hello), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (err != nil) {
+        var (_, err) = hs.c.writeHandshakeRecord(new serverHelloMsgжhandshakeMessage(hs.hello), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (err != nil) {
             return err;
         }
     }
@@ -679,8 +694,12 @@ internal static error doResumeHandshake(this ж<serverHandshakeState> Ꮡhs) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tlsFips1403RequiresTheˢ => ref tlsFips1403RequiresTheˢᵇ;
+private static readonly @string tlsFips1403RequiresTheˢᵇ = "tls: FIPS 140-3 requires the use of Extended Master Secret"u8;
 internal static ref readonly @string tlsClientCertificateUsedˢ => ref tlsClientCertificateUsedˢᵇ;
 private static readonly @string tlsClientCertificateUsedˢᵇ = "tls: client certificate used with invalid signature algorithm"u8;
+internal static ref readonly @string tlsInternalErrorDidNotˢ => ref tlsInternalErrorDidNotˢᵇ;
+private static readonly @string tlsInternalErrorDidNotˢᵇ = "tls: internal error: did not keep handshake transcript for TLS 1.2"u8;
 
 internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
@@ -704,23 +723,23 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         // certificates won't be used.
         hs.finishedHash.discardHandshakeBuffer();
     }
-    var errΔ1 = transcriptMsg(new clientHelloMsgжhandshakeMessage(hs.clientHello), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ1 != nil) {
+    var errΔ1 = transcriptMsg(new clientHelloMsgжhandshakeMessage(hs.clientHello), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ1 != nil) {
         return errΔ1;
     }
-    var (_, errΔ2) = hs.c.writeHandshakeRecord(new serverHelloMsgжhandshakeMessage(hs.hello), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ2 != nil) {
+    var (_, errΔ2) = hs.c.writeHandshakeRecord(new serverHelloMsgжhandshakeMessage(hs.hello), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ2 != nil) {
         return errΔ2;
     }
 
     var certMsg = @new<certificateMsg>();
     certMsg.certificates = hs.cert.ΔCertificate;
-    var (_, errΔ3) = hs.c.writeHandshakeRecord(new certificateMsgжhandshakeMessage(certMsg), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ3 != nil) {
+    var (_, errΔ3) = hs.c.writeHandshakeRecord(new certificateMsgжhandshakeMessage(certMsg), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ3 != nil) {
         return errΔ3;
     }
 
     if (hs.hello.ocspStapling) {
         var certStatus = @new<certificateStatusMsg>();
         certStatus.response = hs.cert.OCSPStaple;
-        var (_, errΔ4) = hs.c.writeHandshakeRecord(new certificateStatusMsgжhandshakeMessage(certStatus), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ4 != nil) {
+        var (_, errΔ4) = hs.c.writeHandshakeRecord(new certificateStatusMsgжhandshakeMessage(certStatus), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ4 != nil) {
             return errΔ4;
         }
     }
@@ -736,7 +755,7 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
             c.curveID = keyAgreementΔ1.curveID;
             c.peerSigAlg = keyAgreementΔ1.signatureAlgorithm;
         }
-        var (_, errΔ5) = hs.c.writeHandshakeRecord(new serverKeyExchangeMsgжhandshakeMessage(skx), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ5 != nil) {
+        var (_, errΔ5) = hs.c.writeHandshakeRecord(new serverKeyExchangeMsgжhandshakeMessage(skx), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ5 != nil) {
             return errΔ5;
         }
     }
@@ -762,13 +781,13 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         if (c.config.ClientCAs != nil) {
             certReq.certificateAuthorities = c.config.ClientCAs.Subjects();
         }
-        var (_, errΔ6) = hs.c.writeHandshakeRecord(new certificateRequestMsgжhandshakeMessage(certReq), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ6 != nil) {
+        var (_, errΔ6) = hs.c.writeHandshakeRecord(new certificateRequestMsgжhandshakeMessage(certReq), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ6 != nil) {
             return errΔ6;
         }
     }
 
     var helloDone = @new<serverHelloDoneMsg>();
-    var (_, errΔ7) = hs.c.writeHandshakeRecord(new serverHelloDoneMsgжhandshakeMessage(helloDone), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ7 != nil) {
+    var (_, errΔ7) = hs.c.writeHandshakeRecord(new serverHelloDoneMsgжhandshakeMessage(helloDone), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ7 != nil) {
         return errΔ7;
     }
 
@@ -778,7 +797,7 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
 
     cryptoꓸPublicKey pub = default; // public key for client auth, if any
 
-    (var msg, err) = c.readHandshake(new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash));
+    (var msg, err) = c.readHandshake(new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash));
     if (err != nil) {
         return err;
     }
@@ -801,7 +820,7 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
             pub = c.peerCertificates[0].PublicKey;
         }
 
-        (msg, err) = c.readHandshake(new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash));
+        (msg, err) = c.readHandshake(new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash));
         if (err != nil) {
             return err;
         }
@@ -903,7 +922,7 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
 
         c.peerSigAlg = certVerify.signatureAlgorithm;
 
-        var errΔ14 = transcriptMsg(new certificateVerifyMsgжhandshakeMessage(certVerify), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ14 != nil) {
+        var errΔ14 = transcriptMsg(new certificateVerifyMsgжhandshakeMessage(certVerify), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ14 != nil) {
             return errΔ14;
         }
     }
@@ -971,7 +990,7 @@ internal static error readFinished(this ж<serverHandshakeState> Ꮡhs, slice<by
         return errors.New(tlsClientSFinishedˢ);
     }
 
-    var errΔ2 = transcriptMsg(new finishedMsgжhandshakeMessage(clientFinished), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ2 != nil) {
+    var errΔ2 = transcriptMsg(new finishedMsgжhandshakeMessage(clientFinished), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ2 != nil) {
         return errΔ2;
     }
 
@@ -1014,7 +1033,7 @@ internal static error sendSessionTicket(this ж<serverHandshakeState> Ꮡhs) {
     }
 
     {
-        var (_, err) = hs.c.writeHandshakeRecord(new newSessionTicketMsgжhandshakeMessage(m), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (err != nil) {
+        var (_, err) = hs.c.writeHandshakeRecord(new newSessionTicketMsgжhandshakeMessage(m), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (err != nil) {
             return err;
         }
     }
@@ -1036,7 +1055,7 @@ internal static error sendFinished(this ж<serverHandshakeState> Ꮡhs, slice<by
     var finished = @new<finishedMsg>();
     finished.verifyData = hs.finishedHash.serverSum(hs.masterSecret);
     {
-        var (_, err) = hs.c.writeHandshakeRecord(new finishedMsgжhandshakeMessage(finished), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (err != nil) {
+        var (_, err) = hs.c.writeHandshakeRecord(new finishedMsgжhandshakeMessage(finished), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (err != nil) {
             return err;
         }
     }
@@ -1045,6 +1064,8 @@ internal static error sendFinished(this ж<serverHandshakeState> Ꮡhs, slice<by
 
     return default;
 }
+
+} partial class tlsᴛConn {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsClientDidnTProvideAˢ => ref tlsClientDidnTProvideAˢᵇ;
@@ -1139,10 +1160,12 @@ internal static error processCertsFromClient(this ж<Conn> Ꮡc, Certificate cer
     return default;
 }
 
+} partial class tls_package {
+
 internal static ж<ClientHelloInfo> clientHelloInfo(context.Context ctx, ref Conn c, ref clientHelloMsg clientHello) {
-    var ΔsupportedVersions = clientHello.supportedVersions;
+    var supportedVersions = clientHello.supportedVersions;
     if (len(clientHello.supportedVersions) == 0) {
-        ΔsupportedVersions = supportedVersionsFromMax(clientHello.vers);
+        supportedVersions = supportedVersionsFromMax(clientHello.vers);
     }
 
     return Ꮡ(new ClientHelloInfo(
@@ -1152,7 +1175,7 @@ internal static ж<ClientHelloInfo> clientHelloInfo(context.Context ctx, ref Con
         SupportedPoints: clientHello.supportedPoints,
         SignatureSchemes: clientHello.supportedSignatureAlgorithms,
         SupportedProtos: clientHello.alpnProtocols,
-        SupportedVersions: ΔsupportedVersions,
+        SupportedVersions: supportedVersions,
         Extensions: clientHello.extensions,
         Conn: c.conn,
         HelloRetryRequest: c.didHRR,

@@ -1,13 +1,18 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct ints /*[]nint*/;
 
+} partial class mainᴛints {
+
 internal static void swap(this ref ints p, nint i, nint j) { ((p)[i], (p)[j]) = ((p)[j], (p)[i]); }
 internal static void set(this ref ints p, nint i, nint v) { (p)[i] = v; }
+
+} partial class main_package {
 
 internal static void show(ref ints p) {
     foreach (var (i, x) in range<nint>(p)) {
@@ -25,9 +30,13 @@ partial struct cell {
 
 partial struct cells /*[]cell*/;
 
+} partial class mainᴛcells {
+
 internal static ж<cell> at(this ref cells c, nint i) { return Ꮡ((c), i); }
 internal static void swapAt(this ref cells c, nint i, nint j) { (c.at(i).Value, c.at(j).Value) = (c.at(j).Value, c.at(i).Value); }
 internal static void setAt(this ref cells c, nint i, nint v) { c.at(i).Value = new cell(v); }
+
+} partial class main_package {
 
 internal static void showCells(ref cells c) {
     foreach (var (i, x) in range<cell>(c)) {

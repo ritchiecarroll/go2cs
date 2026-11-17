@@ -27,7 +27,6 @@ using static go.go.doc.comment_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Text", "ΔText")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -38,15 +37,15 @@ using static go.go.doc.comment_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<Code, Block>(Pointer = true)]
-[assembly: GoImplement<DocLink, ΔText>(Pointer = true)]
+[assembly: GoImplement<DocLink, Text>(Pointer = true)]
 [assembly: GoImplement<Heading, Block>(Pointer = true)]
-[assembly: GoImplement<Italic, ΔText>(Pointer = true)]
-[assembly: GoImplement<Italic, ΔText>]
-[assembly: GoImplement<Link, ΔText>(Pointer = true)]
+[assembly: GoImplement<Italic, Text>(Pointer = true)]
+[assembly: GoImplement<Italic, Text>]
+[assembly: GoImplement<Link, Text>(Pointer = true)]
 [assembly: GoImplement<List, Block>(Pointer = true)]
 [assembly: GoImplement<Paragraph, Block>(Pointer = true)]
-[assembly: GoImplement<Plain, ΔText>(Pointer = true)]
-[assembly: GoImplement<Plain, ΔText>]
+[assembly: GoImplement<Plain, Text>(Pointer = true)]
+[assembly: GoImplement<Plain, Text>]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
@@ -81,12 +80,12 @@ using static go.go.doc.comment_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/doc/comment/html.go", "html.cs", "ABIqwoKCgpQACgiypLaClIK2goKCgoKClIKCgoK2goK2goKUgoKCgoKCgoKCgpSUgoKClJSCzKKCgoKClJTosoKUtIKCtIKCgoK0goKCgpSCggAOEtKCgpSCgrSCgrSCgrSCgrSCgrY=")]
-[assembly: GoPositionMap("go/doc/comment/markdown.go", "markdown.cs", "ABMs0sqCgoKUlOjCpLaCtoKCgoKClLaCgoKCgoKUyIKCgpSCgoKUlIKCgpSC7sKCgoKClKa0goKUlIKCtqzSgpS0goK0goKCgrSCgpSCgoKCgoIABhLSgoLugoKCAAkQgoKCtg==", "", "", "26=headingLevel/1/1/2,Repeat/1/1/2")]
-[assembly: GoPositionMap("go/doc/comment/parse.go", "parse.cs", "ACdSABo6AAES8gACEuKClILKpgASKAAJFAAKFsoACBIAESYAOIwBAAsCgoKUlJSCpqaCggACFgAIAoKUqsKC7oKqooKClLS0tLS0pIKUuIKUtIKCguwAFC6iAAgSlIKCgpSClIKUgqaCgoLugoKCgpS4goIADyCCpoKUuIKClAAKFoLcgoKCAAgQgraCgsqCgoKUuILGuqKu1IKUgpSCuIKCgriCooKClJSClIKUqJKokoKClKiSgoKUqqKCpqaCgriCgriCuIKCgpSCyoKCgpSCuKiSqJKukqiygoKqxJKCgoKUlJKCgqaChAACENKClIKCpoKCgoLuqsKCqoKCgqamoqSUgoKUgoKCgpSUgq7ygoK4goKCgoKUgpSUpoKmrLKCAAIaAA0CgoKCgoK4goKCgoKUlLSCgoKCuIKCgoKCpoKkgriCAAISAAkCgoKCpoKCgqaCooKClIKCpoKmyqzigoKClIKUAAIS4oKCgoKUkoKCgqaCgoKAktyCgoKkgIKSgoKUgoKUlIKCtpSUgoKUlIKCgrSCgoK0toIAAhD4spSktLS0tJSCuILKgoKUgoKCgpSUAAgSgoKCgoKUgpSUtLS0gpSkgtissgACEJTqqgAQGKyqAAsQ6poAHDCqkoKClIIAAhDkgoKCgoKUlIKCgpSU6JoACgysooKUgpSClIKUgpSCgoKClKamgoKUgoKm5ooADhQ=", "291-291:1;703-710:1;787-792:1;899-902:1;903-909:2", "", "640=TrimSpace/1/1/3;837=parseText/1/1/1")]
-[assembly: GoPositionMap("go/doc/comment/print.go", "print.cs", "ADN0goKUpqKClKaigpQAAioAEgKCgoKUlJSkpKaClAAGFPaigoKCgpSCgoKClKYABhLCgoKCgpQABxCCgoKCgoKClIKCgoLKqqKClOiypLaCtoKCtoKCgoKCgpTIgoKClIKClIKUgoKClILusoKUtLSClIKCxoKC3sKCgoKCgpQ=")]
+[assembly: GoPositionMap("go/doc/comment/html.go", "html.cs", "ABUqwoKCgpQADAiypLaClIK2goKCgoKClIKCgoK2goK2goKUgoKCgoKCgoKCgpSUgoKClJSC7KKCgoKClJQACAiygpS0goK0goKCgrSCgoKClIKCAA4S0oKClIKCtIKCtIKCtIKCtIKCtg==")]
+[assembly: GoPositionMap("go/doc/comment/markdown.go", "markdown.cs", "ABYs0sqCgoKUlAAICMKktoK2goKCgoKUtoKCgoKCgpTIgoKClIKCgpSUgoKClILuwoKCgoKUprSCgpSUgoK2rNKClLSCgrSCgoKCtIKClIKCgoKCggAGEtKCgu6CgoIACRCCgoK2", "", "", "29=headingLevel/1/1/2,Repeat/1/1/2")]
+[assembly: GoPositionMap("go/doc/comment/parse.go", "parse.cs", "ACpSAB46AAES8gACEuKClILKpgAWKAANFAAOFgAICgAMEgAVJgA8jAEACwKCgpSUlIKmxoKCAAIWAAgCgpTKwoLugqqigoKUtLS0tLSkgpS4gpS0goKC7AAWLqIACBKUgoKClIKUgpSCpoKCgu6CgoKClLiCggAPIIKmgpS4goKUAAoWgtyCgoIACBCCtoKCyoKCgpS4gsa6oq7UgpSClIK4goKCuIKigoKUlIKUgpSokqiSgoKUqJKCgpSqooKmpoKCuIKCuIK4goKClILKgoKClIK4yJLIks6SqLKCgqrEkoKCgpSUkoKCpoKEAAQQ0oKUgoKmgoKCgu7KwoKqgoKCpqaipJSCgpSCgoKClJSCzvKCgriCgoKCgpSClJSmgqassoIABBoADQKCgoKCgriCgoKCgpSUtIKCgoK4goKCgoKmgqSCuIIAAhIACQKCgoKmgoKCpoKigoKUgoKmgqbKzOKCgoKUgpQABBLigoKCgpSSgoKCpoKCgoCS3IKCgqSAgpKCgpSCgpSUgoK2lJSCgpSUgoKCtIKCgrS2ggAEEPiylKS0tLS0lIK4gsqCgpSCgoKClJQACBKCgoKCgpSClJS0tLSClKSC2KyyAAIQlOqqABAYrKoACxDqmgAcMKqSgoKUggACEOSCgoKCgpSUgoKClJTomgAKDKyigpSClIKUgpSClIKCgoKUpqaCgpSCgqbmigAOFA==", "291-291:1;703-710:1;787-792:1;899-902:1;903-909:2", "", "685=TrimSpace/1/1/3;892=parseText/1/1/1")]
+[assembly: GoPositionMap("go/doc/comment/print.go", "print.cs", "ADZ0goKUpqKClKaigpQABCoAEgKCgoKUlJSkpKaClAAIFPaigoKCgpSCgoKClKYAChLCgoKCgpQABxCCgoKCgoKClIKCgoLKyqKClAAICLKktoK2goK2goKCgoKClMiCgoKUgoKUgpSCgoKUgu6ygpS0tIKUgoLGgoLewoKCgoKClA==")]
 [assembly: GoPositionMap("go/doc/comment/std.go", "std.cs", "AAkU")]
-[assembly: GoPositionMap("go/doc/comment/text.go", "text.cs", "ABg00tyClIKmgoKCgpSUgoKCgqaCgoKCuKrUgoKClIKU6MKktoK2goK2goKCgoKClMiCgoKClIKCgpSClIKCgoKClO7CgoKUgoKUlIKCgpSCgpSUvrKClLS0tAAMKAAvPoqClKSkpJTKgoKCuLSCgu6CgoKU3IK0sqKClIKUuIKCgoKCgoKClIKUgriCuKaCgpSCgoKUqJKUlA==", "231-231:1;232-244:2;255-272:3;278-278:4;280-289:5;281-284:5.1")]
+[assembly: GoPositionMap("go/doc/comment/text.go", "text.cs", "ABs00tyClIKmgoKCgpSUgoKCgqaCgoKCuMrUgoKClIKUAAgIwqS2graCgraCgoKCgoKUyIKCgoKUgoKClIKUgoKCgoKU7sKCgpSCgpSUgoKClIKClJS+soKUtLS0AA4oAC8+ioKUpKSklMqCgoK4tIKC7oKCgpTcgrSyooKUgpS4goKCgoKCgoKUgpSCuIK4poKClIKCgpSokpSU", "231-231:1;232-244:2;255-272:3;278-278:4;280-289:5;281-284:5.1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.doc;
@@ -110,7 +109,7 @@ public static partial class comment_package
     internal partial struct textPrinter {}
     [GoLocalName("score")] internal partial struct wrap_score {}
     public partial interface Block {}
-    public partial interface ΔText {}
+    public partial interface Text {}
     public partial struct Code {}
     public partial struct Doc {}
     public partial struct DocLink {}
@@ -143,3 +142,27 @@ public static partial class comment_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(global::go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(comment_package.Code)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛCode;
+[GoMethodHost(typeof(comment_package.DocLink)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛDocLink;
+[GoMethodHost(typeof(comment_package.Heading)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛHeading;
+[GoMethodHost(typeof(comment_package.Italic)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛItalic;
+[GoMethodHost(typeof(comment_package.Link)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛLink;
+[GoMethodHost(typeof(comment_package.List)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛList;
+[GoMethodHost(typeof(comment_package.Paragraph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛParagraph;
+[GoMethodHost(typeof(comment_package.Parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛParser;
+[GoMethodHost(typeof(comment_package.Plain)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛPlain;
+[GoMethodHost(typeof(comment_package.Printer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛPrinter;
+[GoMethodHost(typeof(comment_package.commentPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛcommentPrinter;
+[GoMethodHost(typeof(comment_package.htmlPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛhtmlPrinter;
+[GoMethodHost(typeof(comment_package.mdPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛmdPrinter;
+[GoMethodHost(typeof(comment_package.parseDoc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛparseDoc;
+[GoMethodHost(typeof(comment_package.textPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛtextPrinter;
+// </MethodHolders>

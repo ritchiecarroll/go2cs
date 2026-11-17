@@ -3,7 +3,11 @@
 // license that can be found in the LICENSE file.
 namespace go.regexp;
 
+using static syntax_package;
+
 partial class syntax_package {
+
+} partial class syntaxᴛRegexp {
 
 // Simplify returns a regexp equivalent to re but without counted repetitions
 // and with various other simplifications, such as rewriting /(?:a+)+/ to /a+/.
@@ -29,10 +33,10 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
                 nre = @new<Regexp>();
                 nre.Value = re.ΔClone();
                 nre.Rune = default;
-                nre.Sub = builtin.appendꓸꓸꓸ(nre.Sub0[..0], re.Sub.slice(0, i));
+                nre.Sub = appendꓸꓸꓸ(nre.Sub0[..0], re.Sub.slice(0, i));
             }
             if (nre != Ꮡre) {
-                nre.Sub = builtin.append(nre.Sub, nsub);
+                nre.Sub = append(nre.Sub, nsub);
             }
         }
         return nre;
@@ -67,9 +71,9 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
             var nre = Ꮡ(new Regexp(Op: OpConcat));
             nre.Sub = nre.Sub0[..0];
             for (nint i = 0; i < re.Min - 1; i++) {
-                nre.Sub = builtin.append(nre.Sub, sub);
+                nre.Sub = append(nre.Sub, sub);
             }
-            nre.Sub = builtin.append(nre.Sub, simplify1(OpPlus, re.Flags, sub, nil));
+            nre.Sub = append(nre.Sub, simplify1(OpPlus, re.Flags, sub, nil));
             return nre;
         }
 
@@ -90,7 +94,7 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
             prefix = Ꮡ(new Regexp(Op: OpConcat));
             prefix.Sub = prefix.Sub0[..0];
             for (nint i = 0; i < re.Min; i++) {
-                prefix.Sub = builtin.append(prefix.Sub, sub);
+                prefix.Sub = append(prefix.Sub, sub);
             }
         }
 
@@ -99,13 +103,13 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
             var suffix = simplify1(OpQuest, re.Flags, sub, nil);
             for (nint i = re.Min + 1; i < re.Max; i++) {
                 var nre2 = Ꮡ(new Regexp(Op: OpConcat));
-                nre2.Sub = builtin.append(nre2.Sub0[..0], sub, suffix);
+                nre2.Sub = append(nre2.Sub0[..0], sub, suffix);
                 suffix = simplify1(OpQuest, re.Flags, nre2, nil);
             }
             if (prefix == nil) {
                 return suffix;
             }
-            prefix.Sub = builtin.append(prefix.Sub, suffix);
+            prefix.Sub = append(prefix.Sub, suffix);
         }
         if (prefix != nil) {
             return prefix;
@@ -118,6 +122,8 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
 
     return Ꮡre;
 }
+
+} partial class syntax_package {
 
 // simplify1 implements Simplify for the unary OpStar,
 // OpPlus, and OpQuest operators. It returns the simple regexp
@@ -152,7 +158,7 @@ internal static ж<Regexp> simplify1(Op op, Flags flags, ж<Regexp> Ꮡsub, ж<R
     }
 
     Ꮡre = Ꮡ(new Regexp(Op: op, Flags: flags)); re = ref Ꮡre.DerefOrNull();
-    re.Sub = builtin.append(re.Sub0[..0], Ꮡsub);
+    re.Sub = append(re.Sub0[..0], Ꮡsub);
     return Ꮡre;
 }
 

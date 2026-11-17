@@ -63,7 +63,7 @@ using static go.crypto.@internal.fips140.hmac_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/hmac/cast.go", "cast.cs", "AA8cgoK43IKCgoKU", "15-33:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/hmac/hmac.go", "hmac.cs", "AC5euIKU5raClIKCpoKUgqaCpoKUgoKClKaCAA4egoKUgoKmgoKmgoKCgriCggAJCoKmgqqigoKClIKClIKCgpSCgpSosoKCgoKylJSCtJKClIKCgpSClIKCgpSClJSosg==", "173-181:1;174-177:1.1", "", "", "", "189:25,191:17")]
+[assembly: GoPositionMap("crypto/internal/fips140/hmac/hmac.go", "hmac.cs", "ADFeuIKU5raClIKCpoKUgqaCpoKUgoKClKaCAA4egoKUgoKmgoKmgoKCgriCggANCoKmgsqigoKClIKClIKCgpSCgpTIsoKCgoKylJSCtJKClIKCgpSClIKCgpSClJSosg==", "173-181:1;174-177:1.1", "", "", "", "200:25,202:17")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -99,3 +99,14 @@ public static partial class hmac_package
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(hmac_package.HMAC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hmacᴛHMAC;
+[GoMethodHost(typeof(hmac_package.errCloneUnsupported)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hmacᴛerrCloneUnsupported;
+// </MethodHolders>

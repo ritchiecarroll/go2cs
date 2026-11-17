@@ -42,6 +42,7 @@ using @internal;
 // The plain namespace using brings internal/runtime/atomic's [GoRecv] extension methods (Load,
 // CompareAndSwap, Store on the owned flag) into scope; an alias alone does not.
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package
 {
@@ -111,6 +112,8 @@ partial class runtime_package
         return l;
     }
 
+} partial class runtimeᴛdloggerImpl {
+
     // dloggerImpl.s logs a string. Go logs a string constant by its offset into rodata
     // (debugLogConstString) and any other string by value, building the []byte over the string's
     // data by writing a slice header through a reinterpret, which the managed model refuses. A
@@ -132,6 +135,8 @@ partial class runtime_package
         }
         return Ꮡl;
     }
+
+} partial class runtime_package {
 
     internal static void printDebugLogImpl() {
         // This function should not panic or throw since it is used in
@@ -187,7 +192,7 @@ partial class runtime_package
                 dlogWrite(" <<\n"u8);
                 s.Value.first = false;
             }
-            var (end, _, nano, Δp) = s.of(printDebugLogImpl_readState.ᏑdebugLogReader).header();
+            var (end, _, nano, p) = s.of(printDebugLogImpl_readState.ᏑdebugLogReader).header();
             var oldEnd = s.Value.end;
             s.Value.end = end;
             dlogWrite("["u8);
@@ -202,7 +207,7 @@ partial class runtime_package
             // reinterpret the managed model refuses); printstring would only hand them to gwrite.
             gwrite(pnanoBytes);
             dlogWrite(" P "u8);
-            dlogInt(Δp);
+            dlogInt(p);
             dlogWrite("] "u8);
             for (nint i = 0; (~s).begin < (~s).end; i++) {
                 if (i > 0) {
@@ -248,9 +253,11 @@ partial class runtime_package
     // The runtime's own printers, as Go's compiler lowers `print`. These were special cases while
     // printstring's bytes(s) reinterpreted a string header the managed model refuses; bytes(s) is a
     // hand-owned copy since the print-fidelity seat, so printstring and printint's sign work.
-    private static void dlogWrite(@string s) => printstring(s);
+    internal static void dlogWrite(@string s) => printstring(s);
 
-    private static void dlogInt(int64 v) => printint(v);
+    internal static void dlogInt(int64 v) => printint(v);
+
+} partial class runtimeᴛdebugLogReader {
 
     // debugLogReader.printVal prints one logged value. Go's `print` is the runtime's own printer
     // (printlock/printstring/printint..., through gwrite), which DumpDebugLog captures by setting the
@@ -341,4 +348,7 @@ partial class runtime_package
         }
         return true;
     }
+
+} partial class runtime_package {
+
 }

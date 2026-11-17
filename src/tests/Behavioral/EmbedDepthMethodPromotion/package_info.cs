@@ -89,7 +89,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAsggu6iggAKDgASJAAIDAAbMMgAFiTYgoIAERzIAAkSABEgAAgMABEeyAAJEgAlRoKCgoLYgqKClIKCgoKClIIACg4ACRKCAAoSggAQIgAOGoKCgoKmhIKCgoKCgoKCloKCgoKUgoKClIKCgoKCgpaCgoKCgoKWgoKCgoKWgoKCgpaCgoKWgoKCgoKCgoKCgoKUgpSU", "", "", "423=Modifiers/1/1/1,propagateSubtreeFacts/1/1/1,subtreeFactsWorker/1/1/1;426=computeSubtreeFacts/1/1/1,subtreeFactsWorker/1/1/1;428=propagateSubtreeFacts/1/1/1;430=subtreeFactsWorker/1/1/1,Modifiers/1/1/1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABAgggAKDqKCAA4OABYkAAwMAB8wAAgIABokAAkIgoIAFRwACAgADRIAFSAADAwAFR4ACAgADRIAKUaCgoKCAAkIgqKClIKCgoKClIIADg4ADRKCAA4SggAUIgAQGoKCgoKmhIKCgoKCgoKCloKCgoKUgoKClIKCgoKCgpaCgoKCgoKWgoKCgoKWgoKCgpaCgoKWgoKCgoKCgoKCgoKUgpSU", "", "", "518=Modifiers/1/1/1,propagateSubtreeFacts/1/1/1,subtreeFactsWorker/1/1/1;521=computeSubtreeFacts/1/1/1,subtreeFactsWorker/1/1/1;523=propagateSubtreeFacts/1/1/1;525=subtreeFactsWorker/1/1/1,Modifiers/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -180,3 +180,35 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.aDefault)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛaDefault;
+[GoMethodHost(typeof(main_package.aNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛaNode;
+[GoMethodHost(typeof(main_package.aSide)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛaSide;
+[GoMethodHost(typeof(main_package.bDeep)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbDeep;
+[GoMethodHost(typeof(main_package.bFlat)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbFlat;
+[GoMethodHost(typeof(main_package.bFlow)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbFlow;
+[GoMethodHost(typeof(main_package.bNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbNode;
+[GoMethodHost(typeof(main_package.cDefault)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcDefault;
+[GoMethodHost(typeof(main_package.cNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcNode;
+[GoMethodHost(typeof(main_package.dLeft)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛdLeft;
+[GoMethodHost(typeof(main_package.dRight)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛdRight;
+[GoMethodHost(typeof(main_package.dTop)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛdTop;
+[GoMethodHost(typeof(main_package.eFar)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛeFar;
+[GoMethodHost(typeof(main_package.eNear)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛeNear;
+[GoMethodHost(typeof(main_package.fDeep)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfDeep;
+[GoMethodHost(typeof(main_package.fOne)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfOne;
+[GoMethodHost(typeof(main_package.fTwo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfTwo;
+[GoMethodHost(typeof(main_package.gDefault)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛgDefault;
+[GoMethodHost(typeof(main_package.gFlowBase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛgFlowBase;
+[GoMethodHost(typeof(main_package.gModsBase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛgModsBase;
+[GoMethodHost(typeof(main_package.gNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛgNode;
+[GoMethodHost(typeof(main_package.gTypeSyntax)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛgTypeSyntax;
+[GoMethodHost(typeof(main_package.gUnion)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛgUnion;
+// </MethodHolders>

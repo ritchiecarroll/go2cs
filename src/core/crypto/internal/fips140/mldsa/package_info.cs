@@ -27,7 +27,6 @@ using static go.crypto.@internal.fips140.mldsa_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("PublicKey", "ΔPublicKey")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -51,7 +50,7 @@ using static go.crypto.@internal.fips140.mldsa_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(PrivateKey))]
-[assembly: GoFieldAccess(typeof(ΔPublicKey))]
+[assembly: GoFieldAccess(typeof(PublicKey))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -63,7 +62,7 @@ using static go.crypto.@internal.fips140.mldsa_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/mldsa/cast.go", "cast.cs", "ABQggoKCgoKUyIIACBT07AAJFNzcgoKCgpSCgoKCgpQ=", "17-24:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/mldsa/field.go", "field.cs", "ABo2mKKCpqqigqq0qqKUqqKmqJKCqJKCqJKCqJKCqJKCgqqigqqigoIACBLSgpSo0oKUAAgQmtKUgoKCpoKCgoKmgoLcgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKmrNKmgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKmgoKCpoKCgpSmgoLKgpSo0oKUrLKCgpSCgoKCgoKClIKCgoKUgpSssoKClIKCgoKCgoKUgoKCgoKClIKUgoKClIKmqqKCgoKUgoKCgoKUpoKCgpS4rLKClAANHIKYooKCggAKFIKUpAAEEMKmgqaCqLKClILGgsakrOKClILGgsakqPKUgoLGgoLGpKjagoKCrOKCpoKUqJKCgoKCuKaopIKUlKikgoKCrOKCpoKUqJKCgoKUgpS4gpS4qKSCgoIAAhDylKSkAAQS8oKClIKCgoKCgoKCgoKCgoKCgoKUAAIQ8oKClIKCgoKCgoKClKqilKSkzKKClIKCgoKCgoKCgoKCgpSqooKUgoKCgoKCgoKUrvKClIKUgqiSqJKokg==")]
-[assembly: GoPositionMap("crypto/internal/fips140/mldsa/mldsa.go", "mldsa.cs", "ABw4goKWlKaUABs2oqaCgqamAAoWooKmgoIACgaClKSkpMiCgoKCgoKCpoKCgoKCgoKmgoKCgoKCgqaUgoKCgpSmgoKCgpSmgoKCgpSmoqSClIKCgoKCgpSClIKClIKCuIKCgoK4goK4goKCgpTugoKUpoKSgoLKgoKCgoKmgoKCpoKUuIKCtIKCgoKCgoKCgoKmpqKClIKUgoKCgoKCpqaUgqaCpoKmgqSCgoKmgoKCgpSogoKWooKCgoKSgpSmooKCgpKClKaigoKSgpSClKaCgoKCgoKUpoKCgoKClKaCgoKClIKUpoKClIKCgoKCgoKC5rKilIKCgoKUgoKCgoKUgoIABxCCgoKClIKCgoKUuIKClIKCgoKUpoKCgpSCuJSCgpSCgqaCgqaCgpS4gqaCgpS4goKmgoKUuIKCgoKCpoKClKYAChSypoKCgoKUxoKCgoKCgoKClLTI2IKCpqailIKCgtiCgoLYpKiCgoKCgpaigoKSgpSmgoKCgpSmoqKUgoKUgoKCgqamgoKUgoKCgpSCuIKCpoKCgpSClIKCuIKmpoKCgoKUgqaigpSCgoKClIKUpoKSgoKCgoKCppTmgpKClIKCgoKUgoKClIKmgoKm")]
+[assembly: GoPositionMap("crypto/internal/fips140/mldsa/mldsa.go", "mldsa.cs", "AB04goKWlKaUAB02oqaCgqamAA4WooKmgoIACgaClKSkpOiCgoKCgoKCpoKCgoKCgoKmgoKCgoKCgqaUgoKCgpSmgoKCgpSmgoKCgpSmoqSClIKCgoKCgpSClIKClIKCuIKCgoK4goK4goKCgpTugoKUpoKSgoLKgoKCgoKmgoKCpoKUuIKCtIKCgoKCgoKCgoKmpqKClIKUgoKCgoKCpqaUgqaCpoKmgqSCgoKmgoKCgpSogoKWooKCgoKSgpSmooKCgpKClKaigoKSgpSClKaCgoKCgoKUpoKCgoKClKaCgoKClIKUpoKClIKCgoKCgoKC5rKilIKCgoKUgoKCgoKUgoIABxCCgoKClIKCgoKUuIKClIKCgoKUpoKCgpSCuJSCgpSCgqaCgqaCgpS4gqaCgpS4goKmgoKUuIKCgoKCpoKClKYAChSypoKCgoKUxoKCgoKCgoKClLTI2IKCpqailIKCgtiCgoLYpKiCgoKCgpaigoKSgpSmgoKCgpSmoqKUgoKUgoKCgqamgoKUgoKCgpSCuIKCpoKCgpSClIKCuIKmpoKCgoKUgqaigpSCgoKClIKUpoKSgoKCgoKCppTmgpKClIKCgoKUgoKClIKmgoKm")]
 [assembly: GoPositionMap("crypto/internal/fips140/mldsa/semiexpanded.go", "semiexpanded.cs", "AA0wAAoCkqYAChLigpS0tLSUpIKCpoKCgoKCgpSClILKABImgoKCgpSCgoKCgsqCgpSUpqKigoKCgoKUgpSCgpSmAAgCooKClIKCgoKClIKCgoKClKaCgoKCgpSmgoKCgoKClKamooKClIKCgoKCgoKCgoKCpoKUAAgGgoKClIKmgpSCgoKUgoKCgoKmgoKUgoKm")]
 // </GoSourcePositionMaps>
 
@@ -82,9 +81,9 @@ public static partial class mldsa_package
     internal partial struct nttElement {}
     internal partial struct ringElement {}
     [GoValueClone("seed", "pub", "s1", "s2", "t0", "k")] public partial struct PrivateKey {}
+    [GoValueClone("raw", "a", "t1", "tr")] public partial struct PublicKey {}
     public partial struct fieldElement {}
     public partial struct parameters {}
-    [GoValueClone("raw", "a", "t1", "tr")] public partial struct ΔPublicKey {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -106,3 +105,14 @@ public static partial class mldsa_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(mldsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mldsaᴛPrivateKey;
+[GoMethodHost(typeof(mldsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mldsaᴛPublicKey;
+// </MethodHolders>

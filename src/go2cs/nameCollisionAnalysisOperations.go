@@ -9,12 +9,9 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
-	"path/filepath"
-	"strings"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -46,31 +43,12 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 
 	// Track names of various declarations
 	namedElementNames := make(map[string]bool)
-	methodNames := make(map[string]bool)
-
-	// A `-tests` variant universe mixes production files with `_test.go` files, but only the test
-	// files are EMITTED — the production .cs on disk were converted from the production-only
-	// universe and are recompiled into the test assembly as-is. Production symbol names are
-	// therefore IMMUTABLE here: a collision a test file introduces must resolve by Δ-renaming the
-	// TEST-side declarator (see the resolution loop and the dot-import scan below). Production
-	// conversions have no `_test.go` files in pkg.Syntax, so these maps stay empty and the
-	// function behaves exactly as before.
-	elementInTestFile := make(map[string]bool)
-	methodInProductionFile := make(map[string]bool)
-	testMethodObjects := make(map[string][]types.Object)
-
-	// Every package-level FuncDecl (method AND free function), keyed by name — the input to the
-	// receiver-vs-first-parameter collision scan below, which needs the full signature, not just
-	// the name sets above.
-	funcDeclsByName := make(map[string][]packageFuncDecl)
 
 	// Names this package declares in a C# 15 reserved TYPE position (see csReservedTypeNames).
 	csReservedTypeNameDecls := make(map[string]bool)
 
-	// Collect all named element names and method names (top-level declarations only)
+	// Collect all named element names (top-level declarations only)
 	for _, file := range pkg.Syntax {
-		isTestFile := strings.HasSuffix(strings.ToLower(filepath.Base(pkg.Fset.Position(file.Pos()).Filename)), "_test.go")
-
 		collectCSReservedTypeNameDecls(file, csReservedTypeNameDecls)
 
 		for _, decl := range file.Decls {
@@ -91,10 +69,6 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 								}
 
 								namedElementNames[name.Name] = false
-
-								if isTestFile {
-									elementInTestFile[name.Name] = true
-								}
 							}
 						}
 					}
@@ -106,58 +80,11 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 						if typeSpec, ok := spec.(*ast.TypeSpec); ok {
 							if !typeSpec.Assign.IsValid() {
 								namedElementNames[typeSpec.Name.Name] = true
-
-								if isTestFile {
-									elementInTestFile[typeSpec.Name.Name] = true
-								}
 							}
 						}
 					}
 				}
-
-			case *ast.FuncDecl:
-				methodNames[node.Name.Name] = true
-
-				if pkg.TypesInfo != nil {
-					if obj := pkg.TypesInfo.Defs[node.Name]; obj != nil {
-						if signature, ok := obj.Type().(*types.Signature); ok {
-							funcDeclsByName[node.Name.Name] = append(funcDeclsByName[node.Name.Name],
-								packageFuncDecl{Object: obj, Signature: signature, InTestFile: isTestFile})
-						}
-					}
-				}
-
-				if isTestFile {
-					if pkg.TypesInfo != nil {
-						if obj := pkg.TypesInfo.Defs[node.Name]; obj != nil {
-							testMethodObjects[node.Name.Name] = append(testMethodObjects[node.Name.Name], obj)
-						}
-					}
-				} else {
-					methodInProductionFile[node.Name.Name] = true
-				}
 			}
-		}
-	}
-
-	// A package method/function whose name is a Go built-in (`func (b *pageBits) clear()`) shadows
-	// the using-static `go.builtin.<name>` for an unqualified free call in C#, so such built-in calls
-	// must be emitted qualified (`builtin.<name>(…)`). Record which built-ins this package shadows.
-	packageBuiltinShadows = make(map[string]bool)
-
-	for name := range methodNames {
-		// `recover` was excluded here for as long as a Go `recover()` emitted as the execution
-		// context's lambda PARAMETER: a parameter is in scope wherever recover is legal and
-		// correctly shadows a same-named package method, and there was no `builtin.recover` to
-		// qualify to anyway. The GoFrame emission retires that parameter — `recover()` is the
-		// static built-in now, reading the same thread-local slot the emitted catch parks the panic
-		// in — so the shadow is live again and qualification is both possible and required:
-		// text/template/parse declares `func (t *Tree) recover(errp *error)`, and inside its own
-		// package class that extension method wins over the using-static import (CS7036 on the
-		// nullary built-in call). It therefore takes the same treatment as every other shadowed
-		// built-in, with no special case at all.
-		if goBuiltinNames[name] {
-			packageBuiltinShadows[name] = true
 		}
 	}
 
@@ -182,235 +109,12 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 		nameCollisions[name] = true
 	}
 
-	// A method/function name can also shadow an IMPORTED PACKAGE's using-alias inside the
-	// package class (`func (s *byLiteral) sort(…)` vs `import "sort"` — `sort.Sort(…)`
-	// bound the method group, CS0119, compress/flate). Record every method/function name;
-	// the package-ident emission qualifies through the _package class when shadowed.
-	packageFuncMethodNames = make(map[string]bool)
-	packageTestAliasShadows = make(map[string]bool)
-
-	for name := range methodNames {
-		packageFuncMethodNames[name] = true
-	}
-
-	// A name the package's own `_test.go` half declares lands in the SAME package class when tests
-	// are compiled and shadows a production file's using-alias there just as a production
-	// declarator would. Fold the sibling half's declarator names into every production analysis so
-	// ordinary and -tests conversion emit the same source spelling. Track names contributed ONLY by
-	// tests separately so statement emission can explain the otherwise surprising qualification.
-	for _, name := range siblingTestFuncMethodNames {
-		if !methodNames[name] {
-			packageTestAliasShadows[name] = true
-		}
-
-		packageFuncMethodNames[name] = true
-	}
-
-	// Find collisions (names that appear in both sets)
-	for name, isType := range namedElementNames {
-		if methodNames[name] {
-			// B2 (test-variant coherence): a collision that exists ONLY because a `_test.go`
-			// file declared a method over a production-declared element must NOT Δ-rename the
-			// element — the production .cs on disk keeps the bare name, so renaming it here
-			// splits one assembly into two disagreeing halves (strings' export_test.go method
-			// `Replacer` over the production type: CS0102 + CS0246 ΔReplacer). Production names
-			// are pinned; the TEST-side declarator is Δ-renamed instead — necessarily a METHOD
-			// (Go keeps method names in a separate namespace; any other same-scope reuse is a Go
-			// compile error) — and its reference sites follow via convIdent's isMethod arm. When
-			// a PRODUCTION method also carries the name, the production universe had the same
-			// collision and its emission already Δ-renamed the element, so the normal path below
-			// stays consistent with the on-disk .cs.
-			if !elementInTestFile[name] && !methodInProductionFile[name] && len(testMethodObjects[name]) > 0 {
-				registerTestMethodRenames(testMethodObjects[name])
-				continue
-			}
-
-			// Found a collision
-			nameCollisions[name] = true
-
-			// Add collision avoidance name as a type aliases to package info,
-			// this way original name can be referenced as normal when using
-			// the name from referenced package. The name will not collide in
-			// a remote package because the type will have the package prefix.
-			if getAccess(name) == "public" {
-				var typePrefix string
-
-				if !isType {
-					typePrefix = "const:"
-				}
-
-				packageLock.Lock()
-				exportedTypeAliases[getCoreSanitizedIdentifier(name)] = fmt.Sprintf("%s%s", typePrefix, getCollisionAvoidanceIdentifier(name))
-				packageLock.Unlock()
-			}
-		}
-	}
-
-	// B9 (test-variant coherence, dot-import): a TEST-declared method whose name matches a
-	// dot-imported foreign FUNCTION the variant references UNQUALIFIED hijacks every such call
-	// site — Go keeps method names and dot-imported function names in separate namespaces, but
-	// both land in the package class's member-lookup scope in C#, and the enclosing class's
-	// method group always wins over `using static` imports (sort_test.go's dot-imported
-	// `Sort(data)` bound example_keys_test.go's `By.Sort` extension: CS1501 ×14). Production
-	// names are pinned (the foreign function keeps its bare emission at every call site); the
-	// test method declarator is Δ-renamed. Only unqualified references conflict — a qualified
-	// `sort.Sort(ps)` resolves through the package alias — so SelectorExpr Sels are excluded
-	// from the scan; an unqualified reference to another package's package-level function can
-	// only have arrived through a dot-import. The scan covers the WHOLE variant universe:
-	// production files' on-disk .cs recompile into the same class, so their dot-imported call
-	// sites are hijacked just the same.
-	if len(testMethodObjects) > 0 && pkg.TypesInfo != nil {
-		unqualifiedForeignFuncRefs := make(map[string]bool)
-		selIdents := make(map[*ast.Ident]bool)
-
-		for _, file := range pkg.Syntax {
-			ast.Inspect(file, func(n ast.Node) bool {
-				switch node := n.(type) {
-				case *ast.SelectorExpr:
-					// Parents are visited before children, so the Sel is marked before the
-					// ident case below can reach it.
-					selIdents[node.Sel] = true
-				case *ast.Ident:
-					if selIdents[node] {
-						break
-					}
-
-					if fn, ok := pkg.TypesInfo.Uses[node].(*types.Func); ok &&
-						fn.Pkg() != nil && fn.Pkg() != pkg.Types && fn.Signature().Recv() == nil {
-						unqualifiedForeignFuncRefs[fn.Name()] = true
-					}
-				}
-
-				return true
-			})
-		}
-
-		for name, objects := range testMethodObjects {
-			if unqualifiedForeignFuncRefs[name] && !methodInProductionFile[name] {
-				registerTestMethodRenames(objects)
-			}
-		}
-	}
-
-	resolveReceiverParameterCollisions(funcDeclsByName)
-}
-
-// packageFuncDecl is one package-level FuncDecl — method or free function — with the signature
-// and test/production origin the receiver-vs-first-parameter collision scan needs.
-type packageFuncDecl struct {
-	Object     types.Object
-	Signature  *types.Signature
-	InTestFile bool
-}
-
-// resolveReceiverParameterCollisions Δ-renames a `-tests` test-file declarator whose EMITTED C#
-// signature is identical to a same-named sibling's because a METHOD's receiver becomes the
-// extension method's leading `this` parameter. Go keeps method names and package-scope function
-// names in separate namespaces, so `func (z nat) norm() nat` (nat.go) and `func norm(x nat) nat`
-// (int_test.go) coexist legally; both emit into the package class as `norm(nat)` — `this` does not
-// participate in C# signature identity — so the test variant fails to compile (math/big, CS0111).
-//
-// Production names are pinned exactly as in B2/B9 above: the production .cs on disk recompile into
-// the test assembly unchanged, so only the TEST-side declarator may move. When BOTH sides are
-// test-declared the free function is the one renamed, so the choice is deterministic and two
-// colliding declarators never both become Δ-prefixed. A collision between two PRODUCTION
-// declarators is deliberately left alone: it would equally break the production-only conversion,
-// making it a different (and currently hypothetical — the 302-package corpus compiles clean) fix
-// than test-variant coherence.
-func resolveReceiverParameterCollisions(funcDeclsByName map[string][]packageFuncDecl) {
-	for _, decls := range funcDeclsByName {
-		if len(decls) < 2 {
-			continue
-		}
-
-		for i, left := range decls {
-			for _, right := range decls[i+1:] {
-				if !emittedSignaturesCollide(left.Signature, right.Signature) {
-					continue
-				}
-
-				// Rename the test-side declarator; with both test-declared, the free function
-				// (the one WITHOUT a receiver) is renamed so the outcome does not depend on
-				// declaration order.
-				switch {
-				case left.InTestFile && right.InTestFile:
-					if left.Signature.Recv() == nil {
-						registerTestMethodRenames([]types.Object{left.Object})
-					} else {
-						registerTestMethodRenames([]types.Object{right.Object})
-					}
-				case left.InTestFile:
-					registerTestMethodRenames([]types.Object{left.Object})
-				case right.InTestFile:
-					registerTestMethodRenames([]types.Object{right.Object})
-				}
-			}
-		}
-	}
-}
-
-// emittedSignaturesCollide reports whether two same-named package-level signatures land on the
-// same C# member signature once emitted. Only a method/free-function pair can: a method emits its
-// receiver as the leading `this` parameter, so `func (r R) f(a A)` and `func f(r R, a A)` both
-// become `f(R, A)`. Two methods differ by receiver type (Go forbids redeclaring one method on one
-// type) and two free functions cannot share a package scope at all.
-func emittedSignaturesCollide(left, right *types.Signature) bool {
-	method, function := left, right
-
-	if method.Recv() == nil {
-		method, function = right, left
-	}
-
-	// Not a method/free-function pair — either two methods or two free functions.
-	if method.Recv() == nil || function.Recv() != nil {
-		return false
-	}
-
-	// Generic declarations are emitted with their type parameters, which keeps the C# signatures
-	// distinct; comparing instantiated parameter types here would be meaningless anyway.
-	if method.TypeParams().Len() != 0 || function.TypeParams().Len() != 0 ||
-		method.RecvTypeParams().Len() != 0 || function.RecvTypeParams().Len() != 0 {
-		return false
-	}
-
-	// A variadic tail emits as `params`, which C# still counts as one parameter of the same type,
-	// so the arities must agree in the same way — but a variadic/non-variadic mismatch is a
-	// genuine difference in the emitted member and must not be treated as a collision.
-	if method.Variadic() != function.Variadic() {
-		return false
-	}
-
-	methodParams, functionParams := method.Params(), function.Params()
-
-	if methodParams.Len()+1 != functionParams.Len() {
-		return false
-	}
-
-	if !types.Identical(method.Recv().Type(), functionParams.At(0).Type()) {
-		return false
-	}
-
-	for i := 0; i < methodParams.Len(); i++ {
-		if !types.Identical(methodParams.At(i).Type(), functionParams.At(i+1).Type()) {
-			return false
-		}
-	}
-
-	return true
-}
-
-// registerTestMethodRenames records `-tests` test-file method declarators that must emit (and be
-// referenced) Δ-renamed to keep production symbol names immutable — see testMethodRenames in
-// main.go for the session-scoping rationale. Lazy-initialized so direct unit-test drivers of a
-// single variant conversion need no session setup.
-func registerTestMethodRenames(objects []types.Object) {
-	if testMethodRenames == nil {
-		testMethodRenames = make(map[types.Object]bool)
-	}
-
-	for _, obj := range objects {
-		testMethodRenames[obj] = true
-	}
+	// A package-level type, constant or variable named like a METHOD of the package is no collision: a
+	// method is a member of its receiver type's holder, beside the package class, and never of the class
+	// that declares the element (methodHolder.go). Until 2026-11-11 both were members of the package
+	// class, and the element took the rename here. For the same reason no method hides a Go built-in or
+	// an import's alias anywhere but in its own holder: the two package-wide name sets that qualified
+	// those references are gone, and each reference asks its holder (holderDeclares).
 }
 
 // heapIntrinsicIdent is the Go identifier that shadows golib's heap-boxing intrinsic. Unlike the

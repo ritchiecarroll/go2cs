@@ -18,6 +18,6 @@ partial class types_package {
 // See go.dev/issue/67401.
 //
 //go:linkname badlinkname_Checker_infer go/types.(*Checker).infer
-internal static partial slice<ΔType> badlinkname_Checker_infer(ж<Checker> _Δp0, positioner _Δp1, slice<ж<TypeParam>> _Δp2, slice<ΔType> _Δp3, ж<Tuple> _Δp4, slice<ж<operand>> _Δp5, bool _Δp6, ж<error_> _Δp7);
+internal static partial slice<Type> badlinkname_Checker_infer(ж<Checker> _Δp0, positioner _Δp1, slice<ж<TypeParam>> _Δp2, slice<Type> _Δp3, ж<Tuple> _Δp4, slice<ж<operand>> _Δp5, bool _Δp6, ж<error_> _Δp7);
 
 } // end types_package

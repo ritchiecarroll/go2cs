@@ -18,6 +18,7 @@ using strings = strings_package;
 using encoding;
 using go.crypto;
 using hash = hash_package;
+using static x509_package;
 
 partial class x509_package {
 
@@ -47,13 +48,13 @@ partial struct rfc1423Algo {
     name: "DES-CBC",
     cipherFunc: des.NewCipher,
     keySize: 8,
-    blockSize: des.ΔBlockSize
+    blockSize: des.BlockSize
 ), new(
     cipher: PEMCipher3DES,
     name: "DES-EDE3-CBC",
     cipherFunc: des.NewTripleDESCipher,
     keySize: 24,
-    blockSize: des.ΔBlockSize
+    blockSize: des.BlockSize
 ), new(
     cipher: PEMCipherAES128,
     name: "AES-128-CBC",
@@ -76,6 +77,8 @@ partial struct rfc1423Algo {
 ]); }
 internal static ref slice<rfc1423Algo> rfc1423Algos => ref ((StaticBox<slice<rfc1423Algo>>)Ꮡrfc1423Algos).ValueSlot;
 
+} partial class x509ᴛrfc1423Algo {
+
 // deriveKey uses a key derivation function to stretch the password into a key
 // with the number of bits our cipher requires. This algorithm was derived from
 // the OpenSSL source.
@@ -84,7 +87,7 @@ internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, 
     var @out = new slice<byte>(c.keySize);
     slice<byte> digest = default;
 
-    for (nint i = 0; i < builtin.len(@out); i += builtin.len(digest)) {
+    for (nint i = 0; i < len(@out); i += len(digest)) {
         hash.Reset();
         hash.Write(digest);
         hash.Write(password);
@@ -94,6 +97,8 @@ internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, 
     }
     return @out;
 }
+
+} partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dekInfoˢ => ref dekInfoˢᵇ;
@@ -162,7 +167,7 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
     if (err != nil) {
         return (default, err);
     }
-    if (builtin.len(iv) != ciph.blockSize) {
+    if (len(iv) != ciph.blockSize) {
         return (default, errors.New(x509IncorrectIvSizeˢ));
     }
 
@@ -174,11 +179,11 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
         return (default, err);
     }
 
-    if (builtin.len(b.Bytes) % block.BlockSize() != 0) {
+    if (len(b.Bytes) % block.BlockSize() != 0) {
         return (default, errors.New(x509EncryptedPemDataIsˢ));
     }
 
-    var data = new slice<byte>(builtin.len(b.Bytes));
+    var data = new slice<byte>(len(b.Bytes));
     var dec = cipher.NewCBCDecrypter(block, iv);
     dec.CryptBlocks(data, b.Bytes);
 
@@ -188,7 +193,7 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
     //	[x y z 2 2]
     //	[x y 7 7 7 7 7 7 7]
     // If we detect a bad padding, we assume it is an invalid password.
-    nint dlen = builtin.len(data);
+    nint dlen = len(data);
     if (dlen == 0 || rem(dlen, ciph.blockSize) != 0) {
         return (default, errors.New(x509InvalidPaddingˢ));
     }
@@ -231,8 +236,8 @@ public static (ж<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string blo
         return (default, err);
     }
     var enc = cipher.NewCBCEncrypter(block, iv);
-    nint pad = ciph.blockSize - builtin.len(data) % ciph.blockSize;
-    var encrypted = new slice<byte>(builtin.len(data), builtin.len(data) + pad);
+    nint pad = ciph.blockSize - len(data) % ciph.blockSize;
+    var encrypted = new slice<byte>(len(data), len(data) + pad);
     // We could save this copy by encrypting all the whole blocks in
     // the data separately, but it doesn't seem worth the additional
     // code.
@@ -254,7 +259,7 @@ public static (ж<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string blo
 }
 
 internal static ж<rfc1423Algo> cipherByName(@string name) {
-    foreach (var i in range(builtin.len(rfc1423Algos))) {
+    foreach (var i in range(len(rfc1423Algos))) {
         var alg = Ꮡ(rfc1423Algos, i);
         if (alg.name == name) {
             return alg;
@@ -264,7 +269,7 @@ internal static ж<rfc1423Algo> cipherByName(@string name) {
 }
 
 internal static ж<rfc1423Algo> cipherByKey(PEMCipher key) {
-    foreach (var i in range(builtin.len(rfc1423Algos))) {
+    foreach (var i in range(len(rfc1423Algos))) {
         var alg = Ꮡ(rfc1423Algos, i);
         if (alg.cipher == key) {
             return alg;

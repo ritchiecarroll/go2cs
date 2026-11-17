@@ -4,6 +4,7 @@
 namespace go.@internal;
 
 using fmt = fmt_package;
+using static trace_package;
 
 partial class trace_package {
 
@@ -44,6 +45,8 @@ public static GoState GoRunning => 3;                 // Goroutine is running.
 public static GoState GoWaiting => 4;                 // Goroutine is waiting on something to happen.
 public static GoState GoSyscall => 5;                 // Goroutine is in a system call.
 
+} partial class traceᴛGoState {
+
 // Executing returns true if the state indicates that the goroutine is executing
 // and bound to its thread.
 public static bool Executing(this GoState s) {
@@ -51,14 +54,20 @@ public static bool Executing(this GoState s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string undeterminedˢ => ref undeterminedˢᵇ;
+private static readonly @string undeterminedˢᵇ = "Undetermined"u8;
 internal static ref readonly @string notExistˢ => ref notExistˢᵇ;
 private static readonly @string notExistˢᵇ = "NotExist"u8;
 internal static ref readonly @string runnableˢ => ref runnableˢᵇ;
 private static readonly @string runnableˢᵇ = "Runnable"u8;
+internal static ref readonly @string runningˢ => ref runningˢᵇ;
+private static readonly @string runningˢᵇ = "Running"u8;
 internal static ref readonly @string waitingˢ => ref waitingˢᵇ;
 private static readonly @string waitingˢᵇ = "Waiting"u8;
 internal static ref readonly @string syscallˢ => ref syscallˢᵇ;
 private static readonly @string syscallˢᵇ = "Syscall"u8;
+internal static ref readonly @string badˢ => ref badˢᵇ;
+private static readonly @string badˢᵇ = "Bad"u8;
 
 // String returns a human-readable representation of a GoState.
 //
@@ -86,6 +95,8 @@ public static @string String(this GoState s) {
     return badˢ;
 }
 
+} partial class trace_package {
+
 // ProcState represents the state of a proc.
 //
 // New ProcStates may be added in the future. Users of this type must be robust
@@ -97,6 +108,8 @@ public static ProcState ProcNotExist => 1;                // Proc does not exist
 public static ProcState ProcRunning => 2;                 // Proc is running.
 public static ProcState ProcIdle => 3;                    // Proc is idle.
 
+} partial class traceᴛProcState {
+
 // Executing returns true if the state indicates that the proc is executing
 // and bound to its thread.
 public static bool Executing(this ProcState s) {
@@ -104,8 +117,16 @@ public static bool Executing(this ProcState s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string undeterminedˢ => ref undeterminedˢᵇ;
+private static readonly @string undeterminedˢᵇ = "Undetermined"u8;
+internal static ref readonly @string notExistˢ => ref notExistˢᵇ;
+private static readonly @string notExistˢᵇ = "NotExist"u8;
+internal static ref readonly @string runningˢ => ref runningˢᵇ;
+private static readonly @string runningˢᵇ = "Running"u8;
 internal static ref readonly @string idleˢ => ref idleˢᵇ;
 private static readonly @string idleˢᵇ = "Idle"u8;
+internal static ref readonly @string badˢ => ref badˢᵇ;
+private static readonly @string badˢᵇ = "Bad"u8;
 
 // String returns a human-readable representation of a ProcState.
 //
@@ -127,6 +148,8 @@ public static @string String(this ProcState s) {
     return badˢ;
 }
 
+} partial class trace_package {
+
 // ResourceKind indicates a kind of resource that has a state machine.
 //
 // New ResourceKinds may be added in the future. Users of this type must be robust
@@ -138,6 +161,8 @@ public static ResourceKind ResourceGoroutine => 1;       // Goroutine.
 public static ResourceKind ResourceProc => 2;            // Proc.
 public static ResourceKind ResourceThread => 3;          // Thread.
 
+} partial class traceᴛResourceKind {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noneˢ => ref noneˢᵇ;
 private static readonly @string noneˢᵇ = "None"u8;
@@ -147,6 +172,8 @@ internal static ref readonly @string procˢ => ref procˢᵇ;
 private static readonly @string procˢᵇ = "Proc"u8;
 internal static ref readonly @string threadˢ => ref threadˢᵇ;
 private static readonly @string threadˢᵇ = "Thread"u8;
+internal static ref readonly @string badˢ => ref badˢᵇ;
+private static readonly @string badˢᵇ = "Bad"u8;
 
 // String returns a human-readable representation of a ResourceKind.
 //
@@ -167,6 +194,8 @@ public static @string String(this ResourceKind r) {
     }}
     return badˢ;
 }
+
+} partial class trace_package {
 
 // ResourceID represents a generic resource ID.
 partial struct ResourceID {
@@ -197,6 +226,8 @@ public static ResourceID MakeResourceID<T>(T id)
     rd.id = (int64)ConvertToUInt64<T>(id);
     return rd;
 }
+
+} partial class traceᴛResourceID {
 
 // Goroutine obtains a GoID from the resource ID.
 //
@@ -238,8 +269,10 @@ public static @string String(this ResourceID r) {
     return fmt.Sprintf("%s(%d)"u8, r.Kind, r.id);
 }
 
+} partial class trace_package {
+
 // StateTransition provides details about a StateTransition event.
-partial struct ΔStateTransition {
+partial struct StateTransition {
     // Resource is the resource this state transition is for.
     public ResourceID Resource;
     // Reason is a human-readable reason for the state transition.
@@ -255,7 +288,7 @@ partial struct ΔStateTransition {
     // a Stack here would refer to the starting stack of the new goroutine, and
     // an (Event).Stack would refer to the stack trace of whoever created the
     // goroutine.
-    public ΔStack Stack;
+    public Stack Stack;
     // The actual transition data. Stored in a neutral form so that
     // we don't need fields for every kind of resource.
     internal uint8 oldState;
@@ -263,8 +296,8 @@ partial struct ΔStateTransition {
 }
 
 // MakeGoStateTransition creates a goroutine state transition.
-public static ΔStateTransition MakeGoStateTransition(GoID id, GoState from, GoState to) {
-    return new ΔStateTransition(
+public static StateTransition MakeGoStateTransition(GoID id, GoState from, GoState to) {
+    return new StateTransition(
         Resource: new ResourceID(Kind: ResourceGoroutine, id: (int64)id),
         oldState: (uint8)from,
         newState: (uint8)to
@@ -272,13 +305,15 @@ public static ΔStateTransition MakeGoStateTransition(GoID id, GoState from, GoS
 }
 
 // MakeProcStateTransition creates a proc state transition.
-public static ΔStateTransition MakeProcStateTransition(ProcID id, ProcState from, ProcState to) {
-    return new ΔStateTransition(
+public static StateTransition MakeProcStateTransition(ProcID id, ProcState from, ProcState to) {
+    return new StateTransition(
         Resource: new ResourceID(Kind: ResourceProc, id: (int64)id),
         oldState: (uint8)from,
         newState: (uint8)to
     );
 }
+
+} partial class traceᴛStateTransition {
 
 // Goroutine returns the state transition for a goroutine.
 //
@@ -287,7 +322,7 @@ public static ΔStateTransition MakeProcStateTransition(ProcID id, ProcState fro
 // on the same thread will feature the same goroutine until it stops running.
 //
 // Panics if d.Resource.Kind is not ResourceGoroutine.
-public static (GoState from, GoState to) Goroutine(this ΔStateTransition d) {
+public static (GoState from, GoState to) Goroutine(this StateTransition d) {
     if (d.Resource.Kind != ResourceGoroutine) {
         throw panic("Goroutine called on non-Goroutine state transition");
     }
@@ -301,11 +336,11 @@ public static (GoState from, GoState to) Goroutine(this ΔStateTransition d) {
 // on the same thread will feature the same goroutine until it stops running.
 //
 // Panics if d.Resource.Kind is not ResourceProc.
-public static (ProcState from, ProcState to) Proc(this ΔStateTransition d) {
+public static (ProcState from, ProcState to) Proc(this StateTransition d) {
     if (d.Resource.Kind != ResourceProc) {
         throw panic("Proc called on non-Proc state transition");
     }
     return ((ProcState)d.oldState, (ProcState)d.newState);
 }
 
-} // end trace_package
+} // end traceᴛStateTransition

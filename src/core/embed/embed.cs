@@ -137,6 +137,7 @@ using fs = go.io.fs_package;
 using time = time_package;
 using @internal;
 using go.io;
+using static embed_package;
 
 partial class embed_package {
 
@@ -216,6 +217,8 @@ partial struct @file {
 internal static fs.FileInfo _ᴛ3ʗ = new fileжFileInfo(((ж<@file>)nil));
 internal static fs.DirEntry _ᴛ4ʗ = new fileжDirEntry(((ж<@file>)nil));
 
+} partial class embedᴛfile {
+
 internal static @string Name(this ref @file f) {
     var (_, elem, _) = split(f.name);
     return elem;
@@ -244,9 +247,13 @@ internal static @string String(this ж<@file> Ꮡf) {
     return fs.FormatFileInfo(new fileжFileInfo(Ꮡf));
 }
 
+} partial class embed_package {
+
 // dotFile is a file for the root directory,
 // which is omitted from the files list in a FS.
 internal static ж<@file> dotFile = Ꮡ(new @file(name: "./"));
+
+} partial class embedᴛFS {
 
 // lookup returns the named file, or nil if it is not present.
 internal static ж<@file> lookup(this FS f, @string name) {
@@ -351,6 +358,8 @@ public static (slice<byte>, error) ReadFile(this FS f, @string name) {
     return (slice<byte>(ofile.f.data), default);
 }
 
+} partial class embed_package {
+
 // An openFile is a regular file open for reading.
 partial struct openFile {
     internal ж<@file> f;   // the file itself
@@ -359,6 +368,8 @@ partial struct openFile {
 
 internal static Δio.Seeker _ᴛ5ʗ = new openFileжSeeker(((ж<openFile>)nil));
 internal static Δio.ReaderAt _ᴛ6ʗ = new openFileжReaderAt(((ж<openFile>)nil));
+
+} partial class embedᴛopenFile {
 
 internal static error Close(this ref openFile f) { return default; }
 internal static (fs.FileInfo, error) Stat(this ref openFile f) { return (new fileжFileInfo(f.f), default); }
@@ -407,6 +418,8 @@ internal static (nint, error) ReadAt(this ref openFile f, slice<byte> b, int64 o
     return (n, default);
 }
 
+} partial class embed_package {
+
 // An openDir is a directory open for reading.
 partial struct openDir {
     internal ж<@file> f;         // the directory file itself
@@ -414,8 +427,14 @@ partial struct openDir {
     internal nint offset;        // the read offset, an index into the files slice
 }
 
+} partial class embedᴛopenDir {
+
 internal static error Close(this ref openDir d) { return default; }
 internal static (fs.FileInfo, error) Stat(this ref openDir d) { return (new fileжFileInfo(d.f), default); }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static ref readonly @string isADirectoryˢ => ref isADirectoryˢᵇ;
+private static readonly @string isADirectoryˢᵇ = "is a directory"u8;
 
 internal static (nint, error) Read(this ref openDir d, slice<byte> _) {
     return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.f.name, Err: errors.New(isADirectoryˢ)))));
@@ -439,6 +458,8 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
     d.offset += n;
     return (list, default);
 }
+
+} partial class embed_package {
 
 // sortSearch is like sort.Search, avoiding an import.
 internal static nint sortSearch(nint n, Func<nint, bool> f) {

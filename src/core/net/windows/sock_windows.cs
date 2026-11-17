@@ -21,7 +21,7 @@ internal static nint maxListenerBacklog() {
 internal static ref readonly @string socketˢ => ref socketˢᵇ;
 private static readonly @string socketˢᵇ = "socket"u8;
 
-internal static (syscallꓸHandle, error) sysSocket(nint family, nint sotype, nint proto) {
+internal static (syscall.Handle, error) sysSocket(nint family, nint sotype, nint proto) {
     var (s, err) = wsaSocketFunc((int32)family, (int32)sotype, (int32)proto,
         nil, 0, (uint32)((uint32)windows.WSA_FLAG_OVERLAPPED | (uint32)windows.WSA_FLAG_NO_HANDLE_INHERIT));
     if (err != nil) {

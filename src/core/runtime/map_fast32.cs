@@ -14,7 +14,7 @@ partial class runtime_package {
 // Functions below pushed from internal/runtime/maps.
 
 //go:linkname mapaccess1_fast32
-internal static partial @unsafe.Pointer mapaccess1_fast32(ж<abiꓸMapType> t, ж<mapsꓸMap> m, uint32 key);
+internal static partial @unsafe.Pointer mapaccess1_fast32(ж<abi.MapType> t, ж<maps.Map> m, uint32 key);
 
 // mapaccess2_fast32 should be an internal detail,
 // but widely used packages access it using linkname.
@@ -25,7 +25,7 @@ internal static partial @unsafe.Pointer mapaccess1_fast32(ж<abiꓸMapType> t, �
 // See go.dev/issue/67401.
 //
 //go:linkname mapaccess2_fast32
-internal static partial (@unsafe.Pointer, bool) mapaccess2_fast32(ж<abiꓸMapType> t, ж<mapsꓸMap> m, uint32 key);
+internal static partial (@unsafe.Pointer, bool) mapaccess2_fast32(ж<abi.MapType> t, ж<maps.Map> m, uint32 key);
 
 // mapassign_fast32 should be an internal detail,
 // but widely used packages access it using linkname.
@@ -37,7 +37,7 @@ internal static partial (@unsafe.Pointer, bool) mapaccess2_fast32(ж<abiꓸMapTy
 // See go.dev/issue/67401.
 //
 //go:linkname mapassign_fast32
-internal static partial @unsafe.Pointer mapassign_fast32(ж<abiꓸMapType> t, ж<mapsꓸMap> m, uint32 key);
+internal static partial @unsafe.Pointer mapassign_fast32(ж<abi.MapType> t, ж<maps.Map> m, uint32 key);
 
 // mapassign_fast32ptr should be an internal detail,
 // but widely used packages access it using linkname.
@@ -48,9 +48,9 @@ internal static partial @unsafe.Pointer mapassign_fast32(ж<abiꓸMapType> t, ж
 // See go.dev/issue/67401.
 //
 //go:linkname mapassign_fast32ptr
-internal static partial @unsafe.Pointer mapassign_fast32ptr(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @unsafe.Pointer key);
+internal static partial @unsafe.Pointer mapassign_fast32ptr(ж<abi.MapType> t, ж<maps.Map> m, @unsafe.Pointer key);
 
 //go:linkname mapdelete_fast32
-internal static partial void mapdelete_fast32(ж<abiꓸMapType> t, ж<mapsꓸMap> m, uint32 key);
+internal static partial void mapdelete_fast32(ж<abi.MapType> t, ж<maps.Map> m, uint32 key);
 
 } // end runtime_package

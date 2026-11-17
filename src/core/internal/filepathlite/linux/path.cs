@@ -15,6 +15,7 @@ using slices = slices_package;
 using go.@internal;
 using io;
 using ꓸꓸꓸbyte = Span<byte>;
+using static filepathlite_package;
 
 partial class filepathlite_package {
 
@@ -31,6 +32,8 @@ partial struct lazybuf {
     internal @string volAndPath;
     internal nint volLen;
 }
+
+} partial class filepathliteᴛlazybuf {
 
 internal static byte index(this ref lazybuf b, nint i) {
     if (b.buf != nil) {
@@ -65,6 +68,8 @@ internal static @string @string(this ref lazybuf b) {
     }
     return b.volAndPath.slice(0, b.volLen) + ((sstring)(b.buf.slice(0, b.w)));
 }
+
+} partial class filepathlite_package {
 
 // Clean is filepath.Clean.
 public static @string Clean(@string path) {

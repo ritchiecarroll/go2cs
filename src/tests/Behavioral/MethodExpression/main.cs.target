@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct counter {
     internal nint n;
 }
+
+} partial class mainᴛcounter {
 
 internal static nint add(this ref counter c, nint d) {
     c.n += d;
@@ -15,19 +18,21 @@ internal static nint add(this ref counter c, nint d) {
 
 internal static nint get(this counter c) { return c.n; }
 
+} partial class main_package {
+
 internal static void main() {
-    var f = ((Func<ж<counter>, nint, nint>)(add));
+    var f = ((Func<ж<counter>, nint, nint>)(mainᴛcounter.add));
     var c = Ꮡ(new counter(n: 10));
     fmt.Println(f(c, 5));
     fmt.Println(f(c, 2));
     var cv = c.Value;
     fmt.Println(cv.get());
 
-    var g = ((Func<counter, nint>)(get));
+    var g = ((Func<counter, nint>)(mainᴛcounter.get));
     fmt.Println(g(c.Value));
 
     nint apply(Func<ж<counter>, nint, nint> fn, ж<counter> @base, nint dΔ1) => fn(@base, dΔ1);
-    fmt.Println(apply(((Func<ж<counter>, nint, nint>)(add)), c, 3));
+    fmt.Println(apply(((Func<ж<counter>, nint, nint>)(mainᴛcounter.add)), c, 3));
     fmt.Println(g(c.Value));
 
     Func<nint, nint> bump = c.add;
@@ -49,7 +54,11 @@ partial struct shifter {
     internal rune delta;
 }
 
+} partial class mainᴛshifter {
+
 internal static rune shift(this shifter s, rune r) { return r + s.delta; }
+
+} partial class main_package {
 
 internal static slice<rune> mapRunes(Func<rune, rune> f, slice<rune> rs) {
     var @out = new slice<rune>(len(rs));
@@ -61,7 +70,11 @@ internal static slice<rune> mapRunes(Func<rune, rune> f, slice<rune> rs) {
 
 internal delegate nint reader();
 
+} partial class mainᴛreader {
+
 internal static nint sum(this reader f, nint extra) { return f() + extra; }
+
+} partial class main_package {
 
 partial struct dispatcher {
     internal Func<nint, nint> compute;

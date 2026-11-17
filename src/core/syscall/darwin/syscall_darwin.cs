@@ -134,7 +134,7 @@ internal static partial void libc_getfsstat_trampoline();
  * Wrapped
  */
 //sys	kill(pid int, signum int, posix int) (err error)
-public static error /*err*/ Kill(nint pid, ΔSignal signum) { return kill(pid, (nint)signum, 1); }
+public static error /*err*/ Kill(nint pid, Signal signum) { return kill(pid, (nint)signum, 1); }
 
 /*
  * Exposed directly

@@ -271,7 +271,7 @@ partial class syscall_package
     // because it succeeds only on a socket, while GetFileType reports a socket as FILE_TYPE_PIPE. A
     // process that has not started Winsock gets WSANOTINITIALISED for every handle, and binds it here,
     // which is what Go does with every handle.
-    public static Errno GoAssociateAtOpen(ΔHandle handle) {
+    public static Errno GoAssociateAtOpen(Handle handle) {
         nuint descriptor = (nuint)(uintptr)handle;
 
         if (isSocket(handle)) {
@@ -296,7 +296,7 @@ partial class syscall_package
     // SO_TYPE is 0x1008 in winsock2.h; Go's syscall does not declare it for windows.
     private const int32 soType = 0x1008;
 
-    private static unsafe bool isSocket(ΔHandle handle) {
+    private static unsafe bool isSocket(Handle handle) {
         int32 type = 0;
         int32 length = sizeof(int32);
 
@@ -527,7 +527,7 @@ partial class syscall_package
     [System.Runtime.CompilerServices.ModuleInitializer]
     internal static void RegisterAsyncOperationFactory() => GoAsyncIO.SetOperationFactory(s_operationFactory);
 
-    private static OverlappedOp operationFor(ΔHandle handle, ж<Overlapped> Ꮡoverlapped, nint mode)
+    private static OverlappedOp operationFor(Handle handle, ж<Overlapped> Ꮡoverlapped, nint mode)
     {
         nuint descriptor = (nuint)(uintptr)handle;
 
@@ -575,7 +575,7 @@ partial class syscall_package
         }
     }
 
-    public static unsafe error /*err*/ WSARecv(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡrecvd, ж<uint32> Ꮡflags, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+    public static unsafe error /*err*/ WSARecv(Handle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡrecvd, ж<uint32> Ꮡflags, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
         if (Ꮡoverlapped == nil) {
             return wsaRecvSync(s, Ꮡbufs, bufcnt, Ꮡrecvd, Ꮡflags);
         }
@@ -604,7 +604,7 @@ partial class syscall_package
         return r1 == socket_error ? errnoErr(e1) : default!;
     }
 
-    public static unsafe error /*err*/ WSASend(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+    public static unsafe error /*err*/ WSASend(Handle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
         if (Ꮡoverlapped == nil) {
             return wsaSendSync(s, Ꮡbufs, bufcnt, Ꮡsent, flags);
         }
@@ -633,7 +633,7 @@ partial class syscall_package
     // The kernel gets a null overlapped, exactly as Go hands it one, and the staging is `stackalloc`
     // by the same lifetime argument as WSASendto's synchronous arm. On an overlapped socket a
     // synchronous call is legal, and with a null overlapped no completion is queued to the port.
-    private static unsafe error wsaRecvSync(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡrecvd, ж<uint32> Ꮡflags) {
+    private static unsafe error wsaRecvSync(Handle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡrecvd, ж<uint32> Ꮡflags) {
         NativeWSABuf* buffers = stackalloc NativeWSABuf[(int)(bufcnt == 0 ? 1 : bufcnt)];
 
         writeWSABufs(Ꮡbufs, bufcnt, buffers, null);
@@ -657,7 +657,7 @@ partial class syscall_package
         return r1 == socket_error ? errnoErr(e1) : default!;
     }
 
-    private static unsafe error wsaSendSync(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags) {
+    private static unsafe error wsaSendSync(Handle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags) {
         NativeWSABuf* buffers = stackalloc NativeWSABuf[(int)(bufcnt == 0 ? 1 : bufcnt)];
 
         writeWSABufs(Ꮡbufs, bufcnt, buffers, null);
@@ -724,7 +724,7 @@ partial class syscall_package
     // without entering a goroutine scope). Both are stable for the accept-then-parse sequence.
     private static object acceptHandoffKey() => (object?)Goroutine.Current ?? Thread.CurrentThread;
 
-    public static unsafe error /*err*/ AcceptEx(ΔHandle ls, ΔHandle @as, ж<byte> Ꮡbuf, uint32 rxdatalen, uint32 laddrlen, uint32 raddrlen, ж<uint32> Ꮡrecvd, ж<Overlapped> Ꮡoverlapped) {
+    public static unsafe error /*err*/ AcceptEx(Handle ls, Handle @as, ж<byte> Ꮡbuf, uint32 rxdatalen, uint32 laddrlen, uint32 raddrlen, ж<uint32> Ꮡrecvd, ж<Overlapped> Ꮡoverlapped) {
         // The listening socket owns the overlapped and is the descriptor the completion arrives on;
         // `as` is merely the socket the kernel fills in. Accept is internal/poll's READ operation.
         OverlappedOp operation = operationFor(ls, Ꮡoverlapped, wsaModeRead);
@@ -848,7 +848,7 @@ partial class syscall_package
     // pipe/file close path), which passes straight through. A non-nil overlapped with no record
     // answers ERROR_NOT_FOUND -- which execIO already tolerates as "the IO already completed" --
     // rather than falling back to 0 and cancelling everything on the socket.
-    public static unsafe error /*err*/ CancelIoEx(ΔHandle s, ж<Overlapped> Ꮡo) {
+    public static unsafe error /*err*/ CancelIoEx(Handle s, ж<Overlapped> Ꮡo) {
         uintptr address = 0;
 
         if (Ꮡo != nil) {
@@ -948,7 +948,7 @@ partial class syscall_package
     // The retention is taken AFTER Rearm and cannot be reordered: Rearm() clears the previous
     // submit's pins, so a box pinned before it would be dropped on the spot. Folding both into one
     // call is what makes that ordering unstateable at the call site rather than merely documented.
-    internal static unsafe uintptr rearmOverlapped(ΔHandle handle, ж<Overlapped> Ꮡoverlapped, nint mode, INilPointer? pinFirst, INilPointer? pinSecond) {
+    internal static unsafe uintptr rearmOverlapped(Handle handle, ж<Overlapped> Ꮡoverlapped, nint mode, INilPointer? pinFirst, INilPointer? pinSecond) {
         OverlappedOp operation = operationFor(handle, Ꮡoverlapped, mode);
         uintptr native = (uintptr)(void*)operation.Rearm();
 
@@ -1271,7 +1271,7 @@ partial class syscall_package
     // transcription to where `internal/syscall/windows.WSAGetOverlappedResult` observes the
     // completion -- the one call every asynchronous exit of `execIO` funnels through. A SYNCHRONOUS
     // completion never reaches that harvest, so it is transcribed inline at the end.
-    public static unsafe error /*err*/ WSARecvFrom(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡrecvd, ж<uint32> Ꮡflags, ж<RawSockaddrAny> Ꮡfrom, ж<int32> Ꮡfromlen, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+    public static unsafe error /*err*/ WSARecvFrom(Handle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡrecvd, ж<uint32> Ꮡflags, ж<RawSockaddrAny> Ꮡfrom, ж<int32> Ꮡfromlen, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
         OverlappedOp operation = operationFor(s, Ꮡoverlapped, wsaModeRead);
         NativeOverlapped* native = operation.Rearm();
 
@@ -1395,7 +1395,7 @@ partial class syscall_package
     // which can only matter if the call returns before the send completes. A synchronous send cannot,
     // so the established rule applies unchanged -- "a LOCAL at the call site, trivially stable for
     // exactly that long" (syscall_windows_impl.cs).
-    public static unsafe error /*err*/ WSASendto(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ΔSockaddr to, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+    public static unsafe error /*err*/ WSASendto(Handle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, Sockaddr to, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
         // SEEDED from the caller's own slot rather than from zero, so the unconditional write-back
         // below is a no-op on any path where the kernel did not write. Go hands the kernel the
         // caller's pointer directly, so a failed call leaves that slot exactly as it was; starting
@@ -1530,7 +1530,7 @@ partial class syscall_package
     // back a FRESH, zeroed control block each submit -- has never had to carry anything across. Here
     // it must: without the copy every chunk would transmit from offset 0, which is not a hang but a
     // silent wrong answer (TestSendfileSeeked's whole subject).
-    public static unsafe error /*err*/ TransmitFile(ΔHandle s, ΔHandle handle, uint32 bytesToWrite, uint32 bytsPerSend, ж<Overlapped> Ꮡoverlapped, ж<TransmitFileBuffers> ᏑtransmitFileBuf, uint32 flags) {
+    public static unsafe error /*err*/ TransmitFile(Handle s, Handle handle, uint32 bytesToWrite, uint32 bytsPerSend, ж<Overlapped> Ꮡoverlapped, ж<TransmitFileBuffers> ᏑtransmitFileBuf, uint32 flags) {
         OverlappedOp operation = operationFor(s, Ꮡoverlapped, wsaModeWrite);
         NativeOverlapped* native = operation.Rearm();
 

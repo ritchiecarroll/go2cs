@@ -8,6 +8,7 @@ using os = os_package;
 using Δsync = sync_package;
 using syscall = syscall_package;
 using time = time_package;
+using static net_package;
 
 partial class net_package {
 
@@ -22,11 +23,17 @@ partial struct UnixAddr {
     public @string Net;
 }
 
+} partial class netᴛUnixAddr {
+
 // Network returns the address's network name, "unix", "unixgram" or
 // "unixpacket".
 public static @string Network(this ref UnixAddr a) {
     return a.Net;
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
 
 public static @string String(this ж<UnixAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -43,12 +50,14 @@ internal static bool isWildcard(this ж<UnixAddr> Ꮡa) {
     return Ꮡa == nil || a.Name == ""u8;
 }
 
-internal static ΔAddr opAddr(this ж<UnixAddr> Ꮡa) {
+internal static Addr opAddr(this ж<UnixAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
-    return new UnixAddrжΔAddr(Ꮡa);
+    return new UnixAddrжAddr(Ꮡa);
 }
+
+} partial class net_package {
 
 // ResolveUnixAddr returns an address of Unix domain socket end point.
 //
@@ -72,6 +81,8 @@ public static (ж<UnixAddr>, error) ResolveUnixAddr(@string network, @string add
 partial struct UnixConn {
     /*embed*/ internal conn conn;
 }
+
+} partial class netᴛUnixConn {
 
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
@@ -127,7 +138,7 @@ public static (nint, ж<UnixAddr>, error) ReadFromUnix(this ж<UnixConn> Ꮡc, s
 }
 
 // ReadFrom implements the [PacketConn].ReadFrom method.
-public static (nint, ΔAddr, error) ReadFrom(this ж<UnixConn> Ꮡc, slice<byte> b) {
+public static (nint, Addr, error) ReadFrom(this ж<UnixConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -140,7 +151,7 @@ public static (nint, ΔAddr, error) ReadFrom(this ж<UnixConn> Ꮡc, slice<byte>
     if (addr == nil) {
         return (n, default, err);
     }
-    return (n, new UnixAddrжΔAddr(addr), err);
+    return (n, new UnixAddrжAddr(addr), err);
 }
 
 // ReadMsgUnix reads a message from c, copying the payload into b and
@@ -183,7 +194,7 @@ public static (nint, error) WriteToUnix(this ж<UnixConn> Ꮡc, slice<byte> b, �
 }
 
 // WriteTo implements the [PacketConn].WriteTo method.
-public static (nint, error) WriteTo(this ж<UnixConn> Ꮡc, slice<byte> b, ΔAddr addr) {
+public static (nint, error) WriteTo(this ж<UnixConn> Ꮡc, slice<byte> b, Addr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -221,6 +232,8 @@ public static (nint n, nint oobn, error err) WriteMsgUnix(this ж<UnixConn> Ꮡc
     }
     return (n, oobn, err);
 }
+
+} partial class net_package {
 
 internal static ж<UnixConn> newUnixConn(ж<netFD> fd) { return Ꮡ(new UnixConn(new conn(fd))); }
 
@@ -265,6 +278,8 @@ partial struct UnixListener {
     internal bool unlink;
     internal Δsync.Once unlinkOnce;
 }
+
+} partial class netᴛUnixListener {
 
 internal static bool ok(this ж<UnixListener> Ꮡln) {
     ref var ln = ref Ꮡln.DerefOrNull();
@@ -333,7 +348,7 @@ public static error Close(this ж<UnixListener> Ꮡl) {
 // Addr returns the listener's network address.
 // The [Addr] returned is shared by all invocations of Addr, so
 // do not modify it.
-public static ΔAddr Addr(this ref UnixListener l) { return l.fd.laddr; }
+public static Addr Addr(this ref UnixListener l) { return l.fd.laddr; }
 
 // SetDeadline sets the deadline associated with the listener.
 // A zero time value disables the deadline.
@@ -370,6 +385,8 @@ public static (ж<os.File> f, error err) File(this ж<UnixListener> Ꮡl) {
     }
     return (f, err);
 }
+
+} partial class net_package {
 
 // ListenUnix acts like [Listen] for Unix networks.
 //

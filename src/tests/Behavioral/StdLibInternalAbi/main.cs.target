@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void main() {
-    ΔKind kind = default;
+    Kind kind = default;
     kind = Slice;
     fmt.Printf("kind = %s\n"u8, kind.String());
 

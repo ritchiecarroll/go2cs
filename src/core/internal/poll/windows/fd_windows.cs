@@ -19,6 +19,7 @@ using go.@internal;
 using go.@internal.syscall;
 using go.sync;
 using unicode;
+using static poll_package;
 
 partial class poll_package {
 
@@ -80,6 +81,8 @@ partial struct operation {
     internal int32 mode;
 }
 
+} partial class pollᴛFD {
+
 internal static ж<Δsyscall.Overlapped> overlapped(this ref FD fd, ж<operation> o) {
     if (fd.isBlocking) {
         // Don't return the overlapped object if the file handle
@@ -90,6 +93,8 @@ internal static ж<Δsyscall.Overlapped> overlapped(this ref FD fd, ж<operation
     }
     return o.Ꮡo;
 }
+
+} partial class poll_package {
 
 internal static ж<Δsyscall.WSABuf> newWsaBuf(slice<byte> b) {
     return Ꮡ(new Δsyscall.WSABuf(Buf: @unsafe.SliceData(b), Len: (uint32)len(b)));
@@ -220,6 +225,8 @@ internal static readonly ж<sync.Pool> ᏑoperationPool = new StaticBox<sync.Poo
 ));
 internal static ref sync.Pool operationPool => ref ((StaticBox<sync.Pool>)ᏑoperationPool).ValueSlot;
 
+} partial class pollᴛFD {
+
 // waitIO waits for the IO operation o to complete.
 internal static error waitIO(this ж<FD> Ꮡfd, ж<operation> Ꮡo) {
     ref var fd = ref Ꮡfd.DerefOrNull();
@@ -318,7 +325,7 @@ internal static (nint, error) execIO(this ж<FD> Ꮡfd, nint mode, Func<ж<opera
                 throw panic(errΔ1);
             }
             // Set the low bit so that the external IOCP doesn't receive the completion packet.
-            o.o.HEvent = (syscallꓸHandle)(h | 1);
+            o.o.HEvent = (Δsyscall.Handle)(h | 1);
             defer(Δsyscall.CloseHandle, h, ref ᒐ);
         }
         fd.pin(mode, o.OrTypedNil());
@@ -374,13 +381,15 @@ internal static (nint, error) execIO(this ж<FD> Ꮡfd, nint mode, Func<ж<opera
     finally { ᒐ.Run(); }
 }
 
+} partial class poll_package {
+
 // FD is a file descriptor. The net and os packages embed this type in
 // a larger type representing a network connection or OS file.
 partial struct FD {
     // Lock sysfd and serialize access to Read and Write methods.
     internal fdMutex fdmu;
     // System file descriptor. Immutable until Close.
-    public syscallꓸHandle Sysfd;
+    public Δsyscall.Handle Sysfd;
     // I/O poller.
     internal pollDesc pd;
     // The file offset for the next read or write.
@@ -417,6 +426,8 @@ partial struct FD {
     internal Δruntime.Pinner writePinner;
 }
 
+} partial class pollᴛFD {
+
 // setOffset sets the offset fields of the overlapped object
 // to the given offset. The fd read/write lock must be held.
 //
@@ -447,6 +458,8 @@ internal static bool pollable(this ж<FD> Ꮡfd) {
     return fd.pd.pollable() && !Ꮡfd.Ꮡdisassociated.Load();
 }
 
+} partial class poll_package {
+
 // fileKind describes the kind of file.
 partial struct fileKind /*num:byte*/;
 
@@ -455,6 +468,8 @@ internal static fileKind kindFile => 1;
 internal static fileKind kindConsole => 2;
 internal static fileKind kindPipe => 3;
 internal static fileKind kindFileNet => 4;
+
+} partial class pollᴛFD {
 
 // Init initializes the FD. The Sysfd field should already be set.
 // This can be called multiple times on a single FD.
@@ -579,10 +594,14 @@ public static error Close(this ж<FD> Ꮡfd) {
     return err;
 }
 
+} partial class poll_package {
+
 // Windows ReadFile and WSARecv use DWORD (uint32) parameter to pass buffer length.
 // This prevents us reading blocks larger than 4GB.
 // See golang.org/issue/26923.
 internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824; // 1GB is large enough and keeps subsequent reads aligned
+
+} partial class pollᴛFD {
 
 // Read implements io.Reader.
 public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> buf) {
@@ -665,8 +684,12 @@ public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> buf) {
     finally { if (ᒐd2) Ꮡfd.readUnlock(); if (ᒐd1) Ꮡfd.readWriteUnlock(); ᒐ.Run(); }
 }
 
-public static readonly ж<Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error>> ᏑReadConsole = new StaticBox<Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error>>(Δsyscall.ReadConsole);
-public static ref Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error> ReadConsole => ref ((StaticBox<Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error>>)ᏑReadConsole).ValueSlot; // changed for testing
+} partial class poll_package {
+
+public static readonly ж<Func<Δsyscall.Handle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error>> ᏑReadConsole = new StaticBox<Func<Δsyscall.Handle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error>>(Δsyscall.ReadConsole);
+public static ref Func<Δsyscall.Handle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error> ReadConsole => ref ((StaticBox<Func<Δsyscall.Handle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error>>)ᏑReadConsole).ValueSlot; // changed for testing
+
+} partial class pollᴛFD {
 
 // readConsole reads utf16 characters from console File,
 // encodes them into utf8 and stores them in buffer b.
@@ -801,7 +824,7 @@ public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> buf, int64 off)
 }
 
 // ReadFrom wraps the recvfrom network call.
-public static (nint, syscallꓸSockaddr, error) ReadFrom(this ж<FD> Ꮡfd, slice<byte> buf) {
+public static (nint, Δsyscall.Sockaddr, error) ReadFrom(this ж<FD> Ꮡfd, slice<byte> buf) {
     GoFrame ᒐ = default;
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
@@ -1143,7 +1166,7 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
 }
 
 // WriteTo wraps the sendto network call.
-public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> buf, syscallꓸSockaddr sa) {
+public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> buf, Δsyscall.Sockaddr sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1298,7 +1321,7 @@ public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> buf, ж<
 // Call ConnectEx. This doesn't need any locking, since it is only
 // called when the descriptor is first created. This is here rather
 // than in the net package so that it can use fd.wop.
-public static error ConnectEx(this ж<FD> Ꮡfd, syscallꓸSockaddr ra) {
+public static error ConnectEx(this ж<FD> Ꮡfd, Δsyscall.Sockaddr ra) {
     var (_, err) = Ꮡfd.execIO('w', (ж<operation> o) => ((uint32)(0), ConnectExFunc(Ꮡfd.Value.Sysfd, ra, nil, 0, nil, o.Ꮡo)));
     return err;
 }
@@ -1309,7 +1332,7 @@ private static readonly @string acceptexˢᵇ = "acceptex"u8;
 internal static ref readonly @string setsockoptˢ => ref setsockoptˢᵇ;
 private static readonly @string setsockoptˢᵇ = "setsockopt"u8;
 
-internal static (@string, error) acceptOne(this ж<FD> Ꮡfd, syscallꓸHandle s, slice<Δsyscall.RawSockaddrAny> rawsa) {
+internal static (@string, error) acceptOne(this ж<FD> Ꮡfd, Δsyscall.Handle s, slice<Δsyscall.RawSockaddrAny> rawsa) {
     // Submit accept request.
     var rsan = (uint32)/* unsafe.Sizeof(rawsa[0]) */ (uintptr)116;
     var rawsaʗ1 = rawsa;
@@ -1325,7 +1348,7 @@ internal static (@string, error) acceptOne(this ж<FD> Ꮡfd, syscallꓸHandle s
     }
 
     // Inherit properties of the listening socket.
-    err = Δsyscall.Setsockopt(s, Δsyscall.SOL_SOCKET, Δsyscall.SO_UPDATE_ACCEPT_CONTEXT, Ꮡfd.ᏑSysfd.Reinterpret<syscallꓸHandle, byte>(), (int32)/* unsafe.Sizeof(fd.Sysfd) */ (uintptr)8);
+    err = Δsyscall.Setsockopt(s, Δsyscall.SOL_SOCKET, Δsyscall.SO_UPDATE_ACCEPT_CONTEXT, Ꮡfd.ᏑSysfd.Reinterpret<Δsyscall.Handle, byte>(), (int32)/* unsafe.Sizeof(fd.Sysfd) */ (uintptr)8);
     if (err != nil) {
         CloseFunc(s);
         return (setsockoptˢ, err);
@@ -1336,7 +1359,7 @@ internal static (@string, error) acceptOne(this ж<FD> Ꮡfd, syscallꓸHandle s
 
 // Accept handles accepting a socket. The sysSocket parameter is used
 // to allocate the net socket.
-public static (syscallꓸHandle, slice<Δsyscall.RawSockaddrAny>, uint32, @string, error) Accept(this ж<FD> Ꮡfd, Func<(syscallꓸHandle, error)> sysSocket) {
+public static (Δsyscall.Handle, slice<Δsyscall.RawSockaddrAny>, uint32, @string, error) Accept(this ж<FD> Ꮡfd, Func<(Δsyscall.Handle, error)> sysSocket) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1588,6 +1611,8 @@ public static error RawWrite(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
     finally { if (ᒐd1) Ꮡfd.writeUnlock(); ᒐ.Run(); }
 }
 
+} partial class poll_package {
+
 // go2cs generated this placeholder — func sockaddrInet4ToRaw is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func sockaddrInet6ToRaw is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1596,7 +1621,7 @@ public static error RawWrite(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
 
 // go2cs generated this placeholder — func rawToSockaddrInet6 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static (int32, error) sockaddrToRaw(ж<Δsyscall.RawSockaddrAny> rsa, syscallꓸSockaddr sa) {
+internal static (int32, error) sockaddrToRaw(ж<Δsyscall.RawSockaddrAny> rsa, Δsyscall.Sockaddr sa) {
     switch (sa.type()) {
     case ж<Δsyscall.SockaddrInet4> saΔ1: {
         var sz = sockaddrInet4ToRaw(rsa, ref (saΔ1).DerefOrNull());
@@ -1612,8 +1637,10 @@ internal static (int32, error) sockaddrToRaw(ж<Δsyscall.RawSockaddrAny> rsa, s
     }}
 }
 
+} partial class pollᴛFD {
+
 // ReadMsg wraps the WSARecvMsg network call.
-public static (nint, nint, nint, syscallꓸSockaddr, error) ReadMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) {
+public static (nint, nint, nint, Δsyscall.Sockaddr, error) ReadMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) {
     GoFrame ᒐ = default;
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
@@ -1639,7 +1666,7 @@ public static (nint, nint, nint, syscallꓸSockaddr, error) ReadMsg(this ж<FD> 
             return (Ꮡqty.Value, errΔ2);
         });
         err = fd.eofError(n, err);
-        syscallꓸSockaddr sa = default;
+        Δsyscall.Sockaddr sa = default;
         if (err == nil) {
             (sa, err) = msg.Name.Sockaddr();
         }
@@ -1726,7 +1753,7 @@ internal static ref readonly @string packetIsTooLargeOnly1gbˢ => ref packetIsTo
 private static readonly @string packetIsTooLargeOnly1gbˢᵇ = "packet is too large (only 1GB is allowed)"u8;
 
 // WriteMsg wraps the WSASendMsg network call.
-public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, syscallꓸSockaddr sa) {
+public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, Δsyscall.Sockaddr sa) {
     GoFrame ᒐ = default;
     try {
         if (len(p) > maxRW) {
@@ -1831,6 +1858,8 @@ public static (nint, nint, error) WriteMsgInet6(this ж<FD> Ꮡfd, slice<byte> p
     finally { ᒐ.Run(); }
 }
 
+} partial class poll_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string getCurrentProcessˢ => ref getCurrentProcessˢᵇ;
 private static readonly @string getCurrentProcessˢᵇ = "GetCurrentProcess"u8;
@@ -1843,9 +1872,9 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
         return (0, getCurrentProcessˢ, err);
     }
 
-    ref var nfd = ref heap(new syscallꓸHandle(), out var Ꮡnfd);
+    ref var nfd = ref heap(new Δsyscall.Handle(), out var Ꮡnfd);
     const bool inherit = false; // analogous to CLOEXEC
-    var errΔ1 = Δsyscall.DuplicateHandle(proc, (syscallꓸHandle)(uintptr)fd, proc, Ꮡnfd, 0, inherit, Δsyscall.DUPLICATE_SAME_ACCESS); if (errΔ1 != nil) {
+    var errΔ1 = Δsyscall.DuplicateHandle(proc, (Δsyscall.Handle)(uintptr)fd, proc, Ꮡnfd, 0, inherit, Δsyscall.DUPLICATE_SAME_ACCESS); if (errΔ1 != nil) {
         return (0, duplicateHandleˢ, errΔ1);
     }
     return ((nint)nfd, "", default);

@@ -66,6 +66,7 @@ func emitAutoConversionSiblings(markedFiles []FileEntry, fset *token.FileSet, pa
 	collectStackAppendHints(markedFiles, fset, packageTypes, info, filepath.Dir(markedFiles[0].filePath), options)
 	collectAddressedGlobals(markedFiles, packageTypes, info)
 	computeImportAliasRenames(markedFiles, packageTypes, packageNamespace, options.go2csPath, goosOfTarget(options.targetPlatform), false)
+	computeSelfAlias(packageTypes, packageNamespace)
 	preloadImportedTypeAliases(markedFiles, options)
 
 	var autoFileNames []string

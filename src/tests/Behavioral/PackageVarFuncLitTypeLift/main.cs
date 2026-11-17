@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -12,9 +13,13 @@ partial struct namedGreeter {
     internal @string name;
 }
 
+} partial class mainᴛnamedGreeter {
+
 internal static @string Greet(this namedGreeter g) {
     return "hello "u8 + g.name;
 }
+
+} partial class main_package {
 
 
 partial struct makersᴛ1 /*dyn*/ {

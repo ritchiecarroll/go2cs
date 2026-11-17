@@ -13,6 +13,7 @@ using bits = go.math.bits_package;
 using reflect = reflect_package;
 using @internal;
 using go.math;
+using static gob_package;
 
 partial class gob_package {
 
@@ -39,6 +40,8 @@ partial struct decBuffer {
     internal slice<byte> data;
     internal nint offset; // Read offset.
 }
+
+} partial class gobᴛdecBuffer {
 
 internal static (nint, error) Read(this ref decBuffer d, slice<byte> p) {
     nint n = copy(p, d.data.slice(d.offset));
@@ -84,6 +87,8 @@ internal static void Reset(this ref decBuffer d) {
     d.offset = 0;
 }
 
+} partial class gobᴛDecoder {
+
 // We pass the bytes.Buffer separately for easier testing of the infrastructure
 // without requiring a full Decoder.
 internal static ж<decoderState> newDecoderState(this ж<Decoder> Ꮡdec, ж<decBuffer> buf) {
@@ -106,6 +111,8 @@ internal static void freeDecoderState(this ref Decoder dec, ж<decoderState> Ꮡ
     d.next = dec.freeList;
     dec.freeList = Ꮡd;
 }
+
+} partial class gob_package {
 
 internal static error overflow(@string name) {
     return errors.New(@"value for """u8 + name + @""" out of range"u8);
@@ -146,6 +153,8 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
     width++; // +1 for length byte
     return (x, width, err);
 }
+
+} partial class gobᴛdecoderState {
 
 // decodeUint reads an encoded unsigned integer from state.r.
 // Does not check for overflow.
@@ -197,19 +206,21 @@ internal static (nint, bool) getLength(this ref decoderState state) {
     return (n, true);
 }
 
+} partial class gob_package {
+
 // decOp is the signature of a decoding operator for a given type.
 // type decOp is a methodless func type — rendered inline as its base delegate
 
 // The 'instructions' of the decoding machine
 partial struct decInstr {
-    internal Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> op;
+    internal Action<ж<decInstr>, ж<decoderState>, reflect.Value> op;
     internal nint field;        // field number of the wire type
     internal slice<nint> index; // field access indices for destination type
     internal error ovfl;        // error message for overflow/underflow (for arrays, of the elements)
 }
 
 // ignoreUint discards a uint value with no destination.
-internal static void ignoreUint(ж<decInstr> i, ж<decoderState> Ꮡstate, reflectꓸValue v) {
+internal static void ignoreUint(ж<decInstr> i, ж<decoderState> Ꮡstate, reflect.Value v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     state.decodeUint();
@@ -217,7 +228,7 @@ internal static void ignoreUint(ж<decInstr> i, ж<decoderState> Ꮡstate, refle
 
 // ignoreTwoUints discards a uint value with no destination. It's used to skip
 // complex values.
-internal static void ignoreTwoUints(ж<decInstr> i, ж<decoderState> Ꮡstate, reflectꓸValue v) {
+internal static void ignoreTwoUints(ж<decInstr> i, ж<decoderState> Ꮡstate, reflect.Value v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     state.decodeUint();
@@ -235,8 +246,8 @@ internal static void ignoreTwoUints(ж<decInstr> i, ж<decoderState> Ꮡstate, r
 // be assigned to. If the value is a pointer, decAlloc guarantees it points to storage.
 // The callers to the individual decoders are expected to have used decAlloc.
 // The individual decoders don't need it.
-internal static reflectꓸValue decAlloc(reflectꓸValue v) {
-    while (v.Kind() == reflect.ΔPointer) {
+internal static reflect.Value decAlloc(reflect.Value v) {
+    while (v.Kind() == reflect.Pointer) {
         if (v.IsNil()) {
             v.Set(reflect.New(v.Type().Elem()));
         }
@@ -246,14 +257,14 @@ internal static reflectꓸValue decAlloc(reflectꓸValue v) {
 }
 
 // decBool decodes a uint and stores it as a boolean in value.
-internal static void decBool(ж<decInstr> i, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decBool(ж<decInstr> i, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     value.SetBool(state.decodeUint() != 0);
 }
 
 // decInt8 decodes an integer and stores it as an int8 in value.
-internal static void decInt8(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decInt8(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var i = ref Ꮡi.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
 
@@ -265,7 +276,7 @@ internal static void decInt8(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, refle
 }
 
 // decUint8 decodes an unsigned integer and stores it as a uint8 in value.
-internal static void decUint8(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decUint8(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var i = ref Ꮡi.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
 
@@ -277,7 +288,7 @@ internal static void decUint8(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, refl
 }
 
 // decInt16 decodes an integer and stores it as an int16 in value.
-internal static void decInt16(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decInt16(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var i = ref Ꮡi.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
 
@@ -289,7 +300,7 @@ internal static void decInt16(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, refl
 }
 
 // decUint16 decodes an unsigned integer and stores it as a uint16 in value.
-internal static void decUint16(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decUint16(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var i = ref Ꮡi.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
 
@@ -301,7 +312,7 @@ internal static void decUint16(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, ref
 }
 
 // decInt32 decodes an integer and stores it as an int32 in value.
-internal static void decInt32(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decInt32(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var i = ref Ꮡi.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
 
@@ -313,7 +324,7 @@ internal static void decInt32(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, refl
 }
 
 // decUint32 decodes an unsigned integer and stores it as a uint32 in value.
-internal static void decUint32(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decUint32(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var i = ref Ꮡi.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
 
@@ -325,7 +336,7 @@ internal static void decUint32(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, ref
 }
 
 // decInt64 decodes an integer and stores it as an int64 in value.
-internal static void decInt64(ж<decInstr> i, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decInt64(ж<decInstr> i, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var v = state.decodeInt();
@@ -333,7 +344,7 @@ internal static void decInt64(ж<decInstr> i, ж<decoderState> Ꮡstate, reflect
 }
 
 // decUint64 decodes an unsigned integer and stores it as a uint64 in value.
-internal static void decUint64(ж<decInstr> i, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decUint64(ж<decInstr> i, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var v = state.decodeUint();
@@ -369,7 +380,7 @@ internal static float64 float32FromBits(uint64 u, error ovfl) {
 
 // decFloat32 decodes an unsigned integer, treats it as a 32-bit floating-point
 // number, and stores it in value.
-internal static void decFloat32(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decFloat32(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var i = ref Ꮡi.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
 
@@ -378,7 +389,7 @@ internal static void decFloat32(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, re
 
 // decFloat64 decodes an unsigned integer, treats it as a 64-bit floating-point
 // number, and stores it in value.
-internal static void decFloat64(ж<decInstr> i, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decFloat64(ж<decInstr> i, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     value.SetFloat(float64FromBits(state.decodeUint()));
@@ -387,7 +398,7 @@ internal static void decFloat64(ж<decInstr> i, ж<decoderState> Ꮡstate, refle
 // decComplex64 decodes a pair of unsigned integers, treats them as a
 // pair of floating point numbers, and stores them as a complex64 in value.
 // The real part comes first.
-internal static void decComplex64(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decComplex64(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var i = ref Ꮡi.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
 
@@ -399,7 +410,7 @@ internal static void decComplex64(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, 
 // decComplex128 decodes a pair of unsigned integers, treats them as a
 // pair of floating point numbers, and stores them as a complex128 in value.
 // The real part comes first.
-internal static void decComplex128(ж<decInstr> i, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decComplex128(ж<decInstr> i, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var real = float64FromBits(state.decodeUint());
@@ -410,7 +421,7 @@ internal static void decComplex128(ж<decInstr> i, ж<decoderState> Ꮡstate, re
 // decUint8Slice decodes a byte slice and stores in value a slice header
 // describing the data.
 // uint8 slices are encoded as an unsigned count followed by the raw bytes.
-internal static void decUint8Slice(ж<decInstr> i, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decUint8Slice(ж<decInstr> i, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var (n, ok) = state.getLength();
@@ -458,7 +469,7 @@ internal static void decUint8Slice(ж<decInstr> i, ж<decoderState> Ꮡstate, re
 // decString decodes byte array and stores in value a string header
 // describing the data.
 // Strings are encoded as an unsigned count followed by the raw bytes.
-internal static void decString(ж<decInstr> i, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decString(ж<decInstr> i, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var (n, ok) = state.getLength();
@@ -476,7 +487,7 @@ internal static void decString(ж<decInstr> i, ж<decoderState> Ꮡstate, reflec
 }
 
 // ignoreUint8Array skips over the data for a byte slice value with no destination.
-internal static void ignoreUint8Array(ж<decInstr> i, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void ignoreUint8Array(ж<decInstr> i, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var (n, ok) = state.getLength();
@@ -499,10 +510,12 @@ partial struct decEngine {
     internal nint numInstr; // the number of active instructions
 }
 
+} partial class gobᴛDecoder {
+
 // decodeSingle decodes a top-level value that is not a struct and stores it in value.
 // Such values are preceded by a zero, making them have the memory layout of a
 // struct field (although with an illegal field number).
-internal static void decodeSingle(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengine, reflectꓸValue value) {
+internal static void decodeSingle(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengine, reflect.Value value) {
     GoFrame ᒐ = default;
     try {
         ref var engine = ref Ꮡengine.DerefOrNull();
@@ -525,7 +538,7 @@ internal static void decodeSingle(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengi
 // differ from ut.indir, which was computed when the engine was built.
 // This state cannot arise for decodeSingle, which is called directly
 // from the user's value, not from the innards of an engine.
-internal static void decodeStruct(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengine, reflectꓸValue value) {
+internal static void decodeStruct(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengine, reflect.Value value) {
     GoFrame ᒐ = default;
     try {
         ref var engine = ref Ꮡengine.DerefOrNull();
@@ -546,11 +559,11 @@ internal static void decodeStruct(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengi
             }
             nint fieldnum = state.fieldnum + delta;
             var instr = Ꮡ(engine.instr, fieldnum);
-            reflectꓸValue field = new(nil);
+            reflect.Value field = new(nil);
             if (instr.index != nil) {
                 // Otherwise the field is unknown to us and instr.op is an ignore op.
                 field = value.FieldByIndex(instr.index);
-                if (field.Kind() == reflect.ΔPointer) {
+                if (field.Kind() == reflect.Pointer) {
                     field = decAlloc(field);
                 }
             }
@@ -562,7 +575,11 @@ internal static void decodeStruct(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengi
     finally { ᒐ.Run(); }
 }
 
-internal static reflectꓸValue noValue = new(nil);
+} partial class gob_package {
+
+internal static reflect.Value noValue = new(nil);
+
+} partial class gobᴛDecoder {
 
 // ignoreStruct discards the data for a struct with no destination.
 internal static void ignoreStruct(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengine) {
@@ -616,14 +633,14 @@ internal static void ignoreSingle(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengi
 }
 
 // decodeArrayHelper does the work for decoding arrays and slices.
-internal static void decodeArrayHelper(this ref Decoder dec, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length, error ovfl, Func<ж<decoderState>, reflectꓸValue, nint, error, bool> helper) {
+internal static void decodeArrayHelper(this ref Decoder dec, ж<decoderState> Ꮡstate, reflect.Value value, Action<ж<decInstr>, ж<decoderState>, reflect.Value> elemOp, nint length, error ovfl, Func<ж<decoderState>, reflect.Value, nint, error, bool> helper) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     if (helper != nil && helper(Ꮡstate, value, length, ovfl)) {
         return;
     }
     var instr = Ꮡ(new decInstr(elemOp, 0, default, ovfl));
-    var isPtr = value.Type().Elem().Kind() == reflect.ΔPointer;
+    var isPtr = value.Type().Elem().Kind() == reflect.Pointer;
     nint ln = value.Len();
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -651,7 +668,7 @@ internal static void decodeArrayHelper(this ref Decoder dec, ж<decoderState> �
 // decodeArray decodes an array and stores it in value.
 // The length is an unsigned integer preceding the elements. Even though the length is redundant
 // (it's part of the type), it's a useful check and is included in the encoding.
-internal static void decodeArray(this ref Decoder dec, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length, error ovfl, Func<ж<decoderState>, reflectꓸValue, nint, error, bool> helper) {
+internal static void decodeArray(this ref Decoder dec, ж<decoderState> Ꮡstate, reflect.Value value, Action<ж<decInstr>, ж<decoderState>, reflect.Value> elemOp, nint length, error ovfl, Func<ж<decoderState>, reflect.Value, nint, error, bool> helper) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var n = state.decodeUint(); if (n != (uint64)length) {
@@ -660,8 +677,10 @@ internal static void decodeArray(this ref Decoder dec, ж<decoderState> Ꮡstate
     dec.decodeArrayHelper(Ꮡstate, value, elemOp, length, ovfl, helper);
 }
 
+} partial class gob_package {
+
 // decodeIntoValue is a helper for map decoding.
-internal static reflectꓸValue decodeIntoValue(ж<decoderState> state, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> op, bool isPtr, reflectꓸValue value, ж<decInstr> instr) {
+internal static reflect.Value decodeIntoValue(ж<decoderState> state, Action<ж<decInstr>, ж<decoderState>, reflect.Value> op, bool isPtr, reflect.Value value, ж<decInstr> instr) {
     var v = value;
     if (isPtr) {
         v = decAlloc(value);
@@ -671,19 +690,21 @@ internal static reflectꓸValue decodeIntoValue(ж<decoderState> state, Action<�
     return value;
 }
 
+} partial class gobᴛDecoder {
+
 // decodeMap decodes a map and stores it in value.
 // Maps are encoded as a length followed by key:value pairs.
 // Because the internals of maps are not visible to us, we must
 // use reflection rather than pointer magic.
-internal static void decodeMap(this ref Decoder dec, reflectꓸType mtyp, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> keyOp, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, error ovfl) {
+internal static void decodeMap(this ref Decoder dec, reflect.Type mtyp, ж<decoderState> Ꮡstate, reflect.Value value, Action<ж<decInstr>, ж<decoderState>, reflect.Value> keyOp, Action<ж<decInstr>, ж<decoderState>, reflect.Value> elemOp, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     nint n = (nint)state.decodeUint();
     if (value.IsNil()) {
         value.Set(reflect.MakeMapWithSize(mtyp, n));
     }
-    var keyIsPtr = mtyp.Key().Kind() == reflect.ΔPointer;
-    var elemIsPtr = mtyp.Elem().Kind() == reflect.ΔPointer;
+    var keyIsPtr = mtyp.Key().Kind() == reflect.Pointer;
+    var elemIsPtr = mtyp.Elem().Kind() == reflect.Pointer;
     var keyInstr = Ꮡ(new decInstr(keyOp, 0, default, ovfl));
     var elemInstr = Ꮡ(new decInstr(elemOp, 0, default, ovfl));
     var keyP = reflect.New(mtyp.Key());
@@ -702,7 +723,7 @@ internal static ref readonly @string noErrorˢ => ref noErrorˢᵇ;
 private static readonly @string noErrorˢᵇ = "no error"u8;
 
 // ignoreArrayHelper does the work for discarding arrays and slices.
-internal static void ignoreArrayHelper(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length) {
+internal static void ignoreArrayHelper(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflect.Value> elemOp, nint length) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var instr = Ꮡ(new decInstr(elemOp, 0, default, errors.New(noErrorˢ)));
@@ -715,7 +736,7 @@ internal static void ignoreArrayHelper(this ref Decoder dec, ж<decoderState> �
 }
 
 // ignoreArray discards the data for an array value with no destination.
-internal static void ignoreArray(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length) {
+internal static void ignoreArray(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflect.Value> elemOp, nint length) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var n = state.decodeUint(); if (n != (uint64)length) {
@@ -725,7 +746,7 @@ internal static void ignoreArray(this ref Decoder dec, ж<decoderState> Ꮡstate
 }
 
 // ignoreMap discards the data for a map value with no destination.
-internal static void ignoreMap(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> keyOp, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp) {
+internal static void ignoreMap(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflect.Value> keyOp, Action<ж<decInstr>, ж<decoderState>, reflect.Value> elemOp) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     nint n = (nint)state.decodeUint();
@@ -739,7 +760,7 @@ internal static void ignoreMap(this ref Decoder dec, ж<decoderState> Ꮡstate, 
 
 // decodeSlice decodes a slice and stores it in value.
 // Slices are encoded as an unsigned length followed by the elements.
-internal static void decodeSlice(this ref Decoder dec, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, error ovfl, Func<ж<decoderState>, reflectꓸValue, nint, error, bool> helper) {
+internal static void decodeSlice(this ref Decoder dec, ж<decoderState> Ꮡstate, reflect.Value value, Action<ж<decInstr>, ж<decoderState>, reflect.Value> elemOp, error ovfl, Func<ж<decoderState>, reflect.Value, nint, error, bool> helper) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var u = state.decodeUint();
@@ -766,7 +787,7 @@ internal static void decodeSlice(this ref Decoder dec, ж<decoderState> Ꮡstate
 }
 
 // ignoreSlice skips over the data for a slice value with no destination.
-internal static void ignoreSlice(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp) {
+internal static void ignoreSlice(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflect.Value> elemOp) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     dec.ignoreArrayHelper(Ꮡstate, elemOp, (nint)state.decodeUint());
@@ -775,7 +796,7 @@ internal static void ignoreSlice(this ref Decoder dec, ж<decoderState> Ꮡstate
 // decodeInterface decodes an interface value and stores it in value.
 // Interfaces are encoded as the name of a concrete type followed by a value.
 // If the name is empty, the value is nil and no value is sent.
-internal static void decodeInterface(this ж<Decoder> Ꮡdec, reflectꓸType ityp, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decodeInterface(this ж<Decoder> Ꮡdec, reflect.Type ityp, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var dec = ref Ꮡdec.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
 
@@ -804,7 +825,7 @@ internal static void decodeInterface(this ж<Decoder> Ꮡdec, reflectꓸType ity
     if (!ok) {
         errorf("name not registered for interface: %q", name);
     }
-    var typ = typi._<reflectꓸType>();
+    var typ = typi._<reflect.Type>();
 
     // Read the type id of the concrete value.
     var concreteId = Ꮡdec.decodeTypeSequence(true);
@@ -858,7 +879,7 @@ internal static void ignoreInterface(this ж<Decoder> Ꮡdec, ж<decoderState> �
 
 // decodeGobDecoder decodes something implementing the GobDecoder interface.
 // The data is encoded as a byte slice.
-internal static void decodeGobDecoder(this ref Decoder dec, ж<userTypeInfo> Ꮡut, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decodeGobDecoder(this ref Decoder dec, ж<userTypeInfo> Ꮡut, ж<decoderState> Ꮡstate, reflect.Value value) {
     ref var ut = ref Ꮡut.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
 
@@ -912,8 +933,10 @@ internal static void ignoreGobDecoder(this ref Decoder dec, ж<decoderState> Ꮡ
     state.b.Drop(n);
 }
 
+} partial class gob_package {
+
 // Index by Go types.
-[GoLazy] partial class lazyᴛdecOpTable { internal static array<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decOpTable = new golib.SparseArray<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>{
+[GoLazy] partial class lazyᴛdecOpTable { internal static array<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decOpTable = new golib.SparseArray<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>{
     [1] = decBool,
     [3] = decInt8,
     [4] = decInt16,
@@ -931,8 +954,8 @@ internal static void ignoreGobDecoder(this ref Decoder dec, ж<decoderState> Ꮡ
 }.array(25); }
 
 // Indexed by gob types.  tComplex will be added during type.init().
-internal static map<typeId, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decIgnoreOpMap;
-internal static void initᴛdecIgnoreOpMap() { decIgnoreOpMap = new map<typeId, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>{
+internal static map<typeId, Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decIgnoreOpMap;
+internal static void initᴛdecIgnoreOpMap() { decIgnoreOpMap = new map<typeId, Action<ж<decInstr>, ж<decoderState>, reflect.Value>>{
     [tBool] = ignoreUint,
     [tInt] = ignoreUint,
     [tUint] = ignoreUint,
@@ -942,9 +965,11 @@ internal static void initᴛdecIgnoreOpMap() { decIgnoreOpMap = new map<typeId, 
     [tComplex] = ignoreTwoUints
 }; }
 
+} partial class gobᴛDecoder {
+
 // decOpFor returns the decoding op for the base type under rt and
 // the indirection count to reach it.
-internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decOpFor(this ж<Decoder> Ꮡdec, typeId wireId, reflectꓸType rt, @string name, map<reflectꓸType, ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>> inProgress) {
+internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decOpFor(this ж<Decoder> Ꮡdec, typeId wireId, reflect.Type rt, @string name, map<reflect.Type, ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>> inProgress) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     var ut = userType(rt);
@@ -959,8 +984,8 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
         return opPtr;
     }
     var typ = ut.@base;
-    ref var op = ref heap<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>(out var Ꮡop);
-    reflectꓸKind k = typ.Kind();
+    ref var op = ref heap<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>(out var Ꮡop);
+    reflect.Kind k = typ.Kind();
     if ((nint)k < len(decOpTable)) {
         op = decOpTable[k];
     }
@@ -980,7 +1005,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
                 var helperʗ1 = helper;
                 var ovflʗ1 = ovfl;
                 var tʗ1 = t;
-                op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.decodeArray(state, value, elemOpʗ1.ValueSlot, tʗ1.Len(), ovflʗ1, helperʗ1);
                 };
                 break;
@@ -995,12 +1020,12 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
                 var keyOpʗ1 = keyOp;
                 var ovflʗ2 = ovfl;
                 var tʗ2 = t;
-                op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.decodeMap(tʗ2, state, value, keyOpʗ1.ValueSlot, elemOpʗ2.ValueSlot, ovflʗ2);
                 };
                 break;
             }
-            case var ᴛ when ᴛ == reflect.ΔSlice: {
+            case var ᴛ when ᴛ == reflect.Slice: {
                 name = "element of "u8 + name;
                 if (t.Elem().Kind() == reflect.Uint8) {
                     op = decUint8Slice;
@@ -1008,7 +1033,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
                 }
                 typeId elemId = default;
                 var tt = builtinIdToType(wireId); if (tt != nil) {
-                    elemId = tt._<ΔgobType, ж<sliceType>>().Elem;
+                    elemId = tt._<gobType, ж<sliceType>>().Elem;
                 } else {
                     elemId = dec.wireType[wireId].SliceT.Elem;
                 }
@@ -1018,7 +1043,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
                 var elemOpʗ3 = elemOp;
                 var helperʗ2 = helper;
                 var ovflʗ3 = ovfl;
-                op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.decodeSlice(state, value, elemOpʗ3.ValueSlot, ovflʗ3, helperʗ2);
                 };
                 break;
@@ -1031,15 +1056,15 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
                     error_(err);
                 }
                 var enginePtrʗ1 = enginePtr;
-                op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     // indirect through enginePtr to delay evaluation for recursive structs.
                     Ꮡdec.decodeStruct(enginePtrʗ1.ValueSlot, value);
                 };
                 break;
             }
-            case var ᴛ when ᴛ == reflect.ΔInterface: {
+            case var ᴛ when ᴛ == reflect.Interface: {
                 var tʗ3 = t;
-                op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.decodeInterface(tʗ3, state, value);
                 };
                 break;
@@ -1052,14 +1077,18 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
     return Ꮡop;
 }
 
+} partial class gob_package {
+
 internal static nint maxIgnoreNestingDepth = 10000;
+
+} partial class gobᴛDecoder {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidNestingDepthˢ => ref invalidNestingDepthˢᵇ;
 private static readonly @string invalidNestingDepthˢᵇ = "invalid nesting depth"u8;
 
 // decIgnoreOpFor returns the decoding op for a field that has no destination.
-internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decIgnoreOpFor(this ж<Decoder> Ꮡdec, typeId wireId, map<typeId, ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>> inProgress) {
+internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decIgnoreOpFor(this ж<Decoder> Ꮡdec, typeId wireId, map<typeId, ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>> inProgress) {
     GoFrame ᒐ = default;
     try {
         ref var dec = ref Ꮡdec.DerefOrNull();
@@ -1077,14 +1106,14 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decI
         var opPtr = inProgress[wireId]; if (opPtr != nil) {
             return opPtr;
         }
-        ref var op = ref heap<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>(out var Ꮡop);
+        ref var op = ref heap<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>(out var Ꮡop);
         (op, var ok) = decIgnoreOpMap[wireId, ꟷ];
         if (!ok) {
             inProgress[wireId] = Ꮡop;
             if (wireId == tInterface) {
                 // Special case because it's a method: the ignored item might
                 // define types and we need to record their state in the decoder.
-                op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.ignoreInterface(state);
                 };
                 return Ꮡop;
@@ -1101,7 +1130,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decI
                 var elemOp = Ꮡdec.decIgnoreOpFor(elemId, inProgress);
                 var elemOpʗ1 = elemOp;
                 var wireʗ1 = wire;
-                op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.ignoreArray(state, elemOpʗ1.ValueSlot, wireʗ1.ArrayT.Len);
                 };
                 break;
@@ -1113,7 +1142,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decI
                 var elemOp = Ꮡdec.decIgnoreOpFor(elemId, inProgress);
                 var elemOpʗ2 = elemOp;
                 var keyOpʗ1 = keyOp;
-                op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.ignoreMap(state, keyOpʗ1.ValueSlot, elemOpʗ2.ValueSlot);
                 };
                 break;
@@ -1122,7 +1151,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decI
                 var elemId = wire.SliceT.Elem;
                 var elemOp = Ꮡdec.decIgnoreOpFor(elemId, inProgress);
                 var elemOpʗ3 = elemOp;
-                op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.ignoreSlice(state, elemOpʗ3.ValueSlot);
                 };
                 break;
@@ -1134,14 +1163,14 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decI
                     error_(err);
                 }
                 var enginePtrʗ1 = enginePtr;
-                op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     // indirect through enginePtr to delay evaluation for recursive structs
                     state.dec.ignoreStruct(enginePtrʗ1.ValueSlot);
                 };
                 break;
             }
             case {} when (wire.GobEncoderT != nil) || (wire.BinaryMarshalerT != nil) || (wire.TextMarshalerT != nil): {
-                op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.ignoreGobDecoder(state);
                 };
                 break;
@@ -1158,7 +1187,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decI
 
 // gobDecodeOpFor returns the op for a type that is known to implement
 // GobDecoder.
-internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> gobDecodeOpFor(this ref Decoder dec, ж<userTypeInfo> Ꮡut) {
+internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> gobDecodeOpFor(this ref Decoder dec, ж<userTypeInfo> Ꮡut) {
     ref var ut = ref Ꮡut.DerefOrNull();
 
     var rcvrType = ut.user;
@@ -1169,11 +1198,11 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> gobD
             rcvrType = rcvrType.Elem();
         }
     }
-    ref var op = ref heap<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>(out var Ꮡop);
+    ref var op = ref heap<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>(out var Ꮡop);
     var rcvrTypeʗ1 = rcvrType;
-    op = (ж<decInstr> i, ж<decoderState> state, reflectꓸValue value) => {
+    op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
         // We now have the base type. We need its address if the receiver is a pointer.
-        if (value.Kind() != reflect.ΔPointer && rcvrTypeʗ1.Kind() == reflect.ΔPointer) {
+        if (value.Kind() != reflect.Pointer && rcvrTypeʗ1.Kind() == reflect.Pointer) {
             value = value.Addr();
         }
         state.dec.decodeGobDecoder(Ꮡut, state, value);
@@ -1185,7 +1214,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> gobD
 // Answers the question for basic types, arrays, maps and slices, plus
 // GobEncoder/Decoder pairs.
 // Structs are considered ok; fields will be checked later.
-internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typeId fw, map<reflectꓸType, typeId> inProgress) {
+internal static bool compatibleType(this ref Decoder dec, reflect.Type fr, typeId fw, map<reflect.Type, typeId> inProgress) {
     var (rhs, okΔ1) = inProgress[fr, ꟷ]; if (okΔ1) {
         return rhs == fw;
     }
@@ -1210,13 +1239,13 @@ internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typ
         // chan, etc: cannot handle.
         return false;
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         return fw == tBool;
     }
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return fw == tInt;
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return fw == tUint;
     }
     case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
@@ -1225,10 +1254,10 @@ internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typ
     case var ᴛ when ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
         return fw == tComplex;
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         return fw == tString;
     }
-    case var ᴛ when ᴛ == reflect.ΔInterface: {
+    case var ᴛ when ᴛ == reflect.Interface: {
         return fw == tInterface;
     }
     case var ᴛ when ᴛ == reflect.Array: {
@@ -1245,7 +1274,7 @@ internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typ
         var MapType = wire.MapT;
         return dec.compatibleType(t.Key(), MapType.Key, inProgress) && dec.compatibleType(t.Elem(), MapType.Elem, inProgress);
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         // Is it an array of bytes?
         if (t.Elem().Kind() == reflect.Uint8) {
             return fw == tBytes;
@@ -1295,15 +1324,15 @@ internal static (ж<decEngine> engine, error err) compileSingle(this ж<Decoder>
     engine = @new<decEngine>();
     engine.instr = new slice<decInstr>(1); // one item
     @string name = rt.String();            // best we can do
-    if (!dec.compatibleType(rt, remoteId, new map<reflectꓸType, typeId>())) {
+    if (!dec.compatibleType(rt, remoteId, new map<reflect.Type, typeId>())) {
         @string remoteType = Ꮡdec.typeString(remoteId);
         // Common confusing case: local interface type, remote concrete type.
-        if (ut.@base.Kind() == reflect.ΔInterface && remoteId != tInterface) {
+        if (ut.@base.Kind() == reflect.Interface && remoteId != tInterface) {
             return (default, errors.New("gob: local interface type "u8 + name + " can only be decoded from remote interface type; received concrete type "u8 + remoteType));
         }
         return (default, errors.New("gob: decoding into local type "u8 + name + ", received remote type "u8 + remoteType));
     }
-    var op = Ꮡdec.decOpFor(remoteId, rt, name, new map<reflectꓸType, ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>>());
+    var op = Ꮡdec.decOpFor(remoteId, rt, name, new map<reflect.Type, ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>>());
     var ovfl = errors.New(@"value for """u8 + name + @""" out of range"u8);
     engine.instr[singletonField] = new decInstr(op.ValueSlot, singletonField, default, ovfl);
     engine.numInstr = 1;
@@ -1314,7 +1343,7 @@ internal static (ж<decEngine> engine, error err) compileSingle(this ж<Decoder>
 internal static ж<decEngine> compileIgnoreSingle(this ж<Decoder> Ꮡdec, typeId remoteId) {
     var engine = @new<decEngine>();
     engine.instr = new slice<decInstr>(1); // one item
-    var op = Ꮡdec.decIgnoreOpFor(remoteId, new map<typeId, ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>>());
+    var op = Ꮡdec.decIgnoreOpFor(remoteId, new map<typeId, ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>>());
     var ovfl = overflow(Ꮡdec.typeString(remoteId));
     engine.instr[0] = new decInstr(op.ValueSlot, 0, default, ovfl);
     engine.numInstr = 1;
@@ -1355,7 +1384,7 @@ internal static (ж<decEngine> engine, error err) compileDec(this ж<Decoder> �
         }
         engine = @new<decEngine>();
         engine.instr = new slice<decInstr>(len(wireStruct.Field));
-        var seen = new map<reflectꓸType, ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>>();
+        var seen = new map<reflect.Type, ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>>();
         // Loop over the fields of the wire type.
         for (nint fieldnum = 0; fieldnum < len(wireStruct.Field); fieldnum++) {
             var wireField = wireStruct.Field[fieldnum];
@@ -1367,11 +1396,11 @@ internal static (ж<decEngine> engine, error err) compileDec(this ж<Decoder> �
             var (localField, present) = srt.FieldByName(wireField.Name);
             // TODO(r): anonymous names
             if (!present || !isExported(wireField.Name)) {
-                var opΔ1 = Ꮡdec.decIgnoreOpFor(wireField.Id, new map<typeId, ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>>());
+                var opΔ1 = Ꮡdec.decIgnoreOpFor(wireField.Id, new map<typeId, ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>>());
                 engine.instr[fieldnum] = new decInstr(opΔ1.ValueSlot, fieldnum, default, ovfl);
                 continue;
             }
-            if (!dec.compatibleType(localField.Type, wireField.Id, new map<reflectꓸType, typeId>())) {
+            if (!dec.compatibleType(localField.Type, wireField.Id, new map<reflect.Type, typeId>())) {
                 errorf("wrong type (%s) for received field %s.%s", localField.Type, wireStruct.Name, wireField.Name);
             }
             var op = Ꮡdec.decOpFor(wireField.Id, localField.Type, localField.Name, seen);
@@ -1409,11 +1438,15 @@ internal static (ж<ж<decEngine>> enginePtr, error err) getDecEnginePtr(this ж
     return (enginePtr, err);
 }
 
+} partial class gob_package {
+
 // emptyStruct is the type we compile into when ignoring a struct value.
 partial struct emptyStruct {
 }
 
-internal static reflectꓸType emptyStructType = reflect.TypeFor<emptyStruct>();
+internal static reflect.Type emptyStructType = reflect.TypeFor<emptyStruct>();
+
+} partial class gobᴛDecoder {
 
 // getIgnoreEnginePtr returns the engine for the specified type when the value is to be discarded.
 internal static (ж<ж<decEngine>> enginePtr, error err) getIgnoreEnginePtr(this ж<Decoder> Ꮡdec, typeId wireId) {
@@ -1440,7 +1473,7 @@ internal static (ж<ж<decEngine>> enginePtr, error err) getIgnoreEnginePtr(this
 }
 
 // decodeValue decodes the data stream representing a value and stores it in value.
-internal static void decodeValue(this ж<Decoder> Ꮡdec, typeId wireId, reflectꓸValue value) {
+internal static void decodeValue(this ж<Decoder> Ꮡdec, typeId wireId, reflect.Value value) {
     GoFrame ᒐ = default;
     try {
         ref var dec = ref Ꮡdec.DerefOrNull();
@@ -1493,12 +1526,14 @@ internal static void decodeIgnoredValue(this ж<Decoder> Ꮡdec, typeId wireId) 
     }
 }
 
+} partial class gob_package {
+
 internal static UntypedInt intBits => /* 32 << (^uint(0) >> 63) */ 64;
 internal static UntypedInt uintptrBits => /* 32 << (^uintptr(0) >> 63) */ 64;
 
 [GoInit] internal static void init() {
-    Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> iop = default;
-    Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> uop = default;
+    Action<ж<decInstr>, ж<decoderState>, reflect.Value> iop = default;
+    Action<ж<decInstr>, ж<decoderState>, reflect.Value> uop = default;
     switch (intBits) {
     case var ᴛ when ᴛ == 32: {
         iop = decInt32;
@@ -1514,8 +1549,8 @@ internal static UntypedInt uintptrBits => /* 32 << (^uintptr(0) >> 63) */ 64;
         throw panic("gob: unknown size of int/uint");
         break;
     }}
-    decOpTable[reflect.ΔInt] = iop;
-    decOpTable[reflect.ΔUint] = uop;
+    decOpTable[reflect.Int] = iop;
+    decOpTable[reflect.Uint] = uop;
 
     // Finally uintptr
     switch (uintptrBits) {
@@ -1538,7 +1573,7 @@ internal static UntypedInt uintptrBits => /* 32 << (^uintptr(0) >> 63) */ 64;
 // of zeroed Values it creates, so use this wrapper instead
 // of the standard reflect.Zero.
 // Each call allocates once.
-internal static reflectꓸValue allocValue(reflectꓸType t) {
+internal static reflect.Value allocValue(reflect.Type t) {
     return reflect.New(t).Elem();
 }
 

@@ -27,7 +27,6 @@ using static go.net.textproto_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -37,6 +36,7 @@ using static go.net.textproto_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Error, error>(Pointer = true)]
 [assembly: GoImplement<ProtocolError, error>]
 [assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<dotReader, io_package.Reader>(Pointer = true)]
@@ -44,7 +44,6 @@ using static go.net.textproto_package;
 [assembly: GoImplement<io_package.ReadWriteCloser, io_package.Reader>]
 [assembly: GoImplement<io_package.ReadWriteCloser, io_package.Writer>]
 [assembly: GoImplement<net_package.Conn, io_package.ReadWriteCloser>]
-[assembly: GoImplement<ΔError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -70,11 +69,11 @@ using static go.net.textproto_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/textproto/header.go", "header.cs", "AAsaooKssgACENKClIKClAACENKClKiS")]
-[assembly: GoPositionMap("net/textproto/pipeline.go", "pipeline.cs", "ACFIsoKCgoKqoqqiqqKqogAMINKCgoKUgoKUgoKs0oKCgpSCgoKUgoKUgoI=")]
-[assembly: GoPositionMap("net/textproto/reader.go", "reader.cs", "ABQsAAke0qqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgqqigoKUgoKClKqigoKUAAIQ0oK4goKUgqaC7oKChNyUgpSmgoKClIKClJSokoKCgpSUgoKUlKbSgoKUptKCgpSCgoKClIKGlAACKAAVAoKClAACOgAeAoKCgoKCgoKmgoKCgoKCgpSClIKUlAACJgASAoKCAAcS2AAIEIKCgoKCgpSUlIKClIKClLaCgpSCgpS2goK4goK2goKmgoK2goKUgraClIKUgpSqooKUgqa+sq7osoKCgoKCgpS4goKUlJS2AAEqABMCAAIQ8oKssoKCgpSmpoCCgoKClLaCgoK4goKUgoKUgoK4goK4lIKGtIKUgoKUyoKClKaCzpCasoKUppjUgoKClIKCgoKUlJSUlAACFgAJBIKCgoKUgoKUgoKUlAAIGgAICgAXJgAGIAAMDAALCAACHAAKAoK4goKCpriClJSCpoLqgoKClIKUuIKUAAgQgoIAKFI=")]
-[assembly: GoPositionMap("net/textproto/textproto.go", "textproto.cs", "ACtWgu6CAA4gkgAGEJKqooKClAACNgAcAoKCgoKClKiSgpSClKiSgpSClKaCpoKC", "", "", "70=NewReader/1/1/1,NewWriter/1/1/2")]
-[assembly: GoPositionMap("net/textproto/writer.go", "writer.cs", "ABMqkqaClrKCgoIAAhQACQKCgqaCggANILKCgoKkgpSUpoKUgoK4goKmgpSUpqKClIK0gqSCpJQ=")]
+[assembly: GoPositionMap("net/textproto/header.go", "header.cs", "AA8aooKssgACENKClIKClAACENKClKiS")]
+[assembly: GoPositionMap("net/textproto/pipeline.go", "pipeline.cs", "ACRIsoKCgoKqoqqiqqKqogAQINKCgoKUgoKUgoKs0oKCgpSCgoKUgoKUgoI=")]
+[assembly: GoPositionMap("net/textproto/reader.go", "reader.cs", "ABUsAAke0sqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgsqigoKUgoKClMqigoKUAAIQ0oK4goKUgqaC7oKChNyUgpSmgoKClIKClJSokoKCgpSUgoKUlKbSgoKUxtKCgpSCgoKClIKGlAAEKAAVAoKClAACOgAeAoKCgoKCgoKmgoKCgoKCgpSClIKUlAACJgASAoKCAAsS2AAIEIKCgoKCgpSUlIKClIKClLaCgpSCgpS2goK4goK2goKmgoK2goKUgraClIKUgpTKooKUgqa+sq7osoKCgoKCgpS4goKUlJTWAAMqABMCAAQQ8oKssoKCgpSmpoCCgoKClLaCgoK4goKUgoKUgoK4goK4lIKGtIKUgoKUyoKClKaCzpCasoKUprjUgoKClIKCgoKUlJSUlAAEFgAJBIKCgoKUgoKUgoKUlAAIGgAICgAXJgAGIAAMDAALCAACHAAKAoK4goKCpriClJSCpoLqgoKClIKUuIKUAAgQgoIAKFI=")]
+[assembly: GoPositionMap("net/textproto/textproto.go", "textproto.cs", "AC5WggAKDoIAECCSAAgQksqigoKUAAQ2ABwCgoKCgoKUyJKClIKUqJKClIKUpoKmgoI=", "", "", "79=NewReader/1/1/1,NewWriter/1/1/2")]
+[assembly: GoPositionMap("net/textproto/writer.go", "writer.cs", "ABQqkqaCtrKCgoIAAhQACQKCgqaCggARILKCgoKkgpSUpoKUgoK4goKmgpSUpqKClIK0gqSCpJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -93,12 +92,12 @@ public static partial class textproto_package
     internal partial struct dotWriter {}
     internal partial struct sequencer {}
     public partial struct Conn {}
+    public partial struct Error {}
     public partial struct MIMEHeader {}
     public partial struct Pipeline {}
     public partial struct ProtocolError {}
     public partial struct Reader {}
     public partial struct Writer {}
-    public partial struct ΔError {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -120,3 +119,22 @@ public static partial class textproto_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(textproto_package.Conn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛConn;
+[GoMethodHost(typeof(textproto_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛError;
+[GoMethodHost(typeof(textproto_package.MIMEHeader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛMIMEHeader;
+[GoMethodHost(typeof(textproto_package.Pipeline)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛPipeline;
+[GoMethodHost(typeof(textproto_package.ProtocolError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛProtocolError;
+[GoMethodHost(typeof(textproto_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛReader;
+[GoMethodHost(typeof(textproto_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛWriter;
+[GoMethodHost(typeof(textproto_package.dotReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛdotReader;
+[GoMethodHost(typeof(textproto_package.dotWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛdotWriter;
+[GoMethodHost(typeof(textproto_package.sequencer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛsequencer;
+// </MethodHolders>

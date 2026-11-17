@@ -12,8 +12,11 @@ using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using token = global::go.go.token_package;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
@@ -70,7 +73,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
                 check.record(Ꮡ(new operand(
                     mode: constant_,
                     expr: rangeVar,
-                    typ: new BasicжΔType(Typ[Int]),
+                    typ: new BasicжType(Typ[Int]),
                     val: constant.MakeInt64(t.len),
                     id: x.id
                 )));
@@ -78,8 +81,8 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
         }
 
         // determine key/value types
-        ΔType key = default;
-        ΔType val = default;
+        Type key = default;
+        Type val = default;
         if (x.mode != invalid) {
             var (k, v, cause, ok) = rangeKeyVal(Ꮡcheck, x.typ, (goVersion vΔ1) => Ꮡcheck.Value.allowVersion(vΔ1));
             switch (ᐧ) {
@@ -116,7 +119,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
 
         // lhs expressions and initialization value (rhs) types
         var lhs = new ast.Expr[]{sKey, sValue}.array(); // sKey, sValue may be nil
-        var rhs = new ΔType[]{key, val}.array();        // key, val may be nil
+        var rhs = new Type[]{key, val}.array();         // key, val may be nil
 
         var rangeOverInt = isInteger(x.typ);
 
@@ -149,7 +152,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
                 var typ = rhs[i];
                 if (typ == nil || AreEqual(typ, Typ[Invalid])) {
                     // typ == Typ[Invalid] can happen if allowVersion fails.
-                    obj.typ = new BasicжΔType(Typ[Invalid]);
+                    obj.typ = new BasicжType(Typ[Invalid]);
                     check.usedVars[obj] = true; // don't complain about unused variable
                     continue;
                 }
@@ -169,7 +172,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
 
             // declare variables
             if (len(vars) > 0) {
-                tokenꓸPos scopePos = rangeStmt.Body.Pos();
+                token.Pos scopePos = rangeStmt.Body.Pos();
                 vars = move2heap(varsᴷ, vars);
                 foreach (var (_, obj) in range(vars)) {
                     Ꮡcheck.declare(check.scope, nil, /* recordDef already called */ new VarжObject(obj), scopePos);
@@ -224,6 +227,8 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
     finally { if (ᒐd1) Ꮡcheck.DerefOrNull().closeScope(); ᒐ.Run(); }
 }
 
+} partial class types_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string requiresGo122OrLaterˢ => ref requiresGo122OrLaterˢᵇ;
 private static readonly @string requiresGo122OrLaterˢᵇ = "requires go1.22 or later"u8;
@@ -248,15 +253,15 @@ private static readonly @string funcMustBeFuncYieldFuncˢ6ᵇ = "func must be fu
 // If the range clause is not permitted, rangeKeyVal returns ok = false.
 // When ok = false, rangeKeyVal may also return a reason in cause.
 // The check parameter is only used in case of an error; it may be nil.
-internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ж<Checker> check, ΔType orig, Func<goVersion, bool> allowVersion) {
-    ΔType key = default;
-    ΔType val = default;
+internal static (Type key, Type val, @string cause, bool ok) rangeKeyVal(ж<Checker> check, Type orig, Func<goVersion, bool> allowVersion) {
+    Type key = default;
+    Type val = default;
     @string cause = default;
     bool ok = default;
 
-    (ΔType, ΔType, @string, bool) bad(@string causeΔ1) => (new BasicжΔType(Typ[Invalid]), new BasicжΔType(Typ[Invalid]), causeΔ1, false);
+    (Type, Type, @string, bool) bad(@string causeΔ1) => (new BasicжType(Typ[Invalid]), new BasicжType(Typ[Invalid]), causeΔ1, false);
 
-    var (rtyp, err) = commonUnder(orig, (ΔType t, ΔType u) => {
+    var (rtyp, err) = commonUnder(orig, (Type t, Type u) => {
         // A channel must permit receive operations.
         var (ch, _) = u._<ж<Chan>>(ᐧ); if (ch != nil && ch.dir == SendOnly) {
             return typeErrorf("receive from send-only channel %s", t);
@@ -269,10 +274,10 @@ internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ж<
 
     switch (arrayPtrDeref(rtyp).type()) {
     case ж<Basic> typ: {
-        if (isString(new BasicжΔType(typ))) {
-            return (new BasicжΔType(Typ[Int]), universeRune, "", true); // use 'rune' name
+        if (isString(new BasicжType(typ))) {
+            return (new BasicжType(Typ[Int]), universeRune, "", true); // use 'rune' name
         }
-        if (isInteger(new BasicжΔType(typ))) {
+        if (isInteger(new BasicжType(typ))) {
             if (allowVersion != nil && !allowVersion(go1_22)) {
                 return bad(requiresGo122OrLaterˢ);
             }
@@ -281,10 +286,10 @@ internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ж<
         break;
     }
     case ж<Array> typ: {
-        return (new BasicжΔType(Typ[Int]), typ.elem, "", true);
+        return (new BasicжType(Typ[Int]), typ.elem, "", true);
     }
     case ж<Slice> typ: {
-        return (new BasicжΔType(Typ[Int]), typ.elem, "", true);
+        return (new BasicжType(Typ[Int]), typ.elem, "", true);
     }
     case ж<Map> typ: {
         return (typ.key, typ.elem, "", true);
@@ -293,7 +298,7 @@ internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ж<
         assert(typ.dir != SendOnly);
         return (typ.elem, default, "", true);
     }
-    case ж<ΔSignature> typ: {
+    case ж<Signature> typ: {
         if (allowVersion != nil && !allowVersion(go1_23)) {
             return bad(requiresGo123OrLaterˢ);
         }
@@ -308,7 +313,7 @@ internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ж<
         assert(typ.Recv() == nil);
         // check iterator argument type
         var (u, errΔ1) = commonUnder(typ.Params().At(0).of(Var.Ꮡobject).Type(), default);
-        var (cb, _) = u._<ж<ΔSignature>>(ᐧ);
+        var (cb, _) = u._<ж<Signature>>(ᐧ);
         switch (ᐧ) {
         case {} when cb == nil: {
             if (errΔ1 != nil) {
