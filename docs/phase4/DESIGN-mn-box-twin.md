@@ -411,6 +411,32 @@ recover (Go's line, at the same point); a later parking argument `f(p, <-ch)` wi
 **Order.** Units red first (written at 458941b71b's successor: P1-P6), this block, COORD's GO on it; then the code,
 the probe rows red first under both controls, the arms from a per-run clone of equal path length.
 
+### 12.2 As built, after the code review (dated block, 2026-11-17)
+
+P3's Fable review of the byref-param code (1ac7dcf40f..dd7627dc97): APPROVE WITH CHANGES, no must-fix. This block
+records where the code departs from 12.1, as ruled. It supersedes 12.1 on these points only.
+
+- **Evaluated once, by blocking, not by a spill (G's ruling 1a, 2026-11-16).** 12.1's "each box value is SPILLED to a
+  temp ahead of any await in the argument list" is not built. A by-ref argument earlier in the list keeps every later
+  awaitable in place, plain (nested ones too), so each box is read where the plain emission reads it: unit P13.
+  **Cost:** that later call blocks its carrier, handing its P off as a thread park does, instead of awaiting. On
+  MnHttpClosure at bf4670ec47 the count is **5** calls. All five are interface calls in a later argument: net/http
+  fs.cs:850 and 862 (2), and crypto/tls handshake_client.cs:848 and handshake_server.cs:831. The spill step stays open.
+- **Form (a) drops `E.Value` (P3's finding 5).** `ref E.Value` faults at the call when E is nil, while a handed box
+  faults at the callee's first dereference, possibly after a park. Such a call is named-plain (unit P16). The
+  converter emits `(p).DerefOrNull()` for a pointer argument; `ref E.Value` comes from hand-owned code.
+- **A heap local is refused only when re-pointed** (`v = ref ...`) or its box is reassigned (`Ꮡv = ...`). A
+  whole-value store `v = ...` writes through the box, which still names v (P19, P20; finding 7).
+- **By symbol (finding 6):** `nonnil` and `heap` bind to golib's builtins, and a package variable's `Ꮡname` binds to
+  the static of the property's own type.
+- **Thunks (G's ruling 2):** a converter go wrapper over a box twin launches the twin when every argument is what the
+  go statement evaluated. That means each by-ref argument is `ref ᴛk.DerefOrNull()` over a literal parameter, and each
+  by-value name is a literal parameter, a constant or a type member (finding 3). Otherwise it stays plain and warns
+  `ref-wrapper`.
+- **The later-parking-argument probe row** (`f(p, <-ch)`) moved to src/tools/mnspike2/MnLaterArg (COORD 2026-11-16
+  15:57Z). gc reads p after the receive, while the plain emission reads it before. That is a pre-existing divergence
+  (a .5 BOARD row), and byref-param equals plain there.
+
 ## 13. HANDOFF to P4, a brief (dated block, 2026-11-16)
 
 Owner ruling, as amended: M:N works on account B until account A's reset (2026-11-20 06:00Z), then comes back to G,

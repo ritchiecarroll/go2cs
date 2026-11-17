@@ -566,20 +566,26 @@ public sealed partial class TwinGenerator : ISourceGenerator
             return byRef;
         }
 
-        // A by-ref wrapper's thunk is followed only where each by-ref argument reads a box the go statement bound: a
-        // `ref ᴛk.DerefOrNull()` over one of the literal's own parameters, never a variable read when the goroutine runs.
-        private static bool BoundThunk(ParenthesizedLambdaExpressionSyntax lambda)
+        // A by-ref wrapper's thunk is followed only where every argument is what the go statement evaluated, as Go evaluates
+        // them all there: each by-ref argument a `ref ᴛk.DerefOrNull()` over one of the literal's own parameters, and each
+        // by-value name one of them too, or a constant or a type's member (P3's finding 3: never a captured variable the
+        // goroutine reads when it runs).
+        private static bool BoundThunk(ParenthesizedLambdaExpressionSyntax lambda, SemanticModel model)
         {
+            if (lambda.ExpressionBody is not InvocationExpressionSyntax call)
+                return false;
+
             HashSet<string> bound = [.. lambda.ParameterList.Parameters.Select(parameter => parameter.Identifier.ValueText)];
 
-            return ((InvocationExpressionSyntax)lambda.ExpressionBody!).ArgumentList.Arguments
-                .Where(argument => !argument.RefKindKeyword.IsKind(SyntaxKind.None))
-                .All(argument => argument.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) &&
-                                 argument.Expression is InvocationExpressionSyntax
-                                 {
-                                     Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax box, Name.Identifier.ValueText: "DerefOrNull" },
-                                     ArgumentList.Arguments.Count: 0
-                                 } && bound.Contains(box.Identifier.ValueText));
+            return call.ArgumentList.Arguments.All(argument => argument.RefKindKeyword.IsKind(SyntaxKind.None)
+                ? argument.Expression is not IdentifierNameSyntax name || bound.Contains(name.Identifier.ValueText) ||
+                  model.GetSymbolInfo(name).Symbol is IFieldSymbol { IsConst: true } or ILocalSymbol { IsConst: true } or IMethodSymbol { IsStatic: true } or ITypeSymbol
+                : argument.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) &&
+                  argument.Expression is InvocationExpressionSyntax
+                  {
+                      Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax box, Name.Identifier.ValueText: "DerefOrNull" },
+                      ArgumentList.Arguments.Count: 0
+                  } && bound.Contains(box.Identifier.ValueText));
         }
 
         // A go literal launches its twin; a by-ref thunk, only where its call is awaited through the boxes (12.1, Thunks).
@@ -622,7 +628,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     // twin (byref-param): the wrapper's twin would only move the block from a thread onto a carrier.
                     if (shaped && parameters.All(parameter => parameter.Type is null) && WrapperCall(lambda) is { } wrapped)
                     {
-                        if (wrapped && !(BoxParam && BoundThunk(lambda)))
+                        if (wrapped && !(BoxParam && BoundThunk(lambda, model)))
                             return GoOther(site, "ref-wrapper", true);
 
                         site.RefThunk = wrapped;

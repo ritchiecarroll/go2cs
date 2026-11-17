@@ -52,6 +52,8 @@ public class TwinGoLaunchTests
 
             internal static void parksRef(channel<nint> c, ref nint v) { ᐸꟷ(c); }
 
+            internal static void parksRefK(channel<nint> c, ref nint v, nint k) { ᐸꟷ(c); }
+
         """;
 
     // The converter's WRAPPER for a go call with a constant argument: an implicitly typed literal over the call.
@@ -92,6 +94,24 @@ public class TwinGoLaunchTests
             public static void launchRefUnbound(channel<nint> c, slice<nint> s, nint i)
             {
                 goǃ((ᴛ1) => parksRef(ᴛ1, ref s[i]), c);
+            }
+
+        """;
+
+    // P3's review, finding 3: Go evaluates every argument at the go statement. A by-VALUE name the literal reads when the
+    // goroutine runs (a captured c) is not bound, so the thunk is not followed; a constant is.
+    private const string RefWrapperCaptured = """
+            public static void launchRefCaptured(channel<nint> c, ж<nint> Ꮡv)
+            {
+                goǃ((ᴛ1) => parksRef(c, ref ᴛ1.DerefOrNull()), Ꮡv);
+            }
+
+        """;
+
+    private const string RefWrapperConstant = """
+            public static void launchRefConstant(channel<nint> c, ж<nint> Ꮡv)
+            {
+                goǃ((ᴛ1, ᴛ2) => parksRefK(ᴛ1, ref ᴛ2.DerefOrNull(), 1), c, Ꮡv);
             }
 
         """;
@@ -208,6 +228,14 @@ public class TwinGoLaunchTests
     [TestMethod]
     public void ABoxedByRefThunkLaunchesItsTwin() =>
         AssertLaunchesTwin(RefWrapper, "launchRefWrapper", "async (ᴛ1, ᴛ2) => await parksRefꞏtwin(ᴛ1, ᴛ2), c, Ꮡv)");
+
+    [TestMethod]
+    public void AThunkWithACapturedByValueArgumentStaysPlainAndWarnsByName() =>
+        AssertRefWrapperPlain(null, RefWrapperCaptured);
+
+    [TestMethod]
+    public void AThunkWithAConstantArgumentLaunchesItsTwin() =>
+        AssertLaunchesTwin(RefWrapperConstant, "launchRefConstant", "async (ᴛ1, ᴛ2) => await parksRefKꞏtwin(ᴛ1, ᴛ2, 1), c, Ꮡv)");
 
     [TestMethod]
     public void TheSwitchOffKeepsTheByRefWrapperPlainAndWarnsByName() =>

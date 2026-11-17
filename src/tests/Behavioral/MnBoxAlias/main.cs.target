@@ -29,6 +29,9 @@ internal static nint waitAt(this ref bag b, nint i) {
     return b.s[i].waitAndRead();
 }
 
+internal static readonly ж<cell> ᏑpkgCell = new StaticBox<cell>(new cell(v: 1));
+internal static ref cell pkgCell => ref ((StaticBox<cell>)ᏑpkgCell).ValueSlot;
+
 internal static channel<EmptyStruct> ready = new channel<EmptyStruct>(0);
 internal static channel<EmptyStruct> resume = new channel<EmptyStruct>(0);
 
@@ -255,6 +258,11 @@ internal static partial void main() {
         tpʗ1.v = 14;
     });
     fmt.Println("param-thunk", ᐸꟷ(done));
+
+    goǃ(writer, () => {
+        pkgCell.v = 15;
+    });
+    fmt.Println("param-package", readCell(ref pkgCell));
 
     var aʗ3 = a;
     goǃ(writer, () => {

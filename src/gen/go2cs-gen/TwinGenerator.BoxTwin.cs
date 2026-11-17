@@ -170,9 +170,11 @@ public sealed partial class TwinGenerator
             return boxes;
         }
 
-        // 12.1's enumerated aliasing forms for an ARGUMENT, beside the receiver rows BoxOf already knows: (a) `(E).DerefOrNull()`,
-        // `E.DerefOrNull()` or `E.Value` with E a side-effect-free ж expression or an element pointer `Ꮡ(x, i)`: E itself,
-        // read once at the call as Go reads it; (c) ruling 10.4's nil-checked field `nonnil(ref e).f`: the field pointer
+        // 12.1's enumerated aliasing forms for an ARGUMENT, beside the receiver rows BoxOf already knows: (a) `(E).DerefOrNull()`
+        // or `E.DerefOrNull()` with E a side-effect-free ж expression or an element pointer `Ꮡ(x, i)`: E itself, read once at
+        // the call as Go reads it (P3's finding 5: never `ref E.Value`, which faults at the call when E is nil where a handed
+        // box would fault at the callee's first dereference, possibly after a park; the converter emits `(p).DerefOrNull()`
+        // for a pointer argument, and `.Value` comes from hand-owned code); (c) ruling 10.4's nil-checked field `nonnil(ref e).f`: the field pointer
         // from e's box, which faults as Go does when e is nil. Never `builtin.Ꮡ(v)` (it COPIES v into a new box).
         private string? ArgBoxOf(ExpressionSyntax operand, SemanticModel model, Candidate caller, RefAliases aliases, int position)
         {
@@ -182,8 +184,6 @@ public sealed partial class TwinGenerator
             ExpressionSyntax? boxed = operand switch
             {
                 InvocationExpressionSyntax { ArgumentList.Arguments.Count: 0, Expression: MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression, Name.Identifier.ValueText: "DerefOrNull" } deref } => deref.Expression,
-                MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression, Name.Identifier.ValueText: "Value" } value
-                    when model.GetTypeInfo(value.Expression).Type is INamedTypeSymbol { Name: "ж", TypeArguments.Length: 1 } => value.Expression,
                 _ => null
             };
 
@@ -196,8 +196,8 @@ public sealed partial class TwinGenerator
             }
 
             if (operand is MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression, Name: IdentifierNameSyntax } member &&
-                member.Expression is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nonnil" }, ArgumentList.Arguments: [{ RefKindKeyword.RawKind: (int)SyntaxKind.RefKeyword } checkedArgument] } &&
-                model.GetSymbolInfo(member).Symbol is IFieldSymbol { IsStatic: false } field)
+                member.Expression is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nonnil" }, ArgumentList.Arguments: [{ RefKindKeyword.RawKind: (int)SyntaxKind.RefKeyword } checkedArgument] } nonnil &&
+                Builtin(model.GetSymbolInfo(nonnil).Symbol, "nonnil") && model.GetSymbolInfo(member).Symbol is IFieldSymbol { IsStatic: false } field)
             {
                 return ArgBoxOf(checkedArgument.Expression, model, caller, aliases, position) is { } parent ? FieldBox(parent, field, model, caller, position) : null;
             }
@@ -450,12 +450,13 @@ public sealed partial class TwinGenerator
 
                     // byref-param (12.1 (b)): a HEAP local, `ref var v = ref heap(…, out var Ꮡv)`, hands its own box, never
                     // re-pointed. Gated on GoTwinsBoxParam, so the switch-off arm equals arm N.
-                    if (BoxParam && HeapBox(source) is { } heapBox)
+                    // P3's finding 7: refused only where v is RE-POINTED (`v = ref …`) or its box reassigned (`Ꮡv = …`); a
+                    // whole-value store `v = …` writes through the box, which still names v.
+                    if (BoxParam && HeapBox(source) is { } heapBox && Builtin(model.GetSymbolInfo(source).Symbol, "heap"))
                     {
-                        string heapDeclared = source.WithoutTrivia().ToString();
-
                         return caller.Syntax.DescendantNodes().OfType<AssignmentExpressionSyntax>().Any(assignment =>
-                            assignment.Left is IdentifierNameSyntax left && (left.Identifier.ValueText == name.Identifier.ValueText || left.Identifier.ValueText == heapBox)) ? null : heapBox;
+                            assignment.Left is IdentifierNameSyntax left &&
+                            (left.Identifier.ValueText == heapBox || left.Identifier.ValueText == name.Identifier.ValueText && assignment.Right is RefExpressionSyntax)) ? null : heapBox;
                     }
 
                     IdentifierNameSyntax? rootName = BoxRoot(source);
@@ -486,8 +487,12 @@ public sealed partial class TwinGenerator
                 case InvocationExpressionSyntax { ArgumentList.Arguments.Count: 0, Expression: MemberAccessExpressionSyntax { Name.Identifier.ValueText: "DerefOrNull", Expression: IdentifierNameSyntax r } }:
                     return r.Identifier.ValueText;
 
-                // A package variable: a ref property over its static box `Ꮡname`.
-                case IdentifierNameSyntax name when symbol is IPropertySymbol { IsStatic: true, ReturnsByRef: true }:
+                // A package variable: a ref property over its static box `Ꮡname`, which must bind at the call to that static
+                // of the property's own type (P3's finding 6: by symbol, never a local of that name).
+                case IdentifierNameSyntax name when symbol is IPropertySymbol { IsStatic: true, ReturnsByRef: true } property &&
+                                                    model.GetSpeculativeSymbolInfo(position, SyntaxFactory.IdentifierName("Ꮡ" + name.Identifier.ValueText), SpeculativeBindingOption.BindAsExpression).Symbol
+                                                        is { IsStatic: true, Kind: SymbolKind.Field or SymbolKind.Property } staticBox &&
+                                                    SymbolEqualityComparer.Default.Equals(staticBox.ContainingType, property.ContainingType):
                     return "Ꮡ" + name.Identifier.ValueText;
 
                 // A field of a receiver that has a box: the field's pointer from that box.
@@ -521,6 +526,10 @@ public sealed partial class TwinGenerator
             heap.ArgumentList.Arguments.LastOrDefault() is { RefKindKeyword.RawKind: (int)SyntaxKind.OutKeyword, Expression: DeclarationExpressionSyntax { Designation: SingleVariableDesignationSyntax designation } }
                 ? designation.Identifier.ValueText
                 : null;
+
+        // A golib builtin, by symbol (P3's finding 6): `go.builtin.<name>`.
+        private static bool Builtin(ISymbol? symbol, string name) =>
+            symbol is IMethodSymbol { Name: var method, ContainingType: { Name: "builtin", ContainingNamespace.Name: "go" } } && method == name;
 
         // A keyword-named local keeps its escape (code review 3: `func (in *T) M()` converts to `this ref T @in`).
         internal static string Local(string name) =>

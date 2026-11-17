@@ -320,6 +320,49 @@ public class TwinBoxTests
 
         """;
 
+    // P3's review of the byref-param cut: findings 1, 2, 5 and 7, each form pinned by its own unit.
+    private const string ReviewPins = """
+            internal static void mixed2(ref T a, ref T b) { ᐸꟷ(ch); a.x = b.x; }
+
+            public static void runMixed(ж<T> px)
+            {
+                T st = default;
+                mixed2(ref (px).DerefOrNull(), ref st);
+                ᐸꟷ(ch);
+            }
+
+            internal static ж<T> Ꮡpk = Ꮡ(new T());
+            internal static ref T pk => ref Ꮡpk.Value;
+
+            public static void runPkg() { pp(ref pk); }
+
+            public static void runValue(ж<T> px) { pp(ref px.Value); ᐸꟷ(ch); }
+
+            public static void runTilde(ж<ж<T>> ppx) { pp(ref (~ppx).DerefOrNull()); }
+
+            internal static void kwp(ref T @in) { ᐸꟷ(ch); @in.x = 1; }
+
+            internal static void kwf(ref T @in) { kwp(ref @in); }
+
+            public static void runKw(ж<T> px) { kwp(ref (px).DerefOrNull()); }
+
+            public static void runHeapStore()
+            {
+                ref var hs = ref heap(new T(), out var Ꮡhs);
+                hs = new T();
+                pp(ref hs);
+            }
+
+            public static void runHeapBoxStore()
+            {
+                ref var hb = ref heap(new T(), out var Ꮡhb);
+                Ꮡhb = Ꮡ(new T());
+                pp(ref hb);
+                ᐸꟷ(ch);
+            }
+
+        """;
+
     // byref-param, 12.1's other enumerated forms (P4's cut): a heap local, a field of a current ref local, ruling 10.4's
     // nil-checked field, a generic callee, a `this ref` method with another `ref` (byref-mixed), and a COPY box
     // (`Ꮡ(v)`, never handed).
@@ -827,6 +870,78 @@ public class TwinBoxTests
         Assert.AreEqual(0, errors.Length, Errors(errors));
         StringAssert.Contains(twins, "await ppꞏtwin(global::go.builtin.Ꮡ((px).DerefOrNull()))", "the call-site control copies, on purpose");
         StringAssert.Contains(twins, "ARGCOPY(control)", "and says so in the report");
+    }
+
+    [TestMethod]
+    public void P14_AMixedCallWithOneUnboxableArgumentStaysPlainAndNamed()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ReviewPins);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("await mixed2ꞏtwin(", StringComparison.Ordinal), "all or nothing: one stack local keeps the call plain");
+        StringAssert.Contains(twins, "|mixed2|st", "named by its first unboxable argument");
+    }
+
+    [TestMethod]
+    public void P15_APackageVariableHandsItsStaticBox()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ReviewPins);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await ppꞏtwin(Ꮡpk)", "a package variable's own static box");
+    }
+
+    [TestMethod]
+    public void P16_AValueArgumentStaysPlainAndNamed()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ReviewPins);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        string twin = twins.Split('\n').Single(line => line.Contains("runValueꞏtwin(", StringComparison.Ordinal));
+
+        // `ref E.Value` faults at the call when E is nil; a handed box would fault later, at the callee's first
+        // dereference, possibly after a park.
+        Assert.IsFalse(twin.Contains("ppꞏtwin(", StringComparison.Ordinal), "no box for `ref px.Value`: " + twin);
+        StringAssert.Contains(twins, "|pp|px.Value", "named-plain");
+    }
+
+    [TestMethod]
+    public void P17_ADereferencedPointerHandsTheInnerBoxReadOnce()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ReviewPins);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await ppꞏtwin(~ppx)", "`~pp` read once at the call, as Go reads *pp");
+    }
+
+    [TestMethod]
+    public void P18_AKeywordNamedParameterKeepsItsEscape()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ReviewPins);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "kwpꞏtwin(global::go.ж<T> Ꮡin)", "the box parameter");
+        StringAssert.Contains(twins, "ref var @in = ref Ꮡin.DerefOrNull();", "the prologue keeps the keyword escape");
+        StringAssert.Contains(twins, "await kwpꞏtwin(Ꮡin)", "a forwarded keyword-named parameter hands its box");
+    }
+
+    [TestMethod]
+    public void P19_AHeapLocalStoredWholeStillHandsItsBox()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ReviewPins);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await ppꞏtwin(Ꮡhs)", "`v = value` writes through the box, which still names v");
+    }
+
+    [TestMethod]
+    public void P20_AHeapLocalWhoseBoxIsReassignedStaysPlainAndNamed()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ReviewPins);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("await ppꞏtwin(Ꮡhb)", StringComparison.Ordinal), "`Ꮡv = ...` re-points the box away from v");
+        StringAssert.Contains(twins, "|pp|hb", "named-plain");
     }
 
     [TestMethod]

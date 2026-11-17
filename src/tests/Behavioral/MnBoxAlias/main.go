@@ -28,6 +28,9 @@ func (b *bag) waitAt(i int) int {
 	return b.s[i].waitAndRead()
 }
 
+// A package variable handed by address (12.1 (b)): its own static box.
+var pkgCell = cell{v: 1}
+
 var ready = make(chan struct{})
 var resume = make(chan struct{})
 
@@ -200,6 +203,9 @@ func main() {
 	go thunkRead(done, tp)
 	go writer(func() { tp.v = 14 })
 	fmt.Println("param-thunk", <-done)
+
+	go writer(func() { pkgCell.v = 15 })
+	fmt.Println("param-package", readCell(&pkgCell))
 
 	go writer(func() { a.bal = 50 })
 	value := a.valueRead()
