@@ -1464,6 +1464,10 @@ jobs:
         env:
           CGO_TEST_FILTER: ${{ needs.plan.outputs.filter }}
           GO2CS_CGO_BUILD: ${{ needs.plan.outputs.stage == 'cgo-e2e' && '1' || '' }}
+          # The -tests -recurse arms that build and run a converted test project (TestTestsRecurseRuns*). Not cgo tests:
+          # they run in this stage because its budget (40-minute go test, 45-minute job) fits a cold build of the fixture's
+          # converted standard library closure, and converter-cgo's (10/15) does not.
+          GO2CS_TESTS_E2E: ${{ needs.plan.outputs.stage == 'cgo-e2e' && '1' || '' }}
           # The dotnet arms (TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet) skip where no .NET SDK is installed; here
           # one always is, so its absence must read red, not skipped.
           GO2CS_REQUIRE_DOTNET: '1'

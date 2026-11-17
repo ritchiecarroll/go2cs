@@ -105,13 +105,20 @@ func writeJwtLikeModule(t *testing.T, root string, goLine string) string {
 func runTestsRecurse(t *testing.T, moduleDir string, outRoot string) (string, error) {
 	t.Helper()
 
+	return runTestsRecurseAction(t, "convert", moduleDir, outRoot)
+}
+
+// runTestsRecurseAction runs -tests -recurse with -test-action action over moduleDir, against this tree's src.
+func runTestsRecurseAction(t *testing.T, action string, moduleDir string, outRoot string) (string, error) {
+	t.Helper()
+
 	treeSrc, err := filepath.Abs("..")
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cmd := exec.Command(driverBinary(t), "-tests", "-test-action", "convert", "-recurse", "-go2cspath", treeSrc, moduleDir, outRoot)
+	cmd := exec.Command(driverBinary(t), "-tests", "-test-action", action, "-recurse", "-go2cspath", treeSrc, moduleDir, outRoot)
 	cmd.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=")
 	output, err := cmd.CombinedOutput()
 
@@ -333,6 +340,14 @@ func TestTestsRecurseConvertsWhatItCanPastARefusedPackage(t *testing.T) {
 		}
 	}
 
+	checkRefusedPackageReasons(t, output)
+}
+
+// checkRefusedPackageReasons checks a -tests -recurse run over writeRefusedPackageModule's module names the refused
+// package, and each tested package it reaches with the reason, and does not name good/.
+func checkRefusedPackageReasons(t *testing.T, output string) {
+	t.Helper()
+
 	for _, want := range []string{
 		"Refused 1 package (no project written):",
 		"  example.test/skipmod/refused  GO2CS2002",
@@ -347,5 +362,43 @@ func TestTestsRecurseConvertsWhatItCanPastARefusedPackage(t *testing.T) {
 
 	if strings.Contains(output, "-tests example.test/skipmod/good: not converted") {
 		t.Errorf("good/ is reported as not converted; its test closure does not reach refused/\n%s", output)
+	}
+}
+
+// testsE2EEnv turns on the -tests -recurse arms that build and run a converted test project. It is opt-in, since the
+// build takes the fixture's whole closure of the converted standard library, which takes minutes. The hosted
+// cgo-e2e stage sets it (os-matrix.yml) because that stage's 40-minute test budget fits the cold build; this is not a
+// cgo test.
+const testsE2EEnv = "GO2CS_TESTS_E2E"
+
+// TestTestsRecurseRunsWhatItCanPastARefusedPackage is TestTestsRecurseConvertsWhatItCanPastARefusedPackage run with
+// -test-action all: good/'s converted tests build, run and compare equal to go test, while the refused package and
+// the two packages it reaches are named and not built.
+func TestTestsRecurseRunsWhatItCanPastARefusedPackage(t *testing.T) {
+	if os.Getenv(testsE2EEnv) != "1" {
+		t.Skipf("opt-in (%s=1): builds and runs the converted tests against the converted standard library", testsE2EEnv)
+	}
+
+	if _, err := exec.LookPath("dotnet"); err != nil {
+		t.Fatalf("%s=1 needs the .NET SDK on PATH: %v", testsE2EEnv, err)
+	}
+
+	root := t.TempDir()
+	moduleDir := writeRefusedPackageModule(t, root)
+
+	output, err := runTestsRecurseAction(t, "all", moduleDir, filepath.Join(root, "out"))
+
+	if err == nil {
+		t.Errorf("exit 0; want nonzero, since a package was refused\n%s", output)
+	}
+
+	checkRefusedPackageReasons(t, output)
+
+	if !strings.Contains(output, "Validated 1 tests against go test") {
+		t.Errorf("good/'s one test was not validated against go test\n%s", output)
+	}
+
+	if !strings.Contains(output, "phase B: 3 of 4 package(s) failed:") {
+		t.Errorf("phase B does not report exactly the three packages the refusal reaches as failed\n%s", output)
 	}
 }

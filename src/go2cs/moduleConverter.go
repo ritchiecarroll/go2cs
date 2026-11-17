@@ -54,6 +54,7 @@ type ModuleConverter struct {
 	referencedThirdParty []string                   // -recurse=module: third-party import paths left OUT of the convert-set
 	lockedModules        map[string]moduleLockEntry // module-cache dependency modules in the convert-set (modulesLock.go)
 	includeTestClosure   bool                       // -tests -recurse: widen the convert-set by the module's test closure (moduleTestsDriver.go)
+	testClosures         map[string]map[string]bool // -tests -recurse: tested package -> every import path its test variants reach (moduleTestsDriver.go)
 	refused              []refusedPackage           // packages refused at a pre-emission gate and skipped (recurseRefusal.go)
 	failed               []string                   // packages that failed to load or panicked, and were skipped (recurseRefusal.go)
 
@@ -595,9 +596,9 @@ func (m *ModuleConverter) convertAll() {
 			packageOptions.packageImportPath = pkgPath
 			packageOptions.programDependencies = m.sortedThirdPartyModules()
 
-			// A refused package is skipped and the run goes on (recurseRefusal.go). Not under -tests -recurse, whose
-			// phase A stays fatal at a refusal, as before.
-			packageOptions.skipRefusedPackages = !m.includeTestClosure
+			// A refused package is skipped and the run goes on (recurseRefusal.go), under -tests -recurse too: its
+			// phase B then names each tested package the refusal reaches (moduleTestsDriver.go).
+			packageOptions.skipRefusedPackages = true
 
 			return processConversion(pkg.Dir, true, outputDir, packageOptions)
 		})

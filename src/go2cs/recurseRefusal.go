@@ -22,7 +22,10 @@ import (
 // nonzero naming the refused package and each converted package that imports it (those cannot build until it
 // converts). A code downgraded by -warn never reaches a gate, so its package is not refused at all. A package that
 // fails to load or panics was already skipped; it now makes the run end nonzero too, where it used to exit 0.
-// -tests -recurse keeps both behaviours it had: a refusal is fatal there, and a failed package does not stop it.
+// -tests -recurse skips a refused package too, and then gives each tested package its own verdict, as `go test ./...`
+// does: one that is refused, or whose test closure imports a refused package, is named with that reason and gets no
+// test project, and the rest are converted and tested. The run still ends nonzero, as `go test ./...` exits 1 when a
+// package fails to build. A failed package does not stop -tests -recurse, as before.
 
 // packageRefusal is a pre-emission refusal returned to the -recurse driver instead of ending the process.
 type packageRefusal struct {
@@ -93,6 +96,12 @@ func (m *ModuleConverter) reportRefusedPackages(refused []refusedPackage) {
 	}
 }
 
+// refusalError is runError's error when refused packages are the only reason the run fails. -tests -recurse goes on
+// to phase B past it (moduleTestsDriver.go), and stops at any other phase-A error.
+type refusalError struct{ text string }
+
+func (e *refusalError) Error() string { return e.text }
+
 // runError is ConvertModule's error when a package was refused or failed (did not load, or panicked), raised after
 // the rest of the run's output is written; nil when every package converted. -tests -recurse (includeTestClosure)
 // goes on past a failed package, as it always did: its phase A converts the closure for phase B, and a failed
@@ -110,12 +119,19 @@ func (m *ModuleConverter) runError() error {
 		parts = append(parts, fmt.Sprintf("%d %s refused: %s", len(m.refused), plural(len(m.refused), "package", "packages"), strings.Join(paths, ", ")))
 	}
 
+	refusedOnly := len(parts) > 0
+
 	if len(m.failed) > 0 && !m.includeTestClosure {
 		parts = append(parts, fmt.Sprintf("%d %s failed: %s", len(m.failed), plural(len(m.failed), "package", "packages"), strings.Join(m.failed, ", ")))
+		refusedOnly = false
 	}
 
 	if len(parts) == 0 {
 		return nil
+	}
+
+	if refusedOnly {
+		return &refusalError{text: parts[0]}
 	}
 
 	return errors.New(strings.Join(parts, "; "))
