@@ -1380,7 +1380,11 @@ func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark 
 			resultType = tuple.String()
 		}
 
-		methodName := getSanitizedIdentifier(fwd.method.Name())
+		// The METHOD's spelling, as the interface declares it (visitInterfaceType) and as call sites read it:
+		// a method that shares its name with a package type keeps its own name while the TYPE takes the Δ
+		// (getCollisionAvoidanceIdentifier), so the collision-aware getSanitizedIdentifier would name the
+		// forwarder after the type -- CS0102 beside the nested type, CS1929 against the interface member.
+		methodName := getSanitizedFunctionName(fwd.method.Name())
 
 		// C# forbids a method more accessible than its parameter types (CS0051), so an exported
 		// interface method promoted onto an UNEXPORTED struct takes the struct's accessibility —

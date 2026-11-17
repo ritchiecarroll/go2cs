@@ -2057,6 +2057,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPromotedFieldProperties() => CheckTarget("PromotedFieldProperties");
 
     [TestMethod]
+    public void CheckPromotedForwarderTypeNameCollision() => CheckTarget("PromotedForwarderTypeNameCollision");
+
+    [TestMethod]
     public void CheckPromotedMethodExpr() => CheckTarget("PromotedMethodExpr");
 
     [TestMethod]

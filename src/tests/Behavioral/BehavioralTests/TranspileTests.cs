@@ -2107,6 +2107,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPromotedFieldProperties() => CheckTarget("PromotedFieldProperties");
 
     [TestMethod]
+    public void CheckPromotedForwarderTypeNameCollision() => CheckTarget("PromotedForwarderTypeNameCollision");
+
+    [TestMethod]
     public void CheckPromotedMethodExpr() => CheckTarget("PromotedMethodExpr");
 
     [TestMethod]
