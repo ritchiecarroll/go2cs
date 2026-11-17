@@ -2025,6 +2025,42 @@ foreign types could not be hosted in either of their assemblies from here in any
 named numerics and never converting between them, converted across in `main`, with the
 foreign→local and local→foreign directions as the live controls for the records that are still needed.)
 
+### ...and a STRUCT pair of two foreign types is served by a FUNCTION, which needs no host
+The decline above rests on the explicit cast still compiling, which holds for a numeric pair and not for a struct
+pair: `lib.Pitch(o)` with `o` an `other.Pitch` has no cast to fall back on, because a conversion operator must be
+declared by one of its two types and both are closed assemblies (CS0030). The converter records that pair anyway,
+outside `checkForImplicitConversion` (`foreignPairStructConversion`), and go2cs-gen answers a record whose BOTH
+sides are referenced-assembly structs with one static function in this package's class instead of an operator,
+named as Go names the target, package then type. The site calls it. No type is extended, so no phantom can be
+minted; the numeric arms keep the rule above unchanged.
+
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.go:60-61 -->
+```go
+lp := lib.Pitch(o)
+op := other.Pitch(p)
+```
+
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.cs:44-45 -->
+```csharp
+var lp = libꓸPitch(o);
+var op = otherꓸPitch(p);
+```
+
+and go2cs-gen writes, for the first:
+
+```csharp
+internal static lib.Pitch libꓸPitch(other.Pitch src) => new lib.Pitch(src.Hz);
+```
+
+The route is taken only where the function can be written and no operator already converts: both types are
+declared with a struct type literal (a type written over another named type keeps its own operator), neither is
+generic or this package's own, every field is exported (an unexported field is `internal` to its assembly), and no
+field's type holds an unnamed struct type (each package lifts its own C# type for one). Any other pair keeps the
+cast. Detail and limits: struct-types.md, *A struct conversion between two types of OTHER packages calls a
+generated function*. (Guarded by the `ForeignPairStructConversion` behavioral test,
+`TestAStructConversionBetweenTwoForeignTypesCallsItsFunction` in the converter and the
+`ForeignPairStructConversionTests` generator tests.)
+
 ### ...but the POINTER-BOXING route needs none, and a whitebox-production operand still counts
 The rule above is about HOSTING, so it stops where hosting does. A record of the form `T` → `ж<T>` —
 the shared Go pointer-boxing route, which the converter does not record and go2cs-gen refuses (see *Such

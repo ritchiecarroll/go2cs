@@ -531,6 +531,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		return converted
 	}
 
+	// A conversion between two struct types of OTHER packages, `lib.Pitch(o)` with o an `other.Pitch`:
+	// a call of the function go2cs-gen writes for the pair (foreignPairStructConversion.go).
+	if converted, ok := v.foreignPairStructConversion(callExpr); ok {
+		return converted
+	}
+
 	// Check if the call is a type conversion
 	if ok, targetTypeName := v.isTypeConversion(callExpr); ok {
 		arg := callExpr.Args[0]
@@ -1797,6 +1803,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// type across even when nil (see typedNilInterfaceBoxing.go).
 			expr = v.boxPointerIntoEmptyInterface(v.info.TypeOf(callExpr), arg, expr)
 		}
+
+		// A conversion to a struct or array type converts a COPY of its operand: an operand that is
+		// existing storage carrying an array is cloned first, `((chord)lc.ΔClone())`, or the result
+		// shares the array's backing with it (conversionOperandCopy).
+		expr = v.conversionOperandCopy(v.info.TypeOf(callExpr), arg, expr)
 
 		// A conversion between two DIFFERENT NAMED types that share a COMPOSITE underlying (net/mail
 		// textproto.MIMEHeader(h) where Header and MIMEHeader both wrap map[string][]string): each is a

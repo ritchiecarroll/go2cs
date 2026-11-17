@@ -346,6 +346,9 @@
     <Project Path="tests/Behavioral/ForeignAnonStructAliasElemAddress/stdio/ForeignAnonStructAliasElemAddress.stdio.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructForwardAlias/ForeignAnonStructForwardAlias.csproj" />
     <Project Path="tests/Behavioral/ForeignAnonStructForwardAlias/dep/ForeignAnonStructForwardAlias.dep.csproj" />
+    <Project Path="tests/Behavioral/ForeignPairStructConversion/ForeignPairStructConversion.csproj" />
+    <Project Path="tests/Behavioral/ForeignPairStructConversion/lib/ForeignPairStructConversion.lib.csproj" />
+    <Project Path="tests/Behavioral/ForeignPairStructConversion/other/ForeignPairStructConversion.other.csproj" />
     <Project Path="tests/Behavioral/KeywordNamedTypeAlias/KeywordNamedTypeAlias.csproj" />
     <Project Path="tests/Behavioral/PackageNameNotDirName/PackageNameNotDirName.csproj" />
     <Project Path="tests/Behavioral/PackageNameNotDirName/lib/PackageNameNotDirName.lib.csproj" />
@@ -1208,6 +1211,9 @@
     <Project Path="tests/Behavioral/StringSliceAndUnsignedConst/StringSliceAndUnsignedConst.csproj" />
     <Project Path="tests/Behavioral/StringZeroValueConcat/StringZeroValueConcat.csproj" />
     <Project Path="tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.csproj" />
+    <Project Path="tests/Behavioral/StructConversionCopy/StructConversionCopy.csproj" />
+    <Project Path="tests/Behavioral/StructConversionCopy/lib/StructConversionCopy.lib.csproj" />
+    <Project Path="tests/Behavioral/StructConversionCopy/other/StructConversionCopy.other.csproj" />
     <Project Path="tests/Behavioral/StructuralAssertFailSoftMiss/StructuralAssertFailSoftMiss.csproj" />
     <Project Path="tests/Behavioral/StructFieldNamedOther/StructFieldNamedOther.csproj" />
     <Project Path="tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.csproj" />
