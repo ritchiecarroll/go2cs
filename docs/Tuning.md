@@ -41,6 +41,17 @@ file: the converted libraries are compiled into the program and are not publishe
      1545 s with 0 'will always throw' lines and ran; at go.* 1.26.10.3 it fails in ILC at the object string table
      (StringTableBuilder.CreateIndex, 6,188 'will always throw' lines), the generic expansion batch 308 removed. -->
 
+A Native AOT publish also needs the platform's native toolchain: on Linux, `clang` and `zlib1g-dev` (Debian and
+Ubuntu: `sudo apt install clang zlib1g-dev`; Fedora: `clang zlib-devel`); on Windows, the MSVC C++ build tools; on
+macOS, the Xcode command line tools. A publish that fails leaves its output folder as it was. A program from an
+earlier publish into the same folder, such as the small launcher a Release publish writes, is still there and still
+runs. Read the publish's own result, its `error` lines and its exit status, before you run what is in the folder.
+
+<!-- Prerequisites: Performance.md's Native AOT prerequisite table ("Running it"), the benchmark runner's
+     requirements, which name the same toolchains. The stale launcher: P3's new-user docs run part 2, 2026-11-15
+     (linux-x64, go.* 1.26.10.3): after the failed AOT publish the publish folder still held the colordemo launcher
+     from the earlier Release publish (78 KB, dated before the AOT run); it ran and printed the right line. -->
+
 Which wins depends on what the program spends its time on. The `win-x64` comparisons below come from the
 performance comparison's current table, measured on one Windows machine (an AMD Ryzen 5 PRO 6650U) against the
 `go.*` 1.26.10.2 packages; a bullet that uses another source names it.
@@ -158,7 +169,16 @@ same; it is larger, and its symbol table is larger.
 Turn folding off where build time matters more than size: a development loop, or a CI job that publishes Native
 AOT to test it. Keep the default for what you ship when the executable's size matters, and for a very large program:
 the symbol names grow, and the native symbol table has a 2 GiB ceiling, so a program already close to it can stop
-fitting. Folding only removes symbols, so a program that builds with folding off also builds with it on.
+fitting. Folding only removes symbols, so a program that builds with folding off also builds with it on. A program
+past the ceiling fails late in the publish, on Linux with `System.OutOfMemoryException: Insufficient memory to
+continue the execution of the program.` and this line in the stack:
+`at ILCompiler.ObjectWriter.StringTableBuilder.CreateIndex(String)`. The message names memory, but the limit is the
+string table's size, not the machine's RAM.
+<!-- The stack: P3's new-user docs run part 2, 2026-11-15, linux-x64 (4 cores, 15 GB, 11 GB free at the failure),
+     SDK 10.0.404, ILCompiler 10.0.15, the README walkthrough's colordemo on go.* 1.26.10.3, with folding on and
+     with folding off; reproduced by P1 2026-11-16 (ILCompiler 10.0.14), StringTableBuilder.CreateIndex in both
+     runs. Windows and macOS write other object formats and were not read. With the 1.26.11.1 tree the same
+     program's string table is 250 MiB (P1, colordemo.o .strtab 262,013,197 bytes). -->
 
 The setting is a project property, `IlcFoldIdenticalMethodBodies`. Set it in one of three places:
 
