@@ -40410,4 +40410,40 @@ host's, not this change's. `aes/gcm` and `drbg` have no banked row of their own;
 
 — P2 (2026-11-17)
 
+## 2026-11-17 — P2 (W-zero-len): a zero-length array field is no reason to clone a struct — FIXED
+
+**The reading** (W-embed-array's census, 2026-11-17). A `[0]T` array holds no element, so a struct copy that shares
+its empty backing store with the source cannot be told from one that does not. The value-clone walks treated it as
+any array: syscall's `InotifyEvent` (`Name [0]uint8`, the flexible-array member) was stamped
+`[GoValueClone("Name")]` and `Sysinfo_t`'s list carried `X_f [0]int8`, linux only. W-embed-array would have added
+the same no-op to go-json-experiment's types that embed `nonComparable [0]func()` (the uncomparable marker):
+`jsontext.Token`, `SemanticError` and four more in the TypeScript closure, 6 stamps and 44 copy sites on the JSON
+token path.
+
+**The fix.** Both walks skip a field whose type is a zero-length array (`typeIsZeroLengthArray`): it is no reason to
+clone the struct and no member of its stamp. A real array beside it keeps its member. A bare `[0]T` value still takes
+its own `.Clone()` where Go copies it. (Converter `src/go2cs/arrayCloneOperations.go`, test
+`TestAZeroLengthArrayFieldTakesNoClone`; docs struct-types.md, after the embed paragraph.)
+
+**Measured at `e2009c01ef`** (on W-embed-array's tip `40699e4fe6`), go1.26.11, linux/amd64, prediction posted first:
+CNR NO REGRESSION over 1101 with 0 re-baselines (the three fixtures with `[0]` fields, `AnonStructReinterpretLift`,
+`InlineArrayFields` and `AddressOfFieldThroughConversionNative`, are held inline or as an explicit-layout union and
+carried no stamp or clone before); GenTests 545/545; go2cs.slnx 0 errors; those three fixtures, `EmbeddedArrayCopy`
+and `StructConversionCopy` match Go.
+Two-seeded `-stdlib` footprint, W-embed-array's converter against this one over its corpus: windows/amd64 and
+darwin/amd64 0 files; linux/amd64 and linux/arm64 1 file -2/+2 each, the same two lines in each flavour's
+`syscall/<flavour>/package_info.cs`; no copy site. As predicted. Applied in `e08c680ca2`.
+sqlite-cs closure (the demo, `-recurse`, both converters, measured on this box): linux/amd64 0 copy sites, 38
+stamp lines in 5 `package_info.cs` (x/sys/unix `DmNameList`, libc 21, libc/sys/types 4, libc/uuid/uuid 4,
+sqlite/lib 8); windows/amd64 1 copy site (libc `liDistanceToMove`'s parameter entry copy, with its position-map
+re-encode) and 296 stamp lines in 2 `package_info.cs` (libc 7, sqlite/lib 289). Each stamp line drops a
+zero-length member (ccgo's union `Fi [0]T` members and flexible arrays) or the whole stamp. The prediction said
+near 0 sites, which held; it named 1 stamp, which missed, because the census does not see ccgo's lifted
+anonymous structs. The TypeScript closure is not converted here; its 6 stamps and 44 sites are the census's.
+At the tip `e08c680ca2`: go test rc 0, 11 ok. The linux-banked rows over syscall, each alone: `syscall` 42 PASS;
+`os` COUNT 3831 against its banked 3840, the count this host also reads at master (the W9a battery on 2026-11-16),
+so the host's.
+
+— P2 (2026-11-17)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
