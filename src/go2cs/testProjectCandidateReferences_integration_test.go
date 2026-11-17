@@ -10,7 +10,9 @@ package main
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -86,5 +88,80 @@ func TestTestsProjectReferencesWhatItsCandidatesAndRecordsName(t *testing.T) {
 		if project := projectOf(arm.pkg); !strings.Contains(project, arm.want) {
 			t.Errorf("%s: the test project does not reference %s (%s)", arm.pkg, arm.want, arm.why)
 		}
+	}
+}
+
+// TestTestsProjectsBuildWithTheirCandidateReferences is the build half of CLASS A, testing the ruled rule from both
+// sides (COORD ruling 20261117T145209Z): refarm (a `this ref T` candidate) and logtarm (a record's emitted base) build
+// only with the reference the converter now writes, and boxarm, the control, builds with database/sql/driver REMOVED
+// from its project: a `this ж<T>` candidate is not bound, which is what registry's banked windows suite measured. If
+// the control fails, C#'s rule is wider than the one fitted to the corpus. Opt-in on GO2CS_TESTS_E2E, as
+// TestTestsRecurseRunsWhatItCanPastARefusedPackage is: each build takes the converted standard library closure.
+func TestTestsProjectsBuildWithTheirCandidateReferences(t *testing.T) {
+	if os.Getenv("GO2CS_TESTS_E2E") != "1" {
+		t.Skip("opt-in (GO2CS_TESTS_E2E=1): builds converted test projects against the converted standard library")
+	}
+
+	dotnet, err := exec.LookPath("dotnet")
+
+	if err != nil {
+		t.Fatalf("GO2CS_TESTS_E2E=1 needs the .NET SDK on PATH: %v", err)
+	}
+
+	root := cgoBuildDir(t, t.TempDir())
+	moduleDir := filepath.Join(root, "refsext")
+	writeModuleFiles(t, moduleDir, candidateReferencesModule)
+	outRoot := filepath.Join(root, "out")
+
+	if output, err := runTestsRecurse(t, moduleDir, outRoot); err != nil {
+		t.Fatalf("go2cs -tests -recurse failed: %v\n%s", err, output)
+	}
+
+	srcRoot := filepath.Join(outRoot, "src", "example.test", "refsext")
+	projectOf := func(pkg string) string {
+		projects, _ := filepath.Glob(filepath.Join(srcRoot, pkg, "*.tests.csproj"))
+
+		if len(projects) != 1 {
+			t.Fatalf("%s: want one test project, got %v", pkg, projects)
+		}
+
+		return projects[0]
+	}
+
+	// The control: the project without database/sql/driver, whatever the converter wrote.
+	control := projectOf("boxarm")
+	data, err := os.ReadFile(control)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var kept []string
+
+	for _, line := range strings.SplitAfter(string(data), "\n") {
+		if !strings.Contains(line, "core/database/sql/driver/database.sql.driver.csproj") {
+			kept = append(kept, line)
+		}
+	}
+
+	if err := os.WriteFile(control, []byte(strings.Join(kept, "")), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, arm := range []struct{ pkg, why string }{
+		{"boxarm", "the CONTROL, built WITHOUT database/sql/driver: a `this ж<Holder>` candidate must not need it; if it does, the rule is wider than fitted"},
+		{"refarm", "reflib's `Commit(this ref Backup)` candidate names driver.Conn"},
+		{"logtarm", "check.TestingT's emitted base logt.LogT"},
+	} {
+		build := exec.Command(dotnet, cgoBuildArgs(t, projectOf(arm.pkg), runtime.GOOS, "")...)
+		build.Env = cgoBuildEnvironment()
+		output, err := build.CombinedOutput()
+
+		if err != nil {
+			t.Errorf("%s: the test project does not build (%s): %v\n%s", arm.pkg, arm.why, err, strings.Join(cgoCompilerErrors(string(output)), "\n"))
+			continue
+		}
+
+		t.Logf("READING %s: builds (%s)", arm.pkg, arm.why)
 	}
 }
