@@ -310,6 +310,8 @@ partial struct onlyValuesCtx {
     internal context.Context lookupValues;
 }
 
+} partial class netᴛonlyValuesCtx {
+
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *onlyValuesCtx's method set; see the pointer-only satisfaction record.
 internal static (time.Time, bool) Deadline(this onlyValuesCtx recvᴛ) => recvᴛ.Context.Deadline();
@@ -321,6 +323,8 @@ internal static /*<-*/channel<EmptyStruct> Done(this onlyValuesCtx recvᴛ) => r
 // Go method set entry for the promoted 'Context.Err()' - provided ONLY by the embedded
 // interface field in *onlyValuesCtx's method set; see the pointer-only satisfaction record.
 internal static error Err(this onlyValuesCtx recvᴛ) => recvᴛ.Context.Err();
+
+} partial class net_package {
 
 internal static context.Context _ᴛ1ʗ = new onlyValuesCtxжContext(((ж<onlyValuesCtx>)nil));
 

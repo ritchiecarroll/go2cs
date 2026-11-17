@@ -4495,6 +4495,8 @@ partial struct onceCloseListener {
     internal error closeErr;
 }
 
+} partial class httpᴛonceCloseListener {
+
 // Go method set entry for the promoted 'Listener.Accept()' - provided ONLY by the embedded
 // interface field in *onceCloseListener's method set; see the pointer-only satisfaction record.
 internal static (net.Conn, error) Accept(this onceCloseListener recvᴛ) => recvᴛ.Listener.Accept();
@@ -4502,8 +4504,6 @@ internal static (net.Conn, error) Accept(this onceCloseListener recvᴛ) => recv
 // Go method set entry for the promoted 'Listener.Addr()' - provided ONLY by the embedded
 // interface field in *onceCloseListener's method set; see the pointer-only satisfaction record.
 internal static net.Addr Addr(this onceCloseListener recvᴛ) => recvᴛ.Listener.Addr();
-
-} partial class httpᴛonceCloseListener {
 
 internal static error Close(this ж<onceCloseListener> Ꮡoc) {
     ref var oc = ref Ꮡoc.DerefOrNull();
@@ -4584,6 +4584,8 @@ partial struct loggingConn {
     /*embed*/ public net_package.Conn Conn;
 }
 
+} partial class httpᴛloggingConn {
+
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
 internal static net.Addr LocalAddr(this loggingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
@@ -4603,6 +4605,8 @@ internal static error SetReadDeadline(this loggingConn recvᴛ, time.Time t) => 
 // Go method set entry for the promoted 'Conn.SetWriteDeadline()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
 internal static error SetWriteDeadline(this loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
+
+} partial class http_package {
 
 internal static readonly ж<sync.Mutex> ᏑuniqNameMu = new StaticBox<sync.Mutex>(default(sync.Mutex));
 internal static ref sync.Mutex uniqNameMu => ref ((StaticBox<sync.Mutex>)ᏑuniqNameMu).ValueSlot;

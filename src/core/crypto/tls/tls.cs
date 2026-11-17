@@ -78,6 +78,8 @@ partial struct listener {
     internal ж<Config> config;
 }
 
+} partial class tlsᴛlistener {
+
 // Go method set entry for the promoted 'Listener.Addr()' - provided ONLY by the embedded
 // interface field in *listener's method set; see the pointer-only satisfaction record.
 internal static net.Addr Addr(this listener recvᴛ) => recvᴛ.Listener.Addr();
@@ -85,8 +87,6 @@ internal static net.Addr Addr(this listener recvᴛ) => recvᴛ.Listener.Addr();
 // Go method set entry for the promoted 'Listener.Close()' - provided ONLY by the embedded
 // interface field in *listener's method set; see the pointer-only satisfaction record.
 internal static error Close(this listener recvᴛ) => recvᴛ.Listener.Close();
-
-} partial class tlsᴛlistener {
 
 // Accept waits for and returns the next incoming TLS connection.
 // The returned connection is of type *Conn.

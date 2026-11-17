@@ -3043,6 +3043,8 @@ partial struct readWriteCloserBody {
     /*embed*/ public io_package.ReadWriteCloser ReadWriteCloser;
 }
 
+} partial class httpᴛreadWriteCloserBody {
+
 // Go method set entry for the promoted 'ReadWriteCloser.Close()' - provided ONLY by the embedded
 // interface field in *readWriteCloserBody's method set; see the pointer-only satisfaction record.
 internal static error Close(this readWriteCloserBody recvᴛ) => recvᴛ.ReadWriteCloser.Close();
@@ -3050,8 +3052,6 @@ internal static error Close(this readWriteCloserBody recvᴛ) => recvᴛ.ReadWri
 // Go method set entry for the promoted 'ReadWriteCloser.Write()' - provided ONLY by the embedded
 // interface field in *readWriteCloserBody's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Write(this readWriteCloserBody recvᴛ, slice<byte> p) => recvᴛ.ReadWriteCloser.Write(p);
-
-} partial class httpᴛreadWriteCloserBody {
 
 internal static (nint n, error err) Read(this ref readWriteCloserBody b, slice<byte> p) {
     nint n = default;
