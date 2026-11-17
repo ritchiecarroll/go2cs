@@ -419,7 +419,7 @@ partial class syscall_package
             }
         }
 
-        return Setsockopt(fd, (int32)level, (int32)opt, (ж<byte>)(uintptr)(void*)buffer, nativeIPMreqLen);
+        return Setsockopt(fd, (int32)level, (int32)opt, @unsafe.Pointer.To<byte>((uintptr)(void*)buffer), nativeIPMreqLen);
     }
 
     // sizeof(struct ip_mreq): two in_addr, no padding.
@@ -447,7 +447,7 @@ partial class syscall_package
             *(uint32*)(buffer + 16) = mreq.Interface;
         }
 
-        return Setsockopt(fd, (int32)level, (int32)opt, (ж<byte>)(uintptr)(void*)buffer, nativeIPv6MreqLen);
+        return Setsockopt(fd, (int32)level, (int32)opt, @unsafe.Pointer.To<byte>((uintptr)(void*)buffer), nativeIPv6MreqLen);
     }
 
     // sizeof(struct ipv6_mreq): in6_addr (16) then ULONG (4), no padding.

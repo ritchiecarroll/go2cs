@@ -43,7 +43,7 @@ internal static void hexdumpWords(uintptr p, uintptr len, Action<uintptr, hexdum
         }
 
         // Can we symbolize this value?
-        var val = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)u);
+        var val = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)u);
         if (managedFuncName(val) is { Length: > 0 } name) {
             hm.start();
             print((@string)"<"u8, (@string)name, (@string)"+"u8, ((hex)(uint64)(val - frameEntry(val))), (@string)">\n"u8);
@@ -51,7 +51,7 @@ internal static void hexdumpWords(uintptr p, uintptr len, Action<uintptr, hexdum
     };
 
     var h = new hexdumper(addr: p, mark: symMark);
-    h.write(@unsafe.Slice((ж<byte>)(uintptr)((@unsafe.Pointer)p), len));
+    h.write(@unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)p), len));
     h.close();
     printunlock();
 }

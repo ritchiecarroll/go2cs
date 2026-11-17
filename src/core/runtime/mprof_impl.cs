@@ -196,7 +196,7 @@ internal static ж<bucket> stkbucket(bucketType typ, uintptr size, slice<uintptr
     }
 
     nb.Value.next = bh[i] ?? (ж<bucket>)nil;
-    nb.Value.allnext = (ж<bucket>)(uintptr)(allnext.Load());
+    nb.Value.allnext = @unsafe.Pointer.To<bucket>(allnext.Load());
 
     // Publish the bucket to its hash chain and its all-buckets list, as Go's two StoreNoWB do.
     Volatile.Write(ref bh[i], nb);

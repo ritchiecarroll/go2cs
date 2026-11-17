@@ -49,6 +49,8 @@ using System;
 
 namespace go;
 
+using @unsafe = unsafe_package;
+
 partial class syscall_package
 {
     // The mirror is NOT declared here: exec_windows.cs (hand-owned, the StartProcess seam) already
@@ -90,9 +92,9 @@ partial class syscall_package
         Syscall(procGetStartupInfoW.Addr(), 1, (uintptr)(void*)(&native), 0, 0);
 
         managed.Cb = native.Cb;
-        managed._ = (ж<uint16>)(uintptr)(nuint)native.Reserved;
-        managed.Desktop = (ж<uint16>)(uintptr)(nuint)native.Desktop;
-        managed.Title = (ж<uint16>)(uintptr)(nuint)native.Title;
+        managed._ = @unsafe.Pointer.To<uint16>((uintptr)(nuint)native.Reserved);
+        managed.Desktop = @unsafe.Pointer.To<uint16>((uintptr)(nuint)native.Desktop);
+        managed.Title = @unsafe.Pointer.To<uint16>((uintptr)(nuint)native.Title);
         managed.X = native.X;
         managed.Y = native.Y;
         managed.XSize = native.XSize;
@@ -103,7 +105,7 @@ partial class syscall_package
         managed.Flags = native.Flags;
         managed.ShowWindow = native.ShowWindow;
         managed.__ = native.Reserved2Length;
-        managed.___ = (ж<byte>)(uintptr)(nuint)native.Reserved2;
+        managed.___ = @unsafe.Pointer.To<byte>((uintptr)(nuint)native.Reserved2);
         managed.StdInput = (Handle)(uintptr)(nuint)native.StdInput;
         managed.StdOutput = (Handle)(uintptr)(nuint)native.StdOutput;
         managed.StdErr = (Handle)(uintptr)(nuint)native.StdErr;

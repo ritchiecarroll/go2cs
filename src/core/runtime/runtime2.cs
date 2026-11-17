@@ -368,7 +368,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
 
 //go:nosplit
 [GoRecv] internal static ж<hchan> get(this ref maybeTraceableChan p) {
-    return (ж<hchan>)(uintptr)(p.maybeTraceablePtr.get());
+    return @unsafe.Pointer.To<hchan>(p.maybeTraceablePtr.get());
 }
 
 } partial class runtime_package {
@@ -1423,8 +1423,8 @@ internal const bool framepointer_enabled = /* GOARCH == "amd64" || GOARCH == "ar
 internal static partial uintptr getcallerfp() {
     var fp = getfp(); // This frame's FP.
     if (fp != 0) {
-        fp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)fp); // The caller's FP.
-        fp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)fp); // The caller's caller's FP.
+        fp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)fp); // The caller's FP.
+        fp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)fp); // The caller's caller's FP.
     }
     return fp;
 }
