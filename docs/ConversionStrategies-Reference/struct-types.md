@@ -535,8 +535,8 @@ alias TARGET has, so the *same* three token-match arms above decide both, with n
 keep in sync. Only the record's generic argument list is scanned (first `<` to last `>`, so a nested
 `ж<…>` argument is covered whole) — an attribute's `(Pointer = true)` / `(ValueType = "…")` payload is
 metadata, and the `ValueType` is a string, not a reference. Additive as before, and the manifest's
-dependency list stays import-derived. This is what lets **os/signal** validate (its `TestCtrlBreak`,
-1/1 vs `go test`). Guarded by `TestAliasReferenceImportsMatchesConversionRecordPackages`,
+dependency list stays import-derived. This is what lets **os/signal** validate (its `TestCtrlBreak`
+agrees with `go test`). Guarded by `TestAliasReferenceImportsMatchesConversionRecordPackages`,
 `TestAliasReferenceImportsMatchesConversionRecordQualifierShapes` and
 `TestAliasReferenceImportsIgnoresConversionRecordAttributePayload`.
 
@@ -1331,7 +1331,7 @@ instance method cannot have null 'this'" when `x` is null. So the classifier dis
   type renders as the structural delegate of its signature
   ([A methodless named func type renders as its base delegate](#a-methodless-named-func-type-renders-as-its-base-delegate)),
   so a value of the unnamed signature, or of another methodless named type with the identical
-  signature, is already the target's C# type. typescript-go's relater is the shape:
+  signature, is already the target's C# type. A type relater is the shape:
   `core.IfElse(reportErrors, r.reportError, nil)` passed to an `ErrorReporter func(*Message, ...any)`
   parameter is an `Actionꓸꓸꓸ<ж<Message>, any>` reaching an `Actionꓸꓸꓸ<ж<Message>, any>` parameter.
 - **Any other value** converts through golib's `NilSafeDelegateConversion<TTarget, TSource>`, the
@@ -1347,7 +1347,7 @@ serve(NilSafeDelegateConversion<Handler, Func<nint, @string>>(g));          // g
 
 (Guarded by the `NilFuncNamedDelegateArg` behavioral test — the nil and non-nil `IfElse` results, a
 method value, a literal, nil locals of the unnamed and the named type, a nil value passed to a named
-type with methods, the structural mirror and the composite-literal fields, values vs Go; TS C47.)
+type with methods, the structural mirror and the composite-literal fields, values vs Go.)<!-- TS C47 -->
 
 ## Func-typed fields with a cross-package (slash-path) type render structurally
 A func-typed struct field whose signature names a type from a **multi-segment** import path —
@@ -1519,7 +1519,7 @@ user functions exactly that way. <!-- 13 of text/template's 52 verdicts. -->
 The call is made in **typed code** instead (`GoReflect.InvokeVariadic`, GoReflect.TypeLayout.cs).
 One small generic trampoline per family arity — eighteen, the closed set golib's variadic.cs
 declares — is closed over the delegate's own parameter types by `MakeGenericMethod` and cached as
-an ordinary delegate, the `elementBoxViaAt` idiom GoReflect.FieldAccess.cs already uses:
+an ordinary delegate, the `MakeGenericMethod` + `CreateDelegate` idiom GoReflect.FieldAccess.cs already uses:
 
 <!-- source: src/core/golib/GoReflect.TypeLayout.cs:1927-1928 -->
 ```csharp
@@ -1767,7 +1767,7 @@ test reading only the field cannot tell a correct render from a mangled one — 
 writes the fully-qualified string verbatim into both `main.cs` and the `[GoTypeAlias]` record.
 
 Neuter-proven three ways: both reverted reproduces the reported `fatal error: stack overflow`; the
-bound alone reverted fails the child test in 0.02 s; the rewrite alone reverted (bound in place)
+bound alone reverted fails the child test at once;<!-- in 0.02 s --> the rewrite alone reverted (bound in place)
 makes the converter print the warning, exit 0, and still write every `.cs` — the crash-proofing
 demonstrated independently of the rendering — while the integration test fails on the emitted
 `global using TopoChan = go.<_chan example.com.mongo_driver.…;`.
@@ -1860,7 +1860,7 @@ is the correct value. `archive/tar`'s `testClose{nil}` is the reported shape; `d
 
 **An imported type ALIAS through an aliased import renders as its `global using` name.** A `global using` alias is not a member of the package class, so `import al "AliasImportLib"` with `al.B2{V: 7}`, where `B2` is an exported alias, cannot render `new al.B2(…)` (CS0426). The alias table is keyed by the package's declared name, and `aliasResolvedSelector` looks a published, non-const type alias up under that name, rendering `new AliasImportLibꓸB2(V: 7)` as the canonical import does. Every other member keeps the file's alias (`new al.Box(V: 8)`). (Guarded by the `AliasImport` behavioral test's `aliased.go`.)
 
-**A member its package collision-renames keeps the file's alias and takes the renamed name.** time declares `ΔLocation`, `ΔMonth`, `ΔUTC`, `ΔLocal` and `ΔSecond`, because each Go name collides with a `Time` method. modernc.org/libc imports time as `gotime "time"` (sqlite-cs S10), so both lookups that swap in the renamed member missed: the alias table is keyed by the declared name `time`, the type arm (`getAliasQualifiedTypeName`) rendered `ж<gotime.Location>` (CS0426), and the value arm (`aliasResolvedSelector`) redirected only non-const entries, so `gotime.UTC`, `gotime.Local` and `gotime.Second` named the `Time` methods' groups (CS1503 for `gotime.UTC` as an argument, CS0019 for `gotime.Local != nil`). Both arms now look the member up under the declared name and keep the file's own qualifier:
+**A member its package collision-renames keeps the file's alias and takes the renamed name.** time declares `ΔLocation`, `ΔMonth`, `ΔUTC`, `ΔLocal` and `ΔSecond`, because each Go name collides with a `Time` method. modernc.org/libc imports time as `gotime "time"`, so both lookups that swap in the renamed member missed: the alias table is keyed by the declared name `time`, the type arm (`getAliasQualifiedTypeName`) rendered `ж<gotime.Location>` (CS0426), and the value arm (`aliasResolvedSelector`) redirected only non-const entries, so `gotime.UTC`, `gotime.Local` and `gotime.Second` named the `Time` methods' groups (CS1503 for `gotime.UTC` as an argument, CS0019 for `gotime.Local != nil`). Both arms now look the member up under the declared name and keep the file's own qualifier:
 
 <!-- source: src/tests/Behavioral/AliasedImportRenamedMember/main.go:15-26 -->
 ```go

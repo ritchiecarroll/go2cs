@@ -1045,6 +1045,34 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// pointer arg needs this.) The numeric address is still not GC-stable — the same caveat as
 		// every unsafe.Pointer-as-uintptr use; the RETAINED box is what survives a move.
 		if targetTypeName == "@unsafe.Pointer" {
+			// Go's unsafe RULE 6 on a reflect header's Data field: `unsafe.Pointer(h.Data)` in ONE expression, with h a
+			// *reflect.StringHeader or *reflect.SliceHeader (spelled `h.Data`, `(*h).Data`, or the inline conversion's
+			// `.Data`). Go's pointer keeps what the header describes alive, and the number the field holds keeps nothing,
+			// so the emission hands golib the header's BOX: `@unsafe.Pointer.FromHeaderData(box)` answers a pointer that
+			// CARRIES the element box for a header box, and today's number pointer for any other box, decided at run time
+			// (docs/phase4/DESIGN-sqlite-ccgo-ts.md, QW-8 and section 10.3; TestHeaderDataPointerEmitsFromHeaderData).
+			//
+			// A pointer PARAMETER or RECEIVER renders as the pointed-to VALUE alias, so its box is asked for by the pointer
+			// context (`Ꮡsh`). Where the body has NO box (a `ref T` parameter or receiver), there is nothing to carry, and
+			// the emission stays today's number pointer (P3's arm b: it must compile).
+			if header, ok := v.reflectHeaderDataOperand(arg); ok {
+				if !v.exprIsDerefAliasedPointer(header) {
+					return fmt.Sprintf("@unsafe.Pointer.FromHeaderData(%s)", v.convExpr(header, nil))
+				}
+
+				identContext := DefaultIdentContext()
+				identContext.isPointer = true
+
+				if box := v.convExpr(header, []ExprContext{identContext}); strings.HasPrefix(box, AddressPrefix) {
+					return fmt.Sprintf("@unsafe.Pointer.FromHeaderData(%s)", box)
+				}
+
+				// DELIBERATE fall-through to the number pointer below: an alias with no box (a `[GoRecv] this ref T`
+				// receiver) has nothing to carry, so it keeps today's safe old behaviour. For a PARAMETER it is
+				// unreachable: ref-lowering vetoes this use as X3 (isReflectHeaderDataPointerUse), so the parameter keeps
+				// its box and takes the arm above.
+			}
+
 			// A NAMED-numeric arg whose underlying is uintptr — `unsafe.Pointer(v)` where v is
 			// `type gclinkptr uintptr` (runtime malloc/mcache/stack: the allocator's span-address
 			// arithmetic type). The [GoType] wrapper only converts named↔underlying, and golib's
@@ -8102,4 +8130,41 @@ func unaliasableStructField(src, target *types.Struct) (string, types.Type, type
 	}
 
 	return "", nil, nil, false
+}
+
+// reflectHeaderDataOperand answers the HEADER POINTER of `h.Data`, `(*h).Data` or `(*reflect.StringHeader)(p).Data` when h
+// (or the conversion) is a *reflect.StringHeader or *reflect.SliceHeader: the operand Go's unsafe rule 6 covers when it is
+// converted to unsafe.Pointer in the same expression. A header VALUE (not a pointer) is not matched: its Data is a
+// number in a local copy, with no header box behind it.
+func (v *Visitor) reflectHeaderDataOperand(arg ast.Expr) (ast.Expr, bool) {
+	selector, ok := ast.Unparen(arg).(*ast.SelectorExpr)
+
+	if !ok || selector.Sel.Name != "Data" {
+		return nil, false
+	}
+
+	header := ast.Unparen(selector.X)
+
+	if star, ok := header.(*ast.StarExpr); ok {
+		header = ast.Unparen(star.X)
+	}
+
+	pointer, ok := types.Unalias(v.info.TypeOf(header)).(*types.Pointer)
+
+	if !ok {
+		return nil, false
+	}
+
+	named, ok := types.Unalias(pointer.Elem()).(*types.Named)
+
+	if !ok || named.Obj().Pkg() == nil || named.Obj().Pkg().Path() != "reflect" {
+		return nil, false
+	}
+
+	switch named.Obj().Name() {
+	case "StringHeader", "SliceHeader":
+		return header, true
+	}
+
+	return nil, false
 }

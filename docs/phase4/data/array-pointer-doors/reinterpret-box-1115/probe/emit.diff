@@ -1,0 +1,158 @@
+38c38
+<     return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(o.Ꮡinner.Ꮡport), 1, 2);
+---
+>     return @unsafe.ArrayPointer<byte>.Of(o.Ꮡinner.Ꮡport, 2).ElementRef(1);
+42c42
+<     @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(o.Ꮡinner.Ꮡport), 0, 2) = v;
+---
+>     @unsafe.ArrayPointer<byte>.Of(o.Ꮡinner.Ꮡport, 2).ElementRef(0) = v;
+46,47c46,47
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(o.Ꮡinner.Ꮡport));
+<     return p.Value[1];
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(o.Ꮡinner.Ꮡport, 2);
+>     return p.ElementRef(1);
+51,52c51,52
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(o.Ꮡinner.Ꮡport));
+<     p.Value[0] = v;
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(o.Ꮡinner.Ꮡport, 2);
+>     p.ElementRef(0) = v;
+60c60
+<     return @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(o.Ꮡinner.Ꮡport)).slice();
+---
+>     return @unsafe.ArrayPointer<byte>.Of(o.Ꮡinner.Ꮡport, 2).slice();
+66c66
+<     return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡport), 1, 2);
+---
+>     return @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2).ElementRef(1);
+72c72
+<     @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡport), 0, 2) = 0xAB;
+---
+>     @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2).ElementRef(0) = 0xAB;
+79,80c79,80
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡport));
+<     return p.Value[1];
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2);
+>     return p.ElementRef(1);
+86,87c86,87
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡport));
+<     p.Value[0] = 0xCD;
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2);
+>     p.ElementRef(0) = 0xCD;
+94c94
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡport));
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2);
+97c97
+<     foreach (var (_, b) in range(p.Value)) {
+---
+>     foreach (var (_, b) in range(p.slice())) {
+105c105
+<     return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡglobal.Ꮡport), 1, 2);
+---
+>     return @unsafe.ArrayPointer<byte>.Of(Ꮡglobal.Ꮡport, 2).ElementRef(1);
+109c109
+<     @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡglobal.Ꮡport), 0, 2) = 0xEF;
+---
+>     @unsafe.ArrayPointer<byte>.Of(Ꮡglobal.Ꮡport, 2).ElementRef(0) = 0xEF;
+114,115c114,115
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡglobal.Ꮡport));
+<     return p.Value[1];
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡglobal.Ꮡport, 2);
+>     return p.ElementRef(1);
+123c123
+<     return @unsafe.Pointer.ElementRef<uint32>(@unsafe.Pointer.FromPinnedBox(o.Ꮡinner.Ꮡword), 1, 2);
+---
+>     return @unsafe.ArrayPointer<uint32>.Of(o.Ꮡinner.Ꮡword, 2).ElementRef(1);
+141,143c141,143
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw.Ꮡport));
+<     p.Value[0] = (byte)(sa.port >> 8);
+<     p.Value[1] = (byte)sa.port;
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡsa.Ꮡraw.Ꮡport, 2);
+>     p.ElementRef(0) = (byte)(sa.port >> 8);
+>     p.ElementRef(1) = (byte)sa.port;
+147,148c147,148
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(sa.Ꮡraw.Ꮡport));
+<     return ((nint)p.Value[0] << 8) + (nint)p.Value[1];
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2);
+>     return ((nint)p.ElementRef(0) << 8) + (nint)p.ElementRef(1);
+152c152
+<     @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(sa.Ꮡraw.Ꮡport), 0, 2) = v;
+---
+>     @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2).ElementRef(0) = v;
+156c156
+<     return @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(sa.Ꮡraw.Ꮡport), 1, 2);
+---
+>     return @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2).ElementRef(1);
+160c160
+<     @unsafe.Pointer.ElementRef<byte>(@unsafe.Pointer.FromPinnedBox(sa.Ꮡraw.Ꮡport), 1, 2) = v;
+---
+>     @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2).ElementRef(1) = v;
+164c164
+<     return @unsafe.Pointer.Element<byte>(@unsafe.Pointer.FromPinnedBox(sa.Ꮡraw.Ꮡport), 1, 2);
+---
+>     return (@unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2)).at<byte>(1);
+168c168
+<     return @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(sa.Ꮡraw.Ꮡport)).slice();
+---
+>     return @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2).slice();
+190,192c190,192
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(t.Ꮡo.Ꮡinner.Ꮡport));
+<     p.Value[0] = 0x44;
+<     return p.Value[1];
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(t.Ꮡo.Ꮡinner.Ꮡport, 2);
+>     p.ElementRef(0) = 0x44;
+>     return p.ElementRef(1);
+198,200c198,200
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(h.@in.Ꮡport));
+<     p.Value[0] = 0x55;
+<     return p.Value[1];
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(h.@in.Ꮡport, 2);
+>     p.ElementRef(0) = 0x55;
+>     return p.ElementRef(1);
+206,208c206,208
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(h.rs.Ꮡport));
+<     p.Value[0] = 0x66;
+<     return p.Value[1];
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(h.rs.Ꮡport, 2);
+>     p.ElementRef(0) = 0x66;
+>     return p.ElementRef(1);
+214,215c214,215
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡport));
+<     p.Value[0] = 0xCD;
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2);
+>     p.ElementRef(0) = 0xCD;
+220,221c220,221
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡgsock.Ꮡraw.Ꮡport));
+<     p.Value[1] = 0x77;
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡgsock.Ꮡraw.Ꮡport, 2);
+>     p.ElementRef(1) = 0x77;
+228,229c228,229
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡport));
+<     p.Value[0] = 0x01;
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡs.Ꮡport, 2);
+>     p.ElementRef(0) = 0x01;
+234,235c234,235
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(sa.Ꮡraw.Ꮡport));
+<     return p.Value.Clone();
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2);
+>     return @unsafe.ArrayPointer<byte>.Load(p);
+241,242c241,242
+<     var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(sa.Ꮡraw.Ꮡport));
+<     p.Value = v.Clone();
+---
+>     var p = @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2);
+>     @unsafe.ArrayPointer<byte>.Store(p, v);

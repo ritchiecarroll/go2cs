@@ -17,7 +17,7 @@ Its significance is what the ninth test demonstrates. `TestAllocationsDecode` as
 its `[]rune` with **zero** heap allocations — a result Go reaches only through compiler escape analysis, so
 the test guards itself with `testenv.SkipIfOptimizationOff`. The managed runtime provably cannot match it: a
 returned `slice<rune>` is always a heap allocation, no matter how the method is written. This is the same
-*allocation-model* divergence `bytes` and `strings` disclosed a day earlier — and `unicode/utf16` is the
+*allocation-model* divergence `bytes` and `strings` disclosed earlier the same day — and `unicode/utf16` is the
 first package to reuse the [disclosed-divergence manifest](../README.md#try-it-yourself--validate-a-converted-test-suite)
 as a **general tool** rather than a two-package special case. Its `go2cs_test_disclosures.json` pins one
 `alloc-profile` row by exact failure signature (`"Decode allocated "`), while the separate `TestDecode`
