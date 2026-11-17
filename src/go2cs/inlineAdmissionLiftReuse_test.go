@@ -101,6 +101,83 @@ func TestUnadmittedImporterStillReusesAnUnadmittedForeignLift(t *testing.T) {
 	}
 }
 
+// The union (COORD 2026-11-16 08:55Z, the windows red): sqlite/lib ADMITS TLARGE_INTEGER, libc does not admit its
+// identical largeInteger (its [0]T carriers are managed there), and the reuse put libc's lift under lib's admitted
+// layout: "its CLR layout is not its Go layout (field F__ccgo0_0 is at CLR offset 32 where Go lays it at 0)" at
+// _winFileSize. Here main converts TLARGE_INTEGER whole through unsafe.Pointer, so main admits it, and lib (the
+// aliasSpelledLib fixture, libc's union verbatim) does not.
+const admittedUnionMain = `package main
+
+import (
+	"fmt"
+	"unsafe"
+
+	"example.com/app/lib"
+)
+
+type TDWORD = uint32
+type TLONG = int32
+type TLONGLONG = int64
+
+type TLARGE_INTEGER = struct {
+	Fu [0]struct {
+		FLowPart  TDWORD
+		FHighPart TLONG
+	}
+	FQuadPart  [0]TLONGLONG
+	F__ccgo0_0 struct {
+		FLowPart  TDWORD
+		FHighPart TLONG
+	}
+}
+
+func main() {
+	var raw [1]uint64
+	li := (*TLARGE_INTEGER)(unsafe.Pointer(&raw))
+	li.F__ccgo0_0.FLowPart = 5
+	li.F__ccgo0_0.FHighPart = 6
+	fmt.Println(raw[0], unsafe.Sizeof(*li))
+	fmt.Println(lib.Seek(*li))
+	seek := *(*func(TLARGE_INTEGER) int64)(unsafe.Pointer(&struct{ uintptr }{lib.SeekWord}))
+	fmt.Println(seek(*li))
+}
+`
+
+// The emission: main's admitted union keeps its own lift and never names lib's unadmitted largeIntegerᴛ1.
+func TestAdmittedUnionKeepsItsOwnLiftOverAnUnadmittedForeignUnion(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	emitted := convertModuleMainWithLib(t, "lib", aliasSpelledLib, admittedUnionMain)
+
+	if strings.Contains(emitted, "lib_package.largeIntegerᴛ1") {
+		t.Errorf("an admitted union names the import's UNADMITTED lift (offset 32 where Go lays the field at 0):\n%s", emitted)
+	}
+
+	if !strings.Contains(emitted, "struct TLARGE_INTEGERᴛ1") {
+		t.Errorf("the admitted union declares no lift of its own:\n%s", emitted)
+	}
+}
+
+// End to end for the union: the converted module builds, reads native memory through the admitted union, passes it to
+// lib, and calls lib's word through main's func type, printing what go prints. GO2CS_INLINE_BUILD=1 runs it.
+func TestAdmittedUnionOverUnadmittedForeignUnionBuildsAndReadsAsGo(t *testing.T) {
+	dotnet := requireInlineBuild(t)
+	files := map[string]string{"lib/lib.go": aliasSpelledLib, "main.go": admittedUnionMain}
+	want := goRunInlineModule(t, "app", files)
+	out := convertInlineModule(t, "app", files)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, out); err != nil {
+		t.Fatalf("the converted module does not build: %v\n%s", err, built)
+	}
+
+	got := runConvertedInlineModule(t, dotnet, out)
+	t.Logf("READING go prints: %s; go2cs prints: %s", want, got)
+
+	if got != want || want == "" {
+		t.Fatalf("go2cs differs from go:\n   go: %s\ngo2cs: %s", want, got)
+	}
+}
+
 // End to end: the converted module builds (CS8377 at the base) and prints what go prints. GO2CS_INLINE_BUILD=1 runs it.
 func TestAdmittedImporterOverUnadmittedForeignLiftBuildsAndReadsAsGo(t *testing.T) {
 	dotnet := requireInlineBuild(t)
