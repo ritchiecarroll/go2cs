@@ -257,6 +257,7 @@ var golibGenericNamespaceTypes = nameSet(
 	"GoZeroSizeSlot",
 	"HandleBox",
 	"HeaderSliceBox",
+	"INativeArrayStore",
 	"INativeWordArray",
 	"IPointer",
 	"ISliceWrap",
