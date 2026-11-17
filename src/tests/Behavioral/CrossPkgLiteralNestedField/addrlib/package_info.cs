@@ -67,7 +67,7 @@ public static partial class addrlib_package
     [GoValueClone("Path")] internal partial struct rawAddr {}
     [GoValueClone("Cells")] internal partial struct slots {}
     [GoValueClone("raw")] public partial struct Addr {}
-    public partial struct Embedder {}
+    [GoValueClone("slots")] public partial struct Embedder {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
