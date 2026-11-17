@@ -30,6 +30,23 @@ func typeIsArrayValue(t types.Type) bool {
 	return isArray
 }
 
+// typeIsZeroLengthArray reports whether t is an array of length zero, `[0]E` or a type over one. Such an array
+// holds no element, so a struct copy that shares its empty backing store with the source is indistinguishable from
+// a copy that does not: there is nothing to write through either. A FIELD of that type is therefore no reason to
+// clone a struct, and no member of its `[GoValueClone(…)]` list -- syscall's `InotifyEvent.Name [0]uint8` (the
+// flexible-array member idiom) and go-json-experiment's embedded `nonComparable [0]func()` (the uncomparable
+// marker) both cost a clone at every copy and bought nothing. A bare `[0]E` VALUE still takes its own `.Clone()`
+// where Go copies it; only the field walks below skip it.
+func typeIsZeroLengthArray(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	array, isArray := t.Underlying().(*types.Array)
+
+	return isArray && array.Len() == 0
+}
+
 // typeNeedsValueClone reports whether a Go BY-VALUE copy of t needs an explicit `.Clone()` in the
 // emitted C# — t is a fixed-size array (typeIsArrayValue above), or a STRUCT that carries one in a
 // field, directly or through another such struct.
@@ -87,7 +104,7 @@ func typeNeedsValueCloneSeen(t types.Type, seen map[types.Type]bool) bool {
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
 
-		if field.Name() == "_" {
+		if field.Name() == "_" || typeIsZeroLengthArray(field.Type()) {
 			continue
 		}
 
@@ -127,7 +144,7 @@ func structValueCloneFields(t types.Type, structTypeName string) []string {
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
 
-		if field.Name() == "_" {
+		if field.Name() == "_" || typeIsZeroLengthArray(field.Type()) {
 			continue
 		}
 
