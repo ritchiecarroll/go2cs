@@ -760,3 +760,58 @@ func TestGolibFriendTypesFollowTheAssemblyName(t *testing.T) {
 		t.Errorf("fmt's assembly go.fmt is not golib's friend, so %s is not golib's there", friendType)
 	}
 }
+
+const promotedForwarderHolderSource = `package main
+
+import "fmt"
+
+type Driver struct{ name string }
+
+type Connector interface {
+	Driver() Driver
+	Name() string
+}
+
+type base struct{}
+
+func (base) Driver() Driver { return Driver{name: "base"} }
+func (base) Name() string   { return "base" }
+
+type (
+	counting struct {
+		Connector
+		hits int
+	}
+	after struct{ n int }
+)
+
+func (c *counting) Name() string {
+	c.hits++
+	return "counting"
+}
+
+func main() {
+	var k Connector = &counting{Connector: base{}}
+	fmt.Println(k.Name(), k.Driver().name, after{n: 1}.n)
+}
+`
+
+// A promoted forwarder the converter writes for a struct (a method its pointer gets only through an
+// embedded interface) is one of the struct's methods, so it is a member of the struct's holder, beside the
+// methods Go declares on it. In the package class it shared a class with the type of its name: CS0102,
+// `Driver` beside `Driver`. The next type of a grouped declaration is back in the package class.
+func TestPromotedForwarderIsEmittedInItsStructsHolder(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": promotedForwarderHolderSource})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
+		"\n} partial class mainᴛcounting {\n\n// Go method set entry for the promoted 'Connector.Driver()'",
+		"internal static Driver Driver(this counting recvᴛ) => recvᴛ.Connector.Driver();\n\n} partial class main_package {\n\npartial struct after {",
+		"\n} partial class mainᴛcounting {\n\ninternal static @string Name(this ref counting c)",
+	}, []string{
+		"Δ",
+	})
+
+	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
+		"[GoMethodHost(typeof(main_package.counting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounting;\n",
+	}, nil)
+}

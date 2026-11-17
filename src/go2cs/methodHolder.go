@@ -155,9 +155,18 @@ func (v *Visitor) testHolderSuffix(method types.Object, typeObj types.Object) st
 // funcDeclClass names the class funcDecl is emitted into: its receiver type's method holder, or the
 // file's own class for a function.
 func (v *Visitor) funcDeclClass(funcDecl *ast.FuncDecl) string {
-	named := receiverNamed(v.info, funcDecl)
+	if holder := v.useMethodHolder(receiverNamed(v.info, funcDecl), v.info.Defs[funcDecl.Name]); holder != "" {
+		return holder
+	}
 
-	if holder, typeofTarget := v.methodHolderClass(named, v.info.Defs[funcDecl.Name]); holder != "" {
+	return v.fileClassName
+}
+
+// useMethodHolder answers the method holder a method of named's is emitted into, recording the holder for
+// package_info.cs, or "" when the type takes none (methodHolderClass). method is nil for a method the
+// converter writes rather than Go declares: a promoted forwarder.
+func (v *Visitor) useMethodHolder(named *types.Named, method types.Object) string {
+	if holder, typeofTarget := v.methodHolderClass(named, method); holder != "" {
 		// A hand-owned file's Go source may declare a type its C# replacement drops (internal/sync's
 		// hashtriemap.cs keeps HashTrieMap and drops entry, indirect and node). The holder's declaration names
 		// its type in `typeof`, so it is written only where the package's C# sources declare the type.
@@ -172,7 +181,7 @@ func (v *Visitor) funcDeclClass(funcDecl *ast.FuncDecl) string {
 		return holder
 	}
 
-	return v.fileClassName
+	return ""
 }
 
 // csharpTypeDeclaration matches a C# type declaration and captures its name: a struct, class, interface,

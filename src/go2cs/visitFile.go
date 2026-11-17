@@ -206,19 +206,37 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 		mark := v.outputBuilder.Len()
 		openClass := v.openClassName
+		_, isFunc := decl.(*ast.FuncDecl)
+
+		// A function switches to its own class as it is emitted (placeFuncDecl). Any other declaration
+		// is the package's: it is written as if the package class were open, and the switch to it is
+		// spliced in front of it below, once it is known to have emitted anything. A struct's promoted
+		// forwarders may leave its method holder open (emitPromotedInterfaceForwarders).
+		if !isFunc {
+			v.openClassName = packageClassName
+		}
+
 		v.lastDeclShape = declShapeOther
 		v.visitDecl(decl)
+
+		endClass := v.openClassName
+
+		if !isFunc {
+			v.openClassName = openClass
+		}
 
 		if genDecl, isGen := decl.(*ast.GenDecl); (isGen && genDecl.Tok == token.IMPORT) || !v.emittedSince(mark) {
 			*previous = nil
 			continue
 		}
 
-		// A function switches to its own class as it is emitted (placeFuncDecl). Any other declaration
-		// is the package's, and follows a method only after its holder's block is closed.
-		if _, isFunc := decl.(*ast.FuncDecl); !isFunc {
+		if !isFunc {
 			if switched := v.switchClass(packageClassName); switched != "" {
 				v.spliceOutput(mark, v.newline+strings.TrimSuffix(switched, v.newline))
+			}
+
+			if endClass != packageClassName {
+				v.openClassName = endClass
 			}
 		}
 

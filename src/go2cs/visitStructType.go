@@ -1137,7 +1137,15 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		v.recordTypeAccessibility("struct", structTypeName, typeParams, access, localNameAttr+valueCloneAttr+memberRecords.String())
 	}
 
-	v.emitPromotedInterfaceForwarders(target, forwarderMark)
+	// A package-level struct's forwarders are its methods, so they go into its method holder beside the methods
+	// Go declares on it. A lifted struct's stay beside it: Go declares no method on a function-local type.
+	var forwarderReceiver *types.Named
+
+	if !lifted {
+		forwarderReceiver, _ = types.Unalias(declaredStructType).(*types.Named)
+	}
+
+	v.emitPromotedInterfaceForwarders(target, forwarderMark, forwarderReceiver)
 
 	if structPrefix == nil {
 		v.replaceMarkerString(target, structPrefixMarker, "")
@@ -1317,7 +1325,22 @@ func (v *Visitor) structZeroValueNeedsConstructionRec(t types.Type, seen map[*ty
 // which is Go's own behavior for the shape and exactly what the forwarder reproduces. Emitted at
 // the struct's own indent, so a function-local lift rides currentFuncPrefix to member level with
 // its type. A variadic method takes its tail as the interface declares it: a params span, passed on.
-func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark int) {
+//
+// A forwarder of receiver, a package-level struct, is one of the struct's methods and is written into the
+// struct's method holder (methodHolder.go), where go2cs-gen writes its pointer-receiver overload too. In the
+// package class it would share a class with the package's types, and a type of the method's name (Go's
+// database/sql/driver Connector.Driver beside a type Driver) would be CS0102. The holder is left open:
+// the declaration after it switches back (visitFile, and visitGenDecl for a grouped type spec).
+func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark int, receiver *types.Named) {
+	if len(v.promotedInterfaceForwarders) > mark && receiver != nil {
+		if holder := v.useMethodHolder(receiver, nil); holder != "" {
+			if switched := v.switchClass(holder); switched != "" {
+				target.WriteString(v.newline)
+				target.WriteString(strings.TrimSuffix(switched, v.newline))
+			}
+		}
+	}
+
 	for _, fwd := range v.promotedInterfaceForwarders[mark:] {
 		signature := fwd.method.Type().(*types.Signature)
 
