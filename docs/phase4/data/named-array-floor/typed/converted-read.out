@@ -1,0 +1,21 @@
+go: panic: runtime error: cannot view native memory as smallMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.viaStruct()
+	<kit>/typed/main.go:41
+main.main()
+   [exit 2]
+byte: panic: runtime error: cannot view native memory as smallMem: a named Go array is a window on a real managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) (see docs/phase4/DESIGN-native-array-view.md)
+
+goroutine 1 [running]:
+main.viaByte()
+	<kit>/typed/main.go:34
+main.main()
+   [exit 2]
+struct: panic: runtime error: cannot read native memory as main.hdr: its CLR layout is not its Go layout (field buf is a managed reference where Go stores the value inline)
+
+goroutine 1 [running]:
+main.viaStruct()
+	<kit>/typed/main.go:40
+main.main()
+   [exit 2]

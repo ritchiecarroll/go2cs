@@ -178,10 +178,10 @@ internal static void initAt(this ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, ui
     // Start in the caller's frame.
     if (frame.pc == 0) {
         if (usesLR) {
-            frame.pc = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)frame.sp);
+            frame.pc = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)frame.sp);
             frame.lr = 0;
         } else {
-            frame.pc = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)frame.sp);
+            frame.pc = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)frame.sp);
             frame.sp += goarch.PtrSize;
         }
     }
@@ -382,12 +382,12 @@ internal static void resolveInternal(this ж<unwinder> Ꮡu, bool innermost, boo
         if (usesLR) {
             if (innermost && frame.sp < frame.fp || frame.lr == 0) {
                 lrPtr = frame.sp;
-                frame.lr = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)lrPtr);
+                frame.lr = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)lrPtr);
             }
         } else {
             if (frame.lr == 0) {
                 lrPtr = frame.fp - (uintptr)goarch.PtrSize;
-                frame.lr = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)lrPtr);
+                frame.lr = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)lrPtr);
             }
         }
     }
@@ -523,7 +523,7 @@ internal static void next(this ж<unwinder> Ꮡu) {
     // On link register architectures, sighandler saves the LR on stack
     // before faking a call.
     if (usesLR && injectedCall) {
-        var x = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)frame.sp);
+        var x = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)frame.sp);
         // same as the size bump used in scanframeworker.
         frame.sp += alignUp(sys.MinFrameSize, sys.StackAlign);
         f = findfunc(frame.pc);
@@ -685,16 +685,16 @@ internal static nint tracebackPCs(ж<unwinder> Ꮡu, nint skip, slice<uintptr> p
 
 // printArgs prints function arguments in traceback.
 internal static void printArgs(ΔfuncInfo f, @unsafe.Pointer argp, uintptr pc) {
-    var Δp = (ж<array<uint8>>)(uintptr)(funcdata(f, abi.FUNCDATA_ArgInfo));
+    var Δp = @unsafe.Pointer.To<array<uint8>>(funcdata(f, abi.FUNCDATA_ArgInfo));
     if (Δp == nil) {
         return;
     }
 
-    @unsafe.Pointer liveInfo = (uintptr)funcdata(f, abi.FUNCDATA_ArgLiveInfo);
+    @unsafe.Pointer liveInfo = funcdata(f, abi.FUNCDATA_ArgLiveInfo);
     var liveIdx = pcdatavalue(f, abi.PCDATA_ArgLiveIndex, pc);
     var startOffset = (uint8)0xff; // smallest offset that needs liveness info (slots with a lower offset is always live)
     if (liveInfo != nil) {
-        startOffset = ~(ж<uint8>)(uintptr)(liveInfo);
+        startOffset = ~@unsafe.Pointer.To<uint8>(liveInfo);
     }
 
     bool isLive(uint8 off, uint8 slotIdxΔ1) {
@@ -704,13 +704,13 @@ internal static void printArgs(ΔfuncInfo f, @unsafe.Pointer argp, uintptr pc) {
         if (off < startOffset) {
             return true;
         }
-        var bits = ~(ж<uint8>)(uintptr)(add(liveInfo, (uintptr)liveIdx + (uintptr)(slotIdxΔ1 / 8)));
+        var bits = ~@unsafe.Pointer.To<uint8>(add(liveInfo, (uintptr)liveIdx + (uintptr)(slotIdxΔ1 / 8)));
         return (uint8)(bits & ((uint8)(1 << (int)(slotIdxΔ1 % 8)))) != 0;
     }
 
     var isLiveʗ1 = isLive;
     void print1(uint8 off, uint8 sz, uint8 slotIdxΔ2) {
-        var x = readUnaligned64((uintptr)add(argp, (uintptr)off));
+        var x = readUnaligned64(add(argp, (uintptr)off));
         // mask out irrelevant bits
         if (sz < 8) {
             var shift = (uint8)(64 - sz * 8);
@@ -1312,7 +1312,7 @@ internal static void goroutineheader(ж<g> Ꮡgp) {
         }
     }
     if (gp.labels != nil && Ꮡdebug.of(debugᴛ1.Ꮡtracebacklabels).Load() == 1) {
-        var labels = ((ж<label.Set>)(uintptr)(gp.labels)).Value.List;
+        var labels = (@unsafe.Pointer.To<label.Set>(gp.labels)).Value.List;
         if (len(labels) > 0) {
             print((@string)" labels:{");
             foreach (var (i, kv) in range(labels)) {
@@ -1668,7 +1668,7 @@ public static void SetCgoTraceback(nint version, @unsafe.Pointer traceback, @uns
             context: context,
             symbolizer: symbolizer
         ), out var Ꮡarg);
-        cgocall(_cgo_set_traceback_functions, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
+        cgocall(_cgo_set_traceback_functions, noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
         System.GC.KeepAlive(Ꮡarg);
     }
 }
@@ -1791,7 +1791,7 @@ internal static void callCgoSymbolizer(ж<cgoSymbolizerArg> arg) {
     if (asanenabled) {
         asanwrite(@unsafe.Pointer.FromPinnedBox(arg), /* unsafe.Sizeof(cgoSymbolizerArg{}) */ (uintptr)56);
     }
-    call(_cgo_call_symbolizer_function, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(arg)));
+    call(_cgo_call_symbolizer_function, noescape(@unsafe.Pointer.FromPinnedBox(arg)));
 }
 
 // cgoContextPCs gets the PC values from a cgo traceback.
@@ -1815,7 +1815,7 @@ internal static void cgoContextPCs(uintptr ctxt, slice<uintptr> buf) {
     if (asanenabled) {
         asanwrite(@unsafe.Pointer.FromPinnedBox(Ꮡarg), /* unsafe.Sizeof(arg) */ (uintptr)32);
     }
-    call(_cgo_call_traceback_function, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
+    call(_cgo_call_traceback_function, noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
     System.GC.KeepAlive(Ꮡarg);
 }
 

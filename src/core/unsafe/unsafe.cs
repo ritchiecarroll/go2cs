@@ -382,13 +382,40 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         if (other is not Pointer pointer)
             return base.Equals(other);
         if (Referent is { } mine && pointer.Referent is { } theirs)
-            return ReferenceEquals(mine, theirs) || ReferentToken(mine) == ReferentToken(theirs);
+            return IdentityOf(mine) == pointer.IdentityOf(theirs);
         return PointerOrderToken == pointer.PointerOrderToken;
+    }
+
+    // ONE IDENTITY FOR A POINTER AND WHAT IS DERIVED FROM IT (2026-11-14). A pointer whose referent resolved is
+    // identified by ONE number, which Equals compares and GetHashCode hashes, so two equal pointers cannot hash
+    // apart (a Go map keyed on unsafe.Pointer would miss a key it holds). Two rules give that number.
+    //
+    //   A DERIVED POINTER. A pointer moved by unsafe.Add, or converted to a typed pointer and back, carries a native
+    //   box AT the new address (it keeps what the pointer carried), while a pointer made over a Go variable carries
+    //   the variable's own box. Identified by what they carry, the two were always different:
+    //   `unsafe.Add(p, 0) == p` answered false, and so did
+    //   `unsafe.Add(unsafe.Pointer(&a[0]), 8) == unsafe.Pointer(&a[1])`, where Go answers true. A native box derived
+    //   from a managed one now answers its place in that box's token space (NativeDerivation.Token: the source's
+    //   token plus the distance moved), which is the token a managed pointer to the same place answers. No address
+    //   is asked of a pointer that was never moved, so equality and hashing pin nothing they did not pin before.
+    //
+    //   TOKEN ARITHMETIC. A struct that holds a reference has no address; its pointer's number is its order token,
+    //   and unsafe.Add over it answers the token plus the offset, carrying the root. Such a pointer's identity is its
+    //   own NUMBER. It was the root's before, so `unsafe.Add(p, 8) == p` answered true over such a struct. Every
+    //   other mint of a token-numbered pointer stores the token of what it carries, so its number and its
+    //   referent's token are one value.
+    //
+    // The asymmetric pair of the hash contract above (exactly one side resolves a referent) is as it was.
+    private nuint IdentityOf(object referent)
+    {
+        nuint number = Value.Value;
+
+        return ManagedPointerTokens.IsTaggedToken(number) ? number : ReferentToken(referent);
     }
 
     public override int GetHashCode()
     {
-        return Referent is { } referent ? ReferentToken(referent).GetHashCode() : PointerOrderToken.GetHashCode();
+        return Referent is { } referent ? IdentityOf(referent).GetHashCode() : PointerOrderToken.GetHashCode();
     }
 
     // A referent's identity is its ORDER TOKEN, never the box OBJECT: a field or element reference is
@@ -407,6 +434,7 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     {
         return referent switch
         {
+            INativeRooted { NativeRootAddress: not 0 } derived => NativeDerivation.Token(derived),
             INilPointer box => box.PointerOrderToken,
             IChannel channel => channel.PointerOrderToken,
             _ => ManagedPointerTokens.IdentityToken(referent)
@@ -512,6 +540,13 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         if (box.NativeAddress != 0)
             return new Pointer((uintptr)box.NativeAddress, box);
 
+        // A view with no storage of its own (golib's view of a field's bytes over a Go value that has no address)
+        // has no slot to take the address of. Its number is the field's, through the box's untyped face, and the
+        // view rides along as the referent: its identity is the field's, so `unsafe.Pointer(p)` and
+        // `unsafe.Pointer(&x.f)` are one pointer, as in Go.
+        if (box is IPointerNumberForwarder)
+            return new Pointer((uintptr)((IGoReflectBox)box).TransientSlotAddress(), box);
+
         fixed (T* ptr = &box.ValueSlot)
             return new Pointer((uintptr)ptr, box);
     }
@@ -565,6 +600,557 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         return new Pointer((uintptr)box, box);
     }
 
+    // The converter's emission for Go's unsafe rule 6 on a reflect header's Data field: `unsafe.Pointer(h.Data)` in ONE
+    // expression, with h a *reflect.StringHeader or *reflect.SliceHeader (docs/phase4/DESIGN-sqlite-ccgo-ts.md, QW-8
+    // and section 10.3). Go's pointer keeps what the header describes alive; the number the field holds keeps nothing,
+    // and a pointer re-formed from it after its element box died read moved memory (measured: 199 of 200 wrong, 10.1).
+    //
+    // So the converter hands over the header's BOX, and the answer is decided at RUN TIME, because the converter sees
+    // only the static type: a HEADER box (golib's string and slice header boxes) answers its Data word together with
+    // the element box it minted the word from, and the pointer CARRIES that box, so the pin and the bytes live while
+    // the pointer does; any other box (a header built field by field, `&reflect.StringHeader{Data: n}`) answers
+    // exactly today's number pointer, from the Data word Go's layout puts first.
+    public static Pointer FromHeaderData<T>(ж<T> header)
+    {
+        // A nil header is Go's nil dereference at `h.Data`, never a .NET NullReferenceException (P3's code read, nit 5).
+        if (header is null || header.IsNilPointer)
+            throw RuntimeErrorPanic.ErrorString("invalid memory address or nil pointer dereference");
+
+        if (header is IHeaderDataCarrier source)
+        {
+            nuint word = source.HeaderDataWord(out object? carried);
+            return new Pointer((uintptr)word, carried);
+        }
+
+        return new Pointer(Unsafe.As<T, uintptr>(ref header.Value));
+    }
+
+    // Go's `(*T)(p)` for an unsafe.Pointer VALUE p (docs/phase4/DESIGN-interior-pointer-root.md 4.1 and 10.1). The
+    // converter's earlier spelling was `(ж<T>)(uintptr)(p)`: the cast to a number dropped what p carried before
+    // golib saw it, so an interior address of Go memory came back as a native box that kept nothing and pinned
+    // nothing, and the storage moved or was collected under a pointer still in use.
+    //
+    // The answer is the number conversion's own (ж<T>.FromNumber: one body, one box minted), with two differences.
+    //
+    //   THE BASE. A pointer straight from a mint names its source at offset 0, and its stored number may be an
+    //   address read before anything held the storage still (FromBox reads it under `fixed` for one statement). So
+    //   the number converted is the source's OWN, asked now (BaseOf), never the stored one.
+    //
+    //   THE ROOT. Where the conversion would mint a native box that keeps nothing, it keeps what p carried.
+    //
+    // A pointer whose source is itself a pointer to T is that pointer: it names its source at offset 0, which is
+    // what the registry answered for a pinned source and what nothing answered for one that was never pinned.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ж<T> To<T>(Pointer? p)
+    {
+        if (p is null || p.IsNull)
+            return ж<T>.FromNumber(default, carried: null);
+
+        if (p.m_retainedSource is ж<T> itself && NamesAManagedSourceByAddress(p, out _))
+            return itself;
+
+        return ж<T>.FromNumber(BaseOf(p), p.m_retainedSource);
+    }
+
+    // The same conversion for an operand that is already a number: the number conversion, unchanged.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ж<T> To<T>(uintptr number)
+    {
+        return ж<T>.FromNumber(number, carried: null);
+    }
+
+    // ---- Go's `(*A)(p)[lo:hi]`, A an array type and p an unsafe.Pointer: the VIEW doors (door A) ----
+    //
+    // docs/phase4/DESIGN-array-pointer-doors.md, 4.1 to 4.4 and section 10. The converter emitted these forms as a
+    // span over the pointer cast to a number, which COPIES: a write through the slice never reached the memory, and
+    // a named array (`type RawMem [1<<50 - 1]byte`, modernc.org/libc) was read as a managed wrapper out of C
+    // memory. A door takes the pointer itself and the array's length N as a constant. Nothing of length N is
+    // allocated or spanned: N is a bound.
+    //
+    //     (*A)(p)[lo:hi]              View<E>(p, lo, hi, N)
+    //     (*A)(p)[lo:hi:max]          View<E>(p, lo, hi, max, N)
+    //     (*A)(p)[lo:]                View<E>(p, lo, N)
+    //     copy((*A)(p)[lo:], src)     CopyInto<E>(p, lo, N, src)
+    //     copy(dst, (*A)(p)[lo:])     CopyFrom<E>(dst, p, lo, N)
+    //
+    // Go's order: the nil check, then the bounds against N with Go's slice panics for an array, then the view.
+    // WHAT THE VIEW IS depends on what p points to (Window):
+    //
+    //   V1  an element of a Go array or slice of E, or a Go array of E named by its own address: a managed window
+    //       on that array. Writes reach it and nothing needs to be held still. Its capacity, and what a copy door
+    //       may copy, end where the Go array ends; a view that would pass that end is refused by name, because the
+    //       managed array is all the storage there is.
+    //   V3  an address the pointer registry does not know (C memory, or an interior address of Go memory): a native
+    //       window over the address, with Go's capacity. It keeps what the pointer carried, which is nothing for C
+    //       memory alone.
+    //   V2  any other Go value that its box holds still (a scalar, a struct of scalars, an array of another element
+    //       type, a named array by its own address): a native window over the value's own bytes, ANCHORED on the
+    //       box. The box owns the pin, so the storage stays where it is for as long as any slice cut from the view
+    //       lives, and writes reach the value. The window ends where the pinned storage ends; a view that would
+    //       pass that end is refused by name.
+    //   V4  a Go value nothing can hold still (it holds references): a COPY of the elements read at the pointer, as
+    //       before the doors. A read is exact and a write does not reach the value, so a copy door refuses such a
+    //       destination by name.
+    //
+    // The length is taken at full width and refused by name past what a span can hold, as unsafe.Slice refuses it:
+    // the cast to int it replaces wrapped (2^32 + 5 would have read five elements).
+    private enum ViewUse
+    {
+        Slice,
+        CopyDestination,
+        CopySource,
+        Element,
+        ArrayLoad,
+        ArrayStore,
+        FieldView
+    }
+
+    // `(*A)(p)[lo:hi]`: length hi-lo, capacity N-lo.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static slice<E> View<E>(Pointer? p, long lo, long hi, long length)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)hi > (ulong)length || (ulong)lo > (ulong)hi)
+            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(lo, hi, length);
+
+        return Window<E>(p!, lo, hi - lo, length - lo, length, ViewUse.Slice);
+    }
+
+    // `(*A)(p)[lo:hi:max]`: length hi-lo, capacity max-lo.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static slice<E> View<E>(Pointer? p, long lo, long hi, long max, long length)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)max > (ulong)length || (ulong)hi > (ulong)max || (ulong)lo > (ulong)hi)
+            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(lo, hi, max, length);
+
+        return Window<E>(p!, lo, hi - lo, max - lo, length, ViewUse.Slice);
+    }
+
+    // `(*A)(p)[lo:]` anywhere but directly under copy: the whole array from lo. For an array longer than a span
+    // can hold (RawMem) this is refused by name: a slice of that length has no representation here, and a
+    // shortened one would answer a wrong len.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static slice<E> View<E>(Pointer? p, long lo, long length)
+    {
+        return View<E>(p, lo, length, length);
+    }
+
+    // `copy((*A)(p)[lo:], src)`. Go copies min(N-lo, len(src)) elements, so the view cut is exactly that long,
+    // whatever N is. p is evaluated before src, as Go evaluates copy's arguments.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static nint CopyInto<E>(Pointer? p, long lo, long length, in slice<E> src)
+    {
+        long count = OpenFormCount(p, lo, length, src.Length);
+
+        if (count == 0)
+            return 0;
+
+        // p is held until the elements are copied: the window is over memory p keeps.
+        nint copied = copy(Window<E>(p!, lo, count, count, length, ViewUse.CopyDestination), src);
+
+        GC.KeepAlive(p);
+
+        return copied;
+    }
+
+    // The same with a string source, which Go allows into a byte destination.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static nint CopyInto(Pointer? p, long lo, long length, in @string src)
+    {
+        long count = OpenFormCount(p, lo, length, src.Length);
+
+        if (count == 0)
+            return 0;
+
+        nint copied = copy(Window<byte>(p!, lo, count, count, length, ViewUse.CopyDestination), src);
+
+        GC.KeepAlive(p);
+
+        return copied;
+    }
+
+    // `copy(dst, (*A)(p)[lo:])`: min(len(dst), N-lo) elements.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static nint CopyFrom<E>(in slice<E> dst, Pointer? p, long lo, long length)
+    {
+        long count = OpenFormCount(p, lo, length, dst.Length);
+
+        if (count == 0)
+            return 0;
+
+        nint copied = copy(dst, Window<E>(p!, lo, count, count, length, ViewUse.CopySource));
+
+        GC.KeepAlive(p);
+
+        return copied;
+    }
+
+    // ---- Go's `(*A)(p)[i]`, `&(*A)(p)[i]`, `*(*A)(p)` and `*(*A)(p) = v`: the ELEMENT and ARRAY doors (door B) ----
+    //
+    // docs/phase4/DESIGN-array-pointer-doors.md, 4.5 and 10.5. These forms went through the pointer conversion to
+    // the array type, which has no answer over memory that is no Go array of that type: C memory was refused by
+    // name (`cannot view native memory as array<...>`), and a named array was read as a managed wrapper out of it.
+    // No box of the whole array is made here. N is a bound, as it is for the view doors.
+    //
+    //     (*A)(p)[i]          ElementRef<E>(p, i, N)        read, store, compound assignment, ++ and --
+    //     &(*A)(p)[i]         Element<E>(p, i, N)
+    //     v := *(*A)(p)       LoadArray<E>(p, N)            a Go array value: a copy
+    //     *(*A)(p) = v        StoreArray<E>(p, N, v)
+    //
+    // Go's order: the nil check, then the index against N with Go's index panic, then the element. WHAT THE ELEMENT
+    // IS follows the view doors' four answers (Aliased), for a window of one element at i:
+    //
+    //   V1  the Go array's own element box. An index past the end of the Go array is refused by name.
+    //   V3  a native box at the element's address, which keeps what the pointer carried.
+    //   V2  a native box at the element's address inside the Go value, anchored on the box that holds the value
+    //       still. An index past the end of the value is refused by name.
+    //   V4  Go's own definition of the form, `(*E)(unsafe.Add(p, i*size))`, which the pointer conversion answers.
+
+    // `&(*A)(p)[i]`: the pointer to element i.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ж<E> Element<E>(Pointer? p, long i, long length)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)i >= (ulong)length)
+            throw RuntimeErrorPanic.IndexOutOfRange(i, length);
+
+        slice<E> window = Aliased<E>(p!, i, 1, 1, length, ViewUse.Element, out ж<E>? unaliased);
+
+        if (unaliased is not null)
+            return i == 0 ? unaliased : To<E>(Moved(p, (nuint)i * (nuint)Unsafe.SizeOf<E>()));
+
+        return ElementAddressUnchecked(window, 0);
+    }
+
+    // `(*A)(p)[i]` as a location: read, stored, compounded or stepped in the one expression that names it.
+    //
+    // THE V3 FAST PATH (10.5). The index form is in hot generated code (sqlite's chacha block, its b-tree balance),
+    // nearly always over C memory. A pointer that keeps nothing, whose number the registry does not know and that
+    // names user memory, is C memory: the element is at p + i*size and nothing has a lifetime, so no box is made.
+    // Every other pointer takes the element door, whose box is what keeps the root until the reference is used: a
+    // reference into Go storage is one the collector follows by itself.
+    //
+    // A `ref` result cannot live across an await (CS8178): a site that cannot keep it in one expression takes
+    // Element(...).Value.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ref E ElementRef<E>(Pointer? p, long i, long length)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)i >= (ulong)length)
+            throw RuntimeErrorPanic.IndexOutOfRange(i, length);
+
+        if (!RuntimeHelpers.IsReferenceOrContainsReferences<E>() && NativeDerivation.Kept(p!.m_retainedSource) is null)
+        {
+            nuint number = (nuint)p.Value.Value;
+
+            if (!ManagedPointerTokens.NamesNoUserMemory(number) && ManagedPointerTokens.Resolve(number) is null)
+                return ref Unsafe.AsRef<E>((void*)(number + (nuint)i * (nuint)Unsafe.SizeOf<E>()));
+        }
+
+        return ref Element<E>(p, i, length).Value;
+    }
+
+    // `v := *(*A)(p)`: the array's N elements, copied, as a Go array value is. Over a Go value nothing can alias
+    // (V4) the read is still exact.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static array<E> LoadArray<E>(Pointer? p, long length)
+    {
+        RequireArrayPointer(p);
+
+        slice<E> view = Window<E>(p!, 0, length, length, length, ViewUse.ArrayLoad);
+        array<E> value = new array<E>((int)length);
+
+        copy(value[..], view);
+        GC.KeepAlive(p);
+
+        return value;
+    }
+
+    // `*(*A)(p) = v`: N elements copied to where p points. A Go value nothing can alias (V4) is refused by name: the
+    // write would land in a copy. A value shorter than N (the zero value of an array that was never given storage)
+    // is zeros from where it ends, as Go's is.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static void StoreArray<E>(Pointer? p, long length, in array<E> value)
+    {
+        RequireArrayPointer(p);
+
+        if (length == 0)
+            return;
+
+        slice<E> view = Window<E>(p!, 0, length, length, length, ViewUse.ArrayStore);
+
+        for (nint i = copy(view, value[..]); i < view.Length; i++)
+            view[i] = default!;
+
+        GC.KeepAlive(p);
+    }
+
+    // ---- Go's `(*[N]E)(unsafe.Pointer(&p.f))`, f not an E, over a root that is not native: the FIELD VIEW ----
+    //
+    // docs/phase4/DESIGN-array-pointer-doors.md, section 18. ArrayPointer<E>.Of answers this where golib's native
+    // field door declines. p is the pinned pointer to the field. The route was the pointer conversion to the array
+    // type, which answered a native box of array<E> over the field: its Value read the field's bytes as the three
+    // fields of array<E> itself, a managed reference made out of content.
+    //
+    // The answer is the view doors' own (Aliased), for a window of N elements at the field:
+    //
+    //   V2  a native array pointer over the bytes the field's root holds still. It is anchored on the box that
+    //       holds them, so the view keeps the root, and it ends where the root's storage ends: a view longer than
+    //       its field reads the fields after it, as Go does, and one that would pass the end of the root is
+    //       refused by name.
+    //   V3  the same over a field whose own box is native.
+    //   V1  a field that is an element of managed E storage: a window on that array.
+    //   V4  a root with no address (a struct that holds references): nothing holds the field's bytes still, so no
+    //       native array pointer can be made over them, and an array pointer over a copy would lose every write.
+    //       The answer is golib's view of the FIELD's own bytes through the field's pointer, read again at every
+    //       access (ReinterpretedArrayBox, section 19). It is made when the field holds no reference and the view
+    //       fits inside it; a longer view, or a field whose converted form holds a reference, is refused by name.
+    internal static ж<array<E>> FieldView<E>(Pointer p, nint length, object? field)
+    {
+        if (p.IsNull)
+            return To<array<E>>(p);
+
+        slice<E> window = Aliased<E>(p, 0, length, length, length, ViewUse.FieldView, out ж<E>? unaliased);
+
+        if (unaliased is not null)
+            return ReinterpretedArrayBox<E>.TryOver(field, length, out string? refusal) ?? throw new PanicException((@string)$"go2cs: {ViewForm<E>(0, length, length, ViewUse.FieldView)}: {refusal}");
+
+        if (window.IsNativeBacked)
+            return builtin.NativeArrayPointer<E>(window.NativeElementAddressUnchecked(0), length, NativeSliceAnchors<E>.Of(window));
+
+        return array<E>.AliasPointer(ElementAddressUnchecked(window, 0), length);
+    }
+
+    // Slicing through a nil array pointer is Go's nil dereference, before any bound is read.
+    private static void RequireArrayPointer(Pointer? p)
+    {
+        if (p is null || p.IsNull)
+            throw RuntimeErrorPanic.NilPointerDereference();
+    }
+
+    // The open form's checks and the count copy uses of it.
+    private static long OpenFormCount(Pointer? p, long lo, long length, nint other)
+    {
+        RequireArrayPointer(p);
+
+        if ((ulong)lo > (ulong)length)
+            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(lo, length, length);
+
+        return Math.Min(length - lo, other);
+    }
+
+    // The Go form a refusal names: N and E are the array's, the bounds the site's.
+    private static string ViewForm<E>(long lo, long count, long length, ViewUse use) =>
+        use switch
+        {
+            ViewUse.Slice => $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:{lo + count}]",
+            ViewUse.Element => $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}]",
+            ViewUse.ArrayLoad => $"*(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)",
+            ViewUse.ArrayStore => $"*(*[{length}]{GoReflect.GoTypeName(typeof(E))})(p) = v",
+            ViewUse.FieldView => $"(*[{length}]{GoReflect.GoTypeName(typeof(E))})(unsafe.Pointer(&p.f))",
+            _ => $"copy through (*[{length}]{GoReflect.GoTypeName(typeof(E))})(p)[{lo}:]"
+        };
+
+    // The view of `count` elements starting `lo` elements after p, with room for `capacity`. The bounds are checked
+    // by the caller. p is resolved where it points and the view starts lo elements on, so a number the registry
+    // knows keeps its answer for every lo.
+    private static slice<E> Window<E>(Pointer p, long lo, long count, long capacity, long length, ViewUse use)
+    {
+        slice<E> window = Aliased<E>(p, lo, count, capacity, length, use, out ж<E>? unaliased);
+
+        if (unaliased is null)
+            return window;
+
+        // V4. A write would land in the copy, so a destination is refused instead of written and lost.
+        if (use is ViewUse.CopyDestination or ViewUse.ArrayStore)
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)} cannot write the Go value p points to: it is not an array of {GoReflect.GoTypeName(typeof(E))}, and a view of it is a copy");
+
+        if (count == 0)
+            return new slice<E>(Array.Empty<E>());
+
+        fixed (E* source = &unaliased.Value)
+            return new slice<E>(new ReadOnlySpan<E>(source + lo, (int)count));
+    }
+
+    // The window that ALIASES what p points to (V1, V2, V3), or `unaliased`: the pointer to the first element where
+    // nothing can be aliased (V4), for the caller to answer as its form requires.
+    private static slice<E> Aliased<E>(Pointer p, long lo, long count, long capacity, long length, ViewUse use, out ж<E>? unaliased)
+    {
+        unaliased = null;
+
+        // The converter refuses such an element at the site; the doors are public, so they refuse it too.
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<E>())
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)}: an element that holds references cannot be viewed at an address");
+
+        // A zero-size element has no storage to view, so a length past any span is still a valid Go slice
+        // (unsafe.Slice's exemption). Its capacity is its length.
+        if (GoSliceLimit.IsZeroSize<E>() && GoSliceLimit.LongerThanAnySpan(count))
+            return new slice<E>((nint)count);
+
+        if (GoSliceLimit.LongerThanAnySpan(count))
+            throw RuntimeErrorPanic.RuntimeRaised($"go2cs: {ViewForm<E>(lo, count, length, use)}: length {count} exceeds the maximum slice length of this runtime");
+
+        ж<E> ptr = To<E>(p);
+
+        // V1, an element of managed E storage: the pointer's own box, or the box a number resolved to.
+        if (ptr.TryGetElementStorage(out E[]? elements, out nint first))
+            return ManagedWindow(elements, first, elements.Length - first, lo, count, capacity, length, use);
+
+        // What holds the storage still, for V2: the box a number resolved to, or the pointer's own box.
+        object? holder = null;
+        nuint held = 0;
+
+        // An order token is a number that is no address: it is never viewed as memory (the copy below reads through
+        // the box, which refuses a token by name).
+        if (ptr.IsNative && !ManagedPointerTokens.IsTaggedToken(ptr.NativeAddress))
+        {
+            object? resolved = ManagedPointerTokens.Resolve(ptr.NativeAddress);
+
+            if (resolved is null)
+            {
+                object? kept = NativeDerivation.Kept(ptr);
+
+                // An address the registry does not know that was DERIVED from a Go value (unsafe.Add over a pointer
+                // to it, an element of a view of it) is inside that value's storage, or was meant to be. Go's
+                // capacity N-lo is no bound on it: `(*[1<<30]byte)(unsafe.Add(unsafe.Pointer(&v), 4))[:n]` would
+                // read and write the heap past v. So the Go value answers for where its storage ends (V2 at an
+                // interior address), and an address outside it is refused by name.
+                if (NativeDerivation.HeldSource(kept) is not { } origin)
+                {
+                    // V3: C memory, or a number that carries nothing. Kept answers null for C memory alone, so no
+                    // anchor is allocated for it. Nothing here knows where such memory ends, as in Go.
+                    nuint address = ptr.NativeAddress + (nuint)lo * (nuint)Unsafe.SizeOf<E>();
+
+                    return slice<E>.OverNativeMemory(address, (nint)count, (nint)capacity, NativeSliceAnchors<E>.For(kept));
+                }
+
+                if (origin.TryHeldExtent(out nuint start, out nuint end))
+                {
+                    if (ptr.NativeAddress < start || ptr.NativeAddress > end)
+                        throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)}: p is outside the Go value it was derived from");
+
+                    return HeldWindow<E>(kept!, ptr.NativeAddress, end - ptr.NativeAddress, lo, count, capacity, length, use);
+                }
+
+                // The Go value holds nothing still at this address (it cannot be pinned, or it has other storage
+                // now): no window is cut over it, and the copy arm below answers.
+            }
+            else if (resolved is ж<array<E>> { IsNilPointer: false } arrayBox && arrayBox.ValueSlot is { Source: { } source } whole)
+            {
+                // V1, a Go array of E named by its own address (`unsafe.Pointer(&a)`, or that number): the address
+                // is the array's element 0, so the view is a window on the array.
+                return ManagedWindow(source, whole.Low, whole.Length, lo, count, capacity, length, use);
+            }
+            else
+            {
+                holder = resolved;
+                held = ptr.NativeAddress;
+            }
+        }
+        else if (!ptr.IsNative && !ptr.IsNilPointer && ptr.StorageKind is PointerStorage.Pinnable)
+        {
+            // A pointer to one E that is no element of an array (`unsafe.Pointer(&x)`, x an E): its number is the
+            // pin moment, and the box is its own holder.
+            holder = ptr;
+            held = (nuint)((uintptr)ptr).Value;
+        }
+
+        // V2. The holder answers for the bytes it holds still from the address; nothing else is viewed.
+        if (holder is IHeldStorage storage && storage.HeldBytesFrom(held) is var room and not 0)
+            return HeldWindow<E>(holder, held, room, lo, count, capacity, length, use);
+
+        unaliased = ptr;
+
+        return default;
+    }
+
+    // A window on the bytes of a Go value its box holds still (V2): `room` bytes exist from `address` to the end of
+    // the storage the holder pinned. The window is anchored on the holder, whose pin keeps the bytes where they are.
+    private static slice<E> HeldWindow<E>(object holder, nuint address, nuint room, long lo, long count, long capacity, long length, ViewUse use)
+    {
+        nuint size = (nuint)Unsafe.SizeOf<E>();
+        long remain = (long)(room / size) - lo;
+
+        if (count > remain)
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)} would pass the end of the Go value p points to ({Math.Max(remain, 0)} elements of it remain)");
+
+        return slice<E>.OverNativeMemory(address + (nuint)lo * size, (nint)count, (nint)Math.Min(capacity, remain), NativeSliceAnchors<E>.For(holder));
+    }
+
+    // A window on a Go array of E: `available` elements exist from the pointer's element to the array's end.
+    private static slice<E> ManagedWindow<E>(E[] elements, nint first, nint available, long lo, long count, long capacity, long length, ViewUse use)
+    {
+        long remain = available - lo;
+
+        if (count > remain)
+            throw new PanicException((@string)$"go2cs: {ViewForm<E>(lo, count, length, use)} would pass the end of the Go array p points into ({Math.Max(remain, 0)} elements remain)");
+
+        nint low = first + (nint)lo;
+
+        return new slice<E>(elements, low, low + (nint)count, low + (nint)Math.Min(capacity, remain));
+    }
+
+    // Whether p came straight from a mint over a MANAGED box and holds an address for it: FromBox, FromBoxObject or
+    // FromPinnedBox over storage that has one. Such a pointer names its source at offset 0 by construction, because
+    // every derivation replaces the source (Add carries the native box NativeDerivation.Moved made). A zerobase
+    // pointer, a native alias and a token (tagged; its arithmetic keeps the source, see Add) are not this case.
+    private static bool NamesAManagedSourceByAddress(Pointer p, [NotNullWhen(true)] out IGoReflectBox? source)
+    {
+        source = p.m_retainedSource as IGoReflectBox;
+
+        return source is { NativeAddress: 0, IsNilPointer: false, NamesZeroBase: false } && !ManagedPointerTokens.IsTaggedToken((nuint)p.Value.Value);
+    }
+
+    // The number a derivation from p starts at (design 10.1): for a pointer that names a managed box by address, the
+    // box's OWN number, asked now. The box's number conversion is the pin moment: it holds pinnable storage still
+    // for the box's lifetime, records it, and answers the address that now holds (or the order token, for a pointee
+    // that holds a reference and so has no address). The stored number is used as it is when the box is already
+    // pinned there, which is every FromPinnedBox mint, and for every other pointer.
+    private static uintptr BaseOf(Pointer p)
+    {
+        if (!NamesAManagedSourceByAddress(p, out IGoReflectBox? source))
+            return p.Value;
+
+        if (source is INilPointer pinned && pinned.IsPinnedAt((nuint)p.Value.Value))
+            return p.Value;
+
+        return (uintptr)source.NativeArgumentAddress();
+    }
+
+    // unsafe.Add's body. Three rules beyond the sum:
+    //
+    //   over NIL it answers the offset as a number, as Go does (`unsafe.Add(nil, n)` is the address n; it answered
+    //   nil here until 2026-11-14). Offset 0 over nil is still nil: the zero address is the nil pointer;
+    //
+    //   the BASE is BaseOf(ptr), so a pointer minted by FromBox is derived from where its storage is held, not from
+    //   a number read before anything held it;
+    //
+    //   the SOURCE is kept. For an address, the moved pointer carries a native box at the new value that retains
+    //   what ptr carried (NativeDerivation.Moved). For a TOKEN (a source that holds a reference has no address) the
+    //   sum is token arithmetic, which the conversion answers by the alias walk over the token's own box; that box
+    //   is found through a weak record, so the moved pointer keeps it, or the struct could be collected while the
+    //   pointer that Go says keeps it alive is still in use.
+    internal static Pointer Moved(Pointer? ptr, nuint offset)
+    {
+        if (ptr is null || ptr.IsNull)
+            return new Pointer((uintptr)offset);
+
+        nuint value = (nuint)BaseOf(ptr).Value + offset;
+
+        if (NativeDerivation.Moved(ptr.m_retainedSource, value) is { } moved)
+            return FromBox(moved);
+
+        if (ManagedPointerTokens.IsTaggedToken(value) && NativeDerivation.Kept(ptr.m_retainedSource) is { } kept)
+            return new Pointer((uintptr)value, kept);
+
+        return new Pointer((uintptr)value);
+    }
+
     // The word a Go FUNC value answers when it is read AS a word -- `*(*unsafe.Pointer)(unsafe.Pointer(&f))`,
     // emitted for a func-typed f. Go's func value is one pointer (to a funcval); a managed one is a
     // delegate with no address, so the word is its GoFuncCookie: carried by native code as an lParam and
@@ -574,6 +1160,73 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     public static Pointer OfFunc(Delegate? fn)
     {
         return fn is null ? Nil : new Pointer(GoFuncCookie.Of(fn));
+    }
+
+    // Go's `*(*F)(e) = fn` for a func type F and an unsafe.Pointer VALUE e (docs/phase4/DESIGN-interior-pointer-root.md
+    // 4.8 B1 and 10.4). The store's own type says the VALUE is a func. It does not say what e names, and a managed
+    // func is a reference while Go's is one word, so what is stored is decided here, at run time, by what e names:
+    //
+    //   a WORD: C memory, or Go memory that holds no reference (a `uintptr` variable, a field of a struct of
+    //   numbers, an element of a word array). The func's word is stored (GoFuncCookie), through the same conversion
+    //   `*(*uintptr)(e) = word` takes. This is ccgo's function-pointer table (modernc.org/sqlite, vfs/patches64.go);
+    //
+    //   a FUNC: a func variable, or a func field or element inside a value that holds references. The func itself is
+    //   stored, as the slot's own delegate type (a named func type's variable takes a func stored as the unnamed
+    //   type, as it does in Go);
+    //
+    //   a `uintptr` field or element inside a value that holds references: the word, through its alias.
+    //
+    // Anything else is refused by name, and no arm writes 8 bytes over a reference. The emission this replaces,
+    // `To<F>(e).Value = fn`, was a native box over a delegate: a managed reference written into raw memory.
+    //
+    // LIFETIME. A word does not keep its func alive, as a uintptr does not in Go. A static function's word is good
+    // for the life of the process. A closure's word is good while something else holds the closure; after that it
+    // names no live func and a call through it is refused by name (GoFuncCookie.ResolveAs).
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static void StoreFunc(Pointer? e, Delegate? fn)
+    {
+        if (e is null || e.IsNull)
+            throw go.golib.RuntimeErrorPanic.NilPointerDereference();
+
+        nuint number = (nuint)BaseOf(e).Value;
+
+        // An address: memory with no reference in it. The word store.
+        if (!ManagedPointerTokens.IsTaggedToken(number))
+        {
+            To<uintptr>(e).Value = (uintptr)GoFuncCookie.Of(fn);
+            return;
+        }
+
+        // A token: a value that holds a reference has no address, and the number names its box (and, moved, an
+        // offset into it). The slot is the one Go's layout puts there.
+        nuint offset = 0;
+        object? root = ManagedPointerTokens.Resolve(number);
+
+        if (root is null && ManagedPointerTokens.IsTokenArithmetic(number))
+            root = ManagedPointerTokens.ResolveArithmeticBase(number, out offset);
+
+        if (root is null)
+            throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer func store: the pointer names no live Go value");
+
+        object? slot = GoReflect.ResolveInteriorFuncSlot(root, offset, out Type? slotType, out string shape);
+
+        if (slot is ж<uintptr> word)
+        {
+            word.Value = (uintptr)GoFuncCookie.Of(fn);
+            return;
+        }
+
+        if (slot is IUntypedSlotAccess func && slotType is not null)
+        {
+            // The slot's own delegate type: a func of another type with the same signature is rebound to it, and one
+            // that cannot be is refused by name there.
+            Delegate? value = fn is null || fn.GetType() == slotType ? fn : GoFuncCookie.ResolveAs(GoFuncCookie.Of(fn), slotType);
+
+            if (func.TryStoreThrough(value))
+                return;
+        }
+
+        throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer func store: the pointer names neither a func nor a word (" + root.GetType().Name + " +" + offset + ":" + shape + ")");
     }
 
     // ---- the bare-unsafe.Pointer primitives' recovery and through-ops (I5) ----
@@ -921,10 +1574,7 @@ public static Pointer Add(Pointer ptr, uintptr len) {
 }
 
 public static Pointer Add<TLen>(Pointer ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
-    if (ptr == nil)
-        return new Pointer(nil);
-
-    return new Pointer(ptr.Value + (uintptr)(nuint)nint.CreateTruncating(len));
+    return Pointer.Moved(ptr, (nuint)nint.CreateTruncating(len));
 }
 
 // A typed element box addresses its target through an Int32 element index, so an offset outside
@@ -950,7 +1600,7 @@ public static ж<T> Add<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numeri
     // byte arithmetic (its argument is an unsafe.Pointer), which is what a native alias reproduces;
     // the managed array-element path below is an element step against a managed backing store.
     if (ptr.IsNative)
-        return new NativeBox<T>((nuint)((nint)ptr.NativeAddress + n));
+        return new NativeBox<T>((nuint)((nint)ptr.NativeAddress + n), retainedSource: NativeDerivation.Kept(ptr));
 
     (IArray array, int index)? arrayRef  = ptr.ArrayRef;
 
@@ -1054,9 +1704,13 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
         // 2026-10-19: crypto/x509's windows chain reads, unsafe.Slice(chainCtx.Chains, n)) and keep the runtime's
         // own words in a shadow. The slice reads the n words (see builtin.NativeArrayPointer).
         if (NativePointerElement<T>.Is)
-            return builtin.NativeArrayPointer<T>(ptr.NativeAddress, n).slice(0, n, n);
+        {
+            slice<T> words = builtin.NativeArrayPointer<T>(ptr.NativeAddress, n).slice(0, n, n);
+            NativeSliceAnchors<T>.Keep(words, NativeDerivation.Kept(ptr));
+            return words;
+        }
 
-        return slice<T>.OverNativeMemory(ptr.NativeAddress, n);
+        return slice<T>.OverNativeMemory(ptr.NativeAddress, n, n, NativeSliceAnchors<T>.For(NativeDerivation.Kept(ptr)));
     }
 
     // A pointer INTO managed array/slice storage (`unsafe.Slice(&s[i], n)`) yields a window that
@@ -1254,16 +1908,70 @@ public static ж<byte> StringData(@string str) {
 // (docs/phase4/DESIGN-native-array-view.md, the LookupServicePort door).
 //
 // It carries both routes. A field one hop off a NATIVE root takes golib's native field-view door, which
-// views the field at its GO offset (builtin.NativeFieldArrayPointer); every other root -- managed,
-// pinned-managed, nil, or a struct whose Go layout cannot be known -- takes the raw-address route the
-// converter emitted before, unchanged. The route lives here rather than in golib because golib sits
-// below this package and cannot name Pointer.FromPinnedBox, the retaining pin the raw route needs.
+// views the field at its GO offset (builtin.NativeFieldArrayPointer). Every other root takes the field view over
+// Go storage (Pointer.FieldView): a native array pointer over the bytes the field's root holds still, which keeps
+// the root and ends where its storage ends, and for a root with no address (a struct that holds references)
+// golib's view of the field's own bytes, read again at every access (section 19). The route lives here rather
+// than in golib because golib sits below this package and cannot name Pointer.FromPinnedBox, the retaining pin it
+// needs.
+//
+// So the answer is a native array pointer for every root that has an address, and the forms the converter emits
+// over it are the same: ElementRef for an index, at and slice for an address and a slice. Over a root with no
+// address the index and the whole-array load and store below are served; a slice and an element's address need
+// storage that can be named, and are refused by name.
+//
+// The other roots took the pointer conversion to the array type until section 18 of the doors' design: first
+// spelled `(ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field)`, a cast through a number that dropped the box, then
+// the typed door Pointer.To, which kept it (10.6). Either way the box answered was a native box of array<T> over
+// the field, whose Value is no array.
 //
 // T rides on the CLASS and TField on the method so the call site names only T: C# infers TField from
 // the field argument, and an extension member cannot take T alone (CS1061 under C# 14).
 public static class ArrayPointer<T> {
     public static ж<array<T>> Of<TField>(ж<TField> field, nint length) =>
-        builtin.NativeFieldArrayPointer<T>(field, length) ?? (ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field);
+        builtin.NativeFieldArrayPointer<T>(field, length) ?? Pointer.FieldView<T>(Pointer.FromPinnedBox(field), length, field);
+
+    // THE WHOLE ARRAY THROUGH THE VIEW (section 18, part C). The view has no array<T> of its own, so its Value
+    // refuses by name, and the forms that need all N elements go through the elements instead. Both take the view's
+    // window, golib's slice of a pointer to an array, which answers for a native array pointer and for an ordinary
+    // box alike, with Go's nil dereference for a nil one. A view of a field's bytes over a root with no address has
+    // no window, and copies element by element.
+    //
+    //     v := *p        Load(p)        a Go array value: a copy of the N elements
+    //     *p = v         Store(p, v)    N element stores, in place
+    //
+    // A range that reads the values ranges the same window, `p.slice()`, where the elements are.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static array<T> Load(ж<array<T>> view)
+    {
+        // A view of a field's bytes over a Go value that has no address has no window: element by element.
+        if (view is ReinterpretedArrayBox<T> field)
+            return field.Load();
+
+        slice<T> window = view.slice();
+        array<T> value = new array<T>((int)window.Length);
+
+        copy(value[..], window);
+
+        return value;
+    }
+
+    // A value shorter than N (the zero value of an array that was never given storage) is zeros from where it
+    // ends, as Go's is.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static void Store(ж<array<T>> view, in array<T> value)
+    {
+        if (view is ReinterpretedArrayBox<T> field)
+        {
+            field.Store(value);
+            return;
+        }
+
+        slice<T> window = view.slice();
+
+        for (nint i = copy(window, value[..]); i < window.Length; i++)
+            window[i] = default!;
+    }
 }
 
 // Go's `(*[unsafe.Sizeof(s)]byte)(unsafe.Pointer(&s))[lo:hi]` as a direct argument of copy, where s's struct is

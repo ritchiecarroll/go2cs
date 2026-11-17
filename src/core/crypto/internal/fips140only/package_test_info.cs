@@ -8,6 +8,7 @@ global using static global::go.crypto.@internal.fips140only_package;
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
+global using cryptoꓸDecrypterOpts = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
 global using hpkeꓸKEM = go.crypto.hpke_package.ΔKEM;
@@ -52,7 +53,7 @@ using static global::go.crypto.@internal.fips140only_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140only/fips140only_test.go", "fips140only_test.cs", "AEVggoKCgoKCgoKUlIKClIKCABsIgoKUgpSCgpSClIKgkoKgpKCSoKSCoKSgpJKSkqSSpKSSpICSkoCkgJKSgKSAkoCAtJKSgsSC1oCSgoC0gLSSgsSC1pKCxILWkoLEgtakgoKSgqaSkpKCkoKClJK2gpKCgqaSkpKSkqSSpJK2gqSCgpSSpLa2yJKSkpKClAABIJKSpKSCgpKkpIKClIKCkpKkgoKUgoKSgoKkAAIUkoKCkoKCkpKClIKCgqaSkpKSgoKSyIIACxiCgoKCgoKCgoKCpoKC5qKCgoKClIK4oqSUgoKCgoK4goKCuIKCgpS4gqaCAAgGlIKCgoKU", "60-63:1;64-67:2;85-85:1;87-87:2;89-89:3;90-90:4;93-93:5;95-95:6;110-110:7;112-112:8;114-114:9;116-116:10;118-118:11;119-119:12;119-119:12.1;123-125:13;126-128:14;130-130:15;131-133:16;132-132:16.1;134-134:17;137-139:18;140-142:19;145-147:20;148-150:21;153-155:22;156-158:23;165-167:24;196-198:25;199-201:26;290-305:27;351-360:1", "124=crypto.Hash.New;127=crypto.Hash.New;132=crypto.Hash.New;134=crypto.Hash.New;138=crypto.Hash.New;141=crypto.Hash.New;146=crypto.Hash.New;149=crypto.Hash.New;154=crypto.Hash.New;157=crypto.Hash.New", "", "", "519:21,520:13")]
+[assembly: GoPositionMap("crypto/internal/fips140only/fips140only_test.go", "fips140only_test.cs", "AEVggoKCgoKCgoKUlIKClIKCABsIgoKUgpSCgpSClIKgkoKgpKCSoKSCoKSgpJKSkqSSpKSSpICSkoCkgJKSgKSAkoCAtJKSgsSC1oCSgoC0gLSSgsSC1pKCxILWkoLEgtakgoKSgqaSkpKCkoKClJK2gpKCgqaSkpKSkqSSpJK2gqSCgpSSpLa2yJKSkpKClAABIJKSpKSCgpKkpIKClIKCkpKkgoKUgoKCkpKSkqKkopK2kpKSkqKStoKCkoKCpAACFJKCgpKCgpKSgpSCgoKmkpKSkoKCksiCAAsYgoKCgoKCgoKCgqaCguaigoKCgpSCuKKklIKCgoKCuIKCgriCgoKUuIKmggAIBpSCgoKClA==", "60-63:1;64-67:2;85-85:1;87-87:2;89-89:3;90-90:4;93-93:5;95-95:6;110-110:7;112-112:8;114-114:9;116-116:10;118-118:11;119-119:12;119-119:12.1;123-125:13;126-128:14;130-130:15;131-133:16;132-132:16.1;134-134:17;137-139:18;140-142:19;145-147:20;148-150:21;153-155:22;156-158:23;165-167:24;196-198:25;199-201:26;280-282:27;283-286:28;292-295:29;314-329:30;375-384:1", "124=crypto.Hash.New;127=crypto.Hash.New;132=crypto.Hash.New;134=crypto.Hash.New;138=crypto.Hash.New;141=crypto.Hash.New;146=crypto.Hash.New;149=crypto.Hash.New;154=crypto.Hash.New;157=crypto.Hash.New", "", "", "562:21,563:13")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

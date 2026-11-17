@@ -130,7 +130,7 @@ A `go` or `defer` argument that stays in the capture list claims no field either
 
 **The cost is design time, and it grows with the sites.** To find each call's callee, the generator binds every call that passes a bare literal to an `any` slot. A generator that binds re-runs on every change to the compilation. So in an IDE, each edit re-binds the `any`-slot literal calls of every file that has one, not only the edited file. That is also what lets `GO2CS0006` see an overload added in another file. A file with no such call pays nothing, because the generator decides that from syntax alone. A build pays the same binding once, and the compiler reuses most of it. For a large project that is IDE-heavy or performance-critical, `-hoist-literals` narrows it: a literal whose words name it takes a pre-boxed field, so only a literal whose name would be degenerate (`"/"`, `"%v"`) still reaches the generator.
 
-**A hoisting package that boxes nothing says so, and the generator skips it.** The converter writes `[assembly: GoHoistedLiterals]` (golib) into the info file of a hoist-mode package that passes no bare literal to an `any` slot: `package_info.cs`, and `package_test_info.cs` for its test assembly, never `package_info_internal_test.cs`, which the same test assembly also compiles. A hoist-mode package whose degenerate-name fallback leaves a bare literal in an interceptable `any` slot carries no stamp, so the interceptor runs; in the standard library that is 8 packages per target (`encoding/gob`, `flag`, `go/ast`, `go/types`, `net/rpc`, `reflect`, `runtime/pprof`, `testing/slogtest`). A test assembly's stamp is one decision over every test variant it compiles. The stamp is regenerated on every write, so it never outlives the flag. The generator finds the stamp from syntax and drops the assembly's files before any semantic step, so a stamped package runs no transform at all, even for a file with a call such as `panic("…")`, whose literal argument goes to a parameter that takes a C# string on purpose. The stamp only skips work: a bare literal in an `any` slot of a stamped assembly would still be `GO2CS0004`, a build error. `hoistedLiteralsStamp_test.go` covers the converter's side, and GenTests' `AStampedAssemblyRunsNoTransform` covers the generator.
+**A hoisting package that boxes nothing says so, and the generator skips it.** The converter writes `[assembly: GoHoistedLiterals]` (golib) into the info file of a hoist-mode package that passes no bare literal to an `any` slot: `package_info.cs`, and `package_test_info.cs` for its test assembly, never `package_info_internal_test.cs`, which the same test assembly also compiles. A hoist-mode package whose degenerate-name fallback leaves a bare literal in an interceptable `any` slot carries no stamp, so the interceptor runs; in the standard library that is a handful of packages per target, among them `encoding/gob`, `flag`, `go/ast`, `go/types`, `net/rpc`, `reflect`, `runtime/pprof` and `testing/slogtest`.<!-- 2026-11-15 (user-facing docs audit, seat 3b): was "8 packages per target", an exact corpus figure no standing process re-measures. --> A test assembly's stamp is one decision over every test variant it compiles. The stamp is regenerated on every write, so it never outlives the flag. The generator finds the stamp from syntax and drops the assembly's files before any semantic step, so a stamped package runs no transform at all, even for a file with a call such as `panic("…")`, whose literal argument goes to a parameter that takes a C# string on purpose. The stamp only skips work: a bare literal in an `any` slot of a stamped assembly would still be `GO2CS0004`, a build error. `hoistedLiteralsStamp_test.go` covers the converter's side, and GenTests' `AStampedAssemblyRunsNoTransform` covers the generator.
 
 `plainStringLiterals_test.go` (`TestPlainLiteralsAtInterceptableAnySlots`, `TestAnySlotsGoInterceptorsCannotReachKeepTheHoist`) covers the converter's side of the `any` slot, and GenTests' `LiteralInterceptorGeneratorTests` covers the generator, building and running each shape.
 
@@ -268,8 +268,8 @@ private static readonly @string trueˢᵇ = "true"u8;
 
 Every use still reads `trueˢ`, so `FormatBool`'s body is unchanged. In the same mode (the standard library, and any
 package converted with `-hoist-literals`), local string constants, package-level string constants and big constants
-take the same pair; a package converted without the flag keeps one field per constant. The example above shows the
-committed corpus, which takes the accessor at the 1.26.10.2 regeneration.
+take the same pair; a package converted without the flag keeps one field per constant. The converted standard library
+uses the accessor.
 <!-- src/go2cs/hoistedLiteralOperations.go:1737 `func structStaticReadAccessorDecl(`; the measurement:
      docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 1. -->
 
@@ -357,6 +357,8 @@ Token next = done + "-next"u8;
 ```
 
 A typed constant keeps its named type, whatever its value expression (a literal, a conversion such as `mapOp("Load")`, or a folded concatenation). It renders through the `u8` bridge, or through `(@string)` for a raw backtick value. A `:=` local keeps its declared type, and heap-boxes like any other local when its address escapes. An untyped string constant stays `@string`. The behavioral tests `NamedStringConsts`, `NamedStringDefine` and `NamedStringConcat` cover these.
+
+An integer converted to a named string type yields the UTF-8 encoding of that code point, as `string(i)` does. The wrapper converts only from `@string`, so the conversion takes the unnamed form's steps (an untyped constant's default type, a named integer's underlying type), then `@string`, then the named cast: github.com/ncruces/go-strftime's `literalErr(b)` for a byte `b` is `(literalErr)(@string)b`. The behavioral test `IntegerToNamedString` covers byte, rune, int, uint16, a named byte, a sum and constants.
 
 ## `sstring`: a string view that allocates nothing
 
@@ -465,16 +467,18 @@ Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
 
 A converting package reads the record, or the embedded standard-library metadata under `-recurse=nuget`, and renders its func values of `fmt.Sprintf` as `fmt.Sprintfᶠ`. The section is omitted when a package has no twins.
 
-**The list.** Twins are an explicit registry, `sstringTwins` in `sstringTwinOperations.go`, keyed `"<pkgPath>.<Func>"` or `"<pkgPath>.<Recv>.<method>"` and listing the twinned parameter indices. It holds fmt's format parameters and the helpers they pass them to, plus `unicode/utf8`'s `DecodeRuneInString` and `RuneCountInString`: 32 parameters in 29 functions. The converter refuses an entry (`validateSStringTwin`) that:
+**The list.** Twins are an explicit registry, `sstringTwins` in `sstringTwinOperations.go`, keyed `"<pkgPath>.<Func>"` or `"<pkgPath>.<Recv>.<method>"` and listing the twinned parameter indices. It holds fmt's format parameters and the helpers they pass them to, plus `unicode/utf8`'s `DecodeRuneInString`, the `decodeRuneInStringSlow` it passes its input to, and `RuneCountInString`: 34 parameters in 31 functions. The converter refuses an entry (`validateSStringTwin`) that:
 - is hand-owned, has no body, or is generic;
 - registers an index that is out of range or is the variadic tail;
 - has a registered parameter that is not `string`;
 - has a blank parameter (`_` or unnamed), which the `@string` forwarder could not pass on;
 - captures a registered parameter in a closure, or uses it in a `defer` or `go` statement;
-- binds a registered parameter to a local, because the implicit `sstring` → `@string` conversion would copy silently.
+- binds a registered parameter to a local, because the implicit `sstring` → `@string` conversion would copy silently;
+- passes a registered parameter to a function in the same package, or to a func value, that is not a twin at that index, because the callee takes an `@string` and every call would copy. A call into another package is admitted: that callee's `@string` parameter is its own package's contract.
 
 **Guards.**
 - `TestSStringTwinEmission` covers the emission, the value sites (bare and cross-package), the defer and go forms, and the records.
+- The `TestSStringTwinCallRule*` tests refuse a same-package copy and a func value, and admit a twin callee and a callee in another package.
 - `TestNoSStringTwinMethodGroupInCorpus` fails on any method-group use of a twin in `src/core` or the behavioral goldens.
 - The behavioral test `SStringTwinPilot` compares every call form, value site, identity and name against Go.
 

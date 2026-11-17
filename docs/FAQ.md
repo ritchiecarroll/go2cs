@@ -31,22 +31,26 @@ to choose.
 ## Does converted code really behave like Go?
 
 That is measured, not claimed. Each standard-library package's own Go test suite is converted to C#, run,
-and compared with `go test`, verdict for verdict, on Windows and Linux. A difference is never hidden: it
+and compared with `go test`, verdict for verdict, on Windows, Linux and macOS. A difference is never hidden: it
 is disclosed by name, with its reason, on the package's row in
 [Validated Test Packages](ValidatedTestPackages.md).
 [What "validated" means, and what it doesn't](Limitations.md#what-validated-means-and-what-it-doesnt)
 says what that proves.
 
-Some things do differ, and you should know them before you start. A goroutine is an operating-system
-thread, so thousands are fine and hundreds of thousands are not. A deadlock usually hangs where Go would
+Some things do differ, and you should know them before you start. By default a goroutine is an
+operating-system thread, so thousands are fine and hundreds of thousands are not. A deadlock usually hangs where Go would
 report it. A goroutine's stack does not grow.
 [What converts, but doesn't behave exactly like Go](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)
 lists them all.
 
 ## What does not convert?
 
-- **cgo.** A package that imports `"C"` is refused, by name, and the run stops
-  ([the plan](Roadmap.md#cgo)).
+- **Most of cgo.** `go2cs -cgo` converts a package whose C uses are calls of C library functions, on
+  a machine with a C compiler. It was measured on linux/amd64, darwin/amd64, darwin/arm64 and
+  windows/amd64.
+  Other C uses are refused, by name, with the phase that covers them: Go memory handed to C, C code
+  written inline in the Go file, and callbacks into Go. Without `-cgo`, a package that imports `"C"`
+  stops the run ([what converts, and what comes next](Roadmap.md#cgo)).
 - **Hand-written assembly.** A function whose body lives in a `.s` file becomes a stub that throws when
   it is called. Many libraries ship a pure-Go fallback behind a build tag, and converting with that tag
   is the usual answer.
@@ -54,7 +58,8 @@ lists them all.
 - **One form of generic type alias**, an alias of an anonymous struct or interface.
 - **A generic call over a pointer element whose constraint shares the element's storage.** `Walk[*Node]`
   under `Walk[N Tree[N]]`, where `Children()` returns `[]N`, is refused with `GO2CS2002`, naming the site
-  and the method. The same code over a value element converts.
+  and the method. The same code over a value element converts. Two related shapes are refused as
+  `GO2CS2005` and `GO2CS2006` ([diagnostic codes](DiagnosticCodes.md)).
 
 [What won't make the trip](Limitations.md#what-wont-make-the-trip) has the detail and the workarounds.
 
@@ -66,9 +71,9 @@ Exactly one Go release and one .NET release at a time, both named in the README'
 
 ## Which platforms are supported?
 
-Windows and Linux on x64, where the converted standard library is validated against Go's own tests.
-macOS, on Intel and Apple silicon, has packages; a row on the [roster](ValidatedTestPackages.md) shows a
-macOS count once its package validates there. One conversion targets one operating system, so you convert
+Windows on x64, Linux on x64 and Arm64, and macOS on Intel and Apple silicon: the converted standard
+library is validated against Go's own tests on each, and the [roster](ValidatedTestPackages.md) shows
+each package's counts. One conversion targets one operating system, so you convert
 once for each. [Platforms](Roadmap.md#platforms) has the rest.
 
 ## What does the generated C# look like?

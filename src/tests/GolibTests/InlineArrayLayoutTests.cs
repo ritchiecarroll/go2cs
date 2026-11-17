@@ -43,6 +43,45 @@ public class InlineArrayLayoutTests
         }
     }
 
+    // C1's stop line S2: S22 with its carrier DELETED from the declaration. Without the converter's stamp the gate derives
+    // Go's alignment from this declaration and passes it; the stamp (go/types: size 202, alignment 2) still says 2.
+    [GoInlineLayout(Size = 202, Align = 2)]
+    [StructLayout(LayoutKind.Explicit, Size = 202)]
+    private struct S22Deleted : IGoManagedLayout
+    {
+        [FieldOffset(0)] public array201<sbyte> Fa;
+        [FieldOffset(201)] public array1<byte> F__ccgo_pad2;
+
+        GoManagedLayout IGoManagedLayout.ManagedLayout
+        {
+            get
+            {
+                S22Deleted probe = default;
+                return new(["Fa", "F__ccgo_pad2"], [GoManagedLayout.OffsetOf(in probe, in probe.Fa), GoManagedLayout.OffsetOf(in probe, in probe.F__ccgo_pad2)],
+                    Unsafe.SizeOf<S22Deleted>(), GoManagedLayout.AlignmentOf<S22Deleted>());
+            }
+        }
+    }
+
+    // ...held by value, as the converter lays it out: S at Go's offset 2, size 204, alignment 2.
+    [GoInlineLayout(Size = 204, Align = 2)]
+    [StructLayout(LayoutKind.Explicit, Size = 204)]
+    private struct HoldsS22Deleted : IGoManagedLayout
+    {
+        [FieldOffset(0)] public byte B;
+        [FieldOffset(2)] public S22Deleted S;
+
+        GoManagedLayout IGoManagedLayout.ManagedLayout
+        {
+            get
+            {
+                HoldsS22Deleted probe = default;
+                return new(["B", "S"], [GoManagedLayout.OffsetOf(in probe, in probe.B), GoManagedLayout.OffsetOf(in probe, in probe.S)],
+                    Unsafe.SizeOf<HoldsS22Deleted>(), GoManagedLayout.AlignmentOf<HoldsS22Deleted>());
+            }
+        }
+    }
+
     // struct{ B byte; S S22 }: Go puts S at 2, size 204.
     [StructLayout(LayoutKind.Explicit)]
     private struct HoldsS22 : IGoManagedLayout
@@ -215,6 +254,35 @@ public class InlineArrayLayoutTests
         Assert.AreEqual("S22NoCarrier aligns to 1 in the CLR where Go aligns it to 2", GoReflect.InlineLayoutMismatch(typeof(S22NoCarrier)));
         Assert.AreEqual("HoldsS22NoCarrier.S is at CLR offset 1 where Go lays it at 2", GoReflect.InlineLayoutMismatch(typeof(HoldsS22NoCarrier)));
         Assert.AreEqual("S22NoCarrier aligns to 1 in the CLR where Go aligns it to 2", GoReflect.ClrLayoutMismatch(typeof(S22NoCarrier)));
+    }
+
+    [TestMethod]
+    public void TheGateNamesS22WithItsCarrierDeletedAgainstTheStamp()
+    {
+        Assert.AreEqual("S22Deleted aligns to 1 in the CLR where Go aligns it to 2", GoReflect.InlineLayoutMismatch(typeof(S22Deleted)));
+        Assert.AreEqual("S22Deleted aligns to 1 in the CLR where Go aligns it to 2", GoReflect.ClrLayoutMismatch(typeof(S22Deleted)));
+        StringAssert.Contains(GoReflect.InlineLayoutMismatch(typeof(HoldsS22Deleted)), "S22Deleted aligns to 1 in the CLR where Go aligns it to 2");
+    }
+
+    [TestMethod]
+    public unsafe void AHeldS22WithItsCarrierDeletedFailsClosedOnANativeRead()
+    {
+        byte* memory = (byte*)NativeMemory.AllocZeroed(204);
+
+        try
+        {
+            ж<HoldsS22Deleted> held = (ж<HoldsS22Deleted>)(uintptr)(nuint)memory;
+
+            PanicException panic = Assert.ThrowsException<PanicException>(() => held.Value.B,
+                "a native read of a struct holding an uncarried S22 answered instead of refusing");
+
+            StringAssert.StartsWith(panic.Message, "runtime error: cannot read native memory as ");
+            StringAssert.Contains(panic.Message, "S22Deleted aligns to 1 in the CLR where Go aligns it to 2");
+        }
+        finally
+        {
+            NativeMemory.Free(memory);
+        }
     }
 
     [TestMethod]

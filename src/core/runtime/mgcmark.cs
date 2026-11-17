@@ -261,7 +261,7 @@ internal static int64 markroot(ж<gcWork> gcw, uint32 i, bool flushBgCredit) {
         break;
     }
     case {} when i == fixedRootCleanups: {
-        for (var cb = (ж<cleanupBlock>)(uintptr)(ᏑgcCleanups.of(cleanupQueue.Ꮡall).Load()); cb != nil; cb = cb.Value.alllink) {
+        for (var cb = @unsafe.Pointer.To<cleanupBlock>(ᏑgcCleanups.of(cleanupQueue.Ꮡall).Load()); cb != nil; cb = cb.Value.alllink) {
             // N.B. This only needs to synchronize with cleanup execution, which only resets these blocks.
             // All cleanup queueing happens during sweep.
             var n = (uintptr)atomic.Load(cb.of(cleanupBlock.Ꮡn));
@@ -363,7 +363,7 @@ internal static int64 markrootBlock(uintptr b0, uintptr n0, ж<uint8> ptrmask0, 
         return 0;
     }
     var b = b0 + off;
-    var ptrmask = (ж<uint8>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(ptrmask0), (uintptr)shard * (uintptr)(rootBlockBytes / (8 * goarch.PtrSize))));
+    var ptrmask = @unsafe.Pointer.To<uint8>(add(@unsafe.Pointer.FromPinnedBox(ptrmask0), (uintptr)shard * (uintptr)(rootBlockBytes / (8 * goarch.PtrSize))));
     var n = (uintptr)rootBlockBytes;
     if (off + n > n0) {
         n = n0 - off;
@@ -1589,7 +1589,7 @@ internal static void scanblock(uintptr b0, uintptr n0, ж<uint8> ptrmask, ж<gcW
         for (nint j = 0; j < 8 && i < n; j++) {
             if ((bits & 1) != 0) {
                 // Same work as in scanObject; see comments there.
-                var Δp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(b + i));
+                var Δp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(b + i));
                 if (Δp != 0) {
                     if (Ꮡstk != nil && Δp >= stk.stack.lo && Δp < stk.stack.hi) {
                         Ꮡstk.putPtr(Δp, false);
@@ -1635,7 +1635,7 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> ptrmask, �
                 }
             }
 
-            var val = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)Δp);
+            var val = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)Δp);
             if (Ꮡstate != nil && Ꮡstate.Value.stack.lo <= val && val < Ꮡstate.Value.stack.hi) {
                 m.start();
                 println((@string)"ptr to stack");
@@ -1678,7 +1678,7 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> ptrmask, �
             }
         }
 
-        var val = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(b + i));
+        var val = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(b + i));
 
         // Check if val points into the stack.
         if (Ꮡstate != nil && state.stack.lo <= val && val < state.stack.hi) {
@@ -1838,7 +1838,7 @@ internal static void gcDumpObject(@string label, uintptr obj, uintptr off) {
             print((@string)" ...\n");
             skipped = false;
         }
-        print((@string)" *(", label, (@string)"+", i, (@string)") = ", (Δhex)(uint64)(~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(obj + i))));
+        print((@string)" *(", label, (@string)"+", i, (@string)") = ", (Δhex)(uint64)(~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(obj + i))));
         if (i == off) {
             print((@string)" <==");
         }

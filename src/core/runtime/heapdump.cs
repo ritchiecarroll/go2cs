@@ -53,12 +53,12 @@ internal static readonly ж<array<byte>> Ꮡbuf = new StaticBox<array<byte>>(new
 internal static ref array<byte> buf => ref ((StaticBox<array<byte>>)Ꮡbuf).ValueSlot;
 internal static uintptr nbuf;
 
-internal static unsafe void dwrite(@unsafe.Pointer data, uintptr len) {
+internal static void dwrite(@unsafe.Pointer data, uintptr len) {
     if (len == 0) {
         return;
     }
     if (nbuf + len <= bufSize) {
-        copy(buf.slice((nint)(nbuf)), new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(data), (int)(len))));
+        copy(buf.slice((nint)(nbuf)), @unsafe.Pointer.View<byte>(data, 0, (nint)(len), 4096));
         nbuf += len;
         return;
     }
@@ -68,7 +68,7 @@ internal static unsafe void dwrite(@unsafe.Pointer data, uintptr len) {
         write(dumpfd, data, (int32)len);
         nbuf = 0;
     } else {
-        copy(buf[..], new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(data), (int)(len))));
+        copy(buf[..], @unsafe.Pointer.View<byte>(data, 0, (nint)(len), 4096));
         nbuf = len;
     }
 }
@@ -259,7 +259,7 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
         // at the function prologue, assume so and hope for the best.
         pcdata = 0;
     }
-    var stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
+    var stkmap = @unsafe.Pointer.To<stackmap>(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
 
     ref var bv = ref heap(new bitvector(), out var Ꮡbv);
     if (stkmap != nil && stkmap.n > 0) {
@@ -318,9 +318,9 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
     // Record arg info for parent.
     child.argoff = s.argp - s.fp;
     child.arglen = s.argBytes();
-    child.sp = (ж<uint8>)(uintptr)((@unsafe.Pointer)s.sp);
+    child.sp = @unsafe.Pointer.To<uint8>((@unsafe.Pointer)s.sp);
     child.depth++;
-    stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
+    stkmap = @unsafe.Pointer.To<stackmap>(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
     if (stkmap != nil) {
         child.args = stackmapdata(stkmap, pcdata);
     } else {
@@ -747,7 +747,7 @@ private static readonly @string heapdumpˢᵇ = "heapdump"u8;
 internal static ref readonly @string heapdumpOutOfMemoryˢ => ref heapdumpOutOfMemoryˢᵇ;
 private static readonly @string heapdumpOutOfMemoryˢᵇ = "heapdump: out of memory"u8;
 
-internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
+internal static bitvector makeheapobjbv(uintptr Δp, uintptr size) {
     // Extend the temp buffer if necessary.
     var nptr = size / (uintptr)goarch.PtrSize;
     if ((uintptr)len(tmpbuf) < nptr / 8 + 1) {
@@ -755,11 +755,11 @@ internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
             sysFree(@unsafe.Pointer.FromPinnedBox(Ꮡ(tmpbuf, 0)), (uintptr)len(tmpbuf), Ꮡmemstats.Ꮡother_sys);
         }
         var n = nptr / 8 + 1;
-        @unsafe.Pointer pΔ1 = (uintptr)sysAlloc(n, Ꮡmemstats.Ꮡother_sys, heapdumpˢ);
+        @unsafe.Pointer pΔ1 = sysAlloc(n, Ꮡmemstats.Ꮡother_sys, heapdumpˢ);
         if (pΔ1 == nil) {
             @throw(heapdumpOutOfMemoryˢ);
         }
-        tmpbuf = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(pΔ1), (int)(n)));
+        tmpbuf = @unsafe.Pointer.View<byte>(pΔ1, 0, (nint)(n), 1073741824);
     }
     // Convert heap bitmap to pointer bitmap.
     builtin.clear(tmpbuf.slice(0, (nint)(nptr / 8 + 1)));

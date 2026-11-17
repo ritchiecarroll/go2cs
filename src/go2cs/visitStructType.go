@@ -197,6 +197,17 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					(v.inFunction || !liftNameNeedsPublicType(name))
 			}
 
+			// An IMPORTED package's public lift of an identical struct (importedStructLift): Go calls the
+			// two one type, so this package declares none of its own. The name is public in its own
+			// assembly, so no accessibility test of this package's applies.
+			if !admissible {
+				if st, ok := structSignatureType.(*types.Struct); ok {
+					if imported := v.importedStructLift(st); imported != "" {
+						existing, admissible = imported, true
+					}
+				}
+			}
+
 			if admissible {
 				if identType != nil {
 					v.liftedTypeMap[identType] = existing
@@ -649,6 +660,15 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				fieldInitializer = fmt.Sprintf(" = new(%s)", v.arrayZeroValueArgs(lengthExpr, fieldType))
 			}
+		} else if _, isAlias := fieldType.(*types.Alias); isAlias {
+			// The same field spelled through an ALIAS of an unnamed array (`FP TBF_key` with `type TBF_key =
+			// [18]TBF_word`, libc's crypt_blowfish) is an array field all the same, and its Go zero carries the length
+			// too. Without the initializer it kept default(array<T>), length 0: Go's c.FP[0] read an empty array, and
+			// golib measured the field's dims as [0] (B2's probe: a decoded TBF_ctx with an empty FP). The length is
+			// the alias's constant. A DEFINED array type is a go2cs-gen wrapper holding its own length: not this.
+			if array, ok := types.Unalias(fieldType).(*types.Array); ok {
+				fieldInitializer = fmt.Sprintf(" = new(%s)", v.arrayZeroValueArgs(fmt.Sprintf("%d", array.Len()), fieldType))
+			}
 		}
 
 		// A DIRECTIONAL channel FIELD carries its direction the same way an array field carries its
@@ -658,6 +678,44 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		// channel VALUE to measure and no attribute to consult, only the zero the field declares.
 		if chanInitializer := v.chanDirNilValue(fieldType); chanInitializer != "" {
 			fieldInitializer = " = " + chanInitializer
+		}
+
+		// An array field of a struct admitted to inline arrays (the layout arc's inline mode, zeroSizeFieldLayout.go):
+		// a nonzero [N]T is the go.arrays member array<N><T>, held in the struct, so it takes no initializer; a [0]T is a
+		// readonly primitive of T's alignment, an alignment carrier that names the array<T> it stands for.
+		var carrierAttr string
+
+		if hasZeroSizeLayout && zeroSizeLayout.inline {
+			if array, ok := fieldType.Underlying().(*types.Array); ok {
+				fieldInitializer = ""
+				v.addRequiredUsing("go.golib")
+
+				if array.Len() == 0 {
+					// The attribute names the Go field's type. For a [0][N]T, the element [N]T is named as the go.arrays
+					// member arrayN<T>, the same type a nonzero [N]T field of this struct takes, because golib reads the
+					// element's length from the member: array<array<T>> dropped N, so golib could not place the struct
+					// (W15, COORD 2026-11-15: libc's in6 statics and sqlite's TBitvec, on every CREATE TABLE).
+					//
+					// Only an UNNAMED element is renamed (an alias is looked through): a named element (type V [4]T, a
+					// field [0]V) keeps array<V>, so reflection still names it [0]V as Go does (P3's review of W15). A
+					// second zero ([0][0]T, [0][0][N]T) keeps the old spelling too: its reflected dims stop at the
+					// second zero, which holds no bytes, so the layout is unchanged.
+					goType := csDisplayTypeName
+
+					if inner, ok := types.Unalias(array.Elem()).(*types.Array); ok && inner.Len() > 0 {
+						goType = fmt.Sprintf("array<%s>", v.inlineArrayTypeName(inner))
+						v.addRequiredUsing("go.arrays")
+					}
+
+					carrierAttr = fmt.Sprintf("[GoAlignmentCarrier(typeof(%s))] ", goType)
+					csDisplayTypeName = v.alignmentCarrierType(array.Elem())
+				} else {
+					csDisplayTypeName = v.inlineArrayTypeName(array)
+					v.addRequiredUsing("go.arrays")
+				}
+
+				displayLenDeviation = token.Pos(len(csDisplayTypeName) - len(goDisplayTypeName))
+			}
 		}
 
 		if field.Names == nil {
@@ -1064,7 +1122,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 					layoutFieldIndex++
 
-					v.writeString(target, "%s%s %s%s%s %s%s;%s", offsetAttr, getAccess(ident.Name), readOnly, fieldDimsComment, csDisplayTypeName, fieldName, fieldInitializer, tagComment)
+					v.writeString(target, "%s%s%s %s%s%s %s%s;%s", offsetAttr, carrierAttr, getAccess(ident.Name), readOnly, fieldDimsComment, csDisplayTypeName, fieldName, fieldInitializer, tagComment)
 					v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+displayLenDeviation))
 					target.WriteString(v.newline)
 				}

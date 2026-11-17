@@ -199,14 +199,14 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref tab
         while (match != 0) {
             var i = match.first();
 
-            @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+            @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             if (typ.IndirectKey()) {
-                slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
+                slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
             }
             if (typ.Key.Equal(key, slotKey)) {
-                @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
+                @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
                 if (typ.IndirectElem()) {
-                    slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
+                    slotElem = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value;
                 }
                 return (slotKey, slotElem, true);
             }
@@ -235,14 +235,14 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi�
         while (match != 0) {
             var i = match.first();
 
-            @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+            @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             if (typ.IndirectKey()) {
-                slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
+                slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
             }
             if (typ.Key.Equal(key, slotKey)) {
-                @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
+                @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
                 if (typ.IndirectElem()) {
-                    slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
+                    slotElem = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value;
                 }
                 return (slotElem, true);
             }
@@ -286,18 +286,18 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
         while (match != 0) {
             var iΔ1 = match.first();
 
-            @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, iΔ1);
+            @unsafe.Pointer slotKey = g.key(Ꮡtyp, iΔ1);
             if (typ.IndirectKey()) {
-                slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
+                slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
             }
             if (typ.Key.Equal(key, slotKey)) {
                 if (typ.NeedKeyUpdate()) {
                     typedmemmove(typ.Key, slotKey, key);
                 }
 
-                @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, iΔ1);
+                @unsafe.Pointer slotElem = g.elem(Ꮡtyp, iΔ1);
                 if (typ.IndirectElem()) {
-                    slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
+                    slotElem = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value;
                 }
 
                 t.checkInvariants(Ꮡtyp, Ꮡm);
@@ -340,18 +340,18 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
 
         // If there is room left to grow, just insert the new entry.
         if (t.growthLeft > 0) {
-            @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+            @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             if (typ.IndirectKey()) {
-                @unsafe.Pointer kmem = (uintptr)newobject(typ.Key);
-                ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = kmem;
+                @unsafe.Pointer kmem = newobject(typ.Key);
+                (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = kmem;
                 slotKey = kmem;
             }
             typedmemmove(typ.Key, slotKey, key);
 
-            @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
+            @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
-                @unsafe.Pointer emem = (uintptr)newobject(typ.Elem);
-                ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = emem;
+                @unsafe.Pointer emem = newobject(typ.Elem);
+                (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value = emem;
                 slotElem = emem;
             }
 
@@ -404,16 +404,16 @@ internal static void uncheckedPutSlot(this ref table t, ж<abiꓸMapType> Ꮡtyp
         if (match != 0) {
             var i = match.first();
 
-            @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+            @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             if (typ.IndirectKey()) {
-                ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = key;
+                (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = key;
             } else {
                 typedmemmove(typ.Key, slotKey, key);
             }
 
-            @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
+            @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
-                ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = elem;
+                (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value = elem;
             } else {
                 typedmemmove(typ.Elem, slotElem, elem);
             }
@@ -440,10 +440,10 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
         while (match != 0) {
             var i = match.first();
 
-            @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+            @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             @unsafe.Pointer origSlotKey = slotKey;
             if (typ.IndirectKey()) {
-                slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
+                slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
             }
 
             if (typ.Key.Equal(key, slotKey)) {
@@ -452,17 +452,17 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
 
                 if (typ.IndirectKey()) {
                     // Clearing the pointer is sufficient.
-                    ((ж<@unsafe.Pointer>)(uintptr)(origSlotKey)).Value = default;
+                    (@unsafe.Pointer.To<@unsafe.Pointer>(origSlotKey)).Value = default;
                 } else if (typ.Key.Pointers()) {
                     // Only bothing clear the key if there
                     // are pointers in it.
                     typedmemclr(typ.Key, slotKey);
                 }
 
-                @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
+                @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
                 if (typ.IndirectElem()) {
                     // Clearing the pointer is sufficient.
-                    ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = default;
+                    (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value = default;
                 } else {
                     // Unlike keys, always clear the elem (even if
                     // it contains no pointers), as compound
@@ -537,9 +537,9 @@ internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp,
         while (match != 0) {
             var j = match.first();
             match = match.removeFirst();
-            @unsafe.Pointer key = (uintptr)g.key(Ꮡtyp, j);
+            @unsafe.Pointer key = g.key(Ꮡtyp, j);
             if (typ.IndirectKey()) {
-                key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
             }
             if (!typ.Key.Equal(key, key)) {
                 // Key not equal to itself. We never have to find these
@@ -798,9 +798,9 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) grownKeyElem(this ref I
         // need to return anything added after
         // clear.
         if (it.clearSeq == it.m.clearSeq && !(~it.typ).Key.Equal(key, key)) {
-            @unsafe.Pointer elem = (uintptr)it.group.elem(it.typ, slotIdx);
+            @unsafe.Pointer elem = it.group.elem(it.typ, slotIdx);
             if (it.typ.IndirectElem()) {
-                elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
             }
             return (key, elem, true);
         }
@@ -846,9 +846,9 @@ public static void Next(this ref Iter it) {
                 continue;
             }
 
-            @unsafe.Pointer key = (uintptr)it.group.key(it.typ, k);
+            @unsafe.Pointer key = it.group.key(it.typ, k);
             if (it.typ.IndirectKey()) {
-                key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
             }
 
             // As below, if we have grown to a full map since Init,
@@ -863,9 +863,9 @@ public static void Next(this ref Iter it) {
                 if (!ok) {
                     // See comment below.
                     if (it.clearSeq == it.m.clearSeq && !(~it.typ).Key.Equal(key, key)) {
-                        elem = (uintptr)it.group.elem(it.typ, k);
+                        elem = it.group.elem(it.typ, k);
                         if (it.typ.IndirectElem()) {
-                            elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                            elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
                         }
                     } else {
                         continue;
@@ -875,9 +875,9 @@ public static void Next(this ref Iter it) {
                     elem = newElem;
                 }
             } else {
-                elem = (uintptr)it.group.elem(it.typ, k);
+                elem = it.group.elem(it.typ, k);
                 if (it.typ.IndirectElem()) {
-                    elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                    elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
                 }
             }
 
@@ -989,9 +989,9 @@ public static void Next(this ref Iter it) {
         if (((ctrl)(it.group.ctrls().get(slotIdx) & ctrlEmpty)) == 0) {
             // Slot full.
 
-            @unsafe.Pointer key = (uintptr)it.group.key(it.typ, slotIdx);
+            @unsafe.Pointer key = it.group.key(it.typ, slotIdx);
             if (it.typ.IndirectKey()) {
-                key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
             }
 
             var grown = it.tab.index == -1;
@@ -1008,9 +1008,9 @@ public static void Next(this ref Iter it) {
                     elem = newElem;
                 }
             } else {
-                elem = (uintptr)it.group.elem(it.typ, slotIdx);
+                elem = it.group.elem(it.typ, slotIdx);
                 if (it.typ.IndirectElem()) {
-                    elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                    elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
                 }
             }
 
@@ -1082,9 +1082,9 @@ next:
                 slotIdxΔ1 = i;
             }
 
-            @unsafe.Pointer key = (uintptr)it.group.key(it.typ, slotIdxΔ1);
+            @unsafe.Pointer key = it.group.key(it.typ, slotIdxΔ1);
             if (it.typ.IndirectKey()) {
-                key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
             }
 
             // If the table has changed since the last
@@ -1123,9 +1123,9 @@ next:
                     elem = newElem;
                 }
             } else {
-                elem = (uintptr)it.group.elem(it.typ, slotIdxΔ1);
+                elem = it.group.elem(it.typ, slotIdxΔ1);
                 if (it.typ.IndirectElem()) {
-                    elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                    elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
                 }
             }
 
@@ -1217,14 +1217,14 @@ internal static void split(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<ΔM
                 continue;
             }
 
-            @unsafe.Pointer key = (uintptr)g.key(Ꮡtyp, j);
+            @unsafe.Pointer key = g.key(Ꮡtyp, j);
             if (typ.IndirectKey()) {
-                key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
             }
 
-            @unsafe.Pointer elem = (uintptr)g.elem(Ꮡtyp, j);
+            @unsafe.Pointer elem = g.elem(Ꮡtyp, j);
             if (typ.IndirectElem()) {
-                elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
             }
 
             var hash = typ.Hasher(key, m.seed);
@@ -1261,14 +1261,14 @@ internal static void grow(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
                     continue;
                 }
 
-                @unsafe.Pointer key = (uintptr)g.key(Ꮡtyp, j);
+                @unsafe.Pointer key = g.key(Ꮡtyp, j);
                 if (typ.IndirectKey()) {
-                    key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                    key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
                 }
 
-                @unsafe.Pointer elem = (uintptr)g.elem(Ꮡtyp, j);
+                @unsafe.Pointer elem = g.elem(Ꮡtyp, j);
                 if (typ.IndirectElem()) {
-                    elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                    elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
                 }
 
                 var hash = typ.Hasher(key, m.seed);

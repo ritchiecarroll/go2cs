@@ -5161,7 +5161,7 @@ internal static partial void serve(this ж<http2serverConn> Ꮡsc, http2http2Con
             }
             case 4 when selᴛ16.ꟷᐳ(out var msg): {
                 switch (msg.type()) {
-                case Action<nint> v: {
+                case {} Δv when Δv._<Action<nint>>(out var v): {
                     v(loopNum); // for testing
                     break;
                 }
@@ -5202,7 +5202,7 @@ internal static partial void serve(this ж<http2serverConn> Ꮡsc, http2http2Con
                     Ꮡsc.startPush(v);
                     break;
                 }
-                case Action<ж<http2serverConn>> v: {
+                case {} Δv when Δv._<Action<ж<http2serverConn>>>(out var v): {
                     v(Ꮡsc);
                     break;
                 }
@@ -6494,7 +6494,7 @@ internal static error processHeaders(this ж<http2serverConn> Ꮡsc, ж<http2Met
         st.readDeadline = time.AfterFunc(sc.hs.ReadTimeout, st.onReadTimeout);
     }
 
-    return Ꮡsc.scheduleHandler(st, rw, req, new Action<ResponseWriter, ж<Request>>(handler));
+    return Ꮡsc.scheduleHandler(st, rw, req, NilSafeDelegateConversion<Action<ResponseWriter, ж<Request>>, HandlerFunc>(handler));
 }
 
 internal static partial void upgradeRequest(this ж<http2serverConn> Ꮡsc, ж<Request> Ꮡreq) {

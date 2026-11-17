@@ -84,7 +84,7 @@ public class RuntimePanicCheckTests
         Assert.AreEqual($"{typeof(RuntimePanicCheckTests).FullName}.{nameof(ThrowHere)}", frame);
     }
 
-    // From 1.26.10.4 the forwarders of a struct's same-package promoted methods are in a class of the struct's own,
+    // From 1.26.11.1 the forwarders of a struct's same-package promoted methods are in a class of the struct's own,
     // `<pkg>ᴛ<Struct>ᴛpkg`, and no longer in the package class. Go names a promoted method's wrapper runtime.*, and
     // the forwarder's frame is the one the walk meets when the JIT inlines the promoted method into it (a .NET trace
     // has no frame for an inlined method). The reader has names only, so the class is read by its name's form.

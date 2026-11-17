@@ -1,0 +1,29 @@
+files: 3531
+cast: 919
+    680  runtime
+    135  internal
+     58  reflect
+     31  syscall
+      8  net
+      3  crypto
+      2  golib
+      1  time
+      1  unsafe
+overAdd: 12
+      8  internal
+      3  runtime
+      1  syscall
+fromRef: 41
+     22  runtime
+     11  internal
+      4  syscall
+      3  reflect
+      1  sync
+fromRef+: 7
+  src/core/internal/abi/abi.cs:103
+  src/core/runtime/darwin/malloc.cs:2575
+  src/core/runtime/linux-amd64/malloc.cs:2575
+  src/core/runtime/linux-arm64/malloc.cs:2575
+  src/core/runtime/windows/malloc.cs:2575
+  src/core/syscall/darwin/sockcmsg_unix.cs:28
+  src/core/syscall/linux/sockcmsg_unix.cs:28

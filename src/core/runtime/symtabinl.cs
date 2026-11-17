@@ -65,11 +65,11 @@ partial struct inlineFrame {
 //
 //go:linkname newInlineUnwinder
 internal static (inlineUnwinder, inlineFrame) newInlineUnwinder(ΔfuncInfo f, uintptr pc) {
-    @unsafe.Pointer inldata = (uintptr)funcdata(f, abi.FUNCDATA_InlTree);
+    @unsafe.Pointer inldata = funcdata(f, abi.FUNCDATA_InlTree);
     if (inldata == nil) {
         return (new inlineUnwinder(f: f), new inlineFrame(pc: pc, index: -1));
     }
-    var inlTree = (ж<array<inlinedCall>>)(uintptr)(inldata);
+    var inlTree = @unsafe.Pointer.To<array<inlinedCall>>(inldata);
     var u = new inlineUnwinder(f: f, inlTree: inlTree);
     var ᴛ1 = u.resolveInternal(pc);
     return (u, ᴛ1);

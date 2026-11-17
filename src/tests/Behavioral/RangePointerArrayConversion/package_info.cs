@@ -49,12 +49,13 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("RangePointerArrayConversion.go", "RangePointerArrayConversion.cs", "AAcQgoKChIKU")]
+[assembly: GoPositionMap("RangePointerArrayConversion.go", "RangePointerArrayConversion.cs", "AAcQgoKChIKUmoKCgqKU")]
 // </GoSourcePositionMaps>
 
 namespace go;
 
 [GoPackage("main")]
+[GoTestMatchingConsoleOutput]
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the

@@ -920,6 +920,9 @@ internal static (nint n, error err) Read(this ж<body> Ꮡb, slice<byte> p) {
     try {
         ref var b = ref Ꮡb.DerefOrNull();
 
+        if (Ꮡb == nil) {
+            (n, err) = (0, io.EOF); goto ᒐdone;
+        }
         b.mu.Lock();
         defer(Ꮡb.Ꮡmu.Unlock, ref ᒐ);
         if (b.closed) {
@@ -1079,6 +1082,9 @@ internal static error Close(this ж<body> Ꮡb) {
     try {
         ref var b = ref Ꮡb.DerefOrNull();
 
+        if (Ꮡb == nil) {
+            return default;
+        }
         b.mu.Lock();
         ᒐd1 = true;
         if (b.closed) {
@@ -1106,12 +1112,14 @@ internal static error Close(this ж<body> Ꮡb) {
                 int64 n = default;
                 // Consume the body, or, which will also lead to us reading
                 // the trailer headers after the body, if present.
-                (n, err) = io.CopyN(io.Discard, new bodyLocked(Ꮡb), maxPostHandlerReadBytes);
-                if (AreEqual(err, io.EOF)) {
+                (n, err) = io.CopyN(io.Discard, new bodyLocked(Ꮡb), maxPostHandlerReadBytes + 1);
+                b.earlyClose = true;
+                if (AreEqual(err, io.EOF) && n <= maxPostHandlerReadBytes) {
+                    b.earlyClose = false;
+                    b.sawEOF = true;
+                    // Reaching the end of the body is the expected
+                    // outcome here, not an error to report to the caller.
                     err = default;
-                }
-                if (n == maxPostHandlerReadBytes) {
-                    b.earlyClose = true;
                 }
             }
             break;
@@ -1151,6 +1159,9 @@ internal static bool bodyRemains(this ж<body> Ꮡb) {
     try {
         ref var b = ref Ꮡb.DerefOrNull();
 
+        if (Ꮡb == nil) {
+            return false;
+        }
         b.mu.Lock();
         ᒐd1 = true;
         return !b.sawEOF;
@@ -1165,6 +1176,9 @@ internal static void registerOnHitEOF(this ж<body> Ꮡb, Action fn) {
     try {
         ref var b = ref Ꮡb.DerefOrNull();
 
+        if (Ꮡb == nil) {
+            return;
+        }
         b.mu.Lock();
         ᒐd1 = true;
         b.onHitEOF = fn;

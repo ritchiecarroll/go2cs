@@ -320,12 +320,13 @@ internal static class Go2CsTestHost
         registry.Add("TestDialListenIPArgs", net_internal_test_package.TestDialListenIPArgs, "iprawsock_test.go", 130);
         registry.Add("TestDialListenerAddr", net_internal_test_package.TestDialListenerAddr, "dial_test.go", 943);
         registry.Add("TestDialLocal", net_internal_test_package.TestDialLocal, "dial_test.go", 63);
+        registry.Add("TestDialNetipInvalidRaddr", net_internal_test_package.TestDialNetipInvalidRaddr, "dial_test.go", 1160);
         registry.Add("TestDialParallel", net_internal_test_package.TestDialParallel, "dial_test.go", 179);
         registry.Add("TestDialParallelSpuriousConnection", net_internal_test_package.TestDialParallelSpuriousConnection, "dial_test.go", 385);
         registry.Add("TestDialTCPDefaultKeepAlive", net_internal_test_package.TestDialTCPDefaultKeepAlive, "tcpsock_test.go", 776);
         registry.Add("TestDialTimeout", net_internal_test_package.TestDialTimeout, "timeout_test.go", 50);
         registry.Add("TestDialTimeoutMaxDuration", net_internal_test_package.TestDialTimeoutMaxDuration, "timeout_test.go", 137);
-        registry.Add("TestDialWithNonZeroDeadline", net_internal_test_package.TestDialWithNonZeroDeadline, "dial_test.go", 1187);
+        registry.Add("TestDialWithNonZeroDeadline", net_internal_test_package.TestDialWithNonZeroDeadline, "dial_test.go", 1212);
         registry.Add("TestDialerControl", net_internal_test_package.TestDialerControl, "dial_test.go", 988);
         registry.Add("TestDialerControlContext", net_internal_test_package.TestDialerControlContext, "dial_test.go", 1033);
         registry.Add("TestDialerDualStack", net_internal_test_package.TestDialerDualStack, "dial_test.go", 641);

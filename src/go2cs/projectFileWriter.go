@@ -426,6 +426,21 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 			`<PackageReference Include="go.gen" Version="$(GoStdLibVersion)" PrivateAssets="all" />`))
 	}
 
+	// A package whose structs hold arrays inline (inlineArrayAdmission.go) compiles against the go.arrays family, golib's
+	// companion assembly. Only such a package references it, so a program that admits nothing never loads it (I0's P7).
+	// Under -recurse=nuget the go.lib package already carries go.arrays.dll beside golib.dll.
+	if !emitNuGet && packageInlineAdmission != nil && len(packageInlineAdmission.keyOrder) > 0 {
+		golibReference := `<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`
+		newline := "\n"
+
+		if strings.Contains(string(newContents), "\r\n") {
+			newline = "\r\n" // the line takes the project file's own ending
+		}
+
+		newContents = []byte(strings.Replace(string(newContents), golibReference,
+			golibReference+newline+"    "+`<ProjectReference Include="$(go2csPath)core/go.arrays/go.arrays.csproj" />`, 1))
+	}
+
 	// The published NuGet package carries its own audit sheet: a validated package's versioned
 	// validation proof page is packed as VALIDATION.md, so whoever extracts the .nupkg holds the
 	// per-test differential offline. Only the stdlib self-conversion has a docs/validation tree to

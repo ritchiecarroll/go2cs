@@ -96,6 +96,10 @@
 // NON-partial: the registry displacement leaves a comment placeholder in sys_libc.cs, not a bodyless
 // partial, so this file owns the whole declaration — the nanotime_impl.cs shape beside it.
 [module: go.GoManualConversion]
+// UNSAFE: this file's own code needs /unsafe, so it says so: the converter raises runtime.csproj's
+// <AllowUnsafeBlocks> on a hand-owned declaration (projectFileWriter.go allowUnsafeBlocks), and it no longer
+// emits an unsafe function in this package that would raise it by accident.
+[module: go.GoRequiresUnsafe]
 
 namespace go;
 

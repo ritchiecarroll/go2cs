@@ -151,6 +151,7 @@ internal static ref readonly @string mlkemInvalidSeedLengthˢ => ref mlkemInvali
 private static readonly @string mlkemInvalidSeedLengthˢᵇ = "mlkem: invalid seed length"u8;
 
 internal static (ж<DecapsulationKey1024>, error) newKeyFromSeed1024(ж<DecapsulationKey1024> dk, slice<byte> seed) {
+    fipsSelfTest();
     if (len(seed) != SeedSize) {
         return (default, errors.New(mlkemInvalidSeedLengthˢ));
     }

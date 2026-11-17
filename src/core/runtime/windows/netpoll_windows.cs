@@ -77,7 +77,7 @@ internal static ж<pollOperation> pollOperationFromOverlappedEntry(ref overlappe
     if (goarch.PtrSize == 4) {
         keyMatch = (uintptr)(e.key & ~(uintptr)(uintptr)sourceMasks) == (uintptr)op.pd << (int)(sourceBits);
     } else {
-        keyMatch = (ж<pollDesc>)(uintptr)(((taggedPointer)(uint64)e.key).pointer()) == op.pd;
+        keyMatch = @unsafe.Pointer.To<pollDesc>(((taggedPointer)(uint64)e.key).pointer()) == op.pd;
     }
     if (!keyMatch) {
         return default;

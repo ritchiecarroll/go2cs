@@ -1,0 +1,114 @@
+namespace go.example.com;
+
+using fmt = fmt_package;
+using os = os_package;
+using strconv = strconv_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+partial struct dirent {
+    internal uint64 ino;
+    internal array<int8> name = new(8);
+}
+
+partial struct wrap {
+    /*embed*/ internal dirent dirent;
+    internal nint tag;
+}
+
+internal static ж<dirent> kept = Ꮡ(new dirent(ino: 3, name: new int8[]{(int8)'c', (int8)'a', (int8)'l', (int8)'l'}.array(8)));
+
+internal static ж<dirent> get() { return kept; }
+
+internal static void @try(@string name, Func<@string> f) {
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: PANIC %v\n"u8, name, r);
+            }
+        }, ref ᒐ);
+
+        fmt.Printf("%s: %s\n"u8, name, f());
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+internal static @string trim(slice<byte> b) {
+    foreach (var (i, c) in range(b)) {
+        if (c == 0) {
+            return (@string)(b.slice(0, i));
+        }
+    }
+
+    return (@string)b;
+}
+
+internal static @string promoted() {
+    ref var w = ref heap(new wrap(), out var Ꮡw);
+    w.name = new int8[]{(int8)'p', (int8)'r', (int8)'o', (int8)'m'}.array(8);
+    var name = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡw.of(wrap.Ꮡname))).slice();
+    return trim(name);
+}
+
+internal static @string sliceElement() {
+    var ds = slice<dirent>([new(name: new int8[]{(int8)'z'}.array(8)), new(name: new int8[]{(int8)'e', (int8)'l', (int8)'e', (int8)'m'}.array(8))]);
+    var name = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡ(ds, 1).Ꮡname)).slice();
+    return trim(name);
+}
+
+internal static @string callResult() {
+    var name = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(get().Ꮡname)).slice();
+    return trim(name);
+}
+
+internal static @string promotedWrittenOut() {
+    ref var w = ref heap(new wrap(), out var Ꮡw);
+    w.name = new int8[]{(int8)'p', (int8)'r', (int8)'o', (int8)'m'}.array(8);
+    var name = @unsafe.ArrayPointer<byte>.Of(Ꮡw.Ꮡdirent.Ꮡname, 8).slice();
+    return trim(name);
+}
+
+internal static @string sliceElementThroughPointer() {
+    var ds = slice<dirent>([new(name: new int8[]{(int8)'z'}.array(8)), new(name: new int8[]{(int8)'e', (int8)'l', (int8)'e', (int8)'m'}.array(8))]);
+    var p = Ꮡ(ds, 1);
+    var name = @unsafe.ArrayPointer<byte>.Of(p.Ꮡname, 8).slice();
+    name[0] = (byte)'E';
+    return trim(name) + " "u8 + fmt.Sprint(ds[1].name[0]);
+}
+
+internal static @string callResultThroughPointer() {
+    var p = get();
+    var name = @unsafe.ArrayPointer<byte>.Of(p.Ꮡname, 8).slice();
+    return trim(name);
+}
+
+internal partial struct main_arms /*dyn*/ {
+    internal @string name;
+    internal Func<@string> f;
+}
+
+internal static void main() {
+    var arms = slice<main_arms>([
+        new("promoted field", promoted),
+        new("field of a slice element", sliceElement),
+        new("field of a call's result", callResult),
+        new("promoted field, embedded field written out", promotedWrittenOut),
+        new("slice element through a pointer variable", sliceElementThroughPointer),
+        new("call's result through a pointer variable", callResultThroughPointer)
+    ]);
+
+    if (len(os.Args) > 1) {
+        var (n, _) = strconv.Atoi(os.Args[1]);
+        @try(arms[n].name, arms[n].f);
+        return;
+    }
+
+    foreach (var (_, a) in range(arms)) {
+        @try(a.name, a.f);
+    }
+}
+
+} // end main_package

@@ -1,0 +1,4 @@
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_bsd.go:162
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_bsd.go:175
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_bsd.go:253
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	golang.org/x/sys/unix	syscall_bsd.go:261

@@ -96,7 +96,7 @@ internal static bool pushHead(this ж<poolDequeue> Ꮡd, any val) {
     var slot = Ꮡ(d.vals, (head & (uint32)(len(d.vals) - 1)));
 
     // Check if the head slot has been released by popTail.
-    @unsafe.Pointer typ = (uintptr)atomic.LoadPointer(slot.of(eface.Ꮡtyp));
+    @unsafe.Pointer typ = atomic.LoadPointer(slot.of(eface.Ꮡtyp));
     if (typ != nil) {
         // Another goroutine is still cleaning up the tail, so
         // the queue is actually still full.

@@ -1,0 +1,15 @@
+--- base/src/core/syscall/linux/lsf_linux.cs
++++ cut/src/core/syscall/linux/lsf_linux.cs
+@@ -27,9 +27,9 @@
+     if (e != nil) {
+         return (0, e);
+     }
+-    var p = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡlsall.ᏑProtocol));
+-    p.Value[0] = (byte)(proto >> 8);
+-    p.Value[1] = (byte)proto;
++    var p = @unsafe.ArrayPointer<byte>.Of(Ꮡlsall.ᏑProtocol, 2);
++    p.ElementRef(0) = (byte)(proto >> 8);
++    p.ElementRef(1) = (byte)proto;
+     lsall.Ifindex = ifindex;
+     e = Bind(s, new SockaddrLinklayerжSockaddr(Ꮡlsall));
+     if (e != nil) {

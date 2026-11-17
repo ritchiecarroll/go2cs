@@ -69,7 +69,7 @@ public static slice<byte> MasterSecret<H>(Func<H> hashΔ1, slice<byte> preMaster
         break;
     }
     case ж<sha512.Digest>: {
-        if (h.Size() != 46 && h.Size() != 64) {
+        if (h.Size() != 48 && h.Size() != 64) {
             fips140.RecordNonApproved();
         }
         break;

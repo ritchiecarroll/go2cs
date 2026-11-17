@@ -1,0 +1,27 @@
+<Project>
+
+  <!-- MSBuild stops at the first Directory.Build.props walking up, so the repository-wide
+       settings (src/Directory.Build.props, which owns $(TargetFramework)) must be imported
+       explicitly or this file silently shadows them for everything beneath it. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!--
+    Pins $(go2csPath) for every behavioral project to the repository's src root, as src/core's
+    Directory.Build.props does for the standard library.
+
+    Each behavioral .csproj is converter-emitted, and its template defaults $(go2csPath) for a project
+    built OUTSIDE this tree: $(SolutionDir) under Debug and $(USERPROFILE)/go2cs/ (the tree
+    deploy-core.ps1 stages) under any other configuration. Inside the repository the second default
+    is wrong. `dotnet build go2cs.slnx -c Release` bound every behavioral member to whatever
+    $(USERPROFILE)/go2cs held (a stale deploy, or nothing at all) and failed in the thousands on
+    golib's own names (CS0246, CS0234) while the same members built clean under Debug.
+
+    The harnesses (BehavioralRunner, BehavioralTestBase, check-no-regression.ps1) pass go2csPath
+    explicitly, and an explicit value still wins: a global property or an environment variable
+    overrides this file, so every documented command keeps working unchanged.
+  -->
+  <PropertyGroup Condition="'$(go2csPath)' == ''">
+    <go2csPath>$([MSBuild]::EnsureTrailingSlash($([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../..'))))</go2csPath>
+  </PropertyGroup>
+
+</Project>

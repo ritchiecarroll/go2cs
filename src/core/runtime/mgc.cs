@@ -735,7 +735,7 @@ internal static void gcStart(gcTrigger trigger) {
             }
             // Initialize ptrBuf if necessary.
             if (goexperiment.GreenTeaGC && (~Δp).gcw.ptrBuf == nil) {
-                Δp.Value.gcw.ptrBuf = (ж<array<uintptr>>)(uintptr)(persistentalloc(gc.PageSize, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
+                Δp.Value.gcw.ptrBuf = @unsafe.Pointer.To<array<uintptr>>(persistentalloc(gc.PageSize, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
             }
         }
 
@@ -1140,7 +1140,7 @@ internal static bool isMaybeRunnable(this ж<g> Ꮡgp) {
         // If waiting on mutexes, wait groups, or condition variables,
         // check if the synchronization primitive attached to the sudog is marked.
         if (gp.waiting != nil) {
-            return isMarkedOrNotInHeap((uintptr)gp.waiting.of(sudog.Ꮡelem).get());
+            return isMarkedOrNotInHeap(gp.waiting.of(sudog.Ꮡelem).get());
         }
         break;
     }}
@@ -1746,7 +1746,7 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
         // Go to sleep until woken by
         // gcController.findRunnableGCWorker.
         gopark((ж<g> g, @unsafe.Pointer nodep) => {
-            var nodeΔ1 = (ж<gcBgMarkWorkerNode>)(uintptr)(nodep);
+            var nodeΔ1 = @unsafe.Pointer.To<gcBgMarkWorkerNode>(nodep);
 
             var mp = nodeΔ1.m.ptr(); if (mp != nil) {
                 // The worker G is no longer running; release
@@ -2256,7 +2256,7 @@ private static readonly @string otherˢᵇ = "other"u8;
 //
 //go:nosplit
 internal static @string gcTestPointerClass(@unsafe.Pointer Δp) {
-    var p2 = (uintptr)(uintptr)noescape(Δp);
+    var p2 = (uintptr)noescape(Δp);
     var gp = getg();
     if ((~gp).stack.lo <= p2 && p2 < (~gp).stack.hi) {
         return stackˢ;

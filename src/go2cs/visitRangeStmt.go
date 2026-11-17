@@ -189,7 +189,19 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	savedHoist := v.hoistedDecls
 	hoistBuf := &strings.Builder{}
 	v.hoistedDecls = hoistBuf
-	rangeExpr := v.convExpr(rangeStmt.X, nil)
+	// A pointer-to-array conversion over an unsafe.Pointer, ranged for its values, ranges the view door's window of
+	// the whole array, a slice (arrayPointerElementDoor.go).
+	rangeExpr, rangeWindowElem, isRangeWindow := v.arrayPointerRangeWindow(rangeStmt)
+
+	// A field view ranged for its values ranges its own window (nativeFieldArrayView.go).
+	if !isRangeWindow {
+		rangeExpr, rangeWindowElem, isRangeWindow = v.nativeFieldArrayViewRangeWindow(rangeStmt)
+	}
+
+	if !isRangeWindow {
+		rangeExpr = v.convExpr(rangeStmt.X, nil)
+	}
+
 	v.hoistedDecls = savedHoist
 
 	if hoistBuf.Len() > 0 {
@@ -204,6 +216,10 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	// type, and an unhandled alias fell through every arm — silently emitting the ENTIRE loop
 	// as a C# comment. Applied again after the pointer unwrap (the pointee may itself alias).
 	rangeType := types.Unalias(v.getExprType(rangeStmt.X))
+
+	if isRangeWindow {
+		rangeType = types.NewSlice(rangeWindowElem)
+	}
 
 	// Ranging THROUGH a pointer shares the pointee — Go copies nothing there — so the array-value
 	// snapshot below must not fire for it. Recorded here because the unwrap immediately makes
@@ -831,6 +847,16 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 
 		switch {
 		case isArrayPointee && rangedThroughPointer && derefdValue:
+			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
+		case isArrayPointee && v.isInlineArrayExpr(rangeStmt.X) && !v.exprHasCallOrReceive(rangeStmt.X):
+			// An inline array (a go.arrays member, inlineArrayEmission.go) ranges its constant length: golib's len
+			// cannot see the family, and Go does not evaluate this operand.
+			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
+		case isArrayPointee && !rangedThroughPointer && v.arrayPointerConversionIsUnevaluated(rangeStmt.X):
+			// `for i := range *(*A)(p)`: the type's length, and no memory (arrayPointerElementDoor.go).
+			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
+		case isArrayPointee && !rangedThroughPointer && v.nativeFieldArrayViewDerefIsUnevaluated(rangeStmt.X):
+			// `for i := range *p`, p a field view: the same (nativeFieldArrayView.go).
 			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
 		case isArrayPointee && rangedThroughPointer && ptrDeref != "":
 			v.writeOutput("foreach (%s%s in range(%s, %d))", decl, iterExpr, rangeExpr, arrayType.Len())

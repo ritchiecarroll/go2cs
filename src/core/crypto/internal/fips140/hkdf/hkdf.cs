@@ -32,7 +32,6 @@ public static slice<byte> Expand<H>(Func<H> h, slice<byte> pseudorandomKey, @str
 {
     var @out = new slice<byte>(0, keyLen);
     var expander = hmac.New(h, pseudorandomKey);
-    hmac.MarkAsUsedInKDF(expander);
     uint8 counter = default;
     slice<byte> buf = default;
 

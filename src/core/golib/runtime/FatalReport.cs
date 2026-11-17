@@ -71,6 +71,18 @@ namespace go.golib;
     public static Func<bool, string>? TracebackRenderer { get; set; }
 
     /// <summary>
+    /// Renders a deadlock report's goroutine blocks: every user goroutine in goid order, each with the
+    /// header and the frames it captured as it entered its forever wait. Registered by the converted
+    /// <c>runtime</c> package; <see langword="null"/> until it is.
+    /// </summary>
+    /// <remarks>
+    /// Separate from <see cref="TracebackRenderer"/> because a deadlock has no failing goroutine: Go's
+    /// checkdead reports from the scheduler, so no block is the "current" one with live frames, and every
+    /// goroutine is parked. The thread that reports here is merely the first poller to see that.
+    /// </remarks>
+    public static Func<string>? DeadlockRenderer { get; set; }
+
+    /// <summary>
     /// The report text: <c>fatal error: &lt;text&gt;</c>, a blank line, and the goroutine blocks.
     /// </summary>
     /// <remarks>
@@ -81,19 +93,26 @@ namespace go.golib;
     /// </remarks>
     public static string Format(string text, bool userFault)
     {
-        string report = $"fatal error: {text}\n";
-
         if (TracebackRenderer is null)
             CrashReport.EnsureRuntimeInitialized();
 
         Func<bool, string>? renderer = TracebackRenderer;
+
+        return Format(text, renderer is null ? null : () => renderer(userFault));
+    }
+
+    // The report text over any renderer of the goroutine blocks: the fatal line, then a blank line and the
+    // blocks when the renderer produced any.
+    private static string Format(string text, Func<string>? renderer)
+    {
+        string report = $"fatal error: {text}\n";
 
         if (renderer is null)
             return report;
 
         try
         {
-            string traceback = renderer(userFault);
+            string traceback = renderer();
 
             if (!string.IsNullOrEmpty(traceback))
                 report = $"{report}\n{traceback}";
@@ -132,8 +151,40 @@ namespace go.golib;
         // Go's startpanic_m sets panicking for a throw too: a main that returns meanwhile waits for this report.
         MainExit.BeginFatal(2);
 
-        string report = Format(text, userFault);
+        Report(Format(text, userFault));
+    }
 
+    /// <summary>
+    /// Go's checkdead deadlock report, <c>fatal error: all goroutines are asleep - deadlock!</c>: the line, a
+    /// blank line, and a block for every user goroutine with the frames of its forever wait; then exit status 2.
+    /// Never returns.
+    /// </summary>
+    /// <remarks>
+    /// A Debug golib throws instead, as <c>builtin.fatal</c> has always done there, so a debugger stops at
+    /// the report.
+    /// </remarks>
+    [DoesNotReturn]
+    public static void Deadlock(string text)
+    {
+    #if DEBUG
+        throw new InvalidOperationException($"fatal error: {text} [2]");
+    #else
+        // Every goroutine in a forever wait polls, so each one finds the deadlock. The first claims the
+        // report (Go's paniclk) and the others wait behind it and never print a second one.
+        MainExit.AwaitReportOwner();
+        MainExit.BeginFatal(2);
+
+        if (DeadlockRenderer is null)
+            CrashReport.EnsureRuntimeInitialized();
+
+        Report(Format(text, DeadlockRenderer));
+    #endif
+    }
+
+    // stderr first and guarded on its own, then the crash descriptor, then the exit, on every path (see Fatal).
+    [DoesNotReturn]
+    private static void Report(string report)
+    {
         try
         {
             Console.Error.Write(report);

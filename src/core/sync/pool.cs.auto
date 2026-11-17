@@ -96,7 +96,7 @@ internal static ref array<uint64> poolRaceHash => ref ((StaticBox<array<uint64>>
 internal static @unsafe.Pointer poolRaceAddr(any xʗp) {
     ref var x = ref heap(xʗp, out var Ꮡx);
 
-    var ptr = (uintptr)((ж<array<@unsafe.Pointer>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡx))).Value[1];
+    var ptr = (uintptr)(@unsafe.Pointer.To<array<@unsafe.Pointer>>(@unsafe.Pointer.FromPinnedBox(Ꮡx))).Value[1];
     var h = (uint32)(((uint64)(uint32)ptr * 0x85ebca6bU) >> 16);
     return @unsafe.Pointer.FromPinnedBox(ᏑpoolRaceHash.at<uint64>((ulong)(h % (uint32)len(poolRaceHash))));
 }
@@ -111,7 +111,7 @@ public static void Put(this ж<Pool> Ꮡp, any x) {
             // Randomly drop x on floor.
             return;
         }
-        race.ReleaseMerge((uintptr)poolRaceAddr(x));
+        race.ReleaseMerge(poolRaceAddr(x));
         race.Disable();
     }
     var (l, _) = Ꮡp.pin();
@@ -156,7 +156,7 @@ public static any Get(this ж<Pool> Ꮡp) {
     if (race.Enabled) {
         race.Enable();
         if (x != nil) {
-            race.Acquire((uintptr)poolRaceAddr(x));
+            race.Acquire(poolRaceAddr(x));
         }
     }
     if (x == nil && p.New != nil) {
@@ -318,8 +318,8 @@ internal static slice<ж<Pool>> oldPools;
 }
 
 internal static ж<poolLocal> indexLocal(@unsafe.Pointer l, nint i) {
-    @unsafe.Pointer lp = (@unsafe.Pointer)((uintptr)l + (uintptr)i * /* unsafe.Sizeof(poolLocal{}) */ (uintptr)128);
-    return (ж<poolLocal>)(uintptr)(lp);
+    @unsafe.Pointer lp = @unsafe.Add(l, (uintptr)i * /* unsafe.Sizeof(poolLocal{}) */ (uintptr)128);
+    return @unsafe.Pointer.To<poolLocal>(lp);
 }
 
 // Implemented in runtime.

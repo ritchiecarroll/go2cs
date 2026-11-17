@@ -102,7 +102,11 @@ separately by the Startup row.
   with the compiler peaking at 12.4 to 13.5 GB, and TlsHandshake's took about 26 minutes at a 24 GB peak. The
   full disclosure, the reasoning, and the compile-farm mitigation live in the suite README's
   ["What the AOT column costs to produce"](https://github.com/ritchiecarroll/go2cs/blob/master/src/tests/Performance/README.md#what-the-aot-column-costs-to-produce--the-honesty-footnote)
-  section.
+  section. Most of that compile time is one pass: ILC folding identical method bodies, which the .NET SDK does by default
+  and go2cs keeps. Turning it off (`IlcFoldIdenticalMethodBodies=false`) cut ILC's time about 4.5 times on one
+  measured publish (PerfStartup, `win-x64`, on a different machine from the one that ran the timed table), for an
+  executable about 15% larger and a larger symbol table. The table measures the default; [Tuning converted code](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#native-aot-method-body-folding) says how
+  to make that trade.
 
 ## Running it
 
@@ -114,7 +118,7 @@ cd src/tests/Performance
 ./run-performance.ps1 --runs 10 --update-readme   # refresh the results block below
 ```
 
-Requirements: Go 1.26.10 (the release go2cs converts), a .NET SDK matching the corpus target
+Requirements: the Go release go2cs converts (Go 1.26.11, the `<GoStdLibVersion>` in `src/version.props`), a .NET SDK matching the corpus target
 framework (`net10.0`, named by `src/Directory.Build.props`), and — for the AOT column — a native
 linker and toolchain, which differs by host:
 
@@ -140,7 +144,7 @@ silently report a benchmark that computes something different in C#.
 
 ## Results
 
-The table below has all 17 of the suite's programs, measured against the published `go.*` 1.26.10.2
+The table below has the 17 programs the suite held when it was measured (`PerfDeferPanic` joined after), measured against the published `go.*` 1.26.10.2
 packages. The same programs measured in the same session against `go.*` 1.24.13.7 are
 [under History](#go-124137-measured-in-the-same-session), with the older tables.
 
@@ -224,7 +228,10 @@ window, and the Native AOT ratio to the same Go binaries timed again in the Nati
   references. ReadyToRun precompiles golib and the packages and starts in about three quarters of
   the JIT's time; **Native AOT removes the JIT-on-the-fly cost and starts about three times faster
   than the JIT**, but still runs the same package initializers, so a gap to Go remains. For CLI-shaped
-  programs AOT is the deployment story on time.
+  programs AOT is the deployment story on time. Under the JIT and ReadyToRun, one setting moves the Startup row:
+  the table runs with the converter's call-counting delay of 0, which suits long-running work; a short-lived tool
+  starts sooner with a delay, by a quarter of its run on one CPU. See
+  [start-up or steady state](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#start-up-or-steady-state-the-call-counting-delay).
 - **ReadyToRun against the JIT:** past start-up, the ReadyToRun column runs within about a tenth of
   the JIT on most rows, because the program's own code is compiled by the JIT in both. String is the
   exception, at about twice the JIT's time.
@@ -320,6 +327,11 @@ binary costs to **build**, and the cost is large enough that omitting it would m
   target), and TlsHandshake's took about 26 minutes. A program that references fewer packages publishes faster: a
   31-package consumer publishes in under four minutes on a hosted Linux runner
   ([Known issues](https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)).
+  Most of that compile time is one pass: ILC folding identical method bodies, which the .NET SDK does by default
+  and go2cs keeps. Turning it off (`IlcFoldIdenticalMethodBodies=false`) cut ILC's time about 4.5 times on one
+  measured publish (PerfStartup, `win-x64`, on a different machine from the one that ran the timed table), for an
+  executable about 15% larger and a larger symbol table. The table measures the default; [Tuning converted code](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#native-aot-method-body-folding) says how
+  to make that trade.
   <!-- Measured figures and the run series: [DATA-hopN-perf.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DATA-hopN-perf.md)
        (an internal record; visible link removed 2026-10-26, OQ-1). -->
 - **Build memory.** On the same machine, the compiler peaked at **12.4 to 13.5 GB working set** per publish,

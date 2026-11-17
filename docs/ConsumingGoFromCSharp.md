@@ -64,9 +64,9 @@ There are two ways to get one:
   `nugetgo.github.com.ritchiecarroll.hashset`. Add them as a `PackageReference`, like any other package.
   A `nugetgo.*` package is compiled against one `go.*` release, which its README names: use it with that release
   of the `go.*` packages. A later release can change a package's public shape, and then the package needs its
-  rebuild for that release. For example, exported package-level value variables such as `os.Args` are ref
-  properties, so an assembly compiled against a `go.*` release that exposed them as fields fails with
-  `MissingFieldException` until it is rebuilt.
+  rebuild for that release. For example, an exported package variable whose address Go code takes, such as
+  `os.Args`, is a ref property, so an assembly compiled against a `go.*` release that exposed it as a field fails
+  with `MissingFieldException` until it is rebuilt.
 - **Convert it yourself.** `go2cs -recurse=nuget <module_dir> <output_root>` converts a module and its dependencies
   (see [Converting a real-world module](README.md#converting-a-real-world-module)). Each Go package becomes one C#
   project; add the ones you call as `ProjectReference` items.
@@ -77,17 +77,18 @@ of them in a project.
 **A converted project takes the newest `go.*` release of its Go minor.** `-recurse=nuget` sets `GoStdLibVersion` to
 the converting toolchain's minor with a float, for example `1.26.*`, so a restore picks up later go2cs releases and
 patch releases of that minor without a reconversion. To pin one exact version, set `GoStdLibVersion` yourself, for
-example `dotnet build -p:GoStdLibVersion=1.26.10.3`.
+example `dotnet build -p:GoStdLibVersion=1.26.11.1`.
 
 If you convert and publish a module of your own, its nuget.org page is covered in
 [Publishing your conversion: the package page](ConvertingAModule.md#publishing-your-conversion-the-package-page).
 
 ### The break floor
 
-The check arrives with `go.*` 1.26.10.4; a project whose `go.lib` is 1.26.10.3 or older is not checked. From that
+The check arrives with `go.*` 1.26.11.1; a project whose `go.lib` is 1.26.10.3 or older is not checked. From that
 release, the build checks each converted package it uses against the **break floor**: the newest `go.*` release that
-changed members that compiled code binds. The floor is `go.*` 1.26.10.3, which changed the member a `foreach` over a
-slice binds. A package built below it, such as a `nugetgo.*` revision built against `go.*` 1.26.10.2, still restores
+changed members that compiled code binds. The floor is `go.*` 1.26.11.1, which moved promoted-method forwarders into
+classes of their own and renamed the standard-library assemblies. A package built below it, such as a `nugetgo.*`
+revision built against `go.*` 1.26.10.3, still restores
 beside the newer `go.*` packages, and then fails at run time with `MissingMethodException`. So the build stops before
 compiling anything, with [`GO2CS3002`](DiagnosticCodes.md): one error for each such package, naming it and the release
 it was built on, and one more saying the build stops.
@@ -171,7 +172,7 @@ projects, or in a project that sets `GoConsumerUsings` to `false`, turn the warn
 
 **Two other forms work too.** `using static` on a package class gives bare names, and brings the methods the
 package's types declare as well. It does not bring a method a struct promotes from an embedded field: since
-1.26.10.4 those are extension methods of a class of the struct's own beside the package class, which the
+1.26.11.1 those are extension methods of a class of the struct's own beside the package class, which the
 namespace brings (`using go;`, or the package's own namespace, both of which the packages add for you). Several
 `using static` lines can collide, though: `Contains` is in `strings`, `bytes` and `slices`, and
 `Reader` is a type in both `strings` and `bytes`. It suits a file that leans on one package. The package class
@@ -301,8 +302,8 @@ shortest exact text.
 `fmt.Sprintf("%v", x)` gives the Go text of any value as an `@string`. Converted Go code's `print` and `println`
 print a named value's underlying value and a pointer's address, as in Go, never its `String()`. That holds for a
 type-parameter value in generic code too.
-<!-- A pointer: src/core/golib/builtin.cs:3276 (`IPrintPointer pointer => pointer.PrintPointer(),`).
-     Every other value: src/core/golib/builtin.cs:3277 (`_ => GoPrintText.Text(arg) ?? arg.ToString()`).
+<!-- A pointer: src/core/golib/builtin.cs:3282 (`IPrintPointer pointer => pointer.PrintPointer(),`).
+     Every other value: src/core/golib/builtin.cs:3283 (`_ => GoPrintText.Text(arg) ?? arg.ToString()`).
      The run-time unwrap of a named basic type:
      src/core/golib/GoPrintText.cs:31 (`GoReflect.TryUnwrapWrapperValue(value, out object? underlying)`).
      Guard:
@@ -624,7 +625,7 @@ goǃ(() => replies.Send(99));
 
 A few things behave as Go's runtime does, so they are worth knowing from the C# side:
 
-- Each goroutine runs on its own thread for as long as it runs. golib reuses the thread for a later goroutine
+- By default, each goroutine runs on its own thread for as long as it runs. golib reuses the thread for a later goroutine
   once it ends, so starting one usually costs a hand-off rather than a new thread.
 - `Send`, `Receive` and `WaitGroup.Wait` block the calling thread until they can complete. Keep them off a UI
   thread: await `ReceiveAsync` or `SendAsync` instead, or run them inside `Task.Run`.

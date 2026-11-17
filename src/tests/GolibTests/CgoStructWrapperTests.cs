@@ -4,6 +4,13 @@ using go;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using C = go.cgotestꓸC_package;
 
+// The Go type cmd/cgo declares C char as for the bindings this build compiled (GolibTests.csproj).
+#if GOCGO_CHAR_UNSIGNED
+using ᴛchar = byte;
+#else
+using ᴛchar = sbyte;
+#endif
+
 namespace GolibTests;
 
 // cgo Phase 2 increment 3b2a (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §5.2, read through §11.1 and §11.7): the bindings
@@ -97,8 +104,8 @@ public unsafe class CgoStructWrapperTests
     {
         System.Text.StringBuilder text = new();
 
-        for (int i = 0; i < chars.Length && (int8)chars[i] != 0; i++)
-            text.Append((char)(byte)(int8)chars[i]);
+        for (int i = 0; i < chars.Length && (ᴛchar)chars[i] != 0; i++)
+            text.Append((char)(byte)(ᴛchar)chars[i]);
 
         return text.ToString();
     }

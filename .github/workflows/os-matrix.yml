@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all five shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all five RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
         type: choice
         required: true
         default: census
@@ -60,11 +60,13 @@ on:
           - aot-smoke
           - nugetgo-behavior
           - golib-tests
+          - gen-tests
+          - solution-build
           - stack-probe
           - converter-cgo
           - cgo-e2e
       filter:
-        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
+        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
         type: string
         required: false
         default: ''
@@ -162,6 +164,8 @@ jobs:
     timeout-minutes: 10
     outputs:
       matrix: ${{ steps.derive.outputs.matrix }}
+      # The consumer legs less the RIDs with no pinned cgo toolchain; release-smoke-cgo reads it ($cgoUnpinnedRids below).
+      cgo-matrix: ${{ steps.derive.outputs.cgo-matrix }}
       go-version: ${{ steps.derive.outputs.go-version }}
       # The EFFECTIVE dispatch parameters. Every consumer downstream reads these rather than
       # `inputs.*`, because `inputs.*` is empty on a schedule event.
@@ -423,7 +427,7 @@ jobs:
           if ($arch -ne 'x64') {
               if ($env:INPUT_GOOS -ne 'linux') { throw "arch '$arch' applies to goos linux only; got goos '$($env:INPUT_GOOS)'." }
               if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior') {
-                  throw "arch '$arch' does not apply to $($env:INPUT_STAGE), which runs every SHIPPED RID from one pack; linux-arm64 joins it when the packages ship it (seat S5c)."
+                  throw "arch '$arch' does not apply to $($env:INPUT_STAGE), which runs every SHIPPED RID from one pack, linux-arm64 included (seat S5c): its leg is already in that stage's list."
               }
               $armFlavour = @(Get-ChildItem -Path 'src/core' -Directory -Recurse -Filter 'linux-arm64' -ErrorAction SilentlyContinue).Count -gt 0
               $calibration = -not $armFlavour
@@ -453,17 +457,22 @@ jobs:
           # release-smoke runs EVERY shipped RID from ONE pack, whatever goos says: its question is whether
           # the packages a release would publish carry what this tree's converter emits, on every OS they
           # ship for (C2, ec147f1d7f: N's converter emits unsafe.ArrayPointer, which the published 1.24.13.3
-          # lacks). Three dispatches would be three packs of the same tree; one pack feeds all four legs.
-          # aot-smoke reads the same pack, on all four RIDs (osx-arm64 since 2026-10-14, below).
+          # lacks). Three dispatches would be three packs of the same tree; one pack feeds every leg.
+          # aot-smoke reads the same pack, on every shipped RID (osx-arm64 since 2026-10-14, below).
           # nugetgo-behavior owes a row for EVERY shipped RID, each run on its own OS (COORD ruling 2026-10-12: no row is
-          # inferred from another), so it takes the same four legs, with no pack.
+          # inferred from another), so it takes the same legs, with no pack.
+          # The list is push-nuget.ps1's $ridFlavors keys, one leg each, and TestConsumerLegsReadEveryShippedRid holds the
+          # two equal: S6 shipped linux-arm64 while this list kept four legs, so no hosted leg consumed that flavour until
+          # seat S5c added its leg (DESIGN-linux-arm64-flavour.md section 6). The arm leg carries arch = arm64, which the run
+          # job binds as GoTargetArch beside GoTargetOS, as the arch input's arm leg does above.
           if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior') {
               $targets = @(
                   @{ goos = 'windows'; runner = 'windows-latest';  rid = 'win-x64'   },
                   @{ goos = 'linux';   runner = 'ubuntu-latest';   rid = 'linux-x64' },
                   @{ goos = 'darwin';  runner = 'macos-15';        rid = 'osx-arm64' },
-                  @{ goos = 'darwin';  runner = 'macos-15-intel';  rid = 'osx-x64'   })
-              Write-Host "$($env:INPUT_STAGE): all four shipped RIDs (goos '$($env:INPUT_GOOS)' does not narrow it)"
+                  @{ goos = 'darwin';  runner = 'macos-15-intel';  rid = 'osx-x64'   },
+                  @{ goos = 'linux';   runner = 'ubuntu-24.04-arm'; rid = 'linux-arm64'; arch = 'arm64' })
+              Write-Host "$($env:INPUT_STAGE): all five shipped RIDs (goos '$($env:INPUT_GOOS)' does not narrow it)"
           }
 
           # aot-smoke dropped osx-arm64 from 2026-10-07 (COORD ruling) to 2026-10-14: on a hosted macos-15 (3-core arm64) runner the
@@ -518,6 +527,12 @@ jobs:
               'golib-tests'      = 90    # one Release build of GolibTests and its core closure for this GOOS from
                                          # cold, then `dotnet test` (whole suite, or a --filter). PROVISIONAL until
                                          # the first run; added for the AES seat's osx-arm64 guard (C1, 2026-11-06).
+              'gen-tests'        = 30    # one Release build of GenTests (go2cs-gen and golib) from cold, then
+                                         # `dotnet test` (whole suite, or a --filter): 526 tests in about 2 min on a
+                                         # laptop. PROVISIONAL until the first run (R, 2026-11-14).
+              'solution-build'   = 60    # one cold build of go2cs.slnx: golib, go2cs-gen, the test projects, every
+                                         # behavioral and performance member and their core closure: 622 s cold on a
+                                         # laptop (R, 2026-11-14). PROVISIONAL until the first hosted run.
               'sweep-shard'      = 210   # one -tests convert/build/run/compare cycle per matched
                                          # row; the sweep's own per-package floors reach 120m.
               'release-smoke'    = 90    # the LEG only (the pack job has its own budget): converter
@@ -525,7 +540,7 @@ jobs:
                                          # src/tests/PackageTests/release-smoke.ps1) against the
                                          # feed, each restoring into a fresh cache. PROVISIONAL
                                          # until the first run.
-              'aot-smoke'        = 240   # the LEG only (four RIDs): ONE Native AOT publish + run of PackageSymbols
+              'aot-smoke'        = 240   # the LEG only (five RIDs): ONE Native AOT publish + run of PackageSymbols
                                          # under go.lib's TrimMode=partial, which compiles the whole
                                          # go.* closure (31 assemblies). Its measured wall times, before
                                          # and after golib's generic-cycle fix, are in docs/CIMatrix.md's
@@ -569,6 +584,18 @@ jobs:
           Write-Host "matrix: $json"
 
           Add-Content -Path $env:GITHUB_OUTPUT -Value "matrix=$json" -Encoding utf8
+
+          # release-smoke-cgo's legs: the same targets less those whose OS default cgo toolchain (.github/cgo-probe.ps1:
+          # llvm-mingw on windows, zig elsewhere) has no pin in .github/cgo-toolchain.ps1. EMPTY since batch 309: linux-arm64
+          # joined the consumer legs in seat S5c with no zig pin and the cgo job refused it (batch 308, run 43696423446), so
+          # 308 skipped it here; 309 pinned zig for linux-arm64 and emptied the list. Every other stage keeps the full matrix.
+          # TestCgoSmokeSkipsOnlyTheLegsWithNoPinnedToolchain holds this list to exactly the unpinned legs, so a RID the
+          # consumer legs gain without a pin has to be named here (and on the BOARD) before the cgo smoke can run.
+          $cgoUnpinnedRids = @()
+          $cgoEntries = @($entries | Where-Object { $_.rid -notin $cgoUnpinnedRids })
+          $cgoJson = ConvertTo-Json -InputObject $cgoEntries -Compress -Depth 4
+          if ($cgoEntries.Count -lt @($entries).Count) { Write-Host "cgo matrix: $cgoJson (no pinned cgo toolchain: $(@($entries | Where-Object { $_.rid -in $cgoUnpinnedRids } | ForEach-Object { $_.rid }) -join ', '))" }
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-matrix=$cgoJson" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "go-version=$goVersion" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "goos=$goos" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "stage=$stage" -Encoding utf8
@@ -684,6 +711,69 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: release-smoke-pack-log
+          path: artifacts/
+          retention-days: 7
+          if-no-files-found: warn
+
+  # ---------------------------------------------------------------------------------------------
+  # release-smoke-cgo -- the cgo path, on every release-smoke, on every shipped RID with a pinned C toolchain (the
+  # plan's cgo-matrix; all five since batch 309) (COORD's ruling 2026-11-14, cgo
+  # 3.1's release-path seat). A -cgo conversion is ONE package and builds against a go2cs clone, never the go.*
+  # packages: src/go2cs/main.go's -cgo help says it is not combinable with -recurse, and csproj-template.xml references
+  # $(go2csPath)'s go2cs-gen and golib. So this job reads the TREE the release is cut from, needs no pack, and runs
+  # beside pack and the consumer legs, adding no wall time unless it outlasts them. go builds cgo Phase 3's end-to-end
+  # program with this runner's C compiler (gcc, clang on darwin) and the probe library, go2cs converts, builds and runs
+  # it, and every arm is read both ways (TestCgoPhase3ProgramRunsAsGoDoes, cgo-e2e's own test and table). The probe is
+  # .github/cgo-probe.ps1's, the same build cgo-e2e uses. ON by default: no input turns it on or off, so every release
+  # proves its cgo path. Its own job keeps the C toolchain out of the consumer legs. .github/release-smoke-cgo.ps1 reads
+  # the outcome and refuses a vacuous green (a SKIP, or a filter that matched nothing).
+  # ---------------------------------------------------------------------------------------------
+  release-smoke-cgo:
+    needs: plan
+    if: needs.plan.outputs.stage == 'release-smoke'
+    name: release-smoke cgo (${{ matrix.goos }} / ${{ matrix.rid }})
+    runs-on: ${{ matrix.runner }}
+    # The test's own deadline is 40 min (cgo-e2e's); the slowest cgo-e2e JOB, which runs four more tests, read 22 min.
+    timeout-minutes: 60
+    strategy:
+      # Every RID's reading is wanted, whatever another reads.
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.plan.outputs.cgo-matrix) }}
+    env:
+      GOOS_TARGET: ${{ matrix.goos }}
+      RID: ${{ matrix.rid }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go (pinned to the corpus release)
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ needs.plan.outputs.go-version }}
+          check-latest: false
+          cache-dependency-path: src/go2cs/go.sum
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ needs.plan.outputs.dotnet }}
+
+      - name: Release smoke cgo — build the cgo probe library
+        shell: pwsh
+        run: |
+          & ./.github/cgo-probe.ps1 -Label 'release-smoke cgo probe'
+
+      - name: Release smoke cgo — the Phase 3 program, converted, built and run both ways
+        shell: pwsh
+        run: |
+          & ./.github/release-smoke-cgo.ps1
+
+      - name: Upload the cgo log
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-smoke-cgo-${{ matrix.rid }}
           path: artifacts/
           retention-days: 7
           if-no-files-found: warn
@@ -1108,54 +1198,13 @@ jobs:
       # search for a bare name reached the current directory, 42936395011), and windows from the test assembly's own
       # directory, where CgoProbeTests copies it. converter-cgo builds it too (increment 5b): the cgo route's real-route
       # test links the Phase 2 fixture's probe functions against it through CGO_LDFLAGS, and on windows llvm-mingw's
-      # linker reads an import library, never the DLL itself, so the build writes one beside it.
+      # linker reads an import library, never the DLL itself, so the build writes one beside it. The build is
+      # .github/cgo-probe.ps1, shared with release-smoke's cgo job (release-smoke-cgo).
       - name: GolibTests — build the cgo probe library
         if: (needs.plan.outputs.stage == 'golib-tests' || needs.plan.outputs.stage == 'converter-cgo' || needs.plan.outputs.stage == 'cgo-e2e') && contains(fromJSON('["linux-x64","osx-x64","osx-arm64","win-x64"]'), matrix.rid)
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-
-          $goos = $env:GOOS_TARGET
-          $cc = if ($goos -eq 'windows') { 'llvm-mingw' } else { 'zig' }
-          $toolchain = & ./.github/cgo-toolchain.ps1 -Cc $cc -Rid $env:RID -Label 'golib-tests cgo probe'
-
-          # darwin's directory is fixed, since the golden binds the probe by its absolute install name there.
-          $dir = if ($goos -eq 'darwin') { '/tmp/go2cs-cgo-probe' } else { Join-Path $env:RUNNER_TEMP 'cgo-probe' }
-          New-Item -ItemType Directory -Force -Path $dir | Out-Null
-
-          # Each OS's load-time name, which the golden's probe fixture binds (src/go2cs's cgoProbeLibrary): the SONAME on
-          # linux, the absolute install name on darwin, the DLL's own name on windows.
-          $probe = @{
-              windows = @{ name = 'go2csprobe.dll'; flags = @("-Wl,--out-implib,$dir/libgo2csprobe.dll.a") }
-              darwin  = @{ name = 'libgo2csprobe.dylib'; flags = @("-Wl,-install_name,$dir/libgo2csprobe.dylib") }
-              linux   = @{ name = 'libgo2csprobe.so'; flags = @('-fPIC', '-Wl,-soname,libgo2csprobe.so') }
-          }[$goos]
-          $name = $probe.name
-          $flags = $probe.flags
-          $library = Join-Path $dir $name
-          $source = Join-Path $PWD 'src/tests/GolibTests/cgo-probe/probe.c'
-
-          $clock = [Diagnostics.Stopwatch]::StartNew()
-          & $toolchain.Exe @($toolchain.Args) -shared -O2 @flags -o $library $source
-          $buildExit = $LASTEXITCODE
-          $buildSeconds = [math]::Round($clock.Elapsed.TotalSeconds, 1)
-          if ($buildExit -ne 0 -or -not (Test-Path -LiteralPath $library)) { throw "golib-tests cgo probe: $($toolchain.Version) could not build $name (exit $buildExit)." }
-
-          Add-Content -Path $env:GITHUB_ENV -Value "GO2CS_CGO_PROBE_DIR=$dir" -Encoding utf8
-          Add-Content -Path $env:GITHUB_ENV -Value 'GO2CS_REQUIRE_CGO_PROBE=1' -Encoding utf8
-
-          if ($goos -eq 'linux') {
-              $path = if ([string]::IsNullOrEmpty($env:LD_LIBRARY_PATH)) { $dir } else { "${dir}:$($env:LD_LIBRARY_PATH)" }
-              Add-Content -Path $env:GITHUB_ENV -Value "LD_LIBRARY_PATH=$path" -Encoding utf8
-          }
-
-          $summary = @(
-              "## golib-tests cgo probe -- $($toolchain.Version) on $($env:RID)"
-              ''
-              "READING built $name ($((Get-Item -LiteralPath $library).Length) bytes) in $buildSeconds s, into GO2CS_CGO_PROBE_DIR"
-          )
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
-          & ./.github/annotate-summary.ps1 -Title "golib-tests cgo probe $($env:RID)" -Lines $summary
+          & ./.github/cgo-probe.ps1 -Label 'golib-tests cgo probe'
 
       # -------------------------------------------------------------------------------------
       # golib-tests — GolibTests on this leg's own host. Added for guards whose subject only exists on one
@@ -1247,6 +1296,139 @@ jobs:
           exit $runExit
 
       # -------------------------------------------------------------------------------------
+      # gen-tests -- GenTests (the go2cs-gen analyzer's suite) on this leg's own host. Until this stage nothing hosted
+      # ran GenTests off windows: batch 290 landed a GenTests red that only linux shows (AConversionBetweenCTypesCompiles,
+      # a path spelled for windows), and no gate saw it until a lane ran the suite by hand (COORD, 2026-11-13). The
+      # suite's subject is the generator, which every converted project runs as an analyzer on every OS, so it runs on
+      # every leg of the dispatch's GOOS (and on linux's arm64 leg too: it runs no converted program).
+      # -------------------------------------------------------------------------------------
+      - name: GenTests — build and run for this GOOS
+        if: needs.plan.outputs.stage == 'gen-tests'
+        shell: pwsh
+        env:
+          GEN_FILTER: ${{ needs.plan.outputs.filter }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $log = Join-Path $art "gen-tests-$goos-$rid.log"
+          $trx = Join-Path $art "gen-tests-$goos-$rid.trx"
+
+          Push-Location 'src/tests/GenTests'
+          try {
+              $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
+              & dotnet build -c Release "-p:GoTargetOS=$goos" @archArgs -nologo -v q *>&1 | Tee-Object -FilePath $log
+              $runExit = $LASTEXITCODE
+
+              if ($runExit -eq 0) {
+                  $testArgs = @('test', '-c', 'Release', '--no-build', "-p:GoTargetOS=$goos") + $archArgs + @('--blame-hang-timeout', '10m',
+                      '--logger', "trx;LogFileName=$trx", '--logger', 'console;verbosity=normal')
+                  if (-not [string]::IsNullOrWhiteSpace($env:GEN_FILTER)) { $testArgs += @('--filter', $env:GEN_FILTER) }
+                  & dotnet @testArgs *>&1 | Tee-Object -FilePath $log -Append
+                  $runExit = $LASTEXITCODE
+              }
+          }
+          finally { Pop-Location }
+
+          # Every test's outcome by name, from the trx: a test that went Inconclusive here is visible, not counted as a pass,
+          # and a failing test is named in the summary rather than left in the log.
+          $outcomes = @()
+          if (Test-Path -LiteralPath $trx) {
+              [xml]$doc = Get-Content -LiteralPath $trx -Raw
+              $failed = @($doc.TestRun.Results.UnitTestResult | Where-Object { $_.outcome -ne 'Passed' } | Sort-Object testName |
+                  ForEach-Object { "  $($_.outcome) $($_.testName)" })
+              $outcomes = if ($failed.Count) { @('Not passed:') + $failed } else { @('Every test passed.') }
+          }
+          else { $outcomes = @('No trx was written: the build or the test run failed before any result (see the log).') }
+
+          $summary = @(
+              "## GenTests -- GOOS=$goos ($rid)"
+              ''
+              "Filter ``$($env:GEN_FILTER)`` -- exit ``$runExit``"
+              ''
+              '```'
+          ) + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "gen-tests $goos/$rid" -Lines $summary
+
+          exit $runExit
+
+      # -------------------------------------------------------------------------------------
+      # solution-build -- `dotnet build src/go2cs.slnx`, the converter-dev workspace, whole: golib, go2cs-gen, the
+      # hand-written test projects, every behavioral and performance member and the core packages they reference.
+      # Nothing else builds the solution whole (the behavioral runner builds its members one by one with its own
+      # -p:go2csPath), and CLAUDE.md asks for this build after any golib or runtime API change. Measured before the stage
+      # (H, 2026-11-13): a Release build failed with 17,714 errors, all in behavioral members, CS0246 and CS0234 on
+      # golib's own names. A converted .csproj defaults $(go2csPath) to $(USERPROFILE)/go2cs/ (the tree deploy-core.ps1
+      # stages) under any configuration but Debug, so every behavioral member bound to that tree, stale or absent. The
+      # test trees' Directory.Build.props now pin go2csPath to the repository, as src/core's does. A hosted runner has no
+      # $(USERPROFILE)/go2cs, so a member that falls back to that default fails here by name.
+      # -------------------------------------------------------------------------------------
+      - name: Solution build — go2cs.slnx for this GOOS
+        if: needs.plan.outputs.stage == 'solution-build'
+        shell: pwsh
+        env:
+          SLN_FILTER: ${{ needs.plan.outputs.filter }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $config = if ([string]::IsNullOrWhiteSpace($env:SLN_FILTER)) { 'Release' } else { $env:SLN_FILTER.Trim() }
+          if ($config -cnotin 'Release', 'Debug') {
+              Write-Host "::error::solution-build's filter is the configuration, Release (blank) or Debug: '$config' is neither"
+              exit 1
+          }
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $log = Join-Path $art "solution-build-$config-$goos-$rid.log"
+
+          # The deployed tree a converted .csproj falls back to must not exist here, or a member falling back to it would
+          # build against whatever it holds and pass.
+          $home_ = if ($env:USERPROFILE) { $env:USERPROFILE } else { $env:HOME }
+          $deployed = Join-Path $home_ 'go2cs'
+          if (Test-Path -LiteralPath $deployed) {
+              Write-Host "::error::$deployed exists on this runner: a member falling back to it would build against it and pass"
+              exit 1
+          }
+
+          $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
+          $sw = [System.Diagnostics.Stopwatch]::StartNew()
+          & dotnet build src/go2cs.slnx -c $config "-p:GoTargetOS=$goos" @archArgs -nologo -clp:ErrorsOnly *>&1 | Tee-Object -FilePath $log
+          $runExit = $LASTEXITCODE
+          $sw.Stop()
+
+          # Distinct error lines (the closing list repeats each one), by code and by project.
+          $errors = @(Get-Content -LiteralPath $log | Where-Object { $_ -match ': error [A-Z]+[0-9]+' } | Sort-Object -Unique)
+          $projectOf = { param($line) if ($line -match '\[([^\]]+\.(cs|sh)proj)') { Split-Path -Leaf $Matches[1] } }
+          $byCode = @($errors | ForEach-Object { if ($_ -match ': error ([A-Z]+[0-9]+)') { $Matches[1] } } | Group-Object |
+              Sort-Object Count -Descending | ForEach-Object { "  $($_.Name) $($_.Count)" })
+          $byProject = @($errors | ForEach-Object { & $projectOf $_ } | Group-Object | Sort-Object Count -Descending)
+
+          $summary = @(
+              "## go2cs.slnx -- $config, GOOS=$goos ($rid)"
+              ''
+              "exit ``$runExit``, $([int]$sw.Elapsed.TotalMinutes) min, $($errors.Count) distinct error line(s) in $($byProject.Count) project(s)"
+              ''
+              '```'
+          ) + $(if ($errors.Count) {
+              @('By code:') + $byCode + @('By project (first 25):') + @($byProject | Select-Object -First 25 | ForEach-Object { "  $($_.Name) $($_.Count)" })
+          } else { @('No errors.') }) + @('```')
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "solution-build $config $goos/$rid" -Lines $summary
+
+          # An exit of 0 with error lines is not a pass, and an exit that is not 0 with none is named, not read as one.
+          if ($runExit -eq 0 -and $errors.Count -gt 0) { Write-Host "::error::the build exited 0 and printed $($errors.Count) error line(s)"; exit 1 }
+          if ($runExit -ne 0 -and $errors.Count -eq 0) { Write-Host "::error::the build exited $runExit and printed no error line: read the log" }
+          exit $runExit
+
+
+      # -------------------------------------------------------------------------------------
       # converter-cgo -- OPT-IN: the converter's own cgo tests on this leg's host, where a C compiler lets go list run
       # cmd/cgo. No other hosted stage gives them one (licensing.yml's go test is filtered to ^TestLicensing), so the
       # compiler-gated tests -- cgo Phase 1's exit gate, TestRealLoadRefusesOnlyASelectedCgoFile -- skip everywhere
@@ -1300,7 +1482,7 @@ jobs:
           $filter = $env:CGO_TEST_FILTER
           $testTimeout = '10m'
           if ($env:STAGE -eq 'cgo-e2e') {
-              if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^TestG1|^TestTheCgoRoutesOutputBuildsAsAProject$|^TestACgoProjectBuilt' }
+              if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^TestG1|^TestTheCgoRoutesOutputBuildsAsAProject$|^TestACgoProjectBuilt|^TestCgoPhase3Program' }
               $testTimeout = '40m'
           }
           if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^Test.*Cgo|^TestRealLoad' }
@@ -2168,7 +2350,7 @@ jobs:
           # A sweep regenerates committed test artifacts in place, so the tree is dirty afterwards
           # and it is (almost always) nothing -- CRLF phantoms and the -tests-closure class. The
           # sweep itself classifies them; this records the raw state alongside for the reader.
-          & git -C $PWD status --porcelain -- src/core |
+          & git -C $PWD status --porcelain -- src/core docs/validation |
               Set-Content -LiteralPath (Join-Path $art "sweep-$goos-$rid-git-status.txt") -Encoding utf8
 
           # The CONTENT of those rewrites, not just their names: a non-windows leg's -tests emission
@@ -2176,8 +2358,12 @@ jobs:
           # ends. The diff lets a lane read per-GOOS emission drift without a runner of that OS
           # (COORD ruling 2026-10-02, after the first darwin row drifted 15+1 lines unread).
           # WriteAllLines always creates the file, so a clean tree uploads an empty diff rather than none.
+          # docs/validation is in it too: the -tests compare renders the row's proof page there
+          # (docs/validation/current/<pkg>.md), and a hosted reading banks that page from this artifact. The
+          # runner's tree is gone when the job ends, so a diff scoped to src/core left a hosted row
+          # unbankable (COORD route, 2026-11-14, the 1.26.11 hop's H10 net row).
           $trackedDiff = Join-Path $art "sweep-$goos-$rid-tracked.diff"
-          $diffLines = [string[]]@(& git -C $PWD -c core.quotePath=false diff --no-ext-diff --no-color -- src/core)
+          $diffLines = [string[]]@(& git -C $PWD -c core.quotePath=false diff --no-ext-diff --no-color -- src/core docs/validation)
           [System.IO.File]::WriteAllLines($trackedDiff, $diffLines)
           Write-Host "==> tracked-rewrite diff: $((Get-Item -LiteralPath $trackedDiff).Length) bytes -> $(Split-Path -Leaf $trackedDiff)"
 
@@ -2301,7 +2487,7 @@ jobs:
       # aot-smoke — ONE Native AOT publish and run of a hand-written consumer of the pack's packages.
       # A consumer with no trim mode of its own takes go.lib's TrimMode=partial, so the publish compiles
       # every referenced go.* assembly whole (COORD ruling 2026-10-06: its own stage, out of release-smoke).
-      # The executable must exit 0 and print its PACKAGE-SYMBOLS line; the publish wall time is a READ line. FOUR RIDs: osx-arm64
+      # The executable must exit 0 and print its PACKAGE-SYMBOLS line; the publish wall time is a READ line. FIVE RIDs (linux-arm64 since seat S5c): osx-arm64
       # since 2026-10-14 (run 38587876788, after e2move broke ILC's generic cycle; it was NOT MEASURED from 2026-10-07).
       # Non-gating on its first train; from the release after, read before a release like the census.
       # -------------------------------------------------------------------------------------

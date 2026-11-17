@@ -51,7 +51,7 @@ partial class runtime_package {
 internal static @unsafe.Pointer sysAlloc(uintptr n, ж<sysMemStat> sysStat, @string vmaName) {
     sysStat.add((int64)n);
     ᏑgcController.ᏑmappedReady.Add((int64)n);
-    @unsafe.Pointer Δp = (uintptr)sysAllocOS(n, vmaName);
+    @unsafe.Pointer Δp = sysAllocOS(n, vmaName);
 
     // When using ASAN leak detection, we must tell ASAN about
     // cases where we store pointers in mmapped memory.
@@ -172,7 +172,7 @@ internal static void sysFault(@unsafe.Pointer v, uintptr n) {
 // sysReserve returns OS-aligned memory. If a larger alignment is required, use
 // sysReservedAligned.
 internal static @unsafe.Pointer sysReserve(@unsafe.Pointer v, uintptr n, @string vmaName) {
-    @unsafe.Pointer Δp = (uintptr)sysReserveOS(v, n, vmaName);
+    @unsafe.Pointer Δp = sysReserveOS(v, n, vmaName);
 
     // When using ASAN leak detection, we must tell ASAN about
     // cases where we store pointers in mmapped memory.
@@ -206,7 +206,7 @@ internal static (@unsafe.Pointer, uintptr) sysReserveAligned(@unsafe.Pointer v, 
     // for a larger region and remove the parts we don't need.
     nint retries = 0;
 retry:
-    var Δp = (uintptr)(uintptr)sysReserve(v, size + align, vmaName);
+    var Δp = (uintptr)sysReserve(v, size + align, vmaName);
     switch (ᐧ) {
     case {} when Δp == 0: {
         return (default, 0);
@@ -221,7 +221,7 @@ retry:
         // so we may have to try again.
         sysUnreserve((@unsafe.Pointer)Δp, size + align);
         Δp = alignUp(Δp, align);
-        @unsafe.Pointer p2 = (uintptr)sysReserve((@unsafe.Pointer)Δp, size, vmaName);
+        @unsafe.Pointer p2 = sysReserve((@unsafe.Pointer)Δp, size, vmaName);
         if (Δp != (uintptr)p2) {
             // Must have raced. Try again.
             sysUnreserve(p2, size);

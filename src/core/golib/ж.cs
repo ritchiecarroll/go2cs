@@ -85,7 +85,7 @@ namespace go;
 
 [System.Diagnostics.DebuggerDisplay("{ToString(),nq}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(ж<>.DebugView))]
-public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IGoReflectBox, IAllocationIdentity, IPrintPointer, IGoEquatable
+public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IGoReflectBox, IAllocationIdentity, IPrintPointer, IGoEquatable, IHeldStorage
 {
     // The debugger's view (DebuggerTypeProxy): the pointee, or null for the nil pointer -- reading a nil
     // box's Value would be Go's nil dereference, which a debugger must never trigger.
@@ -138,6 +138,30 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// nil-pointer dereference (<c>~Ꮡp</c>) still routes through the strict <see cref="Value"/>.
     /// </remarks>
     public abstract ref T ValueSlot { get; }
+
+    /// <summary>
+    /// Go's <c>*p</c> read as a VALUE (a copy), panicking on a nil dereference. The converter emits it in place of
+    /// <c>~p</c> for an rvalue dereference whose pointee is a Go struct kept out of inline arrays.
+    /// </summary>
+    /// <remarks>
+    /// On every box but a <see cref="NativeBox{T}"/> this is <c>~p</c>. A native box over such a struct reads its
+    /// bytes at Go's own field offsets into a fresh managed value (B2, 2026-11-15): the struct's arrays are managed
+    /// references in go2cs, so its CLR layout is not its Go layout and the whole-value read through
+    /// <see cref="Value"/> is refused by name. A copy is exact for a read, since nothing can alias it, so the
+    /// decode never has to write back. Writes keep <see cref="Value"/>, and its refusals.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public T GoValue()
+    {
+        if (IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        return ReadGoValue();
+    }
+
+    // The value GoValue returns once the nil check has passed: the slot's, except where the box's storage is not a T
+    // laid out by the CLR (NativeBox).
+    private protected virtual T ReadGoValue() => ValueSlot;
 
     /// <inheritdoc/>
     // The dereference-guard nil question. For every non-standard kind this is exactly the
@@ -194,6 +218,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         index = 0;
         return false;
     }
+
+    // The element box's field-view slot (ж.Views.cs), a null reference for every other kind. The view lookup
+    // reaches the slot through this virtual because a method of ж<T> must not name ElemRefBox<T>: that one
+    // mention makes every pointer type reach array<T>, whose AliasPointer names ж<array<T>>, one nesting level
+    // deeper each lap, and Native AOT expands the loop to its cut-off (IL3054) for every type a program touches.
+    internal virtual ref ViewEntry? ElementViews => ref Unsafe.NullRef<ViewEntry?>();
 
     // The pinned-reinterpret arm of the Reinterpret fallback (element storage only).
     internal virtual ж<TDst>? TryPinnedReinterpret<TDst>() => null;
@@ -326,7 +356,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (typeof(ISlice).IsAssignableFrom(typeof(T)))
             return false;
 
-        return !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>));
+        return !(typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>)); // ONE TEST, THREE SPELLINGS: s_isArrayShaped below and NativeBox<T>.s_isNamedArrayShaped spell this one; change the three together
 
         // What remains is exactly the shape that IS lazy: a go2cs-gen named fixed-size array
         // wrapper (`Value => m_value ??= new array<E>(N)`, TypeClass "Array") and the array-VIEW
@@ -343,6 +373,13 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // `*p = someOtherArray` installs a fresh still-lazy wrapper, the next element take publishes
     // again rather than trusting a stale "ready" flag).
     private object? m_publishedArrayBacking;
+
+    // Is a T exactly ONE object reference? Every wrapper the publish serves today is: go2cs-gen's named array holds
+    // one holder field, and the array-view wrapper holds one such wrapper. Then the publish can store the holder
+    // with a compare-and-swap on the slot itself (publishArrayBacking). A reference fills a whole aligned word, so a
+    // struct of that size that holds a reference holds nothing else. Two type queries, no code built (the rule at
+    // s_publishArrayBacking), and asked only where that flag is set.
+    private static readonly bool s_arrayHolderIsOneWord = Unsafe.SizeOf<T>() == IntPtr.Size && RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
     /// <summary>
     /// Gets a view of the array or slice this pointer references, with any lazily-materialized
@@ -411,42 +448,71 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (published is not null && Value is IArray view && check.Accepts(view) && ReferenceEquals(view.Source, published))
             return view;
 
-        return publishArrayBacking(check);
+        // The storage reference is resolved BEFORE the publish takes its lock: for a field or element
+        // reference that walk runs through the parent box, and the lock guards the publish, not the walk.
+        return publishArrayBacking(check, ref Value);
     }
 
     // The at-most-once publish. Kept out of line so arrayView stays small enough to inline.
+    //
+    // `value` is the box's own storage, resolved by the caller: the element door passes Value, which panics on
+    // a nil pointer as Go's &p[i] does, and the pin paths pass ValueSlot after their own nil test
+    // (pinnedArrayData).
+    //
+    // The lock serializes the publishes of THIS box. It does not cover the storage: the wrapper's own getter
+    // fills the same slot with no lock (a compare-and-swap of its one holder field, go2cs-gen's materializeValue),
+    // and a second box over the same storage (an element reference is minted per take) holds its own lock. So the
+    // store into the slot is a compare-and-swap too, against the empty slot, and a publish that finds another
+    // holder there adopts it. Until 2026-11-15 the store was a plain write of the whole wrapper: a first use that
+    // landed between this publish's read and its write had its holder replaced, and every element written through
+    // it was lost without a panic (NamedArrayHolderPublishRaceTests: 47,334 of 200,000 arrays at the element door).
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private IArray publishArrayBacking<TCheck>(TCheck check) where TCheck : struct, IArrayViewCheck
+    private IArray publishArrayBacking<TCheck>(TCheck check, ref T value) where TCheck : struct, IArrayViewCheck
     {
-        // Resolve the storage reference BEFORE taking the lock: for a field or element reference
-        // that walk runs through the parent box, and the lock guards the publish, not the walk.
-        ref T value = ref Value;
-
         lock (this)
         {
-            if (value is not IArray view || !check.Accepts(view))
-                throw notAnArrayOrSlice();
-
-            // Materializes the lazy backing on the boxed copy, and hands back the RAW backing
-            // reference — the identity token the fast path compares against. (Only the lazy
-            // wrappers reach here; everything whose Source is defined to copy was excluded by
-            // computePublishArrayBacking, so this neither allocates nor detaches.)
-            object? backing = view.Source;
-
-            if (!ReferenceEquals(backing, m_publishedArrayBacking))
+            while (true)
             {
-                // Copy the whole wrapper — a struct over a SHARED backing reference — back over
-                // the real storage, which lands that reference where every later reader looks.
-                value = (T)(object)view;
+                if (value is not IArray view || !check.Accepts(view))
+                    throw notAnArrayOrSlice();
 
-                // RELEASE: the copy-back above must be visible to any thread that later observes
-                // this write on the lock-free fast path.
-                Volatile.Write(ref m_publishedArrayBacking, backing);
+                // Materializes the lazy backing on the boxed copy, and hands back the RAW backing
+                // reference — the identity token the fast path compares against. (Only the lazy
+                // wrappers reach here; everything whose Source is defined to copy was excluded by
+                // computePublishArrayBacking, so this neither allocates nor detaches.)
+                object? backing = view.Source;
+
+                if (!ReferenceEquals(backing, m_publishedArrayBacking))
+                {
+                    if (s_arrayHolderIsOneWord)
+                    {
+                        // The copy's holder: the one the slot held when it was read, or the one the line above
+                        // just filled. It goes into the slot only where the slot is still empty.
+                        T filled = (T)(object)view;
+                        object? holder = Unsafe.As<T, object?>(ref filled);
+                        object? found = Interlocked.CompareExchange(ref Unsafe.As<T, object?>(ref value), holder, null);
+
+                        // Another holder got there between the read and the swap: read the slot again and
+                        // publish that one. The copy's own backing was reachable from nowhere else.
+                        if (found is not null && !ReferenceEquals(found, holder))
+                            continue;
+                    }
+                    else
+                    {
+                        // A wrapper of another shape (none exists today): copy the whole wrapper back over the
+                        // real storage, as before.
+                        value = (T)(object)view;
+                    }
+
+                    // RELEASE: the store above must be visible to any thread that later observes
+                    // this write on the lock-free fast path.
+                    Volatile.Write(ref m_publishedArrayBacking, backing);
+                }
+
+                // The view we just published, not a fresh copy of it — the element box then names the
+                // published backing by construction rather than by a re-read that could race.
+                return view;
             }
-
-            // The view we just published, not a fresh copy of it — the element box then names the
-            // published backing by construction rather than by a re-read that could race.
-            return view;
         }
     }
 
@@ -743,6 +809,65 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
             return (nuint)ptr == address;
     }
 
+    // IHeldStorage, for the array-pointer view doors' V2. Two facts, each of which must hold or the answer is 0: this
+    // box is pinned AT `address` (IsPinnedAt, the registry's own validate-on-read), and it holds storage still that
+    // the address is in (TryHeldExtent).
+    nuint IHeldStorage.HeldBytesFrom(nuint address) =>
+        IsPinnedAt(address) && heldExtent(out nuint start, out nuint end) && address >= start && address < end ? end - address : 0;
+
+    bool IHeldStorage.TryHeldExtent(out nuint start, out nuint end) => heldExtent(out start, out end);
+
+    // The storage this box holds still. Three facts, each of which must hold: this box owns a pin (m_pin, set at the
+    // address-take and never cleared, released by its finalizer once the box is unreachable); the pinned object is
+    // a managed array (the value slot, an element array, or the root's slot for a field or element view), whose
+    // data ends at a known address; and the pinned object is the storage the value has NOW. The pinned object does
+    // not move while the pin is held, so the two addresses read here are the ones a window over them will use.
+    private unsafe bool heldExtent(out nuint start, out nuint end)
+    {
+        start = 0;
+        end = 0;
+
+        PinnedBuffer? pin = m_pin;
+
+        if (pin is null || NativeAddress != 0 || pin.PinnedTarget is not Array target)
+            return false;
+
+        nuint first = (nuint)pin.Pointer;
+        int elements;
+
+        // A Go array's box pins the array's elements and records the array's length; a pin-only hold records 0.
+        if (pin.Length > 0)
+        {
+            // The pin is made once (pinnedArrayData) and holds the elements the array had then. A whole
+            // assignment gives the array new ones (`a = b` is emitted `a = b.Clone()`), and the pin still holds the
+            // old: a window over them would read what the variable no longer is and lose every write (the review of
+            // 2026-11-15, fix 1). So the pinned elements must be the array's own now.
+            if (ValueSlot is not IArray current || !ReferenceEquals(current.Source, target))
+                return false;
+
+            elements = (int)Math.Min(pin.Length, target.Length);
+            end = (nuint)(nint)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(target, elements);
+        }
+        else
+        {
+            // A pin-only hold is of the object this box's own slot is in.
+            elements = target.Length;
+            end = (nuint)(nint)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(target, elements);
+
+            fixed (void* slot = &this.ValueSlot)
+            {
+                if ((nuint)slot < first || (nuint)slot >= end)
+                {
+                    end = 0;
+                    return false;
+                }
+            }
+        }
+
+        start = first;
+        return true;
+    }
+
     /// <inheritdoc/>
     /// <remarks>
     /// THREE facts, and none of them is redundant.
@@ -780,9 +905,23 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         internal static readonly bool HoldReferences = typeof(T).IsValueType && default(T) is IArray { ElementHoldsReferences: true };
     }
 
+    //
+    // `arr` is what the caller read from ValueSlot, and for a value-type T that is a boxed COPY. A named array
+    // nothing has used yet fills its backing on first use (computePublishArrayBacking names the shape), so
+    // reading the copy's Source filled a backing of the copy's own: the pin held an array the variable never
+    // reads, and a write at the address handed out was lost without a panic. Such a T publishes first, through
+    // the gate the element door uses (publishArrayBacking), and the pin is of the backing that gate put in the
+    // box's own storage. Any other T has no lazy backing and pins what it was given.
     private unsafe void* pinnedArrayData(IArray arr)
     {
-        m_pin ??= new PinnedBuffer(arr.Source, arr.Length);
+        if (m_pin is null)
+        {
+            if (s_publishArrayBacking)
+                arr = publishArrayBacking(new AnyElementArrayViewCheck(), ref ValueSlot);
+
+            m_pin ??= PinnedBuffer.Of(arr.Source, arr.Length);
+        }
+
         return m_pin.Pointer;
     }
 
@@ -834,6 +973,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // for every ж<T> the program has, which Native AOT requires.
 
     object? IGoReflectBox.ReadBoxSlot() => ValueSlot;
+
+    // The pointee for reflect's pointer conversion between two names of one array type (GoReflect.TryConvertPointer):
+    // a named array's lazily filled backing is published into this box's own storage first, through the gate the
+    // element door and the pin paths use, so the conversion's result and the variable share one holder.
+    object? IGoReflectBox.ReadBoxSlotPublished() =>
+        s_publishArrayBacking && !IsNilPointer ? publishArrayBacking(new AnyElementArrayViewCheck(), ref ValueSlot) : ((IGoReflectBox)this).ReadBoxSlot();
 
     bool IGoReflectBox.NamesZeroBase => NamesZeroBase;
 
@@ -963,7 +1108,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // docs/phase4/DESIGN-native-array-view.md §4 as amended). Computed once per instantiation
     // because the operator is on a hot path and the answer cannot change.
     private static readonly bool s_isArrayShaped =
-        typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>);
+        typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>); // ONE TEST, THREE SPELLINGS: the line above the lazy-shape comment (search "s_isArrayShaped below") and NativeBox<T>.s_isNamedArrayShaped spell this one; change the three together
 
     // ---- the address conversions (the uintptr/void* seam; kind tests are virtual reads) ----
 
@@ -973,7 +1118,18 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // pointer arithmetic then walks the GC heap, and handing the pointer back to a native API
     // frees GC memory — STATUS_HEAP_CORRUPTION). Aliasing keeps `uintptr(unsafe.Pointer(p))`
     // an exact round-trip, as Go requires.
-    public static unsafe explicit operator ж<T>(uintptr value)
+    public static explicit operator ж<T>(uintptr value)
+    {
+        return FromNumber(value, carried: null);
+    }
+
+    // The number conversion's body, shared with unsafe.Pointer.To<T> (Go's `(*T)(p)` for an unsafe.Pointer VALUE;
+    // docs/phase4/DESIGN-interior-pointer-root.md 4.1). `carried` is what the unsafe.Pointer carried, or null for a
+    // bare number. It is read at ONE place, the fall-through at the end: where the conversion would mint a native
+    // box that keeps nothing, the box keeps what the pointer carried (NativeDerivation.Kept: nothing for C memory
+    // alone). Every arm above the fall-through answers exactly as it does for a bare number, so the operator is
+    // this method with nothing carried, and one conversion still mints one box.
+    internal static unsafe ж<T> FromNumber(uintptr value, object? carried)
     {
         // A pointer to MANAGED storage has no address to have been converted from: what a
         // reflect projection handed out was an order token (see ManagedPointerTokens). Recover
@@ -1187,7 +1343,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         //
         // `array.cs`'s AliasPointer needs no change of its own: its documented raw-metal fallback is
         // `return (ж<array<T>>)(uintptr)element!`, which funnels through this operator.
-        if (resolved is null && s_isArrayShaped)
+        //
+        // NOT THE NUMBER 0 (2026-11-14). `(*[N]T)(unsafe.Pointer(nil))` is a nil pointer in Go and touches no
+        // memory, but 0 has no provenance record either, so this line refused it through both doors until the
+        // conjunct below (NativeArrayViewFloorTests.ANilPointerAtAnArrayPointeeIsANilPointer, red before it).
+        // The fall-through answers a null native box, as it does for every other pointee.
+        if (resolved is null && value.Value != 0 && s_isArrayShaped)
             throw RuntimeErrorPanic.NativeArrayViewWithoutElementStorage(typeof(T));
 
         // The fall-through, carrying arm 2a's verdict IN THE BOX. `aliasesAnOrderToken` is false for
@@ -1196,7 +1357,11 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // path did not already do. The knowledge was computed once, at the one place that had the
         // resolved box in hand; making the accessor re-derive it would put a token lookup on every
         // native read in the corpus.
-        return new NativeBox<T>((nuint)value.Value, aliasesAnOrderToken: aliasesAnOrderToken);
+        //
+        // What the pointer CARRIED is kept here and only here, and only where the resolve kept nothing: a number that
+        // missed the registry (an interior address of Go memory: only a box's own address is registered) used to
+        // mint a box with no source and no pin under a pointer still in use.
+        return new NativeBox<T>((nuint)value.Value, retainedSource: NativeDerivation.KeptResolved(resolved, aliasesAnOrderToken) ?? NativeDerivation.Kept(carried), aliasesAnOrderToken: aliasesAnOrderToken);
     }
 
     // The interior-alias step's one call shape, shared by both refusal arms: walk, record the path
@@ -1236,6 +1401,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // uintptr(unsafe.Pointer(new(struct{}))) is &zerobase for every such allocation.
         if (value.NamesZeroBase)
             return GoZeroBase.Address;
+
+        // A view with no storage of its own (a field's bytes viewed as an array over a Go value that has no
+        // address) answers the number of the field it views, minted by the field's own conversion. Asked before
+        // the slot is read, which such a box refuses by name.
+        if (value is IPointerNumberForwarder forwarder)
+            return (uintptr)forwarder.ForwardedNumber();
 
         // A pointer to a Go fixed array (`unsafe.Pointer(&arr)`): the native address must reference the
         // array's DATA (element 0), pinned so a syscall can fill it in and the managed reads afterward
@@ -1322,6 +1493,10 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // The zerobase's one address, as in the uintptr operator above.
         if (value.NamesZeroBase)
             return (void*)GoZeroBase.Address;
+
+        // The number of the field a storage-less view views, as in the uintptr operator above.
+        if (value is IPointerNumberForwarder forwarder)
+            return (void*)forwarder.ForwardedNumber();
 
         // A pointer to a Go fixed array resolves to the pinned address of the array data — see the
         // uintptr operator above for the full rationale, including why the address is REGISTERED

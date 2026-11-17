@@ -429,14 +429,21 @@ func applyRecordSection(packageInfoLines []string, records []string, mergeExisti
 			}
 		}
 
-		// Remove the block: the prose lines immediately above the start marker, the section, and
-		// the one blank line after the end marker that separated it from the next section.
+		// Remove the block: the prose above the start marker, the section, and the one blank line after
+		// the end marker that separated it from the next section. The prose is the run of comment lines
+		// directly above the marker, up to a blank line or another section's marker, and NOT the current
+		// prose matched line by line: a converter that rewords the prose would otherwise leave the old
+		// wording above the new on every re-conversion (the <InlineArrays> prose did, 2026-11-13).
 		removeFrom := startIndex
-		prose := spec.prose()
 
-		for len(prose) > 0 && removeFrom > 0 && strings.TrimSpace(packageInfoLines[removeFrom-1]) == prose[len(prose)-1] {
+		for removeFrom > 0 {
+			above := strings.TrimSpace(packageInfoLines[removeFrom-1])
+
+			if !strings.HasPrefix(above, "//") || strings.HasPrefix(above, "// <") {
+				break
+			}
+
 			removeFrom--
-			prose = prose[:len(prose)-1]
 		}
 
 		removeTo := endIndex + 1

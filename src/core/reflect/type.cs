@@ -417,8 +417,8 @@ internal static @string pkgPath(abiꓸName n) {
     ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
-    copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff))).slice(), array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
-    var pkgPathName = new abiꓸName(Bytes: (ж<byte>)(uintptr)(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
+    copy(@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)).slice(), array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
+    var pkgPathName = new abiꓸName(Bytes: @unsafe.Pointer.To<byte>(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
     return pkgPathName.Name();
 }
 
@@ -556,23 +556,23 @@ internal static aTextOff resolveReflectText(@unsafe.Pointer ptr) {
 internal static abiꓸName nameOff(this ж<rtype> Ꮡt, aNameOff off) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    return new abiꓸName(Bytes: (ж<byte>)(uintptr)(resolveNameOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off)));
+    return new abiꓸName(Bytes: @unsafe.Pointer.To<byte>(resolveNameOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off)));
 }
 
 internal static ж<abi.Type> typeOff(this ж<rtype> Ꮡt, aTypeOff off) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    return (ж<abi.Type>)(uintptr)(resolveTypeOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off));
+    return @unsafe.Pointer.To<abi.Type>(resolveTypeOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off));
 }
 
 internal static @unsafe.Pointer textOff(this ж<rtype> Ꮡt, aTextOff off) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    return (uintptr)resolveTextOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off);
+    return resolveTextOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off);
 }
 
 internal static @unsafe.Pointer textOffFor(ж<abi.Type> t, aTextOff off) {
-    return (uintptr)toRType(t).textOff(off);
+    return toRType(t).textOff(off);
 }
 
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -866,7 +866,7 @@ internal static iter.Seq<ΔType> Outs(this ж<rtype> Ꮡt) {
 //
 //go:linkname add
 internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x, @string whySafe) {
-    return (@unsafe.Pointer)((uintptr)p + x);
+    return @unsafe.Add(p, x);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1060,9 +1060,9 @@ internal static StructField /*f*/ Field(this ref structType t, nint i) {
         var staticuint64s = getStaticuint64s();
         @unsafe.Pointer pΔ1 = @unsafe.Pointer.FromPinnedBox(Ꮡ(staticuint64s.Value).at<uint64>(i));
         if (/* unsafe.Sizeof(int(0)) */ (uintptr)8 == 4 && goarch.BigEndian) {
-            pΔ1 = (uintptr)@unsafe.Add(pΔ1, 4);
+            pΔ1 = @unsafe.Add(pΔ1, 4);
         }
-        f.Index = @unsafe.Slice((ж<nint>)(uintptr)(pΔ1), 1);
+        f.Index = @unsafe.Slice(@unsafe.Pointer.To<nint>(pΔ1), 1);
     } else {
         // NOTE(rsc): This is the only allocation in the interface
         // presented by a reflect.Type. It would be nice to avoid,
@@ -1434,7 +1434,7 @@ private static readonly @string sizeofRtype0ˢᵇ = "sizeof(rtype) > 0"u8;
 //
 //go:linkname rtypeOff
 internal static ж<abi.Type> rtypeOff(@unsafe.Pointer section, int32 off) {
-    return (ж<abi.Type>)(uintptr)(add(section, (uintptr)off, sizeofRtype0ˢ));
+    return @unsafe.Pointer.To<abi.Type>(add(section, (uintptr)off, sizeofRtype0ˢ));
 }
 
 // typesByString returns the subslice of typelinks() whose elements have
@@ -1932,7 +1932,7 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
 
     // cache result for future callers
     var xʗ1 = x;
-    framePool = Ꮡ(new Δsync.Pool(New: () => @unsafe.Pointer.OrTypedNil((uintptr)unsafe_New(xʗ1))
+    framePool = Ꮡ(new Δsync.Pool(New: () => @unsafe.Pointer.OrTypedNil(unsafe_New(xʗ1))
     ));
     var (lti, _) = ᏑlayoutCache.LoadOrStore(k, new layoutType(
         t: x,

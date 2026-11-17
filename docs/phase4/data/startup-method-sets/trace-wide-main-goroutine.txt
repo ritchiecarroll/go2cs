@@ -1,0 +1,66 @@
+  100.0%        257 ms  (Non-Activities)
+  100.0%        257 ms  Threads
+  100.0%        257 ms  Thread (17270)
+  100.0%        257 ms  System.Private.CoreLib!System.Threading.Thread.StartCallback()
+  100.0%        257 ms  golib!go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0()
+   99.5%        256 ms  wide!go.b3.main_package.main()
+   94.3%        243 ms  go.fmt!go.fmt_package.Println(value class System.Span`1<class System.Object>)
+   93.9%        241 ms  go.fmt!go.fmt_package.Fprintln(class Writer,value class System.Span`1<class System.Object>)
+   85.0%        219 ms  go.fmt!go.fmt_package.doPrintln(class go.ж`1<value class pp>,value class go.slice`1<class System.Object>)
+   84.5%        217 ms  go.fmt!go.fmt_package.printArg(class go.ж`1<value class pp>,class System.Object,int32)
+   78.5%        202 ms  go.fmt!go.fmt_package.handleMethods(class go.ж`1<value class pp>,int32)
+   64.0%        165 ms  golib!go.builtin.TryTypeAssert(class System.Object,!!0&)
+   45.1%        116 ms  golib!go.builtin._(class System.Object,bool)
+   31.6%         81 ms  golib!go.golib.TypeExtensions.GetGoMethodSetCandidates(class System.Type,bool)
+   31.6%         81 ms  System.Collections.Concurrent!System.Collections.Concurrent.ConcurrentDictionary`2[System.ValueTuple`2[System.__Canon,System.Boolean],System.__Canon].
+   31.6%         81 ms  System.Collections.Concurrent!System.Collections.Concurrent.ConcurrentDictionary`2[System.__Canon,System.Boolean].GetOrAdd(!0,class System.Func`2<!0,!
+   31.2%         80 ms  golib!go.builtin.Implements(class System.Object)
+   31.2%         80 ms  golib!go.builtin+Cache`1[System.__Canon].Implements(class System.Type)
+   31.2%         80 ms  golib!go.builtin+Cache`1+<>c[System.__Canon].<Implements>b__1_0(class System.Type)
+   31.2%         80 ms  golib!go.golib.TypeExtensions.StructurallyImplements(class System.Type,class System.Type)
+   30.8%         79 ms  golib!go.golib.TypeExtensions+<>c.<GetGoMethodSetCandidates>b__77_0(value class System.ValueTuple`2<class System.Type,bool>)
+   30.8%         79 ms  golib!go.golib.TypeExtensions.CollectGoMethodSetCandidates(class System.Type,bool,class System.Collections.Generic.IReadOnlyList`1<value class System.
+   30.8%         79 ms  golib!go.golib.TypeExtensions.CollectGoMethodSetCandidatesB3(class System.Type,bool,class System.Collections.Generic.IReadOnlyList`1<value class Syste
+   30.8%         79 ms  golib!go.golib.TypeExtensions.StructurallyImplementsB3(class System.Type,class System.Type)
+   27.4%         70 ms  System.Linq!System.Linq.Enumerable.ToArray(class System.Collections.Generic.IEnumerable`1<!!0>)
+   26.9%         69 ms  golib!go.golib.TypeExtensions+ExtensionHost.get_Methods()
+   26.4%         68 ms  golib!go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadOnlySet`1<class System.Reflection.Assembly>)
+   26.4%         68 ms  golib!go.golib.TypeExtensions.GetExtensionMethodsHomedInB3(class System.Collections.Generic.IReadOnlySet`1<class System.Reflection.Assembly>)
+   25.5%         66 ms  golib!go.golib.TypeExtensions+ExtensionHost.ReadExtensionMethods(class System.Type)
+   24.2%         62 ms  System.Linq!System.Linq.Enumerable+ArrayWhereSelectIterator`2[System.__Canon,System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].ToArra
+   24.2%         62 ms  System.Linq!System.Linq.Enumerable+ArrayWhereSelectIterator`2[System.__Canon,System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].ToArra
+   19.8%         51 ms  golib!go.builtin._(class System.Object,!!0&)
+   19.3%         50 ms  golib!go.AdapterBinder.TryCreate(class System.Object,class System.Type,class System.Object&)
+   19.0%         49 ms  golib!go.golib.TypeExtensions+ExtensionHost+<>c.<ReadExtensionMethods>b__21_0(class System.Reflection.MethodInfo)
+   19.0%         49 ms  System.Private.CoreLib!System.Reflection.RuntimeMethodInfo.GetParameters()
+   18.9%         49 ms  golib!go.AdapterBinder.TryCreate(class System.Object,class System.Type,class System.Type,class System.Object&)
+   18.5%         48 ms  golib!go.AdapterBinder.BuildFactory(class System.Type,class System.Type)
+   18.1%         47 ms  golib!go.golib.TypeExtensions.GetExtensionTargetType(class System.Reflection.MethodInfo)
+   17.2%         44 ms  System.Private.CoreLib!System.Reflection.RuntimeMethodInfo.<get_Signature>g__LazyCreateSignature|25_0()
+   16.7%         43 ms  golib!go.AdapterBinder.BuildGenericShellFactory(class System.Type,class go.GoInterfaceShellAttribute)
+   16.3%         42 ms  System.Private.CoreLib!System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(value class System.RuntimeTypeHandle)
+   16.3%         42 ms  golib!go.error`1[go.runtime_package+TypeAssertionError]..cctor()
+   16.3%         42 ms  golib!go.golib.TypeExtensions.GetExtensionMethod(class System.Type,class System.String)
+   15.8%         41 ms  golib!go.golib.TypeExtensions.GetExtensionMethods(class System.Type)
+   15.8%         41 ms  System.Collections.Concurrent!System.Collections.Concurrent.ConcurrentDictionary`2[System.__Canon,System.__Canon].GetOrAdd(!0,class System.Func`2<!0,!
+   15.4%         40 ms  golib!go.golib.TypeExtensions+<>c.<GetExtensionMethods>b__41_0(class System.Type)
+   15.4%         40 ms  golib!go.golib.TypeExtensions.ExtensionMethodsOf(class System.Type,class System.Collections.Generic.IReadOnlyList`1<value class System.ValueTuple`2<cl
+   15.4%         40 ms  golib!go.golib.TypeExtensions.ExtensionMethodsOfB3(class System.Type,class System.Collections.Generic.IReadOnlyList`1<value class System.ValueTuple`2<
+   13.6%         35 ms  golib!go.golib.TypeExtensions.GetExtensionMethods()
+   13.6%         35 ms  golib!go.golib.TypeExtensions+ExtensionScan.get_Methods()
+   13.2%         34 ms  System.Linq!System.Linq.Enumerable+SelectManySingleSelectorIterator`2[System.__Canon,System.ValueTuple`2[System.__Canon,System.__Canon]].ToArray()
+   12.2%         31 ms  golib!go.AdapterRegistry.TryGetAdapterFactory(class System.Type,class System.Type,class System.Func`2<class System.Object,class System.Object>&)
+   11.8%         30 ms  golib!go.golib.TypeExtensions+ExtensionScan+<>c.<get_Methods>b__6_0(class ExtensionHost)
+   11.7%         30 ms  golib!go.GoDeferredRegistrations.Run()
+   10.9%         28 ms  golib!go.golib.TypeExtensions.WalkExtensionHosts()
+   10.7%         27 ms  wide!go2cs.Interceptors.<main_69877ed2_Interceptors_g>F35277DE15A03776DBDF5192F86F554F67431EDA1C4A3197DE4FBF77DB6EED051__ˢInterceptors.ˢI0(value class
+   10.3%         27 ms  golib!go.golib.TypeExtensions.LoadAssemblyExtensionHosts(class System.Reflection.Assembly,class System.Collections.Generic.List`1<class ExtensionHost>
+    9.0%         23 ms  golib!go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)
+    8.3%         21 ms  System.Private.CoreLib!System.Runtime.CompilerServices.InitHelpers.InitClassSlow(value class System.Runtime.CompilerServices.MethodTable*)
+    4.8%         12 ms  ?!?
+    4.8%         12 ms  go.go.ast!go.go.ast_package.ᴛRegisterAdapters()
+    4.4%         11 ms  System.Private.CoreLib!System.Reflection.RuntimeMethodInfo.FetchNonReturnParameters()
+    4.4%         11 ms  System.Private.CoreLib!System.Signature..ctor(class System.IRuntimeMethodInfo,class System.RuntimeType)
+    4.4%         11 ms  System.Private.CoreLib!System.Runtime.CompilerServices.StaticsHelpers.GetNonGCStaticBaseSlow(value class System.Runtime.CompilerServices.MethodTable*)
+    4.0%         10 ms  System.Private.CoreLib!System.Array.Copy(class System.Array,class System.Array,int32)
+    4.0%         10 ms  go.fmt!go.fmt_package.newPrinter()

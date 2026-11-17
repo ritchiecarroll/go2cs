@@ -51,6 +51,7 @@ public static ж<ΔPublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
 // All values are in big-endian byte slice format, and may have leading zeros
 // or be shorter if leading zeroes were trimmed.
 public static (ж<PrivateKey>, error) NewPrivateKey(slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q) {
+    fipsSelfTest();
     var (n, err) = bigmod.NewModulus(N);
     if (err != nil) {
         return (default, err);
@@ -118,6 +119,8 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> n, nint
 // NewPrivateKeyWithPrecomputation creates a new RSA private key from the given
 // parameters, which include precomputed CRT values.
 public static (ж<PrivateKey>, error) NewPrivateKeyWithPrecomputation(slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) {
+    fipsSelfTest();
+
     var (n, err) = bigmod.NewModulus(N);
     if (err != nil) {
         return (default, err);

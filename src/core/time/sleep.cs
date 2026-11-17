@@ -116,7 +116,7 @@ public static bool Stop(this ж<Timer> Ꮡt) {
 // in Go 1.27 or later.
 public static ж<Timer> NewTimer(Duration d) {
     var c = new channel<Time>(1);
-    var t = newTimer(when(d), 0, sendTime, c, (uintptr)syncTimer(c));
+    var t = newTimer(when(d), 0, sendTime, c, syncTimer(c));
     t.C = c.AsRecvOnly();
     return t;
 }

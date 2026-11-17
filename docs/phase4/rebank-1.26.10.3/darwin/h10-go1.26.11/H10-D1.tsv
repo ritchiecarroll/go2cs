@@ -1,0 +1,7 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs	run	wall_s	cells	absent
+H10-D1	crypto/internal/fips140test	osx-x64	2282	2274	8	8	0	validated	yes	2274	8	2274/8	no	43591880062	1122	read	-
+H10-D1	crypto/internal/fips140test	osx-arm64	2282	2274	8	8	0	validated	yes	2274	8	2274/8	no	43591880062	381	read	-
+H10-D1	net	osx-x64	556	553	3	3	0	validated	yes	506	3	553/3	yes	43591880062	354	read	-
+H10-D1	net	osx-arm64	556	553	3	3	0	validated	yes	506	3	553/3	yes	43591880062	233	read	-
+H10-D1	net/http	osx-x64	1538	1538	0	0	0	validated	yes	1538	0	1538/0	no	43591880062	845	read	-
+H10-D1	net/http	osx-arm64	1538	1538	0	0	0	validated	yes	1538	0	1538/0	no	43591880062	364	read	-

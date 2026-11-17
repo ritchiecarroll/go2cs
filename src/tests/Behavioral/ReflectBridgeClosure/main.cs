@@ -177,19 +177,19 @@ internal static void main() {
     var seen = new map<any, EmptyStruct>{};
     var backing = new map<@string, nint>{["a"] = 1};
     var mv = reflect.ValueOf(backing);
-    seen[@unsafe.Pointer.OrTypedNil((uintptr)mv.UnsafePointer())] = new EmptyStruct();
-    var (_, again) = seen[@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(backing).UnsafePointer()), ꟷ];
+    seen[@unsafe.Pointer.OrTypedNil(mv.UnsafePointer())] = new EmptyStruct();
+    var (_, again) = seen[@unsafe.Pointer.OrTypedNil(reflect.ValueOf(backing).UnsafePointer()), ꟷ];
     var sl = slice<nint>([1, 2, 3]);
     var sv = reflect.ValueOf(sl);
-    seen[@unsafe.Pointer.OrTypedNil((uintptr)sv.UnsafePointer())] = new EmptyStruct();
-    var (_, slAgain) = seen[@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(sl).UnsafePointer()), ꟷ];
-    var (_, other) = seen[@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(new map<@string, nint>{["b"] = 2}).UnsafePointer()), ꟷ];
+    seen[@unsafe.Pointer.OrTypedNil(sv.UnsafePointer())] = new EmptyStruct();
+    var (_, slAgain) = seen[@unsafe.Pointer.OrTypedNil(reflect.ValueOf(sl).UnsafePointer()), ꟷ];
+    var (_, other) = seen[@unsafe.Pointer.OrTypedNil(reflect.ValueOf(new map<@string, nint>{["b"] = 2}).UnsafePointer()), ꟷ];
     fmt.Println("pointer identity:", again, slAgain, other, len(seen));
 
     var boxed = new map<any, EmptyStruct>{};
-    boxed[new sliceKey(@unsafe.Pointer.OrTypedNil((uintptr)sv.UnsafePointer()), sv.Len())] = new EmptyStruct();
-    var (_, keyAgain) = boxed[new sliceKey(@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(sl).UnsafePointer()), len(sl)), ꟷ];
-    var (_, keyOther) = boxed[new sliceKey(@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(sl).UnsafePointer()), len(sl) - 1), ꟷ];
+    boxed[new sliceKey(@unsafe.Pointer.OrTypedNil(sv.UnsafePointer()), sv.Len())] = new EmptyStruct();
+    var (_, keyAgain) = boxed[new sliceKey(@unsafe.Pointer.OrTypedNil(reflect.ValueOf(sl).UnsafePointer()), len(sl)), ꟷ];
+    var (_, keyOther) = boxed[new sliceKey(@unsafe.Pointer.OrTypedNil(reflect.ValueOf(sl).UnsafePointer()), len(sl) - 1), ꟷ];
     fmt.Println("slice key identity:", keyAgain, keyOther, len(boxed));
 }
 

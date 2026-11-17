@@ -954,7 +954,7 @@ partial struct runtimeProfile {
 
 internal static nint Len(this ref runtimeProfile p) { return len(p.stk); }
 internal static slice<uintptr> Stack(this ref runtimeProfile p, nint i) { return p.stk[i].Stack; }
-internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) { return (ж<labelMap>)(uintptr)(p.labels[i]); }
+internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) { return @unsafe.Pointer.To<labelMap>(p.labels[i]); }
 
 partial struct cpuᴛ1 /*dyn*/ {
     /*embed*/ public go.sync_package.Mutex Mutex;

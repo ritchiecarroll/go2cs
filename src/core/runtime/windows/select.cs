@@ -296,7 +296,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
             }
         } else {
             if (raceenabled) {
-                racereadpc((uintptr)c.raceaddr(), casePC(casi), chansendpc);
+                racereadpc(c.raceaddr(), casePC(casi), chansendpc);
             }
             if (c.closed != 0) {
                 goto sclose;
@@ -365,7 +365,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
     sellock(scases, lockorder);
 
     gp.of(g.ᏑselectDone).Store(0);
-    sg = (ж<sudog>)(uintptr)((~gp).param);
+    sg = @unsafe.Pointer.To<sudog>((~gp).param);
     gp.Value.param = default;
 
     // pass 3 - dequeue from unsuccessful chans
@@ -469,7 +469,7 @@ bufrecv:
         asanwrite(cas.elem, c.elemtype.Size_);
     }
     recvOK = true;
-    qp = (uintptr)chanbuf(c, c.recvx);
+    qp = chanbuf(c, c.recvx);
     if (cas.elem != nil) {
         typedmemmove(c.elemtype, cas.elem, qp);
     }
@@ -494,7 +494,7 @@ bufsend:
     if (asanenabled) {
         asanread(cas.elem, c.elemtype.Size_);
     }
-    typedmemmove(c.elemtype, (uintptr)chanbuf(c, c.sendx), cas.elem);
+    typedmemmove(c.elemtype, chanbuf(c, c.sendx), cas.elem);
     c.sendx++;
     if (c.sendx == c.dataqsiz) {
         c.sendx = 0;
@@ -524,7 +524,7 @@ rclose:
         typedmemclr(c.elemtype, cas.elem);
     }
     if (raceenabled) {
-        raceacquire((uintptr)c.raceaddr());
+        raceacquire(c.raceaddr());
     }
     goto retc;
 
@@ -562,9 +562,7 @@ sclose:
 }
 
 internal static uintptr sortkey(this ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.DerefOrNull();
-
-    return (uintptr)(uintptr)@unsafe.Pointer.FromRef(ref c);
+    return (uintptr)Ꮡc;
 }
 
 // A runtimeSelect is a single case passed to rselect.

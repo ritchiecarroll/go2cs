@@ -60,7 +60,7 @@ internal static ж<listNodeManual> getNode(this ref listHeadManual head, @unsafe
     if (Δp == nil) {
         return default;
     }
-    return (ж<listNodeManual>)(uintptr)(@unsafe.Add(Δp, head.nodeOffset));
+    return @unsafe.Pointer.To<listNodeManual>(@unsafe.Add(Δp, head.nodeOffset));
 }
 
 // Returns true if the list is empty.

@@ -66,8 +66,10 @@ Several Go semantics cannot be written directly in C#, so the converter emits co
 `TypeGenerator`, `ImplementGenerator`, `EscapeRegistryGenerator` and `NativeArrayOpenerGenerator` also fill golib
 registries that code finds at run time, and none of them fills its registry at startup; see
 [Run-time registrations wait for the first lookup that misses](#run-time-registrations-wait-for-the-first-lookup-that-misses).
-The same assembly ships two analyzers, which report and generate nothing: `StringLiteralBindingAnalyzer`
-([`GO2CS0004`](../DiagnosticCodes.md)) and `StackAppendBufferAnalyzer` ([`GO2CS0007`](../DiagnosticCodes.md)).
+The same assembly ships four analyzers, which report and generate nothing: `StringLiteralBindingAnalyzer`
+([`GO2CS0004`](../DiagnosticCodes.md)), `StackAppendBufferAnalyzer` ([`GO2CS0007`](../DiagnosticCodes.md)),
+`RefusalDowngradedAnalyzer` ([`GO2CS0011`](../DiagnosticCodes.md)) and `MethodLimitAnalyzer`
+([`GO2CS0012`](../DiagnosticCodes.md)).
 <!-- The list is every class under src/gen/go2cs-gen declared `[Generator]`: nineteen at C46 (2026-11-11), whose MainEntryGenerator is one;
      BoundedGoroutineInterceptorGenerator and ExtensionHostListGenerator are not yet listed above. Sixteen at 3e3f18925a (fourteen
      at b335356d6; grep for `^\[Generator`); the two analyzers are declared
@@ -479,7 +481,7 @@ queued after a run is run by the next miss.
 <!-- The queueing initializer: src/gen/go2cs-gen/DeferredRegistration.cs:22
      (`public static string Initializer(string registry, string name)`). Its callers:
      src/gen/go2cs-gen/ImplementGenerator.cs:1592 (`DeferredRegistration.Initializer("Adapters", "Adapters")`),
-     src/gen/go2cs-gen/TypeGenerator.cs:692 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
+     src/gen/go2cs-gen/TypeGenerator.cs:725 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
      src/gen/go2cs-gen/EscapeRegistryGenerator.cs:402 (`DeferredRegistration.Initializer("EscapeRegistry", "EscapingContainers")`),
      src/gen/go2cs-gen/NativeArrayOpenerGenerator.cs:220
      (`DeferredRegistration.Initializer("NativeArrayOpeners", "NativeArrayOpeners")`).
@@ -491,7 +493,7 @@ queued after a run is run by the next miss.
      src/core/golib/builtin.cs:1633 (`GoDeferredRegistrations.ZeroFactories.Run()`),
      src/core/golib/GoTypeOps.cs:233 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
      src/core/golib/GoReflect.VariadicRegistry.cs:51 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
-     src/core/golib/NativeArrayOpeners.cs:56 (`GoDeferredRegistrations.NativeArrayOpeners.Run()`), :63
+     src/core/golib/NativeArrayOpeners.cs:57 (`GoDeferredRegistrations.NativeArrayOpeners.Run()`), :67
      (`GoDeferredRegistrations.NativeArrayOpeners.Run()`). Guard: src/tests/GolibTests/DeferredRegistrationTests.cs:212
      (`public void ARegistrationQueuedAfterARunIsRunByTheNextMiss()`). The startup measurement is in the comment of
      GoDeferredRegistrations.cs (PerfStartup, 2026-10-22, win-x64 JIT, median of 9 interleaved runs: 4,402 -> 3,188

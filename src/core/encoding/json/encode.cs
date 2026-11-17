@@ -818,7 +818,7 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
             e.ptrLevel++; if (e.ptrLevel > startDetectingCyclesAfter) {
                 // We're a large number of nested ptrEncoder.encode calls deep;
                 // start checking if we've run into a pointer cycle.
-                @unsafe.Pointer ptr = (uintptr)v.UnsafePointer();
+                @unsafe.Pointer ptr = v.UnsafePointer();
                 var (_, ok) = e.ptrSeen[@unsafe.Pointer.OrTypedNil(ptr), ꟷ]; if (ok) {
                     e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, fmt.Sprintf("encountered a cycle via %s"u8, v.Type())))));
                 }
@@ -912,7 +912,7 @@ internal static void encode(this sliceEncoder se, ж<encodeState> Ꮡe, reflect�
                 // start checking if we've run into a pointer cycle.
                 // Here we use a struct to memorize the pointer to the first element of the slice
                 // and its length.
-                ref var ptr = ref heap<encode_ptr>(new encode_ptr(@unsafe.Pointer.OrTypedNil((uintptr)v.UnsafePointer()), v.Len()), out var Ꮡptr);
+                ref var ptr = ref heap<encode_ptr>(new encode_ptr(@unsafe.Pointer.OrTypedNil(v.UnsafePointer()), v.Len()), out var Ꮡptr);
                 var (_, ok) = e.ptrSeen[ptr, ꟷ]; if (ok) {
                     e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, fmt.Sprintf("encountered a cycle via %s"u8, v.Type())))));
                 }

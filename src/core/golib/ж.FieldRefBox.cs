@@ -36,9 +36,22 @@ namespace go;
 internal interface INativeRooted
 {
     bool IsNativeRooted { get; }
-
+    bool IsGenuinelyNativeRoot => false; // true for a NativeBox over C memory alone (NativeBox's own remarks)
     /// <summary>The native base address when this box IS a native root (a <see cref="NativeBox{T}"/>), else 0.</summary>
     nuint NativeRootAddress => 0;
+
+    /// <summary>
+    /// What a native root was DERIVED from (the source it retains), when its own address is an address and not an
+    /// order token; else null. Read by <see cref="NativeDerivation.Token"/> only.
+    /// </summary>
+    object? NativeDerivedFrom => null;
+
+    /// <summary>
+    /// What a box derived from this one retains IN ITS PLACE, else null (<see cref="NativeDerivation.Kept"/>): the
+    /// source of a native root that holds its source and nothing else. A pointer advanced step by step then stays one
+    /// hop from what it was first derived from.
+    /// </summary>
+    object? NativeRetainedInItsPlace => null;
 
     /// <summary>
     /// A field reference's address at its GO offset when it sits ONE field hop off a native root, else 0
@@ -316,7 +329,7 @@ internal interface IFirstFieldView
     // of a native chain is itself native and addresses Go's layout, never the CLR slot.
     internal ж<T>? NativeFieldBox() =>
         ((INativeRooted)this).NativeGoFieldAddress is var address and not 0
-            ? NativeArrayWindow() ?? new NativeBox<T>(address)
+            ? NativeArrayWindow() ?? new NativeBox<T>(address, retainedSource: NativeDerivation.Kept(m_source))
             : null;
 
     private ж<T>? NativeArrayWindow()
@@ -329,7 +342,7 @@ internal interface IFirstFieldView
         // The window is X's registered door (NativeArrayOpeners), compiled only for an [N]X field some compilation
         // declares, never a generic method closed by reflection (Native AOT has no code for one over a value type).
         // T is array<X>, so the window IS a ж<T>.
-        return length >= 0 ? (ж<T>)NativeArrayOpeners.OpenArray(element, address, length) : null;
+        return length >= 0 ? (ж<T>)NativeArrayOpeners.OpenArray(element, address, length, NativeDerivation.Kept(m_source)) : null;
     }
 
     // X for an array field type T = array<X>, else null: a pure type query, decided once per T.

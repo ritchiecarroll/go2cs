@@ -251,7 +251,7 @@ public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) {
 // does not cause x to advance to the very end of p's allocation
 // and therefore point incorrectly at the next block in memory.
 internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string whySafe) {
-    return (@unsafe.Pointer)((uintptr)p + x);
+    return @unsafe.Add(p, x);
 }
 
 // Imethod represents a method on an interface type
@@ -344,31 +344,31 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
     }
     switch (t.Kind()) {
     case var ᴛ when ᴛ == Struct: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, structTypeUncommon>()).Value.u);
+        return Ꮡt.Reinterpret<Type, structTypeUncommon>().Ꮡu;
     }
     case var ᴛ when ᴛ == Pointer: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_u>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_u>().Ꮡu;
     }
     case var ᴛ when ᴛ == Func: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ1>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ1>().Ꮡu;
     }
     case var ᴛ when ᴛ == Slice: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ2>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ2>().Ꮡu;
     }
     case var ᴛ when ᴛ == Array: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ3>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ3>().Ꮡu;
     }
     case var ᴛ when ᴛ == Chan: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ4>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ4>().Ꮡu;
     }
     case var ᴛ when ᴛ == Map: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ5>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ5>().Ꮡu;
     }
     case var ᴛ when ᴛ == Interface: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ6>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ6>().Ꮡu;
     }
     default: {
-        return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ7>()).Value.u);
+        return Ꮡt.Reinterpret<Type, Uncommon_uᴛ7>().Ꮡu;
     }}
 }
 
@@ -518,7 +518,7 @@ partial struct ΔName {
 // DataChecked does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe for the reason in whySafe (which can appear in a backtrace, etc.)
 public static ж<byte> DataChecked(this ΔName n, nint off, @string whySafe) {
-    return (ж<byte>)(uintptr)(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, whySafe));
+    return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, whySafe));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -528,7 +528,7 @@ private static readonly @string theRuntimeDoesnTNeedToˢᵇ = "the runtime doesn
 // Data does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe because the runtime made the call (other packages use DataChecked)
 public static ж<byte> Data(this ΔName n, nint off) {
-    return (ж<byte>)(uintptr)(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, theRuntimeDoesnTNeedToˢ));
+    return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, theRuntimeDoesnTNeedToˢ));
 }
 
 // IsExported returns "is n exported?"

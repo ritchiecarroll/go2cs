@@ -1,0 +1,16 @@
+# memory and race readings on H, 2026-11-15, .NET 10, workstation GC, Release; predictions in pred-poh.txt (written before each run)
+
+## 100,000 distinct 1 KiB backings
+native    total 97 MiB copied | live copies at peak (sampled every 1024 reads) 5.0 MiB | at loop end 2.2 MiB | after 3 forced collections 0.0 KiB | gen0 28 gen2 3 | 0
+native+p  total 97 MiB copied | live copies at peak (sampled every 1024 reads) 4.0 MiB | at loop end 1.4 MiB | after 3 forced collections 0.0 KiB | gen0 49 gen2 27 | 0
+poh       total 97 MiB copied | live copies at peak (sampled every 1024 reads) 2.9 MiB | at loop end 0.9 MiB | after 3 forced collections 0.0 KiB | gen0 36 gen2 36 | 2
+
+## 200 distinct 8 MiB backings
+native    total 1600 MiB copied | live copies at peak (sampled every 1 reads) 72.0 MiB | at loop end 16.0 MiB | after 3 forced collections 0.0 KiB | gen0 81 gen2 81 | 0
+native+p  total 1600 MiB copied | live copies at peak (sampled every 1 reads) 32.0 MiB | at loop end 24.0 MiB | after 3 forced collections 0.0 KiB | gen0 202 gen2 202 | 0
+poh       total 1600 MiB copied | live copies at peak (sampled every 1 reads) 40.0 MiB | at loop end 16.0 MiB | after 3 forced collections 0.0 KiB | gen0 94 gen2 94 | 2
+
+## the first-read race, 3 runs
+race: 20000 keys x 4 threads | keys whose callback ran more than once 19718 (max 4) | keys where two callers got different objects 0
+race: 20000 keys x 4 threads | keys whose callback ran more than once 19709 (max 4) | keys where two callers got different objects 0
+race: 20000 keys x 4 threads | keys whose callback ran more than once 19811 (max 4) | keys where two callers got different objects 0

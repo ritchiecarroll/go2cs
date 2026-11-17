@@ -13,6 +13,18 @@ namespace go.golib;
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)] public class HashCode
 {
+    // Typed overloads for one to eight values, which a generated struct's GetHashCode binds ahead of the
+    // params form: no object[] and no box per field. System.HashCode.Combine<T> hashes value?.GetHashCode(),
+    // exactly what the params form computes from the boxed value, so every hash is unchanged.
+    public static int Combine<T1>(T1 value1) => System.HashCode.Combine(value1);
+    public static int Combine<T1, T2>(T1 value1, T2 value2) => System.HashCode.Combine(value1, value2);
+    public static int Combine<T1, T2, T3>(T1 value1, T2 value2, T3 value3) => System.HashCode.Combine(value1, value2, value3);
+    public static int Combine<T1, T2, T3, T4>(T1 value1, T2 value2, T3 value3, T4 value4) => System.HashCode.Combine(value1, value2, value3, value4);
+    public static int Combine<T1, T2, T3, T4, T5>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5) => System.HashCode.Combine(value1, value2, value3, value4, value5);
+    public static int Combine<T1, T2, T3, T4, T5, T6>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6) => System.HashCode.Combine(value1, value2, value3, value4, value5, value6);
+    public static int Combine<T1, T2, T3, T4, T5, T6, T7>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7) => System.HashCode.Combine(value1, value2, value3, value4, value5, value6, value7);
+    public static int Combine<T1, T2, T3, T4, T5, T6, T7, T8>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8) => System.HashCode.Combine(value1, value2, value3, value4, value5, value6, value7, value8);
+
     /// <summary>
     /// Combines all values into a single hash code.
     /// </summary>

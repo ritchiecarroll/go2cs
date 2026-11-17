@@ -189,6 +189,8 @@ func TestParseAsmTrampolineAddrs(t *testing.T) {
 	}
 
 	// The vendored x/sys/cpu in GOROOT carries the same shape: the real file must bind both of its variables.
+	// x/sys/cpu names it asm_darwin_x86_gc.s. A missing file fails: this arm once read a name x/sys/cpu does not
+	// use and skipped on the read error, so it never ran (sqlite-cs S21).
 	goRoot := build.Default.GOROOT
 
 	if goRoot == "" {
@@ -196,15 +198,18 @@ func TestParseAsmTrampolineAddrs(t *testing.T) {
 	}
 
 	if goRoot != "" {
-		path := filepath.Join(goRoot, "src", "vendor", "golang.org", "x", "sys", "cpu", "syscall_darwin_x86_gc.s")
+		path := filepath.Join(goRoot, "src", "vendor", "golang.org", "x", "sys", "cpu", "asm_darwin_x86_gc.s")
+		content, err := os.ReadFile(path)
 
-		if content, err := os.ReadFile(path); err == nil {
-			real := parseAsmTrampolineAddrs(string(content))
+		if err != nil {
+			t.Fatalf("GOROOT's vendored x/sys/cpu darwin assembly is unreadable: %v", err)
+		}
 
-			for _, name := range []string{"libc_sysctl_trampoline_addr", "libc_sysctlbyname_trampoline_addr"} {
-				if real[name] != strings.TrimSuffix(name, "_trampoline_addr") {
-					t.Errorf("GOROOT %s: %s binds to %q, want %s", path, name, real[name], strings.TrimSuffix(name, "_trampoline_addr"))
-				}
+		real := parseAsmTrampolineAddrs(string(content))
+
+		for _, name := range []string{"libc_sysctl_trampoline_addr", "libc_sysctlbyname_trampoline_addr"} {
+			if real[name] != strings.TrimSuffix(name, "_trampoline_addr") {
+				t.Errorf("GOROOT %s: %s binds to %q, want %s", path, name, real[name], strings.TrimSuffix(name, "_trampoline_addr"))
 			}
 		}
 	}

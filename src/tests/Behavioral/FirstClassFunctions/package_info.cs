@@ -60,7 +60,7 @@ using static go.main_package;
 namespace go;
 
 [GoPackage("main")]
-//[GoTestMatchingConsoleOutput] -- TODO: enable after conversion of std fmt package
+// Cannot test matching console output, go result is non-deterministic (math/rand: 8 distinct outputs in 8 runs)
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the

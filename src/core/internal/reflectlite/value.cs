@@ -101,7 +101,7 @@ internal static @unsafe.Pointer pointer(this Value v) {
         throw panic("can't call pointer on a non-pointer Value");
     }
     if ((flag)(v.flag & flagIndir) != 0) {
-        return ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
+        return ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
     }
     return v.ptr;
 }
@@ -120,7 +120,7 @@ internal static any packEface(Value v) {
         // Value is indirect, and so is the interface we're making.
         @unsafe.Pointer ptr = v.ptr;
         if ((flag)(v.flag & flagAddr) != 0) {
-            @unsafe.Pointer c = (uintptr)unsafe_New(t);
+            @unsafe.Pointer c = unsafe_New(t);
             typedmemmove(t, c, ptr);
             ptr = c;
         }
@@ -130,7 +130,7 @@ internal static any packEface(Value v) {
     case {} when (flag)(v.flag & flagIndir) != 0: {
         // Value is indirect, but interface is direct. We need
         // to load the data at v.ptr into the interface data word.
-        e.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
+        e.Data = ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
         break;
     }
     default: {
@@ -282,7 +282,7 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
     }
     case {} when implements(Ꮡdst, v.typ()): {
         if (target == nil) {
-            target = (uintptr)unsafe_New(Ꮡdst);
+            target = unsafe_New(Ꮡdst);
         }
         if (v.Kind() == abi.Interface && v.IsNil()) {
             // A nil ReadWriter passed to nil Reader is OK,
@@ -292,7 +292,7 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
         }
         var x = valueInterface(v);
         if (Ꮡdst.NumMethod() == 0) {
-            ((ж<any>)(uintptr)(target)).ValueSlot = x;
+            (@unsafe.Pointer.To<any>(target)).ValueSlot = x;
         } else {
             ifaceE2I(Ꮡdst, x, target);
         }
@@ -315,7 +315,7 @@ private static readonly @string iLenˢᵇ = "i < len"u8;
 // whySafe must explain why i < len. (Passing "i < len" is fine;
 // the benefit is to surface this assumption at the call site.)
 internal static @unsafe.Pointer arrayAt(@unsafe.Pointer p, nint i, uintptr eltSize, @string whySafe) {
-    return (uintptr)add(p, (uintptr)i * eltSize, iLenˢ);
+    return add(p, (uintptr)i * eltSize, iLenˢ);
 }
 
 internal static partial void ifaceE2I(ж<abi.Type> t, any src, @unsafe.Pointer dst);

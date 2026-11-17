@@ -8,7 +8,7 @@ partial class main_package {
 
 internal static @string kind(error err, any expected) {
     switch (expected.type()) {
-    case Func<error, bool> expectedTypeΔ1: {
+    case {} ΔexpectedTypeΔ1 when ΔexpectedTypeΔ1._<Func<error, bool>>(out var expectedTypeΔ1): {
         return fmt.Sprint("func:", expectedTypeΔ1(err));
     }
     case {} ΔexpectedTypeΔ1 when ΔexpectedTypeΔ1._<reflectꓸType>(out var expectedTypeΔ1): {
@@ -27,7 +27,7 @@ partial struct Result /*@string*/;
 internal static Func<Result> errorType(error err, any expected) {
     return () => {
         switch (expected.type()) {
-        case Func<error, bool> expectedTypeΔ1: {
+        case {} ΔexpectedTypeΔ1 when ΔexpectedTypeΔ1._<Func<error, bool>>(out var expectedTypeΔ1): {
             return (Result)fmt.Sprint("func:", expectedTypeΔ1(err));
         }
         case {} ΔexpectedTypeΔ1 when ΔexpectedTypeΔ1._<reflectꓸType>(out var expectedTypeΔ1): {

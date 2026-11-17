@@ -1,0 +1,39 @@
+# readings on H, 2026-11-15, Go 1.26.11, windows/amd64; tool = census-main.go built against golang.org/x/tools v0.52.0
+
+## ctl/pos (written expectations in the file's header comments)
+target / tests=false; files 1
+   slice-data-then-len/other                1
+   string-data-only/other                   1
+   string-data-then-len-fresh-empty/other   1
+   string-data-then-len-maybe-nonempty/go-derived 1
+   string-data-then-len-maybe-nonempty/other 4
+   string-len-then-data/other               1
+   string-value-header/other                1
+
+== slice-data-then-len/other (1)
+   ctl/pos/main.go:48:2  slice.Data-store key=hdr
+
+== string-data-only/other (1)
+   ctl/pos/main.go:36:2  string.Data-store key=hdr
+
+== string-data-then-len-fresh-empty/other (1)
+   ctl/pos/main.go:69:2  string.Data-store key=hdr
+
+== string-data-then-len-maybe-nonempty/go-derived (1)
+   ctl/pos/main.go:24:2  string.Data-store key=hdr
+
+== string-data-then-len-maybe-nonempty/other (4)
+   ctl/pos/main.go:18:2  string.Data-store key=hdr
+   ctl/pos/main.go:56:3  string.Data-store key=hdr
+   ctl/pos/main.go:78:3  string.Data-store key=hdr
+   ctl/pos/main.go:89:2  string.Data-store key=hdr
+
+== string-len-then-data/other (1)
+   ctl/pos/main.go:31:2  string.Data-store key=hdr
+
+== string-value-header/other (1)
+   ctl/pos/main.go:41:2  string.Data-store key=h
+
+## ctl/neg (expected: none)
+target / tests=false; files 1
+   none

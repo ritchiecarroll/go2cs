@@ -168,7 +168,7 @@ public static void TestIntegrityCheckInfo(ж<testing.T> t) {
     }
     sect(0, textˢ, (@unsafe.Pointer)abi.FuncPCABIInternal(checktest.TEXT));
     {
-        @unsafe.Pointer p = (uintptr)checktest.PtrStaticText(); if (p != nil) {
+        @unsafe.Pointer p = checktest.PtrStaticText(); if (p != nil) {
             sect(0, staticTextˢ, p);
         }
     }

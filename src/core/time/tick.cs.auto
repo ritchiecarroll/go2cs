@@ -48,7 +48,7 @@ public static ж<Ticker> NewTicker(Duration d) {
     // If the client falls behind while reading, we drop ticks
     // on the floor until the client catches up.
     var c = new channel<Time>(1);
-    var t = newTimer(when(d), (int64)d, sendTime, c, (uintptr)syncTimer(c)).Reinterpret<Timer, Ticker>();
+    var t = newTimer(when(d), (int64)d, sendTime, c, syncTimer(c)).Reinterpret<Timer, Ticker>();
     t.of(Ticker.ᏑC).Value = c.AsRecvOnly();
     return t;
 }

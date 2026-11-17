@@ -272,6 +272,12 @@ internal static void SetReadBufferSize(this ref fakeNetConn c, nint size) {
     c.loc.setReadBufferSize(size);
 }
 
+internal static void SetReadError(this ref fakeNetConn c, error err) {
+    c.loc.@lock();
+    c.loc.readErr = err;
+    c.loc.unlock();
+}
+
 // fakeNetConnHalf is one data flow in the connection created by fakeNetPipe.
 // Each half contains a buffer. Writes to the half push to the buffer, and reads pull from it.
 partial struct fakeNetConnHalf {

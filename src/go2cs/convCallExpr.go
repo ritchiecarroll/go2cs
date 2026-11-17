@@ -315,6 +315,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// (goImageCopyView.go); marked before the arguments are converted.
 	v.markGoImageCopyArgs(callExpr)
 
+	// A copy into or out of the open view of a named array, `copy((*A)(p)[lo:], src)`, is one of golib's copy
+	// doors (arrayPointerViewDoor.go).
+	if door, ok := v.arrayPointerCopyDoor(callExpr); ok {
+		return door
+	}
+
 	// The //go:cgo_unsafe_args block lift (cgoUnsafeArgsLift.go): the ONE `unsafe.Pointer(&first)` the
 	// current declaration's lift consumes renders as the synthesized block's pinned box. Intercepted
 	// ahead of every arm because the conversion reaches two of them -- the type-conversion arm for a
@@ -323,6 +329,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	if lift := v.currentCgoLift; lift != nil && callExpr == lift.conversion {
 		return cgoUnsafeArgsBlockPointer(lift)
 	}
+
+	// Pointer arithmetic in Go's one valid form, `unsafe.Pointer(uintptr(P) + n)`, is emitted as unsafe.Add; and
+	// unsafe.Add's own first argument is marked as a pointer golib receives (pointerArithmetic.go).
+	if callExpr == v.pointerArithmeticBase {
+		return pointerArithmeticSentinel
+	}
+
+	if emission, ok := v.pointerArithmeticEmission(callExpr); ok {
+		return emission
+	}
+
+	// copy into or out of a slice of an inline array, over a reference to its storage (inlineArrayEmission.go).
+	if emission, ok := v.inlineArrayCopyEmission(callExpr); ok {
+		return emission
+	}
+
+	v.markCarriedPointerArgument(callExpr)
 
 	// An EXPORTED generic of this package called with an array type argument at a parameter whose
 	// zero value it builds: it cannot carry an array-dims companion, so the call is refused loudly
@@ -500,6 +523,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 			return castOf(v.getCSharpTypeName(ifaceType), converted)
 		}
+	}
+
+	// A conversion whose target is an UNNAMED STRUCT type literal, `struct{ Hz int }(v)`: a cast to the
+	// lifted type (namedUnnamedStructConversion.go).
+	if converted, ok := v.structTypeLiteralConversion(callExpr); ok {
+		return converted
 	}
 
 	// Check if the call is a type conversion
@@ -961,6 +990,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				return emission
 			}
 
+			if door, ok := v.typedPointerDoorEmission(callExpr, arg, targetTypeName, expr); ok {
+				return door
+			}
+
 			return fmt.Sprintf("(%s)(uintptr)(%s)", targetTypeName, expr)
 		}
 
@@ -982,6 +1015,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						}
 
 						elemCS := convertToCSTypeName(v.getAliasQualifiedTypeName(ptrUnder.Elem(), false))
+
+						// The same typed door as the `(*T)(p)` form above, then the named type's own operator.
+						if basic.Kind() == types.UnsafePointer {
+							return fmt.Sprintf("((%s)%s<%s>(%s))", targetTypeName, typedPointerDoor, elemCS, expr)
+						}
+
 						return fmt.Sprintf("((%s)(%s<%s>)(uintptr)(%s))", targetTypeName, PointerPrefix, elemCS, expr)
 					}
 				}
@@ -1000,6 +1039,34 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// pointer arg needs this.) The numeric address is still not GC-stable — the same caveat as
 		// every unsafe.Pointer-as-uintptr use; the RETAINED box is what survives a move.
 		if targetTypeName == "@unsafe.Pointer" {
+			// Go's unsafe RULE 6 on a reflect header's Data field: `unsafe.Pointer(h.Data)` in ONE expression, with h a
+			// *reflect.StringHeader or *reflect.SliceHeader (spelled `h.Data`, `(*h).Data`, or the inline conversion's
+			// `.Data`). Go's pointer keeps what the header describes alive, and the number the field holds keeps nothing,
+			// so the emission hands golib the header's BOX: `@unsafe.Pointer.FromHeaderData(box)` answers a pointer that
+			// CARRIES the element box for a header box, and today's number pointer for any other box, decided at run time
+			// (docs/phase4/DESIGN-sqlite-ccgo-ts.md, QW-8 and section 10.3; TestHeaderDataPointerEmitsFromHeaderData).
+			//
+			// A pointer PARAMETER or RECEIVER renders as the pointed-to VALUE alias, so its box is asked for by the pointer
+			// context (`Ꮡsh`). Where the body has NO box (a `ref T` parameter or receiver), there is nothing to carry, and
+			// the emission stays today's number pointer (P3's arm b: it must compile).
+			if header, ok := v.reflectHeaderDataOperand(arg); ok {
+				if !v.exprIsDerefAliasedPointer(header) {
+					return fmt.Sprintf("@unsafe.Pointer.FromHeaderData(%s)", v.convExpr(header, nil))
+				}
+
+				identContext := DefaultIdentContext()
+				identContext.isPointer = true
+
+				if box := v.convExpr(header, []ExprContext{identContext}); strings.HasPrefix(box, AddressPrefix) {
+					return fmt.Sprintf("@unsafe.Pointer.FromHeaderData(%s)", box)
+				}
+
+				// DELIBERATE fall-through to the number pointer below: an alias with no box (a `[GoRecv] this ref T`
+				// receiver) has nothing to carry, so it keeps today's safe old behaviour. For a PARAMETER it is
+				// unreachable: ref-lowering vetoes this use as X3 (isReflectHeaderDataPointerUse), so the parameter keeps
+				// its box and takes the arm above.
+			}
+
 			// A NAMED-numeric arg whose underlying is uintptr — `unsafe.Pointer(v)` where v is
 			// `type gclinkptr uintptr` (runtime malloc/mcache/stack: the allocator's span-address
 			// arithmetic type). The [GoType] wrapper only converts named↔underlying, and golib's
@@ -1051,6 +1118,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// mint that cannot retain (FromRef sees only the ref); a recorded residual, loud at
 				// the primitives if ever reached.
 				if v.exprIsDerefAliasedPointer(arg) {
+					if emission, ok := v.receiverPointerAtProvenUse(callExpr); ok {
+						return emission
+					}
+
 					return fmt.Sprintf("@unsafe.Pointer.FromRef(ref %s)", expr)
 				}
 
@@ -1698,7 +1769,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// Hop through the constant's DEFAULT Go type first (`((@string)(rune)runeError)`) —
 		// exactly Go's conversion semantics. A plain literal is already a C# constant and
 		// keeps its direct form (no churn).
-		if basicTarget != nil && basicTarget.Kind() == types.String {
+		//
+		// A NAMED string target (`type literalErr string`; github.com/ncruces/go-strftime's
+		// `literalErr(b)` over a byte) takes the same code-point steps, then the @string the unnamed
+		// form converts to: its [GoType] wrapper converts only from @string, never from an integer
+		// (CS0030). Scoped to an integer operand; a string operand already converts in one step.
+		namedStringTarget := false
+
+		if targetNamed, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
+			if u, ok := targetNamed.Underlying().(*types.Basic); ok && u.Kind() == types.String {
+				if argType := v.info.TypeOf(arg); argType != nil {
+					argBasic, ok := argType.Underlying().(*types.Basic)
+					namedStringTarget = ok && argBasic.Info()&types.IsInteger != 0
+				}
+			}
+		}
+
+		if basicTarget != nil && basicTarget.Kind() == types.String || namedStringTarget {
 			if tvArg, ok := v.info.Types[arg]; ok && tvArg.Value != nil {
 				if argBasic, ok := tvArg.Type.(*types.Basic); ok && argBasic.Info()&types.IsUntyped != 0 && !v.isCSharpConstantExpr(arg) {
 					expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(types.Default(argBasic).(*types.Basic)), expr)
@@ -1713,6 +1800,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(u), expr)
 					}
 				}
+			}
+
+			if namedStringTarget {
+				// A cast binds tighter than a binary operator: `literalErr(d+1)` converts the sum.
+				if v.needsParentheses(arg) {
+					expr = "(" + expr + ")"
+				}
+
+				expr = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(types.Typ[types.String]), expr)
 			}
 		}
 
@@ -2674,6 +2770,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						callExprContext.interfaceTypes[j] = paramType
 					}
 
+					// An inline array crosses as its deep array<T> copy (C1's review, M1).
+					if j < len(callExpr.Args) && v.isInlineArrayExpr(callExpr.Args[j]) {
+						if callExprContext.inlineArrayBoxArgs == nil {
+							callExprContext.inlineArrayBoxArgs = make(map[int]bool)
+						}
+
+						callExprContext.inlineArrayBoxArgs[j] = true
+					}
+
 					// An untyped constant boxed into the interface must be cast to Go's DEFAULT TYPE for
 					// its kind so its C# box matches Go's boxed dynamic type and a later `.(int)`
 					// (`._<nint>()`) assertion, `case int:`, or `==` succeeds — see untypedConstBoxCast.
@@ -2891,6 +2996,26 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// "not evaluated" carries that carve-out), so those keep the evaluating form rather than
 		// having their side effect silently dropped.
 		if (ident.Name == "len" || ident.Name == "cap") && len(callExpr.Args) == 1 {
+			// A pointer-to-array CONVERSION, dereferenced or not: the length is the type's, and a box of the whole
+			// array would answer the length of whatever Go array the address holds (arrayPointerElementDoor.go).
+			if length, ok := v.arrayPointerConversionLength(callExpr.Args[0]); ok {
+				return fmt.Sprintf("%d", length)
+			}
+
+			// The dereference of a field view: the type's length. The view has no array<T> to ask
+			// (nativeFieldArrayView.go).
+			if v.nativeFieldArrayViewDerefIsUnevaluated(callExpr.Args[0]) {
+				if arr, isArray := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Array); isArray {
+					return fmt.Sprintf("%d", arr.Len())
+				}
+			}
+
+			// An inline array (a go.arrays member, inlineArrayEmission.go) has its length in its type, and golib's len
+			// cannot see the family: the constant, unless the operand calls or receives.
+			if arr, isArray := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Array); isArray && v.isInlineArrayExpr(callExpr.Args[0]) && !v.exprHasCallOrReceive(callExpr.Args[0]) {
+				return fmt.Sprintf("%d", arr.Len())
+			}
+
 			// A NAMED pointer to an array (`type Features *flagSet`) folds the same way.
 			if ptr, ok := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Pointer); ok {
 				if arr, isArray := ptr.Elem().Underlying().(*types.Array); isArray {
@@ -3559,7 +3684,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// (sync/atomic's nil-deref table) emitted `(uintptr)SwapPointer(nil, nil);` — CS0201.
 				// Node identity, not a flag, so a nested call in the same statement whose value IS
 				// consumed keeps the prefix (see visitExprStmt).
-				if callExpr != v.resultDiscardedExpr {
+				//
+				// …and unless the call is a TRUE call, a function or method that RETURNS an unsafe.Pointer.
+				// The prefix belongs to the conversion `unsafe.Pointer(x)`. On a true call it turned the
+				// returned pointer into a number, which converts back to a fresh pointer carrying nothing:
+				// not the box the pointer was minted from, and so not the pin that keeps its storage where
+				// the number says it is. A write through `p := f(q)` was lost once the collector had run
+				// (docs/phase4/DESIGN-unsafe-pointer-call-result.md; guarded by the behavioral program
+				// UnsafePointerCallResultLifetime). A consumer that needs the number builds its own cast: a
+				// pointer cast and uintptr(...) both do.
+				if calleeTV, isTyped := v.info.Types[callExpr.Fun]; callExpr != v.resultDiscardedExpr && isTyped && calleeTV.IsType() {
 					constructType = "(uintptr)"
 				}
 			} else if len(callExpr.Args) == 1 && v.currentFuncSignature != nil {
@@ -3601,6 +3735,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						// which holds the box, so `FromRef(ref p)` was the address of the local's own
 						// slot and the write never reached `h` (Go `7 8`, converted `7 0`). A local, a
 						// field or any other operand falls through to the box-carrying mint below.
+						//
+						// At a use known at this node, and with the receiver's box in scope, the box is
+						// emitted instead (receiverPointerAtProvenUse); every other use keeps FromRef.
+						if emission, ok := v.receiverPointerAtProvenUse(callExpr); ok {
+							return emission
+						}
+
 						return fmt.Sprintf("(uintptr)@unsafe.Pointer.FromRef(ref %s)", v.convExpr(callExpr.Args[0], nil))
 					}
 				}
@@ -4091,7 +4232,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				expr = v.stackAppendBufferName(buffer) + ", " + expr
 			}
 
-			result = fmt.Sprintf("%s%s(%s)", constructType, funcName, expr)
+			if door, ok := v.typedPointerDoorCallEmission(callExpr, constructType, funcName, expr); ok {
+				result = door
+			} else {
+				result = fmt.Sprintf("%s%s(%s)", constructType, funcName, expr)
+			}
 		}
 	}
 
@@ -4230,7 +4375,12 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 // passes "" and pays no traversal. Keep it that way; reading anything out of expr would put a whole
 // second walk of the argument subtree back on every call (see the loop's note in convCallExpr).
 func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, targetTypeName string, expr string) string {
-	argType := v.getType(arg, false)
+	return v.applyImplicitConversionOf(funcType, v.getType(arg, false), targetTypeName, expr)
+}
+
+// applyImplicitConversionOf is applyImplicitConversion for a value known by its type alone: one result of a
+// call that returns several, or the element a range clause assigns (recordNamedUnnamedStructMoves).
+func (v *Visitor) applyImplicitConversionOf(funcType, argType types.Type, targetTypeName string, expr string) string {
 
 	// The callee of a call whose operand went INVALID has no recorded type at all (go/types drops
 	// invalid operands rather than recording them), so getType returned nil for it — a package that
@@ -5315,6 +5465,71 @@ func (v *Visitor) isRawAddressPointerConversion(callExpr *ast.CallExpr, arg ast.
 	return false
 }
 
+// typedPointerDoor is golib's door for Go's `(*T)(p)` over an unsafe.Pointer VALUE: `@unsafe.Pointer.To<T>(p)`.
+const typedPointerDoor = "@unsafe.Pointer.To"
+
+// typedPointerDoorEmission renders `(*T)(p)`, p an unsafe.Pointer, as `@unsafe.Pointer.To<T>(p)`.
+//
+// The conversion was emitted `(ж<T>)(uintptr)(p)`. The cast to a number came first, so golib's number operator
+// saw a number and nothing of what p carried: an interior address of Go memory (a base plus an offset, which no
+// registry holds) came back as a native box that kept nothing and pinned nothing, under a pointer still in use.
+// The door takes the pointer itself, mints the one box the cast minted, and where that box would keep nothing it
+// keeps what p carried (docs/phase4/DESIGN-interior-pointer-root.md 4.1).
+//
+// Three sources keep the cast. A TYPED pointer source that reached this route (see the note at the call site) is
+// a box, not an unsafe.Pointer, and has no door. A conversion convSliceExpr reads as a span view
+// (`(*[N]T)(p)[lo:hi]`) is never rendered as a conversion at all: that lowering cuts the `(ж<…>)` prefix off the
+// text and reads the memory through a raw C# pointer, so its text stays what the cut expects. And a target that
+// is not spelled `ж<…>` has no pointee to name.
+func (v *Visitor) typedPointerDoorEmission(callExpr *ast.CallExpr, arg ast.Expr, targetTypeName, expr string) (string, bool) {
+	if v.spanViewConversions[callExpr] {
+		return "", false
+	}
+
+	argType := v.info.TypeOf(arg)
+
+	if argType == nil {
+		return "", false
+	}
+
+	if basic, ok := argType.Underlying().(*types.Basic); !ok || basic.Kind() != types.UnsafePointer {
+		return "", false
+	}
+
+	prefix := PointerPrefix + "<"
+
+	if !strings.HasPrefix(targetTypeName, prefix) || !strings.HasSuffix(targetTypeName, ">") {
+		return "", false
+	}
+
+	pointee := targetTypeName[len(prefix) : len(targetTypeName)-1]
+
+	return fmt.Sprintf("%s<%s>(%s)", typedPointerDoor, pointee, expr), true
+}
+
+// typedPointerDoorCallEmission is typedPointerDoorEmission for the CALL path. `(*T)(p)` with a parenthesized star
+// type is not classified as a conversion and is assembled as a call whose callee convParenExpr rendered as the
+// cast pair `(ж<T>)(uintptr)`; this is most of the corpus's `(*T)(p)` sites. The callee text is read back only
+// to recover the pointee it already spells; what decides is the call itself: one argument, a TYPE callee, an
+// unsafe.Pointer operand.
+func (v *Visitor) typedPointerDoorCallEmission(callExpr *ast.CallExpr, constructType, funcName, expr string) (string, bool) {
+	if constructType != "" || len(callExpr.Args) != 1 {
+		return "", false
+	}
+
+	if calleeTV, isTyped := v.info.Types[callExpr.Fun]; !isTyped || !calleeTV.IsType() {
+		return "", false
+	}
+
+	const castSuffix = ")(uintptr)"
+
+	if !strings.HasPrefix(funcName, "(") || !strings.HasSuffix(funcName, castSuffix) {
+		return "", false
+	}
+
+	return v.typedPointerDoorEmission(callExpr, callExpr.Args[0], funcName[1:len(funcName)-len(castSuffix)], expr)
+}
+
 // pointerReinterpretIdentitySource reports the underlying pointer expression when a `(*T)(…)`
 // conversion is a semantic IDENTITY — its source, after peeling an optional escape-analysis
 // identity wrapper, is a pointer that ALREADY has the same pointer type `*T`, reached either
@@ -5562,7 +5777,28 @@ func (v *Visitor) reinterpretManagedEmission(callExpr *ast.CallExpr, arg ast.Exp
 	// A source Go already parenthesized renders its own parentheses and is left as written.
 	rendered := v.parenthesizeConversionBase(src, v.convExpr(src, []ExprContext{identContext}))
 
+	// Rendering the source may LIFT the anonymous struct its element names: ccgo's float type-punning
+	// `(*struct{…})(unsafe.Pointer(&struct{ f float64 }{f: x}))` lifts the literal only now. A name taken before
+	// that deferred to a marker no registry answers for a function-local lift, and was emitted as raw Go
+	// (sqlite-cs L1, modernc.org/libc on linux). Name such an element again, now that the lift exists.
+	srcElem = v.reinterpretElemAfterRender(srcElem, src)
+	targetElem = v.reinterpretElemAfterRender(targetElem, callExpr)
+
 	return fmt.Sprintf("%s.Reinterpret<%s, %s>()", rendered, srcElem, targetElem), true
+}
+
+// reinterpretElemAfterRender answers a Reinterpret element name again from expr's pointer type when the name taken
+// before rendering is a deferred dynamic-type marker; any other name is returned unchanged.
+func (v *Visitor) reinterpretElemAfterRender(name string, expr ast.Expr) string {
+	if !strings.Contains(name, dynamicTypeMarkerPrefix) {
+		return name
+	}
+
+	if ptr, ok := types.Unalias(v.info.TypeOf(expr)).(*types.Pointer); ok {
+		return convertToCSTypeName(v.getAliasQualifiedTypeName(ptr.Elem(), false))
+	}
+
+	return name
 }
 
 // The internal/abi record types the managed model can synthesize from a descriptor's carried
@@ -5710,15 +5946,9 @@ func unsafePointerTargetLevels(t types.Type) (int, bool) {
 //
 // A NAMED array target keeps the pre-existing route, matching the slice form (none in the corpus).
 func (v *Visitor) arrayPointerAliasEmission(callExpr *ast.CallExpr, arg ast.Expr) (string, bool) {
-	p, srcPtr, targetPtr := v.pointerConversionSource(callExpr, arg)
+	p, targetArr, ok := v.arrayPointerAliasSource(callExpr, arg)
 
-	if p == nil {
-		return "", false
-	}
-
-	targetArr, ok := types.Unalias(targetPtr.Elem()).(*types.Array)
-
-	if !ok || !types.Identical(srcPtr.Elem(), targetArr.Elem()) {
+	if !ok {
 		return "", false
 	}
 
@@ -5728,6 +5958,25 @@ func (v *Visitor) arrayPointerAliasEmission(callExpr *ast.CallExpr, arg ast.Expr
 	elemName := convertToCSTypeName(v.getAliasQualifiedTypeName(targetArr.Elem(), false))
 
 	return fmt.Sprintf("array<%s>.AliasPointer(%s, %s)", elemName, v.convExpr(p, []ExprContext{identContext}), csNintLiteral(targetArr.Len())), true
+}
+
+// arrayPointerAliasSource reads `(*[N]T)(unsafe.Pointer(p))` as the same-element alias conversion: p, a `*T`, and
+// the unnamed target array. It is the ONE test of that shape: the emission above asks it, and so does the view door
+// (arrayPointerViewOf), which leaves such a conversion to the alias route when it is sliced.
+func (v *Visitor) arrayPointerAliasSource(callExpr *ast.CallExpr, arg ast.Expr) (ast.Expr, *types.Array, bool) {
+	p, srcPtr, targetPtr := v.pointerConversionSource(callExpr, arg)
+
+	if p == nil {
+		return nil, nil, false
+	}
+
+	targetArr, ok := types.Unalias(targetPtr.Elem()).(*types.Array)
+
+	if !ok || !types.Identical(srcPtr.Elem(), targetArr.Elem()) {
+		return nil, nil, false
+	}
+
+	return p, targetArr, true
 }
 
 // convNewOfValue renders Go 1.26's `new(expr)`: a fresh variable holding a COPY of expr's value, boxed.
@@ -7870,4 +8119,41 @@ func unaliasableStructField(src, target *types.Struct) (string, types.Type, type
 	}
 
 	return "", nil, nil, false
+}
+
+// reflectHeaderDataOperand answers the HEADER POINTER of `h.Data`, `(*h).Data` or `(*reflect.StringHeader)(p).Data` when h
+// (or the conversion) is a *reflect.StringHeader or *reflect.SliceHeader: the operand Go's unsafe rule 6 covers when it is
+// converted to unsafe.Pointer in the same expression. A header VALUE (not a pointer) is not matched: its Data is a
+// number in a local copy, with no header box behind it.
+func (v *Visitor) reflectHeaderDataOperand(arg ast.Expr) (ast.Expr, bool) {
+	selector, ok := ast.Unparen(arg).(*ast.SelectorExpr)
+
+	if !ok || selector.Sel.Name != "Data" {
+		return nil, false
+	}
+
+	header := ast.Unparen(selector.X)
+
+	if star, ok := header.(*ast.StarExpr); ok {
+		header = ast.Unparen(star.X)
+	}
+
+	pointer, ok := types.Unalias(v.info.TypeOf(header)).(*types.Pointer)
+
+	if !ok {
+		return nil, false
+	}
+
+	named, ok := types.Unalias(pointer.Elem()).(*types.Named)
+
+	if !ok || named.Obj().Pkg() == nil || named.Obj().Pkg().Path() != "reflect" {
+		return nil, false
+	}
+
+	switch named.Obj().Name() {
+	case "StringHeader", "SliceHeader":
+		return header, true
+	}
+
+	return nil, false
 }

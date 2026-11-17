@@ -491,7 +491,7 @@ internal static ж<sudog> acquireSudog() {
     var s = (~pp).sudogcache[n - 1];
     pp.Value.sudogcache[n - 1] = default;
     pp.Value.sudogcache = (~pp).sudogcache.slice(0, n - 1);
-    if ((uintptr)s.of(sudog.Ꮡelem).get() != nil) {
+    if (s.of(sudog.Ꮡelem).get() != nil) {
         @throw(acquireSudogFoundSElemˢ);
     }
     releasem(ref (mp).DerefOrNull());
@@ -518,7 +518,7 @@ private static readonly @string runtimeReleaseSudogWithˢᵇ = "runtime: release
 internal static void releaseSudog(ж<sudog> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if ((uintptr)s.elem.get() != nil) {
+    if (s.elem.get() != nil) {
         @throw(runtimeSudogWithNonNilˢ);
     }
     if (s.isSelect) {
@@ -752,13 +752,13 @@ internal static slice<ж<g>> allGsSnapshot() {
 // atomicAllG returns &allgs[0] and len(allgs) for use with atomicAllGIndex.
 internal static (ж<ж<g>>, uintptr) atomicAllG() {
     var length = atomic.Loaduintptr(Ꮡallglen);
-    var ptr = (ж<ж<g>>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallgptr)));
+    var ptr = @unsafe.Pointer.To<ж<g>>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallgptr)));
     return (ptr, length);
 }
 
 // atomicAllGIndex returns ptr[i] with the allgptr returned from atomicAllG.
 internal static ж<g> atomicAllGIndex(ж<ж<g>> ptr, uintptr i) {
-    return ~(ж<ж<g>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(ptr), i * (uintptr)goarch.PtrSize));
+    return ~@unsafe.Pointer.To<ж<g>>(add(@unsafe.Pointer.FromPinnedBox(ptr), i * (uintptr)goarch.PtrSize));
 }
 
 // forEachG calls fn on every G from allgs.
@@ -1918,7 +1918,7 @@ internal static void mstart0() {
         if (size == 0) {
             size = 16384 * sys.StackGuardMultiplier;
         }
-        gp.Value.stack.hi = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡsize));
+        gp.Value.stack.hi = (uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡsize));
         gp.Value.stack.lo = (~gp).stack.hi - size + 1024;
     }
     // Initialize stack guard so that we can start calling regular
@@ -2548,7 +2548,7 @@ internal static void needm(bool signal) {
 internal static void needAndBindM() {
     needm(false);
 
-    if (_cgo_pthread_key_created != nil && ~(ж<uintptr>)(uintptr)(_cgo_pthread_key_created) != 0) {
+    if (_cgo_pthread_key_created != nil && ~@unsafe.Pointer.To<uintptr>(_cgo_pthread_key_created) != 0) {
         cgoBindM();
     }
 }
@@ -2837,7 +2837,7 @@ internal static ж<m> lockextra(bool nilokay) {
             continue;
         }
         if (ᏑextraM.CompareAndSwap(old, locked)) {
-            return (ж<m>)(uintptr)((@unsafe.Pointer)old);
+            return @unsafe.Pointer.To<m>((@unsafe.Pointer)old);
         }
         osyield_no_g();
         continue;
@@ -3690,7 +3690,7 @@ top:
     // If we're in the GC mark phase, can safely scan and blacken objects,
     // and have work to do, run idle-time marking rather than give up the P.
     if (gcBlackenEnabled != 0 && gcShouldScheduleWorker(pp) && ᏑgcController.addIdleMarkWorker()) {
-        var node = (ж<gcBgMarkWorkerNode>)(uintptr)(ᏑgcBgMarkWorkerPool.pop());
+        var node = @unsafe.Pointer.To<gcBgMarkWorkerNode>(ᏑgcBgMarkWorkerPool.pop());
         if (node != nil) {
             pp.Value.gcMarkWorkerMode = gcMarkWorkerIdleMode;
             var gpΔ9 = node.gp.ptr();
@@ -4137,7 +4137,7 @@ internal static (ж<Δp>, ж<g>) checkIdleGCNoP() {
         return (default, default);
     }
 
-    var node = (ж<gcBgMarkWorkerNode>)(uintptr)(ᏑgcBgMarkWorkerPool.pop());
+    var node = @unsafe.Pointer.To<gcBgMarkWorkerNode>(ᏑgcBgMarkWorkerPool.pop());
     if (node == nil) {
         pidleput(pp, now);
         unlock(Ꮡsched.of(schedt.Ꮡlock));
@@ -4317,7 +4317,7 @@ internal static void dropg() {
 }
 
 internal static bool parkunlock_c(ж<g> gp, @unsafe.Pointer @lock) {
-    unlock((ж<mutex>)(uintptr)(@lock));
+    unlock(@unsafe.Pointer.To<mutex>(@lock));
     return true;
 }
 
@@ -4567,7 +4567,7 @@ internal static void goyield_m(ж<g> Ꮡgp) {
 internal static void goexit1() {
     if (raceenabled) {
         var gp = getg(); if ((~gp).bubble != nil) {
-            racereleasemergeg(ref (gp).DerefOrNull(), (uintptr)(~gp).bubble.raceaddr());
+            racereleasemergeg(ref (gp).DerefOrNull(), (~gp).bubble.raceaddr());
         }
         racegoend();
     }
@@ -5017,7 +5017,7 @@ internal static ж<g> malg(int32 stacksize) {
         newg.Value.stackguard1 = ~(uintptr)0;
         // Clear the bottom word of the stack. We record g
         // there on gsignal stack during VDSO on ARM and ARM64.
-        ((ж<uintptr>)(uintptr)((@unsafe.Pointer)(~newg).stack.lo)).Value = 0;
+        (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(~newg).stack.lo)).Value = 0;
     }
     return newg;
 }
@@ -5081,12 +5081,12 @@ internal static ж<g> newproc1(ж<funcval> Ꮡfn, ж<g> Ꮡcallergp, uintptr cal
     var sp = (~newg).stack.hi - totalSize;
     if (usesLR) {
         // caller's LR
-        ((ж<uintptr>)(uintptr)((@unsafe.Pointer)sp)).Value = 0;
+        (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)sp)).Value = 0;
         prepGoExitFrame(sp);
     }
     if (GOARCH == "arm64"u8) {
         // caller's FP
-        ((ж<uintptr>)(uintptr)((@unsafe.Pointer)(sp - (uintptr)goarch.PtrSize))).Value = 0;
+        (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)(sp - (uintptr)goarch.PtrSize))).Value = 0;
     }
 
     memclrNoHeapPointers(@unsafe.Pointer.FromPinnedBox(newg.of(g.Ꮡsched)), /* unsafe.Sizeof(newg.sched) */ (uintptr)48);
@@ -6960,7 +6960,7 @@ internal static void mput(ж<m> mp) {
 internal static ж<m> mget() {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
 
-    var mp = (ж<m>)(uintptr)(Ꮡsched.of(schedt.Ꮡmidle).pop());
+    var mp = @unsafe.Pointer.To<m>(Ꮡsched.of(schedt.Ꮡmidle).pop());
     if (mp != nil) {
         sched.nmidle--;
     }
@@ -7884,9 +7884,9 @@ internal static void doInit1(ж<initTask> Ꮡt) {
             @throw(inittaskWithNoFunctionsˢ);
         }
 
-        ref var firstFunc = ref heap<@unsafe.Pointer>((uintptr)add(@unsafe.Pointer.FromPinnedBox(Ꮡt), 8), out var ᏑfirstFunc);
+        ref var firstFunc = ref heap<@unsafe.Pointer>(add(@unsafe.Pointer.FromPinnedBox(Ꮡt), 8), out var ᏑfirstFunc);
         for (var i = (uint32)0; i < t.nfns; i++) {
-            ref var Δp = ref heap<@unsafe.Pointer>((uintptr)add(firstFunc, (uintptr)i * (uintptr)goarch.PtrSize), out var Ꮡp);
+            ref var Δp = ref heap<@unsafe.Pointer>(add(firstFunc, (uintptr)i * (uintptr)goarch.PtrSize), out var Ꮡp);
             var f = (Ꮡp.Reinterpret<@unsafe.Pointer, Action>()).ValueSlot;
             f();
         }
