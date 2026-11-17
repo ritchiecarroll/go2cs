@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"os"
 	"path/filepath"
 	"slices"
 	"sort"
@@ -407,11 +408,30 @@ func (v *Visitor) liftAdmissionMatches(pkg *types.Package, pkgDir, liftKey, name
 	need := packageInlineAdmission.admits(st)
 
 	if !need && !structHoldsArray(st, 0) {
+		traceLiftReuse(v.pkg, pkg, name, need, false, true, "array-free", true)
 		return true
 	}
 
-	have, known := foreignLiftAdmitted(pkg, pkgDir, liftKey, name, spelled, v.options)
-	return known && have == need
+	have, known, source := foreignLiftAdmitted(pkg, pkgDir, liftKey, name, spelled, v.options)
+	reuse := known && have == need
+	traceLiftReuse(v.pkg, pkg, name, need, have, known, source, reuse)
+
+	return reuse
+}
+
+// liftReuseTraceVariable names the environment variable that, set to 1, makes importedStructLift write one line per
+// admission decision to stderr: the importer, the import's lift, this package's need, the import's admission, whether
+// it is known and which source decided it, and the verdict. It is the census instrument for W18's admission rule (COORD
+// 2026-11-17: count each source's decisions per target, and name any it decides wrongly).
+const liftReuseTraceVariable = "GO2CS_TRACE_LIFT_REUSE"
+
+func traceLiftReuse(importer, pkg *types.Package, name string, need, have, known bool, source string, reuse bool) {
+	if os.Getenv(liftReuseTraceVariable) != "1" || importer == nil {
+		return
+	}
+
+	fmt.Fprintf(os.Stderr, "liftreuse\t%s\t%s.%s\tneed=%t\thave=%t\tknown=%t\tsource=%s\treuse=%t\n",
+		importer.Path(), pkg.Path(), name, need, have, known, source, reuse)
 }
 
 // foreignLiftAdmitted reports whether the package pkg (source directory pkgDir) admitted its lift name of the
@@ -420,10 +440,11 @@ func (v *Visitor) liftAdmissionMatches(pkg *types.Package, pkgDir, liftKey, name
 // never takes it. Otherwise pkg's admission record says: GoInlineArrayKeys counts every admitted key and digests them,
 // and GoInlineArrayType names the admitted NAMED types, so the anonymous structs (and generic instantiations) are the
 // difference. None means st is not admitted. Exactly one is st exactly when the digest of the named keys plus st's key
-// reproduces the record's. More than one cannot be told apart, and neither can a record with no key count.
-func foreignLiftAdmitted(pkg *types.Package, pkgDir, liftKey, name string, st *types.Struct, options Options) (admitted bool, known bool) {
+// reproduces the record's. More than one cannot be told apart, and neither can a record with no key count. source
+// names the rule that answered, for the census trace (traceLiftReuse).
+func foreignLiftAdmitted(pkg *types.Package, pkgDir, liftKey, name string, st *types.Struct, options Options) (admitted, known bool, source string) {
 	if inlineArraysExcluded(pkgDir, options) {
-		return false, true
+		return false, true, "std"
 	}
 
 	packageLock.Lock()
@@ -431,7 +452,7 @@ func foreignLiftAdmitted(pkg *types.Package, pkgDir, liftKey, name string, st *t
 	packageLock.Unlock()
 
 	if valueClone {
-		return false, true
+		return false, true, "valueclone"
 	}
 
 	packageLock.Lock()
@@ -454,28 +475,32 @@ func foreignLiftAdmitted(pkg *types.Package, pkgDir, liftKey, name string, st *t
 	}
 
 	if stamp == nil {
-		return false, false
+		return false, false, "unknown-no-record"
 	}
 
 	if stamp.keyCount == 0 {
 		// No admitted key at all, unless an older record named types without counting its keys.
-		return false, len(stamp.types) == 0
+		if len(stamp.types) > 0 {
+			return false, false, "unknown-uncounted"
+		}
+
+		return false, true, "stamp-none"
 	}
 
 	unnamed := stamp.keyCount - len(stamp.types)
 
 	if unnamed <= 0 {
-		return false, true
+		return false, true, "stamp-named-only"
 	}
 
 	if unnamed > 1 {
-		return false, false
+		return false, false, "unknown-several-anonymous"
 	}
 
 	key, ok := inlineTypeKey(st)
 
 	if !ok {
-		return false, false
+		return false, false, "unknown-no-key"
 	}
 
 	keys := make([]string, 0, stamp.keyCount)
@@ -484,7 +509,7 @@ func foreignLiftAdmitted(pkg *types.Package, pkgDir, liftKey, name string, st *t
 		keys = append(keys, pkg.Path()+"."+name)
 	}
 
-	return inlineArrayKeyDigest(append(keys, key)) == stamp.keyDigest, true
+	return inlineArrayKeyDigest(append(keys, key)) == stamp.keyDigest, true, "stamp-digest"
 }
 
 // importedStructLiftTarget returns the `global using` spelling of a lift importedStructLift reused, given its
