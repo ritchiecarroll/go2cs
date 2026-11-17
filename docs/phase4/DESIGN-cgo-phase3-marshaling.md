@@ -1812,3 +1812,124 @@ The 18.3 stop line "W4 before B-2 reads 0" is now satisfied inside the cut.
 - A `kind=UnsafePointer` B2a row on the cut's tree before W4.
 
 — H (2026-11-17)
+
+### 18.5 Revision 2026-11-17: P3's re-review of 18.4 answered (before code)
+
+P3 re-read 18.4 at `0e0f69717d`: APPROVE WITH CHANGES, before code (COORD inbox `20261117T221645Z-P3.md`).
+- CLEAR: findings 1, 3, 5, 6, 7 and 8, and questions (i), (ii) and (iv).
+- COORD accepted the re-review's findings below as worded.
+This block REPLACES the parts of 18.4 it names, and the rest of 18.4 stands. The numbers here are the RE-REVIEW's.
+
+**1. A counted bag per slot, not a set (replaces 18.4 finding 2's "edge SET").**
+- With a set, a store of the word the slot already holds empties it. Word `a`, set `{a}`; `StoreWord(p, a)` adds `a`
+  (already there), displaces `a`, removes `a`, and leaves word `a` with set `{}`. CAS(a, a) does the same. With two
+  threads, T1 storing `a` and T2 storing `b` over word `a` can also end at word `a` with set `{}`.
+- Each slot therefore holds a BAG of entries `(number, referent) -> count`:
+  - adding increments the matching entry's count;
+  - removing decrements exactly ONE count of one entry with the displaced number, preferring an entry whose referent
+    is not the value the same operation just stored;
+  - an entry at count 0 is dropped.
+- INVARIANT: the entry for the slot's current word never reaches count 0. Every operation adds before it exchanges,
+  and removes exactly what its own exchange displaced.
+- ARM B-8, new and single-threaded, so it does not depend on timing: store the same pointer twice, then the same
+  through CAS(a, a); drop every outside reference; run forced compacting collections with finalizers; W1 reads the
+  same box both times.
+
+**2. A W1 miss re-reads the word before it answers a number (replaces 18.4 finding 4's "otherwise it answers the
+NUMBER POINTER").**
+- A reader can load word `a` while a writer runs (a)-(c) for `b` and removes `a`'s entry. If the reader then looks up
+  `a` and answers a number pointer, that pointer may name an object nothing keeps.
+- Over managed storage, W1 now:
+  1. reads the word `w`;
+  2. looks up `w` in the slot's bag; on a hit, answers that referent;
+  3. on a miss, re-reads the word. If it differs from `w`, it starts again at 1. Only an UNCHANGED word with no entry
+     is a number, and it answers the number pointer.
+- So W1 answers the old value or the new one, each with its entry, as Go's load does. The loop ends when no store
+  intervenes between a read and its re-read.
+- B-6 gains a THIRD thread that loops `atomic.LoadPointer(&slot)` during the store race. Every result is box `a` or
+  box `b` by identity, never a number.
+
+**3. The no-cycle argument was wrong for value-type pointees. Edges hold NO pin (replaces 18.4's "OPEN, answered").**
+- 18.4 argued that a pin roots only a blittable object, which holds no references. That is true and not enough: the
+  blittable backing can be the `ConditionalWeakTable` KEY, and the table's value reached the pin. So the pin roots the
+  key, and the key is never collected.
+  - SELF: a slot stores the address of its own backing `K` (a list sentinel, `n.next = n`): `CWT[K]` -> box -> pin on
+    `K`.
+  - MUTUAL: a slot in `A` names `B`, and a slot in `B` names `A`. Each pin roots the other's key.
+- **The fix generalizes P3's (a) from self edges to every edge. NO edge holds a pin, directly or through a box.** An
+  entry holds the REFERENT, by its kind:
+  - a value-type referent: its root BACKING object plus the byte offset. W1 mints a fresh box over (backing, offset) on
+    every hit, so no box, and no box's pin-only hold, lives in the table;
+  - a reference-bearing referent (no pin exists; 18.4 finding 3): the referent BOX, as 18.4 has it.
+- Everything an entry holds is then an ordinary strong reference inside the ephemeron, and no `GCHandle` is reachable
+  from the table. The self and mutual cycles above are ephemeron cycles, which are collectible.
+- **What this costs, stated as a NAMED DEVIATION.** Nothing keeps a value-type referent PINNED once its own pointers
+  are gone, so it can move, and the word W2 wrote can go stale as an address.
+  - W1 is unaffected: it resolves by the entry, matched on the word that was WRITTEN, not on where the object is now.
+  - A program that reads the slot as a `uintptr` (not through W1) and converts that number back to a pointer can name
+    a moved object. Go's unsafe rules forbid exactly that conversion of a stored `uintptr`, so a valid Go program
+    never reaches it.
+  - The visible difference is narrower: `uintptr` of W1's answer (a fresh mint at the object's current address) can
+    differ from the word in the slot. Go's collector does not move objects, so in Go the two are always equal. This is
+    a NAMED DEVIATION. CAS is unaffected, because it compares the word OR the referent (question (iii)).
+- **ARMS c3 and c4 (B-4 now has six arms).**
+  - c3, self: a value-type slot stores its own backing's address.
+  - c4, mutual: two value-type backings each store the other's address.
+  - Each drops every outside reference, runs forced compacting collections with finalizers, and then reads a
+    `WeakReference` to each backing as dead and `EntriesOver == 0` over each.
+- **COORD's (c) stands as written.** If c3 or c4 cannot go green at the cut, the cut STOPS and posts it, and COORD rules
+  a named leak with a BOARD row before any code ships it. With no pin in the table, both are predicted green.
+
+**4. memmove COPIES entries; it does not move them (replaces 18.4 finding 4's "moves the edges").**
+- memmove leaves the source words in place, so the source's entries stay. For the copied range, the door:
+  - drops the destination slots' existing entries, as an overwrite;
+  - then adds, for each destination slot, one count of the source slot's entry for the word now copied there.
+- B-7 gains two reads of the SOURCE slot through W1: one after the copy, and one after the destination backing has
+  been dropped and collected. Both read the same box.
+
+**5. The door list, corrected at master `2c1ce10b25` (replaces 18.4 finding 4's list). All line cites below were read
+there.**
+- **Copy doors:** the hand-owned `runtime.memmove` (`memmove_impl.cs`). The entry transfer sits ABOVE its dispatch,
+  with byte offsets for both arms, because memmove tries the ELEMENT arm before the address arm (`:53`, `:77`, the
+  raw `Buffer.MemoryCopy` at `:98`).
+  - Converted `typedmemmove` and its `maps_` wrapper (`mbarrier.cs`) reach it, and so do the other runtime callers:
+    slice, chan, string, select, stack and iface.
+- **Not a copy today:**
+  - `reflectlite`'s `typedmemmove` has an EMPTY body (`internal/reflectlite/value_impl.cs:18`);
+  - `reflect`'s is a bodyless partial whose stub throws (`reflect/value.cs:2562`);
+  - `internal/runtime/maps`' own `typedmemmove` refuses (`runtime_impl.cs`).
+  Any of these becomes a door on the day it gets a body.
+- **Clear doors, NEW:** `memclrNoHeapPointers` (`memmove_impl.cs:161`), and `typedmemclr` with `reflect_typedmemclr`
+  and `reflect_typedmemclrpartial` (`mbarrier.cs:376`, `:397`, `:407`). A clear DROPS the entries in its range.
+  Without that, a deleted indirect map key would stay referenced for the table's life.
+- **The raw-copy grep, re-run at master** for `Buffer.MemoryCopy` / `Unsafe.CopyBlock` / `Marshal.Copy` in
+  hand-owned `*_impl.cs`. Four files hit:
+  - `memmove_impl.cs`, the door above;
+  - three that copy byte buffers to and from native memory and never Go word storage: `cpu_darwin_impl.cs:47-54`
+    (a sysctl name and its output), `signal_posix_impl.cs:205-206` (a sigaction), and `exec_libc2_impl.cs:560`
+    (exec arguments). They are read and excluded.
+  The cut re-runs the grep at its own tree, and a new hit on Go word storage is a stop line (P3's caveat).
+
+**6. (iii)'s identity branch (nit).** When the observed word `w` differs from the expected number but the slot's entry
+for `w` names the expected value's referent, the CAS is ONE interlocked `CompareExchange(slot, new, w)`, with the
+OBSERVED word as the comparand. If it fails, because the word moved on, the CAS re-reads and re-evaluates. It answers
+false only when a fresh read neither equals the expected number nor names its referent.
+
+**Predictions, added and revised.**
+- B-4: six arms: value-type, reference-bearing, and the cycle arms c1, c2, c3 and c4. c3 and c4 are predicted green
+  (finding 3). If either reds, the cut stops.
+- B-6: two writers and one reader; every load is box `a` or box `b` by identity.
+- B-7: the destination reads the box; the SOURCE reads the box after the copy and again after the destination is
+  collected; a `copy` over `[]uintptr` reads as a number.
+- B-8, new: the single-threaded double-store and CAS(a, a) arm (finding 1).
+- B-9, new: a clear arm. An indirect key is stored, its range is cleared through `memclrNoHeapPointers`, and a
+  `WeakReference` to the key's object reads dead after collection.
+
+**Stop lines, added.**
+- A slot whose current word has no entry, at any check.
+- A W1 number answer while the word moved between its read and re-read.
+- A `GCHandle` reachable from the entry table.
+- c3 or c4 red: stop, post, and wait for COORD's ruling (finding 3).
+- A raw copy over Go word storage outside the doors in finding 5.
+
+— H (2026-11-17)
