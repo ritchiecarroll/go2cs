@@ -147,7 +147,7 @@ public static partial class syscall_package
     public partial struct IfInfomsg {}
     [GoValueClone("Spec_dst", "Addr")] public partial struct Inet4Pktinfo {}
     [GoValueClone("Addr")] public partial struct Inet6Pktinfo {}
-    [GoValueClone("Name")] public partial struct InotifyEvent {}
+    public partial struct InotifyEvent {}
     public partial struct Iovec {}
     public partial struct Linger {}
     [GoValueClone("Pad_cgo_0", "Pad_cgo_1")] public partial struct Msghdr {}
@@ -183,7 +183,7 @@ public static partial class syscall_package
     [GoValueClone("Fsid", "Spare")] public partial struct Statfs_t {}
     public partial struct SysProcAttr {}
     public partial struct SysProcIDMap {}
-    [GoValueClone("Loads", "Pad_cgo_0", "X_f", "Pad_cgo_1")] public partial struct Sysinfo_t {}
+    [GoValueClone("Loads", "Pad_cgo_0", "Pad_cgo_1")] public partial struct Sysinfo_t {}
     [GoValueClone("Pad_cgo_0")] public partial struct TCPInfo {}
     [GoValueClone("Cc", "Pad_cgo_0")] public partial struct Termios {}
     public partial struct Time_t {}
