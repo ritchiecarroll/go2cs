@@ -978,6 +978,7 @@ fmt.Println("overloads:", lib.Pitch(o).Hz, lib.Pitch(twin).Hz, lib.Pitch(other.T
 fmt.Println("overloads:", libꓸPitch(o).Hz, libꓸPitch(twin).Hz, libꓸPitch(new other.Tagged(Hz: 55)).Hz);
 ```
 
+<!-- illustration: go2cs-gen output, written into Generated/ at build time and not committed -->
 ```csharp
 internal static lib.Pitch libꓸPitch(other.Pitch src) => new lib.Pitch(src.Hz);
 ```

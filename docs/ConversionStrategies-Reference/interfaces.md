@@ -2047,6 +2047,7 @@ var op = otherꓸPitch(p);
 
 and go2cs-gen writes, for the first:
 
+<!-- illustration: go2cs-gen output, written into Generated/ at build time and not committed -->
 ```csharp
 internal static lib.Pitch libꓸPitch(other.Pitch src) => new lib.Pitch(src.Hz);
 ```
