@@ -29,7 +29,8 @@ import (
 //
 // Admission reads the stamps of the packages a struct's closure reaches (foreignAdmits), while seeds flow from
 // importers to imports, so the derivation is a fixed point over the closure: compute every package's admission in
-// dependency order against IN-MEMORY stamps of its imports, collect the demands, add them as seeds, and repeat until the
+// dependency order against IN-MEMORY stamps of its convert-set imports (any other import's, std's, is read where the
+// conversion reads it), collect the demands, add them as seeds, and repeat until the
 // seed set stops growing. It only grows, so it ends. The conversion then runs as before, each package with its derived
 // seeds beside the flag's (a union: a type named by both is one seed), and records them as GoInlineArraySeed, so a
 // -tests run repeats them. "-<pattern>" turns a package's admission off, which beats any seed; a forced package admits
@@ -60,9 +61,15 @@ func importerInlineArraySeeds(queue []string, closure map[string]*packages.Packa
 
 		restore := lookupInlineArrayStamp
 
-		lookupInlineArrayStamp = func(importPath string, _ Options) (inlineArrayStamp, bool) {
-			stamp, ok := stamps[importPath]
-			return stamp, ok
+		// A convert-set package's stamp is the one this pass computed (its record on disk, if any, is stale); any other
+		// import's (std's) is read where the conversion reads it.
+		lookupInlineArrayStamp = func(importPath string, options Options) (inlineArrayStamp, bool) {
+			if inSet[importPath] {
+				stamp, ok := stamps[importPath]
+				return stamp, ok
+			}
+
+			return restore(importPath, options)
 		}
 
 		for _, path := range queue {

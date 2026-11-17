@@ -132,3 +132,70 @@ func TestAnArrayFreeStructIsAdmittedOnlyWhenSeeded(t *testing.T) {
 		t.Fatalf("the SEEDED array-free struct is not admitted alone (keys %q)", keys)
 	}
 }
+
+// The pre-pass reads a std stamp as the real conversion does (COORD 2026-11-17 19:34Z): only the convert-set's stamps
+// are in memory; any other import's is read where the conversion reads it. lib reinterprets syscall.RawSockaddrInet4
+// (array-holding, std's decision) as its own Sa; a std stamp that does not admit it keeps lib's Sa out (the pair rule),
+// so main, which admits the identical struct, demands lib#Sa. A pre-pass blind to std stamps saw the pair as foreign,
+// admitted Sa, and demanded nothing.
+const stdPairLib = `package lib
+
+import (
+	"syscall"
+	"unsafe"
+)
+
+type Sa = struct {
+	Family uint16
+	Port   uint16
+	Addr   [4]byte
+	Zero   [8]uint8
+}
+
+func Port(sa *syscall.RawSockaddrInet4) uint16 { return (*Sa)(unsafe.Pointer(sa)).Port }
+`
+
+const stdPairMain = `package main
+
+import (
+	"fmt"
+	"unsafe"
+
+	"example.com/app/lib"
+)
+
+type S = struct {
+	Family uint16
+	Port   uint16
+	Addr   [4]byte
+	Zero   [8]uint8
+}
+
+func main() {
+	var raw [2]uint64
+	s := (*S)(unsafe.Pointer(&raw))
+	s.Port = 9
+	fmt.Println(s.Port, lib.Port(nil) == 0)
+}
+`
+
+func TestImporterSeedPrePassReadsAStdStamp(t *testing.T) {
+	restore := lookupInlineArrayStamp
+	t.Cleanup(func() { lookupInlineArrayStamp = restore })
+
+	lookupInlineArrayStamp = func(importPath string, options Options) (inlineArrayStamp, bool) {
+		if importPath == "syscall" {
+			return inlineArrayStamp{mode: inlineArraysModeAuto, anonymous: []string{}}, true
+		}
+
+		return restore(importPath, options)
+	}
+
+	out := convertInlineModuleWith(t, "app", map[string]string{"lib/lib.go": stdPairLib, "main.go": stdPairMain}, "")
+	info := readGenerated(t, filepath.Join(out, "lib", "package_info.cs"))
+
+	if !strings.Contains(info, `GoInlineArraySeed("Sa")`) {
+		t.Errorf("the pre-pass did not read syscall's stamp: lib's Sa is kept out by the pair rule in the conversion, "+
+			"but the pre-pass admitted it and main demanded no seed:\n%s", info)
+	}
+}
