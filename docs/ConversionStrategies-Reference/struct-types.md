@@ -1060,6 +1060,13 @@ The stamp is `[GoValueClone("Inner")] internal partial struct emb {}`. An embedd
 takes nothing. (Guarded by the `EmbeddedArrayCopy` behavioral test, ten routes in three packages, and by
 `TestAStructCarryingAnArrayThroughAnEmbedCopiesIt` in the converter.)
 
+A ZERO-LENGTH array holds no element, so a copy that shares its empty backing store cannot be told from one that does
+not. A field of type `[0]T` is therefore no reason to clone a struct and no member of its stamp: syscall's
+`InotifyEvent` (`Name [0]uint8`, the flexible-array member) takes no `[GoValueClone]`, and `Sysinfo_t`'s list names
+`Loads`, `Pad_cgo_0` and `Pad_cgo_1` but not `X_f`. An embedded `[0]func()`, the marker that makes a struct
+uncomparable, is skipped the same way. A bare `[0]T` value still takes its own `.Clone()` where Go copies it.
+(Guarded by `TestAZeroLengthArrayFieldTakesNoClone` in the converter.)
+
 ## A methodless named func type renders as its base delegate
 
 Go treats a named func type as freely interconvertible with its underlying `func(...)` when the
