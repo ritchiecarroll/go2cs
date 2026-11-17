@@ -430,6 +430,10 @@ partial class runtime_package
         return previous;
     }
 
+    // TEST SEAM (malloc_impl.cs's pattern: GolibTests is outside the InternalsVisibleTo grant): the value
+    // Go's rule gives GOMAXPROCS when nothing set it, defaultGOMAXPROCS(0), which SetDefaultGOMAXPROCS restores.
+    public static nint GoDefaultGOMAXPROCSProbe() => defaultGOMAXPROCS(0);
+
     // THE /cpu/classes ACCOUNTING. Go writes work.cpuStats only at gcMarkTermination
     // (accumulateGCPauseTime, then accumulate, then sched.idleTime reset), which the managed host
     // never runs, so every /cpu/classes metric and ReadCPUStats read 0. This feeds Go's own state
