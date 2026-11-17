@@ -881,12 +881,11 @@ private static readonly @string httpˢ2ᵇ = "HTTP/"u8;
 // "HTTP/1.0" returns (1, 0, true). Note that strings without
 // a minor version, such as "HTTP/2", are not valid.
 public static (nint major, nint minor, bool ok) ParseHTTPVersion(@string vers) {
-    var exprᴛ1 = vers;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "HTTP/1.1"u8: {
+    case {} when vers == "HTTP/1.1"u8: {
         return (1, 1, true);
     }
-    case {} when exprᴛ1 == "HTTP/1.0"u8: {
+    case {} when vers == "HTTP/1.0"u8: {
         return (1, 0, true);
     }}
     if (!strings.HasPrefix(vers, httpˢ2)) {
@@ -1767,9 +1766,8 @@ internal static int64 outgoingLength(this ref Request r) {
 // Request.outgoingLength() returns -1. See the comments in
 // shouldSendChunkedRequestBody.
 internal static bool requestMethodUsuallyLacksBody(@string method) {
-    var exprᴛ1 = method;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "GET"u8 || exprᴛ1 == "HEAD"u8 || exprᴛ1 == "DELETE"u8 || exprᴛ1 == "OPTIONS"u8 || exprᴛ1 == "PROPFIND"u8 || exprᴛ1 == "SEARCH"u8: {
+    case {} when method == "GET"u8 || method == "HEAD"u8 || method == "DELETE"u8 || method == "OPTIONS"u8 || method == "PROPFIND"u8 || method == "SEARCH"u8: {
         return true;
     }}
     return false;

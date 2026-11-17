@@ -76,18 +76,17 @@ public static ж<Func> Func(this ж<Asm> Ꮡa, @string decl) {
     nint off = 0;
     foreach (var (_, arg) in range(args)) {
         var (nameΔ1, typΔ1, _) = strings.Cut(arg, " ");
-        var exprᴛ1 = typΔ1;
         switch (ᐧ) {
         default: {
             Ꮡa.Fatalf("unknown type %s", typΔ1);
             break;
         }
-        case {} when exprᴛ1 == "Word"u8 || exprᴛ1 == "uint"u8 || exprᴛ1 == "int"u8: {
+        case {} when typΔ1 == "Word"u8 || typΔ1 == "uint"u8 || typΔ1 == "int"u8: {
             f.args[nameΔ1] = off;
             off += a.Arch.WordBytes;
             break;
         }
-        case {} when exprᴛ1 == "[]Word"u8: {
+        case {} when typΔ1 == "[]Word"u8: {
             if (strings.HasPrefix(nameΔ1, "z")) {
                 f.outputs = append(f.outputs, nameΔ1);
             } else {

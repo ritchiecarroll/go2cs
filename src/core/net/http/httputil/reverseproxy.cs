@@ -487,10 +487,10 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             var ctxʗ1 = ctx;
             var notifyChanʗ1 = notifyChan;
             goǃ(() => {
-                var selᴛ3 = notifyChanʗ1;
+                var notifyChanᴛ1 = notifyChanʗ1;
                 var selᴛ4 = ctxʗ1.Done();
-                switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-                case 0 when selᴛ3.ꟷᐳ(out _): {
+                switch (select(ᐸꟷ(notifyChanᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+                case 0 when notifyChanᴛ1.ꟷᐳ(out _): {
                     cancelʗ2();
                     break;
                 }
@@ -1010,12 +1010,12 @@ internal static partial void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, h
             // Ensure that the cancellation of a request closes the backend.
             // See issue https://golang.org/issue/35559.
             var selᴛ5 = Ꮡreq.Value.Context().Done();
-            var selᴛ6 = backConnCloseChʗ1;
-            switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+            var backConnCloseChᴛ1 = backConnCloseChʗ1;
+            switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(backConnCloseChᴛ1, ꓸꓸꓸ))) {
             case 0 when selᴛ5.ꟷᐳ(out _): {
                 break;
             }
-            case 1 when selᴛ6.ꟷᐳ(out _): {
+            case 1 when backConnCloseChᴛ1.ꟷᐳ(out _): {
                 break;
             }}
             backConnʗ1.Close();

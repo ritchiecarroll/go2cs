@@ -455,19 +455,18 @@ public static void Event(this ref Summarizer s, ж<Event> ev) {
             }
 
             // Handle transition in.
-            var exprᴛ5 = @new;
             var matchᴛ1 = false;
-            if (exprᴛ5 == GoRunning) { matchᴛ1 = true;
+            if (@new == GoRunning) { matchᴛ1 = true;
                 // We started running. Record it.
                 g.lastStartTime = ev.Time();
                 if (g.StartTime == 0) {
                     g.StartTime = ev.Time();
                 }
             }
-            else if (exprᴛ5 == GoRunnable) { matchᴛ1 = true;
+            else if (@new == GoRunnable) { matchᴛ1 = true;
                 g.lastRunnableTime = ev.Time();
             }
-            else if (exprᴛ5 == GoWaiting) { matchᴛ1 = true;
+            else if (@new == GoWaiting) { matchᴛ1 = true;
                 do {
                     if (st.Reason != "forever"u8) {
                         g.lastBlockTime = ev.Time();
@@ -478,10 +477,10 @@ public static void Event(this ref Summarizer s, ж<Event> ev) {
                     fallthrough = true;
                 } while (false);
             }
-            if (fallthrough || !matchᴛ1 && exprᴛ5 == GoNotExist) {
+            if (fallthrough || !matchᴛ1 && @new == GoNotExist) {
                 g.finalize(ev.Time(), ev);
             }
-            else if (exprᴛ5 == GoSyscall) { matchᴛ1 = true;
+            else if (@new == GoSyscall) { matchᴛ1 = true;
                 s.syscallingP[ev.Proc()] = id;
                 s.syscallingG[id] = ev.Proc();
                 g.lastSyscallTime = ev.Time();

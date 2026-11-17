@@ -136,9 +136,8 @@ internal static error verifyPKCS1v15(ж<PublicKey> Ꮡpub, @string hash, slice<b
 }
 
 internal static void checkApprovedHashName(@string hash) {
-    var exprᴛ1 = hash;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "SHA-224"u8 || exprᴛ1 == "SHA-256"u8 || exprᴛ1 == "SHA-384"u8 || exprᴛ1 == "SHA-512"u8 || exprᴛ1 == "SHA-512/224"u8 || exprᴛ1 == "SHA-512/256"u8 || exprᴛ1 == "SHA3-224"u8 || exprᴛ1 == "SHA3-256"u8 || exprᴛ1 == "SHA3-384"u8 || exprᴛ1 == "SHA3-512"u8: {
+    case {} when hash == "SHA-224"u8 || hash == "SHA-256"u8 || hash == "SHA-384"u8 || hash == "SHA-512"u8 || hash == "SHA-512/224"u8 || hash == "SHA-512/256"u8 || hash == "SHA3-224"u8 || hash == "SHA3-256"u8 || hash == "SHA3-384"u8 || hash == "SHA3-512"u8: {
         break;
     }
     default: {

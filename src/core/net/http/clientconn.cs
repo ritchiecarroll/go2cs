@@ -126,9 +126,8 @@ public static (ж<ClientConn>, error) NewClientConn(this ж<Transport> Ꮡt, con
 
         Ꮡt.ᏑnextProtoOnce.Do(Ꮡt.onceSetNextProtoDefaults);
 
-        var exprᴛ1 = scheme;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "http"u8 || exprᴛ1 == "https"u8: {
+        case {} when scheme == "http"u8 || scheme == "https"u8: {
             break;
         }
         default: {

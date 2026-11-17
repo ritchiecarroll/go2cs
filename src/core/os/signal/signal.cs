@@ -271,8 +271,8 @@ internal static void process(os.Signal sig) {
         foreach (var (c, h) in handlers.m) {
             if (h.want(n)) {
                 // send but do not block for it
-                var selᴛ1 = c.ᐸꟷ(sig, ꓸꓸꓸ);
-                switch (trySelect(selᴛ1)) {
+                var cᴛ1 = c.ᐸꟷ(sig, ꓸꓸꓸ);
+                switch (trySelect(cᴛ1)) {
                 case 0: {
                     break;
                 }

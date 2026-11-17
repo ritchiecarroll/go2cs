@@ -1352,13 +1352,12 @@ simpleFormat:
                 // Fast path for common case of ascii lower case simple verbs
                 // without precision or width or argument indices.
                 if ('a' <= c && c <= 'z' && argNum < len(a)) {
-                    var exprᴛ1 = c;
                     var matchᴛ1 = false;
-                    if (exprᴛ1 is (byte)'w') {
+                    if (c is (byte)'w') {
                         p.wrappedErrs = append(p.wrappedErrs, argNum);
                         fallthrough = true;
                     }
-                    if (fallthrough || !matchᴛ1 && exprᴛ1 is (byte)'v') { matchᴛ1 = true;
+                    if (fallthrough || !matchᴛ1 && c is (byte)'v') { matchᴛ1 = true;
                         // Go syntax
                         p.fmt.sharpV = p.fmt.sharp;
                         p.fmt.sharp = false;
