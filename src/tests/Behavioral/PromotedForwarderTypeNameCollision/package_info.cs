@@ -27,7 +27,6 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Driver", "ΔDriver")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -38,10 +37,10 @@ using static go.main_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<@base, Connector>(Pointer = true)]
+[assembly: GoImplement<Driver, go.database.sql.driver_package.Driver>(Pointer = true)]
 [assembly: GoImplement<counting, Connector>(Pointer = true)]
 [assembly: GoImplement<fbase, go.database.sql.driver_package.Connector>]
 [assembly: GoImplement<fcounting, go.database.sql.driver_package.Connector>(Pointer = true)]
-[assembly: GoImplement<ΔDriver, go.database.sql.driver_package.Driver>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -49,8 +48,8 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Driver))]
 [assembly: GoFieldAccess(typeof(fcounting))]
-[assembly: GoFieldAccess(typeof(ΔDriver))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -60,7 +59,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA4qAAoSggAKEoKC3oIACg6CgqaUgoKChKKUgpSCgoKUgqamgoKCgoI=")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABEqAA4SggAOEoKCAAkOggAODoKCxpSCgoKEopSClIKCgpSCpqaCgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -81,7 +80,7 @@ public static partial class main_package
     internal partial struct fbase {}
     internal partial struct fcounting {}
     public partial interface Connector {}
-    public partial struct ΔDriver {}
+    public partial struct Driver {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -97,3 +96,17 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.Driver)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛDriver;
+[GoMethodHost(typeof(main_package.@base)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbase;
+[GoMethodHost(typeof(main_package.counting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounting;
+[GoMethodHost(typeof(main_package.fbase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfbase;
+[GoMethodHost(typeof(main_package.fcounting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfcounting;
+// </MethodHolders>
