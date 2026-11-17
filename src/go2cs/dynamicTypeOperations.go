@@ -334,8 +334,28 @@ func (v *Visitor) forwardImportedStructLift(t types.Type) string {
 // libc writes uint32, and types.Struct.String() names the alias (W18). So when this package's spelling finds no
 // record, each identical struct the import declares is tried by ITS spelling, in the import's scope order.
 func (v *Visitor) importedStructLift(st *types.Struct) string {
-	if st == nil || isEmptyStructType(st) || v.pkg == nil {
+	pkg, name := v.importedStructLiftSource(st)
+
+	if pkg == nil {
 		return ""
+	}
+
+	qualified := getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name
+	codeName := convertToCSTypeName(qualified)
+
+	packageLock.Lock()
+	importedStructLiftTargets[codeName] = qualified
+	packageLock.Unlock()
+
+	return codeName
+}
+
+// importedStructLiftSource returns the import whose lift importedStructLift names for st, and that lift's name, or nil.
+// The import's lift is taken only when its inline admission matches this package's (liftAdmissionMatches) and every
+// struct it holds resolves to that import's lift here too (nestedLiftsMatch).
+func (v *Visitor) importedStructLiftSource(st *types.Struct) (*types.Package, string) {
+	if st == nil || isEmptyStructType(st) || v.pkg == nil {
+		return nil, ""
 	}
 
 	imports := slices.Clone(v.pkg.Imports())
@@ -380,21 +400,66 @@ func (v *Visitor) importedStructLift(st *types.Struct) string {
 			}
 		}
 
-		if name == "" || !v.liftAdmissionMatches(pkg, meta.Dir, key, name, st, spelled) {
+		if name == "" || !v.liftAdmissionMatches(pkg, meta.Dir, key, name, st, spelled) || !v.nestedLiftsMatch(pkg, name, st) {
 			continue
 		}
 
-		qualified := getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name
-		codeName := convertToCSTypeName(qualified)
-
-		packageLock.Lock()
-		importedStructLiftTargets[codeName] = qualified
-		packageLock.Unlock()
-
-		return codeName
+		return pkg, name
 	}
 
-	return ""
+	return nil, ""
+}
+
+// nestedLiftsMatch reports whether every anonymous struct that st holds by value (through fields, embedded ones included,
+// and array elements) resolves here to pkg's lift too, as pkg's lift name of st names it. A reused lift fixes its
+// fields' C# types to pkg's choices, while this package types its own values of those fields by ITS choices: libc's
+// Titimerval reused libc/uuid/uuid's Itimervalᴛ1 (neither admits it) while its field type Ttimeval kept libc's own
+// admitted lift, and libc's literal `new Titimerval(Fit_value: new Ttimeval(...))` was CS1503 (G's linux-x64 build,
+// COORD 2026-11-17 10:32Z). The match is transitive: each nested struct is resolved by importedStructLiftSource, which
+// checks that struct's own nested structs. A struct held through a NAMED type is that type's declaration, the same
+// C# type on both sides, and an empty struct is never lifted, so neither is checked.
+func (v *Visitor) nestedLiftsMatch(pkg *types.Package, name string, st *types.Struct) bool {
+	for _, nested := range heldAnonymousStructs(st) {
+		if from, nestedName := v.importedStructLiftSource(nested); from != pkg {
+			resolved := "own"
+
+			if from != nil {
+				resolved = from.Path() + "." + nestedName
+			}
+
+			traceLiftReuse(v.pkg, pkg, name, false, false, true, "nested:"+resolved, false)
+
+			return false
+		}
+	}
+
+	return true
+}
+
+// heldAnonymousStructs returns the anonymous, non-empty struct types st holds directly by value: its fields' types and,
+// through arrays, their element types. It does not descend into those structs (their own check does) nor into a named
+// type.
+func heldAnonymousStructs(st *types.Struct) []*types.Struct {
+	var held []*types.Struct
+
+	var visit func(t types.Type)
+
+	visit = func(t types.Type) {
+		switch t := types.Unalias(t).(type) {
+		case *types.Struct:
+			if !isEmptyStructType(t) {
+				held = append(held, t)
+			}
+		case *types.Array:
+			visit(t.Elem())
+		}
+	}
+
+	for field := range st.Fields() {
+		visit(field.Type())
+	}
+
+	return held
 }
 
 // liftAdmissionMatches reports whether naming pkg's lift of the struct (spelled, pkg's own spelling of st) keeps st's
