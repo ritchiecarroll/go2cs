@@ -1933,3 +1933,100 @@ false only when a fresh read neither equals the expected number nor names its re
 - A raw copy over Go word storage outside the doors in finding 5.
 
 — H (2026-11-17)
+
+### 18.6 Revision 2026-11-17: P3's re-review of 18.5 answered, and COORD's ruling on the pin (before code)
+
+P3 re-read 18.5 at `51315b3568` together with H's addendum on the unpinned number (COORD inbox `20261117T222939Z-P3.md`):
+APPROVE WITH CHANGES, before code.
+- CLEAR: findings 2, 4, 5 and 6, and arms B-8 and B-9.
+- NOT SOUND: 18.5 finding 3's generalization (no entry pins anything). COORD ruled on it.
+This block REPLACES the parts of 18.5 it names, and the rest of 18.5 stands. The numbers here are COORD's ruling's.
+
+**1. The pin is kept while the word is published (REPLACES 18.5 finding 3's "NO edge holds a pin").**
+- An unpinned value-type referent makes the word in the slot a stale number, which fails three ways:
+  - C can read it (finding 3 below);
+  - 3.2's number rule calls a number Go memory only inside a LIVE pin or the exact registry, so a stale word is taken
+    for C memory and dereferenced RAW, where under a pin it was refused by name;
+  - the address is REUSED, so one number can name two objects. CAS(slot, y, new) would match `x`'s stale word; one bag
+    could hold `(A, x)` and `(A, y)`; memequal and memhash would read `x` and `y` as one key.
+- The entry for a VALUE-TYPE referent is therefore 18.4's: (the number, the referent BOX), and the box keeps its own
+  pin-only hold, so the number stays the referent's while the word is published. A reference-bearing referent is held
+  as its box, which has no pin (18.4 finding 3, unchanged). One number then names one live object, and 18.5's
+  `uintptr` deviation is WITHDRAWN.
+- **THE SELF ENTRY**, as ruled: an entry whose referent backing IS the destination backing holds (backing, offset) and
+  no pin, because a pin there roots its own key.
+- **A residual of the self entry, raised here for the ruling before code.** With no pin, the self backing `K` can move
+  once no other pin holds it. Its own word then names `K`'s OLD address `A`, and the reuse hole of the first bullet
+  reopens for that one word:
+  - another object `y` later pinned at `A` makes `CAS(slot, y, new)` match `A == A`;
+  - memequal and memhash over `K`'s word read `A` as `y`'s address.
+  The bag ambiguity does NOT reopen: one slot holds one word, and a store over the self word displaces `(A, K)`
+  under finding 1's rule.
+  - Mitigation inside the design: CAS's identity rule (18.5 finding 6) is extended. When the slot's bag holds an
+    entry for the current word, CAS succeeds only if that entry names the SAME referent as `old`; numbers decide
+    only when there is no entry. That closes the CAS case for every entry, self included. memequal and memhash over
+    the self word stay exposed.
+  - **The two choices.** (A) Keep the self exemption, and name memequal and memhash over a moved self word as a
+    deviation. (B) Pin the self referent too, which makes the self case a bounded leak like c4 below. Under (B),
+    "one number names one live object" holds with NO exception. The self shape lives only in managed WORD storage
+    written through W2: the runtime's own words, never `container/list`'s `root.next = &root`, which is a CLR
+    reference field and outside the table. H RECOMMENDS (B). It is posted here for the ruling, not decided.
+- Stop line: a published word whose value-type referent holds no pin, other than a self entry under (A).
+
+**2. c3 and c4 (B-4).**
+- c3, self: predicted GREEN under (A), meaning dead and `EntriesOver == 0`. Under (B) it becomes a KNOWN-LIMIT arm
+  like c4.
+- **c4, the MUTUAL value-type cycle: a NAMED LEAK, ruled before code.**
+  - Two Go backings each store the other's address through W2, with value-type referents. Each entry's pin roots the
+    other's key, and neither backing is collected.
+  - It is BOUNDED: it lasts until either word is overwritten through W2 or cleared, and that releases the cycle.
+  - c4 stays a measured KNOWN-LIMIT arm that reads both backings ALIVE after the drop and the collections, so the
+    leak's shape is pinned down. A run that reads them dead is NEWS, posted, not a pass.
+  - A second step of c4 overwrites one word through W2, collects, and reads both dead, which measures the bound.
+  - The BOARD row is written with this revision. The NAMED DEVIATION reads: "a mutual value-type cycle through
+    W2-stored words is retained until one word is overwritten or cleared".
+
+**3. The cgo argument door refuses a crossed range that holds any entry (MUST-FIX, new).**
+- The table is exactly cgocheck's information. Go panics "argument of cgo function has Go pointer to unpinned Go
+  pointer" when Go memory handed to C holds a Go pointer. So 3.2's void door, before its call-scoped `fixed`, looks up
+  the backing it would hand C. Any live entry in that backing is refused BY NAME with that text.
+- **Read at master, per P3's caveat.** `GoCgoArgs.VoidPointer` (`GoCgoArgs.cs:122`) refuses ALL Go memory today, and
+  3.2 is what opens it, so no check for word storage exists to reuse. The message does exist:
+  `GoCgoArgs.PointerMember` (`GoCgoArgs.cs:88`) raises exactly that text for a typed struct member, and the new check
+  reuses it.
+- The whole backing is checked, not only the crossed bytes, because cgo lets C touch the whole object.
+- A pointee pinned by `runtime.Pinner` is refused too, under deviation 8(b).
+- Arm: a pinned buffer holding a W2-stored Go pointer is handed to a C function, and the refusal text is asserted. A
+  cgo door that bypasses the check is a stop line.
+
+**4. P3's conditional finding on the unpinned form: MOOT**, because the unpinned form is not kept (1).
+
+**5. The re-read's ABA hole (should-fix; REPLACES 18.5 finding 2's miss rule).**
+- A reader loads `a`; a writer stores `b` and removes `a`'s entry; the lookup misses; a writer stores `a` again; the
+  re-read sees `a` "unchanged" and answers a NUMBER while `a`'s entry exists.
+- FIX: a miss is CONFIRMED under the bag's lock. Holding the lock, W1 re-reads the word and looks up again.
+  - The word equals what it looked up, with no entry: a number, and exact, because every add and remove of that bag
+    happens under the same lock.
+  - The word differs: start again.
+  - A hit: answer that referent.
+- The lock-free path stays for hits, which are the common case.
+
+**6. The door list (nit).** `reflect_typedmemmove` and `reflectlite_typedmemmove` (`mbarrier.cs:219`, `:238`) also
+reach `runtime.memmove` if called, and are listed beside `maps_typedmemmove` as covered. This is distinct from the
+`reflect` and `reflectlite` packages' OWN `typedmemmove`, which 18.5 names as not a copy today.
+
+**Predictions, revised.**
+- B-4: c1, c2, c3 (green under (A); known-limit under (B)), and c4 as a known-limit arm, alive and then released by
+  an overwrite.
+- B-10, new: the cgo door refuses a backing that holds an entry, with cgocheck's text (finding 3).
+- B-11, new: the ABA arm (finding 5), driven deterministically through a test seam between the lookup and the
+  re-read, so it does not rely on timing.
+- Withdrawn: 18.5's uintptr deviation and its census.
+
+**Stop lines, revised.**
+- A published value-type word without a pin, outside a self entry under (A).
+- A W1 number answered without the bag lock.
+- A cgo door that hands C a backing holding an entry.
+- c4 read dead without an overwrite (news, posted).
+
+— H (2026-11-17)

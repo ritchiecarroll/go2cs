@@ -39759,4 +39759,31 @@ shape. Until then it stays refused by name, as a number.
 
 — H (2026-11-15)
 
+## 2026-11-17 — H (COORD ruling on DESIGN-cgo-phase3-marshaling 18.6, before code): a mutual value-type cycle through W2-stored `unsafe.Pointer` words is retained until one word is overwritten or cleared — NAMED LEAK, bounded, .5
+
+**The shape.** Two Go backings `A` and `B`, both managed WORD storage. A slot in `A` stores `B`'s address through W2
+(`StoreWord`, design 18.3), and a slot in `B` stores `A`'s, with value-type referents.
+- Each word's entry holds its referent's box, and that box keeps its pin-only hold (18.6 finding 1).
+- So each entry's pin, a strong `GCHandle`, roots the OTHER backing, which is the other entry's
+  `ConditionalWeakTable` key. Neither backing is collected while both words are published.
+
+**Why it is accepted.** The alternative was 18.5's unpinned word. Its number goes stale when the referent moves, which
+opens three holes P3 found: C reads a stale address; 3.2's number rule takes a stale word for C memory and dereferences
+it raw; and a reused address makes one number name two objects. COORD ruled a bounded leak the lesser harm than silent
+corruption, before any code.
+
+**The bound.** The leak lasts until either word is overwritten through W2 or cleared by a clear door (18.5 finding 5).
+That drops the entry, releases its pin, and the cycle is collected.
+
+**Measured by** B-4's c4, a KNOWN-LIMIT arm at the cut:
+- both backings read ALIVE after the drop and the forced collections;
+- after one word is overwritten through W2, both read DEAD.
+A first-step reading of dead is news and is posted, not a pass.
+
+**Not covered:** the SELF case (one backing storing its own address). It is ruled separately in 18.6 finding 1:
+(A) an unpinned self entry with a memequal/memhash deviation, or (B) pinned, which makes it a second bounded leak of
+this kind.
+
+— H (2026-11-17)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
