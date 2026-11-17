@@ -1350,9 +1350,24 @@ func loadImportedDynamicTypeLiftLines(lines []string, sourceDir string) {
 		importedPublicLiftNames[key] = public
 	}
 
+	if importedValueCloneLiftNames == nil {
+		importedValueCloneLiftNames = make(map[string]map[string]bool)
+	}
+
+	valueClone, ok := importedValueCloneLiftNames[key]
+
+	if !ok {
+		valueClone = make(map[string]bool)
+		importedValueCloneLiftNames[key] = valueClone
+	}
+
 	for _, line := range lines {
 		if match := publicLiftRecordPattern.FindStringSubmatch(line); match != nil {
 			public[match[1]] = true
+
+			if strings.Contains(line, "GoValueClone(") {
+				valueClone[match[1]] = true
+			}
 		}
 	}
 

@@ -105,7 +105,9 @@ func resetPackageState(pkg *packages.Package) {
 	packageDynamicTypeNames = make(map[string]string)
 	importedDynamicTypeNames = make(map[string]map[string]string)
 	importedPublicLiftNames = make(map[string]map[string]bool)
+	importedValueCloneLiftNames = make(map[string]map[string]bool)
 	importedStructLiftTargets = make(map[string]string)
+	importedLiftAdmissionStamps = make(map[string]*inlineArrayStamp)
 	packageConstraintLiftNames = make(map[string]string)
 	resetInlineConstraintState()
 	packageLiftedTypeNames = hashset.HashSet[string]{}

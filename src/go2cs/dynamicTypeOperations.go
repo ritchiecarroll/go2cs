@@ -363,6 +363,9 @@ func (v *Visitor) importedStructLift(st *types.Struct) string {
 
 		var name string
 
+		// The import's own spelling of the struct: its admission record keys an anonymous struct by it.
+		spelled := st
+
 		if name = publicLift(signature); name != "" {
 			if !packageDeclaresIdenticalStruct(pkg, st) {
 				name = ""
@@ -370,12 +373,13 @@ func (v *Visitor) importedStructLift(st *types.Struct) string {
 		} else {
 			for _, identical := range packageIdenticalStructs(pkg, st) {
 				if name = publicLift(identical.String()); name != "" {
+					spelled = identical
 					break
 				}
 			}
 		}
 
-		if name == "" {
+		if name == "" || !v.liftAdmissionMatches(pkg, meta.Dir, key, name, st, spelled) {
 			continue
 		}
 
@@ -390,6 +394,97 @@ func (v *Visitor) importedStructLift(st *types.Struct) string {
 	}
 
 	return ""
+}
+
+// liftAdmissionMatches reports whether naming pkg's lift of the struct (spelled, pkg's own spelling of st) keeps st's
+// inline admission. An admitted struct's lift is [GoInlineLayout] with go.arrays fields, an unadmitted one holds golib's
+// array<T>, and an admitted holder needs its field's lift admitted too: libc's admitted Tstatfs over libc/uuid/uuid's
+// unadmitted lift of Tfsid_t was CS8377 (W18's linux wall, G 2026-11-16). A struct this package does not admit and that
+// holds no array at any depth is the same C# whichever lift it names, so it reuses as before. Otherwise the import's
+// admission of its lift must be KNOWN and equal this package's; an unknown one keeps this package's own lift.
+// liftKey is the import's cleaned source directory, the key its lift records are loaded under, and name its lift.
+func (v *Visitor) liftAdmissionMatches(pkg *types.Package, pkgDir, liftKey, name string, st, spelled *types.Struct) bool {
+	need := packageInlineAdmission.admits(st)
+
+	if !need && !structHoldsArray(st, 0) {
+		return true
+	}
+
+	have, known := foreignLiftAdmitted(pkg, pkgDir, liftKey, name, spelled, v.options)
+	return known && have == need
+}
+
+// foreignLiftAdmitted reports whether the package pkg (source directory pkgDir) admitted its lift name of the
+// anonymous struct st, spelled as pkg spells it, and whether that can be known. A package I0 never admits (std) admits
+// nothing, and a lift whose public record carries [GoValueClone] is not admitted: an admitted struct copies whole and
+// never takes it. Otherwise pkg's admission record says: GoInlineArrayKeys counts every admitted key and digests them,
+// and GoInlineArrayType names the admitted NAMED types, so the anonymous structs (and generic instantiations) are the
+// difference. None means st is not admitted. Exactly one is st exactly when the digest of the named keys plus st's key
+// reproduces the record's. More than one cannot be told apart, and neither can a record with no key count.
+func foreignLiftAdmitted(pkg *types.Package, pkgDir, liftKey, name string, st *types.Struct, options Options) (admitted bool, known bool) {
+	if inlineArraysExcluded(pkgDir, options) {
+		return false, true
+	}
+
+	packageLock.Lock()
+	valueClone := importedValueCloneLiftNames[liftKey][name]
+	packageLock.Unlock()
+
+	if valueClone {
+		return false, true
+	}
+
+	packageLock.Lock()
+	stamp, cached := importedLiftAdmissionStamps[pkg.Path()]
+	packageLock.Unlock()
+
+	if !cached {
+		if read, ok := lookupInlineArrayStamp(pkg.Path(), options); ok {
+			stamp = &read
+		}
+
+		packageLock.Lock()
+
+		if importedLiftAdmissionStamps == nil {
+			importedLiftAdmissionStamps = make(map[string]*inlineArrayStamp)
+		}
+
+		importedLiftAdmissionStamps[pkg.Path()] = stamp
+		packageLock.Unlock()
+	}
+
+	if stamp == nil {
+		return false, false
+	}
+
+	if stamp.keyCount == 0 {
+		// No admitted key at all, unless an older record named types without counting its keys.
+		return false, len(stamp.types) == 0
+	}
+
+	unnamed := stamp.keyCount - len(stamp.types)
+
+	if unnamed <= 0 {
+		return false, true
+	}
+
+	if unnamed > 1 {
+		return false, false
+	}
+
+	key, ok := inlineTypeKey(st)
+
+	if !ok {
+		return false, false
+	}
+
+	keys := make([]string, 0, stamp.keyCount)
+
+	for _, name := range stamp.types {
+		keys = append(keys, pkg.Path()+"."+name)
+	}
+
+	return inlineArrayKeyDigest(append(keys, key)) == stamp.keyDigest, true
 }
 
 // importedStructLiftTarget returns the `global using` spelling of a lift importedStructLift reused, given its

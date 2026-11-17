@@ -532,10 +532,21 @@ var importedDynamicTypeNames map[string]map[string]string
 // importedDynamicTypeNames; guarded by packageLock; reset per package by resetPackageState.
 var importedPublicLiftNames map[string]map[string]bool
 
+// importedValueCloneLiftNames holds, per imported package's cleaned source directory, the public lifts whose record
+// carries [GoValueClone]: an array-holding struct that is NOT admitted to inline arrays, since an admitted one copies
+// whole and never takes the stamp. importedStructLift reads it to match a reused lift's admission. Loaded beside
+// importedPublicLiftNames; guarded by packageLock; reset per package by resetPackageState.
+var importedValueCloneLiftNames map[string]map[string]bool
+
 // importedStructLiftTargets maps the code-body name of each imported lift this package reused
 // (importedStructLift) to its package-qualified spelling below the root namespace, for a `global using`
 // RHS (importedStructLiftTarget). Guarded by packageLock; reset per package by resetPackageState.
 var importedStructLiftTargets map[string]string
+
+// importedLiftAdmissionStamps caches, per import path, the inline-array record importedStructLift reads to match a
+// reused lift's admission (foreignLiftAdmitted); nil marks a record that could not be read. Guarded by packageLock;
+// reset per package by resetPackageState.
+var importedLiftAdmissionStamps map[string]*inlineArrayStamp
 
 // packageConstraintLiftNames maps a generic type's inline-constraint DECLARATION (constraintLiftKey)
 // to its lift, for the methods whose receiver copy of the constraint no signature key may name.
