@@ -40588,4 +40588,49 @@ builds, not a wrong record.
 
 — C2 (2026-11-17)
 
+
+## 2026-11-17 — C2 (ruling C item 3, shape A, COORD 19:34Z): an importer follows its import's resolution — the second-order loss CLOSED, measured on 4 targets
+
+**The rule.** For an anonymous struct, an import offers the lift its code USES. That is either a public lift the
+import declares, or the lift an EXPORTED alias of the identical struct names in the import's `GoTypeAlias` record.
+In the second case, the lift must be checked in the declaring package's own lift records, which load on demand for a
+transitive import. The admission check is read at the declaring package. `nestedLiftsMatch` compares each nested
+struct as a lift, package and name, against the lift the outer lift holds. Termination: the record names the
+declaring package's lift, so one record read reaches a declaration, and the import graph is acyclic.
+
+**The same seat:** the seed pre-pass now reads a std stamp where the conversion reads it. Only the convert-set's
+stamps are in memory.
+
+**Arms.**
+- The P ← Q ← R end-to-end arm went red with CS1503 at 500ae6f765. At a76c8bf2eb it is green, and go prints the
+  same as go2cs: `10 14 12884901888`.
+- The negative nested arm: a nested struct resolves to a fourth package, so the importer keeps its own lift. It is
+  green, turns red with the nested check neutered, and was restored byte-identical.
+- `TestImporterSeedPrePassReadsAStdStamp` is red without the fallback and green with it.
+
+**Census.** sqlite closure, converter a76c8bf2eb, no flag. Scored against census-r3 and the prediction in mailbox
+116aae9cd; no falsifier fired.
+
+| target | seeds | chained reuses (sqlite/lib through libc) | reuse=true r3 → A (census-c) | nested:own | wall |
+|---|---|---|---|---|---|
+| windows/amd64 | as r3 | 1: `time.Timevalᴛ1`. It predates the seed: libc already reused it | 26 → 29 (26) | 0 | 140 s |
+| linux/amd64 | as r3 | 5: uuid `Timespecᴛ1`, `Timevalᴛ1`, `Itimervalᴛ1`, `Itimerspecᴛ1`, plus `Timezoneᴛ1` (also predates the seed) | 58 → 82 (73) | 0 | 146 s |
+| linux/arm64 | as r3 | the same 5 | 57 → 82 (73) | 0 | 139 s |
+| darwin/amd64 | as r3 | 0 | 53 → 53 (43) | 0 | 99 s |
+
+On linux, sqlite/lib now spells `Ttimespec`, `Ttimeval`, `Titimerval`, `Titimerspec` and `Ttimezone` as uuid's
+lifts, and `Tstat` as `libc.Tstatᴛ1`. libc uses exactly those types. The 5 reuses the seed cost (row above) are back,
+and so is 1 that was lost before this seat.
+
+**Residual: darwin.** libc declares no exported alias for any of the 25 lifts it reuses from fcntl, netdb, pthread,
+stdlib and wctype; its `timespec` is unexported. So there is no record to follow, and the timespec seed demand
+(sqlite/lib → libc, then libc → fcntl) still produces no reuse. sqlite/lib has 0 by-value crossings into libc on
+darwin. Following an unexported alias would mean re-deriving the import's resolution rather than reading its record.
+That is not done here.
+
+**Owed (COORD, after 311):** the closure builds on windows, linux and darwin (linux: CS1503 = 0), the slnx build, and
+the `-stdlib` footprint. My prediction for the `-stdlib` footprint is 0 files.
+
+— C2 (2026-11-17)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

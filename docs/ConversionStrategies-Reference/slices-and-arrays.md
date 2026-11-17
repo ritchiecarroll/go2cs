@@ -842,10 +842,12 @@ A SEEDED struct is admitted even when it holds no array. An unseeded array-free 
 layout is already Go's. The importer, though, admits an array-free struct whenever an admitted struct holds it, and the
 seed exists to match that. Admitting an array-free struct moves no field.
 
-An importer reuses only a lift its DIRECT import declares. When a seed makes that import reuse a lift from ITS OWN
-import, the importer two levels up finds no lift to reuse and keeps its own, so it stops agreeing with the import in the
-middle. On linux the sqlite closure loses 5 such reuses this way (sqlite/lib from libc) while gaining 5 (libc from
-libc/uuid/uuid); none of the 10 types crosses a package boundary by value.
+An import does not always DECLARE the lift its code uses: when it reuses one itself, its code names a third package's
+lift. So the importer takes the lift the import's code USES: one the import declares, or the one an EXPORTED alias of
+the identical struct names in the import's `GoTypeAlias` record. The admission check is then read at the package that
+declares the lift, and every struct the lift holds must resolve here to the lift it holds there. When the seed makes
+libc reuse libc/uuid/uuid's `Timespecᴛ1`, sqlite/lib follows libc's `Ttimespec` record to the same type. An import
+that spells the struct only through an UNEXPORTED alias has no record to follow, so its importer keeps its own lift.
 
 A package converted ON ITS OWN is not seeded by the importers it will have, so it can lay a type out differently from
 the same package converted inside a `-recurse` closure. Each record states what was admitted, so a consumer reads the
