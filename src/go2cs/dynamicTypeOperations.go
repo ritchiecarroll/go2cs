@@ -504,9 +504,10 @@ func traceLiftReuse(importer, pkg *types.Package, name string, need, have, known
 // nothing, and a lift whose public record carries [GoValueClone] is not admitted: an admitted struct copies whole and
 // never takes it. Otherwise pkg's admission record says: GoInlineArrayKeys counts every admitted key and digests them,
 // and GoInlineArrayType names the admitted NAMED types, so the anonymous structs (and generic instantiations) are the
-// difference. None means st is not admitted. Exactly one is st exactly when the digest of the named keys plus st's key
-// reproduces the record's. More than one cannot be told apart, and neither can a record with no key count. source
-// names the rule that answered, for the census trace (traceLiftReuse).
+// difference. A record that lists its anonymous keys (GoInlineArrayAnonymous, ruling C) answers by membership. Before
+// it, none means st is not admitted, exactly one is st exactly when the digest of the named keys plus st's key
+// reproduces the record's, and more than one cannot be told apart, nor can a record with no key count. source names the
+// rule that answered, for the census trace (traceLiftReuse).
 func foreignLiftAdmitted(pkg *types.Package, pkgDir, liftKey, name string, st *types.Struct, options Options) (admitted, known bool, source string) {
 	if inlineArraysExcluded(pkgDir, options) {
 		return false, true, "std"
@@ -558,14 +559,19 @@ func foreignLiftAdmitted(pkg *types.Package, pkgDir, liftKey, name string, st *t
 		return false, true, "stamp-named-only"
 	}
 
-	if unnamed > 1 {
-		return false, false, "unknown-several-anonymous"
-	}
-
 	key, ok := inlineTypeKey(st)
 
 	if !ok {
 		return false, false, "unknown-no-key"
+	}
+
+	// A stamp that records its admitted anonymous keys (ruling C, COORD 2026-11-17 12:14Z) answers by membership.
+	if admitted, known := stamp.admitsAnonymous(key); known {
+		return admitted, true, "stamp-anon"
+	}
+
+	if unnamed > 1 {
+		return false, false, "unknown-several-anonymous"
 	}
 
 	keys := make([]string, 0, stamp.keyCount)
