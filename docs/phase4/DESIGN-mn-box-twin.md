@@ -543,3 +543,83 @@ and SB-4 reworded, SB-7 at 20).
 **Read first:** this document's sections 9-12.1; DATA-mn-n2-receivers.md (the arms, the scores, the re-gates, the
 PDB-path rule); DATA-mn-stage-c.md (the closure and its harness); the commit messages of 3b52c5c216 (the cut) and
 cb38d22455 (the review's seven changes); TwinBoxTests.cs (the units, including P1-P6).
+
+## 14. HANDBACK from P4 (dated block, 2026-11-17)
+
+**Tip.** `claude/p4-mn-byref` at this block's commit, on 2a1199942f (2a1199942f, 5bd877cfb6, b98cb51ecc, dd7627dc97,
+bf4670ec47 and 436627d8f4 sit on G's WIP 244dffb9f4 line). P3 reviewed to dd7627dc97, re-read to b98cb51ecc (findings 1-7
+CLOSED) and to 5bd877cfb6 (the chain rule SOUND, nits CLOSED).
+
+**Commits.**
+- 436627d8f4: the parameter box twin per 12.1 (units P1-P12).
+- bf4670ec47: field-access and nil-cast box rules, P13 (no spill), probe rows, the MnLaterArg repro.
+- dd7627dc97: by-ref go wrapper thunks followed (G ruling 2).
+- b98cb51ecc: P3 review findings 1-7 (P14-P20; E.Value dropped from form (a); heap rule; binding by symbol).
+- 5bd877cfb6: G step 1, the two-level field chain (P21, P22), and P3's re-read nits (P23, P24, named constant, nil).
+- 2a1199942f: P3's delta-read nit (P22 asserts its plain row) and the reference-field chain row.
+
+**Green.**
+- GenTests 619/619 at 5bd877cfb6.
+- MnBoxAlias (linux, Release, GO2CS_MN=1, 3 runs each) EQUALS Go under plain, under twins (-p:GoTwinsFor=MnBoxAlias),
+  and under twins with GoTwinsBoxParam=false.
+- Under GoTwinsBoxCopy and GoTwinsBoxArgCopy every param row is red, and both controls exit 2 at param-nil-field.
+  The red rows: param 1, param-forward 5, param-heap 1, param-element 1, param-field 1, param-ptr-field 1,
+  param-two 101, param-array 1300, param-thunk 1, param-package 1, param-chain 1, param-chain-param 16,
+  param-chain-ref 1. Under copy the receiver rows are red too. param-nil-chain sits after param-nil-field, so no control
+  reaches it; under twins it panics at the outer nil, as Go does.
+- P3's one unconfirmed aliasing claim, `.of(token)` over structs that hold a reference field and a nested struct: rows
+  param-chain-ref and param-chain-param, EQUAL under twins and red under both controls.
+
+**Arms.** All count-only: windows/amd64 flavour, convert plus build, run on a 4-core linux box. These are
+host-independent readings.
+
+| Arm | SHA | twinned | await | refused parkers | box twins/calls/plain/param | note |
+|---|---|---|---|---|---|---|
+| O | 1ac7dcf40f | 2,999 | 7,167 | 658 (byref-param 395/60) | - | EXACT to G's |
+| N | 1ac7dcf40f | 3,806 | 9,495 | 175 | 634/987/24/- | |
+| PO (BoxParam=false) | 436627d8f4 | = N | = N | = N | = N | EXACT |
+| P | 436627d8f4 | 3,907 | 9,959 | 116 | 634/1,202/32/76 | PB-2 HIT, PB-3 HIT, PB-5 MISS (13 > 12), SB-7 not fired |
+| P2 | bf4670ec47 | = P | = P | = P | = P | 184 reports byte-identical to P |
+| P3 | dd7627dc97 | 3,907 | 9,961 | 116 | 634/1,204/32/76 | GO2CS0014 ref-wrapper 2 -> 0; only net/http moved |
+| PO2 (BoxParam=false) | b98cb51ecc | = N | = N | = N | = N | EXACT |
+| P4 | b98cb51ecc | = P3 | = P3 | = P3 | = P3 | 185 kept reports byte-identical to P3 |
+| S1 | 5bd877cfb6 | 3,907 | 9,962 | 116 | 634/1,205/31/76 | every prediction HIT; only crypto/x509 moved |
+
+- PB-5's 13 rows at arm P: stack locals 7 (traceback cgoCallers, deepequal visited/inProgress, sort swaps x4);
+  composite temp 1 (parsePublicKey); cascade receiver 1 (locateBrackets p); un-enumerated forms 4 (casLoop
+  ptr.Value.Value x3, x509 nonnil(ref in).TBSCSR.PublicKey).
+- At arm S1 the x509 row is handed (step 1), so 12 stay named-plain: the 7, the 1, the 1, and casLoop x3.
+- casLoop x3 (G ruling 11-17 11:56Z, option (a), no code): internal/runtime/atomic/atomic_impl.cs:209, 218 and 221, in
+  Xadduintptr, Anduintptr and Oruintptr. `ptr.Value.Value` is the `nuint` field of golib's `uintptr` struct in a
+  ж<uintptr>'s pointee (Go's `&(*ptr).Value`), not a ж in a ж. A box for it needs a field-pointer door on a golib
+  struct, a public-surface change, and casLoop's only await is a delegate call that every caller fills with a static,
+  non-parking lambda. A census of `ref X.Value.Value` in src/core finds 20 sites (ptr x10, addr x10), all golib uintptr
+  fields; none is ж<ж<T>>. The true box-through-a-box form, `~ppx`, is form (a) already (P17).
+- G 1(c): inner calls left blocking under box-param calls = 5. All are interface calls in a later argument:
+  net/http fs.cs:850 and 862 (2), and crypto/tls handshake_client.cs:848 and handshake_server.cs:831.
+  Read by a probe-only build that was never committed.
+
+**Kit rules.** Read every arm from its kept copies, listed with `ls -A` (one kept name starts with a dot); the live
+reports are overwritten by the next arm. The arm purge locates each project's csproj. A name-to-path mapping (`tr . /`) misses every dotted
+vendor path and leaves stale generator output for an arm whose properties equal the previous arm's.
+
+**Named limits.**
+- RecvGenerator CS1620 on a hand-written `this ref` method with another `ref` parameter (byref-mixed fixture).
+  G routes it to the BOARD.
+- The GenTests harness parses at C# 13, and its Roslyn cannot parse FieldAccessGenerator's C# 14 `extension(...)`
+  blocks. So the GoFieldAccess box rule has no unit and is evidenced by the probe only.
+- The thunk switch-off unit does not depend on the BoxParam gate.
+- The spill (12.1 item 5) stays open: no spill, and a later parking argument stays plain after the box (P13).
+
+**Known divergence (.5 BOARD row).** f(p, <-ch): gc reads p after the receive, while the converter's plain emission
+reads it before. Repro src/tools/mnspike2/MnLaterArg: go 1405, plain 1505, twins 1505, both controls 105.
+byref-param equals plain.
+
+**G's two steps (16:19Z).** (1) The two-level field chain: DONE at 5bd877cfb6 (12.3), arm S1 every prediction HIT.
+(2) The box read through a box: CLOSED with no code (G ruling 11-17, above).
+
+**Open, for G.**
+- The spill (12.1 item 5): the 5 blocking inner calls of G 1(c).
+- PB-5's remaining 9 non-casLoop rows (stack locals, the composite temp, the cascade receiver).
+- Timed arms and an A/A pair: none run here, by COORD's ruling; they wait for G's laptop.
+- The BOARD rows: RecvGenerator CS1620, and the f(p, <-ch) divergence.
