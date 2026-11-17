@@ -358,7 +358,7 @@ reached the end of the body" *is* "the fallthrough statement was reached" — wh
 be raised at the end rather than at the statement. In a break-wrapped case that equivalence holds only
 **inside** the wrapper, so the assignment goes there and a `break` skips it:
 
-<!-- source: src/core/time/format.cs:1377-1384 -->
+<!-- source: src/core/time/format.cs:1374-1381 -->
 ```csharp
             do {
                 if (len(value) >= 1 && value[0] == 'Z') {
