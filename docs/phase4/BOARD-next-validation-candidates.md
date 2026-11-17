@@ -40360,6 +40360,9 @@ types). The four lines are applied to `src/core` in this commit. `f` is a parame
 is not needed for correctness there; it follows the rule every `return f` of a local array already follows
 (`return f.Clone();` appears 5 times in those packages). Removing copies of a local at its last use would be a
 separate liveness optimization for every copy site, not part of this fix.
+The five linux-banked rows that run those two files, each alone at `403ceafa44`: `crypto/internal/fips140/mldsa`
+46, `crypto/internal/fips140/mlkem` 11, `crypto/mlkem` 8, `crypto/hpke` 231 and `crypto/internal/fips140test` 2274,
+all PASS at their banked counts.
 
 — P2 (2026-11-17)
 
