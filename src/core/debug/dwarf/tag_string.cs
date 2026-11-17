@@ -2,6 +2,7 @@
 namespace go.debug;
 
 using strconv = strconv_package;
+using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -98,6 +99,8 @@ internal static array<uint8> _Tag_index_2 = new uint8[]{0, 5, 18}.array();
 internal static array<uint8> _Tag_index_4 = new uint8[]{0, 11, 24, 35, 45, 55}.array();
 [GoLazy] partial class lazyᴛ_Tag_index_5 { internal static array<uint16> _Tag_index_5 = new uint16[]{0, 14, 21, 30, 51, 58, 74, 89, 100, 117, 123, 138, 145, 157, 165, 182, 190, 205, 214, 222, 232, 240, 246, 254, 266, 276, 286, 307, 329, 339, 352, 363, 371, 383, 397, 409, 422, 431, 445, 460, 471, 483, 494, 503, 513, 521, 540, 553, 564, 579, 590, 600, 608, 625, 637, 650}.array(); }
 
+} partial class dwarfᴛTag {
+
 public static @string String(this Tag i) {
     switch (ᐧ) {
     case {} when 1 <= i && i <= 5: {
@@ -127,4 +130,4 @@ public static @string String(this Tag i) {
     }}
 }
 
-} // end dwarf_package
+} // end dwarfᴛTag

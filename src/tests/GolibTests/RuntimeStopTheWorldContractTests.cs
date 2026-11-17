@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using go.runtime;
 using static go.builtin;
 using static go.runtime_package;
 using debug = go.runtime.debug_package;
@@ -407,9 +408,9 @@ public class RuntimeStopTheWorldContractTests
 
         GoReadMetricsLockedProbe(@unsafe.Pointer.FromPinnedBox(Ꮡ(samples, 0)), len(samples), cap(samples));
 
-        Assert.AreEqual(metrics.KindUint64, metrics.Kind(samples[0].Value), "/sched/gomaxprocs:threads");
-        Assert.AreEqual((ulong)Δruntime.GOMAXPROCS(0), metrics.Uint64(samples[0].Value), "/sched/gomaxprocs:threads");
-        Assert.AreEqual(metrics.KindFloat64Histogram, metrics.Kind(samples[1].Value), "/sched/pauses/total/other:seconds");
+        Assert.AreEqual(metrics.KindUint64, samples[0].Value.Kind(), "/sched/gomaxprocs:threads");
+        Assert.AreEqual((ulong)Δruntime.GOMAXPROCS(0), samples[0].Value.Uint64(), "/sched/gomaxprocs:threads");
+        Assert.AreEqual(metrics.KindFloat64Histogram, samples[1].Value.Kind(), "/sched/pauses/total/other:seconds");
     }
 
     // ---- helpers ------------------------------------------------------------------------------

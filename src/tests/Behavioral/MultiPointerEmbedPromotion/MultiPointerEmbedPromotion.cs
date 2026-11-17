@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using strings = strings_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,6 +10,8 @@ partial struct reader {
     internal @string src;
     internal nint pos;
 }
+
+} partial class mainᴛreader {
 
 internal static (nint, error) Read(this ж<reader> Ꮡr, slice<byte> p) {
     ref var r = ref Ꮡr.DerefOrNull();
@@ -27,10 +30,14 @@ internal static error Close(this ref reader r) {
     return default;
 }
 
+} partial class main_package {
+
 partial struct writer {
     internal slice<byte> @out;
     internal nint flush;
 }
+
+} partial class mainᴛwriter {
 
 internal static (nint, error) Write(this ref writer w, slice<byte> p) {
     w.@out = appendꓸꓸꓸ(w.@out, p);
@@ -46,10 +53,14 @@ internal static @string String(this ref writer w) {
     return (@string)w.@out;
 }
 
+} partial class main_package {
+
 partial struct duplex {
     /*embed*/ internal ж<reader> reader;
     /*embed*/ internal ж<writer> writer;
 }
+
+} partial class mainᴛduplex {
 
 internal static error Close(this ref duplex d) {
     var err = d.reader.Close(); if (err != nil) {
@@ -57,6 +68,8 @@ internal static error Close(this ref duplex d) {
     }
     return d.writer.Close();
 }
+
+} partial class main_package {
 
 partial interface readWriteCloser {
     (nint, error) Read(slice<byte> p);

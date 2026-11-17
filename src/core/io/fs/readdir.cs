@@ -7,6 +7,7 @@ using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using slices = slices_package;
 using @internal;
+using static fs_package;
 
 partial class fs_package {
 
@@ -62,6 +63,8 @@ partial struct dirInfo {
     internal FileInfo fileInfo;
 }
 
+} partial class fsᴛdirInfo {
+
 internal static bool IsDir(this dirInfo di) {
     return di.fileInfo.IsDir();
 }
@@ -81,6 +84,8 @@ internal static @string Name(this dirInfo di) {
 internal static @string String(this dirInfo di) {
     return FormatDirEntry(di);
 }
+
+} partial class fs_package {
 
 // FileInfoToDirEntry returns a [DirEntry] that returns information from info.
 // If info is nil, FileInfoToDirEntry returns nil.

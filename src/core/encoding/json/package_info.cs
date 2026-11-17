@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,8 +27,7 @@ using static go.encoding.json_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Token", "ΔToken")]
-[assembly: GoTypeAlias("ΔToken", "object")]
+[assembly: GoTypeAlias("Token", "object")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -80,14 +77,14 @@ using static go.encoding.json_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/json/decode.go", "decode.cs", "ABfMAQBNCLKCgqaCABUsgoKUAAwaggAMEoKCpoKUpqKCgqaCpoKClN6AlpKokgAULJIACBCigoKCgpSUqqKCurKClIKCgpS2qLKigoKCgoKCgsyygoKUgrzCooKCgoKCgriCAAIWAAoCkoKUgpS0guiCyOi0tLSClJSs0pS2goKmlLaCgqaUyIKUgoLIAAUS4pS2graCpLYAAhAAEBiCyoKClKaCgoKCgriCpoLcgoKUgpSCgIKkgoLKgoKUpqrUgoKCgpSCgoKUpqSUgoKmpIKCtLaClIKCuIKClIK4lIK4gqamgpSClIK4goKCpqaClKaCmNSCgoKClIKCgpSCpoKCgqbcuMqCgoK2gsbGgoKmgoKCppSClJSCuIKCgoKCqJKUgoKClJSUgoKUgoKCgpSCgtyCpoKClJSUgrqUgoKCyoKUgpSUgqSAgtaAgua2gtyCgoKCgoKUlJSCtIKCgoKUgrSCgoKClIK0toLKgpS4gpSClIKmqqKClIKClKYACQ7klIKUgoKClIKCgoKUgpS0pIKUgoKClJSmlMiCgpSU6KaCgpSUgpTGtIKU6oKCgpSUlLSCgpSCgoKClLSCgpS0gpTqgoKUlJSmgpSClLSCgoKUgoKUtoKCgpS2goKClLaCgoKUxgACEAAIApS0grSCtKSosoKUgoKmpoKUgpSCpqiygpSClJSCuIKCgoKCuIKUgpSmpoKUgpSCpqzkgpSUpKamgoKUpoKUgoKUvKKClIKilLS0tJSUqtKCgqaygpTKgoKCgpSCgpSUgqaCgriCgoKUpIKClJSkgoK0goK0goK0goK0goK0goK0goKClIKCgpSCgqaU6riCgsiCgrY=", "", "", "798=Type/1/1/2,Field/1/1/2")]
-[assembly: GoPositionMap("encoding/json/encode.go", "encode.cs", "AEGaAwCPAQKClIKClJTcsoKClIKCgpQADh6CAAkUggAMGoIADhaCgoKUrIAAFSqCgoKCgpSClAAJELKCgpKUuILokqaClKyUpoIADhyCgpSmgoIACBKGkpSCpoKCqIKa6oKUgpSClIKmlKSkpKSkpKSkpKSkpLiCpqKCgpSCgoKUgoKCgoKUgriigoKClIKCgoKCgpSCuKKCgpSCgoKUgoKUpqKCgoKUgoKClKaCgoKCgqaCgoKCgqaCgoKCgsqigoIABxCCgoKUgoKmgpSCgoKmgqiClqKCpoKUgpSCgoKCgpSCgpS4yoK4goKCypSmtoKC2oKCgtyCgoKCgqaCyqaCgoKUpqIADBqCgoKCpoKCgoKUlKaElIKCgpSUgrSClLiCgv7CgoKUgKaCgpSCpJa6goKUlJiCgpSCgpSCoqSCyoK2graigoKmgoKCgoIADBDCgoKUgMqIgpSCpIKipJSCgoKmgv6CgoKCgpSUpoKC/sKCgpSApoKClIKkgqKkgoL+goKUvKKCtoKClIL8pqaCgoKUlAAHEIKClIKClIKUlKSUpqKCgoKCgoKUgpS0tLS0tAAIDqSCgtyCgoKCgoKCAAgSgoKCgoKUlIKCABY0AAsElIKWxpampIKClIKClKaCgoKCgpSUuJSUgoKUgoKUgoKUgpS4goKc2oKCgpQACBKmgoKUgpSUpsqUxriClIKClNqCypS4goLcuICCpICCpIKClJQACBKCpoKCgoKCpoKClIKCuIKYgoKUgoKClIKmAAISAAkIgpTckoKUgqaCgpQ=", "334-342:1;399-401:1;402-404:2;794-796:1;1196-1202:1;1204-1207:2;1209-1211:3;1213-1221:4;1245-1262:5;1293-1295:6", "758=encoding/json.structEncoder.encode;821=encoding/json.mapEncoder.encode;876=encoding/json.sliceEncoder.encode;897=encoding/json.arrayEncoder.encode;925=encoding/json.ptrEncoder.encode;944=encoding/json.condAddrEncoder.encode", "299=String/1/1/1,Error/1/1/2;776=IsZero/1/1/1,Invoke/1/1/1;915=UnsafePointer/1/1/3,Len/1/1/3;1274=Contains/1/2/5,Contains/2/2/6;1298=Elem/1/2/1,Kind/1/1/1,Elem/2/2/1,IsNil/2/2/1,Interface/1/1/2,IsZero/1/1/2", "826:35,920:35,987:35", "349:21,350:13")]
+[assembly: GoPositionMap("encoding/json/decode.go", "decode.cs", "ABjMAQBNCLKCgqaCABcsgoKUABAaggAQEoKCpoKUxqKCgqaCpoKClAAJDoCWkqiSABgskgAMEKKCgoKClJSqooK6soKUgoKClLaosqKCgoKCgoKCzLKCgpSCvMKigoKCgoKCuIIAAhYACgKSgpSClLSC6ILI6LS0tIKUlKzSlLaCgqaUtoKCppTIgpSCgsgACRLilLaCtoKktgAEEAAQGILKgoKUpoKCgoKCuIKmgtyCgpSClIKAgqSCgsqCgpSmytSCgoKClIKCgpSmpJSCgqakgoK0toKUgoK4goKUgriUgriCpqaClIKUgriCgoKmpoKUxoK41IKCgoKUgoKClIKmgoKCpty4yoKCgraCxsaCgqaCgoKmlIKUlIK4goKCgoKokpSCgoKUlJSCgpSCgoKClIKC3IKmgoKUlJSCupSCgoLKgpSClJSCpICC1oCC5raC3IKCgoKCgpSUlIK0goKCgpSCtIKCgoKUgrS2gsqClLiClIKUgqaqooKUgoKUxgALDuSUgpSCgoKUgoKCgpSClLSkgpSCgoKUlKaUyIKClJTopoKClJSClMa0gpTqgoKClJSUtIKClIKCgoKUtIKClLSClOqCgpSUlKaClIKUtIKCgpSCgpS2goKClLaCgoKUtoKCgpTGAAIQAAgClLSCtIK0pKiygpSCgqamgpSClIKmqLKClIKUlIK4goKCgoK4gpSClKamgpSClIKmrOSClJSkpqaCgpSmgpSCgpTcooKUgqKUtLS0lJSq0oKCprKClMqCgoKClIKClJSCpoKCuIKCgpSkgoKUlKSCgrSCgrSCgrSCgrSCgrSCgrSCgoKUgoKClIKCppTquIKCyIKCtg==", "", "", "835=Type/1/1/2,Field/1/1/2")]
+[assembly: GoPositionMap("encoding/json/encode.go", "encode.cs", "AEKaAwCPAQKClIKClJTcsoKClIKCgpQAEB6CAA0UggAQGoIAEhaCgoKUrIAAFyqCgoKCgpSClAALELKCgpKUuILoksaClKyUxoIAEByCgpSmgoIACBKGkpSCpoKCqIKa6oKUgpSClIKmlKSkpKSkpKSkpKSkpPiCpqKCgpSCgoKUgoKCgoKUgriigoKClIKCgoKCgpSCuKKCgpSCgoKUgoKUpqKCgoKUgoKClKaCgoKCgqaCgoKCgqaCgoKCguqigoIABxCCgoKUgoKmgpSCgoKmgsiClqKCpoKUgpSCgoKCgpSCgpS4yoK4goKCypSmtoKC2oKCgtyCgoKCgqaCyqaCgoKUpqIADhqCgoKCpoKCgoKUlKaElIKCgpSUgrSClNiCggANDsKCgpSApoKClIKklrqCgpSUmIKClIKClIKixILKgraCtqKCgqaCgoKCggASEMKCgpSAyoiClIKkgqLElIKCgqaCAAkOgoKCgoKUlMaCggANDsKCgpSApoKClIKkgqLEgoIACQ6CgpTcooK2goKUgvympoKCgpSUAAcQgoKUgoKUgpSUpJSmooKCgoKCgpSClLS0tLS0AAgOpIKC3IKCgoKCgoIACBKCgoKCgpSUgoIAFjQACwSUgpbGlqakgoKUgoKUpoKCgoKClJS4lJSCgpSCgpSCgpSClLiCgpzagoKClAAIEqaCgpSClJSmypTGuIKUgoKU2oLKlLiCgty4gIKkgIKkgoKUlAAIEoKmgoKCgoKmgoKUgoK4gpiCgpSCgoKUgqYAAhIACQiClNySgpSCpoKClA==", "334-342:1;399-401:1;402-404:2;794-796:1;1196-1202:1;1204-1207:2;1209-1211:3;1213-1221:4;1245-1262:5;1293-1295:6", "758=encoding/json.structEncoder.encode;821=encoding/json.mapEncoder.encode;876=encoding/json.sliceEncoder.encode;897=encoding/json.arrayEncoder.encode;925=encoding/json.ptrEncoder.encode;944=encoding/json.condAddrEncoder.encode", "314=String/1/1/1,Error/1/1/2;811=IsZero/1/1/1,Invoke/1/1/1;966=UnsafePointer/1/1/3,Len/1/1/3;1343=Contains/1/2/5,Contains/2/2/6;1367=Elem/1/2/1,Kind/1/1/1,Elem/2/2/1,IsNil/2/2/1,Interface/1/1/2,IsZero/1/1/2", "869:35,971:35,1050:35", "368:21,369:13")]
 [assembly: GoPositionMap("encoding/json/fold.go", "fold.cs", "AAwgpJKmgpSCgpSCgqaCgpSokoKCgpQ=")]
 [assembly: GoPositionMap("encoding/json/indent.go", "indent.cs", "AAog8oKmpoKCgoKCpoKCgqaqwoKCgoKmooKCgoKCgoKUgqaCgpSClIKCgpSClKaClIKU1oKCgoKUAAosAA0CgoKCgqaigoKCgoKCgoKClIKUgoKCyoKCuKaCtIK0tJSUgpS0toKU")]
-[assembly: GoPositionMap("encoding/json/scanner.go", "scanner.cs", "ABMwsoKC3NKCgoKCpoKUAAkUAB5GzIKUgoKmtIKUACVYooKCgqrCgpSClIKClIKU6qKCgpSqooKCgoKUuIKokoKUgpTosoKUlIKkgqSCpIKkgqSCpIKkgpSCgpSosoKUgoKClOiygpSCgpQACgrCgpSCgpSCgpSClIKCgpSkgoKClIKClKSCgpSCgpSU7NKUlOiygoKUgoKUgpTospSCpIKU6LKCgqaosoKCpqiygoKmqLKCgqbosoKClIKClKrCgoKUqLKCgpSCgpTqwoKClKrCgpSCgpSqwoKClOrCgoKUrLKClOiygoKU6LKCgpTosoKClOiygoKU6LKCgpTosoKClOiygoKU6LKCgpTosoKClKiygoKUqqKokoKCqKSClIK4gg==")]
-[assembly: GoPositionMap("encoding/json/stream.go", "stream.cs", "ACRCwqqQmqCe8oKmgqaCuIKClILKppSqoqrClIKChsaCgoLKguqCgsaC3IKCgpSCpoKmgoK0pqaCgoKCqJKCgoK4gpSmgoKCpgAMHpIAAhIACgKCpoKUgoIACBKUgoKCgpSUgpTcsoIAAhTyAAcSkoKU6LKClIKmggALMsiUgoKUgpSCtIKClIKUgqSmgpSUpoKUtP6CAAIcAA0CgoKClKSClIKCgqaClIKCgoKmgpSCgoKmgpSCgoKCpoKUgoKmgoKClIKCgpSmgoKCgoKCgpSClKaClIKClAAQCoKClLS0tLS0pKqigqaCgoKCgoKUgqaClL6y")]
+[assembly: GoPositionMap("encoding/json/scanner.go", "scanner.cs", "ABQwsoKC3NKCgoKCpoKUAAsUACBGzIKUgoKmtIKUACdYooKCgqrCgpSClIKClIKU6qKCgpSqooKCgoKU2IKokoKUgpTosoKUlIKkgqSCpIKkgqSCpIKkgpSCgpSosoKUgoKClOiygpSCgpQACgrCgpSCgpSCgpSClIKCgpSkgoKClIKClKSCgpSCgpSU7NKUlOiygoKUgoKUgpTospSCpIKU6LKCgqaosoKCpqiygoKmqLKCgqbosoKClIKClKrCgoKUqLKCgpSCgpTqwoKClKrCgpSCgpSqwoKClOrCgoKUrLKClOiygoKU6LKCgpTosoKClOiygoKU6LKCgpTosoKClOiygoKU6LKCgpTosoKClKiygoKUqqLIkoKCyKSClIK4gg==")]
+[assembly: GoPositionMap("encoding/json/stream.go", "stream.cs", "ACVCwsqQmqCe8oKmgqaCuIKClILKppSqoqrClIKChsaCgoLKguqCgsaC3IKCgpSCpoKmgoK0pqaCgoKCqJKCgoK4gpTGgoKCpgAMHpIABBIACgKCpoKUgoIACBKUgoKCgpSUgpTcsoIAAhTyAAsSkoKU6LKClILGggANMsiUgoKUgpSCtIKClIKUgqSmgpSUpoKUtAALDoIABBwADQKCgoKUpIKUgoKCpoKUgoKCgqaClIKCgqaClIKCgoKmgpSCgqaCgoKUgoKClKaCgoKCgoKClIKUpoKUgoKUABAKgoKUtLS0tLSkqqKCpoKCgoKCgpSCpoKUvrI=")]
 [assembly: GoPositionMap("encoding/json/tables.go", "tables.cs", "ABEiAGnUAQ==")]
-[assembly: GoPositionMap("encoding/json/tags.go", "tags.cs", "AA4mooKssoKUgoKCgoKm")]
+[assembly: GoPositionMap("encoding/json/tags.go", "tags.cs", "AA8mooLMsoKUgoKCgoKm")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -122,9 +119,9 @@ public static partial class json_package
     internal partial struct tagOptions {}
     internal partial struct unquotedValue {}
     public partial interface Marshaler {}
+    [GoLocalName("Token")] public partial interface Tokenᴅ {}
     public partial interface Unmarshaler {}
     public partial interface isZeroer {}
-    [GoLocalName("Token")] public partial interface ΔTokenᴅ {}
     public partial struct Decoder {}
     public partial struct Delim {}
     public partial struct Encoder {}
@@ -162,3 +159,36 @@ public static partial class json_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(json_package.Decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛDecoder;
+[GoMethodHost(typeof(json_package.Delim)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛDelim;
+[GoMethodHost(typeof(json_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛEncoder;
+[GoMethodHost(typeof(json_package.InvalidUTF8Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛInvalidUTF8Error;
+[GoMethodHost(typeof(json_package.InvalidUnmarshalError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛInvalidUnmarshalError;
+[GoMethodHost(typeof(json_package.MarshalerError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛMarshalerError;
+[GoMethodHost(typeof(json_package.Number)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛNumber;
+[GoMethodHost(typeof(json_package.RawMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛRawMessage;
+[GoMethodHost(typeof(json_package.SyntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛSyntaxError;
+[GoMethodHost(typeof(json_package.UnmarshalFieldError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛUnmarshalFieldError;
+[GoMethodHost(typeof(json_package.UnmarshalTypeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛUnmarshalTypeError;
+[GoMethodHost(typeof(json_package.UnsupportedTypeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛUnsupportedTypeError;
+[GoMethodHost(typeof(json_package.UnsupportedValueError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛUnsupportedValueError;
+[GoMethodHost(typeof(json_package.arrayEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛarrayEncoder;
+[GoMethodHost(typeof(json_package.condAddrEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛcondAddrEncoder;
+[GoMethodHost(typeof(json_package.decodeState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛdecodeState;
+[GoMethodHost(typeof(json_package.encodeState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛencodeState;
+[GoMethodHost(typeof(json_package.floatEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛfloatEncoder;
+[GoMethodHost(typeof(json_package.mapEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛmapEncoder;
+[GoMethodHost(typeof(json_package.ptrEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛptrEncoder;
+[GoMethodHost(typeof(json_package.scanner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛscanner;
+[GoMethodHost(typeof(json_package.sliceEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛsliceEncoder;
+[GoMethodHost(typeof(json_package.structEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛstructEncoder;
+[GoMethodHost(typeof(json_package.tagOptions)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛtagOptions;
+// </MethodHolders>

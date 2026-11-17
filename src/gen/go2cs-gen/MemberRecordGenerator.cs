@@ -346,7 +346,7 @@ public class MemberRecordGenerator : ISourceGenerator
 
         Dictionary<INamedTypeSymbol, (string ns, List<string> records)> byType = new(SymbolEqualityComparer.Default);
 
-        // The methods a [GoParamDims] record names, by the outermost (package) class they live under: golib finds each
+        // The methods a [GoParamDims] record names, by the outermost class (package or holder) they live under: golib finds each
         // one by GetMethods on its declaring type (GoReflect.ParamDimsRecords), so a trimmed publish must keep exactly
         // those methods' metadata (trim stage 3b; EmitParamDimsDependencies).
         Dictionary<INamedTypeSymbol, (string ns, List<string> dependencies)> recordedMethods = new(SymbolEqualityComparer.Default);
@@ -506,11 +506,11 @@ public class MemberRecordGenerator : ISourceGenerator
             context.AddGeneratedSource(GeneratedPartials.HintName(hintNames, pair.Value.ns, pair.Key, "paramdims-keep"), ParamDimsDependencies(pair.Value.ns, pair.Key, pair.Value.dependencies));
     }
 
-    // One EMPTY module initializer per package class carrying a [DynamicDependency] for every method a [GoParamDims]
-    // record names (trim stage 3b, docs/PLAN-golib-full-trim.md section 9.6). A module initializer is always kept, and
-    // both trimmers keep a kept method's dynamic dependencies, so a trimmed publish keeps exactly the recorded methods'
-    // metadata, where golib's GoReflect.ParamDimsRecords reads it. Nothing executes. It sits in the package class so
-    // typeof reaches a private nested declaring type.
+    // One EMPTY module initializer per outermost class (the package class, and each method holder) carrying a
+    // [DynamicDependency] for every method a [GoParamDims] record names there (trim stage 3b, docs/PLAN-golib-full-trim.md
+    // section 9.6). A module initializer is always kept, and both trimmers keep a kept method's dynamic dependencies, so
+    // a trimmed publish keeps exactly the recorded methods' metadata, where golib's GoReflect.ParamDimsRecords reads it.
+    // Nothing executes. It sits in that class so typeof reaches a private nested declaring type.
     private static string ParamDimsDependencies(string ns, INamedTypeSymbol packageClass, IEnumerable<string> dependencies)
     {
         StringBuilder source = new();

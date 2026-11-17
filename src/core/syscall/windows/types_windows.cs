@@ -4,6 +4,7 @@
 namespace go;
 
 using @unsafe = unsafe_package;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -53,19 +54,19 @@ internal static UntypedInt o_NOFOLLOW_ANY => 0x200000000; // used by internal/sy
 internal static UntypedInt o_WRITE_ATTRS => 0x800000000;  // used by internal/syscall/windows
 
 // More invented values for signals
-public static ΔSignal SIGHUP => /* Signal(0x1) */ 1;
-public static ΔSignal SIGINT => /* Signal(0x2) */ 2;
-public static ΔSignal SIGQUIT => /* Signal(0x3) */ 3;
-public static ΔSignal SIGILL => /* Signal(0x4) */ 4;
-public static ΔSignal SIGTRAP => /* Signal(0x5) */ 5;
-public static ΔSignal SIGABRT => /* Signal(0x6) */ 6;
-public static ΔSignal SIGBUS => /* Signal(0x7) */ 7;
-public static ΔSignal SIGFPE => /* Signal(0x8) */ 8;
-public static ΔSignal SIGKILL => /* Signal(0x9) */ 9;
-public static ΔSignal SIGSEGV => /* Signal(0xb) */ 11;
-public static ΔSignal SIGPIPE => /* Signal(0xd) */ 13;
-public static ΔSignal SIGALRM => /* Signal(0xe) */ 14;
-public static ΔSignal SIGTERM => /* Signal(0xf) */ 15;
+public static Signal SIGHUP => /* Signal(0x1) */ 1;
+public static Signal SIGINT => /* Signal(0x2) */ 2;
+public static Signal SIGQUIT => /* Signal(0x3) */ 3;
+public static Signal SIGILL => /* Signal(0x4) */ 4;
+public static Signal SIGTRAP => /* Signal(0x5) */ 5;
+public static Signal SIGABRT => /* Signal(0x6) */ 6;
+public static Signal SIGBUS => /* Signal(0x7) */ 7;
+public static Signal SIGFPE => /* Signal(0x8) */ 8;
+public static Signal SIGKILL => /* Signal(0x9) */ 9;
+public static Signal SIGSEGV => /* Signal(0xb) */ 11;
+public static Signal SIGPIPE => /* Signal(0xd) */ 13;
+public static Signal SIGALRM => /* Signal(0xe) */ 14;
+public static Signal SIGTERM => /* Signal(0xf) */ 15;
 
 [GoLazy] partial class lazyᴛsignals { internal static array<@string> signals = new array<@string>(16){
     [1] = "hangup",
@@ -332,9 +333,13 @@ partial struct Timeval {
     public int32 Usec;
 }
 
+} partial class syscallᴛTimeval {
+
 public static int64 Nanoseconds(this ref Timeval tv) {
     return ((int64)tv.Sec * 1000000 + (int64)tv.Usec) * 1000;
 }
+
+} partial class syscall_package {
 
 public static Timeval /*tv*/ NsecToTimeval(int64 nsec) {
     Timeval tv = default;
@@ -355,7 +360,7 @@ partial struct Overlapped {
     public uintptr InternalHigh;
     public uint32 Offset;
     public uint32 OffsetHigh;
-    public ΔHandle HEvent;
+    public Handle HEvent;
 }
 
 partial struct FileNotifyInformation {
@@ -370,6 +375,8 @@ partial struct Filetime {
     public uint32 HighDateTime;
 }
 
+} partial class syscallᴛFiletime {
+
 // Nanoseconds returns Filetime ft in nanoseconds
 // since Epoch (00:00:00 UTC, January 1, 1970).
 public static int64 Nanoseconds(this ref Filetime ft) {
@@ -381,6 +388,8 @@ public static int64 Nanoseconds(this ref Filetime ft) {
     nsec *= 100;
     return nsec;
 }
+
+} partial class syscall_package {
 
 public static Filetime /*ft*/ NsecToFiletime(int64 nsec) {
     Filetime ft = default;
@@ -503,9 +512,9 @@ partial struct StartupInfo {
     public uint16 ShowWindow;
     internal uint16 __;
     internal ж<byte> ___;
-    public ΔHandle StdInput;
-    public ΔHandle StdOutput;
-    public ΔHandle StdErr;
+    public Handle StdInput;
+    public Handle StdOutput;
+    public Handle StdErr;
 }
 
 // _PROC_THREAD_ATTRIBUTE_LIST is a placeholder type to represent a the opaque PROC_THREAD_ATTRIBUTE_LIST.
@@ -531,8 +540,8 @@ partial struct _STARTUPINFOEXW {
 internal static UntypedInt _EXTENDED_STARTUPINFO_PRESENT => 0x00080000;
 
 partial struct ProcessInformation {
-    public ΔHandle Process;
-    public ΔHandle Thread;
+    public Handle Process;
+    public Handle Thread;
     public uint32 ProcessId;
     public uint32 ThreadId;
 }
@@ -894,7 +903,7 @@ partial struct CertContext {
     public ж<byte> EncodedCert;
     public uint32 Length;
     public ж<CertInfo> CertInfo;
-    public ΔHandle Store;
+    public Handle Store;
 }
 
 partial struct CertChainContext {

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using imageꓸRGBA = go.image_package.ΔRGBA;
 // </ImportedTypeAliases>
 
 using go;
@@ -58,8 +57,8 @@ using static go.image.jpeg_package;
 [assembly: GoFieldAccess(typeof(huffman))]
 [assembly: GoFieldAccess(typeof(image_package.CMYK))]
 [assembly: GoFieldAccess(typeof(image_package.Gray))]
+[assembly: GoFieldAccess(typeof(image_package.RGBA))]
 [assembly: GoFieldAccess(typeof(image_package.YCbCr))]
-[assembly: GoFieldAccess(typeof(image_package.ΔRGBA))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -70,10 +69,10 @@ using static go.image.jpeg_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("image/jpeg/dct.go", "dct.cs", "AAeYAQBKBoKCggA/ggGCqqKCrLKCgoKCgoKCggAHEIKCggAIEoK4gtymAAkUgoKClILKgpTKgoKCvMKCgoKCgoKCgoLcgoKCyoKmgsqUlILKgpTKgoKCgoKCgsqCgoKCgoKCAANQACUEgqrCgoKCgoKCgoKCAA0cgpTKlILKgpS4gsqCpoLKgoKC7oKCgoKCgoK+soKCgoKCgoKC7rimpoLKpoKmgqaCpoKCgqaCgoKCgoKCpoKCgoKCgoI=")]
-[assembly: GoPositionMap("image/jpeg/huffman.go", "huffman.cs", "ACtgsoKCgoKUlIKCgpSUgqaqooKCpoKCgoKClAAOCqKCgpSAgqSCgpSUgpTKgoKCgpSClIKUgoKUgILIgpKCgtyCgoKUgrqigoKCgpSCgoKClKYACArCgqaCgoLKgpSmgoKCgqaCgoKCpoKUgoKClLSmgoKCpoKCgqaCgoKmgoKCgg==")]
-[assembly: GoPositionMap("image/jpeg/reader.go", "reader.cs", "ABUoygAuagBFlAGigriCgoKmgoKClIKUAAIQ0oKCgoKCvNKCgqaCgoIABhDUgoKCgoKUgpSCgqaUgoKUgoKmgoKUgoKUqrSCgpSmgoKCgoKUgqaopIKClKaCgoKUgoKClIKmABIIkoKUlLS0tJSCpoKUgoKCpoKmgoK4goKmgpKClIKUAAwaAAoUyoLGgsaCAA8clILGgsaC6oKUAAgIkoKCgoKClIKClJSkgpSCgpSCxoKUgoKUguiClOiSgpSClIKmgoKUgpSUlIKUpoKClIKUlIKCpoKUAAwIkqaAgqSCuIKCgpQAFCqCgoKmgpSUpoKCpoKU7sqClIKCppSCgoKCxoKUxoKUxoKUtIKUxrS0goKClLaCuIKCpoKUgoKCgpSUAAsU8oLuyoKCgoKCpgALGIKUAAUSgoKCgoKUgoKClLimgoKUppSmgoKCgoKCgoKCgoKCpqiSguqigoKUlOyCgpTs3KaC")]
-[assembly: GoPositionMap("image/jpeg/scan.go", "scan.cs", "AAkYkoKCgqaCgoKCgpS0tLS0tLSkgpSCkoIAIQqSgpSClICCpIKClIqCgoKCgoKmgpTcgoKmpoKAgqSCgILaggATKIKCgoKCgoKUgpSCypKCgoKUgoKCgsqCkgAHEoKCgoKCggAZNIKClIKCgoKCyoKUpoKCpoKClIKClIKUgoKUgqaCpoKCgoKUgoKCgoKUgoKUlIKCgoKClJSClNyUAAcQlICCyIK4goKCgqaCgqaUlMoACArUgoKUgoKUgpS4goKCgoKCgpSClJSCgoKCgpSUxoKCgpSCxqaCgpSClILYgoKCpqrCgoKCgpSClIKClIKUgpSmpqaCgoKClIKCgoKCgsrqwoKClIKSgpSUtLS0tLiCgoKCgoKCgpSUpgAGGAAJAsqUgoKCgoIABxCWgoKmgg==")]
-[assembly: GoPositionMap("image/jpeg/writer.go", "writer.cs", "AA4gkoKUuAAcPgAwagBIkgGigoKCpoKSgoKCgoKU/oKiABkygoKUpoKClKaCgpSqooKCgoKCgoKUgpSokoKqooKClIKClJSCgrqSgoKCgqiSgoKCgrqSgoKCgoKCgoKClIKUgpSCpqiSgoKUlKKUgqKCgr7SlIKUkoKCgpSCgpSCpoKUqqKCgoKCgoKCgoLMsoKCgoKCgoLMsoKCgoKCgpSCgoKClIKCgoLMsoKCgoKCgpSCgoKUgoKCgs6igoKCgoKCAAwaAAwazJKUtKQACBCCpoKCgoLogoKCgoKCgoKCgoKUlJSCgoLaAA8cwoKClIKClKaCgoKCgoKokoKUpoKCgoKCgoKUuIKmtoKClJSUlJSCgoKC")]
+[assembly: GoPositionMap("image/jpeg/huffman.go", "huffman.cs", "AC5gsoKCgoKUlIKCgpSUgqaqooKCpoKCgoKClAAOCqKCgpSAgqSCgpSUgpTKgoKCgpSClIKUgoKUgILIgpKCgtyCgoKUgrqigoKCgpSCgoKClKYACArCgqaCgoLKgpSmgoKCgqaCgoKCpoKUgoKClLSmgoKCpoKCgqaCgoKmgoKCgg==")]
+[assembly: GoPositionMap("image/jpeg/reader.go", "reader.cs", "ABgoAAgKADBqAEeUAaKCuIKCgqaCgoKUgpQAAhDSgoKCgoK80oKCpoKCggAKENSCgoKCgpSClIKCppSCgpSCgqaCgpSCgpSqtIKClKaCgoKCgpSCpqikgoKUpoKCgpSCgoKUgqYAEgiSgpSUtLS0lIKmgpSCgoKmgqaCgriCgqaCkoKUgpQADBoAChTKgsaCxoIADxyUgsaCxoLqgpQACAiSgoKCgoKUgoKUlKSClIKClILGgpSCgpSC6IKU6JKClIKUgqaCgpSClJSUgpSmgoKUgpSUgoKmgpQADAiSpoCCpIK4goKClAAUKoKCgqaClJSmgoKmgpTuyoKUgoKmlIKCgoLGgpTGgpTGgpS0gpTGtLSCgoKUtoK4goKmgpSCgoKClJQADxTygu7KgoKCgoKmAAsYgpQABRKCgoKCgpSCgoKUuKaCgpSmlKaCgoKCgoKCgoKCgoKmyJKC6qKCgpSU7IKClOzcpoI=")]
+[assembly: GoPositionMap("image/jpeg/scan.go", "scan.cs", "AAwYkoKCgqaCgoKCgpS0tLS0tLSkgpSCkoIAJwqSgpSClICCpIKClIqCgoKCgoKmgpTcgoKmpoKAgqSCgILaggATKIKCgoKCgoKUgpSCypKCgoKUgoKCgsqCkgAHEoKCgoKCggAZNIKClIKCgoKCyoKUpoKCpoKClIKClIKUgoKUgqaCpoKCgoKUgoKCgoKUgoKUlIKCgoKClJSClNyUAAcQlICCyIK4goKCgqaCgqaUlMoACArUgoKUgoKUgpS4goKCgoKCgpSClJSCgoKCgpSUxoKCgpSCxqaCgpSClILYgoKCpqrCgoKCgpSClIKClIKUgpSmpqaCgoKClIKCgoKCgsrqwoKClIKSgpSUtLS0tLiCgoKCgoKCgpSUpgAGGAAJAsqUgoKCgoIABxCWgoKmgg==")]
+[assembly: GoPositionMap("image/jpeg/writer.go", "writer.cs", "AA8gkoKUuAAcPgAwagBKkgGigoKCpoKSgoKCgoKUAAkOgqIAGzKCgpSmgoKUpoKClKqigoKCgoKCgpSClKiSgqqigoKUgoKUlIKCupKCgoKCqJKCgoKCupKCgoKCgoKCgoKUgpSClIKmqJKCgpSUopSCooKCvtKUgpSSgoKClIKClIKmgpTKooKCgoKCgoKCgsyygoKCgoKCgsyygoKCgoKClIKCgoKUgoKCgsyygoKCgoKClIKCgpSCgoKCzqKCgoKCgoIADBoADBrskpS0pAAIEIKmgoKCguiCgoKCgoKCgoKCgpSUlIKCgtoAERzCgoKUgoKUpoKCgoKCgqiSgpSmgoKCgoKCgpS4gqa2goKUlJSUlIKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
@@ -123,3 +122,17 @@ public static partial class jpeg_package
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(jpeg_package.FormatError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jpegᴛFormatError;
+[GoMethodHost(typeof(jpeg_package.UnsupportedError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jpegᴛUnsupportedError;
+[GoMethodHost(typeof(jpeg_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jpegᴛdecoder;
+[GoMethodHost(typeof(jpeg_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jpegᴛencoder;
+[GoMethodHost(typeof(jpeg_package.huffmanLUT)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jpegᴛhuffmanLUT;
+// </MethodHolders>

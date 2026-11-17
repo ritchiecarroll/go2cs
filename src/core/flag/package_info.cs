@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,7 +27,6 @@ using static go.flag_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("ErrorHandling", "ΔErrorHandling")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -70,7 +67,7 @@ using static go.flag_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("flag/flag.go", "flag.cs", "AGXKAbi4lIKCgpSClIKU3KKCpoKCgpSCppSUAAwYooKmgoKClIKmlMqigqaCgoKUgqaUyqKCpoKCgpSCppTKooKmgoKClIKmlMqigqaCgqaUyqKCpoKCgpSCppTKooKmgoKClIKmlOqCgoKUgoKUgpSCpoKmgqaCgoKm3JTKlJQAQYgBkoKCgoKUhqqigpSokqiSqqKqooK8oqqigryiqJKqoqiSlIKCAAgSgoKClIKUlJSCgpSClIKokqoACwiCgoKUyoKCgpSmABQQAAoEgoKCgoKCgqa4gpSCxrTUtNSkrNKCgoKCgoKCuIK4lLiCgoKUlKbKgoKCAAQ+ABoCqLKClJQADyCCgriAloCasoKUrLKogJaAloCWgJiiqqKqooKCqqKqoqqiqqKCgqqiqqKqoqqigoKqoqqiqqKqooKCqqKqoqqiqqKCgqqiqqKqoqqigoKqoqqiqqKqooKCqqKssqyyrLKCgqyyAAIQ0gACENKssqyyrLKssgACEvSCgoK4goKCgoKUlJSClIKUAAIS4qiygoKq0oKCqsKClPqygpSCgpSCgoKCgqaCgriCgoKCgoKCgriCgoKClKaCgoKmgsqUgpSClIKmgpSCruKCgoKCgpSClJSkgpS0tqiSqrSokgAHEJSClO6mgqyyuJKssoI=", "423-425:1;552-559:1;609-641:1", "", "", "", "575:21,576:13")]
+[assembly: GoPositionMap("flag/flag.go", "flag.cs", "AGbKAbi4lIKCgpSClIKU3KKCxoKCgpSCppSUAA4YooLGgoKClIKmlOqigsaCgoKUgqaU6qKCxoKCgpSCppTqooLGgoKClIKmlOqigsaCgqaU6qKCxoKCgpSCppTqooLGgoKClIKmlAAICoKCgpSCgpSClILGgqaCpoKCgqYACQyUAAgKlJQAQ4gBkoKCgoKUhsqigpSokqiSqqKqooLcosqigtyiyJLKosiSlIKCAAgSgoKClIKUlJSCgpSClILIkqoACwiCgoKUyoKCgpSmABQQAAoEgoKCgoKCgqa4gpSCxrTUtNSkzNKCgoKCgoKCuIK4lLiCgoKUlKbKgoKCAAY+ABoCyLKClJQAESCCgtiAtoC6soKUzLLIgLaAtoC2gLiiyqLKooKCyqLKosqiyqKCgsqiyqLKosqigoLKosqiyqLKooKCyqLKosqiyqKCgsqiyqLKosqigoLKosqiyqLKooKCyqLMssyyzLKCgsyyAAQQ0gAEENLMssyyzLLMsgAEEvSCgoK4goKCgoKUlJSClIKUAAQS4siygoKq0oKCqsKClPqygpSCgpSCgoKCgqaCgriCgoKCgoKCgriCgoKClKaCgoKmgsqUgpSClIKmgpSCruKCgoKCgpSClJSkgpS0tqiSyrSokgAHEJSClO6mgqyyuJLMsoI=", "423-425:1;552-559:1;609-641:1", "", "", "", "636:21,637:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -97,9 +94,9 @@ public static partial class flag_package
     internal partial struct uintValue {}
     public partial interface Getter {}
     public partial interface Value {}
+    public partial struct ErrorHandling {}
     public partial struct Flag {}
     public partial struct FlagSet {}
-    public partial struct ΔErrorHandling {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -121,3 +118,24 @@ public static partial class flag_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(flag_package.FlagSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛFlagSet;
+[GoMethodHost(typeof(flag_package.boolFuncValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛboolFuncValue;
+[GoMethodHost(typeof(flag_package.boolValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛboolValue;
+[GoMethodHost(typeof(flag_package.durationValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛdurationValue;
+[GoMethodHost(typeof(flag_package.float64Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛfloat64Value;
+[GoMethodHost(typeof(flag_package.funcValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛfuncValue;
+[GoMethodHost(typeof(flag_package.int64Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛint64Value;
+[GoMethodHost(typeof(flag_package.intValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛintValue;
+[GoMethodHost(typeof(flag_package.stringValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛstringValue;
+[GoMethodHost(typeof(flag_package.textValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛtextValue;
+[GoMethodHost(typeof(flag_package.uint64Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛuint64Value;
+[GoMethodHost(typeof(flag_package.uintValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛuintValue;
+// </MethodHolders>

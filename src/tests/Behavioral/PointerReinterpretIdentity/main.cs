@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,6 +15,8 @@ partial struct builder {
     internal ж<builder> addr;
     internal slice<byte> buf;
 }
+
+} partial class mainᴛbuilder {
 
 internal static void copyCheck(this ж<builder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -33,6 +36,8 @@ internal static void write(this ж<builder> Ꮡb, @string s) {
 }
 
 internal static @string String(this ref builder b) { return (@string)b.buf; }
+
+} partial class main_package {
 
 internal static void main() {
     ref var b = ref heap(new builder(), out var Ꮡb);

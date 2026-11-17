@@ -181,6 +181,15 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckArrayRangeSnapshot() => CheckTarget("ArrayRangeSnapshot");
 
     [TestMethod]
+    public void CheckArrayReassignAliases() => CheckTarget("ArrayReassignAliases");
+
+    [TestMethod]
+    public void CheckArrayReassignForms() => CheckTarget("ArrayReassignForms");
+
+    [TestMethod]
+    public void CheckArrayReassignUnsafe() => CheckTarget("ArrayReassignUnsafe");
+
+    [TestMethod]
     public void CheckArraySwitchCases() => CheckTarget("ArraySwitchCases");
 
     [TestMethod]
@@ -1381,6 +1390,12 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMethodGroupGenericArg() => CheckTarget("MethodGroupGenericArg");
 
     [TestMethod]
+    public void CheckMethodHolderAlias() => CheckTarget("MethodHolderAlias");
+
+    [TestMethod]
+    public void CheckMethodHolderNames() => CheckTarget("MethodHolderNames");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]
@@ -1840,6 +1855,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
 
     [TestMethod]
+    public void CheckOpenSliceUnnamedArray() => CheckTarget("OpenSliceUnnamedArray");
+
+    [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
 
     [TestMethod]
@@ -2087,6 +2105,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPromotedFieldProperties() => CheckTarget("PromotedFieldProperties");
+
+    [TestMethod]
+    public void CheckPromotedForwarderTypeNameCollision() => CheckTarget("PromotedForwarderTypeNameCollision");
 
     [TestMethod]
     public void CheckPromotedMethodExpr() => CheckTarget("PromotedMethodExpr");
@@ -2813,6 +2834,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnicodeConsoleOutput() => CheckTarget("UnicodeConsoleOutput");
+
+    [TestMethod]
+    public void CheckUnionElementArrayDoor() => CheckTarget("UnionElementArrayDoor");
 
     [TestMethod]
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");

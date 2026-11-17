@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,6 +12,8 @@ partial struct hasher {
     internal array<uint32> prev = new(16);
     internal array<array<nint>> pairs = new(2, () => new(3));
 }
+
+} partial class mainᴛhasher {
 
 internal static uint32 storeHead(this ref hasher h, uint32 hash, uint32 index) {
     var hh = Ꮡ(h.head, (hash & (uint32)mask));
@@ -26,6 +29,8 @@ internal static void bumpPair(this ref hasher h, nint i, nint j) {
 }
 
 internal static uint32 headAt(this ref hasher h, nint i) { return h.head[i]; }
+
+} partial class main_package {
 
 internal static void main() {
     var h = Ꮡ(new hasher(pairs: new array<nint>[]{new nint[]{0, 0, 0}.array(), new nint[]{0, 0, 0}.array()}.array()));

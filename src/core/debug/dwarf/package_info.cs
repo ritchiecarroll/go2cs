@@ -28,9 +28,6 @@ using static go.debug.dwarf_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("696e746572666163657b42617369632829202a64656275672f64776172662e4261736963547970657d", "readType_type")]
-[assembly: GoTypeAlias("LineReader", "ΔLineReader")]
-[assembly: GoTypeAlias("Reader", "ΔReader")]
-[assembly: GoTypeAlias("Type", "ΔType")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -40,31 +37,31 @@ using static go.debug.dwarf_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<AddrType, ΔType>(Pointer = true)]
-[assembly: GoImplement<ArrayType, ΔType>(Pointer = true)]
-[assembly: GoImplement<BoolType, ΔType>(Pointer = true)]
-[assembly: GoImplement<CharType, ΔType>(Pointer = true)]
-[assembly: GoImplement<ComplexType, ΔType>(Pointer = true)]
+[assembly: GoImplement<AddrType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<ArrayType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<BoolType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<CharType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<ComplexType, go.debug.dwarf_package.Type>(Pointer = true)]
 [assembly: GoImplement<DecodeError, error>]
-[assembly: GoImplement<DotDotDotType, ΔType>(Pointer = true)]
-[assembly: GoImplement<EnumType, ΔType>(Pointer = true)]
-[assembly: GoImplement<FloatType, ΔType>(Pointer = true)]
-[assembly: GoImplement<FuncType, ΔType>(Pointer = true)]
-[assembly: GoImplement<IntType, ΔType>(Pointer = true)]
-[assembly: GoImplement<PtrType, ΔType>(Pointer = true)]
-[assembly: GoImplement<QualType, ΔType>(Pointer = true)]
-[assembly: GoImplement<StructType, ΔType>(Pointer = true)]
-[assembly: GoImplement<TypedefType, ΔType>(Pointer = true)]
-[assembly: GoImplement<UcharType, ΔType>(Pointer = true)]
-[assembly: GoImplement<UintType, ΔType>(Pointer = true)]
-[assembly: GoImplement<UnspecifiedType, ΔType>(Pointer = true)]
-[assembly: GoImplement<UnsupportedType, ΔType>(Pointer = true)]
-[assembly: GoImplement<VoidType, ΔType>(Pointer = true)]
+[assembly: GoImplement<DotDotDotType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<EnumType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<FloatType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<FuncType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<IntType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<PtrType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<QualType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<Reader, typeReader>(Pointer = true)]
+[assembly: GoImplement<StructType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<TypedefType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<UcharType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<UintType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<UnspecifiedType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<UnsupportedType, go.debug.dwarf_package.Type>(Pointer = true)]
+[assembly: GoImplement<VoidType, go.debug.dwarf_package.Type>(Pointer = true)]
 [assembly: GoImplement<typeUnit, dataFormat>(Pointer = true)]
 [assembly: GoImplement<typeUnitReader, typeReader>(Pointer = true)]
 [assembly: GoImplement<unit, dataFormat>(Pointer = true)]
 [assembly: GoImplement<unknownFormat, dataFormat>]
-[assembly: GoImplement<ΔReader, typeReader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -87,8 +84,10 @@ using static go.debug.dwarf_package;
 [assembly: GoFieldAccess(typeof(EnumValue))]
 [assembly: GoFieldAccess(typeof(Field))]
 [assembly: GoFieldAccess(typeof(FuncType))]
+[assembly: GoFieldAccess(typeof(LineReader))]
 [assembly: GoFieldAccess(typeof(PtrType))]
 [assembly: GoFieldAccess(typeof(QualType))]
+[assembly: GoFieldAccess(typeof(Reader))]
 [assembly: GoFieldAccess(typeof(StructField))]
 [assembly: GoFieldAccess(typeof(StructType))]
 [assembly: GoFieldAccess(typeof(TypedefType))]
@@ -99,8 +98,6 @@ using static go.debug.dwarf_package;
 [assembly: GoFieldAccess(typeof(typeUnitReader))]
 [assembly: GoFieldAccess(typeof(unit))]
 [assembly: GoFieldAccess(typeof(unit5))]
-[assembly: GoFieldAccess(typeof(ΔLineReader))]
-[assembly: GoFieldAccess(typeof(ΔReader))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -110,17 +107,17 @@ using static go.debug.dwarf_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/dwarf/attr_string.go", "attr_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKC2gB7+AGCgpQ=")]
-[assembly: GoPositionMap("debug/dwarf/buf.go", "buf.cs", "ACdUgqaCpoKmouaCgoKUgoKCpoKCgpSCgoKmlIKCgoKmgoKCpoKCgpSmgoKClIKUuIKCgpSmgoKClKrSgoKCgoKCgqaokoKokoKCgpTokpSkpKSUguaygoKCgoKUpoKCggAJFII=")]
-[assembly: GoPositionMap("debug/dwarf/class_string.go", "class_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgtqUgoKU")]
-[assembly: GoPositionMap("debug/dwarf/const.go", "const.cs", "AIoBmgKCgpQAhgGWAoKClA==")]
-[assembly: GoPositionMap("debug/dwarf/entry.go", "entry.cs", "ACdOwoKmgoKUlLiClIKCuIKCgoKCgoKClIKUlIKokoKCgoKCgoKCpoKUlIKUgtwAGDIAGDDSlIKmpgAIEoKUAAcQgIKkpqamptyAgqSmpqampgCOAaYCkgACFPKClKqigoKmACwS0qKCgoKUgoKClO6CgoKmgoKCgpSUgoKUgpSCgoKClKaCgoKUlIKCpoKCgpSUgoKUgpSmgoKCgoKClIKUyLSClLS0tLSkgpSCpoKCgoKClNq0tLTItLS0tLS0tMjqyIKCgoKUgoKCgpTYtLS0tMi0goKCgoKUlIKUgpSCgpSCgpSUgoKCgsaClLS0tLSkgpSCgpSClIKUpoK2goKCgpT+goKCgpTs7LS0yMiUgraUgpQAEiqigoKqoqiSAAgKooKCgoKClIKCgoKCpoKCgpSClIKCgqiSgrqSgoKCgqaigpSCggADEOKClIKClIKCgoKUgoKCgpSCgqaUrNKC7oKCpoKCpoKCgpSCzqKqogACHgAOAoKCgpSCgoKCgoKCgoKUgpSCgpSigqaUrOKUlIKCgoKUtIKCgtqCpoKCppSCgpSUgoKUgoKUpoKClIKClKbKgoKCgpSmAAYQAAgCgoKUgoKUgoKCgriCgoKm5sKClIKCgpSCpoKUuLrSgpSCgqaCgoKClIKUpoKCgoLIgpSCgpSCgpS2goKCgpS2goK2toKCtoKCAAkMspSCpoKCgoKU", "429-457:1;459-486:2")]
-[assembly: GoPositionMap("debug/dwarf/line.go", "line.cs", "AH6eAvKUuIKUlIK4poKUAAcQgriUqsKmgoKCgpSC3JSCgpSClIKClJSCgpSCgpSUlIKCpoKUgpSCuIKCgriClIKCuJSCgoKClIKUppTKgoKCgoK4goKCgoKClJSCgoKCooKUuJQAChiSgoKCgpSo0oKCgoKUtIKClJSClIKClJSCgoLYgpTYtLS0tLS0tLS0tLS2lLSClLS0AAgMgqassoKClIKUgoKCgpSUgu6CgpSCpoKqooKUAAMU4oLKgoKUgoKUgu4ADybSlJSCgoKCpqaCgpSUgoK2lLS0tLTYgoKCgoKUyLaUgtq2traCtra2trbItrbagraUgoKCgoKCqqKCggAOIJKuwoKCgoKqtIKmpqi2AAwaggACHgAMAsoAARwADgKAgqSUgoKUlILKgoKCgoKUlIKUuIKUAAMU4oKqooLKgpSmgoKmuIKCgpSUqqKCgqaUlIKUgoK4")]
-[assembly: GoPositionMap("debug/dwarf/open.go", "open.cs", "ADNqAAEUAAgCABAigpSCgoKUpoKUpIK0grSmgoKUgq7CrsKCpLS0tLY=")]
-[assembly: GoPositionMap("debug/dwarf/tag_string.go", "tag_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIADxqCgoKWgpSCpKSCpKSCpIKk")]
-[assembly: GoPositionMap("debug/dwarf/type.go", "type.cs", "AB46lAAOHpSCgpQAOHKUAAkUgqaCgpQACxAABxAAXbwBgoKUpoKClKaCgoKUgoKUgoKClIKCgoKmggAVJIKCgpSCgoKUlIIADRSCgoKClJSCgpQABxAABxCUAAgSgoKUAA4gsgAHEKKClIKCuIKClIIAGxAACQKAgqSCkoKUgoIABxCCgoKUrMSmkoLugoKCgpSCgpSCgoKUlIKUgpTckoKClILGguiUpgAJFIKCgoKUlpKmlIKUgoKCgqa0graUpoKCAA8egoKCgpSUgra0tIK4pLTotLS0tKSChoKCgoKCgoKCABMmgoKClLS0pIKCgoKCgoKClIKClLiCgoKUgoKCxraCgoKCgoKCgpSClKaUgoKUgoKUAAgQgoKCgpSUtLQADRiCgoKCgoKCgoKCgoKCgpSCAAkSgoKCgoKUAAwYgoKCgpSCgoKUtILGpAAIEIKCgoLsgoKC7IKCgoK2gqaCgoKCyrS2lJSIstaCgoKmgoI=", "428-430:1;442-476:2;480-497:3", "", "683=Basic/1/1/2", "", "478:25,479:17")]
-[assembly: GoPositionMap("debug/dwarf/typeunit.go", "typeunit.cs", "AB00soKCgoKCgpSCgoKClIKClJSCgpSClIKClIKCgpSmggAMGoKmqLKCgpSCpoKCgoKmggAKGJKCgoKClKiSqLKClIKUgoKClKiSAAYQkg==", "", "", "74=bytes/1/1/4;161=makeBuf/1/1/3")]
-[assembly: GoPositionMap("debug/dwarf/unit.go", "unit.cs", "AB9IkqaCpoKmgoKUpoKClKaCgpSmgoKU5rSCgoKCgoKUgoKmgriCgoKCgoKClIKUgoKCgpSCgoKUgoKUlIKCgpSUgoKmlLSCgpTIgpSClKrUhoKUgoKUpqKClIKCuJSClIKUgpSClA==", "162-164:1")]
+[assembly: GoPositionMap("debug/dwarf/attr_string.go", "attr_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoLaAH34AYKClA==")]
+[assembly: GoPositionMap("debug/dwarf/buf.go", "buf.cs", "ACpUgqaCpoLGogAIBoKCgpSCgoKmgoKClIKCgqaUgoKCgqaCgoKmgoKClKaCgoKUgpS4goKClKaCgoKUqtKCgoKCgoKCpqiSgqiSgoKClOiSlKSkpJSC5rKCgoKCgpSmgoKCAA0Ugg==")]
+[assembly: GoPositionMap("debug/dwarf/class_string.go", "class_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKC2rSCgpQ=")]
+[assembly: GoPositionMap("debug/dwarf/const.go", "const.cs", "AI4BmgKCgpQAigGWAoKClA==")]
+[assembly: GoPositionMap("debug/dwarf/entry.go", "entry.cs", "ACpOwoKmgoKUlLiClIKCuIKCgoKCgoKClIKUlIKokoKCgoKCgoKCpoKUlIKUgvwAGDIAGDDSlIKmpgAIEoKUAAcQgIKkpqamptyAgqSmpqampgCQAaYCkgAEFPKClKqigoKmADAS0qKCgoKUgoKClO6CgoKmgoKCgpSUgoKUgpSCgoKClKaCgoKUlIKCpoKCgpSUgoKUgpSmgoKCgoKClIKUyLSClLS0tLSkgpSCpoKCgoKClNq0tLTItLS0tLS0tMjqyIKCgoKUgoKCgpTYtLS0tMi0goKCgoKUlIKUgpSCgpSCgpSUgoKCgsaClLS0tLSkgpSCgpSClIKUpoK2goKCgpT+goKCgpTs7LS0yMiUgraUgpQAFiqigoLKoqiSAAgKooKCgoKClIKCgoKCpoKCgpSClIKCgqiSgrqSgoKCgqaigpSCggADEOKClIKClIKCgoKUgoKCgpSCgqaUrNKC7oKCpoKCpoKCgpSCzqKqogACHgAOAoKCgpSCgoKCgoKCgoKUgpSCgpSigqaUzOKUlIKCgoKUtIKCgtqCpoKCppSCgpSUgoKUgoKUpoKClIKClKbKgoKCgpSmAAgQAAgCgoKUgoKUgoKCgriCgoKm5sKClIKCgpSCpoKUuPrSgpSCgqaCgoKClIKUpoKCgoLIgpSCgpSCgpS2goKCgpS2goK2toKCtoKCAAsMspSCpoKCgoKU", "429-457:1;459-486:2")]
+[assembly: GoPositionMap("debug/dwarf/line.go", "line.cs", "AIEBngLylLiClJSCuKaClAAHEIK4lMrCpoKCgoKUgtyUgoKUgpSCgpSUgoKUgoKUlJSCgqaClIKUgriCgoK4gpSCgriUgoKCgpSClKaUyoKCgoKCuIKCgoKCgpSUgoKCgqKClLiUAA4YkoKCgoKUAAgI0oKCgoKUtIKClJSClIKClJSCgoLYgpTYtLS0tLS0tLS0tLS2lLSClLS0AAgMgqassoKClIKUgoKCgpSUgu6CgpSCpoKqooKUAAMU4oLKgoKUgoKUggAIDgAVJtKUlIKCgoKmpoKClJSCgraUtLS0tNiCgoKCgpTItpSC2ra2toK2tra2tsi2ttqCtpSCgoKCgoKqooKCABIgkq7CgoKCgqq0gqamqLYADBqCAAIeAAwC6gADHAAOAoCCpJSCgpSUgsqCgoKCgpSUgpS4gpQABRTigqqigsqClKaCgqa4goKClJSqooKCppSUgpSCgrg=")]
+[assembly: GoPositionMap("debug/dwarf/open.go", "open.cs", "ADRqAAEUAAgCABAigpSCgoKUpoKUpIK0grSmgoKUgs7CrsKCpLS0tLY=")]
+[assembly: GoPositionMap("debug/dwarf/tag_string.go", "tag_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggAPGoKCgraClIKkpIKkpIKkgqQ=")]
+[assembly: GoPositionMap("debug/dwarf/type.go", "type.cs", "ACE6lAASHpSCgpQAPHKUAA0UgqaCgpQADxAACxAAYbwBgoKUxoKClMaCgoKUgoKUgoKClIKCgoKmggAZJIKCgpSCgoKUlIIAERSCgoKClJSCgpQACxAACxCUAAwSgoKUABIgsgALEKKClIKCuIKClIIAHxAACQKAgqSCkoKUgoIABxCCgoKUrMSmkoLugoKCgpSCgpSCgoKUlIKUgpTckoKClILGguiUpgAJFIKCgoKUlpKmlIKUgoKCgqa0graUpoKCAA8egoKCgpSUgra0tIK4pLTotLS0tKSChoKCgoKCgoKCABMmgoKClLS0pIKCgoKCgoKClIKClLiCgoKUgoKCxraCgoKCgoKCgpSClKaUgoKUgoKUAAgQgoKCgpSUtLQADRiCgoKCgoKCgoKCgoKCgpSCAAkSgoKCgoKUAAwYgoKCgpSCgoKUtILGpAAIEIKCgoLsgoKC7IKCgoK2gqaCgoKCyrS2lJSIsvaCgoKmgoI=", "428-430:1;442-476:2;480-497:3", "", "746=Basic/1/1/2", "", "541:25,542:17")]
+[assembly: GoPositionMap("debug/dwarf/typeunit.go", "typeunit.cs", "ACA0soKCgoKCgpSCgoKClIKClJSCgpSClIKClIKCgpSmggAMGoKmqLKCgpSCpoKCgoKmggAOGJKCgoKClKiSqLKClIKUgoKClKiSAAYQkg==", "", "", "77=bytes/1/1/4;168=makeBuf/1/1/3")]
+[assembly: GoPositionMap("debug/dwarf/unit.go", "unit.cs", "ACJIkqaCpoKmgoKUpoKClKaCgpSmgoKUAAgGtIKCgoKCgpSCgqaCuIKCgoKCgoKUgpSCgoKClIKCgpSCgpSUgoKClJSCgqaUtIKClMiClIKUqtSGgpSCgpSmooKUgoK4lIKUgpSClIKU", "162-164:1")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;
@@ -150,7 +147,7 @@ public static partial class dwarf_package
     internal partial struct unit {}
     internal partial struct unit5 {}
     internal partial struct unknownFormat {}
-    public partial interface ΔType {}
+    public partial interface Type {}
     public partial struct AddrType {}
     public partial struct ArrayType {}
     public partial struct Attr {}
@@ -172,10 +169,12 @@ public static partial class dwarf_package
     public partial struct IntType {}
     public partial struct LineEntry {}
     public partial struct LineFile {}
+    public partial struct LineReader {}
     public partial struct LineReaderPos {}
     public partial struct Offset {}
     public partial struct PtrType {}
     public partial struct QualType {}
+    public partial struct Reader {}
     public partial struct StructField {}
     public partial struct StructType {}
     public partial struct Tag {}
@@ -185,8 +184,6 @@ public static partial class dwarf_package
     public partial struct UnspecifiedType {}
     public partial struct UnsupportedType {}
     public partial struct VoidType {}
-    public partial struct ΔLineReader {}
-    public partial struct ΔReader {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -207,3 +204,38 @@ public static partial class dwarf_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(dwarf_package.ArrayType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛArrayType;
+[GoMethodHost(typeof(dwarf_package.Attr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛAttr;
+[GoMethodHost(typeof(dwarf_package.BasicType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛBasicType;
+[GoMethodHost(typeof(dwarf_package.Class)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛClass;
+[GoMethodHost(typeof(dwarf_package.CommonType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛCommonType;
+[GoMethodHost(typeof(dwarf_package.Data)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛData;
+[GoMethodHost(typeof(dwarf_package.DecodeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛDecodeError;
+[GoMethodHost(typeof(dwarf_package.DotDotDotType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛDotDotDotType;
+[GoMethodHost(typeof(dwarf_package.Entry)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛEntry;
+[GoMethodHost(typeof(dwarf_package.EnumType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛEnumType;
+[GoMethodHost(typeof(dwarf_package.FuncType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛFuncType;
+[GoMethodHost(typeof(dwarf_package.LineReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛLineReader;
+[GoMethodHost(typeof(dwarf_package.PtrType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛPtrType;
+[GoMethodHost(typeof(dwarf_package.QualType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛQualType;
+[GoMethodHost(typeof(dwarf_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛReader;
+[GoMethodHost(typeof(dwarf_package.StructField)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛStructField;
+[GoMethodHost(typeof(dwarf_package.StructType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛStructType;
+[GoMethodHost(typeof(dwarf_package.Tag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛTag;
+[GoMethodHost(typeof(dwarf_package.TypedefType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛTypedefType;
+[GoMethodHost(typeof(dwarf_package.UnsupportedType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛUnsupportedType;
+[GoMethodHost(typeof(dwarf_package.VoidType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛVoidType;
+[GoMethodHost(typeof(dwarf_package.buf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛbuf;
+[GoMethodHost(typeof(dwarf_package.typeFixer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛtypeFixer;
+[GoMethodHost(typeof(dwarf_package.typeUnitReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛtypeUnitReader;
+[GoMethodHost(typeof(dwarf_package.unit)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛunit;
+[GoMethodHost(typeof(dwarf_package.unknownFormat)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dwarfᴛunknownFormat;
+// </MethodHolders>

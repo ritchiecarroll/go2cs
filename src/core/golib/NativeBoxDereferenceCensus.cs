@@ -176,6 +176,13 @@ internal static class NativeBoxDereferenceCensus
         return null;
     }
 
+    // Behind the reference floor (NativeBox<T>.ValueAddress, 2026-11-15) the Func, Interface and Pointer lines have no
+    // reachable population at a non-zero address: a pointee that is a CLR reference type is refused before the census
+    // counts it. AT THE NUMBER 0 they are reached: the floor passes a nil box, so that it answers what every nil pointer
+    // answers, and the census counts the attempt before the read faults (the floor's own nil control is such a row).
+    // UnsafePointer is reachable over managed Go storage too, the floor's one exemption. The lines are kept so that a row
+    // of those kinds names itself. Chan, Map, String, Slice and Array are golib VALUE types that hold a reference, so
+    // they are not the floor's and stay reachable.
     private static string KindNameOf(Type t) => GoReflect.KindOf(t) switch
     {
         GoReflect.Array => "Array",

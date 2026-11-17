@@ -56,7 +56,7 @@ internal static void assignCopies() {
     e[1] = 88;
     fmt.Println(garr[1], e[1]);
 
-    e = src.Clone();
+    e.Assign(src);
     e[2] = 66;
     fmt.Println(src[2], e[2]);
 
@@ -65,7 +65,7 @@ internal static void assignCopies() {
     f[0] = 55;
     fmt.Println(h.arr[0], f[0]);
 
-    h.arr = src.Clone();
+    h.arr.Assign(src);
     h.arr[1] = 44;
     fmt.Println(src[1], h.arr[1]);
 
@@ -80,7 +80,9 @@ internal static void assignCopies() {
     fmt.Println(src[0], g[0]);
 
     var (x, y) = (new nint[]{1, 2}.array(), new nint[]{3, 4}.array());
-    (x, y) = (y.Clone(), x.Clone());
+    (var xᴛ1, var yᴛ1) = (y.Clone(), x.Clone());
+    x.Assign(xᴛ1);
+    y.Assign(yᴛ1);
     x[0] = 11;
     fmt.Println(x[0], x[1], y[0], y[1]);
 }

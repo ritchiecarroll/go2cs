@@ -16,7 +16,7 @@ internal static error writeRawConn(syscall.RawConn c, slice<byte> b) {
     var err = c.Write((uintptr s) => {
         ref var written = ref heap(new uint32(), out var Ꮡwritten);
         ref var buf = ref heap<syscall.WSABuf>(new syscall.WSABuf(Len: (uint32)len(bʗ1), Buf: Ꮡ(bʗ1, 0)), out var Ꮡbuf);
-        Ꮡoperr.ValueSlot = syscall.WSASend((syscallꓸHandle)s, Ꮡbuf, 1, Ꮡwritten, 0, nil, nil);
+        Ꮡoperr.ValueSlot = syscall.WSASend((syscall.Handle)s, Ꮡbuf, 1, Ꮡwritten, 0, nil, nil);
         return true;
     });
     if (err != nil) {
@@ -35,7 +35,7 @@ internal static (nint, error) readRawConn(syscall.RawConn c, slice<byte> b) {
         ref var buf = ref heap(new syscall.WSABuf(), out var Ꮡbuf);
         buf.Buf = Ꮡ(bʗ1, 0);
         buf.Len = (uint32)len(bʗ1);
-        Ꮡoperr.ValueSlot = syscall.WSARecv((syscallꓸHandle)s, Ꮡbuf, 1, Ꮡread, Ꮡflags, nil, nil);
+        Ꮡoperr.ValueSlot = syscall.WSARecv((syscall.Handle)s, Ꮡbuf, 1, Ꮡread, Ꮡflags, nil, nil);
         n = (nint)read;
         return true;
     });

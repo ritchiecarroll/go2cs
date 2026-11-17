@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -55,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAwcgoLagoIABhCCkqCAAAoOkAAGEIKClAAKEKKCgqaipIKCgoKUlKaCgoKUprKCgpS8goKUkqSCpqKClMqCpqKCuLoACBKCgoKCgoKUgoKUgoKClJSCgoKUlIKClIKCgoKUgpSCgoKUgg==", "61-65:1;103-103:1;104-104:2;107-109:3;110-113:4;114-116:5;120-122:6;123-126:7;129-129:8;151-151:1;152-152:2;153-153:3;155-161:4;162-168:5;169-172:6;173-181:7;182-189:8", "", "", "", "75:21,76:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA8cgoIACQqCggAKEIKSoIAADg6QAAoQgoKUAAwQooKCpqKkgoKCgpSUpoKCgpSmsoKClLyCgpSSpIKmooKUyoKmooK4ugAIEoKCgoKCgpSCgpSCgoKUlIKCgpSUgoKUgoKCgpSClIKCgpSC", "61-65:1;103-103:1;104-104:2;107-109:3;110-113:4;114-116:5;120-122:6;123-126:7;129-129:8;151-151:1;152-152:2;153-153:3;155-161:4;162-168:5;169-172:6;173-181:7;182-189:8", "", "", "", "96:21,97:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -92,3 +90,17 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.Box<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛBox;
+[GoMethodHost(typeof(main_package.Cell<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛCell;
+[GoMethodHost(typeof(main_package.Ord2<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛOrd2;
+[GoMethodHost(typeof(main_package.Pair<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛPair;
+[GoMethodHost(typeof(main_package.Plain)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛPlain;
+// </MethodHolders>

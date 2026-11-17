@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.compress;
 
+using static flate_package;
+
 partial class flate_package {
 
 // dictDecoder implements the LZ77 sliding dictionary as used in decompression.
@@ -32,6 +34,8 @@ partial struct dictDecoder {
     internal nint rdPos; // Have emitted hist[:rdPos] already
     internal bool full;  // Has a full window length been written yet?
 }
+
+} partial class flateᴛdictDecoder {
 
 // init initializes dictDecoder to have a sliding window dictionary of the given
 // size. If a preset dict is provided, it will initialize the dictionary with
@@ -181,4 +185,4 @@ internal static slice<byte> readFlush(this ref dictDecoder dd) {
     return toRead;
 }
 
-} // end flate_package
+} // end flateᴛdictDecoder

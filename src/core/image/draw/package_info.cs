@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using imageꓸRGBA = go.image_package.ΔRGBA;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,8 +56,8 @@ using static go.image.draw_package;
 [assembly: GoFieldAccess(typeof(image_package.NRGBA))]
 [assembly: GoFieldAccess(typeof(image_package.NRGBA64))]
 [assembly: GoFieldAccess(typeof(image_package.Paletted))]
+[assembly: GoFieldAccess(typeof(image_package.RGBA))]
 [assembly: GoFieldAccess(typeof(image_package.Uniform))]
-[assembly: GoFieldAccess(typeof(image_package.ΔRGBA))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -68,7 +67,7 @@ using static go.image.draw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("image/draw/draw.go", "draw.cs", "ADZuogALGMiigoKUrOKCgoKClIKCgpSCgoKCuIKskqrSgoIACRSUgoKUgoKUlKSCpILsgsaCpIKUgpSCpIKkgsiCuIKUgoKkgoKUpIKkgsaCpIK4gqSCgoKCgoKUgoKCgpSCgoLYgoKCgpTYgoKCgpTaoqKCggAJFICCgoKCgoKCgoKClIKCggAIEoSCgoKCgoKCgpSmxrSCgoKC7gAKFAAKFIKCgoKCgoKCgpSUpsa0goKCgoKCgpSCgoLc7LSCgoKCgoKCgpSCgoKUgriigoKCuIKCgoKCgpSCgoKCuLKSgoLIgoKCuIKCgoKUgoKCgoKCgoKmlIKCgoKUgr66wtyCgoKUgoKCuIKCgoKUgoKCgpSUgoKCgpSCgoKCppSCgoLKgoKCgpSCgoKClJSCgoKClIKCgoLKgoKCgpSCgoKClIKCgoKCgsqCgoKClIKCgoKUgoKCgsrCgoKCgoKCgoKUppSCgoKClIKCuMKiooKCgriCgoKCgoKCgoKCgoKCgoKUgoKCggAHEJSCgoKUuMKiooKCgriCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4sqKigoKCuIKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4oqKigoKCuIKCgoKCggAHEIKCgoKCgoKCgoKCgoKCgpSmgoKCgoKCgpSmhIKCgoKCgoKCgoKCgoKCgpSmgoKCgoKCgoKUpgAIEoKCgoKUgoKCgoKCAAcQlIKCgpaCgoKmupKClIKUrviCpgAIEqKAgoKCgoKCgpS8woKClIDIlIDEgMSA2IKCpoKCgoKCgqa4kqKCgoKCuJSClIKCgpaCgoLKlIKUgoKCgriCgoKCgoKCgoKCgoKCgoK4goI=", "986-986:1;992-992:2;994-994:3;996-996:4", "", "112=Sub/1/1/1,Add/1/1/1,Overlaps/1/1/1;210=Dx/1/1/1;265=Dx/1/1/1;277=Dx/1/1/1")]
+[assembly: GoPositionMap("image/draw/draw.go", "draw.cs", "ADluogANGOiigoKUzOKCgoKClIKCgpSCgoKCuIKskqrSgoIACRSUgoKUgoKUlKSCpILsgsaCpIKUgpSCpIKkgsiCuIKUgoKkgoKUpIKkgsaCpIK4gqSCgoKCgoKUgoKCgpSCgoLYgoKCgpTYgoKCgpTaoqKCggAJFICCgoKCgoKCgoKClIKCggAIEoSCgoKCgoKCgpSmxrSCgoKC7gAKFAAKFIKCgoKCgoKCgpSUpsa0goKCgoKCgpSCgoLc7LSCgoKCgoKCgpSCgoKUgriigoKCuIKCgoKCgpSCgoKCuLKSgoLIgoKCuIKCgoKUgoKCgoKCgoKmlIKCgoKUgr66wtyCgoKUgoKCuIKCgoKUgoKCgpSUgoKCgpSCgoKCppSCgoLKgoKCgpSCgoKClJSCgoKClIKCgoLKgoKCgpSCgoKClIKCgoKCgsqCgoKClIKCgoKUgoKCgsrCgoKCgoKCgoKUppSCgoKClIKCuMKiooKCgriCgoKCgoKCgoKCgoKCgoKUgoKCggAHEJSCgoKUuMKiooKCgriCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4sqKigoKCuIKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4oqKigoKCuIKCgoKCggAHEIKCgoKCgoKCgoKCgoKCgpSmgoKCgoKCgpSmhIKCgoKCgoKCgoKCgoKCgpSmgoKCgoKCgoKUpgAIEoKCgoKUgoKCgoKCAAcQlIKCgpaCgoKmupKClIKUrviCpgAIEqKAgoKCgoKCgpS8woKClIDIlIDEgMSA2IKCpoKCgoKCgqa4kqKCgoKCuJSClIKCgpaCgoLKlIKUgoKCgriCgoKCgoKCgoKCgoKCgoK4goI=", "986-986:1;992-992:2;994-994:3;996-996:4", "", "121=Sub/1/1/1,Add/1/1/1,Overlaps/1/1/1;219=Dx/1/1/1;274=Dx/1/1/1;286=Dx/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
@@ -103,3 +102,14 @@ public static partial class draw_package
     [GoInit] internal static void initᴛᴛimportꓸimageꓸinternalꓸimageutil() => builtin.initPackage(typeof(go.image.@internal.imageutil_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(draw_package.Op)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class drawᴛOp;
+[GoMethodHost(typeof(draw_package.floydSteinberg)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class drawᴛfloydSteinberg;
+// </MethodHolders>

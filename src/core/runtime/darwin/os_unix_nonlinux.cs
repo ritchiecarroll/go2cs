@@ -4,7 +4,11 @@
 //go:build unix && !linux
 namespace go;
 
+using static runtime_package;
+
 partial class runtime_package {
+
+} partial class runtimeᴛsigctxt {
 
 // sigFromUser reports whether the signal was sent because of a call
 // to kill.
@@ -21,4 +25,4 @@ internal static bool sigFromSeccomp(this ref sigctxt c) {
     return false;
 }
 
-} // end runtime_package
+} // end runtimeᴛsigctxt

@@ -63,7 +63,7 @@ using static go.encoding.base64_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/base64/base64.go", "base64.cs", "ACaAAfKCpoKCgpS4lLSklAACFAAJApS0pIIAAhIACAKCuLjKygABGAAKAoLKlJKClJSCgoKUgqaCgqaCgqaClJSCgsaCgt6igoKCqJKCggALGLKCuIKCgoKUgoKClIKClLiCgoKClIKClIK4goKCqrSCgoKUAAIQ0qqigpQABBKyAAIQ9JKmlIKClKSUgpSClIKCgqaCgqaCuKbIgpSUlJSmyIKUlJSCuIKCpIKCpIKClIKkgoK4rtSCgpSUgoKssoKCAA0ctIKCgqaC3IKCgpSClIKmgoSSgoKCgoKClIKmgoKUuIKCgoKCgpSUgoIAAhIACQKC3JSCgoIACBSCgpSCgoKCyoKCzIKClIKCgoLKgoKCgoKmrNaClAACFNaClAAGHoKCgoKCgoKUpoKmlKiSqqKmgpSm")]
+[assembly: GoPositionMap("encoding/base64/base64.go", "base64.cs", "ACeAAfKCpoKCgpS4lLSklAAEFAAJApS0pIIAAhIACAKC2LjKygADGAAKAoLKlJKClJSCgoKUgqaCgqaCgqaClJSCgsaCgt6igoKCqJKCggAPGLKCuIKCgoKUgoKClIKClLiCgoKClIKClIK4goKCqrSCgoKUAAQQ0sqigpQACBKyAAQQ9JKmlIKClKSUgpSClIKCgqaCgqaCuKbIgpSUlJSmyIKUlJSCuIKCpIKCpIKClIKkgoK4rtSCgpSUgoKssoKCABEctIKCgqaC3IKCgpSClIKmgoSSgoKCgoKClIKmgoKUuIKCgoKCgpSUgoIABBIACQKC3JSCgoIACBSCgpSCgoKCyoKCzIKClIKCgoLKgoKCgoKmzNaClAACFNaClAAIHoKCgoKCgoKUpoKmlMiSyqLGgpSm")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -97,3 +97,17 @@ public static partial class base64_package
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(base64_package.CorruptInputError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛCorruptInputError;
+[GoMethodHost(typeof(base64_package.Encoding)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛEncoding;
+[GoMethodHost(typeof(base64_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛdecoder;
+[GoMethodHost(typeof(base64_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛencoder;
+[GoMethodHost(typeof(base64_package.newlineFilteringReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛnewlineFilteringReader;
+// </MethodHolders>

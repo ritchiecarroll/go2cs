@@ -249,7 +249,7 @@ public static partial void TestIssue69210(ж<testing.T> Ꮡt) {
         if (testing.Short()) {
             Ꮡt.Skip(thisIsAStressTestThatˢ);
         }
-        var (ctx, cancel) = context.WithTimeout(context.Background(), 1 * time.ΔSecond);
+        var (ctx, cancel) = context.WithTimeout(context.Background(), 1 * time.Second);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
 

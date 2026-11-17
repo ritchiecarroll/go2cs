@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using runtime = runtime_package;
+using static main_package;
 
 partial class main_package {
 
@@ -10,9 +11,13 @@ partial struct T {
     internal nint n;
 }
 
+} partial class mainᴛT {
+
 internal static nint valueMethod(this T t) { return t.n; }
 
 internal static nint pointerMethod(this ref T t) { return t.n; }
+
+} partial class main_package {
 
 internal static @string nameOf(any fn) {
     var f = runtime.FuncForPC(reflect.ValueOf(fn).Pointer());
@@ -45,9 +50,9 @@ internal static partial void main() {
     ref var t = ref heap<T>(new T(n: 1), out var Ꮡt);
     var p = Ꮡt;
 
-    fmt.Println("method expression, value receiver:   ", nameOf(((Func<T, nint>)(valueMethod))));
-    fmt.Println("method expression, pointer receiver: ", nameOf(((Func<ж<T>, nint>)(pointerMethod))));
-    fmt.Println("method expression, promoted to *T:   ", nameOf(((Func<ж<T>, nint>)([GoWrapper("(*T).valueMethod")] (p0) => valueMethod(panicwrapRecv(p0, "value method main.T.valueMethod called using nil *T pointer").Value)))));
+    fmt.Println("method expression, value receiver:   ", nameOf(((Func<T, nint>)(mainᴛT.valueMethod))));
+    fmt.Println("method expression, pointer receiver: ", nameOf(((Func<ж<T>, nint>)(mainᴛT.pointerMethod))));
+    fmt.Println("method expression, promoted to *T:   ", nameOf(((Func<ж<T>, nint>)([GoWrapper("(*T).valueMethod")] (p0) => mainᴛT.valueMethod(panicwrapRecv(p0, "value method main.T.valueMethod called using nil *T pointer").Value)))));
 
     fmt.Println("method value, pointer receiver:      ", nameOf(p.pointerMethod));
     fmt.Println("method value, &t pointer receiver:   ", nameOf((Ꮡt).pointerMethod));
@@ -73,6 +78,8 @@ internal static partial void main() {
 
 partial struct named /*num:nint*/;
 
+} partial class mainᴛnamed {
+
 internal static @string String(this named n) { return "named"; }
 
-} // end main_package
+} // end mainᴛnamed

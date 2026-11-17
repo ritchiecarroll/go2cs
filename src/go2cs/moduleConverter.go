@@ -1054,6 +1054,13 @@ func (m *ModuleConverter) generateRecurseBuildFiles() {
 		"  <Import Project=\"$(go2csPath)core/golib/buildTransitive/go.lib.symbols.targets\"",
 		"          Condition=\"'$(GoLibSymbolsTargetsImported)' != 'true' and '$(go2csPath)' != '' and Exists('$(go2csPath)core/golib/buildTransitive/go.lib.symbols.targets')\" />",
 		"",
+		"  <!-- A converted library is not an application. Publishing one is publishing the program that references",
+		"       it; a 'dotnet publish -r <rid> -p:PublishAot=true' that reaches a library through a solution would",
+		"       otherwise publish it as its own native library. The program's publish still carries the library. -->",
+		"  <PropertyGroup Condition=\"'$(OutputType)' == 'Library'\">",
+		"    <IsPublishable>false</IsPublishable>",
+		"  </PropertyGroup>",
+		"",
 		"</Project>",
 		"",
 	}

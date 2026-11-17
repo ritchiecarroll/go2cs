@@ -45,15 +45,18 @@ namespace go.sync;
 using @unsafe = unsafe_package;
 using System.Threading;
 using System.Runtime.InteropServices;
+using static atomic_package;
 
 partial class atomic_package {
 
 // A Bool is an atomic boolean value.
 // The zero value is false.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Bool {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] public partial struct Bool {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal uint32 v;
 }
+
+} partial class atomicᴛBool {
 
 // Load atomically loads and returns the value stored in x.
 [GoRecv] public static bool Load(this ref Bool x) {
@@ -76,6 +79,8 @@ partial class atomic_package {
     return Interlocked.CompareExchange(ref x.v, b32(@new), old32) == old32;
 }
 
+} partial class atomic_package {
+
 // b32 returns a uint32 0 or 1 representing b.
 internal static uint32 b32(bool b) {
     if (b) {
@@ -89,7 +94,7 @@ internal static uint32 b32(bool b) {
 internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 
 // A Pointer is an atomic pointer of type *T. The zero value is a nil *T.
-[GoType] partial struct Pointer<T>{
+[GoType] public partial struct Pointer<T>{
     // Mention *T in a field to disallow conversion between Pointer types.
     // See go.dev/issue/56603 for more details.
     // Use *T, not T, to avoid spurious recursive type definition errors.
@@ -115,9 +120,11 @@ internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 // nil `any` lost the value outright (Range skipped the entry, CompareAndSwap failed against it), and
 // its `expunged = new(any)` sentinel was indistinguishable from nil, so a deleted entry could not be
 // told from an expunged one. Same conflation for atomic.Pointer[error], [func()], and a **T slot.
-private static ж<T> nilCanon<T>(ж<T> p){
+internal static ж<T> nilCanon<T>(ж<T> p){
     return p is null || p.IsNilPointer ? default! : p;
 }
+
+} partial class atomicᴛPointer {
 
 // A NATIVE-backed ж<Pointer<T>> is the hammer family's `(*Pointer[byte])(unsafe.Pointer(&val))`
 // reinterpret over a uint64: the box aliases raw pinned storage, and Go's semantics for those 8
@@ -176,11 +183,15 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
     return ReferenceEquals(Interlocked.CompareExchange(ref x.v, nilCanon(Ꮡnew), old), old);
 }
 
+} partial class atomic_package {
+
 // An Int32 is an atomic int32. The zero value is zero.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Int32 {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] public partial struct Int32 {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal int32 v;
 }
+
+} partial class atomicᴛInt32 {
 
 // Load atomically loads and returns the value stored in x.
 [GoRecv] public static int32 Load(this ref Int32 x) {
@@ -219,12 +230,16 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
     return Interlocked.Or(ref x.v, mask);
 }
 
+} partial class atomic_package {
+
 // An Int64 is an atomic int64. The zero value is zero.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Int64 {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] public partial struct Int64 {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal readonly align64 __;
     [FieldOffset(0)] internal int64 v;
 }
+
+} partial class atomicᴛInt64 {
 
 // Load atomically loads and returns the value stored in x.
 [GoRecv] public static int64 Load(this ref Int64 x) {
@@ -263,11 +278,15 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
     return Interlocked.Or(ref x.v, mask);
 }
 
+} partial class atomic_package {
+
 // A Uint32 is an atomic uint32. The zero value is zero.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Uint32 {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] public partial struct Uint32 {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal uint32 v;
 }
+
+} partial class atomicᴛUint32 {
 
 // Load atomically loads and returns the value stored in x.
 [GoRecv] public static uint32 Load(this ref Uint32 x) {
@@ -306,12 +325,16 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
     return Interlocked.Or(ref x.v, mask);
 }
 
+} partial class atomic_package {
+
 // A Uint64 is an atomic uint64. The zero value is zero.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uint64 {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] public partial struct Uint64 {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal readonly align64 __;
     [FieldOffset(0)] internal uint64 v;
 }
+
+} partial class atomicᴛUint64 {
 
 // Load atomically loads and returns the value stored in x.
 [GoRecv] public static uint64 Load(this ref Uint64 x) {
@@ -350,11 +373,15 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
     return Interlocked.Or(ref x.v, mask);
 }
 
+} partial class atomic_package {
+
 // A Uintptr is an atomic uintptr. The zero value is zero.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uintptr {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] public partial struct Uintptr {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal uintptr v;
 }
+
+} partial class atomicᴛUintptr {
 
 // Load atomically loads and returns the value stored in x.
 [GoRecv] public static uintptr Load(this ref Uintptr x) {
@@ -426,6 +453,8 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
     return initialValue;
 }
 
+} partial class atomic_package {
+
 // noCopy may be added to structs which must not be copied
 // after the first use.
 //
@@ -433,8 +462,10 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
 // for details.
 //
 // Note that it must not be embedded, due to the Lock and Unlock methods.
-[GoType] partial struct noCopy {
+[GoType] internal partial struct noCopy {
 }
+
+} partial class atomicᴛnoCopy {
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
 [GoRecv] internal static void Lock(this ref noCopy _) {
@@ -442,6 +473,8 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
 
 [GoRecv] internal static void Unlock(this ref noCopy _) {
 }
+
+} partial class atomic_package {
 
 // align64 may be added to structs that must be 64-bit aligned.
 // This struct is recognized by a special case in the compiler

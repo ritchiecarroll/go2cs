@@ -7,6 +7,7 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using strings = strings_package;
 using io = io_package;
+using static comment_package;
 
 partial class comment_package {
 
@@ -49,6 +50,8 @@ partial struct Printer {
     public nint TextWidth;
 }
 
+} partial class commentᴛPrinter {
+
 internal static nint headingLevel(this ref Printer p) {
     if (p.HeadingLevel <= 0) {
         return 3;
@@ -73,6 +76,8 @@ internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) {
     }
     return link.DefaultURL(p.DocLinkBaseURL);
 }
+
+} partial class commentᴛDocLink {
 
 // DefaultURL constructs and returns the documentation URL for l,
 // using baseURL as a prefix for links to other packages.
@@ -117,6 +122,8 @@ public static @string DefaultURL(this ref DocLink l, @string baseURL) {
     return "#"u8 + l.Name;
 }
 
+} partial class commentᴛHeading {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string hdrˢ => ref hdrˢᵇ;
 private static readonly @string hdrˢᵇ = "hdr-"u8;
@@ -150,9 +157,13 @@ public static @string DefaultID(this ref Heading h) {
     return @out.String();
 }
 
+} partial class comment_package {
+
 partial struct commentPrinter {
     /*embed*/ public ж<Printer> Printer;
 }
+
+} partial class commentᴛPrinter {
 
 // Comment returns the standard Go formatting of the [Doc],
 // without any comment markers.
@@ -194,6 +205,8 @@ public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     return @out.Bytes();
 }
 
+} partial class comment_package {
+
 // blankBefore reports whether the block x requires a blank line before it.
 // All blocks do, except for Lists that return false from x.BlankBefore().
 internal static bool blankBefore(Block x) {
@@ -202,6 +215,8 @@ internal static bool blankBefore(Block x) {
     }
     return true;
 }
+
+} partial class commentᴛcommentPrinter {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string fourSpaceᶜ1 => ref fourSpaceᶜ1ᵇ;
@@ -268,7 +283,7 @@ internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, B
 }
 
 // text prints the text sequence x to out.
-internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<ΔText> x) {
+internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in range(x)) {
@@ -316,4 +331,4 @@ internal static void indent(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, 
     }
 }
 
-} // end comment_package
+} // end commentᴛcommentPrinter

@@ -13,6 +13,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.syscall;
 using time = time_package;
+using static net_package;
 
 partial class net_package {
 
@@ -45,7 +46,7 @@ internal static bool canUseConnectEx(@string net) {
     return false;
 }
 
-internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, nint sotype, @string net) {
+internal static (ж<netFD>, error) newFD(syscall.Handle sysfd, nint family, nint sotype, @string net) {
     var ret = Ꮡ(new netFD(
         pfd: new poll.FD(
             Sysfd: sysfd,
@@ -58,6 +59,8 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
     ));
     return (ret, default);
 }
+
+} partial class netᴛnetFD {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string wsaioctlˢ => ref wsaioctlˢᵇ;
@@ -108,7 +111,7 @@ internal static ref readonly @string setsockoptˢ => ref setsockoptˢᵇ;
 private static readonly @string setsockoptˢᵇ = "setsockopt"u8;
 
 // Always returns nil for connected peer address result.
-internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, context.Context ctx, syscallꓸSockaddr la, syscallꓸSockaddr ra) {
+internal static (syscall.Sockaddr, error) connect(this ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
     GoFrame ᒐ = default;
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
@@ -142,7 +145,7 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
                     // Force the runtime's poller to immediately give
                     // up waiting for writability.
                     Ꮡfd.Ꮡpfd.SetWriteDeadline(aLongTimeAgo);
-                    builtin.close(doneʗ1);
+                    close(doneʗ1);
                 });
                 var doneʗ2 = done;
                 var stopʗ1 = stop;
@@ -164,11 +167,11 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
         if (la == nil) {
             switch (ra.type()) {
             case ж<syscall.SockaddrInet4>: {
-                la = new syscall.SockaddrInet4жΔSockaddr(Ꮡ(new syscall.SockaddrInet4()));
+                la = new syscall.SockaddrInet4жSockaddr(Ꮡ(new syscall.SockaddrInet4()));
                 break;
             }
             case ж<syscall.SockaddrInet6>: {
-                la = new syscall.SockaddrInet6жΔSockaddr(Ꮡ(new syscall.SockaddrInet6()));
+                la = new syscall.SockaddrInet6жSockaddr(Ꮡ(new syscall.SockaddrInet6()));
                 break;
             }
             default: {
@@ -229,11 +232,13 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
             }
         }
         // Refresh socket properties.
-        return (default, os.NewSyscallError(setsockoptˢ, syscall.Setsockopt(fd.pfd.Sysfd, syscall.SOL_SOCKET, syscall.SO_UPDATE_CONNECT_CONTEXT, Ꮡfd.Ꮡpfd.ᏑSysfd.Reinterpret<syscallꓸHandle, byte>(), (int32)/* unsafe.Sizeof(fd.pfd.Sysfd) */ (uintptr)8)));
+        return (default, os.NewSyscallError(setsockoptˢ, syscall.Setsockopt(fd.pfd.Sysfd, syscall.SOL_SOCKET, syscall.SO_UPDATE_CONNECT_CONTEXT, Ꮡfd.Ꮡpfd.ᏑSysfd.Reinterpret<syscall.Handle, byte>(), (int32)/* unsafe.Sizeof(fd.pfd.Sysfd) */ (uintptr)8)));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class netᴛconn {
 
 internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> v) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -247,6 +252,8 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> v) {
     }
     return (n, default);
 }
+
+} partial class netᴛnetFD {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string wsasendˢ => ref wsasendˢᵇ;
@@ -295,10 +302,14 @@ internal static (ж<netFD>, error) accept(this ж<netFD> Ꮡfd) {
     return (netfd, default);
 }
 
+} partial class net_package {
+
 // Defined in os package.
-/*linkname*/ internal static partial ж<os.File> newWindowsFile(syscallꓸHandle h, @string name) {
+/*linkname*/ internal static partial ж<os.File> newWindowsFile(syscall.Handle h, @string name) {
     return os.net_newWindowsFile((uintptr)h, name);
 }
+
+} partial class netᴛnetFD {
 
 internal static (ж<os.File>, error) dup(this ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
@@ -309,10 +320,10 @@ internal static (ж<os.File>, error) dup(this ж<netFD> Ꮡfd) {
     var errΔ1 = Ꮡfd.Ꮡpfd.DisassociateIOCP(); if (errΔ1 != nil) {
         return (default, errΔ1);
     }
-    syscallꓸHandle h = default;
+    syscall.Handle h = default;
     ref var syserr = ref heap<error>(out var Ꮡsyserr);
     var err = Ꮡfd.Ꮡpfd.RawControl((uintptr fdΔ1) => {
-        (h, Ꮡsyserr.ValueSlot) = dupSocket((syscallꓸHandle)fdΔ1);
+        (h, Ꮡsyserr.ValueSlot) = dupSocket((syscall.Handle)fdΔ1);
     });
     if (err == nil) {
         err = syserr;
@@ -326,4 +337,4 @@ internal static (ж<os.File>, error) dup(this ж<netFD> Ꮡfd) {
     return (newWindowsFile(h, fd.name()), default);
 }
 
-} // end net_package
+} // end netᴛnetFD

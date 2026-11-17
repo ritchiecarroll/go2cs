@@ -25,7 +25,7 @@ private static readonly @string cryptoRandPrimeSizeMustˢᵇ = "crypto/rand: pri
 // Since Go 1.26, a secure source of random bytes is always used, and the Reader is
 // ignored unless GODEBUG=cryptocustomrand=1 is set. This setting will be removed
 // in a future Go release. Instead, use [testing/cryptotest.SetGlobalRandom].
-public static (ж<bigꓸInt>, error) Prime(io.Reader r, nint bits) {
+public static (ж<big.Int>, error) Prime(io.Reader r, nint bits) {
     if (fips140only.Enforced()) {
         return (default, errors.New(cryptoRandUseOfPrimeIsˢ));
     }
@@ -41,7 +41,7 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader r, nint bits) {
     }
 
     var bytes = new slice<byte>((bits + 7) / 8);
-    var p = @new<bigꓸInt>();
+    var p = @new<big.Int>();
 
     for (;;) {
         var (_, err) = io.ReadFull(r, bytes); if (err != nil) {
@@ -75,15 +75,15 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader r, nint bits) {
 
 // Int returns a uniform random value in [0, max). It panics if max <= 0, and
 // returns an error if rand.Read returns one.
-public static (ж<bigꓸInt> n, error err) Int(io.Reader rand, ж<bigꓸInt> Ꮡmax) {
-    ж<bigꓸInt> n = default;
+public static (ж<big.Int> n, error err) Int(io.Reader rand, ж<big.Int> Ꮡmax) {
+    ж<big.Int> n = default;
     error err = default;
     ref var max = ref Ꮡmax.DerefOrNull();
 
     if (max.Sign() <= 0) {
         throw panic("crypto/rand: argument to Int is <= 0");
     }
-    n = @new<bigꓸInt>();
+    n = @new<big.Int>();
     n.Sub(Ꮡmax, n.SetUint64(1));
     // bitLen is the maximum bit length needed to encode a value < max.
     nint bitLen = n.BitLen();

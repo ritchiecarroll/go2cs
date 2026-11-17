@@ -2,18 +2,28 @@ namespace go;
 
 using fmt = fmt_package;
 using sort = sort_package;
+using main = main_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct words /*[]@string*/;
 
+} partial class mainᴛwords {
+
 internal static nint Len(this words w) { return len(w); }
 internal static bool Less(this words w, nint i, nint j) { return w[i] < w[j]; }
 internal static void Swap(this words w, nint i, nint j) { (w[i], w[j]) = (w[j], w[i]); }
 
+} partial class main_package {
+
 public static void Sort(sort.Interface data) { sort.Sort(data); }
 
-internal static void Sort(this words w) { Sort((sort.Interface)(w)); }
+} partial class mainᴛwords {
+
+internal static void Sort(this words w) { main.Sort(w); }
+
+} partial class main_package {
 
 internal static void main() {
     var ints = new sort.IntSlice(new nint[]{3, 1, 2}.slice());
@@ -29,7 +39,7 @@ internal static void main() {
     fmt.Println("StringSlice.Sort:", strs);
 
     var names = slice<@string>(["carol", "alice", "bob"]);
-    sort.Sort((sort.Interface)((sort.StringSlice)names));
+    sort.Sort((sort.StringSlice)names);
     fmt.Println("sort.Sort(sort.StringSlice(v)):", names);
 
     var w = new words(new @string[]{"delta", "alpha", "charlie"}.slice());

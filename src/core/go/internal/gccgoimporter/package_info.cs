@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using typesꓸSignature = go.go.types_package.ΔSignature;
-global using typesꓸType = go.go.types_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -45,8 +42,8 @@ using static go.go.@internal.gccgoimporter_package;
 [assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReadSeeker>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
-[assembly: GoImplement<reservedᴛ1, go.go.types_package.ΔType>(Pointer = true)]
-[assembly: GoImplement<reservedᴛ1, go.go.types_package.ΔType>(Promoted = true)]
+[assembly: GoImplement<reservedᴛ1, go.go.types_package.Type>(Pointer = true)]
+[assembly: GoImplement<reservedᴛ1, go.go.types_package.Type>(Promoted = true)]
 [assembly: GoImplement<seekerReadAt, io_package.ReaderAt>]
 [assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
@@ -74,10 +71,10 @@ using static go.go.@internal.gccgoimporter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/internal/gccgoimporter/ar.go", "ar.cs", "ADRq0oCCtoKAgrakpKSkupKCgoKAgqSUgqaCgqaCuIKCgriClIKCAAgOooKClIKClKiSgoKCpoKCgpSCgrissoKU7oKClA==")]
-[assembly: GoPositionMap("go/internal/gccgoimporter/gccgoinstallation.go", "gccgoinstallation.cs", "ACM80oKCgoKmgoKmgoKClLaCgoLsgoKClJSosoKCgoKUlIKCgpSmlKqi")]
+[assembly: GoPositionMap("go/internal/gccgoimporter/ar.go", "ar.cs", "ADVq0oCCtoKAgrakpKSkupKCgoKAgqSUgqaCgqaCuIKCgriClIKCAAgOooKClIKClKiSgoKCpoKCgpSCgrissoKUAAgOgoKU")]
+[assembly: GoPositionMap("go/internal/gccgoimporter/gccgoinstallation.go", "gccgoinstallation.cs", "ACc80oKCgoKmgoKmgoKClLaCgoLsgoKClJSosoKCgoKUlIKCgpSmlKqi")]
 [assembly: GoPositionMap("go/internal/gccgoimporter/importer.go", "importer.cs", "AC1UooKClO6CgsoADyAACwKCgpSCkoK4goKCpoK2gqaCpraCgoKCgpSCpoKCgoKClIKmggASGIIACgqCpoKCgoKClIKCpoKSgoKUgpSCpoKCpoKClIKkpoKCgqaCgoKUgoK4pIKCgoIAFzK2/KKCgIKkgIKk", "83-87:1;146-247:1", "", "", "202:29,225:33", "101:21,102:13")]
-[assembly: GoPositionMap("go/internal/gccgoimporter/parser.go", "parser.cs", "ADlwooKCgoKmooKAkoKCggAHEIKmgoKmpqKmgoKClIKmgoKUpoKCgriCgoKU2qKClIKmgoKUgqaCgpS0yIKmgqzigoKmlMaCxoK2rMSClIKCgpSu8oKCgpSCgpSokpSCpoKmgoKU2NKCgoKClIKUpLTEyIKClAAICNKUgpSUgoKCgpSCgoKClIKClIKCqLKCgriU6NKCgoKCgoIACAoACAaCgoK4lIKCgqaC1ramtoKCgqaCgoKmlIKCpoKCgpTIgpSClIK2gsiCtoKClIKmgoKClIKClIK2tqiygoKClIKCgpQAChCWAAgQgoKUlIKUAAMS0oKUgpSClIKUgpS0goKClJTEAAoQ0oKCgoKmgu6CgoKUgoKClIKCgrimgoKCuIKUgpSCgpSmgoKCgpS4gpSCgpSCgoKUgpSCgoKCgoKClIK4poKCgoKUpoKCgoKUqLKCgpSClIKmgpSClILospSClIKCgpSC6LKUgpSClIKCyIKCgsiC6LKUgpSClIKCgoKClJSC2LKClIKCgpSCgoKClKaUqLKUgoKUgoKCpoKmurKClIKUgqiylIKCgpSCpoKClMqm6LKUgpSClIKCgoKUgoKmlJSC6LKCgoKCgqaClJSospSmpKampsimpqaCACM8ggADOOKCgujilIKUgoKClIKClJSCyIKCgraCpoKmgqwACAKCguoACAaCgoKClKaCgpSClJSCgoKClLT24oKChJyCgoKCpoKUyoKCgoKUlJSCkqaCtKbSgoKCpoKCgoKClIKUgoKUgrSmkoKCgoKUqJKCAAMSAAkClKakgoKCtoKCtoKClLaUgoKUyIKUgoKCtsQAAhoADQKUpqS2goKCgoKUtoKCgraCgraCgoKCgraCgoKCtoKCtoKCgpS2goK2goKClLaCgoK2yrKClIKClJSCgoKmgg==", "66-66:1;1014-1016:1;1048-1050:1;1078-1082:1;1162-1164:1", "", "1067=Lookup/1/4/18,Type/1/4/18,Lookup/2/4/19,Type/2/4/19,Lookup/3/4/20,Type/3/4/20,Lookup/4/4/21,Type/4/4/21", "", "1175:29,1176:13,1217:29,1218:13,1255:64,1256:13,1351:35,1352:17")]
+[assembly: GoPositionMap("go/internal/gccgoimporter/parser.go", "parser.cs", "ADxwooKCgoKmooKAkoKCggALEILGgoKmpqKmgoKClIKmgoKUpoKCgriCgoKU2qKClIKmgoKUgqaCgpS0yIKmgqzigoKmlMaCxoK2rMSClIKCgpSu8oKCgpSCgpSokpSCpoLGgoKU+NKCgoKClIKUpLTEyIKClAAICNKUgpSUgoKCgpSCgoKClIKClIKCqLKCgriU6NKCgoKCgoIACAoACAaCgoK4lIKCgqaC1ramtoKCgqaCgoKmlIKCpoKCgpTIgpSClIK2gsiCtoKClIKmgoKClIKClIK2tqiygoKClIKCgpQADBC2AAgQgoKUlIKUAAMS0oKUgpSClIKUgpS0goKClJTEAAoQ0oKCgoKmgu6CgoKUgoKClIKCgrimgoKCuIKUgpSCgpSmgoKCgpS4gpSCgpSCgoKUgpSCgoKCgoKClIK4poKCgoKUpoKCgoKUqLKCgpSClIKmgpSClILospSClIKCgpSC6LKUgpSClIKCyIKCgsiC6LKUgpSClIKCgoKClJSC2LKClIKCgpSCgoKClKaUqLKUgoKUgoKCpoKmurKClIKUgqiylIKCgpSCpoKClMqm6LKUgpSClIKCgoKUgoKmlJSC6LKCgoKCgqaClJSospSmpKampsimpqaCACc8ggAFOOKCgujilIKUgoKClIKClJSCyIKCgraCpoKmgqwACAKCguoACAaCgoKClKaCgpSClJSCgoKClLQACwbigoKEnIKCgoKmgpTKgoKCgpSUlIKSpoK0ptKCgoKmgoKCgoKUgpSCgpSCtKaSgoKCgpSokoIAAxIACQKUpqSCgoK2goK2goKUtpSCgpTIgpSCgoK2xAACGgANApSmpLaCgoKCgpS2goKCtoKCtoKCgoKCtoKCgoK2goK2goKClLaCgraCgoKUtoKCgrbKsoKUgoKUlIKCgqaC", "66-66:1;1014-1016:1;1048-1050:1;1078-1082:1;1162-1164:1", "", "1088=Lookup/1/4/18,Type/1/4/18,Lookup/2/4/19,Type/2/4/19,Lookup/3/4/20,Type/3/4/20,Lookup/4/4/21,Type/4/4/21", "", "1198:29,1199:13,1244:29,1245:13,1282:64,1283:13,1378:35,1379:17")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;
@@ -130,3 +127,16 @@ public static partial class gccgoimporter_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(gccgoimporter_package.GccgoInstallation)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gccgoimporterᴛGccgoInstallation;
+[GoMethodHost(typeof(gccgoimporter_package.importError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gccgoimporterᴛimportError;
+[GoMethodHost(typeof(gccgoimporter_package.parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gccgoimporterᴛparser;
+[GoMethodHost(typeof(gccgoimporter_package.seekerReadAt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gccgoimporterᴛseekerReadAt;
+// </MethodHolders>

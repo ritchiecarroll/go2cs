@@ -42,6 +42,32 @@ internal static class IArrayTypeTemplate
                     object global::System.ICloneable.Clone() => Clone();
             """;
 
+    // Go's `a = b` on an EXISTING location of the named array type copies b's elements into a's own storage, so what
+    // was taken from a beforehand still names a (docs/phase4/DESIGN-array-reassign-in-place.md; golib's
+    // ArrayExtensions.Assign is the array<T> half). The Value getter materializes the backing, so the copy always has
+    // storage to land in, and the wrapper is never replaced. A Go type that declares its OWN Assign method gets
+    // ΔAssign instead, so the instance member cannot shadow Go's method (the Clone case above); the converter spells
+    // the call the same way (arrayAssignMethod).
+    // The explicit IGoValueAssign member is what a container's per-element walk and reflect's store call (golib's
+    // IGoValueAssign): the copy of the wrapper shares its published backing, so the elements land in place.
+    private static string AssignMembers(string structName, ICollection<string> goMethods) =>
+        $$"""
+        public void {{AssignMethod(goMethods)}}({{structName}} source)
+                {
+                    var target = {{ValueMember(structName)}};
+                    target.Assign(source.{{ValueMember(structName)}});
+                }
+
+                {{structName}} global::go.golib.IGoValueAssign<{{structName}}>.AssignedFrom(in {{structName}} source)
+                {
+                    {{structName}} target = this;
+                    target.{{AssignMethod(goMethods)}}(source);
+                    return target;
+                }
+        """;
+
+    internal static string AssignMethod(ICollection<string> goMethods) => goMethods.Contains("Assign") ? "ΔAssign" : "Assign";
+
     public static string Generate(string structName, string typeName, string targetTypeName, string? targetTypeSize, ICollection<string> goMethods) =>
         $$"""
                 
@@ -109,6 +135,8 @@ internal static class IArrayTypeTemplate
                 public bool Equals(IArray<{{targetTypeName}}>? other) => {{ValueMember(structName)}}.Equals(other);
 
                 {{CloneMembers(structName, goMethods)}}
+
+                {{AssignMembers(structName, goMethods)}}
 
                 public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}();
         """;

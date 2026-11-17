@@ -183,7 +183,7 @@ internal static void @try(@string label, Action f) {
     try {
         defer(() => {
             var r = recover(); if (r != nil) {
-                var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
+                var (_, isRuntimeError) = r._<runtime.Error>(ᐧ);
                 fmt.Println(label + ": panic:", r, "runtime.Error:", isRuntimeError);
             }
         }, ref ᒐ);
@@ -246,7 +246,7 @@ internal static void hashPanic() {
 }
 
 internal static void reflectSide() {
-    ref var m = ref heap<reflectꓸValue>(reflect.MakeMap(reflect.MapOf(reflect.TypeFor<any>(), reflect.TypeFor<bool>())), out var Ꮡm);
+    ref var m = ref heap<reflect.Value>(reflect.MakeMap(reflect.MapOf(reflect.TypeFor<any>(), reflect.TypeFor<bool>())), out var Ꮡm);
     slice<nint> Δslice = default;
     var mʗ1 = m;
     var sliceʗ1 = Δslice;
@@ -258,7 +258,7 @@ internal static void reflectSide() {
     @try("reflect SetMapIndex []int", () => {
         mʗ2.SetMapIndex(reflect.ValueOf(sliceʗ2), reflect.ValueOf(true));
     });
-    ref var nilm = ref heap<reflectꓸValue>(reflect.Zero(reflect.TypeFor<map<any, bool>>()), out var Ꮡnilm);
+    ref var nilm = ref heap<reflect.Value>(reflect.Zero(reflect.TypeFor<map<any, bool>>()), out var Ꮡnilm);
     var nilmʗ1 = nilm;
     var sliceʗ3 = Δslice;
     @try("reflect MapIndex []int on nil map", () => {
@@ -267,7 +267,7 @@ internal static void reflectSide() {
     var nilmʗ2 = nilm;
     var sliceʗ4 = Δslice;
     @try("reflect delete []int on nil map", () => {
-        nilmʗ2.SetMapIndex(reflect.ValueOf(sliceʗ4), new reflectꓸValue());
+        nilmʗ2.SetMapIndex(reflect.ValueOf(sliceʗ4), new reflect.Value());
     });
 
     var fm = reflect.MakeMap(reflect.MapOf(reflect.TypeFor<float64>(), reflect.TypeFor<bool>()));

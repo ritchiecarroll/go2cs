@@ -13,6 +13,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+using static textproto_package;
 
 partial class textproto_package {
 
@@ -36,6 +37,8 @@ partial struct Reader {
 public static ж<Reader> NewReader(ж<bufio.Reader> r) {
     return Ꮡ(new Reader(R: r));
 }
+
+} partial class textprotoᴛReader {
 
 // ReadLine reads a single line from r,
 // eliding the final \n or \r\n from the returned string.
@@ -102,6 +105,8 @@ public static (@string, error) ReadContinuedLine(this ref Reader r) {
     return ((@string)line, err);
 }
 
+} partial class textproto_package {
+
 // trim returns s with leading and trailing spaces and tabs removed.
 // It does not assume Unicode or UTF-8.
 internal static slice<byte> trim(slice<byte> s) {
@@ -116,6 +121,8 @@ internal static slice<byte> trim(slice<byte> s) {
     }
     return s.slice(0, n + 1);
 }
+
+} partial class textprotoᴛReader {
 
 // ReadContinuedLineBytes is like [Reader.ReadContinuedLine] but
 // returns a []byte instead of a string.
@@ -216,6 +223,8 @@ internal static (nint code, bool continued, @string message, error err) readCode
     return parseCodeLine(line, expectCode);
 }
 
+} partial class textproto_package {
+
 internal static (nint code, bool continued, @string message, error err) parseCodeLine(@string line, nint expectCode) {
     nint code = default;
     bool continued = default;
@@ -234,10 +243,12 @@ internal static (nint code, bool continued, @string message, error err) parseCod
     }
     message = line[4..];
     if (1 <= expectCode && expectCode < 10 && code / 100 != expectCode || 10 <= expectCode && expectCode < 100 && code / 10 != expectCode || 100 <= expectCode && expectCode < 1000 && code != expectCode) {
-        err = new ΔErrorжerror(Ꮡ(new ΔError(code, message)));
+        err = new Errorжerror(Ꮡ(new Error(code, message)));
     }
     return (code, continued, message, err);
 }
+
+} partial class textprotoᴛReader {
 
 // ReadCodeLine reads a response code line of the form
 //
@@ -324,7 +335,7 @@ public static (nint code, @string message, error err) ReadResponse(this ref Read
     message = messageBuilder.String();
     if (err != nil && multi && message != ""u8) {
         // replace one line error message with all lines (full message)
-        err = new ΔErrorжerror(Ꮡ(new ΔError(code, message)));
+        err = new Errorжerror(Ꮡ(new Error(code, message)));
     }
     return (code, message, err);
 }
@@ -353,10 +364,14 @@ public static io.Reader DotReader(this ж<Reader> Ꮡr) {
     return new dotReaderжReader(r.dot);
 }
 
+} partial class textproto_package {
+
 partial struct dotReader {
     internal ж<Reader> r;
     internal nint state;
 }
+
+} partial class textprotoᴛdotReader {
 
 // Read satisfies reads by decoding dot-encoded data read from d.r.
 internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b) {
@@ -453,6 +468,8 @@ internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b)
     return (n, err);
 }
 
+} partial class textprotoᴛReader {
+
 // closeDot drains the current DotReader if any,
 // making sure that it reads until the ending dot line.
 internal static void closeDot(this ref Reader r) {
@@ -509,7 +526,11 @@ public static (slice<@string>, error) ReadDotLines(this ref Reader r) {
     return (v, err);
 }
 
+} partial class textproto_package {
+
 internal static slice<byte> colon = slice<byte>(":"u8);
+
+} partial class textprotoᴛReader {
 
 // ReadMIMEHeader reads a MIME-style header from r.
 // The header is a sequence of possibly continued Key: Value lines
@@ -533,6 +554,8 @@ internal static slice<byte> colon = slice<byte>(":"u8);
 public static (MIMEHeader, error) ReadMIMEHeader(this ж<Reader> Ꮡr) {
     return readMIMEHeader(Ꮡr, math.MaxInt64, math.MaxInt64);
 }
+
+} partial class textproto_package {
 
 // readMIMEHeader is accessed from mime/multipart.
 //go:linkname readMIMEHeader
@@ -648,6 +671,8 @@ internal static error mustHaveFieldNameColon(slice<byte> line) {
 
 internal static slice<byte> nl = slice<byte>("\n"u8);
 
+} partial class textprotoᴛReader {
+
 // upcomingHeaderKeys returns an approximation of the number of keys
 // that will be in this header. If it gets confused, it returns 0.
 internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) {
@@ -675,6 +700,8 @@ internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) {
     }
     return n;
 }
+
+} partial class textproto_package {
 
 // CanonicalMIMEHeaderKey returns the canonical format of the
 // MIME header key s. The canonicalization converts the first

@@ -33,7 +33,7 @@ partial class runtime_package {
 // hexdumpWords prints a word-oriented hex dump of [p, p+len).
 //
 // If mark != nil, it will be passed to hexdumper.mark.
-internal static void hexdumpWords(uintptr Δp, uintptr len, Action<uintptr, hexdumpMarker> mark) {
+internal static void hexdumpWords(uintptr p, uintptr len, Action<uintptr, hexdumpMarker> mark) {
     printlock();
 
     // Provide a default annotation
@@ -43,15 +43,15 @@ internal static void hexdumpWords(uintptr Δp, uintptr len, Action<uintptr, hexd
         }
 
         // Can we symbolize this value?
-        var val = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)u);
+        var val = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)u);
         if (managedFuncName(val) is { Length: > 0 } name) {
             hm.start();
-            print((@string)"<"u8, (@string)name, (@string)"+"u8, ((Δhex)(uint64)(val - frameEntry(val))), (@string)">\n"u8);
+            print((@string)"<"u8, (@string)name, (@string)"+"u8, ((hex)(uint64)(val - frameEntry(val))), (@string)">\n"u8);
         }
     };
 
-    var h = new hexdumper(addr: Δp, mark: symMark);
-    h.write(@unsafe.Slice((ж<byte>)(uintptr)((@unsafe.Pointer)Δp), len));
+    var h = new hexdumper(addr: p, mark: symMark);
+    h.write(@unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)p), len));
     h.close();
     printunlock();
 }

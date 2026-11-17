@@ -7,7 +7,7 @@ partial class main_package {
 internal static @string bomKind(@string s) {
     array<byte> bom = new(2);
     if (len(s) >= 2) {
-        bom = new byte[]{s[0], s[1]}.array();
+        bom.Assign(new byte[]{s[0], s[1]}.array());
         switch (bom) {
         case var ᴛ when ᴛ == new byte[]{0xFF, 0xFE}.array(): {
             return "le";

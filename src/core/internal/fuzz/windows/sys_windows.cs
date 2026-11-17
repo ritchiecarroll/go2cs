@@ -11,11 +11,12 @@ using @unsafe = unsafe_package;
 using fs = global::go.io.fs_package;
 using global::go.io;
 using global::go.os;
+using static fuzz_package;
 
 partial class fuzz_package {
 
 partial struct sharedMemSys {
-    internal syscallꓸHandle mapObj;
+    internal Δsyscall.Handle mapObj;
 }
 
 internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> f, nint size, bool removeOnClose) {
@@ -33,7 +34,7 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> f, n
 
         // Create a file mapping object. The object itself is not shared.
         (var mapObj, err) = Δsyscall.CreateFileMapping(
-            (syscallꓸHandle)f.Fd(),  // fhandle
+            (Δsyscall.Handle)f.Fd(), // fhandle
             nil,                     // sa
             Δsyscall.PAGE_READWRITE, // prot
             0,                       // maxSizeHigh
@@ -71,6 +72,8 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> f, n
     ᒐdone: return (mem, Ꮡerr.ValueSlot);
 }
 
+} partial class fuzzᴛsharedMem {
+
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
 internal static error Close(this ref sharedMem m) {
@@ -95,17 +98,19 @@ internal static error Close(this ref sharedMem m) {
     return default;
 }
 
+} partial class fuzz_package {
+
 // setWorkerComm configures communication channels on the cmd that will
 // run a worker process.
 internal static void setWorkerComm(ref exec.Cmd cmd, workerComm comm) {
     var mem = ᐸꟷ(comm.memMu);
     var memFD = mem.f.Fd();
     comm.memMu.ᐸꟷ(mem);
-    Δsyscall.SetHandleInformation((syscallꓸHandle)comm.fuzzIn.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
-    Δsyscall.SetHandleInformation((syscallꓸHandle)comm.fuzzOut.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
-    Δsyscall.SetHandleInformation((syscallꓸHandle)memFD, Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((Δsyscall.Handle)comm.fuzzIn.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((Δsyscall.Handle)comm.fuzzOut.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((Δsyscall.Handle)memFD, Δsyscall.HANDLE_FLAG_INHERIT, 1);
     cmd.Env = append(cmd.Env, fmt.Sprintf("GO_TEST_FUZZ_WORKER_HANDLES=%x,%x,%x"u8, comm.fuzzIn.Fd(), comm.fuzzOut.Fd(), memFD));
-    cmd.SysProcAttr = Ꮡ(new Δsyscall.SysProcAttr(AdditionalInheritedHandles: slice<syscallꓸHandle>([(syscallꓸHandle)comm.fuzzIn.Fd(), (syscallꓸHandle)comm.fuzzOut.Fd(), (syscallꓸHandle)memFD])));
+    cmd.SysProcAttr = Ꮡ(new Δsyscall.SysProcAttr(AdditionalInheritedHandles: slice<Δsyscall.Handle>([(Δsyscall.Handle)comm.fuzzIn.Fd(), (Δsyscall.Handle)comm.fuzzOut.Fd(), (Δsyscall.Handle)memFD])));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -162,12 +167,12 @@ internal static bool isInterruptError(error err) {
 }
 
 // terminationSignal returns -1 and false because Windows doesn't have signals.
-internal static (osꓸSignal, bool) terminationSignal(error err) {
-    return (new syscall_ΔSignalᴠΔSignal(((syscallꓸSignal)(-1))), false);
+internal static (os.Signal, bool) terminationSignal(error err) {
+    return (new syscall_SignalᴠSignal(((Δsyscall.Signal)(-1))), false);
 }
 
 // isCrashSignal is not implemented because Windows doesn't have signals.
-internal static bool isCrashSignal(osꓸSignal signal) {
+internal static bool isCrashSignal(os.Signal signal) {
     throw panic("not implemented: no signals on windows");
 }
 

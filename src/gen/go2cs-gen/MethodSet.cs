@@ -98,8 +98,8 @@ internal static class MethodSet
 
         // The type's own methods first: a method it declares hides every promotion of that name (Go's rule), and the
         // template already writes no forwarder for one, so this only orders a set that cannot collide.
-        IEnumerable<Shape> shapes = package.GetMembers().OfType<IMethodSymbol>()
-            .Select(method => Declared(method, type, package))
+        IEnumerable<Shape> shapes = GoMethodHosts.DeclaredMethods(package, type)
+            .Select(method => Declared(method, type))
             .OfType<Shape>()
             .Concat(Promoted(type, generatedPart));
 
@@ -153,7 +153,7 @@ internal static class MethodSet
 
     // A method the type declares, or null when it is not a Go method of `type` with a delegate form that is exported or
     // has a variadic tail.
-    private static Shape? Declared(IMethodSymbol method, INamedTypeSymbol type, INamedTypeSymbol package)
+    private static Shape? Declared(IMethodSymbol method, INamedTypeSymbol type)
     {
         if (!method.IsExtensionMethod || method.Parameters.Length == 0 || method.ReturnsByRef || method.ReturnsByRefReadonly)
             return null;
@@ -235,7 +235,8 @@ internal static class MethodSet
         Receiver kind = boxed || receiver.RefKind != RefKind.None && method.IsPointerSetMethod() ? Receiver.Pointer :
             receiver.RefKind != RefKind.None ? Receiver.CopyBound : Receiver.Value;
 
-        return new Shape(method.Name, kind, $"{package.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{name}{typeArguments}",
+        // The call names the class that declares the method: the type's method holder, or its package class.
+        return new Shape(method.Name, kind, $"{method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{name}{typeArguments}",
             parameters, variadic, closed.ReturnsVoid ? "" : closed.ReturnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
     }
 

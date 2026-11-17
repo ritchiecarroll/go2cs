@@ -13,10 +13,12 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"os"
 	"path/filepath"
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 )
 
 // Sentinels wrapping a deferred dynamic-type-name reference, resolved to the lifted
@@ -326,9 +328,34 @@ func (v *Visitor) forwardImportedStructLift(t types.Type) string {
 // libc's largeInteger alias one anonymous struct, and two lifts made libc's function unbindable through
 // sqlite's delegate type (DESIGN-sqlite-cs-funcptr.md section 3.3). An internal lift is never reused:
 // it is CS0122 from this assembly. When two imports qualify, the lexically smallest import path wins.
+//
+// The import's lift record is keyed by the DECLARING package's spelling of the struct, and an identical struct can be
+// spelled differently here: sqlite/lib writes TLARGE_INTEGER's fields through its own aliases (`LowPart DWORD`) where
+// libc writes uint32, and types.Struct.String() names the alias (W18). So when this package's spelling finds no
+// record, each identical struct the import declares is tried by ITS spelling, in the import's scope order.
 func (v *Visitor) importedStructLift(st *types.Struct) string {
-	if st == nil || isEmptyStructType(st) || v.pkg == nil {
+	pkg, name := v.importedStructLiftSource(st)
+
+	if pkg == nil {
 		return ""
+	}
+
+	qualified := getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name
+	codeName := convertToCSTypeName(qualified)
+
+	packageLock.Lock()
+	importedStructLiftTargets[codeName] = qualified
+	packageLock.Unlock()
+
+	return codeName
+}
+
+// importedStructLiftSource returns the import whose lift importedStructLift names for st, and that lift's name, or nil.
+// The import's lift is taken only when its inline admission matches this package's (liftAdmissionMatches) and every
+// struct it holds resolves to that import's lift here too (nestedLiftsMatch).
+func (v *Visitor) importedStructLiftSource(st *types.Struct) (*types.Package, string) {
+	if st == nil || isEmptyStructType(st) || v.pkg == nil {
+		return nil, ""
 	}
 
 	imports := slices.Clone(v.pkg.Imports())
@@ -344,26 +371,210 @@ func (v *Visitor) importedStructLift(st *types.Struct) string {
 
 		key := filepath.Clean(meta.Dir)
 
-		packageLock.Lock()
-		name := importedDynamicTypeNames[key][signature]
-		public := name != "" && importedPublicLiftNames[key][name]
-		packageLock.Unlock()
+		publicLift := func(spelling string) string {
+			packageLock.Lock()
+			defer packageLock.Unlock()
 
-		if !public || !packageDeclaresIdenticalStruct(pkg, st) {
+			if name := importedDynamicTypeNames[key][spelling]; name != "" && importedPublicLiftNames[key][name] {
+				return name
+			}
+
+			return ""
+		}
+
+		var name string
+
+		// The import's own spelling of the struct: its admission record keys an anonymous struct by it.
+		spelled := st
+
+		if name = publicLift(signature); name != "" {
+			if !packageDeclaresIdenticalStruct(pkg, st) {
+				name = ""
+			}
+		} else {
+			for _, identical := range packageIdenticalStructs(pkg, st) {
+				if name = publicLift(identical.String()); name != "" {
+					spelled = identical
+					break
+				}
+			}
+		}
+
+		if name == "" || !v.liftAdmissionMatches(pkg, meta.Dir, key, name, st, spelled) || !v.nestedLiftsMatch(pkg, name, st) {
 			continue
 		}
 
-		qualified := getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name
-		codeName := convertToCSTypeName(qualified)
-
-		packageLock.Lock()
-		importedStructLiftTargets[codeName] = qualified
-		packageLock.Unlock()
-
-		return codeName
+		return pkg, name
 	}
 
-	return ""
+	return nil, ""
+}
+
+// nestedLiftsMatch reports whether every anonymous struct that st holds by value (through fields, embedded ones included,
+// and array elements) resolves here to pkg's lift too, as pkg's lift name of st names it. A reused lift fixes its
+// fields' C# types to pkg's choices, while this package types its own values of those fields by ITS choices: libc's
+// Titimerval reused libc/uuid/uuid's Itimervalᴛ1 (neither admits it) while its field type Ttimeval kept libc's own
+// admitted lift, and libc's literal `new Titimerval(Fit_value: new Ttimeval(...))` was CS1503 (G's linux-x64 build,
+// COORD 2026-11-17 10:32Z). The match is transitive: each nested struct is resolved by importedStructLiftSource, which
+// checks that struct's own nested structs. A struct held through a NAMED type is that type's declaration, the same
+// C# type on both sides, and an empty struct is never lifted, so neither is checked.
+func (v *Visitor) nestedLiftsMatch(pkg *types.Package, name string, st *types.Struct) bool {
+	for _, nested := range heldAnonymousStructs(st) {
+		if from, nestedName := v.importedStructLiftSource(nested); from != pkg {
+			resolved := "own"
+
+			if from != nil {
+				resolved = from.Path() + "." + nestedName
+			}
+
+			traceLiftReuse(v.pkg, pkg, name, false, false, true, "nested:"+resolved, false)
+
+			return false
+		}
+	}
+
+	return true
+}
+
+// heldAnonymousStructs returns the anonymous, non-empty struct types st holds directly by value: its fields' types and,
+// through arrays, their element types. It does not descend into those structs (their own check does) nor into a named
+// type.
+func heldAnonymousStructs(st *types.Struct) []*types.Struct {
+	var held []*types.Struct
+
+	var visit func(t types.Type)
+
+	visit = func(t types.Type) {
+		switch t := types.Unalias(t).(type) {
+		case *types.Struct:
+			if !isEmptyStructType(t) {
+				held = append(held, t)
+			}
+		case *types.Array:
+			visit(t.Elem())
+		}
+	}
+
+	for field := range st.Fields() {
+		visit(field.Type())
+	}
+
+	return held
+}
+
+// liftAdmissionMatches reports whether naming pkg's lift of the struct (spelled, pkg's own spelling of st) keeps st's
+// inline admission. An admitted struct's lift is [GoInlineLayout] with go.arrays fields, an unadmitted one holds golib's
+// array<T>, and an admitted holder needs its field's lift admitted too: libc's admitted Tstatfs over libc/uuid/uuid's
+// unadmitted lift of Tfsid_t was CS8377 (W18's linux wall, G 2026-11-16). A struct this package does not admit and that
+// holds no array at any depth is the same C# whichever lift it names, so it reuses as before. Otherwise the import's
+// admission of its lift must be KNOWN and equal this package's; an unknown one keeps this package's own lift.
+// liftKey is the import's cleaned source directory, the key its lift records are loaded under, and name its lift.
+func (v *Visitor) liftAdmissionMatches(pkg *types.Package, pkgDir, liftKey, name string, st, spelled *types.Struct) bool {
+	need := packageInlineAdmission.admits(st)
+
+	if !need && !structHoldsArray(st, 0) {
+		traceLiftReuse(v.pkg, pkg, name, need, false, true, "array-free", true)
+		return true
+	}
+
+	have, known, source := foreignLiftAdmitted(pkg, pkgDir, liftKey, name, spelled, v.options)
+	reuse := known && have == need
+	traceLiftReuse(v.pkg, pkg, name, need, have, known, source, reuse)
+
+	return reuse
+}
+
+// liftReuseTraceVariable names the environment variable that, set to 1, makes importedStructLift write one line per
+// admission decision to stderr: the importer, the import's lift, this package's need, the import's admission, whether
+// it is known and which source decided it, and the verdict. It is the census instrument for W18's admission rule (COORD
+// 2026-11-17: count each source's decisions per target, and name any it decides wrongly).
+const liftReuseTraceVariable = "GO2CS_TRACE_LIFT_REUSE"
+
+func traceLiftReuse(importer, pkg *types.Package, name string, need, have, known bool, source string, reuse bool) {
+	if os.Getenv(liftReuseTraceVariable) != "1" || importer == nil {
+		return
+	}
+
+	fmt.Fprintf(os.Stderr, "liftreuse\t%s\t%s.%s\tneed=%t\thave=%t\tknown=%t\tsource=%s\treuse=%t\n",
+		importer.Path(), pkg.Path(), name, need, have, known, source, reuse)
+}
+
+// foreignLiftAdmitted reports whether the package pkg (source directory pkgDir) admitted its lift name of the
+// anonymous struct st, spelled as pkg spells it, and whether that can be known. A package I0 never admits (std) admits
+// nothing, and a lift whose public record carries [GoValueClone] is not admitted: an admitted struct copies whole and
+// never takes it. Otherwise pkg's admission record says: GoInlineArrayKeys counts every admitted key and digests them,
+// and GoInlineArrayType names the admitted NAMED types, so the anonymous structs (and generic instantiations) are the
+// difference. None means st is not admitted. Exactly one is st exactly when the digest of the named keys plus st's key
+// reproduces the record's. More than one cannot be told apart, and neither can a record with no key count. source
+// names the rule that answered, for the census trace (traceLiftReuse).
+func foreignLiftAdmitted(pkg *types.Package, pkgDir, liftKey, name string, st *types.Struct, options Options) (admitted, known bool, source string) {
+	if inlineArraysExcluded(pkgDir, options) {
+		return false, true, "std"
+	}
+
+	packageLock.Lock()
+	valueClone := importedValueCloneLiftNames[liftKey][name]
+	packageLock.Unlock()
+
+	if valueClone {
+		return false, true, "valueclone"
+	}
+
+	packageLock.Lock()
+	stamp, cached := importedLiftAdmissionStamps[pkg.Path()]
+	packageLock.Unlock()
+
+	if !cached {
+		if read, ok := lookupInlineArrayStamp(pkg.Path(), options); ok {
+			stamp = &read
+		}
+
+		packageLock.Lock()
+
+		if importedLiftAdmissionStamps == nil {
+			importedLiftAdmissionStamps = make(map[string]*inlineArrayStamp)
+		}
+
+		importedLiftAdmissionStamps[pkg.Path()] = stamp
+		packageLock.Unlock()
+	}
+
+	if stamp == nil {
+		return false, false, "unknown-no-record"
+	}
+
+	if stamp.keyCount == 0 {
+		// No admitted key at all, unless an older record named types without counting its keys.
+		if len(stamp.types) > 0 {
+			return false, false, "unknown-uncounted"
+		}
+
+		return false, true, "stamp-none"
+	}
+
+	unnamed := stamp.keyCount - len(stamp.types)
+
+	if unnamed <= 0 {
+		return false, true, "stamp-named-only"
+	}
+
+	if unnamed > 1 {
+		return false, false, "unknown-several-anonymous"
+	}
+
+	key, ok := inlineTypeKey(st)
+
+	if !ok {
+		return false, false, "unknown-no-key"
+	}
+
+	keys := make([]string, 0, stamp.keyCount)
+
+	for _, name := range stamp.types {
+		keys = append(keys, pkg.Path()+"."+name)
+	}
+
+	return inlineArrayKeyDigest(append(keys, key)) == stamp.keyDigest, true, "stamp-digest"
 }
 
 // importedStructLiftTarget returns the `global using` spelling of a lift importedStructLift reused, given its
@@ -382,54 +593,87 @@ func importedStructLiftTarget(codeName string) (string, bool) {
 // defined struct, through pointers, slices, arrays, maps and channels. Two structs with the same text
 // and an unexported field are different Go types, so text alone is not identity.
 func packageDeclaresIdenticalStruct(pkg *types.Package, st *types.Struct) bool {
-	seen := map[types.Type]bool{}
-	var found func(t types.Type, depth int) bool
+	return len(packageIdenticalStructs(pkg, st)) > 0
+}
 
-	found = func(t types.Type, depth int) bool {
+// packageIdenticalStructs returns the anonymous structs identical to st that pkg's package-level declarations spell
+// (packageDeclaredStructs), one per distinct types.Struct.String() spelling, in the order the declarations are walked.
+func packageIdenticalStructs(pkg *types.Package, st *types.Struct) []*types.Struct {
+	var identical []*types.Struct
+	spellings := map[string]bool{}
+
+	for _, declared := range packageDeclaredStructs(pkg) {
+		if !types.Identical(declared, st) {
+			continue
+		}
+
+		if spelling := declared.String(); !spellings[spelling] {
+			spellings[spelling] = true
+			identical = append(identical, declared)
+		}
+	}
+
+	return identical
+}
+
+var (
+	declaredStructsLock      sync.Mutex
+	declaredStructsByPackage = map[*types.Package][]*types.Struct{}
+)
+
+// packageDeclaredStructs returns every anonymous struct that appears in pkg's package-level declarations: an alias
+// target, a variable, a function signature, or a field of a defined struct, through pointers, slices, arrays, maps and
+// channels, in scope order (scope.Names is sorted). It is walked once per package and kept: an importer asks it once
+// per anonymous struct it lifts, and libc's scope is large.
+func packageDeclaredStructs(pkg *types.Package) []*types.Struct {
+	declaredStructsLock.Lock()
+	cached, ok := declaredStructsByPackage[pkg]
+	declaredStructsLock.Unlock()
+
+	if ok {
+		return cached
+	}
+
+	seen := map[types.Type]bool{}
+	var structs []*types.Struct
+	var walk func(t types.Type, depth int)
+
+	walk = func(t types.Type, depth int) {
 		if t == nil || depth > 8 || seen[t] {
-			return false
+			return
 		}
 
 		seen[t] = true
 
 		switch x := t.(type) {
 		case *types.Alias:
-			return found(types.Unalias(x), depth)
+			walk(types.Unalias(x), depth)
 		case *types.Struct:
-			if types.Identical(x, st) {
-				return true
-			}
+			structs = append(structs, x)
 
 			for i := range x.NumFields() {
-				if found(x.Field(i).Type(), depth+1) {
-					return true
-				}
+				walk(x.Field(i).Type(), depth+1)
 			}
 		case *types.Pointer:
-			return found(x.Elem(), depth+1)
+			walk(x.Elem(), depth+1)
 		case *types.Slice:
-			return found(x.Elem(), depth+1)
+			walk(x.Elem(), depth+1)
 		case *types.Array:
-			return found(x.Elem(), depth+1)
+			walk(x.Elem(), depth+1)
 		case *types.Map:
-			return found(x.Key(), depth+1) || found(x.Elem(), depth+1)
+			walk(x.Key(), depth+1)
+			walk(x.Elem(), depth+1)
 		case *types.Chan:
-			return found(x.Elem(), depth+1)
+			walk(x.Elem(), depth+1)
 		case *types.Signature:
 			for i := range x.Params().Len() {
-				if found(x.Params().At(i).Type(), depth+1) {
-					return true
-				}
+				walk(x.Params().At(i).Type(), depth+1)
 			}
 
 			for i := range x.Results().Len() {
-				if found(x.Results().At(i).Type(), depth+1) {
-					return true
-				}
+				walk(x.Results().At(i).Type(), depth+1)
 			}
 		}
-
-		return false
 	}
 
 	scope := pkg.Scope()
@@ -438,20 +682,20 @@ func packageDeclaresIdenticalStruct(pkg *types.Package, st *types.Struct) bool {
 		switch obj := scope.Lookup(name).(type) {
 		case *types.TypeName:
 			if named, ok := obj.Type().(*types.Named); ok {
-				if found(named.Underlying(), 0) {
-					return true
-				}
-			} else if found(obj.Type(), 0) {
-				return true
+				walk(named.Underlying(), 0)
+			} else {
+				walk(obj.Type(), 0)
 			}
 		case *types.Var, *types.Func:
-			if found(obj.Type(), 0) {
-				return true
-			}
+			walk(obj.Type(), 0)
 		}
 	}
 
-	return false
+	declaredStructsLock.Lock()
+	declaredStructsByPackage[pkg] = structs
+	declaredStructsLock.Unlock()
+
+	return structs
 }
 
 // dynamicStructTypeName resolves the C# type name of an expression whose type is

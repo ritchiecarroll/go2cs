@@ -17,6 +17,7 @@ using global::go.go;
 using text;
 using unicode;
 using ꓸꓸꓸany = Span<any>;
+using static gccgoimporter_package;
 
 partial class gccgoimporter_package {
 
@@ -29,7 +30,7 @@ partial struct parser {
     internal @string pkgname;                        // name of imported package
     internal ж<types.Package> pkg;                   // reference to imported package
     internal map<@string, ж<types.Package>> imports; // package path -> package object
-    internal slice<typesꓸType> typeList;             // type number -> type
+    internal slice<types.Type> typeList;             // type number -> type
     internal slice<@string> typeData;                // unparsed type data (v3 and later)
     internal slice<fixupRecord> fixups;              // fixups to apply at end of parsing
     internal InitData initdata;                      // package init priority data
@@ -52,8 +53,10 @@ partial struct parser {
 // which point fixups are applied.
 partial struct fixupRecord {
     internal ж<types.Named> toUpdate; // type to modify when fixup is processed
-    internal typesꓸType target;       // type that was incomplete when fixup was created
+    internal types.Type target;       // type that was incomplete when fixup was created
 }
+
+} partial class gccgoimporterᴛparser {
 
 internal static void init(this ж<parser> Ꮡp, @string filename, io.Reader src, map<@string, ж<types.Package>> imports) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -62,7 +65,7 @@ internal static void init(this ж<parser> Ꮡp, @string filename, io.Reader src,
     Ꮡp.initScanner(filename, src);
     p.imports = imports;
     p.aliases = new map<nint, @string>();
-    p.typeList = new slice<typesꓸType>(1, 16);
+    p.typeList = new slice<types.Type>(1, 16);
 }
 
 internal static void initScanner(this ж<parser> Ꮡp, @string filename, io.Reader src) {
@@ -78,14 +81,20 @@ internal static void initScanner(this ж<parser> Ꮡp, @string filename, io.Read
     p.next();
 }
 
+} partial class gccgoimporter_package {
+
 partial struct importError {
     internal scanner.Position pos;
     internal error err;
 }
 
+} partial class gccgoimporterᴛimportError {
+
 internal static @string Error(this importError e) {
     return fmt.Sprintf("import error %s (byte offset = %d): %s"u8, e.pos, e.pos.Offset, e.err);
 }
+
+} partial class gccgoimporterᴛparser {
 
 internal static void error(this ref parser p, any err) {
     var (s, ok) = err._<@string>(ᐧ); if (ok) {
@@ -125,7 +134,7 @@ internal static void expectKeyword(this ref parser p, @string keyword) {
 }
 
 internal static @string parseString(this ref parser p) {
-    var (str, err) = strconv.Unquote(p.expect(scanner.ΔString));
+    var (str, err) = strconv.Unquote(p.expect(scanner.String));
     if (err != nil) {
         p.error(err);
     }
@@ -156,7 +165,7 @@ internal static @string parseUnquotedString(this ref parser p) {
 internal static void next(this ref parser p) {
     p.tok = p.scanner.Scan();
     switch (p.tok) {
-    case var ᴛ when ᴛ == scanner.Ident || ᴛ == scanner.Int || ᴛ == scanner.Float || ᴛ == scanner.ΔString || ᴛ == '·': {
+    case var ᴛ when ᴛ == scanner.Ident || ᴛ == scanner.Int || ᴛ == scanner.Float || ᴛ == scanner.String || ᴛ == '·': {
         p.lit = p.scanner.TokenText();
         break;
     }
@@ -233,7 +242,7 @@ internal static (ж<types.Package> pkg, @string name) parseExportedName(this ref
 
     (var path, name) = p.parseQualifiedName();
     @string pkgname = default;
-    if (p.tok == scanner.ΔString) {
+    if (p.tok == scanner.String) {
         pkgname = p.parseString();
     }
     pkg = p.getPkg(path, pkgname);
@@ -255,12 +264,16 @@ internal static @string parseName(this ref parser p) {
     return name;
 }
 
-internal static typesꓸType deref(typesꓸType typ) {
+} partial class gccgoimporter_package {
+
+internal static types.Type deref(types.Type typ) {
     var (p, _) = typ._<ж<types.Pointer>>(ᐧ); if (p != nil) {
         typ = p.Elem();
     }
     return typ;
 }
+
+} partial class gccgoimporterᴛparser {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object embeddedFieldExpectedˢ = (@string)"embedded field expected"u8;
@@ -298,7 +311,7 @@ internal static (ж<types.Var> field, @string tag) parseField(this ж<parser> �
         }
     }
     field = types.NewField(token.NoPos, pkg, name, typ, anon);
-    if (p.tok == scanner.ΔString) {
+    if (p.tok == scanner.String) {
         tag = p.parseString();
     }
     return (field, tag);
@@ -337,7 +350,7 @@ internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser
     }
     var typ = Ꮡp.parseType(pkg);
     if (isVariadic) {
-        typ = new types.SliceжΔType(types.NewSlice(typ));
+        typ = new types.SliceжType(types.NewSlice(typ));
     }
     param = types.NewParam(token.NoPos, pkg, name, typ);
     param.SetKind(kind);
@@ -364,9 +377,9 @@ internal static ref readonly @string convertˢ => ref convertˢᵇ;
 private static readonly @string convertˢᵇ = "convert"u8;
 
 // Conversion = "convert" "(" Type "," ConstValue ")" .
-internal static (constant.Value val, typesꓸType typ) parseConversion(this ж<parser> Ꮡp, ж<types.Package> pkg) {
+internal static (constant.Value val, types.Type typ) parseConversion(this ж<parser> Ꮡp, ж<types.Package> pkg) {
     constant.Value val = default;
-    typesꓸType typ = default;
+    types.Type typ = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(convertˢ);
@@ -386,9 +399,9 @@ internal static readonly object couldNotParseImagˢ = (@string)"could not parse 
 
 // ConstValue     = string | "false" | "true" | ["-"] (int ["'"] | FloatOrComplex) | Conversion .
 // FloatOrComplex = float ["i" | ("+"|"-") float "i"] .
-internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<parser> Ꮡp, ж<types.Package> pkg) {
+internal static (constant.Value val, types.Type typ) parseConstValue(this ж<parser> Ꮡp, ж<types.Package> pkg) {
     constant.Value val = default;
-    typesꓸType typ = default;
+    types.Type typ = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
     // v3 changed to $false, $true, $convert, to avoid confusion
@@ -401,10 +414,10 @@ internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<p
     }
 
     switch (p.tok) {
-    case var ᴛ when ᴛ == scanner.ΔString: {
+    case var ᴛ when ᴛ == scanner.String: {
         @string str = p.parseString();
         val = constant.MakeString(str);
-        typ = new types.BasicжΔType(types.Typ[types.UntypedString]);
+        typ = new types.BasicжType(types.Typ[types.UntypedString]);
         return (val, typ);
     }
     case var ᴛ when ᴛ == scanner.Ident: {
@@ -428,7 +441,7 @@ internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<p
 
         p.next();
         val = constant.MakeBool(b);
-        typ = new types.BasicжΔType(types.Typ[types.UntypedBool]);
+        typ = new types.BasicжType(types.Typ[types.UntypedBool]);
         return (val, typ);
     }}
 
@@ -448,9 +461,9 @@ internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<p
         p.next();
         if (p.tok == '\'') {
             p.next();
-            typ = new types.BasicжΔType(types.Typ[types.UntypedRune]);
+            typ = new types.BasicжType(types.Typ[types.UntypedRune]);
         } else {
-            typ = new types.BasicжΔType(types.Typ[types.ΔUntypedInt]);
+            typ = new types.BasicжType(types.Typ[types.ΔUntypedInt]);
         }
         break;
     }
@@ -481,7 +494,7 @@ internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<p
             if (val == nil) {
                 p.error(couldNotParseFloatˢ);
             }
-            typ = new types.BasicжΔType(types.Typ[types.ΔUntypedFloat]);
+            typ = new types.BasicжType(types.Typ[types.ΔUntypedFloat]);
             return (val, typ);
         }}
 
@@ -495,7 +508,7 @@ internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<p
             p.error(couldNotParseImagˢ);
         }
         val = constant.BinaryOp(reval, token.ADD, imval);
-        typ = new types.BasicжΔType(types.Typ[types.ΔUntypedComplex]);
+        typ = new types.BasicжType(types.Typ[types.ΔUntypedComplex]);
         break;
     }
     default: {
@@ -511,7 +524,7 @@ internal static ж<types.Const> parseConst(this ж<parser> Ꮡp, ж<types.Packag
     ref var p = ref Ꮡp.DerefOrNull();
 
     @string name = p.parseName();
-    typesꓸType typ = default;
+    types.Type typ = default;
     if (p.tok == '<') {
         typ = Ꮡp.parseType(pkg);
     }
@@ -523,15 +536,19 @@ internal static ж<types.Const> parseConst(this ж<parser> Ꮡp, ж<types.Packag
     return types.NewConst(token.NoPos, pkg, name, typ, val);
 }
 
+} partial class gccgoimporter_package {
+
 // reserved is a singleton type used to fill type map slots that have
 // been reserved (i.e., for which a type number has been parsed) but
 // which don't have their actual type yet. When the type map is updated,
 // the actual type must replace a reserved entry (or we have an internal
 // error). Used for self-verification only - not required for correctness.
 partial struct reservedᴛ1 /*dyn*/ {
-    /*embed*/ public global::go.go.types_package.ΔType Type;
+    /*embed*/ public global::go.go.types_package.Type Type;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
+
+} partial class gccgoimporterᴛparser {
 
 // reserve reserves the type map entry n for future use.
 internal static void reserve(this ref parser p, nint n) {
@@ -546,12 +563,12 @@ internal static void reserve(this ref parser p, nint n) {
         if (n != len(p.typeList)) {
             p.errorf("invalid type number %d (out of sync)", n);
         }
-        p.typeList = append(p.typeList, (typesꓸType)(new reservedᴛ1жΔType(reserved)));
+        p.typeList = append(p.typeList, (types.Type)(new reservedᴛ1жType(reserved)));
     } else {
         if (p.typeList[n] != nil) {
             p.errorf("previously visited type number %d", n);
         }
-        p.typeList[n] = new reservedᴛ1жΔType(reserved);
+        p.typeList[n] = new reservedᴛ1жType(reserved);
     }
 }
 
@@ -560,7 +577,7 @@ internal static void reserve(this ref parser p, nint n) {
 // used to resolve named types, or it can be a *types.Pointer,
 // used to resolve pointers to named types in case they are referenced
 // by embedded fields.
-internal static void update(this ref parser p, typesꓸType t, slice<any> nlist) {
+internal static void update(this ref parser p, types.Type t, slice<any> nlist) {
     if (AreEqual(t, reserved)) {
         p.errorf("internal error: update(%v) invoked on reserved", (any)(nlist));
     }
@@ -606,7 +623,7 @@ private static readonly @string funcˢᵇ = "func"u8;
 // NamedType = TypeName [ "=" ] Type { Method } .
 // TypeName  = ExportedName .
 // Method    = "func" "(" Param ")" Name ParamList ResultList [InlineBody] ";" .
-internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nlist) {
+internal static types.Type parseNamedType(this ж<parser> Ꮡp, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var (pkg, name) = p.parseExportedName();
@@ -703,7 +720,7 @@ internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nli
         }
     }
 
-    return new types.NamedжΔType(nt);
+    return new types.NamedжType(nt);
 }
 
 internal static int64 parseInt64(this ref parser p) {
@@ -725,7 +742,7 @@ internal static nint parseInt(this ref parser p) {
 }
 
 // ArrayOrSliceType = "[" [ int ] "]" Type .
-internal static typesꓸType parseArrayOrSliceType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+internal static types.Type parseArrayOrSliceType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expect('[');
@@ -733,20 +750,20 @@ internal static typesꓸType parseArrayOrSliceType(this ж<parser> Ꮡp, ж<type
         p.next();
 
         var tΔ1 = @new<types.Slice>();
-        p.update(new types.SliceжΔType(tΔ1), nlist);
+        p.update(new types.SliceжType(tΔ1), nlist);
 
         tΔ1.Value = types.NewSlice(Ꮡp.parseType(pkg)).Value;
-        return new types.SliceжΔType(tΔ1);
+        return new types.SliceжType(tΔ1);
     }
 
     var t = @new<types.Array>();
-    p.update(new types.ArrayжΔType(t), nlist);
+    p.update(new types.ArrayжType(t), nlist);
 
     var len = p.parseInt64();
     p.expect(']');
 
     t.Value = types.NewArray(Ꮡp.parseType(pkg), len).Value;
-    return new types.ArrayжΔType(t);
+    return new types.ArrayжType(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -754,13 +771,13 @@ internal static ref readonly @string mapˢ => ref mapˢᵇ;
 private static readonly @string mapˢᵇ = "map"u8;
 
 // MapType = "map" "[" Type "]" Type .
-internal static typesꓸType parseMapType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+internal static types.Type parseMapType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(mapˢ);
 
     var t = @new<types.Map>();
-    p.update(new types.MapжΔType(t), nlist);
+    p.update(new types.MapжType(t), nlist);
 
     p.expect('[');
     var key = Ꮡp.parseType(pkg);
@@ -768,7 +785,7 @@ internal static typesꓸType parseMapType(this ж<parser> Ꮡp, ж<types.Package
     var elem = Ꮡp.parseType(pkg);
 
     t.Value = types.NewMap(key, elem).Value;
-    return new types.MapжΔType(t);
+    return new types.MapжType(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -776,13 +793,13 @@ internal static ref readonly @string chanˢ => ref chanˢᵇ;
 private static readonly @string chanˢᵇ = "chan"u8;
 
 // ChanType = "chan" ["<-" | "-<"] Type .
-internal static typesꓸType parseChanType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+internal static types.Type parseChanType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(chanˢ);
 
     var t = @new<types.Chan>();
-    p.update(new types.ChanжΔType(t), nlist);
+    p.update(new types.ChanжType(t), nlist);
 
     types.ChanDir dir = types.SendRecv;
     switch (p.tok) {
@@ -803,7 +820,7 @@ internal static typesꓸType parseChanType(this ж<parser> Ꮡp, ж<types.Packag
     }}
 
     t.Value = types.NewChan(dir, Ꮡp.parseType(pkg)).Value;
-    return new types.ChanжΔType(t);
+    return new types.ChanжType(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -811,13 +828,13 @@ internal static ref readonly @string structˢ => ref structˢᵇ;
 private static readonly @string structˢᵇ = "struct"u8;
 
 // StructType = "struct" "{" { Field } "}" .
-internal static typesꓸType parseStructType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+internal static types.Type parseStructType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(structˢ);
 
     var t = @new<types.Struct>();
-    p.update(new types.StructжΔType(t), nlist);
+    p.update(new types.StructжType(t), nlist);
 
     slice<ж<types.Var>> fields = default;
     slice<@string> tags = default;
@@ -832,7 +849,7 @@ internal static typesꓸType parseStructType(this ж<parser> Ꮡp, ж<types.Pack
     p.expect('}');
 
     t.Value = types.NewStruct(fields, tags).Value;
-    return new types.StructжΔType(t);
+    return new types.StructжType(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -889,11 +906,11 @@ internal static ж<types.Tuple> parseResultList(this ж<parser> Ꮡp, ж<types.P
 }
 
 // FunctionType = ParamList ResultList .
-internal static ж<typesꓸSignature> parseFunctionType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+internal static ж<types.Signature> parseFunctionType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    var t = @new<typesꓸSignature>();
-    p.update(new types.ΔSignatureжΔType(t), nlist);
+    var t = @new<types.Signature>();
+    p.update(new types.SignatureжType(t), nlist);
 
     var (@params, isVariadic) = Ꮡp.parseParamList(types.ParamVar, pkg);
     var results = Ꮡp.parseResultList(pkg);
@@ -937,16 +954,16 @@ internal static ref readonly @string interfaceˢ => ref interfaceˢᵇ;
 private static readonly @string interfaceˢᵇ = "interface"u8;
 
 // InterfaceType = "interface" "{" { ("?" Type | Func) ";" } "}" .
-internal static typesꓸType parseInterfaceType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+internal static types.Type parseInterfaceType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(interfaceˢ);
 
     var t = @new<types.Interface>();
-    p.update(new types.InterfaceжΔType(t), nlist);
+    p.update(new types.InterfaceжType(t), nlist);
 
     slice<ж<types.Func>> methods = default;
-    slice<typesꓸType> embeddeds = default;
+    slice<types.Type> embeddeds = default;
 
     p.expect('{');
     while (p.tok != '}' && p.tok != scanner.EOF) {
@@ -964,7 +981,7 @@ internal static typesꓸType parseInterfaceType(this ж<parser> Ꮡp, ж<types.P
     p.expect('}');
 
     t.Value = types.NewInterfaceType(methods, embeddeds).Value;
-    return new types.InterfaceжΔType(t);
+    return new types.InterfaceжType(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -972,31 +989,31 @@ internal static ref readonly @string anyˢ => ref anyˢᵇ;
 private static readonly @string anyˢᵇ = "any"u8;
 
 // PointerType = "*" ("any" | Type) .
-internal static typesꓸType parsePointerType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+internal static types.Type parsePointerType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expect('*');
     if (p.tok == scanner.Ident) {
         p.expectKeyword(anyˢ);
         var tΔ1 = types.Typ[types.UnsafePointer];
-        p.update(new types.BasicжΔType(tΔ1), nlist);
-        return new types.BasicжΔType(tΔ1);
+        p.update(new types.BasicжType(tΔ1), nlist);
+        return new types.BasicжType(tΔ1);
     }
 
     var t = @new<types.Pointer>();
-    p.update(new types.PointerжΔType(t), nlist);
+    p.update(new types.PointerжType(t), nlist);
 
     t.Value = types.NewPointer(Ꮡp.parseType(pkg, t.OrTypedNil())).Value;
 
-    return new types.PointerжΔType(t);
+    return new types.PointerжType(t);
 }
 
 // TypeSpec = NamedType | MapType | ChanType | StructType | InterfaceType | PointerType | ArrayOrSliceType | FunctionType .
-internal static typesꓸType parseTypeSpec(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+internal static types.Type parseTypeSpec(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (p.tok) {
-    case var ᴛ when ᴛ == scanner.ΔString: {
+    case var ᴛ when ᴛ == scanner.String: {
         return Ꮡp.parseNamedType(nlist);
     }
     case var ᴛ when ᴛ == scanner.Ident: {
@@ -1023,12 +1040,14 @@ internal static typesꓸType parseTypeSpec(this ж<parser> Ꮡp, ж<types.Packag
         return Ꮡp.parseArrayOrSliceType(pkg, nlist);
     }
     case '(': {
-        return new types.ΔSignatureжΔType(Ꮡp.parseFunctionType(pkg, nlist));
+        return new types.SignatureжType(Ꮡp.parseFunctionType(pkg, nlist));
     }}
 
     p.errorf("expected type name or literal, got %s", scanner.TokenString(p.tok));
     return default;
 }
+
+} partial class gccgoimporter_package {
 
 // From gofrontend/go/export.h
 // Note that these values are negative in the gofrontend and have been made positive
@@ -1062,16 +1081,20 @@ internal static ref readonly @string byteˢ => ref byteˢᵇ;
 private static readonly @string byteˢᵇ = "byte"u8;
 internal static ref readonly @string runeˢ => ref runeˢᵇ;
 private static readonly @string runeˢᵇ = "rune"u8;
+internal static ref readonly @string anyˢ => ref anyˢᵇ;
+private static readonly @string anyˢᵇ = "any"u8;
 
-internal static typesꓸType lookupBuiltinType(nint typ) {
-    return new golib.SparseArray<typesꓸType>{[gccgoBuiltinINT8] = new types.BasicжΔType(types.Typ[types.Int8]), [gccgoBuiltinINT16] = new types.BasicжΔType(types.Typ[types.Int16]), [gccgoBuiltinINT32] = new types.BasicжΔType(types.Typ[types.Int32]), [gccgoBuiltinINT64] = new types.BasicжΔType(types.Typ[types.Int64]), [gccgoBuiltinUINT8] = new types.BasicжΔType(types.Typ[types.Uint8]), [gccgoBuiltinUINT16] = new types.BasicжΔType(types.Typ[types.Uint16]), [gccgoBuiltinUINT32] = new types.BasicжΔType(types.Typ[types.Uint32]), [gccgoBuiltinUINT64] = new types.BasicжΔType(types.Typ[types.Uint64]), [gccgoBuiltinFLOAT32] = new types.BasicжΔType(types.Typ[types.Float32]), [gccgoBuiltinFLOAT64] = new types.BasicжΔType(types.Typ[types.Float64]), [gccgoBuiltinINT] = new types.BasicжΔType(types.Typ[types.Int]), [gccgoBuiltinUINT] = new types.BasicжΔType(types.Typ[types.Uint]), [gccgoBuiltinUINTPTR] = new types.BasicжΔType(types.Typ[types.Uintptr]), [gccgoBuiltinBOOL] = new types.BasicжΔType(types.Typ[types.Bool]), [gccgoBuiltinSTRING] = new types.BasicжΔType(types.Typ[types.ΔString]), [gccgoBuiltinCOMPLEX64] = new types.BasicжΔType(types.Typ[types.Complex64]), [gccgoBuiltinCOMPLEX128] = new types.BasicжΔType(types.Typ[types.Complex128]), [gccgoBuiltinERROR] = types.Universe.Lookup(errorˢ).Type(), [gccgoBuiltinBYTE] = types.Universe.Lookup(byteˢ).Type(), [gccgoBuiltinRUNE] = types.Universe.Lookup(runeˢ).Type(), [gccgoBuiltinANY] = types.Universe.Lookup(anyˢ).Type()
+internal static types.Type lookupBuiltinType(nint typ) {
+    return new golib.SparseArray<types.Type>{[gccgoBuiltinINT8] = new types.BasicжType(types.Typ[types.Int8]), [gccgoBuiltinINT16] = new types.BasicжType(types.Typ[types.Int16]), [gccgoBuiltinINT32] = new types.BasicжType(types.Typ[types.Int32]), [gccgoBuiltinINT64] = new types.BasicжType(types.Typ[types.Int64]), [gccgoBuiltinUINT8] = new types.BasicжType(types.Typ[types.Uint8]), [gccgoBuiltinUINT16] = new types.BasicжType(types.Typ[types.Uint16]), [gccgoBuiltinUINT32] = new types.BasicжType(types.Typ[types.Uint32]), [gccgoBuiltinUINT64] = new types.BasicжType(types.Typ[types.Uint64]), [gccgoBuiltinFLOAT32] = new types.BasicжType(types.Typ[types.Float32]), [gccgoBuiltinFLOAT64] = new types.BasicжType(types.Typ[types.Float64]), [gccgoBuiltinINT] = new types.BasicжType(types.Typ[types.Int]), [gccgoBuiltinUINT] = new types.BasicжType(types.Typ[types.Uint]), [gccgoBuiltinUINTPTR] = new types.BasicжType(types.Typ[types.Uintptr]), [gccgoBuiltinBOOL] = new types.BasicжType(types.Typ[types.Bool]), [gccgoBuiltinSTRING] = new types.BasicжType(types.Typ[types.String]), [gccgoBuiltinCOMPLEX64] = new types.BasicжType(types.Typ[types.Complex64]), [gccgoBuiltinCOMPLEX128] = new types.BasicжType(types.Typ[types.Complex128]), [gccgoBuiltinERROR] = types.Universe.Lookup(errorˢ).Type(), [gccgoBuiltinBYTE] = types.Universe.Lookup(byteˢ).Type(), [gccgoBuiltinRUNE] = types.Universe.Lookup(runeˢ).Type(), [gccgoBuiltinANY] = types.Universe.Lookup(anyˢ).Type()
     }.array(23)[typ];
 }
+
+} partial class gccgoimporterᴛparser {
 
 // Type = "<" "type" ( "-" int | int [ TypeSpec ] ) ">" .
 //
 // parseType updates the type map to t for all type numbers n.
-internal static typesꓸType parseType(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
+internal static types.Type parseType(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
     var n = nʗp.sslice();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -1085,8 +1108,8 @@ internal static ref readonly @string typeˢ => ref typeˢᵇ;
 private static readonly @string typeˢᵇ = "type"u8;
 
 // (*parser).Type after reading the "<".
-internal static (typesꓸType t, nint n1) parseTypeAfterAngle(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
-    typesꓸType t = default;
+internal static (types.Type t, nint n1) parseTypeAfterAngle(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
+    types.Type t = default;
     nint n1 = default;
     var n = nʗp.slice();
     ref var p = ref Ꮡp.DerefOrNull();
@@ -1135,8 +1158,8 @@ internal static (typesꓸType t, nint n1) parseTypeAfterAngle(this ж<parser> �
 // parseTypeExtended is identical to parseType, but if the type in
 // question is a saved type, returns the index as well as the type
 // pointer (index returned is zero if we parsed a builtin).
-internal static (typesꓸType t, nint n1) parseTypeExtended(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
-    typesꓸType t = default;
+internal static (types.Type t, nint n1) parseTypeExtended(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
+    types.Type t = default;
     nint n1 = default;
     var n = nʗp.sslice();
     ref var p = ref Ꮡp.DerefOrNull();
@@ -1190,10 +1213,14 @@ internal static void skipInlineBody(this ж<parser> Ꮡp) {
     finally { ᒐ.Run(); }
 }
 
+} partial class gccgoimporter_package {
+
 internal partial struct parseTypes_typeOffset /*dyn*/ {
     internal nint offset;
     internal nint length;
 }
+
+} partial class gccgoimporterᴛparser {
 
 // Types = "types" maxp1 exportedp1 (offset length)* .
 internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> pkg) {
@@ -1204,7 +1231,7 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> pkg) {
 
         nint maxp1 = p.parseInt();
         nint exportedp1 = p.parseInt();
-        p.typeList = new slice<typesꓸType>(maxp1, maxp1);
+        p.typeList = new slice<types.Type>(maxp1, maxp1);
         slice<parseTypes_typeOffset> typeOffsets = default;
 
         nint total = 0;
@@ -1498,4 +1525,4 @@ internal static ж<types.Package> parsePackage(this ж<parser> Ꮡp) {
     return p.pkg;
 }
 
-} // end gccgoimporter_package
+} // end gccgoimporterᴛparser

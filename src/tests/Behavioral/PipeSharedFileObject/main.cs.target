@@ -27,13 +27,13 @@ internal static readonly ж<atomic.Int64> Ꮡwritten = new StaticBox<atomic.Int6
 internal static ref atomic.Int64 written => ref ((StaticBox<atomic.Int64>)Ꮡwritten).ValueSlot;
 internal static slice<ж<os.File>> keep;
 
-internal static (ж<os.File>, syscallꓸHandle) pipe() {
+internal static (ж<os.File>, syscall.Handle) pipe() {
     @string name = @"\\.\pipe\go2cs-pipeshared-"u8 + strconv.Itoa(os.Getpid()) + "-"u8 + strconv.FormatUint(Ꮡcounter.Add(1), 10);
     var (wname, _) = syscall.UTF16PtrFromString(name);
 
     var (h, _, e) = procCreateNamedPipe.Call((uintptr)wname, (uintptr)((uintptr)pipeAccessDuplex | (uintptr)fileFlagOverlapped),
         (uintptr)((uintptr)pipeTypeByte | (uintptr)pipeReadModeByte), 1, 4096, 4096, 0, 0);
-    if (((syscallꓸHandle)h) == syscall.InvalidHandle) {
+    if (((syscall.Handle)h) == syscall.InvalidHandle) {
         throw panic(fmt.Sprintf("CreateNamedPipe: %v"u8, e));
     }
 
@@ -90,7 +90,7 @@ internal partial struct main_type /*dyn*/ {
 internal static void main() {
     var (server, client) = pipe();
 
-    ref var dup = ref heap(new syscallꓸHandle(), out var Ꮡdup);
+    ref var dup = ref heap(new syscall.Handle(), out var Ꮡdup);
     var (self, _) = syscall.GetCurrentProcess();
     {
         var err = syscall.DuplicateHandle(self, client, self, Ꮡdup, 0, false, syscall.DUPLICATE_SAME_ACCESS); if (err != nil) {
@@ -116,8 +116,8 @@ internal static void main() {
     var stderrʗ2 = stderr;
     var stdoutʗ2 = stdout;
     step("2 deadlines", () => {
-        var refused = stderrʗ2.SetDeadline(time.Now().Add(time.ΔHour));
-        var bound = stdoutʗ2.SetDeadline(time.Now().Add(time.ΔHour));
+        var refused = stderrʗ2.SetDeadline(time.Now().Add(time.Hour));
+        var bound = stdoutʗ2.SetDeadline(time.Now().Add(time.Hour));
         stdoutʗ2.SetDeadline(new time.Time());
         return fmt.Sprintf("stderr ErrNoDeadline=%v stdout err=%v"u8, errors.Is(refused, os.ErrNoDeadline), bound);
     });
@@ -142,7 +142,7 @@ internal static void main() {
                 return "second write: "u8 + err.Error();
             }
         }
-        var deadline = first.SetWriteDeadline(time.Now().Add(time.ΔHour));
+        var deadline = first.SetWriteDeadline(time.Now().Add(time.Hour));
         {
             var (_, err) = first.Write(slice<byte>("first line\n"u8)); if (err != nil) {
                 return "first write: "u8 + err.Error();
@@ -155,7 +155,7 @@ internal static void main() {
 
         return fmt.Sprintf("%q first deadline err=%v first read timed out=%v second ErrNoDeadline=%v"u8,
             arrived, deadline, errors.Is(timeout, os.ErrDeadlineExceeded),
-            errors.Is(second.SetDeadline(time.Now().Add(time.ΔHour)), os.ErrNoDeadline));
+            errors.Is(second.SetDeadline(time.Now().Add(time.Hour)), os.ErrNoDeadline));
     });
 
     step("5 Fd disassociates", () => {
@@ -169,7 +169,7 @@ internal static void main() {
         }
         var before = f.SetDeadline(new time.Time());
         f.Fd();
-        var after = f.SetDeadline(time.Now().Add(time.ΔHour));
+        var after = f.SetDeadline(time.Now().Add(time.Hour));
         {
             var (_, err) = f.Write(slice<byte>("after Fd\n"u8)); if (err != nil) {
                 return "write after Fd: "u8 + err.Error();
@@ -184,7 +184,7 @@ internal static void main() {
         var (server5, other) = pipe();
 
         @string before = default;
-        ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
+        ref var h = ref heap(new syscall.Handle(), out var Ꮡh);
         for (nint round = 0; round < 8; round++) {
             var (server4, client4) = pipe();
             var first = os.NewFile((uintptr)client4, "first");

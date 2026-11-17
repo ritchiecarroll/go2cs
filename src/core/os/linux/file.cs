@@ -57,13 +57,19 @@ using @unsafe = unsafe_package;
 using @internal;
 using go.io;
 using go.sync;
+using os = os_package;
+using static os_package;
 
 partial class os_package {
+
+} partial class osᴛFile {
 
 // Name returns the name of the file as presented to Open.
 //
 // It is safe to call Name after [Close].
 public static @string Name(this ref File f) { return f.name; }
+
+} partial class os_package {
 
 // Stdin, Stdout, and Stderr are open Files pointing to the standard input,
 // standard output, and standard error file descriptors.
@@ -107,6 +113,8 @@ partial struct LinkError {
     public error Err;
 }
 
+} partial class osᴛLinkError {
+
 public static @string Error(this ref LinkError e) {
     return e.Op + " "u8 + e.Old + " "u8 + e.New + ": "u8 + e.Err.Error();
 }
@@ -114,6 +122,8 @@ public static @string Error(this ref LinkError e) {
 public static error Unwrap(this ref LinkError e) {
     return e.Err;
 }
+
+} partial class os_package {
 
 // NewFile returns a new [File] with the given file descriptor and name.
 // The returned value will be nil if fd is not a valid file descriptor.
@@ -133,6 +143,8 @@ public static error Unwrap(this ref LinkError e) {
 public static ж<File> NewFile(uintptr fd, @string name) {
     return newFileFromNewFile(fd, name);
 }
+
+} partial class osᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string readˢ => ref readˢᵇ;
@@ -205,16 +217,22 @@ public static (int64 n, error err) ReadFrom(this ж<File> Ꮡf, Δio.Reader r) {
     return (n, f.wrapErr(writeˢ, e));
 }
 
+} partial class os_package {
+
 // noReadFrom can be embedded alongside another type to
 // hide the ReadFrom method of that other type.
 partial struct noReadFrom {
 }
+
+} partial class osᴛnoReadFrom {
 
 // ReadFrom hides another ReadFrom method.
 // It should never be called.
 internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1) {
     throw panic("can't happen");
 }
+
+} partial class os_package {
 
 // fileWithoutReadFrom implements all the methods of *File other
 // than ReadFrom. This is used to permit ReadFrom to call io.Copy
@@ -227,6 +245,8 @@ partial struct fileWithoutReadFrom {
 internal static (int64, error) genericReadFrom(ж<File> f, Δio.Reader r) {
     return Δio.Copy(new fileWithoutReadFrom(File: f), r);
 }
+
+} partial class osᴛFile {
 
 // Write writes len(b) bytes from b to the File.
 // It returns the number of bytes written and an error, if any.
@@ -256,7 +276,11 @@ public static (nint n, error err) Write(this ж<File> Ꮡf, slice<byte> b) {
     return (n, err);
 }
 
+} partial class os_package {
+
 internal static error errWriteAtInAppendMode = errors.New("os: invalid use of WriteAt on file opened with O_APPEND");
+
+} partial class osᴛFile {
 
 // WriteAt writes len(b) bytes to the File starting at byte offset off.
 // It returns the number of bytes written and an error, if any.
@@ -307,16 +331,22 @@ public static (int64 n, error err) WriteTo(this ж<File> Ꮡf, Δio.Writer w) {
     return genericWriteTo(Ꮡf, w); // without wrapping
 }
 
+} partial class os_package {
+
 // noWriteTo can be embedded alongside another type to
 // hide the WriteTo method of that other type.
 partial struct noWriteTo {
 }
+
+} partial class osᴛnoWriteTo {
 
 // WriteTo hides another WriteTo method.
 // It should never be called.
 internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) {
     throw panic("can't happen");
 }
+
+} partial class os_package {
 
 // fileWithoutWriteTo implements all the methods of *File other
 // than WriteTo. This is used to permit WriteTo to call io.Copy
@@ -329,6 +359,8 @@ partial struct fileWithoutWriteTo {
 internal static (int64, error) genericWriteTo(ж<File> f, Δio.Writer w) {
     return Δio.Copy(w, new fileWithoutWriteTo(File: f));
 }
+
+} partial class osᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string seekˢ => ref seekˢᵇ;
@@ -361,6 +393,8 @@ public static (nint n, error err) WriteString(this ж<File> Ꮡf, @string s) {
     var b = @unsafe.Slice(@unsafe.StringData(s), len(s));
     return Ꮡf.Write(b);
 }
+
+} partial class os_package {
 
 // Mkdir creates a new directory with the specified name and permission
 // bits (before umask).
@@ -499,6 +533,8 @@ internal static (nint, error) fixCount(nint n, error err) {
 // It is set to true in the export_test.go for tests (including fuzz tests).
 internal static bool checkWrapErr = false;
 
+} partial class osᴛFile {
+
 // wrapErr wraps an error that occurred during an operation on an open file.
 // It passes io.EOF through unchanged, otherwise converts
 // poll.ErrFileClosing to ErrClosed and wraps the error in a PathError.
@@ -513,6 +549,8 @@ internal static error wrapErr(this ref File f, @string op, error err) {
     }
     return new fs.PathErrorжerror(Ꮡ(new PathError(Op: op, Path: f.name, Err: err)));
 }
+
+} partial class os_package {
 
 // TempDir returns the default directory to use for temporary files.
 //
@@ -743,6 +781,8 @@ public static (@string, error) UserHomeDir() {
 // and [ModeTemporary] are used.
 public static error Chmod(@string name, FileMode mode) { return chmod(name, mode); }
 
+} partial class osᴛFile {
+
 // Chmod changes the mode of the file to mode.
 // If there is an error, it will be of type [*PathError].
 public static error Chmod(this ж<File> Ꮡf, FileMode mode) { return Ꮡf.chmod(mode); }
@@ -828,6 +868,8 @@ public static uintptr Fd(this ж<File> Ꮡf) {
     return Ꮡf.fd();
 }
 
+} partial class os_package {
+
 // DirFS returns a file system (an fs.FS) for the tree of files rooted at the directory dir.
 //
 // Note that DirFS("/prefix") only guarantees that the Open calls it makes to the
@@ -856,12 +898,14 @@ internal static fs.ReadLinkFS _ᴛ4ʗ = ((dirFS)(@string)""u8);
 
 partial struct dirFS /*@string*/;
 
+} partial class osᴛdirFS {
+
 internal static (fs.File, error) Open(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open", Path: name, Err: err))));
     }
-    (var f, err) = Open(fullname);
+    (var f, err) = os.Open(fullname);
     if (err != nil) {
         // DirFS takes a string appropriate for GOOS,
         // while the name argument here is always slash separated.
@@ -882,7 +926,7 @@ internal static (slice<byte>, error) ReadFile(this dirFS dir, @string name) {
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readfile", Path: name, Err: err))));
     }
-    (var b, err) = ReadFile(fullname);
+    (var b, err) = os.ReadFile(fullname);
     if (err != nil) {
         var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
             // See comment in dirFS.Open.
@@ -900,7 +944,7 @@ internal static (slice<DirEntry>, error) ReadDir(this dirFS dir, @string name) {
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdir", Path: name, Err: err))));
     }
-    (var entries, err) = ReadDir(fullname);
+    (var entries, err) = os.ReadDir(fullname);
     if (err != nil) {
         var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
             // See comment in dirFS.Open.
@@ -916,7 +960,7 @@ internal static (fs.FileInfo, error) Stat(this dirFS dir, @string name) {
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "stat", Path: name, Err: err))));
     }
-    (var f, err) = Stat(fullname);
+    (var f, err) = os.Stat(fullname);
     if (err != nil) {
         // See comment in dirFS.Open.
         err._<ж<PathError>>().Path = name;
@@ -930,7 +974,7 @@ internal static (fs.FileInfo, error) Lstat(this dirFS dir, @string name) {
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lstat", Path: name, Err: err))));
     }
-    (var f, err) = Lstat(fullname);
+    (var f, err) = os.Lstat(fullname);
     if (err != nil) {
         // See comment in dirFS.Open.
         err._<ж<PathError>>().Path = name;
@@ -965,6 +1009,8 @@ internal static (@string, error) join(this dirFS dir, @string name) {
     }
     return (((@string)dir) + ((@string)(rune)PathSeparator) + name, default);
 }
+
+} partial class os_package {
 
 // ReadFile reads the named file and returns the contents.
 // A successful call returns err == nil, not err == EOF.

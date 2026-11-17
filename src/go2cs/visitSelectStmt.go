@@ -342,11 +342,27 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 									}
 								}
 
-								boundName, boxDecl := v.selectCommBinding(lhs, assignStmt.Tok == token.DEFINE)
-								v.outputBuilder.WriteString(boundName)
+								var boundName, boxDecl string
 
-								if boxDecl != "" {
-									commBoxDecls = append(commBoxDecls, boxDecl)
+								if v.valueAssignInPlace(assignStmt, lhs) {
+									// An existing location that owns array storage (P5's C5): receive into a temporary and
+									// take it in place first in the clause body, so what was taken from the location before
+									// the select still names it.
+									lhsType := v.info.TypeOf(lhs)
+									temp := v.getTempVarName(valueAssignTempRoot(lhs))
+									starContext := DefaultStarExprContext()
+									starContext.inLhsAssign = true
+									target := valueAssignTarget(lhs, lhsType, v.convExpr(lhs, []ExprContext{starContext}))
+
+									v.outputBuilder.WriteString("var " + temp)
+									commBoxDecls = append(commBoxDecls, fmt.Sprintf("%s.%s(%s);", target, valueAssignMethod(lhsType), temp))
+								} else {
+									boundName, boxDecl = v.selectCommBinding(lhs, assignStmt.Tok == token.DEFINE)
+									v.outputBuilder.WriteString(boundName)
+
+									if boxDecl != "" {
+										commBoxDecls = append(commBoxDecls, boxDecl)
+									}
 								}
 
 								if lhsCount == 2 {

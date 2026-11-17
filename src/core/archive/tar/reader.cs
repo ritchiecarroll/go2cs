@@ -11,6 +11,7 @@ using strings = strings_package;
 using time = time_package;
 using @internal;
 using go.path;
+using static tar_package;
 
 partial class tar_package {
 
@@ -39,6 +40,8 @@ partial interface fileReader :
 public static ж<Reader> NewReader(io.Reader r) {
     return Ꮡ(new Reader(r: r, curr: new regFileReaderжfileReader(Ꮡ(new regFileReader(r, 0)))));
 }
+
+} partial class tarᴛReader {
 
 // Next advances to the next entry in the tar archive.
 // The Header.Size determines how many bytes can be read for the next file.
@@ -287,6 +290,8 @@ internal static (sparseDatas, error) readGNUSparsePAXHeaders(this ref Reader tr,
     return readGNUSparseMap0x1(hdr.PAXRecords);
 }
 
+} partial class tar_package {
+
 // mergePAX merges paxHdrs into hdr for all relevant fields of Header.
 internal static error /*err*/ mergePAX(ref Header hdr, map<@string, @string> paxHdrs) {
     error err = default;
@@ -401,6 +406,8 @@ internal static (map<@string, @string>, error) parsePAX(io.Reader r) {
     }
     return (paxHdrs, default);
 }
+
+} partial class tarᴛReader {
 
 // readHeader reads the next block header and assumes that the underlying reader
 // is already aligned to a block boundary. It returns the raw block of the
@@ -596,6 +603,8 @@ internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<
     return (default, errSparseTooLong);
 }
 
+} partial class tar_package {
+
 // readGNUSparseMap1x0 reads the sparse map as stored in GNU's PAX sparse format
 // version 1.0. The format of the sparse map consists of a series of
 // newline-terminated numeric fields. The first field is the number of entries
@@ -718,6 +727,8 @@ internal static (sparseDatas, error) appendSparseEntry(sparseDatas spd, sparseEn
     return (append(spd, ent), default);
 }
 
+} partial class tarᴛReader {
+
 // Read reads from the current file in the tar archive.
 // It returns (0, io.EOF) when it reaches the end of that file,
 // until [Next] is called to advance to the next file.
@@ -760,11 +771,15 @@ internal static (int64, error) writeTo(this ref Reader tr, io.Writer w) {
     return (n, err);
 }
 
+} partial class tar_package {
+
 // regFileReader is a fileReader for reading data from a regular file entry.
 partial struct regFileReader {
     internal io.Reader r; // Underlying Reader
     internal int64 nb;    // Number of remaining bytes to read
 }
+
+} partial class tarᴛregFileReader {
 
 internal static (nint n, error err) Read(this ref regFileReader fr, slice<byte> b) {
     nint n = default;
@@ -789,9 +804,13 @@ internal static (nint n, error err) Read(this ref regFileReader fr, slice<byte> 
     }}
 }
 
+} partial class tar_package {
+
 internal partial struct WriteTo_src /*dyn*/ {
     /*embed*/ public io_package.Reader Reader;
 }
+
+} partial class tarᴛregFileReader {
 
 internal static (int64, error) WriteTo(this ж<regFileReader> Ꮡfr, io.Writer w) {
     return io.Copy(w, new WriteTo_src(new regFileReaderжReader(Ꮡfr)));
@@ -807,12 +826,16 @@ internal static int64 physicalRemaining(this regFileReader fr) {
     return fr.nb;
 }
 
+} partial class tar_package {
+
 // sparseFileReader is a fileReader for reading data from a sparse file entry.
 partial struct sparseFileReader {
     internal fileReader fr;  // Underlying fileReader
     internal sparseHoles sp; // Normalized list of sparse holes
     internal int64 pos;      // Current position in sparse file
 }
+
+} partial class tarᴛsparseFileReader {
 
 internal static (nint n, error err) Read(this ж<sparseFileReader> Ꮡsr, slice<byte> b) {
     nint n = default;
@@ -929,13 +952,19 @@ internal static int64 physicalRemaining(this sparseFileReader sr) {
     return sr.fr.physicalRemaining();
 }
 
+} partial class tar_package {
+
 partial struct zeroReader {
 }
+
+} partial class tarᴛzeroReader {
 
 internal static (nint, error) Read(this zeroReader _, slice<byte> b) {
     clear(b);
     return (len(b), default);
 }
+
+} partial class tar_package {
 
 // mustReadFull is like io.ReadFull except it returns
 // io.ErrUnexpectedEOF when io.EOF is hit before len(b) bytes are read.

@@ -5,6 +5,7 @@ namespace go.@internal;
 
 using atomic = go.sync.atomic_package;
 using go.sync;
+using static poll_package;
 
 partial class poll_package {
 
@@ -36,6 +37,8 @@ internal static UntypedInt mutexWMask => /* (1<<20 - 1) << 43 */ 922336324076175
 
 internal static ref readonly @string overflowMsg => ref overflowMsgᵇ;
 private static readonly @string overflowMsgᵇ = "too many concurrent operations on a single file or socket (max 1048575)"u8;
+
+} partial class pollᴛfdMutex {
 
 // Read operations must do rwlock(true)/rwunlock(true).
 //
@@ -88,9 +91,13 @@ internal static bool decref(this ж<fdMutex> Ꮡmu) {
 
 // go2cs generated this placeholder — func rwunlock is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+} partial class poll_package {
+
 // Implemented in runtime package.
 internal static partial void runtime_Semacquire(ж<uint32> sema);
 internal static partial void runtime_Semrelease(ж<uint32> sema);
+
+} partial class pollᴛFD {
 
 // incref adds a reference to fd.
 // It returns an error when fd cannot be used.
@@ -185,4 +192,4 @@ internal static bool closing(this ж<FD> Ꮡfd) {
     return (atomic.LoadUint64(Ꮡfd.Ꮡfdmu.Ꮡstate) & (uint64)mutexClosed) != 0;
 }
 
-} // end poll_package
+} // end pollᴛFD

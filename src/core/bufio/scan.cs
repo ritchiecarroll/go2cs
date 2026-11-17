@@ -8,6 +8,7 @@ using errors = errors_package;
 using io = io_package;
 using utf8 = unicode.utf8_package;
 using unicode;
+using static bufio_package;
 
 partial class bufio_package {
 
@@ -90,6 +91,8 @@ public static ж<Scanner> NewScanner(io.Reader r) {
     ));
 }
 
+} partial class bufioᴛScanner {
+
 // Err returns the first non-EOF error that was encountered by the [Scanner].
 public static error Err(this ref Scanner s) {
     if (AreEqual(s.err, io.EOF)) {
@@ -111,6 +114,8 @@ public static @string Text(this ref Scanner s) {
     return (@string)s.token;
 }
 
+} partial class bufio_package {
+
 // ErrFinalToken is a special sentinel error value. It is intended to be
 // returned by a Split function to indicate that the scanning should stop
 // with no error. If the token being delivered with this error is not nil,
@@ -122,6 +127,8 @@ public static @string Text(this ref Scanner s) {
 // providing one here is tidier.
 // See the emptyFinalToken example for a use of this value.
 public static error ErrFinalToken = errors.New("final token");
+
+} partial class bufioᴛScanner {
 
 // Scan advances the [Scanner] to the next token, which will then be
 // available through the [Scanner.Bytes] or [Scanner.Text] method. It returns false when
@@ -286,6 +293,8 @@ public static void Split(this ref Scanner s, Func<slice<byte>, bool, (nint, slic
     }
     s.split = split;
 }
+
+} partial class bufio_package {
 
 // Split functions
 

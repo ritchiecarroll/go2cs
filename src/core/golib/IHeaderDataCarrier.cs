@@ -4,8 +4,6 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
-using System.ComponentModel;
-
 namespace go.golib;
 
 /// <summary>
@@ -13,8 +11,12 @@ namespace go.golib;
 /// <c>unsafe.Pointer.FromHeaderData</c> for Go's rule-6 shape, <c>unsafe.Pointer(h.Data)</c> in one expression
 /// (docs/phase4/DESIGN-sqlite-ccgo-ts.md, QW-8): the header's current Data word, and the box that holds what it names.
 /// </summary>
-[EditorBrowsable(EditorBrowsableState.Never)]
-public interface IHeaderDataCarrier
+/// <remarks>
+/// Internal: golib's own header boxes are its only implementers, and <c>go.unsafe</c> reaches it through golib's
+/// <c>InternalsVisibleTo</c> grant. A public interface would be one more exported type the binary-compat floor carries,
+/// and a foreign implementer could make <c>FromHeaderData</c> trust a word golib never minted.
+/// </remarks>
+internal interface IHeaderDataCarrier
 {
     /// <summary>
     /// The header's Data word now, and in <paramref name="carried"/> the element box it was minted from when the word is

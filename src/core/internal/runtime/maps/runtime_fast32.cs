@@ -9,11 +9,12 @@ using sys = go.@internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
+using static maps_package;
 
 partial class maps_package {
 
 //go:linkname runtime_mapaccess1_fast32 runtime.mapaccess1_fast32
-internal static @unsafe.Pointer runtime_mapaccess1_fast32(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint32 key) {
+internal static @unsafe.Pointer runtime_mapaccess1_fast32(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint32 key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -87,7 +88,7 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast32(ж<abiꓸMapType> Ꮡt
 }
 
 //go:linkname runtime_mapaccess2_fast32 runtime.mapaccess2_fast32
-internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint32 key) {
+internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint32 key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -160,7 +161,9 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abiꓸMapTy
     }
 }
 
-internal static @unsafe.Pointer putSlotSmallFast32(this ref ΔMap m, ж<abiꓸMapType> typ, uintptr hash, uint32 key) {
+} partial class mapsᴛMap {
+
+internal static @unsafe.Pointer putSlotSmallFast32(this ref Map m, ж<abi.MapType> typ, uintptr hash, uint32 key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -200,8 +203,10 @@ internal static @unsafe.Pointer putSlotSmallFast32(this ref ΔMap m, ж<abiꓸMa
     return slotElem;
 }
 
+} partial class maps_package {
+
 //go:linkname runtime_mapassign_fast32 runtime.mapassign_fast32
-internal static @unsafe.Pointer runtime_mapassign_fast32(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint32 key) {
+internal static @unsafe.Pointer runtime_mapassign_fast32(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint32 key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -347,7 +352,7 @@ break_outer:;
 // TODO(prattmic): With some compiler refactoring we could avoid duplication of this function.
 //
 //go:linkname runtime_mapassign_fast32ptr runtime.mapassign_fast32ptr
-internal static @unsafe.Pointer runtime_mapassign_fast32ptr(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @unsafe.Pointer key) {
+internal static @unsafe.Pointer runtime_mapassign_fast32ptr(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -483,7 +488,7 @@ break_outer:;
 }
 
 //go:linkname runtime_mapdelete_fast32 runtime.mapdelete_fast32
-internal static void runtime_mapdelete_fast32(ж<abiꓸMapType> typ, ж<ΔMap> Ꮡm, uint32 keyʗp) {
+internal static void runtime_mapdelete_fast32(ж<abi.MapType> typ, ж<Map> Ꮡm, uint32 keyʗp) {
     ref var m = ref Ꮡm.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 

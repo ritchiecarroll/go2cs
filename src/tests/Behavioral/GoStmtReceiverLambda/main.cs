@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,6 +9,8 @@ partial struct counter {
     internal nint n;
     internal channel<bool> done;
 }
+
+} partial class mainᴛcounter {
 
 internal static error bump(this ref counter c, nint delta) {
     c.n += delta;
@@ -20,9 +23,13 @@ internal static error report(this ref counter c) {
     return default;
 }
 
+} partial class main_package {
+
 partial struct engine {
     internal ж<counter> tally;
 }
+
+} partial class mainᴛengine {
 
 internal static partial void start(this ж<engine> Ꮡe, nint delta) {
     goǃ((ᴛ0, ᴛ1) => ᴛ0.bump(ᴛ1), Ꮡe.Value.tally, delta);
@@ -32,12 +39,18 @@ internal static partial void ping(this ж<engine> Ꮡe) {
     goǃ(ᴛ0 => ᴛ0.report(), Ꮡe.Value.tally);
 }
 
+} partial class main_package {
+
 partial struct valueSender {
     internal channel<nint> c;
 }
 
+} partial class mainᴛvalueSender {
+
 internal static void send(this valueSender v, nint n) { v.c.ᐸꟷ(n); }
 internal static void ping(this valueSender v) { v.c.ᐸꟷ(99); }
+
+} partial class main_package {
 
 internal static partial void main() {
     var e = Ꮡ(new engine(tally: Ꮡ(new counter(done: new channel<bool>(1)))));

@@ -621,6 +621,20 @@ follow-up): more than 0 bytes per element for V3 stops door B.**
 The control is the same loop over a Go `[]uint32` through `&s[0]` (V1), which is expected to allocate and
 shows the instrument can read a non-zero.
 
+**Amended 2026-11-16 (P5, COORD's ask of 08:38Z): the window is bounded, not zero.** A full-suite GolibTests
+Release run read 5,784 bytes once in the 100,000-iteration window (H's W8 re-gate at master 2c1ce10b25). That is
+far below one object per access (a box per access is at least 24 B x 200,000 = 4.8 MB), so it is a cost paid once,
+and the instrument counts every byte the thread allocates, including what a tier change costs when the JIT moves
+the loop inside the window. Measured on linux/amd64 at 2c1ce10b25: the loop's unoptimized body allocates 24 B per
+call, so with on-stack replacement held past the window (`DOTNET_TC_OnStackReplacement_InitialCounter=50000`)
+or off, the zero form read 24 and failed. CPU load (six busy processes) and three in-process allocating threads
+did not reproduce the red in 15 probe runs. The arm now measures 1,000,000 iterations (2,000,000 accesses) and
+asserts fewer than 65,536 bytes: eleven times the one-time cost seen, and below one 24-byte object per 700
+accesses, so a per-access cost (at least 48 MB) still fails it. The control now asserts at least 24 bytes per
+access. Readings: green 2 of 2 in each of four arms (plain, on-stack replacement late, off, tiering off), 3 of 3
+under CPU load; the negative control (the store through the boxing door `Element<E>(...).Value` on the native
+pointer) read 112,000,000 bytes and failed.
+
 **For whoever cuts N3** (G's caveat): a `ref` return cannot live across an `await` (CS8178). `ElementRef`'s
 result is used inside one expression, and the spill the N3 twin introduces must never split that expression.
 If a site cannot be kept in one expression, it takes `Element(...).Value`.
@@ -1465,6 +1479,114 @@ element that route converts, as before this change, and at run time it is that r
 "slice bounds out of range [1:0]". The program's slice arm is written closed (`[1:2]`) for that reason. Nothing
 here ran on windows or darwin, and the sqlite-cs conversion itself is G's to re-run at this tip. The local gates are
 scored in the announce of this commit, not here.
+
+### 16.10 Amendment 2026-11-16 (P5): the open slice of an unnamed array takes the doors (decision D4, taken)
+
+Section 4.3 kept door A's open form for a named array, and section 8 put the unnamed one to the owner as decision
+D4, recommending a BOARD row. That row is the 2026-11-14 row "an array viewed over another array type answers
+length 0" (its first item, shape Q). COORD's brief of 2026-11-16 00:57Z asked for it in .4, and its 01:10Z
+reading approved the plan below as written.
+
+**What D4 left.** The view door declined `(*[N]T)(p)[lo:]` when the array was unnamed, and the copy door took the
+open form only for a named one. The unnamed form kept the older route, `@unsafe.Pointer.To<array<E>>(p).slice(lo)`:
+the box of the whole array, read as a value. Over memory that is a Go array of that very type it is right. Over
+anything else it answers length 0, so a store panics where Go slices, and as `copy`'s destination over the bytes of
+a number (reflect's `nameOff` copy) the box read itself ends the process (an access violation in the constructor
+of `slice<byte>`, which no `recover` sees).
+
+**The change.** Both `named` conditions go (`arrayPointerViewDoor.go`): the unnamed open form is the view door's
+`View<E>(p, lo, N)` wherever it stands, and `CopyInto` / `CopyFrom` where it is a direct argument of `copy`. The
+open form over a field's address stays the field view's (`ArrayPointer<E>.Of(h.Ꮡf, N).slice()`), and the converter
+test keeps that as its control. No golib change.
+
+**The census.** Over the door census of 11-14: the sqlite closure (modernc.org/sqlite v1.62.0, libc v1.80.1)
+holds 0 unnamed open forms; its three open forms are libc's `RawMem`, named, door A's already. The standard
+library holds 7 (linux), 8 (darwin) and 11 (windows); in the corpus they are the seven lines below, and the other
+windows sites take a typed pointer, which is no door operand.
+
+| reading (linux/amd64, Release) | at W17's tip | with the change |
+|:--|:--|:--|
+| converter test, three new positives (open view, copy into, copy from) and the field-address control | the three red: the old route | green; the control unchanged |
+| `OpenSliceUnnamedArray`, 7 arms under a recover each (the probe) | A and B panic where Go slices; C ends the process (exit 134) | 7 of 7 equal Go |
+| footprint, two seeded `-stdlib` roots per target | | linux/amd64 and arm64 4 files, darwin/amd64 3, windows/amd64 5 files, 6 lines; 0 unresolved markers |
+
+The moved lines: the `nameOff` copy in `reflect/type.cs`, `internal/reflectlite/type.cs` and `runtime/type.cs`
+(every target) is now `CopyInto<byte>(FromPinnedBox(ᏑnameOff), 0, 4, ...)`; `runtime/linux/os_linux.cs` reads
+`startupRand` through `View<byte>(val, 0, 16)`; `runtime/windows/os_windows.cs` reads the environment block
+through `View<uint16>(strings, 0, 16777216)`; and the registry's `value.cs.auto` review sibling takes
+`View<byte>(..., 0, 4)` and `(..., 0, 8)` in `SetDWordValue` and `SetQWordValue`. The sibling was also stale since
+batch 308 in four other sites (the span copy with the `unsafe` modifier); by COORD's 01:46Z note it is taken whole
+to this tip's emission, 8 lines more, in its own commit.
+
+**What the first gate battery found, two reds of this seat, each fixed on the branch.** (1) check-no-regression
+moved one behavioral program, `GoImageCopyThroughView`: its open-form copies through a byte view of a struct that
+holds an array (darwin's `Dirent`) had taken the Go-image view (`copy(@unsafe.GoImage(Ꮡd).slice(), data)`), and
+with D4 the copy door, which is asked before the arguments are converted, took them as `CopyInto` over the box.
+Such a box has no address for a door, so the copy door now declines a slice the Go-image route has marked, through
+that route's own mark (`goImageCopySlices`), and the converter test carries it as CONTROL 10, red without the
+decline. The corpus holds no Go-image site, so the footprint above stands. (2) `TestCommentParityCensus` rose 350
+to 352 on the comment above the `nameOff` copy in reflect and internal/reflectlite: the comment is where Go has it,
+but the census asked the C# line for Go's `copy` and the door spells it `CopyInto`. The census now reads a copy
+door's line as carrying `copy` (as it already reads `new slice<T>` for `make`), with an anchor fixture arm, red
+without the change, and the corpus census is back at 350.
+
+**A candidate, not this seat.** The registry's `value.cs` is hand-owned because of this form: its own header says
+the generated `(*[N]byte)(unsafe.Pointer(&value))[:]` read the value's bytes as a managed array and failed
+`TestValues` with a nil dereference. With door A serving it, the review sibling
+now emits the view, so retiring that hand-own is a candidate for a later seat, measured on its own.
+
+**What this leaves.** The 11-14 row's other shape, `ge` (a named array bound to a local and then indexed as an unnamed
+one), is the kept-local class of door C and stays .5. A nil array pointer made from a number still carries no
+length (the 2026-11-14 row after it). The windows reading of the banked rows the moved lines touch (reflect,
+runtime, internal/reflectlite, internal/abi) is COORD's to place; the local gates and the hosted set are scored in
+the announce of this seat.
+
+### 16.11 Amendment 2026-11-16 (P5): the doors read inline admission for the element (W19)
+
+G found, on 2026-11-16, that door B still stepped aside in the sqlite-cs demo for arrays whose element is a ccgo
+union, so the old copying box remained and G's demo carried a stand-in for those reads (W12b's: 11 reads on
+windows, 18 reads and 1 store on linux). COORD's brief of 02:52Z asked for the size first; its 03:30Z reading
+approved the plan below as written.
+
+**The root.** Each door names its element in `arrayPointerViewOfBase` and requires it to be unmanaged in C#. It
+asked `csManagedField(E, 0)`, the plain reading, where every Go array is golib's `array<T>`, a reference. A ccgo
+union, `struct{ Fi [0]int32; Fu [0]uint32; Ff float32 }`, holds a `[0]T` carrier for each member but the one that
+has storage, so under that reading it is managed and the door declined. The old route,
+`To<array<E>>(p).Value[i]`, reads the whole array as a value and answers length 0 over memory that is no Go array
+of that type, which libc's heap is not. But a struct ADMITTED to inline arrays (inlineArrayAdmission.go) holds a
+`[0]T` as a readonly primitive marked `GoAlignmentCarrier` and a nonzero array as a `go.arrays` member, and
+zeroSizeFieldLayout.go already reads such a struct with `csManagedFieldInline`. The door never asked admission.
+COORD's question, whether a `[0]T` carrier is a managed field for the door's purpose: not once the struct is
+admitted, and yes when it is not (then it really is an `array<T>`). The carrier classification (C2's B2 side) is
+right as it stands; no change there.
+
+**The change.** The element rule asks admission: admitted, `csManagedFieldInline`; otherwise `csManagedField` as
+before. No golib change. The door's own `(*[N]E)(p)` converts the element whole, which is itself an admission
+seed (condition 1 of the admission rule), so a union the doors meet is admitted unless a cap, a face, a foreign
+closure or the pair rule keeps it out. The standard library is never admitted, so no corpus line moves by
+construction.
+
+**The census** (the doors' operand rule over modernc.org/sqlite v1.62.0 and libc v1.80.1; the tool and its output
+are in the kit): elements managed under the plain reading and unmanaged under the inline one. linux/amd64 19 sites:
+TExpr 7 and TRtreeCoord 4 (every array a `[0]T` carrier), Taddress 4 and the sockaddr union
+`struct{ Fsin6 [0]Tsockaddr_in6; Fsin Tsockaddr_in; F__ccgo_pad2 [12]byte }` 4 (a nonzero array among them).
+windows/amd64 11: TExpr 7 and TRtreeCoord 4. That is G's list exactly.
+
+| reading (linux/amd64, Release) | at D4's tip | with the change |
+|:--|:--|:--|
+| converter test: read, store, nested union, nonzero inline array; control a union a cap keeps out | the four red: the box route; the control unchanged | green; the control unchanged |
+| `UnionElementArrayDoor`, 7 arms under a recover each | 6 panic (length 0, and slice bounds [1:0]); arm F, a Go array of the same type, equal | 7 of 7 equal Go |
+| footprint, two seeded `-stdlib` roots per target | | 0 corpus files on linux/amd64, windows/amd64, darwin/amd64 and linux/arm64; 0 unresolved markers |
+
+**The control, and a premise that did not hold.** The plan's control was "the same union never converted whole,
+so not admitted". The first run showed that premise false: the door's `(*[N]E)(p)` is the whole conversion, so
+that union was admitted and took the door. The control is now a union the 4096-element cap keeps out (GO2CS2009),
+whose `[0]T` stays an `array<T>`: it keeps the box route at both converters, which is the reading the not-admitted
+arm of the rule must give.
+
+**What this leaves.** Whether each of G's 19 types is admitted in its own package is read where it is converted:
+G's sqlite-cs demo with no W12b stand-in, both demos, windows and linux, is the proof. A type a face or the pair
+rule keeps out would keep the box route and name itself in that package's GO2CS2009 warnings.
 
 ## 17. Amendment 2026-11-15 (P5): the publish of a named array's holder is a compare-and-swap (option 2)
 

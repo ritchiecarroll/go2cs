@@ -8,6 +8,7 @@ using aes = go.crypto.@internal.fips140.aes_package;
 using subtle = go.crypto.@internal.fips140.subtle_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static gcm_package;
 
 partial class gcm_package {
 
@@ -18,8 +19,8 @@ partial class gcm_package {
 // as a stand-alone MAC.
 partial struct CMAC {
     internal aes.Block b;
-    internal array<byte> k1 = new(aes.ΔBlockSize);
-    internal array<byte> k2 = new(aes.ΔBlockSize);
+    internal array<byte> k1 = new(aes.BlockSize);
+    internal array<byte> k2 = new(aes.BlockSize);
 }
 
 public static ж<CMAC> NewCMAC(ж<aes.Block> Ꮡb) {
@@ -30,6 +31,8 @@ public static ж<CMAC> NewCMAC(ж<aes.Block> Ꮡb) {
     return c;
 }
 
+} partial class gcmᴛCMAC {
+
 internal static void deriveSubkeys(this ж<CMAC> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -37,7 +40,7 @@ internal static void deriveSubkeys(this ж<CMAC> Ꮡc) {
     var msb = shiftLeft(Ꮡc.Ꮡk1);
     c.k1[len(c.k1) - 1] ^= (byte)(msb * 0b10000111);
 
-    c.k2 = c.k1.Clone();
+    c.k2.Assign(c.k1);
     msb = shiftLeft(Ꮡc.Ꮡk2);
     c.k2[len(c.k2) - 1] ^= (byte)(msb * 0b10000111);
 }
@@ -47,22 +50,22 @@ public static array<byte> MAC(this ж<CMAC> Ꮡc, slice<byte> m) {
 
     fips140.RecordApproved();
     _ = c.b; // Hoist the nil check out of the loop.
-    array<byte> x = new(16); /* aes.ΔBlockSize */
+    array<byte> x = new(16); /* aes.BlockSize */
     if (len(m) == 0) {
         // Special-cased as a single empty partial final block.
-        x = c.k2.Clone();
+        x.Assign(c.k2);
         x[len(m)] ^= (byte)(0b10000000);
         aes.EncryptBlockInternal(Ꮡc.Ꮡb, x[..], x[..]);
         return x.Clone();
     }
-    while (len(m) >= aes.ΔBlockSize) {
-        subtle.XORBytes(x[..], m[..(int)(aes.ΔBlockSize)], x[..]);
-        if (len(m) == aes.ΔBlockSize) {
+    while (len(m) >= aes.BlockSize) {
+        subtle.XORBytes(x[..], m[..(int)(aes.BlockSize)], x[..]);
+        if (len(m) == aes.BlockSize) {
             // Final complete block.
             subtle.XORBytes(x[..], c.k1[..], x[..]);
         }
         aes.EncryptBlockInternal(Ꮡc.Ꮡb, x[..], x[..]);
-        m = m[(int)(aes.ΔBlockSize)..];
+        m = m[(int)(aes.BlockSize)..];
     }
     if (len(m) > 0) {
         // Final incomplete block.
@@ -73,6 +76,8 @@ public static array<byte> MAC(this ж<CMAC> Ꮡc, slice<byte> m) {
     }
     return x.Clone();
 }
+
+} partial class gcm_package {
 
 // shiftLeft sets x to x << 1, and returns MSB₁(x).
 internal static byte shiftLeft(/*[16]*/ ж<array<byte>> Ꮡx) {

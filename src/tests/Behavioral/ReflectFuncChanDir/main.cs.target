@@ -4,19 +4,28 @@ using context = context_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using time = time_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct R {
 }
 
+} partial class mainᴛR {
+
 public static bool Equal(this R _, /*<-*/channel<bool> y) { return true; }
+
+} partial class main_package {
 
 partial struct S {
     internal nint n;
 }
 
+} partial class mainᴛS {
+
 public static void Feed(this ref S s, channel/*<-*/<nint> c) { s.n++; }
+
+} partial class main_package {
 
 partial interface Notifier {
     /*<-*/channel<EmptyStruct> Done();
@@ -24,7 +33,11 @@ partial interface Notifier {
 
 partial struct AssignD /*<-chan bool*/;
 
+} partial class mainᴛAssignD {
+
 public static bool Equal(this AssignD x, /*<-*/channel<bool> y) { return true; }
+
+} partial class main_package {
 
 internal static void recvLocal(/*<-*/channel<nint> c) { }
 internal static void bidiLocal(channel<nint> c) { }
@@ -62,7 +75,7 @@ internal static void main() {
     fmt.Println("named recv to param:", reflect.TypeOf((AssignD)default).AssignableTo(ad.Type.In(1)));
 
     Func</*<-*/channel<nint>> h = default;
-    h = reflect.MakeFunc(reflect.TypeOf((h).OrTypedNilFunc()), (slice<reflectꓸValue> _Δp0) => slice<reflectꓸValue>([reflect.ValueOf(new channel<nint>(0))])).Interface()._<Func</*<-*/channel<nint>>>();
+    h = reflect.MakeFunc(reflect.TypeOf((h).OrTypedNilFunc()), (slice<reflect.Value> _Δp0) => slice<reflect.Value>([reflect.ValueOf(new channel<nint>(0))])).Interface()._<Func</*<-*/channel<nint>>>();
     fmt.Println("makefunc:", h() != nil);
     _ = (Action<channel/*<-*/</*<-*/channel<nint>>>)(nestedDir);
 }

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,6 +10,8 @@ partial struct digest {
     internal array<byte> x = new(2);
     internal nint nx;
 }
+
+} partial class mainᴛdigest {
 
 internal static void bump(this ref digest d) {
     foreach (var i in range(len(d.h))) {
@@ -23,6 +26,8 @@ internal static @string show(this digest d) {
 
     return fmt.Sprintf("%v %v %d"u8, d.h, d.x, d.nx);
 }
+
+} partial class main_package {
 
 partial struct nest {
     internal digest d;

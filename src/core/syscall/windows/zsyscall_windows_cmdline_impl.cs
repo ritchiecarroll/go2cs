@@ -79,7 +79,7 @@ partial class syscall_package
             }
         }
 
-        return (ж<uint16>)(uintptr)((@unsafe.Pointer)(uintptr)(nuint)line);
+        return @unsafe.Pointer.To<uint16>((@unsafe.Pointer)(uintptr)(nuint)line);
     }
 
     private static nint snapshotCommandLine()

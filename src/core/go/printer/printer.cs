@@ -19,6 +19,7 @@ using global::go.go;
 using global::go.go.build;
 using text;
 using ꓸꓸꓸany = Span<any>;
+using static printer_package;
 
 partial class printer_package {
 
@@ -71,9 +72,9 @@ partial struct printer {
     // white space). If there's a difference and SourcePos is set in
     // ConfigMode, //line directives are used in the output to restore
     // original source positions for a reader.
-    internal tokenꓸPosition pos;  // current position in AST (source) space
-    internal tokenꓸPosition @out; // current position in output space
-    internal tokenꓸPosition last; // value of pos after calling writeString
+    internal token.Position pos;  // current position in AST (source) space
+    internal token.Position @out; // current position in output space
+    internal token.Position last; // value of pos after calling writeString
     internal ж<nint> linePtr;     // if set, record out.Line for the next token in *linePtr
     internal error sourcePosErr;  // if non-nil, the first error emitting a //line directive
     // The list of all source comments, in order of appearance.
@@ -84,9 +85,11 @@ partial struct printer {
     // Cache of already computed node sizes.
     internal map<ast.Node, nint> nodeSizes;
     // Cache of most recently computed line position.
-    internal tokenꓸPos cachedPos;
+    internal token.Pos cachedPos;
     internal nint cachedLine; // line corresponding to cachedPos
 }
+
+} partial class printerᴛprinter {
 
 internal static void internalError(this ref printer p, params ꓸꓸꓸany msgʗp) {
     var msg = msgʗp.sslice();
@@ -137,13 +140,13 @@ internal static void nextComment(this ref printer p) {
 // commentBefore reports whether the current comment group occurs
 // before the next position in the source code and printing it does
 // not introduce implicit semicolons.
-internal static bool commentBefore(this ref printer p, tokenꓸPosition next) {
+internal static bool commentBefore(this ref printer p, token.Position next) {
     return p.commentOffset < next.Offset && (!p.impliedSemi || !p.commentNewline);
 }
 
 // commentSizeBefore returns the estimated size of the
 // comments on the same line before the next position.
-internal static nint commentSizeBefore(this ж<printer> Ꮡp, tokenꓸPosition next) {
+internal static nint commentSizeBefore(this ж<printer> Ꮡp, token.Position next) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -184,12 +187,12 @@ internal static nint linesFrom(this ref printer p, nint line) {
     return p.@out.Line - line;
 }
 
-internal static tokenꓸPosition posFor(this ref printer p, tokenꓸPos pos) {
+internal static token.Position posFor(this ref printer p, token.Pos pos) {
     // not used frequently enough to cache entire token.Position
     return p.fset.PositionFor(pos, false /* absolute position */);
 }
 
-internal static nint lineFor(this ref printer p, tokenꓸPos pos) {
+internal static nint lineFor(this ref printer p, token.Pos pos) {
     if (pos != p.cachedPos) {
         p.cachedPos = pos;
         p.cachedLine = p.fset.PositionFor(pos, false /* absolute position */).Line;
@@ -198,7 +201,7 @@ internal static nint lineFor(this ref printer p, tokenꓸPos pos) {
 }
 
 // writeLineDirective writes a //line directive if necessary.
-internal static void writeLineDirective(this ref printer p, tokenꓸPosition pos) {
+internal static void writeLineDirective(this ref printer p, token.Position pos) {
     if (pos.IsValid() && (p.@out.Line != pos.Line || p.@out.Filename != pos.Filename)) {
         if (strings.ContainsAny(pos.Filename, "\r\n")) {
             if (p.sourcePosErr == nil) {
@@ -283,7 +286,7 @@ internal static void writeByte(this ref printer p, byte ch, nint n) {
 // needed (i.e., when we don't know that s contains no tabs or line breaks)
 // avoids processing extra escape characters and reduces run time of the
 // printer benchmark by up to 10%.
-internal static void writeString(this ref printer p, tokenꓸPosition pos, @string s, bool isLit) {
+internal static void writeString(this ref printer p, token.Position pos, @string s, bool isLit) {
     if (p.@out.Column == 1) {
         if ((Mode)(p.Config.Mode & SourcePos) != 0) {
             p.writeLineDirective(pos);
@@ -352,7 +355,7 @@ internal static void writeString(this ref printer p, tokenꓸPosition pos, @stri
 // pos is the comment position, next the position of the item
 // after all pending comments, prev is the previous comment in
 // a group of comments (or nil), and tok is the next token.
-internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos, tokenꓸPosition next, ж<ast.Comment> Ꮡprev, token.Token tok) {
+internal static void writeCommentPrefix(this ref printer p, token.Position pos, token.Position next, ж<ast.Comment> Ꮡprev, token.Token tok) {
     ref var prev = ref Ꮡprev.DerefOrNull();
 
     if (len(p.output) == 0) {
@@ -487,6 +490,8 @@ internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos
         }
     }
 }
+
+} partial class printer_package {
 
 // Returns true if s contains only white space
 // (only tabs and blanks can appear in the printer's context).
@@ -644,6 +649,8 @@ internal static void stripCommonPrefix(slice<@string> lines) {
     }
 }
 
+} partial class printerᴛprinter {
+
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string linePrefixᶜ => ref linePrefixᶜᵇ;
 private static readonly @string linePrefixᶜᵇ = "//line "u8;
@@ -777,7 +784,7 @@ internal static readonly object intersperseCommentsˢ = (@string)"intersperseCom
 // that needs to be written before the next token). A heuristic is used to mix
 // the comments and whitespace. The intersperseComments result indicates if a
 // newline was written or if a formfeed was dropped from the whitespace buffer.
-internal static (bool wroteNewline, bool droppedFF) intersperseComments(this ж<printer> Ꮡp, tokenꓸPosition next, token.Token tok) {
+internal static (bool wroteNewline, bool droppedFF) intersperseComments(this ж<printer> Ꮡp, token.Position next, token.Token tok) {
     bool wroteNewline = default;
     bool droppedFF = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -905,6 +912,8 @@ internal static void writeWhitespace(this ref printer p, nint n) {
     p.wsbuf = p.wsbuf.slice(0, l);
 }
 
+} partial class printer_package {
+
 // ----------------------------------------------------------------------------
 // Printing interface
 
@@ -944,7 +953,9 @@ internal static bool /*b*/ mayCombine(token.Token prev, byte next) {
     return b;
 }
 
-internal static void setPos(this ref printer p, tokenꓸPos pos) {
+} partial class printerᴛprinter {
+
+internal static void setPos(this ref printer p, token.Pos pos) {
     if (pos.IsValid()) {
         p.pos = p.posFor(pos); // accurate position of next item
     }
@@ -1115,7 +1126,7 @@ internal static void print(this ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
 // before the position of the next token tok. The flush result indicates
 // if a newline was written or if a formfeed was dropped from the whitespace
 // buffer.
-internal static (bool wroteNewline, bool droppedFF) flush(this ж<printer> Ꮡp, tokenꓸPosition next, token.Token tok) {
+internal static (bool wroteNewline, bool droppedFF) flush(this ж<printer> Ꮡp, token.Position next, token.Token tok) {
     bool wroteNewline = default;
     bool droppedFF = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -1129,6 +1140,8 @@ internal static (bool wroteNewline, bool droppedFF) flush(this ж<printer> Ꮡp,
     }
     return (wroteNewline, droppedFF);
 }
+
+} partial class printer_package {
 
 // getDoc returns the ast.CommentGroup associated with n, if any.
 internal static ж<ast.CommentGroup> getDoc(ast.Node n) {
@@ -1186,6 +1199,8 @@ internal static ж<ast.CommentGroup> getLastComment(ast.Node n) {
     return default;
 }
 
+} partial class printerᴛprinter {
+
 internal static error printNode(this ж<printer> Ꮡp, any node) {
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -1202,8 +1217,8 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
         if (!ok) {
             goto unsupported;
         }
-        tokenꓸPos beg = n.Pos();
-        tokenꓸPos end = n.End();
+        token.Pos beg = n.Pos();
+        token.Pos end = n.End();
         // if the node has associated documentation,
         // include that commentgroup in the range
         // (the comment list is sorted in the order
@@ -1212,7 +1227,7 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
             beg = doc.Pos();
         }
         var com = getLastComment(n); if (com != nil) {
-            tokenꓸPos e = com.End(); if (e > end) {
+            token.Pos e = com.End(); if (e > end) {
                 end = e;
             }
         }
@@ -1296,6 +1311,8 @@ unsupported:
     return fmt.Errorf("go/printer: unsupported node type %T"u8, node);
 }
 
+} partial class printer_package {
+
 // ----------------------------------------------------------------------------
 // Trimmer
 
@@ -1316,10 +1333,14 @@ internal static UntypedInt inSpace => iota; // inside space
 internal static UntypedInt inEscape => 1;   // inside text bracketed by tabwriter.Escapes
 internal static UntypedInt inText => 2;     // inside text
 
+} partial class printerᴛtrimmer {
+
 internal static void resetSpace(this ref trimmer p) {
     p.state = inSpace;
     p.space = p.space[0..0];
 }
+
+} partial class printer_package {
 
 // Design note: It is tempting to eliminate extra blanks occurring in
 //              whitespace in this function as it could simplify some
@@ -1327,6 +1348,8 @@ internal static void resetSpace(this ref trimmer p) {
 //              However, this would mess up any formatting done by
 //              the tabwriter.
 internal static slice<byte> aNewline = slice<byte>("\n"u8);
+
+} partial class printerᴛtrimmer {
 
 internal static (nint n, error err) Write(this ref trimmer p, slice<byte> data) {
     nint nΔ1 = default;
@@ -1423,6 +1446,8 @@ internal static (nint n, error err) Write(this ref trimmer p, slice<byte> data) 
     return (nΔ1, err);
 }
 
+} partial class printer_package {
+
 // ----------------------------------------------------------------------------
 // Public interface
 
@@ -1471,8 +1496,8 @@ internal static ж<printer> newPrinter(ref Config cfg, ж<token.FileSet> fset, m
     p.Value = new printer(
         Config: cfg,
         fset: fset,
-        pos: new tokenꓸPosition(Line: 1, Column: 1),
-        @out: new tokenꓸPosition(Line: 1, Column: 1),
+        pos: new token.Position(Line: 1, Column: 1),
+        @out: new token.Position(Line: 1, Column: 1),
         wsbuf: p.wsbuf[..0],
         nodeSizes: nodeSizes,
         cachedPos: -1,
@@ -1480,6 +1505,8 @@ internal static ж<printer> newPrinter(ref Config cfg, ж<token.FileSet> fset, m
     );
     return p;
 }
+
+} partial class printerᴛprinter {
 
 internal static void free(this ж<printer> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -1491,6 +1518,8 @@ internal static void free(this ж<printer> Ꮡp) {
 
     ᏑprinterPool.Put(Ꮡp.OrTypedNil());
 }
+
+} partial class printerᴛConfig {
 
 // fprint implements Fprint and takes a nodesSizes map for setting up the printer state.
 internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> fset, any node, map<ast.Node, nint> nodeSizes) {
@@ -1508,7 +1537,7 @@ internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, �
         }
         // print outstanding comments
         p.impliedSemi = false; // EOF acts like a newline
-        p.flush(new tokenꓸPosition(Offset: infinity, Line: infinity), token.EOF);
+        p.flush(new token.Position(Offset: infinity, Line: infinity), token.EOF);
 
         // output is buffered in p.output now.
         // fix //go:build and // +build comments if needed.
@@ -1553,12 +1582,16 @@ internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, �
     ᒐdone: return err;
 }
 
+} partial class printer_package {
+
 // A CommentedNode bundles an AST node and corresponding comments.
 // It may be provided as argument to any of the [Fprint] functions.
 partial struct CommentedNode {
     public any Node; // *ast.File, or ast.Expr, ast.Decl, ast.Spec, or ast.Stmt
     public slice<ж<ast.CommentGroup>> Comments;
 }
+
+} partial class printerᴛConfig {
 
 // Fprint "pretty-prints" an AST node to output for a given configuration cfg.
 // Position information is interpreted relative to the file set fset.
@@ -1567,6 +1600,8 @@ partial struct CommentedNode {
 public static error Fprint(this ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> fset, any node) {
     return Ꮡcfg.fprint(output, fset, node, new map<ast.Node, nint>());
 }
+
+} partial class printer_package {
 
 // Fprint "pretty-prints" an AST node to output.
 // It calls [Config.Fprint] with default settings.

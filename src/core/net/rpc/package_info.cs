@@ -10,10 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -31,7 +27,6 @@ using static go.net.rpc_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Call", "ΔCall")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -41,10 +36,10 @@ using static go.net.rpc_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<Server, go.net.http_package.ΔHandler>(Pointer = true)]
+[assembly: GoImplement<Server, go.net.http_package.Handler>(Pointer = true)]
 [assembly: GoImplement<ServerError, error>]
 [assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
-[assembly: GoImplement<debugHTTP, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<debugHTTP, go.net.http_package.Handler>]
 [assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
 [assembly: GoImplement<gobClientCodec, ClientCodec>(Pointer = true)]
 [assembly: GoImplement<gobServerCodec, ServerCodec>(Pointer = true)]
@@ -60,6 +55,7 @@ using static go.net.rpc_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Call))]
 [assembly: GoFieldAccess(typeof(Client))]
 [assembly: GoFieldAccess(typeof(Request))]
 [assembly: GoFieldAccess(typeof(Response))]
@@ -67,7 +63,6 @@ using static go.net.rpc_package;
 [assembly: GoFieldAccess(typeof(go.net.http_package.Response))]
 [assembly: GoFieldAccess(typeof(methodType))]
 [assembly: GoFieldAccess(typeof(service))]
-[assembly: GoFieldAccess(typeof(ΔCall))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -77,9 +72,9 @@ using static go.net.rpc_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/rpc/client.go", "client.cs", "ABYsgqYAKlrigqaCgoKCgpSCgoKmgoKCgoKCgoKCgsbUooKCgoKCgpSCgoKClO6CgvyCgoKUtIKClMiCgoKCgoKUpoKClIKCguiiAAgMggAFHAAJAoKCqqK4kgAJFKKClIKUpoKmgqaCqqKqooKClLiCgpSClIIABxKSgoKUqsKCgoKUgoLewoKCgoKC3IKmgoKokoI=")]
-[assembly: GoPositionMap("net/rpc/debug.go", "debug.cs", "ACtQABQogoKUgoIACA6UkoKCgoKUhoKUhoKC", "76-87:1;82-84:1.1;88-90:2")]
-[assembly: GoPositionMap("net/rpc/server.go", "server.cs", "AJoBsAIALFySuJaSgrgAAhwACwKqou6CgoKCgoKUgoKClIKCgpSmlIKmgoKUlIKmgpSqooKCgoKUgqaCgpSmgoKClKaCgoKUpoKClKaCgpSmgoKUlJTcxKKUgoKClIKCgoKUgqaygoKCptKClIKCgpSUgoKClIKiAAoUgqaC5qKCpoKUlIKmgpSUpoKUlIIAAhLigtzaooKCgqKCgpSCpoKClJSCyIKqooKCgoKmgoKUlIKmooKCgpSClIKmsoKCgqaigoKClIKUgqaygoKCpgAIAoKCgqaCuIKClIKmgpSCppSUtKSm9IKCgoKClILKlIKCgpSCpoKCgpSCgoKU3sKCgoKClLqAmKIAFDTiqqKqoqygAA0MsoKCgoKUgoKClIKssoKssg==", "", "", "474=NewDecoder/1/1/2,NewEncoder/1/1/3")]
+[assembly: GoPositionMap("net/rpc/client.go", "client.cs", "ABksgsYALFrigqaCgoKCgpSCgoKmgoKCgoKCgoKCgsbUooKCgoKCgpSCgoKClO6CgvyCgoKUtIKClMiCgoKCgoKUpoKClIKCggAICKIACAyCAAccAAkCgoKqoriSAAsUooKUgpSmgqaCpoLKoqqigoKUuIKClIKUggAHEpKCgpTKwoKCgpSCgt7CgoKCgoLcgqaCgqiSgg==")]
+[assembly: GoPositionMap("net/rpc/debug.go", "debug.cs", "ACxQABYogoK0goIADA6UkoKCgoKUhoKUhoKC", "76-87:1;82-84:1.1;88-90:2")]
+[assembly: GoPositionMap("net/rpc/server.go", "server.cs", "AJsBsAIALFySuJaSgrgABBwACwKqogAKDoKCgoKCgpSCgoKUgoKClKaUgqaCgpSUgqaClMqigoKCgpSCpoKClKaCgoKUpoKCgpSmgoKUpoKClKaCgpSUlNzkopSCgoKUgoKCgpSCxrKCgoLG0oKUgoKClJSCgoKUgqIADhSCpoLmooKmgpSUgqaClJSmgpSUggAEEuKC3NqigoKCooKClIKmgoKUlILIgqqigoKCgqaCgpSUgqaigoKClIKUgqaygoKCpqKCgoKUgpSCprKCgoKmAAgCgoKCpoK4goKUgqaClIKmlJS0pKb0goKCgoKUgsqUgoKClIKmgoKClIKCgpTewoKCgoKU2oCYogAUNOKqoqqirKAADwyygoKCgpSCgoKUgqyygsyy", "", "", "495=NewDecoder/1/1/2,NewEncoder/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -102,6 +97,7 @@ public static partial class rpc_package
     internal partial struct serviceArray {}
     public partial interface ClientCodec {}
     public partial interface ServerCodec {}
+    public partial struct Call {}
     public partial struct Client {}
     public partial struct Request {}
     public partial struct Response {}
@@ -110,7 +106,6 @@ public static partial class rpc_package
     public partial struct debugMethod {}
     public partial struct methodType {}
     public partial struct service {}
-    public partial struct ΔCall {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -136,3 +131,23 @@ public static partial class rpc_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(rpc_package.Call)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛCall;
+[GoMethodHost(typeof(rpc_package.Client)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛClient;
+[GoMethodHost(typeof(rpc_package.Server)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛServer;
+[GoMethodHost(typeof(rpc_package.ServerError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛServerError;
+[GoMethodHost(typeof(rpc_package.debugHTTP)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛdebugHTTP;
+[GoMethodHost(typeof(rpc_package.gobClientCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛgobClientCodec;
+[GoMethodHost(typeof(rpc_package.gobServerCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛgobServerCodec;
+[GoMethodHost(typeof(rpc_package.methodArray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛmethodArray;
+[GoMethodHost(typeof(rpc_package.methodType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛmethodType;
+[GoMethodHost(typeof(rpc_package.service)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛservice;
+[GoMethodHost(typeof(rpc_package.serviceArray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛserviceArray;
+// </MethodHolders>

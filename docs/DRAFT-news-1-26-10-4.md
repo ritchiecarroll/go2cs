@@ -267,10 +267,14 @@ through it works as Go's `*p` does: `*p` read as a value is a copy, `*p = v` sto
 slice of the field, and a `range` over `p` reads each element when its round comes, while a `range` over `*p`
 ranges a copy.
 
-A limit: the view of a field of a struct that holds a string, a slice, a map, an interface or a pointer panics by
-name. Every such site found in the TypeScript compiler and in the nine nugetgo modules is in `golang.org/x/sys`
-(`unix` on linux and macOS, `windows` on Windows). A tuple assignment that stores the whole array through two
-such views at once is also refused by name. See
+The view also works over a struct that holds a string, a slice, a map, an interface or a pointer, which is where
+`golang.org/x/sys` reads a socket address (`unix` on linux and macOS, `windows` on Windows), and through a chain of
+field selections from a variable (`&sa.raw.port`). Over such a struct the index, the whole-array load and store,
+`len` and a `range` that takes only the index work; a slice of the view, the address of one of its elements and a
+`range` by value are refused by name, and so is a tuple assignment that stores the whole array through two views at
+once. One related form can end the process: a slice taken where it is written, `(*[N]E)(unsafe.Pointer(&x.f))[:]`,
+over a promoted field, a slice element's field or a call's result
+([Limitations](Limitations.md)). See
 [Pointers](ConversionStrategies-Reference/pointers.md#the-bytes-of-one-field-through-ntunsafepointerpf-the-field-view).
 <!-- F1 parts A and B: merge 0d1f6f1f3f (P5, claude/p5-field-view-index d073be7130), BOARD 2026-11-15 "the field view
      answers over a Go struct, and is indexed in place where it is written" (the before-probe at 516586c4a9,
@@ -281,7 +285,14 @@ such views at once is also refused by name. See
      holds a reference is refused by name" and its census amendment (TypeScript closure: 17/17/4/7 sites on
      linux/amd64, linux/arm64, darwin/amd64, windows/amd64; nugetgo modules 17/17/4/0; all x/sys). The tuple store:
      BOARD 2026-11-15 "a tuple assignment that stores the whole array through two field views is refused by name"
-     (proposed .5). REVISIT AT 310: P5's box-kind seat (a1a1d8534b) answers the reference-holding sites. -->
+     (proposed .5). The reference-holding struct and the chain: batch 310 merge e207d6f5b6 (P5, claude/p5-reinterpret-array-box
+     a1a1d8534b), BOARD 2026-11-15 "a field view over a struct that holds a reference reads and writes the field's own
+     bytes" (DONE; footprint lsf_linux.cs 3 lines on linux x2) and its row "a range by value, a slice and an element's
+     address ... are refused by name" (proposed .5). The process-ending open slice: BOARD 2026-11-15 "the open slice of
+     a pointer conversion over an array field of another element type ends the process" (.5), disclosed in
+     docs/Limitations.md for this release. 2026-11-16 (P4): the earlier text's limit ("the view of a field of a struct
+     that holds a string ... panics by name") was rewritten after 310 landed; if P5's D4 (311) cures the open slice in
+     this release, drop that sentence. -->
 
 ### A write at the address of a named array is no longer lost (P5)
 
@@ -311,8 +322,8 @@ See [Pointers](ConversionStrategies-Reference/pointers.md).
      0c1d295ea8), the lost write (882e3da582, 85b1c4181b), five sqlite-cs shapes (6992717d09, c09d5e04da,
      39b40c8c3a, b62c67b6d8, 4c101b8e57), the inline-array slice limit (6b78cef1a1) and the validated-modules page
      (65be87fd89, 64a5cc7e24). Already carried by their own seats' edits: door A (2d7ac32ffb), the pin-extent fixes
-     (dbd872acad), cgo 3.1 and the cgo truth pass (d658f700cb, 3b202a6c56). HELD for P1: 055f4e6230 and d39b1ffe00
-     (the Tuning section's note). LEFT OUT, each a fix to a feature new in this release, so no released build had
+     (dbd872acad), cgo 3.1 and the cgo truth pass (d658f700cb, 3b202a6c56). Written after P1's AOT reading (2026-11-16): 055f4e6230 and d39b1ffe00, in the
+     Tuning section. LEFT OUT, each a fix to a feature new in this release, so no released build had
      the defect: the inline-array fixes 6b78cef1a1 (the foreign slice itself), b1c73ce844, d7f5a59f79, a6f526f31e
      and 63c2a339c7; the unsafe.Add box chain 18b36cb712, which came with batch 305's derived pointers. LEFT OUT as
      internal (CI, tests, records, design docs): 6f5def3cca (two darwin roster rows; the roster carries them),
@@ -991,14 +1002,35 @@ Converted projects keep .NET's default, workstation GC. See [.NET runtime settin
      converted-project default". "Since 1.26.10.2": Tuning.md at nuget-1.26.10.3 attributed most of the 1.26.10.1 ->
      1.26.10.2 JIT speed-up to the delay of 0. -->
 
-<!-- 2026-11-16 (P4): HELD for P1's AOT reading (COORD: "the AOT items still wait for P1"). Two user-visible Native AOT
-     changes from batch 308 have no line yet, and get one when P1's reading lands:
-     (1) merge 055f4e6230 (i9, lever G): golib's ж<T> no longer names ElemRefBox<T> in its view lookup, which ends a
-     generic cycle; Native AOT IL3054 654 -> 0 on a golib-only consumer, image 19.7 -> 11.2 MB, PerfStartup -44%,
-     parsedemo -34%, ILC peak -34..-41%; +2.7% PerfFieldView under the JIT.
-     (2) merge d39b1ffe00 (P4): Tuning.md's "Native AOT method-body folding" (anchor native-aot-method-body-folding):
-     IlcFoldIdenticalMethodBodies=false makes the AOT compiler 4.5x faster on PerfStartup and parsedemo 32m20s ->
-     7m06s, for an image 11-15% larger; go2cs keeps the SDK default (the owner's ruling). -->
+**A Native AOT publish is smaller and lighter to build, and the README walkthrough's program now publishes.**
+golib's pointer box named a type that named the pointer box again, one level deeper each time, and Native AOT
+expanded that cycle until it reached its nesting limit, compiling every method past the limit as one that always
+throws. The cycle is gone. A program that uses only golib went from 654 such cut-offs to none and from a 19.7 MB
+executable to 11.2 MB. A larger benchmark program's executable shrank by about a quarter, and the AOT compiler's
+peak memory by a third or more (measured on `win-x64`). With the 1.26.10.3 packages the README walkthrough's
+program, which uses github.com/fatih/color, did not publish with Native AOT on `linux-x64`: the compiler stopped at
+the native string table's 2 GiB ceiling. Now it publishes, and its string table is 250 MiB. To publish a program
+that `go2cs -recurse` converted, put `<PublishAot>true</PublishAot>` in the program's own project file and name
+that project to `dotnet publish`; [Tuning](Tuning.md#choosing-a-deployment) says why the command-line property
+does not work there yet. A program under the JIT runs as before, with one benchmark 2.7% slower.
+
+**Tuning has a new section on Native AOT build time.** One pass of the AOT compiler, which folds identical method
+bodies, takes most of its time on go2cs programs. Turning it off with `IlcFoldIdenticalMethodBodies=false` built
+one benchmark program 4.5 times faster and a large program in 7 minutes instead of 32, for an executable 11% to 15%
+larger. go2cs keeps the .NET default. See
+[Native AOT method-body folding](Tuning.md#native-aot-method-body-folding).
+<!-- Lever G: merge 055f4e6230 (i9, claude/i9-golib-elemview-cycle c08c2bba8c): golib's ж<T> no longer names
+     ElemRefBox<T> in its view lookup (an internal virtual the element box overrides); the cycle had returned with
+     4ad8e8df66 (2026-10-21), so 1.26.10.3 carries it. docs/phase4/DATA-ts-aot-b4.md section 15 (win-x64): the
+     golib-only consumer 654 IL3054 lines -> 0, image 19,697,664 -> 11,214,848 B; PerfStartup image 120.5 -> 87.6 MB
+     (-27.3%), ILC peak private 6.54 -> 3.84 GB (-41.3%); parsedemo image -26.2%, ILC peak -33.8%. JIT cost: +2.7%
+     PerfFieldView (the merge message). The walkthrough program: P1's AOT rows 1-3, 2026-11-16, linux-x64 (mailbox
+     20261116T041238Z-P1.md): at master colordemo publishes with the property in its csproj, .strtab 262,013,197
+     bytes, 0 'will always throw'; at 1.26.10.3 ILC fails at StringTableBuilder.CreateIndex with 6,188 such lines,
+     on both routes. P3's runs A and B, 2026-11-15, read the same failure. The command-line property: P1's seat
+     E1+E2 (proposed for batch 311) makes it work; reword the sentence if that seat lands in this release.
+     Folding: merge d39b1ffe00 (P4); Tuning.md's table (win-x64: PerfStartup 6 min 29 s -> 1 min 27 s, parsedemo
+     32 min 20 s -> 7 min 6 s; executables +15% and +11%); the owner's ruling keeps the SDK default. -->
 
 ### Documentation (COORD)
 
@@ -1033,8 +1065,8 @@ beside the standard-library roster.
      1.26.11.1, built from Go 1.26.11 (2026-11-12, the 1.26.11 patch hop). -->
 
 **NuGet 1.26.11.1.** PENDING. The fourth release on the Go 1.26 line, and the first built from Go 1.26.11, a Go patch
-release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a promoted
-method through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
+release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a method
+through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
 
 **Upgrading from 1.26.10.3.**
 
@@ -1050,9 +1082,10 @@ method through `using static` alone; they are first under *Upgrading from 1.26.1
   1.26.11.1 revision.
   <!-- source: the promoted-forwarder seat (docs/phase4/DESIGN-promoted-forwarder-placement.md; owner ruling
        2026-11-10: "better breaking changes now than before we're deep with users"). The moved members are announced
-       to the binary-compatibility guard as generated CP0002 entries, 900 entries in 20 suppression files
-       (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1), and <GoBreakFloor> is 1.26.11.1. The nugetgo
-       rebuild wave ships with this release (the owner's hands). -->
+       to the binary-compatibility guard as generated CP0002 entries
+       (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1; 900 entries in 20 files when this seat landed,
+       generated since together with the method-holder moves and the U+0394 renames below), and <GoBreakFloor> is
+       1.26.11.1. The nugetgo rebuild wave ships with this release (the owner's hands). -->
 - **Standard-library assemblies are named after their packages.** PENDING. Package `go.fmt` now ships `go.fmt.dll`,
   not `fmt.dll`, and likewise every converted standard-library assembly (`go.net.dll`, `go.crypto.tls.dll`,
   `go.go.ast.dll` for package `go.go.ast`, `go.testing.dll`). The package IDs do not change, nor do `golib.dll`
@@ -1064,13 +1097,52 @@ method through `using static` alone; they are first under *Upgrading from 1.26.1
   <!-- source: OQ4, docs/PLAN-public-surface-stability.md (ruled), the design docs/phase4/DESIGN-assembly-identity.md;
        src/go2cs/assemblyIdentity.go. The binary-compatibility guard compares each renamed assembly with its 1.26.10.3
        baseline through a rename map keyed to this release (src/tools/pushnuget/GoApiCompat.psm1). -->
-- **`using static` alone no longer brings promoted methods.** PENDING. C# that calls into a converted package with
-  only `using static go.bufio_package;` still sees the package's types, functions and the methods its types declare.
-  A method a struct promotes from an embedded struct of the same package now needs the namespace as well:
-  add `using go;` (or `using go.<path>;` for a package below the root). Converted code already has it.
-  [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
+- **`using static` alone no longer brings methods.** PENDING. C# that calls into a converted package with only
+  `using static go.bufio_package;` still sees the package's types, functions, constants and variables, but no method:
+  neither the methods its types declare nor a method a struct promotes from an embedded struct of the same package.
+  Add the namespace as well: `using go;` (or `using go.<path>;` for a package below the root). Converted code already
+  has it. [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
   <!-- source: the same seat; GenTests PromotedHostClassTests.UsingStaticAloneBringsDeclaredMethodsAndNoPromotedOne
        (CS1929 without the namespace) and TheNamespaceBringsThePromotedMethods. -->
+- **Every Go method is in its receiver type's method holder.** PENDING. Through 1.26.10.3 the methods a package
+  declares were members of the package class (`time_package`); from 1.26.11.1 the methods of each type are in a class
+  of their own beside the package class, in the same namespace (`timeᴛTime` holds `time.Time`'s methods). A method is
+  still an extension method on its receiver, so `t.Add(d)` reads as before once the namespace is imported (`using go;`,
+  or `using go.<path>;` for a package below the root); `using static go.time_package;` alone no longer brings any
+  method. A call written in static form through the package class, `time_package.Add(t, d)`, is now
+  `t.Add(d)`. In the standard library more than eight thousand public methods moved, counted once for each assembly
+  a package ships, in over two hundred packages, about 120 of which a program can import. An assembly compiled
+  against 1.26.10.3 that calls a Go method fails under 1.26.11.1 with `MissingMethodException`, and the break floor
+  refuses that combination first (`GO2CS3002`): rebuild against 1.26.11.1.
+  <!-- source: the method-holder seat (OQ2, P1; docs/phase4/SCOUT-method-holder.md on
+       claude/p1-oq2-method-holder-scout). The moved members are announced to the binary-compatibility guard by
+       New-GoApiCompatMoveSuppressions.ps1 over the OQ2 cut's release-smoke pack (2026-11-15): 8,273 CP0002 move
+       entries across all assets, promoted forwarders included, in 230 suppression files that also carry the renames
+       below (13,234 entries in all). The package counts are read from those files: 213 carry a CP0002 entry, 120 of
+       them reachable (no internal segment, not vendored). -->
+- **Names that carried a `Δ` prefix keep their Go names.** PENDING. Through 1.26.10.3 a type, constant or variable
+  whose Go name a method of its package also used was emitted with a `Δ` prefix: `go/doc/comment`'s interface `Text`
+  was `ΔText`, because `Printer` has a method `Text`. With each method in its receiver's holder the two names no
+  longer meet, and from 1.26.11.1 every such name is its Go name. In the standard library this renames over two hundred
+  types and dozens of constants and variables, and changes well over a thousand members that name them (fields,
+  parameters, return types, interface members), in about a hundred packages, two thirds of which a program can
+  import. C# source that names the prefixed form uses the Go name instead (`ΔText` becomes `Text`). An assembly
+  compiled against 1.26.10.3 that binds a prefixed name fails under 1.26.11.1, and the break floor refuses that
+  combination first (`GO2CS3002`): rebuild against 1.26.11.1.
+  <!-- source: the method-holder seat (OQ2, P1); the converter's ShadowVarMarker no longer applies once methods leave
+       the package class. Announced to the binary-compatibility guard as generated rename entries
+       (New-GoApiCompatMoveSuppressions.ps1, the U+0394 drop, COORD ruling 2026-11-15 10:14Z: a removed member is a
+       rename only when its documentation id with every U+0394 dropped is in the current surface exactly, or a move
+       once its receiver and signature drop theirs): 4,961 entries across all assets, CP0001 369, CP0002 4,515, CP0006
+       59, CP0008 16, CP0021 2. On the lib asset alone: 241 types (CP0001), 1,713 members whose id names a prefixed
+       form, in 102 packages, 67 of them reachable. -->
+- **A type, constant or variable named like a method keeps its Go name.** PENDING. A package-level name that shared
+  its spelling with a method of the package took a `Δ` prefix in C#, because both were members of the package class:
+  `time.Second` was `time.ΔSecond`, `reflect.Type` was `reflect.ΔType`, `syscall.Handle` was `syscall.ΔHandle`. With
+  the methods in their holders the names no longer meet, and each keeps its Go spelling. C# source that wrote a `Δ`
+  name writes the Go name.
+  <!-- source: the same seat; behavioral fixtures MethodHolderNames and MethodHolderAlias, and every golden that named
+       a renamed element (goldens: re-baseline). -->
 
 **A package whose types promote very many methods now loads.** PENDING. The .NET runtime loads no type with more
 than 65,521 methods. A converted package class held every promoted-method forwarder of every struct in the package,

@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("GenericStructFields.go", "GenericStructFields.cs", "ABYwAAYYhAASKIKCgpqCgoKaguqCgoKUgoLc", "", "", "31=Errorf/1/1/15")]
+[assembly: GoPositionMap("GenericStructFields.go", "GenericStructFields.cs", "ABkwAAgYhAASKIKCgpqCgoKaggAICoKCgpSCggAJDA==", "", "", "36=Errorf/1/1/15")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -66,9 +66,9 @@ public static partial class main_package
 
     // <TypeAccessibility>
     internal partial struct keeper {}
+    internal partial struct pool<T> {}
     internal partial struct tag<T> {}
     internal partial struct wrapped<T> {}
-    internal partial struct Δpool<T> {}
     public partial struct Container {}
     public partial struct Result<T> {}
     // </TypeAccessibility>
@@ -83,3 +83,15 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.keeper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛkeeper;
+[GoMethodHost(typeof(main_package.pool<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛpool;
+[GoMethodHost(typeof(main_package.tag<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛtag;
+// </MethodHolders>

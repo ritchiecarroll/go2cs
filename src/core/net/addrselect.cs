@@ -7,6 +7,7 @@ namespace go;
 using netip = net.netip_package;
 using slices = slices_package;
 using net;
+using static net_package;
 
 partial class net_package {
 
@@ -17,7 +18,7 @@ internal static void sortByRFC6724(slice<IPAddr> addrs) {
     sortByRFC6724withSrcs(addrs, srcAddrs(addrs));
 }
 
-internal static void sortByRFC6724withSrcs(slice<IPAddr> addrs, slice<netipꓸAddr> srcs) {
+internal static void sortByRFC6724withSrcs(slice<IPAddr> addrs, slice<netip.Addr> srcs) {
     if (len(addrs) != len(srcs)) {
         throw panic("internal error");
     }
@@ -44,8 +45,8 @@ private static readonly @string udpˢᵇ = "udp"u8;
 // srcAddrs tries to UDP-connect to each address to see if it has a
 // route. (This doesn't send any packets). The destination port
 // number is irrelevant.
-internal static slice<netipꓸAddr> srcAddrs(slice<IPAddr> addrs) {
-    var srcs = new slice<netipꓸAddr>(len(addrs));
+internal static slice<netip.Addr> srcAddrs(slice<IPAddr> addrs) {
+    var srcs = new slice<netip.Addr>(len(addrs));
     ref var dst = ref heap<UDPAddr>(new UDPAddr(Port: 53), out var Ꮡdst);
     foreach (var i in range(len(addrs))) {
         dst.IP = addrs[i].IP;
@@ -67,7 +68,7 @@ partial struct ipAttr {
     public uint8 Label;
 }
 
-internal static ipAttr ipAttrOf(netipꓸAddr ip) {
+internal static ipAttr ipAttrOf(netip.Addr ip) {
     if (!ip.IsValid()) {
         return new ipAttr();
     }
@@ -82,7 +83,7 @@ internal static ipAttr ipAttrOf(netipꓸAddr ip) {
 partial struct byRFC6724Info {
     internal IPAddr addr;
     internal ipAttr addrAttr;
-    internal netipꓸAddr src;
+    internal netip.Addr src;
     internal ipAttr srcAttr;
 }
 
@@ -212,7 +213,7 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
 }
 
 partial struct policyTableEntry {
-    public netipꓸPrefix Prefix;
+    public netip.Prefix Prefix;
     public uint8 Precedence;
     public uint8 Label;
 }
@@ -281,10 +282,12 @@ internal static policyTable rfc6724policyTable = new policyTable(new policyTable
     )
 }.slice());
 
+} partial class netᴛpolicyTable {
+
 // Classify returns the policyTableEntry of the entry with the longest
 // matching prefix that contains ip.
 // The table t must be sorted from largest mask size to smallest.
-internal static policyTableEntry Classify(this policyTable t, netipꓸAddr ip) {
+internal static policyTableEntry Classify(this policyTable t, netip.Addr ip) {
     // Prefix.Contains() will not match an IPv6 prefix for an IPv4 address.
     if (ip.Is4()) {
         ip = netip.AddrFrom16(ip.As16());
@@ -297,6 +300,8 @@ internal static policyTableEntry Classify(this policyTable t, netipꓸAddr ip) {
     return new policyTableEntry();
 }
 
+} partial class net_package {
+
 // RFC 6724 section 3.1.
 public partial struct scope /*num:uint8*/;
 
@@ -307,7 +312,7 @@ internal static scope scopeSiteLocal => 0x5;
 internal static scope scopeOrgLocal => 0x8;
 internal static scope scopeGlobal => 0xe;
 
-internal static scope classifyScope(netipꓸAddr ip) {
+internal static scope classifyScope(netip.Addr ip) {
     if (ip.IsLoopback() || ip.IsLinkLocalUnicast()) {
         return scopeLinkLocal;
     }
@@ -334,7 +339,7 @@ internal static scope classifyScope(netipꓸAddr ip) {
 // If a and b are different IP versions, 0 is returned.
 //
 // See https://tools.ietf.org/html/rfc6724#section-2.2
-internal static nint /*cpl*/ commonPrefixLen(netipꓸAddr a, IP b) {
+internal static nint /*cpl*/ commonPrefixLen(netip.Addr a, IP b) {
     nint cpl = default;
 
     var b4 = b.To4(); if (b4 != nil) {

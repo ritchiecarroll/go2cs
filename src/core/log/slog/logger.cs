@@ -16,6 +16,7 @@ using go.sync;
 using io = io_package;
 using ꓸꓸꓸAttr = Span<slog_package.Attr>;
 using ꓸꓸꓸany = Span<any>;
+using static slog_package;
 
 partial class slog_package {
 
@@ -47,8 +48,8 @@ internal static ref LevelVar logLoggerLevel => ref ((StaticBox<LevelVar>)ᏑlogL
 // A call to [log.Printf] will result in output at level [LevelDebug].
 //
 // SetLogLoggerLevel returns the previous value.
-public static ΔLevel /*oldLevel*/ SetLogLoggerLevel(ΔLevel level) {
-    ΔLevel oldLevel = default;
+public static Level /*oldLevel*/ SetLogLoggerLevel(Level level) {
+    Level oldLevel = default;
 
     oldLevel = ᏑlogLoggerLevel.Level();
     ᏑlogLoggerLevel.Set(level);
@@ -56,7 +57,7 @@ public static ΔLevel /*oldLevel*/ SetLogLoggerLevel(ΔLevel level) {
 }
 
 [GoInit] internal static void init() {
-    ᏑdefaultLogger.Store(New(new defaultHandlerжΔHandler(newDefaultHandler(loginternal.DefaultOutput))));
+    ᏑdefaultLogger.Store(New(new defaultHandlerжHandler(newDefaultHandler(loginternal.DefaultOutput))));
 }
 
 // Default returns the default [Logger].
@@ -78,22 +79,24 @@ public static void SetDefault(ж<Logger> Ꮡl) {
     // This can occur with SetDefault(Default()).
     // See TestSetDefault.
     var (_, ok) = l.Handler()._<ж<defaultHandler>>(ᐧ); if (!ok) {
-        ref var capturePC = ref heap<bool>((log_package.Flags() & (nint)((nint)((nint)log_package.Lshortfile | (nint)log_package.Llongfile))) != 0, out var ᏑcapturePC);
-        log_package.SetOutput(new handlerWriterжWriter(Ꮡ(new handlerWriter(l.Handler(), new LevelVarжLeveler(ᏑlogLoggerLevel), capturePC))));
-        log_package.SetFlags(0); // we want just the log message, no time or location
+        ref var capturePC = ref heap<bool>((log.Flags() & (nint)((nint)((nint)log.Lshortfile | (nint)log.Llongfile))) != 0, out var ᏑcapturePC);
+        log.SetOutput(new handlerWriterжWriter(Ꮡ(new handlerWriter(l.Handler(), new LevelVarжLeveler(ᏑlogLoggerLevel), capturePC))));
+        log.SetFlags(0); // we want just the log message, no time or location
     }
 }
 
 // handlerWriter is an io.Writer that calls a Handler.
 // It is used to link the default log.Logger to the default slog.Logger.
 partial struct handlerWriter {
-    internal ΔHandler h;
+    internal Handler h;
     internal Leveler level;
     internal bool capturePC;
 }
 
+} partial class slogᴛhandlerWriter {
+
 internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte> buf) {
-    ΔLevel level = w.level.Level();
+    Level level = w.level.Level();
     if (!w.h.Enabled(context.Background(), level)) {
         return (0, default);
     }
@@ -108,9 +111,11 @@ internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte
     // Remove final newline.
     nint origLen = len(buf); // Report that the entire buf was written.
     buf = bytes.TrimSuffix(buf, [(byte)'\n']);
-    var r = NewRecord(time_package.Now(), level, (@string)buf, pc);
+    var r = NewRecord(time.Now(), level, (@string)buf, pc);
     return (origLen, w.h.Handle(context.Background(), r));
 }
+
+} partial class slog_package {
 
 // A Logger records structured information about each call to its
 // Log, Debug, Info, Warn, and Error methods.
@@ -119,8 +124,10 @@ internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte
 // To create a new Logger, call [New] or a Logger method
 // that begins "With".
 partial struct Logger {
-    internal ΔHandler handler; // for structured logging
+    internal Handler handler; // for structured logging
 }
+
+} partial class slogᴛLogger {
 
 internal static ж<Logger> clone(this ref Logger l) {
     ref var c = ref heap<Logger>(l, out var Ꮡc);
@@ -128,7 +135,7 @@ internal static ж<Logger> clone(this ref Logger l) {
 }
 
 // Handler returns l's Handler.
-public static ΔHandler Handler(this ref Logger l) { return l.handler; }
+public static Handler Handler(this ref Logger l) { return l.handler; }
 
 // With returns a Logger that includes the given attributes
 // in each output operation. Arguments are converted to
@@ -162,8 +169,10 @@ public static ж<Logger> WithGroup(this ж<Logger> Ꮡl, @string name) {
     return c;
 }
 
+} partial class slog_package {
+
 // New creates a new Logger with the given non-nil Handler.
-public static ж<Logger> New(ΔHandler h) {
+public static ж<Logger> New(Handler h) {
     if (h == nil) {
         throw panic("nil Handler");
     }
@@ -177,20 +186,26 @@ public static ж<Logger> With(params ꓸꓸꓸany argsʗp) {
     return Default().With(args.ꓸꓸꓸ);
 }
 
+} partial class slogᴛLogger {
+
 // Enabled reports whether l emits log records at the given context and level.
-public static bool Enabled(this ref Logger l, context.Context ctx, ΔLevel level) {
+public static bool Enabled(this ref Logger l, context.Context ctx, Level level) {
     if (ctx == nil) {
         ctx = context.Background();
     }
     return l.Handler().Enabled(ctx, level);
 }
 
+} partial class slog_package {
+
 // NewLogLogger returns a new [log.Logger] such that each call to its Output method
 // dispatches a Record to the specified handler. The logger acts as a bridge from
 // the older log API to newer structured logging handlers.
-public static ж<log.Logger> NewLogLogger(ΔHandler h, ΔLevel level) {
-    return log_package.New(new handlerWriterжWriter(Ꮡ(new handlerWriter(h, level, true))), ""u8, 0);
+public static ж<log.Logger> NewLogLogger(Handler h, Level level) {
+    return log.New(new handlerWriterжWriter(Ꮡ(new handlerWriter(h, level, true))), ""u8, 0);
 }
+
+} partial class slogᴛLogger {
 
 // Log emits a log record with the current time and the given level and message.
 // The Record's Attrs consist of the Logger's attributes followed by
@@ -202,14 +217,14 @@ public static ж<log.Logger> NewLogLogger(ΔHandler h, ΔLevel level) {
 //     the following argument is treated as the value and the two are combined
 //     into an Attr.
 //   - Otherwise, the argument is treated as a value with key "!BADKEY".
-public static partial void Log(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Log(this ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(ctx, level, msg, args.ꓸꓸꓸ);
 }
 
 // LogAttrs is a more efficient version of [Logger.Log] that accepts only Attrs.
-public static partial void LogAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
+public static partial void LogAttrs(this ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.sslice();
 
     l.logAttrs(ctx, level, msg, attrs.ꓸꓸꓸ);
@@ -274,7 +289,7 @@ public static partial void ErrorContext(this ref Logger l, context.Context ctx, 
 // log is the low-level logging method for methods that take ...any.
 // It must always be called directly by an exported logging method
 // or function, because it uses a fixed call depth to obtain the pc.
-internal static partial void log(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸany argsʗp) {
+internal static partial void log(this ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (ctx == nil) {
@@ -290,13 +305,13 @@ internal static partial void log(this ref Logger l, context.Context ctx, ΔLevel
         runtime.Callers(3, pcs[..]);
         pc = pcs[0];
     }
-    var r = NewRecord(time_package.Now(), level, msg, pc);
+    var r = NewRecord(time.Now(), level, msg, pc);
     r.Add(args.ꓸꓸꓸ);
     _ = l.Handler().Handle(ctx, r);
 }
 
 // logAttrs is like [Logger.log], but for methods that take ...Attr.
-internal static partial void logAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
+internal static partial void logAttrs(this ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.sslice();
 
     if (ctx == nil) {
@@ -312,10 +327,12 @@ internal static partial void logAttrs(this ref Logger l, context.Context ctx, Δ
         runtime.Callers(3, pcs[..]);
         pc = pcs[0];
     }
-    var r = NewRecord(time_package.Now(), level, msg, pc);
+    var r = NewRecord(time.Now(), level, msg, pc);
     r.AddAttrs(attrs.ꓸꓸꓸ);
     _ = l.Handler().Handle(ctx, r);
 }
+
+} partial class slog_package {
 
 // Debug calls [Logger.Debug] on the default logger.
 public static partial void Debug(@string msg, params ꓸꓸꓸany argsʗp) {
@@ -374,14 +391,14 @@ public static partial void ErrorContext(context.Context ctx, @string msg, params
 }
 
 // Log calls [Logger.Log] on the default logger.
-public static partial void Log(context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Log(context.Context ctx, Level level, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     Default().log(ctx, level, msg, args.ꓸꓸꓸ);
 }
 
 // LogAttrs calls [Logger.LogAttrs] on the default logger.
-public static partial void LogAttrs(context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
+public static partial void LogAttrs(context.Context ctx, Level level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.sslice();
 
     Default().logAttrs(ctx, level, msg, attrs.ꓸꓸꓸ);

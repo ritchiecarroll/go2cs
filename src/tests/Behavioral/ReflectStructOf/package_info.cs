@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -51,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAtAlLKCgqaC6ILmgoKCnIKCgqiugoKCgpSsyoKCgqaogoKClIKmqMqCAAMQgriCvri+gsyCgpSWkJKQkoCSopSSlII=", "35-39:1;164-164:1;165-165:2;166-166:3;167-169:4;170-172:5;173-175:6", "", "50=Kind/1/1/1,Name/1/1/1,PkgPath/1/1/1,NumField/1/1/1,Size/1/1/1,Align/1/1/1;57=StructOf/2/2/1;59=Size/1/2/1,Size/2/2/1;62=field/1/3/1,ArrayOf/1/3/2,field/2/3/2,ArrayOf/2/3/3,ArrayOf/3/3/3,field/3/3/3;73=Field/3/3/1,Elem/1/1/1,Len/3/3/1;82=Interface/1/1/1,Type/1/1/1,Field/1/3/1,Int/1/1/1,Field/2/3/1,Index/1/3/1,Uint/1/2/1,Field/3/3/2,Index/2/3/2,Index/3/3/2,Uint/2/2/2;85=Zero/2/2/1,Interface/2/3/1,New/1/1/1,Elem/1/1/1,Interface/3/3/1,DeepEqual/1/1/1;94=Field/1/5/1,Field/2/5/1,Field/3/5/1,Field/4/5/2,Get/1/2/2,Field/5/5/2,Get/2/2/2;99=TypeOf/1/1/1,field/1/1/2;104=Field/3/5/1,Field/4/5/1,Field/5/5/2,NumField/1/1/2;112=Field/1/4/1,Field/2/4/1,Field/3/4/2,IsExported/1/2/2,Field/4/4/2,IsExported/2/2/2;117=TypeOf/1/2/1,Elem/1/1/1,Implements/2/3/1,Comparable/1/1/2,TypeOf/2/2/3,Implements/3/3/3", "", "18:21,19:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA5AtLKCgqaC6ILmgoKCnIKCgqiugoKCgpSsyoKCgqaogoKClIKmqMqCAAMQgriCvri+gsyCgpSWkJKQkoCSopSSlII=", "35-39:1;164-164:1;165-165:2;166-166:3;167-169:4;170-172:5;173-175:6", "", "55=Kind/1/1/1,Name/1/1/1,PkgPath/1/1/1,NumField/1/1/1,Size/1/1/1,Align/1/1/1;62=StructOf/2/2/1;64=Size/1/2/1,Size/2/2/1;67=field/1/3/1,ArrayOf/1/3/2,field/2/3/2,ArrayOf/2/3/3,ArrayOf/3/3/3,field/3/3/3;78=Field/3/3/1,Elem/1/1/1,Len/3/3/1;87=Interface/1/1/1,Type/1/1/1,Field/1/3/1,Int/1/1/1,Field/2/3/1,Index/1/3/1,Uint/1/2/1,Field/3/3/2,Index/2/3/2,Index/3/3/2,Uint/2/2/2;90=Zero/2/2/1,Interface/2/3/1,New/1/1/1,Elem/1/1/1,Interface/3/3/1,DeepEqual/1/1/1;99=Field/1/5/1,Field/2/5/1,Field/3/5/1,Field/4/5/2,Get/1/2/2,Field/5/5/2,Get/2/2/2;104=TypeOf/1/1/1,field/1/1/2;109=Field/3/5/1,Field/4/5/1,Field/5/5/2,NumField/1/1/2;117=Field/1/4/1,Field/2/4/1,Field/3/4/2,IsExported/1/2/2,Field/4/4/2,IsExported/2/2/2;122=TypeOf/1/2/1,Elem/1/1/1,Implements/2/3/1,Comparable/1/1/2,TypeOf/2/2/3,Implements/3/3/3", "", "23:21,24:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -83,3 +82,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.stringer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛstringer;
+// </MethodHolders>

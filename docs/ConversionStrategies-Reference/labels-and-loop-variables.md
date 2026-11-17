@@ -237,8 +237,8 @@ for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);  // the element is read at the defer statement
 }
 ```
-<!-- shape: src/tests/Behavioral/DeferLoopCapture/main.cs.target:69 `defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);`
-(deferIndexedReceiverInLoop, :65 `for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {`), the fixture's conn construction written
+<!-- shape: src/tests/Behavioral/DeferLoopCapture/main.cs.target:82 `defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);`
+(deferIndexedReceiverInLoop, :78 `for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {`), the fixture's conn construction written
 as dial(i). -->
 
 net's `TestConcurrentSetDeadline` is the witness: with the variable shared, `defer c[i].Close()` over a
@@ -300,7 +300,7 @@ for range atyp.Len {
 ```csharp
 foreach (var _ᴛ1 in range<uintptr>((~atyp).Len)) {
     var exprᴛ1 = etyp.Kind();
-    if (exprᴛ1 == abi.ΔString) {
+    if (exprᴛ1 == abi.String) {
         seq.stringOffsets = append(seq.stringOffsets, offset);
     }
     …
@@ -392,7 +392,7 @@ ranges a nil `*[3]int` and a nil `*grid` and prints Go's counts, and whose `fill
 :261 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`; :267 `expect("overPointerParam", "foreach (var i in range(2))")`;
 :269 `expect("setAll", "foreach (var i in range(4))")`;
 :281 `expect("overString", "foreach (var (i, _) in str)")`; :282 `expect("overMap", "foreach (var (k, _) in m)")`.
-src/go2cs/collectionExpressionTargets_test.go:218 `func TestAnIndexOnlyRangeQualifiesAShadowedLen(t *testing.T) {`.
+src/go2cs/collectionExpressionTargets_test.go:219 `func TestAnIndexOnlyRangeQualifiesAShadowedLen(t *testing.T) {`.
 src/go2cs/rangeNilPointerArray_test.go `func TestRangeOverPointerArrayValueIsCountRange(t *testing.T) {`.
 src/tests/Behavioral/PointerArraySlice/main.go:63 `func rangeIndexOnly() {`, :90 `func (b *grid) fill() {`.
 src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.go:113 `for i := range a {` -> .cs.target:105 `foreach (var i in range(len(a))) {`;

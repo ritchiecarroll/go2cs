@@ -51,16 +51,20 @@ using System.Runtime.CompilerServices;
 
 namespace go;
 
+using static sync_package;
+
 partial class sync_package
 {
     // The token identifying the allocation this checker lives in. Never 0 — 0 is Go's
     // "uninitialized" sentinel, and the top bit is what guarantees a real allocation can never
     // produce it.
-    private static nuint copyCheckerToken(ж<copyChecker> Ꮡc)
+    internal static nuint copyCheckerToken(ж<copyChecker> Ꮡc)
     {
         object root = ((INilPointer)Ꮡc).ReferentObject;
         return unchecked((nuint)(uint)RuntimeHelpers.GetHashCode(root) | ((nuint)1 << (System.IntPtr.Size * 8 - 1)));
     }
+
+} partial class syncᴛcopyChecker {
 
     internal static void check(this ж<copyChecker> Ꮡc)
     {
@@ -82,4 +86,7 @@ partial class sync_package
         // Initialized somewhere else: this Cond's bytes came from another allocation.
         throw panic("sync.Cond is copied");
     }
+
+} partial class sync_package {
+
 }

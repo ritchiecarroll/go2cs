@@ -14,27 +14,27 @@ internal static void prepareContextForSigResume(ref windows.Context c) {
 }
 
 internal static void dumpregs(ref windows.Context r) {
-    print((@string)"rax     ", (Δhex)r.Rax, (@string)"\n");
-    print((@string)"rbx     ", (Δhex)r.Rbx, (@string)"\n");
-    print((@string)"rcx     ", (Δhex)r.Rcx, (@string)"\n");
-    print((@string)"rdx     ", (Δhex)r.Rdx, (@string)"\n");
-    print((@string)"rdi     ", (Δhex)r.Rdi, (@string)"\n");
-    print((@string)"rsi     ", (Δhex)r.Rsi, (@string)"\n");
-    print((@string)"rbp     ", (Δhex)r.Rbp, (@string)"\n");
-    print((@string)"rsp     ", (Δhex)r.Rsp, (@string)"\n");
-    print((@string)"r8      ", (Δhex)r.R8, (@string)"\n");
-    print((@string)"r9      ", (Δhex)r.R9, (@string)"\n");
-    print((@string)"r10     ", (Δhex)r.R10, (@string)"\n");
-    print((@string)"r11     ", (Δhex)r.R11, (@string)"\n");
-    print((@string)"r12     ", (Δhex)r.R12, (@string)"\n");
-    print((@string)"r13     ", (Δhex)r.R13, (@string)"\n");
-    print((@string)"r14     ", (Δhex)r.R14, (@string)"\n");
-    print((@string)"r15     ", (Δhex)r.R15, (@string)"\n");
-    print((@string)"rip     ", (Δhex)r.Rip, (@string)"\n");
-    print((@string)"rflags  ", (Δhex)(uint64)r.EFlags, (@string)"\n");
-    print((@string)"cs      ", (Δhex)(uint64)r.SegCs, (@string)"\n");
-    print((@string)"fs      ", (Δhex)(uint64)r.SegFs, (@string)"\n");
-    print((@string)"gs      ", (Δhex)(uint64)r.SegGs, (@string)"\n");
+    print((@string)"rax     ", (hex)r.Rax, (@string)"\n");
+    print((@string)"rbx     ", (hex)r.Rbx, (@string)"\n");
+    print((@string)"rcx     ", (hex)r.Rcx, (@string)"\n");
+    print((@string)"rdx     ", (hex)r.Rdx, (@string)"\n");
+    print((@string)"rdi     ", (hex)r.Rdi, (@string)"\n");
+    print((@string)"rsi     ", (hex)r.Rsi, (@string)"\n");
+    print((@string)"rbp     ", (hex)r.Rbp, (@string)"\n");
+    print((@string)"rsp     ", (hex)r.Rsp, (@string)"\n");
+    print((@string)"r8      ", (hex)r.R8, (@string)"\n");
+    print((@string)"r9      ", (hex)r.R9, (@string)"\n");
+    print((@string)"r10     ", (hex)r.R10, (@string)"\n");
+    print((@string)"r11     ", (hex)r.R11, (@string)"\n");
+    print((@string)"r12     ", (hex)r.R12, (@string)"\n");
+    print((@string)"r13     ", (hex)r.R13, (@string)"\n");
+    print((@string)"r14     ", (hex)r.R14, (@string)"\n");
+    print((@string)"r15     ", (hex)r.R15, (@string)"\n");
+    print((@string)"rip     ", (hex)r.Rip, (@string)"\n");
+    print((@string)"rflags  ", (hex)(uint64)r.EFlags, (@string)"\n");
+    print((@string)"cs      ", (hex)(uint64)r.SegCs, (@string)"\n");
+    print((@string)"fs      ", (hex)(uint64)r.SegFs, (@string)"\n");
+    print((@string)"gs      ", (hex)(uint64)r.SegGs, (@string)"\n");
 }
 
 } // end runtime_package

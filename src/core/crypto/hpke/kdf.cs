@@ -13,6 +13,7 @@ using hash = hash_package;
 using byteorder = go.@internal.byteorder_package;
 using go.@internal;
 using go.crypto;
+using static hpke_package;
 
 partial class hpke_package {
 
@@ -72,6 +73,8 @@ internal static ж<hkdfKDF> hkdfSHA256 = Ꮡ(new hkdfKDF(hash: sha256.New, id: 0
 internal static ж<hkdfKDF> hkdfSHA384 = Ꮡ(new hkdfKDF(hash: sha512.New384, id: 0x0002, nH: sha512.Size384));
 internal static ж<hkdfKDF> hkdfSHA512 = Ꮡ(new hkdfKDF(hash: sha512.New, id: 0x0003, nH: sha512.Size));
 
+} partial class hpkeᴛhkdfKDF {
+
 internal static uint16 ID(this ref hkdfKDF kdf) {
     return kdf.id;
 }
@@ -111,6 +114,8 @@ internal static (slice<byte>, error) labeledExpand(this ref hkdfKDF kdf, slice<b
     return hkdf.Expand(kdf.hash, randomKey, (@string)labeledInfo, (nint)length);
 }
 
+} partial class hpke_package {
+
 // SHAKE128 returns a SHAKE128 KDF implementation.
 public static KDF SHAKE128() {
     return new shakeKDFжKDF(shake128KDF);
@@ -129,6 +134,8 @@ partial struct shakeKDF {
 
 internal static ж<shakeKDF> shake128KDF = Ꮡ(new shakeKDF(hash: sha3.NewSHAKE128, id: 0x0010, nH: 32));
 internal static ж<shakeKDF> shake256KDF = Ꮡ(new shakeKDF(hash: sha3.NewSHAKE256, id: 0x0011, nH: 64));
+
+} partial class hpkeᴛshakeKDF {
 
 internal static uint16 ID(this ref shakeKDF kdf) {
     return kdf.id;
@@ -172,4 +179,4 @@ internal static (slice<byte>, error) labeledExpand(this ref shakeKDF kdf, slice<
     return (default, errors.New(hpkeInternalErrorˢ3));
 }
 
-} // end hpke_package
+} // end hpkeᴛshakeKDF

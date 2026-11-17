@@ -4096,6 +4096,13 @@ release published nothing: §2, AMENDED
    against the tree, not the packages, so that job reads the tree; [CIMatrix](CIMatrix.md#release-smoke--consume-a-rehearsal-feed-the-way-a-user-does))*. On a release that ships
    macOS assets, the darwin `census` must also be green AT that tree (the daily schedule lags master by up to a day;
    dispatch one when the tip landed after it).
+   **And one Native AOT publish, every release** *(added 2026-11-16: P3's 1.26.10.3 run and P1's reproduction)*: the
+   README walkthrough's program, converted with `go2cs -recurse=nuget` against the same repacked packages, published
+   on linux-x64 with [Tuning](Tuning.md)'s Native AOT command in the program's folder; the executable must print the
+   walkthrough's line. `aot-smoke` cannot stand in for it: its consumer is hand-written, so it never meets a
+   `-recurse` tree, the go2cs-gen analyzer reference or a `.slnx`. At 1.26.10.3 this program failed in ILC (the 2 GiB
+   object string table) while every other release check passed. It takes about 25 minutes on a 4-core box, so it is a
+   release check, not a per-batch leg.
 3. **The publish** is the owner's act at the release machine's own console, from a checkout with empty porcelain
    (an agent's credential checks are refused by the permission classifier). **No GPG signing on the release
    machine during NuGet Phase 2, or `disable-scdaemon` in gpg-agent.conf when no GPG key lives on a card** (the

@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using atomic = sync.atomic_package;
 using @unsafe = unsafe_package;
 using sync;
+using static main_package;
 
 partial class main_package {
 
@@ -14,9 +15,13 @@ internal static stdFunction other;
 
 partial struct counter /*global::go.sync.atomic_package.Uint32*/;
 
+} partial class mainᴛcounter {
+
 internal static uint32 Load(this ж<counter> Ꮡc) { return (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Load(); }
 internal static void Store(this ж<counter> Ꮡc, uint32 v) { (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Store(v); }
 internal static uint32 Add(this ж<counter> Ꮡc, uint32 d) { return (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Add(d); }
+
+} partial class main_package {
 
 internal static void main() {
     handler = other;

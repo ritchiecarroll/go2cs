@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using ast = global::go.go.ptrunion_package;
 using ptrunion = global::go.go.ptrunion_package;
+using static main_package;
 
 partial class main_package {
 
@@ -45,6 +46,8 @@ partial struct link<T> {
     internal T from, to;
 }
 
+} partial class mainᴛlink {
+
 internal static @string String<T>(this link<T> l) {
     if (GoReflect.IsNilGoValue(l.to)) {
         return describe(l.from) + "->(none)"u8;
@@ -52,17 +55,27 @@ internal static @string String<T>(this link<T> l) {
     return describe(l.from) + "->"u8 + describe(l.to);
 }
 
+} partial class main_package {
+
 partial struct holder<P> {
     internal P p;
 }
 
+} partial class mainᴛholder {
+
 internal static bool empty<P>(this holder<P> h) { return GoReflect.IsNilGoValue(h.p); }
+
+} partial class main_package {
 
 partial struct holderOf<P, T> {
     internal P p;
 }
 
+} partial class mainᴛholderOf {
+
 internal static bool empty<P, T>(this holderOf<P, T> h) { return GoReflect.IsNilGoValue(h.p); }
+
+} partial class main_package {
 
 internal static void main() {
     var n = Ꮡ(new ast.Node(Kind: 4));

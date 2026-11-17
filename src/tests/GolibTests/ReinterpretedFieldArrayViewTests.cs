@@ -141,6 +141,30 @@ public class ReinterpretedFieldArrayViewTests
     }
 
     /// <summary>
+    /// The tuple and range stores, <c>*p, n = v, 9</c> and <c>for _, *p = range vs</c>, which the converter emits as
+    /// <c>p.Assign(v)</c> (ArrayExtensions.Assign): through this box that is the box's own store, N element stores to
+    /// the field and to nothing else. Without the box's INativeArrayStore forward, Assign fell to Value, which refuses
+    /// by name.
+    /// </summary>
+    [TestMethod]
+    public void AssignThroughTheViewIsTheBoxsStore()
+    {
+        ж<Named> named = NewNamed();
+        ж<array<byte>> p = PortOf(named);
+
+        p.Assign(new byte[] { 0xCD, 0xAB }.array());
+
+        Assert.AreEqual(BitConverter.IsLittleEndian ? (ushort)0xABCD : (ushort)0xCDAB, named.Value.Port, "an Assign through the view is a store to the field");
+        Assert.AreEqual((ushort)2, named.Value.Family, "and to nothing before it");
+        Assert.AreEqual((ushort)0x5678, named.Value.Tail, "and to nothing after it");
+
+        p.Assign(new array<byte>(2));
+
+        Assert.AreEqual((ushort)0, named.Value.Port, "the zero array stores zeros");
+        Assert.AreEqual((ushort)0x5678, named.Value.Tail);
+    }
+
+    /// <summary>
     /// The field's own accesses and the view's name one storage: each sees the other at once, in both directions.
     /// </summary>
     [TestMethod]

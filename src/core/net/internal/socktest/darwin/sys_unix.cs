@@ -5,8 +5,11 @@
 namespace go.net.@internal;
 
 using syscall = syscall_package;
+using static socktest_package;
 
 partial class socktest_package {
+
+} partial class socktestᴛSwitch {
 
 // Socket wraps [syscall.Socket].
 public static (nint s, error err) Socket(this ж<Switch> Ꮡsw, nint family, nint sotype, nint proto) {
@@ -244,4 +247,4 @@ public static (nint soerr, error err) GetsockoptInt(this ж<Switch> Ꮡsw, nint 
     return (soerr, default);
 }
 
-} // end socktest_package
+} // end socktestᴛSwitch

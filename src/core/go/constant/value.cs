@@ -23,32 +23,34 @@ using utf8 = unicode.utf8_package;
 using global::go.go;
 using global::go.math;
 using unicode;
+using constant = constant_package;
+using static constant_package;
 
 partial class constant_package {
 
 //go:generate stringer -type Kind
 
 // Kind specifies the kind of value represented by a [Value].
-partial struct ΔKind /*num:nint*/;
+partial struct Kind /*num:nint*/;
 
 // unknown values
-public static ΔKind Unknown => /* iota */ 0;
+public static Kind Unknown => /* iota */ 0;
 
 // non-numeric values
-public static ΔKind Bool => 1;
-public static ΔKind ΔString => 2;
+public static Kind Bool => 1;
+public static Kind String => 2;
 
 // numeric values
-public static ΔKind Int => 3;
-public static ΔKind Float => 4;
-public static ΔKind Complex => 5;
+public static Kind Int => 3;
+public static Kind Float => 4;
+public static Kind Complex => 5;
 
 // A Value represents the value of a Go constant.
 partial interface Value :
     fmt.Stringer
 {
     // Kind returns the value kind.
-    ΔKind Kind();
+    Kind Kind();
     // String returns a short, quoted (human-readable) form of the value.
     // For numeric values, the result may be an approximation;
     // for String values the result may be a shortened string.
@@ -97,11 +99,11 @@ partial struct stringVal {
 partial struct int64Val /*num:int64*/; // Int values representable as an int64
 
 partial struct intVal {                // Int values not representable as an int64
-    internal ж<bigꓸInt> val;
+    internal ж<big.Int> val;
 }
 
 partial struct ratVal {                // Float values representable as a fraction
-    internal ж<bigꓸRat> val;
+    internal ж<big.Rat> val;
 }
 
 partial struct floatVal {              // Float values not representable as a fraction
@@ -112,21 +114,51 @@ partial struct complexVal {
     internal Value re, im;
 }
 
-internal static ΔKind Kind(this unknownVal _) { return Unknown; }
-internal static ΔKind Kind(this boolVal _) { return Bool; }
-internal static ΔKind Kind(this ref stringVal _) { return ΔString; }
-internal static ΔKind Kind(this int64Val _) { return Int; }
-internal static ΔKind Kind(this intVal _) { return Int; }
-internal static ΔKind Kind(this ratVal _) { return Float; }
-internal static ΔKind Kind(this floatVal _) { return Float; }
-internal static ΔKind Kind(this complexVal _) { return Complex; }
+} partial class constantᴛunknownVal {
+
+internal static Kind Kind(this unknownVal _) { return Unknown; }
+
+} partial class constantᴛboolVal {
+
+internal static Kind Kind(this boolVal _) { return Bool; }
+
+} partial class constantᴛstringVal {
+
+internal static Kind Kind(this ref stringVal _) { return constant.String; }
+
+} partial class constantᴛint64Val {
+
+internal static Kind Kind(this int64Val _) { return Int; }
+
+} partial class constantᴛintVal {
+
+internal static Kind Kind(this intVal _) { return Int; }
+
+} partial class constantᴛratVal {
+
+internal static Kind Kind(this ratVal _) { return Float; }
+
+} partial class constantᴛfloatVal {
+
+internal static Kind Kind(this floatVal _) { return Float; }
+
+} partial class constantᴛcomplexVal {
+
+internal static Kind Kind(this complexVal _) { return Complex; }
+
+} partial class constantᴛunknownVal {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
 private static readonly @string unknownˢᵇ = "unknown"u8;
 
 internal static @string String(this unknownVal _) { return unknownˢ; }
+
+} partial class constantᴛboolVal {
+
 internal static @string String(this boolVal x) { return strconv.FormatBool((bool)x); }
+
+} partial class constantᴛstringVal {
 
 // String returns a possibly shortened quoted form of the String value.
 internal static @string String(this ж<stringVal> Ꮡx) {
@@ -166,6 +198,8 @@ internal static @string @string(this ж<stringVal> Ꮡx) {
     return s;
 }
 
+} partial class constant_package {
+
 // reverse reverses x in place and returns it.
 internal static slice<@string> reverse(slice<@string> x) {
     nint n = len(x);
@@ -174,6 +208,8 @@ internal static slice<@string> reverse(slice<@string> x) {
     }
     return x;
 }
+
+} partial class constantᴛstringVal {
 
 // appendReverse appends to list all of x's subpieces, but in reverse,
 // and returns the result. Appending the reversal allows processing
@@ -202,9 +238,19 @@ internal static slice<@string> appendReverse(this ж<stringVal> Ꮡx, slice<@str
     return append(list, s);
 }
 
+} partial class constantᴛint64Val {
+
 internal static @string String(this int64Val x) { return strconv.FormatInt((int64)x, 10); }
+
+} partial class constantᴛintVal {
+
 internal static @string String(this intVal x) { return x.val.String(); }
+
+} partial class constantᴛratVal {
+
 internal static @string String(this ratVal x) { return rtof(x).String(); }
+
+} partial class constantᴛfloatVal {
 
 // String returns a decimal approximation of the Float value.
 internal static @string String(this floatVal x) {
@@ -263,13 +309,31 @@ internal static @string String(this floatVal x) {
     return fmt.Sprintf("%.6ge%+d"u8, m, e);
 }
 
+} partial class constantᴛcomplexVal {
+
 internal static @string String(this complexVal x) { return fmt.Sprintf("(%s + %si)"u8, x.re, x.im); }
 
+} partial class constantᴛunknownVal {
+
 internal static @string ExactString(this unknownVal x) { return x.String(); }
+
+} partial class constantᴛboolVal {
+
 internal static @string ExactString(this boolVal x) { return x.String(); }
+
+} partial class constantᴛstringVal {
+
 internal static @string ExactString(this ж<stringVal> Ꮡx) { return strconv.Quote(Ꮡx.@string()); }
+
+} partial class constantᴛint64Val {
+
 internal static @string ExactString(this int64Val x) { return x.String(); }
+
+} partial class constantᴛintVal {
+
 internal static @string ExactString(this intVal x) { return x.String(); }
+
+} partial class constantᴛratVal {
 
 internal static @string ExactString(this ratVal x) {
     var r = x.val;
@@ -279,23 +343,52 @@ internal static @string ExactString(this ratVal x) {
     return r.String();
 }
 
+} partial class constantᴛfloatVal {
+
 internal static @string ExactString(this floatVal x) { return x.val.Text((byte)'p', 0); }
+
+} partial class constantᴛcomplexVal {
 
 internal static @string ExactString(this complexVal x) {
     return fmt.Sprintf("(%s + %si)"u8, x.re.ExactString(), x.im.ExactString());
 }
 
+} partial class constantᴛunknownVal {
+
 internal static void implementsValue(this unknownVal _) { }
+
+} partial class constantᴛboolVal {
+
 internal static void implementsValue(this boolVal _) { }
+
+} partial class constantᴛstringVal {
+
 internal static void implementsValue(this ref stringVal _) { }
+
+} partial class constantᴛint64Val {
+
 internal static void implementsValue(this int64Val _) { }
+
+} partial class constantᴛratVal {
+
 internal static void implementsValue(this ratVal _) { }
+
+} partial class constantᴛintVal {
+
 internal static void implementsValue(this intVal _) { }
+
+} partial class constantᴛfloatVal {
+
 internal static void implementsValue(this floatVal _) { }
+
+} partial class constantᴛcomplexVal {
+
 internal static void implementsValue(this complexVal _) { }
 
-internal static ж<bigꓸInt> newInt() { return @new<bigꓸInt>(); }
-internal static ж<bigꓸRat> newRat() { return @new<bigꓸRat>(); }
+} partial class constant_package {
+
+internal static ж<big.Int> newInt() { return @new<big.Int>(); }
+internal static ж<big.Rat> newRat() { return @new<big.Rat>(); }
 internal static ж<big.Float> newFloat() { return @new<big.Float>().SetPrec(prec); }
 
 internal static intVal i64toi(int64Val x) { return new intVal(newInt().SetInt64((int64)x)); }
@@ -306,7 +399,7 @@ internal static floatVal itof(intVal x) { return new floatVal(newFloat().SetInt(
 internal static floatVal rtof(ratVal x) { return new floatVal(newFloat().SetRat(x.val)); }
 internal static complexVal vtoc(Value x) { return new complexVal(x, (int64Val)0); }
 
-internal static Value makeInt(ж<bigꓸInt> Ꮡx) {
+internal static Value makeInt(ж<big.Int> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.IsInt64()) {
@@ -315,7 +408,7 @@ internal static Value makeInt(ж<bigꓸInt> Ꮡx) {
     return new intVal(Ꮡx);
 }
 
-internal static Value makeRat(ж<bigꓸRat> x) {
+internal static Value makeRat(ж<big.Rat> x) {
     var a = x.Num();
     var b = x.Denom();
     if (smallInt(a) && smallInt(b)) {
@@ -378,7 +471,7 @@ internal static UntypedInt maxExp => /* 4 << 10 */ 4096;
 
 // smallInt reports whether x would lead to "reasonably"-sized fraction
 // if converted to a *big.Rat.
-internal static bool smallInt(ж<bigꓸInt> Ꮡx) {
+internal static bool smallInt(ж<big.Int> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     return x.BitLen() < maxExp;
@@ -720,10 +813,10 @@ public static Value Make(any x) {
     case int64 xΔ1: {
         return ((int64Val)xΔ1);
     }
-    case ж<bigꓸInt> xΔ1: {
+    case ж<big.Int> xΔ1: {
         return makeInt(xΔ1);
     }
-    case ж<bigꓸRat> xΔ1: {
+    case ж<big.Rat> xΔ1: {
         return makeRat(xΔ1);
     }
     case ж<big.Float> xΔ1: {

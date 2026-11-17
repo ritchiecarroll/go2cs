@@ -25,6 +25,7 @@ using fs = go.io.fs_package;
 using path = path_package;
 using time = time_package;
 using go.io;
+using static zip_package;
 
 partial class zip_package {
 
@@ -144,15 +145,21 @@ partial struct FileHeader {
     public uint32 ExternalAttrs; // Meaning depends on CreatorVersion
 }
 
+} partial class zipᴛFileHeader {
+
 // FileInfo returns an fs.FileInfo for the [FileHeader].
 public static fs.FileInfo FileInfo(this ж<FileHeader> Ꮡh) {
     return new headerFileInfo(Ꮡh);
 }
 
+} partial class zip_package {
+
 // headerFileInfo implements [fs.FileInfo].
 partial struct headerFileInfo {
     internal ж<FileHeader> fh;
 }
+
+} partial class zipᴛheaderFileInfo {
 
 internal static @string Name(this headerFileInfo fi) { return path.Base(fi.fh.Name); }
 internal static int64 Size(this headerFileInfo fi) {
@@ -177,6 +184,8 @@ internal static (fs.FileInfo, error) Info(this headerFileInfo fi) { return (fi, 
 internal static @string String(this headerFileInfo fi) {
     return fs.FormatFileInfo(fi);
 }
+
+} partial class zip_package {
 
 // FileInfoHeader creates a partially-populated [FileHeader] from an
 // fs.FileInfo.
@@ -214,7 +223,7 @@ partial struct directoryEnd {
 
 // timeZone returns a *time.Location based on the provided offset.
 // If the offset is non-sensible, then this uses an offset of zero.
-internal static ж<timeꓸLocation> timeZone(time.Duration offset) {
+internal static ж<time.Location> timeZone(time.Duration offset) {
     time.Duration minOffset = /* -12 * time.Hour */ -43200000000000; // E.g., Baker island at -12:00
     time.Duration maxOffset = /* +14 * time.Hour */ 50400000000000;  // E.g., Line island at +14:00
     time.Duration offsetAlias = /* 15 * time.Minute */ 900000000000; // E.g., Nepal at +5:45
@@ -222,7 +231,7 @@ internal static ж<timeꓸLocation> timeZone(time.Duration offset) {
     if (offset < minOffset || maxOffset < offset) {
         offset = 0;
     }
-    return time.FixedZone(""u8, (nint)(offset / time.ΔSecond));
+    return time.FixedZone(""u8, (nint)(offset / time.Second));
 }
 
 // msDosTimeToTime converts an MS-DOS date and time into a time.Time.
@@ -232,7 +241,7 @@ internal static time.Time msDosTimeToTime(uint16 dosDate, uint16 dosTime) {
     return time.Date(
         // date bits 0-4: day of month; 5-8: month; 9-15: years since 1980
         (nint)((uint16)((dosDate >> 9) + 1980)),
-        (timeꓸMonth)(nint)((uint16)(dosDate >> 5 & 0xf)),
+        (time.Month)(nint)((uint16)(dosDate >> 5 & 0xf)),
         (nint)((uint16)(dosDate & 0x1f)),
 
         // time bits 0-4: second/2; 5-10: minute; 11-15: hour
@@ -241,7 +250,7 @@ internal static time.Time msDosTimeToTime(uint16 dosDate, uint16 dosTime) {
         (nint)((uint16)((uint16)(dosTime & 0x1f) * 2)),
         0, // nanoseconds
 
-        time.ΔUTC);
+        time.UTC);
 }
 
 // timeToMsDosTime converts a time.Time to an MS-DOS date and time.
@@ -255,6 +264,8 @@ internal static (uint16 fDate, uint16 fTime) timeToMsDosTime(time.Time t) {
     fTime = (uint16)(t.Second() / 2 + (t.Minute() << 5) + (t.Hour() << 11));
     return (fDate, fTime);
 }
+
+} partial class zipᴛFileHeader {
 
 // ModTime returns the modification time in UTC using the legacy
 // [ModifiedDate] and [ModifiedTime] fields.
@@ -274,6 +285,8 @@ public static void SetModTime(this ref FileHeader h, time.Time t) {
     (h.ModifiedDate, h.ModifiedTime) = timeToMsDosTime(t);
 }
 
+} partial class zip_package {
+
 // Unix constants. The specification doesn't mention them,
 // but these seem to be the values agreed on by tools.
 internal static UntypedInt s_IFMT => 0xf000;
@@ -290,6 +303,8 @@ internal static UntypedInt s_ISVTX => 0x200;
 
 internal static UntypedInt msdosDir => 0x10;
 internal static UntypedInt msdosReadOnly => 0x01;
+
+} partial class zipᴛFileHeader {
 
 // Mode returns the permission and mode bits for the [FileHeader].
 public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
@@ -332,6 +347,8 @@ internal static bool isZip64(this ref FileHeader h) {
 internal static bool hasDataDescriptor(this ref FileHeader h) {
     return (uint16)(h.Flags & 0x8) != 0;
 }
+
+} partial class zip_package {
 
 internal static fs.FileMode /*mode*/ msdosModeToFileMode(uint32 m) {
     fs.FileMode mode = default;

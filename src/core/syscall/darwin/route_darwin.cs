@@ -4,8 +4,11 @@
 namespace go;
 
 using @unsafe = unsafe_package;
+using static syscall_package;
 
 partial class syscall_package {
+
+} partial class syscallᴛanyMessage {
 
 internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slice<byte> b) {
     ref var any = ref Ꮡany.DerefOrNull();
@@ -30,6 +33,8 @@ internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slic
     return default;
 }
 
+} partial class syscall_package {
+
 // InterfaceMulticastAddrMessage represents a routing message
 // containing network interface address entries.
 //
@@ -38,6 +43,8 @@ partial struct InterfaceMulticastAddrMessage {
     public IfmaMsghdr2 Header;
     public slice<byte> Data;
 }
+
+} partial class syscallᴛInterfaceMulticastAddrMessage {
 
 internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMulticastAddrMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
@@ -79,4 +86,4 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMulticastAdd
     return (sas[..], default);
 }
 
-} // end syscall_package
+} // end syscallᴛInterfaceMulticastAddrMessage

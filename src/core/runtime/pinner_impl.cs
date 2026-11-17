@@ -92,6 +92,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using @unsafe = unsafe_package;
 using abi = go.@internal.abi_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -105,14 +106,16 @@ partial struct pinner {
     internal List<object>? pinnedReferents;
 }
 
+} partial class runtimeᴛPinner {
+
 // Pin pins a Go object, preventing it from being moved or freed by the garbage
 // collector until the [Pinner.Unpin] method has been called.
 //
 // The argument must be a pointer of any type or an [unsafe.Pointer].
 // It's safe to call Pin on non-Go pointers, in which case Pin will do nothing.
-[GoRecv] public static void Pin(this ref Pinner Δp, any pointer)
+[GoRecv] public static void Pin(this ref Pinner p, any pointer)
 {
-    if (Δp.pinner == nil)
+    if (p.pinner == nil)
     {
         // Go's per-P pinnerCache is not reproduced (there is no P); a fresh pinner per Pinner is
         // the cost the design states. The leak finalizer is set ONCE per pinner, exactly as Go
@@ -121,7 +124,7 @@ partial struct pinner {
         // so the delegate captures nothing that could keep the box alive.
         ж<pinner> box = @new<pinner>();
         box.Value.pinnedReferents = new List<object>();
-        Δp.pinner = box;
+        p.pinner = box;
         SetFinalizer(box, (Action<ж<pinner>>)pinnerFinalizer);
     }
 
@@ -133,22 +136,24 @@ partial struct pinner {
         return;
 
     PinTable.Pin(referent);
-    Δp.pinner.Value.pinnedReferents!.Add(referent);
+    p.pinner.Value.pinnedReferents!.Add(referent);
 }
 
 // Unpin unpins all pinned objects of the [Pinner].
-[GoRecv] public static void Unpin(this ref Pinner Δp)
+[GoRecv] public static void Unpin(this ref Pinner p)
 {
     // Go's unpin: `if p == nil || p.refs == nil { return }` — a Pinner that never pinned, or
     // one already unpinned, is a no-op (TestPinnerEmptyUnpin). The pinner box is kept, as Go
     // keeps the backing store when application code reuses a Pinner.
-    if (Δp.pinner == nil)
+    if (p.pinner == nil)
         return;
 
-    unpinManaged(Δp.pinner);
+    unpinManaged(p.pinner);
 }
 
-private static void unpinManaged(ж<pinner> box)
+} partial class runtime_package {
+
+internal static void unpinManaged(ж<pinner> box)
 {
     List<object>? refs = box.Value.pinnedReferents;
 
@@ -164,7 +169,7 @@ private static void unpinManaged(ж<pinner> box)
 // The finalizer Go sets on every pinner: a pinner that dies with pins outstanding is a leak, and
 // the (test-swappable) pinnerLeakPanic variable is what reports it. The unpin first is Go's own
 // line — "only required to make the test idempotent".
-private static void pinnerFinalizer(ж<pinner> i)
+internal static void pinnerFinalizer(ж<pinner> i)
 {
     if (i.Value.pinnedReferents is { Count: > 0 })
     {
@@ -175,7 +180,7 @@ private static void pinnerFinalizer(ж<pinner> i)
 
 // pinnerGetPtr, over managed values: the object a Pin argument names, or null when the argument
 // is a nil pointer or not a Go pointer at all. Panics exactly where Go's pinnerGetPtr does.
-private static object? pinnerReferentOf(any pointer)
+internal static object? pinnerReferentOf(any pointer)
 {
     switch (pointer)
     {
@@ -282,7 +287,7 @@ internal static ж<uintptr> pinnerGetPinCounter(@unsafe.Pointer addr)
 
 // ---- the pin table: Go's pinnerBits, keyed by the allocation rather than the span index ----
 
-private static class PinTable
+internal static class PinTable
 {
     private sealed class PinRecord
     {
@@ -394,7 +399,7 @@ internal static void cgoCheckPointer(any ptr, any arg)
 // of the type checked at that level, while a word found by cgoCheckUnknownPointer names abi.Pointer. The
 // converted cgoFormatErr (cgocall.cs) composes "argument of cgo function has Go pointer to unpinned Go
 // <kind>", so each site below passes the kind of its own arm.
-private static PanicException cgoCheckFailure(abiꓸKind kind)
+private static PanicException cgoCheckFailure(abi.Kind kind)
 {
     return panic(cgoFormatErr(cgoCheckPointerFail, kind));
 }
@@ -441,7 +446,7 @@ private static void checkArg(object? value, Type staticType, bool top)
             object? data = stringBacking(str);
 
             if (data is not null && !top && !PinTable.IsPinned(data))
-                throw cgoCheckFailure(abi.ΔString);
+                throw cgoCheckFailure(abi.String);
 
             return;
         }
@@ -514,7 +519,7 @@ private static void checkArg(object? value, Type staticType, bool top)
 
 // The abi.Pointer / abi.UnsafePointer arm: below top level the pointer itself must be pinned;
 // then its pointee's words are the next (and last) level.
-private static void checkPointer(object? referent, bool top, abiꓸKind kind)
+private static void checkPointer(object? referent, bool top, abi.Kind kind)
 {
     if (referent is null)
         return;

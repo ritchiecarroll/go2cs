@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using strings = strings_package;
+using static main_package;
 
 partial class main_package {
 
@@ -23,7 +24,11 @@ partial struct tagErr {
     internal @string tag;
 }
 
+} partial class mainᴛtagErr {
+
 internal static @string Error(this ref tagErr e) { return "tag:"u8 + e.tag; }
+
+} partial class main_package {
 
 internal static (nint, error) check(@string s) {
     if (s == ""u8) {
@@ -69,12 +74,16 @@ partial struct @file {
     internal nint n;
 }
 
+} partial class mainᴛfile {
+
 internal static nint readOne(this ref @file f) {
     var buf = new slice<byte>(1);
     var (k, _) = f.ΔΔfile.Read(buf);
     f.n += k;
     return f.n;
 }
+
+} partial class main_package {
 
 internal static void main() {
     fmt.Println(f(10));

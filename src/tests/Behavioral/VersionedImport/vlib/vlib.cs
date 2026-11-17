@@ -1,5 +1,7 @@
 namespace go.vlib;
 
+using static vlib_package;
+
 partial class vlib_package {
 
 partial interface Source {
@@ -14,12 +16,16 @@ public static ж<PCG> NewPCG(uint64 seed) {
     return Ꮡ(new PCG(state: seed));
 }
 
+} partial class vlibᴛPCG {
+
 public static uint64 Uint64(this ref PCG p) {
     p.state ^= (uint64)((p.state << 13));
     p.state ^= (uint64)((p.state >> 7));
     p.state ^= (uint64)((p.state << 17));
     return p.state;
 }
+
+} partial class vlib_package {
 
 partial struct Rand {
     internal Source src;
@@ -29,8 +35,10 @@ public static ж<Rand> New(Source src) {
     return Ꮡ(new Rand(src: src));
 }
 
+} partial class vlibᴛRand {
+
 public static nint IntN(this ref Rand r, nint n) {
     return (nint)(r.src.Uint64() % (uint64)n);
 }
 
-} // end vlib_package
+} // end vlibᴛRand

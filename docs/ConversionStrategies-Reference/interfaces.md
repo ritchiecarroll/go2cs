@@ -19,7 +19,7 @@ func (p point) String() string { return fmt.Sprintf("(%d,%d)", p.x, p.y) }
 	var n Named = point{3, 4} // concrete point -> Named (defined over the Stringer interface)
 	fmt.Println(n.String())
 ```
-<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:10-18, 44-45 -->
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:11-21, 49-50 -->
 ```csharp
 partial interface Stringer {
     @string String();
@@ -28,6 +28,8 @@ partial interface Stringer {
 partial struct point {
     internal nint x, y;
 }
+
+} partial class mainᴛpoint {
 
 internal static @string String(this point p) { return fmt.Sprintf("(%d,%d)"u8, p.x, p.y); }
 …
@@ -48,7 +50,7 @@ The prune matches a FOREIGN base by its **canonical name**: the inheritance trac
 
 **An embedded INTERFACE FIELD forwards the members it declares in the pointer adapter.** zip's `type nopCloser struct { io.Writer }` satisfies `io.WriteCloser` with `Write` living on the embedded interface VALUE (Go promotes the field's method set) and `Close` on the struct. The `IжAdapter` forwards still-unbound members that the field's interface declares through the field itself — `m_box.Value.Writer.Write(…)` (CS1929 with no forward). Detection is semantic (a non-static field whose name equals its interface type's simple name — the converter emits embeds as real fields), gated to a SINGLE embedded interface field, and filtered to members the field's interface (including its inherited interfaces) actually declares. (Guarded by `InterfaceCasting`'s `wrapSink{Animal}` cast by pointer to the wider `speakShutter` — both the promoted and the own member called through the interface, runtime-verified vs Go.)
 
-**Promoted forwarders through a Δ-renamed embedded interface use the markerless FIELD name.** The converter names an embedded field after the **Go embed name**, so a struct value-embedding an interface whose C# TYPE was collision-renamed (see [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)) declares `public log.slog_package.ΔHandler Handler;` — the marker lives on the type only. testing/slogtest's `type wrapper struct { slog.Handler; mod func(*slog.Record) }` (slog has both a `Handler` type and a `Logger.Handler()` method, so the type is `ΔHandler`) would break in BOTH generated wrapper forms if the `ImplementGenerator` derived the promoted-forwarder field name from the interface TYPE's simple name: the value partial struct would emit bare `ΔHandler.Enabled(…)` (CS0103 cross-package, CS0120 same-package where the bare name binds the nested interface type), and the pointer adapter `m_box.Value.ΔHandler.Enabled(…)` (CS1061). The field name is the `Δ`-stripped simple name (`GetSimpleName(…, dropCollisionPrefix: true)`, the same derivation `StructTypeTemplate` already used for embedded-field accessors) in all three places: the value template's promoted arm, the pointer arm's promoted fallback, and the pointer arm's semantic embedded-interface-field detection (which compares field name to type name and otherwise never matches `Handler` vs `ΔHandler`):
+**Promoted forwarders through a Δ-renamed embedded interface use the markerless FIELD name.** The converter names an embedded field after the **Go embed name**, so a struct value-embedding an interface whose C# TYPE was collision-renamed (see [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)) declares the field under the markerless name — the marker lives on the type only. Since 2026-11-11 a type is renamed only by a remaining package-level rename (a type named `any`, `rune`, `nint`, `nuint`, `closed` or `union`); the slog example below dates from the type-vs-method rename, when the field read `public log.slog_package.ΔHandler Handler;`. testing/slogtest's `type wrapper struct { slog.Handler; mod func(*slog.Record) }` (slog has both a `Handler` type and a `Logger.Handler()` method, so the type was `ΔHandler`; it is `Handler` now) would have broken in BOTH generated wrapper forms if the `ImplementGenerator` derived the promoted-forwarder field name from the interface TYPE's simple name: the value partial struct would emit bare `ΔHandler.Enabled(…)` (CS0103 cross-package, CS0120 same-package where the bare name binds the nested interface type), and the pointer adapter `m_box.Value.ΔHandler.Enabled(…)` (CS1061). The field name is the `Δ`-stripped simple name (`GetSimpleName(…, dropCollisionPrefix: true)`, the same derivation `StructTypeTemplate` already used for embedded-field accessors) in all three places: the value template's promoted arm, the pointer arm's promoted fallback, and the pointer arm's semantic embedded-interface-field detection (which compares field name to type name and otherwise never matches `Handler` vs `ΔHandler`):
 
 <!-- illustration: not converter output -->
 ```csharp
@@ -59,6 +61,24 @@ bool global::go.main_package.ΔHandler.Enabled(nint level) => m_box.Value.Handle
 ```
 
 An overridden member is untouched (it forwards to the struct's own method, `this.Handle(…)` / `m_box.Value.Handle(…)`), and a non-renamed interface's simple name has no marker to strip, so every other promotion emits byte-identical code. (Guarded by `ShadowedInterfaceEmbed` — a `Handler` interface Δ-renamed by a `Logger.Handler()` method collision, value-embedded in a `wrapper` struct that overrides one of its three methods, cast to the interface by BOTH value and pointer, promoted and overridden members runtime-verified vs Go.)<!-- cleared testing/slogtest's 6 errors at the time -->
+
+**A converter-emitted promoted forwarder is one of its struct's methods: it takes the METHOD's spelling and stands in the struct's method holder.** When a struct satisfies an interface only through its pointer, the converter writes a forwarder for each method the embedded interface field still promotes into the VALUE method set (`// Go method set entry for the promoted 'Connector.Driver()'`). The forwarder's name and the member it calls come from the method spelling (`getSanitizedFunctionName`), which is how the interface declares the member and how every call site reads it. A package-level struct's forwarders are written into the struct's method holder, beside the methods Go declares on it ([Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)), and go2cs-gen writes their pointer-receiver overloads there too. A package's types and its methods are then members of different classes, so a type and a method of one name keep both names:
+
+<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:43-47 -->
+```csharp
+} partial class mainᴛcounting {
+
+// Go method set entry for the promoted 'Connector.Driver()' - provided ONLY by the embedded
+// interface field in *counting's method set; see the pointer-only satisfaction record.
+internal static Driver Driver(this counting recvᴛ) => recvᴛ.Connector.Driver();
+```
+
+<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:75 -->
+```csharp
+internal static driver.Driver Driver(this fcounting recvᴛ) => recvᴛ.Connector.Driver();
+```
+
+Each earlier placement failed. When a type and a method of one name renamed the TYPE (`ΔDriver`), a forwarder named after the type was `ΔDriver(…) => recvᴛ.Connector.ΔDriver()`: CS0102 beside the nested type in the same package, and CS1929 against a foreign interface's `Driver()` (modernc.org/sqlite's tests, through `database/sql/driver.Connector`). Once the method-holder rule kept the type's name, a forwarder still written in the package class stood beside the type `Driver` there: CS0102 in `main.cs` and in go2cs-gen's two overloads (batch 311). A function-local struct keeps its forwarders beside it, in the package class: Go declares no method on a local type, so it has no holder. (Guarded by `PromotedForwarderTypeNameCollision` — `Driver` is a type and a `Connector` method, `*counting` overrides `Name`, and the promoted `Driver` is reached through the interface, directly, as a method value and through reflect's method sets, all compared with Go; its second arm is the TS probe's `t3` repro, `fcounting` embedding the foreign `driver.Connector` and overriding `Connect` through its pointer — and by the converter test `TestPromotedForwarderIsEmittedInItsStructsHolder`.)
 
 **A FOREIGN struct's adapter forwards a PROMOTED interface method through the box value, not a phantom static.** When the pointer adapter is generated in an assembly OTHER than the struct's — the struct's package class lives in a different namespace segment, so its extension methods are invisible to extension-method lookup — the `ImplementGenerator` forwards each interface member through a package-class STATIC call (`xcoff_package.ReadAt(m_box, …)`). But this only works for a method the struct **declares directly** (whose `RecvGenerator` ж/ref static exists). A **promoted** interface method — debug/buildinfo's `*xcoff.Section` → `io.ReaderAt`, where `Section` embeds the `io.ReaderAt` interface so `ReadAt` is promoted, not declared — has no such static, so the forward targets a nonexistent overload (CS1501, "no overload takes 3 arguments"). The static forward is gated on a real box/ref-bound static existing; when absent, the adapter forwards through the box VALUE — `m_box.Value.ReadAt(…)` — invoking the struct's own PUBLIC promoted method (the same promotion `File.ReadAt` etc. rely on). A directly-declared method keeps the static forward. (Validated by the `core/debug/buildinfo` build — its `*os.File → io.ReaderAt` [direct `ReadAt`, static] and `*xcoff.Section → io.ReaderAt` [promoted, box-value] adapters — plus the full behavioral suite + tar/math-big/net corpus; a single-assembly behavioral guard cannot host it — the shape needs a struct embedding a THIRD package's interface, cast cross-assembly, so no behavioral test guards it.)<!-- GUARD OWED -->
 
@@ -451,7 +471,7 @@ A Go **type** whose name is a C# reserved keyword (`type fixed struct{…}`, `ty
 Emitted form (from the `KeywordNamedTypes` goldens and its generated adapters):
 At a cast site the converter composes the adapter's name, with no marker:
 
-<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:94-100 -->
+<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:99-105 -->
 ```csharp
 sizer p = new fixedжsizer(Ꮡf);
 …
@@ -519,7 +539,7 @@ The `Ꮡ` prefix already de-keywords the composed name (the keyword + affix rule
 above rely on), so the field declaration strips the escape — matching every `&null` use site, which
 already composes `Ꮡnull` through `boxBaseName`. The var's own property keeps its escape (`@null`), and a
 use site reads the box:
-<!-- source: src/tests/Behavioral/HeapKeywordVar/main.cs.target:9-10, 40 -->
+<!-- source: src/tests/Behavioral/HeapKeywordVar/main.cs.target:10-11, 45 -->
 ```csharp
 internal static readonly ж<slice<byte>> Ꮡnull = new StaticBox<slice<byte>>(slice<byte>("null"u8));
 internal static ref slice<byte> @null => ref ((StaticBox<slice<byte>>)Ꮡnull).ValueSlot;
@@ -826,7 +846,7 @@ interface-field arm:
 
 <!-- illustration: not converter output -->
 ```csharp
-ж<CommonType> ΔType.Common() => m_box.of(PtrType.ᏑCommonType).Common();   // not m_box.Value.Type.Common()
+ж<CommonType> Type.Common() => m_box.of(PtrType.ᏑCommonType).Common();    // not m_box.Value.Type.Common()
 ```
 
 Legal Go guarantees the two can never both be correct at depth 1: promoting one member from two depth-1
@@ -1204,7 +1224,7 @@ beside the `public` method (go-cmp's
 `func Reporter(r interface{ PushStep(PathStep); Report(Result); PopStep() }) Option`, CS0051 in production).
 `visitInterfaceType` consults `isPublicizedLiftedType` ahead of the function-local `internal` default:
 
-<!-- source: src/tests/Behavioral/AnonInterfaceParamPublic/AnonInterfaceParamPublic.cs.target:14 -->
+<!-- source: src/tests/Behavioral/AnonInterfaceParamPublic/AnonInterfaceParamPublic.cs.target:19 -->
 ```csharp
 public partial interface Report_r /*dyn*/ {
 ```
@@ -1234,7 +1254,7 @@ interface from a **directly imported** package (checked with `types.Implements`)
 emits real C# inheritance at the declaration and **skips re-declaring the covered members**
 (redeclaring would HIDE the base member — implementers would need both):
 
-<!-- source: src/core/io/fs/fs.cs:98-102 -->
+<!-- source: src/core/io/fs/fs.cs:99-103 -->
 ```csharp
 partial interface File :
     io.ReadCloser
@@ -1272,7 +1292,7 @@ is ambiguous (CS0121). The interface therefore **redeclares each such method onc
 hides every inherited member of that name; every implementer fills the redeclaration with the same
 method that fills the inherited slots:
 
-<!-- source: src/tests/Behavioral/EmbeddedInterfaceMergedMethod/main.cs:20-26 -->
+<!-- source: src/tests/Behavioral/EmbeddedInterfaceMergedMethod/main.cs:21-27 -->
 ```csharp
 partial interface EmitHost :
     PrinterHost,
@@ -1411,7 +1431,7 @@ result list — C# tuple conversions do not consult user conversions element-wis
 converter deconstructs into temps and converts each element through the usual interface
 machinery (which also records the `GoImplement` pairing):
 
-<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:120-121 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:145-146 -->
 ```csharp
 var (ᴛ1, ᴛ2) = makeRelay();
 return (new relayжReporter(ᴛ1), ᴛ2);
@@ -1425,7 +1445,7 @@ Go lets a MULTI-VALUE call fill the parameters of an enclosing call — `r := t.
 where `parseControl` returns five values feeding `newRange`'s five parameters. C# has no splat, so the inner
 call is deconstructed into markers and passed expanded (`rangeˢ` is the hoisted `"range"` literal):
 
-<!-- source: src/core/text/template/parse/parse.cs:754-755 -->
+<!-- source: src/core/text/template/parse/parse.cs:781-782 -->
 ```csharp
     var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl(rangeˢ);
     var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
@@ -1608,7 +1628,7 @@ it is present — the marker resolves as one unit to the already-simple lifted n
 well-defined even when several files lift the same shape. Emitted form:
 The declaring file, `batch.cs`:
 
-<!-- source: src/core/internal/trace/batch.cs:49-53 -->
+<!-- source: src/core/internal/trace/batch.cs:54-58 -->
 ```csharp
 internal partial interface readBatch_r /*dyn*/ :
     io.Reader,
@@ -1626,7 +1646,7 @@ The cast site in another file, `generation.cs`:
 
 And the record in `package_info.cs`:
 
-<!-- source: src/core/internal/trace/package_info.cs:54 -->
+<!-- source: src/core/internal/trace/package_info.cs:43 -->
 ```csharp
 [assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
 ```
@@ -1656,7 +1676,7 @@ resolved after the file-visit barrier, so the lift named may live in any file of
 no lift claimed resolves to an empty line, and the marker on every other dyn member resolves to nothing.
 Emitted form:
 
-<!-- source: src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.cs.target:7-11, :16-17, :37-39 -->
+<!-- source: src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.cs.target:8-12, :17-18, :46-48 -->
 ```csharp
 partial interface constraints_permitted<T, V> /*dyn*/ {
     (T, bool) query(V _);

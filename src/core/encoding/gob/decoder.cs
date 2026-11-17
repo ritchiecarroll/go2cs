@@ -10,6 +10,7 @@ using io = io_package;
 using reflect = reflect_package;
 using sync = sync_package;
 using @internal;
+using static gob_package;
 
 partial class gob_package {
 
@@ -30,7 +31,7 @@ partial struct Decoder {
     internal io.Reader r;                                                  // source of the data
     internal decBuffer buf;                                                // buffer for more efficient i/o from r
     internal map<typeId, ж<wireType>> wireType;                            // map from remote ID to local description
-    internal map<reflectꓸType, map<typeId, ж<ж<decEngine>>>> decoderCache; // cache of compiled engines
+    internal map<reflect.Type, map<typeId, ж<ж<decEngine>>>> decoderCache; // cache of compiled engines
     internal map<typeId, ж<ж<decEngine>>> ignorerCache;                    // ditto for ignored objects
     internal ж<decoderState> freeList;                                     // list of free decoderStates; avoids reallocation
     internal slice<byte> countBuf;                                         // used for decoding integers while parsing messages
@@ -50,12 +51,14 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
     }
     dec.r = r;
     dec.wireType = new map<typeId, ж<wireType>>();
-    dec.decoderCache = new map<reflectꓸType, map<typeId, ж<ж<decEngine>>>>();
+    dec.decoderCache = new map<reflect.Type, map<typeId, ж<ж<decEngine>>>>();
     dec.ignorerCache = new map<typeId, ж<ж<decEngine>>>();
     dec.countBuf = new slice<byte>(9); // counts may be uint64s (unlikely!), require 9 bytes
 
     return dec;
 }
+
+} partial class gobᴛDecoder {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string gobDuplicateTypeReceivedˢ => ref gobDuplicateTypeReceivedˢᵇ;
@@ -81,7 +84,11 @@ internal static void recvType(this ж<Decoder> Ꮡdec, typeId id) {
     dec.wireType[id] = wire;
 }
 
+} partial class gob_package {
+
 internal static error errBadCount = errors.New("invalid message length");
+
+} partial class gobᴛDecoder {
 
 // recvMessage reads the next count-delimited item from the input. It is the converse
 // of Encoder.writeMessage. It returns false on EOF or other error reading the message.
@@ -115,6 +122,8 @@ internal static void readMessage(this ref Decoder dec, nint nbytes) {
     }
 }
 
+} partial class gob_package {
+
 // toInt turns an encoded uint64 into an int, according to the marshaling rules.
 internal static int64 toInt(uint64 x) {
     var i = (int64)(x >> 1);
@@ -123,6 +132,8 @@ internal static int64 toInt(uint64 x) {
     }
     return i;
 }
+
+} partial class gobᴛDecoder {
 
 internal static int64 nextInt(this ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
@@ -216,12 +227,12 @@ public static error Decode(this ж<Decoder> Ꮡdec, any e) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     if (e == nil) {
-        return Ꮡdec.DecodeValue(new reflectꓸValue());
+        return Ꮡdec.DecodeValue(new reflect.Value());
     }
     var value = reflect.ValueOf(e);
     // If e represents a value as opposed to a pointer, the answer won't
     // get back to the caller. Make sure it's a pointer.
-    if (value.Kind() != reflect.ΔPointer) {
+    if (value.Kind() != reflect.Pointer) {
         dec.err = errors.New(gobAttemptToDecodeIntoAˢ);
         return dec.err;
     }
@@ -238,14 +249,14 @@ private static readonly @string gobDecodeValueOfˢᵇ = "gob: DecodeValue of una
 // a non-nil pointer to data or be an assignable reflect.Value (v.CanSet())
 // If the input is at EOF, DecodeValue returns [io.EOF] and
 // does not modify v.
-public static error DecodeValue(this ж<Decoder> Ꮡdec, reflectꓸValue v) {
+public static error DecodeValue(this ж<Decoder> Ꮡdec, reflect.Value v) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
         ref var dec = ref Ꮡdec.DerefOrNull();
 
         if (v.IsValid()) {
-            if (v.Kind() == reflect.ΔPointer && !v.IsNil()) {
+            if (v.Kind() == reflect.Pointer && !v.IsNil()) {
                 // That's okay, we'll store through the pointer.
             } else if (!v.CanSet()) {
                 return errors.New(gobDecodeValueOfˢ);
@@ -266,6 +277,8 @@ public static error DecodeValue(this ж<Decoder> Ꮡdec, reflectꓸValue v) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡdec.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
+
+} partial class gob_package {
 
 // If debug.go is compiled into the program, debugFunc prints a human-readable
 // representation of the gob data read from r by calling that file's Debug function.
