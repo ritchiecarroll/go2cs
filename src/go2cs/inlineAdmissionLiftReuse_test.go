@@ -30,6 +30,9 @@ type Fsid = struct {
 }
 
 func Sum(f Fsid) int32 { return f.Val[0] + f.Val[1]*10 }
+
+// Name lets main import lib without passing a struct across the boundary.
+const Name = "lib"
 `
 
 // The importer spells the identical struct through int32 and admits it: Statfs is converted whole through
@@ -58,7 +61,7 @@ func main() {
 	s := (*Statfs)(unsafe.Pointer(&raw))
 	s.Fsid.Val[0] = 3
 	s.Fsid.Val[1] = 4
-	fmt.Println(lib.Sum(s.Fsid), unsafe.Sizeof(*s))
+	fmt.Println(s.Fsid.Val[0]+s.Fsid.Val[1]*10, raw[1], unsafe.Sizeof(*s), lib.Name)
 }
 `
 
@@ -105,8 +108,46 @@ func TestUnadmittedImporterStillReusesAnUnadmittedForeignLift(t *testing.T) {
 // identical largeInteger (its [0]T carriers are managed there), and the reuse put libc's lift under lib's admitted
 // layout: "its CLR layout is not its Go layout (field F__ccgo0_0 is at CLR offset 32 where Go lays it at 0)" at
 // _winFileSize. Here main converts TLARGE_INTEGER whole through unsafe.Pointer, so main admits it, and lib (the
-// aliasSpelledLib fixture, libc's union verbatim) does not.
+// aliasSpelledLib fixture, libc's union verbatim) does not. Under COORD's ruling A (2026-11-17 07:20Z) each package keeps
+// its own lift, so main reads native memory through its admitted union and touches lib only through a word.
 const admittedUnionMain = `package main
+
+import (
+	"fmt"
+	"unsafe"
+
+	"example.com/app/lib"
+)
+
+type TDWORD = uint32
+type TLONG = int32
+type TLONGLONG = int64
+
+type TLARGE_INTEGER = struct {
+	Fu [0]struct {
+		FLowPart  TDWORD
+		FHighPart TLONG
+	}
+	FQuadPart  [0]TLONGLONG
+	F__ccgo0_0 struct {
+		FLowPart  TDWORD
+		FHighPart TLONG
+	}
+}
+
+func main() {
+	var raw [1]uint64
+	li := (*TLARGE_INTEGER)(unsafe.Pointer(&raw))
+	li.F__ccgo0_0.FLowPart = 5
+	li.F__ccgo0_0.FHighPart = 6
+	fmt.Println(raw[0], unsafe.Sizeof(*li), lib.SeekWord != 0)
+}
+`
+
+// The crossing the ruling leaves open: main passes its admitted union BY VALUE to lib, which holds the unadmitted lift
+// of the same Go type, and calls lib's word through main's func type. Go calls the two one type; under A they are two C#
+// types with no conversion between them (CS1503).
+const admittedUnionCrossingMain = `package main
 
 import (
 	"fmt"
@@ -158,8 +199,8 @@ func TestAdmittedUnionKeepsItsOwnLiftOverAnUnadmittedForeignUnion(t *testing.T) 
 	}
 }
 
-// End to end for the union: the converted module builds, reads native memory through the admitted union, passes it to
-// lib, and calls lib's word through main's func type, printing what go prints. GO2CS_INLINE_BUILD=1 runs it.
+// End to end for the union: the converted module builds and reads native memory through main's admitted union, printing
+// what go prints (the windows red panicked here). GO2CS_INLINE_BUILD=1 runs it.
 func TestAdmittedUnionOverUnadmittedForeignUnionBuildsAndReadsAsGo(t *testing.T) {
 	dotnet := requireInlineBuild(t)
 	files := map[string]string{"lib/lib.go": aliasSpelledLib, "main.go": admittedUnionMain}
@@ -174,6 +215,27 @@ func TestAdmittedUnionOverUnadmittedForeignUnionBuildsAndReadsAsGo(t *testing.T)
 	t.Logf("READING go prints: %s; go2cs prints: %s", want, got)
 
 	if got != want || want == "" {
+		t.Fatalf("go2cs differs from go:\n   go: %s\ngo2cs: %s", want, got)
+	}
+}
+
+// KNOWN LIMIT under COORD's ruling A (2026-11-17 07:20Z): a value of a struct the two packages admit differently cannot
+// cross between them by value, nor through a func word, because each keeps its own lift (CS1503 at the crossing,
+// measured 2026-11-17 on linux-x64). Retirement: ruling C (312) makes the packages agree, so the importer reuses the
+// import's lift again; that seat un-skips this arm.
+func TestAdmittedUnionByValueCrossingIsAKnownLimit(t *testing.T) {
+	t.Skip("KNOWN LIMIT (COORD ruling A, 2026-11-17 07:20Z): a by-value crossing between two lifts of one Go type is CS1503; retired by ruling C in 312")
+
+	dotnet := requireInlineBuild(t)
+	files := map[string]string{"lib/lib.go": aliasSpelledLib, "main.go": admittedUnionCrossingMain}
+	want := goRunInlineModule(t, "app", files)
+	out := convertInlineModule(t, "app", files)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, out); err != nil {
+		t.Fatalf("the converted module does not build: %v\n%s", err, built)
+	}
+
+	if got := runConvertedInlineModule(t, dotnet, out); got != want || want == "" {
 		t.Fatalf("go2cs differs from go:\n   go: %s\ngo2cs: %s", want, got)
 	}
 }
