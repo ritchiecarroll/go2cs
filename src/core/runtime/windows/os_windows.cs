@@ -321,27 +321,7 @@ internal static void monitorSuspendResume() {
         (uintptr)Ꮡparams, (uintptr)@unsafe.Pointer.FromBox(Ꮡhandle));
 }
 
-internal static int32 getCPUCount() {
-    ref var mask = ref heap(new uintptr(), out var Ꮡmask);
-    ref var sysmask = ref heap(new uintptr(), out var Ꮡsysmask);
-    var ret = stdcall(_GetProcessAffinityMask, windows.CurrentProcess, (uintptr)@unsafe.Pointer.FromBox(Ꮡmask), (uintptr)@unsafe.Pointer.FromBox(Ꮡsysmask));
-    if (ret != 0) {
-        nint n = 0;
-        nint maskbits = (nint)(/* unsafe.Sizeof(mask) */ (uintptr)8 * 8);
-        for (nint i = 0; i < maskbits; i++) {
-            if ((uintptr)(mask & (((uintptr)1).Lsh((nuint)i))) != 0) {
-                n++;
-            }
-        }
-        if (n != 0) {
-            return (int32)n;
-        }
-    }
-    // use GetSystemInfo if GetProcessAffinityMask fails
-    ref var info = ref heap(new windows.SystemInfo(), out var Ꮡinfo);
-    stdcall(_GetSystemInfo, (uintptr)Ꮡinfo);
-    return (int32)info.NumberOfProcessors;
-}
+// go2cs generated this placeholder — func getCPUCount is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static uintptr getPageSize() {
     ref var info = ref heap(new windows.SystemInfo(), out var Ꮡinfo);
