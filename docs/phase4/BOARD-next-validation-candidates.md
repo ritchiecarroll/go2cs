@@ -40503,4 +40503,89 @@ libc package (nugetgo) carries no seed, though, and then sqlite on windows meets
 
 — C2 (2026-11-17)
 
+
+## 2026-11-17 — C2 (ruling C item 3, scope b): the `-recurse` importer seed, measured — windows recovers its one crossing; linux trades 5 reuses for 5; a second-order loss is OPEN
+
+**The rule, as built.** In a `-recurse` run with no flag, the converter seeds an import with an alias when two things
+hold: an importer admits an anonymous struct identical to that alias, and the import does not admit it. The import
+is the first in import-path order that declares the alias. This is path order, NOT import-statement order: it is the
+order `importedStructLift` reuses in. When the import has several identical aliases, the first by name is seeded.
+The derivation is a fixed point over the closure in dependency order, against in-memory stamps. Its seeds form a union
+with the `-inline-arrays` flag's. `-<pattern>` beats both. A seeded struct is admitted even when it holds no array; an
+unseeded array-free struct is still never admitted (negative control
+`TestAnArrayFreeStructIsAdmittedOnlyWhenSeeded`).
+
+**Census.** sqlite closure, converter e190d6da30, no flag. Base: 0881fa6371 with the flag. The prediction is mailbox
+029483ad9, scored at 47c03e896.
+
+| target | seeds (passes) | reuses recovered | reuses lost | reuse=true decisions | wall |
+|---|---|---|---|---|---|
+| windows/amd64 | 1 (1): libc#largeInteger | the flag's, line for line | 0 | 26 → 26 | 133 s vs 130 |
+| linux/amd64 | 3 (1): uuid#Timespec, Timeval, Fsid_t | 5: libc ← uuid | 5: sqlite/lib ← libc | 73 → 58 | 137 s vs 132 |
+| linux/arm64 | the same 3 | the same 5 | the same 5 | 73 → 57 | 143 s vs 131 |
+| darwin/amd64 | 7 (2) | 8: libc ← netdb, pthread, wctype | 0 | 43 → 53 | 103 s vs 96 |
+
+**What the prediction missed.**
+- linux, the lost reuses: I predicted 2 lost (`Titimerval`, `Titimerspec`); 5 were lost. The other 3 are `Ttimespec`,
+  `Ttimeval` and `Tstat`. Once seeded, libc REUSES uuid's lifts, so it no longer publishes its own. sqlite/lib reuses
+  only a lift its DIRECT import declares (`importedStructLiftSource`), so it finds none and keeps its own.
+- linux, the third seed's name: I predicted `X__fsid_t`; it was `Fsid_t`. Both alias one struct, so it is one lift.
+- darwin, the seed count: I predicted 5; it was 7. The extra seed in pass 1 is sqlite/lib → libc#timespec. The extra
+  seed in pass 2 is libc → libc/fcntl#Timespec. Pass 2 hands libc's new lift on to fcntl, so sqlite/lib gains nothing
+  from its own demand. It is the same second-order shape as linux.
+
+**Gate (COORD 19:18Z): no lost reuse crosses by value.**
+- The linux emission grep of sqlite/lib for `Titimerval|Titimerspec|Itimerval|Itimerspec` finds 12 lines per
+  architecture, and all are sqlite/lib's own declarations: lift records, alias records, stubs, global usings and the
+  2 struct bodies. No code uses either type.
+- The Go-level crossing census lists every use in a convert-set package of another convert-set package's func, var,
+  field or type name whose type holds an anonymous struct by value. It finds 0 uses from sqlite/lib into libc on
+  linux, so none of the 5 lost types crosses; sqlite/lib passes libc only `uintptr`.
+- libc ← uuid, the pair the seed repairs on linux, also has 0 crossings.
+- windows has 1 crossing: sqlite/lib → `libc.XSetFilePointerEx(LARGE_INTEGER)`. That is the one ruling C exists for,
+  and the seed now repairs it with no flag.
+- Expected: the linux closure build reads CS1503 = 0. That build is COORD's leg after 311.
+
+**Side measurement: std stamps.** The pre-pass reads only in-memory stamps, while the real conversion also reads std
+stamps from disk. Giving the pre-pass in-memory std stamps changes 0 of 13 / 13 / 23 / 38 convert-set admissions
+(linux amd64, linux arm64, windows, darwin). The gap is latent; it would be closed by a fallback to the real lookup.
+
+**OPEN, for a ruling (mailbox 47c03e896).** Should an importer follow its direct import's own resolution? Example: P
+imports Q, and Q's identical alias names a lift that Q reuses from R. P would then reuse R's lift too, under the same
+admission and nested checks. That turns linux's 5-for-5 trade into 10 agreements, and darwin's timespec demand into a
+reuse. Estimated cost: about 3 h, red first, plus an e2e arm over P ← Q ← R.
+
+— C2 (2026-11-17)
+
+## 2026-11-17 — C2 (ruling C item 3, scope a): foreign NAMED structs converted whole while their declaring package does not admit them — census; reading OWED on darwin
+
+**The shape.** An importer writes `(*pkg.T)(unsafe.Pointer(p))`, where `T` is a named struct of another package and
+`T` holds an array by value. Admission treats that as the declaring package's decision and skips it
+(`computeInlineArrayAdmission`, "a seed declared in another package"). If the declaring package never converts `T`
+whole itself, `T` keeps `array<T>` storage and the importer reads native memory through it.
+
+**Census.** A Go-level probe over the sqlite closure, per target, run against e190d6da30. It lists every whole
+conversion whose target is a foreign named struct, and judges each by the declaring package's admission.
+
+| target | foreign named targets | array-holding, NOT admitted by their package |
+|---|---|---|
+| linux/amd64, linux/arm64 | 2 each (`reflect.StringHeader`, `sync.Mutex`), both array-free | **0** |
+| windows/amd64 | 6 | **1 type, 2 sites**: x/sys/windows → `syscall.RawSockaddrAny`. This is std's own pair-rule state (both sides `array<T>`). |
+| darwin/amd64 | 14 | **2 types, 4 sites**: libc → x/sys/unix `FdSet` (3) and `Utsname` (1) |
+
+The other darwin targets are admitted by x/sys/unix itself (`Dirent`, `Rusage`, `Stat_t`, `Statfs_t`, `Termios`,
+`Timeval`) or hold no array (`Flock_t`, `Kevent_t`, `Timespec`, `Winsize`, `StringHeader`, `Mutex`).
+
+**Not measured: whether the 4 darwin sites read correctly today.** That needs a darwin run of libc's select and
+uname paths, and this box cannot run darwin. The shape predicts wrong bytes, or a refusal from golib's reinterpret,
+not a compile error. Each is a darwin-only site.
+
+**Determinism caveat (the flag and item 3 too).** A package converted on its own carries no importer seeds. For
+example, a stand-alone x/sys/unix or libc sub-package nugetgo package lays its types out without the importer's
+demand. A fix that seeds the declaring package from its importers inherits that caveat: the stand-alone build needs
+the hand seed. Each stamp records its seeds, so every consumer reads the truth. The trap is a mismatch between two
+builds, not a wrong record.
+
+— C2 (2026-11-17)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

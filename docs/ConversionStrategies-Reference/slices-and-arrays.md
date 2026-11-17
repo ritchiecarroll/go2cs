@@ -813,6 +813,44 @@ by-value parameter, returned field, array and slice index, range value, map valu
 Validated end-to-end by crypto/sha1, crypto/sha256, crypto/sha512 and bufio, whose only residue is
 the `alloc-profile` disclosure the extra managed allocations force.)
 
+## A struct read from native memory holds its arrays inline, and seeds make two packages agree
+
+A struct a package converts whole through `unsafe.Pointer` must have Go's bytes, so its arrays are held INLINE (the
+`go.arrays` family, `array2<T>` and so on) rather than as golib's `array<T>`, together with every struct it holds by
+value. That decision is per package, and it is recorded in the package's `package_info.cs`
+([`-inline-arrays`](../CommandLine.md) overrides it).
+
+Two packages can spell one Go type: an alias of an identical anonymous struct in each, as ccgo-generated code does
+(modernc.org/sqlite's `TLARGE_INTEGER` and modernc.org/libc's `largeInteger`). The importer reuses the import's
+C# type for it only when the two agree on admission, every struct it holds included. Otherwise the importer keeps its
+own type, and a value cannot cross between the packages by value. A SEED makes them agree. It admits one type in the
+package that declares it, as if that package converted the type whole:
+- `-inline-arrays=<import path>#<TypeName>` seeds by hand. The sqlite demo for Windows passes
+  `modernc.org/libc#largeInteger`.
+- In a `-recurse` run the converter seeds by itself. When an importer admits an anonymous struct identical to an alias
+  that a direct import declares and does not admit, that import is seeded with the alias. The import chosen is the
+  first in IMPORT-PATH order (not the order of the `import` statement) that declares it, the one whose type the
+  importer reuses. When that import declares several identical aliases, the first by name is seeded; they name one
+  struct, so they share one lift. The derivation repeats over the whole closure until no new seed appears, because an import's
+  admission can depend on its own imports' records.
+
+The two kinds of seed are one set: a type named by both is seeded once. `-inline-arrays=-<pattern>` turns a package's
+admission off and beats every seed; a package forced on needs none. A seed is recorded as `GoInlineArraySeed`, so a
+`-tests` conversion repeats it.
+
+A SEEDED struct is admitted even when it holds no array. An unseeded array-free struct is never admitted, because its
+layout is already Go's. The importer, though, admits an array-free struct whenever an admitted struct holds it, and the
+seed exists to match that. Admitting an array-free struct moves no field.
+
+An importer reuses only a lift its DIRECT import declares. When a seed makes that import reuse a lift from ITS OWN
+import, the importer two levels up finds no lift to reuse and keeps its own, so it stops agreeing with the import in the
+middle. On linux the sqlite closure loses 5 such reuses this way (sqlite/lib from libc) while gaining 5 (libc from
+libc/uuid/uuid); none of the 10 types crosses a package boundary by value.
+
+A package converted ON ITS OWN is not seeded by the importers it will have, so it can lay a type out differently from
+the same package converted inside a `-recurse` closure. Each record states what was admitted, so a consumer reads the
+truth either way, but a stand-alone build of an import needs the hand seed where its importers need it.
+
 ## Nil-vs-empty slice identity (`s == nil` is representation nilness, not emptiness)
 Go distinguishes a **nil** slice (nil backing pointer) from a **non-nil empty** slice (a real backing
 pointer with zero length), and programs observe the difference through `s == nil`, `reflect.DeepEqual`,
