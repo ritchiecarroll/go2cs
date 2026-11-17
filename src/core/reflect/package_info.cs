@@ -137,8 +137,8 @@ public static partial class reflect_package
     internal partial struct layoutKey {}
     [GoValueClone("abid")] internal partial struct layoutType {}
     [GoValueClone("regPtrs")] internal partial struct makeFuncCtxt {}
-    internal partial struct makeFuncImpl {}
-    internal partial struct methodValue {}
+    [GoValueClone("makeFuncCtxt")] internal partial struct makeFuncImpl {}
+    [GoValueClone("makeFuncCtxt")] internal partial struct methodValue {}
     internal partial struct nonEmptyInterface {}
     internal partial struct ptrType {}
     internal partial struct rtype {}

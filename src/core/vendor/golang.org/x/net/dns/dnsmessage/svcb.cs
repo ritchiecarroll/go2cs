@@ -326,6 +326,7 @@ public static error SVCBResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSVCB
 // HTTPSResource adds a single HTTPSResource.
 public static error HTTPSResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔHTTPSResource r) {
     h = h.ΔClone();
+    r = r.ΔClone();
 
     h.Type = r.realType();
     return Ꮡb.genericSVCBResource(h, r.SVCBResource);

@@ -85,12 +85,12 @@ public static partial class aes_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct block {}
+    [GoValueClone("blockExpanded")] internal partial struct block {}
     [GoValueClone("enc", "dec")] internal partial struct blockExpanded {}
-    public partial struct Block {}
-    [GoValueClone("iv")] public partial struct CBCDecrypter {}
-    [GoValueClone("iv")] public partial struct CBCEncrypter {}
-    public partial struct CTR {}
+    [GoValueClone("block")] public partial struct Block {}
+    [GoValueClone("b", "iv")] public partial struct CBCDecrypter {}
+    [GoValueClone("b", "iv")] public partial struct CBCEncrypter {}
+    [GoValueClone("b")] public partial struct CTR {}
     public partial struct KeySizeError {}
     // </TypeAccessibility>
 

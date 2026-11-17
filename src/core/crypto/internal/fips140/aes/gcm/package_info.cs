@@ -87,11 +87,11 @@ public static partial class gcm_package
     // <TypeAccessibility>
     internal partial struct gcmFieldElement {}
     internal partial struct gcmPlatformData {}
-    [GoValueClone("k1", "k2")] public partial struct CMAC {}
+    [GoValueClone("b", "k1", "k2")] public partial struct CMAC {}
     [GoValueClone("mac")] public partial struct CounterKDF {}
-    public partial struct GCM {}
-    public partial struct GCMWithCounterNonce {}
-    public partial struct GCMWithXORCounterNonce {}
+    [GoValueClone("cipher")] public partial struct GCM {}
+    [GoValueClone("g")] public partial struct GCMWithCounterNonce {}
+    [GoValueClone("g")] public partial struct GCMWithXORCounterNonce {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

@@ -50,7 +50,7 @@ internal static partial (ж<GCM>, error) newGCM(ж<GCM> Ꮡg, ж<aes.Block> Ꮡc
     if (cipher.BlockSize() != gcmBlockSize) {
         return (default, errors.New(cipherNewGCMRequires128ˢ));
     }
-    g.cipher = cipher;
+    g.cipher = cipher.ΔClone();
     g.nonceSize = nonceSize;
     g.tagSize = tagSize;
     initGCM(ref (Ꮡg).DerefOrNull());

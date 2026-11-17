@@ -58,7 +58,7 @@ public static (ж<GCMWithCounterNonce>, error) NewGCMWithCounterNonce(ж<aes.Blo
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new GCMWithCounterNonce(g: g.Value)), default);
+    return (Ꮡ(new GCMWithCounterNonce(g: g.Value.ΔClone())), default);
 }
 
 // NewGCMForTLS12 returns a new AEAD that works like GCM, but enforces the
@@ -72,7 +72,7 @@ public static (ж<GCMWithCounterNonce>, error) NewGCMForTLS12(ж<aes.Block> ciph
         return (default, err);
     }
     // TLS 1.2 counters always start at zero.
-    return (Ꮡ(new GCMWithCounterNonce(g: g.Value, startReady: true)), default);
+    return (Ꮡ(new GCMWithCounterNonce(g: g.Value.ΔClone(), startReady: true)), default);
 }
 
 // NewGCMForSSH returns a new AEAD that works like GCM, but enforces the
@@ -84,7 +84,7 @@ public static (ж<GCMWithCounterNonce>, error) NewGCMForSSH(ж<aes.Block> cipher
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new GCMWithCounterNonce(g: g.Value)), default);
+    return (Ꮡ(new GCMWithCounterNonce(g: g.Value.ΔClone())), default);
 }
 
 partial struct GCMWithCounterNonce {
@@ -163,7 +163,7 @@ public static (ж<GCMWithXORCounterNonce>, error) NewGCMWithXORCounterNonce(ж<a
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default);
+    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value.ΔClone())), default);
 }
 
 // NewGCMForTLS13 returns a new AEAD that works like GCM, but enforces the
@@ -175,7 +175,7 @@ public static (ж<GCMWithXORCounterNonce>, error) NewGCMForTLS13(ж<aes.Block> c
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default);
+    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value.ΔClone())), default);
 }
 
 // NewGCMForHPKE returns a new AEAD that works like GCM, but enforces the
@@ -187,7 +187,7 @@ public static (ж<GCMWithXORCounterNonce>, error) NewGCMForHPKE(ж<aes.Block> ci
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default);
+    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value.ΔClone())), default);
 }
 
 // NewGCMForQUIC returns a new AEAD that works like GCM, but enforces the
@@ -206,7 +206,7 @@ public static (ж<GCMWithXORCounterNonce>, error) NewGCMForQUIC(ж<aes.Block> ci
     if (err != nil) {
         return (default, err);
     }
-    var gcm = Ꮡ(new GCMWithXORCounterNonce(g: g.Value));
+    var gcm = Ꮡ(new GCMWithXORCounterNonce(g: g.Value.ΔClone()));
     var errΔ1 = gcm.SetNoncePrefixAndMask(iv); if (errΔ1 != nil) {
         return (default, errΔ1);
     }

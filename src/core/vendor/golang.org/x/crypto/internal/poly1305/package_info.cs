@@ -75,11 +75,11 @@ public static partial class poly1305_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct mac {}
-    [GoValueClone("buffer")] internal partial struct macGeneric {}
+    [GoValueClone("macGeneric")] internal partial struct mac {}
+    [GoValueClone("macState", "buffer")] internal partial struct macGeneric {}
     [GoValueClone("h", "r", "s")] internal partial struct macState {}
     internal partial struct uint128 {}
-    public partial struct MAC {}
+    [GoValueClone("mac")] public partial struct MAC {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
