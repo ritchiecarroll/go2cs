@@ -38,6 +38,11 @@ import (
 // only anonymous ones, so without the digest its -tests check compared an empty list with an empty list). A pair that
 // reaches another package's anonymous type is counted, not judged. A package with nothing to record carries no section,
 // so a package that admits nothing is byte-identical to one converted before the stamp existed.
+//
+// Ruling C (COORD 2026-11-17 12:14Z) adds two records. GoInlineArraySeed names each -inline-arrays seed the package
+// declares, so a -tests run selects the same types. GoInlineArrayAnonymous carries a digest per admitted ANONYMOUS key,
+// so an importer that admits an identical struct can tell whether this package's lift of it is admitted: with two or
+// more anonymous keys the count and digest alone cannot say which (W18's unknown-several-anonymous rows).
 
 const (
 	inlineArraysSectionStart = "// <InlineArrays>"
@@ -53,10 +58,11 @@ func inlineArraysProseLines() []string {
 	return []string{
 		"// The struct types whose arrays this package holds inline (the go.arrays family), as the converter",
 		"// admitted them: a `GoInlineArrayType` record per named type, a `GoInlineArrayKeys` record with the",
-		"// count and a digest of every admitted type (anonymous ones included), and a `GoInlineArrays` record",
-		"// naming the rule when it is not the default. A -tests conversion applies the same rule rather than",
-		"// deciding again, and refuses a production set that admits differently. The section exists only while",
-		"// there is a record to hold.",
+		"// count and a digest of every admitted type (anonymous ones included), a `GoInlineArrayAnonymous`",
+		"// record per admitted anonymous type, a `GoInlineArraySeed` record per -inline-arrays seed, and a",
+		"// `GoInlineArrays` record naming the rule when it is not the default. A -tests conversion applies the",
+		"// same rule and seeds rather than deciding again, and refuses a production set that admits differently.",
+		"// The section exists only while there is a record to hold.",
 	}
 }
 
@@ -71,7 +77,7 @@ var inlineArraysSection = recordSection{
 }
 
 // inlineArrayRecordPattern parses either record, in any spelling rootAttributeName gives it.
-var inlineArrayRecordPattern = regexp.MustCompile(`^\[assembly: (?:global::)?(?:go\.golib\.)?(GoInlineArrays|GoInlineArrayType)\("([^"]+)"\)\]$`)
+var inlineArrayRecordPattern = regexp.MustCompile(`^\[assembly: (?:global::)?(?:go\.golib\.)?(GoInlineArrays|GoInlineArrayType|GoInlineArraySeed|GoInlineArrayAnonymous)\("([^"]+)"\)\]$`)
 
 // inlineArrayKeysPattern parses the count-and-digest record.
 var inlineArrayKeysPattern = regexp.MustCompile(`^\[assembly: (?:global::)?(?:go\.golib\.)?GoInlineArrayKeys\((\d+), "([0-9a-f]+)"\)\]$`)
@@ -86,6 +92,19 @@ type inlineArrayStamp struct {
 	types     []string // the admitted named types' Go names, sorted
 	keyCount  int      // how many struct types were admitted, anonymous ones included (0 when no record says)
 	keyDigest string   // inlineArrayKeyDigest of those keys ("" when none)
+	seeds     []string // the -inline-arrays seeds the package declared, sorted
+	anonymous []string // inlineArrayKeyDigest of each admitted anonymous key, sorted (nil for a stamp before ruling C)
+}
+
+// admitsAnonymous reports whether the stamp records the anonymous key as admitted, and whether it can say: only a
+// stamp that records its anonymous keys (ruling C) can.
+func (s inlineArrayStamp) admitsAnonymous(key string) (admitted, known bool) {
+	if s.anonymous == nil {
+		return false, false
+	}
+
+	_, found := slices.BinarySearch(s.anonymous, inlineArrayKeyDigest([]string{key}))
+	return found, true
 }
 
 // inlineArrayKeyDigest is the first 16 hex digits of the SHA-256 of the admitted keys, sorted, one per line.
@@ -131,7 +150,35 @@ func inlineArrayStampRecords(a *inlineArrayAdmission, mode string) []string {
 		records = append(records, fmt.Sprintf("[assembly: %s(%q)]", rootAttributeName("golib.GoInlineArrayType", false), name))
 	}
 
+	for _, digest := range a.anonymousDigests() {
+		records = append(records, fmt.Sprintf("[assembly: %s(%q)]", rootAttributeName("golib.GoInlineArrayAnonymous", false), digest))
+	}
+
+	if a != nil {
+		for _, name := range a.seeded {
+			records = append(records, fmt.Sprintf("[assembly: %s(%q)]", rootAttributeName("golib.GoInlineArraySeed", false), name))
+		}
+	}
+
 	return records
+}
+
+// anonymousDigests returns the digest of each admitted anonymous struct key, sorted.
+func (a *inlineArrayAdmission) anonymousDigests() []string {
+	if a == nil {
+		return nil
+	}
+
+	var digests []string
+
+	for _, key := range a.keyOrder {
+		if strings.HasPrefix(key, "anon:") {
+			digests = append(digests, inlineArrayKeyDigest([]string{key}))
+		}
+	}
+
+	sort.Strings(digests)
+	return digests
 }
 
 // namedTypes returns the Go names of the admitted named struct types the package declares, sorted.
@@ -171,14 +218,21 @@ func parseInlineArrayStamp(lines []string) inlineArrayStamp {
 			continue
 		}
 
-		if matches[1] == "GoInlineArrays" {
+		switch matches[1] {
+		case "GoInlineArrays":
 			stamp.mode = matches[2]
-		} else {
+		case "GoInlineArraySeed":
+			stamp.seeds = append(stamp.seeds, matches[2])
+		case "GoInlineArrayAnonymous":
+			stamp.anonymous = append(stamp.anonymous, matches[2])
+		default:
 			stamp.types = append(stamp.types, matches[2])
 		}
 	}
 
 	sort.Strings(stamp.types)
+	sort.Strings(stamp.seeds)
+	sort.Strings(stamp.anonymous)
 	return stamp
 }
 
@@ -240,9 +294,14 @@ func (a *inlineArrayAdmission) foreignAdmits(t types.Type) (admitted bool, known
 	return found, true
 }
 
-// stampedOptions returns options whose -inline-arrays value applies a recorded rule to pkgPath and nothing else.
-func stampedOptions(options Options, pkgPath string, mode string) Options {
+// stampedOptions returns options whose -inline-arrays value applies a recorded rule, and the recorded seeds, to pkgPath
+// and nothing else.
+func stampedOptions(options Options, pkgPath string, mode string, seeds []string) Options {
 	options.inlineArrays = inlineArrayOverride{}
+
+	if len(seeds) > 0 {
+		options.inlineArrays.seeds = map[string][]string{pkgPath: slices.Clone(seeds)}
+	}
 
 	switch mode {
 	case inlineArraysModeForced:
@@ -262,7 +321,7 @@ func admitFromStamp(files []*ast.File, fset *token.FileSet, pkg *types.Package, 
 		return nil, fmt.Errorf("package_info.cs records inline-array rule %q, which this converter does not know", stamp.mode)
 	}
 
-	a := computeInlineArrayAdmission(files, fset, pkg, info, pkgDir, stampedOptions(options, pkg.Path(), stamp.mode))
+	a := computeInlineArrayAdmission(files, fset, pkg, info, pkgDir, stampedOptions(options, pkg.Path(), stamp.mode, stamp.seeds))
 
 	if got := a.namedTypes(); !slices.Equal(got, stamp.types) {
 		return nil, fmt.Errorf("the production package_info.cs records inline arrays for %s, but its production files admit %s under the same rule; reconvert the package first",
@@ -304,7 +363,7 @@ func inlineArrayTestsStamp(stamp inlineArrayStamp, read bool, pkgPath string, op
 		return stamp, nil
 	}
 
-	if options.inlineArrays.matches(options.inlineArrays.force, pkgPath) || options.inlineArrays.matches(options.inlineArrays.off, pkgPath) {
+	if options.inlineArrays.matches(options.inlineArrays.force, pkgPath) || options.inlineArrays.matches(options.inlineArrays.off, pkgPath) || len(options.inlineArrays.seedsFor(pkgPath)) > 0 {
 		return inlineArrayStamp{}, fmt.Errorf("-inline-arrays names %s, but its production package_info.cs cannot be read, so the rule production applied is unknown; convert the package first", pkgPath)
 	}
 

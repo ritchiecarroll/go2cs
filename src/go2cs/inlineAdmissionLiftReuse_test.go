@@ -144,9 +144,9 @@ func main() {
 }
 `
 
-// The crossing the ruling leaves open: main passes its admitted union BY VALUE to lib, which holds the unadmitted lift
-// of the same Go type, and calls lib's word through main's func type. Go calls the two one type; under A they are two C#
-// types with no conversion between them (CS1503).
+// The crossing ruling A left open: main passes its admitted union BY VALUE to lib, and calls lib's word through main's
+// func type. Go calls the two one type; under A alone they are two C# types with no conversion between them (CS1503).
+// Ruling C's seed makes lib admit the union too, so they are one lift again.
 const admittedUnionCrossingMain = `package main
 
 import (
@@ -219,17 +219,16 @@ func TestAdmittedUnionOverUnadmittedForeignUnionBuildsAndReadsAsGo(t *testing.T)
 	}
 }
 
-// KNOWN LIMIT under COORD's ruling A (2026-11-17 07:20Z): a value of a struct the two packages admit differently cannot
-// cross between them by value, nor through a func word, because each keeps its own lift (CS1503 at the crossing,
-// measured 2026-11-17 on linux-x64). Retirement: ruling C (312) makes the packages agree, so the importer reuses the
-// import's lift again; that seat un-skips this arm.
-func TestAdmittedUnionByValueCrossingIsAKnownLimit(t *testing.T) {
-	t.Skip("KNOWN LIMIT (COORD ruling A, 2026-11-17 07:20Z): a by-value crossing between two lifts of one Go type is CS1503; retired by ruling C in 312")
-
+// RETIRED KNOWN LIMIT (COORD ruling A, 2026-11-17 07:20Z; retired by ruling C, 12:14Z). Under A a value of a struct the
+// two packages admit differently could not cross between them by value, nor through a func word, because each kept its
+// own lift (CS1503, and on windows G's func-cookie panic at _winHandleSeek). With lib's largeInteger seeded
+// (-inline-arrays=<lib>#largeInteger) lib admits it and records the anonymous key, so main's admitted union reuses lib's
+// lift and the value crosses as in go.
+func TestAdmittedUnionByValueCrossingWithTheSeedReadsAsGo(t *testing.T) {
 	dotnet := requireInlineBuild(t)
 	files := map[string]string{"lib/lib.go": aliasSpelledLib, "main.go": admittedUnionCrossingMain}
 	want := goRunInlineModule(t, "app", files)
-	out := convertInlineModule(t, "app", files)
+	out := convertInlineModuleWith(t, "app", files, largeIntegerSeed)
 
 	if built, err := buildConvertedInlineModule(t, dotnet, out); err != nil {
 		t.Fatalf("the converted module does not build: %v\n%s", err, built)

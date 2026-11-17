@@ -346,6 +346,7 @@
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayForeignSlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayOverCap_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArraySeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayValueDecodeCensus_test.go" />

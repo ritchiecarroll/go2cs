@@ -40458,4 +40458,49 @@ above converts, and its output equals Go's; a twin that sorts before the rebindi
 
 — P1 (2026-11-16)
 
+## 2026-11-17 — C2 (ruling C, COORD 12:14Z: a row for .5): a `-recurse` importer seed would recover 15 lift reuses the demo flag leaves lost — OPEN for .5, with a measured cost and a corrected design note
+
+**What 312 ships.** Ruling C adds two pieces:
+- A per-type seed, `-inline-arrays=<import path>#<TypeName>`.
+- A digest record per admitted anonymous key, `GoInlineArrayAnonymous`.
+
+The sqlite demo and release-smoke conversions pass `-inline-arrays=modernc.org/libc#largeInteger`. That
+retires ruling A's known limit on windows: libc admits `largeInteger`, and sqlite/lib reuses its lift.
+
+**The rule this row is for, shape (3).** In a `-recurse` run, seed each foreign type an importer admits in the
+package that declares it. This is a pre-pass over the closure: no flag, and no module knowledge in the converter.
+Its seeds are exactly the census rows where need=true and have=false KNOWN (the importer admits a struct
+identical to one its import declares and does not admit). At 6bcc05d11f/bd2a09c423 those rows are:
+- **windows:** sqlite/lib <- libc `largeInteger` (+ its inner struct). The same as the flag.
+- **linux amd64 and arm64:** libc <- libc/uuid/uuid `Timespec`, `Timeval` and `X__fsid_t`.
+- **darwin:** libc <- netdb `In_addr` and `Servent`; netinet/in `In_addr`; pthread `Tm`; time `Tm`; wctype
+  `X_RuneLocale` and `X_RuneRange`.
+
+**The 10 extra seeds** are the linux 3 and the darwin 7.
+
+**The 15 reuses they recover:**
+- linux, per architecture (5): libc <- uuid `Timespecᴛ1`, `Timevalᴛ1` and `X__fsid_tᴛ1`, plus, transitively,
+  `Itimervalᴛ1` and `Itimerspecᴛ1`. These are the two the transitive match gave up at bd2a09c423.
+- darwin (10): libc <- the 7 seeded lifts, plus, transitively, netdb `Ip_mreqᴛ1`, `Ip_mreqnᴛ1` and `Ip_optsᴛ1`.
+
+Not measured: whether the faces check keeps any of the 10 out (`GO2CS2009`). Each moves a layout in a package
+that no closure build has exercised: uuid, and 5 darwin packages.
+
+**Correction to the costing I posted (c6088af4f).** I wrote that a pre-pass gives the same admission the real
+conversion will, because `computeInlineArrayAdmission` reads no foreign stamp. That is wrong. It reads foreign
+stamps through `foreignAdmits` in two places:
+- `reconcileDefinedTypes`: a defined type over another package's named struct, go-winio's GUID.
+- `closureAdmitted`: a closure that reaches another package's array-holding struct.
+
+A pre-pass that walks importers first therefore sees those imports' stamps missing or stale. So (3) needs either
+a first pass in dependency order that computes every package's own admission before the importer pass, or a
+fixed point. That makes it dearer than the 3-4 hours posted. Price it again before .5.
+
+**Determinism caveat (the flag too).** libc converted on its own lays out differently from libc converted inside
+the sqlite closure with the seed. Each stamp records its seeds, so every consumer reads the truth. A stand-alone
+libc package (nugetgo) carries no seed, though, and then sqlite on windows meets the WAL func-cookie panic again
+([Known issues](../KnownIssues.md)). The flag stays the answer there.
+
+— C2 (2026-11-17)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
