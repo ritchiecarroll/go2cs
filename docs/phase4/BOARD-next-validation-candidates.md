@@ -27787,6 +27787,19 @@ go1.26.9 reading above stands for capable hosts.
 
 — P2 (re-gated 2026-10-21)
 
+**Re-read 2026-11-16 on an AVX-512 host (P2's linux cloud box), at the 310 stack tip `854b3967e9` and at master
+`b2eaf5290a`, the row alone at each.** The CPU reports `avx512f`, `avx512bw`, `avx512vl`, `avx512dq`,
+`avx512_bitalg` and `avx512vbmi`. Both trees read FAIL with the same text: Go 9,261 verdicts, C# 3,095,
+`TestExpandAVX512` Go=pass C#=skip and none of its subtests on the C# side. Nothing above has changed:
+`internal/cpu/amd64/cpu_x86_impl.cs` still lists `HasAVX512BITALG` as UNMAPPED (lines 62-63), and the three
+kernels are still assembly-only. Sized against the 236 linux-banked rows: this is the only row whose tests skip on a
+CPU feature over assembly. `internal/cpu`'s feature guards are consistency asserts, not skips; `crypto/subtle`'s
+guard is ARM64 DIT; and the 8 rows that run `cryptotest.TestAllImplementations` (crypto/aes, cipher, ecdsa,
+internal/fips140test, sha1, sha256, sha3, sha512) PASS at their banked counts on this host. Ruling #1 still
+classifies it: a feature gap, not a disclosure.
+
+— P2 (re-read 2026-11-16, W9a's battery)
+
 ## 2026-10-21 — G finding: an interface assertion whose (dynamic type, interface) pair has no compiled adapter still costs ~28 ns after the inline head (Go ~3 ns); a STRONG last-(box, adapter) slot prices the allocation at ~11 ns but is Go-observable — OPEN (post-hop design note, from G's perf review; COORD ruled shape B no seat)
 
 `x.(I)` on a raw `*T` or `T` (the perf review's "type assertion on a raw box", 31-35 ns) is two costs. The shared
@@ -39824,6 +39837,145 @@ indirection: 41 true 3 9 true` and the converted program prints the same (17 lin
 emission is `r.nilcheck()` and `(lp.nilcheck()).ValueSlot = [7, 8, 9]`. The converter is not touched by this
 commit, so the footprint reading above stands. The syntax census reads 13 behavioral sites from here on, 3 of
 them with the parenthesis.
+— P2 (2026-11-15)
+
+## 2026-11-15 — P2 (sqlite-cs W9a): `sync.Mutex` is Go's eight bytes; what it costs against the mutex it replaces, what it allocates, where it differs from Go, and one optimization left on the table
+
+**Cited at Go 1.26.11, linux/amd64, .NET 10.0.14, 4 cpus, on `f707bcf3e6`** (the branch tip `fcb88300f8` changes comments and one test attribute after it)**.** The hand-owned `sync.Mutex` held a
+`SemaphoreSlim` by reference, so a mutex in C memory (sqlite's `lib/mutex.go`, libc's pthread overlay) could not be
+read at all. It is now `{state int32; sema uint32}`: a three-state lock word and the HANDLE of a wait queue kept in
+a process-wide table of 64 striped locks, held only while a goroutine waits. The design and its guards are in
+[manual-conversions](../ConversionStrategies-Reference/manual-conversions.md#syncmutex-is-gos-eight-bytes-and-its-wait-queue-is-a-handle-in-the-sema-word).
+P3 read it three times: ship with fixes, SHIP, and SHIP on the change that keeps every queue, with its four
+notes folded in `fcb88300f8`.
+
+**Cost against master `091935257c`, quiet box, ns per Lock/Unlock pair** (median of 3 run medians of 5 rounds;
+churn = a one-instruction critical section, hold = the holder yields inside the lock one pair in 64; 1 = one mutex,
+N = 8 mutexes). The bar was B/op <= master and ns within master's noise at 2, 4 and 16 threads.
+
+| arm | master | W9a | spin 4x30 | spin 4x8 | no padding | master again |
+|---|---|---|---|---|---|---|
+| pair T=1 | 49 | 19 | 19 | 18 | 19 | 49 |
+| churn1 T=2 | 200 | 56 | 27 | 33 | 52 | 184 |
+| churn1 T=4 | 240 | 84 | 40 | 46 | 83 | 245 |
+| churn1 T=16 | 156 | 79 | 36 | 50 | 83 | 141 |
+| hold1 T=2 | 220 | 74 | 36 | 42 | 71 | 212 |
+| hold1 T=4 | 278 | 102 | 53 | 57 | 108 | 278 |
+| hold1 T=16 | 274 | 105 | 114 | 107 | 107 | 271 |
+| churnN T=2 | 142 | 61 | 35 | 42 | 58 | 144 |
+| churnN T=4 | 277 | 62 | 58 | 56 | 62 | 284 |
+| churnN T=16 | 237 | 60 | 60 | 58 | 56 | 226 |
+| holdN T=2 | 163 | 58 | 38 | 46 | 63 | 151 |
+| holdN T=4 | 290 | 72 | 66 | 60 | 65 | 312 |
+| holdN T=16 | 325 | 188 | 217 | 183 | 177 | 322 |
+
+The W9a column was measured at `0cda857b12`, before the two commits below; they were not re-timed. The ns bar is
+met on all 13 arms. The B/op bar is MISSED as worded on 6 of 12 contended arms, by 0.001 B/pair (for example hold1
+T=2 0.004 against 0.003), and that led to the next paragraph.
+
+**What a contended Lock allocates.** The bench starts new threads every round, and its 8 static mutexes are warm
+before the first measured pair, so master reads 0 there: master allocated one semaphore (88 B) for every Mutex
+ever locked, contended or not, for the mutex's life. W9a allocates per thread instead. With the same threads
+reused over 8 rounds, master's workers allocate in round 0 only; W9a's kept allocating, from two causes, measured
+per worker thread with the number of queues in existence read from the stripes by reflection:
+
+1. **First use per stripe, kept and disclosed.** Spare queues belong to the stripe, and threads share stripes
+   (always, past 64 threads). A Lock that has to install a queue allocates one (104 B) when its thread's stripe
+   has no spare, which is when more of that stripe's queues are in use at once than ever before; so a thread's
+   first install often allocates nothing and one thread can pay for another's peak. A thread's first read of
+   its stripe slot allocates 32 B (the runtime's storage for one more type's thread-static reference, 0 B on
+   every later read; measured with a two-line probe).
+2. **A limit of four spare queues per stripe, cured in `f707bcf3e6`.** A thread that installed a queue moves on
+   while others still wait on it, so one stripe can have more than four queues in the table; the fifth was
+   allocated and later dropped, every time. On 16 threads over 8 mutexes that was 7 to 12 queues (about 1 KB) per
+   16M pairs, forever, with the queue count constant at 136. A stripe now keeps every queue it created. It is
+   bounded without a limit: a stripe creates a queue only when all of its queues are in the table, and a queue
+   in the table has a goroutine counted on it (from before its first swap until it has the lock), so the worst
+   case is 64 stripes x the most goroutines that were ever inside a contended Lock at once x 104 B, for the life
+   of the process; loose, because the stripes' peaks need not coincide. Under an M:N scheduler the counted
+   population is goroutines, not threads, and the keep-every-queue rule is to be re-read then (P3, noted in the
+   header). Red first: `SyncMutexQueueTests.TheQueuesAThreadInstalledAtOnceAllServeItAgain`
+   read "2 were not among the 6 it gave up" with the limit.
+
+After the cure, 60 rounds of the same arm (960M pairs): in every round after the first, bytes allocated = 104 x
+the rise in the queue count, and the count never falls; it is 72 after the first round and 95 after the last,
+against a bound of 128 for those 16 threads. 48 of the last 59 rounds allocate nothing and the last 11 allocate
+nothing. The prediction "0 B after the first rounds" was MISSED as worded: 5 rounds after the eighth still
+allocated 104 or 208 B, each time a stripe passed its own earlier peak.
+
+**Padding dropped (`35a5be159b`, the second review's nit 2).** `QueueStripe`'s twelve pad longs sat in the middle
+of the object, because the runtime lays references first. The "no padding" column is within the padded column's
+run-to-run spread on the six 8-mutex arms or faster, so the padding went.
+
+**Left on the table: a short spin before the first block.** The spin columns are a scratch switch, never
+committed: 4 rounds of 30 spins (Go's `active_spin` and `active_spin_cnt`) or of 8. 4x8 is ahead of or level
+with W9a on all 13 arms, by up to 1.8x on one contended mutex at 2 and 4 threads; 4x30 loses hold1 T=16 and holdN
+T=16. It was to land only if W9a needed it to match master at churn1 T=16, and W9a is ahead there without it.
+Whoever takes it: 4x8 is the candidate, it changes the timing of `Lock`'s slow path, so it owes the queue arms, the stress arms and a review.
+
+**Where it differs from Go, each stated in the file's header and none cured.**
+- Go's starvation mode is not reproduced: wakeups follow the semaphore's order and a woken waiter competes with
+  newcomers, as in Go's normal mode.
+- A waiter blocks its OS thread, where Go parks a goroutine; and an `Unlock` that finds a waiter takes its
+  stripe's monitor for the lookup, where Go's `Unlock` never blocks.
+- A mutex copied WHILE a goroutine waits on it carries the queue's handle, and until that queue empties a waiter
+  of the copy can take a wakeup meant for the original. In Go the two wait on different addresses. (vet forbids
+  the copy; a copy of an idle or of a locked mutex behaves as in Go, and both are pinned by arms.)
+- Bytes that happen to hold a handle a stripe hands out again after its 26-bit sequence wraps (about a minute of
+  one stripe installing a queue every microsecond), or memory zeroed and reused as a mutex while a queue it named
+  still has waiters, can name another mutex's queue. The cost is a spurious wakeup, never a second owner.
+- With a mutex profile rate on, the wait stamps stay attached to a pooled queue across mutexes; they are cleared
+  when the last stamped waiter leaves, and one event can be attributed to the wrong mutex (second review, nit 4).
+
+**Copy census, read 2026-11-15 16:49Z to 21:06Z** (record: `docs/phase4/probes/p2-mutex-copy-census/`). Every
+process of the 8 behavioral slices (979 projects, 953 compared, 0 failed) and of 20 sweep rows (18 PASS at their
+banked counts; `net` 594 of 597 and `os` 3831 of 3840, both this host's readings with the census off) logged each
+mutex gate's uses: 4599 processes, 17,364,705 uses of 405,140 gates, `ALTERNATING` 0, `SECOND-ADDRESS` 0. No copy
+of a used mutex was in use beside its original, so the census names no converter copy to cure before this seats.
+It does not cover packages outside the 20 rows, windows or darwin, paths no suite runs, or abnormal exits.
+
+**A profile arm whose proof of "parked" was too weak; found by the hosted linux leg, dated 2026-11-15 15:00Z.**
+`SyncMutexProfileTests.EveryEpisodeOfTwoAlternatingWorkersRecordsItsContention` failed once on the hosted linux
+golib-tests leg at `fcb88300f8` ("1 Unlock(s) released a waiter parked in Lock and recorded no mutex event") and
+passed on windows and on both darwin runners. The arm asserted an event at every Unlock made while the other worker
+was "Parked": its in-Lock flag set, `SemaphoreSlim.m_waitCount >= 1`, and the thread in `WaitSleepJoin`. All three
+are still true of a waiter the PREVIOUS Unlock already woke and charged, until that waiter runs. If the holder takes
+the lock straight back, the woken waiter can take it between the holder's next swap to 0 and that Unlock's charge;
+it retires its stamp first and the Unlock records nothing. Go records nothing there either: `unlockSlow` returns when
+`mutexWoken` is set (`internal/sync/mutex.go:215`). The mutex this one replaces could not show it: its Unlock charged
+before its Release. Measured with the arm called 50 times per process, 6 processes per arm per load level, blocks
+alternating, linux/amd64, 4 cpus, nothing else running:
+
+| load | this mutex, old proof | master's mutex, old proof | this mutex, corrected proof |
+|---|---|---|---|
+| quiet | 144 of 300 runs failed; 219 of 101,743 asserted Unlocks | 0 of 300; 0 of 89,122 | 0 of 300; 0 of 83,871 |
+| 4 busy-loop processes | 0 of 300; 0 of 113,683 | 0 of 300; 0 of 113,598 | 0 of 300; 0 of 113,206 |
+
+Every one of the 219 misses read, just before the blamed Unlock: state word 1, one wakeup in the queue, one pulsed
+waiter. The corrected proof also requires the queue's `CurrentCount == 0`: only the holder adds a wakeup, so a 0 it
+reads stays 0 until its own Unlock, and a waiter with no wakeup to take cannot leave Lock before that Unlock's
+charge. **NOT MEASURED:** 8 busy-loop processes (the arm ran into its own 60 s cap on 36 of the first 50 runs and
+the level was stopped), and the rate under `dotnet test`, where the hosted leg read 1 miss in 338 asserted Unlocks.
+The lesson for any proof built on these fields: `m_waitCount` and `WaitSleepJoin` say a thread is inside a
+`SemaphoreSlim` wait; they do not say it has no wakeup. The header's stated deviation now reads "every Unlock that
+still finds a stamped waiter outstanding".
+
+**A load-sensitive test, not a W9a finding.** `GolibTests.ThreadCpuTimeTests.ASpinningThreadsCpuTimeAdvancesWithItsWallTime`
+failed once beside a full gate battery (load 16 on 4 cpus): "a spinner used 153.8 ms of CPU in 200.2 ms", where
+it needs 80%. No mutex is in that file. It is green on a quiet box (2770 passed, 0 failed) and at loads of 5 to 12 (2771
+passed, 0 failed). A red from it under a battery is a load reading; re-run it alone before reading anything into it.
+
+**Battery, read 2026-11-16 02:06Z to 23:55Z at the 310 stack tip `854b3967e9`** (309 master `0c1d295ea8` + W9b +
+W11 + W9a + W12; go1.26.11, linux/amd64, .NET 10, 4 cpus). The 8 behavioral slices: 0 failed
+(`MutexInNativeMemory`, `RenamedTypeAliasReexportRecords` and `DeepEqual` among them). All 236 linux-banked
+sweep rows, one row per sweep invocation: 232 PASS at their banked counts, `sync` 48 among them with
+`TestMutexMisuse` reading Go's fatal text; `net` 594 of 597 and `os` 3831 of 3840, this host's readings as
+predicted. Two rows are red as host readings, and each reads the same red at master `b2eaf5290a`, run alone:
+`crypto/x509` (`TestSetFallbackRoots/after_first_load_no_system_CAs` Go=fail C#=skip; the uid-0 cause is
+inferred) and `internal/runtime/gc/scan` (this host has AVX-512; see the dated block under the 2026-10-16 row).
+No row was cut by a deadline, and no row's output names `sync.(*Mutex).Lock` in a goroutine dump. The box
+restarted once, with 227 rows done; the ledger resumed the run from the row in flight.
+
 — P2 (2026-11-15)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
