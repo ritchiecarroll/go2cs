@@ -463,13 +463,51 @@ partial class runtime_package
         startTheWorldGC(stw);
     }
 
-    // schedinit's GOMAXPROCS steps, which the converted schedinit (never run here) would take after
-    // parsedebugvars: goenvs_impl.cs's module initializer calls this at the same point. On linux,
-    // defaultGOMAXPROCSInit opens the process's CPU cgroup, so defaultGOMAXPROCS lowers the default to
-    // the cgroup's CPU limit as Go's does (debug.containermaxprocs, on by default); elsewhere it is empty.
+    // osinit's and schedinit's GOMAXPROCS steps, which the converted osinit and schedinit (never run here)
+    // would take: goenvs_impl.cs's module initializer calls this after parsedebugvars and gcinit, schedinit's
+    // order. NumCPU is getCPUCount(), the CPUs the operating system lets the process run on, read once as
+    // osinit reads it: not .NET's Environment.ProcessorCount, which also applies DOTNET_PROCESSOR_COUNT
+    // and a cgroup quota, neither of which Go's NumCPU reads. On linux, defaultGOMAXPROCSInit opens the
+    // process's CPU cgroup, so defaultGOMAXPROCS lowers the default to the cgroup's CPU limit as Go's does
+    // (debug.containermaxprocs, on by default); elsewhere it is empty.
     internal static void startGOMAXPROCS()
     {
+        numCPUStartup = getCPUCount();
         defaultGOMAXPROCSInit();
+        initialGOMAXPROCS();
+    }
+
+    // schedinit's starting value, verbatim: the GOMAXPROCS environment variable when it parses as a
+    // positive number, which marks the setting custom, and Go's default for NumCPU otherwise.
+    private static void initialGOMAXPROCS()
+    {
+        int32 procs;
+        var (n, err) = @internal.strconv_package.ParseInt(gogetenv(gomaxprocsˢ), 10, 32);
+
+        if (err == nil && n > 0)
+        {
+            procs = (int32)n;
+            sched.customGOMAXPROCS = true;
+        }
+        else
+        {
+            procs = defaultGOMAXPROCS(numCPUStartup);
+            sched.customGOMAXPROCS = false;
+        }
+
+        lock (s_cpuStatsLock)
+        {
+            Volatile.Write(ref s_gomaxprocs, procs);
+            gomaxprocs = procs;
+        }
+    }
+
+    // TEST SEAM (goenvs_impl.cs's pattern): the starting value over a given environment, as a process started
+    // with it would compute it. The caller restores by passing back what GoStartEnvironment returned.
+    public static void GoStartGOMAXPROCS(string[] environment)
+    {
+        GoParseDebugVarsAtStart(environment);
+        initialGOMAXPROCS();
     }
 
     // TEST SEAM (malloc_impl.cs's pattern: GolibTests is outside the InternalsVisibleTo grant): the value

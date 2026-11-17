@@ -196,6 +196,15 @@ public class RuntimeLinuxSchedExitTests
         Assert.AreEqual(KernelAllowedCpus(), count, "getCPUCount against the kernel's own list of allowed CPUs");
     }
 
+    // NumCPU is read once at start-up from getCPUCount, as Go's osinit reads it: the allowed CPUs, whatever
+    // DOTNET_PROCESSOR_COUNT or a cgroup quota tells .NET's Environment.ProcessorCount.
+    [TestMethod]
+    public void NumCPUCountsTheAllowedCpus()
+    {
+        Console.WriteLine($"READING host processor count = {Environment.ProcessorCount}, NumCPU = {runtime_package.NumCPU()}");
+        Assert.AreEqual(KernelAllowedCpus(), (int)runtime_package.NumCPU(), "runtime.NumCPU against the kernel's own list of allowed CPUs");
+    }
+
     [TestMethod]
     public void SetDefaultGOMAXPROCSReachesNoStub()
     {

@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using go;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -36,6 +38,41 @@ public class RuntimeSetDefaultGOMAXPROCSTests
         finally
         {
             runtime_package.GOMAXPROCS(original);
+        }
+    }
+
+    // The GOMAXPROCS environment variable sets the starting value when it parses as a positive number, and
+    // marks it custom, so SetDefaultGOMAXPROCS replaces it with the default (which ignores the variable).
+    // Anything else leaves Go's default. Run over a restarted environment (GoStartGOMAXPROCS), as a process
+    // started with it would compute it; the original start is restored the same way.
+    [TestMethod]
+    public void TheGOMAXPROCSVariableSetsTheStartingValue()
+    {
+        string[] original = runtime_package.GoStartEnvironment();
+        string[] without = original.Where(entry => !entry.StartsWith("GOMAXPROCS=", StringComparison.Ordinal)).ToArray();
+
+        try
+        {
+            nint want = runtime_package.GoDefaultGOMAXPROCSProbe();
+
+            runtime_package.GoStartGOMAXPROCS([.. without, $"GOMAXPROCS={Explicit}"]);
+            Assert.AreEqual(Explicit, runtime_package.GOMAXPROCS(0), "GOMAXPROCS=1000 in the environment");
+
+            runtime_package.SetDefaultGOMAXPROCS();
+            Assert.AreEqual(want, runtime_package.GOMAXPROCS(0), "SetDefaultGOMAXPROCS after GOMAXPROCS=1000 in the environment");
+
+            foreach (string ignored in new[] { "0", "-2", "x", "" })
+            {
+                runtime_package.GoStartGOMAXPROCS([.. without, $"GOMAXPROCS={ignored}"]);
+                Assert.AreEqual(want, runtime_package.GOMAXPROCS(0), $"GOMAXPROCS={ignored} in the environment");
+            }
+
+            runtime_package.GoStartGOMAXPROCS(without);
+            Assert.AreEqual(want, runtime_package.GOMAXPROCS(0), "no GOMAXPROCS in the environment");
+        }
+        finally
+        {
+            runtime_package.GoStartGOMAXPROCS(original);
         }
     }
 }
