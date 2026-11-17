@@ -3308,7 +3308,7 @@ docs/phase4/DESIGN-array-pointer-doors.md section 16. -->
 Guarded by: the behavioral program `ArrayPointerElementDoors` (native pages from `syscall.Mmap`, Go arrays by
 their number and Go values of another type, each form stored through and read back from the memory, against
 Go); `ArrayPointerElementDoorTests` in GolibTests, whose `AnIndexedLoopOverNativeMemoryAllocatesNothing`
-holds the index over C memory at no allocation and whose `TheAddressOfAnElementOfAGoValueKeepsTheValue` holds
+holds the index over C memory at no allocation per access and whose `TheAddressOfAnElementOfAGoValueKeepsTheValue` holds
 the pinned case across a collection; the converter's `TestArrayPointerElementDoorReplacesTheWholeArrayBox`,
 one arm per form and one control per route that keeps its own emission; and repoguard's
 `TestArrayPointerViewDoors`, which refuses a `FromRef` mint at any door.
