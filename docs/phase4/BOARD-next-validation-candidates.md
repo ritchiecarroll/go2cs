@@ -39759,30 +39759,35 @@ shape. Until then it stays refused by name, as a number.
 
 — H (2026-11-15)
 
-## 2026-11-17 — H (COORD ruling on DESIGN-cgo-phase3-marshaling 18.6, before code): a mutual value-type cycle through W2-stored `unsafe.Pointer` words is retained until one word is overwritten or cleared — NAMED LEAK, bounded, .5
+## 2026-11-17 — H (COORD rulings on DESIGN-cgo-phase3-marshaling 18.6, before code): a self or mutual value-type cycle through W2-stored `unsafe.Pointer` words is retained until a word in the cycle is overwritten or cleared — NAMED LEAK, bounded, .5
 
-**The shape.** Two Go backings `A` and `B`, both managed WORD storage. A slot in `A` stores `B`'s address through W2
-(`StoreWord`, design 18.3), and a slot in `B` stores `A`'s, with value-type referents.
-- Each word's entry holds its referent's box, and that box keeps its pin-only hold (18.6 finding 1).
-- So each entry's pin, a strong `GCHandle`, roots the OTHER backing, which is the other entry's
-  `ConditionalWeakTable` key. Neither backing is collected while both words are published.
+**The shapes.** All are managed WORD storage written through W2 (`StoreWord`, design 18.3), with value-type
+referents.
+- SELF: a slot in backing `K` stores `K`'s own address.
+- MUTUAL: a slot in `A` stores `B`'s address, and a slot in `B` stores `A`'s.
+- Each word's entry holds its referent's box, and that box keeps its pin-only hold (18.6 finding 1). So the entry's
+  pin, a strong `GCHandle`, roots a backing that is itself an entry table's `ConditionalWeakTable` key. In the self
+  case that is the entry's own key; in the mutual case, the other backing's key. No backing in the cycle is collected
+  while its words are published.
 
-**Why it is accepted.** The alternative was 18.5's unpinned word. Its number goes stale when the referent moves, which
-opens three holes P3 found: C reads a stale address; 3.2's number rule takes a stale word for C memory and dereferences
-it raw; and a reused address makes one number name two objects. COORD ruled a bounded leak the lesser harm than silent
-corruption, before any code.
+**Why it is accepted.** The alternative is an unpinned word, whose number goes stale when the referent moves. That
+opens three holes P3 found:
+- C reads a stale address;
+- 3.2's number rule takes a stale word for C memory and dereferences it raw;
+- a reused address makes one number name two objects (CAS, memequal, memhash).
+COORD ruled a bounded leak the lesser harm than silent corruption, before any code, first for the mutual cycle (c4),
+then for the self case (ruling (B)), so that "one number names one live object" holds with no exception.
 
-**The bound.** The leak lasts until either word is overwritten through W2 or cleared by a clear door (18.5 finding 5).
-That drops the entry, releases its pin, and the cycle is collected.
+**The bound.** The leak lasts until a word in the cycle is overwritten through W2 or cleared by a clear door (18.5
+finding 5). That drops the entry, releases its pin, and the cycle is collected.
 
-**Measured by** B-4's c4, a KNOWN-LIMIT arm at the cut:
-- both backings read ALIVE after the drop and the forced collections;
-- after one word is overwritten through W2, both read DEAD.
+**The shape is rare.** It is reached only through W2 into managed word storage, which means the runtime's own word
+slots. `container/list`'s `root.next = &root` is a CLR reference field, outside the table, and never leaks this way.
+
+**Measured by** B-4's known-limit arms at the cut, c3 (self) and c4 (mutual):
+- every backing reads ALIVE after the drop and the forced collections;
+- after one word is overwritten through W2, every backing reads DEAD.
 A first-step reading of dead is news and is posted, not a pass.
-
-**Not covered:** the SELF case (one backing storing its own address). It is ruled separately in 18.6 finding 1:
-(A) an unpinned self entry with a memequal/memhash deviation, or (B) pinned, which makes it a second bounded leak of
-this kind.
 
 — H (2026-11-17)
 

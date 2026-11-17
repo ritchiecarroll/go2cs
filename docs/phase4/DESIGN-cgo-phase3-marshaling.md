@@ -1953,38 +1953,34 @@ This block REPLACES the parts of 18.5 it names, and the rest of 18.5 stands. The
   pin-only hold, so the number stays the referent's while the word is published. A reference-bearing referent is held
   as its box, which has no pin (18.4 finding 3, unchanged). One number then names one live object, and 18.5's
   `uintptr` deviation is WITHDRAWN.
-- **THE SELF ENTRY**, as ruled: an entry whose referent backing IS the destination backing holds (backing, offset) and
-  no pin, because a pin there roots its own key.
-- **A residual of the self entry, raised here for the ruling before code.** With no pin, the self backing `K` can move
-  once no other pin holds it. Its own word then names `K`'s OLD address `A`, and the reuse hole of the first bullet
-  reopens for that one word:
-  - another object `y` later pinned at `A` makes `CAS(slot, y, new)` match `A == A`;
-  - memequal and memhash over `K`'s word read `A` as `y`'s address.
-  The bag ambiguity does NOT reopen: one slot holds one word, and a store over the self word displaces `(A, K)`
-  under finding 1's rule.
-  - Mitigation inside the design: CAS's identity rule (18.5 finding 6) is extended. When the slot's bag holds an
-    entry for the current word, CAS succeeds only if that entry names the SAME referent as `old`; numbers decide
-    only when there is no entry. That closes the CAS case for every entry, self included. memequal and memhash over
-    the self word stay exposed.
-  - **The two choices.** (A) Keep the self exemption, and name memequal and memhash over a moved self word as a
-    deviation. (B) Pin the self referent too, which makes the self case a bounded leak like c4 below. Under (B),
-    "one number names one live object" holds with NO exception. The self shape lives only in managed WORD storage
-    written through W2: the runtime's own words, never `container/list`'s `root.next = &root`, which is a CLR
-    reference field and outside the table. H RECOMMENDS (B). It is posted here for the ruling, not decided.
-- Stop line: a published word whose value-type referent holds no pin, other than a self entry under (A).
+- **NO SELF EXEMPTION (COORD ruling (B), 2026-11-17, folded in before P3's read).** A self entry, whose referent
+  backing IS the destination backing, is pinned like every other value-type entry.
+  - An unpinned self backing `K` could move, and its own word would then name `K`'s OLD address `A`. A later object
+    pinned at `A` would reopen the reuse hole for that word: CAS, memequal and memhash over it would read `A` as the
+    other object.
+  - Pinned, the self case is a BOUNDED LEAK of the same kind as c4 (finding 2), and "one number names one live object"
+    holds with NO exception.
+  - The shape is rare: it lives only in managed WORD storage written through W2, never in `container/list`'s
+    `root.next = &root`, which is a CLR reference field and outside the table.
+  - The CAS identity rule (18.5 finding 6, extended: when the bag holds an entry for the current word, CAS succeeds
+    only if that entry names the same referent as `old`) is KEPT as defence in depth. With every published referent
+    pinned it is redundant for uniqueness, and it is consulted only when the numbers differ, so it costs nothing on the
+    matching path.
+- Stop line: a published word whose value-type referent holds no pin. There is no exception.
 
-**2. c3 and c4 (B-4).**
-- c3, self: predicted GREEN under (A), meaning dead and `EntriesOver == 0`. Under (B) it becomes a KNOWN-LIMIT arm
-  like c4.
-- **c4, the MUTUAL value-type cycle: a NAMED LEAK, ruled before code.**
+**2. c3 and c4 (B-4): ONE NAMED LEAK covering both cycles, ruled before code.**
+- c3, SELF: a value-type backing stores its own address through W2. It is a KNOWN-LIMIT arm: the backing reads ALIVE
+  after the drop and the forced collections, and DEAD after its word is overwritten through W2, which measures the
+  bound.
+- **c4, the MUTUAL value-type cycle:**
   - Two Go backings each store the other's address through W2, with value-type referents. Each entry's pin roots the
     other's key, and neither backing is collected.
   - It is BOUNDED: it lasts until either word is overwritten through W2 or cleared, and that releases the cycle.
   - c4 stays a measured KNOWN-LIMIT arm that reads both backings ALIVE after the drop and the collections, so the
     leak's shape is pinned down. A run that reads them dead is NEWS, posted, not a pass.
   - A second step of c4 overwrites one word through W2, collects, and reads both dead, which measures the bound.
-  - The BOARD row is written with this revision. The NAMED DEVIATION reads: "a mutual value-type cycle through
-    W2-stored words is retained until one word is overwritten or cleared".
+  - The BOARD row is written with this revision and covers BOTH cycles. The NAMED DEVIATION reads: "a self or mutual
+    value-type cycle through W2-stored words is retained until a word in the cycle is overwritten or cleared".
 
 **3. The cgo argument door refuses a crossed range that holds any entry (MUST-FIX, new).**
 - The table is exactly cgocheck's information. Go panics "argument of cgo function has Go pointer to unpinned Go
@@ -2016,17 +2012,17 @@ reach `runtime.memmove` if called, and are listed beside `maps_typedmemmove` as 
 `reflect` and `reflectlite` packages' OWN `typedmemmove`, which 18.5 names as not a copy today.
 
 **Predictions, revised.**
-- B-4: c1, c2, c3 (green under (A); known-limit under (B)), and c4 as a known-limit arm, alive and then released by
-  an overwrite.
+- B-4: c1 and c2, then c3 (self) and c4 (mutual) as known-limit arms: alive after the drop, and dead after a W2
+  overwrite.
 - B-10, new: the cgo door refuses a backing that holds an entry, with cgocheck's text (finding 3).
 - B-11, new: the ABA arm (finding 5), driven deterministically through a test seam between the lookup and the
   re-read, so it does not rely on timing.
 - Withdrawn: 18.5's uintptr deviation and its census.
 
 **Stop lines, revised.**
-- A published value-type word without a pin, outside a self entry under (A).
+- A published value-type word without a pin. There is no exception.
 - A W1 number answered without the bag lock.
 - A cgo door that hands C a backing holding an entry.
-- c4 read dead without an overwrite (news, posted).
+- c3 or c4 read dead without an overwrite (news, posted).
 
 — H (2026-11-17)
