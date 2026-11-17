@@ -694,6 +694,53 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		}
 	}
 
+	// A whole array stored through `(*A)(p)`, p an unsafe.Pointer, is copied to what the pointer names by the
+	// array store door (arrayPointerElementDoor.go).
+	if lhsLen == 1 && rhsLen == 1 && assignStmt.Tok == token.ASSIGN {
+		store, isStore := v.arrayPointerStoreDoor(lhsExprs[0], rhsExprs[0])
+
+		// A whole array stored through a field view writes its elements (nativeFieldArrayView.go).
+		if !isStore {
+			store, isStore = v.nativeFieldArrayViewStore(lhsExprs[0], rhsExprs[0])
+		}
+
+		if isStore {
+			result.WriteString(store)
+
+			if hoistBuf != nil && hoistBuf.Len() > 0 {
+				v.outputBuilder.WriteString(hoistBuf.String())
+			} else if format.useNewLine {
+				v.outputBuilder.WriteString(v.newline)
+			}
+
+			if format.useIndent {
+				v.outputBuilder.WriteString(v.indent(v.indentLevel))
+			}
+
+			v.outputBuilder.WriteString(result.String())
+			return
+		}
+	}
+
+	// A func stored into a word slot, or a word stored into a func variable, stores the func's word
+	// or the func the word names (funcWordOperations.go, w2 and w1).
+	if store, isStore := v.funcWordStoreEmission(assignStmt); isStore {
+		result.WriteString(store)
+
+		if hoistBuf != nil && hoistBuf.Len() > 0 {
+			v.outputBuilder.WriteString(hoistBuf.String())
+		} else if format.useNewLine {
+			v.outputBuilder.WriteString(v.newline)
+		}
+
+		if format.useIndent {
+			v.outputBuilder.WriteString(v.indent(v.indentLevel))
+		}
+
+		v.outputBuilder.WriteString(result.String())
+		return
+	}
+
 	// A `name := func(…) {…}` whose variable is only ever CALLED emits as a C# LOCAL FUNCTION
 	// rather than a lambda bound to a variable — the capturing form costs a display class plus a
 	// delegate on every evaluation, the local function nothing (see localFunctionDefine). The
@@ -1370,6 +1417,16 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				indexContext := DefaultIndexExprContext()
 				indexContext.isAssignmentTarget = true
 				lhsElemContexts = append(lhsElemContexts, indexContext)
+			}
+
+			// A dereferenced pointer-cast element (`*(*uint64)(unsafe.Pointer(p))`) writes through the
+			// box's `.Value`, as the single-target path above does. The prefix `~` form is a value, not
+			// a variable, and a tuple element of it does not compile (CS0131; modernc.org/libc qsort.go's
+			// parallel swap `*(*uint64)(unsafe.Pointer(p)), *(*uint64)(unsafe.Pointer(q)) = …`).
+			if _, lhsIsStar := lhs.(*ast.StarExpr); lhsIsStar {
+				starExprContext := DefaultStarExprContext()
+				starExprContext.inLhsAssign = true
+				lhsElemContexts = append(lhsElemContexts, starExprContext)
 			}
 
 			lhsExpr := v.convExpr(lhs, lhsElemContexts)

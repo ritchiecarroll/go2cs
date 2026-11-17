@@ -4,6 +4,13 @@ using go;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using C = go.cgotestꓸC_package;
 
+// The Go type cmd/cgo declares C char as for the bindings this build compiled (GolibTests.csproj).
+#if GOCGO_CHAR_UNSIGNED
+using ᴛchar = byte;
+#else
+using ᴛchar = sbyte;
+#endif
+
 namespace GolibTests;
 
 // cgo Phase 2 increment 3b2b (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §5.2, §7 as amended 2026-11-10, read through
@@ -155,7 +162,7 @@ public unsafe class CgoPointerWrapperTests
     [TestMethod]
     public void AManagedPointerMemberPanicsWithCgosOwnMessageBeforeTheCall()
     {
-        ж<C.struct_tm> tm = new StandardBox<C.struct_tm>(new C.struct_tm { tm_year = 999, tm_zone = new StandardBox<C.@char>((C.@char)(int8)'Z') });
+        ж<C.struct_tm> tm = new StandardBox<C.struct_tm>(new C.struct_tm { tm_year = 999, tm_zone = new StandardBox<C.@char>((C.@char)(ᴛchar)'Z') });
         ж<C.@long> t = new StandardBox<C.@long>((C.@long)0L);
 
         string message = RefusalOf(() => C.gmtime_r(t, tm));

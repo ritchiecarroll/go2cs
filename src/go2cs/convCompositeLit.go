@@ -210,6 +210,14 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 // Passing nil is the ordinary path and leaves every existing caller byte-identical: the elided block
 // still runs, and the typed path still reads its type from the AST exactly as before.
 func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType types.Type, context KeyValueContext) string {
+	// An array literal that initializes an inline array field (inlineArrayEmission.go) is the go.arrays member's
+	// constructor; a struct literal of an admitted type marks the array literals among its own values first.
+	if inline, ok := v.inlineArrayLiteral(compositeLit); ok {
+		return inline
+	}
+
+	v.markInlineArrayLiterals(compositeLit)
+
 	result := &strings.Builder{}
 
 	// Go's all-or-nothing keying rule is a STRUCT-literal rule. An ARRAY or SLICE literal may MIX

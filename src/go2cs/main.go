@@ -299,6 +299,7 @@ func main() {
 	licenseCmd := commandLine.String("license", "", "Override NuGet license metadata with an SPDX expression (for example MIT or BSD-3-Clause); does not relicense input code")
 	provenanceCmd := commandLine.Bool("provenance", false, "Include in each converted file a notice naming its Go source and module and that go2cs modified it by conversion (no timestamp)")
 	trimPathCmd := commandLine.Bool("trimpath", true, "Record a main-module source in the converted position maps the way `go build -trimpath` bakes it, <module path>/<path in module>, so the output names no directory of this machine; -trimpath=false records the absolute source path, as an untrimmed `go build` does")
+	inlineArraysCmd := commandLine.String("inline-arrays", "", "Override inline-array admission per package (comma-separated import-path patterns, each an exact path or a /... prefix). A pattern forces its packages ON with the declaration-local population: every struct the package declares or spells that holds an array and passes the caps holds its arrays inline (go.arrays). A -<pattern> turns admission OFF. With no override, a struct is admitted when its own package converts it whole through unsafe.Pointer (the auto rule); the standard library is never admitted")
 	warnCmd := commandLine.String("warn", "", "Downgrade the listed converter refusal codes to warnings (comma-separated), so a package holding a refused site still converts; each downgraded site fails loud, a panic carrying the refusal text, when reached, and the build reports it (GO2CS0011). Opt-in per code, never a default; only GO2CS2002 is allowed (an unknown or disallowed code is an error that names it)")
 	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
 	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Convert a single cgo package: load it cgo-on (CGO_ENABLED=1; needs a C compiler) and convert it when every C use it makes is one cgo support binds (calls of C functions a shared library defines; docs/Limitations.md). Any other use is refused by name, with the phase that owns it, before anything is written. Converts for the host's own target only: a cgo-on load for another target needs that target's C toolchain, so any other -platforms is refused, for a package with no C in it too. Not combinable with -stdlib, -tests or -recurse")
@@ -585,8 +586,15 @@ Examples:
 		log.Fatalln(warnErr)
 	}
 
+	inlineArrays, inlineArraysErr := parseInlineArrayOverride(*inlineArraysCmd)
+
+	if inlineArraysErr != nil {
+		log.Fatalln(inlineArraysErr)
+	}
+
 	options := Options{
 		warnCodes:           warnCodes,
+		inlineArrays:        inlineArrays,
 		goRoot:              *goRootCmd,
 		goPath:              *goPathCmd,
 		go2csPath:           absoluteGo2CSPath(*go2csPathCmd),

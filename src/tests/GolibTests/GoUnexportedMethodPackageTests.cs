@@ -39,7 +39,7 @@ public class GoUnexportedMethodPackageTests
 
     // A PROMOTED unexported method. Go: a struct that embeds a type of its own package has that type's unexported
     // methods in its method set, so it satisfies its package's marker interface (net's `*TCPConn` is a
-    // `buffersWriter` through the embedded `conn`). From 1.26.10.4 go2cs-gen writes the forwarder in a class of
+    // `buffersWriter` through the embedded `conn`). From 1.26.11.1 go2cs-gen writes the forwarder in a class of
     // the struct's own, marked [GoPromotedHost], and no longer in the package class: the forwarder's package is
     // its STRUCT's, read through the attribute.
     [TestMethod]
@@ -118,7 +118,7 @@ public static class markerimpl_package
     public static void exprNode(this ж<ForeignNode> n) { }
 }
 
-// The promoted methods of markerdecl's OuterNode, in the shape go2cs-gen emits from 1.26.10.4: a class of the
+// The promoted methods of markerdecl's OuterNode, in the shape go2cs-gen emits from 1.26.11.1: a class of the
 // struct's own beside the package class, found by its attribute.
 [GoPromotedHost(typeof(markerdecl_package.OuterNode))]
 public static class markerdeclᴛOuterNodeᴛpkg

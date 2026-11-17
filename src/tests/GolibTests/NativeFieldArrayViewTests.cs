@@ -194,10 +194,19 @@ public class NativeFieldArrayViewTests
 
     /// <summary>
     /// The helper the converter EMITS, <c>@unsafe.ArrayPointer&lt;T&gt;.Of(field, N)</c>, which names the field
-    /// once: a native root reaches the door, and every other root gets exactly what the raw route gives.
+    /// once: a native root reaches the door, and a Go root with no address is viewed through the field's own
+    /// bytes.
     /// </summary>
+    /// <remarks>
+    /// Every other root took the pointer conversion to the array type until 2026-11-15, and this arm held the
+    /// helper equal to it, "box for box or panic for panic". Over a Go struct that conversion answered a box whose
+    /// Value was no array, and refused a struct that holds references as "native memory"
+    /// (docs/phase4/DESIGN-array-pointer-doors.md, section 18; the roots that are viewed are in
+    /// FieldArrayViewOverGoStructTests). A struct that holds references was then refused by name, in true words,
+    /// until the view of the field's own bytes (section 19, ReinterpretedFieldArrayViewTests).
+    /// </remarks>
     [TestMethod]
-    public void TheEmittedHelperTakesTheDoorForANativeRootAndTheRawRouteOtherwise()
+    public void TheEmittedHelperTakesTheDoorForANativeRootAndViewsTheFieldOfAGoRootWithNoAddress()
     {
         nint block = NativeSockaddrForHttp();
 
@@ -214,13 +223,71 @@ public class NativeFieldArrayViewTests
             Marshal.FreeHGlobal(block);
         }
 
-        // A managed root: the helper and the raw route must agree, box for box or panic for panic.
+        // A Go root: the build flavour's sockaddr carries array<> fields, so the converted struct holds references
+        // and has no address. The view is over the Port field's own two bytes: x/sys writes the port through it in
+        // network order, and the field holds it.
         ж<syscall.RawSockaddrInet4> managed = new StandardBox<syscall.RawSockaddrInet4>(default(syscall.RawSockaddrInet4));
+        ж<array<byte>> port = @unsafe.ArrayPointer<byte>.Of(managed.of(syscall.RawSockaddrInet4.ᏑPort), 2);
 
-        Assert.AreEqual(
-            Outcome(() => (ж<array<byte>>)(uintptr)@unsafe.Pointer.FromPinnedBox(managed.of(syscall.RawSockaddrInet4.ᏑPort))),
-            Outcome(() => @unsafe.ArrayPointer<byte>.Of(managed.of(syscall.RawSockaddrInet4.ᏑPort), 2)),
-            "a managed root must take today's raw route through the helper, unchanged");
+        Assert.AreEqual((nuint)0, port.NativeAddress, "a Go root is no native pointer");
+
+        port.ElementRef(0) = (byte)(8080 >> 8);
+        port.ElementRef(1) = unchecked((byte)8080);
+
+        Assert.AreEqual(BitConverter.IsLittleEndian ? (ushort)0x901F : (ushort)8080, (ushort)managed.Value.Port, "the store is to the field");
+        Assert.AreEqual(8080, port.ElementRef(0) << 8 | port.ElementRef(1), "and the port decodes back");
+
+        // A view longer than the field is refused by name, and names the Go form.
+        string outcome = Outcome(() => @unsafe.ArrayPointer<byte>.Of(managed.of(syscall.RawSockaddrInet4.ᏑPort), 4));
+
+        StringAssert.StartsWith(outcome, "threw PanicException: go2cs: (*[4]uint8)(unsafe.Pointer(&p.f))");
+        StringAssert.Contains(outcome, "has no address");
+    }
+
+    // A struct with no reference in it: its box can be pinned, so its field has a real address.
+    private struct Endpoint
+    {
+        public ushort Family;
+        public ushort Port;
+
+        // Converter-named, as the generated accessors are.
+        internal static ref ushort ᏑPort(ref Endpoint instance) => ref instance.Port;
+    }
+
+    /// <summary>
+    /// The view over a PINNABLE Go root: the array pointer is at the field's pinned address and keeps the struct
+    /// its field is in, by the box its view is anchored on (it was <c>Pointer.To</c> over the pinned pointer, and
+    /// before that a cast through a number, which kept the struct only while the registry still resolved the
+    /// address). With no other reference to the struct, collections leave it alive and where it was.
+    /// </summary>
+    [TestMethod]
+    public void TheRawRouteKeepsThePinnableStructItsFieldIsIn()
+    {
+        (ж<array<byte>> p, WeakReference root) = PortOfAStructNothingElseHolds();
+        nuint address = p.NativeAddress;
+
+        Assert.AreNotEqual((nuint)0, address, "a pinnable root's field has an address");
+
+        for (int i = 0; i < 3; i++)
+        {
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+        }
+
+        Assert.IsTrue(root.IsAlive, "the array pointer is the only reference, and it must keep the struct its field is in");
+
+        ж<Endpoint> endpoint = (ж<Endpoint>)root.Target!;
+
+        Assert.AreEqual(address, (nuint)(uintptr)@unsafe.Pointer.FromPinnedBox(endpoint.of(Endpoint.ᏑPort)), "the field is still at the address the array pointer names");
+        GC.KeepAlive(p);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static (ж<array<byte>>, WeakReference) PortOfAStructNothingElseHolds()
+    {
+        ж<Endpoint> endpoint = new StandardBox<Endpoint>(new Endpoint { Family = 2, Port = 80 });
+
+        return (@unsafe.ArrayPointer<byte>.Of(endpoint.of(Endpoint.ᏑPort), 2), new WeakReference(endpoint));
     }
 
     private static string Outcome(Func<ж<array<byte>>> route)
@@ -236,8 +303,8 @@ public class NativeFieldArrayViewTests
     }
 
     /// <summary>
-    /// A MANAGED root is not the door's: it answers <c>null</c>, and the emission falls back to today's
-    /// route unchanged.
+    /// A MANAGED root is not the door's: it answers <c>null</c>, and the helper takes its route for a Go root
+    /// (<c>Pointer.FieldView</c>).
     /// </summary>
     [TestMethod]
     public void AManagedRootTakesTheFallback()
@@ -246,7 +313,7 @@ public class NativeFieldArrayViewTests
 
         Assert.AreEqual((nuint)0, sa.NativeAddress, "a managed box has no native address");
         Assert.IsNull(builtin.NativeFieldArrayPointer<byte>(sa.of(syscall.RawSockaddrInet4.ᏑPort), 2),
-            "the door must decline a managed root, so the fallback keeps today's route");
+            "the door must decline a managed root, so the helper takes its route for a Go root");
     }
 
     /// <summary>

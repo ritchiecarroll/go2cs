@@ -1221,8 +1221,21 @@ func (v *Visitor) aliasResolvedSelector(selectorExpr *ast.SelectorExpr, rendered
 			isConst := constImportedTypeAliases.Contains(key)
 			packageLock.Unlock()
 
-			if published && !isConst && aliasSourceMatchesPackage(key, pkgName.Imported()) {
-				return getAliasedTypeName(key)
+			if published && aliasSourceMatchesPackage(key, pkgName.Imported()) {
+				if !isConst {
+					return getAliasedTypeName(key)
+				}
+
+				// A CONST entry is a collision-renamed member that stays qualified through its package
+				// (`time.Second` is `time.ΔSecond`, `time.UTC` is `time.ΔUTC`). getAliasedTypeName would
+				// qualify it with the DECLARED package name, which this file does not import under that
+				// name, so keep this file's own alias and swap the member: libc's `gotime "time"` renders
+				// `gotime.ΔSecond` (sqlite-cs S10; CS1503 and CS0019 before).
+				packageLock.Lock()
+				target := importedTypeAliases[key]
+				packageLock.Unlock()
+
+				return rendered[:len(rendered)-len(member)] + target
 			}
 		}
 	}
@@ -1343,6 +1356,11 @@ func (v *Visitor) selectorBasePackageObj(selectorExpr *ast.SelectorExpr) *types.
 }
 
 func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context LambdaContext) string {
+	// A word read back as a func through a one-func-field struct (funcWordOperations.go, r2).
+	if emission, ok := v.funcWordEmission(selectorExpr); ok {
+		return emission
+	}
+
 	// A store TARGET on a readonly zero-size layout field (see markZeroSizeFieldStores): emit the plain
 	// selector, then route it through the generated accessor so the store lands on the shared slot.
 	if accessor, ok := v.zeroSizeFieldStores[selectorExpr]; ok {

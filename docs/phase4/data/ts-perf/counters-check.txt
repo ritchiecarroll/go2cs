@@ -1,0 +1,15 @@
+dotnet-counters, checkdemo over the 101 units (one run), totals of the per-second rates:
+dotnet.gc.collections gc.heap.generation=gen0	0
+dotnet.gc.collections gc.heap.generation=gen1	115
+dotnet.gc.collections gc.heap.generation=gen2	116
+dotnet.gc.heap.total_allocated	27972284384
+dotnet.gc.pause.time	42.0
+dotnet.jit.compilation.time	35.5
+dotnet.jit.compiled_il.size	4793041
+dotnet.jit.compiled_methods	68852
+dotnet.monitor.lock_contentions	22
+dotnet.process.cpu.time cpu.mode=system	7.7
+dotnet.process.cpu.time cpu.mode=user	140.7
+dotnet.thread_pool.queue.length	0
+dotnet.thread_pool.thread.count	0
+dotnet.thread_pool.work_item.count	0

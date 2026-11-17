@@ -56,7 +56,7 @@
 
 .PARAMETER ConsumerRef
     The git ref (a tag or a branch on origin) whose src/tests/CSharpConsumer arm H builds. Default: the newest
-    nuget-<version> tag whose version is below -Version (for 1.26.10.4-ci.7, the newest tag below 1.26.10.4).
+    nuget-<version> tag whose version is below -Version (for 1.26.11.1-ci.7, the newest tag below 1.26.11.1).
     Given, it is an OVERRIDE and must come with -ConsumerOverride.
 
 .PARAMETER ConsumerOverride

@@ -120,8 +120,11 @@ internal class StructTypeTemplate : TemplateBase
 
     // Go's == through an interface (golib builtin.AreEqual): a second partial part implements golib's IGoEquatable
     // EXPLICITLY, through this struct's own ==, so the comparison runs in compiled code and no member is added.
+    // IEquatable<T> beside IGoEquatable lets EqualityComparer<T>.Default (a Dictionary key, a map<K,V>
+    // keyed by this struct) call Equals(T) directly instead of boxing the probe key into Equals(object).
+    // A hand-owned partial's own equality may not have that signature, so it gets IGoEquatable alone.
     private string GoEquatablePart =>
-        $"\r\n\r\n    partial struct {StructName} : global::go.IGoEquatable\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {StructName} value && this == value;\r\n    }}";
+        $"\r\n\r\n    partial struct {StructName} : global::go.IGoEquatable{(HandWrittenEquality ? "" : $", global::System.IEquatable<{StructName}>")}\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {StructName} value && this == value;\r\n    }}";
 
     // golib's IGoManagedLayout for a [GoInlineLayout] struct: the struct measures its own fields' CLR offsets with
     // Unsafe.ByteOffset over a default instance, its CLR size and its CLR alignment, so the inline-layout gate compares them

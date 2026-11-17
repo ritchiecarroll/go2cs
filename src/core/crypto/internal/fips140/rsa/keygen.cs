@@ -33,6 +33,7 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
     if (bits < 32) {
         return (default, errors.New(rsaKeyTooSmallˢ));
     }
+    fipsSelfTest();
     fips140.RecordApproved();
     if (bits < 2048 || bits % 2 == 1) {
         fips140.RecordNonApproved();

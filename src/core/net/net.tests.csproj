@@ -424,7 +424,6 @@
     <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
     <ProjectReference Include="$(go2csPath)core/cmp/cmp.csproj" />
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha256/crypto.sha256.csproj" />
     <ProjectReference Include="$(go2csPath)core/encoding/hex/encoding.hex.csproj" />
     <ProjectReference Include="$(go2csPath)core/encoding/json/encoding.json.csproj" />
@@ -438,8 +437,6 @@
     <ProjectReference Include="$(go2csPath)core/internal/poll/internal.poll.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/race/internal.race.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/singleflight/internal.singleflight.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/internal.syscall.windows.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />

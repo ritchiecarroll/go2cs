@@ -1,0 +1,83 @@
+== Thread (30113): 1,133 ms sampled; UNMANAGED_CODE_TIME 373 ms, CPU_TIME 759 ms
+  -- exclusive
+    8.4%         95 ms  System.Private.CoreLib!System.Threading.Thread.<PollGC>g__PollGCWorker|67_0()
+    8.1%         92 ms  System.Linq!System.Linq.Enumerable+ArrayWhereSelectIterator`2[System.__Canon,System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].ToArra
+    3.5%         40 ms  System.Private.CoreLib!System.Reflection.RuntimeMethodInfo.<get_Signature>g__LazyCreateSignature|25_0()
+    3.1%         35 ms  ?!?
+    2.6%         29 ms  golib!go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)
+    2.3%         26 ms  System.Private.CoreLib!System.Runtime.CompilerServices.InitHelpers.InitClassSlow(value class System.Runtime.CompilerServices.MethodTable*)
+    1.9%         22 ms  System.Private.CoreLib!System.Signature..ctor(class System.IRuntimeMethodInfo,class System.RuntimeType)
+    1.6%         18 ms  native github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.overrideParentInImmediateChi
+    1.5%         17 ms  System.Private.CoreLib!System.Reflection.CustomAttribute.IsCustomAttributeDefined(class System.Reflection.RuntimeModule,int32,class System.RuntimeType
+    1.4%         16 ms  native ?!?
+    1.3%         14 ms  native System.Private.CoreLib!System.RuntimeTypeHandle.GetRuntimeTypeFromHandleSlow(int)
+    1.2%         13 ms  golib!go.golib.TypeExtensions.CollectGoMethodSetCandidates(class System.Type,bool,class System.Collections.Generic.IReadOnlyList`1<value class System.
+    1.1%         13 ms  native parsedemo!go.main_package.dump(class Writer,value class go.string,value class go.string,bool,bool)
+    1.0%         12 ms  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package.ᴛRegisterAdapters()
+    1.0%         11 ms  System.Private.CoreLib!System.Reflection.CustomAttribute.IsDefined(class System.Reflection.RuntimeMethodInfo,class System.RuntimeType,bool)
+    0.9%         11 ms  native System.Private.CoreLib!System.Threading.Monitor.Wait(class System.Object,int32)
+    0.8%         10 ms  github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core_package.New(value class Arena`1<!!0>&)
+    0.8%          9 ms  System.Reflection.Metadata!System.Reflection.Metadata.Ecma335.SignatureDecoder`2[go.golib.TypeExtensions+ReceiverShape,System.__Canon].DecodeTypeHandl
+    0.7%          8 ms  native github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core_package.New(value class Arena`1<!!0>&)
+    0.7%          8 ms  native golib!go.GoDeferredRegistrations.Run()
+    0.7%          8 ms  native System.Private.CoreLib!System.Runtime.CompilerServices.InitHelpers.InitClassSlow(value class System.Runtime.CompilerServices.MethodTable*)
+    0.7%          8 ms  native golib!go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)
+    0.7%          7 ms  golib!go.PointerExtensions.DerefOrNull(class go.ж`1<!!0>)
+    0.6%          7 ms  golib!go.golib.TypeExtensions.CarriesExtensionAttribute(class System.Reflection.Metadata.MetadataReader,value class System.Reflection.Metadata.CustomA
+    0.6%          6 ms  golib!go.builtin.appendꓸꓸꓸ(!!0,value class ZeroElements`1<!!1>)
+    0.5%          6 ms  native golib!go.golib.TypeExtensions.CollectGoMethodSetCandidates(class System.Type,bool,class System.Collections.Generic.IReadOnlyList`1<value class 
+    0.5%          6 ms  native golib!go.builtin+<>c__DisplayClass248_0`3[System.__Canon,System.Int32,go.string].<defer>b__0()
+    0.5%          5 ms  golib!go.golib.TypeExtensions+ReceiverShapeProvider.GetTypeFromReference(class System.Reflection.Metadata.MetadataReader,value class System.Reflection
+    0.4%          5 ms  native golib!go.builtin.subslice(!!0,int,int)
+    0.4%          5 ms  native github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package.newNode(value class Kind,class nod
+    0.4%          5 ms  System.Reflection.Metadata!System.Reflection.Metadata.TypeReference.get_ResolutionScope()
+    0.4%          5 ms  native github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package.newNode(value class NodeFactory&,v
+    0.4%          5 ms  native golib!go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadOnlySet`1<class System.Reflection.Assembly>)
+    0.4%          4 ms  native github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package.NewVariableDeclarationList(value c
+    0.4%          4 ms  System.Private.CoreLib!System.Array.Copy(class System.Array,class System.Array,int32)
+    0.3%          4 ms  System.Reflection.Metadata!System.Reflection.Internal.MemoryBlock.Utf8NullTerminatedFastCompare(int32,class System.String,int32,int32&,wchar,bool)
+    0.3%          4 ms  System.Reflection.Metadata!System.Reflection.Metadata.Ecma335.SignatureDecoder`2[go.golib.TypeExtensions+ReceiverShape,System.__Canon].DecodeType(valu
+    0.3%          4 ms  native github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseSourceFileWorker(class 
+    0.3%          4 ms  System.Private.CoreLib!System.RuntimeType.GetGenericArguments()
+    0.3%          4 ms  golib!go.builtin.Ꮡ(value class go.slice`1<!!0>,int)
+  -- inclusive
+  100.0%      1,133 ms  Process64 parsedemo (30095) Args: <bin>/parsedemo.dll good.ts
+  100.0%      1,133 ms  (Non-Activities)
+  100.0%      1,133 ms  Threads
+  100.0%      1,133 ms  Thread (30113)
+  100.0%      1,133 ms  System.Private.CoreLib!System.Threading.Thread.StartCallback()
+  100.0%      1,133 ms  golib!go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0()
+   99.7%      1,129 ms  parsedemo!go.main_package.main()
+   92.4%      1,047 ms  parsedemo!go.main_package.dump(class Writer,value class go.string,value class go.string,bool,bool)
+   54.2%        614 ms  go.fmt!go.fmt_package.Fprintf(class Writer,value class go.sstring,value class System.Span`1<class System.Object>)
+   52.6%        596 ms  parsedemo!go.main_package+<>c__DisplayClass11_0.<dump>b__0(class go.ж`1<value class Node>,int)
+   52.2%        591 ms  go.fmt!go.fmt_package.doPrintf(class go.ж`1<value class pp>,value class go.sstring,value class go.slice`1<class System.Object>)
+   52.1%        590 ms  go.fmt!go.fmt_package.printArg(class go.ж`1<value class pp>,class System.Object,int32)
+   51.8%        586 ms  go.fmt!go.fmt_package.handleMethods(class go.ж`1<value class pp>,int32)
+   50.0%        567 ms  golib!go.builtin.TryTypeAssert(class System.Object,!!0&)
+   47.6%        539 ms  golib!go.builtin._(class System.Object,bool)
+   42.6%        482 ms  golib!go.golib.TypeExtensions.GetGoMethodSetCandidates(class System.Type,bool)
+   42.6%        482 ms  System.Collections.Concurrent!System.Collections.Concurrent.ConcurrentDictionary`2[System.ValueTuple`2[System.__Canon,System.Boolean],System.__Canon].
+   42.3%        479 ms  golib!go.golib.TypeExtensions+<>c.<GetGoMethodSetCandidates>b__74_0(value class System.ValueTuple`2<class System.Type,bool>)
+   42.3%        479 ms  golib!go.golib.TypeExtensions.CollectGoMethodSetCandidates(class System.Type,bool,class System.Collections.Generic.IReadOnlyList`1<value class System.
+   40.8%        462 ms  golib!go.builtin.Implements(class System.Object)
+   40.8%        462 ms  golib!go.builtin+Cache`1[System.__Canon].Implements(class System.Type)
+   40.8%        462 ms  System.Collections.Concurrent!System.Collections.Concurrent.ConcurrentDictionary`2[System.__Canon,System.Boolean].GetOrAdd(!0,class System.Func`2<!0,!
+   40.8%        462 ms  golib!go.builtin+Cache`1+<>c[System.__Canon].<Implements>b__1_0(class System.Type)
+   40.8%        462 ms  golib!go.golib.TypeExtensions.StructurallyImplements(class System.Type,class System.Type)
+   39.2%        444 ms  golib!go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadOnlySet`1<class System.Reflection.Assembly>)
+   38.6%        437 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.ParseSourceFile(value class SourceF
+   36.4%        412 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseSourceFileWorker(class go.ж`1<
+   32.6%        369 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseListIndex(class go.ж`1<value c
+   32.2%        364 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseToplevelStatement(class go.ж`1
+   32.2%        364 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseStatement(class go.ж`1<value c
+   24.0%        272 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseDeclaration(class go.ж`1<value
+   23.5%        266 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseDeclarationWorker(class go.ж`1
+   21.2%        240 ms  System.Linq!System.Linq.Enumerable+ArrayWhereSelectIterator`2[System.__Canon,System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].ToArra
+   16.5%        187 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseList(class go.ж`1<value class 
+   15.4%        175 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package+<>c__DisplayClass190_0.<parseList>b
+   12.6%        143 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseDelimitedList(class go.ж`1<val
+   12.4%        141 ms  golib!go.golib.TypeExtensions.WalkExtensionHosts()
+   12.1%        137 ms  golib!go.golib.TypeExtensions.LoadAssemblyExtensionHosts(class System.Reflection.Assembly,class System.Collections.Generic.List`1<class ExtensionHost>
+   11.5%        131 ms  golib!go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)
+   11.2%        126 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.parseFunctionBlockOrSemicolon(class

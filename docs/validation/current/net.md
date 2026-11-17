@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `net` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-25 · converter `3e3f18925`*
+*Validated 2026-11-14 · converter `049e497c8`*
 
-**505 matched · 3 disclosed** — Go 1.26.10, `windows/amd64`, converted package
+**506 matched · 3 disclosed** — Go 1.26.11, `windows/amd64`, converted package
 [`src/core/net`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.11 windows/amd64`.
 
 Both runtimes skip 38 of the matched tests identically.
 
@@ -109,6 +109,7 @@ Both runtimes skip 38 of the matched tests identically.
 | `TestDialListenIPArgs` | pass | pass |
 | `TestDialListenerAddr` | pass | pass |
 | `TestDialLocal` | pass | pass |
+| `TestDialNetipInvalidRaddr` | pass | pass |
 | `TestDialParallel` | pass | pass |
 | `TestDialParallel/0` | pass | pass |
 | `TestDialParallel/1` | pass | pass |

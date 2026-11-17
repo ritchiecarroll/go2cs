@@ -312,7 +312,7 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
         return default;
     };
     {
-        var err = visitor.VisitFuncs(new Func<uint32, uint32, slice<uint32>, error>(emitter)); if (err != nil) {
+        var err = visitor.VisitFuncs(emitter); if (err != nil) {
             return err;
         }
     }

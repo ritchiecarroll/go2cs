@@ -427,14 +427,57 @@ internal static void testFIPS140Only(ж<testing.T> t) {
     expectErr(t, rsa.VerifyPSS(smallKey.ᏑPublicKey, crypto.SHA256, new slice<byte>(32), sigPSS, nil));
     expectErr(t, rsa.VerifyPSS(rsaKey.ᏑPublicKey, crypto.SHA1, new slice<byte>(20), sigPSS, nil));
 
+    var oaepMsg = new slice<byte>(32);
+    (var oaepCiphertext, err) = rsa.EncryptOAEP(sha256.New(), rand.Reader, rsaKey.ᏑPublicKey, oaepMsg, default);
+    expectNoErr(t, err);
+    var (ᴛ126, ᴛ127) = rsa.EncryptOAEP(sha256.New(), rand.Reader, smallKey.ᏑPublicKey, oaepMsg, default);
+    expectErr(t, errRet2(ᴛ126, ᴛ127));
+    var (ᴛ128, ᴛ129) = rsa.EncryptOAEP(sha1.New(), rand.Reader, rsaKey.ᏑPublicKey, oaepMsg, default);
+    expectErr(t, errRet2(ᴛ128, ᴛ129));
+    var (ᴛ130, ᴛ131) = rsa.EncryptOAEP(sha256.New(), new readerWrap(rand.Reader), rsaKey.ᏑPublicKey, oaepMsg, default);
+    expectErr(t, errRet2(ᴛ130, ᴛ131));
+    var (ᴛ132, ᴛ133) = rsa.EncryptOAEPWithOptions(rand.Reader, rsaKey.ᏑPublicKey, oaepMsg, Ꮡ(new rsa.OAEPOptions(Hash: crypto.SHA256)));
+    expectNoErr(t, errRet2(ᴛ132, ᴛ133));
+    var oaepMsgʗ1 = oaepMsg;
+    var rsaKeyʗ1 = rsaKey;
+    withApprovedHash([MethodImpl(MethodImplOptions.NoInlining)] (crypto.Hash h) => {
+        var (ᴛ134, ᴛ135) = rsa.EncryptOAEPWithOptions(rand.Reader, rsaKeyʗ1.ᏑPublicKey, oaepMsgʗ1, Ꮡ(new rsa.OAEPOptions(Hash: crypto.SHA256, MGFHash: h)));
+        expectNoErr(t, errRet2(ᴛ134, ᴛ135));
+    });
+    var oaepMsgʗ2 = oaepMsg;
+    var rsaKeyʗ2 = rsaKey;
+    withNonApprovedHash((crypto.Hash h) => {
+        var (ᴛ136, ᴛ137) = rsa.EncryptOAEPWithOptions(rand.Reader, rsaKeyʗ2.ᏑPublicKey, oaepMsgʗ2, Ꮡ(new rsa.OAEPOptions(Hash: h)));
+        expectErr(t, errRet2(ᴛ136, ᴛ137));
+        var (ᴛ138, ᴛ139) = rsa.EncryptOAEPWithOptions(rand.Reader, rsaKeyʗ2.ᏑPublicKey, oaepMsgʗ2, Ꮡ(new rsa.OAEPOptions(Hash: crypto.SHA256, MGFHash: h)));
+        expectErr(t, errRet2(ᴛ138, ᴛ139));
+    });
+
+    var (ᴛ140, ᴛ141) = rsa.DecryptOAEP(sha256.New(), default, rsaKey, oaepCiphertext, default);
+    expectNoErr(t, errRet2(ᴛ140, ᴛ141));
+    var (ᴛ142, ᴛ143) = rsa.DecryptOAEP(sha256.New(), default, smallKey, oaepCiphertext, default);
+    expectErr(t, errRet2(ᴛ142, ᴛ143));
+    var (ᴛ144, ᴛ145) = rsa.DecryptOAEP(sha1.New(), default, rsaKey, oaepCiphertext, default);
+    expectErr(t, errRet2(ᴛ144, ᴛ145));
+    var (ᴛ146, ᴛ147) = rsaKey.Decrypt(default, oaepCiphertext, Ꮡ(new rsa.OAEPOptions(Hash: crypto.SHA256)));
+    expectNoErr(t, errRet2(ᴛ146, ᴛ147));
+    var oaepCiphertextʗ1 = oaepCiphertext;
+    var rsaKeyʗ3 = rsaKey;
+    withNonApprovedHash((crypto.Hash h) => {
+        var (ᴛ148, ᴛ149) = rsaKeyʗ3.Decrypt(default, oaepCiphertextʗ1, Ꮡ(new rsa.OAEPOptions(Hash: h)));
+        expectErr(t, errRet2(ᴛ148, ᴛ149));
+        var (ᴛ150, ᴛ151) = rsaKeyʗ3.Decrypt(default, oaepCiphertextʗ1, Ꮡ(new rsa.OAEPOptions(Hash: crypto.SHA256, MGFHash: h)));
+        expectErr(t, errRet2(ᴛ150, ᴛ151));
+    });
+
     (var k, err) = mlkem.GenerateKey768();
     expectNoErr(t, err);
-    var (ᴛ126, ᴛ127, ᴛ128) = mlkemtest.Encapsulate768(k.EncapsulationKey(), new slice<byte>(32));
-    expectErr(t, errRet3(ᴛ126, ᴛ127, ᴛ128));
+    var (ᴛ152, ᴛ153, ᴛ154) = mlkemtest.Encapsulate768(k.EncapsulationKey(), new slice<byte>(32));
+    expectErr(t, errRet3(ᴛ152, ᴛ153, ᴛ154));
     (var k1024, err) = mlkem.GenerateKey1024();
     expectNoErr(t, err);
-    var (ᴛ129, ᴛ130, ᴛ131) = mlkemtest.Encapsulate1024(k1024.EncapsulationKey(), new slice<byte>(32));
-    expectErr(t, errRet3(ᴛ129, ᴛ130, ᴛ131));
+    var (ᴛ155, ᴛ156, ᴛ157) = mlkemtest.Encapsulate1024(k1024.EncapsulationKey(), new slice<byte>(32));
+    expectErr(t, errRet3(ᴛ155, ᴛ156, ᴛ157));
 
     foreach (var (_, kem) in range(slice<hpkeꓸKEM>([hpke.DHKEM(ecdh.P256()), hpke.DHKEM(ecdh.P384()), hpke.DHKEM(ecdh.P521()), hpke.MLKEM768(), hpke.MLKEM1024(), hpke.MLKEM768P256(), hpke.MLKEM1024P384(), hpke.MLKEM768X25519()
     ]))) {
@@ -443,14 +486,14 @@ internal static void testFIPS140Only(ж<testing.T> t) {
         t.Run(fmt.Sprintf("HKPE KEM %04x"u8, kem.ID()), (ж<testing.T> tΔ1) => {
             var (kΔ3, errΔ3) = kemʗ1.GenerateKey();
             expectNoErr(tΔ1, errΔ3);
-            var (ᴛ132, ᴛ133) = kemʗ1.DeriveKeyPair(new slice<byte>(64));
-            expectNoErr(tΔ1, errRet2(ᴛ132, ᴛ133));
+            var (ᴛ158, ᴛ159) = kemʗ1.DeriveKeyPair(new slice<byte>(64));
+            expectNoErr(tΔ1, errRet2(ᴛ158, ᴛ159));
             (var kb, errΔ3) = kΔ3.Bytes();
             expectNoErr(tΔ1, errΔ3);
-            var (ᴛ134, ᴛ135) = kemʗ1.NewPrivateKey(kb);
-            expectNoErr(tΔ1, errRet2(ᴛ134, ᴛ135));
-            var (ᴛ136, ᴛ137) = kemʗ1.NewPublicKey(kΔ3.PublicKey().Bytes());
-            expectNoErr(tΔ1, errRet2(ᴛ136, ᴛ137));
+            var (ᴛ160, ᴛ161) = kemʗ1.NewPrivateKey(kb);
+            expectNoErr(tΔ1, errRet2(ᴛ160, ᴛ161));
+            var (ᴛ162, ᴛ163) = kemʗ1.NewPublicKey(kΔ3.PublicKey().Bytes());
+            expectNoErr(tΔ1, errRet2(ᴛ162, ᴛ163));
             if (Δfips140.Version() == "v1.0.0"u8) {
                 tΔ1.Skip(fips1403ModuleV100Doesˢ);
             }
@@ -460,20 +503,20 @@ internal static void testFIPS140Only(ж<testing.T> t) {
             expectNoErr(tΔ1, errΔ3);
         });
     }
-    var (ᴛ138, ᴛ139) = hpke.DHKEM(ecdh.X25519()).GenerateKey();
-    expectErr(t, errRet2(ᴛ138, ᴛ139));
-    var (ᴛ140, ᴛ141) = hpke.DHKEM(ecdh.X25519()).DeriveKeyPair(new slice<byte>(64));
-    expectErr(t, errRet2(ᴛ140, ᴛ141));
-    var (ᴛ142, ᴛ143) = hpke.DHKEM(ecdh.X25519()).NewPrivateKey(new slice<byte>(32));
-    expectErr(t, errRet2(ᴛ142, ᴛ143));
-    var (ᴛ144, ᴛ145) = hpke.DHKEM(ecdh.X25519()).NewPublicKey(new slice<byte>(32));
-    expectErr(t, errRet2(ᴛ144, ᴛ145));
+    var (ᴛ164, ᴛ165) = hpke.DHKEM(ecdh.X25519()).GenerateKey();
+    expectErr(t, errRet2(ᴛ164, ᴛ165));
+    var (ᴛ166, ᴛ167) = hpke.DHKEM(ecdh.X25519()).DeriveKeyPair(new slice<byte>(64));
+    expectErr(t, errRet2(ᴛ166, ᴛ167));
+    var (ᴛ168, ᴛ169) = hpke.DHKEM(ecdh.X25519()).NewPrivateKey(new slice<byte>(32));
+    expectErr(t, errRet2(ᴛ168, ᴛ169));
+    var (ᴛ170, ᴛ171) = hpke.DHKEM(ecdh.X25519()).NewPublicKey(new slice<byte>(32));
+    expectErr(t, errRet2(ᴛ170, ᴛ171));
     (var hpkeK, err) = hpke.MLKEM768().GenerateKey();
     expectNoErr(t, err);
-    var (ᴛ146, ᴛ147) = hpke.Seal(hpkeK.PublicKey(), hpke.HKDFSHA256(), hpke.ChaCha20Poly1305(), default, default);
-    expectErr(t, errRet2(ᴛ146, ᴛ147));
-    var (ᴛ148, ᴛ149) = hpke.Open(hpkeK, hpke.HKDFSHA256(), hpke.ChaCha20Poly1305(), default, new slice<byte>(2000));
-    expectErr(t, errRet2(ᴛ148, ᴛ149));
+    var (ᴛ172, ᴛ173) = hpke.Seal(hpkeK.PublicKey(), hpke.HKDFSHA256(), hpke.ChaCha20Poly1305(), default, default);
+    expectErr(t, errRet2(ᴛ172, ᴛ173));
+    var (ᴛ174, ᴛ175) = hpke.Open(hpkeK, hpke.HKDFSHA256(), hpke.ChaCha20Poly1305(), default, new slice<byte>(2000));
+    expectErr(t, errRet2(ᴛ174, ᴛ175));
 
     // fips140=only mode should prevent any operation that would make the FIPS
     // 140-3 module set its service indicator to false.

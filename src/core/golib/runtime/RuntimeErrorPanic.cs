@@ -131,6 +131,63 @@ namespace go.golib;
         return new PanicException(string.Format(NativeArrayViewMessage, shape));
     }
 
+    private const string NamedArrayNativeViewMessage =
+        $"{RuntimeErrorMessage}cannot view native memory as {{0}}: a named Go array is a window on a real "
+        + "managed array, and the memory at this address is not one (it is C memory, or Go storage of another type) "
+        + "(see docs/phase4/DESIGN-native-array-view.md)";
+    /// <summary>
+    /// The NAMED-ARRAY FLOOR: the whole value of a named array type read through a pointer at a real
+    /// address (<c>ж.NativeBox.cs</c>, <c>ValueAddress</c>).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Its OWN text, beside <see cref="NativeArrayViewWithoutElementStorage(Type)"/> and not that
+    /// one's. The unnamed array is refused where an unrecorded address is converted, and "no managed
+    /// element storage behind it" is true there. This refusal also meets pinned Go storage of another
+    /// type (a named array laid over a slice element, or over a Go array of another element type), and
+    /// that memory HAS managed storage behind it: what it lacks is the wrapper, whose one field is a
+    /// reference no pinned storage and no C memory ever held. So the text names both arrivals.
+    /// </para>
+    /// <para>
+    /// The prefix <c>cannot view native memory as &lt;shape&gt;:</c> and the document pointer are the
+    /// unnamed array's, on purpose: a reader searching a failing run for either refusal uses one key.
+    /// Internal, because the only thrower is the native box's read.
+    /// </para>
+    /// </remarks>
+    internal static PanicException NamedArrayViewOfNativeMemory(Type namedArrayType)
+    {
+        return new PanicException(string.Format(NamedArrayNativeViewMessage, namedArrayType.Name));
+    }
+
+    private const string ManagedDerivedStructReadMessage =
+        $"{RuntimeErrorMessage}cannot read {{0}} whole through a pointer into Go storage of another type: {{0}} holds managed "
+        + "references, and the bytes at that address are not {0}'s (a reference-free value, or one field of a larger value), "
+        + "so the read would take them for references (a field read at its Go offset is unaffected)";
+    /// <summary>
+    /// THE MANAGED-DERIVED STRUCT FLOOR (B0', W14): the whole value of a Go struct that holds a managed reference, read
+    /// through a native box derived from Go storage of another type (<c>ж.NativeBox.cs</c>, <c>ValueAddress</c>).
+    /// </summary>
+    /// <remarks>
+    /// The census's class B2b with source=retained or source=pinned. Internal, because the only thrower is the native
+    /// box's read. Native-origin boxes (C memory) are not refused here; they are the deferred B2 of the same census.
+    /// </remarks>
+    internal static PanicException ManagedDerivedStructRead(Type structType)
+    {
+        return new PanicException(string.Format(ManagedDerivedStructReadMessage, structType.Name));
+    }
+
+    private const string ValueDecodeRefusedMessage =
+        $"{RuntimeErrorMessage}cannot read {{0}} as a value out of memory: {{1}}";
+    /// <summary>
+    /// B2's value decode refused (<c>NativeStructMarshal.DecodeValue</c>): a Go struct read as a VALUE through a native
+    /// box (<see cref="ж{T}.GoValue"/>) whose bytes cannot be decoded at Go's offsets, with the reason, which names the
+    /// field where there is one.
+    /// </summary>
+    internal static PanicException ValueDecodeRefused(Type structType, string reason)
+    {
+        return new PanicException(string.Format(ValueDecodeRefusedMessage, structType.Name, reason));
+    }
+
     private const string UnknownGoSizeMessage =
         $"{RuntimeErrorMessage}{{0}} of {{1}} is not known (the length of {{2}} is not carried for an unnamed array type argument)";
     private const string UnknownGoSizeInnerMessage =

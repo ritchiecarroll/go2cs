@@ -1,0 +1,83 @@
+== Thread (30310): 124,868 ms sampled; UNMANAGED_CODE_TIME 27,234 ms, CPU_TIME 97,634 ms
+  -- exclusive
+   66.4%     82,929 ms  System.Private.CoreLib!System.Threading.Thread
+    3.4%      4,276 ms  native System.Private.CoreLib!System.Buffer
+    2.2%      2,807 ms  System.Private.CoreLib!System.ValueType
+    2.1%      2,580 ms  native github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package
+    1.9%      2,338 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase]
+    1.8%      2,213 ms  native golib!go.sstring
+    1.7%      2,152 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault]
+    1.1%      1,431 ms  System.Private.CoreLib!System.Threading.Monitor
+    1.1%      1,417 ms  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package
+    1.0%      1,194 ms  System.Private.CoreLib!System.Buffer
+    0.9%      1,165 ms  native System.Private.CoreLib!System.Threading.Monitor
+    0.9%      1,156 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase]
+    0.9%      1,104 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package
+    0.8%        959 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier]
+    0.7%        818 ms  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package
+    0.6%        761 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase]
+    0.6%        750 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase]
+    0.6%        720 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase]
+    0.6%        691 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase]
+    0.5%        660 ms  golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase]
+    0.5%        659 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase]
+    0.5%        652 ms  native github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package
+    0.5%        640 ms  native github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core_package
+    0.5%        639 ms  native go.slices!go.slices_package
+    0.5%        638 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionBase]
+    0.3%        381 ms  native golib!go.string.
+    0.3%        351 ms  native github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package
+    0.3%        331 ms  golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase]
+    0.2%        311 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionWithTypeArguments]
+    0.2%        268 ms  golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase]
+    0.2%        264 ms  golib!go.ManagedPointerTokens
+    0.2%        249 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeReferenceNode]
+    0.2%        228 ms  System.Private.CoreLib!System.Runtime.CompilerServices.CastHelpers
+    0.2%        221 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeWithTypeArgumentsBase]
+    0.2%        214 ms  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder_package
+    0.2%        197 ms  golib!go.builtin
+    0.2%        196 ms  System.Private.CoreLib!System.RuntimeTypeHandle
+    0.2%        194 ms  native golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration]
+    0.2%        190 ms  System.Private.CoreLib!System.Runtime.CompilerServices.RuntimeHelpers
+    0.2%        190 ms  golib!go.sstring
+  -- inclusive
+  100.0%    124,868 ms  Process64 checkdemo 
+  100.0%    124,868 ms  
+  100.0%    124,868 ms  Threads
+  100.0%    124,868 ms  Thread 
+   98.7%    123,237 ms  System.Private.CoreLib!System.Threading.Thread
+   97.8%    122,076 ms  checkdemo!go.main_package
+   97.7%    122,043 ms  golib!go.golib.MainThread+<>c__DisplayClass1_0
+   96.7%    120,793 ms  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler_package
+   92.9%    115,970 ms  github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core_package
+   69.5%     86,844 ms  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package
+   69.5%     86,812 ms  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler_package+<>c__DisplayClass266_1
+   29.0%     36,211 ms  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package
+   24.7%     30,832 ms  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package
+   22.4%     27,917 ms  go.sync!go.sync_package
+   22.2%     27,752 ms  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler_package+<>c__DisplayClass115_0
+   22.2%     27,748 ms  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler_package+<>c__DisplayClass115_1
+   21.9%     27,388 ms  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder_package
+   21.6%     26,952 ms  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler_package+<>c__DisplayClass346_1
+   21.6%     26,922 ms  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder_package+<>c__DisplayClass48_0
+   19.6%     24,432 ms  System.Private.CoreLib!System.Reflection.FieldAccessor
+   16.6%     20,790 ms  golib!go.builtin
+   16.6%     20,722 ms  github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core_package+singleThreadedWorkGroupжWorkGroup.globa
+   13.7%     17,124 ms  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler_package+ΔProgramжProgram.global::go.git
+    7.4%      9,269 ms  System.Private.CoreLib!System.Buffer
+    6.7%      8,414 ms  github.com.microsoft.TypeScript.tsc.internal.scanner!go.github.com.microsoft.TypeScript.tsc.internal.scanner_package
+    6.5%      8,134 ms  go.unicode.utf8!go.unicode.utf8_package
+    6.5%      8,129 ms  golib!go.sstring
+    5.3%      6,642 ms  System.Private.CoreLib!System.ValueType
+    4.2%      5,251 ms  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.astᴛLeftHandSideExpressionBaseᴛpkg
+    3.3%      4,115 ms  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler_package+compilerHostжCompilerHost.globa
+    2.9%      3,643 ms  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package+<>c__DisplayClass3285_0
+    2.4%      3,016 ms  golib!go.golib.Coro
+    2.4%      3,016 ms  golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase]
+    2.2%      2,801 ms  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package+<>c__DisplayClass1531_1
+    2.1%      2,595 ms  System.Private.CoreLib!System.Threading.Monitor
+    1.8%      2,298 ms  go.slices!go.slices_package
+    1.8%      2,263 ms  golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault]
+    1.8%      2,240 ms  golib!go.slice`1[System.__Canon]
+    1.2%      1,499 ms  golib!go.ж`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase]
+    1.1%      1,425 ms  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package+<>c__DisplayClass2626_0

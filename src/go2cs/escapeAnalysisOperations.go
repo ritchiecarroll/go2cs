@@ -53,6 +53,12 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 	// the read renders as a bitcast of x's value, so that address-of boxes nothing. See valuePunOperations.go.
 	collectValuePunReads(files, info)
 
+	// And the func words: a func value carried as a number, read or stored (funcWordOperations.go).
+	collectFuncWords(files, info)
+
+	// And where each dereference stands: one read for its value may be an array load door (arrayPointerElementDoor.go).
+	collectArrayPointerLoads(files, info)
+
 	var concurrentTasks sync.WaitGroup
 
 	// A panic raised on THIS side of the `go` statement below cannot be recovered by the caller:
@@ -565,7 +571,9 @@ func (v *Visitor) markCaptureModeBoxedParams(params *ast.FieldList, body *ast.Bl
 //
 // The trigger is ADDRESS-TAKEN specifically — the one condition that hands other code a pointer
 // into the result's own storage, requiring the box `Ꮡerr`, the pointee write, and `return err` to
-// share one slot (mirrors identHasHeapBox's box gate for an inherently-heap ident). A result that
+// share one slot (mirrors identHasHeapBox's box gate for an inherently-heap ident). Go's two
+// IMPLICIT address-of forms count too: a call of a capture-mode pointer method on the result and a
+// pointer-method value of it (see the parameter arm, markCaptureModeBoxedParams). A result that
 // is merely referenced or WRITTEN inside a closure does NOT qualify: a C# closure already captures
 // the outer local by reference, so the full escape analysis (which blanket-marks any inherently-
 // heap ident referenced in a closure) would needlessly flip such a result to box-ref emission. The
@@ -599,8 +607,21 @@ func (v *Visitor) analyzeNamedResults(results *ast.FieldList, body *ast.BlockStm
 				continue
 			}
 
-			if v.objectAddressTaken(obj, body, false) || v.pointerMethodValueAddressTaken(obj, body) {
+			// Go also takes `&r` implicitly for a call of a capture-mode (direct-ж) pointer method on
+			// the result or on a value chain rooted at it (`r.SetBigInt(bi)`, modernc.org/mathutil's
+			// NewInt128FromFloat32, sqlite-cs S8c), and for a pointer-method VALUE of it. The method's
+			// only emitted receiver is the box, so an unboxed result failed with CS1929. Same two
+			// reasons, same record, as the parameter and receiver arms.
+			captureMode := v.bodyCallsCaptureModeMethodOnObject(obj, body) || v.pointerMethodValueAddressTaken(obj, body)
+
+			if captureMode || v.objectAddressTaken(obj, body, false) {
 				v.identEscapesHeap[obj] = true
+
+				// An inherently-heap result (named slice/map/chan) boxes only for a recorded
+				// capture-mode reason, as in the parameter arm (see identHasHeapBox).
+				if captureMode && packageCaptureModeBoxIdents != nil && isInherentlyHeapAllocatedType(obj.Type()) {
+					packageCaptureModeBoxIdents[obj] = true
+				}
 			}
 		}
 	}
@@ -728,9 +749,17 @@ func (v *Visitor) objectAddressTaken(obj types.Object, body ast.Node, directOnly
 	}
 
 	found := false
+	pinFree := pinFreeInlineCopySlices(body, v.info)
 
 	ast.Inspect(body, func(n ast.Node) bool {
 		if found {
+			return false
+		}
+
+		// A slice of an array held inline in obj's storage is an address of it (inlineArraySliceBase), unless a copy
+		// reads or writes it without one (inlineArrayCopyOperand).
+		if slice, ok := n.(*ast.SliceExpr); ok && !directOnly && !pinFree[slice] && v.inlineArraySliceRootsAt(slice, obj) {
+			found = true
 			return false
 		}
 
@@ -859,6 +888,7 @@ func (v *Visitor) performEscapeAnalysisForObject(identObj types.Object, parentBl
 	}
 
 	escapes := false
+	pinFree := pinFreeInlineCopySlices(parentBlock, v.info)
 
 	// Visitor function to traverse the AST
 	inspectFunc := func(node ast.Node) bool {
@@ -946,6 +976,15 @@ func (v *Visitor) performEscapeAnalysisForObject(identObj types.Object, parentBl
 					// for field values, not directly stored in the composite literal
 					return true
 				}
+			}
+
+		case *ast.SliceExpr:
+			// A slice of an array held inline in the ident's own storage, `x.f[lo:hi]`, is Go's (&x.f)[lo:hi]: it is
+			// emitted over the field's address (inlineArraySliceBase), so the ident lives in a box, as for `&x.f`. A
+			// copy that reads or writes the slice over a reference instead (inlineArrayCopyOperand) takes no address.
+			if !pinFree[n] && v.inlineArraySliceRootsAt(n, identObj) {
+				escapes = true
+				return false
 			}
 
 		case *ast.CallExpr:

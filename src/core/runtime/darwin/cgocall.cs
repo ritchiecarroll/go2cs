@@ -512,7 +512,7 @@ internal static void unwindm(ref bool restore) {
         // unwind of g's stack (see comment at top of file).
         var mp = acquirem();
         var sched = (~mp).g0.of(g.Ꮡsched);
-        sched.Value.sp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)((~sched).sp + alignUp(sys.MinFrameSize, sys.StackAlign)));
+        sched.Value.sp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)((~sched).sp + alignUp(sys.MinFrameSize, sys.StackAlign)));
 
         // Do the accounting that cgocall will not have a chance to do
         // during an unwind.
@@ -636,7 +636,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
     }
     case var ᴛ when ᴛ == abi.Func: {
         if (indir) {
-            Δp = ~(ж<@unsafe.Pointer>)(uintptr)(Δp);
+            Δp = ~@unsafe.Pointer.To<@unsafe.Pointer>(Δp);
         }
         if (!cgoIsGoPointer(Δp)) {
             return;
@@ -645,7 +645,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         break;
     }
     case var ᴛ when ᴛ == abi.Interface: {
-        var it = ~(ж<ж<_type>>)(uintptr)(Δp);
+        var it = ~@unsafe.Pointer.To<ж<_type>>(Δp);
         if (it == nil) {
             return;
         }
@@ -655,7 +655,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         if (inheap((uintptr)it)) {
             throw panic(cgoFormatErr(msg, t.Kind()));
         }
-        Δp = ~(ж<@unsafe.Pointer>)(uintptr)(add(Δp, goarch.PtrSize));
+        Δp = ~@unsafe.Pointer.To<@unsafe.Pointer>(add(Δp, goarch.PtrSize));
         if (!cgoIsGoPointer(Δp)) {
             return;
         }
@@ -667,7 +667,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
     }
     case var ᴛ when ᴛ == abi.Slice: {
         var st = Ꮡt.Reinterpret<_type, slicetype>();
-        var s = (ж<Δsliceᴛ>)(uintptr)(Δp);
+        var s = @unsafe.Pointer.To<Δsliceᴛ>(Δp);
         Δp = s.Δarray;
         if (Δp == nil || !cgoIsGoPointer(Δp)) {
             return;
@@ -685,7 +685,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         break;
     }
     case var ᴛ when ᴛ == abi.ΔString: {
-        var ss = (ж<stringStruct>)(uintptr)(Δp);
+        var ss = @unsafe.Pointer.To<stringStruct>(Δp);
         if (!cgoIsGoPointer(ss.str)) {
             return;
         }
@@ -713,7 +713,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
     }
     case var ᴛ when ᴛ == abi.Pointer || ᴛ == abi.UnsafePointer: {
         if (indir) {
-            Δp = ~(ж<@unsafe.Pointer>)(uintptr)(Δp);
+            Δp = ~@unsafe.Pointer.To<@unsafe.Pointer>(Δp);
             if (Δp == nil) {
                 return;
             }
@@ -751,7 +751,7 @@ internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointe
             (tp, addr) = tp.next(@base + span.elemsize); if (addr == 0) {
                 break;
             }
-            @unsafe.Pointer pp = ~(ж<@unsafe.Pointer>)(uintptr)((@unsafe.Pointer)addr);
+            @unsafe.Pointer pp = ~@unsafe.Pointer.To<@unsafe.Pointer>((@unsafe.Pointer)addr);
             if (cgoIsGoPointer(pp) && !isPinned(pp)) {
                 throw panic(cgoFormatErr(msg, abi.Pointer));
             }

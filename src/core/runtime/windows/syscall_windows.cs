@@ -334,7 +334,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
         retPop = abiMap.srcStackSize;
     }
 
-    var key = new winCallbackKey((ж<funcval>)(uintptr)(fn.data), cdecl);
+    var key = new winCallbackKey(@unsafe.Pointer.To<funcval>(fn.data), cdecl);
 
     cbsLock();
 

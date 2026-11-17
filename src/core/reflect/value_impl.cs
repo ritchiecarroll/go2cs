@@ -514,6 +514,8 @@ public static nint Len(this ΔValue v) {
     return cur switch {
         @string s => s.Length,
         IArray a => a.Length,
+        // A Go array held inline (a go.arrays member) is not an IArray; its reflection face is IGoInlineArray.
+        global::go.golib.IGoInlineArray inline => inline.Length,
         IMap m => m.Length,
         // Go's Len covers Chan too — `len(ch)` is the count of buffered elements — and this arm was
         // simply missing, so every channel Value reported 0 while Cap answered correctly one method
@@ -549,6 +551,14 @@ public static ΔValue Index(this ΔValue v, nint i) {
     }
     if (k == Array && elemType is not null) {
         object? liveArr = v.live;
+        // A Go array held inline (a go.arrays member) reads an element through IGoInlineArray: a copy, never addressable,
+        // which is what fmt and the other value readers need. Its addressable form goes through its owner (GoReflect).
+        if (liveArr is global::go.golib.IGoInlineArray inline) {
+            if ((nuint)i >= (nuint)inline.Length) {
+                throw panic("reflect: array index out of range");
+            }
+            return makeTypedValue(inline[i], elemType, v.typ_.Value.arrayDims is { Length: > 1 } inlineDims ? inlineDims[1..] : null, ro);
+        }
         if (liveArr is not IArray arr || (nuint)i >= (nuint)arr.Length) {
             throw panic("reflect: array index out of range");
         }

@@ -61,11 +61,12 @@ machinery:
   through the wrapper, because a lambda cannot capture one. An inline body has no parameters to
   thread, so it simply uses the one it has (`GenericVariadicFunc`, `VariadicPointerParam`).
 
-Measured with `GC.GetAllocatedBytesForCurrentThread` over 5,000 Release calls, the frame allocates
+Counted with `GC.GetAllocatedBytesForCurrentThread` in a Release build, the frame allocates
 **nothing** with no defers and **nothing** with one or two whose targets are cached static method groups;
 for the two-capturing-defer shape of `internal/poll.FD.Write` the only allocation is the
 display class and delegate of each defer that genuinely closes over something. The body-owning
-alternative allocates in all three shapes.
+alternative allocates in all three shapes. These are allocations the emitted C# makes, so they do not
+depend on the operating system.
 <!-- The full as-built record of the frame's design lives in
      [`phase4/DESIGN-closure-emission.md`](../phase4/DESIGN-closure-emission.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 <!-- measured at the design (platform not recorded): frame 0 B / 0 B / 192 B; body-owning alternative 160 B / 248 B / 440 B. -->
@@ -385,7 +386,7 @@ kept and wrapped — `defer(() => ((Actionꓸꓸꓸ<nint>)(<literal>))(), ref �
 arms for the same reasons.
 
 **Reach.** The shape is `html/template`'s `examplefiles_test.go:90`, which was that package's last
-build wall. The same cast
+build failure. The same cast
 also closes the immediately-invoked variadic literal (`func(parts ...int) int { … }(1, 2, 3)`), which
 `convCallExpr`'s IIFE interception had explicitly excluded on the stale reasoning that "delegate type
 would need a params array" — `iifeDelegateType` has rendered the family form for a variadic signature
@@ -408,9 +409,9 @@ and spreading inside the thunk, at every variadic deferred call in the corpus.
 
 An empty variadic call is NOT such a wall: `f()` on `func f(parts ...int)` answers `parts == nil` as `true`, as in
 Go, because the variadic pack's `Span<T>.slice()` keeps a null span nil.
-<!-- src/core/golib/slice.cs:1939 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
+<!-- src/core/golib/slice.cs:1955 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
      empty slice where Go passes nil); golib's Span-to-slice copy has since kept nil-ness,
-     slice.cs:1909 `NIL-NESS CROSSES THIS BOUNDARY`. -->
+     slice.cs:1925 `NIL-NESS CROSSES THIS BOUNDARY`. -->
 
 ## A ZERO-ARG deferred/spawned call of a NAMED variadic callee keeps the lambda — the group carries `params`
 
@@ -1311,9 +1312,9 @@ A pointer method PROMOTED to a value through an embedded field, and another pack
 binds a copy, a documented limitation), keep their earlier emission.
 
 Not covered: a nil interface receiver panics in Go at the statement, and the snapshot passes it to the thunk, which
-panics when it runs. An IDENTIFIER receiver keeps the capture copy above. (Guarded by the `DeferLoopCapture` behavioral test's red 3, 4 and 5: an
+panics when it runs. An IDENTIFIER receiver keeps the capture copy above. (Guarded by the `DeferLoopCapture` behavioral test's arms 3, 4 and 5, each of which fails without this rule: an
 interface, pointer and value element reassigned after a `defer` or `go` on it, and a pointer method on a value
-element, output-compared vs Go; before the change red 3 and red 5 printed the new element and red 4 did not compile.)
+element, output-compared with Go.)<!-- Before the change arms 3 and 5 printed the new element and arm 4 did not compile. -->
 
 ## A deferred pointer-receiver method on an escaping value local captures by-box, not by-copy
 The emission above binds the box (`Ꮡstate.free`) for a `defer state.free()` on a value local — but the CAPTURE analysis must cooperate. `defer`/`go`/closure bodies are lambda-conversion scopes: a variable used inside them that escapes to the heap is normally snapshot-copied into a `var stateʗ1 = state;` declaration so the C# closure captures a value, not an uncapturable ref-local. For an escaping value local used **only** as the receiver of a pointer-receiver method call (`state` a `handleState` value, `free` a `*handleState` method — log/slog handler.go's `defer state.free()`), that snapshot is doubly wrong: the address-taking is *implicit* (Go auto-takes `&state`), so the emission still binds the box — but of the *snapshot name* `Ꮡstateʗ1`, which is a plain value with no `Ꮡ` companion:

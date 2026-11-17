@@ -107,13 +107,18 @@ namespace go;
     /// reads through <c>Value</c>, exactly as <c>p.Value[i]</c> does, with the same overloads and so the
     /// same bounds checks and panics. One type test per read; no element box (runtime's cheaprand is on
     /// the emitted population). A pointer array over FOREIGN memory reads its element's word in place
-    /// (<see cref="NativePointerArrayBox{E}"/>); that second test exists only for a reference-bearing
-    /// <typeparamref name="T"/>, a JIT-time constant, so an unmanaged element's read is unchanged.
+    /// (<see cref="NativePointerArrayBox{E}"/>); that test exists only for a reference-bearing
+    /// <typeparamref name="T"/>, a JIT-time constant. A view of one field's bytes over a Go value that has no
+    /// address reads the field's live slot (<see cref="ReinterpretedArrayBox{E}"/>); that test exists only for a
+    /// reference-free <typeparamref name="T"/>, the same constant, and is one exact-type compare.
     /// </remarks>
     public static ref T ElementRef<T>(this ж<array<T>> pointer, int index)
     {
         if (pointer is NativeArrayBox<T> native)
             return ref native.ElementRef(index);
+
+        if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is ReinterpretedArrayBox<T> field)
+            return ref field.ElementRef(index);
 
         if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
             return ref words.ElementRef(index);
@@ -127,6 +132,9 @@ namespace go;
         if (pointer is NativeArrayBox<T> native)
             return ref native.ElementRef(index);
 
+        if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is ReinterpretedArrayBox<T> field)
+            return ref field.ElementRef(index);
+
         if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
             return ref words.ElementRef(index);
 
@@ -138,6 +146,9 @@ namespace go;
     {
         if (pointer is NativeArrayBox<T> native)
             return ref native.ElementRef(index);
+
+        if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is ReinterpretedArrayBox<T> field)
+            return ref field.ElementRef(index);
 
         if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
         {
@@ -198,19 +209,18 @@ namespace go;
 
         // A native-backed box IS its address; reinterpreting it keeps aliasing that address.
         if (box.IsNative)
-            return new NativeBox<TDst>(box.NativeAddress);
+            return new NativeBox<TDst>(box.NativeAddress, retainedSource: NativeDerivation.Kept(box));
 
         // A FUNC read back out of a machine word -- `*(*func())(unsafe.Pointer(&lparam))`, the inbound
         // half of Go's closure-through-an-lParam idiom (runtime's `callback`). The word was minted by
         // GoFuncCookie when the func was read AS a word, so it resolves to that delegate; a zero word is
-        // Go's nil func. Any other word is not something this runtime minted for a func, and keeps the
-        // route below unchanged. The box is a READ view: a store through it does not re-encode the
-        // word into the slot (no Go caller of the idiom writes through it).
-        if (FuncCookieReinterpret<T, TDst>.Applies &&
-            Unsafe.As<T, nuint>(ref box.ValueSlot) is var word &&
-            (word == 0 || GoFuncCookie.IsCookie(word)))
+        // Go's nil func. Any other word is not something this runtime minted for a func, and panics by
+        // name: the route below would read a number as a reference. The box is a READ view: a store
+        // through it does not re-encode the word into the slot (the converter emits a func stored into
+        // a word slot as a store of the func's word, sqlite-cs S1's class w2).
+        if (FuncCookieReinterpret<T, TDst>.Applies)
         {
-            TDst fn = FuncCookieReinterpret<T, TDst>.Resolve(word);
+            TDst fn = FuncCookieReinterpret<T, TDst>.Resolve(Unsafe.As<T, nuint>(ref box.ValueSlot));
             return new StandardBox<TDst>(fn);
         }
 
@@ -396,27 +406,12 @@ namespace go;
         /// read as a word; the reading side may name the same Go signature through another delegate
         /// type (a named func type, or <c>Action</c> against a <c>Func</c> twin), so a mismatch is
         /// rebound over the same target and method -- never a DynamicInvoke, which would silently
-        /// narrow the contract. A cookie whose func is no longer alive, or whose signature cannot be
-        /// bound, is refused by name: both are a use of a word nothing live stands behind.
+        /// narrow the contract. A word that is not a cookie, a cookie whose func is no longer alive,
+        /// or one whose signature cannot be bound is refused by name: each is a use of a word nothing
+        /// live stands behind. The resolve is GoFuncCookie's, the one the converter's
+        /// <see cref="GoFuncCookie.Func{F}"/> emission reads through.
         /// </remarks>
-        internal static TDst Resolve(nuint word)
-        {
-            if (word == 0)
-                return default!;
-
-            Delegate? fn = GoFuncCookie.Resolve(word);
-
-            if (fn is null)
-                throw new PanicException("go2cs: func cookie 0x" + word.ToString("x") + " names no live func -- the func value it was read from is no longer referenced");
-
-            if (fn is TDst typed)
-                return typed;
-
-            if (Delegate.CreateDelegate(typeof(TDst), fn.Target, fn.Method, throwOnBindFailure: false) is TDst rebound)
-                return rebound;
-
-            throw new PanicException("go2cs: func cookie 0x" + word.ToString("x") + " holds a " + fn.GetType().Name + ", which cannot be read as " + typeof(TDst).Name);
-        }
+        internal static TDst Resolve(nuint word) => (TDst)(object?)GoFuncCookie.ResolveAs(word, typeof(TDst))!;
     }
 
     internal static class RemembersReinterpretSource<T, TDst>
@@ -613,6 +608,37 @@ namespace go;
             return ref Unsafe.NullRef<T>();
 
         return ref box.ValueSlot;
+    }
+
+    /// <summary>
+    /// Go's <c>&amp;*p</c>: the pointer itself, after the nil check Go's indirection makes.
+    /// </summary>
+    /// <typeparam name="T">Pointee type.</typeparam>
+    /// <param name="p">Pointer the Go expression dereferences without reading.</param>
+    /// <returns><paramref name="p"/>, the same box.</returns>
+    /// <remarks>
+    /// <para>
+    /// The address of the variable a pointer indirection denotes is the pointer, so <c>&amp;*p</c> yields
+    /// <c>p</c>; and Go still evaluates <c>*p</c>, so a nil <c>p</c> panics with
+    /// <c>runtime error: invalid memory address or nil pointer dereference</c> at that expression, whether
+    /// or not anything is read through the result. The converter emits this for the form, where it used to
+    /// emit <c>Ꮡ(~p)</c>, a NEW box over a copy of the pointee, which lost every write through the result.
+    /// </para>
+    /// <para>
+    /// The nil question is the dereference operator's own (<see cref="ж{T}.IsNilPointer"/>), plus the null
+    /// reference, the other managed spelling of a Go nil pointer: an extension and not an instance member so
+    /// that a null <c>p</c> takes Go's panic here rather than a <see cref="NullReferenceException"/> on the
+    /// way in. Named as Go's compiler names the operation it lowers <c>&amp;*p</c> to (NilCheck: panics if
+    /// the pointer is nil, returns it unmodified).
+    /// </para>
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never), MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ж<T> nilcheck<T>(this ж<T>? p)
+    {
+        if (p is null || p.IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        return p;
     }
 
     /// <summary>

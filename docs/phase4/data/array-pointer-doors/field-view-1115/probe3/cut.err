@@ -1,0 +1,7 @@
+panic: go2cs: native-backed array at 0x7f0c4dd03102: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+
+goroutine 1 [running]:
+main.storeMulti()
+	example.com/f1probe3/main.go:152
+main.main()
+	example.com/f1probe3/main.go:244

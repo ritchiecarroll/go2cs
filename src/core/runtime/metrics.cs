@@ -885,7 +885,7 @@ partial struct metricValue {
 internal static ж<metricFloat64Histogram> float64HistOrInit(this ref metricValue v, slice<float64> buckets) {
     ж<metricFloat64Histogram> hist = default;
     if (v.kind == metricKindFloat64Histogram && v.pointer != nil) {
-        hist = (ж<metricFloat64Histogram>)(uintptr)(v.pointer);
+        hist = @unsafe.Pointer.To<metricFloat64Histogram>(v.pointer);
     } else {
         v.kind = metricKindFloat64Histogram;
         hist = @new<metricFloat64Histogram>();

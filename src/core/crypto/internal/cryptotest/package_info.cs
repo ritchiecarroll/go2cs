@@ -66,7 +66,7 @@ using static go.crypto.@internal.cryptotest_package;
 [assembly: GoPositionMap("crypto/internal/cryptotest/block.go", "block.cs", "ABUitIKClIKCppSSppLckqaUlIKUgri0lIKUggAWDIKCuIKClJSCgriClKaCuIKCuIKUgqaCkoKCpoKCuIKClILKgoKC7oKUgoKCpoKkgoKUgoKCyoKCuIKmgoKUpoKmlIKCuIKUgqaCgoC2goKAtoKCgOy4ppCSkLaQkpCSkMiilIKUlIKmog==", "30-32:1;34-36:2;41-67:3;72-87:1;89-104:2;106-141:3;146-174:4;176-197:5;199-219:6;208-208:6.1;213-213:6.2;218-218:6.3;224-238:7;228-228:7.1;231-231:7.2;232-232:7.3;235-235:7.4;236-236:7.5;237-237:7.6;244-252:1", "", "", "", "298:21,299:13")]
 [assembly: GoPositionMap("crypto/internal/cryptotest/blockmode.go", "blockmode.cs", "ABEmooKClKaCkqaSppKUgoKmgpSCgoIAFAqClIKCkLaSlIKClIKCuJKUlIKClIKCypKUlJSCuIKCypKUgqaCkoKCpoKCuIKClILKgoKCuIKUkqaClILckpSCgoKmgqSCgpSClIK4kpSCpoKCkLaCgpC2goKQyKSCgoKwyJKUgpSSgpSUgg==", "28-30:1;32-34:2;36-52:3;58-61:1;60-60:1.1;63-74:2;76-90:3;92-109:4;111-161:5;151-153:5.1;165-187:6;189-209:7;198-198:7.1;203-203:7.2;208-208:7.3;212-219:8;217-217:8.1;221-236:9")]
 [assembly: GoPositionMap("crypto/internal/cryptotest/fetchmodule.go", "fetchmodule.cs", "ACQmsriCgoKClJSCgoKmgpSmlIKClIaCpg==")]
-[assembly: GoPositionMap("crypto/internal/cryptotest/fips140.go", "fips140.cs", "AAsYgoKC")]
+[assembly: GoPositionMap("crypto/internal/cryptotest/fips140.go", "fips140.cs", "AA0cgoKCvKKCgpSCuIKCgoKUgoKUgoKU")]
 [assembly: GoPositionMap("crypto/internal/cryptotest/hash.go", "hash.cs", "ABUsooKClKaCgoI=")]
 [assembly: GoPositionMap("crypto/internal/cryptotest/implementations.go", "implementations.cs", "ABcoxIKCpoKCgqaApIKAgpSmgpT+guaCgoKUpLa2", "33-33:1;39-47:2")]
 [assembly: GoPositionMap("crypto/internal/cryptotest/methods.go", "methods.cs", "AA0sAAoCgoKClIKClLiigoKmgpSCgqaCgoKClIK4")]
@@ -114,6 +114,7 @@ public static partial class cryptotest_package
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));

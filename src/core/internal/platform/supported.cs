@@ -66,6 +66,19 @@ public static bool ASanSupported(@string goos, @string goarch) {
     }}
 }
 
+// FIPS140Supported reports whether goos/goarch supports FIPS 140-3 mode.
+// It does not consider non-platform constraints such as the purego build tag,
+// -asan, or GOEXPERIMENT=boringcrypto.
+// There is a copy of this function in cmd/dist/test.go.
+public static bool FIPS140Supported(@string goos, @string goarch) {
+    // Keep this in sync with crypto/internal/fips140.Supported.
+    switch (ᐧ) {
+    case {} when (goarch == "wasm"u8) || (goos == "windows"u8 && goarch == "386"u8) || (goos == "openbsd"u8) || (goos == "aix"u8): {
+        return false;
+    }}
+    return true;
+}
+
 // FuzzSupported reports whether goos/goarch supports fuzzing
 // ('go test -fuzz=.').
 public static bool FuzzSupported(@string goos, @string goarch) {

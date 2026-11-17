@@ -22,6 +22,28 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		return emission
 	}
 
+	// A func read as a word, or a word read back as a func (funcWordOperations.go, m2 and r1).
+	if emission, ok := v.funcWordEmission(starExpr); ok {
+		return emission
+	}
+
+	// A dereference of `(*A)(p)` read for its value, p an unsafe.Pointer and A an unnamed array, is the array
+	// load door (arrayPointerElementDoor.go).
+	if door, ok := v.arrayPointerLoadDoor(starExpr); ok {
+		return door
+	}
+
+	// A field view read for its whole value copies its elements: the view has no array of its own
+	// (nativeFieldArrayView.go).
+	if load, ok := v.nativeFieldArrayViewLoad(starExpr); ok {
+		return load
+	}
+
+	// A whole-value read of a struct the inline-array admission kept out decodes at Go's offsets (valueDecodeSites.go).
+	if emission, ok := v.valueDecodeEmission(starExpr, context); ok {
+		return emission
+	}
+
 	ident := getIdentifier(starExpr.X)
 	pointerRecv, recvName := v.isPointerReceiver()
 

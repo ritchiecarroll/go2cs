@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/internal/fips140test` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-25 · converter `3e3f18925`*
+*Validated 2026-11-14 · converter `5bdf0a90b`*
 
-**2270 matched · 8 disclosed** — Go 1.26.10, `windows/amd64`, converted package
+**2274 matched · 8 disclosed** — Go 1.26.11, `windows/amd64`, converted package
 [`src/core/crypto/internal/fips140test`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140test).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.11 windows/amd64`.
 
 Both runtimes skip 6 of the matched tests identically.
 
@@ -48,12 +48,15 @@ Both runtimes skip 6 of the matched tests identically.
 | `TestFIPS140/EDDSA_KeyGen,_SigGen,_SigVer` | pass | pass |
 | `TestFIPS140/Feedback_KDF` | pass | pass |
 | `TestFIPS140/HMAC` | pass | pass |
+| `TestFIPS140/HMAC_w/_Keccak-256_[NOT_APPROVED]` | pass | pass |
 | `TestFIPS140/KAS-ECC-SSC_ephemeralUnified` | pass | pass |
 | `TestFIPS140/KDA_HKDF` | pass | pass |
 | `TestFIPS140/KDA_OneStepNoCounter` | pass | pass |
 | `TestFIPS140/KDF_TLS_v1.2_CVL` | pass | pass |
+| `TestFIPS140/KDF_TLS_v1.2_CVL_SHA-384` | pass | pass |
 | `TestFIPS140/KDF_TLS_v1.3_CVL` | pass | pass |
 | `TestFIPS140/KTS_IFC_OAEP` | pass | pass |
+| `TestFIPS140/Keccak-256_[NOT_APPROVED]` | pass | pass |
 | `TestFIPS140/ML-DSA_KeyGen,_SigGen,_SigVer` | pass | pass |
 | `TestFIPS140/ML-KEM_KeyGen,_Encap,_Decap` | pass | pass |
 | `TestFIPS140/PBKDF` | pass | pass |
@@ -61,6 +64,7 @@ Both runtimes skip 6 of the matched tests identically.
 | `TestFIPS140/RSA_KeyGen_w/_small_key_[NOT_APPROVED]` | pass | pass |
 | `TestFIPS140/RSA_SigGen,_SigVer_PKCS_1.5` | pass | pass |
 | `TestFIPS140/RSA_SigGen,_SigVer_PSS` | pass | pass |
+| `TestFIPS140/RSA_SigGen_PSS_w/_Keccak-256_[NOT_APPROVED]` | pass | pass |
 | `TestFIPS140/SHA2-224` | pass | pass |
 | `TestFIPS140/SHA2-256` | pass | pass |
 | `TestFIPS140/SHA2-384` | pass | pass |

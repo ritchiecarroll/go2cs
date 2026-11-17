@@ -102,27 +102,43 @@
      "Keep Q1 2027"; gojq and timefmt-go "Keep Q4 2026"; goroutine scheduling "List as unscheduled". The page holds
      all three as drafted. -->
 
+<!-- Tightened 2026-11-15 at master 091935257c (P4, owner request relayed by COORD: "a more concise read", with the cgo
+     items grouped in one section). Every change is read from a committed record or the mailbox:
+     (1) New "The next two releases" section: the owner's scope rulings of 2026-11-14 (COORD -> FLEET 20261114T234509Z):
+         1.26.11.1 is gated by the sqlite-cs demo and the TypeScript emit demo (rulings 1 and 2), carries cgo Phases 1-2
+         plus 3.1 and the pin-extent fix (ruling 4); the release after it carries M:N scheduling, cgo against the go.*
+         packages, cgo 3.2 with the net resolver as the real-package proof, door C unless the sqlite demo needs it, and
+         the start-up method-set items A1/A3 (ruling 6); lever E as a .5 option (i9's BOARD row, announced
+         20261115T074730Z-i9, not yet on master). No date is given for either release; none is ruled.
+     (2) cgo: the scattered cgo items (Timeline, Limitations links) gathered into the cgo section, split into what
+         converts, what the next release adds, and what comes later.
+     (3) Real-world Go modules: nine modules validate with Go 1.26.10 (ValidatedModules.md, refreshed in the same docs
+         seat), so gojq and timefmt-go leave the "next candidate" table; the table is gone.
+     (4) Platforms: linux-arm64 is validated (the roster's Linux line: 236 of 236 banked at linux-arm64) and shipped
+         (KnownIssues.md, "Platforms the packages do not ship"); a build for an unshipped platform is refused or warned
+         about there, replacing "other architectures receive the Windows flavor".
+     (5) Figures no standing process re-measures are stated in words; the comments keep the numbers.
+     (6) History dropped from the visible text (the 1.24 and 1.25 support dates, "from release N on"); it is in
+         RoadmapHistory.md, NEWS.md and the records cited. -->
+
 This page is the plan for what comes next in go2cs: the Go and .NET releases the converted standard
 library moves to, the platforms it runs on, the real-world Go code it converts beyond the standard
-library, and the runtime and converter work still ahead. It states what is planned. The completed
-phases, with the git commits and tags that anchor them, are in [Roadmap history](RoadmapHistory.md).
-Dates are month or quarter targets.
+library, and the runtime and converter work still ahead. The completed phases are in
+[Roadmap history](RoadmapHistory.md). Dates are month or quarter targets.
 
 **Where things stand.** Every implementable package of the converted standard library validates
-against Go's own tests on Windows and Linux, and the same validation is under way on macOS, package
-by package. `go2cs -tests -recurse` validates real third-party modules against their own tests the
-same way, and converted modules are published as NuGet packages, listed on [nugetgo.net](https://nugetgo.net).
-[Validated Test Packages](ValidatedTestPackages.md), the validation roster, carries the current state
-of the standard library, and [Validated Modules](ValidatedModules.md) that of third-party modules.
+against Go's own tests on Windows, on Linux (x64 and arm64) and on macOS (Intel and Apple silicon).
+`go2cs -tests -recurse` validates third-party modules against their own tests the same way,
+and converted modules are published as NuGet packages, listed on [nugetgo.net](https://nugetgo.net).
+[Validated Test Packages](ValidatedTestPackages.md) carries the current state of the standard library, and
+[Validated Modules](ValidatedModules.md) that of third-party modules.
 
-**What that rests on.** The converter is guarded by hundreds of Go-versus-C# behavioral test projects.
-Each one is transpiled, compiled and compared against a committed expected output, and each runnable
-one is executed with its output compared against Go's. The whole Go standard library compiles cleanly
-as .NET assemblies. It reproduces Go built with `-tags purego`: a managed runtime cannot execute Go's
-hand-written assembly, so the portable pure-Go variants of the assembly-backed crypto and hash
-functions are the faithful target
+**What that rests on.** Hundreds of Go-versus-C# behavioral test projects guard the converter: each is
+transpiled, compiled and compared against a committed expected output, and each runnable one is run and
+compared against Go. The whole standard library compiles as .NET assemblies. It reproduces Go built with
+`-tags purego`, since a managed runtime cannot run Go's hand-written assembly
 ([Conversion Strategies](ConversionStrategies.md#the-standard-library-reproduces-go--tags-purego)).
-Compiling is not the same as running correctly, which is what Phase 4 below is for.
+Compiling is not the same as running correctly, which is what Phase 4 is for.
 <!-- "hundreds" (697 at the 2026-09-26 count) counted at master db1bd885a2: 697 directories under src/tests/Behavioral
      carry a committed .cs.target golden; the two harness directories (BehavioralRunner, BehavioralTests)
      carry none and are not counted. -->
@@ -130,34 +146,55 @@ Compiling is not the same as running correctly, which is what Phase 4 below is f
      c2591d5b95, read from the Phase 4 progress header of docs/ValidatedTestPackages.md, which carries
      the current figures. -->
 
+## The next two releases
+
+**In short.** 1.26.11.1, built from Go 1.26.11, ships when two real programs convert and run exactly as Go
+runs them. The release after it adds the rest of the cgo work, goroutine scheduling and Native AOT work that
+did not fit. Neither has a date: completeness comes first.
+
+**1.26.11.1** ships when both of these hold:
+- **SQLite.** The converted `modernc.org/sqlite` opens a database, creates a table, inserts and selects, with
+  output byte-identical to Go's, on Windows and on Linux.
+- **The TypeScript compiler.** The converted TypeScript compiler (written in Go) emits JavaScript byte-identical to
+  what the Go build emits, at least under the JIT.
+
+It also carries the cgo work under [cgo](#cgo) as "What converts".
+
+**The release after 1.26.11.1** is planned to carry:
+- goroutine scheduling, many goroutines over a few threads ([Performance](#performance)), which lands on the Go 1.26
+  line, before the corpus moves to the next Go minor release;
+  <!-- Owner ruling 2026-11-12, given in session to COORD (relayed 20261115T083540Z): M:N lands on the Go 1.26 line,
+       then one Go minor hop; 1.26 patch hops continue meanwhile. -->
+- the next cgo steps ([cgo](#cgo));
+- viewing a Go array through a pointer to an array of another type, when that pointer is kept, unless the SQLite
+  program needs it first, in which case it moves into 1.26.11.1;
+- start-up work on how converted types find their methods ([Performance](#performance));
+- as an option, a runtime-library change that cuts the memory and image size of a Native AOT publish of a large
+  program ([Native AOT and trimming](#native-aot-and-trimming)).
+
 ## Phase 4: validation against Go's own tests
 
 **In short.** Phase 4 checks the converted standard library against Go's own tests, package by package,
-so that "it works" is measured and not claimed. It is done on Windows and Linux, under way on macOS, and
-has one planned extension.
-
-Phase 4 converts each package's `_test.go` suite and compares it, verdict for verdict, with `go test`.
-It is not finished, and it stands in three parts:
+so that "it works" is measured and not claimed. It is done on Windows, Linux and macOS, and has one
+planned extension.
 
 - **Phases 4A to 4C are complete.** The test pipeline, subtests and parallelism, and the package-by-package
-  validation are done: every implementable package validates on Windows and Linux. Their record is in
-  [Roadmap history](RoadmapHistory.md#phase-4--convert-and-run-go-package-tests).
-- **macOS parity is in progress.** Each roster row gains a macOS count when the package validates on
-  both Apple silicon and Intel, each chip's results compared with Go built for that same chip. A row gains
-  its macOS count only when both chips agree with each other and with Go. The
-  [roster](ValidatedTestPackages.md) rows carry the live state; see [Platforms](#platforms).
-- **Phase 4D is planned.** It widens validation to examples, fuzz seed corpora and benchmarks; see
-  [below](#phase-4d-examples-fuzz-seed-corpora-and-benchmarks).
+  validation are done: every implementable package validates on Windows and on Linux, x64 and arm64
+  ([Roadmap history](RoadmapHistory.md#phase-4--convert-and-run-go-package-tests)).
+- **macOS parity is reached.** Every package that applies to macOS validates on Apple silicon and on Intel, each
+  chip compared with Go built for that chip; where the two chips' counts differ, the
+  [roster](ValidatedTestPackages.md) row shows both. See [Platforms](#platforms).
+- **Phase 4D is planned.** It widens validation to examples, fuzz seed corpora and benchmarks
+  ([below](#phase-4d-examples-fuzz-seed-corpora-and-benchmarks)).
 
 ## How the project moves: release hops
 
 **In short.** go2cs follows Go and .NET one release at a time, and every move proves every package
-again. For a user that means each go2cs release names exactly one Go release and one .NET release.
+again. Each go2cs release names exactly one Go release and one .NET release.
 
 The project advances by release migrations, called [hops](Glossary.md#hop): moving the converted
-standard library (the *corpus*) to a new Go release or to a new .NET runtime, one variable at a time
-and never both in one hop. Each Go hop re-validates every package against that release's own tests.
-This page states which releases come next.
+standard library (the *corpus*) to a new Go release or to a new .NET runtime, never both in one hop. Each
+Go hop re-validates every package against that release's own tests.
 <!-- How a hop is run: [`PLAN-corpus-upgrade.md`](PLAN-corpus-upgrade.md); the step-by-step procedure:
      [`GoCorpusMigration.md`](GoCorpusMigration.md) for a Go release and
      [`DotNetMigration.md`](DotNetMigration.md) for a .NET one. Internal records, unlinked from the visible
@@ -165,212 +202,207 @@ This page states which releases come next.
 
 ## Go releases
 
-**In short.** The converted standard library is on Go 1.26.10, a release Go still supports. The next
-move is Go 1.27, before the 1.26 series leaves support. 1.24.13.7 is the last 1.24 release.
+**In short.** The converted standard library is on Go 1.26.11, a release Go supports. The next move is
+Go 1.27, before the 1.26 series leaves support.
 
-Go 1.24 left upstream support in February 2026, and the 1.25 series left it in August 2026, so
-packages built from either carry none of the Go security fixes issued since. The Go 1.24 line is
-closed: 1.24.13.7 is its last release, and there is no Go 1.25 release. Fix releases on the Go 1.26.10
-line continue; 1.26.10.3 is the current release. The main line of development carries the current Go
-line, and the next Go minor is prepared separately until its packages ship. The next hop brings
-Go 1.27:
+The published packages are 1.26.10.3, from Go 1.26.10, and 1.26.11.1 is next
+([The next two releases](#the-next-two-releases)). The main line of development carries the current Go line,
+and the next Go minor is prepared separately until its packages ship. Go 1.24 and 1.25 have no further
+releases: packages built from either carry none of the Go security fixes issued since.
+<!-- Go 1.24 left upstream support in February 2026 and 1.25 in August 2026; 1.24.13.7 is the last 1.24 release, and
+     there is no Go 1.25 release (docs/PLAN-version-lines.md). -->
 
 | Hop | When | What it involves |
 |:--|:--|:--|
-| **Go 1.27** | Q1 2027, by about February | Generic methods, which need a conversion design first. The 1.26 series leaves support when Go 1.28 ships, around February 2027, so the corpus reaches 1.27 before then. |
+| **Go 1.27** | Q1 2027, by about February | Generic methods, which need a conversion design first. The 1.26 series leaves support when Go 1.28 ships, around February 2027. |
 
 How often later hops run is decided ahead of the Go 1.27 hop.
 
 ## .NET
 
-**In short.** Converted code targets .NET 10, a long-term-support release, and stays there until
-.NET 12. You need the .NET 10 SDK, and a newer SDK on your machine does not change what you get.
+**In short.** Converted code targets .NET 10, a long-term-support release, until .NET 12. You need the
+.NET 10 SDK, and a newer SDK on your machine does not change what you get.
 
-**The published target stays `net10.0`.** .NET 10 is a long-term-support release, supported until
-November 2028, and converted packages stay on it until `net12.0`, the next long-term-support release.
+**The published target stays `net10.0`** until `net12.0`, the next long-term-support release. .NET 10 is
+supported until November 2028.
 
-**The SDK and the C# language version are pinned.** A repository `global.json` pins the .NET SDK,
-and every project, including the template the converter emits, fixes `LangVersion` instead of
-following `latest`, so a machine whose default SDK moves to a newer .NET does not silently compile
-converted code under a newer C#. The converter also escapes Go identifiers that newer C# gives new
-meaning, such as `closed`, `union` and `safe` when they name a type.
+**The SDK and the C# language version are pinned.** A repository `global.json` pins the SDK, and every
+project, the converter's template included, fixes `LangVersion`, so a newer default SDK does not compile
+converted code under a newer C#. The converter also escapes Go identifiers that newer C# gives new meaning,
+such as `closed`, `union` and `safe` when they name a type.
 
 **A .NET 11 measurement stage follows the Go 1.26 hop**, once .NET 11 has shipped (November 2026), and
-never overlaps a Go hop. It compares JIT and allocation behavior on .NET 11 over identical code, and
-reviews the deployment shape, including the full-trim publish floor, which depends on the runtime
-library's trim safety ([Native AOT and trimming](#native-aot-and-trimming)).
+never overlaps a Go hop. It compares JIT and allocation behavior on .NET 11 over identical code and reviews
+the deployment shape, the full-trim publish included ([Native AOT and trimming](#native-aot-and-trimming)).
+Its findings inform the move to `net12.0`.
 <!-- plan: [`PLAN-bflat-perf-exploration.md`](PLAN-bflat-perf-exploration.md) (internal record, unlinked
-     2026-10-26, OQ-1) --> Its findings inform the move
-to `net12.0`; `net10.0` stays the published target until then.
+     2026-10-26, OQ-1) -->
 
 ### Declared host limits and their retirement path
 
 The roster's **`host-limit`** disclosure class, defined in
-[`ValidatedTestPackages.md`](ValidatedTestPackages.md), covers tests whose premise rests on a property
-of the test *binary* that the converted host's deployment shape structurally lacks. An entry must
-name that structural property, never a fixable defect, and it is written to retire itself when the
-shape gains the property: disclosed tests keep running in every validation run, so an entry that
-starts passing breaks the roster's disclosure arithmetic loudly and must be removed. The converted
-test host publishes as a self-contained, relocatable single-file executable, so Go tests that copy
-and relaunch their own binary pass on Windows and Linux.
+[`ValidatedTestPackages.md`](ValidatedTestPackages.md), covers tests that rest on a property of the test
+*binary* the converted host's deployment shape lacks. Each entry names that property, never a fixable defect,
+and retires itself when the shape gains it: disclosed tests keep running, so an entry that starts passing
+breaks the roster's arithmetic loudly and is removed. The test host publishes as a self-contained, relocatable
+single-file executable, so Go tests that copy and relaunch their own binary pass on Windows and Linux.
 
-Entries remain in `crypto/tls`, `os`, `os/exec` and `syscall`, and not every one retires through the
-deployment shape; the roster's class text names what each one needs. In `crypto/tls`'s
-`TestBogoSuite`, BoringSSL's test runner starts a converted helper process once per case inside Go's
-own 10-minute test deadline. Each launch costs about 1.2 s where Go's costs about 85 ms, measured on
-`linux-x64` on one 4-core machine, and most of that is the converted process loading its packages. That
-per-process start-up cost is what keeps the run outside the deadline, and the entry retires when the
-start-up work under [Performance](#performance) brings it inside.
+Entries remain in `crypto/tls`, `os`, `os/exec` and `syscall`, and the roster's class text names what each
+needs. In `crypto/tls`'s `TestBogoSuite`, BoringSSL's runner starts a converted helper process once per case
+inside Go's own 10-minute deadline, and each converted launch costs many times Go's (`linux-x64`), most of it
+loading packages. That entry retires when the start-up work under [Performance](#performance) brings the run
+inside the deadline.
+<!-- DATA-bogo-startup.md §3: about 1.2 s per launch against Go's about 85 ms, linux-x64, one 4-core box; §7: the
+     remaining lever is the host's start-up. -->
 
 ## Native AOT and trimming
 
 **In short.** You can publish converted Go as a native executable today, and it runs, but the publish
-compiles every converted package it references in full. This work makes that publish smaller, quicker and free of
-warnings, in stages.
+compiles every converted package it references in full. This work makes that publish smaller, quicker and
+free of warnings, in stages.
 
 A converted program, and a C# program that references the `go.*` packages, can be published with Native
-AOT. Making that publish smaller, faster and free of trim warnings is staged work on the runtime
-library and the source generators. The stages done so far:
+AOT. Done so far:
 
-- Every package registers the Go types it defines. A Native AOT publish runs, and the check that gates each
-  release measures it with the default trim. A fully trimmed build (`TrimMode` set to `full`) runs, measured on
-  `win-x64` on one development machine.
+- Every package registers the Go types it defines. A Native AOT publish runs with the default trim, and the
+  release check measures it. A fully trimmed build (`TrimMode` set to `full`) runs (`win-x64`).
 - `reflect` works under Native AOT without generating code at run time: the source generators write the
-  operations it needs at build time.
-- Under a fully trimmed publish, `fmt` finds a value's own `String` and `Error` methods, and reflection reaches
-  a struct's fields through a pointer.
-- Reading a slice element inlines under Native AOT, as it does under the JIT, and so does a 64-bit multiply
-  with a 128-bit result. The first type assertion to an interface a type satisfies without declaring it reads a
-  list written at build time instead of scanning every type. A single-file publish compiles ReadyToRun one
-  assembly at a time, and a small converted program starts in about 0.47 s against about 3.5 s for the SDK's
-  compressed composite image (`win-x64`, one development machine).
+  operations it needs at build time. Under a full trim, `fmt` finds a value's own `String` and `Error` methods,
+  and reflection reaches a struct's fields through a pointer.
+- Reading a slice element and a 64-bit multiply with a 128-bit result inline under Native AOT, as under the JIT.
+  The first type assertion to an interface a type satisfies without declaring it reads a list written at build
+  time. A single-file publish compiles ReadyToRun one assembly at a time, and starts several times faster than
+  the SDK's compressed composite image (`win-x64`).
+  <!-- About 0.47 s against about 3.5 s for a small converted program, win-x64, one development machine
+       (DATA-hop126-perf.md §11.8, batch 214). -->
 
-**Later stages** cover method sets and stack frames.
+**Later stages** cover method sets and stack frames, and, as an option for the release after 1.26.11.1, a
+runtime-library change that cuts the memory and image size of the publish of a large program.
 
-Converted packages are built for the default x64 instruction set. Building for `x86-64-v3` gives no gain
-across the benchmark suite on `win-x64`, and an image built that way does not start on a processor without AVX2.
+Converted packages are built for the default x64 instruction set: `x86-64-v3` gives no gain across the
+benchmark suite on `win-x64`, and an image built that way does not start without AVX2.
 
-The check that gates each release publishes a program with Native AOT and runs it on `linux-x64`,
-`win-x64` and `osx-arm64`. On `osx-x64` the publish is read when it finishes inside the hosted
-runner's time limit, and reported as not measured when it does not.
+The release check publishes a program with Native AOT and runs it on `linux-x64`, `linux-arm64`, `win-x64` and
+`osx-arm64`.
+<!-- 2026-11-15 (P4, docs audit Q5): linux-arm64 added (os-matrix.yml aot-smoke, all five shipped RIDs since seat
+     S5c); the rest of the Native AOT lines wait for P1's PublishAot reading. Kept word-identical with KnownIssues. --> On `osx-x64` the publish is read when it finishes inside the hosted runner's time limit, and
+reported as not measured when it does not.
 
 **The cost today is real.** With the default trim, Native AOT compiles every `go.*` assembly a program
-references in full, which costs publish time and executable size.
-[Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
-has the measurements. A build, `dotnet run` and a publish without Native AOT are not affected.
+references in full, which costs publish time and executable size
+([Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)).
+A build, `dotnet run` and a publish without Native AOT are not affected.
 
 ## Platforms
 
-**In short.** go2cs is validated on x64 Windows and x64 Linux. macOS, on Intel and on Apple silicon,
-has packages and is being validated package by package now. Other platforms are not supported yet.
+**In short.** go2cs is validated on x64 Windows, on Linux, x64 and arm64, and on macOS, Intel and Apple
+silicon. Other platforms are not supported yet.
 
 **Windows and Linux.** The converter runs on both, and the standard library is multi-target on disk:
-platform-shared files sit flat, and a package whose Go source varies by platform keeps one folder per
-target OS. <!-- design: [design](phase4/DESIGN-multiplatform-corpus.md) --> Each platform-varying package
-ships a `win-x64` and a `linux-x64` flavor, and roster rows record their Linux verdict counts beside the
+platform-shared files sit flat, and a package whose Go source varies by platform keeps one folder per target.
+<!-- design: [design](phase4/DESIGN-multiplatform-corpus.md) --> Each platform-varying package ships `win-x64`,
+`linux-x64` and `linux-arm64` flavors, and roster rows record each Linux flavor's verdict counts beside the
 Windows record. A few Linux operational items remain open.
 <!-- Remaining Linux operational items are tracked in [`PLAN-linux-operation.md`](PLAN-linux-operation.md)
      and the multi-target design (internal records, unlinked 2026-10-26, OQ-1). -->
 
 **macOS (Intel and Apple silicon):** packages ship for both chips, the behavioral suite passes on both,
-and the README walkthrough runs. A roster row gains its macOS count only when both chips agree with each other and with Go, and
-the [roster](ValidatedTestPackages.md) rows show which packages have one. Until a package has its
-count, don't expect it to be fully operational there. The work also finds macOS-only gaps, each fixed
-as it is found. The compile is checked daily in CI on macOS arm64 and x64 runners
+and the standard library validates on both: each chip is compared with Go built for that chip, and where
+the two chips' counts differ the roster row shows both. The two Windows-only packages are the only rows
+without a macOS reading. The compile is checked daily in CI on macOS arm64 and x64 runners
 ([`CIMatrix.md`](CIMatrix.md)).
 
-**Other architectures** receive the Windows flavor until a flavor ships for them: a platform-varying
-package's Windows flavor is what compiles and loads, and its platform-entangled behavior (local time
-zones, sockets, the `syscall` surface) follows Windows semantics or fails.
+**Other platforms.** A build for a platform the packages do not ship is refused, or, on `win-arm64`, warned
+about ([Known issues](KnownIssues.md#platforms-the-packages-do-not-ship)).
 
 ## Real-world Go modules
 
 **In short.** Beyond the standard library, go2cs converts third-party Go modules and holds each to the
-same bar: its own tests must match Go's. The modules on [Validated Modules](ValidatedModules.md) pass, measured with Go 1.24.13, and a
-larger one is next.
+same bar: its own tests must match Go's. The modules on [Validated Modules](ValidatedModules.md) pass,
+measured with Go 1.26.10, and two large programs gate the next release.
 
-Third-party modules are the proving ground after the standard library. Each module is converted,
-validated against its own Go test suite exactly as a standard-library package is, and given a proof
-page beside the conversion rather than on the standard-library roster. `go2cs -tests -recurse` runs a
-module's tests across all of its packages, and a validated module packs as one NuGet package.
+Each module is converted, validated against its own test suite exactly as a standard-library package is, and
+given a proof page beside the conversion. `go2cs -tests -recurse` runs a module's tests across all of its
+packages, and a validated module packs as one NuGet package.
 
-These modules validate, each with the Go release and on the platforms
-[Validated Modules](ValidatedModules.md) names:
-`golang.org/x/sync`, [`google/uuid`](https://github.com/google/uuid),
-[`golang-jwt/jwt`](https://github.com/golang-jwt/jwt) v5, [`ritchiecarroll/hashset`](https://github.com/ritchiecarroll/hashset)
-and [`spf13/pflag`](https://github.com/spf13/pflag). `uuid` is one package with no dependencies; it
-brings Go's v1, v3, v5 and v6 UUIDs to .NET, where `System.Guid` generates v4 and v7. `jwt` is the first
-module whose tests span several of its own packages, and it exercises the converted crypto stack in
-real code. The next candidate:
+The validated modules include [`google/uuid`](https://github.com/google/uuid), which brings Go's v1, v3, v5
+and v6 UUIDs to .NET (where `System.Guid` generates v4 and v7); [`golang-jwt/jwt`](https://github.com/golang-jwt/jwt)
+v5, which exercises the converted crypto stack; [`spf13/cobra`](https://github.com/spf13/cobra) with its
+dependencies `pflag` and `mousetrap`; and [`itchyny/gojq`](https://github.com/itchyny/gojq) with
+[`itchyny/timefmt-go`](https://github.com/itchyny/timefmt-go), an in-process, fully managed jq. gojq's
+command-line package and its conformance suite come later, once that package's own dependencies convert.
 
-| Module | Why it comes here | When |
-|:--|:--|:--|
-| [`itchyny/gojq`](https://github.com/itchyny/gojq) v0.12.19, with its dependency [`itchyny/timefmt-go`](https://github.com/itchyny/timefmt-go) v0.1.8 | The first conversion with a dependency. It gives .NET an in-process, fully managed jq, with no native binary per platform. | Q4 2026 |
-
-gojq's full command-line conformance suite is a later second stage, once its command-line package's
-own dependencies convert. Further modules follow, and libraries come first: a converted module is most useful as Go
-code a .NET program calls, not as a stand-in for a command-line tool Go already runs well. The
-[go2cs Target Atlas](https://go2cs.net/TargetAtlas.html) is one input to their selection.
+`modernc.org/sqlite` and the TypeScript compiler gate 1.26.11.1
+([The next two releases](#the-next-two-releases)). Further modules follow, libraries first: a converted module
+is most useful as Go code a .NET program calls. The [go2cs Target Atlas](https://go2cs.net/TargetAtlas.html) is
+one input to their selection.
 
 ## NuGet packages of converted modules
 
 **In short.** A Go module that someone has already converted can arrive as a NuGet package, so your
-conversion restores it and does not convert it again. Converted modules are published this way today,
-and [nugetgo.net](https://nugetgo.net), the registry that maps Go modules to their packages, lists them.
+conversion restores it and does not convert it again. [nugetgo.net](https://nugetgo.net), the registry that maps
+Go modules to their packages, lists the published ones.
 
-With `-recurse=nuget`, a converted program references the standard library, the runtime and the
-source generators as published NuGet packages, and the same substitution reaches third-party modules:
-the [nugetgo.net](https://nugetgo.net) community registry maps Go module paths to published NuGet
-packages of their conversions, so a dependency someone has already converted becomes a package restore
-instead of a local transpile. The converter side is built and on by default (see
-[Mapping modules to NuGet packages](ConvertingAModule.md#mapping-modules-to-nuget-packages)).
+With `-recurse=nuget`, a converted program references the standard library, the runtime and the source
+generators as published NuGet packages, and the same substitution reaches third-party modules: a dependency
+someone has already converted becomes a package restore instead of a local transpile
+([Mapping modules to NuGet packages](ConvertingAModule.md#mapping-modules-to-nuget-packages)). The converter side is
+on by default.
 <!-- The design is [`PLAN-nugetgo.md`](PLAN-nugetgo.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 
 - **Package IDs:** a converted module publishes as `nugetgo.<dotted module path>`; the `go.` prefix is
   the converted standard library's alone.
 - **A package rehearses first**, on a local feed, before it reaches nuget.org.
-- **Converted modules are published.** The [nugetgo.net](https://nugetgo.net) registry lists each
-  one, with the Go module and version it was converted from. A program that imports a listed module
-  converts with `-recurse=nuget` to a project that restores the package instead of converting the
-  module again.
-- **The package-ID prefixes are not reserved yet.** The reservation requests are with NuGet, which has
-  not decided them.
+- **The package-ID prefixes are not reserved yet.** The requests are with NuGet, which has not decided them.
 - **Packages built from an unsupported Go release are labelled as proofs**, and are rebuilt once the
   converted standard library is on a supported release.
 
 ## cgo
 
-**In short.** Go code that calls C through cgo cannot be converted yet. The converter says so and
-stops, naming the file, and a bridge to native code is planned from 2027.
+**In short.** `go2cs -cgo` converts a Go package that calls C library functions, on a machine with a C
+compiler. Next come Go memory handed to C, cgo packages built against the `go.*` packages, and a real
+standard-library cgo package; C code written inline in the Go file and callbacks from C into Go follow.
+[Limitations](Limitations.md#cgo) has the detail of what converts and what is refused.
 
-A Go file that imports `"C"` is not converted, and the standard library is converted with
-`CGO_ENABLED=0`. The plan:
+The standard library is converted with `CGO_ENABLED=0`.
 <!-- The plan is [`PLAN-cgo-interop.md`](PLAN-cgo-interop.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 
-- **It fails loudly today.** When a file the build selects imports `"C"`, the conversion stops with
-  error `GO2CS2001`, which names the file and the cause, instead of skipping the file silently
-  ([Limitations](Limitations.md)). Test-only and platform-deselected files are skipped as usual.
-- **Next, a phased P/Invoke bridge** (from Q1 2027, as capacity allows): recognize and extract the C
-  declarations, generate P/Invoke calls and blittable structs, then marshal pointers, strings and
-  slices, starting with a slice limited to the C library. Platform order: Linux, then Windows, then
-  macOS. Each target needs a C toolchain on the converting machine.
+**What converts** (cgo Phases 1 and 2 and the first step of Phase 3, in 1.26.11.1):
+- One package, when every C use it makes is a call of a C function a shared library defines. Integers,
+  floating-point numbers, pointers, and structs of integers and pointers cross, as do a `void *` that is nil or
+  points at C memory, the `C.CString` family, `C.malloc`, `C.free` and `defer C.f(…)`. It converts for the
+  machine's own operating system and architecture, and a program that uses it needs only the C library.
+- A converted cgo program printed what the Go build printed on linux/amd64, darwin/amd64, darwin/arm64 and
+  windows/amd64, apart from the differences [Limitations](Limitations.md#cgo) lists.
+- Without `-cgo`, a file the build selects that imports `"C"` stops the conversion with error `GO2CS2001`, which
+  names the file. Test-only and platform-deselected files are skipped as usual.
+<!-- 2026-11-14 (H, the release-notes audit): cgo Phase 2's real route and G1 gate (docs/phase4/DESIGN-cgo-phase2-pinvoke.md
+     section 11.22: hosted legs on linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64) and Phase 3 increment 3.1
+     (43ac9e33fa, batch 305; DESIGN-cgo-phase3-marshaling.md section 16; its hosted cgo-e2e legs 43638330006 linux-x64,
+     43638338397 win-x64, 43638346986 osx-arm64 and osx-x64, each 50 of 50 arms as Go does or refused as the arm's table
+     says). The owner's scope ruling 4 (2026-11-14): 1.26.11.1 = Phases 1-2 + 3.1 + H's pin-extent fix. -->
+
+**Next, in the release after 1.26.11.1:**
+- Go memory handed to C without a copy, and a slice viewed over C memory (the rest of Phase 3).
+- A cgo package built against the `go.*` packages, so a `-recurse=nuget` conversion can include one.
+- A real standard-library cgo package, the `net` resolver, converted and validated as the proof.
+
+**Later:** C code written inline in the Go file (Phase 4), then `//export` and callbacks from C into Go
+(Phase 5). Until each lands, it is refused by name, with the phase that covers it.
 
 ## Phase 4D: examples, fuzz seed corpora and benchmarks
 
 **In short.** Validation counts Go's `Test` functions today. Phase 4D adds the other kinds of test a
-Go package carries: examples, fuzz seeds and benchmarks. It is planned and not yet started.
+Go package carries. It is planned and not yet started.
 
-Validation counts a package's `Test` functions. Phase 4D, the next validation slice, widens what
-"validated" covers:
+Phase 4D widens what "validated" covers:
 
 - runnable `Example` functions, with their declared output compared;
 - fuzz seed corpora, run as deterministic tests before any active fuzzing is considered;
-- benchmarks, compiled and executed for compatibility, with their speed kept outside the correctness
-  gate.
+- benchmarks, compiled and run for compatibility, with their speed outside the correctness gate.
 
 Active fuzzing, race-detector equivalence and coverage-percentage equivalence stay outside the
-correctness gate. The design kickoff is planned for Q1 2027, and the work proceeds without delaying
-Phase 5.
+correctness gate. The design kickoff is planned for Q1 2027, without delaying Phase 5.
 <!-- Detail:
      [`TestingInfrastructureRequirements.md`](TestingInfrastructureRequirements.md#phase-4d--later-test-kinds)
      (internal record, unlinked 2026-10-26, OQ-1). -->
@@ -378,65 +410,50 @@ Phase 5.
 ## Phase 5 — Implement assembly-backed declarations in C#
 
 **In short.** Phase 5 is about completeness, not speed. A small set of standard-library declarations
-has no portable Go body, because Go implements them in assembly, in cgo or inside its runtime. Today
-each of those compiles to a stub that throws a `NotImplementedException`, naming the declaration, if
-it is ever called. Phase 5 gives each one a real C# body. Making portable code that already works
-run faster is a different subject, under [Performance](#performance).
+has no portable Go body, because Go implements them in assembly, in cgo or inside its runtime. Each
+compiles to a stub that throws a `NotImplementedException` naming it, if it is ever called. Phase 5 gives
+each one a real C# body. Making working code faster is under [Performance](#performance).
 
 **What it means for you.** No validated package's tests reach a stub, and a call that does reach one
-fails loudly and by name, never silently. Which exported functions can reach one is measured, on the
-Go 1.24 standard library. <!-- the measurement: [exported-reach record](phase4/CENSUS-phase5-exported-reach.md)
-(internal record, unlinked 2026-10-26, OQ-1) --> Every call it confirmed reaching one reaches a real body. Clearing coverage
-counters in a program built without coverage, and `runtime.Breakpoint`, answer exactly as Go does. On
-macOS, verifying a certificate against the system's root certificates and CPU profiling have real
-bodies.
+fails loudly and by name. Which exported functions can reach one is measured, on the Go 1.24 standard
+library, and every call that measurement confirmed reaches a real body.
+<!-- the measurement: [exported-reach record](phase4/CENSUS-phase5-exported-reach.md)
+     (internal record, unlinked 2026-10-26, OQ-1). Bodies given since: clearing coverage counters in a program built
+     without coverage, runtime.Breakpoint, and on macOS certificate verification against the system roots and CPU
+     profiling. -->
 
-The converted library reproduces Go built with `-tags purego`, so most assembly-backed code takes its
-portable Go path and needs nothing from Phase 5. The declarations it is about are the ones with no Go
-body at all: they are backed by assembler, cgo, runtime or compiler intrinsics, or platform services.
-The `PartialStubGenerator` writes the throwing stub for each until a C# implementation exists.
-
-**It proceeds package by package, as validation demands, not all at once.** When a package's own
-tests need a declaration, it gets a hand-written C# body and the package validates with it. That is how
-most of the surface that matters is implemented, including the gaps the macOS validation found: `os.Executable`, the system page size, and an arm64 path for `hash/crc32`. A declaration no
-validated test reaches can still be a throwing stub, and a program that calls one stops with a
-`NotImplementedException` that names it.
-
-**The remaining stubs are measured.** A measured inventory lists the declarations that still compile
-against throwing stubs, per package and per operating system, taken on the Go 1.24 standard library.
-None of them was reached by a validated package's tests.
+**It proceeds package by package, as validation demands.** When a package's own tests need a declaration,
+it gets a hand-written C# body, as `os.Executable`, the system page size and an arm64 path for
+`hash/crc32` did for macOS. A measured inventory lists the declarations that still compile against throwing
+stubs, per package and per operating system, on the Go 1.24 standard library; no validated package's tests
+reach any of them.
 <!-- The inventory: [Phase 5 stub inventory](phase4/CENSUS-phase5-stub-inventory.md) (internal record,
      unlinked 2026-10-26, OQ-1). The record carries the counts, so this page quotes none. -->
 
 **How a declaration gets its implementation.**
 
 - The converter keeps the bodyless declaration as a `partial` method, and a hand-owned companion such
-  as `*_impl.cs` supplies the body; where the Go source uses a declaration-oriented file, the
-  converted `*_decl.cs` is paired with a `*_impl.cs`. `sync/atomic`'s `doc.cs` and `doc_impl.cs` are
-  the model. Regenerable declaration output is never hand-edited, and the generated stub disappears
-  for a member once its real implementation is present.
+  as `*_impl.cs` supplies the body (`sync/atomic`'s `doc.cs` and `doc_impl.cs` are the model). Generated
+  output is never hand-edited, and the stub disappears once the real body is present.
 - Behaviorally equivalent managed code (`Interlocked`, `Volatile`, `BitOperations`, spans, BCL crypto)
-  is preferred over instruction-by-instruction translation, preserving Go's overflow, alignment,
-  memory-ordering, pointer and GC, and platform semantics.
-- Platform implementations are isolated by target and fail clearly on unsupported targets, and a
-  generic throwing stub never passes for completed platform support. Focused Go/C# behavioral
-  fixtures cover declarations that upstream tests do not reach.
-- Compiling alone is not completion. An implementation counts when the package's converted tests run
-  against it and match Go, with no silent exclusions, and stress and edge tests are added where unit
-  tests are not enough (concurrency, atomics, unsafe pointers, cryptography, platform calls).
+  is preferred over instruction-by-instruction translation, keeping Go's overflow, alignment,
+  memory-ordering, pointer, GC and platform semantics.
+- Platform implementations are isolated by target and fail clearly on unsupported targets; a generic
+  throwing stub never passes for platform support. Focused behavioral fixtures cover declarations that
+  upstream tests do not reach.
+- Compiling is not completion: an implementation counts when the package's converted tests run against it
+  and match Go, with stress and edge tests where unit tests are not enough.
 
 **What closing Phase 5 means:** for every supported target, no unexplained throwing stub remains; each
 implemented member has a real companion or a documented target exclusion; and every applicable package
 is validated.
 
-**What is closed first.** Priority follows that reach measurement: a stub that an ordinary program can
+**What is closed first.** A stub an ordinary program can easily reach comes first. The stubs no exported
+call reaches stay, by name, until a real use needs one; closing those has no date.
 <!-- [exported-reach record](phase4/CENSUS-phase5-exported-reach.md) (internal record, unlinked
      2026-10-26, OQ-1) -->
-easily reach is closed ahead of everything else. The stubs no exported call reaches stay as they
-are, by name, until a real use needs one; closing those has no date.
 
-Phase 5 is not the "stage 5" of the trimming work under
-[Native AOT and trimming](#native-aot-and-trimming); the two numberings are unrelated.
+Phase 5 is not the "stage 5" of the trimming work; the two numberings are unrelated.
 
 ## Performance
 
@@ -444,30 +461,20 @@ Phase 5 is not the "stage 5" of the trimming work under
 comparison says by how much. This section lists the work planned to narrow the gap. None of it holds
 up anything else on this page.
 
-The published [performance comparison](Performance.md) measures converted C# against Go on the JIT
-and under Native AOT, and [Tuning converted code](Tuning.md) says which deployment and runtime settings to choose.
-The follow-ups run off the critical path:
+The [performance comparison](Performance.md) measures converted C# against Go on the JIT and under Native
+AOT, on the published 1.26.10.2 packages, and [Tuning converted code](Tuning.md) says which deployment and
+runtime settings to choose. It is the before picture for the .NET 11 measurement stage.
 
-- **The published comparison is measured on the 1.26.10.2 packages**, the TLS-handshake benchmark
-  included. It is the before picture for the .NET 11 measurement stage. The Native AOT work it pointed
-  to is in 1.26.10.3 ([Native AOT and trimming](#native-aot-and-trimming)).
-- **Start-up cost of a converted process** (in progress). A converted process pays .NET's process
-  start and loads its converted packages each time it starts: a converted `crypto/tls` helper takes
-  about 1.2 s to start and run one handshake, where Go's takes about 85 ms (`linux-x64`, one 4-core
-  machine). Loading the packages is most of it. Faster P-521 key setup and a cheaper first interface
-  assertion are in 1.26.10.3; the remaining lever is the converted process's own start-up. This cost
-  is also what keeps the `crypto/tls`
+- **Start-up cost of a converted process** (in progress). A converted process pays .NET's process start
+  and loads its converted packages each time; a converted `crypto/tls` helper takes many times Go's time to
+  start and run one handshake (`linux-x64`), most of it loading packages. How converted types find their
+  methods at start-up is planned for the release after 1.26.11.1. This cost also keeps the `crypto/tls`
   [host-limit entry](#declared-host-limits-and-their-retirement-path) open.
-- **Allocations** (committed; planned for Q1 2027): the retirement plan named by each deferred allocation-count disclosure
-  on the roster. Go meets those assertions through compiler optimizations, chiefly escape analysis
-  keeping values off the heap, that the converted code does not yet reproduce. The work closes the gap
-  by construction (storage for Go array values, frame-local allocations kept off the heap, and
-  ref-receiver method emission), and each disclosure retires when its assertion matches. Its design,
-  stack-allocation parity, is written.
-- **Goroutine scheduling** (planned next): each live goroutine runs on its own OS thread
-  today, so a program can hold only as many goroutines alive at once as the system allows threads, a limit
-  macOS reaches first ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). The
-  work moves toward Go's model of many goroutines over a few threads.
+  <!-- DATA-bogo-startup.md; the B3 items A1/A3 (start-up method sets) are .5 by the owner's ruling 6 of 2026-11-14. -->
+- **Goroutine scheduling** (planned for the release after 1.26.11.1): each live goroutine runs on its own
+  OS thread today, so a program can hold only as many goroutines alive at once as the system allows threads,
+  a limit macOS reaches first ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)).
+  The work moves toward Go's model of many goroutines over a few threads.
   <!-- Owner ruling 2026-11-08, relayed by COORD, verbatim: "In addition to the TypeScript issues, M:N scheduling
        right after .3 sounds appropriate." The trigger is C1's macOS thread-cap measurement (run 42497561630; see the
        Limitations bullet's comment). The design starts from docs/DESIGN-mn-scheduler-sizing.md and
@@ -480,13 +487,18 @@ The follow-ups run off the critical path:
        excluded at any level, visible emission included. The design weighs each one: the behavioral-parity gain (which
        Go semantics it matches better), the visual-parity cost (what a reader sees change), and the other tenets' costs.
        A behavior gain bought with visual cost gets strong consideration; golib and generated-code async remains the
-       cheapest level where it suffices. Previously "unscheduled" (owner, 2026-11-07: "List as unscheduled"). -->
-
+       cheapest level where it suffices. Previously "unscheduled" (owner, 2026-11-07: "List as unscheduled").
+       2026-11-14 (owner's scope ruling 6): M:N is in the release after 1.26.11.1. -->
+- **Allocations** (committed; planned for Q1 2027): the retirement plan named by each deferred
+  allocation-count disclosure on the roster. Go meets those assertions through escape analysis and other
+  compiler optimizations the converted code does not yet reproduce. The work closes the gap by construction
+  (storage for Go array values, frame-local allocations kept off the heap, ref-receiver method emission), and
+  each disclosure retires when its assertion matches. Its design, stack-allocation parity, is written.
 - **Interface conversions** (unscheduled): the remaining interface-shell caching items, a per-value
-  shell-cache experiment and a base-class marker.
+  shell-cache experiment and a base-class marker; a converter-emitted per-call-site inline cache stays
+  deferred.
   <!-- items from the [interface-shell caching design](phase4/DESIGN-iface-shell-caching.md) (internal
-       record, unlinked 2026-10-26, OQ-1) --> A converter-emitted per-call-site inline cache
-  stays deferred.
+       record, unlinked 2026-10-26, OQ-1) -->
 - **Stack strings**: the two remaining increments below, unscheduled.
 
 ### Expand the `sstring` stack-string MVP: the remaining increments
@@ -531,19 +543,14 @@ a commitment yet.
 **In short.** Known, smaller gaps in the converter, none of them scheduled. The validated standard
 library and modules convert despite them; one matters to you only if your code uses that construct.
 
-Smaller converter items, unscheduled. The first is described in
-[Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go);
+The first is described in [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go);
 the rest are tracked in `src/go2cs/ToDo.md`:
 
-- **The address of another package's pointer- or interface-typed variable.** A variable another
-  package exports with a value type has its own storage, so `&otherpkg.V`, a pointer-receiver method
-  value such as `f := otherpkg.V.Reset`, and `flag.BoolVar(&otherpkg.Debug, ...)` reach the variable
-  itself, as in Go. Two kinds still give a pointer to a copy, so writes through it are lost: a
-  variable whose type is a pointer or an interface, such as `&otherpkg.ErrMissing`, and a variable
-  whose storage lives somewhere else, such as `runtime.MemProfileRate`.
-  [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) and
-  [Known issues](KnownIssues.md#writes-through-the-address-of-another-packages-pointer-or-interface-variable-are-lost)
-  give the workarounds.
+- **The address of another package's pointer- or interface-typed variable**, such as `&otherpkg.ErrMissing`,
+  or of a variable whose storage lives somewhere else, such as `runtime.MemProfileRate`, points at a copy, so
+  writes through it are lost
+  ([Known issues](KnownIssues.md#writes-through-the-address-of-another-packages-pointer-or-interface-variable-are-lost)
+  gives the workaround).
 - **The remaining dynamic-struct implicit-cast checks** in the `AssignStmt`, `CompositeLit`,
   `IndexExpr`, `BinaryExpr`, `UnaryExpr`, `SelectorExpr`, `TypeSwitchStmt` and `ValueSpec` visitors.
 - **Complete comment conversion**, free-floating comments included, which depends on
@@ -559,10 +566,10 @@ something else finishing first.
 
 | When | Planned |
 |:--|:--|
-| Now | macOS validation of the standard library, package by package. The trimming work for Native AOT. The start-up cost of a converted process. Further converted modules as NuGet packages. |
-| Next | The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. Goroutine scheduling. The generic-methods design for Go 1.27. The decision on how often later hops run. |
-| Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work, whose design is written. |
-| Unscheduled | The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
+| Now | 1.26.11.1: the SQLite and TypeScript programs that gate it. The trimming work for Native AOT. The start-up cost of a converted process. |
+| Next | The release after 1.26.11.1: goroutine scheduling and the next cgo steps ([The next two releases](#the-next-two-releases)). The .NET 11 measurement stage (.NET 11 ships in November 2026). The generic-methods design for Go 1.27. The decision on how often later hops run. |
+| Q1 2027 | Go 1.27 hop, by about February. The Phase 4D design kickoff. The allocation work, whose design is written. |
+| Unscheduled | Inline C and callbacks from C (cgo Phases 4 and 5). The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
 ## How progress is tracked
 
@@ -570,7 +577,7 @@ something else finishing first.
 
 | What | Where |
 |:--|:--|
-| Validation | [Validated Test Packages](ValidatedTestPackages.md), the authoritative roster: each package's verdict counts on Windows and Linux, its macOS count once it has one, its disclosures with their stated reasons, and its proof page. Its header carries the current totals. |
+| Validation | [Validated Test Packages](ValidatedTestPackages.md), the authoritative roster: each package's verdict counts on Windows, Linux and macOS, its disclosures with their stated reasons, and its proof page. Its header carries the current totals. |
 | Third-party modules | [Validated Modules](ValidatedModules.md): each validated module, its version, the platforms it was measured on, and its proof pages. |
 | Compilation | The whole converted standard library builds with zero errors (`src/go2cs-stdlib.slnx`) for Windows and Linux; the macOS compile runs daily in CI ([`CIMatrix.md`](CIMatrix.md)). |
 | The converter | Hundreds of Go-vs-C# behavioral projects under `src/tests/Behavioral`, each transpiled, compiled, compared against a committed golden and, where it is a runnable program, output-compared against Go. |

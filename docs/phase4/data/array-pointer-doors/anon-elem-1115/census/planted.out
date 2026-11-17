@@ -1,0 +1,17 @@
+roots: 1, errors: 0
+packages: 62, files: 586
+    13  anonymous struct element, unsafe.Pointer operand (the W17 class)
+   129  control: (*A)(x), x an unsafe.Pointer
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:102	struct{name uintptr; x go2cs/AnonStructArrayPointerDoor.tokenizer}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:109	struct{name uintptr; x go2cs/AnonStructArrayPointerDoor.tokenizer}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:126	struct{lo uintptr; hi uintptr}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:131	struct{lo uintptr; hi uintptr}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:35	struct{nList int32; aList uintptr}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:39	struct{nList int32; aList uintptr}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:43	struct{nList int32; aList uintptr}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:46	struct{nList int32; aList uintptr}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:53	struct{nList int32; aList uintptr}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:72	struct{name uintptr; x go2cs/AnonStructArrayPointerDoor.tokenizer}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:85	struct{name uintptr; x go2cs/AnonStructArrayPointerDoor.tokenizer}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:88	struct{name uintptr; x go2cs/AnonStructArrayPointerDoor.tokenizer}
+anonymous struct element, unsafe.Pointer operand (the W17 class)	main.go:95	struct{name uintptr; x go2cs/AnonStructArrayPointerDoor.tokenizer}

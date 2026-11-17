@@ -22,7 +22,7 @@ partial class runtime_package {
 //go:linkname add
 //go:nosplit
 internal static @unsafe.Pointer add(@unsafe.Pointer Δp, uintptr x) {
-    return (@unsafe.Pointer)((uintptr)Δp + x);
+    return @unsafe.Add(Δp, x);
 }
 
 // getg returns the pointer to the current g.
@@ -201,7 +201,7 @@ internal static @unsafe.Pointer noescape(@unsafe.Pointer Δp) {
 //go:nosplit
 internal static ж<T> noEscapePtr<T>(ж<T> Δp) {
     var x = (uintptr)Δp;
-    return (ж<T>)(uintptr)((@unsafe.Pointer)((uintptr)(x ^ 0)));
+    return @unsafe.Pointer.To<T>((@unsafe.Pointer)((uintptr)(x ^ 0)));
 }
 
 // Not all cgocallback frames are actually cgocallback,

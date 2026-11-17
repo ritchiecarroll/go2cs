@@ -198,6 +198,12 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 			}
 		}
 
+		// A type the Go source declares is named as declared, even where its spelling is one the basic
+		// types use (`type float struct{…}`), decided by its go/types object.
+		if typeName, ok := v.info.ObjectOf(ident).(*types.TypeName); ok && typeName.Parent() != types.Universe {
+			return convertToCSDeclaredTypeName(v.getIdentName(ident))
+		}
+
 		return convertToCSTypeName(v.getIdentName(ident))
 	}
 
@@ -458,8 +464,14 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 // Only `const:`-marked entries are honored — a TYPE entry resolves to a `pkgꓸName` global-using
 // alias, which is the type layer's business and not a value identifier.
 func (v *Visitor) dotImportedRenamedMember(ident *ast.Ident) (string, bool) {
-	obj := v.info.ObjectOf(ident)
+	return v.foreignRenamedValueMember(v.info.ObjectOf(ident))
+}
 
+// foreignRenamedValueMember answers the member name ANOTHER package's converted form declares a package-level const or
+// var under, when a name collision renamed it (`lib.Tid` beside `func (*T) Tid()` is declared `ΔTid`), from the
+// `const:` GoTypeAlias record that package published. It answers false for a name that was not renamed, for this
+// package's own members, and for anything but a package-level const or var.
+func (v *Visitor) foreignRenamedValueMember(obj types.Object) (string, bool) {
 	if obj == nil {
 		return "", false
 	}

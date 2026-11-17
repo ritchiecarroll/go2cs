@@ -34923,6 +34923,29 @@ while Go's signal-driven profiler delivered one.
 - Unmeasured: how often the converted sampler misses the window per host, and whether the sampler's period or its
   start-up latency is the cause.
 
+> **CORRECTION 2026-11-14 (P4, read on COORD's order of 11:42Z; the row above is kept as written).** The premise is
+> false: the converted sampler is not in the path. `testTraceProg` (trace_test.go; converted `trace_test.cs`) builds
+> `testdata/testprog/cpu-profile.go` with the real `go` tool (`testenv.GoToolPath`) and runs that NATIVE program on BOTH
+> sides. The program profiles, parses its own profile and prints the `tracing=on` sample summary; each side's test only
+> parses that stderr and skips at `pprofSamples == 0`. `go2cs.CpuProfiler` is never loaded. So every skip on either side
+> is the native Go profiler missing the 100 ms window on the hosted mac, and the osx-x64 `Default` C#=skip above is the
+> native program's run under the converted test, not a converted-sampler miss. D-W1's Go-side-only reading (2026-10-25)
+> falls with it. Linux control (4 vCPU, go1.26.10, the same testprog): 40 runs, 0 with zero samples, 5 to 13 each.
+>
+> **Rate** (4 stack-probe + 2 sweep-shard reads at master 314e1d8b60 / c978595f0c, 12 runs each of `Default` and
+> `AsyncPreemptOff` per RID): the sides disagreed in 7 of 12 on each RID, in both directions on both; skips at least
+> 6 Go / 3 C# on osx-arm64 and 2 Go / 5 C# on osx-x64 (a stack-probe read shows only disagreements, so skip/skip is
+> counted only in the two sweep reads). `Stress` runs the same program and never skipped (0 of 6 per side per RID).
+> Runs: 43591393256, 43591400051, 43593684487, 43595545217 (probe); 43586434174, 43593728853 (sweep).
+>
+> **What follows instead.** No converted fix exists. COORD ruled a symmetric native-subprocess admission for this test
+> only: G's arm (a) extended with `skipEitherSide` (Go=pass / C#=skip admitted on the converted side's skip text, which
+> is Go's own `t.Skip` text), and the two subtests entered as darwin-scoped `host-identity` disclosures pinned on
+> "CPU profile did not include any samples while tracing was active" (`claude/p4-trace-skip-both`). The same seat
+> found arm (a) inert on real input: `go test -json` carries a test's `t.Skip` text in `output` events and nothing on
+> the terminal `skip` event, so the Go side's skip text read empty and the Go=skip shape could never be admitted; the
+> Go side's text is now joined from its output events.
+
 ## 2026-11-09 — G: runtime's `TestDecorateMappings` passes VACUOUSLY on the converted side, because `setVMANameSupported()` is never probed
 
 **The mechanism.** The converted `setVMANameSupported()` (`src/core/runtime/linux/set_vma_name_linux.cs`) returns
@@ -37545,6 +37568,2748 @@ built end to end. Read instead: both member paths are in the solution file and e
 in the runner's Compile row. Native AOT. Linux and macOS rows.
 
 — G (2026-11-13)
+
+## 2026-11-13 — G (seat N2, COORD's cut of the nil-func design): a func-type case of a type switch takes the guard form, so a typed nil func takes its own case; predictions scored, no stop line tripped
+
+**Dated 2026-11-13 06:53 CST. Base master `6dc4bae09b` (batch 299, which holds seat N1), fix `f2ac0a00a5`, merged with
+master at `b9764693e2`, Windows x64, SDK 10.0.400, go1.26.10.** The row above this one is seat N1. This is seat
+N2, the second and last of the cut: root G, the converter's func-type case of a type switch.
+
+**What was wrong.** Go keeps a typed nil func's type as the dynamic type of the interface that holds it, so a
+type switch takes the case that names that func type and binds the nil func. The emitted C# tested a func-type
+case with a type pattern (`case Func<nint, nint> v:`). A typed nil func reaches the switch as its func type's
+canonical carrier, which is no delegate, so the pattern missed and the switch fell to default, or to a later
+interface case, in silence, on every route into the interface. That is L1 of the design's measurement: 38 reads,
+with 6 more that L2 masked until seat N1.
+
+**The fix.** A case whose label is a func type (unnamed, a named func type without a method, a named func type
+with one) emits the guard form that the interface cases already use:
+
+- with a binding: `case {} Δv when Δv._<Func<nint, nint>>(out var v):`;
+- without one, or in a multi-type case: `case {} ᴛ0 when ᴛ0._<Func<nint, nint>>(out var _):`.
+
+golib's try form answers a live value by the same type test the pattern made, and a nil carrier by its type, so
+a live value's answer does not move. One converter file. No golib change and no generator change.
+
+**The collision rule (stop line S6).** Two func types can share one C# delegate (two named func types without a
+method and with one signature), and a guard never makes a later label unreachable. The guard form alone would
+lose the compile error that today stops a switch whose two such cases have DIFFERING bodies. So the label's C#
+type key is carried beside its text. A pre-pass finds the delegate types that two or more func labels name with
+differing bodies, and those labels keep the pattern form: CS8120 still stops the build. Duplicates with an
+identical body still merge under the unchanged marker comment. `TestTypeSwitchCollapsedFuncCase` asserts both;
+its new asserts fail 6 times against the base visitor.
+
+**Named before the run, then read.**
+
+- Goldens: FOUR fixtures, 12 labels, each changed in place: `FuncLitEmptyInterfaceTarget` 2,
+  `TypeSwitchCollapsedFuncCase` 7, `TypeSwitchGuardLaterRedeclare` 2, `LocalValueIfaceCallConversion` 1 (a named
+  func type with a method). The design post said three: it searched the unnamed delegate spellings only. The
+  no-regression check (1056 behavioral packages, 8 platform-exclusive ones skipped on this host) names those four
+  and no other tracked file.
+- Corpus hunks: 7 label lines in 4 `net/http` files, each changed in place, the same on every target. In the
+  `-stdlib` arm, `h2_bundle.cs` 2 lines. In the `-tests` arm, `clientserver_test.cs` 3, `requestwrite_test.cs`
+  1 and `httputil/dump_test.cs` 1. No position-map line. Read by a two-seeded reconvert of the declared universe
+  (four targets) from committed refs, base master and seat `eba0d52d3f`, each arm by a converter built at its
+  ref, with the `-tests` conversion of nine packages (`net/http`, `net/http/httputil` and the seven rows seat N1
+  read): 4 files differ, 7 lines, at the lines named; no file is in one arm only; 0 of 226 hand-owned files
+  clobbered in either arm. The corpus apply is `d4eb94fd60`. For the three test files the committed blob equals
+  the seat emission. `h2_bundle.cs` as committed differs from a fresh reconvert at master in one line this seat
+  does not own (one of the 13 files of the side finding already routed), so its two lines went in by the hunk
+  rule and that line stays as committed.
+
+**The census: 714 reads, 7 carriers, four arms, each scored against Go's output.**
+
+| Arm | Base: EQUAL / SILENT | Fix: EQUAL / SILENT |
+|---|---|---|
+| direct | 222 / 16 | 236 / 2 |
+| va | 190 / 14 | 202 / 2 |
+| sh | 190 / 14 | 202 / 2 |
+| er | 62 / 6 | 68 / 0 |
+
+EQUAL moves from 664 to 708. The 44 reads that closed are the type switch reads, by the census's probe names:
+15 `l-switch` (the switch on the value), 14 `l-reswitch` (the switch after an assertion to its interface) and 15
+`ifacesw` (the switch on what reflect's `Interface` returns). The 6 that still differ are address prints of a
+live func, which no two runs share. Set check, both ways: 44 reads closed, 0 reads newly differ. The base arm
+was read on the tip that holds N1 and master's merge, with the base visitor swapped in and the fix restored
+byte-identical afterwards: 664, with the same 50 differing reads seat N1 read.
+
+**Predictions, posted with the design, scored.**
+
+- P2, after N2 the 44 type switch reads are EQUAL: TRUE (708 of 714, plus the 6 address prints).
+- P3, no read EQUAL at the base leaves EQUAL, here and in the 1028 reads of the unwrap seat: TRUE in both; the
+  unwrap census reads 1028 of 1028 at the base arm and at the fix.
+- P5, the `-tests` rows and GolibTests keep their sets: TRUE for the two rows whose emission moves. `net/http`
+  validates 1526 tests and `net/http/httputil` 62, on windows, at base master and at the fix `d4eb94fd60`, each
+  arm by a converter built at its ref; each equals the bank and 0 tests moved, read test by test. The comparator
+  was made to fail first (one flipped test, which it named). NOT RE-RUN: seat N1's seven rows (the two-seeded
+  reconvert shows their packages' emission identical in both arms) and GolibTests (no golib, generator or
+  GolibTests file changes, and GolibTests references no `net` project).
+- P6, the seat has a tracked program, red first: TRUE. `NilFuncTypeSwitch` (234 lines of Go output; carriers
+  from another package and this one, with and without a method, unnamed, with live and nil-pointer controls;
+  bound, unbound, multi-type, mixed with interface cases, address-taken and merged switches) at the base
+  transpiles and compiles, exits 0 with nothing on stderr, and 90 of its 234 lines differ from Go. At the fix
+  its four rows pass and its output equals Go's on every line.
+
+**Stop lines.** S1 (a read leaves EQUAL), S4 (a `-tests` row or GolibTests moves), S5 (the corpus diff holds a
+hunk that is not a func-type case label, or a position-map line moves), S6 (the guard form collides with the
+collapsed func case rule) and "a golden outside the four named fixtures moves": none tripped. S3 holds by
+construction: a live value meets the same type test the pattern made.
+
+**Owed, found by this seat.** A var declaration that converts between a named func type WITH a method and the
+unnamed func type of one signature does not compile, in either direction: `var s typelib.Step = f` (f an unnamed
+func variable) is CS0029 from the unnamed delegate to the named type, and `var u func(int) int =
+typelib.Step(nil)` is CS0029 the other way. It is loud, and it is a converter root of its own (the declaration's
+conversion), not root G. So seat N1's NOT EXAMINED case (a nil func of a named type stored into a slot of an
+unnamed func type with the same signature) and its mirror could not ride this seat's program: neither compiles
+at the base. Both programs are kept beside the seat's scratch record. Go's answer for both is known from the Go
+run.
+
+**Not re-run at the merged tip.** The two censuses, the no-regression check and the behavioral rows were read
+with the fix installed on N1's tip merged with master, before batch 299 landed. The merge with master that
+followed brought docs only (no file under `src`), so those readings carry by the diff. The repo guards and
+`go test ./...` were run at the final tip.
+
+**Not built or measured.** The fixture adds two members to the converter-dev solution; that solution was not
+built end to end. Read instead: both member paths are in the solution file and exist, and both projects compile
+in the runner's Compile row. Native AOT. Linux and macOS rows.
+
+## 2026-11-13 — G (sqlite-cs S1, C1's design as approved): a func value carried as a number takes one word per static function; predictions scored, no stop line tripped
+
+**Dated 2026-11-13 12:20 CST. Base master `651c4ad147` (batch 300), fix `60064685b2`, docs `bd76bba1c6` and
+`78c512b223`, corpus `f982350008`, Windows x64, SDK 10.0.400, go1.26.10.** The design is C1's
+`docs/phase4/DESIGN-sqlite-cs-funcptr.md`, sections 3.1, 3.3 and 3.8; COORD approved this seat's plan with its
+answers to section 3.5 and stop lines XG1-XG4 added to C1's X1.1-X1.6.
+
+**What was wrong.** ccgo keeps a C function pointer as a `uintptr`: it mints the number with `__ccgo_fp(f)` and
+calls through it by rebuilding a Go func value from `struct{ uintptr }`. At the base the tracked program
+`FuncWordShapes` (one site per class) fails on every class. r1 and r2 stop the transpile ("Unresolved dynamic
+struct type: struct{uintptr}", sqlite-cs's row S1). m1, m2 and w1 panic ("dereference of a managed pointer with no
+address"). w2 is silent: the store lands in the read view the reinterpret hands out, and the slot stays 0.
+
+**The fix.** golib's GoFuncCookie keys a delegate with no target (a converted top-level Go func) on its METHOD
+and holds that row for the process, so every delegate over the method, under any delegate type, answers one word,
+as Go's static funcval does. A closure or a bound method value keeps the per-instance word, held weakly. A
+delegate built over another (`new F(g)`) stands for g; the 64-thread race unit found that case on its first run.
+One recovery serves the new `GoFuncCookie.Func<F>(word)` and golib's Reinterpret route: the minted delegate, or one
+rebound over the same target and method, cached per delegate type for a static function only. A number that is no
+func word now panics by name on both routes. A 32-bit runtime is refused at the mint. The converter's new
+`funcWordOperations.go` recognises the six classes by their types in a package pre-pass and emits each through
+GoFuncCookie; a declared function is minted through the cached method-group conversion `(F)name`. ccgo's own m1
+spelling (a local `type iface [2]uintptr` before the return) was read from sqlite-cs's `repros/s1funcptrstruct`
+before the measurement, and both spellings are in the program and the unit test.
+
+**Not covered, by design:** a func stored into memory at a computed address (vfs/patches64.go's nine offset stores
+on every target), a recovery from a pointer or from memory (runtime's mcleanup and panic), and the
+`*unsafe.Pointer` forms, which already read through `unsafe.Pointer.OfFunc`.
+
+**Predictions, scored.**
+
+- Q1, the tracked program fails on every class at the base, loudly or silently: TRUE (four loud, w2 silent; read
+  class by class, because each loud failure hides the classes after it). At the fix its four rows pass and its 22
+  lines equal Go's.
+- Q2, the two-seeded `-stdlib` diff on four targets is the one reflect/value.cs `funcName` line, no map line, no
+  `.cs.auto` change, and the `-tests` arm of reflect and runtime does not differ: TRUE. Committed blob equalled the
+  base emission; the apply is `f982350008`. 0 of 226 hand-owned files clobbered in either arm.
+- Q3, the eight existing GoFuncCookieTests pass unchanged and each new unit fails once: TRUE. Seven new units; three
+  planted regressions of GoFuncCookie.cs (the static row off, the non-word panic and the 32-bit refusal off, the
+  wrapper rule off) fail 4, 2 and 1 of them, the eight existing none; restored byte-identical. The whole suite reads
+  2595 passed, 0 failed, 45 skipped. TestFuncWordShapes fails 9 asserts against a disabled pre-pass.
+- Q4, sqlite-cs on windows/amd64: TRUE for what can be read. Its demo stops at start-up on row S22, before S1, so the
+  run is NOT REACHED. Its closure (libc, sqlite/lib, sqlite) converted by each arm's converter: master refuses with 16
+  `struct{uintptr}` lines; the fix with none (4 other anonymous structs in sqlite's vtab.cs remain, other rows). The
+  fix emits 503 recoveries (libc 7, lib 496) and 12 mints (lib 1 m1 and 9 m2, sqlite 2 m2), each equal to C1's
+  per-package census, and its 1,303 `__ccgo_fp` call sites stay method-group arguments.
+- No-regression check (1065 behavioral packages transpiled, 8 platform-exclusive ones skipped on this host):
+  only FuncWordShapes' new files differ; no tracked golden moves.
+
+**Stop lines.** X1.1-X1.6 and XG1-XG4: none tripped. One public golib member is added, `Func<F>`, on a
+[go-tier2] type, and the row type is private. The reflect row validates 445 tests with 21 disclosed, equal to the
+bank, and 0 tests move against seat N1's reflect arm; the comparator was made to fail first.
+
+**Observed, not this seat's.** The runtime row dies at its 30-minute package deadline at master too
+(`TestSmhasherAvalanche` in flight; the Smhasher tests run about 1,600 s each on this box). Read at master and at
+the fix: 0 tests move between them. The bank (11,083 matched, 2026-11-09) was read on a run that finished.
+
+**Named requirements and routes.**
+- N3's park-set census (M:N stage (c)) includes sqlite-cs's three paths through a recovered func word: the mutex
+  calls, the VFS method calls and the busy handler's sleep, with sqlite-cs as the measured consumer. Until N3, a
+  park inside one of them holds a carrier (COORD's ruling on G2); on .4 master nothing changes.
+- N3 keys a twin on the METHOD and binds the delegate's target at the call (G1): nothing per instance, and a
+  rebound delegate finds the same twin.
+- winSeekFile's `TLARGE_INTEGER` recovery on windows/amd64 (C1's 3.3) is P1's M5, sqlite row S23.
+- S21's cpu name table is the next seat.
+
+**Not built or measured.** The converter-dev solution end to end (the fixture adds one member; its path is in the
+solution file and the project compiles in the runner's Compile row). Native AOT; linux and macOS; contention under
+many goroutines; per-site delegate caching at an m1 call site.
+
+## 2026-11-13 — G (sqlite-cs S21, C1's design as approved): x/sys/cpu's cpuid and xgetbv take golib bodies by name; predictions scored
+
+**Dated 2026-11-13 17:01 CST. Base master `651c4ad147` (batch 300), fix `bb79fb1f20`, docs `d74c7fc15d`,
+registry wording and re-cited notes `95d3b9dcd4`, the GOROOT gate `37de01a37d`, Windows x64, SDK 10.0.400,
+go1.26.10.** The design is C1's
+`docs/phase4/DESIGN-sqlite-cs-funcptr.md`, sections 2.3 and 3.7; COORD approved this seat's plan and both of its
+narrowings.
+
+**What was wrong.** golang.org/x/sys/cpu decodes its feature flags from `cpuid` and `xgetbv` in its init, and
+writes both in assembly. Their bodyless declarations converted to stubs that throw, so a converted program that
+imports x/sys/cpu died before `main` (modernc.org/libc imports it on windows and darwin: sqlite-cs row S21). A
+module importing x/sys/cpu v0.49.0, converted with `-recurse` at master, built and run here: exit 2, nothing
+printed, `NotImplementedException` "cpuid: no implementation reached this compilation" out of x/sys/cpu's init.
+The conversion named neither function.
+
+**The fix.** golib's `go.golib.GoCpu`, the one new public type (tier 2, EditorBrowsable Never): `Cpuid` reads the
+processor through `X86Base.CpuId`; `Xgetbv` SYNTHESISES XCR0 from `Sse`, `Avx` and `Avx512F.IsSupported`, since
+.NET has no XGETBV, and its doc comment says so. The converter's `asmForwardBodies.go` maps (golang.org/x/sys/cpu,
+function) to that body together with the Go signature it implements; a listed function takes the linkname
+forwarder writer. A listed function declared with another signature refuses its package before any file is
+written (`GO2CS2011`). A bodyless function of a module outside GOROOT that nothing forwards keeps its stub and is
+named (`GO2CS2012`, a warning). Both codes follow C2's two (inline arrays, batch 302).
+
+**Predictions, scored.**
+
+- R1, red at master: TRUE, as above.
+- R2, the same program at the fix prints Go's output on this host, line by line: TRUE. Exit 0; its 29 feature
+  flags equal Go's, so no flag differs from what Go's own cpuid and xgetbv read (stop line X2.2 not tripped).
+- R3, the converter tests (both forwards, the stub kept and named, a wrong signature refused): TRUE; planted
+  regressions fail them (forward off: 4 asserts; refusal off: 1; warning off: 1), restored byte-identical.
+- R4, the corpus does not move: FALSE at `95d3b9dcd4` (4 vendored files, below), TRUE at `37de01a37d`. The
+  two-seeded reconvert of the four-target universe from committed refs, with the `-tests` conversion of
+  internal/cpu: 0 files differ, no file in one arm only, 0 of 226 hand-owned files clobbered in either arm, and no
+  GO2CS2011 or GO2CS2012 in std. The no-regression check (1056 behavioral packages, 8 platform-exclusive ones
+  skipped on this host): byte-identical. Its one bodyless function, MapCloneLinkname's linkname pull, is
+  forwarded, so no fixture is named as a stub.
+- R5, sqlite-cs's windows closure: x/sys/cpu's two functions emit forwards, and no assembly function is left a
+  stub. The prediction also said 0 warnings, and that is FALSE as worded: `GO2CS2012` names 8 stubs, all linkname
+  pulls, which the warning covers by design: bigfft's 7 pulls of math/big's arithmetic (addVV, subVV, addVW,
+  subVW, shlVU, mulAddVWW, addMulVVW) and x/sys/cpu's `runtime_getAuxv`. Each is a real stub, now named; whether
+  a sqlite path reaches one is NOT MEASURED.
+- R6, golib: `GoCpuTests`' three units pass (the CPUID leaves against `X86Base.CpuId`, the synthesised XCR0 bit by
+  bit, `Xgetbv` against .NET's answers); planted regressions fail 1 and 2 of them. The whole suite reads 2591
+  passed, 0 failed, 45 skipped.
+
+**Stop lines.** X2.1 (a forwarder whose signature was not checked), X2.2, X2.3 (a stub reached and not named),
+any corpus move, and more than one new public golib type: none tripped.
+
+**Kept as stubs, on purpose (for a future freebsd or Windows-on-Arm reader).** x/sys/cpu's four arm64
+ID-register reads, `getisar0`, `getisar1`, `getpfr0` and `getzfr0`, have no managed body. x/sys/cpu reads them only
+on freebsd, which go2cs does not target, and no host here can run an arm64 body to check one. They convert to
+throwing stubs that `GO2CS2012` names. A target that reaches them needs bodies built from .NET's Arm intrinsics.
+
+**Not in the table, by ruling.** The standard library's vendored copy (`vendor/golang.org/x/sys/cpu`) keeps its
+stubs: it is std corpus. It converts under the module's own import path, so a table keyed on the path reached it
+too: the first footprint (seat `95d3b9dcd4`) moved 4 vendored files, tripping the corpus stop line, and
+`37de01a37d` gates the forward and the refusal on a package outside GOROOT, as the stub warning already was.
+
+**Why no converted program reaches the vendored stub (COORD's check).** Its init calls `cpuid` three times, and
+`cpu_gc_x86.cs` declares `cpuid` with no body, yet crypto/tls validates on windows and linux. Read at the tree,
+case (a) holds: the closure as converted does not import it. A bare `-stdlib` conversion applies the `purego` tag
+(`defaultStdLibBuildTags`), and under `purego` std's vendored chacha20poly1305 builds its `noasm` variant, which
+does not import x/sys/cpu (`go list -deps crypto/tls` for windows/amd64: present without the tag, absent with it).
+The converted chacha20poly1305 holds `chacha20poly1305_noasm.cs` and no amd64 file, and no converted std project
+references the vendored x/sys/cpu project. So its init never runs, and nothing reads zeros from it; std's
+generic crypto path is the `purego` decision itself, not a silent fallback.
+
+**Darwin needs no change.** x/sys/cpu's `syscall_syscall6` pull is already forwarded: the x/sys darwin twin
+table maps `syscall.syscall6` to `syscall.Syscall6` for every golang.org/x/sys package.
+
+**Found and fixed: a check that never ran.** C1's section 3.7 asks the implementing seat for an x/sys/cpu darwin
+case in `TestParseAsmTrampolineAddrs`. The test already had one, reading GOROOT's vendored x/sys/cpu, but it read
+`syscall_darwin_x86_gc.s`, which x/sys/cpu does not have (its file is `asm_darwin_x86_gc.s`), and it skipped
+silently when the read failed. It reads the real file now, both of its variables bind, and a missing file fails;
+pointed back at the old name it fails, restored byte-identical.
+
+**Not built or measured.** Darwin and linux conversions of x/sys/cpu (the twin forward is read at the code, not
+run); Native AOT.
+
+## 2026-11-13 — G (sqlite-cs S21's R5, read on COORD's order): the sqlite-cs demo reaches none of the 8 stubs GO2CS2012 names
+
+**Dated 2026-11-13 17:32 CST. Read at master `651c4ad147`, Windows x64, go1.26.10.** Seat S21 (its own row,
+seated in batch 302) names every bodyless function of a module that nothing forwards as `GO2CS2012`. In
+sqlite-cs's windows closure it named 8, all linkname pulls: bigfft's 7 of math/big's arithmetic (`addVV`,
+`subVV`, `addVW`, `subVW`, `shlVU`, `mulAddVWW`, `addMulVVW`) and x/sys/cpu's `runtime_getAuxv`. COORD asked
+whether sqlite-cs reaches any of them.
+
+**The read.** Rapid type analysis (`golang.org/x/tools/go/callgraph/rta`, x/tools v0.52.0, the converter's own) of
+the sqlite-cs demo from `main` and every package `init`, for windows/amd64, linux/amd64, linux/arm64,
+darwin/amd64 and darwin/arm64, each with no build tags and with `safe,purego,noasm` (the tags `-recurse` applies):
+ten runs, each loading cleanly. The tool and its output are `docs/phase4/data/sqlite-cs-funcptr/s21/`
+`r5-cgtool-main.go` and `r5-reach.txt`.
+
+- **bigfft's 7: not reachable on any target, under either tag set.** Neither is `bigfft.Mul`, bigfft's own entry:
+  nothing in the demo's closure multiplies through it.
+- **`runtime_getAuxv`: address-taken, never called.** x/sys/cpu's `init` (runtime_auxv_go121.go) stores it in
+  `getAuxvFn`. The one call of `getAuxvFn` is in `getAuxv`, which only `hwcap_linux.go` calls. On linux the demo's
+  closure does not import x/sys/cpu at all (libc imports it on windows and darwin only), and on windows and darwin
+  `getAuxv` is not reachable. RTA lists `runtime_getAuxv` as reachable on those six builds (two tag sets each)
+  only through its conservative edge from `(reflect.Value).Call` to every address-taken function.
+- **Control:** x/sys/cpu's `cpuid` reads reachable on both amd64 targets with six direct calls from `archInit`, so
+  the analysis sees direct calls where they exist.
+
+**So no seat follows.** The 8 stubs stay stubs, named by `GO2CS2012`, and the sqlite-cs demo calls none of them.
+**Not read:** sqlite's own test suite as converted (only the demo's entry points), and whether a call through
+`reflect` could reach `runtime_getAuxv` at run time.
+
+— G (2026-11-13)
+
+## 2026-11-13 — P5 (seat B, closed with seat A by COORD's ruling): the linux-arm64 GolibTests leg ended its test host about 2,060 tests early; the cause was the linux/amd64 cgo golden, not the EventPipe sampler — FIXED in seat A
+
+**The blind spot.** On master 651c4ad147 the hosted linux-arm64 golib-tests leg (runs 43510049988 and 43497473577)
+ran 503 of the suite's tests, failed 23 with the cgo target refusal, and then the test host died while
+`EventPipeSamplerHostProbe.TheSamplersThreadKeysAndCpuReadingsAreMeasured` ran. About 2,060 tests never ran on
+that leg. vstest gave as the reason the last line on stderr, `invalid boolean value "bogus" for -test.v`, which a
+`ChattyFlagBridgeTests` test that passed had printed.
+
+**The cause.** `GolibTests.csproj` compiled `GoCgoWrappers.linux.golden.cs` on every linux leg. Its module
+initializer registers golib's cgo resolver for the whole GolibTests assembly with target `linux/amd64`, and
+`GoCgoLibraries.Resolve` refuses EVERY P/Invoke that assembly makes when the process target differs, a hand-owned
+import among them. Two tests make such a call on a thread that is not the test's own: the probe calls `gettid`
+inside each hog's `new Thread(...)`, and `GoTimerTests.serviceThread()` calls `gettid` inside a `GoTimer` callback
+on the timer service thread. The `PlatformNotSupportedException` was unhandled there, and the process ended.
+
+**The four isolating runs** (linux-arm64 golib-tests):
+
+| Run | Ref | Filter | Result |
+|---|---|---|---|
+| 43515648007 | master 651c4ad147 | the probe alone | host crashed in the probe |
+| 43515652676 | master 651c4ad147 | everything but the probe | 980 run, 25 refusals, host crashed in `GoTimerTests.TheServiceThreadIsIdleUnderAFarFutureTimer` |
+| 43516731364 | master 651c4ad147 | `EventPipeSamplerTests` alone | 7 of 7 pass: golib's sampler does not crash on arm64 |
+| 43517263836 | seat A 177ab806cf | the probe and `GoTimerTests` | 16 of 16 pass |
+
+The abort moved with the test set, which ruled out the probe and the sampler as its source.
+
+**The fix.** Seat A (177ab806cf) generates `GoCgoWrappers.linux-arm64.golden.cs` with the converter and selects
+it by process architecture. At 177ab806cf the whole linux-arm64 leg (run 43515128508) ran to completion: 2,661
+executed, 2,661 passed, 0 failed. The probe's readings are present there: hog ids 4010 and 4011, own CPU 932
+and 934 ms against sampler readings of 920 and 930 ms, 92 and 93 written, and the hog as leaf in 103 of 248.
+
+**Hardening** (seat A's second commit, c3486c0f68, COORD's ruling). Each of the two tests now catches on its own
+thread and fails on the test's thread, so a refused import fails one test and the suite still runs.
+It was made to fail once: with the linux/amd64 golden forced on the arm64 leg (a plant commit on top of
+c3486c0f68, never merged, run 43519587318), the leg ran to completion, 2,661 executed, 2,618 passed and 43
+failed, every one with the refusal text. The three tests on the two threads are among them:
+`TheSamplersThreadKeysAndCpuReadingsAreMeasured` ("hog 0 threw on its own thread"), and
+`TheServiceThreadIsIdleUnderAFarFutureTimer` and `DenseTimersCostTheServiceThreadLittleCpu` ("the timer
+callback threw on the service thread"). The host did not abort. So the suite's true refusal count under the
+wrong golden is 43, where the aborted master runs showed 23. Without the plant, c3486c0f68 reads 2,661 passed
+and 0 failed on linux-arm64 (run 43519596892).
+
+**Product-side reading, observed and NOT a defect.** A cgo target mismatch refuses every P/Invoke its assembly
+makes, on any thread. On a thread that is not a test's, an unhandled refusal ends the process. That is by design.
+
+**Prediction scored.** Seat A predicted that arm64 would read 0 refusals and abort at the same probe. The abort
+half MISSED as worded, because the abort was caused by the golden that seat A replaced.
+
+**Not run here.** `check-no-regression.ps1`: this box has no dotnet or pwsh. Seat A changes no converter source
+(one `_test.go` row, one generated golden, the csproj and two test files), so the corpus footprint is 0 by
+construction.
+
+— P5 (2026-11-13)
+
+## 2026-11-13 — P5 (seat A, COORD's ask): the cgo wrapper fixture declares `_Ctype_char` as `int8` for linux/arm64, where cmd/cgo declares `uint8` — CLOSED 2026-11-13 in seat A (`198bc1d62b`); was OPEN, fixture only
+
+**What cgo picks.** cmd/cgo takes the Go type of C `char` from the DWARF encoding the C compiler wrote
+(`src/cmd/cgo/gcc.go`, go1.26.10): a `dwarf.CharType` (signed char encoding) becomes `int8`, and a
+`dwarf.UcharType` (unsigned char encoding) becomes `uint8`. Plain `char` is unsigned in the linux/arm64 C ABI,
+so there cgo declares `type _Ctype_char uint8`. On linux/amd64 and on both darwin targets it is `int8`.
+
+**Whether the generator agrees.** The generator reads the type the Go side declares, so on real cgo output it
+follows cgo. The converter test's fixture does not: `cgoLinuxStructs` in `src/go2cs/cgoWrappers_test.go`
+(and the declarations in `cgoDeclarations_test.go` and `cgoMirrors_test.go`) writes `type _Ctype_char int8`
+once for every target, and seat A's linux/arm64 row reuses it. `GoCgoWrappers.linux-arm64.golden.cs` therefore
+carries `sbyte` where bindings converted from real linux/arm64 cgo output would carry `byte`
+(`ᴍarray65_sbyte sysname`, golden line 688). The size and layout are the same, 1 byte, and the suite is green on
+the arm64 leg (2,661 passed, run 43519596892), so nothing fails today; the fixture is not what cgo emits there.
+
+**Read, not measured.** The cgo side is read from cmd/cgo's source and the C ABI. No cgo run on a linux/arm64
+host was made, and the generator was not run on a `uint8` fixture.
+
+**Owed.** A linux/arm64 fixture with `_Ctype_char uint8`, the golden regenerated from it, and the arm64 leg
+re-read. Its own seat, not seat A.
+
+— P5 (2026-11-13)
+
+**CLOSED 2026-11-13, in seat A by COORD's ruling (22:59Z), commit `198bc1d62b`.** The fixture's target now names its
+char type: `uint8` for linux/arm64, `int8` for linux/amd64, both darwin targets and windows.
+`GoCgoWrappers.linux-arm64.golden.cs` was regenerated and moved 35 lines, every one char-typed: the `strtol` char
+mirror (368, 374, 393), `struct utsname`'s six members (688-693, 697-708, and the even lines of 830-840 and 846-856)
+and the inline array type (725, 727). No other golden moved. GolibTests' hand-declared `C.@char` wraps `uint8` under
+`GOCGO_CHAR_UNSIGNED` (linux with an arm64 process), and the two tests that cast a C char name the type by an alias.
+Made to fail first: with the arm64 type forced back to `int8`, `TestCgoScalarWrapperGoldensAreTheGeneratorsOutput`
+fails naming only the linux/arm64 golden.
+
+| leg at `198bc1d62b` | executed / passed / failed | run |
+|:--|:--|:--|
+| linux-arm64 | 2,661 / 2,661 / 0 | 43525931102 |
+| linux-x64 | 2,665 / 2,665 / 0 | 43525931102 |
+| win-x64 | 2,607 / 2,607 / 0 | 43525934547 |
+| osx-x64 | 2,563 / 2,563 / 0 | 43525938386 |
+| osx-arm64 | 2,562 / 2,562 / 0 | 43525938386 |
+
+The counts equal the earlier tips' on every leg; osx-arm64 reads 2,562 or 2,563 across this seat's runs, the
+disclosed Inconclusive of one sampler test there. **Still read, not measured:** no cgo run on a linux/arm64 host was
+made; the `uint8` is cmd/cgo's rule as its source states it. The fixtures in `cgoDeclarations_test.go` and
+`cgoMirrors_test.go` are not per target and keep `int8`.
+
+— P5 (2026-11-13)
+
+## 2026-11-12 — H (cgo Phase 3 increment 3.1, stop line S3.1-E, COORD's ruling C): a pointer rebuilt from a number that points into Go memory crosses a `void *` unchecked — OPEN, a DISCLOSED memory-safety gap; two closures seated after 3.1
+
+Increment 3.1's `void *` door (`GoCgoArgs.VoidPointer`) refuses every pointer into Go memory that carries its box,
+and every bare number the pin and token registry knows. Measured over 36 hand-overs (9 sources of a pointer over
+managed storage, 4 ways each), exactly 4 cross as C memory, all as a bare number: a wider view pinned over a slice
+element, and a native box over a pinned managed buffer. Those two pin moments register nothing
+(`ElemRefBox.TryPinnedReinterpret`, `PinnedBuffer`'s constructors). An interior address (a number plus an offset)
+misses the registry for every pin.
+
+**What it takes.** An explicit `uintptr` in the source. `unsafe.Pointer(uintptr(unsafe.Pointer(p)) + n)` in one
+expression is legal Go. **The harm:** C is handed Go memory whose only pin holder is a temporary, so the collector
+may release the pin during the call: the syscall pin hole through a new door. 3.1 opens no new way to mint the
+number.
+
+**RULED (COORD, 2026-11-12): C.** 3.1 lands with the class disclosed by name in `docs/Limitations.md`, the 3.1 record
+(`DESIGN-cgo-phase3-marshaling.md` §16.9) and the release notes. The GolibTests arm asserts exactly the four
+crossings and the 32 refusals. **OPEN, each its own seat:** (A) register at the two pin moments and give a registry
+entry its length, so a number inside any live pinned range is refused; its allocation-meter question on banked rows
+is named up front. (B) Section 13.4's first rule in the converter, the first item of 3.2's design step.
+
+— H (2026-11-12)
+
+## 2026-11-12 — H (found by cgo Phase 3 increment 3.1, and NOT cgo; COORD: priority, a .4 candidate): inside a method with a pointer receiver, `unsafe.Pointer(p)` of a LOCAL of the receiver's type is the address of the local itself, and a write through it is silently lost — OPEN, for COORD to route
+
+**The program, with no cgo.** Go prints `7 8 0 9`. The converted program prints `7 0 0 9`, exits 0 and says nothing.
+
+```go
+type T struct{ n int }
+
+func poke(p unsafe.Pointer, v int) { *(*int)(p) = v }
+
+func (h *T) viaReceiver()       { poke(unsafe.Pointer(h), 7) }
+func (h *T) viaLocal()          { p := h; poke(unsafe.Pointer(p), 8) }
+func (h *T) viaOther(other *T)  { poke(unsafe.Pointer(other), 9) }
+
+func main() {
+	var a, b, c, d T
+	a.viaReceiver()
+	b.viaLocal()
+	c.viaOther(&d)
+	fmt.Println(a.n, b.n, c.n, d.n)
+}
+```
+
+**The emission** (read on H at `43ac9e33fa`, windows/amd64):
+
+```csharp
+internal static void viaReceiver(this ж<T> Ꮡh) {
+    ref var h = ref Ꮡh.DerefOrNull();
+
+    poke((uintptr)@unsafe.Pointer.FromRef(ref h), 7);
+}
+
+internal static void viaLocal(this ж<T> Ꮡh) {
+    var p = Ꮡh;
+    poke((uintptr)@unsafe.Pointer.FromRef(ref p), 8);
+}
+```
+
+`p` is the box. `FromRef(ref p)` is the address of the LOCAL that holds the box, so `poke` writes 8 over the local's
+own slot, and `b.n` stays 0. The receiver and the parameter arms are right here, because each of those names is an
+alias of the value: `ref h` and `ref other` are the pointee.
+
+**The predicate of the arm** (`convCallExpr`, the `resultType.String() == "unsafe.Pointer"` block). All of:
+
+- the call is a conversion to `unsafe.Pointer` with one argument, in a position where the conversion's result is
+  consumed as a number (the block's `constructType` is set; a conversion folded into a reinterpret,
+  `(*int)(unsafe.Pointer(p))`, does not take the arm and is correct);
+- the enclosing function is a method whose receiver is a pointer;
+- the argument's type is a pointer whose element type is identical to the receiver's.
+
+It is keyed on the argument's TYPE. It never asks whether the argument is the receiver, or an alias of a value at
+all. It is right when the name is rendered as the value (the receiver, a pointer parameter) and wrong when the name
+holds a box. That is MEASURED for a local. A field, a call result or an element would take the same arm by the
+code, and is NOT MEASURED.
+
+**A coarse census.** 39 emitted `Pointer.FromRef(ref …)` sites in the converted standard library (`src/core`, the
+`.cs` files of every flavour, comment lines and the hand-owned `unsafe` package excluded): `runtime` 22 across its
+flavours, `reflect` 4, `internal/sync` 4, `internal/runtime/maps` 4, `internal/abi` 3, `syscall` 2. By the operand's
+spelling, 34 name what reads as a receiver (`t`, `h`, `r`, `m`, `g`, `c`, …), 4 name a shadow-renamed identifier
+(`Δp`, in `runtime`'s `malloc`), and 1 is an explicit box expression. **NOT MEASURED:** which of the 39 have an
+operand that holds a box. That needs each site's declaration read, and the four `Δp` sites are the first to read.
+
+**In a cgo package the conversion is refused** (increment 3.1, `cgoReceiverAddresses`), because that number would
+reach C as a bare number the `void *` door cannot tell from C memory. Outside cgo the emission stands as it was.
+Nothing is fixed here.
+
+**OPEN:** the per-site reading of the census, and the fix (a name that holds a box takes the box mint). It moves
+corpus bytes wherever such a site exists.
+
+— H (2026-11-12)
+
+## 2026-11-14 — P5 (found by the interior-pointer mint census, design 4.7; COORD: a row now, the callers read after the gates): `ManagedPointerTokens.MintOpaque` keeps nothing of a reference-free managed box — OPEN, callers not read
+
+**The mint** (`src/core/golib/ж.PointerTokens.cs`, `MintOpaque<T>`). The converter emits it for `T(unsafe.Pointer(p))`
+where `T`'s underlying type is `*struct{}` (Go's `syscall.Pointer`). It has three answers:
+
+- a nil box: address 0;
+- a box whose pointee holds a reference: the box's registered order token, and the minted box holds the referent
+  for its own lifetime (`s_mintedReferents`);
+- a native box, or a MANAGED box whose pointee holds no reference: `new NativeBox<EmptyStruct>((nuint)(uintptr)box)`.
+
+In the third answer, for a managed box, the number is the address the box's own number conversion pinned. The pin is
+held by a handle that is a field of the source box. The minted box does not hold the source box. So when the source
+box is no longer referenced, its finalizer releases the pin, and the minted pointer names storage that can move or be
+collected. Go's rule is that the converted pointer keeps its pointee alive.
+
+**This is the family of the interior-pointer root** (docs/phase4/DESIGN-interior-pointer-root.md 4.1 and 10.1): a
+native box minted at an address of Go memory that carries nothing of what owns that memory. The 4.7 census
+(`TestInteriorPointerMintCensus`) lists the mint with this disposition; it is not changed in that cut.
+
+**Callers, by a text read at `30a0cc3c2c`.** One emitted site in the committed corpus:
+`src/core/crypto/x509/windows/root_windows.cs:142` (`ExtraPolicyPara`, whose pointee holds a pointer and so takes
+the token answer, not the third). Hand-owned consumers that name the mint in comments:
+`src/core/syscall/windows/zsyscall_windows_certchain_impl.cs` and
+`src/core/internal/syscall/windows/windows/syscall_windows_impl.cs`. Converted test suites and third-party code that
+write the same Go shape take the same emission.
+
+**NOT READ:** whether any caller reaches the third answer over a managed box and lets that box go while the minted
+pointer is in use. **OPEN:** that read (each caller: which answer it takes, and whether it holds its box across the
+use). If every caller holds it, the row closes as "holds by construction" with the sites named. If one does not, the
+fix is the root's: the minted box keeps the source box (`NativeDerivation.Kept`).
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — P5 (the interior-pointer cut, design 10.12; COORD ruling (a), 08:40Z: a row for after the release): the use walk that retires the 13 kept `FromRef` sites — OPEN, not started, after the release
+
+**What the cut does.** A converted method that takes a number from its receiver or a pointer parameter emitted
+`@unsafe.Pointer.FromRef(...)`, a pointer that keeps nothing of the box it came from. The cut emits the receiver's
+box instead, but only where the USE of the conversion is known at the conversion itself: the first argument of
+`unsafe.Add`, the `P` of an arithmetic form `unsafe.Pointer(uintptr(P) + n)`, or the operand of Go's own
+`uintptr(...)`. That is the node rule.
+
+**What it leaves.** A conversion whose value is a call argument, a return value or a store keeps `FromRef`, because
+the converter cannot read at that node what the callee, the caller or the later reader does with the pointer. 13
+sites at every target, each named with its use in `receiverFromRefSites`
+(`src/go2cs/internal/repoguard/interiorPointerMintCensus_test.go`, disposition "kept: use not provable at the
+node"): `internal/abi/type.cs` `Methods` and `ExportedMethods` (an argument of `addChecked`); `internal/sync/mutex.cs`
+`Lock`, `TryLock`, `lockSlow`, `Unlock` (arguments of `race.Acquire` and `race.Release`, under `race.Enabled`, a
+constant false); `reflect/type.cs` `nameOff`, `typeOff`, `textOff`; runtime's `mheap.cs` `init` (one file per layout
+key folder), `mgcmark_greenteagc.cs` `init`, `synctest.cs` `raceaddr` (a return) and `time.cs` `unlockAndRun`.
+
+**Why it is a row and not a defect today.** A kept site is the emission that shipped before the cut, unchanged. The
+design's prediction P2 (every `FromRef` leaves) is scored a MISS as worded, with this list beside it.
+
+**OPEN: the use walk.** For the argument, return and store cases, follow the value to where it is used: the callee's
+parameter (does it reach `unsafe.Add`, an arithmetic form or a dereference), the function's callers for a return, the
+readers of the stored location. Where every use is one the box serves, emit the box and drop the row from the kept
+list; where a use needs the number, say which and keep it. It moves corpus bytes at the sites it retires. Not started.
+Scheduled after 1.26.11.1.
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — P5 (COORD ruling, 2026-11-14 12:20Z; design 10.5 and 10.13): B2, the refusal by name of a native-box dereference whose pointee holds a reference, and the every-banked-row reading it waits on — MOVED to after 1.26.11.1, not started
+
+**What ships now.** The counter (`src/core/golib/NativeBoxDereferenceCensus.cs`, cut commit `65d9a4a990`), off unless
+`GO2CS_NATIVEBOX_CENSUS` is set. It counts each `NativeBox<T>` dereference that passes the layout refusal, in three
+classes: B2a (the pointee holds a reference and is not a Go struct value), B2b (a Go struct value that holds a
+reference and that the layout check does not refuse), UNPINNABLE (the box is derived from managed storage that
+cannot be pinned). It refuses nothing. The reader and its controls are `docs/phase4/probes/p5-nativebox-census/`.
+
+**What does not ship.** B2 itself: nothing refuses by name a dereference in those classes. And the reading B2 waits
+on: the counter over EVERY banked row on every flavour the roster banks (windows, linux/amd64, linux/arm64, darwin),
+one sweep per flavour with the variable set. The design lands B2 for a class only when every flavour reads 0 for it.
+
+**What is read before the release.** The canary rows on linux/amd64 only, in the cut's gates. An UNPINNABLE arrival
+there is a live instance of the interior-pointer hole and is posted on its own.
+
+**NOT SHOWN until that reading:** that the three classes are empty on windows, darwin and linux/arm64. The design's
+windows evidence that linux cannot stand in for it is `net/windows/interface_windows_impl.cs:262`, a cast of an OS
+buffer to a struct with pointer fields; it is unread.
+
+**Two corrections the cut made to the design's population** (design 10.13): the hand-owned `sync.Mutex` is refused
+by the layout check already and is not in B2b; an array value arrives as B2a, by kind.
+
+**OPEN, after 1.26.11.1:** a sweep option that sets the two variables and keeps the files; the four readings; then B2
+for each class that reads 0 everywhere, and a finding for each that does not.
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — P5 (closes the 2026-11-14 `MintOpaque` row above; COORD, 13:04Z): `ManagedPointerTokens.MintOpaque`'s callers each hold their box — CLOSED, holds by construction
+
+**The read** (text, at `fb79ad6afb`; nothing run, nothing changed). The converter emits the mint only for
+`T(unsafe.Pointer(p))` where `T`'s underlying type is `*struct{}` (`convCallExpr.go`, `opaquePointerMintEmission`).
+Go 1.26.10's standard library outside `cmd` declares two such types, `syscall.Pointer` (`types_windows.go:343`) and
+sync's `dequeueNil` (`poolqueue.go:63`). `dequeueNil` is converted only from `nil`, so it never takes the mint. One
+Go site converts to `syscall.Pointer`: `crypto/x509/root_windows.go:125`. No `_test.go` in the standard library has
+the shape.
+
+**The callers, all of them:**
+
+- `src/core/crypto/x509/windows/root_windows.cs:142` (`checkChainSSLServerPolicy`), over `sslPara`;
+- `src/tests/Behavioral/SystemCertVerify/main.cs:152`, the same shape, over `sslPara`.
+
+Both pass a box of `syscall.SSLExtraCertChainPolicyPara`, whose `ServerName` is a pointer
+(`src/core/syscall/windows/types_windows.cs`). A pointee that holds a reference takes the mint's second answer: the
+box's order token, with the minted box holding the source box (`s_mintedReferents`). The minted box is stored in
+`para.ExtraPolicyPara`; `para` is the argument of `CertVerifyCertificateChainPolicy`, whose hand-owned wrapper
+resolves the token back to the box before the native call (`zsyscall_windows_certchain_impl.cs`). Each caller holds
+its box across the use. GolibTests' `ManagedPointerTokenMintTests` calls the mint directly; it is the mint's own
+test, not a consumer.
+
+**What stays as the row above describes.** The third answer over a managed box (a pointee with no reference) keeps
+nothing of its source, and no caller in `src/core`, in a committed converted test or in the behavioral corpus
+reaches it. A caller that would: user code, or a later Go release, that converts a pointer to a reference-free
+struct to `syscall.Pointer`. The fix named in the row above stands for that day; it is not made here.
+
+**One stale comment, not changed:** `src/core/internal/syscall/windows/windows/syscall_windows_impl.cs` says
+internal/poll mints `msg.Name` with `MintOpaque`. At this corpus internal/poll emits `msg.Name = Ꮡrsa.Ꮡname`
+(`src/core/internal/poll/windows/fd_windows.cs:178`), no mint. NOT READ: whether that consumer's `Resolve` still
+finds its box by another route; the banked windows `net` row is evidence that it does, not a reading.
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — P5 (found by release-smoke's binary-compat guard on the interior-pointer cut): `IGoReflectSlice.ReflectOverNativeMemory` lost its published signature to an optional parameter — FIXED in the cut, no suppression
+
+**What the guard read** (release-smoke 43601673661 at `e2c0ceb579`, baseline go.lib 1.26.10.3; the two failures are the
+only two across the 362 packages):
+
+- `CP0002`: member `object go.IGoReflectSlice.ReflectOverNativeMemory(System.UIntPtr, System.IntPtr, System.IntPtr)`
+  exists on the baseline and not on the current `golib.dll`;
+- `CP0006`: cannot add interface member `ReflectOverNativeMemory(System.UIntPtr, System.IntPtr, System.IntPtr, object?)`.
+
+**Cause.** `86247389c0` (design 4.5, the slices over native memory keep their root; H's golib half, carried by this
+cut) added `object? root = null` to the public interface member in `src/core/golib/slice.cs`. An optional parameter
+is a new signature to every compiled caller and implementer: the old member is gone and the new one is an abstract
+addition. `.claude/rules/golib-gen.md` already says a public-surface change runs the check before it is posted; it
+was not run on that commit, by its author or by me when the cut took it. Release-smoke was the first run that did,
+and its first attempt (43594378587) stopped on a 304 from the baseline download and measured nothing.
+
+**Reach.** The tree's only callers are golib's two header boxes (`ж.HeaderSliceBox.cs`, `ж.SliceHeaderBox.cs`) and its
+only implementer is `ISlice<T>`. No converted package names the member, so no published package would have failed
+to load. The guard is right regardless: the published surface lost a member.
+
+**The fix.** The three-argument member stays as published. The rooted one is a second member with a default body that
+forwards to it, which is what an implementer compiled before it did (it keeps nothing). `ISlice<T>` implements both.
+Red first and then green with the pinned tool (10.0.403) run directly, the published `lib/net10.0/golib.dll` as the
+left side and the tree's Release build as the right: the same two lines before, "without finding any breaking
+changes" after. GolibTests' `ReflectOverNativeMemoryMemberTests` holds what each member answers, and that an
+implementer written against the published surface alone compiles and answers the rooted call through the default.
+The mint guard's row for the member counts 4 sites now, one of which mints.
+
+**NOT READ:** the guard on the per-RID assets of the fixed tree. Release-smoke is dispatched again at the fix; its
+verdict is posted to COORD, not appended here unless it is red.
+
+**For the next reader of a red guard:** the check that reproduces it in a minute is the tool itself,
+`dotnet tool run apicompat -- -l <published dll> -r <built dll>`, with the baseline package taken from the flat
+container. It needs no pack.
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — P5 (the interior-pointer cut, stop line S11; COORD ruling (a), 15:39Z: a row for after the release): the number conversion of a FIELD box costs about twice that of a box that owns its storage — OPEN, not started, after 1.26.11.1
+
+**What was measured** (design 10.14 holds the table; linux/amd64, one host, Release, 20,000,000 calls, median of 5
+interleaved runs, the base converter against the cut converter over one golib). The cut's node rule (design 4.3)
+emits the receiver's BOX where the base emitted `FromRef(ref g)`, so `unsafe.Pointer(g)` on a receiver goes through
+the box's number conversion (`ж<T>`'s `uintptr` operator) at each call:
+
+- a receiver that owns its storage (`new(ctrlGroup)`): `set` -5%, `get` +6%;
+- the shape internal/runtime/maps uses, `(*ctrlGroup)(g.data)`: +7% and +12% with the receiver kept, +17% and +20%
+  made at each call;
+- a receiver that is a FIELD of a struct (`&held.ctrls`): `set` +77%, `get` +95% (about 95 to 105 ns per call
+  before, 185 after).
+
+S11's line is 25%. Ruled: 4.3 lands as cut, because the package's own shape is inside the line and the banked
+`internal/runtime/maps` row never reaches `ctrlGroup.get` or `set` (control: both made to throw, verdicts identical).
+
+**What the code says the field box pays per call** (read, not profiled): `ж.cs`'s operator asks `StorageKind`, which
+on `FieldRefBox` is three tests, one of them `CrossesAsItsRoot` behind an accessor test, then `PinnableStorage`;
+then `EnsureStableAddress` (a null test once pinned), `ValueSlot` through the accessor delegate, and
+`ManagedPointerTokens.RegisterPinned`, which is a table lookup that returns when the same box is already there. So
+the registry is not rewritten per call; my post of 15:17Z named "skip the registry write for a box already
+registered" as the candidate remedy, and that already holds. NOT MEASURED: which of these the 80 ns is.
+
+**Candidate remedy, for the seat that takes this row:** a box that is pinned answers its number from the pin, without
+asking its storage kind again (the kind of a box does not change once it has a pin). Measure first; the loop
+programs are in the seat's kit.
+
+**The read 4.3 still owes, carried here:** which of the other receiver sites the regen changed are called on a field
+box in code that runs. The 21 sites: internal/abi `Get`; internal/runtime/maps `get` and `set`; runtime `add`,
+`sortkey`, `gcdata`, `or`, `funcInfo`; syscall `data` (unix).
+
+**A lesson for the next stop line:** S11's second arm named the maps row's wall time, and the row does not run the
+code the arm was meant to time. An arm is written against a measurement that has been seen to move with the thing
+it guards.
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — P5 (the interior-pointer cut's corpus regen, batch 305): three instruments read the SPELLING the regen changed; one went red, one fell without failing, one rose on lines whose blank lines did not move — the two guards FIXED in the seat; the comment census baseline RAISED by 9 (COORD ruled (a))
+
+**None of the three was in the regen's prediction.** The prediction was the emission's line kinds per target, and it
+was met on four targets. What the regen's commit owes besides the corpus was listed from memory (the mint census's
+leaving rows, the metadata, the docs citations) and not from a search for who reads the old spelling. The search is
+one command and it is the lesson: before a regen that respells a form, grep the instruments for the old form.
+
+**1. `nativeBoundaryBoxDeref_test.go` went red, correctly.** Its pattern was the cast `(ж<T>)(uintptr)`; the
+converter now writes Go's `(*T)(p)` as `@unsafe.Pointer.To<T>(p)`, so all 11 code sites in its scope left the
+pattern and it read `code sites 0`, with both declared `CertContext` rows DECLARED BUT NOT MEASURED. The sites are
+not cured: over an address the kernel produced the door builds the same native box. The pattern reads both
+spellings now and the control plants the door spelling (a hazard and a known negative). Reading after: 11 code
+sites = 2 in class + 9 blittable, as before the regen.
+
+**2. `nativeRootFieldViewCensus_test.go` fell from 13 to 5 and stayed green.** It counts and does not refuse (COORD,
+2026-10-02), and its one positive control is a `Reinterpret` site, so nothing told it that the cast route had left
+its pattern. Same fix. Its second positive control is now `runtime/alg.cs`, whose mints are all door-spelled; made
+to fail once by breaking the pattern, then restored. Reading after: 13 in 5 files, the same rows as before.
+
+**3. `TestCommentParityCensus` rose by 9 on three files: `body:extra:after-param-prelude` 194 to 195,
+`body:extra:unexplained` 2503 to 2507, `body:go-blank-unmapped` 2127 to 2131.** No blank line moved at any of the
+five sites. The census pairs a Go line with its C# line by requiring every Go identifier on the C# line, and the
+cut's emission no longer spells two of them:
+
+- `internal/runtime/maps/group.cs`, `key` and `elem`: Go `return unsafe.Pointer(uintptr(g.data) + offset)` is
+  `return @unsafe.Add(g.data, offset);` (no `Pointer`, no `uintptr`). One unmapped Go blank and one unexplained C#
+  blank each.
+- `internal/runtime/maps/runtime.cs`, two `slotElem = unsafe.Pointer(uintptr(slotKeyOrig) + typ.ElemOff)` lines:
+  the same.
+- `runtime/stack.cs`, `gcdata`: Go `ptr := uintptr(unsafe.Pointer(r))` is `var ptr = (uintptr)Ꮡr;` (no `Pointer`),
+  so the prelude's separator is not recognised as one.
+
+The baseline is raised by those 9 in the regen's commit, since the battery has to be green at the tip and the
+alternative is an instrument change that is not this seat's. **RULED (a) by COORD, 2026-11-14 17:04Z: the raise
+stands; the anchor is a seat for the census's owner after 1.26.11.1.** The nine by file and line are in the regen
+commit's message.
+
+**A candidate for the census, measured and not applied (the `runtime/sema.cs` blank it moves must be read, not
+assumed):** on a Go line that holds `unsafe.Pointer(`, do not require
+`Pointer`, nor `uintptr` when the line also holds `uintptr(`. On the regenerated tree it clears 8 of the 9 (the
+separator in `gcdata` anchors through another function) and it also lowers six files that are unmapped today for
+the same reason (`runtime/runtime1.cs` and `runtime/string.cs` by 4 and 3 in two classes each,
+`runtime/mcheckmark.cs`, `runtime/plugin.cs`, `internal/syscall/execenv/execenv_windows.cs`), and it moves one
+blank in `runtime/sema.cs` from unmapped to `go-blank-cs-none`, which is either a real missing blank it uncovers
+or a wrong anchor. Dropping the two names for every line is too wide: it moves 63 rows, most of them in go/types,
+where `Pointer` is the package's own type.
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — P4: B3 sizing on TypeScript hello: the double read is 18.5 ms; the first read's 211-233 ms of host reflection needs OQ2 then A1; one untested idea
+
+**What was measured.** Master `314e1d8b60`, linux-x64, 4 vCPU. TypeScript hello is `parsedemo good.ts`, built against
+that master. A scratch probe golib (three timers, never committed) was swapped into a copy of the bin directory; the
+output was byte-identical to the unprobed bin. Three probe runs, stable to about 15 ms.
+
+| step | call 1 (`ast.Kind`, value set) | call 2 (`ast.Kind`, pointer set) |
+|---|---|---|
+| `WalkExtensionHosts` | 123-130 ms | 0 (cached) |
+| host reads (221 hosts, 114,694 methods, reflection) | 211-233 ms | 0 (cached) |
+| `GetExtensionMethodsHomedIn` total | 402-436 ms | 5.1-5.5 ms |
+| `CollectGoMethodSetCandidates` total | 421-457 ms | 18.4-18.7 ms |
+
+Each call scans 114,694 entries and returns 1 candidate. Hello wall over 12 unprobed runs: median 2,120 ms, standard
+deviation 110 ms. The prediction for the second read (10 to 25 ms) was MET.
+
+**What follows.**
+- The double read (value set, then pointer set, cached per key) costs about 18 ms: about 5 ms rebuilding the homed-in
+  list and about 13 ms walking it again through `ResolveReceiverElement`. Collecting both sets in one walk saves it all;
+  a memo of the homed-in list saves about 5 ms. Neither shows in hello's wall time against a 110 ms deviation.
+- A receiver-key filter while building the homed-in list removes the list and its walk (about 18 ms per call) but cannot
+  skip a host read: a package-scoped host holds every receiver in its package, and its methods are known only after
+  reflection reads them. Skipping the 211-233 ms (about 10% of hello) needs a host per receiver type (OQ2's method-holder
+  move) and then A1. The 123-130 ms assembly walk is A3's. About 50-75 ms of call 1 is unattributed (first-call JIT,
+  `ExtensionHomesOf`, list building).
+
+**Untested idea, unpriced.** Decode each method's receiver from its metadata signature (the walk already reads the
+metadata tables) and materialize `MethodInfo` only for methods whose receiver matches. That could cut the host-read cost
+without OQ2. It is the seed of A1's "the table is already in the metadata", to be priced with A1.
+
+— P4 (2026-11-14)
+
+## 2026-11-14 — P4: internal/synctest banks darwin 58 + 1 through a darwin-scoped host-fatal entry; the mint rule now honours an entry's platform scope, so a non-windows-scoped host-fatal entry is UNCHECKED, not cleared
+
+**The row.** On both mac RIDs `TestWaitGroupManyBubbles` keeps 10,100 goroutines alive at once; go2cs runs each on its
+own OS thread and macOS caps a process's threads (2,028 osx-arm64, 3,052 osx-x64; DATA-mn-spike-2 T6), so thread
+creation throws an OutOfMemoryException in `GoroutineThreadPool.Worker.Start` and the host dies, taking
+`TestHappensBefore` and `TestWeak` with it. Scout reading (os-matrix sweep-shard run 43586434174 at master
+`314e1d8b60`): "matched 56 of 59 Go / 58 C#" on both RIDs. COORD ruled `host-fatal` for it on darwin (11:03Z), by the
+precedent of runtime's init-deadlock entry: the cause is go2cs's 1:1 thread model meeting the host cap, and Go runs it.
+The new `src/core/internal/synctest/go2cs_test_disclosures.json` scopes the entry `"platforms": ["darwin"]` and states
+its retirement: M:N scheduling (R5/R6). Seat reading (run 43589630577 on `claude/p4-darwin-synctest`, both RIDs):
+"status validated; matched 58 of 58 Go / 58 C# verdicts; disclosed 1; undisclosed divergences 0" (arm64 236 s, x64 454 s).
+Predicted before the run: `TestHappensBefore` and `TestWeak` pass once the host survives, 58 + 1 on both. HIT.
+Evidence: `docs/phase4/rebank-1.26.10.3/darwin/reread/SYNC-HF.tsv`.
+
+**The mint rule.** `hostFatalMintViolations` read the package's proof page and never the entry's `platforms`, so the
+darwin entry would have been REFUSED at mint on a darwin run, before either side ran: the page is the windows record
+and shows the test pass/pass. Read in the code, not met on a runner. The rule now reads the page's platform from its
+totals line and reports an entry scoped away from that platform as UNCHECKED (the existing warning, naming both
+platforms). In-scope, unscoped and unreadable-platform entries are refused as before. Guard
+`TestHostFatalMintHonoursThePlatformScope`, red with the arm disabled and red with the page pattern broken. All 253
+committed proof pages parse, and all 253 are windows.
+
+**The gap this leaves, named so the warning is not read as a check.** Every proof page is the windows record, so
+EVERY host-fatal entry scoped away from windows (today: this one) is unchecked at mint: no committed page says whether
+the platform it names runs the test successfully. The mint can refuse such an entry only once per-OS proof pages
+exist. Until then the evidence for a non-windows host-fatal entry is its own reading (here, the scout run and the seat
+run), not the mint.
+
+**Side readings, not this seat's.** (1) Both darwin runs, at master and on the seat, re-emit one line of
+`synctest_test.cs` (`TestIteratorPull`: `new iter.Seq<time.Time>(seqʗ1)` becomes `NilSafeDelegateConversion<...>`), so
+the committed test source trails the converter. (2) The sweep's README badge rewrite on darwin reads "58 matched / 0
+disclosed": the badge does not count the host-fatal disclosure. Neither was committed.
+
+— P4 (2026-11-14)
+
+## 2026-11-14 — P4: Q31 amended (COORD, 19:39Z): a host-conditional-disclosure entry may fire in the mirror shape, Go=skip/C#=pass; and the darwin re-read at go1.26.11 corrects both of this seat's banks
+
+**Q31 amendment, 2026-11-14.** `Test-HostConditionalDisclosureDelta` in `src/_roster.ps1` absorbed a fired entry only
+in the Go=pass/C#=skip shape. It now also admits Go=skip/C#=pass, which is exactly the shape a `skipEitherSide`
+manifest entry discloses (a native subprocess that both sides run, so either side can be the one that skips).
+fail/pass and skip/fail stay refused. Guard: three `check-roster-format` fixtures (the mirror accepted; fail/pass and
+skip/fail refused); red with the shape narrowed back, restored byte-identical. COORD accepted it as keeping Q31's
+"nothing else is absorbed": no per-package flag.
+
+**Corrections to the banks above and to the 2026-11-14 internal/trace bank.** Read on os-matrix run 43620172118
+(go1.26.11, both mac RIDs; evidence `docs/phase4/rebank-1.26.10.3/darwin/reread/P4-R11.tsv`, which supersedes
+SYNC-HF.tsv and TRACE-NS.tsv):
+- internal/synctest banks darwin **58**, not 58 + 1. The run printed "disclosed 1" because the host-fatal entry is
+  disclosed, but the converter's disclosed-divergent count, which the roster segment uses, excludes host-fatal.
+  The entry above scored its own prediction against the wrong count.
+- internal/trace banks the **187 floor** on darwin with `TestTraceCPUProfile/Default` and
+  `TestTraceCPUProfile/AsyncPreemptOff` annotated as host-conditional disclosures. The earlier 185 + 2 (osx-arm64)
+  / 186 + 1 (osx-x64) split came from one sweep where the native skip fired; the skip rate is 7 of 12 runs per RID,
+  so a fixed split reads DISC on most later runs. This re-read fired nothing: 187 + 0 on both RIDs.
+
+— P4 (2026-11-14)
+
+## 2026-11-14 — C2 (found by the `[GoInlineLayout]` seat's `go test ./...`; seen the same day by C2, P4 and P5): the converter's offline cgo tests fail when GOROOT is a toolchain that `GOTOOLCHAIN` downloaded into the module cache — ENVIRONMENT, no converter change; remedy below
+
+**What fails.** Under go1.26.11, `go test ./...` in `src/go2cs` failed 13 `TestCgo*` tests on this box (P4 read 14 on
+its box, the same set as master; P5 saw the same reds, as COORD relayed 2026-11-14 20:14Z). Every one fails at the
+package load with the same line:
+
+    go: overlay contains a replacement for <GOROOT>/src/runtime/cgo/go2cs_incomplete.go.
+    Files beneath GOMODCACHE (<GOMODCACHE>) must not be replaced.
+
+**Cause.** The offline cgo route loads a test's checked-in cmd/cgo output at `CGO_ENABLED=0` and overlays a file
+into `runtime/cgo` (`conversionDriver.go:153-158`). A toolchain that `GOTOOLCHAIN` fetched lives at
+`$GOMODCACHE/golang.org/toolchain@v0.0.1-go<version>.<os>-<arch>`, so GOROOT is under GOMODCACHE, and the go command
+refuses any overlay of a file there. It is independent of the commit under test: the same 13 fail at any SHA on
+such a toolchain.
+
+**Who reaches it.** Only the converter's own tests. `cgoOfflineTrees` is set only by `cgoDriver_test.go`
+(`cgoRoute.go:45`), so a user's `-cgo` conversion never builds this overlay.
+
+**Remedy** (the copy measured here; the `golang.org/dl` route as COORD named it, not run here). Use a GOROOT outside the module cache. Either copy the downloaded toolchain out (`cp -a
+$GOMODCACHE/golang.org/toolchain@v0.0.1-go1.26.11.linux-amd64 <dir>`, make it writable, and point `GOROOT` and
+`PATH` at the copy, so `go env GOROOT` prints `<dir>`), or install with `go install golang.org/dl/go1.26.11@latest`
+and `go1.26.11 download`, which puts the toolchain under `~/sdk`. With the copy, all 13 `TestCgo*` pass (29 s) and
+the whole suite reads 11 ok at `ae272556a6`.
+
+**Candidate, not applied.** The cgo tests could check `go env GOMODCACHE` against GOROOT once and fail by name with
+this remedy, instead of 13 loader errors that read like a converter defect. A seat for the cgo route's owner if wanted.
+
+— C2 (2026-11-14)
+
+**Amended 2026-11-14 (C2; COORD ruling (a), 20:24Z): the candidate above is SUPERSEDED, and the 13 tests now pass on
+such a toolchain instead of failing by name.** The tree already held the answer. `cgoDeclarations_test.go` met the
+same refusal for its own overlaid load: it gave that load a module cache of its own, since the fixture module has no
+dependencies. It also set `GOTOOLCHAIN=local` and put the toolchain's `bin` first on `PATH`. The offline helper
+process never got that. The seat on `claude/c2-cgo-gomodcache` moves it into `cgoOverlayModCacheEnv`, which both
+loads call. It adds nothing when GOROOT is outside GOMODCACHE. Measured on go1.26.11: 13 `TestCgo*` FAIL at master
+with the toolchain in the module cache; `TestCgo*` ok at the seat on the same toolchain; and ok on the same release
+copied outside the cache, where the helper adds nothing.
+
+**Three of the 13 never showed the loader's message**, so they read as a converter defect, not as the environment:
+
+- `TestCgoPhase1FixtureIsRefusedNamingEachUseAndItsOwner`: `no refusal line carries all of ["C.twice" "§11.6"]`;
+- `TestCgoPhase2FixtureIsRefusedNamingOnlyItsGoroutineCall`: `0 refusal lines, want 1`;
+- `TestCgoUnrecognisedCheckClosuresAreRefusedNamingTheirSite` (subtest `an_extra_statement_in_the_closure`): `no refusal
+  line carries all of ["fixture.go(74,"]`.
+
+Each asserts on refusal lines alone, so a load that failed before any refusal could be printed reaches it as an
+empty list. The copy remedy above still works, and is no longer needed for these tests.
+
+## 2026-11-14 — C2 (I1, sized on COORD's ask and PARKED by COORD's ruling 15:11Z): spell the three faces so a reinterpret group of x/sys structs is admitted inline whole — PARKED, no consumer before .4
+
+**What I1 is.** I0's automatic rule keeps a struct out of inline storage when its package uses an array field
+through a face an inline array cannot express (`inlineArrayFaces.go`). Since the sockaddr fix (batch 306,
+`claude/c2-inline-pairs` 3c25375a04), a mixed reinterpret pair keeps its admitted side out with its partner. So
+x/sys's `RawSockaddrAny` decode now converts, but the whole group holds `array<T>`, as std does. I1 would spell the
+faces so the group is admitted whole, in Go's layout.
+
+**Who needs it** (census arm at 3c25375a04, face-blocked types by face: whole value / sliced / element's
+address, then partner keep-outs):
+
+| population | whole value | sliced | address | partner |
+|:--|--:|--:|--:|--:|
+| x/sys/windows | 3 | 5 | 4 | 1 |
+| x/sys/unix linux/amd64 and linux/arm64 | 8 | 5 | 1 | 4 |
+| x/sys/unix darwin/amd64 | 4 | 2 | 1 | 2 |
+| modernc libc, sqlite/lib (4 targets) | 0 | 0 | 0 | 0 |
+
+So I1 is worth nothing to sqlite-cs. Its value is Go layout for x/sys's native socket and setupapi calls
+(getsockname, recvfrom and accept write a `RawSockaddrAny` the converted code then reads).
+
+**Sized:**
+
+| face | size | what it takes |
+|:--|:--|:--|
+| whole value (copied, stored, compared, returned) | S, one seat | reads use `ΔCopy()`, which exists; one new go.arrays member assigns from `array<T>`; the face rule drops the case. It also subsumes I0's stated deviation (a copy between two admitted fields). Alone it gains about 0 in x/sys, read from the census lists and not measured. |
+| element's address (`&x.f[i]`, and below an element) | M, one seat | an alias box for an inline element inside its owning box, on golib's existing alias-box pattern (FieldAliasBox, `at`, GoReflect.InteriorAlias), with no pin; GolibTests at both configurations |
+| sliced (`x.f[:]`) | L, one seat plus a Performance A/B | a new `slice<T>` backing kind (an object plus a byte offset) on the slice hot path |
+
+**A group is admitted whole:** the windows sockaddr group with whole value + address (S+M); linux and darwin sockaddrs
+need all three; the windows setupapi types (DrvInfo*, DevInstallParams, win32finddata1) are slice-blocked. Each
+seat is red first, with the census arm as its prediction instrument. The -stdlib footprint is 0 by construction
+(std never runs admission). The behavioral footprint is FieldAccessReinterpret, GoImageCopyThroughView and
+PointerFieldSelectors, predictable from the I0 record.
+
+**Open question, re-read after batch 305 lands:** does P5's interior-pointer seat give the slice face's
+object-plus-offset backing? If it does, L shrinks.
+
+— C2 (2026-11-14)
+
+**Amended 2026-11-14 (C2): the open question, read at batch 305's landed master `c2919b8b16`. YES, by another route.
+The slice face drops from L to M and the element-address face from M to S/M. Still PARKED.** P5's interior-pointer
+seat adds no new `slice<T>` backing kind. It gives a ROOTED native-backed slice over pinned managed storage, which
+serves the same purpose:
+
+- `ж.NativeBox.cs`: a native box over an address INTO managed storage carries what holds that storage still
+  (`NativeBox(nativeAddress, PinnedBuffer? pin, object? retainedSource, ...)`, line 57).
+- `ж.NativeDerivation.cs`: a box derived from such a box (a field, a reinterpret, an offset, an element of an
+  `unsafe.Slice` over it) RETAINS that root.
+- `slice.cs`: `OverNativeMemory(baseAddress, length, capacity, anchor)` (line 325) keeps the root with no word added
+  to `slice<T>`. The native-backed slice's otherwise unused array field becomes a zero-length anchor array tied to
+  the root (`NativeSliceAnchors<T>.For(root)`, lines 160 and 455), and a re-slice passes it along.
+
+So for I1:
+
+- **Sliced (`x.f[:]`): M, not L.** Emit an `unsafe.Slice` over a native box minted (pinned) over the owning box's
+  inline storage, rooted in that box. The slice hot path does not change. The cost moves to one pin per sliced
+  inline array, held while any slice of it lives, which fragments the heap if the slice lives long. The gate that
+  replaces the Performance A/B is a pin-count census.
+- **Element's address (`&x.f[i]`): S/M, not M.** The same derivation at the element's offset: a native box that
+  retains the root, with no alias-box type of its own.
+- **Whole value:** unchanged, S.
+
+Group cost after this: the windows sockaddrs need S + S/M; linux and darwin sockaddrs and the windows setupapi types
+need S + S/M + M. Still no consumer before .4, so the row stays PARKED. Re-size it when a consumer appears.
+
+— C2 (2026-11-14)
+
+## 2026-11-14 — P2 (sqlite-cs S8c): a direct-ж method called on a named result boxes the result; footprint 0 predicted and met at three bases
+
+**Dated 2026-11-14 UTC. Seat `cf82633d2b` on master `a6cefba6ee` (batch 301), docs re-cite `9532e986ef`, merged
+with `314e1d8b60` (batch 302) as `095238264c` and with `c978595f0c` (batch 303) as `f9726527fb`; linux/amd64 box,
+go1.26.10.** sqlite-cs row S8c; the red repro is modernc.org/mathutil's `NewInt128FromFloat32`.
+
+**What was wrong.** `NewInt128FromFloat32` calls `r.SetBigInt(bi)` on its named result `r`. `SetBigInt` uses its
+receiver pointer as a value (`fmt.Errorf("%T…", x)`), so its only emitted receiver form is the box `ж<Int128>`
+(a capture-mode, direct-ж method). Go takes `&r` for the call and moves `r` to the heap. The converter declared `r`
+as a plain local, and the call failed with CS1929. `analyzeNamedResults` boxed a named result for an explicit
+`&r` and for a pointer-method value, but not for a direct-ж call on it, which the value-parameter and
+value-receiver arms already take.
+
+**Silent defect found on the way.** The value-field CHAIN form on a named result, `h.inner.Add(n)` with `Add`
+direct-ж, compiles at master as `Ꮡ(h).Ꮡinner.Add(n)`: a copy box of `h`, so the method's writes land in the copy and
+the returned `h.inner` keeps its old value. Nothing marks it at compile time. Measured with a one-function probe
+(`func chain(n int) (h Holder) { h.name = "h"; h.inner.Add(n); return h }`, n = 300) converted by each arm's
+converter at master `c978595f0c`, linux/amd64: Go prints `h 300 +300`; master's C# builds and prints `h 0 `; the
+fix emits `ref var h = ref heap(new Holder(), out var Ꮡh); … Ꮡh.Ꮡinner.Add(n);` and prints `h 300 +300`. The
+tracked program carries the same shape (`tally`'s `h.inner.Add(n * 100)`), output-compared.
+
+**The fix.** `analyzeNamedResults` takes the same reason through `bodyCallsCaptureModeMethodOnObject` (the bare
+result or a value-field chain rooted at it) beside the existing two, and a named slice/map/chan result records it in
+`packageCaptureModeBoxIdents` as the parameter arm does. Emission: `ref var r = ref heap(new Int128(), out var Ꮡr);
+Ꮡr.SetBig(v); return r;`.
+
+**Predictions, scored.**
+- The tracked program fails at the base: TRUE, CS1929 ×6 (one each in `fromInt` and `fromIntBare`, two in `tally`, two on `build`'s
+  named slice result). With the fix it prints Go's six lines.
+- Two-seeded `-stdlib` footprint, four targets, 0 files: TRUE at `a6cefba6ee` (4,674 .cs per target),
+  at `314e1d8b60` (4,679) and at `c978595f0c` (4,679). Basis written before any conversion: a go/types census of std finds
+  45 pointer-method calls on named results, the same list on all four targets, test files adding 0; every method
+  has a `this ref T` overload (archive/tar `Format.mustNotBe`/`mayOnlyBe`, time `Time.setLoc`,
+  internal/runtime/gc/internal/gen `valAny.initOp`), so none is direct-ж.
+
+**Gates** at each merged tip: go test all ok, CNR byte-identical, the full runner in 8 slices with bin/obj purged
+between, 0 fail. At `f9726527fb`: CNR across 1066 packages (12 platform-exclusive skipped); Target 973/0/0, Output
+943 pass, 0 fail, 30 skip, 0 timeout; tracked deletions 0.
+
+## 2026-11-14 — P2 (sqlite-cs, libc): a sync.Mutex cast from C memory is refused by name; reached only by opt-in worker threads; DISCLOSED, design deferred
+
+**Dated 2026-11-14 UTC. modernc.org/libc v1.80.1, modernc.org/sqlite v1.62.0; converter of master `c978595f0c`;
+linux/amd64 box, go1.26.10.** COORD accepted this as a disclosure (no design now).
+
+**The sites.** libc places a Go `sync.Mutex` inside C memory and reaches it by a pointer cast, in two places.
+`pthread_musl.go` (linux on amd64, arm64, loong64, ppc64le, s390x, riscv64, 386, arm): `:136` Xpthread_create of a
+joinable thread, `(*sync.Mutex)(unsafe.Pointer(p + off)).Lock()`; `:177-179` Xpthread_exit, `mu := (*sync.Mutex)(…);
+mu.TryLock(); mu.Unlock()`; `:190` Xpthread_join, `(…).Lock()`. And `libc_darwin.go:144`, `file.mu()`, a lock placed
+behind every stdio FILE and taken by each darwin stdio function (29 uses). All are method calls through the cast,
+never a whole-value or field read.
+
+**What the converted code does.** The cast becomes a native box `(ж<Δsync.Mutex>)(uintptr)…`, and the hand-owned
+Mutex's `Lock`/`TryLock`/`Unlock` are `[GoRecv] ref Mutex` primaries, so each call takes the box's `ref` value and
+golib's layout check refuses it before any read or write: "runtime error: cannot read native memory as sync.Mutex: its
+CLR layout is not its Go layout (field gate is a managed reference where Go stores the value inline)". Measured with
+a probe of the three pthread spellings over mmap'd memory, one recover per step: Go prints ok three times, the
+converted program prints that refusal three times. In libc the first refusal would leave Xpthread_create before its
+goroutine starts. The darwin FILE lock was not probed; the same refusal applies by the same route.
+
+**Reach.** By `go list` GoFiles per OS on amd64, sqlite/lib calls `Xpthread_create` and `Xpthread_join` once each, on
+linux only (windows 0, darwin 0), both in `_sqlite3ThreadCreate`, the sorter's worker threads.
+`SQLITE_DEFAULT_WORKER_THREADS` is 0, so they run only after `PRAGMA threads=N` (N > 0) or
+`sqlite3_limit(SQLITE_LIMIT_WORKER_THREADS)`; the sqlite-cs demo sets neither and no sqlite `_test.go` mentions
+threads. sqlite/lib reaches darwin stdio only in the proxy-lock conch path (two `Xfprintf` to stderr). Windows libc
+(`pthread.go`) puts no Mutex in C memory.
+
+**The route when a target needs threads or darwin stdio:** a libc hand-own keyed by address, a C-layout lock word
+in the C storage with a side table for the waiters, so nothing managed is read out of raw bytes.
+
+## 2026-11-14 — H (the owner's ruling, relayed by COORD: target .5): O1, a `-cgo` conversion that builds against the `go.*` packages from the feed
+
+**What is open.** A `-cgo` conversion is one package, and it builds only against a go2cs clone. It is not
+combinable with `-recurse`, so not with `-recurse=nuget` either. <!-- src/go2cs/main.go:305 (`Not combinable with -stdlib, -tests or -recurse`) -->
+Its project file references the analyzer and golib from the clone unconditionally.
+<!-- src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`) -->
+So a cgo package cannot be built the way release-smoke builds every other consumer: from the `go.*` feed, with no
+clone. This release says so in `docs/Limitations.md`, `docs/DotnetTool.md` and the release notes (COORD's ruling
+O2), and says that building against the feed is planned for the next release.
+
+**Ruled.** COORD filed O1 for `.5`. The owner confirmed `.5` on 2026-11-14, preferring a longer `.4` over a rushed
+one, and the stance for `.4` is completeness over date.
+
+**What it would take, NOT MEASURED (a sketch for the seat, not a design):**
+
+- a project shape for a `-cgo` package that takes the analyzer and golib as package references from the feed,
+  where the single-package template references them from the clone;
+- `-cgo` admitted with `-recurse=nuget`, or a `-cgo` mode of its own that emits that shape. Which one is the
+  seat's first question;
+- the C library capture and the module-initializer registration, unchanged: both live in the converted package and
+  in golib, which the feed ships (`GoCgoLibraries` is in golib);
+- a release-smoke consumer leg that builds a converted cgo program from the feed alone, on every OS the cgo jobs
+  run. Today's `release-smoke cgo` jobs build against the clone.
+
+**Owner:** H, as the cgo lane. **Target:** `.5`.
+
+— H (2026-11-14)
+
+## 2026-11-14 — P5 (interior-pointer design, routed to P2 by COORD's ruling 4): modernc.org/libc reads C memory as a `*sync.Mutex`, and the C# `sync.Mutex` holds a managed reference — OPEN, for the sqlite-cs queue after P2's S8 seat
+
+**The item, in one paragraph.** modernc.org/libc v1.80.1 keeps each thread's mutex in C memory and reads it as a Go
+`*sync.Mutex` at pthread_musl.go:136, 177 and 190, which run at thread create, join and exit on linux. In Go that is
+sound: a `sync.Mutex` is two words of numbers and holds no pointer. The hand-owned C# `sync.Mutex` holds a
+`SemaphoreSlim` reference (sync/mutex.cs:70), so the same read hands back a managed reference made out of 8 bytes of
+C memory: a wrong value today, with no panic, and not a layout `GoReflect.ClrLayoutMismatch` can prove (the type has
+no Go layout to compare). It is NOT measured: sqlite-cs stops earlier, at `init`, on the nine func stores of
+vfs/patches64.go, so no run has reached these lines. Once the design's B2 lands for this class the read is refused
+by name instead. The remedy belongs in a libc hand-own: a mutex with C layout for libc's own use, for example a
+table of managed mutexes keyed by the C address, with the three sites reading through it. It is not designed in
+docs/phase4/DESIGN-interior-pointer-root.md (sections 2.4, 4.8 and 10.5 state the class and the refusal only).
+**Owed, by P2:** read the three sites at sqlite-cs's pins, decide the hand-own's shape, and add a guard that runs a
+libc thread create, join and exit.
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — G (sqlite-cs W2 seated in batch 306, and W5a): a dependency's alias records load past a long line, a forward alias and an element address name an imported anonymous struct's lift
+
+**Dated 2026-11-14 16:35 CST. W2 `431368149e` + merge of master `ffaafa144f` = `d078a4ea21` (batch 306); W5a
+`4e12ecb7a3`, merged with master `c2919b8b16` (batch 305) at `7c2ba70723`. Windows x64, SDK 10.0.400,
+go1.26.11.** COORD ordered the sqlite-cs demo's
+walls W2 then W5, each red first, after re-running the demo at `c978595f0c`.
+
+**W2a, the long line.** `readPackageInfoLines` read package_info.cs with a `bufio.Scanner` at its 64 KB default.
+modernc.org/sqlite/lib's carries a 123,448-byte `GoPositionMap` line (sqlite_windows.go's map), so the scan stopped
+with "token too long", reported only as a warning, and no importer loaded ANY of lib's alias records: every alias of
+lib's anonymous structs (vtab.go's `cIndexConstraint`, `cIndexOrderBy`, `cConstraintUsage`; pagecache.go's
+`pcacheMethods2`) fell back to raw Go text. The reader now takes a line to 256 MB. Guard:
+`TestPackageInfoReaderReadsALineLongerThanTheScannerDefault`, red with the demo's own error.
+- **Latent, same class, not fixed (no live site):** `readFileBuildConstraint` (directiveOperations.go, Go source
+  lines) and `containsModuleMarker` (a C# file's lines) keep the 64 KB default scanner. A line past 64 KB stops
+  each one early. No package_info.cs in src/core has a line over 64 KB today.
+
+**W2b, the forward alias.** lib declares `type LC_ID = TLC_ID` above `type TLC_ID = struct{...}`, a struct identical
+to libc's `tagLC_ID`, which libc already lifted. The declaration reuses the import's lift, but the forward reference
+deferred to a marker the post-barrier pass cannot resolve (the reused lift is another package's and never enters
+this package's registry). The marker now takes the import's lift (`forwardImportedStructLift`), in both renderers.
+Guard: behavioral `ForeignAnonStructForwardAlias` (emitted `global using LC_ID = go.main_package.struct{...}` red).
+
+**W5a, the element address.** libc's `iobMap[uintptr(unsafe.Pointer(&X_iob[i]))]` over `X_iob
+[stdio.X_IOB_ENTRIES]stdio.FILE` emitted `ᏑX_iob.at<stdio.FILE>(i)` (CS0426). libc's real `FILE` is `type FILE =
+X_iobuf` with `type X_iobuf = struct{...}` (ccgo): an alias of an alias of an ANONYMOUS struct. S12's fix
+(`isForeignAliasOfNamed`) covers an alias of a DEFINED type, and its guard `ForeignAliasElementAddress` declared a
+defined `X_iobuf`, so the real shape kept the Go spelling while the array's own declaration said `stdioꓸFILE`.
+`dynamicStructTypeName` now spells a foreign alias of a published anonymous-struct lift as its declarations do
+(`isPublishedForeignAnonStructAlias`). Guard: behavioral `ForeignAnonStructAliasElemAddress`, red under master's
+converter (CS0426 ×4), green in all four phases.
+
+**Predictions, scored.**
+
+- W2 four-target two-seeded footprint (`-tests` net/http, encoding/json), predicted 0/0: TRUE at `c978595f0c`
+  (go1.26.10) and at `ffaafa144f` (go1.26.11). At go1.26.11 both arms wrote 0 files, master's corpus being its own
+  fixed point; the instrument's "seat wrote 0" guard aborted and its remaining steps were run by hand (0 of 226
+  hand-owned files clobbered, `-tests` wrote 115 files in each root, 0 files differ, 0 in one arm only).
+- W5a footprint, the same instrument, predicted 0/0 (the replaced spelling never compiled): TRUE at `c2919b8b16`
+  (base) against `7c2ba70723` (seat): 0 files differ, 0 in one arm only, 0 of 226 hand-owned files clobbered.
+  Each arm wrote the same 12 `.cs.auto` siblings, which is master's own state after batch 305, not W5a's:
+  `internal/syscall/windows/registry/windows/value`, `net/windows/lookup_windows`, `runtime/{darwin,linux,windows}/
+  runtime2`, `runtime/mcleanup`, `runtime/mfinal`, `sync/atomic/type`, `sync/pool`,
+  `syscall/windows/security_windows`, `unique/clone`, `weak/pointer`. Named here, not applied.
+- Converter `go test ./...`: W2 at `d078a4ea21`, 11/11 packages ok. W5a's runs at the tip that carries this entry;
+  its result is in the announce.
+
+**The demo after W2** (`d078a4ea21`, `-inline-arrays "-golang.org/x/sys/windows"` for W1): W2's five raw-Go aliases
+are gone. Read by hand-fixing each wall in a scratch copy: W3 = S8 (mathutil, 4 × CS1929, P2), then W4 = S10
+(libc, `gotime.Location` 3 × CS0426, 9 `gotime` sites, P2), then exactly two errors, W5a (CS0426) and W5b (CS0021).
+W5b's compile half closes with P5's typed pointer door (`@unsafe.Pointer.To<RawMem>(…).Value[..]` builds). Its
+run-time half does not: libc's `RawMem` is `[1<<50 - 1]byte`, and a whole `[:]` of it throws `OverflowException`
+(`RawMem.get_Item(Range)` → `materializeValue` → `array(UInt64)`). libc's windows build holds 16 such views: 1
+whole `[:]`, 13 bounded (`Xmemcpy` among them, which S3's copying view also breaks), 2 index stores. COORD routed
+that half design-first to P5, after batch 305.
+
+— G (2026-11-14)
+
+## 2026-11-14 — P5 (the named-array floor seat; COORD rulings D4 at 19:35Z and item 3 at 19:58Z): three rows the seat leaves open: an array viewed over another array type answers length 0; a plain pointer conversion to a named array does not compile; a named array over Go memory of another type is refused where Go answers — OPEN, all three, owner P5
+
+Read at master `c2919b8b16` on linux/amd64, Go 1.26.11, Release. Programs, Go's answers and the converted answers:
+`docs/phase4/data/named-array-floor/` and, for Q, `docs/phase4/data/array-pointer-doors/` (design branch
+`claude/p5-native-view-design`). The floor seat (`claude/p5-named-array-floor`) refuses the named-array half of this
+class by name; these three are what it does not change.
+
+**1. A whole view of an array over Go memory of another array type answers length 0 (wrong answer or a panic, owner
+P5, deferred by ruling D4).** Two shapes, one emission (`Reinterpret` over the pinned box, then the array read
+through a box whose pointee is the destination array):
+
+- **Q, unnamed over unnamed.** `w := (*[16]byte)(unsafe.Pointer(&arr))[:]` over `var arr [4]uint32`, then
+  `w[4] = 1`. Go prints `[0 1 0 0]`. Converted: `index out of range [4] with length 0`.
+- **ge, a named array viewed as the unnamed one.** `e := (*[64]byte)(unsafe.Pointer(&sm))` over `var sm smallMem`
+  (`type smallMem [64]byte`), then `e[5] = 7`. Go prints `7 7 [0 0 0 0 0 7 0 0]`. Converted:
+  `index out of range [5] with length 0`.
+
+Neither stores anything it should not: the view is empty, so the store panics. The floor seat leaves both as they
+are (its refusal is keyed on the generated wrapper as the POINTEE, and here the pointee is `array<E>`). The cure is
+door C of the array-pointer design, ruled to .5.
+
+**2. A plain conversion between a pointer to an unnamed array and a pointer to a named array of the same
+underlying type does not compile (CS0030, owner P5, not in the floor seat by COORD's 19:58Z ruling).** Go:
+`g := (*smallMem)(&h.buf)` with `buf [64]byte` and no `unsafe`. Emitted: `(ж<smallMem>)(h.Ꮡbuf)`, and C# has no
+conversion from the box of `array<byte>` to the box of `smallMem`. Go allows it because the two pointer types have
+identical underlying base types. Found while writing the Go-memory probe; the arm was taken out of the probe and
+its source and emission are kept beside it (`gomem/plain-conversion.go.txt`, `.cs.txt`). No std or behavioral site
+is known: none was looked for, so this is a shape, not a census.
+
+**3. A named array viewed over Go memory of ANOTHER type is refused by name from this seat on, where Go answers
+(owner P5, cure in doors B and C).** Five shapes of seven in the probe: over a `[64]byte` field (`ga`), over a
+`[64]byte` variable (`gb`), over a `[8]uint64` (`gd`), over a slice's first element (`gg`), over a struct's first
+field (`gh`). At master each stored a managed address into the Go storage and lost the program's write (Go prints
+3, 4, 6, 9, 1; converted, in the committed run, 162, 207, 161, 0, 139934896735784: the values are addresses and
+differ per run), which is why the seat refuses them. The same-type
+round trip (`gf`) is right before and after. std has 8 conversions to a named array per target and none of them
+runs on a banked row (3 in `mprof.go` inside the hand-owned `stkbucket`, 4 in `mgcmark_greenteagc.go` in the
+collector's own scan, 1 in `internal/runtime/maps` `TestMapIndirect`, which is disclosed and refuses earlier).
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — P5 (the named-array floor seat after COORD's review, items 5 and 6): the floor's census of conversions to a named array missed seven sites, named here and read safe; and a nil array pointer made from a number carries no length — the census CORRECTED (15 sites per target, not 8); the nil row OPEN, owner P5, cure in door A
+
+Read at `claude/p5-named-array-floor` on linux/amd64, Go 1.26.11, Release. This entry corrects the count in row 3
+of the entry above (which stays as written) and adds one row.
+
+**The census correction.** Row 3 above says std has 8 conversions to a named array per target. COORD's review
+of the seat found 7 more with a search for the `Reinterpret` spelling, all in `runtime/mpallocbits.go`, where
+`type pallocBits pageBits` and `type pageBits [pallocChunkPages / 64]uint64`:
+
+| Go line | Method and its conversion | Emitted (`src/core/runtime/mpallocbits.cs`) |
+|:--|:--|:--|
+| 344 | `(*pallocBits).allocRange`: `(*pageBits)(b).setRange(i, n)` | :362 `Ꮡb.Reinterpret<pallocBits, pageBits>()` |
+| 349 | `allocAll`: `setAll()` | :367 |
+| 354 | `free1`: `clear(i)` | :372 |
+| 359 | `free`: `clearRange(i, n)` | :377 |
+| 364 | `freeAll`: `clearAll()` | :382 |
+| 371 | `pages64`: `block64(i)` | :389 |
+| 377 | `allocPages64`: `setBlock64(i, alloc)` | :395 |
+
+So the count is 15 per target, not 8. My census searched for conversions through `unsafe.Pointer`; these seven
+are plain conversions between two named array types of one underlying type, which Go allows without `unsafe` and
+the converter emits as `Reinterpret`. The predicate was narrower than the claim it supported.
+
+**Why the seven are safe, read and then tested.** The source of each is a pointer to a `pallocBits` in managed
+storage. For two named arrays of one field sequence `Reinterpret` takes its alias arm
+(`ReinterpretAliasesStorage`, `ж.PointerExtensions.cs`) before any native route: the result is a field view on
+the SAME box, no native box is made, and the floor is not reached. The arm
+`NamedArrayCarrierTests.ANamedArrayReinterpretedAsAnotherOfItsShapeAliasesTheSameArray` holds that pair shape
+(two named `[64]byte` types): a store through the converted pointer is read back through the original. If a
+`pallocBits` ever sat in native memory, the conversion would still succeed (the box is a carrier) and the first
+read through it would be refused by name.
+
+**New row. A nil pointer to an unnamed array made from a number carries no length (wrong answer from reflect,
+owner P5, cure in door A).** Go: `reflect.TypeOf((*[4]byte)(unsafe.Pointer(nil))).Elem().Len()` is 4, and the
+same for a pointer made from the number 0. Converted: 0, the type prints as `*[]uint8`, and `Size()` panics
+"the size of [?]uint8 is not known". The language's own nil, `(*[4]byte)(nil)`, is emitted as `NilBoxOfDims(4)`
+and answers 4. The difference is the construction: the number conversion's type argument is `array<byte>`, which
+carries no length, so the runtime has no 4 to attach, and golib cannot cure it from its side. The array-pointer
+creation door of `DESIGN-array-pointer-doors.md` (door A) is handed N by the converter and can answer
+`NilBoxOfDims(N)` for a nil source. Not affected: `len(p)` and `cap(p)`, which the converter writes as the
+constant when the operand neither calls nor receives; equality (the two nils compare equal); `IsNil`. A NAMED
+array pointee is not affected either: its type declares its length, and reflect reads 64 for a nil
+`*smallMem`-shaped pointer. No std or behavioral site is known to read the length of such a nil: none was looked
+for. The measured answer is asserted, and this row named, in
+`NativeArrayViewFloorTests.ANilArrayPointerFromANumberCarriesNoLengthWhereTheLanguagesNilDoes`; whoever cures it
+turns that arm's two measured assertions into Go's answer.
+
+— P5 (2026-11-14)
+
+## 2026-11-14 — G (row, found by the i9; owner of the runtime / M:N thread-reuse contract): RuntimeStopTheWorldContractTests' holder arm usually asserts nothing
+
+**Dated 2026-11-14 21:50 CST. Read at master `091935257c` (batch 307). Not fixed here; this row records it.**
+
+`GolibTests.RuntimeStopTheWorldContractTests.AHolderIsItsGoroutineNotTheThreadItRanOn` guards the stop-the-world
+contract's holder rule: worldsema's and metricsSema's holder is the GOROUTINE, not the thread it ran on, because
+goroutine threads are reused (GoroutineThreadPool). Its probe, `GoSemaHolderReuseProbe` (runtime/managed_impl.cs),
+starts goroutine A, which takes both locks and ends holding them, then starts goroutine B up to 20 times, hoping
+the pool hands B A's just-idled worker; only then does B call the releases and the test assert that A still holds
+both. Otherwise the test ends `Assert.Inconclusive("goroutine B never landed on goroutine A's reused thread; nothing
+to assert")`.
+
+**The reading (the i9's).** 1 or 2 of 5 runs assert when the test runs ALONE, also at master; the rest end
+Inconclusive. Whether A's worker is back in the idle set before B starts, and whether the pool picks that worker
+among the idle ones, is scheduling: nothing in the probe makes it happen. A contract test that usually asserts
+nothing proves nothing, and an Inconclusive does not fail a run, so a regression of the holder rule would most
+often pass unseen.
+
+**The fix (later, after the sqlite-cs .4 gate work):** make the reuse deterministic, or assert the rule another
+way. Candidates: a GolibTests-only hook that runs B on A's worker by identity (or waits until that worker is the
+only idle one), or an arm that reads the holder key the locks record and checks it names A's goroutine and not
+the managed thread id, which needs no reuse at all. Either way the arm must be made to fail once (safety floor
+item 13): key the holder by thread id, see the arm go red, restore.
+
+— G (2026-11-14)
+
+## 2026-11-15 — P5 (corrects one phrase of the 2026-11-14 floor-review entry above; COORD, 01:20Z): the nil array pointer's missing length is cured by door C, not door A — the row stays OPEN, owner P5, with door C
+
+The entry above says of a nil pointer to an unnamed array made from a number: "owner P5, cure in door A", and
+"The array-pointer creation door of `DESIGN-array-pointer-doors.md` (door A) is handed N by the converter". That
+names the wrong door. It is left as written; this entry is the correction.
+
+Door A, as designed (4.1) and as cut (`claude/p5-array-door-a`, design section 11), emits VIEWS: a slice of the
+conversion. The conversion whose value is KEPT, `(*[N]T)(p)`, is still emitted as
+`@unsafe.Pointer.To<array<T>>(p)`, and that is the construction the row measures. Handing it `N` is door C's
+unnamed form, `@unsafe.Pointer.ToArray<E>(p, N)` (design 4.5): 84 `To<array<...>>` lines in 28 files by the
+design's census (P7, D5), not proposed in the first cut.
+
+**State.** OPEN, owner P5, cure in door C. Door C is in .5 unless the sqlite-cs demo reaches it, and the nil
+case goes with it: it is a wrong length from reflect, not a lost store. Everything else in the row stands: what
+is measured, what is not affected, and the arm that holds the measured answer
+(`NativeArrayViewFloorTests.ANilArrayPointerFromANumberCarriesNoLengthWhereTheLanguagesNilDoes`).
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (found rerunning door A's kits; COORD ruling 01:19Z): a write at the ADDRESS of a named array that has not been used yet is lost, silently, on master — OPEN, owner P5, in .4: option 1 as its own golib seat after door A, option 2 after door B
+
+**Finding (measured, linux/amd64, golib and go2cs-gen as on master).** Seven arms, `type small [8]byte`:
+
+| arm | Go | Go prints | converted prints |
+|:--|:--|:--|:--|
+| la | `var local small; fill(unsafe.Pointer(&local), 41)` | `41` | `0` |
+| lb | a package variable, by number: `fillNumber(uintptr(unsafe.Pointer(&global)), 42)` | `42` | `0` |
+| lc | a field: `h := &holder{}; fill(unsafe.Pointer(&h.buf), 43)` | `43` | `0` |
+| ld | `x := new(small); fillNumber(uintptr(unsafe.Pointer(x)), 44)` | `44` | `0` |
+| le | libc's memcpy shape into a fresh named array | `[1 2 3 4 5 6 7 8]` | `[0 0 0 0 0 0 0 0]` |
+| lf | control: the named array is written once before its address is taken | `45 9` | `45 9` |
+| lg | control: an unnamed `[8]byte`, never used before | `46` | `46` |
+
+No panic and no diagnostic: five lost writes, both controls right. The doors of
+`DESIGN-array-pointer-doors.md` emit nothing at these sites, so this is not that seat's. Program, emission and
+both outputs: `docs/phase4/data/array-pointer-doors/door-a-1115/lazy/`.
+
+**Cause (read).** A named array's generated wrapper is a one-field struct whose backing is allocated on the
+first use of its `Value` getter (go2cs-gen `InheritedTypeTemplate`, the lazy backing with its interlocked
+publish). The box's two pin paths, the `uintptr` operator and the `void*` path in golib's `ж.cs`, test
+`value.ValueSlot is IArray arr`. For a value-type pointee that BOXES A COPY of the wrapper. `pinnedArrayData`
+then reads `arr.Source`, which allocates the backing on the copy and pins that. The real slot stays empty, so
+the address names an array the variable never reads, and the variable allocates its own on its next use.
+
+This is the by-value-copy class `INVESTIGATION-element-aliasing.md` closed for ELEMENTS in August: `arrayView`
+and `publishArrayBacking` materialize on the boxed copy and copy the wrapper back under the box's lock. The pin
+paths never went through that gate.
+
+**Reach.** The corpus declares named arrays on 228 lines in 140 files of `src/core` (per-platform files each
+counted). For the sqlite-cs demo, a census of its package closure (`modernc.org/sqlite/...` v1.62.0 with its
+dependencies, loaded with go/packages; tool and rows in `door-a-1115/lazy/census/`) counts every conversion to
+`unsafe.Pointer` whose operand is a pointer to a defined named array:
+
+| target | packages | module packages: named arrays, sites | std packages: named arrays, sites |
+|:--|--:|:--|:--|
+| linux/amd64 | 151 | 6, 4 | 16, 3 |
+| windows/amd64 | 161 | 4, 0 | 16, 3 |
+
+The four module sites are all in `golang.org/x/sys/unix` (`SchedGetaffinity`, `SchedSetaffinity`,
+`SetMemPolicy` over a `CPUSet`, and the PPPoX socket address), and no non-test file of the closure's other
+modules names any of the four (a grep, not a call graph). The three std sites are `internal/abi`'s
+`IntArgRegBitmap.Get` and `runtime`'s `stkbucket` and `slicebytetostring`. libc's `RawMem` and `RawMem64` and
+`modernc.org/memory`'s `rawmem` are defined named arrays, and nothing takes the address of one: they are only
+conversion TARGETS, which is the doors' side. So no site was found in the demo's generated code or in libc.
+
+What the predicate does not see: a struct that holds a named array field and has its OWN address taken, and
+golib or hand-owned C# that calls the pin paths directly. The TypeScript demo's closure is not measured: its
+source is not on the box this was run on. An earlier reading of mine (a grep of two files, posted 01:18Z) is
+superseded by this table; one of the two files was a 5 KB stub and not sqlite's generated code.
+
+**Two options, both ruled into .4.**
+
+1. **golib only, about half a day: its own seat directly after door A.** The two pin sites take their array
+   through the existing per-box publish gate before pinning. No public surface, no converter change, so no
+   corpus footprint. With it: a GolibTests arm per shape and per control, each red first; the program as a
+   behavioral project; the full behavioral suite; `go2cs.slnx`. What it leaves: the gate's copy-back is a plain
+   write under the box's lock, and the wrapper's own getter publishes without that lock, so a goroutine that
+   first-touches the variable directly while another pins it can still lose one of the two backings. That
+   window exists today for the element door as well.
+2. **Closing that window, about one more day: the seat after door B.** The copy-back becomes an interlocked
+   publish of the holder into the slot (the wrapper is exactly one reference field; asserted by size per type),
+   in the element gate and in the pin paths, with a two-thread stress arm. It touches the August gate's code, so
+   it owes that gate's own tests and the `crypto/internal/boring/bcache` row.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door A's decision D8; COORD ruling (a), 2026-11-14 22:39Z): after the view doors, three kinds of `(*[N]T)(p)[lo:hi]` are still a COPY or still lose a write — OPEN as a record, owner P5; the first kind has no known site
+
+`DESIGN-array-pointer-doors.md` sections 11 and 12. A slice taken through an array-pointer conversion over an
+`unsafe.Pointer` is now a view of the memory in every case but these:
+
+1. **The pointee is a Go value that holds a reference.** Nothing can hold it still, so the view is a copy of
+   the elements read at the pointer. A read is exact. `copy` with an OPEN view of it as the destination is
+   refused by name. A BOUNDED view of it under `copy`, or an element store through the view, writes the copy
+   and the write is lost: no panic, and no conversion-time note since the doors replaced the span the note
+   was attached to. No site of this kind is known in modernc.org/libc, modernc.org/sqlite or the standard
+   library; none was searched for beyond the design's census (10.4), which reads the 17 parameter lines of
+   libc's C ABI by their callers in sqlite's generated code on windows/amd64 only.
+2. **The conversion's operand holds a `FromRef` mint.** The address is true for one statement, so the site
+   keeps the copying span: two lines of `internal/abi/type.cs`, which only read. Held by repoguard's
+   `TestArrayPointerViewDoors`.
+3. **The pointee is a named array whose address is taken before the array's first use.** The view is over a
+   backing the variable never reads: the row above of this date, with its own seat.
+
+What the doors cured that this row used to hold: sqlite's first seeding of its random number state,
+`sqlite_windows.go:5802`, `memcpy(&sqlite3Prng, &chacha20_init, 16)`, a write through a byte view of a Go
+struct of scalars and arrays. It is the anchored arm's case (design 12) and prints Go's answer on the shape
+measured (`data/array-pointer-doors/amend-1114/prng/`, arms pa pb pc pe). It was not observed in the sqlite-cs
+demo itself.
+
+If a site of kind 1 appears, the options are the ones of design 10.4's D8 (b): emit a bounded view that is
+`copy`'s direct destination through the copy door, so the door sees the write and refuses a copy destination
+by name.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (found adding V2's mint to door A; COORD ruling 02:54Z: a BOARD row, the fix is a later seat): the repoguard mint census reads a statement line `return F(a, b);` as a MEMBER DECLARATION named F, so a mint below it in the same method is attributed to F — OPEN, no owner; no mint is attributed that way today
+
+`src/go2cs/internal/repoguard/interiorPointerMintCensus_test.go`, `mintMemberSites`: the census keys each mint
+as `<file>|<member>`, and the member is the name captured by the last line above the mint that matched one of
+the four `mintMemberDecls` patterns. The fourth pattern is meant for a bare interface member
+(`nuint HeldBytesFrom(nuint address);`): a type, a name, a parameter list of `type name` pairs, a semicolon. Its
+type class admits letters, digits, `.` and `,`, so a call statement fits it:
+
+| line | read as |
+|:--|:--|
+| `return ManagedWindow(source, whole.Low, whole.Length, lo, count, capacity, length, use);` | a member `ManagedWindow` of type `return` |
+| `return Compute(a, b);` and `return Compute(a, b, c);` | a member `Compute` (the comma is read as a type) |
+| `return ManagedWindow(elements, first, elements.Length - first, lo, ...);` | not matched: the ` - ` |
+| `Store(a, b);` | not matched: no leading word |
+
+Measured with the pattern alone on those lines (go1.26.11).
+
+**How it showed.** V2's first shape minted its window inside `Window<E>` (`src/core/unsafe/unsafe.cs`), below
+the second `return ManagedWindow(...)`. The census failed with "NEW NATIVE MINT: src/core/unsafe/unsafe.cs|
+ManagedWindow ... is in no row", naming a method that mints nothing. A row under that name would have recorded
+a false member, so the mint was moved to its own method, `HeldWindow<E>`, with the row `unsafe.cs|HeldWindow`
+(`a7490fcee7`). The scanner was not changed.
+
+**Reach, measured at `08125e154e`.** In the 202 tracked `.cs` files under `src/core/golib` and
+`src/core/unsafe`, 87 statement lines are read as a member declaration. No native mint and no pointer mint is
+attributed through one of them today: 0 of the census's sites in those two arms. The third arm (a receiver's
+`FromRef` in converted files) was not probed.
+
+**Why it matters.** The failure above was loud, because `ManagedWindow` had no row. It is silent when the
+misread name has a row whose count the stray mint happens to complete, or when a mint leaves the member it
+belongs to and the two rows still sum: the census then holds a "what keeps this mint" sentence against the
+wrong method.
+
+**Options, not sized beyond a reading.** (1) Refuse a statement keyword as the fourth pattern's type (`return`,
+`throw`, `yield`, `await`), and require a `type name` pair to hold no comma in its type; small, with a planted
+arm per misread shape. (2) Track brace depth and take a declaration only at type-body depth; larger, and it
+closes the class.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door A, from the review of V2): a view of a Go value's bytes uses the CLR's layout of the value, and only the element type is checked against Go's — OPEN, no owner
+
+The array-pointer view doors' V2 (`@unsafe.Pointer.View` and the copy doors over a Go value of another type,
+docs/phase4/DESIGN-array-pointer-doors.md section 12) cut a window over the storage the value's box holds still.
+The window's end is the end of that storage as the CLR laid it out. The element type `E` is refused when its C#
+size differs from its Go size (`slice<T>.OverNativeMemory`, `GoLayoutFacts<T>.SizeDiverges`). The VALUE's type is
+not checked. A struct with a Go zero-size field and no explicit layout is larger in C# than in Go, and its later
+fields can sit at other offsets, so a program that views such a value as bytes reads and writes the C# layout where
+Go reads and writes Go's, and the view is longer than Go's value.
+
+Reach: not measured. No V2 site in the standard library or in the two demos is known to view such a struct.
+Candidate remedy: the box answers 0 from `HeldBytesFrom` and false from `TryHeldExtent` when
+`GoLayoutFacts<T>.SizeDiverges` holds for its own pointee, so the door falls to its copy arm and a copy door refuses
+by name. Small (golib only, one test arm per answer).
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door A, from the review of V2): a view at an address the element type is not aligned to is cut without a check — OPEN, no owner
+
+`(*[N]uint64)(unsafe.Pointer(&bytes[1]))[:n]` is a view of 8-byte elements at an odd address. Go's own rule makes
+the conversion invalid when the pointer is not aligned for the new type (checkptr reports it under `-race` or
+`-d=checkptr`; without it the program runs on amd64 and arm64). The view doors cut the window at the address they
+are given, in every arm that views memory (V2 and V3; `HeldWindow` and `Window` in `src/core/unsafe/unsafe.cs`).
+Plain reads and writes of a misaligned element work on amd64 and arm64. The review's concern is an atomic operation
+on such an element (`sync/atomic` over a 64-bit word at an address that is no multiple of 8), which the hardware
+does not promise to perform atomically and may refuse.
+
+Reach: not measured. Candidate remedy: refuse by name when the address is not a multiple of the element's alignment
+and the element is wider than one byte, as checkptr does, or leave it and state it as a limit. A ruling, then small.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door A, from the review of V2): no arm takes views of one Go value on two threads — OPEN, no owner
+
+V2's test arms are single-threaded: one thread takes the view, forces collections and reads. The design record says
+so (docs/phase4/DESIGN-array-pointer-doors.md 12.5). Two threads taking views of one Go value at once both reach
+the box's pin moment (`EnsureStableAddress`, `pinnedArrayData`), and `pinnedArrayData` sets the pin with `??=`,
+which is not atomic: two pins can be made and one dropped, to be released by its finalizer. The review read this
+as benign (both pins hold the same object still, and the address answered is the same). No arm shows it.
+
+Candidate: a two-thread stress arm beside `TenThousandRoundsOfWriteCollectReadKeepEveryViewOnItsValue`. It fits
+the seat that makes the named-array publish interlocked (the lost-write wall's option 2), which adds a two-thread
+arm of its own.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (found by door A's review fix 1): assigning a whole array gives the variable new storage, so everything that named the old storage stops naming the variable — OPEN, no owner, sized
+
+In Go an array variable is its storage. `a = b` copies b's elements into a, and a slice of a, a pointer to an
+element of a, and a's address as a number all still name a afterwards. In converted code an `array<T>` holds a
+reference to a backing array, and a whole assignment swaps the backing: `a = b` is emitted `a = b.Clone()`, and
+`a = [4]int{1, 2, 3, 4}` a fresh array. What was taken from a before the assignment keeps the old backing.
+
+Measured 2026-11-15 on door A's tree (`docs/phase4/data/array-pointer-doors/door-a-1115/`, emission and outputs
+beside each program):
+
+- `reassign-plain/`, no `unsafe`: 7 of 9 lines differ from Go. `s := a[:]; a = [4]int{1,2,3,4}; s[0]` prints 0
+  where Go prints 1; a write through s, or through `p := &a[0]`, does not reach a; the same for a field
+  (`h.arr`), a package variable, an assignment from another variable, and an assignment through `*r = …`. The two
+  lines that agree go through a pointer to the array itself (`q := &a; q[0] = …`), which holds the box.
+- `reassign/`, with `unsafe`: 8 of 10 lines differ. A write through `*(*T)(p)` or through the address as a
+  number, taken before the assignment, is lost (local, package variable, field, named array), and a read
+  through it answers the old elements. The box's pin is made once and holds the old backing
+  (`pinnedArrayData`, `m_pin ??=`), and the registry resolves the old address.
+
+By reading, both are on master: neither the emission nor the pin code is door A's. The runs were not repeated on
+master. Door A's fix 1 makes its own doors refuse or copy instead of writing the old backing; it cures nothing here.
+
+Reach: not measured. The shape that loses is an alias taken BEFORE a whole assignment and used AFTER it. A reset
+(`d.buf = [N]byte{}`) after a slice of the buffer was taken is the likely real form.
+
+Size. Two steps.
+1. A census (small, a go/ast and go/types tool, no converter change): every `=` whose left side is an existing
+   location of array type, and every `=` of a struct that has an array field, in the standard library and in
+   the two demo closures. It says how many lines the cut would move.
+2. The cut (medium; converter, golib, go2cs-gen; a corpus footprint on four targets): such an assignment copies
+   the elements into the destination's own backing (`array<T>` and the named-array wrapper gain an in-place
+   assign; the converter emits it for an existing location and keeps the clone for a declaration, an argument and
+   a map value, which are new storage in Go as well). A struct assignment that carries array fields is the
+   second half and is sized by the census. With the cut the pin never holds storage the variable has left, and
+   fix 1's test becomes a check.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (the lost-write seat; closes option 1 of the 2026-11-15 row "a write at the ADDRESS of a named array that has not been used yet is lost"; COORD ruling 01:19Z): the two pin paths publish a named array's backing before they pin — option 1 DONE, option 2 OPEN, owner P5, the seat after door B
+
+**What changed.** golib only, `src/core/golib/ж.cs` and `ж.Contracts.cs`. `pinnedArrayData`, which both pin paths
+call (the `uintptr` operator and the `void*` operator), now takes the array from the box's publish gate when the
+pointee is a type whose backing is filled on first use (`s_publishArrayBacking`: a go2cs-gen named array wrapper,
+or a view wrapper over one) and the box holds no pin yet. `publishArrayBacking` takes the storage as a `ref T`
+parameter: the element door passes `Value`, as before, and the pin passes `ValueSlot`, after the operators' own
+nil test. `AnyElementArrayViewCheck` is the pin's check: it accepts a view of any element. No public surface, no
+converter change, no emitted line moves.
+
+**Red first, one arm per shape** (`src/tests/GolibTests/NamedArrayPinPublishTests.cs`, linux/amd64, Release):
+seven red before the change and two controls green, as predicted; nine green after.
+
+| arm | shape | before | after |
+|:--|:--|:--|:--|
+| local | `var local small; fill(unsafe.Pointer(&local), 41)` | 0 | 41 |
+| package variable | by number | 0 | 42 |
+| struct field | `fill(unsafe.Pointer(&h.buf), 43)` | 0 | 43 |
+| `new(small)` | by number | 0 | 44 |
+| memcpy destination | libc's `Xmemcpy` shape | zeros | the eight bytes |
+| raw pointer | the `void*` operator | 0 | written |
+| stable number | the number taken twice is one number, and names the variable | not the variable | the variable |
+| control | a named array used before its address is taken | right | right |
+| control | an unnamed array | right | right |
+
+**The program.** `door-a-1115/lazy/main.go` is now the behavioral project `NamedArrayAddressWrite`, output
+compared with `go run`: seven lines, all equal (linux/amd64, built by path against this tree). It imports `fmt` and `unsafe` only, so it runs
+on every target.
+
+**Readings.** Whole GolibTests, linux/amd64 Release: 2802 passed, 0 failed, 49 skipped (2793 / 0 / 49 at
+`996ce6c9bf`, so the nine new arms and nothing else). Code: `ddba5cc1e7`. The local gates and the hosted set are scored in
+the announce, not here.
+
+**What option 1 leaves, as the row said.** The gate's copy-back is a plain write under the box's lock, and the
+wrapper's own getter publishes without that lock. A goroutine that first uses the variable directly at the moment
+another takes its address for the first time can leave the two on different elements. The element door has had
+the same window since August. A field or element reference is a box minted per take, so two takes of one field's
+address on two goroutines do not share a lock either. Option 2 (an interlocked publish of the wrapper's one
+holder field into the slot, in the element gate and in the pin, with a two-thread stress arm) is the seat after
+door B, and the BOARD row of this date "no arm takes views of one Go value on two threads" fits the same seat.
+
+**Not this seat.** A named array ASSIGNED whole after its address was taken (the 2026-11-15 row "assigning a
+whole array gives the variable new storage", routed to R): the pin still holds the elements the array had when
+it was pinned.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (found while writing design 14.4; COORD ruling 04:39Z): a pointer advanced step by step with `unsafe.Add` over a Go value keeps every step — OPEN, ruled .4, owner P5, its own golib seat cut from the lost-write seat, before door B
+
+**The finding.** `unsafe.Add` over a pointer that carries Go storage mints a native box that retains the box
+before it (`NativeDerivation.Moved`), so `p = unsafe.Add(p, 1)` in a loop builds a chain one hop per step. Over C
+memory nothing is retained. Measured on linux/amd64, Release, over a pinned 16-byte Go struct, with 16 bytes of
+C memory as the control (`docs/phase4/data/array-pointer-doors/door-a-1115/chain/`):
+
+| steps | bytes kept, Go value | bytes kept, C memory | one `==` on the walked pointer |
+|--:|--:|--:|:--|
+| 10 | 656 | 96 | equal |
+| 100 | 4,976 | 0 | equal |
+| 10,000 | 554,336 | 24 | equal, 0.5 ms |
+| 100,000 | not read | not read | equal, 6.6 ms |
+| 1,000,000 | 55,440,880 | 0 | stack overflow, the process ends |
+
+- Memory: 55.4 bytes per step, linear, kept as long as the last pointer lives.
+- Comparison and hashing: `NativeDerivation.Token` recurses once per step. The overflow trace held 104,679
+  `Token` frames.
+- The usual loop, one `!=` per step: 10,000 steps 659 ms and 20,000 steps 2,094 ms over the Go value, 0.46 ms
+  and 1.65 ms over C memory.
+- The view doors (door A's fix 2, not on master at this date): at an interior address the capacity is bounded
+  by the value through 61 steps and is Go's capacity from 63, because the walk to the Go value stops at 64 hops.
+  At the value's own first address the registry answers and the bound holds at any depth.
+
+The first three are on master since batch 305.
+
+**Reach, read from Go sources.** Predicate: an assignment whose left side is the first argument of the
+`unsafe.Add` on its right, in non-test files, every platform file (`chain/reach.txt`). The standard library
+outside cmd has 3 such lines: two walk the Windows environment block, which is C memory, and one in reflect is a
+single step. The sqlite closure (sqlite 1.62.0, libc 1.80.1, memory, mathutil) has 11 in 10,210 lines that call
+`unsafe.Add`, in two functions, `_sqlite3Fts5GetVarint` (eight straight-line steps) and `_whereOrInsert` (a loop
+bounded by `N_OR_COST`). Neither reaches 62 steps. The TypeScript closure is not read. The predicate does not
+match a pointer carried through a second variable, a struct field or a call between steps.
+
+**The remedy, as ruled.** A derivation from a native box that owns no pin retains that box's SOURCE, so the
+chain stays one hop. The order token does not change: it is the source's token plus an address difference, and
+the differences add up. `Token` becomes a loop. The 64-hop cap stays as a guard. Red first from the probe's
+arms: bytes kept per step, the hop count after N steps, `==` at 1,000,000 steps, a 1,000-step pointer equal to
+the same address minted directly, and the view bound at 63 and 10,000 steps.
+
+— P5 (2026-11-15)
+## 2026-11-15 — P5 (the chain seat; closes the 2026-11-15 row "a pointer advanced step by step with `unsafe.Add` over a Go value keeps every step"; COORD ruling 04:39Z): a derivation from a native box that owns no pin retains that box's source — DONE
+
+**The change** (`fcc2a35455`, golib only; design `DESIGN-array-pointer-doors.md` 15). A native box that owns no pin
+holds its source and nothing else, so a box derived from it retains that SOURCE in its place
+(`NativeDerivation.Kept`, through `INativeRooted.NativeRetainedInItsPlace`). A pointer advanced with
+`p = unsafe.Add(p, 1)` is then one box from its Go value at every step. `NativeDerivation.Token` is a loop. A box
+that owns a pin, a box over an order token or 0, and every other box kind are kept as before. No public surface,
+no instance state, no converter change, no emitted line moves.
+
+**Readings** (linux/amd64, Release; `UnsafeAddChainTests`, 16 rows; the probe's second run is
+`docs/phase4/data/array-pointer-doors/door-a-1115/chain/probe-after.out`):
+
+| | before (`70abf5dd5a`) | with the change |
+|:--|:--|:--|
+| what the box retains after 2, 10, 1,000 steps | the box of the step before | the box the walk began at |
+| bytes kept after 1,000,000 steps | 55,440,880 | none |
+| `==` after 1,000,000 steps | stack overflow, the process ends | equal, 23 microseconds |
+| a loop of 10,000 steps with one `!=` per step | 659 ms | 23 ms, on a loaded box |
+| view capacity one byte inside a 16-byte value after 63 to 10,001 steps | Go's capacity, 1,073,741,824 | 15 |
+| `UnsafeAddChainTests` | 5 green, 9 red, 2 end the host | 16 green |
+| whole GolibTests | 2802 passed, 0 failed, 49 skipped | 2818 passed, 0 failed, 49 skipped |
+
+**The order token** is the same at every step, before and after: an arm walks 1,000 steps over a `[1024]byte`
+and asserts at each that the walked pointer's token is the token of `&b[k]` and of `unsafe.Add(p, k)` minted in
+one step, and that it `==` and hashes with both.
+
+**Left, stated in design 15.4, no row opened:** a loop that takes a field's address through a typed view whose
+Go layout is not known would still add objects per step (read from the code, no site known); the two bounds of
+64 stay as guards that no mint reaches.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P4 (found by a red control on the Tuning.md folding docs seat; COORD: a row, owner R, a small guard seat later): `TestDocsFragmentLinksResolve` does not check the fragment of an absolute github.com URL into this repository
+
+**What was seen.** The docs seat `claude/p4-tuning-ilc-folding` links the Performance pages to
+`https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#native-aot-method-body-folding`. The links are
+absolute because `docs/Performance.md` is a verbatim mirror of `src/tests/Performance/README.md`, whose links must work
+from the suite folder too. Red control: with one of those fragments changed to `...foldingX` and committed locally,
+`go test -count=1 -run TestDocsFragmentLinksResolve ./internal/repoguard` read `ok`. The broken link would have
+deployed. The control commit was local only and was reset away.
+
+**Why it matters.** Every absolute same-repository link in the published docs, and every link in the suite README, is
+outside the fragment guard, so a heading rename breaks them silently. Today these anchors are checked only by reading.
+
+**The seat (owner R, small).** For a link whose URL is `https://github.com/ritchiecarroll/go2cs/blob/<ref>/<path>#<frag>`
+(and `tree/`), resolve `<path>` against the local tree and check `<frag>` exactly as a relative link's fragment is
+checked. Red first: the planted `...foldingX` must fail by name, and the real anchor must pass.
+
+— P4 (2026-11-15)
+
+## 2026-11-15 — i9 (B4, the TypeScript Native AOT sizing; COORD ruling 06:30Z: a .5 option with its own seat, not .4): lever E, golib's per-instantiation static tables moved to one non-generic holder, takes a further 30% off a Native AOT image's symbol names once lever G is in — OPEN, not started, after 1.26.11.1
+
+**What it is.** golib keeps several static tables inside its generic pointer-box types (`ж<T>`'s view table,
+`ElemRefBox<T>`'s element-box table, `FieldRefBox<T>`'s accessor wrappers and its two offset records,
+`NilArrayBox`'s). Each is a `ConditionalWeakTable` or dictionary closed over `T`, so every pointee type a
+program touches instantiates the table's whole method set under its own names. Lever E moves them to one
+internal non-generic class, `GoBoxTables`, keyed by object. The experiment is `claude/i9-b4-lever-e`
+(`f6633c0e8f`, v2); `GolibTests` whole read every verdict equal to the unpatched tree's, after one text guard's
+allow-list entry (`NoUncountedBackingAllocationsTests`) was updated for the moved line.
+
+**What it buys, on `parsedemo` (converted TypeScript, `651c4ad147`, full trim, no native debug symbols), one
+build per arm, each image matching native Go on the demo and 17,422 of 17,422 corpus units:**
+
+| | E v2 alone | G alone | E v2 + G |
+|:--|:--|:--|:--|
+| symbol names (the string table with the 2 GiB limit) | 655.1 MB | 616.2 MB | 429.6 MB |
+| image | 297.4 MB | 252.3 MB | 219.5 MB |
+| ILC peak private | 17.60 GB | 15.69 GB | 11.66 GB |
+| `IL3054` lines | 884 | 0 | 0 |
+
+So with lever G landed (batch 308), E is worth a further 30% of the names (616.2 to 429.6), 13% of the image and
+a quarter of ILC's memory. At PerfStartup, before G, it took 44% of the names (366.8 to 206.7 MB): the two
+levers overlap, since G removes instantiations and E removes tables per instantiation.
+
+**Why it is not .4.** G alone fits: `checkdemo`, the largest image measured (1,545.2 MB of names under E v2
+alone), projects to 1,453 MB with G alone, 68% of the stream. E is margin, and it moves six tables that hold
+weak references and pointer identity, which wants its own seat and review rather than release-week risk.
+
+**What a seat owes.** The form of the two lever G lookups has changed since the experiment (a virtual, not an
+interface), so the patch is re-cut on master, not applied. A guard that the tables are not per-instantiation
+again (the IL reader of `PointerBoxGenericCycleTests` is the model: no static field of a generic box type whose
+type is closed over the box's own `T`). `PerfFieldView` and the alloc rows before and after, since the tables
+are on the field-view and element-box paths. Record: `docs/phase4/DATA-ts-aot-b4.md`, sections 7, 13 to 15, 18 and 19.
+
+— i9 (2026-11-15)
+
+## 2026-11-15 — C2 (go-winio Part 2, COORD ruling (b)+(a) 02:38Z): an escaping slice of a foreign inline array pays a finalizable pin per box; the pinned-object-heap variant is a .5 candidate — DISCLOSED cost, (c) OPEN, not started
+
+**What it is.** A slice of an array held inline by another package's admission (go-winio's `guid.GUID` over
+`windows.GUID`, `Data4 [8]byte`) aliases the struct, so its box is pinned for as long as the box lives
+(`ж<T>.ΔInlineSlice<E>()`, DESIGN-array-value-storage.md, amended 2026-11-15). The copy shapes (`copy` into or out
+of `x.f[lo:hi]`) take no pin (ruling (b)). An ESCAPING slice keeps the pin (ruling (a)): go-winio's `String`, whose
+`g.Data4[:2]` and `g.Data4[2:]` go to `fmt.Sprintf`.
+
+**Measured** (`TestInlineArrayForeignSlicePinIsReleased`, linux-x64, Debug, workstation GC; N = 1,000,000 calls of a
+value-receiver method returning `g.Data4[:2]`, read after `runtime.GC()`):
+
+| arm | retained heap | fragmentation | pinned | peak (sampled) | time |
+|---|---|---|---|---|---|
+| unpinned control | 2.1 MB | 1.1 MB | 3 | 33.4 MB | 0.35 s |
+| escaping slice | 27.5-28.7 MB | 10.6-11.7 MB | 4 | 200.7-261.2 MB | 3.3-3.8 s |
+| leak control (every slice kept) | 500-532 MB | 64-96 MB | 1,000,003 | 660 MB | 8.1-8.6 s |
+
+B3 (pins released after a drain) holds and is the gate. B1, B2 and B4 (retained heap, fragmentation, peak against the
+control) do not, by the margins above, and are disclosed here per the ruling.
+
+**Why.** Each slicing of a value receiver allocates a boxed copy, a FINALIZABLE `PinnedBuffer` with a pinned
+`GCHandle`, an anchor array with its `ConditionalWeakTable` entry, and a provenance entry. A pin is released by its
+box's finalizer, so it survives two collections, with the slot pinned in gen0 the whole time: peak and fragmentation
+are the cost. Go allocates the receiver on the heap here too (the slice escapes), but without a pin.
+
+**Who reaches it.** A consumer that slices a foreign inline array of numeric or boolean elements and lets the slice
+escape. go-winio's `String` is a format path. sqlite-cs's foreign faces are all spelled (0 sliced), and std admits
+nothing.
+
+**(c), OPEN, a .5 candidate (COORD).** Allocate the box of a struct whose inline array is sliced on the pinned object
+heap: no `GCHandle` and no finalizer, but the box is reclaimed only by gen2 collections. A golib heap variant the
+converter selects. Not started; measure against this row's table.
+
+— C2 (2026-11-15)
+
+## 2026-11-15 — C2 (go-winio Part 2, P3's review, COORD rulings 05:21Z): a slice of an inline array inside a root that holds a Go reference panics by name — DISCLOSED for .4, the cure a .5 candidate, OPEN; a nested inline array's slice is CS0411, OPEN
+
+**What it is.** A slice of an array held inline (`p.ID.Data4[:2]`) aliases the storage, so the storage is pinned for
+as long as the slice lives (`ж<T>.ΔInlineSlice<E>()`). A root that holds a string, a slice, a map, an interface or a
+pointer cannot be pinned: such a box is a `StandardBox` with no pinnable slot (`ж.FieldRefBox.cs` StorageKind), so the
+slice panics with `inline array slice: an array held inline in a struct that also holds a Go reference cannot be held
+still, so it cannot be sliced`. Go slices it. This is plain Go and probably the common foreign shape:
+`type P struct { ID guid.GUID; name string }`. go-winio users who keep a GUID beside a string will hit it.
+
+**Measured** (`TestInlineArrayForeignSliceReviewShapes`, its `refroot` mode; GolibTests'
+`InlineSliceStorageTests.AFieldOfAReferenceBearingRootIsRefusedByName`): Go prints `1 beside`, go2cs panics with the
+message above. Not affected: go-winio's own GUID methods (each slices its receiver's reference-free copy), a `copy`
+into or out of the array with constant bounds (no pin), and a slice of a local copy of the array.
+
+**Cure, .5 candidate (COORD's ruling 3b).** A slice backing that is an object plus a field offset, with no pin: the
+slice holds the box and reads through the offset, so the GC may move it. Not started.
+
+**Also OPEN, loud.** A slice of a NESTED inline array (`g.M[i][:]`, a go.arrays member of go.arrays members) is a C#
+compile error, CS0411 at `Ꮡ(g.M, i)`, because golib has no element address for a go.arrays member. It read the same
+before and after the review. go-winio does not reach it.
+
+## 2026-11-15 — C2 (batch 308, COORD 10:45Z, option (b)): release-smoke cgo skips linux-arm64 until zig has a linux-arm64 pin — OPEN, the pin is owed for 309
+
+**What happened.** Seat S5c added linux-arm64 to the consumer legs. `release-smoke-cgo` (batch 307) ran on the same
+matrix, so it inherited the leg, and `.github/cgo-toolchain.ps1` refused it: "release-smoke cgo probe: no zig pin for
+runner linux-arm64" (run 43696423446, the 308 union). The pin table has zig for linux-x64, osx-x64, osx-arm64 and
+win-x64, and llvm-mingw for win-x64; nothing for aarch64-linux.
+
+**What changed.** The plan step emits a second matrix, `cgo-matrix`: the consumer legs less the RIDs in
+`$cgoUnpinnedRids` (today `linux-arm64`). `release-smoke-cgo` reads it; release-smoke, aot-smoke and nugetgo-behavior
+keep all five legs. `TestCgoSmokeSkipsOnlyTheLegsWithNoPinnedToolchain` (repoguard) holds the list equal to the consumer
+legs whose OS default toolchain (llvm-mingw on windows, zig elsewhere) has no pin, both ways: red before the list
+existed, and red with a planted `zig|linux-arm64` key (the file restored byte-identical after).
+
+**Why not the pin now.** Option (a) is one pin-table line, but its sha256 must be the publisher's, read from
+ziglang.org's download index, and that host is outside this box's network policy. A hash computed from our own
+download is not the publisher's statement, so it is not used.
+
+**OPEN, for 309:** add `'zig|linux-arm64'` (zig 0.17.0, `zig-aarch64-linux-0.17.0.tar.xz`, the index's sha256), drop
+`linux-arm64` from `$cgoUnpinnedRids` (the guard fails until both move together), and read release-smoke cgo on
+linux-arm64. Until then, **NOT SHOWN:** that the cgo path works for a linux-arm64 consumer.
+
+— C2 (2026-11-15)
+
+## 2026-11-15 — H (the pin-extent seat; COORD's ruling (a) and P3's final read, 2026-11-15): four rows the seat leaves for `.5`
+
+The seat is `claude/h-cgo-pin-extents-cut`, gated at `9233d46ed4`; its record is
+[`DESIGN-cgo-pin-extents.md`](DESIGN-cgo-pin-extents.md) section 11.
+
+**Row 1. The 3.2 PRECONDITION: before Go memory crosses to C, the pin-extent side list gets an ordered index
+(O(log L)), or its threshold goes back to 16 pages (owner H, tied to cgo Phase 3.2, `.5`).** Every pinned object over
+2 pages is one entry in a side list that `Find` walks, O(L). At L=1000 a hit on a MID entry's interior costs
+1672-3164 ns, where the page path answered the same hit in about 9 ns (M3h, section 11.5). Under 3.1 every hit ends in
+a refusal, so the walk is on cold paths only. From 3.2 a hit IS a crossing, paid once per call.
+
+**Row 2. Pool or elide the joiner's holder and `WeakReference`: M2a's remaining cost is allocation and the
+collections it causes (owner H, `.5` candidate).** A further pin of an object already pinned costs 112 B: the buffer, a
+holder and a finalizable `WeakReference` (D-4). It costs 353-463 ns amortized over 200,000 ops, collections included,
+and 253-492 ns in samples without a collection. With the index on, a process collects about 2.5x as often (K=100,
+200,000 ops: 5 collections against 2). The pause per collection is not the index's (4.4-5.7 ms on, 3.5-4.0 ms off). D-4
+needs the weak reference, because a lock-free reader may stand on a removed entry, so a pool is a design change to D-4.
+
+**Row 3. Concurrent pins collapse upstream of the index (owner open, UNROOTED, `.5`).** 4 threads, each pinning its
+OWN array, run 4-6.7x slower per op than 1 thread, with throughput BELOW one thread's. That holds with the index ON or
+OFF, and on the 16 B per-page path as much as on the 64 KiB one. Measured at `9233d46ed4`: TieredCompilation=0, 2
+processes x 2 readings, 8 logical CPUs, 200,000 pin-and-release ops a thread, an 8 KiB filler keeping any two arrays
+off one page.
+
+| arm | per op, 1 thread → 4 threads | ratio |
+|---|---|---|
+| 64 KiB, index ON | 382-423 → 2210-2550 ns | 5.5-6.7 |
+| 64 KiB, index OFF | 106-132 → 644-694 ns | 5.2-6.2 |
+| 16 B, index ON | 469-524 → 2173-2430 ns | 4.1-5.1 |
+| 16 B, index OFF | 102-125 → 600-718 ns | 5.2-6.5 |
+
+- The candidates, none measured: the runtime's GC handle table (a pinned handle per pin, plus the `WeakReference`'s
+  weak handle when ON), and the registration of the finalizable `PinnedBuffer`.
+- **The cheap discriminator, for whoever takes it:** three arms in one process, at 1 and at 4 threads.
+  - (a) `GCHandle.Alloc(Pinned)` plus `Free` alone.
+  - (b) A `PinnedBuffer` made with the index OFF but without the finalizer (`GC.SuppressFinalize` on construction,
+    test-only).
+  - (c) A `fixed` statement over the same array.
+  Whichever arm collapses names the resource.
+- **It is not the index's lock.** The rule stated before the run said `m_largeGate` is contended if ON 64 KiB's ratio
+  is at least 1.5x OFF 64 KiB's in both processes. It read 1.03-1.10x, so COORD ruled it NOT contended.
+- **Not `.4`.** Under 3.1 a cgo call pins only what crosses, and the demos are single-threaded at the crossing.
+- The run's own predictions, scored as worded: C1-C3 MISSED, C4 MET (section 11.6). The miss was my model: I assumed
+  the runtime's own pin and release scale across threads.
+
+**Row 4. `src/safe-push.sh` reports a toolchain refusal as a failed security guard (owner R).** When the tree's
+`go.mod` asks for a newer Go than the shell's (`GOTOOLCHAIN=local`), the security gate's inner `go test` refuses to run.
+safe-push then aborts with "repository fleet-identifier guard FAILED (exit 1) -- NOT pushed". The abort is right, since
+nothing was checked. The message names a finding where there is none, and sends the reader to re-run a guard that
+fails the same way. Met on 2026-11-15, when master moved to go 1.26.11 under a 1.26.10 lane default. The cure is to
+tell `go`'s toolchain refusal apart from a guard failure, and to say which it is.
+
+## 2026-11-15 — H (sqlite-cs wall W8, the reflect.StringHeader number Data; docs/phase4/DESIGN-sqlite-ccgo-ts.md): three rows the cut leaves
+
+**Row 1. The `&b[0]` round trip, a number kept ACROSS STATEMENTS and re-formed into a pointer, is a MEMORY-UNSAFE READ
+in Go-invalid code only (owner open; not `.4`).** A number minted from an element box (`&b[0]`, and a header's Data under
+route (H)) stays valid while that ELEMENT BOX lives. Once the box is collected its pin is released, the registry
+validates "alive and still pinned" and misses, and the number reads as a native address into a managed array that may
+have moved. Measured (`docs/phase4/data/w8-ccgo-ts/roundtrip-probe`, golib at master `091935257c`, the prediction
+written first): with the box dropped and a compacting collection with finalizers between, 0 of 200 resolved and the
+bytes read were WRONG in 199 of 200, in both processes (control with the box held: 0 of 200). Go's rule 6 shape,
+`unsafe.Pointer(h.Data)` in one expression, is CLOSED by the cut's carrying pointer (`FromHeaderData`); a number held
+across statements is what Go calls invalid, and keeps the window.
+
+**Row 2. `reflect.SliceHeader`: the census reads 0 in modernc.org/sqlite v1.62.0 and modernc.org/libc v1.80.1 (owner
+H, closed by measurement).** COORD's run of the census instrument on the i7 (`docs/phase4/data/w8-ccgo-ts/census-main.go`,
+header-use class; controls: all four planted SliceHeader uses found, none in the negative control). The cut admits
+the uintptr shape on `SliceHeaderBox` under (H) anyway, because Go's rule covers it; no ccgo wall needs it.
+
+**Row 3. A header store of a NATIVE Data, then Len, commits once with the OLD Len first (owner open; inherited, not
+the W8 cut's).** `StringHeaderBox`'s commit (both the `unsafe.Pointer` and the number shape) and `SliceHeaderBox`'s run on
+every field store. `hdr.Data = n` over native memory commits the string or slice at the header's CURRENT Len before
+`hdr.Len = k` arrives, so the first commit reads (or views) the old Len bytes at `n`. Past a small native block that is
+an over-read, and an unmapped page there is a fatal access violation rather than Go's silent wrong bytes. P3's code read
+of the W8 cut, note 3 (`docs/phase4/inbox/COORD/20261115T113448Z-P3.md`). A cure would hold a native Data until a
+Len store arrives, or commit lazily at the next read; neither is in this cut.
+
+— H (2026-11-15)
+
+## 2026-11-15 — P5 (door B of `DESIGN-array-pointer-doors.md`; COORD rulings 06:07Z, 06:14Z, 06:22Z): an index, an element's address and a whole array through `(*A)(p)` reach the memory p names; the length of the dereference is the type's — DONE
+
+**The change** (`5244cfbe2b` code, `ef92f09825` regen, `cf55010966` goldens; design section 16). Four doors on `@unsafe.Pointer` replace the
+box of the whole array the conversion made, which C memory could not answer and which every such form in sqlite
+and libc went through:
+
+    (*A)(p)[i]      ElementRef<E>(p, i, N)      a `ref E`; no allocation over C memory
+    &(*A)(p)[i]     Element<E>(p, i, N)
+    *(*A)(p)        LoadArray<E>(p, N)          a copy, cast to A when A is named
+    *(*A)(p) = v    StoreArray<E>(p, N, v)
+
+What the element is follows door A's four answers. Ruled into the seat on the way: `len` and `cap` of
+`*(*A)(p)` and `(*A)(p)`, and an index-only range over the dereference, answer the type's `N` where Go evaluates
+nothing (F4, a silent wrong answer before: the length of whatever array was behind the address); the conversion
+ranged for its values ranges door A's window (F5, silent before); a named array's whole load and store take the
+doors (C6).
+
+**Readings** (linux/amd64, Release):
+
+| | before (`04660ffaa6`) | with the change |
+|:--|:--|:--|
+| `ArrayPointerElementDoors`, 38 lines against Go | a panic at the first line | 38 of 38 equal |
+| 100,000 stores and reads through the index form over C memory | (no answer: refused by name) | 0 bytes allocated |
+| `len(*(*[4]byte)(p))` over a `[64]byte`, over a `uint64`, over nil | 64, 0, a panic | 4, 4, 4, as Go |
+| `for _, b := range (*[4]byte)(p)` over a `[64]byte` | 64 rounds | 4 rounds, a store in the body seen |
+| converter test, 35 arms; GolibTests door arms, 20 | red first | green |
+| whole GolibTests | 2818 passed, 0 failed, 49 skipped | 2838 passed, 0 failed, 49 skipped |
+| `NativeViewShapes`, 24 arms against Go | 14 equal (at V2's commit) | 21 equal: D D0 M M0 R S T join, so P2 is MET; F, F0 (door C) and Q (the floor's row) remain |
+| `internal/runtime/maps` through `-tests`, the one banked row with a test site of the cut | 19 matched, 108 disclosed (banked) | the same |
+| the behavioral corpus re-transpiled | | five programs move, 12 lines, each a form the doors take; all five print Go's output; goldens re-baselined. No prediction was made for it |
+| the regenerated packages (`runtime`, `internal/runtime/maps`) built for four targets | | 8 of 8 builds, 0 errors (linux/amd64, windows/amd64, darwin/amd64, linux/arm64) |
+
+**Corpus.** Two-seeded on four targets, the same on each: 39 lines in 6 converted files (34 index stores in `runtime`'s
+malloc files, 2 element addresses in `runtime/lock_spinbit.cs`, 3 whole loads in `runtime/alg.cs` and
+`internal/runtime/maps/runtime_faststr.cs`), no position-map line, no `.csproj`. Applied by the hunk rule: 45
+lines in 9 files. `runtime/mfinal.cs.auto` gains one `StoreArray` line and is not applied (hand-owned
+`mfinal.cs`). P6 MISSED as worded: it named the malloc files only and one argument site; three files are not
+malloc files, one of them outside `runtime`, and the argument site (`sync/pool.go:93`) has a managed element
+and a hand-owned corpus file. Its index-form falsifier did not fire.
+
+**Left:** the four entries below, and door C (the conversion kept in a variable, passed or returned).
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door B, a shape the cut does not move; COORD ruling 06:07Z): a direct index of the native field view panics with length 0 — OPEN, ruled .4, owner P5, its own small seat after option 2
+
+`(*[2]byte)(unsafe.Pointer(&h.port))[1]`, `h` a Go struct, emits
+`(@unsafe.ArrayPointer<byte>.Of(h.Ꮡport, 2)).Value[1]` and panics "index out of range [1] with length 0". Go
+answers the field's second byte. The emission is the same at `04660ffaa6`. It is one of the four routes door A's
+predicate leaves alone, so door B declines it. **Census: 0 sites.** The 11 corpus field-view sites bind the
+conversion to a local and index through the route's in-place path, which is right. **Size:** about 20 lines
+inside that route (index through its own element path) and one behavioral line.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door B, a shape the cut does not move; COORD ruling 06:07Z): an index through a named array over memory that holds an unnamed array of the same shape is refused by name — OPEN, door C's, .5 unless the sqlite-cs demo reaches it
+
+`(*small)(unsafe.Pointer(a))[1]`, `a` a `*[64]byte` and `small` a `[64]byte` by name, emits
+`(a.Reinterpret<array<byte>, small>()).Value[1]` and stops at the named floor ("cannot view native memory as
+small"). Loud. Go answers the element. Its whole-load and whole-store half (`*(*small)(p) = s`,
+`x := *(*small)(p)`) is closed by door B's named whole door. **Census: 0 sites.** In the stored tables
+(`docs/phase4/data/array-pointer-doors/census/`, the standard library on five targets, sqlite and libc on two)
+an index or a dereference whose operand is `unsafe.Pointer(q)` with `q` a typed pointer has 2 sites per target
+in the standard library, both `runtime/lock_spinbit.go` over a `*uintptr`, which door B takes, and none in
+sqlite or libc. None has an array behind `q`. **Cure:** door C's named form (design 4.5).
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door B, a shape the cut does not move; COORD ruling 06:07Z): an index through `(*A)(p)` where p is made from a pointer receiver keeps the box and reads length 0 — OPEN, no owner
+
+`(*[12]byte)(unsafe.Pointer(h))[0]` in a pointer-receiver method emits
+`(@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromRef(ref h))).Value[0]` and panics "index out of range [0]
+with length 0". The doors decline a `FromRef` operand by design: its address is true for one statement only
+(design 4.6), and repoguard refuses one at a door. **Census: 0 corpus lines** match
+`To<array<...>>(...FromRef(`. This is the receiver-box question, not an array question, and it has no estimate
+until a site exists.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (door B's limits; COORD ruling 06:07Z): three forms through `(*A)(p)` keep the box of the whole array — OPEN, no owner, no site
+
+All three are stated in design 16.7. None has a site in the standard library with its tests, in
+modernc.org/libc v1.80.1 or in modernc.org/sqlite v1.62.0 as an index or a dereference over an `unsafe.Pointer`.
+
+- **An element that is itself an array** (`(*[2][2]int32)(p)[1][0]`). The element is managed, so the doors
+  decline it and the box route answers length 0 over memory that is no Go array of that type.
+- **An element that holds a reference** (`(*[2]unsafe.Pointer)(p)[1]`, and its whole store). Refused by name by
+  the pointee rule, by design. `sync/pool.go:93` has this form in Go; the corpus file is hand-owned and does not
+  carry it.
+- **A call inside the pointer form under `len`** (`len((*[4]byte)(get(p)))`). Go answers 4 after one call and no
+  dereference; the emission keeps `len(To<...>(get(p)).Value)`, which dereferences. golib has no door for
+  "evaluate, then answer N".
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — G (sqlite-cs L1; P3's review, COORD's ruling on note 1): no lift is made for an anonymous struct inside a function-local FUNC type — OPEN, loud, on no demo path
+
+**Dated 2026-11-15 02:30 CST. L1 `373b01438b` + merge of master `091935257c` + the review fold `6162a6e517`.
+Windows x64, go1.26.11.** P3 asked whether L1's per-name walk (`aliasPerNameLifts`) needed a `*types.Signature`
+arm for `var f, g func(struct{A int}) struct{B int}`. It does not help: the converter makes no lift for an anonymous
+struct reached through a local func type at all, so ONE name is refused too.
+
+- Repro: `var f func(struct{ A uint32 }) struct{ B uint32 }` inside a function. The convert exits rc=1 with 3
+  unresolved dynamic types, and the declaration is emitted as raw Go,
+  `Func<struct{A uint32}, struct{B uint32}> f = default;` (CS1525 and friends). Same at master and at L1's tip.
+- `liftDeclaredAnonStructTypeArgs` walks only the type ARGUMENTS of instantiations (`declaredTypeArgs`), and the
+  local var's own struct lift does not descend into a signature's parameters or results.
+- Loud, not silent: the conversion fails. A census of GOROOT/src (tests included) finds no function-local var
+  whose type reaches an anonymous struct through two or more names; single-name func-typed sites were not counted.
+- COORD's ruling: the comment route in L1 (the walk states why a function type is not walked) and this row. Fix
+  later: lift a func type's anonymous parameter and result structs as the var's own struct is lifted, then add the
+  Signature arm to `aliasPerNameLifts` in step.
+
+**Dated 2026-11-15 21:12Z, P2 (COORD ruling 16:22Z), master `0c1d295ea8` (batch 309) and W12 `2899b91992`, linux/amd64,
+go1.26.11.** Five more shapes, one package each, all exit 1 with `Unresolved dynamic struct type: struct{Hz int}`
+and emit raw Go, at master and with W12 alike: a package variable of func type (`var take func(struct{ Hz int }) int
+= func...`), a struct field of func type, a parameter of func type (`func apply(take func(struct{ Hz int }) int)`), a
+result of func type (`func mk() func(struct{ Hz int }) int`), and a named func type (`type taker func(struct{ Hz int })
+int`). Two forms convert: a declared function taken as a value (`f := take`) and a called func literal. The fix this
+row names covers all five: a func type's anonymous parameter and result structs are lifted wherever the func type is
+written, not only for a local variable.
+
+## 2026-11-15 — P5 (option 2; closes the 2026-11-15 row "a write at the ADDRESS of a named array that has not been used yet is lost"; COORD rulings 01:19Z and 08:54Z): the publish of a named array's holder is a compare-and-swap — DONE
+
+**What was wrong.** The publish of a named array's backing into a pointer box's storage (`publishArrayBacking` in
+golib's `ж.cs`: the gate of the element door `&p[i]`, and since option 1 of the two pin paths) filled a boxed
+copy of the wrapper and then copied the whole wrapper back, under the box's lock. The wrapper's own getter fills
+the same storage with no lock, and a second box over the same storage holds a lock of its own. A goroutine that
+first used the variable between the gate's read and its write had its holder replaced, and the elements it had
+written were lost without a panic. Go has one array.
+
+**What changed.** golib only, `ж.cs`, `ж.Contracts.cs`, `GoReflect.PointerConversions.cs`. The publish stores
+the copy's holder into the storage with a compare-and-swap against the empty slot; a publish that finds another
+holder reads the storage again and publishes that one. The swap is taken where the wrapper is one reference word,
+which both wrappers that reach the gate are; a wrapper of another shape would keep the plain write, and none
+exists. A third site with the same plain write was found by reading: reflect's pointer conversion between two
+names of one array type. It goes through the same gate by one internal member on the box. No public surface, no
+converter change, no emitted line moves, no instance state on a box.
+
+**Red first** (`src/tests/GolibTests/NamedArrayHolderPublishRaceTests.cs`; linux/amd64, Release, 4 processors;
+two threads released together, 200,000 fresh arrays an arm; "lost" counts the arrays where one side's write was
+not read back):
+
+| arm | at `8536236dd6` | with the change |
+|:--|:--|:--|
+| control: the old publish by hand against a direct first use | 81,465 lost | 62,831 lost (it must lose: where it does not, the arms report Inconclusive) |
+| a direct first use against the element door | 47,334 lost | 0 |
+| a direct first use against the pin by number | 15,878 lost | 0 |
+| a direct first use against the raw pointer | 32,698 lost | 0 |
+| two element references of one element | 78,243 lost | 0 |
+| a direct first use against reflect's pointer conversion | 6,735 lost | 0 |
+| two field references of one field (a control) | 0 lost | 0 |
+
+**Prediction missed.** The two-field-references arm was predicted red and read 0. A field's address is one cached
+box for each parent box and field, so its two takes share one lock. The option 1 entry above and design 14.3 say
+"a field or element reference is a box minted per take"; that holds for elements only. Design 17.2 carries the
+correction.
+
+**Four more arms.** Each door alone still publishes. A publish after a whole assignment follows the storage. Two
+pins by number of one array on two threads, named and unnamed (green with the plain write as well). Every named
+array go2cs-gen wrote in the converted `runtime` is one reference word (8 wrappers), so a change of the
+generator's layout reads red and does not return the publish to the plain write silently.
+
+**Planted regressions,** each restored byte-identical by hash. The publish forced onto the plain write reds
+exactly the five racing arms (44,698, 46,668, 42,426, 77,670 and 204 lost). Reflect's site put back as it was
+reds the reflect arm alone (6,320 lost).
+
+**Readings.** Whole GolibTests, linux/amd64 Release: 2849 passed, 0 failed, 49 skipped (2838 / 0 / 49 at `8536236dd6`, so the eleven
+new arms and nothing else). Code: `1ecae62963`. The local gates and the hosted set are scored in the announce,
+not here.
+
+**The row "no arm takes views of one Go value on two threads"** (2026-11-15, door A's review) named this seat
+for its arm. The two-pin arm covers the pin of an array taken on two threads (`pinnedArrayData`), and reads
+green. A view of a Go value that is not an array, taken on two threads (`EnsureStableAddress`), still has no
+arm: that row stays OPEN for it.
+
+**Not this seat.** A named array ASSIGNED whole after its address was taken keeps its old pin (the 2026-11-15
+row "assigning a whole array gives the variable new storage", another lane's cut).
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — R (COORD's seat, from P4's ValidatedModules refresh): a proof page wrote a test name holding a pipe as `\|` inside a table code span, which GitHub and the Pages site render differently — FIXED, claude/r-proof-pipe a39559ef2094287a43461b2696800647013e26a5
+
+**The defect.** `escapeProofCell` (`src/go2cs/validationProofPages.go`) turned a pipe into a backslash-pipe, and
+every caller wrapped the result in backticks. In a TABLE cell GitHub removes the backslash before a pipe even in a
+code span, and kramdown keeps it, so one renderer was always wrong; repoguard's
+`TestDocsTableCodeSpanHasNoEscapedPipe` refuses the form. timefmt-go's proof page (index.md:26) is the first page
+whose test name holds a pipe; P4 hand-fixed that line while copying the 1.26.10.3 nugetgo wave's pages. No
+standard-library test name holds one, which is why no roster page had met it.
+
+**Red first.** `TestValidationProofPageCodeCellWithAPipe` renders the fixture page with a verdict named
+`TestFormat/2006-01-02|15:04`. At master 091935257c it read ``| `TestFormat/2006-01-02\|15:04` | pass | pass |``
+and failed on both of its assertions.
+
+**The fix.** A table code cell takes `proofCodeCell`: the backtick span when the value has no pipe (byte for byte what
+every committed page holds), and with a pipe `<code>…&#124;…</code>`, with the backslash and the Markdown-active
+characters as entities (the form the guard's header names). A prose code span (the skip-class paragraphs, the
+withdrawn and host lists) takes `proofCodeSpan`: there a span is literal on both renderers, so the pipe is written
+as it is, where the old escape showed its backslash. A non-code cell keeps `escapeProofCell`'s escape, which both
+renderers read the same outside code. `TestProofCodeForms` pins both forms.
+
+**Footprint: 0 committed proof pages, as predicted.** An exact census of the 3,915 tracked pages under
+`docs/validation` finds a backslash-pipe inside a code span on 4 lines, all in the frozen 1.24.13.1 and 1.24.13.2
+`ValidatedTestPackages.md` snapshots: build-tag text (`(amd64 || arm64 …)` with the pipes escaped), not this writer's
+output, and outside the guard's living pages. The census catches a planted proof row. The .4 nugetgo wave
+regenerates timefmt-go's page byte-equal to P4's hand fix, and that hand fix retires.
+
+— R (2026-11-15)
+
+## 2026-11-15 — P5 (F1, parts A and B; closes the 2026-11-15 row "a direct index of the native field view panics with length 0"; COORD rulings 06:07Z, 09:36Z): the field view answers over a Go struct, and is indexed in place where it is written — DONE
+
+**The row was narrower than the defect.** A probe of every sibling shape of `(*[N]T)(unsafe.Pointer(&h.f))`,
+f not a T, run before any fix (15 forms over each of four roots, 4 over a fifth; linux/amd64 Release, at
+`516586c4a9`), read: over native memory 8 forms answer in place and the 7 the converter spelled with `.Value`
+are refused by name; over a Go struct with no reference in it NOTHING but `len` is right, the forms through a
+local included (9 panic "index out of range with length 0", 4 "nil pointer dereference", and a range by value
+is SILENT: 0x0 where Go answers 0xf1); over a Go struct that holds a reference all are refused by name, as
+"native memory". The helper answered golib's native door for a native root only. Every other root took the
+pointer conversion to the array type, a box whose `Value` read the field's bytes as an array header.
+
+**What changed.** A, the converter (`convIndexExpr.go`, `nativeFieldArrayView.go`): the view indexed where it
+is written, and its explicit dereference, emit `@unsafe.ArrayPointer<T>.Of(field, N).ElementRef(i)`, as a
+local bound by the view does. B, the unsafe package (`src/core/unsafe/unsafe.cs`, hand-owned): where the
+native door declines, the helper answers a native array pointer over the bytes the field's root holds still
+(the view doors' own resolution). It keeps the root, it ends where the root's storage ends, and a root with no
+address is refused by name in words that are true. No golib change, no public surface.
+
+**Red first.** GolibTests `FieldArrayViewOverGoStructTests`: 8 of 8 red at `516586c4a9`, 8 of 8 green with the
+change; the held-extent arm reads the last byte of the struct through a view of 12 bytes and is refused by
+name at 13. The converter's `TestNativeFieldArrayViewIndexedDirectlyReadsThroughElementRef`: red on every
+form at the base converter, green with A. One older arm, which held the helper equal to the pointer
+conversion over a reference-bearing root, now asserts the refusal's new words.
+
+**Readings.** The probe's 64 lines against Go's: 8 equal with the base emission and the base package, 48 with
+the cut; the other 16 are the 12 whole-array forms and the 4 forms over the reference-bearing struct, each
+refused by name. Predicted before the run and MET as worded. The behavioral program `FieldViewOverGoStruct`
+(four roots, 62 lines) equals Go's output. Whole GolibTests, linux/amd64 Release: 2857 passed, 0 failed, 49 skipped. Footprint on four
+targets: 0 corpus files on linux/amd64, windows/amd64, darwin/amd64 and linux/arm64, as predicted. Each pair of roots differs in 2 files, the run's own dated report and progress log (`reports/conversion_report.html`, `stdlib_conversion_progress.txt`). Code: `d3d9786321`. Design 18 has the tables.
+
+**Prediction missed.** A struct laid over a Go byte slice was predicted wrong in every form at the base. It is
+rooted in a native box, so the native door answers for it and it behaves as the native root.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (F1's census; COORD ruling 09:54Z): the field view of a struct that holds a reference is refused by name, and that is where the 26 known sites are — OPEN, ruled .4 if it lands before the cut, owner P5, the seat after F1's part C
+
+`p := (*[2]byte)(unsafe.Pointer(&sa.Port))`, `sa` a pointer to a Go struct whose converted form holds
+references. A fixed array is enough: it converts to a managed array. Such a struct has no address, so the view
+is refused by name ("the field is in a Go value that has no address"). Go reads and writes the port's two bytes.
+
+**Census** (a typed census with the converter's own predicate, `docs/phase4/data/array-pointer-doors/field-view-1115/census/`):
+
+| tree | field-address array views | of the field view's shape | over a struct that holds references |
+|:--|:--|:--|:--|
+| the sqlite demo's module closure, linux/amd64 (12 module packages, 310 files) | 17, all in `golang.org/x/sys/unix`'s sockaddr code | 12 (4 are two selections deep, 1 is a same-element view) | 17 |
+| `syscall`'s emitted `recvfrom` code, linux and darwin (displaced by a hand-owned file) | 8 | 8 | 8 |
+| `runtime`'s `cheaprand`, the 32-bit path | 1 | 1 | 1 |
+
+26 sites, all refused by name, none reached by a banked row or by the sqlite demo on linux. sqlite and libc
+themselves have none. A Go struct with no reference in it, the class F1's part B cured, has 0 sites in these
+trees. `x/sys/unix`'s sockaddr code is what a Linux networking program built on that module reaches.
+
+**Remedy, ruled the next seat.** Each of the 26 views exactly its field (by reading the lines). A view that
+fits inside its field needs no address: it is a managed reinterpret of the field's own storage. That is a new
+box kind in golib, about 150 lines with its per-kind arms; a view that crosses into the next field stays
+refused by name. Design block first, with the same census over the TypeScript closure and the nine nugetgo
+modules.
+
+**Read since, by probe 2** (`docs/phase4/data/array-pointer-doors/field-view-1115/probe2/`): the index where
+the view is written, `(*[2]byte)(unsafe.Pointer(&sa.raw.port))[1]`, is right over such a struct today, 4 of 4
+forms (a read, two stores, the address of an element). Door B's element door answers it by Go's own
+definition, `(*E)(unsafe.Add(p, i*size))`, inside the field and with no address. So the element access the box
+needs exists; the seat adds the pointer that carries it, the bound that keeps it inside the field, and the
+field view's shape widened to two selections, which 4 of the 17 sites are. The size is to be read again in
+the design block and is likely under 150 lines.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (F1's second probe): an array view of a Go value of another type, kept in a local, panics, and a range by value over it is silent — OPEN, proposed .4 with the next seat for the field shapes, owner P5
+
+`p := (*[2]byte)(unsafe.Pointer(&o.inner.port)); p[1]`, and the same from a field of a struct variable or of a
+package variable: every shape the field view does not take (it is one field selected from a pointer-typed
+identifier). The conversion is kept as `unsafe.Pointer.To<array<byte>>`, a box whose `Value` reads the
+field's bytes as an array header. Over a Go struct with no reference in it (probe 2, 25 lines,
+`docs/phase4/data/array-pointer-doors/field-view-1115/probe2/`, emitted identically before and after F1's
+parts A and B): 5 of 5 indexed forms through the local panic ("nil pointer dereference", "index out of range
+with length 0"), and `for _, b := range p` runs no rounds and says nothing, 0x0 where Go answers 0x46. The same
+index where the view is written is right, 7 of 7: door B's element door takes it.
+
+**This corrects decision D5** of DESIGN-array-pointer-doors.md, which leaves door C's unnamed form for later
+because "the form works over Go memory today". It works where the memory is a Go array of that type. Over a Go
+value of another type it is this row.
+
+**Sites.** 0 known. The census of F1 counts field-address views only: 0 over a struct with no reference in the
+sqlite demo's closure and in the standard library's emitted field views. A kept view of an address that is not
+a field's (`p := (*[8]byte)(unsafe.Pointer(&x))`, x a number) is the same class by reading and was NOT counted
+or run.
+
+**Size.** Two parts. (1) The field shapes: widen the field view to a chain of field selections and to a root
+that is a variable, about 60 converter lines with arms, and a probe of golib's native field door two selections
+deep before any of it, because that door resolves one field's Go offset and a chain needs each. It rides the
+next seat, which needs the two-selection shape for 4 of its sites. (2) The kept view of any other address is
+door C's unnamed form (84 `To<array<...>>` lines in 28 corpus files by its design); a census of that form by
+what its operand addresses comes first, with the next seat's census. Until then the forms are loud except the
+range by value.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (F1, part C; COORD ruling 09:36Z): a form that reads the whole array through the field view is refused by name — OPEN, ruled .4, owner P5, a commit on top of parts A and B
+
+`*p`, `for _, b := range p` and `(*p)[i]`, p a field view, and the dereference of the view where it is
+written. The view has no array value to hand out, so each is refused by name on every root. Before parts A
+and B the same forms over a Go struct were a panic or, for the range, no rounds and no message. Go copies the
+N elements, or ranges them. **Size:** a load door on the view and three converter sites, about 60 lines, with
+a behavioral line each; the silent range is its red arm, by value (0x0 against 0xf1).
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — C2 (batch 309, COORD 11:32Z): zig pinned for linux-arm64; release-smoke cgo reads all five legs again — closes the 308 skip above, pending one hosted reading
+
+**The pin.** `.github/cgo-toolchain.ps1` gains `zig|linux-arm64`: zig 0.17.0, `zig-aarch64-linux-0.17.0.tar.xz`, sha256
+`9e8d11661d4ae3bd57702a3832781e23ad151dde5798e16a5ccd503f65234ff8`. The value is the publisher's, from
+`https://ziglang.org/download/index.json` as i9 fetched it (2026-11-15T11:31:08Z, HTTP 200). The same index gives the four
+existing zig pins equal, so it is the source they came from. The hex was copied from i9's post by a script, not typed.
+The runner still hashes the download against it, as it does for the other four.
+
+**The skip retires in the same cut.** `$cgoUnpinnedRids` is `@()`, and TestCgoSmokeSkipsOnlyTheLegsWithNoPinnedToolchain
+holds it equal to the unpinned legs (none). The cgo-matrix mechanism stays, so the next RID without a pin is named, not
+refused.
+
+**OPEN until the hosted run:** the cgo path on a linux-arm64 consumer is new ground. One release-smoke on this tip reads
+`release-smoke cgo (linux / linux-arm64)` by name. If it fails for a reason beyond the pin, the first error is posted and
+the skip returns with that reason.
+
+— C2 (2026-11-15)
+
+## 2026-11-15 — P5 (F1, part C; closes the 2026-11-15 row "a form that reads the whole array through the field view is refused by name"; COORD ruling 09:36Z): the whole array through the field view is a load, a store or the view's window — DONE
+
+**What changed.** The unsafe package (`src/core/unsafe/unsafe.cs`, hand-owned): `ArrayPointer<T>.Load` copies
+the view's N elements into a new array, and `ArrayPointer<T>.Store` writes N elements through it. The
+converter names them: `*p` in a value position is `Load(p)`, `*p = v` is `Store(p, v)`, a range over the view
+ranges its window (`p.slice()`), a range over the dereference ranges a load, `(*p)[i]` and `(*p)[lo:hi]` are
+the view's own element and window, and `len(*p)` and an index-only range of the dereference are the constant.
+p is the conversion where it is written or a local bound by it and never pointed elsewhere. No golib change.
+Surface: two members added to `ArrayPointer<T>`, tier 2 (what converted code calls, hidden from IntelliSense);
+no existing name changes.
+
+**The value positions are a list of their own**, wider than door B's by three: an element or field value of
+a composite literal, a sent value, and any of them inside parentheses. Door B's dereference has a general
+emission behind it; the view has none, so a position the list missed would be a refusal at run time. The
+struct-literal position is how `x/sys/windows` writes the form (the census row of this date).
+
+**Scope probe first** (`docs/phase4/data/array-pointer-doors/field-view-1115/probe3/`): 32 functions converted
+by the A+B converter and by the cut. 22 lines differ, each a whole-array form of a field view; the five
+controls are byte-identical. Go prints 11 lines; the cut prints the first 10 equal and stops at the tuple
+store, refused by name (the next row).
+
+**Red first.** The silent arm by its value: a range by value over the kept view read 0x0 where Go reads 0xf1
+at `516586c4a9`, was refused by name after parts A and B, and equals Go's with C. The converter's
+`TestNativeFieldArrayViewWholeArrayGoesThroughTheHelpers`: seven positive arms red at the A+B converter (19
+failed assertions), green with C; the re-pointed control green on both. The helpers are new, so their seven
+GolibTests arms are read green only.
+
+**Readings**, linux/amd64 Release, at `73319097cd`. The behavioral program `FieldViewOverGoStruct`, with part C's forms: 114 lines, equal to Go's. Whole
+GolibTests 2864 passed, 0 failed, 49 skipped (parts A and B: 2857 passed; the seven new arms). By path 25 of
+25. check-no-regression: NO REGRESSION, byte-identical across all 1076 behavioral packages (12 platform-exclusive skipped by name). Footprint, two seeded emissions on each of four targets:
+0 corpus files. Predictions scored in the design record, section 18.7: five of seven met as worded; the
+probe's line count was miscounted (11, not 13) and its stopping line moved when the tuple store was called
+last. **Not predicted:** part C's edits moved 14 cites the docs guards hold (12 provenance notes, 2 samples
+in `pointers.md`); `go test` named them at the code commit and they are re-pointed in the docs commit.
+Kit: `docs/phase4/data/array-pointer-doors/field-view-1115/probe3/`.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (F1, part C's probe): a tuple assignment that stores the whole array through two field views is refused by name — OPEN, proposed .5, owner P5
+
+`*p, *q = *q, *p`, p and q field views. The right side emits two loads. The left side keeps
+`(p.Value, q.Value) = ...`, and the view's `Value` refuses by name ("has no array<T> to dereference"). Go swaps
+the two arrays. Loud, never silent. **Sites:** 0 in the standard library's emitted field views, the sqlite
+demo's closure, the TypeScript closure and the nine nugetgo modules (the census counts no whole-array store
+through a view at all). **Size:** about 25 converter lines in the tuple-assignment path (each left operand
+that is a view dereference becomes a temporary and a `Store` after the tuple is evaluated, as Go orders it),
+one unit arm, one behavioral line. Probe line: `storeMulti` in
+`docs/phase4/data/array-pointer-doors/field-view-1115/probe3/main.go`.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (F1's census over the TypeScript closure and the nine nugetgo modules; COORD ruling 09:54Z; amends the 2026-11-15 row "the field view of a struct that holds a reference is refused by name"): every site is in `golang.org/x/sys`, and windows adds three whole-array loads and one GUID field — recorded, the box-kind seat's population
+
+The typed census of that row, per target and with two more columns (what the field is; whether the view fits
+inside it). Kit: `docs/phase4/data/array-pointer-doors/field-view-1115/census2/`. The TypeScript tree is
+private: counts and `x/sys` site rows only.
+
+| closure | own packages | linux/amd64 | linux/arm64 | darwin/amd64 | windows/amd64 |
+|:--|--:|--:|--:|--:|--:|
+| TypeScript (the tsc module at `ba29a56299`, 104 roots) | 0 | 17 | 17 | 4 | 7 |
+| the nine nugetgo modules (18 roots) | 0 | 17 | 17 | 4 | 0 |
+
+All in `golang.org/x/sys` (`unix` 17 on linux and 4 on darwin, `windows` 7). Every root is a struct whose
+converted form holds references, so every site is refused by name today. Every field but one is a number, and
+every view fits inside its field. Not measured: whether any site is on an executed path.
+
+**New on windows:** `SockaddrBth.sockaddr` (syscall_windows.go:1051-1053) loads the whole array through the
+view where it is written, as field values of a struct literal. Part C emits the three as loads; they answer
+once the box kind exists. One of the three is over a GUID field, a struct whose converted form holds an array:
+its bytes are not contiguous in managed memory, so the reinterpret does not serve it. That site is door C's
+class (a layout copy) and stays refused by name after the box-kind seat. Bluetooth sockets only.
+
+**The seat.** Design approved 11:17Z: an internal `ReinterpretedArrayBox<E>` over the field's own box, made
+only where the field and E hold no reference and N elements fit inside the field, else refused by name; plus
+three arms (identity against Go, the pointer's number, a compacting collection between a store and a read),
+and the field view's shape widened to two selections as its second commit, probe first. Predicted footprint:
+0 corpus files (`src/core/unsafe/unsafe.cs` is hand-owned and changes), behavioral +1.
+
+— P5 (2026-11-15)
+## 2026-11-15 — P5 (the box-kind seat; closes the 2026-11-15 row "the field view of a struct that holds a reference is refused by name, and that is where the 26 known sites are"; COORD rulings 09:54Z and 11:17Z): a field view over a struct that holds a reference reads and writes the field's own bytes — DONE
+
+**What changed.** `(*[N]E)(unsafe.Pointer(&x.f))`, x a Go struct whose converted form holds a reference (a
+fixed array is enough), f a field that holds none. golib gains an internal box kind,
+`ReinterpretedArrayBox<E>` (`src/core/golib/ж.ReinterpretedArrayBox.cs`): it holds the field's own pointer and
+N, and element i is byte `i x size(E)` of the field's slot, found again from the live box at every access. No
+copy, no pin, no address. `ArrayPointer<E>.Of` makes it in the arm that refused
+(`src/core/unsafe/unsafe.cs`, hand-owned); the index, the whole-array load and the whole-array store that
+parts A and C emit gain an arm for it. The converter's emission for these forms does not change. Surface: none
+added or changed (the kind and its interface are internal; `Of` keeps its signature).
+
+**The 26 sites** of the closed row (17 in `golang.org/x/sys/unix`'s sockaddr code, 8 in `syscall`, of which 4
+are in its emitted `recvfrom` code and 4 in functions a hand-owned file displaces, 1 in `runtime`'s
+`cheaprand`) and the 7 `x/sys/windows` sites of the census row of this date:
+each views a number field as its bytes, inside the field, and binds a local that is indexed, or (3 on
+windows) loads the whole array. All are served, but for one: the Bluetooth GUID field, whose converted form
+holds an array (door C's class, refused by name). The 4 sites two selections deep (`&sa.raw.Port`,
+syscall_linux.go:394, 406, 508, 514) are served by the second commit, which widens the field view's shape.
+
+**A 27th site, in the standard library.** `syscall.LsfSocket` (lsf_linux.go:32) views a port field of a struct
+VARIABLE as two bytes. The closed row's standard-library count was made by reading; its instrument skips
+packages that have no module, so it never read `std`. Run with that filter flipped on four targets
+(`reinterpret-box-1115/census-std/`: 13 sites on linux, 15 on darwin, 12 on windows) it agrees with the row on
+linux and adds this one. The second commit's shape takes it, and its emitted file
+(`src/core/syscall/linux/lsf_linux.cs`) moves in the third commit.
+
+**The second commit: the field view's shape is a chain of field selections off a variable.** It was one field
+selected from a pointer-typed variable. It is now one or more single-field selections whose root is any
+variable: `&p.f`, `&sa.raw.Port`, `&s.f` (s a struct variable), `&global.f`. A promoted field, and a root that
+is an index, a call or a dereference, keep their earlier route. Probe first, as ruled
+(`docs/phase4/data/array-pointer-doors/reinterpret-box-1115/probe/`, 36 lines of Go output, both emissions
+built against the cut): the converter of part C prints 12 lines equal to Go's, the widened one 32. 49 emitted
+lines differ, each a field view through such a chain. A second probe, of an ARRAY field viewed as an array of
+another element type (`probe-arr/`, 7 lines, `os`'s `readdir` shape on darwin): the widened converter prints
+Go's 7; part C's prints 2, panics on 2 and ends the process on 3 (the last row of this seat, below).
+
+This also closes the field shapes of the 2026-11-15 row "an array view of a Go value of another type, kept in
+a local, panics, and a range by value over it is silent": over a struct with no reference those shapes now
+take the field view of part B, and the silent range reads Go's 0x46. What that row still holds: a promoted
+field and a field of a slice element or of a call's result, kept in a local ("index out of range with length
+0", 2 control lines of the probe, loud), and a kept view of an address that is not a field's.
+
+**Three arms ruled 11:17Z.** Identity: `unsafe.Pointer(p) == unsafe.Pointer(&x.f)` is true, two views of one
+field are one pointer, views of two fields or of two structs are not; it holds across a move. The move: 200
+rounds of store, forced compacting collection, read, with the field's own number as the witness that the
+struct moved. The number: see the next row, it is not as the ruling worded it.
+
+**Red first.** The 16 new GolibTests arms against part C's golib and unsafe package: 14 red (12 by the old
+refusal, 2 on the refusal's words), 2 green (the control that the struct has no address, and the nil field
+pointer). The converter arm of the second commit (`TestNativeFieldArrayViewTakesAChainOfFieldSelections`) at part C's
+converter: red on 12 assertions. The behavioral program converted by part C's converter and run against part C's
+tree: no line printed, refused by name at its first view.
+
+**Readings**, linux/amd64 Release. The seat was merged with batch 308 before it was gated whole
+(`e245e697be`). GolibTests 2935, 0 failed (2886 passed, 49 skipped: merged part C's 2919 and the 16 arms); GenTests
+530 of 530; check-no-regression 1089 transpiled, NO REGRESSION across 1077; the behavioral program's 18 lines equal
+Go's; the converter's `go test ./...` rc 0, 11 packages ok. Footprint, two-seeded on four targets against merged part C's
+converter: `src/core/syscall/linux/lsf_linux.cs` alone, 3 lines, on linux/amd64 and linux/arm64, and no corpus file
+on windows/amd64 or darwin/amd64, as the corrected prediction said (the first wording, 0 files, would have missed
+by this one; it was corrected before any footprint ran). At the second commit before the merge GolibTests read
+2929 with 2886 passed and 43 skipped against a predicted 2880 and 49: that run had the pinned Go toolchain on its
+path and six toolchain arms ran that otherwise report inconclusive. Scores and the one run that read a timing arm
+red under load: DESIGN-array-pointer-doors 19.5.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (the box-kind seat, against COORD's arm 2 of 11:17Z): `uintptr(unsafe.Pointer(p))` of a view over a reference-bearing struct's field is the field's address at that moment, not an order token — recorded, no change proposed
+
+The ruling asked that the number follow "the existing rule for a no-address pointee (the order token)", be
+stable across two reads and equal the field pointer's own number. The last holds by construction: the view
+forwards the field pointer's number and mints nothing. But that number is an address. The STRUCT has no
+address and its pointer's number is a token; a reference-free FIELD of it is `PointerStorage.Unpinnable`, a
+real address that nothing holds still (`ж.FieldRefBox.cs`; tokenising such a field made the kernel refuse
+every Windows TCP dial, which is why it is not a token). So two reads agree only when no collection moved the
+struct between them, as `uintptr(unsafe.Pointer(&x.f))` already did before this seat. The unit arm reads the
+two inside a no-GC region and asserts the token equality separately. Pointer identity does not depend on the
+number and holds across a move. This is the standing hole of an unpinnable field, older than this seat and
+not widened by it.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (the box-kind seat; departs from the design block approved 11:17Z): a range by value, a slice and an element's address over a view of a reference-bearing struct's field are refused by name — OPEN, proposed .5, owner P5
+
+`for _, b := range p`, `p[lo:hi]` and `&p[i]`, p a field view over a struct that holds a reference. Each needs
+storage it can name: part C emits the range as `range(p.slice())`, and a slice header or an element pointer
+over bytes that the collector may move has nothing to point at. The view's `Value` refuses by name and says
+which forms are served ("Index it (p[i]), load it (*p) or store it (*p = v)"). The approved design block said
+the range "takes the element per round"; it does not, and this row is that departure. The index-only range
+and `len` read no memory and are served.
+
+**One change of behaviour to name.** `&(*[2]byte)(unsafe.Pointer(&sa.raw.port))[1]`, the element's address
+where the conversion is written, two selections deep: before the second commit it took door B's element door
+and printed Go's answer, through a box at an address nothing holds still. Probe
+(`reinterpret-box-1115/probe-unpinnable/`): over 200 rounds with a forced compacting collection, the struct
+moved in 200 and the kept pointer read stale in 200 (index 1) and 196 (index 0). That is the UNPINNABLE class
+of DESIGN-interior-pointer-root 10.1, whose refusal is ruled for after 1.26.11.1. With the widened shape this
+one form is refused by name now. One selection deep it already was a field view and already refused.
+
+**Sites:** 0 in the standard library's emitted field views, the sqlite demo's closure, the TypeScript closure
+and the nine nugetgo modules, for all three forms.
+
+**Size.** The range: an enumerator over the element door in the unsafe package and the converter naming it
+where it now emits `range(p.slice())` for this kind only at run time, about 20 lines of C#, 10 of Go, one unit
+arm and one behavioral line. The element's address: a second internal box kind, one element of the field's
+bytes at an offset, about 60 lines with its identity arms. The slice: not served without a layout copy, which
+is door C's remedy and would lose writes; it stays refused.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — P5 (the box-kind seat; adds a reading to the 2026-11-15 row "an array view of a Go value of another type, kept in a local, panics, and a range by value over it is silent"): the open slice of a pointer conversion over an array field of another element type ends the process — OPEN, .5 (COORD 13:44Z), disclosed in docs/Limitations.md for .4, owner P5
+
+`(*[8]byte)(unsafe.Pointer(&d.name))[:]`, name a `[8]int8`. Where the address is not the field view's shape the
+converter emits the pointer conversion and its open slice, `Pointer.To<array<byte>>(...).slice()` (door A
+keeps the open form of an unnamed array on that route, decision D4). The conversion reads the field's pointer
+as a pointer to an `array<byte>`, and the slice reads an array header from what is behind it. Read at part C's
+converter and tree, one arm per process (`reinterpret-box-1115/probe-arr/`): over a struct variable, a package
+variable and a two-selection chain the process ends with an `AccessViolationException` in `slice<byte>`'s
+constructor. It is not a panic, and a `recover` does not take it. The same form over a number field panics or
+is refused by name (DESIGN-array-pointer-doors 18.5).
+
+**What this seat closes:** the three roots read. The second commit makes them field views, and they print Go's
+lines.
+
+**What it leaves, read** (`reinterpret-box-1115/probe-open/`: predictions written before the probe was
+converted, this seat's converter and tree merged with batch 308, linux/amd64 Release, one arm per process, each
+arm under a `recover`). The same `[:]` over a promoted field (`&w.name`), over a field of a slice element
+(`&ds[1].name`) and over a field of a call's result (`&get().name`) ends the process with the same
+`AccessViolationException`, exit code 134, no line printed; the `recover` does not run. The three forms that
+reach the field from a variable or a pointer print Go's lines: the embedded field written out
+(`&w.dirent.name`), the element bound to a pointer variable first (`p := &ds[1]`, then `&p.name`; a store
+through the slice is read in the element), and the call's result bound first. All six read as predicted.
+
+**Sites:** 0 in the standard library on four targets and 0 in the TypeScript, nugetgo and sqlite closures, by
+the typed censuses (every field-address view that is not of the earlier shape is a two-selection chain or a
+variable root, and those are field views now). `os`'s `readdir` on darwin (dir_darwin.go:77) has the
+struct-variable shape and is hand-converted.
+
+**Size.** The open form routed through door A's view (`View<E>(p, 0, N, N)`), which answers per root and
+refuses by name where it cannot: about 15 lines in `convSliceExpr.go`, 4 unit arms, 3 behavioral lines, and a
+footprint of the 5 emitted open slices of a pointer conversion in the standard library (`runtime/type.cs`,
+`reflect/type.cs`, `internal/reflectlite/type.cs`, `runtime/linux/os_linux.cs`, `runtime/windows/os_windows.cs`),
+each to be read against Go before it moves. Half a seat. It reopens decision D4.
+
+**Ruled (COORD 13:44Z, read against the finding post of 13:42Z).** .5, as this row, landing with the box kind's
+docs commit. An access violation that ends the process is the worst failure class, so for .4 the form and its
+workaround are a bullet of `docs/Limitations.md` ("One array view can end the process"), in the same commit.
+
+— P5 (2026-11-15)
+
+## 2026-11-15 — G (sqlite-cs W7, P3's review): implicit-conversion and implement records still consult the narrower lift lookup — OPEN, not riding W7; and the L1/W7/W13 footprint prediction scored
+
+**Dated 2026-11-15 07:00 CST. W7 `ff06d10513` + merge of master `091935257c` + regen `a90b81039f` + the review fold
+on top. Windows x64, go1.26.11.**
+
+**P3's note 2, not folded.** `resolveImplicitConvTypeName` (typeNameResolution.go) resolves a deferred marker through
+`lookupDynamicTypeName` alone: this package's own lifts. W7's GoTypeAlias records now go through
+`lookupAnyDynamicTypeName`, which also asks the production package's lifts (a -tests conversion) and the
+inline-constraint lifts. So under -tests a GoImplicitConv or GoImplement record whose type is a lift only the
+production package holds is DROPPED, while an alias record to the same lift resolves.
+- Why not in W7: the one-line reroute is trivial, but it changes -tests emission wherever such a record exists
+  (records that drop today would appear). No census predicts where, so proving it needs a -tests measure across the
+  roster, not W7's census-scoped leg. -stdlib cannot move: during a production conversion the production registry is
+  empty, and constraint keys (`constraint <path>.<name>#<i>`) never equal a type signature.
+- Fix later: reroute it, then run the roster's -tests convert leg two-seeded and attribute every new record.
+
+**The footprint prediction, scored.** COORD asked for the whole-corpus footprint of L1, W7 and W13 (four targets,
+two-seeded, one N-arm run at base `091935257c`, -tests leg over every corpus package whose test files hold a census
+hit). G predicted 0 / 0 / 0 from three censuses: no function-local multi-name spec reaching an anonymous struct in
+GOROOT/src (L1 arm B), no `«DYNTYPE:` marker in the committed corpus (L1 arm A, W7), and 22 collision-renamed
+package vars whose raw box name cannot exist (W13). P3 predicted NONZERO for L1 arm B. Read: 0 / 0 / 0 on both legs,
+emission 1949 / 2023 / 2022 / 2017 .cs per target in all four arms. The census-based prediction held; the
+structural guess did not, because std has no site of the shape.
+
+## 2026-11-15 — P2 (sqlite-cs W9b, the third form): `&*p` boxed a copy of the pointee for ANY pointer; it is now the pointer after Go's nil check, and one generic shape is left out with the erasure that declines it
+
+**Cited at Go 1.26.11, linux/amd64, on the W9b tip `1145614922`.** G's read of the converted sqlite closure
+(20261115T065022Z) named three spellings that still reached `Ꮡ((@unsafe.Pointer.To<T>(P)).Value…)`. Two were
+already the W9b arm (`&(*(*T)(q)).F`, 50 linux sites; `&(*T)(p).F` under a reinterpret, 76 sites). The third,
+`&*(*struct{ Fi [0]uint64; Ff float64 })(p)`, 23 sites in libc's float functions, had no arm of its own and was
+not a conversion defect at all: `&*p` fell to the address-of builtin over the dereferenced VALUE for every
+pointer, so the result was a new box over a copy, never equal to `p`, and every write through it was lost.
+
+**Measured, one fixture, three converters** (`AddressOfFieldThroughConversion` as it stood before its
+increment line, 15 lines against `go run`): master's converter differs on 14 lines; the W9b tip holds 11 and
+differs on exactly the four `&*p` lines; the tip with this arm equals Go on all 15. The nil line (`runtime
+error: invalid memory address or nil pointer dereference`) equals Go at all three, because the copy form
+dereferenced too. As committed the fixture has 16 lines and `AddressOfFieldThroughConversionNative` 17, and
+both equal Go with this commit's converter.
+
+**The cure.** `&*p` renders `p.nilcheck()` (COORD ruling 20261115T065612Z, a golib member and not an inline
+throw). `PointerExtensions.nilcheck<T>(this ж<T>? p)` is hidden from IntelliSense inside a hidden class, so it
+owes no PublicSurface line; it owes one line in `src/go2cs/fieldAccessCollisions.txt`, which the converter and
+go2cs-gen both read. A named pointer type is converted to its box first; a type parameter the converter erases
+(`[P *T]`) is the box already.
+
+**Census of Go source** (`&*` before a name or a parenthesis, comment lines out): std outside `cmd/` 10 sites,
+all in `crypto/internal/boring/sha.go` (build tag `boringcrypto`, not in the corpus); behavioral corpus 0. The
+two-seeded `-stdlib` footprint is predicted 0 files on each of the four targets (windows/amd64, linux/amd64, darwin/amd64,
+linux/arm64), posted before the run; the reading is in the seat's DONE post, and a miss lands as a dated block
+under this row.
+
+**Left out, with the shape that leaves it out.** A type parameter whose pointer constraint the erasure
+declines (`~*T`, a union of pointers, a pointer constraint with methods; `pointerCoreConstraint`, 0 std
+occurrences) keeps the copy form, and that is not reachable today: the function does not build. The probe
+`func tilde[P ~*T, T any](p P) *T { return &*p }` converts with the standing warning ("approximate/union/
+method-carrying pointer constraint `~*T` ... is not erased; emission may not compile") and fails with CS1061
+(`'P' does not contain a definition for 'ValueSlot'`) on `return Ꮡ(p.ValueSlot)`. Whoever makes those
+constraints build owes `&*p` the same arm, and this row is the note.
+
+**Found by the fixture and cured in the same commit: `*(*T)(x)++` did not compile.** The native fixture's
+`*(*int32)(unsafe.Pointer(&(*expr)(unsafe.Pointer(b)).u))++` failed with CS1059 at master, at the W9b tip and
+with the arm above: the increment statement rendered `~<pointer>++`, a value, where the assignment forms beside
+it render `(<pointer>).Value`. `visitIncDecStmt` never told the dereference it was a write (`visitAssignStmt`
+does, for libc's qsort swap). It now passes the same context. Census (a line holding `*(*`
+and later `)++` or `)--`, comment lines out): 0 sites in std outside `cmd/` and `testdata`, 0 in the behavioral
+corpus outside these two fixtures, and 0 in every Go file of sqlite 1.62.0 and libc 1.80.1, for every platform.
+Both fixtures carry the form: `++` and `--` through a conversion, with `*ip++` and `*ip--` through an ordinary
+pointer as the control (`ip.Value++`, unchanged).
+— P2 (2026-11-15)
+
+**Dated 2026-11-15 12:50Z, read at `fb41027880` (the W9b tip `1145614922` plus the form-3 commit). The footprint
+prediction above MISSED, and the miss is the census's.** Predicted: 0 files on each of the four targets. Read
+from the two-seeded `-stdlib` diff: **1 file and 1 changed line on each target** (windows/amd64, linux/amd64,
+darwin/amd64, linux/arm64; 4681 `.cs` in both roots of each pair; the changed line is the same text on all
+four). The file is `runtime/malloc.cs`, the statement is `runtime/malloc.go:899` in `(*mheap).sysAlloc`,
+`*(*notInHeapSlice)(unsafe.Pointer(&(*arenaList))) = notInHeapSlice{...}`. Before:
+`(Ꮡ((arenaList)).Reinterpret<slice<arenaIdx>, notInHeapSlice>()).Value = ...`. After:
+`(ᏑarenaList.nilcheck().Reinterpret<slice<arenaIdx>, notInHeapSlice>()).Value = ...`.
+
+**Why the census missed it.** Its predicate was text, `&*` before a name or a parenthesis, and Go writes this
+site `&(*arenaList)`, with a parenthesis BETWEEN the two operators. The converter's arm peels parentheses, as it
+must. The row's "10 sites" in `boring/sha.go` was a count of LINES, too: there are 15 sites on 10 lines.
+
+**The corrected census reads the syntax tree** (`docs/phase4/probes/p2-addr-deref-census`: a unary `&` whose
+operand, parentheses peeled, is a dereference). Std outside `cmd/` and `testdata`, 4353 files: 16 sites, the 15
+in `crypto/internal/boring/sha.go` (build tag `boringcrypto`, not in the corpus) and this one. Behavioral
+corpus: 10 sites, all in this seat's two fixtures (8 and 2), which is the positive control. libc 1.80.1 has 656
+and sqlite 1.62.0 has 117 across every platform file, all of the form `&*(*T)(x)` and none with a parenthesis
+between the operators. So the footprint the census predicts is 1 line in `runtime/malloc.cs` per target, which
+is what the diff reads.
+
+**The changed line is the cure reaching a real site: master loses the write there.** `arenaList` is a
+`*[]arenaIdx` parameter (`ж<slice<arenaIdx>> ᏑarenaList`, read through `ref var arenaList = ref
+ᏑarenaList.DerefOrNull()`). Go's statement replaces the slice header THROUGH that pointer when the arena list
+grows. The old emission boxed a copy of the slice and stored the new header in the copy; the new one stores
+through the pointer. Whether any banked row executes the statement is not measured (it is the Go heap's arena
+registration); the runtime row is read at the commit that carries this block and scored in the seat's DONE post.
+
+**Applied in the same commit as this block**: the one line in each of the four `malloc.cs` copies
+(`src/core/runtime/windows`, `linux-amd64`, `linux-arm64`, `darwin`), numstat 1/1 each, byte-equal to the
+changed line of the measured diff.
+— P2 (2026-11-15)
+
+**Dated 2026-11-15 13:03Z, the fixture increment the miss owed.** Neither fixture carried the spelling the one
+corpus site uses, so `AddressOfFieldThroughConversion` now has it: `e := &(*r)` written through and compared
+with `r`, and a slice header replaced through `&(*lp)`, the runtime's own use. Go prints `parenthesized
+indirection: 41 true 3 9 true` and the converted program prints the same (17 lines, equal to `go run`); the
+emission is `r.nilcheck()` and `(lp.nilcheck()).ValueSlot = [7, 8, 9]`. The converter is not touched by this
+commit, so the footprint reading above stands. The syntax census reads 13 behavioral sites from here on, 3 of
+them with the parenthesis.
+— P2 (2026-11-15)
+
+
+
+## 2026-11-15 — C2 (W14, sqlite-cs .4 gate, linux libc init; COORD rulings 09:44Z and 12:24Z): (a) zero-length arrays count no bytes; B0' refuses a whole read of a reference-bearing struct over Go storage — DONE; B2 (the value decode) follows on its own branch; B1 DECLINED
+
+**The wall.** crypt_blowfish (modernc libc) reads its initial state as a VALUE:
+`_BF_init_state = *(*TBF_ctx)(unsafe.Pointer(&[1042]uint32{...}))`, with
+`TBF_ctx = struct { FPS [0][1042]TBF_word; Fs struct { FP [18]TBF_word; FS [4][256]TBF_word } }`.
+
+**(a) DONE.** `inlineArrayCaps` applied the byte caps to a zero-length array's element, so `[0][1042]uint32` counted as
+4168 bytes. It now applies no byte cap below a `[0]` and keeps the element-count cap. TBF_ctx itself stays out, on the
+4096-byte STRUCT cap (Fs alone is 72 + 4096); its warning now names that cap. Footprint by census: of every struct field
+in std (19-20k per target, on windows/linux/darwin amd64 and linux/arm64), 0 change verdict; a control reads 1/1.
+
+**B0' DONE (a safety floor, not the fix).**
+- The measured route: Reinterpret takes the address route to a NativeBox at a real address. ClrLayoutMismatch cannot
+  prove TBF_ctx wrong: a `[0][N]` field's inner length is unrecoverable from the zero instance, so its Go offsets are
+  unknown. The whole read fabricated array references: an AccessViolationException in the static constructor. The
+  census read `B2b kind=Struct T=TBF_ctxᴛ1 source=retained`.
+- The refusal: NativeBox.ValueAddress now refuses that read by name (RuntimeErrorPanic.ManagedDerivedStructRead).
+- Its scope is the census's B2b with source=retained|pinned, i.e. the managed-derived slice of P5's deferred B2 (P5
+  agreed, with a precision on unpinnable sources that is adopted). Native-origin reads (source=none) stay P5's.
+- Carriers are untouched: a field read at its Go offset, the number, a conversion onward.
+- GolibTests census, Release linux: 0 managed-derived B2b reads.
+- Falsifier: any banked row that reads `B2b ... source=retained|pinned`.
+
+**B1 DECLINED** (COORD 09:44Z): raise the 4096-byte struct cap. Ruling 3 tied the cap to the null-fault distance, and
+this linux box reads `vm.mmap_min_addr = 4096` with a 4096-byte page. On linux the OS guard is one page, so raising
+the cap cannot rest on the kernel. (darwin's __PAGEZERO and windows' 64 KiB are larger; linux is the floor.) A JIT
+null-check measurement was not judged worth it with B2 the principled route.
+
+**B0''s text, fixed before the seat.** The message's plain tail spelled `{{0}}`, so the panic printed a literal "{0}'s"
+where the type belongs. Found reading the base arm of B2's probe; the floor's arm now asserts the type is named there
+and that no brace survives formatting (red first, 5/5 after).
+
+**B2, the value decode, is the .4 route for TBF_ctx and is its own seat** (claude/c2-b2-value-decode, cut on this
+branch, for 310 behind it). Until it lands, TBF_ctx's read is the named panic above, and the sqlite demo does not pass
+libc init on linux.
+
+— C2 (2026-11-15)
+
+## 2026-11-15 — P2 (sqlite-cs W12; COORD rulings 10:46Z, 15:22Z, 16:22Z): a struct value moves between a named type, an unnamed type and a second lift of the unnamed type — CLOSED for the moves in one file; three neighbour shapes OPEN, loud, census reach 0
+
+**What was wrong.** Go converts, assigns and compares two struct types with identical fields. C# has an unrelated
+type per declaration, and an unnamed struct type is a generated lift, so each move needs a recorded operator. Five
+shapes had none or the wrong one at master `b2214e00e4`:
+
+| Shape | Go | At master |
+|---|---|---|
+| foreign source, local target | `hertz(p)`, `p` a `lib.Pitch` | CS0246, the operator named the foreign type bare |
+| A: conversion to an unnamed type | `struct{ Hz int }(h)` | CS1955, the lift's name emitted as a callee |
+| A': every other assignment | `var x struct{ Hz int } = h`, a field, an element, a send ... | CS0029 / CS1503, only arguments, returns and `append` recorded |
+| B: comparison | `a == h`, a `switch` over one with a case of the other | CS9342, two candidate operators |
+| U2U: two lifts of one unnamed type | a function's slot filled from a declaration BELOW it | CS0029 / CS1503 / CS0019 |
+
+**What changed.** go2cs-gen `ImplicitConvGenerator`: a foreign source converted to a local struct is hosted in the
+local target and named by its qualified name, and a foreign side is told apart by that name (two packages' `Pitch`
+are two operators). Converter, `namedUnnamedStructConversion.go`: A is a cast to the lift; A' is a pass after the
+file's declarations (`recordNamedUnnamedStructMoves`) that records the pair at every place Go assigns a value; B
+casts the unnamed operand to the named type; U2U records the pair between two lifts (`recordStructLiftMove`) and
+casts one comparison operand to the other's lift. Where the lifter already made one type nothing is recorded.
+Reference: `struct-types.md`, *A struct value moves between a named type, an unnamed type and a second lift of the
+unnamed type*.
+
+**Evidence.** Unit matrix `TestEachNamedUnnamedStructMoveRecordsItsConversion`: 176 packages, one site each (142
+named and unnamed arms: each form in the directions Go allows, with a local and a foreign named side; and 34 two-lift
+arms); with the U2U fix off 24 of the 34 are red, the other 10 being the argument kinds the old recorder covered;
+with it on 0 of 176. Fixture `ForeignAndUnnamedStructConversion` (three packages, 59 output lines) equals Go's
+output. GenTests `ForeignStructSourceConversionTests` 7 arms (8 test cases; with the generator fix off 6 red, with it
+on 8 of 8). Gates at the 310 stack `854b3967e9` (W12 merged at `2899b91992` with W9b, W11, W9a on master
+`0c1d295ea8`): go test 11 ok; CNR byte-identical over 1086 packages (12 platform-exclusive skipped); GolibTests 0
+failed; GenTests 537/537; go2cs.slnx 0 errors; the fixture passes; runtime row PASS 11094. Corpus footprint on 4
+targets: 0 lines of W12 (each file the stack moves is W9b's committed regen, equal byte for byte;
+predicted 0 lines, falsifier any corpus line). W12 seats in 310 without W9a; W12 alone at 309, and the three seats
+without W9a, are not gated (W9a's 22 files are disjoint from W12's).
+
+**Reach (a syntax census, an upper bound, taken before the work).** std on 4 targets: 0 sites of any of these shapes.
+sqlite on 3 targets: 1, `modernc.org/libc`'s `Xglob`, an alias declared above its use, which is one lift today.
+TypeScript on 3 targets: 0. std tests: 8 (2 `runtime_test` arguments, 6 `encoding/xml` one-lift adoptions). The
+behavioral suite: 12 sites in 6 fixtures that pass at master; their emission is 0 lines different (A/B of the six,
+master converter against the seat's) under this change.
+
+**OPEN, three neighbours, each loud (a C# compile error, never a wrong value):**
+
+1. **Two lifts in two FILES of one package record nothing.** `var x struct{ Hz int } = src()` in `a.go`, with `func
+   src() (r struct{ Hz int })` in `b.go`: CS0029, `Src_r` to `Run_x` (package-level form: CS0029, `V0ᴛ1` to `Xᴛ1`). A
+   lift's name is known per file. Cure: a package table of lifts by type, replayed after the file-visit barrier as
+   `replayDeferredConstraintRecords` is. Sized 1.5-2 h.
+2. **The unnamed type behind a pointer, slice, map or channel.** `var p *struct{ Hz int } = psrc()` with `psrc`
+   declared below: CS0029, `ж<psrc_R0>` to `ж<Run_p>` (slice form: `slice<all_R0>` to `slice<Run_s>`). No operator
+   converts `ж<A>` to `ж<B>`; the cure is ONE lift, in the lifter (register signature and package-level lifts before
+   bodies, so adoption stops depending on declaration order). Ruled a seat of its own after wall C, after .4; it is
+   not footprint-free, so a rename census comes first.
+3. **An exported package-level declaration reuses an unexported declaration's lift in one file.** An exported package
+   variable written below an unexported one of the same unnamed type adopts the unexported `internal` lift: CS0052,
+   CS0053; as an exported type's field: CS0050, CS0051, CS0052. Cure: publish the reused lift. Sized 1 h.
+
+Repros: `docs/phase4/probes/p2-struct-lift-neighbours/` (six one-site packages; each prints 3 under Go and stops at
+the C# build with exactly the codes above).
+
+**Known limit, G's row.** An unnamed struct inside a FUNC type gets no lift and the conversion stops, exit 1; see the
+2026-11-15 row "no lift is made for an anonymous struct inside a function-local FUNC type". My five further shapes
+are a dated block under that row.
+
+**NOT SHOWN.** A generic struct on either side of a two-lift move (skipped by `typeContainsTypeParams`); the moves
+under `-tests` white-box conversion.
+
+— P2 (2026-11-15; gate readings 2026-11-16)
+
+## 2026-11-15 — G (from P3's review of W13; COORD: a BOARD line): a collision rename's `const:` record is keyed by the owner's package NAME, not its import path, so two imported packages of one name share it — OPEN, loud, pre-existing
+
+**Dated 2026-11-15 11:10 CST. Read at W13 `d69ddab07b` (seated for 310); not reproduced yet.** A package-level
+const or var that its package Δ-renames (its name is also one of the package's method or function names) is
+published as `GoTypeAlias("X", "const:ΔX")`, and every importer finds that record under the key
+`<package name>.<member>`: the value path (`foreignRenamedValueMember`, convIdent.go), the type path
+(typeNameResolution.go) and, since W13, the `&pkg.V` box path (convUnaryExpr.go) all build the key from
+`obj.Pkg().Name()`.
+
+- **The shape:** two imported packages with one NAME, `math/rand` and `crypto/rand`, or two modules' `lib`. When
+  one renames `X` and the other declares a plain `X`, the second package's `X` can take the first one's rename and
+  render `rand.ΔX`, which that package does not declare: CS0117 at build. Loud, never a silent wrong binding,
+  because the renamed member exists only in the package that published it.
+- **Why it can happen:** the import loader records `const:` keys per name and keeps no source directory for them
+  ("a CONST key declares no alias and renders through its import qualifier", importOperations.go), so the
+  ambiguity bookkeeping that protects two same-named TYPE aliases (`ambiguousImportedTypeAliases`) does not cover
+  them. The three readers share the key, so they agree with each other, wrong or right.
+- **Fix later:** key the `const:` lookup by import path, or check the record's source directory against the
+  object's package (`aliasSourceMatchesPackage`, as the selector path does for types), in the one helper the three
+  paths share. First a repro: two same-named packages, one renaming `X`, the other with a plain `X`, both used.
+  Size S. Owner: G (the W13 helper's family).
+
+— G (2026-11-15)
+
+## 2026-11-15 — C2 (COORD 16:54Z): CallerLineMultiLineDebugTests' Debug build ran at 85 per cent of its budget on an idle box and overran it under load — budget 360 s -> 540 s, build cap 300 s -> 480 s — DONE
+
+**The reading.** GolibTests Debug, linux/amd64, at a b2214e00e4 merge of W15 (738803f6e7): one red,
+`EveryShapeEqualsGoInADebugBuild`, "dotnet build ... -c Debug did not finish in 300 s". The same run was writing three
+crash dumps of about 0.5 GB each, which loaded the box. Re-run alone on the same tip: PASSED, in 4 min 15 s for the whole
+test (255 s), 85 per cent of the old 300 s build cap. The margin was the defect, not the converted code.
+
+**The cure.** The build cap goes to 480 s, and the test's whole budget (ChildDeadline) goes from 360 s to 540 s. The
+stage's `--blame-hang-timeout 10m` (os-matrix.yml) is unchanged, so a slow build still fails BY NAME 60 s inside the
+watchdog, with room for ChildTimeoutDiagnostics to dump the child. That is the test's own purpose (98973cdb3f). 600 s, as
+first asked, would have put the whole test at the watchdog, which COORD ruled out.
+
+— C2 (2026-11-15)
+
+## 2026-11-15 — G (sqlite-cs W17, COORD: a BOARD row): a type NAMED instead of the visit that lifts it — the class of L1 and W17, OPEN as a class
+
+**Dated 2026-11-15 15:25 CST. Read at master `0c1d295ea8` (batch 309).** Two sqlite-cs walls in two days had one
+root shape. The converter LIFTS a function-local anonymous struct to a C# type when it VISITS the struct's type
+syntax. A path that only NAMES the type, without that visit, gets a deferred marker that no registry ever answers,
+and the conversion refuses with raw Go text.
+
+- **L1 (fixed, batch 309).** A Reinterpret's type arguments were named before the operand rendered, and the
+  render is what made the lift (arm A). And a multi-name `var p, q struct{…}` lifted only one of go/types' two
+  struct objects (arm B).
+- **W17 (open, P5, batch 310).** Door B (batch 309) names the element of `(*[N]struct{…})(p)` from its type for
+  `@unsafe.Pointer.ElementRef<E>`/`View<E>`/`LoadArray<E>`/`StoreArray<E>` (arrayPointerViewDoor.go:96). It no
+  longer renders the conversion. ccgo declares these structs only through a blank `var _ /* x at bp+N */ [N]struct{…}`,
+  and a blank var gets no lift, so nothing lifts them. sqlite's WAL-index merge sort and fts5's tokenizer table
+  refuse on both operating systems.
+- **The question for any new emission.** Does it name a type the source spells inline without visiting that type
+  syntax? Doors, records (W7's GoTypeAlias, a sibling shape: a value captured before the resolver ran) and generic
+  type-argument renders are the places it recurs.
+- **The guard that catches it.** sqlite-cs's convert-only leg (COORD is adding it to the batch battery). It fails
+  loudly (rc=1, "unresolved dynamic type(s) were emitted as raw Go"). A behavioral fixture per shape keeps it fixed:
+  L1's AnonStructReinterpretLift, and W17's own when P5 lands it.
+
+— G (2026-11-15)
+
+## 2026-11-15 — H (W8 BOARD row 3, measured; docs/phase4/DESIGN-header-native-commit.md): a string header's native Data store copies at the OLD Len — OPEN, .5, cure direction shape C
+
+**What.** `StringHeaderBox` commits on every header field store (go2cs-gen's setter calls `ж<T>.OnHeaderStore()` after
+each one), and it commits a native Data as a COPY, because `@string` has no native-backed form. So in
+`hdr.Data = p; hdr.Len = n` over C memory, the `Data` store copies the header's OLD Len bytes at `p` before the `Len`
+store arrives.
+- When the old Len exceeds the block at `p`, that is an over-read, and at an unmapped page a fatal access violation.
+- Go reads no byte at either store.
+- `SliceHeaderBox` does NOT share it: a native Data commits as a view (`OverNativeMemory`) that touches no byte, so its
+  value between the stores is Go's `(p, oldLen, oldCap)`.
+
+**Census** (type-based, go/packages, per target; the predicate, both controls and the readings are in
+`data/hdr-native-commit/`; the controls read exactly as the expectations written in their files):
+- std on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64, WITHOUT tests: 0 string-header stores on all four.
+- WITH tests: one, `internal/unsafeheader/unsafeheader_test.go:93`, classified `fresh-empty` (its string starts
+  empty, so it cannot over-read).
+- modernc.org/sqlite v1.62.0 and modernc.org/libc v1.80.1: W8's syntactic census over every platform file reads 0
+  header writes. The type-based run over both modules on the four targets is COORD's, on the i7, predicted "none" on
+  each, and is appended here when read.
+
+**Cure**, compared in the record's section 3, with the ruling of 2026-11-15:
+- Shape A (hold a native Data until a Len store) trades the over-read for two silent wrong values.
+- Shape B (commit at the next read) is not buildable: converted code reads the string without the box.
+- **Shape C, one commit after a run of consecutive header stores, is the .5 DIRECTION.** It spans the go2cs-gen setter,
+  the converter and the box's L1 rule, so it takes a review at design time. It is not a seat yet.
+- The red arm (a child process; two pages, the second inaccessible, a 3-byte block ending at the boundary, a
+  4096-byte string's header stored Data then Len = 3: today a fault, Go prints `abc`) is written red FIRST in that cure
+  seat, not before. An arm asserting today's fault would pin wrong behaviour on every RID's CI for no .4 gain.
+
+**State.** OPEN, owner H, .5. No known population: 0 on std's non-test code, and 0 on the sqlite path by the syntactic
+census, with the type-based confirmation pending.
+
+— H (2026-11-15)
+
+## 2026-11-15 — H (W8 BOARD row 3, the census completed): the sqlite path reads none on all four targets
+
+The type-based run pending in the row above, over `modernc.org/sqlite/...` and `modernc.org/libc/...`, read by COORD on
+the i7. The tool is `data/hdr-native-commit/census-main.go` from `235efa55be`, run from the sqlite-cs demo module
+(sqlite v1.62.0, libc v1.80.1), with tests excluded. It reads `none` on windows/amd64 (280 files), linux/amd64 (393),
+darwin/amd64 (356) and linux/arm64 (384), as predicted (`data/hdr-native-commit/readings/sqlite-*.txt`). The row
+stays .5: no known population on std's non-test code or on the sqlite path.
+
+— H (2026-11-15)
+
+## 2026-11-15 — H (pin-extent row 3, the discriminator run): concurrent pins collapse in the RUNTIME, at the GC handle table and finalizer registration, not in the index — ROOTED, .5
+
+Row 3 of the pin-extent seat's rows (4 threads pinning their own arrays ran 4-6.7x slower per op than 1, index ON or
+OFF) was UNROOTED. Its discriminator ran on H (8 logical CPUs), at master `0c1d295ea8`. The plan and predictions were
+posted to COORD first. The probe was a scratch file in GolibTests, never committed; its source and both readings are
+in `data/pin-collapse/`.
+- Setup: TieredCompilation=0, the index OFF, 2 processes x 2 readings, 200,000 ops per thread.
+- Each of 1 and 4 threads works on its OWN 64 KiB and 16 B array, separated by 8 KiB fillers.
+- GC mode, as run: workstation (GolibTests' default), latency Interactive, concurrent at the runtime default.
+
+| arm | 1 thread → 4 threads, per-op median | ratio | 4-thread throughput vs 1 |
+|---|---|---|---|
+| (a) `GCHandle.Alloc(Pinned)` + `Free` alone | 28-35 → 247-353 ns | 8.2-10.4 | ~0.4x |
+| (b) `PinnedBuffer.Of` (index OFF) + `Dispose`, today's whole plain pin | 93-115 → 568-666 ns | 4.9-6.9 | ~0.7x |
+| (b2) a finalizable object of PinnedBuffer's shape + `SuppressFinalize`, no handle | 59-79 → 501-615 ns | 6.8-9.9 | ~0.5x |
+| (c) `fixed` over the array | 1 → 1-2 ns | (resolution) | ~2.1x |
+| (d) a non-finalizable object of the same shape | 8-23 → 33-42 ns | 1.4-4.75 | ~1.0-2.7x |
+
+**Scored against the predictions posted first.**
+- P1 MET: (b) reproduces the row.
+- P3 MET: both candidates collapse, (a) and (b2) alike, each with 4-thread throughput below one thread's.
+- P4 MET: the costs compose; (b) at 1 thread is about (a) + (b2) + (d).
+- P2 MISSED on both controls, as worded:
+  - (c) prints 1 → 2 ns at the probe's 1-ns resolution, while its throughput doubles;
+  - (d), plain allocation, rises 1.4-4.75x per op, though its throughput does not fall below one thread's.
+
+**Server GC** (COORD's added axis, arms (a) and (b2) only): the collapse holds, milder.
+- (a) 33-37 → 184-277 ns, ratio 5.3-7.7, throughput below one thread's in every reading.
+- (b2) 43-112 → 217-558 ns, ratio 2.0-12, throughput below one thread's in 6 of 8 readings.
+
+**So.** The collapse is the runtime's, in two places: the GC handle table (a pinned handle allocated and freed per pin)
+and finalizable-object registration (one per `PinnedBuffer`). It holds for both GC modes on H. The pin-extent index
+adds its own cost on top (row 2), not the collapse.
+
+**A cure** would take the per-pin handle and finalizer off the hot path:
+- pool pinned handles per thread, or re-pin through one long-lived handle per object;
+- release through `IDisposable` without a finalizer, where the box's lifetime allows.
+That joins row 2 (pool or elide the holder and `WeakReference`) as one `.5` design.
+
+— H (2026-11-15)
+
+## 2026-11-16 — C1 (the arm64 r2 seat's side finding; COORD ruling 01:01Z: a row, not code): syscall's `rawSyscallNoError` returns -1 and 0 when its syscall fails, where Go returns the negated errno and the register — OPEN, latent, no owner
+
+Go's `rawSyscallNoError` is assembly that traps and returns the two result registers without testing them
+(`asm_linux_amd64.s`: `MOVQ AX, r1`, `MOVQ DX, r2`; `asm_linux_arm64.s`: `MOVD R0, r1`, `MOVD R1, r2`). On a
+failed syscall r1 is the kernel's raw return, the negated errno, and r2 is the register's unchanged argument
+(a3 on amd64, a2 on arm64). The converted body (`src/core/syscall/linux/syscall_linux_impl.cs`, hand-owned) calls
+`internal/runtime/syscall/linux.Syscall6`, whose failure branch answers `(-1, 0, errno)`, and drops the errno, so
+a failure reads r1 = -1 and r2 = 0. Success is exact on both architectures since this seat.
+
+**Callers: 9, and none can fail.** The 8 generated wrappers in each linux `zsyscall_linux_*.go` (Getpid,
+Getppid, Gettid, Umask, Getegid, Geteuid, Getgid, Getuid) and `forkAndExecInChild1` in `exec_linux.go`
+(4 sites, getpid and getppid). Linux documents all eight syscalls as always successful. Every caller discards
+r2, and none compares r1 against an error value. The one way such a syscall fails is a seccomp filter that
+answers it with an errno (`SECCOMP_RET_ERRNO`); the caller then reads -1 where Go reads -errno. Not measured:
+whether any validated package runs under such a filter (none is known to).
+
+**Go-exact fix, for when it is wanted:** on failure return `((uintptr)(-(nint)errno), a3 on x86 or a2 elsewhere)`
+from `rawSyscallNoError`, choosing the register the way the converted `rawSyscall6` already does. About 5
+lines in the one hand-owned file. Its arm needs a syscall that fails without side effects through the same
+door, which none of the 9 callers has; a GolibTests arm can drive `rawSyscallNoError` itself with an invalid
+trap number (ENOSYS).
+
+— C1 (2026-11-16)
 
 ## 2026-11-14 — P1 (Tour visual-parity item 4): array literals read `array<T>([…])`; one consumer-visible break, disclosed; committed converted tests keep the old form until the next `-tests` reconvert
 

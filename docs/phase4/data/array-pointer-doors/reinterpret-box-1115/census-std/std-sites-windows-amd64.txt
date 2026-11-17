@@ -1,0 +1,12 @@
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_windows.go:865
+hook=false other-elem root-other bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_windows.go:884
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-array-of-numbers fits=false	runtime	mgcmark_greenteagc.go:202
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-array-of-numbers fits=false	runtime	mgcmark_greenteagc.go:948
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-array-of-numbers fits=false	runtime	mgcmark_greenteagc.go:949
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	internal/poll	fd_windows.go:1347
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	internal/poll	fd_windows.go:1358
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	internal/poll	fd_windows.go:1368
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	internal/poll	fd_windows.go:1375
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	runtime	rand.go:245
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_windows.go:965
+hook=true other-elem root-pointer-ident bound-local root-struct-holds-reference field-number fits=true	syscall	syscall_windows.go:973

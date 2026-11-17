@@ -14,6 +14,7 @@ import (
 	"go/ast"
 	"go/types"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -303,6 +304,156 @@ func (v *Visitor) importedDynamicInterfaceName(iface *types.Interface) string {
 	return convertToCSTypeName(getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name)
 }
 
+// forwardImportedStructLift answers a reference to an anonymous struct that would otherwise defer to a marker:
+// the lift an import already made of an identical struct (importedStructLift), the one the struct's own
+// declaration reuses when it is visited. A reference reached BEFORE that declaration -- modernc.org/sqlite/lib's
+// `type LC_ID = TLC_ID` ahead of `type TLC_ID = struct{...}` in one file, the struct libc's tagLC_ID -- deferred to
+// a marker the post-barrier pass could not resolve, since a reused lift is another package's and never enters
+// this package's registry: raw Go text (sqlite-cs W2). "" when t is not such a struct.
+func (v *Visitor) forwardImportedStructLift(t types.Type) string {
+	st, ok := t.(*types.Struct)
+
+	if !ok {
+		return ""
+	}
+
+	return v.importedStructLift(st)
+}
+
+// importedStructLift returns the qualified C# name of an anonymous struct that a package this one
+// imports directly has already lifted, when that struct is IDENTICAL to st (types.Identical) and its
+// lift is public; otherwise "". Go calls the two one type, so C# must too: sqlite's TLARGE_INTEGER and
+// libc's largeInteger alias one anonymous struct, and two lifts made libc's function unbindable through
+// sqlite's delegate type (DESIGN-sqlite-cs-funcptr.md section 3.3). An internal lift is never reused:
+// it is CS0122 from this assembly. When two imports qualify, the lexically smallest import path wins.
+func (v *Visitor) importedStructLift(st *types.Struct) string {
+	if st == nil || isEmptyStructType(st) || v.pkg == nil {
+		return ""
+	}
+
+	imports := slices.Clone(v.pkg.Imports())
+	slices.SortFunc(imports, func(a, b *types.Package) int { return strings.Compare(a.Path(), b.Path()) })
+	signature := st.String()
+
+	for _, pkg := range imports {
+		meta, ok := importPackageDirs[pkg.Path()]
+
+		if !ok {
+			continue
+		}
+
+		key := filepath.Clean(meta.Dir)
+
+		packageLock.Lock()
+		name := importedDynamicTypeNames[key][signature]
+		public := name != "" && importedPublicLiftNames[key][name]
+		packageLock.Unlock()
+
+		if !public || !packageDeclaresIdenticalStruct(pkg, st) {
+			continue
+		}
+
+		qualified := getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name
+		codeName := convertToCSTypeName(qualified)
+
+		packageLock.Lock()
+		importedStructLiftTargets[codeName] = qualified
+		packageLock.Unlock()
+
+		return codeName
+	}
+
+	return ""
+}
+
+// importedStructLiftTarget returns the `global using` spelling of a lift importedStructLift reused, given its
+// code-body name, below the root namespace (the RHS renderer roots it). A reused lift is another package's
+// type, so usingAliasTypeQualifier, which qualifies THIS package's lifts, must not prefix it.
+func importedStructLiftTarget(codeName string) (string, bool) {
+	packageLock.Lock()
+	target, ok := importedStructLiftTargets[codeName]
+	packageLock.Unlock()
+
+	return target, ok
+}
+
+// packageDeclaresIdenticalStruct reports whether an anonymous struct identical to st appears in pkg's
+// package-level declarations: an alias target, a variable, a function signature, or a field of a
+// defined struct, through pointers, slices, arrays, maps and channels. Two structs with the same text
+// and an unexported field are different Go types, so text alone is not identity.
+func packageDeclaresIdenticalStruct(pkg *types.Package, st *types.Struct) bool {
+	seen := map[types.Type]bool{}
+	var found func(t types.Type, depth int) bool
+
+	found = func(t types.Type, depth int) bool {
+		if t == nil || depth > 8 || seen[t] {
+			return false
+		}
+
+		seen[t] = true
+
+		switch x := t.(type) {
+		case *types.Alias:
+			return found(types.Unalias(x), depth)
+		case *types.Struct:
+			if types.Identical(x, st) {
+				return true
+			}
+
+			for i := range x.NumFields() {
+				if found(x.Field(i).Type(), depth+1) {
+					return true
+				}
+			}
+		case *types.Pointer:
+			return found(x.Elem(), depth+1)
+		case *types.Slice:
+			return found(x.Elem(), depth+1)
+		case *types.Array:
+			return found(x.Elem(), depth+1)
+		case *types.Map:
+			return found(x.Key(), depth+1) || found(x.Elem(), depth+1)
+		case *types.Chan:
+			return found(x.Elem(), depth+1)
+		case *types.Signature:
+			for i := range x.Params().Len() {
+				if found(x.Params().At(i).Type(), depth+1) {
+					return true
+				}
+			}
+
+			for i := range x.Results().Len() {
+				if found(x.Results().At(i).Type(), depth+1) {
+					return true
+				}
+			}
+		}
+
+		return false
+	}
+
+	scope := pkg.Scope()
+
+	for _, name := range scope.Names() {
+		switch obj := scope.Lookup(name).(type) {
+		case *types.TypeName:
+			if named, ok := obj.Type().(*types.Named); ok {
+				if found(named.Underlying(), 0) {
+					return true
+				}
+			} else if found(obj.Type(), 0) {
+				return true
+			}
+		case *types.Var, *types.Func:
+			if found(obj.Type(), 0) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 // dynamicStructTypeName resolves the C# type name of an expression whose type is
 // a (possibly anonymous) struct, for use where a concrete type name is required —
 // e.g. the `ж.of(StructType.ᏑField)` address-of-field form. It prefers this
@@ -336,8 +487,10 @@ func (v *Visitor) dynamicStructTypeName(expr ast.Expr) string {
 
 	// Another package's alias of a defined type (`stdio.FILE`, `type FILE = X_iobuf`) is that defined type, spelled
 	// through the importer's alias table (`stdioꓸFILE`) as its declarations are. The normal path below returns its
-	// Go-shaped name, which names no member of the package class (CS0426, sqlite-cs S12).
-	if t != nil && v.isForeignAliasOfNamed(t) {
+	// Go-shaped name, which names no member of the package class (CS0426, sqlite-cs S12). The same holds where the
+	// alias reaches an ANONYMOUS struct its package lifted and published (libc's `type X_iobuf = struct{...}`,
+	// `type FILE = X_iobuf`): `&X_iob[i]` took `.at<stdio.FILE>` (CS0426, sqlite-cs W5a).
+	if t != nil && (v.isForeignAliasOfNamed(t) || v.isPublishedForeignAnonStructAlias(t)) {
 		return convertToCSTypeName(v.getScopeCheckedTypeName(t))
 	}
 
@@ -371,15 +524,7 @@ func resolveDynamicTypeMarkers(outputFileNames []string) {
 				return payload, false
 			}
 
-			replacement := lookupDynamicTypeName(signature)
-
-			if replacement == "" {
-				replacement = lookupProductionDynamicTypeName(signature)
-			}
-
-			if replacement == "" {
-				replacement = lookupConstraintLift(signature)
-			}
+			replacement := lookupAnyDynamicTypeName(signature)
 
 			if replacement == "" {
 				showWarning("Unresolved dynamic struct type: %s in \"%s\"(%d)", signature, fileName, line)
@@ -396,4 +541,71 @@ func resolveDynamicTypeMarkers(outputFileNames []string) {
 			// them all at once and warn about the signature only once.
 			return replacement, true
 		})
+}
+
+// lookupAnyDynamicTypeName names a structural signature's lift from the registries the marker resolver consults, in
+// its order: this package's lifts, the production package's (a -tests conversion), then inline-constraint lifts.
+// It answers "" when none holds the signature.
+func lookupAnyDynamicTypeName(signature string) string {
+	if name := lookupDynamicTypeName(signature); name != "" {
+		return name
+	}
+
+	if name := lookupProductionDynamicTypeName(signature); name != "" {
+		return name
+	}
+
+	return lookupConstraintLift(signature)
+}
+
+// resolvedDynamicTypeText answers text with each dynamic-type marker replaced by the lift the registries name for its
+// signature (lookupAnyDynamicTypeName). A marker no registry answers stays as written, and its signature (or, for an
+// undecodable payload, the payload itself) is returned in unresolved, for its caller to report.
+//
+// package_info.cs's GoTypeAlias records are written from values captured while files were visited, so a forward alias
+// chain to an anonymous struct (modernc.org/sqlite/lib's `Sqlite3_vtab_cursor = sqlite3_vtab_cursor =
+// Tsqlite3_vtab_cursor`, the first declared above the struct) recorded the marker resolveDynamicTypeMarkers later
+// rewrote in the .cs files only. Importers copy a record into a `global using`, where the marker does not parse
+// (sqlite-cs W7: 3,080 of lib's 15,499 records). A prefix with no suffix after it is not a marker and stays as text.
+func resolvedDynamicTypeText(text string) (result string, unresolved []string) {
+	var resolved strings.Builder
+
+	for {
+		start := strings.Index(text, dynamicTypeMarkerPrefix)
+
+		if start < 0 {
+			break
+		}
+
+		payloadStart := start + len(dynamicTypeMarkerPrefix)
+		length := strings.Index(text[payloadStart:], dynamicTypeMarkerSuffix)
+
+		if length < 0 {
+			break
+		}
+
+		markerEnd := payloadStart + length + len(dynamicTypeMarkerSuffix)
+		payload := text[payloadStart : payloadStart+length]
+		name := ""
+
+		if signature, decoded := dynamicTypeMarkerSignature(payload); decoded {
+			if name = lookupAnyDynamicTypeName(signature); name == "" {
+				unresolved = append(unresolved, signature)
+			}
+		} else {
+			unresolved = append(unresolved, "«undecodable marker payload: "+payload+"»")
+		}
+
+		if name == "" {
+			name = text[start:markerEnd]
+		}
+
+		resolved.WriteString(text[:start])
+		resolved.WriteString(name)
+		text = text[markerEnd:]
+	}
+
+	resolved.WriteString(text)
+
+	return resolved.String(), unresolved
 }

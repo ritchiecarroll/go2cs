@@ -97,7 +97,7 @@ public sealed class ArrayFamilyGenerator : IIncrementalGenerator
         source.Append("/// <summary>A Go array value <c>[").Append(n).Append("]T</c>, held inline in its owner.</summary>\n");
         source.Append("[global::go.golib.GoInlineArray(").Append(n).Append(")]\n");
         source.Append("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]\n");
-        source.Append("public struct ").Append(name).Append("<T> : global::go.IGoEquatable, global::System.IEquatable<")
+        source.Append("public struct ").Append(name).Append("<T> : global::go.IGoEquatable, global::go.golib.IGoInlineArray, global::System.IEquatable<")
             .Append(name).Append("<T>> where T : unmanaged\n");
         source.Append("{\n");
         source.Append("    [global::System.Runtime.CompilerServices.InlineArray(").Append(n).Append(")]\n");
@@ -105,6 +105,30 @@ public sealed class ArrayFamilyGenerator : IIncrementalGenerator
         source.Append("    private Storage m_storage;\n\n");
         source.Append("    /// <summary>The Go array's length.</summary>\n");
         source.Append("    public const int Length = ").Append(n).Append(";\n\n");
+        source.Append("    /// <summary>A Go array literal <c>[").Append(n).Append("]T{e0, e1, ...}</c>: the given elements from index 0, and Go's zero after them.\n");
+        source.Append("    /// Go refuses a literal longer than the array at compile time, so more than ").Append(n).Append(" elements is a converter defect: Go's index panic.</summary>\n");
+        source.Append("    public ").Append(name).Append("(params global::System.ReadOnlySpan<T> elements)\n");
+        source.Append("    {\n");
+        source.Append("        if (elements.Length > ").Append(n).Append(")\n");
+        source.Append("            throw global::go.golib.RuntimeErrorPanic.IndexOutOfRange(").Append(n).Append(", ").Append(n).Append(");\n\n");
+        source.Append("        for (int i = 0; i < elements.Length; i++)\n");
+        source.Append("            global::System.Runtime.CompilerServices.Unsafe.Add(ref global::System.Runtime.CompilerServices.Unsafe.As<Storage, T>(ref m_storage), i) = elements[i];\n");
+        source.Append("    }\n\n");
+        source.Append("    /// <summary>The copy a Go <c>range</c> over this array iterates: Go ranges over a copy of an array value, so writes the loop\n");
+        source.Append("    /// body makes to the array are not seen. A copy, never a view: nothing the caller holds aliases the inline storage.</summary>\n");
+        source.Append("    public global::go.array<T> ΔRangeSnapshot() => new(global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref global::System.Runtime.CompilerServices.Unsafe.As<Storage, T>(ref m_storage), ").Append(n).Append("));\n\n");
+        source.Append("    /// <summary>The copy of this array a Go interface holds: Go boxes an array value by copy, and interface space holds\n");
+        source.Append("    /// every Go <c>[N]T</c> as golib's array, so a type switch, interface ==, a map key and reflect see one form.</summary>\n");
+        source.Append("    public global::go.array<T> ΔCopy() => new(global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref global::System.Runtime.CompilerServices.Unsafe.As<Storage, T>(ref m_storage), ").Append(n).Append("));\n\n");
+        source.Append("    /// <summary>The array of <paramref name=\"select\"/> over each element: the deep copy of a nested inline array, whose\n");
+        source.Append("    /// elements are inline arrays themselves (<c>x.m.ΔSelect(static e => e.ΔCopy())</c>).</summary>\n");
+        source.Append("    public global::go.array<U> ΔSelect<U>(global::System.Func<T, U> select)\n");
+        source.Append("    {\n");
+        source.Append("        global::go.array<U> result = new(").Append(n).Append(");\n\n");
+        source.Append("        for (int i = 0; i < ").Append(n).Append("; i++)\n");
+        source.Append("            result[i] = select(global::System.Runtime.CompilerServices.Unsafe.Add(ref global::System.Runtime.CompilerServices.Unsafe.As<Storage, T>(ref m_storage), i));\n\n");
+        source.Append("        return result;\n");
+        source.Append("    }\n\n");
         source.Append("    /// <summary>The element at <paramref name=\"index\"/>; Go's index panic when it is out of range.</summary>\n");
         source.Append("    [global::System.Diagnostics.CodeAnalysis.UnscopedRef]\n");
         source.Append("    public ref T this[int index]\n");
@@ -138,6 +162,8 @@ public sealed class ArrayFamilyGenerator : IIncrementalGenerator
         source.Append("            return ref global::System.Runtime.CompilerServices.Unsafe.Add(ref global::System.Runtime.CompilerServices.Unsafe.As<Storage, T>(ref m_storage), (nint)index);\n");
         source.Append("        }\n");
         source.Append("    }\n\n");
+        source.Append("    nint global::go.golib.IGoInlineArray.Length => ").Append(n).Append(";\n\n");
+        source.Append("    object? global::go.golib.IGoInlineArray.this[nint index] => this[index];\n\n");
         source.Append("    public bool Equals(").Append(name).Append("<T> other) => global::go.arrays.InlineArrays.Equal(ref global::System.Runtime.CompilerServices.Unsafe.As<Storage, T>(ref m_storage), ref global::System.Runtime.CompilerServices.Unsafe.As<Storage, T>(ref other.m_storage), ").Append(n).Append(");\n\n");
         source.Append("    public override bool Equals(object? obj) => obj is ").Append(name).Append("<T> other && Equals(other);\n\n");
         source.Append("    bool global::go.IGoEquatable.GoEquals(object? other) => other is ").Append(name).Append("<T> value && Equals(value);\n\n");

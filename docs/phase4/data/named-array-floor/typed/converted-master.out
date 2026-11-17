@@ -1,0 +1,13 @@
+go: 127 208
+7 8
+   [exit 0]
+byte: 7 8
+"\x00N\xd0\xf5\x19\x7f\x00\x00"
+   [exit 0]
+struct: panic: runtime error: cannot read native memory as main.hdr: its CLR layout is not its Go layout (field buf is a managed reference where Go stores the value inline)
+
+goroutine 1 [running]:
+main.viaStruct()
+	<kit>/typed/main.go:40
+main.main()
+   [exit 2]

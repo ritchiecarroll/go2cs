@@ -1,0 +1,64 @@
+managed direct read [1]: PANIC go2cs: native-backed array at 0x7fab39d03134: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+managed direct write [0]: PANIC go2cs: native-backed array at 0x7fab39d03134: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+managed direct address: port 0xcd34
+managed direct op-assign: PANIC go2cs: native-backed array at 0x7fab39d03134: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+managed direct len: 2
+managed direct slice: len 2 cap 2 port 0xcd11
+managed direct whole: PANIC go2cs: native-backed array at 0x7fab39d03134: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+managed direct word [1]: PANIC go2cs: native-backed array at 0x7fab39d03138: a *[N]UInt32 over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+managed local read [1]: 0xcd
+managed local write [0]: port 0xcd22
+managed local range index: 0xcd22
+managed local range value: PANIC go2cs: native-backed array at 0x7fab39d03134: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+managed local word: 0x33333333
+managed local slice: len 2 cap 2 port 0x3322
+managed local whole: PANIC go2cs: native-backed array at 0x7fab39d03134: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+global direct read [1]: PANIC go2cs: native-backed array at 0x7fab39d295ec: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+global direct write [0]: PANIC go2cs: native-backed array at 0x7fab39d295ec: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+global direct address: port 0xcd34
+global direct op-assign: PANIC go2cs: native-backed array at 0x7fab39d295ec: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+global direct len: 2
+global direct slice: len 2 cap 2 port 0xcd11
+global direct whole: PANIC go2cs: native-backed array at 0x7fab39d295ec: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+global direct word [1]: PANIC go2cs: native-backed array at 0x7fab39d295f0: a *[N]UInt32 over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+global local read [1]: 0xcd
+global local write [0]: port 0xcd22
+global local range index: 0xcd22
+global local range value: PANIC go2cs: native-backed array at 0x7fab39d295ec: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+global local word: 0x33333333
+global local slice: len 2 cap 2 port 0x3322
+global local whole: PANIC go2cs: native-backed array at 0x7fab39d295ec: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes direct read [1]: PANIC go2cs: native-backed array at 0x7fab39d36adc: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes direct write [0]: PANIC go2cs: native-backed array at 0x7fab39d36adc: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes direct address: port 0xcd34
+over-bytes direct op-assign: PANIC go2cs: native-backed array at 0x7fab39d36adc: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes direct len: 2
+over-bytes direct slice: len 2 cap 2 port 0xcd11
+over-bytes direct whole: PANIC go2cs: native-backed array at 0x7fab39d36adc: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes direct word [1]: PANIC go2cs: native-backed array at 0x7fab39d36ae0: a *[N]UInt32 over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes local read [1]: 0xcd
+over-bytes local write [0]: port 0xcd22
+over-bytes local range index: 0xcd22
+over-bytes local range value: PANIC go2cs: native-backed array at 0x7fab39d36adc: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+over-bytes local word: 0x33333333
+over-bytes local slice: len 2 cap 2 port 0x3322
+over-bytes local whole: PANIC go2cs: native-backed array at 0x7fab39d36adc: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native direct read [1]: PANIC go2cs: native-backed array at 0x7fb852a67004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native direct write [0]: PANIC go2cs: native-backed array at 0x7fb852a67004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native direct address: port 0xcd34
+native direct op-assign: PANIC go2cs: native-backed array at 0x7fb852a67004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native direct len: 2
+native direct slice: len 2 cap 2 port 0xcd11
+native direct whole: PANIC go2cs: native-backed array at 0x7fb852a67004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native direct word [1]: PANIC go2cs: native-backed array at 0x7fb852a67008: a *[N]UInt32 over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native local read [1]: 0xcd
+native local write [0]: port 0xcd22
+native local range index: 0xcd22
+native local range value: PANIC go2cs: native-backed array at 0x7fb852a67004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+native local word: 0x33333333
+native local slice: len 2 cap 2 port 0x3322
+native local whole: PANIC go2cs: native-backed array at 0x7fb852a67004: a *[N]Byte over native memory has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); reach the elements through the element door instead
+ref direct read [1]: PANIC go2cs: (*[2]uint8)(unsafe.Pointer(&p.f)): the field is in a Go value that has no address (a struct that holds references has none), so its bytes cannot be viewed as an array
+ref direct write [0]: PANIC go2cs: (*[2]uint8)(unsafe.Pointer(&p.f)): the field is in a Go value that has no address (a struct that holds references has none), so its bytes cannot be viewed as an array
+ref local read [1]: PANIC go2cs: (*[2]uint8)(unsafe.Pointer(&p.f)): the field is in a Go value that has no address (a struct that holds references has none), so its bytes cannot be viewed as an array
+ref local write [0]: PANIC go2cs: (*[2]uint8)(unsafe.Pointer(&p.f)): the field is in a Go value that has no address (a struct that holds references has none), so its bytes cannot be viewed as an array

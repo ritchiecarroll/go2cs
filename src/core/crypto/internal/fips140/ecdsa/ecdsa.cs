@@ -181,6 +181,7 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
 {
     ref var c = ref Ꮡc.DerefOrNull();
 
+    fipsSelfTest();
     fips140.RecordApproved();
     var (pub, err) = NewPublicKey(Ꮡc, Q);
     if (err != nil) {
@@ -230,6 +231,7 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
 {
     ref var c = ref Ꮡc.DerefOrNull();
 
+    fipsSelfTest();
     fips140.RecordApproved();
 
     var (k, Q, err) = randomPoint(ref (Ꮡc).DerefOrNull(), (slice<byte> b) => drbg.ReadWithReader(rand, b));
