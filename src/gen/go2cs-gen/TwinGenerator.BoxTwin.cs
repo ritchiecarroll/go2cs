@@ -195,11 +195,37 @@ public sealed partial class TwinGenerator
                 return BoxSideEffectFree(boxed, model) ? boxed.WithoutTrivia().ToFullString() : null;
             }
 
-            if (operand is MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression, Name: IdentifierNameSyntax } member &&
-                member.Expression is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nonnil" }, ArgumentList.Arguments: [{ RefKindKeyword.RawKind: (int)SyntaxKind.RefKeyword } checkedArgument] } nonnil &&
-                Builtin(model.GetSymbolInfo(nonnil).Symbol, "nonnil") && model.GetSymbolInfo(member).Symbol is IFieldSymbol { IsStatic: false } field)
+            // (c), and G's next step 1: a field CHAIN `nonnil(ref e).f.g…` (Go's `&e.f.g`), each level an instance field of the
+            // one before and every level but the last of struct type, so each is a field of e's own object: FieldBox once per
+            // level, outermost first. The nil check stays on the first level only (the first token faults at a nil e, as Go
+            // panics at the outer nil); a deeper level cannot be nil, since it is not a pointer.
+            if (operand is MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression, Name: IdentifierNameSyntax })
             {
-                return ArgBoxOf(checkedArgument.Expression, model, caller, aliases, position) is { } parent ? FieldBox(parent, field, model, caller, position) : null;
+                List<IFieldSymbol> fields = [];
+                ExpressionSyntax level = operand;
+
+                while (level is MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression, Name: IdentifierNameSyntax } chain &&
+                       model.GetSymbolInfo(chain).Symbol is IFieldSymbol { IsStatic: false } chainField &&
+                       (fields.Count == 0 || chainField.Type is { IsValueType: true, TypeKind: TypeKind.Struct }))
+                {
+                    fields.Insert(0, chainField);
+                    level = chain.Expression;
+
+                    while (level is ParenthesizedExpressionSyntax parenthesizedLevel)
+                        level = parenthesizedLevel.Expression;
+                }
+
+                if (fields.Count > 0 &&
+                    level is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nonnil" }, ArgumentList.Arguments: [{ RefKindKeyword.RawKind: (int)SyntaxKind.RefKeyword } checkedArgument] } nonnil &&
+                    Builtin(model.GetSymbolInfo(nonnil).Symbol, "nonnil"))
+                {
+                    string? box = ArgBoxOf(checkedArgument.Expression, model, caller, aliases, position);
+
+                    foreach (IFieldSymbol field in fields)
+                        box = box is null ? null : FieldBox(box, field, model, caller, position);
+
+                    return box;
+                }
             }
 
             return BoxOf(operand, model, caller, aliases, position);

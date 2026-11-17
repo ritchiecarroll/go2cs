@@ -47,11 +47,12 @@ using static go.main_package;
 [assembly: GoFieldAccess(typeof(bag))]
 [assembly: GoFieldAccess(typeof(cell))]
 [assembly: GoFieldAccess(typeof(holder))]
+[assembly: GoFieldAccess(typeof(nest))]
 [assembly: GoFieldAccess(typeof(ptrs))]
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 255, 5, 12)]
+[assembly: GoBoundedGoroutine("main.cs", 280, 5, 12)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -61,7 +62,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABs2gqikgpSCgoKmgoKCpoKCgqiCgoKCgqqCgoKoggAGFIKCgqaCgoKqgoKCprKCgqaC6IKCgqbSgoKmgubSgoKmguaClJCSgpSQkoKUgoKCkJKCgpSCkJKClIKQkoKUkJKClIKCgpCSlIKQkpSCkJKUgpCSlIKQkpSCgpCSlIKCgpCSlICSlJCSgoKUkpSY", "105-109:1;122-126:1;132-136:1;144-144:1;148-148:2;155-155:3;161-161:4;166-166:5;170-170:6;177-177:7;181-181:8;185-185:9;189-189:10;193-193:11;198-198:12;204-204:13;207-207:14;210-210:15;215-215:16", "", "", "255:21", "100:21,101:13,125:21,126:13,144:21,145:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "AB88gqikgpSCgoKmgoKCpoKCgqiCgoKCgqqCgoKoggAGFIKCgqaCgoKqgoKCqoKosoKCpoLmsoKCpoLogoKCptKCgqaC5tKCgqaC5oKUkJKClJCSgpSCgoKQkoKClIKQkoKUgpCSgpSQkoKUgoKCkJKUgpCSlIKQkpSCkJKUgpCSlIKCkJKUgoKCkJKUgJKUgpCSlJCSlJCSgoKUkpSYgg==", "115-119:1;125-129:1;142-146:1;152-156:1;164-164:1;168-168:2;175-175:3;181-181:4;186-186:5;190-190:6;197-197:7;201-201:8;205-205:9;209-209:10;213-213:11;218-218:12;224-224:13;227-227:14;231-231:15;234-234:16;237-237:17;242-242:18", "", "", "280:21", "108:21,109:13,125:21,126:13,150:21,151:13,169:21,170:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -82,6 +83,7 @@ public static partial class main_package
     internal partial struct cell {}
     internal partial struct holder {}
     internal partial struct inner {}
+    internal partial struct nest {}
     internal partial struct ptrs {}
     // </TypeAccessibility>
 

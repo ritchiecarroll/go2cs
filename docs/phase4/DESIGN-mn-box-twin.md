@@ -437,6 +437,29 @@ records where the code departs from 12.1, as ruled. It supersedes 12.1 on these 
   15:57Z). gc reads p after the receive, while the plain emission reads it before. That is a pre-existing divergence
   (a .5 BOARD row), and byref-param equals plain there.
 
+### 12.3 Step 1, the two-level field chain, and the re-read's notes (dated block, 2026-11-17)
+
+- **The chain.** An argument `nonnil(ref e).f.g…` (Go's `&e.f.g`) hands FieldBox applied once per level over e's box,
+  outermost first: `Ꮡe.of(F.Field‿Tokens.Ꮡf‿).of(G.Field‿Tokens.Ꮡg‿)`, or the `Ꮡf.Ꮡg` members where the converter
+  recorded the type. Every level but the last must be an instance field of struct type, so each is a field of e's own
+  object. The nil check stays on the first level only: the first token faults at a nil e, as Go panics at the outer
+  nil, and a deeper level is not a pointer and cannot be nil. A chain through a POINTER field is not this shape; its
+  second level is a dereference, and it stays named-plain (unit P22).
+- **Where the converter emits it.** Inside a byref-param body, where the pointer is the ref-lowered parameter
+  (`chainRead(ref nest n)` emits `readCell(ref nonnil(ref n).h.c)`). Over a plain pointer local the converter emits
+  form (a) instead (`(nc.Ꮡh.Ꮡc).DerefOrNull()`), which was already handed. In the corpus the one row is x509's
+  parsePublicKey `nonnil(ref @in).TBSCSR.PublicKey`, one of PB-5's 13.
+- **Probe rows.** param-chain (form (a), 16), param-chain-param (the nonnil chain in a twin, 17) and param-nil-chain (the
+  outer nil, after param-nil-field, so neither control reaches it). Before the rule the twin arm read box plain=2 (the
+  two chain calls); after it plain=0. Both controls read param-chain 1 and param-chain-param 16.
+- **P3's re-read, note 4 (coverage).** A by-value `nil` in a by-ref wrapper is a static readonly field, neither a
+  constant nor a bound parameter, so that thunk stays plain and warns ref-wrapper (unit
+  AThunkWithAByValueNilStaysPlainAndWarnsByName). No such wrapper exists in src/core.
+- **Step 2 is a question to G.** The three casLoop rows `ref ptr.Value.Value` are not a box read through a box:
+  `ptr.Value` is ж's `ref T Value` over golib's `uintptr` STRUCT, and the second `.Value` is that struct's `nuint` field.
+  No ж<ж<T>> `.Value.Value` shape exists in src/core. casLoop's only await site is a delegate call that its callers'
+  static lambdas never park in.
+
 ## 13. HANDOFF to P4, a brief (dated block, 2026-11-16)
 
 Owner ruling, as amended: M:N works on account B until account A's reset (2026-11-20 06:00Z), then comes back to G,

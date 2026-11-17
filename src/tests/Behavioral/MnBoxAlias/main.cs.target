@@ -21,6 +21,10 @@ partial struct holder {
     internal cell c;
 }
 
+partial struct nest {
+    internal holder h;
+}
+
 partial struct bag {
     internal slice<cell> s;
 }
@@ -91,6 +95,27 @@ internal static void thunkRead(channel<nint> done, ref cell c) {
     ready.ᐸꟷ(new EmptyStruct());
     ᐸꟷ(resume);
     done.ᐸꟷ(c.v);
+}
+
+internal static nint chainRead(ref nest n) {
+    return readCell(ref nonnil(ref n).h.c);
+}
+
+internal static @string /*out*/ nilChain(ref nest n) {
+    @string @out = default;
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            var r = recover(); if (r != nil) {
+                @out = fmt.Sprint("panic: ", r);
+            }
+        }, ref ᒐ);
+        nint v = readCell(ref nonnil(ref n).h.c);
+        @out = fmt.Sprint(v);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return @out;
 }
 
 internal static @string /*out*/ nilParam(ref holder nh) {
@@ -264,6 +289,19 @@ internal static partial void main() {
     });
     fmt.Println("param-package", readCell(ref pkgCell));
 
+    var nc = Ꮡ(new nest(h: new holder(c: new cell(v: 1))));
+    var ncʗ1 = nc;
+    goǃ(writer, () => {
+        ncʗ1.h.c.v = 16;
+    });
+    fmt.Println("param-chain", readCell(ref (nc.Ꮡh.Ꮡc).DerefOrNull()));
+
+    var ncʗ2 = nc;
+    goǃ(writer, () => {
+        ncʗ2.h.c.v = 17;
+    });
+    fmt.Println("param-chain-param", chainRead(ref (nc).DerefOrNull()));
+
     var aʗ3 = a;
     goǃ(writer, () => {
         aʗ3.bal = 50;
@@ -279,6 +317,7 @@ internal static partial void main() {
     fmt.Println("nil-field", nilField(nil));
 
     fmt.Println("param-nil-field", nilParam(ref ((ж<holder>)default).DerefOrNull()));
+    fmt.Println("param-nil-chain", nilChain(ref ((ж<nest>)default).DerefOrNull()));
 }
 
 } // end main_package

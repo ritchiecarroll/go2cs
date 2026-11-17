@@ -336,6 +336,8 @@ public class TwinBoxTests
 
             public static void runPkg() { pp(ref pk); }
 
+            public static void runPkgShadow(ж<T> Ꮡpk) { pp(ref pk); }
+
             public static void runValue(ж<T> px) { pp(ref px.Value); ᐸꟷ(ch); }
 
             public static void runTilde(ж<ж<T>> ppx) { pp(ref (~ppx).DerefOrNull()); }
@@ -358,6 +360,14 @@ public class TwinBoxTests
                 ref var hb = ref heap(new T(), out var Ꮡhb);
                 Ꮡhb = Ꮡ(new T());
                 pp(ref hb);
+                ᐸꟷ(ch);
+            }
+
+            public static void runHeapRepoint()
+            {
+                ref var hr = ref heap(new T(), out var Ꮡhr);
+                hr = ref pk;
+                pp(ref hr);
                 ᐸꟷ(ch);
             }
 
@@ -392,6 +402,18 @@ public class TwinBoxTests
                 pp(ref Ꮡ(st).DerefOrNull());
                 ᐸꟷ(ch);
             }
+
+        """;
+
+    // G's next step 1 (11-16 16:19Z): the two-level field chain `&e.f.g` (x509's `nonnil(ref in).TBSCSR.PublicKey`): the
+    // field pointer of a field pointer, the nil check on the first level only, as Go panics at the outer nil. A chain
+    // through a POINTER field is not this shape (its second level is a dereference, not a field of e's object).
+    private const string TwoLevelField = """
+            public partial struct U { public nint z; public T t; public ж<T> pt; }
+
+            public static void runChain(ж<U> pu) { ppS(ref nonnil(ref (pu).DerefOrNull()).t.inner); }
+
+            public static void runChainPtr(ж<U> pu) { ppS(ref nonnil(ref (nonnil(ref (pu).DerefOrNull()).pt).DerefOrNull()).inner); }
 
         """;
 
@@ -942,6 +964,51 @@ public class TwinBoxTests
         Assert.AreEqual(0, errors.Length, Errors(errors));
         Assert.IsFalse(twins.Contains("await ppꞏtwin(Ꮡhb)", StringComparison.Ordinal), "`Ꮡv = ...` re-points the box away from v");
         StringAssert.Contains(twins, "|pp|hb", "named-plain");
+    }
+
+    [TestMethod]
+    public void P23_APackageVariableShadowedByAParameterNamedItsBoxStaysPlain()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ReviewPins);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        // P3's re-read, nit 1: `Ꮡpk` binds to runPkgShadow's PARAMETER at the call, not to pk's static box.
+        Assert.AreEqual(1, twins.Split("await ppꞏtwin(Ꮡpk)").Length - 1, "only runPkg hands the static box");
+        StringAssert.Contains(twins, "|pp|pk", "the shadowed call is named-plain");
+    }
+
+    [TestMethod]
+    public void P24_AHeapLocalRePointedStaysPlainAndNamed()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ReviewPins);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        // P3's re-read, nit 3: `v = ref …` re-points v away from its heap box.
+        Assert.IsFalse(twins.Contains("ppꞏtwin(Ꮡhr)", StringComparison.Ordinal), "`hr = ref pk` no longer names Ꮡhr's object");
+        StringAssert.Contains(twins, "|pp|hr", "named-plain");
+    }
+
+    [TestMethod]
+    public void P21_ATwoLevelFieldChainHandsTheFieldPointerOfAFieldPointer()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ByRefForms, TwoLevelField);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await ppSꞏtwin(pu.of(global::go.box_package.U.Field‿Tokens.Ꮡt‿).of(global::go.box_package.T.Field‿Tokens.Ꮡinner‿))",
+            "FieldBox twice over e's box; the first level's token faults at a nil e, as Go's nonnil does");
+        Assert.IsFalse(twins.Contains("|ppS|nonnil(ref (pu).DerefOrNull()).t.inner", StringComparison.Ordinal), "no named-plain row for it");
+    }
+
+    [TestMethod]
+    public void P22_AFieldChainThroughAPointerFieldTakesThatPointerAsItsRoot()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, ByRefParams, ByRefForms, TwoLevelField);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        // `&e.pt.inner`: Go reads e.pt at the call (nil-checking e), then takes inner's address in *e.pt (nil-checking
+        // e.pt); the handed root is the pointer read once, never a field pointer of e's object.
+        Assert.IsFalse(twins.Contains("await ppSꞏtwin(pu.of(global::go.box_package.U.Field‿Tokens.Ꮡpt‿).of(", StringComparison.Ordinal),
+            "never the field pointer of the POINTER field");
     }
 
     [TestMethod]

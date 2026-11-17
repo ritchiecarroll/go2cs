@@ -54,6 +54,10 @@ public class TwinGoLaunchTests
 
             internal static void parksRefK(channel<nint> c, ref nint v, nint k) { ᐸꟷ(c); }
 
+            internal static void parksRefP(channel<nint> c, ref nint v, ж<nint> p) { ᐸꟷ(c); }
+
+            internal const nint kc = 2;
+
         """;
 
     // The converter's WRAPPER for a go call with a constant argument: an implicitly typed literal over the call.
@@ -112,6 +116,25 @@ public class TwinGoLaunchTests
             public static void launchRefConstant(channel<nint> c, ж<nint> Ꮡv)
             {
                 goǃ((ᴛ1, ᴛ2) => parksRefK(ᴛ1, ref ᴛ2.DerefOrNull(), 1), c, Ꮡv);
+            }
+
+        """;
+
+    // P3's re-read, nit 2: a NAMED constant reaches BoundThunk's symbol test (the literal never does).
+    private const string RefWrapperNamedConstant = """
+            public static void launchRefNamedConstant(channel<nint> c, ж<nint> Ꮡv)
+            {
+                goǃ((ᴛ1, ᴛ2) => parksRefK(ᴛ1, ref ᴛ2.DerefOrNull(), kc), c, Ꮡv);
+            }
+
+        """;
+
+    // P3's re-read, note 4: a by-value `nil` is a static readonly field, neither a constant nor a bound parameter, so the
+    // thunk stays plain and warns (coverage: no such wrapper in src/core).
+    private const string RefWrapperNil = """
+            public static void launchRefNil(channel<nint> c, ж<nint> Ꮡv)
+            {
+                goǃ((ᴛ1, ᴛ2) => parksRefP(ᴛ1, ref ᴛ2.DerefOrNull(), nil), c, Ꮡv);
             }
 
         """;
@@ -236,6 +259,14 @@ public class TwinGoLaunchTests
     [TestMethod]
     public void AThunkWithAConstantArgumentLaunchesItsTwin() =>
         AssertLaunchesTwin(RefWrapperConstant, "launchRefConstant", "async (ᴛ1, ᴛ2) => await parksRefKꞏtwin(ᴛ1, ᴛ2, 1), c, Ꮡv)");
+
+    [TestMethod]
+    public void AThunkWithANamedConstantArgumentLaunchesItsTwin() =>
+        AssertLaunchesTwin(RefWrapperNamedConstant, "launchRefNamedConstant", "async (ᴛ1, ᴛ2) => await parksRefKꞏtwin(ᴛ1, ᴛ2, kc), c, Ꮡv)");
+
+    [TestMethod]
+    public void AThunkWithAByValueNilStaysPlainAndWarnsByName() =>
+        AssertRefWrapperPlain(null, RefWrapperNil);
 
     [TestMethod]
     public void TheSwitchOffKeepsTheByRefWrapperPlainAndWarnsByName() =>

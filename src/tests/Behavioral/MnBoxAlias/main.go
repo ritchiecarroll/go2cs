@@ -21,6 +21,9 @@ type cell struct{ v int }
 
 type holder struct{ c cell }
 
+// G's next step 1: a two-level field chain `&n.h.c` (the field pointer of a field pointer).
+type nest struct{ h holder }
+
 type bag struct{ s []cell }
 
 // The review's t.s[i] row: an element of a slice field of the box twin's OWN receiver.
@@ -99,6 +102,23 @@ func thunkRead(done chan int, c *cell) {
 	ready <- struct{}{}
 	<-resume
 	done <- c.v
+}
+
+// G's next step 1 through a byref-param: inside the twin `&n.h.c` is `nonnil(ref n).h.c` over the boxed parameter, the
+// field pointer of a field pointer from n's box.
+func chainRead(n *nest) int {
+	return readCell(&n.h.c)
+}
+
+// The two-level chain over a nil: Go panics at the OUTER nil, at the call.
+func nilChain(n *nest) (out string) {
+	defer func() {
+		if r := recover(); r != nil {
+			out = fmt.Sprint("panic: ", r)
+		}
+	}()
+	v := readCell(&n.h.c)
+	return fmt.Sprint(v)
 }
 
 func nilParam(nh *holder) (out string) {
@@ -207,6 +227,13 @@ func main() {
 	go writer(func() { pkgCell.v = 15 })
 	fmt.Println("param-package", readCell(&pkgCell))
 
+	nc := &nest{h: holder{c: cell{v: 1}}}
+	go writer(func() { nc.h.c.v = 16 })
+	fmt.Println("param-chain", readCell(&nc.h.c))
+
+	go writer(func() { nc.h.c.v = 17 })
+	fmt.Println("param-chain-param", chainRead(nc))
+
 	go writer(func() { a.bal = 50 })
 	value := a.valueRead()
 	fmt.Println("value", value)
@@ -220,4 +247,5 @@ func main() {
 	// Last: under GoTwinsBoxCopy the callee's prologue copies through the nil box and faults before nilParam's recover
 	// is installed, which ends the program; every row above is read first.
 	fmt.Println("param-nil-field", nilParam(nil))
+	fmt.Println("param-nil-chain", nilChain(nil))
 }
