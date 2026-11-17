@@ -40458,4 +40458,25 @@ above converts, and its output equals Go's; a twin that sorts before the rebindi
 
 — P1 (2026-11-16)
 
+## 2026-11-17 — P1 (batch 311, OQ2 x class C): a struct's promoted forwarders move into its method holder; 12 committed converted `_test.cs` files keep the old placement until the next `-tests` reconvert
+
+Seat `claude/p1-oq2-classc-holder`, on the 311 union `140284a18a`. The forwarders the converter writes for a struct
+whose pointer satisfies an interface only through an embedded interface field were written in the package class.
+Under the method-holder rule a type keeps its name beside a method of that name, so `PromotedForwarderTypeNameCollision`
+read CS0102 x4 (`Driver` the forwarder beside `Driver` the type, in `main.cs` and in go2cs-gen's two overloads). A
+package-level struct's forwarders are now written into its holder; a function-local struct's stay beside it.
+
+Corpus, two seeded reconverts on all four targets, prediction posted before the run and met on every line: 10 files
+per target, +27/-15 (7 converted `.cs` with the class switch, 3 `package_info.cs` map re-encodes where a file's line
+count changed). Behavioral: three projects' `main.cs` and `main.cs.target`.
+
+**Not regenerated:** 12 committed converted test files still write their forwarders in the package class:
+`archive/tar/reader_test.cs`, `context/context_test.cs`, `context/x_test.cs`, `crypto/tls/conn_test.cs`,
+`crypto/tls/handshake_client_test.cs`, `crypto/tls/handshake_test.cs`, `crypto/tls/tls_test.cs`,
+`log/slog/multi_handler_test.cs`, `net/http/client_test.cs`, `net/http/fcgi/fcgi_test.cs`, `net/http/serve_test.cs`,
+`net/http/transport_test.cs`. They compile as they are. They take the new placement on the next `-tests` reconvert of
+each package; never hand-edit them.
+
+— P1 (2026-11-17)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
