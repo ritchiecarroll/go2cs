@@ -8,6 +8,7 @@ namespace go.go;
 using atomic = global::go.sync.atomic_package;
 using global::go.sync;
 using token = global::go.go.token_package;
+using static types_package;
 
 partial class types_package {
 
@@ -30,7 +31,7 @@ partial struct TypeParam {
     internal uint64 id;        // unique id, for debugging only
     internal ж<TypeName> obj;  // corresponding type name
     internal nint index;       // type parameter index in source order, starting at 0
-    internal ΔType bound;      // any type, but underlying is eventually *Interface for correct programs (see TypeParam.iface)
+    internal Type bound;       // any type, but underlying is eventually *Interface for correct programs (see TypeParam.iface)
 }
 
 // NewTypeParam returns a new TypeParam. Type parameters may be set on a Named
@@ -39,12 +40,14 @@ partial struct TypeParam {
 //
 // The constraint argument can be nil, and set later via SetConstraint. If the
 // constraint is non-nil, it must be fully defined.
-public static ж<TypeParam> NewTypeParam(ж<TypeName> obj, ΔType constraint) {
+public static ж<TypeParam> NewTypeParam(ж<TypeName> obj, Type constraint) {
     return (((ж<Checker>)nil)).newTypeParam(obj, constraint);
 }
 
+} partial class typesᴛChecker {
+
 // check may be nil
-internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ΔType constraint) {
+internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type constraint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
 
@@ -56,7 +59,7 @@ internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeNam
     }
     var typ = Ꮡ(new TypeParam(check: Ꮡcheck, id: id, obj: Ꮡobj, index: -1, bound: constraint));
     if (obj.typ == nil) {
-        obj.typ = new TypeParamжΔType(typ);
+        obj.typ = new TypeParamжType(typ);
     }
     // iface may mutate typ.bound, so we must ensure that iface() is called
     // at least once before the resulting TypeParam escapes.
@@ -68,6 +71,8 @@ internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeNam
     return typ;
 }
 
+} partial class typesᴛTypeParam {
+
 // Obj returns the type name for the type parameter t.
 public static ж<TypeName> Obj(this ref TypeParam t) { return t.obj; }
 
@@ -78,7 +83,7 @@ public static nint Index(this ref TypeParam t) {
 }
 
 // Constraint returns the type constraint specified for t.
-public static ΔType Constraint(this ref TypeParam t) {
+public static Type Constraint(this ref TypeParam t) {
     return t.bound;
 }
 
@@ -88,7 +93,7 @@ public static ΔType Constraint(this ref TypeParam t) {
 // fully defined, and before using the type parameter in any way other than to
 // form other types. Once SetConstraint returns the receiver, t is safe for
 // concurrent use.
-public static void SetConstraint(this ref TypeParam t, ΔType bound) {
+public static void SetConstraint(this ref TypeParam t, Type bound) {
     if (bound == nil) {
         throw panic("nil constraint");
     }
@@ -102,11 +107,11 @@ public static void SetConstraint(this ref TypeParam t, ΔType bound) {
 // the underlying type of its constraint. This type is always an interface.
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
-public static ΔType Underlying(this ref TypeParam t) {
-    return new InterfaceжΔType(t.iface());
+public static Type Underlying(this ref TypeParam t) {
+    return new InterfaceжType(t.iface());
 }
 
-public static @string String(this ж<TypeParam> Ꮡt) { return TypeString(new TypeParamжΔType(Ꮡt), default); }
+public static @string String(this ж<TypeParam> Ꮡt) { return TypeString(new TypeParamжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
@@ -123,7 +128,7 @@ internal static ж<Interface> iface(this ref TypeParam t) {
     ж<Interface> ityp = default;
     switch (bound.Underlying().type()) {
     case ж<Basic> u: {
-        if (!isValid(new BasicжΔType(u))) {
+        if (!isValid(new BasicжType(u))) {
             // error is reported elsewhere
             return ᏑemptyInterface;
         }
@@ -142,13 +147,13 @@ internal static ж<Interface> iface(this ref TypeParam t) {
     if (ityp == nil) {
         ityp = NewInterfaceType(default, [bound]);
         ityp.@implicit = true;
-        t.bound = new InterfaceжΔType(ityp); // update t.bound for next time (optimization)
+        t.bound = new InterfaceжType(ityp); // update t.bound for next time (optimization)
     }
 
     // compute type set if necessary
     if (ityp.tset == nil) {
         // pos is used for tracing output; start with the type parameter position.
-        tokenꓸPos pos = t.obj.pos;
+        token.Pos pos = t.obj.pos;
         // use the (original or possibly instantiated) type bound position if we have one
         var n = asNamed(bound); if (n != nil) {
             pos = n.obj.pos;
@@ -162,7 +167,7 @@ internal static ж<Interface> iface(this ref TypeParam t) {
 // is calls f with the specific type terms of t's constraint and reports whether
 // all calls to f returned true. If there are no specific terms, is
 // returns the result of f(nil).
-internal static bool @is(this ref TypeParam t, Func<ж<Δterm>, bool> f) {
+internal static bool @is(this ref TypeParam t, Func<ж<term>, bool> f) {
     return t.iface().typeSet().@is(f);
 }
 
@@ -170,8 +175,8 @@ internal static bool @is(this ref TypeParam t, Func<ж<Δterm>, bool> f) {
 // specific type terms of t's constraint.
 // If there are no specific terms, typeset returns f(nil, nil).
 // In any case, typeset is guaranteed to call f at least once.
-internal static bool typeset(this ref TypeParam t, Func<ΔType, ΔType, bool> f) {
+internal static bool typeset(this ref TypeParam t, Func<Type, Type, bool> f) {
     return t.iface().typeSet().all(f);
 }
 
-} // end types_package
+} // end typesᴛTypeParam

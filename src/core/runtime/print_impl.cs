@@ -26,7 +26,7 @@ namespace go;
 
 partial class runtime_package {
 
-partial struct Δhex : IRuntimePrintable {
+partial struct hex : IRuntimePrintable {
     void IRuntimePrintable.RuntimePrint() => printhex((uint64)this);
 }
 
@@ -37,6 +37,6 @@ partial struct quoted : IRuntimePrintable {
 // The two values as print arguments, for golib's tests: both types are internal to this package.
 public static object GoQuotedPrintArg(@string s) => (quoted)s;
 
-public static object GoHexPrintArg(uint64 v) => (Δhex)v;
+public static object GoHexPrintArg(uint64 v) => (hex)v;
 
 } // end runtime_package

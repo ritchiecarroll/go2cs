@@ -371,9 +371,17 @@ public class PublicizedRecvOverloadTests
         yield return typeof(go.flag_package);
     }
 
+    // A Go method and its generated overloads are members of the receiver type's method holder, the
+    // [GoMethodHost] class beside the package class, so the package's overloads are read from every holder
+    // whose receiver type the package class declares.
+    private static IEnumerable<Type> MethodHolders(Type packageClass) =>
+        packageClass.Assembly.GetTypes().Where(type =>
+            type.GetCustomAttribute<GoMethodHostAttribute>() is { } host &&
+            (host.Receiver.IsGenericType ? host.Receiver.GetGenericTypeDefinition() : host.Receiver).DeclaringType == packageClass);
+
     private static IEnumerable<(MethodInfo method, Type receiver)> GeneratedBoxOverloads(Type packageClass)
     {
-        foreach (MethodInfo method in packageClass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+        foreach (MethodInfo method in MethodHolders(packageClass).SelectMany(holder => holder.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)))
         {
             if (method.GetCustomAttribute<GeneratedCodeAttribute>() is not { Tool: GeneratorToolName })
                 continue;

@@ -1,14 +1,19 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 public delegate @string Handler(nint _Δp0, @string _Δp1);
 
+} partial class mainᴛHandler {
+
 internal static @string tag(this Handler h) {
     return "handler";
 }
+
+} partial class main_package {
 
 // type Plain is a methodless func type — rendered inline as its base delegate
 
@@ -47,9 +52,13 @@ partial struct screen {
     internal @string prefix;
 }
 
+} partial class mainᴛscreen {
+
 internal static @string render(this ref screen s, nint n, @string msg) {
     return fmt.Sprintf("%s%d-%s"u8, s.prefix, n, msg);
 }
+
+} partial class main_package {
 
 internal static Handler makeHandler(@string tag) {
     return (nint n, @string s) => fmt.Sprintf("%s%d%s"u8, tag, n, s);

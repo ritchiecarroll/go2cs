@@ -67,10 +67,10 @@ using static go.os.user_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("os/user/cgo_listgroups_unix.go", "cgo_listgroups_unix.cs", "AA4igoKClIKClIKCgqaCpoKCgpSq5IKUgoKClA==")]
 [assembly: GoPositionMap("os/user/cgo_lookup_syscall.go", "cgo_lookup_syscall.cs", "ABUugoKCgoKClIKUlLKCgqaygoKmsoKCprKCggAFEA==")]
-[assembly: GoPositionMap("os/user/cgo_lookup_unix.go", "cgo_lookup_unix.cs", "AA8kgqaCgoKClJKClJSClIKUpoKCgpSmgoKUgoKUlIKUgpSmggAKFoKmgoKUgpSSgpSUgpSClKaCgoKUpoKClIKClJSClIKUpoK4AAcUgoK4lJSUrLKCgoKCgqaClIKClNyCqJKCgoI=", "28-33:1;55-60:1;93-98:1;120-125:1", "", "70=_C_pw_uid/1/1/1,FormatUint/1/2/1,_C_pw_gid/1/1/2,FormatUint/2/2/2,_C_pw_name/1/1/3,_C_GoString/1/3/3,_C_pw_gecos/1/1/4,_C_GoString/2/3/4,_C_pw_dir/1/1/5,_C_GoString/3/3/5;136=_C_gr_gid/1/1/1,Itoa/1/1/1,_C_gr_name/1/1/2,_C_GoString/1/1/2")]
+[assembly: GoPositionMap("os/user/cgo_lookup_unix.go", "cgo_lookup_unix.cs", "ABAkgqaCgoKClJKClJSClIKUpoKCgpSmgoKUgoKUlIKUgpSmggAKFoKmgoKUgpSSgpSUgpSClKaCgoKUpoKClIKClJSClIKUpoK4AAkUgoK4lJSUzLKCgoKCgqaClIKClNyCqJKCgoI=", "28-33:1;55-60:1;93-98:1;120-125:1", "", "71=_C_pw_uid/1/1/1,FormatUint/1/2/1,_C_pw_gid/1/1/2,FormatUint/2/2/2,_C_pw_name/1/1/3,_C_GoString/1/3/3,_C_pw_gecos/1/1/4,_C_GoString/2/3/4,_C_pw_dir/1/1/5,_C_GoString/3/3/5;137=_C_gr_gid/1/1/1,Itoa/1/1/1,_C_gr_name/1/1/2,_C_GoString/1/1/2")]
 [assembly: GoPositionMap("os/user/getgrouplist_syscall.go", "getgrouplist_syscall.cs", "AAsagoKClA==")]
-[assembly: GoPositionMap("os/user/lookup.go", "lookup.cs", "AA4cntKAkoKUggALGKKClKqigpSqoqqiqJI=", "22-22:1")]
-[assembly: GoPositionMap("os/user/user.go", "user.cs", "AEKKAYLugu6C7oI=")]
+[assembly: GoPositionMap("os/user/lookup.go", "lookup.cs", "AA8cntKAkoKUggALGKKClKqigpSqoqqiyJI=", "22-22:1")]
+[assembly: GoPositionMap("os/user/user.go", "user.cs", "AEWKAYIACg6CAAoOggAKDoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.os;
@@ -111,3 +111,18 @@ public static partial class user_package
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(user_package.UnknownGroupError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupError;
+[GoMethodHost(typeof(user_package.UnknownGroupIdError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupIdError;
+[GoMethodHost(typeof(user_package.UnknownUserError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownUserError;
+[GoMethodHost(typeof(user_package.UnknownUserIdError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownUserIdError;
+[GoMethodHost(typeof(user_package.User)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUser;
+[GoMethodHost(typeof(user_package.bufferKind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛbufferKind;
+// </MethodHolders>

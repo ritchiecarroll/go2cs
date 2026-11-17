@@ -43,6 +43,7 @@ using static global::go.@internal.types.errors_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
 
@@ -50,9 +51,9 @@ partial class types_package {
 // A "soft" error is an error that still permits a valid interpretation of a
 // package (such as "unused variable"); "hard" errors may lead to unpredictable
 // behavior if ignored.
-partial struct ΔError {
+partial struct Error {
     public ж<token.FileSet> Fset; // file set for interpretation of Pos
-    public tokenꓸPos Pos;         // error position
+    public token.Pos Pos;         // error position
     public @string Msg;           // error message
     public bool Soft;             // if set, error is "soft"
     // go116code is a future API, unexported as the set of error codes is large
@@ -61,15 +62,19 @@ partial struct ΔError {
     // errorcodes_test.go), but beware that there is no guarantee of future
     // compatibility.
     internal errors.Code go116code;
-    internal tokenꓸPos go116start;
-    internal tokenꓸPos go116end;
+    internal token.Pos go116start;
+    internal token.Pos go116end;
 }
+
+} partial class typesᴛError {
 
 // Error returns an error string formatted as follows:
 // filename:line:column: message
-public static @string Error(this ΔError err) {
+public static @string Error(this Error err) {
     return fmt.Sprintf("%s: %s"u8, err.Fset.Position(err.Pos), err.Msg);
 }
+
+} partial class types_package {
 
 // An ArgumentError holds an error associated with an argument index.
 partial struct ArgumentError {
@@ -77,8 +82,12 @@ partial struct ArgumentError {
     public error Err;
 }
 
+} partial class typesᴛArgumentError {
+
 public static @string Error(this ref ArgumentError e) { return e.Err.Error(); }
 public static error Unwrap(this ref ArgumentError e) { return e.Err; }
+
+} partial class types_package {
 
 // An Importer resolves import paths to Packages.
 //
@@ -201,7 +210,7 @@ public static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
 // Only the information for which a map is provided is collected.
 // If the package has type errors, the collected information may
 // be incomplete.
-partial struct ΔInfo {
+partial struct Info {
     // Types maps expressions to their types, and for constant
     // expressions, also their values. Invalid expressions are
     // omitted.
@@ -306,7 +315,7 @@ partial struct ΔInfo {
     //     *ast.ForStmt
     //     *ast.RangeStmt
     //
-    public map<ast.Node, ж<ΔScope>> Scopes;
+    public map<ast.Node, ж<Scope>> Scopes;
     // InitOrder is the list of package-level initializers in the order in which
     // they must be executed. Initializers referring to variables related by an
     // initialization dependency appear in topological order, the others appear
@@ -321,13 +330,15 @@ partial struct ΔInfo {
     public map<ж<ast.File>, @string> FileVersions;
 }
 
-internal static bool recordTypes(this ref ΔInfo info) {
+} partial class typesᴛInfo {
+
+internal static bool recordTypes(this ref Info info) {
     return info.Types != nil;
 }
 
 // TypeOf returns the type of expression e, or nil if not found.
 // Precondition: the Types, Uses and Defs maps are populated.
-public static ΔType TypeOf(this ref ΔInfo info, ast.Expr e) {
+public static Type TypeOf(this ref Info info, ast.Expr e) {
     var (t, ok) = info.Types[e, ꟷ]; if (ok) {
         return t.Type;
     }
@@ -346,7 +357,7 @@ public static ΔType TypeOf(this ref ΔInfo info, ast.Expr e) {
 // it defines, not the type (*[TypeName]) it uses.
 //
 // Precondition: the Uses and Defs maps are populated.
-public static Object ObjectOf(this ref ΔInfo info, ж<ast.Ident> id) {
+public static Object ObjectOf(this ref Info info, ж<ast.Ident> id) {
     var obj = info.Defs[id]; if (obj != nil) {
         return obj;
     }
@@ -359,7 +370,7 @@ public static Object ObjectOf(this ref ΔInfo info, ж<ast.Ident> id) {
 // For dot-imports, the package name is ".".
 //
 // Precondition: the Defs and Implicts maps are populated.
-public static ж<PkgName> PkgNameOf(this ref ΔInfo info, ж<ast.ImportSpec> Ꮡimp) {
+public static ж<PkgName> PkgNameOf(this ref Info info, ж<ast.ImportSpec> Ꮡimp) {
     ref var imp = ref Ꮡimp.DerefOrNull();
 
     Object obj = default;
@@ -372,13 +383,17 @@ public static ж<PkgName> PkgNameOf(this ref ΔInfo info, ж<ast.ImportSpec> Ꮡ
     return pkgname;
 }
 
+} partial class types_package {
+
 // TypeAndValue reports the type and value (for constants)
 // of the corresponding expression.
 partial struct TypeAndValue {
     internal operandMode mode;
-    public ΔType Type;
+    public Type Type;
     public constant.Value Value;
 }
+
+} partial class typesᴛTypeAndValue {
 
 // IsVoid reports whether the corresponding expression
 // is a function call without results.
@@ -394,7 +409,7 @@ public static bool IsType(this TypeAndValue tv) {
 // IsBuiltin reports whether the corresponding expression denotes
 // a (possibly parenthesized) built-in function.
 public static bool IsBuiltin(this TypeAndValue tv) {
-    return tv.mode == Δbuiltinᴛ;
+    return tv.mode == Δbuiltin;
 }
 
 // IsValue reports whether the corresponding expression is a value.
@@ -432,13 +447,15 @@ public static bool HasOk(this TypeAndValue tv) {
     return tv.mode == commaok || tv.mode == mapindex;
 }
 
+} partial class types_package {
+
 // Instance reports the type arguments and instantiated type for type and
 // function instantiations. For type instantiations, [Type] will be of dynamic
 // type *[Named]. For function instantiations, [Type] will be of dynamic type
 // *Signature.
 partial struct Instance {
     public ж<TypeList> TypeArgs;
-    public ΔType Type;
+    public Type Type;
 }
 
 // An Initializer describes a package-level variable, or a list of variables in case
@@ -448,6 +465,8 @@ partial struct Initializer {
     public slice<ж<Var>> Lhs; // var Lhs = Rhs
     public ast.Expr Rhs;
 }
+
+} partial class typesᴛInitializer {
 
 public static @string String(this ref Initializer init) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
@@ -462,6 +481,8 @@ public static @string String(this ref Initializer init) {
     return Ꮡbuf.String();
 }
 
+} partial class typesᴛConfig {
+
 // Check type-checks a package and returns the resulting package object and
 // the first error if any. Additionally, if info != nil, Check populates each
 // of the non-nil maps in the [Info] struct.
@@ -473,9 +494,9 @@ public static @string String(this ref Initializer init) {
 // The package is specified by a list of *ast.Files and corresponding
 // file set, and the package path the package is identified with.
 // The clean path must not be empty or dot (".").
-public static (ж<Package>, error) Check(this ж<Config> Ꮡconf, @string path, ж<token.FileSet> fset, slice<ж<ast.File>> files, ж<ΔInfo> info) {
+public static (ж<Package>, error) Check(this ж<Config> Ꮡconf, @string path, ж<token.FileSet> fset, slice<ж<ast.File>> files, ж<Info> info) {
     var pkg = NewPackage(path, ""u8);
     return (pkg, NewChecker(Ꮡconf, fset, pkg, info).Files(files));
 }
 
-} // end types_package
+} // end typesᴛConfig

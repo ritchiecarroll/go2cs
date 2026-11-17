@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -25,11 +26,15 @@ internal static Row leakRow() {
     return r.Clone();
 }
 
+} partial class mainᴛholder {
+
 internal static array<nint> get(this holder h) {
     h = h.ΔClone();
 
     return h.arr.Clone();
 }
+
+} partial class main_package {
 
 internal static void modDirect(/*[3]*/ array<nint> a) {
     a = a.Clone();
@@ -49,11 +54,15 @@ internal static void modDeep(/*[2][3]*/ array<array<nint>> m) {
     m[0][0] = 99;
 }
 
+} partial class mainᴛRow {
+
 internal static void mut(this Row r) {
     r = r.Clone();
 
     r[0] = 77;
 }
+
+} partial class main_package {
 
 internal static void rangeValues() {
     var m = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array();

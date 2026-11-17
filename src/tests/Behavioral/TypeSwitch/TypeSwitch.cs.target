@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -134,10 +135,14 @@ internal static @string probe(any x) {
 
 partial struct marker /*num:byte*/;
 
+} partial class mainᴛmarker {
+
 internal static byte tag(this marker _Δp0, slice<byte> b) {
     _ = b[1];
     return b[0];
 }
+
+} partial class main_package {
 
 internal static void scanInto(any v) {
     switch (v.type()) {

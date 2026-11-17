@@ -168,16 +168,16 @@ internal static void debugCallWrap(uintptr dispatch) {
         gpΔ1.Value.schedlink = 0;
 
         // Park the calling goroutine.
-        var Δtrace = traceAcquire();
-        if (Δtrace.ok()) {
+        var trace = traceAcquire();
+        if (trace.ok()) {
             // Trace the event before the transition. It may take a
             // stack trace, but we won't own the stack after the
             // transition anymore.
-            Δtrace.GoPark(traceBlockDebugCall, 1);
+            trace.GoPark(traceBlockDebugCall, 1);
         }
         casGToWaiting(gpΔ1, _Grunning, waitReasonDebugCall);
-        if (Δtrace.ok()) {
-            traceRelease(Δtrace);
+        if (trace.ok()) {
+            traceRelease(trace);
         }
         dropg();
 
@@ -234,27 +234,27 @@ internal static void debugCallWrap1() {
         // Switch back to the calling goroutine. At some point
         // the scheduler will schedule us again and we'll
         // finish exiting.
-        var Δtrace = traceAcquire();
-        if (Δtrace.ok()) {
+        var trace = traceAcquire();
+        if (trace.ok()) {
             // Trace the event before the transition. It may take a
             // stack trace, but we won't own the stack after the
             // transition anymore.
-            Δtrace.GoSched();
+            trace.GoSched();
         }
         casgstatus(gpΔ1, _Grunning, _Grunnable);
-        if (Δtrace.ok()) {
-            traceRelease(Δtrace);
+        if (trace.ok()) {
+            traceRelease(trace);
         }
         dropg();
         @lock(Ꮡsched.of(schedt.Ꮡlock));
         globrunqput(gpΔ1);
         unlock(Ꮡsched.of(schedt.Ꮡlock));
 
-        Δtrace = traceAcquire();
+        trace = traceAcquire();
         casgstatus(callingGΔ1, _Gwaiting, _Grunnable);
-        if (Δtrace.ok()) {
-            Δtrace.GoUnpark(callingGΔ1, 0);
-            traceRelease(Δtrace);
+        if (trace.ok()) {
+            trace.GoUnpark(callingGΔ1, 0);
+            traceRelease(trace);
         }
         execute(callingGΔ1, true);
     });

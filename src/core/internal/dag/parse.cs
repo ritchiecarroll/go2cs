@@ -46,6 +46,7 @@ using fmt = fmt_package;
 using slices = slices_package;
 using strings = strings_package;
 using ꓸꓸꓸany = Span<any>;
+using static dag_package;
 
 partial class dag_package {
 
@@ -58,6 +59,8 @@ partial struct Graph {
 internal static ж<Graph> newGraph() {
     return Ꮡ(new Graph(byLabel: new map<@string, nint>{}, edges: new map<@string, map<@string, bool>>{}));
 }
+
+} partial class dagᴛGraph {
 
 internal static bool addNode(this ref Graph g, @string label) {
     var (_, ok) = g.byLabel[label, ꟷ]; if (ok) {
@@ -91,6 +94,8 @@ public static slice<@string> Edges(this ж<Graph> Ꮡg, @string from) {
     slices.SortFunc(edges, (@string a, @string b) => cmp.Compare(Ꮡg.Value.byLabel[a], Ꮡg.Value.byLabel[b]));
     return edges;
 }
+
+} partial class dag_package {
 
 // Parse parses the DAG language and returns the transitive closure of
 // the described graph. In the returned graph, there is an edge from "b"
@@ -187,11 +192,15 @@ partial struct rule {
     internal slice<@string> def;
 }
 
-partial struct ΔsyntaxError /*@string*/;
+partial struct syntaxError /*@string*/;
 
-internal static @string Error(this ΔsyntaxError e) {
+} partial class dagᴛsyntaxError {
+
+internal static @string Error(this syntaxError e) {
     return (@string)e;
 }
+
+} partial class dag_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedEofˢ => ref unexpectedEofˢᵇ;
@@ -211,7 +220,7 @@ internal static (slice<rule> @out, error err) parseRules(@string rules) {
             case null: {
                 return;
             }
-            case ΔsyntaxError eΔ1: {
+            case syntaxError eΔ1: {
                 err = eΔ1;
                 break;
             }
@@ -260,9 +269,11 @@ partial struct rulesParser {
     internal @string text;
 }
 
+} partial class dagᴛrulesParser {
+
 // syntaxError reports a parsing error.
 internal static void syntaxError(this ref rulesParser p, @string msg) {
-    throw panic(((ΔsyntaxError)fmt.Sprintf("parsing graph: line %d: syntax error: %s near %s"u8, p.lineno, msg, p.lastWord)));
+    throw panic(((syntaxError)fmt.Sprintf("parsing graph: line %d: syntax error: %s near %s"u8, p.lineno, msg, p.lastWord)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -349,4 +360,4 @@ internal static @string nextToken(this ref rulesParser p) {
     }
 }
 
-} // end dag_package
+} // end dagᴛrulesParser

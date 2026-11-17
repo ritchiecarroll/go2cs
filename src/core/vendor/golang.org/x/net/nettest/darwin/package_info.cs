@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using netꓸError = go.net_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;

@@ -10,6 +10,7 @@ using io = io_package;
 using strconv = strconv_package;
 using @internal;
 using encoding;
+using static pe_package;
 
 partial class pe_package {
 
@@ -27,6 +28,8 @@ partial struct SectionHeader32 {
     public uint32 Characteristics;
 }
 
+} partial class peᴛSectionHeader32 {
+
 // fullName finds real name of section sh. Normally name is stored
 // in sh.Name, but if it is longer then 8 characters, it is stored
 // in COFF string table st instead.
@@ -40,6 +43,8 @@ internal static (@string, error) fullName(this ref SectionHeader32 sh, StringTab
     }
     return st.String((uint32)i);
 }
+
+} partial class pe_package {
 
 // TODO(brainman): copy all IMAGE_REL_* consts from ldpe.go here
 
@@ -85,7 +90,7 @@ partial struct SectionHeader {
 }
 
 // Section provides access to PE COFF section.
-partial struct ΔSection {
+partial struct Section {
     /*embed*/ public SectionHeader SectionHeader;
     public slice<Reloc> Relocs;
     // Embed ReaderAt for ReadAt method.
@@ -98,11 +103,13 @@ partial struct ΔSection {
     internal ж<io.SectionReader> sr;
 }
 
+} partial class peᴛSection {
+
 // Data reads and returns the contents of the PE section s.
 //
 // If s.Offset is 0, the section has no contents,
 // and Data will always return a non-nil error.
-public static (slice<byte>, error) Data(this ref ΔSection s) {
+public static (slice<byte>, error) Data(this ref Section s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
@@ -110,9 +117,11 @@ public static (slice<byte>, error) Data(this ref ΔSection s) {
 //
 // If s.Offset is 0, the section has no contents, and all calls
 // to the returned reader will return a non-nil error.
-public static io.ReadSeeker Open(this ref ΔSection s) {
+public static io.ReadSeeker Open(this ref Section s) {
     return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
+
+} partial class pe_package {
 
 // Section characteristics flags.
 public static UntypedInt IMAGE_SCN_CNT_CODE => 0x00000020;

@@ -8,6 +8,7 @@ using bytes = bytes_package;
 using binary = encoding.binary_package;
 using strconv = strconv_package;
 using encoding;
+using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -37,6 +38,8 @@ partial interface dataFormat {
 partial struct unknownFormat {
 }
 
+} partial class dwarfᴛunknownFormat {
+
 internal static nint version(this unknownFormat u) {
     return 0;
 }
@@ -49,11 +52,15 @@ internal static nint addrsize(this unknownFormat u) {
     return 0;
 }
 
+} partial class dwarf_package {
+
 internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offset off, slice<byte> data) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     return new buf(Ꮡd, d.order, format, name, off, data, default);
 }
+
+} partial class dwarfᴛbuf {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string underflowˢ => ref underflowˢᵇ;
@@ -215,14 +222,18 @@ internal static void error(this ref buf b, @string s) {
     }
 }
 
+} partial class dwarf_package {
+
 partial struct DecodeError {
     public @string Name;
     public Offset Offset;
     public @string Err;
 }
 
+} partial class dwarfᴛDecodeError {
+
 public static @string Error(this DecodeError e) {
     return "decoding dwarf section "u8 + e.Name + " at offset 0x"u8 + strconv.FormatInt((int64)e.Offset, 16) + ": "u8 + e.Err;
 }
 
-} // end dwarf_package
+} // end dwarfᴛDecodeError

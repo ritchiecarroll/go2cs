@@ -9,6 +9,7 @@ using sys = go.@internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
+using static scan_package;
 
 partial class scan_package {
 
@@ -78,6 +79,8 @@ internal static unsafeBuf<T> newUnsafeBuf<T>(ж<T> @base) {
     return new unsafeBuf<T>(@base, 0);
 }
 
+} partial class scanᴛunsafeBuf {
+
 // addIf appends a value to the buffer if the predicate is true.
 //
 // addIf speculatively writes to the next index of the buffer, so the caller
@@ -99,6 +102,8 @@ internal static void check<T>(this unsafeBuf<T> b, nint cap) {
         throw panic("unsafeBuf overflow");
     }
 }
+
+} partial class scan_package {
 
 internal static nint bool2int(bool x) {
     // This particular pattern gets optimized by the compiler.

@@ -15,6 +15,7 @@ using utf8 = go.unicode.utf8_package;
 using @internal;
 using go.unicode;
 using math;
+using static strings_package;
 
 partial class strings_package {
 
@@ -992,10 +993,14 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
     return (@as.Clone(), true);
 }
 
+} partial class stringsᴛasciiSet {
+
 // contains reports whether c is inside the set.
 internal static bool contains(this ref asciiSet @as, byte c) {
     return (@as.Value[c / 32] & ((uint32)1 << (int)(c % 32))) != 0;
 }
+
+} partial class strings_package {
 
 // Trim returns a slice of the string s with all leading and
 // trailing Unicode code points contained in cutset removed.

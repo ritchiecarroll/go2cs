@@ -18,6 +18,7 @@ using encoding;
 using go.@internal;
 using go.@internal.coverage;
 using iter = iter_package;
+using static encodecounter_package;
 
 partial class encodecounter_package {
 
@@ -62,6 +63,8 @@ partial interface CounterVisitor {
 // coverage counter data.
 // type CounterVisitorFn is a methodless func type — rendered inline as its base delegate
 
+} partial class encodecounterᴛCoverageDataWriter {
+
 // Write writes the contents of the count-data file to the writer
 // previously supplied to NewCoverageDataWriter. Returns an error
 // if something went wrong somewhere with the write.
@@ -74,6 +77,8 @@ public static error Write(this ж<CoverageDataWriter> Ꮡcfw, /*[16]*/ array<byt
     }
     return Ꮡcfw.AppendSegment(args, visitor);
 }
+
+} partial class encodecounter_package {
 
 internal static error padToFourByteBoundary(ж<slicewriter.WriteSeeker> Ꮡws) {
     ref var ws = ref Ꮡws.DerefOrNull();
@@ -91,6 +96,8 @@ internal static error padToFourByteBoundary(ж<slicewriter.WriteSeeker> Ꮡws) {
     }
     return default;
 }
+
+} partial class encodecounterᴛCoverageDataWriter {
 
 internal static error patchSegmentHeader(this ref CoverageDataWriter cfw, ж<slicewriter.WriteSeeker> Ꮡws) {
     ref var ws = ref Ꮡws.DerefOrNull();
@@ -331,4 +338,4 @@ internal static error writeFooter(this ref CoverageDataWriter cfw) {
     return default;
 }
 
-} // end encodecounter_package
+} // end encodecounterᴛCoverageDataWriter

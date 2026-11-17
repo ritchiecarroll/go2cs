@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using typesꓸError = go.go.types_package.ΔError;
-global using typesꓸInfo = go.go.types_package.ΔInfo;
 // </ImportedTypeAliases>
 
 using go;
@@ -65,7 +63,7 @@ using static go.go.@internal.srcimporter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/internal/srcimporter/srcimporter.go", "srcimporter.cs", "ACVOAAgCAAwakgACEgALAoKmgpSCgriCuIKCgpTKlKaC2oK4goKUgoKokriC3IKmlIKCgpS4griCgpSUlKaC1rSCgoDGgpSCgoLSgoKCgpSCoqSmgoK4AA4G4oKClJSCgpSCgqS0toKCgoKCgoKUlIKCgpSCgoKm2ramgoKUpqKClKg=", "98-106:1;122-126:2;169-169:1;178-187:2", "", "47=SizesFor/1/1/3", "", "112:21,117:13")]
+[assembly: GoPositionMap("go/internal/srcimporter/srcimporter.go", "srcimporter.cs", "ACZOAAgCAA4akgACEgALAoKmgpSCgriCuIKCgpTKlKaC2oK4goKUgoKokriC3IKmlIKCgpS4griCgpSUlKaC1rSCgoDGgpSCgoLSgoKCgpSCoqSmgoK4AA4G4oKClJSCgpSCgqS0toKCgoKCgoKUlIKCgpSCgoKm2ramgoKUpqKClMg=", "98-106:1;122-126:2;169-169:1;178-187:2", "", "48=SizesFor/1/1/3", "", "115:21,120:13")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;
@@ -104,3 +102,13 @@ public static partial class srcimporter_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(srcimporter_package.Importer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class srcimporterᴛImporter;
+// </MethodHolders>

@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal.coverage;
 
+using static calloc_package;
+
 partial class calloc_package {
 
 // This package contains a simple "batch" allocator for allocating
@@ -13,6 +15,8 @@ partial class calloc_package {
 partial struct BatchCounterAlloc {
     internal slice<uint32> pool;
 }
+
+} partial class callocᴛBatchCounterAlloc {
 
 public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint n) {
     const nint chunk = 8192;
@@ -28,4 +32,4 @@ public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint
     return rv;
 }
 
-} // end calloc_package
+} // end callocᴛBatchCounterAlloc

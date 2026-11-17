@@ -68,17 +68,17 @@ internal static void readHosts() {
         var hs = new map<@string, byName>();
         var @is = new map<@string, slice<@string>>();
 
-        (var Δfile, err) = open(hp);
+        (var @file, err) = open(hp);
         if (err != nil) {
             if (!errors.Is(err, fs.ErrNotExist) && !errors.Is(err, fs.ErrPermission)) {
                 return;
             }
         }
 
-        if (Δfile != nil) {
-            var fileʗ1 = Δfile;
+        if (@file != nil) {
+            var fileʗ1 = @file;
             defer(fileʗ1.close, ref ᒐ);
-            for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
+            for (var (line, ok) = @file.readLine(); ok; (line, ok) = @file.readLine()) {
                 {
                     nint i = bytealg.IndexByteString(line, (byte)'#'); if (i >= 0) {
                         // Discard comments.

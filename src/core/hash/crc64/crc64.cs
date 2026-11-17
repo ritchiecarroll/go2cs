@@ -12,11 +12,13 @@ using hash = hash_package;
 using byteorder = @internal.byteorder_package;
 using sync = sync_package;
 using @internal;
+using crc64 = crc64_package;
+using static crc64_package;
 
 partial class crc64_package {
 
 // The size of a CRC-64 checksum in bytes.
-public static UntypedInt ΔSize => 8;
+public static UntypedInt Size => 8;
 
 // Predefined polynomials.
 // The ISO polynomial, defined in ISO 3309 and used in HDLC.
@@ -98,15 +100,21 @@ partial struct digest {
 // marshal and unmarshal the internal state of the hash.
 public static hash.Hash64 New(ж<Table> tab) { return new digestжHash64(Ꮡ(new digest(0, tab))); }
 
-internal static nint Size(this ref digest d) { return ΔSize; }
+} partial class crc64ᴛdigest {
+
+internal static nint Size(this ref digest d) { return crc64.Size; }
 
 internal static nint BlockSize(this ref digest d) { return 1; }
 
 internal static void Reset(this ref digest d) { d.crc = 0; }
 
+} partial class crc64_package {
+
 internal static ref readonly @string magic => ref magicᵇ;
 private static readonly @string magicᵇ = "crc\x02"u8;
 internal const nint marshaledSize = /* len(magic) + 8 + 8 */ 20;
+
+} partial class crc64ᴛdigest {
 
 internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
@@ -146,6 +154,8 @@ internal static (hash.Cloner, error) Clone(this ref digest d) {
     return (new digestжCloner(Ꮡr), default);
 }
 
+} partial class crc64_package {
+
 internal static uint64 update(uint64 crc, ref Table tab, slice<byte> p) {
     buildSlicing8TablesOnce();
     crc = ~crc;
@@ -183,6 +193,8 @@ public static uint64 Update(uint64 crc, ж<Table> tab, slice<byte> p) {
     return update(crc, ref (tab).DerefOrNull(), p);
 }
 
+} partial class crc64ᴛdigest {
+
 internal static (nint n, error err) Write(this ref digest d, slice<byte> p) {
     d.crc = update(d.crc, ref (d.tab).DerefOrNull(), p);
     return (len(p), default);
@@ -194,6 +206,8 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = d.Sum64();
     return append(@in, (byte)(s >> 56), (byte)(s >> 48), (byte)(s >> 40), (byte)(s >> 32), (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }
+
+} partial class crc64_package {
 
 // Checksum returns the CRC-64 checksum of data
 // using the polynomial represented by the [Table].

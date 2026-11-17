@@ -65,7 +65,7 @@ using static go.vendor.golang.org.x.sys.cpu_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/byteorder.go", "byteorder.cs", "ABQogoKmgoKogoKmgoKsogACFAACEJQ=")]
+[assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/byteorder.go", "byteorder.cs", "ABcogoKmgoLIgoKmgoLMogACFAACEJQ=")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu.go", "cpu.cs", "AIsC8gOCgoIAFSSCgoKCgoKClJSClIKCgpSkgqS0tIK2goKClKaCgoKCuMaCgqaCgqaCgqY=")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_gc_x86.go", "cpu_gc_x86.cs", "AAgWuA==")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_linux_noinit.go", "cpu_linux_noinit.cs", "AAgS")]
@@ -117,3 +117,14 @@ public static partial class cpu_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cpu_package.bigEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cpuᴛbigEndian;
+[GoMethodHost(typeof(cpu_package.littleEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cpuᴛlittleEndian;
+// </MethodHolders>

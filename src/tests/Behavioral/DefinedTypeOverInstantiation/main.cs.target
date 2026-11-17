@@ -9,6 +9,7 @@ using fmt = fmt_package;
 using lib = global::go.go.instlib_package;
 using global::go.go;
 using instlib = global::go.go.instlib_package;
+using static main_package;
 
 partial class main_package {
 
@@ -17,7 +18,11 @@ public partial struct pair<T> {
     public nint B;
 }
 
+} partial class mainᴛpair {
+
 public static T First<T>(this pair<T> p) { return p.A; }
+
+} partial class main_package {
 
 public partial struct duo<K, V> {
     public K Key;

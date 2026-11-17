@@ -13,8 +13,8 @@ partial class runtime_package {
 // We use the uintptr mutex.key and note.key as a uint32.
 //
 //go:nosplit
-internal static ж<uint32> key32(ж<uintptr> Δp) {
-    return Δp.Reinterpret<uintptr, uint32>();
+internal static ж<uint32> key32(ж<uintptr> p) {
+    return p.Reinterpret<uintptr, uint32>();
 }
 
 // One-time notifications.

@@ -63,26 +63,27 @@ using syscall = syscall_package;
 using @internal.syscall;
 using go.io;
 using go.sync;
+using static os_package;
 
 partial class os_package {
 
 // Byte offsets of the directory-entry fields this file reads. See the layout table above.
-private const int dirEntryNextEntryOffsetOff = 0;
+internal const int dirEntryNextEntryOffsetOff = 0;
 private const int dirEntryCreationTimeOff = 8;
 private const int dirEntryLastAccessTimeOff = 16;
 private const int dirEntryLastWriteTimeOff = 24;
 private const int dirEntryEndOfFileOff = 40;
 private const int dirEntryFileAttributesOff = 56;
-private const int dirEntryFileNameLengthOff = 60;
+internal const int dirEntryFileNameLengthOff = 60;
 private const int dirEntryEaSizeOff = 64;
-private const int fileIDBothDirInfoFileIDOff = 96;
-private const int fileIDBothDirInfoFileNameOff = 104;
-private const int fileFullDirInfoFileNameOff = 68;
+internal const int fileIDBothDirInfoFileIDOff = 96;
+internal const int fileIDBothDirInfoFileNameOff = 104;
+internal const int fileFullDirInfoFileNameOff = 68;
 
 // readEntryUint32 / readEntryUint64 read one little-endian field of the directory entry starting at
 // `entry` in the buffer. Both go through the bounds-checked slice indexer, so a short or truncated
 // buffer surfaces as an ordinary index panic rather than reading past the OS data.
-private static uint32 readEntryUint32(slice<byte> buf, nint entry, int fieldOffset) {
+internal static uint32 readEntryUint32(slice<byte> buf, nint entry, int fieldOffset) {
     nint at = entry + fieldOffset;
     return (uint32)((uint32)buf[at] | ((uint32)buf[at + 1] << 8) | ((uint32)buf[at + 2] << 16) | ((uint32)buf[at + 3] << 24));
 }
@@ -101,7 +102,7 @@ private static syscall.Filetime readEntryFiletime(slice<byte> buf, nint entry, i
 // readEntryName reads the entry's trailing UTF-16 name — Go's
 // `unsafe.Slice(&info.FileName[0], info.FileNameLength/2)` — as a managed uint16 slice copied out of
 // the buffer. FileNameLength counts BYTES, so the rune count is half of it.
-private static slice<uint16> readEntryName(slice<byte> buf, nint entry, int nameOffset, uint32 nameLengthBytes) {
+internal static slice<uint16> readEntryName(slice<byte> buf, nint entry, int nameOffset, uint32 nameLengthBytes) {
     nint runes = (nint)(nameLengthBytes / 2);
     slice<uint16> name = new slice<uint16>(runes);
     nint at = entry + nameOffset;
@@ -117,7 +118,7 @@ private static slice<uint16> readEntryName(slice<byte> buf, nint entry, int name
 // offset, or -1 for FILE_FULL_DIR_INFO, which carries no file ID. Mirrors
 // newFileStatFromFileIDBothDirInfo / newFileStatFromFileFullDirInfo, whose auto forms remain but are
 // unreachable now that this file owns the only caller (their parameter is the unusable reinterpret).
-private static ж<fileStat> newFileStatFromDirEntryBytes(slice<byte> buf, nint entry, int fileIDOffset) {
+internal static ж<fileStat> newFileStatFromDirEntryBytes(slice<byte> buf, nint entry, int fileIDOffset) {
     uint64 endOfFile = readEntryUint64(buf, entry, dirEntryEndOfFileOff);
     // The FILE_ID_BOTH_DIR_INFO MSDN documentation isn't completely correct. FileAttributes can
     // contain any file attributes currently set on the file, not just the documented ones, and
@@ -139,6 +140,8 @@ private static ж<fileStat> newFileStatFromDirEntryBytes(slice<byte> buf, nint e
 
     return f;
 }
+
+} partial class osᴛFile {
 
 internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> infos, error err) readdir(this ж<File> Ꮡfile, nint n, readdirMode mode) {
     slice<@string> names = default!;
@@ -262,5 +265,7 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
         d.of(dirInfo.Ꮡmu).Unlock();
     }
 }
+
+} partial class os_package {
 
 } // end os_package

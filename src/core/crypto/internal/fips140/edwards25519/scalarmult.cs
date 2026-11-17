@@ -4,6 +4,7 @@
 namespace go.crypto.@internal.fips140;
 
 using sync = sync_package;
+using static edwards25519_package;
 
 partial class edwards25519_package {
 
@@ -28,6 +29,8 @@ partial struct basepointTablePrecompᴛ1 /*dyn*/ {
 }
 internal static readonly ж<basepointTablePrecompᴛ1> ᏑbasepointTablePrecomp = new StaticBox<basepointTablePrecompᴛ1>(new basepointTablePrecompᴛ1());
 internal static ref basepointTablePrecompᴛ1 basepointTablePrecomp => ref ((StaticBox<basepointTablePrecompᴛ1>)ᏑbasepointTablePrecomp).ValueSlot;
+
+} partial class edwards25519ᴛPoint {
 
 // ScalarBaseMult sets v = x * B, where B is the canonical generator, and
 // returns v.
@@ -125,6 +128,8 @@ public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> x, ж<Point> 
     return Ꮡv;
 }
 
+} partial class edwards25519_package {
+
 // basepointNafTable is the nafLookupTable8 for the basepoint.
 // It is precomputed the first time it's used.
 internal static ж<nafLookupTable8> basepointNafTable() {
@@ -140,6 +145,8 @@ partial struct basepointNafTablePrecompᴛ1 /*dyn*/ {
 }
 internal static readonly ж<basepointNafTablePrecompᴛ1> ᏑbasepointNafTablePrecomp = new StaticBox<basepointNafTablePrecompᴛ1>(new basepointNafTablePrecompᴛ1());
 internal static ref basepointNafTablePrecompᴛ1 basepointNafTablePrecomp => ref ((StaticBox<basepointNafTablePrecompᴛ1>)ᏑbasepointNafTablePrecomp).ValueSlot;
+
+} partial class edwards25519ᴛPoint {
 
 // VarTimeDoubleScalarBaseMult sets v = a * A + b * B, where B is the canonical
 // generator, and returns v.
@@ -218,4 +225,4 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
     return Ꮡv;
 }
 
-} // end edwards25519_package
+} // end edwards25519ᴛPoint

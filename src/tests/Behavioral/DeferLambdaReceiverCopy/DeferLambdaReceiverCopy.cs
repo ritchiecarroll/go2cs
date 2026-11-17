@@ -2,12 +2,15 @@ namespace go;
 
 using fmt = fmt_package;
 using ꓸꓸꓸany = Span<any>;
+using static main_package;
 
 partial class main_package {
 
 partial struct path {
     internal @string name;
 }
+
+} partial class mainᴛpath {
 
 internal static error Close(this path p) {
     fmt.Println("close", p.name);
@@ -20,9 +23,13 @@ internal static void Log(this path p, params ꓸꓸꓸany argsʗp) {
     fmt.Println("log", p.name, args);
 }
 
+} partial class main_package {
+
 partial struct state {
     internal path cur;
 }
+
+} partial class mainᴛstate {
 
 internal static void run(this ж<state> Ꮡs, nint k) {
     GoFrame ᒐ = default;
@@ -36,6 +43,8 @@ internal static void run(this ж<state> Ꮡs, nint k) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class main_package {
 
 internal static void viaPointer(ж<path> Ꮡp) {
     GoFrame ᒐ = default;

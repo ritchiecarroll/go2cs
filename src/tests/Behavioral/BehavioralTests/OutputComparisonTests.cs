@@ -1346,6 +1346,12 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMethodGroupGenericArg() => CheckTarget("MethodGroupGenericArg");
 
     [TestMethod]
+    public void CheckMethodHolderAlias() => CheckTarget("MethodHolderAlias");
+
+    [TestMethod]
+    public void CheckMethodHolderNames() => CheckTarget("MethodHolderNames");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]

@@ -38,6 +38,7 @@ using sort = sort_package;
 using strings = strings_package;
 using token = global::go.go.token_package;
 using ꓸꓸꓸany = Span<any>;
+using static types_package;
 
 partial class types_package {
 
@@ -76,7 +77,7 @@ partial struct unifier {
     // that inferring the type for a given type parameter P will
     // automatically infer the same type for all other parameters
     // unified (joined) with P.
-    internal map<ж<TypeParam>, ж<ΔType>> handles;
+    internal map<ж<TypeParam>, ж<Type>> handles;
     internal nint depth;                    // recursion depth during unification
     internal bool enableInterfaceInference; // use shared methods for better inference
 }
@@ -85,15 +86,15 @@ partial struct unifier {
 // and corresponding type argument lists. The type argument list may be shorter
 // than the type parameter list, and it may contain nil types. Matching type
 // parameters and arguments must have the same index.
-internal static ж<unifier> newUnifier(slice<ж<TypeParam>> tparams, slice<ΔType> targs, bool enableInterfaceInference) {
+internal static ж<unifier> newUnifier(slice<ж<TypeParam>> tparams, slice<Type> targs, bool enableInterfaceInference) {
     assert(len(tparams) >= len(targs));
-    var handles = new map<ж<TypeParam>, ж<ΔType>>(len(tparams));
+    var handles = new map<ж<TypeParam>, ж<Type>>(len(tparams));
     // Allocate all handles up-front: in a correct program, all type parameters
     // must be resolved and thus eventually will get a handle.
     // Also, sharing of handles caused by unified type parameters is rare and
     // so it's ok to not optimize for that case (and delay handle allocation).
     foreach (var (i, x) in range(tparams)) {
-        ref var t = ref heap<ΔType>(out var Ꮡt);
+        ref var t = ref heap<Type>(out var Ꮡt);
         if (i < len(targs)) {
             t = targs[i];
         }
@@ -108,7 +109,7 @@ partial struct unifyMode /*num:nuint*/;
 // If assign is set, we are unifying types involved in an assignment:
 // they may match inexactly at the top, but element types must match
 // exactly.
-internal static unifyMode Δassign => /* 1 << iota */ 1;
+internal static unifyMode assign => /* 1 << iota */ 1;
 
 // If exact is set, types unify if they are identical (or can be
 // made identical with suitable arguments for type parameters).
@@ -117,6 +118,8 @@ internal static unifyMode Δassign => /* 1 << iota */ 1;
 // if there is an interface, the other type must implement the
 // interface.
 internal static unifyMode exact => 2;
+
+} partial class typesᴛunifyMode {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string inexactˢ => ref inexactˢᵇ;
@@ -133,22 +136,24 @@ internal static @string String(this unifyMode m) {
     case var ᴛ when ᴛ == (unifyMode)(0): {
         return inexactˢ;
     }
-    case var ᴛ when ᴛ == Δassign: {
+    case var ᴛ when ᴛ == assign: {
         return assignˢ;
     }
     case var ᴛ when ᴛ == exact: {
         return exactˢ;
     }
-    case var ᴛ when ᴛ == (unifyMode)((unifyMode)(Δassign | exact)): {
+    case var ᴛ when ᴛ == (unifyMode)((unifyMode)(assign | exact)): {
         return assignExactˢ;
     }}
     return fmt.Sprintf("mode %d"u8, m);
 }
 
+} partial class typesᴛunifier {
+
 // unify attempts to unify x and y and reports whether it succeeded.
 // As a side-effect, types may be inferred for type parameters.
 // The mode parameter controls how types are compared.
-internal static bool unify(this ж<unifier> Ꮡu, ΔType x, ΔType y, unifyMode mode) {
+internal static bool unify(this ж<unifier> Ꮡu, Type x, Type y, unifyMode mode) {
     return Ꮡu.nify(x, y, mode, nil);
 }
 
@@ -177,7 +182,7 @@ internal static @string String(this ref unifier u) {
         if (iΔ1 > 0) {
             w.@string(", ");
         }
-        w.typ(new TypeParamжΔType(x));
+        w.typ(new TypeParamжType(x));
         w.@string(": ");
         w.typ(u.at(x));
     }
@@ -185,11 +190,17 @@ internal static @string String(this ref unifier u) {
     return Ꮡbuf.String();
 }
 
+} partial class types_package {
+
 partial struct typeParamsById /*[]ж<TypeParam>*/;
+
+} partial class typesᴛtypeParamsById {
 
 internal static nint Len(this typeParamsById s) { return len(s); }
 internal static bool Less(this typeParamsById s, nint i, nint j) { return s[i].id < s[j].id; }
 internal static void Swap(this typeParamsById s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
+
+} partial class typesᴛunifier {
 
 // join unifies the given type parameters x and y.
 // If both type parameters already have a type associated with them
@@ -227,7 +238,7 @@ internal static bool join(this ref unifier u, ж<TypeParam> x, ж<TypeParam> y) 
 
 // asBoundTypeParam returns x.(*TypeParam) if x is a type parameter recorded with u.
 // Otherwise, the result is nil.
-internal static ж<TypeParam> asBoundTypeParam(this ref unifier u, ΔType x) {
+internal static ж<TypeParam> asBoundTypeParam(this ref unifier u, Type x) {
     var (xΔ1, _) = Unalias(x)._<ж<TypeParam>>(ᐧ); if (xΔ1 != nil) {
         var (_, found) = u.handles[xΔ1, ꟷ]; if (found) {
             return xΔ1;
@@ -238,7 +249,7 @@ internal static ж<TypeParam> asBoundTypeParam(this ref unifier u, ΔType x) {
 
 // setHandle sets the handle for type parameter x
 // (and all its joined type parameters) to h.
-internal static void setHandle(this ref unifier u, ж<TypeParam> x, ж<ΔType> h) {
+internal static void setHandle(this ref unifier u, ж<TypeParam> x, ж<Type> h) {
     var hx = u.handles[x];
     assert(hx != nil);
     foreach (var (y, hy) in u.handles) {
@@ -249,13 +260,13 @@ internal static void setHandle(this ref unifier u, ж<TypeParam> x, ж<ΔType> h
 }
 
 // at returns the (possibly nil) type for type parameter x.
-internal static ΔType at(this ref unifier u, ж<TypeParam> x) {
+internal static Type at(this ref unifier u, ж<TypeParam> x) {
     return u.handles[x].ValueSlot;
 }
 
 // set sets the type t for type parameter x;
 // t must not be nil.
-internal static void set(this ref unifier u, ж<TypeParam> x, ΔType t) {
+internal static void set(this ref unifier u, ж<TypeParam> x, Type t) {
     assert(t != nil);
     if (traceInference) {
         u.tracef("%s ➞ %s", x.OrTypedNil(), t);
@@ -278,17 +289,19 @@ internal static nint unknowns(this ref unifier u) {
 // The result is never nil and has the same length as tparams; result types that
 // could not be inferred are nil. Corresponding type parameters and result types
 // have identical indices.
-internal static slice<ΔType> inferred(this ref unifier u, slice<ж<TypeParam>> tparams) {
-    var list = new slice<ΔType>(len(tparams));
+internal static slice<Type> inferred(this ref unifier u, slice<ж<TypeParam>> tparams) {
+    var list = new slice<Type>(len(tparams));
     foreach (var (i, x) in range(tparams)) {
         list[i] = u.at(x);
     }
     return list;
 }
 
+} partial class types_package {
+
 // asInterface returns the underlying type of x as an interface if
 // it is a non-type parameter interface. Otherwise it returns nil.
-internal static ж<Interface> /*i*/ asInterface(ΔType x) {
+internal static ж<Interface> /*i*/ asInterface(Type x) {
     ж<Interface> i = default;
 
     var (_, ok) = Unalias(x)._<ж<TypeParam>>(ᐧ); if (!ok) {
@@ -297,11 +310,13 @@ internal static ж<Interface> /*i*/ asInterface(ΔType x) {
     return i;
 }
 
+} partial class typesᴛunifier {
+
 // nify implements the core unification algorithm which is an
 // adapted version of Checker.identical. For changes to that
 // code the corresponding changes should be made here.
 // Must not be called directly from outside the unifier.
-internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType yʗp, unifyMode mode, ж<ifacePair> Ꮡp) {
+internal static bool /*result*/ nify(this ж<unifier> Ꮡu, Type xʗp, Type yʗp, unifyMode mode, ж<ifacePair> Ꮡp) {
     bool result = default;
     GoFrame ᒐ = default;
     try {
@@ -602,7 +617,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
         // Type elements (array, slice, etc. elements) use emode for unification.
         // Element types must match exactly if the types are used in an assignment.
         unifyMode emode = mode;
-        if ((unifyMode)(mode & Δassign) != 0) {
+        if ((unifyMode)(mode & assign) != 0) {
             emode |= (unifyMode)(exact);
         }
 
@@ -682,14 +697,14 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             }
             break;
         }
-        case ж<ΔSignature> xΔ3: {
+        case ж<Signature> xΔ3: {
             // Two function types unify if they have the same number of parameters
             // and result values, corresponding parameter and result types unify,
             // and either both functions are variadic or neither is.
             // Parameter and result names are not required to match.
             // TODO(gri) handle type parameters or document why we can ignore them.
-            if (y._<ж<ΔSignature>>(out var yΔ7)) {
-                result = xΔ3.variadic == yΔ7.variadic && Ꮡu.nify(new TupleжΔType(xΔ3.@params), new TupleжΔType(yΔ7.@params), emode, Ꮡp) && Ꮡu.nify(new TupleжΔType(xΔ3.results), new TupleжΔType(yΔ7.results), emode, Ꮡp); goto ᒐdone;
+            if (y._<ж<Signature>>(out var yΔ7)) {
+                result = xΔ3.variadic == yΔ7.variadic && Ꮡu.nify(new TupleжType(xΔ3.@params), new TupleжType(yΔ7.@params), emode, Ꮡp) && Ꮡu.nify(new TupleжType(xΔ3.results), new TupleжType(yΔ7.results), emode, Ꮡp); goto ᒐdone;
             }
             break;
         }
@@ -796,7 +811,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
         case ж<TypeParam> xΔ3: {
             // x must be an unbound type parameter (see comment above).
             if (debug) {
-                assert(u.asBoundTypeParam(new TypeParamжΔType(xΔ3)) == nil);
+                assert(u.asBoundTypeParam(new TypeParamжType(xΔ3)) == nil);
             }
             // By definition, a valid type argument must be in the type set of
             // the respective type constraint. Therefore, the type argument's
@@ -817,7 +832,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                 // If y is also an unbound type parameter, we will end
                 // up here again with x and y swapped, so we don't
                 // need to take care of that case separately.
-                var (cx, _) = commonUnder(new TypeParamжΔType(xΔ3), default); if (cx != nil) {
+                var (cx, _) = commonUnder(new TypeParamжType(xΔ3), default); if (cx != nil) {
                     if (traceInference) {
                         u.tracef("core %s ≡ %s", xorig, yorig);
                     }
@@ -825,7 +840,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                     // is an underlying type (incl. int, string, etc.). Use assign
                     // mode here so that the unifier automatically uses y.Underlying()
                     // if necessary.
-                    result = Ꮡu.nify(cx, yorig, Δassign, Ꮡp); goto ᒐdone;
+                    result = Ꮡu.nify(cx, yorig, assign, Ꮡp); goto ᒐdone;
                 }
             }
             // x != y and there's nothing to do
@@ -848,4 +863,4 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
     ᒐdone: return result;
 }
 
-} // end types_package
+} // end typesᴛunifier

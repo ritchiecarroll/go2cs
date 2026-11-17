@@ -4,6 +4,7 @@
 namespace go.runtime;
 
 using @unsafe = unsafe_package;
+using static pprof_package;
 
 partial class pprof_package {
 
@@ -25,6 +26,8 @@ partial struct profMapEntry {
     internal @unsafe.Pointer tag;
     internal int64 count;
 }
+
+} partial class pprofᴛprofMap {
 
 internal static ж<profMapEntry> lookup(this ref profMap m, slice<uint64> stk, @unsafe.Pointer tag) {
     // Compute hash of (stk, tag).
@@ -92,4 +95,4 @@ break_Search:;
     return e;
 }
 
-} // end pprof_package
+} // end pprofᴛprofMap

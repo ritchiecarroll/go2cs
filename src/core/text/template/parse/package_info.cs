@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -90,9 +89,9 @@ using static go.text.template.parse_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("text/template/parse/lex.go", "lex.cs", "ABosgpSkpKSUACpaADh2koKClIKCgpSokoKCqJKCgpSCzqKCgoKokqiSgqyygoKokoKUgqiSlKrCgoKCgqrCgoKClIKCgsySgpSClAAIEgAMGrKCgpSCgoKUgoKCgoKCppSUgoKUqJKokoKUgpSokqrCgoKCgpSCgoKUgoKCgoKosoKCgpSCgoKUgoKClIKClIKClKiygoKClIKCgoKUgqjogoKClJSkpIKkpIKUpKSkpKS2goKClrSCpIKkgqSCgpSkpM7SgoKCgoKUgriCgoKmqLKC6IKCgpSUgoKUpKSkAAYQoqrCgpSqwoKClJSCgoKCgqaClK7CgoKUlJSqwoKCtIKUtKTGruKClJSClJSmlJSClIKCgoKCpoKClIKClIKCppSCgpSosoKCtIKUtKTGqLKCgpSk1qiSqJKmgqaC")]
-[assembly: GoPositionMap("text/template/parse/node.go", "node.cs", "AChUgqqiACROgqaCpoKmgoKCpoKCuKKClIKClKaCAAoWgqaCpoKmgqaCAAoWgqaCgoKmgoKCpoKmggANHIKmgqaCgoKmgoKCgpSUgpSmgoKUuIKmooKUgoKUgoKClKaCAA0cgqaCgoKmgoKCpoKmggAKFoKmgqaCgoKmgoKClIKCgoKUuIKmooKUgoKUAAoYkqzSgqzSgqaCpoKmgqaCAAsYgqaCgoKmgoKClLiCpoIACRSCprimgqaCpoKmggAJFIKmuOaCpoKmgqaCAAwagqaCgoKmgoKCuIKmggANHIKokoKUgoKUpoKCgqaCgoKClJSCgriCpoIAChaCAAgGgoKUpoKmgqaCABgqgoKUgoKUgpSCgoKCgoK2gpSCgqaCgoKCgoK4goKClIKCgoKCgriCgoKCgpSCpoKUgpSCgpSCgriClKqigoKCgoKUgoLKgqaCpoKmgoKCAAsYgqaCpoKmgqaCAAoWguaCpoKmgqaCAAoWgqaC5oKmgqaCpoIADRyCgoIACAaCgpS0tLSkgoKCgoKCgoKUpoKmgpSkpKQACRKCpoIAChaCpsKCggAJFIKmwoKC7oKmggAHEIKmggAMGoKmgoKC5oKCgoKClKaCpoI=")]
-[assembly: GoPositionMap("text/template/parse/parse.go", "parse.cs", "ADBmkoK6soKUAAcY4oKCgoKokoKUlKiSqqKCqrKCgqiSgpSCgqiygoKCpqiSgoKs0gAFEtKCgoKUgoKClIKUgoKosoKCqJKokoKClKiSgoKU6JKCgoKCgqaUqPKCgoKUgpS0AAgGsoKCgoKCggAGEJKCgoKuAAwCgoKCgoKCgoLosoKCgpSCupKU1taCgqYACAjmpOzSgoKCgoKCgoKCgoKUlKS0AAkQ0oKCgoKClIKCgoKUggACEAAJAoKCgpSUlILsAAgCgKSkgoKkpLTWggAGFAAJAqSkpKSkpKSkpJSClAACEPKClIKUAAIQ8oKUgpSs4oKUgoLKgoKUgoKCtIKCgoKmtLa0tLaCtoKmgrTatIKmgqbaAAkCgoKClIKCgpQADhqCgoKCgoKClIKCyAAGEuIAAxLikgACEuIABxDyAAYQ8riClIIABhQACQKUgoKUgoKCgoKCgoKUgpQABhIACAKCgoKCgpSUpqKUgoKUtKQABhIACAKCgoKCgpSktPiklIKUAAIUAAkCgoKUgoKC7pS0tLS2AAYcAA8CgKSCgpSkpKSkpKSCgpSkgpSCgJKkgoKUpILYkoKClIKmqJKqwoKCgqaC", "807-807:1", "", "63=CopyList/1/1/3;272=hasFunction/1/2/2,hasFunction/2/2/3", "", "1036:29,1037:21")]
+[assembly: GoPositionMap("text/template/parse/lex.go", "lex.cs", "AB0sgpSkpKSUACxaADp2koKClIKCgpSokoKCqJKCgpSCzqKCgoKokqiSgqyygoKokoKUgqiSlKrCgoKCgqrCgoKClIKCguySgpSClAAIEgAMGrKCgpSCgoKUgoKCgoKCppSUgoKUqJLIkoKUgpTIkqrCgoKCgpSCgoKUgoKCgoKosoKCgpSCgoKUgoKClIKClIKClKiygoKClIKCgoKUgqjogoKClJSkpIKkpIKUpKSkpKS2goKClrSCpIKkgqSCgpSkpM7SgoKCgoKUgriCgoKmqLKC6IKCgpSUgoKUpKSkAAYQoqrCgpSqwoKClJSCgoKCgqaClM7CgoKUlJTKwoKCtIKUtKTGruKClJSClJTGlJSClIKCgoKCpoKClIKClIKCppSCgpTIsoKCtIKUtKTGqLKCgpSk1qiSqJKmgqaC")]
+[assembly: GoPositionMap("text/template/parse/node.go", "node.cs", "ACtUgsqiAChOgsaCpoKmgoKCpoKCuKKClIKClKaCAA4WgsaCpoKmgqaCAA4WgsaCgoKmgoKCpoKmggARHILGgqaCgoKmgoKCgpSUgpSmgoKUuIKmooKUgoKUgoKClKaCABEcgsaCgoKmgoKCpoKmggAOFoLGgqaCgoKmgoKClIKCgoKUuIKmooKUgoKUAAwYkszSgqzSgqaCpoKmgqaCAA8YgsaCgoKmgoKClLiCpoIADRSCxrimgqaCpoKmggANFILGuOaCpoKmgqaCABAagsaCgoKmgoKCuIKmggARHILIkoKUgoKUpoKCgqaCgoKClJSCgriCpoIADhaCAAoGgoKUpoKmgqaCABwqgoKUgoKUgpSCgoKCgoK2gpSCgqaCgoKCgoK4goKClIKCgoKCgriCgoKCgpSCpoKUgpSCgpSCgriClMqigoKCgoKUgoLKgqaCpoKmgoKCAA8YgsaCpoKmgqaCAA4WggAIBoKmgqaCpoIADhaCxoLmgqaCpoKmggARHIKCggAMBoKClLS0tKSCgoKCgoKCgpSmgqaClKSkpAANEoLGggAOFoLGwoKCAA0UgsbCgoIACg6CxoIACxCCxoIAEBqCxoKCguaCgoKCgpSmgqaC")]
+[assembly: GoPositionMap("text/template/parse/parse.go", "parse.cs", "ADFmkoLasoKUAAkY4oKCgoLIkoKUlKiSqqKCqrKCgqiSgpSCgqiygoKCpqiSgoLM0gAHEtKCgoKUgoKClIKUgoKosoKCqJKokoKClKiSgoKU6JKCgoKCgqaUqPKCgoKUgpS0AAgGsoKCgoKCggAGEJKCgoKuAAwCgoKCgoKCgoLosoKCgpSC2pKU1taCgqYACAjmpAAIDNKCgoKCgoKCgoKCgpSUpLQACRDSgoKCgoKUgoKCgpSCAAIQAAkCgoKClJSUguwACAKApKSCgqSktNaCAAYUAAkCpKSkpKSkpKSklIKUAAYQ8oKUgpQABhDygpSClKzigpSCgsqCgpSCgoK0goKCgqa0trS0toK2gqaCtNq0gqaCptoACQKCgoKUgoKClAAOGoKCgoKCgoKUgoLIAAYS4gAHEuKSAAYS4gAHEPIABhDyuIKUggAGFAAJApSCgpSCgoKCgoKCgpSClAAGEgAIAoKCgoKClJSmopSCgpS0pAAGEgAIAoKCgoKClKS0+KSUgpQAAhQACQKCgpSCgoLulLS0tLYABhwADwKApIKClKSkpKSkpIKClKSClIKAkqSCgpSkgtiSgoKUgqaokqrCgoKCpoI=", "807-807:1", "", "66=CopyList/1/1/3;283=hasFunction/1/2/2,hasFunction/2/2/3", "", "1067:29,1068:21")]
 // </GoSourcePositionMaps>
 
 namespace go.text.template;
@@ -158,3 +157,41 @@ public static partial class parse_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(parse_package.ActionNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛActionNode;
+[GoMethodHost(typeof(parse_package.BoolNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛBoolNode;
+[GoMethodHost(typeof(parse_package.BranchNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛBranchNode;
+[GoMethodHost(typeof(parse_package.BreakNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛBreakNode;
+[GoMethodHost(typeof(parse_package.ChainNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛChainNode;
+[GoMethodHost(typeof(parse_package.CommandNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛCommandNode;
+[GoMethodHost(typeof(parse_package.CommentNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛCommentNode;
+[GoMethodHost(typeof(parse_package.ContinueNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛContinueNode;
+[GoMethodHost(typeof(parse_package.DotNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛDotNode;
+[GoMethodHost(typeof(parse_package.FieldNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛFieldNode;
+[GoMethodHost(typeof(parse_package.IdentifierNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛIdentifierNode;
+[GoMethodHost(typeof(parse_package.IfNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛIfNode;
+[GoMethodHost(typeof(parse_package.ListNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛListNode;
+[GoMethodHost(typeof(parse_package.NilNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛNilNode;
+[GoMethodHost(typeof(parse_package.NodeType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛNodeType;
+[GoMethodHost(typeof(parse_package.NumberNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛNumberNode;
+[GoMethodHost(typeof(parse_package.PipeNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛPipeNode;
+[GoMethodHost(typeof(parse_package.Pos)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛPos;
+[GoMethodHost(typeof(parse_package.RangeNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛRangeNode;
+[GoMethodHost(typeof(parse_package.StringNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛStringNode;
+[GoMethodHost(typeof(parse_package.TemplateNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛTemplateNode;
+[GoMethodHost(typeof(parse_package.TextNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛTextNode;
+[GoMethodHost(typeof(parse_package.Tree)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛTree;
+[GoMethodHost(typeof(parse_package.VariableNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛVariableNode;
+[GoMethodHost(typeof(parse_package.WithNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛWithNode;
+[GoMethodHost(typeof(parse_package.elseNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛelseNode;
+[GoMethodHost(typeof(parse_package.endNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛendNode;
+[GoMethodHost(typeof(parse_package.item)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛitem;
+[GoMethodHost(typeof(parse_package.lexer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛlexer;
+// </MethodHolders>

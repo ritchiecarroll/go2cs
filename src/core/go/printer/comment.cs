@@ -70,7 +70,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
     text = (@string)Ꮡpr.Comment(d);
 
     // For /* */ comment, return one big comment with text inside.
-    ref var slash = ref heap<tokenꓸPos>(list[0].Slash, out var Ꮡslash);
+    ref var slash = ref heap<go.token_package.Pos>(list[0].Slash, out var Ꮡslash);
     if (kind == "/*"u8) {
         var c = Ꮡ(new ast.Comment(
             Slash: slash,

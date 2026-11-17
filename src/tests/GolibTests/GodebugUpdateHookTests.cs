@@ -11,6 +11,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using go.@internal;
 using godebug = go.@internal.godebug_package;
 using os = go.os_package;
 
@@ -59,13 +60,13 @@ public class GodebugUpdateHookTests
         try
         {
             os.Setenv("GODEBUG", "go2cssetenv=bar");
-            Assert.AreEqual("bar", (string)godebug.Value(setting), "after os.Setenv GODEBUG=go2cssetenv=bar");
+            Assert.AreEqual("bar", (string)setting.Value(), "after os.Setenv GODEBUG=go2cssetenv=bar");
 
             os.Setenv("GODEBUG", "go2cssetenv=baz");
-            Assert.AreEqual("baz", (string)godebug.Value(setting), "after os.Setenv GODEBUG=go2cssetenv=baz");
+            Assert.AreEqual("baz", (string)setting.Value(), "after os.Setenv GODEBUG=go2cssetenv=baz");
 
             os.Unsetenv("GODEBUG");
-            Assert.AreEqual("", (string)godebug.Value(setting), "after os.Unsetenv GODEBUG");
+            Assert.AreEqual("", (string)setting.Value(), "after os.Unsetenv GODEBUG");
         }
         finally
         {
@@ -98,11 +99,11 @@ public class GodebugUpdateHookTests
             return;
 
         // Read before any Setenv: only the registration's update can have cached it.
-        string startup = godebug.Value(godebug.New("#" + StartupName));
+        string startup = godebug.New("#" + StartupName).Value();
 
         os.Setenv("GODEBUG", "fips140=on");
         os.Setenv("GODEBUG", "fips140=off");
-        string intermediate = godebug.Value(godebug.New("fips140"));
+        string intermediate = godebug.New("fips140").Value();
 
         File.WriteAllLines(record, [$"startup={startup}", $"intermediate={intermediate}"]);
     }

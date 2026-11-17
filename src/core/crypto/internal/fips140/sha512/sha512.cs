@@ -12,6 +12,7 @@ using errors = errors_package;
 using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140deps;
+using static sha512_package;
 
 partial class sha512_package {
 
@@ -75,6 +76,8 @@ partial struct Digest {
     internal nint size; // size224, size256, size384, or size512
 }
 
+} partial class sha512ᴛDigest {
+
 public static void Reset(this ref Digest d) {
     switch (d.size) {
     case var ᴛ when ᴛ == size384: {
@@ -129,6 +132,8 @@ public static void Reset(this ref Digest d) {
     d.len = 0;
 }
 
+} partial class sha512_package {
+
 internal static ref readonly @string magic384 => ref magic384ᵇ;
 private static readonly @string magic384ᵇ = "sha\x04"u8;
 internal static ref readonly @string magic512_224 => ref magic512_224ᵇ;
@@ -138,6 +143,8 @@ private static readonly @string magic512_256ᵇ = "sha\x06"u8;
 internal static ref readonly @string magic512 => ref magic512ᵇ;
 private static readonly @string magic512ᵇ = "sha\x07"u8;
 internal const nint marshaledSize = /* len(magic512) + 8*8 + chunk + 8 */ 204;
+
+} partial class sha512ᴛDigest {
 
 public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
@@ -223,14 +230,20 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     return default;
 }
 
+} partial class sha512_package {
+
 internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
     return (b[8..], byteorder.BEUint64(b));
 }
+
+} partial class sha512ᴛDigest {
 
 public static (hash.Cloner, error) Clone(this ref Digest d) {
     ref var r = ref heap<Digest>(d.ΔClone(), out var Ꮡr);
     return (new DigestжCloner(Ꮡr), default);
 }
+
+} partial class sha512_package {
 
 // New returns a new Digest computing the SHA-512 hash.
 public static ж<Digest> New() {
@@ -259,6 +272,8 @@ public static ж<Digest> New384() {
     d.Reset();
     return d;
 }
+
+} partial class sha512ᴛDigest {
 
 public static nint Size(this ref Digest d) {
     return d.size;
@@ -344,4 +359,4 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     return digest.Clone();
 }
 
-} // end sha512_package
+} // end sha512ᴛDigest

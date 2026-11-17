@@ -42,6 +42,7 @@ using go.net.http.@internal;
 using go.sync;
 using vendor.golang.org.x.net.http;
 using ꓸꓸꓸany = Span<any>;
+using static http_package;
 
 partial class http_package {
 
@@ -61,7 +62,7 @@ internal static void initᴛDefaultTransport() { DefaultTransport = new Transpor
     MaxIdleConns: 100,
     IdleConnTimeout: (time.Duration)(90000000000L),
     TLSHandshakeTimeout: (time.Duration)(10000000000L),
-    ExpectContinueTimeout: 1 * time.ΔSecond
+    ExpectContinueTimeout: 1 * time.Second
 ))); }
 
 // DefaultMaxIdleConnsPerHost is the default value of [Transport]'s
@@ -244,7 +245,7 @@ partial struct Transport {
     // ProxyConnectHeader optionally specifies headers to send to
     // proxies during CONNECT requests.
     // To set the header dynamically, see GetProxyConnectHeader.
-    public ΔHeader ProxyConnectHeader;
+    public Header ProxyConnectHeader;
     // GetProxyConnectHeader optionally specifies a func to return
     // headers to send to proxyURL during a CONNECT request to the
     // ip:port target.
@@ -252,7 +253,7 @@ partial struct Transport {
     // that error. It can return (nil, nil) to not add headers.
     // If GetProxyConnectHeader is non-nil, ProxyConnectHeader is
     // ignored.
-    public Func<context.Context, ж<url.URL>, @string, (ΔHeader, error)> GetProxyConnectHeader;
+    public Func<context.Context, ж<url.URL>, @string, (Header, error)> GetProxyConnectHeader;
     // MaxResponseHeaderBytes specifies a limit on how many
     // response bytes are allowed in the server's response
     // header.
@@ -290,6 +291,8 @@ partial struct Transport {
     // the default is HTTP/1 and HTTP/2.
     public ж<Protocols> Protocols;
 }
+
+} partial class httpᴛTransport {
 
 internal static nint writeBufferSize(this ref Transport t) {
     if (t.WriteBufferSize > 0) {
@@ -361,6 +364,8 @@ public static ж<Transport> Clone(this ж<Transport> Ꮡt) {
     return t2;
 }
 
+} partial class http_package {
+
 // h2Transport is the interface we expect to be able to call from
 // net/http against an *http2.Transport that's either bundled into
 // h2_bundle.go or supplied by the user via x/net/http2.
@@ -371,11 +376,21 @@ partial interface h2Transport {
     void CloseIdleConnections();
 }
 
+} partial class httpᴛTransport {
+
 internal static bool hasCustomTLSDialer(this ref Transport t) {
     return t.DialTLS != nil || t.DialTLSContext != nil;
 }
 
+} partial class http_package {
+
 internal static ж<godebug.Setting> http2client = godebug.New("http2client");
+
+} partial class httpᴛTransport {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string httpsˢ => ref httpsˢᵇ;
+private static readonly @string httpsˢᵇ = "https"u8;
 
 // onceSetNextProtoDefaults initializes TLSNextProto.
 // It must be called via t.nextProtoOnce.Do.
@@ -478,6 +493,8 @@ internal static Protocols protocols(this ref Transport t) {
     return p;
 }
 
+} partial class http_package {
+
 // ProxyFromEnvironment returns the URL of the proxy to use for a
 // given request, as indicated by the environment variables
 // HTTP_PROXY, HTTPS_PROXY and NO_PROXY (or the lowercase versions
@@ -511,7 +528,7 @@ public static Func<ж<Request>, (ж<url.URL>, error)> ProxyURL(ж<url.URL> fixed
 // from roundTrip.
 partial struct transportRequest {
     /*embed*/ public ж<Request> Request;     // original request, not to be mutated
-    internal ΔHeader extra;                  // extra headers to write, or nil
+    internal Header extra;                   // extra headers to write, or nil
     internal ж<httptrace.ClientTrace> trace; // optional
     internal context.Context ctx; // canceled when we are done with the request
     internal Action<error> cancel;
@@ -519,9 +536,11 @@ partial struct transportRequest {
     internal error err;     // first setError value for mapRoundTripError to consider
 }
 
-internal static ΔHeader extraHeaders(this ref transportRequest tr) {
+} partial class httpᴛtransportRequest {
+
+internal static Header extraHeaders(this ref transportRequest tr) {
     if (tr.extra == nil) {
-        tr.extra = new ΔHeader(0);
+        tr.extra = new Header(0);
     }
     return tr.extra;
 }
@@ -535,6 +554,8 @@ internal static void setError(this ж<transportRequest> Ꮡtr, error err) {
     }
     tr.mu.Unlock();
 }
+
+} partial class httpᴛTransport {
 
 // useRegisteredProtocol reports whether an alternate protocol (as registered
 // with Transport.RegisterProtocol) should be respected for this request.
@@ -565,7 +586,9 @@ internal static RoundTripper alternateRoundTripper(this ж<Transport> Ꮡt, ж<R
     return altProto[req.URL.Scheme];
 }
 
-internal static @string validateHeaders(ΔHeader hdrs) {
+} partial class http_package {
+
+internal static @string validateHeaders(Header hdrs) {
     foreach (var (k, vv) in hdrs) {
         if (!httpguts.ValidHeaderFieldName(k)) {
             return fmt.Sprintf("field name %q"u8, k);
@@ -581,9 +604,17 @@ internal static @string validateHeaders(ΔHeader hdrs) {
     return ""u8;
 }
 
+} partial class httpᴛTransport {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string httpNilRequestUrlˢ => ref httpNilRequestUrlˢᵇ;
+private static readonly @string httpNilRequestUrlˢᵇ = "http: nil Request.URL"u8;
+internal static ref readonly @string httpNilRequestHeaderˢ => ref httpNilRequestHeaderˢᵇ;
+private static readonly @string httpNilRequestHeaderˢᵇ = "http: nil Request.Header"u8;
 internal static ref readonly @string unsupportedProtocolˢ => ref unsupportedProtocolˢᵇ;
 private static readonly @string unsupportedProtocolˢᵇ = "unsupported protocol scheme"u8;
+internal static ref readonly @string httpNoHostInRequestUrlˢ => ref httpNoHostInRequestUrlˢᵇ;
+private static readonly @string httpNoHostInRequestUrlˢᵇ = "http: no Host in request URL"u8;
 
 // roundTrip implements a RoundTripper over HTTP.
 internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
@@ -657,7 +688,7 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
         //     after reading the request body.
         //   - For an HTTP/2 request, RoundTrip cancels this context after the HTTP/2
         //     RoundTripper returns.
-        (ctx, var cancel) = context_package.WithCancelCause(req.Context());
+        (ctx, var cancel) = context.WithCancelCause(req.Context());
 
         // Convert Request.Cancel into context cancelation.
         if (origReq.Cancel != nil) {
@@ -682,7 +713,7 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
             switch (trySelect(ᐸꟷ(selᴛ98, ꓸꓸꓸ))) {
             case 0 when selᴛ98.ꟷᐳ(out _): {
                 req.closeBody();
-                (_ᴛ1, err) = (default, context_package.Cause(ctx)); goto ᒐdone;
+                (_ᴛ1, err) = (default, context.Cause(ctx)); goto ᒐdone;
             }
             default: {
                 break;
@@ -768,6 +799,8 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
     ᒐdone: return (_ᴛ1, err);
 }
 
+} partial class http_package {
+
 internal static void awaitLegacyCancel(context.Context ctx, Action<error> cancel, ref Request req) {
     var selᴛ99 = req.Cancel;
     var selᴛ100 = ctx.Done();
@@ -789,6 +822,8 @@ partial struct readTrackingBody {
     internal atomic.Bool didClose;
 }
 
+} partial class httpᴛreadTrackingBody {
+
 internal static (nint, error) Read(this ref readTrackingBody r, slice<byte> data) {
     r.didRead = true;
     return r.ReadCloser.Read(data);
@@ -802,6 +837,8 @@ internal static error Close(this ж<readTrackingBody> Ꮡr) {
     }
     return r.ReadCloser.Close();
 }
+
+} partial class http_package {
 
 // setupRewindBody returns a new request with a custom body wrapper
 // that can report whether the body needs rewinding.
@@ -843,6 +880,8 @@ internal static (ж<Request> rewound, error err) rewindBody(ж<Request> Ꮡreq) 
     newReq.Body = new readTrackingBodyжReadCloser(Ꮡ(new readTrackingBody(ReadCloser: body)));
     return (ᏑnewReq, default);
 }
+
+} partial class httpᴛpersistConn {
 
 // shouldRetryRequest reports whether we should retry sending a failed
 // HTTP request on a new connection. The non-nil input error is the
@@ -896,8 +935,12 @@ internal static bool shouldRetryRequest(this ж<persistConn> Ꮡpc, ж<Request> 
     return false; // conservatively
 }
 
+} partial class http_package {
+
 // ErrSkipAltProtocol is a sentinel error value defined by Transport.RegisterProtocol.
 public static error ErrSkipAltProtocol = errors.New("net/http: skip alternate protocol");
+
+} partial class httpᴛTransport {
 
 // RegisterProtocol registers a new protocol with scheme.
 // The [Transport] will pass requests using the given scheme to rt.
@@ -1005,6 +1048,8 @@ public static void CancelRequest(this ж<Transport> Ꮡt, ж<Request> req) {
     }
 }
 
+} partial class http_package {
+
 //
 // Private implementation past this point.
 //
@@ -1027,6 +1072,8 @@ internal static void resetProxyConfig() {
     envProxyFuncValue = default;
 }
 
+} partial class httpᴛTransport {
+
 internal static (connectMethod cm, error err) connectMethodForRequest(this ref Transport t, ж<transportRequest> Ꮡtreq) {
     connectMethod cm = default;
     error err = default;
@@ -1041,6 +1088,8 @@ internal static (connectMethod cm, error err) connectMethodForRequest(this ref T
     return (cm, err);
 }
 
+} partial class httpᴛconnectMethod {
+
 // proxyAuth returns the Proxy-Authorization header to set
 // on requests, if applicable.
 internal static @string proxyAuth(this ref connectMethod cm) {
@@ -1054,6 +1103,8 @@ internal static @string proxyAuth(this ref connectMethod cm) {
     }
     return ""u8;
 }
+
+} partial class http_package {
 
 // error values for debugging and testing, not seen by users.
 internal static error errKeepAlivesDisabled = errors.New("http: putIdleConn: keep alives disabled");
@@ -1083,11 +1134,15 @@ partial struct transportReadFromServerError {
     internal error err;
 }
 
+} partial class httpᴛtransportReadFromServerError {
+
 internal static error Unwrap(this transportReadFromServerError e) { return e.err; }
 
 internal static @string Error(this transportReadFromServerError e) {
     return fmt.Sprintf("net/http: Transport failed to read from server: %v"u8, e.err);
 }
+
+} partial class httpᴛTransport {
 
 internal static void putOrCloseIdleConn(this ж<Transport> Ꮡt, ж<persistConn> pconn) {
     var err = Ꮡt.tryPutIdleConn(pconn); if (err != nil) {
@@ -1195,7 +1250,7 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
             t.idleConn = new map<connectMethodKey, slice<ж<persistConn>>>();
         }
         var idles = t.idleConn[key];
-        if (builtin.len(idles) >= t.maxIdleConnsPerHost()) {
+        if (len(idles) >= t.maxIdleConnsPerHost()) {
             return errTooManyIdleHost;
         }
         foreach (var (_, exist) in range(idles)) {
@@ -1267,8 +1322,8 @@ internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> �
             var (list, ok) = t.idleConn[w.key, ꟷ]; if (ok) {
                 var stop = false;
                 var deliveredΔ1 = false;
-                while (builtin.len(list) > 0 && !stop) {
-                    var pconn = list[builtin.len(list) - 1];
+                while (len(list) > 0 && !stop) {
+                    var pconn = list[len(list) - 1];
 
                     // See whether this connection has been idle too long, considering
                     // only the wall time (the Round(0)), in case this is a laptop or VM
@@ -1287,7 +1342,7 @@ internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> �
                         // from the idle list, or if this persistConn is too old (it was
                         // idle too long), then ignore it and look for another. In both
                         // cases it's already in the process of being closed.
-                        list = list.slice(0, builtin.len(list) - 1);
+                        list = list.slice(0, len(list) - 1);
                         continue;
                     }
                     deliveredΔ1 = Ꮡw.tryDeliver(pconn, default, pconn.idleAt);
@@ -1299,12 +1354,12 @@ internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> �
                             // HTTP/1: only one client can use pconn.
                             // Remove it from the list.
                             t.idleLRU.remove(pconn);
-                            list = list.slice(0, builtin.len(list) - 1);
+                            list = list.slice(0, len(list) - 1);
                         }
                     }
                     stop = true;
                 }
-                if (builtin.len(list) > 0) {
+                if (len(list) > 0) {
                     t.idleConn[w.key] = list;
                 } else {
                     delete(t.idleConn, w.key);
@@ -1360,7 +1415,7 @@ internal static bool removeIdleConnLocked(this ref Transport t, ж<persistConn> 
     var key = pconn.cacheKey;
     var pconns = t.idleConn[key];
     bool removed = default;
-    switch (builtin.len(pconns)) {
+    switch (len(pconns)) {
     case 0: {
         // Nothing
         break;
@@ -1380,7 +1435,7 @@ internal static bool removeIdleConnLocked(this ref Transport t, ж<persistConn> 
             // Slide down, keeping most recently-used
             // conns at the end.
             copy(pconns.slice(i), pconns.slice(i + 1));
-            t.idleConn[key] = pconns.slice(0, builtin.len(pconns) - 1);
+            t.idleConn[key] = pconns.slice(0, len(pconns) - 1);
             removed = true;
             break;
         }
@@ -1389,8 +1444,12 @@ internal static bool removeIdleConnLocked(this ref Transport t, ж<persistConn> 
     return removed;
 }
 
+} partial class http_package {
+
 internal static readonly ж<net.Dialer> ᏑzeroDialer = new StaticBox<net.Dialer>(default(net.Dialer));
 internal static ref net.Dialer zeroDialer => ref ((StaticBox<net.Dialer>)ᏑzeroDialer).ValueSlot;
+
+} partial class httpᴛTransport {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string netHttpTransportˢ => ref netHttpTransportˢᵇ;
@@ -1415,6 +1474,8 @@ internal static (net.Conn, error) dial(this ref Transport t, context.Context ctx
     }
     return ᏑzeroDialer.DialContext(ctx, network, addr);
 }
+
+} partial class http_package {
 
 // A wantConn records state about a wanted connection
 // (that is, an active call to getConn).
@@ -1442,6 +1503,8 @@ partial struct connOrError {
     internal error err;
     internal time.Time idleAt;
 }
+
+} partial class httpᴛwantConn {
 
 // waiting reports whether w is still waiting for an answer (connection or error).
 internal static bool waiting(this ж<wantConn> Ꮡw) {
@@ -1495,7 +1558,7 @@ internal static bool tryDeliver(this ж<wantConn> Ꮡw, ж<persistConn> pc, erro
         w.done = true;
 
         w.result.ᐸꟷ(new connOrError(pc: pc, err: err, idleAt: idleAt));
-        builtin.close(w.result);
+        close(w.result);
 
         return true;
     }
@@ -1515,7 +1578,7 @@ internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> t) {
             pc = r.pc;
         }
     } else {
-        builtin.close(w.result);
+        close(w.result);
     }
     w.ctx = default;
     w.done = true;
@@ -1528,6 +1591,8 @@ internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> t) {
         t.putOrCloseIdleConn(pc);
     }
 }
+
+} partial class http_package {
 
 // A wantConnQueue is a queue of wantConns.
 partial struct wantConnQueue {
@@ -1545,6 +1610,8 @@ partial struct wantConnQueue {
     internal nint headPos;
     internal slice<ж<wantConn>> tail;
 }
+
+} partial class httpᴛwantConnQueue {
 
 // len returns the number of items in the queue.
 internal static nint len(this ref wantConnQueue q) {
@@ -1619,6 +1686,8 @@ internal static void all(this ref wantConnQueue q, Action<ж<wantConn>> f) {
     }
 }
 
+} partial class httpᴛTransport {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string netHttpTransportDialTLSˢ => ref netHttpTransportDialTLSˢᵇ;
 private static readonly @string netHttpTransportDialTLSˢᵇ = "net/http: Transport.DialTLS or DialTLSContext returned (nil, nil)"u8;
@@ -1661,7 +1730,7 @@ internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж
         // because a future request may be able to make use of the connection.
         //
         // We retain the request context's values.
-        var (dialCtx, dialCancel) = context_package.WithCancel(context_package.WithoutCancel(ctx));
+        var (dialCtx, dialCancel) = context.WithCancel(context.WithoutCancel(ctx));
 
         var w = Ꮡ(new wantConn(
             cm: cm,
@@ -1709,7 +1778,7 @@ internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж
                 var selᴛ104 = treq.ctx.Done();
                 switch (trySelect(ᐸꟷ(selᴛ104, ꓸꓸꓸ))) {
                 case 0 when selᴛ104.ꟷᐳ(out _): {
-                    var errΔ1 = context_package.Cause(treq.ctx);
+                    var errΔ1 = context.Cause(treq.ctx);
                     if (AreEqual(errΔ1, errRequestCanceled)) {
                         errΔ1 = errRequestCanceledConn;
                     }
@@ -1723,7 +1792,7 @@ internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж
             (_ᴛ1, err) = (r.pc, r.err); goto ᒐdone;
         }
         case 1 when selᴛ103.ꟷᐳ(out _): {
-            var errΔ2 = context_package.Cause(treq.ctx);
+            var errΔ2 = context.Cause(treq.ctx);
             if (AreEqual(errΔ2, errRequestCanceled)) {
                 errΔ2 = errRequestCanceledConn;
             }
@@ -1885,6 +1954,8 @@ internal static void decConnsPerHost(this ж<Transport> Ꮡt, connectMethodKey k
     finally { if (ᒐd1) Ꮡt.DerefOrNull().connsPerHostMu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class httpᴛpersistConn {
+
 // Add TLS to a persistent connection, i.e. negotiate a TLS session. If pconn is already a TLS
 // tunnel, this function establishes a nested TLS session inside the encrypted channel.
 // The remote endpoint's name may be overridden by TLSClientConfig.ServerName.
@@ -1933,12 +2004,12 @@ internal static partial error addTLS(this ref persistConn pconn, context.Context
                 ᐸꟷ(errc);
             }
             if (Ꮡtrace != nil && trace.TLSHandshakeDone != nil) {
-                trace.TLSHandshakeDone(new tlsꓸConnectionState(), err);
+                trace.TLSHandshakeDone(new tls.ConnectionState(), err);
             }
             return err;
         }
     }
-    ref var cs = ref heap<tlsꓸConnectionState>(tlsConn.ConnectionState(), out var Ꮡcs);
+    ref var cs = ref heap<tls.ConnectionState>(tlsConn.ConnectionState(), out var Ꮡcs);
     if (Ꮡtrace != nil && trace.TLSHandshakeDone != nil) {
         trace.TLSHandshakeDone(cs, default);
     }
@@ -1947,13 +2018,19 @@ internal static partial error addTLS(this ref persistConn pconn, context.Context
     return default;
 }
 
+} partial class http_package {
+
 partial interface erringRoundTripper {
     error RoundTripErr();
 }
 
-internal static Func<context.Context, time.Duration, (context.Context, Action)> testHookProxyConnectTimeout = context_package.WithTimeout;
+internal static Func<context.Context, time.Duration, (context.Context, Action)> testHookProxyConnectTimeout = context.WithTimeout;
+
+} partial class httpᴛTransport {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
 internal static ref readonly @string proxyAuthorizationˢ => ref proxyAuthorizationˢᵇ;
 private static readonly @string proxyAuthorizationˢᵇ = "Proxy-Authorization"u8;
 internal static ref readonly @string unknownStatusCodeˢ => ref unknownStatusCodeˢᵇ;
@@ -1974,7 +2051,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
             t: Ꮡt,
             cacheKey: cm.key(),
             reqch: new channel<requestAndChan>(1),
-            writech: new channel<ΔwriteRequest>(1),
+            writech: new channel<writeRequest>(1),
             closech: new channel<EmptyStruct>(0),
             writeErrCh: new channel<error>(1),
             writeLoopDone: new channel<EmptyStruct>(0),
@@ -2006,12 +2083,12 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
                         var errΔ3 = tc.HandshakeContext(ctx); if (errΔ3 != nil) {
                             goǃ(ᴛ0 => ᴛ0.Close(), pconn.conn);
                             if (trace != nil && trace.TLSHandshakeDone != nil) {
-                                trace.TLSHandshakeDone(new tlsꓸConnectionState(), errΔ3);
+                                trace.TLSHandshakeDone(new tls.ConnectionState(), errΔ3);
                             }
                             (pconn, err) = (default, errΔ3); goto ᒐdone;
                         }
                     }
-                    ref var cs = ref heap<tlsꓸConnectionState>(tc.ConnectionState(), out var Ꮡcs);
+                    ref var cs = ref heap<tls.ConnectionState>(tc.ConnectionState(), out var Ꮡcs);
                     if (trace != nil && trace.TLSHandshakeDone != nil) {
                         trace.TLSHandshakeDone(cs, default);
                     }
@@ -2068,7 +2145,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
             pconn.isProxy = true;
             {
                 @string pa = cm.proxyAuth(); if (pa != ""u8) {
-                    pconn.mutateHeaderFunc = (ΔHeader h) => {
+                    pconn.mutateHeaderFunc = (Header h) => {
                         h.Set(proxyAuthorizationˢ, pa);
                     };
                 }
@@ -2077,7 +2154,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
         }
         case {} when cm.targetScheme == "https"u8: {
             var conn = pconn.conn;
-            ΔHeader hdr = default;
+            Header hdr = default;
             if (t.GetProxyConnectHeader != nil) {
                 error errΔ9 = default;
                 (hdr, errΔ9) = t.GetProxyConnectHeader(ctx, cm.proxyURL, cm.targetAddr);
@@ -2089,7 +2166,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
                 hdr = t.ProxyConnectHeader;
             }
             if (hdr == nil) {
-                hdr = new ΔHeader(0);
+                hdr = new Header(0);
             }
             {
                 @string pa = cm.proxyAuth(); if (pa != ""u8) {
@@ -2121,7 +2198,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
             goǃ(() => {
                 GoFrame ᒐ = default;
                 try {
-                    defer(ᴛ1 => builtin.close(ᴛ1), didReadResponseʗ1, ref ᒐ);
+                    defer(ᴛ1 => close(ᴛ1), didReadResponseʗ1, ref ᒐ);
                     ᏑerrΔ10.ValueSlot = connectReqʗ1.Write(new net_ConnᴠWriter(connʗ1));
                     if (ᏑerrΔ10.ValueSlot != nil) {
                         return;
@@ -2229,6 +2306,8 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
     ᒐdone: return (pconn, err);
 }
 
+} partial class http_package {
+
 // persistConnWriter is the io.Writer written to by pc.bw.
 // It accumulates the number of bytes written to the underlying conn,
 // so the retry logic can determine whether any bytes made it across
@@ -2238,6 +2317,8 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
 partial struct persistConnWriter {
     internal ж<persistConn> pc;
 }
+
+} partial class httpᴛpersistConnWriter {
 
 internal static (nint n, error err) Write(this persistConnWriter w, slice<byte> p) {
     nint n = default;
@@ -2259,6 +2340,8 @@ internal static (int64 n, error err) ReadFrom(this persistConnWriter w, io.Reade
     w.pc.nwrite += n;
     return (n, err);
 }
+
+} partial class http_package {
 
 internal static io.ReaderFrom _ᴛ12ʗ = new persistConnWriterжReaderFrom(((ж<persistConnWriter>)nil));
 
@@ -2288,6 +2371,8 @@ partial struct connectMethod {
     internal @string targetAddr;
     internal bool onlyH1; // whether to disable HTTP/2 and force HTTP/1
 }
+
+} partial class httpᴛconnectMethod {
 
 internal static connectMethodKey key(this ref connectMethod cm) {
     @string proxyStr = ""u8;
@@ -2332,6 +2417,8 @@ internal static @string tlsHost(this ref connectMethod cm) {
     return h;
 }
 
+} partial class http_package {
+
 // connectMethodKey is the map key version of connectMethod, with a
 // stringified proxy URL (or the empty string) instead of a pointer to
 // a URL.
@@ -2339,6 +2426,8 @@ partial struct connectMethodKey {
     internal @string proxy, scheme, addr;
     internal bool onlyH1;
 }
+
+} partial class httpᴛconnectMethodKey {
 
 internal static @string String(this connectMethodKey k) {
     // Only used by tests.
@@ -2348,6 +2437,8 @@ internal static @string String(this connectMethodKey k) {
     }
     return fmt.Sprintf("%s|%s%s|%s"u8, k.proxy, k.scheme, h1, k.addr);
 }
+
+} partial class http_package {
 
 // persistConn wraps a connection, usually a persistent one
 // (but may be used for non-keep-alive requests as well)
@@ -2359,14 +2450,14 @@ partial struct persistConn {
     internal ж<Transport> t;
     internal connectMethodKey cacheKey;
     internal net.Conn conn;
-    internal ж<tlsꓸConnectionState> tlsState;
-    internal ж<bufio.Reader> br;             // from conn
-    internal ж<bufio.Writer> bw;             // to conn
-    internal int64 nwrite;                   // bytes written
-    internal channel<requestAndChan> reqch;  // written by roundTrip; read by readLoop
-    internal channel<ΔwriteRequest> writech; // written by roundTrip; read by writeLoop
-    internal channel<EmptyStruct> closech;   // closed when conn closed
-    internal channel<EmptyStruct> availch;   // ClientConn only: contains a value when conn is usable
+    internal ж<tls.ConnectionState> tlsState;
+    internal ж<bufio.Reader> br;            // from conn
+    internal ж<bufio.Writer> bw;            // to conn
+    internal int64 nwrite;                  // bytes written
+    internal channel<requestAndChan> reqch; // written by roundTrip; read by readLoop
+    internal channel<writeRequest> writech; // written by roundTrip; read by writeLoop
+    internal channel<EmptyStruct> closech;  // closed when conn closed
+    internal channel<EmptyStruct> availch;  // ClientConn only: contains a value when conn is usable
     internal bool isProxy;
     internal bool sawEOF;       // whether we've seen EOF from conn; owned by readLoop
     internal bool isClientConn; // whether this is a ClientConn (outside any pool)
@@ -2391,8 +2482,10 @@ partial struct persistConn {
     // mutateHeaderFunc is an optional func to modify extra
     // headers on each outbound request before it's written. (the
     // original Request given to RoundTrip is not modified)
-    internal Action<ΔHeader> mutateHeaderFunc;
+    internal Action<Header> mutateHeaderFunc;
 }
+
+} partial class httpᴛpersistConn {
 
 internal static int64 maxHeaderResponseSize(this ref persistConn pc) {
     return pc.t.maxHeaderResponseSize();
@@ -2405,7 +2498,7 @@ internal static (nint n, error err) Read(this ref persistConn pc, slice<byte> p)
     if (pc.readLimit <= 0) {
         return (0, fmt.Errorf("read limit of %d bytes exhausted"u8, pc.maxHeaderResponseSize()));
     }
-    if ((int64)builtin.len(p) > pc.readLimit) {
+    if ((int64)len(p) > pc.readLimit) {
         p = p.slice(0, (nint)(pc.readLimit));
     }
     (n, err) = pc.conn.Read(p);
@@ -2551,10 +2644,22 @@ internal static error mapRoundTripError(this ж<persistConn> Ꮡpc, ж<transport
     return err;
 }
 
+} partial class http_package {
+
 // errCallerOwnsConn is an internal sentinel error used when we hand
 // off a writable response.Body to the caller. We use this to prevent
 // closing a net.Conn that is now owned by the caller.
 internal static error errCallerOwnsConn = errors.New("read loop ending; caller owns writable underlying conn");
+
+} partial class httpᴛpersistConn {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string contentEncodingˢ => ref contentEncodingˢᵇ;
+private static readonly @string contentEncodingˢᵇ = "Content-Encoding"u8;
+internal static ref readonly @string gzipˢ => ref gzipˢᵇ;
+private static readonly @string gzipˢᵇ = "gzip"u8;
+internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
+private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
 
 internal static void readLoop(this ж<persistConn> Ꮡpc) {
     GoFrame ᒐ = default;
@@ -2750,7 +2855,7 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
             }
             case 1 when selᴛ114.ꟷᐳ(out _): {
                 alive = false;
-                Ꮡpc.cancelRequest(context_package.Cause(rc.treq.ctx));
+                Ꮡpc.cancelRequest(context.Cause(rc.treq.ctx));
                 break;
             }
             case 2 when selᴛ115.ꟷᐳ(out _): {
@@ -2787,11 +2892,13 @@ internal static void readLoopPeekFailLocked(this ref persistConn pc, error peekE
     }
 }
 
+} partial class http_package {
+
 // is408Message reports whether buf has the prefix of an
 // HTTP 408 Request Timeout response.
 // See golang.org/issue/32310.
 internal static bool is408Message(slice<byte> buf) {
-    if (builtin.len(buf) < builtin.len("HTTP/1.x 408")) {
+    if (len(buf) < len("HTTP/1.x 408")) {
         return false;
     }
     if (((sstring)(buf[..7])) != "HTTP/1."u8) {
@@ -2799,6 +2906,8 @@ internal static bool is408Message(slice<byte> buf) {
     }
     return ((sstring)(buf[8..12])) == " 408"u8;
 }
+
+} partial class httpᴛpersistConn {
 
 // readResponse reads an HTTP response (or two, in the case of "Expect:
 // 100-continue") from the server. It returns the final non-100 one.
@@ -2809,7 +2918,7 @@ internal static (ж<Response> resp, error err) readResponse(this ref persistConn
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
     if (Ꮡtrace != nil && trace.GotFirstResponseByte != nil) {
-        var (peek, errΔ1) = pc.br.Peek(1); if (errΔ1 == nil && builtin.len(peek) == 1) {
+        var (peek, errΔ1) = pc.br.Peek(1); if (errΔ1 == nil && len(peek) == 1) {
             trace.GotFirstResponseByte();
         }
     }
@@ -2911,6 +3020,8 @@ internal static Func<bool> waitForContinue(this ж<persistConn> Ꮡpc, /*<-*/cha
     };
 }
 
+} partial class http_package {
+
 internal static io.ReadWriteCloser newReadWriteCloserBody(ж<bufio.Reader> Ꮡbr, io.ReadWriteCloser rwc) {
     ref var br = ref Ꮡbr.DerefOrNull();
 
@@ -2940,12 +3051,14 @@ internal static error Close(this readWriteCloserBody recvᴛ) => recvᴛ.ReadWri
 // interface field in *readWriteCloserBody's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Write(this readWriteCloserBody recvᴛ, slice<byte> p) => recvᴛ.ReadWriteCloser.Write(p);
 
+} partial class httpᴛreadWriteCloserBody {
+
 internal static (nint n, error err) Read(this ref readWriteCloserBody b, slice<byte> p) {
     nint n = default;
     error err = default;
 
     if (b.br != nil) {
-        nint nΔ1 = b.br.Buffered(); if (builtin.len(p) > nΔ1) {
+        nint nΔ1 = b.br.Buffered(); if (len(p) > nΔ1) {
             p = p.slice(0, nΔ1);
         }
         (n, err) = b.br.Read(p);
@@ -2957,9 +3070,13 @@ internal static (nint n, error err) Read(this ref readWriteCloserBody b, slice<b
     return b.ReadWriteCloser.Read(p);
 }
 
+} partial class http_package {
+
 internal partial interface CloseWrite_type /*dyn*/ {
     error CloseWrite();
 }
+
+} partial class httpᴛreadWriteCloserBody {
 
 internal static error CloseWrite(this ref readWriteCloserBody b) {
     var (cw, ok) = b.ReadWriteCloser._<CloseWrite_type>(ᐧ); if (ok) {
@@ -2968,14 +3085,20 @@ internal static error CloseWrite(this ref readWriteCloserBody b) {
     return fmt.Errorf("CloseWrite: %w"u8, ErrNotSupported.OrTypedNil());
 }
 
+} partial class http_package {
+
 // nothingWrittenError wraps a write errors which ended up writing zero bytes.
 partial struct nothingWrittenError {
     /*embed*/ internal error error;
 }
 
+} partial class httpᴛnothingWrittenError {
+
 internal static error Unwrap(this nothingWrittenError nwe) {
     return nwe.error;
 }
+
+} partial class httpᴛpersistConn {
 
 internal static void writeLoop(this ж<persistConn> Ꮡpc) {
     GoFrame ᒐ = default;
@@ -3026,6 +3149,8 @@ internal static void writeLoop(this ж<persistConn> Ꮡpc) {
     finally { ᒐ.Run(); }
 }
 
+} partial class http_package {
+
 // maxWriteWaitBeforeConnReuse is how long the a Transport RoundTrip
 // will wait to see the Request's Body.Write result after getting a
 // response from the server. See comments in (*persistConn).wroteRequest.
@@ -3034,6 +3159,8 @@ internal static void writeLoop(this ж<persistConn> Ꮡpc) {
 // recycling of connections.
 internal static readonly ж<time.Duration> ᏑmaxWriteWaitBeforeConnReuse = new StaticBox<time.Duration>(50 * time.Millisecond);
 internal static ref time.Duration maxWriteWaitBeforeConnReuse => ref ((StaticBox<time.Duration>)ᏑmaxWriteWaitBeforeConnReuse).ValueSlot;
+
+} partial class httpᴛpersistConn {
 
 // wroteRequest is a check before recycling a connection that the previous write
 // (from writeLoop above) happened and was successful.
@@ -3080,6 +3207,8 @@ internal static bool wroteRequest(this ж<persistConn> Ꮡpc) {
     finally { ᒐ.Run(); }
 }
 
+} partial class http_package {
+
 // responseAndError is how the goroutine reading from an HTTP/1 server
 // communicates with the goroutine doing the RoundTrip.
 partial struct responseAndError {
@@ -3108,7 +3237,7 @@ partial struct requestAndChan {
 // writeLoop's goroutine to write a request while the read loop
 // concurrently waits on both the write response and the server's
 // reply.
-partial struct ΔwriteRequest {
+partial struct writeRequest {
     internal ж<transportRequest> req;
     internal channel/*<-*/<error> ch = channel/*<-*/<error>.SendOnly;
     // Optional blocking chan for Expect: 100-continue (for receive).
@@ -3123,10 +3252,14 @@ partial struct timeoutError {
     internal @string err;
 }
 
+} partial class httpᴛtimeoutError {
+
 internal static @string Error(this ref timeoutError e) { return e.err; }
 internal static bool Timeout(this ref timeoutError e) { return true; }
 internal static bool Temporary(this ref timeoutError e) { return true; }
-internal static bool Is(this ref timeoutError e, error err) { return AreEqual(err, context_package.DeadlineExceeded); }
+internal static bool Is(this ref timeoutError e, error err) { return AreEqual(err, context.DeadlineExceeded); }
+
+} partial class http_package {
 
 internal static error errTimeout = new timeoutErrorжerror(Ꮡ(new timeoutError("net/http: timeout awaiting response headers")));
 
@@ -3154,6 +3287,8 @@ internal static Action testHookPostPendingDial = nop;
 internal static sync.Locker testHookMu = new fakeLocker(); // guards following
 internal static Action testHookReadLoopBeforeNextRead = nop;
 
+} partial class httpᴛpersistConn {
+
 internal static error waitForAvailability(this ref persistConn pc, context.Context ctx) {
     var selᴛ124 = pc.availch;
     var selᴛ125 = pc.closech;
@@ -3174,6 +3309,12 @@ internal static error waitForAvailability(this ref persistConn pc, context.Conte
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string acceptEncodingˢ => ref acceptEncodingˢᵇ;
 private static readonly @string acceptEncodingˢᵇ = "Accept-Encoding"u8;
+internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
+private static readonly @string rangeˢᵇ = "Range"u8;
+internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
+private static readonly @string connectionˢᵇ = "Connection"u8;
+internal static ref readonly @string closeˢ => ref closeˢᵇ;
+private static readonly @string closeˢᵇ = "close"u8;
 
 internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> Ꮡpc, ж<transportRequest> Ꮡreq) {
     ж<Response> resp = default;
@@ -3246,7 +3387,7 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
         // request body.
         var startBytesWritten = pc.nwrite;
         var writeErrCh = new channel<error>(1);
-        pc.writech.ᐸꟷ(new ΔwriteRequest(Ꮡreq, writeErrCh, continueCh));
+        pc.writech.ᐸꟷ(new writeRequest(Ꮡreq, writeErrCh, continueCh));
 
         var resc = new channel<responseAndError>(0);
         pc.reqch.ᐸꟷ(new requestAndChan(
@@ -3341,7 +3482,7 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
                 default: {
                     break;
                 }}
-                Ꮡpc.cancelRequest(context_package.Cause(req.ctx));
+                Ꮡpc.cancelRequest(context.Cause(req.ctx));
                 break;
             }}
         }
@@ -3351,10 +3492,14 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
     ᒐdone: return (resp, err);
 }
 
+} partial class http_package {
+
 // tLogKey is a context WithValue key for test debugging contexts containing
 // a t.Logf func. See export_test.go's Request.WithT method.
 partial struct tLogKey {
 }
+
+} partial class httpᴛtransportRequest {
 
 internal static void logf(this ref transportRequest tr, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
@@ -3363,6 +3508,8 @@ internal static void logf(this ref transportRequest tr, @string format, params �
         logf(time.Now().Format(time.RFC3339Nano) + ": "u8 + format, args.ꓸꓸꓸ);
     }
 }
+
+} partial class httpᴛpersistConn {
 
 // markReused marks this connection as having been successfully used for a
 // request and response.
@@ -3411,6 +3558,8 @@ internal static void closeLocked(this ref persistConn pc, error err) {
     }
     pc.mutateHeaderFunc = default;
 }
+
+} partial class http_package {
 
 internal static @string schemePort(@string scheme) {
     var exprᴛ1 = scheme;
@@ -3472,6 +3621,8 @@ partial struct bodyEOFSignal {
 
 internal static error errReadOnClosedResBody = errors.New("http: read on closed response body");
 internal static error errConcurrentReadOnResBody = errors.New("http: concurrent read on response body");
+
+} partial class httpᴛbodyEOFSignal {
 
 internal static (nint n, error err) Read(this ж<bodyEOFSignal> Ꮡes, slice<byte> p) {
     nint n = default;
@@ -3537,6 +3688,8 @@ internal static error condfn(this ref bodyEOFSignal es, error err) {
     return err;
 }
 
+} partial class http_package {
+
 // gzipReader wraps a response body so it can lazily
 // get gzip.Reader from the pool on the first call to Read.
 // After Close is called it puts gzip.Reader to the pool immediately
@@ -3552,8 +3705,12 @@ partial struct gzipReader {
 partial struct eofReader {
 }
 
+} partial class httpᴛeofReader {
+
 internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
 internal static (byte, error) ReadByte(this eofReader _) { return (0, io.EOF); }
+
+} partial class http_package {
 
 internal static readonly ж<sync.Pool> ᏑgzipPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<gzip.Reader>()));
 internal static ref sync.Pool gzipPool => ref ((StaticBox<sync.Pool>)ᏑgzipPool).ValueSlot;
@@ -3578,6 +3735,8 @@ internal static void gzipPoolPut(ж<gzip.Reader> Ꮡzr) {
     zr.Reset(r);
     ᏑgzipPool.Put(Ꮡzr.OrTypedNil());
 }
+
+} partial class httpᴛgzipReader {
 
 // acquire returns a gzip.Reader for reading response body.
 // The reader must be released after use.
@@ -3672,8 +3831,12 @@ internal static error Close(this ж<gzipReader> Ꮡgz) {
     return gz.body.Close();
 }
 
+} partial class http_package {
+
 partial struct tlsHandshakeTimeoutError {
 }
+
+} partial class httpᴛtlsHandshakeTimeoutError {
 
 internal static bool Timeout(this tlsHandshakeTimeoutError _) { return true; }
 internal static bool Temporary(this tlsHandshakeTimeoutError _) { return true; }
@@ -3683,14 +3846,20 @@ private static readonly @string netHttpTlsHandshakeˢᵇ = "net/http: TLS handsh
 
 internal static @string Error(this tlsHandshakeTimeoutError _) { return netHttpTlsHandshakeˢ; }
 
+} partial class http_package {
+
 // fakeLocker is a sync.Locker which does nothing. It's used to guard
 // test-only fields when not under test, to avoid runtime atomic
 // overhead.
 partial struct fakeLocker {
 }
 
+} partial class httpᴛfakeLocker {
+
 internal static void Lock(this fakeLocker _) { }
 internal static void Unlock(this fakeLocker _) { }
+
+} partial class http_package {
 
 // cloneTLSConfig returns a shallow clone of cfg, or a new zero tls.Config if
 // cfg is nil. This is safe to call even if cfg is in active use by a TLS
@@ -3716,6 +3885,8 @@ partial struct connLRU {
     internal ж<list.List> ll; // list.Element.Value type is of *persistConn
     internal map<ж<persistConn>, ж<list.Element>> m;
 }
+
+} partial class httpᴛconnLRU {
 
 // add adds pc to the head of the linked list.
 internal static void add(this ref connLRU cl, ж<persistConn> pc) {
@@ -3751,4 +3922,4 @@ internal static nint len(this ref connLRU cl) {
     return builtin.len(cl.m);
 }
 
-} // end http_package
+} // end httpᴛconnLRU

@@ -18,6 +18,7 @@ using @internal;
 using @internal.runtime.syscall;
 using go.sync;
 using ꓸꓸꓸuintptr = Span<uintptr>;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -446,6 +447,8 @@ internal static UntypedInt exited => 0x00;
 internal static UntypedInt stopped => 0x7F;
 internal static UntypedInt shift => 8;
 
+} partial class syscallᴛWaitStatus {
+
 public static bool Exited(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == exited; }
 
 public static bool Signaled(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != exited; }
@@ -463,18 +466,18 @@ public static nint ExitStatus(this WaitStatus w) {
     return (nint)(w >> (int)(shift)) & 0xFF;
 }
 
-public static ΔSignal Signal(this WaitStatus w) {
+public static Signal Signal(this WaitStatus w) {
     if (!w.Signaled()) {
         return -1;
     }
-    return (ΔSignal)(nint)((WaitStatus)(w & (uint32)mask));
+    return (Signal)(nint)((WaitStatus)(w & (uint32)mask));
 }
 
-public static ΔSignal StopSignal(this WaitStatus w) {
+public static Signal StopSignal(this WaitStatus w) {
     if (!w.Stopped()) {
         return -1;
     }
-    return (ΔSignal)(((ΔSignal)(nint)((w >> (int)(shift)))) & 0xFF);
+    return (Signal)(((Signal)(nint)((w >> (int)(shift)))) & 0xFF);
 }
 
 public static nint TrapCause(this WaitStatus w) {
@@ -483,6 +486,8 @@ public static nint TrapCause(this WaitStatus w) {
     }
     return (nint)(w >> (int)(shift)) >> 8;
 }
+
+} partial class syscall_package {
 
 //sys	wait4(pid int, wstatus *_C_int, options int, rusage *Rusage) (wpid int, err error)
 public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, nint options, ж<Rusage> rusage) {
@@ -502,9 +507,15 @@ public static error /*err*/ Mkfifo(@string path, uint32 mode) {
     return Mknod(path, mode | (uint32)S_IFIFO, 0);
 }
 
-// go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+} partial class syscallᴛSockaddrInet4 {
 
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class syscallᴛSockaddrInet6 {
+
+// go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class syscallᴛSockaddrUnix {
 
 internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
@@ -542,6 +553,8 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw), sl, default);
 }
 
+} partial class syscall_package {
+
 partial struct SockaddrLinklayer {
     public uint16 Protocol;
     public nint Ifindex;
@@ -551,6 +564,8 @@ partial struct SockaddrLinklayer {
     public array<byte> Addr = new(8);
     internal RawSockaddrLinklayer raw;
 }
+
+} partial class syscallᴛSockaddrLinklayer {
 
 internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrLinklayer> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
@@ -568,6 +583,8 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrLink
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw), SizeofSockaddrLinklayer, default);
 }
 
+} partial class syscall_package {
+
 partial struct SockaddrNetlink {
     public uint16 Family;
     public uint16 Pad;
@@ -575,6 +592,8 @@ partial struct SockaddrNetlink {
     public uint32 Groups;
     internal RawSockaddrNetlink raw;
 }
+
+} partial class syscallᴛSockaddrNetlink {
 
 internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrNetlink> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
@@ -585,6 +604,8 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrNetl
     sa.raw.Groups = sa.Groups;
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw), SizeofSockaddrNetlink, default);
 }
+
+} partial class syscall_package {
 
 // go2cs generated this placeholder — func anyToSockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

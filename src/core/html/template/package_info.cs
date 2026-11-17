@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -28,7 +27,6 @@ using static go.html.template_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Error", "ΔError")]
 [assembly: GoTypeAlias("FuncMap", "go.text.template_package.FuncMap")]
 // </ExportedTypeAliases>
 
@@ -39,8 +37,8 @@ using static go.html.template_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Error, error>(Pointer = true)]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
-[assembly: GoImplement<ΔError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -54,6 +52,7 @@ using static go.html.template_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Error))]
 [assembly: GoFieldAccess(typeof(Template))]
 [assembly: GoFieldAccess(typeof(escaper))]
 [assembly: GoFieldAccess(typeof(go.text.template.parse_package.ActionNode))]
@@ -71,7 +70,6 @@ using static go.html.template_package;
 [assembly: GoFieldAccess(typeof(go.text.template_package.Template))]
 [assembly: GoFieldAccess(typeof(nameSpace))]
 [assembly: GoFieldAccess(typeof(rangeContext))]
-[assembly: GoFieldAccess(typeof(ΔError))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -82,22 +80,22 @@ using static go.html.template_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("html/template/attr.go", "attr.cs", "ABEmAIAB8gGiuIKCgqaUgqaCAAoWhpQ=", "", "", "178=Contains/2/3/1,Contains/3/3/2")]
-[assembly: GoPositionMap("html/template/attr_string.go", "attr_string.cs", "/oaigoKCgoKC2pSCgpQ=")]
+[assembly: GoPositionMap("html/template/attr_string.go", "attr_string.cs", "AAgOhqKCgoKCgoLatIKClA==")]
 [assembly: GoPositionMap("html/template/content.go", "content.cs", "AGzmAaKClJSUgoKUqIKcsoKUgoKUqsKClKSkpKSkpKSmgriCpoKU")]
-[assembly: GoPositionMap("html/template/context.go", "context.cs", "ACNIgoKClKiSAAIYtIKUgoKUgpSClIKUgpSClKiSgoIAV7gBopSUqJKUlKzolJQ=", "", "", "46=Equal/1/1/4")]
+[assembly: GoPositionMap("html/template/context.go", "context.cs", "ACZIgoKClKiSAAIYtIKUgoKUgpSClIKUgpSClKiSgoIAWbgBopSUqJKUlKzolJQ=", "", "", "49=Equal/1/1/4")]
 [assembly: GoPositionMap("html/template/css.go", "css.cs", "AA8iooKUlIKClAAHEKjIAAQewoKCyoKCgoKUgoK4poKClIKClLimgqaokqiSgoKClLS0tLaokoKmlNqClJSokpSUqLKCgqKUgoKUtKSClIKCgoKmgpSCpgAXMIKeAAgCgoKUAAwagpTIgsaCyIKClA==")]
-[assembly: GoPositionMap("html/template/delim_string.go", "delim_string.cs", "/oaigoKC2pSCgpQ=")]
-[assembly: GoPositionMap("html/template/element_string.go", "element_string.cs", "/oaigoKCgoLalIKClA==")]
-[assembly: GoPositionMap("html/template/error.go", "error.cs", "AOgB1AOClIKkpJSqwg==")]
-[assembly: GoPositionMap("html/template/escape.go", "escape.cs", "ABUw8oKCgoKClJSCgoKUlIKAgoKkqtSCgqaClLgAMWaSABkokpSkgoKkpIKCpKSkpKSklKaUlrKUlJSCggAHEJSCgoTugpSkpIKklLTGpNoACAqC3MaUtLS0tLS0+IK0tIKUtti0pILs0pTKgoKCgpTcgoK4goKCgqam3IKCgoKCgqaCyqbK7gASKJKqooKUygAPMMKCgoKCpqiSAAUwABICpsbGpKyygpSClIKUgpSCpoKClIKmgoKUggAHEIKCuN6ygpSCgoKUgoLcgoKCgriCgpSCgoKmgqa4goKCgoKmgoKCgoKmqLKClIKCgqauwoKUgoKClIKCgoKUgpSCpqiygoKUqsaCgpSUgqaCysqmgoKCgpSUqtSClIK4gsqs0pKUlKam3IK4ABMqgpaCpoKmlrKygoKCgoKCgoKCuIKCgoKmggAIEoKUxqSUlIKUgpSUgpSCgoKUgpSmgoKUlKqigoKmpsqCgpQABxCC3MqCgpSmpoKmlLiokoKUqJKClKiSgpSqooK4goKCpoKUgpSCuIKCgqi2goKUqqKClK7CqJKqwqiSqJKqwqrC", "701-713:1", "", "221=errorf/1/1/2;255=errorf/1/1/2;498=NewIdentifier/1/1/2,SetTree/1/1/2,SetPos/1/1/2;589=errorf/1/1/2;732=errorf/1/1/2;737=errorf/1/1/2;771=Name/1/1/2,errorf/1/1/2;954=errorf/1/1/2")]
+[assembly: GoPositionMap("html/template/delim_string.go", "delim_string.cs", "AAgOhqKCgoLatIKClA==")]
+[assembly: GoPositionMap("html/template/element_string.go", "element_string.cs", "AAgOhqKCgoKCgtq0goKU")]
+[assembly: GoPositionMap("html/template/error.go", "error.cs", "AOsB1AOClIKkpJTKwg==")]
+[assembly: GoPositionMap("html/template/escape.go", "escape.cs", "ABYw8oKCgoKClJSCgoKUlIKAgoKkqtSCgqaClLgAMWaSABsokpSkgoKkpIKCpKSkpKSklMaUtrKUlJSCggAHEJSCgoTugpSkpIKklLTGpNoACAqC3MaUtLS0tLS0+IK0tIKUtti0pIIACAzSlMqCgoKClNyCgriCgoKCpqbcgoKCgoKCpoLKpsruABIokqqigpTKAA8wwoKCgoKmqJIABTAAEgKmxsakrLKClIKUgpSClIKmgoKUgqaCgpSCAAcQgoK4/rKClIKCgpSCgtyCgoKCuIKClIKCgqaCAAgGuIKCgoKCpoKCgoKCpsiygpSCgoKmrsKClIKCgpSCgoKClIKUgqaosoKClKrGgoKUlIKmgsrKpoKCgoKUlKrUgpSCuILKrNKSlJSmptyC2AATKoKWgqaCpraysoKCgoKCgoKCgriCgoKCpoIACBKClMaklJSClIKUlIKUgoKClIKUpoKClJTKooKCpqbKgoKUAAcQgtzKgoKUpqaCppS4yJKClKiSgpSokoKUqqKCuIKCgqaClIKUgriCgoKotoKClKqigpTOwqiSqsKokqiSqsKqwg==", "701-713:1", "", "228=errorf/1/1/2;262=errorf/1/1/2;507=NewIdentifier/1/1/2,SetTree/1/1/2,SetPos/1/1/2;598=errorf/1/1/2;751=errorf/1/1/2;756=errorf/1/1/2;790=Name/1/1/2,errorf/1/1/2;979=errorf/1/1/2")]
 [assembly: GoPositionMap("html/template/html.go", "html.cs", "AA8esoKClIKUqLKCgpSosoKClKiygoKUygARJAAZNAAWLgATLKKSkriCgoKClIKClKaCgpSCpoKUgqqigtaCgpSClIKClIKCgoKCuJSUgpSCgpSUlJSCgoKUqsKCgpTclIKUlIL4pgACEgAIAg==")]
 [assembly: GoPositionMap("html/template/js.go", "js.cs", "ABhEAA0EgoK42JSClKaUtoKUyMjIyAANGsiCgriE7NwAESSY6oKmgoKUpgALCMKCgoKUtui2gpS4ggAUKoKCgoIABxCmlIKCpoKClKaCgoKCgoKUgoKClJSCgoKUlKzSgoKUpqKCruKCgpSUAAIQ0oKilIKClLS0tLSkgpSCgpSClIKmAA0cABUsABgyABEkAB9IwpSkpKSklKwACQ6CgoIAAiyk", "", "", "113=TrimRight/1/1/1,HasSuffix/1/1/1")]
-[assembly: GoPositionMap("html/template/jsctx_string.go", "jsctx_string.cs", "/oaigoLalIKClA==")]
-[assembly: GoPositionMap("html/template/state_string.go", "state_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKC2pSCgpQ=")]
-[assembly: GoPositionMap("html/template/template.go", "template.cs", "ACdEAAkY4oKCpIKClAAFKgAVAoKq4oKUgoKClNjSgoKCgoKUgpSClAAFFAAJAoKUAAIU8oKClKwACQKCgoKCgpSClIKUgpSClNyyAAIcAA8CgqaCgtyCgoKCgoKUgpTeAAgCgqaCgoKClNyCAAUWAAwCgoKClIKClIKC3IKCgoKClIIABxDYkoKC3IIAAhQACwKCgtiS3IKClIKokgACFPKCAAIQ8oKq4oKCAAUQ0oKUAAIYAAsCAAIWAAoCqtKAgraUlIKCgpSO4oKUgpSUgoKmAAIYAAkCAAIaAAoCqJKClIKClIKUrLKu4q7ipoKCgoKClIKUlKbCgoKmgrKCgg==", "525-529:1", "", "350=New/1/1/2;382=New/1/1/2")]
+[assembly: GoPositionMap("html/template/jsctx_string.go", "jsctx_string.cs", "AAgOhqKCgtq0goKU")]
+[assembly: GoPositionMap("html/template/state_string.go", "state_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoLatIKClA==")]
+[assembly: GoPositionMap("html/template/template.go", "template.cs", "AChEAAsY4oKCpIKClAAFKgAVAoKq4oKUgoKClNjSgoKCgoKUgpSClAAFFAAJAoKUAAIU8oKClKwACQKCgoKCgpSClIKUgpSClNyyAAIcAA8CgqaCgtyCgoKCgoKUgpTeAAgCgqaCgoKClNyCAAUWAAwCgoKClIKClIKC3IKCgoKClIIABxD4koKC3IIABBQACwKCgtiS3IKClIKokgACFPKCAAIQ8oKq4oKCAAcQ0oKUAAIYAAsCAAQWAAoCytKAgraUlIKCgpSO4oKUgpSUgoKmAAIYAAkCAAQaAAoCyJKClIKClIKUrLKu4s7ixoKCgoKClIKUlKbCgoKmgrKCgg==", "525-529:1", "", "355=New/1/1/2;389=New/1/1/2")]
 [assembly: GoPositionMap("html/template/transition.go", "transition.cs", "AA8gACBCgpaSgoKCgoKClIKCgoKUlIKCgqaUuAAIFKSCgpSmgpTKgoKUgoLcgoKCgpSUtLS0yIKUlKiSgoKCgpSopIKCgpSClJSmAAkWkoKCpoKUtKSCqJKClMoABxKCmqKmgpSCpqiSgoKUgoKUlIKUgpSUlKiSqJKCgqaUqJKClIKUgpS0tLSUtLS0tAAOGoLGgtiCgriClNiCgpSCtIKC3IKCgpSCtKSmgoKCgoKUlIKC/IKCgtiClKaqooKUtLaSgoKClJSCgvy06oKCgoLYgoK2pqbcppaSgoKUlLS0pKiSgoKUtAAKEraCgpTcqAAcOIKCgoKUpoKCgpS0tKTGgpSCpILYgqSClLqSgpS02LS2goKCgoKUgoKC3IKUgrqSqJKCgoKCuKiSgoKCpq7CgpTa6qYABxKSqJKokoKUgoKCgoKmgoKUlKiSgtim", "", "", "115=errorf/1/1/2;332=errorf/1/1/2;419=errorf/1/1/2;470=errorf/1/1/2;511=errorf/1/1/2;699=errorf/1/1/2")]
 [assembly: GoPositionMap("html/template/url.go", "url.cs", "AAxEABgCgoKUgpQACgqigoKmqsIAAhDyqsKCgpSCgpSqooLugoIABxCCAAkQxoLYgpSClIK2goKUgqrCgpSoooKmpoKCgoKCgqaCAAYQoqaCpoKCgpSCgoKCpqaCgoKCpoKCgoKmgg==")]
-[assembly: GoPositionMap("html/template/urlpart_string.go", "urlpart_string.cs", "/oaigoKC2pSCgpQ=")]
+[assembly: GoPositionMap("html/template/urlpart_string.go", "urlpart_string.cs", "AAgOhqKCgoLatIKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.html;
@@ -124,6 +122,7 @@ public static partial class template_package
     internal partial struct state {}
     internal partial struct urlPart {}
     public partial struct CSS {}
+    public partial struct Error {}
     public partial struct ErrorCode {}
     public partial struct HTML {}
     public partial struct HTMLAttr {}
@@ -132,7 +131,6 @@ public static partial class template_package
     public partial struct Srcset {}
     public partial struct Template {}
     public partial struct URL {}
-    public partial struct ΔError {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -165,3 +163,22 @@ public static partial class template_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(template_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛError;
+[GoMethodHost(typeof(template_package.Template)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛTemplate;
+[GoMethodHost(typeof(template_package.attr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛattr;
+[GoMethodHost(typeof(template_package.context)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛcontext;
+[GoMethodHost(typeof(template_package.delim)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛdelim;
+[GoMethodHost(typeof(template_package.element)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛelement;
+[GoMethodHost(typeof(template_package.escaper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛescaper;
+[GoMethodHost(typeof(template_package.jsCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛjsCtx;
+[GoMethodHost(typeof(template_package.state)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛstate;
+[GoMethodHost(typeof(template_package.urlPart)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛurlPart;
+// </MethodHolders>

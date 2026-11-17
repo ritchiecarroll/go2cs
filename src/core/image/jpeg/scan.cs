@@ -4,8 +4,11 @@
 namespace go.image;
 
 using image = image_package;
+using static jpeg_package;
 
 partial class jpeg_package {
+
+} partial class jpegᴛdecoder {
 
 // makeImg allocates and initializes the destination image.
 internal static void makeImg(this ref decoder d, nint mxx, nint myy) {
@@ -60,7 +63,19 @@ internal static void makeImg(this ref decoder d, nint mxx, nint myy) {
     }
 }
 
+} partial class jpeg_package {
+
+internal partial struct processSOS_scan /*dyn*/ {
+    internal uint8 compIndex;
+    internal uint8 td; // DC table selector.
+    internal uint8 ta; // AC table selector.
+}
+
+} partial class jpegᴛdecoder {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string missingSofMarkerˢ => ref missingSofMarkerˢᵇ;
+private static readonly @string missingSofMarkerˢᵇ = "missing SOF marker"u8;
 internal static ref readonly @string sosHasWrongLengthˢ => ref sosHasWrongLengthˢᵇ;
 private static readonly @string sosHasWrongLengthˢᵇ = "SOS has wrong length"u8;
 internal static ref readonly @string sosLengthInconsistentˢ => ref sosLengthInconsistentˢᵇ;
@@ -83,12 +98,6 @@ internal static ref readonly @string badSuccessiveˢ => ref badSuccessiveˢᵇ;
 private static readonly @string badSuccessiveˢᵇ = "bad successive approximation values"u8;
 internal static ref readonly @string excessiveDcComponentˢ => ref excessiveDcComponentˢᵇ;
 private static readonly @string excessiveDcComponentˢᵇ = "excessive DC component"u8;
-
-internal partial struct processSOS_scan /*dyn*/ {
-    internal uint8 compIndex;
-    internal uint8 td; // DC table selector.
-    internal uint8 ta; // AC table selector.
-}
 
 // Specified in section B.2.3.
 internal static error processSOS(this ref decoder d, nint n) {
@@ -631,4 +640,4 @@ internal static error findRST(this ref decoder d, uint8 expectedRST) {
     }
 }
 
-} // end jpeg_package
+} // end jpegᴛdecoder

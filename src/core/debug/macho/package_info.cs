@@ -27,8 +27,6 @@ using static go.debug.macho_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Section", "ΔSection")]
-[assembly: GoTypeAlias("Segment", "ΔSegment")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -47,16 +45,16 @@ using static go.debug.macho_package;
 [assembly: GoImplement<LoadBytes, Load>]
 [assembly: GoImplement<Rpath, Load>(Pointer = true)]
 [assembly: GoImplement<Rpath, Load>]
+[assembly: GoImplement<Section, io_package.ReaderAt>(Promoted = true)]
+[assembly: GoImplement<Segment, Load>(Pointer = true)]
+[assembly: GoImplement<Segment, Load>]
+[assembly: GoImplement<Segment, io_package.ReaderAt>(Promoted = true)]
 [assembly: GoImplement<Symtab, Load>(Pointer = true)]
 [assembly: GoImplement<Symtab, Load>]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
-[assembly: GoImplement<ΔSection, io_package.ReaderAt>(Promoted = true)]
-[assembly: GoImplement<ΔSegment, Load>(Pointer = true)]
-[assembly: GoImplement<ΔSegment, Load>]
-[assembly: GoImplement<ΔSegment, io_package.ReaderAt>(Promoted = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -77,9 +75,9 @@ using static go.debug.macho_package;
 [assembly: GoFieldAccess(typeof(File))]
 [assembly: GoFieldAccess(typeof(Reloc))]
 [assembly: GoFieldAccess(typeof(Rpath))]
+[assembly: GoFieldAccess(typeof(Section))]
+[assembly: GoFieldAccess(typeof(Segment))]
 [assembly: GoFieldAccess(typeof(Symtab))]
-[assembly: GoFieldAccess(typeof(ΔSection))]
-[assembly: GoFieldAccess(typeof(ΔSegment))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -89,11 +87,11 @@ using static go.debug.macho_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/macho/fat.go", "fat.cs", "AClSmrKCuIKCgoaigoKClKaWkoKClJSCyoTIgoKUgoKCgoKUlIKCgriCgpSmgpSCuKaqooKClIKCgpSCpoKCgoKU")]
-[assembly: GoPositionMap("debug/macho/file.go", "file.cs", "ADVqAB5CkqiAAChWkqiAADNogoKClIKokoKClIKCgpSCrLKCgoKUqqKCmKKClIKClIK0grS4griCgpSCgpSCgpSCgpSClIKClIKCgoKUtoKCgpSCgpSCgraCgoKUgoKUgoKCgoK2goKClIKClIKClJSCgpSCgpSCtoKCgpSCgoKmgriCgpSCgpSCgoKCgraCgoKUgoKCgoKCgoKCgoKCgoKCgoKUgoKCgoKCgoKCgoLagoKClIKCgoKCgoKCgoKCgoKCgoKClIKCgoKCgoKCgoKCyIKClIKUgqamooKCgpSCgoKCgoKmgoKUgoKCgpSCpoKClAAHEIKCggAHEKKCgpSCgoKUlJSCgpSCgqaCgoKCgoKUlIKCgoKCtIKCgoKCtOymgoKClKiSgoKmqqKCgqYAEgiSgoKClLS0uAAIEoKCppSCgoKmgoKCgoKUgpSClJSssoKCgpSClIKClKaCgriCgoKUlKaCgqaClJSCuKyygqaCgoKCgqi6goK4rNKCgoKm", "612-640:1;641-663:2")]
-[assembly: GoPositionMap("debug/macho/macho.go", "macho.cs", "ACpi7oIADSAACBKCAA4iAAgSggDYAboDgoKCgpSm")]
-[assembly: GoPositionMap("debug/macho/reloctype.go", "reloctype.cs", "ABEoAA4iAA4iAA8k")]
-[assembly: GoPositionMap("debug/macho/reloctype_string.go", "reloctype_string.cs", "/oaigoKCgoLalIKClJSGooKCgoKCgoKCgtqUgoKUlIaigoKCgoKCgoKC2pSCgpSUhqKCgoKCgoKCgoKC2pSCgpQ=")]
+[assembly: GoPositionMap("debug/macho/fat.go", "fat.cs", "ACpSmrKCuIKCgoaigoKClKaWkoKClJSCyoTIgoKUgoKCgoKUlIKCgriCgpSmgpSCuKaqooKClIKCgpSCxoKCgoKU")]
+[assembly: GoPositionMap("debug/macho/file.go", "file.cs", "ADhqACJCkqiAACxWkqiAADdogoKClILIkoKClIKCgpSCzLKCgoKUyqKCmKKClIKClIK0grS4griCgpSCgpSCgpSCgpSClIKClIKCgoKUtoKCgpSCgpSCgraCgoKUgoKUgoKCgoK2goKClIKClIKClJSCgpSCgpSCtoKCgpSCgoKmgriCgpSCgpSCgoKCgraCgoKUgoKCgoKCgoKCgoKCgoKCgoKUgoKCgoKCgoKCgoLagoKClIKCgoKCgoKCgoKCgoKCgoKClIKCgoKCgoKCgoKCyIKClIKUgqbGooKCgpSCgoKCgoKmgoKUgoKCgpSCpoKClAAHEIKCggALEKKCgpSCgoKUlJSCgpSCgqaCgoKCgoKUlIKCgoKCtIKCgoKCtOzGgoKClMiSgoKmqqKCgqYAEgiSgoKClLS0uAAIEoKCppSCgoKmgoKCgoKUgpSClJSssoKCgpSClIKClKaCgriCgoKUlKaCgqaClJSCuKyygqaCgoKCgqi6goK4rNKCgoKm", "612-640:1;641-663:2")]
+[assembly: GoPositionMap("debug/macho/macho.go", "macho.cs", "ACtiAAgOggAPIAAKEoIAECIAChKCANoBugOCgoKClKY=")]
+[assembly: GoPositionMap("debug/macho/reloctype.go", "reloctype.cs", "ABUoABIiABIiABMk")]
+[assembly: GoPositionMap("debug/macho/reloctype_string.go", "reloctype_string.cs", "AAgOhqKCgoKCgtq0goKUxIaigoKCgoKCgoKC2rSCgpTEhqKCgoKCgoKCgoLatIKClMSGooKCgoKCgoKCgoLatIKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;
@@ -135,9 +133,11 @@ public static partial class macho_package
     public partial struct RelocTypeX86_64 {}
     public partial struct Rpath {}
     public partial struct RpathCmd {}
+    public partial struct Section {}
     [GoValueClone("Name", "Seg")] public partial struct Section32 {}
     [GoValueClone("Name", "Seg")] public partial struct Section64 {}
     public partial struct SectionHeader {}
+    public partial struct Segment {}
     [GoValueClone("Name")] public partial struct Segment32 {}
     [GoValueClone("Name")] public partial struct Segment64 {}
     public partial struct SegmentHeader {}
@@ -146,8 +146,6 @@ public static partial class macho_package
     public partial struct SymtabCmd {}
     public partial struct Thread {}
     public partial struct Type {}
-    public partial struct ΔSection {}
-    public partial struct ΔSegment {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -169,3 +167,25 @@ public static partial class macho_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(macho_package.Cpu)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛCpu;
+[GoMethodHost(typeof(macho_package.FatFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛFatFile;
+[GoMethodHost(typeof(macho_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛFile;
+[GoMethodHost(typeof(macho_package.FormatError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛFormatError;
+[GoMethodHost(typeof(macho_package.LoadBytes)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛLoadBytes;
+[GoMethodHost(typeof(macho_package.LoadCmd)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛLoadCmd;
+[GoMethodHost(typeof(macho_package.RelocTypeARM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeARM;
+[GoMethodHost(typeof(macho_package.RelocTypeARM64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeARM64;
+[GoMethodHost(typeof(macho_package.RelocTypeGeneric)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeGeneric;
+[GoMethodHost(typeof(macho_package.RelocTypeX86_64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeX86_64;
+[GoMethodHost(typeof(macho_package.Section)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛSection;
+[GoMethodHost(typeof(macho_package.Segment)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛSegment;
+[GoMethodHost(typeof(macho_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛType;
+// </MethodHolders>

@@ -7,6 +7,7 @@ namespace go;
 using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -19,6 +20,8 @@ partial class runtime_package {
 // The stack does not keep GC-visible pointers to nodes, so the caller
 // must ensure the nodes are allocated outside the Go heap.
 partial struct lfstack /*num:uint64*/;
+
+} partial class runtimeᴛlfstack {
 
 internal static void push(this ж<lfstack> Ꮡhead, ж<lfnode> Ꮡnode) {
     ref var node = ref Ꮡnode.DerefOrNull();
@@ -65,6 +68,8 @@ internal static @unsafe.Pointer pop(this ж<lfstack> Ꮡhead) {
 internal static bool empty(this ж<lfstack> Ꮡhead) {
     return atomic.Load64(Ꮡhead.Reinterpret<lfstack, uint64>()) == 0;
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lfstackNodeAllocatedFromˢ => ref lfstackNodeAllocatedFromˢᵇ;

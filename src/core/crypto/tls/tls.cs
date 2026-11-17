@@ -39,6 +39,7 @@ using encoding;
 using go.@internal;
 using go.crypto;
 using time = time_package;
+using static tls_package;
 
 partial class tls_package {
 
@@ -79,11 +80,13 @@ partial struct listener {
 
 // Go method set entry for the promoted 'Listener.Addr()' - provided ONLY by the embedded
 // interface field in *listener's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr Addr(this listener recvᴛ) => recvᴛ.Listener.Addr();
+internal static net.Addr Addr(this listener recvᴛ) => recvᴛ.Listener.Addr();
 
 // Go method set entry for the promoted 'Listener.Close()' - provided ONLY by the embedded
 // interface field in *listener's method set; see the pointer-only satisfaction record.
 internal static error Close(this listener recvᴛ) => recvᴛ.Listener.Close();
+
+} partial class tlsᴛlistener {
 
 // Accept waits for and returns the next incoming TLS connection.
 // The returned connection is of type *Conn.
@@ -94,6 +97,8 @@ internal static (net.Conn, error) Accept(this ref listener l) {
     }
     return (new ConnжConn(Server(c, l.config)), default);
 }
+
+} partial class tls_package {
 
 // NewListener creates a Listener which accepts connections from an inner
 // Listener and wraps each connection with [Server].
@@ -133,6 +138,8 @@ public static (net.Listener, error) Listen(@string network, @string laddr, ж<Co
 partial struct timeoutError {
 }
 
+} partial class tlsᴛtimeoutError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsDialWithDialerTimedˢ => ref tlsDialWithDialerTimedˢᵇ;
 private static readonly @string tlsDialWithDialerTimedˢᵇ = "tls: DialWithDialer timed out"u8;
@@ -140,6 +147,8 @@ private static readonly @string tlsDialWithDialerTimedˢᵇ = "tls: DialWithDial
 internal static @string Error(this timeoutError _) { return tlsDialWithDialerTimedˢ; }
 internal static bool Timeout(this timeoutError _) { return true; }
 internal static bool Temporary(this timeoutError _) { return true; }
+
+} partial class tls_package {
 
 // DialWithDialer connects to the given network address using dialer.Dial and
 // then initiates a TLS handshake, returning the resulting TLS connection. Any
@@ -233,6 +242,8 @@ partial struct Dialer {
     public ж<Config> Config;
 }
 
+} partial class tlsᴛDialer {
+
 // Dial connects to the given network address and initiates a TLS
 // handshake, returning the resulting TLS connection.
 //
@@ -268,6 +279,8 @@ public static (net.Conn, error) DialContext(this ref Dialer d, context.Context c
     }
     return (new ConnжConn(c), default);
 }
+
+} partial class tls_package {
 
 // LoadX509KeyPair reads and parses a public/private key pair from a pair of
 // files. The files must contain PEM encoded data. The certificate file may

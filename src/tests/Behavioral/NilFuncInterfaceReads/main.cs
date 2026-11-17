@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using typelib = NilFuncInterfaceReads.typelib_package;
 using NilFuncInterfaceReads;
+using static main_package;
 
 partial class main_package {
 
@@ -13,13 +14,21 @@ partial interface namer {
 
 internal delegate nint localStep(nint _);
 
+} partial class mainᴛlocalStep {
+
 internal static @string Name(this localStep s) { return "local"; }
 
+} partial class main_package {
+
 internal delegate nint localStepE(nint _);
+
+} partial class mainᴛlocalStepE {
 
 internal static @string Name(this localStepE s) { return "locale"; }
 
 internal static @string Error(this localStepE s) { return "locale error"; }
+
+} partial class main_package {
 
 partial struct probe {
     internal @string name;
@@ -143,7 +152,7 @@ internal static any build(@string arm, @string kind) {
     return default;
 }
 
-internal static reflectꓸType namerType = reflect.TypeOf((ж<namer>)nil).Elem();
+internal static reflect.Type namerType = reflect.TypeOf((ж<namer>)nil).Elem();
 
 [GoLazy] partial class lazyᴛprobes { internal static slice<probe> probes = [
     new("l-isnil", (any a) => fmt.Sprint(a == nil)),
@@ -199,7 +208,7 @@ internal static reflectꓸType namerType = reflect.TypeOf((ж<namer>)nil).Elem()
         return reflect.TypeOf(a).Method(0).Name + " "u8 + v.Method(0).Call(default)[0].String();
     }),
     new("call", (any a) => {
-        var @out = reflect.ValueOf(a).Call(slice<reflectꓸValue>([reflect.ValueOf((nint)1)]));
+        var @out = reflect.ValueOf(a).Call(slice<reflect.Value>([reflect.ValueOf((nint)1)]));
         return fmt.Sprint(@out[0].Int());
     }),
     new("same", (any a) => fmt.Sprint(reflect.ValueOf(a) == reflect.ValueOf(a))),

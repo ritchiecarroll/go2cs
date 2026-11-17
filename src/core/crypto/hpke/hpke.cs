@@ -13,6 +13,7 @@ using errors = errors_package;
 using byteorder = go.@internal.byteorder_package;
 using go.@internal;
 using go.crypto;
+using static hpke_package;
 
 partial class hpke_package {
 
@@ -56,8 +57,8 @@ private static readonly @string baseNonceˢᵇ = "base_nonce"u8;
 internal static ref readonly @string expˢ => ref expˢᵇ;
 private static readonly @string expˢᵇ = "exp"u8;
 
-internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16 kemID, KDF kdf, AEAD Δaead, slice<byte> info) {
-    var sid = suiteID(kemID, kdf.ID(), Δaead.ID());
+internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16 kemID, KDF kdf, AEAD aead, slice<byte> info) {
+    var sid = suiteID(kemID, kdf.ID(), aead.ID());
 
     if (kdf.oneStage()) {
         var secrets = new slice<byte>(0, 2 + 2 + len(sharedSecret));
@@ -72,15 +73,15 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
         ksContextΔ1 = appendꓸꓸꓸ(ksContextΔ1, info);
 
         var (secretΔ1, errΔ1) = kdf.labeledDerive(sid, secrets, secretˢ, ksContextΔ1,
-            (uint16)(Δaead.keySize() + Δaead.nonceSize() + kdf.size()));
+            (uint16)(aead.keySize() + aead.nonceSize() + kdf.size()));
         if (errΔ1 != nil) {
             return (default, errΔ1);
         }
-        var keyΔ1 = secretΔ1.slice(0, Δaead.keySize());
-        var baseNonceΔ1 = secretΔ1.slice(Δaead.keySize(), Δaead.keySize() + Δaead.nonceSize());
-        var expSecretΔ1 = secretΔ1.slice(Δaead.keySize() + Δaead.nonceSize());
+        var keyΔ1 = secretΔ1.slice(0, aead.keySize());
+        var baseNonceΔ1 = secretΔ1.slice(aead.keySize(), aead.keySize() + aead.nonceSize());
+        var expSecretΔ1 = secretΔ1.slice(aead.keySize() + aead.nonceSize());
 
-        (var aΔ1, errΔ1) = Δaead.aead(keyΔ1);
+        (var aΔ1, errΔ1) = aead.aead(keyΔ1);
         if (errΔ1 != nil) {
             return (default, errΔ1);
         }
@@ -111,15 +112,15 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
     if (err != nil) {
         return (default, err);
     }
-    (var key, err) = kdf.labeledExpand(sid, secret, keyˢ, ksContext, (uint16)Δaead.keySize());
+    (var key, err) = kdf.labeledExpand(sid, secret, keyˢ, ksContext, (uint16)aead.keySize());
     if (err != nil) {
         return (default, err);
     }
-    (var a, err) = Δaead.aead(key);
+    (var a, err) = aead.aead(key);
     if (err != nil) {
         return (default, err);
     }
-    (var baseNonce, err) = kdf.labeledExpand(sid, secret, baseNonceˢ, ksContext, (uint16)Δaead.nonceSize());
+    (var baseNonce, err) = kdf.labeledExpand(sid, secret, baseNonceˢ, ksContext, (uint16)aead.nonceSize());
     if (err != nil) {
         return (default, err);
     }
@@ -148,14 +149,14 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
 //
 // The returned enc ciphertext can be used to instantiate a matching receiving
 // HPKE context with the corresponding KEM decapsulation key.
-public static (slice<byte> enc, ж<Sender> s, error err) NewSender(ΔPublicKey pk, KDF kdf, AEAD Δaead, slice<byte> info) {
+public static (slice<byte> enc, ж<Sender> s, error err) NewSender(PublicKey pk, KDF kdf, AEAD aead, slice<byte> info) {
     error err = default;
 
     (var sharedSecret, var encapsulatedKey, err) = pk.encap();
     if (err != nil) {
         return (default, default, err);
     }
-    (var context, err) = newContext(sharedSecret, pk.KEM().ID(), kdf, Δaead, info);
+    (var context, err) = newContext(sharedSecret, pk.KEM().ID(), kdf, aead, info);
     if (err != nil) {
         return (default, default, err);
     }
@@ -169,17 +170,19 @@ public static (slice<byte> enc, ж<Sender> s, error err) NewSender(ΔPublicKey p
 // The enc parameter must have been produced by a matching sending HPKE context
 // with the corresponding KEM encapsulation key. The info parameter is
 // additional public information that must match between sender and recipient.
-public static (ж<Recipient>, error) NewRecipient(slice<byte> enc, PrivateKey k, KDF kdf, AEAD Δaead, slice<byte> info) {
+public static (ж<Recipient>, error) NewRecipient(slice<byte> enc, PrivateKey k, KDF kdf, AEAD aead, slice<byte> info) {
     var (sharedSecret, err) = k.decap(enc);
     if (err != nil) {
         return (default, err);
     }
-    (var context, err) = newContext(sharedSecret, k.KEM().ID(), kdf, Δaead, info);
+    (var context, err) = newContext(sharedSecret, k.KEM().ID(), kdf, aead, info);
     if (err != nil) {
         return (default, err);
     }
     return (Ꮡ(new Recipient(context)), default);
 }
+
+} partial class hpkeᴛSender {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string exportOnlyInstantiationˢ => ref exportOnlyInstantiationˢᵇ;
@@ -199,11 +202,13 @@ public static (slice<byte>, error) Seal(this ref Sender s, slice<byte> aad, slic
     return (ciphertext, default);
 }
 
+} partial class hpke_package {
+
 // Seal instantiates a single-use HPKE sending HPKE context like [NewSender],
 // and then encrypts the provided plaintext like [Sender.Seal] (with no aad).
 // Seal returns the concatenation of the encapsulated key and the ciphertext.
-public static (slice<byte>, error) Seal(ΔPublicKey pk, KDF kdf, AEAD Δaead, slice<byte> info, slice<byte> plaintext) {
-    var (enc, s, err) = NewSender(pk, kdf, Δaead, info);
+public static (slice<byte>, error) Seal(PublicKey pk, KDF kdf, AEAD aead, slice<byte> info, slice<byte> plaintext) {
+    var (enc, s, err) = NewSender(pk, kdf, aead, info);
     if (err != nil) {
         return (default, err);
     }
@@ -213,6 +218,8 @@ public static (slice<byte>, error) Seal(ΔPublicKey pk, KDF kdf, AEAD Δaead, sl
     }
     return (appendꓸꓸꓸ(enc, ct), default);
 }
+
+} partial class hpkeᴛSender {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidLengthˢ => ref invalidLengthˢᵇ;
@@ -226,6 +233,12 @@ public static (slice<byte>, error) Export(this ref Sender s, @string exporterCon
     }
     return s.export(exporterContext, (uint16)length);
 }
+
+} partial class hpkeᴛRecipient {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string exportOnlyInstantiationˢ => ref exportOnlyInstantiationˢᵇ;
+private static readonly @string exportOnlyInstantiationˢᵇ = "export-only instantiation"u8;
 
 // Open decrypts the provided ciphertext, optionally binding to the additional
 // public data aad, or returns an error if decryption fails.
@@ -244,6 +257,8 @@ public static (slice<byte>, error) Open(this ref Recipient r, slice<byte> aad, s
     return (plaintext, default);
 }
 
+} partial class hpke_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string ciphertextTooShortˢ => ref ciphertextTooShortˢᵇ;
 private static readonly @string ciphertextTooShortˢᵇ = "ciphertext too short"u8;
@@ -251,19 +266,25 @@ private static readonly @string ciphertextTooShortˢᵇ = "ciphertext too short"
 // Open instantiates a single-use HPKE receiving HPKE context like [NewRecipient],
 // and then decrypts the provided ciphertext like [Recipient.Open] (with no aad).
 // ciphertext must be the concatenation of the encapsulated key and the actual ciphertext.
-public static (slice<byte>, error) Open(PrivateKey k, KDF kdf, AEAD Δaead, slice<byte> info, slice<byte> ciphertext) {
+public static (slice<byte>, error) Open(PrivateKey k, KDF kdf, AEAD aead, slice<byte> info, slice<byte> ciphertext) {
     nint encSize = k.KEM().encSize();
     if (len(ciphertext) < encSize) {
         return (default, errors.New(ciphertextTooShortˢ));
     }
     var enc = ciphertext.slice(0, encSize);
     ciphertext = ciphertext.slice(encSize);
-    var (r, err) = NewRecipient(enc, k, kdf, Δaead, info);
+    var (r, err) = NewRecipient(enc, k, kdf, aead, info);
     if (err != nil) {
         return (default, err);
     }
     return r.Open(default, ciphertext);
 }
+
+} partial class hpkeᴛRecipient {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string invalidLengthˢ => ref invalidLengthˢᵇ;
+private static readonly @string invalidLengthˢᵇ = "invalid length"u8;
 
 // Export produces a secret value derived from the shared key between sender and
 // recipient. length must be at most 65,535.
@@ -274,6 +295,8 @@ public static (slice<byte>, error) Export(this ref Recipient r, @string exporter
     return r.export(exporterContext, (uint16)length);
 }
 
+} partial class hpkeᴛcontext {
+
 internal static slice<byte> nextNonce(this ref context ctx) {
     var nonce = new slice<byte>(ctx.aead.NonceSize());
     byteorder.BEPutUint64(nonce.slice(len(nonce) - 8), ctx.seqNum);
@@ -282,6 +305,8 @@ internal static slice<byte> nextNonce(this ref context ctx) {
     }
     return nonce;
 }
+
+} partial class hpke_package {
 
 internal static slice<byte> suiteID(uint16 kemID, uint16 kdfID, uint16 aeadID) {
     var suiteID = new slice<byte>(0, 4 + 2 + 2 + 2);

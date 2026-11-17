@@ -11,6 +11,7 @@ using errors = errors_package;
 using io = io_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140.edwards25519;
+using static ecdh_package;
 
 partial class ecdh_package {
 
@@ -23,12 +24,14 @@ internal static nint x25519SharedSecretSize = 32;
 //
 // Multiple invocations of this function will return the same value, so it can
 // be used for equality checks and switch statements.
-public static ΔCurve X25519() { return new x25519CurveжΔCurve(x25519); }
+public static Curve X25519() { return new x25519CurveжCurve(x25519); }
 
 internal static ж<x25519Curve> x25519 = Ꮡ(new x25519Curve());
 
 partial struct x25519Curve {
 }
+
+} partial class ecdhᴛx25519Curve {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string x25519ˢ => ref x25519ˢᵇ;
@@ -72,21 +75,25 @@ internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<x25519Curve> Ꮡc,
     // never zero because of clamping, and the basepoint is not the identity in
     // the prime-order subgroup(s).
     return (Ꮡ(new PrivateKey(
-        curve: new x25519CurveжΔCurve(Ꮡc),
+        curve: new x25519CurveжCurve(Ꮡc),
         privateKey: bytes.Clone(key),
-        publicKey: Ꮡ(new ΔPublicKey(curve: new x25519CurveжΔCurve(Ꮡc), publicKey: publicKey))
+        publicKey: Ꮡ(new PublicKey(curve: new x25519CurveжCurve(Ꮡc), publicKey: publicKey))
     )), default);
 }
 
-internal static (ж<ΔPublicKey>, error) NewPublicKey(this ж<x25519Curve> Ꮡc, slice<byte> key) {
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static ref readonly @string cryptoEcdhInvalidPublicˢ => ref cryptoEcdhInvalidPublicˢᵇ;
+private static readonly @string cryptoEcdhInvalidPublicˢᵇ = "crypto/ecdh: invalid public key"u8;
+
+internal static (ж<PublicKey>, error) NewPublicKey(this ж<x25519Curve> Ꮡc, slice<byte> key) {
     if (fips140only.Enforced()) {
         return (default, errors.New(cryptoEcdhUseOfX25519Isˢ));
     }
     if (len(key) != x25519PublicKeySize) {
         return (default, errors.New(cryptoEcdhInvalidPublicˢ));
     }
-    return (Ꮡ(new ΔPublicKey(
-        curve: new x25519CurveжΔCurve(Ꮡc),
+    return (Ꮡ(new PublicKey(
+        curve: new x25519CurveжCurve(Ꮡc),
         publicKey: bytes.Clone(key)
     )), default);
 }
@@ -95,7 +102,7 @@ internal static (ж<ΔPublicKey>, error) NewPublicKey(this ж<x25519Curve> Ꮡc,
 private static ref readonly @string cryptoEcdhBadX25519ˢ => ref cryptoEcdhBadX25519ˢᵇ;
 private static readonly @string cryptoEcdhBadX25519ˢᵇ = "crypto/ecdh: bad X25519 remote ECDH input: low order point"u8;
 
-internal static (slice<byte>, error) ecdh(this ref x25519Curve c, ж<PrivateKey> Ꮡlocal, ж<ΔPublicKey> Ꮡremote) {
+internal static (slice<byte>, error) ecdh(this ref x25519Curve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) {
     ref var local = ref Ꮡlocal.DerefOrNull();
     ref var remote = ref Ꮡremote.DerefOrNull();
 
@@ -106,6 +113,8 @@ internal static (slice<byte>, error) ecdh(this ref x25519Curve c, ж<PrivateKey>
     }
     return (@out, default);
 }
+
+} partial class ecdh_package {
 
 internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice<byte> point) {
     array<byte> e = new(32);

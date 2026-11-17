@@ -8,6 +8,7 @@ using errors = errors_package;
 using bits = math.bits_package;
 using go.crypto.@internal.fips140deps;
 using math;
+using static edwards25519_package;
 
 partial class edwards25519_package {
 
@@ -59,6 +60,8 @@ partial struct Scalar {
 public static ж<Scalar> NewScalar() {
     return Ꮡ(new Scalar());
 }
+
+} partial class edwards25519ᴛScalar {
 
 // MultiplyAdd sets s = x * y + z mod l, and returns s. It is equivalent to
 // using Multiply and then Add.
@@ -155,6 +158,8 @@ public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<by
     return (Ꮡs, default);
 }
 
+} partial class edwards25519_package {
+
 // scalarTwo168 and scalarTwo336 are 2^168 and 2^336 modulo l, encoded as a
 // fiatScalarMontgomeryDomainFieldElement, which is a little-endian 4-limb value
 // in the 2^256 Montgomery domain.
@@ -164,6 +169,8 @@ internal static ж<Scalar> scalarTwo168 = Ꮡ(new Scalar(s: new uint64[]{0x5b8ab
 internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: new uint64[]{0xbd3d108e2b35ecc5UL, 0x5c3a3718bdf9c90bUL,
     0x63aa97a331b4f2eeUL, 0x3d217f5be65cb5cUL}.array()
 ));
+
+} partial class edwards25519ᴛScalar {
 
 // setShortBytes sets s = x mod l, where x is a little-endian integer shorter
 // than 32 bytes.
@@ -209,6 +216,8 @@ public static (ж<Scalar>, error) SetCanonicalBytes(this ж<Scalar> Ꮡs, slice<
     return (Ꮡs, default);
 }
 
+} partial class edwards25519_package {
+
 // scalarMinusOneBytes is l - 1 in little endian.
 [GoLazy] partial class lazyᴛscalarMinusOneBytes { internal static array<byte> scalarMinusOneBytes = new byte[]{236, 211, 245, 92, 26, 99, 18, 88, 214, 156, 247, 162, 222, 249, 222, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16}.array(); }
 
@@ -237,6 +246,8 @@ internal static bool isReduced(slice<byte> s) {
     (_, b) = bits.Sub64(l3, s3, b);
     return b == 0;
 }
+
+} partial class edwards25519ᴛScalar {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string edwards25519Invalidˢ2 => ref edwards25519Invalidˢ2ᵇ;
@@ -402,4 +413,4 @@ internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) {
     return digits.Clone();
 }
 
-} // end edwards25519_package
+} // end edwards25519ᴛScalar

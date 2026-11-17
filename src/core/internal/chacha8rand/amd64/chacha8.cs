@@ -11,6 +11,7 @@ using byteorder = go.@internal.byteorder_package;
 using cpu = go.@internal.cpu_package;
 using @unsafe = unsafe_package;
 using go.@internal;
+using static chacha8rand_package;
 
 partial class chacha8rand_package {
 
@@ -38,6 +39,8 @@ partial struct State {
     internal uint32 n;
     internal uint32 c;
 }
+
+} partial class chacha8randᴛState {
 
 // Next returns the next random value, along with a boolean
 // indicating whether one was available.
@@ -131,6 +134,8 @@ public static void Reseed(this ж<State> Ꮡs) {
     Ꮡs.Init64(seed);
 }
 
+} partial class chacha8rand_package {
+
 // Marshal marshals the state into a byte slice.
 // Marshal and Unmarshal are functions, not methods,
 // so that they will not be linked into the runtime
@@ -152,6 +157,8 @@ public static slice<byte> Marshal(ж<State> Ꮡs) {
 partial struct errUnmarshalChaCha8 {
 }
 
+} partial class chacha8randᴛerrUnmarshalChaCha8 {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidChaCha8Encodingˢ => ref invalidChaCha8Encodingˢᵇ;
 private static readonly @string invalidChaCha8Encodingˢᵇ = "invalid ChaCha8 encoding"u8;
@@ -159,6 +166,8 @@ private static readonly @string invalidChaCha8Encodingˢᵇ = "invalid ChaCha8 e
 internal static @string Error(this ref errUnmarshalChaCha8 _) {
     return invalidChaCha8Encodingˢ;
 }
+
+} partial class chacha8rand_package {
 
 // Unmarshal unmarshals the state from a byte slice.
 public static error Unmarshal(ж<State> Ꮡs, slice<byte> data) {

@@ -1,22 +1,31 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
-partial struct Δsliceᴛ {
+partial struct Δslice {
     internal nint lo, hi;
 }
 
-internal static nint span(this Δsliceᴛ s) { return s.hi - s.lo; }
+} partial class mainᴛΔslice {
+
+internal static nint span(this Δslice s) { return s.hi - s.lo; }
+
+} partial class main_package {
 
 partial struct builder {
     internal nint @base;
 }
 
-internal static Δsliceᴛ Δslice(this ref builder b, nint n) {
-    return new Δsliceᴛ(lo: b.@base, hi: b.@base + n);
+} partial class mainᴛbuilder {
+
+internal static Δslice Δslice(this ref builder b, nint n) {
+    return new Δslice(lo: b.@base, hi: b.@base + n);
 }
+
+} partial class main_package {
 
 internal static void main() {
     var b = Ꮡ(new builder(@base: 10));
@@ -30,11 +39,13 @@ internal static void main() {
     fmt.Println(sv.Filter(even));
 }
 
-// type ΔFilter is a methodless func type — rendered inline as its base delegate
+// type Filter is a methodless func type — rendered inline as its base delegate
 
 partial struct Sieve {
     internal slice<nint> vals;
 }
+
+} partial class mainᴛSieve {
 
 public static nint Filter(this Sieve sv, Func<nint, bool> f) {
     nint count = 0;
@@ -46,4 +57,4 @@ public static nint Filter(this Sieve sv, Func<nint, bool> f) {
     return count;
 }
 
-} // end main_package
+} // end mainᴛSieve

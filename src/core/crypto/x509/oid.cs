@@ -13,26 +13,27 @@ using strconv = strconv_package;
 using strings = strings_package;
 using encoding;
 using go.math;
+using static x509_package;
 
 partial class x509_package {
 
 internal static error errInvalidOID = errors.New("invalid oid");
 
 // An OID represents an ASN.1 OBJECT IDENTIFIER.
-partial struct ΔOID {
+partial struct OID {
     internal slice<byte> der;
 }
 
 // ParseOID parses a Object Identifier string, represented by ASCII numbers separated by dots.
-public static (ΔOID, error) ParseOID(@string oid) {
-    ΔOID o = default;
+public static (OID, error) ParseOID(@string oid) {
+    OID o = default;
     var ᴛ1 = o.unmarshalOIDText(oid);
     return (o, ᴛ1);
 }
 
-internal static (ΔOID, bool) newOIDFromDER(slice<byte> der) {
-    if (builtin.len(der) == 0 || (byte)(der[builtin.len(der) - 1] & 0x80) != 0) {
-        return (new ΔOID(), false);
+internal static (OID, bool) newOIDFromDER(slice<byte> der) {
+    if (len(der) == 0 || (byte)(der[len(der) - 1] & 0x80) != 0) {
+        return (new OID(), false);
     }
 
     nint start = 0;
@@ -41,20 +42,20 @@ internal static (ΔOID, bool) newOIDFromDER(slice<byte> der) {
         // The subidentifier shall be encoded in the fewest possible octets,
         // that is, the leading octet of the subidentifier shall not have the value 0x80.
         if (i == start && v == 0x80) {
-            return (new ΔOID(), false);
+            return (new OID(), false);
         }
         if ((byte)(v & 0x80) == 0) {
             start = i + 1;
         }
     }
 
-    return (new ΔOID(der), true);
+    return (new OID(der), true);
 }
 
 // OIDFromInts creates a new OID using ints, each integer is a separate component.
-public static (ΔOID, error) OIDFromInts(slice<uint64> oid) {
-    if (builtin.len(oid) < 2 || oid[0] > 2 || (oid[0] < 2 && oid[1] >= 40)) {
-        return (new ΔOID(), errInvalidOID);
+public static (OID, error) OIDFromInts(slice<uint64> oid) {
+    if (len(oid) < 2 || oid[0] > 2 || (oid[0] < 2 && oid[1] >= 40)) {
+        return (new OID(), errInvalidOID);
     }
 
     nint length = base128IntLength(oid[0] * 40 + oid[1]);
@@ -67,7 +68,7 @@ public static (ΔOID, error) OIDFromInts(slice<uint64> oid) {
     foreach (var (_, v) in range(oid[2..])) {
         der = appendBase128Int(der, v);
     }
-    return (new ΔOID(der), default);
+    return (new OID(der), default);
 }
 
 internal static nint base128IntLength(uint64 n) {
@@ -89,7 +90,7 @@ internal static slice<byte> appendBase128Int(slice<byte> dst, uint64 n) {
     return dst;
 }
 
-internal static nint base128BigIntLength(ж<bigꓸInt> Ꮡn) {
+internal static nint base128BigIntLength(ж<big.Int> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn.Cmp(big.NewInt(0)) == 0) {
@@ -98,7 +99,7 @@ internal static nint base128BigIntLength(ж<bigꓸInt> Ꮡn) {
     return (n.BitLen() + 6) / 7;
 }
 
-internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<bigꓸInt> n) {
+internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<big.Int> n) {
     if (n.Cmp(big.NewInt(0)) == 0) {
         return append(dst, (byte)0);
     }
@@ -114,22 +115,24 @@ internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<bigꓸInt> n
     return dst;
 }
 
+} partial class x509ᴛOID {
+
 // AppendText implements [encoding.TextAppender]
-public static (slice<byte>, error) AppendText(this ΔOID o, slice<byte> b) {
+public static (slice<byte>, error) AppendText(this OID o, slice<byte> b) {
     return (append(b, o.String().ꓸꓸꓸ), default);
 }
 
 // MarshalText implements [encoding.TextMarshaler]
-public static (slice<byte>, error) MarshalText(this ΔOID o) {
+public static (slice<byte>, error) MarshalText(this OID o) {
     return o.AppendText(default);
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
-public static error UnmarshalText(this ref ΔOID o, slice<byte> text) {
+public static error UnmarshalText(this ref OID o, slice<byte> text) {
     return o.unmarshalOIDText((@string)text);
 }
 
-internal static error unmarshalOIDText(this ref ΔOID o, @string oid) {
+internal static error unmarshalOIDText(this ref OID o, @string oid) {
     // (*big.Int).SetString allows +/- signs, but we don't want
     // to allow them in the string representation of Object Identifier, so
     // reject such encodings.
@@ -150,8 +153,8 @@ internal static error unmarshalOIDText(this ref ΔOID o, @string oid) {
     }
     (secondNum, oid, nextComponentExists) = strings.Cut(oid, ".");
 
-    ж<bigꓸInt> first = big.NewInt(0);
-    ж<bigꓸInt> second = big.NewInt(0);
+    ж<big.Int> first = big.NewInt(0);
+    ж<big.Int> second = big.NewInt(0);
 
     {
         var (_, ok) = first.SetString(firstNum, 10); if (!ok) {
@@ -188,17 +191,17 @@ internal static error unmarshalOIDText(this ref ΔOID o, @string oid) {
 }
 
 // AppendBinary implements [encoding.BinaryAppender]
-public static (slice<byte>, error) AppendBinary(this ΔOID o, slice<byte> b) {
+public static (slice<byte>, error) AppendBinary(this OID o, slice<byte> b) {
     return (appendꓸꓸꓸ(b, o.der), default);
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler]
-public static (slice<byte>, error) MarshalBinary(this ΔOID o) {
+public static (slice<byte>, error) MarshalBinary(this OID o) {
     return o.AppendBinary(default);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler]
-public static error UnmarshalBinary(this ref ΔOID o, slice<byte> b) {
+public static error UnmarshalBinary(this ref OID o, slice<byte> b) {
     var (oid, ok) = newOIDFromDER(bytes.Clone(b));
     if (!ok) {
         return errInvalidOID;
@@ -208,11 +211,13 @@ public static error UnmarshalBinary(this ref ΔOID o, slice<byte> b) {
 }
 
 // Equal returns true when oid and other represents the same Object Identifier.
-public static bool Equal(this ΔOID oid, ΔOID other) {
+public static bool Equal(this OID oid, OID other) {
     // There is only one possible DER encoding of
     // each unique Object Identifier.
     return bytes.Equal(oid.der, other.der);
 }
+
+} partial class x509_package {
 
 internal static (nint ret, nint offset, bool failed) parseBase128Int(slice<byte> bytes, nint initOffset) {
     nint ret = default;
@@ -221,7 +226,7 @@ internal static (nint ret, nint offset, bool failed) parseBase128Int(slice<byte>
 
     offset = initOffset;
     int64 ret64 = default;
-    for (nint shifted = 0; offset < builtin.len(bytes); shifted++) {
+    for (nint shifted = 0; offset < len(bytes); shifted++) {
         // 5 * 7 bits per byte == 35 bits of data
         // Thus the representation is either non-minimal or too large for an int32
         if (shifted == 5) {
@@ -251,11 +256,13 @@ internal static (nint ret, nint offset, bool failed) parseBase128Int(slice<byte>
     return (ret, offset, failed);
 }
 
+} partial class x509ᴛOID {
+
 // EqualASN1OID returns whether an OID equals an asn1.ObjectIdentifier. If
 // asn1.ObjectIdentifier cannot represent the OID specified by oid, because
 // a component of OID requires more than 31 bits, it returns false.
-public static bool EqualASN1OID(this ΔOID oid, asn1.ObjectIdentifier other) {
-    if (builtin.len(other) < 2) {
+public static bool EqualASN1OID(this OID oid, asn1.ObjectIdentifier other) {
+    if (len(other) < 2) {
         return false;
     }
     var (v, offset, failed) = parseBase128Int(oid.der, 0);
@@ -279,23 +286,23 @@ public static bool EqualASN1OID(this ΔOID oid, asn1.ObjectIdentifier other) {
     }
 
     nint i = 2;
-    for (; offset < builtin.len(oid.der); i++) {
+    for (; offset < len(oid.der); i++) {
         (v, offset, failed) = parseBase128Int(oid.der, offset);
         if (failed) {
             // Again, shouldn't happen, since we've already parsed
             // the OID, but better safe than sorry.
             return false;
         }
-        if (i >= builtin.len(other) || v != other[i]) {
+        if (i >= len(other) || v != other[i]) {
             return false;
         }
     }
 
-    return i == builtin.len(other);
+    return i == len(other);
 }
 
 // String returns the string representation of the Object Identifier.
-public static @string String(this ΔOID oid) {
+public static @string String(this OID oid) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     Ꮡb.Grow(32);
     UntypedInt valSize = 64; // size in bits of val.
@@ -304,7 +311,7 @@ public static @string String(this ΔOID oid) {
     nint start = 0;
     uint64 val = (uint64)0;
     slice<byte> numBuf = new slice<byte>(0, 21);
-    ж<bigꓸInt> bigVal = default;
+    ж<big.Int> bigVal = default;
     bool overflow = default;
     foreach (var (i, v) in range(oid.der)) {
         var curVal = (byte)(v & 0x7F);
@@ -316,7 +323,7 @@ public static @string String(this ΔOID oid) {
         }
         if (!overflow && val > maxValSafeShift) {
             if (bigVal == nil) {
-                bigVal = @new<bigꓸInt>();
+                bigVal = @new<big.Int>();
             }
             bigVal = bigVal.SetUint64(val);
             overflow = true;
@@ -359,8 +366,8 @@ public static @string String(this ΔOID oid) {
     return b.String();
 }
 
-internal static (asn1.ObjectIdentifier, bool) toASN1OID(this ΔOID oid) {
-    var @out = new slice<nint>(0, builtin.len(oid.der) + 1);
+internal static (asn1.ObjectIdentifier, bool) toASN1OID(this OID oid) {
+    var @out = new slice<nint>(0, len(oid.der) + 1);
 
     UntypedInt valSize = 31; // amount of usable bits of val for OIDs.
     UntypedInt bitsPerByte = 7;
@@ -377,7 +384,7 @@ internal static (asn1.ObjectIdentifier, bool) toASN1OID(this ΔOID oid) {
         val |= (nint)((nint)((byte)(v & 0x7F)));
 
         if ((byte)(v & 0x80) == 0) {
-            if (builtin.len(@out) == 0) {
+            if (len(@out) == 0) {
                 if (val < 80) {
                     @out = append(@out, val / 40);
                     @out = append(@out, val % 40);
@@ -396,18 +403,20 @@ internal static (asn1.ObjectIdentifier, bool) toASN1OID(this ΔOID oid) {
     return (@out, true);
 }
 
+} partial class x509_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509OidComponentsMustBeˢ => ref x509OidComponentsMustBeˢᵇ;
 private static readonly @string x509OidComponentsMustBeˢᵇ = "x509: OID components must be non-negative"u8;
 
 // OIDFromASN1OID creates a new OID using asn1OID.
-public static (ΔOID, error) OIDFromASN1OID(asn1.ObjectIdentifier asn1OID) {
+public static (OID, error) OIDFromASN1OID(asn1.ObjectIdentifier asn1OID) {
     var uint64OIDᴷ = new stackAppend<uint64>();
 
-    var uint64OID = new slice<uint64>(0, builtin.len(asn1OID));
+    var uint64OID = new slice<uint64>(0, len(asn1OID));
     foreach (var (_, component) in range<nint>(asn1OID)) {
         if (component < 0) {
-            return (new ΔOID(), errors.New(x509OidComponentsMustBeˢ));
+            return (new OID(), errors.New(x509OidComponentsMustBeˢ));
         }
         uint64OID = append(uint64OIDᴷ, uint64OID, (uint64)component);
     }

@@ -19,7 +19,7 @@ internal static error setKeepAliveIdle(ж<netFD> fd, time.Duration d) {
     }
 
     // The kernel expects seconds so round to next highest second.
-    nint secs = (nint)roundDurationUp(d, time.ΔSecond);
+    nint secs = (nint)roundDurationUp(d, time.Second);
     var err = fd.Ꮡpfd.SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_KEEPIDLE, secs);
     runtime.KeepAlive(fd.OrTypedNil());
     return wrapSyscallError(setsockoptˢ, err);
@@ -33,7 +33,7 @@ internal static error setKeepAliveInterval(ж<netFD> fd, time.Duration d) {
     }
 
     // The kernel expects seconds so round to next highest second.
-    nint secs = (nint)roundDurationUp(d, time.ΔSecond);
+    nint secs = (nint)roundDurationUp(d, time.Second);
     var err = fd.Ꮡpfd.SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_KEEPINTVL, secs);
     runtime.KeepAlive(fd.OrTypedNil());
     return wrapSyscallError(setsockoptˢ, err);

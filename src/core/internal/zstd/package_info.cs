@@ -63,14 +63,14 @@ using static go.@internal.zstd_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/zstd/bits.go", "bits.cs", "ABg0kgAGEqKCgpSCgoKUqJKCgoKokoKCupIAECDSgoKUAAcQqJKCpoKCrLKCgpSCgoKClKiS", "", "", "94=LeadingZeros8/1/1/6")]
-[assembly: GoPositionMap("internal/zstd/block.go", "block.cs", "ABAi0oK4gqaCpoKClIKClJSUgoKmlIKmlKYAFzIAGzbSgqaCgoKmgoKCgoKUgpSClILKgpSCgpS4goKCpoKCpoKCpuzSgqaCgriClIK47oKUgoCCtoKCuIKUlIKClJSClJSCpoKCuIKUlAAKCNaSgqaCgqaCgqaCgsqCgoKmgoKUgoKUlIKClJSCgpS4goKClIKUlLSCgrSCgoK0goKCyIKUgoKUlIKClJSCgpTKgriClIKCpoKCypSCpgAICLKCAAcQgoKCgoKClIKClIKUyoKCgpSClA==")]
-[assembly: GoPositionMap("internal/zstd/fse.go", "fse.cs", "ABswAAgCgoKmgoLKyqamppSUgoKmuIKCgoKCgqaCgoKCgu6UgqaCpoKmgoKUgoKmgoKUgqaCgpSUgpSClJSCgriCpoKmlIKmAAgMsoKUlIKClIKCuIKCgoKCgoKCuIKmgoKClIKmlIKCpgAULAAaMJKCuIKClIKUgoKClJTokoK4ggAUKoKClIKUAAcSABcykoK4goKUgpSCgoKUlNwAGzgAECI=")]
-[assembly: GoPositionMap("internal/zstd/huff.go", "huff.cs", "ABguAAsCgqaClIKClIKUgoKUlIKmgoKmgoKmgoLcgoKCgpSCgoKmgoKUlIKmgpSUgoKUgoKCpoKClJSCpoKmuIKClIKCgoLcgoKCgpSCgqaCpoKCpoLKgoKUgoKUgpSCgpSC3IKCgoKmgoKUgoKCgpSm")]
-[assembly: GoPositionMap("internal/zstd/literals.go", "literals.cs", "AAoc0oK4gpSClAALDMKUgpS0gpSCtIKUguyCppSClIKmgpSCgoK4AAkKwqqUgpSCgoKClMaClIKCgrSClIKCguyCpoKCpoK4gqaCgpSUgpSCuILugoKUpoKm6OaCgqaCgpSCgqaCgoKCpgAJCuaClILcgoKmgoKClIKClJSCgpSClIKUgsqSgqaSgqaSgqaSgqaCgoKUlJSCgpSClJKClIKmgoKmgoKmgoKmgoKClIKCpoKClIKClIKCpg==", "289-295:1")]
-[assembly: GoPositionMap("internal/zstd/window.go", "window.cs", "ABQqkoKClIKCqJKokoKUgqaCgoKCuIKCgoKUpoKUgs6igoKUgoKClIKCpoKClA==")]
-[assembly: GoPositionMap("internal/zstd/xxhash.go", "xxhash.cs", "ABo8oqaClIKmgpSCqJKUgoKCpoKCgoKCgoKmgoKCgoKmgoK6koKClIiCgoKmlIKCgoKCgoKClIKCgoKUgoKCgqaCgoKClKiSgoKCqJKCgoI=", "", "", "87=RotateLeft64/2/4/1,RotateLeft64/3/4/2,RotateLeft64/4/4/3")]
-[assembly: GoPositionMap("internal/zstd/zstd.go", "zstd.cs", "AEawAZKCgqqiuIKCgoKCgoIADyKygpSCgqiygpSCgqiygoKUlKiygoKmAAwIkoKmgJSClLaClIKClIKmpqaAgqSUlIKCpoKClKaCpoKCuIKCppSUgIK6opSCgoKCgoKmgsqClIKC3IKCgpS0tLS0tOyCqJKCppSCgqaCgoKCgoKClKiSlIKmlIKCgqaCpoKClIKClIKCuIKClIKmgoKClIIADAiypoCCtpSUgoLKgriUgoCCpIK0goCCpIKCgpS0goCCpLSmgoKUpoKmgpSCpoKCpoKCgqaUpqqigoKUAAgSgqaCpoKmgoKUpoKmgoKU")]
+[assembly: GoPositionMap("internal/zstd/bits.go", "bits.cs", "ABs0kgAIEqKCgpSCgoKUqJKCgoKokoKCupIAFCDSgoKUAAcQyJKCpoKCrLKCgpSCgoKClKiS", "", "", "103=LeadingZeros8/1/1/6")]
+[assembly: GoPositionMap("internal/zstd/block.go", "block.cs", "ABMi0oK4gqaCpoKClIKClJSUgoKmlIKmlKYAGTIAHTbSgqaCgoKmgoKCgoKUgpSClILKgpSCgpS4goKCpoKCpoKCpuzSgqaCgriClIK47oKUgoCCtoKCuIKUlIKClJSClJSCpoKCuIKUlAAKCNaSgqaCgqaCgqaCgsqCgoKmgoKUgoKUlIKClJSCgpS4goKClIKUlLSCgrSCgoK0goKCyIKUgoKUlIKClJSCgpTKgriClIKCpoKCypSCpgAICLKCAAcQgoKCgoKClIKClIKUyoKCgpSClA==")]
+[assembly: GoPositionMap("internal/zstd/fse.go", "fse.cs", "AB4wAAgCgoKmgoLKyqamppSUgoKmuIKCgoKCgqaCgoKCgu6UgqaCpoKmgoKUgoKmgoKUgqaCgpSUgpSClJSCgriCpoKmlIKmAAgMsoKUlIKClIKCuIKCgoKCgoKCuIKmgoKClIKmlIKCpgAWLAAcMJKCuIKClIKUgoKClJTokoK4ggAUKoKClIKUAAkSABkykoK4goKUgpSCgoKUlPwAGzgAECI=")]
+[assembly: GoPositionMap("internal/zstd/huff.go", "huff.cs", "ABsuAAsCgqaClIKClIKUgoKUlIKmgoKmgoKmgoLcgoKCgpSCgoKmgoKUlIKmgpSUgoKUgoKCpoKClJSCpoKmuIKClIKCgoLcgoKCgpSCgqaCpoKCpoLKgoKUgoKUgpSCgpSC3IKCgoKmgoKUgoKCgpSm")]
+[assembly: GoPositionMap("internal/zstd/literals.go", "literals.cs", "AA0c0oK4gpSClAALDMKUgpS0gpSCtIKUguyCppSClIKmgpSCgoK4AAkKwqqUgpSCgoKClMaClIKCgrSClIKCguyCpoKCpoK4gqaCgpSUgpSCuILugoKUpoKm6OaCgqaCgpSCgqaCgoKCpgAJCuaClILcgoKmgoKClIKClJSCgpSClIKUgsqSgqaSgqaSgqaSgqaCgoKUlJSCgpSClJKClIKmgoKmgoKmgoKmgoKClIKCpoKClIKClIKCpg==", "289-295:1")]
+[assembly: GoPositionMap("internal/zstd/window.go", "window.cs", "ABgqkoKClIKCqJKokoKUgqaCgoKCuIKCgoKUpoKUgs6igoKUgoKClIKCpoKClA==")]
+[assembly: GoPositionMap("internal/zstd/xxhash.go", "xxhash.cs", "AB08oqaClIKmgpSCqJKUgoKCpoKCgoKCgoKmgoKCgoKmgoK6koKClIiCgoKmlIKCgoKCgoKClIKCgoKUgoKCgqaCgoKClKiSgoKCqJKCgoI=", "", "", "90=RotateLeft64/2/4/1,RotateLeft64/3/4/2,RotateLeft64/4/4/3")]
+[assembly: GoPositionMap("internal/zstd/zstd.go", "zstd.cs", "AEewAZKCgsqiuIKCgoKCgoIADyKygpSCgqiygpSCgqiygoKUlKiygoKmAAwIkoKmgJSClLaClIKClIKmpqaAgqSUlIKCpoKClKaCpoKCuIKCppSUgIK6opSCgoKCgoKmgsqClIKC3IKCgpS0tLS0tOyCqJKCppSCgqaCgoKCgoKClKiSlIKmlIKCgqaCpoKClIKClIKCuIKClIKmgoKClIIADAiypoCCtpSUgoLKgriUgoCCpIK0goCCpIKCgpS0goCCpLSmgoKUpoKmgpSCpoKCpoKCgqaUpqqigoKUAAwSgqaCxoKmgoKUpoKmgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -112,3 +112,18 @@ public static partial class zstd_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(zstd_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zstdᴛReader;
+[GoMethodHost(typeof(zstd_package.bitReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zstdᴛbitReader;
+[GoMethodHost(typeof(zstd_package.reverseBitReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zstdᴛreverseBitReader;
+[GoMethodHost(typeof(zstd_package.window)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zstdᴛwindow;
+[GoMethodHost(typeof(zstd_package.xxhash64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zstdᴛxxhash64;
+[GoMethodHost(typeof(zstd_package.zstdError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zstdᴛzstdError;
+// </MethodHolders>

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,16 +9,20 @@ partial struct snapshot {
     internal nint addr;
 }
 
-internal static snapshot Δtrace = new snapshot(addr: 42);
+internal static snapshot trace = new snapshot(addr: 42);
 
 partial struct acquirer {
     internal nint n;
 }
 
+} partial class mainᴛacquirer {
+
 internal static nint trace(this acquirer _) { return 1; }
 
+} partial class main_package {
+
 internal static partial nint collisionGlobalShadow() {
-    nint a = main_package.Δtrace.addr;
+    nint a = main_package.trace.addr;
     nint traceΔ1 = 7;
     return a + traceΔ1;
 }
@@ -34,8 +39,8 @@ internal static partial nint acquire(nint n) { return n * 10; }
 
 internal static partial nint nestedBlockShadow(nint kind) {
     nint total = 0;
-    nint Δtrace = acquire(1);
-    total += Δtrace;
+    nint trace = acquire(1);
+    total += trace;
     if (kind == 0) {
         total = -1;
     } else {
@@ -46,7 +51,7 @@ internal static partial nint nestedBlockShadow(nint kind) {
         nint traceΔ2 = acquire(3);
         total += traceΔ2;
     }
-    total += Δtrace;
+    total += trace;
     return total;
 }
 
@@ -90,7 +95,7 @@ internal static void main() {
     fmt.Println(constSelfInitShadow(), constNestedInitShadow(), constVarInitShadow(), constUnshadowedElsewhere());
     fmt.Println(collisionGlobalShadow());
     fmt.Println(plainGlobalShadow());
-    fmt.Println(Δtrace.addr, plainCounter);
+    fmt.Println(trace.addr, plainCounter);
     fmt.Println(nestedBlockShadow(2), nestedBlockShadow(1));
     fmt.Println(tupleInitShadow("a"), tupleInitShadow("z"));
 

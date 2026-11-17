@@ -15,6 +15,7 @@ using @internal;
 using net;
 using time = time_package;
 using vendor.golang.org.x.net.dns;
+using static net_package;
 
 partial class net_package {
 
@@ -172,6 +173,8 @@ partial struct Resolver {
     internal singleflight.Group lookupGroup;
 }
 
+} partial class netᴛResolver {
+
 // TODO(bradfitz): optional interface impl override hook
 // TODO(bradfitz): Timeout time.Duration?
 internal static bool preferGo(this ж<Resolver> Ꮡr) {
@@ -193,6 +196,8 @@ internal static ж<singleflight.Group> getLookupGroup(this ж<Resolver> Ꮡr) {
     return Ꮡr.ᏑlookupGroup;
 }
 
+} partial class net_package {
+
 // LookupHost looks up the given host using the local resolver.
 // It returns a slice of that host's addresses.
 //
@@ -201,6 +206,8 @@ internal static ж<singleflight.Group> getLookupGroup(this ж<Resolver> Ꮡr) {
 public static (slice<@string> addrs, error err) LookupHost(@string host) {
     return DefaultResolver.LookupHost(context.Background(), host);
 }
+
+} partial class netᴛResolver {
 
 // LookupHost looks up the given host using the local resolver.
 // It returns a slice of that host's addresses.
@@ -215,6 +222,8 @@ public static (slice<@string> addrs, error err) LookupHost(this ж<Resolver> Ꮡ
     return Ꮡr.lookupHost(ctx, host);
 }
 
+} partial class net_package {
+
 // LookupIP looks up host using the local resolver.
 // It returns a slice of that host's IPv4 and IPv6 addresses.
 public static (slice<IP>, error) LookupIP(@string host) {
@@ -228,6 +237,8 @@ public static (slice<IP>, error) LookupIP(@string host) {
     }
     return (ips, default);
 }
+
+} partial class netᴛResolver {
 
 // LookupIPAddr looks up host using the local resolver.
 // It returns a slice of that host's IPv4 and IPv6 addresses.
@@ -262,7 +273,7 @@ public static (slice<IP>, error) LookupIP(this ж<Resolver> Ꮡr, context.Contex
     }
 
     var ips = new slice<IP>(0, len(addrs));
-    foreach (var (_, addr) in range<ΔAddr>(addrs)) {
+    foreach (var (_, addr) in range<Addr>(addrs)) {
         ips = append(ips, addr._<ж<IPAddr>>().IP);
     }
     return (ips, default);
@@ -272,7 +283,7 @@ public static (slice<IP>, error) LookupIP(this ж<Resolver> Ꮡr, context.Contex
 // It returns a slice of that host's IP addresses of the type specified by
 // network.
 // The network must be one of "ip", "ip4" or "ip6".
-public static (slice<netipꓸAddr>, error) LookupNetIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
+public static (slice<netip.Addr>, error) LookupNetIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
     // TODO(bradfitz): make this efficient, making the internal net package
     // type throughout be netip.Addr and only converting to the net.IP slice
     // version at the edge. But for now (2021-10-20), this is a wrapper around
@@ -281,7 +292,7 @@ public static (slice<netipꓸAddr>, error) LookupNetIP(this ж<Resolver> Ꮡr, c
     if (err != nil) {
         return (default, err);
     }
-    var ret = new slice<netipꓸAddr>(0, len(ips));
+    var ret = new slice<netip.Addr>(0, len(ips));
     foreach (var (_, ip) in range(ips)) {
         var (a, ok) = netip.AddrFromSlice(ip); if (ok) {
             ret = append(ret, a);
@@ -289,6 +300,8 @@ public static (slice<netipꓸAddr>, error) LookupNetIP(this ж<Resolver> Ꮡr, c
     }
     return (ret, default);
 }
+
+} partial class net_package {
 
 // onlyValuesCtx is a context that uses an underlying context
 // for value lookup if the underlying context hasn't yet expired.
@@ -311,6 +324,8 @@ internal static error Err(this onlyValuesCtx recvᴛ) => recvᴛ.Context.Err();
 
 internal static context.Context _ᴛ1ʗ = new onlyValuesCtxжContext(((ж<onlyValuesCtx>)nil));
 
+} partial class netᴛonlyValuesCtx {
+
 // Value performs a lookup if the original context hasn't expired.
 internal static any Value(this ref onlyValuesCtx ovc, any key) {
     var selᴛ11 = ovc.lookupValues.Done();
@@ -323,6 +338,8 @@ internal static any Value(this ref onlyValuesCtx ovc, any key) {
     }}
 }
 
+} partial class net_package {
+
 // withUnexpiredValuesPreserved returns a context.Context that only uses lookupCtx
 // for its values, otherwise it is never canceled and has no deadline.
 // If the lookup context expires, any looked up values will return nil.
@@ -330,6 +347,8 @@ internal static any Value(this ref onlyValuesCtx ovc, any key) {
 internal static context.Context withUnexpiredValuesPreserved(context.Context lookupCtx) {
     return new onlyValuesCtxжContext(Ꮡ(new onlyValuesCtx(Context: context.Background(), lookupValues: lookupCtx)));
 }
+
+} partial class netᴛResolver {
 
 // lookupIPAddr looks up host using the local resolver and particular network.
 // It returns a slice of that host's IPv4 and IPv6 addresses.
@@ -420,6 +439,8 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
     return default;
 }
 
+} partial class net_package {
+
 // lookupIPReturn turns the return values from singleflight.Do into
 // the return values from LookupIP.
 internal static (slice<IPAddr>, error) lookupIPReturn(any addrsi, error err, bool shared) {
@@ -451,6 +472,8 @@ internal static slice<any> ipAddrsEface(slice<IPAddr> addrs) {
 public static (nint port, error err) LookupPort(@string network, @string service) {
     return DefaultResolver.LookupPort(context.Background(), network, service);
 }
+
+} partial class netᴛResolver {
 
 // LookupPort looks up the port for the given network and service.
 //
@@ -484,6 +507,8 @@ public static (nint port, error err) LookupPort(this ж<Resolver> Ꮡr, context.
     return (port, default);
 }
 
+} partial class net_package {
+
 // LookupCNAME returns the canonical name for the given host.
 // Callers that do not care about the canonical name can call
 // [LookupHost] or [LookupIP] directly; both take care of resolving
@@ -503,6 +528,8 @@ public static (nint port, error err) LookupPort(this ж<Resolver> Ꮡr, context.
 public static (@string cname, error err) LookupCNAME(@string host) {
     return DefaultResolver.LookupCNAME(context.Background(), host);
 }
+
+} partial class netᴛResolver {
 
 // LookupCNAME returns the canonical name for the given host.
 // Callers that do not care about the canonical name can call
@@ -528,6 +555,8 @@ public static (@string, error) LookupCNAME(this ж<Resolver> Ꮡr, context.Conte
     return (cname, default);
 }
 
+} partial class net_package {
+
 // LookupSRV tries to resolve an [SRV] query of the given service,
 // protocol, and domain name. The proto is "tcp" or "udp".
 // The returned records are sorted by priority and randomized
@@ -545,6 +574,8 @@ public static (@string, error) LookupCNAME(this ж<Resolver> Ꮡr, context.Conte
 public static (@string cname, slice<ж<SRV>> addrs, error err) LookupSRV(@string service, @string proto, @string name) {
     return DefaultResolver.LookupSRV(context.Background(), service, proto, name);
 }
+
+} partial class netᴛResolver {
 
 // LookupSRV tries to resolve an [SRV] query of the given service,
 // protocol, and domain name. The proto is "tcp" or "udp".
@@ -584,6 +615,8 @@ public static (@string, slice<ж<SRV>>, error) LookupSRV(this ж<Resolver> Ꮡr,
     return (cname, filteredAddrs, default);
 }
 
+} partial class net_package {
+
 // LookupMX returns the DNS MX records for the given domain name sorted by preference.
 //
 // The returned mail server names are validated to be properly
@@ -596,6 +629,8 @@ public static (@string, slice<ж<SRV>>, error) LookupSRV(this ж<Resolver> Ꮡr,
 public static (slice<ж<MX>>, error) LookupMX(@string name) {
     return DefaultResolver.LookupMX(context.Background(), name);
 }
+
+} partial class netᴛResolver {
 
 // LookupMX returns the DNS MX records for the given domain name sorted by preference.
 //
@@ -629,6 +664,8 @@ public static (slice<ж<MX>>, error) LookupMX(this ж<Resolver> Ꮡr, context.Co
     return (filteredMX, default);
 }
 
+} partial class net_package {
+
 // LookupNS returns the DNS NS records for the given domain name.
 //
 // The returned name server names are validated to be properly
@@ -641,6 +678,8 @@ public static (slice<ж<MX>>, error) LookupMX(this ж<Resolver> Ꮡr, context.Co
 public static (slice<ж<NS>>, error) LookupNS(@string name) {
     return DefaultResolver.LookupNS(context.Background(), name);
 }
+
+} partial class netᴛResolver {
 
 // LookupNS returns the DNS NS records for the given domain name.
 //
@@ -669,6 +708,8 @@ public static (slice<ж<NS>>, error) LookupNS(this ж<Resolver> Ꮡr, context.Co
     return (filteredNS, default);
 }
 
+} partial class net_package {
+
 // LookupTXT returns the DNS TXT records for the given domain name.
 //
 // If a DNS TXT record holds multiple strings, they are concatenated as a
@@ -680,6 +721,8 @@ public static (slice<@string>, error) LookupTXT(@string name) {
     return DefaultResolver.lookupTXT(context.Background(), name);
 }
 
+} partial class netᴛResolver {
+
 // LookupTXT returns the DNS TXT records for the given domain name.
 //
 // If a DNS TXT record holds multiple strings, they are concatenated as a
@@ -687,6 +730,8 @@ public static (slice<@string>, error) LookupTXT(@string name) {
 public static (slice<@string>, error) LookupTXT(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     return Ꮡr.lookupTXT(ctx, name);
 }
+
+} partial class net_package {
 
 // LookupAddr performs a reverse lookup for the given address, returning a list
 // of names mapping to that address.
@@ -703,6 +748,8 @@ public static (slice<@string>, error) LookupTXT(this ж<Resolver> Ꮡr, context.
 public static (slice<@string> names, error err) LookupAddr(@string addr) {
     return DefaultResolver.LookupAddr(context.Background(), addr);
 }
+
+} partial class netᴛResolver {
 
 // LookupAddr performs a reverse lookup for the given address, returning a list
 // of names mapping to that address.
@@ -727,10 +774,14 @@ public static (slice<@string>, error) LookupAddr(this ж<Resolver> Ꮡr, context
     return (filteredNames, default);
 }
 
+} partial class net_package {
+
 // errMalformedDNSRecordsDetail is the DNSError detail which is returned when a Resolver.Lookup...
 // method receives DNS records which contain invalid DNS names. This may be returned alongside
 // results which have had the malformed records filtered out.
 internal static @string errMalformedDNSRecordsDetail = "DNS response contained records which contain invalid names";
+
+} partial class netᴛResolver {
 
 // dial makes a new connection to the provided server (which must be
 // an IP address) with the provided network type, using either r.Dial
@@ -968,6 +1019,8 @@ internal static (slice<@string>, error) goLookupTXT(this ж<Resolver> Ꮡr, cont
     return (txts, default);
 }
 
+} partial class net_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noCnameRecordReceivedˢ => ref noCnameRecordReceivedˢᵇ;
 private static readonly @string noCnameRecordReceivedˢᵇ = "no CNAME record received"u8;
@@ -978,7 +1031,7 @@ internal static (@string, error) parseCNAMEFromResources(slice<dnsmessage.Resour
     if (len(resources) == 0) {
         return ("", errors.New(noCnameRecordReceivedˢ));
     }
-    var (c, ok) = resources[0].Body._<ж<dnsmessageꓸCNAMEResource>>(ᐧ);
+    var (c, ok) = resources[0].Body._<ж<dnsmessage.CNAMEResource>>(ᐧ);
     if (!ok) {
         return ("", errors.New(couldNotParseCnameRecordˢ));
     }

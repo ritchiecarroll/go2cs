@@ -5,6 +5,7 @@ namespace go.go;
 
 using fmt = fmt_package;
 using iter = iter_package;
+using static ast_package;
 
 partial class ast_package {
 
@@ -417,12 +418,16 @@ public static void Walk(Visitor v, Node node) {
 
 internal delegate bool inspector(Node _);
 
+} partial class astᴛinspector {
+
 internal static Visitor Visit(this inspector f, Node node) {
     if (f(node)) {
         return new inspectorᴠVisitor(f);
     }
     return default;
 }
+
+} partial class ast_package {
 
 // Inspect traverses an AST in depth-first order: It starts by calling
 // f(node); node must not be nil. If f returns true, Inspect invokes f

@@ -64,13 +64,13 @@ private static void probeVMAName() {
         }
 
         uintptr n = (uintptr)4096;
-        var (Δp, err) = mmap(nil, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
+        var (p, err) = mmap(nil, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
         if (err != 0) {
             return;
         }
 
-        var (_, _, errno) = linux.Syscall6(linux.SYS_PRCTL, linux.PR_SET_VMA, linux.PR_SET_VMA_ANON_NAME, (uintptr)Δp, n, 0, 0);
-        munmap(Δp, n);
+        var (_, _, errno) = linux.Syscall6(linux.SYS_PRCTL, linux.PR_SET_VMA, linux.PR_SET_VMA_ANON_NAME, (uintptr)p, n, 0, 0);
+        munmap(p, n);
         if (errno == _EINVAL) {
             ᏑprSetVMAUnsupported.Store(true);
         }

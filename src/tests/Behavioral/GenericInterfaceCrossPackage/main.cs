@@ -2,6 +2,7 @@ namespace go;
 
 using keylike = GenericInterfaceCrossPackage.keylike_package;
 using GenericInterfaceCrossPackage;
+using static main_package;
 
 partial class main_package {
 
@@ -9,16 +10,24 @@ partial struct encKey {
     internal slice<byte> b;
 }
 
+} partial class mainᴛencKey {
+
 internal static slice<byte> Bytes(this ref encKey e) { return e.b; }
+
+} partial class main_package {
 
 partial struct decKey {
     internal slice<byte> b;
     internal ж<encKey> ek;
 }
 
+} partial class mainᴛdecKey {
+
 internal static slice<byte> Bytes(this ref decKey d) { return d.b; }
 
 internal static ж<encKey> EncapsulationKey(this ref decKey d) { return d.ek; }
+
+} partial class main_package {
 
 internal static (ж<decKey>, error) generateKey() {
     return (Ꮡ(new decKey(b: [1, 2], ek: Ꮡ(new encKey(b: [3, 4])))), default);

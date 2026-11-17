@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct tracer {
     internal @string id;
 }
+
+} partial class mainᴛtracer {
 
 internal static void touch(this ref tracer t) {
     fmt.Println("touch", t.id);
@@ -16,10 +19,14 @@ internal static void done(this ref tracer t) {
     fmt.Println("done", t.id);
 }
 
+} partial class main_package {
+
 partial struct box {
     internal tracer a;
     internal tracer b;
 }
+
+} partial class mainᴛbox {
 
 internal static void two(this ж<box> Ꮡx) {
     GoFrame ᒐ = default;
@@ -206,6 +213,8 @@ internal static void rebound(this ж<box> Ꮡx, ж<box> other) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class main_package {
 
 internal static void main() {
     var x = Ꮡ(new box(a: new tracer(id: "a"), b: new tracer(id: "b")));

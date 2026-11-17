@@ -7,11 +7,14 @@ namespace go.math;
 using fmt = fmt_package;
 using io = io_package;
 using strings = strings_package;
+using static big_package;
 
 partial class big_package {
 
 internal static readonly ж<Float> ᏑfloatZero = new StaticBox<Float>(default(Float));
 internal static ref Float floatZero => ref ((StaticBox<Float>)ᏑfloatZero).ValueSlot;
+
+} partial class bigᴛFloat {
 
 // SetString sets z to the value of s and returns z and a boolean indicating
 // success. s must be a floating-point number of the same format as accepted
@@ -160,6 +163,8 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
     return (f, b, err);
 }
 
+} partial class big_package {
+
 // These powers of 5 fit into a uint64.
 //
 //	for p, q := uint64(0), uint64(1); p < q; p, q = q, q*5 {
@@ -195,6 +200,8 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
     1490116119384765625UL,
     7450580596923828125UL
 }.array(); }
+
+} partial class bigᴛFloat {
 
 // pow5 sets z to 5**n and returns z.
 // n must not be negative.
@@ -300,6 +307,8 @@ public static (ж<Float> f, nint b, error err) Parse(this ж<Float> Ꮡz, @strin
     return (f, b, err);
 }
 
+} partial class big_package {
+
 // ParseFloat is like f.Parse(s, base) with f set to the given precision
 // and rounding mode.
 public static (ж<Float> f, nint b, error err) ParseFloat(@string s, nint @base, nuint prec, RoundingMode mode) {
@@ -307,6 +316,8 @@ public static (ж<Float> f, nint b, error err) ParseFloat(@string s, nint @base,
 }
 
 internal static fmt.Scanner _ᴛ2ʗ = new FloatжScanner(((ж<Float>)nil)); // *Float must implement fmt.Scanner
+
+} partial class bigᴛFloat {
 
 // Scan is a support routine for [fmt.Scanner]; it sets z to the value of
 // the scanned number. It accepts formats whose verbs are supported by
@@ -319,4 +330,4 @@ public static error Scan(this ж<Float> Ꮡz, fmt.ScanState s, rune ch) {
     return err;
 }
 
-} // end big_package
+} // end bigᴛFloat

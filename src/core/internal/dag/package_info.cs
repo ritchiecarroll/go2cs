@@ -36,7 +36,7 @@ using static go.@internal.dag_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<ΔsyntaxError, error>]
+[assembly: GoImplement<syntaxError, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -60,8 +60,8 @@ using static go.@internal.dag_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/dag/alg.go", "alg.cs", "AAcQkpSCgqaCgsyygpSCkoKUgpSClIKUgpSqtIKCgoKC", "29-38:1")]
-[assembly: GoPositionMap("internal/dag/parse.go", "parse.cs", "ADlygqaCgpSCgoKmgqaCpoKmooKClIassoKUgoKokpKUgoKClIKCgpSClIKClIKU7oKCgtyCgoKCuJTugoKCgtyCpgALGIIACAjSgoKUpMS2lIKCgoKCgpSUgpSCgoKClIKUlgAMFpLosoKCpIKUpJSUgoIACA6igoKUpIKCpoKUgqaCgpSCpoKkgqaCgpSCgoI=", "88-90:1;108-110:1;196-206:1", "", "", "", "208:21,209:13")]
+[assembly: GoPositionMap("internal/dag/alg.go", "alg.cs", "AAsQkpSCgqaCgsyygpSCkoKUgpSClIKUgpSqtIKCgoKC", "29-38:1")]
+[assembly: GoPositionMap("internal/dag/parse.go", "parse.cs", "ADpygsaCgpSCgoKmgqaCpoKmooKClIbMsoKUgoKokpKUgoKClIKCgpSClIKClIKU7oKCgtyCgoKCuJTugoKCgtyCpgANGIIACgjSgoKUpMS2lIKCgoKCgpSUgpSCgoKClIKUlgAOFpLosoKCpIKUpJSUgoIACA6igoKUpIKCpoKUgqaCgpSCpoKkgqaCgpSCgoI=", "88-90:1;108-110:1;196-206:1", "", "", "", "217:21,218:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -78,7 +78,7 @@ public static partial class dag_package
     // <TypeAccessibility>
     internal partial struct rule {}
     internal partial struct rulesParser {}
-    internal partial struct ΔsyntaxError {}
+    internal partial struct syntaxError {}
     public partial struct Graph {}
     // </TypeAccessibility>
 
@@ -94,3 +94,15 @@ public static partial class dag_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(dag_package.Graph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dagᴛGraph;
+[GoMethodHost(typeof(dag_package.rulesParser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dagᴛrulesParser;
+[GoMethodHost(typeof(dag_package.syntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dagᴛsyntaxError;
+// </MethodHolders>

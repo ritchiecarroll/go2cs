@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,13 +9,21 @@ partial struct box<T> {
     internal T v;
 }
 
+} partial class mainᴛbox {
+
 internal static T Get<T>(this box<T> b) { return b.v; }
+
+} partial class main_package {
 
 partial struct keeper<T> {
     internal T v;
 }
 
+} partial class mainᴛkeeper {
+
 internal static T Get<T>(this ref keeper<T> k) { return k.v; }
+
+} partial class main_package {
 
 internal partial interface describe_type /*dyn*/ {
     @string Get();

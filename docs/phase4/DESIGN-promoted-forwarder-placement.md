@@ -675,3 +675,25 @@ and `writer.cs`, `internal/trace/order.cs` and `reader.cs`, `internal/zstd/block
 The plant is in the arm beside the seat's, not in the seat's arm: the readings above say no standard-library file
 reaches the seat's arm, so a plant there would also read 0 files. What the control shows is that this instrument
 reports a converter whose emission differs. It was run for one target.
+
+## Amendment 2026-11-15 — OQ2: the generator reads method holders and the U+0394 drop
+
+The sections above are kept as written; the "900 entries in 20 files" they cite was this seat's release at the time.
+The method-holder seat (OQ2, branch `claude/p1-oq2-method-holder`) moved every method the standard library declares
+into its receiver type's holder, a class marked `[GoMethodHost(typeof(T))]`, and dropped the U+0394 prefix a type,
+constant or variable took when a method of its package shared its Go name. The generator changed with it:
+
+- **Moves** accept a class marked `[GoMethodHost]` for the method's receiver as well as `[GoPromotedHost]`, under
+  the same signature, attribute and decoded-nullability test.
+- **Renames** are the second kind (COORD ruling 2026-11-15 10:14Z): a removed type or member gets an entry only
+  when its documentation id with every U+0394 dropped is in the current surface exactly, or, for a method, when it is
+  a move once its receiver, its name and its signature drop theirs (a parameter may keep its prefix or lose it). The
+  entry is the diagnostic the engine reports: CP0001 a type, CP0002 a member, CP0006 an interface member, CP0008 a
+  type that lost a renamed interface, CP0021 a constraint. Anything else stays REFUSED. `Test-GoApiCompatMoves.ps1`
+  carries a negative control per refusal shape, each made to fail once.
+- **Renamed assemblies** (OQ4) are paired with their baselines through the guard's own rename map
+  (`Get-GoApiCompatRenameSuccessors`), so the generator reads the same pairs the guard compares.
+
+Over the OQ2 cut's release-smoke pack (362 packages against 1.26.10.3): 230 files, 13,234 entries (move CP0002
+8,273; rename CP0001 369, CP0002 4,515, CP0006 59, CP0008 16, CP0021 2), 0 refused. Counts were read, not predicted.
+`Test-GoApiCompat.ps1` caps each file at its generated count.

@@ -20,6 +20,8 @@ using go;
 
 namespace go.@internal;
 
+using static abi_package;
+
 partial class abi_package {
 
 // The managed System.Type this synthetic abi.Type stands for — carried directly on the descriptor so
@@ -303,7 +305,7 @@ private static string descriptorDimsKeyCore(nint[]? arrayDims, nint[]?[]? funcPa
 private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, nint[]?[]? funcParamDims, GoChanDir[]? chanDirChain, nint[]? keyDims,
     GoChanDir[]? funcInChanDirs, GoChanDir[]? funcOutChanDirs) {
     ref var t = ref heap<Type>(out var Ꮡt);
-    t.Kind_ = (ΔKind)((uint8)GoReflect.KindOf(st));
+    t.Kind_ = (Kind)((uint8)GoReflect.KindOf(st));
     // TFlagNamed — the descriptor bit that says "this is a DEFINED type", carried because three
     // separate readers consult it and a synthesized descriptor answered NO to all of them:
     // abi.Type.HasName(), internal/reflectlite's rtype.Name() (which gates on it and therefore
@@ -489,9 +491,9 @@ public static ж<Type> TypeOf(any a) {
 // caller of abi.StructType reads a field name: unique reads Typ and Offset, internal/reflectlite
 // reads len(Fields).
 
-private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔStructType>> s_structTypes = new();
-private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔArrayType>> s_arrayTypes = new();
-private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔMapType>> s_mapTypes = new();
+internal static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<StructType>> s_structTypes = new();
+internal static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ArrayType>> s_arrayTypes = new();
+internal static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<MapType>> s_mapTypes = new();
 
 // TypeFor returns the abi.Type for a type parameter.
 //
@@ -506,7 +508,9 @@ public static ж<Type> TypeFor<T>() {
     return TypeOf((ж<T>)nil).Elem();
 }
 
-private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔInterfaceType>> s_interfaceTypes = new();
+internal static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<InterfaceType>> s_interfaceTypes = new();
+
+} partial class abiᴛType {
 
 // InterfaceType returns t cast to a *InterfaceType, or nil if its tag does not match.
 //
@@ -518,11 +522,11 @@ private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Ty
 // so the two layers cannot disagree about an interface's size. Each entry's Name and Typ stay zero:
 // they are offsets into a module's name and type sections, which a managed descriptor does not have,
 // exactly as StructType leaves each field's Name zero. No converted caller reads them.
-public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
+public static ж<InterfaceType> InterfaceType(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Interface || Ꮡt.Value.sysType is null) {
         return default!;
     }
-    return s_interfaceTypes.GetOrAdd(Ꮡt, static box => new StandardBox<ΔInterfaceType>(new ΔInterfaceType(
+    return s_interfaceTypes.GetOrAdd(Ꮡt, static box => new StandardBox<InterfaceType>(new InterfaceType(
         Type: box.Value,
         PkgPath: default!,
         Methods: new slice<Imethod>(new Imethod[(int)GoReflect.GoMethodCount(box.Value.sysType!)])
@@ -530,14 +534,16 @@ public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
 }
 
 // StructType returns t cast to a *StructType, or nil if its tag does not match.
-public static ж<ΔStructType> StructType(this ж<Type> Ꮡt) {
+public static ж<StructType> StructType(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Struct || Ꮡt.Value.sysType is null) {
         return default!;
     }
     return s_structTypes.GetOrAdd(Ꮡt, static box => synthesizeStructType(box));
 }
 
-private static ж<ΔStructType> synthesizeStructType(ж<Type> Ꮡt) {
+} partial class abi_package {
+
+internal static ж<StructType> synthesizeStructType(ж<Type> Ꮡt) {
     System.Type st = Ꮡt.Value.sysType!;
     GoReflect.GoFieldInfo[] infos = GoReflect.GoFields(st);
     nint[]? offsets = GoReflect.GoFieldOffsets(st);
@@ -577,22 +583,24 @@ private static ж<ΔStructType> synthesizeStructType(ж<Type> Ꮡt) {
         );
     }
 
-    return new StandardBox<ΔStructType>(new ΔStructType(
+    return new StandardBox<StructType>(new StructType(
         Type: Ꮡt.Value,
         PkgPath: default!,
         Fields: new slice<StructField>(fields)
     ));
 }
 
+} partial class abiᴛType {
+
 // ArrayType returns t cast to a *ArrayType, or nil if its tag does not match.
 //
 // An array descriptor whose length is unknown refuses by name. Its nil would read as "not an array", Go's own
 // tag-mismatch answer, for a descriptor whose tag IS Array.
-public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
+public static ж<ArrayType> ArrayType(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Array || Ꮡt.Value.sysType is null) {
         return default!;
     }
-    ж<ΔArrayType> arrayType = s_arrayTypes.GetOrAdd(Ꮡt, static box => synthesizeArrayType(box));
+    ж<ArrayType> arrayType = s_arrayTypes.GetOrAdd(Ꮡt, static box => synthesizeArrayType(box));
     if (arrayType == nil) {
         throw global::go.golib.RuntimeErrorPanic.UnknownGoSize("the length", Ꮡt.Value.sysType, Ꮡt.Value.arrayDims);
     }
@@ -610,6 +618,8 @@ public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
     }
     return t.Size_;
 }
+
+} partial class abi_package {
 
 // ==== the FUNC specialization — the same operation, and the same answer ==========================
 //
@@ -636,17 +646,21 @@ public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
 // — the SAME projection reflect's own hand-owned rtype.NumIn/In/NumOut/Out use one layer up
 // (value_impl.cs), so the descriptor layer and the reflect layer cannot disagree about a func's
 // shape. That is the property the Elem/Key hand-owns above were written for, applied to funcs.
-private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔFuncType>> s_funcTypes = new();
+internal static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<FuncType>> s_funcTypes = new();
+
+} partial class abiᴛType {
 
 // FuncType returns t cast to a *FuncType, or nil if its tag does not match.
-public static ж<ΔFuncType> FuncType(this ж<Type> Ꮡt) {
+public static ж<FuncType> FuncType(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Func || Ꮡt.Value.sysType is null) {
         return default!;
     }
     return s_funcTypes.GetOrAdd(Ꮡt, static box => synthesizeFuncType(box));
 }
 
-private static ж<ΔFuncType> synthesizeFuncType(ж<Type> Ꮡt) {
+} partial class abi_package {
+
+internal static ж<FuncType> synthesizeFuncType(ж<Type> Ꮡt) {
     if (!GoReflect.TryFuncShape(Ꮡt.Value.sysType!, out System.Type[]? ins, out System.Type[]? outs, out bool isVariadic)) {
         return default!;
     }
@@ -659,7 +673,7 @@ private static ж<ΔFuncType> synthesizeFuncType(ж<Type> Ꮡt) {
     if (isVariadic) {
         outCount |= 1 << 15;
     }
-    return new StandardBox<ΔFuncType>(new ΔFuncType(
+    return new StandardBox<FuncType>(new FuncType(
         Type: Ꮡt.Value,
         InCount: (uint16)ins.Length,
         OutCount: outCount
@@ -669,7 +683,7 @@ private static ж<ΔFuncType> synthesizeFuncType(ж<Type> Ꮡt) {
 // The parameter descriptors, derived rather than walked. Per-parameter array dims come from the
 // descriptor's own funcParamDims cargo, which exists for exactly this: an array parameter's LENGTH
 // is not recoverable from `array<T>` alone.
-private static slice<ж<Type>> synthesizeFuncSide(ж<ΔFuncType> Ꮡt, bool wantIns) {
+internal static slice<ж<Type>> synthesizeFuncSide(ж<FuncType> Ꮡt, bool wantIns) {
     if (Ꮡt == nil) {
         return default!;
     }
@@ -697,13 +711,17 @@ private static slice<ж<Type>> synthesizeFuncSide(ж<ΔFuncType> Ꮡt, bool want
     return new slice<ж<Type>>(descriptors);
 }
 
-public static slice<ж<Type>> InSlice(this ж<ΔFuncType> Ꮡt) {
+} partial class abiᴛFuncType {
+
+public static slice<ж<Type>> InSlice(this ж<FuncType> Ꮡt) {
     return synthesizeFuncSide(Ꮡt, wantIns: true);
 }
 
-public static slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
+public static slice<ж<Type>> OutSlice(this ж<FuncType> Ꮡt) {
     return synthesizeFuncSide(Ꮡt, wantIns: false);
 }
+
+} partial class abiᴛType {
 
 // ==== the descriptor ACCESSORS that reach an element or a key: Elem() / Key() ====
 //
@@ -794,13 +812,13 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
 // descriptor onto the linker's chanType record and reading `.Dir` out of the memory after the value
 // slot, so reflect.MakeChan's `ChanDir() != BothDir` guard and haveIdenticalUnderlyingType's chan
 // arm each answered differently run to run.
-public static ΔChanDir ChanDir(this ж<Type> Ꮡt) {
+public static ChanDir ChanDir(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Chan) {
         return InvalidDir;
     }
     GoChanDir[]? chain = Ꮡt.Value.chanDirChain;
     GoChanDir carried = chain is { Length: > 0 } ? chain[0] : GoChanDir.Unstamped;
-    return carried == GoChanDir.Unstamped ? BothDir : (ΔChanDir)(nint)(byte)carried;
+    return carried == GoChanDir.Unstamped ? BothDir : (ChanDir)(nint)(byte)carried;
 }
 
 // Key returns the key type for t if t is a map, otherwise nil.
@@ -855,12 +873,14 @@ public static ΔChanDir ChanDir(this ж<Type> Ꮡt) {
 // predicates that sit on Flags (NeedKeyUpdate, HashMightPanic, IndirectKey, IndirectElem)
 // therefore answer false, the same honest zero -- including IndirectKey/IndirectElem, which the
 // group's layout above already applied to its slot size.
-public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
+public static ж<MapType> MapType(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Map || Ꮡt.Value.sysType is null) {
         return default!;
     }
     return s_mapTypes.GetOrAdd(Ꮡt, static box => synthesizeMapType(box));
 }
+
+} partial class abi_package {
 
 // The raw spelling of the same downcast -- `(*abi.MapType)(unsafe.Pointer(abi.TypeOf(m)))` (`*SwissMapType` at 1.24), which
 // internal/runtime/maps' newTestMapType writes -- reaches golib's Reinterpret, not MapType. Register
@@ -868,14 +888,14 @@ public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
 // descriptor of any other kind answers nil and keeps the reinterpret it had.
 [System.Runtime.CompilerServices.ModuleInitializer]
 internal static void registerMapTypeProjection() {
-    PrefixProjection<Type, ΔMapType>.Project = static box => box.MapType();
+    PrefixProjection<Type, MapType>.Project = static box => box.MapType();
 }
 
-private static ж<ΔMapType> synthesizeMapType(ж<Type> Ꮡt) {
+internal static ж<MapType> synthesizeMapType(ж<Type> Ꮡt) {
     var key = Ꮡt.Key();
     var elem = Ꮡt.Elem();
     var group = synthesizeGroup(key, elem);
-    return new StandardBox<ΔMapType>(new ΔMapType(
+    return new StandardBox<MapType>(new MapType(
         Type: Ꮡt.Value,
         Key: key,
         Elem: elem,
@@ -942,6 +962,8 @@ private static nuint structSize(nuint end, bool endsInZeroSizeField, nuint align
     return alignUp(end, align);
 }
 
+} partial class abiᴛType {
+
 public static ж<Type> Key(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Map) {
         return default!;
@@ -975,7 +997,9 @@ public static nint Len(this ж<Type> Ꮡt) {
     throw global::go.golib.RuntimeErrorPanic.UnknownGoSize("the length", Ꮡt.Value.sysType, null);
 }
 
-private static ж<ΔArrayType> synthesizeArrayType(ж<Type> Ꮡt) {
+} partial class abi_package {
+
+internal static ж<ArrayType> synthesizeArrayType(ж<Type> Ꮡt) {
     System.Type at = Ꮡt.Value.sysType!;
     System.Type? elem = GoReflect.ElementType(at);
     nint[]? dims = Ꮡt.Value.arrayDims;
@@ -987,7 +1011,7 @@ private static ж<ΔArrayType> synthesizeArrayType(ж<Type> Ꮡt) {
     }
     nint[]? elemDims = dims.Length > 1 ? dims[1..] : null;
 
-    return new StandardBox<ΔArrayType>(new ΔArrayType(
+    return new StandardBox<ArrayType>(new ArrayType(
         Type: Ꮡt.Value,
         Elem: synthType(elem, elemDims),
         Slice: synthType(typeof(slice<>).MakeGenericType(elem)),

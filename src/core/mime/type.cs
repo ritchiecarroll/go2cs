@@ -254,6 +254,8 @@ internal static ref readonly @string textˢ => ref textˢᵇ;
 private static readonly @string textˢᵇ = "text/"u8;
 internal static ref readonly @string charsetˢ => ref charsetˢᵇ;
 private static readonly @string charsetˢᵇ = "charset"u8;
+internal static ref readonly @string utf8ˢ2 => ref utf8ˢ2ᵇ;
+private static readonly @string utf8ˢ2ᵇ = "utf-8"u8;
 
 internal static error setExtensionType(@string extension, @string mimeType) {
     GoFrame ᒐ = default;

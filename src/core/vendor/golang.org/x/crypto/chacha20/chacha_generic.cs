@@ -15,6 +15,7 @@ using encoding;
 using go.crypto;
 using go.vendor.golang.org.x.crypto.@internal;
 using math;
+using static chacha20_package;
 
 partial class chacha20_package {
 
@@ -144,6 +145,8 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
     b = bits.RotateLeft32(b, 7);
     return (a, b, c, d);
 }
+
+} partial class chacha20ᴛCipher {
 
 // SetCounter sets the Cipher counter. The next invocation of XORKeyStream will
 // behave as if (64 * counter) bytes had been encrypted so far.
@@ -351,6 +354,8 @@ internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> ds
         (src, dst) = (src[(int)(blockSize)..], dst[(int)(blockSize)..]);
     }
 }
+
+} partial class chacha20_package {
 
 // HChaCha20 uses the ChaCha20 core to generate a derived key from a 32 bytes
 // key and a 16 bytes nonce. It returns an error if key or nonce have any other

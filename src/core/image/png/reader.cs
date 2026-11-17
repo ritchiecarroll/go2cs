@@ -19,6 +19,7 @@ using compress;
 using encoding;
 using go.hash;
 using go.image;
+using static png_package;
 
 partial class png_package {
 
@@ -121,14 +122,22 @@ partial struct decoder {
 // A FormatError reports that the input is not a valid PNG.
 partial struct FormatError /*@string*/;
 
+} partial class pngᴛFormatError {
+
 public static @string Error(this FormatError e) { return "png: invalid format: "u8 + ((@string)e); }
+
+} partial class png_package {
 
 internal static FormatError chunkOrderError = ((FormatError)(@string)"chunk out of order");
 
 // An UnsupportedError reports that the input uses a valid but unimplemented PNG feature.
 partial struct UnsupportedError /*@string*/;
 
+} partial class pngᴛUnsupportedError {
+
 public static @string Error(this UnsupportedError e) { return "png: unsupported feature: "u8 + ((@string)e); }
+
+} partial class pngᴛdecoder {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badIhdrLengthˢ => ref badIhdrLengthˢᵇ;
@@ -288,7 +297,7 @@ internal static error parsePLTE(this ref decoder d, uint32 length) {
     case var ᴛ when ᴛ == cbP1 || ᴛ == cbP2 || ᴛ == cbP4 || ᴛ == cbP8: {
         d.palette = new color.Palette(256);
         for (nint i = 0; i < np; i++) {
-            d.palette[i] = new colorꓸRGBA(d.tmp[3 * i + 0], d.tmp[3 * i + 1], d.tmp[3 * i + 2], 0xff);
+            d.palette[i] = new color.RGBA(d.tmp[3 * i + 0], d.tmp[3 * i + 1], d.tmp[3 * i + 2], 0xff);
         }
         for (nint i = np; i < 256; i++) {
             // Initialize the rest of the palette to opaque black. The spec (section
@@ -296,7 +305,7 @@ internal static error parsePLTE(this ref decoder d, uint32 length) {
             // is an error", but some real-world PNG files have out-of-range pixel
             // values. We fall back to opaque black, the same as libpng 1.5.13;
             // ImageMagick 6.5.7 returns an error.
-            d.palette[i] = new colorꓸRGBA(0x00, 0x00, 0x00, 0xff);
+            d.palette[i] = new color.RGBA(0x00, 0x00, 0x00, 0xff);
         }
         d.palette = d.palette.slice(0, np);
         break;
@@ -375,7 +384,7 @@ internal static error parsetRNS(this ref decoder d, uint32 length) {
             d.palette = d.palette.slice(0, n);
         }
         for (nint i = 0; i < n; i++) {
-            var rgba = d.palette[i]._<colorꓸRGBA>();
+            var rgba = d.palette[i]._<color.RGBA>();
             d.palette[i] = new color.NRGBA(rgba.R, rgba.G, rgba.B, d.tmp[i]);
         }
         break;
@@ -500,7 +509,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
     nint bitsPerPixel = 0;
     nint pixOffset = 0;
     ж<image.Gray> gray = default;
-    ж<imageꓸRGBA> rgba = default;
+    ж<image.RGBA> rgba = default;
     ж<image.Paletted> paletted = default;
     ж<image.NRGBA> nrgba = default;
     ж<image.Gray16> gray16 = default;
@@ -546,7 +555,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
             img = new image.NRGBAжImage(nrgba);
         } else {
             rgba = image.NewRGBA(image.Rect(0, 0, width, height));
-            img = new image.ΔRGBAжImage(rgba);
+            img = new image.RGBAжImage(rgba);
         }
         break;
     }
@@ -990,8 +999,8 @@ internal static void mergePassInto(this ref decoder d, image.Image dst, image.Im
         }
         break;
     }
-    case ж<imageꓸRGBA> target: {
-        srcPix = src._<ж<imageꓸRGBA>>().Pix;
+    case ж<image.RGBA> target: {
+        srcPix = src._<ж<image.RGBA>>().Pix;
         (dstPix, stride, rect) = (target.Pix, target.Stride, target.Rect);
         bytesPerPixel = 4;
         break;
@@ -1150,6 +1159,8 @@ internal static error checkHeader(this ref decoder d) {
     }
     return default;
 }
+
+} partial class png_package {
 
 // Decode reads a PNG image from r and returns it as an [image.Image].
 // The type of Image returned depends on the PNG contents.

@@ -1,4 +1,4 @@
-global using localTone = go.RenamedTypeAliasReexportRecords.tone_package.ΔTone;
+global using localTone = go.RenamedTypeAliasReexportRecords.tone_package.Tone;
 
 namespace go;
 
@@ -23,16 +23,16 @@ partial interface raiser {
 internal static @string describe(toner t) { return fmt.Sprintf("%s -> %d"u8, t.String(), t.Tone()); }
 
 internal static void main() {
-    toner t = new tone_ΔToneᴠtoner(((tone.ΔTone)3));
+    toner t = new tone_Toneᴠtoner(((tone.Tone)3));
     fmt.Println(describe(t));
-    fmt.Println(describe(new tone_ΔToneᴠtoner(((tone.ΔTone)4))));
+    fmt.Println(describe(new tone_Toneᴠtoner(((tone.Tone)4))));
     fmt.Println(t);
 
     localTone lt = 5;
-    fmt.Println(describe(new tone_ΔToneᴠtoner(lt)));
+    fmt.Println(describe(new tone_Toneᴠtoner(lt)));
 
-    ref var p = ref heap<RenamedTypeAliasReexportRecords.tone_package.ΔPitch>(lt.Pitch(), out var Ꮡp);
-    raiser r = new tone_ΔPitchжraiser(Ꮡp);
+    ref var p = ref heap<RenamedTypeAliasReexportRecords.tone_package.Pitch>(lt.Pitch(), out var Ꮡp);
+    raiser r = new tone_Pitchжraiser(Ꮡp);
     r.Raise(2);
     fmt.Println(r.Label());
 
