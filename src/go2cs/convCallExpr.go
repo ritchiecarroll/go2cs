@@ -315,8 +315,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// (goImageCopyView.go); marked before the arguments are converted.
 	v.markGoImageCopyArgs(callExpr)
 
-	// A copy into or out of the open view of a named array, `copy((*A)(p)[lo:], src)`, is one of golib's copy
-	// doors (arrayPointerViewDoor.go).
+	// A copy into or out of the open view of an array, `copy((*A)(p)[lo:], src)`, is one of golib's copy doors
+	// (arrayPointerViewDoor.go), unless the slice took the Go-image view just above.
 	if door, ok := v.arrayPointerCopyDoor(callExpr); ok {
 		return door
 	}

@@ -417,7 +417,7 @@ internal static @string pkgPath(abiꓸName n) {
     ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
-    copy(@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)).slice(), array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
+    @unsafe.Pointer.CopyInto<byte>(@unsafe.Pointer.FromPinnedBox(ᏑnameOff), 0, 4, array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
     var pkgPathName = new abiꓸName(Bytes: @unsafe.Pointer.To<byte>(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
     return pkgPathName.Name();
 }

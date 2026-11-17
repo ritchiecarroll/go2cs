@@ -1843,6 +1843,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
 
     [TestMethod]
+    public void CheckOpenSliceUnnamedArray() => CheckTarget("OpenSliceUnnamedArray");
+
+    [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
 
     [TestMethod]
@@ -2813,6 +2816,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnicodeConsoleOutput() => CheckTarget("UnicodeConsoleOutput");
+
+    [TestMethod]
+    public void CheckUnionElementArrayDoor() => CheckTarget("UnionElementArrayDoor");
 
     [TestMethod]
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");

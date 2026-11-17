@@ -1840,6 +1840,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
 
     [TestMethod]
+    public void CheckOpenSliceUnnamedArray() => CheckTarget("OpenSliceUnnamedArray");
+
+    [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
 
     [TestMethod]
@@ -2810,6 +2813,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnicodeConsoleOutput() => CheckTarget("UnicodeConsoleOutput");
+
+    [TestMethod]
+    public void CheckUnionElementArrayDoor() => CheckTarget("UnionElementArrayDoor");
 
     [TestMethod]
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");

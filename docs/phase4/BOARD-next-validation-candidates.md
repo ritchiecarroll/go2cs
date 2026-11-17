@@ -40311,4 +40311,38 @@ trap number (ENOSYS).
 
 — C1 (2026-11-16)
 
+## 2026-11-16 — P5 (decision D4 taken; COORD rulings 00:57Z and 01:10Z; closes shape Q of item 1 of the 2026-11-14 row "an array viewed over another array type answers length 0"): the open slice of an unnamed array takes the array pointer doors — CLOSED for Q, `ge` stays OPEN for door C
+
+`(*[N]T)(p)[lo:]` with an unnamed array kept the box route (`To<array<E>>(p).slice(lo)`), which reads the whole
+array as a value: length 0 over memory that is no Go array of that type, and as `copy`'s destination over a
+number's bytes (reflect's `nameOff` copy) an access violation that ends the process. The view and copy doors now
+take it for an unnamed array as for a named one (design 16.10, branch `claude/p5-d4-open-slice`).
+
+- **Q** (`w := (*[16]byte)(unsafe.Pointer(&arr))[:]` over `[4]uint32`, `w[4] = 1`): Go `16 [0 1 0 0]`; converted
+  now the same (arm B of the behavioral program `OpenSliceUnnamedArray`). CLOSED.
+- **`ge`** (a named array bound to a local, then indexed as an unnamed one) is the kept-local class: door C, .5,
+  unchanged. Items 2 and 3 of the 11-14 row are unchanged.
+- Census: sqlite closure 0 sites; std 7 / 8 / 11 (linux / darwin / windows). Corpus: 7 lines in 6 files (the
+  three `nameOff` copies, `os_linux.cs`, `os_windows.cs`, the registry `value.cs.auto`), and the registry sibling
+  taken whole to the emission (8 lines more, stale since 308).
+- Candidate for a later seat: retiring the registry `value.cs` hand-own, which exists because of this form.
+
+— P5 (2026-11-16)
+
+## 2026-11-16 — P5 (W19; COORD brief 02:52Z, plan approved 03:30Z; G's finding at the newest tree): the array pointer doors take an array whose element is a ccgo union — FIXED on `claude/p5-w19-union-elem`, the W12b stand-in RETIRED pending G's re-run
+
+Door B stepped aside for `(*[N]E)(p)[i]` when E is a ccgo union (a `[0]T` carrier for each member but the one with
+storage): the door asked whether E is managed with the plain reading, where every Go array is an `array<T>`, so
+the union read as managed and the old box route stayed, length 0 over libc's heap. A struct admitted to inline
+arrays holds a `[0]T` as an alignment carrier, so the doors now read admission (design 16.11). The carrier
+classification is unchanged.
+
+- Census (sqlite v1.62.0, libc v1.80.1): linux/amd64 19 sites (TExpr 7, TRtreeCoord 4, Taddress 4, the sockaddr
+  union 4), windows/amd64 11 (TExpr 7, TRtreeCoord 4): G's list. std 0 by construction (std is never admitted).
+- Behavioral program `UnionElementArrayDoor`: 6 of 7 arms panic at D4's tip, 7 of 7 equal Go with the change.
+- W12b's stand-in (11 reads on windows; 18 reads and 1 store on linux) is retired by this seat once G's sqlite-cs
+  demo converts and runs with no stand-in, both demos, windows and linux. Until then this row is FIXED, not CLOSED.
+
+— P5 (2026-11-16)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

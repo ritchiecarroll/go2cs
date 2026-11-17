@@ -1793,6 +1793,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
 
     [TestMethod]
+    public void CheckOpenSliceUnnamedArray() => CheckTarget("OpenSliceUnnamedArray");
+
+    [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
 
     [TestMethod]
@@ -2742,6 +2745,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnicodeConsoleOutput() => CheckTarget("UnicodeConsoleOutput");
+
+    [TestMethod]
+    public void CheckUnionElementArrayDoor() => CheckTarget("UnionElementArrayDoor");
 
     [TestMethod]
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");
