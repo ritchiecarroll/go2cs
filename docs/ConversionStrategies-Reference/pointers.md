@@ -844,27 +844,31 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:1359-1368 -->
+<!-- source: src/core/unsafe/unsafe.cs:1365-1373 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
-    // signed form reported a type of 2^63 bytes and up as -1, indistinguishable from
-    // "unknown", and this line then answered with Marshal.SizeOf<T>() -- a DIFFERENT layout
-    // model's number for a type whose Go size was in fact known exactly. The marshalled
-    // fallback now applies only where the Go size genuinely is not derivable.
-    return GoReflect.TryGoSizeOf(typeof(T), GoReflect.ArrayDimsOfValue(x), out nuint size)
+    // signed form reported a type of 2^63 bytes and up as -1, indistinguishable from "unknown".
+    nint[]? dims = GoReflect.ArrayDimsOfValue(x);
+
+    return GoReflect.TryGoSizeOf(typeof(T), dims, out nuint size)
         ? (uintptr)size
-        : (uintptr)Marshal.SizeOf<T>();
+        : throw new PanicException($"runtime error: unsafe.Sizeof: the Go size of {GoReflect.GoTypeName(typeof(T), dims)} cannot be derived (GoReflect.TryGoSizeOf declined it)");
 }
 ```
 
 `typeof(T)` is Go's rule verbatim — `Sizeof` is defined against the operand's **static** type, and the
 converter's inferred type argument is that type. Dims come from the live value because `array<T>`
-carries its Go length in the instance, not the type. `Marshal.SizeOf` stays as the fallback for the
-shapes whose Go size is not derivable (`TryGoSizeOf` answers false: an array whose length nothing can
-reveal, a struct holding such a field), so every operand `Marshal.SizeOf` could measure still resolves. <!-- history: an
-earlier signed GoSizeOf reported "unknown" as -1, which could not be told apart from a type of
-2^63 bytes or more. -->
+carries its Go length in the instance, not the type. A shape whose Go size is not derivable
+(`TryGoSizeOf` answers false: a type past the address space, an array whose length nothing can reveal,
+the depth bound) is **refused by name** rather than answered. No other number is Go's: the CLR's
+marshalled size of `dnsmessage`'s `SVCParam` is 48 where Go says 32, and of a struct holding a
+`[1<<62]int64` field, 16. <!-- history: an earlier signed GoSizeOf reported "unknown" as -1, which could
+not be told apart from a type of 2^63 bytes or more; until 2026-11-16 the false answer fell back
+to Marshal.SizeOf<T>(), and that generic call made ILC compile a struct-marshalling thunk for every T
+reaching this method -- a "will always throw" stub in every Native AOT image for a T holding a slice,
+string or array value field (SVCParam, string, debug/macho.Symbol, debug/pe.COFFSymbol), though every
+corpus T answers through TryGoSizeOf. Guarded by GolibTests UnsafeSizeofRefusalTests. -->
 
 This makes the answer *correct* as well as non-throwing, which matters beyond the three packages:
 `Marshal.SizeOf` reports a **bool** as 4 bytes where Go says 1, so it would measure any struct containing
@@ -872,6 +876,9 @@ one wrong — silently. A Go size has one definition in the runtime. <!-- The un
 golib/GoReflect.TypeLayout.cs had recorded as deferred pending a named consumer. --> Corpus reach is small
 by construction: the run-time
 call sites are few against the folded ones. <!-- 7 run-time call sites against 283 folded at landing -->
+
+Guarded by: `UnsafeSizeofRefusalTests` (GolibTests), which refuses a type `TryGoSizeOf` declines by name and
+answers Go's size for the derivable shapes.
 
 ## Converting a Go pointer to `unsafe.Pointer`
 `unsafe.Pointer` is the golib class `unsafe_package.Pointer : StandardBox<uintptr>` (a `ж<uintptr>` heap box over a numeric address). A `uintptr`/`unsafe.Pointer` argument converts through the implicit `uintptr ↔ Pointer` operators, but a **Go pointer** argument (`*T`, emitted as the managed box `ж<T>`) has no such conversion — a plain cast `(@unsafe.Pointer)(ж<T>)` is `CS0030` (when `T` is unrelated to `uintptr`) or a runtime `InvalidCastException` (the base→derived downcast `(@unsafe.Pointer)(ж<uintptr>)` compiles but the object is a plain `ж<uintptr>`, not a `Pointer`). So `unsafe.Pointer(ptr)` for a pointer `ptr` is emitted through the referent-**retaining** mint: <!-- history: since 2026-08-27 (the I5 ruling); before that it was @unsafe.Pointer.FromRef(ref (box).Value), which flattened the pointer to a transient number in a fresh box. -->
