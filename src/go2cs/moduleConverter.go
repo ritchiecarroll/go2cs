@@ -54,6 +54,7 @@ type ModuleConverter struct {
 	referencedThirdParty []string                   // -recurse=module: third-party import paths left OUT of the convert-set
 	lockedModules        map[string]moduleLockEntry // module-cache dependency modules in the convert-set (modulesLock.go)
 	includeTestClosure   bool                       // -tests -recurse: widen the convert-set by the module's test closure (moduleTestsDriver.go)
+	importerSeeds        map[string][]string        // import path -> the inline-array seeds its importers demand (inlineArrayImporterSeed.go)
 	refused              []refusedPackage           // packages refused at a pre-emission gate and skipped (recurseRefusal.go)
 	failed               []string                   // packages that failed to load or panicked, and were skipped (recurseRefusal.go)
 
@@ -188,6 +189,12 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	// A pull to the pre-converted stdlib (not a node here) resolves as acyclic — correct, since the
 	// stdlib never depends back on app/third-party code.
 	conversionGraph = m.graph
+
+	// 3a. The inline-array seeds each package's importers demand (inlineArrayImporterSeed.go): read from the closure's
+	//     syntax and types, so only when the closure was loaded with them (not -recurse=module).
+	if !m.options.moduleOnly {
+		m.importerSeeds = importerInlineArraySeeds(m.graph.sortedQueue, closure, m.options)
+	}
 
 	// 4. Convert the convert-set in dependency order.
 	m.convertAll()
@@ -594,6 +601,7 @@ func (m *ModuleConverter) convertAll() {
 			packageOptions := m.options
 			packageOptions.packageImportPath = pkgPath
 			packageOptions.programDependencies = m.sortedThirdPartyModules()
+			packageOptions.inlineArrays = withImporterSeeds(m.options.inlineArrays, pkgPath, setOf(m.importerSeeds[pkgPath]))
 
 			// A refused package is skipped and the run goes on (recurseRefusal.go). Not under -tests -recurse, whose
 			// phase A stays fatal at a refusal, as before.

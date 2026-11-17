@@ -92,3 +92,43 @@ func TestRecurseImporterSeedCrossesByValueAndReadsAsGo(t *testing.T) {
 		t.Fatalf("go2cs differs from go:\n   go: %s\ngo2cs: %s", want, got)
 	}
 }
+
+// The seed rule's negative control (COORD 2026-11-17 19:18Z): an array-free struct converted whole through
+// unsafe.Pointer is still NOT admitted when nothing seeds it (its layout is Go's already); seeded, it is admitted.
+const arrayFreeSeedLib = `package lib
+
+import "unsafe"
+
+type Pair = struct {
+	A int32
+	B int32
+}
+
+func Read(p unsafe.Pointer) int32 { return (*Pair)(p).A }
+`
+
+func TestAnArrayFreeStructIsAdmittedOnlyWhenSeeded(t *testing.T) {
+	plain, _ := admitFixture(t, "", Options{}, [2]string{"lib.go", arrayFreeSeedLib})
+
+	if plain != nil && len(plain.keyOrder) > 0 {
+		t.Fatalf("an UNSEEDED array-free struct is admitted (%q); only a seed may admit one", plain.keyOrder)
+	}
+
+	override, err := parseInlineArrayOverride("example.com/lib#Pair")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	seeded, _ := admitFixture(t, "", Options{inlineArrays: override}, [2]string{"lib.go", arrayFreeSeedLib})
+
+	if seeded == nil || len(seeded.keyOrder) != 1 || !strings.HasPrefix(seeded.keyOrder[0], "anon:") {
+		var keys []string
+
+		if seeded != nil {
+			keys = seeded.keyOrder
+		}
+
+		t.Fatalf("the SEEDED array-free struct is not admitted alone (keys %q)", keys)
+	}
+}
