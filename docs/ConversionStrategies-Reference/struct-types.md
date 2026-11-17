@@ -1035,10 +1035,30 @@ wrapper, whose two operators with that base already copy (`[GoValueClone("Value"
 clone, so the value is copied once. A named ARRAY wrapper's operators hand the array over, so its conversions
 keep the site clone.
 
-An array reached only through an EMBEDDED struct is not cloned yet, here or at any other copy site:
-`typeNeedsValueClone` does not walk embeds (see its header in `arrayCloneOperations.go`). (Guarded by the
-`StructConversionCopy` behavioral test, twelve routes in three packages whose output is compared with Go's, and by
-`TestAStructConversionOfExistingStorageCopiesItsArrays` in the converter, one package per site.)
+(Guarded by the `StructConversionCopy` behavioral test, twelve routes in three packages whose output is compared
+with Go's, and by `TestAStructConversionOfExistingStorageCopiesItsArrays` in the converter, one package per site.)
+
+An array reached only through an EMBEDDED struct is cloned the same way. The embed is an inline field, so a C# struct
+copy copies the embed, but the array inside it still shares its backing store. `typeNeedsValueClone` walks embedded
+value fields, so the struct is stamped with the embed's member and every copy site clones it:
+
+<!-- source: src/tests/Behavioral/EmbeddedArrayCopy/main.go:57, 62 -->
+```go
+c := le
+…
+e := emb(le)
+```
+
+<!-- source: src/tests/Behavioral/EmbeddedArrayCopy/main.cs:51, 55 -->
+```csharp
+var c = le.ΔClone();
+…
+var e = (emb)le.ΔClone();
+```
+
+The stamp is `[GoValueClone("Inner")] internal partial struct emb {}`. An embedded POINTER is shared in Go too and
+takes nothing. (Guarded by the `EmbeddedArrayCopy` behavioral test, ten routes in three packages, and by
+`TestAStructCarryingAnArrayThroughAnEmbedCopiesIt` in the converter.)
 
 ## A methodless named func type renders as its base delegate
 

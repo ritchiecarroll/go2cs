@@ -4631,7 +4631,7 @@ so it is not nil, as in Go, and allocates nothing. See [Nil and Zero Values](#ni
 elements. The converter adds `.Clone()` wherever Go copies an array: assignment, parameters, results and
 the other places Go copies a value. So `d := garr` becomes `var d = garr.Clone();`.
 <!-- source: src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.go:53 and src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.cs.target:52 -->
-<!-- The array-copy claim is scoped to "Go's array copy sites": a fixed array reached only through an embedded (promoted) struct field is not seen by the value-clone stamping, so a by-value copy of such a struct leaves the array backing shared (src/go2cs/arrayCloneOperations.go:44-52#9c92a3, :85-88#a7773d). -->
+<!-- The array-copy claim covers an array reached only through an embedded (promoted) struct field as well: the value-clone stamping walks embedded value fields like any other (src/go2cs/arrayCloneOperations.go:46-54#f365db, :87-92#37b740), guarded by the EmbeddedArrayCopy behavioral test. -->
 
 An array parameter is cloned on entry, so the callee's writes stay local, as in Go:
 

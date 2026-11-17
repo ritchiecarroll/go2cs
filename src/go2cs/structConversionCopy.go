@@ -26,8 +26,8 @@ import (
 // wrapper, and its two operators with that base already copy (`[GoValueClone("Value")]`,
 // InheritedTypeTemplate.ConversionCopy); that pair is left to them, so the value is copied once.
 //
-// An array reached only through an EMBEDDED struct is not cloned here, as it is not by any other copy
-// site: typeNeedsValueClone does not walk embeds (see its header).
+// An array reached only through an EMBEDDED struct is cloned too: typeNeedsValueClone walks embedded
+// value fields (see its header).
 func (v *Visitor) conversionOperandCopy(target types.Type, operand ast.Expr, rendered string) string {
 	if target == nil {
 		return rendered
