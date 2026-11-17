@@ -6026,20 +6026,22 @@ func declarationClosureImportsFrom(roots []*packages.Package, compileExcluded ma
 	}
 
 	// The CROSS-PACKAGE CANDIDATE edge. The overload edge above weighs the called method's own package only, and only
-	// parameter types; but every converted method is an extension in the one `go` namespace, so `tx.Commit()` makes C#
-	// gather EVERY visible extension named Commit, from every referenced assembly. A candidate emitted as
-	// `this ref T` has its whole signature bound even when it cannot apply: t2b's `tx.Commit()` on a *sql.Tx failed
-	// `CS0012 … 'driver_package.Conn'` from its lib's `Commit(this ref Backup)` returning `(driver.Conn, error)`, and
-	// sqlite's root suite failed `… 'big_package.ΔInt'` from modernc.org/mathutil's `Next(this ref FCBig)`. A
-	// `this ж<T>` candidate does not: registry's banked windows suite calls `k.Stat()` beside os's
-	// `Stat(this ж<File>)`, whose result names io/fs, and compiles with no io/fs reference.
+	// parameter types; but every converted method is a C# extension, so `tx.Commit()` makes C# gather the visible
+	// extensions named Commit from every referenced assembly, and it binds the whole signature of each one it weighs,
+	// even one that cannot apply. t2b's `tx.Commit()` on a *sql.Tx failed `CS0012 … 'driver_package.Conn'` from its
+	// lib's `Commit(this ref Backup)` returning `(driver.Conn, error)`, and sqlite's root suite failed
+	// `… 'big_package.ΔInt'` from modernc.org/mathutil's `Next(this ref FCBig)`. The candidate's receiver form does not
+	// spare it: TestTestsProjectsBuildWithTheirCandidateReferences measured CS0012 from a `this ж<T>` candidate under
+	// a ж receiver and under a value receiver, and from a VALUE-receiver method (`this T`, which go2cs-gen also gives a
+	// `this ж<T>` twin) under a ж receiver.
 	//
-	// Which methods another package emits `this ref` is its own conversion's decision and is recorded nowhere this run
-	// can read, so the candidate set is every POINTER-RECEIVER method, the superset (COORD ruling 20261117T145209Z).
-	// Measured over the 242 committed windows test projects before this edge existed (data/test-refs-ext/census1):
-	// the exact `this ref` set adds 0 references, and this superset adds 1 (registry's io/fs). A visible package is one
-	// this project references, or one an edge has added, to a fixpoint; a ROOT package is visible whole, unexported
-	// members included, since it compiles here or grants InternalsVisibleTo.
+	// So the candidate set is every same-named method a visible package declares, at an arity the call accepts (COORD
+	// rulings 20261117T145209Z and 20261117T172451Z). C# weighs fewer: it searches namespace scopes innermost first and
+	// stops at the first that holds an applicable candidate, which is why registry's banked windows suite builds with
+	// no io/fs reference beside os's `Stat(this ж<File>)` (its own `Key.Stat` is in its namespace; os's is in the outer
+	// `go`). This set over-approximates that search, never under. A visible package is one this project references,
+	// or one an edge has added, to a fixpoint; a ROOT package is visible whole, unexported members included, since it
+	// compiles here or grants InternalsVisibleTo.
 	typesByPath := rootTypesByPath(roots)
 
 	scanned := hashset.HashSet[string]{}
@@ -6062,7 +6064,7 @@ func declarationClosureImportsFrom(roots []*packages.Package, compileExcluded ma
 		for _, path := range pending {
 			scanned.Add(path)
 
-			for _, candidate := range pointerReceiverCandidates(typesByPath[path], rootPaths.Contains(path), calledMethods) {
+			for _, candidate := range sameNameCandidates(typesByPath[path], rootPaths.Contains(path), calledMethods) {
 				for _, mentioned := range namedTypesIn(candidate.Type()) {
 					reach(mentioned)
 					enqueue(mentioned)
@@ -6221,12 +6223,12 @@ func testRecordInterfaces(testInfoFile string, roots []*packages.Package) []*typ
 	return result
 }
 
-// pointerReceiverCandidates returns the pointer-receiver methods of pkg's non-interface named types whose names a test
-// source calls at an arity they accept (arityAccepts): the extension-method candidates declarationClosureImports'
-// cross-package edge binds. Promoted methods
-// count, since go2cs-gen writes a forwarder for each; exported types and methods only, unless the package is a root
-// (all), which compiles here or grants InternalsVisibleTo. `testing` contributes none, for closureWalkable's reason.
-func pointerReceiverCandidates(pkg *types.Package, root bool, called map[string][]*types.Signature) []*types.Func {
+// sameNameCandidates returns the methods of pkg's non-interface named types, value and pointer receivers alike (the
+// method set of *T), whose names a test source calls at an arity they accept (arityAccepts): the extension-method
+// candidates declarationClosureImports' cross-package edge binds. Promoted methods count, since go2cs-gen writes a
+// forwarder for each; exported types and methods only, unless the package is a root (all), which compiles here or
+// grants InternalsVisibleTo. `testing` contributes none, for closureWalkable's reason.
+func sameNameCandidates(pkg *types.Package, root bool, called map[string][]*types.Signature) []*types.Func {
 	if pkg == nil || pkg.Path() == "testing" {
 		return nil
 	}
@@ -6260,10 +6262,6 @@ func pointerReceiverCandidates(pkg *types.Package, root bool, called map[string]
 			signature, isSignature := method.Type().(*types.Signature)
 
 			if !isSignature || signature.Recv() == nil {
-				continue
-			}
-
-			if _, isPointer := signature.Recv().Type().(*types.Pointer); !isPointer {
 				continue
 			}
 
