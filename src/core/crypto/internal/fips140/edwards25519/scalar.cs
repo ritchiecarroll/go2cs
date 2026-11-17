@@ -116,7 +116,7 @@ public static ж<Scalar> Set(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
-    s = x.ΔClone();
+    s.AssignFrom(x);
     return Ꮡs;
 }
 

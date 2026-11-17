@@ -74,7 +74,7 @@ public static void Init64(this ж<State> Ꮡs, /*[4]*/ array<uint64> seed) {
     seed = seed.Clone();
     ref var s = ref Ꮡs.DerefOrNull();
 
-    s.seed = seed.Clone();
+    s.seed.Assign(seed);
     block(Ꮡs.Ꮡseed, Ꮡs.Ꮡbuf, 0);
     s.c = 0;
     s.i = 0;

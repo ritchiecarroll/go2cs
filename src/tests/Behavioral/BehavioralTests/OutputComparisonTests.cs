@@ -179,6 +179,15 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckArrayRangeSnapshot() => CheckTarget("ArrayRangeSnapshot");
 
     [TestMethod]
+    public void CheckArrayReassignAliases() => CheckTarget("ArrayReassignAliases");
+
+    [TestMethod]
+    public void CheckArrayReassignForms() => CheckTarget("ArrayReassignForms");
+
+    [TestMethod]
+    public void CheckArrayReassignUnsafe() => CheckTarget("ArrayReassignUnsafe");
+
+    [TestMethod]
     public void CheckArraySwitchCases() => CheckTarget("ArraySwitchCases");
 
     [TestMethod]

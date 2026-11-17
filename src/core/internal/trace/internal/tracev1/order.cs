@@ -155,7 +155,11 @@ internal static orderEvent Pop(this ж<orderEventList> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     nint n = len(h) - 1;
-    ((h)[0], (h)[n]) = ((h)[n].ΔClone(), (h)[0].ΔClone());
+    ref var hᴛ1 = ref (h)[0];
+    ref var hᴛ3 = ref (h)[n];
+    (var hᴛ2, var hᴛ4) = ((h)[n].ΔClone(), (h)[0].ΔClone());
+    hᴛ1.AssignFrom(hᴛ2);
+    hᴛ3.AssignFrom(hᴛ4);
     heapDown(Ꮡh, 0, n);
     var x = (h)[len(h) - 1].ΔClone();
     h = (h).slice(0, len(h) - 1);
@@ -170,7 +174,11 @@ internal static void heapUp(ж<orderEventList> Ꮡh, nint j) {
         if (i == j || !h.Less(j, i)) {
             break;
         }
-        ((h)[i], (h)[j]) = ((h)[j].ΔClone(), (h)[i].ΔClone());
+        ref var hᴛ1 = ref (h)[i];
+        ref var hᴛ3 = ref (h)[j];
+        (var hᴛ2, var hᴛ4) = ((h)[j].ΔClone(), (h)[i].ΔClone());
+        hᴛ1.AssignFrom(hᴛ2);
+        hᴛ3.AssignFrom(hᴛ4);
         j = i;
     }
 }
@@ -191,7 +199,11 @@ internal static bool heapDown(ж<orderEventList> Ꮡh, nint i0, nint n) {
         if (!h.Less(j, i)) {
             break;
         }
-        ((h)[i], (h)[j]) = ((h)[j].ΔClone(), (h)[i].ΔClone());
+        ref var hᴛ1 = ref (h)[i];
+        ref var hᴛ3 = ref (h)[j];
+        (var hᴛ2, var hᴛ4) = ((h)[j].ΔClone(), (h)[i].ΔClone());
+        hᴛ1.AssignFrom(hᴛ2);
+        hᴛ3.AssignFrom(hᴛ4);
         i = j;
     }
     return i > i0;

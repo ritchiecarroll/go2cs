@@ -100,10 +100,10 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 // result of its original state from [NewReader], but reading from r instead.
 // This permits reusing a [Reader] rather than allocating a new one.
 public static error Reset(this ref Reader z, io.Reader r) {
-    z = new Reader(
+    z.AssignFrom(new Reader(
         decompressor: z.decompressor,
         multistream: true
-    );
+    ));
     var (rr, ok) = r._<flate.Reader>(ᐧ); if (ok) {
         z.r = rr;
     } else {

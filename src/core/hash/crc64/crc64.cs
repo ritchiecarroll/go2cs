@@ -74,7 +74,7 @@ internal static ж<Table> makeTable(uint64 poly) {
 
 internal static ж<array<Table>> makeSlicingBy8Table(ref Table t) {
     ref var helperTable = ref heap(new array<Table>(8), out var ᏑhelperTable);
-    helperTable[0] = t.Clone();
+    helperTable[0].Assign(t);
     for (nint i = 0; i < 256; i++) {
         var crc = t[i];
         for (nint j = 1; j < 8; j++) {

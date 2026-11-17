@@ -1906,7 +1906,7 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
     }
 
     // Compute the ABI layout.
-    abid = newAbiDesc(Ꮡt, Ꮡrcvr);
+    abid.AssignFrom(newAbiDesc(Ꮡt, Ꮡrcvr));
 
     // build dummy rtype holding gc program
     var x = Ꮡ(new abi.Type(

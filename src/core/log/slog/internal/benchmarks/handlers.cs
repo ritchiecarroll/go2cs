@@ -165,7 +165,7 @@ internal static bool Enabled(this ref asyncHandler _Δp0, context.Context _Δp1,
 internal static error Handle(this ref asyncHandler h, context.Context _, slog.Record r) {
     r = r.ΔClone();
 
-    h.ringBuffer[h.next] = r.Clone();
+    h.ringBuffer[h.next].AssignFrom(r.Clone());
     h.next = (h.next + 1) % len(h.ringBuffer);
     return default;
 }

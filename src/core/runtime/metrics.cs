@@ -850,7 +850,7 @@ internal static void ensure(this ж<statAggregate> Ꮡa, ж<statDepSet> deps) {
             break;
         }}
     }
-    a.ensured = a.ensured.union(missing);
+    a.ensured.Assign(a.ensured.union(missing));
 }
 
 // metricKind is a runtime copy of runtime/metrics.ValueKind and

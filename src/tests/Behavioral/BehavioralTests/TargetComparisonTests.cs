@@ -184,6 +184,15 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckArrayRangeSnapshot() => CheckTarget("ArrayRangeSnapshot");
 
     [TestMethod]
+    public void CheckArrayReassignAliases() => CheckTarget("ArrayReassignAliases");
+
+    [TestMethod]
+    public void CheckArrayReassignForms() => CheckTarget("ArrayReassignForms");
+
+    [TestMethod]
+    public void CheckArrayReassignUnsafe() => CheckTarget("ArrayReassignUnsafe");
+
+    [TestMethod]
     public void CheckArraySwitchCases() => CheckTarget("ArraySwitchCases");
 
     [TestMethod]

@@ -297,7 +297,7 @@ public static slice<byte> Sum(this ref Digest d, slice<byte> @in) {
     fips140.RecordApproved();
     // Make a copy of d so that caller can keep writing and summing.
     var d0 = @new<Digest>();
-    d0.Value = d.ΔClone();
+    d0.Value.AssignFrom(d);
     var hash = d0.checkSum();
     return appendꓸꓸꓸ(@in, hash.slice(0, d.size));
 }

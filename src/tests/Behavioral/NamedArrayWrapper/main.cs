@@ -11,7 +11,7 @@ partial struct pallocBits /*pageBits*/;
 partial struct pm /*[]uint32*/;
 partial struct tb /*[4]byte*/;
 
-internal static void zeroTB(ref tb buf) { buf = new tb(new byte[4].array()); }
+internal static void zeroTB(ref tb buf) { buf.Assign(new tb(new byte[4].array())); }
 
 internal static void set(this ref pageBits b, nuint i, uint64 v) { b.Value[i] = v; }
 internal static uint64 get(this ref pageBits b, nuint i) { return b.Value[i]; }

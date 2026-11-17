@@ -65,7 +65,7 @@ public static array<byte> TestingOnlySHA384(slice<byte> p) {
     finalBlock[len(p)] = 0x80;
     if (len(p) >= 112) {
         sha384Block(ref h, ᏑfinalBlock);
-        finalBlock = new byte[]{}.array(128);
+        finalBlock.Assign(new byte[]{}.array(128));
     }
     bePutUint64(finalBlock[(int)(112 + 8)..], bitLen);
     sha384Block(ref h, ᏑfinalBlock);

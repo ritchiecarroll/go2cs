@@ -85,7 +85,7 @@ public static void Reset(this ref Writer z, io.Writer w) {
         z.digest.Reset();
     }
     z.err = default;
-    z.scratch = new byte[]{}.array(4);
+    z.scratch.Assign(new byte[]{}.array(4));
     z.wroteHeader = false;
 }
 

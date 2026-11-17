@@ -1117,7 +1117,7 @@ public static void SetSessionTicketKeys(this ж<Config> Ꮡc, slice<array<byte>>
     foreach (var (i, vᴛ1) in range(keys)) {
         var bytes = vᴛ1.Clone();
 
-        newKeys[i] = c.ticketKeyFromBytes(bytes);
+        newKeys[i].AssignFrom(c.ticketKeyFromBytes(bytes));
     }
 
     Ꮡc.Ꮡmutex.Lock();

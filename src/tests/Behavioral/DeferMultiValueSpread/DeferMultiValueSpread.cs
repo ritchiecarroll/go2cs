@@ -200,7 +200,7 @@ internal static array<nint> regs = new nint[]{1, 2, 3}.array();
 
 internal static (nint, nint, nint) setRegs(nint a, nint b, nint c) {
     var old = regs.Clone();
-    regs = new nint[]{a, b, c}.array();
+    regs.Assign(new nint[]{a, b, c}.array());
     fmt.Println("  setRegs: now", regs, "was", old);
     return (old[0], old[1], old[2]);
 }

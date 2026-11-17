@@ -120,7 +120,7 @@ internal static void rangeAssignExisting() {
 
     foreach (var (iᴛ1, vᴛ1) in range(m.ΔRangeSnapshot())) {
         i = iᴛ1;
-        row = vᴛ1.Clone();
+        row.Assign(vᴛ1);
 
         row[2] = 99;
     }

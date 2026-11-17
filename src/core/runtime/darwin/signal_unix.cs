@@ -236,7 +236,7 @@ internal static void setProcessCPUProfilerTimer(int32 hz) {
         ref var it = ref heap(new itimerval(), out var Ꮡit);
         it.it_interval.tv_sec = 0;
         it.it_interval.set_usec(1000000 / hz);
-        it.it_value = it.it_interval.ΔClone();
+        it.it_value.AssignFrom(it.it_interval);
         setitimer(_ITIMER_PROF, Ꮡit, nil);
     } else {
         setitimer(_ITIMER_PROF, Ꮡ(new itimerval()), nil);

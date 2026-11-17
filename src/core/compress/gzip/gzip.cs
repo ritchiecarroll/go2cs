@@ -71,14 +71,14 @@ internal static void init(this ref Writer z, io.Writer w, nint level) {
     if (compressor != nil) {
         compressor.Reset(w);
     }
-    z = new Writer(
+    z.AssignFrom(new Writer(
         Header: new Header(
             OS: 255 // unknown
         ),
         w: w,
         level: level,
         compressor: compressor
-    );
+    ));
 }
 
 // Reset discards the [Writer] z's state and makes it equivalent to the
@@ -154,7 +154,7 @@ public static (nint, error) Write(this ref Writer z, slice<byte> p) {
     // Write the GZIP header lazily.
     if (!z.wroteHeader) {
         z.wroteHeader = true;
-        z.buf = new array<byte>(10){[0] = gzipID1, [1] = gzipID2, [2] = gzipDeflate};
+        z.buf.Assign(new array<byte>(10){[0] = gzipID1, [1] = gzipID2, [2] = gzipDeflate});
         if (z.Extra != nil) {
             z.buf[3] |= (byte)(0x04);
         }

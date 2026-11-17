@@ -355,22 +355,22 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         it.procMs[((ProcID)(int64)ev.P)] = (ThreadID)(int64)ev.Args[0];
         if (it.seenProcs[((ProcID)(int64)ev.P), ꟷ] is (_, true)) {
             mappedType = tracev2.EvProcStart;
-            mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P}.array(4));
+            mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)ev.P}.array(4)));
         } else {
             it.seenProcs[((ProcID)(int64)ev.P)] = new EmptyStruct();
             mappedType = tracev2.EvProcStatus;
-            mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P, (uint64)tracev2.ProcRunning}.array(4));
+            mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)ev.P, (uint64)tracev2.ProcRunning}.array(4)));
         }
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvProcStop: {
         if (it.seenProcs[((ProcID)(int64)ev.P), ꟷ] is (_, true)) {
             mappedType = tracev2.EvProcStop;
-            mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P}.array(4));
+            mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)ev.P}.array(4)));
         } else {
             it.seenProcs[((ProcID)(int64)ev.P)] = new EmptyStruct();
             mappedType = tracev2.EvProcStatus;
-            mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P, (uint64)tracev2.ProcIdle}.array(4));
+            mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)ev.P, (uint64)tracev2.ProcIdle}.array(4)));
         }
         break;
     }
@@ -386,12 +386,12 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         var sid = it.builtinToStringID[(nint)sSTWUnknown + it.trace.STWReason(ev.Args[0])];
         it.lastStwReason = sid;
         mappedType = tracev2.EvSTWBegin;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)sid}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)sid}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvSTWDone: {
         mappedType = tracev2.EvSTWEnd;
-        mappedArgs = new timedEventArgs(new uint64[]{it.lastStwReason}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{it.lastStwReason}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGCSweepStart: {
@@ -413,7 +413,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
     case var ᴛ when ᴛ == tracev1.EvGoStart: {
         if (it.preInit) {
             mappedType = tracev2.EvGoStatus;
-            mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], ~(uint64)0, (uint64)tracev2.GoRunning}.array(4));
+            mappedArgs.Assign(new timedEventArgs(new uint64[]{ev.Args[0], ~(uint64)0, (uint64)tracev2.GoRunning}.array(4)));
             delete(it.createdPreInit, (GoID)(int64)ev.Args[0]);
         } else {
             mappedType = tracev2.EvGoStart;
@@ -455,27 +455,27 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
     }
     case var ᴛ when ᴛ == tracev1.EvGoStop: {
         mappedType = tracev2.EvGoBlock;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sForever], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sForever], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoSched: {
         mappedType = tracev2.EvGoStop;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sGosched], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sGosched], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoPreempt: {
         mappedType = tracev2.EvGoStop;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sPreempted], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sPreempted], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoSleep: {
         mappedType = tracev2.EvGoBlock;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sSleep], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sSleep], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoBlock: {
         mappedType = tracev2.EvGoBlock;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sEmpty], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sEmpty], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoUnblock: {
@@ -484,37 +484,37 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
     }
     case var ᴛ when ᴛ == tracev1.EvGoBlockSend: {
         mappedType = tracev2.EvGoBlock;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sChanSend], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sChanSend], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoBlockRecv: {
         mappedType = tracev2.EvGoBlock;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sChanRecv], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sChanRecv], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoBlockSelect: {
         mappedType = tracev2.EvGoBlock;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sSelect], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sSelect], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoBlockSync: {
         mappedType = tracev2.EvGoBlock;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sSync], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sSync], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoBlockCond: {
         mappedType = tracev2.EvGoBlock;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sSyncCond], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sSyncCond], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoBlockNet: {
         mappedType = tracev2.EvGoBlock;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sNetwork], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sNetwork], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoBlockGC: {
         mappedType = tracev2.EvGoBlock;
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sMarkAssistWait], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sMarkAssistWait], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoSysCall: {
@@ -535,7 +535,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         });
         if (blocked) {
             mappedType = tracev2.EvGoSyscallBegin;
-            mappedArgs = new timedEventArgs(new array<uint64>(4){[1] = (uint64)ev.StkID});
+            mappedArgs.Assign(new timedEventArgs(new array<uint64>(4){[1] = (uint64)ev.StkID}));
         } else {
             // Convert the old instantaneous syscall event to a pair of syscall
             // begin and syscall end and give it the shortest possible duration,
@@ -578,7 +578,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
     }
     case var ᴛ when ᴛ == tracev1.EvGoWaiting: {
         mappedType = tracev2.EvGoStatus;
-        mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], ~(uint64)0, (uint64)tracev2.GoWaiting}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{ev.Args[0], ~(uint64)0, (uint64)tracev2.GoWaiting}.array(4)));
         delete(it.createdPreInit, (GoID)(int64)ev.Args[0]);
         break;
     }
@@ -587,7 +587,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         // In the new tracer, GoStatus with GoSyscall knows what thread the
         // syscall is on. In trace v1, EvGoInSyscall doesn't contain that
         // information and all we can do here is specify NoThread.
-        mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], ~(uint64)0, (uint64)tracev2.GoSyscall}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{ev.Args[0], ~(uint64)0, (uint64)tracev2.GoSyscall}.array(4)));
         delete(it.createdPreInit, (GoID)(int64)ev.Args[0]);
         break;
     }
@@ -613,7 +613,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         if (parent == 0) {
             parent = (uint64)NoTask;
         }
-        mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], parent, ev.Args[2], (uint64)ev.StkID}.array());
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{ev.Args[0], parent, ev.Args[2], (uint64)ev.StkID}.array()));
         var (name, _) = it.evt.Ꮡstrings.get((stringID)ev.Args[2]);
         it.tasks[((TaskID)ev.Args[0])] = new taskState(name: name, parentID: ((TaskID)ev.Args[1]));
         break;
@@ -625,14 +625,14 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         var (ts, ok) = it.tasks[((TaskID)ev.Args[0]), ꟷ];
         if (ok) {
             delete(it.tasks, (TaskID)ev.Args[0]);
-            mappedArgs = new timedEventArgs(new uint64[]{
+            mappedArgs.Assign(new timedEventArgs(new uint64[]{
                 ev.Args[0],
                 ev.Args[1],
                 (uint64)ts.parentID,
                 (uint64)it.evt.addExtraString(ts.name)
-            }.array());
+            }.array()));
         } else {
-            mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], ev.Args[1], (uint64)NoTask, (uint64)it.evt.addExtraString(""u8)}.array());
+            mappedArgs.Assign(new timedEventArgs(new uint64[]{ev.Args[0], ev.Args[1], (uint64)NoTask, (uint64)it.evt.addExtraString(""u8)}.array()));
         }
         break;
     }
@@ -646,12 +646,12 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
             mappedType = tracev2.EvUserRegionEnd;
             break;
         }}
-        mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], ev.Args[2], (uint64)ev.StkID}.array(4));
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{ev.Args[0], ev.Args[2], (uint64)ev.StkID}.array(4)));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvUserLog: {
         mappedType = tracev2.EvUserLog;
-        mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], ev.Args[1], it.inlineToStringID[ev.Args[3]], (uint64)ev.StkID}.array());
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{ev.Args[0], ev.Args[1], it.inlineToStringID[ev.Args[3]], (uint64)ev.StkID}.array()));
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvCPUSample: {
@@ -661,7 +661,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         // they have the arguments stack, M, P, G.
         //
         // In Go 1.21, CPU samples did not have Ms.
-        mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.StkID, ~(uint64)0, (uint64)ev.P, ev.G}.array());
+        mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)ev.StkID, ~(uint64)0, (uint64)ev.P, ev.G}.array()));
         break;
     }
     default: {

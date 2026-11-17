@@ -460,7 +460,7 @@ break_stepsLoop:;
     frameSize += abid.spill;
 
     // Mark pointers in registers for the return path.
-    regArgs.ReturnIsPtr = abid.outRegPtrs.Clone();
+    regArgs.ReturnIsPtr.Assign(abid.outRegPtrs);
 
     if (debugReflectCall) {
         regArgs.Dump();
@@ -1064,7 +1064,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
     methodFrameSize += methodABI.spill;
 
     // Mark pointers in registers for the return path.
-    methodRegs.ReturnIsPtr = methodABI.outRegPtrs.Clone();
+    methodRegs.ReturnIsPtr.Assign(methodABI.outRegPtrs);
 
     // Call.
     // Call copies the arguments from scratch to the stack, calls fn,
@@ -1081,7 +1081,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
     // Avoid constructing out-of-bounds pointers if there are no return values.
     // because the arguments may be laid out differently.
     if (valueRegs != nil) {
-        valueRegs.Value = methodRegs.ΔClone();
+        valueRegs.Value.AssignFrom(methodRegs);
     }
     var retSize = methodFrameType.Size() - methodABI.retOffset; if (retSize > 0) {
         @unsafe.Pointer valueRet = add(valueFrame, valueABI.retOffset, valueFrameSSizeRetOffsetˢ);

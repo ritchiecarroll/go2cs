@@ -188,7 +188,7 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrData
     sa.raw.Nlen = sa.Nlen;
     sa.raw.Alen = sa.Alen;
     sa.raw.Slen = sa.Slen;
-    sa.raw.Data = sa.Data.Clone();
+    sa.raw.Data.Assign(sa.Data);
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw), SizeofSockaddrDatalink, default);
 }
 

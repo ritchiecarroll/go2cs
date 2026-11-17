@@ -130,7 +130,7 @@ public static ж<SHA3> New512() {
 
 internal static void init(this ref SHA3 s) {
     if (s.s.Size() == 0) {
-        s = New256().Value.ΔClone();
+        s.AssignFrom(New256().Value);
     }
 }
 
@@ -198,7 +198,7 @@ partial struct SHAKE {
 
 internal static void init(this ref SHAKE s) {
     if (s.s.Size() == 0) {
-        s = NewSHAKE256().Value.ΔClone();
+        s.AssignFrom(NewSHAKE256().Value);
     }
 }
 

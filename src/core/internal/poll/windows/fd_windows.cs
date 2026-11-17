@@ -210,7 +210,7 @@ internal static ref sync.Pool wsaRsaPool => ref ((StaticBox<sync.Pool>)ᏑwsaRsa
 
 internal static ж<wsaRsa> newWSARsa() {
     var rsa = ᏑwsaRsaPool.Get()._<ж<wsaRsa>>();
-    rsa.name = new Δsyscall.RawSockaddrAny();
+    rsa.name.AssignFrom(new Δsyscall.RawSockaddrAny());
     rsa.namelen = (int32)/* unsafe.Sizeof(syscall.RawSockaddrAny{}) */ (uintptr)116;
     return rsa;
 }

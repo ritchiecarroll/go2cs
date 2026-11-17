@@ -374,6 +374,9 @@
     <Project Path="tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />
     <Project Path="tests/Behavioral/ArrayPointerElementAlias/ArrayPointerElementAlias.csproj" />
     <Project Path="tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.csproj" />
+    <Project Path="tests/Behavioral/ArrayReassignAliases/ArrayReassignAliases.csproj" />
+    <Project Path="tests/Behavioral/ArrayReassignForms/ArrayReassignForms.csproj" />
+    <Project Path="tests/Behavioral/ArrayReassignUnsafe/ArrayReassignUnsafe.csproj" />
     <Project Path="tests/Behavioral/ArraySwitchCases/ArraySwitchCases.csproj" />
     <Project Path="tests/Behavioral/ArrayValueCopySites/ArrayValueCopySites.csproj" />
     <Project Path="tests/Behavioral/ArrayWideIndexAddress/ArrayWideIndexAddress.csproj" />

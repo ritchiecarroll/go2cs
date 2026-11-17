@@ -50,7 +50,7 @@ public static ж<P384Element> Set(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡ
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
-    e.x = t.x.Clone();
+    e.x.Assign(t.x);
     return Ꮡe;
 }
 
