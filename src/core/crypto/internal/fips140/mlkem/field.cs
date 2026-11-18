@@ -509,7 +509,7 @@ internal static nttElement ntt(ringElement f) {
             }
         }
     }
-    return ((nttElement)(array<fieldElement>)f.Clone()).Clone();
+    return ((nttElement)(array<fieldElement>)f).Clone();
 }
 
 // inverseNTT maps a nttElement back to the ringElement it represents.
@@ -535,7 +535,7 @@ internal static ringElement inverseNTT(nttElement f) {
     foreach (var i in range(len(f))) {
         f[i] = fieldMul(f[i], 3303); // 3303 = 128⁻¹ mod q
     }
-    return ((ringElement)(array<fieldElement>)f.Clone()).Clone();
+    return ((ringElement)(array<fieldElement>)f).Clone();
 }
 
 // sampleNTT draws a uniformly random nttElement from a stream of uniformly
