@@ -29,10 +29,13 @@ namespace go;
 using System.Runtime.InteropServices;
 using Δruntime = runtime_package;
 using syscall = syscall_package;
+using static os_package;
 
 partial class os_package {
 
 internal static UntypedInt _P_PID => 1;
+
+} partial class osᴛProcess {
 
 // blockUntilWaitable attempts to block until a call to p.Wait will
 // succeed immediately, and reports whether it has done so.
@@ -69,5 +72,7 @@ internal static (bool, error) blockUntilWaitable(this ж<Process> Ꮡp) {
     }
     return (true, default!);
 }
+
+} partial class os_package {
 
 } // end os_package

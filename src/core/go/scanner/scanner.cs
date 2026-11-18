@@ -20,6 +20,7 @@ using global::go.go.@internal;
 using global::go.unicode;
 using path;
 using ꓸꓸꓸany = Span<any>;
+using static scanner_package;
 
 partial class scanner_package {
 
@@ -34,10 +35,10 @@ partial class scanner_package {
 // structure but must be initialized via [Scanner.Init] before use.
 partial struct Scanner {
     // immutable state
-    internal ж<tokenꓸFile> @file;                 // source file handle
+    internal ж<token.File> @file;                 // source file handle
     internal @string dir;                         // directory portion of file.Name()
     internal slice<byte> src;                     // source
-    internal Action<tokenꓸPosition, @string> err; // error reporting; or nil
+    internal Action<token.Position, @string> err; // error reporting; or nil
     internal Mode mode;                           // scanning mode
     // scanning state
     internal rune ch;             // current character
@@ -45,8 +46,8 @@ partial struct Scanner {
     internal nint rdOffset;       // reading offset (position after current character)
     internal nint lineOffset;     // current line offset
     internal bool insertSemi;     // insert a semicolon before next newline
-    internal tokenꓸPos nlPos;     // position of newline in preceding comment
-    internal tokenꓸPos stringEnd; // end position; defined only for STRING tokens
+    internal token.Pos nlPos;     // position of newline in preceding comment
+    internal token.Pos stringEnd; // end position; defined only for STRING tokens
     // public state - ok to modify
     public nint ErrorCount; // number of errors encountered
 }
@@ -58,6 +59,8 @@ partial struct Scanner {
 
 internal static UntypedInt bom => 0xFEFF; // byte order mark, only permitted as very first character
 internal static UntypedInt eof => -1;     // end of file
+
+} partial class scannerᴛScanner {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string illegalCharacterNulˢ => ref illegalCharacterNulˢᵇ;
@@ -127,12 +130,16 @@ internal static byte peek(this ref Scanner s) {
     return 0;
 }
 
+} partial class scanner_package {
+
 // A Mode value is a set of flags (or 0).
 // They control scanner behavior.
 partial struct Mode /*num:nuint*/;
 
 public static Mode ScanComments => /* 1 << iota */ 1; // return comments as COMMENT tokens
 internal static Mode dontInsertSemis => 2;            // do not automatically insert semicolons - for testing only
+
+} partial class scannerᴛScanner {
 
 // Init prepares the scanner s to tokenize the text src by setting the
 // scanner at the beginning of src. The scanner uses the file set file
@@ -148,7 +155,7 @@ internal static Mode dontInsertSemis => 2;            // do not automatically in
 //
 // Note that Init may call err if there is an error in the first character
 // of the file.
-public static void Init(this ref Scanner s, ж<tokenꓸFile> Ꮡfile, slice<byte> src, Action<tokenꓸPosition, @string> err, Mode mode) {
+public static void Init(this ref Scanner s, ж<token.File> Ꮡfile, slice<byte> src, Action<token.Position, @string> err, Mode mode) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     // Explicitly initialize all fields since a scanner may be reused.
@@ -264,7 +271,11 @@ exit:
     return ((@string)lit, nlOffset);
 }
 
+} partial class scanner_package {
+
 internal static slice<byte> prefix = slice<byte>("line "u8);
+
+} partial class scannerᴛScanner {
 
 // updateLineInfo parses the incoming comment text at offset offs
 // as a line directive. If successful, it updates the line info table
@@ -333,6 +344,8 @@ internal static void updateLineInfo(this ref Scanner s, nint next, nint offs, sl
     s.@file.AddLineColumnInfo(next, filename, line, col);
 }
 
+} partial class scanner_package {
+
 internal static (nint, nint, bool) trailingDigits(slice<byte> text) {
     nint i = bytes.LastIndexByte(text, (byte)':'); // look from right (Windows filenames may contain ':')
     if (i < 0) {
@@ -350,6 +363,8 @@ internal static bool isLetter(rune ch) {
 internal static bool isDigit(rune ch) {
     return isDecimal(ch) || ch >= utf8.RuneSelf && unicode.IsDigit(ch);
 }
+
+} partial class scannerᴛScanner {
 
 // scanIdentifier reads the string of valid identifier characters at s.offset.
 // It must only be called when s.ch is known to be a valid letter.
@@ -401,6 +416,8 @@ exit:
     return (@string)(s.src.slice(offs, s.offset));
 }
 
+} partial class scanner_package {
+
 internal static nint digitVal(rune ch) {
     switch (ᐧ) {
     case {} when '0' <= ch && ch <= '9': {
@@ -415,6 +432,8 @@ internal static nint digitVal(rune ch) {
 internal static rune lower(rune ch) { return (rune)(((rune)'a' - (rune)'A') | ch); } // returns lower-case ch iff ch is ASCII letter
 internal static bool isDecimal(rune ch) { return '0' <= ch && ch <= '9'; }
 internal static bool isHex(rune ch) { return '0' <= ch && ch <= '9' || 'a' <= lower(ch) && lower(ch) <= 'f'; }
+
+} partial class scannerᴛScanner {
 
 // digits accepts the sequence { digit | '_' }.
 // If base <= 10, digits accepts any decimal digit but records
@@ -556,6 +575,8 @@ internal static (token.Token, @string) scanNumber(this ref Scanner s) {
     return (tok, lit);
 }
 
+} partial class scanner_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string hexadecimalLiteralˢ => ref hexadecimalLiteralˢᵇ;
 private static readonly @string hexadecimalLiteralˢᵇ = "hexadecimal literal"u8;
@@ -624,6 +645,8 @@ internal static nint invalidSep(@string x) {
 
     return -1;
 }
+
+} partial class scannerᴛScanner {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownEscapeSequenceˢ => ref unknownEscapeSequenceˢᵇ;
@@ -768,6 +791,8 @@ internal static @string scanString(this ref Scanner s) {
     return (@string)(s.src.slice(offs, s.offset));
 }
 
+} partial class scanner_package {
+
 internal static slice<byte> stripCR(slice<byte> b, bool comment) {
     var c = new slice<byte>(len(b));
     nint i = 0;
@@ -784,6 +809,8 @@ internal static slice<byte> stripCR(slice<byte> b, bool comment) {
     }
     return c.slice(0, i);
 }
+
+} partial class scannerᴛScanner {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rawStringLiteralNotˢ => ref rawStringLiteralNotˢᵇ;
@@ -895,8 +922,8 @@ internal static token.Token switch4(this ref Scanner s, token.Token tok0, token.
 // Scan adds line information to the file added to the file
 // set with Init. Token positions are relative to that file
 // and thus relative to the file set.
-public static (tokenꓸPos pos, token.Token tok, @string lit) Scan(this ref Scanner s) {
-    tokenꓸPos pos = default;
+public static (token.Pos pos, token.Token tok, @string lit) Scan(this ref Scanner s) {
+    token.Pos pos = default;
     token.Token tok = default;
     @string lit = default;
 
@@ -961,7 +988,7 @@ scanAgain:
             insertSemi = true;
             tok = token.STRING;
             lit = s.scanString();
-            s.stringEnd = pos + ((tokenꓸPos)len(lit));
+            s.stringEnd = pos + ((token.Pos)len(lit));
             break;
         }
         case '\'': {
@@ -975,7 +1002,7 @@ scanAgain:
             tok = token.STRING;
             nint rawLen = default;
             (lit, rawLen) = s.scanRawString();
-            s.stringEnd = pos + ((tokenꓸPos)rawLen);
+            s.stringEnd = pos + ((token.Pos)rawLen);
             break;
         }
         case ':': {
@@ -1141,4 +1168,4 @@ scanAgain:
     return (pos, tok, lit);
 }
 
-} // end scanner_package
+} // end scannerᴛScanner

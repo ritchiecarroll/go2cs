@@ -56,8 +56,8 @@ using static go.vendor.golang.org.x.crypto.chacha20_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_generic.go", "chacha_generic.cs", "ADp6AAEWAAwIggAIBqKClLiCgoKCgqaCAAkUygAKILKCgoKCgoKCgoKCgoIAAhYADAqCgu6ClIIAAxwACgKClIKUgoK4goKClIKClIKUgtyCgoKC7oKClJiigoKCgoKCgsqCgoKCuIKCAAIcAB4UgoKCgsqUpoKCgqaUgoKCpoKCgsqCgoKCgoKCgoKCgoKCgoKUlL7oggAIBoKClIKmgoKCgoKCgoKCgoKClJSCgoKmgoKCpoKCgoKCgoKCgg==", "", "", "103=Uint32/1/8/1,Uint32/2/8/2,Uint32/3/8/3,Uint32/4/8/4,Uint32/5/8/5,Uint32/6/8/6,Uint32/7/8/7,Uint32/8/8/8;113=Uint32/1/3/1,Uint32/2/3/2,Uint32/3/3/3")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_noasm.go", "chacha_noasm.cs", "AAoWgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_generic.go", "chacha_generic.cs", "ADt6AAEWAAwIggAIBqKClLiCgoKCgqaCAAkUygAKILKCgoKCgoKCgoKCgoIABBYADAqCgu6ClIIAAxwACgKClIKUgoK4goKClIKClIKUgtyCgoKC7oKClJiigoKCgoKCgsqCgoKCuIKCAAIcAB4UgoKCgsqUpoKCgqaUgoKCpoKCgsqCgoKCgoKCgoKCgoKCgoKUlN7oggAIBoKClIKmgoKCgoKCgoKCgoKClJSCgoKmgoKCpoKCgoKCgoKCgg==", "", "", "104=Uint32/1/8/1,Uint32/2/8/2,Uint32/3/8/3,Uint32/4/8/4,Uint32/5/8/5,Uint32/6/8/6,Uint32/7/8/7,Uint32/8/8/8;114=Uint32/1/3/1,Uint32/2/3/2,Uint32/3/3/3")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_noasm.go", "chacha_noasm.cs", "AA4Wgg==")]
 [assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/xor.go", "xor.cs", "ABAkopLcgoKCgoKCgoKUgoKCgg==")]
 // </GoSourcePositionMaps>
 
@@ -91,3 +91,13 @@ public static partial class chacha20_package
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸcryptoꓸinternalꓸalias() => builtin.initPackage(typeof(go.vendor.golang.org.x.crypto.@internal.alias_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(chacha20_package.Cipher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha20ᴛCipher;
+// </MethodHolders>

@@ -19,6 +19,7 @@ using go.@internal;
 using go.image;
 using go.image.color;
 using math;
+using static gif_package;
 
 partial class gif_package {
 
@@ -64,6 +65,8 @@ partial struct encoder {
 partial struct blockWriter {
     internal ж<encoder> e;
 }
+
+} partial class gifᴛblockWriter {
 
 internal static void setup(this blockWriter b) {
     b.e.buf[0] = 0;
@@ -114,6 +117,8 @@ internal static void close(this blockWriter b) {
     }
     b.e.flush();
 }
+
+} partial class gifᴛencoder {
 
 internal static void flush(this ref encoder e) {
     if (e.err != nil) {
@@ -197,6 +202,8 @@ internal static void writeHeader(this ref encoder e) {
     }
 }
 
+} partial class gif_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string gifCannotEncodeColorˢ => ref gifCannotEncodeColorˢᵇ;
 private static readonly @string gifCannotEncodeColorˢᵇ = "gif: cannot encode color table with more than 256 entries"u8;
@@ -216,7 +223,7 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
         uint8 b = default;
         // It is most likely that the palette is full of color.RGBAs, so they
         // get a fast path.
-        var (rgba, ok) = c._<colorꓸRGBA>(ᐧ); if (ok) {
+        var (rgba, ok) = c._<Δcolor.RGBA>(ᐧ); if (ok) {
             (r, g, b) = (rgba.R, rgba.G, rgba.B);
         } else {
             var (rr, gg, bb, _) = c.RGBA();
@@ -234,6 +241,8 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
     return (3 * n, default);
 }
 
+} partial class gifᴛencoder {
+
 internal static bool colorTablesMatch(this ref encoder e, nint localLen, nint transparentIndex) {
     nint localSize = 3 * localLen;
     if (transparentIndex >= 0) {
@@ -250,6 +259,8 @@ internal static ref readonly @string gifImageBlockIsTooLargeˢ => ref gifImageBl
 private static readonly @string gifImageBlockIsTooLargeˢᵇ = "gif: image block is too large to encode"u8;
 internal static ref readonly @string gifImageBlockIsOutOfˢ => ref gifImageBlockIsOutOfˢᵇ;
 private static readonly @string gifImageBlockIsOutOfˢᵇ = "gif: image block is out of bounds"u8;
+internal static ref readonly @string gifCannotEncodeColorˢ2 => ref gifCannotEncodeColorˢ2ᵇ;
+private static readonly @string gifCannotEncodeColorˢ2ᵇ = "gif: cannot encode color table with nil entries"u8;
 
 internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> Ꮡpm, nint delay, byte disposal) {
     ref var e = ref Ꮡe.DerefOrNull();
@@ -367,6 +378,8 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     lzww.Close(); // flush to bw
     bw.close();   // flush to e.w
 }
+
+} partial class gif_package {
 
 // Options are the encoding parameters.
 partial struct Options {

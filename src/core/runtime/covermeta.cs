@@ -15,10 +15,10 @@ private static readonly @string runtimeAddCovMetaˢᵇ = "runtime.addCovMeta: co
 
 // The compiler emits calls to runtime.addCovMeta
 // but this code has moved to rtcov.AddMeta.
-internal static uint32 addCovMeta(@unsafe.Pointer Δp, uint32 dlen, /*[16]*/ array<byte> hash, @string pkgpath, nint pkgid, uint8 cmode, uint8 cgran) {
+internal static uint32 addCovMeta(@unsafe.Pointer p, uint32 dlen, /*[16]*/ array<byte> hash, @string pkgpath, nint pkgid, uint8 cmode, uint8 cgran) {
     hash = hash.Clone();
 
-    var id = rtcov.AddMeta(Δp, dlen, hash, pkgpath, pkgid, cmode, cgran);
+    var id = rtcov.AddMeta(p, dlen, hash, pkgpath, pkgid, cmode, cgran);
     if (id == 0) {
         @throw(runtimeAddCovMetaˢ);
     }

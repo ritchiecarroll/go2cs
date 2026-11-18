@@ -10,10 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using traceꓸEvent = go.@internal.trace_package.ΔEvent;
-global using traceꓸStack = go.@internal.trace_package.ΔStack;
-global using traceꓸSync = go.@internal.trace_package.ΔSync;
-global using traceꓸTime = go.@internal.trace_package.ΔTime;
 // </ImportedTypeAliases>
 
 using go;
@@ -72,11 +68,11 @@ using static go.@internal.trace.testtrace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABYukgACENKClIKUgpSokoKCgoLWgoKUgoKUtJSUpoKCgpSCgpQ=")]
+[assembly: GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABcukgAEENKClIKUgpTIkoKCgoLWgoKUgoKUtJSUpoKCgpSCgpQ=")]
 [assembly: GoPositionMap("internal/trace/testtrace/format.go", "format.cs", "ABAikoKClIKUgpSClIKClIKCgpSCgoKUgpSCpoKClA==")]
 [assembly: GoPositionMap("internal/trace/testtrace/helpers.go", "helpers.cs", "ABookoKUuILulIK4uIKUgoKUgoKClIKCgpSClIKmpqKUgoKClJKClA==", "", "", "", "93:21")]
 [assembly: GoPositionMap("internal/trace/testtrace/platforms.go", "platforms.cs", "AA0cooKUqqLalA==")]
-[assembly: GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ADFgkgAJHMKs4qaCgpSmuJSUgoLugoKUgpSClIKUgoKUgpSCyrSClKaClKbWpoK4gpSUgoLGgoLGgoIAEhyCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgpSCppSCgoKUgpTqgpKClIKUgpSCgoKUlIKUgqaCgoKClIKUgoKCgpSClAAIDIKUgpS0gsaClOiClJSUpuqCgoKUAAkQpKaCgqaCgoKmgoKmgoKClIKClKbCyIKUgpSCgpSClIKClIKCgoKUprSCuJSCAAgSoqaC", "368-384:1")]
+[assembly: GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ADJgkgALHMKs4qaCgpSmuJSUgoLugoKUgpSClIKUgoKUgpSCyrSClKaClKbWpoK4gpSUgoLGgoLGgoIAEhyCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgpSCppSCgoKUgpTqgpKClIKUgpSCgoKUlIKUgqaCgoKClIKUgoKCgpSClAAIDIKUgpS0gsaClOiClJSUpuqCgoKUAAkQpKaCgqaCgoKmgoKmgoKClIKClKbCyIKUgpSCgpSClIKClIKCgoKUxrSCuJSCAAoSoqaC", "368-384:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
@@ -125,3 +121,15 @@ public static partial class testtrace_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(testtrace_package.Expectation)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testtraceᴛExpectation;
+[GoMethodHost(typeof(testtrace_package.Validator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testtraceᴛValidator;
+[GoMethodHost(typeof(testtrace_package.errAccumulator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testtraceᴛerrAccumulator;
+// </MethodHolders>

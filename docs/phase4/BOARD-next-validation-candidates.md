@@ -27787,19 +27787,6 @@ go1.26.9 reading above stands for capable hosts.
 
 — P2 (re-gated 2026-10-21)
 
-**Re-read 2026-11-16 on an AVX-512 host (P2's linux cloud box), at the 310 stack tip `854b3967e9` and at master
-`b2eaf5290a`, the row alone at each.** The CPU reports `avx512f`, `avx512bw`, `avx512vl`, `avx512dq`,
-`avx512_bitalg` and `avx512vbmi`. Both trees read FAIL with the same text: Go 9,261 verdicts, C# 3,095,
-`TestExpandAVX512` Go=pass C#=skip and none of its subtests on the C# side. Nothing above has changed:
-`internal/cpu/amd64/cpu_x86_impl.cs` still lists `HasAVX512BITALG` as UNMAPPED (lines 62-63), and the three
-kernels are still assembly-only. Sized against the 236 linux-banked rows: this is the only row whose tests skip on a
-CPU feature over assembly. `internal/cpu`'s feature guards are consistency asserts, not skips; `crypto/subtle`'s
-guard is ARM64 DIT; and the 8 rows that run `cryptotest.TestAllImplementations` (crypto/aes, cipher, ecdsa,
-internal/fips140test, sha1, sha256, sha3, sha512) PASS at their banked counts on this host. Ruling #1 still
-classifies it: a feature gap, not a disclosure.
-
-— P2 (re-read 2026-11-16, W9a's battery)
-
 ## 2026-10-21 — G finding: an interface assertion whose (dynamic type, interface) pair has no compiled adapter still costs ~28 ns after the inline head (Go ~3 ns); a STRONG last-(box, adapter) slot prices the allocation at ~11 ns but is Go-observable — OPEN (post-hop design note, from G's perf review; COORD ruled shape B no seat)
 
 `x.(I)` on a raw `*T` or `T` (the perf review's "type assertion on a raw box", 31-35 ns) is two costs. The shared
@@ -40324,143 +40311,172 @@ trap number (ENOSYS).
 
 — C1 (2026-11-16)
 
-## 2026-11-15 — P2 (sqlite-cs W9a): `sync.Mutex` is Go's eight bytes; what it costs against the mutex it replaces, what it allocates, where it differs from Go, and one optimization left on the table
+## 2026-11-16 — P5 (decision D4 taken; COORD rulings 00:57Z and 01:10Z; closes shape Q of item 1 of the 2026-11-14 row "an array viewed over another array type answers length 0"): the open slice of an unnamed array takes the array pointer doors — CLOSED for Q, `ge` stays OPEN for door C
 
-**Cited at Go 1.26.11, linux/amd64, .NET 10.0.14, 4 cpus, on `f707bcf3e6`** (the branch tip `fcb88300f8` changes comments and one test attribute after it)**.** The hand-owned `sync.Mutex` held a
-`SemaphoreSlim` by reference, so a mutex in C memory (sqlite's `lib/mutex.go`, libc's pthread overlay) could not be
-read at all. It is now `{state int32; sema uint32}`: a three-state lock word and the HANDLE of a wait queue kept in
-a process-wide table of 64 striped locks, held only while a goroutine waits. The design and its guards are in
-[manual-conversions](../ConversionStrategies-Reference/manual-conversions.md#syncmutex-is-gos-eight-bytes-and-its-wait-queue-is-a-handle-in-the-sema-word).
-P3 read it three times: ship with fixes, SHIP, and SHIP on the change that keeps every queue, with its four
-notes folded in `fcb88300f8`.
+`(*[N]T)(p)[lo:]` with an unnamed array kept the box route (`To<array<E>>(p).slice(lo)`), which reads the whole
+array as a value: length 0 over memory that is no Go array of that type, and as `copy`'s destination over a
+number's bytes (reflect's `nameOff` copy) an access violation that ends the process. The view and copy doors now
+take it for an unnamed array as for a named one (design 16.10, branch `claude/p5-d4-open-slice`).
 
-**Cost against master `091935257c`, quiet box, ns per Lock/Unlock pair** (median of 3 run medians of 5 rounds;
-churn = a one-instruction critical section, hold = the holder yields inside the lock one pair in 64; 1 = one mutex,
-N = 8 mutexes). The bar was B/op <= master and ns within master's noise at 2, 4 and 16 threads.
+- **Q** (`w := (*[16]byte)(unsafe.Pointer(&arr))[:]` over `[4]uint32`, `w[4] = 1`): Go `16 [0 1 0 0]`; converted
+  now the same (arm B of the behavioral program `OpenSliceUnnamedArray`). CLOSED.
+- **`ge`** (a named array bound to a local, then indexed as an unnamed one) is the kept-local class: door C, .5,
+  unchanged. Items 2 and 3 of the 11-14 row are unchanged.
+- Census: sqlite closure 0 sites; std 7 / 8 / 11 (linux / darwin / windows). Corpus: 7 lines in 6 files (the
+  three `nameOff` copies, `os_linux.cs`, `os_windows.cs`, the registry `value.cs.auto`), and the registry sibling
+  taken whole to the emission (8 lines more, stale since 308).
+- Candidate for a later seat: retiring the registry `value.cs` hand-own, which exists because of this form.
 
-| arm | master | W9a | spin 4x30 | spin 4x8 | no padding | master again |
-|---|---|---|---|---|---|---|
-| pair T=1 | 49 | 19 | 19 | 18 | 19 | 49 |
-| churn1 T=2 | 200 | 56 | 27 | 33 | 52 | 184 |
-| churn1 T=4 | 240 | 84 | 40 | 46 | 83 | 245 |
-| churn1 T=16 | 156 | 79 | 36 | 50 | 83 | 141 |
-| hold1 T=2 | 220 | 74 | 36 | 42 | 71 | 212 |
-| hold1 T=4 | 278 | 102 | 53 | 57 | 108 | 278 |
-| hold1 T=16 | 274 | 105 | 114 | 107 | 107 | 271 |
-| churnN T=2 | 142 | 61 | 35 | 42 | 58 | 144 |
-| churnN T=4 | 277 | 62 | 58 | 56 | 62 | 284 |
-| churnN T=16 | 237 | 60 | 60 | 58 | 56 | 226 |
-| holdN T=2 | 163 | 58 | 38 | 46 | 63 | 151 |
-| holdN T=4 | 290 | 72 | 66 | 60 | 65 | 312 |
-| holdN T=16 | 325 | 188 | 217 | 183 | 177 | 322 |
+— P5 (2026-11-16)
 
-The W9a column was measured at `0cda857b12`, before the two commits below; they were not re-timed. The ns bar is
-met on all 13 arms. The B/op bar is MISSED as worded on 6 of 12 contended arms, by 0.001 B/pair (for example hold1
-T=2 0.004 against 0.003), and that led to the next paragraph.
+## 2026-11-16 — P5 (W19; COORD brief 02:52Z, plan approved 03:30Z; G's finding at the newest tree): the array pointer doors take an array whose element is a ccgo union — FIXED on `claude/p5-w19-union-elem`, the W12b stand-in RETIRED pending G's re-run
 
-**What a contended Lock allocates.** The bench starts new threads every round, and its 8 static mutexes are warm
-before the first measured pair, so master reads 0 there: master allocated one semaphore (88 B) for every Mutex
-ever locked, contended or not, for the mutex's life. W9a allocates per thread instead. With the same threads
-reused over 8 rounds, master's workers allocate in round 0 only; W9a's kept allocating, from two causes, measured
-per worker thread with the number of queues in existence read from the stripes by reflection:
+Door B stepped aside for `(*[N]E)(p)[i]` when E is a ccgo union (a `[0]T` carrier for each member but the one with
+storage): the door asked whether E is managed with the plain reading, where every Go array is an `array<T>`, so
+the union read as managed and the old box route stayed, length 0 over libc's heap. A struct admitted to inline
+arrays holds a `[0]T` as an alignment carrier, so the doors now read admission (design 16.11). The carrier
+classification is unchanged.
 
-1. **First use per stripe, kept and disclosed.** Spare queues belong to the stripe, and threads share stripes
-   (always, past 64 threads). A Lock that has to install a queue allocates one (104 B) when its thread's stripe
-   has no spare, which is when more of that stripe's queues are in use at once than ever before; so a thread's
-   first install often allocates nothing and one thread can pay for another's peak. A thread's first read of
-   its stripe slot allocates 32 B (the runtime's storage for one more type's thread-static reference, 0 B on
-   every later read; measured with a two-line probe).
-2. **A limit of four spare queues per stripe, cured in `f707bcf3e6`.** A thread that installed a queue moves on
-   while others still wait on it, so one stripe can have more than four queues in the table; the fifth was
-   allocated and later dropped, every time. On 16 threads over 8 mutexes that was 7 to 12 queues (about 1 KB) per
-   16M pairs, forever, with the queue count constant at 136. A stripe now keeps every queue it created. It is
-   bounded without a limit: a stripe creates a queue only when all of its queues are in the table, and a queue
-   in the table has a goroutine counted on it (from before its first swap until it has the lock), so the worst
-   case is 64 stripes x the most goroutines that were ever inside a contended Lock at once x 104 B, for the life
-   of the process; loose, because the stripes' peaks need not coincide. Under an M:N scheduler the counted
-   population is goroutines, not threads, and the keep-every-queue rule is to be re-read then (P3, noted in the
-   header). Red first: `SyncMutexQueueTests.TheQueuesAThreadInstalledAtOnceAllServeItAgain`
-   read "2 were not among the 6 it gave up" with the limit.
+- Census (sqlite v1.62.0, libc v1.80.1): linux/amd64 19 sites (TExpr 7, TRtreeCoord 4, Taddress 4, the sockaddr
+  union 4), windows/amd64 11 (TExpr 7, TRtreeCoord 4): G's list. std 0 by construction (std is never admitted).
+- Behavioral program `UnionElementArrayDoor`: 6 of 7 arms panic at D4's tip, 7 of 7 equal Go with the change.
+- W12b's stand-in (11 reads on windows; 18 reads and 1 store on linux) is retired by this seat once G's sqlite-cs
+  demo converts and runs with no stand-in, both demos, windows and linux. Until then this row is FIXED, not CLOSED.
 
-After the cure, 60 rounds of the same arm (960M pairs): in every round after the first, bytes allocated = 104 x
-the rise in the queue count, and the count never falls; it is 72 after the first round and 95 after the last,
-against a bound of 128 for those 16 threads. 48 of the last 59 rounds allocate nothing and the last 11 allocate
-nothing. The prediction "0 B after the first rounds" was MISSED as worded: 5 rounds after the eighth still
-allocated 104 or 208 B, each time a stripe passed its own earlier peak.
+— P5 (2026-11-16)
 
-**Padding dropped (`35a5be159b`, the second review's nit 2).** `QueueStripe`'s twelve pad longs sat in the middle
-of the object, because the runtime lays references first. The "no padding" column is within the padded column's
-run-to-run spread on the six 8-mutex arms or faster, so the padding went.
+## 2026-11-16 — H (the NativeBox reference floor; COORD ruling C and the 311 plan): a native box refuses a whole-value read or write of a reference-type pointee — SEATED for 311, branch `claude/h-nativebox-ref-floor`
 
-**Left on the table: a short spin before the first block.** The spin columns are a scratch switch, never
-committed: 4 rounds of 30 spins (Go's `active_spin` and `active_spin_cnt`) or of 8. 4x8 is ahead of or level
-with W9a on all 13 arms, by up to 1.8x on one contended mutex at 2 and 4 threads; 4x30 loses hold1 T=16 and holdN
-T=16. It was to land only if W9a needed it to match master at churn1 T=16, and W9a is ahead there without it.
-Whoever takes it: 4x8 is the candidate, it changes the timing of `Lock`'s slow path, so it owes the queue arms, the stress arms and a review.
+`NativeBox<T>.ValueAddress` now throws `NativeStructLayoutMismatch(T, "a managed reference where Go stores words")`
+when `T` is a CLR reference type (a Go pointer, a func, an interface, `unsafe.Pointer`) and the address is not the
+number 0. Before it, `Unsafe.AsRef` read Go's word as a managed reference: cgo-e2e s6next's `entry.next` became a
+reference to an object that does not exist, and a write stored a reference the collector could not see
+(DESIGN-cgo-phase3-marshaling.md, section 18).
+- **Order in `ValueAddress`:** the layout mismatch, the dereferenceable address, the named-array floor, 310's B0'
+  (managed-derived struct reads), this floor, then the census. B0' and this floor cover disjoint populations: B0' a
+  value-type Go struct holding a reference, this floor a CLR reference type. A refused read is never counted.
+- **One exemption (ruling C, narrowed by source):** `unsafe.Pointer` over MANAGED Go storage, where the box retains
+  its source or carries a pin. These are the converted runtime's `map.go` indirect key and `atomic_pointer.go`
+  atomicwb. Over native memory it is refused like every other reference. The exempt read's hazard is the next row.
+- **Not refused:** golib's map, channel, string, slice and array, which are value types and stay census B2a value
+  kinds. The number 0 also passes: a nil pointer to a Go pointer answers what every nil pointer answers. The census
+  counts that attempt before the read faults (COORD 2026-11-16: it stays counted).
+- **Tests:** `NativeBoxReferenceFloorTests`, with 4 refusal arms that were red before the floor and 4 controls (the
+  managed `unsafe.Pointer` control among them). The census controls that minted reference-type boxes over C memory
+  are re-pointed:
+  - the off arm, the source-tag arm and the file arm, to value kinds (string, `array<short>`, `Unsized`);
+  - the reference-kind arm, to "refused and not counted";
+  - a new arm keeps the exempt `unsafe.Pointer` counted as B2a source=retained.
 
-**Where it differs from Go, each stated in the file's header and none cured.**
-- Go's starvation mode is not reproduced: wakeups follow the semaphore's order and a woken waiter competes with
-  newcomers, as in Go's normal mode.
-- A waiter blocks its OS thread, where Go parks a goroutine; and an `Unlock` that finds a waiter takes its
-  stripe's monitor for the lookup, where Go's `Unlock` never blocks.
-- A mutex copied WHILE a goroutine waits on it carries the queue's handle, and until that queue empties a waiter
-  of the copy can take a wakeup meant for the original. In Go the two wait on different addresses. (vet forbids
-  the copy; a copy of an idle or of a locked mutex behaves as in Go, and both are pinned by arms.)
-- Bytes that happen to hold a handle a stripe hands out again after its 26-bit sequence wraps (about a minute of
-  one stripe installing a queue every microsecond), or memory zeroed and reused as a mutex while a queue it named
-  still has waiters, can name another mutex's queue. The cost is a spurious wakeup, never a second owner.
-- With a mutex profile rate on, the wait stamps stay attached to a pooled queue across mutexes; they are cleared
-  when the last stamped waiter leaves, and one event can be attributed to the wrong mutex (second review, nit 4).
+**The census, before and after** (GolibTests Release unfiltered, census on; behavioral executed, census on):
 
-**Copy census, read 2026-11-15 16:49Z to 21:06Z** (record: `docs/phase4/probes/p2-mutex-copy-census/`). Every
-process of the 8 behavioral slices (979 projects, 953 compared, 0 failed) and of 20 sweep rows (18 PASS at their
-banked counts; `net` 594 of 597 and `os` 3831 of 3840, both this host's readings with the census off) logged each
-mutex gate's uses: 4599 processes, 17,364,705 uses of 405,140 gates, `ALTERNATING` 0, `SECOND-ADDRESS` 0. No copy
-of a used mutex was in use beside its original, so the census names no converter copy to cure before this seats.
-It does not cover packages outside the 20 rows, windows or darwin, paths no suite runs, or abnormal exits.
-
-**A profile arm whose proof of "parked" was too weak; found by the hosted linux leg, dated 2026-11-15 15:00Z.**
-`SyncMutexProfileTests.EveryEpisodeOfTwoAlternatingWorkersRecordsItsContention` failed once on the hosted linux
-golib-tests leg at `fcb88300f8` ("1 Unlock(s) released a waiter parked in Lock and recorded no mutex event") and
-passed on windows and on both darwin runners. The arm asserted an event at every Unlock made while the other worker
-was "Parked": its in-Lock flag set, `SemaphoreSlim.m_waitCount >= 1`, and the thread in `WaitSleepJoin`. All three
-are still true of a waiter the PREVIOUS Unlock already woke and charged, until that waiter runs. If the holder takes
-the lock straight back, the woken waiter can take it between the holder's next swap to 0 and that Unlock's charge;
-it retires its stamp first and the Unlock records nothing. Go records nothing there either: `unlockSlow` returns when
-`mutexWoken` is set (`internal/sync/mutex.go:215`). The mutex this one replaces could not show it: its Unlock charged
-before its Release. Measured with the arm called 50 times per process, 6 processes per arm per load level, blocks
-alternating, linux/amd64, 4 cpus, nothing else running:
-
-| load | this mutex, old proof | master's mutex, old proof | this mutex, corrected proof |
+| reading | tree | GolibTests | B2a rows |
 |---|---|---|---|
-| quiet | 144 of 300 runs failed; 219 of 101,743 asserted Unlocks | 0 of 300; 0 of 89,122 | 0 of 300; 0 of 83,871 |
-| 4 busy-loop processes | 0 of 300; 0 of 113,683 | 0 of 300; 0 of 113,598 | 0 of 300; 0 of 113,206 |
+| C1 before | master `0c1d295ea8` | 2839/0/44 of 2883 | 12: three kind=Func (`Func<short>` none, `Func<int>` retained, `Func<long,long>` none), kind=Pointer `ж<long>` none 1, String none 1, `array<short>` none 1, `array<array<uint>>` retained 2, `FloorSmallMem` none 4 |
+| C1 after | `0c1d295ea8` + the floor | 2849/0/44 of 2893 | 14 |
+| C1 after | 311, `f17b5ddc40` | 2909/1/44 of 2954 | 14: kind=Func gone, kind=Pointer `ж<long>` none 1 (the nil control alone), String none 1, String retained 1, `array<short>` none 2, `array<array<uint>>` retained 2, `FloorSmallMem` none 4, UnsafePointer retained 3 |
+| arm A, FILTERED to the nil control | `f17b5ddc40` | 1/0/0 | 1: kind=Pointer `ж<long>` none |
+| arm B, FILTERED to all but the nil control | `f17b5ddc40` | 2909/0/44 of 2953 | 13, no kind=Pointer row |
+| C2 before | `0c1d295ea8` | behavioral, 956 census files | 2: UnsafePointer retained |
+| C2 after | `f17b5ddc40` | Output 966/0/26, 968 census files | 2: UnsafePointer retained |
 
-Every one of the 219 misses read, just before the blamed Unlock: state word 1, one wakeup in the queue, one pulsed
-waiter. The corrected proof also requires the queue's `CurrentCount == 0`: only the holder adds a wakeup, so a 0 it
-reads stays 0 until its own Unlock, and a waiter with no wakeup to take cannot leave Lock before that Unlock's
-charge. **NOT MEASURED:** 8 busy-loop processes (the arm ran into its own 60 s cap on 36 of the first 50 runs and
-the level was stopped), and the rate under `dotnet test`, where the hosted leg read 1 miss in 338 asserted Unlocks.
-The lesson for any proof built on these fields: `m_waitCount` and `WaitSleepJoin` say a thread is inside a
-`SemaphoreSlim` wait; they do not say it has no wakeup. The header's stated deviation now reads "every Unlock that
-still finds a stamped waiter outstanding".
+- B2b and unpinnable at 311 read 2 and 4, against 1 and 2 before. The extra B2b row (`ManagedDerivedStructReadFloorTests+Ctx`
+  source=none) and the 2 extra unpinnable rows are 310's own `ManagedDerivedStructReadFloorTests`.
+- The C3 package arms (13 packages: crypto/tls, encoding/json, the runtime and others) read b2a 0 in every package
+  before the floor. They were NOT re-measured after it.
 
-**A load-sensitive test, not a W9a finding.** `GolibTests.ThreadCpuTimeTests.ASpinningThreadsCpuTimeAdvancesWithItsWallTime`
-failed once beside a full gate battery (load 16 on 4 cpus): "a spinner used 153.8 ms of CPU in 200.2 ms", where
-it needs 80%. No mutex is in that file. It is green on a quiet box (2770 passed, 0 failed) and at loads of 5 to 12 (2771
-passed, 0 failed). A red from it under a battery is a load reading; re-run it alone before reading anything into it.
+**Gates at `f17b5ddc40`, all unfiltered:** GolibTests R 2902/0/52 and D 2877/0/77 (total 2954, which is 310's 2944
+plus the floor's 10); GenTests 537/0; go test 11 ok, 0 FAIL, 0 cached; CNR byte-identical across 1093 (11
+platform-exclusive). At `0c1d295ea8` + the floor, before 310: R 2841/0/52, D 2816/0/77, GenTests 530/0, CNR
+byte-identical across 1079.
 
-**Battery, read 2026-11-16 02:06Z to 23:55Z at the 310 stack tip `854b3967e9`** (309 master `0c1d295ea8` + W9b +
-W11 + W9a + W12; go1.26.11, linux/amd64, .NET 10, 4 cpus). The 8 behavioral slices: 0 failed
-(`MutexInNativeMemory`, `RenamedTypeAliasReexportRecords` and `DeepEqual` among them). All 236 linux-banked
-sweep rows, one row per sweep invocation: 232 PASS at their banked counts, `sync` 48 among them with
-`TestMutexMisuse` reading Go's fatal text; `net` 594 of 597 and `os` 3831 of 3840, this host's readings as
-predicted. Two rows are red as host readings, and each reads the same red at master `b2eaf5290a`, run alone:
-`crypto/x509` (`TestSetFallbackRoots/after_first_load_no_system_CAs` Go=fail C#=skip; the uid-0 cause is
-inferred) and `internal/runtime/gc/scan` (this host has AVX-512; see the dated block under the 2026-10-16 row).
-No row was cut by a deadline, and no row's output names `sync.(*Mutex).Lock` in a goroutine dump. The box
-restarted once, with 227 rows done; the ledger resumed the run from the row in flight.
+**Scored against the predictions posted first.**
+- 0c1d C1 after, b2a: MISSED, 14 against 13. The 14th row is the nil control's counted attempt, the mechanism its
+  author had named for the `FloorSmallMem` rows. Arms A and B settle it at 311: 14 = 13 + the nil control.
+- 311 C1: MET on mechanism (b2a 14, total 2954, skipped 44), MISSED on three specifics:
+  - **the fail set** read `[AnIndexedLoopOverNativeMemoryAllocatesNothing]` (Actual 3696 B), not empty. This is the
+    door-B alloc test's one-time cost, not the floor's: it also failed once at W8 `9d3401725c`, which has no floor
+    (5784 B), and it passed in 3 other full Release runs that night. P5's `p5-alloc-loop-harden` `4fe430f549`,
+    seated in 311, bounds the window at 1,000,000 iterations and 64 KiB, so both costs pass under it by construction.
+    Not re-run for it;
+  - **b2b** read 2, not 1;
+  - **unpinnable** read 4, not 2.
+- **The b2b and unpinnable misses** are census counts carried from 0c1d, not re-derived at the tree (corpus-reconvert
+  section 1 already holds the rule). The extras are 310's. That holds by construction (the floor throws before the
+  census and cannot add a count), and a filtered arm at W8 (master + the should-fix, no floor),
+  `FullyQualifiedName~ManagedDerivedStructReadFloorTests`, read exactly them: b2b 1 `Ctx`, unpinnable 2. That arm ran
+  before its prediction was posted, so it is a CONFIRMATION, not a predicted measurement.
+- Arms A and B, C2, and every gate: MET. Stop lines clean: no kind=UnsafePointer source=none row anywhere.
 
-— P2 (2026-11-15)
+— H (2026-11-16)
+
+## 2026-11-16 — H (COORD ruling C: a BOARD row): the exempt `unsafe.Pointer` read keeps a managed reference in a word the collector does not track — OPEN, .5, cure carried into DESIGN-cgo-phase3-marshaling.md section 18.2
+
+The reference floor (row above) exempts one population: `NativeBox<unsafe.Pointer>` over MANAGED Go storage (the box
+retains its source or carries a pin). It is the converted runtime's `map.go` indirect key and `atomic_pointer.go`
+atomicwb, which store a pointer into storage Go types as words.
+- **The hazard:** golib's `unsafe.Pointer` is a CLR reference (a class), so the exempt read and write put a managed
+  reference into a slot the storage declares as a word (`uintptr` or bytes). The collector does not trace that
+  slot. A reference kept only there does not keep its object alive and is not updated if the object moves, so it
+  can go stale or be collected.
+- **Measured:** the exempt population is live. C2 at 311 (behavioral, executed, census on, 968 files) reads 2 B2a
+  rows, both kind=UnsafePointer source=retained, and C1 reads 3 (the controls).
+- **Not measured:** a failure from the hazard. Nothing has been reproduced; the row records the mechanism, not an
+  observed fault.
+- **Cure direction (B):** word semantics for `unsafe.Pointer`, carried into the section 18.2 design, where it
+  belongs (COORD ruling). Owner: H, with the S-B 18.2 design.
+
+— H (2026-11-16)
+
+## 2026-11-16 — P1 (the TS probe's side note; COORD ruling 07:16Z: a row, not code now): GO2CS2006 refuses a callee that writes only a fresh copy it rebound its parameter to — OPEN, over-refusal, no owner
+
+The GO2CS2006 gate (`src/go2cs/sliceWideningWriteRefusals.go`) proves a callee read-only for a `[]N` parameter by
+classifying every use of the parameter's object in the body (`classify`, line 331, `info.Uses[ident] == param`).
+Rebinding the parameter is allowed (`useWrite`, line 432: "rebinding the local writes nothing of the caller's
+slice"), but the classification is flow-insensitive, so a use AFTER the rebinding is still read as a use of the
+caller's slice. The shape the TS probe met:
+
+```go
+func sortedKeys[N keyer](xs []N) []int {
+	xs = slices.Clone(xs)
+	slices.SortFunc(xs, func(a, b N) int { return a.Key() - b.Key() })
+	...
+}
+```
+
+Go sorts the clone and never writes the caller's slice. Measured on linux/amd64 with a probe of exactly that shape
+(caller `sortedKeys(all)`, `all []*item`, Go prints `[1 2 3] 3 1 2`): conversion exits 1 with `GO2CS2006:
+sortedKeys(...) receives all as []N; sortedKeys may write it: it is passed to slices.SortFunc at main.go:17, which
+may write it: ... an element is assigned at zsortanyfunc.go:13`. The refusal is safe (no wrong program is
+written); the cost is a refused package that Go-equivalent output exists for.
+
+**Cure, when wanted:** treat a use as the caller's slice only while no rebinding to a fresh value dominates it. The
+minimal form: a top-level statement `p = slices.Clone(p)` (or `p = append(p[:0:0], p...)`) ends the parameter's
+caller-visible life for every later statement of the function's top block and everything nested in them; uses
+before it are classified as today. A rebinding inside a branch or loop keeps today's reading. Its arm: the probe
+above converts, and its output equals Go's; a twin that sorts before the rebinding stays refused.
+
+— P1 (2026-11-16)
+
+## 2026-11-17 — P1 (batch 311, OQ2 x class C): a struct's promoted forwarders move into its method holder; 12 committed converted `_test.cs` files keep the old placement until the next `-tests` reconvert
+
+Seat `claude/p1-oq2-classc-holder`, on the 311 union `140284a18a`. The forwarders the converter writes for a struct
+whose pointer satisfies an interface only through an embedded interface field were written in the package class.
+Under the method-holder rule a type keeps its name beside a method of that name, so `PromotedForwarderTypeNameCollision`
+read CS0102 x4 (`Driver` the forwarder beside `Driver` the type, in `main.cs` and in go2cs-gen's two overloads). A
+package-level struct's forwarders are now written into its holder; a function-local struct's stay beside it.
+
+Corpus, two seeded reconverts on all four targets, prediction posted before the run and met on every line: 10 files
+per target, +27/-15 (7 converted `.cs` with the class switch, 3 `package_info.cs` map re-encodes where a file's line
+count changed). Behavioral: three projects' `main.cs` and `main.cs.target`.
+
+**Not regenerated:** 12 committed converted test files still write their forwarders in the package class:
+`archive/tar/reader_test.cs`, `context/context_test.cs`, `context/x_test.cs`, `crypto/tls/conn_test.cs`,
+`crypto/tls/handshake_client_test.cs`, `crypto/tls/handshake_test.cs`, `crypto/tls/tls_test.cs`,
+`log/slog/multi_handler_test.cs`, `net/http/client_test.cs`, `net/http/fcgi/fcgi_test.cs`, `net/http/serve_test.cs`,
+`net/http/transport_test.cs`. They compile as they are. They take the new placement on the next `-tests` reconvert of
+each package; never hand-edit them.
+
+— P1 (2026-11-17)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

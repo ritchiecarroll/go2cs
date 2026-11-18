@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -17,22 +18,34 @@ partial struct circle {
     internal nint r;
 }
 
+} partial class mainᴛcircle {
+
 internal static @string name(this ref circle c) { return "circle"; }
 internal static void grow(this ref circle c, nint n) { c.r += n; }
 internal static nint size(this ref circle c) { return c.r; }
+
+} partial class main_package {
 
 partial struct dot {
     internal nint tag;
 }
 
+} partial class mainᴛdot {
+
 internal static @string name(this dot d) { return "dot"; }
 internal static void grow(this dot d, nint n) { d.tag += n; }
+
+} partial class main_package {
 
 partial struct errMark {
     internal nint code;
 }
 
+} partial class mainᴛerrMark {
+
 internal static @string Error(this ref errMark e) { return fmt.Sprintf("errMark(%d)"u8, e.code); }
+
+} partial class main_package {
 
 internal static @string describe(any x) {
     switch (x.type()) {

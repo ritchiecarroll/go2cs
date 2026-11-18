@@ -3,10 +3,13 @@ namespace go;
 using fmt = fmt_package;
 using latelib = NamedInterfaceLateAssert.latelib_package;
 using NamedInterfaceLateAssert;
+using static main_package;
 
 partial class main_package {
 
 partial struct dirLike /*@string*/;
+
+} partial class mainᴛdirLike {
 
 internal static @string Name(this dirLike d) { return (@string)d; }
 
@@ -16,13 +19,19 @@ internal static @string Detail(this dirLike d, @string prefix) { return prefix +
 
 internal static @string Whisper(this dirLike d) { return "shh "u8 + ((@string)d); }
 
+} partial class main_package {
+
 partial struct partial {
     internal @string n;
 }
 
+} partial class mainᴛpartial {
+
 internal static @string Name(this partial p) { return p.n; }
 
 internal static @string Kind(this partial p) { return "partial"; }
+
+} partial class main_package {
 
 internal static void report(@string label, @string s, bool ok) {
     fmt.Println(label, ok, s);

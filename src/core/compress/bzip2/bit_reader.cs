@@ -5,6 +5,7 @@ namespace go.compress;
 
 using bufio = bufio_package;
 using io = io_package;
+using static bzip2_package;
 
 partial class bzip2_package {
 
@@ -28,6 +29,8 @@ internal static bitReader newBitReader(io.Reader r) {
     }
     return new bitReader(r: byter);
 }
+
+} partial class bzip2ᴛbitReader {
 
 // ReadBits64 reads the given number of bits and returns them in the
 // least-significant part of a uint64. In the event of an error, it returns 0
@@ -82,4 +85,4 @@ internal static error Err(this ref bitReader br) {
     return br.err;
 }
 
-} // end bzip2_package
+} // end bzip2ᴛbitReader

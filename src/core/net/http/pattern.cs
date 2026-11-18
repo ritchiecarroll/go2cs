@@ -10,6 +10,7 @@ using url = go.net.url_package;
 using strings = strings_package;
 using unicode = unicode_package;
 using go.net;
+using static http_package;
 
 partial class http_package {
 
@@ -33,11 +34,15 @@ partial struct pattern {
     internal @string loc; // source location of registering call, for helpful messages
 }
 
+} partial class httpᴛpattern {
+
 internal static @string String(this ref pattern p) { return p.str; }
 
 internal static segment lastSegment(this ref pattern p) {
-    return p.segments[builtin.len(p.segments) - 1];
+    return p.segments[len(p.segments) - 1];
 }
+
+} partial class http_package {
 
 // A segment is a pattern piece that matches one or more path segments, or
 // a trailing slash.
@@ -105,7 +110,7 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
     error err = default;
     GoFrame ᒐ = default;
     try {
-        if (builtin.len(s) == 0) {
+        if (len(s) == 0) {
             (_ᴛ1, err) = (default, errors.New(emptyPatternˢ)); goto ᒐdone;
         }
         nint off = 0; // offset into string
@@ -132,7 +137,7 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
         var p = Ꮡ(new pattern(str: s, method: method));
 
         if (found) {
-            off = builtin.len(method) + 1;
+            off = len(method) + 1;
         }
         nint i = strings.IndexByte(rest, (byte)'/');
         if (i < 0) {
@@ -154,18 +159,18 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
         }
 
         var seenNames = new map<@string, bool>{}; // remember wildcard names to catch dups
-        while (builtin.len(rest) > 0) {
+        while (len(rest) > 0) {
             // Invariant: rest[0] == '/'.
             rest = rest[1..];
-            off = builtin.len(s) - builtin.len(rest);
-            if (builtin.len(rest) == 0) {
+            off = len(s) - len(rest);
+            if (len(rest) == 0) {
                 // Trailing slash.
                 p.segments = append(p.segments, new segment(wild: true, multi: true));
                 break;
             }
             nint iΔ2 = strings.IndexByte(rest, (byte)'/');
             if (iΔ2 < 0) {
-                iΔ2 = builtin.len(rest);
+                iΔ2 = len(rest);
             }
             @string seg = default;
             (seg, rest) = (rest.slice(0, iΔ2), rest.slice(iΔ2));
@@ -178,19 +183,19 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
                 if (iΔ3 != 0) {
                     (_ᴛ1, err) = (default, errors.New(badWildcardSegmentMustˢ)); goto ᒐdone;
                 }
-                if (seg[builtin.len(seg) - 1] != '}') {
+                if (seg[len(seg) - 1] != '}') {
                     (_ᴛ1, err) = (default, errors.New(badWildcardSegmentMustˢ2)); goto ᒐdone;
                 }
-                @string name = seg.slice(1, builtin.len(seg) - 1);
+                @string name = seg.slice(1, len(seg) - 1);
                 if (name == "$"u8) {
-                    if (builtin.len(rest) != 0) {
+                    if (len(rest) != 0) {
                         (_ᴛ1, err) = (default, errors.New(notAtEndˢ)); goto ᒐdone;
                     }
                     p.segments = append(p.segments, new segment(s: "/"));
                     break;
                 }
                 (name, var multi) = strings.CutSuffix(name, "...");
-                if (multi && builtin.len(rest) != 0) {
+                if (multi && len(rest) != 0) {
                     (_ᴛ1, err) = (default, errors.New(wildcardNotAtEndˢ)); goto ᒐdone;
                 }
                 if (name == ""u8) {
@@ -248,6 +253,8 @@ internal static ref readonly relationship disjoint => ref disjointᵇ;
 private static readonly relationship disjointᵇ = "disjoint"u8;         // there is no request that both match
 internal static ref readonly relationship overlaps => ref overlapsᵇ;
 private static readonly relationship overlapsᵇ = "overlaps"u8;         // there is a request that both match, but neither is more specific
+
+} partial class httpᴛpattern {
 
 // conflictsWith reports whether p1 conflicts with p2, that is, whether
 // there is a request that both match but where neither is higher precedence
@@ -322,7 +329,7 @@ internal static relationship comparePaths(this ref pattern p1, ж<pattern> Ꮡp2
 
     // Optimization: if a path pattern doesn't end in a multi ("...") wildcard, then it
     // can only match paths with the same number of segments.
-    if (builtin.len(p1.segments) != builtin.len(p2.segments) && !p1.lastSegment().multi && !p2.lastSegment().multi) {
+    if (len(p1.segments) != len(p2.segments) && !p1.lastSegment().multi && !p2.lastSegment().multi) {
         return disjoint;
     }
 
@@ -330,7 +337,7 @@ internal static relationship comparePaths(this ref pattern p1, ж<pattern> Ꮡp2
     slice<segment> segs1 = default;
     slice<segment> segs2 = default;
     relationship rel = equivalent;
-    for ((segs1, segs2) = (p1.segments, p2.segments); builtin.len(segs1) > 0 && builtin.len(segs2) > 0; (segs1, segs2) = (segs1[1..], segs2[1..])) {
+    for ((segs1, segs2) = (p1.segments, p2.segments); len(segs1) > 0 && len(segs2) > 0; (segs1, segs2) = (segs1[1..], segs2[1..])) {
         rel = combineRelationships(rel, compareSegments(segs1[0], segs2[0]));
         if (rel == disjoint) {
             return rel;
@@ -339,20 +346,22 @@ internal static relationship comparePaths(this ref pattern p1, ж<pattern> Ꮡp2
     // We've reached the end of the corresponding segments of the patterns.
     // If they have the same number of segments, then we've already determined
     // their relationship.
-    if (builtin.len(segs1) == 0 && builtin.len(segs2) == 0) {
+    if (len(segs1) == 0 && len(segs2) == 0) {
         return rel;
     }
     // Otherwise, the only way they could fail to be disjoint is if the shorter
     // pattern ends in a multi. In that case, that multi is more general
     // than the remainder of the longer pattern, so combine those two relationships.
-    if (builtin.len(segs1) < builtin.len(segs2) && p1.lastSegment().multi) {
+    if (len(segs1) < len(segs2) && p1.lastSegment().multi) {
         return combineRelationships(rel, moreGeneral);
     }
-    if (builtin.len(segs2) < builtin.len(segs1) && p2.lastSegment().multi) {
+    if (len(segs2) < len(segs1) && p2.lastSegment().multi) {
         return combineRelationships(rel, moreSpecific);
     }
     return disjoint;
 }
+
+} partial class http_package {
 
 // compareSegments determines the relationship between two segments.
 internal static relationship compareSegments(segment s1, segment s2) {
@@ -498,16 +507,16 @@ internal static @string commonPath(ref pattern p1, ref pattern p2) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     slice<segment> segs1 = default;
     slice<segment> segs2 = default;
-    for ((segs1, segs2) = (p1.segments, p2.segments); builtin.len(segs1) > 0 && builtin.len(segs2) > 0; (segs1, segs2) = (segs1[1..], segs2[1..])) {
+    for ((segs1, segs2) = (p1.segments, p2.segments); len(segs1) > 0 && len(segs2) > 0; (segs1, segs2) = (segs1[1..], segs2[1..])) {
         var s1 = segs1[0]; if (s1.wild) {
             writeSegment(Ꮡb, segs2[0]);
         } else {
             writeSegment(Ꮡb, s1);
         }
     }
-    if (builtin.len(segs1) > 0) {
+    if (len(segs1) > 0) {
         writeMatchingPath(Ꮡb, segs1);
-    } else if (builtin.len(segs2) > 0) {
+    } else if (len(segs2) > 0) {
         writeMatchingPath(Ꮡb, segs2);
     }
     return b.String();
@@ -520,7 +529,7 @@ internal static @string differencePath(ref pattern p1, ref pattern p2) {
 
     slice<segment> segs1 = default;
     slice<segment> segs2 = default;
-    for ((segs1, segs2) = (p1.segments, p2.segments); builtin.len(segs1) > 0 && builtin.len(segs2) > 0; (segs1, segs2) = (segs1[1..], segs2[1..])) {
+    for ((segs1, segs2) = (p1.segments, p2.segments); len(segs1) > 0 && len(segs2) > 0; (segs1, segs2) = (segs1[1..], segs2[1..])) {
         var s1 = segs1[0];
         var s2 = segs2[0];
         if (s1.multi && s2.multi) {
@@ -571,11 +580,11 @@ internal static @string differencePath(ref pattern p1, ref pattern p2) {
             writeSegment(Ꮡb, s1);
         }
     }
-    if (builtin.len(segs1) > 0) {
+    if (len(segs1) > 0) {
         // p1 is longer than p2, and p2 does not end in a multi.
         // Anything that matches the rest of p1 will do.
         writeMatchingPath(Ꮡb, segs1);
-    } else if (builtin.len(segs2) > 0) {
+    } else if (len(segs2) > 0) {
         writeMatchingPath(Ꮡb, segs2);
     }
     return b.String();

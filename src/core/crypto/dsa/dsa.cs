@@ -26,19 +26,19 @@ partial class dsa_package {
 // Parameters represents the domain parameters for a key. These parameters can
 // be shared across many keys. The bit length of Q must be a multiple of 8.
 partial struct Parameters {
-    public ж<bigꓸInt> P, Q, G;
+    public ж<big.Int> P, Q, G;
 }
 
 // PublicKey represents a DSA public key.
 partial struct PublicKey {
     /*embed*/ public Parameters Parameters;
-    public ж<bigꓸInt> Y;
+    public ж<big.Int> Y;
 }
 
 // PrivateKey represents a DSA private key.
 partial struct PrivateKey {
     /*embed*/ public PublicKey PublicKey;
-    public ж<bigꓸInt> X;
+    public ж<big.Int> X;
 }
 
 // ErrInvalidPublicKey results when a public key is not usable by this code.
@@ -110,10 +110,10 @@ public static error GenerateParameters(ж<Parameters> Ꮡparams, io.Reader rand,
     var qBytes = new slice<byte>(N / 8);
     var pBytes = new slice<byte>(L / 8);
 
-    var q = @new<bigꓸInt>();
-    var p = @new<bigꓸInt>();
-    var rem = @new<bigꓸInt>();
-    var one = @new<bigꓸInt>();
+    var q = @new<big.Int>();
+    var p = @new<big.Int>();
+    var rem = @new<big.Int>();
+    var one = @new<big.Int>();
     one.SetInt64(1);
 
 GeneratePrimes:
@@ -160,12 +160,12 @@ continue_GeneratePrimes:;
     }
 break_GeneratePrimes:;
 
-    var h = @new<bigꓸInt>();
+    var h = @new<big.Int>();
     h.SetInt64(2);
-    var g = @new<bigꓸInt>();
+    var g = @new<big.Int>();
 
-    var pm1 = @new<bigꓸInt>().Sub(p, one);
-    var e = @new<bigꓸInt>().Div(pm1, q);
+    var pm1 = @new<big.Int>().Sub(p, one);
+    var e = @new<big.Int>().Div(pm1, q);
 
     for (;;) {
         g.Exp(h, e, p);
@@ -196,7 +196,7 @@ public static error GenerateKey(ж<PrivateKey> Ꮡpriv, io.Reader rand) {
         return errors.New(cryptoDsaParametersNotˢ);
     }
 
-    var x = @new<bigꓸInt>();
+    var x = @new<big.Int>();
     var xBytes = new slice<byte>(priv.Q.BitLen() / 8);
 
     for (;;) {
@@ -211,7 +211,7 @@ public static error GenerateKey(ж<PrivateKey> Ꮡpriv, io.Reader rand) {
     }
 
     priv.X = x;
-    priv.Y = @new<bigꓸInt>();
+    priv.Y = @new<big.Int>();
     priv.Y.Exp(priv.G, x, priv.P);
     return default;
 }
@@ -220,10 +220,10 @@ public static error GenerateKey(ж<PrivateKey> Ꮡpriv, io.Reader rand) {
 // This has better constant-time properties than Euclid's method (implemented
 // in math/big.Int.ModInverse) although math/big itself isn't strictly
 // constant-time so it's not perfect.
-internal static ж<bigꓸInt> fermatInverse(ж<bigꓸInt> k, ж<bigꓸInt> P) {
+internal static ж<big.Int> fermatInverse(ж<big.Int> k, ж<big.Int> P) {
     var two = big.NewInt(2);
-    var pMinus2 = @new<bigꓸInt>().Sub(P, two);
-    return @new<bigꓸInt>().Exp(k, pMinus2, P);
+    var pMinus2 = @new<big.Int>().Sub(P, two);
+    return @new<big.Int>().Exp(k, pMinus2, P);
 }
 
 // Sign signs an arbitrary length hash (which should be the result of hashing a
@@ -241,9 +241,9 @@ internal static ж<bigꓸInt> fermatInverse(ж<bigꓸInt> k, ж<bigꓸInt> P) {
 //
 // Be aware that calling Sign with an attacker-controlled [PrivateKey] may
 // require an arbitrary amount of CPU.
-public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> hash) {
-    ж<bigꓸInt> r = default;
-    ж<bigꓸInt> s = default;
+public static (ж<big.Int> r, ж<big.Int> s, error err) Sign(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> hash) {
+    ж<big.Int> r = default;
+    ж<big.Int> s = default;
     error err = default;
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
@@ -264,7 +264,7 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rando
 
     nint attempts = default;
     for (attempts = 10; attempts > 0; attempts--) {
-        var k = @new<bigꓸInt>();
+        var k = @new<big.Int>();
         var buf = new slice<byte>(n);
         for (;;) {
             (_, err) = io.ReadFull(random, buf);
@@ -283,7 +283,7 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rando
 
         var kInv = fermatInverse(k, priv.Q);
 
-        r = @new<bigꓸInt>().Exp(priv.G, k, priv.P);
+        r = @new<big.Int>().Exp(priv.G, k, priv.P);
         r.Mod(r, priv.Q);
 
         if (r.Sign() == 0) {
@@ -292,7 +292,7 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rando
 
         var z = k.SetBytes(hash);
 
-        s = @new<bigꓸInt>().Mul(priv.X, r);
+        s = @new<big.Int>().Mul(priv.X, r);
         s.Add(s, z);
         s.Mod(s, priv.Q);
         s.Mul(s, kInv);
@@ -318,7 +318,7 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rando
 // Note that FIPS 186-3 section 4.6 specifies that the hash should be truncated
 // to the byte-length of the subgroup. This function does not perform that
 // truncation itself.
-public static bool Verify(ж<PublicKey> Ꮡpub, slice<byte> hash, ж<bigꓸInt> Ꮡr, ж<bigꓸInt> Ꮡs) {
+public static bool Verify(ж<PublicKey> Ꮡpub, slice<byte> hash, ж<big.Int> Ꮡr, ж<big.Int> Ꮡs) {
     ref var pub = ref Ꮡpub.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
@@ -340,7 +340,7 @@ public static bool Verify(ж<PublicKey> Ꮡpub, slice<byte> hash, ж<bigꓸInt> 
         return false;
     }
 
-    var w = @new<bigꓸInt>().ModInverse(Ꮡs, pub.Q);
+    var w = @new<big.Int>().ModInverse(Ꮡs, pub.Q);
     if (w == nil) {
         return false;
     }
@@ -349,9 +349,9 @@ public static bool Verify(ж<PublicKey> Ꮡpub, slice<byte> hash, ж<bigꓸInt> 
     if (n % 8 != 0) {
         return false;
     }
-    var z = @new<bigꓸInt>().SetBytes(hash);
+    var z = @new<big.Int>().SetBytes(hash);
 
-    var u1 = @new<bigꓸInt>().Mul(z, w);
+    var u1 = @new<big.Int>().Mul(z, w);
     u1.Mod(u1, pub.Q);
     var u2 = w.Mul(Ꮡr, w);
     u2.Mod(u2, pub.Q);

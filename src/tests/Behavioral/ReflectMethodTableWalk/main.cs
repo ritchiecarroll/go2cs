@@ -4,12 +4,15 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using sort = sort_package;
 using strings = strings_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct counter {
     internal nint n;
 }
+
+} partial class mainᴛcounter {
 
 internal static nint Add(this ref counter c, nint d) {
     c.n += d;
@@ -24,19 +27,29 @@ internal static @string Label(this counter c, @string p) {
 
 internal static nint hidden(this counter c) { return -1; }
 
+} partial class main_package {
+
 partial struct embedded {
 }
 
+} partial class mainᴛembedded {
+
 internal static @string Zeta(this embedded _) { return "zeta"; }
+
+} partial class main_package {
 
 partial struct outer {
     /*embed*/ internal embedded embedded;
 }
 
+} partial class mainᴛouter {
+
 internal static @string Beta(this outer _) { return "beta"; }
 internal static @string Alpha(this outer _) { return "alpha"; }
 
-internal static slice<@string> names(reflectꓸType t) {
+} partial class main_package {
+
+internal static slice<@string> names(reflect.Type t) {
     var @out = new slice<@string>(0, t.NumMethod());
     for (nint i = 0; i < t.NumMethod(); i++) {
         @out = append(@out, t.Method(i).Name);
@@ -68,12 +81,12 @@ internal static void main() {
 
     var add = pv.Method(0);
     fmt.Println("Add kind:", add.Kind(), "in0:", add.Type().In(0).Kind());
-    fmt.Println("Add(5) =", add.Call(slice<reflectꓸValue>([reflect.ValueOf((nint)5)]))[0].Interface());
-    fmt.Println("Add(7) =", add.Call(slice<reflectꓸValue>([reflect.ValueOf((nint)7)]))[0].Interface());
+    fmt.Println("Add(5) =", add.Call(slice<reflect.Value>([reflect.ValueOf((nint)5)]))[0].Interface());
+    fmt.Println("Add(7) =", add.Call(slice<reflect.Value>([reflect.ValueOf((nint)7)]))[0].Interface());
     fmt.Println("receiver observed the writes:", c.n);
 
     var label = pv.MethodByName("Label");
-    fmt.Println("Label:", label.Call(slice<reflectꓸValue>([reflect.ValueOf("n")]))[0].Interface());
+    fmt.Println("Label:", label.Call(slice<reflect.Value>([reflect.ValueOf("n")]))[0].Interface());
     fmt.Println("Value:", pv.MethodByName("Value").Call(default)[0].Interface());
 
     var reset = pv.MethodByName("Reset");
@@ -87,7 +100,7 @@ internal static void main() {
     var c2 = Ꮡ(new counter(n: 3));
     var (addM, _) = pt.MethodByName("Add");
     fmt.Println("unbound Func numIn:", addM.Type.NumIn(),
-        "call:", addM.Func.Call(slice<reflectꓸValue>([reflect.ValueOf(c2.OrTypedNil()), reflect.ValueOf((nint)4)]))[0].Interface());
+        "call:", addM.Func.Call(slice<reflect.Value>([reflect.ValueOf(c2.OrTypedNil()), reflect.ValueOf((nint)4)]))[0].Interface());
 
     fmt.Println("outer methods:", strings.Join(names(reflect.TypeOf(new outer())), ","));
     fmt.Println("outer Zeta:", reflect.ValueOf(new outer()).MethodByName("Zeta").Call(default)[0].Interface());
@@ -101,6 +114,8 @@ internal static void main() {
 
 partial struct stringish /*@string*/;
 
+} partial class mainᴛstringish {
+
 internal static @string String(this stringish s) { return "<"u8 + ((@string)s) + ">"u8; }
 
-} // end main_package
+} // end mainᴛstringish

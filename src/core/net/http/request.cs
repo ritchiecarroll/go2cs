@@ -34,6 +34,7 @@ using go.net.http;
 using go.net.http.@internal;
 using vendor.golang.org.x.net;
 using vendor.golang.org.x.net.http;
+using static http_package;
 
 partial class http_package {
 
@@ -51,12 +52,16 @@ partial struct ProtocolError {
     public @string ErrorString;
 }
 
+} partial class httpᴛProtocolError {
+
 public static @string Error(this ref ProtocolError pe) { return pe.ErrorString; }
 
 // Is lets http.ErrNotSupported match errors.ErrUnsupported.
 public static bool Is(this ж<ProtocolError> Ꮡpe, error err) {
     return Ꮡpe == ErrNotSupported && AreEqual(err, errors.ErrUnsupported);
 }
+
+} partial class http_package {
 
 // ErrNotSupported indicates that a feature is not supported.
 //
@@ -167,7 +172,7 @@ partial struct Request {
     // and Connection are automatically written when needed and
     // values in Header may be ignored. See the documentation
     // for the Request.Write method.
-    public ΔHeader Header;
+    public Header Header;
     // Body is the request's body.
     //
     // For client requests, a nil body means the request has no
@@ -268,7 +273,7 @@ partial struct Request {
     // not mutate Trailer.
     //
     // Few HTTP clients, servers, or proxies support HTTP trailers.
-    public ΔHeader Trailer;
+    public Header Trailer;
     // RemoteAddr allows HTTP servers and other software to record
     // the network address that sent the request, usually for
     // logging. This field is not filled in by ReadRequest and
@@ -289,7 +294,7 @@ partial struct Request {
     // TLS-enabled connections before invoking a handler;
     // otherwise it leaves the field nil.
     // This field is ignored by the HTTP client.
-    public ж<tlsꓸConnectionState> TLS;
+    public ж<tls.ConnectionState> TLS;
     // Cancel is an optional channel whose closure indicates that the client
     // request should be regarded as canceled. Not all implementations of
     // RoundTripper may support Cancel.
@@ -318,6 +323,8 @@ partial struct Request {
     internal map<@string, @string> otherValues; // for calls to SetPathValue that don't match a wildcard
 }
 
+} partial class httpᴛRequest {
+
 // Context returns the request's context. To change the context, use
 // [Request.Clone] or [Request.WithContext].
 //
@@ -333,7 +340,7 @@ public static context.Context Context(this ref Request r) {
     if (r.ctx != nil) {
         return r.ctx;
     }
-    return context_package.Background();
+    return context.Background();
 }
 
 // WithContext returns a shallow copy of r with its context changed
@@ -375,7 +382,7 @@ public static ж<Request> Clone(this ref Request r, context.Context ctx) {
     r2.Trailer = r.Trailer.Clone();
     {
         var s = r.TransferEncoding; if (s != nil) {
-            var s2 = new slice<@string>(builtin.len(s));
+            var s2 = new slice<@string>(len(s));
             copy(s2, s);
             r2.TransferEncoding = s2;
         }
@@ -387,7 +394,7 @@ public static ж<Request> Clone(this ref Request r, context.Context ctx) {
     // Copy matches and otherValues. See issue 61410.
     {
         var s = r.matches; if (s != nil) {
-            var s2 = new slice<@string>(builtin.len(s));
+            var s2 = new slice<@string>(len(s));
             copy(s2, s);
             r2.matches = s2;
         }
@@ -412,27 +419,31 @@ public static @string UserAgent(this ref Request r) {
 }
 
 // Cookies parses and returns the HTTP cookies sent with the request.
-public static slice<ж<ΔCookie>> Cookies(this ref Request r) {
+public static slice<ж<Cookie>> Cookies(this ref Request r) {
     return readCookies(r.Header, ""u8);
 }
 
 // CookiesNamed parses and returns the named HTTP cookies sent with the request
 // or an empty slice if none matched.
-public static slice<ж<ΔCookie>> CookiesNamed(this ref Request r, @string name) {
+public static slice<ж<Cookie>> CookiesNamed(this ref Request r, @string name) {
     if (name == ""u8) {
         return [];
     }
     return readCookies(r.Header, name);
 }
 
+} partial class http_package {
+
 // ErrNoCookie is returned by Request's Cookie method when a cookie is not found.
 public static error ErrNoCookie = errors.New("http: named cookie not present");
+
+} partial class httpᴛRequest {
 
 // Cookie returns the named cookie provided in the request or
 // [ErrNoCookie] if not found.
 // If multiple cookies match the given name, only one cookie will
 // be returned.
-public static (ж<ΔCookie>, error) Cookie(this ref Request r, @string name) {
+public static (ж<Cookie>, error) Cookie(this ref Request r, @string name) {
     if (name == ""u8) {
         return (default, ErrNoCookie);
     }
@@ -442,13 +453,17 @@ public static (ж<ΔCookie>, error) Cookie(this ref Request r, @string name) {
     return (default, ErrNoCookie);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string cookieˢ => ref cookieˢᵇ;
+private static readonly @string cookieˢᵇ = "Cookie"u8;
+
 // AddCookie adds a cookie to the request. Per RFC 6265 section 5.4,
 // AddCookie does not attach more than one [Cookie] header field. That
 // means all cookies, if any, are written into the same line,
 // separated by semicolon.
 // AddCookie only sanitizes c's name and value, and does not sanitize
 // a Cookie header already present in the request.
-public static void AddCookie(this ref Request r, ж<ΔCookie> Ꮡc) {
+public static void AddCookie(this ref Request r, ж<Cookie> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     @string s = fmt.Sprintf("%s=%s"u8, sanitizeCookieName(c.Name), sanitizeCookieValue(c.Value, c.Quoted));
@@ -458,6 +473,10 @@ public static void AddCookie(this ref Request r, ж<ΔCookie> Ꮡc) {
         r.Header.Set(cookieˢ, s);
     }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string refererˢ => ref refererˢᵇ;
+private static readonly @string refererˢᵇ = "Referer"u8;
 
 // Referer returns the referring URL, if sent in the request.
 //
@@ -471,6 +490,8 @@ public static @string Referer(this ref Request r) {
     return r.Header.Get(refererˢ);
 }
 
+} partial class http_package {
+
 // multipartByReader is a sentinel value.
 // Its presence in Request.MultipartForm indicates that parsing of the request
 // body has been handed off to a MultipartReader instead of ParseMultipartForm.
@@ -478,6 +499,8 @@ internal static ж<multipart.Form> multipartByReader = Ꮡ(new multipart.Form(
     Value: new map<@string, slice<@string>>(),
     File: new map<@string, slice<ж<multipart.FileHeader>>>()
 ));
+
+} partial class httpᴛRequest {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpMultipartReaderˢ => ref httpMultipartReaderˢᵇ;
@@ -501,6 +524,8 @@ public static (ж<multipart.Reader>, error) MultipartReader(this ref Request r) 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
 internal static ref readonly @string missingFormBodyˢ => ref missingFormBodyˢᵇ;
 private static readonly @string missingFormBodyˢᵇ = "missing form body"u8;
 internal static ref readonly @string boundaryˢ => ref boundaryˢᵇ;
@@ -528,8 +553,10 @@ internal static (ж<multipart.Reader>, error) multipartReader(this ref Request r
 // isH2Upgrade reports whether r represents the http2 "client preface"
 // magic string.
 internal static bool isH2Upgrade(this ref Request r) {
-    return r.Method == "PRI"u8 && builtin.len(r.Header) == 0 && r.URL.Path == "*"u8 && r.Proto == "HTTP/2.0"u8;
+    return r.Method == "PRI"u8 && len(r.Header) == 0 && r.URL.Path == "*"u8 && r.Proto == "HTTP/2.0"u8;
 }
+
+} partial class http_package {
 
 // Return value if nonempty, def otherwise.
 internal static @string valueOrDefault(@string value, @string def) {
@@ -545,6 +572,8 @@ internal static @string valueOrDefault(@string value, @string def) {
 // See https://codereview.appspot.com/7532043.
 internal static ref readonly @string defaultUserAgent => ref defaultUserAgentᵇ;
 private static readonly @string defaultUserAgentᵇ = "Go-http-client/1.1"u8;
+
+} partial class httpᴛRequest {
 
 // Write writes an HTTP/1.1 request, which is the header and body, in wire format.
 // This method consults the following fields of the request:
@@ -574,20 +603,28 @@ public static error WriteProxy(this ж<Request> Ꮡr, io.Writer w) {
     return Ꮡr.write(w, true, default, default);
 }
 
+} partial class http_package {
+
 // errMissingHost is returned by Write when there is no Host or URL present in
 // the Request.
 internal static error errMissingHost = errors.New("http: Request.Write on Request with no Host or URL set");
+
+} partial class httpᴛRequest {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpInvalidHostHeaderˢ => ref httpInvalidHostHeaderˢᵇ;
 private static readonly @string httpInvalidHostHeaderˢᵇ = "http: invalid Host header"u8;
 internal static ref readonly @string netHttpCanTWriteControlˢ => ref netHttpCanTWriteControlˢᵇ;
 private static readonly @string netHttpCanTWriteControlˢᵇ = "net/http: can't write control character in Request.URL"u8;
+internal static ref readonly @string getˢ => ref getˢᵇ;
+private static readonly @string getˢᵇ = "GET"u8;
+internal static ref readonly @string hostˢ => ref hostˢᵇ;
+private static readonly @string hostˢᵇ = "Host"u8;
 
 // extraHeaders may be nil
 // waitForContinue may be nil
 // always closes body
-internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usingProxy, ΔHeader extraHeaders, Func<bool> waitForContinue) {
+internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usingProxy, Header extraHeaders, Func<bool> waitForContinue) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -794,6 +831,8 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
     ᒐdone: return Ꮡerr.ValueSlot;
 }
 
+} partial class http_package {
+
 // requestBodyReadError wraps an error from (*Request).write to indicate
 // that the error came from a Read call on the Request.Body.
 // This error type should not escape the net/http package to users.
@@ -853,7 +892,7 @@ public static (nint major, nint minor, bool ok) ParseHTTPVersion(@string vers) {
     if (!strings.HasPrefix(vers, httpˢ2)) {
         return (0, 0, false);
     }
-    if (builtin.len(vers) != builtin.len("HTTP/X.Y")) {
+    if (len(vers) != len("HTTP/X.Y")) {
         return (0, 0, false);
     }
     if (vers[6] != '.') {
@@ -889,7 +928,7 @@ internal static bool validMethod(@string method) {
 
 // NewRequest wraps [NewRequestWithContext] using [context.Background].
 public static (ж<Request>, error) NewRequest(@string method, @string url, io.Reader body) {
-    return NewRequestWithContext(context_package.Background(), method, url, body);
+    return NewRequestWithContext(context.Background(), method, url, body);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -949,7 +988,7 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
         Proto: "HTTP/1.1",
         ProtoMajor: 1,
         ProtoMinor: 1,
-        Header: new ΔHeader(0),
+        Header: new Header(0),
         Body: rc,
         Host: u.Host
     ));
@@ -1011,6 +1050,12 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
     return (req, default);
 }
 
+} partial class httpᴛRequest {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string authorizationˢ => ref authorizationˢᵇ;
+private static readonly @string authorizationˢᵇ = "Authorization"u8;
+
 // BasicAuth returns the username and password provided in the request's
 // Authorization header, if the request uses HTTP Basic Authentication.
 // See RFC 2617, Section 2.
@@ -1021,6 +1066,8 @@ public static (@string username, @string password, bool ok) BasicAuth(this ref R
     }
     return parseBasicAuth(auth);
 }
+
+} partial class http_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string prefixᶜ => ref prefixᶜᵇ;
@@ -1045,10 +1092,10 @@ internal static (@string username, @string password, bool ok) parseBasicAuth(@st
 
     @string prefix = prefixᶜ;
     // Case insensitive prefix match. See Issue 22736.
-    if (builtin.len(auth) < builtin.len(prefix) || !ascii.EqualFold(auth[..(int)(builtin.len(prefix))], prefix)) {
+    if (len(auth) < len(prefix) || !ascii.EqualFold(auth[..(int)(len(prefix))], prefix)) {
         return ("", "", false);
     }
-    var (c, err) = base64.StdEncoding.DecodeString(auth[(int)(builtin.len(prefix))..]);
+    var (c, err) = base64.StdEncoding.DecodeString(auth[(int)(len(prefix))..]);
     if (err != nil) {
         return ("", "", false);
     }
@@ -1059,6 +1106,8 @@ internal static (@string username, @string password, bool ok) parseBasicAuth(@st
     }
     return (username, password, true);
 }
+
+} partial class httpᴛRequest {
 
 // SetBasicAuth sets the request's Authorization header to use HTTP
 // Basic Authentication with the provided username and password.
@@ -1074,6 +1123,8 @@ internal static (@string username, @string password, bool ok) parseBasicAuth(@st
 public static void SetBasicAuth(this ref Request r, @string username, @string password) {
     r.Header.Set(authorizationˢ, "Basic "u8 + basicAuth(username, password));
 }
+
+} partial class http_package {
 
 // parseRequestLine parses "GET /foo HTTP/1.1" into its three parts.
 internal static (@string method, @string requestURI, @string proto, bool ok) parseRequestLine(@string line) {
@@ -1131,6 +1182,8 @@ internal static ref readonly @string invalidMethodˢ => ref invalidMethodˢᵇ;
 private static readonly @string invalidMethodˢᵇ = "invalid method"u8;
 internal static ref readonly @string malformedHttpVersionˢ => ref malformedHttpVersionˢᵇ;
 private static readonly @string malformedHttpVersionˢᵇ = "malformed HTTP version"u8;
+internal static ref readonly @string hostˢ => ref hostˢᵇ;
+private static readonly @string hostˢᵇ = "Host"u8;
 
 // readRequest should be an internal detail,
 // but widely used packages access it using linkname.
@@ -1207,8 +1260,8 @@ internal static (ж<Request> req, error err) readRequest(ж<bufio.Reader> b) {
         if (err != nil) {
             (req, err) = (default, err); goto ᒐdone;
         }
-        req.Header = (ΔHeader)(map<@string, slice<@string>>)mimeHeader;
-        if (builtin.len(req.Header[hostˢ]) > 1) {
+        req.Header = (Header)(map<@string, slice<@string>>)mimeHeader;
+        if (len(req.Header[hostˢ]) > 1) {
             (req, err) = (default, fmt.Errorf("too many Host headers"u8)); goto ᒐdone;
         }
 
@@ -1272,6 +1325,8 @@ partial struct MaxBytesError {
     public int64 Limit;
 }
 
+} partial class httpᴛMaxBytesError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpRequestBodyTooLargeˢ => ref httpRequestBodyTooLargeˢᵇ;
 private static readonly @string httpRequestBodyTooLargeˢᵇ = "http: request body too large"u8;
@@ -1280,6 +1335,8 @@ public static @string Error(this ref MaxBytesError e) {
     // Due to Hyrum's law, this text cannot be changed.
     return httpRequestBodyTooLargeˢ;
 }
+
+} partial class http_package {
 
 partial struct maxBytesReader {
     internal ResponseWriter w;
@@ -1300,6 +1357,8 @@ internal partial interface Read_requestTooLarger /*dyn*/ {
     void requestTooLarge();
 }
 
+} partial class httpᴛmaxBytesReader {
+
 internal static (nint n, error err) Read(this ref maxBytesReader l, slice<byte> p) {
     nint n = default;
     error err = default;
@@ -1307,14 +1366,14 @@ internal static (nint n, error err) Read(this ref maxBytesReader l, slice<byte> 
     if (l.err != nil) {
         return (0, l.err);
     }
-    if (builtin.len(p) == 0) {
+    if (len(p) == 0) {
         return (0, default);
     }
     // If they asked for a 32KB byte read but only 5 bytes are
     // remaining, no need to read 32KB. 6 bytes will answer the
     // question of the whether we hit the limit or go past it.
     // 0 < len(p) < 2^63
-    if ((int64)builtin.len(p) - 1 > l.n) {
+    if ((int64)len(p) - 1 > l.n) {
         p = p.slice(0, (nint)(l.n + 1));
     }
     (n, err) = l.r.Read(p);
@@ -1338,6 +1397,8 @@ internal static error Close(this ref maxBytesReader l) {
     return l.r.Close();
 }
 
+} partial class http_package {
+
 internal static void copyValues(urlpkg.Values dst, urlpkg.Values src) {
     foreach (var (k, vs) in src) {
         dst[k] = appendꓸꓸꓸ(dst[k], vs);
@@ -1345,6 +1406,8 @@ internal static void copyValues(urlpkg.Values dst, urlpkg.Values src) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string missingFormBodyˢ => ref missingFormBodyˢᵇ;
+private static readonly @string missingFormBodyˢᵇ = "missing form body"u8;
 internal static ref readonly @string applicationOctetStreamˢ => ref applicationOctetStreamˢᵇ;
 private static readonly @string applicationOctetStreamˢᵇ = "application/octet-stream"u8;
 internal static ref readonly @string httpPostTooLargeˢ => ref httpPostTooLargeˢᵇ;
@@ -1380,7 +1443,7 @@ internal static (urlpkg.Values vs, error err) parsePostForm(ref Request r) {
             }
             break;
         }
-        if ((int64)builtin.len(b) > maxFormSize) {
+        if ((int64)len(b) > maxFormSize) {
             err = errors.New(httpPostTooLargeˢ);
             return (vs, err);
         }
@@ -1401,6 +1464,8 @@ internal static (urlpkg.Values vs, error err) parsePostForm(ref Request r) {
     }}
     return (vs, err);
 }
+
+} partial class httpᴛRequest {
 
 // ParseForm populates r.Form and r.PostForm.
 //
@@ -1433,7 +1498,7 @@ public static error ParseForm(this ж<Request> Ꮡr) {
         }
     }
     if (r.Form == nil) {
-        if (builtin.len(r.PostForm) > 0) {
+        if (len(r.PostForm) > 0) {
             r.Form = new urlpkg.Values(0);
             copyValues(r.Form, r.PostForm);
         }
@@ -1526,7 +1591,7 @@ public static @string FormValue(this ж<Request> Ꮡr, @string key) {
     if (r.Form == nil) {
         Ꮡr.ParseMultipartForm(defaultMaxMemory);
     }
-    var vs = r.Form[key]; if (builtin.len(vs) > 0) {
+    var vs = r.Form[key]; if (len(vs) > 0) {
         return vs[0];
     }
     return ""u8;
@@ -1543,7 +1608,7 @@ public static @string PostFormValue(this ж<Request> Ꮡr, @string key) {
     if (r.PostForm == nil) {
         Ꮡr.ParseMultipartForm(defaultMaxMemory);
     }
-    var vs = r.PostForm[key]; if (builtin.len(vs) > 0) {
+    var vs = r.PostForm[key]; if (len(vs) > 0) {
         return vs[0];
     }
     return ""u8;
@@ -1564,7 +1629,7 @@ public static (multipart.File, ж<multipart.FileHeader>, error) FormFile(this ж
         }
     }
     if (r.MultipartForm != nil && r.MultipartForm.File != nil) {
-        var fhs = r.MultipartForm.File[key]; if (builtin.len(fhs) > 0) {
+        var fhs = r.MultipartForm.File[key]; if (len(fhs) > 0) {
             var (f, err) = fhs[0].Open();
             return (f, fhs[0], err);
         }
@@ -1616,11 +1681,19 @@ internal static nint patIndex(this ref Request r, @string name) {
     return -1;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string expectˢ2 => ref expectˢ2ᵇ;
+private static readonly @string expectˢ2ᵇ = "Expect"u8;
+internal static ref readonly @string continueˢ => ref continueˢᵇ;
+private static readonly @string continueˢᵇ = "100-continue"u8;
+
 internal static bool expectsContinue(this ref Request r) {
     return hasToken(r.Header.get(expectˢ2), continueˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
+private static readonly @string connectionˢᵇ = "Connection"u8;
 internal static ref readonly @string keepAliveˢ => ref keepAliveˢᵇ;
 private static readonly @string keepAliveˢᵇ = "keep-alive"u8;
 
@@ -1630,6 +1703,10 @@ internal static bool wantsHttp10KeepAlive(this ref Request r) {
     }
     return hasToken(r.Header.get(connectionˢ), keepAliveˢ);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string closeˢ => ref closeˢᵇ;
+private static readonly @string closeˢᵇ = "close"u8;
 
 internal static bool wantsClose(this ref Request r) {
     if (r.Close) {
@@ -1680,6 +1757,8 @@ internal static int64 outgoingLength(this ref Request r) {
     return -1;
 }
 
+} partial class http_package {
+
 // requestMethodUsuallyLacksBody reports whether the given request
 // method is one that typically does not involve a request body.
 // This is used by the Transport (via
@@ -1696,6 +1775,8 @@ internal static bool requestMethodUsuallyLacksBody(@string method) {
     return false;
 }
 
+} partial class httpᴛRequest {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string upgradeˢ => ref upgradeˢᵇ;
 private static readonly @string upgradeˢᵇ = "upgrade"u8;
@@ -1710,4 +1791,4 @@ internal static bool requiresHTTP1(this ref Request r) {
     return hasToken(r.Header.Get(connectionˢ), upgradeˢ) && ascii.EqualFold(r.Header.Get(upgradeˢ2), websocketˢ);
 }
 
-} // end http_package
+} // end httpᴛRequest

@@ -7,14 +7,17 @@ namespace go.math;
 using bytes = bytes_package;
 using fmt = fmt_package;
 using io = io_package;
+using static big_package;
 
 partial class big_package {
 
 // Gob codec version. Permits backward-compatible changes to the encoding.
 internal const byte intGobVersion = 1;
 
+} partial class bigᴛInt {
+
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
-public static (slice<byte>, error) GobEncode(this ж<ΔInt> Ꮡx) {
+public static (slice<byte>, error) GobEncode(this ж<Int> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -31,10 +34,10 @@ public static (slice<byte>, error) GobEncode(this ж<ΔInt> Ꮡx) {
 }
 
 // GobDecode implements the [encoding/gob.GobDecoder] interface.
-public static error GobDecode(this ref ΔInt z, slice<byte> buf) {
+public static error GobDecode(this ref Int z, slice<byte> buf) {
     if (len(buf) == 0) {
         // Other side sent a nil or default value.
-        z = new ΔInt();
+        z = new Int();
         return default;
     }
     var b = buf[0];
@@ -47,18 +50,18 @@ public static error GobDecode(this ref ΔInt z, slice<byte> buf) {
 }
 
 // AppendText implements the [encoding.TextAppender] interface.
-public static (slice<byte> text, error err) AppendText(this ж<ΔInt> Ꮡx, slice<byte> b) {
+public static (slice<byte> text, error err) AppendText(this ж<Int> Ꮡx, slice<byte> b) {
     return (Ꮡx.Append(b, 10), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-public static (slice<byte> text, error err) MarshalText(this ж<ΔInt> Ꮡx) {
+public static (slice<byte> text, error err) MarshalText(this ж<Int> Ꮡx) {
     return Ꮡx.AppendText(default);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-public static error UnmarshalText(this ж<ΔInt> Ꮡz, slice<byte> text) {
-    var (_, ok) = Ꮡz.setFromScanner(new bytes_ReaderжByteScanner(bytes_package.NewReader(text)), 0); if (!ok) {
+public static error UnmarshalText(this ж<Int> Ꮡz, slice<byte> text) {
+    var (_, ok) = Ꮡz.setFromScanner(new bytes_ReaderжByteScanner(bytes.NewReader(text)), 0); if (!ok) {
         return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Int"u8, text);
     }
     return default;
@@ -69,7 +72,7 @@ public static error UnmarshalText(this ж<ΔInt> Ꮡz, slice<byte> text) {
 // fine with the TextMarshaler only.
 
 // MarshalJSON implements the [encoding/json.Marshaler] interface.
-public static (slice<byte>, error) MarshalJSON(this ж<ΔInt> Ꮡx) {
+public static (slice<byte>, error) MarshalJSON(this ж<Int> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -79,7 +82,7 @@ public static (slice<byte>, error) MarshalJSON(this ж<ΔInt> Ꮡx) {
 }
 
 // UnmarshalJSON implements the [encoding/json.Unmarshaler] interface.
-public static error UnmarshalJSON(this ж<ΔInt> Ꮡz, slice<byte> text) {
+public static error UnmarshalJSON(this ж<Int> Ꮡz, slice<byte> text) {
     // Ignore null, like in the main JSON package.
     if (((sstring)text) == "null"u8) {
         return default;
@@ -87,4 +90,4 @@ public static error UnmarshalJSON(this ж<ΔInt> Ꮡz, slice<byte> text) {
     return Ꮡz.UnmarshalText(text);
 }
 
-} // end big_package
+} // end bigᴛInt

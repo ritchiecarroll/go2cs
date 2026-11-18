@@ -1,6 +1,7 @@
 namespace go.go;
 
 using sync = sync_package;
+using static xpkgvar_package;
 
 partial class xpkgvar_package {
 
@@ -8,8 +9,12 @@ partial struct Counter {
     internal nint n;
 }
 
+} partial class xpkgvarᴛCounter {
+
 public static void Inc(this ref Counter c) { c.n++; }
 public static nint Value(this Counter c) { return c.n; }
+
+} partial class xpkgvar_package {
 
 partial struct Holder {
     public sync.WaitGroup WG;

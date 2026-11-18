@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
 // </ImportedTypeAliases>
 
 using go;
@@ -63,9 +62,9 @@ using static go.os.user_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("os/user/lookup.go", "lookup.cs", "AA4cntKAkoKUggALGKKClKqigpSqoqqiqJI=", "22-22:1")]
+[assembly: GoPositionMap("os/user/lookup.go", "lookup.cs", "AA8cntKAkoKUggALGKKClKqigpSqoqqiyJI=", "22-22:1")]
 [assembly: GoPositionMap("os/user/lookup_windows.go", "lookup_windows.cs", "ABEigoKCgoKUgqaCAAUugoKCgoKmgoLKqqKCgoKCgpSClILKgqYABxCElJiUpoKUpJSmgpTsAAgQlKjigoKUgpTo0oKClIKCgpTokoKClIKUAARegoKSgpTuAAcUiLKigoKUgoKClIKClJKClJKClJKClJKClJKmlO7ErNKCgriCgpSmgoKUgoKClIKm2uKUgpSClAAEeIKCgpSCgpSCypSCggALGILKgoKUlKaCgoKUgpSmgoKClKaCkoKUpoKCgpSSgpSClKaCgoCmooKClIKCgpSCgoKUlMSCpoKClIKClIKC2oKCpg==", "256-300:1;310-320:1;330-332:2;501-519:1", "", "85=GetSidIdentifierAuthority/1/1/1", "161:21,221:25,295:21,433:33", "280:21,284:13,300:25,301:17")]
-[assembly: GoPositionMap("os/user/user.go", "user.cs", "AEKKAYLugu6C7oI=")]
+[assembly: GoPositionMap("os/user/user.go", "user.cs", "AEWKAYIACg6CAAoOggAKDoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.os;
@@ -106,3 +105,17 @@ public static partial class user_package
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(user_package.UnknownGroupError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupError;
+[GoMethodHost(typeof(user_package.UnknownGroupIdError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupIdError;
+[GoMethodHost(typeof(user_package.UnknownUserError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownUserError;
+[GoMethodHost(typeof(user_package.UnknownUserIdError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownUserIdError;
+[GoMethodHost(typeof(user_package.User)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUser;
+// </MethodHolders>

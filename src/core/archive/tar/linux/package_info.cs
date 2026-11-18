@@ -84,13 +84,13 @@ using static go.archive.tar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("archive/tar/common.go", "common.cs", "AB8+loKCgoKCgoKCAAsKooKCgoKmgpQAYZwBAEqgAQAlUsaClIKClKSkpJSUAAIU8oKCgoKClIKmAAIWAAgCgoKCgpSCgpSUggAtKAAMAoKUooLYgoKCgpSCgoKClIKClKaAgraigoKUgoKCgoKUpoKmooKUgoKUgoKCgpSCgoKCgpSmgrqSgoKCgoKCgoKCgoKCgoKClqKmgsakgoKUgqSCuIKClIKUgoKktLS2gpSCggAbOIKClJSClLS0tLaokgAHEIKCgpaSgpSoxKaClIKUgriktLS0tIK0tpS0grS0tLamggAZRgALAoKUgsqUgrSCtIK0gpTGtKSUgpSClIK4poKCgoKCgoKUgoKUlIKCgoKCgpSCgqaClAAOIKKUpA==", "350-376:1;377-395:2;396-423:3", "", "770=Name/1/1/1,ModTime/1/1/2,Perm/1/1/3")]
-[assembly: GoPositionMap("archive/tar/format.go", "format.cs", "AGrYAYKCgpT4ooKCgqaUpKQAHjyiAAcQsKKgoqCioKKa1JKCgoK4goKClKSkpLzU2IK0goK0grS6ooKCgq7yooKUgpSoktqCgoKCgoKCgsigooKCgoKCgoKCgsigooKCgoKCgoKCgsigooKCgoKCgriCgriC")]
-[assembly: GoPositionMap("archive/tar/reader.go", "reader.cs", "ACVOkgACHAANAoKUgoKCgoKmpqKC/oKUgIKkgpSUgoKUgIKkppSCgoKUgoIABxC0goKCpoKUtKTqgpSClIKUgoKU3ILKgriClIIABBDSgoKUgqaCgqrCgoKClMqCgpSClK7kkpKUtLSktJSmgpSCgpSCgoKUuIKUqLKCgpSCpLS0tLSCtIK0tLS0tIKClLaCpoKqwoKClJrEgoKCgpSUtoaUtLaClAACFgALBICCpIKClIKUuIKCpoKmgoKCgoKCgoKmgoKCgoKUgpSCgriCgpSChMaCgoK0goKCgIKkgIIAGDCCgoKClLaCpgACFgAOCIKUlIKCgpSCgoKClIKUgoKClIKCgriUgpSCgpSUAAIaAAoCAAYSkoKCgpSClIKCgrjKgoKCyoKUgoLcgpSCgoKCgpSCgqaqxoKCgriCgpSCyoKCgoKClIKClJSmgoKUAAIaAAoCgpSCgpQAAhoACgKClIKClAAIErKClIKClJSkpPiCqJKokgAJFMKCgqaCgoKCgoKClIKUgoKCuIKUpKSkpLjCgoKCpoKmgoKCgoKCgpSCgoKUlIKC3IKCpoKUpKSkuIKUgtqCgqqigoKUqtKCgoKUgpSqooKClKiawsqClIKClLiCgpQ=", "407-407:1;411-411:2;546-563:1;567-571:2", "", "388=Contains/1/1/2;474=modTime/1/1/1,Invoke/5/7/1,devMajor/1/1/1,Invoke/6/7/1,devMinor/1/1/1,Invoke/7/7/1")]
+[assembly: GoPositionMap("archive/tar/common.go", "common.cs", "ACA+loKCgoKCgoKCAA0KooKCgoKmgpQAY5wBAEygAQAnUsaClIKClKSkpJSUAAIU8oKCgoKClIKmAAIWAAgCgoKCgpSCgpSUggAvKAAMAoKUooLYgoKCgpSCgoKClIKClKaAgraigoKUgoKCgoKUpoKmooKUgoKUgoKCgpSCgoKCgpSmgrqSgoKCgoKCgoKCgoKCgoKClqKmgsakgoKUgqSCuIKClIKUgoKktLS2gpSCggAbOIKClJSClLS0tLaokgALEIKCgpaSgpSoxKaClIKUgriktLS0tIK0tpS0grS0tLamggAbRgALAoKUgsqUgrSCtIK0gpTGtKSUgpSClIK4poKCgoKCgoKUgoKUlIKCgoKCgpSCgqaClAAOIKKUpA==", "350-376:1;377-395:2;396-423:3", "", "787=Name/1/1/1,ModTime/1/1/2,Perm/1/1/3")]
+[assembly: GoPositionMap("archive/tar/format.go", "format.cs", "AG3YAYKCgrQACQiigoKCppSkpAAgPKIACRCwoqCioKKgoprUkoKCgriCgoKUpKSkvNTYgrSCgrSCtLqigoKCrvKigpSClKiSAAkKgoKCgoKCgoIACAigooKCgoKCgoKCggAICKCigoKCgoKCgoKCAAgIoKKCgoKCgoL4goL4gg==")]
+[assembly: GoPositionMap("archive/tar/reader.go", "reader.cs", "ACZOkgAEHAANAoKUgoKCgoKmpqKC/oKUgIKkgpSUgoKUgIKkppSCgoKUgoIABxC0goKCpoKUtKTqgpSClIKUgoKU3ILKgriClIIABBDSgoKUgqaCgqrCgoKClMqCgpSClK7kkpKUtLSktJSmgpSCgpSCgoKUuIKUyLKCgpSCpLS0tLSCtIK0tLS0tIKClLaCpoKqwoKClJrEgoKCgpSUtoaUtLaClAAEFgALBICCpIKClIKUuIKCpoKmgoKCgoKCgoKmgoKCgoKUgpSCgriCgpSChMaCgoK0goKCgIKkgIIAGDCCgoKClLaCpgACFgAOCIKUlIKCgpSCgoKClIKUgoKClIKCgriUgpSCgpSUAAQaAAoCAAYSkoKCgpSClIKCgrjKgoKCyoKUgoLcgpSCgoKCgpSCgqaqxoKCgriCgpSCyoKCgoKClIKClJSmgoKUAAQaAAoCgpSCgpQAAhoACgKClIKClAAMErKClIKClJSkpAALCIKokqiSAA0UwoKCpoKCgoKCgoKUgpSCgoK4gpSkpKSkuMKCgoKmgqaCgoKCgoKClIKCgpSUgoLcgoKmgpSkpKS4gpSCAAkKgoLKooKClKrSgoKClIKUqqKCgpSomsLKgpSCgpS4goKU", "407-407:1;411-411:2;546-563:1;567-571:2", "", "393=Contains/1/1/2;481=modTime/1/1/1,Invoke/5/7/1,devMajor/1/1/1,Invoke/6/7/1,devMinor/1/1/1,Invoke/7/7/1")]
 [assembly: GoPositionMap("archive/tar/stat_actime1.go", "stat_actime1.cs", "AAscorai")]
 [assembly: GoPositionMap("archive/tar/stat_unix.go", "stat_unix.cs", "ABIkggAJDqKCgpSCgriCgoKClIKCgoKmgqaCgqSSgoLGgoKCgsaCgsaCgsaCgsaCgoLGgoKC+g==")]
-[assembly: GoPositionMap("archive/tar/strconv.go", "strconv.cs", "AA0gkqiSgoKmqsKClIKCgqYAChqigpSokoKUgoLcgoIAAxbygqzojNKCpoKigoKUgoKUlIKClIKUuKqigoKmgoKClIKmgqbclIKUgoKUpoKCgqaUgpSqooKssqamgoKUgsqCgqSktoKClKqikoK4goKCgpSs9IKCuIKClIKCuKKCuIKCpoKUqqKCpoKCgqaCgpQAAhoACgKClKSk")]
-[assembly: GoPositionMap("archive/tar/writer.go", "writer.cs", "ACJIkgAJHtKClIKUgpSCrvKClLiCgpQACBKCgoKmgpSCpIKkgqS4tJKCqJKCgoKClAAIBrIAJEimgoSkgoKClKiSgoKCgpSUgoKUgoKUgILKkoCSgoKAggAPHua0koKCgqaCgoK6koKCgoKUggAnUIKAgsiUgpSUAAYcAAkClIKCpoKCgoKCgoKClIKCgoKUrNKmgoKUlIKCgoKCgoKCgoKCuIKUgqzSgIKkgIKkgpSCguyyooKUgpSCgpSCgoKCgpSClIKClIKClIKUgpSCgpSSguyigoKCgoKCpoKCgoKUAAIU8oKUgoKUAAIaAAoCgpSCgpSssoKUgriCgriCAAgSsoKClIKClJSkpPiCqJKokgAJFMKCgqaCgoKCgoKClIKUgoKCuIKUpKSkpLjCgoKCpoKmgoKCgoKCgoKClJSClIKC3IKCpoKUpKSkpLiCpoLsgoKCpqiSgpSkpA==", "209-209:1;407-449:1", "", "", "497:25")]
+[assembly: GoPositionMap("archive/tar/strconv.go", "strconv.cs", "AA4gkqiSgoKmqsKClIKCgqYADBqigpTIkoKUgoLcgoIABRbygszojNKCpoKigoKUgoKUlIKClIKUuMqigoKmgoKClIKmgsbclIKUgoKUxoKCgqaUgpTKooKssqamgoKUgsqCgqSktoKClKqikoK4goKCgpSs9IKCuIKClIKCuKKCuIKCpoKUqqKCpoKCgqaCgpQAAhoACgKClKSk")]
+[assembly: GoPositionMap("archive/tar/writer.go", "writer.cs", "ACNIkgALHtKClIKUgpSCrvKClLiCgpQACBKCgoKmgpSCpIKkgqS4tJKCqJKCgoKClAAIBrIAJEimgoSkgoKClKiSgoKCgpSUgoKUgoKUgILKkoCSgoKAggAPHua0koKCgqaCgoK6koKCgoKUggAnUIKAgsiUgpSUAAocAAkClIKCpoKCgoKCgoKClIKCgoKUrNKmgoKUlIKCgoKCgoKCgoKCuIKUgqzSgIKkgIKkgpSCguyyooKUgpSCgpSCgoKCgpSClIKClIKClIKUgpSCgpSSggAIDKKCgoKCgoKmgoKCgpQABBTygpSCgpQAAhoACgKClIKClKyygpSCuIKCuIIADBKygoKUgoKUlKSkAAsIgqiSqJIADRTCgoKmgoKCgoKCgpSClIKCgriClKSkpKS4woKCgqaCpoKCgoKCgoKCgpSUgpSCgtyCgqaClKSkpKS4gqaCAAoMgoKCpsiSgpSkpA==", "209-209:1;407-449:1", "", "", "504:25")]
 // </GoSourcePositionMaps>
 
 namespace go.archive;
@@ -165,3 +165,34 @@ public static partial class tar_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(tar_package.Format)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛFormat;
+[GoMethodHost(typeof(tar_package.Header)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛHeader;
+[GoMethodHost(typeof(tar_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛReader;
+[GoMethodHost(typeof(tar_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛWriter;
+[GoMethodHost(typeof(tar_package.block)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛblock;
+[GoMethodHost(typeof(tar_package.formatter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛformatter;
+[GoMethodHost(typeof(tar_package.headerError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛheaderError;
+[GoMethodHost(typeof(tar_package.headerFileInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛheaderFileInfo;
+[GoMethodHost(typeof(tar_package.headerGNU)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛheaderGNU;
+[GoMethodHost(typeof(tar_package.headerSTAR)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛheaderSTAR;
+[GoMethodHost(typeof(tar_package.headerUSTAR)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛheaderUSTAR;
+[GoMethodHost(typeof(tar_package.headerV7)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛheaderV7;
+[GoMethodHost(typeof(tar_package.parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛparser;
+[GoMethodHost(typeof(tar_package.regFileReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛregFileReader;
+[GoMethodHost(typeof(tar_package.regFileWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛregFileWriter;
+[GoMethodHost(typeof(tar_package.sparseArray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛsparseArray;
+[GoMethodHost(typeof(tar_package.sparseElem)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛsparseElem;
+[GoMethodHost(typeof(tar_package.sparseEntry)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛsparseEntry;
+[GoMethodHost(typeof(tar_package.sparseFileReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛsparseFileReader;
+[GoMethodHost(typeof(tar_package.sparseFileWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛsparseFileWriter;
+[GoMethodHost(typeof(tar_package.zeroReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛzeroReader;
+[GoMethodHost(typeof(tar_package.zeroWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tarᴛzeroWriter;
+// </MethodHolders>

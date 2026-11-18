@@ -6,8 +6,11 @@ namespace go.@internal;
 
 using io = io_package;
 using Δsyscall = syscall_package;
+using static poll_package;
 
 partial class poll_package {
+
+} partial class pollᴛFD {
 
 // eofError returns io.EOF when fd is available for reading end of
 // file.
@@ -83,6 +86,8 @@ public static error RawControl(this ж<FD> Ꮡfd, Action<uintptr> f) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
+
+} partial class poll_package {
 
 // ignoringEINTR makes a function call and repeats it if it returns
 // an EINTR error. This appears to be required even though we install all

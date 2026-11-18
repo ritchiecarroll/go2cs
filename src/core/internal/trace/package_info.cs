@@ -29,17 +29,6 @@ using static go.@internal.trace_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("696e746572666163657b696f2e5265616465723b20696f2e427974655265616465727d", "readBatch_r")]
-[assembly: GoTypeAlias("Event", "ΔEvent")]
-[assembly: GoTypeAlias("Label", "ΔLabel")]
-[assembly: GoTypeAlias("Log", "ΔLog")]
-[assembly: GoTypeAlias("Metric", "ΔMetric")]
-[assembly: GoTypeAlias("Range", "ΔRange")]
-[assembly: GoTypeAlias("Region", "ΔRegion")]
-[assembly: GoTypeAlias("Stack", "ΔStack")]
-[assembly: GoTypeAlias("StateTransition", "ΔStateTransition")]
-[assembly: GoTypeAlias("Sync", "ΔSync")]
-[assembly: GoTypeAlias("Task", "ΔTask")]
-[assembly: GoTypeAlias("Time", "ΔTime")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -61,8 +50,8 @@ using static go.@internal.trace_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<ΔTime, timestamp>(Inverted = true, ValueType = "int64")]
-[assembly: GoImplicitConv<ΔTime, tracev1.Timestamp>(Inverted = false, ValueType = "int64")]
+[assembly: GoImplicitConv<Time, timestamp>(Inverted = true, ValueType = "int64")]
+[assembly: GoImplicitConv<Time, tracev1.Timestamp>(Inverted = false, ValueType = "int64")]
 // </ImplicitConversions>
 
 // This package's string literals are hoisted to `static readonly` fields (the standard
@@ -102,19 +91,19 @@ using static go.@internal.trace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/base.go", "base.cs", "AB5CopSUABMwooKUgpSClIKCgoKqooKUAAse8oKUgpSCqLKClIKCrNKUpoKCgoKUgqaUpoKUgpSCgoKCgpSqwoKUgoKUgoKmqLKCgpSCpoKUgoKmrNKCgpTekgASMPYABxCCAAcQgoKClA==")]
-[assembly: GoPositionMap("internal/trace/batch.go", "batch.cs", "ABw6gqaCpoKmgqqCAAgIqoKClICCpICCyIKCgoKUyoKClIKClIKCuIKClIKokoKCgpSCuA==", "", "", "119=Bytes/1/1/3")]
-[assembly: GoPositionMap("internal/trace/batchcursor.go", "batchcursor.cs", "ABYu1oKCgqaCpoKmgoKmpqaCpqIAAhQACASCgoKUpoKClKaCgpSmgoKClIKUppSmgqaUgqamlIKCpoKUgqaCgoKUpoKCgpSUgpSmgoKCgpSCgoKmgoKCpg==")]
-[assembly: GoPositionMap("internal/trace/event.go", "event.cs", "AFq8AZKClKYAKFSSAHD4AaSCgoIACxqSkoKUgoKC3IIABRKygoKmgoKC3AAiSpKClIKClAAjUgAIBMqkgpSCuKaClIKUpILGgILWgILWgILWgsaAgtaAgtaAgtaCtuaigpSktLS0lIKmooKUgpSCppbWpIKUlLS0tMaClJSCtIK0lLTGgpSUgrSCtJS0xoKClIKUlJS0lLSUpKailIKmgoK0grSCgoLGgoKCgsaCgpSCgoKUgpSUlIKCtIKCtIK0xoK0lIK0goK0goK0grTGlIK0grSCtMaUgrTG2JSmooKCgpSCgoKCgoKmgqaCgoKUlOaigpSClIKCtIKCxqSmooKClLS0pKaigoKCgqaigoKCpqKCgtyUAAkWsqiyAAIYAAsCAAIQ8gACGgAMAq7igpSClIKCyoKClAAKDNKClIKUgrSCtIK0pKzSgpSClAANEtKClIK4grSCtIKCgpTGgoKClMakrNKClIKUAAse0oKUgoKUgrSCtKQABhTSgpSClAAFEtKClIKUAAYU0oKUgpS0xoLKlMa0goKUgrS0tLS0goK0goLqtIK0tLSCgoK0pKrCgpSCgoKClIKC7gAeTNKClIKCAAoWADVs7u7uAAkS0oKClKSCgoKUtIK0goKCgoKClJTGgrSCtIK0gpSCgrSCgqSCgoKCxoKCgoKUlLSCgoLugoKClKrCgpSmgoKCgu6CgoKCpqaCAAsYgg==", "287-304:1;418-433:1", "", "283=mustGet/1/2/2,mustGet/2/2/3;919=append/1/2/2,append/2/2/3;1073=mustGet/1/1/1;1149=Uint64Value/1/2/3,Uint64Value/2/2/7;1206=mustGet/1/1/2;1224=mustGet/1/2/2,mustGet/2/2/3;1355=mul/1/1/1;1404=Experiments/1/1/2;1595=Format/1/1/3", "", "409:21,411:13")]
-[assembly: GoPositionMap("internal/trace/gc.go", "gc.cs", "AD1uAAwEAAAegoKCgoKCpoaGmpKCgqaUtIKClIKClIKmlJSCgoKUlIK2uKa0uNyCpKa4AAwUgriSgoKClIKClNq0goKCgoKCgoLIgoKCgoKCgoLYgoKUgoKClIKUprSCAAcQgoLKlIKUgoKUgoK4uKaCgoKClNyC7oKClLaCgpSUlIKUpgAHEIKokgAfRqKCgpTulIKCgoKCggAHEIKmlIKCgriCgoKCgoKCgoKUpqaygoIADh6CpoKmgqaCpoKCggALGIKmgoKUpoKmgqaCgoIAGDzYAAIQ8oKUlKa43IKClKaCyoKClKaUpqaClJSCgsq4uK7CgoIAAhDSgoKCAAIaAAoCggAOHoKCggACEuKCgoKmuIKCpoKCggANHJSUpqKCgqaCgqKCgqaCgpTKyoKCgrjugoKClIKCgpSCiviCgoK4gpSCgpS0tKTKgqamqsIAECKCgoKClIKUgoKUgu7KgpSUgpS4AA0isp7ilIK4koKCgpSmlIKCgpSqooKCpuaCpoKmgg==", "81-83:1;84-86:2;87-89:3")]
+[assembly: GoPositionMap("internal/trace/base.go", "base.cs", "ACFCopSUABcwooKUgpSClIKCgoKqooKUAA8e8oKUgpSCqLKClIKCrNKUpoKCgoKUgqaUpoKUgpSCgoKCgpSqwoKUgoKUgoKmqLKCgpSCpoKUgoKmrNKCgpQACQ6SABYw9gAHEIIACxCCgoKU")]
+[assembly: GoPositionMap("internal/trace/batch.go", "batch.cs", "AB86gqaCpoKmgqqCAAoIqoKClICCpICCyIKCgoKUyoKClIKClIKCuIKClIKokoKCgpSCuA==", "", "", "124=Bytes/1/1/3")]
+[assembly: GoPositionMap("internal/trace/batchcursor.go", "batchcursor.cs", "ABku1oKCgqaCpoKmgoKmpqaCpqIABBQACASCgoKUpoKClKaCgpSmgoKClIKUppSmgqaUgqamlIKCpoKUgqaCgoKUpoKCgpSUgpSmgoKCgpSCgoKmgoKCpg==")]
+[assembly: GoPositionMap("internal/trace/event.go", "event.cs", "AF28AZKClMYAKlSSAHL4AaSCgoIADRqSkoKUgoKC3IIABRKygoLGgoKC3AAkSpKClIKClAAlUgAIBMqkgpSCuKaClIKUpILGgILWgILWgILWgsaAgtaAgtaAgtaCtuaigpSktLS0lIKmooKUgpSCppbWpIKUlLS0tMaClJSCtIK0lLTGgpSUgrSCtJS0xoKClIKUlJS0lLSUpKailIKmgoK0grSCgoLGgoKCgsaCgpSCgoKUgpSUlIKCtIKCtIK0xoK0lIK0goK0goK0grTGlIK0grSCtMaUgrTG2JSmooKCgpSCgoKCgoKmgqaCgoKUlOaigpSClIKCtIKCxqSmooKClLS0pKaigoKCgqaigoKCpqKCgtyUAAsWsqiyAAIYAAsCAAIQ8gACGgAMAq7igpSClIKCyoKClAAKDNKClIKUgrSCtIK0pKzSgpSClAANEtKClIK4grSCtIKCgpTGgoKClMakrNKClIKUAAse0oKUgoKUgrSCtKQABhTSgpSClAAFEtKClIKUAAYU0oKUgpS0xoLKlMa0goKUgrS0tLS0goK0goLqtIK0tLSCgoK0pKrCgpSCgoKClIKC7gAiTNKClIKCAAwWADVs7u7uAAsS0oKClKSCgoKUtIK0goKCgoKClJTGgrSCtIK0gpSCgrSCgqSCgoKCxoKCgoKUlLSCgoLugoKClKrCgpSmgoKCgu6CgoKCpsaCAAsYgg==", "287-304:1;418-433:1", "", "294=mustGet/1/2/2,mustGet/2/2/3;936=append/1/2/2,append/2/2/3;1092=mustGet/1/1/1;1168=Uint64Value/1/2/3,Uint64Value/2/2/7;1225=mustGet/1/1/2;1243=mustGet/1/2/2,mustGet/2/2/3;1374=mul/1/1/1;1427=Experiments/1/1/2;1622=Format/1/1/3", "", "426:21,428:13")]
+[assembly: GoPositionMap("internal/trace/gc.go", "gc.cs", "AD5uAAwEAAAegoKCgoKCpoaGmpKCgqaUtIKClIKClIKmlJSCgoKUlIK2uKa0uNyCpKa4AAwUgriSgoKClIKClNq0goKCgoKCgoLIgoKCgoKCgoLYgoKUgoKClIKUprSCAAcQgoLKlIKUgoKUgoK4uKaCgoKClNyC7oKClLaCgpSUlIKUpgAHEILIkgAhRqKCgpTulIKCgoKCggAHEIKmlIKCgriCgoKCgoKCgoKUpsaygoIAEh6CpoKmgqaCpoKCggAPGIKmgoKUpoKmgqaCgoIAHDzYAAIQ8oKUlKa43IKClKaCyoKClKaUpqaClJSCgsq4uM7CgoIAAhDSgoKCAAIaAAoCggAOHoKCggACEuKCgoKmuIKCpoKCggANHJSUpqKCgqaCgqKCgqaCgpTKyoKCgtjugoKClIKCgpSCiviCgoK4gpSCgpS0tKTKgqamqsIAECKCgoKClIKUgoKUgu7KgpSUgpS4ABEisp7ilIK4koKCgpSmlIKCgpSqooKCpgAIBoKmgqaC", "81-83:1;84-86:2;87-89:3")]
 [assembly: GoPositionMap("internal/trace/generation.go", "generation.cs", "AClMooKUAAcQgoKCgpSUgpSUlIKUlJSClIKUgsqClIIACRSCpoCCyIIAECgACQKClO6UgoKClJaSgqKClIK4gpSUlJSUlJSClAAHEJSClILKgpSCAAkUgqaAgsiC6LKUgILWgILWgoKUtICC1oKUgILWpIKUpKrKgpKCgoKClIKCgpSCgoKmlKzSgpSCgoKmgpSCgpSCuIKCuIKClIK4goKUgriCgoKmrNKClIKCgqaUgoKUgriCgriCgpSCuIKUgoKUgoKUgoKUgoKUlIIACRSCpqyygpSCgoKmlIKClIK4goK4goKUpoKClKaCgpSCgriCgrgACRQACxiCgpSCgoKCuIKUgoKUgpSCpoKCprSClJSCgpSCgoKClIKCgpSCgsq0pqqigpS4ppSCgqY=", "271-290:1;600-602:1")]
-[assembly: GoPositionMap("internal/trace/mud.go", "mud.cs", "ADR4woKmgriClIK4goKCgpSClIKCgpSClIKCgoLcgoKUlKYABBTSuIKCgpSCgpSUggACENKClAACFPKCuIKYgoKUgoKSgoKCgoKCgoKClIKmuIKCgqbKlJSClJSClA==", "170-172:1")]
-[assembly: GoPositionMap("internal/trace/order.go", "order.cs", "ACNeAA8ClKaSgpSCgoKClpKCgriUgoKmgoKUgpSClKaC2gBIkgGigoKClIKCuIKCuIKCgpSUgoKUpqaCggAHEJSCgoKCgoKmgqaCpqKCyoLcyoKClIKCgoKCpgALFIKClIKUgoKUgoKCgqaigoKCuKaCggAHEIKmgriCgriUgpSClIKCuIKCuIIACBKCgqaigoKUgpSCgoKUgpSClJSUgqa0gsqCypSC7oKmlLiCuMqkgqbGgoKmgqaCgpSCgpSCgqbYgpSCgpSCuIKmgsaCxoKkgqaigoKCuKaCgpSCgoKCgqa0goKCuJSCpoKmAAsUgpSCgpSClIKCgriUyqa4xqa2goKCpoKCgqbGgpSCgpSCpoKCgpQACxiCgpSCgqbYgpSCgpSClKaCgpSClIKCpgAMFoKCgpSCyoKUgoKUgpSCgoKCptiCpoKClJSCgoKmABIigqaCgpSCpoKCpoKCgpSCpoKmgoKUgqYAChCCgriCuILKgoKClIKClIKmsoK4goKmgpSClIKmsoCCpIKCgoKUgoKUgIKkgqaygIKkgoKCgpSCgpSAgqSCAAIUAAkCgoKClIKCgpSUlIKUgoKUgqaigoKCgoKUlJSClIKCgpSCpqKClJSClIKUgoKClIKmtIKUgqa0gpSCprSAgqSAgqSCpqLKgoKUgpSCpqKClIKClIKmtICCpIKClIKClICCpIKmoriCgpSClIKmooKUgoKUgoKUppSCprSClIKokgAJGLSCgoK4goKCuIKCgpQAFR6SlKSklAAVLpKClAANIpKCqJKUlIKUggAXOLKClIKqooKClIKClKiSrLKCgoKCgqaCpoKCggAIFJKokqiSpoKCgpSCgpSCgpSCggAQJpKClIKokoKCuIKCgoKmgoKqooKUgoKCggACEPIABxCCABMs")]
-[assembly: GoPositionMap("internal/trace/reader.go", "reader.cs", "ADJskoKSgpSUgoKUyAAMGL4ACgSCuIKUgoKCpoKUgoKCgpQAEyiCgpSClIKUuIK4goKUgpSCuIKCgpSUgpSCuIKClJSmlKaCgoKCyoKUgIKC3IKCgoKCgoKmgtqCgpQACgqigpSCgpSCgpTcgoKokoKCgoKClKrClIKCgpSmprKCgoKClJSUlKamgoKCgoKClJQ=", "134-145:1;172-192:2", "", "65=convertV1Trace/1/1/1", "", "141:21,142:13")]
-[assembly: GoPositionMap("internal/trace/resources.go", "resources.cs", "AC5kogAMDLKUpKSkpKSUAA0kouyylKSkpJQAFyaylKSkpJQACRaygoKUtLSkgqyygpSssoKUrLKClKyygpQAGj6SAAYQkgAGHPKClAACFPKClA==")]
-[assembly: GoPositionMap("internal/trace/summary.go", "summary.cs", "ADqKAaKqwoKClAAkVILugriokoSCuIKUqLKCgoKClIKCgoKUpqKCgoKUgoKUrNKUgriCuIKUgpSClIKUgpSClKyygpSU3IKCgoKmACFOkgANHpKClJSmyIKmgoKUuIKUyoKCgu6ClLS0/IKUtrSmgoKCAAsYgoKClMaCxoKC2IKC2IKCgpSUgqaCAAgQgtyCyraCgra0goKCprSkgoLsgoKCgoKCAAgOgoLu6oKCtoKUgoKUlMaCgpS0goKmlLaClIKClILIgoLclIKCtIKCgpSCgoK4lIKClIKC2oKCgoKClMqCgoLGpoKCyIKCgoKUqqKCpoKCgoKClJSClJSUAA4S2oqigpSClIKClIKCgpTugoKUgoKUgoKmlOa4", "618-631:1", "", "112=UnknownTime/1/1/5;566=Time/1/1/4,snapshotStat/1/1/4;708=Goroutine/1/1/1")]
-[assembly: GoPositionMap("internal/trace/tracev1.go", "tracev1.cs", "AJMBugGigoKCgoKCgoKClJaSgoKCpriClIKSgqaCgoKUgqaClIKSgoKUgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSUpqaCyoLugoKCqsKCgpSCuIKUgqaCgqaUgoKCyoKUgqYAARIACgKCgpSUgqaCuAAOHoLGgoKClIKCxoKClIKCxrS0goKCtIK0tLSCgpS0goKClMYADRoADhy0grSCtIK0grSCtLSCtIK0grSCtIK0grSC2IKCgsqClJSCgsoADRwACRSCyLSkgoK0uIK0tLS0tIKCgpSCgrSmgoKC7saUtKS0grTctKaCgriCgoKmgpSCgpQADBqqooKC", "123-127:1;141-145:2;408-419:1", "", "628=addExtraString/1/1/4")]
-[assembly: GoPositionMap("internal/trace/value.go", "value.cs", "ABhE4qyygpTqooKUlJSokqiS")]
+[assembly: GoPositionMap("internal/trace/mud.go", "mud.cs", "ADd4woKmgriClIK4goKCgpSClIKCgpSClIKCgoLcgoKUlKYABBTSuIKCgpSCgpSUggACENKClAACFPKCuIKYgoKUgoKSgoKCgoKCgoKClIKmuIKCgqbKlJSClJSClA==", "170-172:1")]
+[assembly: GoPositionMap("internal/trace/order.go", "order.cs", "ACZeAA8ClKaSgpSCgoKClpKCgriUgoKmgoKUgpSClKaC+gBKkgGigoKClIKCuIKCuIKCgpSUgoKUpqaCggAHEJSCgoKCgoKmgqaCpqKCyoLcyoKClIKCgoKCpgALFIKClIKUgoKUgoKCgqaigoKCuKaCggAHEIKmgriCgriUgpSClIKCuIKCuIIACBKCgqaigoKUgpSCgoKUgpSClJSUgqa0gsqCypSC7oKmlLiCuMqkgqbGgoKmgqaCgpSCgpSCgqbYgpSCgpSCuIKmgsaCxoKkgqaigoKCuKaCgpSCgoKCgqa0goKCuJSCpoKmAAsUgpSCgpSClIKCgriUyqa4xqa2goKCpoKCgqbGgpSCgpSCpoKCgpQACxiCgpSCgqbYgpSCgpSClKaCgpSClIKCpgAMFoKCgpSCyoKUgoKUgpSCgoKCptiCpoKClJSCgoKmABIigqaCgpSCpoKCpoKCgpSCpoKmgoKUgqYAChCCgriCuILKgoKClIKClIKmsoK4goKmgpSClIKmsoCCpIKCgoKUgoKUgIKkgqaygIKkgoKCgpSCgpSAgqSCAAIUAAkCgoKClIKCgpSUlIKUgoKUgqaigoKCgoKUlJSClIKCgpSCpqKClJSClIKUgoKClIKmtIKUgqa0gpSCprSAgqSAgqSCpqLKgoKUgpSCpqKClIKClIKmtICCpIKClIKClICCpIKmoriCgpSClIKmooKUgoKUgoKUppSCprSClIKokgALGLSCgoK4goKCuIKCgpQAFx6SlKSklAAXLpKClAAPIpKCqJKUlIKUggAbOLKClIKqooKClIKClKiSrLKCgoKCgqaCpoKCggAKFJLIkqiSxoKCgpSCgpSCgpSCggASJpKClIKokoKCuIKCgoKmgoKqooKUgoKCggAEEPIABxCCABMs")]
+[assembly: GoPositionMap("internal/trace/reader.go", "reader.cs", "ADNskoKSgpSUgoKUyAAMGN4ACgSCuIKUgoKCpoKUgoKCgpQAEyiCgpSClIKUuIK4goKUgpSCuIKCgpSUgpSCuIKClJSmlKaCgoKCyoKUgIKC3IKCgoKCgoKmgtqCgpQACgqigpSCgpSCgpTcgoKokoKCgoKClKrClIKCgpSmprKCgoKClJSUlKbGgoKCgoKClJQ=", "134-145:1;172-192:2", "", "66=convertV1Trace/1/1/1", "", "144:21,145:13")]
+[assembly: GoPositionMap("internal/trace/resources.go", "resources.cs", "ADFkogASDLKUpKSkpKSUABEkogAODLKUpKSklAAdJrKUpKSklAALFrKCgpS0tKSCzLKClKyygpSssoKUrLKClAAcPpIABhCSAAgc8oKUAAIU8oKU")]
+[assembly: GoPositionMap("internal/trace/summary.go", "summary.cs", "AD2KAaKqwoKClAAoVILugriokoSCuIKUqLKCgoKClIKCgoKUpqKCgoKUgoKUzNKUgriCuIKUgpSClIKUgpSClKyygpSU3IKCgoKmACNOkgAPHpKClJSmyIKmgoKUuIKUyoKCgu6ClLS0/IKUtrSmgoKCAAsYgoKClMaCxoKC2IKC2IKCgpSUgqaCAAgQgtyCyraCgra0goKCprSkgoLsgoKCgoKCAAgOgoLu6oKCtoKUgoKUlMaCgpS0goKmlLaClIKClILIgoLclIKCtIKCgpSCgoK4lIKClIKC2oKCgoKClMqCgoLGpoKCyIKCgoKUqqKCpoKCgoKClJSClJSUABAS2oqigpSClIKClIKCgpTugoKUgoKUgoKmlOa4", "618-631:1", "", "119=UnknownTime/1/1/5;579=Time/1/1/4,snapshotStat/1/1/4;723=Goroutine/1/1/1")]
+[assembly: GoPositionMap("internal/trace/tracev1.go", "tracev1.cs", "AJYBugGigoKCgoKCgoKClJaSgoKCpriClIKSgqaCgoKUgqaClIKSgoKUgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSUpqaCyoLugoKCqsKCgpSCuIKUgqaCgqaUgoKCyoKUgsYAAxIACgKCgpSUgqaCuAAOHoLGgoKClIKCxoKClIKCxrS0goKCtIK0tLSCgpS0goKClMYADRoADhy0grSCtIK0grSCtLSCtIK0grSCtIK0grSC2IKCgsqClJSCgsoADRwACRSCyLSkgoK0uIK0tLS0tIKCgpSCgrSmgoKC7saUtKS0grTctKaCgriCgoKmgpSCgpQADBrKooKC", "123-127:1;141-145:2;408-419:1", "", "635=addExtraString/1/1/4")]
+[assembly: GoPositionMap("internal/trace/value.go", "value.cs", "ABtE4qyygpTqooKUlJTIkqiS")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -178,6 +167,7 @@ public static partial class trace_package
     internal partial struct utilHeap {}
     public partial interface EventDetails<ΔT> {}
     public partial struct ClockSnapshot {}
+    [GoValueClone("@base")] public partial struct Event {}
     public partial struct EventConfig<T> {}
     public partial struct EventKind {}
     public partial struct ExperimentalBatch {}
@@ -186,20 +176,30 @@ public static partial class trace_package
     public partial struct GoState {}
     public partial struct GoroutineExecStats {}
     public partial struct GoroutineSummary {}
+    public partial struct Label {}
+    public partial struct Log {}
     public partial struct MMUCurve {}
+    public partial struct Metric {}
     public partial struct MutatorUtil {}
     public partial struct ProcID {}
     public partial struct ProcState {}
+    public partial struct Range {}
     public partial struct RangeAttribute {}
     public partial struct Reader {}
+    public partial struct Region {}
     public partial struct ResourceID {}
     public partial struct ResourceKind {}
+    public partial struct Stack {}
     public partial struct StackFrame {}
     public partial struct StackSample {}
+    public partial struct StateTransition {}
     public partial struct Summarizer {}
     public partial struct Summary {}
+    public partial struct Sync {}
+    public partial struct Task {}
     public partial struct TaskID {}
     public partial struct ThreadID {}
+    public partial struct Time {}
     public partial struct UserRegionSummary {}
     public partial struct UserTaskSummary {}
     public partial struct UtilFlags {}
@@ -207,17 +207,6 @@ public static partial class trace_package
     public partial struct Value {}
     public partial struct ValueKind {}
     public partial struct constraint {}
-    [GoValueClone("@base")] public partial struct ΔEvent {}
-    public partial struct ΔLabel {}
-    public partial struct ΔLog {}
-    public partial struct ΔMetric {}
-    public partial struct ΔRange {}
-    public partial struct ΔRegion {}
-    public partial struct ΔStack {}
-    public partial struct ΔStateTransition {}
-    public partial struct ΔSync {}
-    public partial struct ΔTask {}
-    public partial struct ΔTime {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -247,3 +236,51 @@ public static partial class trace_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(trace_package.Event)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛEvent;
+[GoMethodHost(typeof(trace_package.EventKind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛEventKind;
+[GoMethodHost(typeof(trace_package.ExperimentalEvent)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛExperimentalEvent;
+[GoMethodHost(typeof(trace_package.GoState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛGoState;
+[GoMethodHost(typeof(trace_package.GoroutineExecStats)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛGoroutineExecStats;
+[GoMethodHost(typeof(trace_package.GoroutineSummary)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛGoroutineSummary;
+[GoMethodHost(typeof(trace_package.MMUCurve)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛMMUCurve;
+[GoMethodHost(typeof(trace_package.ProcState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛProcState;
+[GoMethodHost(typeof(trace_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛReader;
+[GoMethodHost(typeof(trace_package.ResourceID)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛResourceID;
+[GoMethodHost(typeof(trace_package.ResourceKind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛResourceKind;
+[GoMethodHost(typeof(trace_package.Stack)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛStack;
+[GoMethodHost(typeof(trace_package.StateTransition)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛStateTransition;
+[GoMethodHost(typeof(trace_package.Summarizer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛSummarizer;
+[GoMethodHost(typeof(trace_package.Time)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛTime;
+[GoMethodHost(typeof(trace_package.UserTaskSummary)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛUserTaskSummary;
+[GoMethodHost(typeof(trace_package.Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛValue;
+[GoMethodHost(typeof(trace_package.accumulator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛaccumulator;
+[GoMethodHost(typeof(trace_package.bandUtilHeap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛbandUtilHeap;
+[GoMethodHost(typeof(trace_package.baseEvent)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛbaseEvent;
+[GoMethodHost(typeof(trace_package.batch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛbatch;
+[GoMethodHost(typeof(trace_package.batchCursor)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛbatchCursor;
+[GoMethodHost(typeof(trace_package.cpuSample)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛcpuSample;
+[GoMethodHost(typeof(trace_package.dataTable<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛdataTable;
+[GoMethodHost(typeof(trace_package.evTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛevTable;
+[GoMethodHost(typeof(trace_package.frequency)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛfrequency;
+[GoMethodHost(typeof(trace_package.gState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛgState;
+[GoMethodHost(typeof(trace_package.gcState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛgcState;
+[GoMethodHost(typeof(trace_package.integrator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛintegrator;
+[GoMethodHost(typeof(trace_package.mmuSeries)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛmmuSeries;
+[GoMethodHost(typeof(trace_package.mud)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛmud;
+[GoMethodHost(typeof(trace_package.ordering)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛordering;
+[GoMethodHost(typeof(trace_package.queue<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛqueue;
+[GoMethodHost(typeof(trace_package.rangeState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛrangeState;
+[GoMethodHost(typeof(trace_package.seqCounter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛseqCounter;
+[GoMethodHost(typeof(trace_package.stack)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛstack;
+[GoMethodHost(typeof(trace_package.totalUtil)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛtotalUtil;
+[GoMethodHost(typeof(trace_package.traceV1Converter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛtraceV1Converter;
+[GoMethodHost(typeof(trace_package.utilHeap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛutilHeap;
+// </MethodHolders>

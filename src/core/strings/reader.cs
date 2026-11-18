@@ -7,6 +7,7 @@ using errors = errors_package;
 using io = io_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
+using static strings_package;
 
 partial class strings_package {
 
@@ -19,6 +20,8 @@ partial struct Reader {
     internal int64 i;       // current reading index
     internal nint prevRune; // index of previous rune; or < 0
 }
+
+} partial class stringsᴛReader {
 
 // Len returns the number of bytes of the unread portion of the
 // string.
@@ -189,6 +192,8 @@ public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
 
 // Reset resets the [Reader] to be reading from s.
 public static void Reset(this ref Reader r, @string s) { r = new Reader(s, 0, -1); }
+
+} partial class strings_package {
 
 // NewReader returns a new [Reader] reading from s.
 // It is similar to [bytes.NewBufferString] but more efficient and non-writable.

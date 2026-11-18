@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -60,8 +59,8 @@ using static go.@internal.buildcfg_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABkusqKioqKioqKioqKi1AAHEJKCgriCgpTmgrSkpKSUguaCgqSUgpSCqqKCgpSClIKUgpSClIKClIKUqqKCgpQABxCCgoKUlAAOBqKYgpSUlIKCgoKUgoKmpLS0tILIgpQADh6CgoKUgpQACgayqoKUgoKCgqaCgoKmpqS2lLSUtuaigqq0gqaCpoamgpSCgpSU+IK0lILmgrSUguaCtKSklILmgrSkpJSCgoaCAAUSsoLmooIADhC25oKmgoKCpqLcgpT6oqSkpKSkpKSkpJSmwqSkgoKUtIKClLSCgoKCpoKCpqSkpIKClLSCgpSClKSUlIKU", "326-328:1")]
-[assembly: GoPositionMap("internal/buildcfg/exp.go", "exp.cs", "ACA+goKCgpQAEBze2tKkgrQADBiU7gAHEJSCgoKCgv6SgriSgpS4gpSCgpSCgpS4goKmgoKmgpSqoq7CgoKCgpSCgoKCgoKUgoKUuKqiqqI=", "112-115:1", "105=reflect.Value.SetBool")]
+[assembly: GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABousqKioqKioqKioqKi1AAHEJKCgriCgpTmgrSkpKSUguaCgqSUgpSCqqKCgpSClIKUgpSClIKClIKUqqKCgpQACRCCgoKUlAAQBqKYgpSUlIKCgoKUgoKmpLS0tILIgpQAEB6CgoKUgpQADAayqoKUgoKCgqaCgoKmpqS2lLSUtuaigsq0gqaCpoamgpSCgpSUAAkIgrSUguaCtJSC5oK0pKSUguaCtKSklIKChoIABxKyggAIBqKCAA4QtuaCpoKCgqai3IKU+qKkpKSkpKSkpKSUpsKkpIKClLSCgpS0goKCgqaCgqakpKSCgpS0goKUgpSklJSClA==", "326-328:1")]
+[assembly: GoPositionMap("internal/buildcfg/exp.go", "exp.cs", "ACE+goKCgpQAEBze2tKkgrQADBiU7gAHEJSCgoKCgv6SgriSgpS4gpSCgpSCgpS4goKmgoKmgpTKos7CgoKCgpSCgoKCgoKUgoKUuMqiqqI=", "112-115:1", "105=reflect.Value.SetBool")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -98,3 +97,16 @@ public static partial class buildcfg_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(buildcfg_package.ExperimentFlags)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildcfgᴛExperimentFlags;
+[GoMethodHost(typeof(buildcfg_package.Goarm64Features)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildcfgᴛGoarm64Features;
+[GoMethodHost(typeof(buildcfg_package.GoarmFeatures)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildcfgᴛGoarmFeatures;
+[GoMethodHost(typeof(buildcfg_package.gowasmFeatures)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildcfgᴛgowasmFeatures;
+// </MethodHolders>

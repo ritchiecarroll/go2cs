@@ -5,14 +5,19 @@ using json = encoding.json_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using encoding;
+using static main_package;
 
 partial class main_package {
 
 public partial struct celsius /*num:float64*/;
 
+} partial class mainᴛcelsius {
+
 public static (slice<byte>, error) MarshalJSON(this celsius c) {
     return (slice<byte>(fmt.Sprintf(@"""%.1fC"""u8, (float64)c)), default);
 }
+
+} partial class main_package {
 
 partial struct reading {
     public @string Where;
@@ -32,7 +37,11 @@ partial struct thing {
     internal @string s;
 }
 
+} partial class mainᴛthing {
+
 internal static @string Name(this thing t) { return t.s; }
+
+} partial class main_package {
 
 internal static void main() {
     var (b, err) = json.Marshal(new reading("lab", 21.5D));

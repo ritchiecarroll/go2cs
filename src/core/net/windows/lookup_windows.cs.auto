@@ -17,6 +17,7 @@ using syscall = syscall_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal.syscall;
+using static net_package;
 
 partial class net_package {
 
@@ -95,6 +96,8 @@ internal static partial (nint, error) lookupProtocol(context.Context ctx, @strin
     return default;
 }
 
+} partial class netᴛResolver {
+
 internal static (slice<@string>, error) lookupHost(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var (ips, err) = Ꮡr.lookupIP(ctx, "ip"u8, name);
     if (err != nil) {
@@ -110,10 +113,14 @@ internal static (slice<@string>, error) lookupHost(this ж<Resolver> Ꮡr, conte
     return (addrs, default);
 }
 
+} partial class net_package {
+
 [GoLocalName("ret")] internal partial struct lookupIP_ret /*dyn*/ {
     internal slice<IPAddr> addrs;
     internal error err;
 }
+
+} partial class netᴛResolver {
 
 internal static partial (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name) {
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name); if (order != hostLookupCgo) {
@@ -504,6 +511,8 @@ internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, conte
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class net_package {
 
 internal static UntypedInt dnsSectionMask => 0x0003;
 

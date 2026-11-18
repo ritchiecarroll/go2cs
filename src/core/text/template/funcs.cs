@@ -15,7 +15,7 @@ using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using net;
 using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸreflectꓸValue = Span<reflectꓸValue>;
+using ꓸꓸꓸreflectꓸValue = Span<reflect_package.Value>;
 
 partial class template_package {
 
@@ -41,22 +41,22 @@ partial struct FuncMap /*map[@string, any]*/;
 // TODO: revert this back to a global map once golang.org/issue/2559 is fixed.
 internal static FuncMap builtins() {
     return new FuncMap(new map<@string, any>{
-        ["and"] = ((Funcꓸꓸꓸ<reflectꓸValue, reflectꓸValue, reflectꓸValue>)(and)),
-        ["call"] = ((Funcꓸꓸꓸ<reflectꓸValue, reflectꓸValue, reflectꓸValue>)(emptyCall)),
+        ["and"] = ((Funcꓸꓸꓸ<reflect.Value, reflect.Value, reflect.Value>)(and)),
+        ["call"] = ((Funcꓸꓸꓸ<reflect.Value, reflect.Value, reflect.Value>)(emptyCall)),
         ["html"] = ((Funcꓸꓸꓸ<any, @string>)(HTMLEscaper)),
-        ["index"] = ((Funcꓸꓸꓸ<reflectꓸValue, reflectꓸValue, (reflectꓸValue, error)>)(index)),
-        ["slice"] = ((Funcꓸꓸꓸ<reflectꓸValue, reflectꓸValue, (reflectꓸValue, error)>)(Δslice)),
+        ["index"] = ((Funcꓸꓸꓸ<reflect.Value, reflect.Value, (reflect.Value, error)>)(index)),
+        ["slice"] = ((Funcꓸꓸꓸ<reflect.Value, reflect.Value, (reflect.Value, error)>)(Δslice)),
         ["js"] = ((Funcꓸꓸꓸ<any, @string>)(JSEscaper)),
         ["len"] = length,
         ["not"] = not,
-        ["or"] = ((Funcꓸꓸꓸ<reflectꓸValue, reflectꓸValue, reflectꓸValue>)(or)),
+        ["or"] = ((Funcꓸꓸꓸ<reflect.Value, reflect.Value, reflect.Value>)(or)),
         ["print"] = ((Funcꓸꓸꓸ<any, @string>)(fmt.Sprint)),
         ["printf"] = ((Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ)),
         ["println"] = ((Funcꓸꓸꓸ<any, @string>)(fmt.Sprintln)),
         ["urlquery"] = ((Funcꓸꓸꓸ<any, @string>)(URLQueryEscaper)),
 
         // Comparisons
-        ["eq"] = ((Funcꓸꓸꓸ<reflectꓸValue, reflectꓸValue, (bool, error)>)(eq)), // ==
+        ["eq"] = ((Funcꓸꓸꓸ<reflect.Value, reflect.Value, (bool, error)>)(eq)), // ==
         ["ge"] = ge,                                                           // >=
         ["gt"] = gt,                                                           // >
         ["le"] = le,                                                           // <=
@@ -66,16 +66,16 @@ internal static FuncMap builtins() {
 }
 
 // builtinFuncs lazily computes & caches the builtinFuncs map.
-internal static Func<map<@string, reflectꓸValue>> builtinFuncs;
-internal static void initᴛbuiltinFuncs() { builtinFuncs = sync.OnceValue(map<@string, reflectꓸValue> () => {
+internal static Func<map<@string, reflect.Value>> builtinFuncs;
+internal static void initᴛbuiltinFuncs() { builtinFuncs = sync.OnceValue(map<@string, reflect.Value> () => {
     var funcMap = builtins();
-    var m = new map<@string, reflectꓸValue>(len(funcMap));
+    var m = new map<@string, reflect.Value>(len(funcMap));
     addValueFuncs(m, funcMap);
     return m;
 }); }
 
 // addValueFuncs adds to values the functions in funcs, converting them to reflect.Values.
-internal static void addValueFuncs(map<@string, reflectꓸValue> @out, FuncMap @in) {
+internal static void addValueFuncs(map<@string, reflect.Value> @out, FuncMap @in) {
     foreach (var (name, fn) in @in) {
         if (!goodName(name)) {
             throw panic(fmt.Errorf("function name %q is not a valid identifier"u8, name));
@@ -100,7 +100,7 @@ internal static void addFuncs(FuncMap @out, FuncMap @in) {
 }
 
 // goodFunc reports whether the function or method has the right result signature.
-internal static error goodFunc(@string name, reflectꓸType typ) {
+internal static error goodFunc(@string name, reflect.Type typ) {
     // We allow functions with 1 result or 2 results where the second is an error.
     nint numOut = typ.NumOut();
     switch (ᐧ) {
@@ -139,8 +139,8 @@ internal static bool goodName(@string name) {
 }
 
 // findFunction looks for a function in the template, and global map.
-internal static (reflectꓸValue v, bool isBuiltin, bool ok) findFunction(@string name, ж<Template> Ꮡtmpl) {
-    reflectꓸValue v = new(nil);
+internal static (reflect.Value v, bool isBuiltin, bool ok) findFunction(@string name, ж<Template> Ꮡtmpl) {
+    reflect.Value v = new(nil);
     bool isBuiltin = default;
     bool ok = default;
     GoFrame ᒐ = default;
@@ -159,7 +159,7 @@ internal static (reflectꓸValue v, bool isBuiltin, bool ok) findFunction(@strin
                 (v, isBuiltin, ok) = (fn, true, true); goto ᒐdone;
             }
         }
-        (v, isBuiltin, ok) = (new reflectꓸValue(), false, false);
+        (v, isBuiltin, ok) = (new reflect.Value(), false, false);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -168,10 +168,10 @@ internal static (reflectꓸValue v, bool isBuiltin, bool ok) findFunction(@strin
 
 // prepareArg checks if value can be used as an argument of type argType, and
 // converts an invalid value to appropriate zero if possible.
-internal static (reflectꓸValue, error) prepareArg(reflectꓸValue value, reflectꓸType argType) {
+internal static (reflect.Value, error) prepareArg(reflect.Value value, reflect.Type argType) {
     if (!value.IsValid()) {
         if (!canBeNil(argType)) {
-            return (new reflectꓸValue(), fmt.Errorf("value is nil; should be of type %s"u8, argType));
+            return (new reflect.Value(), fmt.Errorf("value is nil; should be of type %s"u8, argType));
         }
         value = reflect.Zero(argType);
     }
@@ -182,29 +182,29 @@ internal static (reflectꓸValue, error) prepareArg(reflectꓸValue value, refle
         value = value.Convert(argType);
         return (value, default);
     }
-    return (new reflectꓸValue(), fmt.Errorf("value has type %s; should be %s"u8, value.Type(), argType));
+    return (new reflect.Value(), fmt.Errorf("value has type %s; should be %s"u8, value.Type(), argType));
 }
 
-internal static bool intLike(reflectꓸKind typ) {
+internal static bool intLike(reflect.Kind typ) {
     switch (typ) {
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return true;
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return true;
     }}
     return false;
 }
 
 // indexArg checks if a reflect.Value can be used as an index, and converts it to int if possible.
-internal static (nint, error) indexArg(reflectꓸValue index, nint cap) {
+internal static (nint, error) indexArg(reflect.Value index, nint cap) {
     int64 x = default;
     switch (index.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         x = index.Int();
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         x = (int64)index.Uint();
         break;
     }
@@ -225,12 +225,12 @@ internal static (nint, error) indexArg(reflectꓸValue index, nint cap) {
 // index returns the result of indexing its first argument by the following
 // arguments. Thus "index x 1 2 3" is, in Go syntax, x[1][2][3]. Each
 // indexed item must be a map, slice, or array.
-internal static (reflectꓸValue, error) index(reflectꓸValue item, params ꓸꓸꓸreflectꓸValue indexesʗp) {
+internal static (reflect.Value, error) index(reflect.Value item, params ꓸꓸꓸreflectꓸValue indexesʗp) {
     var indexes = indexesʗp.sslice();
 
     item = indirectInterface(item);
     if (!item.IsValid()) {
-        return (new reflectꓸValue(), fmt.Errorf("index of untyped nil"u8));
+        return (new reflect.Value(), fmt.Errorf("index of untyped nil"u8));
     }
     foreach (var (_, vᴛ1) in range(indexes)) {
         var index = vᴛ1;
@@ -238,13 +238,13 @@ internal static (reflectꓸValue, error) index(reflectꓸValue item, params ꓸ�
         index = indirectInterface(index);
         bool isNil = default;
         (item, isNil) = indirect(item); if (isNil) {
-            return (new reflectꓸValue(), fmt.Errorf("index of nil pointer"u8));
+            return (new reflect.Value(), fmt.Errorf("index of nil pointer"u8));
         }
         switch (item.Kind()) {
-        case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice || ᴛ == reflect.ΔString: {
+        case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Slice || ᴛ == reflect.String: {
             var (x, err) = indexArg(index, item.Len());
             if (err != nil) {
-                return (new reflectꓸValue(), err);
+                return (new reflect.Value(), err);
             }
             item = item.Index(x);
             break;
@@ -252,7 +252,7 @@ internal static (reflectꓸValue, error) index(reflectꓸValue item, params ꓸ�
         case var ᴛ when ᴛ == reflect.Map: {
             var (indexΔ2, err) = prepareArg(index, item.Type().Key());
             if (err != nil) {
-                return (new reflectꓸValue(), err);
+                return (new reflect.Value(), err);
             }
             {
                 var x = item.MapIndex(indexΔ2); if (x.IsValid()) {
@@ -269,7 +269,7 @@ internal static (reflectꓸValue, error) index(reflectꓸValue item, params ꓸ�
             break;
         }
         default: {
-            return (new reflectꓸValue(), fmt.Errorf("can't index item of type %s"u8, item.Type()));
+            return (new reflect.Value(), fmt.Errorf("can't index item of type %s"u8, item.Type()));
         }}
     }
     return (item, default);
@@ -281,55 +281,55 @@ internal static (reflectꓸValue, error) index(reflectꓸValue item, params ꓸ�
 // arguments. Thus "slice x 1 2" is, in Go syntax, x[1:2], while "slice x"
 // is x[:], "slice x 1" is x[1:], and "slice x 1 2 3" is x[1:2:3]. The first
 // argument must be a string, slice, or array.
-internal static (reflectꓸValue, error) Δslice(reflectꓸValue item, params ꓸꓸꓸreflectꓸValue indexesʗp) {
+internal static (reflect.Value, error) Δslice(reflect.Value item, params ꓸꓸꓸreflectꓸValue indexesʗp) {
     var indexes = indexesʗp.sslice();
 
     item = indirectInterface(item);
     if (!item.IsValid()) {
-        return (new reflectꓸValue(), fmt.Errorf("slice of untyped nil"u8));
+        return (new reflect.Value(), fmt.Errorf("slice of untyped nil"u8));
     }
     bool isNil = default;
     (item, isNil) = indirect(item); if (isNil) {
-        return (new reflectꓸValue(), fmt.Errorf("slice of nil pointer"u8));
+        return (new reflect.Value(), fmt.Errorf("slice of nil pointer"u8));
     }
     if (len(indexes) > 3) {
-        return (new reflectꓸValue(), fmt.Errorf("too many slice indexes: %d"u8, len(indexes)));
+        return (new reflect.Value(), fmt.Errorf("too many slice indexes: %d"u8, len(indexes)));
     }
     nint cap = default;
     switch (item.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         if (len(indexes) == 3) {
-            return (new reflectꓸValue(), fmt.Errorf("cannot 3-index slice a string"u8));
+            return (new reflect.Value(), fmt.Errorf("cannot 3-index slice a string"u8));
         }
         cap = item.Len();
         break;
     }
-    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Slice: {
         cap = item.Cap();
         break;
     }
     default: {
-        return (new reflectꓸValue(), fmt.Errorf("can't slice item of type %s"u8, item.Type()));
+        return (new reflect.Value(), fmt.Errorf("can't slice item of type %s"u8, item.Type()));
     }}
     // set default values for cases item[:], item[i:].
     var idx = new nint[]{0, item.Len()}.array(3);
     foreach (var (i, index) in range(indexes)) {
         var (x, err) = indexArg(index, cap);
         if (err != nil) {
-            return (new reflectꓸValue(), err);
+            return (new reflect.Value(), err);
         }
         idx[i] = x;
     }
     // given item[i:j], make sure i <= j.
     if (idx[0] > idx[1]) {
-        return (new reflectꓸValue(), fmt.Errorf("invalid slice index: %d > %d"u8, idx[0], idx[1]));
+        return (new reflect.Value(), fmt.Errorf("invalid slice index: %d > %d"u8, idx[0], idx[1]));
     }
     if (len(indexes) < 3) {
         return (item.Slice(idx[0], idx[1]), default);
     }
     // given item[i:j:k], make sure i <= j <= k.
     if (idx[1] > idx[2]) {
-        return (new reflectꓸValue(), fmt.Errorf("invalid slice index: %d > %d"u8, idx[1], idx[2]));
+        return (new reflect.Value(), fmt.Errorf("invalid slice index: %d > %d"u8, idx[1], idx[2]));
     }
     return (item.Slice3(idx[0], idx[1], idx[2]), default);
 }
@@ -337,20 +337,20 @@ internal static (reflectꓸValue, error) Δslice(reflectꓸValue item, params �
 // Length
 
 // length returns the length of the item, with an error if it has no defined length.
-internal static (nint, error) length(reflectꓸValue item) {
+internal static (nint, error) length(reflect.Value item) {
     (item, var isNil) = indirect(item);
     if (isNil) {
         return (0, fmt.Errorf("len of nil pointer"u8));
     }
     switch (item.Kind()) {
-    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Chan || ᴛ == reflect.Map || ᴛ == reflect.ΔSlice || ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Chan || ᴛ == reflect.Map || ᴛ == reflect.Slice || ᴛ == reflect.String: {
         return (item.Len(), default);
     }}
     return (0, fmt.Errorf("len of type %s"u8, item.Type()));
 }
 
 // Function invocation
-internal static reflectꓸValue emptyCall(reflectꓸValue fn, params ꓸꓸꓸreflectꓸValue argsʗp) {
+internal static reflect.Value emptyCall(reflect.Value fn, params ꓸꓸꓸreflectꓸValue argsʗp) {
     var args = argsʗp.sslice();
 
     throw panic("unreachable"); // implemented as a special case in evalCall
@@ -358,36 +358,36 @@ internal static reflectꓸValue emptyCall(reflectꓸValue fn, params ꓸꓸꓸre
 
 // call returns the result of evaluating the first argument as a function.
 // The function must return 1 result, or 2 results, the second of which is an error.
-internal static (reflectꓸValue, error) call(@string name, reflectꓸValue fn, params ꓸꓸꓸreflectꓸValue argsʗp) {
+internal static (reflect.Value, error) call(@string name, reflect.Value fn, params ꓸꓸꓸreflectꓸValue argsʗp) {
     var args = argsʗp.sslice();
 
     fn = indirectInterface(fn);
     if (!fn.IsValid()) {
-        return (new reflectꓸValue(), fmt.Errorf("call of nil"u8));
+        return (new reflect.Value(), fmt.Errorf("call of nil"u8));
     }
     var typ = fn.Type();
     if (typ.Kind() != reflect.Func) {
-        return (new reflectꓸValue(), fmt.Errorf("non-function %s of type %s"u8, name, typ));
+        return (new reflect.Value(), fmt.Errorf("non-function %s of type %s"u8, name, typ));
     }
 
     {
         var err = goodFunc(name, typ); if (err != nil) {
-            return (new reflectꓸValue(), err);
+            return (new reflect.Value(), err);
         }
     }
     nint numIn = typ.NumIn();
-    reflectꓸType dddType = default;
+    reflect.Type dddType = default;
     if (typ.IsVariadic()) {
         if (len(args) < numIn - 1) {
-            return (new reflectꓸValue(), fmt.Errorf("wrong number of args for %s: got %d want at least %d"u8, name, len(args), numIn - 1));
+            return (new reflect.Value(), fmt.Errorf("wrong number of args for %s: got %d want at least %d"u8, name, len(args), numIn - 1));
         }
         dddType = typ.In(numIn - 1).Elem();
     } else {
         if (len(args) != numIn) {
-            return (new reflectꓸValue(), fmt.Errorf("wrong number of args for %s: got %d want %d"u8, name, len(args), numIn));
+            return (new reflect.Value(), fmt.Errorf("wrong number of args for %s: got %d want %d"u8, name, len(args), numIn));
         }
     }
-    var argv = new slice<reflectꓸValue>(len(args), () => new(nil));
+    var argv = new slice<reflect.Value>(len(args), () => new(nil));
     foreach (var (i, vᴛ1) in range(args)) {
         var arg = vᴛ1;
 
@@ -400,7 +400,7 @@ internal static (reflectꓸValue, error) call(@string name, reflectꓸValue fn, 
 
         error err = default;
         (argv[i], err) = prepareArg(arg, argType); if (err != nil) {
-            return (new reflectꓸValue(), fmt.Errorf("arg %d: %w"u8, i, err));
+            return (new reflect.Value(), fmt.Errorf("arg %d: %w"u8, i, err));
         }
     }
     return safeCall(fn, argv);
@@ -408,8 +408,8 @@ internal static (reflectꓸValue, error) call(@string name, reflectꓸValue fn, 
 
 // safeCall runs fun.Call(args), and returns the resulting value and error, if
 // any. If the call panics, the panic value is returned as an error.
-internal static (reflectꓸValue val, error err) safeCall(reflectꓸValue fun, slice<reflectꓸValue> args) {
-    reflectꓸValue val = new(nil);
+internal static (reflect.Value val, error err) safeCall(reflect.Value fun, slice<reflect.Value> args) {
+    reflect.Value val = new(nil);
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -434,14 +434,14 @@ internal static (reflectꓸValue val, error err) safeCall(reflectꓸValue fun, s
 }
 
 // Boolean logic.
-internal static bool truth(reflectꓸValue arg) {
+internal static bool truth(reflect.Value arg) {
     var (t, _) = isTrue(indirectInterface(arg));
     return t;
 }
 
 // and computes the Boolean AND of its arguments, returning
 // the first false argument it encounters, or the last argument.
-internal static reflectꓸValue and(reflectꓸValue arg0, params ꓸꓸꓸreflectꓸValue argsʗp) {
+internal static reflect.Value and(reflect.Value arg0, params ꓸꓸꓸreflectꓸValue argsʗp) {
     var args = argsʗp.sslice();
 
     throw panic("unreachable"); // implemented as a special case in evalCall
@@ -449,14 +449,14 @@ internal static reflectꓸValue and(reflectꓸValue arg0, params ꓸꓸꓸreflec
 
 // or computes the Boolean OR of its arguments, returning
 // the first true argument it encounters, or the last argument.
-internal static reflectꓸValue or(reflectꓸValue arg0, params ꓸꓸꓸreflectꓸValue argsʗp) {
+internal static reflect.Value or(reflect.Value arg0, params ꓸꓸꓸreflectꓸValue argsʗp) {
     var args = argsʗp.sslice();
 
     throw panic("unreachable"); // implemented as a special case in evalCall
 }
 
 // not returns the Boolean negation of its argument.
-internal static bool not(reflectꓸValue arg) {
+internal static bool not(reflect.Value arg) {
     return !truth(arg);
 }
 
@@ -475,15 +475,15 @@ internal static kind floatKind => 4;
 internal static kind stringKind => 5;
 internal static kind uintKind => 6;
 
-internal static (kind, error) basicKind(reflectꓸValue v) {
+internal static (kind, error) basicKind(reflect.Value v) {
     switch (v.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         return (boolKind, default);
     }
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return (intKind, default);
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return (uintKind, default);
     }
     case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
@@ -492,19 +492,19 @@ internal static (kind, error) basicKind(reflectꓸValue v) {
     case var ᴛ when ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
         return (complexKind, default);
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         return (stringKind, default);
     }}
     return (invalidKind, errBadComparisonType);
 }
 
 // isNil returns true if v is the zero reflect.Value, or nil of its type.
-internal static bool isNil(reflectꓸValue v) {
+internal static bool isNil(reflect.Value v) {
     if (!v.IsValid()) {
         return true;
     }
     switch (v.Kind()) {
-    case var ᴛ when ᴛ == reflect.Chan || ᴛ == reflect.Func || ᴛ == reflect.ΔInterface || ᴛ == reflect.Map || ᴛ == reflect.ΔPointer || ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Chan || ᴛ == reflect.Func || ᴛ == reflect.Interface || ᴛ == reflect.Map || ᴛ == reflect.Pointer || ᴛ == reflect.Slice: {
         return v.IsNil();
     }}
     return false;
@@ -512,9 +512,9 @@ internal static bool isNil(reflectꓸValue v) {
 
 // canCompare reports whether v1 and v2 are both the same kind, or one is nil.
 // Called only when dealing with nillable types, or there's about to be an error.
-internal static bool canCompare(reflectꓸValue v1, reflectꓸValue v2) {
-    reflectꓸKind k1 = v1.Kind();
-    reflectꓸKind k2 = v2.Kind();
+internal static bool canCompare(reflect.Value v1, reflect.Value v2) {
+    reflect.Kind k1 = v1.Kind();
+    reflect.Kind k2 = v2.Kind();
     if (k1 == k2) {
         return true;
     }
@@ -523,7 +523,7 @@ internal static bool canCompare(reflectꓸValue v1, reflectꓸValue v2) {
 }
 
 // eq evaluates the comparison a == b || a == c || ...
-internal static (bool, error) eq(reflectꓸValue arg1, params ꓸꓸꓸreflectꓸValue arg2ʗp) {
+internal static (bool, error) eq(reflect.Value arg1, params ꓸꓸꓸreflectꓸValue arg2ʗp) {
     var arg2 = arg2ʗp.sslice();
 
     arg1 = indirectInterface(arg1);
@@ -603,14 +603,14 @@ internal static (bool, error) eq(reflectꓸValue arg1, params ꓸꓸꓸreflect�
 }
 
 // ne evaluates the comparison a != b.
-internal static (bool, error) ne(reflectꓸValue arg1, reflectꓸValue arg2) {
+internal static (bool, error) ne(reflect.Value arg1, reflect.Value arg2) {
     // != is the inverse of ==.
     var (equal, err) = eq(arg1, arg2);
     return (!equal, err);
 }
 
 // lt evaluates the comparison a < b.
-internal static (bool, error) lt(reflectꓸValue arg1, reflectꓸValue arg2) {
+internal static (bool, error) lt(reflect.Value arg1, reflect.Value arg2) {
     arg1 = indirectInterface(arg1);
     var (k1, err) = basicKind(arg1);
     if (err != nil) {
@@ -666,7 +666,7 @@ internal static (bool, error) lt(reflectꓸValue arg1, reflectꓸValue arg2) {
 }
 
 // le evaluates the comparison <= b.
-internal static (bool, error) le(reflectꓸValue arg1, reflectꓸValue arg2) {
+internal static (bool, error) le(reflect.Value arg1, reflect.Value arg2) {
     // <= is < or ==.
     var (lessThan, err) = lt(arg1, arg2);
     if (lessThan || err != nil) {
@@ -676,7 +676,7 @@ internal static (bool, error) le(reflectꓸValue arg1, reflectꓸValue arg2) {
 }
 
 // gt evaluates the comparison a > b.
-internal static (bool, error) gt(reflectꓸValue arg1, reflectꓸValue arg2) {
+internal static (bool, error) gt(reflect.Value arg1, reflect.Value arg2) {
     // > is the inverse of <=.
     var (lessOrEqual, err) = le(arg1, arg2);
     if (err != nil) {
@@ -686,7 +686,7 @@ internal static (bool, error) gt(reflectꓸValue arg1, reflectꓸValue arg2) {
 }
 
 // ge evaluates the comparison a >= b.
-internal static (bool, error) ge(reflectꓸValue arg1, reflectꓸValue arg2) {
+internal static (bool, error) ge(reflect.Value arg1, reflect.Value arg2) {
     // >= is the inverse of <.
     var (lessThan, err) = lt(arg1, arg2);
     if (err != nil) {

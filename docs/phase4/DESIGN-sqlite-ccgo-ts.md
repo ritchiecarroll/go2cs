@@ -696,3 +696,17 @@ Two count predictions MISSED, each in the instrument:
   which the measured set excludes.
 
 — H (2026-11-15)
+
+### 10.5 Amendment (2026-11-15): `IHeaderDataCarrier` is internal
+
+COORD's review SHOULD-FIX, a commit on top of `c9a9409f16` (310 carries that tip; this one seats in 311).
+- `IHeaderDataCarrier` (`src/core/golib/IHeaderDataCarrier.cs`, namespace `go.golib`) is now `internal`, which
+  supersedes the "public" of the `PublicSurfaceTests` line in 10.4. Its implementers are golib's own internal sealed
+  header boxes, and its one caller outside golib, `go.unsafe`'s `FromHeaderData`, reaches it through golib's
+  `InternalsVisibleTo` grant. A public interface was one more exported type for the binary-compat floor, and a
+  foreign implementer could make `FromHeaderData` trust a word golib never minted.
+- `ж.SliceHeaderBox.cs` drops the `using System.ComponentModel;` this cut added, which nothing in the file uses.
+- Gated UNFILTERED at `c9a9409f16` plus the two files: GolibTests Release 2861/0/50 and Debug 2836/0/75, each with
+  2927 TRX rows identical in outcome to the `c9a9409f16` reading. Predicted as worded, and MET.
+
+— H (2026-11-15)

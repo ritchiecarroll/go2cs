@@ -8,8 +8,11 @@ using slices = slices_package;
 using tabwriter = text.tabwriter_package;
 using global::go.go.build;
 using text;
+using static printer_package;
 
 partial class printer_package {
+
+} partial class printerᴛprinter {
 
 internal static void fixGoBuildLines(this ref printer p) {
     var blockᴷ = new stackAppend<byte>();
@@ -136,6 +139,8 @@ internal static void fixGoBuildLines(this ref printer p) {
     p.output = appendꓸꓸꓸ(p.output, after);
 }
 
+} partial class printer_package {
+
 // appendLines is like append(x, y...)
 // but it avoids creating doubled blank lines,
 // which would not be gofmt-standard output.
@@ -148,6 +153,8 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
     }
     return appendꓸꓸꓸ(x, y);
 }
+
+} partial class printerᴛprinter {
 
 internal static slice<byte> lineAt(this ref printer p, nint start) {
     nint pos = start;
@@ -170,6 +177,8 @@ internal static @string commentTextAt(this ref printer p, nint start) {
     }
     return (@string)(p.output.slice(start, pos));
 }
+
+} partial class printer_package {
 
 internal static bool isNL(byte b) {
     return b == '\n' || b == '\f';

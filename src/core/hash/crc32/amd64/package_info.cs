@@ -27,7 +27,6 @@ using static go.hash.crc32_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Size", "const:ΔSize")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -58,7 +57,7 @@ using static go.hash.crc32_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/crc32/crc32.go", "crc32.cs", "AFSmAYKUgoKmgqq47IKCgqaCAAMQopSCpIKkAAke0oKUAAIQwJSUlN6CgoKCpoIACgiCgpSClIKUgqaCgqaClKSClKS6tqamgqaUgoKqkJiigqiygoKCgqY=")]
+[assembly: GoPositionMap("hash/crc32/crc32.go", "crc32.cs", "AFamAYKUgoKmgqq47IKCgqaCAAMQopSCpIKkAAke0oKUAAIQwLSUlAAJDoKCgoKmggAKCIKClIKUgpSCpoKCxoKUpIKUpLq2xqaCppSCgsqQmKKCqLKCgoKCpg==")]
 [assembly: GoPositionMap("hash/crc32/crc32_generic.go", "crc32_generic.cs", "ABEosoKCqqKCgoKClKa8ooKClAAIFqKCgoKCgoKmqsKCgoKChpSUgpQ=")]
 // </GoSourcePositionMaps>
 
@@ -92,3 +91,13 @@ public static partial class crc32_package
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(crc32_package.digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class crc32ᴛdigest;
+// </MethodHolders>

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -28,15 +27,6 @@ using static go.time_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Hour", "const:ΔHour")]
-[assembly: GoTypeAlias("Local", "const:ΔLocal")]
-[assembly: GoTypeAlias("Location", "ΔLocation")]
-[assembly: GoTypeAlias("Minute", "const:ΔMinute")]
-[assembly: GoTypeAlias("Month", "ΔMonth")]
-[assembly: GoTypeAlias("Nanosecond", "const:ΔNanosecond")]
-[assembly: GoTypeAlias("Second", "const:ΔSecond")]
-[assembly: GoTypeAlias("UTC", "const:ΔUTC")]
-[assembly: GoTypeAlias("Weekday", "ΔWeekday")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -52,10 +42,10 @@ using static go.time_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<absJanFeb, ΔMonth>(Inverted = true, ValueType = "nint")]
-[assembly: GoImplicitConv<absMonth, ΔMonth>(Inverted = true, ValueType = "nint")]
+[assembly: GoImplicitConv<Weekday, absDays>(Inverted = true, ValueType = "nint")]
+[assembly: GoImplicitConv<absJanFeb, Month>(Inverted = true, ValueType = "nint")]
+[assembly: GoImplicitConv<absMonth, Month>(Inverted = true, ValueType = "nint")]
 [assembly: GoImplicitConv<absSeconds, absDays>(Inverted = true, ValueType = "uint64")]
-[assembly: GoImplicitConv<ΔWeekday, absDays>(Inverted = true, ValueType = "nint")]
 // </ImplicitConversions>
 
 // This package's string literals are hoisted to `static readonly` fields (the standard
@@ -66,9 +56,9 @@ using static go.time_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Location))]
 [assembly: GoFieldAccess(typeof(Timer))]
 [assembly: GoFieldAccess(typeof(zone))]
-[assembly: GoFieldAccess(typeof(ΔLocation))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -78,15 +68,15 @@ using static go.time_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("time/format.go", "format.cs", "AMEB5gKYooKUggACHgAMAoKkgoKUgtqCgoKUgqaC2oKUgsiClKaClKaUgpSUgsimpqaCyILIgpSClIKUgpSCyIKUgpSClIKUgsiCgoKCpoKCgpSC2qYACRQACRQADh4ADiKigoKClIKCgrimgoKCpqyygoKCuIKUpKiSgpSCuIK4gpS4goKCgoKUgriW4oKCgpSCgoKUgpSsxIKUpoKmgoKUqqKCgoKUgoKCgpSCgpSCpgAGHAANAqaCgoKCgpSSkoKCgoKCgpSCgoKUqsKCgpSCgoKCgriUgoKCgoKCgoKCgoKktAASIoKCpIIAAhLigoKCgoKUlIKqtKSkpLiCgpQACBaCgoKUgpSmgpSCuIKmlIKClLS0tIK0tLS0grS0gpS0tIKCgqa0tMaCgpTGgoKUtLS0tLSClMaClOqCgpSCgoKCgpSUgoKUgriCgpTIgoK4goKClJSCtLamAAoaooKCAAkWooKCgo7igoKCppSCgoKmgpSmgqiSgpyqsoKUgqyygpSCgpSUrLKSgpSClKaCgpSqooKCgpSCgpSClIKUAAJaACsEgoKmAAIQ5IKCpgAaBoKSgoKWAA0egoKCgoKClIKClJSCgoK0goKUgoKClIKU1oKClIK0gqSCpIKCyKSkgpTIgoKmyIKCtoKCtoKCxoKClIKCuIKCgpSmgpSC1oKClIKktLTmgoKUgqS0tOaCgoKUxLKCgoKUgoKUgoKCgpSCgoKClIKClIKCgoKUlIKClJSigoKCgu6ClIKUgqaCxrT4goKClIKCgpTqgoKClILGlLiCgpSCpIKUgqaCgoK4goKCgoKCgoKmgpSCgoKUuIKUgoKUlIKUgsqCpoKmgoK4goKCuIKCpoKmgoKCgriCgpSCgrgAAhoADAKCpoKmgoKmgoKClpKCgpSCppSkgtiCxpSssoKCpqyygoKUpoKUgpSmgubigoKUgoKUgpSCgriCgpSmluKCgoKClJSUgpSmrOKCgoKCgoKUgpSUgpSCgoKUgpQACBKCpgAKIOSCgqaCgoKCuIKUgpSCuqaCpoKCgpSmgoKCgoKUlLiCgoKCpoKUgoKCgpSUlIKmgpSmgoKmgpSClA==", "426-426:1", "", "1001=quote/1/4/1,quote/2/4/2,quote/3/4/3,quote/4/4/4;1003=quote/1/1/1")]
-[assembly: GoPositionMap("time/format_rfc3339.go", "format_rfc3339.cs", "AAkkAAgCpoKCgoKClKaCgoKCgpSCgqaCuIKCgpSUgoKCAAgGgoLKgpSkgoK2puqCkoKCgpSUgoKUuIKUgoKCgoKCgpSWkoKClIK4goKClIKCgpSCgpSmgpSmpoKCgoKC3IK4pKSklKTGpg==", "69-69:1;88-101:1;166-166:1")]
-[assembly: GoPositionMap("time/sleep.go", "sleep.cs", "AAsctAADSMKClIKmlAACFAAIBqYAEEYAFQKClAACNAAXAoKCggACMAAXAoKUgqjsAAkgAAoCrsKmgg==")]
+[assembly: GoPositionMap("time/format.go", "format.cs", "AMMB5gKYooKUggACHgAMAoKkgoKUgtqCgoKUgqaC2oKUgsiClKaClKaUgpSUgsimpqaCyILIgpSClIKUgpSCyIKUgpSClIKUgsiCgoKCpoKCgpSC2qYACRQACRQADh4ADiKigoKClIKCgrimgoKCpqyygoKCuIKUpKiSgpSCuIK4gpS4goKCgoKUgriW4oKCgpSCgoKUgpSsxIKUpoKmgoKUqqKCgoKUgoKCgpSCgpSCpgAIHAANAqaCgoKCgpSSkoKCgoKCgpSCgoKUqsKCgpSCgoKCgriUgoKCgoKCgoKCgoKktAASIoKCpIIAAhLigoKCgoKUlIKqtKSkpLiCgpQACBaCgoKUgpSmgpSCuIKmlIKClLS0tIK0tLS0grS0gpS0tIKCgqa0tMaCgpTGgoKUtLS0tLSClMaClOqCgpSCgoKCgpSUgoKUgriCgpTIgoK4goKClJSCtLbGAAoaooKCAAkWooKCgo7igoKCppSCgoKmgpSmgsiSgpzKsoKUgqyygpSCgpSUrLKSgpSClKaCgpSqooKCgpSCgpSClIKUAAJaACsEgoKmAAIQ5IKCpgAaBoKSgoKWAA0egoKCgoKClIKClJSCgoK0goKUgoKClIKU1oKClIK0gqSCpIKCyKSkgpTIgoKmyIKCtoKCtoKCxoKClIKCuIKCgpSmgpSC1oKClIKktLTmgoKUgqS0tOaCgoKUxLKCgoKUgoKUgoKCgpSCgoKClIKClIKCgoKUlIKClJSigoKCgu6ClIKUgqaCxrT4goKClIKCgpTqgoKClILGlLiCgpSCpIKUgqaCgoK4goKCgoKCgoKmgpSCgoKUuIKUgoKUlIKUgsqCpoKmgoK4goKCuIKCpoKmgoKCgriCgpSCgrgAAhoADAKCpoKmgoKmgoKClpKCgpSCppSkgtiCxpSssoKCpqyygoKUpoKUgpSmgubigoKUgoKUgpSCgriCgpSmluKCgoKClJSUgpSmrOKCgoKCgoKUgpSUgpSCgoKUgpQAChKCxgAKIOSCgqaCgoKCuIKUgpSCuqaCpoKCgpSmgoKCgoKUlLiCgoKCpoKUgoKCgpSUlIKmgpSmgoKmgpSClA==", "426-426:1", "", "1009=quote/1/4/1,quote/2/4/2,quote/3/4/3,quote/4/4/4;1011=quote/1/1/1")]
+[assembly: GoPositionMap("time/format_rfc3339.go", "format_rfc3339.cs", "AAwkAAgCpoKCgoKClKaCgoKCgpSCgqaCuIKCgpSUgoKCAAgGgoLKgpSkgoK2xuqCkoKCgpSUgoKUuIKUgoKCgoKCgpSWkoKClIK4goKClIKCgpSCgpSmgpSmpoKCgoKC3IK4pKSklKTGpg==", "69-69:1;88-101:1;166-166:1")]
+[assembly: GoPositionMap("time/sleep.go", "sleep.cs", "AAwctAADSMKClIKmlAACFAAIBqYAEkYAFQKClAAENAAXAoKCggAEMAAXAoKUgsjsAAkgAAoCrsKmgg==")]
 [assembly: GoPositionMap("time/sys_unix.go", "sys_unix.cs", "AAwg7IK4goKClKaCpoLmgoKClICCpIKCgoKUlJQ=")]
-[assembly: GoPositionMap("time/time.go", "time.cs", "AKgB4ALSqJKClKiAlpKCgoKCgri4goKCgpS6soKUgqiSgoIAAxDCgoKClJQAAhDSgpSq6qiSgpSCgqiSgpSCgqqikoKUgoKmlKSUAAIQ0oKUABIskoKUgoIADSKSgpSCggDeAcgDxIKCgpSCABMolIKCgpSokqjkggAJFAARJIKCgqgADx6CqKSCgpSopKikgoKUgoKUgoKUqKSopKjSgoKCgoKowoKCgoKuwpSClIKCgpSCpurigoKmgoKCgpSUlJSCqJKokoKCqJKCgqiSgoKokqikrgAQFoKCgqiSqNKCgoKCgqiSqJKokqqiqqKCAB1MxqKCqtSUgoKCpoaigoKClIK2gsaUgsaCpIKUgpSmgqaCgoKCuIKCgsqCgqau1IKCgoKCgoKUlIKClKqigoKClIKCgqaogJaAloAAARgACgKCgqiSgoKokoKCqqKClKqiAAIS4oKUgoKCgpSClJSClICCpKyylKSkupKCgoKCgoKClIKCgoKUlKauwoKUlJSkpLiCgoKUgpSqopSUqqKUlAACKAARAoKCqqKCggAMGqaCgoKU3AACJAAQDNzWAAgQnMKCgpSCgriUpoKokoKokoIAAhDSgpSCqJKCgpSq0oIAAhAACAKCgoKUgoKUAAIS4gACENIAAhDSAAIS4gAJEpKCgpSClIKCgqaCgpSmgoIADyKClKiSgoKUAAoIkoKCpoKCppKClIKmgpaClIKCgqaCgpSCgoKUpgACENKokq7CgoKCgoKU6qKCpoKUgoKCpoKCgpTuwu7CqqKCggACENKCgoKCgoKmqqKqoqiSgqbKgoKUrsKCgoKUgoKClAACKgASAoK4goKmgoKCpgAFEIKCpoKUpoKCAAIU8oKClIIAAhYACAKCgpSCgpSs4oKCgpSCgoKCgrimgsiCggAIEIKCgoKCkoKUgoLKgoKUgoKClIKCgpSUgpSCgpS27oKUAAJAAB0CqJKo4oKCgoI=")]
-[assembly: GoPositionMap("time/zoneinfo.go", "zoneinfo.cs", "AEKOAcoACRAACA6CgpSClKqiAAYQpqKCgoKCgoKmlKaC7oIAAhQADgKUgoKCgoKCpoKCgoKCgqaCgoKCgoKUlILKgoKCgoKCgoKClKaCgoKUuIKCuAACJAAQBIK4goKC3IKCyqqigoKmAAYSAAgCyoKClILclJSmgoKClIKmgqaUpoKUlJKCgpSCgoLKgoKUgoK4goKCgu6CgoKUvKKClIKClIKUpoKUlIKCpr7SgpSCgoKCgqqigoKUgoKClKaCgoKUgoKClKaCgoKUlIKUABIuooKClIKCgoKClIKCgoKCgpaCgoKUgoKClIKCgpSCgoKUgqaCgqaCgpSUrNKClIKCgoKUlIKCgqaClKyygpSCgsbGgoKClIKCgoK4goKUgoKUlIKClLas8gAHEIKCgoKC3IKCgsrMAAkoAA8CgpSClKaUgpKUgoKCgpSCgqaAgoKCpKiSgpSCgqY=", "119-124:1;675-678:1")]
+[assembly: GoPositionMap("time/time.go", "time.cs", "AKwB4ALSqJKClKiAlpKCgoKCgri4goKCgpS6soKUgqiSgoIAAxDCgoKClJQAAhDSgpSq6qiSgpSCgqiSgpSCgqqikoKUgoKmlKSUAAIQ0oKUABYskoKUgoIAESKSgpSCggDgAcgDxIKCgpSCABMolIKCgpTIksjkggAJFAARJIKCgsgADx6CqKSCgpTIpMikgoKUgoKUgoKUqKTIpMjSgoKCgoKowoKCgoLOwpSClIKCgpSCpurigoKmgoKCgpSUlJSCqJKokoKCqJKCgqiSgoKoksikzgAQFoKCgqiSyNKCgoKCgsiSqJKokqqiqqKCACFMxqKCqtSUgoKCpoaigoKClIK2gsaUgsaCpIKUgpSmgqaCgoKCuIKCgsqCgqbO1IKCgoKCgoKUlIKClKqigoKClIKCgqbIgJaAloAAARgACgKCgqiSgoKokoKCqqKClMqiAAQS4oKUgoKCgpSClJSClICCpKyylKSk2pKCgoKCgoKClIKCgoKUlKauwoKUlJSkpNiCgoKUgpSqopSUqqKUlAAEKAARAoKCyqKCggAMGqaCgoKU3AACJAAQDNzWAAgQnMKCgpSCgriUpoLIkoKokoIAAhDSgpSCqJKCgpSq0oIAAhAACAKCgoKUgoKUAAIS4gACENIAAhDSAAIS4gANEpKCgpSClIKCgqaCgpSmgoIADyKClKiSgoKUAAoIkoKCpoKCppKClIKmgpaClIKCgqaCgpSCgoKUpgACENKokq7CgoKCgoKU6qKCpoKUgoKCpoKCgpTuwu7CqqKCggAEENKCgoKCgoKmqqKqosiSgsbKgoKUrsKCgoKUgoKClAACKgASAoK4goKmgoKCpgAFEIKCpoKUpoKCAAQU8oKClIIAAhYACAKCgpSCgpTM4oKCgpSCgoKCgrimgsiCggAIEIKCgoKCkoKUgoLKgoKUgoKClIKCgpSUgpSCgpS27oKUAAJAAB0CqJKo4oKCgoI=")]
+[assembly: GoPositionMap("time/zoneinfo.go", "zoneinfo.cs", "AEOOAcoACRAACg6CgpSClKqiAAgQpqKCgoKCgoKmlKaC7oIACBQADgKUgoKCgoKCpoKCgoKCgqaCgoKCgoKUlILKgoKCgoKCgoKClKaCgoKUuIKCuAACJAAQBIK4goKC3IKCyqqigoKmAAgSAAgCyoKClILclJSmgoKClIKmgqaUpoKUlJKCgpSCgoLKgoKUgoK4goKCgu6CgoKUvKKClIKClIKUpoKUlIKCpr7SgpSCgoKCgqqigoKUgoKClKaCgoKUgoKClKaCgoKUlIKUABIuooKClIKCgoKClIKCgoKCgpaCgoKUgoKClIKCgpSCgoKUgqaCgqaCgpSUrNKClIKCgoKUlIKCgqaClKyygpSCgsbGgoKClIKCgoK4goKUgoKUlIKClLbM8gAHEIKCgoKC3IKCgsrsAAkoAA8CgpSClKaUgpKUgoKCgpSCgqaAgoKCpKiSgpSCgqY=", "119-124:1;675-678:1")]
 [assembly: GoPositionMap("time/zoneinfo_goroot.go", "zoneinfo_goroot.cs", "AAgSgoKU")]
-[assembly: GoPositionMap("time/zoneinfo_read.go", "zoneinfo_read.cs", "ABIwwgAPIIIADSCCgoKClIKCpoKCgoKUpoKCgoKClKaCgoKClKiSgoKokoKUppzCpoKokoKClJS0tLQAAxYADBCCgoKClIKUAAcQgpQAARCClKaCgoKUgpS4goK4pqampri4lIKmgoKC3IKmlIKCgoKClIKUgoKClIKClIKmlNyCgoKCgpSmgpSmgoKUgoKUgrimuLiCgoKCgoKCgqaygpSClAAHELimgoKCpqqigpSClAACGAAJAoKUqJKClKrCgoKUlAAGEoKClIKClIKCpgAXMIKUgoKCgoKCgoKClIIAEiaCipSUgoKmpgAKGMKClK7ygoKCgqaCpoKCgoKmgqaAgoKCgqaCtoKUruKCgpSCqoKCgpSClIKm")]
-[assembly: GoPositionMap("time/zoneinfo_unix.go", "zoneinfo_unix.cs", "ABEqAAwOAAcQgpSCgoKCxoKUgoKCgpSUlIKCguw=")]
+[assembly: GoPositionMap("time/zoneinfo_read.go", "zoneinfo_read.cs", "ABMwwgARIIIAESCCgoKClIKCpoKCgoKUpoKCgoKClKaCgoKClKiSgoLIkoKUppzCpoKokoKClJS0tLQAAxYADBCCgoKClIKUAAcQgpQAARCClKaCgoKUgpS4goK4pqampri4lIKmgoKC3IKmlIKCgoKClIKUgoKClIKClIKmlNyCgoKCgpSmgpSmgoKUgoKUgrimuLiCgoKCgoKCgqaygpSClAAHELimgoKCpqqigpSClAACGAAJAoKUqJKClKrCgoKUlAAGEoKClIKClIKCpgAXMIKUgoKCgoKCgoKClIIAEiaCipSUgoKmpgAKGMKClK7ygoKCgqaCpoKCgoKmgqaAgoKCgqaCtoKUruKCgpSCqoKCgpSClIKm")]
+[assembly: GoPositionMap("time/zoneinfo_unix.go", "zoneinfo_unix.cs", "ABEqAA4OAAcQgpSCgoKCxoKUgoKCgpSUlIKCguw=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -117,12 +107,12 @@ public static partial class time_package
     internal partial struct zone {}
     internal partial struct zoneTrans {}
     public partial struct Duration {}
+    public partial struct Location {}
+    public partial struct Month {}
     public partial struct ParseError {}
     public partial struct Time {}
     public partial struct Timer {}
-    public partial struct ΔLocation {}
-    public partial struct ΔMonth {}
-    public partial struct ΔWeekday {}
+    public partial struct Weekday {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -142,3 +132,28 @@ public static partial class time_package
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(time_package.Duration)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛDuration;
+[GoMethodHost(typeof(time_package.Location)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛLocation;
+[GoMethodHost(typeof(time_package.Month)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛMonth;
+[GoMethodHost(typeof(time_package.ParseError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛParseError;
+[GoMethodHost(typeof(time_package.Ticker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛTicker;
+[GoMethodHost(typeof(time_package.Time)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛTime;
+[GoMethodHost(typeof(time_package.Timer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛTimer;
+[GoMethodHost(typeof(time_package.Weekday)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛWeekday;
+[GoMethodHost(typeof(time_package.absCentury)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛabsCentury;
+[GoMethodHost(typeof(time_package.absDays)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛabsDays;
+[GoMethodHost(typeof(time_package.absMonth)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛabsMonth;
+[GoMethodHost(typeof(time_package.absSeconds)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛabsSeconds;
+[GoMethodHost(typeof(time_package.absYday)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛabsYday;
+[GoMethodHost(typeof(time_package.dataIO)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛdataIO;
+[GoMethodHost(typeof(time_package.fileSizeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛfileSizeError;
+[GoMethodHost(typeof(time_package.parseDurationError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛparseDurationError;
+// </MethodHolders>

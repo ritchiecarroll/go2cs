@@ -16,6 +16,7 @@ namespace go;
 
 using atomic = sync.atomic_package;
 using sync;
+using static sync_package;
 
 partial class sync_package {
 
@@ -28,7 +29,7 @@ partial class sync_package {
 // the return from any call of once.Do(f).
 //
 // [the Go memory model]: https://go.dev/ref/mem
-[GoType] partial struct Once {
+[GoType] public partial struct Once {
     internal noCopy _;
     // done indicates whether the action has been performed.
     // It is first in the struct because it is used in the hot path.
@@ -38,6 +39,8 @@ partial class sync_package {
     internal atomic.Bool done;
     internal Mutex m;
 }
+
+} partial class syncᴛOnce {
 
 // Do calls the function f if and only if Do is being called for the
 // first time for this instance of [Once]. In other words, given
@@ -94,5 +97,7 @@ internal static void doSlow(this ж<Once> Ꮡo, Action f) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class sync_package {
 
 } // end sync_package

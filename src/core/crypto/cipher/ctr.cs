@@ -16,6 +16,7 @@ using subtle = go.crypto.subtle_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static cipher_package;
 
 partial class cipher_package {
 
@@ -69,9 +70,13 @@ partial struct aesCtrWrapper {
     internal ж<aes.CTR> c;
 }
 
+} partial class cipherᴛaesCtrWrapper {
+
 internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<byte> src) {
     x.c.XORKeyStream(dst, src);
 }
+
+} partial class cipherᴛctr {
 
 internal static void refill(this ref ctr x) {
     nint remain = len(x.@out) - x.outUsed;
@@ -115,4 +120,4 @@ internal static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> s
     }
 }
 
-} // end cipher_package
+} // end cipherᴛctr

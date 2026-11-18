@@ -58,7 +58,7 @@ using static go.@internal.runtime.gc.scan_package;
 [assembly: GoPositionMap("internal/runtime/gc/scan/expand_reference.go", "expand_reference.cs", "AAweAAoKgsqClIK4goI=")]
 [assembly: GoPositionMap("internal/runtime/gc/scan/filter.go", "filter.cs", "AAkYsoKCgoKClIKUgpSClIKU")]
 [assembly: GoPositionMap("internal/runtime/gc/scan/scan_generic.go", "scan_generic.cs", "AAwcuKaC")]
-[assembly: GoPositionMap("internal/runtime/gc/scan/scan_go.go", "scan_go.cs", "AA4ewoKUooKClMqC3IIADRyCgoLuggAIEoIAAhDSggACEOSCuISSgpQ=")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/scan_go.go", "scan_go.cs", "AA8ewoKUooKClMqC3IIADRyCgoLuggAIEoIABBDSggACEOSC2ISSgpQ=")]
 [assembly: GoPositionMap("internal/runtime/gc/scan/scan_reference.go", "scan_reference.cs", "AA0qAAwCgoKCgoKUgpSCgpSClA==")]
 // </GoSourcePositionMaps>
 
@@ -88,3 +88,13 @@ public static partial class scan_package
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸsys() => builtin.initPackage(typeof(go.@internal.runtime.sys_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(scan_package.unsafeBuf<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scanᴛunsafeBuf;
+// </MethodHolders>

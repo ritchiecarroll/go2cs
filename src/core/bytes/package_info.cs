@@ -55,10 +55,10 @@ using static go.bytes_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("bytes/buffer.go", "buffer.cs", "AC5kggADEsCcsNzilJQAAhDSgpSogJiQmJCWgJqygoKUgoKUrLKCgqyygoKUrLKUgqaClIKClILKgoKmpoKCAAIQ0oKUgqyygoKClKyygoKClAAIGuKCgoKCgoKmgoKClILOwoKCAAoWgqaUgoLe4oKCgoKUgoKCuIK4gq7CgoKClIKu1IKClIKCgpSCruKClIKClJSCgoKUrsKCgoKUgoKClKqilIKUgoKCAAIQ8pSClIKCgoKUgoKCAAYQ0oKUgpSCppzCgpSCgpQAAhIACQKmgqjCgoKCgpSCgoIAAhIACAKCAAIYAAgAAAEQ4g==", "248-252:1", "", "", "", "255:21,256:13")]
-[assembly: GoPositionMap("bytes/bytes.go", "bytes.cs", "ABMoxKyyqqKClIKCgoKCgoKUgoKClKq0gpSClIKCgoKUgrqSqJKokqiSqJKmgoKCpqiSgpSkpIKUpJSokgACENKClKSCgoKUlKSqsoKCgoKCgoKClKaCgqaCgoKChKaUhqKCyoKCgoKCgoKm2AADEMKUlIKClKKCppSClJSCgoKUlIKCgoKmpoKCgoKClIKUgpSCgpSmgoKUpoKCuK7ClJSCgoKCpqaCgoKigqaUgpSUgoKClIKCgoKmlIKCgoKUgpSCgpSCgpSmgoKUpoKCuKqigpSClIKUgqaCgoKCgoKUgoKUggACGAAIAAABEvIAAhLQnMKmAAEQAAgGgpSCgoKCgoKmlLiCgoKUgpSCgoKClIKClIKUlIKUAAkYAAsGAAUUgoKCgoKCpoKmuIK4goKmqqKClJSmgoKClJSCgpSmgoKCgpSokqiSrviCgoKCgpSUAAImABACgtyClIKClJSCAAIaAAoCgoKCgqaCgoKClKqigoKCgoKUpoKUlIKCgoKUlJSqooKCgoKClKaCgpSCgoKClJSUqICYorqiuqK6ooKCgoKCgoKClIKCgoKClJSCgpSqtIKUpKSklKaCpgACEAAICIKUgoKUgs6igoKUqqKCgoKUlKqiqqKClKqigpSssqyyrLKCgoKClJSssoKSgpSCgqYADB7CgoKClJSokqyygoKmqqKUlIKUgpSSlKqilJSClIKUkpSmgoKUlJSmooKClJSUlKaCgoKClJSUlKqigpSClJKUpoKClKaigoKUlKaCgpKClIKUlKq0gqaUgpSUgoKClLjcqqKCgoKCgoKUAAIS4oKUlJSUgriCgoKCgoKCgqaCgoKCgoKmggACENKsxIKCgoKCuIK4gqaClKaUgoKClIKCgsqCuIKmlIKUyoKClIKUuKiSgpSkpIKUpLaClIKCgoKCgqaCgpSUgpSClIKCgpSmlIKCgoKCgoKCgpSUgpSCggAIEoKClKYAAhLigpSssoKUAAIS4oKUAAIS4oKU", "834-841:1", "754=unicode.SpecialCase.ToUpper;760=unicode.SpecialCase.ToLower;766=unicode.SpecialCase.ToTitle")]
+[assembly: GoPositionMap("bytes/buffer.go", "buffer.cs", "AC9kggAFEsCcsNzilJQAAhDSgpSogJiQmJCWgJqygoKUgoKUrLKCgqyygoKUrLKUgqaClIKClILKgoKmpoKCAAIQ0oKUgqyygoKClKyygoKClAAMGuKCgoKCgoKmgoKClILuwoKCAAoWgqaUgoL+4oKCgoKUgoKCuIK4gq7CgoKClIKu1IKClIKCgpSCruKClIKClJSCgoKUrsKCgoKUgoKClKqilIKUgoKCAAIQ8pSClIKCgoKUgoKCAAYQ0oKUgpSCxrzCgpSCgpQAAhIACQKmgqjCgoKCgpSCgoIAAhIACAKCAAQYAAgAAAEQ4g==", "248-252:1", "", "", "", "264:21,265:13")]
+[assembly: GoPositionMap("bytes/bytes.go", "bytes.cs", "ABQoxKyyqqKClIKCgoKCgoKUgoKClKq0gpSClIKCgoKUgrqSqJKokqiSqJKmgoKCpqiSgpSkpIKUpJSokgACENKClKSCgoKUlKSqsoKCgoKCgoKClKaCgqaCgoKChKaUhqKCyoKCgoKCgoKm2AADEMKUlIKClKKCppSClJSCgoKUlIKCgoKmpoKCgoKClIKUgpSCgpSmgoKUpoKCuK7ClJSCgoKCpqaCgoKigqaUgpSUgoKClIKCgoKmlIKCgoKUgpSCgpSCgpSmgoKUpoKCuKqigpSClIKUgqaCgoKCgoKUgoKUggACGAAIAAABEvIAAhLQnMKmAAEQAAgGgpSCgoKCgoKmlLiCgoKUgpSCgoKClIKClIKUlIKUAAkYAAsGAAUUgoKCgoKCpoKmuIK4goKmqqKClJSmgoKClJSCgpSmgoKCgpSokqiSrviCgoKCgpSUAAImABACgtyClIKClJSCAAIaAAoCgoKCgqaCgoKClKqigoKCgoKUpoKUlIKCgoKUlJSqooKCgoKClKaCgpSCgoKClJSUqICYorqiuqK6ooKCgoKCgoKClIKCgoKClJSCgpSqtIKUpKSklKaCpgACEAAICIKUgoKUgs6igoKUqqKCgoKUlKqiqqKClKqigpSssqyyrLKCgoKClJSssoKSgpSCgqYADB7CgoKClJTIksyygoKmqqKUlIKUgpSSlKqilJSClIKUkpSmgoKUlJSmooKClJSUlKaCgoKClJSUlKqigpSClJKUpoKClKaigoKUlKaCgpKClIKUlKq0gqaUgpSUgoKClLjcqqKCgoKCgoKUAAIS4oKUlJSUgriCgoKCgoKCgqaCgoKCgoKmggACENKsxIKCgoKCuIK4gqaClKaUgoKClIKCgsqCuIKmlIKUyoKClIKUuKiSgpSkpIKUpLaClIKCgoKCgqaCgpSUgpSClIKCgpSmlIKCgoKCgoKCgpSUgpSCggAIEoKClKYAAhLigpSssoKUAAIS4oKUAAIS4oKU", "834-841:1", "754=unicode.SpecialCase.ToUpper;760=unicode.SpecialCase.ToLower;766=unicode.SpecialCase.ToTitle")]
 [assembly: GoPositionMap("bytes/iter.go", "iter.cs", "AAwk0oKCgoKUlIIABRCikoKCgoKUlJSCgoKUgoKUlAADEMKuwq7CkoKCgoKCgoKUgoKClJSClJSCAAQSwpKCgoKCgoKUlIKUlII=", "19-31:1;37-60:1;84-109:1;117-136:1")]
-[assembly: GoPositionMap("bytes/reader.go", "reader.cs", "ABc0ooKUrKCWwoKUgoKC6NSClIKUgoKUqJKCgpSCguiSgpSCgqjSgoKUgoKClIKCAAgIkoKUgpSCggAICJKCgpS0tLSUgpSCqMKCgpSCgoKUgoKClKiAloA=")]
+[assembly: GoPositionMap("bytes/reader.go", "reader.cs", "ABo0ooKUrKCWwoKUgoKC6NSClIKUgoKUqJKCgpSCguiSgpSCgqjSgoKUgoKClIKCAAgIkoKUgpSCggAICJKCgpS0tLSUgpSCqMKCgpSCgoKUgoKClKiAtoA=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -96,3 +96,15 @@ public static partial class bytes_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(bytes_package.Buffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bytesᴛBuffer;
+[GoMethodHost(typeof(bytes_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bytesᴛReader;
+[GoMethodHost(typeof(bytes_package.asciiSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bytesᴛasciiSet;
+// </MethodHolders>

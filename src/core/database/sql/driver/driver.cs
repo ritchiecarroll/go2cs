@@ -59,6 +59,7 @@ namespace go.database.sql;
 using context = context_package;
 using errors = errors_package;
 using reflect = reflect_package;
+using static driver_package;
 
 partial class driver_package {
 
@@ -454,7 +455,7 @@ partial interface RowsNextResultSet :
 partial interface RowsColumnTypeScanType :
     Rows
 {
-    reflectꓸType ColumnTypeScanType(nint index);
+    reflect.Type ColumnTypeScanType(nint index);
 }
 
 // RowsColumnTypeDatabaseTypeName may be implemented by [Rows]. It should return the
@@ -517,21 +518,25 @@ partial interface Tx {
 
 // RowsAffected implements [Result] for an INSERT or UPDATE operation
 // which mutates a number of rows.
-partial struct ΔRowsAffected /*num:int64*/;
+partial struct RowsAffected /*num:int64*/;
 
-internal static Result _ᴛ1ʗ = ((ΔRowsAffected)0);
+internal static Result _ᴛ1ʗ = ((RowsAffected)0);
+
+} partial class driverᴛRowsAffected {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lastInsertIdIsNotˢ => ref lastInsertIdIsNotˢᵇ;
 private static readonly @string lastInsertIdIsNotˢᵇ = "LastInsertId is not supported by this driver"u8;
 
-public static (int64, error) LastInsertId(this ΔRowsAffected _) {
+public static (int64, error) LastInsertId(this RowsAffected _) {
     return (0, errors.New(lastInsertIdIsNotˢ));
 }
 
-public static (int64, error) RowsAffected(this ΔRowsAffected v) {
+public static (int64, error) RowsAffected(this RowsAffected v) {
     return ((int64)v, default);
 }
+
+} partial class driver_package {
 
 // ResultNoRows is a pre-defined [Result] for drivers to return when a DDL
 // command (such as a CREATE TABLE) succeeds. It returns an error for both
@@ -543,6 +548,8 @@ public partial struct noRows {
 }
 
 internal static Result _ᴛ2ʗ = new noRows();
+
+} partial class driverᴛnoRows {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noLastInsertIdAvailableˢ => ref noLastInsertIdAvailableˢᵇ;
@@ -560,4 +567,4 @@ public static (int64, error) RowsAffected(this noRows _) {
     return (0, errors.New(noRowsAffectedAvailableˢ));
 }
 
-} // end driver_package
+} // end driverᴛnoRows

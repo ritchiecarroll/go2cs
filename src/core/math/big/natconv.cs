@@ -12,6 +12,7 @@ using bits = go.math.bits_package;
 using slices = slices_package;
 using sync = sync_package;
 using go.math;
+using static big_package;
 
 partial class big_package {
 
@@ -65,6 +66,8 @@ internal static Word /*p*/ pow(Word x, nint n) {
 internal static error errNoDigits = errors.New("number has no digits");
 internal static error errInvalSep = errors.New("'_' must separate successive digits");
 
+} partial class bigᴛnat {
+
 // scan scans the number corresponding to the longest possible prefix
 // from r representing an unsigned number in a given conversion base.
 // scan returns the corresponding natural number res, the actual base b,
@@ -109,8 +112,8 @@ internal static error errInvalSep = errors.New("'_' must separate successive dig
 // parsed. A digit count <= 0 indicates the presence of a period (if fracOk
 // is set, only), and -count is the number of fractional digits found.
 // In this case, the actual value of the scanned number is res * b**count.
-internal static (Δnat res, nint b, nint count, error err) scan(this Δnat z, io.ByteScanner r, nint @base, bool fracOk) {
-    Δnat res = default;
+internal static (nat res, nint b, nint count, error err) scan(this nat z, io.ByteScanner r, nint @base, bool fracOk) {
+    nat res = default;
     nint b = default;
     nint count = default;
     error err = default;
@@ -293,7 +296,7 @@ internal static (Δnat res, nint b, nint count, error err) scan(this Δnat z, io
             // Left-justify group's digits; will shift back down after reverse.
             z = append(z, di * pow(b1, n - i));
         }
-        slices.Reverse<Δnat, Word>(z);
+        slices.Reverse<nat, Word>(z);
         z = z.norm();
         if (i > 0) {
             z = z.rsh(z, (nuint)(n - i) * (nuint)((nint)_W / n));
@@ -317,12 +320,12 @@ internal static (Δnat res, nint b, nint count, error err) scan(this Δnat z, io
 
 // utoa converts x to an ASCII representation in the given base;
 // base must be between 2 and MaxBase, inclusive.
-internal static slice<byte> utoa(this Δnat x, nint @base) {
+internal static slice<byte> utoa(this nat x, nint @base) {
     return x.itoa(false, @base);
 }
 
 // itoa is like utoa but it prepends a '-' if neg && x != 0.
-internal static slice<byte> itoa(this Δnat x, bool neg, nint @base) {
+internal static slice<byte> itoa(this nat x, bool neg, nint @base) {
     GoFrame ᒐ = default;
     try {
         if (@base < 2 || @base > MaxBase) {
@@ -396,7 +399,7 @@ internal static slice<byte> itoa(this Δnat x, bool neg, nint @base) {
                 var table = divisors(stk, len(x), b, ndigits, bb);
 
                 // preserve x, create local copy for use by convertWords
-                var q = ((Δnat)default).set(x);
+                var q = ((nat)default).set(x);
 
                 // convert q to string s in base b
                 q.convertWords(stk, s, b, ndigits, bb, table);
@@ -437,11 +440,11 @@ internal static slice<byte> itoa(this Δnat x, bool neg, nint @base) {
 // range 2..64 shows that values of 8 and 16 work well, with a 4x speedup at medium lengths and
 // ~30x for 20000 digits. Use nat_test.go's BenchmarkLeafSize tests to optimize leafSize for
 // specific hardware.
-internal static void convertWords(this Δnat q, ж<stack> stk, slice<byte> s, Word b, nint ndigits, Word bb, slice<divisor> table) {
+internal static void convertWords(this nat q, ж<stack> stk, slice<byte> s, Word b, nint ndigits, Word bb, slice<divisor> table) {
     // split larger blocks recursively
     if (table != nil) {
         // len(q) > leafSize > 0
-        Δnat rΔ1 = default;
+        nat rΔ1 = default;
         nint index = len(table) - 1;
         while (len(q) > leafSize) {
             // find divisor close to sqrt(q) if possible, but in any case < q
@@ -504,6 +507,8 @@ internal static void convertWords(this Δnat q, ж<stack> stk, slice<byte> s, Wo
     }
 }
 
+} partial class big_package {
+
 // Split blocks greater than leafSize Words (or set to 0 to disable recursive conversion)
 // Benchmark and configure leafSize using: go test -bench="Leaf"
 //
@@ -512,7 +517,7 @@ internal static void convertWords(this Δnat q, ж<stack> stk, slice<byte> s, Wo
 internal static nint leafSize = 8; // number of Word-size binary values treat as a monolithic block
 
 partial struct divisor {
-    internal Δnat bbb;     // divisor
+    internal nat bbb;      // divisor
     internal nint nbits;   // bit length of divisor (discounting leading zeros) ~= log2(bbb)
     internal nint ndigits; // digit length of divisor in terms of output base digits
 }
@@ -524,10 +529,14 @@ partial struct cacheBase10ᴛ1 /*dyn*/ {
 internal static readonly ж<cacheBase10ᴛ1> ᏑcacheBase10 = new StaticBox<cacheBase10ᴛ1>(new cacheBase10ᴛ1(nil));
 internal static ref cacheBase10ᴛ1 cacheBase10 => ref ((StaticBox<cacheBase10ᴛ1>)ᏑcacheBase10).ValueSlot;
 
+} partial class bigᴛnat {
+
 // expWW computes x**y
-internal static Δnat expWW(this Δnat z, ж<stack> stk, Word x, Word y) {
-    return z.expNN(stk, ((Δnat)default).setWord(x), ((Δnat)default).setWord(y), default, false);
+internal static nat expWW(this nat z, ж<stack> stk, Word x, Word y) {
+    return z.expNN(stk, ((nat)default).setWord(x), ((nat)default).setWord(y), default, false);
 }
+
+} partial class big_package {
 
 // construct table of powers of bb*leafSize to use in subdivisions.
 internal static slice<divisor> divisors(ж<stack> stk, nint m, Word b, nint ndigits, Word bb) {
@@ -554,19 +563,19 @@ internal static slice<divisor> divisors(ж<stack> stk, nint m, Word b, nint ndig
     // extend table
     if (table[k - 1].ndigits == 0) {
         // add new entries as needed
-        Δnat larger = default;
+        nat larger = default;
         for (nint i = 0; i < k; i++) {
             if (table[i].ndigits == 0) {
                 if (i == 0) {
-                    table[0].bbb = ((Δnat)default).expWW(stk, bb, (Word)(nuint)leafSize);
+                    table[0].bbb = ((nat)default).expWW(stk, bb, (Word)(nuint)leafSize);
                     table[0].ndigits = ndigits * leafSize;
                 } else {
-                    table[i].bbb = ((Δnat)default).sqr(stk, table[i - 1].bbb);
+                    table[i].bbb = ((nat)default).sqr(stk, table[i - 1].bbb);
                     table[i].ndigits = 2 * table[i - 1].ndigits;
                 }
 
                 // optimization: exploit aggregated extra bits in macro blocks
-                larger = ((Δnat)default).set(table[i].bbb);
+                larger = ((nat)default).set(table[i].bbb);
                 while (mulAddVWW(larger, larger, b, 0) == 0) {
                     table[i].bbb = table[i].bbb.set(larger);
                     table[i].ndigits++;

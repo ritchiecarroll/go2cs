@@ -30,7 +30,7 @@ public class RuntimeMetricsHistogramTests
         try
         {
             metrics.Read(samples);
-            ж<metrics.ΔFloat64Histogram> hist = samples[0].Value.Float64Histogram();
+            ж<metrics.Float64Histogram> hist = samples[0].Value.Float64Histogram();
             counts = (int)len(hist.Value.Counts);
             buckets = (int)len(hist.Value.Buckets);
             for (int i = 0; i < counts; i++)

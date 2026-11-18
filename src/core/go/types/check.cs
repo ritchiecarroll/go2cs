@@ -18,11 +18,12 @@ using global::go.go;
 using global::go.sync;
 using io = io_package;
 using ꓸꓸꓸany = Span<any>;
+using static types_package;
 
 partial class types_package {
 
 // nopos, noposn indicate an unknown position
-internal static tokenꓸPos nopos;
+internal static token.Pos nopos;
 internal static atPos noposn = ((atPos)nopos);
 
 // debugging/development support
@@ -80,18 +81,20 @@ partial struct exprInfo {
 // type-checked.
 partial struct environment {
     internal ж<declInfo> decl;                   // package-level declaration whose init expression/function body is checked
-    internal ж<ΔScope> scope;                    // top-most scope for lookups
+    internal ж<Scope> scope;                     // top-most scope for lookups
     internal goVersion version;                  // current accepted language version; changes across files
     internal constant.Value iota;                // value of iota in a constant declaration; nil otherwise
     internal positioner errpos;                  // if set, identifier position of a constant with inherited initializer
     internal bool inTParamList;                  // set if inside a type parameter list
-    internal ж<ΔSignature> sig;                  // function signature if inside a function; nil otherwise
+    internal ж<Signature> sig;                   // function signature if inside a function; nil otherwise
     internal map<ж<ast.CallExpr>, bool> isPanic; // set of panic call expressions (used for termination check)
     internal bool hasLabel;                      // set if a function makes use of labels (only ~1% of functions); unused outside functions
     internal bool hasCallOrRecv;                 // set if an expression contains a function call or channel receive operation
     // go/types only
-    internal tokenꓸPos exprPos; // if valid, identifiers are looked up as if at position pos (used by CheckExpr, Eval)
+    internal token.Pos exprPos; // if valid, identifiers are looked up as if at position pos (used by CheckExpr, Eval)
 }
+
+} partial class typesᴛenvironment {
 
 // lookupScope looks up name in the current environment and if an object
 // is found it returns the scope containing the object and the object.
@@ -101,7 +104,7 @@ partial struct environment {
 // object was inserted into the scope and already had a parent at that
 // time (see Scope.Insert). This can only happen for dot-imported objects
 // whose parent is the scope of the package that exported them.
-internal static (ж<ΔScope>, Object) lookupScope(this ref environment env, @string name) {
+internal static (ж<Scope>, Object) lookupScope(this ref environment env, @string name) {
     for (var s = env.scope; s != nil; s = s.parent) {
         var obj = s.Lookup(name); if (obj != nil && (!env.exprPos.IsValid() || cmpPos(obj.scopePos(), env.exprPos) <= 0)) {
             return (s, obj);
@@ -116,6 +119,8 @@ internal static Object lookup(this ref environment env, @string name) {
     return obj;
 }
 
+} partial class types_package {
+
 // An importKey identifies an imported package by import path and source directory
 // (directory containing the file containing the import). In practice, the directory
 // may always be the same, or may not matter. Given an (import path, directory), an
@@ -128,7 +133,7 @@ partial struct importKey {
 
 // A dotImportKey describes a dot-imported object in the given scope.
 partial struct dotImportKey {
-    internal ж<ΔScope> scope;
+    internal ж<Scope> scope;
     internal @string name;
 }
 
@@ -139,6 +144,8 @@ partial struct action {
     internal ж<actionDesc> desc; // action description; may be nil, requires debug to be set
 }
 
+} partial class typesᴛaction {
+
 // If debug is set, describef sets a printf-formatted description for action a.
 // Otherwise, it is a no-op.
 internal static void describef(this ref action a, positioner pos, @string format, params ꓸꓸꓸany argsʗp) {
@@ -148,6 +155,8 @@ internal static void describef(this ref action a, positioner pos, @string format
         a.desc = Ꮡ(new actionDesc(pos, format, args));
     }
 }
+
+} partial class types_package {
 
 // An actionDesc provides information on an action.
 // For debugging only.
@@ -166,7 +175,7 @@ partial struct Checker {
     internal ж<Context> ctxt; // context for de-duplicating instances
     internal ж<token.FileSet> fset;
     internal ж<Package> pkg;
-    /*embed*/ public ж<ΔInfo> Info;
+    /*embed*/ public ж<Info> Info;
     internal uint64 nextID;                     // unique Id for type parameters (first valid Id is 1)
     internal map<Object, ж<declInfo>> objMap;   // maps package-level objects and (non-interface) methods to declaration info
     internal slice<Object> objList;             // source-ordered keys of objMap
@@ -210,6 +219,8 @@ partial struct Checker {
     internal nint indent;                // indentation for tracing
 }
 
+} partial class typesᴛChecker {
+
 // addDeclDep adds the dependency edge (check.decl -> to) if check.decl exists
 internal static void addDeclDep(this ref Checker check, Object to) {
     var from = check.decl;
@@ -236,11 +247,11 @@ internal static void brokenAlias(this ref Checker check, ж<TypeName> Ꮡalias) 
         check.brokenAliases = new map<ж<TypeName>, bool>();
     }
     check.brokenAliases[Ꮡalias] = true;
-    alias.typ = new BasicжΔType(Typ[Invalid]);
+    alias.typ = new BasicжType(Typ[Invalid]);
 }
 
 // validAlias records that alias has the valid type typ (possibly Typ[Invalid]).
-internal static void validAlias(this ref Checker check, ж<TypeName> Ꮡalias, ΔType typ) {
+internal static void validAlias(this ref Checker check, ж<TypeName> Ꮡalias, Type typ) {
     ref var alias = ref Ꮡalias.DerefOrNull();
 
     assert(!check.conf._EnableAlias);
@@ -293,9 +304,13 @@ internal static void pop(this ref Checker check) {
     delete(check.objPathIdx, obj);
 }
 
+} partial class types_package {
+
 partial interface cleaner {
     void cleanup();
 }
+
+} partial class typesᴛChecker {
 
 // needsCleanup records objects/types that implement the cleanup method
 // which will be called at the end of type-checking.
@@ -303,9 +318,11 @@ internal static void needsCleanup(this ref Checker check, cleaner c) {
     check.cleaners = append(check.cleaners, c);
 }
 
+} partial class types_package {
+
 // NewChecker returns a new [Checker] instance for a given package.
 // [Package] files may be added incrementally via checker.Files.
-public static ж<Checker> NewChecker(ж<Config> Ꮡconf, ж<token.FileSet> fset, ж<Package> pkg, ж<ΔInfo> Ꮡinfo) {
+public static ж<Checker> NewChecker(ж<Config> Ꮡconf, ж<token.FileSet> fset, ж<Package> pkg, ж<Info> Ꮡinfo) {
     ref var conf = ref Ꮡconf.DerefOrNull();
     ref var info = ref Ꮡinfo.DerefOrNull();
 
@@ -316,7 +333,7 @@ public static ж<Checker> NewChecker(ж<Config> Ꮡconf, ж<token.FileSet> fset,
 
     // make sure we have an info struct
     if (Ꮡinfo == nil) {
-        Ꮡinfo = @new<ΔInfo>(); info = ref Ꮡinfo.DerefOrNull();
+        Ꮡinfo = @new<Info>(); info = ref Ꮡinfo.DerefOrNull();
     }
 
     // Note: clients may call NewChecker with the Unsafe package, which is
@@ -340,6 +357,8 @@ public static ж<Checker> NewChecker(ж<Config> Ꮡconf, ж<token.FileSet> fset,
         usedPkgNames: new map<ж<PkgName>, bool>()
     ));
 }
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidPackageNameˢ => ref invalidPackageNameˢᵇ;
@@ -442,12 +461,16 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
     }
 }
 
+} partial class types_package {
+
 internal static goVersion versionMax(goVersion a, goVersion b) {
     if (a.cmp(b) < 0) {
         return b;
     }
     return a;
 }
+
+} partial class typesᴛChecker {
 
 // pushPos pushes pos onto the pos stack.
 internal static void pushPos(this ref Checker check, positioner pos) {
@@ -459,9 +482,13 @@ internal static void popPos(this ref Checker check) {
     check.posStack = check.posStack.slice(0, len(check.posStack) - 1);
 }
 
+} partial class types_package {
+
 // A bailout panic is used for early termination.
 partial struct bailout {
 }
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object theFollowingPanicˢ = (@string)"The following panic happened checking types near:"u8;
@@ -695,15 +722,17 @@ internal static void cleanup(this ref Checker check) {
 
 // go/types doesn't support recording of types directly in the AST.
 // dummy function to match types2 code.
-internal static void recordTypeAndValueInSyntax(this ref Checker check, ast.Expr x, operandMode mode, ΔType typ, constant.Value val) {
+internal static void recordTypeAndValueInSyntax(this ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
     // nothing to do
 }
 
 // go/types doesn't support recording of types directly in the AST.
 // dummy function to match types2 code.
-internal static void recordCommaOkTypesInSyntax(this ref Checker check, ast.Expr x, ΔType t0, ΔType t1) {
+internal static void recordCommaOkTypesInSyntax(this ref Checker check, ast.Expr x, Type t0, Type t1) {
     // nothing to do
 }
+
+} partial class types_package {
 
 // instantiatedIdent determines the identifier of the type instantiated in expr.
 // Helper function for recordInstance in recording.go.

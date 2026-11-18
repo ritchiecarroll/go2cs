@@ -25,38 +25,51 @@ using strings = strings_package;
 using @internal;
 using go.net;
 using ꓸꓸꓸstring = Span<@string>;
+using static url_package;
 
 partial class url_package {
 
 internal static ж<godebug.Setting> urlstrictcolons = godebug.New("urlstrictcolons");
 
 // Error reports an error and the operation and URL that caused it.
-partial struct ΔError {
+partial struct Error {
     public @string Op;
     public @string URL;
     public error Err;
 }
 
-public static error Unwrap(this ref ΔError e) { return e.Err; }
-public static @string Error(this ref ΔError e) { return fmt.Sprintf("%s %q: %s"u8, e.Op, e.URL, e.Err); }
+} partial class urlᴛError {
+
+public static error Unwrap(this ref Error e) { return e.Err; }
+public static @string Error(this ref Error e) { return fmt.Sprintf("%s %q: %s"u8, e.Op, e.URL, e.Err); }
+
+} partial class url_package {
 
 internal partial interface Timeout_type /*dyn*/ {
     bool Timeout();
 }
 
-public static bool Timeout(this ref ΔError e) {
+} partial class urlᴛError {
+
+public static bool Timeout(this ref Error e) {
     var (t, ok) = e.Err._<Timeout_type>(ᐧ);
     return ok && t.Timeout();
 }
+
+} partial class url_package {
 
 internal partial interface Temporary_type /*dyn*/ {
     bool Temporary();
 }
 
-public static bool Temporary(this ref ΔError e) {
+} partial class urlᴛError {
+
+public static bool Temporary(this ref Error e) {
     var (t, ok) = e.Err._<Temporary_type>(ᐧ);
     return ok && t.Temporary();
 }
+
+} partial class url_package {
 
 internal static ref readonly @string upperhex => ref upperhexᵇ;
 private static readonly @string upperhexᵇ = "0123456789ABCDEF"u8;
@@ -72,15 +85,23 @@ internal static byte unhex(byte c) {
 
 partial struct EscapeError /*@string*/;
 
+} partial class urlᴛEscapeError {
+
 public static @string Error(this EscapeError e) {
     return "invalid URL escape "u8 + strconv.Quote((@string)e);
 }
 
+} partial class url_package {
+
 partial struct InvalidHostError /*@string*/;
+
+} partial class urlᴛInvalidHostError {
 
 public static @string Error(this InvalidHostError e) {
     return "invalid character "u8 + strconv.Quote((@string)e) + " in host name"u8;
 }
+
+} partial class url_package {
 
 // See the reference implementation in gen_encoding_table.go.
 internal static bool shouldEscape(byte c, encoding mode) {
@@ -354,6 +375,8 @@ partial struct Userinfo {
     internal bool passwordSet;
 }
 
+} partial class urlᴛUserinfo {
+
 // Username returns the username.
 public static @string Username(this ж<Userinfo> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
@@ -388,6 +411,8 @@ public static @string String(this ж<Userinfo> Ꮡu) {
     }
     return s;
 }
+
+} partial class url_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string missingProtocolSchemeˢ => ref missingProtocolSchemeˢᵇ;
@@ -437,13 +462,13 @@ public static (ж<URL>, error) Parse(@string rawURL) {
     (u, var frag, _) = strings.Cut(rawURL, "#");
     var (url, err) = parse(u, false);
     if (err != nil) {
-        return (default, new ΔErrorжerror(Ꮡ(new ΔError("parse", u, err))));
+        return (default, new Errorжerror(Ꮡ(new Error("parse", u, err))));
     }
     if (frag == ""u8) {
         return (url, default);
     }
     err = url.setFragment(frag); if (err != nil) {
-        return (default, new ΔErrorжerror(Ꮡ(new ΔError("parse", rawURL, err))));
+        return (default, new Errorжerror(Ꮡ(new Error("parse", rawURL, err))));
     }
     return (url, default);
 }
@@ -456,7 +481,7 @@ public static (ж<URL>, error) Parse(@string rawURL) {
 public static (ж<URL>, error) ParseRequestURI(@string rawURL) {
     var (url, err) = parse(rawURL, true);
     if (err != nil) {
-        return (default, new ΔErrorжerror(Ꮡ(new ΔError("parse", rawURL, err))));
+        return (default, new Errorжerror(Ꮡ(new Error("parse", rawURL, err))));
     }
     return (url, default);
 }
@@ -701,6 +726,8 @@ internal static (@string, error) parseHost(@string scheme, @string host) {
     return (host, default);
 }
 
+} partial class urlᴛURL {
+
 // setPath sets the Path and RawPath fields of the URL based on the provided
 // escaped path p. It maintains the invariant that RawPath is only specified
 // when it differs from the default encoding of the path.
@@ -734,8 +761,12 @@ internal static error setPath(this ref URL u, @string p) {
     return default;
 }
 
+} partial class url_package {
+
 // for linkname because we cannot linkname methods directly
 internal static partial error badSetPath(ж<URL> _Δp0, @string _Δp1);
+
+} partial class urlᴛURL {
 
 // EscapedPath returns the escaped form of u.Path.
 // In general there are multiple possible escaped forms of any path.
@@ -758,6 +789,8 @@ public static @string EscapedPath(this ref URL u) {
     }
     return escape(u.Path, encodePath);
 }
+
+} partial class url_package {
 
 // validEncoded reports whether s is a valid encoded path or fragment,
 // according to mode.
@@ -791,6 +824,8 @@ internal static bool validEncoded(@string s, encoding mode) {
     }
     return true;
 }
+
+} partial class urlᴛURL {
 
 // setFragment is like setPath but for Fragment/RawFragment.
 internal static error setFragment(this ref URL u, @string f) {
@@ -826,6 +861,8 @@ public static @string EscapedFragment(this ref URL u) {
     return escape(u.Fragment, encodeFragment);
 }
 
+} partial class url_package {
+
 // validOptionalPort reports whether port is either an empty string
 // or matches /^:\d*$/
 internal static bool validOptionalPort(@string port) {
@@ -842,6 +879,8 @@ internal static bool validOptionalPort(@string port) {
     }
     return true;
 }
+
+} partial class urlᴛURL {
 
 // String reassembles the [URL] into a valid URL string.
 // The general form of the result is one of:
@@ -953,11 +992,15 @@ public static @string Redacted(this ж<URL> Ꮡu) {
     return ru.String();
 }
 
+} partial class url_package {
+
 // Values maps a string key to a list of values.
 // It is typically used for query parameters and form values.
 // Unlike in the http.Header map, the keys in a Values map
 // are case-sensitive.
 partial struct Values /*map[@string, slice<@string>]*/;
+
+} partial class urlᴛValues {
 
 // Get gets the first value associated with the given key.
 // If there are no values associated with the key, Get returns
@@ -993,6 +1036,8 @@ public static bool Has(this Values v, @string key) {
     var (_, ok) = v[key, ꟷ];
     return ok;
 }
+
+} partial class url_package {
 
 // ParseQuery parses the URL-encoded query string and returns
 // a map listing the values specified for each key.
@@ -1071,6 +1116,8 @@ internal static error /*err*/ parseQuery(Values m, @string query) {
     return err;
 }
 
+} partial class urlᴛValues {
+
 // Encode encodes the values into “URL encoded” form
 // ("bar=baz&foo=quux") sorted by key.
 public static @string Encode(this Values v) {
@@ -1101,6 +1148,8 @@ public static @string Encode(this Values v) {
     }
     return buf.String();
 }
+
+} partial class url_package {
 
 // resolvePath applies special path segments from refs and applies
 // them to base, per RFC 3986.
@@ -1165,6 +1214,8 @@ internal static @string resolvePath(@string @base, @string @ref) {
     return (@string)dst;
 }
 
+} partial class urlᴛURL {
+
 // IsAbs reports whether the [URL] is absolute.
 // Absolute means that it has a non-empty scheme.
 public static bool IsAbs(this ref URL u) {
@@ -1175,7 +1226,7 @@ public static bool IsAbs(this ref URL u) {
 // may be relative or absolute. Parse returns nil, err on parse
 // failure, otherwise its return value is the same as [URL.ResolveReference].
 public static (ж<URL>, error) Parse(this ref URL u, @string @ref) {
-    var (refURL, err) = Parse(@ref);
+    var (refURL, err) = url_package.Parse(@ref);
     if (err != nil) {
         return (default, err);
     }
@@ -1274,6 +1325,8 @@ public static @string Port(this ref URL u) {
     return port;
 }
 
+} partial class url_package {
+
 // splitHostPort separates host and port. If the port is not valid, it returns
 // the entire input as host, and it doesn't check the validity of the host.
 // Unlike net.SplitHostPort, but per RFC 3986, it requires ports to be numeric.
@@ -1295,6 +1348,8 @@ internal static (@string host, @string port) splitHostPort(@string hostPort) {
     return (host, port);
 }
 
+} partial class urlᴛURL {
+
 // Marshaling interface implementations.
 // Would like to implement MarshalText/UnmarshalText but that will change the JSON representation of URLs.
 public static (slice<byte> text, error err) MarshalBinary(this ref URL u) {
@@ -1306,7 +1361,7 @@ public static (slice<byte>, error) AppendBinary(this ref URL u, slice<byte> b) {
 }
 
 public static error UnmarshalBinary(this ref URL u, slice<byte> text) {
-    var (u1, err) = Parse((@string)text);
+    var (u1, err) = url_package.Parse((@string)text);
     if (err != nil) {
         return err;
     }
@@ -1347,6 +1402,8 @@ internal static (ж<URL>, error) joinPath(this ref URL u, params ꓸꓸꓸstring
     var err = url.setPath(p);
     return (Ꮡurl, err);
 }
+
+} partial class url_package {
 
 // validUserinfo reports whether s is a valid userinfo string per RFC 3986
 // Section 3.2.1:

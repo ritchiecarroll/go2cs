@@ -13,6 +13,7 @@ using fmt = fmt_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using encoding;
+using static gosym_package;
 
 partial class gosym_package {
 
@@ -30,6 +31,8 @@ partial struct Sym {
     public ж<Func> Func;
     internal version goVersion;
 }
+
+} partial class gosymᴛSym {
 
 // Static reports whether this symbol is static (not visible outside its file).
 public static bool Static(this ref Sym s) { return s.Type >= 'a'; }
@@ -132,6 +135,8 @@ public static @string BaseName(this ref Sym s) {
     }
     return s.Name;
 }
+
+} partial class gosym_package {
 
 // A Func collects information about a single function.
 partial struct Func {
@@ -565,6 +570,8 @@ break_countloop:;
     return (Ꮡt, default);
 }
 
+} partial class gosymᴛTable {
+
 // PCToFunc returns the function containing the program counter pc,
 // or nil if there is no such function.
 public static ж<Func> PCToFunc(this ref Table t, uint64 pc) {
@@ -686,9 +693,7 @@ public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) {
     return default;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string malformedSymbolTableˢ => ref malformedSymbolTableˢᵇ;
-private static readonly @string malformedSymbolTableˢᵇ = "<malformed symbol table>"u8;
+} partial class gosym_package {
 
 internal partial struct lineFromAline_stackEnt /*dyn*/ {
     internal @string path;
@@ -696,6 +701,12 @@ internal partial struct lineFromAline_stackEnt /*dyn*/ {
     internal nint offset;
     internal ж<lineFromAline_stackEnt> prev;
 }
+
+} partial class gosymᴛObj {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string malformedSymbolTableˢ => ref malformedSymbolTableˢᵇ;
+private static readonly @string malformedSymbolTableˢᵇ = "<malformed symbol table>"u8;
 
 /*
  * Object files
@@ -793,6 +804,8 @@ break_pathloop:;
     return (0, ((UnknownFileError)path));
 }
 
+} partial class gosym_package {
+
 /*
  * Errors
  */
@@ -801,7 +814,11 @@ break_pathloop:;
 // the symbol table.
 partial struct UnknownFileError /*@string*/;
 
+} partial class gosymᴛUnknownFileError {
+
 public static @string Error(this UnknownFileError e) { return "unknown file: "u8 + ((@string)e); }
+
+} partial class gosym_package {
 
 // UnknownLineError represents a failure to map a line to a program
 // counter, either because the line is beyond the bounds of the file
@@ -811,9 +828,13 @@ partial struct UnknownLineError {
     public nint Line;
 }
 
+} partial class gosymᴛUnknownLineError {
+
 public static @string Error(this ref UnknownLineError e) {
     return "no code at "u8 + e.File + ":"u8 + strconv.Itoa(e.Line);
 }
+
+} partial class gosym_package {
 
 // DecodingError represents an error during the decoding of
 // the symbol table.
@@ -822,6 +843,8 @@ partial struct DecodingError {
     internal @string msg;
     internal any val;
 }
+
+} partial class gosymᴛDecodingError {
 
 public static @string Error(this ref DecodingError e) {
     @string msg = e.msg;
@@ -832,4 +855,4 @@ public static @string Error(this ref DecodingError e) {
     return msg;
 }
 
-} // end gosym_package
+} // end gosymᴛDecodingError

@@ -4,6 +4,8 @@
 //go:generate go test . -run=^TestGenerated$ -fix
 namespace go.@internal;
 
+using static platform_package;
+
 partial class platform_package {
 
 // An OSArch is a pair of GOOS and GOARCH values indicating a platform.
@@ -11,9 +13,13 @@ partial struct OSArch {
     public @string GOOS, GOARCH;
 }
 
+} partial class platformᴛOSArch {
+
 public static @string String(this OSArch p) {
     return p.GOOS + "/"u8 + p.GOARCH;
 }
+
+} partial class platform_package {
 
 // RaceDetectorSupported reports whether goos/goarch supports the race
 // detector. There is a copy of this function in cmd/dist/test.go.

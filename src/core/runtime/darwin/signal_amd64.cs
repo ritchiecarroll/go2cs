@@ -8,34 +8,37 @@ using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static runtime_package;
 
 partial class runtime_package {
 
 internal static void dumpregs(ж<sigctxt> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    print((@string)"rax    ", (Δhex)c.rax(), (@string)"\n");
-    print((@string)"rbx    ", (Δhex)c.rbx(), (@string)"\n");
-    print((@string)"rcx    ", (Δhex)c.rcx(), (@string)"\n");
-    print((@string)"rdx    ", (Δhex)c.rdx(), (@string)"\n");
-    print((@string)"rdi    ", (Δhex)c.rdi(), (@string)"\n");
-    print((@string)"rsi    ", (Δhex)c.rsi(), (@string)"\n");
-    print((@string)"rbp    ", (Δhex)c.rbp(), (@string)"\n");
-    print((@string)"rsp    ", (Δhex)c.rsp(), (@string)"\n");
-    print((@string)"r8     ", (Δhex)c.r8(), (@string)"\n");
-    print((@string)"r9     ", (Δhex)c.r9(), (@string)"\n");
-    print((@string)"r10    ", (Δhex)c.r10(), (@string)"\n");
-    print((@string)"r11    ", (Δhex)c.r11(), (@string)"\n");
-    print((@string)"r12    ", (Δhex)c.r12(), (@string)"\n");
-    print((@string)"r13    ", (Δhex)c.r13(), (@string)"\n");
-    print((@string)"r14    ", (Δhex)c.r14(), (@string)"\n");
-    print((@string)"r15    ", (Δhex)c.r15(), (@string)"\n");
-    print((@string)"rip    ", (Δhex)c.rip(), (@string)"\n");
-    print((@string)"rflags ", (Δhex)c.rflags(), (@string)"\n");
-    print((@string)"cs     ", (Δhex)c.cs(), (@string)"\n");
-    print((@string)"fs     ", (Δhex)c.fs(), (@string)"\n");
-    print((@string)"gs     ", (Δhex)c.gs(), (@string)"\n");
+    print((@string)"rax    ", (hex)c.rax(), (@string)"\n");
+    print((@string)"rbx    ", (hex)c.rbx(), (@string)"\n");
+    print((@string)"rcx    ", (hex)c.rcx(), (@string)"\n");
+    print((@string)"rdx    ", (hex)c.rdx(), (@string)"\n");
+    print((@string)"rdi    ", (hex)c.rdi(), (@string)"\n");
+    print((@string)"rsi    ", (hex)c.rsi(), (@string)"\n");
+    print((@string)"rbp    ", (hex)c.rbp(), (@string)"\n");
+    print((@string)"rsp    ", (hex)c.rsp(), (@string)"\n");
+    print((@string)"r8     ", (hex)c.r8(), (@string)"\n");
+    print((@string)"r9     ", (hex)c.r9(), (@string)"\n");
+    print((@string)"r10    ", (hex)c.r10(), (@string)"\n");
+    print((@string)"r11    ", (hex)c.r11(), (@string)"\n");
+    print((@string)"r12    ", (hex)c.r12(), (@string)"\n");
+    print((@string)"r13    ", (hex)c.r13(), (@string)"\n");
+    print((@string)"r14    ", (hex)c.r14(), (@string)"\n");
+    print((@string)"r15    ", (hex)c.r15(), (@string)"\n");
+    print((@string)"rip    ", (hex)c.rip(), (@string)"\n");
+    print((@string)"rflags ", (hex)c.rflags(), (@string)"\n");
+    print((@string)"cs     ", (hex)c.cs(), (@string)"\n");
+    print((@string)"fs     ", (hex)c.fs(), (@string)"\n");
+    print((@string)"gs     ", (hex)c.gs(), (@string)"\n");
 }
+
+} partial class runtimeᴛsigctxt {
 
 //go:nosplit
 //go:nowritebarrierrec
@@ -89,4 +92,4 @@ internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resu
     c.set_rip((uint64)targetPC);
 }
 
-} // end runtime_package
+} // end runtimeᴛsigctxt

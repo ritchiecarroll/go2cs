@@ -107,7 +107,7 @@ internal static void timeoutWrapper(ж<testing.T> t, Func<(net.Conn, net.Conn, A
             stopʗ1();
         }, ref ᒐ);
         var stopʗ2 = stop;
-        var timer = time.AfterFunc(time.ΔMinute, () => {
+        var timer = time.AfterFunc(time.Minute, () => {
             var stopʗ3 = stopʗ2;
             Ꮡonce.Do(() => {
                 t.Error(testTimedOutTerminatingˢ);
@@ -604,7 +604,7 @@ internal static partial void testConcurrentMethods(ж<testing.T> t, net.Conn c1,
 // and that Timeout returns true.
 internal static void checkForTimeoutError(ж<testing.T> t, error err) {
     t.Helper();
-    var (nerr, ok) = err._<netꓸError>(ᐧ); if (ok) {
+    var (nerr, ok) = err._<net.Error>(ᐧ); if (ok) {
         if (!nerr.Timeout()) {
             if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm64"u8 && t.Name() == "TestTestConn/TCP/RacyRead"u8) {
                 t.Logf("ignoring known failure mode on windows/arm64; see https://go.dev/issue/52893");

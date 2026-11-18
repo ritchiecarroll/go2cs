@@ -124,8 +124,8 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
 - **[Short Variable Redeclaration (Shadowing)](shadowing.md)**
   - [An init statement keeps its block only where moving its names could change what they mean](shadowing.md#an-init-statement-keeps-its-block-only-where-moving-its-names-could-change-what-they-mean)
   - [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)
-  - [Test-variant name coherence: production names are pinned, test-side method declarators Δ-rename](shadowing.md#test-variant-name-coherence-production-names-are-pinned-test-side-method-declarators-δ-rename)
-  - [A production free function and a same-named method: the function Δ-renames](shadowing.md#a-production-free-function-and-a-same-named-method-the-function-δ-renames)
+  - [Test-variant names: a test file's method needs no rename](shadowing.md#test-variant-names-a-test-files-method-needs-no-rename)
+  - [A production free function and a same-named method keep their names](shadowing.md#a-production-free-function-and-a-same-named-method-keep-their-names)
   - [A NESTED package's production `GoImplement` record anchors to the production metadata file](shadowing.md#a-nested-packages-production-goimplement-record-anchors-to-the-production-metadata-file)
   - [Test suites REFERENCE the production project instead of recompiling it](shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it)
   - [Under the RECOMPILE model the test half CONTINUES the production emission (the `productionSeed`)](shadowing.md#under-the-recompile-model-the-test-half-continues-the-production-emission-the-productionseed)
@@ -143,7 +143,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A module hosted under `go.` shadows the root namespace the way a `go/*` import does](shadowing.md#a-module-hosted-under-go-shadows-the-root-namespace-the-way-a-go-import-does)
   - [A file that reaches Go names through `using static` binds .NET types by alias, never by namespace](shadowing.md#a-file-that-reaches-go-names-through-using-static-binds-net-types-by-alias-never-by-namespace)
   - [A dot-imported package's type is qualified by its class when another import has the package's name](shadowing.md#a-dot-imported-packages-type-is-qualified-by-its-class-when-another-import-has-the-packages-name)
-  - [A function called with a value whose type has a same-named method is cast to its parameter type](shadowing.md#a-function-called-with-a-value-whose-type-has-a-same-named-method-is-cast-to-its-parameter-type)
+  - [A function called inside a holder with a method of its name is written through the package alias](shadowing.md#a-function-called-inside-a-holder-with-a-method-of-its-name-is-written-through-the-package-alias)
 - **[Multi-Result Values and Comma-Ok Forms](multi-result-and-comma-ok.md)**
   - [A grouped var spec with one multi-result call deconstructs](multi-result-and-comma-ok.md#a-grouped-var-spec-with-one-multi-result-call-deconstructs)
 - **[Slices and Arrays](slices-and-arrays.md)**
@@ -474,7 +474,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Foreign renamed types reference the recorded imported-type alias](golib-namespace.md#foreign-renamed-types-reference-the-recorded-imported-type-alias)
   - [A foreign package's collision rename is derived from that package, not from the conversion run](golib-namespace.md#a-foreign-packages-collision-rename-is-derived-from-that-package-not-from-the-conversion-run)
   - [A foreign package's re-exported type ALIAS is derived from that package too](golib-namespace.md#a-foreign-packages-re-exported-type-alias-is-derived-from-that-package-too)
-  - [A renamed type reached only through another package's alias is spelled by its producer's member](golib-namespace.md#a-renamed-type-reached-only-through-another-packages-alias-is-spelled-by-its-producers-member)
+  - [A type reached only through another package's alias keeps its Go name](golib-namespace.md#a-type-reached-only-through-another-packages-alias-keeps-its-go-name)
   - [A DOT-IMPORTED renamed type is spelled through the same alias as the qualified reference](golib-namespace.md#a-dot-imported-renamed-type-is-spelled-through-the-same-alias-as-the-qualified-reference)
   - [The reflection bridge answers a read where the answer EXISTS](golib-namespace.md#the-reflection-bridge-answers-a-read-where-the-answer-exists)
   - [A typed nil keeps its type across BOTH interface-space boundaries](golib-namespace.md#a-typed-nil-keeps-its-type-across-both-interface-space-boundaries)

@@ -13,6 +13,7 @@ using color = go.image.color_package;
 using imageutil = go.image.@internal.imageutil_package;
 using go.image;
 using go.image.@internal;
+using static draw_package;
 
 partial class draw_package {
 
@@ -52,11 +53,15 @@ public static Op Over => /* iota */ 0;
 // Src specifies ``src in mask''.
 public static Op Src => 1;
 
+} partial class drawᴛOp {
+
 // Draw implements the [Drawer] interface by calling the Draw function with this
 // [Op].
 public static void Draw(this Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) {
     DrawMask(dst, r, src, sp, default, new image.Point(), op);
 }
+
+} partial class draw_package {
 
 // Drawer contains the [Draw] method.
 partial interface Drawer {
@@ -72,6 +77,8 @@ public static Drawer FloydSteinberg = new floydSteinberg();
 partial struct floydSteinberg {
 }
 
+} partial class drawᴛfloydSteinberg {
+
 internal static void Draw(this floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) {
     ref var r = ref heap(rʗp, out var Ꮡr);
 
@@ -81,6 +88,8 @@ internal static void Draw(this floydSteinberg _, Image dst, image.Rectangle rʗp
     }
     drawPaletted(dst, r, src, sp, true);
 }
+
+} partial class draw_package {
 
 // clip clips r against each image's bounds (after translating into the
 // destination image's coordinate space) and shifts the points sp and mp by
@@ -136,7 +145,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
     // converting non-alpha-premultiplied color to and from alpha-premultiplied
     // color. See TestDrawSrcNonpremultiplied.
     switch (dst.type()) {
-    case ж<imageꓸRGBA> dst0: {
+    case ж<image.RGBA> dst0: {
         if (op == Over) {
             if (mask == nil) {
                 switch (src.type()) {
@@ -149,7 +158,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     }
                     return;
                 }
-                case ж<imageꓸRGBA> src0: {
+                case ж<image.RGBA> src0: {
                     drawCopyOver(dst0, r, src0, sp);
                     return;
                 }
@@ -181,7 +190,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     drawGlyphOver(dst0, r, src0, mask0, mp);
                     return;
                 }
-                case ж<imageꓸRGBA> src0: {
+                case ж<image.RGBA> src0: {
                     drawRGBAMaskOver(dst0, r, src0, sp, mask0, mp);
                     return;
                 }
@@ -204,7 +213,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     drawFillSrc(dst0, r, sr, sg, sb, sa);
                     return;
                 }
-                case ж<imageꓸRGBA> src0: {
+                case ж<image.RGBA> src0: {
                     nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
                     nint s0 = src0.PixOffset(sp.X, sp.Y);
                     drawCopySrc(
@@ -431,7 +440,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
     }
 }
 
-internal static void drawFillOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, uint32 sr, uint32 sg, uint32 sb, uint32 sa) {
+internal static void drawFillOver(ж<image.RGBA> Ꮡdst, image.Rectangle r, uint32 sr, uint32 sg, uint32 sb, uint32 sa) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
     // The 0x101 is here for the same reason as in drawRGBA.
@@ -455,7 +464,7 @@ internal static void drawFillOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ui
     }
 }
 
-internal static void drawFillSrc(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, uint32 sr, uint32 sg, uint32 sb, uint32 sa) {
+internal static void drawFillSrc(ж<image.RGBA> Ꮡdst, image.Rectangle r, uint32 sr, uint32 sg, uint32 sb, uint32 sa) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
     var sr8 = (uint8)(sr >> 8);
@@ -481,7 +490,7 @@ internal static void drawFillSrc(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, uin
     }
 }
 
-internal static void drawCopyOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ж<imageꓸRGBA> Ꮡsrc, image.Point sp) {
+internal static void drawCopyOver(ж<image.RGBA> Ꮡdst, image.Rectangle r, ж<image.RGBA> Ꮡsrc, image.Point sp) {
     ref var dst = ref Ꮡdst.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
 
@@ -558,7 +567,7 @@ internal static void drawCopySrc(slice<byte> dstPix, nint dstStride, image.Recta
     }
 }
 
-internal static void drawNRGBAOver(ref imageꓸRGBA dst, image.Rectangle r, ref image.NRGBA src, image.Point sp) {
+internal static void drawNRGBAOver(ref image.RGBA dst, image.Rectangle r, ref image.NRGBA src, image.Point sp) {
     nint i0 = (r.Min.X - dst.Rect.Min.X) * 4;
     nint i1 = (r.Max.X - dst.Rect.Min.X) * 4;
     nint si0 = (sp.X - src.Rect.Min.X) * 4;
@@ -595,7 +604,7 @@ internal static void drawNRGBAOver(ref imageꓸRGBA dst, image.Rectangle r, ref 
     }
 }
 
-internal static void drawNRGBASrc(ref imageꓸRGBA dst, image.Rectangle r, ref image.NRGBA src, image.Point sp) {
+internal static void drawNRGBASrc(ref image.RGBA dst, image.Rectangle r, ref image.NRGBA src, image.Point sp) {
     nint i0 = (r.Min.X - dst.Rect.Min.X) * 4;
     nint i1 = (r.Max.X - dst.Rect.Min.X) * 4;
     nint si0 = (sp.X - src.Rect.Min.X) * 4;
@@ -624,7 +633,7 @@ internal static void drawNRGBASrc(ref imageꓸRGBA dst, image.Rectangle r, ref i
     }
 }
 
-internal static void drawGray(ref imageꓸRGBA dst, image.Rectangle r, ref image.Gray src, image.Point sp) {
+internal static void drawGray(ref image.RGBA dst, image.Rectangle r, ref image.Gray src, image.Point sp) {
     nint i0 = (r.Min.X - dst.Rect.Min.X) * 4;
     nint i1 = (r.Max.X - dst.Rect.Min.X) * 4;
     nint si0 = (sp.X - src.Rect.Min.X) * 1;
@@ -647,7 +656,7 @@ internal static void drawGray(ref imageꓸRGBA dst, image.Rectangle r, ref image
     }
 }
 
-internal static void drawCMYK(ref imageꓸRGBA dst, image.Rectangle r, ref image.CMYK src, image.Point sp) {
+internal static void drawCMYK(ref image.RGBA dst, image.Rectangle r, ref image.CMYK src, image.Point sp) {
     nint i0 = (r.Min.X - dst.Rect.Min.X) * 4;
     nint i1 = (r.Max.X - dst.Rect.Min.X) * 4;
     nint si0 = (sp.X - src.Rect.Min.X) * 4;
@@ -668,7 +677,7 @@ internal static void drawCMYK(ref imageꓸRGBA dst, image.Rectangle r, ref image
     }
 }
 
-internal static void drawGlyphOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ж<image.Uniform> Ꮡsrc, ж<image.Alpha> Ꮡmask, image.Point mp) {
+internal static void drawGlyphOver(ж<image.RGBA> Ꮡdst, image.Rectangle r, ж<image.Uniform> Ꮡsrc, ж<image.Alpha> Ꮡmask, image.Point mp) {
     ref var dst = ref Ꮡdst.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
     ref var mask = ref Ꮡmask.DerefOrNull();
@@ -700,7 +709,7 @@ internal static void drawGlyphOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, �
     }
 }
 
-internal static void drawGrayMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ж<image.Gray> Ꮡsrc, image.Point sp, ж<image.Alpha> Ꮡmask, image.Point mp) {
+internal static void drawGrayMaskOver(ж<image.RGBA> Ꮡdst, image.Rectangle r, ж<image.Gray> Ꮡsrc, image.Point sp, ж<image.Alpha> Ꮡmask, image.Point mp) {
     ref var dst = ref Ꮡdst.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
     ref var mask = ref Ꮡmask.DerefOrNull();
@@ -758,7 +767,7 @@ internal static void drawGrayMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
     }
 }
 
-internal static void drawRGBAMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ж<imageꓸRGBA> Ꮡsrc, image.Point sp, ж<image.Alpha> Ꮡmask, image.Point mp) {
+internal static void drawRGBAMaskOver(ж<image.RGBA> Ꮡdst, image.Rectangle r, ж<image.RGBA> Ꮡsrc, image.Point sp, ж<image.Alpha> Ꮡmask, image.Point mp) {
     ref var dst = ref Ꮡdst.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
     ref var mask = ref Ꮡmask.DerefOrNull();
@@ -820,7 +829,7 @@ internal static void drawRGBAMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
     }
 }
 
-internal static void drawRGBA64ImageMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.RGBA64Image src, image.Point sp, ж<image.Alpha> Ꮡmask, image.Point mp) {
+internal static void drawRGBA64ImageMaskOver(ж<image.RGBA> Ꮡdst, image.Rectangle r, image.RGBA64Image src, image.Point sp, ж<image.Alpha> Ꮡmask, image.Point mp) {
     ref var dst = ref Ꮡdst.DerefOrNull();
     ref var mask = ref Ꮡmask.DerefOrNull();
 
@@ -830,7 +839,7 @@ internal static void drawRGBA64ImageMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rect
     nint y0 = r.Min.Y;
     nint y1 = r.Max.Y;
     nint dy = 1;
-    if (AreEqual(((image.Image)new image.ΔRGBAжImage(Ꮡdst)), src) && r.Overlaps(r.Add(sp.Sub(r.Min)))) {
+    if (AreEqual(((image.Image)new image.RGBAжImage(Ꮡdst)), src) && r.Overlaps(r.Add(sp.Sub(r.Min)))) {
         if (sp.Y < r.Min.Y || sp.Y == r.Min.Y && sp.X < r.Min.X) {
             (x0, x1, dx) = (x1 - 1, x0 - 1, -1);
             (y0, y1, dy) = (y1 - 1, y0 - 1, -1);
@@ -873,7 +882,7 @@ internal static void drawRGBA64ImageMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rect
     }
 }
 
-internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.Image src, image.Point sp, image.Image mask, image.Point mp, Op op) {
+internal static void drawRGBA(ж<image.RGBA> Ꮡdst, image.Rectangle r, image.Image src, image.Point sp, image.Image mask, image.Point mp, Op op) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
     nint x0 = r.Min.X;
@@ -882,7 +891,7 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
     nint y0 = r.Min.Y;
     nint y1 = r.Max.Y;
     nint dy = 1;
-    if (AreEqual(((image.Image)new image.ΔRGBAжImage(Ꮡdst)), src) && r.Overlaps(r.Add(sp.Sub(r.Min)))) {
+    if (AreEqual(((image.Image)new image.RGBAжImage(Ꮡdst)), src) && r.Overlaps(r.Add(sp.Sub(r.Min)))) {
         if (sp.Y < r.Min.Y || sp.Y == r.Min.Y && sp.X < r.Min.X) {
             (x0, x1, dx) = (x1 - 1, x0 - 1, -1);
             (y0, y1, dy) = (y1 - 1, y0 - 1, -1);
@@ -1080,7 +1089,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
     // interface which escapes to the heap but need to be discovered for
     // each pixel on r. See also https://golang.org/issues/15759.
     switch (src.type()) {
-    case ж<imageꓸRGBA> src0: {
+    case ж<image.RGBA> src0: {
         pxRGBA = (nint x, nint y) => {
             return src0.RGBAAt(x, y).RGBA();
         };

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,17 +9,25 @@ partial struct myErr {
     internal nint code;
 }
 
+} partial class mainᴛmyErr {
+
 internal static @string Error(this ref myErr e) {
     return fmt.Sprintf("myErr %d"u8, e.code);
 }
+
+} partial class main_package {
 
 partial struct valErr {
     internal @string tag;
 }
 
+} partial class mainᴛvalErr {
+
 internal static @string Error(this valErr e) {
     return "valErr "u8 + e.tag;
 }
+
+} partial class main_package {
 
 internal static error pointerSourced() {
     return new myErrжerror(Ꮡ(new myErr(code: 42)));

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -22,6 +23,8 @@ partial struct resolver {
     internal map<@string, @string> ns;
 }
 
+} partial class mainᴛresolver {
+
 internal static void fix(this ref resolver r, ж<name> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
@@ -35,6 +38,8 @@ internal static void reset(this ref resolver r, ж<end> Ꮡe) {
 
     e.n.space = "reset";
 }
+
+} partial class main_package {
 
 internal static any process(any tok, ж<resolver> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();

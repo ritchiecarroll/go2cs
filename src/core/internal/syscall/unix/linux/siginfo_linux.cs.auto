@@ -10,6 +10,7 @@
 namespace go.@internal.syscall;
 
 using syscall = syscall_package;
+using static unix_package;
 
 partial class unix_package {
 
@@ -45,6 +46,8 @@ internal static UntypedInt core => 0x80;
 internal static UntypedInt stopped => 0x7f;
 internal static UntypedInt continued => 0xffff;
 
+} partial class unixᴛSiginfoChild {
+
 // WaitStatus converts SiginfoChild, as filled in by the waitid syscall,
 // to syscall.WaitStatus.
 public static syscall.WaitStatus /*ws*/ WaitStatus(this ref SiginfoChild s) {
@@ -74,4 +77,4 @@ public static syscall.WaitStatus /*ws*/ WaitStatus(this ref SiginfoChild s) {
     return ws;
 }
 
-} // end unix_package
+} // end unixᴛSiginfoChild

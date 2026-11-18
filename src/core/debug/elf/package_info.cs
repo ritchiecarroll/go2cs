@@ -27,8 +27,6 @@ using static go.debug.elf_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Data", "ΔData")]
-[assembly: GoTypeAlias("Section", "ΔSection")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -40,6 +38,7 @@ using static go.debug.elf_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<FormatError, error>(Pointer = true)]
 [assembly: GoImplement<Prog, io_package.ReaderAt>(Promoted = true)]
+[assembly: GoImplement<Section, io_package.ReaderAt>(Promoted = true)]
 [assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<errorReader, error>(Promoted = true)]
 [assembly: GoImplement<errorReader, io_package.ReadSeeker>]
@@ -49,7 +48,6 @@ using static go.debug.elf_package;
 [assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<readSeekerFromReader, io_package.ReadSeeker>(Pointer = true)]
-[assembly: GoImplement<ΔSection, io_package.ReaderAt>(Promoted = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -66,9 +64,9 @@ using static go.debug.elf_package;
 [assembly: GoFieldAccess(typeof(File))]
 [assembly: GoFieldAccess(typeof(ImportedSymbol))]
 [assembly: GoFieldAccess(typeof(Prog))]
+[assembly: GoFieldAccess(typeof(Section))]
 [assembly: GoFieldAccess(typeof(Section32))]
 [assembly: GoFieldAccess(typeof(Section64))]
-[assembly: GoFieldAccess(typeof(ΔSection))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -78,9 +76,9 @@ using static go.debug.elf_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/elf/elf.go", "elf.cs", "AEiWAcqCAAgW3IIACBbcggAZOAAWLoIADiIACxiCAMIBigMAvwGAA4IADyQACBKCACROACFEggASKgANHIIACxwACBKCADVwABk0ggAKGtyCAJUBsAIAT6ABggARKAAHEIIAUKYBACFEggAIFtyCAAweAAkUggAVMAAPIIIACRjuggA0bgAtXIIAhwGUAgCEAYoCggAhSAAePoIAlQGwAgCSAaYCggAvZAAsWoIAOHYAM2iCAHr6AQB38AGCAFe0AQBPoAGCAKsB3AIAowHIAoIAO3wAOHKCAEKKAQA/gAGCAD2AAQA6doIATp4BgoIADRyCgoKUAFCiAYKCABk4goKCgpTcgoKCgoKUuKaCgoKCgpSClIKmgpSClA==")]
-[assembly: GoPositionMap("debug/elf/file.go", "file.cs", "AGjcAfLqooKUAAYSAAgCgqaChIKmgoKCpoKCgoSCyJS0uoKmpIIAHkKAABxCgoKClIKokoKClIKCgpSCrLKCgoKUqqKCgqaqwoSSgpSCpoKCAAgKpoKClLS0lJSCgqaClpKSgqKUgoKClIKCgoCCpIKCgoKCgrSCgoKUgoKCgIKkgoKCgoKCtoKUgqaCpoKmkpSCtIKkgriCgoKUgoKClIIADBaCAAsWgpSClIKC7oKSgpSCgpSCgrSCgpSCgqSCpoIABxCCgoLKgriCgpSClIKCgoKUgoKClIKCAA0YgoIADBiClIKUlIKCppSCgoKUgoKCtIKCgpSCgoLIpoK4ppSCgpSCgpSCgoKCuOqilKamytSCgoKmgoKUgpSCpoKCuJSUgoKCgoKCgoKCgoKCgoKCgoKm5oKCgqaCgpSClIKmgoK4lJSCgoKCgoKCgoKCgoKCgoKCgqaokoKmgoKmqqKCgqbqopSkpKSkpKSkpKSkpKQAAxTi5pSCpoKCpoKUgoKClIKUgoLulLTI5pSCpoKCpoKUgoKClIKUlIK4ppSCpoKCpoKUgoKClIKUlJTIppSCpoKCpoKUgoKClIKUgoLulLTI5pSCpoKCpoKUgoKClIKUgoKmlMimlIKmgoKmgpSCgoKUgpSCgqaUtMimlIKmgoKmgpSCgoKUgpSUlMimlIKmgoKmgpSCgoKCgoKUgqaClIKCppS0yKaUgqaCgqaClIKCgoKClIKUgoKmlLTIppSCpoKCpoKUgoKClIKUgoKmlLTIppSCpoKCpoKUgoKClIKUgoKmlLTIppSCpoKCpoKUgoKClIKUgoKmlLbIABIGooKUpKTMgoKCprimgoKUgpSCgpSCgqaqooKCgpSClIKClKaCgriCgoKUlKaCgqaCgqaCygACEuKCAAIYAAkCgoKUgoKUgoKmAAgawoKClIKUgoKCgoKmAAUQogACIAANAgAeQJKUuIKClJSCgoKClIKClIKCgoKUgqaCgoKCgoKUgoKUgpSmpu6ClKaU6JKCgoKUgoKUgriokpS4goKUlIKCgoKUgoKUgoKCgpSCgoKClIKCgoKU3IKUpsqClKaU6JKCgoKUgoKUgrisxIKClJSCgIKkgIKkqrSCgpSCgpSClIKmgoKCyoKCuKyyAAYQ8saUgpSUgoKmgoKUgqaCgpSCgoKClIKCtIKCpIKCgri6woKClIKCpoKClIKokoKCgpSCgrSCgqSCpgAKCoIAAhTygpSCppSUgoKUtIKClLQ=", "161-163:1;171-174:2;1258-1268:1;1271-1301:2", "", "447=Uint32/1/8/1,Uint32/2/8/2,Uint32/3/8/3,Uint32/4/8/4,Uint32/5/8/5,Uint32/6/8/6,Uint32/7/8/7,Uint32/8/8/8;461=Uint32/1/2/1,Uint32/2/2/2,Uint64/1/6/3,Uint64/2/6/4,Uint64/3/6/5,Uint64/4/6/6,Uint64/5/6/7,Uint64/6/6/8;559=Uint32/1/9/1,Uint32/2/9/2,Uint32/3/9/3,Uint32/4/9/4,Uint32/5/9/5,Uint32/6/9/6,Uint32/7/9/7,Uint32/8/9/8,Uint32/9/9/9;575=Uint32/1/3/1,Uint64/1/6/2,Uint64/2/6/3,Uint64/3/6/4,Uint64/4/6/5,Uint32/2/3/6,Uint32/3/3/7,Uint64/5/6/8,Uint64/6/6/9")]
-[assembly: GoPositionMap("debug/elf/reader.go", "reader.cs", "AA8igqaCpoKmggANHIKCgpSUprKClIKCpoKClLS0tKaUpqa2tpSWkoKCgpSCyII=")]
+[assembly: GoPositionMap("debug/elf/elf.go", "elf.cs", "AEmWAeqCAAoW/IIAChb8ggAbOAAYLoIAECIADRiCAMQBigMAwQGAA4IAESQAChKCACZOACNEggAUKgAPHIIADRwAChKCADdwABs0ggAMGvyCAJcBsAIAUaABggATKAAJEIIAUqYBACNEggAKFvyCAA4eAAsUggAXMAARIIIACxgACA6CADZuAC9cggCJAZQCAIYBigKCACNIACA+ggCXAbACAJQBpgKCADFkAC5aggA6dgA1aIIAfPoBAHnwAYIAWbQBAFGgAYIArQHcAgClAcgCggA9fAA6coIARIoBAEGAAYIAP4ABADx2ggBQngGCggANHIKCgpQAUKIBgoIAGTiCgoKClNyCgoKCgpS4poKCgoKClIKUgqaClIKU")]
+[assembly: GoPositionMap("debug/elf/file.go", "file.cs", "AGvcAfIACAqigpQACBIACAKCpoKEgqaCgoKmgoKChILIlLS6gqakggAiQoAAIEKCgoKUgsiSgoKUgoKClILMsoKCgpSqooKCpsrChJKClIKmgoIACAqmgoKUtLSUlIKCpoKWkpKCopSCgoKUgoKCgIKkgoKCgoKCtIKCgpSCgoKAgqSCgoKCgoK2gpSCpoKmgqaSlIK0gqSCuIKCgpSCgoKUggAMFoIACxaClIKUgoLugpKClIKClIKCtIKClIKCpIKmggAHEIKCgsqCuIKClIKUgoKCgpSCgoKUgoIADRiCggAMGIKUgpSUgoKmlIKCgpSCgoK0goKClIKCgsimgrimlIKClIKClIKCgoK4AAgKopSmpur0goKCpoKClIKUgqaCgriUlIKCgoKCgoKCgoKCgoKCgoKCpuaCgoKmgoKUgpSCpoKCuJSUgoKCgoKCgoKCgoKCgoKCgoKmyJKCpoKCpsqigoKm6qKUpKSkpKSkpKSkpKSkAAUU4gAIBpSCpoKCpoKUgoKClIKUgoLulLTI5pSCpoKCpoKUgoKClIKUlIK4ppSCpoKCpoKUgoKClIKUlJTIppSCpoKCpoKUgoKClIKUgoLulLTI5pSCpoKCpoKUgoKClIKUgoKmlMimlIKmgoKmgpSCgoKUgpSCgqaUtMimlIKmgoKmgpSCgoKUgpSUlMimlIKmgoKmgpSCgoKCgoKUgqaClIKCppS0yKaUgqaCgqaClIKCgoKClIKUgoKmlLTIppSCpoKCpoKUgoKClIKUgoKmlLTIppSCpoKCpoKUgoKClIKUgoKmlLTIppSCpoKCpoKUgoKClIKUgoKmlLbIABIGooKUpKTMgoKCprimgoKUgpSCgpSCgqaqooKCgpSClIKClKaCgriCgoKUlKaCgqaCgqaCygACEuKCAAIYAAkCgoKUgoKUgoKmAAwawoKClIKUgoKCgoKmAAkQogACIAANAgAiQJKUuIKClJSCgoKClIKClIKCgoKUgqaCgoKCgoKUgoKUgpSmpu6ClKaU6JKCgoKUgoKUgriokpS4goKUlIKCgoKUgoKUgoKCgpSCgoKClIKCgoKU3IKUpsqClKaU6JKCgoKUgoKUgrisxIKClJSCgIKkgIKkqrSCgpSCgpSClIKmgoKCyoKCuKyyAAYQ8saUgpSUgoKmgoKUgqaCgpSCgoKClIKCtIKCpIKCgri6woKClIKCpoKClIKokoKCgpSCgrSCgqSCpgAOCoIABBTygpSCppSUgoKUtIKClLQ=", "161-163:1;171-174:2;1258-1268:1;1271-1301:2", "", "468=Uint32/1/8/1,Uint32/2/8/2,Uint32/3/8/3,Uint32/4/8/4,Uint32/5/8/5,Uint32/6/8/6,Uint32/7/8/7,Uint32/8/8/8;482=Uint32/1/2/1,Uint32/2/2/2,Uint64/1/6/3,Uint64/2/6/4,Uint64/3/6/5,Uint64/4/6/6,Uint64/5/6/7,Uint64/6/6/8;580=Uint32/1/9/1,Uint32/2/9/2,Uint32/3/9/3,Uint32/4/9/4,Uint32/5/9/5,Uint32/6/9/6,Uint32/7/9/7,Uint32/8/9/8,Uint32/9/9/9;596=Uint32/1/3/1,Uint64/1/6/2,Uint64/2/6/3,Uint64/3/6/4,Uint64/4/6/5,Uint32/2/3/6,Uint32/3/3/7,Uint64/5/6/8,Uint64/6/6/9")]
+[assembly: GoPositionMap("debug/elf/reader.go", "reader.cs", "ABIigqaCpoKmggARHIKCgpSUprKClIKCpoKClLS0tKaUpqa2tpSWkoKCgpSCyII=")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;
@@ -103,6 +101,7 @@ public static partial class elf_package
     public partial struct Chdr64 {}
     public partial struct Class {}
     public partial struct CompressionType {}
+    public partial struct Data {}
     public partial struct Dyn32 {}
     public partial struct Dyn64 {}
     public partial struct DynFlag {}
@@ -143,6 +142,7 @@ public static partial class elf_package
     public partial struct Rel64 {}
     public partial struct Rela32 {}
     public partial struct Rela64 {}
+    public partial struct Section {}
     public partial struct Section32 {}
     public partial struct Section64 {}
     public partial struct SectionFlag {}
@@ -158,8 +158,6 @@ public static partial class elf_package
     public partial struct Type {}
     public partial struct Version {}
     public partial struct VersionIndex {}
-    public partial struct ΔData {}
-    public partial struct ΔSection {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -184,3 +182,51 @@ public static partial class elf_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(elf_package.Class)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛClass;
+[GoMethodHost(typeof(elf_package.CompressionType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛCompressionType;
+[GoMethodHost(typeof(elf_package.Data)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛData;
+[GoMethodHost(typeof(elf_package.DynFlag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛDynFlag;
+[GoMethodHost(typeof(elf_package.DynFlag1)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛDynFlag1;
+[GoMethodHost(typeof(elf_package.DynTag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛDynTag;
+[GoMethodHost(typeof(elf_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛFile;
+[GoMethodHost(typeof(elf_package.FormatError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛFormatError;
+[GoMethodHost(typeof(elf_package.Machine)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛMachine;
+[GoMethodHost(typeof(elf_package.NType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛNType;
+[GoMethodHost(typeof(elf_package.OSABI)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛOSABI;
+[GoMethodHost(typeof(elf_package.Prog)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛProg;
+[GoMethodHost(typeof(elf_package.ProgFlag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛProgFlag;
+[GoMethodHost(typeof(elf_package.ProgType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛProgType;
+[GoMethodHost(typeof(elf_package.R_386)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_386;
+[GoMethodHost(typeof(elf_package.R_390)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_390;
+[GoMethodHost(typeof(elf_package.R_AARCH64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_AARCH64;
+[GoMethodHost(typeof(elf_package.R_ALPHA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_ALPHA;
+[GoMethodHost(typeof(elf_package.R_ARM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_ARM;
+[GoMethodHost(typeof(elf_package.R_LARCH)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_LARCH;
+[GoMethodHost(typeof(elf_package.R_MIPS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_MIPS;
+[GoMethodHost(typeof(elf_package.R_PPC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_PPC;
+[GoMethodHost(typeof(elf_package.R_PPC64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_PPC64;
+[GoMethodHost(typeof(elf_package.R_RISCV)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_RISCV;
+[GoMethodHost(typeof(elf_package.R_SPARC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_SPARC;
+[GoMethodHost(typeof(elf_package.R_X86_64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_X86_64;
+[GoMethodHost(typeof(elf_package.Section)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSection;
+[GoMethodHost(typeof(elf_package.SectionFlag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSectionFlag;
+[GoMethodHost(typeof(elf_package.SectionIndex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSectionIndex;
+[GoMethodHost(typeof(elf_package.SectionType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSectionType;
+[GoMethodHost(typeof(elf_package.SymBind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSymBind;
+[GoMethodHost(typeof(elf_package.SymType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSymType;
+[GoMethodHost(typeof(elf_package.SymVis)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSymVis;
+[GoMethodHost(typeof(elf_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛType;
+[GoMethodHost(typeof(elf_package.Version)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛVersion;
+[GoMethodHost(typeof(elf_package.VersionIndex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛVersionIndex;
+[GoMethodHost(typeof(elf_package.errorReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛerrorReader;
+[GoMethodHost(typeof(elf_package.nobitsSectionReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛnobitsSectionReader;
+[GoMethodHost(typeof(elf_package.readSeekerFromReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛreadSeekerFromReader;
+// </MethodHolders>

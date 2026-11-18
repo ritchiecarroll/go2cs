@@ -12,6 +12,7 @@ using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
 using math;
+using static drbg_package;
 
 partial class drbg_package {
 
@@ -48,7 +49,7 @@ public static ж<Counter> NewCounter(/*[48]*/ ж<array<byte>> entropy) {
     fips140.RecordApproved();
 
     var K = new slice<byte>(keySize);
-    var V = new slice<byte>(aes.ΔBlockSize);
+    var V = new slice<byte>(aes.BlockSize);
 
     // V starts at 0, but is incremented in CTR_DRBG_Update before each use,
     // unlike AES-CTR where it is incremented after each use.
@@ -65,6 +66,8 @@ public static ж<Counter> NewCounter(/*[48]*/ ж<array<byte>> entropy) {
     c.reseedCounter = 1;
     return c;
 }
+
+} partial class drbgᴛCounter {
 
 internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -87,6 +90,8 @@ internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡs
     c.c = aes.NewCTR(cipher, V).Value;
 }
 
+} partial class drbg_package {
+
 internal static void increment(/*[16]*/ ж<array<byte>> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
@@ -97,6 +102,8 @@ internal static void increment(/*[16]*/ ж<array<byte>> Ꮡv) {
     byteorder.BEPutUint64(v[..8], hi);
     byteorder.BEPutUint64(v[8..], lo);
 }
+
+} partial class drbgᴛCounter {
 
 public static void Reseed(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -154,4 +161,4 @@ public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte
     return false;
 }
 
-} // end drbg_package
+} // end drbgᴛCounter

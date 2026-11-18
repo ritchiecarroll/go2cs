@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -10,6 +11,8 @@ public static void ShowValue(fmt.Stringer val) {
     fmt.Println(val.String());
 }
 
+} partial class mainᴛmain_MyBool {
+
 internal static @string String(this main_MyBool b) {
     if (b) {
         return "true-ish";
@@ -17,6 +20,8 @@ internal static @string String(this main_MyBool b) {
 
     return "false-ish";
 }
+
+} partial class main_package {
 
 internal partial struct main_MyBoolᴛ1 /*bool*/;
 

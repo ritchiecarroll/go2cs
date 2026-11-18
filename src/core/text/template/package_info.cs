@@ -10,10 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -76,11 +72,11 @@ using static go.text.template_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("text/template/exec.go", "exec.cs", "ABgslIKClAATKpKokqiSqqKCgoKmqJKokoKCpoL+lJSCqJKqogAOHoKmgqiygoKUgpQADRyCzuKCgpS0tMTWAAISAAkCgoKUAAIaAAoCpuKCgoKUyoKUggAJDgAJAoKUgoKCgoKUgpSUlOqCmsKCuIKCxua0tILGtLSCxsTM4oKCgoKUgoKUlIK0qrKmspSUlLS0tLS0tLS0lKbSgoKCpoKUgqKCpoKUyqaCgrimgpSCpqKStoKClIKClJSClMSClIKUxIKUgoKUxIKUgoKUgoKCgpSUgpTExIKCgpSCgqaUgpSUgoKCgoLKpoKUlLSUgrSkooKCgpSCpoKCgpSCAAIWAAsCgpSCgoKUgqaCgpSmpoKCuKKClKS2toKklIKClKSktKSUgu4ACQiClKqmgoKUpqSmgqaCpqKCpqKCgpSCpoKmtIKCgoKUrLKCgqamooKCgoKUrLKCgpSUgoKmgsqCgpSClJSUgoKCgpSCpoKU2IKCgpSCgti0tsaCgqamgraCqIKCnLKClIKCgpSCgoKClIKUgqaCgpS4goKCgoKmpu6UuJSCgqaCgoK4goKCprimyoKClJSUgqamgoKUqJKUpJSokoKUlJSUlIKUgoKCggAHEJSCgsa0tqaCgpSkgpS0pKSkpJSUpKSkpILGgsaklIKmgoKCgoKUgqaCgoKCgpSCpoKCgoKClIKmgoKCgoKUgqaCgoKCgpSCpoKCgoKUgqaCgpSkpKS2tKSkpJSCrLKCgqauwoKUgpSqooKCgpSCguyigpSCpoKClJS4", "354-358:1;363-396:2;389-394:2.1;794-799:1", "", "149=Name/1/1/1,Errorf/1/1/2", "240:21", "451:21,452:13,488:29,490:21")]
+[assembly: GoPositionMap("text/template/exec.go", "exec.cs", "ABkslIKClAAVKpKokqiSqqKCgoKmqJKokoKCpoIACQ6UlILIksqiABAegqaCyLKCgpSClAARHILu4oKClLS0xNYABBIACQKCgpQAAhoACgKm4oKCgpTKgpSCAAkOAAkCgpSCgoKCgpSClJSUAAgKgrrCgriCgsbmtLSCxrS0gsbEzOKCgoKClIKClJSCtMqyprKUlJS0tLS0tLS0tJTG0oKCgqaClIKigqaClMqmgoK4poKUgqaikraCgpSCgpSUgpTEgpSClMSClIKClMSClIKClIKCgoKUlIKUxMSCgoKUgoKmlIKUlIKCgoKCyqaClJS0lIK0pKKCgoKUgqaCgoKUggACFgALAoKUgoKClIKmgoKUpqaCgriigpSktraCpJSCgpSkpLSklILuAAkIgpSqpoKClKakxoKmgsaigqaigoKUgqaCprSCgoKClKyygoKmpqKCgoKClKyygoKUlIKCpoLKgoKUgpSUlIKCgoKUgqaClNiCgoKUgoLYtLbGgoKmpoK2gsiCgryygpSCgoKUgoKCgpSClIKmgoKUuIKCgoKCpqbulLiUgoKmgoKCuIKCgqa4psqCgpSUlIKmpoKClMiSlKSUyJKClJSUlJSClIKCgoIABxCUgoLGtLamgoKUpIKUtKSkpKSUlKSkpKSCxoLGpJSCpoKCgoKClIKmgoKCgoKUgqaCgoKCgpSCpoKCgoKClIKmgoKCgoKUgqaCgoKClIKmgoKUpKSktrSkpKSUgsyygoKmrsKClIKUyqKCgoKUgoIACAyigpSCpoKClJS4", "354-358:1;363-396:2;389-394:2.1;794-799:1", "", "162=Name/1/1/1,Errorf/1/1/2", "261:21", "480:21,481:13,517:29,519:21")]
 [assembly: GoPositionMap("text/template/funcs.go", "funcs.cs", "ACVOwgAaNIKCgoKokoKClIKClIKUvKKCuqSkpKSkupKClILGpKaoAAgCgoKCgqaAgqTqooKClJSClIKClKaClKSUqJKClLS0pJSClAACEPKCgpSigoKClJSCgpS0goKUgIKU6LSmAAISAAgCgoKUgoKUgpSClIKUtLSmgoKCgpSmgpSCpoKUrLKCgpSUlKqyqsKCgpSCgqaAgqSCgoKClJSCpoKilIKCpoKCpqrigoKClLiCgpTqkoKqwqrCqJIABBCCAAsegpSkpKSkpJSokoKUlJSqooKCgqaosoKClIKigoKClJS0tILIlLS0tLS0tIKUgpSClMiCpqikgqiSgoKClIKCgpSClJS0tKaUpLS0tLS2qKSCgpSopIKClKikgoKUvIKCgoKCmJKCgoKUtLS0tLS0pIKClKikgpSCgqrCvIKUgoKCgoKCmJKCgpSUlJSmlLS0tLS0tLSCgoLIgoKUlJSUqKSClIKCpoKUlKrCqsIAAhTygpSClIKCgoKmlA==", "357-365:1", "", "", "", "416:21,417:13")]
-[assembly: GoPositionMap("text/template/helper.go", "helper.cs", "ABEw8oKUAAIYAAsCAAIcAA4CgqrSlJSCgoKUjuKClIKUlIKCpgACGAAJAgACFgAKAoKokoKClIKUruKu8oKmgoKCgoKUgpSUpsKCgqaCsoKC", "173-177:1")]
-[assembly: GoPositionMap("text/template/option.go", "option.cs", "ABZUABUCgoKUpoKCpoKkpIKkgqSCyA==")]
-[assembly: GoPositionMap("text/template/template.go", "template.cs", "ACVOkqaCqJIAAhTygtyokoKCgoKCAAMUAAwCgoKClIKCgoKCgqaClIKCgoLYkgAIGgAJAoKCgoKCpoKU2OKCpoKCgoKUAAUQ8oKCggACEgALAoKCgoKC2vKClIKCAAUaAAwCgoKCgoKmgoKmrOKClKaUgg==")]
+[assembly: GoPositionMap("text/template/helper.go", "helper.cs", "ABIw8oKUAAIYAAsCAAQcAA4CgsrSlJSCgoKUjuKClIKUlIKCpgACGAAJAgAEFgAKAoLIkoKClIKUruLO8oLGgoKCgoKUgpSUpsKCgqaCsoKC", "173-177:1")]
+[assembly: GoPositionMap("text/template/option.go", "option.cs", "ABlUABUCgoKUpoKCpoKkpIKkgqSCyA==")]
+[assembly: GoPositionMap("text/template/template.go", "template.cs", "ACZOkqaCyJIAAhTygtyokoKCgoKCAAMUAAwCgoKClIKCgoKCgqaClIKCgoLYkgAIGgAJAoKCgoKCpoKU2OKCpoKCgoKUAAUQ8oKCggACEgALAoKCgoKC2vKClIKCAAUaAAwCgoKCgoKmgoKmrOKClKaUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.text;
@@ -102,7 +98,7 @@ public static partial class template_package
     internal partial struct option {}
     internal partial struct state {}
     internal partial struct variable {}
-    internal partial struct ΔwriteError {}
+    internal partial struct writeError {}
     public partial struct ExecError {}
     public partial struct FuncMap {}
     public partial struct Template {}
@@ -134,3 +130,15 @@ public static partial class template_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(template_package.ExecError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛExecError;
+[GoMethodHost(typeof(template_package.Template)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛTemplate;
+[GoMethodHost(typeof(template_package.state)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛstate;
+// </MethodHolders>

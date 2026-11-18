@@ -16,6 +16,7 @@ using time = time_package;
 using @internal;
 using crypto;
 using go.net;
+using static httptrace_package;
 
 partial class httptrace_package {
 
@@ -135,7 +136,7 @@ partial struct ClientTrace {
     // TLSHandshakeDone is called after the TLS handshake with either the
     // successful handshake's connection state, or a non-nil error on handshake
     // failure.
-    public Action<tlsꓸConnectionState, error> TLSHandshakeDone;
+    public Action<tls.ConnectionState, error> TLSHandshakeDone;
     // WroteHeaderField is called after the Transport has written
     // each request header. At the time of this call the values
     // might be buffered and not yet written to the network.
@@ -161,6 +162,8 @@ partial struct WroteRequestInfo {
     public error Err;
 }
 
+} partial class httptraceᴛClientTrace {
+
 // compose modifies t such that it respects the previously-registered hooks in old,
 // subject to the composition policy requested in t.Compose.
 internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> old) {
@@ -176,7 +179,7 @@ internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> old) {
         if (hookType.Kind() != reflect.Func) {
             continue;
         }
-        ref var of = ref heap<reflectꓸValue>(ov.Field(i), out var Ꮡof);
+        ref var of = ref heap<reflect.Value>(ov.Field(i), out var Ꮡof);
         if (of.IsNil()) {
             continue;
         }
@@ -187,18 +190,20 @@ internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> old) {
 
         // Make a copy of tf for tf to call. (Otherwise it
         // creates a recursive call cycle and stack overflows)
-        ref var tfCopy = ref heap<reflectꓸValue>(reflect.ValueOf(tf.Interface()), out var ᏑtfCopy);
+        ref var tfCopy = ref heap<reflect.Value>(reflect.ValueOf(tf.Interface()), out var ᏑtfCopy);
 
         // We need to call both tf and of in some order.
         var ofʗ1 = of;
         var tfCopyʗ1 = tfCopy;
-        var newFunc = reflect.MakeFunc(hookType, (slice<reflectꓸValue> args) => {
+        var newFunc = reflect.MakeFunc(hookType, (slice<reflect.Value> args) => {
             tfCopyʗ1.Call(args);
             return ofʗ1.Call(args);
         });
         tv.Field(i).Set(newFunc);
     }
 }
+
+} partial class httptrace_package {
 
 // DNSStartInfo contains information about a DNS request.
 partial struct DNSStartInfo {
@@ -217,6 +222,8 @@ partial struct DNSDoneInfo {
     public bool Coalesced;
 }
 
+} partial class httptraceᴛClientTrace {
+
 internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -225,6 +232,8 @@ internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) {
     }
     return t.DNSStart != nil || t.DNSDone != nil || t.ConnectStart != nil || t.ConnectDone != nil;
 }
+
+} partial class httptrace_package {
 
 // GotConnInfo is the argument to the [ClientTrace.GotConn] function and
 // contains information about the obtained connection.

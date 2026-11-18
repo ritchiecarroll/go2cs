@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,9 +10,13 @@ public partial struct hkdfState {
     internal nint size;
 }
 
+} partial class mainᴛhkdfState {
+
 internal static @string describe(this ref hkdfState s) {
     return fmt.Sprintf("%s/%d"u8, s.name, s.size);
 }
+
+} partial class main_package {
 
 public partial struct cfg {
     internal bool verbose;

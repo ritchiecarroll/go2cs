@@ -8,6 +8,7 @@ using isync = @internal.sync_package;
 using @unsafe = unsafe_package;
 using @internal;
 using Δsync = @internal.sync_package;
+using static unique_package;
 
 partial class unique_package {
 
@@ -23,11 +24,15 @@ partial struct Handle<T> {
     internal ж<T> value;
 }
 
+} partial class uniqueᴛHandle {
+
 // Value returns a shallow copy of the T value that produced the Handle.
 // Value is safe for concurrent use by multiple goroutines.
 public static T Value<T>(this Handle<T> h) {
     return h.value.ValueSlot;
 }
+
+} partial class unique_package {
 
 // Make returns a globally unique handle for a value of type T. Handles
 // are equal if and only if the values used to produce them are equal.

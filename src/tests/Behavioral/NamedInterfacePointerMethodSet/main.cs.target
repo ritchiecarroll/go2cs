@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using pmslib = NamedInterfacePointerMethodSet.pmslib_package;
 using NamedInterfacePointerMethodSet;
+using static main_package;
 
 partial class main_package {
 
@@ -10,32 +11,52 @@ partial struct PtrOnly {
     internal @string name;
 }
 
+} partial class mainᴛPtrOnly {
+
 public static @string Speak(this ref PtrOnly p) { return "ptr:"u8 + p.name; }
+
+} partial class main_package {
 
 partial struct ValOnly {
     internal @string name;
 }
 
+} partial class mainᴛValOnly {
+
 public static @string Speak(this ValOnly v) { return "val:"u8 + v.name; }
+
+} partial class main_package {
 
 partial struct Mixed {
     internal nint n;
 }
 
+} partial class mainᴛMixed {
+
 public static @string Speak(this Mixed m) { return fmt.Sprintf("mixed:%d"u8, m.n); }
 
 public static void Bump(this ref Mixed m) { m.n++; }
 
+} partial class main_package {
+
 partial struct WrongSig {
 }
 
+} partial class mainᴛWrongSig {
+
 public static @string Speak(this WrongSig w, nint times) { return "wrong"; }
+
+} partial class main_package {
 
 partial struct gbox<T> {
     internal T v;
 }
 
+} partial class mainᴛgbox {
+
 internal static T Get<T>(this gbox<T> b) { return b.v; }
+
+} partial class main_package {
 
 internal static void report(@string label, @string s, bool ok) {
     fmt.Println(label, ok, s);

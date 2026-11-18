@@ -6,6 +6,7 @@ using other = ForeignAndUnnamedStructConversion.other_package;
 using ForeignAndUnnamedStructConversion;
 using ꓸꓸꓸanonBox_V = Span<main_package.anonBox_V>;
 using ꓸꓸꓸlibꓸPitch = Span<ForeignAndUnnamedStructConversion.lib_package.Pitch>;
+using static main_package;
 
 partial class main_package {
 
@@ -13,7 +14,11 @@ public partial struct hertz {
     public nint Hz;
 }
 
+} partial class mainᴛhertz {
+
 internal static nint half(this hertz h) { return h.Hz / 2; }
+
+} partial class main_package {
 
 partial struct Hertz {
     public nint Hz;
@@ -252,8 +257,12 @@ internal static anonBox_V pkgAnon = pkgHertz;
 partial struct taker {
 }
 
+} partial class mainᴛtaker {
+
 internal static nint anon(this taker _, anonBox_V a) { return a.Hz; }
 internal static nint named(this taker _, lib.Pitch p) { return p.Double(); }
+
+} partial class main_package {
 
 internal static nint takeAnons(params ꓸꓸꓸanonBox_V xsʗp) {
     var xs = xsʗp.sslice();
@@ -431,7 +440,11 @@ internal static nint takePitches(params ꓸꓸꓸlibꓸPitch xsʗp) {
     return n;
 }
 
+} partial class mainᴛtaker {
+
 internal static nint local(this taker _, hertz h) { return h.half(); }
+
+} partial class main_package {
 
 internal static nint backSetFieldForeign(anonBox_V a) {
     foreignBox b = default;

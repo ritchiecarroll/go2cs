@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using static reflect_package;
+
 partial class reflect_package {
 
 // VisibleFields returns all the visible fields in t, which must be a
@@ -14,7 +16,7 @@ partial class reflect_package {
 //
 // For each element e of the returned slice, the corresponding field
 // can be retrieved from a value v of type t by calling v.FieldByIndex(e.Index).
-public static slice<StructField> VisibleFields(ΔType t) {
+public static slice<StructField> VisibleFields(Type t) {
     if (t == nil) {
         throw panic("reflect: VisibleFields(nil)");
     }
@@ -23,7 +25,7 @@ public static slice<StructField> VisibleFields(ΔType t) {
     }
     var w = Ꮡ(new visibleFieldsWalker(
         byName: new map<@string, nint>(),
-        visiting: new map<ΔType, bool>(),
+        visiting: new map<Type, bool>(),
         fields: new slice<StructField>(0, t.NumField()),
         index: new slice<nint>(0, 2)
     ));
@@ -49,24 +51,26 @@ public static slice<StructField> VisibleFields(ΔType t) {
 
 partial struct visibleFieldsWalker {
     internal map<@string, nint> byName;
-    internal map<ΔType, bool> visiting;
+    internal map<Type, bool> visiting;
     internal slice<StructField> fields;
     internal slice<nint> index;
 }
+
+} partial class reflectᴛvisibleFieldsWalker {
 
 // walk walks all the fields in the struct type t, visiting
 // fields in index preorder and appending them to w.fields
 // (this maintains the required ordering).
 // Fields that have been overridden have their
 // Name field cleared.
-internal static void walk(this ref visibleFieldsWalker w, ΔType t) {
+internal static void walk(this ref visibleFieldsWalker w, Type t) {
     if (w.visiting[t]) {
         return;
     }
     w.visiting[t] = true;
     for (nint i = 0; i < t.NumField(); i++) {
         var f = t.Field(i);
-        w.index = builtin.append(w.index, i);
+        w.index = append(w.index, i);
         var add = true;
         var (oldIndex, ok) = w.byName[f.Name, ꟷ]; if (ok) {
             var old = Ꮡ(w.fields, oldIndex);
@@ -88,12 +92,12 @@ internal static void walk(this ref visibleFieldsWalker w, ΔType t) {
         if (add) {
             // Copy the index so that it's not overwritten
             // by the other appends.
-            f.Index = builtin.appendꓸꓸꓸ(slice<nint>(default), w.index);
+            f.Index = appendꓸꓸꓸ(slice<nint>(default), w.index);
             w.byName[f.Name] = len(w.fields);
-            w.fields = builtin.append(w.fields, f);
+            w.fields = append(w.fields, f);
         }
         if (f.Anonymous) {
-            if (f.Type.Kind() == ΔPointer) {
+            if (f.Type.Kind() == Pointer) {
                 f.Type = f.Type.Elem();
             }
             if (f.Type.Kind() == Struct) {
@@ -105,4 +109,4 @@ internal static void walk(this ref visibleFieldsWalker w, ΔType t) {
     delete(w.visiting, t);
 }
 
-} // end reflect_package
+} // end reflectᴛvisibleFieldsWalker

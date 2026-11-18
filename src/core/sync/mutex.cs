@@ -89,6 +89,8 @@ using WaitReason = go.golib.WaitReason;
 
 namespace go;
 
+using static sync_package;
+
 partial class sync_package {
 
 // Fatal-error hooks (Go provides these via runtime linkname): one-line forwards to golib's fatal
@@ -111,7 +113,7 @@ internal static partial void fatal(@string s) => FatalReport.Fatal(s, userFault:
 // The zero value for a Mutex is an unlocked mutex.
 //
 // A Mutex must not be copied after first use.
-[GoType] partial struct Mutex {
+[GoType] public partial struct Mutex {
     // Go's layout (internal/sync.Mutex): the lock word and the semaphore word, eight bytes, no managed
     // reference. `state`: 0 unlocked, 1 locked, 2 locked with a waiter possibly blocked. `sema`: the
     // handle of this mutex's wait queue (queueOf), 0 while no goroutine waits.
@@ -132,7 +134,7 @@ internal static partial void fatal(@string s) => FatalReport.Fatal(s, userFault:
 // before its queue was given up names nothing afterwards. So a contended Lock allocates a queue only
 // while its thread's stripe has no spare one, which is when more of that stripe's queues are in use at
 // once than ever before. `handle`, `waiters` and `next` are written under the stripe's lock.
-private sealed class WaitQueue : SemaphoreSlim {
+internal sealed class WaitQueue : SemaphoreSlim {
     internal uint32 handle;
     internal int waiters;
     internal WaitQueue? next;   // the next queue of its bucket, or the next spare one
@@ -271,7 +273,7 @@ private static int s_stripeTurn;
 
 // queueOf returns the wait queue a handle names, or null: a handle whose queue was given up, or bytes
 // that were never a handle.
-private static WaitQueue? queueOf(uint32 handle) {
+internal static WaitQueue? queueOf(uint32 handle) {
     QueueStripe stripe = stripeOf(handle);
 
     lock (stripe) {
@@ -293,7 +295,7 @@ private static WaitQueue? queueOf(uint32 handle) {
 // the queue was given up. A handle with no queue is replaced like a zero one: the handle of a queue
 // given up since the read, or bytes the mutex never wrote. Takes the mutex BY REF: the methods that
 // call it are `ref Mutex` primaries, and the mutex can live where no box reaches it.
-private static WaitQueue gateOf(ref Mutex m) {
+internal static WaitQueue gateOf(ref Mutex m) {
     while (true) {
         uint32 seen = Volatile.Read(ref m.sema);
         QueueStripe stripe;
@@ -333,7 +335,7 @@ private static WaitQueue gateOf(ref Mutex m) {
 // leave gives back a queue gateOf returned. The last waiter out takes the queue out of the table and
 // writes 0 back into the mutex, so an idle mutex holds no handle. Both happen under the lock gateOf
 // counts under, so no waiter is counted into a queue that is being given up.
-private static void leave(ref Mutex m, WaitQueue queue) {
+internal static void leave(ref Mutex m, WaitQueue queue) {
     uint32 handle = queue.handle;
     QueueStripe stripe = stripeOf(handle);
 
@@ -344,6 +346,8 @@ private static void leave(ref Mutex m, WaitQueue queue) {
         }
     }
 }
+
+} partial class syncᴛMutex {
 
 // Lock locks m.
 // If the lock is already in use, the calling goroutine blocks until the mutex is available.
@@ -433,12 +437,14 @@ private static void leave(ref Mutex m, WaitQueue queue) {
     }
 }
 
+} partial class sync_package {
+
 // The acquire times of a queue's stamped waiters, Go's per-sudog acquiretime reduced to the two its
 // semrelease1 reads: the HEAD (the waiter a handoff dequeues) and the TAIL (the newest), plus the count
 // between them. Kept beside the queue rather than in Mutex, so Mutex keeps Go's layout, and
 // reached only while stamped waiters exist anywhere (s_outstanding), so an Unlock with profiling off
 // pays one volatile read.
-private sealed class WaitStamps {
+internal sealed class WaitStamps {
     internal static int s_outstanding;
 
     private int64 m_head;
@@ -500,7 +506,9 @@ private sealed class WaitStamps {
     }
 }
 
-private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<SemaphoreSlim, WaitStamps> s_waitStamps = new();
+internal static readonly System.Runtime.CompilerServices.ConditionalWeakTable<SemaphoreSlim, WaitStamps> s_waitStamps = new();
+
+} partial class syncᴛMutex {
 
 // TryLock tries to lock m and reports whether it succeeded.
 [GoRecv] public static bool TryLock(this ref Mutex m) => Interlocked.CompareExchange(ref m.state, 1, 0) == 0;
@@ -553,5 +561,7 @@ private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Sem
         }
     }
 }
+
+} partial class sync_package {
 
 } // end sync_package

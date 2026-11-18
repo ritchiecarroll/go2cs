@@ -55,7 +55,7 @@ using static go.crypto.@internal.entropy.v1_0_0.entropy_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/entropy/v1.0.0/entropy.go", "entropy.cs", "ABQmwgAHHPiyggAbOAAGENKClIKUlIKUgIKkgIKkAAgSggAGFsKCgoKmpoKClIKUgpSUgoLKAAYeAAwCgoKCgoKCpoKmAAYmABACgoKCgpSCpg==", "", "", "119=HighPrecisionNow/1/2/2,HighPrecisionNow/2/2/3")]
+[assembly: GoPositionMap("crypto/internal/entropy/v1.0.0/entropy.go", "entropy.cs", "ABUmwgAHHPiyggAbOAAGENKClIKUlIKUgIKkgIKkAAgSggAGFsKCgoLGpoKClIKUgpSUgoLKAAgeAAwCgoKCgoKCpoKmAAYmABACgoKCgpSCpg==", "", "", "120=HighPrecisionNow/1/2/2,HighPrecisionNow/2/2/3")]
 [assembly: GoPositionMap("crypto/internal/entropy/v1.0.0/sha384.go", "sha384.cs", "AA4cAAoWopSCgoKCgoKClIKCgpSmgoKmgqaCgqiSgoKCgpSClKaCgoKCgoKCgqYAUqYBooKCgpSCgoKUuJSChJaCgoKCgoKCpoKCgoKCgoKmgoKogoKCgoKCgoKC", "", "", "190=RotateLeft64/3/3/1;191=RotateLeft64/3/3/1")]
 // </GoSourcePositionMaps>
 
@@ -88,3 +88,13 @@ public static partial class entropy_package
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(sync.atomic_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(entropy_package.source)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class entropyᴛsource;
+// </MethodHolders>

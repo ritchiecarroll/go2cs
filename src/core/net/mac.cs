@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using static net_package;
+
 partial class net_package {
 
 internal static ref readonly @string hexDigit => ref hexDigitᵇ;
@@ -10,6 +12,8 @@ private static readonly @string hexDigitᵇ = "0123456789abcdef"u8;
 
 // A HardwareAddr represents a physical hardware address.
 partial struct HardwareAddr /*[]byte*/;
+
+} partial class netᴛHardwareAddr {
 
 public static @string String(this HardwareAddr a) {
     var bufᴷ = new stackAppend<byte>();
@@ -27,6 +31,8 @@ public static @string String(this HardwareAddr a) {
     }
     return (@string)buf;
 }
+
+} partial class net_package {
 
 // ParseMAC parses s as an IEEE 802 MAC-48, EUI-48, EUI-64, or a 20-octet
 // IP over InfiniBand link-layer address using one of the following formats:

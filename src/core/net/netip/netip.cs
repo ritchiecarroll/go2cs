@@ -19,6 +19,7 @@ using math = math_package;
 using strconv = strconv_package;
 using unique = unique_package;
 using @internal;
+using static netip_package;
 
 partial class netip_package {
 
@@ -35,7 +36,7 @@ partial class netip_package {
 //
 // The zero Addr is not a valid IP address.
 // Addr{} is distinct from both 0.0.0.0 and ::.
-partial struct ΔAddr {
+partial struct Addr {
     // addr is the hi and lo bits of an IPv6 address. If z==z4,
     // hi and lo contain the IPv4-mapped IPv6 address.
     //
@@ -70,26 +71,26 @@ internal static unique.Handle<addrDetail> z6noz = unique.Make<addrDetail>(new ad
 
 // IPv6LinkLocalAllNodes returns the IPv6 link-local all nodes multicast
 // address ff02::1.
-public static ΔAddr IPv6LinkLocalAllNodes() { return AddrFrom16(new array<byte>(16){[0] = 0xff, [1] = 0x02, [15] = 0x01}); }
+public static Addr IPv6LinkLocalAllNodes() { return AddrFrom16(new array<byte>(16){[0] = 0xff, [1] = 0x02, [15] = 0x01}); }
 
 // IPv6LinkLocalAllRouters returns the IPv6 link-local all routers multicast
 // address ff02::2.
-public static ΔAddr IPv6LinkLocalAllRouters() { return AddrFrom16(new array<byte>(16){[0] = 0xff, [1] = 0x02, [15] = 0x02}); }
+public static Addr IPv6LinkLocalAllRouters() { return AddrFrom16(new array<byte>(16){[0] = 0xff, [1] = 0x02, [15] = 0x02}); }
 
 // IPv6Loopback returns the IPv6 loopback address ::1.
-public static ΔAddr IPv6Loopback() { return AddrFrom16(new array<byte>(16){[15] = 0x01}); }
+public static Addr IPv6Loopback() { return AddrFrom16(new array<byte>(16){[15] = 0x01}); }
 
 // IPv6Unspecified returns the IPv6 unspecified address "::".
-public static ΔAddr IPv6Unspecified() { return new ΔAddr(z: z6noz); }
+public static Addr IPv6Unspecified() { return new Addr(z: z6noz); }
 
 // IPv4Unspecified returns the IPv4 unspecified address "0.0.0.0".
-public static ΔAddr IPv4Unspecified() { return AddrFrom4(new byte[]{}.array(4)); }
+public static Addr IPv4Unspecified() { return AddrFrom4(new byte[]{}.array(4)); }
 
 // AddrFrom4 returns the address of the IPv4 address given by the bytes in addr.
-public static ΔAddr AddrFrom4(/*[4]*/ array<byte> addr) {
+public static Addr AddrFrom4(/*[4]*/ array<byte> addr) {
     addr = addr.Clone();
 
-    return new ΔAddr(
+    return new Addr(
         addr: new uint128(0, 0xffff00000000UL | (uint64)addr[0] << 24 | (uint64)addr[1] << 16 | (uint64)addr[2] << 8 | (uint64)addr[3]),
         z: z4
     );
@@ -98,10 +99,10 @@ public static ΔAddr AddrFrom4(/*[4]*/ array<byte> addr) {
 // AddrFrom16 returns the IPv6 address given by the bytes in addr.
 // An IPv4-mapped IPv6 address is left as an IPv6 address.
 // (Use Unmap to convert them if needed.)
-public static ΔAddr AddrFrom16(/*[16]*/ array<byte> addr) {
+public static Addr AddrFrom16(/*[16]*/ array<byte> addr) {
     addr = addr.Clone();
 
-    return new ΔAddr(
+    return new Addr(
         addr: new uint128(
             byteorder.BEUint64(addr[..8]),
             byteorder.BEUint64(addr[8..])
@@ -113,7 +114,7 @@ public static ΔAddr AddrFrom16(/*[16]*/ array<byte> addr) {
 // ParseAddr parses s as an IP address, returning the result. The string
 // s can be in dotted decimal ("192.0.2.1"), IPv6 ("2001:db8::68"),
 // or IPv6 with a scoped addressing zone ("fe80::1cc0:3e8c:119f:c2e1%ens18").
-public static (ΔAddr, error) ParseAddr(@string s) {
+public static (Addr, error) ParseAddr(@string s) {
     for (nint i = 0; i < len(s); i++) {
         switch (s[i]) {
         case (byte)'.': {
@@ -125,15 +126,15 @@ public static (ΔAddr, error) ParseAddr(@string s) {
         case (byte)'%': {
             // Assume that this was trying to be an IPv6 address with
             // a zone specifier, but the address is missing.
-            return (new ΔAddr(), new parseAddrError(@in: s, msg: "missing IPv6 address"));
+            return (new Addr(), new parseAddrError(@in: s, msg: "missing IPv6 address"));
         }}
     }
-    return (new ΔAddr(), new parseAddrError(@in: s, msg: "unable to parse IP"));
+    return (new Addr(), new parseAddrError(@in: s, msg: "unable to parse IP"));
 }
 
 // MustParseAddr calls [ParseAddr](s) and panics on error.
 // It is intended for use in tests with hard-coded strings.
-public static ΔAddr MustParseAddr(@string s) {
+public static Addr MustParseAddr(@string s) {
     var (ip, err) = ParseAddr(s);
     if (err != nil) {
         throw panic(err);
@@ -147,6 +148,8 @@ partial struct parseAddrError {
     internal @string at;  // optionally, the unparsed portion of in at which the error occurred.
 }
 
+} partial class netipᴛparseAddrError {
+
 internal static @string Error(this parseAddrError err) {
     var q = strconv.Quote;
     if (err.at != ""u8) {
@@ -154,6 +157,8 @@ internal static @string Error(this parseAddrError err) {
     }
     return "ParseAddr("u8 + q(err.@in) + "): "u8 + err.msg;
 }
+
+} partial class netip_package {
 
 internal static error parseIPv4Fields(@string @in, nint off, nint end, slice<uint8> fields) {
     nint val = default;
@@ -197,19 +202,19 @@ internal static error parseIPv4Fields(@string @in, nint off, nint end, slice<uin
 }
 
 // parseIPv4 parses s as an IPv4 address (in form "192.168.0.1").
-internal static (ΔAddr ip, error err) parseIPv4(@string s) {
+internal static (Addr ip, error err) parseIPv4(@string s) {
     error err = default;
 
     array<uint8> fields = new(4);
     err = parseIPv4Fields(s, 0, len(s), fields[..]);
     if (err != nil) {
-        return (new ΔAddr(), err);
+        return (new Addr(), err);
     }
     return (AddrFrom4(fields), default);
 }
 
 // parseIPv6 parses s as an IPv6 address (in form "2001:db8::68").
-internal static (ΔAddr, error) parseIPv6(@string @in) {
+internal static (Addr, error) parseIPv6(@string @in) {
     @string s = @in;
 
     // Split off the zone right from the start. Yes it's a second scan
@@ -222,7 +227,7 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
         (s, zone) = (s.slice(0, i), s.slice(i + 1));
         if (zone == ""u8) {
             // Not allowed to have an empty zone if explicitly specified.
-            return (new ΔAddr(), new parseAddrError(@in: @in, msg: "zone must be a non-empty string"));
+            return (new Addr(), new parseAddrError(@in: @in, msg: "zone must be a non-empty string"));
         }
     }
 
@@ -259,27 +264,27 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
             }
             if (off > 3) {
                 //more than 4 digits in group, fail.
-                return (new ΔAddr(), new parseAddrError(@in: @in, msg: "each group must have 4 or less digits", at: s));
+                return (new Addr(), new parseAddrError(@in: @in, msg: "each group must have 4 or less digits", at: s));
             }
             if (acc > math.MaxUint16) {
                 // Overflow, fail.
-                return (new ΔAddr(), new parseAddrError(@in: @in, msg: "IPv6 field has value >=2^16", at: s));
+                return (new Addr(), new parseAddrError(@in: @in, msg: "IPv6 field has value >=2^16", at: s));
             }
         }
         if (off == 0) {
             // No digits found, fail.
-            return (new ΔAddr(), new parseAddrError(@in: @in, msg: "each colon-separated field must have at least one digit", at: s));
+            return (new Addr(), new parseAddrError(@in: @in, msg: "each colon-separated field must have at least one digit", at: s));
         }
 
         // If followed by dot, might be in trailing IPv4.
         if (off < len(s) && s[off] == '.') {
             if (ellipsis < 0 && i != 12) {
                 // Not the right place.
-                return (new ΔAddr(), new parseAddrError(@in: @in, msg: "embedded IPv4 address must replace the final 2 fields of the address", at: s));
+                return (new Addr(), new parseAddrError(@in: @in, msg: "embedded IPv4 address must replace the final 2 fields of the address", at: s));
             }
             if (i + 4 > 16) {
                 // Not enough room.
-                return (new ΔAddr(), new parseAddrError(@in: @in, msg: "too many hex fields to fit an embedded IPv4 at the end of the address", at: s));
+                return (new Addr(), new parseAddrError(@in: @in, msg: "too many hex fields to fit an embedded IPv4 at the end of the address", at: s));
             }
 
             nint end = len(@in);
@@ -288,7 +293,7 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
             }
             var err = parseIPv4Fields(@in, end - len(s), end, ip.slice(i, i + 4));
             if (err != nil) {
-                return (new ΔAddr(), err);
+                return (new Addr(), err);
             }
             s = ""u8;
             i += 4;
@@ -308,16 +313,16 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
 
         // Otherwise must be followed by colon and more.
         if (s[0] != ':') {
-            return (new ΔAddr(), new parseAddrError(@in: @in, msg: "unexpected character, want colon", at: s));
+            return (new Addr(), new parseAddrError(@in: @in, msg: "unexpected character, want colon", at: s));
         } else if (len(s) == 1) {
-            return (new ΔAddr(), new parseAddrError(@in: @in, msg: "colon must be followed by more characters", at: s));
+            return (new Addr(), new parseAddrError(@in: @in, msg: "colon must be followed by more characters", at: s));
         }
         s = s[1..];
 
         // Look for ellipsis.
         if (s[0] == ':') {
             if (ellipsis >= 0) { // already have one
-                return (new ΔAddr(), new parseAddrError(@in: @in, msg: "multiple :: in address", at: s));
+                return (new Addr(), new parseAddrError(@in: @in, msg: "multiple :: in address", at: s));
             }
             ellipsis = i;
             s = s[1..];
@@ -329,13 +334,13 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
 
     // Must have used entire string.
     if (len(s) != 0) {
-        return (new ΔAddr(), new parseAddrError(@in: @in, msg: "trailing garbage after address", at: s));
+        return (new Addr(), new parseAddrError(@in: @in, msg: "trailing garbage after address", at: s));
     }
 
     // If didn't parse enough, expand ellipsis.
     if (i < 16) {
         if (ellipsis < 0) {
-            return (new ΔAddr(), new parseAddrError(@in: @in, msg: "address string too short"));
+            return (new Addr(), new parseAddrError(@in: @in, msg: "address string too short"));
         }
         nint n = 16 - i;
         for (nint j = i - 1; j >= ellipsis; j--) {
@@ -344,7 +349,7 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
         clear(ip.slice(ellipsis, ellipsis + n));
     } else if (ellipsis >= 0) {
         // Ellipsis must represent at least one 0 group.
-        return (new ΔAddr(), new parseAddrError(@in: @in, msg: "the :: must expand to at least one field of zeros"));
+        return (new Addr(), new parseAddrError(@in: @in, msg: "the :: must expand to at least one field of zeros"));
     }
     return (AddrFrom16(ip).WithZone(zone), default);
 }
@@ -352,7 +357,7 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
 // AddrFromSlice parses the 4- or 16-byte byte slice as an IPv4 or IPv6 address.
 // Note that a [net.IP] can be passed directly as the []byte argument.
 // If slice's length is not 4 or 16, AddrFromSlice returns [Addr]{}, false.
-public static (ΔAddr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
+public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
     switch (len(Δslice)) {
     case 4: {
         return (AddrFrom4(new array<byte>(Δslice, 4)), true);
@@ -360,18 +365,20 @@ public static (ΔAddr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
     case 16: {
         return (AddrFrom16(new array<byte>(Δslice, 16)), true);
     }}
-    return (new ΔAddr(), false);
+    return (new Addr(), false);
 }
+
+} partial class netipᴛAddr {
 
 // v4 returns the i'th byte of ip. If ip is not an IPv4, v4 returns
 // unspecified garbage.
-internal static uint8 v4(this ΔAddr ip, uint8 i) {
+internal static uint8 v4(this Addr ip, uint8 i) {
     return (uint8)(ip.addr.lo.Rsh((uint64)((uint8)((3 - i) * 8))));
 }
 
 // v6 returns the i'th byte of ip. If ip is an IPv4 address, this
 // accesses the IPv4-mapped IPv6 address form of the IP.
-internal static uint8 v6(this ΔAddr ipʗp, uint8 i) {
+internal static uint8 v6(this Addr ipʗp, uint8 i) {
     ref var ip = ref heap(ipʗp, out var Ꮡip);
 
     return (uint8)(((Ꮡip.Ꮡaddr.halves()[(i / 8) % 2]).Value).Rsh((uint64)((uint8)((7 - i % 8) * 8))));
@@ -379,7 +386,7 @@ internal static uint8 v6(this ΔAddr ipʗp, uint8 i) {
 
 // v6u16 returns the i'th 16-bit word of ip. If ip is an IPv4 address,
 // this accesses the IPv4-mapped IPv6 address form of the IP.
-internal static uint16 v6u16(this ΔAddr ipʗp, uint8 i) {
+internal static uint16 v6u16(this Addr ipʗp, uint8 i) {
     ref var ip = ref heap(ipʗp, out var Ꮡip);
 
     return (uint16)(((Ꮡip.Ꮡaddr.halves()[(i / 4) % 2]).Value).Rsh((uint64)((uint8)((3 - i % 4) * 16))));
@@ -390,7 +397,7 @@ internal static uint16 v6u16(this ΔAddr ipʗp, uint8 i) {
 //
 // Note that "0.0.0.0" and "::" are not the zero value. Use IsUnspecified to
 // check for these values instead.
-internal static bool isZero(this ΔAddr ip) {
+internal static bool isZero(this Addr ip) {
     // Faster than comparing ip == Addr{}, but effectively equivalent,
     // as there's no way to make an IP with a nil z from this package.
     return ip.z == z0;
@@ -399,14 +406,14 @@ internal static bool isZero(this ΔAddr ip) {
 // IsValid reports whether the [Addr] is an initialized address (not the zero Addr).
 //
 // Note that "0.0.0.0" and "::" are both valid values.
-public static bool IsValid(this ΔAddr ip) { return ip.z != z0; }
+public static bool IsValid(this Addr ip) { return ip.z != z0; }
 
 // BitLen returns the number of bits in the IP address:
 // 128 for IPv6, 32 for IPv4, and 0 for the zero [Addr].
 //
 // Note that IPv4-mapped IPv6 addresses are considered IPv6 addresses
 // and therefore have bit length 128.
-public static nint BitLen(this ΔAddr ip) {
+public static nint BitLen(this Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return 0;
@@ -418,7 +425,7 @@ public static nint BitLen(this ΔAddr ip) {
 }
 
 // Zone returns ip's IPv6 scoped addressing zone, if any.
-public static @string Zone(this ΔAddr ip) {
+public static @string Zone(this Addr ip) {
     if (ip.z == z0) {
         return ""u8;
     }
@@ -428,7 +435,7 @@ public static @string Zone(this ΔAddr ip) {
 // Compare returns an integer comparing two IPs.
 // The result will be 0 if ip == ip2, -1 if ip < ip2, and +1 if ip > ip2.
 // The definition of "less than" is the same as the [Addr.Less] method.
-public static nint Compare(this ΔAddr ip, ΔAddr ip2) {
+public static nint Compare(this Addr ip, Addr ip2) {
     nint f1 = ip.BitLen();
     nint f2 = ip2.BitLen();
     if (f1 < f2) {
@@ -467,25 +474,25 @@ public static nint Compare(this ΔAddr ip, ΔAddr ip2) {
 // Less reports whether ip sorts before ip2.
 // IP addresses sort first by length, then their address.
 // IPv6 addresses with zones sort just after the same address without a zone.
-public static bool Less(this ΔAddr ip, ΔAddr ip2) { return ip.Compare(ip2) == -1; }
+public static bool Less(this Addr ip, Addr ip2) { return ip.Compare(ip2) == -1; }
 
 // Is4 reports whether ip is an IPv4 address.
 //
 // It returns false for IPv4-mapped IPv6 addresses. See [Addr.Unmap].
-public static bool Is4(this ΔAddr ip) {
+public static bool Is4(this Addr ip) {
     return ip.z == z4;
 }
 
 // Is4In6 reports whether ip is an "IPv4-mapped IPv6 address"
 // as defined by RFC 4291.
 // That is, it reports whether ip is in ::ffff:0:0/96.
-public static bool Is4In6(this ΔAddr ip) {
+public static bool Is4In6(this Addr ip) {
     return ip.Is6() && ip.addr.hi == 0 && ip.addr.lo >> 32 == 0xffff;
 }
 
 // Is6 reports whether ip is an IPv6 address, including IPv4-mapped
 // IPv6 addresses.
-public static bool Is6(this ΔAddr ip) {
+public static bool Is6(this Addr ip) {
     return ip.z != z0 && ip.z != z4;
 }
 
@@ -493,7 +500,7 @@ public static bool Is6(this ΔAddr ip) {
 //
 // That is, if ip is an IPv6 address wrapping an IPv4 address, it
 // returns the wrapped IPv4 address. Otherwise it returns ip unmodified.
-public static ΔAddr Unmap(this ΔAddr ip) {
+public static Addr Unmap(this Addr ip) {
     if (ip.Is4In6()) {
         ip.z = z4;
     }
@@ -503,7 +510,7 @@ public static ΔAddr Unmap(this ΔAddr ip) {
 // WithZone returns an IP that's the same as ip but with the provided
 // zone. If zone is empty, the zone is removed. If ip is an IPv4
 // address, WithZone is a no-op and returns ip unchanged.
-public static ΔAddr WithZone(this ΔAddr ip, @string zone) {
+public static Addr WithZone(this Addr ip, @string zone) {
     if (!ip.Is6()) {
         return ip;
     }
@@ -517,7 +524,7 @@ public static ΔAddr WithZone(this ΔAddr ip, @string zone) {
 
 // withoutZone unconditionally strips the zone from ip.
 // It's similar to WithZone, but small enough to be inlinable.
-internal static ΔAddr withoutZone(this ΔAddr ip) {
+internal static Addr withoutZone(this Addr ip) {
     if (!ip.Is6()) {
         return ip;
     }
@@ -526,12 +533,12 @@ internal static ΔAddr withoutZone(this ΔAddr ip) {
 }
 
 // hasZone reports whether ip has an IPv6 zone.
-internal static bool hasZone(this ΔAddr ip) {
+internal static bool hasZone(this Addr ip) {
     return ip.z != z0 && ip.z != z4 && ip.z != z6noz;
 }
 
 // IsLinkLocalUnicast reports whether ip is a link-local unicast address.
-public static bool IsLinkLocalUnicast(this ΔAddr ip) {
+public static bool IsLinkLocalUnicast(this Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -550,7 +557,7 @@ public static bool IsLinkLocalUnicast(this ΔAddr ip) {
 }
 
 // IsLoopback reports whether ip is a loopback address.
-public static bool IsLoopback(this ΔAddr ip) {
+public static bool IsLoopback(this Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -569,7 +576,7 @@ public static bool IsLoopback(this ΔAddr ip) {
 }
 
 // IsMulticast reports whether ip is a multicast address.
-public static bool IsMulticast(this ΔAddr ip) {
+public static bool IsMulticast(this Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -589,7 +596,7 @@ public static bool IsMulticast(this ΔAddr ip) {
 
 // IsInterfaceLocalMulticast reports whether ip is an IPv6 interface-local
 // multicast address.
-public static bool IsInterfaceLocalMulticast(this ΔAddr ip) {
+public static bool IsInterfaceLocalMulticast(this Addr ip) {
     // IPv6 Addressing Architecture (2.7.1. Pre-Defined Multicast Addresses)
     // https://datatracker.ietf.org/doc/html/rfc4291#section-2.7.1
     if (ip.Is6() && !ip.Is4In6()) {
@@ -599,7 +606,7 @@ public static bool IsInterfaceLocalMulticast(this ΔAddr ip) {
 }
 
 // IsLinkLocalMulticast reports whether ip is a link-local multicast address.
-public static bool IsLinkLocalMulticast(this ΔAddr ip) {
+public static bool IsLinkLocalMulticast(this Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -626,7 +633,7 @@ public static bool IsLinkLocalMulticast(this ΔAddr ip) {
 // It returns false for the zero [Addr].
 //
 // For reference, see RFC 1122, RFC 4291, and RFC 4632.
-public static bool IsGlobalUnicast(this ΔAddr ip) {
+public static bool IsGlobalUnicast(this Addr ip) {
     if (ip.z == z0) {
         // Invalid or zero-value.
         return false;
@@ -649,7 +656,7 @@ public static bool IsGlobalUnicast(this ΔAddr ip) {
 // (IPv4 addresses) and RFC 4193 (IPv6 addresses). That is, it reports whether
 // ip is in 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, or fc00::/7. This is the
 // same as [net.IP.IsPrivate].
-public static bool IsPrivate(this ΔAddr ip) {
+public static bool IsPrivate(this Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -674,7 +681,7 @@ public static bool IsPrivate(this ΔAddr ip) {
 // address "0.0.0.0" or the IPv6 address "::".
 //
 // Note that the zero [Addr] is not an unspecified address.
-public static bool IsUnspecified(this ΔAddr ip) {
+public static bool IsUnspecified(this Addr ip) {
     return ip == IPv4Unspecified() || ip == IPv6Unspecified();
 }
 
@@ -687,25 +694,25 @@ private static readonly @string negativePrefixBitsˢᵇ = "negative Prefix bits"
 // If ip is a zero [Addr], Prefix always returns a zero Prefix and a nil error.
 // Otherwise, if bits is less than zero or greater than ip.BitLen(),
 // Prefix returns an error.
-public static (ΔPrefix, error) Prefix(this ΔAddr ip, nint b) {
+public static (Prefix, error) Prefix(this Addr ip, nint b) {
     if (b < 0) {
-        return (new ΔPrefix(), errors.New(negativePrefixBitsˢ));
+        return (new Prefix(), errors.New(negativePrefixBitsˢ));
     }
     nint effectiveBits = b;
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
-        return (new ΔPrefix(), default);
+        return (new Prefix(), default);
     }
     case var ᴛ when ᴛ == z4: {
         if (b > 32) {
-            return (new ΔPrefix(), errors.New("prefix length "u8 + strconv.Itoa(b) + " too large for IPv4"u8));
+            return (new Prefix(), errors.New("prefix length "u8 + strconv.Itoa(b) + " too large for IPv4"u8));
         }
         effectiveBits += 96;
         break;
     }
     default: {
         if (b > 128) {
-            return (new ΔPrefix(), errors.New("prefix length "u8 + strconv.Itoa(b) + " too large for IPv6"u8));
+            return (new Prefix(), errors.New("prefix length "u8 + strconv.Itoa(b) + " too large for IPv6"u8));
         }
         break;
     }}
@@ -718,7 +725,7 @@ public static (ΔPrefix, error) Prefix(this ΔAddr ip, nint b) {
 // IPv6 addresses with zones are returned without their zone (use the
 // [Addr.Zone] method to get it).
 // The ip zero value returns all zeroes.
-public static array<byte> /*a16*/ As16(this ΔAddr ip) {
+public static array<byte> /*a16*/ As16(this Addr ip) {
     array<byte> a16 = new(16);
 
     byteorder.BEPutUint64(a16[..8], ip.addr.hi);
@@ -729,7 +736,7 @@ public static array<byte> /*a16*/ As16(this ΔAddr ip) {
 // As4 returns an IPv4 or IPv4-in-IPv6 address in its 4-byte representation.
 // If ip is the zero [Addr] or an IPv6 address, As4 panics.
 // Note that 0.0.0.0 is not the zero Addr.
-public static array<byte> /*a4*/ As4(this ΔAddr ip) {
+public static array<byte> /*a4*/ As4(this Addr ip) {
     array<byte> a4 = new(4);
 
     if (ip.z == z4 || ip.Is4In6()) {
@@ -743,7 +750,7 @@ public static array<byte> /*a4*/ As4(this ΔAddr ip) {
 }
 
 // AsSlice returns an IPv4 or IPv6 address in its respective 4-byte or 16-byte representation.
-public static slice<byte> AsSlice(this ΔAddr ip) {
+public static slice<byte> AsSlice(this Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return default;
@@ -763,17 +770,17 @@ public static slice<byte> AsSlice(this ΔAddr ip) {
 
 // Next returns the address following ip.
 // If there is none, it returns the zero [Addr].
-public static ΔAddr Next(this ΔAddr ip) {
+public static Addr Next(this Addr ip) {
     ip.addr = ip.addr.addOne();
     if (ip.Is4()) {
         if ((uint32)ip.addr.lo == 0) {
             // Overflowed.
-            return new ΔAddr();
+            return new Addr();
         }
     } else {
         if (ip.addr.isZero()) {
             // Overflowed
-            return new ΔAddr();
+            return new Addr();
         }
     }
     return ip;
@@ -781,13 +788,13 @@ public static ΔAddr Next(this ΔAddr ip) {
 
 // Prev returns the IP before ip.
 // If there is none, it returns the IP zero value.
-public static ΔAddr Prev(this ΔAddr ip) {
+public static Addr Prev(this Addr ip) {
     if (ip.Is4()) {
         if ((uint32)ip.addr.lo == 0) {
-            return new ΔAddr();
+            return new Addr();
         }
     } else if (ip.addr.isZero()) {
-        return new ΔAddr();
+        return new Addr();
     }
     ip.addr = ip.addr.subOne();
     return ip;
@@ -809,7 +816,7 @@ private static readonly @string invalidIpˢᵇ = "invalid IP"u8;
 // Note that unlike package net's IP.String method,
 // IPv4-mapped IPv6 addresses format with a "::ffff:"
 // prefix before the dotted quad.
-public static @string String(this ΔAddr ip) {
+public static @string String(this Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return invalidIpˢ;
@@ -828,7 +835,7 @@ public static @string String(this ΔAddr ip) {
 // AppendTo appends a text encoding of ip,
 // as generated by [Addr.MarshalText],
 // to b and returns the extended buffer.
-public static slice<byte> AppendTo(this ΔAddr ip, slice<byte> b) {
+public static slice<byte> AppendTo(this Addr ip, slice<byte> b) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return b;
@@ -843,6 +850,8 @@ public static slice<byte> AppendTo(this ΔAddr ip, slice<byte> b) {
         return ip.appendTo6(b);
     }}
 }
+
+} partial class netip_package {
 
 // digits is a string of the hex digits from 0 to f. It's used in
 // appendDecimal and appendHex to format IP addresses.
@@ -885,14 +894,16 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
     return append(b, digits[(x >> 12)], digits[(uint16)(x >> 8 & 0xf)], digits[(uint16)(x >> 4 & 0xf)], digits[(uint16)(x & 0xf)]);
 }
 
-internal static @string string4(this ΔAddr ip) {
+} partial class netipᴛAddr {
+
+internal static @string string4(this Addr ip) {
     const nint max = /* len("255.255.255.255") */ 15;
     var ret = new slice<byte>(0, max);
     ret = ip.appendTo4(ret);
     return (@string)ret;
 }
 
-internal static slice<byte> appendTo4(this ΔAddr ip, slice<byte> ret) {
+internal static slice<byte> appendTo4(this Addr ip, slice<byte> ret) {
     ret = appendDecimal(ret, ip.v4(0));
     ret = append(ret, (byte)'.');
     ret = appendDecimal(ret, ip.v4(1));
@@ -903,14 +914,14 @@ internal static slice<byte> appendTo4(this ΔAddr ip, slice<byte> ret) {
     return ret;
 }
 
-internal static @string string4In6(this ΔAddr ip) {
+internal static @string string4In6(this Addr ip) {
     const nint max = /* len("::ffff:255.255.255.255%enp5s0") */ 29;
     var ret = new slice<byte>(0, max);
     ret = ip.appendTo4In6(ret);
     return (@string)ret;
 }
 
-internal static slice<byte> appendTo4In6(this ΔAddr ip, slice<byte> ret) {
+internal static slice<byte> appendTo4In6(this Addr ip, slice<byte> ret) {
     ret = append(ret, ((@string)"::ffff:").ꓸꓸꓸ);
     ret = ip.Unmap().appendTo4(ret);
     if (ip.z != z6noz) {
@@ -925,7 +936,7 @@ internal static slice<byte> appendTo4In6(this ΔAddr ip, slice<byte> ret) {
 // (https://tools.ietf.org/html/rfc5952#section-4): no unnecessary
 // zeros, use :: to elide the longest run of zeros, and don't use ::
 // to compact a single zero field.
-internal static @string string6(this ΔAddr ip) {
+internal static @string string6(this Addr ip) {
     // Use a zone with a "plausibly long" name, so that most zone-ful
     // IP addresses won't require additional allocation.
     //
@@ -939,7 +950,7 @@ internal static @string string6(this ΔAddr ip) {
     return (@string)ret;
 }
 
-internal static slice<byte> appendTo6(this ΔAddr ip, slice<byte> ret) {
+internal static slice<byte> appendTo6(this Addr ip, slice<byte> ret) {
     var (zeroStart, zeroEnd) = ((uint8)255, (uint8)255);
     for (var i = (uint8)0; i < 8; i++) {
         var j = i;
@@ -975,7 +986,7 @@ internal static slice<byte> appendTo6(this ΔAddr ip, slice<byte> ret) {
 // StringExpanded is like [Addr.String] but IPv6 addresses are expanded with leading
 // zeroes and no "::" compression. For example, "2001:db8::1" becomes
 // "2001:0db8:0000:0000:0000:0000:0000:0001".
-public static @string StringExpanded(this ΔAddr ip) {
+public static @string StringExpanded(this Addr ip) {
     var retᴷ = new stackAppend<byte>();
 
     switch (ip.z) {
@@ -1004,14 +1015,14 @@ public static @string StringExpanded(this ΔAddr ip) {
 
 // AppendText implements the [encoding.TextAppender] interface,
 // It is the same as [Addr.AppendTo].
-public static (slice<byte>, error) AppendText(this ΔAddr ip, slice<byte> b) {
+public static (slice<byte>, error) AppendText(this Addr ip, slice<byte> b) {
     return (ip.AppendTo(b), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface,
 // The encoding is the same as returned by [Addr.String], with one exception:
 // If ip is the zero [Addr], the encoding is the empty string.
-public static (slice<byte>, error) MarshalText(this ΔAddr ip) {
+public static (slice<byte>, error) MarshalText(this Addr ip) {
     var buf = slice<byte>([]);
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
@@ -1040,9 +1051,9 @@ public static (slice<byte>, error) MarshalText(this ΔAddr ip) {
 //
 // If text is empty, UnmarshalText sets *ip to the zero [Addr] and
 // returns no error.
-public static error UnmarshalText(this ref ΔAddr ip, slice<byte> text) {
+public static error UnmarshalText(this ref Addr ip, slice<byte> text) {
     if (len(text) == 0) {
-        ip = new ΔAddr();
+        ip = new Addr();
         return default;
     }
     error err = default;
@@ -1051,7 +1062,7 @@ public static error UnmarshalText(this ref ΔAddr ip, slice<byte> text) {
 }
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
-public static (slice<byte>, error) AppendBinary(this ΔAddr ip, slice<byte> b) {
+public static (slice<byte>, error) AppendBinary(this Addr ip, slice<byte> b) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         break;
@@ -1069,7 +1080,7 @@ public static (slice<byte>, error) AppendBinary(this ΔAddr ip, slice<byte> b) {
     return (b, default);
 }
 
-internal static nint marshalBinarySize(this ΔAddr ip) {
+internal static nint marshalBinarySize(this Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return 0;
@@ -1086,7 +1097,7 @@ internal static nint marshalBinarySize(this ΔAddr ip) {
 // It returns a zero-length slice for the zero [Addr],
 // the 4-byte form for an IPv4 address,
 // and the 16-byte form with zone appended for an IPv6 address.
-public static (slice<byte>, error) MarshalBinary(this ΔAddr ip) {
+public static (slice<byte>, error) MarshalBinary(this Addr ip) {
     return ip.AppendBinary(new slice<byte>(0, ip.marshalBinarySize()));
 }
 
@@ -1096,11 +1107,11 @@ private static readonly @string unexpectedSliceSizeˢᵇ = "unexpected slice siz
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 // It expects data in the form generated by MarshalBinary.
-public static error UnmarshalBinary(this ref ΔAddr ip, slice<byte> b) {
+public static error UnmarshalBinary(this ref Addr ip, slice<byte> b) {
     nint n = len(b);
     switch (ᐧ) {
     case {} when n is 0: {
-        ip = new ΔAddr();
+        ip = new Addr();
         return default;
     }
     case {} when n is 4: {
@@ -1118,21 +1129,27 @@ public static error UnmarshalBinary(this ref ΔAddr ip, slice<byte> b) {
     return errors.New(unexpectedSliceSizeˢ);
 }
 
+} partial class netip_package {
+
 // AddrPort is an IP and a port number.
 partial struct AddrPort {
-    internal ΔAddr ip;
+    internal Addr ip;
     internal uint16 port;
 }
 
 // AddrPortFrom returns an [AddrPort] with the provided IP and port.
 // It does not allocate.
-public static AddrPort AddrPortFrom(ΔAddr ip, uint16 port) { return new AddrPort(ip: ip, port: port); }
+public static AddrPort AddrPortFrom(Addr ip, uint16 port) { return new AddrPort(ip: ip, port: port); }
+
+} partial class netipᴛAddrPort {
 
 // Addr returns p's IP address.
-public static ΔAddr Addr(this AddrPort p) { return p.ip; }
+public static Addr Addr(this AddrPort p) { return p.ip; }
 
 // Port returns p's port.
 public static uint16 Port(this AddrPort p) { return p.port; }
+
+} partial class netip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string notAnIpPortˢ => ref notAnIpPortˢᵇ;
@@ -1213,6 +1230,8 @@ public static AddrPort MustParseAddrPort(@string s) {
     }
     return ip;
 }
+
+} partial class netipᴛAddrPort {
 
 // IsValid reports whether p.Addr() is valid.
 // All ports are valid, including zero.
@@ -1352,13 +1371,17 @@ public static (slice<byte>, error) MarshalBinary(this AddrPort p) {
     return p.AppendBinary(new slice<byte>(0, p.Addr().marshalBinarySize() + 2));
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string unexpectedSliceSizeˢ => ref unexpectedSliceSizeˢᵇ;
+private static readonly @string unexpectedSliceSizeˢᵇ = "unexpected slice size"u8;
+
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 // It expects data in the form generated by [AddrPort.MarshalBinary].
 public static error UnmarshalBinary(this ref AddrPort p, slice<byte> b) {
     if (len(b) < 2) {
         return errors.New(unexpectedSliceSizeˢ);
     }
-    ΔAddr addr = default;
+    Addr addr = default;
     var err = addr.UnmarshalBinary(b.slice(0, len(b) - 2));
     if (err != nil) {
         return err;
@@ -1367,12 +1390,14 @@ public static error UnmarshalBinary(this ref AddrPort p, slice<byte> b) {
     return default;
 }
 
+} partial class netip_package {
+
 // Prefix is an IP address prefix (CIDR) representing an IP network.
 //
 // The first [Prefix.Bits]() of [Addr]() are specified. The remaining bits match any address.
 // The range of Bits() is [0,32] for IPv4 or [0,128] for IPv6.
-partial struct ΔPrefix {
-    internal ΔAddr ip;
+partial struct Prefix {
+    internal Addr ip;
     // bitsPlusOne stores the prefix bit length plus one.
     // A Prefix is valid if and only if bitsPlusOne is non-zero.
     internal uint8 bitsPlusOne;
@@ -1386,41 +1411,43 @@ partial struct ΔPrefix {
 //
 // If bits is less than zero or greater than ip.BitLen, [Prefix.Bits]
 // will return an invalid value -1.
-public static ΔPrefix PrefixFrom(ΔAddr ip, nint bits) {
+public static Prefix PrefixFrom(Addr ip, nint bits) {
     uint8 bitsPlusOne = default;
     if (!ip.isZero() && bits >= 0 && bits <= ip.BitLen()) {
         bitsPlusOne = (uint8)((uint8)bits + 1);
     }
-    return new ΔPrefix(
+    return new Prefix(
         ip: ip.withoutZone(),
         bitsPlusOne: bitsPlusOne
     );
 }
 
+} partial class netipᴛPrefix {
+
 // Addr returns p's IP address.
-public static ΔAddr Addr(this ΔPrefix p) { return p.ip; }
+public static Addr Addr(this Prefix p) { return p.ip; }
 
 // Bits returns p's prefix length.
 //
 // It reports -1 if invalid.
-public static nint Bits(this ΔPrefix p) { return (nint)p.bitsPlusOne - 1; }
+public static nint Bits(this Prefix p) { return (nint)p.bitsPlusOne - 1; }
 
 // IsValid reports whether p.Bits() has a valid range for p.Addr().
 // If p.Addr() is the zero [Addr], IsValid returns false.
 // Note that if p is the zero [Prefix], then p.IsValid() == false.
-public static bool IsValid(this ΔPrefix p) { return p.bitsPlusOne > 0; }
+public static bool IsValid(this Prefix p) { return p.bitsPlusOne > 0; }
 
-internal static bool isZero(this ΔPrefix p) { return p == new ΔPrefix(); }
+internal static bool isZero(this Prefix p) { return p == new Prefix(); }
 
 // IsSingleIP reports whether p contains exactly one IP.
-public static bool IsSingleIP(this ΔPrefix p) { return p.IsValid() && p.Bits() == p.ip.BitLen(); }
+public static bool IsSingleIP(this Prefix p) { return p.IsValid() && p.Bits() == p.ip.BitLen(); }
 
 // Compare returns an integer comparing two prefixes.
 // The result will be 0 if p == p2, -1 if p < p2, and +1 if p > p2.
 // Prefixes sort first by validity (invalid before valid), then
 // address family (IPv4 before IPv6), then masked prefix address, then
 // prefix length, then unmasked address.
-public static nint Compare(this ΔPrefix p, ΔPrefix p2) {
+public static nint Compare(this Prefix p, Prefix p2) {
     // Aside from sorting based on the masked address, this use of
     // Addr.Compare also enforces the valid vs. invalid and address
     // family ordering for the prefix.
@@ -1439,14 +1466,20 @@ public static nint Compare(this ΔPrefix p, ΔPrefix p2) {
     return p.Addr().Compare(p2.Addr());
 }
 
+} partial class netip_package {
+
 partial struct parsePrefixError {
     internal @string @in; // the string given to ParsePrefix
     internal @string msg; // an explanation of the parse failure
 }
 
+} partial class netipᴛparsePrefixError {
+
 internal static @string Error(this parsePrefixError err) {
     return "netip.ParsePrefix("u8 + strconv.Quote(err.@in) + "): "u8 + err.msg;
 }
+
+} partial class netip_package {
 
 // ParsePrefix parses s as an IP address prefix.
 // The string can be in the form "192.168.1.0/24" or "2001:db8::/32",
@@ -1455,44 +1488,44 @@ internal static @string Error(this parsePrefixError err) {
 // zone is present.
 //
 // Note that masked address bits are not zeroed. Use Masked for that.
-public static (ΔPrefix, error) ParsePrefix(@string s) {
+public static (Prefix, error) ParsePrefix(@string s) {
     nint i = bytealg.LastIndexByteString(s, (byte)'/');
     if (i < 0) {
-        return (new ΔPrefix(), new parsePrefixError(@in: s, msg: "no '/'"));
+        return (new Prefix(), new parsePrefixError(@in: s, msg: "no '/'"));
     }
     var (ip, err) = ParseAddr(s.slice(0, i));
     if (err != nil) {
-        return (new ΔPrefix(), new parsePrefixError(@in: s, msg: err.Error()));
+        return (new Prefix(), new parsePrefixError(@in: s, msg: err.Error()));
     }
     // IPv6 zones are not allowed: https://go.dev/issue/51899
     if (ip.Is6() && ip.z != z6noz) {
-        return (new ΔPrefix(), new parsePrefixError(@in: s, msg: "IPv6 zones cannot be present in a prefix"));
+        return (new Prefix(), new parsePrefixError(@in: s, msg: "IPv6 zones cannot be present in a prefix"));
     }
 
     @string bitsStr = s.slice(i + 1);
 
     // strconv.Atoi accepts a leading sign and leading zeroes, but we don't want that.
     if (len(bitsStr) > 1 && (bitsStr[0] < '1' || bitsStr[0] > '9')) {
-        return (new ΔPrefix(), new parsePrefixError(@in: s, msg: "bad bits after slash: "u8 + strconv.Quote(bitsStr)));
+        return (new Prefix(), new parsePrefixError(@in: s, msg: "bad bits after slash: "u8 + strconv.Quote(bitsStr)));
     }
 
     (var bits, err) = strconv.Atoi(bitsStr);
     if (err != nil) {
-        return (new ΔPrefix(), new parsePrefixError(@in: s, msg: "bad bits after slash: "u8 + strconv.Quote(bitsStr)));
+        return (new Prefix(), new parsePrefixError(@in: s, msg: "bad bits after slash: "u8 + strconv.Quote(bitsStr)));
     }
     nint maxBits = 32;
     if (ip.Is6()) {
         maxBits = 128;
     }
     if (bits < 0 || bits > maxBits) {
-        return (new ΔPrefix(), new parsePrefixError(@in: s, msg: "prefix length out of range"));
+        return (new Prefix(), new parsePrefixError(@in: s, msg: "prefix length out of range"));
     }
     return (PrefixFrom(ip, bits), default);
 }
 
 // MustParsePrefix calls [ParsePrefix](s) and panics on error.
 // It is intended for use in tests with hard-coded strings.
-public static ΔPrefix MustParsePrefix(@string s) {
+public static Prefix MustParsePrefix(@string s) {
     var (ip, err) = ParsePrefix(s);
     if (err != nil) {
         throw panic(err);
@@ -1500,11 +1533,13 @@ public static ΔPrefix MustParsePrefix(@string s) {
     return ip;
 }
 
+} partial class netipᴛPrefix {
+
 // Masked returns p in its canonical form, with all but the high
 // p.Bits() bits of p.Addr() masked off.
 //
 // If p is zero or otherwise invalid, Masked returns the zero [Prefix].
-public static ΔPrefix Masked(this ΔPrefix p) {
+public static Prefix Masked(this Prefix p) {
     var (m, _) = p.ip.Prefix(p.Bits());
     return m;
 }
@@ -1516,7 +1551,7 @@ public static ΔPrefix Masked(this ΔPrefix p) {
 // A zero-value IP will not match any prefix.
 // If ip has an IPv6 zone, Contains returns false,
 // because Prefixes strip zones.
-public static bool Contains(this ΔPrefix p, ΔAddr ip) {
+public static bool Contains(this Prefix p, Addr ip) {
     if (!p.IsValid() || ip.hasZone()) {
         return false;
     }
@@ -1547,7 +1582,7 @@ public static bool Contains(this ΔPrefix p, ΔAddr ip) {
 // If p and o are of different address families or either have a zero
 // IP, it reports false. Like the Contains method, a prefix with an
 // IPv4-mapped IPv6 address is still treated as an IPv6 mask.
-public static bool Overlaps(this ΔPrefix p, ΔPrefix o) {
+public static bool Overlaps(this Prefix p, Prefix o) {
     if (!p.IsValid() || !o.IsValid()) {
         return false;
     }
@@ -1584,7 +1619,7 @@ public static bool Overlaps(this ΔPrefix p, ΔPrefix o) {
 // AppendTo appends a text encoding of p,
 // as generated by [Prefix.MarshalText],
 // to b and returns the extended buffer.
-public static slice<byte> AppendTo(this ΔPrefix p, slice<byte> b) {
+public static slice<byte> AppendTo(this Prefix p, slice<byte> b) {
     if (p.isZero()) {
         return b;
     }
@@ -1611,14 +1646,14 @@ public static slice<byte> AppendTo(this ΔPrefix p, slice<byte> b) {
 
 // AppendText implements the [encoding.TextAppender] interface.
 // It is the same as [Prefix.AppendTo].
-public static (slice<byte>, error) AppendText(this ΔPrefix p, slice<byte> b) {
+public static (slice<byte>, error) AppendText(this Prefix p, slice<byte> b) {
     return (p.AppendTo(b), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface,
 // The encoding is the same as returned by [Prefix.String], with one exception:
 // If p is the zero value, the encoding is the empty string.
-public static (slice<byte>, error) MarshalText(this ΔPrefix p) {
+public static (slice<byte>, error) MarshalText(this Prefix p) {
     var buf = slice<byte>([]);
     switch (p.ip.z) {
     case var ᴛ when ᴛ == z0: {
@@ -1640,9 +1675,9 @@ public static (slice<byte>, error) MarshalText(this ΔPrefix p) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface.
 // The IP address is expected in a form accepted by [ParsePrefix]
 // or generated by [Prefix.MarshalText].
-public static error UnmarshalText(this ref ΔPrefix p, slice<byte> text) {
+public static error UnmarshalText(this ref Prefix p, slice<byte> text) {
     if (len(text) == 0) {
-        p = new ΔPrefix();
+        p = new Prefix();
         return default;
     }
     error err = default;
@@ -1653,7 +1688,7 @@ public static error UnmarshalText(this ref ΔPrefix p, slice<byte> text) {
 // AppendBinary implements the [encoding.AppendMarshaler] interface.
 // It returns [Addr.AppendBinary] with an additional byte appended
 // containing the prefix bits.
-public static (slice<byte>, error) AppendBinary(this ΔPrefix p, slice<byte> b) {
+public static (slice<byte>, error) AppendBinary(this Prefix p, slice<byte> b) {
     (b, var err) = p.Addr().withoutZone().AppendBinary(b);
     if (err != nil) {
         return (default, err);
@@ -1664,18 +1699,22 @@ public static (slice<byte>, error) AppendBinary(this ΔPrefix p, slice<byte> b) 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
 // It returns [Addr.MarshalBinary] with an additional byte appended
 // containing the prefix bits.
-public static (slice<byte>, error) MarshalBinary(this ΔPrefix p) {
+public static (slice<byte>, error) MarshalBinary(this Prefix p) {
     // without the zone the max length is 16, plus an additional byte is 17
     return p.AppendBinary(new slice<byte>(0, p.Addr().withoutZone().marshalBinarySize() + 1));
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string unexpectedSliceSizeˢ => ref unexpectedSliceSizeˢᵇ;
+private static readonly @string unexpectedSliceSizeˢᵇ = "unexpected slice size"u8;
+
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 // It expects data in the form generated by [Prefix.MarshalBinary].
-public static error UnmarshalBinary(this ref ΔPrefix p, slice<byte> b) {
+public static error UnmarshalBinary(this ref Prefix p, slice<byte> b) {
     if (len(b) < 1) {
         return errors.New(unexpectedSliceSizeˢ);
     }
-    ΔAddr addr = default;
+    Addr addr = default;
     var err = addr.UnmarshalBinary(b.slice(0, len(b) - 1));
     if (err != nil) {
         return err;
@@ -1689,11 +1728,11 @@ internal static ref readonly @string invalidPrefixˢ => ref invalidPrefixˢᵇ;
 private static readonly @string invalidPrefixˢᵇ = "invalid Prefix"u8;
 
 // String returns the CIDR notation of p: "<ip>/<bits>".
-public static @string String(this ΔPrefix p) {
+public static @string String(this Prefix p) {
     if (!p.IsValid()) {
         return invalidPrefixˢ;
     }
     return p.ip.String() + "/"u8 + strconv.Itoa(p.Bits());
 }
 
-} // end netip_package
+} // end netipᴛPrefix

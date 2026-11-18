@@ -1,20 +1,25 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
-partial struct ΔHeader /*map[@string, slice<@string>]*/;
+partial struct Header /*map[@string, slice<@string>]*/;
 
 partial struct Counts /*map[@string, nint]*/;
 
 partial struct response {
-    internal ΔHeader hdr;
+    internal Header hdr;
 }
 
-internal static ΔHeader Header(this ref response r) { return r.hdr; }
+} partial class mainᴛresponse {
 
-internal static ж<response> newResponse() { return Ꮡ(new response(hdr: new ΔHeader(new map<@string, slice<@string>>{}))); }
+internal static Header Header(this ref response r) { return r.hdr; }
+
+} partial class main_package {
+
+internal static ж<response> newResponse() { return Ꮡ(new response(hdr: new Header(new map<@string, slice<@string>>{}))); }
 
 internal static void main() {
     var r = newResponse();

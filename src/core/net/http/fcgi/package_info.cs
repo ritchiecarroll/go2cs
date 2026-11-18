@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
 // </ImportedTypeAliases>
 
 using go;
@@ -71,8 +69,8 @@ using static go.net.http.fcgi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/fcgi/child.go", "child.cs", "ACVKgsqCqJKCgoKCgpSCgoKUgoKUgoKCggANHKLugqaCgpSClAAMBoKClIKClIKClIIAAxDCgpSCgoKUgoKmgoKUpoKCAAgUgu7CgoKCgoCCpICCAAgKlLi41LKClKaUpqaCgpSCgpSCgsiCgpSCpIKCgqaklJSmlIKCpqSCgrakgoKClJSUpIKCgryigoKCpqaygoKUgpSCgoKCpoKCAAgSgpSCuIKCpgAEFPKCgoKClJSClIKCgpSCAAcS8oLqtKqUgtykpg==", "", "", "87=newWriter/1/1/3;172=newConn/1/1/1", "184:21,388:25")]
-[assembly: GoPositionMap("net/http/fcgi/fcgi.go", "fcgi.cs", "AEqeAYKClIKC7oKCgoKCAA0egqjigoKCgpQADhCygpSClIKClKaCqOKCgoKCgpSClIKUgtaCgoKCpoKCgoKCgoCCpICCpICCtoKmgoKUkoKClIKClKaCgpSmgoKCgpSCAAkUgoKClKaCgoIAChaCgoKCgpSClIKUppQ=")]
+[assembly: GoPositionMap("net/http/fcgi/child.go", "child.cs", "ACZKgsqCyJKCgoKCgpSCgoKUgoKUgoKCggAPHKIACA6CpoKClIKUAAwGgoKUgoKUgoKUggADEMKClIKCgpSCgqaCgpSmgoIAChSCAAgOwoKCgoKAgqSAggAKCpS4uPSygpSmlKamgoKUgoKUgoLIgoKUgqSCgoKmpJSUppSCgqakgoK2pIKCgpSUlKSCgoLcooKCgqbGsoKClIKUgoKCgqaCggAIEoKUgriCgqYABhTygoKCgpSUgpSCgoKUggAHEvKC6rSqlILcpKY=", "", "", "92=newWriter/1/1/3;181=newConn/1/1/1", "195:21,409:25")]
+[assembly: GoPositionMap("net/http/fcgi/fcgi.go", "fcgi.cs", "AE2eAYKClIKCAAoOgoKCgoIADx6CyOKCgoKClAASELKClIKUgoKUpoLI4oKCgoKClIKUgpSC1oKCgoKmgoKCgoKCgIKkgIKkgIK2gsaCgpSSgoKUgoKUpoKClKaCgoKClIIACxSCgoKUxoKCggAMFoKCgoKClIKUgpSmlA==")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -123,3 +121,21 @@ public static partial class fcgi_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(fcgi_package.beginRequest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛbeginRequest;
+[GoMethodHost(typeof(fcgi_package.bufWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛbufWriter;
+[GoMethodHost(typeof(fcgi_package.child)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛchild;
+[GoMethodHost(typeof(fcgi_package.conn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛconn;
+[GoMethodHost(typeof(fcgi_package.header)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛheader;
+[GoMethodHost(typeof(fcgi_package.record)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛrecord;
+[GoMethodHost(typeof(fcgi_package.request)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛrequest;
+[GoMethodHost(typeof(fcgi_package.response)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛresponse;
+[GoMethodHost(typeof(fcgi_package.streamWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛstreamWriter;
+// </MethodHolders>

@@ -10,6 +10,7 @@ using subtle = go.crypto.subtle_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static cipher_package;
 
 partial class cipher_package {
 
@@ -53,6 +54,8 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
     return new ofbжStream(x);
 }
 
+} partial class cipherᴛofb {
+
 internal static void refill(this ref ofb x) {
     nint bs = x.b.BlockSize();
     nint remain = len(x.@out) - x.outUsed;
@@ -88,4 +91,4 @@ internal static void XORKeyStream(this ref ofb x, slice<byte> dst, slice<byte> s
     }
 }
 
-} // end cipher_package
+} // end cipherᴛofb

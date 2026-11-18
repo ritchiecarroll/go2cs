@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,8 +15,12 @@ partial struct Node {
     internal slice<ж<Node>> kids;
 }
 
+} partial class mainᴛNode {
+
 public static @string Name(this ref Node n) { return n.name; }
 public static slice<ж<Node>> Children(this ref Node n) { return n.kids; }
+
+} partial class main_package {
 
 public static void Walk<N>(N n)
     where N : Tree<N>
