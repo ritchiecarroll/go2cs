@@ -365,6 +365,21 @@ change across the four targets, each at such an assignment.
      (7 forms: slice, element pointer, array pointer and argument, from a variable, field, package var, through a
      pointer), ArrayReassignForms and ArrayReassignUnsafe; GolibTests ArrayAssignInPlaceTests. -->
 
+### A struct's copy copies all of its arrays (P2)
+
+**A copy of a struct copies an array the struct reaches through an embedded struct, and a conversion copies its
+operand, as in Go.** A struct that held an array only through an embedded struct was copied without its array, so
+the copy and the original shared it, and a write through one showed in the other. A conversion between struct types,
+`T(v)`, built its result from `v`'s fields, so an array field, or a nested struct holding one, was shared with `v`
+the same way. Both now copy. A conversion copies once, where its result is stored or passed, and not where it is only
+read. See [Struct types](ConversionStrategies-Reference/struct-types.md#a-conversion-copies-its-operand).
+<!-- Batch 312 (ledger afe47908f0): P2's W-embed-array (claude/p2-embed-array-copy 40699e4fe6; converter 084af172ce7,
+     typeNeedsValueClone and structValueCloneFields now visit embedded value fields; fixture EmbeddedArrayCopy;
+     corpus b2d40722376 from the two-seeded footprint on four targets) and W-conv-copy (claude/p2-wall-c a7540ab86d;
+     structConversionCopy.go, b2e58928b51; fixture StructConversionCopy). The single clone: P2's union fix
+     ad5e15194c (926566a93f1: the operand copy and R's result copy both fired; the result copy is kept; mldsa/mlkem
+     field.cs lose 4 double clones, 9dd0f84c9a). -->
+
 ### A reference read from native memory is refused (H)
 
 **A Go pointer, func, interface or `unsafe.Pointer` read or written whole through a pointer into native memory is
@@ -594,7 +609,9 @@ inline arrays come from `go.arrays.dll`, a new assembly in the go.lib package be
 loads only when it uses one. Indexing, `len`, `range` and printing such a field work as in Go. The standard library
 is never laid out this way, so its converted code is unchanged.
 
-For a module, the rule is automatic, and `-inline-arrays <pattern>` forces packages on, or `-<pattern>` off. A type
+For a module, the rule is automatic, and `-inline-arrays <pattern>` forces packages on, or `-<pattern>` off;
+`-inline-arrays <import path>#<TypeName>` selects one type in its own package, for a type that another package lays
+out at Go's bytes and passes back by value. A type
 the rule picks but cannot hold inline (an array or struct over 4096 bytes, an array field sliced or addressed, a
 struct from another package) converts as before, with warning `GO2CS2009`. Error `GO2CS2010` refuses a
 reinterpret between two structs whose arrays disagree, inline on one side and not on the other, when the packages
@@ -711,6 +728,10 @@ Among the shapes that now convert and run as in Go:
 - `&^` with a constant on a `uintptr` alias, a `:=`-bound variadic func literal used as a value, a value passed to
   another package's anonymous interface parameter, and a package function and a method of the same name;
 
+and a slice of pointers passed beside a callback to a generic function over an interface constraint
+(`GetErrorBaseline[T Diagnostic](…, diagnostics []T, compare func(a, b T) int)` called with a `[]*T`), which did not
+compile;
+
 and others. Two of these answered wrong without any error before: the promoted variadic method's reflection count,
 and a loop header that re-pointed a pointer parameter, whose condition read a stale value. The standard library
 contains almost none of these shapes, so its converted code is unchanged by all but a handful of lines.
@@ -739,7 +760,12 @@ contains almost none of these shapes, so its converted code is unchanged by all 
 **Code that ccgo translated from C converts further.** modernc.org/sqlite and modernc.org/libc are C libraries
 translated to Go by ccgo, and converting them through go2cs found Go shapes that are rare in hand-written code but
 everywhere in translated C. At this release's tree, modernc.org/sqlite v1.62.0 and every package it imports convert
-with no package refused, on Windows x64 and on Linux x64. These shapes now convert and run as in Go:
+with no package refused, on Windows x64 and on Linux x64. A converted program that creates a database file, writes
+and reads it back in SQLite's default journal mode and then in WAL mode, and removes it, prints exactly what the
+native Go program prints, on Windows x64 and on Linux x64. On Windows the conversion needs one extra value,
+`-inline-arrays=modernc.org/libc#largeInteger`, without which the first database opened in WAL mode panics
+([Known issues](KnownIssues.md#converting-modernc-sqlite-for-windows-needs-a-seed-for-libcs-largeinteger)). These
+shapes now convert and run as in Go:
 
 - a C function pointer carried as a `uintptr`: `__ccgo_fp(f)` and a call back through
   `*(*func(…))(unsafe.Pointer(&struct{ uintptr }{x}))`. Each top-level function gets one number, the same at every
@@ -773,6 +799,19 @@ with no package refused, on Windows x64 and on Linux x64. These shapes now conve
   and a pointer method called on a field of a named result, which compiled but wrote into a copy, so the write was lost;
 - importing a converted package whose position map is one line longer than 64 KB, as modernc.org/sqlite's `lib`
   package's is. Its importers read none of its type aliases;
+- an anonymous struct that another package declares identically but spells through its own aliases, as sqlite's
+  `TLARGE_INTEGER` (fields of `DWORD` and `LONG`) does libc's `largeInteger` union, which now takes the other
+  package's type where both lay it out alike, so a C function pointer minted in one package is read through the
+  other's func type. On Windows sqlite lays `TLARGE_INTEGER` out at Go's bytes and libc does not, which is what the
+  `-inline-arrays` value above settles;
+- a struct that another package also declares, held as a field by a struct this package keeps (libc's `Titimerval`
+  on Linux), which did not compile;
+- an array-pointer view whose element is a ccgo union, such as `struct{ Fi [0]int32; Ff float32 }` (sqlite's `TExpr`
+  and `TRtreeCoord`, libc's socket-address union), which had length 0 over native memory;
+- a conversion between two struct types that both belong to other packages, `lib.Pitch(o)` with `o` an
+  `other.Pitch`, which did not compile. go2cs writes one small conversion function for such a pair in the package
+  that converts, since neither type's own assembly can hold it
+  ([Interfaces](ConversionStrategies-Reference/interfaces.md#and-a-struct-pair-of-two-foreign-types-is-served-by-a-function-which-needs-no-host));
 - one instantiation of a generic type used as a non-generic interface whose method names the type argument
   (`box[point]` as `interface{ val() point }`);
 - a struct value moving between a named struct type and an unnamed struct type with the same fields, by an explicit
@@ -783,14 +822,6 @@ with no package refused, on Windows x64 and on Linux x64. These shapes now conve
   `(*[N]struct{ … })(unsafe.Pointer(p))[i]`, which stopped the conversion;
 - a string's bytes read through `reflect.StringHeader`, whose `Data` is a number: `unsafe.Pointer(h.Data)` now
   points at the string's bytes, as sqlite's table of C string constants (`__ccgo_ts`) needs;
-- an anonymous struct that another package declares identically but spells through its own aliases, as sqlite's
-  `TLARGE_INTEGER` (fields of `DWORD` and `LONG`) does libc's `largeInteger` union, which now takes the other
-  package's type, so a C function pointer minted in one package is read through the other's func type (on Windows
-  this panicked in the WAL pass of a database file);
-- a struct that another package also declares, held as a field by a struct this package keeps (libc's `Titimerval`
-  on Linux), which did not compile;
-- an array-pointer view whose element is a ccgo union, such as `struct{ Fi [0]int32; Ff float32 }` (sqlite's `TExpr`
-  and `TRtreeCoord`, libc's socket-address union), which had length 0 over native memory;
 
 and others. Three uses of that last shape are not converted yet: the instantiation as a type argument the interface
 constrains, a required method promoted from an embedded field, and a second instantiation of the same type behind
@@ -805,6 +836,21 @@ equal to the field's address or to `p`. sqlite's mutexes record their owner thro
 through `&*`, so both lost their writes. An increment or decrement through a conversion, `*(*int32)(x)++`, now
 compiles. In the standard library one line changes, in `runtime`'s heap growth (`&(*arenaList)`). See
 [Pointers](ConversionStrategies-Reference/pointers.md#the-address-of-a-field-reached-through-a-pointer-conversion-is-the-fields-own-address).
+
+**Parentheses around the operand of `&` change nothing.** `&((*T)(p).f)` is the same address as `&(*T)(p).f`, and
+`&(x)` the same as `&x`, as in Go. With the parentheses, go2cs took the address of a copy, so every write through it
+was lost. libc's recursive pthread mutex records its owner that way, and on Linux sqlite stopped forever the first
+time it opened a database, waiting on a lock it already held. In the standard library one line changes per target,
+in `runtime`'s heap. See
+[Pointers](ConversionStrategies-Reference/pointers.md#parentheses-around-an-address-of-operand-change-nothing).
+
+**`sync.Mutex` is Go's eight bytes.** C code translated to Go keeps mutexes in memory it allocates itself: sqlite's
+mutex is a struct holding a `sync.Mutex`, allocated with libc's `calloc` and reached through `unsafe.Pointer`. go2cs's
+`sync.Mutex` held a managed reference, so reading one out of that memory was refused by name. It now holds only two
+32-bit words, as Go's does, and works the same in the managed heap, on the stack and in C memory. An idle mutex is
+eight zero bytes, so a copy of an idle mutex is a free mutex of its own, and contended locking no longer allocates.
+One difference remains: a mutex copied while a goroutine is waiting on it can wake that goroutine through the copy.
+Go's `vet` reports every copy of a mutex after first use.
 
 **golang.org/x/sys/cpu reports the real CPU on amd64.** x/sys/cpu reads the processor's features with two assembly
 functions, `cpuid` and `xgetbv`, from its `init`. They converted to methods that throw, so a converted program that
@@ -1011,6 +1057,15 @@ type that reaches it.
      dnsmessage's SVCParam marshalled as 48 where Go says 32; a struct with a [1<<62]int64 field as 16. Every T the
      windows corpus passes to Sizeof<T> answers through TryGoSizeOf (15 types probed under JIT, plus 3 TypeScript
      boxes). -->
+
+**In a converted test, `t.Deadline()` reports the deadline that ends the test.** go2cs's test runner can end a
+single test that runs past a per-test limit, which Go does not have, and `t.Deadline()` reported only the deadline
+of the whole package run. A test that sized a wait from it could wait past the limit that ended it, and the run
+reported it abandoned instead of its own result. `t.Deadline()` now reports the earlier of the two.
+<!-- Batch 312, P4's T.Deadline seat (from C2; claude/p4-tdeadline 99bb4bc5bd; fix 0417718b99, COORD ruling (A)
+     2026-11-16). internal/poll's TestSplicePipePool, 45m budget and 30m per-test floor: abandoned at 1802.75 s
+     before (hosted A-7); after, it fails with its disclosed "leaked descriptors" signature at 1620.06 s, not
+     abandoned (hosted run 1759). GolibTests TestDeadlinePerTestTests 6/6. -->
 <!-- Profiler: merge c64f8404c8 (ca23b88d6e: "at MemProfileRate = 1 the first block event on a new stack hangs every
      time"; GolibTests ProfilerOwnAllocationTests, child-process bound; found as an 84-minute hang of GolibTests Debug in
      batch 283's battery; no platform named). GOARCH: merge 26186c1739 (28cfcf657e darwin, 030725e30e windows: Windows on
@@ -1072,6 +1127,13 @@ loads many packages started about 40 to 65 ms faster under the JIT on linux/amd6
      -66 ms against an A/A control of -9 to +14 ms; hello and stringer within noise; one cloud linux/amd64 VM). -->
 
 ### Smaller converter fixes (R, P2, P1)
+
+**A `switch` on a variable reads as written.** `switch os { … }` used to copy `os` into a temporary named `exprᴛ1`
+and test the temporary. When nothing can change the variable between the first case and the last, the converted
+`switch` now tests it in place; otherwise the temporary is named after it (`osᴛ1`). A `select` case on a channel
+variable names its temporary after the channel (`quitᴛ1`).
+<!-- Batch 312, P1's Tour item 3 (claude/p1-vp-switch-temp 672c430fc7; converter 061ae3868d4, switchTagInPlace and
+     switchTagTempPrefix; behavioral fixture over one plain identifier 8968472cde8; regen c6bd89f8b4c). -->
 
 **Converting for another platform reads that platform's Go settings.** With `-platforms` naming a target other than
 the converting host, go2cs now selects files gated on Go's tool tags (`goexperiment.*`, `amd64.v1`, `arm64.v8.0`)
@@ -1222,10 +1284,26 @@ beside the standard-library roster.
        to @unsafe.Pointer.To<T>, same behaviour, plus a repoguard rule); P4 AOT docs (e7a4d94f7d, already in this
        draft). -->
 
-<!-- HOOK 312 (P4): batch 312's user-facing items go above this line. Expected (COORD, 11-17/18): P2 W9a (the
-     mutex; the windows sqlite WAL pass and the file-backed demo's run claim, from 312's sqlite gates only), P4
-     T.Deadline (testing's T.Deadline is the earlier of the package and per-test deadlines), and the rest of 312's
-     seat list when it lands. -->
+<!-- HOOK 312 (P4), FILLED 2026-11-18 from the ledger line of batch 312 (afe47908f0; master f36b6b0d48 ->
+     b63418fafc), the last batch before the .4 freeze. Each seat and where it went:
+     - The sqlite demo GUARD is LIFTED, per platform: the file demo (sqlite-cs cf739c54a5, demo/file) is
+       byte-identical to native Go, WAL pass included, on windows (i9, union 2fb422386c) and on linux (P4, union
+       33d60d2ab9, after P2's paren-address fix), no stand-ins, both with -inline-arrays=modernc.org/libc#largeInteger
+       (COORD 312 landing post). The sqlite lead now says so; the windows seed is C2's ruling C (0881fa6371) with its
+       known issue (docs/KnownIssues.md) and the per-type -inline-arrays form (native-struct section).
+     - P2 W9a mutex (bd2f1e3c38): the sqlite section, "sync.Mutex is Go's eight bytes".
+     - P2 paren-address (b346c4d6a4, union fix; converter 2289a7c49b4; std runtime/<t>/mheap.cs -1/+1 x4 at
+       33d60d2ab9): the sqlite section.
+     - P2 wall C (a7540ab86d): a sqlite-cs bullet; W-conv-copy, W-embed-array (40699e4fe6) and the one-clone union fix
+       (ad5e15194c): the new struct-copy section.
+     - P2 zero-length array clone (54aa3a5b85) and its InotifyEvent suppressions (0a34f2f4d6): P2's own bullet under
+       Upgrading from 1.26.10.3, as written.
+     - C1 -tests -recurse skip (bcc0b03286): C1's own sentence in the -recurse section, as written.
+     - P4 T.Deadline (99bb4bc5bd): Runtime fixes. P1 Tour 3 switch temps (672c430fc7): Smaller converter fixes.
+       R class B slice proxy (9b6a116c33): a TypeScript readiness bullet.
+     - No news item: P5 cpu-time harden (fc18c360b6, a test); P4 ide-mode cites (978a497b63, docs citations);
+       P4 news-310 and news-311 (this draft).
+     The .4 freeze is in effect: no batch follows before the release; only release-cut items change this draft. -->
 
 <!-- 2026-11-15 (P4, docs audit Q2): the section below stood in NEWS.md as a held, visible "November XX" entry.
      Moved here verbatim (its heading demoted to ###) so the archive page shows no PENDING text; its items repeat
