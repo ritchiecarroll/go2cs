@@ -12,7 +12,7 @@ partial class entropy_package {
 // from any changes in the FIPS 140-3 module's crypto/internal/fips140/sha512
 // package. We support 1024-byte inputs for the entropy source, and arbitrary
 // length inputs for ACVP testing.
-internal static array<uint64> initState = new uint64[]{
+internal static array<uint64> initState = array<uint64>([
     0xcbbb9d5dc1059ed8UL,
     0x629a292a367cd507UL,
     0x9159015a3070dd17UL,
@@ -21,7 +21,7 @@ internal static array<uint64> initState = new uint64[]{
     0x8eb44a8768581511UL,
     0xdb0c2e0d64f98fa7UL,
     0x47b5481dbefa4fa4UL
-}.array();
+]);
 
 public static array<byte> SHA384(/*[1024]*/ ж<array<byte>> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -84,7 +84,7 @@ internal static array<byte> digestBytes(ref array<uint64> h) {
     return digest.Clone();
 }
 
-[GoLazy] partial class lazyᴛ_K { internal static array<uint64> _K = new uint64[]{
+[GoLazy] partial class lazyᴛ_K { internal static array<uint64> _K = array<uint64>([
     0x428a2f98d728ae22UL,
     0x7137449123ef65cdUL,
     0xb5c0fbcfec4d3b2fUL,
@@ -165,7 +165,7 @@ internal static array<byte> digestBytes(ref array<uint64> h) {
     0x597f299cfc657e2aUL,
     0x5fcb6fab3ad6faecUL,
     0x6c44198c4a475817UL
-}.array(); }
+]); }
 
 internal static void sha384Block(ref array<uint64> dh, /*[128]*/ ж<array<byte>> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();

@@ -21,7 +21,7 @@ internal static void _ᴛ1() {
 internal static ref readonly @string _Kind_name => ref _Kind_nameᵇ;
 private static readonly @string _Kind_nameᵇ = "UnknownBoolStringIntFloatComplex"u8;
 
-internal static array<uint8> _Kind_index = new uint8[]{0, 7, 11, 17, 20, 25, 32}.array();
+internal static array<uint8> _Kind_index = array<uint8>([0, 7, 11, 17, 20, 25, 32]);
 
 } partial class constantᴛKind {
 

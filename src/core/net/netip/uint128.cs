@@ -70,7 +70,7 @@ internal static uint128 addOne(this uint128 u) {
 // Logically, think of it as returning two uint64s.
 // It only returns pointers for inlining reasons on 32-bit platforms.
 internal static array<ж<uint64>> halves(this ж<uint128> Ꮡu) {
-    return new ж<uint64>[]{Ꮡu.Ꮡhi, Ꮡu.Ꮡlo}.array();
+    return array<ж<uint64>>([Ꮡu.Ꮡhi, Ꮡu.Ꮡlo]);
 }
 
 // bitsSetFrom returns a copy of u with the given bit

@@ -28,13 +28,13 @@ internal static UntypedInt pallocChunksL1Bits => 13;
 // structure.
 //
 // The sum of all the entries of levelBits should equal heapAddrBits.
-internal static array<nuint> levelBits = new nuint[]{
+internal static array<nuint> levelBits = array<nuint>([
     summaryL0Bits,
     summaryLevelBits,
     summaryLevelBits,
     summaryLevelBits,
     summaryLevelBits
-}.array();
+]);
 
 // levelShift is the number of bits to shift to acquire the radix for a given level
 // in the super summary structure.
@@ -43,25 +43,25 @@ internal static array<nuint> levelBits = new nuint[]{
 // pointer p by doing:
 //
 //	p >> levelShift[l]
-[GoLazy] partial class lazyᴛlevelShift { internal static array<nuint> levelShift = new nuint[]{
+[GoLazy] partial class lazyᴛlevelShift { internal static array<nuint> levelShift = array<nuint>([
     heapAddrBits - summaryL0Bits,
     heapAddrBits - summaryL0Bits - 1 * summaryLevelBits,
     heapAddrBits - summaryL0Bits - 2 * summaryLevelBits,
     heapAddrBits - summaryL0Bits - 3 * summaryLevelBits,
     heapAddrBits - summaryL0Bits - 4 * summaryLevelBits
-}.array(); }
+]); }
 
 // levelLogPages is log2 the maximum number of runtime pages in the address space
 // a summary in the given level represents.
 //
 // The leaf level always represents exactly log2 of 1 chunk's worth of pages.
-[GoLazy] partial class lazyᴛlevelLogPages { internal static array<nuint> levelLogPages = new nuint[]{
+[GoLazy] partial class lazyᴛlevelLogPages { internal static array<nuint> levelLogPages = array<nuint>([
     logPallocChunkPages + 4 * summaryLevelBits,
     logPallocChunkPages + 3 * summaryLevelBits,
     logPallocChunkPages + 2 * summaryLevelBits,
     logPallocChunkPages + 1 * summaryLevelBits,
     logPallocChunkPages
-}.array(); }
+]); }
 
 } partial class runtimeᴛpageAlloc {
 

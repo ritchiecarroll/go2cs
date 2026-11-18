@@ -729,7 +729,7 @@ internal static ж<Signature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж<a
 
 } partial class types_package {
 
-internal static array<@string> cgoPrefixes = new @string[]{
+internal static array<@string> cgoPrefixes = array<@string>([
     "_Ciconst_",
     "_Cfconst_",
     "_Csconst_",
@@ -738,7 +738,7 @@ internal static array<@string> cgoPrefixes = new @string[]{
     "_Cfpvar_fp_",
     "_Cfunc_",
     "_Cmacro_" // function to evaluate the expanded expression
-}.array();
+]);
 
 } partial class typesᴛChecker {
 

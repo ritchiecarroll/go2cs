@@ -296,12 +296,12 @@ internal static gcMarkWorkerMode gcMarkWorkerIdleMode => 3;
 
 // gcMarkWorkerModeStrings are the strings labels of gcMarkWorkerModes
 // to use in execution traces.
-internal static array<@string> gcMarkWorkerModeStrings = new @string[]{
+internal static array<@string> gcMarkWorkerModeStrings = array<@string>([
     "Not worker",
     "GC (dedicated)",
     "GC (fractional)",
     "GC (idle)"
-}.array();
+]);
 
 // pollFractionalWorkerExit reports whether a fractional mark worker
 // should self-preempt. It assumes it is called from the fractional
