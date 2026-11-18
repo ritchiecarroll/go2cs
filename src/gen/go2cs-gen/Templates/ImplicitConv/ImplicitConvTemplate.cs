@@ -40,12 +40,20 @@ internal class ImplicitConvTemplate : TemplateBase
     // struct declared with its own fields.
     public IReadOnlyList<string> ConstructionChain = [];
 
-    public override string TemplateBody =>
+    // The name of the static FUNCTION that stands in for the operator when both types are declared in
+    // referenced assemblies, where no operator can be declared: `libꓸPitch` for a conversion to `lib.Pitch`.
+    // Null writes the operator.
+    public string? FunctionName = null;
+
+    public override string TemplateBody => FunctionName is null ?
         $$"""
              partial struct {{HostTypeName}}
              {
                  public static implicit operator {{LHTypeName}}({{RHTypeName}} src) => {{ConvExprValue}};
              }    
+         """ :
+        $$"""
+             internal static {{LHTypeName}} {{FunctionName}}({{RHTypeName}} src) => {{ConvExprValue}};
          """;
 
     private string HostTypeName => HostTypeNameOverride ?? SourceTypeName;

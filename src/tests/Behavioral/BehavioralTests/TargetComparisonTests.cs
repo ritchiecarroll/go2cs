@@ -790,6 +790,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckForeignPairNumericConv() => CheckTarget("ForeignPairNumericConv");
 
     [TestMethod]
+    public void CheckForeignPairStructConversion() => CheckTarget("ForeignPairStructConversion");
+
+    [TestMethod]
     public void CheckForeignPointerImplementSuppression() => CheckTarget("ForeignPointerImplementSuppression");
 
     [TestMethod]
@@ -2609,6 +2612,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckStructArrayFieldValueCopy() => CheckTarget("StructArrayFieldValueCopy");
+
+    [TestMethod]
+    public void CheckStructConversionCopy() => CheckTarget("StructConversionCopy");
 
     [TestMethod]
     public void CheckStructFieldNamedOther() => CheckTarget("StructFieldNamedOther");

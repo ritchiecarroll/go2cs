@@ -959,6 +959,87 @@ An unnamed struct inside a FUNC type (a variable, field, parameter or result of 
 gets no lift at all and the conversion stops with `Unresolved dynamic struct type`; a declared function taken as
 a value and a called func literal convert.
 
+## A struct conversion between two types of OTHER packages calls a generated function
+Go converts `lib.Pitch(o)`, with `o` an `other.Pitch`, because the two struct types have identical fields. In C#
+each is a `partial struct` of its own assembly, a conversion operator must be declared by one of its two types, and
+this package can reopen neither, so the cast the converter writes for a named target binds nothing (CS0030). The
+pair is recorded as `[assembly: GoImplicitConv<other.Pitch, lib.Pitch>]` like any other, and go2cs-gen, seeing
+both sides in referenced assemblies, writes one static function in this package's class instead of an operator.
+It is named as Go names the target, the package's class name without its suffix, the alias dot, then the type,
+and the site calls it:
+
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.go:79 -->
+```go
+fmt.Println("overloads:", lib.Pitch(o).Hz, lib.Pitch(twin).Hz, lib.Pitch(other.Tagged{Hz: 55}).Hz)
+```
+
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.cs:59 -->
+```csharp
+fmt.Println("overloads:", libꓸPitch(o).Hz, libꓸPitch(twin).Hz, libꓸPitch(new other.Tagged(Hz: 55)).Hz);
+```
+
+<!-- illustration: go2cs-gen output, written into Generated/ at build time and not committed -->
+```csharp
+internal static lib.Pitch libꓸPitch(other.Pitch src) => new lib.Pitch(src.Hz);
+```
+
+A second source type for the same target overloads the name (`libꓸPitch(lib.Twin src)`), and two types of ONE
+foreign package are as closed as two of two. The function's name is derived on both sides from the type itself,
+not from the file's import alias, so a file that imports `lib` as `l` still calls `libꓸPitch`. The operand is
+evaluated once, and, as for every conversion, an operand in existing storage that carries an array is cloned
+first (*A conversion copies its operand* below).
+
+The route is taken only where the function can be written and nothing else converts. Each limit keeps today's
+cast and its compile error, so none is silent:
+
+- a type written over another named type, `type Tag other.Pitch`, converts from that base through its own
+  operator and keeps the cast;
+- a generic type on either side;
+- an unexported field on either side (CS0030): it is `internal` to its own assembly, out of this package's reach
+  in C# as it is by name in Go;
+- a field whose type holds an unnamed struct type: each package lifts its own C# type for it, and the function
+  would need a second conversion per field;
+- two target types of one name in two packages of one name (`a/lib.Pitch` and `b/lib.Pitch`), each converted
+  from the same source type in one package: both functions are `libꓸPitch` with one parameter type (CS0111).
+
+(Guarded by the `ForeignPairStructConversion` behavioral test, three packages whose output is compared with Go's,
+by `TestAStructConversionBetweenTwoForeignTypesCallsItsFunction` in the converter, one package per site, and by
+the `ForeignPairStructConversionTests` generator tests.)
+
+## A conversion copies its operand
+Go converts a COPY: after `c := chord(lc)` a write to `c.Notes`, or to an array inside a nested struct field,
+does not reach `lc`. A fixed array is a golib `array<T>` over a shared backing store, and every operator a
+struct conversion binds (go2cs-gen's field-wise operator, or its function for two foreign types) builds the result
+from the operand's fields, so the backing would be shared. Where the operand is existing storage (an identifier,
+selector, index or dereference) whose type carries an array, the site clones it first, as an assignment, a
+return or a send already does (`exprReadsValueNeedingClone`); a call result or a composite literal is reachable
+by no other name and is converted as it is.
+
+<!-- source: src/tests/Behavioral/StructConversionCopy/main.go:44-45, 96 -->
+```go
+c := chord(lc)
+c.Notes[0], c.In.V[1] = 9, 8
+…
+n := notes(raw)
+```
+
+<!-- source: src/tests/Behavioral/StructConversionCopy/main.cs:42, 84 -->
+```csharp
+var c = (chord)lc.ΔClone();
+…
+var n = (notes)raw.Clone();
+```
+
+A defined type written over another named struct, `type Counts counts`, converts through go2cs-gen's inherited
+wrapper, whose two operators with that base already copy (`[GoValueClone("Value")]`); that pair takes no site
+clone, so the value is copied once. A named ARRAY wrapper's operators hand the array over, so its conversions
+keep the site clone.
+
+An array reached only through an EMBEDDED struct is not cloned yet, here or at any other copy site:
+`typeNeedsValueClone` does not walk embeds (see its header in `arrayCloneOperations.go`). (Guarded by the
+`StructConversionCopy` behavioral test, twelve routes in three packages whose output is compared with Go's, and by
+`TestAStructConversionOfExistingStorageCopiesItsArrays` in the converter, one package per site.)
+
 ## A methodless named func type renders as its base delegate
 
 Go treats a named func type as freely interconvertible with its underlying `func(...)` when the
