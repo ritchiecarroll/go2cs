@@ -62,6 +62,7 @@ using global::go.testing;
 using static global::go.net.http_internal_test_package;
 using Δhttp = global::go.net.http_package;
 using ꓸꓸꓸstring = Span<@string>;
+using http_test = http_test_package;
 using static http_test_package;
 
 partial class http_test_package {
@@ -225,7 +226,7 @@ internal static handlerTest newHandlerTest(Δhttp.Handler h) {
 internal static partial @string rawResponse(this ж<handlerTest> Ꮡht, @string req) {
     ref var ht = ref Ꮡht.DerefOrNull();
 
-    var reqb = reqBytes(req);
+    var reqb = http_test.reqBytes(req);
     ref var output = ref heap(new strings.Builder(), out var Ꮡoutput);
     var conn = Ꮡ(new rwTestConn(
         Reader: new http_test_package.bytes_ReaderжReader(bytes.NewReader(reqb)),
