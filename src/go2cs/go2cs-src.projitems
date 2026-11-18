@@ -14,6 +14,8 @@
     <None Include="$(MSBuildThisFileDirectory)adapterPassSeparation_test.go" />
     <None Include="$(MSBuildThisFileDirectory)adapterStructLocality_test.go" />
     <None Include="$(MSBuildThisFileDirectory)addCleanupCaptures.go" />
+    <None Include="$(MSBuildThisFileDirectory)addressOfParenOperand.go" />
+    <None Include="$(MSBuildThisFileDirectory)addressOfParenOperand_test.go" />
     <None Include="$(MSBuildThisFileDirectory)addressTakenPredicates_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasArrayFieldZero_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasDocComments_test.go" />

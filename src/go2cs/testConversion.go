@@ -806,6 +806,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		Env: converterLoaderEnv(
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
+		ParseFile: parseFileUnparenAddressOperands,
 	}
 
 	loaded, err := packages.Load(cfg, ".")

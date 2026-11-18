@@ -270,6 +270,7 @@ func censusOneTarget(options Options, target string, packageFilter []string) (*r
 		BuildFlags: options.loaderBuildFlags(),
 		Env: converterLoaderEnv("GO111MODULE=off",
 			fmt.Sprintf("GOOS=%s", targetParts[0]), fmt.Sprintf("GOARCH=%s", targetParts[1])),
+		ParseFile: parseFileUnparenAddressOperands,
 	}
 
 	fmt.Println("Loading standard library packages with full syntax (this may take a while)...")

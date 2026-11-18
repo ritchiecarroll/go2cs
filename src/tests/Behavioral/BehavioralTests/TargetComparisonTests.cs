@@ -37,6 +37,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]
+    public void CheckAddressOfParenthesizedOperand() => CheckTarget("AddressOfParenthesizedOperand");
+
+    [TestMethod]
     public void CheckAliasImport() => CheckTarget("AliasImport");
 
     [TestMethod]
