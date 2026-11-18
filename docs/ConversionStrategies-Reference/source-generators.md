@@ -492,7 +492,7 @@ queued after a run is run by the next miss.
      (`public void Defer(Action register)`); Run :83 (`internal bool Run()`); Native AOT :28
      (`Native AOT is unchanged`). Each consumer runs its queue on a miss, then looks again:
      src/core/golib/AdapterRegistry.cs:116 (`GoDeferredRegistrations.Adapters.Run()`),
-     src/core/golib/builtin.cs:1633 (`GoDeferredRegistrations.ZeroFactories.Run()`),
+     src/core/golib/builtin.cs:1637 (`GoDeferredRegistrations.ZeroFactories.Run()`),
      src/core/golib/GoTypeOps.cs:233 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
      src/core/golib/GoReflect.VariadicRegistry.cs:51 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
      src/core/golib/NativeArrayOpeners.cs:57 (`GoDeferredRegistrations.NativeArrayOpeners.Run()`), :67
