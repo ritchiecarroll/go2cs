@@ -2627,7 +2627,7 @@ internal static ж<atomic.Uintptr> getOrAddWeakHandle(@unsafe.Pointer p) {
     @lock(Ꮡmheap_.Ꮡspeciallock);
     var s = @unsafe.Pointer.To<specialWeakHandle>(Ꮡmheap_.ᏑspecialWeakHandleAlloc.alloc());
     unlock(Ꮡmheap_.Ꮡspeciallock);
-    var handle = Ꮡ((@new<getOrAddWeakHandle_weakHandleBox>().h));
+    var handle = @new<getOrAddWeakHandle_weakHandleBox>().Ꮡh;
     s.special.kind = _KindSpecialWeakHandle;
     s.handle = handle;
     handle.Store((uintptr)p);
