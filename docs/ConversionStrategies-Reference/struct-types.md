@@ -986,8 +986,8 @@ internal static lib.Pitch libꓸPitch(other.Pitch src) => new lib.Pitch(src.Hz);
 A second source type for the same target overloads the name (`libꓸPitch(lib.Twin src)`), and two types of ONE
 foreign package are as closed as two of two. The function's name is derived on both sides from the type itself,
 not from the file's import alias, so a file that imports `lib` as `l` still calls `libꓸPitch`. The operand is
-evaluated once, and, as for every conversion, an operand in existing storage that carries an array is cloned
-first (*A conversion copies its operand* below).
+evaluated once, and, as for every conversion, a result that carries an array is cloned where it is transferred
+(*A conversion copies its operand* below).
 
 The route is taken only where the function can be written and nothing else converts. Each limit keeps today's
 cast and its compile error, so none is silent:
@@ -1011,9 +1011,12 @@ Go converts a COPY: after `c := chord(lc)` a write to `c.Notes`, or to an array 
 does not reach `lc`. A fixed array is a golib `array<T>` over a shared backing store, and every operator a
 struct conversion binds (go2cs-gen's field-wise operator, or its function for two foreign types) builds the result
 from the operand's fields, so the backing would be shared. Where the operand is existing storage (an identifier,
-selector, index or dereference) whose type carries an array, the site clones it first, as an assignment, a
-return or a send already does (`exprReadsValueNeedingClone`); a call result or a composite literal is reachable
-by no other name and is converted as it is.
+selector, index or dereference) whose type carries an array, the conversion reads that storage, and the copy is
+taken ONCE, where the converted value is transferred: an assignment, a return, a send or a composite-literal
+element clones the result, as it clones any value (`exprReadsValueNeedingClone`). A conversion consumed by a read
+(a value-receiver call, an index) is not transferred and copies nothing; passed as an argument, it is copied by
+the parameter, as any argument is. A call result or a composite literal is reachable by no other name and is
+converted as it is.
 
 <!-- source: src/tests/Behavioral/StructConversionCopy/main.go:44-45, 96 -->
 ```go
@@ -1025,15 +1028,15 @@ n := notes(raw)
 
 <!-- source: src/tests/Behavioral/StructConversionCopy/main.cs:42, 84 -->
 ```csharp
-var c = (chord)lc.ΔClone();
+var c = ((chord)lc).ΔClone();
 …
-var n = (notes)raw.Clone();
+var n = ((notes)raw).Clone();
 ```
 
 A defined type written over another named struct, `type Counts counts`, converts through go2cs-gen's inherited
-wrapper, whose two operators with that base already copy (`[GoValueClone("Value")]`); that pair takes no site
-clone, so the value is copied once. A named ARRAY wrapper's operators hand the array over, so its conversions
-keep the site clone.
+wrapper, whose two operators with that base already copy (`[GoValueClone("Value")]`, the `ConversionCopy` of
+go2cs-gen's `InheritedTypeTemplate`); that pair takes no clone at the transfer, so the value is copied once. A
+named ARRAY wrapper's operators hand the array over, so its conversions keep the clone at the transfer.
 
 (Guarded by the `StructConversionCopy` behavioral test, twelve routes in three packages whose output is compared
 with Go's, and by `TestAStructConversionOfExistingStorageCopiesItsArrays` in the converter, one package per site.)
@@ -1053,7 +1056,7 @@ e := emb(le)
 ```csharp
 var c = le.ΔClone();
 …
-var e = (emb)le.ΔClone();
+var e = ((emb)le).ΔClone();
 ```
 
 The stamp is `[GoValueClone("Inner")] internal partial struct emb {}`. An embedded POINTER is shared in Go too and
