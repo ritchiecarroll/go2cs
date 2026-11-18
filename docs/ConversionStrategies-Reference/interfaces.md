@@ -2059,7 +2059,7 @@ lp := lib.Pitch(o)
 op := other.Pitch(p)
 ```
 
-<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.cs:44-45 -->
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.cs:49-50 -->
 ```csharp
 var lp = libꓸPitch(o);
 var op = otherꓸPitch(p);
