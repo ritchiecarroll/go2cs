@@ -41,7 +41,7 @@ frames run their deferred calls during the unwind, and the goroutine root swallo
 goroutine, `runtime.Goexit` throws `NotSupportedException` naming the Goexit design record, and the program exits 2
 with that message instead of Go's.
 
-<!-- src/core/runtime/managed_impl.cs:1631 (`if (!Goroutine.OnGoroutine)`), :1642 (`throw new GoexitException();`).
+<!-- src/core/runtime/managed_impl.cs:1742 (`if (!Goroutine.OnGoroutine)`), :1753 (`throw new GoexitException();`).
 The goroutine root: src/core/golib/runtime/Goroutine.cs:539 (`public static bool OnGoroutine => t_current is { IsMain: false };`). -->
 
 ## Why the goroutine shape does not carry over
