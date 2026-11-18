@@ -19,35 +19,39 @@ partial struct point {
 internal static void main() {
     ref var m = ref heap(new mutex(), out var Ꮡm);
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡm);
-    atomic.CompareAndSwapInt32(Ꮡ(((@unsafe.Pointer.To<mutex>(p)).Value.owner)), 0, 7);
-    var pc = Ꮡ(((@unsafe.Pointer.To<mutex>(p)).Value.count));
+    atomic.CompareAndSwapInt32(@unsafe.Pointer.To<mutex>(p).Ꮡowner, 0, 7);
+    var pc = @unsafe.Pointer.To<mutex>(p).Ꮡcount;
     pc.Value = 3;
+    var po = (@unsafe.Pointer.To<mutex>(p)).Ꮡowner;
+    po.Value += 10;
     fmt.Println("converted:", m.owner, m.count);
 
     atomic.AddInt32(@unsafe.Pointer.To<mutex>(p).Ꮡcount, 1);
     fmt.Println("unparenthesized:", m.count);
 
     ref var pt = ref heap(new point(), out var Ꮡpt);
-    var px = Ꮡ(((pt).X));
+    var px = Ꮡpt.ᏑX;
     px.Value = 5;
-    var py = Ꮡ((pt.Y));
+    var py = Ꮡpt.ᏑY;
     py.Value = 6;
     fmt.Println("field:", pt.X, pt.Y);
 
     ref var arr = ref heap(new array<nint>(3), out var Ꮡarr);
-    var pe = Ꮡ((arr[1]));
+    var pe = Ꮡarr.at<nint>(1);
     pe.Value = 9;
+    var pa = Ꮡarr.at<nint>(2);
+    pa.Value = 8;
     fmt.Println("element:", arr);
 
-    nint n = 1;
-    var pn = Ꮡ((n));
+    ref var n = ref heap<nint>(1, out var Ꮡn);
+    var pn = Ꮡn;
     pn.Value = 2;
     fmt.Println("local:", n);
 
     var pp = Ꮡpt;
-    var pf = Ꮡ(((pp.Value).X));
+    var pf = pp.ᏑX;
     pf.Value = 11;
-    var pg = Ꮡ((pp.Y));
+    var pg = pp.ᏑY;
     pg.Value = 12;
     fmt.Println("pointer:", pt.X, pt.Y);
 }
