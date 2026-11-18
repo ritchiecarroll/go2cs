@@ -40479,4 +40479,34 @@ each package; never hand-edit them.
 
 — P1 (2026-11-17)
 
+## 2026-11-18 — i9 (lever E census, COORD scope ruling 00:21Z: (a) for the seat, (c) this row): two more golib static tables are per-type, `builtin.Itab<T>.s_entries` and `map<K,V>.s_sampledStorage` — OPEN, .5, not started
+
+**What it is.** Lever E (`claude/i9-lever-e`) moves the pointer boxes' seven per-type static tables into one
+non-generic holder, `GoBoxTables`, because a static table whose type names its class's own parameter is a new
+instantiation of the table's whole method set for every type argument, and Native AOT compiles each under its own
+symbol names. Its census (reflection over golib at `b2eaf5290a`: 336 generic type definitions, 51 static fields closed
+over their own parameter, 9 of them tables) found two more of the same shape outside the pointer box. The seat's guard,
+`PointerBoxStaticTableTests`, admits both by (type, field) with a reason, under a liveness arm that fails if either
+stops being a per-type table.
+
+- **`builtin.Itab<T>.s_entries`**, a `ConcurrentDictionary<Type, Entry>` (`Entry` is nested, so it carries `T`). One per
+  interface type a program asserts to: the type-assertion cache, behind a per-type monomorphic slot `s_last`. Moving it
+  keys one table by (interface type, dynamic type), a tuple hash on every miss of the slot, on the assertion hot path.
+  **Its own arm:** a JIT perf read of type assertions (hit and miss) before and after, as well as the AOT one.
+- **`map<K,V>.s_sampledStorage`**, a `ConditionalWeakTable<NilKeyDictionary, GoSampledStorage>`. One per map
+  instantiation, consulted only for a map the profiler sampled. Read since the census: `GoSampledStorage` holds two
+  `object?` fields and names neither `K` nor `V`, so moving it out of `map<K,V>` and keying one weak table by the store
+  is small. A TypeScript-shaped program reaches many map types, so it may carry more names than `Itab`.
+
+**The AOT arm that separates them.** On top of lever E (landed or seated): `parsedemo` (TypeScript `651c4ad147`, full
+trim, no native debug symbols, the B4 arm (a) command), one build per arm, one at a time: the lever E base, base +
+`map` only, base + `Itab` only. Read the symbol-name string table, the image and ILC peak for each, and check output
+against native Go on the demo and the corpus units. Each table is then priced alone. Score the two on their own numbers,
+not as a pair.
+
+**Guard.** Removing an entry from `PointerBoxStaticTableTests`' admitted list makes the guard red until the table moves.
+That is the cut's red-first arm.
+
+— i9 (2026-11-18)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
