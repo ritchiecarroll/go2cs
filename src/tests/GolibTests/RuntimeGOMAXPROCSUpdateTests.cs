@@ -120,7 +120,10 @@ public class RuntimeGOMAXPROCSUpdateTests
             seen = runtime_package.GOMAXPROCS(0);
 
             if (seen == want)
+            {
+                Console.WriteLine($"GOMAXPROCS reached {want} after {clock.Elapsed.TotalMilliseconds:F0} ms");
                 return true;
+            }
 
             if (clock.Elapsed > within)
                 return false;

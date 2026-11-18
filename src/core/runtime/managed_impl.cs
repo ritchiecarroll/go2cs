@@ -411,6 +411,9 @@ partial class runtime_package
         // longer follows the CPUs on its own.
         sched.customGOMAXPROCS = true;
 
+        // Wait for sysmon to complete running defaultGOMAXPROCS (s_computeMaxProcsLock, below).
+        lock (s_computeMaxProcsLock) { }
+
         if (n == previous)
             return previous;
 
@@ -443,6 +446,14 @@ partial class runtime_package
         // same way (the stop-the-world contract, stopTheWorld below).
         worldStop stw = stopTheWorldGC(stwGOMAXPROCS);
 
+        storeGOMAXPROCS(n, custom);
+
+        startTheWorldGC(stw);
+    }
+
+    // What startTheWorld does with newprocs, with the world stopped.
+    private static void storeGOMAXPROCS(nint n, bool custom)
+    {
         lock (s_cpuStatsLock)
         {
             Volatile.Write(ref s_gomaxprocs, n);
@@ -459,8 +470,105 @@ partial class runtime_package
         }
 
         sched.customGOMAXPROCS = custom;
+    }
+
+    // THE AUTOMATIC UPDATE (W-gmp-e). Go's sysmon, at most once a second, recomputes defaultGOMAXPROCS
+    // while the setting is not custom, and when the value changed it wakes a helper goroutine that stops
+    // the world and sets it (proc.go: sysmon, sysmonUpdateGOMAXPROCS, updateMaxProcsGoroutine). So a
+    // program follows a change of its CPU affinity or of its cgroup's CPU limit without being restarted.
+    // The converted bodies never run here (sysmon and runtime.main are the runtime bootstrap), so the
+    // managed sysmon tick (Sysmon, below) carries the arm, and the helper is a thread-pool work item.
+    // Their state takes managed names beside the converted ones, which stay in proc.cs unreached.
+    //
+    // Go's synchronization, kept: sysmon holds computeMaxProcsLock while it reads defaultGOMAXPROCS and
+    // skips when the setting is custom; GOMAXPROCS(n) marks the setting custom, then takes and releases
+    // the lock, so a read in flight finishes first; the helper re-checks custom once the world is
+    // stopped. An explicit GOMAXPROCS therefore always wins over an update. SetDefaultGOMAXPROCS takes no
+    // part, as in Go. defaultGOMAXPROCS reads the CALLING thread's affinity (sched_getaffinity(0) on
+    // linux), and Go's sysmon is the thread that calls it; so is this one.
+    //
+    // GODEBUG=updatemaxprocs=0 turns it off, as debug.updatemaxprocs does in Go.
+    private static readonly object s_computeMaxProcsLock = new();
+
+    // updateMaxProcsG.idle: 1 while the helper waits to be woken. 0 before the update is enabled, while an
+    // update is pending, and for good once the helper has returned (below).
+    private static int s_updateMaxProcsIdle;
+    private static nint s_updateMaxProcsProcs;
+    private static int64 s_lastgomaxprocs;
+
+    // defaultGOMAXPROCSUpdateEnable, from the runtime's start-up (startGOMAXPROCS). Go calls it from
+    // runtime.main before any package init, so the non-default increment for updatemaxprocs=0 reaches no
+    // registered counter and Go's /godebug/non-default-behavior/updatemaxprocs:events reads 0; the call
+    // sits in the same place here and reads the same.
+    private static void gomaxprocsUpdateEnable()
+    {
+        if (debug.updatemaxprocs == 0)
+        {
+            updatemaxprocs.IncNonDefault();
+            return;
+        }
+
+        // Go's helper goroutine marks itself idle before its first park.
+        Volatile.Write(ref s_updateMaxProcsIdle, 1);
+    }
+
+    // sysmon's arm: "Check if we need to update GOMAXPROCS at most once per second."
+    private static void sysmonCheckGOMAXPROCS(int64 now)
+    {
+        if (debug.updatemaxprocs != 0 && s_lastgomaxprocs + 1000000000 <= now)
+        {
+            sysmonGOMAXPROCSUpdate();
+            s_lastgomaxprocs = now;
+        }
+    }
+
+    // sysmonUpdateGOMAXPROCS, verbatim but for the helper's wakeup: a thread-pool work item where Go
+    // injects the parked helper goroutine.
+    private static void sysmonGOMAXPROCSUpdate()
+    {
+        nint procs, curr;
+
+        lock (s_computeMaxProcsLock)
+        {
+            // No update if GOMAXPROCS was set manually.
+            if (sched.customGOMAXPROCS)
+                return;
+
+            curr = Volatile.Read(ref s_gomaxprocs);
+            procs = defaultGOMAXPROCS(0);
+        }
+
+        if (procs == curr)
+            return;
+
+        // If the helper is not idle, a previous update is still pending.
+        if (Interlocked.CompareExchange(ref s_updateMaxProcsIdle, 0, 1) != 1)
+            return;
+
+        Volatile.Write(ref s_updateMaxProcsProcs, procs);
+
+        ThreadPool.UnsafeQueueUserWorkItem(static _ => updateMaxProcs(), null);
+    }
+
+    // One wakeup of updateMaxProcsGoroutine. When the setting turned custom between sysmon's read and the
+    // stop, Go's helper RETURNS: its goroutine ends without marking itself idle again, so no later update
+    // is ever made, even after SetDefaultGOMAXPROCS. That is Go's rule, so it is kept: idle stays 0.
+    private static void updateMaxProcs()
+    {
+        worldStop stw = stopTheWorldGC(stwGOMAXPROCS);
+
+        // Still OK to update?
+        if (sched.customGOMAXPROCS)
+        {
+            startTheWorldGC(stw);
+            return;
+        }
+
+        storeGOMAXPROCS(Volatile.Read(ref s_updateMaxProcsProcs), custom: false);
 
         startTheWorldGC(stw);
+
+        Volatile.Write(ref s_updateMaxProcsIdle, 1);
     }
 
     // osinit's and schedinit's GOMAXPROCS steps, which the converted osinit and schedinit (never run here)
@@ -475,6 +583,7 @@ partial class runtime_package
         numCPUStartup = getCPUCount();
         defaultGOMAXPROCSInit();
         initialGOMAXPROCS();
+        gomaxprocsUpdateEnable();
     }
 
     // schedinit's starting value, verbatim: the GOMAXPROCS environment variable when it parses as a
@@ -996,6 +1105,8 @@ partial class runtime_package
 
         private static void Tick()
         {
+            sysmonCheckGOMAXPROCS(nanotime());
+
             if (System.GC.CollectionCount(2) != Volatile.Read(ref LastGen2Count))
                 noteGCEnd();
 
