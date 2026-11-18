@@ -11,6 +11,7 @@ package main
 import (
 	"go/build"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sort"
 	"strings"
@@ -77,6 +78,13 @@ func TestAStructConversionOfExistingStorageCopiesItsArrays(t *testing.T) {
 		// A struct WRITTEN with a literal is no wrapper: its unnamed twin still takes the site clone.
 		"literalwrite": {lib, chord + "func F(c chord) int { x := struct {\n\tName  string\n\tNotes [2]int\n\tIn    lib.Inner\n}(c); x.Notes[0] = 1; return c.Notes[0] }\n\nfunc G(c chord) chord { return chord(c) }",
 			[]string{"F_x)c.ΔClone()", "(chord)c.ΔClone()"}, nil},
+		// A conversion consumed by a READ copies nothing: a value-receiver method call and an index read
+		// the converted value where it stands.
+		"receiver": {lib, chord + "func (c chord) First() int { return c.Notes[0] }\n\nfunc F(lc lib.Chord) int { return chord(lc).First() }",
+			[]string{"(chord)lc).First()"}, []string{"lc.ΔClone()"}},
+		"index": {"", "type notes [2]int\n\nfunc F(b [2]int) int { return notes(b)[0] }",
+			[]string{"(notes)b))[0]"}, []string{".Clone()"}},
+
 		// A struct without an array copies whole as a C# struct: no clone.
 		"plain": {"", "type a struct{ X int }\n\ntype b struct{ X int }\n\nfunc F(v a) b { return b(v) }",
 			nil, []string{"ΔClone", ".Clone()"}},
@@ -146,11 +154,11 @@ type Chord struct {
 			}
 		}
 
-		// The value is copied once: no clone of a clone, at any site.
-		for _, twice := range []string{".Clone().Clone()", "ΔClone().ΔClone()", ".Clone().ΔClone()", "ΔClone().Clone()"} {
-			if strings.Contains(emitted, twice) {
-				t.Errorf("%s: the emitted file copies twice, %q, in:\n%s", name, twice, emitted)
-			}
+		// The value is copied once: no clone of a clone, at any site, also where the first clone sits inside
+		// the cast the second one clones, `((chord)lc.ΔClone()).ΔClone()` (the operand copy and the
+		// conversion-result copy both firing).
+		if twice := cloneOfACloneRE.FindString(emitted); twice != "" {
+			t.Errorf("%s: the emitted file copies twice, %q, in:\n%s", name, twice, emitted)
 		}
 
 		for _, absent := range a.absent {
@@ -160,3 +168,6 @@ type Chord struct {
 		}
 	}
 }
+
+// cloneOfACloneRE matches a clone applied to a value already cloned, with any closing parentheses between the two.
+var cloneOfACloneRE = regexp.MustCompile(`Δ?Clone\(\)\)*\.Δ?Clone\(\)`)
