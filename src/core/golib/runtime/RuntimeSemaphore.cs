@@ -39,11 +39,15 @@ namespace go.golib;
 /// one semaphore word resolve to one bucket — which is the property the whole protocol rests on.
 /// </para>
 /// <para>
-/// ⚠ <b>Known, pre-existing, and deliberately NOT changed here:</b> the table has a
-/// <c>GetOrAdd</c> and no removal path, so a semaphore word's bucket outlives its owner for the
-/// life of the process. That accumulation came with this code and is carried across unchanged,
-/// because this move is required to be zero-behaviour-change; retiring it is its own increment with
-/// its own measurement.
+/// <b>A bucket lives only while someone needs it.</b> Whoever leaves a bucket with an empty queue, under
+/// its lock, retires it: marks it and removes it from the table. A thread that fetched it before then
+/// finds the mark under the same lock and fetches again, so every live bucket is the one the table holds
+/// and the count is only ever read and written under that bucket's lock. A retired bucket is never
+/// reused (a holder of the old reference would take it for another word's). So a word that blocked once
+/// keeps nothing, and its key (the pointer box) no longer keeps the word's owner alive. In Go an address
+/// is in its semaRoot's tree only while a goroutine waits on it (sema.go, semaRoot.queue and dequeue).
+/// The table had a <c>GetOrAdd</c> and no removal until sync.RWMutex took Go's layout and began to block
+/// here; each RWMutex that ever blocked would then have kept a bucket and its owner for the process.
 /// </para>
 /// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)] public static class RuntimeSemaphore
@@ -73,6 +77,10 @@ namespace go.golib;
     private sealed class SemaBucket
     {
         internal readonly Queue<SemaWaiter> Waiters = new();
+
+        // Set, under this bucket's lock, by whoever removed it from the table. A thread that fetched the
+        // bucket before then reads it under the same lock and fetches the word's current bucket instead.
+        internal bool Retired;
     }
 
     private static readonly ConcurrentDictionary<ж<uint32>, SemaBucket> semaTable = new();
@@ -83,6 +91,17 @@ namespace go.golib;
     internal static long s_handoffYieldTimeouts;
 
     private static SemaBucket bucketFor(ж<uint32> s) => semaTable.GetOrAdd(s, static _ => new SemaBucket());
+
+    // Called under b's lock by whoever may have left its queue empty. Removes exactly this bucket: the key
+    // and value pair, so a newer bucket for the same word is never touched.
+    private static void retireIfIdle(ж<uint32> s, SemaBucket b)
+    {
+        if (b.Waiters.Count != 0)
+            return;
+
+        b.Retired = true;
+        semaTable.TryRemove(new KeyValuePair<ж<uint32>, SemaBucket>(s, b));
+    }
 
     /// <summary>
     /// Acquires the semaphore addressed by <paramref name="s"/>, parking until a permit is
@@ -96,10 +115,10 @@ namespace go.golib;
     // pass waitReasonSemacquire, SyncMutexLock, SyncRWMutexRLock and SyncRWMutexLock respectively).
     public static void Acquire(ж<uint32> s, WaitReason reason)
     {
-        SemaBucket b = bucketFor(s);
-
         while (true)
         {
+            // Fetched on every pass: a woken waiter's bucket may have been retired by the Release that woke it.
+            SemaBucket b = bucketFor(s);
             SemaWaiter w;
             bool locked = false;
 
@@ -107,9 +126,13 @@ namespace go.golib;
             {
                 Monitor.Enter(b, ref locked);
 
+                if (b.Retired)
+                    continue; // removed after we fetched it; the finally releases its lock
+
                 if (s.Value > 0)
                 {
                     s.Value--; // acquired without parking
+                    retireIfIdle(s, b);
                     return;
                 }
 
@@ -165,23 +188,35 @@ namespace go.golib;
     /// </summary>
     public static void Release(ж<uint32> s, bool handoff)
     {
-        SemaBucket b = bucketFor(s);
         SemaWaiter? w = null;
 
-        lock (b)
+        // The count is added under the word's live bucket, never beside it, so an Acquire that read zero and
+        // queued itself under that lock is always seen here (Go reads nwait for the same reason).
+        while (true)
         {
-            s.Value++;
+            SemaBucket b = bucketFor(s);
 
-            if (b.Waiters.Count > 0)
+            lock (b)
             {
-                w = b.Waiters.Dequeue();
+                if (b.Retired)
+                    continue; // removed after we fetched it
 
-                if (handoff)
+                s.Value++;
+
+                if (b.Waiters.Count > 0)
                 {
-                    s.Value--;        // hand the just-added permit directly to w
-                    w.HandedOff = true;
-                    w.Resumed = new ManualResetEventSlim(false, spinCount: 0);
+                    w = b.Waiters.Dequeue();
+
+                    if (handoff)
+                    {
+                        s.Value--;        // hand the just-added permit directly to w
+                        w.HandedOff = true;
+                        w.Resumed = new ManualResetEventSlim(false, spinCount: 0);
+                    }
                 }
+
+                retireIfIdle(s, b);
+                break;
             }
         }
 
