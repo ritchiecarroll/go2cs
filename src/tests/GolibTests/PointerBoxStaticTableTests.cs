@@ -91,7 +91,7 @@ public class PointerBoxStaticTableTests
 
         foreach ((string typeName, string fieldName) in s_admitted.Keys)
         {
-            Type? type = golib.GetType(typeName);
+            Type type = golib.GetType(typeName);
 
             Assert.IsNotNull(type, $"admitted table's type {typeName} no longer exists: remove its entry");
 
