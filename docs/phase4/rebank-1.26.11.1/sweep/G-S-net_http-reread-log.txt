@@ -1,0 +1,9 @@
+# net/http re-read at 8a86140f79 (the holder fix), sweep row output, windows, G-LAPTOP solo (repo-relative)
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+validated sweep: 1 package(s), 1538 expected verdicts, timeout 10m, test-config Release
+==> building the converter
+  PASS  net/http                           1538 [453s]
+
+sweep: 1 pass / 0 fail  (453s)
+
+per-row wall times: 1 row(s) -> scratchpad/sweep-row-walltimes/20261118-115933-sweep.tsv
