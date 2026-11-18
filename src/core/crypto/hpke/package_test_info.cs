@@ -7,15 +7,12 @@
 global using static global::go.crypto.hpke_package;
 
 // <ImportedTypeAliases>
-global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 // </ImportedTypeAliases>
 
 using go;
 using static global::go.crypto.hpke_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("KEM", "ΔKEM")]
-[assembly: GoTypeAlias("PublicKey", "ΔPublicKey")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

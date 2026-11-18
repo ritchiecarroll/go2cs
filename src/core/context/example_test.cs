@@ -35,8 +35,8 @@ public static void ExampleWithCancel() {
             goǃ(() => {
                 for (;;) {
                     var selᴛ3 = ctxΔ1.Done();
-                    var selᴛ4 = dstʗ1.ᐸꟷ(n, ꓸꓸꓸ);
-                    switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), selᴛ4)) {
+                    var dstᴛ1 = dstʗ1.ᐸꟷ(n, ꓸꓸꓸ);
+                    switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), dstᴛ1)) {
                     case 0 when selᴛ3.ꟷᐳ(out _): {
                         return; // returning not to leak the goroutine
                     }
@@ -87,10 +87,10 @@ public static void ExampleWithDeadline() {
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
 
-        var selᴛ5 = neverReady;
+        var neverReadyᴛ1 = neverReady;
         var selᴛ6 = ctx.Done();
-        switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
-        case 0 when selᴛ5.ꟷᐳ(out _): {
+        switch (select(ᐸꟷ(neverReadyᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+        case 0 when neverReadyᴛ1.ꟷᐳ(out _): {
             fmt.Println(readyˢ);
             break;
         }
@@ -117,10 +117,10 @@ public static void ExampleWithTimeout() {
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
 
-        var selᴛ7 = neverReady;
+        var neverReadyᴛ1 = neverReady;
         var selᴛ8 = ctx.Done();
-        switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
-        case 0 when selᴛ7.ꟷᐳ(out _): {
+        switch (select(ᐸꟷ(neverReadyᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
+        case 0 when neverReadyᴛ1.ꟷᐳ(out _): {
             fmt.Println(readyˢ);
             break;
         }

@@ -7,8 +7,6 @@
 global using static global::go.image.gif_package;
 
 // <ImportedTypeAliases>
-global using colorꓸRGBA = go.image.color_package.ΔRGBA;
-global using imageꓸRGBA = go.image_package.ΔRGBA;
 // </ImportedTypeAliases>
 
 using go;
@@ -25,7 +23,7 @@ using static global::go.image.gif_internal_test_package;
 [assembly: GoImplement<global::go.image.gif_package.blockReader, io_package.ByteReader>(Pointer = true)]
 [assembly: GoImplement<global::go.image.gif_package.blockWriter, global::go.image.gif_package.writer>]
 [assembly: GoImplement<image_package.Paletted, go.image.draw_package.Image>(Pointer = true)]
-[assembly: GoImplement<image_package.ΔRGBA, go.image.draw_package.Image>(Pointer = true)]
+[assembly: GoImplement<image_package.RGBA, go.image.draw_package.Image>(Pointer = true)]
 [assembly: GoImplement<offsetImage, image_package.Image>(Promoted = true)]
 [assembly: GoImplement<offsetImage, image_package.Image>]
 [assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
@@ -56,8 +54,8 @@ using static global::go.image.gif_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("image/gif/fuzz_test.go", "fuzz_test.cs", "ABogooKmgoKUgoKUgoKUpoKCgpSClIKClKKCgoKUgoKUgoKC", "36-64:1")]
-[assembly: GoPositionMap("image/gif/reader_test.go", "reader_test.cs", "AChClpKCgoCCpICCpAAQBojEABM4goKCyoKCgoKUuKa4ppSClIKUgoK4gpQABhKC3IKCgoKClIKCpoKCgpSCgpSUgoKUgoKCyoKUgoKC3AAPIIKCgoKUgviUgpSCgriCgoKmgoKUpoK4gqamgoKClJTmgoKmgqamgoKClKaCgpS4gqaCAAgSpqaCgoKUlAAMBoIAGkSykoKClIKCgpSCgpSClIIACwyCgoKClIKClIL8soKCyoKClIKAgqSCgoKCgIKkgoK05KKCgpSCgpSCgoKCuIKCgpSCgpSCgg==", "357-377:1", "", "145=Rect/1/1/3")]
-[assembly: GoPositionMap("image/gif/writer_test.go", "writer_test.cs", "ABcqooKClJKC1qKCgpSS1oKCgpSqooKqopKCgoKCgoKCgoKmytQABRKCgoKCgpSCgoKClIKCgpSCgqaCgoLKgoKClIKCgoKUgoKUgpSCvKKCgpSCgqaCgoKmgoKCpqb6gqTKgoKClIKCpu6CgpSCgoKUyqaCgpSCgoKUgoKmgpSClJKmgpSClIKUgpSCpoKCgpSSgpSCgpSCyoKC1IKCgqa4gIK2yoKUgIL4goK4gsqCAAgSgoKCpoLcgu6CuIKCgpSCgoKUgtyCgriCgoKCgpSCgoKUgoKClICCgraSlMqAgqSAgtoACRSCpriCgoKmgtyCkgAPJgAPIIKClIKClIKUgoLKgpKCgoKCgrgADBqCgoIACQyCgoKCyoKUgoKCgIKkgIKkgpSCuKaCAAoWgoKCgIKCpICCAAoUgqaCgoK4goKCgpSCgpSCgrgACRSCgoKClIKCpgAJFIKCuKKCgoKmgoKCgriigoKCgoIACBKCgoKC+KKCgpSCgpSCgoKCuKKCgpTKgpSCgoKC", "398-402:1", "", "209=Bounds/1/1/1;346=Rect/1/3/1,NewPaletted/1/3/1,Rect/2/3/2,NewPaletted/2/3/2,Rect/3/3/3,NewPaletted/3/3/3;383=Add/1/1/2;406=Add/1/1/2;467=Rect/1/1/1,NewPaletted/1/1/1;506=Rect/1/4/2,NewPaletted/1/4/2,Rect/2/4/3,NewPaletted/2/4/3,Rect/3/4/4,NewPaletted/3/4/4,Rect/4/4/5,NewPaletted/4/4/5;552=Rect/1/1/2,NewPaletted/1/1/2;615=Rect/1/9/1,Rect/2/9/2,Rect/3/9/3,Rect/4/9/4,Rect/5/9/5,Rect/6/9/6,Rect/7/9/7,Rect/8/9/8,Rect/9/9/9;737=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3", "32:21,48:21")]
+[assembly: GoPositionMap("image/gif/reader_test.go", "reader_test.cs", "AChClpKCgoCCpICCpAAQBojEABM4goKCyoKCgoKUuKa4ppSClIKUgoK4gpQABhKC3IKCgoKClIKCpoKCgpSCgpSUgoKUgoKCyoKUgoKC3AAPIIKCgoKUggAJCJSClIKCuIKCgqaCgpTmgriCpqaCgoKUlOaCgqaCpqaCgoKUpoKClLiCpoIACBKmpoKCgpSUAAwGggAaRLKSgoKUgoKClIKClIKUggALDIKCgoKUgoKUgvyygoLKgoKUgoCCpIKCgoKAgqSCgrTkooKClIKClIKCgoK4goKClIKClIKC", "357-377:1", "", "145=Rect/1/1/3")]
+[assembly: GoPositionMap("image/gif/writer_test.go", "writer_test.cs", "ABgqooKClJKC1qKCgpSS1oKCgpSqooKqopKCgoKCgoKCgoKmytQABRKCgoKCgpSCgoKClIKCgpSCgqaCgoLKgoKClIKCgoKUgoKUgpSCvKKCgpSCgqaCgoKmgoKCpqb6gqTKgoKClIKCpu6CgpSCgoKUyqaCgpSCgoKUgoKmgpSClJKmgpSClIKUgpSCpoKCgpSSgpSCgpSCyoKC1IKCgqa4gIK2yoKUgIL4goK4gsqCAAgSgoKCpoLcgu6CuIKCgpSCgoKUgtyCgriCgoKCgpSCgoKUgoKClICCgraSlMqAgqSAgtoACRSCpriCgoKmgtyCkgAPJgAPIIKClIKClIKUgoLKgpKCgoKCgrgADBqCgoIACQyCgoKCyoKUgoKCgIKkgIKkgpSCuKaCAAoWgoKCgIKCpICCAAwUgsaCgoK4goKCgpSCgpSCgrgACRSCgoKClIKCpgAJFIKCuKKCgoKmgoKCgriigoKCgoIACBKCgoKC+KKCgpSCgpSCgoKCuKKCgpTKgpSCgoKC", "398-402:1", "", "210=Bounds/1/1/1;347=Rect/1/3/1,NewPaletted/1/3/1,Rect/2/3/2,NewPaletted/2/3/2,Rect/3/3/3,NewPaletted/3/3/3;384=Add/1/1/2;407=Add/1/1/2;468=Rect/1/1/1,NewPaletted/1/1/1;507=Rect/1/4/2,NewPaletted/1/4/2,Rect/2/4/3,NewPaletted/2/4/3,Rect/3/4/4,NewPaletted/3/4/4,Rect/4/4/5,NewPaletted/4/4/5;553=Rect/1/1/2,NewPaletted/1/1/2;616=Rect/1/9/1,Rect/2/9/2,Rect/3/9/3,Rect/4/9/4,Rect/5/9/5,Rect/6/9/6,Rect/7/9/7,Rect/8/9/8,Rect/9/9/9;742=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3", "33:21,49:21")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
@@ -107,3 +105,13 @@ public static partial class gif_internal_test_package
         builtin.initPackage(typeof(global::go.image.gif_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(gif_internal_test_package.offsetImage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gif_internal_testᴛoffsetImage;
+// </MethodHolders>

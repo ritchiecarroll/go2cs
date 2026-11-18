@@ -191,7 +191,7 @@ internal static void testWriteToConn(ж<testing.T> t, @string raddr) {
         assertErrWriteToConnected(t, err);
         (_, err) = c._<ж<global::go.net_package.UDPConn>>().WriteToUDP(b, ra);
         assertErrWriteToConnected(t, err);
-        (_, err) = c._<ж<global::go.net_package.UDPConn>>().WriteTo(b, new global::go.net_package.UDPAddrжΔAddr(ra));
+        (_, err) = c._<ж<global::go.net_package.UDPConn>>().WriteTo(b, new global::go.net_package.UDPAddrжAddr(ra));
         assertErrWriteToConnected(t, err);
         (_, err) = c.Write(b);
         if (err != nil) {
@@ -234,7 +234,7 @@ internal static void testWriteToPacketConn(ж<testing.T> t, @string raddr) {
         if (err != nil) {
             t.Fatal(err);
         }
-        (_, err) = c.WriteTo(b, new global::go.net_package.UDPAddrжΔAddr(ra));
+        (_, err) = c.WriteTo(b, new global::go.net_package.UDPAddrжAddr(ra));
         if (err != nil) {
             t.Fatal(err);
         }
@@ -302,7 +302,7 @@ public static void TestUDPConnLocalName(ж<testing.T> t) {
 }
 
 internal partial struct TestUDPConnLocalAndRemoteNames_type /*dyn*/ {
-    internal global::go.net_package.ΔAddr got;
+    internal global::go.net_package.Addr got;
     internal bool ok;
 }
 
@@ -511,7 +511,7 @@ public static void TestUDPZeroByteBuffer(ж<testing.T> t) {
                 break;
             }
             default: { // Read may timeout, it depends on the platform
-                var (nerr, ok) = err._<ΔError>(ᐧ); if ((!ok || !nerr.Timeout()) && Δruntime.GOOS != "windows"u8) { // Windows returns WSAEMSGSIZE
+                var (nerr, ok) = err._<Error>(ᐧ); if ((!ok || !nerr.Timeout()) && Δruntime.GOOS != "windows"u8) { // Windows returns WSAEMSGSIZE
                     t.Fatal(err);
                 }
                 break;

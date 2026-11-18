@@ -163,7 +163,6 @@
     <ProjectReference Include="$(go2csPath)core/go/token/go.token.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/dag/internal.dag.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/maps/internal.runtime.maps.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />

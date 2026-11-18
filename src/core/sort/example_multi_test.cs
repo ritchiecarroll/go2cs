@@ -6,6 +6,7 @@ namespace go;
 using fmt = fmt_package;
 using sort = sort_package;
 using static go.sort_internal_test_package;
+using static sort_test_package;
 
 partial class sort_test_package {
 
@@ -24,13 +25,17 @@ public partial struct multiSorter {
     internal slice<Func<ж<Change>, ж<Change>, bool>> less;
 }
 
+} partial class sort_testᴛmultiSorter {
+
 // Sort sorts the argument slice according to the less functions passed to OrderedBy.
-public static void ΔSort(this ж<multiSorter> Ꮡms, slice<Change> changes) {
+public static void Sort(this ж<multiSorter> Ꮡms, slice<Change> changes) {
     ref var ms = ref Ꮡms.DerefOrNull();
 
     ms.changes = changes;
     sort.Sort(new sort_test_package.multiSorterжInterface(Ꮡms));
 }
+
+} partial class sort_test_package {
 
 // OrderedBy returns a Sorter that sorts using the less functions, in order.
 // Call its Sort method to sort the data.
@@ -41,6 +46,8 @@ public static ж<multiSorter> OrderedBy(params Span<Func<ж<Change>, ж<Change>,
         less: less
     ));
 }
+
+} partial class sort_testᴛmultiSorter {
 
 // Len is part of sort.Interface.
 public static nint Len(this ref multiSorter ms) {
@@ -80,6 +87,8 @@ public static bool Less(this ref multiSorter ms, nint i, nint j) {
     return ms.less[k](p, q);
 }
 
+} partial class sort_test_package {
+
 internal static slice<Change> changes = [
     new("gri", "Go", 100),
     new("ken", "C", 150),
@@ -112,20 +121,20 @@ public static void Example_sortMultiKeys() {
     };
 
     // Simple use: Sort by user.
-    OrderedBy(new Func<ж<Change>, ж<Change>, bool>(user)).ΔSort(changes);
+    OrderedBy(user).Sort(changes);
     fmt.Println(byUserˢ, changes);
 
     // More examples.
-    OrderedBy(new Func<ж<Change>, ж<Change>, bool>(user), increasingLines).ΔSort(changes);
+    OrderedBy(user, increasingLines).Sort(changes);
     fmt.Println(byUserLinesˢ, changes);
 
-    OrderedBy(new Func<ж<Change>, ж<Change>, bool>(user), decreasingLines).ΔSort(changes);
+    OrderedBy(user, decreasingLines).Sort(changes);
     fmt.Println(byUserLinesˢ2, changes);
 
-    OrderedBy(new Func<ж<Change>, ж<Change>, bool>(language), increasingLines).ΔSort(changes);
+    OrderedBy(language, increasingLines).Sort(changes);
     fmt.Println(byLanguageLinesˢ, changes);
 
-    OrderedBy(new Func<ж<Change>, ж<Change>, bool>(language), increasingLines, user).ΔSort(changes);
+    OrderedBy(language, increasingLines, user).Sort(changes);
     fmt.Println(byLanguageLinesUserˢ, changes);
 
     // Output:

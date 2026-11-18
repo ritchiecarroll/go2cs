@@ -42,9 +42,8 @@ public static void TestPacketConn(ж<testing.T> t) {
 
         void closer(global::go.net_package.PacketConn c, @string net, @string addr1, @string addr2) {
             c.Close();
-            var exprᴛ1 = net;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "unixgram"u8: {
+            case {} when net == "unixgram"u8: {
                 Δos.Remove(addr1);
                 Δos.Remove(addr2);
                 break;
@@ -113,9 +112,8 @@ public static void TestConnAndPacketConn(ж<testing.T> t) {
 
         void closer(global::go.net_package.PacketConn c, @string net, @string addr1, @string addr2) {
             c.Close();
-            var exprᴛ1 = net;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "unixgram"u8: {
+            case {} when net == "unixgram"u8: {
                 Δos.Remove(addr1);
                 Δos.Remove(addr2);
                 break;
@@ -157,7 +155,7 @@ public static void TestConnAndPacketConn(ж<testing.T> t) {
             var (_, _, errΔ2) = c1.ReadFrom(rb1); if (errΔ2 != nil) {
                 t.Fatal(errΔ2);
             }
-            global::go.net_package.ΔAddr dst = default;
+            global::go.net_package.Addr dst = default;
             var exprᴛ2 = tt.net;
             switch (ᐧ) {
             case {} when exprᴛ2 == "unixgram"u8: {

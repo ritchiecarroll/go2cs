@@ -8,12 +8,15 @@ using fmt = fmt_package;
 using io = io_package;
 using testing = testing_package;
 using static go.debug.buildinfo_package;
+using static buildinfo_internal_test_package;
 
 partial class buildinfo_internal_test_package {
 
 internal partial struct byteExe {
     internal slice<byte> b;
 }
+
+} partial class buildinfo_internal_testᴛbyteExe {
 
 internal static (io.ReaderAt, error) DataReader(this ref byteExe x, uint64 addr) {
     if (addr >= (uint64)len(x.b)) {
@@ -25,6 +28,8 @@ internal static (io.ReaderAt, error) DataReader(this ref byteExe x, uint64 addr)
 internal static (uint64, uint64) DataStart(this ref byteExe x) {
     return (0, (uint64)len(x.b));
 }
+
+} partial class buildinfo_internal_test_package {
 
 internal partial struct TestSearchMagic_tests /*dyn*/ {
     internal @string name;

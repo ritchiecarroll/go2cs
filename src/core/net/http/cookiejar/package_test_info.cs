@@ -8,10 +8,6 @@ global using static global::go.net.http.cookiejar_package;
 global using static global::go.net.http.cookiejar_internal_test_package;
 
 // <ImportedTypeAliases>
-global using httpꓸCookie = go.net.http_package.ΔCookie;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,7 +43,7 @@ using static global::go.net.http.cookiejar_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/cookiejar/dummy_publicsuffix_test.go", "dummy_publicsuffix_test.cs", "AA8aguaCpg==")]
+[assembly: GoPositionMap("net/http/cookiejar/dummy_publicsuffix_test.go", "dummy_publicsuffix_test.cs", "ABIaguaCxg==")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -89,3 +85,13 @@ public static partial class cookiejar_test_package
         builtin.initPackage(typeof(global::go.net.http.cookiejar_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cookiejar_test_package.dummypsl)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cookiejar_testᴛdummypsl;
+// </MethodHolders>

@@ -27,7 +27,7 @@ internal static ref readonly @string truncatedˢ => ref truncatedˢᵇ;
 private static readonly @string truncatedˢᵇ = "truncated"u8;
 
 public static void TestRegress(ж<testing.T> t) {
-    var argsᴷ = new stackAppend<reflectꓸValue>();
+    var argsᴷ = new stackAppend<reflect.Value>();
 
     slice<int32> int32s = slice<int32>([1, 10, 32, (int32)(1 << 20), (1 << 20) + 1, 1000000000, (int32)(1 << 30), (int32)(2147483648L - 2), (int32)(2147483648L - 1)]);
     slice<int64> int64s = slice<int64>([1, 10, 32, (int64)1 << 20, (1 << 20) + 1, 1000000000, (int64)1 << 30, 2147483648L - 2, 2147483648L - 1, 1000000000000000000L, 1152921504606846976L, 9223372036854775806L, 9223372036854775807L]);
@@ -50,7 +50,7 @@ public static void TestRegress(ж<testing.T> t) {
         }
         r.Seed(0);
         for (nint repeat = 0; repeat < 20; repeat++) {
-            slice<reflectꓸValue> args = default;
+            slice<reflect.Value> args = default;
             @string argstr = default;
             if (mt.NumIn() == 1) {
                 any x = default;
@@ -59,7 +59,7 @@ public static void TestRegress(ж<testing.T> t) {
                     t.Fatalf("unexpected argument type for r.%s", m.Name);
                     break;
                 }
-                case var ᴛ when ᴛ == reflect.ΔInt: {
+                case var ᴛ when ᴛ == reflect.Int: {
                     if (m.Name == "Perm"u8) {
                         x = permSizes[repeat % len(permSizes)];
                         break;
@@ -84,7 +84,7 @@ public static void TestRegress(ж<testing.T> t) {
                     x = int64s[repeat % len(int64s)];
                     break;
                 }
-                case var ᴛ when ᴛ == reflect.ΔSlice: {
+                case var ᴛ when ᴛ == reflect.Slice: {
                     if (m.Name == "Read"u8) {
                         nint nΔ2 = readBufferSizes[repeat % len(readBufferSizes)];
                         x = new slice<byte>(nΔ2);
@@ -109,7 +109,7 @@ public static void TestRegress(ж<testing.T> t) {
                 if ((int64)(nint)big != big && (m.Name == "Int"u8 || m.Name == "Intn"u8)) {
                     // 32-bit machine cannot print 64-bit results
                     val = truncatedˢ;
-                } else if (reflect.TypeOf(@out).Kind() == reflect.ΔSlice) {
+                } else if (reflect.TypeOf(@out).Kind() == reflect.Slice) {
                     val = fmt.Sprintf("%#v"u8, @out);
                 } else {
                     val = fmt.Sprintf("%T(%v)"u8, @out, @out);

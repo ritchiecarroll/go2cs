@@ -9,6 +9,7 @@ using strings = strings_package;
 using testing = testing_package;
 using io = io_package;
 using static go.html.template_package;
+using static template_internal_test_package;
 
 partial class template_internal_test_package {
 
@@ -429,17 +430,25 @@ internal partial struct myStringer {
     internal nint v;
 }
 
+} partial class template_internal_testᴛmyStringer {
+
 internal static @string String(this ref myStringer s) {
     return fmt.Sprintf("string=%d"u8, s.v);
 }
+
+} partial class template_internal_test_package {
 
 internal partial struct errorer {
     internal nint v;
 }
 
+} partial class template_internal_testᴛerrorer {
+
 internal static @string Error(this ref errorer s) {
     return fmt.Sprintf("error=%d"u8, s.v);
 }
+
+} partial class template_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string string3ˢ => ref string3ˢᵇ;

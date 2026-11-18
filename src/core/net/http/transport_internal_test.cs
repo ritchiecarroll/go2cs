@@ -17,6 +17,7 @@ using crypto;
 using global::go.net.http.@internal;
 using static global::go.net.http_package;
 using time = time_package;
+using static http_internal_test_package;
 
 partial class http_internal_test_package {
 
@@ -38,7 +39,7 @@ public static partial void TestTransportPersistConnReadLoopEOF(ж<testing.T> t) 
         goǃ(() => {
             GoFrame ᒐ = default;
             try {
-                defer(ᴛ1 => builtin.close(ᴛ1), conncʗ1, ref ᒐ);
+                defer(ᴛ1 => close(ᴛ1), conncʗ1, ref ᒐ);
                 var (c, errΔ1) = lnʗ2.Accept();
                 if (errΔ1 != nil) {
                     t.Error(errΔ1);
@@ -53,7 +54,7 @@ public static partial void TestTransportPersistConnReadLoopEOF(ж<testing.T> t) 
         var tr = @new<global::go.net.http_package.Transport>();
         var (req, _) = NewRequest(getˢ, "http://"u8 + ln.Addr().String(), default);
         req = req.WithT(t);
-        var (ctx, cancel) = context_package.WithCancelCause(context_package.Background());
+        var (ctx, cancel) = context.WithCancelCause(context.Background());
         var treq = Ꮡ(new transportRequest(Request: req, ctx: ctx, cancel: cancel));
         var cm = new connectMethod(targetScheme: "http", targetAddr: ln.Addr().String());
         var (pc, err) = tr.getConn(treq, cm);
@@ -96,6 +97,8 @@ internal static bool isTransportReadFromServerError(error err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
 internal static ref readonly @string tcp6ˢ => ref tcp6ˢᵇ;
 private static readonly @string tcp6ˢᵇ = "tcp6"u8;
 
@@ -139,12 +142,16 @@ internal static ж<global::go.net.http_package.Request> dummyRequestWithBodyNoGe
 internal partial struct issue22091Error {
 }
 
+} partial class http_internal_testᴛissue22091Error {
+
 internal static void IsHTTP2NoCachedConnError(this issue22091Error _) { }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string issue22091Errorˢ => ref issue22091Errorˢᵇ;
 private static readonly @string issue22091Errorˢᵇ = "issue22091Error"u8;
 
 internal static @string Error(this issue22091Error _) { return issue22091Errorˢ; }
+
+} partial class http_internal_test_package {
 
 internal partial struct TestTransportShouldRetryRequest_tests /*dyn*/ {
     internal ж<global::go.net.http_package.persistConn> pc;
@@ -226,9 +233,13 @@ public static void TestTransportShouldRetryRequest(ж<testing.T> t) {
 
 internal delegate (ж<global::go.net.http_package.Response>, error) roundTripFunc(ж<global::go.net.http_package.Request> r);
 
+} partial class http_internal_testᴛroundTripFunc {
+
 internal static partial (ж<global::go.net.http_package.Response>, error) RoundTrip(this roundTripFunc f, ж<global::go.net.http_package.Request> r) {
     return f(r);
 }
+
+} partial class http_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpsExampleOrgˢ => ref httpsExampleOrgˢᵇ;

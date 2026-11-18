@@ -80,7 +80,7 @@ public static void TestHybridPool(ж<testing.T> t) {
         Subject: new pkix.Name(CommonName: "Go test root"),
         IsCA: true,
         BasicConstraintsValid: true,
-        NotBefore: time.Now().Add(-time.ΔHour),
+        NotBefore: time.Now().Add(-time.Hour),
         NotAfter: time.Now().Add((time.Duration)(36000000000000L))
     ));
     (var k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
@@ -116,7 +116,7 @@ public static void TestHybridPool(ж<testing.T> t) {
 
     var certTmpl = Ꮡ(new Δx509.Certificate(
         SerialNumber: big.NewInt(1),
-        NotBefore: time.Now().Add(-time.ΔHour),
+        NotBefore: time.Now().Add(-time.Hour),
         NotAfter: time.Now().Add((time.Duration)(36000000000000L)),
         DNSNames: ["example.com"]
     ));

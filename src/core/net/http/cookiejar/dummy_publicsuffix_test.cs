@@ -6,12 +6,15 @@ namespace go.net.http;
 using cookiejar = go.net.http.cookiejar_package;
 using go.net.http;
 using static go.net.http.cookiejar_internal_test_package;
+using static cookiejar_test_package;
 
 partial class cookiejar_test_package {
 
 partial struct dummypsl {
     public cookiejar.PublicSuffixList List;
 }
+
+} partial class cookiejar_testᴛdummypsl {
 
 internal static @string PublicSuffix(this dummypsl _, @string domain) {
     return domain;
@@ -24,6 +27,8 @@ private static readonly @string dummyˢᵇ = "dummy"u8;
 internal static @string String(this dummypsl _) {
     return dummyˢ;
 }
+
+} partial class cookiejar_test_package {
 
 internal static dummypsl publicsuffix = new dummypsl();
 

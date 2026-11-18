@@ -39,9 +39,9 @@ internal static partial void testWaitGroup(ж<Δtesting.T> t, ж<Δsync.WaitGrou
     }
     wg1.Wait();
     for (nint i = 0; i != n; i++) {
-        var selᴛ11 = exited;
-        switch (trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
-        case 0 when selᴛ11.ꟷᐳ(out _): {
+        var exitedᴛ1 = exited;
+        switch (trySelect(ᐸꟷ(exitedᴛ1, ꓸꓸꓸ))) {
+        case 0 when exitedᴛ1.ꟷᐳ(out _): {
             t.Fatal(waitGroupReleasedGroupˢ);
             break;
         }

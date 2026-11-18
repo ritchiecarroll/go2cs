@@ -44,16 +44,17 @@ using go.net;
 using go.os;
 using hash = hash_package;
 using static go.crypto.x509_package;
+using static x509_internal_test_package;
 
 partial class x509_internal_test_package {
 
 internal partial struct TestParsePKCS1PrivateKey_val /*dyn*/ {
     public nint Version;
-    public ж<bigꓸInt> N;
+    public ж<big.Int> N;
     public nint E;
-    public ж<bigꓸInt> D;
-    public ж<bigꓸInt> P;
-    public ж<bigꓸInt> Q;
+    public ж<big.Int> D;
+    public ж<big.Int> P;
+    public ж<big.Int> Q;
 }
 
 public static void TestParsePKCS1PrivateKey(ж<testing.T> t) {
@@ -171,7 +172,7 @@ public static void TestParsePKIXPublicKey(ж<testing.T> t) {
     });
     t.Run(x25519ˢ, (ж<testing.T> tΔ3) => {
         var pub = testParsePKIXPublicKey(tΔ3, pemX25519Key);
-        var (k, ok) = pub._<ж<ecdhꓸPublicKey>>(ᐧ);
+        var (k, ok) = pub._<ж<ecdh.PublicKey>>(ᐧ);
         if (!ok || !AreEqual(k.Curve(), ecdh.X25519())) {
             tΔ3.Errorf("Value returned from ParsePKIXPublicKey was not an X25519 public key");
         }
@@ -259,20 +260,20 @@ internal static ref ж<rsa.PrivateKey> testPrivateKey => ref ((StaticBox<ж<rsa.
     }
 }
 
-internal static ж<bigꓸInt> bigFromString(@string s) {
-    var ret = @new<bigꓸInt>();
+internal static ж<big.Int> bigFromString(@string s) {
+    var ret = @new<big.Int>();
     ret.SetString(s, 10);
     return ret;
 }
 
-internal static ж<bigꓸInt> fromBase10(@string base10) {
-    var i = @new<bigꓸInt>();
+internal static ж<big.Int> fromBase10(@string base10) {
+    var i = @new<big.Int>();
     i.SetString(base10, 10);
     return i;
 }
 
-internal static ж<bigꓸInt> bigFromHexString(@string s) {
-    var ret = @new<bigꓸInt>();
+internal static ж<big.Int> bigFromHexString(@string s) {
+    var ret = @new<big.Int>();
     ret.SetString(s, 16);
     return ret;
 }
@@ -283,7 +284,7 @@ internal static ж<rsa.PrivateKey> rsaPrivateKey = Ꮡ(new rsa.PrivateKey(
         E: 65537
     ),
     D: bigFromString("69322600686866301945688231018559005300304807960033948687567105312977055197015197977971637657636780793670599180105424702854759606794705928621125408040473426339714144598640466128488132656829419518221592374964225347786430566310906679585739468938549035854760501049443920822523780156843263434219450229353270690889"),
-    Primes: slice<ж<bigꓸInt>>([
+    Primes: slice<ж<big.Int>>([
         bigFromString("11405025354575369741595561190164746858706645478381139288033759331174478411254205003127028642766986913445391069745480057674348716675323735886284176682955723"),
         bigFromString("10937079261204603443118731009201819560867324167189758120988909645641782263430128449826989846631183550578761324239709121189827307416350485191350050332642639")
     ])
@@ -296,7 +297,7 @@ public static void TestMarshalRSAPrivateKey(ж<testing.T> t) {
             E: 3
         ),
         D: fromBase10("10897585948254795600358846499957366070880176878341177571733155050184921896034527397712889205732614568234385175145686545381899460748279607074689061600935843283397424506622998458510302603922766336783617368686090042765718290914099334449154829375179958369993407724946186243249568928237086215759259909861748642124071874879861299389874230489928271621259294894142840428407196932444474088857746123104978617098858619445675532587787023228852383149557470077802718705420275739737958953794088728369933811184572620857678792001136676902250566845618813972833750098806496641114644760255910789397593428910198080271317419213080834885003"),
-        Primes: slice<ж<bigꓸInt>>([
+        Primes: slice<ж<big.Int>>([
             fromBase10("1025363189502892836833747188838978207017355117492483312747347695538428729137306368764177201532277413433182799108299960196606011786562992097313508180436744488171474690412562218914213688661311117337381958560443"),
             fromBase10("3467903426626310123395340254094941045497208049900750380025518552334536945536837294961497712862519984786362199788654739924501424784631315081391467293694361474867825728031147665777546570788493758372218019373"),
             fromBase10("4597024781409332673052708605078359346966325141767460991205742124888960305710298765592730135879076084498363772408626791576005136245060321874472727132746643162385746062759369754202494417496879741537284589047")
@@ -310,7 +311,7 @@ public static void TestMarshalRSAPrivateKey(ж<testing.T> t) {
         t.Errorf("error parsing serialized key: %s", err);
         return;
     }
-    if (priv.PublicKey.N.Cmp(priv2.PublicKey.N) != 0 || priv.PublicKey.E != priv2.PublicKey.E || priv.D.Cmp(priv2.D) != 0 || builtin.len(priv2.Primes) != 3 || priv.Primes[0].Cmp(priv2.Primes[0]) != 0 || priv.Primes[1].Cmp(priv2.Primes[1]) != 0 || priv.Primes[2].Cmp(priv2.Primes[2]) != 0) {
+    if (priv.PublicKey.N.Cmp(priv2.PublicKey.N) != 0 || priv.PublicKey.E != priv2.PublicKey.E || priv.D.Cmp(priv2.D) != 0 || len(priv2.Primes) != 3 || priv.Primes[0].Cmp(priv2.Primes[0]) != 0 || priv.Primes[1].Cmp(priv2.Primes[1]) != 0 || priv.Primes[2].Cmp(priv2.Primes[2]) != 0) {
         t.Errorf("wrong priv:\ngot  %+v\nwant %+v", priv2.OrTypedNil(), priv.OrTypedNil());
     }
 
@@ -363,7 +364,7 @@ public static void TestMarshalRSAPrivateKeyInvalid(ж<testing.T> t) {
     var (testRSA2048, _) = ParsePKCS1PrivateKey(block.Bytes);
 
     ref var broken = ref heap<rsa.PrivateKey>(testRSA2048.Value, out var Ꮡbroken);
-    broken.Precomputed.Dp = @new<bigꓸInt>().SetUint64(42);
+    broken.Precomputed.Dp = @new<big.Int>().SetUint64(42);
 
     var (parsed, err) = ParsePKCS1PrivateKey(MarshalPKCS1PrivateKey(Ꮡbroken));
     if (err == nil) {
@@ -415,7 +416,7 @@ public static void TestMarshalRSAPublicKey(ж<testing.T> t) {
     if (err != nil) {
         t.Errorf("Unmarshal(rsa.PublicKey): %v", err);
     }
-    if (builtin.len(rest) != 0 || pub.N.Cmp(pub3.N) != 0 || pub.E != pub3.E) {
+    if (len(rest) != 0 || pub.N.Cmp(pub3.N) != 0 || pub.E != pub3.E) {
         t.Errorf("Unmarshal(rsa.PublicKey) = %+v, %q want %+v, %q", pub.OrTypedNil(), rest, pub2.OrTypedNil(), slice<byte>(default));
     }
 
@@ -482,7 +483,7 @@ public static void TestMarshalRSAPublicKey(ж<testing.T> t) {
     ]);
 
     foreach (var (i, test) in range(publicKeys)) {
-        var shouldFail = builtin.len(test.expectedErrSubstr) > 0;
+        var shouldFail = len(test.expectedErrSubstr) > 0;
         var (pubΔ1, errΔ1) = ParsePKCS1PublicKey(test.derBytes);
         if (shouldFail) {
             if (errΔ1 == nil) {
@@ -616,8 +617,8 @@ public static void TestCertificateParse(ж<testing.T> t) {
     if (err != nil) {
         t.Error(err);
     }
-    if (builtin.len(certs) != 2) {
-        t.Errorf("Wrong number of certs: got %d want 2", builtin.len(certs));
+    if (len(certs) != 2) {
+        t.Errorf("Wrong number of certs: got %d want 2", len(certs));
         return;
     }
 
@@ -631,7 +632,7 @@ public static void TestCertificateParse(ж<testing.T> t) {
     }
 
     const nint expectedExtensions = 10;
-    nint n = builtin.len(certs[0].Extensions); if (n != expectedExtensions) {
+    nint n = len(certs[0].Extensions); if (n != expectedExtensions) {
         t.Errorf("want %d extensions, got %d", (nint)(expectedExtensions), n);
     }
 }
@@ -794,7 +795,7 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> t) {
             IPAddresses: slice<net.IP>([net.IPv4(127, 0, 0, 1).To4(), net.ParseIP("2001:4860:0:2001::68")]),
             URIs: slice<ж<url.URL>>([parseURI(httpsFooComWibbleFooˢ)]),
 
-            Policies: slice<global::go.crypto.x509_package.ΔOID>([mustNewOIDFromInts([1, 2, 3, math.MaxUint32, math.MaxUint64])]),
+            Policies: slice<global::go.crypto.x509_package.OID>([mustNewOIDFromInts([1, 2, 3, math.MaxUint32, math.MaxUint64])]),
             PermittedDNSDomains: [".example.com", "example.com"],
             ExcludedDNSDomains: ["bar.example.com"],
             PermittedIPRanges: slice<ж<net.IPNet>>([parseCIDR("192.168.1.1/16"), parseCIDR("1.2.3.4/8")]),
@@ -832,39 +833,39 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> t) {
             continue;
         }
 
-        if (builtin.len(cert.Policies) != 1 || !cert.Policies[0].Equal(template.Policies[0])) {
+        if (len(cert.Policies) != 1 || !cert.Policies[0].Equal(template.Policies[0])) {
             t.Errorf("%s: failed to parse policy identifiers: got:%#v want:%#v", test.name, cert.PolicyIdentifiers, template.Policies);
         }
 
-        if (builtin.len(cert.PermittedDNSDomains) != 2 || cert.PermittedDNSDomains[0] != ".example.com" || cert.PermittedDNSDomains[1] != "example.com") {
+        if (len(cert.PermittedDNSDomains) != 2 || cert.PermittedDNSDomains[0] != ".example.com" || cert.PermittedDNSDomains[1] != "example.com") {
             t.Errorf("%s: failed to parse name constraints: %#v", test.name, cert.PermittedDNSDomains);
         }
 
-        if (builtin.len(cert.ExcludedDNSDomains) != 1 || cert.ExcludedDNSDomains[0] != "bar.example.com") {
+        if (len(cert.ExcludedDNSDomains) != 1 || cert.ExcludedDNSDomains[0] != "bar.example.com") {
             t.Errorf("%s: failed to parse name constraint exclusions: %#v", test.name, cert.ExcludedDNSDomains);
         }
 
-        if (builtin.len(cert.PermittedIPRanges) != 2 || cert.PermittedIPRanges[0].String() != "192.168.0.0/16"u8 || cert.PermittedIPRanges[1].String() != "1.0.0.0/8"u8) {
+        if (len(cert.PermittedIPRanges) != 2 || cert.PermittedIPRanges[0].String() != "192.168.0.0/16"u8 || cert.PermittedIPRanges[1].String() != "1.0.0.0/8"u8) {
             t.Errorf("%s: failed to parse IP constraints: %#v", test.name, cert.PermittedIPRanges);
         }
 
-        if (builtin.len(cert.ExcludedIPRanges) != 1 || cert.ExcludedIPRanges[0].String() != "2001:db8::/48"u8) {
+        if (len(cert.ExcludedIPRanges) != 1 || cert.ExcludedIPRanges[0].String() != "2001:db8::/48"u8) {
             t.Errorf("%s: failed to parse IP constraint exclusions: %#v", test.name, cert.ExcludedIPRanges);
         }
 
-        if (builtin.len(cert.PermittedEmailAddresses) != 1 || cert.PermittedEmailAddresses[0] != "foo@example.com") {
+        if (len(cert.PermittedEmailAddresses) != 1 || cert.PermittedEmailAddresses[0] != "foo@example.com") {
             t.Errorf("%s: failed to parse permitted email addresses: %#v", test.name, cert.PermittedEmailAddresses);
         }
 
-        if (builtin.len(cert.ExcludedEmailAddresses) != 2 || cert.ExcludedEmailAddresses[0] != ".example.com" || cert.ExcludedEmailAddresses[1] != "example.com") {
+        if (len(cert.ExcludedEmailAddresses) != 2 || cert.ExcludedEmailAddresses[0] != ".example.com" || cert.ExcludedEmailAddresses[1] != "example.com") {
             t.Errorf("%s: failed to parse excluded email addresses: %#v", test.name, cert.ExcludedEmailAddresses);
         }
 
-        if (builtin.len(cert.PermittedURIDomains) != 2 || cert.PermittedURIDomains[0] != ".bar.com" || cert.PermittedURIDomains[1] != "bar.com") {
+        if (len(cert.PermittedURIDomains) != 2 || cert.PermittedURIDomains[0] != ".bar.com" || cert.PermittedURIDomains[1] != "bar.com") {
             t.Errorf("%s: failed to parse permitted URIs: %#v", test.name, cert.PermittedURIDomains);
         }
 
-        if (builtin.len(cert.ExcludedURIDomains) != 2 || cert.ExcludedURIDomains[0] != ".bar2.com" || cert.ExcludedURIDomains[1] != "bar2.com") {
+        if (len(cert.ExcludedURIDomains) != 2 || cert.ExcludedURIDomains[0] != ".bar2.com" || cert.ExcludedURIDomains[1] != "bar2.com") {
             t.Errorf("%s: failed to parse excluded URIs: %#v", test.name, cert.ExcludedURIDomains);
         }
 
@@ -872,7 +873,7 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> t) {
             t.Errorf("%s: subject wasn't correctly copied from the template. Got %s, want %s", test.name, cert.Subject.CommonName, commonName);
         }
 
-        if (builtin.len(cert.Subject.Country) != 1 || cert.Subject.Country[0] != "NL") {
+        if (len(cert.Subject.Country) != 1 || cert.Subject.Country[0] != "NL") {
             t.Errorf("%s: ExtraNames didn't override Country", test.name);
         }
 
@@ -907,7 +908,7 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> t) {
             t.Errorf("%s: extkeyusage wasn't correctly copied from the template. Got %v, want %v", test.name, cert.ExtKeyUsage, testExtKeyUsage);
         }
 
-        if (!slices.EqualFunc<slice<asn1.ObjectIdentifier>, slice<asn1.ObjectIdentifier>, asn1.ObjectIdentifier, asn1.ObjectIdentifier>(cert.UnknownExtKeyUsage, testUnknownExtKeyUsage, ((Func<asn1.ObjectIdentifier, asn1.ObjectIdentifier, bool>)(asn1.Equal)))) {
+        if (!slices.EqualFunc<slice<asn1.ObjectIdentifier>, slice<asn1.ObjectIdentifier>, asn1.ObjectIdentifier, asn1.ObjectIdentifier>(cert.UnknownExtKeyUsage, testUnknownExtKeyUsage, ((Func<asn1.ObjectIdentifier, asn1.ObjectIdentifier, bool>)(global::go.encoding.asn1ᴛObjectIdentifier.Equal)))) {
             t.Errorf("%s: unknown extkeyusage wasn't correctly copied from the template. Got %v, want %v", test.name, cert.UnknownExtKeyUsage, testUnknownExtKeyUsage);
         }
 
@@ -927,11 +928,11 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> t) {
             t.Errorf("%s: SAN emails differ from template. Got %v, want %v", test.name, cert.EmailAddresses, template.EmailAddresses);
         }
 
-        if (builtin.len(cert.URIs) != 1 || cert.URIs[0].String() != "https://foo.com/wibble#foo"u8) {
+        if (len(cert.URIs) != 1 || cert.URIs[0].String() != "https://foo.com/wibble#foo"u8) {
             t.Errorf("%s: URIs differ from template. Got %v, want %v", test.name, cert.URIs, template.URIs);
         }
 
-        if (!slices.EqualFunc<slice<net.IP>, slice<net.IP>, net.IP, net.IP>(cert.IPAddresses, template.IPAddresses, ((Func<net.IP, net.IP, bool>)(net.Equal)))) {
+        if (!slices.EqualFunc<slice<net.IP>, slice<net.IP>, net.IP, net.IP>(cert.IPAddresses, template.IPAddresses, ((Func<net.IP, net.IP, bool>)(global::go.netᴛIP.Equal)))) {
             t.Errorf("%s: SAN IPs differ from template. Got %v, want %v", test.name, cert.IPAddresses, template.IPAddresses);
         }
 
@@ -1306,7 +1307,7 @@ public static void TestEd25519SelfSigned(ж<testing.T> t) {
     if (!ok) {
         t.Fatalf("Parsed key was not an Ed25519 key: %s", err);
     }
-    if (builtin.len(parsedKey) != ed25519.PublicKeySize) {
+    if (len(parsedKey) != ed25519.PublicKeySize) {
         t.Fatalf("Invalid Ed25519 key");
     }
 
@@ -1469,7 +1470,7 @@ public static void TestCRLCreation(ж<testing.T> t) {
 }
 
 internal static slice<byte> fromBase64(@string @in) {
-    var @out = new slice<byte>(base64.StdEncoding.DecodedLen(builtin.len(@in)));
+    var @out = new slice<byte>(base64.StdEncoding.DecodedLen(len(@in)));
     var (n, err) = base64.StdEncoding.Decode(@out, slice<byte>(@in));
     if (err != nil) {
         throw panic("failed to base64 decode");
@@ -1484,7 +1485,7 @@ public static void TestParseDERCRL(ж<testing.T> t) {
         t.Errorf("error parsing: %s", err);
         return;
     }
-    nint numCerts = builtin.len(certList.TBSCertList.RevokedCertificates);
+    nint numCerts = len(certList.TBSCertList.RevokedCertificates);
     nint expected = 88;
     if (numCerts != expected) {
         t.Errorf("bad number of revoked certificates. got: %d want: %d", numCerts, expected);
@@ -1515,7 +1516,7 @@ public static void TestParsePEMCRL(ж<testing.T> t) {
         t.Errorf("error parsing: %s", err);
         return;
     }
-    nint numCerts = builtin.len(certList.TBSCertList.RevokedCertificates);
+    nint numCerts = len(certList.TBSCertList.RevokedCertificates);
     nint expected = 2;
     if (numCerts != expected) {
         t.Errorf("bad number of revoked certificates. got: %d want: %d", numCerts, expected);
@@ -1618,13 +1619,13 @@ public static void TestCreateCertificateRequest(ж<testing.T> t) {
 
         if (@out.Subject.CommonName != template.Subject.CommonName) {
             t.Errorf("%s: output subject common name and template subject common name don't match", test.name);
-        } else if (builtin.len(@out.Subject.Organization) != builtin.len(template.Subject.Organization)) {
+        } else if (len(@out.Subject.Organization) != len(template.Subject.Organization)) {
             t.Errorf("%s: output subject organisation and template subject organisation don't match", test.name);
-        } else if (builtin.len(@out.DNSNames) != builtin.len(template.DNSNames)) {
+        } else if (len(@out.DNSNames) != len(template.DNSNames)) {
             t.Errorf("%s: output DNS names and template DNS names don't match", test.name);
-        } else if (builtin.len(@out.EmailAddresses) != builtin.len(template.EmailAddresses)) {
+        } else if (len(@out.EmailAddresses) != len(template.EmailAddresses)) {
             t.Errorf("%s: output email addresses and template email addresses don't match", test.name);
-        } else if (builtin.len(@out.IPAddresses) != builtin.len(template.IPAddresses)) {
+        } else if (len(@out.IPAddresses) != len(template.IPAddresses)) {
             t.Errorf("%s: output IP addresses and template IP addresses names don't match", test.name);
         }
     }
@@ -1671,11 +1672,11 @@ public static void TestCertificateRequestOverrides(ж<testing.T> t) {
 
     var csr = marshalAndParseCSR(t, Ꮡtemplate);
 
-    if (builtin.len(csr.DNSNames) != 1 || csr.DNSNames[0] != "foo.example.com") {
+    if (len(csr.DNSNames) != 1 || csr.DNSNames[0] != "foo.example.com") {
         t.Errorf("Extension did not override template. Got %v\n", csr.DNSNames);
     }
 
-    if (builtin.len(csr.Extensions) != 1 || !csr.Extensions[0].Id.Equal(oidExtensionSubjectAltName) || !csr.Extensions[0].Critical) {
+    if (len(csr.Extensions) != 1 || !csr.Extensions[0].Id.Equal(oidExtensionSubjectAltName) || !csr.Extensions[0].Critical) {
         t.Errorf("SAN extension was not faithfully copied, got %#v", csr.Extensions);
     }
 
@@ -1697,11 +1698,11 @@ public static void TestCertificateRequestOverrides(ж<testing.T> t) {
     ];
 
     csr = marshalAndParseCSR(t, Ꮡtemplate);
-    nint l = builtin.len(csr.Attributes); if (l != 1) {
+    nint l = len(csr.Attributes); if (l != 1) {
         t.Errorf("incorrect number of attributes: %d\n", l);
     }
 
-    if (!csr.Attributes[0].Type.Equal(oidExtensionRequest) || builtin.len(csr.Attributes[0].Value) != 1 || builtin.len(csr.Attributes[0].Value[0]) != 2) {
+    if (!csr.Attributes[0].Type.Equal(oidExtensionRequest) || len(csr.Attributes[0].Value) != 1 || len(csr.Attributes[0].Value[0]) != 2) {
         t.Errorf("bad attributes: %#v\n", csr.Attributes);
     }
 
@@ -1718,7 +1719,7 @@ public static void TestCertificateRequestOverrides(ж<testing.T> t) {
 
     csr = marshalAndParseCSR(t, Ꮡtemplate);
 
-    if (builtin.len(csr.DNSNames) != 1 || csr.DNSNames[0] != "foo2.example.com") {
+    if (len(csr.DNSNames) != 1 || csr.DNSNames[0] != "foo2.example.com") {
         t.Errorf("Attributes did not override ExtraExtensions. Got %v\n", csr.DNSNames);
     }
 }
@@ -1731,15 +1732,15 @@ public static void TestParseCertificateRequest(ж<testing.T> t) {
             t.Fatalf("failed to parse CSR: %s", err);
         }
 
-        if (builtin.len(csr.EmailAddresses) != 1 || csr.EmailAddresses[0] != "gopher@golang.org") {
+        if (len(csr.EmailAddresses) != 1 || csr.EmailAddresses[0] != "gopher@golang.org") {
             t.Errorf("incorrect email addresses found: %v", csr.EmailAddresses);
         }
 
-        if (builtin.len(csr.DNSNames) != 1 || csr.DNSNames[0] != "test.example.com") {
+        if (len(csr.DNSNames) != 1 || csr.DNSNames[0] != "test.example.com") {
             t.Errorf("incorrect DNS names found: %v", csr.DNSNames);
         }
 
-        if (builtin.len(csr.Subject.Country) != 1 || csr.Subject.Country[0] != "AU") {
+        if (len(csr.Subject.Country) != 1 || csr.Subject.Country[0] != "AU") {
             t.Errorf("incorrect Subject name: %v", csr.Subject);
         }
 
@@ -1787,8 +1788,8 @@ public static void TestCriticalFlagInCSRRequestedExtensions(ж<testing.T> t) {
         new(oidExtensionKeyUsage, fromBase64(awIChAˢ))
     ]);
 
-    nint n = builtin.len(csr.Extensions); if (n != builtin.len(expected)) {
-        t.Fatalf("expected to find %d extensions but found %d", builtin.len(expected), n);
+    nint n = len(csr.Extensions); if (n != len(expected)) {
+        t.Fatalf("expected to find %d extensions but found %d", len(expected), n);
     }
 
     foreach (var (i, extension) in range(csr.Extensions)) {
@@ -1935,14 +1936,14 @@ public static void TestNoAuthorityKeyIdInSelfSignedCert(ж<testing.T> t) {
     ));
 
     {
-        var cert = serialiseAndParse(t, template); if (builtin.len(cert.AuthorityKeyId) != 0) {
+        var cert = serialiseAndParse(t, template); if (len(cert.AuthorityKeyId) != 0) {
             t.Fatalf("self-signed certificate contained default authority key id");
         }
     }
 
     template.AuthorityKeyId = [1, 2, 3, 4];
     {
-        var cert = serialiseAndParse(t, template); if (builtin.len(cert.AuthorityKeyId) == 0) {
+        var cert = serialiseAndParse(t, template); if (len(cert.AuthorityKeyId) == 0) {
             t.Fatalf("self-signed certificate erased explicit authority key id");
         }
     }
@@ -1961,21 +1962,21 @@ public static void TestNoSubjectKeyIdInCert(ж<testing.T> t) {
         IsCA: true
     ));
     {
-        var cert = serialiseAndParse(t, template); if (builtin.len(cert.SubjectKeyId) == 0) {
+        var cert = serialiseAndParse(t, template); if (len(cert.SubjectKeyId) == 0) {
             t.Fatalf("self-signed certificate did not generate subject key id using the public key");
         }
     }
 
     template.IsCA = false;
     {
-        var cert = serialiseAndParse(t, template); if (builtin.len(cert.SubjectKeyId) != 0) {
+        var cert = serialiseAndParse(t, template); if (len(cert.SubjectKeyId) != 0) {
             t.Fatalf("self-signed certificate generated subject key id when it isn't a CA");
         }
     }
 
     template.SubjectKeyId = [1, 2, 3, 4];
     {
-        var cert = serialiseAndParse(t, template); if (builtin.len(cert.SubjectKeyId) == 0) {
+        var cert = serialiseAndParse(t, template); if (len(cert.SubjectKeyId) == 0) {
             t.Fatalf("self-signed certificate erased explicit subject key id");
         }
     }
@@ -2492,7 +2493,7 @@ public static void TestCriticalNameConstraintWithUnknownType(ж<testing.T> t) {
         t.Fatalf("unexpected parsing failure: %s", err);
     }
 
-    nint l = builtin.len(cert.UnhandledCriticalExtensions); if (l != 1) {
+    nint l = len(cert.UnhandledCriticalExtensions); if (l != 1) {
         t.Fatalf("expected one unhandled critical extension, but found %d", l);
     }
 }
@@ -2616,7 +2617,7 @@ public static void TestEmptySerialNumber(ж<testing.T> t) {
             t.Fatalf("failed to marshal generated serial number: %s", err);
         }
         // subtract 2 for tag and length
-        nint l = builtin.len(b) - 2; if (l > 20) {
+        nint l = len(b) - 2; if (l > 20) {
             t.Fatalf("generated serial number larger than 20 octets when encoded: %d", l);
         }
     }
@@ -2805,7 +2806,7 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                 SubjectKeyId: [1, 2, 3]
             )),
             template: Ꮡ(new RevocationList(
-                ThisUpdate: new time.Time().Add(time.ΔHour),
+                ThisUpdate: new time.Time().Add(time.Hour),
                 NextUpdate: new time.Time()
             )),
             expectedError: "x509: template.ThisUpdate is after template.NextUpdate"
@@ -2875,7 +2876,7 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                 RevokedCertificates: slice<pkix.RevokedCertificate>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time().Add(time.ΔHour)
+                        RevocationTime: new time.Time().Add(time.Hour)
                     )
                 ]),
                 Number: big.NewInt(5),
@@ -2898,7 +2899,7 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                 RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time().Add(time.ΔHour)
+                        RevocationTime: new time.Time().Add(time.Hour)
                     )
                 ]),
                 Number: big.NewInt(5),
@@ -2920,7 +2921,7 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                 RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time().Add(time.ΔHour),
+                        RevocationTime: new time.Time().Add(time.Hour),
                         ReasonCode: 1
                     )
                 ]),
@@ -2943,7 +2944,7 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                 RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time().Add(time.ΔHour),
+                        RevocationTime: new time.Time().Add(time.Hour),
                         ExtraExtensions: [
                             new(
                                 Id: slice<nint>([2, 5, 29, 99]),
@@ -2971,7 +2972,7 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                 RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time().Add(time.ΔHour)
+                        RevocationTime: new time.Time().Add(time.Hour)
                     )
                 ]),
                 Number: big.NewInt(5),
@@ -2994,7 +2995,7 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                 RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time().Add(time.ΔHour)
+                        RevocationTime: new time.Time().Add(time.Hour)
                     )
                 ]),
                 Number: big.NewInt(5),
@@ -3016,7 +3017,7 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                 RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time().Add(time.ΔHour)
+                        RevocationTime: new time.Time().Add(time.Hour)
                     )
                 ]),
                 Number: big.NewInt(5),
@@ -3044,7 +3045,7 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                 RevokedCertificates: slice<pkix.RevokedCertificate>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time().Add(time.ΔHour),
+                        RevocationTime: new time.Time().Add(time.Hour),
                         Extensions: [
                             new(
                                 Id: slice<nint>([2, 5, 29, 99]),
@@ -3114,16 +3115,16 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                     tcʗ1.template.SignatureAlgorithm);
             }
 
-            if (builtin.len(tcʗ1.template.RevokedCertificates) > 0) {
+            if (len(tcʗ1.template.RevokedCertificates) > 0) {
                 if (!reflect.DeepEqual(parsedCRL.RevokedCertificates, tcʗ1.template.RevokedCertificates)) {
                     tΔ1.Fatalf("RevokedCertificates mismatch: got %v; want %v.",
                         parsedCRL.RevokedCertificates, tcʗ1.template.RevokedCertificates);
                 }
             } else {
-                if (builtin.len(parsedCRL.RevokedCertificateEntries) != builtin.len(tcʗ1.template.RevokedCertificateEntries)) {
+                if (len(parsedCRL.RevokedCertificateEntries) != len(tcʗ1.template.RevokedCertificateEntries)) {
                     tΔ1.Fatalf("RevokedCertificateEntries length mismatch: got %d; want %d.",
-                        builtin.len(parsedCRL.RevokedCertificateEntries),
-                        builtin.len(tcʗ1.template.RevokedCertificateEntries));
+                        len(parsedCRL.RevokedCertificateEntries),
+                        len(tcʗ1.template.RevokedCertificateEntries));
                 }
                 foreach (var (i, rce) in range(parsedCRL.RevokedCertificateEntries)) {
                     var expected = tcʗ1.template.RevokedCertificateEntries[i];
@@ -3142,8 +3143,8 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                 }
             }
 
-            if (builtin.len(parsedCRL.Extensions) != 2 + builtin.len(tcʗ1.template.ExtraExtensions)) {
-                tΔ1.Fatalf("Generated CRL has wrong number of extensions, wanted: %d, got: %d", 2 + builtin.len(tcʗ1.template.ExtraExtensions), builtin.len(parsedCRL.Extensions));
+            if (len(parsedCRL.Extensions) != 2 + len(tcʗ1.template.ExtraExtensions)) {
+                tΔ1.Fatalf("Generated CRL has wrong number of extensions, wanted: %d, got: %d", 2 + len(tcʗ1.template.ExtraExtensions), len(parsedCRL.Extensions));
             }
             (var expectedAKI, errΔ1) = asn1.Marshal(new authKeyId(Id: tcʗ1.issuer.SubjectKeyId));
             if (errΔ1 != nil) {
@@ -3175,7 +3176,7 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
             // However, this doesn't work with our hacked issuers above (that
             // aren't parsed from a proper DER bundle but are instead manually
             // constructed). Prefer RawSubject when it is set.
-            if (builtin.len(tcʗ1.issuer.RawSubject) > 0) {
+            if (len(tcʗ1.issuer.RawSubject) > 0) {
                 var (issuerSubj, errΔ2) = subjectBytes(ref (tcʗ1.issuer).DerefOrNull());
                 if (errΔ2 != nil) {
                     tΔ1.Fatalf("failed to get issuer subject: %s", errΔ2);
@@ -3196,7 +3197,7 @@ public static void TestCreateRevocationList(ж<testing.T> t) {
                 }
             }
 
-            if (builtin.len(parsedCRL.Extensions[2..]) == 0 && builtin.len(tcʗ1.template.ExtraExtensions) == 0) {
+            if (len(parsedCRL.Extensions[2..]) == 0 && len(tcʗ1.template.ExtraExtensions) == 0) {
                 // If we don't have anything to check return early so we don't
                 // hit a [] != nil false positive below.
                 return;
@@ -3460,6 +3461,8 @@ internal partial struct brokenSigner {
     internal cryptoꓸPublicKey pub;
 }
 
+} partial class x509_internal_testᴛbrokenSigner {
+
 internal static cryptoꓸPublicKey Public(this ref brokenSigner bs) {
     return bs.pub;
 }
@@ -3467,6 +3470,8 @@ internal static cryptoꓸPublicKey Public(this ref brokenSigner bs) {
 internal static (slice<byte>, error) Sign(this ref brokenSigner bs, io.Reader _Δp1, slice<byte> _Δp2, crypto.SignerOpts _Δp3) {
     return (slice<byte>([1, 2, 3]), default);
 }
+
+} partial class x509_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string signatureReturnedByˢ => ref signatureReturnedByˢᵇ;
@@ -3503,6 +3508,8 @@ public static void TestCreateCertificateLegacy(ж<testing.T> t) {
     }
 }
 
+} partial class x509_internal_testᴛCertPool {
+
 internal static ж<global::go.crypto.x509_package.Certificate> mustCert(this ref global::go.crypto.x509_package.CertPool s, ж<testing.T> t, nint n) {
     var (c, err) = s.lazyCerts[n].getCert();
     if (err != nil) {
@@ -3511,11 +3518,13 @@ internal static ж<global::go.crypto.x509_package.Certificate> mustCert(this ref
     return c;
 }
 
+} partial class x509_internal_test_package {
+
 internal static slice<ж<global::go.crypto.x509_package.Certificate>> allCerts(ж<testing.T> t, ж<global::go.crypto.x509_package.CertPool> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var all = new slice<ж<global::go.crypto.x509_package.Certificate>>(Ꮡp.len());
-    foreach (var i in range(builtin.len(all))) {
+    foreach (var i in range(len(all))) {
         all[i] = p.mustCert(t, i);
     }
     return all;
@@ -3533,10 +3542,10 @@ internal static bool certPoolEqual(ж<global::go.crypto.x509_package.CertPool> �
     if (Ꮡa == nil) {
         return true;
     }
-    if (!reflect.DeepEqual(a.byName, b.byName) || builtin.len(a.lazyCerts) != builtin.len(b.lazyCerts)) {
+    if (!reflect.DeepEqual(a.byName, b.byName) || len(a.lazyCerts) != len(b.lazyCerts)) {
         return false;
     }
-    foreach (var i in range(builtin.len(a.lazyCerts))) {
+    foreach (var i in range(len(a.lazyCerts))) {
         var (la, lb) = (a.lazyCerts[i], b.lazyCerts[i]);
         if (!bytes.Equal(la.rawSubject, lb.rawSubject)) {
             return false;
@@ -3586,7 +3595,7 @@ public static void TestCertificateRequestRoundtripFields(ж<testing.T> t) {
     if (!slices.Equal<slice<@string>, @string>(@in.EmailAddresses, @out.EmailAddresses)) {
         t.Fatalf("Unexpected EmailAddresses: got %v, want %v", @out.EmailAddresses, @in.EmailAddresses);
     }
-    if (builtin.len(@in.IPAddresses) != builtin.len(@out.IPAddresses) || !@in.IPAddresses[0].Equal(@out.IPAddresses[0]) || !@in.IPAddresses[1].Equal(@out.IPAddresses[1])) {
+    if (len(@in.IPAddresses) != len(@out.IPAddresses) || !@in.IPAddresses[0].Equal(@out.IPAddresses[0]) || !@in.IPAddresses[1].Equal(@out.IPAddresses[1])) {
         t.Fatalf("Unexpected IPAddresses: got %v, want %v", @out.IPAddresses, @in.IPAddresses);
     }
     if (!reflect.DeepEqual(@in.URIs, @out.URIs)) {
@@ -3977,8 +3986,8 @@ public static void TestParseUniqueID(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("ParseCertificate to failed to parse certificate with unique identifier id: %s", err);
     }
-    if (builtin.len(cert.Extensions) != 7) {
-        t.Fatalf("unexpected number of extensions (probably because the extension section was not parsed): got %d, want 7", builtin.len(cert.Extensions));
+    if (len(cert.Extensions) != 7) {
+        t.Fatalf("unexpected number of extensions (probably because the extension section was not parsed): got %d, want 7", len(cert.Extensions));
     }
 }
 
@@ -3990,8 +3999,8 @@ public static void TestDisableSHA1ForCertOnly(ж<testing.T> t) {
 
     var tmpl = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
-        NotBefore: time.Now().Add(-time.ΔHour),
-        NotAfter: time.Now().Add(time.ΔHour),
+        NotBefore: time.Now().Add(-time.Hour),
+        NotAfter: time.Now().Add(time.Hour),
         SignatureAlgorithm: SHA1WithRSA,
         BasicConstraintsValid: true,
         IsCA: true,
@@ -4016,8 +4025,8 @@ public static void TestDisableSHA1ForCertOnly(ж<testing.T> t) {
     (var crlDER, err) = CreateRevocationList(rand.Reader, Ꮡ(new RevocationList(
         SignatureAlgorithm: SHA1WithRSA,
         Number: big.NewInt(1),
-        ThisUpdate: time.Now().Add(-time.ΔHour),
-        NextUpdate: time.Now().Add(time.ΔHour)
+        ThisUpdate: time.Now().Add(-time.Hour),
+        NextUpdate: time.Now().Add(time.Hour)
     )), cert, new x509_test_package.rsa_PrivateKeyжSigner(rsaPrivateKey));
     if (err != nil) {
         t.Fatalf("failed to generate test CRL: %s", err);
@@ -4053,8 +4062,8 @@ public static void TestParseRevocationList(ж<testing.T> t) {
         t.Errorf("error parsing: %s", err);
         return;
     }
-    nint numCerts = builtin.len(certList.RevokedCertificateEntries);
-    nint numCertsDeprecated = builtin.len(certList.RevokedCertificateEntries);
+    nint numCerts = len(certList.RevokedCertificateEntries);
+    nint numCertsDeprecated = len(certList.RevokedCertificateEntries);
     nint expected = 88;
     if (numCerts != expected || numCertsDeprecated != expected) {
         t.Errorf("bad number of revoked certificates. got: %d want: %d", numCerts, expected);
@@ -4190,8 +4199,8 @@ public static void TestOmitEmptyExtensions(ж<testing.T> t) {
         Subject: new pkix.Name(
             CommonName: ":)"
         ),
-        NotAfter: time.Now().Add(time.ΔHour),
-        NotBefore: time.Now().Add(-time.ΔHour)
+        NotAfter: time.Now().Add(time.Hour),
+        NotBefore: time.Now().Add(-time.Hour)
     ));
     (var der, err) = CreateCertificate(rand.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
     if (err != nil) {
@@ -4236,8 +4245,8 @@ public static void TestCreateNegativeSerial(ж<testing.T> t) {
         Subject: new pkix.Name(
             CommonName: ":)"
         ),
-        NotAfter: time.Now().Add(time.ΔHour),
-        NotBefore: time.Now().Add(-time.ΔHour)
+        NotAfter: time.Now().Add(time.Hour),
+        NotBefore: time.Now().Add(-time.Hour)
     ));
     @string expectedErr = x509SerialNumberMustBeˢ;
     (_, err) = CreateCertificate(rand.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
@@ -4351,7 +4360,7 @@ public static void TestCertificateOIDPoliciesGODEBUG(ж<testing.T> t) {
         slice<nint>([1, 2, 3])
     ]);
 
-    slice<global::go.crypto.x509_package.ΔOID> expectPolicies = slice<global::go.crypto.x509_package.ΔOID>([
+    slice<global::go.crypto.x509_package.OID> expectPolicies = slice<global::go.crypto.x509_package.OID>([
         mustNewOIDFromInts([1, 2, 3])
     ]);
 
@@ -4369,7 +4378,7 @@ public static void TestCertificateOIDPoliciesGODEBUG(ж<testing.T> t) {
         t.Errorf("cert.PolicyIdentifiers = %v, want: %v", cert.PolicyIdentifiers, expectPolicyIdentifiers);
     }
 
-    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>(cert.Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
+    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.OID>, slice<global::go.crypto.x509_package.OID>, global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID>(cert.Policies, expectPolicies, ((Func<global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID, bool>)(global::go.crypto.x509ᴛOID.Equal)))) {
         t.Errorf("cert.Policies = %v, want: %v", cert.Policies, expectPolicies);
     }
 }
@@ -4390,10 +4399,10 @@ public static void TestCertificatePolicies(ж<testing.T> t) {
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
         PolicyIdentifiers: [slice<nint>([1, 2, 3])],
-        Policies: slice<global::go.crypto.x509_package.ΔOID>([mustNewOIDFromInts([1, 2, math.MaxUint32 + 1])])
+        Policies: slice<global::go.crypto.x509_package.OID>([mustNewOIDFromInts([1, 2, math.MaxUint32 + 1])])
     ), out var Ꮡtemplate);
 
-    var expectPolicies = slice<global::go.crypto.x509_package.ΔOID>([mustNewOIDFromInts([1, 2, math.MaxUint32 + 1])]);
+    var expectPolicies = slice<global::go.crypto.x509_package.OID>([mustNewOIDFromInts([1, 2, math.MaxUint32 + 1])]);
     var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
     if (err != nil) {
         t.Fatalf("CreateCertificate() unexpected error: %v", err);
@@ -4404,12 +4413,12 @@ public static void TestCertificatePolicies(ж<testing.T> t) {
         t.Fatalf("ParseCertificate() unexpected error: %v", err);
     }
 
-    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>(cert.Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
+    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.OID>, slice<global::go.crypto.x509_package.OID>, global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID>(cert.Policies, expectPolicies, ((Func<global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID, bool>)(global::go.crypto.x509ᴛOID.Equal)))) {
         t.Errorf("cert.Policies = %v, want: %v", cert.Policies, expectPolicies);
     }
 
     t.Setenv(godebugˢ, x509usepolicies1ˢ);
-    expectPolicies = slice<global::go.crypto.x509_package.ΔOID>([mustNewOIDFromInts([1, 2, math.MaxUint32 + 1])]);
+    expectPolicies = slice<global::go.crypto.x509_package.OID>([mustNewOIDFromInts([1, 2, math.MaxUint32 + 1])]);
 
     (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
     if (err != nil) {
@@ -4421,7 +4430,7 @@ public static void TestCertificatePolicies(ж<testing.T> t) {
         t.Fatalf("ParseCertificate() unexpected error: %v", err);
     }
 
-    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>(cert.Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
+    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.OID>, slice<global::go.crypto.x509_package.OID>, global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID>(cert.Policies, expectPolicies, ((Func<global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID, bool>)(global::go.crypto.x509ᴛOID.Equal)))) {
         t.Errorf("cert.Policies = %v, want: %v", cert.Policies, expectPolicies);
     }
 }
@@ -4514,6 +4523,8 @@ public static void TestRejectCriticalSKI(ж<testing.T> t) {
 internal partial struct messageSigner {
 }
 
+} partial class x509_internal_testᴛmessageSigner {
+
 internal static cryptoꓸPublicKey Public(this ref messageSigner ms) { return rsaPrivateKey.Public(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -4537,6 +4548,8 @@ internal static (slice<byte> signature, error err) SignMessage(this ref messageS
     var tbs = h.Sum(default);
     return rsa.SignPKCS1v15(rand, rsaPrivateKey, opts.HashFunc(), tbs);
 }
+
+} partial class x509_internal_test_package {
 
 public static void TestMessageSigner(ж<testing.T> t) {
     ref var template = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(

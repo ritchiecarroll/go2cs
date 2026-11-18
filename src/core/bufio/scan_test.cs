@@ -14,6 +14,7 @@ using utf8 = go.unicode.utf8_package;
 using bufio = bufio_package;
 using go.unicode;
 using static go.bufio_internal_test_package;
+using static bufio_test_package;
 
 partial class bufio_test_package {
 
@@ -146,12 +147,16 @@ partial struct slowReader {
     internal Δio.Reader buf;
 }
 
+} partial class bufio_testᴛslowReader {
+
 internal static (nint n, error err) Read(this ref slowReader sr, slice<byte> p) {
     if (len(p) > sr.max) {
         p = p.slice(0, sr.max);
     }
     return sr.buf.Read(p);
 }
+
+} partial class bufio_test_package {
 
 // genLine writes to buf a predictable but non-trivial line of text of length
 // n, including the terminal newline and an occasional carriage return.
@@ -354,7 +359,7 @@ public static void TestSplitError(ж<Δtesting.T> t) {
     @string text = textᶜ4;
     var buf = strings.NewReader(text);
     var s = NewScanner(new bufio_test_package.slowReaderжReader(Ꮡ(new slowReader(1, new bufio_test_package.strings_ReaderжReader(buf)))));
-    s.Split(new Func<slice<byte>, bool, (nint, slice<byte>, error)>(errorSplit));
+    s.Split(errorSplit);
     nint i = default;
     for (i = 0; s.Scan(); i++) {
         if (len(s.Bytes()) != 1 || text[i] != s.Bytes()[0]) {
@@ -393,7 +398,7 @@ public static void TestErrAtEOF(ж<Δtesting.T> t) {
         }
         return (advance, token, err);
     };
-    s.Split(new Func<slice<byte>, bool, (nint, slice<byte>, error)>(split));
+    s.Split(split);
     while (s.Scan()) {
     }
     if (!AreEqual(s.Err(), testError)) {
@@ -405,9 +410,13 @@ public static void TestErrAtEOF(ж<Δtesting.T> t) {
 partial struct alwaysError {
 }
 
+} partial class bufio_testᴛalwaysError {
+
 internal static (nint, error) Read(this alwaysError _, slice<byte> p) {
     return (0, Δio.ErrUnexpectedEOF);
 }
+
+} partial class bufio_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readShouldFailˢ = (@string)"read should fail"u8;
@@ -427,9 +436,13 @@ public static void TestNonEOFWithEmptyRead(ж<Δtesting.T> t) {
 partial struct endlessZeros {
 }
 
+} partial class bufio_testᴛendlessZeros {
+
 internal static (nint, error) Read(this endlessZeros _, slice<byte> p) {
     return (0, default);
 }
+
+} partial class bufio_test_package {
 
 public static void TestBadReader(ж<Δtesting.T> t) {
     var scanner = NewScanner(new endlessZeros());
@@ -555,6 +568,8 @@ public static void TestBlankLines(ж<Δtesting.T> t) {
 
 partial struct countdown /*num:nint*/;
 
+} partial class bufio_testᴛcountdown {
+
 internal static (nint advance, slice<byte> token, error err) split(this ref countdown c, slice<byte> data, bool atEOF) {
     if (c > 0) {
         c--;
@@ -562,6 +577,8 @@ internal static (nint advance, slice<byte> token, error err) split(this ref coun
     }
     return (0, default, default);
 }
+
+} partial class bufio_test_package {
 
 // Check that the looping-at-EOF check doesn't trigger for merely empty tokens.
 public static void TestEmptyLinesOK(ж<Δtesting.T> t) {
@@ -598,6 +615,8 @@ public static void TestHugeBuffer(ж<Δtesting.T> t) {
 // were wrapping the read system call.
 partial struct negativeEOFReader /*num:nint*/;
 
+} partial class bufio_testᴛnegativeEOFReader {
+
 internal static (nint, error) Read(this ref negativeEOFReader r, slice<byte> p) {
     if (r > 0) {
         nint c = (nint)(r);
@@ -613,6 +632,8 @@ internal static (nint, error) Read(this ref negativeEOFReader r, slice<byte> p) 
     }
     return (-1, Δio.EOF);
 }
+
+} partial class bufio_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readTooManyLinesˢ = (@string)"read too many lines"u8;
@@ -640,9 +661,13 @@ public static void TestNegativeEOFReader(ж<Δtesting.T> t) {
 partial struct largeReader {
 }
 
+} partial class bufio_testᴛlargeReader {
+
 internal static (nint, error) Read(this largeReader _, slice<byte> p) {
     return (len(p) + 1, default);
 }
+
+} partial class bufio_test_package {
 
 // Test that the scanner doesn't panic and returns ErrBadReadCount
 // on a reader that returns an impossibly large count of bytes read (issue 38053).

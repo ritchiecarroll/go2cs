@@ -14,6 +14,7 @@ using time = time_package;
 using go.crypto;
 using math;
 using static go.crypto.rand_internal_test_package;
+using static rand_test_package;
 
 partial class rand_test_package {
 
@@ -65,7 +66,7 @@ public static void TestPrimeNondeterministic(ж<testing.T> t) {
 public static void TestInt(ж<testing.T> t) {
     // start at 128 so the case of (max.BitLen() % 8) == 0 is covered
     for (nint n = 128; n < 140; n++) {
-        var b = @new<bigꓸInt>().SetInt64((int64)n);
+        var b = @new<big.Int>().SetInt64((int64)n);
         var (i, err) = rand.Int(rand.Reader, b); if (err != nil) {
             t.Fatalf("Can't generate random value: %v, %v", i.OrTypedNil(), err);
         }
@@ -77,6 +78,8 @@ partial struct countingReader {
     internal nint n;
 }
 
+} partial class rand_testᴛcountingReader {
+
 internal static (nint n, error err) Read(this ref countingReader r, slice<byte> p) {
     nint n = default;
     error err = default;
@@ -85,6 +88,8 @@ internal static (nint n, error err) Read(this ref countingReader r, slice<byte> 
     r.n += n;
     return (n, err);
 }
+
+} partial class rand_test_package {
 
 // Test that Int reads only the necessary number of bytes from the reader for
 // max at each bit length
@@ -130,7 +135,7 @@ public static void TestIntMask(ж<testing.T> t) {
     }
 }
 
-internal static void testIntPanics(ж<testing.T> t, ж<bigꓸInt> b) {
+internal static void testIntPanics(ж<testing.T> t, ж<big.Int> b) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -146,13 +151,13 @@ internal static void testIntPanics(ж<testing.T> t, ж<bigꓸInt> b) {
 
 // Test that passing a new big.Int as max causes Int to panic
 public static void TestIntEmptyMaxPanics(ж<testing.T> t) {
-    var b = @new<bigꓸInt>();
+    var b = @new<big.Int>();
     testIntPanics(t, b);
 }
 
 // Test that passing a negative value as max causes Int to panic
 public static void TestIntNegativeMaxPanics(ж<testing.T> t) {
-    var b = @new<bigꓸInt>().SetInt64((int64)(-1));
+    var b = @new<big.Int>().SetInt64((int64)(-1));
     testIntPanics(t, b);
 }
 

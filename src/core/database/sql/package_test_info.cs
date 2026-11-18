@@ -8,13 +8,7 @@ global using static global::go.database.sql_package;
 global using static global::go.database.sql_internal_test_package;
 
 // <ImportedTypeAliases>
-global using driverꓸRowsAffected = go.database.sql.driver_package.ΔRowsAffected;
 global using driverꓸValue = object;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
@@ -25,8 +19,6 @@ using static global::go.database.sql_test_package;
 [assembly: GoDynamicTypeLift("696e746572666163657b446561646c696e652829202874696d652e54696d652c20626f6f6c297d", "waitCondition_deadliner")]
 [assembly: GoDynamicTypeLift("7374727563747b73796e632e4d757465783b20666e2066756e632829206572726f727d", "hookOpenErrᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b73796e632e4d757465783b20666e2066756e63282a64617461626173652f73716c2e66616b65436f6e6e2c206572726f72297d", "hookPostCloseConnᴛ1")]
-[assembly: GoTypeAlias("Conn", "ΔConn")]
-[assembly: GoTypeAlias("Stmt", "ΔStmt")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -46,12 +38,12 @@ using static global::go.database.sql_test_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.database.sql_package.Conn))]
 [assembly: GoFieldAccess(typeof(global::go.database.sql_package.DB))]
 [assembly: GoFieldAccess(typeof(global::go.database.sql_package.Rows))]
+[assembly: GoFieldAccess(typeof(global::go.database.sql_package.Stmt))]
 [assembly: GoFieldAccess(typeof(global::go.database.sql_package.Tx))]
 [assembly: GoFieldAccess(typeof(global::go.database.sql_package.driverConn))]
-[assembly: GoFieldAccess(typeof(global::go.database.sql_package.ΔConn))]
-[assembly: GoFieldAccess(typeof(global::go.database.sql_package.ΔStmt))]
 [assembly: GoFieldAccess(typeof(time_package.Ticker))]
 [assembly: GoFieldAccess(typeof(time_package.Timer))]
 

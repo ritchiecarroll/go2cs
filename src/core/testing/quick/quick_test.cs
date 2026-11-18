@@ -8,6 +8,7 @@ using reflect = reflect_package;
 using testing = testing_package;
 using go.math;
 using static go.testing.quick_package;
+using static quick_internal_test_package;
 
 partial class quick_internal_test_package {
 
@@ -315,9 +316,13 @@ internal partial struct myStruct {
     internal nint x;
 }
 
-internal static reflectꓸValue Generate(this myStruct m, ж<rand.Rand> r, nint _) {
+} partial class quick_internal_testᴛmyStruct {
+
+internal static reflect.Value Generate(this myStruct m, ж<rand.Rand> r, nint _) {
     return reflect.ValueOf(new myStruct(x: 42));
 }
+
+} partial class quick_internal_test_package {
 
 internal static bool myStructProperty(myStruct @in) { return @in.x == 42; }
 

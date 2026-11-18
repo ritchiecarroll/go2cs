@@ -8,8 +8,6 @@ global using static global::go.encoding.gob_package;
 global using static global::go.encoding.gob_internal_test_package;
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -17,7 +15,6 @@ using static global::go.encoding.gob_test_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b4120696e747d", "Δtype")]
-[assembly: GoTypeAlias("String", "ΔString")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -46,7 +43,7 @@ using static global::go.encoding.gob_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/gob/example_interface_test.go", "example_interface_test.cs", "ABQmggAGFLLKpoKCuIKCggALFAAJDoKC6paigoKU")]
+[assembly: GoPositionMap("encoding/gob/example_interface_test.go", "example_interface_test.cs", "ABcmggAIFLLKpoKCuIKCggALFAAJDoKC6paigoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -101,3 +98,13 @@ public static partial class gob_test_package
         builtin.initPackage(typeof(global::go.encoding.gob_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(gob_test_package.Point)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gob_testᴛPoint;
+// </MethodHolders>

@@ -114,7 +114,7 @@ public static partial void TestCtrlBreak(ж<testing.T> t) {
         }
         var cmdʗ1 = cmd;
         goǃ(() => {
-            time.Sleep(1 * time.ΔSecond);
+            time.Sleep(1 * time.Second);
             sendCtrlBreak(t, cmdʗ1.Process.Pid);
         });
         err = cmd.Wait();

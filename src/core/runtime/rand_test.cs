@@ -13,13 +13,13 @@ partial class runtime_test_package {
 
 public static void TestReadRandom(ж<testing.T> t) {
     if (runtime_internal_test_package.ReadRandomFailed.Value) {
-        var exprᴛ1 = GOOS;
+        var GOOSᴛ1 = GOOS;
         switch (ᐧ) {
         default: {
             t.Fatalf("readRandom failed at startup");
             break;
         }
-        case {} when exprᴛ1 == "plan9"u8: {
+        case {} when GOOSᴛ1 == "plan9"u8: {
             // ok
             break;
         }}

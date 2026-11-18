@@ -91,8 +91,8 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
                 DNSNames: ["valid.testing.golang.invalid"],
-                NotBefore: now.Add(-time.ΔHour),
-                NotAfter: now.Add(time.ΔHour),
+                NotBefore: now.Add(-time.Hour),
+                NotAfter: now.Add(time.Hour),
                 ExtKeyUsage: [ExtKeyUsageServerAuth]
             ))
         ),
@@ -101,8 +101,8 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
                 DNSNames: ["valid.testing.golang.invalid"],
-                NotBefore: now.Add(-time.ΔHour),
-                NotAfter: now.Add(time.ΔHour),
+                NotBefore: now.Add(-time.Hour),
+                NotAfter: now.Add(time.Hour),
                 ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             dnsName: "valid.testing.golang.invalid"
@@ -112,8 +112,8 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
                 DNSNames: ["valid.testing.golang.invalid"],
-                NotBefore: now.Add(-time.ΔHour),
-                NotAfter: now.Add(time.ΔHour),
+                NotBefore: now.Add(-time.Hour),
+                NotAfter: now.Add(time.Hour),
                 ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             time: now.Add((time.Duration)(1800000000000L))
@@ -123,8 +123,8 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
                 DNSNames: ["valid.testing.golang.invalid"],
-                NotBefore: now.Add(-time.ΔHour),
-                NotAfter: now.Add(time.ΔHour),
+                NotBefore: now.Add(-time.Hour),
+                NotAfter: now.Add(time.Hour),
                 ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             eku: [ExtKeyUsageServerAuth]
@@ -134,8 +134,8 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
                 DNSNames: ["valid.testing.golang.invalid"],
-                NotBefore: now.Add(-time.ΔHour),
-                NotAfter: now.Add(time.ΔHour),
+                NotBefore: now.Add(-time.Hour),
+                NotAfter: now.Add(time.Hour),
                 ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             dnsName: "invalid.testing.golang.invalid",
@@ -146,8 +146,8 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
                 DNSNames: ["valid.testing.golang.invalid"],
-                NotBefore: now.Add(-time.ΔHour),
-                NotAfter: now.Add(time.ΔHour),
+                NotBefore: now.Add(-time.Hour),
+                NotAfter: now.Add(time.Hour),
                 ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             time: now.Add((time.Duration)(7200000000000L)),
@@ -158,8 +158,8 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
                 DNSNames: ["valid.testing.golang.invalid"],
-                NotBefore: now.Add(-time.ΔHour),
-                NotAfter: now.Add(time.ΔHour),
+                NotBefore: now.Add(-time.Hour),
+                NotAfter: now.Add(time.Hour),
                 ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             time: now.Add((time.Duration)(7200000000000L)),
@@ -170,8 +170,8 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
                 DNSNames: ["valid.testing.golang.invalid"],
-                NotBefore: now.Add(-time.ΔHour),
-                NotAfter: now.Add(time.ΔHour),
+                NotBefore: now.Add(-time.Hour),
+                NotAfter: now.Add(time.Hour),
                 ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             selfSigned: true,
@@ -183,8 +183,8 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
                 DNSNames: ["valid.testing.golang.invalid"],
-                NotBefore: now.Add(-time.ΔHour),
-                NotAfter: now.Add(time.ΔHour),
+                NotBefore: now.Add(-time.Hour),
+                NotAfter: now.Add(time.Hour),
                 ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             eku: [ExtKeyUsageEmailProtection],
@@ -195,8 +195,8 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
                 DNSNames: ["valid.testing.golang.invalid"],
-                NotBefore: now.Add(-time.ΔHour),
-                NotAfter: now.Add(time.ΔHour),
+                NotBefore: now.Add(-time.Hour),
+                NotAfter: now.Add(time.Hour),
                 ExtKeyUsage: [ExtKeyUsageEmailProtection]
             )),
             macosErr: "x509: “valid.testing.golang.invalid” certificate is not permitted for this usage",
@@ -239,7 +239,7 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             if (!tcʗ1.time.IsZero()) {
                 opts.CurrentTime = tcʗ1.time;
             }
-            if (builtin.len(tcʗ1.eku) > 0) {
+            if (len(tcʗ1.eku) > 0) {
                 opts.KeyUsages = tcʗ1.eku;
             }
 

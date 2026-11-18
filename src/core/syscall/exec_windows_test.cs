@@ -106,7 +106,7 @@ public static void TestChangingProcessParent(ж<testing.T> t) {
             // in parent process
 
             // Parent does nothing. It is just used as a parent of a child process.
-            time.Sleep(time.ΔMinute);
+            time.Sleep(time.Minute);
             Δos.Exit(0);
         }
 
@@ -144,7 +144,7 @@ public static void TestChangingProcessParent(ж<testing.T> t) {
         UntypedInt _PROCESS_CREATE_PROCESS = 0x0080;
         UntypedInt _PROCESS_DUP_HANDLE = 0x0040;
         @string childDumpPath = filepath.Join(t.TempDir(), ppidTxtˢ);
-        ref var ph = ref heap<syscallꓸHandle>(out var Ꮡph);
+        ref var ph = ref heap<syscall.Handle>(out var Ꮡph);
         (ph, err) = syscall.OpenProcess((uint32)((UntypedInt)(_PROCESS_CREATE_PROCESS | _PROCESS_DUP_HANDLE) | (uint32)syscall.PROCESS_QUERY_INFORMATION),
             false, (uint32)parent.Process.Pid);
         if (err != nil) {

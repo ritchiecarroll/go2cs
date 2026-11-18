@@ -18,6 +18,7 @@ using crypto;
 using hash = hash_package;
 using static go.io_internal_test_package;
 using Δio = io_package;
+using static io_test_package;
 
 partial class io_test_package {
 
@@ -139,7 +140,9 @@ partial struct writeStringChecker {
     internal bool called;
 }
 
-internal static (nint n, error err) ΔWriteString(this ref writeStringChecker c, @string s) {
+} partial class io_testᴛwriteStringChecker {
+
+internal static (nint n, error err) WriteString(this ref writeStringChecker c, @string s) {
     c.called = true;
     return (len(s), default);
 }
@@ -147,6 +150,8 @@ internal static (nint n, error err) ΔWriteString(this ref writeStringChecker c,
 internal static (nint n, error err) Write(this ref writeStringChecker c, slice<byte> p) {
     return (len(p), default);
 }
+
+} partial class io_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object didNotSeeWriteStringCallˢ = (@string)"did not see WriteString call to writeStringChecker"u8;
@@ -200,9 +205,13 @@ internal static void testMultiWriter(ж<testing.T> t, testMultiWriter_sink sink)
 // writerFunc is a Writer implemented by the underlying func.
 internal delegate (nint, error) writerFunc(slice<byte> p);
 
+} partial class io_testᴛwriterFunc {
+
 internal static partial (nint, error) Write(this writerFunc f, slice<byte> p) {
     return f(p);
 }
+
+} partial class io_test_package {
 
 // Test that MultiWriter properly flattens chained multiWriters.
 public static partial void TestMultiWriterSingleChainFlatten(ж<testing.T> t) {
@@ -279,9 +288,13 @@ public static void TestMultiWriterCopy(ж<testing.T> t) {
 // readerFunc is a Reader implemented by the underlying func.
 internal delegate (nint, error) readerFunc(slice<byte> p);
 
+} partial class io_testᴛreaderFunc {
+
 internal static partial (nint, error) Read(this readerFunc f, slice<byte> p) {
     return f(p);
 }
+
+} partial class io_test_package {
 
 // callDepth returns the logical call depth for the given PCs.
 internal static nint /*depth*/ callDepth(slice<uintptr> callers) {
@@ -331,6 +344,8 @@ public static partial void TestMultiReaderFlatten(ж<testing.T> t) {
 // byte) and EOF at once in its Read call.
 partial struct byteAndEOFReader /*num:byte*/;
 
+} partial class io_testᴛbyteAndEOFReader {
+
 internal static (nint n, error err) Read(this byteAndEOFReader b, slice<byte> p) {
     if (len(p) == 0) {
         // Read(0 bytes) is useless. We expect no such useless
@@ -340,6 +355,8 @@ internal static (nint n, error err) Read(this byteAndEOFReader b, slice<byte> p)
     p[0] = (byte)b;
     return (1, EOF);
 }
+
+} partial class io_test_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string wantᶜ => ref wantᶜᵇ;
@@ -396,10 +413,10 @@ public static void TestMultiReaderFreesExhaustedReaders(ж<testing.T> t) {
     }
 
     Δruntime.GC();
-    var selᴛ1 = closed;
+    var closedᴛ1 = closed;
     var selᴛ2 = time.After((time.Duration)(5000000000L));
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out _): {
+    switch (select(ᐸꟷ(closedᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    case 0 when closedᴛ1.ꟷᐳ(out _): {
         break;
     }
     case 1 when selᴛ2.ꟷᐳ(out _): {

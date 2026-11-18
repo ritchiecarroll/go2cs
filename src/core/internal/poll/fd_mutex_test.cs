@@ -80,9 +80,9 @@ public static partial void TestMutexCloseUnblock(ж<testing.T> t) {
     }
     // Concurrent goroutines must not be able to read lock the mutex.
     time.Sleep(time.Millisecond);
-    var selᴛ1 = c;
-    switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out _): {
+    var cᴛ1 = c;
+    switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+    case 0 when cᴛ1.ꟷᐳ(out _): {
         t.Fatal(brokenˢ);
         break;
     }
@@ -91,10 +91,10 @@ public static partial void TestMutexCloseUnblock(ж<testing.T> t) {
     }}
     Ꮡmu.IncrefAndClose(); // Must unblock the readers.
     for (nint i = 0; i < 4; i++) {
-        var selᴛ2 = c;
+        var cᴛ2 = c;
         var selᴛ3 = time.After((time.Duration)(10000000000L));
-        switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
-        case 0 when selᴛ2.ꟷᐳ(out _): {
+        switch (select(ᐸꟷ(cᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
+        case 0 when cᴛ2.ꟷᐳ(out _): {
             break;
         }
         case 1 when selᴛ3.ꟷᐳ(out _): {

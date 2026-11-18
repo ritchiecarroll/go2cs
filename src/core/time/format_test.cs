@@ -77,7 +77,7 @@ partial struct TimeFormatTest {
 }
 
 internal static slice<TimeFormatTest> rfc3339Formats = slice<TimeFormatTest>([
-    new(Date(2008, 9, 17, 20, 4, 26, 0, ΔUTC), "2008-09-17T20:04:26Z"),
+    new(Date(2008, 9, 17, 20, 4, 26, 0, UTC), "2008-09-17T20:04:26Z"),
     new(Date(1994, 9, 17, 20, 4, 26, 0, FixedZone("EST", -18000)), "1994-09-17T20:04:26-05:00"),
     new(Date(2000, 12, 26, 1, 15, 6, 0, FixedZone("OTO", 15600)), "2000-12-26T01:15:06+04:20")
 ]);
@@ -198,9 +198,9 @@ partial struct goStringTestsᴛ1 /*dyn*/ {
     internal @string want;
 }
 internal static slice<goStringTestsᴛ1> goStringTests = slice<goStringTestsᴛ1>([
-    new(Date(2009, February, 5, 5, 0, 57, 12345600, ΔUTC),
+    new(Date(2009, February, 5, 5, 0, 57, 12345600, UTC),
         "time.Date(2009, time.February, 5, 5, 0, 57, 12345600, time.UTC)"),
-    new(Date(2009, February, 5, 5, 0, 57, 12345600, ΔLocal),
+    new(Date(2009, February, 5, 5, 0, 57, 12345600, Local),
         "time.Date(2009, time.February, 5, 5, 0, 57, 12345600, time.Local)"),
     new(Date(2009, February, 5, 5, 0, 57, 12345600, FixedZone("Europe/Berlin", 3 * 60 * 60)),
         @"time.Date(2009, time.February, 5, 5, 0, 57, 12345600, time.Location(""Europe/Berlin""))"
@@ -221,7 +221,7 @@ public static void TestGoString(ж<Δtesting.T> t) {
 
 // issue 12440.
 public static void TestFormatSingleDigits(ж<Δtesting.T> t) {
-    var time = Date(2001, 2, 3, 4, 5, 6, 700000000, ΔUTC);
+    var time = Date(2001, 2, 3, 4, 5, 6, 700000000, UTC);
     var test = new FormatTest("single digit format", "3:4:5", "4:5:6");
     @string result = time.Format(test.format);
     if (result != test.result) {
@@ -245,7 +245,7 @@ public static void TestFormatShortYear(ж<Δtesting.T> t) {
     ]);
 
     foreach (var (_, y) in range(years)) {
-        var time = Date(y, January, 1, 0, 0, 0, 0, ΔUTC);
+        var time = Date(y, January, 1, 0, 0, 0, 0, UTC);
         @string result = time.Format("2006.01.02");
         @string want = default;
         if (y < 0) {
@@ -763,7 +763,7 @@ internal static ref readonly @string expectᶜ => ref expectᶜᵇ;
 private static readonly @string expectᶜᵇ = "12:00PM"u8;
 
 public static void TestNoonIs12PM(ж<Δtesting.T> t) {
-    var noon = Date(0, January, 1, 12, 0, 0, 0, ΔUTC);
+    var noon = Date(0, January, 1, 12, 0, 0, 0, UTC);
     @string expect = expectᶜ;
     @string got = noon.Format("3:04PM");
     if (got != expect) {
@@ -776,7 +776,7 @@ public static void TestNoonIs12PM(ж<Δtesting.T> t) {
 }
 
 public static void TestMidnightIs12AM(ж<Δtesting.T> t) {
-    var midnight = Date(0, January, 1, 0, 0, 0, 0, ΔUTC);
+    var midnight = Date(0, January, 1, 0, 0, 0, 0, UTC);
     @string expect = "12:00AM";
     @string got = midnight.Format("3:04PM");
     if (got != expect) {
@@ -1115,14 +1115,14 @@ public static void FuzzFormatRFC3339(ж<Δtesting.F> Ꮡf) {
     }
 
     Ꮡf.Fuzz((ж<Δtesting.T> t, int64 sec, int64 nsec, bool useUTC, bool useLocal, nint tzOffset) => {
-        ж<timeꓸLocation> loc = default;
+        ж<Δtime.Location> loc = default;
         switch (ᐧ) {
         case {} when useUTC: {
-            loc = ΔUTC;
+            loc = UTC;
             break;
         }
         case {} when useLocal: {
-            loc = ΔLocal;
+            loc = Local;
             break;
         }
         default: {
@@ -1169,10 +1169,10 @@ public static void FuzzParseRFC3339(ж<Δtesting.F> Ꮡf) {
             return t1.Equal(t2) && name1 == name2 && offset1 == offset2;
         }
 
-        foreach (var (_, tz) in range(slice<ж<timeꓸLocation>>([ΔUTC, ΔLocal]))) {
+        foreach (var (_, tz) in range(slice<ж<Δtime.Location>>([UTC, Local]))) {
             // Parsing as RFC3339 or RFC3339Nano should be identical.
-            var (t1, err1) = time_internal_test_package.ParseAny(RFC3339, s, ΔUTC, tz);
-            var (t2, err2) = time_internal_test_package.ParseAny(RFC3339Nano, s, ΔUTC, tz);
+            var (t1, err1) = time_internal_test_package.ParseAny(RFC3339, s, UTC, tz);
+            var (t2, err2) = time_internal_test_package.ParseAny(RFC3339Nano, s, UTC, tz);
             switch (ᐧ) {
             case {} when (err1 == nil) != (err2 == nil): {
                 t.Fatalf("ParseAny(%q) error mismatch:\n\tgot:  %v\n\twant: %v", s, err1, err2);

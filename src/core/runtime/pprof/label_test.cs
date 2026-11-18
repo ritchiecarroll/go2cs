@@ -21,7 +21,7 @@ internal static slice<label.Label> labelsSorted(context.Context ctx) {
         Ꮡls.ValueSlot = append(Ꮡls.ValueSlot, new label.Label(Key: key, Value: value));
         return true;
     });
-    slices.SortFunc(ls, (label.Label a, label.Label b) => strings_package.Compare(a.Key, b.Key));
+    slices.SortFunc(ls, (label.Label a, label.Label b) => strings.Compare(a.Key, b.Key));
     return ls;
 }
 

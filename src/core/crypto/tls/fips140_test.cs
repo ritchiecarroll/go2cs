@@ -62,7 +62,7 @@ internal static global::go.crypto.tls_package.keyShare generateKeyShare(global::
     if (err != nil) {
         throw panic(err);
     }
-    (_, var shares, err) = ke.keyShares(go.crypto.rand_package.Reader);
+    (_, var shares, err) = ke.keyShares(rand.Reader);
     if (err != nil) {
         throw panic(err);
     }
@@ -217,7 +217,7 @@ internal static bool isFIPSCurve(global::go.crypto.tls_package.CurveID id) {
 }
 
 internal static bool isECDSA(uint16 id) {
-    foreach (var (_, suite) in range(ΔcipherSuites)) {
+    foreach (var (_, suite) in range(cipherSuites)) {
         if (suite.id == id) {
             return (suite.flags & (nint)suiteECSign) == suiteECSign;
         }
@@ -728,7 +728,7 @@ internal static UntypedInt fipsCertLeaf => 1;
 internal static UntypedInt fipsCertFIPSOK => 0x80;
 
 internal static ж<rsa.PrivateKey> fipsRSAKey(ж<testing.T> t, nint size) {
-    var (k, err) = rsa.GenerateKey(go.crypto.rand_package.Reader, size);
+    var (k, err) = rsa.GenerateKey(rand.Reader, size);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -736,7 +736,7 @@ internal static ж<rsa.PrivateKey> fipsRSAKey(ж<testing.T> t, nint size) {
 }
 
 internal static ж<ecdsa.PrivateKey> fipsECDSAKey(ж<testing.T> t, elliptic.Curve curve) {
-    var (k, err) = ecdsa.GenerateKey(curve, go.crypto.rand_package.Reader);
+    var (k, err) = ecdsa.GenerateKey(curve, rand.Reader);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -767,8 +767,8 @@ internal static ж<fipsCertificate> fipsCert(ж<testing.T> t, @string name, any 
         Subject: new pkix.Name(
             Organization: [org]
         ),
-        NotBefore: time_package.Unix(0, 0),
-        NotAfter: time_package.Unix(0, 0),
+        NotBefore: time.Unix(0, 0),
+        NotAfter: time.Unix(0, 0),
 
         KeyUsage: (Δx509.KeyUsage)(Δx509.KeyUsageKeyEncipherment | Δx509.KeyUsageDigitalSignature),
         ExtKeyUsage: [Δx509.ExtKeyUsageServerAuth, Δx509.ExtKeyUsageClientAuth],
@@ -810,7 +810,7 @@ internal static ж<fipsCertificate> fipsCert(ж<testing.T> t, @string name, any 
         break;
     }}
 
-    var (der, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, pcert, pub, pkey);
+    var (der, err) = Δx509.CreateCertificate(rand.Reader, tmpl, pcert, pub, pkey);
     if (err != nil) {
         t.Fatal(err);
     }

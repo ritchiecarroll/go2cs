@@ -35,6 +35,7 @@ using global::go.runtime;
 using path;
 using static global::go.runtime_internal_test_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -50,14 +51,13 @@ internal static readonly object runtimeTestSomeTestLeftAˢ = (@string)"runtime.t
 
 public static void TestMain(ж<testing.M> m) {
     @string entrypoint = Δos.Getenv(entrypointVar);
-    var exprᴛ1 = entrypoint;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "panic"u8: {
+    case {} when entrypoint == "panic"u8: {
         crashViaPanic();
         throw panic("unreachable");
         break;
     }
-    case {} when exprᴛ1 == "trap"u8: {
+    case {} when entrypoint == "trap"u8: {
         crashViaTrap();
         throw panic("unreachable");
         break;
@@ -66,7 +66,7 @@ public static void TestMain(ж<testing.M> m) {
         Δlog.Fatalf("invalid %s: %q", entrypointVar, entrypoint);
         break;
     }
-    case {} when exprᴛ1 == ""u8: {
+    case {} when entrypoint == ""u8: {
         // fall through to normal behavior
         break;
     }}
@@ -744,7 +744,7 @@ public static void TestRuntimePanicWithRuntimeError(ж<testing.T> t) {
 
     foreach (var (i, fn) in range(testCases.ΔRangeSnapshot())) {
         var got = panicValue(fn);
-        var (_, ok) = got._<runtimeꓸError>(ᐧ); if (!ok) {
+        var (_, ok) = got._<Δruntime.Error>(ᐧ); if (!ok) {
             t.Errorf("test #%d: recovered value %v(type %T) does not implement runtime.Error", i, got, got);
         }
     }
@@ -1071,10 +1071,14 @@ partial struct point {
     internal ж<nint> x, y;
 }
 
+} partial class runtime_testᴛpoint {
+
 internal static void negate(this ref point p) {
     p.x.Value = p.x.Value * -1;
     p.y.Value = p.y.Value * -1;
 }
+
+} partial class runtime_test_package {
 
 // Test for issue #10152.
 public static void TestPanicInlined(ж<testing.T> t) {

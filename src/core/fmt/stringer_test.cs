@@ -6,6 +6,7 @@ namespace go;
 using static fmt_package;
 using Δtesting = testing_package;
 using static go.fmt_internal_test_package;
+using static fmt_test_package;
 
 partial class fmt_test_package {
 
@@ -26,22 +27,71 @@ partial struct TF64 /*num:float64*/;
 partial struct TB /*bool*/;
 partial struct TS /*@string*/;
 
+} partial class fmt_testᴛTI {
+
 public static @string String(this TI v) { return Sprintf("I: %d"u8, (nint)v); }
+
+} partial class fmt_testᴛTI8 {
+
 public static @string String(this TI8 v) { return Sprintf("I8: %d"u8, (int8)v); }
+
+} partial class fmt_testᴛTI16 {
+
 public static @string String(this TI16 v) { return Sprintf("I16: %d"u8, (int16)v); }
+
+} partial class fmt_testᴛTI32 {
+
 public static @string String(this TI32 v) { return Sprintf("I32: %d"u8, (int32)v); }
+
+} partial class fmt_testᴛTI64 {
+
 public static @string String(this TI64 v) { return Sprintf("I64: %d"u8, (int64)v); }
+
+} partial class fmt_testᴛTU {
+
 public static @string String(this TU v) { return Sprintf("U: %d"u8, (nuint)v); }
+
+} partial class fmt_testᴛTU8 {
+
 public static @string String(this TU8 v) { return Sprintf("U8: %d"u8, (uint8)v); }
+
+} partial class fmt_testᴛTU16 {
+
 public static @string String(this TU16 v) { return Sprintf("U16: %d"u8, (uint16)v); }
+
+} partial class fmt_testᴛTU32 {
+
 public static @string String(this TU32 v) { return Sprintf("U32: %d"u8, (uint32)v); }
+
+} partial class fmt_testᴛTU64 {
+
 public static @string String(this TU64 v) { return Sprintf("U64: %d"u8, (uint64)v); }
+
+} partial class fmt_testᴛTUI {
+
 public static @string String(this TUI v) { return Sprintf("UI: %d"u8, (uintptr)v); }
+
+} partial class fmt_testᴛTF {
+
 public static @string String(this TF v) { return Sprintf("F: %f"u8, (float64)v); }
+
+} partial class fmt_testᴛTF32 {
+
 public static @string String(this TF32 v) { return Sprintf("F32: %f"u8, (float32)v); }
+
+} partial class fmt_testᴛTF64 {
+
 public static @string String(this TF64 v) { return Sprintf("F64: %f"u8, (float64)v); }
+
+} partial class fmt_testᴛTB {
+
 public static @string String(this TB v) { return Sprintf("B: %t"u8, (bool)v); }
+
+} partial class fmt_testᴛTS {
+
 public static @string String(this TS v) { return Sprintf("S: %q"u8, (@string)v); }
+
+} partial class fmt_test_package {
 
 internal static partial void check(ж<Δtesting.T> t, @string got, @string want) {
     if (got != want) {

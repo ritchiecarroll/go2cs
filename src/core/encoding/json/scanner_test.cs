@@ -45,7 +45,7 @@ public static void TestValid(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestValid_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -89,7 +89,7 @@ public static void TestCompactAndIndent(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestCompactAndIndent_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -154,7 +154,7 @@ public static void TestCompactSeparators(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestCompactSeparators_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -250,7 +250,7 @@ public static void TestIndentErrors(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestIndentErrors_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {

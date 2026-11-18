@@ -43,7 +43,7 @@ using static global::go.crypto.ed25519_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/ed25519/ed25519vectors_test.go", "ed25519vectors_test.cs", "ABk+AA4CgoiClIKCgv7qyIKClIKClIIADAqmgoKUgoKUpoKCgoKU")]
+[assembly: GoPositionMap("crypto/ed25519/ed25519vectors_test.go", "ed25519vectors_test.cs", "ABk+AA4CgoiClIKCgu7qyIKClIKClIIADAqmgoKUgoKUpoKCgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

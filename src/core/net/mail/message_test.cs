@@ -118,7 +118,7 @@ public static void TestParsing(ж<testing.T> t) {
 }
 
 internal static bool headerEq(global::go.net.mail_package.Header a, global::go.net.mail_package.Header b) {
-    if (builtin.len(a) != builtin.len(b)) {
+    if (len(a) != len(b)) {
         return false;
     }
     foreach (var (k, @as) in a) {
@@ -166,7 +166,7 @@ public static void TestDateParsing(ж<testing.T> t) {
         ),
         new(
             "Thu, 20 Nov 1997 09:55:06 GMT (GMT)",
-            time.Date(1997, 11, 20, 9, 55, 6, 0, time.ΔUTC)
+            time.Date(1997, 11, 20, 9, 55, 6, 0, time.UTC)
         ),
         new(
             "Fri, 21 Nov 1997 09:55:06 +1300 (TOT)",
@@ -321,37 +321,37 @@ public static void TestDateParsingCFWS(ж<testing.T> t) {
         // doesn't trip out ParseDate, as per issue 39260.
         new(
             "Tue, 26 May 2020 14:04:40 GMT",
-            time.Date(2020, 5, 26, 14, 4, 40, 0, time.ΔUTC),
+            time.Date(2020, 5, 26, 14, 4, 40, 0, time.UTC),
             true
         ),
         new(
             "Tue, 26 May 2020 14:04:40 UT",
-            time.Date(2020, 5, 26, 14, 4, 40, 0, time.ΔUTC),
+            time.Date(2020, 5, 26, 14, 4, 40, 0, time.UTC),
             true
         ),
         new(
             "Thu, 21 May 2020 14:04:40 UT",
-            time.Date(2020, 5, 21, 14, 4, 40, 0, time.ΔUTC),
+            time.Date(2020, 5, 21, 14, 4, 40, 0, time.UTC),
             true
         ),
         new(
             "Tue, 26 May 2020 14:04:40 XT",
-            time.Date(2020, 5, 26, 14, 4, 40, 0, time.ΔUTC),
+            time.Date(2020, 5, 26, 14, 4, 40, 0, time.UTC),
             false
         ),
         new(
             "Thu, 21 May 2020 14:04:40 XT",
-            time.Date(2020, 5, 21, 14, 4, 40, 0, time.ΔUTC),
+            time.Date(2020, 5, 21, 14, 4, 40, 0, time.UTC),
             false
         ),
         new(
             "Thu, 21 May 2020 14:04:40 UTC",
-            time.Date(2020, 5, 21, 14, 4, 40, 0, time.ΔUTC),
+            time.Date(2020, 5, 21, 14, 4, 40, 0, time.UTC),
             true
         ),
         new(
             "Fri, 21 Nov 1997 09:55:06 GMT (GMT)",
-            time.Date(1997, 11, 21, 9, 55, 6, 0, time.ΔUTC),
+            time.Date(1997, 11, 21, 9, 55, 6, 0, time.UTC),
             true
         )
     ]);
@@ -814,7 +814,7 @@ public static void TestAddressParsing(ж<testing.T> t) {
         )
     ]);
     foreach (var (_, test) in range(tests)) {
-        if (builtin.len(test.exp) == 1) {
+        if (len(test.exp) == 1) {
             var (addr, errΔ1) = ParseAddress(test.addrsStr);
             if (errΔ1 != nil) {
                 t.Errorf("Failed parsing (single) %q: %v", test.addrsStr, errΔ1);
@@ -975,13 +975,12 @@ public static void TestAddressParser(ж<testing.T> t) {
                 return (default, err);
             }
 
-            var exprᴛ1 = charset;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "iso-8859-15"u8: {
+            case {} when charset == "iso-8859-15"u8: {
                 @in = bytes.ReplaceAll(@in, slice<byte>(((@string)(new byte[]{0xf6}))), slice<byte>("ö"u8));
                 break;
             }
-            case {} when exprᴛ1 == "windows-1252"u8: {
+            case {} when charset == "windows-1252"u8: {
                 @in = bytes.ReplaceAll(@in, slice<byte>(((@string)(new byte[]{0xe9}))), slice<byte>("é"u8));
                 break;
             }}
@@ -992,7 +991,7 @@ public static void TestAddressParser(ж<testing.T> t) {
     );
 
     foreach (var (_, test) in range(tests)) {
-        if (builtin.len(test.exp) == 1) {
+        if (len(test.exp) == 1) {
             var (addr, errΔ1) = ap.Parse(test.addrsStr);
             if (errΔ1 != nil) {
                 t.Errorf("Failed parsing (single) %q: %v", test.addrsStr, errΔ1);
@@ -1232,15 +1231,15 @@ public static void TestEmptyAddress(ж<testing.T> t) {
         t.Errorf(@"ParseAddress("""") = %v, %v, want nil, error", parsed.OrTypedNil(), err);
     }
     (var list, err) = ParseAddressList(""u8);
-    if (builtin.len(list) > 0 || err == nil) {
+    if (len(list) > 0 || err == nil) {
         t.Errorf(@"ParseAddressList("""") = %v, %v, want nil, error", list, err);
     }
     (list, err) = ParseAddressList(",");
-    if (builtin.len(list) > 0 || err == nil) {
+    if (len(list) > 0 || err == nil) {
         t.Errorf(@"ParseAddressList("""") = %v, %v, want nil, error", list, err);
     }
     (list, err) = ParseAddressList(aBCDˢ);
-    if (builtin.len(list) > 0 || err == nil) {
+    if (len(list) > 0 || err == nil) {
         t.Errorf(@"ParseAddressList("""") = %v, %v, want nil, error", list, err);
     }
 }

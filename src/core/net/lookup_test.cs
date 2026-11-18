@@ -23,6 +23,7 @@ using go.sync;
 using net;
 using static go.net_package;
 using Δio = io_package;
+using static net_internal_test_package;
 
 partial class net_internal_test_package {
 
@@ -34,9 +35,8 @@ internal static bool hasSuffixFold(@string s, @string suffix) {
 }
 
 internal static (slice<global::go.net_package.IPAddr>, error) lookupLocalhost(context.Context ctx, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) {
-    var exprᴛ1 = host;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "localhost"u8: {
+    case {} when host == "localhost"u8: {
         return (slice<global::go.net_package.IPAddr>([
             new(IP: IPv4(127, 0, 0, 1)),
             new(IP: IPv6loopback)
@@ -78,7 +78,7 @@ internal static slice<lookupGoogleSRVTestsᴛ1> lookupGoogleSRVTests = [
     )
 ];
 
-internal static array<time.Duration> backoffDuration = new time.Duration[]{time.ΔSecond, (time.Duration)(5000000000L), (time.Duration)(30000000000L)}.array();
+internal static array<time.Duration> backoffDuration = new time.Duration[]{time.Second, (time.Duration)(5000000000L), (time.Duration)(30000000000L)}.array();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noResolvConfOnIOSˢ = (@string)"no resolv.conf on iOS"u8;
@@ -629,20 +629,20 @@ public static partial void TestDNSFlood(ж<testing.T> t) {
         var qstats = new TestDNSFlood_qstats();
         var deadline = time.After((time.Duration)(4000000000L));
         for (nint i = 0; i < 2 * N; i++) {
-            var selᴛ4 = deadline;
-            var selᴛ5 = c;
-            switch (select(ᐸꟷ(selᴛ4, ꓸꓸꓸ), ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
-            case 0 when selᴛ4.ꟷᐳ(out _): {
+            var deadlineᴛ1 = deadline;
+            var cᴛ1 = c;
+            switch (select(ᐸꟷ(deadlineᴛ1, ꓸꓸꓸ), ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+            case 0 when deadlineᴛ1.ꟷᐳ(out _): {
                 t.Fatal(deadlineExceededˢ);
                 break;
             }
-            case 1 when selᴛ5.ꟷᐳ(out var err): {
+            case 1 when cᴛ1.ꟷᐳ(out var err): {
                 switch (err.type()) {
                 case null: {
                     qstats.succeeded++;
                     break;
                 }
-                case {} ΔerrΔ1 when ΔerrΔ1._<ΔError>(out var errΔ1): {
+                case {} ΔerrΔ1 when ΔerrΔ1._<Error>(out var errΔ1): {
                     qstats.failed++;
                     if (errΔ1.Timeout()) {
                         qstats.timeout++;
@@ -1049,9 +1049,9 @@ public static void TestLookupContextCancel(ж<testing.T> t) {
         var cancelLookupʗ1 = cancelLookup;
         var unblockLookupʗ1 = unblockLookup;
         testHookLookupIP = [MethodImpl(MethodImplOptions.NoInlining)] (slice<global::go.net_package.IPAddr>, error) (context.Context ctx, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) => {
-            var selᴛ6 = unblockLookupʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
-            case 0 when selᴛ6.ꟷᐳ(out _): {
+            var unblockLookupᴛ1 = unblockLookupʗ1;
+            switch (trySelect(ᐸꟷ(unblockLookupᴛ1, ꓸꓸꓸ))) {
+            case 0 when unblockLookupᴛ1.ꟷᐳ(out _): {
                 break;
             }
             default: {
@@ -1097,7 +1097,7 @@ public static void TestLookupContextCancel(ж<testing.T> t) {
         var (dnsErr, ok) = err._<ж<global::go.net_package.DNSError>>(ᐧ); if (!ok || dnsErr.Err != errCanceled.Error()) {
             t.Errorf("unexpected error from canceled, blocked LookupIPAddr: %v", err);
         }
-        builtin.close(unblockLookup);
+        close(unblockLookup);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -1190,6 +1190,8 @@ internal partial struct lookupCustomResolver {
     internal bool dialed;
 }
 
+} partial class net_internal_testᴛlookupCustomResolver {
+
 internal static Func<context.Context, @string, @string, (global::go.net_package.Conn, error)> dial(this ж<lookupCustomResolver> Ꮡlcr) {
     return (context.Context ctx, @string network, @string address) => {
         Ꮡlcr.Ꮡmu.Lock();
@@ -1198,6 +1200,8 @@ internal static Func<context.Context, @string, @string, (global::go.net_package.
         return Dial(network, address);
     };
 }
+
+} partial class net_internal_test_package {
 
 // TestConcurrentPreferGoResolversDial tests that multiple resolvers with the
 // PreferGo option used concurrently are all dialed properly.
@@ -1388,12 +1392,12 @@ public static partial void TestLookupIPAddrConcurrentCallsForNetworks(ж<testing
             // expected result. This will ensure that the lookup group would wait
             // for the existing call if it was to be reused.
             if (atomic.AddInt32(Ꮡcalls, 1) == (int32)len(resultsʗ1)) {
-                builtin.close(waitChʗ1);
+                close(waitChʗ1);
             }
-            var selᴛ7 = waitChʗ1;
+            var waitChᴛ1 = waitChʗ1;
             var selᴛ8 = ctxΔ1.Done();
-            switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
-            case 0 when selᴛ7.ꟷᐳ(out _): {
+            switch (select(ᐸꟷ(waitChᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
+            case 0 when waitChᴛ1.ꟷᐳ(out _): {
                 break;
             }
             case 1 when selᴛ8.ꟷᐳ(out _): {
@@ -1547,8 +1551,8 @@ public static void TestResolverLookupIP(ж<testing.T> t) {
                                 tΔ2.Fatalf("DefaultResolver.LookupIP(%q, %q): failed with unexpected error: %v", network, host, err);
                             }
 
-                            slice<netipꓸAddr> v4Addrs = default;
-                            slice<netipꓸAddr> v6Addrs = default;
+                            slice<netip.Addr> v4Addrs = default;
+                            slice<netip.Addr> v6Addrs = default;
                             foreach (var (_, ip) in range(ips)) {
                                 var (addr, ok) = netip.AddrFromSlice(ip); if (ok) {
                                     if (addr.Is4()) {
@@ -1658,14 +1662,14 @@ public static partial void TestDNSTimeout(ж<testing.T> t) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        builtin.close(timeoutHookGo);
+        close(timeoutHookGo);
         Ꮡwg.Wait();
         checkErr(err1);
         checkErr(err2);
 
         // Double lookup with context.
         timeoutHookGo = new channel<bool>(0);
-        var (ctx, cancel) = context.WithTimeout(context.Background(), time.ΔNanosecond);
+        var (ctx, cancel) = context.WithTimeout(context.Background(), time.Nanosecond);
         Ꮡwg.Add(2);
         var ctxʗ1 = ctx;
         goǃ(() => {
@@ -1687,8 +1691,8 @@ public static partial void TestDNSTimeout(ж<testing.T> t) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        time.Sleep(10 * time.ΔNanosecond);
-        builtin.close(timeoutHookGo);
+        time.Sleep(10 * time.Nanosecond);
+        close(timeoutHookGo);
         Ꮡwg.Wait();
         checkErr(err1);
         checkErr(err2);

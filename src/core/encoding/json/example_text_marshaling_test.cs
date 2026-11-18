@@ -10,6 +10,7 @@ using log = log_package;
 using strings = strings_package;
 using go.encoding;
 using static go.encoding.json_internal_test_package;
+using static json_test_package;
 
 partial class json_test_package {
 
@@ -18,6 +19,8 @@ partial struct Size /*num:nint*/;
 public static Size Unrecognized => /* iota */ 0;
 public static Size Small => 1;
 public static Size Large => 2;
+
+} partial class json_testᴛSize {
 
 public static error UnmarshalText(this ref Size s, slice<byte> text) {
     var exprᴛ1 = strings.ToLower((@string)text);
@@ -62,6 +65,8 @@ public static (slice<byte>, error) MarshalText(this Size s) {
     }}
     return (slice<byte>(name), default);
 }
+
+} partial class json_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string smallRegularLargeˢ => ref smallRegularLargeˢᵇ;

@@ -88,7 +88,7 @@ internal static command cmdMlDsaSigGenAft() {
     );
 }
 
-internal static command cmdMlDsaSigVerAft(Func<slice<byte>, (ж<mldsaꓸPublicKey>, error)> pubKey) {
+internal static command cmdMlDsaSigVerAft(Func<slice<byte>, (ж<mldsa.PublicKey>, error)> pubKey) {
     return new command(
         requiredArgs: 5, // public key, message, signature, context, mu
         handler: (slice<slice<byte>> args) => {

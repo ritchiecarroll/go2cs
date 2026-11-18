@@ -215,7 +215,6 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/diff/internal.diff.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/race/internal.race.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/internal/tracev1/internal.trace.internal.tracev1.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/testtrace/internal.trace.testtrace.csproj" />
