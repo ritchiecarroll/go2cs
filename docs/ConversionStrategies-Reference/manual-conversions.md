@@ -1733,7 +1733,7 @@ every dependent with it.
 **The design is the `sync` precedent applied one level up: hand-own the whole file, and keep<!-- ruled 2026-08-03 -->
 the SEMANTICS rather than the mechanism.** `sync`'s Mutex/RWMutex/WaitGroup are reimplemented on
 `SemaphoreSlim`/monitors because Go's sleeping semaphore is co-designed with the state machine and cannot be
-emulated; here the coupling is to the descriptor surface instead of to the scheduler, but the fork is the
+emulated;<!-- 2026-11-18: of the three, only WaitGroup still is. Mutex took Go's eight bytes (W9a) and RWMutex became Go's own code over it (P2, .5), which needs no handoff. --> here the coupling is to the descriptor surface instead of to the scheduler, but the fork is the
 same one — the raw-metal arm of the split between a managed reimplementation and a real conversion (see
 [`Baseline-vs-FullConversion.md`](../../src/archived/Baseline-vs-FullConversion.md)).
 `src/core/internal/sync/hashtriemap.cs`
@@ -2804,7 +2804,7 @@ list, so `TaskNode.Next` is a `TaskNode` and the descent never ends. `go/types`'
 `reflect` for the size of `Named`, which holds a `sync.Mutex`, and the run died there with a
 `StackOverflowException`: uncatchable, so it took the whole process and reported the 44 tests
 alphabetically after it as **absent** verdicts rather than as one failure.
-<!-- 2026-11-15, sqlite-cs W9a: `sync.Mutex` no longer holds a reference. It is Go's two words, `{state int32; sema uint32}`, and its wait queue is named by a handle in `sema` (the section "`sync.Mutex` is Go's eight bytes" below), so it is an ordinary struct to this rule. The rule and its history stand; `sync.RWMutex`'s `RWState` and `sync.WaitGroup`'s `WaitGroupState` are the handles it serves today. -->
+<!-- 2026-11-15, sqlite-cs W9a: `sync.Mutex` no longer holds a reference. It is Go's two words, `{state int32; sema uint32}`, and its wait queue is named by a handle in `sema` (the section "`sync.Mutex` is Go's eight bytes" below), so it is an ordinary struct to this rule. The rule and its history stand; `sync.RWMutex`'s `RWState` and `sync.WaitGroup`'s `WaitGroupState` are the handles it serves today. 2026-11-18 (P2, .5): `sync.RWMutex` is now Go's own code too (the section "`sync.RWMutex` is Go's own code"), so `WaitGroupState` is the one `sync` handle left. -->
 
 The rule is therefore stated positively: **a managed reference is one pointer word wide and is never
 descended into.** `KindOf` reports `Pointer` for it, which is both finite and Go's own answer —
@@ -3584,8 +3584,8 @@ never a second owner.
 
 **Reflection.** `Mutex` was the first example of an opaque managed handle in the reflection bridge's
 descent rule above. It is now an ordinary struct of two 4-byte fields, so `reflect` sizes it by its
-fields and reads Go's 8, and `go/types`' `Named` still computes to 112. `sync.RWMutex`'s `RWState` and
-`sync.WaitGroup`'s `WaitGroupState` remain handles.
+fields and reads Go's 8, and `go/types`' `Named` still computes to 112. `sync.WaitGroup`'s
+`WaitGroupState` remains a handle.<!-- 2026-11-18 (P2, .5): this read "`sync.RWMutex`'s `RWState` and `sync.WaitGroup`'s `WaitGroupState` remain handles" until RWMutex became Go's own code (the next section). -->
 
 Guarded by `GolibTests.SyncMutexLayoutTests` (the layout, exact counts in native memory at 2, 4 and 8
 threads, a handle that names no queue, `TryLock`), `GolibTests.SyncMutexQueueTests` (a copy of an idle
@@ -3599,6 +3599,55 @@ counts with queues coming and going, over 8 and over 64 mutexes),
 and the `MutexInNativeMemory` behavioral program, which runs sqlite's own shapes over an anonymous
 mmap: the fast mutex, the recursive mutex with its owner id written through `&(*mutex)(p).id`,
 `TryLock`, the recursive re-entry and a counter in the same native page under 2, 4 and 8 goroutines.
+
+## `sync.RWMutex` is Go's own code, and an empty semaphore bucket is retired
+
+**Nothing in `sync/rwmutex.cs` is hand-owned.** It is the converter's emission of Go's `rwmutex.go`:
+`{w Mutex; writerSem, readerSem uint32; readerCount, readerWait atomic.Int32}`, 24 bytes and no managed
+reference, the same on all four targets. Readers take Go's fast path, one atomic add on `readerCount`
+each way; a writer takes `w` and waits for departing readers on `writerSem`. The blocking runs on what
+already existed: `w` is the `sync.Mutex` above, and `runtime_SemacquireRWMutex`, `runtime_SemacquireRWMutexR`
+and `runtime_Semrelease` (`runtime_impl.cs`) are golib's `RuntimeSemaphore`, keyed by pointer identity
+with the count in the word, as Go keeps it. The reason given above for hand-owning the `sync` primitives,
+a sleeping semaphore co-designed with the state machine, is starvation mode's direct handoff; Go's
+`RWMutex` never uses it, and all four of its semaphore calls pass `handoff=false`. `RLocker` is Go's
+pointer reinterpretation (`Reinterpret<RWMutex, rlocker>`), so the returned `Locker` shares the
+RWMutex's storage.
+
+So a copy of a `RWMutex` is a separate lock (a copy of a write-locked one stays write-locked after the
+original unlocks), a `RWMutex` lives in C memory, and `reflect` sees its five fields, so `DeepEqual`
+tells a held lock from a free one. Until 2026-11-18 it was hand-owned around one managed `RWState`, a
+monitor and four counters, and each of those read the other way.
+
+**A semaphore bucket lives only while someone needs it.** `RuntimeSemaphore` keeps a lock and a waiter
+queue per word that is in use. It had a `GetOrAdd` and no removal, so a word that ever blocked, or that a
+`Release` touched, kept its bucket for the life of the process, and the key, the pointer box, kept the
+word's owner alive. Whoever leaves a bucket with an empty queue now retires it under its lock: it marks
+the bucket and removes exactly that key and value from the table. A thread that fetched the bucket
+before then sees the mark under the same lock and fetches again, so every live bucket is the one the
+table holds, and the count is only read and written under that bucket's lock. A retired bucket is never
+reused, because a holder of the old reference would take it for another word's. In Go an address is in
+its `semaRoot`'s tree only while a goroutine waits on it.
+
+Measured on one linux-x64 box with 4 CPUs, against Go 1.26.11 on the same box:
+
+| uncontended | Go 1.26.11 | hand-owned (before) | Go's code (now) |
+|---|---|---|---|
+| `RLock` + `RUnlock` | 14.8 to 15.8 ns | 64.7 ns | 22.8 ns |
+| `Lock` + `Unlock` | 22 to 30 ns | 65.6 ns | 37.9 ns |
+| readers only, 4 threads, per pair | 67 to 73 ns | 576 ns | 98.6 ns |
+
+All read 0 bytes a pair. A new `RWMutex` in a heap box allocates once more on its first lock, 120 bytes,
+where the hand-own allocated its `RWState` and monitor object. By the generated accessors, those are the
+field boxes `readerCount` and the semaphore words are reached through (`ʗp.of`), kept with the RWMutex's
+box (inferred from the code, not traced). 10,000 `RWMutex`es that each blocked one reader once leave the semaphore table at its starting
+size; without the retire, every such word kept a bucket.
+
+Guarded by `GolibTests.SyncRWMutexLayoutTests` (the layout; a copy of a write-locked and of a read-locked
+`RWMutex`; exclusive writers and consistent readers in native memory; `DeepEqual` of a held and a free
+lock) and `GolibTests.RuntimeSemaphoreBucketTests` (a word that blocked once keeps no bucket; a release
+with no waiter keeps none; the owner of a word that blocked once is collected; exact counts with
+buckets retiring under 2, 4 and 8 threads). Every arm failed before this change.
 
 ## `sync.Pool` — a managed-reference ring slot, and a thread-affine stand-in for the P pin
 
