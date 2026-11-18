@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using slices = slices_package;
 using strings = strings_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static main_package;
 
 partial class main_package {
 
@@ -15,7 +16,11 @@ partial struct item {
     internal @string n;
 }
 
+} partial class mainᴛitem {
+
 internal static @string Name(this ref item i) { return i.n; }
+
+} partial class main_package {
 
 internal static nint compareItems(ж<item> Ꮡa, ж<item> Ꮡb) {
     ref var a = ref Ꮡa.DerefOrNull();
