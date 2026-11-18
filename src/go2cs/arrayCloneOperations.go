@@ -44,16 +44,15 @@ func typeIsArrayValue(t types.Type) bool {
 // `[GoValueClone(…)]`, go2cs-gen generates its field-precise `Clone()`, and every copy site here
 // appends it.
 //
-// EMBEDDED (promoted) struct members are not a reason to clone: go2cs-gen holds an embed as an
-// INLINE field, so the plain C# struct copy already copies it, exactly as Go does. (Until
-// 2026-08-14 an embed was a shared `ж<T>` box, which gave it reference semantics a value copy then
-// aliased — the defect behind go/types' type-parameter identity wall; see
-// ConversionStrategies-Reference, *An embedded struct is an INLINE field, so a value copy copies
-// it*.) What the skip below still costs is narrower and named: a fixed ARRAY reached only THROUGH
-// an embed is not seen, so such a struct is not stamped and the array backing stays shared. Widening
-// the walk is now sound — the generated `copy.<member> = <member>.ΔClone()` lands in the copy's own
-// inline storage — but it moves EMISSION corpus-wide, so it belongs to a change that owns that
-// footprint.
+// An EMBEDDED (promoted) struct is walked like any other field. go2cs-gen holds an embed as an INLINE
+// field, so the plain C# struct copy copies the embed itself, exactly as Go does (until 2026-08-14 an
+// embed was a shared `ж<T>` box, which gave it reference semantics a value copy then aliased -- the
+// defect behind go/types' type-parameter identity wall; see ConversionStrategies-Reference, *An
+// embedded struct is an INLINE field, so a value copy copies it*). An ARRAY the embed carries is
+// another matter: its backing store is shared by that copy, so a struct that carries an array only
+// through an embed is stamped with the embed's member, and the generated `copy.<member> =
+// <member>.ΔClone()` lands in the copy's own inline storage. An embedded POINTER is a pointer, shared
+// in Go too, and needs nothing.
 func typeNeedsValueClone(t types.Type) bool {
 	return typeNeedsValueCloneSeen(t, map[types.Type]bool{})
 }
@@ -89,7 +88,7 @@ func typeNeedsValueCloneSeen(t types.Type, seen map[types.Type]bool) bool {
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
 
-		if field.Embedded() || field.Name() == "_" {
+		if field.Name() == "_" {
 			continue
 		}
 
@@ -129,7 +128,7 @@ func structValueCloneFields(t types.Type, structTypeName string) []string {
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
 
-		if field.Embedded() || field.Name() == "_" {
+		if field.Name() == "_" {
 			continue
 		}
 

@@ -40534,4 +40534,48 @@ all PASS at their banked counts.
 
 — P2 (2026-11-17)
 
+## 2026-11-17 — P2 (W-embed-array): a struct whose array is reached only through an EMBEDDED struct clones it on copy — FIXED
+
+**The reading** (wall C's copy probe, 2026-11-16, four embedded routes). Go copies a struct value whole: after
+`c := e` a write to `c.V`, the array of an embedded `Inner` promoted through `e`, does not reach `e`. go2cs-gen holds
+an embed as an inline field, so the C# struct copy copies the embed, but the `array<T>` inside it is a struct over a
+shared backing store. `typeNeedsValueClone` and `structValueCloneFields` skipped embedded fields, so such a struct
+was never stamped `[GoValueClone(…)]` and no copy site cloned it: every write through the copy reached the source.
+
+**The fix.** Both walks visit an embedded value field like any other field. A struct carrying an array only through
+an embed is stamped with the embed's member (`[GoValueClone("Inner")] internal partial struct emb {}`), and every
+copy site the value-clone rule already serves clones it: assignment, parameter, return, range element, composite
+literal element, and the four conversion routes of W-conv-copy. An embedded pointer is shared in Go too and takes
+nothing. (Converter `src/go2cs/arrayCloneOperations.go`, test `TestAStructCarryingAnArrayThroughAnEmbedCopiesIt`,
+fixture `EmbeddedArrayCopy`, 3 packages and 10 routes; docs struct-types.md, after *A conversion copies its operand*.)
+
+**Limits, named here:** a struct the inline-array admission holds inline is copied whole by C# and takes no clone,
+as before; a returned parameter is copied twice (`e = e.ΔClone();` on entry, then `return e.ΔClone();`), as every
+array-carrying parameter already is (COORD ruled 2026-11-16: left alone). A zero-length array is cloned like any
+other; it holds nothing, so that clone is pure cost. That is W-zero-len, ruled a seat of its own after this one.
+
+**Measured at `22f57eb243`** (on wall C's tip `a7540ab86d`), go1.26.11, linux/amd64, prediction posted first:
+go test rc 0, 11 ok; CNR measured BEFORE re-baselining moved exactly the 2 predicted files, one `package_info.cs`
+line each (`CrossPkgLiteralNestedField/addrlib` Embedder gains `slots`, `EmptyStructLiteralCtor` embeds gains
+`grid`; no main.cs), then NO REGRESSION over 1101 (+12 platform-exclusive); GenTests 545/545; go2cs.slnx 0 errors;
+fixtures `EmbeddedArrayCopy`, `CrossPkgLiteralNestedField`, `EmptyStructLiteralCtor`, `EmbeddedStructValueCopy`,
+`StructConversionCopy` and `ForeignPairStructConversion` match Go.
+Two-seeded `-stdlib` footprint, wall C's converter against this one over wall C's corpus: windows/amd64, linux/amd64
+and linux/arm64 17 files -46/+47 each, darwin/amd64 17 files -47/+48 (its `m` gains `mOS`), every count, file and
+line kind as predicted; each shared file byte-identical across the four targets. 28 type stamps in nine
+`package_info.cs` (aes 5, aes/gcm 4, drbg 1, mlkem 4 widened, go/internal/gcimporter 1, reflect 2, runtime 7,
+x/crypto poly1305 3, dnsmessage 1), the `runtime2.cs.auto` review siblings (`g`, `mPadded`, `p`; darwin `m`), 14
+copy sites in aes `cbc.cs`/`ctr.cs`, gcm `cmac.cs`/`gcm.cs`/`gcm_nonces.cs` and drbg `ctrdrbg.cs` (`b: b.ΔClone()`,
+`g: g.Value.ΔClone()`, `c.c = aes.NewCTR(cipher, V).Value.ΔClone()`), and dnsmessage's `HTTPSResource` parameter
+entry copy with its position-map re-encode. 22 corpus files, applied in `b2d4072237`.
+The linux-banked rows that run those files, each alone at `b2d4072237`: `crypto/internal/fips140/aes` 5,
+`crypto/aes` 58, `crypto/cipher` 27289, `crypto/rand` 314, `crypto/internal/fips140/mlkem` 11, `crypto/mlkem` 8,
+`go/internal/gcimporter` 636, `reflect` 445, `crypto/internal/fips140test` 2274 and `crypto/tls` 4921, all PASS at
+their banked counts. `net` reads COUNT 594 against its banked 597, the count this host also reads at master (the
+W9a battery on 2026-11-16 and the copy census's master arm, both 594 of 597, no alternating test), so it is the
+host's, not this change's. `aes/gcm` and `drbg` have no banked row of their own; `crypto/cipher`, `crypto/rand`,
+`crypto/tls` and `fips140test` run them (read from their imports).
+
+— P2 (2026-11-17)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

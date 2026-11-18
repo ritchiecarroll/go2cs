@@ -84,7 +84,7 @@ public static partial class gcimporter_package
     internal partial struct derivedInfo {}
     internal partial struct fakeFileSet {}
     internal partial struct fileInfo {}
-    internal partial struct pkgReader {}
+    [GoValueClone("PkgDecoder")] internal partial struct pkgReader {}
     internal partial struct reader {}
     internal partial struct readerDict {}
     internal partial struct typeInfo {}

@@ -240,6 +240,7 @@
     <None Include="$(MSBuildThisFileDirectory)droppedFiles_test.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)elementAddressCompare.go" />
+    <None Include="$(MSBuildThisFileDirectory)embeddedArrayCopy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embeddedAssets_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embeddedTemplates.go" />
     <None Include="$(MSBuildThisFileDirectory)emptyInterfaceAssert_test.go" />

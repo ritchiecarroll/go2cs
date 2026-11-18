@@ -634,6 +634,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckEmbedLayoutMatchesGo() => CheckTarget("EmbedLayoutMatchesGo");
 
     [TestMethod]
+    public void CheckEmbeddedArrayCopy() => CheckTarget("EmbeddedArrayCopy");
+
+    [TestMethod]
     public void CheckEmbeddedInterfaceMergedMethod() => CheckTarget("EmbeddedInterfaceMergedMethod");
 
     [TestMethod]
