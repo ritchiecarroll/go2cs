@@ -1103,6 +1103,7 @@
     <Project Path="tests/Behavioral/ReflectNewAtField/ReflectNewAtField.csproj" />
     <Project Path="tests/Behavioral/RefusalDowngradeProxy/RefusalDowngradeProxy.csproj" />
     <Project Path="tests/Behavioral/ReflectArrayOf/ReflectArrayOf.csproj" />
+    <Project Path="tests/Behavioral/ReflectArrayStoreCopies/ReflectArrayStoreCopies.csproj" />
     <Project Path="tests/Behavioral/ReflectAssignabilityNamed/ReflectAssignabilityNamed.csproj" />
     <Project Path="tests/Behavioral/ReflectBridgeClosure/ReflectBridgeClosure.csproj" />
     <Project Path="tests/Behavioral/ReflectChanDirection/ReflectChanDirection.csproj" />
