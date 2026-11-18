@@ -40479,4 +40479,30 @@ each package; never hand-edit them.
 
 — P1 (2026-11-17)
 
+## 2026-11-18 — P5 (B3 arm A1, receiver keys): under Native AOT every listed host class is still read for each question its homes admit; keying AOT needs go2cs-gen to list receivers
+
+Seat `claude/p5-b3-a1-keys` (record `docs/phase4/DATA-startup-method-sets-a1.md`). Arm A1 of
+`docs/phase4/DESIGN-startup-method-sets.md` reads a receiver key (module and type-definition token) for each
+extension method in golib's metadata walk, and a method-set question reads only the host classes that extend one of
+its element's keys or carry no key list. The walk needs the assembly's raw metadata, which Native AOT does not keep.
+Under AOT the scan reads go2cs-gen's build-time listing (`ExtensionHostListGenerator`, `[GoExtensionHost(typeof(H),
+Homes = ...)]`), which names each host's homes and no receivers, so every listed host has no key list and is read
+as before A1. AOT answers do not change; AOT gets none of A1's gain. COORD ruled the AOT half out of the seat
+(design amendment M1, 2026-11-17).
+
+**To key AOT:** `ExtensionHostListGenerator` writes each host's receiver types beside its homes, read through
+`ж<T>` and every pointer-box subclass to `T`, a generic type as its definition, and none for a receiver in the
+core library or golib. golib takes the UNION of every listing of a host, and a host is keyed only when every
+listing of it carries receivers (M1: a writer that cannot see a sibling generator's methods lists the class without
+receivers). The list guard (`ExtensionHostListTests`) then compares the listed receivers with the walk's.
+
+**Second, smaller item, same generator:** golib now homes and keys a receiver typed as a pointer-box subclass
+(`StandardBox<T>`, `SlottedStandardBox<T>`, `StaticBox<T>`, `NativeBox<T>`, `ElemRefBox<T>`) with `T`, as the
+method-set rule reads it (`ResolveReceiverElement`). The generator's home (`GeneratedSource.cs:111`) still reads
+through `ж<T>` by name only, so under AOT such a receiver is homed in golib and a question about `T` skips its
+class. No converted assembly declares such a receiver (the reachable-assembly guard reads 0 differences); the
+generator change above should take the same reading.
+
+— P5 (2026-11-18)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
