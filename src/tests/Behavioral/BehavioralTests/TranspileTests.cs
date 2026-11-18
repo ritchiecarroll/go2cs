@@ -2242,6 +2242,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckReflectArrayOf() => CheckTarget("ReflectArrayOf");
 
     [TestMethod]
+    public void CheckReflectArrayStoreCopies() => CheckTarget("ReflectArrayStoreCopies");
+
+    [TestMethod]
     public void CheckReflectAssignabilityNamed() => CheckTarget("ReflectAssignabilityNamed");
 
     [TestMethod]
