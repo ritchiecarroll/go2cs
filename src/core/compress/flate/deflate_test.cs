@@ -18,6 +18,7 @@ using @internal;
 using go.math;
 using go.runtime;
 using static go.compress.flate_package;
+using static flate_internal_test_package;
 
 partial class flate_internal_test_package {
 
@@ -172,6 +173,8 @@ internal partial struct sparseReader {
     internal int64 cur;
 }
 
+} partial class flate_internal_testᴛsparseReader {
+
 internal static (nint n, error err) Read(this ref sparseReader r, slice<byte> b) {
     nint n = default;
     error err = default;
@@ -195,6 +198,8 @@ internal static (nint n, error err) Read(this ref sparseReader r, slice<byte> b)
     r.cur = cur;
     return (n, err);
 }
+
+} partial class flate_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingSparseChunkˢ = (@string)"skipping sparse chunk during short test"u8;
@@ -224,6 +229,8 @@ internal partial struct syncBuffer {
 internal static ж<syncBuffer> newSyncBuffer() {
     return Ꮡ(new syncBuffer(ready: new channel<bool>(1)));
 }
+
+} partial class flate_internal_testᴛsyncBuffer {
 
 internal static (nint n, error err) Read(this ж<syncBuffer> Ꮡb, slice<byte> p) {
     nint n = default;
@@ -277,6 +284,8 @@ internal static error Close(this ref syncBuffer b) {
     b.signal();
     return default;
 }
+
+} partial class flate_internal_test_package {
 
 internal static void testSync(ж<testing.T> t, nint level, slice<byte> input, @string name) {
     if (len(input) == 0) {
@@ -766,6 +775,8 @@ internal partial struct failWriter {
     internal nint n;
 }
 
+} partial class flate_internal_testᴛfailWriter {
+
 internal static (nint, error) Write(this ref failWriter w, slice<byte> b) {
     w.n--;
     if (w.n == -1) {
@@ -773,6 +784,8 @@ internal static (nint, error) Write(this ref failWriter w, slice<byte> b) {
     }
     return (len(b), default);
 }
+
+} partial class flate_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testdataIsaacNewtonˢ => ref testdataIsaacNewtonˢᵇ;

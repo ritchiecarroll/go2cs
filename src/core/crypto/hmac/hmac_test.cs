@@ -45,8 +45,8 @@ internal static slice<hmacTest> hmacTests = [
         ],
         slice<byte>("Sample #1"u8),
         "4f4ca3d5d68ba7cc0a1208c9c61e9c5da0403c0a",
-        sha1.ΔSize,
-        sha1.ΔBlockSize
+        sha1.Size,
+        sha1.BlockSize
     ),
     new(
         sha1.New,
@@ -57,8 +57,8 @@ internal static slice<hmacTest> hmacTests = [
         ],
         slice<byte>("Sample #2"u8),
         "0922d3405faa3d194f82a45830737d5cc6c75d24",
-        sha1.ΔSize,
-        sha1.ΔBlockSize
+        sha1.Size,
+        sha1.BlockSize
     ),
     new(
         sha1.New,
@@ -79,8 +79,8 @@ internal static slice<hmacTest> hmacTests = [
         ],
         slice<byte>("Sample #3"u8),
         "bcf41eab8bb2d802f3d05caf7cb092ecf8d1a3aa",
-        sha1.ΔSize,
-        sha1.ΔBlockSize
+        sha1.Size,
+        sha1.BlockSize
     ),
 
     // Test from Plan 9.
@@ -89,8 +89,8 @@ internal static slice<hmacTest> hmacTests = [
         slice<byte>("Jefe"u8),
         slice<byte>("what do ya want for nothing?"u8),
         "750c783e6ab0b503eaa86e310a5db738",
-        md5.ΔSize,
-        md5.ΔBlockSize
+        md5.Size,
+        md5.BlockSize
     ),
 
     // Tests from RFC 4231
@@ -224,8 +224,8 @@ internal static slice<hmacTest> hmacTests = [
         ],
         slice<byte>("Sample message for keylen=blocklen"u8),
         "5fd596ee78d5553c8ff4e72d266dfd192366da29",
-        sha1.ΔSize,
-        sha1.ΔBlockSize
+        sha1.Size,
+        sha1.BlockSize
     ),
     new(
         sha1.New,
@@ -236,8 +236,8 @@ internal static slice<hmacTest> hmacTests = [
         ],
         slice<byte>("Sample message for keylen<blocklen"u8),
         "4c99ff0cb1b31bd33f8431dbaf4d17fcd356a807",
-        sha1.ΔSize,
-        sha1.ΔBlockSize
+        sha1.Size,
+        sha1.BlockSize
     ),
     new(
         sha1.New,
@@ -258,8 +258,8 @@ internal static slice<hmacTest> hmacTests = [
         ],
         slice<byte>("Sample message for keylen=blocklen"u8),
         "2d51b2f7750e410584662e38f133435f4c4fd42a",
-        sha1.ΔSize,
-        sha1.ΔBlockSize
+        sha1.Size,
+        sha1.BlockSize
     ),
     new(
         sha256.New224,
@@ -521,8 +521,8 @@ internal static slice<hmacTest> hmacTests = [
         [],
         slice<byte>("message"u8),
         "d5d1ed05121417247616cfc8378f360a39da7cfa",
-        sha1.ΔSize,
-        sha1.ΔBlockSize
+        sha1.Size,
+        sha1.BlockSize
     ),
     new(
         sha256.New,

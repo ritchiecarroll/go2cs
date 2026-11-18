@@ -140,9 +140,9 @@ internal static void testTempDir(ж<testing.T> t) {
     var dirChʗ1 = dirCh;
     t.Cleanup(() => {
         // Verify directory has been removed.
-        var selᴛ1 = dirChʗ1;
-        switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out var dirΔ1): {
+        var dirChᴛ1 = dirChʗ1;
+        switch (trySelect(ᐸꟷ(dirChᴛ1, ꓸꓸꓸ))) {
+        case 0 when dirChᴛ1.ꟷᐳ(out var dirΔ1): {
             var (fiΔ1, errΔ1) = Δos.Stat(dirΔ1);
             if (Δos.IsNotExist(errΔ1)) {
                 // All good

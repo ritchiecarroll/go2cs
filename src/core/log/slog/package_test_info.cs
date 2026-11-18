@@ -8,33 +8,22 @@ global using static global::go.log.slog_package;
 global using static global::go.log.slog_internal_test_package;
 
 // <ImportedTypeAliases>
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using slogꓸHandler = go.log.slog_package.ΔHandler;
-global using slogꓸLevel = go.log.slog_package.ΔLevel;
-global using slogꓸSource = go.log.slog_package.ΔSource;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
 using static global::go.log.slog_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Handler", "ΔHandler")]
-[assembly: GoTypeAlias("Kind", "ΔKind")]
-[assembly: GoTypeAlias("Level", "ΔLevel")]
-[assembly: GoTypeAlias("LogValuer", "ΔLogValuer")]
-[assembly: GoTypeAlias("Source", "ΔSource")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
-[assembly: GoImplement<LevelHandler, go.log.slog_package.ΔHandler>(Pointer = true)]
+[assembly: GoImplement<LevelHandler, go.log.slog_package.Handler>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<global::go.log.slog_package.Level, encoding_package.TextMarshaler>]
+[assembly: GoImplement<global::go.log.slog_package.Level, encoding_package.TextUnmarshaler>(Pointer = true)]
+[assembly: GoImplement<global::go.log.slog_package.Level, global::go.log.slog_package.Leveler>]
 [assembly: GoImplement<global::go.log.slog_package.LevelVar, encoding_package.TextMarshaler>(Pointer = true)]
 [assembly: GoImplement<global::go.log.slog_package.LevelVar, encoding_package.TextUnmarshaler>(Pointer = true)]
-[assembly: GoImplement<global::go.log.slog_package.ΔLevel, encoding_package.TextMarshaler>]
-[assembly: GoImplement<global::go.log.slog_package.ΔLevel, encoding_package.TextUnmarshaler>(Pointer = true)]
-[assembly: GoImplement<global::go.log.slog_package.ΔLevel, global::go.log.slog_package.Leveler>]
 [assembly: GoImplement<go.log.slog.@internal.buffer_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
 // </InterfaceImplementations>
@@ -44,8 +33,8 @@ using static global::go.log.slog_test_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: GoFieldAccess(typeof(global::go.log.slog_package.ΔSource))]
-[assembly: GoFieldAccess(typeof(go.log.slog_package.ΔSource))]
+[assembly: GoFieldAccess(typeof(global::go.log.slog_package.Source))]
+[assembly: GoFieldAccess(typeof(go.log.slog_package.Source))]
 [assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -56,7 +45,7 @@ using static global::go.log.slog_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("log/slog/example_level_handler_test.go", "example_level_handler_test.cs", "ABUstIKUqqKosqiSqJKokgAIFgAIAoKClJSCgoI=", "65-70:1")]
+[assembly: GoPositionMap("log/slog/example_level_handler_test.go", "example_level_handler_test.cs", "ABYstIKUyqKosqiSqJKokgAKFgAIAoKClJSCgoI=", "65-70:1")]
 [assembly: GoPositionMap("log/slog/example_wrap_test.go", "example_wrap_test.cs", "ABQm0oKUgoKC1oKUgqaCgpSUgg==", "30-41:1")]
 [assembly: GoPositionMap("log/slog/slogtest_test.go", "slogtest_test.cs", "ABskggAGEJKCgpKCgpSUgILsgoKCgpSCgpSUpoKCgpQAAhLigoKCgoKClJSCgoKCgoKUgoKolIKU", "24-24:1;25-25:2;27-40:3;30-36:3.1")]
 // </GoSourcePositionMaps>
@@ -120,3 +109,13 @@ public static partial class slog_test_package
         builtin.initPackage(typeof(global::go.log.slog_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(slog_test_package.LevelHandler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class slog_testᴛLevelHandler;
+// </MethodHolders>

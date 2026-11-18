@@ -17,6 +17,7 @@ using @internal;
 using go.math.rand;
 using sort = sort_package;
 using static go.sort_internal_test_package;
+using static sort_test_package;
 
 partial class sort_test_package {
 
@@ -27,7 +28,7 @@ internal static array<@string> stringsData = new @string[]{"", "Hello", "foo", "
 public static void TestSortIntSlice(ж<testing.T> t) {
     var data = ints.Clone();
     var a = (sort.IntSlice)(data[0..]);
-    Sort((sort.Interface)(a));
+    Sort(a);
     if (!IsSorted(a)) {
         t.Errorf("sorted %v", ints);
         t.Errorf("   got %v", data);
@@ -37,7 +38,7 @@ public static void TestSortIntSlice(ж<testing.T> t) {
 public static void TestSortFloat64Slice(ж<testing.T> t) {
     var data = float64s.Clone();
     var a = (sort.Float64Slice)(data[0..]);
-    Sort((sort.Interface)(a));
+    Sort(a);
     if (!IsSorted(a)) {
         t.Errorf("sorted %v", float64s);
         t.Errorf("   got %v", data);
@@ -49,7 +50,7 @@ public static void TestSortFloat64sCompareSlicesSort(ж<testing.T> t) {
     var slice1 = slices.Clone<slice<float64>, float64>(float64s[..]);
     var slice2 = slices.Clone<slice<float64>, float64>(float64s[..]);
 
-    Sort((sort.Interface)((sort.Float64Slice)slice1));
+    Sort((sort.Float64Slice)slice1);
     slices.Sort<slice<float64>, float64>(slice2);
 
     // Compare for equality using cmp.Compare, which considers NaNs equal.
@@ -61,7 +62,7 @@ public static void TestSortFloat64sCompareSlicesSort(ж<testing.T> t) {
 public static void TestSortStringSlice(ж<testing.T> t) {
     var data = stringsData.Clone();
     var a = (sort.StringSlice)(data[0..]);
-    Sort((sort.Interface)(a));
+    Sort(a);
     if (!IsSorted(a)) {
         t.Errorf("sorted %v", stringsData);
         t.Errorf("   got %v", data);
@@ -128,7 +129,7 @@ public static void TestReverseSortIntSlice(ж<testing.T> t) {
     var data = ints.Clone();
     var data1 = ints.Clone();
     var a = (sort.IntSlice)(data[0..]);
-    Sort((sort.Interface)(a));
+    Sort(a);
     var r = (sort.IntSlice)(data1[0..]);
     Sort(Reverse(r));
     for (nint i = 0; i < len(data); i++) {
@@ -150,7 +151,7 @@ public static void TestBreakPatterns(ж<testing.T> t) {
     data[(len(data) / 4) * 1] = 0;
     data[(len(data) / 4) * 2] = 1;
     data[(len(data) / 4) * 3] = 2;
-    Sort((sort.Interface)((sort.IntSlice)data));
+    Sort((sort.IntSlice)data);
 }
 
 public static void TestReverseRange(ж<testing.T> t) {
@@ -176,6 +177,8 @@ partial struct nonDeterministicTestingData {
     internal ж<rand.Rand> r;
 }
 
+} partial class sort_testᴛnonDeterministicTestingData {
+
 internal static nint Len(this ref nonDeterministicTestingData t) {
     return 500;
 }
@@ -190,6 +193,8 @@ internal static void Swap(this ref nonDeterministicTestingData t, nint i, nint j
         throw panic("nondeterministic comparison out of bounds");
     }
 }
+
+} partial class sort_test_package {
 
 public static void TestNonDeterministicComparison(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -433,6 +438,8 @@ partial struct testingData {
     internal nint ncmp, nswap;
 }
 
+} partial class sort_testᴛtestingData {
+
 internal static nint Len(this ref testingData d) { return len(d.data); }
 internal static bool Less(this ref testingData d, nint i, nint j) {
     d.ncmp++;
@@ -445,6 +452,8 @@ internal static void Swap(this ref testingData d, nint i, nint j) {
     d.nswap++;
     (d.data[i], d.data[j]) = (d.data[j], d.data[i]);
 }
+
+} partial class sort_test_package {
 
 internal static nint lg(nint n) {
     nint i = 0;
@@ -595,6 +604,8 @@ partial struct adversaryTestingData {
     internal nint gas;         // special value for unset elements, higher than everything else
 }
 
+} partial class sort_testᴛadversaryTestingData {
+
 internal static nint Len(this ref adversaryTestingData d) { return len(d.data); }
 
 internal static bool Less(this ref adversaryTestingData d, nint i, nint j) {
@@ -627,6 +638,8 @@ internal static bool Less(this ref adversaryTestingData d, nint i, nint j) {
 internal static void Swap(this ref adversaryTestingData d, nint i, nint j) {
     (d.data[i], d.data[j]) = (d.data[j], d.data[i]);
 }
+
+} partial class sort_test_package {
 
 internal static ж<adversaryTestingData> newAdversaryTestingData(ж<testing.T> t, nint size, nint maxcmp) {
     ref var gas = ref heap<nint>(size - 1, out var Ꮡgas);
@@ -664,6 +677,8 @@ partial struct intPairsᴛ1 /*dyn*/ {
 
 partial struct intPairs /*[]intPairsᴛ1*/;
 
+} partial class sort_testᴛintPairs {
+
 // IntPairs compare on a only.
 internal static nint Len(this intPairs d) { return len(d); }
 internal static bool Less(this intPairs d, nint i, nint j) { return d[i].a < d[j].a; }
@@ -693,6 +708,8 @@ internal static bool inOrder(this intPairs d) {
     }
     return true;
 }
+
+} partial class sort_test_package {
 
 public static void TestStability(ж<testing.T> t) {
     nint n = 100000;

@@ -198,7 +198,7 @@ internal partial struct routeStats {
     internal nint ipv4, ipv6; // # of active connected unicast, anycast or multicast routes
 }
 
-internal static (ж<routeStats>, error) validateInterfaceUnicastAddrs(slice<global::go.net_package.ΔAddr> ifat) {
+internal static (ж<routeStats>, error) validateInterfaceUnicastAddrs(slice<global::go.net_package.Addr> ifat) {
     // Note: BSD variants allow assigning any IPv4/IPv6 address
     // prefix to IP interface. For example,
     //   - 0.0.0.0/0 through 255.255.255.255/32
@@ -259,7 +259,7 @@ internal static (ж<routeStats>, error) validateInterfaceUnicastAddrs(slice<glob
     return (stats, default);
 }
 
-internal static (ж<routeStats>, error) validateInterfaceMulticastAddrs(slice<global::go.net_package.ΔAddr> ifat) {
+internal static (ж<routeStats>, error) validateInterfaceMulticastAddrs(slice<global::go.net_package.Addr> ifat) {
     var stats = @new<routeStats>();
     foreach (var (_, ifa) in range(ifat)) {
         switch (ifa.type()) {

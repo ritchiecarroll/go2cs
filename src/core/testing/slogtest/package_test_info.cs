@@ -7,7 +7,6 @@
 global using static global::go.testing.slogtest_package;
 
 // <ImportedTypeAliases>
-global using slogꓸHandler = go.log.slog_package.ΔHandler;
 // </ImportedTypeAliases>
 
 using go;

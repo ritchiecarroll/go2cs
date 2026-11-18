@@ -20,6 +20,7 @@ using go.image;
 using go.math;
 using runtime;
 using static go.image.jpeg_package;
+using static jpeg_internal_test_package;
 
 partial class jpeg_internal_test_package {
 
@@ -115,6 +116,8 @@ internal partial struct eofReader {
     internal nint lenAtEOF;
 }
 
+} partial class jpeg_internal_testᴛeofReader {
+
 internal static (nint n, error err) Read(this ref eofReader r, slice<byte> b) {
     nint n = default;
     error err = default;
@@ -134,6 +137,8 @@ internal static (nint n, error err) Read(this ref eofReader r, slice<byte> b) {
     }
     return (n, err);
 }
+
+} partial class jpeg_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testdataVideo001Jpegˢ => ref testdataVideo001Jpegˢᵇ;
@@ -448,10 +453,10 @@ public static void TestPaddedRSTMarker(ж<testing.T> t) {
 public static void TestExtraneousData(ж<testing.T> t) {
     // Encode a 1x1 red image.
     var src = image.NewRGBA(image.Rect(0, 0, 1, 1));
-    src.Set(0, 0, new colorꓸRGBA(0xff, 0x00, 0x00, 0xff));
+    src.Set(0, 0, new color.RGBA(0xff, 0x00, 0x00, 0xff));
     var buf = @new<bytes.Buffer>();
     {
-        var err = Encode(new jpeg_internal_test_package.bytes_BufferжWriter(buf), new image.ΔRGBAжImage(src), nil); if (err != nil) {
+        var err = Encode(new jpeg_internal_test_package.bytes_BufferжWriter(buf), new image.RGBAжImage(src), nil); if (err != nil) {
             t.Fatalf("encode: %v", err);
         }
     }
@@ -502,7 +507,7 @@ public static void TestExtraneousData(ж<testing.T> t) {
             nerr++;
             continue;
         }
-        if (averageDelta(got, new image.ΔRGBAжImage(src)) > (int64)2 << 8) {
+        if (averageDelta(got, new image.RGBAжImage(src)) > (int64)2 << 8) {
             t.Errorf("image #%d changed too much after a round trip", i);
             nerr++;
             continue;

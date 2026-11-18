@@ -72,7 +72,7 @@ public static void TestTimeHistogram(ж<testing.T> t) {
         t.Errorf("overflow bucket has count that is not 2: %d", c);
     }
 
-    dummyTimeHistogram = new runtime_internal_test_package.TimeHistogram();
+    dummyTimeHistogram.AssignFrom(new runtime_internal_test_package.TimeHistogram());
 }
 
 public static void TestTimeHistogramMetricsBuckets(ж<testing.T> t) {

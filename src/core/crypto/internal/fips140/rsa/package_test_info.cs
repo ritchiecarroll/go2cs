@@ -7,8 +7,6 @@
 global using static global::go.crypto.@internal.fips140.rsa_package;
 
 // <ImportedTypeAliases>
-global using bigmodꓸNat = go.crypto.@internal.fips140.bigmod_package.ΔNat;
-global using bigꓸInt = go.math.big_package.ΔInt;
 // </ImportedTypeAliases>
 
 using go;
@@ -16,7 +14,6 @@ using static global::go.crypto.@internal.fips140.rsa_internal_test_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b48617368416c676f726974686d2063727970746f2f783530392f706b69782e416c676f726974686d4964656e7469666965723b2048617368205b5d627974657d", "TestHashPrefixes_val")]
-[assembly: GoTypeAlias("PublicKey", "ΔPublicKey")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -40,7 +37,7 @@ using static global::go.crypto.@internal.fips140.rsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/rsa/keygen_test.go", "keygen_test.cs", "ABkkgoKCpoKSgoKCgoKCpoKkpLS01rSUgoKUgqaCgoKCpoKCgoKmgoKC2LaCAAoIgoKCprKCgoKCgoKmgqS0tLSUgoKUgqaCgoKUlIKCuIKCgpSUgpSAgui2griCgoKmgoKCpoKCgpSCgpQ=", "51-78:1;115-149:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/keygen_test.go", "keygen_test.cs", "ABkkgoKCpoKSgoKCgoKCpoKUlLS01rSUgoKUgqaCgoKCpoKCgoKmgoKC2LaCAAoIgoKCprKCgoKCgoKmgpS0tLSUgoKUgqaCgoKUlIKCuIKCgpSUgpSAgui2griCgoKmgoKCpoKCgpSCgpQ=", "51-78:1;115-149:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15_test.go", "pkcs1v15_test.cs", "ABUeggAnUIIABhSClIKCgg==", "", "", "64=Size/1/1/8")]
 [assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22_test.go", "pkcs1v22_test.cs", "AA4alAANHLgADyCCgpSCgpSCpoI=")]
 // </GoSourcePositionMaps>

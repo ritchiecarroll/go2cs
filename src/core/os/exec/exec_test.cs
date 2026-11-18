@@ -41,6 +41,7 @@ using go.sync;
 using path;
 using static go.os.exec_internal_test_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static exec_test_package;
 
 partial class exec_test_package {
 
@@ -930,7 +931,7 @@ public static void TestExtraFiles(ж<testing.T> Ꮡt) {
 
         // Force TLS root certs to be loaded (which might involve
         // cgo), to make sure none of that potential C code leaks fds.
-        var ts = httptest.NewUnstartedServer(new exec_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var ts = httptest.NewUnstartedServer(new exec_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
         })));
         // quiet expected TLS handshake error "remote error: bad certificate"
         ts.Config.ErrorLog = log.New(io.Discard, ""u8, 0);
@@ -1094,6 +1095,8 @@ public static partial void TestExtraFilesRace(ж<testing.T> t) {
 partial struct delayedInfiniteReader {
 }
 
+} partial class exec_testᴛdelayedInfiniteReader {
+
 internal static (nint, error) Read(this delayedInfiniteReader _, slice<byte> b) {
     time.Sleep(100 * time.Millisecond);
     foreach (var i in range(len(b))) {
@@ -1101,6 +1104,8 @@ internal static (nint, error) Read(this delayedInfiniteReader _, slice<byte> b) 
     }
     return (len(b), default);
 }
+
+} partial class exec_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string infiniteˢ => ref infiniteˢᵇ;
@@ -1132,9 +1137,13 @@ public static void TestIgnorePipeErrorOnSuccess(ж<testing.T> t) {
 partial struct badWriter {
 }
 
+} partial class exec_testᴛbadWriter {
+
 internal static (nint, error) Write(this ref badWriter w, slice<byte> data) {
     return (0, io.ErrUnexpectedEOF);
 }
+
+} partial class exec_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string yesˢ => ref yesˢᵇ;
@@ -1258,7 +1267,7 @@ public static void TestContextCancel(ж<testing.T> t) {
                 break;
             }
 
-            if (time.Since(start) > time.ΔMinute) {
+            if (time.Since(start) > time.Minute) {
                 // Panic instead of calling t.Fatal so that we get a goroutine dump.
                 // We want to know exactly what the os/exec goroutines got stuck on.
                 debug.SetTraceback(systemˢ);
@@ -1268,8 +1277,8 @@ public static void TestContextCancel(ж<testing.T> t) {
             // Back off exponentially (up to 1-second sleeps) to give the OS time to
             // terminate the process.
             delay *= 2;
-            if (delay > 1 * time.ΔSecond) {
-                delay = 1 * time.ΔSecond;
+            if (delay > 1 * time.Second) {
+                delay = 1 * time.Second;
             }
             time.Sleep(delay);
         }
@@ -1491,7 +1500,7 @@ internal static partial void cmdHang(params ꓸꓸꓸstring argsʗp) {
     }
 
     if (exitOnInterrupt.Value) {
-        var c = new channel<osꓸSignal>(1);
+        var c = new channel<os.Signal>(1);
         signal.Notify(c.AsSendOnly(), os.Interrupt);
         var cʗ1 = c;
         goǃ(() => {
@@ -1554,6 +1563,8 @@ internal static ж<tickReader> newTickReader(time.Duration interval) {
     return Ꮡ(new tickReader(interval: interval));
 }
 
+} partial class exec_testᴛtickReader {
+
 internal static (nint n, error err) Read(this ref tickReader r, slice<byte> p) {
     nint n = default;
 
@@ -1570,7 +1581,9 @@ internal static (nint n, error err) Read(this ref tickReader r, slice<byte> p) {
     return (n, default);
 }
 
-internal static ж<Δexec.Cmd> startHang(ж<testing.T> t, context.Context ctx, time.Duration hangTime, osꓸSignal interrupt, time.Duration waitDelay, params ꓸꓸꓸstring flagsʗp) {
+} partial class exec_test_package {
+
+internal static ж<Δexec.Cmd> startHang(ж<testing.T> t, context.Context ctx, time.Duration hangTime, os.Signal interrupt, time.Duration waitDelay, params ꓸꓸꓸstring flagsʗp) {
     var flags = flagsʗp.sslice();
 
     t.Helper();
@@ -1647,7 +1660,7 @@ public static void TestWaitInterrupt(ж<testing.T> t) {
     // process to exit.
     t.Run(waitˢ, (ж<testing.T> tΔ1) => {
         tΔ1.Parallel();
-        var cmd = startHang(tΔ1, context.Background(), 1 * time.Millisecond, os.ΔKill, 0);
+        var cmd = startHang(tΔ1, context.Background(), 1 * time.Millisecond, os.Kill, 0);
         var err = cmd.Wait();
         tΔ1.Logf("stderr:\n%s", cmd.Stderr);
         tΔ1.Logf("[%d] %v", cmd.Process.Pid, err);
@@ -1713,7 +1726,7 @@ public static void TestWaitInterrupt(ж<testing.T> t) {
         tΔ3.Parallel();
 
         var (ctx, cancel) = context.WithCancel(context.Background());
-        var cmd = startHang(tΔ3, ctx, tooLong, os.ΔKill, 10 * time.Millisecond, subsleep10mˢ, probe1msˢ);
+        var cmd = startHang(tΔ3, ctx, tooLong, os.Kill, 10 * time.Millisecond, subsleep10mˢ, probe1msˢ);
         cancel();
         var err = cmd.Wait();
         tΔ3.Logf("stderr:\n%s", cmd.Stderr);

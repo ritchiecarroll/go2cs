@@ -10,6 +10,7 @@ using reflect = reflect_package;
 using runtime = runtime_package;
 using testing = testing_package;
 using static go.encoding.gob_package;
+using static gob_internal_test_package;
 
 partial class gob_internal_test_package {
 
@@ -216,6 +217,8 @@ internal partial struct benchmarkBuf {
     internal slice<byte> data;
 }
 
+} partial class gob_internal_testᴛbenchmarkBuf {
+
 internal static (nint n, error err) Read(this ref benchmarkBuf b, slice<byte> p) {
     nint n = default;
     error err = default;
@@ -244,6 +247,8 @@ internal static void reset(this ref benchmarkBuf b) {
     b.offset = 0;
 }
 
+} partial class gob_internal_test_package {
+
 internal static void benchmarkDecodeSlice(ж<testing.B> Ꮡb, any a) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -254,7 +259,7 @@ internal static void benchmarkDecodeSlice(ж<testing.B> Ꮡb, any a) {
         Ꮡb.Fatal(err);
     }
 
-    ref var ra = ref heap<reflectꓸValue>(reflect.ValueOf(a), out var Ꮡra);
+    ref var ra = ref heap<reflect.Value>(reflect.ValueOf(a), out var Ꮡra);
     var rt = ra.Type();
     b.ResetTimer();
 

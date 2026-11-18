@@ -9,6 +9,7 @@ using log = log_package;
 using strings = strings_package;
 using go.encoding;
 using static go.encoding.xml_internal_test_package;
+using static xml_test_package;
 
 partial class xml_test_package {
 
@@ -17,6 +18,8 @@ partial struct Size /*num:nint*/;
 public static Size Unrecognized => /* iota */ 0;
 public static Size Small => 1;
 public static Size Large => 2;
+
+} partial class xml_testᴛSize {
 
 public static error UnmarshalText(this ref Size s, slice<byte> text) {
     var exprᴛ1 = strings.ToLower((@string)text);
@@ -61,6 +64,8 @@ public static (slice<byte>, error) MarshalText(this Size s) {
     }}
     return (slice<byte>(name), default);
 }
+
+} partial class xml_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sizesSizeSmallSizeSizeˢ => ref sizesSizeSmallSizeSizeˢᵇ;

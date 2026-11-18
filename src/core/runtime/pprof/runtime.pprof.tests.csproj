@@ -166,11 +166,7 @@
     <ProjectReference Include="$(go2csPath)core/internal/asan/internal.asan.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/profile/internal.profile.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/profilerecord/internal.profilerecord.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/maps/internal.runtime.maps.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/pprof/label/internal.runtime.pprof.label.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/unix/internal.syscall.unix.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />

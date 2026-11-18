@@ -101,7 +101,7 @@ public static void TestStructTagObjectKey(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestStructTagObjectKey_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {

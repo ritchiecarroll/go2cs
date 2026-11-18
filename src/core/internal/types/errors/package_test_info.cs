@@ -7,8 +7,6 @@
 global using static global::go.@internal.types.errors_package;
 
 // <ImportedTypeAliases>
-global using typesꓸError = go.go.types_package.ΔError;
-global using typesꓸInfo = go.go.types_package.ΔInfo;
 // </ImportedTypeAliases>
 
 using go;

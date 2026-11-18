@@ -19,6 +19,7 @@ using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOpti
 using runtime;
 using static go.encoding.base64_package;
 using ꓸꓸꓸany = Span<any>;
+using static base64_internal_test_package;
 
 partial class base64_internal_test_package {
 
@@ -510,6 +511,8 @@ internal partial struct faultInjectReader {
     internal /*<-*/channel<nextRead> nextc = /*<-*/channel<nextRead>.RecvOnly;
 }
 
+} partial class base64_internal_testᴛfaultInjectReader {
+
 internal static (nint, error) Read(this ref faultInjectReader r, slice<byte> p) {
     var nr = ᐸꟷ(r.nextc);
     if (len(p) > nr.n) {
@@ -519,6 +522,8 @@ internal static (nint, error) Read(this ref faultInjectReader r, slice<byte> p) 
     r.source = r.source.slice(n);
     return (n, nr.err);
 }
+
+} partial class base64_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string myErrorˢ => ref myErrorˢᵇ;
@@ -542,10 +547,10 @@ public static partial void TestDecoderIssue3577(ж<testing.T> t) {
         var (_, err) = io.ReadAll(dʗ1);
         errcʗ1.ᐸꟷ(err);
     });
-    var selᴛ1 = errc;
+    var errcᴛ1 = errc;
     var selᴛ2 = time.After((time.Duration)(5000000000L));
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out var err): {
+    switch (select(ᐸꟷ(errcᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    case 0 when errcᴛ1.ꟷᐳ(out var err): {
         if (!AreEqual(err, wantErr)) {
             t.Errorf("got error %v; want %v", err, wantErr);
         }

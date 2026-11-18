@@ -54,8 +54,8 @@ public static void TestMMU(ж<testing.T> t) {
     foreach (var (_, test) in range(slice<TestMMU_type>([
         new(0, 0D, []),
         new(time.Millisecond, 0D, [0D, 0D]),
-        new(time.ΔSecond, 0D, [0D, 0D]),
-        new(2 * time.ΔSecond, 0.5D, [0.5D, 0.5D]),
+        new(time.Second, 0D, [0D, 0D]),
+        new(2 * time.Second, 0.5D, [0.5D, 0.5D]),
         new((time.Duration)(3000000000L), 1D / 3.0D, [1D / 3.0D]),
         new((time.Duration)(4000000000L), 0.5D, [0.5D]),
         new((time.Duration)(5000000000L), 3D / 5.0D, [3D / 5.0D]),
@@ -101,7 +101,7 @@ public static void TestMMUTrace(ж<testing.T> t) {
 
             // Test the optimized implementation against the "obviously
             // correct" implementation.
-            for (var window = time.ΔNanosecond; window < (time.Duration)(10000000000L); window *= 10) {
+            for (var window = time.Nanosecond; window < (time.Duration)(10000000000L); window *= 10) {
                 var want = mmuSlow(mu[0], window);
                 var got = mmuCurve.MMU(window);
                 if (!aeq(want, got)) {
@@ -119,7 +119,7 @@ public static void TestMMUTrace(ж<testing.T> t) {
             trace_internal_test_package.BandsPerSeries = 1;
             var mmuCurve2 = Δtrace.NewMMUCurve(mu);
             var quantiles = slice<float64>([0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D]);
-            for (var window = time.Microsecond; window < time.ΔSecond; window *= 10) {
+            for (var window = time.Microsecond; window < time.Second; window *= 10) {
                 var mud1 = mmuCurve.MUD(window, quantiles);
                 var mud2 = mmuCurve2.MUD(window, quantiles);
                 foreach (var i in range(len(mud1))) {
@@ -140,7 +140,7 @@ public static void TestMMUTrace(ж<testing.T> t) {
         if (err != nil) {
             tΔ2.Fatalf("malformed test %s: bad trace file: %v", testPath, err);
         }
-        slice<traceꓸEvent> events = default;
+        slice<Δtrace.Event> events = default;
         (var tr, err) = Δtrace.NewReader(r);
         if (err != nil) {
             tΔ2.Fatalf("malformed test %s: bad trace file: %v", testPath, err);

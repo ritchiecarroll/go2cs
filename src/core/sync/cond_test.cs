@@ -38,9 +38,9 @@ public static partial void TestCondSignal(ж<Δtesting.T> t) {
         ᐸꟷ(running); // Wait for everyone to run.
     }
     while (n > 0) {
-        var selᴛ1 = awake;
-        switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out _): {
+        var awakeᴛ1 = awake;
+        switch (trySelect(ᐸꟷ(awakeᴛ1, ꓸꓸꓸ))) {
+        case 0 when awakeᴛ1.ꟷᐳ(out _): {
             t.Fatal(goroutineNotAsleepˢ);
             break;
         }
@@ -51,9 +51,9 @@ public static partial void TestCondSignal(ж<Δtesting.T> t) {
         c.Signal();
         Ꮡm.Unlock();
         ᐸꟷ(awake); // Will deadlock if no goroutine wakes up
-        var selᴛ2 = awake;
-        switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-        case 0 when selᴛ2.ꟷᐳ(out _): {
+        var awakeᴛ2 = awake;
+        switch (trySelect(ᐸꟷ(awakeᴛ2, ꓸꓸꓸ))) {
+        case 0 when awakeᴛ2.ꟷᐳ(out _): {
             t.Fatal(tooManyGoroutinesAwakeˢ);
             break;
         }
@@ -129,9 +129,9 @@ public static partial void TestCondBroadcast(ж<Δtesting.T> t) {
             exit = true;
             Ꮡm.Unlock();
         }
-        var selᴛ3 = awake;
-        switch (trySelect(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
-        case 0 when selᴛ3.ꟷᐳ(out _): {
+        var awakeᴛ1 = awake;
+        switch (trySelect(ᐸꟷ(awakeᴛ1, ꓸꓸꓸ))) {
+        case 0 when awakeᴛ1.ꟷᐳ(out _): {
             t.Fatal(goroutineNotAsleepˢ);
             break;
         }
@@ -150,9 +150,9 @@ public static partial void TestCondBroadcast(ж<Δtesting.T> t) {
             seen[g] = true;
         }
     }
-    var selᴛ4 = running;
-    switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-    case 0 when selᴛ4.ꟷᐳ(out _): {
+    var runningᴛ1 = running;
+    switch (trySelect(ᐸꟷ(runningᴛ1, ꓸꓸꓸ))) {
+    case 0 when runningᴛ1.ꟷᐳ(out _): {
         t.Fatal(goroutineDidNotExitˢ);
         break;
     }

@@ -26,11 +26,12 @@ using io = io_package;
 using iter = iter_package;
 using static global::go.go.types_internal_test_package;
 using types = global::go.go.types_package;
+using static types_test_package;
 
 partial class types_test_package {
 
 // nopos indicates an unknown position
-internal static tokenꓸPos nopos;
+internal static token.Pos nopos;
 
 internal static types.Importer defaultImporter(ж<token.FileSet> fset) {
     return importer.ForCompiler(fset, runtime.Compiler, default);
@@ -44,7 +45,7 @@ internal static ж<ast.File> mustParse(ж<token.FileSet> fset, @string src) {
     return f;
 }
 
-internal static (ж<types.Package>, error) typecheck(@string src, ж<types.Config> Ꮡconf, ж<typesꓸInfo> info) {
+internal static (ж<types.Package>, error) typecheck(@string src, ж<types.Config> Ꮡconf, ж<types.Info> info) {
     ref var conf = ref Ꮡconf.DerefOrNull();
 
     // TODO(adonovan): plumb this from caller.
@@ -60,7 +61,7 @@ internal static (ж<types.Package>, error) typecheck(@string src, ж<types.Confi
     return Ꮡconf.Check(f.Name.Name, fset, [f], info);
 }
 
-internal static ж<types.Package> mustTypecheck(@string src, ж<types.Config> conf, ж<typesꓸInfo> info) {
+internal static ж<types.Package> mustTypecheck(@string src, ж<types.Config> conf, ж<types.Info> info) {
     var (pkg, err) = typecheck(src, conf, info);
     if (err != nil) {
         throw panic(err); // so we don't need to pass *testing.T
@@ -168,7 +169,7 @@ public static void TestValuesInfo(ж<testing.T> t) {
     ]);
 
     foreach (var (_, test) in range(tests)) {
-        ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
+        ref var info = ref heap<types.Info>(new Info(
             Types: new map<ast.Expr, types.TypeAndValue>()
         ), out var Ꮡinfo);
         @string name = mustTypecheck(test.src, nil, Ꮡinfo).Name();
@@ -556,7 +557,7 @@ public static void TestTypesInfo(ж<testing.T> t) {
     ]);
 
     foreach (var (_, test) in range(tests)) {
-        ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
+        ref var info = ref heap<types.Info>(new Info(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
         @string name = default;
         if (strings.HasPrefix(test.src, broken)) {
             var (pkg, err) = typecheck(test.src, nil, Ꮡinfo);
@@ -572,7 +573,7 @@ public static void TestTypesInfo(ж<testing.T> t) {
         }
 
         // look for expression type
-        typesꓸType typ = default;
+        types.Type typ = default;
         foreach (var (e, tv) in info.Types) {
             if (ExprString(e) == test.expr) {
                 typ = tv.Type;
@@ -791,7 +792,7 @@ public static void TestInstanceInfo(ж<testing.T> t) {
         var instMapʗ1 = instMap;
         var useMapʗ1 = useMap;
         ж<types.Package> makePkg(@string src) {
-            var (pkgΔ1, err) = typecheck(src, Ꮡconf, Ꮡ(new typesꓸInfo(Instances: instMapʗ1, Uses: useMapʗ1)));
+            var (pkgΔ1, err) = typecheck(src, Ꮡconf, Ꮡ(new Info(Instances: instMapʗ1, Uses: useMapʗ1)));
             // allow error for issue51803
             if (err != nil && (pkgΔ1 == nil || pkgΔ1.Name() != "issue51803"u8)) {
                 t.Fatal(err);
@@ -818,7 +819,7 @@ public static void TestInstanceInfo(ж<testing.T> t) {
 
             // Pairwise compare with the expected instances.
             foreach (var (ii, inst) in range(instances)) {
-                slice<typesꓸType> targs = default;
+                slice<types.Type> targs = default;
                 for (nint i = 0; i < inst.Inst.TypeArgs.Len(); i++) {
                     targs = append(targs, inst.Inst.TypeArgs.At(i));
                 }
@@ -905,7 +906,7 @@ public static void TestDefsInfo(ж<testing.T> t) {
     ]);
 
     foreach (var (_, test) in range(tests)) {
-        ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
+        ref var info = ref heap<types.Info>(new Info(
             Defs: new map<ж<ast.Ident>, types.Object>()
         ), out var Ꮡinfo);
         @string name = mustTypecheck(test.src, nil, Ꮡinfo).Name();
@@ -980,7 +981,7 @@ public static void TestUsesInfo(ж<testing.T> t) {
     ]);
 
     foreach (var (_, test) in range(tests)) {
-        ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
+        ref var info = ref heap<types.Info>(new Info(
             Uses: new map<ж<ast.Ident>, types.Object>()
         ), out var Ꮡinfo);
         @string name = mustTypecheck(test.src, nil, Ꮡinfo).Name();
@@ -1023,7 +1024,7 @@ public static void TestGenericMethodInfo(ж<testing.T> t) {
     @string src = packagePTypeNAAnyIntFuncˢ;
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
-    ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
+    ref var info = ref heap<types.Info>(new Info(
         Defs: new map<ж<ast.Ident>, types.Object>(),
         Uses: new map<ж<ast.Ident>, types.Object>(),
         Selections: new map<ж<ast.SelectorExpr>, ж<types.Selection>>()
@@ -1147,7 +1148,7 @@ public static void TestImplicitsInfo(ж<testing.T> t) {
     ]);
 
     foreach (var (_, test) in range(tests)) {
-        ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
+        ref var info = ref heap<types.Info>(new Info(
             Implicits: new map<ast.Node, types.Object>()
         ), out var Ꮡinfo);
         @string name = mustTypecheck(test.src, nil, Ꮡinfo).Name();
@@ -1233,7 +1234,7 @@ public static void TestPkgNameOf(ж<testing.T> t) {
 
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
-    ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
+    ref var info = ref heap<types.Info>(new Info(
         Defs: new map<ж<ast.Ident>, types.Object>(),
         Implicits: new map<ast.Node, types.Object>()
     ), out var Ꮡinfo);
@@ -1398,7 +1399,7 @@ public static void TestPredicatesInfo(ж<testing.T> t) {
     ]);
 
     foreach (var (_, test) in range(tests)) {
-        ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
+        ref var info = ref heap<types.Info>(new Info(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
         @string name = mustTypecheck(test.src, nil, Ꮡinfo).Name();
 
         // look for expression predicates
@@ -1514,7 +1515,7 @@ public static void TestScopesInfo(ж<testing.T> t) {
     ]);
 
     foreach (var (_, test) in range(tests)) {
-        ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Scopes: new map<ast.Node, ж<typesꓸScope>>()), out var Ꮡinfo);
+        ref var info = ref heap<types.Info>(new Info(Scopes: new map<ast.Node, ж<types.Scope>>()), out var Ꮡinfo);
         @string name = mustTypecheck(test.src, nil, Ꮡinfo).Name();
 
         // number of scopes must match
@@ -1726,7 +1727,7 @@ package p15
     ]);
 
     foreach (var (_, test) in range(tests)) {
-        ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(), out var Ꮡinfo);
+        ref var info = ref heap<types.Info>(new Info(), out var Ꮡinfo);
         @string name = mustTypecheck(test.src, nil, Ꮡinfo).Name();
 
         // number of initializers must match
@@ -1771,7 +1772,7 @@ public static void TestMultiFileInitOrder(ж<testing.T> t) {
         new([fileA, fileB], "[a = 1 b = 2]"),
         new([fileB, fileA], "[b = 2 a = 1]")
     ]))) {
-        ref var info = ref heap(new typesꓸInfo(), out var Ꮡinfo);
+        ref var info = ref heap(new types.Info(), out var Ꮡinfo);
         var (_, err) = @new<types.Config>().Check(mainˢ, fset, test.files, Ꮡinfo); if (err != nil) {
             t.Fatal(err);
         }
@@ -1792,7 +1793,7 @@ public static void TestFiles(ж<testing.T> t) {
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     var fset = token.NewFileSet();
     var pkg = NewPackage("p", "p");
-    ref var info = ref heap(new typesꓸInfo(), out var Ꮡinfo);
+    ref var info = ref heap(new types.Info(), out var Ꮡinfo);
     var check = NewChecker(Ꮡconf, fset, pkg, Ꮡinfo);
 
     foreach (var (_, src) in range(sources)) {
@@ -1816,12 +1817,16 @@ public static void TestFiles(ж<testing.T> t) {
 
 partial struct testImporter /*map[@string, ж<types.Package>]*/;
 
+} partial class types_testᴛtestImporter {
+
 internal static (ж<types.Package>, error) Import(this testImporter m, @string path) {
     var pkg = m[path]; if (pkg != nil) {
         return (pkg, default);
     }
     return (default, fmt.Errorf("package %q not found"u8, path));
 }
+
+} partial class types_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string libˢ => ref libˢᵇ;
@@ -1933,7 +1938,7 @@ public static void TestSelection(ж<testing.T> t) {
     var importsʗ1 = imports;
     var selectionsʗ1 = selections;
     void makePkg(@string path, @string src) {
-        var (pkg, err) = Ꮡconf.Check(path, fsetʗ1, slice<ж<ast.File>>([mustParse(fsetʗ1, src)]), Ꮡ(new typesꓸInfo(Selections: selectionsʗ1)));
+        var (pkg, err) = Ꮡconf.Check(path, fsetʗ1, slice<ж<ast.File>>([mustParse(fsetʗ1, src)]), Ꮡ(new Info(Selections: selectionsʗ1)));
         if (err != nil) {
             t.Fatal(err);
         }
@@ -2003,7 +2008,7 @@ public static void TestSelection(ж<testing.T> t) {
         // We must explicitly assert properties of the
         // Signature's receiver since it doesn't participate
         // in Identical() or String().
-        var (sig, _) = sel.Type()._<ж<typesꓸSignature>>(ᐧ);
+        var (sig, _) = sel.Type()._<ж<types.Signature>>(ᐧ);
         if (sel.Kind() == MethodVal) {
             var gotΔ1 = sig.Recv().Type();
             var wantΔ1 = sel.Recv();
@@ -2255,13 +2260,13 @@ public static void TestLookupFieldOrMethod_RecursiveGeneric(ж<testing.T> t) {
 
 // newDefined creates a new defined type named T with the given underlying type.
 // Helper function for use with TestIncompleteInterfaces only.
-internal static ж<types.Named> newDefined(typesꓸType underlying) {
+internal static ж<types.Named> newDefined(types.Type underlying) {
     var tname = NewTypeName(nopos, nil, "T", default);
     return NewNamed(tname, underlying, default);
 }
 
 internal partial struct TestConvertibleTo_type /*dyn*/ {
-    internal typesꓸType v, t;
+    internal types.Type v, t;
     internal bool want;
 }
 
@@ -2269,19 +2274,19 @@ public static void TestConvertibleTo(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     foreach (var (_, test) in range(slice<TestConvertibleTo_type>([
-        new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Int]), true),
-        new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Float32]), true),
-        new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[ΔString]), true),
-        new(new types.NamedжΔType(newDefined(new types.BasicжΔType(Typ[Int]))), new types.BasicжΔType(Typ[Int]), true),
-        new(new types.NamedжΔType(newDefined(new types.StructжΔType(@new<types.Struct>()))), new types.StructжΔType(@new<types.Struct>()), true),
-        new(new types.NamedжΔType(newDefined(new types.BasicжΔType(Typ[Int]))), new types.StructжΔType(@new<types.Struct>()), false),
-        new(new types.BasicжΔType(Typ[ΔUntypedInt]), new types.BasicжΔType(Typ[Int]), true),
-        new(new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int]))), new types.ArrayжΔType(NewArray(new types.BasicжΔType(Typ[Int]), 10)), true),
-        new(new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int]))), new types.ArrayжΔType(NewArray(new types.BasicжΔType(Typ[Uint]), 10)), false),
-        new(new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int]))), new types.PointerжΔType(NewPointer(new types.ArrayжΔType(NewArray(new types.BasicжΔType(Typ[Int]), 10)))), true),
-        new(new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int]))), new types.PointerжΔType(NewPointer(new types.ArrayжΔType(NewArray(new types.BasicжΔType(Typ[Uint]), 10)))), false),
+        new(new types.BasicжType(Typ[Int]), new types.BasicжType(Typ[Int]), true),
+        new(new types.BasicжType(Typ[Int]), new types.BasicжType(Typ[Float32]), true),
+        new(new types.BasicжType(Typ[Int]), new types.BasicжType(Typ[String]), true),
+        new(new types.NamedжType(newDefined(new types.BasicжType(Typ[Int]))), new types.BasicжType(Typ[Int]), true),
+        new(new types.NamedжType(newDefined(new types.StructжType(@new<types.Struct>()))), new types.StructжType(@new<types.Struct>()), true),
+        new(new types.NamedжType(newDefined(new types.BasicжType(Typ[Int]))), new types.StructжType(@new<types.Struct>()), false),
+        new(new types.BasicжType(Typ[ΔUntypedInt]), new types.BasicжType(Typ[Int]), true),
+        new(new types.SliceжType(NewSlice(new types.BasicжType(Typ[Int]))), new types.ArrayжType(NewArray(new types.BasicжType(Typ[Int]), 10)), true),
+        new(new types.SliceжType(NewSlice(new types.BasicжType(Typ[Int]))), new types.ArrayжType(NewArray(new types.BasicжType(Typ[Uint]), 10)), false),
+        new(new types.SliceжType(NewSlice(new types.BasicжType(Typ[Int]))), new types.PointerжType(NewPointer(new types.ArrayжType(NewArray(new types.BasicжType(Typ[Int]), 10)))), true),
+        new(new types.SliceжType(NewSlice(new types.BasicжType(Typ[Int]))), new types.PointerжType(NewPointer(new types.ArrayжType(NewArray(new types.BasicжType(Typ[Uint]), 10)))), false),
         // Untyped string values are not permitted by the spec, so the behavior below is undefined.
-        new(new types.BasicжΔType(Typ[UntypedString]), new types.BasicжΔType(Typ[ΔString]), true)
+        new(new types.BasicжType(Typ[UntypedString]), new types.BasicжType(Typ[String]), true)
     ]))) {
         var got = ConvertibleTo(test.v, test.t); if (got != test.want) {
             Ꮡt.Errorf("ConvertibleTo(%v, %v) = %t, want %t", test.v, test.t, got, test.want);
@@ -2290,7 +2295,7 @@ public static void TestConvertibleTo(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestAssignableTo_type /*dyn*/ {
-    internal typesꓸType v, t;
+    internal types.Type v, t;
     internal bool want;
 }
 
@@ -2298,17 +2303,17 @@ public static void TestAssignableTo(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     foreach (var (_, test) in range(slice<TestAssignableTo_type>([
-        new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Int]), true),
-        new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Float32]), false),
-        new(new types.NamedжΔType(newDefined(new types.BasicжΔType(Typ[Int]))), new types.BasicжΔType(Typ[Int]), false),
-        new(new types.NamedжΔType(newDefined(new types.StructжΔType(@new<types.Struct>()))), new types.StructжΔType(@new<types.Struct>()), true),
-        new(new types.BasicжΔType(Typ[UntypedBool]), new types.BasicжΔType(Typ[Bool]), true),
-        new(new types.BasicжΔType(Typ[UntypedString]), new types.BasicжΔType(Typ[Bool]), false),
+        new(new types.BasicжType(Typ[Int]), new types.BasicжType(Typ[Int]), true),
+        new(new types.BasicжType(Typ[Int]), new types.BasicжType(Typ[Float32]), false),
+        new(new types.NamedжType(newDefined(new types.BasicжType(Typ[Int]))), new types.BasicжType(Typ[Int]), false),
+        new(new types.NamedжType(newDefined(new types.StructжType(@new<types.Struct>()))), new types.StructжType(@new<types.Struct>()), true),
+        new(new types.BasicжType(Typ[UntypedBool]), new types.BasicжType(Typ[Bool]), true),
+        new(new types.BasicжType(Typ[UntypedString]), new types.BasicжType(Typ[Bool]), false),
         // Neither untyped string nor untyped numeric assignments arise during
         // normal type checking, so the below behavior is technically undefined by
         // the spec.
-        new(new types.BasicжΔType(Typ[UntypedString]), new types.BasicжΔType(Typ[ΔString]), true),
-        new(new types.BasicжΔType(Typ[ΔUntypedInt]), new types.BasicжΔType(Typ[Int]), true)
+        new(new types.BasicжType(Typ[UntypedString]), new types.BasicжType(Typ[String]), true),
+        new(new types.BasicжType(Typ[ΔUntypedInt]), new types.BasicжType(Typ[Int]), true)
     ]))) {
         var got = AssignableTo(test.v, test.t); if (got != test.want) {
             Ꮡt.Errorf("AssignableTo(%v, %v) = %t, want %t", test.v, test.t, got, test.want);
@@ -2368,16 +2373,16 @@ public static void TestIdentical(ж<testing.T> t) {
 }
 
 internal partial struct TestIdentical_issue15173_type /*dyn*/ {
-    internal typesꓸType x, y;
+    internal types.Type x, y;
     internal bool want;
 }
 
 public static void TestIdentical_issue15173(ж<testing.T> t) {
     // Identical should allow nil arguments and be symmetric.
     foreach (var (_, test) in range(slice<TestIdentical_issue15173_type>([
-        new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Int]), true),
-        new(new types.BasicжΔType(Typ[Int]), default, false),
-        new(default, new types.BasicжΔType(Typ[Int]), false),
+        new(new types.BasicжType(Typ[Int]), new types.BasicжType(Typ[Int]), true),
+        new(new types.BasicжType(Typ[Int]), default, false),
+        new(default, new types.BasicжType(Typ[Int]), false),
         new(default, default, true)
     ]))) {
         var got = Identical(test.x, test.y); if (got != test.want) {
@@ -2397,18 +2402,18 @@ internal partial struct TestIdenticalUnions_type /*dyn*/ {
 
 public static void TestIdenticalUnions(ж<testing.T> t) {
     var tname = NewTypeName(nopos, nil, myIntˢ, default);
-    var myInt = NewNamed(tname, new types.BasicжΔType(Typ[Int]), default);
-    var tmap = new map<@string, ж<typesꓸTerm>>{
-        ["int"] = NewTerm(false, new types.BasicжΔType(Typ[Int])),
-        ["~int"] = NewTerm(true, new types.BasicжΔType(Typ[Int])),
-        ["string"] = NewTerm(false, new types.BasicжΔType(Typ[ΔString])),
-        ["~string"] = NewTerm(true, new types.BasicжΔType(Typ[ΔString])),
-        ["myInt"] = NewTerm(false, new types.NamedжΔType(myInt))
+    var myInt = NewNamed(tname, new types.BasicжType(Typ[Int]), default);
+    var tmap = new map<@string, ж<types.Term>>{
+        ["int"] = NewTerm(false, new types.BasicжType(Typ[Int])),
+        ["~int"] = NewTerm(true, new types.BasicжType(Typ[Int])),
+        ["string"] = NewTerm(false, new types.BasicжType(Typ[String])),
+        ["~string"] = NewTerm(true, new types.BasicжType(Typ[String])),
+        ["myInt"] = NewTerm(false, new types.NamedжType(myInt))
     };
     var tmapʗ1 = tmap;
     ж<types.Union> makeUnion(@string s) {
         var parts = strings.Split(s, "|");
-        slice<ж<typesꓸTerm>> terms = default;
+        slice<ж<types.Term>> terms = default;
         foreach (var (_, p) in range(parts)) {
             var term = tmapʗ1[p];
             if (term == nil) {
@@ -2429,7 +2434,7 @@ public static void TestIdenticalUnions(ж<testing.T> t) {
     ]))) {
         var x = makeUnion(test.x);
         var y = makeUnion(test.y);
-        var got = Identical(new types.UnionжΔType(x), new types.UnionжΔType(y)); if (got != test.want) {
+        var got = Identical(new types.UnionжType(x), new types.UnionжType(y)); if (got != test.want) {
             t.Errorf("Identical(%v, %v) = %t", test.x, test.y, got);
         }
     }
@@ -2442,8 +2447,8 @@ public static void TestIssue61737(ж<testing.T> t) {
     // It must be possible for importers to construct such invalid interfaces.
     // Previously, this panicked.
 
-    var sig1 = NewSignatureType(nil, default, default, NewTuple(NewParam(nopos, nil, ""u8, new types.BasicжΔType(Typ[Int]))), nil, false);
-    var sig2 = NewSignatureType(nil, default, default, NewTuple(NewParam(nopos, nil, ""u8, new types.BasicжΔType(Typ[ΔString]))), nil, false);
+    var sig1 = NewSignatureType(nil, default, default, NewTuple(NewParam(nopos, nil, ""u8, new types.BasicжType(Typ[Int]))), nil, false);
+    var sig2 = NewSignatureType(nil, default, default, NewTuple(NewParam(nopos, nil, ""u8, new types.BasicжType(Typ[String]))), nil, false);
 
     var methods = slice<ж<types.Func>>([
         NewFunc(nopos, nil, "M", sig1),
@@ -2454,13 +2459,13 @@ public static void TestIssue61737(ж<testing.T> t) {
         NewFunc(nopos, nil, "M", sig2)
     ]);
     var embedded = NewInterfaceType(embeddedMethods, default);
-    var iface = NewInterfaceType(methods, [new types.InterfaceжΔType(embedded)]);
+    var iface = NewInterfaceType(methods, [new types.InterfaceжType(embedded)]);
     iface.Complete();
 }
 
 public static void TestNewAlias_Issue65455(ж<testing.T> t) {
     var obj = NewTypeName(nopos, nil, "A", default);
-    var alias = NewAlias(obj, new types.BasicжΔType(Typ[Int]));
+    var alias = NewAlias(obj, new types.BasicжType(Typ[Int]));
     alias.Underlying(); // must not panic
 }
 
@@ -2476,7 +2481,7 @@ public static void TestIssue15305(ж<testing.T> t) {
         Error: (error err) => {
         } // allow errors
     ), out var Ꮡconf);
-    var info = Ꮡ(new typesꓸInfo(
+    var info = Ꮡ(new Info(
         Types: new map<ast.Expr, types.TypeAndValue>()
     ));
     Ꮡconf.Check("p", fset, [f], info); // ignore result
@@ -2515,7 +2520,7 @@ public static void TestCompositeLitTypes(ж<testing.T> t) {
         var fset = token.NewFileSet();
         var f = mustParse(fset, fmt.Sprintf("package p%d; var _ = %s"u8, i, test.lit));
         var types = new map<ast.Expr, types.TypeAndValue>();
-        var (_, err) = @new<types.Config>().Check("p", fset, [f], Ꮡ(new typesꓸInfo(Types: types))); if (err != nil) {
+        var (_, err) = @new<types.Config>().Check("p", fset, [f], Ꮡ(new Info(Types: types))); if (err != nil) {
             t.Fatalf("%s: %v", test.lit, err);
         }
 
@@ -2578,7 +2583,7 @@ public static void TestObjectParents(ж<testing.T> t) {
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
 
-    var info = Ꮡ(new typesꓸInfo(
+    var info = Ꮡ(new Info(
         Defs: new map<ж<ast.Ident>, types.Object>()
     ));
     var (_, err) = @new<types.Config>().Check("p", fset, [f], info); if (err != nil) {
@@ -2668,7 +2673,7 @@ public static void TestFailedImport(ж<testing.T> t) {
             Importer: importer.For(compiler, default)
         ), out var Ꮡconf);
 
-        var info = Ꮡ(new typesꓸInfo(
+        var info = Ꮡ(new Info(
             Uses: new map<ж<ast.Ident>, types.Object>()
         ));
         var (pkg, _) = Ꮡconf.Check("p", fset, files, info);
@@ -2720,7 +2725,7 @@ public static void TestInstantiate(ж<testing.T> t) {
 
     // instantiation should succeed (no endless recursion)
     // even with a nil *Checker
-    var (res, err) = Instantiate(nil, new types.NamedжΔType(T), [new types.BasicжΔType(Typ[Int])], false);
+    var (res, err) = Instantiate(nil, new types.NamedжType(T), [new types.BasicжType(Typ[Int])], false);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -2798,16 +2803,16 @@ public static partial void TestInstantiateConcurrent(ж<testing.T> t) {
 
 internal partial struct TestInstantiateErrors_tests /*dyn*/ {
     internal @string src; // by convention, T must be the type being instantiated
-    internal slice<typesꓸType> targs;
+    internal slice<types.Type> targs;
     internal nint wantAt; // -1 indicates no error
 }
 
 public static void TestInstantiateErrors(ж<testing.T> t) {
     var tests = slice<TestInstantiateErrors_tests>([
-        new("type T[P interface{~string}] int", [new types.BasicжΔType(Typ[Int])], 0),
-        new("type T[P1 interface{int}, P2 interface{~string}] int", [new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Int])], 1),
-        new("type T[P1 any, P2 interface{~[]P1}] int", slice<typesꓸType>([new types.BasicжΔType(Typ[Int]), new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[ΔString])))]), 1),
-        new("type T[P1 interface{~[]P2}, P2 any] int", slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[ΔString]))), new types.BasicжΔType(Typ[Int])]), 0)
+        new("type T[P interface{~string}] int", [new types.BasicжType(Typ[Int])], 0),
+        new("type T[P1 interface{int}, P2 interface{~string}] int", [new types.BasicжType(Typ[Int]), new types.BasicжType(Typ[Int])], 1),
+        new("type T[P1 any, P2 interface{~[]P1}] int", slice<types.Type>([new types.BasicжType(Typ[Int]), new types.SliceжType(NewSlice(new types.BasicжType(Typ[String])))]), 1),
+        new("type T[P1 interface{~[]P2}, P2 any] int", slice<types.Type>([new types.SliceжType(NewSlice(new types.BasicжType(Typ[String]))), new types.BasicжType(Typ[Int])]), 0)
     ]);
 
     foreach (var (_, test) in range(tests)) {
@@ -2816,7 +2821,7 @@ public static void TestInstantiateErrors(ж<testing.T> t) {
 
         var T = pkg.Scope().Lookup("T").Type()._<ж<types.Named>>();
 
-        var (_, err) = Instantiate(nil, new types.NamedжΔType(T), test.targs, true);
+        var (_, err) = Instantiate(nil, new types.NamedжType(T), test.targs, true);
         if (err == nil) {
             t.Fatalf("Instantiate(%v, %v) returned nil error, want non-nil", T.OrTypedNil(), test.targs);
         }
@@ -2839,9 +2844,9 @@ private static readonly @string testˢᵇ = "test"u8;
 public static void TestArgumentErrorUnwrapping(ж<testing.T> t) {
     error err = new types.ArgumentErrorжerror(Ꮡ(new ArgumentError(
         Index: 1,
-        Err: new typesꓸError(Msg: "test")
+        Err: new Error(Msg: "test")
     )));
-    var (e, ok) = errors.AsType<typesꓸError>(err);
+    var (e, ok) = errors.AsType<types.Error>(err);
     if (!ok) {
         t.Fatalf("error %v does not wrap types.Error", err);
     }
@@ -2928,7 +2933,7 @@ internal partial struct TestInstantiatedObjects_tests /*dyn*/ {
 // TestInstantiatedObjects verifies properties of instantiated objects.
 public static void TestInstantiatedObjects(ж<testing.T> t) {
     @string src = srcᶜ7;
-    var info = Ꮡ(new typesꓸInfo(
+    var info = Ꮡ(new Info(
         Defs: new map<ж<ast.Ident>, types.Object>()
     ));
     var fset = token.NewFileSet();
@@ -2940,7 +2945,7 @@ public static void TestInstantiatedObjects(ж<testing.T> t) {
     }
 
     var pkgʗ1 = pkg;
-    typesꓸType lookup(@string name) => pkgʗ1.Scope().Lookup(name).Type();
+    types.Type lookup(@string name) => pkgʗ1.Scope().Lookup(name).Type();
     var fnScope = pkg.Scope().Lookup("fn")._<ж<types.Func>>().Scope();
 
     var tests = slice<TestInstantiatedObjects_tests>([
@@ -2958,12 +2963,12 @@ public static void TestInstantiatedObjects(ж<testing.T> t) {
         new("interfaceMethod", new types.FuncжObject(lookup("i").Underlying()._<ж<types.Interface>>().Method(0))),
 
         // Function type fields
-        new("ftParam", new types.VarжObject(lookup("ft").Underlying()._<ж<typesꓸSignature>>().Params().At(0))),
-        new("ftResult", new types.VarжObject(lookup("ft").Underlying()._<ж<typesꓸSignature>>().Results().At(0))),
+        new("ftParam", new types.VarжObject(lookup("ft").Underlying()._<ж<types.Signature>>().Params().At(0))),
+        new("ftResult", new types.VarжObject(lookup("ft").Underlying()._<ж<types.Signature>>().Results().At(0))),
 
         // Function fields
-        new("fParam", new types.VarжObject(lookup("f")._<ж<typesꓸSignature>>().Params().At(0))),
-        new("fResult", new types.VarжObject(lookup("f")._<ж<typesꓸSignature>>().Results().At(0)))
+        new("fParam", new types.VarжObject(lookup("f")._<ж<types.Signature>>().Params().At(0))),
+        new("fResult", new types.VarжObject(lookup("f")._<ж<types.Signature>>().Results().At(0)))
     ]);
 
     // Collect all identifiers by name.
@@ -3082,7 +3087,7 @@ type Bad Bad // invalid type
 """u8.Raw();
 
 internal partial struct TestImplements_tests /*dyn*/ {
-    public typesꓸType V;
+    public types.Type V;
     public ж<types.Interface> T;
     internal bool want;
 }
@@ -3097,7 +3102,7 @@ public static void TestImplements(ж<testing.T> t) {
     var (pkg, _) = Ꮡconf.Check(f.Name.Name, fset, [f], nil);
 
     var pkgʗ1 = pkg;
-    typesꓸType lookup(@string tname) => pkgʗ1.Scope().Lookup(tname).Type();
+    types.Type lookup(@string tname) => pkgʗ1.Scope().Lookup(tname).Type();
     ж<types.Interface> EmptyIface = lookup(emptyIfaceˢ).Underlying()._<ж<types.Interface>>();
     ж<types.Named> I = lookup("I")._<ж<types.Named>>();
     ж<types.Interface> II = I.Underlying()._<ж<types.Interface>>();
@@ -3105,33 +3110,33 @@ public static void TestImplements(ж<testing.T> t) {
     ж<types.Interface> CI = C.Underlying()._<ж<types.Interface>>();
     ж<types.Interface> Integer = lookup(integerˢ).Underlying()._<ж<types.Interface>>();
     ж<types.Interface> EmptyTypeSet = lookup(emptyTypeSetˢ).Underlying()._<ж<types.Interface>>();
-    typesꓸType N1 = lookup("N1");
+    types.Type N1 = lookup("N1");
     ж<types.Pointer> N1p = NewPointer(N1);
-    typesꓸType N2 = lookup("N2");
+    types.Type N2 = lookup("N2");
     ж<types.Pointer> N2p = NewPointer(N2);
-    typesꓸType N3 = lookup("N3");
-    typesꓸType N4 = lookup("N4");
-    typesꓸType Bad = lookup(badˢ);
+    types.Type N3 = lookup("N3");
+    types.Type N4 = lookup("N4");
+    types.Type Bad = lookup(badˢ);
 
     var tests = slice<TestImplements_tests>([
-        new(new types.NamedжΔType(I), II, true),
-        new(new types.NamedжΔType(I), CI, false),
-        new(new types.NamedжΔType(C), II, true),
-        new(new types.NamedжΔType(C), CI, true),
-        new(new types.BasicжΔType(Typ[Int8]), Integer, true),
-        new(new types.BasicжΔType(Typ[Int64]), Integer, true),
-        new(new types.BasicжΔType(Typ[ΔString]), Integer, false),
-        new(new types.InterfaceжΔType(EmptyTypeSet), II, true),
-        new(new types.InterfaceжΔType(EmptyTypeSet), EmptyTypeSet, true),
-        new(new types.BasicжΔType(Typ[Int]), EmptyTypeSet, false),
+        new(new types.NamedжType(I), II, true),
+        new(new types.NamedжType(I), CI, false),
+        new(new types.NamedжType(C), II, true),
+        new(new types.NamedжType(C), CI, true),
+        new(new types.BasicжType(Typ[Int8]), Integer, true),
+        new(new types.BasicжType(Typ[Int64]), Integer, true),
+        new(new types.BasicжType(Typ[String]), Integer, false),
+        new(new types.InterfaceжType(EmptyTypeSet), II, true),
+        new(new types.InterfaceжType(EmptyTypeSet), EmptyTypeSet, true),
+        new(new types.BasicжType(Typ[Int]), EmptyTypeSet, false),
         new(N1, II, true),
         new(N1, CI, true),
-        new(new types.PointerжΔType(N1p), II, true),
-        new(new types.PointerжΔType(N1p), CI, false),
+        new(new types.PointerжType(N1p), II, true),
+        new(new types.PointerжType(N1p), CI, false),
         new(N2, II, false),
         new(N2, CI, false),
-        new(new types.PointerжΔType(N2p), II, true),
-        new(new types.PointerжΔType(N2p), CI, false),
+        new(new types.PointerжType(N2p), II, true),
+        new(new types.PointerжType(N2p), CI, false),
         new(N3, II, false),
         new(N3, CI, false),
         new(N4, II, true),
@@ -3354,7 +3359,7 @@ public static void TestFileVersions(ж<testing.T> t) {
 
         ref var conf = ref heap<types.Config>(new Config(GoVersion: test.goVersion), out var Ꮡconf);
         var versions = new map<ж<ast.File>, @string>();
-        ref var info = ref heap(new typesꓸInfo(), out var Ꮡinfo);
+        ref var info = ref heap(new types.Info(), out var Ꮡinfo);
         info.FileVersions = versions;
         mustTypecheck(src, Ꮡconf, Ꮡinfo);
 
@@ -3408,7 +3413,7 @@ public static void TestTooNew(ж<testing.T> t) {
                 Ꮡerrs.ValueSlot = append(Ꮡerrs.ValueSlot, err);
             }
         ), out var Ꮡconf);
-        var info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
+        var info = Ꮡ(new Info(Defs: new map<ж<ast.Ident>, types.Object>()));
         typecheck(src, Ꮡconf, info);
         @string got = fmt.Sprint(errs);
         if (!strings.Contains(got, test.wantErr)) {
@@ -3641,7 +3646,7 @@ public static void TestVarKind(ж<testing.T> t) {
     var (f, _) = parser.ParseFile(fset, aGoˢ, packagePVarGlobalIntTypeˢ, 0);
 
     var pkg = NewPackage("p", "p");
-    var info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
+    var info = Ꮡ(new Info(Defs: new map<ж<ast.Ident>, types.Object>()));
     var check = NewChecker(Ꮡ(new Config()), fset, pkg, info);
     var err = check.Files([f]); if (err != nil) {
         t.Fatal(err);
@@ -3691,7 +3696,7 @@ public static void TestIssue73871(ж<testing.T> t) {
     var (f, _) = parser.ParseFile(fset, pGoˢ, src, 0);
 
     var pkg = NewPackage("p", "p");
-    var info = Ꮡ(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()));
+    var info = Ꮡ(new Info(Types: new map<ast.Expr, types.TypeAndValue>()));
     var check = NewChecker(Ꮡ(new Config()), fset, pkg, info);
     var err = check.Files([f]); if (err != nil) {
         t.Fatal(err);
@@ -3705,7 +3710,7 @@ public static void TestIssue73871(ж<testing.T> t) {
     // variadic flag set, an invalid combination that caused
     // NewSignatureType to panic.
     var append = f.Decls[0]._<ж<ast.FuncDecl>>().Body.List[0]._<ж<ast.ReturnStmt>>().Results[0]._<ж<ast.CallExpr>>().Fun;
-    var tAppend = info.TypeOf(append)._<ж<typesꓸSignature>>();
+    var tAppend = info.TypeOf(append)._<ж<types.Signature>>();
     {
         @string got = fmt.Sprint(tAppend.OrTypedNil());
         @string want = funcByteByteByteˢ; if (got != want) {

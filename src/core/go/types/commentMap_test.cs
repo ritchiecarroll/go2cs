@@ -37,16 +37,15 @@ internal static map<nint, slice<comment>> /*res*/ commentMap(slice<byte> src, ж
 
     scanner.Scanner s = default;
     s.Init(@file, src, default, scanner.ScanComments);
-    tokenꓸPos prev = default; // position of last non-comment, non-semicolon token
+    token.Pos prev = default; // position of last non-comment, non-semicolon token
 
     for (;;) {
         var (pos, tok, lit) = s.Scan();
-        var exprᴛ1 = tok;
         var matchᴛ1 = false;
-        if (exprᴛ1 == token.EOF) { matchᴛ1 = true;
+        if (tok == token.EOF) { matchᴛ1 = true;
             return res;
         }
-        if (exprᴛ1 == token.COMMENT) { matchᴛ1 = true;
+        if (tok == token.COMMENT) { matchᴛ1 = true;
             if (lit[1] == '*') {
                 lit = lit.slice(0, len(lit) - 2); // strip trailing */
             }
@@ -60,7 +59,7 @@ internal static map<nint, slice<comment>> /*res*/ commentMap(slice<byte> src, ж
                 res[p.Line] = append(res[p.Line], err);
             }
         }
-        else if (exprᴛ1 == token.SEMICOLON) { matchᴛ1 = true;
+        else if (tok == token.SEMICOLON) { matchᴛ1 = true;
             // ignore automatically inserted semicolon
             if (lit == "\n"u8) {
                 continue;

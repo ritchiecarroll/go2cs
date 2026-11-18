@@ -211,7 +211,7 @@ internal static ref readonly @string redˢ => ref redˢᵇ;
 private static readonly @string redˢᵇ = "red"u8;
 
 public static void BenchmarkStringSet(ж<testing.B> b) {
-    ref var s = ref heap(new global::go.expvar_package.ΔString(), out var Ꮡs);
+    ref var s = ref heap(new global::go.expvar_package.String(), out var Ꮡs);
 
     b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
@@ -465,14 +465,14 @@ private static readonly @string helloˢᵇ = "Hello, !"u8;
 public static void BenchmarkMapSetString(ж<testing.B> b) {
     var m = @new<global::go.expvar_package.Map>().Init();
 
-    var v = @new<global::go.expvar_package.ΔString>();
+    var v = @new<global::go.expvar_package.String>();
     v.Set(helloˢ);
 
     var mʗ1 = m;
     var vʗ1 = v;
     b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
-            mʗ1.Set(redˢ, new expvar_internal_test_package.expvar_ΔStringжVar(vʗ1));
+            mʗ1.Set(redˢ, new global::go.expvar_package.StringжVar(vʗ1));
         }
     });
 }
@@ -659,11 +659,11 @@ public static void BenchmarkMapString(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < 9; i++) {
         Ꮡm2.Add(strconv.Itoa(i), (int64)i);
     }
-    ref var s1 = ref heap(new global::go.expvar_package.ΔString(), out var Ꮡs1);
-    ref var s2 = ref heap(new global::go.expvar_package.ΔString(), out var Ꮡs2);
-    Ꮡm.Set(str1ˢ, new expvar_internal_test_package.expvar_ΔStringжVar(Ꮡs1));
+    ref var s1 = ref heap(new global::go.expvar_package.String(), out var Ꮡs1);
+    ref var s2 = ref heap(new global::go.expvar_package.String(), out var Ꮡs2);
+    Ꮡm.Set(str1ˢ, new global::go.expvar_package.StringжVar(Ꮡs1));
     Ꮡs1.Set(helloWorldˢ);
-    Ꮡm.Set(str2ˢ, new expvar_internal_test_package.expvar_ΔStringжVar(Ꮡs2));
+    Ꮡm.Set(str2ˢ, new global::go.expvar_package.StringжVar(Ꮡs2));
     Ꮡs2.Set(fizzBuzzˢ);
     b.ResetTimer();
 

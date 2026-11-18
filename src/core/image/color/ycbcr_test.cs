@@ -147,7 +147,7 @@ public static void TestCMYKGray(ж<testing.T> t) {
 }
 
 public static void TestPalette(ж<testing.T> t) {
-    var p = new Palette(new global::go.image.color_package.Color[]{new ΔRGBA(0xff, 0xff, 0xff, 0xff), new ΔRGBA(0x80, 0x00, 0x00, 0xff), new ΔRGBA(0x7f, 0x00, 0x00, 0x7f), new ΔRGBA(0x00, 0x00, 0x00, 0x7f), new ΔRGBA(0x00, 0x00, 0x00, 0x00), new ΔRGBA(0x40, 0x40, 0x40, 0x40)
+    var p = new Palette(new global::go.image.color_package.Color[]{new RGBA(0xff, 0xff, 0xff, 0xff), new RGBA(0x80, 0x00, 0x00, 0xff), new RGBA(0x7f, 0x00, 0x00, 0x7f), new RGBA(0x00, 0x00, 0x00, 0x7f), new RGBA(0x00, 0x00, 0x00, 0x00), new RGBA(0x40, 0x40, 0x40, 0x40)
     }.slice());
     // Check that, for a Palette with no repeated colors, the closest color to
     // each element is itself.
@@ -159,8 +159,8 @@ public static void TestPalette(ж<testing.T> t) {
     }
     // Check that finding the closest color considers alpha, not just red,
     // green and blue.
-    var got = p.Convert(new ΔRGBA(0x80, 0x00, 0x00, 0x80));
-    var want = new ΔRGBA(0x7f, 0x00, 0x00, 0x7f);
+    var got = p.Convert(new RGBA(0x80, 0x00, 0x00, 0x80));
+    var want = new RGBA(0x7f, 0x00, 0x00, 0x7f);
     if (!AreEqual(got, want)) {
         t.Errorf("got %v, want %v", got, want);
     }

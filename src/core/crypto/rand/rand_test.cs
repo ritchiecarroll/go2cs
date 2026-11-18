@@ -18,6 +18,7 @@ using go.@internal;
 using go.crypto.@internal;
 using go.os;
 using static go.crypto.rand_package;
+using static rand_internal_test_package;
 
 partial class rand_internal_test_package {
 
@@ -113,9 +114,13 @@ internal static void testReadEmpty(ж<testing.T> t, Func<slice<byte>, (nint, err
 
 internal delegate (nint, error) readerFunc(slice<byte> _);
 
+} partial class rand_internal_testᴛreaderFunc {
+
 internal static (nint, error) Read(this readerFunc f, slice<byte> b) {
     return f(b);
 }
+
+} partial class rand_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readDidNotUseReaderˢ = (@string)"Read did not use Reader"u8;

@@ -42,7 +42,7 @@ internal partial struct TestCrossOriginProtectionSecFetchSite_tests /*dyn*/ {
 
 public static void TestCrossOriginProtectionSecFetchSite(ж<testing.T> t) {
     var protection = Δhttp.NewCrossOriginProtection();
-    var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠΔHandler(okHandler));
+    var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠHandler(okHandler));
 
     var tests = slice<TestCrossOriginProtectionSecFetchSite_tests>([
         new("same-origin allowed", "POST", "same-origin", "", Δhttp.StatusOK),
@@ -103,7 +103,7 @@ public static void TestCrossOriginProtectionTrustedOriginBypass(ж<testing.T> t)
     if (err != nil) {
         t.Fatalf("AddTrustedOrigin: %v", err);
     }
-    var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠΔHandler(okHandler));
+    var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠHandler(okHandler));
 
     var tests = slice<TestCrossOriginProtectionTrustedOriginBypass_tests>([
         new("trusted origin without sec-fetch-site", "https://trusted.example", "", Δhttp.StatusOK),
@@ -169,7 +169,7 @@ public static void TestCrossOriginProtectionPatternBypass(ж<testing.T> t) {
     protection.AddInsecureBypassPattern(putPutOnlyˢ);
     protection.AddInsecureBypassPattern(getGetOnlyˢ);
     protection.AddInsecureBypassPattern(postPostOnlyˢ);
-    var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠΔHandler(okHandler));
+    var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠHandler(okHandler));
 
     var tests = slice<TestCrossOriginProtectionPatternBypass_tests>([
         new("bypass path without sec-fetch-site", "/bypass/", "", Δhttp.StatusOK),
@@ -228,7 +228,7 @@ private static readonly @string customErrorˢᵇ = "custom error"u8;
 public static void TestCrossOriginProtectionSetDenyHandler(ж<testing.T> t) {
     var protection = Δhttp.NewCrossOriginProtection();
 
-    var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠΔHandler(okHandler));
+    var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠHandler(okHandler));
 
     var req = httptestNewRequest(postˢ, httpsExampleComˢ);
     req.Header.Set(secFetchSiteˢ, crossSiteˢ);
@@ -244,7 +244,7 @@ public static void TestCrossOriginProtectionSetDenyHandler(ж<testing.T> t) {
         wΔ1.WriteHeader(Δhttp.StatusTeapot);
         io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(wΔ1), customErrorˢ);
     });
-    protection.SetDenyHandler(new http_test_package.http_HandlerFuncᴠΔHandler(customErrHandler));
+    protection.SetDenyHandler(new http_test_package.http_HandlerFuncᴠHandler(customErrHandler));
 
     w = httptest.NewRecorder();
     handler.ServeHTTP(new http_test_package.httptest_ResponseRecorderжResponseWriter(w), req);
@@ -326,7 +326,7 @@ private static readonly @string fooˢ5ᵇ = "/foo/"u8;
 
 public static partial void TestCrossOriginProtectionAddingBypassesConcurrently(ж<testing.T> t) {
     var protection = Δhttp.NewCrossOriginProtection();
-    var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠΔHandler(okHandler));
+    var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠHandler(okHandler));
 
     var req = httptestNewRequest(postˢ, httpsExampleComˢ);
     req.Header.Set(originˢ, httpsConcurrentExampleˢ);
@@ -348,8 +348,8 @@ public static partial void TestCrossOriginProtectionAddingBypassesConcurrently(�
     goǃ(() => {
         GoFrame ᒐ = default;
         try {
-            builtin.close(startʗ1);
-            defer(ᴛ1 => builtin.close(ᴛ1), doneʗ1, ref ᒐ);
+            close(startʗ1);
+            defer(ᴛ1 => close(ᴛ1), doneʗ1, ref ᒐ);
             foreach (var _ᴛ1 in range(10)) {
                 var wΔ1 = httptest.NewRecorder();
                 handlerʗ1.ServeHTTP(new http_test_package.httptest_ResponseRecorderжResponseWriter(wΔ1), reqʗ1);
@@ -388,7 +388,7 @@ public static void TestCrossOriginProtectionServer(ж<testing.T> t) {
         var protection = Δhttp.NewCrossOriginProtection();
         protection.AddTrustedOrigin(httpsTrustedExampleˢ);
         protection.AddInsecureBypassPattern(bypassˢ);
-        var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠΔHandler(okHandler));
+        var handler = protection.Handler(new http_test_package.http_HandlerFuncᴠHandler(okHandler));
 
         var ts = httptest.NewServer(handler);
         var tsʗ1 = ts;

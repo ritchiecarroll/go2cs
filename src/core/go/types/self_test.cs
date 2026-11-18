@@ -98,7 +98,7 @@ internal static void runbench(ж<testing.B> Ꮡb, @string path, bool ignoreFuncB
     }
     // determine line count
     nint lines = 0;
-    fset.Iterate((ж<tokenꓸFile> f) => {
+    fset.Iterate((ж<token.File> f) => {
         lines += f.LineCount();
         return true;
     });
@@ -110,15 +110,15 @@ internal static void runbench(ж<testing.B> Ꮡb, @string path, bool ignoreFuncB
             IgnoreFuncBodies: ignoreFuncBodies,
             Importer: defaultImporter(fset)
         ), out var Ꮡconf);
-        ж<typesꓸInfo> info = default;
+        ж<types.Info> info = default;
         if (writeInfo) {
-            info = Ꮡ(new typesꓸInfo(
+            info = Ꮡ(new Info(
                 Types: new map<ast.Expr, types.TypeAndValue>(),
                 Defs: new map<ж<ast.Ident>, types.Object>(),
                 Uses: new map<ж<ast.Ident>, types.Object>(),
                 Implicits: new map<ast.Node, types.Object>(),
                 Selections: new map<ж<ast.SelectorExpr>, ж<types.Selection>>(),
-                Scopes: new map<ast.Node, ж<typesꓸScope>>()
+                Scopes: new map<ast.Node, ж<types.Scope>>()
             ));
         }
         var (_, errΔ1) = Ꮡconf.Check(path, fset, files, info); if (errΔ1 != nil) {

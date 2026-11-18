@@ -158,7 +158,7 @@ public static void ExampleMethodSet() {
 
     // Print the method sets of Celsius and *Celsius.
     var celsius = pkg.Scope().Lookup(celsiusˢ).Type();
-    foreach (var (_, t) in range(slice<typesꓸType>([celsius, new types.PointerжΔType(types.NewPointer(celsius))]))) {
+    foreach (var (_, t) in range(slice<types.Type>([celsius, new types.PointerжType(types.NewPointer(celsius))]))) {
         fmt.Printf("Method set of %s:\n"u8, t);
         foreach (var m in range<ж<types.Selection>>(types.NewMethodSet(t).Methods().Invoke)) {
             fmt.Println(m.OrTypedNil());
@@ -223,7 +223,7 @@ public static void ExampleInfo() {
     // Type-check the package.
     // We create an empty map for each kind of input
     // we're interested in, and Check populates them.
-    ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
+    ref var info = ref heap<types.Info>(new types.Info(
         Types: new map<ast.Expr, types.TypeAndValue>(),
         Defs: new map<ж<ast.Ident>, types.Object>(),
         Uses: new map<ж<ast.Ident>, types.Object>()

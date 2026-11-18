@@ -26,11 +26,11 @@ public static void TestTime(ж<testing.T> t) {
         ref var start = ref heap<time.Time>(time.Now(), out var Ꮡstart); // always midnight UTC 2000-01-01
         var startʗ1 = start;
         goǃ(() => {
-            time.Sleep(1 * time.ΔNanosecond);
+            time.Sleep(1 * time.Nanosecond);
             tΔ1.Log(time.Since(startʗ1)); // always logs "1ns"
         });
-        time.Sleep(2 * time.ΔNanosecond); // the AfterFunc will run before this Sleep returns
-        tΔ1.Log(time.Since(start));       // always logs "2ns"
+        time.Sleep(2 * time.Nanosecond); // the AfterFunc will run before this Sleep returns
+        tΔ1.Log(time.Since(start));      // always logs "2ns"
     });
 }
 
@@ -94,7 +94,7 @@ public static void TestContextWithTimeout(ж<testing.T> t) {
             }
 
             // Wait the rest of the way until the timeout.
-            time.Sleep(time.ΔNanosecond);
+            time.Sleep(time.Nanosecond);
             synctest.Wait();
             {
                 var err = ctx.Err(); if (!AreEqual(err, context.DeadlineExceeded)) {

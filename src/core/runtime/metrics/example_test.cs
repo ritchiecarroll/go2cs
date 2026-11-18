@@ -93,7 +93,7 @@ public static void ExampleRead_readingAllMetrics() {
     }
 }
 
-internal static float64 medianBucket(ж<metricsꓸFloat64Histogram> Ꮡh) {
+internal static float64 medianBucket(ж<metrics.Float64Histogram> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var total = (uint64)0;

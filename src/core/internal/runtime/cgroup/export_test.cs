@@ -6,8 +6,11 @@ global using LineReader = global::go.@internal.runtime.cgroup_package.lineReader
 namespace go.@internal.runtime;
 
 using static go.@internal.runtime.cgroup_package;
+using static cgroup_internal_test_package;
 
 partial class cgroup_internal_test_package {
+
+} partial class cgroup_internal_testᴛlineReader {
 
 internal static error Next(this ref LineReader l) {
     return l.next();
@@ -16,6 +19,8 @@ internal static error Next(this ref LineReader l) {
 internal static slice<byte> Line(this ref LineReader l) {
     return l.line();
 }
+
+} partial class cgroup_internal_test_package {
 
 internal static ж<LineReader> NewLineReader(nint fd, slice<byte> scratch, Func<nint, slice<byte>, (nint, uintptr)> read) {
     return newLineReader(fd, scratch, read);

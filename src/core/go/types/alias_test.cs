@@ -49,7 +49,7 @@ public static void TestIssue74181(ж<testing.T> t) {
     }
 
     ref var conf = ref heap<types.Config>(new types.Config(), out var Ꮡconf);
-    (var pkg, err) = Ꮡconf.Check(@file.Name.Name, fset, [@file], Ꮡ(new typesꓸInfo()));
+    (var pkg, err) = Ꮡconf.Check(@file.Name.Name, fset, [@file], Ꮡ(new types.Info()));
     if (err != nil) {
         t.Fatalf("could not type check: %v", err);
     }
@@ -59,7 +59,7 @@ public static void TestIssue74181(ж<testing.T> t) {
         var (s, okΔ1) = n.Underlying()._<ж<types.Struct>>(ᐧ); if (okΔ1) {
             var got = s.Field(0).Type();
             var want = types.NewPointer(pkg.Scope().Lookup("AB").Type());
-            if (!types.Identical(got, new types.PointerжΔType(want))) {
+            if (!types.Identical(got, new types.PointerжType(want))) {
                 t.Errorf("wrong type for f: got %v, want %v", got, want.OrTypedNil());
             }
             return;
@@ -88,14 +88,14 @@ public static void TestPartialTypeCheckUndeclaredAliasPanic(ж<testing.T> t) {
     }
 
     ref var conf = ref heap<types.Config>(new types.Config(), out var Ꮡconf); // no error handler, panic
-    var (pkg, _) = Ꮡconf.Check(@file.Name.Name, fset, [@file], Ꮡ(new typesꓸInfo()));
+    var (pkg, _) = Ꮡconf.Check(@file.Name.Name, fset, [@file], Ꮡ(new types.Info()));
     var a = pkg.Scope().Lookup("A").Type();
 
     var (alias, ok) = a._<ж<types.Alias>>(ᐧ); if (ok) {
         var got = alias.Rhs();
         var want = types.Typ[types.Invalid];
 
-        if (!types.Identical(got, new types.BasicжΔType(want))) {
+        if (!types.Identical(got, new types.BasicжType(want))) {
             t.Errorf("wrong type for B: got %v, want %v", got, want.OrTypedNil());
         }
         return;

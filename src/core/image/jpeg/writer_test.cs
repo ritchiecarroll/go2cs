@@ -226,7 +226,7 @@ public static void TestEncodeYCbCr(ж<testing.T> t) {
     // Create identical rgba and ycbcr images.
     for (nint y = bo.Min.Y; y < bo.Max.Y; y++) {
         for (nint x = bo.Min.X; x < bo.Max.X; x++) {
-            var col = new colorꓸRGBA(
+            var col = new color.RGBA(
                 (uint8)rnd.Intn(256),
                 (uint8)rnd.Intn(256),
                 (uint8)rnd.Intn(256),
@@ -245,7 +245,7 @@ public static void TestEncodeYCbCr(ж<testing.T> t) {
     // Now check that both images are identical after an encode.
     ref var bufRGBA = ref heap(new bytes.Buffer(), out var ᏑbufRGBA);
     ref var bufYCbCr = ref heap(new bytes.Buffer(), out var ᏑbufYCbCr);
-    Encode(new jpeg_internal_test_package.bytes_BufferжWriter(ᏑbufRGBA), new image.ΔRGBAжImage(imgRGBA), nil);
+    Encode(new jpeg_internal_test_package.bytes_BufferжWriter(ᏑbufRGBA), new image.RGBAжImage(imgRGBA), nil);
     Encode(new jpeg_internal_test_package.bytes_BufferжWriter(ᏑbufYCbCr), new image.YCbCrжImage(imgYCbCr), nil);
     if (!bytes.Equal(bufRGBA.Bytes(), bufYCbCr.Bytes())) {
         t.Errorf("RGBA and YCbCr encoded bytes differ");
@@ -260,7 +260,7 @@ public static void BenchmarkEncodeRGBA(ж<testing.B> Ꮡb) {
     var rnd = rand.New(rand.NewSource(123));
     for (nint y = bo.Min.Y; y < bo.Max.Y; y++) {
         for (nint x = bo.Min.X; x < bo.Max.X; x++) {
-            img.SetRGBA(x, y, new colorꓸRGBA(
+            img.SetRGBA(x, y, new color.RGBA(
                 (uint8)rnd.Intn(256),
                 (uint8)rnd.Intn(256),
                 (uint8)rnd.Intn(256),
@@ -273,7 +273,7 @@ public static void BenchmarkEncodeRGBA(ж<testing.B> Ꮡb) {
     b.ResetTimer();
     var options = Ꮡ(new Options(Quality: 90));
     for (nint i = 0; i < b.N; i++) {
-        Encode(io.Discard, new image.ΔRGBAжImage(img), options);
+        Encode(io.Discard, new image.RGBAжImage(img), options);
     }
 }
 

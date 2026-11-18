@@ -230,7 +230,7 @@ public static partial void TestWritevError(ж<testing.T> t) {
         goǃ(() => {
             GoFrame ᒐ = default;
             try {
-                defer(ᴛ1 => builtin.close(ᴛ1), chʗ2, ref ᒐ);
+                defer(ᴛ1 => close(ᴛ1), chʗ2, ref ᒐ);
                 var (c, errΔ1) = lnʗ2.Accept();
                 if (errΔ1 != nil) {
                     t.Error(errΔ1);

@@ -51,21 +51,21 @@ public static void TestPredefinedTables(ж<testing.T> t) {
             name: "literal",
             distribution: literalPredefinedDistribution,
             tableBits: 6,
-            toBaseline: ((Func<ж<global::go.@internal.zstd_package.Reader>, nint, slice<global::go.@internal.zstd_package.fseEntry>, slice<global::go.@internal.zstd_package.fseBaselineEntry>, error>)(global::go.@internal.zstd_package.makeLiteralBaselineFSE)),
+            toBaseline: ((Func<ж<global::go.@internal.zstd_package.Reader>, nint, slice<global::go.@internal.zstd_package.fseEntry>, slice<global::go.@internal.zstd_package.fseBaselineEntry>, error>)(global::go.@internal.zstdᴛReader.makeLiteralBaselineFSE)),
             predef: predefinedLiteralTable[..]
         ),
         new(
             name: "offset",
             distribution: offsetPredefinedDistribution,
             tableBits: 5,
-            toBaseline: ((Func<ж<global::go.@internal.zstd_package.Reader>, nint, slice<global::go.@internal.zstd_package.fseEntry>, slice<global::go.@internal.zstd_package.fseBaselineEntry>, error>)(global::go.@internal.zstd_package.makeOffsetBaselineFSE)),
+            toBaseline: ((Func<ж<global::go.@internal.zstd_package.Reader>, nint, slice<global::go.@internal.zstd_package.fseEntry>, slice<global::go.@internal.zstd_package.fseBaselineEntry>, error>)(global::go.@internal.zstdᴛReader.makeOffsetBaselineFSE)),
             predef: predefinedOffsetTable[..]
         ),
         new(
             name: "match",
             distribution: matchPredefinedDistribution,
             tableBits: 6,
-            toBaseline: ((Func<ж<global::go.@internal.zstd_package.Reader>, nint, slice<global::go.@internal.zstd_package.fseEntry>, slice<global::go.@internal.zstd_package.fseBaselineEntry>, error>)(global::go.@internal.zstd_package.makeMatchBaselineFSE)),
+            toBaseline: ((Func<ж<global::go.@internal.zstd_package.Reader>, nint, slice<global::go.@internal.zstd_package.fseEntry>, slice<global::go.@internal.zstd_package.fseBaselineEntry>, error>)(global::go.@internal.zstdᴛReader.makeMatchBaselineFSE)),
             predef: predefinedMatchTable[..]
         )
     ]);
@@ -83,7 +83,7 @@ public static void TestPredefinedTables(ж<testing.T> t) {
                 }
             }
 
-            var baselineTable = new slice<global::go.@internal.zstd_package.fseBaselineEntry>(builtin.len(table));
+            var baselineTable = new slice<global::go.@internal.zstd_package.fseBaselineEntry>(len(table));
             {
                 var err = testʗ1.toBaseline(Ꮡr, 0, table, baselineTable); if (err != nil) {
                     tΔ1.Fatal(err);

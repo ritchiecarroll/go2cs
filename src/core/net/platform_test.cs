@@ -18,12 +18,11 @@ partial class net_internal_test_package {
 // platform configuration.
 internal static bool testableNetwork(@string network) {
     var (net, _, _) = strings.Cut(network, ":");
-    var exprᴛ1 = net;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip+nopriv"u8: {
+    case {} when net == "ip+nopriv"u8: {
         break;
     }
-    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+    case {} when net == "ip"u8 || net == "ip4"u8 || net == "ip6"u8: {
         var exprᴛ2 = Δruntime.GOOS;
         switch (ᐧ) {
         case {} when exprᴛ2 == "plan9"u8: {
@@ -37,7 +36,7 @@ internal static bool testableNetwork(@string network) {
         }}
         break;
     }
-    case {} when exprᴛ1 == "unixgram"u8: {
+    case {} when net == "unixgram"u8: {
         var exprᴛ3 = Δruntime.GOOS;
         switch (ᐧ) {
         case {} when exprᴛ3 == "windows"u8: {
@@ -48,10 +47,10 @@ internal static bool testableNetwork(@string network) {
         }}
         break;
     }
-    case {} when exprᴛ1 == "unix"u8: {
+    case {} when net == "unix"u8: {
         return supportsUnixSocket();
     }
-    case {} when exprᴛ1 == "unixpacket"u8: {
+    case {} when net == "unixpacket"u8: {
         var exprᴛ4 = Δruntime.GOOS;
         switch (ᐧ) {
         case {} when exprᴛ4 == "aix"u8 || exprᴛ4 == "android"u8 || exprᴛ4 == "darwin"u8 || exprᴛ4 == "ios"u8 || exprᴛ4 == "plan9"u8 || exprᴛ4 == "windows"u8: {
@@ -59,15 +58,14 @@ internal static bool testableNetwork(@string network) {
         }}
         break;
     }}
-    var exprᴛ5 = net;
     switch (ᐧ) {
-    case {} when exprᴛ5 == "tcp4"u8 || exprᴛ5 == "udp4"u8 || exprᴛ5 == "ip4"u8: {
+    case {} when net == "tcp4"u8 || net == "udp4"u8 || net == "ip4"u8: {
         if (!supportsIPv4()) {
             return false;
         }
         break;
     }
-    case {} when exprᴛ5 == "tcp6"u8 || exprᴛ5 == "udp6"u8 || exprᴛ5 == "ip6"u8: {
+    case {} when net == "tcp6"u8 || net == "udp6"u8 || net == "ip6"u8: {
         if (!supportsIPv6()) {
             return false;
         }
@@ -80,9 +78,8 @@ internal static bool testableNetwork(@string network) {
 // the current platform configuration.
 internal static bool testableAddress(@string network, @string address) {
     var (net, _, _) = strings.Cut(network, ":");
-    var exprᴛ1 = net;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
+    case {} when net == "unix"u8 || net == "unixgram"u8 || net == "unixpacket"u8: {
         // Abstract unix domain sockets, a Linux-ism.
         if (address[0] == '@' && Δruntime.GOOS != "linux"u8) {
             return false;
@@ -100,23 +97,22 @@ internal static bool testableListenArgs(@string network, @string address, @strin
     }
 
     error err = default;
-    global::go.net_package.ΔAddr addr = default;
+    global::go.net_package.Addr addr = default;
     var (net, _, _) = strings.Cut(network, ":");
-    var exprᴛ1 = net;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when net == "tcp"u8 || net == "tcp4"u8 || net == "tcp6"u8: {
         var (ᴛ1, ᴛ2) = ResolveTCPAddr(tcpˢ, address);
-        (addr, err) = (new global::go.net_package.TCPAddrжΔAddr(ᴛ1), ᴛ2);
+        (addr, err) = (new global::go.net_package.TCPAddrжAddr(ᴛ1), ᴛ2);
         break;
     }
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when net == "udp"u8 || net == "udp4"u8 || net == "udp6"u8: {
         var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, address);
-        (addr, err) = (new global::go.net_package.UDPAddrжΔAddr(ᴛ1), ᴛ2);
+        (addr, err) = (new global::go.net_package.UDPAddrжAddr(ᴛ1), ᴛ2);
         break;
     }
-    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+    case {} when net == "ip"u8 || net == "ip4"u8 || net == "ip6"u8: {
         var (ᴛ1, ᴛ2) = ResolveIPAddr("ip", address);
-        (addr, err) = (new global::go.net_package.IPAddrжΔAddr(ᴛ1), ᴛ2);
+        (addr, err) = (new global::go.net_package.IPAddrжAddr(ᴛ1), ᴛ2);
         break;
     }
     default: {

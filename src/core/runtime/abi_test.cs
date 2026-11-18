@@ -19,6 +19,7 @@ using @internal;
 using @internal.runtime;
 using global::go.os;
 using static global::go.runtime_internal_test_package;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -45,7 +46,11 @@ partial struct TintPointer {
     internal ж<Tint> p;
 }
 
+} partial class runtime_testᴛTintPointer {
+
 internal static void m(this ref TintPointer _) { }
+
+} partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testFinalizerRegabiˢ => ref testFinalizerRegabiˢᵇ;
@@ -129,7 +134,7 @@ public static void TestFinalizerRegisterABI(ж<testing.T> t) {
                 Δruntime.GC();
                 Δruntime.GC();
 
-                if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)time.ΔSecond)) {
+                if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)time.Second)) {
                     tΔ1.Fatal(finalizerFailedToExecuteˢ);
                 }
                 nint got = (nint)ᏑregConfirmRun.Load(); if (got != (~testʗ1).confirmValue) {

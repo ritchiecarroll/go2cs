@@ -18,6 +18,7 @@ using go.crypto;
 using go.math;
 using go.testing;
 using static go.crypto.tls_package;
+using static tls_internal_test_package;
 
 partial class tls_internal_test_package {
 
@@ -36,7 +37,7 @@ internal static slice<byte> mustMarshal(ж<testing.T> t, global::go.crypto.tls_p
 }
 
 public static void TestMarshalUnmarshal(ж<testing.T> t) {
-    var randΔ1 = go.math.rand_package.New(go.math.rand_package.NewSource(time_package.Now().UnixNano()));
+    var randΔ1 = rand.New(rand.NewSource(time.Now().UnixNano()));
 
     foreach (var (i, m) in range(tests)) {
         var ty = reflect.ValueOf(m).Type();
@@ -113,7 +114,7 @@ public static void TestMarshalUnmarshal(ж<testing.T> t) {
 }
 
 public static void TestFuzz(ж<testing.T> t) {
-    var randΔ1 = go.math.rand_package.New(go.math.rand_package.NewSource(0));
+    var randΔ1 = rand.New(rand.NewSource(0));
     foreach (var (_, m) in range(tests)) {
         for (nint j = 0; j < 1000; j++) {
             nint len = randΔ1.Intn(1000);
@@ -137,7 +138,9 @@ internal static @string randomString(nint n, ж<rand.Rand> randΔ1) {
     return (@string)b;
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.clientHelloMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛclientHelloMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.clientHelloMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new clientHelloMsg());
@@ -239,7 +242,9 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.serverHelloMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛserverHelloMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.serverHelloMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new serverHelloMsg());
@@ -299,7 +304,9 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.encryptedExtensionsMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛencryptedExtensionsMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.encryptedExtensionsMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new encryptedExtensionsMsg());
@@ -314,7 +321,9 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛcertificateMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.certificateMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateMsg());
@@ -326,7 +335,9 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateRequestMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛcertificateRequestMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.certificateRequestMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateRequestMsg());
@@ -337,7 +348,9 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateVerifyMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛcertificateVerifyMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.certificateVerifyMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateVerifyMsg());
@@ -347,7 +360,9 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateStatusMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛcertificateStatusMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.certificateStatusMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateStatusMsg());
@@ -355,7 +370,9 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.clientKeyExchangeMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛclientKeyExchangeMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.clientKeyExchangeMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new clientKeyExchangeMsg());
@@ -363,19 +380,25 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.finishedMsg _, ж<rand.Rand> randΔ1, nint size) {
+} partial class tls_internal_testᴛfinishedMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.finishedMsg _, ж<rand.Rand> randΔ1, nint size) {
     var m = Ꮡ(new finishedMsg());
     m.verifyData = randomBytes(12, randΔ1);
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.newSessionTicketMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛnewSessionTicketMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.newSessionTicketMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new newSessionTicketMsg());
     m.ticket = randomBytes(randΔ1.Intn(4), Ꮡrand);
     return reflect.ValueOf(m.OrTypedNil());
 }
+
+} partial class tls_internal_test_package {
 
 internal static slice<ж<Δx509.Certificate>> sessionTestCerts;
 
@@ -392,7 +415,9 @@ internal static slice<ж<Δx509.Certificate>> sessionTestCerts;
     sessionTestCerts = append(sessionTestCerts, cert);
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.SessionState _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛSessionState {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.SessionState _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var s = Ꮡ(new SessionState());
@@ -463,12 +488,16 @@ internal static bool unmarshal(this ref global::go.crypto.tls_package.SessionSta
     return true;
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.endOfEarlyDataMsg _, ж<rand.Rand> randΔ1, nint size) {
+} partial class tls_internal_testᴛendOfEarlyDataMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.endOfEarlyDataMsg _, ж<rand.Rand> randΔ1, nint size) {
     var m = Ꮡ(new endOfEarlyDataMsg());
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.keyUpdateMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛkeyUpdateMsg {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.keyUpdateMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new keyUpdateMsg());
@@ -476,7 +505,9 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.newSessionTicketMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛnewSessionTicketMsgTLS13 {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.newSessionTicketMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new newSessionTicketMsgTLS13());
@@ -490,7 +521,9 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateRequestMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛcertificateRequestMsgTLS13 {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.certificateRequestMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateRequestMsgTLS13());
@@ -515,7 +548,9 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
+} partial class tls_internal_testᴛcertificateMsgTLS13 {
+
+internal static reflect.Value Generate(this ref global::go.crypto.tls_package.certificateMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateMsgTLS13());
@@ -536,6 +571,8 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     }
     return reflect.ValueOf(m.OrTypedNil());
 }
+
+} partial class tls_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object failedToUnmarshalInitialˢ = (@string)"Failed to unmarshal initial message"u8;
@@ -645,7 +682,7 @@ internal partial struct TestECHRemoveOuterPSK_type /*dyn*/ {
 }
 
 public static void TestECHRemoveOuterPSK(ж<testing.T> t) {
-    var r = go.math.rand_package.New(go.math.rand_package.NewSource(0));
+    var r = rand.New(rand.NewSource(0));
 
     foreach (var (_, vᴛ1) in range(slice<TestECHRemoveOuterPSK_type>([
         new(

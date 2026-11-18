@@ -12,6 +12,7 @@ using testing = testing_package;
 using go.math;
 using io = io_package;
 using static go.image.jpeg_package;
+using static jpeg_internal_test_package;
 
 partial class jpeg_internal_test_package {
 
@@ -19,7 +20,7 @@ internal static void benchmarkDCT(ж<testing.B> b, Action<ж<global::go.image.jp
     ref var blk = ref heap(new global::go.image.jpeg_package.block(), out var Ꮡblk); // avoid potential allocation in loop
     while (b.Loop()) {
         foreach (var (_, vᴛ1) in range(testBlocks.ΔRangeSnapshot())) {
-            blk = vᴛ1.Clone();
+            blk.Assign(vᴛ1);
 
             f(Ꮡblk);
         }
@@ -307,7 +308,7 @@ internal static void slowFDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
             dst[8 * v + u] = (int32)math.Round(sum);
         }
     }
-    b = dst.Clone();
+    b.Assign(dst);
 }
 
 // slowerFDCT is slowFDCT but using big.Floats to validate slowFDCT.
@@ -339,7 +340,7 @@ internal static void slowerFDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
             dst[8 * v + u] = (int32)i;
         }
     }
-    b = dst.Clone();
+    b.Assign(dst);
 }
 
 // slowIDCT performs the 8*8 2-dimensional inverse discrete cosine transform:
@@ -366,7 +367,7 @@ internal static void slowIDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
             dst[8 * y + x] = (int32)math.Round(sum / 8D);
         }
     }
-    b = dst.Clone();
+    b.Assign(dst);
 }
 
 // slowerIDCT is slowIDCT but using big.Floats to validate slowIDCT.
@@ -399,8 +400,10 @@ internal static void slowerIDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
             dst[8 * y + x] = (int32)i;
         }
     }
-    b = dst.Clone();
+    b.Assign(dst);
 }
+
+} partial class jpeg_internal_testᴛblock {
 
 internal static @string String(this ref global::go.image.jpeg_package.block b) {
     var s = Ꮡ(new strings.Builder());
@@ -415,6 +418,8 @@ internal static @string String(this ref global::go.image.jpeg_package.block b) {
     fmt.Fprintf(new jpeg_internal_test_package.strings_BuilderжWriter(s), "}"u8);
     return s.String();
 }
+
+} partial class jpeg_internal_test_package {
 
 // testBlocks are the first 10 pre-IDCT blocks from ../testdata/video-001.jpeg.
 internal static array<global::go.image.jpeg_package.block> testBlocks = new global::go.image.jpeg_package.block[]{

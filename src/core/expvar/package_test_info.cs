@@ -13,11 +13,9 @@ using go;
 using static global::go.expvar_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("String", "ΔString")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
-[assembly: GoImplement<global::go.expvar_package.ΔString, global::go.expvar_package.Var>(Pointer = true)]
 [assembly: GoImplement<go.net.http.httptest_package.ResponseRecorder, go.net.http_package.ResponseWriter>(Pointer = true)]
 // </InterfaceImplementations>
 

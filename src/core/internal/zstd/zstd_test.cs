@@ -186,7 +186,7 @@ public static void TestLarge(ж<testing.T> t) {
     var data = bigData(new zstd_internal_test_package.testing_TжTB(t));
     var compressed = zstdBigData(new zstd_internal_test_package.testing_TжTB(t));
 
-    t.Logf("zstd compressed %d bytes to %d", builtin.len(data), builtin.len(compressed));
+    t.Logf("zstd compressed %d bytes to %d", len(data), len(compressed));
 
     var r = NewReader(new zstd_internal_test_package.bytes_ReaderжReader(bytes.NewReader(compressed)));
     var (got, err) = io.ReadAll(new zstd_internal_test_package.zstd_ReaderжReader(r));
@@ -205,12 +205,12 @@ internal static readonly object dataMismatchˢ = (@string)"data mismatch"u8;
 // showDiffs reports the first few differences in two []byte.
 internal static void showDiffs(ж<testing.T> t, slice<byte> got, slice<byte> want) {
     t.Error(dataMismatchˢ);
-    if (builtin.len(got) != builtin.len(want)) {
-        t.Errorf("got data length %d, want %d", builtin.len(got), builtin.len(want));
+    if (len(got) != len(want)) {
+        t.Errorf("got data length %d, want %d", len(got), len(want));
     }
     nint diffs = 0;
     foreach (var (i, b) in range(got)) {
-        if (i >= builtin.len(want)) {
+        if (i >= len(want)) {
             break;
         }
         if (b != want[i]) {
@@ -309,7 +309,7 @@ public static void BenchmarkLarge(ж<testing.B> Ꮡb) {
 
     var compressed = zstdBigData(new zstd_internal_test_package.testing_BжTB(Ꮡb));
 
-    b.SetBytes((int64)builtin.len(compressed));
+    b.SetBytes((int64)len(compressed));
 
     var input = bytes.NewReader(compressed);
     var r = NewReader(new zstd_internal_test_package.bytes_ReaderжReader(input));

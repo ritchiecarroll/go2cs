@@ -12,6 +12,7 @@ using Δtesting = testing_package;
 using go.io;
 using go.path;
 using static go.os_internal_test_package;
+using static os_test_package;
 
 partial class os_test_package {
 
@@ -246,7 +247,11 @@ partial struct myErrorIs {
     /*embed*/ internal error error;
 }
 
+} partial class os_testᴛmyErrorIs {
+
 internal static bool Is(this myErrorIs e, error target) { return AreEqual(target, e.error); }
+
+} partial class os_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object osIsPermissionErrTrueˢ = (@string)"os.IsPermission(err) = true when err.Is(fs.ErrPermission), wanted false"u8;

@@ -42,16 +42,14 @@ public static void TestMillerRabin(ж<testing.T> t) {
         }
 
         var (k, v, _) = strings.Cut(line, " = ");
-        var exprᴛ1 = k;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "Result"u8: {
-            var exprᴛ2 = v;
+        case {} when k == "Result"u8: {
             switch (ᐧ) {
-            case {} when exprᴛ2 == "Composite"u8: {
+            case {} when v == "Composite"u8: {
                 expected = millerRabinCOMPOSITE;
                 break;
             }
-            case {} when exprᴛ2 == "PossiblyPrime"u8: {
+            case {} when v == "PossiblyPrime"u8: {
                 expected = millerRabinPOSSIBLYPRIME;
                 break;
             }
@@ -61,11 +59,11 @@ public static void TestMillerRabin(ж<testing.T> t) {
             }}
             break;
         }
-        case {} when exprᴛ1 == "W"u8: {
+        case {} when k == "W"u8: {
             W = v;
             break;
         }
-        case {} when exprᴛ1 == "B"u8: {
+        case {} when k == "B"u8: {
             B = v;
 
             t.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {
@@ -135,21 +133,20 @@ public static void TestTotient(ж<testing.T> t) {
         }
 
         var (k, v, _) = strings.Cut(line, " = ");
-        var exprᴛ1 = k;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "GCD"u8: {
+        case {} when k == "GCD"u8: {
             GCD = v;
             break;
         }
-        case {} when exprᴛ1 == "A"u8: {
+        case {} when k == "A"u8: {
             A = v;
             break;
         }
-        case {} when exprᴛ1 == "B"u8: {
+        case {} when k == "B"u8: {
             B = v;
             break;
         }
-        case {} when exprᴛ1 == "LCM"u8: {
+        case {} when k == "LCM"u8: {
             LCM = v;
 
             t.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {
@@ -202,13 +199,13 @@ public static void TestTotient(ж<testing.T> t) {
 }
 
 internal static bool oddDivisorLargerThan32Bits(slice<byte> b) {
-    var x = @new<bigꓸInt>().SetBytes(b);
+    var x = @new<big.Int>().SetBytes(b);
     x.Rsh(x, x.TrailingZeroBits());
     return x.BitLen() > 32;
 }
 
 internal static slice<byte> addOne(slice<byte> b) {
-    var x = @new<bigꓸInt>().SetBytes(b);
+    var x = @new<big.Int>().SetBytes(b);
     x.Add(x, big.NewInt(1));
     return x.Bytes();
 }

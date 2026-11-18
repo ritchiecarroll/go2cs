@@ -20,14 +20,15 @@ using global::go.@internal;
 using reflectlite = global::go.@internal.reflectlite_package;
 using static global::go.@internal.reflectlite_internal_test_package;
 using ꓸꓸꓸPoint = Span<reflectlite_test_package.Point>;
+using static reflectlite_test_package;
 
 partial class reflectlite_test_package {
 
-public static reflectꓸValue ToValue(reflectlite.Value v) {
+public static reflect.Value ToValue(reflectlite.Value v) {
     return reflect.ValueOf(reflectlite_internal_test_package.ToInterface(v));
 }
 
-public static @string TypeString(reflectliteꓸType t) {
+public static @string TypeString(reflectlite.Type t) {
     return fmt.Sprintf("%T"u8, reflectlite_internal_test_package.ToInterface(reflectlite_internal_test_package.Zero(t)));
 }
 
@@ -304,14 +305,14 @@ internal static slice<pair> valueTests = slice<pair>([
     )
 ]);
 
-internal static partial void testType(ж<testing.T> t, nint i, reflectliteꓸType typ, @string want) {
+internal static partial void testType(ж<testing.T> t, nint i, reflectlite.Type typ, @string want) {
     @string s = TypeString(typ);
     if (s != want) {
         t.Errorf("#%d: have %#q, want %#q", i, s, want);
     }
 }
 
-internal static partial void testReflectType(ж<testing.T> t, nint i, reflectliteꓸType typ, @string want) {
+internal static partial void testReflectType(ж<testing.T> t, nint i, reflectlite.Type typ, @string want) {
     @string s = TypeString(typ);
     if (s != want) {
         t.Errorf("#%d: have %#q, want %#q", i, s, want);
@@ -387,7 +388,7 @@ public static void TestSetValue(ж<testing.T> t) {
             v.Set(ValueOf((complex128)(564.25D + 1D.i())));
             break;
         }
-        case var ᴛ when ᴛ == abi.ΔString: {
+        case var ᴛ when ᴛ == abi.String: {
             v.Set(ValueOf(stringyCheeseˢ));
             break;
         }
@@ -909,6 +910,8 @@ partial struct Point {
     internal nint x, y;
 }
 
+} partial class reflectlite_testᴛPoint {
+
 // This will be index 0.
 public static nint AnotherMethod(this Point p, nint scale) {
     return -1;
@@ -944,6 +947,8 @@ public static nint TotalDist(this Point p, params ꓸꓸꓸPoint pointsʗp) {
     return tot;
 }
 
+} partial class reflectlite_test_package {
+
 partial struct D1 {
     internal nint d;
 }
@@ -952,7 +957,7 @@ partial struct D2 {
 }
 
 internal partial struct TestImportPath_tests /*dyn*/ {
-    internal reflectliteꓸType t;
+    internal reflectlite.Type t;
     internal @string path;
 }
 

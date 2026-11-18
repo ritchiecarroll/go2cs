@@ -38,11 +38,11 @@ public static void TestReadLine(ж<testing.T> t) {
         defer(() => fdʗ1.Close(), ref ᒐ);
         var br = bufio.NewReader(new net_test_package.os_FileжReader(fd));
 
-        (var Δfile, err) = open(filename);
-        if (Δfile == nil) {
+        (var @file, err) = open(filename);
+        if (@file == nil) {
             t.Fatal(err);
         }
-        var fileʗ1 = Δfile;
+        var fileʗ1 = @file;
         defer(fileʗ1.close, ref ᒐ);
 
         nint lineno = 1;
@@ -52,7 +52,7 @@ public static void TestReadLine(ж<testing.T> t) {
             nint n = len(bline); if (n > 0) {
                 bline = bline.slice(0, n - 1);
             }
-            var (line, ok) = Δfile.readLine();
+            var (line, ok) = @file.readLine();
             if ((berr != nil) != !ok || bline != line) {
                 t.Fatalf("%s:%d (#%d)\nbufio => %q, %v\nnet => %q, %v", filename, lineno, byteno, bline, berr, line, ok);
             }

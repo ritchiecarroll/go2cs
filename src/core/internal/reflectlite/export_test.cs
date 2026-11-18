@@ -7,6 +7,7 @@ using @unsafe = unsafe_package;
 using abi = global::go.@internal.abi_package;
 using global::go.@internal;
 using static global::go.@internal.reflectlite_package;
+using static reflectlite_internal_test_package;
 
 partial class reflectlite_internal_test_package {
 
@@ -15,7 +16,7 @@ partial class reflectlite_internal_test_package {
 // go2cs generated this placeholder — func TField is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Field returns the i'th struct field.
-public static global::go.@internal.reflectlite_package.ΔType StructFieldType(ж<abiꓸStructType> Ꮡt, nint i) {
+public static global::go.@internal.reflectlite_package.Type StructFieldType(ж<abi.StructType> Ꮡt, nint i) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (i < 0 || i >= len(t.Fields)) {
@@ -41,7 +42,11 @@ public static any /*i*/ ToInterface(global::go.@internal.reflectlite_package.Val
 public partial struct EmbedWithUnexpMeth {
 }
 
+} partial class reflectlite_internal_testᴛEmbedWithUnexpMeth {
+
 internal static void f(this EmbedWithUnexpMeth _) { }
+
+} partial class reflectlite_internal_test_package {
 
 internal partial interface pinUnexpMeth {
     void f();
@@ -49,7 +54,7 @@ internal partial interface pinUnexpMeth {
 
 internal static pinUnexpMeth pinUnexpMethI = ((pinUnexpMeth)new EmbedWithUnexpMeth());
 
-public static ж<byte> FirstMethodNameBytes(global::go.@internal.reflectlite_package.ΔType t) {
+public static ж<byte> FirstMethodNameBytes(global::go.@internal.reflectlite_package.Type t) {
     _ = pinUnexpMethI;
 
     var ut = t.uncommon();

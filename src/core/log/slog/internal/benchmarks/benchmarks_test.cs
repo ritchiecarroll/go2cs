@@ -30,8 +30,8 @@ internal static ref readonly @string statusˢ => ref statusˢᵇ;
 private static readonly @string statusˢᵇ = "status"u8;
 internal static ref readonly @string durationˢ => ref durationˢᵇ;
 private static readonly @string durationˢᵇ = "duration"u8;
-internal static ref readonly @string timeˢ2 => ref timeˢ2ᵇ;
-private static readonly @string timeˢ2ᵇ = "time"u8;
+internal static ref readonly @string timeˢ => ref timeˢᵇ;
+private static readonly @string timeˢᵇ = "time"u8;
 internal static ref readonly @string errorˢ => ref errorˢᵇ;
 private static readonly @string errorˢᵇ = "error"u8;
 internal static ref readonly @string eventˢ => ref eventˢᵇ;
@@ -39,7 +39,7 @@ private static readonly @string eventˢᵇ = "event"u8;
 
 internal partial struct BenchmarkAttrs_type /*dyn*/ {
     internal @string name;
-    internal slogꓸHandler h;
+    internal slog.Handler h;
     internal bool skipRace;
 }
 
@@ -54,11 +54,11 @@ internal partial struct BenchmarkAttrs_typeᴛ1 /*dyn*/ {
 public static void BenchmarkAttrs(ж<testing.B> b) {
     var ctx = context.Background();
     foreach (var (_, vᴛ1) in range(slice<BenchmarkAttrs_type>([
-        new("disabled", new benchmarks_internal_test_package.benchmarks_disabledHandlerᴠΔHandler(new disabledHandler()), false),
-        new("async discard", new benchmarks_internal_test_package.benchmarks_asyncHandlerжΔHandler(newAsyncHandler()), true),
+        new("disabled", new benchmarks_internal_test_package.benchmarks_disabledHandlerᴠHandler(new disabledHandler()), false),
+        new("async discard", new benchmarks_internal_test_package.benchmarks_asyncHandlerжHandler(newAsyncHandler()), true),
         new("fastText discard", newFastTextHandler(io.Discard), false),
-        new("Text discard", new slog.TextHandlerжΔHandler(slog.NewTextHandler(io.Discard, nil)), false),
-        new("JSON discard", new slog.JSONHandlerжΔHandler(slog.NewJSONHandler(io.Discard, nil)), false)
+        new("Text discard", new slog.TextHandlerжHandler(slog.NewTextHandler(io.Discard, nil)), false),
+        new("JSON discard", new slog.JSONHandlerжHandler(slog.NewJSONHandler(io.Discard, nil)), false)
     ]))) {
         ref var handler = ref heap(new BenchmarkAttrs_type(), out var Ꮡhandler);
         handler = vᴛ1;
@@ -91,7 +91,7 @@ public static void BenchmarkAttrs(ж<testing.B> b) {
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(errorˢ, testError));
                     }
                 ),
@@ -102,7 +102,7 @@ public static void BenchmarkAttrs(ж<testing.B> b) {
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(errorˢ, testError));
                     }
                 ),
@@ -113,12 +113,12 @@ public static void BenchmarkAttrs(ж<testing.B> b) {
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(eventˢ, testEvent));
                     }
                 ),
@@ -130,42 +130,42 @@ public static void BenchmarkAttrs(ж<testing.B> b) {
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(errorˢ, testError),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
-                            slog.Time(timeˢ2, testTime),
+                            slog.Time(timeˢ, testTime),
                             slog.Any(eventˢ, testEvent));
                     }
                 )

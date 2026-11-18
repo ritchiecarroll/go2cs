@@ -53,7 +53,7 @@ public static void TestMapPut(ж<testing.T> t) {
         if (!ok) {
             t.Errorf("Get(%d) got ok false want true", key);
         }
-        var gotElem = ~(ж<uint64>)(uintptr)(got);
+        var gotElem = ~@unsafe.Pointer.To<uint64>(got);
         if (gotElem != elem) {
             t.Errorf("Get(%d) got elem %d want %d", key, gotElem, elem);
         }
@@ -91,7 +91,7 @@ public static void TestMapSplit(ж<testing.T> t) {
         if (!ok) {
             t.Errorf("Get(%d) got ok false want true", key);
         }
-        var gotElem = ~(ж<uint64>)(uintptr)(got);
+        var gotElem = ~@unsafe.Pointer.To<uint64>(got);
         if (gotElem != elem) {
             t.Errorf("Get(%d) got elem %d want %d", key, gotElem, elem);
         }
@@ -204,14 +204,14 @@ public static void TestTableKeyUpdate(ж<testing.T> t) {
     var it = @new<maps.Iter>();
     it.Init(typ, m);
     it.Next();
-    @unsafe.Pointer keyPtr = (uintptr)it.Key();
-    @unsafe.Pointer elemPtr = (uintptr)it.Elem();
+    @unsafe.Pointer keyPtr = it.Key();
+    @unsafe.Pointer elemPtr = it.Elem();
     if (keyPtr == nil) {
         t.Fatal(itKeyGotNilWantKeyˢ);
     }
 
-    var key = ~(ж<float64>)(uintptr)(keyPtr);
-    elem = ~(ж<uint64>)(uintptr)(elemPtr);
+    var key = ~@unsafe.Pointer.To<float64>(keyPtr);
+    elem = ~@unsafe.Pointer.To<uint64>(elemPtr);
     if (math.Copysign(1.0D, key) > 0D) {
         t.Errorf("map key %f has positive sign", key);
     }
@@ -249,10 +249,10 @@ public static void TestTablePutDelete(ж<testing.T> t) {
         // Put may grow/split a table. Initial construction of the new
         // table(s) could result in a full group consisting of
         // arbitrary keys.
-        @unsafe.Pointer fullKeyPtr = (uintptr)m.KeyFromFullGroup(typ);
+        @unsafe.Pointer fullKeyPtr = m.KeyFromFullGroup(typ);
         if (fullKeyPtr != nil) {
             // Found a full group.
-            key = ~(ж<uint32>)(uintptr)(fullKeyPtr);
+            key = ~@unsafe.Pointer.To<uint32>(fullKeyPtr);
             elem = 256 + key;
             break;
         }
@@ -305,14 +305,14 @@ public static void TestTableIteration(ж<testing.T> t) {
     it.Init(typ, m);
     for (;;) {
         it.Next();
-        @unsafe.Pointer keyPtr = (uintptr)it.Key();
-        @unsafe.Pointer elemPtr = (uintptr)it.Elem();
+        @unsafe.Pointer keyPtr = it.Key();
+        @unsafe.Pointer elemPtr = it.Elem();
         if (keyPtr == nil) {
             break;
         }
 
-        var keyΔ1 = ~(ж<uint32>)(uintptr)(keyPtr);
-        var elemΔ1 = ~(ж<uint64>)(uintptr)(elemPtr);
+        var keyΔ1 = ~@unsafe.Pointer.To<uint32>(keyPtr);
+        var elemΔ1 = ~@unsafe.Pointer.To<uint64>(elemPtr);
         got[keyΔ1] = elemΔ1;
     }
 
@@ -361,14 +361,14 @@ public static void TestTableIterationDelete(ж<testing.T> t) {
     it.Init(typ, m);
     for (;;) {
         it.Next();
-        @unsafe.Pointer keyPtr = (uintptr)it.Key();
-        @unsafe.Pointer elemPtr = (uintptr)it.Elem();
+        @unsafe.Pointer keyPtr = it.Key();
+        @unsafe.Pointer elemPtr = it.Elem();
         if (keyPtr == nil) {
             break;
         }
 
-        var keyΔ1 = ~(ж<uint32>)(uintptr)(keyPtr);
-        var elemΔ1 = ~(ж<uint64>)(uintptr)(elemPtr);
+        var keyΔ1 = ~@unsafe.Pointer.To<uint32>(keyPtr);
+        var elemΔ1 = ~@unsafe.Pointer.To<uint64>(elemPtr);
         got[keyΔ1] = elemΔ1;
 
         if (first) {
@@ -434,14 +434,14 @@ public static void TestTableIterationGrowDelete(ж<testing.T> t) {
     it.Init(typ, m);
     for (;;) {
         it.Next();
-        @unsafe.Pointer keyPtr = (uintptr)it.Key();
-        @unsafe.Pointer elemPtr = (uintptr)it.Elem();
+        @unsafe.Pointer keyPtr = it.Key();
+        @unsafe.Pointer elemPtr = it.Elem();
         if (keyPtr == nil) {
             break;
         }
 
-        var keyΔ1 = ~(ж<uint32>)(uintptr)(keyPtr);
-        var elemΔ1 = ~(ж<uint64>)(uintptr)(elemPtr);
+        var keyΔ1 = ~@unsafe.Pointer.To<uint32>(keyPtr);
+        var elemΔ1 = ~@unsafe.Pointer.To<uint64>(elemPtr);
         got[keyΔ1] = elemΔ1;
 
         if (first) {
@@ -520,14 +520,14 @@ internal static void testTableIterationGrowDuplicate(ж<testing.T> t, nint grow)
     it.Init(typ, m);
     for (nint i = 0; ; i++) {
         it.Next();
-        @unsafe.Pointer keyPtr = (uintptr)it.Key();
-        @unsafe.Pointer elemPtr = (uintptr)it.Elem();
+        @unsafe.Pointer keyPtr = it.Key();
+        @unsafe.Pointer elemPtr = it.Elem();
         if (keyPtr == nil) {
             break;
         }
 
-        var keyΔ1 = ~(ж<uint32>)(uintptr)(keyPtr);
-        var elemΔ1 = ~(ж<uint64>)(uintptr)(elemPtr);
+        var keyΔ1 = ~@unsafe.Pointer.To<uint32>(keyPtr);
+        var elemΔ1 = ~@unsafe.Pointer.To<uint64>(elemPtr);
         if (elemΔ1 != 256 + (uint64)keyΔ1) {
             t.Errorf("iteration got key %d elem %d want elem %d", keyΔ1, elemΔ1, 256 + (uint64)keyΔ1);
         }
@@ -638,15 +638,15 @@ public static void TestMapZeroSizeSlot(ж<testing.T> t) {
     if (!ok) {
         t.Errorf("Get(%d) got ok false want true", key);
     }
-    var gotElem = ((ж<EmptyStruct>)(uintptr)(got)).Value;
+    var gotElem = (@unsafe.Pointer.To<EmptyStruct>(got)).Value;
     if (gotElem != elem) {
         t.Errorf("Get(%d) got elem %d want %d", key, gotElem, elem);
     }
 
     var tab = m.TableFor(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey));
-    @unsafe.Pointer start = (uintptr)tab.GroupsStart();
+    @unsafe.Pointer start = tab.GroupsStart();
     var length = tab.GroupsLength();
-    @unsafe.Pointer end = (@unsafe.Pointer)((uintptr)start + length * typ.GroupSize - 1); // inclusive to ensure we have a valid pointer
+    @unsafe.Pointer end = @unsafe.Add(start, length * typ.GroupSize - 1); // inclusive to ensure we have a valid pointer
     if ((uintptr)got < (uintptr)start || (uintptr)got > (uintptr)end) {
         t.Errorf("elem address outside groups allocation; got %p want [%p, %p]", @unsafe.Pointer.OrTypedNil(got), @unsafe.Pointer.OrTypedNil(start), @unsafe.Pointer.OrTypedNil(end));
     }
@@ -676,8 +676,8 @@ public static void TestMapIndirect(ж<testing.T> t) {
         t.Errorf("Used() used got %d want 31", m.Used());
     }
 
-    key = new TestMapIndirect_big(new byte[256].array());
-    elem = new TestMapIndirect_big(new byte[256].array());
+    key.Assign(new TestMapIndirect_big(new byte[256].array()));
+    elem.Assign(new TestMapIndirect_big(new byte[256].array()));
     elem[0] = 128;
 
     for (nint i = 0; i < 31; i++) {
@@ -687,7 +687,7 @@ public static void TestMapIndirect(ж<testing.T> t) {
         if (!ok) {
             t.Errorf("Get(%v) got ok false want true", key);
         }
-        var gotElem = (~(ж<TestMapIndirect_big>)(uintptr)(got)).Clone();
+        var gotElem = (TestMapIndirect_big)@unsafe.Pointer.LoadArray<byte>(got, 256);
         if (gotElem != elem) {
             t.Errorf("Get(%v) got elem %v want %v", key, gotElem, elem);
         }
@@ -711,14 +711,14 @@ public static void TestMapDeleteClear(ж<testing.T> t) {
     if (!ok) {
         t.Errorf("Get(%d) got ok false want true", key);
     }
-    var gotElem = ~(ж<int64>)(uintptr)(got);
+    var gotElem = ~@unsafe.Pointer.To<int64>(got);
     if (gotElem != elem) {
         t.Errorf("Get(%d) got elem %d want %d", key, gotElem, elem);
     }
 
     m.Delete(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey));
 
-    gotElem = ~(ж<int64>)(uintptr)(got);
+    gotElem = ~@unsafe.Pointer.To<int64>(got);
     if (gotElem != 0) {
         t.Errorf("Delete(%d) failed to clear element. got %d want 0", key, gotElem);
     }
@@ -862,7 +862,7 @@ public static void TestTableGroupCount(ж<testing.T> t) {
 
     void testMap(ж<testing.T> tΔ1, map<nint, nint> mʗp, nint n, TestTableGroupCount_mapCount initial, TestTableGroupCount_mapCount after) {
         ref var m = ref heap(mʗp, out var Ꮡm);
-        var mm = ~Ꮡm.Reinterpret<map<nint, nint>, ж<mapsꓸMap>>();
+        var mm = ~Ꮡm.Reinterpret<map<nint, nint>, ж<maps.Map>>();
 
         nint gotTab = mm.TableCount();
         if (gotTab != initial.tables) {
@@ -976,17 +976,16 @@ public static void TestTombstoneGrow(ж<testing.T> t) {
         foreach (var (_, load) in range(slice<@string>(["low", "mid", "high"]))) {
             nint capacity = tableSize * 7 / 8;
             nint initialElems = default;
-            var exprᴛ1 = load;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "low"u8: {
+            case {} when load == "low"u8: {
                 initialElems = capacity / 8;
                 break;
             }
-            case {} when exprᴛ1 == "mid"u8: {
+            case {} when load == "mid"u8: {
                 initialElems = capacity / 2;
                 break;
             }
-            case {} when exprᴛ1 == "high"u8: {
+            case {} when load == "high"u8: {
                 initialElems = capacity;
                 break;
             }}

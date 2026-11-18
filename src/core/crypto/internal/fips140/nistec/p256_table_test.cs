@@ -42,7 +42,7 @@ internal static void testP256AffineTable(ж<testing.T> t, ж<global::go.crypto.@
         p.Ꮡy.Mul(p.Ꮡy, zInv);
         p.Ꮡz.One();
 
-        if (!bytes_package.Equal(table.at<global::go.crypto.@internal.fips140.nistec_package.p256AffinePoint>(j).Ꮡx.Bytes(), p.Ꮡx.Bytes()) || !bytes_package.Equal(table.at<global::go.crypto.@internal.fips140.nistec_package.p256AffinePoint>(j).Ꮡy.Bytes(), p.Ꮡy.Bytes())) {
+        if (!bytes.Equal(table.at<global::go.crypto.@internal.fips140.nistec_package.p256AffinePoint>(j).Ꮡx.Bytes(), p.Ꮡx.Bytes()) || !bytes.Equal(table.at<global::go.crypto.@internal.fips140.nistec_package.p256AffinePoint>(j).Ꮡy.Bytes(), p.Ꮡy.Bytes())) {
             t.Fatalf("incorrect table entry at index %d", j);
         }
     }

@@ -13,7 +13,6 @@ using go;
 using static global::go.debug.plan9obj_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Section", "ΔSection")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -32,7 +31,7 @@ using static global::go.debug.plan9obj_internal_test_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(fileTest))]
 [assembly: GoFieldAccess(typeof(global::go.debug.plan9obj_package.File))]
-[assembly: GoFieldAccess(typeof(global::go.debug.plan9obj_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(global::go.debug.plan9obj_package.Section))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

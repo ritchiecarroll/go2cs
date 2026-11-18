@@ -51,7 +51,7 @@ public static void BenchmarkWorkerFuzzOverhead(ж<testing.B> Ꮡb) {
         os.Setenv(godebugˢ, fmt.Sprintf("%s,fuzzseed=123"u8, origEnv));
 
         var ws = Ꮡ(new workerServer(
-            fuzzFn: (CorpusEntry _) => (time.ΔSecond, default),
+            fuzzFn: (CorpusEntry _) => (time.Second, default),
             workerComm: new workerComm(memMu: new channel<ж<global::go.@internal.fuzz_package.sharedMem>>(1))
         ));
 
@@ -143,7 +143,7 @@ public static void BenchmarkWorkerFuzz(ж<testing.B> Ꮡb) {
 internal static ж<global::go.@internal.fuzz_package.worker> newWorkerForTest(testing.TB tb) {
     tb.Helper();
     var (c, err) = newCoordinator(new CoordinateFuzzingOpts(
-        Types: slice<reflectꓸType>([reflect.TypeOf(slice<byte>(default))]),
+        Types: slice<reflect.Type>([reflect.TypeOf(slice<byte>(default))]),
         Log: io.Discard
     ));
     if (err != nil) {
@@ -233,9 +233,9 @@ public static void BenchmarkWorkerMinimize(ж<testing.B> b) {
                 wsʗ1.fuzzFn = (CorpusEntry _) => {
                     if (i == 0) {
                         i++;
-                        return (time.ΔSecond, errors.New(initialFailureForDeflakeˢ));
+                        return (time.Second, errors.New(initialFailureForDeflakeˢ));
                     }
-                    return (time.ΔSecond, default);
+                    return (time.Second, default);
                 };
                 for (nint iΔ1 = 0; iΔ1 < (~bΔ1).N; iΔ1++) {
                     bΔ1.SetBytes((int64)sz);

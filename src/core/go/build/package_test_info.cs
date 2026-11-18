@@ -53,11 +53,11 @@ using static global::go.go.build_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/build/build_test.go", "build_test.cs", "ABgqgoIACAaCgoKCgoKClIKmgoKCgpSCuIKClIKCgoKCggALBoKCgpSCpoKClIKUgoL4goKClIKUggAICIKCggAKCIKUgoKUyoK4gqaCpoL4goKmgoKmgoKUggALCACIAfwCgrKSgoKCggALFIKCgoKClIIABxCCqIL2ABAsgrKCkoKUlJKUgoIACwqCgqaCgpSCusYADB6CgoKClAAJCoIACRqCgoKUggAWDsKClJSClAAGFpSCkpSClIKCgoKUlIK4gqaC6gAMBIKUlIKCgpSCgoKUgoK4opSUgoKClIKCgoKCggAKCoKUlIKCgpSCgoKmgoK4gpSUgoKClJSCgpSClIKCABAOsri4goCCpICCtoKCgoKUgoCCgoCClAAJDNiCgqaC/NiCgqaCAA4OsoKCgpSCgpSClIKCgsrKlIL+soKCgoKUgoIAEBLCgoKCgoKUgoKUgoKmgoKCgpSClIKC+IKCgpSCABcIgoKCpoKClIKCgqaUlA==", "29-38:1;39-48:2;346-357:1;411-416:1;417-419:2;521-548:1;814-823:1", "", "147=FromSlash/1/1/1;539=Join/1/2/6,Join/2/2/8")]
-[assembly: GoPositionMap("go/build/deps_test.go", "deps_test.cs", "AOAGuA2UpIKCgqaCgqaCgqaClICCpKaClIKCgpSUgpSCgoKClIKUgoKCgqaCytSCgoKUgoKClIKCgpSCgoKUlIKUuIKClIKCgpSClIKUgoKCgriCqJKCgpSqopSCgoKmgoLMkoKClIKCgoKCgqY=", "865-882:1", "", "963=Join/1/1/1")]
+[assembly: GoPositionMap("go/build/build_test.go", "build_test.cs", "ABkqgoIACAaCgoKCgoKClIKmgoKCgpSCuIKClIKCgoKCggALBoKCgpSCpoKClIKUgoL4goKClIKUggAICIKCggAKCIKUgoKUyoK4gqaCpoL4goKmgoKmgoKUggALCACIAfwCgrKSgoKCggALFIKCgoKClIIACRCCyIL2ABAsgrKCkoKUlJKUgoIACwqCgqaCgpSCusYADB6CgoKClAAJCoIACRqCgoKUggAYDsKClJSClAAGFpSCkpSClIKCgoKUlIK4gqaC6gAMBIKUlIKCgpSCgoKUgoK4opSUgoKClIKCgoKCggAKCoKUlIKCgpSCgoKmgoK4gpSUgoKClJSCgpSClIKCABAOsri4goCCpICCtoKCgoKUgoCCgoCClAAJDNiCgqaC/NiCgqaCABAOsoKCgpSCgpSClIKCgsrKlIL+soKCgoKUgoIAEBLCgoKCgoKUgoKUgoKmgoKCgpSClIKC+IKCgpSCABcIgoKCpoKClIKCgqaUlA==", "29-38:1;39-48:2;346-357:1;411-416:1;417-419:2;521-548:1;814-823:1", "", "148=FromSlash/1/1/1;546=Join/1/2/6,Join/2/2/8")]
+[assembly: GoPositionMap("go/build/deps_test.go", "deps_test.cs", "AOYGuA2UpIKCgqaCgqaCgqaClICCpKaClIKCgpSUgpSCgoKClIKUgoKCgqaCyvSCgoKUgoKClIKCgpSCgoKUlIKUuIKClIKCgpSClIKUgoKCgriCqJKCgpSqopSCgoKmgoLMkoKClIKCgoKCgqY=", "865-882:1", "", "971=Join/1/1/1")]
 [assembly: GoPositionMap("go/build/read_test.go", "read_test.cs", "ABguADtoADBagoKCgpSCgqaCgoKCgoKUlIKCpoKCyoKCgoK4gqYARoYBuIKCgoKCpoKCgugAWJoBgoKCuIKCgpSCgoKClIKCgg==", "154-158:1;244-248:1")]
 [assembly: GoPositionMap("go/build/syslist_test.go", "syslist_test.cs", "AA0egpaCgpSmgoKUAAcQABEkgoKC")]
-[assembly: GoPositionMap("go/build/vendor_test.go", "vendor_test.cs", "ABYoAA4QkoKCgoKClIKCgoKCpoIAChKCgoKm9oIABhSCgg==")]
+[assembly: GoPositionMap("go/build/vendor_test.go", "vendor_test.cs", "ABYoABAQkoKCgoKClIKCgoKCpoIAChKCgoKm9oIABhSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -105,3 +105,13 @@ public static partial class build_internal_test_package
         builtin.initPackage(typeof(global::go.go.build_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(build_internal_test_package.readNopCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class build_internal_testᴛreadNopCloser;
+// </MethodHolders>

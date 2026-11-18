@@ -7,9 +7,6 @@
 global using static global::go.go.@internal.gcimporter_package;
 
 // <ImportedTypeAliases>
-global using typesꓸInfo = go.go.types_package.ΔInfo;
-global using typesꓸScope = go.go.types_package.ΔScope;
-global using typesꓸType = go.go.types_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,7 +43,7 @@ using static global::go.go.@internal.gcimporter_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/internal/gcimporter/gcimporter_test.go", "gcimporter_test.cs", "ACM+goIADAzkgoKUgpSCgoKmgoKCgoKClKaCgoKCgoKUgqbkgoKClIKClOa0gqaUuJSCgpSClLiCgoLqAAoEooK4gtyCgoK4lIK4goKCpoKUppKCgoKUuMqCgoKUgoKClJSCgpSCgpSClIK4goKU2KrSgoKClJSmgoKCgpSmgoKUABQGoqaCpoKCgqaCgoKCppSCgoKUgpSUgriClIKm2oIAAhLagqTIgsqCgqamgoKmgqaCgqaCgoKAgtYADQSCgpSmgqiSgoKCgpSUgoKCgriCgqbmABcwgqaCpoKCgoKUgpSCgoKmgoKCpoKCpoLOtIKCpoKCuIKCgoKClILKlIIACAqCpoKmlIKCgoKUgoKCgoIAEBCSpoKmgoKCgqaCgoKCkgANCKKmgqaCgsqCgqaCpqaCgsYACASipoKmgoKUpqIACwSCpoK4goKCgqiSgoKCpoK4goKCuIKCuIIACQiipoKmgpQADRyCgoKCxuSCpoKm5oKmgriCgoLmgqaCpuaCpoKm5oKmgqamgoKCgoKUpqKCgoKC1qKClIKC3AAUBIKmgqaCgoKmlJSCgqaSgoKUpqoAAhCmgoKCwoKCtKQ=", "165-214:1;380-384:1;794-803:1;821-826:2", "", "285=Default/1/1/1")]
+[assembly: GoPositionMap("go/internal/gcimporter/gcimporter_test.go", "gcimporter_test.cs", "ACQ+goIADAzkgoKUgpSCgoKmgoKCgoKClKaCgoKCgoKUgqbkgoKClIKClOa0gqaUuJSCgpSClLiCgoLqAAoEooK4gtyCgoK4lIK4goKCpoKUppKCgoKUuMqCgoKUgoKClJSCgpSCgpSClIK4goKU2KrSgoKClJSmgoKCgpSmgoKUABQGoqaCpoKCgqaCgoKCppSCgoKUgpSUgriClIKW2oIAARLagpTIgsqCgqamgoKmgqaCgqaCgoKAgtYADQSCgpSmgqiSgoKCgpSUgoKCgriCgqbmABcwgqaCpoKCgoKUgpSCgoKmgoKCpoKCpoLOtIKCpoKCuIKCgoKClILKlIIACAqCpoKmlIKCgoKUgoKCgoIAEBCSpoKmgoKCgqaCgoKCkgANCKKmgqaCgsqCgqaCpqaCgsYACASipoKmgoKUpqIACwSCpoK4goKCgqiSgoKCpoK4goKCuIKCuIIACQiipoKmgpQADRyCgoKCxuSCpoKm5oKmgriCgoLmgqaCpuaCpoKm5oKmgqamgoKCgoKUpqKCgoKC1qKClIKC/AAWBIKmgqaCgoKmlJSCgqaSgoKUpqoAAhCmgoKCwoKCtKQ=", "165-214:1;380-384:1;794-803:1;821-826:2", "", "286=Default/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;
@@ -100,3 +97,13 @@ public static partial class gcimporter_test_package
         builtin.initPackage(typeof(global::go.go.@internal.gcimporter_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(gcimporter_test_package.importMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcimporter_testᴛimportMap;
+// </MethodHolders>

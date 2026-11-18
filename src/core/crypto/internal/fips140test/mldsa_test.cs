@@ -100,7 +100,7 @@ public static void TestMLDSAAccumulated(ж<testing.T> t) {
     }
 }
 
-internal static void testMLDSAAccumulated(ж<testing.T> t, Func<slice<byte>, (ж<mldsa.PrivateKey>, error)> newPrivateKey, Func<slice<byte>, (ж<mldsaꓸPublicKey>, error)> newPublicKey, nint n, @string expected) {
+internal static void testMLDSAAccumulated(ж<testing.T> t, Func<slice<byte>, (ж<mldsa.PrivateKey>, error)> newPrivateKey, Func<slice<byte>, (ж<mldsa.PublicKey>, error)> newPublicKey, nint n, @string expected) {
     var s = sha3.NewShake128();
     var o = sha3.NewShake128();
     var seed = new slice<byte>(PrivateKeySize);
@@ -270,7 +270,7 @@ public static void BenchmarkMLDSAVerify(ж<testing.B> b) {
 internal static ref readonly @string contextˢ => ref contextˢᵇ;
 private static readonly @string contextˢᵇ = "context"u8;
 
-internal static void benchmarkMLDSAVerify(ж<testing.B> b, Func<ж<mldsa.PrivateKey>> generateKey, Func<slice<byte>, (ж<mldsaꓸPublicKey>, error)> newPublicKey) {
+internal static void benchmarkMLDSAVerify(ж<testing.B> b, Func<ж<mldsa.PrivateKey>> generateKey, Func<slice<byte>, (ж<mldsa.PublicKey>, error)> newPublicKey) {
     var priv = generateKey();
     var msg = new slice<byte>(128);
     var (sig, err) = SignDeterministic(priv, msg, contextˢ);

@@ -12,6 +12,7 @@ using testing = testing_package;
 using iotest = go.testing.iotest_package;
 using go.testing;
 using static go.net.http.internal_package;
+using static internal_internal_test_package;
 
 partial class internal_internal_test_package {
 
@@ -381,6 +382,8 @@ internal partial struct funcReader {
     internal error err;
 }
 
+} partial class internal_internal_testᴛfuncReader {
+
 internal static (nint n, error err) Read(this ref funcReader r, slice<byte> p) {
     nint n = default;
 
@@ -396,4 +399,4 @@ internal static (nint n, error err) Read(this ref funcReader r, slice<byte> p) {
     return (n, r.err);
 }
 
-} // end internal_internal_test_package
+} // end internal_internal_testᴛfuncReader

@@ -1605,7 +1605,7 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
     rand.Read(serialBytes[..]);
 
     var template = Ꮡ(new Certificate(
-        SerialNumber: @new<bigꓸInt>().SetBytes(serialBytes[..]),
+        SerialNumber: @new<big.Int>().SetBytes(serialBytes[..]),
         Subject: new pkix.Name(
             CommonName: name
         ),
@@ -1655,7 +1655,7 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
     rand.Read(serialBytes[..]);
 
     var template = Ꮡ(new Certificate(
-        SerialNumber: @new<bigꓸInt>().SetBytes(serialBytes[..]),
+        SerialNumber: @new<big.Int>().SetBytes(serialBytes[..]),
         Subject: new pkix.Name(
             OrganizationalUnit: ["Leaf"],
             CommonName: leaf.cn
@@ -1705,7 +1705,7 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
             // This is a special case for testing unknown
             // name types. A custom SAN extension is
             // injected into the certificate.
-            if (builtin.len(leaf.sans) != 1) {
+            if (len(leaf.sans) != 1) {
                 throw panic("when using unknown name types, it must be the sole name");
             }
 
@@ -1747,11 +1747,11 @@ internal static pkix.Extension customConstraintsExtension(nint typeNum, slice<by
     var constraintʗ1 = constraint;
     slice<byte> appendConstraint(slice<byte> contentsΔ1, uint8 tag) {
         contentsΔ1 = append(contentsΔ1, (byte)((uint8)((uint8)(tag | 32) /* constructed */ | 0x80)) /* context-specific */);
-        contentsΔ1 = append(contentsΔ1, (byte)(4 + builtin.len(constraintʗ1)) /* length */);
+        contentsΔ1 = append(contentsΔ1, (byte)(4 + len(constraintʗ1)) /* length */);
         contentsΔ1 = append(contentsΔ1, (byte)0x30 /* SEQUENCE */);
-        contentsΔ1 = append(contentsΔ1, (byte)(2 + builtin.len(constraintʗ1)) /* length */);
+        contentsΔ1 = append(contentsΔ1, (byte)(2 + len(constraintʗ1)) /* length */);
         contentsΔ1 = append(contentsΔ1, (byte)typeNum /* GeneralName type */);
-        contentsΔ1 = append(contentsΔ1, (byte)builtin.len(constraintʗ1));
+        contentsΔ1 = append(contentsΔ1, (byte)len(constraintʗ1));
         return appendꓸꓸꓸ(contentsΔ1, constraintʗ1);
     }
 
@@ -1764,7 +1764,7 @@ internal static pkix.Extension customConstraintsExtension(nint typeNum, slice<by
 
     slice<byte> value = default;
     value = append(value, (byte)0x30 /* SEQUENCE */);
-    value = append(value, (byte)builtin.len(contents));
+    value = append(value, (byte)len(contents));
     value = appendꓸꓸꓸ(value, contents);
 
     return new pkix.Extension(
@@ -1825,13 +1825,13 @@ internal static error addConstraintsToTemplate(constraintsSpec constraints, ж<g
         return true;
     }
 
-    if (builtin.len(constraints.ok) == 1 && builtin.len(constraints.bad) == 0) {
+    if (len(constraints.ok) == 1 && len(constraints.bad) == 0) {
         if (handleSpecialConstraint(constraints.ok[0], false)) {
             return default;
         }
     }
 
-    if (builtin.len(constraints.bad) == 1 && builtin.len(constraints.ok) == 0) {
+    if (len(constraints.bad) == 1 && len(constraints.ok) == 0) {
         if (handleSpecialConstraint(constraints.bad[0], true)) {
             return default;
         }
@@ -1862,33 +1862,32 @@ internal static (slice<global::go.crypto.x509_package.ExtKeyUsage> ekus, slice<a
     var unknownsᴷ = new stackAppend<asn1.ObjectIdentifier>(moves: true);
 
     foreach (var (_, s) in range(ekuStrs)) {
-        var exprᴛ1 = s;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "serverAuth"u8: {
+        case {} when s == "serverAuth"u8: {
             ekus = append(ekus, ExtKeyUsageServerAuth);
             break;
         }
-        case {} when exprᴛ1 == "clientAuth"u8: {
+        case {} when s == "clientAuth"u8: {
             ekus = append(ekus, ExtKeyUsageClientAuth);
             break;
         }
-        case {} when exprᴛ1 == "email"u8: {
+        case {} when s == "email"u8: {
             ekus = append(ekus, ExtKeyUsageEmailProtection);
             break;
         }
-        case {} when exprᴛ1 == "netscapeSGC"u8: {
+        case {} when s == "netscapeSGC"u8: {
             ekus = append(ekus, ExtKeyUsageNetscapeServerGatedCrypto);
             break;
         }
-        case {} when exprᴛ1 == "msSGC"u8: {
+        case {} when s == "msSGC"u8: {
             ekus = append(ekus, ExtKeyUsageMicrosoftServerGatedCrypto);
             break;
         }
-        case {} when exprᴛ1 == "any"u8: {
+        case {} when s == "any"u8: {
             ekus = append(ekus, ExtKeyUsageAny);
             break;
         }
-        case {} when exprᴛ1 == "other"u8: {
+        case {} when s == "other"u8: {
             unknowns = append(unknownsᴷ, unknowns, new asn1.ObjectIdentifier(new nint[]{2, 4, 1, 2, 3}.slice()));
             break;
         }
@@ -1984,7 +1983,7 @@ public static void TestConstraintCases(ж<testing.T> t) {
             // against name constraints, while we ignore it when it's not hostname-looking.
             if (!testʗ1.noOpenSSL && testNameConstraintsAgainstOpenSSL && testʗ1.leaf.cn == ""u8) {
                 var (output, errΔ1) = testChainAgainstOpenSSL(tΔ1, leafCert, intermediatePool, rootPool);
-                if (errΔ1 == nil && builtin.len(testʗ1.expectedError) > 0) {
+                if (errΔ1 == nil && len(testʗ1.expectedError) > 0) {
                     tΔ1.Error(unexpectedlySucceededˢ);
                     if (debugOpenSSLFailure) {
                         return;
@@ -1994,7 +1993,7 @@ public static void TestConstraintCases(ж<testing.T> t) {
                 if (errΔ1 != nil) {
                     var (_, ok) = errΔ1._<ж<exec.ExitError>>(ᐧ); if (!ok) {
                         tΔ1.Errorf("OpenSSL failed to run: %s", errΔ1);
-                    } else if (builtin.len(testʗ1.expectedError) == 0) {
+                    } else if (len(testʗ1.expectedError) == 0) {
                         tΔ1.Errorf("OpenSSL unexpectedly failed: %v", output);
                         if (debugOpenSSLFailure) {
                             return;
@@ -2012,7 +2011,7 @@ public static void TestConstraintCases(ж<testing.T> t) {
             (_, err) = leafCert.Verify(verifyOpts);
 
             var logInfo = false;
-            if (builtin.len(testʗ1.expectedError) == 0) {
+            if (len(testʗ1.expectedError) == 0) {
                 if (err != nil) {
                     tΔ1.Errorf("unexpected failure: %s", err);
                 } else {
@@ -2035,7 +2034,7 @@ public static void TestConstraintCases(ж<testing.T> t) {
                     return Ꮡbuf.String();
                 }
                 tΔ1.Errorf("root:\n%s", certAsPEM(rootPool.mustCert(tΔ1, 0)));
-                var intermediates = allCerts(tΔ1, intermediatePool); if (builtin.len(intermediates) > 0) {
+                var intermediates = allCerts(tΔ1, intermediatePool); if (len(intermediates) > 0) {
                     foreach (var (ii, intermediate) in range(intermediates)) {
                         tΔ1.Errorf("intermediate %d:\n%s", ii, certAsPEM(intermediate));
                     }
@@ -2142,7 +2141,7 @@ internal static slice<rfc2821Testsᴛ1> rfc2821Tests = [
 public static void TestRFC2821Parsing(ж<testing.T> t) {
     foreach (var (i, test) in range(rfc2821Tests)) {
         var (mailbox, ok) = parseRFC2821Mailbox(test.@in);
-        var expectedFailure = builtin.len(test.localPart) == 0 && builtin.len(test.domain) == 0;
+        var expectedFailure = len(test.localPart) == 0 && len(test.domain) == 0;
 
         if (ok && expectedFailure) {
             t.Errorf("#%d: %q unexpectedly parsed as (%q, %q)", i, test.@in, mailbox.local, mailbox.domain);

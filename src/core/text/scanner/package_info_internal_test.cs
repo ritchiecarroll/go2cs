@@ -31,7 +31,7 @@ using static go.text.scanner_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("text/scanner/scanner_test.go", "scanner_test.cs", "ABYssoKCgpSUpoKCgoKCgoKUlIK4AAoWgoIAChYAmgG2AoKCgpSmooKUgpSCgqaCgsqigoKCuIKCgoKmpoKCgoKCgoKClJSmgoIACgaCgoKCgoKmgoKCgoKCgoK4goKCgoKCgoKUgpSClIKCpoK4goKCgoKCgoKClJSClIK4goKCgoKCgpSUgriCgriCgoIADAaCgriGgoKCgoKCgoKCgqaCgoKCgoKCgoKCgoKCgoKCgoKCgriCgpSCgpSClIKCgoKCuIKCgoKUgpSClKaCgpSClIIAHQiCgoKUgoKUgoKUgoKUgpSCgoKCgoKCgpSCgoKCguyCpoKCgoKCgpSmgoKUgriCgsqigpSCpqKCgoKCgqYACAaUgoKCpoKClIKUgriCgpSClIK4goKCgoKCgoKCgoKCgoKClIKUgriCgoKCgoKCgoKCgoKUgpSC3IKC5oKmlIKCpoKCpoK4gqaUgoKmgoKmgviCgoKCgoKmAAgIggCBAYoCgoKCgriCgoKCgoKUgqaCyoCCAAoKggAHFoKCyqKCgoKCpIKUtAAMCoKCgpSCgoKCpoKCgg==", "296-301:1;395-397:1;458-469:1;530-537:1;704-710:1;851-855:1;920-920:1")]
+[assembly: GoPositionMap("text/scanner/scanner_test.go", "scanner_test.cs", "ABkssoKCgpSUxoKCgoKCgoKUlIK4AAoWgoIAChYAmgG2AoKCgpSmooKUgpSCgqaCgsqigoKCuIKCgoKmpoKCgoKCgoKClJSmgoIACgaCgoKCgoKmgoKCgoKCgoK4goKCgoKCgoKUgpSClIKCpoK4goKCgoKCgoKClJSClIK4goKCgoKCgpSUgriCgriCgoIADAaCgriGgoKCgoKCgoKCgqaCgoKCgoKCgoKCgoKCgoKCgoKCgriCgpSCgpSClIKCgoKCuIKCgoKUgpSClKaCgpSClIIAKwiCgoKUgoKUgoKUgoKUgpSCgoKCgoKCgpSCgoKCggAIDILGgoKCgoKClKaCgpSCuIKCyqKClIKmooKCgoKCpgAIBpSCgoKmgoKUgpSCuIKClIKUgriCgoKCgoKCgoKCgoKCgoKUgpSCuIKCgoKCgoKCgoKCgpSClIL8goIACAaCppSCgqaCgqaCuIKmlIKCpoKCpoL4goKCgoKCpgAICIIAgQGKAoKCgoK4goKCgoKClIKmgsqAggAKCoIABxaCgsqigoKCgqSClLQADAqCgoKUgoKCgqaCgoI=", "296-301:1;395-397:1;458-469:1;530-537:1;704-710:1;851-855:1;920-920:1")]
 // </GoSourcePositionMaps>
 
 namespace go.text;
@@ -63,3 +63,15 @@ public static partial class scanner_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(scanner_internal_test_package.StringReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scanner_internal_testᴛStringReader;
+[GoMethodHost(typeof(scanner_internal_test_package.countReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scanner_internal_testᴛcountReader;
+[GoMethodHost(typeof(scanner_internal_test_package.errReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scanner_internal_testᴛerrReader;
+// </MethodHolders>

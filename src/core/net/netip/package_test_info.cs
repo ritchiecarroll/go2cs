@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using netipꓸAddr = go.net.netip_package.ΔAddr;
-global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
-global using reflectꓸType = go.reflect_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -33,9 +30,7 @@ using static go.net.netip_test_package;
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b6970206e65742f6e657469702e416464723b206e657874206e65742f6e657469702e416464723b2070726576206e65742f6e657469702e416464727d", "nextPrevTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b6e616d6520737472696e673b20697020737472696e677d", "parseBenchInputsᴛ1")]
-[assembly: GoTypeAlias("Addr", "ΔAddr")]
 [assembly: GoTypeAlias("AddrDetail", "go.net.netip_package.addrDetail")]
-[assembly: GoTypeAlias("Prefix", "ΔPrefix")]
 [assembly: GoTypeAlias("Uint128", "go.net.netip_package.uint128")]
 // </ExportedTypeAliases>
 
@@ -46,16 +41,16 @@ using static go.net.netip_test_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Addr, go.net.netip_package.appendMarshaler>]
+[assembly: GoImplement<Addr, netipTypeCmp>]
 [assembly: GoImplement<AddrPort, go.net.netip_package.appendMarshaler>]
 [assembly: GoImplement<AddrPort, netipTypeCmp>]
+[assembly: GoImplement<Prefix, go.net.netip_package.appendMarshaler>]
+[assembly: GoImplement<Prefix, netipTypeCmp>]
 [assembly: GoImplement<parseAddrError, error>]
 [assembly: GoImplement<parsePrefixError, error>]
 [assembly: GoImplement<testing_package.B, testing_package.TB>(Pointer = true)]
 [assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
-[assembly: GoImplement<ΔAddr, go.net.netip_package.appendMarshaler>]
-[assembly: GoImplement<ΔAddr, netipTypeCmp>]
-[assembly: GoImplement<ΔPrefix, go.net.netip_package.appendMarshaler>]
-[assembly: GoImplement<ΔPrefix, netipTypeCmp>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -69,8 +64,8 @@ using static go.net.netip_test_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Addr))]
 [assembly: GoFieldAccess(typeof(uint128))]
-[assembly: GoFieldAccess(typeof(ΔAddr))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -80,7 +75,7 @@ using static go.net.netip_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/netip/export_test.go", "export_test.cs", "AA8UoqKegqaCpoKmlKSC")]
+[assembly: GoPositionMap("net/netip/export_test.go", "export_test.cs", "ABAUoqKegqaCpoKmlMSy")]
 [assembly: GoPositionMap("net/netip/fuzz_test.go", "fuzz_test.cs", "ABIkAGzaAaKCpoKCgqaCgoKmgoKClIKClIKUgpSClIKUgpSClIKUgpSClILcgpSCpoKCgpSCgpSCgoKUgoK6koKClIKCgoKUgoKCgpSCgoKClIKCgoK6koKClIKCgoKUgoKCgpSCgoKClIKCgoK4goKClIKCAAkUkoKCpoKCggAQIrKUpoKCgpSClIKCuIKCgoKmgg==", "132-211:1")]
 [assembly: GoPositionMap("net/netip/inlining_test.go", "inlining_test.cs", "AB4gooKCyoKUgpKClAAsWrbugoKClJSCgpQ=", "28-31:1", "", "36=GoToolPath/1/1/1,CombinedOutput/1/1/4")]
 [assembly: GoPositionMap("net/netip/netip.go", "netip.cs", "AESKAYKakJiQloCWgJaAlrIABRLSAAgYsoKUpMimqqKCgpQAChKCgoKUxoKSgoKCgoKUgoKClLiCpoKUgoKClKaClIKosoKCgpSoktyCgoKClLiCpoKClILKgqaCgoKCgoKCgoKUlJSUlKaUuIKUlJSmgoKUgoKUgoK4goKmgoK4goKClKaCgpSCgoLcgriCgpSCgpSClJSsspSklMqiqsKqwgACEPasoJ7SlKSUqJKClKyykoKUgpSCgpSClIKClIKUgpKClIKmrKCasqyyqqKuwoKUrLKClIKClIKqooKUgqiSqJKCyoK4gpSokoLKgriClKiSgsqCuIKUqsaClKiSgsqCuIKUAAIYAAkClKaCyoKmAAIUwoK4pqqmpq7CAAYQ0oKUgpSkgpS0graCAAIQ8oKCrNKCgpSClKiSlKSCgqSCgoK8ooKClKaUpqqigoKUgpSCAAYeAAwClKSkgpS+spSkpIKUAAoSyIKUgpSoyIKUgpSClKiSxoKCgoKmgoKCgoKCgoKmgoKCgqaCgoKCgpQAAhAABRDygoKmgoKCgoKUgriCgoKCgpSCpqaCgpSs0pSmgoKCgqampoKUqqKssoLGgrSCgoKUgqQAAhDSgoKUgoKoksa0goKkpoKUpKQAAxDC6qKClIKkgqSCpIKUAAoWkLaAloAADQ4ACQKCgqaCgpSClIKClIKmrsKCgoKUgoKUgoKClIKCgpSqooKClMqQmrKClOaigpSkgoK0goKCgpSCgoKUpIKCrLKUpLSCgpSUpIKCqqKssoLGgrSCpKyygoKUgoKssoKClKyy6qKClIKCgpSCAA8uAAgCgoKU/oCaoJqglJaAngAICICCtoCCtgALEIIABBTygoKUgoKmgqamgqaCgpSCgpSClKqigoKUzsKCAAIU8oKUkpQACBLKAAMS0oKUgpSClIKSlJSCnMKClIKUrLKClIK4gpSCgpS4goKqoqyygsaCtIKkrLKCgpSCgqyygoKUrMTqooKUgoKClILokoKU", "", "", "105=BEUint64/1/2/2,BEUint64/2/2/3;652=IsLoopback/1/1/1,IsMulticast/1/1/2,IsLinkLocalUnicast/1/1/3;668=v4/2/5/1,v4/3/5/1,v4/4/5/2,v4/5/5/2;1419=withoutZone/1/1/1")]
@@ -118,9 +113,9 @@ public static partial class netip_package
     internal partial struct parsePrefixError {}
     internal partial struct uint128 {}
     public partial interface appendMarshaler {}
+    public partial struct Addr {}
     public partial struct AddrPort {}
-    public partial struct ΔAddr {}
-    public partial struct ΔPrefix {}
+    public partial struct Prefix {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -151,6 +146,23 @@ public static partial class netip_package
     [GoInit] internal static void initᴛᴛimportꓸunique() => builtin.initPackage(typeof(unique_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(netip_package.Addr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛAddr;
+[GoMethodHost(typeof(netip_package.AddrPort)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛAddrPort;
+[GoMethodHost(typeof(netip_package.Addr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛAddrᴛtest;
+[GoMethodHost(typeof(netip_package.Prefix)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛPrefix;
+[GoMethodHost(typeof(netip_package.Prefix)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛPrefixᴛtest;
+[GoMethodHost(typeof(netip_package.parseAddrError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛparseAddrError;
+[GoMethodHost(typeof(netip_package.parsePrefixError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛparsePrefixError;
+[GoMethodHost(typeof(netip_package.uint128)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛuint128;
+// </MethodHolders>
 
 [GoPackage("netip_test")]
 public static partial class netip_test_package

@@ -7,6 +7,7 @@ using reflect = reflect_package;
 using testing = testing_package;
 using time = time_package;
 using static go.database.sql.driver_package;
+using static driver_internal_test_package;
 
 partial class driver_internal_test_package {
 
@@ -96,6 +97,8 @@ internal partial struct dec {
     internal int32 exponent;
 }
 
+} partial class driver_internal_testᴛdec {
+
 internal static (byte form, bool negative, slice<byte> coefficient, int32 exponent) Decompose(this dec d, slice<byte> buf) {
     d = d.ΔClone();
 
@@ -104,4 +107,4 @@ internal static (byte form, bool negative, slice<byte> coefficient, int32 expone
     return (d.form, d.neg, coef, d.exponent);
 }
 
-} // end driver_internal_test_package
+} // end driver_internal_testᴛdec
