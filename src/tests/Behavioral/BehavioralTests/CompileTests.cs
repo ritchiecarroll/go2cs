@@ -2518,6 +2518,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSliceAliasing() => CheckTarget("SliceAliasing");
 
     [TestMethod]
+    public void CheckSliceArrayElementCopies() => CheckTarget("SliceArrayElementCopies");
+
+    [TestMethod]
     public void CheckSliceBoundsEscapeRoutes() => CheckTarget("SliceBoundsEscapeRoutes");
 
     [TestMethod]
