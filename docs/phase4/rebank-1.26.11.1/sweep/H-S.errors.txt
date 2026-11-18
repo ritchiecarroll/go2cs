@@ -1,0 +1,4 @@
+# runtime.tests.csproj build errors, windows, at 6e870821d6 (sweep row output, de-duplicated, repo-relative)
+src/core/runtime/export_impl_test.cs(47,31): error CS1501: No overload for method 'Kind' takes 1 arguments
+src/core/runtime/export_impl_test.cs(51,58): error CS1501: No overload for method 'Elem' takes 1 arguments
+src/core/runtime/hash_test.cs(135,62): error CS0229: Ambiguity between 'runtime_test_package.hashSize' and 'runtime_package.hashSize'
