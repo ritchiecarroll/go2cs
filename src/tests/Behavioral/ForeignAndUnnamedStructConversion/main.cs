@@ -338,7 +338,7 @@ internal static nint positionalForeign(lib.Pitch p) {
 }
 
 internal static nint arrayLocal(hertz h) {
-    var s = new anonBox_V[]{h, h}.array();
+    var s = array<anonBox_V>([h, h]);
     return s[1].Hz;
 }
 
@@ -510,7 +510,7 @@ internal static nint backPositionalLocal(anonBox_V a) {
 }
 
 internal static nint backArrayForeign(anonBox_V a) {
-    var s = new lib.Pitch[]{a, a}.array();
+    var s = array<lib.Pitch>([a, a]);
     return s[1].Double();
 }
 

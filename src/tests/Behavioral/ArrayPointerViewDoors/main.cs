@@ -17,9 +17,9 @@ partial struct hdr {
     internal array<byte> buf = new(12);
 }
 
-internal static readonly ж<array<uint32>> ᏑchachaInit = new StaticBox<array<uint32>>(new uint32[]{0x61707865, 0x3320646e, 0x79622d32, 0x6b206574}.array());
+internal static readonly ж<array<uint32>> ᏑchachaInit = new StaticBox<array<uint32>>(array<uint32>([0x61707865, 0x3320646e, 0x79622d32, 0x6b206574]));
 internal static ref array<uint32> chachaInit => ref ((StaticBox<array<uint32>>)ᏑchachaInit).ValueSlot;
-internal static readonly ж<array<uint8>> Ꮡmagic = new StaticBox<array<uint8>>(new uint8[]{0xd9, 0xd5, 0x05, 0xf9, 0x20, 0xa1, 0x63, 0xd7}.array());
+internal static readonly ж<array<uint8>> Ꮡmagic = new StaticBox<array<uint8>>(array<uint8>([0xd9, 0xd5, 0x05, 0xf9, 0x20, 0xa1, 0x63, 0xd7]));
 internal static ref array<uint8> magic => ref ((StaticBox<array<uint8>>)Ꮡmagic).ValueSlot;
 
 internal static uintptr native(@string fill) {

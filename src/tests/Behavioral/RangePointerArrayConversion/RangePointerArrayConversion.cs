@@ -14,7 +14,7 @@ internal static void main() {
     }
     fmt.Println(sum);
 
-    ref var rows = ref heap<array<array<nint>>>(new array<nint>[]{new nint[]{1, 2}.array(), new nint[]{3, 4}.array()}.array(), out var Ꮡrows);
+    ref var rows = ref heap<array<array<nint>>>(new array<nint>[]{array<nint>([1, 2]), array<nint>([3, 4])}.array(), out var Ꮡrows);
     @unsafe.Pointer q = @unsafe.Pointer.FromPinnedBox(Ꮡrows);
     nint total = 0;
     foreach (var (i, vᴛ1) in range((@unsafe.Pointer.To<array<array<nint>>>(q)).Value)) {
