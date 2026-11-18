@@ -1,0 +1,29 @@
+shard	row	RID	line	run
+DW-8	encoding/json	osx-x64	  FAIL  encoding/json                      [308s]	44365263752
+DW-8	encoding/json	osx-arm64	  FAIL  encoding/json                      [97s]	44365263752
+DW-8	go/importer	osx-x64	  PASS  go/importer                        3 (darwin) [209s]	44365263752
+DW-8	go/importer	osx-arm64	  PASS  go/importer                        3 (darwin) [oracle-goarch=arm64] [78s]	44365263752
+DW-8	hash/maphash	osx-x64	  PASS  hash/maphash                       66 (darwin) [508s]	44365263752
+DW-8	hash/maphash	osx-arm64	  PASS  hash/maphash                       66 (darwin) [oracle-goarch=arm64] [266s]	44365263752
+DW-8	html	osx-x64	  PASS  html                               3 (darwin) [71s]	44365263752
+DW-8	html	osx-arm64	  PASS  html                               3 (darwin) [oracle-goarch=arm64] [21s]	44365263752
+DW-8	internal/cpu	osx-x64	  PASS  internal/cpu                       2 (darwin) [53s]	44365263752
+DW-8	internal/cpu	osx-arm64	  PASS  internal/cpu                       2 (darwin) [oracle-goarch=arm64] [29s]	44365263752
+DW-8	internal/fuzz	osx-x64	  PASS  internal/fuzz                      52 (darwin) [85s]	44365263752
+DW-8	internal/fuzz	osx-arm64	  PASS  internal/fuzz                      52 (darwin) [oracle-goarch=arm64] [48s]	44365263752
+DW-8	internal/sysinfo	osx-x64	  PASS  internal/sysinfo                   1 (darwin) [37s]	44365263752
+DW-8	internal/sysinfo	osx-arm64	  PASS  internal/sysinfo                   1 (darwin) [oracle-goarch=arm64] [24s]	44365263752
+DW-8	io	osx-x64	  PASS  io                                 60 (darwin) [99s]	44365263752
+DW-8	io	osx-arm64	  PASS  io                                 60 (darwin) [oracle-goarch=arm64] [39s]	44365263752
+DW-8	math/rand	osx-x64	  PASS  math/rand                          47 (darwin) [96s]	44365263752
+DW-8	math/rand	osx-arm64	  PASS  math/rand                          47 (darwin) [oracle-goarch=arm64] [55s]	44365263752
+DW-8	net/http/httptrace	osx-x64	  PASS  net/http/httptrace                 2 (darwin) [183s]	44365263752
+DW-8	net/http/httptrace	osx-arm64	  PASS  net/http/httptrace                 2 (darwin) [oracle-goarch=arm64] [74s]	44365263752
+DW-8	net/url	osx-x64	  PASS  net/url                            53 (darwin) [217s]	44365263752
+DW-8	net/url	osx-arm64	  PASS  net/url                            53 (darwin) [oracle-goarch=arm64] [68s]	44365263752
+DW-8	text/template	osx-x64	  PASS  text/template                      53 (darwin) [89s]	44365263752
+DW-8	text/template	osx-arm64	  PASS  text/template                      53 (darwin) [oracle-goarch=arm64] [45s]	44365263752
+DW-8	unicode/utf16	osx-x64	  PASS  unicode/utf16                      8 (darwin) [711s]	44365263752
+DW-8	unicode/utf16	osx-arm64	  PASS  unicode/utf16                      8 (darwin) [oracle-goarch=arm64] [218s]	44365263752
+DW-8	weak	osx-x64	  PASS  weak                               9 (darwin) [51s]	44365263752
+DW-8	weak	osx-arm64	  PASS  weak                               9 (darwin) [oracle-goarch=arm64] [25s]	44365263752

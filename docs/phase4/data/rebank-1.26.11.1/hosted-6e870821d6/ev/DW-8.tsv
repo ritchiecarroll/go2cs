@@ -1,0 +1,13 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs	run	wall_s	cells	absent
+DW-8	crypto/hkdf	osx-x64	3	3	0	0	0	validated	yes	3	0	3/0	no	44365263752	134	read	-
+DW-8	crypto/hkdf	osx-arm64	3	3	0	0	0	validated	yes	3	0	3/0	no	44365263752	38	read	-
+DW-8	crypto/internal/fips140/edwards25519/field	osx-x64	15	15	0	0	0	validated	yes	15	0	15/0	no	44365263752	76	read	-
+DW-8	crypto/internal/fips140/edwards25519/field	osx-arm64	15	15	0	0	0	validated	yes	15	0	15/0	no	44365263752	44	read	-
+DW-8	crypto/internal/fips140/subtle	osx-x64	1	1	0	0	0	validated	yes	1	0	1/0	no	44365263752	74	read	-
+DW-8	crypto/internal/fips140/subtle	osx-arm64	1	1	0	0	0	validated	yes	1	0	1/0	no	44365263752	24	read	-
+DW-8	crypto/md5	osx-x64	15	14	1	1	0	validated	yes	14	1	14/1	no	44365263752	80	read	-
+DW-8	crypto/md5	osx-arm64	15	14	1	1	0	validated	yes	14	1	14/1	no	44365263752	36	read	-
+DW-8	debug/dwarf	osx-x64	41	41	0	0	0	validated	yes	41	0	41/0	no	44365263752	68	read	-
+DW-8	debug/dwarf	osx-arm64	41	41	0	0	0	validated	yes	41	0	41/0	no	44365263752	31	read	-
+DW-8	encoding/ascii85	osx-x64	9	9	0	0	0	validated	yes	9	0	9/0	no	44365263752	84	read	-
+DW-8	encoding/ascii85	osx-arm64	9	9	0	0	0	validated	yes	9	0	9/0	no	44365263752	27	read	-

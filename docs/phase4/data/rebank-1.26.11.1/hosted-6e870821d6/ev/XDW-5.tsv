@@ -1,0 +1,23 @@
+shard	row	RID	line	run
+DW-5	internal/reflectlite	osx-x64	  FAIL  internal/reflectlite               [77s]	44343842893
+DW-5	internal/reflectlite	osx-arm64	  FAIL  internal/reflectlite               [20s]	44343842893
+DW-5	internal/runtime/maps	osx-x64	  PASS  internal/runtime/maps              19 (darwin) [83s]	44343842893
+DW-5	internal/runtime/maps	osx-arm64	  PASS  internal/runtime/maps              19 (darwin) [oracle-goarch=arm64] [43s]	44343842893
+DW-5	internal/sync	osx-x64	  PASS  internal/sync                      106 (darwin) [73s]	44343842893
+DW-5	internal/sync	osx-arm64	  PASS  internal/sync                      106 (darwin) [oracle-goarch=arm64] [22s]	44343842893
+DW-5	internal/syscall/unix	osx-x64	  PASS  internal/syscall/unix              8 (darwin) [92s]	44343842893
+DW-5	internal/syscall/unix	osx-arm64	  PASS  internal/syscall/unix              8 (darwin) [oracle-goarch=arm64] [12s]	44343842893
+DW-5	internal/zstd	osx-x64	  PASS  internal/zstd                      535 (darwin) [52s]	44343842893
+DW-5	internal/zstd	osx-arm64	  PASS  internal/zstd                      535 (darwin) [oracle-goarch=arm64] [29s]	44343842893
+DW-5	log	osx-x64	  PASS  log                                24 (darwin) [92s]	44343842893
+DW-5	log	osx-arm64	  PASS  log                                24 (darwin) [oracle-goarch=arm64] [30s]	44343842893
+DW-5	mime/quotedprintable	osx-x64	  PASS  mime/quotedprintable               5 (darwin) [73s]	44343842893
+DW-5	mime/quotedprintable	osx-arm64	  PASS  mime/quotedprintable               5 (darwin) [oracle-goarch=arm64] [20s]	44343842893
+DW-5	net	osx-x64	  PASS  net                                553 (darwin) [763s]	44343842893
+DW-5	net	osx-arm64	  PASS  net                                553 (darwin) [oracle-goarch=arm64] [1039s]	44343842893
+DW-5	net/http/cookiejar	osx-x64	  PASS  net/http/cookiejar                 17 (darwin) [441s]	44343842893
+DW-5	net/http/cookiejar	osx-arm64	  PASS  net/http/cookiejar                 17 (darwin) [oracle-goarch=arm64] [107s]	44343842893
+DW-5	os/user	osx-x64	  PASS  os/user                            6 (darwin) [106s]	44343842893
+DW-5	os/user	osx-arm64	  PASS  os/user                            6 (darwin) [oracle-goarch=arm64] [12s]	44343842893
+DW-5	text/tabwriter	osx-x64	  FAIL  text/tabwriter                     [850s]	44343842893
+DW-5	text/tabwriter	osx-arm64	  FAIL  text/tabwriter                     [161s]	44343842893

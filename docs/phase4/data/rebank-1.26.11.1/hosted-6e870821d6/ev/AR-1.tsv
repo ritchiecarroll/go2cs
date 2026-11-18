@@ -1,0 +1,2 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	absent	divergent_names	run	wall_s	cells	same_names
+AR-1	internal/poll	linux-arm64	13	12	1	1	0	validated	-	-	TestSplicePipePool	44343993159	1878	read	yes

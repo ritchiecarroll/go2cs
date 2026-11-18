@@ -1,0 +1,15 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs	run	wall_s	cells	absent
+DW-9	bufio	osx-x64	82	81	1	1	0	validated	yes	80	1	81/1	yes	44365276144	57	read	-
+DW-9	bufio	osx-arm64	82	81	1	1	0	validated	yes	80	1	81/1	yes	44365276144	41	read	-
+DW-9	cmp	osx-x64	4	4	0	0	0	validated	yes	4	0	4/0	no	44365276144	28	read	-
+DW-9	cmp	osx-arm64	4	4	0	0	0	validated	yes	4	0	4/0	no	44365276144	16	read	-
+DW-9	crypto/internal/boring	osx-x64	3	3	0	0	0	validated	yes	3	0	3/0	no	44365276144	80	read	-
+DW-9	crypto/internal/boring	osx-arm64	3	3	0	0	0	validated	yes	3	0	3/0	no	44365276144	26	read	-
+DW-9	crypto/internal/fips140/ecdh	osx-x64	1	1	0	0	0	validated	yes	1	0	1/0	no	44365276144	84	read	-
+DW-9	crypto/internal/fips140/ecdh	osx-arm64	1	1	0	0	0	validated	yes	1	0	1/0	no	44365276144	37	read	-
+DW-9	crypto/internal/fips140/rsa	osx-x64	123	123	0	0	0	validated	yes	123	0	123/0	no	44365276144	47	read	-
+DW-9	crypto/internal/fips140/rsa	osx-arm64	123	123	0	0	0	validated	yes	123	0	123/0	no	44365276144	26	read	-
+DW-9	crypto/internal/fips140cache	osx-x64	1	1	0	0	0	validated	yes	1	0	1/0	no	44365276144	33	read	-
+DW-9	crypto/internal/fips140cache	osx-arm64	1	1	0	0	0	validated	yes	1	0	1/0	no	44365276144	19	read	-
+DW-9	crypto/rc4	osx-x64	75	75	0	0	0	validated	yes	75	0	75/0	no	44365276144	57	read	-
+DW-9	crypto/rc4	osx-arm64	75	75	0	0	0	validated	yes	75	0	75/0	no	44365276144	23	read	-

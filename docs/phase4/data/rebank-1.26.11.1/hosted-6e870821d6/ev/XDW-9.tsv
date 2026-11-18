@@ -1,0 +1,27 @@
+shard	row	RID	line	run
+DW-9	encoding/gob	osx-x64	  FAIL  encoding/gob                       [74s]	44365276144
+DW-9	encoding/gob	osx-arm64	  FAIL  encoding/gob                       [35s]	44365276144
+DW-9	go/ast	osx-x64	  PASS  go/ast                             36 (darwin) [63s]	44365276144
+DW-9	go/ast	osx-arm64	  PASS  go/ast                             36 (darwin) [oracle-goarch=arm64] [34s]	44365276144
+DW-9	go/doc/comment	osx-x64	  PASS  go/doc/comment                     10059 (darwin) [58s]	44365276144
+DW-9	go/doc/comment	osx-arm64	  PASS  go/doc/comment                     10059 (darwin) [oracle-goarch=arm64] [47s]	44365276144
+DW-9	go/scanner	osx-x64	  PASS  go/scanner                         12 (darwin) [115s]	44365276144
+DW-9	go/scanner	osx-arm64	  PASS  go/scanner                         12 (darwin) [oracle-goarch=arm64] [47s]	44365276144
+DW-9	go/version	osx-x64	  PASS  go/version                         3 (darwin) [27s]	44365276144
+DW-9	go/version	osx-arm64	  PASS  go/version                         3 (darwin) [oracle-goarch=arm64] [17s]	44365276144
+DW-9	internal/runtime/cgroup	osx-x64	  PASS  internal/runtime/cgroup            114 (darwin) [63s]	44365276144
+DW-9	internal/runtime/cgroup	osx-arm64	  PASS  internal/runtime/cgroup            114 (darwin) [oracle-goarch=arm64] [35s]	44365276144
+DW-9	internal/strconv	osx-x64	  PASS  internal/strconv                   47 (darwin) [98s]	44365276144
+DW-9	internal/strconv	osx-arm64	  PASS  internal/strconv                   47 (darwin) [oracle-goarch=arm64] [64s]	44365276144
+DW-9	internal/unsafeheader	osx-x64	  PASS  internal/unsafeheader              6 (darwin) [55s]	44365276144
+DW-9	internal/unsafeheader	osx-arm64	  PASS  internal/unsafeheader              6 (darwin) [oracle-goarch=arm64] [20s]	44365276144
+DW-9	io/ioutil	osx-x64	  PASS  io/ioutil                          28 (darwin) [30s]	44365276144
+DW-9	io/ioutil	osx-arm64	  PASS  io/ioutil                          28 (darwin) [oracle-goarch=arm64] [18s]	44365276144
+DW-9	net/http/cgi	osx-x64	  PASS  net/http/cgi                       39 (darwin) [371s]	44365276144
+DW-9	net/http/cgi	osx-arm64	  PASS  net/http/cgi                       39 (darwin) [oracle-goarch=arm64] [177s]	44365276144
+DW-9	syscall	osx-x64	  PASS  syscall                            32 (darwin) [116s]	44365276144
+DW-9	syscall	osx-arm64	  PASS  syscall                            32 (darwin) [oracle-goarch=arm64] [60s]	44365276144
+DW-9	testing/iotest	osx-x64	  PASS  testing/iotest                     18 (darwin) [620s]	44365276144
+DW-9	testing/iotest	osx-arm64	  PASS  testing/iotest                     18 (darwin) [oracle-goarch=arm64] [282s]	44365276144
+DW-9	text/scanner	osx-x64	  PASS  text/scanner                       18 (darwin) [73s]	44365276144
+DW-9	text/scanner	osx-arm64	  PASS  text/scanner                       18 (darwin) [oracle-goarch=arm64] [29s]	44365276144

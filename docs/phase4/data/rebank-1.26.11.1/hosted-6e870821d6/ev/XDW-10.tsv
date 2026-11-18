@@ -1,0 +1,7 @@
+shard	row	RID	line	run
+DW-10	reflect	osx-x64	  FAIL  reflect                            [175s]	44343883151
+DW-10	reflect	osx-arm64	  FAIL  reflect                            [131s]	44343883151
+DW-10	runtime/pprof	osx-x64	  PASS  runtime/pprof                      146 (darwin) [770s]	44343883151
+DW-10	runtime/pprof	osx-arm64	  PASS  runtime/pprof                      146 (darwin) [oracle-goarch=arm64] [466s]	44343883151
+DW-10	sort	osx-x64	  PASS  sort                               63 (darwin) [45s]	44343883151
+DW-10	sort	osx-arm64	  PASS  sort                               63 (darwin) [oracle-goarch=arm64] [34s]	44343883151

@@ -1,0 +1,11 @@
+shard	row	RID	line	run
+DW-7	net/http	osx-x64	  FAIL  net/http                           [286s]	44343855934
+DW-7	net/http	osx-arm64	  FAIL  net/http                           [280s]	44343855934
+DW-7	net/http/pprof	osx-x64	  PASS  net/http/pprof                     15 (darwin) [243s]	44343855934
+DW-7	net/http/pprof	osx-arm64	  PASS  net/http/pprof                     15 (darwin) [oracle-goarch=arm64] [176s]	44343855934
+DW-7	path	osx-x64	  PASS  path                               9 (darwin) [50s]	44343855934
+DW-7	path	osx-arm64	  PASS  path                               9 (darwin) [oracle-goarch=arm64] [23s]	44343855934
+DW-7	strings	osx-x64	  PASS  strings                            68 (darwin) [70s]	44343855934
+DW-7	strings	osx-arm64	  PASS  strings                            68 (darwin) [oracle-goarch=arm64] [49s]	44343855934
+DW-7	unicode	osx-x64	  PASS  unicode                            28 (darwin) [653s]	44343855934
+DW-7	unicode	osx-arm64	  PASS  unicode                            28 (darwin) [oracle-goarch=arm64] [313s]	44343855934
