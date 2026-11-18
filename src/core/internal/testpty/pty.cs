@@ -9,6 +9,7 @@ namespace go.@internal;
 using errors = errors_package;
 using fmt = fmt_package;
 using os = os_package;
+using static testpty_package;
 
 partial class testpty_package {
 
@@ -22,11 +23,15 @@ internal static ж<PtyError> ptyError(@string name, error err) {
     return Ꮡ(new PtyError(name, err.Error(), err));
 }
 
+} partial class testptyᴛPtyError {
+
 public static @string Error(this ref PtyError e) {
     return fmt.Sprintf("%s: %s"u8, e.FuncName, e.ErrorString);
 }
 
 public static error Unwrap(this ref PtyError e) { return e.Errno; }
+
+} partial class testpty_package {
 
 public static error ErrNotSupported = errors.New("testpty.Open not implemented on this platform");
 

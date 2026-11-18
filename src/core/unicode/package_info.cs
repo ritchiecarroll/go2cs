@@ -64,7 +64,7 @@ using static go.unicode_package;
 [assembly: GoPositionMap("unicode/casetables.go", "casetables.cs", "AAsYku4=")]
 [assembly: GoPositionMap("unicode/digit.go", "digit.cs", "AAcQkoKU")]
 [assembly: GoPositionMap("unicode/graphic.go", "graphic.cs", "ABcu7M7WgpQAAhDSgpSqooKCpqiygoKmrLKCpqiSgpSopKiSgpSqooKUAAIWAAkEgpSUlKiSgpQ=")]
-[assembly: GoPositionMap("unicode/letter.go", "letter.cs", "AFa2AZKCgoKClIKmuIKCgoKCgpSClKaokoKCgoKUgqa4goKCgoKClIKUpqiylIKUgoKUpoKUgpSCgpSopIKUqKSClKiSgpSqtIKCgoKCgpSClKaokoIAChaUqqKClIKUqJKCqJKCgpSUqJKCgpSUqJKCgpSUqJKCgpSokoKClKiSgoKUAAs8ABICgqaCuIKCgoKClKaC3IKClJQ=")]
+[assembly: GoPositionMap("unicode/letter.go", "letter.cs", "AFm2AZKCgoKClIKmuIKCgoKCgpSClKaokoKCgoKUgqa4goKCgoKClIKUpqiylIKUgoKUpoKUgpSCgpSopIKUqKSClKiSgpSqtIKCgoKCgpSClKaokoIAChaUqqKClIKUqJKCqJKCgpSUqJKCgpSUqJKCgpSUyJKCgpSokoKClKiSgoKUAA08ABICgqaCuIKCgoKClKaC3IKClJQ=")]
 [assembly: GoPositionMap("unicode/tables.go", "tables.cs", "AAoSACpUAC1aAOgE0gkABxAAGDIA4gTGCQAJFNwA9gTuCQCOAZ4CAKoB1gIAPHoA6wPYBwALGACcAboCALEC5AQApAHKAgAJFAC6AvYEAI4BngIAR5ABABEkAE6eAQCuAd4CAAkUABImABw6AAkUAAoWAKsB2AIAH0AA0AGiAwAWLgAhRAA4cgCtAdwCAAsY3NwACxqCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKoAKYBzAIACBIACBLuADdwAAgSAAcQ7gAIEgAHEO4AEiYACRQABxAACBLc7twACRTuAAcQAAcQAAgSAAcQ7gCrAdgCAAcQAAkUAAoW7gAPIO4ACxgADRzuAAoW7u7uACpWAAwaAAwa7gATKAAmTgASJgALGAAUKgAaNgASJgAHENwACBIADRwADBoABxAAIUQABxAABxAABxAABxAAESQAFCoACBLuAA0cAAcQAAgSAAcQAAcQAA8gACtYAAcQAAkUAAgSAAwaAAgS7gAHEO7uAAsY7gAHEAAIEgAMGu4ABxAABxAACBLuAAgSAAcQAAwaAAgSAAoWAAcQAAcQ7gAIEgAIEgAHEO4ABxAACRTc3AAIEgAHEO7uAAcQ7u7u7gASJgAHEAAHEAAKFu7u3AAHEAAIEu7u7u7u7gAHEAAIEgATKO4ABxDu7twACBLuAAcQ7gAJFO4ABxAAFzAABxAACRQAESTc7gALGAAHEAAHEO4ABxDcAA0cAAcQAAcQAAgS7gAHEoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgqgAJkwACBIACBIAFCoADBoAqgHWAgAdPAALGAALGO7cABo23AAKFgAYMgDsAdoDAA8gABYuAAcQAAcQACBCAHz6AQALGAAdPAAJFAALGAAPIAAHEO4ASJIBACBCAGPIAQAVLAAKFgANHoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoK6kgDJApQFAIIChgQAggGGAgBevgEACRLcAH38AQANHAB+/gHuAAwW3Nzc")]
 // </GoSourcePositionMaps>
 
@@ -98,3 +98,13 @@ public static partial class unicode_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(unicode_package.SpecialCase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class unicodeᴛSpecialCase;
+// </MethodHolders>

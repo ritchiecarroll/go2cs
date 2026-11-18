@@ -41,7 +41,7 @@ using static go.vendor.golang.org.x.net.idna_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<info, Δcategory>(Inverted = true, ValueType = "uint16")]
+[assembly: GoImplicitConv<info, category>(Inverted = true, ValueType = "uint16")]
 // </ImplicitConversions>
 
 // This package's string literals are hoisted to `static readonly` fields (the standard
@@ -63,12 +63,12 @@ using static go.vendor.golang.org.x.net.idna_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/net/idna/idna10.0.0.go", "idna10.0.0.cs", "AB5cABACqJIABRbSgL7CgLqigAADENKmgpSCgoKClAAEFNKAvsKCggADHAAKAoAAAxTygLqigoKCgoIAAxgACAKCgoIAGj6CggADGAAKAoKCrsKuwoKCAAgKooKClJSClIKUgpSClNzKuLiUggAKFAAJEgASJIKCyoKCqsKCgoKmgtyClIKCgqaClJSCgoKCgqaUgpSCgoKUuJSCpoKCgoK4goKCgoKClIKUgoK4gpSCgpSCpqaCgoKmpuiCgqbEgpSCgoKUlOqClJSmgoK4gpSUpsIAARDCgoKCgoKCgpSUgoKClJS0goKUtIK0xoKklJSCpoKCppQACxiCgoKmgqaCgpSmgoKUgoKClKiSgoKCpoKCyoKClOyClIKUxoKUxoLYpKaigriCgoKUgpSUABAmAChgooKClJSCgpSCpoKUlIKCgqaClIKCgoKCgpSCgpSClIKUgpSmgoKCpg==", "64-64:1;72-72:1;78-78:1;87-101:1;110-110:1;118-121:1;135-135:1;146-146:1;152-158:1;170-174:1")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/idna/idna10.0.0.go", "idna10.0.0.cs", "AB9cABACqJIABRbSgL7CgLqigAADENKmgpSCgoKClAAEFNKAvsKCggADHAAKAoAAAxTygLqigoKCgoIAAxgACAKCgoIAGj6CggADGAAKAoKCzsKuwoKCAAgKooKClJSClIKUgpSClPzKuLiUggAKFAAJEgAUJIKCAAgKgoLKwoKCgqaC3IKUgoKCpoKUlIKCgoKCppSClIKCgpS4lIKmgoKCgriCgoKCgoKUgpSCgriClIKClIKmxoKCgqam6IKCpsSClIKCgpSU6oKUlMaCgriClJTGwgABEMKCgoKCgoKClJSCgoKUlLSCgpS0grTGgqSUlIKmgoKmlAANGIKCgqaCpoKClKaCgpSCgoKUqJKCgoKmgoLKgoKUAAoMgpSClMaClMaC2KTGooK4goKClIKUlAAQJgAqYKKCgpSUgoKUgqaClJSCgoKmgpSCgoKCgoKUgoKUgpSClIKUxoKCgqY=", "64-64:1;72-72:1;78-78:1;87-101:1;110-110:1;118-121:1;135-135:1;146-146:1;152-158:1;170-174:1")]
 [assembly: GoPositionMap("vendor/golang.org/x/net/idna/punycode.go", "punycode.cs", "ABo+lrKClIKClIKUgoKCpoKCgoKCgpSCgpSCgoKUgoKCgpSClIKCpoKUgoKCgoKUgoKClAACEPKCgoKCgoKClKaCgpSCgoKCgqaCgpSCgoKCgpSUgpSCgoKCgoKUgpSClIKCgoKUgpSokoKClKaClKSklKaClKSUqJKClJSCgoKClA==")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/idna/tables15.0.0.go", "tables15.0.0.cs", "AA1yAPoBxgeygpSkpIKUgoKClKSClIKCgpSCgoKClKSClIKCgpSCgoKClIKCgoKUpqqigoKUgoKUgoKUgoKUrLKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpTsgqiSlKSC3ADNDJwZALkC9ASm")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trie.go", "trie.cs", "ABMq7JzCgoKCgoKCgoKUgpSm")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trie13.0.0.go", "trie13.0.0.cs", "AAkaooKCgpSClJSCgqY=")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trieval.go", "trieval.cs", "AFa8AYKmgoKClKaCgpSmgqaC")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/idna/tables15.0.0.go", "tables15.0.0.cs", "AA9yAPwBxgeygpSkpIKUgoKClKSClIKCgpSCgoKClKSClIKCgpSCgoKClIKCgoKUpqqigoKUgoKUgoKUgoKUrLKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpQACAyCyJKUpIL8AM0MnBkAuQL0BKY=")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trie.go", "trie.cs", "ABUq7LzCgoKCgoKCgoKUgpSm")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trie13.0.0.go", "trie13.0.0.cs", "AA0aooKCgpSClJSCgqY=")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trieval.go", "trieval.cs", "AFq8AYKmgoKClKaCgpSmgqaC")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net;
@@ -83,6 +83,7 @@ public static partial class idna_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct category {}
     internal partial struct idnaTrie {}
     internal partial struct info {}
     internal partial struct joinState {}
@@ -91,7 +92,6 @@ public static partial class idna_package
     internal partial struct runeError {}
     internal partial struct sparseBlocks {}
     internal partial struct valueRange {}
-    internal partial struct Δcategory {}
     public partial struct Profile {}
     public partial struct options {}
     // </TypeAccessibility>
@@ -112,3 +112,19 @@ public static partial class idna_package
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸtextꓸunicodeꓸnorm() => builtin.initPackage(typeof(go.vendor.golang.org.x.text.unicode.norm_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(idna_package.Profile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛProfile;
+[GoMethodHost(typeof(idna_package.idnaTrie)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛidnaTrie;
+[GoMethodHost(typeof(idna_package.info)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛinfo;
+[GoMethodHost(typeof(idna_package.labelError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛlabelError;
+[GoMethodHost(typeof(idna_package.labelIter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛlabelIter;
+[GoMethodHost(typeof(idna_package.runeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛruneError;
+[GoMethodHost(typeof(idna_package.sparseBlocks)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛsparseBlocks;
+// </MethodHolders>

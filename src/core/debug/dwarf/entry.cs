@@ -13,6 +13,7 @@ using errors = errors_package;
 using fmt = fmt_package;
 using strconv = strconv_package;
 using encoding;
+using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -32,6 +33,8 @@ partial struct afield {
 
 // a map from entry format ids to their descriptions
 partial struct abbrevTable /*map[uint32, abbrev]*/;
+
+} partial class dwarfᴛData {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string abbrevˢ => ref abbrevˢᵇ;
@@ -108,6 +111,8 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
     d.abbrevCache[off] = m;
     return (m, default);
 }
+
+} partial class dwarf_package {
 
 // attrIsExprloc indicates attributes that allow exprloc values that
 // are encoded as block values in DWARF 2 and 3. See DWARF 4, Figure
@@ -383,10 +388,14 @@ public static Class ClassRngListsPtr => 18;
 // offset into the "str_offsets" section.
 public static Class ClassStrOffsetsPtr => 19;
 
+} partial class dwarfᴛClass {
+
 //go:generate stringer -type=Class
 public static @string GoString(this Class i) {
     return "dwarf."u8 + i.String();
 }
+
+} partial class dwarfᴛEntry {
 
 // Val returns the value associated with attribute [Attr] in [Entry],
 // or nil if there is no such attribute.
@@ -413,9 +422,13 @@ public static ж<Field> AttrField(this ref Entry e, Attr a) {
     return default;
 }
 
+} partial class dwarf_package {
+
 // An Offset represents the location of an [Entry] within the DWARF info.
 // (See [Reader.Seek].)
 partial struct Offset /*num:uint32*/;
+
+} partial class dwarfᴛbuf {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownAbbreviationTableˢ => ref unknownAbbreviationTableˢᵇ;
@@ -851,12 +864,14 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> cu, ж<unit> Ꮡu) 
     return e;
 }
 
+} partial class dwarf_package {
+
 // A Reader allows reading [Entry] structures from a DWARF “info” section.
 // The [Entry] structures are arranged in a tree. The [Reader.Next] function
 // return successive entries from a pre-order traversal of the tree.
 // If an entry has children, its Children field will be true, and the children
 // follow, terminated by an [Entry] with [Tag] 0.
-partial struct ΔReader {
+partial struct Reader {
     internal buf b;
     internal ж<Data> d;
     internal error err;
@@ -867,22 +882,26 @@ partial struct ΔReader {
     internal ж<Entry> cu;        // current compilation unit
 }
 
+} partial class dwarfᴛData {
+
 // Reader returns a new Reader for [Data].
 // The reader is positioned at byte offset 0 in the DWARF “info” section.
-public static ж<ΔReader> Reader(this ж<Data> Ꮡd) {
-    var r = Ꮡ(new ΔReader(d: Ꮡd));
+public static ж<Reader> Reader(this ж<Data> Ꮡd) {
+    var r = Ꮡ(new Reader(d: Ꮡd));
     r.Seek(0);
     return r;
 }
 
+} partial class dwarfᴛReader {
+
 // AddressSize returns the size in bytes of addresses in the current compilation
 // unit.
-public static nint AddressSize(this ref ΔReader r) {
+public static nint AddressSize(this ref Reader r) {
     return r.d.unit[r.unit].asize;
 }
 
 // ByteOrder returns the byte order in the current compilation unit.
-public static binary.ByteOrder ByteOrder(this ref ΔReader r) {
+public static binary.ByteOrder ByteOrder(this ref Reader r) {
     return r.b.order;
 }
 
@@ -894,7 +913,7 @@ private static readonly @string offsetOutOfRangeˢᵇ = "offset out of range"u8;
 
 // Seek positions the [Reader] at offset off in the encoded entry stream.
 // Offset 0 can be used to denote the first entry.
-public static void Seek(this ref ΔReader r, Offset off) {
+public static void Seek(this ref Reader r, Offset off) {
     var d = r.d;
     r.err = default;
     r.lastChildren = false;
@@ -925,14 +944,14 @@ public static void Seek(this ref ΔReader r, Offset off) {
 }
 
 // maybeNextUnit advances to the next unit if this one is finished.
-internal static void maybeNextUnit(this ref ΔReader r) {
+internal static void maybeNextUnit(this ref Reader r) {
     while (len(r.b.data) == 0 && r.unit + 1 < len(r.d.unit)) {
         r.nextUnit();
     }
 }
 
 // nextUnit advances to the next unit.
-internal static void nextUnit(this ref ΔReader r) {
+internal static void nextUnit(this ref Reader r) {
     r.unit++;
     var u = Ꮡ(r.d.unit, r.unit);
     r.b = makeBuf(r.d, new unitжdataFormat(u), infoˢ, u.off, u.data);
@@ -940,7 +959,7 @@ internal static void nextUnit(this ref ΔReader r) {
     r.collectDwarf5BaseOffsets(u);
 }
 
-internal static void collectDwarf5BaseOffsets(this ref ΔReader r, ж<unit> Ꮡu) {
+internal static void collectDwarf5BaseOffsets(this ref Reader r, ж<unit> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (u.vers < 5 || u.unit5 != nil) {
@@ -956,7 +975,7 @@ internal static void collectDwarf5BaseOffsets(this ref ΔReader r, ж<unit> Ꮡu
 // It returns nil, nil when it reaches the end of the section.
 // It returns an error if the current offset is invalid or the data at the
 // offset cannot be decoded as a valid [Entry].
-public static (ж<Entry>, error) Next(this ж<ΔReader> Ꮡr) {
+public static (ж<Entry>, error) Next(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.err != nil) {
@@ -991,7 +1010,7 @@ public static (ж<Entry>, error) Next(this ж<ΔReader> Ꮡr) {
 // SkipChildren skips over the child entries associated with
 // the last [Entry] returned by [Reader.Next]. If that [Entry] did not have
 // children or [Reader.Next] has not been called, SkipChildren is a no-op.
-public static void SkipChildren(this ж<ΔReader> Ꮡr) {
+public static void SkipChildren(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.err != nil || !r.lastChildren) {
@@ -1025,13 +1044,13 @@ public static void SkipChildren(this ж<ΔReader> Ꮡr) {
 
 // clone returns a copy of the reader. This is used by the typeReader
 // interface.
-internal static typeReader clone(this ref ΔReader r) {
-    return new ΔReaderжtypeReader(r.d.Reader());
+internal static typeReader clone(this ref Reader r) {
+    return new ReaderжtypeReader(r.d.Reader());
 }
 
 // offset returns the current buffer offset. This is used by the
 // typeReader interface.
-internal static Offset offset(this ref ΔReader r) {
+internal static Offset offset(this ref Reader r) {
     return r.b.off;
 }
 
@@ -1047,7 +1066,7 @@ internal static Offset offset(this ref ΔReader r) {
 // looking up a series of PCs will be faster if they are sorted. If
 // the caller wishes to do repeated fast PC lookups, it should build
 // an appropriate index using the Ranges method.
-public static (ж<Entry>, error) SeekPC(this ж<ΔReader> Ꮡr, uint64 pc) {
+public static (ж<Entry>, error) SeekPC(this ж<Reader> Ꮡr, uint64 pc) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     nint unit = r.unit;
@@ -1084,6 +1103,8 @@ public static (ж<Entry>, error) SeekPC(this ж<ΔReader> Ꮡr, uint64 pc) {
     }
     return (default, ErrUnknownPC);
 }
+
+} partial class dwarfᴛData {
 
 // Ranges returns the PC ranges covered by e, a slice of [low,high) pairs.
 // Only some entry types, such as [TagCompileUnit] or [TagSubprogram], have PC
@@ -1174,6 +1195,8 @@ public static (slice<array<uint64>>, error) Ranges(this ж<Data> Ꮡd, ж<Entry>
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noUnitForEntryˢ => ref noUnitForEntryˢᵇ;
 private static readonly @string noUnitForEntryˢᵇ = "no unit for entry"u8;
+internal static ref readonly @string infoˢ => ref infoˢᵇ;
+private static readonly @string infoˢᵇ = "info"u8;
 
 // baseAddressForEntry returns the initial base address to be used when
 // looking up the range list of entry e.
@@ -1240,6 +1263,10 @@ internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, �
     ret = move2heap(retᴷ, ret);
     return (ret, default);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string rnglistsˢ => ref rnglistsˢᵇ;
+private static readonly @string rnglistsˢᵇ = "rnglists"u8;
 
 // dwarf5Ranges interprets a debug_rnglists sequence, see DWARFv5 section
 // 2.17.3 (page 53).
@@ -1326,6 +1353,8 @@ internal static (slice<array<uint64>>, error) dwarf5Ranges(this ж<Data> Ꮡd, �
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string offsetOutOfRangeˢ => ref offsetOutOfRangeˢᵇ;
+private static readonly @string offsetOutOfRangeˢᵇ = "offset out of range"u8;
 internal static ref readonly @string addrˢ => ref addrˢᵇ;
 private static readonly @string addrˢᵇ = "addr"u8;
 
@@ -1348,4 +1377,4 @@ internal static (uint64, error) debugAddr(this ж<Data> Ꮡd, dataFormat format,
     return (val, default);
 }
 
-} // end dwarf_package
+} // end dwarfᴛData

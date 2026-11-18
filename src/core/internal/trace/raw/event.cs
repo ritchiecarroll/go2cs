@@ -11,6 +11,7 @@ using version = go.@internal.trace.version_package;
 using encoding;
 using go;
 using go.@internal.trace;
+using static raw_package;
 
 partial class raw_package {
 
@@ -25,6 +26,8 @@ partial struct Event {
     public slice<uint64> Args;
     public slice<byte> Data;
 }
+
+} partial class rawᴛEvent {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string dataˢ => ref dataˢᵇ;
@@ -80,4 +83,4 @@ public static nint EncodedSize(this ref Event e) {
     return size;
 }
 
-} // end raw_package
+} // end rawᴛEvent

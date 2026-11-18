@@ -38,6 +38,8 @@ using System.Runtime.InteropServices;
 
 namespace go.@internal.syscall;
 
+using static unix_package;
+
 public static partial class unix_package
 {
     [StructLayout(LayoutKind.Sequential, Size = 128)]
@@ -67,9 +69,11 @@ public static partial class unix_package
     internal const int _CLD_STOPPED = 5;
     internal const int _CLD_CONTINUED = 6;
 
-    private const uint core = 0x80;
-    private const uint stopped = 0x7f;
-    private const uint continued = 0xffff;
+    internal const uint core = 0x80;
+    internal const uint stopped = 0x7f;
+    internal const uint continued = 0xffff;
+
+} partial class unixᴛSiginfoChild {
 
     // WaitStatus converts SiginfoChild, as filled in by the waitid syscall, to syscall.WaitStatus
     // — the converted body verbatim over the mirror's fields.
@@ -99,4 +103,7 @@ public static partial class unix_package
 
         return (syscall_package.WaitStatus)ws;
     }
+
+} partial class unix_package {
+
 }

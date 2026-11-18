@@ -750,14 +750,8 @@ func testImplCompanionAppliesTo(name, goos string) bool {
 }
 
 func processTestConversion(inputPath, outputPath string, options Options) (err error) {
-	// The sibling declarator names steer the PRODUCTION pass only (see siblingTestFuncMethodNames);
-	// that pass is complete by the time this runs. Each variant's own analysis then computes the
-	// shadow set from its own universe — the in-package variant already contains these names, and
-	// the external variant's declarations live in a different C# class, so leaving them set would
-	// only over-qualify the external half's package idents.
-	siblingTestFuncMethodNames = nil
-
-	// Likewise for the addressed-global seed: each variant's universe already CONTAINS the
+	// The addressed-global seed steers the PRODUCTION pass only, and that pass is complete by the
+	// time this runs: each variant's universe already CONTAINS the
 	// `_test.go` files, so its own collectAddressedGlobals sees `&g` (and `g.inc` as a value)
 	// directly. The seed exists only for the production pass, which cannot.
 	siblingTestAddressedGlobalNames = nil
@@ -812,6 +806,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		Env: converterLoaderEnv(
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
+		ParseFile: parseFileUnparenAddressOperands,
 	}
 
 	loaded, err := packages.Load(cfg, ".")
@@ -1332,11 +1327,10 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 		options.testPackageName = ""
 	}
 
-	// Session-scoped, not per-variant (B2/B9): both variants come from the ONE load the caller
-	// performed, so the external variant's references to an internal-variant-renamed method (the
-	// export_test pattern) resolve by object identity to entries registered during the internal
-	// pass — resetPackageState deliberately does not clear this map.
-	testMethodRenames = make(map[types.Object]bool)
+	// Session-scoped, not per-variant: both variants come from the ONE load the caller performed, so
+	// the external variant's references to a type the internal variant renamed resolve by object
+	// identity to entries registered during the internal pass — resetPackageState deliberately does
+	// not clear this map.
 	testTypeRenames = make(map[types.Object]bool)
 	whiteboxInternalTestObjects = collectWhiteboxInternalTestObjects(internal)
 
@@ -3255,7 +3249,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		}
 
 		packageInlineAdmission = admission
-		packageInlineArrayRecords = inlineArrayStampRecords(admission, inlineArrayMode(pkg.Types.Path(), pkg.Dir, stampedOptions(options, pkg.Types.Path(), stamp.mode)))
+		packageInlineArrayRecords = inlineArrayStampRecords(admission, inlineArrayMode(pkg.Types.Path(), pkg.Dir, stampedOptions(options, pkg.Types.Path(), stamp.mode, stamp.seeds)))
 	}
 
 	// B2's D2 sites (valueDecodeSites.go), over every file the variant emits, test files included: a test that reads a
@@ -3282,6 +3276,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	collectStackAppendHints(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, options)
 	collectAddressedGlobals(allEntries, pkg.Types, pkg.TypesInfo)
 	computeImportAliasRenames(allEntries, pkg.Types, packageNamespace, options.go2csPath, goosOfTarget(options.targetPlatform), true)
+	computeSelfAlias(pkg.Types, packageNamespace)
 	collectPackageLevelLiteralStructFieldTypes(allEntries, pkg.Types, pkg.TypesInfo)
 	collectPublicizedTypes(pkg.Types, pkg.Fset)
 
@@ -3950,6 +3945,17 @@ func splitWhiteboxVariantRecords(bridgeTypeNames hashset.HashSet[string], bridge
 func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName, bridgeClassName, goPackageName, internalAnchor, testAnchor string, bridgeTypeNames hashset.HashSet[string], bridgeVariant bool) (string, error) {
 	bridgeAnchored, testAnchored := splitWhiteboxVariantRecords(bridgeTypeNames, bridgeVariant)
 
+	// Both info files compile into the one tests assembly, so each method holder is declared in exactly one
+	// of them (a second declaration is CS0579, a duplicate [GoMethodHost]): the bridge variant's holders, of
+	// types the bridge class declares, in the bridge unit; the other variant's in package_test_info.cs.
+	variantHolders, bridgeHolders, testHolders := packageMethodHolders, map[string]string{}, map[string]string{}
+
+	if bridgeVariant {
+		bridgeHolders = variantHolders
+	} else {
+		testHolders = variantHolders
+	}
+
 	// Both anchored writes below are reference-model files: their anchor class IS the local
 	// type scope, and the production class is a referenced assembly.
 	metadataAnchorLocalTypes = true
@@ -3996,6 +4002,7 @@ func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName,
 
 		bridgeAnchored.install()
 		metadataAnchorClassPrefix = internalAnchor
+		packageMethodHolders = bridgeHolders
 		writePackageInfoFile(unitPath, true)
 
 		importedTypeAliases, exportedTypeAliases = savedImported, savedExported
@@ -4005,7 +4012,9 @@ func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName,
 
 	testAnchored.install()
 	metadataAnchorClassPrefix = testAnchor
+	packageMethodHolders = testHolders
 	writePackageInfoFile(testInfoPath, true)
+	packageMethodHolders = variantHolders
 
 	return unitName, nil
 }

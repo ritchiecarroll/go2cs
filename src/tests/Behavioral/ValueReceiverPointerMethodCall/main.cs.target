@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,6 +12,8 @@ partial struct Tag {
 
 public static readonly ж<Tag> ᏑUnd = new StaticBox<Tag>(default(Tag));
 public static ref Tag Und => ref ((StaticBox<Tag>)ᏑUnd).ValueSlot;
+
+} partial class mainᴛTag {
 
 internal static bool equalTags(this Tag t, Tag o) { return t.str == o.str; }
 
@@ -28,10 +31,14 @@ public static void RemakeString(this ж<Tag> Ꮡt) {
     t.str = ((sstring)b) + "!"u8;
 }
 
+} partial class main_package {
+
 internal static (Tag, error) next(Tag t) {
     t.str += "+"u8;
     return (t, default);
 }
+
+} partial class mainᴛTag {
 
 internal static (Tag, error) minimize(this Tag tʗp) {
     ref var t = ref heap(tʗp, out var Ꮡt);
@@ -71,10 +78,14 @@ internal static Tag minimizeMethodValue(this Tag tʗp) {
     return t;
 }
 
+} partial class main_package {
+
 partial struct wrapper {
     internal Tag tag;
     internal nint n;
 }
+
+} partial class mainᴛwrapper {
 
 internal static wrapper remakeField(this wrapper wʗp) {
     ref var w = ref heap(wʗp, out var Ꮡw);
@@ -84,9 +95,13 @@ internal static wrapper remakeField(this wrapper wʗp) {
     return w;
 }
 
+} partial class main_package {
+
 partial struct handle {
     /*embed*/ public ж<Tag> Tag;
 }
+
+} partial class mainᴛhandle {
 
 internal static void remake(this handle h) { h.RemakeString(); }
 
@@ -94,6 +109,8 @@ internal static void remakeMethodValue(this handle h) {
     var remake = Ꮡ(h).RemakeString;
     remake();
 }
+
+} partial class main_package {
 
 internal static void remakeHandleParam(handle h) { h.RemakeString(); }
 

@@ -11,6 +11,7 @@ using atomic = sync.atomic_package;
 using @unsafe = unsafe_package;
 using go.crypto.@internal.fips140deps;
 using sync;
+using static entropy_package;
 
 partial class entropy_package {
 
@@ -134,6 +135,8 @@ internal static void touchMemory(ж<ScratchBuffer> memory, uint32 idx) {
     atomic.SwapUint32(u32, last + 13);
 }
 
+} partial class entropyᴛsource {
+
 internal static uint8 Sample(this ref source s) {
     // Perform a few memory accesses in an unpredictable pattern to expose the
     // next measurement to as much system noise as possible.
@@ -158,6 +161,8 @@ internal static uint8 Sample(this ref source s) {
     // differences.
     return (uint8)sample;
 }
+
+} partial class entropy_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string entropyRepetitionCountˢ => ref entropyRepetitionCountˢᵇ;

@@ -63,7 +63,7 @@ using static go.runtime.debug_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("runtime/debug/garbage.go", "garbage.cs", "ABU+AAoM0oIACBKCgoKCgoKUgpSCgqaCgriCgoKCgpQABCAACwKuwgACHgAMAgACIgAOAgACJgAQAgACGAAKFgAKbgA1Ag==")]
-[assembly: GoPositionMap("runtime/debug/mod.go", "mod.cs", "AA0eqrKCgpSCgoLulAA3epKokgAICJKCgpSClIKSgoKCgoKCgpSClJSClIKUgoKClIKClKYAHhIACgKCgoK4AAcUgoKUgoKClO6CvIKCgpSUgrSCgoKCxoKCgoKCxoKClIKUyrSCgqaSlKaCgpSClIKUgraCgoKUgsiCgpSCgoLIgoLapJQ=", "117-131:1;161-165:1;177-191:2", "", "", "", "196:21,197:13")]
+[assembly: GoPositionMap("runtime/debug/mod.go", "mod.cs", "AA4eqrKCgpSCgoLulAA3epKokgAKCJKCgpSClIKSgoKCgoKCgpSClJSClIKUgoKClIKClKYAIBIACgKCgoK4AAcUgoKUgoKClO6CvIKCgpSUgrSCgoKCxoKCgoKCxoKClIKUyrSCgqaSlKaCgpSClIKUgraCgoKUgsiCgpSCgoLIgoLapJQ=", "117-131:1;161-165:1;177-191:2", "", "", "", "201:21,202:13")]
 [assembly: GoPositionMap("runtime/debug/stack.go", "stack.cs", "ABAikqqigoKCgpQACCYACwKCABk0goKUgpSmlKg=")]
 [assembly: GoPositionMap("runtime/debug/stubs.go", "stubs.cs", "AAkYkoKCgoKC")]
 // </GoSourcePositionMaps>
@@ -104,3 +104,13 @@ public static partial class debug_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(debug_package.BuildInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class debugᴛBuildInfo;
+// </MethodHolders>

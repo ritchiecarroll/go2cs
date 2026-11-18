@@ -4,6 +4,7 @@
 namespace go.vendor.golang.org.x.net.http2;
 
 using fmt = fmt_package;
+using static hpack_package;
 
 partial class hpack_package {
 
@@ -38,6 +39,8 @@ partial struct headerFieldTable {
 partial struct pairNameValue {
     internal @string name, value;
 }
+
+} partial class hpackᴛheaderFieldTable {
 
 internal static void init(this ref headerFieldTable t) {
     t.byName = new map<@string, uint64>();
@@ -126,6 +129,8 @@ internal static uint64 idToIndex(this ж<headerFieldTable> Ꮡt, uint64 id) {
     }
     return k + 1;
 }
+
+} partial class hpack_package {
 
 [GoLazy] partial class lazyᴛhuffmanCodes { internal static array<uint32> huffmanCodes = new uint32[]{
     0x1ff8,

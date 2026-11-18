@@ -7,15 +7,18 @@ namespace go.go;
 
 using token = global::go.go.token_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // validType verifies that the given type does not "expand" indefinitely
 // producing a cycle in the type graph.
 // (Cycles involving alias types, as in "type A = [10]A" are detected
 // earlier, via the objDecl cycle detection mechanism.)
 internal static void validType(this ж<Checker> Ꮡcheck, ж<Named> typ) {
-    Ꮡcheck.validType0(nopos, new NamedжΔType(typ), default, default);
+    Ꮡcheck.validType0(nopos, new NamedжType(typ), default, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -32,7 +35,7 @@ private static readonly @string validTypeSNestVPathVˢᵇ = "validType(%s) nest 
 // of) F in S, leading to the nest S->F. If a type appears in its own nest
 // (say S->F->S) we have an invalid recursive type. The path list is the full
 // path of named types in a cycle, it is only needed for error reporting.
-internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔType typ, slice<ж<Named>> nest, slice<ж<Named>> path) {
+internal static bool validType0(this ж<Checker> Ꮡcheck, token.Pos pos, Type typ, slice<ж<Named>> nest, slice<ж<Named>> path) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -113,7 +116,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             // If the current type t is also found in nest, (the memory of) t is
             // embedded in itself, indicating an invalid recursive type.
             foreach (var (_, e) in range(nest)) {
-                if (Identical(new NamedжΔType(e), new NamedжΔType(t))) {
+                if (Identical(new NamedжType(e), new NamedжType(t))) {
                     // We have a cycle. If t != t.Origin() then t is an instance of
                     // the generic type t.Origin(). Because t is in the nest, t must
                     // occur within the definition (RHS) of the generic type t.Origin(),
@@ -139,7 +142,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
                     assert(t.Origin().obj.pkg == check.pkg);
 
                     // let t become invalid when it is unpacked
-                    t.Origin().fromRHS = new BasicжΔType(Typ[Invalid]);
+                    t.Origin().fromRHS = new BasicжType(Typ[Invalid]);
 
                     // Find the starting point of the cycle and report it.
                     // Because each type in nest must also appear in path (see invariant below),
@@ -147,7 +150,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
                     // is in nest. Specifically t may appear in path with an earlier index than the
                     // index of t in nest. Search again.
                     foreach (var (start, p) in range(path)) {
-                        if (Identical(new NamedжΔType(p), new NamedжΔType(t))) {
+                        if (Identical(new NamedжType(p), new NamedжType(t))) {
                             Ꮡcheck.cycleError(makeObjList(path.slice(start)), 0);
                             return false;
                         }
@@ -205,6 +208,8 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class types_package {
 
 // makeObjList returns the list of type name objects for the given
 // list of named types.

@@ -1,0 +1,31 @@
+seed=8ec8caba0887c66d11fa08b41de7d3fa409125a8 base=7d72da607b7cafb0 cut=e6ca0081042219b7 03:42:42Z
+linux/amd64 base rc=0 seeded_cs=4685 written=17 wall=223s 03:46:28Z
+linux/amd64 cut rc=0 seeded_cs=4685 written=17 wall=219s 03:50:09Z
+linux/amd64 differing files: 2 only-in: 0 lines -361 +361
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+linux/amd64 cut arm equals the committed file in 0 of 2
+linux/amd64 unresolved lift markers in cut root: 0
+windows/amd64 base rc=0 seeded_cs=4685 written=17 wall=219s 03:53:54Z
+windows/amd64 cut rc=0 seeded_cs=4685 written=17 wall=213s 03:57:30Z
+windows/amd64 differing files: 2 only-in: 0 lines -363 +363
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+windows/amd64 cut arm equals the committed file in 0 of 2
+windows/amd64 unresolved lift markers in cut root: 0
+darwin/amd64 base rc=0 seeded_cs=4685 written=16 wall=219s 04:01:16Z
+darwin/amd64 cut rc=0 seeded_cs=4685 written=16 wall=221s 04:04:59Z
+darwin/amd64 differing files: 2 only-in: 0 lines -361 +361
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+darwin/amd64 cut arm equals the committed file in 0 of 2
+darwin/amd64 unresolved lift markers in cut root: 0
+linux/arm64 base rc=0 seeded_cs=4685 written=17 wall=225s 04:08:51Z
+linux/arm64 cut rc=0 seeded_cs=4685 written=17 wall=227s 04:12:40Z
+linux/arm64 differing files: 2 only-in: 0 lines -359 +359
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+linux/arm64 cut arm equals the committed file in 0 of 2
+linux/arm64 unresolved lift markers in cut root: 0
+DONE
+footprint rc=0 04:12:43Z

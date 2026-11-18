@@ -27,8 +27,6 @@ using static go.RenamedTypeAliasReexportRecords.tone_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Pitch", "ΔPitch")]
-[assembly: GoTypeAlias("Tone", "ΔTone")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -51,7 +49,7 @@ using static go.RenamedTypeAliasReexportRecords.tone_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("tone.go", "tone.cs", "AAgSlN6UlA==")]
+[assembly: GoPositionMap("tone.go", "tone.cs", "AAsSlAAJDrSU")]
 // </GoSourcePositionMaps>
 
 namespace go.RenamedTypeAliasReexportRecords;
@@ -66,8 +64,8 @@ public static partial class tone_package
     // via declarations below.
 
     // <TypeAccessibility>
-    public partial struct ΔPitch {}
-    public partial struct ΔTone {}
+    public partial struct Pitch {}
+    public partial struct Tone {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -80,3 +78,14 @@ public static partial class tone_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(tone_package.Pitch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class toneᴛPitch;
+[GoMethodHost(typeof(tone_package.Tone)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class toneᴛTone;
+// </MethodHolders>

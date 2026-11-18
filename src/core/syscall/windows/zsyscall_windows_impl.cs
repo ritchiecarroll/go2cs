@@ -217,7 +217,7 @@ partial class syscall_package
     // why it cannot be a literal conversion. Results follow the Go original exactly: the raw HANDLE
     // is returned whatever it is, and only InvalidHandle produces an error. `data` is left untouched
     // on failure, as it is in Go, because the kernel did not write it.
-    internal static unsafe (ΔHandle handle, error err) findFirstFile1(ж<uint16> Ꮡname, ж<win32finddata1> Ꮡdata) {
+    internal static unsafe (Handle handle, error err) findFirstFile1(ж<uint16> Ꮡname, ж<win32finddata1> Ꮡdata) {
         NativeWin32FindDataW native;
         nint raw;
 
@@ -240,7 +240,7 @@ partial class syscall_package
             }
         }
 
-        ΔHandle handle = (ΔHandle)(uintptr)raw;
+        Handle handle = (Handle)(uintptr)raw;
 
         if (handle == InvalidHandle) {
             return (handle, errnoErr((Errno)(uint32)lastError));
@@ -254,7 +254,7 @@ partial class syscall_package
     // findNextFile1 is the native transcription of the generated wrapper — see findFirstFile1. The
     // ordinary end of an enumeration arrives here as ERROR_NO_MORE_FILES, which callers compare
     // against, so the last error has to be reported faithfully rather than flattened.
-    internal static unsafe error /*err*/ findNextFile1(ΔHandle handle, ж<win32finddata1> Ꮡdata) {
+    internal static unsafe error /*err*/ findNextFile1(Handle handle, ж<win32finddata1> Ꮡdata) {
         NativeWin32FindDataW native;
         int ok;
         int lastError;
@@ -336,7 +336,7 @@ partial class syscall_package
     // Process32First is the native transcription of the generated wrapper — see the file header for
     // why it cannot be a literal conversion. `procEntry` is left untouched on failure, as in Go,
     // because the kernel did not write it.
-    public static unsafe error /*err*/ Process32First(ΔHandle snapshot, ж<ProcessEntry32> ᏑprocEntry) {
+    public static unsafe error /*err*/ Process32First(Handle snapshot, ж<ProcessEntry32> ᏑprocEntry) {
         NativeProcessEntry32 native = default;
 
         // dwSize is an INPUT: Windows rejects the call unless it is the native record size. Go sets
@@ -369,7 +369,7 @@ partial class syscall_package
     // Process32Next is the native transcription of the generated wrapper — see Process32First. The
     // ordinary end of an enumeration arrives as ERROR_NO_MORE_FILES, which the Go caller's loop
     // compares against, so the last error is reported faithfully rather than flattened.
-    public static unsafe error /*err*/ Process32Next(ΔHandle snapshot, ж<ProcessEntry32> ᏑprocEntry) {
+    public static unsafe error /*err*/ Process32Next(Handle snapshot, ж<ProcessEntry32> ᏑprocEntry) {
         NativeProcessEntry32 native = default;
 
         native.Size = (uint32)sizeof(NativeProcessEntry32);

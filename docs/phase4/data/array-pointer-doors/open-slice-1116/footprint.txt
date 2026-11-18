@@ -1,0 +1,47 @@
+start 01:12:12Z
+linux/amd64 base rc=0 seeded_cs=4685 written=17 wall=254s 01:16:31Z
+linux/amd64 cut rc=0 seeded_cs=4685 written=21 wall=224s 01:20:17Z
+linux/amd64 differing files: 6 only-in: 0 lines -365 +365
+  src/core/internal/reflectlite/type.cs base==committed:yes cut==committed:no
+  src/core/reflect/type.cs base==committed:yes cut==committed:no
+  src/core/runtime/linux/os_linux.cs base==committed:yes cut==committed:no
+  src/core/runtime/type.cs base==committed:yes cut==committed:no
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+linux/amd64 cut arm equals the committed file in 0 of 6
+linux/amd64 unresolved lift markers in cut root: 0
+linux/arm64 base rc=0 seeded_cs=4685 written=17 wall=233s 01:24:16Z
+linux/arm64 cut rc=0 seeded_cs=4685 written=21 wall=227s 01:28:05Z
+linux/arm64 differing files: 6 only-in: 0 lines -363 +363
+  src/core/internal/reflectlite/type.cs base==committed:yes cut==committed:no
+  src/core/reflect/type.cs base==committed:yes cut==committed:no
+  src/core/runtime/linux/os_linux.cs base==committed:yes cut==committed:no
+  src/core/runtime/type.cs base==committed:yes cut==committed:no
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+linux/arm64 cut arm equals the committed file in 0 of 6
+linux/arm64 unresolved lift markers in cut root: 0
+windows/amd64 base rc=0 seeded_cs=4685 written=18 wall=229s 01:32:01Z
+windows/amd64 cut rc=0 seeded_cs=4685 written=22 wall=226s 01:35:49Z
+windows/amd64 differing files: 7 only-in: 0 lines -369 +369
+  src/core/internal/reflectlite/type.cs base==committed:yes cut==committed:no
+  src/core/internal/syscall/windows/registry/windows/value.cs.auto base==committed:no cut==committed:no
+  src/core/reflect/type.cs base==committed:yes cut==committed:no
+  src/core/runtime/type.cs base==committed:yes cut==committed:no
+  src/core/runtime/windows/os_windows.cs base==committed:yes cut==committed:no
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+windows/amd64 cut arm equals the committed file in 0 of 7
+windows/amd64 unresolved lift markers in cut root: 0
+darwin/amd64 base rc=0 seeded_cs=4685 written=16 wall=224s 01:39:40Z
+darwin/amd64 cut rc=0 seeded_cs=4685 written=19 wall=223s 01:43:26Z
+darwin/amd64 differing files: 5 only-in: 0 lines -364 +364
+  src/core/internal/reflectlite/type.cs base==committed:yes cut==committed:no
+  src/core/reflect/type.cs base==committed:yes cut==committed:no
+  src/core/runtime/type.cs base==committed:yes cut==committed:no
+  src/reports/conversion_report.html base==committed:no cut==committed:no
+  src/stdlib_conversion_progress.txt base==committed:no cut==committed:no
+darwin/amd64 cut arm equals the committed file in 0 of 5
+darwin/amd64 unresolved lift markers in cut root: 0
+DONE
+footprint rc=0 01:43:30Z

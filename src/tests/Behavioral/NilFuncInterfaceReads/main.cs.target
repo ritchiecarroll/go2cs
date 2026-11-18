@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using typelib = NilFuncInterfaceReads.typelib_package;
 using NilFuncInterfaceReads;
+using static main_package;
 
 partial class main_package {
 
@@ -13,13 +14,21 @@ partial interface namer {
 
 internal delegate nint localStep(nint _);
 
+} partial class mainᴛlocalStep {
+
 internal static @string Name(this localStep s) { return "local"; }
 
+} partial class main_package {
+
 internal delegate nint localStepE(nint _);
+
+} partial class mainᴛlocalStepE {
 
 internal static @string Name(this localStepE s) { return "locale"; }
 
 internal static @string Error(this localStepE s) { return "locale error"; }
+
+} partial class main_package {
 
 partial struct probe {
     internal @string name;
@@ -33,12 +42,11 @@ internal static namer viaAny(any a) {
 internal static slice<@string> kinds = ["step", "stepe", "local", "locale", "bare", "livestep", "nilptr"];
 
 internal static slice<@string> armsFor(@string kind) {
-    var exprᴛ1 = kind;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "bare"u8: {
+    case {} when kind == "bare"u8: {
         return ["direct"];
     }
-    case {} when exprᴛ1 == "stepe"u8 || exprᴛ1 == "locale"u8: {
+    case {} when kind == "stepe"u8 || kind == "locale"u8: {
         return ["direct", "va", "sh", "er"];
     }}
 
@@ -46,27 +54,26 @@ internal static slice<@string> armsFor(@string kind) {
 }
 
 internal static any concrete(@string kind) {
-    var exprᴛ1 = kind;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "step"u8: {
+    case {} when kind == "step"u8: {
         return (default(typelib.Step)!).OrTypedNilFunc();
     }
-    case {} when exprᴛ1 == "stepe"u8: {
+    case {} when kind == "stepe"u8: {
         return (default(typelib.StepE)!).OrTypedNilFunc();
     }
-    case {} when exprᴛ1 == "local"u8: {
+    case {} when kind == "local"u8: {
         return (default(localStep)!).OrTypedNilFunc();
     }
-    case {} when exprᴛ1 == "locale"u8: {
+    case {} when kind == "locale"u8: {
         return (default(localStepE)!).OrTypedNilFunc();
     }
-    case {} when exprᴛ1 == "bare"u8: {
+    case {} when kind == "bare"u8: {
         return ((Func<nint, nint>)(default)).OrTypedNilFunc();
     }
-    case {} when exprᴛ1 == "livestep"u8: {
+    case {} when kind == "livestep"u8: {
         return (typelib.NewStep()).OrTypedNilFunc();
     }
-    case {} when exprᴛ1 == "nilptr"u8: {
+    case {} when kind == "nilptr"u8: {
         return (ж<typelib.Box>)nil;
     }}
 
@@ -75,29 +82,28 @@ internal static any concrete(@string kind) {
 
 internal static namer @static(@string kind) {
     namer n = default;
-    var exprᴛ1 = kind;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "step"u8: {
+    case {} when kind == "step"u8: {
         n = new typelib_Stepᴠnamer(default(typelib.Step)!);
         break;
     }
-    case {} when exprᴛ1 == "stepe"u8: {
+    case {} when kind == "stepe"u8: {
         n = new typelib_StepEᴠnamer(default(typelib.StepE)!);
         break;
     }
-    case {} when exprᴛ1 == "local"u8: {
+    case {} when kind == "local"u8: {
         n = new localStepᴠnamer(default(localStep)!);
         break;
     }
-    case {} when exprᴛ1 == "locale"u8: {
+    case {} when kind == "locale"u8: {
         n = new localStepEᴠnamer(default(localStepE)!);
         break;
     }
-    case {} when exprᴛ1 == "livestep"u8: {
+    case {} when kind == "livestep"u8: {
         n = new typelib_Stepᴠnamer(typelib.NewStep());
         break;
     }
-    case {} when exprᴛ1 == "nilptr"u8: {
+    case {} when kind == "nilptr"u8: {
         n = new typelib_Boxжnamer(((ж<typelib.Box>)nil));
         break;
     }}
@@ -107,13 +113,12 @@ internal static namer @static(@string kind) {
 
 internal static error asError(@string kind) {
     error e = default;
-    var exprᴛ1 = kind;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "stepe"u8: {
+    case {} when kind == "stepe"u8: {
         e = new typelib_StepEᴠerror(default(typelib.StepE)!);
         break;
     }
-    case {} when exprᴛ1 == "locale"u8: {
+    case {} when kind == "locale"u8: {
         e = new localStepEᴠerror(default(localStepE)!);
         break;
     }}
@@ -122,20 +127,19 @@ internal static error asError(@string kind) {
 }
 
 internal static any build(@string arm, @string kind) {
-    var exprᴛ1 = arm;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "direct"u8: {
+    case {} when arm == "direct"u8: {
         return concrete(kind);
     }
-    case {} when exprᴛ1 == "va"u8: {
+    case {} when arm == "va"u8: {
         any a = @static(kind);
         return a;
     }
-    case {} when exprᴛ1 == "sh"u8: {
+    case {} when arm == "sh"u8: {
         any a = viaAny(concrete(kind));
         return a;
     }
-    case {} when exprᴛ1 == "er"u8: {
+    case {} when arm == "er"u8: {
         any a = asError(kind);
         return a;
     }}
@@ -143,7 +147,7 @@ internal static any build(@string arm, @string kind) {
     return default;
 }
 
-internal static reflectꓸType namerType = reflect.TypeOf((ж<namer>)nil).Elem();
+internal static reflect.Type namerType = reflect.TypeOf((ж<namer>)nil).Elem();
 
 [GoLazy] partial class lazyᴛprobes { internal static slice<probe> probes = [
     new("l-isnil", (any a) => fmt.Sprint(a == nil)),
@@ -199,7 +203,7 @@ internal static reflectꓸType namerType = reflect.TypeOf((ж<namer>)nil).Elem()
         return reflect.TypeOf(a).Method(0).Name + " "u8 + v.Method(0).Call(default)[0].String();
     }),
     new("call", (any a) => {
-        var @out = reflect.ValueOf(a).Call(slice<reflectꓸValue>([reflect.ValueOf((nint)1)]));
+        var @out = reflect.ValueOf(a).Call(slice<reflect.Value>([reflect.ValueOf((nint)1)]));
         return fmt.Sprint(@out[0].Int());
     }),
     new("same", (any a) => fmt.Sprint(reflect.ValueOf(a) == reflect.ValueOf(a))),

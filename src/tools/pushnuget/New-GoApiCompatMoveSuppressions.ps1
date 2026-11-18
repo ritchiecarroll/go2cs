@@ -1,18 +1,27 @@
 <#
 .SYNOPSIS
     Writes the CompatibilitySuppressions.xml of every packed go.* package whose public methods moved into a class
-    marked [GoPromotedHost] since its baseline, and reports every other member the package lost.
+    marked [GoPromotedHost] or [GoMethodHost] since its baseline, whose names dropped the Delta prefix (U+0394), or
+    whose structs no longer need a value clone, and reports every other member the package lost.
 
 .DESCRIPTION
     Run it over the merged packages of a pack-only run (push-nuget.ps1 -VersionSuffix local.1 -OutDir <dir>), in the
     tree that packed them. For each package it downloads the baseline the guard will compare with (the highest
     published version below -ReleaseVersion on its line), reads both with GoApiCompatMoves.psm1, and writes the
-    package's entries to src/core/<its directory>/CompatibilitySuppressions.xml: one CP0002 per moved member per asset.
+    package's entries to src/core/<its directory>/CompatibilitySuppressions.xml, one per diagnostic per asset:
+
+      a move    a CP0002 per moved member;
+      a rename  the Delta drop (OQ2): what the engine reports for a type, member or interface whose baseline form, with
+                every Delta dropped, is the current form exactly. CP0001 a type, CP0002 a member (a property by its
+                accessors, and a member whose return or value type was renamed), CP0006 an interface member, CP0008 a
+                type implementing a renamed interface, CP0021 a renamed constraint. GoApiCompatMoves.psm1 says how.
+      a clone   a struct whose value copy needs no clone (a zero-length array holds nothing to copy, 1.26.11.1): CP0008
+                the struct no longer implementing go.IGoValueClone, CP0002 its Delta-named Clone().
 
     Nothing is written for a member that left any other way. Each is listed with its reason, and the script exits 1:
     the guard will read it red, as it should, until someone announces it or puts it back.
 
-    It writes only the files of this one kind of break. A package that already carries a suppression file is refused
+    It writes only the files of these three kinds of break. A package that already carries a suppression file is refused
     unless -Force is given, because that file's other entries would be lost.
 
     The guard is the judge of the result, not this script: pack again and read "Binary compatibility: CLEAN". An entry
@@ -82,6 +91,7 @@ $flat = $FlatContainer.TrimEnd('/') + '/'
 
 $read = 0; $noBaseline = 0; $files = 0; $entryCount = 0
 $byAsset = @{}
+$byKind = @{}
 $refusedLines = New-Object System.Collections.Generic.List[string]
 $problems = New-Object System.Collections.Generic.List[string]
 
@@ -93,13 +103,20 @@ try {
         if (-not $baselineVersion) { $noBaseline++; continue }
 
         $baseline = Save-GoApiCompatBaseline $client $flat $identity.Id $baselineVersion (Join-Path $work '_baselines')
-        $found = Get-GoApiCompatPackageMoves -Baseline $baseline -Current $package.FullName -WorkDir $work
+        # The guard compares a renamed assembly with its baseline under the declaration, and names the baseline asset.
+        $rename = Get-GoApiCompatRenameSuccessors -Id $identity.Id -Assets @(Get-GoApiCompatAssets $baseline) `
+            -CurrentAssets @(Get-GoApiCompatAssets $package.FullName) -ReleaseVersion $ReleaseVersion
+        $successors = if ($rename.Declared) { $rename.Successors } else { @{} }
+        $found = Get-GoApiCompatPackageMoves -Baseline $baseline -Current $package.FullName -WorkDir $work -Successors $successors
         $read++
         foreach ($refusal in $found.Refused) { $refusedLines.Add("$($identity.Id): $($refusal.Asset): $($refusal.Target) $($refusal.Reason) (baseline $baselineVersion)") }
         Remove-Item -LiteralPath $baseline -Force
         if (@($found.Entries).Count -eq 0) { continue }
 
-        foreach ($entry in $found.Entries) { $byAsset[$entry.Asset -replace '/[^/]+$', ''] = 1 + [int]$byAsset[$entry.Asset -replace '/[^/]+$', ''] }
+        foreach ($entry in $found.Entries) {
+            $byAsset[$entry.Asset -replace '/[^/]+$', ''] = 1 + [int]$byAsset[$entry.Asset -replace '/[^/]+$', '']
+            $byKind["$($entry.Kind) $($entry.DiagnosticId)"] = 1 + [int]$byKind["$($entry.Kind) $($entry.DiagnosticId)"]
+        }
         $entryCount += @($found.Entries).Count
         $files++
 
@@ -118,6 +135,7 @@ finally {
 Write-Host ("Moves: {0} package(s) read against a baseline below {1}, {2} with none; {3} file(s){4}, {5} entr(ies)" -f `
     $read, $ReleaseVersion, $noBaseline, $files, $(if ($ReportOnly) { ' would be written' } else { ' written' }), $entryCount)
 foreach ($folder in @($byAsset.Keys | Sort-Object)) { Write-Host ("  {0,-40} {1,6}" -f $folder, $byAsset[$folder]) }
+foreach ($kind in @($byKind.Keys | Sort-Object)) { Write-Host ("  {0,-40} {1,6}" -f $kind, $byKind[$kind]) }
 foreach ($line in $problems) { Write-Host "PROBLEM: $line" -ForegroundColor Red }
 if ($refusedLines.Count) {
     Write-Host "REFUSED: $($refusedLines.Count) removed member(s) are not moves and got no entry; the guard reads each one red:" -ForegroundColor Red

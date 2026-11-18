@@ -9,10 +9,13 @@ using strconv = global::go.strconv_package;
 using strings = strings_package;
 using atomic = global::go.sync.atomic_package;
 using time = time_package;
-using System.Runtime.InteropServices;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using global::go;
 using global::go.math;
 using global::go.sync;
+using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -80,6 +83,8 @@ internal static ж<pcgRand> newPcgRand() {
     return r;
 }
 
+} partial class fuzzᴛpcgRand {
+
 internal static void step(this ref pcgRand r) {
     r.state *= multiplier;
     r.state += r.inc;
@@ -139,6 +144,8 @@ internal static bool @bool(this ref pcgRand r) {
     return (r.uint32() & 1) == 0;
 }
 
+} partial class fuzz_package {
+
 // noCopy may be embedded into structs which must not be copied
 // after the first use.
 //
@@ -147,8 +154,10 @@ internal static bool @bool(this ref pcgRand r) {
 partial struct noCopy {
 }
 
+} partial class fuzzᴛnoCopy {
+
 // Lock is a no-op used by -copylocks checker from `go vet`.
 internal static void Lock(this ref noCopy _) { }
 internal static void Unlock(this ref noCopy _) { }
 
-} // end fuzz_package
+} // end fuzzᴛnoCopy

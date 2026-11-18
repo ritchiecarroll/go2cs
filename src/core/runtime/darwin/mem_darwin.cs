@@ -54,11 +54,11 @@ internal static void sysFaultOS(@unsafe.Pointer v, uintptr n) {
 }
 
 internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n, @string _) {
-    var (Δp, err) = mmap(v, n, _PROT_NONE, (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
+    var (p, err) = mmap(v, n, _PROT_NONE, (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
         return default;
     }
-    return Δp;
+    return p;
 }
 
 internal static UntypedInt _ENOMEM => 12;
@@ -70,12 +70,12 @@ internal static ref readonly @string runtimeCannotMapPagesInˢ => ref runtimeCan
 private static readonly @string runtimeCannotMapPagesInˢᵇ = "runtime: cannot map pages in arena address space"u8;
 
 internal static void sysMapOS(@unsafe.Pointer v, uintptr n, @string _) {
-    var (Δp, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
+    var (p, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
     if (err == _ENOMEM) {
         @throw(runtimeOutOfMemoryˢ);
     }
-    if (Δp != v || err != 0) {
-        print((@string)"runtime: mmap(", @unsafe.Pointer.OrTypedNil(v), (@string)", ", n, (@string)") returned ", @unsafe.Pointer.OrTypedNil(Δp), (@string)", ", err, (@string)"\n");
+    if (p != v || err != 0) {
+        print((@string)"runtime: mmap(", @unsafe.Pointer.OrTypedNil(v), (@string)", ", n, (@string)") returned ", @unsafe.Pointer.OrTypedNil(p), (@string)", ", err, (@string)"\n");
         @throw(runtimeCannotMapPagesInˢ);
     }
 }

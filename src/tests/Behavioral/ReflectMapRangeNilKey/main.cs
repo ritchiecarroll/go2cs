@@ -20,13 +20,13 @@ internal static void main() {
             invalid++;
             continue;
         }
-        if (k.Kind() == reflect.ΔInterface) {
+        if (k.Kind() == reflect.Interface) {
             iface++;
             if (k.IsNil()) {
                 nils++;
             }
         }
-        if (v.Kind() == reflect.ΔInt) {
+        if (v.Kind() == reflect.Int) {
             sum += (nint)v.Int();
         }
     }
@@ -41,7 +41,7 @@ internal static void main() {
             invalid++;
             continue;
         }
-        if (k.Kind() == reflect.ΔInterface) {
+        if (k.Kind() == reflect.Interface) {
             iface++;
             if (k.IsNil()) {
                 nils++;
@@ -63,7 +63,7 @@ internal static void main() {
             pinvalid++;
             continue;
         }
-        if (k.Kind() == reflect.ΔPointer) {
+        if (k.Kind() == reflect.Pointer) {
             ptrs++;
             if (k.IsNil()) {
                 pnils++;
@@ -78,7 +78,7 @@ internal static void main() {
     iter = reflect.ValueOf(errKeys).MapRange();
     while (iter.Next()) {
         var k = iter.Key();
-        if (k.IsValid() && k.Kind() == reflect.ΔInterface) {
+        if (k.IsValid() && k.Kind() == reflect.Interface) {
             eiface++;
             if (k.IsNil()) {
                 enils++;
@@ -94,10 +94,10 @@ internal static void main() {
     iter = reflect.ValueOf(plain).MapRange();
     while (iter.Next()) {
         var (k, v) = (iter.Key(), iter.Value());
-        if (k.Kind() == reflect.ΔString) {
+        if (k.Kind() == reflect.String) {
             strs++;
         }
-        if (k.IsValid() && k.Kind() == reflect.ΔString && k.String() == ""u8) {
+        if (k.IsValid() && k.Kind() == reflect.String && k.String() == ""u8) {
             snils++;
         }
         psum += (nint)v.Int();
@@ -108,14 +108,14 @@ internal static void main() {
     iter = reflect.ValueOf(slices).MapRange();
     while (iter.Next()) {
         var v = iter.Value();
-        fmt.Println("slice value:", v.Kind() == reflect.ΔSlice, v.Len(), v.IsNil());
+        fmt.Println("slice value:", v.Kind() == reflect.Slice, v.Len(), v.IsNil());
     }
 
     var anyVals = new map<@string, any>{["k"] = default};
     iter = reflect.ValueOf(anyVals).MapRange();
     while (iter.Next()) {
         var v = iter.Value();
-        fmt.Println("nil value:", v.IsValid(), v.Kind() == reflect.ΔInterface, v.IsNil());
+        fmt.Println("nil value:", v.IsValid(), v.Kind() == reflect.Interface, v.IsNil());
     }
 }
 

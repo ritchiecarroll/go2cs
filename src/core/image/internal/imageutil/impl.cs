@@ -12,7 +12,7 @@ partial class imageutil_package {
 // This function assumes that r is entirely within dst's bounds and the
 // translation of r from dst coordinate space to src coordinate space is
 // entirely within src's bounds.
-public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ж<image.YCbCr> Ꮡsrc, image.Point sp) {
+public static bool /*ok*/ DrawYCbCr(ж<image.RGBA> Ꮡdst, image.Rectangle r, ж<image.YCbCr> Ꮡsrc, image.Point sp) {
     ref var dst = ref Ꮡdst.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
 

@@ -66,14 +66,16 @@ Several Go semantics cannot be written directly in C#, so the converter emits co
 `TypeGenerator`, `ImplementGenerator`, `EscapeRegistryGenerator` and `NativeArrayOpenerGenerator` also fill golib
 registries that code finds at run time, and none of them fills its registry at startup; see
 [Run-time registrations wait for the first lookup that misses](#run-time-registrations-wait-for-the-first-lookup-that-misses).
-The same assembly ships four analyzers, which report and generate nothing: `StringLiteralBindingAnalyzer`
+The same assembly ships five analyzers, which report and generate nothing: `StringLiteralBindingAnalyzer`
 ([`GO2CS0004`](../DiagnosticCodes.md)), `StackAppendBufferAnalyzer` ([`GO2CS0007`](../DiagnosticCodes.md)),
-`RefusalDowngradedAnalyzer` ([`GO2CS0011`](../DiagnosticCodes.md)) and `MethodLimitAnalyzer`
-([`GO2CS0012`](../DiagnosticCodes.md)).
+`RefusalDowngradedAnalyzer` ([`GO2CS0011`](../DiagnosticCodes.md)), `MethodLimitAnalyzer`
+([`GO2CS0012`](../DiagnosticCodes.md)) and `MethodHolderNameAnalyzer` ([`GO2CS0013`](../DiagnosticCodes.md)).
 <!-- The list is every class under src/gen/go2cs-gen declared `[Generator]`: nineteen at C46 (2026-11-11), whose MainEntryGenerator is one;
      BoundedGoroutineInterceptorGenerator and ExtensionHostListGenerator are not yet listed above. Sixteen at 3e3f18925a (fourteen
-     at b335356d6; grep for `^\[Generator`); the two analyzers are declared
-     `[DiagnosticAnalyzer(LanguageNames.CSharp)]`. -->
+     at b335356d6; grep for `^\[Generator`); the analyzers are the classes declared
+     `[DiagnosticAnalyzer(LanguageNames.CSharp)]`: five at the merge of batch 286 into the method-holder cut
+     (2026-11-12), MethodHolderNameAnalyzer the newest; the page said two while MethodLimitAnalyzer and
+     RefusalDowngradedAnalyzer already stood beside them. -->
 
 What the generators read is, for the most part, the code itself: where a type is declared, a receiver's `ref`, a parameter's type, and a few short comments written in Go's own spelling. [Marker comments: what converted code carries instead of an attribute](#marker-comments-what-converted-code-carries-instead-of-an-attribute) lists each of them and the attributes that remain. The records a package keeps out of view are classified in [Extended attributes: what stays on the declaration and what moves](#extended-attributes-what-stays-on-the-declaration-and-what-moves).
 
@@ -208,7 +210,7 @@ generator writes the overload that takes a pointer (`ж<Reader>`), and the runti
 to `Reader` and which to `*Reader`. A Go reader sees a receiver and whether it is a pointer, which is what the
 Go line showed.
 
-<!-- source: src/core/bufio/bufio.cs:218 -->
+<!-- source: src/core/bufio/bufio.cs:225 -->
 ```csharp
 public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
 ```
@@ -222,7 +224,7 @@ generator builds one from the comment. `num:int64` says "a number over `int64`",
 slice, a map, a channel, a pointer or another named type the same way. If the comment is deleted the type loses
 its arithmetic and conversions, and the build fails rather than running wrong.
 
-<!-- source: src/core/time/time.cs:936 -->
+<!-- source: src/core/time/time.cs:976 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```
@@ -233,7 +235,7 @@ on an embedded interface, an embedded predeclared type, and a pointer to one. Pr
 type's methods, and `reflect`'s `Anonymous`, follow from it. An embedded struct value needs no comment: it is
 a `partial ref` property (`public partial ref Inner Inner { get; }`).
 
-<!-- source: src/go2cs/testdata/markercomments/main.cs:41-42 -->
+<!-- source: src/go2cs/testdata/markercomments/main.cs:42-43 -->
 ```csharp
     /*embed*/ public Reader Reader;
     /*embed*/ internal nint @int;
@@ -246,7 +248,7 @@ that contains a backquote, a `*/`, or any character Go does not count as printab
 is not valid UTF-8. Inside the quoted spelling a `*/` is written `*\x2f`, so the tag cannot end the comment
 early. A grouped declaration carries the tag once, as Go does.
 
-<!-- source: src/go2cs/testdata/markercomments/main.cs:46-47, 50 -->
+<!-- source: src/go2cs/testdata/markercomments/main.cs:47-51 -->
 ```csharp
     public @string Plain; /*`json:"plain"`*/
     public nint Grouped, Pair; /*`json:"g"`*/
@@ -259,7 +261,7 @@ becomes `array<byte>` and the length would be lost. The comment `/*[32]*/` keeps
 prefix, on a parameter, on a field, on a map's key type argument, and on a defined type whose inner lengths
 its definition does not spell. Nested arrays list each length in order.
 
-<!-- source: src/go2cs/testdata/markercomments/main.cs:68, 77, 83 -->
+<!-- source: src/go2cs/testdata/markercomments/main.cs:69-84 -->
 ```csharp
     internal /*[3]*/ ж<array<nint>> p;
 …
@@ -284,7 +286,7 @@ public static (rune r, nint size) DecodeRuneInString(sstring s) {
 a wrapper over golib's `channel<bool>`, which has no direction in its type. The comment after the name spells
 the type as Go does, arrow included, and the generator records the direction from it.
 
-<!-- source: src/tests/Behavioral/ReflectFuncChanDir/main.cs.target:25 -->
+<!-- source: src/tests/Behavioral/ReflectFuncChanDir/main.cs.target:34 -->
 ```csharp
 partial struct AssignD /*<-chan bool*/;
 ```
@@ -355,7 +357,7 @@ are the only way to say those things there.
 
 <!-- source: src/core/internal/poll/fd_mutex_impl.cs:150 -->
 <!-- attribute-shown: a hand-written file keeps the attribute -->
-<!-- source: src/core/internal/poll/fd_mutex_impl.cs:150 -->
+<!-- source: src/core/internal/poll/fd_mutex_impl.cs:154 -->
 ```csharp
 [GoRecv] internal static bool rwlock(this ref fdMutex mu, bool read) {
 ```
@@ -480,10 +482,10 @@ zero, an adapter, a container's operations, a variadic family) runs its queued r
 queued after a run is run by the next miss.
 <!-- The queueing initializer: src/gen/go2cs-gen/DeferredRegistration.cs:22
      (`public static string Initializer(string registry, string name)`). Its callers:
-     src/gen/go2cs-gen/ImplementGenerator.cs:1592 (`DeferredRegistration.Initializer("Adapters", "Adapters")`),
-     src/gen/go2cs-gen/TypeGenerator.cs:725 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
-     src/gen/go2cs-gen/EscapeRegistryGenerator.cs:402 (`DeferredRegistration.Initializer("EscapeRegistry", "EscapingContainers")`),
-     src/gen/go2cs-gen/NativeArrayOpenerGenerator.cs:220
+     src/gen/go2cs-gen/ImplementGenerator.cs:1608 (`DeferredRegistration.Initializer("Adapters", "Adapters")`),
+     src/gen/go2cs-gen/TypeGenerator.cs:728 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
+     src/gen/go2cs-gen/EscapeRegistryGenerator.cs:406 (`DeferredRegistration.Initializer("EscapeRegistry", "EscapingContainers")`),
+     src/gen/go2cs-gen/NativeArrayOpenerGenerator.cs:221
      (`DeferredRegistration.Initializer("NativeArrayOpeners", "NativeArrayOpeners")`).
      The four queues: src/core/golib/GoDeferredRegistrations.cs:41 (`NativeArrayOpeners = new()`), :44
      (`ZeroFactories = new()`), :47 (`Adapters = new()`), :53 (`EscapeRegistry = new()`); Defer :65

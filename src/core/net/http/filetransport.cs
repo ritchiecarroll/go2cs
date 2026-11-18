@@ -7,6 +7,7 @@ using fmt = fmt_package;
 using io = io_package;
 using fs = go.io.fs_package;
 using go.io;
+using static http_package;
 
 partial class http_package {
 
@@ -50,6 +51,8 @@ public static RoundTripper NewFileTransportFS(fs.FS fsys) {
     return NewFileTransport(FS(fsys));
 }
 
+} partial class httpᴛfileTransport {
+
 internal static partial (ж<Response> resp, error err) RoundTrip(this fileTransport t, ж<Request> req) {
     // We start ServeHTTP in a goroutine, which may take a long
     // time if the file is large. The newPopulateResponseWriter
@@ -66,6 +69,8 @@ internal static partial (ж<Response> resp, error err) RoundTrip(this fileTransp
     return (ᐸꟷ(resc), default);
 }
 
+} partial class http_package {
+
 internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateResponseWriter(ж<Request> req) {
     var (pr, pw) = io.Pipe();
     var rw = Ꮡ(new populateResponse(
@@ -74,7 +79,7 @@ internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateR
         res: Ꮡ(new Response(
             Proto: "HTTP/1.0",
             ProtoMajor: 1,
-            Header: new ΔHeader(0),
+            Header: new Header(0),
             Close: true,
             Body: new io.PipeReaderжReadCloser(pr),
             Request: req
@@ -95,6 +100,8 @@ partial struct populateResponse {
     internal bool sentResponse;
     internal ж<io.PipeWriter> pw;
 }
+
+} partial class httpᴛpopulateResponse {
 
 internal static void finish(this ref populateResponse pr) {
     if (!pr.wroteHeader) {
@@ -118,7 +125,7 @@ internal static void sendResponse(this ref populateResponse pr) {
     pr.ch.ᐸꟷ(pr.res);
 }
 
-internal static ΔHeader Header(this ref populateResponse pr) {
+internal static Header Header(this ref populateResponse pr) {
     return pr.res.Header;
 }
 
@@ -143,4 +150,4 @@ internal static (nint n, error err) Write(this ref populateResponse pr, slice<by
     return pr.pw.Write(p);
 }
 
-} // end http_package
+} // end httpᴛpopulateResponse

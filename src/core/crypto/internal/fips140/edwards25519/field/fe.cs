@@ -13,6 +13,7 @@ using bits = math.bits_package;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
 using math;
+using static field_package;
 
 partial class field_package {
 
@@ -40,6 +41,8 @@ internal const uint64 maskLow51Bits = /* (1 << 51) - 1 */ 2251799813685247;
 
 internal static ж<Element> feZero = Ꮡ(new Element(0, 0, 0, 0, 0));
 
+} partial class fieldᴛElement {
+
 // Zero sets v = 0, and returns v.
 public static ж<Element> Zero(this ж<Element> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
@@ -48,7 +51,11 @@ public static ж<Element> Zero(this ж<Element> Ꮡv) {
     return Ꮡv;
 }
 
+} partial class field_package {
+
 internal static ж<Element> feOne = Ꮡ(new Element(1, 0, 0, 0, 0));
+
+} partial class fieldᴛElement {
 
 // One sets v = 1, and returns v.
 public static ж<Element> One(this ж<Element> Ꮡv) {
@@ -293,8 +300,12 @@ public static nint Equal(this ref Element v, ж<Element> Ꮡu) {
     return subtle.ConstantTimeCompare(sa, sv);
 }
 
+} partial class field_package {
+
 // mask64Bits returns 0xffffffff if cond is 1, and 0 otherwise.
 internal static uint64 mask64Bits(nint cond) { return ~((uint64)cond - 1); }
+
+} partial class fieldᴛElement {
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
 public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb, nint cond) {
@@ -377,6 +388,8 @@ public static ж<Element> Mult32(this ж<Element> Ꮡv, ж<Element> Ꮡx, uint32
     return Ꮡv;
 }
 
+} partial class field_package {
+
 // mul51 returns lo + hi * 2⁵¹ = a * b.
 internal static (uint64 lo, uint64 hi) mul51(uint64 a, uint32 b) {
     uint64 lo = default;
@@ -387,6 +400,8 @@ internal static (uint64 lo, uint64 hi) mul51(uint64 a, uint32 b) {
     hi = (mh << 13) | (ml >> 51);
     return (lo, hi);
 }
+
+} partial class fieldᴛElement {
 
 // Pow22523 set v = x^((p-5)/8), and returns v. (p-5)/8 is 2^252-3.
 public static ж<Element> Pow22523(this ж<Element> Ꮡv, ж<Element> x) {
@@ -441,9 +456,13 @@ public static ж<Element> Pow22523(this ж<Element> Ꮡv, ж<Element> x) {
     return Ꮡv.Multiply(Ꮡt0, x); // 2^252 - 3 -> x^(2^252-3)
 }
 
+} partial class field_package {
+
 // sqrtM1 is 2^((p-1)/4), which squared is equal to -1 by Euler's Criterion.
 internal static ж<Element> sqrtM1 = Ꮡ(new Element(1718705420411056UL, 234908883556509UL,
     2233514472574048UL, 2117202627021982UL, 765476049583133UL));
+
+} partial class fieldᴛElement {
 
 // SqrtRatio sets r to the non-negative square root of the ratio of u and v.
 //
@@ -474,4 +493,4 @@ public static (ж<Element> R, nint wasSquare) SqrtRatio(this ж<Element> Ꮡr, �
     return (Ꮡr, correctSignSqrt | flippedSignSqrt);
 }
 
-} // end field_package
+} // end fieldᴛElement

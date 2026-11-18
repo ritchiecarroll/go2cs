@@ -56,7 +56,7 @@ internal static void secret_eraseSecrets() {
 
 // addSecret records the fact that we need to zero p immediately
 // when it is freed.
-internal static void addSecret(@unsafe.Pointer Δp, uintptr size) {
+internal static void addSecret(@unsafe.Pointer p, uintptr size) {
     // TODO(dmo): figure out the cost of these. These are mostly
     // intended to catch allocations that happen via the runtime
     // that the user has no control over and not big buffers that user
@@ -67,7 +67,7 @@ internal static void addSecret(@unsafe.Pointer Δp, uintptr size) {
     s.special.kind = _KindSpecialSecret;
     s.size = size;
     unlock(Ꮡmheap_.Ꮡspeciallock);
-    addspecial(Δp, s.Ꮡspecial, false);
+    addspecial(p, s.Ꮡspecial, false);
 }
 
 // send a no-op signal to an M for the purposes of
@@ -96,8 +96,8 @@ internal static (uintptr, uintptr) secret_getStack() {
 // For testing only.
 //
 //go:linkname secret_appendSignalStacks runtime/secret.appendSignalStacks
-internal static slice<Δstack> secret_appendSignalStacks(slice<Δstack> sigstacks) {
-    var sigstacksᴷ = new stackAppend<Δstack>(moves: true);
+internal static slice<stack> secret_appendSignalStacks(slice<stack> sigstacks) {
+    var sigstacksᴷ = new stackAppend<stack>(moves: true);
 
     // This is probably overkill, but it's what
     // doAllThreadsSyscall does

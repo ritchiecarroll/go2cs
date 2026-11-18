@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using netꓸAddr = go.net_package.ΔAddr;
 // </ImportedTypeAliases>
 
 using go;
@@ -89,10 +87,10 @@ using static go.net.http.httputil_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/httputil/dump.go", "dump.cs", "ABMy8pSUgoKUgpQACBKCgoKCgriCgpSqooKUgpQACAzygoKCgoKCpoKCggAHEIKCgoKCggACENKCkpKUytqUsoKmgpT4yJSCgoKClO6CgqYADRaCgoKCpqiSgpSmAA0sABICgoKClIKCuAAHEIKCpqaCgoKClIK4goKmgoKmlIKCgpSCgoK4goKUygAIEIKmlrKCgoKUpoKUlIKUgoKmgoKUgoKClA==", "119-121:1;130-144:2", "", "", "127:21,129:21")]
+[assembly: GoPositionMap("net/http/httputil/dump.go", "dump.cs", "ABQy8pSUgoKUgpQAChKCgoKCgviCgpTKooKUgpQACAzygoKCgoKCpoKCggAHEIKCgoKCggACENKCkpKUytqUsoKmgpT4yJSCgoKClO6CgqYADxaCgoKCpsiSgpSmAA0sABICgoKClIKCuAAHEIKCpqaCgoKClIK4goKmgoKmlIKCgpSCgoK4goKUygAKEILGlrKCgoKUpoKUlIKUgoKmgoKUgoKClA==", "119-121:1;130-144:2", "", "", "136:21,138:21")]
 [assembly: GoPositionMap("net/http/httputil/httputil.go", "httputil.cs", "AA4o4gACHAALAso=")]
-[assembly: GoPositionMap("net/http/httputil/persist.go", "persist.cs", "ABImpqa6ABEw8oKUrgAJAoKCgoKCgtiSgoKUrgAIAoKmgoKCgoKCpoKCuIKCgpSCgpSCgpSCgoKmuIKCgoKCuIKCgoK4gpSCpoKCgoKU2vKCggAJDAAJBoKCgoKClKaClIKCgpSCgpSCgoKUuJSUgoKCgoKUlAAWNPKClAAHGtKCgq4ACgKCgoKCgoLYkoKClAACEAAKAqaCgoKCgoKmgoK4goKClIKClIKClIKmlJSCgoKCgpSU2vKCgt4ACwSCgoKCgpSmgpSCgoKUgoKUgoKCpriCgoKCgriCgoKCgpSUlIKClNiSgoKU", "95-106:1;305-316:1", "", "", "", "107:21,108:13,354:21,355:13")]
-[assembly: GoPositionMap("net/http/httputil/reverseproxy.go", "reverseproxy.cs", "ADB0AA4CggAMLAATAoKCgoKUlJSCgpQAqwHmAoKCgpSklKaygriClIKUlKSUAAI2ABgCgpSmooKCgoKClLiCgoIACRQACxiCgqaigpSq0oKUgoKClAAUBuKCgqaCAAoWgoKCkoKytAAIDIKClAALGO6kgqaCgqaCgoKmlIKCgpTugsqCgqa4goKCppS4gpS4goKClILKyoKClIKUpqammLSCgqaUgoKmgtaUgoKCgoKCuIKClIKmlIKmuIKCgoKUppSCgsiCgpSUlLimgoKmooKCxgAEEvKUlKa4qKSCkoLugvzCuIK4gqamwpSCyraClKaCgoKUgtqigpSCgoKClIKCgpSClIKmgoKUyqKClAAMHOKCgoKCgpSClIKUlILW0oKCgpSCoqTSgoKCgrSkgoKUptKCgoKClIKCpoKCgqaCgoKCpoLGAAgIlJSCgpSklIKCgoKUgoKUgoKSyIKCtKQACxCCgoK4goKmpoKCgriCgqamyoKCgpSUlJSUgpSkgpS0tqaClKSklAAHEIKC5qKClA==", "334-336:1;426-432:1;560-575:2;861-869:1;947-950:1", "", "791=NewResponseController/1/1/2", "469:25,512:25,678:25,988:21,995:21,1012:19,1014:19")]
+[assembly: GoPositionMap("net/http/httputil/persist.go", "persist.cs", "ABMmpqa6ABEw8oKUzgAJAoKCgoKCgtiSgoKUrgAIAoKmgoKCgoKCpoKCuIKCgpSCgpSCgpSCgoKmuIKCgoKCuIKCgoK4gpSCpoKCgoKU2vKCggAJDAAJBoKCgoKClKaClIKCgpSCgpSCgoKUuJSUgoKCgoKUlAAYNPKClAAHGtKCgs4ACgKCgoKCgoLYkoKClAACEAAKAqaCgoKCgoKmgoK4goKClIKClIKClIKmlJSCgoKCgpSU2vKCgt4ACwSCgoKCgpSmgpSCgoKUgoKUgoKCpriCgoKCgriCgoKCgpSUlIKClNiSgoKU", "95-106:1;305-316:1", "", "", "", "110:21,111:13,361:21,362:13")]
+[assembly: GoPositionMap("net/http/httputil/reverseproxy.go", "reverseproxy.cs", "ADN0AA4CggAOLAATAoKCgoKUlJSCgpQArQHmAoKCgpSklKaygriClIKUlKSUAAI2ABgCgpSmooKCgoKClLiCgoIACRQADRiCgqaigpSq0oKUgoKClAAaBuKCgqaCAAoWgoKCkoKytAAIDIKClAALGO6kgqaCgqaCgoKmlIKCgpTugsqCgqa4goKCppS4gpS4goKClILKyoKClIKUpqammLSCgqaUgoKmgtaUgoKCgoKCuIKClIKmlIKmuIKCgoKUppSCgsiCgpSUlLimgoKmooKCxgAGEvKUlKa46KSCkoLuggAJDMK4griCpqbClILKtoKUpoKCgpSC2qKClIKCgoKUgoKClIKUgqaCgpTKooKUABAc4oKCgoKClIKUgpSUgtbSgoKClIKipNKCgoKCtAAIBIKClMbSgoKCgpSCgqaCgoKmgoKCgqaCxgAICJSUgoKUpJSCgoKClIKClIKCksiCgrTEAA0QgoKCuIKCpqaCgoK4goKmxsqCgoKUlJSUlIKUpIKUtLamgpSkpJQACRCCguaigpQ=", "334-336:1;426-432:1;560-575:2;861-869:1;947-950:1", "", "814=NewResponseController/1/1/2", "484:25,527:25,693:25,1023:21,1030:21,1047:19,1049:19")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -152,3 +150,23 @@ public static partial class httputil_package
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸnetꓸhttpꓸhttpguts() => builtin.initPackage(typeof(vendor.golang.org.x.net.http.httpguts_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(httputil_package.ClientConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛClientConn;
+[GoMethodHost(typeof(httputil_package.ProxyRequest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛProxyRequest;
+[GoMethodHost(typeof(httputil_package.ReverseProxy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛReverseProxy;
+[GoMethodHost(typeof(httputil_package.ServerConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛServerConn;
+[GoMethodHost(typeof(httputil_package.delegateReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛdelegateReader;
+[GoMethodHost(typeof(httputil_package.dumpConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛdumpConn;
+[GoMethodHost(typeof(httputil_package.failureToReadBody)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛfailureToReadBody;
+[GoMethodHost(typeof(httputil_package.maxLatencyWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛmaxLatencyWriter;
+[GoMethodHost(typeof(httputil_package.neverEnding)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛneverEnding;
+[GoMethodHost(typeof(httputil_package.noopCloseReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛnoopCloseReader;
+[GoMethodHost(typeof(httputil_package.switchProtocolCopier)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛswitchProtocolCopier;
+// </MethodHolders>

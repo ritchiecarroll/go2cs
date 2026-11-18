@@ -141,4 +141,34 @@ public class GoTypeDefinitionCommentTests
         Assert.IsTrue(withoutComment.Any(error => error.Id == "CS0019"),
             "with the comment deleted the type is a plain struct with no arithmetic, so the build fails (CS0019): " + string.Join("; ", withoutComment.Take(3)));
     }
+
+    // A defined pointer over another package's type, `type timeLocation *time.Location` (log/slog), spells the
+    // pointee through the file's alias of that package. The generated part has no such alias, so it qualifies
+    // the pointee, as it does a slice, array or map definition's element type.
+    [TestMethod]
+    public void APointerDefinitionThroughAFileAliasCompiles()
+    {
+        const string source =
+            """
+            namespace go;
+
+            using lib = lib_package;
+
+            public static partial class lib_package
+            {
+                public class Location { public int v; }
+            }
+
+            [GoPackage("ctest")]
+            public static partial class ctest_package
+            {
+                partial class locationPtr /*ж<lib.Location>*/;
+            }
+            """;
+
+        (string[] generated, Diagnostic[] errors) = Run(source);
+
+        Assert.AreEqual(1, generated.Length, "the defined pointer type generates one part");
+        Assert.AreEqual(0, errors.Length, "the generated part reads the pointee through its package class: " + string.Join("; ", errors.Take(3)));
+    }
 }

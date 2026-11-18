@@ -129,9 +129,9 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
     int64 nextPreemptM = default;
     for (nint i = 0; ; i++) {
         var s = readgstatus(Ꮡgp);
-        var exprᴛ1 = s;
+        var sᴛ1 = s;
         var matchᴛ1 = false;
-        if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) { matchᴛ1 = true;
+        if (sᴛ1 == _Gdead || sᴛ1 == _Gdeadextra) { matchᴛ1 = true;
             // Nothing to suspend.
             //
             // preemptStop may need to be cleared, but
@@ -139,11 +139,11 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
             // reuse. Instead, goexit0 clears it.
             return new suspendGState(dead: true);
         }
-        if (exprᴛ1 == _Gcopystack) { matchᴛ1 = true;
+        if (sᴛ1 == _Gcopystack) { matchᴛ1 = true;
             // The stack is being copied. We need to wait
             // until this is done.
         }
-        else if (exprᴛ1 == _Gpreempted) { matchᴛ1 = true;
+        else if (sᴛ1 == _Gpreempted) { matchᴛ1 = true;
             do {
                 // We (or someone else) suspended the G. Claim
                 // ownership of it by transitioning it to
@@ -159,7 +159,7 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
                 fallthrough = true;
             } while (false);
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting || exprᴛ1 == _Gleaked)) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && (sᴛ1 == _Grunnable || sᴛ1 == _Gsyscall || sᴛ1 == _Gwaiting || sᴛ1 == _Gleaked)) { matchᴛ1 = true;
             do {
                 // Claim goroutine by setting scan bit.
                 // This may race with execution or readying of gp.
@@ -190,7 +190,7 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
                 return new suspendGState(g: Ꮡgp, stopped: stopped);
             } while (false);
         }
-        else if (exprᴛ1 == _Grunning) {
+        else if (sᴛ1 == _Grunning) {
             do {
                 // Optimization: if there is already a pending preemption request
                 // (from the previous loop iteration), don't bother with the atomics.

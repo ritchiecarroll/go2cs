@@ -1,0 +1,15 @@
+--- FAIL: TestArrayPointerViewDoorReplacesTheCopyingSpan (1.17s)
+    arrayPointerViewDoor_test.go:236: openUnnamed: expected the door "return @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(x), 0, 4);", got:
+        internal static slice<byte> openUnnamed(ж<uint32> x) {
+            return @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(x)).slice();
+        }
+    arrayPointerViewDoor_test.go:236: intoUnnamed: expected the door "return @unsafe.Pointer.CopyInto<byte>(@unsafe.Pointer.FromPinnedBox(n), 0, 4, src);", got:
+        internal static nint intoUnnamed(ж<int32> n, slice<byte> src) {
+            return copy(@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(n)).slice(), src);
+        }
+    arrayPointerViewDoor_test.go:236: fromUnnamed: expected the door "return @unsafe.Pointer.CopyFrom<byte>(dst, p, 2, 8);", got:
+        internal static nint fromUnnamed(slice<byte> dst, @unsafe.Pointer p) {
+            return copy(dst, @unsafe.Pointer.To<array<byte>>(p).slice(2));
+        }
+FAIL
+FAIL	go2cs	1.185s

@@ -12,6 +12,7 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -41,6 +42,8 @@ internal static addrRange makeAddrRange(uintptr @base, uintptr limit) {
     }
     return r;
 }
+
+} partial class runtimeᴛaddrRange {
 
 // size returns the size of the range represented in bytes.
 internal static uintptr size(this addrRange a) {
@@ -114,6 +117,8 @@ internal static addrRange removeGreaterEqual(this addrRange a, uintptr addr) {
     return makeAddrRange(a.@base.addr(), addr);
 }
 
+} partial class runtime_package {
+
 // minOffAddr is the minimum address in the offset space, and
 // it corresponds to the virtual address arenaBaseOffset.
 internal static offAddr minOffAddr = new offAddr(arenaBaseOffset);
@@ -131,6 +136,8 @@ partial struct offAddr {
     // directly. Call addr() to get this value instead.
     internal uintptr a;
 }
+
+} partial class runtimeᴛoffAddr {
 
 // add adds a uintptr offset to the offAddr.
 internal static offAddr add(this offAddr l, uintptr bytes) {
@@ -172,6 +179,8 @@ internal static uintptr addr(this offAddr l) {
     return l.a;
 }
 
+} partial class runtime_package {
+
 // atomicOffAddr is like offAddr, but operations on it are atomic.
 // It also contains operations to be able to store marked addresses
 // to ensure that they're not overridden until they've been seen.
@@ -179,6 +188,8 @@ partial struct atomicOffAddr {
     // a contains the offset address, unlike offAddr.
     internal atomic.Int64 a;
 }
+
+} partial class runtimeᴛatomicOffAddr {
 
 // Clear attempts to store minOffAddr in atomicOffAddr. It may fail
 // if a marked value is placed in the box in the meanwhile.
@@ -235,6 +246,8 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
     return ((uintptr)v + (uintptr)arenaBaseOffset, wasMarked);
 }
 
+} partial class runtime_package {
+
 // addrRanges is a data structure holding a collection of ranges of
 // address space.
 //
@@ -254,6 +267,8 @@ partial struct addrRanges {
     // sysStat is the stat to track allocations by this type
     internal ж<sysMemStat> sysStat;
 }
+
+} partial class runtimeᴛaddrRanges {
 
 // go2cs generated this placeholder — func init is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -382,4 +397,4 @@ internal static void removeGreaterEqual(this ref addrRanges a, uintptr addr) {
 
 // go2cs generated this placeholder — func cloneInto is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} // end runtime_package
+} // end runtimeᴛaddrRanges

@@ -15,6 +15,7 @@ using errors = errors_package;
 using strconv = strconv_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static rc4_package;
 
 partial class rc4_package {
 
@@ -26,9 +27,13 @@ partial struct Cipher {
 
 partial struct KeySizeError /*num:nint*/;
 
+} partial class rc4ᴛKeySizeError {
+
 public static @string Error(this KeySizeError k) {
     return "crypto/rc4: invalid key size "u8 + strconv.Itoa((nint)k);
 }
+
+} partial class rc4_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoRc4UseOfRc4IsNotˢ => ref cryptoRc4UseOfRc4IsNotˢᵇ;
@@ -55,6 +60,8 @@ public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
     }
     return (Ꮡc, default);
 }
+
+} partial class rc4ᴛCipher {
 
 // Reset zeros the key data and makes the [Cipher] unusable.
 //
@@ -88,4 +95,4 @@ public static void XORKeyStream(this ref Cipher c, slice<byte> dst, slice<byte> 
     (c.i, c.j) = (i, j);
 }
 
-} // end rc4_package
+} // end rc4ᴛCipher

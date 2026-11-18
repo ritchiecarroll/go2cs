@@ -22,6 +22,7 @@ using io = io_package;
 using runtime = runtime_package;
 using global::go.go;
 using global::go.go.@internal;
+using static importer_package;
 
 partial class importer_package {
 
@@ -51,16 +52,15 @@ private static readonly @string gccgoˢᵇ = "gccgo"u8;
 // Deprecated: If lookup is nil, for backwards-compatibility, the importer
 // will attempt to resolve imports in the $GOPATH workspace.
 public static types.Importer ForCompiler(ж<token.FileSet> fset, @string compiler, Func<@string, (io.ReadCloser, error)> lookup) {
-    var exprᴛ1 = compiler;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "gc"u8: {
+    case {} when compiler == "gc"u8: {
         return new gcimportsжImporter(Ꮡ(new gcimports(
             fset: fset,
             packages: new map<@string, ж<types.Package>>(),
             lookup: lookup
         )));
     }
-    case {} when exprᴛ1 == "gccgo"u8: {
+    case {} when compiler == "gccgo"u8: {
         gccgoimporter.GccgoInstallation inst = default;
         var err = inst.InitFromDriver(gccgoˢ); if (err != nil) {
             return default;
@@ -71,7 +71,7 @@ public static types.Importer ForCompiler(ж<token.FileSet> fset, @string compile
             lookup: lookup
         )));
     }
-    case {} when exprᴛ1 == "source"u8: {
+    case {} when compiler == "source"u8: {
         if (lookup != nil) {
             throw panic("source importer for custom import path lookup not supported (issue #13847).");
         }
@@ -112,6 +112,8 @@ partial struct gcimports {
     internal Func<@string, (io.ReadCloser, error)> lookup;
 }
 
+} partial class importerᴛgcimports {
+
 internal static (ж<types.Package>, error) Import(this ref gcimports m, @string path) {
     return m.ImportFrom(path, ""u8, /* no vendoring */ 0);
 }
@@ -123,12 +125,16 @@ internal static (ж<types.Package>, error) ImportFrom(this ref gcimports m, @str
     return gcimporter.Import(m.fset, m.packages, path, srcDir, m.lookup);
 }
 
+} partial class importer_package {
+
 // gccgo importer
 partial struct gccgoimports {
     internal map<@string, ж<types.Package>> packages;
     internal Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> importer;
     internal Func<@string, (io.ReadCloser, error)> lookup;
 }
+
+} partial class importerᴛgccgoimports {
 
 internal static (ж<types.Package>, error) Import(this ref gccgoimports m, @string path) {
     return m.ImportFrom(path, ""u8, /* no vendoring */ 0);
@@ -141,4 +147,4 @@ internal static (ж<types.Package>, error) ImportFrom(this ref gccgoimports m, @
     return m.importer(m.packages, path, srcDir, m.lookup);
 }
 
-} // end importer_package
+} // end importerᴛgccgoimports

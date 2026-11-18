@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,11 +9,15 @@ partial struct T {
     internal nint n;
 }
 
+} partial class mainᴛT {
+
 public static @string Hello(this T _) { return "hello"; }
 
 public static nint N(this T t) { return t.n; }
 
 public static @string PtrHello(this ref T _) { return "ptr hello"; }
+
+} partial class main_package {
 
 partial interface Helloer {
     @string Hello();

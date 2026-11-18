@@ -94,9 +94,9 @@ internal static void traceSyncBatch(uintptr gen, uint64 frequency) {
     // Immediately flush the buffer.
     var wʗ1 = w;
     systemstack(() => {
-        @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         traceBufFlush(wʗ1.traceBuf, gen);
-        unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
     });
 }
 

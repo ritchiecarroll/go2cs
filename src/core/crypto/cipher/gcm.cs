@@ -15,6 +15,7 @@ using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140.aes;
+using static cipher_package;
 
 partial class cipher_package {
 
@@ -120,6 +121,8 @@ partial struct gcmWithRandomNonce {
     /*embed*/ public ж<crypto.@internal.fips140.aes.gcm_package.GCM> GCM;
 }
 
+} partial class cipherᴛgcmWithRandomNonce {
+
 internal static nint NonceSize(this gcmWithRandomNonce g) {
     return 0;
 }
@@ -211,6 +214,8 @@ internal static (slice<byte>, error) Open(this gcmWithRandomNonce g, slice<byte>
     return (ret, default);
 }
 
+} partial class cipher_package {
+
 // gcmAble is an interface implemented by ciphers that have a specific optimized
 // implementation of GCM. crypto/aes doesn't use this anymore, and we'd like to
 // eventually remove it.
@@ -250,6 +255,8 @@ partial struct gcmFallback {
     internal nint nonceSize;
     internal nint tagSize;
 }
+
+} partial class cipherᴛgcmFallback {
 
 internal static nint NonceSize(this ref gcmFallback g) {
     return g.nonceSize;
@@ -294,7 +301,11 @@ internal static slice<byte> Seal(this ref gcmFallback g, slice<byte> dst, slice<
     return ret;
 }
 
+} partial class cipher_package {
+
 internal static error errOpen = errors.New("cipher: message authentication failed");
+
+} partial class cipherᴛgcmFallback {
 
 internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != g.nonceSize) {
@@ -344,6 +355,8 @@ internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> ds
 
     return (ret, default);
 }
+
+} partial class cipher_package {
 
 internal static void deriveCounter(/*[16]*/ ж<array<byte>> H, /*[16]*/ ж<array<byte>> Ꮡcounter, slice<byte> nonce) {
     ref var counter = ref Ꮡcounter.DerefOrNull();

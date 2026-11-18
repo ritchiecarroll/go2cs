@@ -16,6 +16,7 @@ using strings = strings_package;
 using time = time_package;
 using go.net;
 using go.net.http;
+using static fcgi_package;
 
 partial class fcgi_package {
 
@@ -45,6 +46,8 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
     return r;
 }
 
+} partial class fcgiᴛrequest {
+
 // parseParams reads an encoded []byte into Params.
 internal static void parseParams(this ref request r) {
     var text = r.rawParams;
@@ -71,10 +74,12 @@ internal static void parseParams(this ref request r) {
     }
 }
 
+} partial class fcgi_package {
+
 // response implements http.ResponseWriter.
 partial struct response {
     internal ж<request> req;
-    internal httpꓸHeader header;
+    internal http.Header header;
     internal nint code;
     internal bool wroteHeader;
     internal bool wroteCGIHeader;
@@ -86,12 +91,14 @@ internal static ж<response> newResponse(ref child c, ж<request> Ꮡreq) {
 
     return Ꮡ(new response(
         req: Ꮡreq,
-        header: new httpꓸHeader(new map<@string, slice<@string>>{}),
+        header: new http.Header(new map<@string, slice<@string>>{}),
         w: newWriter(c.conn, typeStdout, req.reqId)
     ));
 }
 
-internal static httpꓸHeader Header(this ref response r) {
+} partial class fcgiᴛresponse {
+
+internal static http.Header Header(this ref response r) {
     return r.header;
 }
 
@@ -162,19 +169,23 @@ internal static error Close(this ref response r) {
     return r.w.Close();
 }
 
+} partial class fcgi_package {
+
 partial struct child {
     internal ж<conn> conn;
-    internal httpꓸHandler handler;
+    internal http.Handler handler;
     internal map<uint16, ж<request>> requests; // keyed by request ID
 }
 
-internal static ж<child> newChild(io.ReadWriteCloser rwc, httpꓸHandler handler) {
+internal static ж<child> newChild(io.ReadWriteCloser rwc, http.Handler handler) {
     return Ꮡ(new child(
         conn: newConn(rwc),
         handler: handler,
         requests: new map<uint16, ж<request>>()
     ));
 }
+
+} partial class fcgiᴛchild {
 
 internal static void serve(this ж<child> Ꮡc) {
     GoFrame ᒐ = default;
@@ -201,6 +212,8 @@ internal static void serve(this ж<child> Ꮡc) {
     finally { ᒐ.Run(); }
 }
 
+} partial class fcgi_package {
+
 internal static error errCloseConn = errors.New("fcgi: connection should be closed");
 
 internal static io.ReadCloser emptyBody = io.NopCloser(new strings_ReaderжReader(strings.NewReader("")));
@@ -212,6 +225,8 @@ public static error ErrRequestAborted = errors.New("fcgi: request aborted by web
 // ErrConnClosed is returned by Read when a handler attempts to read the body of
 // a request after the connection to the web server has been closed.
 public static error ErrConnClosed = errors.New("fcgi: connection to web server closed");
+
+} partial class fcgiᴛchild {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fcgiReceivedIdThatIsˢ => ref fcgiReceivedIdThatIsˢᵇ;
@@ -312,6 +327,8 @@ internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡre
     }}
 }
 
+} partial class fcgi_package {
+
 // filterOutUsedEnvVars returns a new map of env vars without the
 // variables in the given envVars map that are read for creating each http.Request
 internal static map<@string, @string> filterOutUsedEnvVars(map<@string, @string> envVars) {
@@ -323,6 +340,8 @@ internal static map<@string, @string> filterOutUsedEnvVars(map<@string, @string>
     }
     return withoutUsedEnvVars;
 }
+
+} partial class fcgiᴛchild {
 
 internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.ReadCloser body) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -371,12 +390,14 @@ internal static void cleanUp(this ref child c) {
     }
 }
 
+} partial class fcgi_package {
+
 // Serve accepts incoming FastCGI connections on the listener l, creating a new
 // goroutine for each. The goroutine reads requests and then calls handler
 // to reply to them.
 // If l is nil, Serve accepts connections from os.Stdin.
 // If handler is nil, [http.DefaultServeMux] is used.
-public static partial error Serve(net.Listener l, httpꓸHandler handler) {
+public static partial error Serve(net.Listener l, http.Handler handler) {
     GoFrame ᒐ = default;
     try {
         if (l == nil) {
@@ -388,7 +409,7 @@ public static partial error Serve(net.Listener l, httpꓸHandler handler) {
             defer(() => l.Close(), ref ᒐ);
         }
         if (handler == nil) {
-            handler = new http.ServeMuxжΔHandler(http.DefaultServeMux);
+            handler = new http.ServeMuxжHandler(http.DefaultServeMux);
         }
         for (;;) {
             var (rw, err) = l.Accept();
@@ -424,9 +445,8 @@ private static readonly @string httpˢᵇ = "HTTP_"u8;
 // in the http.Request.Context, accessible via ProcessEnv.
 internal static bool addFastCGIEnvToContext(@string s) {
     // Exclude things supported by net/http natively:
-    var exprᴛ1 = s;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "CONTENT_LENGTH"u8 || exprᴛ1 == "CONTENT_TYPE"u8 || exprᴛ1 == "HTTPS"u8 || exprᴛ1 == "PATH_INFO"u8 || exprᴛ1 == "QUERY_STRING"u8 || exprᴛ1 == "REMOTE_ADDR"u8 || exprᴛ1 == "REMOTE_HOST"u8 || exprᴛ1 == "REMOTE_PORT"u8 || exprᴛ1 == "REQUEST_METHOD"u8 || exprᴛ1 == "REQUEST_URI"u8 || exprᴛ1 == "SCRIPT_NAME"u8 || exprᴛ1 == "SERVER_PROTOCOL"u8: {
+    case {} when s == "CONTENT_LENGTH"u8 || s == "CONTENT_TYPE"u8 || s == "HTTPS"u8 || s == "PATH_INFO"u8 || s == "QUERY_STRING"u8 || s == "REMOTE_ADDR"u8 || s == "REMOTE_HOST"u8 || s == "REMOTE_PORT"u8 || s == "REQUEST_METHOD"u8 || s == "REQUEST_URI"u8 || s == "SCRIPT_NAME"u8 || s == "SERVER_PROTOCOL"u8: {
         return false;
     }}
     if (strings.HasPrefix(s, httpˢ)) {
@@ -436,9 +456,8 @@ internal static bool addFastCGIEnvToContext(@string s) {
     // This list is redundant with the default "return true" below.
     // Consider this documentation of the sorts of things we expect
     // to maybe see.
-    var exprᴛ2 = s;
     switch (ᐧ) {
-    case {} when exprᴛ2 == "REMOTE_USER"u8: {
+    case {} when s == "REMOTE_USER"u8: {
         return true;
     }}
     // Unknown, so include it to be safe.

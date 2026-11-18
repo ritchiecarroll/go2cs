@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,7 +9,11 @@ partial struct stringer {
     internal @string s;
 }
 
+} partial class mainᴛstringer {
+
 internal static @string String(this stringer b) { return b.s; }
+
+} partial class main_package {
 
 internal static void main() {
     @string name = "x";

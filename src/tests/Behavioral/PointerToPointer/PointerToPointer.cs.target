@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -49,6 +50,8 @@ internal static void main() {
     derefElements();
 }
 
+} partial class mainᴛBuffer {
+
 public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
     nint n = default;
 
@@ -62,6 +65,8 @@ public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
 
     return (n, default);
 }
+
+} partial class main_package {
 
 public static ж<Buffer> /*b1*/ NewBuffer(slice<byte> buf) {
     return Ꮡ(new Buffer(buf: buf));

@@ -27,6 +27,7 @@ using go.crypto.@internal.fips140;
 using go.crypto.tls.@internal;
 using go.sync;
 using math;
+using static tls_package;
 
 partial class tls_package {
 
@@ -60,13 +61,15 @@ partial struct serverHandshakeStateTLS13 {
     internal SignatureScheme sigAlg;
     internal ж<tls13.EarlySecret> earlySecret;
     internal slice<byte> sharedKey;
-    internal ж<tls13ꓸHandshakeSecret> handshakeSecret;
-    internal ж<tls13ꓸMasterSecret> masterSecret;
+    internal ж<tls13.HandshakeSecret> handshakeSecret;
+    internal ж<tls13.MasterSecret> masterSecret;
     internal slice<byte> trafficSecret; // client_application_traffic_secret_0
     internal hash.Hash transcript;
     internal slice<byte> clientFinished;
     internal ж<echServerContext> echContext;
 }
+
+} partial class tlsᴛserverHandshakeStateTLS13 {
 
 internal static error handshake(this ж<serverHandshakeStateTLS13> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
@@ -132,14 +135,20 @@ internal static error handshake(this ж<serverHandshakeStateTLS13> Ꮡhs) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsClientUsedTheLegacyˢ => ref tlsClientUsedTheLegacyˢᵇ;
 private static readonly @string tlsClientUsedTheLegacyˢᵇ = "tls: client used the legacy version field to negotiate TLS 1.3"u8;
+internal static ref readonly @string tlsClientUsingˢ => ref tlsClientUsingˢᵇ;
+private static readonly @string tlsClientUsingˢᵇ = "tls: client using inappropriate protocol fallback"u8;
 internal static ref readonly @string tlsTls13ClientSupportsˢ => ref tlsTls13ClientSupportsˢᵇ;
 private static readonly @string tlsTls13ClientSupportsˢᵇ = "tls: TLS 1.3 client supports illegal compression methods"u8;
+internal static ref readonly @string tlsInitialHandshakeHadˢ => ref tlsInitialHandshakeHadˢᵇ;
+private static readonly @string tlsInitialHandshakeHadˢᵇ = "tls: initial handshake had non-empty renegotiation extension"u8;
 internal static ref readonly @string tlsEarlyDataWithoutPreˢ => ref tlsEarlyDataWithoutPreˢᵇ;
 private static readonly @string tlsEarlyDataWithoutPreˢᵇ = "tls: early_data without pre_shared_key"u8;
 internal static ref readonly @string tlsClientSentUnexpectedˢ => ref tlsClientSentUnexpectedˢᵇ;
 private static readonly @string tlsClientSentUnexpectedˢᵇ = "tls: client sent unexpected early data"u8;
 internal static ref readonly @string tlsNoKeyExchangesˢ => ref tlsNoKeyExchangesˢᵇ;
 private static readonly @string tlsNoKeyExchangesˢᵇ = "tls: no key exchanges supported by both client and server"u8;
+internal static ref readonly @string tlsCurvePreferencesˢ => ref tlsCurvePreferencesˢᵇ;
+private static readonly @string tlsCurvePreferencesˢᵇ = "tls: CurvePreferences includes unsupported curve"u8;
 internal static ref readonly @string tlsInvalidClientKeyShareˢ => ref tlsInvalidClientKeyShareˢᵇ;
 private static readonly @string tlsInvalidClientKeyShareˢᵇ = "tls: invalid client key share"u8;
 internal static ref readonly @string tlsClientOfferedTlsˢ => ref tlsClientOfferedTlsˢᵇ;
@@ -400,7 +409,7 @@ internal static error checkForResumption(this ref serverHandshakeStateTLS13 hs) 
             continue;
         }
 
-        var createdAt = time_package.Unix((int64)sessionState.createdAt, 0);
+        var createdAt = time.Unix((int64)sessionState.createdAt, 0);
         if (c.config.time().Sub(createdAt) > maxSessionTicketLifetime) {
             continue;
         }
@@ -488,6 +497,8 @@ internal static error checkForResumption(this ref serverHandshakeStateTLS13 hs) 
     return default;
 }
 
+} partial class tls_package {
+
 // Recreate the interface to avoid importing encoding.
 internal partial interface cloneHash_binaryMarshaler /*dyn*/ {
     (slice<byte> data, error err) MarshalBinary();
@@ -523,6 +534,8 @@ internal static hash.Hash cloneHash(hash.Hash @in, crypto.Hash h) {
     }
     return @out;
 }
+
+} partial class tlsᴛserverHandshakeStateTLS13 {
 
 internal static error pickCertificate(this ref serverHandshakeStateTLS13 hs) {
     var c = hs.c;
@@ -575,6 +588,8 @@ internal static error sendDummyChangeCipherSpec(this ref serverHandshakeStateTLS
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsHandshakeBufferNotˢ2 => ref tlsHandshakeBufferNotˢ2ᵇ;
 private static readonly @string tlsHandshakeBufferNotˢ2ᵇ = "tls: handshake buffer not empty before HelloRetryRequest"u8;
+internal static ref readonly @string hrrEchAcceptConfirmationˢ => ref hrrEchAcceptConfirmationˢᵇ;
+private static readonly @string hrrEchAcceptConfirmationˢᵇ = "hrr ech accept confirmation"u8;
 internal static ref readonly @string tlsSecondClientHelloˢ => ref tlsSecondClientHelloˢᵇ;
 private static readonly @string tlsSecondClientHelloˢᵇ = "tls: second client hello missing encrypted client hello extension"u8;
 internal static ref readonly @string tlsClientSentInvalidˢ => ref tlsClientSentInvalidˢᵇ;
@@ -728,6 +743,8 @@ internal static (ж<keyShare>, error) doHelloRetryRequest(this ref serverHandsha
     return (ks, default);
 }
 
+} partial class tls_package {
+
 // illegalClientHelloChange reports whether the two ClientHello messages are
 // different, with the exception of the changes allowed before and after a
 // HelloRetryRequest. See RFC 8446, Section 4.1.2.
@@ -767,6 +784,12 @@ internal static bool illegalClientHelloChange(ref clientHelloMsg ch, ref clientH
     }
     return ch.vers != ch1.vers || !bytes.Equal(ch.random, ch1.random) || !bytes.Equal(ch.sessionId, ch1.sessionId) || !bytes.Equal(ch.compressionMethods, ch1.compressionMethods) || ch.serverName != ch1.serverName || ch.ocspStapling != ch1.ocspStapling || !bytes.Equal(ch.supportedPoints, ch1.supportedPoints) || ch.ticketSupported != ch1.ticketSupported || !bytes.Equal(ch.sessionTicket, ch1.sessionTicket) || ch.secureRenegotiationSupported != ch1.secureRenegotiationSupported || !bytes.Equal(ch.secureRenegotiation, ch1.secureRenegotiation) || ch.scts != ch1.scts || !bytes.Equal(ch.cookie, ch1.cookie) || !bytes.Equal(ch.pskModes, ch1.pskModes);
 }
+
+} partial class tlsᴛserverHandshakeStateTLS13 {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string echAcceptConfirmationˢ => ref echAcceptConfirmationˢᵇ;
+private static readonly @string echAcceptConfirmationˢᵇ = "ech accept confirmation"u8;
 
 internal static error sendServerParameters(this ref serverHandshakeStateTLS13 hs) {
     var c = hs.c;
@@ -1028,6 +1051,8 @@ internal static error sendSessionTickets(this ref serverHandshakeStateTLS13 hs) 
     return c.sendSessionTicket(false, default);
 }
 
+} partial class tlsᴛConn {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsInternalErrorUnknownˢ => ref tlsInternalErrorUnknownˢᵇ;
 private static readonly @string tlsInternalErrorUnknownˢᵇ = "tls: internal error: unknown cipher suite"u8;
@@ -1067,7 +1092,7 @@ internal static error sendSessionTicket(this ж<Conn> Ꮡc, bool earlyData, slic
             return err;
         }
     }
-    m.lifetime = (uint32)(maxSessionTicketLifetime / time_package.ΔSecond);
+    m.lifetime = (uint32)(maxSessionTicketLifetime / time.Second);
 
     // ticket_age_add is a random 32-bit value. See RFC 8446, section 4.6.1
     // The value is not stored anywhere; we never need to check the ticket age
@@ -1093,6 +1118,12 @@ internal static error sendSessionTicket(this ж<Conn> Ꮡc, bool earlyData, slic
 
     return default;
 }
+
+} partial class tlsᴛserverHandshakeStateTLS13 {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tlsClientCertificateUsedˢ => ref tlsClientCertificateUsedˢᵇ;
+private static readonly @string tlsClientCertificateUsedˢᵇ = "tls: client certificate used with invalid signature algorithm"u8;
 
 internal static error readClientCertificate(this ref serverHandshakeStateTLS13 hs) {
     var c = hs.c;
@@ -1216,4 +1247,4 @@ internal static error readClientFinished(this ref serverHandshakeStateTLS13 hs) 
     return default;
 }
 
-} // end tls_package
+} // end tlsᴛserverHandshakeStateTLS13

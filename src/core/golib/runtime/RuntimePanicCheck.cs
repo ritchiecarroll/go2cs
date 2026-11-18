@@ -74,8 +74,8 @@ internal static class RuntimePanicCheck
 
     /// <summary>
     /// Reports whether the first frame of <paramref name="site"/> outside golib is declared on package
-    /// <c>runtime</c>'s class, its internal-test bridge, a type nested in either, or the promoted-method class of a
-    /// struct of either, and names that frame.
+    /// <c>runtime</c>'s class, its internal-test bridge, a type nested in either, or the method holder or
+    /// promoted-method class of a type of either, and names that frame.
     /// </summary>
     internal static bool RaisedInRuntimePackage(StackTrace? site, out string frameName)
     {
@@ -105,7 +105,8 @@ internal static class RuntimePanicCheck
 
     /// <summary>
     /// Reports whether the type whose full name is <paramref name="typeName"/> is package <c>runtime</c>'s
-    /// class or its internal-test bridge, is nested in either, or is the promoted-method class of a struct of either.
+    /// class or its internal-test bridge, is nested in either, or is the method holder or the promoted-method class
+    /// of a type of either.
     /// </summary>
     internal static bool IsRuntimePackageType(string typeName)
     {
@@ -114,8 +115,25 @@ internal static class RuntimePanicCheck
         ReadOnlySpan<char> outermost = nested < 0 ? typeName : typeName.AsSpan(0, nested);
 
         return outermost is "go.runtime_package" or "go.runtime_internal_test_package" ||
-               IsPromotedMethodClassOf(outermost, "go.runtime") || IsPromotedMethodClassOf(outermost, "go.runtime_internal_test");
+               IsMethodClassOf(outermost, "go.runtime") || IsMethodClassOf(outermost, "go.runtime_internal_test");
     }
+
+    /// <summary>
+    /// Reports whether <paramref name="typeName"/> is the full name of a class that holds methods of a type of the
+    /// package whose class is <c>&lt;packageStem&gt;_package</c>: the type's method holder
+    /// <c>&lt;packageStem&gt;ᴛ&lt;Type&gt;</c>, which the converter declares for the methods the type declares, or its
+    /// promoted-method class (<see cref="IsPromotedMethodClassOf"/>).
+    /// </summary>
+    /// <remarks>
+    /// Go names a method by its receiver type's package, so a frame in either class is a frame of that package. A
+    /// cross-package forwarder class ends <c>ᴛxpkg</c> and is not matched, as it never was: its forwarders are
+    /// go2cs-gen's, for methods of another package.
+    /// </remarks>
+    internal static bool IsMethodClassOf(ReadOnlySpan<char> typeName, ReadOnlySpan<char> packageStem) =>
+        typeName.Length > packageStem.Length + TempVarMarker.Length &&
+        typeName.StartsWith(packageStem, StringComparison.Ordinal) &&
+        typeName[packageStem.Length..].StartsWith(TempVarMarker, StringComparison.Ordinal) &&
+        !typeName.EndsWith(CrossPackageClassEnding, StringComparison.Ordinal);
 
     /// <summary>
     /// Reports whether <paramref name="typeName"/> is the full name of the promoted-method class go2cs-gen writes for
@@ -133,4 +151,5 @@ internal static class RuntimePanicCheck
         typeName.EndsWith(PromotedMethodClassEnding, StringComparison.Ordinal);
 
     private const string PromotedMethodClassEnding = $"{TempVarMarker}pkg";
+    private const string CrossPackageClassEnding = $"{TempVarMarker}xpkg";
 }

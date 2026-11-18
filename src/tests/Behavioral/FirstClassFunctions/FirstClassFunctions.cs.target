@@ -8,6 +8,7 @@ using fmt = fmt_package;
 using rand = math.rand_package;
 using math;
 using ꓸꓸꓸnint = Span<nint>;
+using static main_package;
 
 partial class main_package {
 
@@ -185,6 +186,8 @@ partial struct worker {
 
 internal static ж<nint> lastN;
 
+} partial class mainᴛworker {
+
 internal static nint fillFast(this ж<worker> Ꮡw, slice<byte> b) {
     ref var w = ref Ꮡw.DerefOrNull();
 
@@ -197,8 +200,8 @@ internal static void bump(this ref worker w) { w.n++; }
 internal static error /*err*/ initWorker(this ref worker w, nint level) {
     switch (ᐧ) {
     case {} when level is 0: {
-        w.fill = ((Func<ж<worker>, slice<byte>, nint>)(fillFast));
-        w.step = ((Action<ж<worker>>)(bump));
+        w.fill = ((Func<ж<worker>, slice<byte>, nint>)(mainᴛworker.fillFast));
+        w.step = ((Action<ж<worker>>)(mainᴛworker.bump));
         break;
     }
     default: {
@@ -215,9 +218,15 @@ internal static nint run(this ж<worker> Ꮡw, slice<byte> b) {
     return w.fill(Ꮡw, b);
 }
 
+} partial class main_package {
+
 internal delegate nint handler(nint _);
 
+} partial class mainᴛhandler {
+
 internal static @string tag(this handler h) { return "handler"; }
+
+} partial class main_package {
 
 partial interface tagged {
     @string tag();

@@ -252,9 +252,8 @@ internal static (@string, bool) decode2231Enc(@string v) {
         return ("", false);
     }
     charset = strings.ToLower(charset);
-    var exprᴛ1 = charset;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "us-ascii"u8 || exprᴛ1 == "utf-8"u8: {
+    case {} when charset == "us-ascii"u8 || charset == "utf-8"u8: {
         break;
     }
     default: {

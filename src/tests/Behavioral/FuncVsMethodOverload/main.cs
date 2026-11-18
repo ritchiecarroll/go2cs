@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
+using static main_package;
 
 partial class main_package {
 
@@ -13,12 +14,16 @@ partial struct nih {
     internal uint32 a, b;
 }
 
+} partial class mainᴛnih {
+
 internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
     if (bytes == 0) {
         return Ꮡp;
     }
     return @unsafe.Pointer.To<nih>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡp), bytes));
 }
+
+} partial class main_package {
 
 internal static partial uint32 step(ж<uint32> v) {
     var q = @unsafe.Pointer.To<uint32>(add(@unsafe.Pointer.FromPinnedBox(v), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
@@ -29,11 +34,15 @@ partial struct holder {
     internal uint32 x, y;
 }
 
+} partial class mainᴛholder {
+
 internal static uint32 second(this ж<holder> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     return ~@unsafe.Pointer.To<uint32>(add((uintptr)@unsafe.Pointer.FromRef(ref h), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
 }
+
+} partial class main_package {
 
 internal static void main() {
     ref var vals = ref heap<array<uint32>>(array<uint32>([10, 20, 30, 40]), out var Ꮡvals);

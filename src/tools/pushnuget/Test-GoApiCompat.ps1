@@ -356,41 +356,112 @@ try {
     $real = Get-GoApiCompatSuppressionMap (Join-Path $repoRoot 'src/core')
     $onDisk = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot 'src/core') -Recurse -File -Filter 'CompatibilitySuppressions.xml')
     Check 'every suppression file in the tree is mapped by its package id' ($real.Count -eq $onDisk.Count) "$($real.Count) mapped of $($onDisk.Count) on disk; keys: $(@($real.Keys | Sort-Object) -join ', ')"
-    # Deleted with golib's when 1.26.10.3 was published; a later break re-adds it under the same bound.
-    $cb = @()
-    if ($real.ContainsKey('go.vendor.golang.org.x.crypto.cryptobyte')) { $cb = @(Read-GoApiCompatSuppressions $real['go.vendor.golang.org.x.crypto.cryptobyte']) }
-    Check 'vendored cryptobyte carries at most batch 235''s 5 entries, and cites the batch while it carries any' (
-        $cb.Count -le 5 -and ($cb.Count -eq 0 -or [System.IO.File]::ReadAllText($real['go.vendor.golang.org.x.crypto.cryptobyte']).Contains('batch 235'))) "$($cb.Count) entries"
 
-    # 1.26.11.1 announces one break: every struct's promoted-method forwarders left the package class for a class of
-    # the struct's own (docs/phase4/DESIGN-promoted-forwarder-placement.md; the owner's ruling, 2026-11-10). Its entries
-    # are GENERATED from the packed assemblies and their 1.26.10.3 baselines (New-GoApiCompatMoveSuppressions.ps1 over
-    # the pack rehearsal of 2026-11-10: master ae69e4ce74 and the seat), one CP0002 per moved public forwarder per
-    # asset: 900 in these 20 files. The bound is those counts and no other file. Each header says when its file goes:
-    # once 1.26.11.1 is published, the release after it compares with 1.26.11.1 and the entries match nothing.
-    Write-Host 'the tree carries at most the promoted-forwarder move''s generated entries'
+    # 1.26.11.1 announces three breaks (docs/NEWS.md, 1.26.11.1, Upgrading). MOVES: every struct's promoted-method
+    # forwarders left the package class for a class of the struct's own
+    # (docs/phase4/DESIGN-promoted-forwarder-placement.md; the owner's ruling, 2026-11-10), and every method left it
+    # for its receiver type's method holder (OQ2). RENAMES:
+    # with the methods in their holders, a type, constant or variable drops the U+0394 prefix its Go name took when a
+    # method of the package shared it (OQ2). The entries are GENERATED from the packed assemblies and their 1.26.10.3
+    # baselines (New-GoApiCompatMoveSuppressions.ps1 over the release-smoke pack of the OQ2 cut, 2026-11-15): one CP0002
+    # per moved public method per asset, and per rename the diagnostic the engine reports (CP0001 a type, CP0002 a
+    # member, CP0006 an interface member, CP0008 a lost interface, CP0021 a constraint): 13,234 in these 230 files,
+    # vendored cryptobyte among them. CLONES (batch 312): a struct whose only array is zero-length no longer needs a
+    # value clone, and loses go.IGoValueClone and its Delta-named Clone(); syscall's InotifyEvent on linux-x64 is the
+    # one, a CP0008 and a CP0002 generated over the 312 union's release-smoke pack: 13,236 in all. The bound is those
+    # counts and no other file. Each header says when its file goes: once 1.26.11.1 is published, the release after it
+    # compares with 1.26.11.1 and the entries match nothing.
+    Write-Host 'the tree carries at most the 1.26.11.1 breaks'' generated entries'
     $moveCaps = [ordered]@{
-        'go.archive.zip' = 14; 'go.bufio' = 4; 'go.crypto.internal.fips140.aes' = 2; 'go.debug.dwarf' = 20;
-        'go.debug.macho' = 4; 'go.encoding.binary' = 18; 'go.encoding.gob' = 10; 'go.go.types' = 232; 'go.image' = 4;
-        'go.internal.abi' = 119; 'go.internal.poll' = 6; 'go.internal.reflectlite' = 6;
-        'go.internal.runtime.gc.internal.gen' = 74; 'go.internal.trace' = 16; 'go.net' = 240; 'go.net.textproto' = 9;
-        'go.reflect' = 14; 'go.runtime' = 10; 'go.text.template.parse' = 96;
-        'go.vendor.golang.org.x.net.dns.dnsmessage' = 2
+        'go.archive.tar' = 70; 'go.archive.zip' = 52; 'go.bufio' = 66; 'go.bytes' = 69; 'go.compress.bzip2' = 2;
+        'go.compress.flate' = 13; 'go.compress.gzip' = 16; 'go.compress.lzw' = 9; 'go.compress.zlib' = 8;
+        'go.container.list' = 22; 'go.container.ring' = 7; 'go.crypto' = 10; 'go.crypto.aes' = 2;
+        'go.crypto.cipher' = 6; 'go.crypto.des' = 3; 'go.crypto.dsa' = 34; 'go.crypto.ecdh' = 30;
+        'go.crypto.ecdsa' = 32; 'go.crypto.ed25519' = 12; 'go.crypto.elliptic' = 37; 'go.crypto.hpke' = 28;
+        'go.crypto.internal.boring' = 6; 'go.crypto.internal.boring.bbig' = 2; 'go.crypto.internal.boring.bcache' = 4;
+        'go.crypto.internal.fips140.aes' = 21; 'go.crypto.internal.fips140.aes.gcm' = 22;
+        'go.crypto.internal.fips140.bigmod' = 42; 'go.crypto.internal.fips140.drbg' = 2;
+        'go.crypto.internal.fips140.ecdh' = 8; 'go.crypto.internal.fips140.ecdsa' = 10;
+        'go.crypto.internal.fips140.ed25519' = 13; 'go.crypto.internal.fips140.edwards25519' = 21;
+        'go.crypto.internal.fips140.edwards25519.field' = 23; 'go.crypto.internal.fips140.hmac' = 12;
+        'go.crypto.internal.fips140.mldsa' = 17; 'go.crypto.internal.fips140.mlkem' = 18;
+        'go.crypto.internal.fips140.nistec' = 58; 'go.crypto.internal.fips140.nistec.fiat' = 48;
+        'go.crypto.internal.fips140.rsa' = 12; 'go.crypto.internal.fips140.sha256' = 17;
+        'go.crypto.internal.fips140.sha3' = 34; 'go.crypto.internal.fips140.sha512' = 17;
+        'go.crypto.internal.fips140.tls13' = 28; 'go.crypto.internal.fips140cache' = 1;
+        'go.crypto.internal.fips140deps.godebug' = 1; 'go.crypto.md5' = 2; 'go.crypto.mlkem' = 24;
+        'go.crypto.rand' = 2; 'go.crypto.rc4' = 6; 'go.crypto.rsa' = 48; 'go.crypto.sha1' = 2; 'go.crypto.sha3' = 28;
+        'go.crypto.tls' = 89; 'go.crypto.x509' = 565; 'go.crypto.x509.internal.macos' = 4; 'go.crypto.x509.pkix' = 14;
+        'go.database.sql' = 101; 'go.database.sql.driver' = 28; 'go.debug.buildinfo' = 4; 'go.debug.dwarf' = 150;
+        'go.debug.elf' = 172; 'go.debug.gosym' = 28; 'go.debug.macho' = 67; 'go.debug.pe' = 27;
+        'go.debug.plan9obj' = 15; 'go.embed' = 6; 'go.encoding.ascii85' = 2; 'go.encoding.asn1' = 12;
+        'go.encoding.base32' = 20; 'go.encoding.base64' = 22; 'go.encoding.binary' = 66; 'go.encoding.csv' = 20;
+        'go.encoding.gob' = 14; 'go.encoding.hex' = 2; 'go.encoding.json' = 71; 'go.encoding.xml' = 50;
+        'go.expvar' = 28; 'go.flag' = 75; 'go.go.ast' = 527; 'go.go.build' = 175; 'go.go.build.constraint' = 18;
+        'go.go.constant' = 11; 'go.go.doc' = 16; 'go.go.doc.comment' = 45; 'go.go.internal.gccgoimporter' = 6;
+        'go.go.internal.scannerhooks' = 2; 'go.go.internal.srcimporter' = 2; 'go.go.printer' = 1;
+        'go.go.scanner' = 40; 'go.go.token' = 54; 'go.go.types' = 613; 'go.hash.adler32' = 1; 'go.hash.crc32' = 1;
+        'go.hash.crc64' = 1; 'go.hash.maphash' = 27; 'go.html.template' = 22; 'go.image' = 324; 'go.image.color' = 28;
+        'go.image.draw' = 2; 'go.image.internal.imageutil' = 1; 'go.image.jpeg' = 4; 'go.image.png' = 7;
+        'go.index.suffixarray' = 8; 'go.internal.abi' = 270; 'go.internal.bisect' = 6; 'go.internal.buildcfg' = 55;
+        'go.internal.cgrouptest' = 6; 'go.internal.chacha8rand' = 6; 'go.internal.coverage' = 4;
+        'go.internal.coverage.calloc' = 2; 'go.internal.coverage.cformat' = 9; 'go.internal.coverage.cmerge' = 14;
+        'go.internal.coverage.decodecounter' = 12; 'go.internal.coverage.decodemeta' = 22;
+        'go.internal.coverage.encodecounter' = 2; 'go.internal.coverage.encodemeta' = 4;
+        'go.internal.coverage.slicereader' = 16; 'go.internal.coverage.slicewriter' = 8;
+        'go.internal.coverage.stringtab' = 17; 'go.internal.dag' = 12; 'go.internal.fmtsort' = 8;
+        'go.internal.fuzz' = 45; 'go.internal.godebug' = 7; 'go.internal.lazyregexp' = 8;
+        'go.internal.lazytemplate' = 1; 'go.internal.pkgbits' = 115; 'go.internal.platform' = 2;
+        'go.internal.poll' = 325; 'go.internal.profile' = 60; 'go.internal.profilerecord' = 4;
+        'go.internal.reflectlite' = 36; 'go.internal.routebsd' = 20; 'go.internal.runtime.atomic' = 53;
+        'go.internal.runtime.cgroup' = 2; 'go.internal.runtime.gc.internal.gen' = 131;
+        'go.internal.runtime.maps' = 35; 'go.internal.runtime.syscall.windows' = 36; 'go.internal.singleflight' = 3;
+        'go.internal.strconv' = 16; 'go.internal.sync' = 14; 'go.internal.synctest' = 2;
+        'go.internal.syscall.unix' = 3; 'go.internal.syscall.windows' = 154;
+        'go.internal.syscall.windows.registry' = 76; 'go.internal.testenv' = 11; 'go.internal.testpty' = 20;
+        'go.internal.trace' = 163; 'go.internal.trace.internal.testgen' = 24;
+        'go.internal.trace.internal.tracev1' = 35; 'go.internal.trace.raw' = 16; 'go.internal.trace.testtrace' = 5;
+        'go.internal.trace.tracev2' = 6; 'go.internal.trace.traceviewer' = 55; 'go.internal.trace.version' = 6;
+        'go.internal.types.errors' = 2; 'go.internal.xcoff' = 25; 'go.internal.zstd' = 4; 'go.io' = 24;
+        'go.io.fs' = 16; 'go.log' = 16; 'go.log.slog' = 151; 'go.log.slog.internal.buffer' = 15; 'go.log.syslog' = 30;
+        'go.math.big' = 174; 'go.math.big.internal.asmgen' = 124; 'go.math.rand' = 31; 'go.math.rand.v2' = 53;
+        'go.mime' = 30; 'go.mime.multipart' = 26; 'go.mime.quotedprintable' = 6; 'go.net' = 1465; 'go.net.http' = 239;
+        'go.net.http.cgi' = 7; 'go.net.http.cookiejar' = 2; 'go.net.http.fcgi' = 1; 'go.net.http.httptest' = 27;
+        'go.net.http.httptrace' = 4; 'go.net.http.httputil' = 16; 'go.net.http.pprof' = 1;
+        'go.net.internal.socktest' = 101; 'go.net.mail' = 12; 'go.net.netip' = 138; 'go.net.rpc' = 23;
+        'go.net.smtp' = 20; 'go.net.textproto' = 53; 'go.net.url' = 58; 'go.os' = 432; 'go.os.exec' = 115;
+        'go.os.signal' = 7; 'go.os.user' = 45; 'go.plugin' = 1; 'go.reflect' = 274; 'go.regexp' = 52;
+        'go.regexp.syntax' = 29; 'go.runtime' = 170; 'go.runtime.debug' = 2; 'go.runtime.metrics' = 9;
+        'go.runtime.pprof' = 30; 'go.runtime.trace' = 9; 'go.sort' = 30; 'go.strconv' = 4; 'go.strings' = 37;
+        'go.sync' = 35; 'go.sync.atomic' = 90; 'go.syscall' = 725; 'go.testing.fstest' = 16;
+        'go.testing.internal.testdeps' = 36; 'go.testing.quick' = 13; 'go.testing.slogtest' = 2;
+        'go.text.scanner' = 12; 'go.text.tabwriter' = 3; 'go.text.template' = 22; 'go.text.template.parse' = 192;
+        'go.time' = 795; 'go.unicode' = 6; 'go.unique' = 2; 'go.vendor.golang.org.x.crypto.chacha20' = 4;
+        'go.vendor.golang.org.x.crypto.chacha20poly1305' = 2; 'go.vendor.golang.org.x.crypto.cryptobyte' = 106;
+        'go.vendor.golang.org.x.crypto.cryptobyte.asn1' = 4; 'go.vendor.golang.org.x.crypto.internal.poly1305' = 7;
+        'go.vendor.golang.org.x.net.dns.dnsmessage' = 205; 'go.vendor.golang.org.x.net.http.httpproxy' = 2;
+        'go.vendor.golang.org.x.net.http2.hpack' = 34; 'go.vendor.golang.org.x.net.idna' = 5;
+        'go.vendor.golang.org.x.text.secure.bidirule' = 8; 'go.vendor.golang.org.x.text.transform' = 8;
+        'go.vendor.golang.org.x.text.unicode.bidi' = 65; 'go.vendor.golang.org.x.text.unicode.norm' = 68;
+        'go.weak' = 2
     }
     $capTotal = 0
     foreach ($cap in $moveCaps.Values) { $capTotal += $cap }
-    Check 'the caps are the generator''s 900 entries in 20 files' ($capTotal -eq 900 -and $moveCaps.Count -eq 20) "$capTotal in $($moveCaps.Count)"
-    $known = @('go.lib', 'go.vendor.golang.org.x.crypto.cryptobyte') + @($moveCaps.Keys)
+    Check 'the caps are the generator''s 13236 entries in 230 files' ($capTotal -eq 13236 -and $moveCaps.Count -eq 230) "$capTotal in $($moveCaps.Count)"
+    $known = @('go.lib') + @($moveCaps.Keys)
     $other = @($real.Keys | Where-Object { $known -cnotcontains $_ } | Sort-Object)
     Check 'no other package carries a suppression file' ($other.Count -eq 0) ($other -join ', ')
+    $kinds = @('CP0001', 'CP0002', 'CP0006', 'CP0008', 'CP0021')
     $over = New-Object System.Collections.Generic.List[string]
     foreach ($id in @($real.Keys | Where-Object { $moveCaps.Contains($_) } | Sort-Object)) {
         $read = @(Read-GoApiCompatSuppressions $real[$id])
         if ($read.Count -gt $moveCaps[$id]) { $over.Add("$id has $($read.Count) entries, over its $($moveCaps[$id])") }
-        if (@($read | Where-Object { $_.DiagnosticId -cne 'CP0002' }).Count) { $over.Add("$id has an entry that is not CP0002") }
-        if (-not [System.IO.File]::ReadAllText($real[$id]).Contains('DESIGN-promoted-forwarder-placement.md')) { $over.Add("$id does not cite the design note") }
+        $foreign = @($read | Where-Object { $kinds -cnotcontains $_.DiagnosticId } | ForEach-Object { $_.DiagnosticId } | Sort-Object -Unique)
+        if ($foreign.Count) { $over.Add("$id has an entry the generator does not write: $($foreign -join ', ')") }
+        $text = [System.IO.File]::ReadAllText($real[$id])
+        if (-not ($text.Contains('DESIGN-promoted-forwarder-placement.md') -and $text.Contains('New-GoApiCompatMoveSuppressions.ps1'))) { $over.Add("$id does not cite the design note and its generator") }
     }
-    Check 'each file holds at most its generated count, CP0002 only, and cites the design note' ($over.Count -eq 0) ($over -join '; ')
+    Check 'each file holds at most its generated count, only the generator''s diagnostics, and cites the design note and the generator' ($over.Count -eq 0) ($over -join '; ')
 
     # The break floor (DESIGN-go-break-floor.md section 4): go.lib's targets fail a consumer's build for a package built
     # below $(GoBreakFloor), and push-nuget refuses a release whose floor disagrees with its suppression files. Once the

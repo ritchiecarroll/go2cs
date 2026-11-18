@@ -970,11 +970,9 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 
 		// Most exported aliases are still knowable — they are a function of the dependency's OWN
 		// declarations — so derive and apply those, giving a single-package conversion the same
-		// foreign spelling a whole-stdlib run produces: its name-collision renames (an unrenamed
-		// `time.Second` binds the `Second(this Time)` method group and does not compile) and its
-		// re-exported type aliases (`os.FileMode` is a using alias to `go.io.fs_package.FileMode`,
-		// not a member of `os_package` — CS0426). See foreignNameCollisions.go and
-		// foreignTypeAliases.go for the invariant and for what deliberately stays underivable.
+		// foreign spelling a whole-stdlib run produces: its re-exported type aliases (`os.FileMode`
+		// is a using alias to `go.io.fs_package.FileMode`, not a member of `os_package` — CS0426).
+		// See foreignTypeAliases.go for the invariant and for what deliberately stays underivable.
 		applyExportedTypeAliases(foreignDerivedTypeAliases(importedPackageSources[filepath.Clean(info.SourceDir)]), info)
 		return
 	}
@@ -1350,9 +1348,24 @@ func loadImportedDynamicTypeLiftLines(lines []string, sourceDir string) {
 		importedPublicLiftNames[key] = public
 	}
 
+	if importedValueCloneLiftNames == nil {
+		importedValueCloneLiftNames = make(map[string]map[string]bool)
+	}
+
+	valueClone, ok := importedValueCloneLiftNames[key]
+
+	if !ok {
+		valueClone = make(map[string]bool)
+		importedValueCloneLiftNames[key] = valueClone
+	}
+
 	for _, line := range lines {
 		if match := publicLiftRecordPattern.FindStringSubmatch(line); match != nil {
 			public[match[1]] = true
+
+			if strings.Contains(line, "GoValueClone(") {
+				valueClone[match[1]] = true
+			}
 		}
 	}
 
@@ -1360,8 +1373,11 @@ func loadImportedDynamicTypeLiftLines(lines []string, sourceDir string) {
 }
 
 // publicLiftRecordPattern matches a package_info.cs accessibility record that declares a lifted struct
-// public: `    public partial struct largeIntegerᴛ1 {}`.
-var publicLiftRecordPattern = regexp.MustCompile(`^\s*public partial struct (\S+) \{\}\s*$`)
+// public: `    public partial struct largeIntegerᴛ1 {}`, after any attributes the record carries. A lift that needs a
+// value clone writes `[GoValueClone("Fu", "FQuadPart")] public partial struct largeIntegerᴛ1 {}` (libc's ccgo union),
+// and a bare-only pattern left such a lift never public, so no importer could reuse it (W18). Each attribute is one
+// bracket whose quoted strings may hold ']' or an escaped quote.
+var publicLiftRecordPattern = regexp.MustCompile(`^\s*(?:\[(?:[^\]"]|"(?:[^"\\]|\\.)*")*\]\s*)*public partial struct (\S+) \{\}\s*$`)
 
 // preloadImportedTypeAliases loads the exported type aliases of EVERY package imported by ANY file in
 // the current package, BEFORE file conversion begins. importedTypeAliases is package-global but was

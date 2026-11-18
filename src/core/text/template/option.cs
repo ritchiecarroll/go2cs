@@ -6,6 +6,7 @@ namespace go.text;
 
 using strings = strings_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static template_package;
 
 partial class template_package {
 
@@ -19,6 +20,8 @@ internal static missingKeyAction mapError => 2;              // Error out
 partial struct option {
     internal missingKeyAction missingKey;
 }
+
+} partial class templateᴛTemplate {
 
 // Option sets options for the template. Options are described by
 // strings, either a simple string or "key=value". There can be at
@@ -55,20 +58,18 @@ internal static void setOption(this ref Template t, @string opt) {
     }
     // key=value
     var (key, value, ok) = strings.Cut(opt, "="); if (ok) {
-        var exprᴛ1 = key;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "missingkey"u8: {
-            var exprᴛ2 = value;
+        case {} when key == "missingkey"u8: {
             switch (ᐧ) {
-            case {} when exprᴛ2 == "invalid"u8 || exprᴛ2 == "default"u8: {
+            case {} when value == "invalid"u8 || value == "default"u8: {
                 t.option.missingKey = mapInvalid;
                 return;
             }
-            case {} when exprᴛ2 == "zero"u8: {
+            case {} when value == "zero"u8: {
                 t.option.missingKey = mapZeroValue;
                 return;
             }
-            case {} when exprᴛ2 == "error"u8: {
+            case {} when value == "error"u8: {
                 t.option.missingKey = mapError;
                 return;
             }}
@@ -78,4 +79,4 @@ internal static void setOption(this ref Template t, @string opt) {
     throw panic("unrecognized option: " + opt);
 }
 
-} // end template_package
+} // end templateᴛTemplate

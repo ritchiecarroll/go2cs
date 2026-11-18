@@ -17,6 +17,8 @@
 // decimal format - left shift can be done precisely in binary format.
 namespace go.math;
 
+using static big_package;
+
 partial class big_package {
 
 // A decimal represents an unsigned floating-point number in decimal representation.
@@ -29,6 +31,8 @@ partial struct @decimal {
     internal nint exp;         // exponent
 }
 
+} partial class bigᴛdecimal {
+
 // at returns the i'th mantissa digit, starting with the most significant digit at 0.
 internal static byte at(this ref @decimal d, nint i) {
     if (0 <= i && i < len(d.mant)) {
@@ -37,9 +41,13 @@ internal static byte at(this ref @decimal d, nint i) {
     return (byte)'0';
 }
 
+} partial class big_package {
+
 // Maximum shift amount that can be done in one pass without overflow.
 // A Word has _W bits and (1<<maxShift - 1)*10 + 9 must fit into Word.
 internal static UntypedInt maxShift => /* _W - 4 */ 60;
+
+} partial class bigᴛdecimal {
 
 // TODO(gri) Since we know the desired decimal precision when converting
 // a floating-point number, we may be able to limit the number of decimal
@@ -51,7 +59,7 @@ internal static UntypedInt maxShift => /* _W - 4 */ 60;
 
 // Init initializes x to the decimal representation of m << shift (for
 // shift >= 0), or m >> -shift (for shift < 0).
-internal static void init(this ж<@decimal> Ꮡx, Δnat m, nint shift) {
+internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // special case 0
@@ -70,13 +78,13 @@ internal static void init(this ж<@decimal> Ꮡx, Δnat m, nint shift) {
         if (sΔ1 >= ntz) {
             sΔ1 = ntz; // shift at most ntz bits
         }
-        m = ((Δnat)default).rsh(m, sΔ1);
+        m = ((nat)default).rsh(m, sΔ1);
         shift += (nint)sΔ1;
     }
 
     // Do any shift left in binary representation.
     if (shift > 0) {
-        m = ((Δnat)default).lsh(m, (nuint)shift);
+        m = ((nat)default).lsh(m, (nuint)shift);
         shift = 0;
     }
 
@@ -100,6 +108,8 @@ internal static void init(this ж<@decimal> Ꮡx, Δnat m, nint shift) {
         rsh(ref (Ꮡx).DerefOrNull(), (nuint)(-shift));
     }
 }
+
+} partial class big_package {
 
 // rsh implements x >> s, for s <= maxShift.
 internal static void rsh(ref @decimal x, nuint s) {
@@ -158,6 +168,8 @@ internal static void rsh(ref @decimal x, nuint s) {
     trim(ref x);
 }
 
+} partial class bigᴛdecimal {
+
 internal static @string String(this ref @decimal x) {
     var bufᴷ = new stackAppend<byte>();
 
@@ -195,6 +207,8 @@ internal static @string String(this ref @decimal x) {
     return (@string)buf;
 }
 
+} partial class big_package {
+
 // appendZeros appends n 0 digits to buf and returns buf.
 internal static slice<byte> appendZeros(slice<byte> buf, nint n) {
     var bufᴷ = new stackAppend<byte>(moves: true);
@@ -217,6 +231,8 @@ internal static bool shouldRoundUp(ref @decimal x, nint n) {
     // not halfway - digit tells all (x.mant has no trailing zeros)
     return x.mant[n] >= '5';
 }
+
+} partial class bigᴛdecimal {
 
 // round sets x to (at most) n mantissa digits by rounding it
 // to the nearest even value with n (or fever) mantissa digits.
@@ -269,6 +285,8 @@ internal static void roundDown(this ж<@decimal> Ꮡx, nint n) {
     x.mant = x.mant.slice(0, n);
     trim(ref (Ꮡx).DerefOrNull());
 }
+
+} partial class big_package {
 
 // trim cuts off any trailing zeros from x's mantissa;
 // they are meaningless for the value of x.

@@ -12,6 +12,7 @@ using strconv = @internal.strconv_package;
 using @internal;
 using @internal.runtime;
 using @unsafe = unsafe_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -338,6 +339,8 @@ partial struct gcControllerState {
     internal cpu.CacheLinePad _;
 }
 
+} partial class runtimeᴛgcControllerState {
+
 internal static void init(this ж<gcControllerState> Ꮡc, int32 gcPercent, int64 memoryLimit) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -399,9 +402,9 @@ internal static void startCycle(this ж<gcControllerState> Ꮡc, int64 markStart
     }
 
     // Clear per-P state
-    foreach (var (_, Δp) in range(allp)) {
-        Δp.Value.gcAssistTime = 0;
-        Δp.of(runtime_package.Δp.ᏑgcFractionalMarkTime).Store(0);
+    foreach (var (_, p) in range(allp)) {
+        p.Value.gcAssistTime = 0;
+        p.of(runtime_package.p.ᏑgcFractionalMarkTime).Store(0);
     }
 
     if (trigger.kind == gcTriggerTime) {
@@ -716,11 +719,11 @@ internal static void enlistWorker(this ж<gcControllerState> Ꮡc) {
         if (id >= myID) {
             id++;
         }
-        var Δp = allp[id];
-        if ((~Δp).status != _Prunning) {
+        var p = allp[id];
+        if ((~p).status != _Prunning) {
             continue;
         }
-        if (preemptone(ref (Δp).DerefOrNull())) {
+        if (preemptone(ref (p).DerefOrNull())) {
             return;
         }
     }
@@ -742,7 +745,7 @@ private static readonly @string gcControllerStateˢᵇ = "gcControllerState.find
 // - Or, call c.releaseNextGCMarkWorker.
 //
 // This must only be called when gcBlackenEnabled != 0.
-internal static (bool, int64) assignWaitingGCWorker(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp, int64 now) {
+internal static (bool, int64) assignWaitingGCWorker(this ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var pp = ref Ꮡpp.DerefOrNull();
 
@@ -817,7 +820,7 @@ internal static (bool, int64) assignWaitingGCWorker(this ж<gcControllerState> �
         //
         // This should be kept in sync with pollFractionalWorkerExit.
         var delta = now - c.markStartTime;
-        if (delta > 0 && (float64)Ꮡpp.of(runtime_package.Δp.ᏑgcFractionalMarkTime).Load() / (float64)delta > c.fractionalUtilizationGoal) {
+        if (delta > 0 && (float64)Ꮡpp.of(p.ᏑgcFractionalMarkTime).Load() / (float64)delta > c.fractionalUtilizationGoal) {
             // Nope. No need to run a fractional worker.
             ᏑgcBgMarkWorkerPool.push(node.Ꮡnode);
             return (false, now);
@@ -842,7 +845,7 @@ internal static (bool, int64) assignWaitingGCWorker(this ж<gcControllerState> �
 // the portion of findRunnable that always has a P.
 //
 //go:yeswritebarrierrec
-internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp, int64 now) {
+internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     // Since we have the current time, check if the GC CPU limiter
@@ -869,11 +872,11 @@ internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> �
 
     // Run the background mark worker.
     var gp = node.gp.ptr();
-    var Δtrace = traceAcquire();
+    var trace = traceAcquire();
     casgstatus(gp, _Gwaiting, _Grunnable);
-    if (Δtrace.ok()) {
-        Δtrace.GoUnpark(gp, 0);
-        traceRelease(Δtrace);
+    if (trace.ok()) {
+        trace.GoUnpark(gp, 0);
+        traceRelease(trace);
     }
     return (gp, now);
 }
@@ -884,7 +887,7 @@ internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> �
 // the portion of schedule.
 //
 //go:yeswritebarrierrec
-internal static void releaseNextGCMarkWorker(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp) {
+internal static void releaseNextGCMarkWorker(this ж<gcControllerState> Ꮡc, ж<p> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     var node = pp.nextGCMarkWorker;
@@ -913,10 +916,10 @@ internal static void resetLive(this ж<gcControllerState> Ꮡc, uint64 bytesMark
     c.triggered = ~(uint64)0; // Reset triggered.
 
     // heapLive was updated, so emit a trace event.
-    var Δtrace = traceAcquire();
-    if (Δtrace.ok()) {
-        Δtrace.HeapAlloc(bytesMarked);
-        traceRelease(Δtrace);
+    var trace = traceAcquire();
+    if (trace.ok()) {
+        trace.HeapAlloc(bytesMarked);
+        traceRelease(trace);
     }
 }
 
@@ -954,12 +957,12 @@ internal static void markWorkerStop(this ж<gcControllerState> Ꮡc, gcMarkWorke
 
 internal static void update(this ж<gcControllerState> Ꮡc, int64 dHeapLive, int64 dHeapScan) {
     if (dHeapLive != 0) {
-        var Δtrace = traceAcquire();
+        var trace = traceAcquire();
         var live = ᏑgcController.ᏑheapLive.Add(dHeapLive);
-        if (Δtrace.ok()) {
+        if (trace.ok()) {
             // gcController.heapLive changed.
-            Δtrace.HeapAlloc(live);
-            traceRelease(Δtrace);
+            trace.HeapAlloc(live);
+            traceRelease(trace);
         }
     }
     if (gcBlackenEnabled == 0) {
@@ -974,7 +977,7 @@ internal static void update(this ж<gcControllerState> Ꮡc, int64 dHeapLive, in
     }
 }
 
-internal static void addScannableStack(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp, int64 amount) {
+internal static void addScannableStack(this ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 amount) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     if (Ꮡpp == nil) {
@@ -1170,6 +1173,8 @@ internal static uint64 memoryLimitHeapGoal(this ж<gcControllerState> Ꮡc) {
     return goal;
 }
 
+} partial class runtime_package {
+
 // These constants determine the bounds on the GC trigger as a fraction
 // of heap bytes allocated between the start of a GC (heapLive == heapMarked)
 // and the end of a GC (heapLive == heapGoal).
@@ -1188,6 +1193,8 @@ internal static UntypedInt minTriggerRatioNum => 45; // ~0.7
 // The maximum trigger constant is chosen somewhat arbitrarily, but the
 // current constant has served us well over the years.
 internal static UntypedInt maxTriggerRatioNum => 61; // ~0.95
+
+} partial class runtimeᴛgcControllerState {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string producedATriggerGreaterˢ => ref producedATriggerGreaterˢᵇ;
@@ -1251,7 +1258,7 @@ internal static (uint64, uint64) trigger(this ж<gcControllerState> Ꮡc) {
     if (goal > defaultHeapMinimum && goal - (uint64)defaultHeapMinimum > maxTrigger) {
         maxTrigger = goal - (uint64)defaultHeapMinimum;
     }
-    maxTrigger = builtin.max(maxTrigger, minTrigger);
+    maxTrigger = max(maxTrigger, minTrigger);
 
     // Compute the trigger from our bounds and the runway stored by commit.
     uint64 trigger = default;
@@ -1261,7 +1268,7 @@ internal static (uint64, uint64) trigger(this ж<gcControllerState> Ꮡc) {
     } else {
         trigger = goal - runway;
     }
-    trigger = builtin.max(trigger, minTrigger);
+    trigger = max(trigger, minTrigger);
     trigger = min(trigger, maxTrigger);
     if (trigger > goal) {
         print((@string)"trigger=", trigger, (@string)" heapGoal=", goal, (@string)"\n");
@@ -1367,6 +1374,8 @@ internal static int32 setGCPercent(this ж<gcControllerState> Ꮡc, int32 @in) {
     return @out;
 }
 
+} partial class runtime_package {
+
 //go:linkname setGCPercent runtime/debug.setGCPercent
 internal static int32 /*out*/ setGCPercent(int32 @in) {
     int32 @out = default;
@@ -1393,15 +1402,17 @@ internal static ref readonly @string gogcˢ => ref gogcˢᵇ;
 private static readonly @string gogcˢᵇ = "GOGC"u8;
 
 internal static int32 readGOGC() {
-    @string Δp = gogetenv(gogcˢ);
-    if (Δp == "off"u8) {
+    @string p = gogetenv(gogcˢ);
+    if (p == "off"u8) {
         return -1;
     }
-    var (n, err) = strconv.ParseInt(Δp, 10, 32); if (err == nil) {
+    var (n, err) = strconv.ParseInt(p, 10, 32); if (err == nil) {
         return (int32)n;
     }
     return 100;
 }
+
+} partial class runtimeᴛgcControllerState {
 
 // setMemoryLimit updates memoryLimit. commit must be called after
 // Returns the old value of memoryLimit.
@@ -1421,6 +1432,8 @@ internal static int64 setMemoryLimit(this ж<gcControllerState> Ꮡc, int64 @in)
 
     return @out;
 }
+
+} partial class runtime_package {
 
 //go:linkname setMemoryLimit runtime/debug.setMemoryLimit
 internal static int64 /*out*/ setMemoryLimit(int64 @in) {
@@ -1449,17 +1462,19 @@ internal static ref readonly @string malformedGomemlimitSeeGoˢ => ref malformed
 private static readonly @string malformedGomemlimitSeeGoˢᵇ = "malformed GOMEMLIMIT; see `go doc runtime/debug.SetMemoryLimit`"u8;
 
 internal static int64 readGOMEMLIMIT() {
-    @string Δp = gogetenv(gomemlimitˢ);
-    if (Δp == ""u8 || Δp == "off"u8) {
+    @string p = gogetenv(gomemlimitˢ);
+    if (p == ""u8 || p == "off"u8) {
         return Δmath.MaxInt64;
     }
-    var (n, ok) = parseByteCount(Δp);
+    var (n, ok) = parseByteCount(p);
     if (!ok) {
-        print((@string)"GOMEMLIMIT=", Δp, (@string)"\n");
+        print((@string)"GOMEMLIMIT=", p, (@string)"\n");
         @throw(malformedGomemlimitSeeGoˢ);
     }
     return n;
 }
+
+} partial class runtimeᴛgcControllerState {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string negativeIdleMarkWorkersˢ => ref negativeIdleMarkWorkersˢᵇ;
@@ -1504,8 +1519,8 @@ internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 //
 //go:nosplit
 internal static bool needIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
-    var Δp = Ꮡc.ᏑidleMarkWorkers.Load();
-    var (n, max) = ((int32)(Δp & (uint64)(~(uint32)0)), (int32)(Δp >> 32));
+    var p = Ꮡc.ᏑidleMarkWorkers.Load();
+    var (n, max) = ((int32)(p & (uint64)(~(uint32)0)), (int32)(p >> 32));
     return n < max;
 }
 
@@ -1545,6 +1560,8 @@ internal static void setMaxIdleMarkWorkers(this ж<gcControllerState> Ꮡc, int3
     }
 }
 
+} partial class runtime_package {
+
 // gcControllerCommit is gcController.commit, but passes arguments from live
 // (non-test) data. It also updates any consumers of the GC pacing, such as
 // sweep pacing and the background scavenger.
@@ -1566,10 +1583,10 @@ internal static void gcControllerCommit() {
 
     // TODO(mknyszek): This isn't really accurate any longer because the heap
     // goal is computed dynamically. Still useful to snapshot, but not as useful.
-    var Δtrace = traceAcquire();
-    if (Δtrace.ok()) {
-        Δtrace.HeapGoal();
-        traceRelease(Δtrace);
+    var trace = traceAcquire();
+    if (trace.ok()) {
+        trace.HeapGoal();
+        traceRelease(trace);
     }
 
     var (trigger, heapGoal) = ᏑgcController.trigger();

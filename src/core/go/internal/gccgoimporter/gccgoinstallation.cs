@@ -16,6 +16,8 @@ using global::go.os;
 using io = io_package;
 using path;
 using ꓸꓸꓸstring = Span<@string>;
+using gccgoimporter = gccgoimporter_package;
+using static gccgoimporter_package;
 
 partial class gccgoimporter_package {
 
@@ -28,6 +30,8 @@ partial struct GccgoInstallation {
     // Built-in library paths used by this installation.
     public slice<@string> LibPaths;
 }
+
+} partial class gccgoimporterᴛGccgoInstallation {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string targetˢ => ref targetˢᵇ;
@@ -108,7 +112,7 @@ public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation in
 // Return an importer that searches incpaths followed by the gcc installation's
 // built-in search paths and the current directory.
 public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) {
-    return GetImporter(append(appendꓸꓸꓸ(incpaths, inst.SearchPaths()), (@string)"."), initmap);
+    return gccgoimporter.GetImporter(append(appendꓸꓸꓸ(incpaths, inst.SearchPaths()), (@string)"."), initmap);
 }
 
-} // end gccgoimporter_package
+} // end gccgoimporterᴛGccgoInstallation

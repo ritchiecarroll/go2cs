@@ -64,15 +64,18 @@ namespace go;
 using sysdll = @internal.syscall.windows.sysdll_package;
 using Δsync = sync_package;
 using ꓸꓸꓸuintptr = Span<uintptr>;
+using static syscall_package;
 
 partial class syscall_package {
 
 // DLLError describes reasons for DLL load failures.
-[GoType] partial struct DLLError {
+[GoType] public partial struct DLLError {
     public error Err;
     public @string ObjName;
     public @string Msg;
 }
+
+} partial class syscallᴛDLLError {
 
 [GoRecv] public static @string Error(this ref DLLError e) {
     return e.Msg;
@@ -81,6 +84,8 @@ partial class syscall_package {
 [GoRecv] public static error Unwrap(this ref DLLError e) {
     return e.Err;
 }
+
+} partial class syscall_package {
 
 // ---- native Win32 entry points (the runtime-provided assembly in Go) ----
 
@@ -108,7 +113,7 @@ private static partial IntPtr win32LoadLibraryEx(string lpLibFileName, IntPtr hF
 // both directions for any name outside the current codepage. Taking `byte*` deletes both halves and
 // is byte-for-byte what Go does.
 [LibraryImport("kernel32.dll", EntryPoint = "GetProcAddress", SetLastError = true)]
-private static unsafe partial IntPtr win32GetProcAddress(IntPtr hModule, byte* lpProcName);
+internal static unsafe partial IntPtr win32GetProcAddress(IntPtr hModule, byte* lpProcName);
 
 // THE TOKEN DOOR (DESIGN-token-value-tag-refusal.md, outcome B).
 //
@@ -369,9 +374,9 @@ public static (uintptr r1, uintptr r2, Errno err) SyscallN(uintptr trap, params 
 }
 
 // A DLL implements access to a single DLL.
-[GoType] partial struct DLL {
+[GoType] public partial struct DLL {
     public @string Name;
-    public ΔHandle Handle;
+    public Handle Handle;
 }
 
 // LoadDLL loads the named DLL file into memory.
@@ -401,7 +406,7 @@ public static (ж<DLL>, error) LoadDLL(@string name) {
 
     var d = Ꮡ(new DLL(
         Name: name,
-        Handle: (ΔHandle)(uintptr)(nuint)h
+        Handle: (Handle)(uintptr)(nuint)h
     ));
     return (d, default!);
 }
@@ -414,6 +419,8 @@ public static ж<DLL> MustLoadDLL(@string name) {
     }
     return d;
 }
+
+} partial class syscallᴛDLL {
 
 // FindProc searches [DLL] d for procedure named name and returns [*Proc]
 // if found. It returns an error if search fails.
@@ -468,12 +475,16 @@ public static ж<Proc> MustFindProc(this ж<DLL> Ꮡd, @string name) {
     return FreeLibrary(d.Handle);
 }
 
+} partial class syscall_package {
+
 // A Proc implements access to a procedure inside a [DLL].
-[GoType] partial struct Proc {
+[GoType] public partial struct Proc {
     public ж<DLL> Dll;
     public @string Name;
     internal uintptr addr;
 }
+
+} partial class syscallᴛProc {
 
 // Addr returns the address of the procedure represented by p.
 // The return value can be passed to Syscall to run the procedure.
@@ -492,6 +503,8 @@ public static ж<Proc> MustFindProc(this ж<DLL> Ꮡd, @string name) {
     return (r1, r2, err);
 }
 
+} partial class syscall_package {
+
 // A LazyDLL implements access to a single [DLL].
 // It will delay the load of the DLL until the first
 // call to its [LazyDLL.Handle] method or to one of its
@@ -502,11 +515,13 @@ public static ж<Proc> MustFindProc(this ж<DLL> Ꮡd, @string name) {
 //
 // Use LazyDLL in golang.org/x/sys/windows for a secure way to
 // load system DLLs.
-[GoType] partial struct LazyDLL {
+[GoType] public partial struct LazyDLL {
     internal Δsync.Mutex mu;
     internal ж<DLL> dll; // non nil once DLL is loaded
     public @string Name;
 }
+
+} partial class syscallᴛLazyDLL {
 
 // Load loads DLL file d.Name into memory. It returns an error if fails.
 // Load will not try to load DLL, if it is already loaded into memory.
@@ -557,6 +572,8 @@ public static ж<LazyProc> NewProc(this ж<LazyDLL> Ꮡd, @string name) {
     return Ꮡ(new LazyProc(l: Ꮡd, Name: name));
 }
 
+} partial class syscall_package {
+
 // NewLazyDLL creates new [LazyDLL] associated with [DLL] file.
 public static ж<LazyDLL> NewLazyDLL(@string name) {
     return Ꮡ(new LazyDLL(Name: name));
@@ -564,12 +581,14 @@ public static ж<LazyDLL> NewLazyDLL(@string name) {
 
 // A LazyProc implements access to a procedure inside a [LazyDLL].
 // It delays the lookup until the [LazyProc.Addr], [LazyProc.Call], or [LazyProc.Find] method is called.
-[GoType] partial struct LazyProc {
+[GoType] public partial struct LazyProc {
     internal Δsync.Mutex mu;
     public @string Name;
     internal ж<LazyDLL> l;
     internal ж<Proc> proc;
 }
+
+} partial class syscallᴛLazyProc {
 
 // Find searches [DLL] for procedure named p.Name. It returns
 // an error if search fails. Find will not search procedure,
@@ -628,5 +647,7 @@ public static (uintptr r1, uintptr r2, error lastErr) Call(this ж<LazyProc> Ꮡ
     Ꮡp.mustFind();
     return p.proc.Call(aʗp);
 }
+
+} partial class syscall_package {
 
 } // end syscall_package

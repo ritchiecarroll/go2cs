@@ -89,6 +89,9 @@ public sealed class TestRunner
     // -test.v (or --json, which implies it, as `go test -json` passes -test.v): Go's chatty output.
     internal bool Verbose => m_options.Verbose;
 
+    // The per-test deadline the watchdog enforces (TestOptions.TestDeadline); zero is none. testing.T.Deadline reads it.
+    internal TimeSpan TestDeadline => m_options.TestDeadline;
+
     // --json: the run emits go test -json events; otherwise each test prints Go's text output (TestExecution).
     internal bool Json => m_reporter.Json;
 
@@ -349,8 +352,11 @@ public sealed class TestRunner
     /// (testify's TestSuiteLogging pipes it to read its own suite's log lines), <see cref="Redirected"/>
     /// writes Go's text output to that file and the root reports nothing to the run.
     /// </remarks>
-    internal sealed class NestedRoot(int parallel, Action<string>? redirected)
+    internal sealed class NestedRoot(int parallel, Action<string>? redirected, TestExecution? caller = null)
     {
+        // The test that called testing.RunTests. The watchdog bounds IT, not this root's tests, so their deadline is its.
+        internal TestExecution? Caller { get; } = caller;
+
         internal SemaphoreSlim ParallelLimiter { get; } = new(parallel);
 
         internal Action<string>? Redirected { get; } = redirected;
@@ -378,7 +384,7 @@ public sealed class TestRunner
             if (count > 0 && !ran)
                 break;
 
-            NestedRoot root = new(m_options.Parallel, redirectedStdout);
+            NestedRoot root = new(m_options.Parallel, redirectedStdout, caller);
             List<TestExecution> started = [];
             List<TestExecution> parallel = [];
 

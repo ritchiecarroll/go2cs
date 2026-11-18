@@ -10,6 +10,7 @@ using slices = slices_package;
 using strings = strings_package;
 using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
 using vendor.golang.org.x.crypto;
+using static tls_package;
 
 partial class tls_package {
 
@@ -17,9 +18,13 @@ partial class tls_package {
 // functions as cryptobyte.MarshalingValue.
 internal delegate error marshalingFunction(ж<cryptobyte.Builder> b);
 
+} partial class tlsᴛmarshalingFunction {
+
 internal static error Marshal(this marshalingFunction f, ж<cryptobyte.Builder> b) {
     return f(b);
 }
+
+} partial class tls_package {
 
 // addBytesWithLength appends a sequence of bytes to the cryptobyte.Builder. If
 // the length of the sequence is not the value specified, it produces an error.
@@ -112,6 +117,8 @@ partial struct clientHelloMsg {
     // extensions are only populated on the server-side of a handshake
     internal slice<uint16> extensions;
 }
+
+} partial class tlsᴛclientHelloMsg {
 
 internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bool echInner) {
     ref var m = ref Ꮡm.DerefOrNull();
@@ -461,15 +468,15 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
         return false;
     }
 
-    ref var ΔcipherSuites = ref heap<cryptobyte.String>(out var ᏑcipherSuites);
+    ref var cipherSuites = ref heap<cryptobyte.String>(out var ᏑcipherSuites);
     if (!s.ReadUint16LengthPrefixed(ᏑcipherSuites)) {
         return false;
     }
     m.cipherSuites = [];
     m.secureRenegotiationSupported = false;
-    while (!ΔcipherSuites.Empty()) {
+    while (!cipherSuites.Empty()) {
         ref var suite = ref heap(new uint16(), out var Ꮡsuite);
-        if (!ΔcipherSuites.ReadUint16(Ꮡsuite)) {
+        if (!cipherSuites.ReadUint16(Ꮡsuite)) {
             return false;
         }
         if (suite == scsvRenegotiation) {
@@ -779,6 +786,8 @@ internal static ж<clientHelloMsg> clone(this ref clientHelloMsg m) {
     ));
 }
 
+} partial class tls_package {
+
 partial struct serverHelloMsg {
     internal slice<byte> original;
     internal uint16 vers;
@@ -804,6 +813,8 @@ partial struct serverHelloMsg {
     internal slice<byte> cookie;
     internal CurveID selectedGroup;
 }
+
+} partial class tlsᴛserverHelloMsg {
 
 internal static (slice<byte>, error) marshal(this ж<serverHelloMsg> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
@@ -1087,6 +1098,8 @@ internal static slice<byte> originalBytes(this ref serverHelloMsg m) {
     return m.original;
 }
 
+} partial class tls_package {
+
 partial struct encryptedExtensionsMsg {
     internal @string alpnProtocol;
     internal slice<byte> quicTransportParameters;
@@ -1094,6 +1107,8 @@ partial struct encryptedExtensionsMsg {
     internal slice<byte> echRetryConfigs;
     internal bool serverNameAck;
 }
+
+} partial class tlsᴛencryptedExtensionsMsg {
 
 internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -1214,8 +1229,12 @@ internal static bool unmarshal(this ref encryptedExtensionsMsg m, slice<byte> da
     return true;
 }
 
+} partial class tls_package {
+
 partial struct endOfEarlyDataMsg {
 }
+
+} partial class tlsᴛendOfEarlyDataMsg {
 
 internal static (slice<byte>, error) marshal(this ref endOfEarlyDataMsg m) {
     var x = new slice<byte>(4);
@@ -1227,9 +1246,13 @@ internal static bool unmarshal(this ref endOfEarlyDataMsg m, slice<byte> data) {
     return len(data) == 4;
 }
 
+} partial class tls_package {
+
 partial struct keyUpdateMsg {
     internal bool updateRequested;
 }
+
+} partial class tlsᴛkeyUpdateMsg {
 
 internal static (slice<byte>, error) marshal(this ж<keyUpdateMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -1268,6 +1291,8 @@ internal static bool unmarshal(this ref keyUpdateMsg m, slice<byte> data) {
     return true;
 }
 
+} partial class tls_package {
+
 partial struct newSessionTicketMsgTLS13 {
     internal uint32 lifetime;
     internal uint32 ageAdd;
@@ -1275,6 +1300,8 @@ partial struct newSessionTicketMsgTLS13 {
     internal slice<byte> label;
     internal uint32 maxEarlyData;
 }
+
+} partial class tlsᴛnewSessionTicketMsgTLS13 {
 
 internal static (slice<byte>, error) marshal(this ж<newSessionTicketMsgTLS13> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -1342,6 +1369,8 @@ internal static bool unmarshal(this ж<newSessionTicketMsgTLS13> Ꮡm, slice<byt
     return true;
 }
 
+} partial class tls_package {
+
 partial struct certificateRequestMsgTLS13 {
     internal bool ocspStapling;
     internal bool scts;
@@ -1349,6 +1378,8 @@ partial struct certificateRequestMsgTLS13 {
     internal slice<SignatureScheme> supportedSignatureAlgorithmsCert;
     internal slice<slice<byte>> certificateAuthorities;
 }
+
+} partial class tlsᴛcertificateRequestMsgTLS13 {
 
 internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -1496,9 +1527,13 @@ internal static bool unmarshal(this ref certificateRequestMsgTLS13 m, slice<byte
     return true;
 }
 
+} partial class tls_package {
+
 partial struct certificateMsg {
     internal slice<slice<byte>> certificates;
 }
+
+} partial class tlsᴛcertificateMsg {
 
 internal static (slice<byte>, error) marshal(this ref certificateMsg m) {
     nint i = default;
@@ -1566,11 +1601,15 @@ internal static bool unmarshal(this ref certificateMsg m, slice<byte> data) {
     return true;
 }
 
+} partial class tls_package {
+
 partial struct certificateMsgTLS13 {
     internal Certificate certificate;
     internal bool ocspStapling;
     internal bool scts;
 }
+
+} partial class tlsᴛcertificateMsgTLS13 {
 
 internal static (slice<byte>, error) marshal(this ж<certificateMsgTLS13> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -1590,6 +1629,8 @@ internal static (slice<byte>, error) marshal(this ж<certificateMsgTLS13> Ꮡm) 
 
     return b.Bytes();
 }
+
+} partial class tls_package {
 
 internal static void marshalCertificate(ж<cryptobyte.Builder> b, Certificate certificate) {
     var certificateʗ1 = certificate;
@@ -1636,6 +1677,8 @@ internal static void marshalCertificate(ж<cryptobyte.Builder> b, Certificate ce
     });
 }
 
+} partial class tlsᴛcertificateMsgTLS13 {
+
 internal static bool unmarshal(this ж<certificateMsgTLS13> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -1653,6 +1696,8 @@ internal static bool unmarshal(this ж<certificateMsgTLS13> Ꮡm, slice<byte> da
 
     return true;
 }
+
+} partial class tls_package {
 
 internal static bool unmarshalCertificate(ж<cryptobyte.String> Ꮡs, ж<Certificate> Ꮡcertificate) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -1721,6 +1766,8 @@ partial struct serverKeyExchangeMsg {
     internal slice<byte> key;
 }
 
+} partial class tlsᴛserverKeyExchangeMsg {
+
 internal static (slice<byte>, error) marshal(this ref serverKeyExchangeMsg m) {
     nint length = len(m.key);
     var x = new slice<byte>(length + 4);
@@ -1741,9 +1788,13 @@ internal static bool unmarshal(this ref serverKeyExchangeMsg m, slice<byte> data
     return true;
 }
 
+} partial class tls_package {
+
 partial struct certificateStatusMsg {
     internal slice<byte> response;
 }
+
+} partial class tlsᴛcertificateStatusMsg {
 
 internal static (slice<byte>, error) marshal(this ж<certificateStatusMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -1771,8 +1822,12 @@ internal static bool unmarshal(this ж<certificateStatusMsg> Ꮡm, slice<byte> d
     return true;
 }
 
+} partial class tls_package {
+
 partial struct serverHelloDoneMsg {
 }
+
+} partial class tlsᴛserverHelloDoneMsg {
 
 internal static (slice<byte>, error) marshal(this ref serverHelloDoneMsg m) {
     var x = new slice<byte>(4);
@@ -1784,9 +1839,13 @@ internal static bool unmarshal(this ref serverHelloDoneMsg m, slice<byte> data) 
     return len(data) == 4;
 }
 
+} partial class tls_package {
+
 partial struct clientKeyExchangeMsg {
     internal slice<byte> ciphertext;
 }
+
+} partial class tlsᴛclientKeyExchangeMsg {
 
 internal static (slice<byte>, error) marshal(this ref clientKeyExchangeMsg m) {
     nint length = len(m.ciphertext);
@@ -1812,9 +1871,13 @@ internal static bool unmarshal(this ref clientKeyExchangeMsg m, slice<byte> data
     return true;
 }
 
+} partial class tls_package {
+
 partial struct finishedMsg {
     internal slice<byte> verifyData;
 }
+
+} partial class tlsᴛfinishedMsg {
 
 internal static (slice<byte>, error) marshal(this ж<finishedMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -1831,6 +1894,8 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
     return s.Skip(1) && readUint24LengthPrefixed(Ꮡs, Ꮡm.ᏑverifyData) && s.Empty();
 }
 
+} partial class tls_package {
+
 partial struct certificateRequestMsg {
     // hasSignatureAlgorithm indicates whether this message includes a list of
     // supported signature algorithms. This change was introduced with TLS 1.2.
@@ -1839,6 +1904,8 @@ partial struct certificateRequestMsg {
     internal slice<SignatureScheme> supportedSignatureAlgorithms;
     internal slice<slice<byte>> certificateAuthorities;
 }
+
+} partial class tlsᴛcertificateRequestMsg {
 
 internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
     // See RFC 4346, Section 7.4.4.
@@ -1964,11 +2031,15 @@ internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> dat
     return len(data) == 0;
 }
 
+} partial class tls_package {
+
 partial struct certificateVerifyMsg {
     internal bool hasSignatureAlgorithm; // format change introduced in TLS 1.2
     internal SignatureScheme signatureAlgorithm;
     internal slice<byte> signature;
 }
+
+} partial class tlsᴛcertificateVerifyMsg {
 
 internal static (slice<byte>, error) marshal(this ж<certificateVerifyMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -2001,9 +2072,13 @@ internal static bool unmarshal(this ж<certificateVerifyMsg> Ꮡm, slice<byte> d
     return readUint16LengthPrefixed(Ꮡs, Ꮡm.Ꮡsignature) && s.Empty();
 }
 
+} partial class tls_package {
+
 partial struct newSessionTicketMsg {
     internal slice<byte> ticket;
 }
+
+} partial class tlsᴛnewSessionTicketMsg {
 
 internal static (slice<byte>, error) marshal(this ref newSessionTicketMsg m) {
     // See RFC 5077, Section 3.3.
@@ -2041,8 +2116,12 @@ internal static bool unmarshal(this ref newSessionTicketMsg m, slice<byte> data)
     return true;
 }
 
+} partial class tls_package {
+
 partial struct helloRequestMsg {
 }
+
+} partial class tlsᴛhelloRequestMsg {
 
 internal static (slice<byte>, error) marshal(this ref helloRequestMsg _) {
     return (slice<byte>([typeHelloRequest, 0, 0, 0]), default);
@@ -2051,6 +2130,8 @@ internal static (slice<byte>, error) marshal(this ref helloRequestMsg _) {
 internal static bool unmarshal(this ref helloRequestMsg _, slice<byte> data) {
     return len(data) == 4;
 }
+
+} partial class tls_package {
 
 partial interface transcriptHash {
     (nint, error) Write(slice<byte> _);

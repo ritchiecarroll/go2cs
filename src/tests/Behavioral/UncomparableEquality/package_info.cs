@@ -50,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ADGcAZaigoKClJSiAAIiooKCgpSUovSClIKQpIKQlKKQpIKQpIKQlJKQpIKQpIKQlKKQpIKQpIKUgpCkgpCkgpCkgpCkgpqCkKSCkKailIKUgpCkgpSQkpCSkJKQkpCkgqCSkKSClIKgkqCSoKSClKKUopSSlJKUopSilLKiloKSlIKilpKGmpSCmIKQkqA=", "82-88:1;108-114:1;122-122:1;125-125:2;127-127:3;128-128:4;131-131:5;134-134:6;136-136:7;137-137:8;140-140:9;143-143:10;145-145:11;146-146:12;149-149:13;155-155:14;158-158:15;161-161:16;164-164:17;173-173:18;176-176:19;186-186:20;191-191:21;192-192:22;193-193:23;194-194:24;195-195:25;198-198:26;199-199:27;205-205:28;206-206:29;207-207:30;261-261:31;262-262:32", "", "", "", "55:21,56:13,71:21,72:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "ADScAbaigoKClJSiAAIiooKCgpSUovSClIKQpIKQlKKQpIKQpIKQlJKQpIKQpIKQlKKQpIKQpIKUgpCkgpCkgpCkgpCkgpqCkKSCkKailIKUgpCkgpSQkpCSkJKQkpCkgqCSkKSClIKgkqCSoKSClKKUopSSlJKUopSilLKiloKSlIKilpKGmpSCmIKQkqA=", "82-88:1;108-114:1;122-122:1;125-125:2;127-127:3;128-128:4;131-131:5;134-134:6;136-136:7;137-137:8;140-140:9;143-143:10;145-145:11;146-146:12;149-149:13;155-155:14;158-158:15;161-161:16;164-164:17;173-173:18;176-176:19;186-186:20;191-191:21;192-192:22;193-193:23;194-194:24;195-195:25;198-198:26;199-199:27;205-205:28;206-206:29;207-207:30;261-261:31;262-262:32", "", "", "", "60:21,61:13,76:21,77:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -89,3 +89,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.sliceErr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛsliceErr;
+// </MethodHolders>

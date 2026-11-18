@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,6 +10,8 @@ partial struct Kind /*num:int32*/;
 partial struct Set<T> {
     internal map<T, EmptyStruct> m;
 }
+
+} partial class mainᴛSet {
 
 public static bool AddIfAbsent<T>(this ref Set<T> s, T v) {
     var (_, ok) = s.m[v, ꟷ]; if (ok) {
@@ -24,6 +27,8 @@ public static bool AddIfAbsent<T>(this ref Set<T> s, T v) {
 }
 
 public static nint Len<T>(this ref Set<T> s) { return len(s.m); }
+
+} partial class main_package {
 
 partial struct Pair<K, V> {
     public K Key;

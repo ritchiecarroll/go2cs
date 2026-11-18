@@ -11,6 +11,7 @@ using runtime = runtime_package;
 using syscall = syscall_package;
 using @internal;
 using time = time_package;
+using static net_package;
 
 partial class net_package {
 
@@ -41,6 +42,8 @@ internal static (ж<netFD>, error) newFD(nint sysfd, nint family, nint sotype, @
     return (ret, default);
 }
 
+} partial class netᴛnetFD {
+
 internal static error init(this ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
@@ -65,11 +68,10 @@ internal static (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, 
         // so no concurrent operations are possible.
         {
             var err = connectFunc(fd.pfd.Sysfd, ra);
-            var exprᴛ1 = err;
             var matchᴛ1 = false;
-            if (AreEqual(exprᴛ1, syscall.EINPROGRESS) || AreEqual(exprᴛ1, syscall.EALREADY) || AreEqual(exprᴛ1, syscall.EINTR)) { matchᴛ1 = true;
+            if (AreEqual(err, syscall.EINPROGRESS) || AreEqual(err, syscall.EALREADY) || AreEqual(err, syscall.EINTR)) { matchᴛ1 = true;
             }
-            else if (AreEqual(exprᴛ1, default) || AreEqual(exprᴛ1, syscall.EISCONN)) { matchᴛ1 = true;
+            else if (AreEqual(err, default) || AreEqual(err, syscall.EISCONN)) { matchᴛ1 = true;
                 var selᴛ11 = ctx.Done();
                 switch (trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
                 case 0 when selᴛ11.ꟷᐳ(out _): {
@@ -84,7 +86,7 @@ internal static (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, 
                 runtime.KeepAlive(Ꮡfd.OrTypedNil());
                 (rsa, ret) = (default, default); goto ᒐdone;
             }
-            else if (AreEqual(exprᴛ1, syscall.EINVAL)) { matchᴛ1 = true;
+            else if (AreEqual(err, syscall.EINVAL)) { matchᴛ1 = true;
                 // On Solaris and illumos we can see EINVAL if the socket has
                 // already been accepted and closed by the server.  Treat this
                 // as a successful connection--writes to the socket will see
@@ -152,9 +154,9 @@ internal static (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, 
             // details.
             {
                 var errΔ1 = fd.pfd.WaitWrite(); if (errΔ1 != nil) {
-                    var selᴛ12 = ctxDone;
-                    switch (trySelect(ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
-                    case 0 when selᴛ12.ꟷᐳ(out _): {
+                    var ctxDoneᴛ1 = ctxDone;
+                    switch (trySelect(ᐸꟷ(ctxDoneᴛ1, ꓸꓸꓸ))) {
+                    case 0 when ctxDoneᴛ1.ꟷᐳ(out _): {
                         (rsa, ret) = (default, mapErr(ctx.Err())); goto ᒐdone;
                     }
                     default: {
@@ -223,10 +225,14 @@ internal static (ж<netFD> netfd, error err) accept(this ж<netFD> Ꮡfd) {
     return (netfd, default);
 }
 
+} partial class net_package {
+
 // Defined in os package.
 /*linkname*/ internal static partial ж<os.File> newUnixFile(nint fd, @string name) {
     return os.net_newUnixFile(fd, name);
 }
+
+} partial class netᴛnetFD {
 
 internal static (ж<os.File> f, error err) dup(this ж<netFD> Ꮡfd) {
     error err = default;
@@ -243,4 +249,4 @@ internal static (ж<os.File> f, error err) dup(this ж<netFD> Ꮡfd) {
     return (newUnixFile(ns, fd.name()), default);
 }
 
-} // end net_package
+} // end netᴛnetFD

@@ -34,6 +34,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]
+    public void CheckAddressOfParenthesizedOperand() => CheckTarget("AddressOfParenthesizedOperand");
+
+    [TestMethod]
     public void CheckAliasImport() => CheckTarget("AliasImport");
 
     [TestMethod]
@@ -182,6 +185,15 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckArrayRangeSnapshot() => CheckTarget("ArrayRangeSnapshot");
+
+    [TestMethod]
+    public void CheckArrayReassignAliases() => CheckTarget("ArrayReassignAliases");
+
+    [TestMethod]
+    public void CheckArrayReassignForms() => CheckTarget("ArrayReassignForms");
+
+    [TestMethod]
+    public void CheckArrayReassignUnsafe() => CheckTarget("ArrayReassignUnsafe");
 
     [TestMethod]
     public void CheckArraySwitchCases() => CheckTarget("ArraySwitchCases");
@@ -628,6 +640,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckEmbedLayoutMatchesGo() => CheckTarget("EmbedLayoutMatchesGo");
 
     [TestMethod]
+    public void CheckEmbeddedArrayCopy() => CheckTarget("EmbeddedArrayCopy");
+
+    [TestMethod]
     public void CheckEmbeddedInterfaceMergedMethod() => CheckTarget("EmbeddedInterfaceMergedMethod");
 
     [TestMethod]
@@ -779,6 +794,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckForeignPairNumericConv() => CheckTarget("ForeignPairNumericConv");
+
+    [TestMethod]
+    public void CheckForeignPairStructConversion() => CheckTarget("ForeignPairStructConversion");
 
     [TestMethod]
     public void CheckForeignPointerImplementSuppression() => CheckTarget("ForeignPointerImplementSuppression");
@@ -1384,6 +1402,12 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMethodGroupGenericArg() => CheckTarget("MethodGroupGenericArg");
 
     [TestMethod]
+    public void CheckMethodHolderAlias() => CheckTarget("MethodHolderAlias");
+
+    [TestMethod]
+    public void CheckMethodHolderNames() => CheckTarget("MethodHolderNames");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]
@@ -1442,6 +1466,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMulticastGroupJoin() => CheckTarget("MulticastGroupJoin");
+
+    [TestMethod]
+    public void CheckMutexInNativeMemory() => CheckTarget("MutexInNativeMemory");
 
     [TestMethod]
     public void CheckNamedAnySliceType() => CheckTarget("NamedAnySliceType");
@@ -1840,7 +1867,13 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNonSelfConstraintPointerArg() => CheckTarget("NonSelfConstraintPointerArg");
 
     [TestMethod]
+    public void CheckNonSelfConstraintSliceArg() => CheckTarget("NonSelfConstraintSliceArg");
+
+    [TestMethod]
     public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
+
+    [TestMethod]
+    public void CheckOpenSliceUnnamedArray() => CheckTarget("OpenSliceUnnamedArray");
 
     [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
@@ -2090,6 +2123,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPromotedFieldProperties() => CheckTarget("PromotedFieldProperties");
+
+    [TestMethod]
+    public void CheckPromotedForwarderTypeNameCollision() => CheckTarget("PromotedForwarderTypeNameCollision");
 
     [TestMethod]
     public void CheckPromotedMethodExpr() => CheckTarget("PromotedMethodExpr");
@@ -2587,6 +2623,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckStructArrayFieldValueCopy() => CheckTarget("StructArrayFieldValueCopy");
 
     [TestMethod]
+    public void CheckStructConversionCopy() => CheckTarget("StructConversionCopy");
+
+    [TestMethod]
     public void CheckStructFieldNamedOther() => CheckTarget("StructFieldNamedOther");
 
     [TestMethod]
@@ -2657,6 +2696,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTcpLoopbackRoundTrip() => CheckTarget("TcpLoopbackRoundTrip");
+
+    [TestMethod]
+    public void CheckTempNamedAfterIdentifier() => CheckTarget("TempNamedAfterIdentifier");
 
     [TestMethod]
     public void CheckTerminatingSwitchDefaultFallthrough() => CheckTarget("TerminatingSwitchDefaultFallthrough");
@@ -2813,6 +2855,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnicodeConsoleOutput() => CheckTarget("UnicodeConsoleOutput");
+
+    [TestMethod]
+    public void CheckUnionElementArrayDoor() => CheckTarget("UnionElementArrayDoor");
 
     [TestMethod]
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");

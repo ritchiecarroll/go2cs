@@ -26,6 +26,7 @@ using go.crypto.@internal;
 using go.crypto.@internal.fips140.aes;
 using vendor.golang.org.x.crypto;
 using Δx509 = go.crypto.x509_package;
+using static tls_package;
 
 partial class tls_package {
 
@@ -146,7 +147,7 @@ partial struct cipherSuite {
     internal Func<slice<byte>, slice<byte>, aead> aead;
 }
 
-[GoLazy] partial class lazyᴛΔcipherSuites { internal static slice<ж<cipherSuite>> ΔcipherSuites = [ // TODO: replace with a map, since the order doesn't matter.
+[GoLazy] partial class lazyᴛcipherSuites { internal static slice<ж<cipherSuite>> cipherSuites = [ // TODO: replace with a map, since the order doesn't matter.
     Ꮡ(new cipherSuite(TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256, 32, 0, 12, ecdheRSAKA, (nint)((nint)suiteECDHE | (nint)suiteTLS12), default, default, aeadChaCha20Poly1305)),
     Ꮡ(new cipherSuite(TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, 32, 0, 12, ecdheECDSAKA, (nint)((nint)(UntypedInt)(suiteECDHE | suiteECSign) | (nint)suiteTLS12), default, default, aeadChaCha20Poly1305)),
     Ꮡ(new cipherSuite(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, 16, 0, 4, ecdheRSAKA, (nint)((nint)suiteECDHE | (nint)suiteTLS12), default, default, aeadAESGCM)),
@@ -463,6 +464,8 @@ partial struct prefixNonceAEAD {
     internal cipher.AEAD aead;
 }
 
+} partial class tlsᴛprefixNonceAEAD {
+
 internal static nint NonceSize(this ref prefixNonceAEAD f) { return aeadNonceLength - noncePrefixLength; }
 internal static nint Overhead(this ref prefixNonceAEAD f) { return f.aead.Overhead(); }
 internal static nint explicitNonceLen(this ref prefixNonceAEAD f) { return f.NonceSize(); }
@@ -477,12 +480,16 @@ internal static (slice<byte>, error) Open(this ref prefixNonceAEAD f, slice<byte
     return f.aead.Open(@out, f.nonce[..], ciphertext, additionalData);
 }
 
+} partial class tls_package {
+
 // xorNonceAEAD wraps an AEAD by XORing in a fixed pattern to the nonce
 // before each call.
 partial struct xorNonceAEAD {
     internal array<byte> nonceMask = new(aeadNonceLength);
     internal cipher.AEAD aead;
 }
+
+} partial class tlsᴛxorNonceAEAD {
 
 internal static nint NonceSize(this ref xorNonceAEAD f) { return 8; } // 64-bit sequence number
 internal static nint Overhead(this ref xorNonceAEAD f) { return f.aead.Overhead(); }
@@ -511,6 +518,8 @@ internal static (slice<byte>, error) Open(this ref xorNonceAEAD f, slice<byte> @
 
     return (result, err);
 }
+
+} partial class tls_package {
 
 internal static aead aeadAESGCM(slice<byte> key, slice<byte> noncePrefix) {
     if (len(noncePrefix) != noncePrefixLength) {
@@ -598,11 +607,15 @@ partial struct cthWrapper {
     internal constantTimeHash h;
 }
 
+} partial class tlsᴛcthWrapper {
+
 internal static nint Size(this ref cthWrapper c) { return c.h.Size(); }
 internal static nint BlockSize(this ref cthWrapper c) { return c.h.BlockSize(); }
 internal static void Reset(this ref cthWrapper c) { c.h.Reset(); }
 internal static (nint, error) Write(this ref cthWrapper c, slice<byte> p) { return c.h.Write(p); }
 internal static slice<byte> Sum(this ref cthWrapper c, slice<byte> b) { return c.h.ConstantTimeSum(b); }
+
+} partial class tls_package {
 
 internal static Func<hash.Hash> newConstantTimeHash(Func<hash.Hash> h) {
     boring.Unreachable();
@@ -652,7 +665,7 @@ internal static ж<cipherSuite> mutualCipherSuite(slice<uint16> have, uint16 wan
 }
 
 internal static ж<cipherSuite> cipherSuiteByID(uint16 id) {
-    foreach (var (_, cipherSuite) in range(ΔcipherSuites)) {
+    foreach (var (_, cipherSuite) in range(cipherSuites)) {
         if (cipherSuite.id == id) {
             return cipherSuite;
         }

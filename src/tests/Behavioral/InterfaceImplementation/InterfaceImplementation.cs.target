@@ -3,6 +3,7 @@ global using Test = object;
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -60,9 +61,13 @@ internal static void main() {
 
 partial struct errno /*num:uintptr*/;
 
+} partial class mainᴛerrno {
+
 internal static @string Error(this errno e) {
     return "errno";
 }
+
+} partial class main_package {
 
 internal static errno errAgain => 11;
 
@@ -124,6 +129,8 @@ public static void ShowZoo(/*[2]*/ ж<array<Animal>> Ꮡzoo) {
     }
 }
 
+} partial class mainᴛFrog {
+
 public static @string Type(this ref Frog f) {
     return "Frog";
 }
@@ -131,6 +138,8 @@ public static @string Type(this ref Frog f) {
 public static @string Swim(this ref Frog f) {
     return "Kick";
 }
+
+} partial class mainᴛDog {
 
 public static @string Swim(this ref Dog d) {
     return "Paddle";
@@ -140,4 +149,4 @@ public static @string Type(this ref Dog d) {
     return "Doggie";
 }
 
-} // end main_package
+} // end mainᴛDog

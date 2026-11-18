@@ -4,11 +4,14 @@
 namespace go;
 
 using syscall = syscall_package;
+using static os_package;
 
 partial class os_package {
+
+} partial class osᴛprocessHandle {
 
 internal static void closeHandle(this ref processHandle ph) {
     syscall.Close((nint)ph.handle);
 }
 
-} // end os_package
+} // end osᴛprocessHandle

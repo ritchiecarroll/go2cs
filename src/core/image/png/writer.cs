@@ -16,6 +16,7 @@ using encoding;
 using go.hash;
 using go.image;
 using hash = hash_package;
+using static png_package;
 
 partial class png_package {
 
@@ -92,6 +93,8 @@ internal static nint abs8(uint8 d) {
     }
     return 256 - (nint)d;
 }
+
+} partial class pngᴛencoder {
 
 internal static void writeChunk(this ref encoder e, slice<byte> b, @string name) {
     if (e.err != nil) {
@@ -235,6 +238,8 @@ public static (nint, error) Write(this ref encoder e, slice<byte> b) {
     return (len(b), default);
 }
 
+} partial class png_package {
+
 // Chooses the filter to use for encoding the current row, and applies it.
 // The return value is the index of the filter and also of the row in cr that has had it applied.
 internal static nint filter(ref array<slice<byte>> cr, slice<byte> pr, nint bpp) {
@@ -328,6 +333,8 @@ internal static nint filter(ref array<slice<byte>> cr, slice<byte> pr, nint bpp)
     return filter;
 }
 
+} partial class pngᴛencoder {
+
 internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image m, nint cb, nint level) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
@@ -415,7 +422,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
         var pr = e.pr;
 
         var (gray, _) = m._<ж<image.Gray>>(ᐧ);
-        var (rgba, _) = m._<ж<imageꓸRGBA>>(ᐧ);
+        var (rgba, _) = m._<ж<image.RGBA>>(ᐧ);
         var (paletted, _) = m._<ж<image.Paletted>>(ᐧ);
         var (nrgba, _) = m._<ж<image.NRGBA>>(ᐧ);
 
@@ -636,6 +643,8 @@ internal static void writeIDATs(this ж<encoder> Ꮡe) {
     e.err = e.bw.Flush();
 }
 
+} partial class png_package {
+
 // This function is required because we want the zero value of
 // Encoder.CompressionLevel to map to zlib.DefaultCompression.
 internal static nint levelToZlib(CompressionLevel l) {
@@ -657,11 +666,15 @@ internal static nint levelToZlib(CompressionLevel l) {
     }}
 }
 
+} partial class pngᴛencoder {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string iendˢ => ref iendˢᵇ;
 private static readonly @string iendˢᵇ = "IEND"u8;
 
 internal static void writeIEND(this ref encoder e) { e.writeChunk(default, iendˢ); }
+
+} partial class png_package {
 
 // Encode writes the Image m to w in PNG format. Any Image may be
 // encoded, but images that are not [image.NRGBA] might be encoded lossily.
@@ -669,6 +682,8 @@ public static error Encode(io.Writer w, image.Image m) {
     ref var e = ref heap(new Encoder(), out var Ꮡe);
     return Ꮡe.Encode(w, m);
 }
+
+} partial class pngᴛEncoder {
 
 // Encode writes the Image m to w in PNG format.
 public static error Encode(this ж<Encoder> Ꮡenc, io.Writer w, image.Image m) {
@@ -756,4 +771,4 @@ public static error Encode(this ж<Encoder> Ꮡenc, io.Writer w, image.Image m) 
     finally { ᒐ.Run(); }
 }
 
-} // end png_package
+} // end pngᴛEncoder

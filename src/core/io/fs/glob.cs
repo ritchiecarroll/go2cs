@@ -86,9 +86,8 @@ internal static (slice<@string> matches, error err) globWithLimit(FS fsys, @stri
 
 // cleanGlobPath prepares path for glob matching.
 internal static @string cleanGlobPath(@string path) {
-    var exprᴛ1 = path;
     switch (ᐧ) {
-    case {} when exprᴛ1 == ""u8: {
+    case {} when path == ""u8: {
         return ".";
     }
     default: {

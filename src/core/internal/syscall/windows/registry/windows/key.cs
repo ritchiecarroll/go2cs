@@ -25,6 +25,7 @@ namespace go.@internal.syscall.windows;
 
 using runtime = runtime_package;
 using syscall = syscall_package;
+using static registry_package;
 
 partial class registry_package {
 
@@ -48,22 +49,26 @@ public static UntypedInt WRITE => 0x20006;
 // Keys can be obtained by calling OpenKey; there are
 // also some predefined root keys such as CURRENT_USER.
 // Keys can be used directly in the Windows API.
-partial struct Key /*global::go.syscall_package.ΔHandle*/;
+partial struct Key /*global::go.syscall_package.Handle*/;
 
 // Windows defines some predefined root keys that are always open.
 // An application can use these keys as entry points to the registry.
 // Normally these keys are used in OpenKey to open new keys,
 // but they can also be used anywhere a Key is required.
-public static Key CLASSES_ROOT => /* Key(syscall.HKEY_CLASSES_ROOT) */ unchecked((Key)(syscallꓸHandle)2147483648);
-public static Key CURRENT_USER => /* Key(syscall.HKEY_CURRENT_USER) */ unchecked((Key)(syscallꓸHandle)2147483649);
-public static Key LOCAL_MACHINE => /* Key(syscall.HKEY_LOCAL_MACHINE) */ unchecked((Key)(syscallꓸHandle)2147483650);
-public static Key USERS => /* Key(syscall.HKEY_USERS) */ unchecked((Key)(syscallꓸHandle)2147483651);
-public static Key CURRENT_CONFIG => /* Key(syscall.HKEY_CURRENT_CONFIG) */ unchecked((Key)(syscallꓸHandle)2147483653);
+public static Key CLASSES_ROOT => /* Key(syscall.HKEY_CLASSES_ROOT) */ unchecked((Key)(syscall.Handle)2147483648);
+public static Key CURRENT_USER => /* Key(syscall.HKEY_CURRENT_USER) */ unchecked((Key)(syscall.Handle)2147483649);
+public static Key LOCAL_MACHINE => /* Key(syscall.HKEY_LOCAL_MACHINE) */ unchecked((Key)(syscall.Handle)2147483650);
+public static Key USERS => /* Key(syscall.HKEY_USERS) */ unchecked((Key)(syscall.Handle)2147483651);
+public static Key CURRENT_CONFIG => /* Key(syscall.HKEY_CURRENT_CONFIG) */ unchecked((Key)(syscall.Handle)2147483653);
+
+} partial class registryᴛKey {
 
 // Close closes open key k.
 public static error Close(this Key k) {
-    return syscall.RegCloseKey((syscallꓸHandle)k);
+    return syscall.RegCloseKey((syscall.Handle)k);
 }
+
+} partial class registry_package {
 
 // OpenKey opens a new key with path name relative to key k.
 // It accepts any open key, including CURRENT_USER and others,
@@ -73,15 +78,17 @@ public static error Close(this Key k) {
 public static (Key, error) OpenKey(Key k, @string path, uint32 access) {
     var (p, err) = syscall.UTF16PtrFromString(path);
     if (err != nil) {
-        return ((Key)(syscallꓸHandle)(0), err);
+        return ((Key)(syscall.Handle)(0), err);
     }
-    ref var subkey = ref heap(new syscallꓸHandle(), out var Ꮡsubkey);
-    err = syscall.RegOpenKeyEx((syscallꓸHandle)k, p, 0, access, Ꮡsubkey);
+    ref var subkey = ref heap(new syscall.Handle(), out var Ꮡsubkey);
+    err = syscall.RegOpenKeyEx((syscall.Handle)k, p, 0, access, Ꮡsubkey);
     if (err != nil) {
-        return ((Key)(syscallꓸHandle)(0), err);
+        return ((Key)(syscall.Handle)(0), err);
     }
     return ((Key)subkey, default);
 }
+
+} partial class registryᴛKey {
 
 // ReadSubKeyNames returns the names of subkeys of key k.
 public static (slice<@string>, error) ReadSubKeyNames(this Key k) {
@@ -101,7 +108,7 @@ loopItems:
         for (var i = (uint32)0; ; i++) {
             ref var l = ref heap<uint32>((uint32)len(buf), out var Ꮡl);
             for (;;) {
-                var err = syscall.RegEnumKeyEx((syscallꓸHandle)k, i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
+                var err = syscall.RegEnumKeyEx((syscall.Handle)k, i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
                 if (err == nil) {
                     break;
                 }
@@ -126,6 +133,8 @@ break_loopItems:;
     finally { ᒐ.Run(); }
 }
 
+} partial class registry_package {
+
 // CreateKey creates a key named path under open key k.
 // CreateKey returns the new key and a boolean flag that reports
 // whether the key already existed.
@@ -134,16 +143,16 @@ break_loopItems:;
 public static (Key newk, bool openedExisting, error err) CreateKey(Key k, @string path, uint32 access) {
     error err = default;
 
-    ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
+    ref var h = ref heap(new syscall.Handle(), out var Ꮡh);
     ref var d = ref heap(new uint32(), out var Ꮡd);
     (var pathp, err) = syscall.UTF16PtrFromString(path);
     if (err != nil) {
-        return ((Key)(syscallꓸHandle)(0), false, err);
+        return ((Key)(syscall.Handle)(0), false, err);
     }
-    err = regCreateKeyEx((syscallꓸHandle)k, pathp,
+    err = regCreateKeyEx((syscall.Handle)k, pathp,
         0, nil, _REG_OPTION_NON_VOLATILE, access, nil, Ꮡh, Ꮡd);
     if (err != nil) {
-        return ((Key)(syscallꓸHandle)(0), false, err);
+        return ((Key)(syscall.Handle)(0), false, err);
     }
     return ((Key)h, d == _REG_OPENED_EXISTING_KEY, default);
 }
@@ -154,7 +163,7 @@ public static error DeleteKey(Key k, @string path) {
     if (err != nil) {
         return err;
     }
-    return regDeleteKey((syscallꓸHandle)k, pathp);
+    return regDeleteKey((syscall.Handle)k, pathp);
 }
 
 // A KeyInfo describes the statistics of a key. It is returned by Stat.
@@ -167,10 +176,12 @@ partial struct KeyInfo {
     internal syscall.Filetime lastWriteTime;
 }
 
+} partial class registryᴛKey {
+
 // Stat retrieves information about the open key k.
 public static (ж<KeyInfo>, error) Stat(this Key k) {
     ref var ki = ref heap(new KeyInfo(), out var Ꮡki);
-    var err = syscall.RegQueryInfoKey((syscallꓸHandle)k, nil, nil, nil,
+    var err = syscall.RegQueryInfoKey((syscall.Handle)k, nil, nil, nil,
         Ꮡki.ᏑSubKeyCount, Ꮡki.ᏑMaxSubKeyLen, nil, Ꮡki.ᏑValueCount,
         Ꮡki.ᏑMaxValueNameLen, Ꮡki.ᏑMaxValueLen, nil, Ꮡki.ᏑlastWriteTime);
     if (err != nil) {
@@ -179,4 +190,4 @@ public static (ж<KeyInfo>, error) Stat(this Key k) {
     return (Ꮡki, default);
 }
 
-} // end registry_package
+} // end registryᴛKey

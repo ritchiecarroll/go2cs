@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -44,7 +45,11 @@ partial struct sval {
     internal @string s;
 }
 
+} partial class mainᴛsval {
+
 internal static @string String(this sval v) { return v.s; }
+
+} partial class main_package {
 
 internal static (stringer, Func<nint>) ifaceAndFunc() {
     return (new sval(s: "iface"), () => 9);

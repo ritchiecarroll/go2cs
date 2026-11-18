@@ -40311,6 +40311,381 @@ trap number (ENOSYS).
 
 — C1 (2026-11-16)
 
+## 2026-11-16 — P5 (decision D4 taken; COORD rulings 00:57Z and 01:10Z; closes shape Q of item 1 of the 2026-11-14 row "an array viewed over another array type answers length 0"): the open slice of an unnamed array takes the array pointer doors — CLOSED for Q, `ge` stays OPEN for door C
+
+`(*[N]T)(p)[lo:]` with an unnamed array kept the box route (`To<array<E>>(p).slice(lo)`), which reads the whole
+array as a value: length 0 over memory that is no Go array of that type, and as `copy`'s destination over a
+number's bytes (reflect's `nameOff` copy) an access violation that ends the process. The view and copy doors now
+take it for an unnamed array as for a named one (design 16.10, branch `claude/p5-d4-open-slice`).
+
+- **Q** (`w := (*[16]byte)(unsafe.Pointer(&arr))[:]` over `[4]uint32`, `w[4] = 1`): Go `16 [0 1 0 0]`; converted
+  now the same (arm B of the behavioral program `OpenSliceUnnamedArray`). CLOSED.
+- **`ge`** (a named array bound to a local, then indexed as an unnamed one) is the kept-local class: door C, .5,
+  unchanged. Items 2 and 3 of the 11-14 row are unchanged.
+- Census: sqlite closure 0 sites; std 7 / 8 / 11 (linux / darwin / windows). Corpus: 7 lines in 6 files (the
+  three `nameOff` copies, `os_linux.cs`, `os_windows.cs`, the registry `value.cs.auto`), and the registry sibling
+  taken whole to the emission (8 lines more, stale since 308).
+- Candidate for a later seat: retiring the registry `value.cs` hand-own, which exists because of this form.
+
+— P5 (2026-11-16)
+
+## 2026-11-16 — P5 (W19; COORD brief 02:52Z, plan approved 03:30Z; G's finding at the newest tree): the array pointer doors take an array whose element is a ccgo union — FIXED on `claude/p5-w19-union-elem`, the W12b stand-in RETIRED pending G's re-run
+
+Door B stepped aside for `(*[N]E)(p)[i]` when E is a ccgo union (a `[0]T` carrier for each member but the one with
+storage): the door asked whether E is managed with the plain reading, where every Go array is an `array<T>`, so
+the union read as managed and the old box route stayed, length 0 over libc's heap. A struct admitted to inline
+arrays holds a `[0]T` as an alignment carrier, so the doors now read admission (design 16.11). The carrier
+classification is unchanged.
+
+- Census (sqlite v1.62.0, libc v1.80.1): linux/amd64 19 sites (TExpr 7, TRtreeCoord 4, Taddress 4, the sockaddr
+  union 4), windows/amd64 11 (TExpr 7, TRtreeCoord 4): G's list. std 0 by construction (std is never admitted).
+- Behavioral program `UnionElementArrayDoor`: 6 of 7 arms panic at D4's tip, 7 of 7 equal Go with the change.
+- W12b's stand-in (11 reads on windows; 18 reads and 1 store on linux) is retired by this seat once G's sqlite-cs
+  demo converts and runs with no stand-in, both demos, windows and linux. Until then this row is FIXED, not CLOSED.
+
+— P5 (2026-11-16)
+
+## 2026-11-16 — H (the NativeBox reference floor; COORD ruling C and the 311 plan): a native box refuses a whole-value read or write of a reference-type pointee — SEATED for 311, branch `claude/h-nativebox-ref-floor`
+
+`NativeBox<T>.ValueAddress` now throws `NativeStructLayoutMismatch(T, "a managed reference where Go stores words")`
+when `T` is a CLR reference type (a Go pointer, a func, an interface, `unsafe.Pointer`) and the address is not the
+number 0. Before it, `Unsafe.AsRef` read Go's word as a managed reference: cgo-e2e s6next's `entry.next` became a
+reference to an object that does not exist, and a write stored a reference the collector could not see
+(DESIGN-cgo-phase3-marshaling.md, section 18).
+- **Order in `ValueAddress`:** the layout mismatch, the dereferenceable address, the named-array floor, 310's B0'
+  (managed-derived struct reads), this floor, then the census. B0' and this floor cover disjoint populations: B0' a
+  value-type Go struct holding a reference, this floor a CLR reference type. A refused read is never counted.
+- **One exemption (ruling C, narrowed by source):** `unsafe.Pointer` over MANAGED Go storage, where the box retains
+  its source or carries a pin. These are the converted runtime's `map.go` indirect key and `atomic_pointer.go`
+  atomicwb. Over native memory it is refused like every other reference. The exempt read's hazard is the next row.
+- **Not refused:** golib's map, channel, string, slice and array, which are value types and stay census B2a value
+  kinds. The number 0 also passes: a nil pointer to a Go pointer answers what every nil pointer answers. The census
+  counts that attempt before the read faults (COORD 2026-11-16: it stays counted).
+- **Tests:** `NativeBoxReferenceFloorTests`, with 4 refusal arms that were red before the floor and 4 controls (the
+  managed `unsafe.Pointer` control among them). The census controls that minted reference-type boxes over C memory
+  are re-pointed:
+  - the off arm, the source-tag arm and the file arm, to value kinds (string, `array<short>`, `Unsized`);
+  - the reference-kind arm, to "refused and not counted";
+  - a new arm keeps the exempt `unsafe.Pointer` counted as B2a source=retained.
+
+**The census, before and after** (GolibTests Release unfiltered, census on; behavioral executed, census on):
+
+| reading | tree | GolibTests | B2a rows |
+|---|---|---|---|
+| C1 before | master `0c1d295ea8` | 2839/0/44 of 2883 | 12: three kind=Func (`Func<short>` none, `Func<int>` retained, `Func<long,long>` none), kind=Pointer `ж<long>` none 1, String none 1, `array<short>` none 1, `array<array<uint>>` retained 2, `FloorSmallMem` none 4 |
+| C1 after | `0c1d295ea8` + the floor | 2849/0/44 of 2893 | 14 |
+| C1 after | 311, `f17b5ddc40` | 2909/1/44 of 2954 | 14: kind=Func gone, kind=Pointer `ж<long>` none 1 (the nil control alone), String none 1, String retained 1, `array<short>` none 2, `array<array<uint>>` retained 2, `FloorSmallMem` none 4, UnsafePointer retained 3 |
+| arm A, FILTERED to the nil control | `f17b5ddc40` | 1/0/0 | 1: kind=Pointer `ж<long>` none |
+| arm B, FILTERED to all but the nil control | `f17b5ddc40` | 2909/0/44 of 2953 | 13, no kind=Pointer row |
+| C2 before | `0c1d295ea8` | behavioral, 956 census files | 2: UnsafePointer retained |
+| C2 after | `f17b5ddc40` | Output 966/0/26, 968 census files | 2: UnsafePointer retained |
+
+- B2b and unpinnable at 311 read 2 and 4, against 1 and 2 before. The extra B2b row (`ManagedDerivedStructReadFloorTests+Ctx`
+  source=none) and the 2 extra unpinnable rows are 310's own `ManagedDerivedStructReadFloorTests`.
+- The C3 package arms (13 packages: crypto/tls, encoding/json, the runtime and others) read b2a 0 in every package
+  before the floor. They were NOT re-measured after it.
+
+**Gates at `f17b5ddc40`, all unfiltered:** GolibTests R 2902/0/52 and D 2877/0/77 (total 2954, which is 310's 2944
+plus the floor's 10); GenTests 537/0; go test 11 ok, 0 FAIL, 0 cached; CNR byte-identical across 1093 (11
+platform-exclusive). At `0c1d295ea8` + the floor, before 310: R 2841/0/52, D 2816/0/77, GenTests 530/0, CNR
+byte-identical across 1079.
+
+**Scored against the predictions posted first.**
+- 0c1d C1 after, b2a: MISSED, 14 against 13. The 14th row is the nil control's counted attempt, the mechanism its
+  author had named for the `FloorSmallMem` rows. Arms A and B settle it at 311: 14 = 13 + the nil control.
+- 311 C1: MET on mechanism (b2a 14, total 2954, skipped 44), MISSED on three specifics:
+  - **the fail set** read `[AnIndexedLoopOverNativeMemoryAllocatesNothing]` (Actual 3696 B), not empty. This is the
+    door-B alloc test's one-time cost, not the floor's: it also failed once at W8 `9d3401725c`, which has no floor
+    (5784 B), and it passed in 3 other full Release runs that night. P5's `p5-alloc-loop-harden` `4fe430f549`,
+    seated in 311, bounds the window at 1,000,000 iterations and 64 KiB, so both costs pass under it by construction.
+    Not re-run for it;
+  - **b2b** read 2, not 1;
+  - **unpinnable** read 4, not 2.
+- **The b2b and unpinnable misses** are census counts carried from 0c1d, not re-derived at the tree (corpus-reconvert
+  section 1 already holds the rule). The extras are 310's. That holds by construction (the floor throws before the
+  census and cannot add a count), and a filtered arm at W8 (master + the should-fix, no floor),
+  `FullyQualifiedName~ManagedDerivedStructReadFloorTests`, read exactly them: b2b 1 `Ctx`, unpinnable 2. That arm ran
+  before its prediction was posted, so it is a CONFIRMATION, not a predicted measurement.
+- Arms A and B, C2, and every gate: MET. Stop lines clean: no kind=UnsafePointer source=none row anywhere.
+
+— H (2026-11-16)
+
+## 2026-11-16 — H (COORD ruling C: a BOARD row): the exempt `unsafe.Pointer` read keeps a managed reference in a word the collector does not track — OPEN, .5, cure carried into DESIGN-cgo-phase3-marshaling.md section 18.2
+
+The reference floor (row above) exempts one population: `NativeBox<unsafe.Pointer>` over MANAGED Go storage (the box
+retains its source or carries a pin). It is the converted runtime's `map.go` indirect key and `atomic_pointer.go`
+atomicwb, which store a pointer into storage Go types as words.
+- **The hazard:** golib's `unsafe.Pointer` is a CLR reference (a class), so the exempt read and write put a managed
+  reference into a slot the storage declares as a word (`uintptr` or bytes). The collector does not trace that
+  slot. A reference kept only there does not keep its object alive and is not updated if the object moves, so it
+  can go stale or be collected.
+- **Measured:** the exempt population is live. C2 at 311 (behavioral, executed, census on, 968 files) reads 2 B2a
+  rows, both kind=UnsafePointer source=retained, and C1 reads 3 (the controls).
+- **Not measured:** a failure from the hazard. Nothing has been reproduced; the row records the mechanism, not an
+  observed fault.
+- **Cure direction (B):** word semantics for `unsafe.Pointer`, carried into the section 18.2 design, where it
+  belongs (COORD ruling). Owner: H, with the S-B 18.2 design.
+
+— H (2026-11-16)
+
+## 2026-11-16 — P1 (the TS probe's side note; COORD ruling 07:16Z: a row, not code now): GO2CS2006 refuses a callee that writes only a fresh copy it rebound its parameter to — OPEN, over-refusal, no owner
+
+The GO2CS2006 gate (`src/go2cs/sliceWideningWriteRefusals.go`) proves a callee read-only for a `[]N` parameter by
+classifying every use of the parameter's object in the body (`classify`, line 331, `info.Uses[ident] == param`).
+Rebinding the parameter is allowed (`useWrite`, line 432: "rebinding the local writes nothing of the caller's
+slice"), but the classification is flow-insensitive, so a use AFTER the rebinding is still read as a use of the
+caller's slice. The shape the TS probe met:
+
+```go
+func sortedKeys[N keyer](xs []N) []int {
+	xs = slices.Clone(xs)
+	slices.SortFunc(xs, func(a, b N) int { return a.Key() - b.Key() })
+	...
+}
+```
+
+Go sorts the clone and never writes the caller's slice. Measured on linux/amd64 with a probe of exactly that shape
+(caller `sortedKeys(all)`, `all []*item`, Go prints `[1 2 3] 3 1 2`): conversion exits 1 with `GO2CS2006:
+sortedKeys(...) receives all as []N; sortedKeys may write it: it is passed to slices.SortFunc at main.go:17, which
+may write it: ... an element is assigned at zsortanyfunc.go:13`. The refusal is safe (no wrong program is
+written); the cost is a refused package that Go-equivalent output exists for.
+
+**Cure, when wanted:** treat a use as the caller's slice only while no rebinding to a fresh value dominates it. The
+minimal form: a top-level statement `p = slices.Clone(p)` (or `p = append(p[:0:0], p...)`) ends the parameter's
+caller-visible life for every later statement of the function's top block and everything nested in them; uses
+before it are classified as today. A rebinding inside a branch or loop keeps today's reading. Its arm: the probe
+above converts, and its output equals Go's; a twin that sorts before the rebinding stays refused.
+
+— P1 (2026-11-16)
+
+## 2026-11-17 — P1 (batch 311, OQ2 x class C): a struct's promoted forwarders move into its method holder; 12 committed converted `_test.cs` files keep the old placement until the next `-tests` reconvert
+
+Seat `claude/p1-oq2-classc-holder`, on the 311 union `140284a18a`. The forwarders the converter writes for a struct
+whose pointer satisfies an interface only through an embedded interface field were written in the package class.
+Under the method-holder rule a type keeps its name beside a method of that name, so `PromotedForwarderTypeNameCollision`
+read CS0102 x4 (`Driver` the forwarder beside `Driver` the type, in `main.cs` and in go2cs-gen's two overloads). A
+package-level struct's forwarders are now written into its holder; a function-local struct's stay beside it.
+
+Corpus, two seeded reconverts on all four targets, prediction posted before the run and met on every line: 10 files
+per target, +27/-15 (7 converted `.cs` with the class switch, 3 `package_info.cs` map re-encodes where a file's line
+count changed). Behavioral: three projects' `main.cs` and `main.cs.target`.
+
+**Not regenerated:** 12 committed converted test files still write their forwarders in the package class:
+`archive/tar/reader_test.cs`, `context/context_test.cs`, `context/x_test.cs`, `crypto/tls/conn_test.cs`,
+`crypto/tls/handshake_client_test.cs`, `crypto/tls/handshake_test.cs`, `crypto/tls/tls_test.cs`,
+`log/slog/multi_handler_test.cs`, `net/http/client_test.cs`, `net/http/fcgi/fcgi_test.cs`, `net/http/serve_test.cs`,
+`net/http/transport_test.cs`. They compile as they are. They take the new placement on the next `-tests` reconvert of
+each package; never hand-edit them.
+
+— P1 (2026-11-17)
+
+## 2026-11-17 — P2 (sqlite-cs wall C + W-conv-copy): a struct conversion between two FOREIGN types calls a generated function, and every struct or array conversion copies its operand — FIXED
+
+**Wall C, the reading.** `lib.Pitch(o)` with `o` an `other.Pitch` converts two struct types that both belong to
+other packages. Go allows it because the fields are identical. The converter emitted the cast it emits for every
+named target, `(lib.Pitch)o`, and nothing bound it (CS0030): a C# conversion operator must be declared by one of its
+two types, and both are in closed assemblies.
+
+**Wall C, the fix.** The pair is recorded as any conversion is (`GoImplicitConv`), and go2cs-gen writes ONE static
+function for it in the converting package's class, named as Go names the target:
+`internal static lib.Pitch libꓸPitch(other.Pitch src) => new lib.Pitch(src.Hz);`. The site calls `libꓸPitch(o)`.
+A second source type overloads the name. The route is taken only when both types are written with a struct
+literal, neither is generic or this package's own, every field is exported, and no field's type holds an unnamed
+struct. Any other pair keeps its cast. (Converter `src/go2cs/foreignPairStructConversion.go`, generator
+`ImplicitConvGenerator`, GenTests `ForeignPairStructConversionTests`, fixture `ForeignPairStructConversion`;
+docs struct-types.md, *A struct conversion between two types of OTHER packages calls a generated function*.)
+
+**Wall C, limits, each still the cast (CS0030) and named here:** a field that is unexported (it is `internal`
+to its assembly); a field whose type holds an unnamed struct (each package lifts its own C# type); a generic type;
+two same-named target types in two same-named packages (both functions get one name, CS0111). A file's own
+import alias does not rename the function, which is named from the type on both sides.
+
+**W-conv-copy, the reading** (found by wall C's copy probe, 2026-11-16). Go converts a COPY of its operand: after
+`c := chord(lc)` a write to `c.Notes` does not reach `lc`. Every emitted conversion (the cast's operator, the
+unnamed-struct route, wall C's function) builds its result from the operand's fields, so an `array<T>` field, or a
+nested struct holding one, shared its backing store with the operand. An assignment, a return or a send already
+cloned such a value; a conversion did not.
+
+**W-conv-copy, the fix.** Where the operand is existing storage (an identifier, a field, an element, a
+dereference) and its type needs a value clone, it is cloned first: `(chord)lc.ΔClone()`, `(notes)b.Clone()`. A
+fresh operand (a call, a composite literal) is left as it is. A pair served by an inherited wrapper's operators,
+`type Counts counts`, is left to them, because those operators already copy (`[GoValueClone]`), so the value is
+copied once. A type written with a struct LITERAL is no wrapper and still takes the site clone. (Converter
+`src/go2cs/structConversionCopy.go`, fixture `StructConversionCopy`, 12 routes; docs struct-types.md, *A
+conversion copies its operand*.) Not covered: an array reached only through an EMBEDDED struct, which no copy
+site clones today. That is W-embed-array, ruled a seat of its own after this one.
+
+**Measured at `9293b261c9`** (master `b2eaf5290a` merged), go1.26.11, linux/amd64:
+go test rc 0, 11 ok; CNR NO REGRESSION over 1098 (+12 platform-exclusive), with the two predicted re-baselines,
+`DefinedOverNamedComposite` (`(shuffledBuf)b.Clone()`) and `PackageVarTupleInitOrder` (`(Sum)src.Clone()`);
+GenTests 545/545; go2cs.slnx 0 errors; fixtures `ForeignPairStructConversion`, `StructConversionCopy`,
+`DefinedOverNamedComposite`, `PackageVarTupleInitOrder` and `DefinedStructConversionCopy` match Go.
+Two-seeded `-stdlib` footprint, master's converter against this one over master's corpus, on all four targets:
+2 files, 4 lines, identical on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64, exactly as predicted:
+`crypto/internal/fips140/mldsa/field.cs` and `mlkem/field.cs`, `return (nttElement)(array<fieldElement>)f;` and
+its `ringElement` twin each gain `.Clone()`. Wall C moves no corpus file (no corpus record pairs two foreign
+types). The four lines are applied to `src/core` in this commit. `f` is a parameter cloned on entry, so the new copy
+is not needed for correctness there; it follows the rule every `return f` of a local array already follows
+(`return f.Clone();` appears 5 times in those packages). Removing copies of a local at its last use would be a
+separate liveness optimization for every copy site, not part of this fix.
+The five linux-banked rows that run those two files, each alone at `403ceafa44`: `crypto/internal/fips140/mldsa`
+46, `crypto/internal/fips140/mlkem` 11, `crypto/mlkem` 8, `crypto/hpke` 231 and `crypto/internal/fips140test` 2274,
+all PASS at their banked counts.
+
+— P2 (2026-11-17)
+
+## 2026-11-17 — P2 (W-embed-array): a struct whose array is reached only through an EMBEDDED struct clones it on copy — FIXED
+
+**The reading** (wall C's copy probe, 2026-11-16, four embedded routes). Go copies a struct value whole: after
+`c := e` a write to `c.V`, the array of an embedded `Inner` promoted through `e`, does not reach `e`. go2cs-gen holds
+an embed as an inline field, so the C# struct copy copies the embed, but the `array<T>` inside it is a struct over a
+shared backing store. `typeNeedsValueClone` and `structValueCloneFields` skipped embedded fields, so such a struct
+was never stamped `[GoValueClone(…)]` and no copy site cloned it: every write through the copy reached the source.
+
+**The fix.** Both walks visit an embedded value field like any other field. A struct carrying an array only through
+an embed is stamped with the embed's member (`[GoValueClone("Inner")] internal partial struct emb {}`), and every
+copy site the value-clone rule already serves clones it: assignment, parameter, return, range element, composite
+literal element, and the four conversion routes of W-conv-copy. An embedded pointer is shared in Go too and takes
+nothing. (Converter `src/go2cs/arrayCloneOperations.go`, test `TestAStructCarryingAnArrayThroughAnEmbedCopiesIt`,
+fixture `EmbeddedArrayCopy`, 3 packages and 10 routes; docs struct-types.md, after *A conversion copies its operand*.)
+
+**Limits, named here:** a struct the inline-array admission holds inline is copied whole by C# and takes no clone,
+as before; a returned parameter is copied twice (`e = e.ΔClone();` on entry, then `return e.ΔClone();`), as every
+array-carrying parameter already is (COORD ruled 2026-11-16: left alone). A zero-length array is cloned like any
+other; it holds nothing, so that clone is pure cost. That is W-zero-len, ruled a seat of its own after this one.
+
+**Measured at `22f57eb243`** (on wall C's tip `a7540ab86d`), go1.26.11, linux/amd64, prediction posted first:
+go test rc 0, 11 ok; CNR measured BEFORE re-baselining moved exactly the 2 predicted files, one `package_info.cs`
+line each (`CrossPkgLiteralNestedField/addrlib` Embedder gains `slots`, `EmptyStructLiteralCtor` embeds gains
+`grid`; no main.cs), then NO REGRESSION over 1101 (+12 platform-exclusive); GenTests 545/545; go2cs.slnx 0 errors;
+fixtures `EmbeddedArrayCopy`, `CrossPkgLiteralNestedField`, `EmptyStructLiteralCtor`, `EmbeddedStructValueCopy`,
+`StructConversionCopy` and `ForeignPairStructConversion` match Go.
+Two-seeded `-stdlib` footprint, wall C's converter against this one over wall C's corpus: windows/amd64, linux/amd64
+and linux/arm64 17 files -46/+47 each, darwin/amd64 17 files -47/+48 (its `m` gains `mOS`), every count, file and
+line kind as predicted; each shared file byte-identical across the four targets. 28 type stamps in nine
+`package_info.cs` (aes 5, aes/gcm 4, drbg 1, mlkem 4 widened, go/internal/gcimporter 1, reflect 2, runtime 7,
+x/crypto poly1305 3, dnsmessage 1), the `runtime2.cs.auto` review siblings (`g`, `mPadded`, `p`; darwin `m`), 14
+copy sites in aes `cbc.cs`/`ctr.cs`, gcm `cmac.cs`/`gcm.cs`/`gcm_nonces.cs` and drbg `ctrdrbg.cs` (`b: b.ΔClone()`,
+`g: g.Value.ΔClone()`, `c.c = aes.NewCTR(cipher, V).Value.ΔClone()`), and dnsmessage's `HTTPSResource` parameter
+entry copy with its position-map re-encode. 22 corpus files, applied in `b2d4072237`.
+The linux-banked rows that run those files, each alone at `b2d4072237`: `crypto/internal/fips140/aes` 5,
+`crypto/aes` 58, `crypto/cipher` 27289, `crypto/rand` 314, `crypto/internal/fips140/mlkem` 11, `crypto/mlkem` 8,
+`go/internal/gcimporter` 636, `reflect` 445, `crypto/internal/fips140test` 2274 and `crypto/tls` 4921, all PASS at
+their banked counts. `net` reads COUNT 594 against its banked 597, the count this host also reads at master (the
+W9a battery on 2026-11-16 and the copy census's master arm, both 594 of 597, no alternating test), so it is the
+host's, not this change's. `aes/gcm` and `drbg` have no banked row of their own; `crypto/cipher`, `crypto/rand`,
+`crypto/tls` and `fips140test` run them (read from their imports).
+
+— P2 (2026-11-17)
+
+## 2026-11-17 — P2 (W-zero-len): a zero-length array field is no reason to clone a struct — FIXED
+
+**The reading** (W-embed-array's census, 2026-11-17). A `[0]T` array holds no element, so a struct copy that shares
+its empty backing store with the source cannot be told from one that does not. The value-clone walks treated it as
+any array: syscall's `InotifyEvent` (`Name [0]uint8`, the flexible-array member) was stamped
+`[GoValueClone("Name")]` and `Sysinfo_t`'s list carried `X_f [0]int8`, linux only. W-embed-array would have added
+the same no-op to go-json-experiment's types that embed `nonComparable [0]func()` (the uncomparable marker):
+`jsontext.Token`, `SemanticError` and four more in the TypeScript closure, 6 stamps and 44 copy sites on the JSON
+token path.
+
+**The fix.** Both walks skip a field whose type is a zero-length array (`typeIsZeroLengthArray`): it is no reason to
+clone the struct and no member of its stamp. A real array beside it keeps its member. A bare `[0]T` value still takes
+its own `.Clone()` where Go copies it. (Converter `src/go2cs/arrayCloneOperations.go`, test
+`TestAZeroLengthArrayFieldTakesNoClone`; docs struct-types.md, after the embed paragraph.)
+
+**Measured at `e2009c01ef`** (on W-embed-array's tip `40699e4fe6`), go1.26.11, linux/amd64, prediction posted first:
+CNR NO REGRESSION over 1101 with 0 re-baselines (the three fixtures with `[0]` fields, `AnonStructReinterpretLift`,
+`InlineArrayFields` and `AddressOfFieldThroughConversionNative`, are held inline or as an explicit-layout union and
+carried no stamp or clone before); GenTests 545/545; go2cs.slnx 0 errors; those three fixtures, `EmbeddedArrayCopy`
+and `StructConversionCopy` match Go.
+Two-seeded `-stdlib` footprint, W-embed-array's converter against this one over its corpus: windows/amd64 and
+darwin/amd64 0 files; linux/amd64 and linux/arm64 1 file -2/+2 each, the same two lines in each flavour's
+`syscall/<flavour>/package_info.cs`; no copy site. As predicted. Applied in `e08c680ca2`.
+sqlite-cs closure (the demo, `-recurse`, both converters, measured on this box): linux/amd64 0 copy sites, 38
+stamp lines in 5 `package_info.cs` (x/sys/unix `DmNameList`, libc 21, libc/sys/types 4, libc/uuid/uuid 4,
+sqlite/lib 8); windows/amd64 1 copy site (libc `liDistanceToMove`'s parameter entry copy, with its position-map
+re-encode) and 296 stamp lines in 2 `package_info.cs` (libc 7, sqlite/lib 289). Each stamp line drops a
+zero-length member (ccgo's union `Fi [0]T` members and flexible arrays) or the whole stamp. The prediction said
+near 0 sites, which held; it named 1 stamp, which missed, because the census does not see ccgo's lifted
+anonymous structs. The TypeScript closure is not converted here; its 6 stamps and 44 sites are the census's.
+At the tip `e08c680ca2`: go test rc 0, 11 ok. The linux-banked rows over syscall, each alone: `syscall` 42 PASS;
+`os` COUNT 3831 against its banked 3840, the count this host also reads at master (the W9a battery on 2026-11-16),
+so the host's.
+
+— P2 (2026-11-17)
+
+## 2026-11-17 — C2 (ruling C, COORD 12:14Z: a row for .5): a `-recurse` importer seed would recover 15 lift reuses the demo flag leaves lost — OPEN for .5, with a measured cost and a corrected design note
+
+**What 312 ships.** Ruling C adds two pieces:
+- A per-type seed, `-inline-arrays=<import path>#<TypeName>`.
+- A digest record per admitted anonymous key, `GoInlineArrayAnonymous`.
+
+The sqlite demo and release-smoke conversions pass `-inline-arrays=modernc.org/libc#largeInteger`. That
+retires ruling A's known limit on windows: libc admits `largeInteger`, and sqlite/lib reuses its lift.
+
+**The rule this row is for, shape (3).** In a `-recurse` run, seed each foreign type an importer admits in the
+package that declares it. This is a pre-pass over the closure: no flag, and no module knowledge in the converter.
+Its seeds are exactly the census rows where need=true and have=false KNOWN (the importer admits a struct
+identical to one its import declares and does not admit). At 6bcc05d11f/bd2a09c423 those rows are:
+- **windows:** sqlite/lib <- libc `largeInteger` (+ its inner struct). The same as the flag.
+- **linux amd64 and arm64:** libc <- libc/uuid/uuid `Timespec`, `Timeval` and `X__fsid_t`.
+- **darwin:** libc <- netdb `In_addr` and `Servent`; netinet/in `In_addr`; pthread `Tm`; time `Tm`; wctype
+  `X_RuneLocale` and `X_RuneRange`.
+
+**The 10 extra seeds** are the linux 3 and the darwin 7.
+
+**The 15 reuses they recover:**
+- linux, per architecture (5): libc <- uuid `Timespecᴛ1`, `Timevalᴛ1` and `X__fsid_tᴛ1`, plus, transitively,
+  `Itimervalᴛ1` and `Itimerspecᴛ1`. These are the two the transitive match gave up at bd2a09c423.
+- darwin (10): libc <- the 7 seeded lifts, plus, transitively, netdb `Ip_mreqᴛ1`, `Ip_mreqnᴛ1` and `Ip_optsᴛ1`.
+
+Not measured: whether the faces check keeps any of the 10 out (`GO2CS2009`). Each moves a layout in a package
+that no closure build has exercised: uuid, and 5 darwin packages.
+
+**Correction to the costing I posted (c6088af4f).** I wrote that a pre-pass gives the same admission the real
+conversion will, because `computeInlineArrayAdmission` reads no foreign stamp. That is wrong. It reads foreign
+stamps through `foreignAdmits` in two places:
+- `reconcileDefinedTypes`: a defined type over another package's named struct, go-winio's GUID.
+- `closureAdmitted`: a closure that reaches another package's array-holding struct.
+
+A pre-pass that walks importers first therefore sees those imports' stamps missing or stale. So (3) needs either
+a first pass in dependency order that computes every package's own admission before the importer pass, or a
+fixed point. That makes it dearer than the 3-4 hours posted. Price it again before .5.
+
+**Determinism caveat (the flag too).** libc converted on its own lays out differently from libc converted inside
+the sqlite closure with the seed. Each stamp records its seeds, so every consumer reads the truth. A stand-alone
+libc package (nugetgo) carries no seed, though, and then sqlite on windows meets the WAL func-cookie panic again
+([Known issues](../KnownIssues.md)). The flag stays the answer there.
+
+— C2 (2026-11-17)
+
+## 2026-11-18 — P1 (batch 312, Tour item 3): switch tag and select channel temps follow the identifier; 88 committed converted `_test.cs` files keep the old `exprᴛN`/`selᴛN` names until the next `-tests` reconvert
+
+Seat `claude/p1-vp-switch-temp`, on master `f36b6b0d48` (batch 311). A `switch` whose tag is a local or parameter
+the switch cannot change now reads it in place (no `var exprᴛ1 = x;`); any other identifier tag is held in a temp
+named after it (`var osᴛ1 = os;`). A `select` case's channel temp is named after an identifier channel
+(`var cᴛ1 = c;`). Scout: `docs/phase4/SCOUT-tour-visual-parity.md`, section 3.
+
+Corpus, two seeded reconverts on all four targets, prediction posted before the measured run: linux/amd64 143 files +629/-770, windows/amd64 144 +632/-774, darwin/amd64
+141 +634/-774, linux/arm64 143 +629/-770, every line and file as predicted (195 files in all, +867/-1045). Line
+kinds: the switch and select temp lines and the `GoPositionMap` re-encodes of their `package_info.cs`.
+Behavioral: six projects' goldens.
+
+**Not regenerated:**
+- 88 committed converted test files hold 228 temp declarations with an identifier tag or channel (89 `exprᴛN`,
+  139 `selᴛN`; counted on the source text at this seat's tip). They compile as they are and take the new names on
+  the next `-tests` reconvert of each package; never hand-edit them. Most in `net` (13 files), `runtime` (9),
+  `net/http` (5).
+- `net/windows/lookup_windows.cs.auto`, the review sibling of a hand-owned file: on windows the converter moves 19
+  of its lines (two select channel temps, one string switch tag). Named, not overlaid.
+
+**Comment census:** the baseline rises because a lowered tagless switch (`switch (ᐧ)`) keeps no C# line naming its tag
+once the temp is gone, so the Go blank line before the switch has nowhere to anchor: `go-blank-cs-none` +8,
+`free-stmt/anchor-differs` +10, `extra:unexplained` +4. These come from how the census reads the file, not from wrong
+output; every site was read.
+
+— P1 (2026-11-18)
+
 ## 2026-11-14 — P1 (Tour visual-parity item 4): array literals read `array<T>([…])`; one consumer-visible break, disclosed; committed converted tests keep the old form until the next `-tests` reconvert
 
 Seat `claude/p1-vp-array-literal`. An unkeyed, non-empty literal of an unnamed or alias array type now calls golib's

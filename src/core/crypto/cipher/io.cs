@@ -4,6 +4,7 @@
 namespace go.crypto;
 
 using io = io_package;
+using static cipher_package;
 
 partial class cipher_package {
 
@@ -17,6 +18,8 @@ partial struct StreamReader {
     public io.Reader R;
 }
 
+} partial class cipherᴛStreamReader {
+
 public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) {
     nint n = default;
     error err = default;
@@ -25,6 +28,8 @@ public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) {
     r.S.XORKeyStream(dst.slice(0, n), dst.slice(0, n));
     return (n, err);
 }
+
+} partial class cipher_package {
 
 // StreamWriter wraps a [Stream] into an io.Writer. It calls XORKeyStream
 // to process each slice of data which passes through. If any [StreamWriter.Write]
@@ -36,6 +41,8 @@ partial struct StreamWriter {
     public io.Writer W;
     public error Err; // unused
 }
+
+} partial class cipherᴛStreamWriter {
 
 public static (nint n, error err) Write(this StreamWriter w, slice<byte> src) {
     nint n = default;
@@ -59,4 +66,4 @@ public static error Close(this StreamWriter w) {
     return default;
 }
 
-} // end cipher_package
+} // end cipherᴛStreamWriter

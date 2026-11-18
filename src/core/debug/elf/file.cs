@@ -32,6 +32,7 @@ using @internal;
 using compress;
 using encoding;
 using go.debug;
+using static elf_package;
 
 partial class elf_package {
 
@@ -43,7 +44,7 @@ partial class elf_package {
 // A FileHeader represents an ELF file header.
 partial struct FileHeader {
     public Class Class;
-    public ΔData Data;
+    public Data Data;
     public Version Version;
     public OSABI OSABI;
     public uint8 ABIVersion;
@@ -56,7 +57,7 @@ partial struct FileHeader {
 // A File represents an open ELF file.
 partial struct File {
     /*embed*/ public FileHeader FileHeader;
-    public slice<ж<ΔSection>> Sections;
+    public slice<ж<Section>> Sections;
     public slice<ж<Prog>> Progs;
     internal io.Closer closer;
     internal slice<DynamicVersion> dynVers;
@@ -84,7 +85,7 @@ partial struct SectionHeader {
 }
 
 // A Section represents a single section in an ELF file.
-partial struct ΔSection {
+partial struct Section {
     /*embed*/ public SectionHeader SectionHeader;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
@@ -102,16 +103,20 @@ partial struct ΔSection {
     internal int64 compressionOffset;
 }
 
+} partial class elfᴛSection {
+
 // Data reads and returns the contents of the ELF section.
 // Even if the section is stored compressed in the ELF file,
 // Data returns uncompressed data.
 //
 // For an [SHT_NOBITS] section, Data always returns a non-nil error.
-public static (slice<byte>, error) Data(this ж<ΔSection> Ꮡs) {
+public static (slice<byte>, error) Data(this ж<Section> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     return saferio.ReadData(new io_ReadSeekerᴠReader(Ꮡs.Open()), s.Size);
 }
+
+} partial class elfᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sectionHasInvalidStringˢ => ref sectionHasInvalidStringˢᵇ;
@@ -126,6 +131,8 @@ internal static (slice<byte>, error) stringTable(this ref File f, uint32 link) {
     return f.Sections[link].Data();
 }
 
+} partial class elfᴛSection {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string zdebugˢ => ref zdebugˢᵇ;
 private static readonly @string zdebugˢᵇ = ".zdebug"u8;
@@ -136,7 +143,7 @@ private static readonly @string zdebugˢᵇ = ".zdebug"u8;
 //
 // For an [SHT_NOBITS] section, all calls to the opened reader
 // will return a non-nil error.
-public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
+public static io.ReadSeeker Open(this ж<Section> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.Type == SHT_NOBITS) {
@@ -189,6 +196,8 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
     )));
 }
 
+} partial class elf_package {
+
 // A ProgHeader represents a single ELF program header.
 partial struct ProgHeader {
     public ProgType Type;
@@ -214,8 +223,12 @@ partial struct Prog {
     internal ж<io.SectionReader> sr;
 }
 
+} partial class elfᴛProg {
+
 // Open returns a new ReadSeeker reading the ELF program body.
 public static io.ReadSeeker Open(this ref Prog p) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(p.sr), 0, 9223372036854775807L)); }
+
+} partial class elf_package {
 
 // A Symbol represents an entry in an ELF symbol table section.
 partial struct Symbol {
@@ -244,6 +257,8 @@ partial struct FormatError {
     internal any val;
 }
 
+} partial class elfᴛFormatError {
+
 public static @string Error(this ref FormatError e) {
     @string msg = e.msg;
     if (e.val != nil) {
@@ -252,6 +267,8 @@ public static @string Error(this ref FormatError e) {
     msg += fmt.Sprintf("in record at byte %#x"u8, e.off);
     return msg;
 }
+
+} partial class elf_package {
 
 // Open opens the named file using [os.Open] and prepares it for use as an ELF binary.
 public static (ж<File>, error) Open(@string name) {
@@ -268,6 +285,8 @@ public static (ж<File>, error) Open(@string name) {
     return (ff, default);
 }
 
+} partial class elfᴛFile {
+
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
@@ -282,7 +301,7 @@ public static error Close(this ref File f) {
 
 // SectionByType returns the first section in f with the
 // given type, or nil if there is no such section.
-public static ж<ΔSection> SectionByType(this ref File f, SectionType typ) {
+public static ж<Section> SectionByType(this ref File f, SectionType typ) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Type == typ) {
             return s;
@@ -290,6 +309,8 @@ public static ж<ΔSection> SectionByType(this ref File f, SectionType typ) {
     }
     return default;
 }
+
+} partial class elf_package {
 
 // NewFile creates a new [File] for accessing an ELF binary in an underlying reader.
 // The ELF binary is expected to start at position 0 in the ReaderAt.
@@ -320,7 +341,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         return (default, new FormatErrorжerror(Ꮡ(new FormatError(0, "unknown ELF class", f.Class))));
     }}
 
-    f.Data = (ΔData)ident[EI_DATA];
+    f.Data = (Data)ident[EI_DATA];
     binary.ByteOrder bo = default;
     switch (f.Data) {
     case var ᴛ when ᴛ == ELFDATA2LSB: {
@@ -536,14 +557,14 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     }
 
     // Read section headers
-    nint c = saferio.SliceCap<ΔSection>((uint64)shnum);
+    nint c = saferio.SliceCap<Section>((uint64)shnum);
     if (c < 0) {
         return (default, new FormatErrorжerror(Ꮡ(new FormatError(0, "too many sections", shnum))));
     }
     if (shnum > 0 && (18446744073709551615UL) / (uint64)shnum < (uint64)shentsize) {
         return (default, new FormatErrorжerror(Ꮡ(new FormatError(0, "section header overflow", shnum))));
     }
-    f.Sections = new slice<ж<ΔSection>>(0, c);
+    f.Sections = new slice<ж<Section>>(0, c);
     var names = new slice<uint32>(0, c);
     (var shdata, err) = saferio.ReadDataAt(new io.SectionReaderжReaderAt(sr), (uint64)shnum * (uint64)shentsize, shoff);
     if (err != nil) {
@@ -551,7 +572,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     }
     for (nint i = 0; i < shnum; i++) {
         var off = (uintptr)i * (uintptr)shentsize;
-        var s = @new<ΔSection>();
+        var s = @new<Section>();
         switch (f.Class) {
         case var ᴛ when ᴛ == ELFCLASS32: {
             Section32 sh = default;
@@ -657,6 +678,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     return (f, default);
 }
 
+} partial class elfᴛFile {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string notImplementedˢ => ref notImplementedˢᵇ;
 private static readonly @string notImplementedˢᵇ = "not implemented"u8;
@@ -675,9 +698,13 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols(this ref File f, 
     return (default, default, errors.New(notImplementedˢ));
 }
 
+} partial class elf_package {
+
 // ErrNoSymbols is returned by [File.Symbols] and [File.DynamicSymbols]
 // if there is no such section in the File.
 public static error ErrNoSymbols = errors.New("no symbol section");
+
+} partial class elfᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lengthOfSymbolSectionIsˢ => ref lengthOfSymbolSectionIsˢᵇ;
@@ -787,6 +814,8 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f
     return (symbols, strdata, default);
 }
 
+} partial class elf_package {
+
 // getString extracts a string from an ELF string table.
 internal static (@string, bool) getString(slice<byte> section, nint start) {
     if (start < 0 || start >= len(section)) {
@@ -801,9 +830,11 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     return ("", false);
 }
 
+} partial class elfᴛFile {
+
 // Section returns a section with the given name, or nil if no such
 // section exists.
-public static ж<ΔSection> Section(this ref File f, @string name) {
+public static ж<Section> Section(this ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -861,6 +892,8 @@ internal static error applyRelocations(this ref File f, slice<byte> dst, slice<b
     }}
 }
 
+} partial class elf_package {
+
 // canApplyRelocation reports whether we should try to apply a
 // relocation to a DWARF data section, given a pointer to the symbol
 // targeted by the relocation.
@@ -870,6 +903,8 @@ internal static error applyRelocations(this ref File f, slice<byte> dst, slice<b
 internal static bool canApplyRelocation(ref Symbol sym) {
     return sym.Section != SHN_UNDEF && sym.Section < SHN_LORESERVE;
 }
+
+} partial class elfᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lengthOfRelocationˢ => ref lengthOfRelocationˢᵇ;
@@ -1384,7 +1419,7 @@ private static readonly @string strˢᵇ = "str"u8;
 public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    @string dwarfSuffix(ж<ΔSection> s) {
+    @string dwarfSuffix(ж<Section> s) {
         switch (ᐧ) {
         case {} when strings.HasPrefix(s.Name, debugˢ): {
             return s.Name[7..];
@@ -1398,7 +1433,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
     }
     // sectionData gets the data for s, checks its size, and
     // applies any applicable relations.
-    (slice<byte>, error) sectionData(nint i, ж<ΔSection> s) {
+    (slice<byte>, error) sectionData(nint i, ж<Section> s) {
         var (b, errΔ1) = s.Data();
         if (errΔ1 != nil && (uint64)len(b) < s.Size) {
             return (default, errΔ1);
@@ -1520,11 +1555,15 @@ public static (slice<Symbol>, error) DynamicSymbols(this ref File f) {
     return (sym, default);
 }
 
+} partial class elf_package {
+
 partial struct ImportedSymbol {
     public @string Name;
     public @string Version;
     public @string Library;
 }
+
+} partial class elfᴛFile {
 
 // ImportedSymbols returns the names of all symbols
 // referred to by the binary f that are expected to be
@@ -1549,8 +1588,12 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
     return (all, default);
 }
 
+} partial class elf_package {
+
 // VersionIndex is the type of a [Symbol] version index.
 partial struct VersionIndex /*num:uint16*/;
+
+} partial class elfᴛVersionIndex {
 
 // IsHidden reports whether the symbol is hidden within the version.
 // This means that the symbol can only be seen by specifying the exact version.
@@ -1574,6 +1617,8 @@ public static bool IsHidden(this VersionIndex vi) {
 public static uint16 Index(this VersionIndex vi) {
     return (uint16)((VersionIndex)(vi & 0x7fff));
 }
+
+} partial class elf_package {
 
 // DynamicVersion is a version defined by a dynamic object.
 // This describes entries in the ELF SHT_GNU_verdef section.
@@ -1602,6 +1647,8 @@ partial struct DynamicVersionDep {
     public uint16 Index; // Version index.
     public @string Dep;  // Name of required version.
 }
+
+} partial class elfᴛFile {
 
 // dynamicVersions returns version information for a dynamic object.
 internal static error dynamicVersions(this ref File f, slice<byte> str) {
@@ -1977,8 +2024,12 @@ public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) {
     return (vals, default);
 }
 
+} partial class elf_package {
+
 partial struct nobitsSectionReader {
 }
+
+} partial class elfᴛnobitsSectionReader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedReadFromShtˢ => ref unexpectedReadFromShtˢᵇ;
@@ -1987,6 +2038,8 @@ private static readonly @string unexpectedReadFromShtˢᵇ = "unexpected read fr
 internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
     return (0, errors.New(unexpectedReadFromShtˢ));
 }
+
+} partial class elf_package {
 
 // putUint writes a relocation to slice
 // at offset start of length length (4 or 8 bytes),

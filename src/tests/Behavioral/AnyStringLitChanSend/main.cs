@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -12,17 +13,25 @@ partial struct dog {
     internal @string name;
 }
 
+} partial class mainᴛdog {
+
 internal static @string speak(this dog d) {
     return "woof:"u8 + d.name;
 }
+
+} partial class main_package {
 
 partial struct cat {
     internal @string name;
 }
 
+} partial class mainᴛcat {
+
 internal static @string speak(this ref cat c) {
     return "meow:"u8 + c.name;
 }
+
+} partial class main_package {
 
 internal static void describe(@string prefix, any v) {
     switch (v.type()) {

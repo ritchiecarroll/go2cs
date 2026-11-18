@@ -7,6 +7,7 @@
 namespace go.go;
 
 using bytes = bytes_package;
+using static types_package;
 
 partial class types_package {
 
@@ -33,7 +34,7 @@ partial class types_package {
 // fields traversed to get to the found entry, starting at depth 0.
 //
 // See also [LookupFieldOrMethod], which returns the components separately.
-public static (Selection, bool) LookupSelection(ΔType T, bool addressable, ж<Package> pkg, @string name) {
+public static (Selection, bool) LookupSelection(Type T, bool addressable, ж<Package> pkg, @string name) {
     var (obj, index, indirect) = LookupFieldOrMethod(T, addressable, pkg, name);
     SelectionKind kind = default;
     switch (obj.type()) {
@@ -87,7 +88,7 @@ public static (Selection, bool) LookupSelection(ΔType T, bool addressable, ж<P
 //     the method's formal receiver base type, nor was the receiver addressable.
 //
 // See also [LookupSelection], which returns the result as a [Selection].
-public static (Object obj, slice<nint> index, bool indirect) LookupFieldOrMethod(ΔType T, bool addressable, ж<Package> pkg, @string name) {
+public static (Object obj, slice<nint> index, bool indirect) LookupFieldOrMethod(Type T, bool addressable, ж<Package> pkg, @string name) {
     if (T == nil) {
         throw panic("LookupFieldOrMethod on nil type");
     }
@@ -96,7 +97,7 @@ public static (Object obj, slice<nint> index, bool indirect) LookupFieldOrMethod
 
 // lookupFieldOrMethod is like LookupFieldOrMethod but with the additional foldCase parameter
 // (see Object.sameId for the meaning of foldCase).
-internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMethod(ΔType T, bool addressable, ж<Package> pkg, @string name, bool foldCase) {
+internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMethod(Type T, bool addressable, ж<Package> pkg, @string name, bool foldCase) {
     Object obj = default;
     slice<nint> index = default;
     bool indirect = default;
@@ -111,7 +112,7 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
     {
         var t = asNamed(T); if (t != nil) {
             var (p, _) = t.Underlying()._<ж<Pointer>>(ᐧ); if (p != nil) {
-                (obj, index, indirect) = lookupFieldOrMethodImpl(new PointerжΔType(p), false, pkg, name, foldCase);
+                (obj, index, indirect) = lookupFieldOrMethodImpl(new PointerжType(p), false, pkg, name, foldCase);
                 var (_, ok) = obj._<ж<Func>>(ᐧ); if (ok) {
                     return (default, default, false);
                 }
@@ -152,7 +153,7 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
 // and missingMethod (the latter doesn't care about struct fields).
 //
 // The resulting object may not be fully type-checked.
-internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMethodImpl(ΔType T, bool addressable, ж<Package> pkg, @string name, bool foldCase) {
+internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMethodImpl(Type T, bool addressable, ж<Package> pkg, @string name, bool foldCase) {
     Object obj = default;
     slice<nint> index = default;
     bool indirect = default;
@@ -293,7 +294,7 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
 
 // embeddedType represents an embedded type
 partial struct embeddedType {
-    internal ΔType typ;
+    internal Type typ;
     internal slice<nint> index; // embedded field indices, starting with index at depth 0
     internal bool indirect;     // if set, there was a pointer indirection on the path to this field
     internal bool multiples;    // if set, typ appears multiple times at this depth
@@ -307,8 +308,8 @@ internal static slice<embeddedType> consolidateMultiples(slice<embeddedType> lis
         return list; // at most one entry - nothing to do
     }
 
-    nint n = 0;                        // number of entries w/ unique type
-    var prev = new map<ΔType, nint>(); // index at which type was previously seen
+    nint n = 0;                       // number of entries w/ unique type
+    var prev = new map<Type, nint>(); // index at which type was previously seen
     foreach (var (_, e) in range(list)) {
         var (i, found) = lookupType(prev, e.typ); if (found) {
             list[i].multiples = true;
@@ -322,7 +323,7 @@ internal static slice<embeddedType> consolidateMultiples(slice<embeddedType> lis
     return list.slice(0, n);
 }
 
-internal static (nint, bool) lookupType(map<ΔType, nint> m, ΔType typ) {
+internal static (nint, bool) lookupType(map<Type, nint> m, Type typ) {
     // fast path: maybe the types are equal
     {
         var (i, found) = m[typ, ꟷ]; if (found) {
@@ -346,14 +347,16 @@ partial struct instanceLookup {
     internal map<ж<Named>, slice<ж<Named>>> m;
 }
 
+} partial class typesᴛinstanceLookup {
+
 internal static ж<Named> lookup(this ref instanceLookup l, ж<Named> inst) {
     foreach (var (_, t) in range(l.buf.ΔRangeSnapshot())) {
-        if (t != nil && Identical(new NamedжΔType(inst), new NamedжΔType(t))) {
+        if (t != nil && Identical(new NamedжType(inst), new NamedжType(t))) {
             return t;
         }
     }
     foreach (var (_, t) in range(l.m[inst.Origin()])) {
-        if (Identical(new NamedжΔType(inst), new NamedжΔType(t))) {
+        if (Identical(new NamedжType(inst), new NamedжType(t))) {
             return t;
         }
     }
@@ -374,6 +377,8 @@ internal static void add(this ref instanceLookup l, ж<Named> inst) {
     l.m[inst.Origin()] = append(insts, inst);
 }
 
+} partial class types_package {
+
 // MissingMethod returns (nil, false) if V implements T, otherwise it
 // returns a missing method required by T and whether it is missing or
 // just has the wrong type: either a pointer receiver or wrong signature.
@@ -383,9 +388,11 @@ internal static void add(this ref instanceLookup l, ж<Named> inst) {
 // is not set), MissingMethod only checks that methods of T which are also
 // present in V have matching types (e.g., for a type assertion x.(T) where
 // x is of interface type V).
-public static (ж<Func> method, bool wrongType) MissingMethod(ΔType V, ж<Interface> T, bool @static) {
-    return (((ж<Checker>)nil)).missingMethod(V, new InterfaceжΔType(T), @static, Identical, nil);
+public static (ж<Func> method, bool wrongType) MissingMethod(Type V, ж<Interface> T, bool @static) {
+    return (((ж<Checker>)nil)).missingMethod(V, new InterfaceжType(T), @static, Identical, nil);
 }
+
+} partial class typesᴛChecker {
 
 // missingMethod is like MissingMethod but accepts a *Checker as receiver,
 // a comparator equivalent for type comparison, and a *string for error causes.
@@ -396,7 +403,7 @@ public static (ж<Func> method, bool wrongType) MissingMethod(ΔType V, ж<Inter
 // lying type) is used for better error messages (reported through *cause).
 // The comparator is used to compare signatures.
 // If a method is missing and cause is not nil, *cause describes the error.
-internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, bool @static, Func<ΔType, ΔType, bool> equivalent, ж<@string> Ꮡcause) {
+internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker> Ꮡcheck, Type V, Type T, bool @static, Func<Type, Type, bool> equivalent, ж<@string> Ꮡcause) {
     ref var cause = ref Ꮡcause.DerefOrNull();
 
     var methods = T.Underlying()._<ж<Interface>>().typeSet().methods; // T must be an interface
@@ -578,7 +585,7 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
 // (an embedded field may have the method in question).
 // If the result is false and cause is not nil, *cause describes the error.
 // Use hasAllMethods to avoid follow-on errors due to incorrect types.
-internal static bool hasAllMethods(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, bool @static, Func<ΔType, ΔType, bool> equivalent, ж<@string> cause) {
+internal static bool hasAllMethods(this ж<Checker> Ꮡcheck, Type V, Type T, bool @static, Func<Type, Type, bool> equivalent, ж<@string> cause) {
     if (!isValid(V)) {
         return true; // we don't know anything about V, assume it implements T
     }
@@ -586,9 +593,11 @@ internal static bool hasAllMethods(this ж<Checker> Ꮡcheck, ΔType V, ΔType T
     return m == nil || hasInvalidEmbeddedFields(V, default);
 }
 
+} partial class types_package {
+
 // hasInvalidEmbeddedFields reports whether T is a struct (or a pointer to a struct) that contains
 // (directly or indirectly) embedded fields with invalid types.
-internal static bool hasInvalidEmbeddedFields(ΔType T, map<ж<Struct>, bool> seen) {
+internal static bool hasInvalidEmbeddedFields(Type T, map<ж<Struct>, bool> seen) {
     var (S, _) = derefStructPtr(T).Underlying()._<ж<Struct>>(ᐧ); if (S != nil && !seen[S]) {
         if (seen == nil) {
             seen = new map<ж<Struct>, bool>();
@@ -603,13 +612,15 @@ internal static bool hasInvalidEmbeddedFields(ΔType T, map<ж<Struct>, bool> se
     return false;
 }
 
-internal static bool isInterfacePtr(ΔType T) {
+internal static bool isInterfacePtr(Type T) {
     var (p, _) = T.Underlying()._<ж<Pointer>>(ᐧ);
     return p != nil && IsInterface(p.@base);
 }
 
+} partial class typesᴛChecker {
+
 // check may be nil.
-internal static @string interfacePtrError(this ж<Checker> Ꮡcheck, ΔType T) {
+internal static @string interfacePtrError(this ж<Checker> Ꮡcheck, Type T) {
     assert(isInterfacePtr(T));
     var (p, _) = T.Underlying()._<ж<Pointer>>(ᐧ); if (isTypeParam(p.@base)) {
         return Ꮡcheck.sprintf("type %s is pointer to type parameter, not type parameter", T);
@@ -630,7 +641,7 @@ internal static @string funcString(this ж<Checker> Ꮡcheck, ж<Func> Ꮡf, boo
     var w = newTypeWriter(buf, qf);
     w.pkgInfo = pkgInfo;
     w.paramNames = false;
-    w.signature(f.typ._<ж<ΔSignature>>());
+    w.signature(f.typ._<ж<Signature>>());
     return buf.String();
 }
 
@@ -640,7 +651,7 @@ internal static @string funcString(this ж<Checker> Ꮡcheck, ж<Func> Ꮡf, boo
 // The underlying type of V must be an interface.
 // If the result is false and cause is not nil, *cause describes the error.
 // TODO(gri) replace calls to this function with calls to newAssertableTo.
-internal static bool assertableTo(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, ж<@string> cause) {
+internal static bool assertableTo(this ж<Checker> Ꮡcheck, Type V, Type T, ж<@string> cause) {
     // no static check is required if T is an interface
     // spec: "If T is an interface type, x.(T) asserts that the
     //        dynamic type of x implements the interface T."
@@ -656,7 +667,7 @@ internal static bool assertableTo(this ж<Checker> Ꮡcheck, ΔType V, ΔType T,
 // in constraint position (we have not yet defined that behavior in the spec).
 // The underlying type of V must be an interface.
 // If the result is false and cause is not nil, *cause is set to the error cause.
-internal static bool newAssertableTo(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, ж<@string> cause) {
+internal static bool newAssertableTo(this ж<Checker> Ꮡcheck, Type V, Type T, ж<@string> cause) {
     // no static check is required if T is an interface
     // spec: "If T is an interface type, x.(T) asserts that the
     //        dynamic type of x implements the interface T."
@@ -666,17 +677,19 @@ internal static bool newAssertableTo(this ж<Checker> Ꮡcheck, ΔType V, ΔType
     return Ꮡcheck.implements(T, V, false, cause);
 }
 
+} partial class types_package {
+
 // deref dereferences typ if it is a *Pointer (but not a *Named type
 // with an underlying pointer type!) and returns its base and true.
 // Otherwise it returns (typ, false).
-internal static (ΔType, bool) deref(ΔType typ) {
+internal static (Type, bool) deref(Type typ) {
     var (p, _) = Unalias(typ)._<ж<Pointer>>(ᐧ); if (p != nil) {
         // p.base should never be nil, but be conservative
         if (p.@base == nil) {
             if (debug) {
                 throw panic("pointer with nil base type (possibly due to an invalid cyclic declaration)");
             }
-            return (new BasicжΔType(Typ[Invalid]), true);
+            return (new BasicжType(Typ[Invalid]), true);
         }
         return (p.@base, true);
     }
@@ -685,7 +698,7 @@ internal static (ΔType, bool) deref(ΔType typ) {
 
 // derefStructPtr dereferences typ if it is a (named or unnamed) pointer to a
 // (named or unnamed) struct and returns its base. Otherwise it returns typ.
-internal static ΔType derefStructPtr(ΔType typ) {
+internal static Type derefStructPtr(Type typ) {
     var (p, _) = typ.Underlying()._<ж<Pointer>>(ᐧ); if (p != nil) {
         var (_, ok) = p.@base.Underlying()._<ж<Struct>>(ᐧ); if (ok) {
             return p.@base;

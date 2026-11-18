@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using netꓸAddr = go.net_package.ΔAddr;
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 // </ImportedTypeAliases>
 
 using go;
