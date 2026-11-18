@@ -3642,7 +3642,7 @@ internal static void sockaddr(this ж<sockInet4> Ꮡsa) {
     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡsa.Ꮡraw.Ꮡport, 2);
     p.ElementRef(0) = (byte)(sa.port >> 8);
     p.ElementRef(1) = (byte)sa.port;
-    sa.raw.addr = sa.addr.Clone();
+    sa.raw.addr.Assign(sa.addr);
 }
 ```
 
