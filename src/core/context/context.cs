@@ -551,9 +551,9 @@ internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context pa
         return; // parent is never canceled
     }
 
-    var selᴛ1 = done;
-    switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out _): {
+    var doneᴛ1 = done;
+    switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+    case 0 when doneᴛ1.ꟷᐳ(out _): {
         // parent is already canceled
         child.cancel(false, parent.Err(), Cause(parent));
         return;

@@ -298,23 +298,21 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
     }
 
     @string typ = idType.Name;
-    var exprᴛ2 = typ;
     switch (ᐧ) {
-    case {} when exprᴛ2 == "string"u8: {
+    case {} when typ == "string"u8: {
         if (kind != token.STRING) {
             return (default, fmt.Errorf("string literal value required for type string"u8));
         }
         var (ᴛ1, ᴛ2) = strconv.Unquote(val);
         return (ᴛ1, ᴛ2);
     }
-    case {} when exprᴛ2 == "byte"u8 || exprᴛ2 == "rune"u8: {
+    case {} when typ == "byte"u8 || typ == "rune"u8: {
         if (kind == token.INT) {
-            var exprᴛ3 = typ;
             switch (ᐧ) {
-            case {} when exprᴛ3 == "rune"u8: {
+            case {} when typ == "rune"u8: {
                 return parseInt(val, typ);
             }
-            case {} when exprᴛ3 == "byte"u8: {
+            case {} when typ == "byte"u8: {
                 return parseUint(val, typ);
             }}
         }
@@ -337,33 +335,33 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
         }
         return ((byte)code, default);
     }
-    case {} when exprᴛ2 == "int"u8 || exprᴛ2 == "int8"u8 || exprᴛ2 == "int16"u8 || exprᴛ2 == "int32"u8 || exprᴛ2 == "int64"u8: {
+    case {} when typ == "int"u8 || typ == "int8"u8 || typ == "int16"u8 || typ == "int32"u8 || typ == "int64"u8: {
         if (kind != token.INT) {
             return (default, fmt.Errorf("integer literal required for int types"u8));
         }
         return parseInt(val, typ);
     }
-    case {} when exprᴛ2 == "uint"u8 || exprᴛ2 == "uint8"u8 || exprᴛ2 == "uint16"u8 || exprᴛ2 == "uint32"u8 || exprᴛ2 == "uint64"u8: {
+    case {} when typ == "uint"u8 || typ == "uint8"u8 || typ == "uint16"u8 || typ == "uint32"u8 || typ == "uint64"u8: {
         if (kind != token.INT) {
             return (default, fmt.Errorf("integer literal required for uint types"u8));
         }
         return parseUint(val, typ);
     }
-    case {} when exprᴛ2 == "float32"u8: {
+    case {} when typ == "float32"u8: {
         if (kind != token.FLOAT && kind != token.INT) {
             return (default, fmt.Errorf("float or integer literal required for float32 type"u8));
         }
         var (v, errΔ4) = strconv.ParseFloat(val, 32);
         return ((float32)v, errΔ4);
     }
-    case {} when exprᴛ2 == "float64"u8: {
+    case {} when typ == "float64"u8: {
         if (kind != token.FLOAT && kind != token.INT) {
             return (default, fmt.Errorf("float or integer literal required for float64 type"u8));
         }
         var (ᴛ1, ᴛ2) = strconv.ParseFloat(val, 64);
         return (ᴛ1, ᴛ2);
     }
-    case {} when exprᴛ2 == "float32-bits"u8: {
+    case {} when typ == "float32-bits"u8: {
         if (kind != token.INT) {
             return (default, fmt.Errorf("integer literal required for math.Float32frombits type"u8));
         }
@@ -373,7 +371,7 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
         }
         return (math.Float32frombits(bits._<uint32>()), default);
     }
-    case {} when exprᴛ2 == "float64-bits"u8: {
+    case {} when typ == "float64-bits"u8: {
         if (kind != token.FLOAT && kind != token.INT) {
             return (default, fmt.Errorf("integer literal required for math.Float64frombits type"u8));
         }
@@ -390,9 +388,8 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
 
 // parseInt returns an integer of value val and type typ.
 internal static (any, error) parseInt(@string val, @string typ) {
-    var exprᴛ1 = typ;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "int"u8: {
+    case {} when typ == "int"u8: {
         // The int type may be either 32 or 64 bits. If 32, the fuzz tests in the
         // corpus may include 64-bit values produced by fuzzing runs on 64-bit
         // architectures. When running those tests, we implicitly wrap the values to
@@ -401,19 +398,19 @@ internal static (any, error) parseInt(@string val, @string typ) {
         var (i, err) = strconv.ParseInt(val, 0, 64);
         return ((nint)i, err);
     }
-    case {} when exprᴛ1 == "int8"u8: {
+    case {} when typ == "int8"u8: {
         var (i, err) = strconv.ParseInt(val, 0, 8);
         return ((int8)i, err);
     }
-    case {} when exprᴛ1 == "int16"u8: {
+    case {} when typ == "int16"u8: {
         var (i, err) = strconv.ParseInt(val, 0, 16);
         return ((int16)i, err);
     }
-    case {} when exprᴛ1 == "int32"u8 || exprᴛ1 == "rune"u8: {
+    case {} when typ == "int32"u8 || typ == "rune"u8: {
         var (i, err) = strconv.ParseInt(val, 0, 32);
         return ((int32)i, err);
     }
-    case {} when exprᴛ1 == "int64"u8: {
+    case {} when typ == "int64"u8: {
         var (ᴛ1, ᴛ2) = strconv.ParseInt(val, 0, 64);
         return (ᴛ1, ᴛ2);
     }
@@ -425,25 +422,24 @@ internal static (any, error) parseInt(@string val, @string typ) {
 
 // parseUint returns an unsigned integer of value val and type typ.
 internal static (any, error) parseUint(@string val, @string typ) {
-    var exprᴛ1 = typ;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "uint"u8: {
+    case {} when typ == "uint"u8: {
         var (i, err) = strconv.ParseUint(val, 0, 64);
         return ((nuint)i, err);
     }
-    case {} when exprᴛ1 == "uint8"u8 || exprᴛ1 == "byte"u8: {
+    case {} when typ == "uint8"u8 || typ == "byte"u8: {
         var (i, err) = strconv.ParseUint(val, 0, 8);
         return ((uint8)i, err);
     }
-    case {} when exprᴛ1 == "uint16"u8: {
+    case {} when typ == "uint16"u8: {
         var (i, err) = strconv.ParseUint(val, 0, 16);
         return ((uint16)i, err);
     }
-    case {} when exprᴛ1 == "uint32"u8: {
+    case {} when typ == "uint32"u8: {
         var (i, err) = strconv.ParseUint(val, 0, 32);
         return ((uint32)i, err);
     }
-    case {} when exprᴛ1 == "uint64"u8: {
+    case {} when typ == "uint64"u8: {
         var (ᴛ1, ᴛ2) = strconv.ParseUint(val, 0, 64);
         return (ᴛ1, ᴛ2);
     }

@@ -868,22 +868,21 @@ internal static void writeWhitespace(this ref printer p, nint n) {
     // write entries
     for (nint i = 0; i < n; i++) {
         var ch = p.wsbuf[i];
-        var exprᴛ1 = ch;
         var matchᴛ1 = false;
-        if (exprᴛ1 == ignore) { matchᴛ1 = true;
+        if (ch == ignore) { matchᴛ1 = true;
             // ignore!
         }
-        else if (exprᴛ1 == indent) { matchᴛ1 = true;
+        else if (ch == indent) { matchᴛ1 = true;
             p.indent++;
         }
-        else if (exprᴛ1 == unindent) { matchᴛ1 = true;
+        else if (ch == unindent) { matchᴛ1 = true;
             p.indent--;
             if (p.indent < 0) {
                 p.internalError(negativeIndentationˢ, p.indent);
                 p.indent = 0;
             }
         }
-        else if (exprᴛ1 == newline || exprᴛ1 == formfeed) { matchᴛ1 = true;
+        else if (ch == newline || ch == formfeed) { matchᴛ1 = true;
             // A line break immediately followed by a "correcting"
             // unindent is swapped with the unindent - this permits
             // proper label positioning. If a comment is between

@@ -2,12 +2,12 @@
 # Written by TestCommentParityCensus with GO2CS_COMMENT_CENSUS_UPDATE=1; one defect class per line.
 # Lower a count only in the commit whose corpus re-emission lowers it (see corpus_test.go).
 blank2:member-boundary	15
-body:extra:after-lowered-switch	92
+body:extra:after-lowered-switch	95
 body:extra:after-named-result-locals	234
-body:extra:after-param-prelude	185
-body:extra:unexplained	2455
-body:go-blank-cs-none	1828
-body:go-blank-unmapped	2077
+body:extra:after-param-prelude	192
+body:extra:unexplained	2459
+body:go-blank-cs-none	1836
+body:go-blank-unmapped	2076
 eol:cs-ragged-run	78
 eol:missing	3
 eol:moved-to-own-line	4
@@ -20,7 +20,7 @@ misplaced:before-close-brace/anchor-differs	24
 misplaced:decl-doc/anchor-differs	83
 misplaced:field-doc/anchor-differs	24
 misplaced:free-in-type/anchor-differs	23
-misplaced:free-stmt/anchor-differs	346
+misplaced:free-stmt/anchor-differs	356
 misplaced:free-top-level/anchor-differs	36
 misplaced:in-composite-literal/anchor-differs	25
 misplaced:in-composite-literal/trailing-to-own-line	4

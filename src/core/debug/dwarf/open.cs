@@ -132,21 +132,20 @@ public static error AddTypes(this ж<Data> Ꮡd, @string name, slice<byte> types
 // DWARF 5 and later.
 public static error AddSection(this ref Data d, @string name, slice<byte> contents) {
     error err = default;
-    var exprᴛ1 = name;
     switch (ᐧ) {
-    case {} when exprᴛ1 == ".debug_addr"u8: {
+    case {} when name == ".debug_addr"u8: {
         d.addr = contents;
         break;
     }
-    case {} when exprᴛ1 == ".debug_line_str"u8: {
+    case {} when name == ".debug_line_str"u8: {
         d.lineStr = contents;
         break;
     }
-    case {} when exprᴛ1 == ".debug_str_offsets"u8: {
+    case {} when name == ".debug_str_offsets"u8: {
         d.strOffsets = contents;
         break;
     }
-    case {} when exprᴛ1 == ".debug_rnglists"u8: {
+    case {} when name == ".debug_rnglists"u8: {
         d.rngLists = contents;
         break;
     }}

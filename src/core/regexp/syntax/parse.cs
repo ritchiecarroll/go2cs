@@ -1617,9 +1617,9 @@ internal static (rune r, @string rest, error err) parseEscape(this ref parser p,
     }
 
 Switch:
-    var exprᴛ1 = c;
+    var cᴛ1 = c;
     var matchᴛ1 = false;
-    var matchᴛ2 = (exprᴛ1 is '1' or '2' or '3' or '4' or '5' or '6' or '7') || exprᴛ1 is '0' || exprᴛ1 is 'x' || exprᴛ1 is 'a' || exprᴛ1 is 'f' || exprᴛ1 is 'n' || exprᴛ1 is 'r' || exprᴛ1 is 't' || exprᴛ1 is 'v';
+    var matchᴛ2 = (cᴛ1 is '1' or '2' or '3' or '4' or '5' or '6' or '7') || cᴛ1 is '0' || cᴛ1 is 'x' || cᴛ1 is 'a' || cᴛ1 is 'f' || cᴛ1 is 'n' || cᴛ1 is 'r' || cᴛ1 is 't' || cᴛ1 is 'v';
     if (!matchᴛ2) { /* default: */
         if (c < utf8.RuneSelf && !isalnum(c)) {
             // Escaped non-word characters are always themselves.
@@ -1630,7 +1630,7 @@ Switch:
         }
     }
     // Octal escapes.
-    else if (exprᴛ1 is '1' or '2' or '3' or '4' or '5' or '6' or '7') { matchᴛ1 = true;
+    else if (cᴛ1 is '1' or '2' or '3' or '4' or '5' or '6' or '7') { matchᴛ1 = true;
         do {
             // Single non-zero digit is a backreference; not supported
             if (t == ""u8 || t[0] < '0' || t[0] > '7') {
@@ -1639,7 +1639,7 @@ Switch:
             fallthrough = true;
         } while (false);
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is '0') { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && cᴛ1 is '0') { matchᴛ1 = true;
         // Consume up to three octal digits; already have one.
         r = c - '0';
         for (nint i = 1; i < 3; i++) {
@@ -1652,7 +1652,7 @@ Switch:
         return (r, t, default);
     }
     // Hexadecimal escapes.
-    else if (exprᴛ1 is 'x') { matchᴛ1 = true;
+    else if (cᴛ1 is 'x') { matchᴛ1 = true;
         do {
             if (t == ""u8) {
                 break;
@@ -1711,22 +1711,22 @@ Switch:
     // but /[\b]/ means backspace. We don't support that.
     // If you want a backspace, embed a literal backspace
     // character or use \x08.
-    else if (exprᴛ1 is 'a') { matchᴛ1 = true;
+    else if (cᴛ1 is 'a') { matchᴛ1 = true;
         return ('\a', t, err);
     }
-    else if (exprᴛ1 is 'f') { matchᴛ1 = true;
+    else if (cᴛ1 is 'f') { matchᴛ1 = true;
         return ('\f', t, err);
     }
-    else if (exprᴛ1 is 'n') { matchᴛ1 = true;
+    else if (cᴛ1 is 'n') { matchᴛ1 = true;
         return ('\n', t, err);
     }
-    else if (exprᴛ1 is 'r') { matchᴛ1 = true;
+    else if (cᴛ1 is 'r') { matchᴛ1 = true;
         return ('\r', t, err);
     }
-    else if (exprᴛ1 is 't') {
+    else if (cᴛ1 is 't') {
         return ('\t', t, err);
     }
-    else if (exprᴛ1 is 'v') { matchᴛ1 = true;
+    else if (cᴛ1 is 'v') { matchᴛ1 = true;
         return ('\v', t, err);
     }
     break_Switch:;
@@ -1921,18 +1921,17 @@ internal static (ж<unicode.RangeTable> tab, ж<unicode.RangeTable> fold, nint s
 
     // Special cases: Any, Assigned, and ASCII.
     // Also LC is the only non-canonical Categories key, so handle it here.
-    var exprᴛ1 = name;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "Any"u8: {
+    case {} when name == "Any"u8: {
         return (anyTable, anyTable, +1);
     }
-    case {} when exprᴛ1 == "Assigned"u8: {
+    case {} when name == "Assigned"u8: {
         return (unicode.Cn, unicode.Cn, -1); // invert Cn (unassigned)
     }
-    case {} when exprᴛ1 == "Ascii"u8: {
+    case {} when name == "Ascii"u8: {
         return (asciiTable, asciiFoldTable, +1);
     }
-    case {} when exprᴛ1 == "Lc"u8: {
+    case {} when name == "Lc"u8: {
         return (unicode.Categories["LC"], unicode.FoldCategory["LC"], +1);
     }}
     {

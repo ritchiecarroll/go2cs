@@ -72,7 +72,7 @@ using static go.math.big.@internal.asmgen_package;
 [assembly: GoPositionMap("math/big/internal/asmgen/arm.go", "arm.cs", "/gAqVoKmooK4ooK4ooK4ooI=")]
 [assembly: GoPositionMap("math/big/internal/asmgen/arm64.go", "arm64.cs", "/gAtXKKCgpSCgoKUgriigoKUgoKClIK4ooKClIKCgpSCuKKCgpSCgoKUgg==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/asm.go", "asm.cs", "AB88woKCgpSCABou4oKCgqiygpSClIKUqqIAAhgACQKokqiSqJKClKiSqLKCgpSCqLKCgoKUgpSClKrCgoKUgpQAAhDygoKUgpQACxSirLKokqjCgoKUqLKowoKClKrCgoKUgqqiqqKs0oKUlIKUgpSCprqygrzCpoKCgoKUqsKqwqrCqsKCgoKUgoKUlIKUupKqwoKUqsKClIKClKrCgpSClKrCgpSqwoKUgoKUqsKClIKUqLKUtLQAFAqylPi0tLS0gpSUgpQADRqCgoKClJSCgpSUxpSCgpSCgoK2lIKUgpS02IKCgoKUgoKCtqaCgoKCmrKUtKSCgoKCuIKCgqaCgoKUggASDLKU+LS0tOqClJQADBiCgpSCgpSUxpSCgpSCgoK2lIKmgoKCtpTugoKCgoKClIKCyoKCgoKCgoKCggAKENKClLS0pOwACAiCgpSUlOrCgoKUgoLclAAICsKClJSClJS0ggAIDMKUtIKCgvqCrNKUtLS0tIK0gsqkqsKqwqiSqJI=")]
-[assembly: GoPositionMap("math/big/internal/asmgen/func.go", "func.cs", "ACA2soKClJKClMq4goKmgpKCgoKUlJS4goKCpLSCtIKUlIKCgsiCgoKClMqiqJKCgpSCgpSCgqiSqJKCgpSCgoKCgoKClA==")]
+[assembly: GoPositionMap("math/big/internal/asmgen/func.go", "func.cs", "ACA2soKClJKClMq4goKmgpKCgoKUlJS4goKClLSCtIKUlIKCgsiCgoKClMqiqJKCgpSCgpSCgqiSqJKCgpSCgoKCgoKClA==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/loong64.go", "loong64.cs", "/g==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/main.go", "main.cs", "ABIiABYcwoKCgoKCgoKC")]
 [assembly: GoPositionMap("math/big/internal/asmgen/mips.go", "mips.cs", "/gAmToI=")]

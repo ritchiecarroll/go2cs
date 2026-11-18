@@ -2692,6 +2692,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTcpLoopbackRoundTrip() => CheckTarget("TcpLoopbackRoundTrip");
 
     [TestMethod]
+    public void CheckTempNamedAfterIdentifier() => CheckTarget("TempNamedAfterIdentifier");
+
+    [TestMethod]
     public void CheckTerminatingSwitchDefaultFallthrough() => CheckTarget("TerminatingSwitchDefaultFallthrough");
 
     [TestMethod]

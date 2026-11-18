@@ -286,15 +286,14 @@ internal static (slice<@string> list, @string token) nextList(this ref rulesPars
 
     for (;;) {
         @string tok = p.nextToken();
-        var exprᴛ1 = tok;
         var matchᴛ1 = false;
-        if (exprᴛ1 == ""u8) {
+        if (tok == ""u8) {
             if (len(list) == 0) {
                 return (default, "");
             }
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 == ","u8 || exprᴛ1 == "<"u8 || exprᴛ1 == "!<"u8 || exprᴛ1 == ";"u8)) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && (tok == ","u8 || tok == "<"u8 || tok == "!<"u8 || tok == ";"u8)) { matchᴛ1 = true;
             p.syntaxError(badListSyntaxˢ);
         }
         list = append(list, tok);

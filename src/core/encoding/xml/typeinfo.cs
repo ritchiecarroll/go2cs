@@ -134,33 +134,32 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflect.Type typ, ref ref
     } else {
         tag = tokens[0];
         foreach (var (_, flag) in range(tokens[1..])) {
-            var exprᴛ1 = flag;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "attr"u8: {
+            case {} when flag == "attr"u8: {
                 finfo.flags |= (fieldFlags)(fAttr);
                 break;
             }
-            case {} when exprᴛ1 == "cdata"u8: {
+            case {} when flag == "cdata"u8: {
                 finfo.flags |= (fieldFlags)(fCDATA);
                 break;
             }
-            case {} when exprᴛ1 == "chardata"u8: {
+            case {} when flag == "chardata"u8: {
                 finfo.flags |= (fieldFlags)(fCharData);
                 break;
             }
-            case {} when exprᴛ1 == "innerxml"u8: {
+            case {} when flag == "innerxml"u8: {
                 finfo.flags |= (fieldFlags)(fInnerXML);
                 break;
             }
-            case {} when exprᴛ1 == "comment"u8: {
+            case {} when flag == "comment"u8: {
                 finfo.flags |= (fieldFlags)(fComment);
                 break;
             }
-            case {} when exprᴛ1 == "any"u8: {
+            case {} when flag == "any"u8: {
                 finfo.flags |= (fieldFlags)(fAny);
                 break;
             }
-            case {} when exprᴛ1 == "omitempty"u8: {
+            case {} when flag == "omitempty"u8: {
                 finfo.flags |= (fieldFlags)(fOmitEmpty);
                 break;
             }}

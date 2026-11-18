@@ -364,8 +364,8 @@ internal static nint appendLocal(hertz h) {
 }
 internal static nint selectForeign(lib.Pitch p) {
     var c = new channel<anonBox_V>(1);
-    var selᴛ1 = c.ᐸꟷ(p, ꓸꓸꓸ);
-    switch (trySelect(selᴛ1)) {
+    var cᴛ1 = c.ᐸꟷ(p, ꓸꓸꓸ);
+    switch (trySelect(cᴛ1)) {
     case 0: {
         break;
     }
@@ -536,8 +536,8 @@ internal static nint backAppendForeign(anonBox_V a) {
 }
 internal static nint backSelectLocal(anonBox_V a) {
     var c = new channel<hertz>(1);
-    var selᴛ2 = c.ᐸꟷ(a, ꓸꓸꓸ);
-    switch (trySelect(selᴛ2)) {
+    var cᴛ1 = c.ᐸꟷ(a, ꓸꓸꓸ);
+    switch (trySelect(cᴛ1)) {
     case 0: {
         break;
     }

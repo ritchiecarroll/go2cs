@@ -93,9 +93,9 @@ internal static channel<EmptyStruct> wait(this ж<pipeDeadline> Ꮡd) {
 } partial class net_package {
 
 internal static bool isClosedChan(/*<-*/channel<EmptyStruct> c) {
-    var selᴛ17 = c;
-    switch (trySelect(ᐸꟷ(selᴛ17, ꓸꓸꓸ))) {
-    case 0 when selᴛ17.ꟷᐳ(out _): {
+    var cᴛ1 = c;
+    switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+    case 0 when cᴛ1.ꟷᐳ(out _): {
         return true;
     }
     default: {

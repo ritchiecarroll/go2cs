@@ -250,16 +250,15 @@ internal static ж<types.Package> doPkg(this ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     @string path = Ꮡr.of(reader.ᏑDecoder).String();
-    var exprᴛ1 = path;
     switch (ᐧ) {
-    case {} when exprᴛ1 == ""u8: {
+    case {} when path == ""u8: {
         path = r.p.of(pkgReader.ᏑPkgDecoder).PkgPath();
         break;
     }
-    case {} when exprᴛ1 == "builtin"u8: {
+    case {} when path == "builtin"u8: {
         return default; // universe
     }
-    case {} when exprᴛ1 == "unsafe"u8: {
+    case {} when path == "unsafe"u8: {
         return types.Unsafe;
     }}
 

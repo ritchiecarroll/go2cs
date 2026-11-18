@@ -254,36 +254,35 @@ public static (ж<Matcher>, error) New(@string pattern) {
             wid = 4;
             continue;
         }
-        var exprᴛ1 = c;
         var matchᴛ1 = false;
-        var matchᴛ2 = (exprᴛ1 is (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9') || (exprᴛ1 is (byte)'0' or (byte)'1') || (exprᴛ1 is (byte)'a' or (byte)'b' or (byte)'c' or (byte)'d' or (byte)'e' or (byte)'f' or (byte)'A' or (byte)'B' or (byte)'C' or (byte)'D' or (byte)'E' or (byte)'F') || exprᴛ1 is (byte)'y' || (exprᴛ1 is (byte)'+' or (byte)'-');
+        var matchᴛ2 = (c is (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9') || (c is (byte)'0' or (byte)'1') || (c is (byte)'a' or (byte)'b' or (byte)'c' or (byte)'d' or (byte)'e' or (byte)'f' or (byte)'A' or (byte)'B' or (byte)'C' or (byte)'D' or (byte)'E' or (byte)'F') || c is (byte)'y' || (c is (byte)'+' or (byte)'-');
         if (!matchᴛ2) { /* default: */
             return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
         }
-        if (exprᴛ1 is (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9') { matchᴛ1 = true;
+        if (c is (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9') { matchᴛ1 = true;
             if (wid != 4) {
                 return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
             }
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 is (byte)'0' or (byte)'1')) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && (c is (byte)'0' or (byte)'1')) { matchᴛ1 = true;
             bits.LshAssign((int64)(wid));
             bits |= (uint64)((uint64)((byte)(c - '0')));
         }
-        else if (exprᴛ1 is (byte)'a' or (byte)'b' or (byte)'c' or (byte)'d' or (byte)'e' or (byte)'f' or (byte)'A' or (byte)'B' or (byte)'C' or (byte)'D' or (byte)'E' or (byte)'F') { matchᴛ1 = true;
+        else if (c is (byte)'a' or (byte)'b' or (byte)'c' or (byte)'d' or (byte)'e' or (byte)'f' or (byte)'A' or (byte)'B' or (byte)'C' or (byte)'D' or (byte)'E' or (byte)'F') { matchᴛ1 = true;
             if (wid != 4) {
                 return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
             }
             bits <<= 4;
             bits |= (uint64)((uint64)((byte)((byte)(c & ~0x20) - 'A' + 10)));
         }
-        else if (exprᴛ1 is (byte)'y') {
+        else if (c is (byte)'y') {
             if (i + 1 < len(p) && (p[i + 1] == '0' || p[i + 1] == '1')) {
                 return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
             }
             bits = 0;
         }
-        else if (exprᴛ1 is (byte)'+' or (byte)'-') { matchᴛ1 = true;
+        else if (c is (byte)'+' or (byte)'-') { matchᴛ1 = true;
             if (c == '+' && result == false) {
                 // Have already seen a -. Should be - from here on.
                 return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax (+ after -): "u8 + pattern))));
