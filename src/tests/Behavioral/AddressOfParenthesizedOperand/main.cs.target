@@ -12,6 +12,11 @@ partial struct mutex {
     internal int32 count;
 }
 
+partial struct @lock {
+    internal int32 owner;
+    internal int32 count;
+}
+
 partial struct point {
     public nint X, Y;
 }
@@ -28,6 +33,12 @@ internal static void main() {
 
     atomic.AddInt32(@unsafe.Pointer.To<mutex>(p).Ꮡcount, 1);
     fmt.Println("unparenthesized:", m.count);
+
+    ref var l = ref heap(new @lock(), out var Ꮡl);
+    @unsafe.Pointer lp = @unsafe.Pointer.FromPinnedBox(Ꮡl);
+    atomic.StoreInt32(@unsafe.Pointer.To<@lock>(lp).Ꮡowner, 21);
+    atomic.AddInt32(@unsafe.Pointer.To<@lock>(lp).Ꮡcount, 2);
+    fmt.Println("only parenthesized:", l.owner, l.count);
 
     ref var pt = ref heap(new point(), out var Ꮡpt);
     var px = Ꮡpt.ᏑX;

@@ -17,6 +17,12 @@ type mutex struct {
 	count int32
 }
 
+// lock's only field address is parenthesized, so nothing else makes its fields addressable.
+type lock struct {
+	owner int32
+	count int32
+}
+
 type point struct{ X, Y int }
 
 func main() {
@@ -33,6 +39,13 @@ func main() {
 	// The same field without the parentheses.
 	atomic.AddInt32(&(*mutex)(p).count, 1)
 	fmt.Println("unparenthesized:", m.count)
+
+	// A type whose only field address is parenthesized.
+	var l lock
+	lp := unsafe.Pointer(&l)
+	atomic.StoreInt32(&((*lock)(lp).owner), 21)
+	atomic.AddInt32(&((*lock)(lp).count), 2)
+	fmt.Println("only parenthesized:", l.owner, l.count)
 
 	// A field of a value, parenthesized two ways.
 	var pt point

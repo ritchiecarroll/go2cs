@@ -43,6 +43,7 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(@lock))]
 [assembly: GoFieldAccess(typeof(mutex))]
 [assembly: GoFieldAccess(typeof(point))]
 
@@ -54,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABIshIKCgoKCgoKWgpaCgoKCgpaCgoKCgpaCgoKWgoKCgoI=")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABc4hIKCgoKCgoKWgpaCgoKCloKCgoKCloKCgoKCloKCgpaCgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -70,6 +71,7 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct @lock {}
     internal partial struct mutex {}
     internal partial struct point {}
     // </TypeAccessibility>
