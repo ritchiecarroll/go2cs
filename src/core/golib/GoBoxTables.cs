@@ -51,10 +51,11 @@ internal static class GoBoxTables
 
     /// <summary>The root a native-backed slice's anchor array keeps (<c>NativeSliceAnchors&lt;T&gt;</c>).</summary>
     internal static readonly ConditionalWeakTable<Array, object> SliceRoots = new();
+
+    /// <summary>A field accessor's cached Go offset and the source type it was resolved for. Nothing in it depends on
+    /// the box's type argument.</summary>
+    internal sealed record FieldGoOffset(Type SourceType, nint Value);
+
+    /// <summary>A field accessor's cached displacement and the source type it was resolved for.</summary>
+    internal sealed record FieldDisplacement(Type SourceType, nuint Value);
 }
-
-/// <summary>A field accessor's cached Go offset and the source type it was resolved for. Nothing in it depends on the box's type argument.</summary>
-internal sealed record FieldGoOffset(Type SourceType, nint Value);
-
-/// <summary>A field accessor's cached displacement and the source type it was resolved for.</summary>
-internal sealed record FieldDisplacement(Type SourceType, nuint Value);

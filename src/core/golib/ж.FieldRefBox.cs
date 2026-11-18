@@ -381,7 +381,7 @@ internal interface IFirstFieldView
     {
         Type sourceType = source.GetType();
 
-        if (GoBoxTables.GoOffsetsByAccessor.TryGetValue(fieldId, out FieldGoOffset? cached) && ReferenceEquals(cached.SourceType, sourceType))
+        if (GoBoxTables.GoOffsetsByAccessor.TryGetValue(fieldId, out GoBoxTables.FieldGoOffset? cached) && ReferenceEquals(cached.SourceType, sourceType))
             return cached.Value;
 
         nint offset = IsReinterpretAccessor(fieldId) ? 0 :
@@ -389,7 +389,7 @@ internal interface IFirstFieldView
                 ? s_goFieldDisplacements.GetOrAdd((structType, fieldName), static key => ResolveGoFieldOffset(key.Item1, key.Item2))
                 : -1;
 
-        GoBoxTables.GoOffsetsByAccessor.AddOrUpdate(fieldId, new FieldGoOffset(sourceType, offset));
+        GoBoxTables.GoOffsetsByAccessor.AddOrUpdate(fieldId, new GoBoxTables.FieldGoOffset(sourceType, offset));
 
         return offset;
     }
@@ -541,11 +541,11 @@ internal interface IFirstFieldView
     {
         Type sourceType = source.GetType();
 
-        if (GoBoxTables.DisplacementsByAccessor.TryGetValue(fieldId, out FieldDisplacement? cached) && ReferenceEquals(cached.SourceType, sourceType))
+        if (GoBoxTables.DisplacementsByAccessor.TryGetValue(fieldId, out GoBoxTables.FieldDisplacement? cached) && ReferenceEquals(cached.SourceType, sourceType))
             return cached.Value;
 
         nuint displacement = ResolveGoFieldDisplacement(source, fieldId);
-        GoBoxTables.DisplacementsByAccessor.AddOrUpdate(fieldId, new FieldDisplacement(sourceType, displacement));
+        GoBoxTables.DisplacementsByAccessor.AddOrUpdate(fieldId, new GoBoxTables.FieldDisplacement(sourceType, displacement));
 
         return displacement;
     }
