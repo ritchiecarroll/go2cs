@@ -1,8 +1,9 @@
 <#
 .SYNOPSIS
-    Generates the binary-compatibility suppressions of two kinds of announced break: a public method that left a
+    Generates the binary-compatibility suppressions of three kinds of announced break: a public method that left a
     package class for a class marked [GoPromotedHost(typeof(S))] or [GoMethodHost(typeof(S))], unchanged in every
-    other respect; and a name that dropped go2cs's Delta prefix (OQ2), unchanged in every other respect.
+    other respect; a name that dropped go2cs's Delta prefix (OQ2), unchanged in every other respect; and a struct
+    that no longer needs a value clone, which loses go.IGoValueClone and its Clone() and nothing else.
 
 .DESCRIPTION
     1.26.11.1 moved every struct's same-package promoted-method forwarders out of the package class into a class of
@@ -34,7 +35,14 @@
     member added under the Go-named id, a type that implements a renamed interface, a renamed constraint. Each rename
     is the diagnostic the engine reports for it, with its target in the engine's form.
 
-    Only a move or a rename gets an entry. Every other removed or changed member is returned as REFUSED with its
+    THE CLONE DROP is the third kind. A struct whose C# value copy is incomplete on its own (a fixed-size array field,
+    directly or through another such struct) implements go.IGoValueClone and has go2cs-gen's Delta-named Clone(). A
+    zero-length array holds nothing to copy, so from 1.26.11.1 a struct whose only such field is one (syscall's
+    InotifyEvent ends Name [0]uint8) has neither. A struct that lost exactly that interface (and ICloneable, which it
+    extends) and that method, and nothing else, gets the two diagnostics the engine reports: CP0008 for the type and
+    CP0002 for the method.
+
+    Only a move, a rename or a clone drop gets an entry. Every other removed or changed member is returned as REFUSED with its
     reason, and the guard (GoApiCompat.psm1) still reads it red: a break nobody announced.
 
     The surface is read with the Roslyn that PowerShell 7 ships for Add-Type, so the documentation ids are the ones
@@ -87,6 +95,7 @@ namespace Go2cs.ApiCompatMoves
     {
         public List<Move> Moves = new List<Move>();
         public List<Rename> Renames = new List<Rename>();
+        public List<Rename> Clones = new List<Rename>();
         public List<Refusal> Refused = new List<Refusal>();
     }
 
@@ -152,6 +161,12 @@ namespace Go2cs.ApiCompatMoves
                         continue;
 
                     string host, reason, now;
+
+                    if (CloneMethodDropped(entry.Value, after))
+                    {
+                        result.Clones.Add(new Rename { DiagnosticId = "CP0002", Target = entry.Key, Now = Id(entry.Value.ContainingType) });
+                        continue;
+                    }
 
                     if (Moved(entry.Value, hosts, baselineTables.Reader, currentTables.Reader, out host, out reason))
                         result.Moves.Add(new Move { Target = entry.Key, Host = host });
@@ -591,6 +606,8 @@ namespace Go2cs.ApiCompatMoves
                     {
                         if (lost.All(each => Strip(each) != each && implemented.Contains(Strip(each)) && !Interfaces(oldType).Contains(Strip(each))))
                             result.Renames.Add(new Rename { DiagnosticId = "CP0008", Target = entry.Key, Now = entry.Key });
+                        else if (CloneDropped(oldType, type, lost))
+                            result.Clones.Add(new Rename { DiagnosticId = "CP0008", Target = entry.Key, Now = entry.Key });
                         else
                             result.Refused.Add(new Refusal { Target = entry.Key, Reason = "no longer implements " + string.Join(", ", lost) });
                     }
@@ -615,6 +632,59 @@ namespace Go2cs.ApiCompatMoves
                     }
                 }
             }
+        }
+
+        // THE CLONE DROP. A struct whose C# value copy is incomplete on its own implements golib's IGoValueClone (which
+        // extends ICloneable), and go2cs-gen writes its field-precise Delta-named Clone(). A struct whose copy needs no
+        // clone has neither: a zero-length array, which holds nothing to copy, no longer makes a struct need one
+        // (1.26.11.1). A struct that lost exactly the interface and the method, and nothing else, is that drop.
+        private const string CloneInterface = "T:go.IGoValueClone";
+        private const string CloneableInterface = "T:System.ICloneable";
+        private const string CloneMethod = ShadowMarker + "Clone";
+
+        // Each assembly is loaded alone, as the guard compares it, so neither interface resolves and each id reads
+        // T:!:<name>; the name is compared.
+        private static bool CloneDropped(INamedTypeSymbol was, INamedTypeSymbol now, List<string> lost)
+        {
+            List<string> names = lost.Select(each => each.StartsWith("T:!:", StringComparison.Ordinal) ? "T:" + each.Substring(4) : each).ToList();
+
+            return IsStruct(was) && IsStruct(now) &&
+                   names.Contains(CloneInterface) && names.All(each => each == CloneInterface || each == CloneableInterface) &&
+                   HasCloneMethod(was) && now.GetMembers(CloneMethod).IsEmpty;
+        }
+
+        // A struct by its base type's name: with the core library unresolved the compiler cannot tell a struct from a
+        // class, and reads every type as a class.
+        private static bool IsStruct(INamedTypeSymbol type)
+        {
+            return type.TypeKind == TypeKind.Struct || (type.BaseType != null && type.BaseType.ToDisplayString(s_type) == "global::System.ValueType");
+        }
+
+        private static bool HasCloneMethod(INamedTypeSymbol type)
+        {
+            return type.GetMembers(CloneMethod).OfType<IMethodSymbol>().Any(method =>
+                method.MethodKind == MethodKind.Ordinary && !method.IsStatic && method.Parameters.Length == 0 &&
+                SymbolEqualityComparer.Default.Equals(method.ReturnType, type));
+        }
+
+        // The removed Clone() of a struct that dropped its clone whole (CloneDropped); the engine reports it as a CP0002.
+        private static bool CloneMethodDropped(ISymbol removed, Dictionary<string, ISymbol> after)
+        {
+            IMethodSymbol method = removed as IMethodSymbol;
+            INamedTypeSymbol was = removed.ContainingType;
+            ISymbol successor;
+
+            if (method == null || was == null || method.Name != CloneMethod || !after.TryGetValue(Id(was), out successor))
+                return false;
+
+            INamedTypeSymbol now = successor as INamedTypeSymbol;
+
+            if (now == null || !SymbolEqualityComparer.Default.Equals(method.ReturnType, was) || method.Parameters.Length != 0 || method.IsStatic)
+                return false;
+
+            HashSet<string> implemented = Interfaces(now);
+
+            return CloneDropped(was, now, Interfaces(was).Where(each => !implemented.Contains(each)).ToList());
         }
 
         private static bool Moved(ISymbol removed, Dictionary<string, List<INamedTypeSymbol>> hosts, Srm.MetadataReader baseline,
@@ -945,6 +1015,7 @@ function Get-GoApiCompatPackageMoves {
             $found = Get-GoApiCompatMoves -Baseline $left -Current $right
             foreach ($move in $found.Moves) { $entries.Add([pscustomobject]@{ Asset = $asset; DiagnosticId = 'CP0002'; Kind = 'move'; Target = $move.Target; Host = $move.Host }) }
             foreach ($rename in $found.Renames) { $entries.Add([pscustomobject]@{ Asset = $asset; DiagnosticId = $rename.DiagnosticId; Kind = 'rename'; Target = $rename.Target; Host = $rename.Now }) }
+            foreach ($clone in $found.Clones) { $entries.Add([pscustomobject]@{ Asset = $asset; DiagnosticId = $clone.DiagnosticId; Kind = 'clone'; Target = $clone.Target; Host = $clone.Now }) }
             foreach ($refusal in $found.Refused) { $refused.Add([pscustomobject]@{ Asset = $asset; Target = $refusal.Target; Reason = $refusal.Reason }) }
         }
     }

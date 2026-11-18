@@ -357,7 +357,7 @@ try {
     $onDisk = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot 'src/core') -Recurse -File -Filter 'CompatibilitySuppressions.xml')
     Check 'every suppression file in the tree is mapped by its package id' ($real.Count -eq $onDisk.Count) "$($real.Count) mapped of $($onDisk.Count) on disk; keys: $(@($real.Keys | Sort-Object) -join ', ')"
 
-    # 1.26.11.1 announces two breaks (docs/NEWS.md, 1.26.11.1, Upgrading). MOVES: every struct's promoted-method
+    # 1.26.11.1 announces three breaks (docs/NEWS.md, 1.26.11.1, Upgrading). MOVES: every struct's promoted-method
     # forwarders left the package class for a class of the struct's own
     # (docs/phase4/DESIGN-promoted-forwarder-placement.md; the owner's ruling, 2026-11-10), and every method left it
     # for its receiver type's method holder (OQ2). RENAMES:
@@ -366,8 +366,11 @@ try {
     # baselines (New-GoApiCompatMoveSuppressions.ps1 over the release-smoke pack of the OQ2 cut, 2026-11-15): one CP0002
     # per moved public method per asset, and per rename the diagnostic the engine reports (CP0001 a type, CP0002 a
     # member, CP0006 an interface member, CP0008 a lost interface, CP0021 a constraint): 13,234 in these 230 files,
-    # vendored cryptobyte among them. The bound is those counts and no other file. Each header says when its file goes:
-    # once 1.26.11.1 is published, the release after it compares with 1.26.11.1 and the entries match nothing.
+    # vendored cryptobyte among them. CLONES (batch 312): a struct whose only array is zero-length no longer needs a
+    # value clone, and loses go.IGoValueClone and its Delta-named Clone(); syscall's InotifyEvent on linux-x64 is the
+    # one, a CP0008 and a CP0002 generated over the 312 union's release-smoke pack: 13,236 in all. The bound is those
+    # counts and no other file. Each header says when its file goes: once 1.26.11.1 is published, the release after it
+    # compares with 1.26.11.1 and the entries match nothing.
     Write-Host 'the tree carries at most the 1.26.11.1 breaks'' generated entries'
     $moveCaps = [ordered]@{
         'go.archive.tar' = 70; 'go.archive.zip' = 52; 'go.bufio' = 66; 'go.bytes' = 69; 'go.compress.bzip2' = 2;
@@ -430,7 +433,7 @@ try {
         'go.os.signal' = 7; 'go.os.user' = 45; 'go.plugin' = 1; 'go.reflect' = 274; 'go.regexp' = 52;
         'go.regexp.syntax' = 29; 'go.runtime' = 170; 'go.runtime.debug' = 2; 'go.runtime.metrics' = 9;
         'go.runtime.pprof' = 30; 'go.runtime.trace' = 9; 'go.sort' = 30; 'go.strconv' = 4; 'go.strings' = 37;
-        'go.sync' = 35; 'go.sync.atomic' = 90; 'go.syscall' = 723; 'go.testing.fstest' = 16;
+        'go.sync' = 35; 'go.sync.atomic' = 90; 'go.syscall' = 725; 'go.testing.fstest' = 16;
         'go.testing.internal.testdeps' = 36; 'go.testing.quick' = 13; 'go.testing.slogtest' = 2;
         'go.text.scanner' = 12; 'go.text.tabwriter' = 3; 'go.text.template' = 22; 'go.text.template.parse' = 192;
         'go.time' = 795; 'go.unicode' = 6; 'go.unique' = 2; 'go.vendor.golang.org.x.crypto.chacha20' = 4;
@@ -444,7 +447,7 @@ try {
     }
     $capTotal = 0
     foreach ($cap in $moveCaps.Values) { $capTotal += $cap }
-    Check 'the caps are the generator''s 13234 entries in 230 files' ($capTotal -eq 13234 -and $moveCaps.Count -eq 230) "$capTotal in $($moveCaps.Count)"
+    Check 'the caps are the generator''s 13236 entries in 230 files' ($capTotal -eq 13236 -and $moveCaps.Count -eq 230) "$capTotal in $($moveCaps.Count)"
     $known = @('go.lib') + @($moveCaps.Keys)
     $other = @($real.Keys | Where-Object { $known -cnotcontains $_ } | Sort-Object)
     Check 'no other package carries a suppression file' ($other.Count -eq 0) ($other -join ', ')
