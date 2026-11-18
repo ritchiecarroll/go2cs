@@ -83,9 +83,13 @@ but every other package converts. The run still ends with exit 1, naming each re
 package that imports one, since those will not build until the refused package converts. A package that fails to
 convert (it does not load, or the converter panics) was already skipped, but the run used to exit 0; it now exits 1
 too, so a script that checks the exit code sees it. A single-package conversion still stops at a refusal and writes
-nothing. See [`-recurse`](CommandLine.md).
+nothing. `-tests -recurse` goes on past a refusal too, as `go test ./...` goes on past a package that does not build:
+each tested package that the refused package does not reach is converted and tested, and each one it does reach is
+named, with its reason, in the run's output (and in MODULE.md, on a run that writes one). See
+[`-recurse`](CommandLine.md).
 <!-- COORD rulings 20261111T053529Z and 20261111T060642Z, branch claude/r-warn-option: src/go2cs/recurseRefusal.go,
-     moduleConverter.go convertAll / ConvertModule; the caller census in R's post 20261111T062125Z. -->
+     moduleConverter.go convertAll / ConvertModule; the caller census in R's post 20261111T062125Z. The -tests -recurse
+     half: COORD ruling 20261117T063529Z, branch claude/c1-tests-recurse-skip, moduleTestsDriver.go runModuleTests. -->
 
 ### A refusal is renumbered: `GO2CS2005` (R)
 
