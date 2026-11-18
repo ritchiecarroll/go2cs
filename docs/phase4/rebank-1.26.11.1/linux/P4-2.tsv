@@ -1,0 +1,5 @@
+row	word	verdicts	matched	disclosed	diverged	sweep_s	wall_s	rc	timeout	deadline
+internal/reflectlite	PASS	30	True	0	0	245	245	0	30m	15m
+encoding/gob	DIVERGED	106	False	0	1	278	278	1	30m	15m
+reflect	PASS	445	True	21	0	336	336	0	30m	15m
+encoding/json	PASS	550	True	0	0	361	361	0	30m	15m

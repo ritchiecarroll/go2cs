@@ -1,0 +1,2 @@
+row	word	verdicts	matched	disclosed	diverged	sweep_s	wall_s	rc	timeout	deadline
+encoding/gob	DIVERGED	106	False	0	1	280	280	1	30m	15m
