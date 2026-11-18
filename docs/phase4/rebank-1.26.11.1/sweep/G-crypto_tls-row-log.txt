@@ -1,0 +1,9 @@
+# crypto/tls arm B (6e870821d6) sweep row output, windows, G-LAPTOP solo; the .4 re-bank reading (repo-relative)
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+validated sweep: 1 package(s), 4920 expected verdicts, timeout 10m, test-config Release
+==> building the converter
+  PASS  crypto/tls                         4920 [test-deadline=30m] [896s]
+
+sweep: 1 pass / 0 fail  (896s)
+
+per-row wall times: 1 row(s) -> scratchpad/sweep-row-walltimes/20261118-113038-sweep.tsv

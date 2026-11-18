@@ -1,0 +1,16 @@
+# crypto/tls arm B (6e870821d6): BoGo facts read from its comparison, results and disclosures records
+comparison status: validated | top keys: package,status,go,csharp,matched,skipped,disclosed,excluded,errors,disclosedRecords,unpinnedDisclosures,orphanedDisclosures,environment
+side go: tests 4921, TestBogoSuite=pass, subtests {"skip":2207,"pass":1319}
+side csharp: tests 4921, TestBogoSuite=pass, subtests {"skip":2207,"pass":1319}
+side disclosedRecords: tests 1, TestBogoSuite=undefined, subtests {}
+side environment: {"configuration":"Release","tiered":false,"oracleGoVersion":"go version go1.26.11 windows/amd64"}
+results event: run elapsed 0
+results event: pass elapsed 401.8304759
+TestBogoSuite output lines: 0
+results subtests by action: {"skip":2207,"pass":1319}
+package event: fail elapsed 478.7784914
+package event: fail elapsed 0
+disclosure: indows only; darwin joins only if its own re-read fails it. Same class as sync's TestOnceXGC and TestPoolGC."},{"name":"TestBogoSuite","class":"host-limit","signature":"bogo failed: exit status 1","reason":"The test delegates to BoringSSL's own test runner, spawned as `go test .` in the boringssl module -- a child that carries Go's default 10-minute test-binary deadline, which neither the package's code nor the host controls (the test passes no -timeout, in either language). Inside that wall the runner spawns the shim once per case --
+disclosure: there too, identically -- with GOMODCACHE pointed at an empty directory and GOPROXY=off both runtimes report `--- FAIL: TestBogoSuite (0.61s)` off that one line. That arm is admitted only in the host-conditional fail/fail shape, where Go itself failed the same way; in the Go pass / C# fail shape the primary signature governs alone. It does not retire the entry: on a host that has the module but whose launches miss the runner's 600 s wall, the Go side fans out every BoGo row in under a minute while the converted side does not finish, s
+disclosure:  reason — measured by pointing GOMODCACHE at an empty directory with GOPROXY=off, where both runtimes report `--- FAIL: TestBogoSuite (0.61s)` off that one line. Until that arm was admitted (`hostConditionalSignature`) the comparison called the converted side MOVED and crypto/tls could not validate AT ALL on such a host: `TestBogoSuite: Go=\"fail\" C#=\"fail\" (failure does not match the disclosed host-limit signature \"bogo failed: exit status 1\")`. It is admitted ONLY in the host-conditional fail/fail shape, where Go itself failed 
+disclosure: nalSignature`) the comparison called the converted side MOVED and crypto/tls could not validate AT ALL on such a host: `TestBogoSuite: Go=\"fail\" C#=\"fail\" (failure does not match the disclosed host-limit signature \"bogo failed: exit status 1\")`. It is admitted ONLY in the host-conditional fail/fail shape, where Go itself failed the same way and the converted side is provably not the half that moved; in the Go pass / C# fail shape the primary signature still governs alone. NOTE this does NOT retire the entry, and the same lane me
