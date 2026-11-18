@@ -258,3 +258,58 @@ namespace go
     }
 #endif
 }
+
+// THE CLONE DROP: a struct whose value copy no longer needs a clone loses go.IGoValueClone and its Delta-named Clone()
+// (a zero-length array holds nothing to copy; syscall's InotifyEvent in 1.26.11.1). Event is the drop; Kept loses the
+// method and keeps the interface, and Boxed is a class that loses both: neither is the drop.
+namespace go
+{
+    public static class cln_package
+    {
+#if !MOVED
+        public struct Event : IGoValueClone
+        {
+            public long Len;
+
+            public Event \u0394Clone() => this;
+
+            object System.ICloneable.Clone() => this;
+        }
+
+        public struct Kept : IGoValueClone
+        {
+            public long Len;
+
+            public Kept \u0394Clone() => this;
+
+            object System.ICloneable.Clone() => this;
+        }
+
+        public class Boxed : IGoValueClone
+        {
+            public long Len;
+
+            public Boxed \u0394Clone() => this;
+
+            object System.ICloneable.Clone() => this;
+        }
+#else
+        public struct Event
+        {
+            public long Len;
+        }
+
+        public struct Kept : IGoValueClone
+        {
+            public long Len;
+
+            object System.ICloneable.Clone() => this;
+        }
+
+        public class Boxed
+        {
+            public long Len;
+        }
+#endif
+    }
+}
