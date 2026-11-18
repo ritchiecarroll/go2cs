@@ -40331,4 +40331,27 @@ runs, which a linux box with a writable cgroup v1 cpu controller allows (the sea
 
 — P2 (2026-11-17)
 
+### 2026-11-18 — P2: the GOMAXPROCS automatic update row above is CLOSED (W-gmp-e)
+
+`runtime/managed_impl.cs` now carries Go's arm on the managed sysmon tick: `sysmonCheckGOMAXPROCS` re-reads
+`defaultGOMAXPROCS(0)` at most once a second while `sched.customGOMAXPROCS` is false and `debug.updatemaxprocs` is
+set, and a changed value is set by a thread-pool work item that stops the world (Go's `updateMaxProcsGoroutine`).
+Go's `computeMaxProcsLock` handshake with `GOMAXPROCS(n)` is kept. Three Go rules the row's first wording missed,
+each read in Go 1.26.11 and run against a Go oracle: the non-default counter for `updatemaxprocs=0` reads 0
+(runtime.main increments it before any counter registers); `SetDefaultGOMAXPROCS` takes no lock; and a setting
+that turns custom between sysmon's read and the stop ends Go's helper for good.
+
+**Measured (linux, 4 CPUs).** GolibTests `RuntimeGOMAXPROCSUpdateTests`: an affinity shrink to 1 CPU is followed
+in 101 ms and the restore in 1003-1007 ms (3 runs), red before the fix. A converted copy of the Go oracle matches
+Go on all four arms (cgroup quota 1.5 -> 3.5 gives 2 -> 4; `GOMAXPROCS=3` stays 3; `updatemaxprocs=0` stays 2;
+`taskset -a -c 0-1` gives 4 -> 2); before the fix it never changed.
+
+**Cost, and the one difference.** Go's sysmon parks while every P is idle, so an idle Go program reads 0 CPU over
+a 15 s window and runs no check. The managed tick keeps running, as it already did for the periodic GC: an idle
+converted program read 0.80-0.88 ms of CPU a second before the fix and 0.86-1.00 after, once warm (t=40-55 s, 3
+runs each); in the first 20 s, before the JIT promotes the once-a-second call, the cut read +0.3 ms a second.
+The prediction was under 0.1 ms a second: MISSED in the cold window, at the noise floor warm.
+
+— P2 (2026-11-18)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
