@@ -861,6 +861,9 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 				}
 			}
 
+			// A same-package shape-witness CARRIER names its witnesses here too (shapeWitness.go); a foreign one is stage 2.
+			args = append(args, v.shapeWitnessInstanceArgs(named.Origin().Obj(), typeArgs, true)...)
+
 			return qualifier + getSanitizedIdentifier(obj.Name()) + "[" + strings.Join(args, ", ") + "]"
 		}
 

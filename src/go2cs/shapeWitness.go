@@ -46,11 +46,10 @@ type shapeWitnessDecl struct {
 	carrier bool                     // a function always carries witness parameters; a named type only when its own methods call T's
 }
 
-// Package state: the selection, the witness interfaces emitted beside their constraints, and the pair witnesses the
-// package emits into package_info.cs's <ShapeWitnesses> section, one rendered line per witness, keyed by its name.
+// Package state: the selection, and the witness declarations the package emits into package_info.cs's <ShapeWitnesses>
+// section (witness interfaces, generic witnesses, pair witnesses), one rendered line per declaration, keyed by its name.
 var (
 	shapeWitnessDecls      = map[types.Object]*shapeWitnessDecl{}
-	shapeWitnessInterfaces = map[*types.TypeName]bool{}
 	shapeWitnessPairs      = map[string]string{}
 	shapeWitnessForeign    = map[string]map[types.Object]*shapeWitnessDecl{}
 )
@@ -68,7 +67,6 @@ type shapeWitnessPair struct {
 
 func resetShapeWitnessState() {
 	shapeWitnessDecls = map[types.Object]*shapeWitnessDecl{}
-	shapeWitnessInterfaces = map[*types.TypeName]bool{}
 	shapeWitnessPairs = map[string]string{}
 }
 
@@ -96,9 +94,17 @@ func shapeWitnessSelfReferential(tp *types.TypeParam) bool {
 }
 
 // shapeWitnessConstraint reports whether the type parameter's constraint is one a witness can carry: a NON-self method
-// set, named (stage 1 does not witness an anonymous constraint the converter lifts).
+// set, NAMED, and declared in the type parameter's own package. Stage 1 emits a witness interface only beside a
+// same-package constraint, so an inline constraint (lifted by the converter) or another package's interface keeps
+// today's routes -- the proxy where it applies, GO2CS2005/2006 where it does not -- until stage 2.
 func shapeWitnessConstraint(tp *types.TypeParam) bool {
-	iface, ok := tp.Constraint().Underlying().(*types.Interface)
+	named, ok := types.Unalias(tp.Constraint()).(*types.Named)
+
+	if !ok || named.Obj().Pkg() == nil || tp.Obj().Pkg() == nil || named.Obj().Pkg().Path() != tp.Obj().Pkg().Path() {
+		return false
+	}
+
+	iface, ok := named.Underlying().(*types.Interface)
 
 	if !ok || iface.NumMethods() == 0 || !(iface.IsMethodSet() || isMethodSetWithPointerNamedUnion(iface)) {
 		return false
@@ -874,42 +880,6 @@ func shapeWitnessDeclFor(object types.Object) *shapeWitnessDecl {
 
 // ---- emission ----
 
-// shapeWitnessInterfacesOf is every same-package interface a selection needs a witness interface for: each selected
-// type parameter's constraint, and the same-package named interfaces those embed (their witnesses are inherited).
-func shapeWitnessInterfacesOf(pkg *types.Package, selection map[types.Object]*shapeWitnessDecl) map[*types.TypeName]bool {
-	result := map[*types.TypeName]bool{}
-
-	var add func(named *types.Named)
-
-	add = func(named *types.Named) {
-		obj := named.Origin().Obj()
-
-		if obj.Pkg() == nil || obj.Pkg().Path() != pkg.Path() || result[obj] {
-			return
-		}
-
-		result[obj] = true
-
-		if it, ok := named.Origin().Underlying().(*types.Interface); ok {
-			for i := range it.NumEmbeddeds() {
-				if embedded, ok := types.Unalias(it.EmbeddedType(i)).(*types.Named); ok && types.IsInterface(embedded) {
-					add(embedded)
-				}
-			}
-		}
-	}
-
-	for _, decl := range selection {
-		for _, tp := range decl.tps {
-			if named, ok := types.Unalias(tp.Constraint()).(*types.Named); ok {
-				add(named)
-			}
-		}
-	}
-
-	return result
-}
-
 // shapeWitnessMethods is an interface's method set split for its witness interface: the methods it declares itself
 // (inherited from no same-package embedded witness), and the bases it inherits.
 func (v *Visitor) shapeWitnessMethods(named *types.Named) ([]*types.Func, []*types.Named) {
@@ -1207,7 +1177,29 @@ func (v *Visitor) recordShapeWitnessImplementations(iface *types.Named) {
 			continue
 		}
 
-		v.convertToInterfaceType(iface, named, "")
+		if named.TypeParams() == nil {
+			v.convertToInterfaceType(iface, named, "")
+			continue
+		}
+
+		// An OPEN generic is recorded by its definition, `GoImplement(typeof(Array<,>), typeof(Value))`: the record path
+		// takes it as the type instantiated at its own type parameters, rendered with its own witness parameters.
+		args := make([]types.Type, named.TypeParams().Len())
+
+		for i := range args {
+			args[i] = named.TypeParams().At(i)
+		}
+
+		instance, err := types.Instantiate(nil, named, args, false)
+
+		if err != nil {
+			continue
+		}
+
+		savedOwner := v.shapeWitnessTypeOwner
+		v.shapeWitnessTypeOwner = named
+		v.convertToInterfaceType(iface, instance, "")
+		v.shapeWitnessTypeOwner = savedOwner
 	}
 }
 
@@ -1523,7 +1515,6 @@ func installShapeWitnessSelection(pkg *packages.Package) bool {
 	}
 
 	shapeWitnessDecls = computeShapeWitnessSelection(pkg)
-	shapeWitnessInterfaces = shapeWitnessInterfacesOf(pkg.Types, shapeWitnessDecls)
 
 	return len(shapeWitnessDecls) > 0
 }

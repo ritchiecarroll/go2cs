@@ -36,8 +36,11 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement(typeof(Ptr<>), typeof(Value))]
+[assembly: GoImplement(typeof(go.main_package.Array<,>), typeof(Value))]
 [assembly: GoImplement<Export, Named>(Pointer = true)]
 [assembly: GoImplement<SourceFile, Script>(Pointer = true)]
+[assembly: GoImplement<memFile, Script>]
 [assembly: GoImplement<u8, Value>]
 // </InterfaceImplementations>
 
@@ -48,6 +51,7 @@ using static go.main_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(Export))]
 [assembly: GoFieldAccess(typeof(SourceFile))]
+[assembly: GoFieldAccess(typeof(boxed))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,12 +61,13 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABMqggAIEKKmooKClKiCqJAACxAACwiigoKCpqaQABEUAAsIoIAADAiggMTCgqaCgoKCgpSCgpSClIKCgoKCgpSCgoKClIKClA==")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABMqggAIEKKmooKClKiCqJAACxAACwiigoKCpqaQABEUAAsIoIAADAiggMTCggAIEIIACQy0goKCgoKUgoKUgpSCgoKCgoKUgoKCgpSCgpSUgpSCgpSCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
 
 [GoPackage("main")]
+[GoTestMatchingConsoleOutput]
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the
@@ -72,12 +77,14 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct boxed {}
+    internal partial struct memFile {}
     internal partial struct registry {}
     internal partial struct u8 {}
     public partial interface Named {}
     public partial interface Script {}
     public partial interface Value {}
-    public partial struct Array<T> {}
+    public partial struct Array<T, TValue> {}
     public partial struct Export {}
     public partial struct Index<T, TNamed> {}
     public partial struct MappedSpan<T> {}
@@ -101,12 +108,15 @@ public static partial class main_package
     // (type, constraint) pair, declared once here so every use names the same C# type.
 
     // <ShapeWitnesses>
+    internal readonly struct boxedжValueΔshape : ValueΔshape<ж<boxed>> { public static @string kind(ж<boxed> self) => self.kind(); }
     public interface NamedΔshape<T> { static abstract @string Name(T self); }
     public interface ScriptΔshape<T> { static abstract @string FileName(T self); static abstract @string Text(T self); }
+    public interface ValueΔshape<T> { static abstract @string kind(T self); }
     public readonly struct ExportжNamedΔshape : NamedΔshape<ж<Export>> { public static @string Name(ж<Export> self) => self.Name(); }
     public readonly struct NamedΔshapeOf<T> : NamedΔshape<T> where T : Named { public static @string Name(T self) => self.Name(); }
     public readonly struct ScriptΔshapeOf<T> : ScriptΔshape<T> where T : Script { public static @string FileName(T self) => self.FileName(); public static @string Text(T self) => self.Text(); }
     public readonly struct SourceFileжScriptΔshape : ScriptΔshape<ж<SourceFile>> { public static @string FileName(ж<SourceFile> self) => self.FileName(); public static @string Text(ж<SourceFile> self) => self.Text(); }
+    public readonly struct ValueΔshapeOf<T> : ValueΔshape<T> where T : Value { public static @string kind(T self) => self.kind(); }
     // </ShapeWitnesses>
 }
 
@@ -117,10 +127,12 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Array<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛArray;
+[GoMethodHost(typeof(main_package.Array<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛArray;
 [GoMethodHost(typeof(main_package.Export)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛExport;
 [GoMethodHost(typeof(main_package.Index<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛIndex;
 [GoMethodHost(typeof(main_package.Ptr<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛPtr;
 [GoMethodHost(typeof(main_package.SourceFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛSourceFile;
+[GoMethodHost(typeof(main_package.boxed)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛboxed;
+[GoMethodHost(typeof(main_package.memFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmemFile;
 [GoMethodHost(typeof(main_package.u8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛu8;
 // </MethodHolders>

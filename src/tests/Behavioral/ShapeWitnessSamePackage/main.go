@@ -92,6 +92,20 @@ func ConstArray[T Value](vals []T, name string) (y Array[T]) {
 	return y
 }
 
+// ---- the generic witness: a VALUE implementer, an INTERFACE type argument, and a carrier selected by a pointer ----
+
+// memFile implements Script by value, so FromLSPRange binds the generic witness ScriptΔshapeOf<memFile>.
+type memFile struct{ name string }
+
+func (m memFile) FileName() string { return m.name }
+func (m memFile) Text() string     { return "mem:" + m.name }
+
+// boxed implements Value only through its pointer: ConstArray([]*boxed) keeps Array and ConstArray selected, so the u8
+// instantiation above names ValueΔshapeOf<u8>, and Array's own kind() calls T's through its witness.
+type boxed struct{ n int }
+
+func (*boxed) kind() string { return "boxed" }
+
 func main() {
 	a := &SourceFile{"a.ts", "let x"}
 	spans := FromLSPRange(a, 10)
@@ -125,4 +139,16 @@ func main() {
 		sb.WriteString(s.Script.FileName())
 	}
 	fmt.Println("range over the result:", sb.String())
+
+	mems := FromLSPRange(memFile{"m.ts"}, 2)
+	fmt.Println("value implementer:", len(mems), mems[0].Start, mems[0].Script.Text())
+
+	var iface Script = a
+	viaIface := FromLSPRange(iface, 0)
+	fmt.Println("interface argument:", viaIface[0].Script == iface, viaIface[0].Start)
+
+	b := &boxed{7}
+	boxes := ConstArray([]*boxed{b}, "b")
+	boxes.vals[0].n = 8
+	fmt.Println("pointer carrier:", boxes.kind(), b.n, boxes.vals[0] == b)
 }

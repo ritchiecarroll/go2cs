@@ -126,31 +126,52 @@ internal static @string kind<T>(this Ptr<T> _)
 
 } partial class main_package {
 
-partial struct Array<T>
-    where T : Value
+partial struct Array<T, TValue>
+    where TValue : struct, ValueΔshape<T>
 {
     internal slice<T> vals;
 }
 
 } partial class mainᴛArray {
 
-internal static @string kind<T>(this Array<T> _)
-    where T : Value
+internal static @string kind<T, TValue>(this Array<T, TValue> _)
+    where TValue : struct, ValueΔshape<T>
 {
     T x = GoZero<T>();
-    return "Array["u8 + x.kind() + "]"u8;
+    return "Array["u8 + TValue.kind(x) + "]"u8;
 }
 
 } partial class main_package {
 
-public static Array<T> /*y*/ ConstArray<T>(slice<T> vals, @string name)
-    where T : Value
+public static Array<T, TValue> /*y*/ ConstArray<T, TValue>(slice<T> vals, @string name)
+    where TValue : struct, ValueΔshape<T>
 {
-    Array<T> y = default;
+    Array<T, TValue> y = default;
 
     y.vals = vals;
     return y;
 }
+
+partial struct memFile {
+    internal @string name;
+}
+
+} partial class mainᴛmemFile {
+
+internal static @string FileName(this memFile m) { return m.name; }
+internal static @string Text(this memFile m) { return "mem:"u8 + m.name; }
+
+} partial class main_package {
+
+partial struct boxed {
+    internal nint n;
+}
+
+} partial class mainᴛboxed {
+
+internal static @string kind(this ref boxed _) { return "boxed"; }
+
+} partial class main_package {
 
 internal static void main() {
     var a = Ꮡ(new SourceFile("a.ts", "let x"));
@@ -176,7 +197,7 @@ internal static void main() {
 
     var p = new Ptr<u8>(3);
     fmt.Println("gen Ptr:", p.kind(), p.off);
-    var arr = ConstArray<u8>(slice<u8>([new(1), new(2)]), "k");
+    var arr = ConstArray<u8, ValueΔshapeOf<u8>>(slice<u8>([new(1), new(2)]), "k");
     arr.vals[0].v = 9;
     fmt.Println("gen ConstArray:", arr.kind(), len(arr.vals), arr.vals[0].v);
 
@@ -185,6 +206,18 @@ internal static void main() {
         Ꮡsb.WriteString(s.Script.FileName());
     }
     fmt.Println("range over the result:", sb.String());
+
+    var mems = FromLSPRange<memFile, ScriptΔshapeOf<memFile>>(new memFile("m.ts"), 2);
+    fmt.Println("value implementer:", len(mems), mems[0].Start, mems[0].Script.Text());
+
+    Script iface = new SourceFileжScript(a);
+    var viaIface = FromLSPRange<Script, ScriptΔshapeOf<Script>>(iface, 0);
+    fmt.Println("interface argument:", AreEqual(viaIface[0].Script, iface), viaIface[0].Start);
+
+    var b = Ꮡ(new boxed(7));
+    var boxes = ConstArray<ж<boxed>, boxedжValueΔshape>(slice<ж<boxed>>([b]), "b");
+    boxes.vals[0].n = 8;
+    fmt.Println("pointer carrier:", boxes.kind(), b.n, boxes.vals[0] == b);
 }
 
 } // end main_package
