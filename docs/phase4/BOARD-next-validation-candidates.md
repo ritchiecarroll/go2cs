@@ -40509,4 +40509,46 @@ That is the cut's red-first arm.
 
 — i9 (2026-11-18)
 
+## 2026-11-18 — i9 (lever E seat, `claude/i9-lever-e`): the pointer boxes' seven per-type static tables move to one non-generic holder; converted TypeScript parsedemo AOT symbol names −29.2%, image −12.6%, ILC peak −24.6% — DONE (seated)
+
+**What moved.** `ж<T>`'s views table, `FieldRefWrappers<TElem>`'s wrappers, `ElemRefBox<T>`'s element boxes,
+`NilArrayBox<T>`'s typed nils, `FieldRefBox<T>`'s Go offsets and displacements, and `NativeSliceAnchors<T>`'s roots
+each declared a static table whose type named the class's own parameter, so every type argument a program reached
+instantiated the table's whole method set. All seven now live in `GoBoxTables` (`src/core/golib/GoBoxTables.cs`), keyed
+by reference (the nil-array table by (pointee type, dims)). Guard: `PointerBoxStaticTableTests`, red at the base naming
+exactly the seven, green at the cut; it admits `builtin.Itab<T>.s_entries` and `map<K,V>.s_sampledStorage` by name
+(the row above).
+
+**AOT, `parsedemo`** (one TypeScript conversion at `f36b6b0d48`, the B4 arm (a) command, win-x64; the cut builds golib
+from the seat via `-p:go2csPath`, its own artifacts root):
+
+| | base `f36b6b0d48` | seat `2b80848c0a` | change |
+|---|---|---|---|
+| symbol string table | 671,917,360 B (31.3% of 2 GiB) | 475,883,681 B (22.2%) | −29.18% |
+| image | 290,183,168 B | 253,496,320 B | −12.64% |
+| ILC peak private | 18.12 GB | 13.67 GB | −24.56% |
+| symbol records | 7,886,766 | 6,873,836 | −12.84% |
+| IL3054 | 0 | 0 | |
+| output vs native Go | demo + 17,422/17,422 units | demo + 17,422/17,422 units | identical |
+
+**The census undershot, and why.** Charging every string-table name whose first `ConditionalWeakTable`2` /
+`ConcurrentDictionary`2` / `KeyValuePair`2` instantiation carries a moved table's per-T arguments read 26.7% of the base
+table and 24 MB of its section bytes, nearly all metadata (39% of all method tables, 41% of writable data, 40% of
+generic dictionaries; 37 unwind records). The cut removed more: per-kind, the extra is GC and non-GC statics and frozen
+objects, i.e. each generic OWNER's static storage and the table instance preinitialized into the image per type
+argument, named after `ElemRefBox<T>` or `FieldRefBox<T>`, never after the table. **A census of a per-type static table
+charges the field's owner as well as the field's type.**
+
+**JIT and allocation.** `PerfFieldView`, 30 interleaved pairs: the seat's median inside the base arm's own A/A spread.
+Process allocation total (startup hook, 10 runs per arm, checksums equal): about 53 KB lower per run at the seat on
+831.5 MB, ranges disjoint, gen0 count equal — a fixed saving consistent with one shared table per kind instead of one
+per type argument (per-run constant inferred, not measured across iteration counts). GolibTests' alloc guards green.
+
+**Gates at `2b80848c0a`.** GolibTests Release 2984 (2929 / 1 / 54) and Debug 2984 (2905 / 0 / 79), skip sets equal by
+name to the base; `go test ./...` green; CNR byte-identical across 1106 behavioral packages. The one Release failure,
+`GoroutinePoolTests.GoroutineExitingLocked_TakesItsThreadWithIt`, fails identically at the base on the same host (its
+own seat).
+
+— i9 (2026-11-18)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
