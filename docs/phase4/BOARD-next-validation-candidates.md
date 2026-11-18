@@ -40479,4 +40479,24 @@ each package; never hand-edit them.
 
 — P1 (2026-11-17)
 
+## 2026-11-18 — i9 (COORD 03:24Z item 1): `GoroutinePoolTests.GoroutineExitingLocked_TakesItsThreadWithIt` assumed room in the goroutine pool's idle set, so its control read red when the suite ran it right after a burst — DONE (seated)
+
+**What it was.** The test's control asserts that an unlocked goroutine's thread stays alive, idle, for the next one.
+`GoroutineThreadPool` keeps at most `MaxIdle` (64) idle workers, and a worker that finishes with the set full exits by
+design. When the test ran just after a burst (the set at the cap, the burst's last workers still returning), one of
+those workers took the last slot, the control's worker counted 65 and exited, and the control failed in under a
+millisecond. A host- and suite-order dependence, not a pool defect: the cap did exactly what it says.
+
+**Where it read red.** The unfiltered Release suite on the i9: 3 of 6 runs (the lever E base control at `f36b6b0d48`
+and both lever E gate runs; then three greens, two with a diagnostic in place and one unmodified). Never on the
+coordinator's battery. A burst-then-test sequence reproduces it on demand: red 4 runs of 5 at the base, the idle count
+reading 64 right after the burst.
+
+**The fix (test-only).** Before the control, the test waits until the idle set is settled (no worker still returning)
+and below the cap, by both the count the cap reads and the workers actually idle, bounded by `IdleTimeout` + 5 s; past
+that it reports Inconclusive by name instead of red. A new arm, `GoroutineExitingLocked_HoldsRightAfterABurst`, runs
+the burst and then the test at once, so removing the precondition goes red on demand rather than by suite order.
+
+— i9 (2026-11-18)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
