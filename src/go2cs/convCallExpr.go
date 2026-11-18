@@ -1832,11 +1832,6 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			expr = v.boxPointerIntoEmptyInterface(v.info.TypeOf(callExpr), arg, expr)
 		}
 
-		// A conversion to a struct or array type converts a COPY of its operand: an operand that is
-		// existing storage carrying an array is cloned first, `((chord)lc.ΔClone())`, or the result
-		// shares the array's backing with it (conversionOperandCopy).
-		expr = v.conversionOperandCopy(v.info.TypeOf(callExpr), arg, expr)
-
 		// A conversion between two DIFFERENT NAMED types that share a COMPOSITE underlying (net/mail
 		// textproto.MIMEHeader(h) where Header and MIMEHeader both wrap map[string][]string): each is a
 		// [GoType] wrapper with implicit conversions only to/from its OWN underlying, and C# will not

@@ -386,6 +386,12 @@ func (v *Visitor) exprReadsValueNeedingClone(expr ast.Expr) bool {
 			return false
 		}
 
+		// An inherited wrapper's operator with its base copies by itself: the value is copied once
+		// (structConversionCopy.go).
+		if conversionCopiedByWrapperOperator(v.getExprType(expr), v.getExprType(e.Args[0])) {
+			return false
+		}
+
 		return v.exprReadsValueNeedingClone(e.Args[0])
 	default:
 		return false

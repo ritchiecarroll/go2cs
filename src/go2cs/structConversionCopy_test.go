@@ -11,6 +11,7 @@ package main
 import (
 	"go/build"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sort"
 	"strings"
@@ -18,8 +19,9 @@ import (
 )
 
 // A Go conversion copies its operand. Where the operand is existing storage whose type carries an array,
-// directly or in a nested struct, the emitted C# shares the array's backing unless the operand is cloned,
-// as every other value transfer clones it (exprReadsValueNeedingClone). ONE SITE PER PACKAGE.
+// directly or in a nested struct, the emitted C# shares the array's backing unless the converted value is
+// cloned where it is transferred, as every other value transfer clones it (exprReadsValueNeedingClone), and
+// cloned ONCE. ONE SITE PER PACKAGE.
 //
 // Each arm names what the emitted file must read and what it must not.
 func TestAStructConversionOfExistingStorageCopiesItsArrays(t *testing.T) {
@@ -41,29 +43,29 @@ func TestAStructConversionOfExistingStorageCopiesItsArrays(t *testing.T) {
 	arms := map[string]arm{
 		// Every direction of a named conversion: the operand is cloned.
 		"fromforeign": {lib, chord + "func F(lc lib.Chord) chord { return chord(lc) }",
-			[]string{"(chord)lc.ΔClone()"}, nil},
+			[]string{"((chord)lc).ΔClone()"}, nil},
 		"toforeign": {lib, chord + "func F(c chord) lib.Chord { return lib.Chord(c) }",
-			[]string{"(lib.Chord)c.ΔClone()"}, nil},
+			[]string{"((lib.Chord)c).ΔClone()"}, nil},
 		"local": {lib, chord + "type chord2 struct {\n\tName  string\n\tNotes [2]int\n\tIn    lib.Inner\n}\n\nfunc F(c chord) chord2 { return chord2(c) }",
-			[]string{"(chord2)c.ΔClone()"}, nil},
+			[]string{"((chord2)c).ΔClone()"}, nil},
 		// A conversion bound to a variable is the case the probe found: the visitor took the call for a
 		// fresh value and the assignment did not clone.
 		"bound": {lib, chord + "func F(lc lib.Chord) int { c := chord(lc); c.Notes[0] = 9; return lc.Notes[0] }",
-			[]string{"(chord)lc.ΔClone()"}, nil},
+			[]string{"((chord)lc).ΔClone()"}, nil},
 		// Existing storage of every shape: a field, an element, a pointer's target.
 		"field": {lib, chord + "type holder struct{ L lib.Chord }\n\nfunc F(h holder) chord { return chord(h.L) }",
-			[]string{"(chord)h.L.ΔClone()"}, nil},
+			[]string{"((chord)h.L).ΔClone()"}, nil},
 		"element": {lib, chord + "func F(s []lib.Chord) chord { return chord(s[0]) }",
-			[]string{"(chord)s[0].ΔClone()"}, nil},
+			[]string{"((chord)s[0]).ΔClone()"}, nil},
 		"deref": {lib, chord + "func F(p *lib.Chord) chord { return chord(*p) }",
 			[]string{"ΔClone()"}, nil},
 		// The unnamed target, written as a struct type literal. (A parameter's own entry copy reads
 		// `c = c.ΔClone();`, so each want names the cast.)
 		"unnamed": {lib, chord + "func F(c chord) int { x := struct {\n\tName  string\n\tNotes [2]int\n\tIn    lib.Inner\n}(c); x.Notes[0] = 1; return c.Notes[0] }",
-			[]string{"F_x)c.ΔClone()"}, nil},
+			[]string{"F_x)c).ΔClone()"}, nil},
 		// A named array converts its array the same way.
 		"array": {"", "type notes [2]int\n\nfunc F(b [2]int) notes { return notes(b) }",
-			[]string{"(notes)b.Clone()"}, nil},
+			[]string{"((notes)b).Clone()"}, nil},
 
 		// A fresh operand is no one else's storage: no clone.
 		"call": {lib, chord + "func src() lib.Chord { return lib.Chord{} }\n\nfunc F() chord { return chord(src()) }",
@@ -73,10 +75,17 @@ func TestAStructConversionOfExistingStorageCopiesItsArrays(t *testing.T) {
 		// A defined type written over a named struct is an inherited wrapper whose operators copy: the
 		// site adds no second copy.
 		"wrapper": {"", "type counts struct{ vals [4]int }\n\ntype Counts counts\n\nfunc F(c Counts) counts { return counts(c) }",
-			[]string{"return (counts)c;"}, []string{"(counts)c.ΔClone()"}},
+			[]string{"return (counts)c;"}, []string{"(counts)c).ΔClone()"}},
 		// A struct WRITTEN with a literal is no wrapper: its unnamed twin still takes the site clone.
 		"literalwrite": {lib, chord + "func F(c chord) int { x := struct {\n\tName  string\n\tNotes [2]int\n\tIn    lib.Inner\n}(c); x.Notes[0] = 1; return c.Notes[0] }\n\nfunc G(c chord) chord { return chord(c) }",
-			[]string{"F_x)c.ΔClone()", "(chord)c.ΔClone()"}, nil},
+			[]string{"F_x)c).ΔClone()", "((chord)c).ΔClone()"}, nil},
+		// A conversion consumed by a READ copies nothing: a value-receiver method call and an index read
+		// the converted value where it stands.
+		"receiver": {lib, chord + "func (c chord) First() int { return c.Notes[0] }\n\nfunc F(lc lib.Chord) int { return chord(lc).First() }",
+			[]string{"(chord)lc).First()"}, []string{"(chord)lc.ΔClone()", "First().ΔClone()"}},
+		"index": {"", "type notes [2]int\n\nfunc F(b [2]int) int { return notes(b)[0] }",
+			[]string{"(notes)b))[0]"}, []string{"(notes)b.Clone()"}},
+
 		// A struct without an array copies whole as a C# struct: no clone.
 		"plain": {"", "type a struct{ X int }\n\ntype b struct{ X int }\n\nfunc F(v a) b { return b(v) }",
 			nil, []string{"ΔClone", ".Clone()"}},
@@ -146,11 +155,11 @@ type Chord struct {
 			}
 		}
 
-		// The value is copied once: no clone of a clone, at any site.
-		for _, twice := range []string{".Clone().Clone()", "ΔClone().ΔClone()", ".Clone().ΔClone()", "ΔClone().Clone()"} {
-			if strings.Contains(emitted, twice) {
-				t.Errorf("%s: the emitted file copies twice, %q, in:\n%s", name, twice, emitted)
-			}
+		// The value is copied once: no clone of a clone, at any site, also where the first clone sits inside
+		// the cast the second one clones, `((chord)lc.ΔClone()).ΔClone()` (the operand copy and the
+		// conversion-result copy both firing).
+		if twice := cloneOfACloneRE.FindString(emitted); twice != "" {
+			t.Errorf("%s: the emitted file copies twice, %q, in:\n%s", name, twice, emitted)
 		}
 
 		for _, absent := range a.absent {
@@ -160,3 +169,6 @@ type Chord struct {
 		}
 	}
 }
+
+// cloneOfACloneRE matches a clone applied to a value already cloned, with any closing parentheses between the two.
+var cloneOfACloneRE = regexp.MustCompile(`Δ?Clone\(\)\)*\.Δ?Clone\(\)`)

@@ -49,13 +49,13 @@ func TestAStructCarryingAnArrayThroughAnEmbedCopiesIt(t *testing.T) {
 			[]string{"var c = le.ΔClone();"}, nil},
 		// The four conversion routes the copy probe read.
 		"fromforeign": {[]string{lib}, emb + "func F(le lib.Emb) emb { return emb(le) }",
-			[]string{"(emb)le.ΔClone()"}, nil},
+			[]string{"((emb)le).ΔClone()"}, nil},
 		"toforeign": {[]string{lib}, emb + "func F(e emb) lib.Emb { return lib.Emb(e) }",
-			[]string{"(lib.Emb)e.ΔClone()"}, nil},
+			[]string{"((lib.Emb)e).ΔClone()"}, nil},
 		"local": {[]string{lib}, emb + "type emb2 struct {\n\tlib.Inner\n\tN int\n}\n\nfunc F(e emb) emb2 { return emb2(e) }",
-			[]string{"(emb2)e.ΔClone()"}, nil},
+			[]string{"((emb2)e).ΔClone()"}, nil},
 		"foreignpair": {[]string{lib, other}, "func F(le lib.Emb) other.Emb { return other.Emb(le) }",
-			[]string{"otherꓸEmb(le.ΔClone())"}, nil},
+			[]string{"otherꓸEmb(le).ΔClone()"}, nil},
 		// An embedded NAMED ARRAY is a field like any other array.
 		"namedarray": {nil, "type A [2]int\n\ntype h struct {\n\tA\n\tN int\n}\n\nfunc F(x h) int { c := x; c.A[0] = 9; return x.A[0] }",
 			[]string{`[GoValueClone("A")] public partial struct h`, "var c = x.ΔClone();"}, nil},
@@ -153,10 +153,9 @@ type Emb struct {
 			}
 		}
 
-		for _, twice := range []string{".Clone().Clone()", "ΔClone().ΔClone()", ".Clone().ΔClone()", "ΔClone().Clone()"} {
-			if strings.Contains(emitted, twice) {
-				t.Errorf("%s: the emitted files copy twice, %q, in:\n%s", name, twice, emitted)
-			}
+		// Also through the parentheses between two clones (cloneOfACloneRE, structConversionCopy_test.go).
+		if twice := cloneOfACloneRE.FindString(emitted); twice != "" {
+			t.Errorf("%s: the emitted files copy twice, %q, in:\n%s", name, twice, emitted)
 		}
 
 		for _, absent := range a.absent {

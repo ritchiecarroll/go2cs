@@ -78,11 +78,9 @@ func (v *Visitor) foreignPairStructConversion(callExpr *ast.CallExpr) (string, b
 	v.recordConversionPackageUsing(source)
 	v.recordConversionPackageUsing(target)
 
-	// Go copies the operand. The function builds its result from the operand's fields, so an array the
-	// operand carries is cloned first where the operand is existing storage (conversionOperandCopy).
-	operand := v.conversionOperandCopy(target, arg, v.convExpr(arg, nil))
-
-	return functionName + "(" + operand + ")", true
+	// The function builds its result from the operand's fields; the copy Go converts is taken where the
+	// result is transferred (structConversionCopy.go).
+	return functionName + "(" + v.convExpr(arg, nil) + ")", true
 }
 
 // foreignLiteralStruct returns t as a named struct type one side of a foreign pair can be: declared by
