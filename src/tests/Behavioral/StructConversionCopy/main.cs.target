@@ -39,15 +39,15 @@ internal partial struct main_x /*dyn*/ {
 
 internal static void main() {
     ref var lc = ref heap<lib.Chord>(fresh(), out var Ꮡlc);
-    var c = (chord)lc.ΔClone();
+    var c = ((chord)lc).ΔClone();
     (c.Notes[0], c.In.V[1]) = (9, 8);
     fmt.Println("local from foreign:", lc.Notes, lc.In.V, c.Notes, c.In.V);
 
-    var back = (lib.Chord)c.ΔClone();
+    var back = ((lib.Chord)c).ΔClone();
     (back.Notes[1], back.In.V[0]) = (7, 6);
     fmt.Println("foreign from local:", c.Notes, c.In.V, back.Notes, back.In.V);
 
-    var c2 = (chord2)c.ΔClone();
+    var c2 = ((chord2)c).ΔClone();
     (c2.Notes[0], c2.In.V[0]) = (5, 5);
     fmt.Println("local from local:", c.Notes, c.In.V, c2.Notes, c2.In.V);
 
@@ -57,39 +57,39 @@ internal static void main() {
     u.Notes[0] = 18;
     fmt.Println("wrapper:", c.Notes, c.In.V, w.Notes, w.In.V, u.Notes);
 
-    var oc = otherꓸChord(lc.ΔClone());
+    var oc = otherꓸChord(lc).ΔClone();
     (oc.Notes[0], oc.In.V[1]) = (4, 4);
     fmt.Println("foreign from foreign:", lc.Notes, lc.In.V, oc.Notes, oc.In.V);
 
-    var x = (main_x)c.ΔClone();
+    var x = ((main_x)c).ΔClone();
     (x.Notes[0], x.In.V[0]) = (3, 3);
     fmt.Println("unnamed from named:", c.Notes, c.In.V, x.Notes, x.In.V);
 
     var h = new holder(L: fresh());
-    var hc = (chord)h.L.ΔClone();
+    var hc = ((chord)h.L).ΔClone();
     hc.Notes[0] = 11;
     fmt.Println("field:", h.L.Notes, hc.Notes);
 
     var s = slice<lib.Chord>([fresh()]);
-    var sc = (chord)s[0].ΔClone();
+    var sc = ((chord)s[0]).ΔClone();
     sc.In.V[0] = 12;
     fmt.Println("element:", s[0].In.V, sc.In.V);
 
     var p = Ꮡlc;
-    var pc = (chord)(p.Value.ΔClone());
+    var pc = ((chord)(p.Value)).ΔClone();
     pc.Notes[1] = 13;
     fmt.Println("pointer:", p.Notes, pc.Notes);
 
     var raw = new nint[]{1, 2}.array();
-    var n = (notes)raw.Clone();
+    var n = ((notes)raw).Clone();
     n[0] = 14;
     fmt.Println("array:", raw, n);
 
-    var same = (chord)c.ΔClone();
+    var same = ((chord)c).ΔClone();
     same.Notes[1] = 15;
     fmt.Println("same type:", c.Notes, same.Notes);
 
-    touch((chord)lc.ΔClone());
+    touch((chord)lc);
     fmt.Println("argument:", lc.Notes);
 }
 

@@ -52,19 +52,19 @@ internal static void main() {
     (c.V[0], c.N) = (9, 9);
     fmt.Println("assign:", le.V, le.N, c.V, c.N);
 
-    var e = (emb)le.ΔClone();
+    var e = ((emb)le).ΔClone();
     (e.V[0], e.N) = (8, 8);
     fmt.Println("local from foreign:", le.V, le.N, e.V, e.N);
 
-    var eb = (lib.Emb)e.ΔClone();
+    var eb = ((lib.Emb)e).ΔClone();
     (eb.V[1], eb.N) = (7, 7);
     fmt.Println("foreign from local:", e.V, e.N, eb.V, eb.N);
 
-    var e2 = (emb2)e.ΔClone();
+    var e2 = ((emb2)e).ΔClone();
     (e2.Inner.V[0], e2.N) = (6, 6);
     fmt.Println("local from local:", e.V, e.N, e2.V, e2.N);
 
-    var oe = otherꓸEmb(le.ΔClone());
+    var oe = otherꓸEmb(le).ΔClone();
     (oe.V[1], oe.N) = (5, 5);
     fmt.Println("foreign from foreign:", le.V, le.N, oe.V, oe.N);
 
