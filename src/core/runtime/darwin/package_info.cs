@@ -566,7 +566,7 @@ public static partial class runtime_package
     internal partial struct functab {}
     internal partial struct gList {}
     internal partial struct gQueue {}
-    internal partial struct gTraceState {}
+    [GoValueClone("traceSchedResourceState")] internal partial struct gTraceState {}
     internal partial struct gcBgMarkWorkerNode {}
     [GoValueClone("pad")] internal partial struct gcBgMarkWorkerNodePadded {}
     internal partial struct gcBits {}
@@ -597,7 +597,7 @@ public static partial class runtime_package
     internal partial struct hchan {}
     internal partial struct headTailIndex {}
     [GoValueClone("spans", "pageInUse", "pageMarks", "pageSpecials", "pageUseSpanInlineMarkBits")] internal partial struct heapArena {}
-    internal partial struct heapStatsAggregate {}
+    [GoValueClone("heapStatsDelta")] internal partial struct heapStatsAggregate {}
     [GoValueClone("smallAllocCount", "smallFreeCount")] internal partial struct heapStatsDelta {}
     internal partial struct hex {}
     internal partial struct hexdumpMarker {}
@@ -676,13 +676,13 @@ public static partial class runtime_package
     internal partial struct offAddr {}
     internal partial struct open_args {}
     internal partial struct pMask {}
-    internal partial struct pTraceState {}
+    [GoValueClone("traceSchedResourceState")] internal partial struct pTraceState {}
     [GoValueClone("summary", "chunks")] internal partial struct pageAlloc {}
     internal partial struct pageAlloc_scav {}
     internal partial struct pageBits {}
     internal partial struct pageCache {}
     internal partial struct pallocBits {}
-    [GoValueClone("scavenged")] internal partial struct pallocData {}
+    [GoValueClone("pallocBits", "scavenged")] internal partial struct pallocData {}
     internal partial struct pallocSum {}
     internal partial struct pcHeader {}
     [GoValueClone("entries")] internal partial struct pcvalueCache {}
@@ -764,7 +764,7 @@ public static partial class runtime_package
     internal partial struct spanSPMC {}
     internal partial struct spanScanOwnership {}
     internal partial struct spanSet {}
-    [GoValueClone("spans")] internal partial struct spanSetBlock {}
+    [GoValueClone("spanSetBlockHeader2", "spans")] internal partial struct spanSetBlock {}
     internal partial struct spanSetBlockAlloc {}
     internal partial struct spanSetBlockHeader {}
     [GoValueClone("pad")] internal partial struct spanSetBlockHeader2 {}
@@ -795,7 +795,7 @@ public static partial class runtime_package
     internal partial struct stackpoolItem {}
     internal partial struct stackpoolᴛ1 {}
     [GoValueClone("pad_cgo_0")] internal partial struct stackt {}
-    [GoValueClone("ensured")] internal partial struct statAggregate {}
+    [GoValueClone("ensured", "heapStats")] internal partial struct statAggregate {}
     internal partial struct statDep {}
     internal partial struct statDepSet {}
     internal partial struct stkframe {}
@@ -888,7 +888,7 @@ public static partial class runtime_package
     [GoValueClone("Z0", "Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12", "Z13", "Z14", "Z15", "Z16", "Z17", "Z18", "Z19", "Z20", "Z21", "Z22", "Z23", "Z24", "Z25", "Z26", "Z27", "Z28", "Z29", "Z30", "Z31")] internal partial struct xRegs {}
     internal partial struct Δslice {}
     public partial interface Error {}
-    public partial struct BlockProfileRecord {}
+    [GoValueClone("StackRecord")] public partial struct BlockProfileRecord {}
     public partial struct Frame {}
     [GoValueClone("frameStore")] public partial struct Frames {}
     public partial struct Func {}

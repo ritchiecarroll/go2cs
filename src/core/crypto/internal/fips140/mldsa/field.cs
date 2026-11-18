@@ -221,7 +221,7 @@ internal static nttElement ntt(ringElement f) {
         f[start] = fieldAdd(f[start], t);
     }
 
-    return ((nttElement)(array<fieldElement>)f).Clone();
+    return ((nttElement)(array<fieldElement>)f.Clone()).Clone();
 }
 
 // inverseNTT maps a nttElement back to the ringElement it represents.
@@ -298,7 +298,7 @@ internal static ringElement inverseNTT(nttElement f) {
     foreach (var i in range(len(f))) {
         f[i] = fieldMontgomeryMul(f[i], 16382); // 16382 = 256⁻¹ * R mod q
     }
-    return ((ringElement)(array<fieldElement>)f).Clone();
+    return ((ringElement)(array<fieldElement>)f.Clone()).Clone();
 }
 
 // nttMul multiplies two nttElements.
