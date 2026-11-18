@@ -2927,7 +2927,7 @@ MINI-BRIDGE* above; `GoStructLayoutTests.FieldOrder_IsGoDeclarationOrder_NotMeta
      order-sensitive test (TestMarshalEmbeds) declares its single plain field first. The section then named
      declaration-order cargo as the remedy; the constructor reorder landed instead, and the converter later declared
      embeds in place (src/go2cs/visitStructType.go:1034 `// declaration order, marked like every other embed:`). The
-     legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:529 (`An embed is emitted by the converter as a partial PROPERTY`). -->
+     legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:530 (`An embed is emitted by the converter as a partial PROPERTY`). -->
 
 ## An UNNAMED func type renders STRUCTURALLY, exactly as an unnamed struct does
 
@@ -4569,7 +4569,7 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3673-3694 -->
+<!-- source: src/core/reflect/value_impl.cs:3674-3695 -->
 ```csharp
 public static Type ArrayOf(nint length, Type elem) {
     if (length < 0) {
