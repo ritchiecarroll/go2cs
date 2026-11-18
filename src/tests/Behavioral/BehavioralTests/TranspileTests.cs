@@ -34,6 +34,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]
+    public void CheckAddressOfParenthesizedOperand() => CheckTarget("AddressOfParenthesizedOperand");
+
+    [TestMethod]
     public void CheckAliasImport() => CheckTarget("AliasImport");
 
     [TestMethod]
