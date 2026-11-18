@@ -89,7 +89,7 @@ func TestOracleBuildsALinknamePullOfMathBig(t *testing.T) {
 		buildTags:   resolveBuildTags(false, true, true, true, false, nil),
 	}
 
-	args := oracleTestArgs(options, "")
+	args := oracleTestArgs(options, "example.test/bigpull", "")
 	output, err := runCommandWithTimeout(3*time.Minute, dir, options, "go", args...)
 	if failure := oracleBuildFailure(output); failure != "" || err != nil {
 		t.Fatalf("the oracle cannot build a module that pulls math/big by linkname.\n"+

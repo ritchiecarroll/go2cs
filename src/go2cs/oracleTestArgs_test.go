@@ -41,7 +41,7 @@ func TestOracleTestArgsCarryResolvedBuildTags(t *testing.T) {
 	}
 
 	options := Options{testTimeout: 2 * time.Minute, buildTags: resolved}
-	args := oracleTestArgs(options, "")
+	args := oracleTestArgs(options, "", "")
 
 	want := "-tags=" + strings.Join(resolved, ",")
 	if !slices.Contains(args, want) {
@@ -77,7 +77,7 @@ func TestOracleTestArgsCarryResolvedBuildTags(t *testing.T) {
 // for the tag set containing the empty string.
 func TestOracleTestArgsUntaggedRunIsUnchanged(t *testing.T) {
 	options := Options{testTimeout: 2 * time.Minute}
-	args := oracleTestArgs(options, "")
+	args := oracleTestArgs(options, "", "")
 
 	for _, a := range args {
 		if strings.HasPrefix(a, "-tags") {
@@ -90,12 +90,53 @@ func TestOracleTestArgsUntaggedRunIsUnchanged(t *testing.T) {
 // sides verbatim, so the extraction that made this list testable cannot have dropped one.
 func TestOracleTestArgsPreservesFilterAndSkip(t *testing.T) {
 	options := Options{testTimeout: 90 * time.Second, testFilter: "TestFoo", buildTags: []string{"purego"}}
-	args := oracleTestArgs(options, "TestBar/sub")
+	args := oracleTestArgs(options, "", "TestBar/sub")
 
 	for _, want := range [][2]string{{"-run", "TestFoo"}, {"-skip", "TestBar/sub"}, {"-timeout", "1m30s"}} {
 		i := slices.Index(args, want[0])
 		if i < 0 || i+1 >= len(args) || args[i+1] != want[1] {
 			t.Fatalf("oracle args lost %s %s: %v", want[0], want[1], args)
+		}
+	}
+}
+
+// TestOracleTestArgsDropMathBigPureGoExceptOnMathBig holds the one tag the oracle does not share with
+// the conversion (oracleBuildFlags). On math/big's own row the oracle carries the loader's tags byte for
+// byte, because there math_big_pure_go changes the test set. On any other row it carries the loader's
+// tags less exactly that one, in the same order. An unknown package keeps the loader's tags.
+func TestOracleTestArgsDropMathBigPureGoExceptOnMathBig(t *testing.T) {
+	for _, recurse := range []bool{false, true} {
+		resolved := resolveBuildTags(false, true, recurse, true, false, nil)
+		if !slices.Contains(resolved, mathBigPureGoTag) {
+			t.Fatalf("precondition: recurse=%v resolves to %v, without %s; this arm would be vacuous", recurse, resolved, mathBigPureGoTag)
+		}
+
+		options := Options{testTimeout: 2 * time.Minute, buildTags: resolved}
+		loader := "-tags=" + strings.Join(resolved, ",")
+
+		var others []string
+		for _, tag := range resolved {
+			if tag != mathBigPureGoTag {
+				others = append(others, tag)
+			}
+		}
+		dropped := "-tags=" + strings.Join(others, ",")
+
+		for _, arm := range []struct{ packagePath, want string }{
+			{"math/big", loader},
+			{"", loader},
+			{"crypto/rsa", dropped},
+			{"example.test/bigpull", dropped},
+		} {
+			args := oracleTestArgs(options, arm.packagePath, "")
+			if !slices.Contains(args, arm.want) {
+				t.Errorf("recurse=%v package %q: want %s\n  oracle args: %v", recurse, arm.packagePath, arm.want, args)
+			}
+		}
+
+		// The rule leaves the options it was handed untouched: the conversion side reads the same slice.
+		if strings.Join(options.buildTags, ",") != strings.Join(resolved, ",") {
+			t.Fatalf("oracleTestArgs mutated the caller's build tags: %v", options.buildTags)
 		}
 	}
 }
