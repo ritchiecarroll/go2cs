@@ -1,0 +1,3 @@
+CONTROL MUST 1 (unclosed dump, T = proxy): assertion to []MappedSpan[*SourceFile] = false (Go: true)
+CONTROL MUST 2 (caller-local witness): same Go type Array[u8], C# identity equal = false (Go: true)
+C# identities: Index<ж<Export>, ExportжNamedΔshape> | Ptr<u8, ValueΔshapeOf<u8>> | Array<u8, u8ValueΔshapeRogue>

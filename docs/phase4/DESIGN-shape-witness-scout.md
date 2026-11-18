@@ -3,8 +3,12 @@
 > **Record**, 2026-11-16, R. COORD's ruling (20:56Z): the full witness rewrite is rejected. Scout the NARROW variant as a
 > design record plus a standalone probe, with no converter code, and prove three things: (a) no copy, no pun and no
 > proxy, with Go's aliasing intact; (b) readability, side by side with the Go; (c) the masked lsconv sites come out
-> correct. A Fable review (P3) comes before the owner rules on readability. It follows
-> [DESIGN-struct-proxy-scout](DESIGN-struct-proxy-scout.md), which found the struct-proxy pun NOT SAFE.
+> correct. A Fable review (P3) comes before the owner rules on readability. It follows the struct-proxy scout record
+> (`docs/phase4/DESIGN-struct-proxy-scout.md` on `claude/r-struct-proxy-scout` 0f24c170c1, seated separately), which
+> found the struct-proxy pun NOT SAFE.
+>
+> **Revised 2026-11-18 after P3's review (APPROVE WITH CHANGES): see section 7. It supersedes sections 2, 5 and 6 where
+> they differ; the earlier text stays visible.**
 
 ## 1. Verdict
 
@@ -171,3 +175,134 @@ What a Go reader meets, honestly:
   witness can be internal.
 - **tsc:** the 12 narrow declarations convert. lsconv, autoimport, ls, project and fourslash leave the refused list,
   provided nothing else in them refuses. The 10 dependent packages then build or show their own defects.
+
+## 7. Revision 2026-11-18: P3's review, answered by number
+
+P3 reviewed 288eb48178 as APPROVE WITH CHANGES (COORD inbox, 20261117T011022Z-P3.md), and COORD accepted every finding
+(01:11Z). Each answer below is measured, not argued: the probe (`data/shape-witness-scout/cs`, now with CONTROL arms on
+stderr) and a census over the converter's own predicates (`data/shape-witness-scout/census`).
+
+### MUST-FIX 1: selection is closed over bodies, to a fixed point
+
+- **Rule.** A generic FUNCTION that instantiates a selected declaration with one of its OWN type parameters, at a
+  selected position, is selected too, repeated until nothing changes. Otherwise today's route binds a pointer T to a
+  proxy, and the proxy reaches a witness type's identity.
+- **Probe.** `dump[T Script](x T) any { return FromLSPRange(x, 0) }` is selected by the closure, so
+  `dump(a).([]MappedSpan[*SourceFile])` succeeds, as in Go.
+- **CONTROL.** The UNCLOSED form (dump on the non-self proxy route) makes that assertion **false** where Go says true.
+- **Census.** The closure adds **0** declarations in std on 4 targets, **0** in the tsc closure and **0** in the 107
+  generic behavioral modules. P3's open question ("whether any of the 12 tsc declarations is reached through a
+  non-selected forwarder") reads 0. The rule still binds every future cut.
+
+### MUST-FIX 2: one canonical witness for every pair, functions included
+
+Section 5's "Functions: nothing to rule" is withdrawn. A function's witness can flow into a witness-carrying type (gen's
+ConstArray returns `Array<T, TValue>`), so a caller-named witness becomes the RESULT'S identity.
+- **CONTROL.** `ConstArray<u8, u8ValueΔshapeRogue>` gives the same Go type, `Array[u8]`, a different C# identity:
+  `is Array<u8, ValueΔshapeOf<u8>>` reads **false**.
+- **Rule.** Every call site and every type mention names THE canonical witness for its pair; no assembly mints a local
+  one.
+
+### MUST-FIX 3: canonical location, eager emission, refusal by name
+
+The canonical witness for a pair (T, I) is:
+- **for a T that implements I nominally in C#** (a value or interface type whose assembly sees I): the generic
+  `IΔshapeOf<T> where T : I`, emitted beside I;
+- **for any other T** (a pointer, a value type of an assembly that cannot see I, a structural interface J): a per-pair
+  witness emitted EAGERLY by the assembly of E's package, for every narrow interface I that package can see and E
+  satisfies. If E's package cannot see I, the instantiation is refused by name, never satisfied by a witness the
+  instantiating assembly mints.
+
+A witness-carrying TYPE therefore never takes a witness emitted where it is instantiated. The eager set, re-predicted:
+- **std:** the two witness-carrying kept types (gen's Ptr and Array) both take Value, whose 7 implementers are gen's
+  own value types (void, Uint64, Uint8x64, Uint64x8, Mask8, Mask64 and the rest, value receivers through valAny). All
+  are nominal, so `ValueΔshapeOf<T>` covers them: **0 per-pair witnesses**, and the stdlib footprint is unchanged.
+- **tsc:** autoimport.Index takes Named, and its owner's import closure holds **38** types satisfying `Name() string`
+  (counted as pairs). That is tsc-only, and an upper bound: some are nominal.
+- **behavioral:** 0, because no behavioral declaration is kept (SHOULD-FIX 6).
+
+### SHOULD-FIX 4: wrap and Deref
+
+Both are in the probe now. `Deref[W wrap[T], T Value](ptr Ptr[W]) T` becomes
+`Deref<W, T, WValue, WWrap>(Ptr<W, WValue> ptr)`: Ptr[W] needs W's Value witness and `w.wrap` needs W's wrap witness, so
+there are two witness parameters for W. T needs none, because its constraint is only carried by wrap's, which the C#
+interface `Δwrap<T> : Value` states without a nominal clause. Called as Go's `Deref[Ptr[u8], Ptr[u8]]`, it prints
+`5 Ptr[u8] main.Ptr[main.u8]`, equal to Go.
+
+### SHOULD-FIX 5: renameFirstNamed relabelled
+
+It is now a PROPERTY CHECK, not a selection arm. A plain `[]T` parameter is class B's position and is not narrow-selected;
+given a witness anyway, the callee still writes the caller's slice.
+
+### SHOULD-FIX 6: P3's predicate, adopted
+
+- **The predicate.** An EXPORTED declaration outside package main stays declaration-level. Any other is kept only if an
+  in-package instantiation (tests included) binds T to a non-nominal implementer, or a kept forwarder forwards into it
+  (fixed point).
+- **Re-scored.**
+  - std: 4 kept of 4, all exported in the internal gen package.
+  - tsc: 12 of 12. The unexported ls, lsconv and lsp ones each have an in-package pointer instantiation, such as
+    lspRangeToVirtual with `*ast.SourceFile`.
+  - behavioral: **0 kept** across all 107 generic modules plus class B's NonSelfConstraintSliceArg.
+- **InlineConstraintLift is UNMOVED.** Box, pair and slot are instantiated with package-main value types only. Ord's
+  `Less(T)` constraint mentions T, so it is self-referential and on the self route, not narrow. The first census
+  classed it non-self because the converter's typeMentionsTypeParam does not look inside interface method signatures;
+  the revised census does.
+- **Correction to section 6:** "CNR moves ONE behavioral golden, InlineConstraintLift" is withdrawn. **CNR: 0 lines.**
+
+### SHOULD-FIX 7: reflection derives what it drops
+
+- Witness parameters carry a `[GoShapeWitness]` marker. The probe's Go-name printer reads it from the generic
+  definition's formals; it is no longer told a count.
+- It drops markers at every nesting depth: `[]Ptr[u8]` prints `[]main.Ptr[main.u8]`, equal to Go.
+- A generic function prints `main.FromLSPRange[...]`, which is Go's own `runtime.FuncForPC` form, with no witness name
+  leaking.
+- A cut owes the same marker read in golib's type naming and in function naming (FuncForPC, tracebacks).
+
+### NIT 8
+
+The struct-proxy link is now plain text naming its branch, because the record is not at this ref.
+
+### READABILITY additions, for the owner
+
+The heaviest shapes, as a Go reader meets them.
+
+Go:
+
+```go
+func Deref[W wrap[T], T Value](ptr Ptr[W]) T
+
+v := Deref[Ptr[u8], Ptr[u8]](Ptr[Ptr[u8]]{4})
+
+type registry struct{ exports Index[*Export] }
+```
+
+C#:
+
+```csharp
+public static T Deref<W, T, [GoShapeWitness] WValue, [GoShapeWitness] WWrap>(Ptr<W, WValue> ptr)
+    where WValue : struct, ValueΔshape<W>
+    where WWrap : struct, ΔwrapΔshape<W, T>
+
+var v = Deref<Ptr<u8, ValueΔshapeOf<u8>>, Ptr<u8, ValueΔshapeOf<u8>>,
+              ValueΔshapeOf<Ptr<u8, ValueΔshapeOf<u8>>>,
+              ΔwrapΔshapeOf<Ptr<u8, ValueΔshapeOf<u8>>, Ptr<u8, ValueΔshapeOf<u8>>>>(
+    new Ptr<Ptr<u8, ValueΔshapeOf<u8>>, ValueΔshapeOf<Ptr<u8, ValueΔshapeOf<u8>>>>(4));
+
+public partial struct registry { internal Index<ж<Export>, ExportжNamedΔshape> exports; }
+```
+
+- A field or signature holding a witness-carrying type spells its pair (`Index<ж<Export>, ExportжNamedΔshape>`).
+- An explicit instantiation of a doubly-witnessed generic, as in Deref, is long. The converter could emit it through a
+  `using` alias per instantiation, but that is not designed here.
+- **Use sites, not just declarations:** std 4 declarations, 10 instantiation sites in 1 file (all in gen); tsc 12
+  declarations, 116 instantiation sites in 11 files.
+
+### Predictions for the eventual cut (scored only when it runs), REVISED
+
+- **stdlib:** gen's 3-4 .cs on 4 targets, plus `ValueΔshape` / `ΔwrapΔshape` beside Value and wrap (in the same files),
+  and 0 per-pair witnesses.
+- **CNR:** 0 behavioral lines (section 6's InlineConstraintLift line is withdrawn above).
+- **Public surface:** 0.
+- **tsc:** the 12 kept declarations convert. autoimport gains up to 38 eager per-pair witnesses. lsconv -> fourslash
+  leave the refused list unless something else in them refuses.

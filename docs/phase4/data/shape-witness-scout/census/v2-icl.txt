@@ -1,0 +1,4 @@
+DECL DROPPED(P3) type go2cs/InlineConstraintLift.Box | generic named type |  | forwarders=0
+DECL DROPPED(P3) type go2cs/InlineConstraintLift.pair | generic named type |  | forwarders=0
+DECL DROPPED(P3) type go2cs/InlineConstraintLift.slot | generic named type |  | forwarders=0
+TOTAL target windows/amd64 selected 3 closure-added 0 kept 0 witness-types 0 eager-pairs 0 uses 0 use-files 0 decl-files 0

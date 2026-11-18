@@ -1,0 +1,5 @@
+DECL KEPT        type internal/runtime/gc/internal/gen.Ptr | generic named type | exported: declaration-level | witness-param eager-pairs=7 | forwarders=0
+DECL KEPT        func internal/runtime/gc/internal/gen.Deref | param internal/runtime/gc/internal/gen.Ptr[W] | exported: declaration-level | forwarders=0
+DECL KEPT        type internal/runtime/gc/internal/gen.Array | generic named type | exported: declaration-level | witness-param eager-pairs=7 | forwarders=0
+DECL KEPT        func internal/runtime/gc/internal/gen.ConstArray | result internal/runtime/gc/internal/gen.Array[T] | exported: declaration-level | forwarders=0
+TOTAL target linux/arm64 selected 4 closure-added 0 kept 4 witness-types 2 eager-pairs 14 uses 10 use-files 1 decl-files 1
