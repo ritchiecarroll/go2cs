@@ -506,21 +506,21 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
         prec = 6; // default precision for 'e', 'f'
     }
 
-    var exprᴛ1 = format;
+    var formatᴛ1 = format;
     var matchᴛ1 = false;
-    if (exprᴛ1 is 'e' or 'E' or 'f' or 'b' or 'p' or 'x') { matchᴛ1 = true;
+    if (formatᴛ1 is 'e' or 'E' or 'f' or 'b' or 'p' or 'x') { matchᴛ1 = true;
         // nothing to do
     }
-    else if (exprᴛ1 is 'F') { matchᴛ1 = true;
+    else if (formatᴛ1 is 'F') { matchᴛ1 = true;
         // (*Float).Text doesn't support 'F'; handle like 'f'
         format = 'f';
     }
-    else if (exprᴛ1 is 'v') { matchᴛ1 = true;
+    else if (formatᴛ1 is 'v') { matchᴛ1 = true;
         // handle like 'g'
         format = 'g';
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && (exprᴛ1 is 'g' or 'G')) {
+    if (fallthrough || !matchᴛ1 && (formatᴛ1 is 'g' or 'G')) {
         if (!hasPrec) {
             prec = -1; // default precision for 'g', 'G'
         }

@@ -812,3 +812,22 @@ force.
   `uintptr` there; its baseline is raised by those 9 (COORD ruled (a), 17:04Z) and the census's anchor is a seat for
   its owner after the release. BOARD row: the cut branch. A cut that respells
   an emitted form searches the instruments for the old form before its regen, and says what it found.
+
+### 10.15 Amendment, 2026-11-15 (P2, sqlite-cs W9a): `sync.Mutex` has Go's layout, and 10.13's arm asserts the reverse
+
+10.13 recorded that the hand-owned `sync.Mutex` held one managed reference at a known Go offset, that the layout
+check refused a whole-value read of it by name, and that the GolibTests arm
+`TheHandOwnedMutexIsRefusedByLayoutAndIsNotInThePopulation` measured it. That was true of the tree it describes.
+
+Since W9a (COORD ruling b5c6bdd163, option (a)) the hand-owned Mutex is `{state int32; sema uint32}` and holds no
+reference: its wait queue is named by a handle in the `sema` word, not by a reference. So:
+
+- `GoReflect.ClrLayoutMismatch(typeof(sync.Mutex))` is null, and a whole-value read of a Mutex out of native memory
+  succeeds. libc's `(*sync.Mutex)(unsafe.Pointer(p + off)).Lock()` (2.4, and the BOARD rows of 2026-11-14) takes
+  the lock in the C bytes.
+- The Mutex is still not in B2b, now because it holds no reference. The census counts a whole-value read of it in
+  the total and in no class.
+- The arm is renamed `TheMutexIsGosLayoutIsReadWholeAndIsInNoClassOfThePopulation` and asserts those three facts,
+  with the census off and on.
+
+Nothing else in 10.13 moves. `sync.RWMutex` and `sync.WaitGroup` still hold a state object by reference.

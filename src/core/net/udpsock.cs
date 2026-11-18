@@ -101,12 +101,11 @@ internal static Addr opAddr(this ж<UDPAddr> Ꮡa) {
 // See func [Dial] for a description of the network and address
 // parameters.
 public static (ж<UDPAddr>, error) ResolveUDPAddr(@string network, @string address) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
         break;
     }
-    case {} when exprᴛ1 == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
+    case {} when network == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
         network = udpˢ;
         break;
     }
@@ -366,9 +365,8 @@ public static (ж<UDPConn>, error) DialUDP(@string network, ж<UDPAddr> laddr, �
 internal static (ж<UDPConn>, error) dialUDP(context.Context ctx, ж<Dialer> Ꮡdialer, @string network, ж<UDPAddr> laddr, ж<UDPAddr> raddr) {
     ref var dialer = ref Ꮡdialer.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
         break;
     }
     default: {
@@ -400,9 +398,8 @@ internal static (ж<UDPConn>, error) dialUDP(context.Context ctx, ж<Dialer> Ꮡ
 public static (ж<UDPConn>, error) ListenUDP(@string network, ж<UDPAddr> Ꮡladdr) {
     ref var laddr = ref Ꮡladdr.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
         break;
     }
     default: {
@@ -442,9 +439,8 @@ public static (ж<UDPConn>, error) ListenUDP(@string network, ж<UDPAddr> Ꮡlad
 public static (ж<UDPConn>, error) ListenMulticastUDP(@string network, ж<Interface> ifi, ж<UDPAddr> Ꮡgaddr) {
     ref var gaddr = ref Ꮡgaddr.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
         break;
     }
     default: {

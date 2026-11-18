@@ -2012,9 +2012,8 @@ internal static void closeWriteAndWait(this ref conn c) {
 // Everything is valid except the empty string and built-in protocol types,
 // so that those can't be overridden with alternate implementations.
 internal static bool validNextProto(@string proto) {
-    var exprᴛ1 = proto;
     switch (ᐧ) {
-    case {} when exprᴛ1 == ""u8 || exprᴛ1 == "http/1.1"u8 || exprᴛ1 == "http/1.0"u8: {
+    case {} when proto == ""u8 || proto == "http/1.1"u8 || proto == "http/1.0"u8: {
         return false;
     }}
     return true;
@@ -3983,16 +3982,15 @@ internal static slice<@string> adjustNextProtos(slice<@string> nextProtos, Proto
     Protocols have = default;
     var protosʗ1 = protos;
     nextProtos = slices.DeleteFunc(nextProtos, (@string s) => {
-        var exprᴛ1 = s;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "http/1.1"u8: {
+        case {} when s == "http/1.1"u8: {
             if (!protosʗ1.HTTP1()) {
                 return true;
             }
             have.SetHTTP1(true);
             break;
         }
-        case {} when exprᴛ1 == "h2"u8: {
+        case {} when s == "h2"u8: {
             if (!protosʗ1.HTTP2()) {
                 return true;
             }
@@ -4358,15 +4356,15 @@ internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWri
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        var selᴛ91 = panicChan;
-        var selᴛ92 = done;
+        var panicChanᴛ1 = panicChan;
+        var doneᴛ1 = done;
         var selᴛ93 = ctx.Done();
-        switch (select(ᐸꟷ(selᴛ91, ꓸꓸꓸ), ᐸꟷ(selᴛ92, ꓸꓸꓸ), ᐸꟷ(selᴛ93, ꓸꓸꓸ))) {
-        case 0 when selᴛ91.ꟷᐳ(out var p): {
+        switch (select(ᐸꟷ(panicChanᴛ1, ꓸꓸꓸ), ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ93, ꓸꓸꓸ))) {
+        case 0 when panicChanᴛ1.ꟷᐳ(out var p): {
             throw panic(p);
             break;
         }
-        case 1 when selᴛ92.ꟷᐳ(out _): {
+        case 1 when doneᴛ1.ꟷᐳ(out _): {
             tw.Ꮡmu.Lock();
             var twʗ2 = tw;
             defer(twʗ2.Ꮡmu.Unlock, ref ᒐ);

@@ -31,6 +31,23 @@ func typeIsArrayValue(t types.Type) bool {
 	return isArray
 }
 
+// typeIsZeroLengthArray reports whether t is an array of length zero, `[0]E` or a type over one. Such an array
+// holds no element, so a struct copy that shares its empty backing store with the source is indistinguishable from
+// a copy that does not: there is nothing to write through either. A FIELD of that type is therefore no reason to
+// clone a struct, and no member of its `[GoValueClone(…)]` list -- syscall's `InotifyEvent.Name [0]uint8` (the
+// flexible-array member idiom) and go-json-experiment's embedded `nonComparable [0]func()` (the uncomparable
+// marker) both cost a clone at every copy and bought nothing. A bare `[0]E` VALUE still takes its own `.Clone()`
+// where Go copies it; only the field walks below skip it.
+func typeIsZeroLengthArray(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	array, isArray := t.Underlying().(*types.Array)
+
+	return isArray && array.Len() == 0
+}
+
 // typeNeedsValueClone reports whether a Go BY-VALUE copy of t needs an explicit `.Clone()` in the
 // emitted C# — t is a fixed-size array (typeIsArrayValue above), or a STRUCT that carries one in a
 // field, directly or through another such struct.
@@ -44,16 +61,15 @@ func typeIsArrayValue(t types.Type) bool {
 // `[GoValueClone(…)]`, go2cs-gen generates its field-precise `Clone()`, and every copy site here
 // appends it.
 //
-// EMBEDDED (promoted) struct members are not a reason to clone: go2cs-gen holds an embed as an
-// INLINE field, so the plain C# struct copy already copies it, exactly as Go does. (Until
-// 2026-08-14 an embed was a shared `ж<T>` box, which gave it reference semantics a value copy then
-// aliased — the defect behind go/types' type-parameter identity wall; see
-// ConversionStrategies-Reference, *An embedded struct is an INLINE field, so a value copy copies
-// it*.) What the skip below still costs is narrower and named: a fixed ARRAY reached only THROUGH
-// an embed is not seen, so such a struct is not stamped and the array backing stays shared. Widening
-// the walk is now sound — the generated `copy.<member> = <member>.ΔClone()` lands in the copy's own
-// inline storage — but it moves EMISSION corpus-wide, so it belongs to a change that owns that
-// footprint.
+// An EMBEDDED (promoted) struct is walked like any other field. go2cs-gen holds an embed as an INLINE
+// field, so the plain C# struct copy copies the embed itself, exactly as Go does (until 2026-08-14 an
+// embed was a shared `ж<T>` box, which gave it reference semantics a value copy then aliased -- the
+// defect behind go/types' type-parameter identity wall; see ConversionStrategies-Reference, *An
+// embedded struct is an INLINE field, so a value copy copies it*). An ARRAY the embed carries is
+// another matter: its backing store is shared by that copy, so a struct that carries an array only
+// through an embed is stamped with the embed's member, and the generated `copy.<member> =
+// <member>.ΔClone()` lands in the copy's own inline storage. An embedded POINTER is a pointer, shared
+// in Go too, and needs nothing.
 func typeNeedsValueClone(t types.Type) bool {
 	return typeNeedsValueCloneSeen(t, map[types.Type]bool{})
 }
@@ -89,7 +105,7 @@ func typeNeedsValueCloneSeen(t types.Type, seen map[types.Type]bool) bool {
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
 
-		if field.Embedded() || field.Name() == "_" {
+		if field.Name() == "_" || typeIsZeroLengthArray(field.Type()) {
 			continue
 		}
 
@@ -129,7 +145,7 @@ func structValueCloneFields(t types.Type, structTypeName string) []string {
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
 
-		if field.Embedded() || field.Name() == "_" {
+		if field.Name() == "_" || typeIsZeroLengthArray(field.Type()) {
 			continue
 		}
 
@@ -367,6 +383,12 @@ func (v *Visitor) exprReadsValueNeedingClone(expr ast.Expr) bool {
 		// through the wrapper's operator, so it reads existing storage exactly when its operand does
 		// (DESIGN-array-reassign-in-place.md §8 N1). appendValueClone parenthesizes the cast it then clones.
 		if len(e.Args) != 1 || !v.callExprIsTypeConversion(e) || !typeNeedsValueClone(v.getExprType(expr)) {
+			return false
+		}
+
+		// An inherited wrapper's operator with its base copies by itself: the value is copied once
+		// (structConversionCopy.go).
+		if conversionCopiedByWrapperOperator(v.getExprType(expr), v.getExprType(e.Args[0])) {
 			return false
 		}
 

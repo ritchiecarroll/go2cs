@@ -152,8 +152,8 @@ internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallo
 A holder must hold exactly one static field, named for the holder, or for a var whose address is taken its box,
 `Ꮡ<name>` (below). The generator refuses any other holder by name (GO2CS0009) and generates nothing for it. `collectMovedInitVars` skips a lazy var, so it gets no `initᴛ` method and
 the package's static constructor never builds it.
-<!-- The holder line: src/go2cs/lazyPackageVarOperations.go:576 (`func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`),
-     its name :606 (`return "lazy" + TempVarMarker + strings.TrimPrefix(csIDName, "@")`), and for a var whose address is taken :593 (`func (v *Visitor) writeLazyAddressedPackageVar(`). The accessor is generated, so it is shown uncited:
+<!-- The holder line: src/go2cs/lazyPackageVarOperations.go:579 (`func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`),
+     its name :609 (`return "lazy" + TempVarMarker + strings.TrimPrefix(csIDName, "@")`), and for a var whose address is taken :596 (`func (v *Visitor) writeLazyAddressedPackageVar(`). The accessor is generated, so it is shown uncited:
      src/gen/go2cs-gen/LazyHolderGenerator.cs:134 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`),
      pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:165 (`"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`);
      a readonly box's by-value accessor src/gen/go2cs-gen/LazyHolderGenerator.cs:132 (`source.Append($"{memberIndent}{Accessibility(field)} static {type} {fieldName} => {holderName}.{fieldName};\r\n");`).
@@ -224,7 +224,7 @@ field instead of the var:
 An exported var such an initializer reads always has a holder of its own, so the snapshot has somewhere to live; a
 reader of an exported var with a constant initializer, which has no holder, stays eager.
 <!-- the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:137 (`source.Append($"{memberIndent}partial class {holderName} `, which adds `internal static readonly T initial` and sets it in the holder's static constructor);
-     the marker argument: src/go2cs/lazyPackageVarOperations.go:580 (`marker = "GoLazy(Initial = true)"`). The importer's
+     the marker argument: src/go2cs/lazyPackageVarOperations.go:583 (`marker = "GoLazy(Initial = true)"`). The importer's
      assignment is the LazyPackageVars behavioral test's case: tables.Heavy, assigned before tables.ByName is first read. -->
 
 **runtime's malloc tables are always built on their first read.** The converter lists runtime's two malloc dispatch

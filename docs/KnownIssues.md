@@ -65,6 +65,34 @@ architecture-specific path in the standard library.
 
 
 <a id="the-packages-do-not-ship-linux-arm64"></a>
+## Converting modernc sqlite for Windows needs a seed for libc's `largeInteger` {#converting-modernc-sqlite-for-windows-needs-a-seed-for-libcs-largeinteger}
+
+A converted `modernc.org/sqlite` program on Windows panics the first time it opens a database in WAL mode, unless
+the conversion passed `-inline-arrays=modernc.org/libc#largeInteger`. The panic names both delegate types:
+
+```text
+panic: go2cs: func cookie 0x... holds a
+  System.Func<ж<libc_package+TLS>, uintptr, libc_package+largeIntegerᴛ1, uintptr, UInt32, Int32>,
+  which cannot be read as
+  System.Func<ж<libc_package+TLS>, uintptr, sqlite.lib.sqlite3_package+TLARGE_INTEGERᴛ1, uintptr, UInt32, Int32>
+```
+
+Go calls sqlite's `TLARGE_INTEGER` and libc's `largeInteger` one type. sqlite converts its spelling whole through
+`unsafe.Pointer`, so it holds that struct's arrays inline. libc never does, so without the seed its spelling keeps
+golib's `array<T>`, and the two are different C# types. A function word that libc builds over its own type is
+then called through sqlite's type, and the call fails. The seed makes libc lay the type out as sqlite does, so both
+packages share one lift. A database that is never opened in WAL mode does not reach the call.
+
+**To avoid it**, convert the sqlite module and libc together (`-recurse`) and pass
+`-inline-arrays=modernc.org/libc#largeInteger`; the same value is harmless on other targets, where libc declares
+no `largeInteger`. A libc converted on its own (as a separate package) carries no seed, so sqlite on Windows hits
+the panic again when built against it.
+<!-- Source: COORD ruling C, 2026-11-17 12:14Z (C2, claude/c2-c-inline-seed). G's windows WAL read at 6bcc05d11f
+     (mailbox 01d7b332fe): delete pass equal to Go, WAL pass panics at _winHandleSeek <- _winHandleTruncate <-
+     _winLockSharedMemory <- _winShmMap with the message above; it was ruling A's known limit. Census at bd2a09c423:
+     sqlite/lib <- libc largeIntegerᴛ1 need=true have=false (valueclone record), so sqlite/lib kept its own lift.
+     The seed's end-to-end arm is TestAdmittedUnionByValueCrossingWithTheSeedReadsAsGo (libc's union verbatim). -->
+
 ## Platforms the packages do not ship
 
 The go.* packages ship `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. A package

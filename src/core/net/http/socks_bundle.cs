@@ -67,14 +67,14 @@ internal static partial (net.Addr, error ctxErr) connect(this ж<socksDialer> �
             var errChʗ2 = errCh;
             goǃ(() => {
                 var selᴛ94 = ctx.Done();
-                var selᴛ95 = doneʗ2;
-                switch (select(ᐸꟷ(selᴛ94, ꓸꓸꓸ), ᐸꟷ(selᴛ95, ꓸꓸꓸ))) {
+                var doneᴛ1 = doneʗ2;
+                switch (select(ᐸꟷ(selᴛ94, ꓸꓸꓸ), ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
                 case 0 when selᴛ94.ꟷᐳ(out _): {
                     c.SetDeadline(socksaLongTimeAgo);
                     errChʗ2.ᐸꟷ(ctx.Err());
                     break;
                 }
-                case 1 when selᴛ95.ꟷᐳ(out _): {
+                case 1 when doneᴛ1.ꟷᐳ(out _): {
                     errChʗ2.ᐸꟷ(default);
                     break;
                 }}
@@ -504,9 +504,8 @@ internal static ref readonly @string commandNotImplementedˢ => ref commandNotIm
 private static readonly @string commandNotImplementedˢᵇ = "command not implemented"u8;
 
 internal static error validateTarget(this ref socksDialer d, @string network, @string address) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "tcp4"u8: {
+    case {} when network == "tcp"u8 || network == "tcp6"u8 || network == "tcp4"u8: {
         break;
     }
     default: {

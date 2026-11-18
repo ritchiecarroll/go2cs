@@ -14,6 +14,8 @@
     <None Include="$(MSBuildThisFileDirectory)adapterPassSeparation_test.go" />
     <None Include="$(MSBuildThisFileDirectory)adapterStructLocality_test.go" />
     <None Include="$(MSBuildThisFileDirectory)addCleanupCaptures.go" />
+    <None Include="$(MSBuildThisFileDirectory)addressOfParenOperand.go" />
+    <None Include="$(MSBuildThisFileDirectory)addressOfParenOperand_test.go" />
     <None Include="$(MSBuildThisFileDirectory)addressTakenPredicates_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasArrayFieldZero_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasDocComments_test.go" />
@@ -94,6 +96,7 @@
     <None Include="$(MSBuildThisFileDirectory)solutionProjectPaths_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallKeepAliveAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)tailCalledFuncValue_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)tempNamedAfterIdentifier_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallFunnelSet_test.go" />
     <None Include="$(MSBuildThisFileDirectory)captureModeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoCheckClosureForms_test.go" />
@@ -240,6 +243,8 @@
     <None Include="$(MSBuildThisFileDirectory)droppedFiles_test.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)elementAddressCompare.go" />
+    <None Include="$(MSBuildThisFileDirectory)embeddedArrayCopy_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)zeroLengthArrayClone_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embeddedAssets_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embeddedTemplates.go" />
     <None Include="$(MSBuildThisFileDirectory)emptyInterfaceAssert_test.go" />
@@ -274,6 +279,8 @@
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignFieldConsumer_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignGenericAdapter_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)foreignPairStructConversion.go" />
+    <None Include="$(MSBuildThisFileDirectory)foreignPairStructConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignWrittenRHS_test.go" />
@@ -346,6 +353,7 @@
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayForeignSlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayOverCap_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArraySeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayValueDecodeCensus_test.go" />
@@ -737,6 +745,8 @@
     <None Include="$(MSBuildThisFileDirectory)stdlibMetadata.go" />
     <None Include="$(MSBuildThisFileDirectory)stdlibMetadata_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stringSliceConversions.go" />
+    <None Include="$(MSBuildThisFileDirectory)structConversionCopy.go" />
+    <None Include="$(MSBuildThisFileDirectory)structConversionCopy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)structFieldEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)subtreeLoadGoRoot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)suppressionCompanion_test.go" />

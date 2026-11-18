@@ -848,9 +848,9 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
 // watchCtx manipulates c.goroutineErr, so its result must be received before
 // c.awaitGoroutines is called.
 internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) {
-    var selᴛ2 = resultc.ᐸꟷ(new ctxResult(), ꓸꓸꓸ);
+    var resultcᴛ1 = resultc.ᐸꟷ(new ctxResult(), ꓸꓸꓸ);
     var selᴛ3 = c.ctx.Done();
-    switch (select(selᴛ2, ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
+    switch (select(resultcᴛ1, ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
     case 0: {
         return;
     }
@@ -882,9 +882,9 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
     }
 
     var timer = time.NewTimer(c.WaitDelay);
-    var selᴛ4 = resultc.ᐸꟷ(new ctxResult(err: err, timer: timer), ꓸꓸꓸ);
+    var resultcᴛ2 = resultc.ᐸꟷ(new ctxResult(err: err, timer: timer), ꓸꓸꓸ);
     var selᴛ5 = timer.C;
-    switch (select(selᴛ4, ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
+    switch (select(resultcᴛ2, ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
     case 0: {
         // c.Process.Wait returned and we've handed the timer off to c.Wait.
         // It will take care of goroutine shutdown from here.
@@ -1488,9 +1488,8 @@ public static error ErrDot = errors.New("cannot run executable found relative to
 // validateLookPath excludes paths that can't be valid
 // executable names. See issue #74466 and CVE-2025-47906.
 internal static error validateLookPath(@string s) {
-    var exprᴛ1 = s;
     switch (ᐧ) {
-    case {} when exprᴛ1 == ""u8 || exprᴛ1 == "."u8 || exprᴛ1 == ".."u8: {
+    case {} when s == ""u8 || s == "."u8 || s == ".."u8: {
         return ErrNotFound;
     }}
     return default;

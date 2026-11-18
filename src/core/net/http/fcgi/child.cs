@@ -445,9 +445,8 @@ private static readonly @string httpˢᵇ = "HTTP_"u8;
 // in the http.Request.Context, accessible via ProcessEnv.
 internal static bool addFastCGIEnvToContext(@string s) {
     // Exclude things supported by net/http natively:
-    var exprᴛ1 = s;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "CONTENT_LENGTH"u8 || exprᴛ1 == "CONTENT_TYPE"u8 || exprᴛ1 == "HTTPS"u8 || exprᴛ1 == "PATH_INFO"u8 || exprᴛ1 == "QUERY_STRING"u8 || exprᴛ1 == "REMOTE_ADDR"u8 || exprᴛ1 == "REMOTE_HOST"u8 || exprᴛ1 == "REMOTE_PORT"u8 || exprᴛ1 == "REQUEST_METHOD"u8 || exprᴛ1 == "REQUEST_URI"u8 || exprᴛ1 == "SCRIPT_NAME"u8 || exprᴛ1 == "SERVER_PROTOCOL"u8: {
+    case {} when s == "CONTENT_LENGTH"u8 || s == "CONTENT_TYPE"u8 || s == "HTTPS"u8 || s == "PATH_INFO"u8 || s == "QUERY_STRING"u8 || s == "REMOTE_ADDR"u8 || s == "REMOTE_HOST"u8 || s == "REMOTE_PORT"u8 || s == "REQUEST_METHOD"u8 || s == "REQUEST_URI"u8 || s == "SCRIPT_NAME"u8 || s == "SERVER_PROTOCOL"u8: {
         return false;
     }}
     if (strings.HasPrefix(s, httpˢ)) {
@@ -457,9 +456,8 @@ internal static bool addFastCGIEnvToContext(@string s) {
     // This list is redundant with the default "return true" below.
     // Consider this documentation of the sorts of things we expect
     // to maybe see.
-    var exprᴛ2 = s;
     switch (ᐧ) {
-    case {} when exprᴛ2 == "REMOTE_USER"u8: {
+    case {} when s == "REMOTE_USER"u8: {
         return true;
     }}
     // Unknown, so include it to be safe.

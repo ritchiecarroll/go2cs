@@ -312,21 +312,20 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
 
     nint i = bytealg.LastIndexByteString(network, (byte)':');
     if (i < 0) { // no colon
-        var exprᴛ1 = network;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+        case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
             break;
         }
-        case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+        case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
             break;
         }
-        case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+        case {} when network == "ip"u8 || network == "ip4"u8 || network == "ip6"u8: {
             if (needsProto) {
                 return ("", 0, ((UnknownNetworkError)network));
             }
             break;
         }
-        case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
+        case {} when network == "unix"u8 || network == "unixgram"u8 || network == "unixpacket"u8: {
             break;
         }
         default: {
@@ -335,9 +334,8 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
         return (network, 0, default);
     }
     afnet = network.slice(0, i);
-    var exprᴛ2 = afnet;
     switch (ᐧ) {
-    case {} when exprᴛ2 == "ip"u8 || exprᴛ2 == "ip4"u8 || exprᴛ2 == "ip6"u8: {
+    case {} when afnet == "ip"u8 || afnet == "ip4"u8 || afnet == "ip6"u8: {
         @string protostr = network.slice(i + 1);
         var (protoΔ2, iΔ2, ok) = dtoi(protostr);
         if (!ok || iΔ2 != len(protostr)) {
@@ -364,9 +362,8 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
     if (op == "dial"u8 && addr == ""u8) {
         return (default, errMissingAddress);
     }
-    var exprᴛ1 = afnet;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
+    case {} when afnet == "unix"u8 || afnet == "unixgram"u8 || afnet == "unixpacket"u8: {
         var (addrΔ2, errΔ2) = ResolveUnixAddr(afnet, addr);
         if (errΔ2 != nil) {
             return (default, errΔ2);
@@ -631,10 +628,10 @@ internal static partial (context.Context, Action) dialCtx(this ref Dialer d, con
             var oldCancelʗ1 = oldCancel;
             var subCtxʗ1 = subCtx;
             goǃ(() => {
-                var selᴛ1 = oldCancelʗ1;
+                var oldCancelᴛ1 = oldCancelʗ1;
                 var selᴛ2 = subCtxʗ1.Done();
-                switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-                case 0 when selᴛ1.ꟷᐳ(out _): {
+                switch (select(ᐸꟷ(oldCancelᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+                case 0 when oldCancelᴛ1.ꟷᐳ(out _): {
                     cancel2ʗ1();
                     break;
                 }
@@ -805,13 +802,13 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
                 ras = fallbacksʗ1;
             }
             var (c, err) = Ꮡsd.dialSerial(ctxΔ1, ras);
-            var selᴛ3 = resultsʗ1.ᐸꟷ(new dialParallel_dialResult(Conn: c, error: err, primary: primaryΔ1, done: true), ꓸꓸꓸ);
-            var selᴛ4 = returnedʗ1;
-            switch (select(selᴛ3, ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+            var resultsᴛ1 = resultsʗ1.ᐸꟷ(new dialParallel_dialResult(Conn: c, error: err, primary: primaryΔ1, done: true), ꓸꓸꓸ);
+            var returnedᴛ1 = returnedʗ1;
+            switch (select(resultsᴛ1, ᐸꟷ(returnedᴛ1, ꓸꓸꓸ))) {
             case 0: {
                 break;
             }
-            case 1 when selᴛ4.ꟷᐳ(out _): {
+            case 1 when returnedᴛ1.ꟷᐳ(out _): {
                 if (c != nil) {
                     c.Close();
                 }
@@ -836,8 +833,8 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
 
         for (;;) {
             var selᴛ5 = fallbackTimer.C;
-            var selᴛ6 = results;
-            switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+            var resultsᴛ2 = results;
+            switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(resultsᴛ2, ꓸꓸꓸ))) {
             case 0 when selᴛ5.ꟷᐳ(out _): {
                 var (fallbackCtx, fallbackCancel) = context.WithCancel(ctx);
                 var fallbackCancelʗ1 = fallbackCancel;
@@ -846,7 +843,7 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
                 goǃ(startRacerʗ2, fallbackCtx, (bool)false);
                 break;
             }
-            case 1 when selᴛ6.ꟷᐳ(out var res): {
+            case 1 when resultsᴛ2.ꟷᐳ(out var res): {
                 if (res.error == nil) {
                     return (res.Conn, default);
                 }

@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
     Writes the CompatibilitySuppressions.xml of every packed go.* package whose public methods moved into a class
-    marked [GoPromotedHost] or [GoMethodHost] since its baseline, or whose names dropped the Delta prefix (U+0394), and
-    reports every other member the package lost.
+    marked [GoPromotedHost] or [GoMethodHost] since its baseline, whose names dropped the Delta prefix (U+0394), or
+    whose structs no longer need a value clone, and reports every other member the package lost.
 
 .DESCRIPTION
     Run it over the merged packages of a pack-only run (push-nuget.ps1 -VersionSuffix local.1 -OutDir <dir>), in the
@@ -15,11 +15,13 @@
                 every Delta dropped, is the current form exactly. CP0001 a type, CP0002 a member (a property by its
                 accessors, and a member whose return or value type was renamed), CP0006 an interface member, CP0008 a
                 type implementing a renamed interface, CP0021 a renamed constraint. GoApiCompatMoves.psm1 says how.
+      a clone   a struct whose value copy needs no clone (a zero-length array holds nothing to copy, 1.26.11.1): CP0008
+                the struct no longer implementing go.IGoValueClone, CP0002 its Delta-named Clone().
 
     Nothing is written for a member that left any other way. Each is listed with its reason, and the script exits 1:
     the guard will read it red, as it should, until someone announces it or puts it back.
 
-    It writes only the files of these two kinds of break. A package that already carries a suppression file is refused
+    It writes only the files of these three kinds of break. A package that already carries a suppression file is refused
     unless -Force is given, because that file's other entries would be lost.
 
     The guard is the judge of the result, not this script: pack again and read "Binary compatibility: CLEAN". An entry

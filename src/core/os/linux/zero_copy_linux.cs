@@ -181,9 +181,8 @@ internal static (ж<poll.FD>, poll.String) getPollFDAndNetwork(any i) {
 }
 
 internal static bool isUnixOrTCP(@string network) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "unix"u8: {
+    case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8 || network == "unix"u8: {
         return true;
     }
     default: {

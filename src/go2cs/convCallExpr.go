@@ -531,6 +531,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		return converted
 	}
 
+	// A conversion between two struct types of OTHER packages, `lib.Pitch(o)` with o an `other.Pitch`:
+	// a call of the function go2cs-gen writes for the pair (foreignPairStructConversion.go).
+	if converted, ok := v.foreignPairStructConversion(callExpr); ok {
+		return converted
+	}
+
 	// Check if the call is a type conversion
 	if ok, targetTypeName := v.isTypeConversion(callExpr); ok {
 		arg := callExpr.Args[0]

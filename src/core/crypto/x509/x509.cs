@@ -1036,17 +1036,16 @@ internal static error /*err*/ checkSignature(SignatureAlgorithm algo, slice<byte
         }
     }
 
-    var exprᴛ1 = hashType;
     var matchᴛ1 = false;
-    if (exprᴛ1 == ((crypto.Hash)0)) { matchᴛ1 = true;
+    if (hashType == ((crypto.Hash)0)) { matchᴛ1 = true;
         if (pubKeyAlgo != Ed25519) {
             return ErrUnsupportedAlgorithm;
         }
     }
-    else if (exprᴛ1 == crypto.MD5) { matchᴛ1 = true;
+    else if (hashType == crypto.MD5) { matchᴛ1 = true;
         return ((InsecureAlgorithmError)(nint)algo);
     }
-    else if (exprᴛ1 == crypto.SHA1) { matchᴛ1 = true;
+    else if (hashType == crypto.SHA1) { matchᴛ1 = true;
         // SHA-1 signatures are only allowed for CRLs and CSRs.
         if (!allowSHA1) {
             return ((InsecureAlgorithmError)(nint)algo);

@@ -113,6 +113,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		Mode:       packages.LoadAllSyntax,
 		Dir:        inputFilePath,
 		BuildFlags: options.loaderBuildFlags(),
+		ParseFile:  parseFileUnparenAddressOperands,
 	}
 
 	targetParts := strings.Split(options.targetPlatform, "/")

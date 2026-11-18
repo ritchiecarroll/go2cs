@@ -37,9 +37,8 @@ private static readonly @string writeMsgSyscallNameᵇ = "wsasendmsg"u8;
 // canUseConnectEx reports whether we can use the ConnectEx Windows API call
 // for the given network type.
 internal static bool canUseConnectEx(@string net) {
-    var exprᴛ1 = net;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when net == "tcp"u8 || net == "tcp4"u8 || net == "tcp6"u8: {
         return true;
     }}
     // ConnectEx windows API does not support connectionless sockets.

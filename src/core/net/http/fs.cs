@@ -364,11 +364,10 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
         var sendSize = size;
         io.Reader sendContent = content;
         (var ranges, err) = parseRange(rangeReq, size);
-        var exprᴛ1 = err;
         var matchᴛ1 = false;
-        if (AreEqual(exprᴛ1, default)) { matchᴛ1 = true;
+        if (AreEqual(err, default)) { matchᴛ1 = true;
         }
-        else if (AreEqual(exprᴛ1, errNoOverlap)) { matchᴛ1 = true;
+        else if (AreEqual(err, errNoOverlap)) { matchᴛ1 = true;
             do {
                 if (size == 0) {
                     // Some clients add a Range header to all requests to

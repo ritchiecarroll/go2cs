@@ -371,9 +371,8 @@ internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<htt
             var k = kᴛ1;
 
             k = CanonicalHeaderKey(k);
-            var exprᴛ1 = k;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "Transfer-Encoding"u8 || exprᴛ1 == "Trailer"u8 || exprᴛ1 == "Content-Length"u8: {
+            case {} when k == "Transfer-Encoding"u8 || k == "Trailer"u8 || k == "Content-Length"u8: {
                 return badStringError(invalidTrailerKeyˢ, k);
             }}
             keys = append(keys, k);
@@ -921,9 +920,8 @@ internal static (Header, error) fixTrailer(Header header, bool chunked) {
         var trailerʗ1 = trailer;
         foreachHeaderElement(v, (@string key) => {
             key = CanonicalHeaderKey(key);
-            var exprᴛ1 = key;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "Transfer-Encoding"u8 || exprᴛ1 == "Trailer"u8 || exprᴛ1 == "Content-Length"u8: {
+            case {} when key == "Transfer-Encoding"u8 || key == "Trailer"u8 || key == "Content-Length"u8: {
                 if (Ꮡerr.ValueSlot == nil) {
                     Ꮡerr.ValueSlot = badStringError(badTrailerKeyˢ, key);
                     return;

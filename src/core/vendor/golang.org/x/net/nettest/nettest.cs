@@ -200,9 +200,8 @@ public static bool TestableAddress(@string network, @string address) {
 // "unixpacket".
 public static (net.Listener, error) NewLocalListener(@string network) {
     ᏑstackOnce.Do(probeStack);
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8: {
+    case {} when network == "tcp"u8: {
         if (canListenTCP4OnLoopback) {
             var (ln, err) = net.Listen(tcp4ˢ, "127.0.0.1:0"); if (err == nil) {
                 return (ln, default);
@@ -213,19 +212,19 @@ public static (net.Listener, error) NewLocalListener(@string network) {
         }
         break;
     }
-    case {} when exprᴛ1 == "tcp4"u8: {
+    case {} when network == "tcp4"u8: {
         if (canListenTCP4OnLoopback) {
             return net.Listen(tcp4ˢ, "127.0.0.1:0");
         }
         break;
     }
-    case {} when exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp6"u8: {
         if (canListenTCP6OnLoopback) {
             return net.Listen(tcp6ˢ, "[::1]:0");
         }
         break;
     }
-    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8: {
+    case {} when network == "unix"u8 || network == "unixpacket"u8: {
         var (path, err) = LocalPath();
         if (err != nil) {
             return (default, err);
@@ -247,9 +246,8 @@ private static readonly @string udp6ˢᵇ = "udp6"u8;
 // The provided network must be "udp", "udp4", "udp6" or "unixgram".
 public static (net.PacketConn, error) NewLocalPacketListener(@string network) {
     ᏑstackOnce.Do(probeStack);
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "udp"u8: {
+    case {} when network == "udp"u8: {
         if (canListenTCP4OnLoopback) {
             var (c, err) = net.ListenPacket(udp4ˢ, "127.0.0.1:0"); if (err == nil) {
                 return (c, default);
@@ -260,19 +258,19 @@ public static (net.PacketConn, error) NewLocalPacketListener(@string network) {
         }
         break;
     }
-    case {} when exprᴛ1 == "udp4"u8: {
+    case {} when network == "udp4"u8: {
         if (canListenTCP4OnLoopback) {
             return net.ListenPacket(udp4ˢ, "127.0.0.1:0");
         }
         break;
     }
-    case {} when exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp6"u8: {
         if (canListenTCP6OnLoopback) {
             return net.ListenPacket(udp6ˢ, "[::1]:0");
         }
         break;
     }
-    case {} when exprᴛ1 == "unixgram"u8: {
+    case {} when network == "unixgram"u8: {
         var (path, err) = LocalPath();
         if (err != nil) {
             return (default, err);
@@ -312,9 +310,8 @@ public static (@string, error) LocalPath() {
 public static (net.IP, error) MulticastSource(@string network, ж<net.Interface> Ꮡifi) {
     ref var ifi = ref Ꮡifi.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+    case {} when network == "ip"u8 || network == "ip4"u8 || network == "ip6"u8: {
         break;
     }
     default: {
@@ -353,9 +350,8 @@ public static (ж<net.Interface>, error) LoopbackInterface() {
 //
 // The provided network must be "ip", "ip4" or "ip6".
 public static (ж<net.Interface>, error) RoutedInterface(@string network, net.Flags flags) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+    case {} when network == "ip"u8 || network == "ip4"u8 || network == "ip6"u8: {
         break;
     }
     default: {
@@ -411,15 +407,14 @@ internal static (net.IP, bool) routableIP(@string network, net.IP ip) {
     if (!ip.IsLoopback() && !ip.IsLinkLocalUnicast() && !ip.IsGlobalUnicast()) {
         return (default, false);
     }
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip4"u8: {
+    case {} when network == "ip4"u8: {
         var ipΔ5 = ip.To4(); if (ipΔ5 != nil) {
             return (ipΔ5, true);
         }
         break;
     }
-    case {} when exprᴛ1 == "ip6"u8: {
+    case {} when network == "ip6"u8: {
         if (ip.IsLoopback()) { // addressing scope of the loopback address depends on each implementation
             return (default, false);
         }

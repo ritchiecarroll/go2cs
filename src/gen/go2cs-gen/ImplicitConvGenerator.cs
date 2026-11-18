@@ -33,6 +33,10 @@ public class ImplicitConvGenerator : ISourceGenerator
     // Fully-qualified, keyword-escaped, special-types display format used to reference a FOREIGN named
     // type unambiguously from a generated file (e.g. `global::go.@internal.abi_package.NameOff`) and to
     // render an underlying basic as its C# keyword (`int`, `ulong`).
+    // The glyph the converter joins a package name and a type name with where Go writes `lib.Pitch` and C#
+    // needs one identifier (TypeAliasDot in the converter's symbols.go).
+    private const string TypeAliasDot = "ꓸ";
+
     private static readonly SymbolDisplayFormat s_qualifiedFormat = new(
         globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Included,
         typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
@@ -160,6 +164,48 @@ public class ImplicitConvGenerator : ISourceGenerator
                 {
                     (structDeclaration, memberTypeParameters, memberTypeArguments) = ResolveStructChain(syntaxContext, sourceTypeName, null);
                     foreignStructTarget = structDeclaration is not null;
+                }
+
+                // BOTH struct types declared in REFERENCED assemblies, `lib.Pitch(o)` where o is an `other.Pitch`
+                // (sqlite-cs wall C): a conversion operator can be declared only in one of its two operand
+                // types, and neither can be reopened here, so no operator exists for the pair. The converter
+                // writes the conversion as a call, `libꓸPitch(o)`, and this is the function it calls: a static
+                // function of the converting package's class, named as Go names the target type and overloaded
+                // by the source type, so the operand is evaluated once, as an argument. A pair this assembly
+                // cannot copy field by field gets no function, and its call site does not compile (CS0103).
+                if (structDeclaration is null && !inverted && !indirect && genericHost is null &&
+                    sourceType is INamedTypeSymbol foreignSource && targetType is INamedTypeSymbol { TypeKind: TypeKind.Struct } foreignTarget &&
+                    !SymbolEqualityComparer.Default.Equals(sourceType.ContainingAssembly, context.Compilation.Assembly) &&
+                    !SymbolEqualityComparer.Default.Equals(targetType.ContainingAssembly, context.Compilation.Assembly))
+                {
+                    if (ForeignPairFunction(foreignSource, foreignTarget, context.Compilation) is not { } function)
+                        continue;
+
+                    string qualifiedSource = sourceType.ToDisplayString(s_qualifiedFormat);
+                    string qualifiedTarget = targetType.ToDisplayString(s_qualifiedFormat);
+
+                    if (!emittedConversions.Add($"{qualifiedSource}->{qualifiedTarget}|function"))
+                        continue;
+
+                    string functionSource = new ImplicitConvTemplate
+                    {
+                        PackageNamespace = packageNamespace,
+                        PackageName = packageName,
+                        SourceTypeName = sourceTypeName,
+                        TargetTypeName = targetTypeName,
+                        Inverted = false,
+                        Indirect = false,
+                        ValueType = null,
+                        StructMembers = function.members,
+                        UsingStatements = usingStatements,
+                        LHTypeNameOverride = qualifiedTarget,
+                        RHTypeNameOverride = qualifiedSource,
+                        FunctionName = function.name
+                    }
+                    .Generate();
+
+                    context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{function.name}-{sourceTypeName}.g.cs")), functionSource);
+                    continue;
                 }
 
                 if (structDeclaration is null)
@@ -534,6 +580,39 @@ public class ImplicitConvGenerator : ISourceGenerator
         }
 
         return declaration is null ? (null, [], []) : (declaration, TypeArgumentSubstitution.TypeParameters(declaration), TypeArgumentSubstitution.TypeArguments(current));
+    }
+
+    // ForeignPairFunction names the conversion function of two struct types declared in referenced assemblies
+    // and lists the members it copies, or returns null when this assembly cannot write it. The name is the
+    // one the converter calls: the target's package name, the alias dot and the target's type name,
+    // `libꓸPitch`, read off the package class that holds the type. The members are the parameters of the
+    // target's own constructor, in its order, so the function builds the target the way every conversion
+    // operator does. Go converts between struct types only when their fields are identical, so each
+    // parameter names a field of the source as well; a field this assembly cannot read (an unexported field
+    // of another package, `internal` there) leaves no function to write.
+    private static (string name, List<(string typeName, string memberName)> members)? ForeignPairFunction(INamedTypeSymbol sourceType, INamedTypeSymbol targetType, Compilation compilation)
+    {
+        if (targetType.ContainingType is not { } targetPackage || !targetPackage.Name.EndsWith(PackageSuffix) || sourceType.IsGenericType || targetType.IsGenericType)
+            return null;
+
+        IFieldSymbol[] sourceFields = sourceType.GetMembers().OfType<IFieldSymbol>().Where(field => !field.IsStatic && !field.IsConst && !field.IsImplicitlyDeclared).ToArray();
+
+        if (sourceFields.Any(field => !compilation.IsSymbolAccessibleWithin(field, compilation.Assembly)))
+            return null;
+
+        IMethodSymbol? constructor = targetType.InstanceConstructors.FirstOrDefault(candidate =>
+            candidate.Parameters.Length == sourceFields.Length &&
+            compilation.IsSymbolAccessibleWithin(candidate, compilation.Assembly) &&
+            candidate.Parameters.All(parameter => sourceFields.Any(field => field.Name == parameter.Name)));
+
+        // An empty struct is built by its implicit parameterless constructor, which metadata may not list.
+        if (constructor is null && sourceFields.Length != 0)
+            return null;
+
+        List<(string typeName, string memberName)> members = constructor is null ? [] :
+            constructor.Parameters.Select(parameter => (parameter.Type.ToDisplayString(s_qualifiedFormat), EscapeCsKeyword(parameter.Name))).ToList();
+
+        return ($"{targetPackage.Name[..^PackageSuffix.Length]}{TypeAliasDot}{targetType.Name}", members);
     }
 
     // True when exactly one side of the pair is declared in ANOTHER assembly and that foreign side is
