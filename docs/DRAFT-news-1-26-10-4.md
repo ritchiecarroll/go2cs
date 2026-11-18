@@ -1318,6 +1318,19 @@ through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
   name writes the Go name.
   <!-- source: the same seat; behavioral fixtures MethodHolderNames and MethodHolderAlias, and every golden that named
        a renamed element (goldens: re-baseline). -->
+- **A struct whose only array has length zero no longer has `ΔClone`.** PENDING. Through 1.26.10.3 a struct with a
+  fixed-size array field implemented `go.IGoValueClone` and had a generated `ΔClone()`, because a C# copy of the
+  struct shares the array where Go copies it, and every Go value copy called the clone. A zero-length array holds
+  nothing to copy, so from 1.26.11.1 a struct whose only such field is zero-length has neither, and its value copy is
+  a plain C# copy. In the standard library this is one type, `syscall.InotifyEvent` on Linux, which ends
+  `Name [0]uint8`. C# source that called its `ΔClone()` copies the value instead. An assembly compiled against
+  1.26.10.3 that calls it, or uses the struct as `IGoValueClone`, fails under 1.26.11.1, and the break floor refuses
+  that combination first (`GO2CS3002`): rebuild against 1.26.11.1.
+  <!-- source: P2's zero-length-array seat (54aa3a5b85, batch 312). Announced to the binary-compatibility guard as two
+       generated entries (New-GoApiCompatMoveSuppressions.ps1, the clone drop: CP0008 for the struct, CP0002 for
+       ΔClone) on runtimes/linux-x64 against 1.26.10.3. The generator over the 312 union's release-smoke pack (362
+       packages) found no other: 13,236 entries in 230 files, 0 refused. linux-arm64 has no 1.26.10.3 asset to compare
+       with; darwin and windows have no InotifyEvent. -->
 
 **A package whose types promote very many methods now loads.** PENDING. The .NET runtime loads no type with more
 than 65,521 methods. A converted package class held every promoted-method forwarder of every struct in the package,
