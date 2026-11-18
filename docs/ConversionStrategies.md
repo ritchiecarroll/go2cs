@@ -4575,7 +4575,7 @@ the variable with the suffix `ᴷ`, and passes it as `append`'s first argument, 
 golib's `append` for this form is a small inlined head that only checks whether the append may take the
 buffer; the take itself, `appendBuffered`, is never inlined, so the first buffer does not stay reachable
 after the slice outgrows it. Any other append goes on as an ordinary append.
-<!-- The head and the take: src/core/golib/stackAppend.cs:128 `public static slice<T> append<T>(in stackAppend<T> buffer, slice<T> slice, params ReadOnlySpan<T> elems)` (marked AggressiveInlining on the line before) and :138 `private static slice<T> appendBuffered<T>(in stackAppend<T> buffer, slice<T> slice, ReadOnlySpan<T> elems)` (marked NoInlining on the line before). Harvest: src/go2cs/stackAppendHints.go. -->
+<!-- The head and the take: src/core/golib/stackAppend.cs:129 `public static slice<T> append<T>(in stackAppend<T> buffer, slice<T> slice, params ReadOnlySpan<T> elems)` (marked AggressiveInlining on the line before) and :139 `private static slice<T> appendBuffered<T>(in stackAppend<T> buffer, slice<T> slice, ReadOnlySpan<T> elems)` (marked NoInlining on the line before). Harvest: src/go2cs/stackAppendHints.go. -->
 
 **A buffered slice that escapes in one statement moves to the heap there.** Go 1.26 also gives the buffer
 to a variable whose only escape is one statement outside its loops: a `return` of it, an assignment of

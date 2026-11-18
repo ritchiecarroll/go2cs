@@ -8,6 +8,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using go.golib;
 
 namespace go;
 

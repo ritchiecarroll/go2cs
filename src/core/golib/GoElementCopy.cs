@@ -5,9 +5,8 @@
 // that can be found in the LICENSE file.
 
 using System;
-using go.golib;
 
-namespace go;
+namespace go.golib;
 
 /// <summary>
 /// The element moves behind Go's <c>copy</c> and <c>append</c>, which copy each element's VALUE.
