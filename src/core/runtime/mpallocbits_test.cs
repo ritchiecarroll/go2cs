@@ -15,7 +15,7 @@ partial class runtime_test_package {
 
 // Ensures that got and want are the same, and if not, reports
 // detailed diff information.
-internal static bool checkPallocBits(ж<testing.T> t, ж<global::go.runtime_internal_test_package.ΔPallocBits> got, ж<global::go.runtime_internal_test_package.ΔPallocBits> want) {
+internal static bool checkPallocBits(ж<testing.T> t, ж<global::go.runtime_internal_test_package.PallocBits> got, ж<global::go.runtime_internal_test_package.PallocBits> want) {
     var d = runtime_internal_test_package.DiffPallocBits(got, want);
     if (len(d) != 0) {
         t.Errorf("%d range(s) different", len(d));
@@ -31,8 +31,8 @@ internal static bool checkPallocBits(ж<testing.T> t, ж<global::go.runtime_inte
 
 // makePallocBits produces an initialized PallocBits by setting
 // the ranges in s to 1 and the rest to zero.
-internal static ж<global::go.runtime_internal_test_package.ΔPallocBits> makePallocBits(slice<global::go.runtime_internal_test_package.BitRange> s) {
-    var b = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
+internal static ж<global::go.runtime_internal_test_package.PallocBits> makePallocBits(slice<global::go.runtime_internal_test_package.BitRange> s) {
+    var b = @new<global::go.runtime_internal_test_package.PallocBits>();
     foreach (var (_, v) in range(s)) {
         b.AllocRange(v.I, v.N);
     }
@@ -59,38 +59,38 @@ private static readonly @string allˢᵇ = "All"u8;
 // method used for testing and initialization since it's used by
 // makePallocBits.
 public static void TestPallocBitsAllocRange(ж<testing.T> t) {
-    void test(ж<testing.T> tΔ1, nuint i, nuint n, ж<global::go.runtime_internal_test_package.ΔPallocBits> want) {
+    void test(ж<testing.T> tΔ1, nuint i, nuint n, ж<global::go.runtime_internal_test_package.PallocBits> want) {
         checkPallocBits(tΔ1, makePallocBits([new(i, n)]), want);
     }
     var testʗ1 = test;
     t.Run(oneLowˢ, (ж<testing.T> tΔ2) => {
-        var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
+        var want = @new<global::go.runtime_internal_test_package.PallocBits>();
         want.Value[0] = 0x1;
         testʗ1(tΔ2, 0, 1, want);
     });
     var testʗ2 = test;
     t.Run(oneHighˢ, (ж<testing.T> tΔ3) => {
-        var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
+        var want = @new<global::go.runtime_internal_test_package.PallocBits>();
         want.Value[runtime_internal_test_package.PallocChunkPages / 64 - 1] = (uint64)1 << 63;
         testʗ2(tΔ3, runtime_internal_test_package.PallocChunkPages - 1, 1, want);
     });
     if (runtime_internal_test_package.PallocChunkPages >= 512) {
         var testʗ3 = test;
         t.Run(innerˢ, (ж<testing.T> tΔ4) => {
-            var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
+            var want = @new<global::go.runtime_internal_test_package.PallocBits>();
             want.Value[..][2] = 0x3e;
             testʗ3(tΔ4, 129, 5, want);
         });
         var testʗ4 = test;
         t.Run(alignedˢ, (ж<testing.T> tΔ5) => {
-            var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
+            var want = @new<global::go.runtime_internal_test_package.PallocBits>();
             want.Value[..][2] = ~(uint64)0;
             want.Value[..][3] = ~(uint64)0;
             testʗ4(tΔ5, 128, 128, want);
         });
         var testʗ5 = test;
         t.Run(beginˢ, (ж<testing.T> tΔ6) => {
-            var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
+            var want = @new<global::go.runtime_internal_test_package.PallocBits>();
             want.Value[..][0] = ~(uint64)0;
             want.Value[..][1] = ~(uint64)0;
             want.Value[..][2] = ~(uint64)0;
@@ -103,7 +103,7 @@ public static void TestPallocBitsAllocRange(ж<testing.T> t) {
         t.Run(endˢ, (ж<testing.T> tΔ7) => {
             // avoid constant overflow when PallocChunkPages is small
             nuint PallocChunkPages = runtime_internal_test_package.PallocChunkPages;
-            var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
+            var want = @new<global::go.runtime_internal_test_package.PallocBits>();
             want.Value[PallocChunkPages / 64 - 1] = ~(uint64)0;
             want.Value[PallocChunkPages / 64 - 2] = ~(uint64)0;
             want.Value[PallocChunkPages / 64 - 3] = ~(uint64)0;
@@ -113,7 +113,7 @@ public static void TestPallocBitsAllocRange(ж<testing.T> t) {
     }
     var testʗ7 = test;
     t.Run(allˢ, (ж<testing.T> tΔ8) => {
-        var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
+        var want = @new<global::go.runtime_internal_test_package.PallocBits>();
         foreach (var i in range(want, 8)) {
             want.Value[i] = ~(uint64)0;
         }
@@ -122,7 +122,7 @@ public static void TestPallocBitsAllocRange(ж<testing.T> t) {
 }
 
 // Inverts every bit in the PallocBits.
-internal static void invertPallocBits(ж<global::go.runtime_internal_test_package.ΔPallocBits> Ꮡb) {
+internal static void invertPallocBits(ж<global::go.runtime_internal_test_package.PallocBits> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     foreach (var i in range(8)) {
@@ -253,7 +253,7 @@ public static void TestMallocBitsPopcntRange(ж<testing.T> t) {
 // Ensures computing bit summaries works as expected by generating random
 // bitmaps and checking against a reference implementation.
 public static void TestPallocBitsSummarizeRandom(ж<testing.T> t) {
-    var b = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
+    var b = @new<global::go.runtime_internal_test_package.PallocBits>();
     for (nint i = 0; i < 1000; i++) {
         // Randomize bitmap.
         foreach (var iΔ1 in range(b, 8)) {
@@ -383,7 +383,7 @@ public static void BenchmarkPallocBitsSummarize(ж<testing.B> b) {
         0x1000404044ccaaffUL
     ]);
     foreach (var (_, p) in range(patterns)) {
-        var buf = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
+        var buf = @new<global::go.runtime_internal_test_package.PallocBits>();
         for (nint i = 0; i < 8; i++) {
             buf.Value[i] = p;
         }

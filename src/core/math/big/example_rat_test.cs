@@ -18,8 +18,8 @@ partial class big_test_package {
 //
 //	   1          if   n mod 3 != 1
 //	(n-1)/3 * 2   if   n mod 3 == 1
-internal static ж<bigꓸRat> recur(int64 n, int64 lim) {
-    var term = @new<bigꓸRat>();
+internal static ж<big.Rat> recur(int64 n, int64 lim) {
+    var term = @new<big.Rat>();
     if (n % 3 != 1) {
         term.SetInt64(1);
     } else {
@@ -32,7 +32,7 @@ internal static ж<bigꓸRat> recur(int64 n, int64 lim) {
 
     // Directly initialize frac as the fractional
     // inverse of the result of recur.
-    var frac = @new<bigꓸRat>().Inv(recur(n + 1, lim));
+    var frac = @new<big.Rat>().Inv(recur(n + 1, lim));
 
     return term.Add(term, frac);
 }

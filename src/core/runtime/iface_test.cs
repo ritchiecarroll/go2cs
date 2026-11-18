@@ -6,6 +6,7 @@ namespace go;
 using Δruntime = runtime_package;
 using testing = testing_package;
 using static global::go.runtime_internal_test_package;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -22,12 +23,22 @@ partial struct TS /*num:uint16*/;
 partial struct TM /*num:uintptr*/;
 partial struct TL /*[2]uintptr*/;
 
+} partial class runtime_testᴛTS {
+
 public static void Method1(this TS _) { }
 public static void Method2(this TS _) { }
+
+} partial class runtime_testᴛTM {
+
 public static void Method1(this TM _) { }
 public static void Method2(this TM _) { }
+
+} partial class runtime_testᴛTL {
+
 public static void Method1(this TL _) { }
 public static void Method2(this TL _) { }
+
+} partial class runtime_test_package {
 
 partial struct T8 /*num:uint8*/;
 partial struct T16 /*num:uint16*/;
@@ -36,12 +47,31 @@ partial struct T64 /*num:uint64*/;
 partial struct Tstr /*@string*/;
 partial struct Tslice /*[]byte*/;
 
+} partial class runtime_testᴛT8 {
+
 public static void Method1(this T8 _) { }
+
+} partial class runtime_testᴛT16 {
+
 public static void Method1(this T16 _) { }
+
+} partial class runtime_testᴛT32 {
+
 public static void Method1(this T32 _) { }
+
+} partial class runtime_testᴛT64 {
+
 public static void Method1(this T64 _) { }
+
+} partial class runtime_testᴛTstr {
+
 public static void Method1(this Tstr _) { }
+
+} partial class runtime_testᴛTslice {
+
 public static void Method1(this Tslice _) { }
+
+} partial class runtime_test_package {
 
 internal static any e;
 internal static any e_;
@@ -203,7 +233,7 @@ public static void BenchmarkAssertE2TLarge(ж<testing.B> Ꮡb) {
 
     e = tl.Clone();
     for (nint i = 0; i < b.N; i++) {
-        tl = e._<TL>();
+        tl.Assign(e._<TL>());
     }
 }
 

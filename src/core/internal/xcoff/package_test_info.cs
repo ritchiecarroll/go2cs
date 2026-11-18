@@ -13,7 +13,6 @@ using go;
 using static global::go.@internal.xcoff_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Section", "ΔSection")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -35,7 +34,7 @@ using static global::go.@internal.xcoff_internal_test_package;
 [assembly: GoFieldAccess(typeof(global::go.@internal.xcoff_package.Archive))]
 [assembly: GoFieldAccess(typeof(global::go.@internal.xcoff_package.File))]
 [assembly: GoFieldAccess(typeof(global::go.@internal.xcoff_package.Member))]
-[assembly: GoFieldAccess(typeof(global::go.@internal.xcoff_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(global::go.@internal.xcoff_package.Section))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

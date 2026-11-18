@@ -17,6 +17,7 @@ using go.math;
 using io = io_package;
 using static go.encoding.gob_package;
 using ꓸꓸꓸany = Span<any>;
+using static gob_internal_test_package;
 
 partial class gob_internal_test_package {
 
@@ -170,7 +171,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     // bool
     {
         bool data = true;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encBool), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encBool), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(boolResult, b.Bytes())) {
@@ -182,7 +183,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         nint data = 17;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encInt), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encInt), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(signedResult, b.Bytes())) {
@@ -194,7 +195,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         nuint data = 17;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encUint), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encUint), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(unsignedResult, b.Bytes())) {
@@ -206,7 +207,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         int8 data = 17;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encInt), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encInt), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(signedResult, b.Bytes())) {
@@ -218,7 +219,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         uint8 data = 17;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encUint), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encUint), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(unsignedResult, b.Bytes())) {
@@ -230,7 +231,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         int16 data = 17;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encInt), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encInt), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(signedResult, b.Bytes())) {
@@ -242,7 +243,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         uint16 data = 17;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encUint), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encUint), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(unsignedResult, b.Bytes())) {
@@ -254,7 +255,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         int32 data = 17;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encInt), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encInt), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(signedResult, b.Bytes())) {
@@ -266,7 +267,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         uint32 data = 17;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encUint), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encUint), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(unsignedResult, b.Bytes())) {
@@ -278,7 +279,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         int64 data = 17;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encInt), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encInt), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(signedResult, b.Bytes())) {
@@ -290,7 +291,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         uint64 data = 17;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encUint), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encUint), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(unsignedResult, b.Bytes())) {
@@ -302,7 +303,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         float32 data = 17F;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encFloat), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encFloat), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(floatResult, b.Bytes())) {
@@ -314,7 +315,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         float64 data = 17D;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encFloat), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encFloat), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(floatResult, b.Bytes())) {
@@ -326,7 +327,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         var data = slice<byte>("hello"u8);
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encUint8Array), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encUint8Array), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(bytesResult, b.Bytes())) {
@@ -338,7 +339,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     {
         b.Reset();
         @string data = helloˢ;
-        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflectꓸValue>(encString), 6, default, 0));
+        var instr = Ꮡ(new encInstr(new Action<ж<global::go.encoding.gob_package.encInstr>, ж<global::go.encoding.gob_package.encoderState>, reflect.Value>(encString), 6, default, 0));
         var state = newEncoderState(b);
         instr.op(instr, state, reflect.ValueOf(data));
         if (!bytes.Equal(bytesResult, b.Bytes())) {
@@ -347,7 +348,7 @@ public static void TestScalarEncInstructions(ж<testing.T> t) {
     }
 }
 
-internal static void execDec(ж<global::go.encoding.gob_package.decInstr> Ꮡinstr, ж<global::go.encoding.gob_package.decoderState> Ꮡstate, ж<testing.T> t, reflectꓸValue value) {
+internal static void execDec(ж<global::go.encoding.gob_package.decInstr> Ꮡinstr, ж<global::go.encoding.gob_package.decoderState> Ꮡstate, ж<testing.T> t, reflect.Value value) {
     GoFrame ᒐ = default;
     try {
         ref var instr = ref Ꮡinstr.DerefOrNull();
@@ -384,7 +385,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // bool
     {
         ref var data = ref heap(new bool(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decBool), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decBool), 6, default, ovfl));
         var state = newDecodeStateFromData(boolResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != true) {
@@ -394,7 +395,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // int
     {
         ref var data = ref heap(new nint(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(decOpTable[reflect.ΔInt], 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(decOpTable[reflect.Int], 6, default, ovfl));
         var state = newDecodeStateFromData(signedResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17) {
@@ -405,7 +406,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // uint
     {
         ref var data = ref heap(new nuint(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(decOpTable[reflect.ΔUint], 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(decOpTable[reflect.Uint], 6, default, ovfl));
         var state = newDecodeStateFromData(unsignedResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17) {
@@ -416,7 +417,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // int8
     {
         ref var data = ref heap(new int8(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decInt8), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decInt8), 6, default, ovfl));
         var state = newDecodeStateFromData(signedResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17) {
@@ -427,7 +428,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // uint8
     {
         ref var data = ref heap(new uint8(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decUint8), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decUint8), 6, default, ovfl));
         var state = newDecodeStateFromData(unsignedResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17) {
@@ -438,7 +439,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // int16
     {
         ref var data = ref heap(new int16(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decInt16), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decInt16), 6, default, ovfl));
         var state = newDecodeStateFromData(signedResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17) {
@@ -449,7 +450,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // uint16
     {
         ref var data = ref heap(new uint16(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decUint16), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decUint16), 6, default, ovfl));
         var state = newDecodeStateFromData(unsignedResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17) {
@@ -460,7 +461,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // int32
     {
         ref var data = ref heap(new int32(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decInt32), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decInt32), 6, default, ovfl));
         var state = newDecodeStateFromData(signedResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17) {
@@ -471,7 +472,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // uint32
     {
         ref var data = ref heap(new uint32(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decUint32), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decUint32), 6, default, ovfl));
         var state = newDecodeStateFromData(unsignedResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17) {
@@ -493,7 +494,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // int64
     {
         ref var data = ref heap(new int64(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decInt64), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decInt64), 6, default, ovfl));
         var state = newDecodeStateFromData(signedResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17) {
@@ -504,7 +505,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // uint64
     {
         ref var data = ref heap(new uint64(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decUint64), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decUint64), 6, default, ovfl));
         var state = newDecodeStateFromData(unsignedResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17) {
@@ -515,7 +516,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // float32
     {
         ref var data = ref heap(new float32(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decFloat32), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decFloat32), 6, default, ovfl));
         var state = newDecodeStateFromData(floatResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17F) {
@@ -526,7 +527,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // float64
     {
         ref var data = ref heap(new float64(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decFloat64), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decFloat64), 6, default, ovfl));
         var state = newDecodeStateFromData(floatResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != 17D) {
@@ -559,7 +560,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // bytes == []uint8
     {
         ref var data = ref heap<slice<byte>>(out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decUint8Slice), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decUint8Slice), 6, default, ovfl));
         var state = newDecodeStateFromData(bytesResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (((sstring)data) != "hello"u8) {
@@ -570,7 +571,7 @@ public static void TestScalarDecInstructions(ж<testing.T> t) {
     // string
     {
         ref var data = ref heap(new @string(), out var Ꮡdata);
-        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflectꓸValue>(decString), 6, default, ovfl));
+        var instr = Ꮡ(new decInstr(new Action<ж<global::go.encoding.gob_package.decInstr>, ж<global::go.encoding.gob_package.decoderState>, reflect.Value>(decString), 6, default, ovfl));
         var state = newDecodeStateFromData(bytesResult);
         execDec(instr, state, t, reflect.ValueOf(Ꮡdata));
         if (data != "hello"u8) {
@@ -1133,7 +1134,7 @@ public static void TestIndirectSliceMapArray(ж<testing.T> t) {
     i.A = @new<ж<ж<array<nint>>>>();
     i.A.ValueSlot = @new<ж<array<nint>>>();
     (i.A.ValueSlot).ValueSlot = Ꮡ(new array<nint>(3));
-    ((i.A.ValueSlot).ValueSlot).Value = new nint[]{1, 2, 3}.array();
+    ((i.A.ValueSlot).ValueSlot).Assign(new nint[]{1, 2, 3}.array());
     i.S = @new<ж<ж<slice<nint>>>>();
     i.S.ValueSlot = @new<ж<slice<nint>>>();
     (i.S.ValueSlot).ValueSlot = @new<slice<nint>>();
@@ -1161,7 +1162,7 @@ public static void TestIndirectSliceMapArray(ж<testing.T> t) {
         t.Errorf("indirect to direct: d.M is %v not %v", d.M, ((i.M.ValueSlot).ValueSlot).ValueSlot.OrTypedNil());
     }
     // Marshal direct, unmarshal to indirect.
-    d.A = new nint[]{11, 22, 33}.array();
+    d.A.Assign(new nint[]{11, 22, 33}.array());
     d.S = [44, 55, 66];
     d.M = new map<@string, nint>{["four"] = 4, ["five"] = 5, ["six"] = 6};
     i = @new<Indirect>();
@@ -1190,17 +1191,27 @@ public partial interface Squarer {
 
 public partial struct Int /*num:nint*/;
 
+} partial class gob_internal_testᴛInt {
+
 public static nint Square(this Int i) {
     return (nint)(i * i);
 }
 
+} partial class gob_internal_test_package {
+
 public partial struct Float /*num:float64*/;
+
+} partial class gob_internal_testᴛFloat {
 
 public static nint Square(this Float f) {
     return (nint)(f * f);
 }
 
+} partial class gob_internal_test_package {
+
 public partial struct Vector /*[]nint*/;
+
+} partial class gob_internal_testᴛVector {
 
 public static nint Square(this Vector v) {
     nint sum = 0;
@@ -1210,13 +1221,19 @@ public static nint Square(this Vector v) {
     return sum;
 }
 
+} partial class gob_internal_test_package {
+
 public partial struct Point {
     public nint X, Y;
 }
 
+} partial class gob_internal_testᴛPoint {
+
 public static nint Square(this Point p) {
     return p.X * p.X + p.Y * p.Y;
 }
+
+} partial class gob_internal_test_package {
 
 // A struct with interfaces in it.
 public partial struct InterfaceItem {
@@ -1344,7 +1361,7 @@ public static void TestInterfaceBasic(ж<testing.T> t) {
     }
 }
 
-public partial struct ΔString /*@string*/;
+public partial struct String /*@string*/;
 
 public partial struct PtrInterfaceItem {
     public any Str1; // basic
@@ -1362,7 +1379,7 @@ private static readonly @string kiddoˢᵇ = "kiddo"u8;
 public static void TestInterfacePointer(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     ref var str1 = ref heap<@string>(howdyˢ, out var Ꮡstr1);
-    ref var str2 = ref heap<ΔString>((ΔString)(@string)kiddoˢ, out var Ꮡstr2);
+    ref var str2 = ref heap<String>((String)(@string)kiddoˢ, out var Ꮡstr2);
     var item1 = Ꮡ(new PtrInterfaceItem(
         Ꮡstr1,
         Ꮡstr2
@@ -1386,7 +1403,7 @@ public static void TestInterfacePointer(ж<testing.T> t) {
         }
     }
     {
-        var (v, ok) = item2.Str2._<ΔString>(ᐧ); if (!ok || v != str2) {
+        var (v, ok) = item2.Str2._<String>(ᐧ); if (!ok || v != str2) {
             t.Errorf("derived type String failed: %q should be %q", v, str2);
         }
     }
@@ -1508,7 +1525,7 @@ internal static DT newDT() {
     dt.J = new OnTheFly(3);
     dt.I_nil = default;
     dt.M = new map<@string, nint>{["one"] = 1, ["two"] = 2};
-    dt.T = new nint[]{11, 22, 33}.array();
+    dt.T.Assign(new nint[]{11, 22, 33}.array());
     dt.S = ["hi", "joe"];
     return dt.ΔClone();
 }

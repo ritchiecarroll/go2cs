@@ -31,7 +31,7 @@ using static go.compress.gzip_internal_test_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("compress/gzip/fuzz_test.go", "fuzz_test.cs", "ABoiooKCgoKClIKClKaCgpSCgpSCgriCgoK4poKCgoKmlIKCpoKmgoKClIKClIKUgg==", "56-91:1")]
 [assembly: GoPositionMap("compress/gzip/gunzip_test.go", "gunzip_test.cs", "ABw0ANQC5AXYlIKUgoKCgpSSgpSCgoKUgoK4goKCgpSClIKCgpSCgsbk/IKClIKClJKCooKClJSUtAAICAAJBISSooKmlIKCgoKopIKCgqaClIKCgqaCuKaCggAICIIAEy6CgoKCgpSUgoKUgtyClIKCgriCgg==", "463-471:1", "", "", "388:25,448:21")]
-[assembly: GoPositionMap("compress/gzip/gzip_test.go", "gzip_test.cs", "AA8ikpSCpoKClIKUgoKUgpSCAAsMopSCgoKCgoKUgqaCgpSCgpSClIKUgpSClIKUgvqSgoKCgoKUgqaCgoKUgoIACAyiAAsegpSCgoKCgpSCpoKCgpSCgoKUgoKUgoIACAqClIKCgoKUgoKmgIK2goKmlIKCpoCCtoKCpoCC/JKCgoKCgoKUgoKUgoK4goKCgoKCgoKCgoIABxCCgoKUgqiSlKKCgIK2gu6Agg==", "", "", "299=Now/1/1/3")]
+[assembly: GoPositionMap("compress/gzip/gzip_test.go", "gzip_test.cs", "ABAikpSCpoKClIKUgoKUgpSCAAsMopSCgoKCgoKUgqaCgpSCgpSClIKUgpSClIKUgvqSgoKCgoKUgqaCgoKUgoIACAyiAAsegpSCgoKCgpSCpoKCgpSCgoKUgoKUgoIACAqClIKCgoKUgoKmgIK2goKmlIKCpoCCtoKCpoCC/JKCgoKCgoKUgoKUgoK4goKCgoKCgoKCgoIACRCCgoKUgsiSlKKCgIK2gu6Agg==", "", "", "304=Now/1/1/3")]
 [assembly: GoPositionMap("compress/gzip/issue14937_test.go", "issue14937_test.cs", "ABo0AAwIgpSUgoKUgoKClIKUlIKClJSClIK4ooKCgpSSgoKClJKCtA==", "40-48:1", "", "", "82:21,89:21")]
 // </GoSourcePositionMaps>
 
@@ -72,3 +72,13 @@ public static partial class gzip_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(gzip_internal_test_package.limitedWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gzip_internal_testᴛlimitedWriter;
+// </MethodHolders>

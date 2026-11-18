@@ -32,7 +32,7 @@ using static go.net.http.cookiejar_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/cookiejar/jar_test.go", "jar_test.cs", "ABIkAA4UggAJBIKClIKUgpSokoKClNYAPYABgoKCgoLKABgygoKCgoKUlIKClIKCygAIEoKCgsoAFzCCgoLKABUsgoKCygAKFoKCgsoADh6CgoIADAoAG0SCgoKCgpSUgpSCAAYQkoKokoKClAAYNNKmgoKCgpSUgpaSgoKCpoKClKaCpoLKgoKCgpSC7gCaArYEgoKC3ACLAZgCgoKCuIKCAB9CAMQBigOCgoLcADNogoKCzAA6doKCgtwApAHKAoKCgriCgrKCgoCCpIKAgg==", "", "", "752=expiresIn/1/3/43,expiresIn/2/3/44,expiresIn/3/3/45;901=expiresIn/1/2/6,expiresIn/2/2/8,run/1/1/19;1199=expiresIn/1/2/25,expiresIn/2/2/53")]
+[assembly: GoPositionMap("net/http/cookiejar/jar_test.go", "jar_test.cs", "ABMkABAUggAJBIKClIKUgpTIkoKClNYAPYABgoKCgoLKABgygoKCgoKUlIKClIKCygAIEoKCgsoAFzCCgoLKABUsgoKCygAKFoKCgsoADh6CgoIADAoAG0SCgoKCgpSUgpSCAAYQkoKokoKClAAaNNKmgoKCgpSUgpaSgoKCpoKClKaCpoLKgoKCgpSCAAgOAJoCtgSCgoLcAIsBmAKCgoK4goIAH0IAxAGKA4KCgtwAM2iCgoLMADp2goKC3ACkAcoCgoKCuIKCsoKCgIKkgoCC", "", "", "761=expiresIn/1/3/43,expiresIn/2/3/44,expiresIn/3/3/45;910=expiresIn/1/2/6,expiresIn/2/2/8,run/1/1/19;1208=expiresIn/1/2/25,expiresIn/2/2/53")]
 [assembly: GoPositionMap("net/http/cookiejar/punycode_test.go", "punycode_test.cs", "AA0WAG+cAoKCgoKC")]
 // </GoSourcePositionMaps>
 
@@ -67,3 +67,14 @@ public static partial class cookiejar_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cookiejar_internal_test_package.jarTest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cookiejar_internal_testᴛjarTest;
+[GoMethodHost(typeof(cookiejar_internal_test_package.testPSL)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cookiejar_internal_testᴛtestPSL;
+// </MethodHolders>

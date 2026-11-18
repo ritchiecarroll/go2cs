@@ -46,11 +46,11 @@ public static partial void TestWeakCertCache(ж<testing.T> t) {
 
     void timeoutRefCheck(ж<testing.T> tΔ1, @string key, bool present) {
         tΔ1.Helper();
-        var timeout = time_package.After((time.Duration)(4000000000L));
+        var timeout = time.After((time.Duration)(4000000000L));
         for (;;) {
-            var selᴛ1 = timeout;
-            switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-            case 0 when selᴛ1.ꟷᐳ(out _): {
+            var timeoutᴛ1 = timeout;
+            switch (trySelect(ᐸꟷ(timeoutᴛ1, ꓸꓸꓸ))) {
+            case 0 when timeoutᴛ1.ꟷᐳ(out _): {
                 tΔ1.Fatal(timedOutWaitingForˢ);
                 break;
             }

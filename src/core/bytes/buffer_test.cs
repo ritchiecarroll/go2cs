@@ -16,6 +16,7 @@ using bytes = bytes_package;
 using go.math;
 using go.unicode;
 using static go.bytes_internal_test_package;
+using static bytes_test_package;
 
 partial class bytes_test_package {
 
@@ -26,7 +27,11 @@ internal static slice<byte> testBytes; // test data; same as testString but as a
 partial struct negativeReader {
 }
 
+} partial class bytes_testᴛnegativeReader {
+
 internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) { return (-1, default); }
+
+} partial class bytes_test_package {
 
 [GoInit] internal static void init() {
     testBytes = new slice<byte>(N);
@@ -373,12 +378,16 @@ partial struct panicReader {
     internal bool panic;
 }
 
+} partial class bytes_testᴛpanicReader {
+
 internal static (nint, error) Read(this panicReader r, slice<byte> p) {
     if (r.panic) {
         throw panic("oops");
     }
     return (0, Δio.EOF);
 }
+
+} partial class bytes_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testReadFromPanicReader1ˢ => ref testReadFromPanicReader1ˢᵇ;

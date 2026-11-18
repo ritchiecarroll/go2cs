@@ -115,7 +115,7 @@ public static void TestForCompiler(ж<testing.T> t) {
             }
             return (new importer_internal_test_package.os_FileжReadCloser(f), default);
         };
-        var imp = ForCompiler(fsetʗ2, compiler, new Func<@string, (io.ReadCloser, error)>(lookup));
+        var imp = ForCompiler(fsetʗ2, compiler, lookup);
         var (pkg, errΔ3) = imp.Import(mathBiggerˢ);
         if (errΔ3 != nil) {
             tΔ2.Fatal(errΔ3);

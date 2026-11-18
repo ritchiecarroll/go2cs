@@ -159,7 +159,7 @@ public static void TestChaCha8Marshal(ж<testing.T> t) {
             t.Errorf("#%d: AppendBinary=%q, want %q", i, encAppend, chacha8marshal[i]);
         }
 
-        p.Value = new ChaCha8();
+        p.Value.AssignFrom(new ChaCha8());
         var errΔ1 = p.UnmarshalBinary(enc); if (errΔ1 != nil) {
             t.Fatalf("#%d: UnmarshalBinary: %v", i, errΔ1);
         }
@@ -190,7 +190,7 @@ public static void TestChaCha8MarshalRead(ж<testing.T> t) {
             t.Errorf("#%d: AppendBinary=%q, want %q", i, encAppend, chacha8marshalread[i]);
         }
 
-        p.Value = new ChaCha8();
+        p.Value.AssignFrom(new ChaCha8());
         var errΔ1 = p.UnmarshalBinary(enc); if (errΔ1 != nil) {
             t.Fatalf("#%d: UnmarshalBinary: %v", i, errΔ1);
         }

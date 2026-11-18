@@ -18,12 +18,16 @@ partial class httptest_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string hiFirstˢ => ref hiFirstˢᵇ;
 private static readonly @string hiFirstˢᵇ = "hi first"u8;
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
 internal static ref readonly @string textPlainCharsetUtf8ˢ => ref textPlainCharsetUtf8ˢᵇ;
 private static readonly @string textPlainCharsetUtf8ˢᵇ = "text/plain; charset=utf-8"u8;
 internal static ref readonly @string htmlˢ => ref htmlˢᵇ;
 private static readonly @string htmlˢᵇ = "<html>"u8;
 internal static ref readonly @string textHtmlCharsetUtf8ˢ => ref textHtmlCharsetUtf8ˢᵇ;
 private static readonly @string textHtmlCharsetUtf8ˢᵇ = "text/html; charset=utf-8"u8;
+internal static ref readonly @string transferEncodingˢ => ref transferEncodingˢᵇ;
+private static readonly @string transferEncodingˢᵇ = "Transfer-Encoding"u8;
 internal static ref readonly @string someEncodingˢ => ref someEncodingˢᵇ;
 private static readonly @string someEncodingˢᵇ = "some encoding"u8;
 internal static ref readonly @string someTypeˢ => ref someTypeˢᵇ;
@@ -36,6 +40,8 @@ internal static ref readonly @string incorrectˢ => ref incorrectˢᵇ;
 private static readonly @string incorrectˢᵇ = "incorrect"u8;
 internal static ref readonly @string nonTrailerˢ => ref nonTrailerˢᵇ;
 private static readonly @string nonTrailerˢᵇ = "Non-Trailer"u8;
+internal static ref readonly @string trailerˢ => ref trailerˢᵇ;
+private static readonly @string trailerˢᵇ = "Trailer"u8;
 internal static ref readonly @string trailerATrailerBˢ => ref trailerATrailerBˢᵇ;
 private static readonly @string trailerATrailerBˢᵇ = "Trailer-A, Trailer-B"u8;
 internal static ref readonly @string trailerCˢ => ref trailerCˢᵇ;
@@ -64,6 +70,8 @@ internal static ref readonly @string xBarˢ => ref xBarˢᵇ;
 private static readonly @string xBarˢᵇ = "X-Bar"u8;
 internal static ref readonly @string someBodyˢ => ref someBodyˢᵇ;
 private static readonly @string someBodyˢᵇ = "Some body"u8;
+internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
+private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
 internal static ref readonly @string httpFooComˢ => ref httpFooComˢᵇ;
 private static readonly @string httpFooComˢᵇ = "http://foo.com/"u8;
 

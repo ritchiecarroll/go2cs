@@ -16,6 +16,7 @@ using strings = strings_package;
 using testing = testing_package;
 using go.encoding;
 using static go.encoding.gob_package;
+using static gob_internal_test_package;
 
 partial class gob_internal_test_package {
 
@@ -595,9 +596,13 @@ internal partial interface interfaceIndirectTestI {
 internal partial struct interfaceIndirectTestT {
 }
 
+} partial class gob_internal_testᴛinterfaceIndirectTestT {
+
 internal static bool F(this ref interfaceIndirectTestT @this) {
     return true;
 }
+
+} partial class gob_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object encodeErrorˢ = (@string)"encode error:"u8;

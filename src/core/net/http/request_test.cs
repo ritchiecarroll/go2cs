@@ -30,6 +30,7 @@ using global::go.mime;
 using global::go.net;
 using global::go.net.http;
 using static global::go.net.http_internal_test_package;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -142,17 +143,17 @@ public static void TestParseFormQueryMethods(ж<testing.T> t) {
 internal partial struct TestParseFormUnknownContentType_type /*dyn*/ {
     internal @string name;
     internal @string wantErr;
-    internal httpꓸHeader contentType;
+    internal Δhttp.Header contentType;
 }
 
 public static void TestParseFormUnknownContentType(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in range(slice<TestParseFormUnknownContentType_type>([
-        new("text", "", new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = ["text/plain"]})),
+        new("text", "", new Header(new map<@string, slice<@string>>{["Content-Type"] = ["text/plain"]})),
         // Empty content type is legal - may be treated as
         // application/octet-stream (RFC 7231, section 3.1.1.5)
-        new("empty", "", new httpꓸHeader(new map<@string, slice<@string>>{})),
-        new("boundary", "mime: invalid media parameter", new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = ["text/plain; boundary="]})),
-        new("unknown", "", new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = ["application/unknown"]}))
+        new("empty", "", new Header(new map<@string, slice<@string>>{})),
+        new("boundary", "mime: invalid media parameter", new Header(new map<@string, slice<@string>>{["Content-Type"] = ["text/plain; boundary="]})),
+        new("unknown", "", new Header(new map<@string, slice<@string>>{["Content-Type"] = ["application/unknown"]}))
     ]))) {
         ref var test = ref heap(new TestParseFormUnknownContentType_type(), out var Ꮡtest);
         test = vᴛ1;
@@ -219,7 +220,7 @@ public static void TestMultipartReader(ж<testing.T> t) {
     foreach (var (i, test) in range(tests)) {
         var req = Ꮡ(new Request(
             Method: "POST",
-            Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = [test.contentType]}),
+            Header: new Header(new map<@string, slice<@string>>{["Content-Type"] = [test.contentType]}),
             Body: io.NopCloser(new http_test_package.bytes_BufferжReader(@new<bytes.Buffer>()))
         ));
         var (multipart, err) = req.MultipartReader();
@@ -261,7 +262,7 @@ public static void TestParseMultipartFormPopulatesPostForm(ж<testing.T> t) {
     @string postData = xxxContentDispositionˢ;
     var req = Ꮡ(new Request(
         Method: "POST",
-        Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/form-data; boundary=xxx"]}),
+        Header: new Header(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/form-data; boundary=xxx"]}),
         Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(postData)))
     ));
 
@@ -309,7 +310,7 @@ internal static readonly object expectedErrNotMultipartˢ = (@string)"expected E
 public static void TestParseMultipartForm(ж<testing.T> t) {
     var req = Ꮡ(new Request(
         Method: "POST",
-        Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/form-data; boundary=""foo123"""]}),
+        Header: new Header(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/form-data; boundary=""foo123"""]}),
         Body: io.NopCloser(new http_test_package.bytes_BufferжReader(@new<bytes.Buffer>()))
     ));
     var err = req.ParseMultipartForm(25);
@@ -317,7 +318,7 @@ public static void TestParseMultipartForm(ж<testing.T> t) {
         t.Error(expectedMultipartEofGotˢ);
     }
 
-    req.Header = new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = ["text/plain"]});
+    req.Header = new Header(new map<@string, slice<@string>>{["Content-Type"] = ["text/plain"]});
     err = req.ParseMultipartForm(25);
     if (!AreEqual(err, ErrNotMultipart)) {
         t.Error(expectedErrNotMultipartˢ);
@@ -342,7 +343,7 @@ public static void TestParseMultipartFormFilename(ж<testing.T> t) {
     @string postData = xxxContentDispositionˢ2;
     var req = Ꮡ(new Request(
         Method: "POST",
-        Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/form-data; boundary=xxx"]}),
+        Header: new Header(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/form-data; boundary=xxx"]}),
         Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(postData)))
     ));
     var (_, hdr, err) = req.FormFile(fileˢ);
@@ -366,7 +367,7 @@ private static readonly @string myfileTxtˢᵇ = "myfile.txt"u8;
 
 internal static void testMaxInt64ForMultipartFormMaxMemoryOverflow(ж<testing.T> t, testMode mode) {
     nint payloadSize = 1 << 10;
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> reqΔ1) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> reqΔ1) => {
         // The combination of:
         //      MaxInt64 + payloadSize + (internal spare of 10MiB)
         // triggers the overflow. See issue https://golang.org/issue/40430/
@@ -409,7 +410,7 @@ internal static ref readonly @string fooˢ6 => ref fooˢ6ᵇ;
 private static readonly @string fooˢ6ᵇ = "/foo/$"u8;
 
 internal static void testRequestRedirect(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> rΔ1) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> rΔ1) => {
         var exprᴛ1 = rΔ1.URL.Path;
         switch (ᐧ) {
         case {} when exprᴛ1 == "/"u8: {
@@ -637,15 +638,15 @@ public static void TestFormFileOrder(ж<testing.T> t) {
 partial struct readRequestErrorTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string err;
-    internal httpꓸHeader header;
+    internal Δhttp.Header header;
 }
 internal static slice<readRequestErrorTestsᴛ1> readRequestErrorTests = new slice<readRequestErrorTestsᴛ1>(11){
-    [0] = new("GET / HTTP/1.1\r\nheader:foo\r\n\r\n", "", new httpꓸHeader(new map<@string, slice<@string>>{["Header"] = ["foo"]})),
+    [0] = new("GET / HTTP/1.1\r\nheader:foo\r\n\r\n", "", new Header(new map<@string, slice<@string>>{["Header"] = ["foo"]})),
     [1] = new("GET / HTTP/1.1\r\nheader:foo\r\n", io.ErrUnexpectedEOF.Error(), default),
     [2] = new("", io.EOF.Error(), default),
     [3] = new(
         @in: "HEAD / HTTP/1.1\r\n\r\n",
-        header: new httpꓸHeader(new map<@string, slice<@string>>{})
+        header: new Header(new map<@string, slice<@string>>{})
     ),
 
     // Multiple Content-Length values should either be
@@ -662,7 +663,7 @@ internal static slice<readRequestErrorTestsᴛ1> readRequestErrorTests = new sli
     [6] = new(
         @in: "PUT / HTTP/1.1\r\nContent-Length: 6 \r\nContent-Length: 6\r\nContent-Length:6\r\n\r\nGopher\r\n",
         err: "",
-        header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Length"] = ["6"]})
+        header: new Header(new map<@string, slice<@string>>{["Content-Length"] = ["6"]})
     ),
     [7] = new(
         @in: "PUT / HTTP/1.1\r\nContent-Length: 1\r\nContent-Length: 6 \r\n\r\n",
@@ -674,7 +675,7 @@ internal static slice<readRequestErrorTestsᴛ1> readRequestErrorTests = new sli
     ),
     [9] = new(
         @in: "HEAD / HTTP/1.1\r\nContent-Length:0\r\nContent-Length: 0\r\n\r\n",
-        header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Length"] = ["0"]})
+        header: new Header(new map<@string, slice<@string>>{["Content-Length"] = ["0"]})
     ),
     [10] = new(
         @in: "HEAD / HTTP/1.1\r\nHost: foo\r\nHost: bar\r\n\r\n\r\n\r\n",
@@ -932,6 +933,8 @@ partial struct logWrites {
     internal ж<slice<@string>> dst;
 }
 
+} partial class http_testᴛlogWrites {
+
 internal static partial error WriteByte(this logWrites l, byte c) {
     l.t.Fatalf("unexpected WriteByte call");
     return default;
@@ -941,6 +944,8 @@ internal static (nint n, error err) Write(this logWrites l, slice<byte> p) {
     l.dst.ValueSlot = append(l.dst.ValueSlot, (@string)p);
     return (len(p), default);
 }
+
+} partial class http_test_package {
 
 public static void TestRequestWriteBufferedWriter(ж<testing.T> t) {
     ref var got = ref heap<slice<@string>>(slice<@string>([]), out var Ꮡgot);
@@ -1063,14 +1068,20 @@ partial struct responseWriterJustWriter {
     /*embed*/ public io_package.Writer Writer;
 }
 
-internal static httpꓸHeader Header(this responseWriterJustWriter _) { throw panic("should not be called"); }
+} partial class http_testᴛresponseWriterJustWriter {
+
+internal static Δhttp.Header Header(this responseWriterJustWriter _) { throw panic("should not be called"); }
 internal static void WriteHeader(this responseWriterJustWriter _Δp0, nint _Δp1) { throw panic("should not be called"); }
+
+} partial class http_test_package {
 
 // delayedEOFReader never returns (n > 0, io.EOF), instead putting
 // off the io.EOF until a subsequent Read call.
 partial struct delayedEOFReader {
     internal io.Reader r;
 }
+
+} partial class http_testᴛdelayedEOFReader {
 
 internal static (nint n, error err) Read(this delayedEOFReader dr, slice<byte> p) {
     nint n = default;
@@ -1082,6 +1093,8 @@ internal static (nint n, error err) Read(this delayedEOFReader dr, slice<byte> p
     }
     return (n, err);
 }
+
+} partial class http_test_package {
 
 public static void TestIssue10884_MaxBytesEOF(ж<testing.T> t) {
     var dst = io.Discard;
@@ -1248,7 +1261,7 @@ public static void TestWithContextNilURL(ж<testing.T> t) {
 
     // Issue 20601
     req.URL = default;
-    var reqCopy = req.WithContext(context_package.Background());
+    var reqCopy = req.WithContext(context.Background());
     if (reqCopy.URL != nil) {
         t.Error(expectedNilUrlInClonedˢ);
     }
@@ -1271,7 +1284,7 @@ public static void TestRequestCloneTransferEncoding(ж<testing.T> t) {
         "encoding1"
     ];
 
-    var clonedReq = req.Clone(context_package.Background());
+    var clonedReq = req.Clone(context.Background());
     // modify original after deep copy
     req.TransferEncoding[0] = encoding2ˢ;
 
@@ -1295,7 +1308,7 @@ public static void TestRequestClonePathValue(ж<testing.T> t) {
     var (req, _) = Δhttp.NewRequest(getˢ2, httpsExampleOrgˢ, default);
     req.SetPathValue("p1", origˢ);
 
-    var clonedReq = req.Clone(context_package.Background());
+    var clonedReq = req.Clone(context.Background());
     clonedReq.SetPathValue("p2", copyˢ);
 
     // Ensure that any modifications to the cloned
@@ -1331,7 +1344,7 @@ public static void TestRequestClonePathValue(ж<testing.T> t) {
 // Issue 34878: verify we don't panic when including basic auth (Go 1.13 regression)
 public static void TestNoPanicOnRoundTripWithBasicAuth(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testNoPanicWithBasicAuth(Δp0, Δp1)); }
 internal static void testNoPanicWithBasicAuth(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
     })));
 
     var (u, err) = url.Parse(cst.ts.URL);
@@ -1536,7 +1549,7 @@ public static void TestRequestCookie(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        req.AddCookie(Ꮡ(new httpꓸCookie(Name: tt.name, Value: tt.value)));
+        req.AddCookie(Ꮡ(new Cookie(Name: tt.name, Value: tt.value)));
         (var c, err) = req.Cookie(tt.name);
         if (!AreEqual(err, tt.expectedErr)) {
             t.Errorf("got %v, want %v", err, tt.expectedErr);
@@ -1556,43 +1569,43 @@ public static void TestRequestCookie(ж<testing.T> t) {
 }
 
 internal partial struct TestRequestCookiesByName_tests /*dyn*/ {
-    internal slice<ж<httpꓸCookie>> @in;
+    internal slice<ж<Δhttp.Cookie>> @in;
     internal @string filter;
-    internal slice<ж<httpꓸCookie>> want;
+    internal slice<ж<Δhttp.Cookie>> want;
 }
 
 public static void TestRequestCookiesByName(ж<testing.T> t) {
     var tests = slice<TestRequestCookiesByName_tests>([
         new(
             @in: [
-                Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-1")),
-                Ꮡ(new httpꓸCookie(Name: "bar", Value: "bar"))
+                Ꮡ(new Δhttp.Cookie(Name: "foo", Value: "foo-1")),
+                Ꮡ(new Δhttp.Cookie(Name: "bar", Value: "bar"))
             ],
             filter: "foo",
-            want: [Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-1"))]
+            want: [Ꮡ(new Δhttp.Cookie(Name: "foo", Value: "foo-1"))]
         ),
         new(
             @in: [
-                Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-1")),
-                Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-2")),
-                Ꮡ(new httpꓸCookie(Name: "bar", Value: "bar"))
+                Ꮡ(new Δhttp.Cookie(Name: "foo", Value: "foo-1")),
+                Ꮡ(new Δhttp.Cookie(Name: "foo", Value: "foo-2")),
+                Ꮡ(new Δhttp.Cookie(Name: "bar", Value: "bar"))
             ],
             filter: "foo",
             want: [
-                Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-1")),
-                Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-2"))
+                Ꮡ(new Δhttp.Cookie(Name: "foo", Value: "foo-1")),
+                Ꮡ(new Δhttp.Cookie(Name: "foo", Value: "foo-2"))
             ]
         ),
         new(
             @in: [
-                Ꮡ(new httpꓸCookie(Name: "bar", Value: "bar"))
+                Ꮡ(new Δhttp.Cookie(Name: "bar", Value: "bar"))
             ],
             filter: "foo",
             want: []
         ),
         new(
             @in: [
-                Ꮡ(new httpꓸCookie(Name: "bar", Value: "bar"))
+                Ꮡ(new Δhttp.Cookie(Name: "bar", Value: "bar"))
             ],
             filter: "",
             want: []
@@ -1669,11 +1682,15 @@ partial struct infiniteReader {
     internal nint offset;
 }
 
+} partial class http_testᴛinfiniteReader {
+
 internal static (nint, error) Read(this ref infiniteReader r, slice<byte> b) {
     nint n = copy(b, r.buf.slice(r.offset));
     r.offset = (r.offset + n) % len(r.buf);
     return (n, default);
 }
+
+} partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string getHttp11HostLocalhostˢ => ref getHttp11HostLocalhostˢᵇ;
@@ -1819,7 +1836,7 @@ internal static void runFileAndServerBenchmarks(ж<testing.B> Ꮡb, testMode mod
         finally { ᒐ.Run(); }
     });
 
-    var cst = newClientServerTest(new http_test_package.testing_BжTB(Ꮡb), mode, new http_test_package.http_HandlerFuncᴠΔHandler(handler)).ts;
+    var cst = newClientServerTest(new http_test_package.testing_BжTB(Ꮡb), mode, new http_test_package.http_HandlerFuncᴠHandler(handler)).ts;
 
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -1936,7 +1953,7 @@ public static void TestPathValueAndPattern(ж<testing.T> t) {
                     t.Errorf("pattern: got %s, want %s", r.Pattern, testʗ1.pattern);
                 }
             });
-            var server = httptest.NewServer(new Δhttp.ServeMuxжΔHandler(mux));
+            var server = httptest.NewServer(new Δhttp.ServeMuxжHandler(mux));
             var serverʗ1 = server;
             defer(serverʗ1.Close, ref ᒐ);
             var (res, err) = Get(server.URL + test.url);
@@ -1973,7 +1990,7 @@ public static void TestSetPathValue(ж<testing.T> t) {
                 }
             }
         });
-        var server = httptest.NewServer(new Δhttp.ServeMuxжΔHandler(mux));
+        var server = httptest.NewServer(new Δhttp.ServeMuxжHandler(mux));
         var serverʗ1 = server;
         defer(serverʗ1.Close, ref ᒐ);
         var (res, err) = Get(server.URL + "/a/b/c/d/e"u8);
@@ -2013,12 +2030,12 @@ public static void TestStatus(ж<testing.T> t) {
         var h = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         });
         var mux = NewServeMux();
-        mux.Handle(getGˢ, new http_test_package.http_HandlerFuncᴠΔHandler(h));
-        mux.Handle(postPˢ, new http_test_package.http_HandlerFuncᴠΔHandler(h));
-        mux.Handle(patchPˢ, new http_test_package.http_HandlerFuncᴠΔHandler(h));
-        mux.Handle(putRˢ, new http_test_package.http_HandlerFuncᴠΔHandler(h));
-        mux.Handle(getRˢ, new http_test_package.http_HandlerFuncᴠΔHandler(h));
-        var server = httptest.NewServer(new Δhttp.ServeMuxжΔHandler(mux));
+        mux.Handle(getGˢ, new http_test_package.http_HandlerFuncᴠHandler(h));
+        mux.Handle(postPˢ, new http_test_package.http_HandlerFuncᴠHandler(h));
+        mux.Handle(patchPˢ, new http_test_package.http_HandlerFuncᴠHandler(h));
+        mux.Handle(putRˢ, new http_test_package.http_HandlerFuncᴠHandler(h));
+        mux.Handle(getRˢ, new http_test_package.http_HandlerFuncᴠHandler(h));
+        var server = httptest.NewServer(new Δhttp.ServeMuxжHandler(mux));
         var serverʗ1 = server;
         defer(serverʗ1.Close, ref ᒐ);
 

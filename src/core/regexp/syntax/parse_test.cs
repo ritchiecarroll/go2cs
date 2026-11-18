@@ -425,13 +425,13 @@ internal static @string mkCharClass(Func<rune, bool> f) {
             }
         } else {
             if (lo >= 0) {
-                re.Rune = builtin.append(re.Rune, lo, i - 1);
+                re.Rune = append(re.Rune, lo, i - 1);
                 lo = -1;
             }
         }
     }
     if (lo >= 0) {
-        re.Rune = builtin.append(re.Rune, lo, (rune)(unicode.MaxRune));
+        re.Rune = append(re.Rune, lo, (rune)(unicode.MaxRune));
     }
     return dump(re);
 }

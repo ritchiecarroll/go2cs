@@ -21,6 +21,7 @@ using global::go.@internal;
 using global::go.go;
 using path;
 using static global::go.go.printer_package;
+using static printer_internal_test_package;
 
 partial class printer_internal_test_package {
 
@@ -157,14 +158,14 @@ internal static partial void check(ж<testing.T> t, @string source, @string gold
 
     // wait with timeout
     var selᴛ1 = time.After((time.Duration)(10000000000L));
-    var selᴛ2 = cc;
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    var ccᴛ1 = cc;
+    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(ccᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out _): { // plenty of a safety margin, even for very slow machines
         // test running past time out
         t.Errorf("%s: running too slowly", source);
         break;
     }
-    case 1 when selᴛ2.ꟷᐳ(out _): {
+    case 1 when ccᴛ1.ꟷᐳ(out _): {
         // test finished within allotted time margin
         break;
     }}
@@ -361,7 +362,7 @@ public static void TestBadComments(ж<testing.T> t) {
     }
 
     var comment = f.Comments[0].List[0];
-    ref var pos = ref heap<tokenꓸPos>(comment.Pos(), out var Ꮡpos);
+    ref var pos = ref heap<token.Pos>(comment.Pos(), out var Ꮡpos);
     if (fset.PositionFor(pos, false /* absolute position */).Offset != 1) {
         t.Error(expectedOffset1ˢ); // error in test
     }
@@ -374,12 +375,16 @@ public static void TestBadComments(ж<testing.T> t) {
 
 internal partial struct visitor /*chan ж<ast.Ident>*/;
 
+} partial class printer_internal_testᴛvisitor {
+
 internal static ast.Visitor /*w*/ Visit(this visitor v, ast.Node n) {
     var (ident, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
         v.ᐸꟷ(ident);
     }
     return v;
 }
+
+} partial class printer_internal_test_package {
 
 // idents is an iterator that returns all idents in f via the result channel.
 internal static partial /*<-*/channel<ж<ast.Ident>> idents(ж<ast.File> f) {
@@ -718,6 +723,8 @@ internal partial struct limitWriter {
     internal nint errCount;
 }
 
+} partial class printer_internal_testᴛlimitWriter {
+
 internal static (nint n, error err) Write(this ref limitWriter l, slice<byte> buf) {
     nint n = default;
     error err = default;
@@ -731,6 +738,8 @@ internal static (nint n, error err) Write(this ref limitWriter l, slice<byte> bu
     l.remaining -= n;
     return (n, err);
 }
+
+} partial class printer_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object writesContinuedAfterˢ = (@string)"Writes continued after first error returned"u8;

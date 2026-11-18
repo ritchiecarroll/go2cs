@@ -17,14 +17,14 @@ using static global::go.net.http_package;
 partial class http_internal_test_package {
 
 partial struct headerWriteTestsᴛ1 /*dyn*/ {
-    internal global::go.net.http_package.ΔHeader h;
+    internal global::go.net.http_package.Header h;
     internal map<@string, bool> exclude;
     internal @string expected;
 }
 internal static slice<headerWriteTestsᴛ1> headerWriteTests = [
-    new(new ΔHeader(new map<@string, slice<@string>>{}), default, ""),
+    new(new Header(new map<@string, slice<@string>>{}), default, ""),
     new(
-        new ΔHeader(new map<@string, slice<@string>>{
+        new Header(new map<@string, slice<@string>>{
             ["Content-Type"] = ["text/html; charset=UTF-8"],
             ["Content-Length"] = ["0"]
         }),
@@ -32,14 +32,14 @@ internal static slice<headerWriteTestsᴛ1> headerWriteTests = [
         "Content-Length: 0\r\nContent-Type: text/html; charset=UTF-8\r\n"
     ),
     new(
-        new ΔHeader(new map<@string, slice<@string>>{
+        new Header(new map<@string, slice<@string>>{
             ["Content-Length"] = ["0", "1", "2"]
         }),
         default,
         "Content-Length: 0\r\nContent-Length: 1\r\nContent-Length: 2\r\n"
     ),
     new(
-        new ΔHeader(new map<@string, slice<@string>>{
+        new Header(new map<@string, slice<@string>>{
             ["Expires"] = ["-1"],
             ["Content-Length"] = ["0"],
             ["Content-Encoding"] = ["gzip"]
@@ -48,7 +48,7 @@ internal static slice<headerWriteTestsᴛ1> headerWriteTests = [
         "Content-Encoding: gzip\r\nExpires: -1\r\n"
     ),
     new(
-        new ΔHeader(new map<@string, slice<@string>>{
+        new Header(new map<@string, slice<@string>>{
             ["Expires"] = ["-1"],
             ["Content-Length"] = ["0", "1", "2"],
             ["Content-Encoding"] = ["gzip"]
@@ -57,7 +57,7 @@ internal static slice<headerWriteTestsᴛ1> headerWriteTests = [
         "Content-Encoding: gzip\r\nExpires: -1\r\n"
     ),
     new(
-        new ΔHeader(new map<@string, slice<@string>>{
+        new Header(new map<@string, slice<@string>>{
             ["Expires"] = ["-1"],
             ["Content-Length"] = ["0"],
             ["Content-Encoding"] = ["gzip"]
@@ -66,7 +66,7 @@ internal static slice<headerWriteTestsᴛ1> headerWriteTests = [
         ""
     ),
     new(
-        new ΔHeader(new map<@string, slice<@string>>{
+        new Header(new map<@string, slice<@string>>{
             ["Nil"] = default,
             ["Empty"] = [],
             ["Blank"] = [""],
@@ -77,7 +77,7 @@ internal static slice<headerWriteTestsᴛ1> headerWriteTests = [
     ),
     // Tests header sorting when over the insertion sort threshold side:
     new(
-        new ΔHeader(new map<@string, slice<@string>>{
+        new Header(new map<@string, slice<@string>>{
             ["k1"] = ["1a", "1b"],
             ["k2"] = ["2a", "2b"],
             ["k3"] = ["3a", "3b"],
@@ -93,7 +93,7 @@ internal static slice<headerWriteTestsᴛ1> headerWriteTests = [
     ),
     // Tests invalid characters in headers.
     new(
-        new ΔHeader(new map<@string, slice<@string>>{
+        new Header(new map<@string, slice<@string>>{
             ["Content-Type"] = ["text/html; charset=UTF-8"],
             ["NewlineInValue"] = ["1\r\nBar: 2"],
             ["NewlineInKey\r\n"] = ["1"],
@@ -117,20 +117,24 @@ public static void TestHeaderWrite(ж<testing.T> t) {
 }
 
 partial struct parseTimeTestsᴛ1 /*dyn*/ {
-    internal global::go.net.http_package.ΔHeader h;
+    internal global::go.net.http_package.Header h;
     internal bool err;
 }
 internal static slice<parseTimeTestsᴛ1> parseTimeTests = [
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = [""]}), true),
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = ["invalid"]}), true),
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = ["1994-11-06T08:49:37Z00:00"]}), true),
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = ["Sun, 06 Nov 1994 08:49:37 GMT"]}), false),
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = ["Sunday, 06-Nov-94 08:49:37 GMT"]}), false),
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = ["Sun Nov  6 08:49:37 1994"]}), false)
+    new(new Header(new map<@string, slice<@string>>{["Date"] = [""]}), true),
+    new(new Header(new map<@string, slice<@string>>{["Date"] = ["invalid"]}), true),
+    new(new Header(new map<@string, slice<@string>>{["Date"] = ["1994-11-06T08:49:37Z00:00"]}), true),
+    new(new Header(new map<@string, slice<@string>>{["Date"] = ["Sun, 06 Nov 1994 08:49:37 GMT"]}), false),
+    new(new Header(new map<@string, slice<@string>>{["Date"] = ["Sunday, 06-Nov-94 08:49:37 GMT"]}), false),
+    new(new Header(new map<@string, slice<@string>>{["Date"] = ["Sun Nov  6 08:49:37 1994"]}), false)
 ];
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string dateˢ => ref dateˢᵇ;
+private static readonly @string dateˢᵇ = "Date"u8;
+
 public static void TestParseTime(ж<testing.T> t) {
-    var expect = time.Date(1994, 11, 6, 8, 49, 37, 0, time.ΔUTC);
+    var expect = time.Date(1994, 11, 6, 8, 49, 37, 0, time.UTC);
     foreach (var (i, test) in range(parseTimeTests)) {
         var (d, err) = ParseTime(test.h.Get(dateˢ));
         if (err != nil) {
@@ -193,15 +197,15 @@ public static void TestHasToken(ж<testing.T> t) {
 }
 
 public static void TestNilHeaderClone(ж<testing.T> t) {
-    var t1 = (global::go.net.http_package.ΔHeader)default;
+    var t1 = (global::go.net.http_package.Header)default;
     var t2 = t1.Clone();
     if (t2 != nil) {
         t.Errorf("cloned header does not match original: got: %+v; want: %+v", t2, (any)(default));
     }
 }
 
-internal static global::go.net.http_package.ΔHeader testHeader;
-internal static void initᴛtestHeader() { testHeader = new ΔHeader(new map<@string, slice<@string>>{
+internal static global::go.net.http_package.Header testHeader;
+internal static void initᴛtestHeader() { testHeader = new Header(new map<@string, slice<@string>>{
     ["Content-Length"] = ["123"],
     ["Content-Type"] = ["text/plain"],
     ["Date"] = ["some date at some time Z"],
@@ -250,24 +254,24 @@ internal static readonly object unexpectedNilHeaderˢ = (@string)"unexpected nil
 
 internal partial struct TestCloneOrMakeHeader_tests /*dyn*/ {
     internal @string name;
-    internal global::go.net.http_package.ΔHeader @in, want;
+    internal global::go.net.http_package.Header @in, want;
 }
 
 // Issue 34878: test that every call to
 // cloneOrMakeHeader never returns a nil Header.
 public static void TestCloneOrMakeHeader(ж<testing.T> t) {
     var tests = slice<TestCloneOrMakeHeader_tests>([
-        new("nil", default, new ΔHeader(new map<@string, slice<@string>>{})),
-        new("empty", new ΔHeader(new map<@string, slice<@string>>{}), new ΔHeader(new map<@string, slice<@string>>{})),
+        new("nil", default, new Header(new map<@string, slice<@string>>{})),
+        new("empty", new Header(new map<@string, slice<@string>>{}), new Header(new map<@string, slice<@string>>{})),
         new(
             name: "non-empty",
-            @in: new ΔHeader(new map<@string, slice<@string>>{["foo"] = ["bar"]}),
-            want: new ΔHeader(new map<@string, slice<@string>>{["foo"] = ["bar"]})
+            @in: new Header(new map<@string, slice<@string>>{["foo"] = ["bar"]}),
+            want: new Header(new map<@string, slice<@string>>{["foo"] = ["bar"]})
         ),
         new(
             name: "nil value",
-            @in: new ΔHeader(new map<@string, slice<@string>>{["foo"] = default}),
-            want: new ΔHeader(new map<@string, slice<@string>>{["foo"] = default})
+            @in: new Header(new map<@string, slice<@string>>{["foo"] = default}),
+            want: new Header(new map<@string, slice<@string>>{["foo"] = default})
         )
     ]);
 

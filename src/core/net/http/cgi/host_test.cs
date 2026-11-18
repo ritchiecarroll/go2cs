@@ -392,6 +392,8 @@ internal static ref readonly @string getTestCgiLocHttpFooComˢ => ref getTestCgi
 private static readonly @string getTestCgiLocHttpFooComˢᵇ = "GET /test.cgi?loc=http://foo.com/ HTTP/1.0\nHost: example.com\n\n"u8;
 internal static ref readonly @string httpFooComˢ => ref httpFooComˢᵇ;
 private static readonly @string httpFooComˢᵇ = "http://foo.com/"u8;
+internal static ref readonly @string locationˢ => ref locationˢᵇ;
+private static readonly @string locationˢᵇ = "Location"u8;
 
 public static void TestRedirect(ж<testing.T> t) {
     testenv.MustHaveExec(new cgi_internal_test_package.testing_TжTB(t));
@@ -427,7 +429,7 @@ public static void TestInternalRedirect(ж<testing.T> t) {
     var h = Ꮡ(new Handler(
         Path: os.Args[0],
         Root: "/test.cgi",
-        PathLocationHandler: new cgi_internal_test_package.http_HandlerFuncᴠΔHandler(baseHandler)
+        PathLocationHandler: new cgi_internal_test_package.http_HandlerFuncᴠHandler(baseHandler)
     ));
     var expectedMap = new map<@string, @string>{
         ["basepath"] = "/foo",
@@ -456,7 +458,7 @@ public static void TestCopyError(ж<testing.T> t) {
             Path: os.Args[0],
             Root: "/test.cgi"
         ));
-        var ts = httptest.NewServer(new cgi_internal_test_package.cgi_HandlerжΔHandler(h));
+        var ts = httptest.NewServer(new cgi_internal_test_package.cgi_HandlerжHandler(h));
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
 

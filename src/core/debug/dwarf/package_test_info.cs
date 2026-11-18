@@ -14,9 +14,6 @@ using go;
 using static global::go.debug.dwarf_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("LineReader", "ΔLineReader")]
-[assembly: GoTypeAlias("Reader", "ΔReader")]
-[assembly: GoTypeAlias("Type", "ΔType")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

@@ -15,7 +15,6 @@ using static global::go.go.doc.comment_internal_test_package;
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b696e20737472696e673b206f757420737472696e677d", "autoURLTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b6c696e6520737472696e673b206f6b20626f6f6c7d", "oldHeadingTestsᴛ1")]
-[assembly: GoTypeAlias("Text", "ΔText")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

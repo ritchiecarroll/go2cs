@@ -310,6 +310,8 @@ internal static (uint32 R1, int32 R0) SpecDecompose(global::go.crypto.@internal.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string mlDsa44ˢ => ref mlDsa44ˢᵇ;
+private static readonly @string mlDsa44ˢᵇ = "ML-DSA-44"u8;
 internal static ref readonly @string mlDsa6587ˢ => ref mlDsa6587ˢᵇ;
 private static readonly @string mlDsa6587ˢᵇ = "ML-DSA-65,87"u8;
 
@@ -371,7 +373,7 @@ public static void TestZetas(ж<testing.T> t) {
     var q = big.NewInt(mldsa_package.q);
     foreach (var (k, zeta) in range(zetas.ΔRangeSnapshot())) {
         // ζ^BitRev₈(k) mod q
-        var exp = @new<bigꓸInt>().Exp(ζ, big.NewInt((int64)BitRev8((uint8)k)), q);
+        var exp = @new<big.Int>().Exp(ζ, big.NewInt((int64)BitRev8((uint8)k)), q);
         var got = fieldFromMontgomery(zeta);
         if (big.NewInt((int64)got).Cmp(exp) != 0) {
             t.Errorf("zetas[%d] = %v, expected %v", k, got, exp.OrTypedNil());

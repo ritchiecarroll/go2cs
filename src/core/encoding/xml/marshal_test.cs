@@ -18,6 +18,7 @@ using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
 using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using static go.encoding.xml_package;
 using ꓸꓸꓸany = Span<any>;
+using static xml_internal_test_package;
 
 partial class xml_internal_test_package {
 
@@ -320,6 +321,8 @@ public partial struct MyMarshalerTest {
 
 internal static global::go.encoding.xml_package.Marshaler _ᴛ1ʗ = new xml_internal_test_package.MyMarshalerTestжMarshaler(((ж<MyMarshalerTest>)nil));
 
+} partial class xml_internal_testᴛMyMarshalerTest {
+
 public static error MarshalXML(this ref MyMarshalerTest m, ж<global::go.encoding.xml_package.Encoder> e, global::go.encoding.xml_package.StartElement start) {
     e.EncodeToken(start);
     e.EncodeToken((global::go.encoding.xml_package.CharData)slice<byte>("hello world"u8));
@@ -327,10 +330,14 @@ public static error MarshalXML(this ref MyMarshalerTest m, ж<global::go.encodin
     return default;
 }
 
+} partial class xml_internal_test_package {
+
 public partial struct MyMarshalerAttrTest {
 }
 
 internal static global::go.encoding.xml_package.MarshalerAttr _ᴛ2ʗ = new xml_internal_test_package.MyMarshalerAttrTestжMarshalerAttr(((ж<MyMarshalerAttrTest>)nil));
+
+} partial class xml_internal_testᴛMyMarshalerAttrTest {
 
 public static (global::go.encoding.xml_package.Attr, error) MarshalXMLAttr(this ref MyMarshalerAttrTest m, global::go.encoding.xml_package.Name name) {
     return (new Attr(name, "hello world"), default);
@@ -339,6 +346,8 @@ public static (global::go.encoding.xml_package.Attr, error) MarshalXMLAttr(this 
 public static error UnmarshalXMLAttr(this ref MyMarshalerAttrTest m, global::go.encoding.xml_package.Attr attr) {
     return default;
 }
+
+} partial class xml_internal_test_package {
 
 public partial struct MarshalerStruct {
     public MyMarshalerAttrTest Foo; /*`xml:",attr"`*/
@@ -1605,7 +1614,7 @@ public partial struct BadAttr {
 partial struct marshalErrorTestsᴛ1 /*dyn*/ {
     public any Value;
     public @string Err;
-    public reflectꓸKind Kind;
+    public reflect.Kind Kind;
 }
 internal static slice<marshalErrorTestsᴛ1> marshalErrorTests = slice<marshalErrorTestsᴛ1>([
     new(
@@ -1671,7 +1680,7 @@ public static void TestMarshalErrors(ж<testing.T> t) {
             t.Errorf("#%d: marshal(%#v) = [error] %v, want %v", idx, test.Value, err, test.Err);
         }
         if (test.Kind != reflect.Invalid) {
-            reflectꓸKind kind = err._<ж<global::go.encoding.xml_package.UnsupportedTypeError>>().Type.Kind(); if (kind != test.Kind) {
+            reflect.Kind kind = err._<ж<global::go.encoding.xml_package.UnsupportedTypeError>>().Type.Kind(); if (kind != test.Kind) {
                 t.Errorf("#%d: marshal(%#v) = [error kind] %s, want %s", idx, test.Value, kind, test.Kind);
             }
         }
@@ -1749,6 +1758,8 @@ internal partial struct limitedBytesWriter {
     internal nint remain; // until writes fail
 }
 
+} partial class xml_internal_testᴛlimitedBytesWriter {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string writeLimitHitˢ => ref writeLimitHitˢᵇ;
 private static readonly @string writeLimitHitˢᵇ = "write limit hit"u8;
@@ -1771,6 +1782,8 @@ internal static (nint n, error err) Write(this ref limitedBytesWriter lw, slice<
     lw.remain -= n;
     return (n, err);
 }
+
+} partial class xml_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedAnErrorˢ = (@string)"expected an error"u8;
@@ -1899,7 +1912,7 @@ public static void TestStructPointerMarshal(ж<testing.T> t) {
 
 partial struct encodeTokenTestsᴛ1 /*dyn*/ {
     internal @string desc;
-    internal slice<ΔToken> toks;
+    internal slice<Token> toks;
     internal @string want;
     internal @string err;
 }

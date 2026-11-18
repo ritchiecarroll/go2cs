@@ -13,8 +13,11 @@ using testing = testing_package;
 using time = time_package;
 using @internal;
 using static go.net_package;
+using static net_internal_test_package;
 
 partial class net_internal_test_package {
+
+} partial class net_internal_testᴛTCPListener {
 
 internal static @string port(this ref global::go.net_package.TCPListener ln) {
     var (_, port, err) = SplitHostPort(ln.Addr().String());
@@ -24,6 +27,8 @@ internal static @string port(this ref global::go.net_package.TCPListener ln) {
     return port;
 }
 
+} partial class net_internal_testᴛUDPConn {
+
 internal static @string port(this ж<global::go.net_package.UDPConn> Ꮡc) {
     var (_, port, err) = SplitHostPort(Ꮡc.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr().String());
     if (err != nil) {
@@ -31,6 +36,8 @@ internal static @string port(this ж<global::go.net_package.UDPConn> Ꮡc) {
     }
     return port;
 }
+
+} partial class net_internal_test_package {
 
 internal static slice<prohibitionaryDialArgTestsᴛ1> tcpListenerTests = [
     new("tcp", ""),
@@ -383,9 +390,8 @@ internal static bool differentWildcardAddr(@string i, @string j) {
 }
 
 internal static error checkFirstListener(@string network, any ln) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8: {
+    case {} when network == "tcp"u8: {
         var fd = ln._<ж<global::go.net_package.TCPListener>>().fd;
         {
             var err = checkDualStackAddrFamily(fd); if (err != nil) {
@@ -394,21 +400,21 @@ internal static error checkFirstListener(@string network, any ln) {
         }
         break;
     }
-    case {} when exprᴛ1 == "tcp4"u8: {
+    case {} when network == "tcp4"u8: {
         var fd = ln._<ж<global::go.net_package.TCPListener>>().fd;
         if (fd.family != syscall.AF_INET) {
             return fmt.Errorf("%v got %v; want %v"u8, fd.laddr, fd.family, (nint)(syscall.AF_INET));
         }
         break;
     }
-    case {} when exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp6"u8: {
         var fd = ln._<ж<global::go.net_package.TCPListener>>().fd;
         if (fd.family != syscall.AF_INET6) {
             return fmt.Errorf("%v got %v; want %v"u8, fd.laddr, fd.family, (nint)(syscall.AF_INET6));
         }
         break;
     }
-    case {} when exprᴛ1 == "udp"u8: {
+    case {} when network == "udp"u8: {
         var fd = ln._<ж<global::go.net_package.UDPConn>>().fd;
         {
             var err = checkDualStackAddrFamily(fd); if (err != nil) {
@@ -417,14 +423,14 @@ internal static error checkFirstListener(@string network, any ln) {
         }
         break;
     }
-    case {} when exprᴛ1 == "udp4"u8: {
+    case {} when network == "udp4"u8: {
         var fd = ln._<ж<global::go.net_package.UDPConn>>().fd;
         if (fd.family != syscall.AF_INET) {
             return fmt.Errorf("%v got %v; want %v"u8, fd.laddr, fd.family, (nint)(syscall.AF_INET));
         }
         break;
     }
-    case {} when exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp6"u8: {
         var fd = ln._<ж<global::go.net_package.UDPConn>>().fd;
         if (fd.family != syscall.AF_INET6) {
             return fmt.Errorf("%v got %v; want %v"u8, fd.laddr, fd.family, (nint)(syscall.AF_INET6));
@@ -438,15 +444,14 @@ internal static error checkFirstListener(@string network, any ln) {
 }
 
 internal static error checkSecondListener(@string network, @string address, error err) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
         if (err == nil) {
             return fmt.Errorf("%s should fail"u8, network + " " + address);
         }
         break;
     }
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
         if (err == nil) {
             return fmt.Errorf("%s should fail"u8, network + " " + address);
         }
@@ -459,15 +464,14 @@ internal static error checkSecondListener(@string network, @string address, erro
 }
 
 internal static error checkDualStackSecondListener(@string network, @string address, error err, error xerr) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
         if (xerr == nil && err != nil || xerr != nil && err == nil) {
             return fmt.Errorf("%s got %v; want %v"u8, network + " " + address, err, xerr);
         }
         break;
     }
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
         if (xerr == nil && err != nil || xerr != nil && err == nil) {
             return fmt.Errorf("%s got %v; want %v"u8, network + " " + address, err, xerr);
         }

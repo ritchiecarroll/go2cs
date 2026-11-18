@@ -19,39 +19,39 @@ internal static void enableSocketConnect() {
 internal static void disableSocketConnect(@string network) {
     var (net, _, _) = strings.Cut(network, ":");
     Ꮡsw.Set(socktest.FilterConnect, (ж<socktest.Status> so) => {
-        var exprᴛ1 = net;
+        var netᴛ1 = net;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "tcp4"u8: {
+        case {} when netᴛ1 == "tcp4"u8: {
             if (so.Cookie.Family() == syscall.AF_INET && so.Cookie.Type() == syscall.SOCK_STREAM) {
                 return (default, syscall.EHOSTUNREACH);
             }
             break;
         }
-        case {} when exprᴛ1 == "udp4"u8: {
+        case {} when netᴛ1 == "udp4"u8: {
             if (so.Cookie.Family() == syscall.AF_INET && so.Cookie.Type() == syscall.SOCK_DGRAM) {
                 return (default, syscall.EHOSTUNREACH);
             }
             break;
         }
-        case {} when exprᴛ1 == "ip4"u8: {
+        case {} when netᴛ1 == "ip4"u8: {
             if (so.Cookie.Family() == syscall.AF_INET && so.Cookie.Type() == syscall.SOCK_RAW) {
                 return (default, syscall.EHOSTUNREACH);
             }
             break;
         }
-        case {} when exprᴛ1 == "tcp6"u8: {
+        case {} when netᴛ1 == "tcp6"u8: {
             if (so.Cookie.Family() == syscall.AF_INET6 && so.Cookie.Type() == syscall.SOCK_STREAM) {
                 return (default, syscall.EHOSTUNREACH);
             }
             break;
         }
-        case {} when exprᴛ1 == "udp6"u8: {
+        case {} when netᴛ1 == "udp6"u8: {
             if (so.Cookie.Family() == syscall.AF_INET6 && so.Cookie.Type() == syscall.SOCK_DGRAM) {
                 return (default, syscall.EHOSTUNREACH);
             }
             break;
         }
-        case {} when exprᴛ1 == "ip6"u8: {
+        case {} when netᴛ1 == "ip6"u8: {
             if (so.Cookie.Family() == syscall.AF_INET6 && so.Cookie.Type() == syscall.SOCK_RAW) {
                 return (default, syscall.EHOSTUNREACH);
             }

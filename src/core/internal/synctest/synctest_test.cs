@@ -30,7 +30,7 @@ using go.sync;
 partial class synctest_test_package {
 
 public static void TestNow(ж<testing.T> t) {
-    ref var start = ref heap<time.Time>(time.Date(2000, 1, 1, 0, 0, 0, 0, time.ΔUTC).In(time.ΔLocal), out var Ꮡstart);
+    ref var start = ref heap<time.Time>(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).In(time.Local), out var Ꮡstart);
     var startʗ1 = start;
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         // Time starts at 2000-1-1 00:00:00.
@@ -50,9 +50,9 @@ public static void TestNow(ж<testing.T> t) {
             }
         });
         // Time advances after a sleep.
-        time.Sleep(1 * time.ΔSecond);
+        time.Sleep(1 * time.Second);
         {
-            var (got, want) = (time.Now(), startʗ1.Add(1 * time.ΔSecond)); if (!got.Equal(want)) {
+            var (got, want) = (time.Now(), startʗ1.Add(1 * time.Second)); if (!got.Equal(want)) {
                 t.Errorf("after sleep: time.Now = %v, want %v", got, want);
             }
         }
@@ -67,12 +67,12 @@ public static void TestMonotonicClock(ж<testing.T> t) {
     synctest.Run(() => {
         time.Sleep(time.Until(startʗ1.Round(0)));
         {
-            var (got, want) = (time.Now().In(time.ΔUTC), startʗ1.In(time.ΔUTC)); if (!got.Equal(want)) {
+            var (got, want) = (time.Now().In(time.UTC), startʗ1.In(time.UTC)); if (!got.Equal(want)) {
                 t.Fatalf("time.Now() = %v, want %v", got, want);
             }
         }
 
-        var wait = 1 * time.ΔSecond;
+        var wait = 1 * time.Second;
         time.Sleep(wait);
         {
             var got = time.Since(startʗ1); if (got != wait) {
@@ -171,7 +171,7 @@ public static void TestTimerReadBeforeDeadline(ж<testing.T> t) {
 
 public static void TestTimerReadAfterDeadline(ж<testing.T> t) {
     synctest.Run(() => {
-        var delay = 1 * time.ΔSecond;
+        var delay = 1 * time.Second;
         var want = time.Now().Add(delay);
         var tm = time.NewTimer(delay);
         time.Sleep(2 * delay);
@@ -185,14 +185,14 @@ public static void TestTimerReadAfterDeadline(ж<testing.T> t) {
 public static void TestTimerReset(ж<testing.T> t) {
     synctest.Run(() => {
         var start = time.Now();
-        var tm = time.NewTimer(1 * time.ΔSecond);
+        var tm = time.NewTimer(1 * time.Second);
         {
-            var (got, want) = (ᐸꟷ(tm.C), start.Add(1 * time.ΔSecond)); if (got != want) {
+            var (got, want) = (ᐸꟷ(tm.C), start.Add(1 * time.Second)); if (got != want) {
                 t.Errorf("first sleep: <-tm.C = %v, want %v", got, want);
             }
         }
 
-        tm.Reset(2 * time.ΔSecond);
+        tm.Reset(2 * time.Second);
         {
             var (got, want) = (ᐸꟷ(tm.C), start.Add((time.Duration)(3000000000L))); if (got != want) {
                 t.Errorf("second sleep: <-tm.C = %v, want %v", got, want);
@@ -200,7 +200,7 @@ public static void TestTimerReset(ж<testing.T> t) {
         }
 
         tm.Reset((time.Duration)(3000000000L));
-        time.Sleep(1 * time.ΔSecond);
+        time.Sleep(1 * time.Second);
         tm.Reset((time.Duration)(3000000000L));
         {
             var (got, want) = (ᐸꟷ(tm.C), start.Add((time.Duration)(7000000000L))); if (got != want) {
@@ -213,11 +213,11 @@ public static void TestTimerReset(ж<testing.T> t) {
 public static void TestTimeAfter(ж<testing.T> t) {
     synctest.Run(() => {
         nint i = 0;
-        time.AfterFunc(1 * time.ΔSecond, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        time.AfterFunc(1 * time.Second, [MethodImpl(MethodImplOptions.NoInlining)] () => {
             // Ensure synctest group membership propagates through the AfterFunc.
             i++; // 1
             goǃ(() => {
-                time.Sleep(1 * time.ΔSecond);
+                time.Sleep(1 * time.Second);
                 i++; // 2
             });
         });
@@ -233,7 +233,7 @@ public static void TestTimeAfter(ж<testing.T> t) {
 public static void TestTimerAfterBubbleExit(ж<testing.T> t) {
     var run = false;
     synctest.Run(() => {
-        time.AfterFunc(1 * time.ΔSecond, () => {
+        time.AfterFunc(1 * time.Second, () => {
             run = true;
         });
     });
@@ -351,7 +351,7 @@ public static void TestTimerRunsImmediately(ж<testing.T> t) {
 // time the timer fired, even when that time is in the past.
 public static void TestTimerRanInPast(ж<testing.T> t) {
     synctest.Run(() => {
-        var delay = 1 * time.ΔSecond;
+        var delay = 1 * time.Second;
         var want = time.Now().Add(delay);
         var tm = time.NewTimer(delay);
         time.Sleep(2 * delay);
@@ -456,13 +456,13 @@ public static void TestChannelFromOutsideBubble(ж<testing.T> t) {
             close(ch);
         },
         inside: (channel<nint> ch) => {
-            var selᴛ7 = ch;
-            var selᴛ8 = choutsideʗ1;
-            switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
-            case 0 when selᴛ7.ꟷᐳ(out _): {
+            var chᴛ1 = ch;
+            var choutsideᴛ1 = choutsideʗ1;
+            switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ), ᐸꟷ(choutsideᴛ1, ꓸꓸꓸ))) {
+            case 0 when chᴛ1.ꟷᐳ(out _): {
                 break;
             }
-            case 1 when selᴛ8.ꟷᐳ(out _): {
+            case 1 when choutsideᴛ1.ꟷᐳ(out _): {
                 break;
             }}
         }
@@ -473,13 +473,13 @@ public static void TestChannelFromOutsideBubble(ж<testing.T> t) {
         },
         inside: (channel<nint> ch) => {
             var ch2 = new channel<EmptyStruct>(0);
-            var selᴛ9 = ch;
-            var selᴛ10 = ch2;
-            switch (select(ᐸꟷ(selᴛ9, ꓸꓸꓸ), ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
-            case 0 when selᴛ9.ꟷᐳ(out _): {
+            var chᴛ2 = ch;
+            var ch2ᴛ1 = ch2;
+            switch (select(ᐸꟷ(chᴛ2, ꓸꓸꓸ), ᐸꟷ(ch2ᴛ1, ꓸꓸꓸ))) {
+            case 0 when chᴛ2.ꟷᐳ(out _): {
                 break;
             }
-            case 1 when selᴛ10.ꟷᐳ(out _): {
+            case 1 when ch2ᴛ1.ꟷᐳ(out _): {
                 break;
             }}
         }
@@ -620,7 +620,7 @@ public static void TestTimerFromInsideBubble(ж<testing.T> t) {
     ), new(
         desc: "Reset",
         f: (ж<time.Timer> tm) => {
-            tm.Reset(1 * time.ΔSecond);
+            tm.Reset(1 * time.Second);
         },
         wantFatal: "reset of synctest timer from outside bubble"
     ), new(
@@ -654,7 +654,7 @@ public static void TestTimerFromInsideBubble(ж<testing.T> t) {
                 });
                 var chʗ2 = ch;
                 synctest.Run(() => {
-                    var tm = time.NewTimer(1 * time.ΔSecond);
+                    var tm = time.NewTimer(1 * time.Second);
                     chʗ2.ᐸꟷ(tm);
                 });
                 ᐸꟷ(donec);
@@ -703,7 +703,7 @@ public static void TestDeadlockTicker(ж<testing.T> t) {
         defer(wantPanic, t, deadlockMainBubbleˢ, ref ᒐ, recovers: true);
         synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
             goǃ(() => {
-                foreach (var _ᴛ1 in time.Tick(1 * time.ΔSecond)) {
+                foreach (var _ᴛ1 in time.Tick(1 * time.Second)) {
                     t.Errorf("ticker unexpectedly ran");
                     return;
                 }
@@ -774,7 +774,7 @@ public static void TestIteratorPush(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var seq = (Func<time.Time, bool> yield) => {
             while (yield(time.Now())) {
-                time.Sleep(1 * time.ΔSecond);
+                time.Sleep(1 * time.Second);
             }
         };
         ref var got = ref heap<slice<time.Time>>(out var Ꮡgot);
@@ -792,8 +792,8 @@ public static void TestIteratorPush(ж<testing.T> t) {
         });
         var want = slice<time.Time>([
             time.Now(),
-            time.Now().Add(1 * time.ΔSecond),
-            time.Now().Add(2 * time.ΔSecond)
+            time.Now().Add(1 * time.Second),
+            time.Now().Add(2 * time.Second)
         ]);
         time.Sleep((time.Duration)(5000000000L));
         synctest.Wait();
@@ -807,7 +807,7 @@ public static void TestIteratorPull(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var seq = (Func<time.Time, bool> yield) => {
             while (yield(time.Now())) {
-                time.Sleep(1 * time.ΔSecond);
+                time.Sleep(1 * time.Second);
             }
         };
         ref var got = ref heap<slice<time.Time>>(out var Ꮡgot);
@@ -815,7 +815,7 @@ public static void TestIteratorPull(ж<testing.T> t) {
         goǃ(() => {
             GoFrame ᒐ = default;
             try {
-                var (next, stop) = iter.Pull(new iter.Seq<time.Time>(seqʗ1));
+                var (next, stop) = iter.Pull(NilSafeDelegateConversion<iter.Seq<time.Time>, Action<Func<time.Time, bool>>>(seqʗ1));
                 var stopʗ1 = stop;
                 defer(stopʗ1, ref ᒐ);
                 while (len(Ꮡgot.ValueSlot) < 3) {
@@ -829,8 +829,8 @@ public static void TestIteratorPull(ж<testing.T> t) {
         });
         var want = slice<time.Time>([
             time.Now(),
-            time.Now().Add(1 * time.ΔSecond),
-            time.Now().Add(2 * time.ΔSecond)
+            time.Now().Add(1 * time.Second),
+            time.Now().Add(2 * time.Second)
         ]);
         time.Sleep((time.Duration)(5000000000L));
         synctest.Wait();
@@ -842,7 +842,7 @@ public static void TestIteratorPull(ж<testing.T> t) {
 
 public static partial void TestReflectFuncOf(ж<testing.T> t) {
     void mkfunc(@string name, nint i) {
-        reflect.FuncOf(slice<reflectꓸType>([reflect.StructOf(slice<reflect.StructField>([new(
+        reflect.FuncOf(slice<reflect.Type>([reflect.StructOf(slice<reflect.StructField>([new(
             Name: name + strconv.Itoa(i),
             Type: reflect.TypeOf((nint)0)
         )
@@ -903,10 +903,10 @@ public static partial void TestWaitGroupOutOfBubble(ж<testing.T> t) {
         Ꮡwg.Wait();
         close(donecʗ1);
     });
-    var selᴛ11 = donec;
+    var donecᴛ1 = donec;
     var selᴛ12 = time.After(1 * time.Millisecond);
-    switch (select(ᐸꟷ(selᴛ11, ꓸꓸꓸ), ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
-    case 0 when selᴛ11.ꟷᐳ(out _): {
+    switch (select(ᐸꟷ(donecᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
+    case 0 when donecᴛ1.ꟷᐳ(out _): {
         t.Fatalf("synctest.Run finished before WaitGroup.Done called");
         break;
     }

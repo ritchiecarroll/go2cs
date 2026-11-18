@@ -27,6 +27,7 @@ using go.io;
 using go.path;
 using static go.os_internal_test_package;
 using ꓸꓸꓸany = Span<any>;
+using static os_test_package;
 
 partial class os_test_package {
 
@@ -145,6 +146,8 @@ partial struct rootTest {
     internal bool alwaysFails;
 }
 
+} partial class os_testᴛrootTest {
+
 // run sets up the test filesystem layout, os.OpenDirs the root, and calls f.
 internal static void run(this ж<rootTest> Ꮡtest, ж<Δtesting.T> t, Action<ж<Δtesting.T>, @string, ж<Δos.Root>> f) {
     ref var test = ref Ꮡtest.DerefOrNull();
@@ -172,6 +175,8 @@ internal static void run(this ж<rootTest> Ꮡtest, ж<Δtesting.T> t, Action<ж
         finally { ᒐ.Run(); }
     });
 }
+
+} partial class os_test_package {
 
 // errEndsTest checks the error result of a test,
 // verifying that it succeeded or failed as expected.
@@ -595,8 +600,8 @@ public static void TestRootChtimes(ж<Δtesting.T> t) {
                 var exprᴛ1 = Δruntime.GOOS;
                 switch (ᐧ) {
                 case {} when exprᴛ1 == "js"u8 || exprᴛ1 == "plan9"u8: {
-                    times.atime = times.atime.Truncate(1 * time.ΔSecond);
-                    times.mtime = times.mtime.Truncate(1 * time.ΔSecond);
+                    times.atime = times.atime.Truncate(1 * time.Second);
+                    times.mtime = times.mtime.Truncate(1 * time.Second);
                     break;
                 }
                 case {} when exprᴛ1 == "illumos"u8: {
@@ -1502,6 +1507,8 @@ internal static @string tempDirWithUnixSocket(ж<Δtesting.T> t, @string name) {
     return dir;
 }
 
+} partial class os_testᴛrootConsistencyTest {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object inconsistentResultsOnˢ = (@string)"#69509: inconsistent results on wasip1"u8;
 internal static ref readonly @string withRootˢ => ref withRootˢᵇ;
@@ -1589,6 +1596,8 @@ internal static void run(this rootConsistencyTest test, ж<Δtesting.T> t, Func<
     });
 }
 
+} partial class os_test_package {
+
 public static void TestRootConsistencyOpen(ж<Δtesting.T> t) {
     foreach (var (_, test) in range(rootConsistencyTestCases)) {
         test.run(t, (ж<Δtesting.T> tΔ1, @string path, ж<Δos.Root> r) => {
@@ -1653,8 +1662,8 @@ public static void TestRootConsistencyChmod(ж<Δtesting.T> t) {
     }
     foreach (var (_, test) in range(rootConsistencyTestCases)) {
         test.run(t, (ж<Δtesting.T> tΔ1, @string path, ж<Δos.Root> r) => {
-            Func<@string, fs.FileMode, error> chmod = Δos.Chmod;
-            Func<@string, (fs.FileInfo, error)> lstat = Δos.Lstat;
+            var chmod = Δos.Chmod;
+            var lstat = Δos.Lstat;
             if (r != nil) {
                 chmod = (@string p1, fs.FileMode p2) => r.Chmod(p1, p2);
                 lstat = (@string p1) => r.Lstat(p1);
@@ -1847,7 +1856,7 @@ internal static void testRootConsistencyMove(ж<Δtesting.T> t, bool rename) {
                         move = (@string p1, @string p2) => r.Link(p1, p2);
                         break;
                     }}
-                    Func<@string, (fs.FileInfo, error)> lstat = Δos.Lstat;
+                    var lstat = Δos.Lstat;
                     if (r != nil) {
                         lstat = (@string p1) => r.Lstat(p1);
                     }
@@ -2610,6 +2619,8 @@ internal static void runRootMultiTest2(ж<Δtesting.T> t, Func<ж<Δtesting.T>, 
     }
 }
 
+} partial class os_testᴛrootMultiTest {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rootˢ2 => ref rootˢ2ᵇ;
 private static readonly @string rootˢ2ᵇ = "root."u8;
@@ -2629,7 +2640,11 @@ internal static void setOp(this ref rootMultiTest test, @string format, params �
     test.op += fmt.Sprintf(format, a.ꓸꓸꓸ);
 }
 
+} partial class os_test_package {
+
 internal static error errAny = errors.New("any error");
+
+} partial class os_testᴛrootMultiTest {
 
 internal static partial void errorf(this ref rootMultiTest test, ж<Δtesting.T> t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
@@ -2647,6 +2662,8 @@ internal static void wantError(this ref rootMultiTest test, ж<Δtesting.T> t, e
     }
     t.Fatalf("%v:\ngot error:  %v\nwant error: %v", test.op, got, want);
 }
+
+} partial class os_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object initialDirectoryContentsˢ = (@string)"Initial directory contents:"u8;
@@ -2832,11 +2849,21 @@ internal static testFileKind testFileMax => 6;
 // such as "a/b" where "a" does not exist.
 internal static testFileKind testFileError => 7;
 
+} partial class os_testᴛtestFileKind {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unusedˢ => ref unusedˢᵇ;
 private static readonly @string unusedˢᵇ = "unused"u8;
 internal static ref readonly @string absentˢ => ref absentˢᵇ;
 private static readonly @string absentˢᵇ = "absent"u8;
+internal static ref readonly @string fileˢ2 => ref fileˢ2ᵇ;
+private static readonly @string fileˢ2ᵇ = "file"u8;
+internal static ref readonly @string dirˢ => ref dirˢᵇ;
+private static readonly @string dirˢᵇ = "dir"u8;
+internal static ref readonly @string symlinkˢ => ref symlinkˢᵇ;
+private static readonly @string symlinkˢᵇ = "symlink"u8;
+internal static ref readonly @string junctionˢ => ref junctionˢᵇ;
+private static readonly @string junctionˢᵇ = "junction"u8;
 internal static ref readonly @string errorˢ2 => ref errorˢ2ᵇ;
 private static readonly @string errorˢ2ᵇ = "error"u8;
 
@@ -2871,6 +2898,8 @@ internal static @string String(this testFileKind kind) {
 internal static bool isLink(this testFileKind kind) {
     return kind == testFileSymlink || kind == testFileJunction;
 }
+
+} partial class os_test_package {
 
 // testFileRef is a kind of reference to a file.
 //
@@ -2909,6 +2938,8 @@ internal static slice<testFileRef> testFileRefs = [
 // (see allTestFileDescs).
 internal static slice<testFileRef> testFileLimitedRefs = testFileRefs[0..2];
 
+} partial class os_testᴛtestFileRef {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string baseˢ => ref baseˢᵇ;
 private static readonly @string baseˢᵇ = "BASE"u8;
@@ -2932,6 +2963,8 @@ internal static @string path(this testFileRef @ref, @string dir, @string @base) 
 internal static bool hasSlashSuffix(this testFileRef @ref) {
     return strings.HasSuffix(@ref.template, "/");
 }
+
+} partial class os_test_package {
 
 // testFileDesc is a description of a type of file, combining the kind and reference type.
 //
@@ -3039,6 +3072,8 @@ internal static iter.Seq<testFileDesc> allTestFileDescs() {
         }
     };
 }
+
+} partial class os_testᴛtestFileDesc {
 
 // String returns the target name.
 //
@@ -3272,7 +3307,13 @@ internal static fs.FileInfo /*fi*/ create(this testFileDesc desc, ж<Δtesting.T
     return fi;
 }
 
+} partial class os_testᴛrootMultiTest {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string sourceˢ => ref sourceˢᵇ;
+private static readonly @string sourceˢᵇ = "source"u8;
+internal static ref readonly @string targetˢ => ref targetˢᵇ;
+private static readonly @string targetˢᵇ = "target"u8;
 internal static ref readonly @string unknownFileˢ => ref unknownFileˢᵇ;
 private static readonly @string unknownFileˢᵇ = "unknown file"u8;
 
@@ -3300,6 +3341,8 @@ internal static @string describeFile(this ref rootMultiTest test, ж<Δtesting.T
         return unknownFileˢ;
     }}
 }
+
+} partial class os_test_package {
 
 // dirTreeContents returns a description of the contents of directory.
 // For example:

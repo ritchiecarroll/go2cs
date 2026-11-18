@@ -28,6 +28,7 @@ using fs = global::go.io.fs_package;
 using global::go.os;
 using path;
 using static global::go.runtime_internal_test_package;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -44,6 +45,8 @@ public static ж<DLL> GetDLL(ж<testing.T> t, @string name) {
     return Ꮡ(new DLL(ΔDLL: d, t: t));
 }
 
+} partial class runtime_testᴛDLL {
+
 public static ж<syscall.Proc> Proc(this ж<DLL> Ꮡd, @string name) {
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -53,6 +56,8 @@ public static ж<syscall.Proc> Proc(this ж<DLL> Ꮡd, @string name) {
     }
     return p;
 }
+
+} partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string user32Dllˢ => ref user32Dllˢᵇ;
@@ -177,7 +182,7 @@ public static void TestEnumWindows(ж<testing.T> t) {
     var isWindows = d.Proc(isWindowˢ);
     nint counter = 0;
     var isWindowsʗ1 = isWindows;
-    var cb = syscall.NewCallback(uintptr (syscallꓸHandle hwnd, uintptr lparam) => {
+    var cb = syscall.NewCallback(uintptr (syscall.Handle hwnd, uintptr lparam) => {
         if (lparam != 888) {
             t.Error(lparamWasNotPassedToˢ);
         }
@@ -351,7 +356,7 @@ public static void TestCallbackInAnotherThread(ж<testing.T> t) {
         if (r == 0) {
             t.Fatalf("CreateThread failed: %v", err);
         }
-        var h = (syscallꓸHandle)r;
+        var h = (syscall.Handle)r;
         defer(syscall.CloseHandle, h, ref ᒐ);
 
         var (s, errΔ1) = syscall.WaitForSingleObject(h, syscall.INFINITE);
@@ -385,6 +390,8 @@ public static void TestCallbackInAnotherThread(ж<testing.T> t) {
 partial struct cbFunc {
     internal any goFunc;
 }
+
+} partial class runtime_testᴛcbFunc {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string stdcallˢ => ref stdcallˢᵇ;
@@ -453,6 +460,8 @@ internal static void testOne(this cbFunc f, ж<testing.T> t, ж<syscall.DLL> dll
         t.Errorf("wanted result %d; got %d", want, r1);
     }
 }
+
+} partial class runtime_test_package {
 
 partial struct uint8Pair {
     internal uint8 x, y;
@@ -594,6 +603,8 @@ partial struct cbDLL {
     internal Func<@string, @string, slice<@string>> buildArgs;
 }
 
+} partial class runtime_testᴛcbDLL {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object includeStdintHTypedefˢ = (@string)"""
 
@@ -635,6 +646,8 @@ internal static @string build(this ref cbDLL d, ж<testing.T> t, @string dir) {
     }
     return filepath.Join(dir, outname);
 }
+
+} partial class runtime_test_package {
 
 internal static slice<cbDLL> cbDLLs = [
     new(
@@ -716,27 +729,27 @@ internal partial struct TestRegisterClass_Wndclassex /*dyn*/ {
     public uintptr WndProc;
     public int32 ClsExtra;
     public int32 WndExtra;
-    public syscallꓸHandle Instance;
-    public syscallꓸHandle Icon;
-    public syscallꓸHandle Cursor;
-    public syscallꓸHandle Background;
+    public syscall.Handle Instance;
+    public syscall.Handle Icon;
+    public syscall.Handle Cursor;
+    public syscall.Handle Background;
     public ж<uint16> MenuName;
     public ж<uint16> ClassName;
-    public syscallꓸHandle IconSm;
+    public syscall.Handle IconSm;
 }
 
 public static void TestRegisterClass(ж<testing.T> t) {
     var kernel32 = GetDLL(t, kernel32Dllˢ);
     var user32 = GetDLL(t, user32Dllˢ);
     var (mh, _, _) = kernel32.Proc(getModuleHandleWˢ).Call(0);
-    var cb = syscall.NewCallback(uintptr (syscallꓸHandle hwnd, uint32 msg, uintptr wparam, uintptr lparam) => {
+    var cb = syscall.NewCallback(uintptr (syscall.Handle hwnd, uint32 msg, uintptr wparam, uintptr lparam) => {
         t.Fatal(callbackShouldNeverGetˢ);
         return (uintptr)(0);
     });
     var name = syscall.StringToUTF16Ptr(testWindowˢ);
     ref var wc = ref heap<TestRegisterClass_Wndclassex>(new TestRegisterClass_Wndclassex(
         WndProc: cb,
-        Instance: ((syscallꓸHandle)mh),
+        Instance: ((syscall.Handle)mh),
         ClassName: name
     ), out var Ꮡwc);
     wc.Size = (uint32)/* unsafe.Sizeof(wc) */ (uintptr)80;
@@ -1250,7 +1263,7 @@ internal static error resumeChildThread(ж<syscall.DLL> kernel32, nint childpid)
         if (h == 0) {
             return err;
         }
-        defer(syscall.Close, (syscallꓸHandle)h, ref ᒐ);
+        defer(syscall.Close, (syscall.Handle)h, ref ᒐ);
 
         (ret, _, err) = _ResumeThread.Call(h);
         if (ret == 0xffffffffU) {
@@ -1509,15 +1522,15 @@ internal static ж<syscall.LazyDLL> modkernel32 = syscall.NewLazyDLL("kernel32.d
 internal static ж<syscall.LazyProc> procCreateEvent = modkernel32.NewProc("CreateEventW");
 internal static ж<syscall.LazyProc> procSetEvent = modkernel32.NewProc("SetEvent");
 
-internal static (syscallꓸHandle, error) createEvent() {
+internal static (syscall.Handle, error) createEvent() {
     var (r0, _, e0) = syscall.Syscall6(procCreateEvent.Addr(), 4, 0, 0, 0, 0, 0, 0);
     if (r0 == 0) {
         return (0, e0);
     }
-    return ((syscallꓸHandle)r0, default);
+    return ((syscall.Handle)r0, default);
 }
 
-internal static error setEvent(syscallꓸHandle h) {
+internal static error setEvent(syscall.Handle h) {
     var (r0, _, e0) = syscall.Syscall(procSetEvent.Addr(), 1, (uintptr)h, 0, 0);
     if (r0 == 0) {
         return e0;

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // For TestRawConnReadWrite.
-global using syscallDescriptor = go.syscall_package.ΔHandle;
+global using syscallDescriptor = go.syscall_package.Handle;
 
 namespace go;
 
@@ -41,6 +41,7 @@ using go.path;
 using go.sync;
 using static go.os_internal_test_package;
 using unicode;
+using static os_test_package;
 
 partial class os_test_package {
 
@@ -181,6 +182,8 @@ partial struct namePosition {
     internal uint16 length;
 }
 
+} partial class os_testᴛreparseData {
+
 internal static uint16 /*offset*/ addUTF16s(this ref reparseData rd, slice<uint16> s) {
     nint off = len(rd.pathBuf) * 2;
     rd.pathBuf = appendꓸꓸꓸ(rd.pathBuf, s);
@@ -218,6 +221,8 @@ internal static void addPrintNameNoNUL(this ref reparseData rd, @string name) {
 internal static uint16 pathBuffeLen(this ref reparseData rd) {
     return (uint16)((uint16)len(rd.pathBuf) * 2);
 }
+
+} partial class os_test_package {
 
 // Windows REPARSE_DATA_BUFFER contains union member, and cannot be
 // translated into Go directly. _REPARSE_DATA_BUFFER type is to help
@@ -344,7 +349,7 @@ internal static error enableCurrentThreadPrivilege(@string privilegeName) {
         if (err != nil) {
             return err;
         }
-        defer(syscall.CloseHandle, (syscallꓸHandle)(uintptr)t, ref ᒐ);
+        defer(syscall.CloseHandle, (syscall.Handle)(uintptr)t, ref ᒐ);
 
         ref var tp = ref heap(new windows.TOKEN_PRIVILEGES(), out var Ꮡtp);
 
@@ -817,7 +822,7 @@ public static void TestReadStdin(ж<Δtesting.T> t) {
         if (err != nil) {
             t.Fatalf("Unable to get handle to current process: %v", err);
         }
-        ref var stdinDuplicate = ref heap(new syscallꓸHandle(), out var ᏑstdinDuplicate);
+        ref var stdinDuplicate = ref heap(new syscall.Handle(), out var ᏑstdinDuplicate);
         err = syscall.DuplicateHandle(p, syscall.Stdin, p, ᏑstdinDuplicate, 0, false, syscall.DUPLICATE_SAME_ACCESS);
         if (err != nil) {
             t.Fatalf("Unable to duplicate stdin: %v", err);
@@ -839,7 +844,7 @@ public static void TestReadStdin(ж<Δtesting.T> t) {
                     var testConsoleʗ1 = testConsole;
                     t.Run(fmt.Sprintf("c%d/r%d/%s"u8, consoleSize, readSize, s), (ж<Δtesting.T> tΔ1) => {
                         ref var s16 = ref heap<slice<uint16>>(utf16.Encode(slice<rune>(s)), out var Ꮡs16);
-                        poll.ReadConsole = error (syscallꓸHandle h, ж<uint16> bufΔ1, uint32 toread, ж<uint32> read, ж<byte> inputControl) => {
+                        poll.ReadConsole = error (syscall.Handle h, ж<uint16> bufΔ1, uint32 toread, ж<uint32> read, ж<byte> inputControl) => {
                             if (inputControl != nil) {
                                 tΔ1.Fatalf("inputControl not nil");
                             }
@@ -927,7 +932,7 @@ internal static (slice<@string>, error) syscallCommandLineToArgv(@string cmd) {
         if (err != nil) {
             return (default, err);
         }
-        defer(syscall.LocalFree, (syscallꓸHandle)(uintptr)argv, ref ᒐ);
+        defer(syscall.LocalFree, (syscall.Handle)(uintptr)argv, ref ᒐ);
 
         slice<@string> args = default;
         foreach (var (_, v) in range((argv.Value).slice(0, argc))) {
@@ -2346,9 +2351,9 @@ public static partial void TestPipeCanceled(ж<Δtesting.T> t) {
     var fileʗ1 = @file;
     goǃ(() => {
         for (;;) {
-            var selᴛ5 = chʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
-            case 0 when selᴛ5.ꟷᐳ(out _): {
+            var chᴛ1 = chʗ1;
+            switch (trySelect(ᐸꟷ(chᴛ1, ꓸꓸꓸ))) {
+            case 0 when chᴛ1.ꟷᐳ(out _): {
                 return;
             }
             default: {
@@ -2359,7 +2364,7 @@ public static partial void TestPipeCanceled(ж<Δtesting.T> t) {
                 }
                 {
                     var errΔ2 = sc.Control((uintptr fd) => {
-                        syscall.CancelIoEx((syscallꓸHandle)fd, nil);
+                        syscall.CancelIoEx((syscall.Handle)fd, nil);
                     }); if (errΔ2 != nil) {
                         t.Error(errΔ2);
                         return;
@@ -2382,8 +2387,8 @@ public static partial void TestPipeCanceled(ж<Δtesting.T> t) {
     }
 }
 
-internal static error iocpAssociateFile(ж<Δos.File> f, syscallꓸHandle iocp) {
-    var (_, err) = windows.CreateIoCompletionPort((syscallꓸHandle)f.Fd(), iocp, 0, 0);
+internal static error iocpAssociateFile(ж<Δos.File> f, syscall.Handle iocp) {
+    var (_, err) = windows.CreateIoCompletionPort((syscall.Handle)f.Fd(), iocp, 0, 0);
     return err;
 }
 
@@ -2622,7 +2627,7 @@ public static void TestOpenFileFlags(ж<Δtesting.T> t) {
                 var fʗ1 = f;
                 defer(() => fʗ1.Close(), ref ᒐ);
                 ref var info = ref heap(new windows.FILE_MODE_INFORMATION(), out var Ꮡinfo);
-                var errΔ1 = windows.NtQueryInformationFile((syscallꓸHandle)f.Fd(), Ꮡ(new windows.IO_STATUS_BLOCK()),
+                var errΔ1 = windows.NtQueryInformationFile((syscall.Handle)f.Fd(), Ꮡ(new windows.IO_STATUS_BLOCK()),
                     @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileModeInformation); if (errΔ1 != nil) {
                     tΔ1.Fatal(errΔ1);
                 }

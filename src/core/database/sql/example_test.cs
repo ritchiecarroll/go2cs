@@ -191,7 +191,7 @@ public static void ExampleDB_PingContext() {
         // When used in long running service Ping may be part of the health
         // checking system.
 
-        var (ctxΔ1, cancel) = context.WithTimeout(sql_test_package.ctx, 1 * time.ΔSecond);
+        var (ctxΔ1, cancel) = context.WithTimeout(sql_test_package.ctx, 1 * time.Second);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
 

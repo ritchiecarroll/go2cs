@@ -646,7 +646,7 @@ same rename for the box accessor. Only the EMBEDDED-field DECLARATION path was o
 emitted `getCoreSanitizedIdentifier(goTypeName)` raw, so the declaration and its accesses disagreed
 and the struct itself was CS0542:
 
-<!-- source: src/core/io/io_test.cs:24-28 -->
+<!-- source: src/core/io/io_test.cs:25-29 -->
 ```csharp
 partial struct Buffer {
     /*embed*/ public bytes_package.Buffer ΔBuffer;

@@ -8,11 +8,6 @@ global using static global::go.encoding.json_package;
 global using static global::go.encoding.json_internal_test_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
@@ -31,7 +26,6 @@ using static global::go.encoding.json_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b582075696e74363420226a736f6e3a5c222c737472696e675c22227d", "Δtypeᴛ7")]
 [assembly: GoDynamicTypeLift("7374727563747b656e636f64696e672f6a736f6e2e436173654e616d653b20696e20737472696e673b2070747220616e793b206f757420616e793b20657272206572726f723b207573654e756d62657220626f6f6c3b20676f6c64656e20626f6f6c3b20646973616c6c6f77556e6b6e6f776e4669656c647320626f6f6c7d", "unmarshalTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b696e20737472696e673b206f757420737472696e677d", "encodeStringTestsᴛ1")]
-[assembly: GoTypeAlias("Token", "ΔToken")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -39,7 +33,7 @@ using static global::go.encoding.json_test_package;
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<go.@internal.zstd_package.Reader, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.Handler>]
 [assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]
 [assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
@@ -64,8 +58,8 @@ using static global::go.encoding.json_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/json/example_marshaling_test.go", "example_marshaling_test.cs", "ABUwgoKClKS0tLYACgaCgpS0tLbmgoKCgqaCgqY=")]
-[assembly: GoPositionMap("encoding/json/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABUwgqS0tKQACgaCgpS0tKTmgoKCgqaCgqY=")]
+[assembly: GoPositionMap("encoding/json/example_marshaling_test.go", "example_marshaling_test.cs", "ABgwgoKClKS0tLYACgaCgpS0tLYACAaCgoKCpoKCpg==")]
+[assembly: GoPositionMap("encoding/json/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABkwgqS0tKQACgaCgpS0tKQACAaCgoKCpoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -129,3 +123,14 @@ public static partial class json_test_package
         builtin.initPackage(typeof(global::go.encoding.json_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(json_test_package.Animal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class json_testᴛAnimal;
+[GoMethodHost(typeof(json_test_package.Size)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class json_testᴛSize;
+// </MethodHolders>

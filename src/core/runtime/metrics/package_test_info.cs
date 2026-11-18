@@ -7,8 +7,6 @@
 global using static global::go.runtime.metrics_package;
 
 // <ImportedTypeAliases>
-global using commentꓸText = go.go.doc.comment_package.ΔText;
-global using metricsꓸFloat64Histogram = go.runtime.metrics_package.ΔFloat64Histogram;
 // </ImportedTypeAliases>
 
 using go;

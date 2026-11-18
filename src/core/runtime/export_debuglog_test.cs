@@ -7,6 +7,7 @@ global using Dlogger = global::go.runtime_package.dloggerImpl;
 namespace go;
 
 using static global::go.runtime_package;
+using static runtime_internal_test_package;
 
 partial class runtime_internal_test_package {
 
@@ -20,6 +21,8 @@ internal static ж<Dlogger> Dlog() {
     return dlogImpl();
 }
 
+} partial class runtime_internal_testᴛdloggerImpl {
+
 internal static void End(this ж<global::go.runtime_package.dloggerImpl> Ꮡl) { Ꮡl.end(); }
 internal static ж<global::go.runtime_package.dloggerImpl> B(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, bool x) { return Ꮡl.b(x); }
 internal static ж<global::go.runtime_package.dloggerImpl> I(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, nint x) { return Ꮡl.i(x); }
@@ -29,6 +32,8 @@ internal static ж<global::go.runtime_package.dloggerImpl> Hex(this ж<global::g
 internal static ж<global::go.runtime_package.dloggerImpl> P(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, any x) { return Ꮡl.p(x); }
 internal static ж<global::go.runtime_package.dloggerImpl> S(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, @string x) { return Ꮡl.s(x); }
 internal static ж<global::go.runtime_package.dloggerImpl> PC(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, uintptr x) { return Ꮡl.pc(x); }
+
+} partial class runtime_internal_test_package {
 
 public static @string DumpDebugLog() {
     var gp = getg();

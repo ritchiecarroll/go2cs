@@ -40,6 +40,7 @@ using hash = hash_package;
 using path;
 using rsa = go.crypto.rsa_package;
 using static go.crypto.tls_package;
+using static tls_internal_test_package;
 
 partial class tls_internal_test_package {
 
@@ -671,7 +672,7 @@ internal partial struct serverTest {
     // validate, if not nil, is a function that will be called with the
     // ConnectionState of the resulting connection. It returns false if the
     // ConnectionState is unacceptable.
-    internal Func<global::go.crypto.tls_package.ΔConnectionState, error> validate;
+    internal Func<global::go.crypto.tls_package.ConnectionState, error> validate;
     // wait, if true, prevents this subtest from calling t.Parallel.
     // If false, runServerTest* returns immediately.
     internal bool wait;
@@ -679,7 +680,11 @@ internal partial struct serverTest {
 
 internal static slice<@string> defaultClientCommand = ["openssl", "s_client", "-no_ticket"];
 
+} partial class tls_internal_testᴛserverTest {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
 internal static ref readonly @string timedOutWaitingForˢ2 => ref timedOutWaitingForˢ2ᵇ;
 private static readonly @string timedOutWaitingForˢ2ᵇ = "timed out waiting for connection from child process"u8;
 
@@ -736,10 +741,10 @@ internal static partial (ж<recordingConn> conn, ж<exec.Cmd> child, error err) 
         });
 
         net.Conn tcpConn = default;
-        var selᴛ2 = connChan;
-        var selᴛ3 = time_package.After(2 * time_package.ΔSecond);
-        switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
-        case 0 when selᴛ2.ꟷᐳ(out var connOrError): {
+        var connChanᴛ1 = connChan;
+        var selᴛ3 = time.After(2 * time.Second);
+        switch (select(ᐸꟷ(connChanᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
+        case 0 when connChanᴛ1.ꟷᐳ(out var connOrError): {
             var (errΔ3, ok) = connOrError._<error>(ᐧ); if (ok) {
                 (conn, child, err) = (default, default, errΔ3); goto ᒐdone;
             }
@@ -760,6 +765,10 @@ internal static partial (ж<recordingConn> conn, ж<exec.Cmd> child, error err) 
     finally { ᒐ.Run(); }
     ᒐdone: return (conn, child, err);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string testdataˢ => ref testdataˢᵇ;
+private static readonly @string testdataˢᵇ = "testdata"u8;
 
 internal static @string dataPath(this ref serverTest test) {
     return filepath.Join(testdataˢ, "Server-" + test.name);
@@ -878,6 +887,8 @@ internal static void run(this ж<serverTest> Ꮡtest, ж<testing.T> t, bool writ
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class tls_internal_test_package {
 
 internal static void runServerTestForVersion(ж<testing.T> t, ж<serverTest> Ꮡtemplate, @string version, @string option) {
     ref var template = ref Ꮡtemplate.DerefOrNull();
@@ -1046,7 +1057,7 @@ public static void TestHandshakeServerHelloRetryRequest(ж<testing.T> t) {
         name: "HelloRetryRequest",
         command: ["openssl", "s_client", "-no_ticket", "-ciphersuites", "TLS_CHACHA20_POLY1305_SHA256", "-curves", "X25519:P-256"],
         config: config,
-        validate: error (global::go.crypto.tls_package.ΔConnectionState cs) => {
+        validate: error (global::go.crypto.tls_package.ConnectionState cs) => {
             if (!cs.HelloRetryRequest) {
                 return errors.New(expectedˢ);
             }
@@ -1091,7 +1102,7 @@ public static void TestHandshakeServerKeySharePreference(ж<testing.T> t) {
         name: "KeySharePreference",
         command: ["openssl", "s_client", "-no_ticket", "-ciphersuites", "TLS_CHACHA20_POLY1305_SHA256", "-curves", "P-256:X25519"],
         config: config,
-        validate: error (global::go.crypto.tls_package.ΔConnectionState cs) => {
+        validate: error (global::go.crypto.tls_package.ConnectionState cs) => {
             if (cs.HelloRetryRequest) {
                 return errors.New(unexpectedˢ);
             }
@@ -1117,7 +1128,7 @@ public static void TestHandshakeServerALPN(ж<testing.T> t) {
         // version that supports the -alpn flag.
         command: ["openssl", "s_client", "-alpn", "proto2,proto1", "-cipher", "ECDHE-RSA-CHACHA20-POLY1305", "-ciphersuites", "TLS_CHACHA20_POLY1305_SHA256"],
         config: config,
-        validate: error (global::go.crypto.tls_package.ΔConnectionState state) => {
+        validate: error (global::go.crypto.tls_package.ConnectionState state) => {
             // The server's preferences should override the client.
             if (state.NegotiatedProtocol != "proto1"u8) {
                 return fmt.Errorf("Got protocol %q, wanted proto1"u8, state.NegotiatedProtocol);
@@ -1155,7 +1166,7 @@ public static void TestHandshakeServerALPNNotConfigured(ж<testing.T> t) {
         // version that supports the -alpn flag.
         command: ["openssl", "s_client", "-alpn", "proto2,proto1", "-cipher", "ECDHE-RSA-CHACHA20-POLY1305", "-ciphersuites", "TLS_CHACHA20_POLY1305_SHA256"],
         config: config,
-        validate: error (global::go.crypto.tls_package.ΔConnectionState state) => {
+        validate: error (global::go.crypto.tls_package.ConnectionState state) => {
             if (state.NegotiatedProtocol != ""u8) {
                 return fmt.Errorf("Got protocol %q, wanted nothing"u8, state.NegotiatedProtocol);
             }
@@ -1176,7 +1187,7 @@ public static void TestHandshakeServerALPNFallback(ж<testing.T> t) {
         // version that supports the -alpn flag.
         command: ["openssl", "s_client", "-alpn", "proto3,http/1.1,proto4", "-cipher", "ECDHE-RSA-CHACHA20-POLY1305", "-ciphersuites", "TLS_CHACHA20_POLY1305_SHA256"],
         config: config,
-        validate: error (global::go.crypto.tls_package.ΔConnectionState state) => {
+        validate: error (global::go.crypto.tls_package.ConnectionState state) => {
             if (state.NegotiatedProtocol != ""u8) {
                 return fmt.Errorf("Got protocol %q, wanted nothing"u8, state.NegotiatedProtocol);
             }
@@ -1258,7 +1269,7 @@ public static void TestHandshakeServerGetCertificateExtensions(ж<testing.T> t) 
 
         var versʗ1 = vers;
         t.Run(fmt.Sprintf("TLS version %04x"u8, vers), (ж<testing.T> tΔ1) => {
-            var (pk, _) = ecdh.P256().GenerateKey(go.crypto.rand_package.Reader);
+            var (pk, _) = ecdh.P256().GenerateKey(rand.Reader);
             var clientHello = Ꮡ(new clientHelloMsg(
                 vers: versʗ1,
                 random: new slice<byte>(32),
@@ -1383,7 +1394,7 @@ public static void TestServerResumption(ж<testing.T> t) {
         var testResume = Ꮡ(new serverTest(
             name: "Resume",
             command: ["openssl", "s_client", "-cipher", "AES128-SHA", "-ciphersuites", "TLS_AES_128_GCM_SHA256", "-sess_in", sessionFilePath],
-            validate: error (global::go.crypto.tls_package.ΔConnectionState state) => {
+            validate: error (global::go.crypto.tls_package.ConnectionState state) => {
                 if (!state.DidResume) {
                     return errors.New(didNotResumeˢ);
                 }
@@ -1405,7 +1416,7 @@ public static void TestServerResumption(ж<testing.T> t) {
             command: ["openssl", "s_client", "-curves", "X25519:P-256", "-cipher", "AES128-SHA", "-ciphersuites",
                 "TLS_AES_128_GCM_SHA256", "-sess_in", sessionFilePath],
             config: config,
-            validate: error (global::go.crypto.tls_package.ΔConnectionState state) => {
+            validate: error (global::go.crypto.tls_package.ConnectionState state) => {
                 if (!state.DidResume) {
                     return errors.New(didNotResumeˢ);
                 }
@@ -1441,7 +1452,7 @@ public static void TestServerResumptionDisabled(ж<testing.T> t) {
             name: "ResumeDisabled",
             command: ["openssl", "s_client", "-cipher", "AES128-SHA", "-ciphersuites", "TLS_AES_128_GCM_SHA256", "-sess_in", sessionFilePath],
             config: config,
-            validate: error (global::go.crypto.tls_package.ΔConnectionState state) => {
+            validate: error (global::go.crypto.tls_package.ConnectionState state) => {
                 if (state.DidResume) {
                     return errors.New(resumedWithˢ);
                 }
@@ -1483,7 +1494,7 @@ public static void TestHandshakeServerExportKeyingMaterial(ж<testing.T> t) {
         name: "ExportKeyingMaterial",
         command: ["openssl", "s_client", "-cipher", "ECDHE-RSA-AES256-SHA", "-ciphersuites", "TLS_CHACHA20_POLY1305_SHA256"],
         config: testConfig.Clone(),
-        validate: error (global::go.crypto.tls_package.ΔConnectionState state) => {
+        validate: error (global::go.crypto.tls_package.ConnectionState state) => {
             var (km, err) = state.ExportKeyingMaterial(testˢ, default, 42); if (err != nil) {
                 return fmt.Errorf("ExportKeyingMaterial failed: %v"u8, err);
             } else if (len(km) != 42) {
@@ -1939,10 +1950,10 @@ public static partial void TestCloseServerConnectionOnIdleClient(ж<testing.T> t
         clientConnʗ1.Write([(byte)'0']);
         serverʗ1.Close();
     });
-    server.SetReadDeadline(time_package.Now().Add(time_package.ΔMinute));
+    server.SetReadDeadline(time.Now().Add(time.Minute));
     var err = server.Handshake();
     if (err != nil) {
-        var (errΔ1, ok) = err._<netꓸError>(ᐧ); if (ok && errΔ1.Timeout()) {
+        var (errΔ1, ok) = err._<net.Error>(ᐧ); if (ok && errΔ1.Timeout()) {
             t.Errorf("Expected a closed network connection error but got '%s'", errΔ1.Error());
         }
     } else {
@@ -2293,7 +2304,7 @@ public static void TestAESCipherReorderingTLS13(ж<testing.T> t) {
             var tcʗ1 = tc;
             t.Run(tc.name, (ж<testing.T> tΔ1) => {
                 hasAESGCMHardwareSupport = tcʗ1.serverHasAESGCM;
-                var (pk, _) = ecdh.X25519().GenerateKey(go.crypto.rand_package.Reader);
+                var (pk, _) = ecdh.X25519().GenerateKey(rand.Reader);
                 var hs = Ꮡ(new serverHandshakeStateTLS13(
                     c: Ꮡ(new Conn(
                         config: Ꮡ(new Config()),
@@ -2487,7 +2498,7 @@ internal static ref readonly @string leafExpiresAfterRootˢ => ref leafExpiresAf
 private static readonly @string leafExpiresAfterRootˢᵇ = "LeafExpiresAfterRoot"u8;
 
 internal static void testHandshakeChainExpiryResumption(ж<testing.T> t, uint16 version) {
-    ref var now = ref heap<time.Time>(time_package.Now(), out var Ꮡnow);
+    ref var now = ref heap<time.Time>(time.Now(), out var Ꮡnow);
 
     (slice<byte> leafDER, slice<byte> expiredLeafDER, ж<Δx509.Certificate> root) createChain(time.Time leafNotAfter, time.Time rootNotAfter) {
         ж<Δx509.Certificate> root = default;
@@ -2498,7 +2509,7 @@ internal static void testHandshakeChainExpiryResumption(ж<testing.T> t, uint16 
             IsCA: true,
             BasicConstraintsValid: true
         ));
-        var (rootDER, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, tmpl, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
+        var (rootDER, err) = Δx509.CreateCertificate(rand.Reader, tmpl, tmpl, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
         if (err != nil) {
             t.Fatalf("CreateCertificate: %v", err);
         }
@@ -2514,12 +2525,12 @@ internal static void testHandshakeChainExpiryResumption(ж<testing.T> t, uint16 
             NotAfter: leafNotAfter,
             KeyUsage: Δx509.KeyUsageDigitalSignature
         ));
-        (var leafCertDER, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, root, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
+        (var leafCertDER, err) = Δx509.CreateCertificate(rand.Reader, tmpl, root, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
         if (err != nil) {
             t.Fatalf("CreateCertificate: %v", err);
         }
         (tmpl.NotBefore, tmpl.NotAfter) = (leafNotAfter.Add((time.Duration)(-31536000000000000L)), leafNotAfter.Add((time.Duration)(-31449600000000000L)));
-        (var expiredLeafDERCertDER, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, root, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
+        (var expiredLeafDERCertDER, err) = Δx509.CreateCertificate(rand.Reader, tmpl, root, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
         if (err != nil) {
             t.Fatalf("CreateCertificate: %v", err);
         }
@@ -2584,9 +2595,9 @@ internal static void testHandshakeChainExpiryResumption(ж<testing.T> t, uint16 
             testResume(tΔ1, serverConfig, clientConfig, false);
             testResume(tΔ1, serverConfig, clientConfig, true);
 
-            ref var expiredNow = ref heap<time.Time>(time_package.Unix(0, min(leafNotAfterʗ1.UnixNano(), rootNotAfterʗ1.UnixNano())).Add(time_package.ΔMinute), out var ᏑexpiredNow);
+            ref var expiredNow = ref heap<time.Time>(time.Unix(0, min(leafNotAfterʗ1.UnixNano(), rootNotAfterʗ1.UnixNano())).Add(time.Minute), out var ᏑexpiredNow);
 
-            (var freshLeafDER, expiredLeafDER, var freshRoot) = createChainʗ2(expiredNow.Add(time_package.ΔHour), expiredNow.Add(time_package.ΔHour));
+            (var freshLeafDER, expiredLeafDER, var freshRoot) = createChainʗ2(expiredNow.Add(time.Hour), expiredNow.Add(time.Hour));
             clientConfig.Certificates = [new(
                 ΔCertificate: [freshLeafDER, expiredLeafDER],
                 PrivateKey: testECDSAPrivateKey.OrTypedNil()
@@ -2602,7 +2613,7 @@ internal static void testHandshakeChainExpiryResumption(ж<testing.T> t, uint16 
     }
 
     testExpiration(leafExpiresBeforeRootˢ, now.Add((time.Duration)(7200000000000L)), now.Add((time.Duration)(10800000000000L)));
-    testExpiration(leafExpiresAfterRootˢ, now.Add((time.Duration)(7200000000000L)), now.Add(time_package.ΔHour));
+    testExpiration(leafExpiresAfterRootˢ, now.Add((time.Duration)(7200000000000L)), now.Add(time.Hour));
 }
 
 public static void TestHandshakeGetConfigForClientDifferentClientCAs(ж<testing.T> t) {
@@ -2615,7 +2626,7 @@ public static void TestHandshakeGetConfigForClientDifferentClientCAs(ж<testing.
 }
 
 internal static partial void testHandshakeGetConfigForClientDifferentClientCAs(ж<testing.T> t, uint16 version) {
-    ref var now = ref heap<time.Time>(time_package.Now(), out var Ꮡnow);
+    ref var now = ref heap<time.Time>(time.Now(), out var Ꮡnow);
     var tmpl = Ꮡ(new Δx509.Certificate(
         Subject: new pkix.Name(CommonName: "root"),
         NotBefore: now.Add((time.Duration)(-86400000000000L)),
@@ -2623,7 +2634,7 @@ internal static partial void testHandshakeGetConfigForClientDifferentClientCAs(�
         IsCA: true,
         BasicConstraintsValid: true
     ));
-    var (rootDER, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, tmpl, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
+    var (rootDER, err) = Δx509.CreateCertificate(rand.Reader, tmpl, tmpl, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
     if (err != nil) {
         t.Fatalf("CreateCertificate: %v", err);
     }
@@ -2631,7 +2642,7 @@ internal static partial void testHandshakeGetConfigForClientDifferentClientCAs(�
     if (err != nil) {
         t.Fatalf("ParseCertificate: %v", err);
     }
-    (rootDER, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, tmpl, testRSA2048PrivateKey.ᏑPublicKey, testRSA2048PrivateKey.OrTypedNil());
+    (rootDER, err) = Δx509.CreateCertificate(rand.Reader, tmpl, tmpl, testRSA2048PrivateKey.ᏑPublicKey, testRSA2048PrivateKey.OrTypedNil());
     if (err != nil) {
         t.Fatalf("CreateCertificate: %v", err);
     }
@@ -2647,11 +2658,11 @@ internal static partial void testHandshakeGetConfigForClientDifferentClientCAs(�
         NotAfter: now.Add((time.Duration)(86400000000000L)),
         KeyUsage: Δx509.KeyUsageDigitalSignature
     ));
-    (var certA, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, rootA, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
+    (var certA, err) = Δx509.CreateCertificate(rand.Reader, tmpl, rootA, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
     if (err != nil) {
         t.Fatalf("CreateCertificate: %v", err);
     }
-    (var certB, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, rootB, testECDSAPrivateKey.ᏑPublicKey, testRSA2048PrivateKey.OrTypedNil());
+    (var certB, err) = Δx509.CreateCertificate(rand.Reader, tmpl, rootB, testECDSAPrivateKey.ᏑPublicKey, testRSA2048PrivateKey.OrTypedNil());
     if (err != nil) {
         t.Fatalf("CreateCertificate: %v", err);
     }
@@ -2735,7 +2746,7 @@ public static void TestHandshakeChangeRootCAsResumption(ж<testing.T> t) {
 }
 
 internal static partial void testHandshakeChangeRootCAsResumption(ж<testing.T> t, uint16 version) {
-    ref var now = ref heap<time.Time>(time_package.Now(), out var Ꮡnow);
+    ref var now = ref heap<time.Time>(time.Now(), out var Ꮡnow);
     var tmpl = Ꮡ(new Δx509.Certificate(
         Subject: new pkix.Name(CommonName: "root"),
         NotBefore: now.Add((time.Duration)(-86400000000000L)),
@@ -2743,7 +2754,7 @@ internal static partial void testHandshakeChangeRootCAsResumption(ж<testing.T> 
         IsCA: true,
         BasicConstraintsValid: true
     ));
-    var (rootDER, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, tmpl, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
+    var (rootDER, err) = Δx509.CreateCertificate(rand.Reader, tmpl, tmpl, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
     if (err != nil) {
         t.Fatalf("CreateCertificate: %v", err);
     }
@@ -2751,7 +2762,7 @@ internal static partial void testHandshakeChangeRootCAsResumption(ж<testing.T> 
     if (err != nil) {
         t.Fatalf("ParseCertificate: %v", err);
     }
-    (rootDER, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, tmpl, testRSA2048PrivateKey.ᏑPublicKey, testRSA2048PrivateKey.OrTypedNil());
+    (rootDER, err) = Δx509.CreateCertificate(rand.Reader, tmpl, tmpl, testRSA2048PrivateKey.ᏑPublicKey, testRSA2048PrivateKey.OrTypedNil());
     if (err != nil) {
         t.Fatalf("CreateCertificate: %v", err);
     }
@@ -2767,11 +2778,11 @@ internal static partial void testHandshakeChangeRootCAsResumption(ж<testing.T> 
         NotAfter: now.Add((time.Duration)(86400000000000L)),
         KeyUsage: Δx509.KeyUsageDigitalSignature
     ));
-    (var certA, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, rootA, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
+    (var certA, err) = Δx509.CreateCertificate(rand.Reader, tmpl, rootA, testECDSAPrivateKey.ᏑPublicKey, testECDSAPrivateKey.OrTypedNil());
     if (err != nil) {
         t.Fatalf("CreateCertificate: %v", err);
     }
-    (var certB, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, rootB, testECDSAPrivateKey.ᏑPublicKey, testRSA2048PrivateKey.OrTypedNil());
+    (var certB, err) = Δx509.CreateCertificate(rand.Reader, tmpl, rootB, testECDSAPrivateKey.ᏑPublicKey, testRSA2048PrivateKey.OrTypedNil());
     if (err != nil) {
         t.Fatalf("CreateCertificate: %v", err);
     }

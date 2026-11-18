@@ -1907,7 +1907,7 @@ In `package_info_internal_test.cs`, anchored at the internal test bridge class:
 
 In `package_test_info.cs`, anchored at the external test class:
 
-<!-- source: src/core/encoding/gob/package_test_info.cs:27 -->
+<!-- source: src/core/encoding/gob/package_test_info.cs:24 -->
 ```csharp
 [assembly: GoImplement<go.encoding.gob_test_package.Point, Pythagoras>]
 ```

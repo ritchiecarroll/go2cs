@@ -37,7 +37,7 @@ using static global::go.@internal.coverage.test_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/test/counter_test.go", "counter_test.cs", "ABgsgoKCpqaCAAoOosqCgoKmpsqUhKaCgoKCuIKClIKCgpSClJaSgpKCuIKUgpSCgoKClIKClIKCgoKUgoKCpoKAgoKC1uTSgoKCgqamgoKCgoKCgoKCgoKCgpSUlJSCgpSCgqaCuIKokoKSgriClIKUgoKUgqaCgpSmgoKCgriCgoKCgoKUgoKC2A==", "45-52:1;91-95:2;187-191:1", "", "63=mkfunc/1/3/1,mkfunc/2/3/2,mkfunc/3/3/3", "", "100:25,101:17,211:21,212:13")]
+[assembly: GoPositionMap("internal/coverage/test/counter_test.go", "counter_test.cs", "ABssgoKCpsaCAAoOosqCgoKmpsqUhKaCgoKCuIKClIKCgpSClJaSgpKCuIKUgpSCgoKClIKClIKCgoKUgoKCpoKAgoKC1uTSgoKCgqamgoKCgoKCgoKCgoKCgpSUlJSCgpSCgqaCuIKokoKSgriClIKUgoKUgqaCgpSmgoKCgriCgoKCgoKUgoKC2A==", "45-52:1;91-95:2;187-191:1", "", "68=mkfunc/1/3/1,mkfunc/2/3/2,mkfunc/3/3/3", "", "105:25,106:17,216:21,217:13")]
 [assembly: GoPositionMap("internal/coverage/test/roundtrip_test.go", "roundtrip_test.cs", "ABYmgoKCgpQACAamgoKCgoKUgoKCgoKUgoKUgoKUgoKUgoIACwiUgoKCgoKUAAcQgoKmAAgSgoK4gqaCgoKUgoKmgoKUgoKmgoKCgpSCgsqCgoKCgoK4lMqU5oKCgoKmgoKUgoKmooKClPaCpoKCgqaCgoKCgoKUgsqClIKCppSCgpSCgpSCuIKClIKClIKCgpSCgoKmgoKCgoKClIKCgqaCgoKmgoK4uKiCgoKCgpSCgoKCgoIABxCCuIKmgoKClIKClIKCgpSCgg==", "", "", "166=Sprintf/1/2/1,Sprintf/2/2/2")]
 // </GoSourcePositionMaps>
 
@@ -75,3 +75,13 @@ public static partial class test_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(test_internal_test_package.ctrVis)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class test_internal_testᴛctrVis;
+// </MethodHolders>

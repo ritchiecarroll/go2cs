@@ -21,6 +21,7 @@ using go.@internal;
 using go.net;
 using go.net.http;
 using static go.net.http.cgi_package;
+using static cgi_internal_test_package;
 
 partial class cgi_internal_test_package {
 
@@ -79,14 +80,20 @@ internal partial struct customWriterRecorder {
     /*embed*/ public ж<net.http.httptest_package.ResponseRecorder> ResponseRecorder;
 }
 
+} partial class cgi_internal_testᴛcustomWriterRecorder {
+
 internal static (nint n, error err) Write(this ref customWriterRecorder r, slice<byte> p) {
     return r.w.Write(p);
 }
+
+} partial class cgi_internal_test_package {
 
 internal partial struct limitWriter {
     internal io.Writer w;
     internal nint n;
 }
+
+} partial class cgi_internal_testᴛlimitWriter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pastWriteLimitˢ => ref pastWriteLimitˢᵇ;
@@ -108,6 +115,8 @@ internal static (nint n, error err) Write(this ref limitWriter w, slice<byte> p)
     }
     return (n, err);
 }
+
+} partial class cgi_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpExampleComTestGoˢ => ref httpExampleComTestGoˢᵇ;

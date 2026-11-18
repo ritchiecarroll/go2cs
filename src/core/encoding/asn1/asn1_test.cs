@@ -280,9 +280,9 @@ internal partial struct timeTest {
 internal static slice<timeTest> utcTestData = slice<timeTest>([
     new("910506164540-0700", true, time.Date(1991, 5, 6, 16, 45, 40, 0, time.FixedZone("", -7 * 60 * 60))),
     new("910506164540+0730", true, time.Date(1991, 5, 6, 16, 45, 40, 0, time.FixedZone("", 7 * 60 * 60 + 30 * 60))),
-    new("910506234540Z", true, time.Date(1991, 5, 6, 23, 45, 40, 0, time.ΔUTC)),
-    new("9105062345Z", true, time.Date(1991, 5, 6, 23, 45, 0, 0, time.ΔUTC)),
-    new("5105062345Z", true, time.Date(1951, 5, 6, 23, 45, 0, 0, time.ΔUTC)),
+    new("910506234540Z", true, time.Date(1991, 5, 6, 23, 45, 40, 0, time.UTC)),
+    new("9105062345Z", true, time.Date(1991, 5, 6, 23, 45, 0, 0, time.UTC)),
+    new("5105062345Z", true, time.Date(1951, 5, 6, 23, 45, 0, 0, time.UTC)),
     new("a10506234540Z", false, new time.Time()),
     new("91a506234540Z", false, new time.Time()),
     new("9105a6234540Z", false, new time.Time()),
@@ -338,9 +338,9 @@ public static void TestUTCTime(ж<testing.T> t) {
 }
 
 internal static slice<timeTest> generalizedTimeTestData = slice<timeTest>([
-    new("20100102030405Z", true, time.Date(2010, 1, 2, 3, 4, 5, 0, time.ΔUTC)),
+    new("20100102030405Z", true, time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
     new("20100102030405", false, new time.Time()),
-    new("20100102030405.123456Z", true, time.Date(2010, 1, 2, 3, 4, 5, 123456000, time.ΔUTC)),
+    new("20100102030405.123456Z", true, time.Date(2010, 1, 2, 3, 4, 5, 123456000, time.UTC)),
     new("20100102030405.123456", false, new time.Time()),
     new("20100102030405.Z", false, new time.Time()),
     new("20100102030405.", false, new time.Time()),
@@ -507,7 +507,7 @@ public partial struct TestElementsAfterString {
 }
 
 public partial struct TestBigInt {
-    public ж<bigꓸInt> X;
+    public ж<big.Int> X;
 }
 
 public partial struct TestSet {
@@ -717,8 +717,8 @@ internal static Certificate derEncodedSelfSignedCert = new Certificate(
             new RelativeDistinguishedNameSET(new AttributeTypeAndValue[]{new AttributeTypeAndValue(Type: new ObjectIdentifier(new nint[]{1, 2, 840, 113549, 1, 9, 1}.slice()), Value: (@string)"false@example.com")}.slice())
         }.slice()),
         Validity: new Validity(
-            NotBefore: time.Date(2009, 10, 8, 0, 25, 53, 0, time.ΔUTC),
-            NotAfter: time.Date(2010, 10, 8, 0, 25, 53, 0, time.ΔUTC)
+            NotBefore: time.Date(2009, 10, 8, 0, 25, 53, 0, time.UTC),
+            NotAfter: time.Date(2010, 10, 8, 0, 25, 53, 0, time.UTC)
         ),
         Subject: new RDNSequence(new RelativeDistinguishedNameSET[]{
             new RelativeDistinguishedNameSET(new AttributeTypeAndValue[]{new AttributeTypeAndValue(Type: new ObjectIdentifier(new nint[]{2, 5, 4, 6}.slice()), Value: (@string)"XX")}.slice()),
@@ -968,7 +968,7 @@ partial struct explicitTaggedTimeTestDataᴛ1 /*dyn*/ {
 }
 internal static slice<explicitTaggedTimeTestDataᴛ1> explicitTaggedTimeTestData = slice<explicitTaggedTimeTestDataᴛ1>([
     new([0x30, 0x11, 0xa0, 0xf, 0x17, 0xd, (byte)'9', (byte)'1', (byte)'0', (byte)'5', (byte)'0', (byte)'6', (byte)'1', (byte)'6', (byte)'4', (byte)'5', (byte)'4', (byte)'0', (byte)'Z'],
-        new explicitTaggedTimeTest(time.Date(1991, 5, 6, 16, 45, 40, 0, time.ΔUTC))),
+        new explicitTaggedTimeTest(time.Date(1991, 5, 6, 16, 45, 40, 0, time.UTC))),
     new([0x30, 0x17, 0xa0, 0xf, 0x18, 0x13, (byte)'2', (byte)'0', (byte)'1', (byte)'0', (byte)'0', (byte)'1', (byte)'0', (byte)'2', (byte)'0', (byte)'3', (byte)'0', (byte)'4', (byte)'0', (byte)'5', (byte)'+', (byte)'0', (byte)'6', (byte)'0', (byte)'7'],
         new explicitTaggedTimeTest(time.Date(2010, 1, 2, 3, 4, 5, 0, time.FixedZone("", 6 * 60 * 60 + 7 * 60))))
 ]);
@@ -1002,7 +1002,7 @@ public static void TestImplicitTaggedTime(ж<testing.T> t) {
     var (_, err) = Unmarshal(der, Ꮡresult); if (err != nil) {
         t.Fatalf("Error while parsing: %s", err);
     }
-    var expected = time.Date(1991, 5, 6, 16, 45, 40, 0, time.ΔUTC); if (!result.Time.Equal(expected)) {
+    var expected = time.Date(1991, 5, 6, 16, 45, 40, 0, time.UTC); if (!result.Time.Equal(expected)) {
         t.Errorf("Wrong result. Got %v, want %v", result.Time, expected);
     }
 }
@@ -1275,8 +1275,8 @@ public static void TestImplicitTypeRoundtrip(ж<testing.T> t) {
         Printable: "printable",
         UTF8: "utf8",
         Numeric: "123 456",
-        UTC: time.Now().UTC().Truncate(time.ΔSecond),
-        Generalized: time.Now().UTC().Truncate(time.ΔSecond)
+        UTC: time.Now().UTC().Truncate(time.Second),
+        Generalized: time.Now().UTC().Truncate(time.Second)
     );
     var (enc, err) = Marshal(a);
     if (err != nil) {

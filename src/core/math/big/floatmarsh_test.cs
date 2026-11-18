@@ -99,20 +99,20 @@ public static void TestFloatCorruptGob(ж<testing.T> t) {
 
     ref var rx = ref heap(new global::go.math.big_package.Float(), out var Ꮡrx);
     {
-        var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes_package.NewReader(b))).Decode(Ꮡrx); if (err != nil) {
+        var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes.NewReader(b))).Decode(Ꮡrx); if (err != nil) {
             t.Fatal(err);
         }
     }
 
     {
-        var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes_package.NewReader(b[..10]))).Decode(Ꮡrx); if (!AreEqual(err, io.ErrUnexpectedEOF)) {
+        var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes.NewReader(b[..10]))).Decode(Ꮡrx); if (!AreEqual(err, io.ErrUnexpectedEOF)) {
             t.Errorf("got %v want EOF", err);
         }
     }
 
     b[1] = 0;
     {
-        var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes_package.NewReader(b))).Decode(Ꮡrx); if (err == nil) {
+        var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes.NewReader(b))).Decode(Ꮡrx); if (err == nil) {
             t.Fatal(gotNilWantVersionErrorˢ);
         }
     }

@@ -12,6 +12,7 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using static go.log.slog_package;
+using static slog_internal_test_package;
 
 partial class slog_internal_test_package {
 
@@ -42,17 +43,17 @@ public static void TestValueEqual(ж<testing.T> t) {
         BoolValue(true),
         BoolValue(false),
         TimeValue(testTime),
-        TimeValue(new time_package.Time()),
-        TimeValue(time_package.Date(2001, 1, 2, 3, 4, 5, 0, time_package.ΔUTC)),
-        TimeValue(time_package.Date(2300, 1, 1, 0, 0, 0, 0, time_package.ΔUTC)),            // overflows nanoseconds
-        TimeValue(time_package.Date(1715, 6, 13, 0, 25, 26, 290448384, time_package.ΔUTC)), // overflowed value
+        TimeValue(new time.Time()),
+        TimeValue(time.Date(2001, 1, 2, 3, 4, 5, 0, time.UTC)),
+        TimeValue(time.Date(2300, 1, 1, 0, 0, 0, 0, time.UTC)),            // overflows nanoseconds
+        TimeValue(time.Date(1715, 6, 13, 0, 25, 26, 290448384, time.UTC)), // overflowed value
         AnyValue(Ꮡx),
         AnyValue(Ꮡy),
         GroupValue(go.log.slog_package.Bool("b", true), Int("i", 3)),
         GroupValue(go.log.slog_package.Bool("b", true), Int("i", 4)),
         GroupValue(go.log.slog_package.Bool("b", true), Int("j", 4)),
         DurationValue((time.Duration)(3000000000L)),
-        DurationValue(2 * time_package.ΔSecond),
+        DurationValue(2 * time.Second),
         StringValue(fooˢ),
         StringValue(fuuˢ)
     ]);
@@ -150,7 +151,7 @@ public static void TestAnyLevelAlloc(ж<testing.T> t) {
     // Because typical Levels are small integers,
     // they are zero-alloc.
     ref var a = ref heap(new global::go.log.slog_package.Value(), out var Ꮡa);
-    global::go.log.slog_package.ΔLevel x = LevelDebug + 100;
+    global::go.log.slog_package.Level x = LevelDebug + 100;
     wantAllocs(t, 0, () => {
         Ꮡa.Value = AnyValue(x);
     });
@@ -170,7 +171,7 @@ public static void TestAnyValue(ж<testing.T> t) {
         new((@string)"s", StringValue("s")),
         new(true, BoolValue(true)),
         new(testTime, TimeValue(testTime)),
-        new(time_package.ΔHour, DurationValue(time_package.ΔHour)),
+        new(time.Hour, DurationValue(time.Hour)),
         new(slice<global::go.log.slog_package.Attr>([Int("i", 3)]), GroupValue(Int("i", 3))),
         new(IntValue(4), IntValue(4)),
         new((nuint)2, Uint64Value(2)),
@@ -196,14 +197,14 @@ public static void TestValueAny(ж<testing.T> t) {
     foreach (var (_, want) in range(slice<any>([
         default,
         LevelDebug + 100,
-        time_package.ΔUTC.OrTypedNil(), // time.Locations treated specially...
-        KindBool,                       // ...as are Kinds
+        time.UTC.OrTypedNil(), // time.Locations treated specially...
+        KindBool,              // ...as are Kinds
         slice<global::go.log.slog_package.Attr>([Int("a", 1)]),
         (int64)2,
         (uint64)3,
         true,
-        time_package.ΔMinute,
-        new time_package.Time(),
+        time.Minute,
+        new time.Time(),
         3.14D,
         fooˢ
     ]))) {
@@ -225,8 +226,8 @@ public static void TestLogValue(ж<testing.T> t) {
     @string want = replacedˢ;
     var r = Ꮡ(new replace(StringValue(want)));
     var v = AnyValue(r.OrTypedNil());
-    global::go.log.slog_package.ΔKind g = v.Kind();
-    global::go.log.slog_package.ΔKind w = KindLogValuer; if (g != w) {
+    global::go.log.slog_package.Kind g = v.Kind();
+    global::go.log.slog_package.Kind w = KindLogValuer; if (g != w) {
         t.Errorf("got %s, want %s", g, w);
     }
     var got = v.LogValuer().LogValue().Any();
@@ -274,9 +275,9 @@ public static void TestLogValue(ж<testing.T> t) {
 public static void TestValueTime(ж<testing.T> t) {
     // Validate that all representations of times work correctly.
     foreach (var (_, tm) in range(slice<time.Time>([
-        new time_package.Time(),
-        time_package.Unix(0, 1000000000000000), // UnixNanos is defined
-        time_package.Date(2300, 1, 1, 0, 0, 0, 0, time_package.ΔUTC) // overflows UnixNanos
+        new time.Time(),
+        time.Unix(0, 1000000000000000), // UnixNanos is defined
+        time.Date(2300, 1, 1, 0, 0, 0, 0, time.UTC) // overflows UnixNanos
     ]))) {
         var got = TimeValue(tm).Time();
         if (!got.Equal(tm)) {
@@ -304,12 +305,20 @@ internal partial struct replace {
     internal global::go.log.slog_package.Value v;
 }
 
+} partial class slog_internal_testᴛreplace {
+
 internal static global::go.log.slog_package.Value LogValue(this ref replace r) { return r.v; }
+
+} partial class slog_internal_test_package {
 
 internal partial struct panickingLogValue {
 }
 
+} partial class slog_internal_testᴛpanickingLogValue {
+
 internal static global::go.log.slog_package.Value LogValue(this panickingLogValue _) { throw panic("bad"); }
+
+} partial class slog_internal_test_package {
 
 // A Value with "unsafe" strings is significantly faster:
 // safe:  1785 ns/op, 0 allocs

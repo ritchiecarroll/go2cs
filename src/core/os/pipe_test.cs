@@ -95,7 +95,7 @@ public static void TestStdPipe(ж<Δtesting.T> t) {
 
     if (Δos.Getenv(goTestStdPipeHelperˢ) != ""u8) {
         if (Δos.Getenv(goTestStdPipeHelperˢ2) != ""u8) {
-            signal.Notify(new channel<osꓸSignal>(1).AsSendOnly(), new os_test_package.syscall_ΔSignalᴠΔSignal(syscall.SIGPIPE));
+            signal.Notify(new channel<Δos.Signal>(1).AsSendOnly(), new os_test_package.syscall_SignalᴠSignal(syscall.SIGPIPE));
         }
         var exprᴛ2 = Δos.Getenv(goTestStdPipeHelperˢ);
         switch (ᐧ) {
@@ -289,7 +289,7 @@ public static void TestReadNonblockingFd(ж<Δtesting.T> t) {
             break;
         }}
         if (Δos.Getenv(goWantReadNonblockingFdˢ) == "1"u8) {
-            var fd = (syscallꓸHandle)Δos.Stdin.Fd();
+            var fd = (syscallDescriptor)Δos.Stdin.Fd();
             syscall.SetNonblock(fd, true);
             defer(syscall.SetNonblock, fd, (bool)false, ref ᒐ);
             var (_, errΔ1) = Δos.Stdin.Read(new slice<byte>(1));
@@ -548,7 +548,7 @@ public static partial void TestFdReadRace(ж<Δtesting.T> t) {
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 ref var buf = ref heap(new array<byte>(10), out var Ꮡbuf);
-                rʗ2.SetReadDeadline(time.Now().Add(time.ΔMinute));
+                rʗ2.SetReadDeadline(time.Now().Add(time.Minute));
                 cʗ1.ᐸꟷ(true);
                 var (_, errΔ1) = rʗ2.Read(buf[..]); if (Δos.IsTimeout(errΔ1)) {
                     t.Error(readTimedOutˢ);

@@ -15,6 +15,7 @@ using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
 using static go.encoding.binary_package;
+using static binary_internal_test_package;
 
 partial class binary_internal_test_package {
 
@@ -309,7 +310,7 @@ public static void TestSliceRoundTrip(ж<testing.T> t) {
             var encʗ1 = enc;
             t.Run(fmt.Sprintf("%s,%s"u8, enc.name, dec.name), (ж<testing.T> tΔ1) => {
                 foreach (var (_, Δarray) in range(intArrays)) {
-                    ref var src = ref heap<reflectꓸValue>(reflect.ValueOf(Δarray).Elem(), out var Ꮡsrc);
+                    ref var src = ref heap<reflect.Value>(reflect.ValueOf(Δarray).Elem(), out var Ꮡsrc);
                     var decʗ2 = decʗ1;
                     var encʗ2 = encʗ1;
                     var srcʗ1 = src;
@@ -906,11 +907,15 @@ internal partial struct byteSliceReader {
     internal slice<byte> remain;
 }
 
+} partial class binary_internal_testᴛbyteSliceReader {
+
 internal static (nint, error) Read(this ref byteSliceReader br, slice<byte> p) {
     nint n = copy(p, br.remain);
     br.remain = br.remain.slice(n);
     return (n, default);
 }
+
+} partial class binary_internal_test_package {
 
 public static void BenchmarkReadSlice1000Int32s(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -1034,9 +1039,9 @@ public static void BenchmarkReadInts(ж<testing.B> Ꮡb) {
     want.Float64 = 0D;
     want.Complex64 = 0F;
     want.Complex128 = 0D;
-    want.Array = new uint8[]{0, 0, 0, 0}.array();
+    want.Array.Assign(new uint8[]{0, 0, 0, 0}.array());
     want.Bool = false;
-    want.BoolArray = new bool[]{false, false, false, false}.array();
+    want.BoolArray.Assign(new bool[]{false, false, false, false}.array());
     if (b.N > 0 && !reflect.DeepEqual(ls, want)) {
         Ꮡb.Fatalf("struct doesn't match:\ngot  %v;\nwant %v", ls, want);
     }
@@ -1250,9 +1255,9 @@ public static void BenchmarkReadFloats(ж<testing.B> Ꮡb) {
     want.Uint64 = 0;
     want.Complex64 = 0F;
     want.Complex128 = 0D;
-    want.Array = new uint8[]{0, 0, 0, 0}.array();
+    want.Array.Assign(new uint8[]{0, 0, 0, 0}.array());
     want.Bool = false;
-    want.BoolArray = new bool[]{false, false, false, false}.array();
+    want.BoolArray.Assign(new bool[]{false, false, false, false}.array());
     if (b.N > 0 && !reflect.DeepEqual(ls, want)) {
         Ꮡb.Fatalf("struct doesn't match:\ngot  %v;\nwant %v", ls, want);
     }

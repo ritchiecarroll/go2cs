@@ -27,7 +27,7 @@ internal static void initᴛbasicTypes() { basicTypes = [
     new(tString, "string")
 ]; }
 
-internal static global::go.encoding.gob_package.ΔgobType getTypeUnlocked(@string name, reflectꓸType rt) {
+internal static global::go.encoding.gob_package.gobType getTypeUnlocked(@string name, reflect.Type rt) {
     GoFrame ᒐ = default;
     try {
         ᏑtypeLock.Lock();
@@ -234,7 +234,7 @@ public static void TestRegistrationNaming(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("nameToConcreteType[%q] = %v, want %v", tc.name, ct, tct);
         }
         // concreteTypeToName is keyed off the base type.
-        if (tct.Kind() == reflect.ΔPointer) {
+        if (tct.Kind() == reflect.Pointer) {
             tct = tct.Elem();
         }
         var (n, _) = ᏑconcreteTypeToName.Load(tct); if (!AreEqual(n, tc.name)) {

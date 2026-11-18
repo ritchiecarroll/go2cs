@@ -13,6 +13,7 @@ using strings = strings_package;
 using testing = testing_package;
 using net;
 using static go.mime.multipart_package;
+using static multipart_internal_test_package;
 
 partial class multipart_internal_test_package {
 
@@ -252,6 +253,8 @@ internal partial struct failOnReadAfterErrorReader {
     internal error sawErr;
 }
 
+} partial class multipart_internal_testᴛfailOnReadAfterErrorReader {
+
 internal static (nint n, error err) Read(this ref failOnReadAfterErrorReader r, slice<byte> p) {
     nint n = default;
     error err = default;
@@ -263,6 +266,8 @@ internal static (nint n, error err) Read(this ref failOnReadAfterErrorReader r, 
     r.sawErr = err;
     return (n, err);
 }
+
+} partial class multipart_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in -short mode"u8;
@@ -313,6 +318,8 @@ Content-Disposition: form-data; name="largetext"
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string contentDispositionˢ => ref contentDispositionˢᵇ;
+private static readonly @string contentDispositionˢᵇ = "Content-Disposition"u8;
 internal static ref readonly @string formDataNameAˢ => ref formDataNameAˢᵇ;
 private static readonly @string formDataNameAˢᵇ = @"form-data; name=""a"""u8;
 internal static ref readonly @string xFooˢ => ref xFooˢᵇ;
@@ -469,6 +476,12 @@ internal static void testReadFormManyFiles(ж<testing.T> t, bool distinct) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
+internal static ref readonly @string applicationOctetStreamˢ => ref applicationOctetStreamˢᵇ;
+private static readonly @string applicationOctetStreamˢᵇ = "application/octet-stream"u8;
+
 internal partial struct TestReadFormLimits_type /*dyn*/ {
     internal nint values;
     internal nint files;
@@ -591,12 +604,16 @@ public static void TestReadFormEndlessHeaderLine(ж<testing.T> t) {
 
 internal partial struct neverendingReader /*num:byte*/;
 
+} partial class multipart_internal_testᴛneverendingReader {
+
 internal static (nint n, error err) Read(this neverendingReader r, slice<byte> p) {
     foreach (var i in range(len(p))) {
         p[i] = (byte)r;
     }
     return (len(p), default);
 }
+
+} partial class multipart_internal_test_package {
 
 internal partial struct BenchmarkReadForm_type /*dyn*/ {
     internal @string name;

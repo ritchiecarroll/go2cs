@@ -242,9 +242,9 @@ public static partial void TestDeltaProfile(ж<testing.T> t) {
         goǃ(() => {
             for (;;) {
                 mutexHog(20 * time.Millisecond, mutexHog2);
-                var selᴛ1 = doneʗ1;
-                switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-                case 0 when selᴛ1.ꟷᐳ(out _): {
+                var doneᴛ1 = doneʗ1;
+                switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+                case 0 when doneᴛ1.ꟷᐳ(out _): {
                     doneʗ1.ᐸꟷ(true);
                     return;
                 }

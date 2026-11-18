@@ -1669,21 +1669,20 @@ private static readonly @string nilˢᵇ = "nil"u8;
 
 public static void TestTrim(ж<testing.T> t) {
     (Func<slice<byte>, @string, slice<byte>>, Func<slice<byte>, slice<byte>, slice<byte>>) toFn(@string name) {
-        var exprᴛ1 = name;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "Trim"u8: {
+        case {} when name == "Trim"u8: {
             return (Trim, default);
         }
-        case {} when exprᴛ1 == "TrimLeft"u8: {
+        case {} when name == "TrimLeft"u8: {
             return (TrimLeft, default);
         }
-        case {} when exprᴛ1 == "TrimRight"u8: {
+        case {} when name == "TrimRight"u8: {
             return (TrimRight, default);
         }
-        case {} when exprᴛ1 == "TrimPrefix"u8: {
+        case {} when name == "TrimPrefix"u8: {
             return (default, TrimPrefix);
         }
-        case {} when exprᴛ1 == "TrimSuffix"u8: {
+        case {} when name == "TrimSuffix"u8: {
             return (default, TrimSuffix);
         }
         default: {

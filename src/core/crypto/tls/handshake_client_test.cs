@@ -45,6 +45,7 @@ using go.os;
 using list = container.list_package;
 using path;
 using static go.crypto.tls_package;
+using static tls_internal_test_package;
 
 partial class tls_internal_test_package {
 
@@ -72,6 +73,8 @@ private static readonly @string opensslSentinelᵇ = "SENTINEL\n"u8;
 
 internal partial struct opensslInput /*chan opensslInputEvent*/;
 
+} partial class tls_internal_testᴛopensslInput {
+
 internal static (nint n, error err) Read(this opensslInput i, slice<byte> buf) {
     foreach (var @event in i) {
         switch (@event) {
@@ -92,6 +95,8 @@ internal static (nint n, error err) Read(this opensslInput i, slice<byte> buf) {
 
     return (0, io.EOF);
 }
+
+} partial class tls_internal_test_package {
 
 // opensslOutputSink is an io.Writer that receives the stdout and stderr from an
 // `openssl` process and sends a value to handshakeComplete or readKeyUpdate
@@ -116,6 +121,8 @@ private static readonly @string opensslEndOfHandshakeᵇ = "SSL_accept:SSLv3/TLS
 // print when a KeyUpdate message is received if run with “-state”.
 internal static ref readonly @string opensslReadKeyUpdate => ref opensslReadKeyUpdateᵇ;
 private static readonly @string opensslReadKeyUpdateᵇ = "SSL_accept:TLSv1.3 read client key update"u8;
+
+} partial class tls_internal_testᴛopensslOutputSink {
 
 internal static (nint n, error err) Write(this ref opensslOutputSink o, slice<byte> data) {
     o.line = appendꓸꓸꓸ(o.line, data);
@@ -143,6 +150,8 @@ internal static @string String(this ref opensslOutputSink o) {
     return (@string)o.all;
 }
 
+} partial class tls_internal_test_package {
+
 // clientTest represents a test of the TLS client handshake against a reference
 // implementation.
 internal partial struct clientTest {
@@ -167,7 +176,7 @@ internal partial struct clientTest {
     // validate, if not nil, is a function that will be called with the
     // ConnectionState of the resulting connection. It returns a non-nil
     // error if the ConnectionState is unacceptable.
-    internal Func<global::go.crypto.tls_package.ΔConnectionState, error> validate;
+    internal Func<global::go.crypto.tls_package.ConnectionState, error> validate;
     // numRenegotiations is the number of times that the connection will be
     // renegotiated.
     internal nint numRenegotiations;
@@ -183,6 +192,12 @@ internal partial struct clientTest {
 }
 
 internal static slice<@string> serverCommand = ["openssl", "s_server", "-no_ticket", "-num_tickets", "0"];
+
+} partial class tls_internal_testᴛclientTest {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
 
 // connFromCommand starts the reference server process, connects to it and
 // returns a recordingConn for the connection. The stdin return value is an
@@ -284,7 +299,7 @@ internal static (ж<recordingConn> conn, ж<exec.Cmd> child, opensslInput stdin,
             if (err == nil) {
                 break;
             }
-            time_package.Sleep(((time.Duration)((int64)1 << (int)(i))) * 5 * time_package.Millisecond);
+            time.Sleep(((time.Duration)((int64)1 << (int)(i))) * 5 * time.Millisecond);
         }
         if (err != nil) {
             close<opensslInputEvent>(stdin);
@@ -531,6 +546,8 @@ internal static partial void run(this ж<clientTest> Ꮡtest, ж<testing.T> t, b
     finally { ᒐ.Run(); }
 }
 
+} partial class tls_internal_test_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedlyReadDataˢ => ref unexpectedlyReadDataˢᵇ;
 private static readonly @string unexpectedlyReadDataˢᵇ = "unexpectedly read data"u8;
@@ -538,11 +555,11 @@ private static readonly @string unexpectedlyReadDataˢᵇ = "unexpectedly read d
 // peekError does a read with a short timeout to check if the next read would
 // cause an error, for example if there is an alert waiting on the wire.
 internal static error peekError(net.Conn conn) {
-    conn.SetReadDeadline(time_package.Now().Add(100 * time_package.Millisecond));
+    conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond));
     var (n, err) = conn.Read(new slice<byte>(1)); if (n != 0) {
         return errors.New(unexpectedlyReadDataˢ);
     } else if (err != nil) {
-        var (netErr, ok) = err._<netꓸError>(ᐧ); if (!ok || !netErr.Timeout()) {
+        var (netErr, ok) = err._<net.Error>(ᐧ); if (!ok || !netErr.Timeout()) {
             return err;
         }
     }
@@ -737,7 +754,7 @@ public static void TestHandshakeClientHelloRetryRequest(ж<testing.T> t) {
         name: "HelloRetryRequest",
         args: ["-cipher", "ECDHE-RSA-AES128-GCM-SHA256", "-curves", "P-256"],
         config: config,
-        validate: error (global::go.crypto.tls_package.ΔConnectionState cs) => {
+        validate: error (global::go.crypto.tls_package.ConnectionState cs) => {
             if (!cs.HelloRetryRequest) {
                 return errors.New(expectedˢ);
             }
@@ -961,6 +978,8 @@ public static void TestResumption(ж<testing.T> t) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ2 = (@string)"skipping in -short mode"u8;
+internal static ref readonly @string handshakeˢ => ref handshakeˢᵇ;
+private static readonly @string handshakeˢᵇ = "Handshake"u8;
 internal static ref readonly @string resumeˢ => ref resumeˢᵇ;
 private static readonly @string resumeˢᵇ = "Resume"u8;
 internal static readonly object ticketDidnTChangeAfterˢ = (@string)"ticket didn't change after resumption"u8;
@@ -1127,7 +1146,7 @@ internal static partial void testResumption(ж<testing.T> t, uint16 version) {
     }
 
     // Age the session ticket a bit at a time, but don't expire it.
-    var d = 0 * time_package.ΔHour;
+    var d = 0 * time.Hour;
     serverConfig.Time = () => testTime().Add(d);
     deleteTicket();
     testResumeState(getFreshSessionTicketˢ, false);
@@ -1227,6 +1246,8 @@ internal partial struct serializingClientCache {
     internal slice<byte> ticket, state;
 }
 
+} partial class tls_internal_testᴛserializingClientCache {
+
 internal static (ж<global::go.crypto.tls_package.ClientSessionState> session, bool ok) Get(this ref serializingClientCache c, @string sessionKey) {
     if (c.ticket == nil) {
         return (default, false);
@@ -1261,6 +1282,8 @@ internal static void Put(this ref serializingClientCache c, @string sessionKey, 
     }
     (c.ticket, c.state) = (ticket, stateBytes);
 }
+
+} partial class tls_internal_test_package {
 
 public static void TestLRUClientSessionCache(ж<testing.T> t) {
     // Initialize cache of capacity 4.
@@ -1464,7 +1487,7 @@ public static void TestHandshakeClientALPNMatch(ж<testing.T> t) {
         // version that supports the -alpn flag.
         args: ["-alpn", "proto1,proto2"],
         config: config,
-        validate: error (global::go.crypto.tls_package.ΔConnectionState state) => {
+        validate: error (global::go.crypto.tls_package.ConnectionState state) => {
             // The server's preferences should override the client.
             if (state.NegotiatedProtocol != "proto1"u8) {
                 return fmt.Errorf("Got protocol %q, wanted proto1"u8, state.NegotiatedProtocol);
@@ -1557,7 +1580,7 @@ public static void TestHandshakClientSCTs(ж<testing.T> t) {
         name: "SCT",
         config: config,
         extensions: [scts],
-        validate: error (global::go.crypto.tls_package.ΔConnectionState state) => {
+        validate: error (global::go.crypto.tls_package.ConnectionState state) => {
             var expectedSCTs = slice<slice<byte>>([
                 sctsʗ1[8..125],
                 sctsʗ1[127..245],
@@ -1671,7 +1694,7 @@ public static void TestHandshakeClientExportKeyingMaterial(ж<testing.T> t) {
     var test = Ꮡ(new clientTest(
         name: "ExportKeyingMaterial",
         config: testConfig.Clone(),
-        validate: error (global::go.crypto.tls_package.ΔConnectionState state) => {
+        validate: error (global::go.crypto.tls_package.ConnectionState state) => {
             var (km, err) = state.ExportKeyingMaterial(testˢ, default, 42); if (err != nil) {
                 return fmt.Errorf("ExportKeyingMaterial failed: %v"u8, err);
             } else if (len(km) != 42) {
@@ -1835,7 +1858,7 @@ internal partial struct testVerifyConnection_tests /*dyn*/ {
 }
 
 internal static void testVerifyConnection(ж<testing.T> t, uint16 version) {
-    error checkFields(global::go.crypto.tls_package.ΔConnectionState c, ж<nint> called, @string errorType) {
+    error checkFields(global::go.crypto.tls_package.ConnectionState c, ж<nint> called, @string errorType) {
         if (c.Version != version) {
             return fmt.Errorf("%s: got Version %v, want %v"u8, errorType, c.Version, version);
         }
@@ -1882,7 +1905,7 @@ internal static void testVerifyConnection(ж<testing.T> t, uint16 version) {
             configureServer: (ж<global::go.crypto.tls_package.Config> config, ж<nint> called) => {
                 config.ClientAuth = RequireAndVerifyClientCert;
                 var checkFieldsʗ2 = checkFieldsʗ1;
-                config.VerifyConnection = (global::go.crypto.tls_package.ΔConnectionState c) => {
+                config.VerifyConnection = (global::go.crypto.tls_package.ConnectionState c) => {
                     called.Value++;
                     nint l = len(c.PeerCertificates); if (l != 1) {
                         return fmt.Errorf("server: got len(PeerCertificates) = %d, wanted 1"u8, l);
@@ -1895,7 +1918,7 @@ internal static void testVerifyConnection(ж<testing.T> t, uint16 version) {
             },
             configureClient: (ж<global::go.crypto.tls_package.Config> config, ж<nint> called) => {
                 var checkFieldsʗ4 = checkFieldsʗ3;
-                config.VerifyConnection = error (global::go.crypto.tls_package.ΔConnectionState c) => {
+                config.VerifyConnection = error (global::go.crypto.tls_package.ConnectionState c) => {
                     called.Value++;
                     nint l = len(c.PeerCertificates); if (l != 1) {
                         return fmt.Errorf("client: got len(PeerCertificates) = %d, wanted 1"u8, l);
@@ -1924,7 +1947,7 @@ internal static void testVerifyConnection(ж<testing.T> t, uint16 version) {
                 config.ClientAuth = RequireAnyClientCert;
                 config.InsecureSkipVerify = true;
                 var checkFieldsʗ6 = checkFieldsʗ5;
-                config.VerifyConnection = (global::go.crypto.tls_package.ΔConnectionState c) => {
+                config.VerifyConnection = (global::go.crypto.tls_package.ConnectionState c) => {
                     called.Value++;
                     nint l = len(c.PeerCertificates); if (l != 1) {
                         return fmt.Errorf("server: got len(PeerCertificates) = %d, wanted 1"u8, l);
@@ -1938,7 +1961,7 @@ internal static void testVerifyConnection(ж<testing.T> t, uint16 version) {
             configureClient: (ж<global::go.crypto.tls_package.Config> config, ж<nint> called) => {
                 config.InsecureSkipVerify = true;
                 var checkFieldsʗ8 = checkFieldsʗ7;
-                config.VerifyConnection = error (global::go.crypto.tls_package.ΔConnectionState c) => {
+                config.VerifyConnection = error (global::go.crypto.tls_package.ConnectionState c) => {
                     called.Value++;
                     nint l = len(c.PeerCertificates); if (l != 1) {
                         return fmt.Errorf("client: got len(PeerCertificates) = %d, wanted 1"u8, l);
@@ -1966,14 +1989,14 @@ internal static void testVerifyConnection(ж<testing.T> t, uint16 version) {
             configureServer: (ж<global::go.crypto.tls_package.Config> config, ж<nint> called) => {
                 config.ClientAuth = NoClientCert;
                 var checkFieldsʗ10 = checkFieldsʗ9;
-                config.VerifyConnection = (global::go.crypto.tls_package.ΔConnectionState c) => {
+                config.VerifyConnection = (global::go.crypto.tls_package.ConnectionState c) => {
                     called.Value++;
                     return checkFieldsʗ10(c, called, serverˢ);
                 };
             },
             configureClient: (ж<global::go.crypto.tls_package.Config> config, ж<nint> called) => {
                 var checkFieldsʗ12 = checkFieldsʗ11;
-                config.VerifyConnection = (global::go.crypto.tls_package.ΔConnectionState c) => {
+                config.VerifyConnection = (global::go.crypto.tls_package.ConnectionState c) => {
                     called.Value++;
                     return checkFieldsʗ12(c, called, clientˢ);
                 };
@@ -1984,7 +2007,7 @@ internal static void testVerifyConnection(ж<testing.T> t, uint16 version) {
             configureServer: (ж<global::go.crypto.tls_package.Config> config, ж<nint> called) => {
                 config.ClientAuth = RequestClientCert;
                 var checkFieldsʗ14 = checkFieldsʗ13;
-                config.VerifyConnection = (global::go.crypto.tls_package.ΔConnectionState c) => {
+                config.VerifyConnection = (global::go.crypto.tls_package.ConnectionState c) => {
                     called.Value++;
                     return checkFieldsʗ14(c, called, serverˢ);
                 };
@@ -1992,7 +2015,7 @@ internal static void testVerifyConnection(ж<testing.T> t, uint16 version) {
             configureClient: (ж<global::go.crypto.tls_package.Config> config, ж<nint> called) => {
                 config.Certificates = default; // clear the client cert
                 var checkFieldsʗ16 = checkFieldsʗ15;
-                config.VerifyConnection = error (global::go.crypto.tls_package.ΔConnectionState c) => {
+                config.VerifyConnection = error (global::go.crypto.tls_package.ConnectionState c) => {
                     called.Value++;
                     nint l = len(c.PeerCertificates); if (l != 1) {
                         return fmt.Errorf("client: got len(PeerCertificates) = %d, wanted 1"u8, l);
@@ -2120,7 +2143,7 @@ internal static partial void testVerifyPeerCertificate(ж<testing.T> t, uint16 v
         called.Value = true;
         return default;
     }
-    error verifyConnectionCallback(ж<bool> called, bool isClient, global::go.crypto.tls_package.ΔConnectionState c) {
+    error verifyConnectionCallback(ж<bool> called, bool isClient, global::go.crypto.tls_package.ConnectionState c) {
         nint l = len(c.PeerCertificates); if (l != 1) {
             return fmt.Errorf("got len(PeerCertificates) = %d, wanted 1"u8, l);
         }
@@ -2274,12 +2297,12 @@ internal static partial void testVerifyPeerCertificate(ж<testing.T> t, uint16 v
             configureServer: (ж<global::go.crypto.tls_package.Config> config, ж<bool> called) => {
                 config.InsecureSkipVerify = false;
                 var verifyConnectionCallbackʗ2 = verifyConnectionCallbackʗ1;
-                config.VerifyConnection = (global::go.crypto.tls_package.ΔConnectionState c) => verifyConnectionCallbackʗ2(called, false, c);
+                config.VerifyConnection = (global::go.crypto.tls_package.ConnectionState c) => verifyConnectionCallbackʗ2(called, false, c);
             },
             configureClient: (ж<global::go.crypto.tls_package.Config> config, ж<bool> called) => {
                 config.InsecureSkipVerify = false;
                 var verifyConnectionCallbackʗ4 = verifyConnectionCallbackʗ3;
-                config.VerifyConnection = (global::go.crypto.tls_package.ΔConnectionState c) => verifyConnectionCallbackʗ4(called, true, c);
+                config.VerifyConnection = (global::go.crypto.tls_package.ConnectionState c) => verifyConnectionCallbackʗ4(called, true, c);
             },
             validate: (ж<testing.T> tΔ5, nint testNo, bool clientCalled, bool serverCalled, error clientErr, error serverErr) => {
                 if (clientErr != nil) {
@@ -2300,7 +2323,7 @@ internal static partial void testVerifyPeerCertificate(ж<testing.T> t, uint16 v
             configureServer: (ж<global::go.crypto.tls_package.Config> config, ж<bool> called) => {
                 config.InsecureSkipVerify = false;
                 var sentinelErrʗ8 = sentinelErrʗ7;
-                config.VerifyConnection = (global::go.crypto.tls_package.ΔConnectionState c) => sentinelErrʗ8;
+                config.VerifyConnection = (global::go.crypto.tls_package.ConnectionState c) => sentinelErrʗ8;
             },
             configureClient: (ж<global::go.crypto.tls_package.Config> config, ж<bool> called) => {
                 config.InsecureSkipVerify = false;
@@ -2320,7 +2343,7 @@ internal static partial void testVerifyPeerCertificate(ж<testing.T> t, uint16 v
             configureClient: (ж<global::go.crypto.tls_package.Config> config, ж<bool> called) => {
                 config.InsecureSkipVerify = false;
                 var sentinelErrʗ11 = sentinelErrʗ10;
-                config.VerifyConnection = (global::go.crypto.tls_package.ΔConnectionState c) => sentinelErrʗ11;
+                config.VerifyConnection = (global::go.crypto.tls_package.ConnectionState c) => sentinelErrʗ11;
             },
             validate: (ж<testing.T> tΔ7, nint testNo, bool clientCalled, bool serverCalled, error clientErr, error serverErr) => {
                 if (!AreEqual(clientErr, sentinelErrʗ12)) {
@@ -2334,7 +2357,7 @@ internal static partial void testVerifyPeerCertificate(ж<testing.T> t, uint16 v
                 var verifyPeerCertificateCallbackʗ6 = verifyPeerCertificateCallbackʗ5;
                 config.VerifyPeerCertificate = (slice<slice<byte>> rawCerts, slice<slice<ж<Δx509.Certificate>>> validatedChains) => verifyPeerCertificateCallbackʗ6(called, rawCerts, validatedChains);
                 var sentinelErrʗ14 = sentinelErrʗ13;
-                config.VerifyConnection = (global::go.crypto.tls_package.ΔConnectionState c) => sentinelErrʗ14;
+                config.VerifyConnection = (global::go.crypto.tls_package.ConnectionState c) => sentinelErrʗ14;
             },
             configureClient: (ж<global::go.crypto.tls_package.Config> config, ж<bool> called) => {
                 config.InsecureSkipVerify = false;
@@ -2361,7 +2384,7 @@ internal static partial void testVerifyPeerCertificate(ж<testing.T> t, uint16 v
                 var verifyPeerCertificateCallbackʗ8 = verifyPeerCertificateCallbackʗ7;
                 config.VerifyPeerCertificate = (slice<slice<byte>> rawCerts, slice<slice<ж<Δx509.Certificate>>> validatedChains) => verifyPeerCertificateCallbackʗ8(called, rawCerts, validatedChains);
                 var sentinelErrʗ17 = sentinelErrʗ16;
-                config.VerifyConnection = (global::go.crypto.tls_package.ΔConnectionState c) => sentinelErrʗ17;
+                config.VerifyConnection = (global::go.crypto.tls_package.ConnectionState c) => sentinelErrʗ17;
             },
             validate: (ж<testing.T> tΔ9, nint testNo, bool clientCalled, bool serverCalled, error clientErr, error serverErr) => {
                 if (!AreEqual(clientErr, sentinelErrʗ18)) {
@@ -2433,13 +2456,15 @@ internal partial struct brokenConn {
     internal nint numWrites;
 }
 
+} partial class tls_internal_testᴛbrokenConn {
+
 // Go method set entry for the promoted 'Conn.Close()' - provided ONLY by the embedded
 // interface field in *brokenConn's method set; see the pointer-only satisfaction record.
 internal static error Close(this brokenConn recvᴛ) => recvᴛ.Conn.Close();
 
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *brokenConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr LocalAddr(this brokenConn recvᴛ) => recvᴛ.Conn.LocalAddr();
+internal static net.Addr LocalAddr(this brokenConn recvᴛ) => recvᴛ.Conn.LocalAddr();
 
 // Go method set entry for the promoted 'Conn.Read()' - provided ONLY by the embedded
 // interface field in *brokenConn's method set; see the pointer-only satisfaction record.
@@ -2447,7 +2472,7 @@ internal static (nint, error) Read(this brokenConn recvᴛ, slice<byte> b) => re
 
 // Go method set entry for the promoted 'Conn.RemoteAddr()' - provided ONLY by the embedded
 // interface field in *brokenConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr RemoteAddr(this brokenConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
+internal static net.Addr RemoteAddr(this brokenConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
 
 // Go method set entry for the promoted 'Conn.SetDeadline()' - provided ONLY by the embedded
 // interface field in *brokenConn's method set; see the pointer-only satisfaction record.
@@ -2461,8 +2486,12 @@ internal static error SetReadDeadline(this brokenConn recvᴛ, time.Time t) => r
 // interface field in *brokenConn's method set; see the pointer-only satisfaction record.
 internal static error SetWriteDeadline(this brokenConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
 
+} partial class tls_internal_test_package {
+
 // brokenConnErr is the error that brokenConn returns once exhausted.
 internal static error brokenConnErr = errors.New("too many writes to brokenConn");
+
+} partial class tls_internal_testᴛbrokenConn {
 
 internal static (nint, error) Write(this ref brokenConn b, slice<byte> data) {
     if (b.numWrites >= b.breakAfter) {
@@ -2472,6 +2501,8 @@ internal static (nint, error) Write(this ref brokenConn b, slice<byte> data) {
     b.numWrites++;
     return b.Conn.Write(data);
 }
+
+} partial class tls_internal_test_package {
 
 public static partial void TestFailedWrite(ж<testing.T> t) {
     // Test that a write error during the handshake is returned.
@@ -2508,13 +2539,15 @@ internal partial struct writeCountingConn {
     internal nint numWrites;
 }
 
+} partial class tls_internal_testᴛwriteCountingConn {
+
 // Go method set entry for the promoted 'Conn.Close()' - provided ONLY by the embedded
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
 internal static error Close(this writeCountingConn recvᴛ) => recvᴛ.Conn.Close();
 
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr LocalAddr(this writeCountingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
+internal static net.Addr LocalAddr(this writeCountingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
 
 // Go method set entry for the promoted 'Conn.Read()' - provided ONLY by the embedded
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
@@ -2522,7 +2555,7 @@ internal static (nint, error) Read(this writeCountingConn recvᴛ, slice<byte> b
 
 // Go method set entry for the promoted 'Conn.RemoteAddr()' - provided ONLY by the embedded
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr RemoteAddr(this writeCountingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
+internal static net.Addr RemoteAddr(this writeCountingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
 
 // Go method set entry for the promoted 'Conn.SetDeadline()' - provided ONLY by the embedded
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
@@ -2540,6 +2573,8 @@ internal static (nint, error) Write(this ref writeCountingConn wcc, slice<byte> 
     wcc.numWrites++;
     return wcc.Conn.Write(data);
 }
+
+} partial class tls_internal_test_package {
 
 public static void TestBuffering(ж<testing.T> t) {
     t.Run(tlSv12ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
@@ -2720,7 +2755,7 @@ public static partial void TestHandshakeRace(ж<testing.T> t) {
 partial struct getClientCertificateTestsᴛ1 /*dyn*/ {
     internal Action<ж<global::go.crypto.tls_package.Config>, ж<global::go.crypto.tls_package.Config>> setup;
     internal @string expectedClientError;
-    internal Action<ж<testing.T>, nint, ж<global::go.crypto.tls_package.ΔConnectionState>> verify;
+    internal Action<ж<testing.T>, nint, ж<global::go.crypto.tls_package.ConnectionState>> verify;
 }
 internal static slice<getClientCertificateTestsᴛ1> getClientCertificateTests;
 internal static void initᴛgetClientCertificateTests() { getClientCertificateTests = [
@@ -2741,7 +2776,7 @@ internal static void initᴛgetClientCertificateTests() { getClientCertificateTe
             };
         },
         "",
-        (ж<testing.T> t, nint testNum, ж<global::go.crypto.tls_package.ΔConnectionState> cs) => {
+        (ж<testing.T> t, nint testNum, ж<global::go.crypto.tls_package.ConnectionState> cs) => {
             nint l = len(cs.PeerCertificates); if (l != 0) {
                 t.Errorf("#%d: expected no certificates but got %d", testNum, l);
             }
@@ -2760,7 +2795,7 @@ internal static void initᴛgetClientCertificateTests() { getClientCertificateTe
             };
         },
         "",
-        (ж<testing.T> t, nint testNum, ж<global::go.crypto.tls_package.ΔConnectionState> cs) => {
+        (ж<testing.T> t, nint testNum, ж<global::go.crypto.tls_package.ConnectionState> cs) => {
             nint l = len(cs.PeerCertificates); if (l != 0) {
                 t.Errorf("#%d: expected no certificates but got %d", testNum, l);
             }
@@ -2773,7 +2808,7 @@ internal static void initᴛgetClientCertificateTests() { getClientCertificateTe
             clientConfig.GetClientCertificate = (ж<global::go.crypto.tls_package.Certificate>, error) (ж<global::go.crypto.tls_package.CertificateRequestInfo> cri) => (default, errors.New("GetClientCertificate"));
         },
         "GetClientCertificate",
-        (ж<testing.T> t, nint testNum, ж<global::go.crypto.tls_package.ΔConnectionState> cs) => {
+        (ж<testing.T> t, nint testNum, ж<global::go.crypto.tls_package.ConnectionState> cs) => {
         }
     ),
     new(
@@ -2790,7 +2825,7 @@ internal static void initᴛgetClientCertificateTests() { getClientCertificateTe
             };
         },
         "",
-        (ж<testing.T> t, nint testNum, ж<global::go.crypto.tls_package.ΔConnectionState> cs) => {
+        (ж<testing.T> t, nint testNum, ж<global::go.crypto.tls_package.ConnectionState> cs) => {
             if (len(cs.VerifiedChains) == 0) {
                 t.Errorf("#%d: expected some verified chains, but found none", testNum);
             }
@@ -2808,7 +2843,7 @@ public static void TestGetClientCertificate(ж<testing.T> t) {
 }
 
 internal partial struct testGetClientCertificate_serverResult /*dyn*/ {
-    internal global::go.crypto.tls_package.ΔConnectionState cs;
+    internal global::go.crypto.tls_package.ConnectionState cs;
     internal error err;
 }
 
@@ -2855,7 +2890,7 @@ internal static partial void testGetClientCertificate(ж<testing.T> t, uint16 ve
                 var server = Server(sʗ1, serverConfigʗ1);
                 var errΔ1 = server.Handshake();
 
-                ref var cs = ref heap(new global::go.crypto.tls_package.ΔConnectionState(), out var Ꮡcs);
+                ref var cs = ref heap(new global::go.crypto.tls_package.ConnectionState(), out var Ꮡcs);
                 if (errΔ1 == nil) {
                     cs = server.ConnectionState();
                 }
@@ -2944,10 +2979,10 @@ public static partial void TestCloseClientConnectionOnIdleServer(ж<testing.T> t
         serverConnʗ1.Read(b[..]);
         clientʗ1.Close();
     });
-    client.SetWriteDeadline(time_package.Now().Add(time_package.ΔMinute));
+    client.SetWriteDeadline(time.Now().Add(time.Minute));
     var err = client.Handshake();
     if (err != nil) {
-        var (errΔ1, ok) = err._<netꓸError>(ᐧ); if (ok && errΔ1.Timeout()) {
+        var (errΔ1, ok) = err._<net.Error>(ᐧ); if (ok && errΔ1.Timeout()) {
             t.Errorf("Expected a closed network connection error but got '%s'", errΔ1.Error());
         }
     } else {
@@ -3241,13 +3276,15 @@ internal partial struct discardConn {
     /*embed*/ public net_package.Conn Conn;
 }
 
+} partial class tls_internal_testᴛdiscardConn {
+
 // Go method set entry for the promoted 'Conn.Close()' - provided ONLY by the embedded
 // interface field in *discardConn's method set; see the pointer-only satisfaction record.
 internal static error Close(this discardConn recvᴛ) => recvᴛ.Conn.Close();
 
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *discardConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr LocalAddr(this discardConn recvᴛ) => recvᴛ.Conn.LocalAddr();
+internal static net.Addr LocalAddr(this discardConn recvᴛ) => recvᴛ.Conn.LocalAddr();
 
 // Go method set entry for the promoted 'Conn.Read()' - provided ONLY by the embedded
 // interface field in *discardConn's method set; see the pointer-only satisfaction record.
@@ -3255,7 +3292,7 @@ internal static (nint, error) Read(this discardConn recvᴛ, slice<byte> b) => r
 
 // Go method set entry for the promoted 'Conn.RemoteAddr()' - provided ONLY by the embedded
 // interface field in *discardConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr RemoteAddr(this discardConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
+internal static net.Addr RemoteAddr(this discardConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
 
 // Go method set entry for the promoted 'Conn.SetDeadline()' - provided ONLY by the embedded
 // interface field in *discardConn's method set; see the pointer-only satisfaction record.
@@ -3272,6 +3309,8 @@ internal static error SetWriteDeadline(this discardConn recvᴛ, time.Time t) =>
 internal static (nint, error) Write(this ref discardConn dc, slice<byte> data) {
     return (len(data), default);
 }
+
+} partial class tls_internal_test_package {
 
 // largeRSAKeyCertPEM contains a 8193 bit RSA key
 internal static ref readonly @string largeRSAKeyCertPEM => ref largeRSAKeyCertPEMᵇ;
@@ -3358,13 +3397,13 @@ private static readonly @string callbackErrˢᵇ = "callback err"u8;
 internal partial struct TestTLS13ECHRejectionCallbacks_type /*dyn*/ {
     internal @string name;
     internal @string expectedErr;
-    internal Func<global::go.crypto.tls_package.ΔConnectionState, error> verifyConnection;
+    internal Func<global::go.crypto.tls_package.ConnectionState, error> verifyConnection;
     internal Func<slice<slice<byte>>, slice<slice<ж<Δx509.Certificate>>>, error> verifyPeerCertificate;
-    internal Func<global::go.crypto.tls_package.ΔConnectionState, error> encryptedClientHelloRejectionVerify;
+    internal Func<global::go.crypto.tls_package.ConnectionState, error> encryptedClientHelloRejectionVerify;
 }
 
 public static void TestTLS13ECHRejectionCallbacks(ж<testing.T> t) {
-    var (k, err) = ecdsa.GenerateKey(elliptic.P256(), go.crypto.rand_package.Reader);
+    var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -3372,10 +3411,10 @@ public static void TestTLS13ECHRejectionCallbacks(ж<testing.T> t) {
         SerialNumber: big.NewInt(1),
         Subject: new pkix.Name(CommonName: "test"),
         DNSNames: ["example.golang"],
-        NotBefore: testConfig.Time().Add(-time_package.ΔHour),
-        NotAfter: testConfig.Time().Add(time_package.ΔHour)
+        NotBefore: testConfig.Time().Add(-time.Hour),
+        NotAfter: testConfig.Time().Add(time.Hour)
     ));
-    (var certDER, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
+    (var certDER, err) = Δx509.CreateCertificate(rand.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
     if (err != nil) {
         t.Fatal(err);
     }
@@ -3405,19 +3444,19 @@ public static void TestTLS13ECHRejectionCallbacks(ж<testing.T> t) {
         ),
         new(
             name: "EncryptedClientHelloRejectionVerify, no err",
-            encryptedClientHelloRejectionVerify: (global::go.crypto.tls_package.ΔConnectionState _Δp0) => default,
+            encryptedClientHelloRejectionVerify: (global::go.crypto.tls_package.ConnectionState _Δp0) => default,
             expectedErr: "tls: server rejected ECH"
         ),
         new(
             name: "EncryptedClientHelloRejectionVerify, err",
-            encryptedClientHelloRejectionVerify: (global::go.crypto.tls_package.ΔConnectionState _Δp0) => errors.New(callbackErrˢ),
+            encryptedClientHelloRejectionVerify: (global::go.crypto.tls_package.ConnectionState _Δp0) => errors.New(callbackErrˢ),
             // testHandshake returns the server side error, so we just need to
             // check alertBadCertificate was sent
             expectedErr: "callback err"
         ),
         new(
             name: "VerifyConnection, err",
-            verifyConnection: (global::go.crypto.tls_package.ΔConnectionState _Δp0) => errors.New(callbackErrˢ),
+            verifyConnection: (global::go.crypto.tls_package.ConnectionState _Δp0) => errors.New(callbackErrˢ),
             expectedErr: "tls: server rejected ECH"
         ),
         new(

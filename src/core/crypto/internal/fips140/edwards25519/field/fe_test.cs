@@ -18,12 +18,17 @@ using go.crypto;
 using go.testing;
 using math;
 using static go.crypto.@internal.fips140.edwards25519.field_package;
+using static field_internal_test_package;
 
 partial class field_internal_test_package {
+
+} partial class field_internal_testᴛElement {
 
 internal static @string String(this global::go.crypto.@internal.fips140.edwards25519.field_package.Element v) {
     return hex.EncodeToString(v.Bytes());
 }
+
+} partial class field_internal_test_package {
 
 // quickCheckConfig returns a quick.Config that scales the max count by the
 // given factor if the -short flag is not set.
@@ -92,7 +97,9 @@ internal static global::go.crypto.@internal.fips140.edwards25519.field_package.E
     );
 }
 
-internal static reflectꓸValue Generate(this global::go.crypto.@internal.fips140.edwards25519.field_package.Element _, ж<mathrand.Rand> Ꮡrand, nint size) {
+} partial class field_internal_testᴛElement {
+
+internal static reflect.Value Generate(this global::go.crypto.@internal.fips140.edwards25519.field_package.Element _, ж<mathrand.Rand> Ꮡrand, nint size) {
     ref var rand = ref Ꮡrand.DerefOrNull();
 
     if (rand.Intn(2) == 0) {
@@ -100,6 +107,8 @@ internal static reflectꓸValue Generate(this global::go.crypto.@internal.fips14
     }
     return reflect.ValueOf(generateFieldElement(Ꮡrand));
 }
+
+} partial class field_internal_test_package {
 
 // isInBounds returns whether the element is within the expected bit size bounds
 // after a light reduction.
@@ -177,7 +186,7 @@ public static void TestSetBytesRoundTrip(ж<testing.T> t) {
         // instead of earlier so we check the masking in SetBytes is working.)
         @in[len(@in) - 1] &= (byte)((1 << 7) - 1);
 
-        return bytes_package.Equal(@in[..], fe.Bytes()) && isInBounds(Ꮡfe);
+        return bytes.Equal(@in[..], fe.Bytes()) && isInBounds(Ꮡfe);
     };
     {
         var err = quick.Check((f1).OrTypedNilFunc(), nil); if (err != nil) {
@@ -219,7 +228,7 @@ public static void TestSetBytesRoundTrip(ж<testing.T> t) {
 
         var b = tt.fe.Bytes();
         var (fe, _) = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>().SetBytes(tt.b);
-        if (!bytes_package.Equal(b, tt.b) || fe.Equal(Ꮡtt.Ꮡfe) != 1) {
+        if (!bytes.Equal(b, tt.b) || fe.Equal(Ꮡtt.Ꮡfe) != 1) {
             t.Errorf("Failed fixed roundtrip: %v", tt);
         }
     }
@@ -240,7 +249,7 @@ public static void TestBytesBigEquivalence(ж<testing.T> t) {
         Ꮡfe.SetBytes(@in[..]);
 
         @in[len(@in) - 1] &= (byte)((1 << 7) - 1); // mask the most significant bit
-        var b = @new<bigꓸInt>().SetBytes(swapEndianness(@in[..]));
+        var b = @new<big.Int>().SetBytes(swapEndianness(@in[..]));
         Ꮡfe1.fromBig(b);
 
         if (fe != fe1) {
@@ -250,15 +259,17 @@ public static void TestBytesBigEquivalence(ж<testing.T> t) {
         var buf = new slice<byte>(32);
         buf = swapEndianness(fe1.toBig().FillBytes(buf));
 
-        return bytes_package.Equal(fe.Bytes(), buf) && isInBounds(Ꮡfe) && isInBounds(Ꮡfe1);
+        return bytes.Equal(fe.Bytes(), buf) && isInBounds(Ꮡfe) && isInBounds(Ꮡfe1);
     };
     var err = quick.Check((f1).OrTypedNilFunc(), nil); if (err != nil) {
         t.Error(err);
     }
 }
 
+} partial class field_internal_testᴛElement {
+
 // fromBig sets v = n, and returns v. The bit length of n must not exceed 256.
-internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> fromBig(this ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> Ꮡv, ж<bigꓸInt> Ꮡn) {
+internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> fromBig(this ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> Ꮡv, ж<big.Int> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
     var bufᴷ = new stackAppend<byte>();
 
@@ -284,7 +295,7 @@ internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_packag
 }
 
 internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> fromDecimal(this ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> Ꮡv, @string s) {
-    var (n, ok) = @new<bigꓸInt>().SetString(s, 10);
+    var (n, ok) = @new<big.Int>().SetString(s, 10);
     if (!ok) {
         throw panic("not a valid decimal: " + s);
     }
@@ -292,7 +303,7 @@ internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_packag
 }
 
 // toBig returns v as a big.Int.
-internal static ж<bigꓸInt> toBig(this ref global::go.crypto.@internal.fips140.edwards25519.field_package.Element v) {
+internal static ж<big.Int> toBig(this ref global::go.crypto.@internal.fips140.edwards25519.field_package.Element v) {
     var buf = v.Bytes();
 
     var words = new slice<big.Word>(32 * 8 / bits.UintSize);
@@ -306,8 +317,10 @@ internal static ж<bigꓸInt> toBig(this ref global::go.crypto.@internal.fips140
         }
     }
 
-    return @new<bigꓸInt>().SetBits(words);
+    return @new<big.Int>().SetBits(words);
 }
+
+} partial class field_internal_test_package {
 
 public static void TestDecimalConstants(ж<testing.T> t) {
     @string sqrtM1String = "19681161376707505956807079304988542015446066515923890162744021073123829784752";
