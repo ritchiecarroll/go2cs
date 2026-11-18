@@ -192,9 +192,11 @@ public static partial class builtin
         T[] store = buffer.store ??= new T[bufferLength];
         nint oldLength = slice.Length;
 
-        // Go: oldPtr != bufPtr && oldLen != 0. Span copies handle the overlap of a window into the buffer itself.
+        // Go: oldPtr != bufPtr && oldLen != 0. The copy handles the overlap of a window into the buffer itself, and copies
+        // an element that owns array storage into its slot (GoElementCopy.CopyInto), so the buffer and the old backing
+        // share no inner array.
         if (oldLength != 0 && !(ReferenceEquals(slice.m_array, store) && slice.Low == 0))
-            slice.ToSpan().CopyTo(store);
+            GoElementCopy.CopyInto<T>(slice.ToSpan(), store.AsSpan(0, (int)oldLength));
 
         nint newCapacity = GoGrowthFacts<T>.RoundUpCapacity(newLength, newLength, stackAppend<T>.Dims(elems));
 
@@ -247,7 +249,9 @@ public static partial class builtin
         T[] moved = AllocationCounter.NewArray<T>(capacity);
         GoMemProfile.Charge<T>(moved, capacity, buffer.capacityUsed ? GoAllocEntry.MoveSlice : GoAllocEntry.MoveSliceNoCap);
 
-        // moveSlice copies all of s[:cap(s)]; moveSliceNoCap copies s[:len(s)] and leaves the rest zero.
+        // moveSlice copies all of s[:cap(s)]; moveSliceNoCap copies s[:len(s)] and leaves the rest zero. A plain move even
+        // for an element that owns array storage: the store was let go above and the slice was its only reference, so
+        // nothing is left to share an inner array with.
         store.AsSpan((int)slice.Low, (int)(buffer.capacityUsed ? capacity : length)).CopyTo(moved);
 
         return new slice<T>(moved, 0, length, capacity);

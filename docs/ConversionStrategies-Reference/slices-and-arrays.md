@@ -696,12 +696,30 @@ must write through. Its `unsafe.Pointer` half emits the load door and stays comp
 results deliberately discarded; the load door's values are compared against Go by the
 `ArrayPointerElementDoors` program.)
 
-**Known gaps:** (1) golib-internal
-element-wise transfers of nested-array elements (`copy(dst, src)`, spread `append(dst, src...)`)
-copy element structs without re-cloning; (2) an array-typed map KEY at an index-STORE (`mk[k] = v`
-stores `k` uncloned — only the composite-literal key form clones); (3) a named↔underlying array
+**`copy` and a spread `append` copy each element's VALUE** (golib `GoElementCopy`). An element that
+owns array storage (an array, a named array, a struct carrying array fields) is a struct over storage
+of its own, so moving the elements with a span copy left two slices holding one inner array:
+`copy(dst, src)` then `src[0][1] = 9` changed `dst` too. golib now copies such elements one by one, in
+the two ways Go's memmove behaves:
+
+- **into existing elements** (`copy`, a spread `append` within capacity, a growth into the stack
+  buffer): each element is assigned IN PLACE through `IGoValueAssign`, top-down when two windows over
+  one backing overlap with the destination above, so a slice taken from a destination element before
+  the copy (`q := dst[0][:]`) sees the copied values, as in Go;
+- **into new storage** (append's first backing and every growth, reflect's `Value.Grow`, `[N]T(s)`):
+  each element is a copy of its own, through `ICloneable`. That is one counted malloc per moved element
+  that owns an array, where Go's memmove has none.
+
+Every other element type keeps its single span copy (the test is a per-`T` constant), and append's
+element LIST (`append(s, a.Clone())`) is not copied a second time. Guarded by the
+`SliceArrayElementCopies` behavioral test and GolibTests' `SliceArrayElementCopyTests`.
+<!-- 2026-11-18, .4 blocker (P5's class 2, found closing the gob root cause): red at master 8a86140f79,
+     20 of the fixture's 24 lines differed from go run and all 10 GolibTests arms failed. -->
+
+**Known gaps:** (1) an array-typed map KEY at an index-STORE (`mk[k] = v`
+stores `k` uncloned — only the composite-literal key form clones); (2) a named↔underlying array
 CONVERSION (`[4]int(named)`) hands the wrapper's backing through the implicit operator uncloned;
-(4) a fixed-size ARRAY reached only through an EMBEDDED struct member keeps a shared backing. An
+(3) a fixed-size ARRAY reached only through an EMBEDDED struct member keeps a shared backing. An
 embed is an INLINE field (see
 [An embedded struct is an INLINE field, so a value copy copies it](struct-embedding.md#an-embedded-struct-is-an-inline-field-so-a-value-copy-copies-it)),
 so a struct copy copies the embed itself, but the clone walk in the section below skips embeds.
