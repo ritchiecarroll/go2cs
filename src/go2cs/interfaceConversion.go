@@ -1362,7 +1362,8 @@ func openGenericImplementRecordName(targetType types.Type, targetTypeName string
 		return "", false
 	}
 
-	typeParams := named.Origin().TypeParams().Len()
+	// A shape-witness carrier's C# arity counts its witness parameters too (shapeWitness.go).
+	typeParams := named.Origin().TypeParams().Len() + shapeWitnessArity(named.Origin().Obj())
 	base, _, hasArgs := strings.Cut(targetTypeName, "<")
 
 	if typeParams == 0 || !hasArgs || base == "" {

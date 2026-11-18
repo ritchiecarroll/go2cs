@@ -999,6 +999,9 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	packageInfoLines = ensureImportInitSection(packageInfoLines)
 	packageInfoLines = applyImportInitSection(packageInfoLines, mergeExisting)
 
+	// The shape witness's per-pair witnesses, after the import hooks; absent for a package that has none (shapeWitness.go).
+	packageInfoLines = applyShapeWitnessSection(packageInfoLines, mergeExisting)
+
 	// Go source position maps. Same merge semantics as every other section: a whole-package
 	// conversion rebuilds the section from this run's records alone, while a merging write (the
 	// -tests flow, single-file conversions) keeps existing records for files this conversion did

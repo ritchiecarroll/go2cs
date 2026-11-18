@@ -353,6 +353,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			return refusePackage(options, diagnosticCgoRefused, err)
 		}
 
+		// The narrow shape witness (shapeWitness.go): select its declarations into package state FIRST, so every proxy
+		// route and refusal below declines a witnessed position, and refuse what the current stage cannot place.
+		if refusal := prepareShapeWitness(pkg); refusal != nil {
+			refusal.report()
+			return refusePackage(options, diagnosticShapeWitnessRefused, refusal)
+		}
+
 		// Refuse, before any file is written as well, an instantiation whose constraint proxy could not
 		// forward its constraint without breaking Go's aliasing (constraintProxyForwarding.go).
 		if refusal := refuseUnforwardableConstraintProxies(pkg); refusal != nil {
