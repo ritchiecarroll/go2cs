@@ -8,43 +8,27 @@
 
 package main
 
-import (
-	"go/ast"
-	"go/types"
-)
+import "go/types"
 
-// conversionOperandCopy renders the operand of a conversion to a struct or array type as the copy Go
-// converts. `c := chord(lc)` copies lc, and a write to `c.Notes` does not reach `lc.Notes`. The emitted
-// conversion operator (and go2cs-gen's function for two foreign types) builds its result from the
-// operand's fields, so an `array<T>` field, or a nested struct holding one, shares its backing with the
-// operand: `new chord(src.Name, src.Notes, src.In)`. Where the operand is existing storage the copy is
-// taken first, `(chord)lc.ΔClone()`, exactly as an assignment, a return or a send takes it
-// (exprReadsValueNeedingClone). A fresh operand (a call, a composite literal) is reachable by no other
-// name and is left as it is.
+// THE COPY A CONVERSION TAKES. Go converts a copy of its operand: after `c := chord(lc)` a write to
+// `c.Notes` does not reach `lc.Notes`. The emitted conversion operator (and go2cs-gen's function for two
+// foreign types) builds its result from the operand's fields, so an `array<T>` field, or a nested or
+// embedded struct holding one, shares its backing with the operand: `new chord(src.Name, src.Notes, src.In)`.
+//
+// The copy is taken ONCE, where the converted value is transferred, as for any other value: the
+// conversion arm of exprReadsValueNeedingClone answers that a conversion reads existing storage exactly
+// when its operand does, so an assignment, a return, a send or a composite-literal element clones the
+// result, `var c = ((chord)lc).ΔClone();`. A conversion consumed by a read (a value-receiver call, an
+// index, a field) is not transferred and copies nothing, as Go's own read of the converted value copies
+// nothing observable. A fresh operand (a call, a composite literal) is reachable by no other name and is
+// not cloned at all.
 //
 // A defined type written over another named STRUCT type, `type Counts counts`, is go2cs-gen's inherited
 // wrapper, and its two operators with that base already copy (`[GoValueClone("Value")]`,
-// InheritedTypeTemplate.ConversionCopy); that pair is left to them, so the value is copied once.
+// InheritedTypeTemplate.ConversionCopy); that pair takes no clone, so the value is copied once.
 //
-// An array reached only through an EMBEDDED struct is cloned too: typeNeedsValueClone walks embedded
-// value fields (see its header).
-func (v *Visitor) conversionOperandCopy(target types.Type, operand ast.Expr, rendered string) string {
-	if target == nil {
-		return rendered
-	}
-
-	switch target.Underlying().(type) {
-	case *types.Struct, *types.Array:
-	default:
-		return rendered
-	}
-
-	if !v.exprReadsValueNeedingClone(operand) || conversionCopiedByWrapperOperator(target, v.getExprType(operand)) {
-		return rendered
-	}
-
-	return appendValueClone(rendered, v.getExprType(operand))
-}
+// (Until batch 312 the operand was cloned as well, `(chord)lc.ΔClone()`, at every conversion: with the
+// transfer's clone that copied twice, and a read copied once where it needs no copy.)
 
 // conversionCopiedByWrapperOperator reports whether the conversion between target and source binds an
 // inherited wrapper's operator that copies by itself: one side is a defined type written over another named
