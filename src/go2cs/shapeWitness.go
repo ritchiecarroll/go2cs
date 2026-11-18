@@ -49,9 +49,9 @@ type shapeWitnessDecl struct {
 // Package state: the selection, and the witness declarations the package emits into package_info.cs's <ShapeWitnesses>
 // section (witness interfaces, generic witnesses, pair witnesses), one rendered line per declaration, keyed by its name.
 var (
-	shapeWitnessDecls      = map[types.Object]*shapeWitnessDecl{}
-	shapeWitnessPairs      = map[string]string{}
-	shapeWitnessForeign    = map[string]map[types.Object]*shapeWitnessDecl{}
+	shapeWitnessDecls   = map[types.Object]*shapeWitnessDecl{}
+	shapeWitnessPairs   = map[string]string{}
+	shapeWitnessForeign = map[string]map[types.Object]*shapeWitnessDecl{}
 )
 
 // ShapeWitnessSection is package_info.cs's section of per-pair witnesses, inside the package class.
@@ -312,6 +312,7 @@ func computeShapeWitnessSelection(pkg *packages.Package) map[types.Object]*shape
 				}
 
 				found := map[int]*types.TypeParam{}
+				foundCarrier := false
 
 				ast.Inspect(node, func(n ast.Node) bool {
 					ident, ok := n.(*ast.Ident)
@@ -328,6 +329,42 @@ func computeShapeWitnessSelection(pkg *packages.Package) map[types.Object]*shape
 
 					origin := shapeWitnessOrigin(pkg.TypesInfo, ident)
 					target := selected[origin]
+
+					// DOWNWARD: a selected body that hands its selected T (the box itself, with no C# clause) to a
+					// same-package generic FUNCTION whose clause would be kept (`nameOf[U Named](x U)` calling x.Name())
+					// selects that function at the position, or the box would meet a nominal C# constraint it cannot
+					// satisfy. Its forwarder edge keeps it exactly as long as the caller is kept (P3's predicate below),
+					// and the caller, now forwarding into a carrier, becomes a carrier itself (UPWARD, below).
+					if ownerDecl := selected[owner]; ownerDecl != nil && origin != owner {
+						if fn, isFunc := origin.(*types.Func); isFunc && fn.Pkg() != nil && fn.Pkg().Path() == pkg.Types.Path() {
+							if sig := fn.Type().(*types.Signature); sig.Recv() == nil && sig.TypeParams() != nil {
+								for i := range min(sig.TypeParams().Len(), instance.TypeArgs.Len()) {
+									if target != nil && target.tps[i] != nil {
+										continue
+									}
+
+									argTypeParam, isTypeParam := types.Unalias(instance.TypeArgs.At(i)).(*types.TypeParam)
+
+									if !isTypeParam || !shapeWitnessOwnsTypeParam(ownerDecl, own, argTypeParam) {
+										continue
+									}
+
+									if !shapeWitnessConstraint(sig.TypeParams().At(i)) || !v.methodSetConstraintNeeded(fn, i) {
+										continue
+									}
+
+									if target == nil {
+										target = &shapeWitnessDecl{obj: fn, tps: map[int]*types.TypeParam{}, carrier: true}
+										selected[fn] = target
+									}
+
+									target.tps[i] = sig.TypeParams().At(i)
+									forwarders[fn] = appendUniqueObject(forwarders[fn], owner)
+									changed = true
+								}
+							}
+						}
+					}
 
 					if target == nil || origin == owner {
 						return true
@@ -347,6 +384,10 @@ func computeShapeWitnessSelection(pkg *packages.Package) map[types.Object]*shape
 								}
 
 								forwarders[origin] = appendUniqueObject(forwarders[origin], owner)
+
+								if target.carrier {
+									foundCarrier = true
+								}
 							}
 						}
 					}
@@ -354,9 +395,29 @@ func computeShapeWitnessSelection(pkg *packages.Package) map[types.Object]*shape
 					return true
 				})
 
-				if len(found) > 0 && selected[owner] == nil {
-					selected[owner] = &shapeWitnessDecl{obj: owner, tps: found, carrier: true}
-					changed = true
+				// UPWARD: the owner forwards its own type parameter into a selected declaration, so it is selected at
+				// that position. A function always carries its witness parameters; a TYPE carries them when its own
+				// methods call T's, or when it forwards T into a carrier (it must name that carrier's witness).
+				if len(found) > 0 {
+					ownerDecl := selected[owner]
+
+					if ownerDecl == nil {
+						carrier := !isType || foundCarrier || shapeWitnessMethodsUseTypeParam(pkg, owner.Type().(*types.Named))
+						selected[owner] = &shapeWitnessDecl{obj: owner, tps: found, carrier: carrier}
+						changed = true
+					} else {
+						for j, tp := range found {
+							if ownerDecl.tps[j] == nil {
+								ownerDecl.tps[j] = tp
+								changed = true
+							}
+						}
+
+						if foundCarrier && !ownerDecl.carrier {
+							ownerDecl.carrier = true
+							changed = true
+						}
+					}
 				}
 			}
 		}
@@ -1268,6 +1329,27 @@ func refuseShapeWitnessSites(pkg *packages.Package, selection map[types.Object]*
 					return true
 				}
 
+				// ONWARD: a selected T (the box, with no C# clause) handed to a generic that keeps a nominal clause at
+				// that position -- one the closure cannot select (another package's, or an inline or foreign
+				// constraint) -- would meet a constraint the box cannot satisfy.
+				if len(scope) > 0 {
+					for i := range instance.TypeArgs.Len() {
+						argTypeParam, isTypeParam := types.Unalias(instance.TypeArgs.At(i)).(*types.TypeParam)
+
+						if !isTypeParam {
+							continue
+						}
+
+						if _, inScope := scope[argTypeParam]; !inScope {
+							continue
+						}
+
+						if constraint, kept := v.shapeWitnessKeptClause(origin, i, selection); kept {
+							refuse(ident.Pos(), "%s hands the witnessed type parameter %s to %s's %s, which keeps its C# constraint; stage 1 of the narrow shape witness cannot pass a witness there", types.ExprString(ident), argTypeParam.Obj().Name(), ident.Name, constraint)
+						}
+					}
+				}
+
 				if origin.Pkg() != nil && origin.Pkg().Path() != pkg.Types.Path() {
 					if shapeWitnessForeignSelected(origin) {
 						refuse(ident.Pos(), "%s is a shape-witness declaration of package %s; instantiating it from another package needs stage 2 of the narrow shape witness", ident.Name, origin.Pkg().Path())
@@ -1553,4 +1635,53 @@ func shapeWitnessArity(object types.Object) int {
 	}
 
 	return 0
+}
+
+// shapeWitnessOwnsTypeParam reports whether tp is one of a selected declaration's WITNESSED type parameters, as its
+// syntax spells it (own is the list that syntax declares: a method's receiver type parameters, for one).
+func shapeWitnessOwnsTypeParam(decl *shapeWitnessDecl, own []*types.TypeParam, tp *types.TypeParam) bool {
+	for j := range decl.tps {
+		if j < len(own) && own[j] == tp {
+			return true
+		}
+	}
+
+	return false
+}
+
+// shapeWitnessKeptClause reports whether position i of the generic origin names keeps a NOMINAL C# clause -- a method-set
+// constraint the emission writes as `where U : I` -- and is not witnessed, with the constraint for the diagnostic. A
+// function's clause is kept only where its body needs it (methodSetConstraintNeeded); a type's always is.
+func (v *Visitor) shapeWitnessKeptClause(origin types.Object, i int, selection map[types.Object]*shapeWitnessDecl) (types.Type, bool) {
+	if decl := selection[origin]; decl != nil && decl.tps[i] != nil {
+		return nil, false
+	}
+
+	var typeParams *types.TypeParamList
+	fn, isFunc := origin.(*types.Func)
+
+	if isFunc {
+		typeParams = fn.Type().(*types.Signature).TypeParams()
+	} else if typeName, ok := origin.(*types.TypeName); ok {
+		if named, ok := typeName.Type().(*types.Named); ok {
+			typeParams = named.TypeParams()
+		}
+	}
+
+	if typeParams == nil || i >= typeParams.Len() {
+		return nil, false
+	}
+
+	constraint := typeParams.At(i).Constraint()
+	iface, ok := constraint.Underlying().(*types.Interface)
+
+	if !ok || iface.NumMethods() == 0 {
+		return nil, false
+	}
+
+	if isFunc && !v.methodSetConstraintNeeded(fn, i) {
+		return nil, false
+	}
+
+	return constraint, true
 }

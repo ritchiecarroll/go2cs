@@ -277,3 +277,23 @@ callee, `any(e)`, a type switch or reflect would see the proxy rather than `*T`.
 **Census** (the widening's predicate restated over go/types; R's 10:58Z sizing): std on four targets, 4 sites, all
 walkList, 0 mixed; the behavioral corpus, 3 sites, all `[]T`-only, 0 mixed; the tsc closure at `ba29a56299`, 9 sites:
 1 `[]T`-only, 5 class B (GetErrorBaseline, one callee), 2 refused under ruling 1, 1 refused by GO2CS2006.
+
+## 12. The narrow shape witness, stage 1 (2026-11-18)
+
+Ruling 1 (a generic NAMED type) and section 5 (T in a result, map, channel, pointer or nested slice) are no longer
+refused for a declaration the narrow shape witness selects (DESIGN-shape-witness-scout, P3 CLEAR 05e789558d). There T
+is the box itself, so a result, a slice and a named type keep Go's own element type and aliasing, and every method
+call through T goes through a witness type parameter, `TScript.Text(s)`. The proxy routes and the GO2CS2005/2006
+passes decline a witnessed position (`shapeWitnessed`); every other shape this document refuses still is.
+
+Stage 1 is the same-package route: the constraint must be an interface declared in the type parameter's own package,
+and a site whose witness needs another package is refused by name (GO2CS2013): a foreign pointer or type argument, an
+instantiation of another package's witness declaration, a method value through T, T converted to a non-empty
+interface, and T handed to a generic that keeps its C# clause. An inline or foreign constraint keeps today's routes.
+
+**A discovery stage 1 made, beyond the reviewed closure.** The closure selects a CALLER that forwards its T into a
+selected declaration (P3 MUST 1). Its mirror is needed too: a selected body that hands its T to a same-package generic
+function whose clause would be kept (`nameOf[U Named](x U)` calling `x.Name()`) must select that callee, or the box
+meets `where U : Named`, which it cannot satisfy (CS0311). And a TYPE whose methods forward its T into a carrier
+carries the witness itself. Both run in the same fixed point, and P3's predicate keeps the callee exactly as long as a
+kept caller forwards into it. ShapeWitnessSamePackage holds the shape (`Index.Find` calling `nameOf`).

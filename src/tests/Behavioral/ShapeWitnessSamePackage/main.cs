@@ -71,6 +71,10 @@ partial struct Index<T, TNamed>
     internal slice<T> entries;
 }
 
+internal static @string nameOf<T, TNamed>(T x)
+    where TNamed : struct, NamedΔshape<T>
+{ return TNamed.Name(x); }
+
 } partial class mainᴛIndex {
 
 public static slice<T> Find<T, TNamed>(this ref Index<T, TNamed> idx, @string name)
@@ -78,7 +82,7 @@ public static slice<T> Find<T, TNamed>(this ref Index<T, TNamed> idx, @string na
 {
     slice<T> @out = default;
     foreach (var (_, e) in range(idx.entries)) {
-        if (TNamed.Name(e) == name) {
+        if (nameOf<T, TNamed>(e) == name) {
             @out = append(@out, e);
         }
     }

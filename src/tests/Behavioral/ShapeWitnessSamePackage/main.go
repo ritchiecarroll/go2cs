@@ -57,10 +57,14 @@ func (e *Export) Name() string { return e.name }
 
 type Index[T Named] struct{ entries []T }
 
+// nameOf takes T only as a plain parameter, but a witnessed body hands it a witnessed T: the closure selects it DOWNWARD
+// too, so it takes the witness rather than keeping a C# clause the box cannot satisfy.
+func nameOf[T Named](x T) string { return x.Name() }
+
 func (idx *Index[T]) Find(name string) []T {
 	var out []T
 	for _, e := range idx.entries {
-		if e.Name() == name {
+		if nameOf(e) == name {
 			out = append(out, e)
 		}
 	}

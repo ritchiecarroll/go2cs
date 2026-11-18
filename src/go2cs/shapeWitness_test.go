@@ -63,7 +63,11 @@ func onlyValue[T Script](s T) []T { s.Text(); return nil } // NOT only a nominal
 
 var _ = onlyValue(mem{})
 
-func keptByPointer[T Script](s T) []T { s.Text(); return nil } // SELECTED pointer instantiation
+func keptByPointer[T Script](s T) []T { s.Text(); helperText(s); idOf(s); return nil } // SELECTED pointer instantiation
+
+func helperText[T Script](s T) string { return s.Text() } // SELECTED downward
+
+func idOf[T Script](s T) T { return s } // NOT elided clause
 
 var _ = keptByPointer(&file{})
 `
@@ -71,7 +75,10 @@ var _ = keptByPointer(&file{})
 // One site per GO2CS2013 refusal of stage 1, each on its own marked line, and a witnessed site that must not be refused.
 const shapeWitnessRefusalFixture = `package swr
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type writer interface{ WriteString(string) (int, error) }
 
@@ -105,6 +112,22 @@ var _, _ = boxed(&item{})
 func allowed[T Named](x T) []T { x.Name(); return []T{x} }
 
 var _ = allowed(&item{}) // ALLOWED
+
+type stringish interface{ String() string }
+
+type tag struct{ s string }
+
+func (t *tag) String() string { return t.s }
+
+func ext[U fmt.Stringer](u U) string { return u.String() }
+
+func labels[T stringish](x T) []T {
+	_ = x.String()
+	_ = ext(x) // REFUSED onward
+	return []T{x}
+}
+
+var _ = labels(&tag{})
 `
 
 func loadShapeWitnessFixture(t *testing.T, module, fixture string) *packages.Package {
@@ -137,9 +160,11 @@ func shapeWitnessFixtureLine(t *testing.T, fixture, marker string) int {
 }
 
 // TestShapeWitnessSelection: the narrow selection takes exactly the SELECTED declarations -- an aliasing result, a
-// generic named type, the closure's forwarder, an unexported declaration a pointer instantiates -- and none of the NOT
+// generic named type, the closure's forwarder, an unexported declaration a pointer instantiates, a helper a selected body
+// hands its T to (DOWNWARD) -- and none of the NOT
 // ones: a plain parameter, a self-referential, inline or foreign constraint (each EXPORTED, so P3's predicate keeps it
-// and only its own rule can exclude it), an unexported declaration instantiated only nominally. Each NOT line is a red arm of its own (safety floor 13): loosen its rule and its name joins the set.
+// and only its own rule can exclude it), an unexported declaration instantiated only nominally, a helper whose clause is
+// elided (its T binds the box as it is). Each NOT line is a red arm of its own (safety floor 13): loosen its rule and its name joins the set.
 func TestShapeWitnessSelection(t *testing.T) {
 	pkg := loadShapeWitnessFixture(t, "sw", shapeWitnessSelectionFixture)
 	selection := computeShapeWitnessSelection(pkg)
@@ -152,7 +177,7 @@ func TestShapeWitnessSelection(t *testing.T) {
 
 	sort.Strings(got)
 
-	want := []string{"Index carrier=true", "Span carrier=false", "Spans carrier=true", "forward carrier=true", "keptByPointer carrier=true"}
+	want := []string{"Index carrier=true", "Span carrier=false", "Spans carrier=true", "forward carrier=true", "helperText carrier=true", "keptByPointer carrier=true"}
 
 	if fmt.Sprint(got) != fmt.Sprint(want) {
 		t.Fatalf("selected %v\nwant     %v", got, want)
@@ -173,6 +198,7 @@ func TestShapeWitnessRefusalsFireBySite(t *testing.T) {
 		"REFUSED foreign-pointer": "is not to a non-generic named type of this package",
 		"REFUSED method-value":    "needs a witness delegate",
 		"REFUSED to-interface":    "converts to the interface",
+		"REFUSED onward":          "keeps its C# constraint",
 	}
 
 	got := map[int]string{}
