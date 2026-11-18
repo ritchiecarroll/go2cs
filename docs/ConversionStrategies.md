@@ -12203,7 +12203,7 @@ A target on the list can be converted Go, as here, or hand-written C#: `testing/
 `testing.checkParallel`, which the hand-written `testing` package provides, and its forwarder calls that.
 <!-- linknameForwardTargets: src/go2cs/visitFuncDecl.go:2461 (`"time.registerLoadFromEmbeddedTZData": true`),
      :2469 (`"testing.checkParallel": true`); the forwarder src/core/testing/cryptotest/rand.cs:27-30
-     (`testing.checkParallel(t);`); the hand-owned target src/core/testing/testing.cs:1003
+     (`testing.checkParallel(t);`); the hand-owned target src/core/testing/testing.cs:1015
      (`public static void checkParallel(ж<T> t)`). -->
 
 The target in `time` is ordinary Go, marked with the one-argument directive. Each converted package is its
