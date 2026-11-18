@@ -1,0 +1,17 @@
+DECL KEPT        type internal/runtime/gc/internal/gen.Ptr | generic named type | exported: declaration-level | witness-param=true forwarders=1
+DECL KEPT        func internal/runtime/gc/internal/gen.Deref | param internal/runtime/gc/internal/gen.Ptr[W] | exported: declaration-level | witness-param=false forwarders=0
+DECL KEPT        type internal/runtime/gc/internal/gen.Array | generic named type | exported: declaration-level | witness-param=true forwarders=1
+DECL KEPT        func internal/runtime/gc/internal/gen.ConstArray | result internal/runtime/gc/internal/gen.Array[T] | exported: declaration-level | witness-param=false forwarders=0
+EAGER open-generic  E-assembly internal/runtime/gc/internal/gen.Array -> Value
+EAGER nominal       n/a        internal/runtime/gc/internal/gen.Mask64 -> Value
+EAGER nominal       n/a        internal/runtime/gc/internal/gen.Mask8 -> Value
+EAGER open-generic  E-assembly internal/runtime/gc/internal/gen.Ptr -> Value
+EAGER nominal       n/a        internal/runtime/gc/internal/gen.Uint64x8 -> Value
+EAGER cut-adds      E-assembly internal/runtime/gc/internal/gen.Uint64 -> Value
+EAGER nominal       n/a        internal/runtime/gc/internal/gen.Uint8x64 -> Value
+EAGER nominal       n/a        internal/runtime/gc/internal/gen.Word -> Value
+EAGER nominal       n/a        internal/runtime/gc/internal/gen.void -> Value
+EAGER-TOTAL pairs 9 | nominal 6 cut-adds 1 open-generic 2 pointer 0 iface 0 | E-assembly 3 I-assembly 0 REFUSED 0
+INST nominal       n/a        internal/runtime/gc/internal/gen.void -> Value
+INST-TOTAL pairs 1 | nominal 1 cut-adds 0 open-generic 0 pointer 0 iface 0 | E-assembly 0 I-assembly 0 REFUSED 0
+TOTAL target linux/arm64 selected 4 closure-added 0 [] kept 4 uses 10 use-files 1

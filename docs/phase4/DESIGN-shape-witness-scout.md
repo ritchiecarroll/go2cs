@@ -8,7 +8,8 @@
 > found the struct-proxy pun NOT SAFE.
 >
 > **Revised 2026-11-18 after P3's review (APPROVE WITH CHANGES): see section 7. It supersedes sections 2, 5 and 6 where
-> they differ; the earlier text stays visible.**
+> they differ; the earlier text stays visible. Revised again the same day after P3's re-read: see section 8, which
+> supersedes section 7 where they differ.**
 
 ## 1. Verdict
 
@@ -306,3 +307,83 @@ public partial struct registry { internal Index<ж<Export>, ExportжNamedΔshape
 - **Public surface:** 0.
 - **tsc:** the 12 kept declarations convert. autoimport gains up to 38 eager per-pair witnesses. lsconv -> fourslash
   leave the refused list unless something else in them refuses.
+
+## 8. Revision 2026-11-18 (second): P3's re-read, answered by number
+
+P3 re-read ba05313af7 as APPROVE WITH CHANGES, 2 MUST + 2 SHOULD (COORD inbox 20261118T031953Z-P3.md); COORD accepted
+every finding and ruled (b) for MUST 2 (03:21Z). Every number below comes from census v3, whose source is in the record
+verbatim (`data/shape-witness-scout/census-v3/census-v3.go.txt`), so the predicate a cut adds and the predicate that was
+counted are one text. Readings: std on 4 targets, the tsc closure at ba29a56299, and 107 generic behavioral modules plus
+class B's.
+
+### 1. MUST: nominal is defined, and the std prediction is restated from a nominal column
+
+- **Definition.** A pair (T, I) is NOMINAL when T is a value or interface type and T's OWN assembly carries
+  `GoImplement<T, I>` (an interface counts as nominal when it embeds I). Today those records are CAST-driven, one per
+  unique cast (gen's `package_info.cs`, "for each unique cast").
+- **What a cut changes.** For the interfaces a cut selects, the records become DECLARATION-driven: E's assembly emits
+  `GoImplement<E, I>` for every value type E it declares that satisfies a selected I, cast or no cast.
+- **Open generic implementers** take the existing open-type route, `GoImplement(typeof(Ptr<,>), typeof(Value))`. The
+  converter already emits it (OpenGenericPointerImplement's `GoImplement(typeof(pair<,>), typeof(Namer))`).
+- **The census, with the column** (`census-v3/v3-std-*.txt`, identical on all 4 targets):
+
+| E -> Value (gen) | today | the cut |
+|---|---|---|
+| void, Mask64, Mask8, Uint64x8, Uint8x64 | nominal (GoImplement present at master f36b6b0d48) | nothing |
+| Word (an interface embedding Value) | nominal | nothing |
+| Uint64 | NOT nominal (no record) | +1 line `GoImplement<Uint64, Value>` |
+| Ptr<T>, Array<T> (open generics) | NOT nominal | +2 lines `GoImplement(typeof(Ptr<,>)/(Array<,>), typeof(Value))` |
+
+- **std prediction, restated.** gen's `package_info.cs` gains **3 lines**, and the stdlib needs **0 per-pair witnesses**
+  (every pair is nominal once those 3 lines exist). The file count stays inside the 3-4 .cs band, because
+  `package_info.cs` was already in it. Only one pair is instantiated today, and it is nominal: `void`, through Ptr.
+  Section 7's "0 per-pair witnesses ... the stdlib footprint is unchanged" is corrected to this.
+
+### 2. MUST: a separate, named, selection-only predicate (COORD's ruling (b))
+
+- The cut adds `shapeWitnessSelfReferential(tp)`. It looks inside interface METHOD SIGNATURES, so
+  `interface{ Less(T) bool }` is self-referential. It is used for narrow selection only.
+- `typeMentionsTypeParam` and its 9 other callers (constraintOperations.go:2309, 2356, 2371, 2458, 2598, 2760;
+  convCallExpr.go:5026, 7051, 7095) are NOT changed.
+- Census v3 selects through exactly that function (its source is in the record). Results:
+  - **behavioral: 0 kept.** InlineConstraintLift's Box, pair and slot are selected, then dropped by P3's predicate
+    (package-main value instantiations); Ord is excluded as self-referential. So the CNR prediction of 0 is now a
+    statement about the cut's own predicate, not only about the census.
+
+### 3. SHOULD: the closure rule widened
+
+- **Rule.** ANY generic declaration (a function, a named type through its fields and embeds, or a method of a generic
+  type, which counts as its receiver type) whose type or body mentions a selected declaration at a type argument that
+  MENTIONS one of its own type parameters (`[]T`, `*T` and `named2[T]` included) is selected, to a fixed point.
+- **Fixture** (`closure-fixture/main.go`, census `census-v3/v3-closurefixture.txt`). The census adds each shape, labelled:
+  - Cache: a field `ix Index[T]`, under a self-referential constraint, so selection alone would miss it;
+  - Holder: a method calling `FromLSPRange(h.x, 0)`;
+  - wrapAll: `Index[*named2[T]]`.
+  wrapAll is then dropped by P3's predicate, because its own T binds `int` and needs no witness. The pair it forwards,
+  `*named2[T]`, takes a generic witness emitted beside named2.
+- **Population:** the widened closure adds **0** declarations in std on 4 targets, in the tsc closure and in the
+  behavioral set.
+
+### 4. SHOULD: one witness-location rule, stated once
+
+**A non-nominal pair (E, I) is witnessed in E's assembly when E's package sees I's; otherwise in I's assembly when I's
+package sees E's; otherwise the instantiation is REFUSED by name.** This replaces section 5's rule and section 7's
+MUST 3 rule, which disagreed. Counted:
+
+| population | pairs | nominal | needs a record (cut adds) | pointer | structural iface | in E's assembly | in I's assembly | REFUSED |
+|---|---|---|---|---|---|---|---|---|
+| std eager (gen) | 9 | 6 | 1 + 2 open | 0 | 0 | 3 | 0 | **0** |
+| tsc eager (autoimport.Index under Named) | 38 | 0 | 9 | 24 | 5 | 2 | 36 | **0** |
+| tsc instantiated (use sites of the 12) | 37 | 4 | 0 | 33 | 0 | 32 | 1 | **0** |
+| behavioral | 0 | - | - | - | - | - | - | **0** |
+
+The tsc eager set is mostly placed in I's assembly (36 of 38). That is P3's "common Go shape": autoimport declares Named
+and sees the types that satisfy it.
+
+### Predictions for the eventual cut, REVISED again (scored only when it runs)
+
+- **stdlib:** gen's 3-4 .cs on 4 targets, `package_info.cs` +3 GoImplement lines among them, and 0 per-pair witnesses.
+- **CNR:** 0 behavioral lines.
+- **Public surface:** 0.
+- **tsc:** the 12 kept declarations convert. autoimport emits up to 38 eager witnesses (36 there under I's-assembly
+  placement, 2 in E's assemblies), and 0 instantiations are refused.

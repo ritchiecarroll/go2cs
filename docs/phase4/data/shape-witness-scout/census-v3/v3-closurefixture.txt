@@ -1,0 +1,31 @@
+DECL KEPT        type closurefixture.MappedSpan | generic named type | forwarded from kept Holder | witness-param=false forwarders=2
+DECL KEPT        func closurefixture.FromLSPRange | result []closurefixture.MappedSpan[T] | forwarded from kept Holder | witness-param=false forwarders=1
+DECL KEPT        type closurefixture.Index | generic named type | in-package non-nominal *closurefixture.named2[T] | witness-param=true forwarders=2
+DECL KEPT        type closurefixture.Cache | closure: generic named type field or embed | in-package non-nominal *closurefixture.Export | witness-param=true forwarders=0
+DECL KEPT        type closurefixture.Holder | closure: method of a generic type | in-package non-nominal *closurefixture.SourceFile | witness-param=true forwarders=0
+DECL DROPPED(P3) func closurefixture.wrapAll | closure: generic function body or signature |  | witness-param=false forwarders=0
+EAGER pointer       E-assembly *closurefixture.Export -> Named
+EAGER pointer       I-assembly *internal/godebug.Setting -> Named
+EAGER pointer       I-assembly *os.File -> Named
+EAGER pointer       I-assembly *os.Root -> Named
+EAGER pointer       I-assembly *os.fileStat -> Named
+EAGER pointer       I-assembly *os.root -> Named
+EAGER pointer       I-assembly *reflect.rtype -> Named
+EAGER pointer       I-assembly *runtime.Func -> Named
+EAGER open-generic  E-assembly closurefixture.named2 -> Named
+EAGER cut-adds      I-assembly internal/abi.Name -> Named
+EAGER iface         I-assembly internal/reflectlite.Type -> Named
+EAGER cut-adds      I-assembly internal/reflectlite.rtype -> Named
+EAGER iface         I-assembly io/fs.DirEntry -> Named
+EAGER iface         I-assembly io/fs.FileInfo -> Named
+EAGER cut-adds      I-assembly io/fs.dirInfo -> Named
+EAGER cut-adds      I-assembly os.dirEntry -> Named
+EAGER cut-adds      I-assembly os.fileWithoutReadFrom -> Named
+EAGER cut-adds      I-assembly os.fileWithoutWriteTo -> Named
+EAGER iface         I-assembly reflect.Type -> Named
+EAGER-TOTAL pairs 19 | nominal 0 cut-adds 6 open-generic 1 pointer 8 iface 4 | E-assembly 2 I-assembly 17 REFUSED 0
+INST pointer       E-assembly *closurefixture.Export -> <inline>
+INST pointer       E-assembly *closurefixture.SourceFile -> <inline>
+INST pointer       E-assembly *closurefixture.named2 -> Named
+INST-TOTAL pairs 3 | nominal 0 cut-adds 0 open-generic 0 pointer 3 iface 0 | E-assembly 3 I-assembly 0 REFUSED 0
+TOTAL target windows/amd64 selected 3 closure-added 3 [generic function body or signature=1, generic named type field or embed=1, method of a generic type=1] kept 5 uses 11 use-files 1

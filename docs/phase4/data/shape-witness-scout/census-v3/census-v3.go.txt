@@ -1,0 +1,683 @@
+package main
+
+// SCRATCH census v3 (never committed; its source is copied into the record as census-v3.go.txt): the NARROW
+// shape-witness population after P3's second read.
+//
+// SELECTION runs through ONE function a cut would add, selection-only (COORD's ruling (b): typeMentionsTypeParam and its
+// 9 callers stay as they are): shapeWitnessSelfReferential, which looks inside interface method signatures.
+//
+//  SEL      a non-self method-set constraint (per shapeWitnessSelfReferential) with a kept clause, and T in an aliasing
+//           position of the signature; or a generic named (non-interface) type under such a constraint.
+//  CLOSURE  (P3 second read, finding 3) ANY generic declaration -- function, named type (fields and embeds), or a method
+//           of a generic type (counted as its receiver type) -- whose type or body mentions a selected declaration at a
+//           type argument that MENTIONS one of its own type parameters ([]T and *T included). Fixed point.
+//  KEPT     P3's predicate: exported outside package main => declaration-level; otherwise an in-package non-nominal
+//           instantiation, or a kept forwarder.
+//  PAIRS    every (E, I) a kept witness-carrying TYPE's owner can see (EAGER), and every concrete (E, I) a use site of a
+//           kept declaration names (INSTANTIATED). Each pair is classified:
+//             nominal      E is a value type and E's OWN assembly carries GoImplement<E, I> (read from the corpus);
+//             cut-adds     E is a value type without it: a declaration-driven GoImplement line the cut adds in E's assembly;
+//             open-generic E is a generic type implementing I: an open GoImplement(typeof(E<...>), typeof(I)) line;
+//             pointer      *E: the box never implements I nominally, so a per-pair witness;
+//             iface        a structural interface J that does not embed I: a per-pair witness.
+//           LOCATION (finding 4, one rule): E's assembly when E's package sees I's; else I's when I's package sees E's;
+//           else REFUSED by name.
+// Env: ZZ_DIR, ZZ_PATTERNS, ZZ_TARGET, ZZ_TAGS, ZZ_OUT, ZZ_NONSTD, ZZ_CORPUS (std src/core), ZZ_CORPUS2 (a -recurse root).
+
+import (
+	"fmt"
+	"go/ast"
+	"go/types"
+	"os"
+	"path/filepath"
+	"regexp"
+	"sort"
+	"strings"
+	"testing"
+
+	"golang.org/x/tools/go/packages"
+)
+
+// shapeWitnessSelfReferential is the selection-only predicate a cut adds: the constraint mentions the type parameter
+// anywhere, its interface METHOD SIGNATURES included (`interface{ Less(T) bool }` is self-referential).
+func shapeWitnessSelfReferential(tp *types.TypeParam) bool {
+	if typeMentionsTypeParam(tp.Constraint(), tp, map[types.Type]bool{}) {
+		return true
+	}
+	iface, ok := tp.Constraint().Underlying().(*types.Interface)
+	if !ok {
+		return false
+	}
+	for i := range iface.NumMethods() {
+		if typeMentionsTypeParam(iface.Method(i).Type(), tp, map[types.Type]bool{}) {
+			return true
+		}
+	}
+	return false
+}
+
+func zz3NonSelf(tp *types.TypeParam) bool {
+	iface, ok := tp.Constraint().Underlying().(*types.Interface)
+	return ok && iface.NumMethods() > 0 && !shapeWitnessSelfReferential(tp)
+}
+
+func zz3Aliasing(t types.Type, tp *types.TypeParam, isParam bool) bool {
+	switch x := types.Unalias(t).(type) {
+	case *types.Slice:
+		if e, ok := types.Unalias(x.Elem()).(*types.TypeParam); ok && e == tp && isParam {
+			return false
+		}
+		return typeMentionsTypeParam(x.Elem(), tp, map[types.Type]bool{})
+	case *types.Map, *types.Chan, *types.Pointer, *types.Array, *types.Struct:
+		return typeMentionsTypeParam(x, tp, map[types.Type]bool{})
+	case *types.Named:
+		return x.TypeArgs() != nil && typeMentionsTypeParam(x, tp, map[types.Type]bool{})
+	}
+	return false
+}
+
+// zz3MethodsUseTP reports whether a generic named type's OWN methods call its type parameter's methods (then the type
+// carries the witness parameter).
+func zz3MethodsUseTP(p *packages.Package, named *types.Named) bool {
+	tn := named.Obj()
+	for _, f := range p.Syntax {
+		for _, d := range f.Decls {
+			fd, ok := d.(*ast.FuncDecl)
+			if !ok || fd.Recv == nil || fd.Body == nil {
+				continue
+			}
+			fn, ok := p.TypesInfo.Defs[fd.Name].(*types.Func)
+			if !ok {
+				continue
+			}
+			recv := fn.Type().(*types.Signature).Recv()
+			if recv == nil {
+				continue
+			}
+			rt := types.Unalias(recv.Type())
+			if ptr, ok := rt.(*types.Pointer); ok {
+				rt = types.Unalias(ptr.Elem())
+			}
+			rn, ok := rt.(*types.Named)
+			if !ok || rn.Origin().Obj() != tn {
+				continue
+			}
+			uses := false
+			ast.Inspect(fd.Body, func(n ast.Node) bool {
+				if sel, ok := n.(*ast.SelectorExpr); ok {
+					if tv, ok := p.TypesInfo.Types[sel.X]; ok {
+						if _, isTP := types.Unalias(tv.Type).(*types.TypeParam); isTP {
+							if _, isMethod := p.TypesInfo.Selections[sel]; isMethod {
+								uses = true
+							}
+						}
+					}
+				}
+				return !uses
+			})
+			if uses {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+type zz3Decl struct {
+	obj      types.Object
+	pkg      *packages.Package
+	kind     string
+	tps      map[int]*types.TypeParam
+	why      string
+	kept     bool
+	keptWhy  string
+	witParam bool
+	fwd      []string
+}
+
+var zz3Impl = regexp.MustCompile(`GoImplement<([^,>]+(?:<[^>]*>)?)\s*,\s*([^>]+?)>\]`)
+var zz3OpenImpl = regexp.MustCompile(`GoImplement\(typeof\(([A-Za-z_@][A-Za-z0-9_]*)<,*>\),\s*typeof\(([^)]+)\)`)
+
+func zz3Last(s string) string {
+	s = strings.TrimSpace(s)
+	if i := strings.LastIndex(s, "."); i >= 0 {
+		s = s[i+1:]
+	}
+	return strings.TrimPrefix(s, "@")
+}
+
+func TestZZWitnessV3(t *testing.T) {
+	dir, out := os.Getenv("ZZ_DIR"), os.Getenv("ZZ_OUT")
+	if dir == "" || out == "" {
+		t.Skip("scratch census: set ZZ_DIR and ZZ_OUT")
+	}
+	target := strings.SplitN(os.Getenv("ZZ_TARGET"), "/", 2)
+	env := append(os.Environ(), "GOOS="+target[0], "GOARCH="+target[1], "CGO_ENABLED=0", "GOWORK=off")
+	var flags []string
+	if tags := os.Getenv("ZZ_TAGS"); tags != "" {
+		flags = []string{"-tags=" + tags}
+	}
+	cfg := &packages.Config{Mode: packages.LoadAllSyntax | packages.NeedModule, Tests: true, Dir: dir, Env: env, BuildFlags: flags}
+	pkgs, err := packages.Load(cfg, strings.Fields(os.Getenv("ZZ_PATTERNS"))...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	nonStd := os.Getenv("ZZ_NONSTD") == "1"
+	var scope []*packages.Package
+	for _, p := range pkgs {
+		if p.TypesInfo != nil && nonStd == (p.Module != nil && p.Module.Path != "std") {
+			scope = append(scope, p)
+		}
+	}
+	key := func(p *packages.Package, o types.Object) string { return p.Fset.Position(o.Pos()).String() }
+	decls := map[string]*zz3Decl{}
+	lookup := func(p *packages.Package, o types.Object) *zz3Decl { return decls[p.Fset.Position(o.Pos()).String()] }
+	originOf := func(p *packages.Package, id *ast.Ident) types.Object {
+		switch o := p.TypesInfo.Uses[id].(type) {
+		case *types.Func:
+			return o.Origin()
+		case *types.TypeName:
+			return o
+		}
+		return nil
+	}
+
+	// SELECTION.
+	for _, p := range scope {
+		v := newGenericRouteVisitor(p)
+		for _, f := range p.Syntax {
+			for _, d := range f.Decls {
+				switch decl := d.(type) {
+				case *ast.FuncDecl:
+					if decl.Recv != nil || decl.Type.TypeParams == nil {
+						continue
+					}
+					fn, ok := p.TypesInfo.Defs[decl.Name].(*types.Func)
+					if !ok {
+						continue
+					}
+					sig := fn.Type().(*types.Signature)
+					tps, why := map[int]*types.TypeParam{}, ""
+					for i := range sig.TypeParams().Len() {
+						tp := sig.TypeParams().At(i)
+						if !zz3NonSelf(tp) || !v.methodSetConstraintNeeded(fn, i) {
+							continue
+						}
+						for j := range sig.Params().Len() {
+							if zz3Aliasing(sig.Params().At(j).Type(), tp, true) {
+								tps[i], why = tp, "param "+types.TypeString(sig.Params().At(j).Type(), nil)
+							}
+						}
+						for j := range sig.Results().Len() {
+							if zz3Aliasing(sig.Results().At(j).Type(), tp, false) {
+								tps[i], why = tp, "result "+types.TypeString(sig.Results().At(j).Type(), nil)
+							}
+						}
+					}
+					if len(tps) > 0 {
+						decls[key(p, fn)] = &zz3Decl{obj: fn, pkg: p, kind: "func", tps: tps, why: why}
+					}
+				case *ast.GenDecl:
+					for _, s := range decl.Specs {
+						ts, ok := s.(*ast.TypeSpec)
+						if !ok || ts.TypeParams == nil {
+							continue
+						}
+						tn, ok := p.TypesInfo.Defs[ts.Name].(*types.TypeName)
+						if !ok {
+							continue
+						}
+						named, ok := tn.Type().(*types.Named)
+						if !ok || named.TypeParams() == nil || types.IsInterface(named) {
+							continue
+						}
+						tps := map[int]*types.TypeParam{}
+						for i := range named.TypeParams().Len() {
+							if zz3NonSelf(named.TypeParams().At(i)) {
+								tps[i] = named.TypeParams().At(i)
+							}
+						}
+						if len(tps) > 0 {
+							decls[key(p, tn)] = &zz3Decl{obj: tn, pkg: p, kind: "type", tps: tps, why: "generic named type", witParam: zz3MethodsUseTP(p, named)}
+						}
+					}
+				}
+			}
+		}
+	}
+	selected := len(decls)
+
+	// CLOSURE (widened): any generic declaration's type or body, methods counted as their receiver type.
+	closureBy := map[string]int{}
+	for changed := true; changed; {
+		changed = false
+		for _, p := range scope {
+			for _, f := range p.Syntax {
+				for _, d := range f.Decls {
+					var node ast.Node
+					var owner types.Object
+					var own []*types.TypeParam
+					kind, shape := "", ""
+					switch decl := d.(type) {
+					case *ast.FuncDecl:
+						fn, ok := p.TypesInfo.Defs[decl.Name].(*types.Func)
+						if !ok {
+							continue
+						}
+						sig := fn.Type().(*types.Signature)
+						if decl.Recv != nil {
+							if sig.RecvTypeParams() == nil {
+								continue
+							}
+							rt := types.Unalias(sig.Recv().Type())
+							if ptr, ok := rt.(*types.Pointer); ok {
+								rt = types.Unalias(ptr.Elem())
+							}
+							rn, ok := rt.(*types.Named)
+							if !ok {
+								continue
+							}
+							owner, kind, shape = rn.Origin().Obj(), "type", "method of a generic type"
+							for i := range sig.RecvTypeParams().Len() {
+								own = append(own, sig.RecvTypeParams().At(i))
+							}
+						} else {
+							if sig.TypeParams() == nil {
+								continue
+							}
+							owner, kind, shape = fn, "func", "generic function body or signature"
+							for i := range sig.TypeParams().Len() {
+								own = append(own, sig.TypeParams().At(i))
+							}
+						}
+						node = decl
+					case *ast.GenDecl:
+						for _, s := range decl.Specs {
+							ts, ok := s.(*ast.TypeSpec)
+							if !ok || ts.TypeParams == nil {
+								continue
+							}
+							tn, ok := p.TypesInfo.Defs[ts.Name].(*types.TypeName)
+							if !ok {
+								continue
+							}
+							named, ok := tn.Type().(*types.Named)
+							if !ok || named.TypeParams() == nil {
+								continue
+							}
+							owner, kind, shape, node = tn, "type", "generic named type field or embed", ts
+							for i := range named.TypeParams().Len() {
+								own = append(own, named.TypeParams().At(i))
+							}
+						}
+					}
+					if node == nil || owner == nil || len(own) == 0 {
+						continue
+					}
+					found := map[int]*types.TypeParam{}
+					var targets []*zz3Decl
+					ast.Inspect(node, func(n ast.Node) bool {
+						id, ok := n.(*ast.Ident)
+						if !ok {
+							return true
+						}
+						inst, ok := p.TypesInfo.Instances[id]
+						if !ok || inst.TypeArgs == nil {
+							return true
+						}
+						o := originOf(p, id)
+						if o == nil {
+							return true
+						}
+						target := lookup(p, o)
+						if target == nil || target.obj == owner {
+							return true
+						}
+						for i := range target.tps {
+							if i >= inst.TypeArgs.Len() {
+								continue
+							}
+							for j, tp := range own {
+								if typeMentionsTypeParam(inst.TypeArgs.At(i), tp, map[types.Type]bool{}) {
+									// a method's receiver type parameter stands for its type's parameter at the same index
+									if kind == "type" {
+										if named, ok := owner.Type().(*types.Named); ok && j < named.TypeParams().Len() {
+											found[j] = named.TypeParams().At(j)
+										}
+									} else {
+										found[j] = tp
+									}
+									targets = append(targets, target)
+								}
+							}
+						}
+						return true
+					})
+					if len(found) == 0 {
+						continue
+					}
+					k := key(p, owner)
+					for _, tg := range targets {
+						dup := false
+						for _, f := range tg.fwd {
+							dup = dup || f == k
+						}
+						if !dup {
+							tg.fwd = append(tg.fwd, k)
+						}
+					}
+					if decls[k] == nil {
+						d := &zz3Decl{obj: owner, pkg: p, kind: kind, tps: found, why: "closure: " + shape}
+						if kind == "type" {
+							if named, ok := owner.Type().(*types.Named); ok {
+								d.witParam = true // it must carry the witness to pass it on
+								_ = named
+							}
+						}
+						decls[k] = d
+						closureBy[shape]++
+						changed = true
+					}
+				}
+			}
+		}
+	}
+	added := len(decls) - selected
+
+	// KEPT (P3's predicate).
+	nonNominal := func(arg, constraint types.Type, declPath string) bool {
+		switch x := types.Unalias(arg).(type) {
+		case *types.Pointer, *types.Interface:
+			return true
+		case *types.Named:
+			if types.IsInterface(x) {
+				return !types.Identical(x, constraint)
+			}
+			return x.Obj().Pkg() != nil && strings.TrimSuffix(x.Obj().Pkg().Path(), "_test") != declPath
+		}
+		return false
+	}
+	for _, d := range decls {
+		if d.obj.Exported() && d.pkg.Name != "main" {
+			d.kept, d.keptWhy = true, "exported: declaration-level"
+			continue
+		}
+		path := strings.TrimSuffix(d.obj.Pkg().Path(), "_test")
+		for _, p := range scope {
+			if strings.TrimSuffix(p.Types.Path(), "_test") != path {
+				continue
+			}
+			for id, inst := range p.TypesInfo.Instances {
+				o := originOf(p, id)
+				if o == nil || p.Fset.Position(o.Pos()).String() != key(d.pkg, d.obj) || inst.TypeArgs == nil {
+					continue
+				}
+				for i, tp := range d.tps {
+					if i < inst.TypeArgs.Len() && nonNominal(inst.TypeArgs.At(i), tp.Constraint(), path) {
+						d.kept, d.keptWhy = true, "in-package non-nominal "+types.TypeString(inst.TypeArgs.At(i), nil)
+					}
+				}
+			}
+		}
+	}
+	for changed := true; changed; {
+		changed = false
+		for _, d := range decls {
+			if d.kept {
+				continue
+			}
+			for _, f := range d.fwd {
+				if g := decls[f]; g != nil && g.kept {
+					d.kept, d.keptWhy, changed = true, "forwarded from kept "+g.obj.Name(), true
+				}
+			}
+		}
+	}
+
+	// The corpus records, per package path.
+	records := map[string]string{}
+	readRecords := func(path string) string {
+		if r, ok := records[path]; ok {
+			return r
+		}
+		var buf strings.Builder
+		for _, root := range []string{os.Getenv("ZZ_CORPUS"), os.Getenv("ZZ_CORPUS2")} {
+			if root == "" {
+				continue
+			}
+			for _, base := range []string{filepath.Join(root, filepath.FromSlash(path)), filepath.Join(root, "src", filepath.FromSlash(path)), filepath.Join(root, "pkg", filepath.FromSlash(path))} {
+				matches, _ := filepath.Glob(filepath.Join(base, "package_info.cs"))
+				more, _ := filepath.Glob(filepath.Join(base, "*", "package_info.cs"))
+				for _, m := range append(matches, more...) {
+					if b, err := os.ReadFile(m); err == nil {
+						buf.Write(b)
+					}
+				}
+			}
+		}
+		records[path] = buf.String()
+		return records[path]
+	}
+	seesPkg := func(from, to *types.Package) bool {
+		if from == nil || to == nil {
+			return false
+		}
+		if from.Path() == to.Path() {
+			return true
+		}
+		seen := map[*types.Package]bool{}
+		var walk func(*types.Package) bool
+		walk = func(p *types.Package) bool {
+			if seen[p] {
+				return false
+			}
+			seen[p] = true
+			for _, imp := range p.Imports() {
+				if imp.Path() == to.Path() || walk(imp) {
+					return true
+				}
+			}
+			return false
+		}
+		return walk(from)
+	}
+	type pairRow struct{ e, i, class, loc string }
+	classify := func(arg types.Type, tp *types.TypeParam) (pairRow, bool) {
+		cons := types.Unalias(tp.Constraint())
+		consNamed, _ := cons.(*types.Named)
+		iName, iPkg := "<inline>", (*types.Package)(nil)
+		if consNamed != nil {
+			iName, iPkg = consNamed.Obj().Name(), consNamed.Obj().Pkg()
+		}
+		var ePkg *types.Package
+		row := pairRow{i: iName}
+		switch x := types.Unalias(arg).(type) {
+		case *types.Pointer:
+			n, ok := types.Unalias(x.Elem()).(*types.Named)
+			if !ok {
+				return row, false
+			}
+			row.e, row.class, ePkg = "*"+n.Obj().Pkg().Path()+"."+n.Obj().Name(), "pointer", n.Obj().Pkg()
+		case *types.Named:
+			ePkg = x.Obj().Pkg()
+			if ePkg == nil {
+				return row, false
+			}
+			row.e = ePkg.Path() + "." + x.Obj().Name()
+			switch {
+			case types.IsInterface(x):
+				embeds := false
+				if it, ok := x.Underlying().(*types.Interface); ok && consNamed != nil {
+					for k := range it.NumEmbeddeds() {
+						embeds = embeds || types.Identical(it.EmbeddedType(k), consNamed)
+					}
+				}
+				if embeds || types.Identical(x, cons) {
+					row.class = "nominal"
+				} else {
+					row.class = "iface"
+				}
+			case x.TypeParams() != nil || x.TypeArgs() != nil:
+				recs := readRecords(ePkg.Path())
+				row.class = "open-generic"
+				for _, m := range zz3OpenImpl.FindAllStringSubmatch(recs, -1) {
+					if zz3Last(m[1]) == x.Obj().Name() && zz3Last(m[2]) == iName {
+						row.class = "nominal"
+					}
+				}
+			default:
+				recs := readRecords(ePkg.Path())
+				row.class = "cut-adds"
+				for _, line := range strings.Split(recs, "\n") {
+					if strings.Contains(line, "Pointer = true") {
+						continue
+					}
+					if m := zz3Impl.FindStringSubmatch(line); m != nil && zz3Last(m[1]) == x.Obj().Name() && zz3Last(m[2]) == iName {
+						row.class = "nominal"
+					}
+				}
+			}
+		default:
+			return row, false
+		}
+		switch {
+		case row.class == "nominal":
+			row.loc = "n/a"
+		case iPkg == nil || seesPkg(ePkg, iPkg):
+			row.loc = "E-assembly"
+		case seesPkg(iPkg, ePkg):
+			row.loc = "I-assembly"
+		default:
+			row.loc = "REFUSED"
+		}
+		return row, true
+	}
+
+	eager := map[string]pairRow{}
+	inst := map[string]pairRow{}
+	uses, useFiles := 0, map[string]bool{}
+	for _, d := range decls {
+		if !(d.kind == "type" && d.kept && d.witParam) {
+			continue
+		}
+		seen := map[*types.Package]bool{}
+		var walk func(*types.Package)
+		walk = func(tp *types.Package) {
+			if tp == nil || seen[tp] {
+				return
+			}
+			seen[tp] = true
+			for _, imp := range tp.Imports() {
+				walk(imp)
+			}
+		}
+		walk(d.obj.Pkg())
+		for _, tp := range d.tps {
+			iface, _ := tp.Constraint().Underlying().(*types.Interface)
+			if iface == nil {
+				continue
+			}
+			for vp := range seen {
+				for _, name := range vp.Scope().Names() {
+					tn, ok := vp.Scope().Lookup(name).(*types.TypeName)
+					if !ok || tn.IsAlias() {
+						continue
+					}
+					nt, ok := tn.Type().(*types.Named)
+					if !ok {
+						continue
+					}
+					var cand types.Type
+					switch {
+					case types.IsInterface(nt):
+						if nt.TypeParams() == nil && !types.Identical(nt, tp.Constraint()) && types.Implements(nt, iface) {
+							cand = nt
+						}
+					case nt.TypeParams() != nil:
+						// an open generic implementer: test its own instantiation over its own parameters
+						if types.Implements(nt, iface) || types.Implements(types.NewPointer(nt), iface) {
+							cand = nt
+						}
+					case types.Implements(nt, iface):
+						cand = nt
+					case types.Implements(types.NewPointer(nt), iface):
+						cand = types.NewPointer(nt)
+					}
+					if cand == nil {
+						continue
+					}
+					if row, ok := classify(cand, tp); ok {
+						eager[row.e+"|"+row.i] = row
+					}
+				}
+			}
+		}
+	}
+	for _, p := range scope {
+		for id, in := range p.TypesInfo.Instances {
+			o := originOf(p, id)
+			if o == nil {
+				continue
+			}
+			dd := lookup(p, o)
+			if dd == nil || !dd.kept {
+				continue
+			}
+			uses++
+			useFiles[p.Fset.Position(id.Pos()).Filename] = true
+			for i, tp := range dd.tps {
+				if i < in.TypeArgs.Len() {
+					if row, ok := classify(in.TypeArgs.At(i), tp); ok {
+						inst[row.e+"|"+row.i] = row
+					}
+				}
+			}
+		}
+	}
+
+	var b strings.Builder
+	keys := make([]string, 0, len(decls))
+	for k := range decls {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	kept := 0
+	for _, k := range keys {
+		d := decls[k]
+		flag := "DROPPED(P3)"
+		if d.kept {
+			flag, kept = "KEPT", kept+1
+		}
+		fmt.Fprintf(&b, "DECL %-11s %-4s %s.%s | %s | %s | witness-param=%v forwarders=%d\n", flag, d.kind, d.obj.Pkg().Path(), d.obj.Name(), d.why, d.keptWhy, d.witParam, len(d.fwd))
+	}
+	tally := func(label string, m map[string]pairRow) {
+		ks := make([]string, 0, len(m))
+		for k := range m {
+			ks = append(ks, k)
+		}
+		sort.Strings(ks)
+		classes, locs := map[string]int{}, map[string]int{}
+		for _, k := range ks {
+			r := m[k]
+			classes[r.class]++
+			if r.class != "nominal" {
+				locs[r.loc]++
+			}
+			fmt.Fprintf(&b, "%s %-13s %-10s %s -> %s\n", label, r.class, r.loc, r.e, r.i)
+		}
+		fmt.Fprintf(&b, "%s-TOTAL pairs %d | nominal %d cut-adds %d open-generic %d pointer %d iface %d | E-assembly %d I-assembly %d REFUSED %d\n",
+			label, len(m), classes["nominal"], classes["cut-adds"], classes["open-generic"], classes["pointer"], classes["iface"], locs["E-assembly"], locs["I-assembly"], locs["REFUSED"])
+	}
+	tally("EAGER", eager)
+	tally("INST", inst)
+	shapes := make([]string, 0, len(closureBy))
+	for s, n := range closureBy {
+		shapes = append(shapes, fmt.Sprintf("%s=%d", s, n))
+	}
+	sort.Strings(shapes)
+	fmt.Fprintf(&b, "TOTAL target %s selected %d closure-added %d [%s] kept %d uses %d use-files %d\n",
+		os.Getenv("ZZ_TARGET"), selected, added, strings.Join(shapes, ", "), kept, uses, len(useFiles))
+	if err := os.WriteFile(out, []byte(b.String()), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
