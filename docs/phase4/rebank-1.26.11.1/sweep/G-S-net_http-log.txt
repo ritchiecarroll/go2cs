@@ -1,0 +1,16 @@
+# net/http test-host build output, windows, at 6e870821d6 (sweep row output, repo-relative)
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+validated sweep: 1 package(s), 1538 expected verdicts, timeout 10m, test-config Release
+  FAIL  net/http                           [184s]
+        src/core/net/http/transport_test.cs(9003,49): error CS0104: 'dumpConn' is an ambiguous reference between 'go.net.http_internal_test_package.dumpConn' and 'go.net.http_test_package.dumpConn' [src/core/net/http/net.http.tests.csproj]
+        src/core/net/http/transport_test.cs(9003,23): error CS8337: The first parameter of a 'ref' extension method 'SetWriteDeadline' must be a value type or a generic type constrained to struct. [src/core/net/http/net.http.tests.csproj]
+        src/core/net/http/bin/tests/Release/net10.0/win-x64/go.net.http.tests.dll
+        oracle-only check: no comparison record at src/core/net/http/go2cs_test_comparison.json
+        full output: scratchpad/sweep-oracle-flake/20261118-110327/net.http/runfinal/row-output.txt
+
+sweep: 0 pass / 1 fail  (184s)
+
+per-row wall times: 1 row(s) -> scratchpad/sweep-row-walltimes/20261118-110327-sweep.tsv
+
+failed:
+  net/http
