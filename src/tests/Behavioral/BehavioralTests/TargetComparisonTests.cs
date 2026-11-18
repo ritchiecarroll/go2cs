@@ -37,6 +37,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]
+    public void CheckAddressOfParenthesizedOperand() => CheckTarget("AddressOfParenthesizedOperand");
+
+    [TestMethod]
     public void CheckAliasImport() => CheckTarget("AliasImport");
 
     [TestMethod]
@@ -637,6 +640,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckEmbedLayoutMatchesGo() => CheckTarget("EmbedLayoutMatchesGo");
 
     [TestMethod]
+    public void CheckEmbeddedArrayCopy() => CheckTarget("EmbeddedArrayCopy");
+
+    [TestMethod]
     public void CheckEmbeddedInterfaceMergedMethod() => CheckTarget("EmbeddedInterfaceMergedMethod");
 
     [TestMethod]
@@ -788,6 +794,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckForeignPairNumericConv() => CheckTarget("ForeignPairNumericConv");
+
+    [TestMethod]
+    public void CheckForeignPairStructConversion() => CheckTarget("ForeignPairStructConversion");
 
     [TestMethod]
     public void CheckForeignPointerImplementSuppression() => CheckTarget("ForeignPointerImplementSuppression");
@@ -1459,6 +1468,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMulticastGroupJoin() => CheckTarget("MulticastGroupJoin");
 
     [TestMethod]
+    public void CheckMutexInNativeMemory() => CheckTarget("MutexInNativeMemory");
+
+    [TestMethod]
     public void CheckNamedAnySliceType() => CheckTarget("NamedAnySliceType");
 
     [TestMethod]
@@ -1853,6 +1865,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNonSelfConstraintPointerArg() => CheckTarget("NonSelfConstraintPointerArg");
+
+    [TestMethod]
+    public void CheckNonSelfConstraintSliceArg() => CheckTarget("NonSelfConstraintSliceArg");
 
     [TestMethod]
     public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
@@ -2608,6 +2623,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckStructArrayFieldValueCopy() => CheckTarget("StructArrayFieldValueCopy");
 
     [TestMethod]
+    public void CheckStructConversionCopy() => CheckTarget("StructConversionCopy");
+
+    [TestMethod]
     public void CheckStructFieldNamedOther() => CheckTarget("StructFieldNamedOther");
 
     [TestMethod]
@@ -2678,6 +2696,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTcpLoopbackRoundTrip() => CheckTarget("TcpLoopbackRoundTrip");
+
+    [TestMethod]
+    public void CheckTempNamedAfterIdentifier() => CheckTarget("TempNamedAfterIdentifier");
 
     [TestMethod]
     public void CheckTerminatingSwitchDefaultFallthrough() => CheckTarget("TerminatingSwitchDefaultFallthrough");

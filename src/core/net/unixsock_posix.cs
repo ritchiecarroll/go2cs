@@ -14,17 +14,16 @@ partial class net_package {
 
 internal static (ж<netFD>, error) unixSocket(context.Context ctx, @string net, sockaddr laddr, sockaddr raddr, @string mode, Func<context.Context, @string, @string, syscall.RawConn, error> ctxCtrlFn) {
     nint sotype = default;
-    var exprᴛ1 = net;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "unix"u8: {
+    case {} when net == "unix"u8: {
         sotype = syscall.SOCK_STREAM;
         break;
     }
-    case {} when exprᴛ1 == "unixgram"u8: {
+    case {} when net == "unixgram"u8: {
         sotype = syscall.SOCK_DGRAM;
         break;
     }
-    case {} when exprᴛ1 == "unixpacket"u8: {
+    case {} when net == "unixpacket"u8: {
         sotype = syscall.SOCK_SEQPACKET;
         break;
     }
@@ -32,9 +31,8 @@ internal static (ж<netFD>, error) unixSocket(context.Context ctx, @string net, 
         return (default, ((UnknownNetworkError)net));
     }}
 
-    var exprᴛ2 = mode;
     switch (ᐧ) {
-    case {} when exprᴛ2 == "dial"u8: {
+    case {} when mode == "dial"u8: {
         if (laddr != nil && laddr.isWildcard()) {
             laddr = default;
         }
@@ -46,7 +44,7 @@ internal static (ж<netFD>, error) unixSocket(context.Context ctx, @string net, 
         }
         break;
     }
-    case {} when exprᴛ2 == "listen"u8: {
+    case {} when mode == "listen"u8: {
         break;
     }
     default: {

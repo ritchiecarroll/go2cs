@@ -806,6 +806,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		Env: converterLoaderEnv(
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
+		ParseFile: parseFileUnparenAddressOperands,
 	}
 
 	loaded, err := packages.Load(cfg, ".")
@@ -3248,7 +3249,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		}
 
 		packageInlineAdmission = admission
-		packageInlineArrayRecords = inlineArrayStampRecords(admission, inlineArrayMode(pkg.Types.Path(), pkg.Dir, stampedOptions(options, pkg.Types.Path(), stamp.mode)))
+		packageInlineArrayRecords = inlineArrayStampRecords(admission, inlineArrayMode(pkg.Types.Path(), pkg.Dir, stampedOptions(options, pkg.Types.Path(), stamp.mode, stamp.seeds)))
 	}
 
 	// B2's D2 sites (valueDecodeSites.go), over every file the variant emits, test files included: a test that reads a

@@ -151,7 +151,7 @@ so a nil `p` ranges N times as in Go, and a deref-aliased pointer parameter or r
 
 **Named-slice pointer reinterpret (`(*[][]byte)(buf)` with `buf *Buffers`).** Go converts a pointer-to-named-slice to a pointer to its underlying slice type freely — net's `fd.pfd.Writev((*[][]byte)(buf))`, where poll's `Writev` *reslices the header through the pointer* (`consume` advances `*v`), and the caller must observe it. The C# boxes `ж<Buffers>` and `ж<slice<slice<byte>>>` are unrelated generic instantiations (CS0030), so the conversion emits a **field view over the wrapper's own backing slice**:
 
-<!-- source: src/core/net/windows/fd_windows.cs:263 -->
+<!-- source: src/core/net/windows/fd_windows.cs:262 -->
 ```csharp
     var (n, err) = Ꮡfd.Ꮡpfd.Writev(buf.of(Buffers.Ꮡm_value));
 ```

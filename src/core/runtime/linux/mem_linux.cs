@@ -58,9 +58,8 @@ internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
     if (debug.madvdontneed != 0 && advise != madviseUnsupported) {
         advise = _MADV_DONTNEED;
     }
-    var exprᴛ1 = advise;
     var matchᴛ1 = false;
-    if (exprᴛ1 == _MADV_FREE) { matchᴛ1 = true;
+    if (advise == _MADV_FREE) { matchᴛ1 = true;
         do {
             if (madvise(v, n, _MADV_FREE) == 0) {
                 break;
@@ -69,7 +68,7 @@ internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
             fallthrough = true;
         } while (false);
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == _MADV_DONTNEED) {
+    if (fallthrough || !matchᴛ1 && advise == _MADV_DONTNEED) {
         do {
             // MADV_FREE was added in Linux 4.5. Fall back on MADV_DONTNEED if it's
             // not supported.
@@ -80,7 +79,7 @@ internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
             fallthrough = true;
         } while (false);
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == madviseUnsupported) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && advise == madviseUnsupported) { matchᴛ1 = true;
         // Since Linux 3.18, support for madvise is optional.
         // Fall back on mmap if it's not supported.
         // _MAP_ANON|_MAP_FIXED|_MAP_PRIVATE will unmap all the

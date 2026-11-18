@@ -24,7 +24,7 @@ public static ж<CBCEncrypter> NewCBCEncrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     iv = iv.Clone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    return Ꮡ(new CBCEncrypter(b: b, iv: iv.Clone()));
+    return Ꮡ(new CBCEncrypter(b: b.ΔClone(), iv: iv.Clone()));
 }
 
 } partial class aesᴛCBCEncrypter {
@@ -89,7 +89,7 @@ public static ж<CBCDecrypter> NewCBCDecrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     iv = iv.Clone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    return Ꮡ(new CBCDecrypter(b: b, iv: iv.Clone()));
+    return Ꮡ(new CBCDecrypter(b: b.ΔClone(), iv: iv.Clone()));
 }
 
 } partial class aesᴛCBCDecrypter {

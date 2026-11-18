@@ -151,9 +151,8 @@ internal static (ж<IPConn>, error) dialIP(this ж<sysDialer> Ꮡsd, context.Con
     if (err != nil) {
         return (default, err);
     }
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+    case {} when network == "ip"u8 || network == "ip4"u8 || network == "ip6"u8: {
         break;
     }
     default: {
@@ -183,9 +182,8 @@ internal static (ж<IPConn>, error) listenIP(this ж<sysListener> Ꮡsl, context
     if (err != nil) {
         return (default, err);
     }
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+    case {} when network == "ip"u8 || network == "ip4"u8 || network == "ip6"u8: {
         break;
     }
     default: {

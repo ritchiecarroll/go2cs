@@ -435,7 +435,7 @@ partial struct heldLockInfo {
     internal lockRank rank;
 }
 
-partial struct g {
+[GoValueClone("trace")] partial struct g {
     // Stack parameters.
     // stack describes the actual stack memory: [stack.lo, stack.hi).
     // stackguard0 is the stack pointer compared in the Go stack growth prologue.
@@ -565,7 +565,7 @@ internal static UntypedInt freeMStack => 0; // M done, free stack and reference.
 internal static UntypedInt freeMRef => 1;   // M done, free reference.
 internal static UntypedInt freeMWait => 2;  // M still in use.
 
-[GoValueClone("tls", "createstack", "trace", "pcvalueCache", "chacha8", "locksHeld")] partial struct m {
+[GoValueClone("tls", "createstack", "trace", "pcvalueCache", "mOS", "chacha8", "locksHeld")] partial struct m {
     internal ж<g> g0;       // goroutine with scheduling stack
     internal gobuf morebuf; // gobuf arg to morestack
     internal uint32 divmod; // div/mod denominator for arm - known to liblink (cmd/internal/obj/arm/obj5.go)
@@ -661,7 +661,7 @@ internal static UntypedInt freeMWait => 2;  // M still in use.
 
 internal static UntypedInt mRedZoneSize => /* (16 << 3) * asanenabledBit */ 0; // redZoneSize(2048)
 
-partial struct mPadded {
+[GoValueClone("m")] partial struct mPadded {
     /*embed*/ internal m m;
     // Size the runtime.m structure so it fits in the 2048-byte size class, and
     // not in the next-smallest (1792-byte) size class. That leaves the 11 low
@@ -715,7 +715,7 @@ internal static void clear(this mWeakPointer w) {
     internal array<ж<mspan>> buf = new(128);
 }
 
-[GoValueClone("deferpoolbuf", "runq", "sudogbuf", "mspancache", "gcw", "wbBuf", "xRegs")] partial struct p {
+[GoValueClone("deferpoolbuf", "runq", "sudogbuf", "mspancache", "trace", "gcw", "wbBuf", "xRegs")] partial struct p {
     internal int32 id;
     internal uint32 status; // one of pidle/prunning/...
     internal puintptr link;

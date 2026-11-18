@@ -333,9 +333,9 @@ internal static void preemptM(ж<m> mp) {
 internal static ж<g> sigFetchG(ж<sigctxt> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    var exprᴛ1 = GOARCH;
+    var GOARCHᴛ1 = GOARCH;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "arm"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "riscv64"u8 || exprᴛ1 == "s390x"u8: {
+    case {} when GOARCHᴛ1 == "arm"u8 || GOARCHᴛ1 == "arm64"u8 || GOARCHᴛ1 == "loong64"u8 || GOARCHᴛ1 == "ppc64"u8 || GOARCHᴛ1 == "ppc64le"u8 || GOARCHᴛ1 == "riscv64"u8 || GOARCHᴛ1 == "s390x"u8: {
         if (!iscgo && inVDSOPage(c.sigpc())) {
             // When using cgo, we save the g on TLS and load it from there
             // in sigtramp. Just use that.
@@ -1027,16 +1027,16 @@ internal static partial void ensureSigM() {
             }
             sigprocmask(_SIG_SETMASK, ᏑsigBlocked, ж<sigset>.NilBoxOfDims(2L));
             for (;;) {
-                var selᴛ1 = enableSigChan;
-                var selᴛ2 = disableSigChan;
-                switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-                case 0 when selᴛ1.ꟷᐳ(out var sig): {
+                var enableSigChanᴛ1 = enableSigChan;
+                var disableSigChanᴛ1 = disableSigChan;
+                switch (select(ᐸꟷ(enableSigChanᴛ1, ꓸꓸꓸ), ᐸꟷ(disableSigChanᴛ1, ꓸꓸꓸ))) {
+                case 0 when enableSigChanᴛ1.ꟷᐳ(out var sig): {
                     if (sig > 0) {
                         sigdelset(ref (ᏑsigBlocked).DerefOrNull(), (nint)sig);
                     }
                     break;
                 }
-                case 1 when selᴛ2.ꟷᐳ(out var sig): {
+                case 1 when disableSigChanᴛ1.ꟷᐳ(out var sig): {
                     if (sig > 0 && blockableSig(sig)) {
                         sigaddset(ref (ᏑsigBlocked).DerefOrNull(), (nint)sig);
                     }

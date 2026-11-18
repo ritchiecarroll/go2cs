@@ -309,25 +309,24 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
         var q = 1D + y * (_lgamR[1] + y * (_lgamR[2] + y * (_lgamR[3] + y * (_lgamR[4] + y * (_lgamR[5] + y * _lgamR[6])))));
         lgamma = 0.5D * y + p / q;
         var z = 1.0D; // Lgamma(1+s) = Log(s) + Lgamma(s)
-        var exprᴛ1 = i;
         var matchᴛ1 = false;
-        if (exprᴛ1 is 7) { matchᴛ1 = true;
+        if (i is 7) { matchᴛ1 = true;
             z *= (y + 6D);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 6) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && i is 6) { matchᴛ1 = true;
             z *= (y + 5D);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 5) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && i is 5) { matchᴛ1 = true;
             z *= (y + 4D);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 4) {
+        if (fallthrough || !matchᴛ1 && i is 4) {
             z *= (y + 3D);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && i is 3) { matchᴛ1 = true;
             z *= (y + 2D);
             lgamma += Log(z);
         }

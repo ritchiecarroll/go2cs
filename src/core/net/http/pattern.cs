@@ -406,27 +406,26 @@ internal static relationship compareSegments(segment s1, segment s2) {
 // Or if p1 is more general in one way and more specific in the other, then
 // they overlap.
 internal static relationship combineRelationships(relationship r1, relationship r2) {
-    var exprᴛ1 = r1;
     switch (ᐧ) {
-    case {} when exprᴛ1 == equivalent: {
+    case {} when r1 == equivalent: {
         return r2;
     }
-    case {} when exprᴛ1 == disjoint: {
+    case {} when r1 == disjoint: {
         return disjoint;
     }
-    case {} when exprᴛ1 == overlaps: {
+    case {} when r1 == overlaps: {
         if (r2 == disjoint) {
             return disjoint;
         }
         return overlaps;
     }
-    case {} when exprᴛ1 == moreGeneral || exprᴛ1 == moreSpecific: {
-        var exprᴛ2 = r2;
+    case {} when r1 == moreGeneral || r1 == moreSpecific: {
+        var r2ᴛ1 = r2;
         switch (ᐧ) {
-        case {} when exprᴛ2 == equivalent: {
+        case {} when r2ᴛ1 == equivalent: {
             return r1;
         }
-        case {} when exprᴛ2 == inverseRelationship(r1): {
+        case {} when r2ᴛ1 == inverseRelationship(r1): {
             return overlaps;
         }
         default: {
@@ -443,12 +442,11 @@ internal static relationship combineRelationships(relationship r1, relationship 
 // If p1 has relationship `r` to p2, then
 // p2 has inverseRelationship(r) to p1.
 internal static relationship inverseRelationship(relationship r) {
-    var exprᴛ1 = r;
     switch (ᐧ) {
-    case {} when exprᴛ1 == moreSpecific: {
+    case {} when r == moreSpecific: {
         return moreGeneral;
     }
-    case {} when exprᴛ1 == moreGeneral: {
+    case {} when r == moreGeneral: {
         return moreSpecific;
     }
     default: {

@@ -921,9 +921,9 @@ internal static error acquireThread(context.Context ctx) {
     ᏑthreadOnce.Do(() => {
         threadLimit = new channel<EmptyStruct>(concurrentThreadsLimit());
     });
-    var selᴛ17 = threadLimit.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
+    var threadLimitᴛ1 = threadLimit.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
     var selᴛ18 = ctx.Done();
-    switch (select(selᴛ17, ᐸꟷ(selᴛ18, ꓸꓸꓸ))) {
+    switch (select(threadLimitᴛ1, ᐸꟷ(selᴛ18, ꓸꓸꓸ))) {
     case 0: {
         return default;
     }

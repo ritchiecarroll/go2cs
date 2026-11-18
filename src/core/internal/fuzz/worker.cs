@@ -1392,12 +1392,12 @@ internal static partial (nint, error) Read(this ж<contextReader> Ꮡcr, slice<b
     });
 
     var selᴛ15 = cr.ctx.Done();
-    var selᴛ16 = done;
-    switch (select(ᐸꟷ(selᴛ15, ꓸꓸꓸ), ᐸꟷ(selᴛ16, ꓸꓸꓸ))) {
+    var doneᴛ1 = done;
+    switch (select(ᐸꟷ(selᴛ15, ꓸꓸꓸ), ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ15.ꟷᐳ(out _): {
         return (0, cr.ctx.Err());
     }
-    case 1 when selᴛ16.ꟷᐳ(out _): {
+    case 1 when doneᴛ1.ꟷᐳ(out _): {
         return (n, err);
     }}
     return default;

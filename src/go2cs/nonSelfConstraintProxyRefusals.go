@@ -14,8 +14,10 @@
 //
 //   - a generic NAMED type (ruling 1): the proxy would be part of the type's identity, and a field such as []O aliases;
 //   - a union-plus-methods constraint (`interface{ ~*T; M() }`, ruling 3a): neither erased nor proxiable;
-//   - a callee whose signature carries the type parameter in an ALIASING position ([]O, map, chan, *O) beside its
-//     direct position (section 5): converting the caller's []*E would be a copy;
+//   - a callee whose signature carries the type parameter in an ALIASING position (map, chan, *O, a []O result or a
+//     slice nested deeper) beside its direct position (section 5): converting the caller's value would be a copy. A
+//     []O PARAMETER is not refused here (class B): the element-wise widening projects it, a copy too, and the GO2CS2006
+//     gate refuses it by name wherever the callee may write it, exactly as for go/ast's walkList;
 //   - a SIBLING type parameter whose constraint mentions the proxied one (`S ~[]O`, ruling 3b);
 //   - inside the callee, the zero value of the type parameter used as a method receiver or converted to an interface
 //     (ruling 2): Go's zero O is a typed nil pointer, the proxy's is a null reference;
@@ -58,24 +60,7 @@ func refuseNonSelfConstraintProxies(pkg *packages.Package) *nonSelfProxyRefusal 
 		return nil
 	}
 
-	// The route's own predicate needs methodSetConstraintNeeded, which asks the callee's body: a visitor over this
-	// package's declarations answers it exactly as the conversion will. A foreign callee's body is read from the loaded
-	// graph, which is THIS package's (collectCaptureModeMethods records the same root moments later), never a previous
-	// package's in a multi-package run.
-	currentLoadedPackage = pkg
-
-	v := &Visitor{info: pkg.TypesInfo, fileFuncDecls: map[*types.Func]*ast.FuncDecl{}}
-
-	for _, file := range pkg.Syntax {
-		for _, decl := range file.Decls {
-			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
-				if fn, ok := pkg.TypesInfo.Defs[funcDecl.Name].(*types.Func); ok {
-					v.fileFuncDecls[fn] = funcDecl
-				}
-			}
-		}
-	}
-
+	v := newGenericRouteVisitor(pkg)
 	refusal := &nonSelfProxyRefusal{pkgPath: pkg.PkgPath}
 	seen := map[string]bool{}
 
@@ -120,7 +105,7 @@ func refuseNonSelfConstraintProxies(pkg *packages.Package) *nonSelfProxyRefusal 
 
 			signature, ok := fn.Origin().Type().(*types.Signature)
 
-			if !ok || signature.Recv() != nil || !typeParamIsDirectPosition(signature, typeParam) {
+			if !ok || signature.Recv() != nil || !typeParamTakesProxyRoute(signature, typeParam) {
 				continue
 			}
 
@@ -170,6 +155,29 @@ func refuseNonSelfConstraintProxies(pkg *packages.Package) *nonSelfProxyRefusal 
 	return refusal
 }
 
+// newGenericRouteVisitor is a visitor that answers the generic-call routes (the non-self proxy, sliceWideningRoute)
+// before any emission, as the conversion will. Those routes need methodSetConstraintNeeded, which asks the callee's
+// body: this visitor holds the package's declarations. A foreign callee's body is read from the loaded graph, which is
+// THIS package's (collectCaptureModeMethods records the same root moments later), never a previous package's in a
+// multi-package run.
+func newGenericRouteVisitor(pkg *packages.Package) *Visitor {
+	currentLoadedPackage = pkg
+
+	v := &Visitor{info: pkg.TypesInfo, fileFuncDecls: map[*types.Func]*ast.FuncDecl{}}
+
+	for _, file := range pkg.Syntax {
+		for _, decl := range file.Decls {
+			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+				if fn, ok := pkg.TypesInfo.Defs[funcDecl.Name].(*types.Func); ok {
+					v.fileFuncDecls[fn] = funcDecl
+				}
+			}
+		}
+	}
+
+	return v
+}
+
 // refusesUnionPlusMethods reports a pointer-to-named type argument against a NON-generic constraint that has methods
 // beside a type-term union the declaration arm does not emit as a pure method set (`interface{ ~*T; M() }`).
 func refusesUnionPlusMethods(typeParam *types.TypeParam, typeArg types.Type) bool {
@@ -193,7 +201,8 @@ func refusesUnionPlusMethods(typeParam *types.TypeParam, typeArg types.Type) boo
 }
 
 // aliasingTypeParamPosition names the first parameter or result of the signature that carries the type parameter
-// inside a slice, map, channel or pointer ("takes []O"), or "" when there is none.
+// inside a slice, map, channel or pointer ("takes []O"), or "" when there is none. A []O PARAMETER is the element-wise
+// widening's position, governed by the GO2CS2006 gate, and is not named here.
 func aliasingTypeParamPosition(signature *types.Signature, typeParam *types.TypeParam) string {
 	check := func(verb string, t types.Type) string {
 		switch x := types.Unalias(t).(type) {
@@ -219,6 +228,10 @@ func aliasingTypeParamPosition(signature *types.Signature, typeParam *types.Type
 	}
 
 	for i := range signature.Params().Len() {
+		if typeParamIsSliceParameter(signature.Params().At(i).Type(), typeParam) {
+			continue
+		}
+
 		if where := check("the parameter of type", signature.Params().At(i).Type()); where != "" {
 			return where
 		}

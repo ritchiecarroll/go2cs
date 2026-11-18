@@ -150,19 +150,18 @@ public static (ж<Rat>, bool) SetString(this ж<Rat> Ꮡz, @string s) {
             // -fcount is the number of digits to the right
             // of '.'. Adjust relevant exponent accordingly.
             var d = (int64)fcount;
-            var exprᴛ1 = @base;
             var matchᴛ1 = false;
-            if (exprᴛ1 is 10) { matchᴛ1 = true;
+            if (@base is 10) { matchᴛ1 = true;
                 exp5 = d; // 10**e == 5**e * 2**e
                 fallthrough = true;
             }
-            if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
+            if (fallthrough || !matchᴛ1 && @base is 2) { matchᴛ1 = true;
                 exp2 = d;
             }
-            else if (exprᴛ1 is 8) { matchᴛ1 = true;
+            else if (@base is 8) { matchᴛ1 = true;
                 exp2 = d * 3; // octal digits are 3 bits each
             }
-            else if (exprᴛ1 is 16) {
+            else if (@base is 16) {
                 exp2 = d * 4; // hexadecimal digits are 4 bits each
             }
             else if (!matchᴛ1) { /* default: */
@@ -172,13 +171,12 @@ public static (ж<Rat>, bool) SetString(this ж<Rat> Ꮡz, @string s) {
         }
 
         // take actual exponent into account
-        var exprᴛ2 = ebase;
         var matchᴛ2 = false;
-        if (exprᴛ2 is 10) { matchᴛ2 = true;
+        if (ebase is 10) { matchᴛ2 = true;
             exp5 += exp; // see fallthrough above
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ2 && exprᴛ2 is 2) {
+        if (fallthrough || !matchᴛ2 && ebase is 2) {
             exp2 += exp;
         }
         else if (!matchᴛ2) { /* default: */
@@ -268,12 +266,11 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     }
 
     // exponent char
-    var exprᴛ1 = ch;
     var matchᴛ1 = false;
-    if (exprᴛ1 is (byte)'e' or (byte)'E') { matchᴛ1 = true;
+    if (ch is (byte)'e' or (byte)'E') { matchᴛ1 = true;
         @base = 10;
     }
-    else if (exprᴛ1 is (byte)'p' or (byte)'P') { matchᴛ1 = true;
+    else if (ch is (byte)'p' or (byte)'P') { matchᴛ1 = true;
         do {
             if (base2ok) {
                 @base = 2;

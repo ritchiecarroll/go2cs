@@ -247,25 +247,24 @@ public static @string String(this CounterMode cm) {
 
 public static CounterMode ParseCounterMode(@string mode) {
     CounterMode cm = default;
-    var exprᴛ1 = mode;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "set"u8: {
+    case {} when mode == "set"u8: {
         cm = CtrModeSet;
         break;
     }
-    case {} when exprᴛ1 == "count"u8: {
+    case {} when mode == "count"u8: {
         cm = CtrModeCount;
         break;
     }
-    case {} when exprᴛ1 == "atomic"u8: {
+    case {} when mode == "atomic"u8: {
         cm = CtrModeAtomic;
         break;
     }
-    case {} when exprᴛ1 == "regonly"u8: {
+    case {} when mode == "regonly"u8: {
         cm = CtrModeRegOnly;
         break;
     }
-    case {} when exprᴛ1 == "testmain"u8: {
+    case {} when mode == "testmain"u8: {
         cm = CtrModeTestMain;
         break;
     }

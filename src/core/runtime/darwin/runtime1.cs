@@ -653,24 +653,23 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
 //go:linkname setTraceback runtime/debug.SetTraceback
 internal static void setTraceback(@string level) {
     uint32 t = default;
-    var exprᴛ1 = level;
     var matchᴛ1 = false;
-    if (exprᴛ1 == "none"u8) { matchᴛ1 = true;
+    if (level == "none"u8) { matchᴛ1 = true;
         t = 0;
     }
-    else if (exprᴛ1 == "single"u8 || exprᴛ1 == ""u8) { matchᴛ1 = true;
+    else if (level == "single"u8 || level == ""u8) { matchᴛ1 = true;
         t = (uint32)1 << (int)(tracebackShift);
     }
-    else if (exprᴛ1 == "all"u8) { matchᴛ1 = true;
+    else if (level == "all"u8) { matchᴛ1 = true;
         t = (uint32)((uint32)(1 << (int)(tracebackShift)) | (uint32)tracebackAll);
     }
-    else if (exprᴛ1 == "system"u8) { matchᴛ1 = true;
+    else if (level == "system"u8) { matchᴛ1 = true;
         t = (uint32)((uint32)(2 << (int)(tracebackShift)) | (uint32)tracebackAll);
     }
-    else if (exprᴛ1 == "crash"u8) { matchᴛ1 = true;
+    else if (level == "crash"u8) { matchᴛ1 = true;
         t = (uint32)((UntypedInt)(2 << (int)(tracebackShift) | tracebackAll) | (uint32)tracebackCrash);
     }
-    else if (exprᴛ1 == "wer"u8) { matchᴛ1 = true;
+    else if (level == "wer"u8) { matchᴛ1 = true;
         do {
             if (GOOS == "windows"u8) {
                 t = (uint32)((UntypedInt)(2 << (int)(tracebackShift) | tracebackAll) | (uint32)tracebackCrash);

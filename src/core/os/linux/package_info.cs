@@ -137,7 +137,7 @@ using static go.os_package;
 [assembly: GoPositionMap("os/tempfile.go", "tempfile.cs", "AA4o9IIAAhgACQKCpoKClJSCgoKCgoKUlLiY0oKCpoKUlAACFgAIAoKmgoKUlIKCgoKClIKClJSCgqa4goKU")]
 [assembly: GoPositionMap("os/types.go", "types.cs", "ABcagAAkXoIAAxDigoKClA==")]
 [assembly: GoPositionMap("os/types_unix.go", "types_unix.cs", "ABcugoKCtII=")]
-[assembly: GoPositionMap("os/zero_copy_linux.go", "zero_copy_linux.cs", "AA0ckgAIBsKUgqaCgqaSgqaCpqYACgyCpoKClObCmIKmAAcQgqaUgqYACAbCmIKmgpS0xKampoKClAAJDLKCgpSCgpSIgpSmgqSk", "30-33:1")]
+[assembly: GoPositionMap("os/zero_copy_linux.go", "zero_copy_linux.cs", "AA0ckgAIBsKUgqaCgqaSgqaCpqYACgyCpoKClObCmIKmAAcQgqaUgqYACAbCmIKmgpS0xKampoKClAAJDLKCgpSCgpSIgpSmgpSk", "30-33:1")]
 [assembly: GoPositionMap("os/zero_copy_posix.go", "zero_copy_posix.cs", "AAsgooKUrLKUgoKmgg==")]
 // </GoSourcePositionMaps>
 

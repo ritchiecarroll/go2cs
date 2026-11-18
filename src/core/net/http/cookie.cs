@@ -167,25 +167,23 @@ public static (ж<Cookie>, error) ParseSetCookie(@string line) {
             continue;
         }
 
-        var exprᴛ1 = lowerAttr;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "samesite"u8: {
+        case {} when lowerAttr == "samesite"u8: {
             var (lowerVal, asciiΔ2) = ascii.ToLower(val);
             if (!asciiΔ2) {
                 c.SameSite = SameSiteDefaultMode;
                 continue;
             }
-            var exprᴛ2 = lowerVal;
             switch (ᐧ) {
-            case {} when exprᴛ2 == "lax"u8: {
+            case {} when lowerVal == "lax"u8: {
                 c.SameSite = SameSiteLaxMode;
                 break;
             }
-            case {} when exprᴛ2 == "strict"u8: {
+            case {} when lowerVal == "strict"u8: {
                 c.SameSite = SameSiteStrictMode;
                 break;
             }
-            case {} when exprᴛ2 == "none"u8: {
+            case {} when lowerVal == "none"u8: {
                 c.SameSite = SameSiteNoneMode;
                 break;
             }
@@ -196,22 +194,22 @@ public static (ж<Cookie>, error) ParseSetCookie(@string line) {
             continue;
             break;
         }
-        case {} when exprᴛ1 == "secure"u8: {
+        case {} when lowerAttr == "secure"u8: {
             c.Secure = true;
             continue;
             break;
         }
-        case {} when exprᴛ1 == "httponly"u8: {
+        case {} when lowerAttr == "httponly"u8: {
             c.HttpOnly = true;
             continue;
             break;
         }
-        case {} when exprᴛ1 == "domain"u8: {
+        case {} when lowerAttr == "domain"u8: {
             c.Domain = val;
             continue;
             break;
         }
-        case {} when exprᴛ1 == "max-age"u8: {
+        case {} when lowerAttr == "max-age"u8: {
             var (secs, err) = strconv.Atoi(val);
             if (err != nil || secs != 0 && val[0] == '0') {
                 break;
@@ -223,7 +221,7 @@ public static (ж<Cookie>, error) ParseSetCookie(@string line) {
             continue;
             break;
         }
-        case {} when exprᴛ1 == "expires"u8: {
+        case {} when lowerAttr == "expires"u8: {
             c.RawExpires = val;
             var (exptime, err) = time.Parse(time.RFC1123, val);
             if (err != nil) {
@@ -237,12 +235,12 @@ public static (ж<Cookie>, error) ParseSetCookie(@string line) {
             continue;
             break;
         }
-        case {} when exprᴛ1 == "path"u8: {
+        case {} when lowerAttr == "path"u8: {
             c.Path = val;
             continue;
             break;
         }
-        case {} when exprᴛ1 == "partitioned"u8: {
+        case {} when lowerAttr == "partitioned"u8: {
             c.Partitioned = true;
             continue;
             break;

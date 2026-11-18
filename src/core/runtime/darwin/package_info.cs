@@ -282,7 +282,7 @@ using static go.runtime_package;
 [assembly: GoPositionMap("runtime/cputicks.go", "cputicks.cs", "AAgW")]
 [assembly: GoPositionMap("runtime/create_file_unix.go", "create_file_unix.cs", "AAoYkg==")]
 [assembly: GoPositionMap("runtime/debug.go", "debug.cs", "AA3qAQANCpSCgoKUpqbcgoKClAACENIACDqSAAIwABYEgoKmggADFgAIBIKCpoIABhrigoKUlA==")]
-[assembly: GoPositionMap("runtime/debugcall.go", "debugcall.cs", "ABoygt7kgpTKqqKCgoKCppQABB4ABxCCgriClIKUpgAGGAAJAoKCAAcQuMiCgri4goLcgpSCgty4uJSCpoK4lIKClNzcgoKCppQABxSigoKCpqaCgoK4goLcgriUgoKUgoKClIKCgoKUuKSSgpSCgoKCpoKi", "49-95:1;123-161:1;164-188:2;222-259:1;269-274:1", "", "", "", "272:21,273:13")]
+[assembly: GoPositionMap("runtime/debugcall.go", "debugcall.cs", "ABoygt7kgpTKqqKCgoKCppQAAx4ABxCCgriClIKUpgAGGAAJAoKCAAcQuMiCgri4goLcgpSCgty4uJSCpoK4lIKClNzcgoKCppQABxSigoKCpqaCgoK4goLcgriUgoKUgoKClIKCgoKUuKSSgpSCgoKCpoKi", "49-95:1;123-161:1;164-188:2;222-259:1;269-274:1", "", "", "", "271:21,272:13")]
 [assembly: GoPositionMap("runtime/debuglog.go", "debuglog.cs", "AC18ABIEqqIAHsIBAAgGxIKCuKaCuAAVKoC2soKUlMiAtpLIgLaSyIC2ksiAtpLIgLaygoLIgLaSyIC2ksiAtpLIgLaSyIC2ksiAtrKCgsiAtrKCgsiA9sKCgpSClLS2yIAAB0aAtrKCgoKCgqaCgoKUgoKmyIC2soKCyIC2soKCgpQAM2SSlO7MkoKCqJKCgoKCgoKokoKCqJKCgoKokoKCgoKCgrqSgoKUlKiSgoKCgpSCggAPHqSClIKUgoKUgpSCqJKqkoKCgpSmlIKCgpSCgpSCpoKCuIKUgoKCgoKCgqaClKb2goKmgoKUpoKCgoKCgoKmpoKCgoKUlAAGzAGSgg==")]
 [assembly: GoPositionMap("runtime/debuglog_off.go", "debuglog_off.cs", "AAwagtqCpoI=")]
 [assembly: GoPositionMap("runtime/defs_darwin_amd64.go", "defs_darwin_amd64.cs", "AJoBsgKCABAckoI=")]
@@ -296,7 +296,7 @@ using static go.runtime_package;
 [assembly: GoPositionMap("runtime/fipsbypass.go", "fipsbypass.cs", "AAkUkqiSqJI=")]
 [assembly: GoPositionMap("runtime/float.go", "float.cs", "AA0elqSokqiSAAIS4oKqooKokqqiAAIaAAoCgpSCgoKUlIIAAhoACgIAAhoADQKClIKklKaCpoKUgoI=")]
 [assembly: GoPositionMap("runtime/hash64.go", "hash64.cs", "ABAqgpKClKSCgrSCtIK0grSCtIKCgoKCgoKClJSCgpSCtqaCgqaCgqaCgqaCpoI=")]
-[assembly: GoPositionMap("runtime/heapdump.go", "heapdump.cs", "ADeeAYKClIKCgqaCgoKUgriipoKCABIqkoKCgoKClIKCpoKClLqSgqaCgoK4gqiygsqCgpSClIKUgtyClKaCgoKCgpSCgoKCgpSokoKCgqaCgoKmooKCgoKCAAwcsoKCggAICrKmgoKCgpS4lJSCgpS4goKCgoKCgoKCgpSmgqaCgsqUgoKUlIKCgpSmlKaCgoKCgoKUlKaiooKCgpSCgqaCgoKCgoKCgoKCgoKClpKCgoKCgoK4goKCgoKCgoKUlJSUgoKCgoKCgoL4gqaCgtqClKSC3MqigoKCgoKmlLiCgoKmgoKCpoKUgoKUgoLcAAoOlJSCgpSCgoKCpoKCuIKCgpTKgoKCgpSUgpKCgpSCgpSCgpSCuIKCgoKmooKCgoKmgqaCgoKCgrqSyoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKClKaCgoKCgoKCgoKCgoKCgoKClIKCgqaCgoKCgoKCgpSCgpSCgqaCppSUgoKClIKClIKCgoLKpIKmgoKmgoKCgoKCgoKCgoKmgpSCpqamgoKCpqiyggAIBpSCgoKUgoKClKaCgoKCgoKUgpQ=", "412-433:1")]
+[assembly: GoPositionMap("runtime/heapdump.go", "heapdump.cs", "ADeeAYKClIKCgqaCgoKUgriipoKCABIqkoKCgoKClIKCpoKClLqSgqaCgoK4gqiygsqCgpSClIKUgtyClKaCgoKCgpSCgoKCgpSokoKCgqaCgoKmooKCgoKCAAwcsoKCggAICrKmgoKCgpS4lJSCgpS4goKCgoKCgoKCgpSmgqaCgsqUgoKUlIKCgpSmlKaCgoKCgoKUlKaiooKCgpSCgqaCgoKCgoKCgoKCgoKClpKCgoKCgoK4goKCgoKCgoKUlJSUgoKCgoKCgoL4gqaCgsqClKSC3MqigoKCgoKmlLiCgoKmgoKCpoKUgoKUgoLcAAoOlJSCgpSCgoKCpoKCuIKCgpTKgoKCgpSUgpKCgpSCgpSCgpSCuIKCgoKmooKCgoKmgqaCgoKCgrqSyoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKClKaCgoKCgoKCgoKCgoKCgoKClIKCgqaCgoKCgoKCgpSCgpSCgqaCppSUgoKClIKClIKCgoLKpIKmgoKmgoKCgoKCgoKCgoKmgpSCpqamgoKCpqiyggAIBpSCgoKUgoKClKaCgoKCgoKUgpQ=", "412-433:1")]
 [assembly: GoPositionMap("runtime/hexdump.go", "hexdump.cs", "ADaoAYKCuIKCgoKClIK4goK4poKCAAkIgpSCgoKmgpSCgriUgoKUuMqUgoKmAAoGgpSCgoaigoKClIKCgqaUlIKmgpSCgoK4gpSCgqaClIKCgpSmgoKmpoKCgoKUlIK4goLqooKCgoKUlNiCgoKUgoKUgg==", "175-179:1")]
 [assembly: GoPositionMap("runtime/histogram.go", "histogram.cs", "AGHSAQAJBIKCAAESAAgCgoKUgriCgqaCqMK4goKUAAcQgoKmgoKsspSUpqa4gpSUyqa4goI=")]
 [assembly: GoPositionMap("runtime/iface.go", "iface.cs", "ABcmggAJFJQABhgADAKCuIKClIKm3IKCuIKCgriCgtyCgoKCgoKUggAHEMr4goKCuIKClIKUggAJDAAICoKmgsqC3IKCppSmyvaCgoKCgsqUyoKClIIABR4ADQKCgtyCgoK4goKCgoKCgoKCgpSCgoKCgoKClIKCgoKClNy0gpSmgoKCgoKmrsKqwoKClKqiAB0ypIKCgoIAARgACwKClIKUgpSCgpS0gpSClIKmgoKmooKCgqaClKaigoKCpoKUAAIYAAsCgpSClAACGAALAoKUgpQAAhgADQSClIKUpoKUlKaCgpSs0oKCgqamgsqUppSmuMqUpqKmgoKC7oKmgoKCppKCgoKCgpSmgoKmlMqe8qaCpoKCgoK4gsq4ppS4uMqUrNKmgoKC7oKmgoKCppKCgoKCgoKUpoKCppTKAAEYAAoCqJKmpoKCgoIAChzC7LI=", "539-549:1;645-656:1")]
@@ -372,7 +372,7 @@ using static go.runtime_package;
 [assembly: GoPositionMap("runtime/rdebug.go", "rdebug.cs", "AAkUsoKCqLKCgoI=")]
 [assembly: GoPositionMap("runtime/retry.go", "retry.cs", "AAgc0oKCgpSU")]
 [assembly: GoPositionMap("runtime/runtime.go", "runtime.cs", "AB8+soKCggAVVAAXBIKCuIKCgoKCuIKmlIKmlIKClKaU3oCWgJaAmKIAChKSgoKCqJKCgoIADBaigoKCgpSCgoKUgqaClMaCgoKClIKUgrqSgoKCgoK6koKCggADEMIADTjsgqYAFi6ClAAJHsA=")]
-[assembly: GoPositionMap("runtime/runtime1.go", "runtime1.cs", "AB1MAA0CgoKCgoKCppSUAAUWsqaCgoKmgoKUgoK4uIKCpoKCuIIAFA6CgoKClIKUgoKUgpSClIKClIKUgpSClIIAUAiCAA4eAAAQlIKUgpSClIKUgpSClIKUgpSClIKUgpSClIKUgpSCpoKCgpSCpoKClIKmgoKUgqaCgoKmgoKCpoKClIKmgoKUgqaCgpSCpoKClIKmlIKmggBLnAEAJEqUgoKCAAgSlKaClIKCgsqmlIIADh6C+IKCgpSCqqKUlJSCggAIHgAKAoKClIKClLiCgpSClKaCgpSSgpSC3IKCpoKCgoKCggAHEIK6koKkpKSkpLSCgoKUtIKCyoKmlKyygoKokoKClAADJgASAoKCgoKClAAEHAALAgACIgAOAgACHAALAqyyrLKssoKCgoKUgoKCgoKUgqiSqJI=")]
+[assembly: GoPositionMap("runtime/runtime1.go", "runtime1.cs", "AB1MAA0CgoKCgoKCppSUAAUWsqaCgoKmgoKUgoK4uIKCpoKCuIIAFA6CgoKClIKUgoKUgpSClIKClIKUgpSClIIAUAiCAA4eAAAQlIKUgpSClIKUgpSClIKUgpSClIKUgpSClIKUgpSCpoKCgpSCpoKClIKmgoKUgqaCgoKmgoKCpoKClIKmgoKUgqaCgpSCpoKClIKmlIKmggBLnAEAJEqUgoKCAAgSlKaClIKCgsqmlIIADh6C+IKCgpSCqqKUlJSCggAIHgAKAoKClIKClLiCgpSClKaCgpSSgpSC3IKCpoKCgoKCggAHEIK6koKUpKSkpLSCgoKUtIKCyoKmlKyygoKokoKClAADJgASAoKCgoKClAAEHAALAgACIgAOAgACHAALAqyyrLKssoKCgoKUgoKCgoKUgqiSqJI=")]
 [assembly: GoPositionMap("runtime/runtime_boring.go", "runtime_boring.cs", "AAkUpIKU")]
 [assembly: GoPositionMap("runtime/runtime_noclearenv.go", "runtime_noclearenv.cs", "AAoYtoI=")]
 [assembly: GoPositionMap("runtime/rwmutex.go", "rwmutex.cs", "ACB4AB4ClIIACAz6gpSUgoKUgriCgoKCggAJDrKCgqaUgoKClKaopIKUlIKUkoKCgqb6xIKCpoKCgoKCgriClA==", "80-96:1;131-136:1")]
@@ -566,7 +566,7 @@ public static partial class runtime_package
     internal partial struct functab {}
     internal partial struct gList {}
     internal partial struct gQueue {}
-    internal partial struct gTraceState {}
+    [GoValueClone("traceSchedResourceState")] internal partial struct gTraceState {}
     internal partial struct gcBgMarkWorkerNode {}
     [GoValueClone("pad")] internal partial struct gcBgMarkWorkerNodePadded {}
     internal partial struct gcBits {}
@@ -597,7 +597,7 @@ public static partial class runtime_package
     internal partial struct hchan {}
     internal partial struct headTailIndex {}
     [GoValueClone("spans", "pageInUse", "pageMarks", "pageSpecials", "pageUseSpanInlineMarkBits")] internal partial struct heapArena {}
-    internal partial struct heapStatsAggregate {}
+    [GoValueClone("heapStatsDelta")] internal partial struct heapStatsAggregate {}
     [GoValueClone("smallAllocCount", "smallFreeCount")] internal partial struct heapStatsDelta {}
     internal partial struct hex {}
     internal partial struct hexdumpMarker {}
@@ -676,13 +676,13 @@ public static partial class runtime_package
     internal partial struct offAddr {}
     internal partial struct open_args {}
     internal partial struct pMask {}
-    internal partial struct pTraceState {}
+    [GoValueClone("traceSchedResourceState")] internal partial struct pTraceState {}
     [GoValueClone("summary", "chunks")] internal partial struct pageAlloc {}
     internal partial struct pageAlloc_scav {}
     internal partial struct pageBits {}
     internal partial struct pageCache {}
     internal partial struct pallocBits {}
-    [GoValueClone("scavenged")] internal partial struct pallocData {}
+    [GoValueClone("pallocBits", "scavenged")] internal partial struct pallocData {}
     internal partial struct pallocSum {}
     internal partial struct pcHeader {}
     [GoValueClone("entries")] internal partial struct pcvalueCache {}
@@ -764,7 +764,7 @@ public static partial class runtime_package
     internal partial struct spanSPMC {}
     internal partial struct spanScanOwnership {}
     internal partial struct spanSet {}
-    [GoValueClone("spans")] internal partial struct spanSetBlock {}
+    [GoValueClone("spanSetBlockHeader2", "spans")] internal partial struct spanSetBlock {}
     internal partial struct spanSetBlockAlloc {}
     internal partial struct spanSetBlockHeader {}
     [GoValueClone("pad")] internal partial struct spanSetBlockHeader2 {}
@@ -795,7 +795,7 @@ public static partial class runtime_package
     internal partial struct stackpoolItem {}
     internal partial struct stackpoolᴛ1 {}
     [GoValueClone("pad_cgo_0")] internal partial struct stackt {}
-    [GoValueClone("ensured")] internal partial struct statAggregate {}
+    [GoValueClone("ensured", "heapStats")] internal partial struct statAggregate {}
     internal partial struct statDep {}
     internal partial struct statDepSet {}
     internal partial struct stkframe {}
@@ -888,7 +888,7 @@ public static partial class runtime_package
     [GoValueClone("Z0", "Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12", "Z13", "Z14", "Z15", "Z16", "Z17", "Z18", "Z19", "Z20", "Z21", "Z22", "Z23", "Z24", "Z25", "Z26", "Z27", "Z28", "Z29", "Z30", "Z31")] internal partial struct xRegs {}
     internal partial struct Δslice {}
     public partial interface Error {}
-    public partial struct BlockProfileRecord {}
+    [GoValueClone("StackRecord")] public partial struct BlockProfileRecord {}
     public partial struct Frame {}
     [GoValueClone("frameStore")] public partial struct Frames {}
     public partial struct Func {}

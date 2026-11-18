@@ -449,11 +449,11 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
     var stopTimerChʗ2 = stopTimerCh;
     var timerʗ1 = timer;
     goǃ(() => {
-        var selᴛ1 = initialReqCancelʗ1;
+        var initialReqCancelᴛ1 = initialReqCancelʗ1;
         var selᴛ2 = timerʗ1.C;
-        var selᴛ3 = stopTimerChʗ2;
-        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out _): {
+        var stopTimerChᴛ1 = stopTimerChʗ2;
+        switch (select(ᐸꟷ(initialReqCancelᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(stopTimerChᴛ1, ꓸꓸꓸ))) {
+        case 0 when initialReqCancelᴛ1.ꟷᐳ(out _): {
             doCancelʗ1();
             timerʗ1.Stop();
             break;
@@ -463,7 +463,7 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
             doCancelʗ1();
             break;
         }
-        case 2 when selᴛ3.ꟷᐳ(out _): {
+        case 2 when stopTimerChᴛ1.ꟷᐳ(out _): {
             timerʗ1.Stop();
             break;
         }}

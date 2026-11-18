@@ -26,7 +26,7 @@ partial struct CMAC {
 public static ж<CMAC> NewCMAC(ж<aes.Block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var c = Ꮡ(new CMAC(b: b));
+    var c = Ꮡ(new CMAC(b: b.ΔClone()));
     c.deriveSubkeys();
     return c;
 }

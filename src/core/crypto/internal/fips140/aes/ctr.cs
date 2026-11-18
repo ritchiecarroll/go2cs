@@ -35,7 +35,7 @@ internal static CTR newCTR(ref Block b, slice<byte> iv) {
     }
 
     return new CTR(
-        b: b,
+        b: b.ΔClone(),
         ivlo: byteorder.BEUint64(iv[8..16]),
         ivhi: byteorder.BEUint64(iv[0..8]),
         offset: 0

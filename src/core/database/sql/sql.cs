@@ -1628,8 +1628,8 @@ internal static (ж<driverConn>, error) conn(this ж<DB> Ꮡdb, context.Context 
 
         // Timeout the connection request with the context.
         var selᴛ15 = ctx.Done();
-        var selᴛ16 = req;
-        switch (select(ᐸꟷ(selᴛ15, ꓸꓸꓸ), ᐸꟷ(selᴛ16, ꓸꓸꓸ))) {
+        var reqᴛ1 = req;
+        switch (select(ᐸꟷ(selᴛ15, ꓸꓸꓸ), ᐸꟷ(reqᴛ1, ꓸꓸꓸ))) {
         case 0 when selᴛ15.ꟷᐳ(out _): {
             // Remove the connection request and ensure no value has been sent
             // on it after removing.
@@ -1648,9 +1648,9 @@ internal static (ж<driverConn>, error) conn(this ж<DB> Ꮡdb, context.Context 
                 // But if we know for sure it wasn't deleted and a sender is
                 // outstanding, we should probably block on req (in a new
                 // goroutine) to get the connection back.
-                var selᴛ17 = req;
-                switch (trySelect(ᐸꟷ(selᴛ17, ꓸꓸꓸ))) {
-                case 0 when selᴛ17.ꟷᐳ(out var ret, out var ok): {
+                var reqᴛ2 = req;
+                switch (trySelect(ᐸꟷ(reqᴛ2, ꓸꓸꓸ))) {
+                case 0 when reqᴛ2.ꟷᐳ(out var ret, out var ok): {
                     if (ok && ret.conn != nil) {
                         Ꮡdb.putConn(ret.conn, ret.err, false);
                     }
@@ -1662,7 +1662,7 @@ internal static (ж<driverConn>, error) conn(this ж<DB> Ꮡdb, context.Context 
             }
             return (default, ctx.Err());
         }
-        case 1 when selᴛ16.ꟷᐳ(out var ret, out var ok): {
+        case 1 when reqᴛ1.ꟷᐳ(out var ret, out var ok): {
             Ꮡdb.ᏑwaitDuration.Add((int64)time.Since(waitStart));
 
             if (!ok) {
@@ -3538,15 +3538,15 @@ internal static void awaitDone(this ж<Rows> Ꮡrs, context.Context ctx, context
         txctxDone = txctx.Done();
     }
     var selᴛ20 = ctx.Done();
-    var selᴛ21 = txctxDone;
+    var txctxDoneᴛ1 = txctxDone;
     var selᴛ22 = closectx.Done();
-    switch (select(ᐸꟷ(selᴛ20, ꓸꓸꓸ), ᐸꟷ(selᴛ21, ꓸꓸꓸ), ᐸꟷ(selᴛ22, ꓸꓸꓸ))) {
+    switch (select(ᐸꟷ(selᴛ20, ꓸꓸꓸ), ᐸꟷ(txctxDoneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ22, ꓸꓸꓸ))) {
     case 0 when selᴛ20.ꟷᐳ(out _): {
         ref var err = ref heap<error>(ctx.Err(), out var Ꮡerr);
         Ꮡrs.ᏑcontextDone.Store(Ꮡerr);
         break;
     }
-    case 1 when selᴛ21.ꟷᐳ(out _): {
+    case 1 when txctxDoneᴛ1.ꟷᐳ(out _): {
         ref var err = ref heap<error>(txctx.Err(), out var Ꮡerr);
         Ꮡrs.ᏑcontextDone.Store(Ꮡerr);
         break;

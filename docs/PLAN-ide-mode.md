@@ -336,7 +336,7 @@ A hybrid, (b) or (c) fed by a richer table that marks statement starts, changes 
      - the two-step wrapper (`go2cs run` or a dotnet tool) that IDE tasks call.
    - NuGet restore runs before targets, so the generated projects need their own restore pass, or the conversion has to run at restore time.
    - This is the phase's main design decision. E8 reduces the risk; the wrapper is the guaranteed fallback.
-2. **Go release lock.** Modules must resolve to the corpus release (`docs/README.md:205`, `276-278`). Many current modules and recent `golang.org/x/*` versions need a newer Go. Until the hops land, a build of a modern Go module fails at step 4 with a clear message rather than a mystery.
+2. **Go release lock.** Modules must resolve to the corpus release (`docs/README.md:180-182`, `docs/ConvertingAModule.md:95-97`). Many current modules and recent `golang.org/x/*` versions need a newer Go. Until the hops land, a build of a modern Go module fails at step 4 with a clear message rather than a mystery.
 3. **Brand risk.** C# compile errors in generated code read as the user's fault; §2 says how each IDE labels them. Worse is a difference at run time: a user stepping through "their Go" that behaves differently will conclude their Go is wrong.
    - Causes include a converter gap, a throwing stub, or golib's stated residual: an ordinary channel or sync deadlock blocks instead of raising Go's fatal "all goroutines are asleep" error (`Goroutine.cs:880-883`).
    - Source-mapped debugging hides the C# layer, which makes this worse.
@@ -628,7 +628,7 @@ Elapsed time depends more on owner review bandwidth than on lane-weeks. With one
 - `src/tests/GolibTests/CallerFrameTestVariantNamingTests.cs:336-361`: golib already compiles `#line` regions.
 
 **Converter modes, writes and build output**
-- `docs/README.md:161-170` (install: clone, `cd src/go2cs`, `go install .`), `:177-213` (modes and options), `:205` (`-recurse=nuget` Go-release lock), `:206-210` (nugetgo mapping on by default, `go2cs.nuget.lock`, transitive case not yet exercised), `:276-290` (Go ≤ 1.24.13 pinning, `GOTOOLCHAIN=local`, silent toolchain download), `:308-362` (output layout, `.slnx`, F5; per-platform flavours and version skew at `:337-345`).
+- `docs/README.md:132-141` (install: clone, `cd go2cs/src/go2cs`, `go install .`), `:146-174` (modes and options), `:180-182` (`-recurse=nuget` Go-release lock; also `docs/ConvertingAModule.md:241-242`). `docs/ConvertingAModule.md:133-136, 333-344` (nugetgo mapping on by default, `go2cs.nuget.lock`, transitive case not yet tested end to end), `:95-107` (pinning to the Go release the converter is built with, `GOTOOLCHAIN=local`, silent toolchain download), `:128-133, 171-177` (output layout, `.slnx`, F5), `:158-163` (per-platform flavours and version skew).
 - `src/go2cs/go.mod:1`: `module go2cs`. Repository tags `nuget-1.24.13.1` to `.3`.
 - `src/go2cs/main.go:255-280`: flag definitions, including `-nuget-map*`; no version flag.
 - `src/go2cs/projectFileWriter.go:16-18, 750-781`: `needToWriteFile`, and `writeOutputFile`, which always calls `os.Create`. Callers of `needToWriteFile`: `projectFileWriter.go:74/601/683`, `moduleConverter.go:806/971`, `solutionGenerator.go:93`, `platformEmit.go:826/894/918`, `embedDirective.go:838`, `readme.go:223`, `testConversion.go` (test-host files). None writes converted `.cs`.
