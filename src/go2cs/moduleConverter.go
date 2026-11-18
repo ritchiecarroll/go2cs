@@ -261,6 +261,7 @@ func (m *ModuleConverter) loadClosure(moduleDir string) (map[string]*packages.Pa
 		Dir:        moduleDir,
 		BuildFlags: m.options.loaderBuildFlags(),
 		Env:        converterLoaderEnv(),
+		ParseFile:  parseFileUnparenAddressOperands,
 	}
 
 	targetParts := strings.Split(m.options.targetPlatform, "/")

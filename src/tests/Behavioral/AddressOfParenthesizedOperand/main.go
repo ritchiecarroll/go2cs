@@ -26,6 +26,8 @@ func main() {
 	atomic.CompareAndSwapInt32(&((*mutex)(p).owner), 0, 7)
 	pc := &((*mutex)(p).count)
 	*pc = 3
+	po := &(((*mutex)(p)).owner)
+	*po += 10
 	fmt.Println("converted:", m.owner, m.count)
 
 	// The same field without the parentheses.
@@ -44,6 +46,8 @@ func main() {
 	var arr [3]int
 	pe := &(arr[1])
 	*pe = 9
+	pa := &((arr)[2])
+	*pa = 8
 	fmt.Println("element:", arr)
 
 	// A local, parenthesized.
