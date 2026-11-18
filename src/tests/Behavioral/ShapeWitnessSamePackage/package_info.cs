@@ -40,6 +40,7 @@ using static go.main_package;
 [assembly: GoImplement(typeof(go.main_package.Array<,>), typeof(Value))]
 [assembly: GoImplement<Export, Named>(Pointer = true)]
 [assembly: GoImplement<SourceFile, Script>(Pointer = true)]
+[assembly: GoImplement<go.main_package.Array<u8, ValueΔshapeOf<u8>>, Value>]
 [assembly: GoImplement<memFile, Script>]
 [assembly: GoImplement<u8, Value>]
 // </InterfaceImplementations>
@@ -61,7 +62,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABMqggAIEKKmooKClKiCqJAACxAACQyQtKKCgoKmppAAERQACwiggAAMCKCAxMKCAAgQggAJDLSCgoKCgpSCgpSClIKCgoKCgpSCgoKClIKClJSClIKClIKCgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABMqggAIEKKmooKClKiCqJAACxAACQyQtKKCgoKmppAAERQACwiggAAMCKCAxMKCAAgQggAJDLSCgoKCgpSCgpSClIKCgoKCgpSCgoKClIKClJSClIKClIKCgpiCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

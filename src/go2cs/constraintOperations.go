@@ -2181,7 +2181,7 @@ func (v *Visitor) namedHasConstraintProxy(named *types.Named) bool {
 // assertion or a conversion). Gated to the proxy case, as the composite-literal re-render is, so nothing else changes.
 func (v *Visitor) proxiedTypeInstantiation(instantiation ast.Expr) (string, bool) {
 	if tv, ok := v.info.Types[instantiation]; ok && tv.IsType() {
-		if named, ok := types.Unalias(tv.Type).(*types.Named); ok && v.namedHasConstraintProxy(named) {
+		if named, ok := types.Unalias(tv.Type).(*types.Named); ok && v.namedRendersResolved(named) {
 			return convertToCSTypeName(v.getAliasQualifiedTypeName(named, false)), true
 		}
 	}

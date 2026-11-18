@@ -222,6 +222,10 @@ internal static void main() {
     var boxes = ConstArray<ж<boxed>, boxedжValueΔshape>(slice<ж<boxed>>([b]), "b");
     boxes.vals[0].n = 8;
     fmt.Println("pointer carrier:", boxes.kind(), b.n, boxes.vals[0] == b);
+
+    Value asValue = new Array<u8, ValueΔshapeOf<u8>>(vals: [new(5)]);
+    var @explicit = FromLSPRange<ж<SourceFile>, SourceFileжScriptΔshape>(a, 3);
+    fmt.Println("written instantiations:", asValue.kind(), @explicit[0].Start, @explicit[0].Script == a);
 }
 
 } // end main_package

@@ -155,4 +155,10 @@ func main() {
 	boxes := ConstArray([]*boxed{b}, "b")
 	boxes.vals[0].n = 8
 	fmt.Println("pointer carrier:", boxes.kind(), b.n, boxes.vals[0] == b)
+
+	// Written instantiations carry no witness in the Go syntax: a carrier's composite literal and an explicit function
+	// instantiation both render from the resolved type.
+	var asValue Value = Array[u8]{vals: []u8{{5}}}
+	explicit := FromLSPRange[*SourceFile](a, 3)
+	fmt.Println("written instantiations:", asValue.kind(), explicit[0].Start, explicit[0].Script == a)
 }

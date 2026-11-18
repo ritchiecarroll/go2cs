@@ -1012,12 +1012,7 @@ func (v *Visitor) shapeWitnessSignature(method *types.Func) (string, string, str
 //	public interface ScriptΔshape<T> { static abstract @string Text(T self); }
 //	public readonly struct ScriptΔshapeOf<T> : ScriptΔshape<T> where T : Script { public static @string Text(T self) => self.Text(); }
 func (v *Visitor) shapeWitnessInterfaceDecl(named *types.Named) (string, string) {
-	access := "internal"
-
-	if named.Obj().Exported() {
-		access = "public"
-	}
-
+	access := shapeWitnessAccess(named.Obj())
 	base := v.shapeWitnessBaseName(named)
 	selfName := "T"
 	typeParams := []string{}
@@ -1073,9 +1068,23 @@ func (v *Visitor) shapeWitnessInterfaceDecl(named *types.Named) (string, string)
 			getSanitizedFunctionName(method.Name()), args))
 	}
 
+	// The generic witness names I itself in its clause, so it carries I's own type-parameter clauses too (`wrap[T Value]`
+	// needs `where T : Value` beside `where TΔself : wrap<T>`). The witness interface names nothing that needs them, so it
+	// stays unconstrained and a selected declaration can name it with whatever clauses its own parameters keep.
+	interfaceClauses := ""
+
+	if len(typeParams) > 0 {
+		_, clauses := v.getGenericDefinition(named)
+		interfaceClauses = strings.Join(strings.Fields(clauses), " ")
+
+		if interfaceClauses != "" {
+			interfaceClauses = " " + interfaceClauses
+		}
+	}
+
 	witnessInterface := fmt.Sprintf("%s interface %s%s<%s>%s { %s }", access, base, ShapeWitnessSuffix, paramList, inherits, strings.Join(abstracts, " "))
-	genericWitness := fmt.Sprintf("%s readonly struct %s%sOf<%s> : %s%s<%s> where %s : %s { %s }", access, base, ShapeWitnessSuffix, paramList,
-		base, ShapeWitnessSuffix, paramList, selfName, constraintRef, strings.Join(forwarders, " "))
+	genericWitness := fmt.Sprintf("%s readonly struct %s%sOf<%s> : %s%s<%s> where %s : %s%s { %s }", access, base, ShapeWitnessSuffix, paramList,
+		base, ShapeWitnessSuffix, paramList, selfName, constraintRef, interfaceClauses, strings.Join(forwarders, " "))
 
 	return witnessInterface, genericWitness
 }
@@ -1114,7 +1123,7 @@ func shapeWitnessParams(selfType string, params string) string {
 func (v *Visitor) shapeWitnessPairDecl(pair shapeWitnessPair) string {
 	access := "internal"
 
-	if pair.elem.(*types.Named).Obj().Exported() && pair.iface.Obj().Exported() {
+	if shapeWitnessAccess(pair.elem.(*types.Named).Obj()) == "public" && shapeWitnessAccess(pair.iface.Origin().Obj()) == "public" {
 		access = "public"
 	}
 
@@ -1684,4 +1693,46 @@ func (v *Visitor) shapeWitnessKeptClause(origin types.Object, i int, selection m
 	}
 
 	return constraint, true
+}
+
+// shapeWitnessAccess is the C# accessibility a witness declaration over a type takes: the type's own as EMITTED, so an
+// unexported constraint an exported declaration names (gen's `wrap`, publicized beside `Deref`) gives a public witness
+// that declaration can name, and a witness never names a type less accessible than itself.
+func shapeWitnessAccess(obj types.Object) string {
+	if obj.Exported() || packagePublicizedTypes[obj] {
+		return "public"
+	}
+
+	return "internal"
+}
+
+// namedRendersResolved reports whether a written instantiation of named must render from the RESOLVED type rather than
+// the AST: a constraint-proxy argument (namedHasConstraintProxy), or a shape-witness carrier, whose witness arguments
+// appear nowhere in the Go syntax (`Ptr[void]{}` is `new Ptr<@void, ValueΔshapeOf<@void>>()`).
+func (v *Visitor) namedRendersResolved(named *types.Named) bool {
+	return v.namedHasConstraintProxy(named) || (named != nil && named.TypeArgs() != nil && shapeWitnessArity(named.Origin().Obj()) > 0)
+}
+
+// shapeWitnessExplicitTypeArgs is the full rendered type-argument list of an explicit instantiation of a shape-witness
+// FUNCTION (`FromLSPRange[*SourceFile]`, written arguments then witnesses), or nil when x names anything else.
+func (v *Visitor) shapeWitnessExplicitTypeArgs(x ast.Expr) []string {
+	funIdent := getCallFunIdent(x)
+
+	if funIdent == nil {
+		return nil
+	}
+
+	fn, ok := v.info.ObjectOf(funIdent).(*types.Func)
+
+	if !ok || shapeWitnessArity(fn.Origin()) == 0 {
+		return nil
+	}
+
+	instance, ok := v.info.Instances[funIdent]
+
+	if !ok || instance.TypeArgs == nil {
+		return nil
+	}
+
+	return v.renderedTypeArgs(funIdent, instance.TypeArgs)
 }
