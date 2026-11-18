@@ -13,24 +13,24 @@ internal static void main() {
     for (nint i = 0; i < 200; i++) {
         a.ᐸꟷ(1);
         b.ᐸꟷ(1);
-        var selᴛ1 = a;
-        var selᴛ2 = b;
-        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out _): {
+        var aᴛ1 = a;
+        var bᴛ1 = b;
+        switch (select(ᐸꟷ(aᴛ1, ꓸꓸꓸ), ᐸꟷ(bᴛ1, ꓸꓸꓸ))) {
+        case 0 when aᴛ1.ꟷᐳ(out _): {
             aCount++;
             break;
         }
-        case 1 when selᴛ2.ꟷᐳ(out _): {
+        case 1 when bᴛ1.ꟷᐳ(out _): {
             bCount++;
             break;
         }}
-        var selᴛ3 = a;
-        var selᴛ4 = b;
-        switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-        case 0 when selᴛ3.ꟷᐳ(out _): {
+        var aᴛ2 = a;
+        var bᴛ2 = b;
+        switch (select(ᐸꟷ(aᴛ2, ꓸꓸꓸ), ᐸꟷ(bᴛ2, ꓸꓸꓸ))) {
+        case 0 when aᴛ2.ꟷᐳ(out _): {
             break;
         }
-        case 1 when selᴛ4.ꟷᐳ(out _): {
+        case 1 when bᴛ2.ꟷᐳ(out _): {
             break;
         }}
     }

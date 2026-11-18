@@ -176,7 +176,7 @@ But neither is more specific than the other.
 %[2]s matches %[5]q, but %[1]s doesn't.`,
 	p1, p2, commonPath(p1, p2), differencePath(p1, p2), differencePath(p2, p1))
 ```
-<!-- source: src/core/net/http/pattern.cs:473-479 -->
+<!-- source: src/core/net/http/pattern.cs:471-477 -->
 ```csharp
         return fmt.Sprintf("""
 %[1]s and %[2]s both match some paths, like %[3]q.
@@ -238,7 +238,7 @@ func FormatBool(b bool) string {
 	return "false"
 }
 ```
-<!-- source: src/core/internal/strconv/atob.cs:23-35 -->
+<!-- source: src/core/internal/strconv/atob.cs:22-34 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string trueˢ => ref trueˢᵇ;

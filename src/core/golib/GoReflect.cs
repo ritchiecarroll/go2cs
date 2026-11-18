@@ -331,8 +331,9 @@ namespace go;
 
         // REFERENCE-typed and none of the above. go2cs emits every Go struct as a C# VALUE type, so
         // this can never be a Go struct: it is an opaque managed handle — the backing object a
-        // hand-owned shim holds in place of Go's own representation, `sync.Mutex`'s `SemaphoreSlim`
-        // gate being the demonstrated case — and in the Go model a handle is one pointer word.
+        // hand-owned shim holds in place of Go's own representation, `sync.RWMutex`'s `RWState` being the
+        // case that remains (`sync.Mutex`'s `SemaphoreSlim` gate was the first, until W9a gave Mutex Go's
+        // eight bytes) — and in the Go model a handle is one pointer word.
         //
         // Answering Struct here was the classification defect behind the only process-KILLING failure
         // mode this bridge has had. Struct is the one kind whose walks descend into the type's fields,

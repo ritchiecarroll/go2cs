@@ -235,13 +235,12 @@ public static (nint n, error err) ReadExportDataHeader(ж<bufio.Reader> Ꮡr) {
     }
 
     @string hdr = (@string)line;
-    var exprᴛ1 = hdr;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "$$\n"u8: {
+    case {} when hdr == "$$\n"u8: {
         err = fmt.Errorf("old textual export format no longer supported (recompile package)"u8);
         return (n, err);
     }
-    case {} when exprᴛ1 == "$$B\n"u8: {
+    case {} when hdr == "$$B\n"u8: {
         byte format = default;
         (format, err) = r.ReadByte();
         if (err != nil) {

@@ -400,13 +400,12 @@ internal static Context defaultContext() {
     if (env == ""u8) {
         env = buildcfg.DefaultCGO_ENABLED;
     }
-    var exprᴛ1 = env;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "1"u8: {
+    case {} when env == "1"u8: {
         c.CgoEnabled = true;
         break;
     }
-    case {} when exprᴛ1 == "0"u8: {
+    case {} when env == "0"u8: {
         c.CgoEnabled = false;
         break;
     }
@@ -1015,13 +1014,12 @@ Found:
         }
 
         // Going to save the file. For non-Go files, can stop here.
-        var exprᴛ3 = ext;
         switch (ᐧ) {
-        case {} when exprᴛ3 == ".go"u8: {
+        case {} when ext == ".go"u8: {
             // keep going
             break;
         }
-        case {} when exprᴛ3 == ".S"u8 || exprᴛ3 == ".sx"u8: {
+        case {} when ext == ".S"u8 || ext == ".sx"u8: {
             // special case for cgo, handled at end
             Sfiles = append(Sfilesᴷ, Sfiles, name);
             continue;
@@ -1201,33 +1199,32 @@ Found:
 } partial class build_package {
 
 internal static ж<slice<@string>> fileListForExt(ж<Package> p, @string ext) {
-    var exprᴛ1 = ext;
     switch (ᐧ) {
-    case {} when exprᴛ1 == ".c"u8: {
+    case {} when ext == ".c"u8: {
         return p.ᏑCFiles;
     }
-    case {} when exprᴛ1 == ".cc"u8 || exprᴛ1 == ".cpp"u8 || exprᴛ1 == ".cxx"u8: {
+    case {} when ext == ".cc"u8 || ext == ".cpp"u8 || ext == ".cxx"u8: {
         return p.ᏑCXXFiles;
     }
-    case {} when exprᴛ1 == ".m"u8: {
+    case {} when ext == ".m"u8: {
         return p.ᏑMFiles;
     }
-    case {} when exprᴛ1 == ".h"u8 || exprᴛ1 == ".hh"u8 || exprᴛ1 == ".hpp"u8 || exprᴛ1 == ".hxx"u8: {
+    case {} when ext == ".h"u8 || ext == ".hh"u8 || ext == ".hpp"u8 || ext == ".hxx"u8: {
         return p.ᏑHFiles;
     }
-    case {} when exprᴛ1 == ".f"u8 || exprᴛ1 == ".F"u8 || exprᴛ1 == ".for"u8 || exprᴛ1 == ".f90"u8: {
+    case {} when ext == ".f"u8 || ext == ".F"u8 || ext == ".for"u8 || ext == ".f90"u8: {
         return p.ᏑFFiles;
     }
-    case {} when exprᴛ1 == ".s"u8 || exprᴛ1 == ".S"u8 || exprᴛ1 == ".sx"u8: {
+    case {} when ext == ".s"u8 || ext == ".S"u8 || ext == ".sx"u8: {
         return p.ᏑSFiles;
     }
-    case {} when exprᴛ1 == ".swig"u8: {
+    case {} when ext == ".swig"u8: {
         return p.ᏑSwigFiles;
     }
-    case {} when exprᴛ1 == ".swigcxx"u8: {
+    case {} when ext == ".swigcxx"u8: {
         return p.ᏑSwigCXXFiles;
     }
-    case {} when exprᴛ1 == ".syso"u8: {
+    case {} when ext == ".syso"u8: {
         return p.ᏑSysoFiles;
     }}
     return default;
@@ -1295,9 +1292,8 @@ internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string 
     // one of its parents. Running 'go env GOMOD' in the source directory would
     // give a canonical answer, but we'd prefer not to execute another command.
     @string go111Module = os.Getenv(go111moduleˢ);
-    var exprᴛ1 = go111Module;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "off"u8: {
+    case {} when go111Module == "off"u8: {
         return errNoModules;
     }
     default: { // "", "on", "auto", anything else
@@ -1943,37 +1939,35 @@ internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Pac
             args[i] = arg;
         }
 
-        var exprᴛ1 = verb;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "CFLAGS"u8 || exprᴛ1 == "CPPFLAGS"u8 || exprᴛ1 == "CXXFLAGS"u8 || exprᴛ1 == "FFLAGS"u8 || exprᴛ1 == "LDFLAGS"u8: {
+        case {} when verb == "CFLAGS"u8 || verb == "CPPFLAGS"u8 || verb == "CXXFLAGS"u8 || verb == "FFLAGS"u8 || verb == "LDFLAGS"u8: {
             // Change relative paths to absolute.
             ctxt.makePathsAbsolute(args, di.Dir);
             break;
         }}
 
-        var exprᴛ2 = verb;
         switch (ᐧ) {
-        case {} when exprᴛ2 == "CFLAGS"u8: {
+        case {} when verb == "CFLAGS"u8: {
             di.CgoCFLAGS = appendꓸꓸꓸ(di.CgoCFLAGS, args);
             break;
         }
-        case {} when exprᴛ2 == "CPPFLAGS"u8: {
+        case {} when verb == "CPPFLAGS"u8: {
             di.CgoCPPFLAGS = appendꓸꓸꓸ(di.CgoCPPFLAGS, args);
             break;
         }
-        case {} when exprᴛ2 == "CXXFLAGS"u8: {
+        case {} when verb == "CXXFLAGS"u8: {
             di.CgoCXXFLAGS = appendꓸꓸꓸ(di.CgoCXXFLAGS, args);
             break;
         }
-        case {} when exprᴛ2 == "FFLAGS"u8: {
+        case {} when verb == "FFLAGS"u8: {
             di.CgoFFLAGS = appendꓸꓸꓸ(di.CgoFFLAGS, args);
             break;
         }
-        case {} when exprᴛ2 == "LDFLAGS"u8: {
+        case {} when verb == "LDFLAGS"u8: {
             di.CgoLDFLAGS = appendꓸꓸꓸ(di.CgoLDFLAGS, args);
             break;
         }
-        case {} when exprᴛ2 == "pkg-config"u8: {
+        case {} when verb == "pkg-config"u8: {
             di.CgoPkgConfig = appendꓸꓸꓸ(di.CgoPkgConfig, args);
             break;
         }

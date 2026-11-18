@@ -9,6 +9,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"go/version"
 	"os"
@@ -160,7 +161,60 @@ func (m *ModuleConverter) addTestOnlyPackages(moduleDir string, closure map[stri
 		visit(root)
 	}
 
+	// Each tested package's test closure: every import path its test variants (`p [p.test]`, `p_test [p.test]`)
+	// reach, production and test-only imports alike. Phase B reads it to name a tested package that a refused package
+	// reaches, as `go test ./...` fails that package's build.
+	m.testClosures = make(map[string]map[string]bool)
+
+	for _, root := range roots {
+		if root.ForTest == "" {
+			continue
+		}
+
+		reached := m.testClosures[root.ForTest]
+
+		if reached == nil {
+			reached = make(map[string]bool)
+			m.testClosures[root.ForTest] = reached
+		}
+
+		addReachedImportPaths(root, reached, make(map[string]bool))
+	}
+
 	return nil
+}
+
+// addReachedImportPaths adds the import path of every package pkg reaches through its imports to reached.
+func addReachedImportPaths(pkg *packages.Package, reached map[string]bool, seen map[string]bool) {
+	for _, imported := range pkg.Imports {
+		if seen[imported.ID] {
+			continue
+		}
+
+		seen[imported.ID] = true
+		reached[imported.PkgPath] = true
+		addReachedImportPaths(imported, reached, seen)
+	}
+}
+
+// refusedTestClosureImport is the first refused package, in import-path order, that pkgPath's test closure reaches,
+// or "" when it reaches none.
+func (m *ModuleConverter) refusedTestClosureImport(pkgPath string, refusedCode map[string]string) string {
+	var reached []string
+
+	for path := range m.testClosures[pkgPath] {
+		if _, isRefused := refusedCode[path]; isRefused && path != pkgPath {
+			reached = append(reached, path)
+		}
+	}
+
+	if len(reached) == 0 {
+		return ""
+	}
+
+	sort.Strings(reached)
+
+	return reached[0]
 }
 
 // mainModulePackagesWithTests lists the convert-set's main-module packages that have Go test files,
@@ -211,8 +265,18 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 	converter := NewModuleConverter(phaseA)
 	converter.includeTestClosure = true
 
-	if err := converter.ConvertModule(moduleDir); err != nil {
+	// A refused package does not stop the run (recurseRefusal.go): phase B still tests every package it does not
+	// reach. Any other phase-A error does.
+	var refusal *refusalError
+
+	if err := converter.ConvertModule(moduleDir); err != nil && !errors.As(err, &refusal) {
 		return fmt.Errorf("phase A (module conversion): %w", err)
+	}
+
+	refusedCode := make(map[string]string, len(converter.refused))
+
+	for _, r := range converter.refused {
+		refusedCode[r.path] = r.code
 	}
 
 	// Phase B: the -tests pipeline per MAIN-MODULE package with tests, into its phase-A directory,
@@ -229,6 +293,23 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 	unvalidated := map[string]string{}
 
 	for _, pkg := range targets {
+		// As `go test ./...` fails the build of a package it cannot compile, a tested package that is refused, or whose
+		// test closure imports a refused package, is named with that reason and gets no test project.
+		reason := ""
+
+		if code, isRefused := refusedCode[pkg.Path]; isRefused {
+			reason = fmt.Sprintf("the package was refused (%s)", code)
+		} else if refused := converter.refusedTestClosureImport(pkg.Path, refusedCode); refused != "" {
+			reason = "its test closure imports the refused package " + refused
+		}
+
+		if reason != "" {
+			fmt.Printf("\n-tests %s: not converted: %s\n", pkg.Path, reason)
+			failed = append(failed, fmt.Sprintf("  %s: not converted: %s", pkg.Path, reason))
+			unvalidated[pkg.Path] = "not converted: " + reason
+			continue
+		}
+
 		pkgOptions := options
 		pkgOptions.convertTests = true
 		pkgOptions.includeComments = true
@@ -255,11 +336,21 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 		}
 	}
 
+	var phaseB error
+
 	if len(failed) > 0 {
-		return fmt.Errorf("phase B: %d of %d package(s) failed:\n%s", len(failed), len(targets), strings.Join(failed, "\n"))
+		phaseB = fmt.Errorf("phase B: %d of %d package(s) failed:\n%s", len(failed), len(targets), strings.Join(failed, "\n"))
 	}
 
-	return nil
+	// A refusal still ends the run nonzero, as `go test ./...` exits 1 when a package fails to build.
+	switch {
+	case refusal != nil && phaseB != nil:
+		return fmt.Errorf("phase A (module conversion): %w\n%w", refusal, phaseB)
+	case refusal != nil:
+		return fmt.Errorf("phase A (module conversion): %w", refusal)
+	}
+
+	return phaseB
 }
 
 // recordsUnvalidatedPackages reports whether a -tests -recurse run names its failed packages in MODULE.md: a run that

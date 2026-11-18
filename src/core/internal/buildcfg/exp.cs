@@ -72,14 +72,13 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
     // always on.
     bool regabiSupported = default;
     bool regabiAlwaysOn = default;
-    var exprᴛ1 = goarch;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "riscv64"u8: {
+    case {} when goarch == "amd64"u8 || goarch == "arm64"u8 || goarch == "loong64"u8 || goarch == "ppc64le"u8 || goarch == "ppc64"u8 || goarch == "riscv64"u8: {
         regabiAlwaysOn = true;
         regabiSupported = true;
         break;
     }
-    case {} when exprᴛ1 == "s390x"u8: {
+    case {} when goarch == "s390x"u8: {
         regabiSupported = true;
         break;
     }}

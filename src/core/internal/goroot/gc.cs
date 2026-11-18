@@ -25,9 +25,8 @@ private static readonly @string srcˢᵇ = "src"u8;
 // IsStandardPackage reports whether path is a standard package,
 // given goroot and compiler. readDir accepts OS filesystem paths.
 public static bool IsStandardPackage(Func<@string, (slice<fs.DirEntry>, error)> readDir, @string goroot, @string compiler, @string path) {
-    var exprᴛ1 = compiler;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "gc"u8: {
+    case {} when compiler == "gc"u8: {
         @string dir = filepath.Join(goroot, srcˢ, path);
         var (dirents, err) = readDir(dir);
         if (err != nil) {
@@ -40,7 +39,7 @@ public static bool IsStandardPackage(Func<@string, (slice<fs.DirEntry>, error)> 
         }
         return false;
     }
-    case {} when exprᴛ1 == "gccgo"u8: {
+    case {} when compiler == "gccgo"u8: {
         return ᏑgccgoSearch.isStandard(path);
     }
     default: {

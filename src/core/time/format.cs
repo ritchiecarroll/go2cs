@@ -705,12 +705,11 @@ public static @string Format(this Time t, @string layout) {
 // representation to b and returns the extended buffer.
 public static slice<byte> AppendFormat(this Time t, slice<byte> b, @string layout) {
     // Optimize for RFC3339 as it accounts for over half of all representations.
-    var exprᴛ1 = layout;
     switch (ᐧ) {
-    case {} when exprᴛ1 == RFC3339: {
+    case {} when layout == RFC3339: {
         return t.appendFormatRFC3339(b, false);
     }
-    case {} when exprᴛ1 == RFC3339Nano: {
+    case {} when layout == RFC3339Nano: {
         return t.appendFormatRFC3339(b, true);
     }
     default: {
@@ -1334,13 +1333,12 @@ internal static (Time, error) parse(@string layout, @string value, ж<Location> 
                     break;
                 }
                 (p, value) = (value[0..2], value[2..]);
-                var exprᴛ2 = p;
                 switch (ᐧ) {
-                case {} when exprᴛ2 == "PM"u8: {
+                case {} when p == "PM"u8: {
                     pmSet = true;
                     break;
                 }
-                case {} when exprᴛ2 == "AM"u8: {
+                case {} when p == "AM"u8: {
                     amSet = true;
                     break;
                 }
@@ -1357,13 +1355,12 @@ internal static (Time, error) parse(@string layout, @string value, ж<Location> 
                     break;
                 }
                 (p, value) = (value[0..2], value[2..]);
-                var exprᴛ3 = p;
                 switch (ᐧ) {
-                case {} when exprᴛ3 == "pm"u8: {
+                case {} when p == "pm"u8: {
                     pmSet = true;
                     break;
                 }
-                case {} when exprᴛ3 == "am"u8: {
+                case {} when p == "am"u8: {
                     amSet = true;
                     break;
                 }

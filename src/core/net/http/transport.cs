@@ -2212,14 +2212,14 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
                 finally { ᒐ.Run(); }
             });
             var selᴛ105 = connectCtx.Done();
-            var selᴛ106 = didReadResponse;
-            switch (select(ᐸꟷ(selᴛ105, ꓸꓸꓸ), ᐸꟷ(selᴛ106, ꓸꓸꓸ))) {
+            var didReadResponseᴛ1 = didReadResponse;
+            switch (select(ᐸꟷ(selᴛ105, ꓸꓸꓸ), ᐸꟷ(didReadResponseᴛ1, ꓸꓸꓸ))) {
             case 0 when selᴛ105.ꟷᐳ(out _): {
                 conn.Close();
                 ᐸꟷ(didReadResponse);
                 (pconn, err) = (default, connectCtx.Err()); goto ᒐdone;
             }
-            case 1 when selᴛ106.ꟷᐳ(out _): {
+            case 1 when didReadResponseᴛ1.ꟷᐳ(out _): {
                 // resp or err now set
                 break;
             }}
@@ -2842,11 +2842,11 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
             // Before looping back to the top of this function and peeking on
             // the bufio.Reader, wait for the caller goroutine to finish
             // reading the response body. (or for cancellation or death)
-            var selᴛ113 = waitForBodyRead;
+            var waitForBodyReadᴛ1 = waitForBodyRead;
             var selᴛ114 = rc.treq.ctx.Done();
             var selᴛ115 = pc.closech;
-            switch (select(ᐸꟷ(selᴛ113, ꓸꓸꓸ), ᐸꟷ(selᴛ114, ꓸꓸꓸ), ᐸꟷ(selᴛ115, ꓸꓸꓸ))) {
-            case 0 when selᴛ113.ꟷᐳ(out var bodyEOF): {
+            switch (select(ᐸꟷ(waitForBodyReadᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ114, ꓸꓸꓸ), ᐸꟷ(selᴛ115, ꓸꓸꓸ))) {
+            case 0 when waitForBodyReadᴛ1.ꟷᐳ(out var bodyEOF): {
                 alive = alive && bodyEOF && !pc.sawEOF && Ꮡpc.wroteRequest() && tryPutIdleConn(rc.treq);
                 if (bodyEOF) {
                     eofc.ᐸꟷ(new EmptyStruct());
@@ -3000,11 +3000,11 @@ internal static Func<bool> waitForContinue(this ж<persistConn> Ꮡpc, /*<-*/cha
             var timerʗ1 = timer;
             defer(() => timerʗ1.Stop(), ref ᒐ);
 
-            var selᴛ116 = continueChʗ1;
+            var continueChᴛ1 = continueChʗ1;
             var selᴛ117 = timer.C;
             var selᴛ118 = Ꮡpc.Value.closech;
-            switch (select(ᐸꟷ(selᴛ116, ꓸꓸꓸ), ᐸꟷ(selᴛ117, ꓸꓸꓸ), ᐸꟷ(selᴛ118, ꓸꓸꓸ))) {
-            case 0 when selᴛ116.ꟷᐳ(out var _, out var ok): {
+            switch (select(ᐸꟷ(continueChᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ117, ꓸꓸꓸ), ᐸꟷ(selᴛ118, ꓸꓸꓸ))) {
+            case 0 when continueChᴛ1.ꟷᐳ(out var _, out var ok): {
                 return ok;
             }
             case 1 when selᴛ117.ꟷᐳ(out _): {
@@ -3416,13 +3416,13 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
         var pcClosed = pc.closech;
         for (;;) {
             testHookWaitResLoop();
-            var selᴛ127 = writeErrCh;
-            var selᴛ128 = pcClosed;
-            var selᴛ129 = respHeaderTimer;
-            var selᴛ130 = resc;
-            var selᴛ131 = ctxDoneChan;
-            switch (select(ᐸꟷ(selᴛ127, ꓸꓸꓸ), ᐸꟷ(selᴛ128, ꓸꓸꓸ), ᐸꟷ(selᴛ129, ꓸꓸꓸ), ᐸꟷ(selᴛ130, ꓸꓸꓸ), ᐸꟷ(selᴛ131, ꓸꓸꓸ))) {
-            case 0 when selᴛ127.ꟷᐳ(out var errΔ2): {
+            var writeErrChᴛ1 = writeErrCh;
+            var pcClosedᴛ1 = pcClosed;
+            var respHeaderTimerᴛ1 = respHeaderTimer;
+            var rescᴛ1 = resc;
+            var ctxDoneChanᴛ1 = ctxDoneChan;
+            switch (select(ᐸꟷ(writeErrChᴛ1, ꓸꓸꓸ), ᐸꟷ(pcClosedᴛ1, ꓸꓸꓸ), ᐸꟷ(respHeaderTimerᴛ1, ꓸꓸꓸ), ᐸꟷ(rescᴛ1, ꓸꓸꓸ), ᐸꟷ(ctxDoneChanᴛ1, ꓸꓸꓸ))) {
+            case 0 when writeErrChᴛ1.ꟷᐳ(out var errΔ2): {
                 if (debugRoundTrip) {
                     req.logf("writeErrCh recv: %T/%#v", errΔ2, errΔ2);
                 }
@@ -3443,10 +3443,10 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
                 }
                 break;
             }
-            case 1 when selᴛ128.ꟷᐳ(out _): {
-                var selᴛ132 = resc;
-                switch (trySelect(ᐸꟷ(selᴛ132, ꓸꓸꓸ))) {
-                case 0 when selᴛ132.ꟷᐳ(out var re): {
+            case 1 when pcClosedᴛ1.ꟷᐳ(out _): {
+                var rescᴛ2 = resc;
+                switch (trySelect(ᐸꟷ(rescᴛ2, ꓸꓸꓸ))) {
+                case 0 when rescᴛ2.ꟷᐳ(out var re): {
                     // The pconn closing raced with the response to the request,
                     // probably after the server wrote a response and immediately
                     // closed the connection. Use the response.
@@ -3460,20 +3460,20 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
                 }
                 (resp, err) = (default, Ꮡpc.mapRoundTripError(Ꮡreq, startBytesWritten, pc.closed)); goto ᒐdone;
             }
-            case 2 when selᴛ129.ꟷᐳ(out _): {
+            case 2 when respHeaderTimerᴛ1.ꟷᐳ(out _): {
                 if (debugRoundTrip) {
                     req.logf("timeout waiting for response headers.");
                 }
                 Ꮡpc.close(errTimeout);
                 (resp, err) = (default, errTimeout); goto ᒐdone;
             }
-            case 3 when selᴛ130.ꟷᐳ(out var re): {
+            case 3 when rescᴛ1.ꟷᐳ(out var re): {
                 (resp, err) = handleResponse(re); goto ᒐdone;
             }
-            case 4 when selᴛ131.ꟷᐳ(out _): {
-                var selᴛ133 = resc;
-                switch (trySelect(ᐸꟷ(selᴛ133, ꓸꓸꓸ))) {
-                case 0 when selᴛ133.ꟷᐳ(out var reΔ1): {
+            case 4 when ctxDoneChanᴛ1.ꟷᐳ(out _): {
+                var rescᴛ3 = resc;
+                switch (trySelect(ᐸꟷ(rescᴛ3, ꓸꓸꓸ))) {
+                case 0 when rescᴛ3.ꟷᐳ(out var reΔ1): {
                     // readLoop is responsible for canceling req.ctx after
                     // it reads the response body. Check for a response racing
                     // the context close, and use the response if available.
@@ -3562,15 +3562,14 @@ internal static void closeLocked(this ref persistConn pc, error err) {
 } partial class http_package {
 
 internal static @string schemePort(@string scheme) {
-    var exprᴛ1 = scheme;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "http"u8: {
+    case {} when scheme == "http"u8: {
         return "80";
     }
-    case {} when exprᴛ1 == "https"u8: {
+    case {} when scheme == "https"u8: {
         return "443";
     }
-    case {} when exprᴛ1 == "socks5"u8 || exprᴛ1 == "socks5h"u8: {
+    case {} when scheme == "socks5"u8 || scheme == "socks5h"u8: {
         return "1080";
     }
     default: {

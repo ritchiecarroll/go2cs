@@ -478,9 +478,8 @@ internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, sl
             (@in.p, @in.n) = (0, 0);
         }
         (needProgress, lastFull) = (lastFull, false);
-        var exprᴛ1 = err0;
         var matchᴛ1 = false;
-        if (AreEqual(exprᴛ1, ErrShortDst)) { matchᴛ1 = true;
+        if (AreEqual(err0, ErrShortDst)) { matchᴛ1 = true;
             // Process the destination buffer next. Return if we are already
             // at the high index.
             if (i == high) {
@@ -499,7 +498,7 @@ internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, sl
             // Return a fatal error as this transformation can never complete.
             c.fatalError(i, errShortInternal);
         }
-        else if (AreEqual(exprᴛ1, ErrShortSrc)) { matchᴛ1 = true;
+        else if (AreEqual(err0, ErrShortSrc)) { matchᴛ1 = true;
             do {
                 if (i == 0) {
                     // Save ErrShortSrc in err. All other errors take precedence.
@@ -521,7 +520,7 @@ internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, sl
                 fallthrough = true;
             } while (false);
         }
-        if (fallthrough || !matchᴛ1 && AreEqual(exprᴛ1, default)) {
+        if (fallthrough || !matchᴛ1 && AreEqual(err0, default)) {
             // if i == low, we have depleted the bytes at index i or any lower levels.
             // In that case we increase low and i. In all other cases we decrease i to
             // fetch more bytes before proceeding to the next index.

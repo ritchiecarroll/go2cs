@@ -1177,14 +1177,13 @@ internal static @string resolvePath(@string @base, @string @ref) {
     var first = true;
     while (found) {
         (elem, remaining, found) = strings.Cut(remaining, "/");
-        var exprᴛ1 = elem;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "."u8: {
+        case {} when elem == "."u8: {
             first = false;
             continue;
             break;
         }
-        case {} when exprᴛ1 == ".."u8: {
+        case {} when elem == ".."u8: {
             nint i = bytes.LastIndexByte(dst[1..], (byte)'/'); if (i >= 0) {
                 dst = dst.slice(0, i + 1);
             } else {

@@ -12,9 +12,9 @@ internal static void f(nint n) {
     }
     var ch = new channel<nint>(1);
     ch.ᐸꟷ(n);
-    var selᴛ1 = ch;
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out sink[rec(n)]): {
+    var chᴛ1 = ch;
+    switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ))) {
+    case 0 when chᴛ1.ꟷᐳ(out sink[rec(n)]): {
         break;
     }}
 }

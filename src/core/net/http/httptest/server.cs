@@ -359,10 +359,10 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
         var timerʗ1 = timer;
         defer(() => timerʗ1.Stop(), ref ᒐ);
         for (nint i = 0; i < nconn; i++) {
-            var selᴛ1 = ch;
+            var chᴛ1 = ch;
             var selᴛ2 = timer.C;
-            switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-            case 0 when selᴛ1.ꟷᐳ(out _): {
+            switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+            case 0 when chᴛ1.ꟷᐳ(out _): {
                 break;
             }
             case 1 when selᴛ2.ꟷᐳ(out _): {

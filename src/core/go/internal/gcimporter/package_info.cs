@@ -66,7 +66,7 @@ using static go.go.@internal.gcimporter_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("go/internal/gcimporter/gcimporter.go", "gcimporter.cs", "ABUs8oKCpoKUpoKUgoKUlIKCgoKUuIK4koKUgpSmlKSCgoKClJSChA==", "62-67:1", "", "", "79:21", "70:25,71:17")]
 [assembly: GoPositionMap("go/internal/gcimporter/support.go", "support.cs", "ABEggoK4ogARIO6CgoKmgpSCuKaCgoKCpoIAGSySgoKUgoKClA==", "64-69:1")]
-[assembly: GoPositionMap("go/internal/gcimporter/ureader.go", "ureader.cs", "AChUksriAA4elIKCgqamgoKUgqaUgqaCqJKCgqaGlIIAHTqC3ILcgsqygoK4goKCpqLGooKmgoLulKaCgqa0lIKCyrKCxsaCpoKCxqKCpLSkpoKmlIKUqrKmgoKClMaygoKCgpSmgqaCgoKUgoKmgqaCxqKkgramgoKCgpSmpoKkgqSkpKSkpKS4goKCgoKCgoKUgoKClKamgoKClKaigoKUgoKCgqaCpoKCAAkUlKaClIKClKaClIKCpqaClIKClIKCqrKUgqaClIKCpsakgoKCgpSClIKmgoK4gqaClIKUkqaUtoKCgpSCtoKCgraCgoK2lIKClJTKgoKCgpSCgqaCgqaCgqaUgsiCgsimpJSCgoKmgoKmgoKCgoK4uMai7oIABxCCgoKUgqaCggAOHoKigrimgoKClIKUgqaCgpSCgs7CgpTotqSCgoKUgg==", "100-102:1;483-485:1;638-642:1", "", "55=NumElems/1/3/11,NumElems/2/3/12,NumElems/3/3/13;141=NewDecoder/1/1/1;148=TempDecoder/1/1/1")]
+[assembly: GoPositionMap("go/internal/gcimporter/ureader.go", "ureader.cs", "AChUksriAA4elIKCgqamgoKUgqaUgqaCqJKCgqaGlIIAHTqC3ILcgsqygoK4goKCpqLGooKmgoLulKaCgqa0lIKCyrKCxsaCpoKCxqKClLSkpoKmlIKUqrKmgoKClMaygoKCgpSmgqaCgoKUgoKmgqaCxqKkgramgoKCgpSmpoKkgqSkpKSkpKS4goKCgoKCgoKUgoKClKamgoKClKaigoKUgoKCgqaCpoKCAAkUlKaClIKClKaClIKCpqaClIKClIKCqrKUgqaClIKCpsakgoKCgpSClIKmgoK4gqaClIKUkqaUtoKCgpSCtoKCgraCgoK2lIKClJTKgoKCgpSCgqaCgqaCgqaUgsiCgsimpJSCgoKmgoKmgoKCgoK4uMai7oIABxCCgoKUgqaCggAOHoKigrimgoKClIKUgqaCgpSCgs7CgpTotqSCgoKUgg==", "100-102:1;483-485:1;638-642:1", "", "55=NumElems/1/3/11,NumElems/2/3/12,NumElems/3/3/13;141=NewDecoder/1/1/1;148=TempDecoder/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;
@@ -84,7 +84,7 @@ public static partial class gcimporter_package
     internal partial struct derivedInfo {}
     internal partial struct fakeFileSet {}
     internal partial struct fileInfo {}
-    internal partial struct pkgReader {}
+    [GoValueClone("PkgDecoder")] internal partial struct pkgReader {}
     internal partial struct reader {}
     internal partial struct readerDict {}
     internal partial struct typeInfo {}

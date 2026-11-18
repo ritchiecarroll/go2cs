@@ -959,6 +959,117 @@ An unnamed struct inside a FUNC type (a variable, field, parameter or result of 
 gets no lift at all and the conversion stops with `Unresolved dynamic struct type`; a declared function taken as
 a value and a called func literal convert.
 
+## A struct conversion between two types of OTHER packages calls a generated function
+Go converts `lib.Pitch(o)`, with `o` an `other.Pitch`, because the two struct types have identical fields. In C#
+each is a `partial struct` of its own assembly, a conversion operator must be declared by one of its two types, and
+this package can reopen neither, so the cast the converter writes for a named target binds nothing (CS0030). The
+pair is recorded as `[assembly: GoImplicitConv<other.Pitch, lib.Pitch>]` like any other, and go2cs-gen, seeing
+both sides in referenced assemblies, writes one static function in this package's class instead of an operator.
+It is named as Go names the target, the package's class name without its suffix, the alias dot, then the type,
+and the site calls it:
+
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.go:79 -->
+```go
+fmt.Println("overloads:", lib.Pitch(o).Hz, lib.Pitch(twin).Hz, lib.Pitch(other.Tagged{Hz: 55}).Hz)
+```
+
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.cs:64 -->
+```csharp
+fmt.Println("overloads:", libꓸPitch(o).Hz, libꓸPitch(twin).Hz, libꓸPitch(new other.Tagged(Hz: 55)).Hz);
+```
+
+<!-- illustration: go2cs-gen output, written into Generated/ at build time and not committed -->
+```csharp
+internal static lib.Pitch libꓸPitch(other.Pitch src) => new lib.Pitch(src.Hz);
+```
+
+A second source type for the same target overloads the name (`libꓸPitch(lib.Twin src)`), and two types of ONE
+foreign package are as closed as two of two. The function's name is derived on both sides from the type itself,
+not from the file's import alias, so a file that imports `lib` as `l` still calls `libꓸPitch`. The operand is
+evaluated once, and, as for every conversion, a result that carries an array is cloned where it is transferred
+(*A conversion copies its operand* below).
+
+The route is taken only where the function can be written and nothing else converts. Each limit keeps today's
+cast and its compile error, so none is silent:
+
+- a type written over another named type, `type Tag other.Pitch`, converts from that base through its own
+  operator and keeps the cast;
+- a generic type on either side;
+- an unexported field on either side (CS0030): it is `internal` to its own assembly, out of this package's reach
+  in C# as it is by name in Go;
+- a field whose type holds an unnamed struct type: each package lifts its own C# type for it, and the function
+  would need a second conversion per field;
+- two target types of one name in two packages of one name (`a/lib.Pitch` and `b/lib.Pitch`), each converted
+  from the same source type in one package: both functions are `libꓸPitch` with one parameter type (CS0111).
+
+(Guarded by the `ForeignPairStructConversion` behavioral test, three packages whose output is compared with Go's,
+by `TestAStructConversionBetweenTwoForeignTypesCallsItsFunction` in the converter, one package per site, and by
+the `ForeignPairStructConversionTests` generator tests.)
+
+## A conversion copies its operand
+Go converts a COPY: after `c := chord(lc)` a write to `c.Notes`, or to an array inside a nested struct field,
+does not reach `lc`. A fixed array is a golib `array<T>` over a shared backing store, and every operator a
+struct conversion binds (go2cs-gen's field-wise operator, or its function for two foreign types) builds the result
+from the operand's fields, so the backing would be shared. Where the operand is existing storage (an identifier,
+selector, index or dereference) whose type carries an array, the conversion reads that storage, and the copy is
+taken ONCE, where the converted value is transferred: an assignment, a return, a send or a composite-literal
+element clones the result, as it clones any value (`exprReadsValueNeedingClone`). A conversion consumed by a read
+(a value-receiver call, an index) is not transferred and copies nothing; passed as an argument, it is copied by
+the parameter, as any argument is. A call result or a composite literal is reachable by no other name and is
+converted as it is.
+
+<!-- source: src/tests/Behavioral/StructConversionCopy/main.go:44-45, 96 -->
+```go
+c := chord(lc)
+c.Notes[0], c.In.V[1] = 9, 8
+…
+n := notes(raw)
+```
+
+<!-- source: src/tests/Behavioral/StructConversionCopy/main.cs:42, 84 -->
+```csharp
+var c = ((chord)lc).ΔClone();
+…
+var n = ((notes)raw).Clone();
+```
+
+A defined type written over another named struct, `type Counts counts`, converts through go2cs-gen's inherited
+wrapper, whose two operators with that base already copy (`[GoValueClone("Value")]`, the `ConversionCopy` of
+go2cs-gen's `InheritedTypeTemplate`); that pair takes no clone at the transfer, so the value is copied once. A
+named ARRAY wrapper's operators hand the array over, so its conversions keep the clone at the transfer.
+
+(Guarded by the `StructConversionCopy` behavioral test, twelve routes in three packages whose output is compared
+with Go's, and by `TestAStructConversionOfExistingStorageCopiesItsArrays` in the converter, one package per site.)
+
+An array reached only through an EMBEDDED struct is cloned the same way. The embed is an inline field, so a C# struct
+copy copies the embed, but the array inside it still shares its backing store. `typeNeedsValueClone` walks embedded
+value fields, so the struct is stamped with the embed's member and every copy site clones it:
+
+<!-- source: src/tests/Behavioral/EmbeddedArrayCopy/main.go:57, 62 -->
+```go
+c := le
+…
+e := emb(le)
+```
+
+<!-- source: src/tests/Behavioral/EmbeddedArrayCopy/main.cs:51, 55 -->
+```csharp
+var c = le.ΔClone();
+…
+var e = ((emb)le).ΔClone();
+```
+
+The stamp is `[GoValueClone("Inner")] internal partial struct emb {}`. An embedded POINTER is shared in Go too and
+takes nothing. (Guarded by the `EmbeddedArrayCopy` behavioral test, ten routes in three packages, and by
+`TestAStructCarryingAnArrayThroughAnEmbedCopiesIt` in the converter.)
+
+A ZERO-LENGTH array holds no element, so a copy that shares its empty backing store cannot be told from one that does
+not. A field of type `[0]T` is therefore no reason to clone a struct and no member of its stamp: syscall's
+`InotifyEvent` (`Name [0]uint8`, the flexible-array member) takes no `[GoValueClone]`, and `Sysinfo_t`'s list names
+`Loads`, `Pad_cgo_0` and `Pad_cgo_1` but not `X_f`. An embedded `[0]func()`, the marker that makes a struct
+uncomparable, is skipped the same way. A bare `[0]T` value still takes its own `.Clone()` where Go copies it.
+(Guarded by `TestAZeroLengthArrayFieldTakesNoClone` in the converter.)
+
 ## A methodless named func type renders as its base delegate
 
 Go treats a named func type as freely interconvertible with its underlying `func(...)` when the

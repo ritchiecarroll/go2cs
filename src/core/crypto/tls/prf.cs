@@ -283,9 +283,8 @@ internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMa
     var masterSecretʗ1 = masterSecret;
     var serverRandomʗ1 = serverRandom;
     return (@string label, slice<byte> context, nint length) => {
-        var exprᴛ1 = label;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "client finished"u8 || exprᴛ1 == "server finished"u8 || exprᴛ1 == "master secret"u8 || exprᴛ1 == "key expansion"u8: {
+        case {} when label == "client finished"u8 || label == "server finished"u8 || label == "master secret"u8 || label == "key expansion"u8: {
             // These values are reserved and may not be used.
             return (default, fmt.Errorf("crypto/tls: reserved ExportKeyingMaterial label: %s"u8, label));
         }}

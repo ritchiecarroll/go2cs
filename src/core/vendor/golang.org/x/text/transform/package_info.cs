@@ -64,7 +64,7 @@ using static go.vendor.golang.org.x.text.transform_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/text/transform/transform.go", "transform.cs", "ABcquLi4uABFjAEAGDaiggAJEpKSlIKCgoKUgoLugoKClJSCuILG+KaClOyClIIAEyqiggAJFtKCpoKClIKCgpSCgoKmgoKCgqamgsaCpoKUgoLuxoK2upKCgoKClIKUAAsMooKClKaCAAoKguymABIkgoKCAA8YgqaCyLKClIKCpoKClMiSgoKUvuSCgoKC/oKCgoKCgpSCyIKUgsqCuLSUgsq4gqaC6oKCtriC3IKClJTIkuqW0oSClJSUgoLcgoKClJSCuIKCgpSUlMqigoKCgpSUgoLOwoKmgtyCgsqSAAgQgqaCgoK4gpSClIKClKaCAAkUgoKClIKCyoS4goKCgoK4goKUgoKUgpSCzqKqooKCgpSmgoKCgoKCgoLKgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/transform/transform.go", "transform.cs", "ABcquLi4uABFjAEAGDaiggAJEpKSlIKCgoKUgoLugoKClJSCuILG+KaClOyClIIAEyqiggAJFtKCpoKClIKCgpSCgoKmgoKCgqamgsaCpoKUgoLuxoK2upKCgoKClIKUAAsMooKClKaCAAoKguymABIkgoKCAA8YgqaCyLKClIKCpoKClMiSgoKUvuSCgoKC/oKCgoKCgpSCuIKUgsqCuLSUgsq4gqaC6oKCtriC3IKClJTIkuqW0oSClJSUgoLcgoKClJSCuIKCgpSUlMqigoKCgpSUgoLOwoKmgtyCgsqSAAgQgqaCgoK4gpSClIKClKaCAAkUgoKClIKCyoS4goKCgoK4goKUgoKUgpSCzqKqooKCgpSmgoKCgoKCgoLKgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.text;

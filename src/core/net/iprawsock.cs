@@ -103,9 +103,8 @@ public static (ж<IPAddr>, error) ResolveIPAddr(@string network, @string address
     if (err != nil) {
         return (default, err);
     }
-    var exprᴛ1 = afnet;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+    case {} when afnet == "ip"u8 || afnet == "ip4"u8 || afnet == "ip6"u8: {
         break;
     }
     default: {

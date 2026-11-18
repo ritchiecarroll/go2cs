@@ -61,7 +61,7 @@ public static ж<Counter> NewCounter(/*[48]*/ ж<array<byte>> entropy) {
     }
 
     var c = Ꮡ(new Counter());
-    c.c = aes.NewCTR(cipher, V).Value;
+    c.c.AssignFrom(aes.NewCTR(cipher, V).Value);
     c.update(entropy);
     c.reseedCounter = 1;
     return c;
@@ -87,7 +87,7 @@ internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡs
     if (err != nil) {
         throw panic(err);
     }
-    c.c = aes.NewCTR(cipher, V).Value;
+    c.c.AssignFrom(aes.NewCTR(cipher, V).Value);
 }
 
 } partial class drbg_package {

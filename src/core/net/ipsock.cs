@@ -87,14 +87,13 @@ internal static bool isNotIPv4(Addr addr) { return !isIPv4(addr); }
 // IPv4 is preferred, unless addr contains an IPv6 literal.
 internal static Addr forResolve(this addrList addrs, @string network, @string addr) {
     bool want6 = default;
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip"u8: {
+    case {} when network == "ip"u8: {
         // IPv6 literal (addr does NOT contain a port)
         want6 = bytealg.CountString(addr, (byte)':') > 0;
         break;
     }
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "udp"u8: {
+    case {} when network == "tcp"u8 || network == "udp"u8: {
         // IPv6 literal. (addr contains a port, so look for '[')
         want6 = bytealg.CountString(addr, (byte)'[') > 0;
         break;
@@ -295,9 +294,9 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
     @string host = default;
     @string port = default;
     ref var portnum = ref heap(new nint(), out var Ꮡportnum);
-    var exprᴛ1 = net;
+    var netᴛ1 = net;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when netᴛ1 == "tcp"u8 || netᴛ1 == "tcp4"u8 || netᴛ1 == "tcp6"u8 || netᴛ1 == "udp"u8 || netᴛ1 == "udp4"u8 || netᴛ1 == "udp6"u8: {
         if (addr != ""u8) {
             (host, port, err) = SplitHostPort(addr); if (err != nil) {
                 return (default, err);
@@ -308,7 +307,7 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
         }
         break;
     }
-    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+    case {} when netᴛ1 == "ip"u8 || netᴛ1 == "ip4"u8 || netᴛ1 == "ip6"u8: {
         if (addr != ""u8) {
             host = addr;
         }
@@ -319,15 +318,15 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
     }}
     var portnumʗ1 = portnum;
     var inetaddr = Addr (IPAddr ip) => {
-        var exprᴛ2 = net;
+        var netᴛ2 = net;
         switch (ᐧ) {
-        case {} when exprᴛ2 == "tcp"u8 || exprᴛ2 == "tcp4"u8 || exprᴛ2 == "tcp6"u8: {
+        case {} when netᴛ2 == "tcp"u8 || netᴛ2 == "tcp4"u8 || netᴛ2 == "tcp6"u8: {
             return new TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ip.IP, Port: portnumʗ1, Zone: ip.Zone)));
         }
-        case {} when exprᴛ2 == "udp"u8 || exprᴛ2 == "udp4"u8 || exprᴛ2 == "udp6"u8: {
+        case {} when netᴛ2 == "udp"u8 || netᴛ2 == "udp4"u8 || netᴛ2 == "udp6"u8: {
             return new UDPAddrжAddr(Ꮡ(new UDPAddr(IP: ip.IP, Port: portnumʗ1, Zone: ip.Zone)));
         }
-        case {} when exprᴛ2 == "ip"u8 || exprᴛ2 == "ip4"u8 || exprᴛ2 == "ip6"u8: {
+        case {} when netᴛ2 == "ip"u8 || netᴛ2 == "ip4"u8 || netᴛ2 == "ip6"u8: {
             return new IPAddrжAddr(Ꮡ(new IPAddr(IP: ip.IP, Zone: ip.Zone)));
         }
         default: {

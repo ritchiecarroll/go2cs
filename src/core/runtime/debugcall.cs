@@ -61,9 +61,8 @@ internal static @string debugCallCheck(uintptr pc) {
 
         @string name = funcname(f);
 
-        var exprᴛ1 = name;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "debugCall32"u8 || exprᴛ1 == "debugCall64"u8 || exprᴛ1 == "debugCall128"u8 || exprᴛ1 == "debugCall256"u8 || exprᴛ1 == "debugCall512"u8 || exprᴛ1 == "debugCall1024"u8 || exprᴛ1 == "debugCall2048"u8 || exprᴛ1 == "debugCall4096"u8 || exprᴛ1 == "debugCall8192"u8 || exprᴛ1 == "debugCall16384"u8 || exprᴛ1 == "debugCall32768"u8 || exprᴛ1 == "debugCall65536"u8: {
+        case {} when name == "debugCall32"u8 || name == "debugCall64"u8 || name == "debugCall128"u8 || name == "debugCall256"u8 || name == "debugCall512"u8 || name == "debugCall1024"u8 || name == "debugCall2048"u8 || name == "debugCall4096"u8 || name == "debugCall8192"u8 || name == "debugCall16384"u8 || name == "debugCall32768"u8 || name == "debugCall65536"u8: {
             // These functions are allowed so that the debugger can initiate multiple function calls.
             // See: https://golang.org/cl/161137/
             return;

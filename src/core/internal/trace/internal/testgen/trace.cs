@@ -427,45 +427,44 @@ internal static uint64 uintArgFor(this ref Batch b, any arg, @string argSpec) {
         typStr = components[1];
     }
     uint64 u = default;
-    var exprᴛ1 = typStr;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "value"u8 || exprᴛ1 == "mono"u8 || exprᴛ1 == "sec"u8 || exprᴛ1 == "nsec"u8: {
+    case {} when typStr == "value"u8 || typStr == "mono"u8 || typStr == "sec"u8 || typStr == "nsec"u8: {
         u = arg._<uint64>();
         break;
     }
-    case {} when exprᴛ1 == "stack"u8: {
+    case {} when typStr == "stack"u8: {
         u = b.gen.Stack(arg._<slice<trace.StackFrame>>());
         break;
     }
-    case {} when exprᴛ1 == "seq"u8: {
+    case {} when typStr == "seq"u8: {
         u = (uint64)(arg._<Seq>());
         break;
     }
-    case {} when exprᴛ1 == "pstatus"u8: {
+    case {} when typStr == "pstatus"u8: {
         u = (uint64)(arg._<tracev2.ProcStatus>());
         break;
     }
-    case {} when exprᴛ1 == "gstatus"u8: {
+    case {} when typStr == "gstatus"u8: {
         u = (uint64)(arg._<tracev2.GoStatus>());
         break;
     }
-    case {} when exprᴛ1 == "g"u8: {
+    case {} when typStr == "g"u8: {
         u = (uint64)(arg._<trace.GoID>());
         break;
     }
-    case {} when exprᴛ1 == "m"u8: {
+    case {} when typStr == "m"u8: {
         u = (uint64)(arg._<trace.ThreadID>());
         break;
     }
-    case {} when exprᴛ1 == "p"u8: {
+    case {} when typStr == "p"u8: {
         u = (uint64)(arg._<trace.ProcID>());
         break;
     }
-    case {} when exprᴛ1 == "string"u8: {
+    case {} when typStr == "string"u8: {
         u = b.gen.String(arg._<@string>());
         break;
     }
-    case {} when exprᴛ1 == "task"u8: {
+    case {} when typStr == "task"u8: {
         u = (uint64)(arg._<trace.TaskID>());
         break;
     }

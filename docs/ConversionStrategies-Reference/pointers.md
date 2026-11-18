@@ -3829,7 +3829,7 @@ conversion followed by the field-address accessor, the same form a pointer-retur
 ```csharp
     atomic.StoreInt32(@unsafe.Pointer.To<rec>(gp).Ꮡid, 3);
 ```
-A parenthesized operand keeps its parentheses, `(@unsafe.Pointer.To<rec>(gp)).Ꮡid`; a field of a
+A parenthesized conversion keeps its parentheses, `(@unsafe.Pointer.To<rec>(gp)).Ꮡid`; a field of a
 value field chains the accessor, `@unsafe.Pointer.To<outer>(op).Ꮡin.Ꮡcnt`; and a conversion
 between two named pointer types takes the managed reinterpret, `Ꮡh.Reinterpret<rec2, rec>().Ꮡcnt`.
 
@@ -3847,6 +3847,40 @@ type other than the field's; and by `AddressOfFieldThroughConversionNative`, lin
 the first four over pages the kernel owns and then ccgo's own union spelling over a `uintptr`: a
 member stored, read, compound-assigned and incremented, a pointer-sized member, a second union, the
 address as a number, an atomic operation on it and a kept address.)
+
+## Parentheses around an address-of operand change nothing
+Go's `&(x)` is `&x`, and `&((*T)(p).f)` is `&(*T)(p).f`. The converter removes the parentheses around
+the operand of every `&`, and around each base on the operand's selector and index path, where the file
+is parsed, so the parenthesized operand converts exactly as the plain one does:
+
+<!-- source: src/tests/Behavioral/AddressOfParenthesizedOperand/main.go:46 -->
+```go
+	atomic.StoreInt32(&((*lock)(lp).owner), 21)
+```
+<!-- source: src/tests/Behavioral/AddressOfParenthesizedOperand/main.cs.target:39 -->
+```csharp
+    atomic.StoreInt32(@unsafe.Pointer.To<@lock>(lp).Ꮡowner, 21);
+```
+A parenthesized local is heap-boxed and addressed through its box (`&(n)` is `Ꮡn`), a field of a
+value is `Ꮡpt.ᏑX` for `&((pt).X)`, and an element is `Ꮡarr.at<nint>(2)` for `&((arr)[2])`. Parentheses
+that are part of the expression stay: around a conversion, `&((*T)(p)).f`, and around a dereference,
+`&((*pp).X)`.
+
+**Why.** Every address-of rule matches the operand's shape, and so do the two analyses that read it:
+the one that heap-boxes an address-taken local, and the one that records which types have their
+fields addressed (`GoFieldAccess`). A parenthesized operand matched none of them and fell to
+`Ꮡ(x)`, which boxes a copy, so every write through the address was lost; a type whose only field
+address was parenthesized got no field-access record at all. ccgo spells libc's pthread mutex owner
+and count this way, `atomic.CompareAndSwapInt32(&((*pthreadMutex)(unsafe.Pointer(m)).owner), 0,
+tls.ID)`, nineteen sites on linux, and sqlite's recursive init mutex deadlocked on re-entry.
+Removing the parentheses once, before `go/types` runs, means every rule and both analyses see the
+one form; removing them in the address-of visitor alone would leave both analyses blind.
+In the standard library the only emitted site whose copy was observable is the TXT record read in
+`net`'s windows lookup, whose hand-converted file already spells it as the element's address. <!-- 2026-11-18, batch 312 blocker (COORD), census over go1.26.11 std on four targets and the sqlite-cs closure: std 5 sites on windows/amd64 and 4 on the others, the sqlite closure 19 on linux and 0 on windows and darwin. -->
+(Guarded by the `AddressOfParenthesizedOperand` behavioral output test: a CAS, a store and a kept
+address of a field reached through a conversion, a type whose only field address is parenthesized, a
+field of a value two ways, an element two ways, a local, and a field reached through a pointer; and by
+`TestAddressOfOperandParenthesesAreRemovedAtParse`, which pins the parsed form.)
 
 ## `&*p` is `p`, after Go's nil check
 The address of the variable a pointer indirection denotes is the pointer itself, so `&*p` yields `p`.

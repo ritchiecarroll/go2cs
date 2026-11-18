@@ -61,7 +61,7 @@ using static go.@internal.strconv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/strconv/atob.go", "atob.cs", "AAcUsqSklAAICJKClKqigpQ=")]
+[assembly: GoPositionMap("internal/strconv/atob.go", "atob.cs", "AAcUspSklAAICJKClKqigpQ=")]
 [assembly: GoPositionMap("internal/strconv/atoc.go", "atoc.cs", "AAc2ABQCgoK4gqamgoKClJSmgrjIgvyClKS4goKClJSCgpQ=")]
 [assembly: GoPositionMap("internal/strconv/atof.go", "atof.cs", "ABAksoKCgoKUgqYACBDSgpSCgqSClIKCpKaClIK2gqbGooKCpoKUlLSCyIKCgqa0gpSCgraCgoKUgoKCgpSklIKUggAHEIKCgpSClLSCpIKUgoKUlIKmpoKmgs4ADAKmgpSUtILIgoKCgoKCgoKUgoKCgoKCgqSCtoKUgoK2goKClIKCgoKCgpS2goKCgoKUlKS0gpSCpoKCAAcQgoKClIKUtIKkgpSCgoKClIKmgpSmgqaCpoK4tMKCpoKCgtyClJSCgriCgoKClJSClIKCgpSUgrjKgoKCpoK4gqaCgoKCyoKUlISSgpSEkoKClNjKAAEWAAwCgpSCgpSm7IKClJSUpJSq0oKUgoKUlOyCgpSUlKSUAAIQ8oKCAAcQgoKUgpSCgtyCgriCgoKCgoKCgriClIKCgoKmgoKClIKU2sKCpoKCpoKCpqaCgqaCgoLKgoLMkoKUgoKClKbCgqaCgqaCgqamgoKmgoKCyoKCzJKClIKCgpQAAjwAGwKCgpSmgoKClA==")]
 [assembly: GoPositionMap("internal/strconv/atofeisel.go", "atofeisel.cs", "ABYw+oKClJSCgriCgqamgoKCgpSClLiCgqaCuIKCgoLugpSCgpSmAA0WgoKUlIKCuIKCpqaCgoKClIKUuIKCpoK4goKCgu6ClIKClA==")]

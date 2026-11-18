@@ -301,47 +301,46 @@ internal static error /*err*/ mergePAX(ref Header hdr, map<@string, @string> pax
             continue; // Keep the original USTAR value
         }
         int64 id64 = default;
-        var exprᴛ1 = k;
         switch (ᐧ) {
-        case {} when exprᴛ1 == paxPath: {
+        case {} when k == paxPath: {
             hdr.Name = v;
             break;
         }
-        case {} when exprᴛ1 == paxLinkpath: {
+        case {} when k == paxLinkpath: {
             hdr.Linkname = v;
             break;
         }
-        case {} when exprᴛ1 == paxUname: {
+        case {} when k == paxUname: {
             hdr.Uname = v;
             break;
         }
-        case {} when exprᴛ1 == paxGname: {
+        case {} when k == paxGname: {
             hdr.Gname = v;
             break;
         }
-        case {} when exprᴛ1 == paxUid: {
+        case {} when k == paxUid: {
             (id64, err) = strconv.ParseInt(v, 10, 64);
             hdr.Uid = (nint)id64; // Integer overflow possible
             break;
         }
-        case {} when exprᴛ1 == paxGid: {
+        case {} when k == paxGid: {
             (id64, err) = strconv.ParseInt(v, 10, 64);
             hdr.Gid = (nint)id64; // Integer overflow possible
             break;
         }
-        case {} when exprᴛ1 == paxAtime: {
+        case {} when k == paxAtime: {
             (hdr.AccessTime, err) = parsePAXTime(v);
             break;
         }
-        case {} when exprᴛ1 == paxMtime: {
+        case {} when k == paxMtime: {
             (hdr.ModTime, err) = parsePAXTime(v);
             break;
         }
-        case {} when exprᴛ1 == paxCtime: {
+        case {} when k == paxCtime: {
             (hdr.ChangeTime, err) = parsePAXTime(v);
             break;
         }
-        case {} when exprᴛ1 == paxSize: {
+        case {} when k == paxSize: {
             (hdr.Size, err) = strconv.ParseInt(v, 10, 64);
             break;
         }
@@ -386,9 +385,8 @@ internal static (map<@string, @string>, error) parsePAX(io.Reader r) {
         }
         sbuf = residual;
 
-        var exprᴛ1 = key;
         switch (ᐧ) {
-        case {} when exprᴛ1 == paxGNUSparseOffset || exprᴛ1 == paxGNUSparseNumBytes: {
+        case {} when key == paxGNUSparseOffset || key == paxGNUSparseNumBytes: {
             // Validate sparse header order and value.
             if ((len(sparseMap) % 2 == 0 && key != paxGNUSparseOffset) || (len(sparseMap) % 2 == 1 && key != paxGNUSparseNumBytes) || strings.Contains(value, ",")) {
                 return (default, ErrHeader);

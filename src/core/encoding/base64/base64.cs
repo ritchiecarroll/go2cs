@@ -408,14 +408,13 @@ internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding en
     // Convert 4x 6bit source bytes into 3 bytes
     nuint val = (nuint)dbuf[0] << 18 | (nuint)dbuf[1] << 12 | (nuint)dbuf[2] << 6 | (nuint)dbuf[3];
     (dbuf[2], dbuf[1], dbuf[0]) = ((byte)(val >> 0), (byte)(val >> 8), (byte)(val >> 16));
-    var exprᴛ1 = dlen;
     var matchᴛ1 = false;
-    if (exprᴛ1 is 4) { matchᴛ1 = true;
+    if (dlen is 4) { matchᴛ1 = true;
         dst[2] = dbuf[2];
         dbuf[2] = 0;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) {
+    if (fallthrough || !matchᴛ1 && dlen is 3) {
         dst[1] = dbuf[1];
         if (enc.strict && dbuf[2] != 0) {
             return (si, 0, ((CorruptInputError)(int64)(si - 1)));
@@ -423,7 +422,7 @@ internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding en
         dbuf[1] = 0;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && dlen is 2) { matchᴛ1 = true;
         dst[0] = dbuf[0];
         if (enc.strict && (dbuf[1] != 0 || dbuf[2] != 0)) {
             return (si, 0, ((CorruptInputError)(int64)(si - 2)));

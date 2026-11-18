@@ -300,9 +300,8 @@ public static int64 Sizeof(this ж<StdSizes> Ꮡs, Type T) {
 // "386", "amd64", "amd64p32", "arm", "arm64", "loong64", "mips", "mipsle",
 // "mips64", "mips64le", "ppc64", "ppc64le", "riscv64", "s390x", "sparc64", "wasm".
 public static Sizes SizesFor(@string compiler, @string arch) {
-    var exprᴛ1 = compiler;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "gc"u8: {
+    case {} when compiler == "gc"u8: {
         {
             var s = gcSizesFor(compiler, arch); if (s != nil) {
                 return ((Sizes)new gcSizesжSizes(s));
@@ -310,7 +309,7 @@ public static Sizes SizesFor(@string compiler, @string arch) {
         }
         break;
     }
-    case {} when exprᴛ1 == "gccgo"u8: {
+    case {} when compiler == "gccgo"u8: {
         {
             var (s, ok) = gccgoArchSizes[arch, ꟷ]; if (ok) {
                 return ((Sizes)new StdSizesжSizes(s));

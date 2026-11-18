@@ -163,12 +163,12 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
                 reqΔ1.Body.Close();
             }
             var selᴛ1 = drʗ2.c.ᐸꟷ(new strings_ReaderжReader(strings.NewReader(http11204NoContentˢ)), ꓸꓸꓸ);
-            var selᴛ2 = quitReadChʗ1;
-            switch (select(selᴛ1, ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+            var quitReadChᴛ1 = quitReadChʗ1;
+            switch (select(selᴛ1, ᐸꟷ(quitReadChᴛ1, ꓸꓸꓸ))) {
             case 0: {
                 break;
             }
-            case 1 when selᴛ2.ꟷᐳ(out _): {
+            case 1 when quitReadChᴛ1.ꟷᐳ(out _): {
                 // Ensure delegateReader.Read doesn't block forever if we get an error.
                 close(drʗ2.c);
                 break;

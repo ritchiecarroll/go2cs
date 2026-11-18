@@ -259,14 +259,13 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
         @string n = assumedPackageName(p);
         if (s.Name != nil) {
             n = s.Name.Name;
-            var exprᴛ1 = n;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "_"u8: {
+            case {} when n == "_"u8: {
                 blankImports = append(blankImportsᴷ, blankImports, (ast.Spec)(new ast.ImportSpecжSpec(s)));
                 continue;
                 break;
             }
-            case {} when exprᴛ1 == "."u8: {
+            case {} when n == "."u8: {
                 // We can't resolve dot imports (yet).
                 return default;
             }}

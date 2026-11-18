@@ -90,18 +90,17 @@ internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
 private static readonly @string tcpˢᵇ = "tcp"u8;
 
 internal static (nint port, error error) lookupPortMap(@string network, @string service) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip"u8: { // no hints
+    case {} when network == "ip"u8: { // no hints
         var (p, err) = lookupPortMapWithNetwork(tcpˢ, "ip", service); if (err == nil) {
             return (p, default);
         }
         return lookupPortMapWithNetwork(udpˢ, "ip", service);
     }
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
         return lookupPortMapWithNetwork(tcpˢ, tcpˢ, service);
     }
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
         return lookupPortMapWithNetwork(udpˢ, udpˢ, service);
     }}
     return (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: "unknown network", Name: network + "/"u8 + service))));
@@ -255,9 +254,8 @@ public static (slice<IP>, error) LookupIP(this ж<Resolver> Ꮡr, context.Contex
     if (err != nil) {
         return (default, err);
     }
-    var exprᴛ1 = afnet;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+    case {} when afnet == "ip"u8 || afnet == "ip4"u8 || afnet == "ip6"u8: {
         break;
     }
     default: {
@@ -400,8 +398,8 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
         cancelFn();
     }
     var selᴛ14 = ctx.Done();
-    var selᴛ15 = ch;
-    switch (select(ᐸꟷ(selᴛ14, ꓸꓸꓸ), ᐸꟷ(selᴛ15, ꓸꓸꓸ))) {
+    var chᴛ1 = ch;
+    switch (select(ᐸꟷ(selᴛ14, ꓸꓸꓸ), ᐸꟷ(chᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ14.ꟷᐳ(out _): {
         // Our context was canceled. If we are the only
         // goroutine looking up this key, then drop the key
@@ -425,7 +423,7 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
         }
         return (default, new DNSErrorжerror(err));
     }
-    case 1 when selᴛ15.ꟷᐳ(out var rΔ1): {
+    case 1 when chᴛ1.ꟷᐳ(out var rΔ1): {
         ᏑdnsWaitGroup.Done();
         lookupGroupCancel();
         var err = rΔ1.Err;
@@ -488,12 +486,11 @@ public static (nint port, error err) LookupPort(this ж<Resolver> Ꮡr, context.
 
     (port, var needsLookup) = parsePort(service);
     if (needsLookup) {
-        var exprᴛ1 = network;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8 || exprᴛ1 == "ip"u8: {
+        case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8 || network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8 || network == "ip"u8: {
             break;
         }
-        case {} when exprᴛ1 == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
+        case {} when network == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
             network = "ip";
             break;
         }

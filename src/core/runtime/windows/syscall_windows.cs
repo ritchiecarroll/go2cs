@@ -255,17 +255,17 @@ internal static partial void callbackasm();
 // hence 8 bytes.
 internal static uintptr callbackasmAddr(nint i) {
     nint entrySize = default;
-    var exprᴛ1 = GOARCH;
+    var GOARCHᴛ1 = GOARCH;
     switch (ᐧ) {
     default: {
         throw panic("unsupported architecture");
         break;
     }
-    case {} when exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8: {
+    case {} when GOARCHᴛ1 == "386"u8 || GOARCHᴛ1 == "amd64"u8: {
         entrySize = 5;
         break;
     }
-    case {} when exprᴛ1 == "arm64"u8: {
+    case {} when GOARCHᴛ1 == "arm64"u8: {
         // On ARM64, each entry is a MOV instruction
         // followed by a branch instruction
         entrySize = 8;
