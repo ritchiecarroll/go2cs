@@ -8929,7 +8929,7 @@ internal delegate (ж<Δhttp.Response>, error) roundTripFunc(ж<Δhttp.Request> 
 
 } partial class http_testᴛroundTripFunc {
 
-internal static partial (ж<Δhttp.Response>, error) RoundTrip(this roundTripFunc f, ж<Δhttp.Request> r) { return f(r); }
+internal static partial (ж<Δhttp.Response>, error) RoundTrip(this http_test_package.roundTripFunc f, ж<Δhttp.Request> r) { return f(r); }
 
 } partial class http_test_package {
 
@@ -8995,12 +8995,12 @@ partial struct dumpConn {
 
 } partial class http_testᴛdumpConn {
 
-internal static error Close(this ref dumpConn c) { return default; }
-internal static net.Addr LocalAddr(this ref dumpConn c) { return default; }
-internal static net.Addr RemoteAddr(this ref dumpConn c) { return default; }
-internal static error SetDeadline(this ref dumpConn c, time.Time t) { return default; }
-internal static error SetReadDeadline(this ref dumpConn c, time.Time t) { return default; }
-internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) { return default; }
+internal static error Close(this ref http_test_package.dumpConn c) { return default; }
+internal static net.Addr LocalAddr(this ref http_test_package.dumpConn c) { return default; }
+internal static net.Addr RemoteAddr(this ref http_test_package.dumpConn c) { return default; }
+internal static error SetDeadline(this ref http_test_package.dumpConn c, time.Time t) { return default; }
+internal static error SetReadDeadline(this ref http_test_package.dumpConn c, time.Time t) { return default; }
+internal static error SetWriteDeadline(this ref http_test_package.dumpConn c, time.Time t) { return default; }
 
 } partial class http_test_package {
 
@@ -9017,7 +9017,7 @@ partial struct delegateReader {
 internal static ref readonly @string delegateClosedˢ => ref delegateClosedˢᵇ;
 private static readonly @string delegateClosedˢᵇ = "delegate closed"u8;
 
-internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref http_test_package.delegateReader r, slice<byte> p) {
     if (r.r == nil) {
         bool ok = default;
         (r.r, ok) = ᐸꟷ(r.c, ꟷ); if (!ok) {

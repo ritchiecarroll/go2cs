@@ -10,6 +10,7 @@ using log = log_package;
 using strings = strings_package;
 using go.encoding;
 using static go.encoding.json_internal_test_package;
+using json_test = json_test_package;
 using static json_test_package;
 
 partial class json_test_package {
@@ -30,7 +31,7 @@ public static error UnmarshalText(this ref Size s, slice<byte> text) {
         break;
     }
     case {} when exprᴛ1 == "small"u8: {
-        s = Small;
+        s = json_test.Small;
         break;
     }
     case {} when exprᴛ1 == "large"u8: {
@@ -55,7 +56,7 @@ public static (slice<byte>, error) MarshalText(this Size s) {
         name = unrecognizedˢ;
         break;
     }
-    case var ᴛ when ᴛ == Small: {
+    case var ᴛ when ᴛ == json_test.Small: {
         name = smallˢ;
         break;
     }

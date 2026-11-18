@@ -22,6 +22,7 @@ using exec = global::go.os.exec_package;
 using global::go.math;
 using global::go.os;
 using static global::go.runtime_internal_test_package;
+using runtime_test = runtime_test_package;
 using static runtime_test_package;
 
 partial class runtime_test_package {
@@ -132,7 +133,7 @@ internal static void check(this ref HashSet s, ж<testing.T> t) {
 
     const float64 SLOP = 50.0;
     var pairs = (int64)n * (int64)(n - 1) / 2;
-    var expected = (float64)pairs / Δmath.Pow(2.0D, (float64)hashSize);
+    var expected = (float64)pairs / Δmath.Pow(2.0D, (float64)runtime_test.hashSize);
     var stddev = Δmath.Sqrt(expected);
     if ((float64)collisions > expected + SLOP * (3D * stddev + 1D)) {
         t.Errorf("unexpected number of collisions: got=%d mean=%f stddev=%f threshold=%f", collisions, expected, stddev, expected + SLOP * (3D * stddev + 1D));

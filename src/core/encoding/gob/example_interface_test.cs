@@ -21,7 +21,7 @@ partial struct Point {
 
 } partial class gob_testᴛPoint {
 
-public static float64 Hypotenuse(this Point p) {
+public static float64 Hypotenuse(this gob_test_package.Point p) {
     return math.Hypot((float64)p.X, (float64)p.Y);
 }
 

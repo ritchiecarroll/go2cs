@@ -59,7 +59,7 @@ using static global::go.encoding.json_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("encoding/json/example_marshaling_test.go", "example_marshaling_test.cs", "ABgwgoKClKS0tLYACgaCgpS0tLYACAaCgoKCpoKCpg==")]
-[assembly: GoPositionMap("encoding/json/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABgwgqS0tKQACgaCgpS0tKQACAaCgoKCpoKCpg==")]
+[assembly: GoPositionMap("encoding/json/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABkwgqS0tKQACgaCgpS0tKQACAaCgoKCpoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
