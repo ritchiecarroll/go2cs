@@ -40479,4 +40479,31 @@ each package; never hand-edit them.
 
 — P1 (2026-11-17)
 
+## 2026-11-18 — P1 (batch 312, Tour item 3): switch tag and select channel temps follow the identifier; 88 committed converted `_test.cs` files keep the old `exprᴛN`/`selᴛN` names until the next `-tests` reconvert
+
+Seat `claude/p1-vp-switch-temp`, on master `f36b6b0d48` (batch 311). A `switch` whose tag is a local or parameter
+the switch cannot change now reads it in place (no `var exprᴛ1 = x;`); any other identifier tag is held in a temp
+named after it (`var osᴛ1 = os;`). A `select` case's channel temp is named after an identifier channel
+(`var cᴛ1 = c;`). Scout: `docs/phase4/SCOUT-tour-visual-parity.md`, section 3.
+
+Corpus, two seeded reconverts on all four targets, prediction posted before the measured run: linux/amd64 143 files +629/-770, windows/amd64 144 +632/-774, darwin/amd64
+141 +634/-774, linux/arm64 143 +629/-770, every line and file as predicted (195 files in all, +867/-1045). Line
+kinds: the switch and select temp lines and the `GoPositionMap` re-encodes of their `package_info.cs`.
+Behavioral: six projects' goldens.
+
+**Not regenerated:**
+- 88 committed converted test files hold 228 temp declarations with an identifier tag or channel (89 `exprᴛN`,
+  139 `selᴛN`; counted on the source text at this seat's tip). They compile as they are and take the new names on
+  the next `-tests` reconvert of each package; never hand-edit them. Most in `net` (13 files), `runtime` (9),
+  `net/http` (5).
+- `net/windows/lookup_windows.cs.auto`, the review sibling of a hand-owned file: on windows the converter moves 19
+  of its lines (two select channel temps, one string switch tag). Named, not overlaid.
+
+**Comment census:** the baseline rises because a lowered tagless switch (`switch (ᐧ)`) keeps no C# line naming its tag
+once the temp is gone, so the Go blank line before the switch has nowhere to anchor: `go-blank-cs-none` +8,
+`free-stmt/anchor-differs` +10, `extra:unexplained` +4. These come from how the census reads the file, not from wrong
+output; every site was read.
+
+— P1 (2026-11-18)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
