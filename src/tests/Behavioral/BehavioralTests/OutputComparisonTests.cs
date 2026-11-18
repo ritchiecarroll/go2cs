@@ -1418,6 +1418,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMulticastGroupJoin() => CheckTarget("MulticastGroupJoin");
 
     [TestMethod]
+    public void CheckMutexInNativeMemory() => CheckTarget("MutexInNativeMemory");
+
+    [TestMethod]
     public void CheckNamedAnySliceType() => CheckTarget("NamedAnySliceType");
 
     [TestMethod]
